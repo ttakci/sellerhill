@@ -1,0 +1,90 @@
+{
+  // GitHub Copilot Configuration
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "markdown": true,
+    "plaintext": false
+  },
+  "github.copilot.advanced": {
+    "inlineSuggest.enable": true
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+
+  // TypeScript Configuration
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.implicitProjectConfig.experimentalDecorators": true,
+
+  // Editor Configuration
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+
+  // File Associations
+  "files.associations": {
+    "*.style.ts": "typescript",
+    "*.types.ts": "typescript",
+    "*.component.tsx": "typescriptreact",
+    "*.container.tsx": "typescriptreact"
+  },
+
+  // ESLint Configuration
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.format.enable": true,
+
+  // Prettier Configuration
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.arrowParens": "always",
+  "prettier.semi": true,
+
+  // File Explorer
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+    "**/coverage": true
+  },
+
+  // Search Configuration
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+    "**/coverage": true,
+    "**/pnpm-lock.yaml": true
+  },
+
+  // Tailwind (disabled - we use Emotion)
+  "tailwindCSS.emmetCompletions": false,
+  "css.validate": true,
+
+  // IntelliSense
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.paths": true,
+
+  // Workspace Context Files (Copilot reads these)
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+
+  // Monorepo Support
+  "search.followSymlinks": false,
+  "typescript.disableAutomaticTypeAcquisition": false
+}

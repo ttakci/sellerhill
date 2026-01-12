@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+/dist/
+/build/
+apps/*/dist/
+apps/*/build/
+packages/*/dist/
+
+# TypeScript build artifacts in src (should only be in dist/)
+**/*.js
+**/*.js.map
+**/*.d.ts
+**/*.d.ts.map
+!*.config.js
+!*.config.cjs
+!*.config.mjs
+!scripts/**/*.js
+!scripts/**/*.mjs
+
+# Env files
+.env
+.env.local
+.env.*.local
+apps/web/.env.local
+apps/api/.env.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite cache
+apps/web/.vite/
+
+# Coverage
+coverage/
+
+# OS/editor
+.DS_Store
+# Keep VS Code workspace settings for Copilot configuration
+# .vscode/

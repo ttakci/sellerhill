@@ -1,0 +1,79 @@
+{
+  "example": {
+    "title": "Examples",
+    "dashboardTitle": "Examples Dashboard",
+    "dashboardSubtitle": "Manage and organize your examples with ease",
+    "createSectionTitle": "Create New Example",
+    "allExamplesTitle": "All Examples",
+    "emptyStateTitle": "No examples yet",
+    "emptyStateText": "Create your first example to get started",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search...",
+    "formTitle": "Create",
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter example name...",
+    "nameHelper": "Choose a unique name for your example",
+    "createButton": "Create",
+    "creatingButton": "Creating...",
+    "archiveButton": "Archive",
+    "deleteButton": "Delete",
+    "loading": "Loading...",
+    "loadError": "Error loading list.",
+    "statusActive": "Active",
+    "statusArchived": "Archived",
+    "createSuccess": "Example created successfully",
+    "archiveSuccess": "Example archived successfully",
+    "deleteSuccess": "Example deleted successfully"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidUuid": "Invalid ID format",
+    "invalidPhone": "Please enter a valid phone number",
+    "invalidDate": "Please enter a valid date",
+    "mustBePositive": "Must be a positive number",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Cannot exceed {{max}} characters",
+    "onlyAlphanumeric": "Only letters, numbers, spaces, hyphens and underscores are allowed",
+    "passwordRequirements": "Password must contain uppercase, lowercase, and number",
+    "invalidStatus": "Please select a valid status",
+    "example": {
+      "nameMin": "Name must be at least 3 characters",
+      "nameMax": "Name cannot exceed 100 characters",
+      "nameInvalid": "Name can only contain letters, numbers, spaces, hyphens and underscores"
+    }
+  },
+  "message": {
+    "error": {
+      "header": "An Error Occurred",
+      "goHome": "Go to Home",
+      "close": "Close",
+      "copyRequestId": "Copy Request ID",
+      "requestIdCopied": "Request ID copied to clipboard"
+    },
+    "success": {
+      "header": "Success",
+      "ok": "OK"
+    }
+  },
+  "errorBoundary": {
+    "title": "Oops! Something went wrong",
+    "message": "We're sorry for the inconvenience. The application encountered an unexpected error.",
+    "reload": "Reload Page",
+    "goHome": "Go to Home",
+    "details": "Error Details (Development Only)"
+  },
+  "error": {
+    "exampleNotFound": "Example not found",
+    "exampleNameTooShort": "Example name must be at least {{minLength}} characters",
+    "resourceNotFound": "{{resourceName}} with ID {{resourceId}} not found",
+    "validationFailed": "Validation failed",
+    "unauthorized": "You are not authorized",
+    "forbidden": "Access forbidden",
+    "serverError": "An error occurred. Please try again later."
+  },
+  "errors": {
+    "example.notFound": "Not found"
+  }
+}

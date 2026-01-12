@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    "github.copilot",
+    "github.copilot-chat",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "firsttris.vscode-jest-runner",
+    "orta.vscode-jest",
+    "ms-vscode.vscode-typescript-next",
+    "styled-components.vscode-styled-components",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "csstools.postcss",
+    "mikestead.dotenv"
+  ],
+  "unwantedRecommendations": ["hookyqr.beautify", "ms-vscode.vscode-typescript-tslint-plugin"]
+}

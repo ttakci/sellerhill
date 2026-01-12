@@ -1,0 +1,79 @@
+{
+  "example": {
+    "title": "Örnekler",
+    "dashboardTitle": "Örnekler Paneli",
+    "dashboardSubtitle": "Örneklerinizi kolayca yönetin ve düzenleyin",
+    "createSectionTitle": "Yeni Örnek Oluştur",
+    "allExamplesTitle": "Tüm Örnekler",
+    "emptyStateTitle": "Henüz örnek yok",
+    "emptyStateText": "Başlamak için ilk örneğinizi oluşturun",
+    "searchLabel": "Arama",
+    "searchPlaceholder": "Ara...",
+    "formTitle": "Oluştur",
+    "nameLabel": "Ad",
+    "namePlaceholder": "Örnek adı girin...",
+    "nameHelper": "Örneğiniz için benzersiz bir ad seçin",
+    "createButton": "Oluştur",
+    "creatingButton": "Oluşturuluyor...",
+    "archiveButton": "Arşivle",
+    "deleteButton": "Sil",
+    "loading": "Yükleniyor...",
+    "loadError": "Liste yüklenemedi.",
+    "statusActive": "Aktif",
+    "statusArchived": "Arşivlendi",
+    "createSuccess": "Örnek başarıyla oluşturuldu",
+    "archiveSuccess": "Örnek başarıyla arşivlendi",
+    "deleteSuccess": "Örnek başarıyla silindi"
+  },
+  "validation": {
+    "required": "Bu alan zorunludur",
+    "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
+    "invalidUrl": "Lütfen geçerli bir URL girin",
+    "invalidUuid": "Geçersiz ID formatı",
+    "invalidPhone": "Lütfen geçerli bir telefon numarası girin",
+    "invalidDate": "Lütfen geçerli bir tarih girin",
+    "mustBePositive": "Pozitif bir sayı olmalıdır",
+    "minLength": "En az {{min}} karakter olmalıdır",
+    "maxLength": "En fazla {{max}} karakter olabilir",
+    "onlyAlphanumeric": "Sadece harf, rakam, boşluk, tire ve alt çizgi kullanılabilir",
+    "passwordRequirements": "Şifre büyük harf, küçük harf ve rakam içermelidir",
+    "invalidStatus": "Lütfen geçerli bir durum seçin",
+    "example": {
+      "nameMin": "Ad en az 3 karakter olmalıdır",
+      "nameMax": "Ad en fazla 100 karakter olabilir",
+      "nameInvalid": "Ad sadece harf, rakam, boşluk, tire ve alt çizgi içerebilir"
+    }
+  },
+  "message": {
+    "error": {
+      "header": "Bir Hata Oluştu",
+      "goHome": "Ana Sayfaya Dön",
+      "close": "Kapat",
+      "copyRequestId": "İstek ID'sini Kopyala",
+      "requestIdCopied": "İstek ID'si panoya kopyalandı"
+    },
+    "success": {
+      "header": "Başarılı",
+      "ok": "Tamam"
+    }
+  },
+  "errorBoundary": {
+    "title": "Bir şeyler ters gitti",
+    "message": "Rahatsızlık için özür dileriz. Uygulama beklenmeyen bir hatayla karşılaştı.",
+    "reload": "Sayfayı Yenile",
+    "goHome": "Ana Sayfaya Dön",
+    "details": "Hata Detayları (Sadece Geliştirme)"
+  },
+  "error": {
+    "exampleNotFound": "Örnek bulunamadı",
+    "exampleNameTooShort": "Örnek adı en az {{minLength}} karakter olmalıdır",
+    "resourceNotFound": "{{resourceName}} ID {{resourceId}} bulunamadı",
+    "validationFailed": "Doğrulama başarısız",
+    "unauthorized": "Yetkiniz yok",
+    "forbidden": "Erişim yasak",
+    "serverError": "Bir hata oluştu. Lütfen tekrar deneyin."
+  },
+  "errors": {
+    "example.notFound": "Bulunamadı"
+  }
+}
