@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 export type TextVariant = 'body' | 'caption' | 'overline';
 
@@ -6,7 +6,6 @@ export type TextWeight = 'regular' | 'medium' | 'semibold';
 
 export type TextAlign = 'left' | 'center' | 'right';
 
-export type TextElement = 'span' | 'p' | 'div';
 
 /**
  * Platform-agnostic Text props
@@ -18,10 +17,6 @@ export interface TextProps {
    */
   children: ReactNode;
 
-  /**
-   * Text element's HTML tag (web only)
-   */
-  as?: TextElement;
 
   /**
    * Text variant (font-size and line-height control)
@@ -48,3 +43,5 @@ export interface TextProps {
    */
   truncate?: boolean;
 }
+
+export type TextElement = ReactElement;

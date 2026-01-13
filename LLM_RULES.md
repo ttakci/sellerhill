@@ -390,16 +390,71 @@ export const toUpdateUserRequest = (formData: UpdateUserFormData): UpdateUserReq
 
 ---
 
-### ✅ RULE 7: React Hook Form + Zod Integration
+### ✅ RULE 7: Form Input Pattern - TextInput Molecule
 
-**ALL forms MUST use React Hook Form with Zod resolver**
+**ALWAYS use TextInput molecule for form fields (NOT raw Input + manual Controller)**
+
+```typescript
+// ❌ WRONG - Manual Controller wrapping
+import { Controller } from 'react-hook-form';
+import { Input, Label } from '@repo/ui';
+
+<Controller
+  name="email"
+  control={control}
+  render={({ field, fieldState: { error } }) => (
+    <>
+      <Text as="label" variant="body" weight="medium">Email</Text>
+      <Input {...field} hasError={!!error} />
+      {error && <ErrorText>{error.message}</ErrorText>}
+    </>
+  )}
+/>
+
+// ✅ CORRECT - Use TextInput molecule
+import { TextInput } from '@repo/ui';
+
+<TextInput
+  name="email"
+  control={control}
+  label={t('auth.login.emailLabel')}
+  type="email"
+  disabled={isLoading}
+/>
+```
+
+**Atomic Design Pattern:**
+
+- **Atom (Input)**: Base component, forwardRef, no form logic
+- **Molecule (TextInput)**: Controller wrapper + Label + Input + Error display
+
+**TextInput Features:**
+
+- ✅ Controller integration built-in
+- ✅ Automatic error display from `fieldState`
+- ✅ Optional label with `required` indicator
+- ✅ Type-safe `name` prop (Path<TFieldValues>)
+- ✅ One line per field instead of 10+
+
+**Future Molecules:**
+
+- `SelectInput` - Dropdown with Controller
+- `DatePickerInput` - Date picker with Controller
+- `TextAreaInput` - Multi-line text with Controller
+
+---
+
+### ✅ RULE 8: React Hook Form + Zod Integration
+
+**ALL forms MUST use React Hook Form with Zod resolver + TextInput molecule**
 
 ```typescript
 // ✅ CORRECT
 // UserForm.component.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createUserFormDataSchema, type CreateUserFormData } from '@repo/shared';
-import { useForm, Controller } from 'react-hook-form';
+import { TextInput, Button } from '@repo/ui';
+import { useForm } from 'react-hook-form';
 
 export const UserForm = (props: UserFormProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -407,7 +462,7 @@ export const UserForm = (props: UserFormProps): React.ReactElement => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
     reset,
   } = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserFormDataSchema(t)),
@@ -424,20 +479,21 @@ export const UserForm = (props: UserFormProps): React.ReactElement => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Controller
+      <TextInput
         name="name"
         control={control}
-        render={({ field }) => (
-          <Input {...field} error={errors.name?.message} />
-        )}
+        label={t('user.nameLabel')}
+        disabled={isSubmitting}
       />
-      <Controller
+      
+      <TextInput
         name="email"
         control={control}
-        render={({ field }) => (
-          <Input {...field} type="email" error={errors.email?.message} />
-        )}
+        label={t('user.emailLabel')}
+        type="email"
+        disabled={isSubmitting}
       />
+      
       <Button type="submit" disabled={isSubmitting}>
         {t('user.createButton')}
       </Button>
@@ -446,11 +502,11 @@ export const UserForm = (props: UserFormProps): React.ReactElement => {
 };
 ```
 
-**WHY**: Type-safe forms with automatic validation. Schema from shared package.
+**WHY**: Type-safe forms with automatic validation. TextInput reduces boilerplate from 10+ lines to 1 line per field.
 
 ---
 
-### ✅ RULE 8: i18n for ALL User-Facing Text
+### ✅ RULE 9: i18n for ALL User-Facing Text
 
 **NO hardcoded strings in UI. ALWAYS use i18n**
 
@@ -485,7 +541,7 @@ export const UserForm = (props: UserFormProps): React.ReactElement => {
 
 ---
 
-### ✅ RULE 9: Error Handling Pattern
+### ✅ RULE 10: Error Handling Pattern
 
 **ALWAYS use standardized error handling**
 
@@ -800,7 +856,7 @@ const Card = () => {
 // ✅ CORRECT
 import { Button, Input, Label, Icon } from '@repo/ui';
 
-<Label>{t('user.nameLabel')}</Label>
+<Text as="label" variant="body" weight="medium">{t('user.nameLabel')}</Text>
 <Input
   {...field}
   type="text"

@@ -13,14 +13,14 @@ export interface InputProps {
   value?: string;
 
   /**
-   * Change handler
+   * Change handler (supports both React Hook Form and direct usage)
    */
-  onChange?: (value: string) => void;
+  onChange?: ((value: string) => void) | ((event: React.ChangeEvent<HTMLInputElement>) => void);
 
   /**
-   * Blur handler
+   * Blur handler (supports both React Hook Form and direct usage)
    */
-  onBlur?: () => void;
+  onBlur?: (() => void) | ((event: React.FocusEvent<HTMLInputElement>) => void);
 
   /**
    * Focus handler
@@ -46,6 +46,11 @@ export interface InputProps {
    * Error message
    */
   error?: string;
+
+  /**
+   * Boolean error state (for form validation)
+   */
+  hasError?: boolean;
 
   /**
    * Success message

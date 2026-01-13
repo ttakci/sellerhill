@@ -37,6 +37,8 @@
     "maxLength": "Cannot exceed {{max}} characters",
     "onlyAlphanumeric": "Only letters, numbers, spaces, hyphens and underscores are allowed",
     "passwordRequirements": "Password must contain uppercase, lowercase, and number",
+    "passwordStrength": "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+    "passwordMismatch": "Passwords do not match",
     "invalidStatus": "Please select a valid status",
     "example": {
       "nameMin": "Name must be at least 3 characters",
@@ -75,5 +77,28 @@
   },
   "errors": {
     "example.notFound": "Not found"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to your account",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submitButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Sign up to get started",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "submitButton": "Create Account",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
   }
 }

@@ -651,12 +651,61 @@ packages/shared/dist/
 **Atomic Design:**
 
 ```
-Atoms → Button, Input, Label, Text, Icon
-Molecules → FormField, SearchBar, ThemeToggle, GeneralMessage, GeneralLoading
+Atoms → Input, Button, Label, Text, Icon (Base components, forwardRef)
+Molecules → TextInput, SelectInput, ThemeToggle, GeneralMessage, GeneralLoading
+            (Controller-wrapped atoms + logic + layout)
 Organisms → Header, Footer, Navigation
 Templates → PageLayout
 Pages → (in apps/web)
 ```
+
+**Form Input Molecules Pattern:**
+
+```typescript
+// Atom: Input (packages/ui/src/atoms/Input/)
+export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  return <S.InputField ref={ref} {...props} />;
+});
+
+// Molecule: TextInput (packages/ui/src/molecules/TextInput/)
+export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
+  name,
+  control,
+  label,
+  type = 'text',
+  ...props
+}: TextInputProps<TFieldValues>) => {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <S.Container>
+          {label && <Text as="label" variant="body" weight="medium">{label}</Text>}
+          <Input {...field} type={type} hasError={!!error} {...props} />
+          {error && <S.ErrorText>{error.message}</S.ErrorText>}
+        </S.Container>
+      )}
+    />
+  );
+};
+
+// Usage in Forms
+<TextInput
+  name="email"
+  control={control}
+  label={t('auth.emailLabel')}
+  type="email"
+  disabled={isLoading}
+/>
+```
+
+**Benefits:**
+
+- ✅ Single line per field (Label + Input + Error)
+- ✅ Controller pattern enforced everywhere
+- ✅ Consistent error handling
+- ✅ Type-safe field name binding
 
 ### **Theme Token Structure**
 

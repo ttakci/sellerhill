@@ -6,6 +6,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { validateEnv } from './common/config/env.validation';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { EbayModule } from './modules/ebay/ebay.module';
 import { ExamplesModule } from './modules/examples/examples.module';
 
 @Module({
@@ -35,6 +38,9 @@ import { ExamplesModule } from './modules/examples/examples.module';
       },
     ]),
     HealthModule,
+    AuthModule,
+    EbayModule,
+    DashboardModule,
     ExamplesModule,
   ],
   providers: [

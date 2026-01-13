@@ -1,0 +1,42 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay Mağazası Bağla",
+      "subtitle": "Listeleri ve siparişleri yönetmek için eBay satıcı hesabınızı bağlayın",
+      "connectButton": "eBay Hesabı Bağla",
+      "connectingButton": "Bağlanıyor...",
+      "marketplaceLabel": "Pazar Yeri",
+      "marketplaceUS": "Amerika Birleşik Devletleri (eBay.com)",
+      "marketplaceUK": "İngiltere (eBay.co.uk)",
+      "marketplaceDE": "Almanya (eBay.de)",
+      "marketplaceFR": "Fransa (eBay.fr)",
+      "marketplaceIT": "İtalya (eBay.it)",
+      "marketplaceES": "İspanya (eBay.es)",
+      "successMessage": "eBay hesabı başarıyla bağlandı!",
+      "errorMessage": "eBay hesabı bağlanırken hata oluştu",
+      "alreadyConnected": "Bu eBay hesabı zaten bağlı"
+    },
+    "accounts": {
+      "title": "Bağlı eBay Hesapları",
+      "noAccounts": "Henüz bağlı eBay hesabı yok",
+      "statusActive": "Aktif",
+      "statusRevoked": "İptal Edildi",
+      "statusError": "Hata",
+      "disconnectButton": "Bağlantıyı Kes",
+      "refreshTokenButton": "Token Yenile"
+    },
+    "callback": {
+      "processing": "eBay bağlantısı işleniyor...",
+      "success": "eBay hesabı başarıyla bağlandı! Dashboard'a yönlendiriliyor...",
+      "error": "eBay hesabı bağlanırken hata oluştu. Lütfen tekrar deneyin.",
+      "cancelled": "eBay bağlantısı iptal edildi."
+    },
+    "errors": {
+      "invalidState": "Geçersiz state parametresi",
+      "authorizationFailed": "eBay yetkilendirmesi başarısız",
+      "tokenExchangeFailed": "Yetkilendirme kodunun token'a dönüştürülmesi başarısız",
+      "accountAlreadyConnected": "Bu eBay hesabı zaten bağlı",
+      "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı"
+    }
+  }
+}

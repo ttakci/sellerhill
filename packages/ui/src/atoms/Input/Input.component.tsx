@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, forwardRef } from 'react';
+import { type ChangeEvent, forwardRef } from 'react';
 
 import { S } from './Input.style';
 import type { InputProps } from './Input.types';
@@ -14,6 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       size = 'md',
       variant = 'default',
       error,
+      hasError,
       success,
       fullWidth = true,
       disabled = false,
@@ -26,11 +27,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const computedVariant = error ? 'error' : success ? 'success' : variant;
+    const computedVariant = error || hasError ? 'error' : success ? 'success' : variant;
     const helperText = error || success;
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      onChange?.(e.target.value);
+      if (onChange) {
+        // Support both React Hook Form (event) and direct usage (value)
+        // TypeScript will handle the overload
+        (onChange as (event: ChangeEvent<HTMLInputElement>) => void)(e);
+      }
     };
 
     if (helperText) {

@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome to your seller dashboard",
+    "greeting": "Hello, {{name}}!",
+    "comingSoon": "Dashboard features coming soon...",
+    "description": "Here you'll be able to manage your eBay listings, track orders, and view analytics."
+  }
+}

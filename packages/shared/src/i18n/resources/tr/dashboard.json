@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Satıcı panelinize hoş geldiniz",
+    "greeting": "Merhaba, {{name}}!",
+    "comingSoon": "Dashboard özellikleri yakında...",
+    "description": "Burada eBay listelerinizi yönetebilecek, siparişleri takip edebilecek ve analizleri görüntüleyebileceksiniz."
+  }
+}

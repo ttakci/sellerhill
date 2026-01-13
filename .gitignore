@@ -23,8 +23,21 @@ packages/*/dist/
 .env
 .env.local
 .env.*.local
+apps/web/.env
 apps/web/.env.local
+apps/api/.env
 apps/api/.env.local
+
+# Docker volumes and data
+postgres_data/
+redis_data/
+pgadmin_data/
+
+# Database backups
+*.sql
+!docker/postgres/init.sql
+*.dump
+*.backup
 
 # Logs
 *.log

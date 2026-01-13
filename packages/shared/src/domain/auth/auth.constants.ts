@@ -1,0 +1,18 @@
+/**
+ * Auth Domain Constants
+ */
+
+export const AUTH_CONSTANTS = {
+  PASSWORD_MIN_LENGTH: 8,
+  PASSWORD_MAX_LENGTH: 100,
+  FIRST_NAME_MIN_LENGTH: 2,
+  FIRST_NAME_MAX_LENGTH: 50,
+  LAST_NAME_MIN_LENGTH: 2,
+  LAST_NAME_MAX_LENGTH: 50,
+  EMAIL_MAX_LENGTH: 255,
+  
+  JWT_ACCESS_TOKEN_EXPIRES_IN: '15m',
+  JWT_REFRESH_TOKEN_EXPIRES_IN: '7d',
+} as const;
+
+export type AuthConstantsType = typeof AUTH_CONSTANTS;

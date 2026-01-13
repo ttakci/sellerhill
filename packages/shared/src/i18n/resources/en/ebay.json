@@ -1,0 +1,42 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "Connect eBay Store",
+      "subtitle": "Link your eBay seller account to manage listings and orders",
+      "connectButton": "Connect eBay Account",
+      "connectingButton": "Connecting...",
+      "marketplaceLabel": "Marketplace",
+      "marketplaceUS": "United States (eBay.com)",
+      "marketplaceUK": "United Kingdom (eBay.co.uk)",
+      "marketplaceDE": "Germany (eBay.de)",
+      "marketplaceFR": "France (eBay.fr)",
+      "marketplaceIT": "Italy (eBay.it)",
+      "marketplaceES": "Spain (eBay.es)",
+      "successMessage": "eBay account connected successfully!",
+      "errorMessage": "Failed to connect eBay account",
+      "alreadyConnected": "This eBay account is already connected"
+    },
+    "accounts": {
+      "title": "Connected eBay Accounts",
+      "noAccounts": "No eBay accounts connected yet",
+      "statusActive": "Active",
+      "statusRevoked": "Revoked",
+      "statusError": "Error",
+      "disconnectButton": "Disconnect",
+      "refreshTokenButton": "Refresh Token"
+    },
+    "callback": {
+      "processing": "Processing eBay connection...",
+      "success": "eBay account connected successfully! Redirecting to dashboard...",
+      "error": "Failed to connect eBay account. Please try again.",
+      "cancelled": "eBay connection was cancelled."
+    },
+    "errors": {
+      "invalidState": "Invalid state parameter",
+      "authorizationFailed": "eBay authorization failed",
+      "tokenExchangeFailed": "Failed to exchange authorization code for tokens",
+      "accountAlreadyConnected": "This eBay account is already connected",
+      "noAuthorizationCode": "No authorization code received from eBay"
+    }
+  }
+}

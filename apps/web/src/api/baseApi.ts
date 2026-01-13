@@ -33,14 +33,15 @@ export const baseApi = createApi({
         sessionStorage.setItem('lastRequestId', requestId);
       }
 
-      // TODO: Add auth token when authentication is implemented
-      // const token = getToken();
-      // if (token) {
-      //   headers.set('authorization', `Bearer ${token}`);
-      // }
+      // Add auth token if available
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
       return headers;
     },
   }),
-  tagTypes: ['Example'],
+  tagTypes: ['Example', 'Auth', 'Ebay', 'Dashboard'],
   endpoints: () => ({}),
 });

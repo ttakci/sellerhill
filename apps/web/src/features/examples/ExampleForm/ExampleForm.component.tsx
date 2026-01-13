@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createExampleFormDataSchema, type CreateExampleFormData, EMPTY_STRING } from '@repo/shared';
-import { Button, Icon, Input, Label } from '@repo/ui';
+import { createExampleFormDataSchema, EMPTY_STRING, type CreateExampleFormData } from '@repo/shared';
+import { Button, TextInput } from '@repo/ui';
 import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ExampleForm.style';
@@ -14,7 +14,7 @@ export const ExampleForm = (props: ExampleFormProps): React.ReactElement => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
     reset,
   } = useForm<CreateExampleFormData>({
     resolver: zodResolver(createExampleFormDataSchema(t)),
@@ -37,32 +37,16 @@ export const ExampleForm = (props: ExampleFormProps): React.ReactElement => {
       }}
     >
       <S.FormGroup>
-        <Label required>{t('example.nameLabel')}</Label>
-        <S.InputWrapper>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="name"
-                type="text"
-                placeholder={t('example.namePlaceholder')}
-                variant={errors.name ? 'error' : 'default'}
-                fullWidth
-                size="md"
-              />
-            )}
-          />
-        </S.InputWrapper>
-        {errors.name ? (
-          <S.ErrorMessage>
-            <Icon name="alert-circle" size={16} strokeWidth={2} />
-            {errors.name.message}
-          </S.ErrorMessage>
-        ) : (
-          <S.HelperText>{t('example.nameHelper')}</S.HelperText>
-        )}
+        <TextInput
+          name="name"
+          control={control}
+          label={t('example.nameLabel')}
+          placeholder={t('example.namePlaceholder')}
+          required
+          fullWidth
+          size="md"
+        />
+        <S.HelperText>{t('example.nameHelper')}</S.HelperText>
       </S.FormGroup>
 
       <S.ButtonGroup>

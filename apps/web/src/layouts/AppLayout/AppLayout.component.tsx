@@ -1,12 +1,9 @@
 import { GeneralLoading, GeneralMessage, ThemeToggle, useUI } from '@repo/ui';
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
 
 const Header = styled.header`
   display: flex;
@@ -21,7 +18,7 @@ const Header = styled.header`
  * Provides global UI components like loading overlay and message dialogs
  * Platform: Web (uses GeneralLoading, GeneralMessage)
  */
-export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
 
   return (
@@ -30,7 +27,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <ThemeToggle />
       </Header>
 
-      {children}
+      <Outlet />
 
       {/* Global Loading Overlay */}
       {loadingState.isLoading && (
