@@ -1,4 +1,14 @@
 {
+  "common": {
+    "loading": "Yükleniyor...",
+    "retry": "Yeniden Dene",
+    "ok": "Tamam",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "back": "Geri"
+  },
+
   "example": {
     "title": "Örnekler",
     "dashboardTitle": "Örnekler Paneli",

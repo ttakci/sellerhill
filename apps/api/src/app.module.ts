@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { validateEnv } from './common/config/env.validation';
+import { DatabaseModule } from './common/database/database.module';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -19,6 +20,8 @@ import { ExamplesModule } from './modules/examples/examples.module';
       validate: validateEnv,
       cache: true,
     }),
+    // Database connection pool (Global)
+    DatabaseModule,
     // Rate limiting configuration
     ThrottlerModule.forRoot([
       {

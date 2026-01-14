@@ -1,4 +1,14 @@
 {
+  "common": {
+    "loading": "Loading...",
+    "retry": "Retry",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "back": "Back"
+  },
+
   "example": {
     "title": "Examples",
     "dashboardTitle": "Examples Dashboard",

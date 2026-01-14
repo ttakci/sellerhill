@@ -29,10 +29,12 @@ export const EBAY_MARKETPLACE: Record<string, EbayMarketplaceId> = {
  * eBay OAuth constants
  */
 export const EBAY_OAUTH_CONSTANTS = {
-  AUTHORIZATION_URL: 'https://auth.ebay.com/oauth2/authorize',
-  TOKEN_URL: 'https://api.ebay.com/identity/v1/oauth2/token',
-  PRODUCTION_API_BASE_URL: 'https://api.ebay.com',
-  SANDBOX_API_BASE_URL: 'https://api.sandbox.ebay.com',
+  AUTHORIZATION_URL_PROD: 'https://auth.ebay.com/oauth2/authorize',
+  AUTHORIZATION_URL_SANDBOX: 'https://auth.sandbox.ebay.com/oauth2/authorize',
+  TOKEN_URL_PROD: 'https://api.ebay.com/identity/v1/oauth2/token',
+  TOKEN_URL_SANDBOX: 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',
+  PRODUCTION_API_BASE_URL: 'https://apiz.ebay.com',
+  SANDBOX_API_BASE_URL: 'https://apiz.sandbox.ebay.com',
   
   // Default scopes for seller operations
   DEFAULT_SCOPES: [
@@ -41,6 +43,7 @@ export const EBAY_OAUTH_CONSTANTS = {
     'https://api.ebay.com/oauth/api_scope/sell.inventory',
     'https://api.ebay.com/oauth/api_scope/sell.marketing',
     'https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
+    'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly',
   ],
   
   // Token expiration (in seconds)

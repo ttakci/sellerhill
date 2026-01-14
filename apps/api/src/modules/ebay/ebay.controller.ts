@@ -1,6 +1,7 @@
 import { BadRequestException, Controller, Get, Logger, Query, Redirect, Request, UseGuards } from '@nestjs/common';
 import {
     ApiBearerAuth,
+    ApiForbiddenResponse,
     ApiOkResponse,
     ApiOperation,
     ApiQuery,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsResponse } from '@repo/shared';
 
+import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { EbayService } from './ebay.service';
 
@@ -20,15 +22,16 @@ export class EbayController {
   constructor(private readonly ebayService: EbayService) {}
 
   @Get('connect-url')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get eBay OAuth consent URL',
-    description: 'Generate URL for user to authorize eBay account connection',
+    description: 'Generate URL for user to authorize eBay account connection (requires verified email)',
   })
   @ApiQuery({ name: 'marketplaceId', required: false, description: 'eBay marketplace identifier', example: 'EBAY_US' })
   @ApiOkResponse({ description: 'Consent URL generated successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'Email not verified' })
   async getConnectUrl(
     @Request() req: any,
     @Query('marketplaceId') marketplaceId?: EbayMarketplaceId
@@ -85,14 +88,15 @@ export class EbayController {
   }
 
   @Get('accounts')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get connected eBay accounts',
-    description: 'Retrieve list of eBay accounts connected by the authenticated user',
+    description: 'Retrieve list of eBay accounts connected by the authenticated user (requires verified email)',
   })
   @ApiOkResponse({ description: 'eBay accounts retrieved successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'Email not verified' })
   async getAccounts(@Request() req: any): Promise<GetEbayAccountsResponse> {
     const userId = req.user.sub;
     return this.ebayService.getAccountsByUserId(userId);

@@ -8,20 +8,43 @@
  */
 
 import { baseApi } from '@/api/baseApi';
-import type { AuthResponse, LoginRequest, RegisterRequest, UserDto } from '@repo/shared';
+import type { AuthResponse, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * Register new user
      */
-    register: builder.mutation<AuthResponse, RegisterRequest>({
+    register: builder.mutation<RegistrationResponse, RegisterRequest>({
       query: (body) => ({
         url: '/auth/register',
         method: 'POST',
         body,
       }),
       invalidatesTags: ['Auth'],
+    }),
+
+    /**
+     * Verify email address
+     */
+    verifyEmail: builder.mutation<AuthResponse, { token: string }>({
+      query: (body) => ({
+        url: '/auth/verify-email',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    /**
+     * Resend verification email
+     */
+    resendVerification: builder.mutation<void, { email: string }>({
+      query: (body) => ({
+        url: '/auth/resend-verification',
+        method: 'POST',
+        body,
+      }),
     }),
 
     /**
@@ -49,4 +72,11 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useGetMeQuery, useLazyGetMeQuery } = authApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useVerifyEmailMutation,
+  useResendVerificationMutation,
+  useGetMeQuery,
+  useLazyGetMeQuery,
+} = authApi;

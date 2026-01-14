@@ -33,23 +33,9 @@ export const RegisterPageContainer = (): React.ReactElement => {
   // Handle success
   useEffect(() => {
     if (isSuccess) {
-      showMessage(
-        {
-          type: 'success',
-          headerKey: 'message.success.header',
-          descriptionKey: 'auth.register.successMessage',
-          primaryButton: {
-            labelKey: 'message.success.ok',
-            onClick: () => {
-              closeMessage();
-              navigate('/dashboard');
-            },
-          },
-        },
-        t
-      );
+      // Success redirection handled in handleSubmit or via useEffect
     }
-  }, [isSuccess, showMessage, closeMessage, navigate, t]);
+  }, [isSuccess]);
 
   // Handle error
   useEffect(() => {
@@ -73,17 +59,15 @@ export const RegisterPageContainer = (): React.ReactElement => {
 
   const handleSubmit = async (data: RegisterFormData): Promise<void> => {
     try {
-      const result = await register({
+      await register({
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         password: data.password,
       }).unwrap();
 
-      // Store tokens
-      localStorage.setItem('accessToken', result.accessToken);
-      localStorage.setItem('refreshToken', result.refreshToken);
-      localStorage.setItem('user', JSON.stringify(result.user));
+      // Redirect to check email page
+      navigate(`/auth/check-email?email=${encodeURIComponent(data.email)}`);
     } catch (err) {
       // Error handled by useEffect
       console.error('Registration failed:', err);

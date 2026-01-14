@@ -1,1 +1,3 @@
-export { AppLayout } from './AppLayout.component';
+export * from './AppLayout.container';
+export { AppLayout as default } from './AppLayout.container';
+

@@ -11,12 +11,15 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { getErrorMessage } from '@/utils/errorHandler';
+import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../api/authApi';
+import { setCredentials } from '../store/authSlice';
 import { LoginPageComponent } from './LoginPage.component';
 
 export const LoginPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { showMessage, closeMessage, showLoading, hideLoading } = useUI();
 
   const [login, { isLoading, isSuccess, error }] = useLoginMutation();
@@ -33,23 +36,9 @@ export const LoginPageContainer = (): React.ReactElement => {
   // Handle success
   useEffect(() => {
     if (isSuccess) {
-      showMessage(
-        {
-          type: 'success',
-          headerKey: 'message.success.header',
-          descriptionKey: 'auth.login.successMessage',
-          primaryButton: {
-            labelKey: 'message.success.ok',
-            onClick: () => {
-              closeMessage();
-              navigate('/dashboard');
-            },
-          },
-        },
-        t
-      );
+      // Navigation is now handled in handleSubmit after token storage
     }
-  }, [isSuccess, showMessage, closeMessage, navigate, t]);
+  }, [isSuccess]);
 
   // Handle error
   useEffect(() => {
@@ -78,10 +67,15 @@ export const LoginPageContainer = (): React.ReactElement => {
         password: data.password,
       }).unwrap();
 
-      // Store tokens
-      localStorage.setItem('accessToken', result.accessToken);
-      localStorage.setItem('refreshToken', result.refreshToken);
-      localStorage.setItem('user', JSON.stringify(result.user));
+      // Store credentials in Redux (which also syncs to localStorage)
+      dispatch(setCredentials(result));
+
+      // Redirect based on whether user has connected accounts
+      if (result.user.hasConnectedAccounts) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding/ebay');
+      }
     } catch (err) {
       // Error handled by useEffect
       console.error('Login failed:', err);

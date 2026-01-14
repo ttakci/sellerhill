@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from '../../common/database/database.module';
+import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { AuthModule } from '../auth/auth.module';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayController } from './ebay.controller';
 import { EbayService } from './ebay.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [ConfigModule, AuthModule, DatabaseModule],
   controllers: [EbayController],
-  providers: [EbayService, EbayOAuthService],
+  providers: [EbayService, EbayOAuthService, EmailVerifiedGuard],
   exports: [EbayService],
 })
 export class EbayModule {}

@@ -15,13 +15,17 @@
  * ```
  */
 
+import type auth from './resources/en/auth.json';
+import type dashboard from './resources/en/dashboard.json';
+import type ebay from './resources/en/ebay.json';
 import type en from './resources/en/translation.json';
 
 /**
  * Translation resource structure
- * Based on English translation file
+ * Combined from all resource files
  */
-export type TranslationResource = typeof en;
+export type TranslationResource = typeof en & typeof auth & typeof ebay & typeof dashboard;
+
 
 /**
  * Utility type to get all nested keys from translation object

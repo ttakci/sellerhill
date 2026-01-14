@@ -4,6 +4,9 @@ export { EMPTY_STRING } from './domain/common/common.constants';
 // Utilities
 export { generateRequestId, getRequestIdFromHeaders, isValidRequestId } from './utils/requestId';
 
+// Domain - User
+export * from './domain/user/user.types';
+
 // Domain - Auth
 export * from './domain/auth/index';
 

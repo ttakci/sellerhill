@@ -41,3 +41,33 @@ export interface JwtPayload {
   iat?: number;
   exp?: number;
 }
+
+/**
+ * Registration response (without tokens)
+ * User must verify email before receiving tokens
+ */
+export interface RegistrationResponse {
+  message: string; // i18n key
+  email: string;
+}
+
+/**
+ * Email verification request
+ */
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+/**
+ * Resend verification email request
+ */
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+/**
+ * Refresh token request
+ */
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}

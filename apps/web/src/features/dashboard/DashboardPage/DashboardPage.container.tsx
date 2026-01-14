@@ -22,19 +22,12 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { data: dashboardData, error: dashboardError } = useGetDashboardQuery();
   const { data: userData, isLoading, error: userError } = useGetMeQuery();
 
-  // Handle errors and redirect to login if unauthorized
+  // Handle errors
   useEffect(() => {
     const error = dashboardError || userError;
     if (error) {
-      // Check if it's an authentication error
+      // Ignore 401 as it's handled by baseApi and AppLayout
       if ('status' in error && error.status === 401) {
-        // Clear auth tokens
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        
-        // Redirect to login
-        navigate('/login');
         return;
       }
 
