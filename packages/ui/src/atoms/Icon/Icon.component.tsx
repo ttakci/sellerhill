@@ -26,12 +26,11 @@ export const Icon = ({
   }
 
   return (
-    <S.IconWrapper
-      $size={numericSize}
-      as={IconComponent}
-      stroke={stroke || color}
-      strokeWidth={strokeWidth}
-      aria-hidden="true"
-    />
+    <S.IconWrapper $size={numericSize} aria-hidden="true">
+      <IconComponent
+        stroke={stroke || color}
+        strokeWidth={strokeWidth}
+      />
+    </S.IconWrapper>
   );
 };

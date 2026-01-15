@@ -12,12 +12,13 @@
  */
 
 import {
-  Controller,
-  type ControllerRenderProps,
-  type FieldError,
-  type FieldValues,
+    Controller,
+    type ControllerRenderProps,
+    type FieldError,
+    type FieldValues,
 } from 'react-hook-form';
 
+import { Icon } from '../../atoms/Icon';
 import { Input } from '../../atoms/Input';
 import { Text } from '../../atoms/Text';
 
@@ -37,6 +38,10 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
   autoFocus = false,
   maxLength,
   id,
+  leftIcon,
+  rightIcon,
+  prefix,
+  suffix,
 }: TextInputProps<TFieldValues>) => {
   const inputId = id || name;
 
@@ -54,24 +59,49 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
         <S.Container>
           {label && (
             <S.LabelText>
-              <Text variant="body" weight="medium">
+              <Text variant="body" weight="medium" color={error ? 'semantic.error' : 'text.primary'}>
                 {label}
                 {required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
               </Text>
             </S.LabelText>
           )}
-          <Input
-            {...field}
-            id={inputId}
-            type={type}
-            placeholder={placeholder}
-            disabled={disabled}
-            hasError={!!error}
-            size={size}
-            fullWidth={fullWidth}
-            autoFocus={autoFocus}
-            maxLength={maxLength}
-          />
+          
+          <S.InputGroup $hasError={!!error}>
+            {prefix && <S.Addon side="left">{prefix}</S.Addon>}
+            {leftIcon && (
+              <S.IconWrapper side="left">
+                <Icon name={leftIcon} size={20} />
+              </S.IconWrapper>
+            )}
+            
+            <Input
+              {...field}
+              id={inputId}
+              type={type}
+              placeholder={placeholder}
+              disabled={disabled}
+              hasError={!!error}
+              size={size}
+              fullWidth={fullWidth}
+              autoFocus={autoFocus}
+              maxLength={maxLength}
+              variant="default" // Use default variant as border is handled by InputGroup
+              style={{ 
+                border: 'none', 
+                backgroundColor: 'transparent',
+                paddingLeft: leftIcon || prefix ? '0' : undefined,
+                paddingRight: rightIcon || suffix ? '0' : undefined
+              }}
+            />
+
+            {rightIcon && (
+              <S.IconWrapper side="right">
+                <Icon name={rightIcon} size={20} />
+              </S.IconWrapper>
+            )}
+            {suffix && <S.Addon side="right">{suffix}</S.Addon>}
+          </S.InputGroup>
+
           {error && <S.ErrorText>{error.message}</S.ErrorText>}
         </S.Container>
       )}

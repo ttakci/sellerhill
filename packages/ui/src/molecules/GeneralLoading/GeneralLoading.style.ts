@@ -1,4 +1,6 @@
-import styled, { keyframes } from 'styled-components';
+import { css, keyframes } from '@emotion/react';
+import styled from '@emotion/styled';
+import { tkn } from '../../theme/tkn';
 
 import type { LoadingSize } from './GeneralLoading.types';
 
@@ -10,18 +12,18 @@ const spin = keyframes`
 export const Overlay = styled.div<{ $overlay: boolean }>`
   ${(props) =>
     props.$overlay &&
-    `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9998;
-  `}
+    css`
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+    `}
 `;
 
 export const Container = styled.div`
@@ -45,8 +47,8 @@ const getSizePixels = (size: LoadingSize): number => {
 export const Spinner = styled.div<{ size: LoadingSize }>`
   width: ${(props) => getSizePixels(props.size)}px;
   height: ${(props) => getSizePixels(props.size)}px;
-  border: 3px solid #f3f4f6;
-  border-top-color: #3b82f6;
+  border: 3px solid ${tkn('colors.surface.secondary')};
+  border-top-color: ${tkn('colors.brand.primary')};
   border-radius: 50%;
   animation: ${spin} 0.8s linear infinite;
 `;

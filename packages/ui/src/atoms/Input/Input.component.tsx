@@ -1,4 +1,4 @@
-import { type ChangeEvent, forwardRef } from 'react';
+import { forwardRef, type ChangeEvent } from 'react';
 
 import { S } from './Input.style';
 import type { InputProps } from './Input.types';
@@ -43,7 +43,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <S.InputWrapper>
           <S.InputField
             ref={ref}
-            value={value}
+            value={value ?? ''}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
@@ -67,7 +67,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <S.InputField
         ref={ref}
-        value={value}
+        value={value ?? ''}
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}

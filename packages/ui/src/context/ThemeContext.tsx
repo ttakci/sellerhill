@@ -1,8 +1,8 @@
-import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ThemeMode } from '../theme/theme.types';
-import { lightTheme, darkTheme } from '../theme/themes';
+import { darkTheme, lightTheme } from '../theme/themes';
 
 import type { ThemeContextValue } from './ThemeContext.types';
 
@@ -87,7 +87,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <ThemeContext.Provider value={value}>
-      <StyledThemeProvider theme={theme}>{children}</StyledThemeProvider>
+      <EmotionThemeProvider theme={theme}>{children}</EmotionThemeProvider>
     </ThemeContext.Provider>
   );
 };

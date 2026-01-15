@@ -1,5 +1,5 @@
+import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
-import styled from 'styled-components';
 
 export const Page = styled.div`
   min-height: 100vh;
@@ -7,7 +7,7 @@ export const Page = styled.div`
 `;
 
 export const Header = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3C50E0 0%, #1c2b91 100%);
   padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')};
   box-shadow: ${tkn('shadows.lg')};
   margin-bottom: ${tkn('spacing.xxl')};
@@ -70,7 +70,7 @@ export const SectionTitle = styled.h2`
     display: inline-block;
     width: 4px;
     height: 28px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3C50E0 0%, #1c2b91 100%);
     border-radius: ${tkn('radius.sm')};
   }
 `;

@@ -1,4 +1,5 @@
-import styled, { css } from 'styled-components';
+import { Theme } from '@emotion/react';
+import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
@@ -11,57 +12,57 @@ interface StyledInputProps {
 }
 
 const sizeStyles = {
-  sm: css`
+  sm: (theme: Theme) => `
     padding: 8px 12px;
-    font-size: 13px;
-    height: 36px;
+    font-size: ${theme.typography.fontSize.sm};
+    height: 38px;
   `,
 
-  md: css`
-    padding: 12px 16px;
-    font-size: 15px;
+  md: (theme: Theme) => `
+    padding: 10px 16px;
+    font-size: ${theme.typography.fontSize.md};
     height: 48px;
   `,
 
-  lg: css`
-    padding: 16px 20px;
-    font-size: 15px;
-    height: 64px;
+  lg: (theme: Theme) => `
+    padding: 12px 20px;
+    font-size: ${theme.typography.fontSize.md};
+    height: 56px;
+    font-weight: ${theme.typography.fontWeight.medium};
   `,
 };
 
 const variantStyles = {
-  default: css`
-    border-color: ${tkn('colors.border.primary')};
+  default: (theme: Theme) => `
+    border-color: ${theme.colors.border.primary};
+    background: ${theme.colors.background.secondary};
 
     &:hover:not(:disabled) {
-      border-color: ${tkn('colors.brand.primary')};
+      border-color: ${theme.colors.brand.primary};
     }
 
     &:focus {
       outline: none;
-      border-color: ${tkn('colors.brand.primary')};
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-  `,
-
-  error: css`
-    border-color: ${tkn('colors.semantic.error')};
-
-    &:focus {
-      outline: none;
-      border-color: ${tkn('colors.semantic.error')};
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      border-color: ${theme.colors.brand.primary};
+      box-shadow: ${theme.shadows.sm};
     }
   `,
 
-  success: css`
-    border-color: ${tkn('colors.semantic.success')};
+  error: (theme: Theme) => `
+    border-color: ${theme.colors.semantic.error};
 
     &:focus {
       outline: none;
-      border-color: ${tkn('colors.semantic.success')};
-      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+      border-color: ${theme.colors.semantic.error};
+    }
+  `,
+
+  success: (theme: Theme) => `
+    border-color: ${theme.colors.semantic.success};
+
+    &:focus {
+      outline: none;
+      border-color: ${theme.colors.semantic.success};
     }
   `,
 };
@@ -72,54 +73,50 @@ const InputField = styled.input<StyledInputProps>`
   width: ${(p) => (p.$fullWidth ? '100%' : 'auto')};
   box-sizing: border-box;
 
-  border-radius: 8px;
+  border-radius: ${(p) => tkn('radius.md')(p as any)};
   border: 1px solid;
 
-  color: #373839;
-  background: #ffffff;
+  color: ${(p) => tkn('colors.text.primary')(p as any)};
+  background: ${(p) => tkn('colors.background.secondary')(p as any)};
 
-  font-family:
-    'Lexend',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
-  font-weight: 500;
-  line-height: 22px;
+  font-family: ${(p) => tkn('typography.fontFamily.sans')(p as any)};
+  font-weight: ${(p) => tkn('typography.fontWeight.normal')(p as any)};
+  line-height: ${(p) => tkn('typography.lineHeight.normal')(p as any)};
 
-  transition: all ${tkn('transitions.fast')};
+  transition: all ${(p) => tkn('transitions.fast')(p as any)};
 
   /* Size styles */
-  ${(p) => sizeStyles[p.$size || 'md']}
+  ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}
 
   /* Variant styles */
-  ${(p) => variantStyles[p.$variant || 'default']}
+  ${(p) => variantStyles[p.$variant || 'default'](p.theme as Theme)}
   
   &::placeholder {
-    color: ${tkn('colors.text.secondary')};
+    color: ${(p) => tkn('colors.text.tertiary')(p as any)};
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
-    background: ${tkn('colors.border.primary')};
+    background: ${(p) => tkn('colors.background.tertiary')(p as any)};
   }
 `;
 
 const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${(p) => tkn('spacing.xs')(p as any)};
 `;
 
 const HelperText = styled.span<{ $variant?: 'error' | 'success' }>`
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${(p) =>
-    p.$variant === 'error'
-      ? tkn('colors.semantic.error')
-      : p.$variant === 'success'
-        ? tkn('colors.brand.primary')
-        : tkn('colors.text.secondary')};
+  font-size: ${(p) => tkn('typography.fontSize.xs')(p as any)};
+  margin-top: ${(p) => tkn('spacing.xs')(p as any)};
+  color: ${(p) => {
+    const variant = p.$variant;
+    if (variant === 'error') return tkn('colors.semantic.error')(p as any);
+    if (variant === 'success') return tkn('colors.semantic.success')(p as any);
+    return tkn('colors.text.secondary')(p as any);
+  }};
 `;
 
 export const S = {

@@ -1,8 +1,9 @@
-import styled, { css } from 'styled-components';
+import { css, Theme } from '@emotion/react';
+import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-import type { ButtonVariant, ButtonSize } from './Button.types';
+import type { ButtonSize, ButtonVariant } from './Button.types';
 
 interface StyledButtonProps {
   $variant?: ButtonVariant;
@@ -12,75 +13,62 @@ interface StyledButtonProps {
 }
 
 const variantStyles = {
-  primary: css`
-    background: ${tkn('colors.brand.primary')};
+  primary: (theme: Theme) => `
+    background: ${theme.colors.brand.primary};
     color: #ffffff;
-    border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${tkn('shadows.sm')};
+    border-color: ${theme.colors.brand.primary};
 
     &:hover:not(:disabled) {
-      background: ${tkn('colors.brand.primaryHover')};
-      border-color: ${tkn('colors.brand.primaryHover')};
-      box-shadow: ${tkn('shadows.md')};
-      transform: translateY(-1px);
+      background: ${theme.colors.brand.primaryHover};
+      border-color: ${theme.colors.brand.primaryHover};
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0);
-      box-shadow: ${tkn('shadows.sm')};
+      opacity: 0.9;
     }
   `,
 
-  secondary: css`
-    background: ${tkn('colors.surface.primary')};
-    color: ${tkn('colors.text.primary')};
-    border-color: ${tkn('colors.border.primary')};
+  secondary: (theme: Theme) => `
+    background: ${theme.colors.background.secondary};
+    color: ${theme.colors.text.primary};
+    border-color: ${theme.colors.border.primary};
 
     &:hover:not(:disabled) {
-      background: ${tkn('colors.background.primary')};
-      border-color: ${tkn('colors.brand.primary')};
-      color: ${tkn('colors.brand.primary')};
+      background: ${theme.colors.background.primary};
+      border-color: ${theme.colors.border.primary};
+      color: ${theme.colors.brand.primary};
     }
   `,
 
-  danger: css`
-    background: ${tkn('colors.semantic.error')};
+  danger: (theme: Theme) => `
+    background: ${theme.colors.semantic.error};
     color: #ffffff;
-    border-color: ${tkn('colors.semantic.error')};
-    box-shadow: ${tkn('shadows.sm')};
+    border-color: ${theme.colors.semantic.error};
 
     &:hover:not(:disabled) {
-      background: ${tkn('colors.semantic.error')};
-      border-color: ${tkn('colors.semantic.error')};
-      box-shadow: ${tkn('shadows.md')};
-      transform: translateY(-1px);
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-      box-shadow: ${tkn('shadows.sm')};
+      opacity: 0.9;
     }
   `,
 };
 
 const sizeStyles = {
-  sm: css`
-    padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
-    font-size: ${tkn('typography.fontSize.sm')};
+  sm: (theme: Theme) => `
+    padding: 6px 12px;
+    font-size: ${theme.typography.fontSize.sm};
     height: 36px;
   `,
 
-  md: css`
-    padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
-    font-size: ${tkn('typography.fontSize.md')};
-    height: 42px;
+  md: (theme: Theme) => `
+    padding: 10px 20px;
+    font-size: ${theme.typography.fontSize.md};
+    height: 44px;
   `,
 
-  lg: css`
-    padding: ${tkn('spacing.lg')} ${tkn('spacing.xxl')};
-    font-size: ${tkn('typography.fontSize.md')};
-    height: 48px;
-    font-weight: ${tkn('typography.fontWeight.semibold')};
+  lg: (theme: Theme) => `
+    padding: 12px 24px;
+    font-size: ${theme.typography.fontSize.md};
+    height: 50px;
+    font-weight: ${theme.typography.fontWeight.semibold};
   `,
 };
 
@@ -88,20 +76,20 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: ${tkn('spacing.xs')};
+  gap: ${(p) => tkn('spacing.xs')(p as any)};
 
-  border-radius: ${tkn('radius.md')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  border-radius: ${(p) => tkn('radius.md')(p as any)};
+  border: 1px solid transparent;
+  font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
 
   cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
+  transition: all ${(p) => tkn('transitions.fast')(p as any)};
 
   /* Size styles */
-  ${(p) => sizeStyles[p.$size || 'md']}
+  ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}
 
   /* Variant styles */
-  ${(p) => variantStyles[p.$variant || 'secondary']}
+  ${(p) => variantStyles[p.$variant || 'secondary'](p.theme as Theme)}
   
   /* Full width */
   ${(p) =>
@@ -115,18 +103,18 @@ const ButtonContainer = styled.button<StyledButtonProps>`
     p.$isLoading &&
     css`
       position: relative;
-      color: transparent;
+      color: transparent !important;
       pointer-events: none;
 
       &::after {
         content: '';
         position: absolute;
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         top: 50%;
         left: 50%;
-        margin-left: -8px;
-        margin-top: -8px;
+        margin-left: -9px;
+        margin-top: -9px;
         border: 2px solid currentColor;
         border-radius: 50%;
         border-top-color: transparent;
@@ -146,7 +134,7 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   /* Disabled state */
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 `;
 

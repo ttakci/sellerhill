@@ -100,7 +100,9 @@ packages/ui:
   - Design tokens & semantic colors
   - Atomic design pattern
   - Global UI context (modals, loading)
-  - Icon components (SVG as React)
+  - Icon components (React functional components)
+  - Icon wrapper (div) to prevent leaking transient props to SVG elements
+
 
 packages/mcp:
   - Model Context Protocol (future use)
@@ -567,27 +569,23 @@ App (Router)
 ### **Styling Strategy**
 
 ```typescript
-// Emotion CSS-in-JS
+// Emotion CSS-in-JS (Strictly enforced)
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
   padding: ${({ theme }) => theme.spacing.md};
-  background: ${({ theme }) => theme.colors.background};
+  background: ${({ theme }) => theme.colors.background.primary};
 `;
 
-// Theme tokens (packages/ui/src/theme)
+// Theme tokens (packages/ui/src/theme/designTokens.ts)
+// TailAdmin-inspired semantic structure
 export const theme = {
   colors: {
-    primary: '#007bff',
-    background: '#ffffff',
+    brand: { primary: '#3C50E0', ... },
+    background: { primary: '#FFFFFF', ... },
     // ...
   },
-  spacing: {
-    xs: '4px',
-    sm: '8px',
-    md: '16px',
-    // ...
-  },
+  // ...
 };
 ```
 
@@ -730,7 +728,8 @@ const lightColors: ThemeColors = {
 };
 
 const darkColors: ThemeColors = {
-  background: { primary: '#212121', secondary: '#424242' },
+  background: { primary: '#1A222C', secondary: '#1C2434', tertiary: '#1B2430' },
+  surface: { primary: '#24303F', secondary: '#1B2430' },
   // ...
 };
 
@@ -784,7 +783,8 @@ import { Icon } from '@repo/ui';
 
 // Available icons:
 // inbox, calendar, chevron-right, trash, archive,
-// alert-circle, moon, sun
+// alert-circle, moon, sun, menu, user
+
 ```
 
 ---
@@ -1056,7 +1056,7 @@ pnpm clean                  # Remove node_modules, dist
 - ✅ Code splitting (Vite)
 - ✅ RTK Query caching
 - ✅ Lazy loading routes
-- ✅ Emotion CSS-in-JS (optimized)
+- UI Library: Emotion CSS-in-JS, Atomic Design, TailAdmin Aesthetics
 
 ---
 
@@ -1158,11 +1158,12 @@ This architecture provides:
 **Last Updated**: January 12, 2026  
 **Version**: 3.0.0
 
-**Latest Features** (v3.0.0):
+**Latest Features** (v3.1.0):
 
-- ✅ Dark/Light mode theme system with localStorage persistence
-- ✅ Global UIContext for modals and loading states
-- ✅ Icon atom components (SVG as React components)
-- ✅ Semantic color tokens (background, surface, text, border, semantic, brand)
-- ✅ Platform-agnostic architecture (Web + Mobile ready)
-- ✅ forwardRef support for form components (React Hook Form integration)
+- ✅ **Emotion Migration**: Removed `styled-components` in favor of `@emotion/styled` and `@emotion/react`.
+- ✅ **TailAdmin UI**: Integrated premium dashboard layout with Sidebar and Header.
+- ✅ Dark/Light mode theme system with localStorage persistence.
+- ✅ Global UIContext for modals and loading states.
+- ✅ Icon atom components (SVG as React components).
+- ✅ Semantic color tokens (background, surface, text, border, semantic, brand).
+- ✅ forwardRef support for form components (React Hook Form integration).

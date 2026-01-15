@@ -1,8 +1,8 @@
 import type { ReactElement, ReactNode } from 'react';
 
-export type TextVariant = 'body' | 'caption' | 'overline';
+export type TextVariant = 'body' | 'caption' | 'overline' | 'h1' | 'h2' | 'h3' | 'h4' | 'nav';
 
-export type TextWeight = 'regular' | 'medium' | 'semibold';
+export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 export type TextAlign = 'left' | 'center' | 'right';
 
@@ -42,6 +42,21 @@ export interface TextProps {
    * Show in single line and truncate overflow with ...
    */
   truncate?: boolean;
+
+  /**
+   * Text color (semantic path)
+   */
+  color?: string;
+
+  /**
+   * Additional CSS classes
+   */
+  className?: string;
+
+  /**
+   * Inline styles
+   */
+  style?: React.CSSProperties;
 }
 
 export type TextElement = ReactElement;

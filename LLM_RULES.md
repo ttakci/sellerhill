@@ -143,9 +143,10 @@ examples/
 - ✅ Styled components use new theme: `theme.colors.background.primary`, `theme.spacing.md`
 - ✅ RTK Query cache invalidation: `invalidatesTags: ['Example']`
 - ✅ Form inputs use `React.forwardRef`: see `ExampleForm.component.tsx`
-- ✅ Icons: `<Icon name="trash" size={20} />`
+- ✅ Icons: `<Icon name="trash" size={20} />` (Wrapper: `div`, Child: `TrashIcon`)
 - ✅ i18n: `{t('examples.title')}`, `{t('examples.createSuccess')}`
 - ✅ UIContext: `showLoading()`, `showMessage()`, `hideLoading()`
+- ✅ Input Safety: `value={value ?? ''}` in Input atoms to prevent uncontrolled warnings.
 
 ### Shared Reference: `packages/shared/src/domain/example/`
 
@@ -421,12 +422,13 @@ import { TextInput } from '@repo/ui';
   type="email"
   disabled={isLoading}
 />
-```
 
 **Atomic Design Pattern:**
 
-- **Atom (Input)**: Base component, forwardRef, no form logic
-- **Molecule (TextInput)**: Controller wrapper + Label + Input + Error display
+- **Atoms**: `Input`, `Button`, `Label`, `Text`, `Icon` (Base components, `forwardRef` for inputs. `Icon` uses a `div` wrapper to prevent prop leakage to SVG).
+- **Molecules**: `TextInput` (Controller-wrapped atoms + error display).
+- **Organisms**: `Header`, `Sidebar` (Collapsible, supports badges).
+- **Templates**: `AppLayout`.
 
 **TextInput Features:**
 
@@ -698,12 +700,12 @@ export class UsersModule {}
 
 ---
 
-### ✅ RULE 11: Styled Components Pattern
+### ✅ RULE 11: Emotion Styling Pattern
 
 **ALL styling MUST use Emotion styled components with NEW theme structure**
 
 ```typescript
-// ✅ CORRECT - Using new theme structure
+// ✅ CORRECT - Using Emotion
 // UserList.style.ts
 import styled from '@emotion/styled';
 
@@ -716,81 +718,9 @@ export const Container = styled.div`
   border-radius: ${({ theme }) => theme.radius.md};
   box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
-
-export const ListItem = styled.div<{ isActive?: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm};
-  background: ${({ theme, isActive }) =>
-    isActive ? theme.colors.brand.primary : theme.colors.surface.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.primary};
-  border-radius: ${({ theme }) => theme.radius.sm};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.brand.primaryHover};
-    transform: translateY(-1px);
-  }
-`;
-
-export const Title = styled.h2`
-  font-size: ${({ theme }) => theme.typography.fontSize.xl};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin: 0;
-`;
-
-// UserList.component.tsx
-import * as S from './UserList.style';
-
-export const UserList = (props: UserListProps) => (
-  <S.Container>
-    <S.Title>Users</S.Title>
-    {props.items.map((item) => (
-      <S.ListItem key={item.id} isActive={item.isActive}>
-        {item.name}
-      </S.ListItem>
-    ))}
-  </S.Container>
-);
 ```
 
-**New Theme Structure** (v3.0.0):
-
-```typescript
-theme.colors.background.primary; // #FFFFFF (light) / #212121 (dark)
-theme.colors.background.secondary; // #FAFAFA (light) / #424242 (dark)
-theme.colors.surface.primary; // Cards, modals
-theme.colors.text.primary; // Main text
-theme.colors.text.secondary; // Muted text
-theme.colors.border.primary; // Borders
-theme.colors.border.focus; // Focus states
-theme.colors.semantic.success; // Success states
-theme.colors.semantic.error; // Error states
-theme.colors.brand.primary; // Brand color
-theme.colors.brand.primaryHover; // Brand hover
-
-theme.spacing.xs; // 0.25rem (4px)
-theme.spacing.md; // 1rem (16px)
-theme.spacing.xl; // 2rem (32px)
-
-theme.radius.sm; // 4px
-theme.radius.md; // 8px
-theme.radius.lg; // 12px
-
-theme.shadows.sm; // Small shadow
-theme.shadows.md; // Medium shadow
-theme.shadows.lg; // Large shadow
-
-theme.typography.fontSize.xs; // 0.75rem (12px)
-theme.typography.fontSize.md; // 1rem (16px)
-theme.typography.fontWeight.normal; // 400
-theme.typography.fontWeight.bold; // 700
-
-theme.transitions.fast; // 150ms
-theme.transitions.normal; // 300ms
-```
-
-**WHY**: Type-safe styles. Theme integration. Component-scoped CSS. Dark mode support.
+**WHY**: Type-safe styles. Theme integration. Component-scoped CSS. Dark mode support. No `styled-components` library usage.
 
 ---
 

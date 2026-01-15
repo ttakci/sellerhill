@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+    dedupe: ['@emotion/react', '@emotion/styled', 'react', 'react-dom'],
   },
   server: {
     port: 5173,

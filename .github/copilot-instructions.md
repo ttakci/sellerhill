@@ -28,17 +28,14 @@ This is a **production-ready pnpm workspace monorepo** with strict architectural
 
 ### 4️⃣ Styling (EMOTION ONLY)
 
+- **ONLY** use `@emotion/styled` and `@emotion/react`.
+- **NEVER** use `styled-components`.
+- Use the TailAdmin-inspired semantic token structure.
+
 ```typescript
 // ✅ CORRECT - New semantic structure
 background: ${({ theme }) => theme.colors.background.primary};
 padding: ${({ theme }) => theme.spacing.md};
-border-radius: ${({ theme }) => theme.radius.md};
-box-shadow: ${({ theme }) => theme.shadows.sm};
-font-size: ${({ theme }) => theme.typography.fontSize.md};
-
-// ❌ WRONG - Old flat structure
-background: ${({ theme }) => theme.tokens.colors.background};
-padding: ${({ theme }) => theme.space.md};
 ```
 
 **Available theme paths**:
@@ -85,32 +82,29 @@ const response = await axios.get('/api/examples');
 ### 7️⃣ Icons (COMPONENT ONLY)
 
 ```tsx
-// ✅ CORRECT
+// ✅ CORRECT - Use Icon component
 import { Icon } from '@repo/ui';
 <Icon name="inbox" size={20} />
 
-// ❌ WRONG
-<svg>...</svg>
-<i className="icon-inbox"></i>
+// 💡 PATTERN: Icon component uses a <div> wrapper to prevent 
+// transient props (like $size) from leaking to the underlying SVG.
 ```
 
-**Available icons**: inbox, calendar, chevron-right, trash, archive, alert-circle, moon, sun
+**Available icons**: inbox, calendar, chevron-right, trash, archive, alert-circle, moon, sun, menu, user
 
-### 8️⃣ Form Components (forwardRef REQUIRED)
+### 8️⃣ Form Components (forwardRef & Safety REQUIRED)
 
 ```typescript
 // ✅ CORRECT
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ value, onChange, ...props }, ref) => {
-    return <S.InputField ref={ref} {...props} />;
+    return <S.InputField ref={ref} value={value ?? ''} {...props} />;
   }
 );
 Input.displayName = 'Input';
 
-// ❌ WRONG
-export const Input = ({ value, onChange }: InputProps) => {
-  return <S.InputField {...props} />;
-};
+// 💡 SAFETY: Always use `value={value ?? ''}` to prevent 
+// "changing uncontrolled input to be controlled" warnings.
 ```
 
 ### 9️⃣ Global UI State (UIContext ONLY)

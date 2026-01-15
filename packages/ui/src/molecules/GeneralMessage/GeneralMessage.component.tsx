@@ -60,7 +60,7 @@ export const GeneralMessage: React.FC<GeneralMessageProps> = ({
 
   return (
     <S.Overlay onClick={handleOverlayClick}>
-      <S.Container type={type}>
+      <S.Container>
         <S.Header>
           <S.IconWrapper type={type}>{icon || defaultIcons[type]}</S.IconWrapper>
           <S.Content>

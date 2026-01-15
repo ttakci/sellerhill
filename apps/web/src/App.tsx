@@ -5,6 +5,7 @@ import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import VerifyEmailPage from './features/auth/VerifyEmailPage';
 import DashboardPage from './features/dashboard/DashboardPage';
+import FormElementsPage from './features/dashboard/FormElementsPage';
 import EbayConnectPage from './features/ebay/EbayConnectPage';
 import OnboardingEbayPage from './features/ebay/OnboardingEbayPage';
 import { AppLayout } from './layouts/AppLayout';
@@ -22,6 +23,7 @@ export function App() {
         {/* Protected routes with layout */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/forms/elements" element={<FormElementsPage />} />
           <Route path="/ebay/connect" element={<EbayConnectPage />} />
           <Route path="/onboarding/ebay" element={<OnboardingEbayPage />} />
           

@@ -9,6 +9,9 @@ export const Text = ({
   align,
   muted = false,
   truncate = false,
+  color,
+  className,
+  style,
 }: TextProps): React.ReactElement => (
   <S.TextElement
     $variant={variant}
@@ -16,6 +19,9 @@ export const Text = ({
     $align={align}
     $muted={muted}
     $truncate={truncate}
+    $color={color}
+    className={className}
+    style={style}
   >
     {children}
   </S.TextElement>

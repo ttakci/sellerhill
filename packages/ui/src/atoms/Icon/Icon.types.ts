@@ -11,4 +11,6 @@ export interface IconProps {
   stroke?: string;
   strokeWidth?: number;
   isLoading?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }

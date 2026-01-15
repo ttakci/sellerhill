@@ -110,5 +110,15 @@
       "alreadyHaveAccount": "Zaten bir hesabınız var mı?",
       "loginLink": "Giriş Yap"
     }
+  },
+  "menu": {
+    "main": "ANA MENÜ",
+    "dashboard": "Panel",
+    "orders": "Siparişler",
+    "listings": "Listelemeler",
+    "settings": "Ayarlar",
+    "editProfile": "Profili Düzenle",
+    "support": "Destek",
+    "logout": "Oturumu Kapat"
   }
 }

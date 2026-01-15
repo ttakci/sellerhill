@@ -1,5 +1,6 @@
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
-import styled from 'styled-components';
 
 export const Grid = styled.div`
   display: grid;
@@ -27,7 +28,7 @@ export const Card = styled.div`
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3C50E0 0%, #1c2b91 100%);
     opacity: 0;
     transition: opacity ${tkn('transitions.fast')};
   }
@@ -66,8 +67,14 @@ export const StatusBadge = styled.span<{ $isActive: boolean }>`
   font-weight: ${tkn('typography.fontWeight.semibold')};
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background-color: ${(props) => (props.$isActive ? 'rgba(22, 163, 74, 0.1)' : 'rgba(107, 114, 128, 0.1)')};
-  color: ${(props) => (props.$isActive ? tkn('colors.semantic.success') : tkn('colors.text.secondary'))};
+  
+  ${(props) => props.$isActive ? css`
+    background-color: rgba(16, 185, 129, 0.1);
+    color: ${tkn('colors.semantic.success')(props)};
+  ` : css`
+    background-color: rgba(107, 114, 128, 0.1);
+    color: ${tkn('colors.text.secondary')(props)};
+  `}
 `;
 
 export const CardBody = styled.div`

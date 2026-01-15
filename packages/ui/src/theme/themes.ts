@@ -1,10 +1,10 @@
 import {
-  colorTokens,
-  spacingTokens,
-  radiusTokens,
-  shadowTokens,
-  typographyTokens,
-  transitionTokens,
+    colorTokens,
+    radiusTokens,
+    shadowTokens,
+    spacingTokens,
+    transitionTokens,
+    typographyTokens,
 } from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
@@ -13,28 +13,28 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[50], // #FAFAFA
-    tertiary: colorTokens.neutral[100], // #F5F5F5
+    primary: colorTokens.neutral[50], // #F1F5F9
+    secondary: colorTokens.neutral[0], // #FFFFFF
+    tertiary: colorTokens.neutral[100], // #E2E8F0
   },
 
   surface: {
     primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[50], // #FAFAFA
+    secondary: colorTokens.neutral[50], // #F1F5F9
   },
 
   text: {
-    primary: colorTokens.neutral[900], // #212121
-    secondary: colorTokens.neutral[600], // #757575
-    tertiary: colorTokens.neutral[500], // #9E9E9E
-    disabled: colorTokens.neutral[400], // #BDBDBD
+    primary: colorTokens.neutral[700], // #1C2434 approximate (TailAdmin text)
+    secondary: colorTokens.neutral[400], // #64748B
+    tertiary: colorTokens.neutral[300], // #94A3B8
+    disabled: colorTokens.neutral[200], // #CBD5E1
     inverse: colorTokens.neutral[0], // #FFFFFF
   },
 
   border: {
-    primary: colorTokens.neutral[300], // #E0E0E0
-    secondary: colorTokens.neutral[200], // #EEEEEE
-    focus: colorTokens.primary[500], // #2196F3
+    primary: colorTokens.neutral[100], // #E2E8F0
+    secondary: colorTokens.neutral[50], // #F1F5F9
+    focus: colorTokens.primary[500], // #3C50E0
   },
 
   semantic: {
@@ -56,28 +56,28 @@ const lightColors: ThemeColors = {
  */
 const darkColors: ThemeColors = {
   background: {
-    primary: colorTokens.neutral[900], // #212121
-    secondary: colorTokens.neutral[800], // #424242
-    tertiary: colorTokens.neutral[700], // #616161
+    primary: colorTokens.neutral[900], // #1A222C
+    secondary: colorTokens.neutral[800], // #1C2434
+    tertiary: colorTokens.neutral[950], // #1B2430
   },
 
   surface: {
-    primary: colorTokens.neutral[800], // #424242
-    secondary: colorTokens.neutral[700], // #616161
+    primary: colorTokens.neutral[1000], // #24303F
+    secondary: colorTokens.neutral[950], // #1B2430
   },
 
   text: {
     primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[300], // #E0E0E0
-    tertiary: colorTokens.neutral[400], // #BDBDBD
-    disabled: colorTokens.neutral[600], // #757575
-    inverse: colorTokens.neutral[900], // #212121
+    secondary: colorTokens.neutral[300], // #94A3B8
+    tertiary: colorTokens.neutral[400], // #64748B
+    disabled: colorTokens.neutral[500], // #475569
+    inverse: colorTokens.neutral[800], // #1C2434
   },
 
   border: {
-    primary: colorTokens.neutral[700], // #616161
-    secondary: colorTokens.neutral[800], // #424242
-    focus: colorTokens.primary[500], // #2196F3
+    primary: colorTokens.neutral[700], // #1E293B
+    secondary: colorTokens.neutral[600], // #334155
+    focus: colorTokens.primary[500], // #3C50E0
   },
 
   semantic: {

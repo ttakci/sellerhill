@@ -1,8 +1,8 @@
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
-import { tkn } from '../../theme/tkn';
 
-import type { TextVariant, TextWeight, TextAlign } from './Text.types';
+import type { TextAlign, TextVariant, TextWeight } from './Text.types';
 
 interface StyledTextProps {
   $variant?: TextVariant;
@@ -10,46 +10,79 @@ interface StyledTextProps {
   $align?: TextAlign;
   $muted?: boolean;
   $truncate?: boolean;
+  $color?: string;
 }
 
 const variantStyles = {
-  body: css`
-    font-size: ${tkn('typography.fontSize.md')};
+  h1: (theme: any) => `
+    font-size: ${theme.typography.fontSize.xxxl};
+    line-height: ${theme.typography.lineHeight.tight};
   `,
-
-  caption: css`
-    font-size: ${tkn('typography.fontSize.sm')};
+  h2: (theme: any) => `
+    font-size: ${theme.typography.fontSize.xxl};
+    line-height: ${theme.typography.lineHeight.tight};
   `,
-
-  overline: css`
-    font-size: ${tkn('typography.fontSize.sm')};
+  h3: (theme: any) => `
+    font-size: ${theme.typography.fontSize.xl};
+    line-height: ${theme.typography.lineHeight.tight};
+  `,
+  h4: (theme: any) => `
+    font-size: ${theme.typography.fontSize.lg};
+    line-height: ${theme.typography.lineHeight.tight};
+  `,
+  body: (theme: any) => `
+    font-size: ${theme.typography.fontSize.md};
+    line-height: ${theme.typography.lineHeight.normal};
+  `,
+  caption: (theme: any) => `
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.normal};
+  `,
+  overline: (theme: any) => `
+    font-size: ${theme.typography.fontSize.xs};
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-weight: ${theme.typography.fontWeight.semibold};
+  `,
+  nav: (theme: any) => `
+    font-size: ${theme.typography.fontSize.md};
+    font-weight: ${theme.typography.fontWeight.medium};
   `,
 };
 
 const weightStyles = {
-  regular: css`
-    font-weight: ${tkn('typography.fontWeight.normal')};
+  regular: (theme: any) => `
+    font-weight: ${theme.typography.fontWeight.normal};
   `,
-
-  medium: css`
-    font-weight: ${tkn('typography.fontWeight.medium')};
+  medium: (theme: any) => `
+    font-weight: ${theme.typography.fontWeight.medium};
   `,
-
-  semibold: css`
-    font-weight: ${tkn('typography.fontWeight.semibold')};
+  semibold: (theme: any) => `
+    font-weight: ${theme.typography.fontWeight.semibold};
+  `,
+  bold: (theme: any) => `
+    font-weight: ${theme.typography.fontWeight.bold};
   `,
 };
 
 const TextElement = styled.span<StyledTextProps>`
-  color: ${(p) => (p.$muted ? tkn('colors.text.secondary') : tkn('colors.text.primary'))};
+  color: ${(p) => {
+    if (p.$color) {
+      if (p.$color.includes('.')) {
+        const [cat, sub] = p.$color.split('.');
+        return (p.theme as any).colors[cat][sub];
+      }
+      return p.$color;
+    }
+    return p.$muted ? (p.theme as any).colors.text.secondary : (p.theme as any).colors.text.primary;
+  }};
+  font-family: ${({ theme }) => (theme as any).typography.fontFamily.sans};
 
   /* Variant styles */
-  ${(p) => variantStyles[p.$variant || 'body']}
+  ${(p) => variantStyles[p.$variant || 'body'](p.theme)}
 
   /* Weight styles */
-  ${(p) => weightStyles[p.$weight || 'regular']}
+  ${(p) => weightStyles[p.$weight || 'regular'](p.theme)}
   
   /* Text align */
   ${(p) =>

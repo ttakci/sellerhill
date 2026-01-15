@@ -1,5 +1,5 @@
+import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
-import styled from 'styled-components';
 
 export const Form = styled.form`
   display: flex;

@@ -1,4 +1,5 @@
 import type { Control, FieldValues, Path } from 'react-hook-form';
+import type { IconName } from '../../atoms/Icon';
 
 /**
  * TextInput Molecule Props
@@ -24,7 +25,7 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
   /**
    * Input type
    */
-  type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search';
+  type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' | 'number';
 
   /**
    * Placeholder text
@@ -65,4 +66,24 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
    * ID attribute (for accessibility)
    */
   id?: string;
+
+  /**
+   * Left icon name
+   */
+  leftIcon?: IconName;
+
+  /**
+   * Right icon name
+   */
+  rightIcon?: IconName;
+
+  /**
+   * Prefix text/element
+   */
+  prefix?: React.ReactNode;
+
+  /**
+   * Suffix text/element
+   */
+  suffix?: React.ReactNode;
 }

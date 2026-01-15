@@ -96,4 +96,9 @@ export interface InputProps {
    * Max length
    */
   maxLength?: number;
+
+  /**
+   * Custom style
+   */
+  style?: React.CSSProperties;
 }

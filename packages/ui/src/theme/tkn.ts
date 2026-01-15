@@ -1,4 +1,4 @@
-import type { DefaultTheme } from 'styled-components';
+import { Theme } from '@emotion/react';
 
 type ThemePath =
   // Colors - Background
@@ -71,8 +71,15 @@ type ThemePath =
   | 'transitions.normal'
   | 'transitions.slow';
 
-export const tkn = (path: ThemePath) => (p: { theme: DefaultTheme }) => {
+export const tkn = (path: ThemePath) => (p: { theme: Theme }) => {
   const t = p.theme;
+
+  if (!t || !t.colors) {
+    console.warn(
+      `[tkn] Theme or colors missing while accessing "${path}". This usually means ThemeProvider is not correctly set up or multiple Emotion instances are loaded.`
+    );
+    return '';
+  }
 
   switch (path) {
     // Colors - Background

@@ -28,6 +28,10 @@ export const LoginPageComponent = ({
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginFormDataSchema(t)),
     mode: 'onBlur',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
   return (

@@ -1,10 +1,10 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 export const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 64px); /* Subtract header height */
+  min-height: calc(100vh - 80px); /* Subtract header height */
   background: ${({ theme }) => theme.colors.background.primary};
   padding: ${({ theme }) => theme.spacing.md};
 `;

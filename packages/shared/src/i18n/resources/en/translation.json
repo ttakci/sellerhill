@@ -110,5 +110,15 @@
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Sign in"
     }
+  },
+  "menu": {
+    "main": "MAIN MENU",
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "listings": "Listings",
+    "settings": "Settings",
+    "editProfile": "Edit Profile",
+    "support": "Support",
+    "logout": "Logout"
   }
 }
