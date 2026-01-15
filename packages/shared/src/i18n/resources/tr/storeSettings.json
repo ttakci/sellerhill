@@ -1,0 +1,32 @@
+{
+  "storeSettings": {
+    "title": "Mağaza Yapılandırması",
+    "subtitle": "Mağazalarınız için global konum, doğrulama ve kara liste ayarlarını yönetin.",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "viewLogs": "Logları Görüntüle",
+    "globalSettings": "Ayarları tüm mağazalara uygula",
+    "globalDescription": "Aşağıdaki yapılandırmayı tüm bağlı mağazalara yayınlamak için bunu etkinleştirin. Belirli bir mağaza seçmek için devre dışı bırakın.",
+    "selectStore": "Mağaza Seç",
+    "selectStorePlaceholder": "Mağaza arayın ve seçin...",
+    "locationSectionTitle": "Konum Ayarları",
+    "country": "Ülke",
+    "state": "Eyalet/Konum",
+    "zipCode": "Posta Kodu",
+    "validationSectionTitle": "Doğrulama Ayarları",
+    "validateTitle": "Başlığı Doğrula",
+    "validateTitleDesc": "Yasaklı kelimeler için ürün başlıklarını tara",
+    "validateDescription": "Açıklamayı Doğrula",
+    "validateDescriptionDesc": "Gövde metni ve madde işaretlerini tara",
+    "blacklistSectionTitle": "Kara Liste Yönetimi",
+    "blacklistSubtitle": "Ürün listeleri için yasaklı anahtar kelimeleri yönetin",
+    "addKeyword": "Anahtar kelime ekle...",
+    "keyword": "Anahtar Kelime",
+    "scope": "Doğrulama Kapsamı",
+    "scope_both": "Her İkisi",
+    "scope_title": "Başlık",
+    "scope_description": "Açıklama",
+    "noBlacklist": "Henüz kara listeye alınmış anahtar kelime yok",
+    "noKeywords": "Anahtar kelime bulunamadı",
+    "copyright": "© {{year}} DropMaster SaaS Platformu. Tüm hakları saklıdır."
+  }
+}

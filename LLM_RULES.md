@@ -543,7 +543,107 @@ export const UserForm = (props: UserFormProps): React.ReactElement => {
 
 ---
 
-### ✅ RULE 10: Error Handling Pattern
+### ✅ RULE 10: Loading & Error Handling (RTK QUERY + useLoading)
+
+**ALWAYS use RTK Query's built-in loading/error states with the `useLoading` hook**
+
+```typescript
+// ✅ CORRECT - Use useLoading hook with RTK Query states
+import { useLoading, useUI } from '@repo/ui';
+
+const [saveSettings, { isLoading, isSuccess, error }] = useSaveStoreSettingsMutation();
+
+// Automatically sync RTK Query loading state with global loading overlay
+useLoading(isLoading);
+
+// Handle success
+useEffect(() => {
+  if (isSuccess) {
+    showMessage({
+      type: 'success',
+      headerKey: 'message.success.header',
+      descriptionKey: 'common.saveSuccess',
+    }, t);
+  }
+}, [isSuccess, showMessage, t]);
+
+// Handle errors
+useEffect(() => {
+  if (error) {
+    const { key, params } = getErrorMessage(error);
+    showMessage({
+      type: 'error',
+      headerKey: 'message.error.header',
+      descriptionKey: key,
+      descriptionParams: params,
+      primaryButton: {
+        labelKey: 'message.error.close',
+        onClick: closeMessage,
+      },
+    }, t);
+  }
+}, [error, showMessage, closeMessage, t]);
+
+// Event handler - NO try-catch-finally needed!
+const handleSave = (data: FormData): void => {
+  void saveSettings(data); // RTK Query handles everything
+};
+
+// ❌ WRONG - Manual loading state management
+const { showLoading, hideLoading } = useUI();
+
+const handleSave = async (data: FormData) => {
+  try {
+    showLoading();
+    await saveSettings(data).unwrap();
+    showMessage({ type: 'success', message: 'Saved!' });
+  } catch (error) {
+    showMessage({ type: 'error', message: 'Error!' });
+  } finally {
+    hideLoading();
+  }
+};
+
+// ❌ WRONG - Local state for loading
+const [isLoading, setIsLoading] = useState(false);
+```
+
+**useLoading Hook Signature:**
+
+```typescript
+/**
+ * Automatically sync a boolean loading state with the global loading overlay
+ * @param isLoading - Boolean state from RTK Query (isLoading, isFetching, etc.)
+ * @param options - Optional loading overlay configuration
+ */
+useLoading(isLoading: boolean, options?: ShowLoadingOptions)
+```
+
+**Multiple Loading States:**
+
+```typescript
+// Combine multiple RTK Query loading states
+const { isLoading: isLoadingData } = useGetDataQuery();
+const [create, { isLoading: isCreating }] = useCreateMutation();
+const [update, { isLoading: isUpdating }] = useUpdateMutation();
+
+// Show loading when ANY operation is in progress
+useLoading(isLoadingData || isCreating || isUpdating);
+```
+
+**Key Benefits:**
+
+- ✅ No manual `showLoading()`/`hideLoading()` calls
+- ✅ No try-catch-finally blocks for loading state
+- ✅ RTK Query handles all error states automatically
+- ✅ Cleaner, more declarative code
+- ✅ Automatic cleanup on unmount
+
+**WHY**: Declarative loading state management. RTK Query provides built-in loading/error states that should be used directly instead of manual imperative calls.
+
+---
+
+### ✅ RULE 11: Error Handling Pattern
 
 **ALWAYS use standardized error handling**
 
@@ -592,7 +692,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
 ---
 
-### ✅ RULE 10: Backend Module Structure
+### ✅ RULE 12: Backend Module Structure
 
 **EVERY backend feature MUST follow NestJS module structure**
 
@@ -700,7 +800,7 @@ export class UsersModule {}
 
 ---
 
-### ✅ RULE 11: Emotion Styling Pattern
+### ✅ RULE 13: Emotion Styling Pattern
 
 **ALL styling MUST use Emotion styled components with NEW theme structure**
 
@@ -724,7 +824,7 @@ export const Container = styled.div`
 
 ---
 
-### ✅ RULE 11B: Theme System Usage
+### ✅ RULE 13B: Theme System Usage
 
 **Use ThemeProvider and useTheme hook for dark/light mode**
 
@@ -774,7 +874,7 @@ const Card = () => {
 
 ---
 
-### ✅ RULE 12: UI Components from @repo/ui
+### ✅ RULE 14: UI Components from @repo/ui
 
 **ALWAYS use atomic components from UI package**
 

@@ -12,6 +12,8 @@ export const Button = ({
   isLoading = false,
   disabled = false,
   type = 'button',
+  className,
+  style,
 }: ButtonProps): React.ReactElement => {
   return (
     <S.ButtonContainer
@@ -22,6 +24,8 @@ export const Button = ({
       $fullWidth={fullWidth}
       $isLoading={isLoading}
       disabled={disabled || isLoading}
+      className={className}
+      style={style}
     >
       {children}
     </S.ButtonContainer>

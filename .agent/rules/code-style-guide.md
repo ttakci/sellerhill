@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# GitHub Copilot Instructions
+# Antigravity Code Style Guide
 
 This is a **production-ready pnpm workspace monorepo** with strict architectural patterns. Follow these rules **WITHOUT EXCEPTION**.
 
@@ -32,17 +32,14 @@ This is a **production-ready pnpm workspace monorepo** with strict architectural
 
 ### 4️⃣ Styling (EMOTION ONLY)
 
+- **ONLY** use `@emotion/styled` and `@emotion/react`.
+- **NEVER** use `styled-components`.
+- Use the TailAdmin-inspired semantic token structure.
+
 ```typescript
 // ✅ CORRECT - New semantic structure
 background: ${({ theme }) => theme.colors.background.primary};
 padding: ${({ theme }) => theme.spacing.md};
-border-radius: ${({ theme }) => theme.radius.md};
-box-shadow: ${({ theme }) => theme.shadows.sm};
-font-size: ${({ theme }) => theme.typography.fontSize.md};
-
-// ❌ WRONG - Old flat structure
-background: ${({ theme }) => theme.tokens.colors.background};
-padding: ${({ theme }) => theme.space.md};
 ```
 
 **Available theme paths**:
@@ -89,55 +86,122 @@ const response = await axios.get('/api/examples');
 ### 7️⃣ Icons (COMPONENT ONLY)
 
 ```tsx
-// ✅ CORRECT
+// ✅ CORRECT - Use Icon component
 import { Icon } from '@repo/ui';
 <Icon name="inbox" size={20} />
 
-// ❌ WRONG
-<svg>...</svg>
-<i className="icon-inbox"></i>
+// 💡 PATTERN: Icon component uses a <div> wrapper to prevent 
+// transient props (like $size) from leaking to the underlying SVG.
 ```
 
-**Available icons**: inbox, calendar, chevron-right, trash, archive, alert-circle, moon, sun
+**Available icons**: inbox, calendar, chevron-right, trash, archive, alert-circle, moon, sun, menu, user
 
-### 8️⃣ Form Components (forwardRef REQUIRED)
+### 8️⃣ Form Components (forwardRef & Safety REQUIRED)
 
 ```typescript
 // ✅ CORRECT
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ value, onChange, ...props }, ref) => {
-    return <S.InputField ref={ref} {...props} />;
+    return <S.InputField ref={ref} value={value ?? ''} {...props} />;
   }
 );
 Input.displayName = 'Input';
 
-// ❌ WRONG
-export const Input = ({ value, onChange }: InputProps) => {
-  return <S.InputField {...props} />;
-};
+// 💡 SAFETY: Always use `value={value ?? ''}` to prevent 
+// "changing uncontrolled input to be controlled" warnings.
 ```
 
-### 9️⃣ Global UI State (UIContext ONLY)
+### 9️⃣ Loading \u0026 Error Handling (RTK QUERY + useLoading)
+
+**ALWAYS use RTK Query's built-in loading/error states with the `useLoading` hook**
 
 ```typescript
-// ✅ CORRECT
-const { showMessage, showLoading, hideLoading } = useUI();
+// ✅ CORRECT - Use useLoading hook with RTK Query states
+import { useLoading, useUI } from '@repo/ui';
 
-try {
-  showLoading({ message: t('common.loading') });
-  await createExample(data);
-  showMessage({
-    type: 'success',
-    message: t('examples.createSuccess'),
-  });
-} finally {
-  hideLoading();
-}
+const [saveSettings, { isLoading, isSuccess, error }] = useSaveStoreSettingsMutation();
 
-// ❌ WRONG
+// Automatically sync RTK Query loading state with global loading overlay
+useLoading(isLoading);
+
+// Handle success
+useEffect(() => {
+  if (isSuccess) {
+    showMessage({
+      type: 'success',
+      headerKey: 'message.success.header',
+      descriptionKey: 'common.saveSuccess',
+    }, t);
+  }
+}, [isSuccess, showMessage, t]);
+
+// Handle errors
+useEffect(() => {
+  if (error) {
+    const { key, params } = getErrorMessage(error);
+    showMessage({
+      type: 'error',
+      headerKey: 'message.error.header',
+      descriptionKey: key,
+      descriptionParams: params,
+    }, t);
+  }
+}, [error, showMessage, t]);
+
+// Event handler - NO try-catch-finally needed!
+const handleSave = (data: FormData): void => {
+  void saveSettings(data); // RTK Query handles everything
+};
+
+// ❌ WRONG - Manual loading state management
+const { showLoading, hideLoading } = useUI();
+
+const handleSave = async (data: FormData) => {
+  try {
+    showLoading();
+    await saveSettings(data).unwrap();
+    showMessage({ type: 'success', message: 'Saved!' });
+  } catch (error) {
+    showMessage({ type: 'error', message: 'Error!' });
+  } finally {
+    hideLoading();
+  }
+};
+
+// ❌ WRONG - Local state for loading
 const [isLoading, setIsLoading] = useState(false);
-const [message, setMessage] = useState('');
 ```
+
+**useLoading Hook Signature:**
+
+```typescript
+/**
+ * Automatically sync a boolean loading state with the global loading overlay
+ * @param isLoading - Boolean state from RTK Query (isLoading, isFetching, etc.)
+ * @param options - Optional loading overlay configuration
+ */
+useLoading(isLoading: boolean, options?: ShowLoadingOptions)
+```
+
+**Multiple Loading States:**
+
+```typescript
+// Combine multiple RTK Query loading states
+const { isLoading: isLoadingData } = useGetDataQuery();
+const [create, { isLoading: isCreating }] = useCreateMutation();
+const [update, { isLoading: isUpdating }] = useUpdateMutation();
+
+// Show loading when ANY operation is in progress
+useLoading(isLoadingData || isCreating || isUpdating);
+```
+
+**Key Benefits:**
+
+- ✅ No manual `showLoading()`/`hideLoading()` calls
+- ✅ No try-catch-finally blocks for loading state
+- ✅ RTK Query handles all error states automatically
+- ✅ Cleaner, more declarative code
+- ✅ Automatic cleanup on unmount
 
 ### 🔟 Theme System (REQUIRED)
 
@@ -282,17 +346,6 @@ const [isLoading, setIsLoading] = useState(false);
 // ❌ NEVER use styled-components package
 import styled from 'styled-components';
 ```
-
----
-
-## 📖 Full Documentation
-
-For complete architectural guidelines, design patterns, and detailed examples:
-
-- **LLM_RULES.md** - Comprehensive rules (1366 lines)
-- **ARCHITECTURE.md** - Architecture documentation (1106 lines)
-
----
 
 ## 🎯 Code Generation Examples
 

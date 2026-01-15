@@ -5,7 +5,7 @@
  */
 
 import type { RegisterFormData } from '@repo/shared';
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -17,18 +17,12 @@ import { RegisterPageComponent } from './RegisterPage.component';
 export const RegisterPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showMessage, closeMessage, showLoading, hideLoading } = useUI();
+  const { showMessage, closeMessage } = useUI();
 
   const [register, { isLoading, isSuccess, error }] = useRegisterMutation();
 
-  // Handle loading state
-  useEffect(() => {
-    if (isLoading) {
-      showLoading({ overlay: true });
-    } else {
-      hideLoading();
-    }
-  }, [isLoading, showLoading, hideLoading]);
+  // Use RTK Query loading state with useLoading hook
+  useLoading(isLoading);
 
   // Handle success
   useEffect(() => {

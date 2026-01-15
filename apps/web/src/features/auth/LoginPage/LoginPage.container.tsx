@@ -5,7 +5,7 @@
  */
 
 import type { LoginFormData } from '@repo/shared';
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -20,18 +20,12 @@ export const LoginPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { showMessage, closeMessage, showLoading, hideLoading } = useUI();
+  const { showMessage, closeMessage } = useUI();
 
   const [login, { isLoading, isSuccess, error }] = useLoginMutation();
 
-  // Handle loading state
-  useEffect(() => {
-    if (isLoading) {
-      showLoading({ overlay: true });
-    } else {
-      hideLoading();
-    }
-  }, [isLoading, showLoading, hideLoading]);
+  // Use RTK Query loading state with useLoading hook
+  useLoading(isLoading);
 
   // Handle success
   useEffect(() => {

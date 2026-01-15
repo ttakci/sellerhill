@@ -5,28 +5,28 @@
 export const colorTokens = {
   // Brand Colors
   primary: {
-    50: '#E0E7FF',
-    100: '#C7D2FE',
-    500: '#3C50E0', // TailAdmin Primary
-    700: '#3143C9',
-    900: '#1C2B91',
+    50: '#eff6ff',
+    100: '#dbeafe',
+    500: '#3b82f6', // Stitch Primary Blue
+    700: '#1d4ed8',
+    900: '#1e3a8a',
   },
 
-  // Neutral Colors (Dark Mode focused)
+  // Neutral Colors (Stitch Dark Mode focused)
   neutral: {
     0: '#FFFFFF',
-    50: '#F1F5F9',
-    100: '#E2E8F0',
-    200: '#CBD5E1',
-    300: '#94A3B8',
-    400: '#64748B',
-    500: '#475569',
-    600: '#334155',
-    700: '#1E293B',
-    800: '#1C2434', // Secondary background (Sidebar)
-    900: '#1A222C', // Main content background
-    950: '#1B2430', // Surface secondary
-    1000: '#24303F', // Surface primary (Cards)
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155', // Stitch Border Dark
+    800: '#1e293b', // Stitch Card Background
+    900: '#0f172a', // Stitch Main Background
+    950: '#020617', // Sidebar Deep Dark
+    1000: '#020617', // Consistent with 950 for deep surfaces
   },
 
   // Semantic Colors

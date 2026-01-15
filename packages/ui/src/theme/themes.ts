@@ -1,10 +1,10 @@
 import {
-    colorTokens,
-    radiusTokens,
-    shadowTokens,
-    spacingTokens,
-    transitionTokens,
-    typographyTokens,
+  colorTokens,
+  radiusTokens,
+  shadowTokens,
+  spacingTokens,
+  transitionTokens,
+  typographyTokens,
 } from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
@@ -56,28 +56,28 @@ const lightColors: ThemeColors = {
  */
 const darkColors: ThemeColors = {
   background: {
-    primary: colorTokens.neutral[900], // #1A222C
-    secondary: colorTokens.neutral[800], // #1C2434
-    tertiary: colorTokens.neutral[950], // #1B2430
+    primary: colorTokens.neutral[900], // #0f172a
+    secondary: colorTokens.neutral[950], // #020617
+    tertiary: colorTokens.neutral[800], // #1e293b
   },
 
   surface: {
-    primary: colorTokens.neutral[1000], // #24303F
-    secondary: colorTokens.neutral[950], // #1B2430
+    primary: colorTokens.neutral[1000], // #1e293b (Card background)
+    secondary: colorTokens.neutral[700], // #334155 (Sub-border/lighter surface)
   },
 
   text: {
     primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[300], // #94A3B8
-    tertiary: colorTokens.neutral[400], // #64748B
-    disabled: colorTokens.neutral[500], // #475569
-    inverse: colorTokens.neutral[800], // #1C2434
+    secondary: colorTokens.neutral[300], // #CBD5E1
+    tertiary: colorTokens.neutral[400], // #94A3B8
+    disabled: colorTokens.neutral[500], // #64748B
+    inverse: colorTokens.neutral[1000], // #1e293b
   },
 
   border: {
-    primary: colorTokens.neutral[700], // #1E293B
-    secondary: colorTokens.neutral[600], // #334155
-    focus: colorTokens.primary[500], // #3C50E0
+    primary: colorTokens.neutral[700], // #334155
+    secondary: colorTokens.neutral[600], // #475569
+    focus: colorTokens.primary[500], // #3b82f6
   },
 
   semantic: {

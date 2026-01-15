@@ -33,6 +33,12 @@ export type { TextAlign, TextElement, TextProps, TextVariant, TextWeight } from 
 export { Icon } from './atoms/Icon';
 export type { IconName, IconProps, IconSize } from './atoms/Icon';
 
+export { Card, CardBody, CardHeader } from './atoms/Card';
+export type { CardBodyProps, CardHeaderProps, CardProps } from './atoms/Card';
+
+export { Badge } from './atoms/Badge';
+export type { BadgeProps, BadgeSize, BadgeVariant } from './atoms/Badge';
+
 // Molecule exports
 export { GeneralLoading, GeneralMessage } from './molecules';
 export type { GeneralLoadingProps, GeneralMessageButton, GeneralMessageProps, LoadingSize, MessageType } from './molecules';
@@ -57,10 +63,21 @@ export type { ToggleInputProps } from './molecules/ToggleInput';
 
 export { ThemeToggle } from './molecules/ThemeToggle';
 
+export { Table } from './molecules/Table';
+export type { TableColumn, TableProps } from './molecules/Table';
+export { TablePagination } from './molecules/Table/TablePagination.component';
+export type { TablePaginationProps } from './molecules/Table/TablePagination.types';
+
+export { CollapsibleCard } from './molecules/CollapsibleCard';
+export type { CollapsibleCardProps } from './molecules/CollapsibleCard';
+
+export { SwitchRow } from './molecules/SwitchRow';
+export type { SwitchRowProps } from './molecules/SwitchRow';
+
 // Context exports
 export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';
 export type { LoadingState, MessageState, ShowLoadingOptions, ShowMessageOptions, ThemeContextValue, UIContextValue } from './context';
 
 // Hook exports
-export { useTheme, useUI } from './hooks';
+export { useLoading, useTheme, useUI } from './hooks';
 

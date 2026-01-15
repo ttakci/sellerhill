@@ -4,7 +4,7 @@ import type { IconName } from '../../atoms/Icon';
 /**
  * TextInput Molecule Props
  * 
- * Controller-wrapped Input component with integrated Label and Error display
+ * Controller-wrapped Input component with integrated Floating Label and Error display
  */
 export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> {
   /**
@@ -18,9 +18,9 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
   control: Control<TFieldValues>;
 
   /**
-   * Label text (optional - if not provided, no label will be shown)
+   * Label text. Acting as placeholder when empty, and floating label when focused/filled.
    */
-  label?: string;
+  label: string;
 
   /**
    * Input type
@@ -28,19 +28,9 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
   type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' | 'number';
 
   /**
-   * Placeholder text
-   */
-  placeholder?: string;
-
-  /**
    * Disabled state
    */
   disabled?: boolean;
-
-  /**
-   * Required indicator on label
-   */
-  required?: boolean;
 
   /**
    * Input size
@@ -48,7 +38,7 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
   size?: 'sm' | 'md' | 'lg';
 
   /**
-   * Full width
+   * Should display as full width
    */
   fullWidth?: boolean;
 

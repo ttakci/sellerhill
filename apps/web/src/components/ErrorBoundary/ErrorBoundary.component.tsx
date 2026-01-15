@@ -1,6 +1,6 @@
 import { Button } from '@repo/ui';
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import { Component, ErrorInfo, ReactNode } from 'react';
+import { WithTranslation, withTranslation } from 'react-i18next';
 
 import * as S from './ErrorBoundary.style';
 
@@ -77,7 +77,7 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
             </Button>
           </S.ButtonGroup>
 
-          {process.env.NODE_ENV === 'development' && this.state.error && (
+          {import.meta.env.MODE === 'development' && this.state.error && (
             <S.Details>
               <S.Summary>{t('errorBoundary.details')}</S.Summary>
               <S.ErrorStack>

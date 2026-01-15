@@ -4,6 +4,6 @@
 
 export interface EbayConnectPageComponentProps {
   onConnect: () => void;
-  isLoading: boolean;
   connectedAccounts: number;
+  isLoading?: boolean;
 }

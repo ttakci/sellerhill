@@ -24,6 +24,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       id,
       autoFocus,
       maxLength,
+      style,
     },
     ref
   ) => {
@@ -55,6 +56,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={id}
             autoFocus={autoFocus}
             maxLength={maxLength}
+            style={style}
             $size={size}
             $variant={computedVariant}
             $fullWidth={fullWidth}
@@ -79,6 +81,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         id={id}
         autoFocus={autoFocus}
         maxLength={maxLength}
+        style={style}
         $size={size}
         $variant={computedVariant}
         $fullWidth={fullWidth}

@@ -25,6 +25,9 @@ export type {
     UpdateExampleResponse
 } from './domain/example/example.dto';
 export type { ExampleAggregate, ExampleEntity } from './domain/example/example.types';
+ 
+ // Domain - Store Settings
+ export * from './domain/store-settings/index';
 
 // API Validation Schemas (Backend)
 export {
@@ -44,6 +47,9 @@ export {
     createExampleFormDataSchema, listExamplesFilterDataSchema, updateExampleFormDataSchema
 } from './schemas/example/index';
 export type { CreateExampleFormData, ListExamplesFilterData, UpdateExampleFormData } from './schemas/example/index';
+ 
+ // Store Settings Schemas
+ export * from './schemas/store-settings/storeSettings.schema';
 
 // Auth Schemas
 export * from './schemas/auth/index';

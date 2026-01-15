@@ -6,9 +6,12 @@
     "cancel": "İptal",
     "save": "Kaydet",
     "delete": "Sil",
-    "back": "Geri"
+    "back": "Geri",
+    "saveSuccess": "Değişiklikler başarıyla kaydedildi",
+    "saveError": "Değişiklikler kaydedilemedi",
+    "showing": "{{count}} kayıttan 1 - {{count}} arası gösteriliyor",
+    "rowsPerPage": "Sayfa başına satır:"
   },
-
   "example": {
     "title": "Örnekler",
     "dashboardTitle": "Örnekler Paneli",
@@ -37,6 +40,9 @@
   },
   "validation": {
     "required": "Bu alan zorunludur",
+    "countryRequired": "Lütfen bir ülke seçin",
+    "stateRequired": "Lütfen bir eyalet veya konum girin",
+    "zipCodeRequired": "Lütfen posta kodu girin",
     "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
     "invalidUrl": "Lütfen geçerli bir URL girin",
     "invalidUuid": "Geçersiz ID formatı",
@@ -114,9 +120,12 @@
   "menu": {
     "main": "ANA MENÜ",
     "dashboard": "Panel",
+    "inventory": "Envanter",
     "orders": "Siparişler",
+    "configuration": "Yapılandırma",
     "listings": "Listelemeler",
     "settings": "Ayarlar",
+    "storeSettings": "Mağaza Ayarları",
     "editProfile": "Profili Düzenle",
     "support": "Destek",
     "logout": "Oturumu Kapat"

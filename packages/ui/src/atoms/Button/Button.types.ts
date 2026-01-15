@@ -48,4 +48,14 @@ export interface ButtonProps {
    * Button type (button, submit, reset)
    */
   type?: 'button' | 'submit' | 'reset';
+
+  /**
+   * Additional CSS classes
+   */
+  className?: string;
+
+  /**
+   * Inline styles
+   */
+  style?: React.CSSProperties;
 }

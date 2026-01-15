@@ -1,0 +1,32 @@
+{
+  "storeSettings": {
+    "title": "Store Configuration",
+    "subtitle": "Manage global location, validation, and blacklist settings for your stores.",
+    "saveChanges": "Save Changes",
+    "viewLogs": "View Logs",
+    "globalSettings": "Apply settings to all stores",
+    "globalDescription": "Enable this to broadcast the configuration below to every connected store. Disable to select a specific store.",
+    "selectStore": "Select Store",
+    "selectStorePlaceholder": "Search and select a store...",
+    "locationSectionTitle": "Location Settings",
+    "country": "Country",
+    "state": "State/Location",
+    "zipCode": "Zip Code",
+    "validationSectionTitle": "Validation Settings",
+    "validateTitle": "Validate Title",
+    "validateTitleDesc": "Scan product titles for prohibited words",
+    "validateDescription": "Validate Description",
+    "validateDescriptionDesc": "Scan body text & bullet points",
+    "blacklistSectionTitle": "Blacklist Management",
+    "blacklistSubtitle": "Manage prohibited keywords for product listings",
+    "addKeyword": "Add keyword...",
+    "keyword": "Keyword",
+    "scope": "Validation Scope",
+    "scope_both": "Both",
+    "scope_title": "Title",
+    "scope_description": "Description",
+    "noBlacklist": "No blacklisted keywords yet",
+    "noKeywords": "No keywords found",
+    "copyright": "© {{year}} DropMaster SaaS Platform. All rights reserved."
+  }
+}

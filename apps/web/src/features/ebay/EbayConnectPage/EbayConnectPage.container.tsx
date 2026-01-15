@@ -16,8 +16,11 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage, closeMessage } = useUI();
 
-  const [getConnectUrl, { isLoading: isGettingUrl, error: urlError }] = useLazyGetEbayConnectUrlQuery();
+  const [getConnectUrl, { isLoading, error: urlError }] = useLazyGetEbayConnectUrlQuery();
   const { data: accountsData } = useGetEbayAccountsQuery();
+
+  // Note: useLoading not used here because we want the user to see the redirect happening
+  // The loading state is brief and followed by a full page redirect
 
   // Handle error
   useEffect(() => {
@@ -40,22 +43,18 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
   }, [urlError, showMessage, closeMessage, t]);
 
   const handleConnect = async (): Promise<void> => {
-    try {
-      const result = await getConnectUrl({ marketplaceId: 'EBAY_US' }).unwrap();
-      
-      // Redirect to eBay OAuth consent page
-      window.location.href = result.url;
-    } catch (err) {
-      // Error handled by useEffect
-      console.error('Failed to get eBay connect URL:', err);
-    }
+    const result = await getConnectUrl({ marketplaceId: 'EBAY_US' }).unwrap();
+    
+    // Redirect to eBay OAuth consent page
+    // Error is handled by RTK Query and the useEffect above
+    window.location.href = result.url;
   };
 
   return (
     <EbayConnectPageComponent
       onConnect={handleConnect}
-      isLoading={isGettingUrl}
       connectedAccounts={accountsData?.total || 0}
+      isLoading={isLoading}
     />
   );
 };

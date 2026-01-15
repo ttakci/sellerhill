@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
 import { ExamplesModule } from './modules/examples/examples.module';
+import { StoreSettingsModule } from './modules/store-settings/store-settings.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ExamplesModule } from './modules/examples/examples.module';
     EbayModule,
     DashboardModule,
     ExamplesModule,
+    StoreSettingsModule,
   ],
   providers: [
     {

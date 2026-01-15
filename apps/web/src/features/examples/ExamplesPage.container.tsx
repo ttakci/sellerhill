@@ -1,17 +1,17 @@
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { EXAMPLE_STATUS, type CreateExampleFormData } from '@repo/shared';
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { toCreateExampleRequest } from './adapters/exampleAdapter';
 import {
-  useCreateExampleMutation,
-  useDeleteExampleMutation,
-  useGetExamplesQuery,
-  useUpdateExampleMutation,
+    useCreateExampleMutation,
+    useDeleteExampleMutation,
+    useGetExamplesQuery,
+    useUpdateExampleMutation,
 } from './api/examplesApi';
 import { ExamplesPage } from './ExamplesPage.component';
 
@@ -20,7 +20,7 @@ import { getErrorMessage } from '@/utils/errorHandler';
 export const ExamplesPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { showMessage, closeMessage, showLoading, hideLoading } = useUI();
+  const { showMessage, closeMessage } = useUI();
 
   // API queries and mutations
   const {
@@ -38,14 +38,8 @@ export const ExamplesPageContainer = (): React.ReactElement => {
   const [deleteExample, { isLoading: isDeleting, isSuccess: deleteSuccess, error: deleteError }] =
     useDeleteExampleMutation();
 
-  // Loading states
-  useEffect(() => {
-    if (isLoading || isCreating || isUpdating || isDeleting) {
-      showLoading({ overlay: true });
-    } else {
-      hideLoading();
-    }
-  }, [isLoading, isCreating, isUpdating, isDeleting, showLoading, hideLoading]);
+  // Use RTK Query loading states with useLoading hook
+  useLoading(isLoading || isCreating || isUpdating || isDeleting);
 
   // Success messages
   useEffect(() => {

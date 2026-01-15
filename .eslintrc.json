@@ -11,8 +11,15 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
-  "plugins": ["@typescript-eslint", "import"],
+  "plugins": ["@typescript-eslint", "import", "design-system"],
   "rules": {
+    // Design System Enforcement (CRITICAL)
+    "design-system/no-hardcoded-colors": "error",
+    "design-system/no-hardcoded-spacing": "warn",
+    "design-system/no-inline-styles": "error",
+    "design-system/no-styled-typography": "error",
+    "design-system/no-bare-text-in-button": "error",
+
     // Console & Debugging
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-debugger": "error",

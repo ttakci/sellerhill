@@ -6,9 +6,12 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
-    "back": "Back"
+    "back": "Back",
+    "saveSuccess": "Changes saved successfully",
+    "saveError": "Failed to save changes",
+    "showing": "Showing 1 to {{count}} of {{count}} entries",
+    "rowsPerPage": "Rows per page:"
   },
-
   "example": {
     "title": "Examples",
     "dashboardTitle": "Examples Dashboard",
@@ -37,6 +40,9 @@
   },
   "validation": {
     "required": "This field is required",
+    "countryRequired": "Please select a country",
+    "stateRequired": "Please enter a state or location",
+    "zipCodeRequired": "Please enter a zip code",
     "invalidEmail": "Please enter a valid email address",
     "invalidUrl": "Please enter a valid URL",
     "invalidUuid": "Invalid ID format",
@@ -114,9 +120,14 @@
   "menu": {
     "main": "MAIN MENU",
     "dashboard": "Dashboard",
+    "inventory": "Inventory",
     "orders": "Orders",
+    "configuration": "Configuration",
     "listings": "Listings",
     "settings": "Settings",
+    "storeSettings": "Store Settings",
+    "reports": "Reports",
+    "users": "Users",
     "editProfile": "Edit Profile",
     "support": "Support",
     "logout": "Logout"
