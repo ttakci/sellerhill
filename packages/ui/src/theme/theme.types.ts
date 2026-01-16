@@ -1,3 +1,5 @@
+import * as tokens from './designTokens';
+
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeColors {
@@ -12,6 +14,7 @@ export interface ThemeColors {
   surface: {
     primary: string;
     secondary: string;
+    overlay: string;
   };
 
   // Text
@@ -49,9 +52,9 @@ export interface ThemeColors {
 export interface AppTheme {
   mode: ThemeMode;
   colors: ThemeColors;
-  spacing: typeof import('./designTokens').spacingTokens;
-  radius: typeof import('./designTokens').radiusTokens;
-  shadows: typeof import('./designTokens').shadowTokens;
-  typography: typeof import('./designTokens').typographyTokens;
-  transitions: typeof import('./designTokens').transitionTokens;
+  spacing: typeof tokens.spacingTokens;
+  radius: typeof tokens.radiusTokens;
+  shadows: typeof tokens.shadowTokens;
+  typography: typeof tokens.typographyTokens;
+  transitions: typeof tokens.transitionTokens;
 }

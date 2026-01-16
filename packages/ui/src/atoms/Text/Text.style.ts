@@ -79,10 +79,10 @@ const TextElement = styled.span<StyledTextProps>`
   font-family: ${({ theme }) => (theme as any).typography.fontFamily.sans};
 
   /* Variant styles */
-  ${(p) => variantStyles[p.$variant || 'body'](p.theme)}
+  ${(p) => (variantStyles[p.$variant || 'body'] || variantStyles.body)(p.theme)}
 
   /* Weight styles */
-  ${(p) => weightStyles[p.$weight || 'regular'](p.theme)}
+  ${(p) => (weightStyles[p.$weight || 'regular'] || weightStyles.regular)(p.theme)}
   
   /* Text align */
   ${(p) =>

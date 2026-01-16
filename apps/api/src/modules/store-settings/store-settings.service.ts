@@ -1,8 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
-  type BlacklistKeyword,
-  type SaveStoreSettingsRequest,
-  type StoreSettingsResponse
+    type BlacklistKeyword,
+    type SaveStoreSettingsRequest,
+    type StoreSettingsResponse
 } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
 
@@ -109,9 +109,9 @@ export class StoreSettingsService implements OnModuleInit {
             id: '',
             isGlobal: !storeId,
             storeId,
-            country: 'United States',
-            state: 'Delaware',
-            zipCode: '19702',
+            country: '',
+            state: '',
+            zipCode: '',
             validateTitle: true,
             validateDescription: false,
             blacklist: [],

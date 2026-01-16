@@ -63,7 +63,7 @@ export const SortIconWrapper = styled.div`
 
 export const Td = styled.td<{ $align?: 'left' | 'center' | 'right' }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-bottom: 1px solid ${tkn('colors.background.secondary')};
+  border-bottom: 1px solid ${tkn('colors.border.secondary')};
   vertical-align: middle;
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.primary')};

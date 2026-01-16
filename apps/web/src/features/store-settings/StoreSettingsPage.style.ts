@@ -2,19 +2,32 @@ import styled from '@emotion/styled';
 import { Button, tkn } from '@repo/ui';
 
 export const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: ${tkn('spacing.xl')};
+  width: 100%;
+ 
+  margin: 0 auto;    /* Centers precisely in the available space */
+  padding: 0 ${tkn('spacing.md')}; /* Ensures equal gaps on both sides */
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
+  box-sizing: border-box;
+
+  @media (min-width: 768px) {
+    padding: 0 ${tkn('spacing.xl')};
+    gap: ${tkn('spacing.lg')};
+  }
 `;
 
 export const Header = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  align-items: flex-start;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 export const HeaderContent = styled.div`
@@ -23,24 +36,41 @@ export const HeaderContent = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
-
-
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
+  width: 100%;
+
+  @media (min-width: 768px) {
+    width: auto;
+  }
+  
+  button {
+    flex: 1;
+    @media (min-width: 768px) {
+      flex: none;
+    }
+  }
 `;
 
 export const GlobalBanner = styled.div`
-  background: ${tkn('colors.background.primary')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  padding: ${tkn('spacing.lg')};
+  background: ${tkn('colors.background.secondary')}; /* Use the Matte white */
+  border: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')};
   border-radius: ${tkn('radius.lg')};
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.lg')};
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: ${tkn('shadows.sm')}; /* Add tiny shadow for depth */
+
+  @media (min-width: 1024px) {
+    padding: ${tkn('spacing.lg')};
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 export const SwitchGroup = styled.div`
@@ -48,7 +78,7 @@ export const SwitchGroup = styled.div`
   align-items: center;
   gap: ${tkn('spacing.md')};
   flex: 1;
-  min-width: 250px;
+  min-width: 0; /* Important for flex-shrink and text wrapping */
 `;
 
 export const SwitchLabelContent = styled.div`
@@ -58,27 +88,37 @@ export const SwitchLabelContent = styled.div`
 `;
 
 export const StoreSelectWrapper = styled.div<{ $disabled?: boolean }>`
-  width: 24rem;
+  width: 100%;
+  max-width: 100%;
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
   transition: opacity ${tkn('transitions.fast')};
   
-  @media (max-width: 768px) {
-    width: 100%;
+  @media (min-width: 1024px) {
+    max-width: 320px;
   }
 `;
 
 export const AddressGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: ${tkn('spacing.md')};
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
 `;
 
 export const GlobalGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   align-items: flex-start;
-  gap: ${tkn('spacing.lg')};
-  margin-top: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
+  margin-top: ${tkn('spacing.sm')};
+
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr 1fr;
+    margin-top: ${tkn('spacing.lg')};
+  }
 `;
 
 export const StoreLabel = styled.label`
@@ -98,23 +138,29 @@ export const Copyright = styled.div`
   padding: ${tkn('spacing.xl')} 0;
 `;
 
-
-
 // Blacklist Styling
 export const BlacklistCard = styled.div`
   border: 1px solid ${tkn('colors.border.secondary')};
   border-radius: ${tkn('radius.md')};
   overflow: hidden;
   margin-top: ${tkn('spacing.xl')};
+  width: 100%;
 `;
 
 export const BlacklistHeaderPanel = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md')};
   background: ${tkn('colors.background.primary')};
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
   border-bottom: 1px solid ${tkn('colors.border.secondary')};
+
+  @media (min-width: 1024px) {
+    padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 export const BlacklistHeader = styled.div`
@@ -122,12 +168,28 @@ export const BlacklistHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: ${tkn('spacing.md')};
+  width: 100%;
+
+  @media (min-width: 1024px) {
+    width: auto;
+  }
 `;
 
 export const BlacklistControls = styled.div`
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  width: 100%;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    width: auto;
+  }
 `;
 
 export const BlacklistInputWrapper = styled.div`
@@ -136,10 +198,10 @@ export const BlacklistInputWrapper = styled.div`
   background: ${tkn('colors.background.secondary')};
   border: 1px solid ${tkn('colors.border.secondary')};
   border-radius: ${tkn('radius.md')};
-  padding: 4px; /* Tight padding for input group feel */
+  padding: 2px 4px;
   gap: ${tkn('spacing.xs')};
-  width: auto;
-  min-width: 400px;
+  width: 100%;
+  max-width: 500px;
   
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
@@ -155,13 +217,25 @@ export const BlacklistInput = styled.input`
   font-size: ${tkn('typography.fontSize.sm')};
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   flex: 1;
-  min-width: 150px;
+  min-width: 100px;
 `;
 
 export const BlacklistActionGroup = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
+  width: 100%;
+
+  @media (min-width: 768px) {
+    width: auto;
+  }
+
+  button {
+    flex: 1;
+    @media (min-width: 768px) {
+      flex: none;
+    }
+  }
 `;
 
 export const BlacklistTitleColumn = styled.div`
@@ -171,14 +245,15 @@ export const BlacklistTitleColumn = styled.div`
 `;
 
 export const ScopeSelectContainer = styled.div`
-  width: 10rem;
+  width: 100%;
+  @media (min-width: 768px) {
+    width: 10rem;
+  }
 `;
 
 export const AddButton = styled(Button)`
   padding: ${tkn('spacing.xs')};
 `;
-
-// Table Footer & Pagination replaced by TablePagination component
 
 export const IconAction = styled.button`
   background: none;

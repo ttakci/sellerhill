@@ -3,18 +3,18 @@ import { tkn } from '../../theme/tkn';
 import type { CardProps } from './Card.types';
 
 export const CardContainer = styled.div<{ $variant: CardProps['variant']; $padding: CardProps['padding'] }>`
-  background: ${tkn('colors.background.tertiary')};
+  background: ${tkn('colors.background.secondary')};
   border-radius: ${tkn('radius.xl')};
   overflow: hidden;
   
   ${({ $variant }) => {
     switch ($variant) {
       case 'bordered':
-        return `border: 1px solid ${tkn('colors.border.secondary')};`;
+        return `border: 1px solid ${tkn('colors.border.primary')};`;
       case 'elevated':
         return `box-shadow: ${tkn('shadows.md')};`;
       default:
-        return `border: 1px solid ${tkn('colors.border.secondary')};`;
+        return `border: 1px solid ${tkn('colors.border.primary')};`;
     }
   }}
   
@@ -36,7 +36,7 @@ export const CardContainer = styled.div<{ $variant: CardProps['variant']; $paddi
 
 export const CardHeaderContainer = styled.div`
   padding: ${tkn('spacing.md')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  border-bottom: 1px solid ${tkn('colors.border.primary')};
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};

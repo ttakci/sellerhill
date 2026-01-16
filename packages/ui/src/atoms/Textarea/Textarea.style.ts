@@ -26,4 +26,13 @@ export const StyledTextarea = styled.textarea<{ $hasError?: boolean; $fullWidth?
   &::placeholder {
     color: ${tkn('colors.text.secondary')};
   }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: ${tkn('colors.text.primary')};
+    caret-color: ${tkn('colors.text.primary')};
+  }
 `;

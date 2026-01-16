@@ -12,32 +12,6 @@
     "showing": "{{count}} kayıttan 1 - {{count}} arası gösteriliyor",
     "rowsPerPage": "Sayfa başına satır:"
   },
-  "example": {
-    "title": "Örnekler",
-    "dashboardTitle": "Örnekler Paneli",
-    "dashboardSubtitle": "Örneklerinizi kolayca yönetin ve düzenleyin",
-    "createSectionTitle": "Yeni Örnek Oluştur",
-    "allExamplesTitle": "Tüm Örnekler",
-    "emptyStateTitle": "Henüz örnek yok",
-    "emptyStateText": "Başlamak için ilk örneğinizi oluşturun",
-    "searchLabel": "Arama",
-    "searchPlaceholder": "Ara...",
-    "formTitle": "Oluştur",
-    "nameLabel": "Ad",
-    "namePlaceholder": "Örnek adı girin...",
-    "nameHelper": "Örneğiniz için benzersiz bir ad seçin",
-    "createButton": "Oluştur",
-    "creatingButton": "Oluşturuluyor...",
-    "archiveButton": "Arşivle",
-    "deleteButton": "Sil",
-    "loading": "Yükleniyor...",
-    "loadError": "Liste yüklenemedi.",
-    "statusActive": "Aktif",
-    "statusArchived": "Arşivlendi",
-    "createSuccess": "Örnek başarıyla oluşturuldu",
-    "archiveSuccess": "Örnek başarıyla arşivlendi",
-    "deleteSuccess": "Örnek başarıyla silindi"
-  },
   "validation": {
     "required": "Bu alan zorunludur",
     "countryRequired": "Lütfen bir ülke seçin",
@@ -55,12 +29,7 @@
     "passwordRequirements": "Şifre büyük harf, küçük harf ve rakam içermelidir",
     "passwordStrength": "Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir",
     "passwordMismatch": "Şifreler eşleşmiyor",
-    "invalidStatus": "Lütfen geçerli bir durum seçin",
-    "example": {
-      "nameMin": "Ad en az 3 karakter olmalıdır",
-      "nameMax": "Ad en fazla 100 karakter olabilir",
-      "nameInvalid": "Ad sadece harf, rakam, boşluk, tire ve alt çizgi içerebilir"
-    }
+    "invalidStatus": "Lütfen geçerli bir durum seçin"
   },
   "message": {
     "error": {
@@ -83,16 +52,11 @@
     "details": "Hata Detayları (Sadece Geliştirme)"
   },
   "error": {
-    "exampleNotFound": "Örnek bulunamadı",
-    "exampleNameTooShort": "Örnek adı en az {{minLength}} karakter olmalıdır",
     "resourceNotFound": "{{resourceName}} ID {{resourceId}} bulunamadı",
     "validationFailed": "Doğrulama başarısız",
     "unauthorized": "Yetkiniz yok",
     "forbidden": "Erişim yasak",
     "serverError": "Bir hata oluştu. Lütfen tekrar deneyin."
-  },
-  "errors": {
-    "example.notFound": "Bulunamadı"
   },
   "auth": {
     "login": {
@@ -126,6 +90,8 @@
     "listings": "Listelemeler",
     "settings": "Ayarlar",
     "storeSettings": "Mağaza Ayarları",
+    "other": "DİĞER",
+    "reports": "Raporlar",
     "editProfile": "Profili Düzenle",
     "support": "Destek",
     "logout": "Oturumu Kapat"

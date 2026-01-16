@@ -1,8 +1,8 @@
 /**
- * CheckEmailPage Component (Dumb Component)
+ * CheckEmailPage Component (Presentation)
  */
 
-import { Button, Icon } from '@repo/ui';
+import { Button, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,18 +19,22 @@ export const CheckEmailPageComponent: React.FC<CheckEmailPageProps> = ({
 
   return (
     <S.Container>
-      <S.Card>
-        <S.IconWrapper>
+      <S.AuthCard>
+        <S.IconCircle>
           <Icon name="inbox" size={40} />
-        </S.IconWrapper>
+        </S.IconCircle>
 
-        <S.Title>{t('auth.verification.checkEmail.title')}</S.Title>
+        <Text variant="h2" weight="bold" color="text.primary">
+          {t('auth.verification.checkEmail.title')}
+        </Text>
         
-        <S.Description>
-          {t('auth.verification.checkEmail.description', { email })}
-        </S.Description>
+        <S.DescriptionWrapper>
+          <Text variant="body" color="text.secondary">
+            {t('auth.verification.checkEmail.description', { email })}
+          </Text>
+        </S.DescriptionWrapper>
 
-        <S.ActionContainer>
+        <S.ActionGroup>
           <Button
             variant="secondary"
             onClick={onBackToLogin}
@@ -38,15 +42,15 @@ export const CheckEmailPageComponent: React.FC<CheckEmailPageProps> = ({
           >
             {t('auth.verification.checkEmail.backToLogin')}
           </Button>
-        </S.ActionContainer>
+        </S.ActionGroup>
 
-        <S.ResendText>
+        <S.Footer>
           {t('auth.verification.checkEmail.resendInfo')}{' '}
           <S.TextButton onClick={onResend} disabled={isResending}>
             {isResending ? t('auth.verification.resending') : t('auth.verification.checkEmail.resendButton')}
           </S.TextButton>
-        </S.ResendText>
-      </S.Card>
+        </S.Footer>
+      </S.AuthCard>
     </S.Container>
   );
 };

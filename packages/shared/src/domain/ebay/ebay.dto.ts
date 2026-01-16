@@ -9,6 +9,7 @@ export class EbayAccountDto {
   id!: string;
   userId!: string;
   sellerId!: string;
+  storeName?: string;
   marketplaceId!: EbayMarketplaceId;
   accessToken!: string;
   refreshToken!: string;

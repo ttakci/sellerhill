@@ -30,7 +30,7 @@ export const Switch = styled.div<{ checked?: boolean; disabled?: boolean }>`
     position: absolute;
     width: 20px;
     height: 20px;
-    background-color: white;
+    background-color: ${tkn('colors.text.inverse')};
     border-radius: ${tkn('radius.full')};
     top: 2px;
     left: ${({ checked }) => (checked ? '22px' : '2px')};

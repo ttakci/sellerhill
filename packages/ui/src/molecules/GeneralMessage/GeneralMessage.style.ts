@@ -9,7 +9,7 @@ export const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: ${tkn('colors.surface.overlay')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,23 +64,23 @@ export const IconWrapper = styled.div<{ type: MessageType }>`
     switch (props.type) {
       case 'success':
         return `
-          background-color: rgba(16, 185, 129, 0.1);
+          background-color: ${theme.colors.semantic.success}26;
           color: ${theme.colors.semantic.success};
         `;
       case 'error':
         return `
-          background-color: rgba(244, 63, 94, 0.1);
+          background-color: ${theme.colors.semantic.error}26;
           color: ${theme.colors.semantic.error};
         `;
       case 'warning':
         return `
-          background-color: rgba(245, 158, 11, 0.1);
+          background-color: ${theme.colors.semantic.warning}26;
           color: ${theme.colors.semantic.warning};
         `;
       case 'info':
       default:
         return `
-          background-color: rgba(59, 130, 246, 0.1);
+          background-color: ${theme.colors.semantic.info}26;
           color: ${theme.colors.semantic.info};
         `;
     }

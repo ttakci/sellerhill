@@ -1,5 +1,5 @@
-import { GeneralLoading, GeneralMessage, Icon, useTheme, useUI } from '@repo/ui';
-import React, { useState } from 'react';
+import { Badge, GeneralLoading, GeneralMessage, Icon, Text, useTheme, useUI } from '@repo/ui';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -8,12 +8,12 @@ import { useTranslation } from 'react-i18next';
 import * as S from './AppLayout.style';
 
 /**
- * Root layout component that wraps the entire application
- * Provides TailAdmin-inspired dashboard structure
+ * TailAdmin Inspired Layout - Fully Responsive Design
+ * Features a collapsible sidebar for desktop and overlay sidebar for mobile.
  */
 export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
-  const { theme, themeMode } = useTheme();
+  const { themeMode, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,174 +21,203 @@ export const AppLayout: React.FC = () => {
   const { data: user } = useGetMeQuery();
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  
-  const { toggleTheme } = useTheme();
-  const { i18n } = useTranslation();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(location.pathname.startsWith('/settings'));
 
-  const currentLang = i18n.language;
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
 
-  const handleLanguageChange = (lang: string) => {
-    void i18n.changeLanguage(lang);
-    setLangDropdownOpen(false);
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User';
+  const userRole = 'Store Admin';
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 1024) {
+      setMobileSidebarOpen(!mobileSidebarOpen);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
   };
-  
-  const navItems = [
-    { label: t('menu.dashboard'), path: '/dashboard', icon: 'inbox' as const, group: 'main' },
-    { label: t('menu.inventory'), path: '/inventory', icon: 'archive' as const, group: 'main' },
-    { label: t('menu.orders'), path: '/orders', icon: 'calendar' as const, badge: '5', badgeVariant: 'primary' as const, group: 'main' },
-    { label: t('menu.storeSettings'), path: '/settings/store', icon: 'inbox' as const, group: 'configuration' },
-    { label: t('menu.reports'), path: '/reports', icon: 'bell' as const, group: 'other' },
-    { label: t('menu.users'), path: '/users', icon: 'user' as const, group: 'other' },
-  ];
-
-  const userName = user ? `${user.firstName} ${user.lastName}` : 'Alex Morgan';
-  const userRole = 'Admin';
-
-  const getBreadcrumbs = () => {
-    const parts = location.pathname.split('/').filter(Boolean);
-    return parts.map((part, index) => ({
-      label: part.charAt(0).toUpperCase() + part.slice(1).replace('-', ' '),
-      path: '/' + parts.slice(0, index + 1).join('/'),
-    }));
-  };
-
-  const breadcrumbs = getBreadcrumbs();
 
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
+        {/* Mobile Sidebar Overlay */}
+        <S.SidebarOverlay 
+            $isOpen={mobileSidebarOpen} 
+            onClick={() => setMobileSidebarOpen(false)} 
+        />
+
         {/* Sidebar */}
-        <S.SidebarContainer $isOpen={true} $isCollapsed={sidebarCollapsed}>
-          <S.LogoArea>
+        <S.SidebarContainer 
+            $isCollapsed={sidebarCollapsed} 
+            $isMobileOpen={mobileSidebarOpen}
+        >
+          <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => navigate('/dashboard')}>
             <S.LogoBox>
-              <Icon name="inbox" size={18} color={theme.colors.text.inverse} />
+              <Icon name="inbox" size={20} color="text.inverse" />
             </S.LogoBox>
-            {!sidebarCollapsed && <S.LogoText>DropMaster</S.LogoText>}
+            {!sidebarCollapsed && (
+              <Text variant="h3" weight="bold" color="brand.primary">
+                Zonds
+              </Text>
+            )}
           </S.LogoArea>
           
           <S.NavSection>
-            {/* Main Section */}
-            <S.NavGroup>
-              {navItems.filter(i => i.group === 'main').map((item) => (
-                <S.NavItem 
-                  key={item.path} 
-                  $active={location.pathname === item.path}
-                  onClick={() => navigate(item.path)}
-                >
-                  <S.NavItemContent>
-                    <Icon name={item.icon} size={22} />
-                    {!sidebarCollapsed && <span>{item.label}</span>}
-                  </S.NavItemContent>
-                  {!sidebarCollapsed && item.badge && (
-                    <S.Badge $variant={item.badgeVariant}>{item.badge}</S.Badge>
-                  )}
-                </S.NavItem>
-              ))}
-            </S.NavGroup>
-
-            {/* Configuration Section */}
-            <S.NavGroup>
-              {!sidebarCollapsed && <S.NavLabel>{t('menu.configuration')}</S.NavLabel>}
-              <S.NavItem $active={location.pathname.startsWith('/settings')}>
-                <S.NavItemContent>
-                  <Icon name="alert-circle" size={22} />
-                  {!sidebarCollapsed && <span>{t('menu.settings')}</span>}
-                </S.NavItemContent>
-              </S.NavItem>
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <Text variant="caption" weight="bold" muted>
+                {t('menu.main')}
+              </Text>
+            </S.NavLabelWrapper>
+            
+            <S.NavItem 
+              $active={location.pathname === '/dashboard'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => navigate('/dashboard')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="inbox" size={20} />
+                {!sidebarCollapsed && <Text variant="body">{t('menu.dashboard')}</Text>}
+              </S.NavItemContent>
               {!sidebarCollapsed && (
-                <S.SubNavDropdown>
+                <S.ChevronWrapper $isOpen={false} $isCollapsed={sidebarCollapsed}>
+                  <Icon name="chevron-down" size={14} />
+                </S.ChevronWrapper>
+              )}
+            </S.NavItem>
+
+            <S.NavItem 
+              $isCollapsed={sidebarCollapsed} 
+              $active={location.pathname === '/inventory'}
+              onClick={() => navigate('/inventory')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="archive" size={20} />
+                {!sidebarCollapsed && <Text variant="body">{t('menu.inventory')}</Text>}
+              </S.NavItemContent>
+              {!sidebarCollapsed && <Badge variant="success" size="sm">NEW</Badge>}
+            </S.NavItem>
+
+            <S.NavItem 
+              $isCollapsed={sidebarCollapsed} 
+              $active={location.pathname === '/orders'}
+              onClick={() => navigate('/orders')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="calendar" size={20} />
+                {!sidebarCollapsed && <Text variant="body">{t('menu.orders')}</Text>}
+              </S.NavItemContent>
+              {!sidebarCollapsed && <Badge variant="primary" size="sm">12</Badge>}
+            </S.NavItem>
+
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <Text variant="caption" weight="bold" muted>
+                {t('menu.configuration')}
+              </Text>
+            </S.NavLabelWrapper>
+            
+            <S.NavItemWrapper>
+              <S.NavItem 
+                $active={location.pathname.startsWith('/settings')}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => {
+                  if (sidebarCollapsed) {
+                    setSidebarCollapsed(false);
+                  }
+                  setSettingsOpen(!settingsOpen);
+                }}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="menu" size={20} />
+                  {!sidebarCollapsed && <Text variant="body">{t('menu.settings')}</Text>}
+                </S.NavItemContent>
+                {!sidebarCollapsed && (
+                  <S.ChevronWrapper $isOpen={settingsOpen} $isCollapsed={sidebarCollapsed}>
+                    <Icon name="chevron-down" size={14} />
+                  </S.ChevronWrapper>
+                )}
+              </S.NavItem>
+
+              {!sidebarCollapsed && (
+                <S.SubNavContainer $isOpen={settingsOpen}>
                   <S.SubNavItem 
                     $active={location.pathname === '/settings/store'} 
                     onClick={() => navigate('/settings/store')}
                   >
-                    <Icon name="inbox" size={14} />
-                    <span>{t('menu.storeSettings')}</span>
+                    <Text variant="caption">
+                      {t('menu.storeSettings')}
+                    </Text>
                   </S.SubNavItem>
-                  <S.SubNavItem>
-                    <Icon name="archive" size={14} />
-                    <span>Listing Settings Group</span>
+                  <S.SubNavItem 
+                    $active={location.pathname === '/settings/ebay'}
+                    onClick={() => navigate('/settings/ebay')}
+                  >
+                    <Text variant="caption">eBay Accounts</Text>
                   </S.SubNavItem>
-                </S.SubNavDropdown>
+                </S.SubNavContainer>
               )}
-            </S.NavGroup>
+            </S.NavItemWrapper>
 
-            {/* Other Section */}
-            <S.NavGroup>
-               {navItems.filter(i => i.group === 'other').map((item) => (
-                <S.NavItem 
-                  key={item.path} 
-                  $active={location.pathname === item.path}
-                  onClick={() => navigate(item.path)}
-                >
-                  <S.NavItemContent>
-                    <Icon name={item.icon} size={22} />
-                    {!sidebarCollapsed && <span>{item.label}</span>}
-                  </S.NavItemContent>
-                </S.NavItem>
-              ))}
-            </S.NavGroup>
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              <Text variant="caption" weight="bold" muted>
+                {t('menu.other')}
+              </Text>
+            </S.NavLabelWrapper>
+            
+            <S.NavItem 
+              $isCollapsed={sidebarCollapsed} 
+              $active={location.pathname === '/reports'}
+              onClick={() => navigate('/reports')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="bell" size={20} />
+                {!sidebarCollapsed && <Text variant="body">{t('menu.reports')}</Text>}
+              </S.NavItemContent>
+            </S.NavItem>
           </S.NavSection>
-
-          <S.SidebarFooter>
-            <S.UserProfile>
-               <S.AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMhtx3kZSxhYC733_AHtlDOcaUThC-vR3lMouMSLwwOkzYyIr0V-DS1B9cKi0SceaKPU4doV26rBdLlFt_KpK5gGRX8Fx_5m9CN108Qu27mdNrjWrtbuOHKcJ7AuXxnKTlgX6Ndh4AMF7NACRAMW4gUgzC1hzwvlT8icArymsrdiaW0BFoUuG3ghJygf9CvoEEXEhVnH7FPr0qS4xj5afAnjBJStjngArDR1aSSoAPolYPOf31qvV1N4lLAmrAt_TUfDgqyJVRft4" />
-               {!sidebarCollapsed && (
-                 <S.UserInfo>
-                   <S.UserName>{userName}</S.UserName>
-                   <S.UserRole>{userRole}</S.UserRole>
-                 </S.UserInfo>
-               )}
-            </S.UserProfile>
-          </S.SidebarFooter>
         </S.SidebarContainer>
 
-        {/* Main Content */}
+        {/* Main Content Area */}
         <S.MainContent>
           <S.HeaderContainer>
-            <S.BreadcrumbArea>
-              <Icon name="inbox" size={18} color={theme.colors.text.secondary} />
-              <S.Separator>/</S.Separator>
-              {breadcrumbs.map((crumb, i) => (
-                <React.Fragment key={crumb.path}>
-                  <S.BreadcrumbItem $active={i === breadcrumbs.length - 1}>
-                    {crumb.label}
-                  </S.BreadcrumbItem>
-                  {i < breadcrumbs.length - 1 && <S.Separator>/</S.Separator>}
-                </React.Fragment>
-              ))}
-            </S.BreadcrumbArea>
+            <S.HeaderLeft>
+              <S.ToggleButton onClick={handleToggleSidebar}>
+                <Icon name="menu" size={20} />
+              </S.ToggleButton>
+              
+              <S.SearchArea>
+                <Icon name="search" size={18} />
+                <S.SearchInput placeholder="Search or type command..." />
+                <S.Kbd>⌘K</S.Kbd>
+              </S.SearchArea>
+            </S.HeaderLeft>
             
-            <S.HeaderActions>
-               <S.LanguageWrapper>
-                 <S.ActionIconButton onClick={() => setLangDropdownOpen(!langDropdownOpen)}>
-                   <Icon name="globe" size={18} />
-                 </S.ActionIconButton>
-                 <S.DropdownMenu $isOpen={langDropdownOpen}>
-                   <S.DropdownItem 
-                     $active={currentLang === 'en'} 
-                     onClick={() => handleLanguageChange('en')}
-                   >
-                     🇺🇸 English
-                   </S.DropdownItem>
-                   <S.DropdownItem 
-                     $active={currentLang === 'tr'} 
-                     onClick={() => handleLanguageChange('tr')}
-                   >
-                     🇹🇷 Türkçe
-                   </S.DropdownItem>
-                 </S.DropdownMenu>
-               </S.LanguageWrapper>
-
-               <S.ActionIconButton onClick={toggleTheme}>
-                 <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={18} />
-               </S.ActionIconButton>
-
-               <S.NotificationButton>
-                 <Icon name="bell" size={20} />
-                 <S.NotificationDot />
-               </S.NotificationButton>
-            </S.HeaderActions>
+            <S.HeaderRight>
+              <S.ActionIcon onClick={toggleTheme} title="Toggle Theme">
+                <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={18} />
+              </S.ActionIcon>
+              
+              <S.ActionIcon title="Notifications">
+                <Icon name="bell" size={18} />
+              </S.ActionIcon>
+              
+              <S.ProfileArea onClick={() => navigate('/logout')}>
+                <S.ProfileInfo>
+                  <Text variant="caption" weight="bold" color="text.primary">
+                    {userName}
+                  </Text>
+                  <Text variant="caption" color="text.tertiary">
+                    {userRole}
+                  </Text>
+                </S.ProfileInfo>
+                <S.AvatarWrapper>
+                  <S.AvatarImg src={`https://ui-avatars.com/api/?name=${userName}&background=3b82f6&color=ffffff`} alt="Profile" />
+                </S.AvatarWrapper>
+                <Icon name="chevron-down" size={14} />
+              </S.ProfileArea>
+            </S.HeaderRight>
           </S.HeaderContainer>
 
           <S.ContentArea>
@@ -218,4 +247,4 @@ export const AppLayout: React.FC = () => {
   );
 };
 
-
+AppLayout.displayName = 'AppLayout';

@@ -2,85 +2,111 @@
  * CheckEmailPage Styles
  */
 
-import { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
+import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: ${({ theme }: { theme: Theme }) => theme.colors.background.secondary};
-  padding: ${({ theme }: { theme: Theme }) => theme.spacing.md};
-`;
+  background: ${tkn('colors.background.primary')};
+  padding: ${tkn('spacing.md')};
+  position: relative;
+  overflow: hidden;
 
-export const Card = styled.div`
-  background: ${({ theme }: { theme: Theme }) => theme.colors.surface.primary};
-  border-radius: ${({ theme }: { theme: Theme }) => theme.radius.lg};
-  box-shadow: ${({ theme }: { theme: Theme }) => theme.shadows.lg};
-  padding: ${({ theme }: { theme: Theme }) => theme.spacing.xxl};
-  width: 100%;
-  max-width: 480px;
-  text-align: center;
-`;
+  /* Premium background effect consistency */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, ${tkn('colors.brand.primary')}15 0%, transparent 70%);
+    filter: blur(60px);
+    z-index: 0;
+  }
 
-export const IconWrapper = styled.div`
-  width: 80px;
-  height: 80px;
-  background: ${({ theme }: { theme: Theme }) => theme.colors.brand.primary}15;
-  color: ${({ theme }: { theme: Theme }) => theme.colors.brand.primary};
-  border-radius: ${({ theme }: { theme: Theme }) => theme.radius.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto ${({ theme }: { theme: Theme }) => theme.spacing.xl} auto;
-`;
-
-export const Title = styled.h1`
-  font-size: ${({ theme }: { theme: Theme }) => theme.typography.fontSize.xxxl};
-  font-weight: ${({ theme }: { theme: Theme }) => theme.typography.fontWeight.bold};
-  color: ${({ theme }: { theme: Theme }) => theme.colors.text.primary};
-  margin: 0 0 ${({ theme }: { theme: Theme }) => theme.spacing.md} 0;
-`;
-
-export const Description = styled.p`
-  font-size: ${({ theme }: { theme: Theme }) => theme.typography.fontSize.md};
-  color: ${({ theme }: { theme: Theme }) => theme.colors.text.secondary};
-  line-height: ${({ theme }: { theme: Theme }) => theme.typography.lineHeight.relaxed};
-  margin-bottom: ${({ theme }: { theme: Theme }) => theme.spacing.xxl};
-
-  strong {
-    color: ${({ theme }: { theme: Theme }) => theme.colors.text.primary};
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, ${tkn('colors.brand.primary')}10 0%, transparent 70%);
+    filter: blur(60px);
+    z-index: 0;
   }
 `;
 
-export const ActionContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }: { theme: Theme }) => theme.spacing.md};
+export const AuthCard = styled.div`
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.xl')};
+  box-shadow: ${tkn('shadows.xl')};
+  border: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.xl')};
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    padding: ${tkn('spacing.xxxl')};
+  }
 `;
 
-export const ResendText = styled.p`
-  font-size: ${({ theme }: { theme: Theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }: { theme: Theme }) => theme.colors.text.secondary};
-  margin-top: ${({ theme }: { theme: Theme }) => theme.spacing.xl};
+export const IconCircle = styled.div`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto ${tkn('spacing.xl')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${tkn('radius.full')};
+  background-color: ${tkn('colors.brand.primary')}15;
+  color: ${tkn('colors.brand.primary')};
+  box-shadow: 0 0 20px ${tkn('colors.brand.primary')}10;
+`;
+
+export const DescriptionWrapper = styled.div`
+  margin-top: ${tkn('spacing.sm')};
+  margin-bottom: ${tkn('spacing.xxl')};
+`;
+
+export const ActionGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  margin-bottom: ${tkn('spacing.xl')};
+`;
+
+export const Footer = styled.div`
+  margin-top: ${tkn('spacing.xl')};
+  padding-top: ${tkn('spacing.xl')};
+  border-top: 1px solid ${tkn('colors.border.secondary')};
+  color: ${tkn('colors.text.tertiary')};
+  font-size: ${tkn('typography.fontSize.sm')};
 `;
 
 export const TextButton = styled.button`
   background: none;
   border: none;
-  color: ${({ theme }: { theme: Theme }) => theme.colors.brand.primary};
+  color: ${tkn('colors.brand.primary')};
   cursor: pointer;
-  font-weight: ${({ theme }: { theme: Theme }) => theme.typography.fontWeight.semibold};
-  text-decoration: none;
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  transition: all ${tkn('transitions.fast')};
   padding: 0;
   
-  &:hover {
+  &:hover:not(:disabled) {
     text-decoration: underline;
+    opacity: 0.8;
   }
-  
+
   &:disabled {
-    opacity: 0.5;
+    color: ${tkn('colors.text.disabled')};
     cursor: not-allowed;
   }
 `;

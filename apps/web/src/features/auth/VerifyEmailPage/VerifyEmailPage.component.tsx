@@ -1,8 +1,8 @@
 /**
- * VerifyEmailPage Dumb Component
+ * VerifyEmailPage Component (Presentation)
  */
 
-import { Button, Icon } from '@repo/ui';
+import { Button, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,66 +11,90 @@ import type { VerifyEmailPageProps } from './VerifyEmailPage.types';
 
 export const VerifyEmailPageComponent = ({
   status,
-  email,
   onResendVerification,
   onNavigateToLogin,
 }: VerifyEmailPageProps): React.ReactElement => {
   const { t } = useTranslation();
 
+  const getStatusContent = () => {
+    switch (status) {
+      case 'loading':
+        return {
+          icon: 'calendar' as const, // Placeholder for loading icon if no spinner atom
+          title: t('auth.verification.verifying'),
+          description: t('common.loading'),
+          type: 'loading' as const,
+        };
+      case 'success':
+        return {
+          icon: 'inbox' as const,
+          title: t('auth.verification.success'),
+          description: t('auth.verification.verified'),
+          type: 'success' as const,
+        };
+      case 'error':
+        return {
+          icon: 'alert-circle' as const,
+          title: t('auth.verification.title'),
+          description: t('auth.errors.verificationFailed'),
+          type: 'error' as const,
+        };
+    }
+  };
+
+  const content = getStatusContent();
+
   return (
     <S.Container>
-      <S.Card>
-        <S.IconWrapper 
-          success={status === 'success'} 
-          error={status === 'error'}
-        >
-          <Icon 
-            name={
-              status === 'loading' ? 'calendar' : // Use calendar as placeholder for loader/clock
-              status === 'success' ? 'inbox' : 
-              'alert-circle'
-            } 
-            size={32} 
-          />
-        </S.IconWrapper>
+      <S.AuthCard>
+        <S.StatusIconWrapper $type={content.type}>
+          <Icon name={content.icon} size={40} />
+        </S.StatusIconWrapper>
 
-        {status === 'loading' && (
-          <>
-            <S.Title>{t('auth.verification.verifying')}</S.Title>
-            <S.Description>{t('common.loading')}</S.Description>
-          </>
-        )}
+        <Text variant="h2" weight="bold" color="text.primary">
+          {content.title}
+        </Text>
+        
+        <S.Description>
+          <Text variant="body" color="text.secondary">
+            {content.description}
+          </Text>
+        </S.Description>
 
-        {status === 'success' && (
-          <>
-            <S.Title>{t('auth.verification.success')}</S.Title>
-            <S.Description>{t('auth.verification.verified')}</S.Description>
-            <S.Footer>
-              <Button onClick={onNavigateToLogin} variant="primary">
-                {t('auth.login.submitButton')}
-              </Button>
-            </S.Footer>
-          </>
-        )}
+        <S.ActionGroup>
+          {status === 'success' && (
+            <Button onClick={onNavigateToLogin} variant="primary" fullWidth>
+              {t('auth.login.submitButton')}
+            </Button>
+          )}
 
-        {status === 'error' && (
-          <>
-            <S.Title>{t('auth.verification.title')}</S.Title>
-            <S.Description>{t('auth.errors.verificationFailed')}</S.Description>
-            <S.Footer>
-              <Button onClick={() => window.location.reload()} variant="primary">
+          {status === 'error' && (
+            <>
+              <Button onClick={() => window.location.reload()} variant="primary" fullWidth>
                 {t('common.retry')}
               </Button>
-              <Button onClick={onResendVerification} variant="secondary">
-                {t('auth.verification.resendButton')}
-              </Button>
-              <Button onClick={onNavigateToLogin} variant="secondary">
+              <Button onClick={onNavigateToLogin} variant="secondary" fullWidth>
                 {t('auth.login.submitButton')}
               </Button>
-            </S.Footer>
-          </>
+              <S.ResendButton onClick={onResendVerification}>
+                {t('auth.verification.resendButton')}
+              </S.ResendButton>
+            </>
+          )}
+
+          {status === 'loading' && (
+             <Text variant="caption" color="text.disabled">Please wait while we confirm your account...</Text>
+          )}
+        </S.ActionGroup>
+
+        {status === 'success' && (
+           <S.Footer>
+             <Text variant="caption" color="text.tertiary">
+               Welcome to the Zonds community! 🚀
+             </Text>
+           </S.Footer>
         )}
-      </S.Card>
+      </S.AuthCard>
     </S.Container>
   );
 };

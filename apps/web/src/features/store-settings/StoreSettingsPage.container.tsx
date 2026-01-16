@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
 import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
 import {
-    useGetStoreSettingsQuery,
-    useSaveStoreSettingsMutation
+  useGetStoreSettingsQuery,
+  useSaveStoreSettingsMutation
 } from './api/storeSettingsApi';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
@@ -72,7 +72,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
 
   const availableStores = ebayAccounts?.items.map(acc => ({
     id: acc.id,
-    name: `${acc.sellerId} (${acc.marketplaceId})`, // Format: "my-store (EBAY_US)"
+    name: acc.storeName || acc.sellerId,
   })) || [];
 
   return (

@@ -2,67 +2,124 @@
  * VerifyEmailPage Styles
  */
 
-import { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
+import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: ${({ theme }: { theme: Theme }) => theme.spacing.xl};
-  background: ${({ theme }: { theme: Theme }) => theme.colors.background.secondary};
+  background: ${tkn('colors.background.primary')};
+  padding: ${tkn('spacing.md')};
+  position: relative;
+  overflow: hidden;
+
+  /* Premium background effect consistency */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, ${tkn('colors.brand.primary')}15 0%, transparent 70%);
+    filter: blur(60px);
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, ${tkn('colors.brand.primary')}10 0%, transparent 70%);
+    filter: blur(60px);
+    z-index: 0;
+  }
 `;
 
-export const Card = styled.div`
+export const AuthCard = styled.div`
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.xl')};
+  box-shadow: ${tkn('shadows.xl')};
+  border: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.xl')};
   width: 100%;
-  max-width: 450px;
-  padding: ${({ theme }: { theme: Theme }) => theme.spacing.xxl};
-  background: ${({ theme }: { theme: Theme }) => theme.colors.surface.primary};
-  border-radius: ${({ theme }: { theme: Theme }) => theme.radius.lg};
-  box-shadow: ${({ theme }: { theme: Theme }) => theme.shadows.lg};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }: { theme: Theme }) => theme.spacing.lg};
+  max-width: 480px;
+  position: relative;
+  z-index: 1;
   text-align: center;
+
+  @media (min-width: 768px) {
+    padding: ${tkn('spacing.xxxl')};
+  }
 `;
 
-export const IconWrapper = styled.div<{ success?: boolean; error?: boolean }>`
-  width: 64px;
-  height: 64px;
-  border-radius: ${({ theme }: { theme: Theme }) => theme.radius.full};
-  background: ${({ theme, success, error }: { theme: Theme; success?: boolean; error?: boolean }) => 
-    success ? theme.colors.semantic.success + '20' : 
-    error ? theme.colors.semantic.error + '20' : 
-    theme.colors.brand.primary + '20'};
-  color: ${({ theme, success, error }: { theme: Theme; success?: boolean; error?: boolean }) => 
-    success ? theme.colors.semantic.success : 
-    error ? theme.colors.semantic.error : 
-    theme.colors.brand.primary};
+export const StatusIconWrapper = styled.div<{ $type: 'success' | 'error' | 'loading' }>`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto ${tkn('spacing.xl')};
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto ${({ theme }: { theme: Theme }) => theme.spacing.md};
+  border-radius: ${tkn('radius.full')};
+  
+  ${(props) => {
+    switch (props.$type) {
+      case 'success':
+        return `
+          background-color: ${tkn('colors.semantic.success')(props)}15;
+          color: ${tkn('colors.semantic.success')(props)};
+          box-shadow: 0 0 20px ${tkn('colors.semantic.success')(props)}10;
+        `;
+      case 'error':
+        return `
+          background-color: ${tkn('colors.semantic.error')(props)}15;
+          color: ${tkn('colors.semantic.error')(props)};
+          box-shadow: 0 0 20px ${tkn('colors.semantic.error')(props)}10;
+        `;
+      case 'loading':
+      default:
+        return `
+          background-color: ${tkn('colors.brand.primary')(props)}15;
+          color: ${tkn('colors.brand.primary')(props)};
+          box-shadow: 0 0 20px ${tkn('colors.brand.primary')(props)}10;
+        `;
+    }
+  }}
 `;
 
-export const Title = styled.h1`
-  font-size: ${({ theme }: { theme: Theme }) => theme.typography.fontSize.xxl};
-  font-weight: ${({ theme }: { theme: Theme }) => theme.typography.fontWeight.bold};
-  color: ${({ theme }: { theme: Theme }) => theme.colors.text.primary};
-  margin: 0;
+export const Description = styled.div`
+  margin-top: ${tkn('spacing.sm')};
+  margin-bottom: ${tkn('spacing.xxl')};
 `;
 
-export const Description = styled.p`
-  font-size: ${({ theme }: { theme: Theme }) => theme.typography.fontSize.md};
-  color: ${({ theme }: { theme: Theme }) => theme.colors.text.secondary};
-  line-height: ${({ theme }: { theme: Theme }) => theme.typography.lineHeight.normal};
-  margin: 0;
+export const ActionGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  margin-top: ${tkn('spacing.xl')};
 `;
 
 export const Footer = styled.div`
-  margin-top: ${({ theme }: { theme: Theme }) => theme.spacing.lg};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }: { theme: Theme }) => theme.spacing.md};
+  margin-top: ${tkn('spacing.xl')};
+  padding-top: ${tkn('spacing.xl')};
+  border-top: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const ResendButton = styled.button`
+  background: none;
+  border: none;
+  color: ${tkn('colors.text.tertiary')};
+  cursor: pointer;
+  font-size: ${tkn('typography.fontSize.sm')};
+  transition: all ${tkn('transitions.fast')};
+  
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+    text-decoration: underline;
+  }
 `;

@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginFormDataSchema, type LoginFormData } from '@repo/shared';
-import { Button, TextInput } from '@repo/ui';
+import { Button, Icon, Text, TextInput } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -36,10 +36,21 @@ export const LoginPageComponent = ({
 
   return (
     <S.Container>
-      <S.Card>
+      <S.AuthCard>
         <S.Header>
-          <S.Title>{t('auth.login.title')}</S.Title>
-          <S.Subtitle>{t('auth.login.subtitle')}</S.Subtitle>
+          <S.LogoWrapper>
+            <S.LogoIcon>
+              <Icon name="inbox" size={28} />
+            </S.LogoIcon>
+          </S.LogoWrapper>
+          <Text variant="h2" weight="bold" color="text.primary">
+            {t('auth.login.title')}
+          </Text>
+          <S.SubtitleWrapper>
+            <Text variant="body" color="text.secondary">
+              {t('auth.login.subtitle')}
+            </Text>
+          </S.SubtitleWrapper>
         </S.Header>
 
         <S.Form onSubmit={handleSubmit(onSubmit)}>
@@ -60,19 +71,21 @@ export const LoginPageComponent = ({
           />
 
           <S.ButtonContainer>
-            <Button type="submit" variant="primary" fullWidth disabled={isLoading || isSubmitting}>
+            <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting}>
               {t('auth.login.submitButton')}
             </Button>
           </S.ButtonContainer>
         </S.Form>
 
         <S.Footer>
-          {t('auth.login.noAccount')}
+          <Text variant="caption" color="text.tertiary">
+            {t('auth.login.noAccount')}
+          </Text>
           <S.FooterLink type="button" onClick={onNavigateToRegister}>
             {t('auth.login.registerLink')}
           </S.FooterLink>
         </S.Footer>
-      </S.Card>
+      </S.AuthCard>
     </S.Container>
   );
 };

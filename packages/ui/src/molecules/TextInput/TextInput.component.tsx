@@ -7,7 +7,6 @@ import {
 } from 'react-hook-form';
 
 import { Icon, type IconName } from '../../atoms/Icon';
-import { Input } from '../../atoms/Input';
 
 import * as S from './TextInput.style';
 import type { TextInputProps } from './TextInput.types';
@@ -37,8 +36,6 @@ const TextInputInner = <TFieldValues extends FieldValues>({
   rightIcon,
   prefix,
   suffix,
-  size,
-  fullWidth,
   autoFocus,
   maxLength,
   id,
@@ -68,37 +65,23 @@ const TextInputInner = <TFieldValues extends FieldValues>({
           </S.IconWrapper>
         )}
         
-        <Input
+        <S.InnerInput
           {...field}
           id={id}
           type={type}
-          placeholder="" // Always empty because label is the placeholder
+          placeholder=""
           disabled={disabled}
-          hasError={!!error}
-          size={size}
-          fullWidth={fullWidth}
           autoFocus={autoFocus}
           maxLength={maxLength}
-          variant="default"
-          onFocus={() => {
-            setIsFocused(true);
-          }}
-          onBlur={() => {
+          $isFloating={isFloating}
+          $hasLeftIcon={!!leftIcon || !!prefix}
+          $hasRightIcon={!!rightIcon || !!suffix}
+          onFocus={() => setIsFocused(true)}
+          onBlur={(e) => {
             setIsFocused(false);
             field.onBlur();
           }}
-          style={{ 
-            border: 'none', 
-            backgroundColor: 'transparent',
-            paddingLeft: leftIcon || prefix ? '0' : '16px',
-            paddingRight: rightIcon || suffix ? '0' : '16px',
-            paddingTop: isFloating ? '28px' : '0',
-            paddingBottom: isFloating ? '6px' : '0',
-            height: '100%',
-            transition: 'all 0.2s ease',
-            flex: 1,
-            zIndex: 12
-          }}
+          value={field.value ?? ''}
         />
 
         {rightIcon && (

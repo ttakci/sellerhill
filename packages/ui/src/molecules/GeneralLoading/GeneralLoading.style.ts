@@ -1,4 +1,4 @@
-import { css, keyframes } from '@emotion/react';
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
 
@@ -10,20 +10,18 @@ const spin = keyframes`
 `;
 
 export const Overlay = styled.div<{ $overlay: boolean }>`
-  ${(props) =>
-    props.$overlay &&
-    css`
+  ${({ $overlay }) => $overlay && `
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: ${tkn('colors.surface.overlay')};
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9998;
-    `}
+  `}
 `;
 
 export const Container = styled.div`

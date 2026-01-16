@@ -12,41 +12,16 @@ export * from './domain/auth/index';
 
 // Domain - eBay
 export * from './domain/ebay/index';
-
-// Domain - Example
-export { EXAMPLE_STATUS } from './domain/example/example.constants';
-export type { ExampleStatus } from './domain/example/example.constants';
-export type {
-    CreateExampleRequest,
-    CreateExampleResponse, DeleteExampleRequest,
-    DeleteExampleResponse,
-    ExampleItem, GetExamplesRequest,
-    GetExamplesResponse, PaginationMeta, UpdateExampleRequest,
-    UpdateExampleResponse
-} from './domain/example/example.dto';
-export type { ExampleAggregate, ExampleEntity } from './domain/example/example.types';
  
  // Domain - Store Settings
  export * from './domain/store-settings/index';
 
-// API Validation Schemas (Backend)
-export {
-    createExampleRequestSchema, exampleItemSchema, getExamplesRequestSchema,
-    getExamplesResponseSchema, updateExampleRequestSchema
-} from './domain/example/example.validators';
+// API Error Types
+export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
 
 // Domain: Common
 export { commonValidators, errorDTOSchema } from './domain/common/common.validators';
 export type { ErrorDTO } from './domain/common/error.dto';
-
-// API Error Types
-export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
-
-// Form Schemas (Frontend - Web/Mobile)
-export {
-    createExampleFormDataSchema, listExamplesFilterDataSchema, updateExampleFormDataSchema
-} from './schemas/example/index';
-export type { CreateExampleFormData, ListExamplesFilterData, UpdateExampleFormData } from './schemas/example/index';
  
  // Store Settings Schemas
  export * from './schemas/store-settings/storeSettings.schema';

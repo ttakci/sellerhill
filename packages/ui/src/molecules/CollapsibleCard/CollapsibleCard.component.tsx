@@ -22,13 +22,17 @@ export const CollapsibleCard = ({
       <S.Header type="button" onClick={() => setIsExpanded(!isExpanded)}>
         <S.HeaderLabel>
           {icon}
-          <Text variant="body" weight="medium">{title}</Text>
+          <Text variant="body" weight="bold">{title}</Text>
         </S.HeaderLabel>
         <S.ChevronWrapper $rotated={isExpanded}>
-          <Icon name="chevron-right" size={14} color={theme.colors.text.secondary} />
+          <Icon name="chevron-right" size={16} color={theme.colors.text.tertiary} />
         </S.ChevronWrapper>
       </S.Header>
-      {isExpanded && <S.Content>{children}</S.Content>}
+      <S.ContentGrid $isExpanded={isExpanded}>
+        <S.ContentInner>
+          {children}
+        </S.ContentInner>
+      </S.ContentGrid>
     </S.Container>
   );
 };

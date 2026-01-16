@@ -34,7 +34,7 @@ export const StyledCheckbox = styled.div<{ checked?: boolean; disabled?: boolean
     content: '';
     width: 6px;
     height: 10px;
-    border: solid white;
+    border: solid ${({ theme }) => theme.colors.text.inverse};
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
     display: ${({ checked }) => (checked ? 'block' : 'none')};

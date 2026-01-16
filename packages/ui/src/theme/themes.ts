@@ -8,95 +8,62 @@ import {
 } from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
-/**
- * Light Mode Colors
- */
 const lightColors: ThemeColors = {
-  background: {
-    primary: colorTokens.neutral[50], // #F1F5F9
-    secondary: colorTokens.neutral[0], // #FFFFFF
-    tertiary: colorTokens.neutral[100], // #E2E8F0
-  },
-
-  surface: {
-    primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[50], // #F1F5F9
-  },
-
+  background: { primary: '#F1F5F9', secondary: '#FFFFFF', tertiary: '#F8FAFC' },
+  surface: { primary: '#FFFFFF', secondary: '#F1F5F9', overlay: 'rgba(15, 23, 42, 0.1)' },
   text: {
-    primary: colorTokens.neutral[700], // #1C2434 approximate (TailAdmin text)
-    secondary: colorTokens.neutral[400], // #64748B
-    tertiary: colorTokens.neutral[300], // #94A3B8
-    disabled: colorTokens.neutral[200], // #CBD5E1
-    inverse: colorTokens.neutral[0], // #FFFFFF
+    primary: '#0F172A',
+    secondary: '#475569',
+    tertiary: '#94A3B8',
+    disabled: '#CBD5E1',
+    inverse: '#FFFFFF',
   },
-
   border: {
-    primary: colorTokens.neutral[100], // #E2E8F0
-    secondary: colorTokens.neutral[50], // #F1F5F9
-    focus: colorTokens.primary[500], // #3C50E0
+    primary: '#E2E8F0',
+    secondary: '#F1F5F9',
+    focus: colorTokens.primary[500],
   },
-
   semantic: {
     success: colorTokens.success.main,
     error: colorTokens.error.main,
     warning: colorTokens.warning.main,
     info: colorTokens.info.main,
   },
-
   brand: {
     primary: colorTokens.primary[500],
     primaryHover: colorTokens.primary[700],
-    secondary: colorTokens.primary[100],
+    secondary: '#EFF6FF',
   },
 };
 
-/**
- * Dark Mode Colors
- */
 const darkColors: ThemeColors = {
-  background: {
-    primary: colorTokens.neutral[900], // #0f172a
-    secondary: colorTokens.neutral[950], // #020617
-    tertiary: colorTokens.neutral[800], // #1e293b
-  },
-
-  surface: {
-    primary: colorTokens.neutral[1000], // #1e293b (Card background)
-    secondary: colorTokens.neutral[700], // #334155 (Sub-border/lighter surface)
-  },
-
+  background: { primary: '#020617', secondary: '#0F172A', tertiary: '#1E293B' },
+  surface: { primary: '#0F172A', secondary: '#1E293B', overlay: 'rgba(2, 6, 23, 0.7)' },
   text: {
-    primary: colorTokens.neutral[0], // #FFFFFF
-    secondary: colorTokens.neutral[300], // #CBD5E1
-    tertiary: colorTokens.neutral[400], // #94A3B8
-    disabled: colorTokens.neutral[500], // #64748B
-    inverse: colorTokens.neutral[1000], // #1e293b
+    primary: '#F8FAFC',
+    secondary: '#94A3B8',
+    tertiary: '#64748B',
+    disabled: '#475569',
+    inverse: '#0F172A',
   },
-
   border: {
-    primary: colorTokens.neutral[700], // #334155
-    secondary: colorTokens.neutral[600], // #475569
-    focus: colorTokens.primary[500], // #3b82f6
+    primary: '#1E293B',
+    secondary: '#334155',
+    focus: colorTokens.primary[500],
   },
-
   semantic: {
     success: colorTokens.success.light,
     error: colorTokens.error.light,
     warning: colorTokens.warning.light,
     info: colorTokens.info.light,
   },
-
   brand: {
-    primary: colorTokens.primary[500],
-    primaryHover: colorTokens.primary[700],
-    secondary: colorTokens.primary[900],
+    primary: '#3B82F6',
+    primaryHover: '#60A5FA',
+    secondary: 'rgba(59, 130, 246, 0.1)',
   },
 };
 
-/**
- * Light Theme
- */
 export const lightTheme: AppTheme = {
   mode: 'light',
   colors: lightColors,
@@ -107,9 +74,6 @@ export const lightTheme: AppTheme = {
   transitions: transitionTokens,
 };
 
-/**
- * Dark Theme
- */
 export const darkTheme: AppTheme = {
   mode: 'dark',
   colors: darkColors,

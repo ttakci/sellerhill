@@ -18,6 +18,7 @@ interface EbayAccountEntity {
   id: string;
   user_id: string;
   seller_id: string;
+  store_name?: string;
   marketplace_id: EbayMarketplaceId;
   access_token: string;
   refresh_token: string;
@@ -61,7 +62,7 @@ export class EbayService {
     const tokenResponse = await this.oauthService.exchangeCodeForTokens(code);
 
     // Get seller information
-    const { sellerId } = await this.oauthService.getSellerInfo(tokenResponse.access_token);
+    const { sellerId, storeName } = await this.oauthService.getSellerInfo(tokenResponse.access_token);
 
     // Check if this seller account is already connected
     const existingAccounts = await this.databaseService.query<EbayAccountEntity>(
@@ -81,15 +82,16 @@ export class EbayService {
     // Insert account into database
     const accounts = await this.databaseService.query<EbayAccountEntity>(
       `INSERT INTO ebay_accounts (
-        user_id, seller_id, marketplace_id, 
+        user_id, seller_id, store_name, marketplace_id, 
         access_token, refresh_token, access_token_expires_at, 
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *`,
       [
         userId,
         sellerId,
+        storeName,
         marketplaceId,
         tokenResponse.access_token,
         tokenResponse.refresh_token,
@@ -131,6 +133,7 @@ export class EbayService {
       id: entity.id,
       userId: entity.user_id,
       sellerId: entity.seller_id,
+      storeName: entity.store_name,
       marketplaceId: entity.marketplace_id,
       accessToken: entity.access_token,
       refreshToken: entity.refresh_token,

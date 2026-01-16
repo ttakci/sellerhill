@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Button, TextInput } from '@repo/ui';
+import { Button, Icon, Text, TextInput } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +32,21 @@ export const RegisterPageComponent = ({
 
   return (
     <S.Container>
-      <S.Card>
+      <S.AuthCard>
         <S.Header>
-          <S.Title>{t('auth.register.title')}</S.Title>
-          <S.Subtitle>{t('auth.register.subtitle')}</S.Subtitle>
+          <S.LogoWrapper>
+            <S.LogoIcon>
+              <Icon name="user" size={28} />
+            </S.LogoIcon>
+          </S.LogoWrapper>
+          <Text variant="h2" weight="bold" color="text.primary">
+            {t('auth.register.title')}
+          </Text>
+          <S.SubtitleWrapper>
+            <Text variant="body" color="text.secondary">
+              {t('auth.register.subtitle')}
+            </Text>
+          </S.SubtitleWrapper>
         </S.Header>
 
         <S.Form onSubmit={handleSubmit(onSubmit)}>
@@ -82,19 +93,21 @@ export const RegisterPageComponent = ({
           />
 
           <S.ButtonContainer>
-            <Button type="submit" variant="primary" fullWidth disabled={isLoading || isSubmitting}>
+            <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting}>
               {t('auth.register.submitButton')}
             </Button>
           </S.ButtonContainer>
         </S.Form>
 
         <S.Footer>
-          {t('auth.register.alreadyHaveAccount')}
+          <Text variant="caption" color="text.tertiary">
+            {t('auth.register.alreadyHaveAccount')}
+          </Text>
           <S.FooterLink type="button" onClick={onNavigateToLogin}>
             {t('auth.register.loginLink')}
           </S.FooterLink>
         </S.Footer>
-      </S.Card>
+      </S.AuthCard>
     </S.Container>
   );
 };

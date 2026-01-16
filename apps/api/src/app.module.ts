@@ -10,7 +10,6 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
-import { ExamplesModule } from './modules/examples/examples.module';
 import { StoreSettingsModule } from './modules/store-settings/store-settings.module';
 
 @Module({
@@ -45,7 +44,6 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     AuthModule,
     EbayModule,
     DashboardModule,
-    ExamplesModule,
     StoreSettingsModule,
   ],
   providers: [

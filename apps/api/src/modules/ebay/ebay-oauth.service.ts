@@ -140,13 +140,15 @@ export class EbayOAuthService {
   /**
    * Get seller information from eBay
    */
-  async getSellerInfo(accessToken: string): Promise<{ sellerId: string }> {
-    this.logger.log(`Fetching seller information from eBay Commerce Identity API (${this.environment})`);
-    this.logger.debug(`Using API Base URL: ${this.apiBaseUrl}`);
+  async getSellerInfo(accessToken: string): Promise<{ sellerId: string; storeName: string }> {
+    this.logger.log(`Fetching seller information from eBay APIs (${this.environment})`);
+
+    let sellerId = 'unknown';
+    let storeName = '';
 
     try {
-      // Try Identity API first to get username/userId
-      const response = await axios.get(
+      // 1. Get User/Identity info
+      const identityResponse = await axios.get(
         `${this.apiBaseUrl}/commerce/identity/v1/user`,
         {
           headers: {
@@ -155,33 +157,40 @@ export class EbayOAuthService {
           },
         }
       );
-
-      this.logger.debug('Identity API Response:', response.data);
-
-      // Extract seller ID (username is better for display, userId is more stable)
-      // We'll use username as the primary sellerId for the system
-      const sellerId = response.data?.username || response.data?.userId || 'unknown';
       
-      this.logger.log(`Successfully retrieved seller ID: ${sellerId}`);
+      sellerId = identityResponse.data?.username || identityResponse.data?.userId || 'unknown';
+      storeName = identityResponse.data?.businessName || identityResponse.data?.username || '';
       
-      if (sellerId === 'unknown') {
-        this.logger.warn('Identity API returned success but no username or userId found in:', response.data);
-      }
-
-      return { sellerId };
+      this.logger.debug('Identity API Response:', identityResponse.data);
     } catch (error: any) {
-      const errorData = error.response?.data;
-      const statusCode = error.response?.status;
+      this.logger.warn('Identity API failed, will try fallback', error.message);
+    }
+
+    try {
+      // 2. Try to get Store specific info (more accurate for store name)
+      const storeResponse = await axios.get(
+        `${this.apiBaseUrl}/sell/account/v1/store`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
-      this.logger.error(`Failed to fetch seller info from Identity API (Status: ${statusCode})`, {
-        error: errorData || error.message,
-        url: `${this.apiBaseUrl}/commerce/identity/v1/user`
-      });
-      
+      if (storeResponse.data?.name) {
+        storeName = storeResponse.data.name;
+        this.logger.log(`Found official eBay store name: ${storeName}`);
+      }
+    } catch (error: any) {
+      // Many sellers don't have a "Store" subscription, so 404 is common and expected
+      this.logger.debug('Store API failed (likely no store subscription):', error.message);
+    }
+
+    // Final fallback for sellerId if still unknown
+    if (sellerId === 'unknown') {
       try {
-        this.logger.log('Trying Account API fallback...');
-        // Fallback to Account API if Identity API fails
-        const response = await axios.get(
+        const fallbackResponse = await axios.get(
           `${this.apiBaseUrl}/sell/account/v1/privilege`,
           {
             headers: {
@@ -190,25 +199,13 @@ export class EbayOAuthService {
             },
           }
         );
-        
-        this.logger.debug('Account API fallback response:', response.data);
-        
-        // Some users might have userId in the Account API response depending on permissions
-        if (response.data?.userId) {
-          const sellerId = response.data.userId;
-          this.logger.log(`Found seller ID in Account API: ${sellerId}`);
-          return { sellerId };
-        }
-
-        const fallbackId = `ebay_user_${Date.now()}`;
-        this.logger.warn(`Account API didn't provide userId, using auto-generated ID: ${fallbackId}`);
-        return { sellerId: fallbackId };
-      } catch (fallbackError: any) {
-        this.logger.error('Account API fallback also failed', fallbackError.response?.data || fallbackError.message);
-        const finalFallbackId = `ebay_user_${Date.now()}`;
-        return { sellerId: finalFallbackId };
+        sellerId = fallbackResponse.data?.userId || `ebay_user_${Date.now()}`;
+      } catch (e) {
+        sellerId = `ebay_user_${Date.now()}`;
       }
     }
+
+    return { sellerId, storeName: storeName || sellerId };
   }
 
   /**

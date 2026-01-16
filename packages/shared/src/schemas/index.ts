@@ -7,11 +7,12 @@
  * - Shared across all frontend platforms (web, mobile)
  * 
  * Structure:
- * - schemas/example/    - Example-related forms
- * - schemas/user/       - User-related forms
- * - schemas/complex/    - Multi-domain forms
+ * - schemas/auth/       - Auth-related forms
  * - schemas/common/     - Reusable utilities
+ * - schemas/store-settings/ - Store settings forms
  */
 
-export * from './example';
+export * from './auth';
 export * from './common/form.utils';
+export * from './store-settings';
+

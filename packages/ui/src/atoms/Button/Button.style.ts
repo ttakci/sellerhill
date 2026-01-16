@@ -15,16 +15,19 @@ interface StyledButtonProps {
 const variantStyles = {
   primary: (theme: Theme) => `
     background: ${theme.colors.brand.primary};
-    color: #ffffff;
+    color: ${theme.colors.text.inverse};
     border-color: ${theme.colors.brand.primary};
+
+    &:active:not(:disabled) {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
 
     &:hover:not(:disabled) {
       background: ${theme.colors.brand.primaryHover};
       border-color: ${theme.colors.brand.primaryHover};
-    }
-
-    &:active:not(:disabled) {
-      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: ${tkn('shadows.md')};
     }
   `,
 
@@ -37,16 +40,28 @@ const variantStyles = {
       background: ${theme.colors.background.primary};
       border-color: ${theme.colors.border.primary};
       color: ${theme.colors.brand.primary};
+      transform: translateY(-1px);
+      box-shadow: ${tkn('shadows.sm')};
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.97);
     }
   `,
 
   danger: (theme: Theme) => `
     background: ${theme.colors.semantic.error};
-    color: #ffffff;
+    color: ${theme.colors.text.inverse};
     border-color: ${theme.colors.semantic.error};
 
     &:hover:not(:disabled) {
       opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: ${tkn('shadows.md')};
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.97);
     }
   `,
 };
@@ -83,7 +98,7 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
 
   cursor: pointer;
-  transition: all ${(p) => tkn('transitions.fast')(p as any)};
+  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Size styles */
   ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}

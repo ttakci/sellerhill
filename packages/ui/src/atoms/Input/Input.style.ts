@@ -25,7 +25,7 @@ const sizeStyles = {
   `,
 
   lg: (theme: Theme) => `
-    padding: 12px 20px;
+    padding: 14px 20px;
     font-size: ${theme.typography.fontSize.md};
     height: 56px;
     font-weight: ${theme.typography.fontWeight.medium};
@@ -38,31 +38,37 @@ const variantStyles = {
     background: ${theme.colors.background.secondary};
 
     &:hover:not(:disabled) {
-      border-color: ${theme.colors.brand.primary};
+      border-color: ${theme.colors.border.focus};
+      background: ${theme.colors.background.primary};
     }
 
     &:focus {
       outline: none;
       border-color: ${theme.colors.brand.primary};
-      box-shadow: ${theme.shadows.sm};
+      box-shadow: 0 0 0 4px ${theme.colors.brand.primary}15; // Soft brand glow
+      background: ${theme.colors.background.primary};
     }
   `,
 
   error: (theme: Theme) => `
     border-color: ${theme.colors.semantic.error};
+    background: ${theme.colors.semantic.error}05;
 
     &:focus {
       outline: none;
       border-color: ${theme.colors.semantic.error};
+      box-shadow: 0 0 0 4px ${theme.colors.semantic.error}15;
     }
   `,
 
   success: (theme: Theme) => `
     border-color: ${theme.colors.semantic.success};
+    background: ${theme.colors.semantic.success}05;
 
     &:focus {
       outline: none;
       border-color: ${theme.colors.semantic.success};
+      box-shadow: 0 0 0 4px ${theme.colors.semantic.success}15;
     }
   `,
 };
@@ -73,7 +79,7 @@ const InputField = styled.input<StyledInputProps>`
   width: ${(p) => (p.$fullWidth ? '100%' : 'auto')};
   box-sizing: border-box;
 
-  border-radius: ${(p) => tkn('radius.md')(p as any)};
+  border-radius: ${(p) => tkn('radius.lg')(p as any)};
   border: 1px solid;
 
   color: ${(p) => tkn('colors.text.primary')(p as any)};
@@ -83,7 +89,7 @@ const InputField = styled.input<StyledInputProps>`
   font-weight: ${(p) => tkn('typography.fontWeight.normal')(p as any)};
   line-height: ${(p) => tkn('typography.lineHeight.normal')(p as any)};
 
-  transition: all ${(p) => tkn('transitions.fast')(p as any)};
+  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Size styles */
   ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}
@@ -93,12 +99,26 @@ const InputField = styled.input<StyledInputProps>`
   
   &::placeholder {
     color: ${(p) => tkn('colors.text.tertiary')(p as any)};
+    transition: color ${tkn('transitions.fast')};
+  }
+  
+  &:focus::placeholder {
+    color: ${(p) => tkn('colors.text.disabled')(p as any)};
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
     background: ${(p) => tkn('colors.background.tertiary')(p as any)};
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: ${(p) => tkn('colors.text.primary')(p as any)};
+    caret-color: ${(p) => tkn('colors.text.primary')(p as any)};
   }
 `;
 
@@ -117,6 +137,7 @@ const HelperText = styled.span<{ $variant?: 'error' | 'success' }>`
     if (variant === 'success') return tkn('colors.semantic.success')(p as any);
     return tkn('colors.text.secondary')(p as any);
   }};
+  font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
 `;
 
 export const S = {
