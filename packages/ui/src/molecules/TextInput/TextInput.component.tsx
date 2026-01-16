@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Controller,
   type ControllerRenderProps,
@@ -34,34 +34,19 @@ const TextInputInner = <TFieldValues extends FieldValues>({
   label,
   leftIcon,
   rightIcon,
-  prefix,
-  suffix,
   autoFocus,
   maxLength,
   id,
   type,
   disabled,
 }: TextInputInnerProps<TFieldValues>) => {
-  const [isFocused, setIsFocused] = useState(false);
-  
-  const hasValue = field.value !== undefined && field.value !== null && field.value !== '';
-  const isFloating = isFocused || hasValue;
-
   return (
     <S.Container>
-      <S.InputGroup $hasError={!!error} $isFloating={isFloating}>
-        <S.FloatingLabel 
-          $isFloating={isFloating} 
-          $hasError={!!error}
-          $hasLeftIcon={!!leftIcon || !!prefix}
-        >
-          {label}
-        </S.FloatingLabel>
-
-        {prefix && <S.Addon side="left">{prefix}</S.Addon>}
+      {label && <S.LabelText htmlFor={id}>{label}</S.LabelText>}
+      <S.InputGroup $hasError={!!error}>
         {leftIcon && (
           <S.IconWrapper side="left">
-            <Icon name={leftIcon} size={20} />
+            <Icon name={leftIcon} size={18} />
           </S.IconWrapper>
         )}
         
@@ -69,27 +54,20 @@ const TextInputInner = <TFieldValues extends FieldValues>({
           {...field}
           id={id}
           type={type}
-          placeholder=""
           disabled={disabled}
           autoFocus={autoFocus}
           maxLength={maxLength}
-          $isFloating={isFloating}
-          $hasLeftIcon={!!leftIcon || !!prefix}
-          $hasRightIcon={!!rightIcon || !!suffix}
-          onFocus={() => setIsFocused(true)}
-          onBlur={(e) => {
-            setIsFocused(false);
-            field.onBlur();
-          }}
+          $hasLeftIcon={!!leftIcon}
+          $hasRightIcon={!!rightIcon}
           value={field.value ?? ''}
+          placeholder={label}
         />
 
         {rightIcon && (
           <S.IconWrapper side="right">
-            <Icon name={rightIcon} size={20} />
+            <Icon name={rightIcon} size={18} />
           </S.IconWrapper>
         )}
-        {suffix && <S.Addon side="right">{suffix}</S.Addon>}
       </S.InputGroup>
 
       {error && <S.ErrorText>{error.message}</S.ErrorText>}

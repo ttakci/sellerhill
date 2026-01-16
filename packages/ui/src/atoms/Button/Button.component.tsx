@@ -12,6 +12,7 @@ export const Button = ({
   isLoading = false,
   disabled = false,
   type = 'button',
+  isPill = false,
   className,
   style,
 }: ButtonProps): React.ReactElement => {
@@ -23,6 +24,7 @@ export const Button = ({
       $size={size}
       $fullWidth={fullWidth}
       $isLoading={isLoading}
+      $isPill={isPill}
       disabled={disabled || isLoading}
       className={className}
       style={style}

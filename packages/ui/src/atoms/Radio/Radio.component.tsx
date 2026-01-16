@@ -11,7 +11,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
     };
 
     return (
-      <S.Container disabled={disabled} className={className}>
+      <S.Container $disabled={disabled} className={className}>
         <S.HiddenRadio
           type="radio"
           ref={ref}
@@ -23,7 +23,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           name={name}
           id={id}
         />
-        <S.StyledRadio checked={checked || defaultChecked} disabled={disabled} />
+        <S.StyledRadio $checked={checked || defaultChecked} $disabled={disabled} />
         {label && <S.Label>{label}</S.Label>}
       </S.Container>
     );

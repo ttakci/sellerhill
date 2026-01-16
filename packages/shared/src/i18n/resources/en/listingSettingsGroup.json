@@ -1,0 +1,156 @@
+{
+  "listingSettingsGroup": {
+    "title": "Listing Settings Groups",
+    "subtitle": "Manage and assign strategy templates to your product listings for automated optimization.",
+    "createNewGroup": "Create New Group",
+    "editGroup": "Edit Listing Group",
+    "backToList": "Back to Groups",
+    "connectorSubtitle": "AMAZON TO EBAY CONNECTOR",
+    
+    "groupDetails": "Group Details",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "e.g., Premium Electronics",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter group internal notes...",
+    
+    "repricingStrategy": "Repricing Strategy",
+    "addPriceRange": "Add Price Range",
+    "removePriceRange": "Remove Price Range",
+    "minPrice": "Min Price ($)",
+    "maxPrice": "Max Price ($)",
+    "profitMargin": "Profit Margin (%)",
+    "fixedProfit": "Fixed Profit ($)",
+    "priceRangeLabel": "Price Range {{index}}",
+    
+    "stock": "Stock",
+    "defaultQuantity": "Default Quantity",
+    "autoRestock": "Auto-restock on sale",
+    "autoRestockDescription": "Automatically restock items when they are sold",
+    
+    "fees": "Fees",
+    "ebayFee": "eBay Fee",
+    "ebayFeePercent": "eBay Fee (%)",
+    "fixedFee": "Fixed Fee",
+    "fixedFeeAmount": "Fixed Fee ($)",
+    "tax": "Tax",
+    "taxPercent": "Tax (%)",
+    
+    "templates": "Template",
+    "customTemplate": "Custom",
+    "predefinedTemplate": "Predefined",
+    "selectTemplate": "Select Template",
+    "selectTemplatePlaceholder": "Choose a predefined template...",
+    "htmlEditor": "HTML Editor",
+    "templatePlaceholder": "Enter your custom HTML template...",
+    "templateVariablesHelp": "Use variables like {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}",
+    
+    "preview": "Preview",
+    "livePreview": "Live Preview",
+    "darkModePreview": "Dark Mode Preview",
+    "desktopView": "Desktop View",
+    "mobileView": "Mobile View",
+    "renderingPreview": "Rendering preview...",
+    
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteGroup": "Delete Group",
+    "confirmDelete": "Are you sure you want to delete this group?",
+    "confirmDeleteMessage": "This action cannot be undone. Products using this group will need to be reassigned.",
+    "deleteSuccess": "Group deleted successfully",
+    "deleteFailed": "Failed to delete group",
+    
+    "productsCount_one": "{{count}} product",
+    "productsCount_other": "{{count}} products",
+    "noProducts": "No products",
+    
+    "statusActive": "Active",
+    "statusDraft": "Draft",
+    "statusInactive": "Inactive",
+    
+    "emptyState": {
+      "title": "No Listing Groups Yet",
+      "description": "Create your first group to start organizing your listings",
+      "action": "Create New Group"
+    },
+    
+    "predefinedTemplates": {
+      "modernMinimalist": "Modern Minimalist",
+      "modernMinimalistDesc": "Clean and professional design with focus on product details",
+      "premiumElectronics": "Premium Electronics",
+      "premiumElectronicsDesc": "High-end design for electronics with technical specifications",
+      "ecommerceClassic": "E-commerce Classic",
+      "ecommerceClassicDesc": "Traditional layout with clear sections and call-to-action"
+    },
+    
+    "validation": {
+      "nameRequired": "Group name is required",
+      "nameMinLength": "Group name must be at least 3 characters",
+      "nameMaxLength": "Group name must not exceed 100 characters",
+      "minPrice": "Minimum price must be greater than 0",
+      "maxPrice": "Maximum price must be greater than 0",
+      "maxPriceGreaterThanMin": "Maximum price must be greater than minimum price",
+      "profitRequired": "Either profit margin or fixed profit is required",
+      "profitMarginRange": "Profit margin must be between 0 and 100",
+      "fixedProfitMin": "Fixed profit must be 0 or greater",
+      "minQuantity": "Quantity must be at least 1",
+      "maxQuantity": "Quantity must not exceed 9999",
+      "maxFeePercent": "Fee percentage cannot exceed 100%",
+      "minFeePercent": "Fee percentage must be 0 or greater",
+      "minFixedFee": "Fixed fee must be 0 or greater",
+      "maxTaxPercent": "Tax percentage cannot exceed 100%",
+      "minTaxPercent": "Tax percentage must be 0 or greater",
+      "templateRequired": "Template content is required",
+      "templateMinLength": "Template must be at least 10 characters",
+      "predefinedTemplateRequired": "Please select a predefined template",
+      "minOnePriceRange": "At least one price range is required",
+      "maxPriceRanges": "Maximum 10 price ranges allowed",
+      "overlappingPriceRanges": "Price ranges cannot overlap"
+    },
+    
+    "errors": {
+      "loadFailed": "Failed to load listing groups",
+      "saveFailed": "Failed to save changes",
+      "createFailed": "Failed to create group",
+      "updateFailed": "Failed to update group",
+      "deleteFailed": "Failed to delete group",
+      "templateLoadFailed": "Failed to load predefined templates",
+      "unauthorized": "You don't have permission to perform this action",
+      "notFound": "Listing group not found",
+      "networkError": "Network error. Please check your connection.",
+      "unknownError": "An unexpected error occurred"
+    },
+    
+    "success": {
+      "created": "Listing group created successfully",
+      "updated": "Listing group updated successfully",
+      "deleted": "Listing group deleted successfully",
+      "saved": "Changes saved successfully"
+    },
+    
+    "tooltips": {
+      "editGroup": "Edit group",
+      "deleteGroup": "Delete group",
+      "addPriceRange": "Add another price range",
+      "removePriceRange": "Remove this price range",
+      "toggleDarkMode": "Toggle dark mode preview",
+      "switchToDesktop": "Switch to desktop view",
+      "switchToMobile": "Switch to mobile view",
+      "copyTemplate": "Copy template HTML",
+      "resetTemplate": "Reset to default template"
+    },
+    
+    "help": {
+      "repricingStrategy": "Define multiple price ranges with different profit margins. Products will be priced according to their cost range.",
+      "profitMargin": "Percentage-based profit calculated from the product cost.",
+      "fixedProfit": "Fixed dollar amount added to the product cost.",
+      "ebayFee": "eBay's final value fee percentage (typically 10-15%).",
+      "fixedFee": "eBay's fixed listing fee (typically $0.30).",
+      "tax": "Sales tax percentage for your location.",
+      "customTemplate": "Write your own HTML template with custom styling.",
+      "predefinedTemplate": "Choose from professionally designed templates.",
+      "templateVariables": "Use {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} in your template."
+    }
+  }
+}

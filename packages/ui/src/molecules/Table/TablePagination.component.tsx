@@ -36,7 +36,7 @@ export const TablePagination = ({
   return (
     <S.PaginationContainer className={className}>
       <S.RowsPerPage>
-        <S.PaginationLabel variant="caption" weight="semibold">
+        <S.PaginationLabel>
           {rowsPerPageLabel}
         </S.PaginationLabel>
         <S.SelectWrapper>
@@ -52,7 +52,7 @@ export const TablePagination = ({
       <div style={{ flex: 1 }} />
 
       <S.PageInfo>
-        <S.PaginationLabel variant="caption" weight="semibold">
+        <S.PaginationLabel>
           {count > 0 ? `${start}-${end} of ${count}` : '0 of 0'}
         </S.PaginationLabel>
       </S.PageInfo>

@@ -7,10 +7,16 @@ export const Badge = ({
   children,
   variant = 'secondary',
   size = 'md',
+  isPill = false,
   className,
 }: BadgeProps): React.ReactElement => {
   return (
-    <S.BadgeContainer $variant={variant} $size={size} className={className}>
+    <S.BadgeContainer
+      $variant={variant}
+      $size={size}
+      $isPill={isPill}
+      className={className}
+    >
       {children}
     </S.BadgeContainer>
   );

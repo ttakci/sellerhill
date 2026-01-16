@@ -90,10 +90,19 @@
     "listings": "Listelemeler",
     "settings": "Ayarlar",
     "storeSettings": "Mağaza Ayarları",
+    "listingSettingsGroups": "Listeleme Ayar Grupları",
     "other": "DİĞER",
     "reports": "Raporlar",
     "editProfile": "Profili Düzenle",
     "support": "Destek",
     "logout": "Oturumu Kapat"
+  },
+  "header": {
+    "selectLanguage": "Dil Seçimi",
+    "toggleTheme": "Temayı Değiştir"
+  },
+  "languages": {
+    "en": "English",
+    "tr": "Türkçe"
   }
 }

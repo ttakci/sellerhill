@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
 
-export const Container = styled.label<{ disabled?: boolean }>`
+export const Container = styled.label<{ $disabled?: boolean }>`
   display: flex;
   align-items: center;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
   user-select: none;
   gap: ${tkn('spacing.sm')};
-  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  opacity: ${({ $disabled }) => ($disabled ? 0.7 : 1)};
 `;
 
 export const HiddenCheckbox = styled.input`
@@ -17,29 +17,35 @@ export const HiddenCheckbox = styled.input`
   height: 0;
 `;
 
-export const Switch = styled.div<{ checked?: boolean; disabled?: boolean }>`
+export const Switch = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
   position: relative;
-  width: 44px;
+  width: 48px;
   height: 24px;
-  background-color: ${({ theme, checked }) => (checked ? theme.colors.brand.primary : theme.colors.border.primary)};
+  background-color: ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)};
   border-radius: ${tkn('radius.full')};
-  transition: background-color ${tkn('transitions.fast')};
+  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
 
   &::after {
     content: '';
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background-color: ${tkn('colors.text.inverse')};
     border-radius: ${tkn('radius.full')};
-    top: 2px;
-    left: ${({ checked }) => (checked ? '22px' : '2px')};
-    transition: left ${tkn('transitions.fast')};
+    top: 3px;
+    left: 3px;
+    transform: translateX(${({ $checked }) => ($checked ? '24px' : '0')});
+    transition: transform ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: ${tkn('shadows.sm')};
+  }
+
+  &:hover {
+    opacity: 0.9;
   }
 `;
 
 export const Label = styled.span`
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${tkn('typography.fontFamily.sans')};
 `;

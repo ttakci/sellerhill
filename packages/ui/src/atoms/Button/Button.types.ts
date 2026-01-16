@@ -50,6 +50,11 @@ export interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
 
   /**
+   * Pill-shaped (fully rounded) style
+   */
+  isPill?: boolean;
+
+  /**
    * Additional CSS classes
    */
   className?: string;

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, tkn } from '@repo/ui';
+import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -22,11 +22,37 @@ export const Header = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   align-items: flex-start;
+  
+  /* Sticky Header Configuration */
+  position: sticky;
+  /* Use calc to safely negate the token */
+  top: calc(-1 * ${tkn('spacing.md')});
+  margin-top: calc(-1 * ${tkn('spacing.md')}); 
+  
+  z-index: 99;
+  background-color: ${tkn('colors.background.secondary')};
+  
+  /* Expand to cover container padding horizontally */
+  margin-left: calc(-1 * ${tkn('spacing.md')});
+  margin-right: calc(-1 * ${tkn('spacing.md')});
+  padding: ${tkn('spacing.md')};
+  
+  /* Visual separator */
+  border-bottom: 1px solid ${tkn('colors.border.secondary')};
 
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    
+    /* Desktop pull up and stick */
+    top: calc(-1 * ${tkn('spacing.xl')});
+    margin-top: calc(-1 * ${tkn('spacing.xl')});
+    
+    /* Desktop expansion */
+    margin-left: calc(-1 * ${tkn('spacing.xl')});
+    margin-right: calc(-1 * ${tkn('spacing.xl')});
+    padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
   }
 `;
 
@@ -43,6 +69,7 @@ export const Actions = styled.div`
 
   @media (min-width: 768px) {
     width: auto;
+    margin-right: ${tkn('spacing.md')};
   }
   
   button {
@@ -69,33 +96,61 @@ export const GlobalBanner = styled.div`
     padding: ${tkn('spacing.lg')};
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* Align to top as requested */
   }
 `;
 
 export const SwitchGroup = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Top align toggle with text */
   gap: ${tkn('spacing.md')};
   flex: 1;
-  min-width: 0; /* Important for flex-shrink and text wrapping */
+  min-width: 0;
 `;
 
 export const SwitchLabelContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: 4px; /* Tighter gap */
+  margin-top: -4px; /* Visual alignment with toggle switch */
 `;
 
 export const StoreSelectWrapper = styled.div<{ $disabled?: boolean }>`
   width: 100%;
   max-width: 100%;
-  opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
   transition: opacity ${tkn('transitions.fast')};
   
   @media (min-width: 1024px) {
     max-width: 320px;
   }
+`;
+
+export const SectionHeader = styled.div`
+  display: flex;
+  align-items: flex-start; /* Align to top so icon aligns with title line */
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')}; /* Increased padding for breathing room */
+  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  
+  /* Ensure consistent height/alignment */
+  min-height: 4.5rem;
+`;
+
+export const HeaderIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: ${tkn('radius.lg')}; /* Squircle */
+  background-color: ${tkn('colors.background.tertiary')};
+  color: ${tkn('colors.text.primary')};
+  flex-shrink: 0;
+  
+  /* Optional: Add subtle border */
+  border: 1px solid ${tkn('colors.border.secondary')};
 `;
 
 export const AddressGrid = styled.div`
@@ -112,100 +167,50 @@ export const GlobalGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   align-items: flex-start;
-  gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.xl')};
+  margin-top: ${tkn('spacing.xl')};
 
   @media (min-width: 1200px) {
     grid-template-columns: 1fr 1fr;
-    margin-top: ${tkn('spacing.lg')};
   }
 `;
 
 export const StoreLabel = styled.label`
   display: block;
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.secondary')};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: ${tkn('spacing.sm')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.text.primary')};
+  margin-bottom: ${tkn('spacing.xs')};
 `;
 
 export const Copyright = styled.div`
   text-align: center;
-  color: ${tkn('colors.text.secondary')};
+  color: ${tkn('colors.text.tertiary')};
   font-size: 13px;
   padding: ${tkn('spacing.xl')} 0;
 `;
 
-// Blacklist Styling
-export const BlacklistCard = styled.div`
-  border: 1px solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.md')};
-  overflow: hidden;
-  margin-top: ${tkn('spacing.xl')};
-  width: 100%;
-`;
-
-export const BlacklistHeaderPanel = styled.div`
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.background.primary')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
-
-  @media (min-width: 1024px) {
-    padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-`;
-
-export const BlacklistHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  width: 100%;
-
-  @media (min-width: 1024px) {
-    width: auto;
-  }
-`;
-
 export const BlacklistControls = styled.div`
+  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  width: 100%;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  @media (min-width: 1024px) {
-    width: auto;
-  }
+  justify-content: flex-end;
+  margin-left: ${tkn('spacing.md')};
 `;
 
 export const BlacklistInputWrapper = styled.div`
   display: flex;
   align-items: center;
   background: ${tkn('colors.background.secondary')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.md')};
-  padding: 2px 4px;
+  border: 1px solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  padding: 2px;
   gap: ${tkn('spacing.xs')};
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   
   &:focus-within {
-    border-color: ${tkn('colors.brand.primary')};
-    box-shadow: 0 0 0 1px ${tkn('colors.brand.primary')};
+    border-color: ${tkn('colors.border.focus')};
+    box-shadow: 0 0 0 3px ${tkn('colors.brand.secondary')};
   }
 `;
 
@@ -215,44 +220,30 @@ export const BlacklistInput = styled.input`
   outline: none;
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  padding: 0 ${tkn('spacing.md')};
   flex: 1;
   min-width: 100px;
+  height: 44px;
 `;
 
 export const BlacklistActionGroup = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-  width: 100%;
-
-  @media (min-width: 768px) {
-    width: auto;
-  }
-
-  button {
-    flex: 1;
-    @media (min-width: 768px) {
-      flex: none;
-    }
+  
+  @media (max-width: 767px) {
+    display: none; /* Hide on mobile to keep it simple or adjust layout */
   }
 `;
 
 export const BlacklistTitleColumn = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.md')};
+  align-items: flex-start;
 `;
 
 export const ScopeSelectContainer = styled.div`
-  width: 100%;
-  @media (min-width: 768px) {
-    width: 10rem;
-  }
-`;
-
-export const AddButton = styled(Button)`
-  padding: ${tkn('spacing.xs')};
+  width: 10rem;
 `;
 
 export const IconAction = styled.button`
@@ -264,11 +255,11 @@ export const IconAction = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${tkn('radius.md')};
+  border-radius: ${tkn('radius.sm')};
   transition: all ${tkn('transitions.fast')};
 
   &:hover {
     color: ${tkn('colors.semantic.error')};
-    background: ${tkn('colors.background.secondary')};
+    background: ${tkn('colors.background.tertiary')};
   }
 `;

@@ -11,7 +11,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     return (
-      <S.Container disabled={disabled} className={className}>
+      <S.Container $disabled={disabled} className={className}>
         <S.HiddenCheckbox
           type="checkbox"
           ref={ref}
@@ -22,7 +22,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           name={name}
           id={id}
         />
-        <S.StyledCheckbox checked={checked || defaultChecked} disabled={disabled} />
+        <S.StyledCheckbox $checked={checked || defaultChecked} $disabled={disabled} />
         {label && <S.Label>{label}</S.Label>}
       </S.Container>
     );

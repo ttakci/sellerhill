@@ -5,5 +5,6 @@ export interface BadgeProps {
   children: React.ReactNode;
   variant?: BadgeVariant;
   size?: BadgeSize;
+  isPill?: boolean;
   className?: string;
 }

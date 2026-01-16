@@ -1,38 +1,49 @@
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
 
-export const StyledTextarea = styled.textarea<{ $hasError?: boolean; $fullWidth?: boolean }>`
+export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?: boolean }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  padding: ${tkn('spacing.md')};
+  padding: 12px 16px;
   background-color: ${tkn('colors.background.secondary')};
   border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)};
-  border-radius: ${tkn('radius.md')};
+  border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${tkn('typography.fontFamily.sans')};
   outline: none;
-  resize: vertical;
+  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 120px;
-  transition: all ${tkn('transitions.fast')};
+  resize: vertical;
+
+  &::placeholder {
+    color: ${tkn('colors.text.tertiary')};
+  }
+
+  &:hover:not(:disabled) {
+    border-color: ${tkn('colors.border.focus')};
+  }
 
   &:focus {
-    border-color: ${tkn('colors.brand.primary')};
+    border-color: ${tkn('colors.border.focus')};
+    box-shadow: 0 0 0 3px ${tkn('colors.brand.secondary')};
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.7;
+    background-color: ${tkn('colors.background.tertiary')};
+    border-color: ${tkn('colors.border.primary')};
   }
+`;
 
-  &::placeholder {
-    color: ${tkn('colors.text.secondary')};
-  }
+export const HelperText = styled.span`
+  font-size: ${tkn('typography.fontSize.xs')};
+  color: ${tkn('colors.semantic.error')};
+  margin-top: 4px;
+`;
 
-  &:-webkit-autofill,
-  &:-webkit-autofill:hover,
-  &:-webkit-autofill:focus,
-  &:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: ${tkn('colors.text.primary')};
-    caret-color: ${tkn('colors.text.primary')};
-  }
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;

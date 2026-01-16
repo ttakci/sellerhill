@@ -7,6 +7,7 @@ import VerifyEmailPage from './features/auth/VerifyEmailPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import EbayConnectPage from './features/ebay/EbayConnectPage';
 import OnboardingEbayPage from './features/ebay/OnboardingEbayPage';
+import { ListingSettingsGroupForm, ListingSettingsGroupPage } from './features/listing-settings-groups';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
 
@@ -26,6 +27,9 @@ export function App() {
           <Route path="/ebay/connect" element={<EbayConnectPage />} />
           <Route path="/onboarding/ebay" element={<OnboardingEbayPage />} />
           <Route path="/settings/store" element={<StoreSettingsPage />} />
+          <Route path="/settings/listing-groups" element={<ListingSettingsGroupPage />} />
+          <Route path="/settings/listing-groups/new" element={<ListingSettingsGroupForm />} />
+          <Route path="/settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
           
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/register" replace />} />

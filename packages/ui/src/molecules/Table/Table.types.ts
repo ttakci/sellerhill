@@ -1,12 +1,13 @@
-export interface TableColumn<T = unknown> {
+export interface TableColumn<T = any> {
   key: string;
   header: string;
   align?: 'left' | 'center' | 'right';
-  render?: (value: unknown, row: T, index: number) => React.ReactNode;
+  render?: (value: any, row: T, index: number) => React.ReactNode;
   sortable?: boolean;
+  width?: string | number;
 }
 
-export interface TableProps<T = unknown> {
+export interface TableProps<T = any> {
   columns: TableColumn<T>[];
   data: T[];
   emptyMessage?: string;
@@ -16,6 +17,9 @@ export interface TableProps<T = unknown> {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (column: string) => void;
+  selectable?: boolean;
+  selectedRows?: T[];
+  onSelectionChange?: (selectedRows: T[]) => void;
 }
 
 export interface TableHeaderProps {

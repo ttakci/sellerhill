@@ -1,13 +1,21 @@
-import type { LoadingSize } from '../molecules/GeneralLoading/GeneralLoading.types';
-import type { MessageType, GeneralMessageButton } from '../molecules/GeneralMessage/GeneralMessage.types';
+export type MessageType = 'success' | 'warning' | 'error' | 'info';
+export type LoadingSize = 'sm' | 'md' | 'lg';
 
 export interface MessageState {
   isOpen: boolean;
   type: MessageType;
   header: string;
   description: string;
-  primaryButton?: GeneralMessageButton;
-  secondaryButton?: GeneralMessageButton;
+  primaryButton?: {
+    label: string;
+    onClick: () => void;
+    variant?: 'primary' | 'secondary';
+  };
+  secondaryButton?: {
+    label: string;
+    onClick: () => void;
+    variant?: 'primary' | 'secondary';
+  };
 }
 
 export interface LoadingState {

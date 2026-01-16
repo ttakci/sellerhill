@@ -58,28 +58,28 @@ export const spacingTokens = {
 } as const;
 
 export const radiusTokens = {
-  sm: '4px', // Badges
-  md: '8px', // Buttons & Inputs
-  lg: '12px', // Cards & Modals
-  xl: '16px', // Large containers
-  full: '9999px',
+  sm: '8px',    // Buttons, Nav items
+  md: '8px',    // Inputs
+  lg: '16px',   // Cards (TailAdmin uses larger radius)
+  xl: '16px',   // Large containers
+  full: '9999px', // Pills, badges
 } as const;
 
 export const shadowTokens = {
-  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  md: '0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06)',
-  lg: '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05)',
-  xl: '0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04)',
+  sm: '0px 1px 2px 0px rgba(16, 24, 40, 0.05)', // TailAdmin subtle shadow
+  md: '0px 2px 4px 0px rgba(16, 24, 40, 0.06)',
+  lg: '0px 4px 8px 0px rgba(16, 24, 40, 0.08)',
+  xl: '0px 8px 16px 0px rgba(16, 24, 40, 0.10)',
 } as const;
 
 export const typographyTokens = {
   fontFamily: {
-    sans: "'Inter', 'Lexend', -apple-system, sans-serif",
+    sans: "'Outfit', 'Inter', -apple-system, sans-serif", // TailAdmin uses Outfit
     mono: "'JetBrains Mono', 'Fira Code', monospace",
   },
   fontSize: {
-    xs: '0.75rem',
-    sm: '0.875rem',
+    xs: '0.75rem',  // 12px - Badges, small text
+    sm: '0.875rem', // 14px - Body text (TailAdmin default)
     md: '1rem',
     lg: '1.125rem',
     xl: '1.25rem',

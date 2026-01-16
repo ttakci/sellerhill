@@ -14,20 +14,20 @@ interface StyledInputProps {
 const sizeStyles = {
   sm: (theme: Theme) => `
     padding: 8px 12px;
-    font-size: ${theme.typography.fontSize.sm};
+    font-size: ${theme.typography.fontSize.xs};
     height: 38px;
   `,
 
   md: (theme: Theme) => `
     padding: 10px 16px;
-    font-size: ${theme.typography.fontSize.md};
-    height: 48px;
+    font-size: ${theme.typography.fontSize.sm};
+    height: 44px;
   `,
 
   lg: (theme: Theme) => `
     padding: 14px 20px;
     font-size: ${theme.typography.fontSize.md};
-    height: 56px;
+    height: 54px;
     font-weight: ${theme.typography.fontWeight.medium};
   `,
 };
@@ -39,36 +39,34 @@ const variantStyles = {
 
     &:hover:not(:disabled) {
       border-color: ${theme.colors.border.focus};
-      background: ${theme.colors.background.primary};
     }
 
     &:focus {
       outline: none;
-      border-color: ${theme.colors.brand.primary};
-      box-shadow: 0 0 0 4px ${theme.colors.brand.primary}15; // Soft brand glow
-      background: ${theme.colors.background.primary};
+      border-color: ${theme.colors.border.focus};
+      box-shadow: 0 0 0 3px ${theme.colors.brand.secondary};
     }
   `,
 
   error: (theme: Theme) => `
     border-color: ${theme.colors.semantic.error};
-    background: ${theme.colors.semantic.error}05;
+    background: ${theme.colors.surface.primary};
 
     &:focus {
       outline: none;
       border-color: ${theme.colors.semantic.error};
-      box-shadow: 0 0 0 4px ${theme.colors.semantic.error}15;
+      box-shadow: 0 0 0 3px ${theme.colors.semantic.error}20;
     }
   `,
 
   success: (theme: Theme) => `
     border-color: ${theme.colors.semantic.success};
-    background: ${theme.colors.semantic.success}05;
+    background: ${theme.colors.surface.primary};
 
     &:focus {
       outline: none;
       border-color: ${theme.colors.semantic.success};
-      box-shadow: 0 0 0 4px ${theme.colors.semantic.success}15;
+      box-shadow: 0 0 0 3px ${theme.colors.semantic.success}20;
     }
   `,
 };
@@ -79,7 +77,7 @@ const InputField = styled.input<StyledInputProps>`
   width: ${(p) => (p.$fullWidth ? '100%' : 'auto')};
   box-sizing: border-box;
 
-  border-radius: ${(p) => tkn('radius.lg')(p as any)};
+  border-radius: ${(p) => tkn('radius.sm')(p as any)};
   border: 1px solid;
 
   color: ${(p) => tkn('colors.text.primary')(p as any)};
@@ -87,6 +85,7 @@ const InputField = styled.input<StyledInputProps>`
 
   font-family: ${(p) => tkn('typography.fontFamily.sans')(p as any)};
   font-weight: ${(p) => tkn('typography.fontWeight.normal')(p as any)};
+  font-size: ${(p) => tkn('typography.fontSize.sm')(p as any)};
   line-height: ${(p) => tkn('typography.lineHeight.normal')(p as any)};
 
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
@@ -108,8 +107,9 @@ const InputField = styled.input<StyledInputProps>`
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.7;
     background: ${(p) => tkn('colors.background.tertiary')(p as any)};
+    border-color: ${(p) => tkn('colors.border.primary')(p as any)};
   }
 
   &:-webkit-autofill,
@@ -126,6 +126,7 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${(p) => tkn('spacing.xs')(p as any)};
+  width: 100%;
 `;
 
 const HelperText = styled.span<{ $variant?: 'error' | 'success' }>`

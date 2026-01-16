@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardBody,
-  CollapsibleCard,
   Icon,
   Select,
   SwitchRow,
@@ -145,7 +144,10 @@ export const StoreSettingsPageComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <Text variant="h1" weight="bold">{t('storeSettings.title')}</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+             <Icon name="store" size={28} color="brand.primary" />
+             <Text variant="h3" weight="bold" style={{ fontSize: '26px' }}>{t('storeSettings.title')}</Text>
+          </div>
           <Text variant="body" color="text.secondary">
             {t('storeSettings.subtitle')}
           </Text>
@@ -160,7 +162,7 @@ export const StoreSettingsPageComponent = ({
         </S.Actions>
       </S.Header>
 
-      <Card>
+      <Card variant="bordered">
         <CardBody>
           <S.GlobalBanner>
             <S.SwitchGroup>
@@ -175,10 +177,15 @@ export const StoreSettingsPageComponent = ({
                 )}
               />
               <S.SwitchLabelContent>
-                <Text variant="body" weight="medium">{t('storeSettings.globalSettings')}</Text>
-                <Text variant="caption" muted>
-                  {t('storeSettings.globalDescription')}
-                </Text>
+                <Text variant="body" weight="semibold">{t('storeSettings.globalSettings')}</Text>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+                  <Text variant="caption" color="text.secondary" style={{ lineHeight: '1.4' }}>
+                     {t('storeSettings.globalDescription').split('. ')[0]}.
+                  </Text>
+                  <Text variant="caption" muted style={{ fontSize: '13px', lineHeight: '1.4' }}>
+                     {t('storeSettings.globalDescription').split('. ')[1]}.
+                  </Text>
+                </div>
               </S.SwitchLabelContent>
             </S.SwitchGroup>
 
@@ -196,67 +203,92 @@ export const StoreSettingsPageComponent = ({
           </S.GlobalBanner>
 
           <S.GlobalGrid>
-            <CollapsibleCard
-              title={t('storeSettings.locationSectionTitle')}
-              icon={<Icon name="user" size={18} color={theme.colors.brand.primary} />}
-            >
-              <S.AddressGrid>
-                <TextInput
-                  name="country"
-                  control={control}
-                  label={t('storeSettings.country')}
-                />
-                <TextInput
-                  name="state"
-                  control={control}
-                  label={t('storeSettings.state')}
-                />
-              </S.AddressGrid>
-              
-              <TextInput
-                name="zipCode"
-                control={control}
-                label={t('storeSettings.zipCode')}
-              />
-            </CollapsibleCard>
-
-            <CollapsibleCard
-              title={t('storeSettings.validationSectionTitle')}
-              icon={<Icon name="alert-circle" size={18} color={theme.colors.brand.primary} />}
-            >
-              <Controller
-                name="validateTitle"
-                control={control}
-                render={({ field }) => (
-                  <SwitchRow
-                    title={t('storeSettings.validateTitle')}
-                    description={t('storeSettings.validateTitleDesc')}
-                    checked={field.value}
-                    onChange={field.onChange}
+            <Card variant="bordered">
+              <S.SectionHeader>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <S.HeaderIconWrapper>
+                    <Icon name="map-pin" size={24} color="text.primary" />
+                  </S.HeaderIconWrapper>
+                  <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
+                    <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.locationSectionTitle')}</Text>
+                    <Text variant="caption" color="text.secondary">{t('storeSettings.locationSectionSubtitle')}</Text>
+                  </div>
+                </div>
+              </S.SectionHeader>
+              <CardBody>
+                <S.AddressGrid>
+                  <TextInput
+                    name="country"
+                    control={control}
+                    label={t('storeSettings.country')}
                   />
-                )}
-              />
-
-              <Controller
-                name="validateDescription"
-                control={control}
-                render={({ field }) => (
-                  <SwitchRow
-                    title={t('storeSettings.validateDescription')}
-                    description={t('storeSettings.validateDescriptionDesc')}
-                    checked={field.value}
-                    onChange={field.onChange}
+                  <TextInput
+                    name="state"
+                    control={control}
+                    label={t('storeSettings.state')}
                   />
-                )}
-              />
-            </CollapsibleCard>
+                </S.AddressGrid>
+                
+                <TextInput
+                  name="zipCode"
+                  control={control}
+                  label={t('storeSettings.zipCode')}
+                />
+              </CardBody>
+            </Card>
+
+            <Card variant="bordered">
+              <S.SectionHeader>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <S.HeaderIconWrapper>
+                    <Icon name="check-list" size={24} color="text.primary" />
+                  </S.HeaderIconWrapper>
+                  <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
+                     <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.validationSectionTitle')}</Text>
+                     <Text variant="caption" color="text.secondary">{t('storeSettings.validationSectionSubtitle')}</Text>
+                  </div>
+                </div>
+              </S.SectionHeader>
+              <CardBody>
+                <Controller
+                  name="validateTitle"
+                  control={control}
+                  render={({ field }) => (
+                    <SwitchRow
+                      title={t('storeSettings.validateTitle')}
+                      description={t('storeSettings.validateTitleDesc')}
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="validateDescription"
+                  control={control}
+                  render={({ field }) => (
+                    <SwitchRow
+                      title={t('storeSettings.validateDescription')}
+                      description={t('storeSettings.validateDescriptionDesc')}
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              </CardBody>
+            </Card>
           </S.GlobalGrid>
 
-          <S.BlacklistCard>
-            <S.BlacklistHeaderPanel>
+          <Card variant="bordered" style={{ marginTop: '24px' }}>
+            <S.SectionHeader>
               <S.BlacklistTitleColumn>
-                <Text weight="semibold">{t('storeSettings.blacklistSectionTitle')}</Text>
-                <Text variant="caption" muted>{t('storeSettings.blacklistSubtitle')}</Text>
+                <S.HeaderIconWrapper>
+                   <Icon name="block" size={24} color="text.primary" />
+                </S.HeaderIconWrapper>
+                <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
+                  <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.blacklistSectionTitle')}</Text>
+                  <Text variant="caption" color="text.secondary">{t('storeSettings.blacklistSubtitle')}</Text>
+                </div>
               </S.BlacklistTitleColumn>
               <S.BlacklistControls>
                 <S.BlacklistInputWrapper>
@@ -278,17 +310,18 @@ export const StoreSettingsPageComponent = ({
                         fullWidth={true}
                       />
                     </S.ScopeSelectContainer>
-                    <S.AddButton
+                    <Button
                       variant="primary"
                       size="sm"
                       onClick={handleAddKeyword}
+                      style={{ height: '44px' }}
                     >
                       <Icon name="plus" size={14} />
-                    </S.AddButton>
+                    </Button>
                   </S.BlacklistActionGroup>
                 </S.BlacklistInputWrapper>
               </S.BlacklistControls>
-            </S.BlacklistHeaderPanel>
+            </S.SectionHeader>
             
             <Table
               columns={blacklistColumns}
@@ -310,7 +343,7 @@ export const StoreSettingsPageComponent = ({
                 )
               }
             />
-          </S.BlacklistCard>
+          </Card>
         </CardBody>
       </Card>
 

@@ -2,33 +2,30 @@ import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
 import type { BadgeSize, BadgeVariant } from './Badge.types';
 
-export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize }>`
+export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize; $isPill: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${tkn('radius.lg')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : '4px')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
   white-space: nowrap;
-  border: 1px solid transparent;
   
   ${({ $size }) => {
     switch ($size) {
       case 'sm':
         return `
-          padding: 0.125rem ${tkn('spacing.xs')};
-          font-size: 0.625rem;
+          padding: 2px 8px;
+          font-size: 11px;
         `;
       case 'md':
         return `
-          padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-          font-size: 0.75rem;
+          padding: 4px 10px;
+          font-size: 12px;
         `;
       case 'lg':
         return `
-          padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-          font-size: ${tkn('typography.fontSize.xs')};
+          padding: 6px 14px;
+          font-size: 13px;
         `;
       default:
         return '';
@@ -39,36 +36,33 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
     switch ($variant) {
       case 'primary':
         return `
-          background: ${tkn('colors.brand.secondary')({ theme })};
-          color: ${tkn('colors.brand.primary')({ theme })};
+          background: rgba(60, 80, 224, 0.08); /* brand.primary with opacity */
+          color: ${theme.colors.brand.primary};
         `;
       case 'secondary':
         return `
-          background: ${tkn('colors.background.tertiary')({ theme })};
-          color: ${tkn('colors.text.secondary')({ theme })};
+          background: ${theme.colors.background.tertiary};
+          color: ${theme.colors.text.secondary};
         `;
       case 'success':
         return `
-          background: ${tkn('colors.background.tertiary')({ theme })};
-          color: ${tkn('colors.semantic.success')({ theme })};
+          background: rgba(33, 150, 83, 0.08);
+          color: #219653; /* TailAdmin Success Green */
         `;
       case 'warning':
         return `
-          background: transparent;
-          border: 1px solid ${tkn('colors.semantic.warning')({ theme })};
-          color: ${tkn('colors.semantic.warning')({ theme })};
+          background: rgba(240, 149, 12, 0.08);
+          color: #F0950C; /* TailAdmin Warning Orange */
         `;
       case 'error':
         return `
-          background: transparent;
-          border: 1px solid ${tkn('colors.semantic.error')({ theme })};
-          color: ${tkn('colors.semantic.error')({ theme })};
+          background: rgba(211, 64, 83, 0.08);
+          color: #D34053; /* TailAdmin Error Red */
         `;
       case 'info':
         return `
-          background: transparent;
-          border: 1px solid ${tkn('colors.semantic.info')({ theme })};
-          color: ${tkn('colors.semantic.info')({ theme })};
+          background: rgba(60, 80, 224, 0.08);
+          color: ${theme.colors.brand.primary};
         `;
       default:
         return '';

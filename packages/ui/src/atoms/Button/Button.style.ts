@@ -10,6 +10,7 @@ interface StyledButtonProps {
   $size?: ButtonSize;
   $fullWidth?: boolean;
   $isLoading?: boolean;
+  $isPill?: boolean;
 }
 
 const variantStyles = {
@@ -18,16 +19,16 @@ const variantStyles = {
     color: ${theme.colors.text.inverse};
     border-color: ${theme.colors.brand.primary};
 
-    &:active:not(:disabled) {
-      transform: scale(0.97);
-      opacity: 0.9;
-    }
-
     &:hover:not(:disabled) {
       background: ${theme.colors.brand.primaryHover};
       border-color: ${theme.colors.brand.primaryHover};
       transform: translateY(-1px);
-      box-shadow: ${tkn('shadows.md')};
+      box-shadow: ${theme.shadows.sm};
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: none;
     }
   `,
 
@@ -41,11 +42,11 @@ const variantStyles = {
       border-color: ${theme.colors.border.primary};
       color: ${theme.colors.brand.primary};
       transform: translateY(-1px);
-      box-shadow: ${tkn('shadows.sm')};
+      box-shadow: ${theme.shadows.sm};
     }
 
     &:active:not(:disabled) {
-      transform: scale(0.97);
+      transform: translateY(0);
     }
   `,
 
@@ -57,32 +58,32 @@ const variantStyles = {
     &:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-1px);
-      box-shadow: ${tkn('shadows.md')};
+      box-shadow: ${theme.shadows.sm};
     }
 
     &:active:not(:disabled) {
-      transform: scale(0.97);
+      transform: translateY(0);
     }
   `,
 };
 
 const sizeStyles = {
   sm: (theme: Theme) => `
-    padding: 6px 12px;
-    font-size: ${theme.typography.fontSize.sm};
-    height: 36px;
+    padding: 8px 16px;
+    font-size: ${theme.typography.fontSize.xs};
+    height: 34px;
   `,
 
   md: (theme: Theme) => `
     padding: 10px 20px;
-    font-size: ${theme.typography.fontSize.md};
-    height: 44px;
+    font-size: ${theme.typography.fontSize.sm};
+    height: 42px;
   `,
 
   lg: (theme: Theme) => `
-    padding: 12px 24px;
+    padding: 14px 28px;
     font-size: ${theme.typography.fontSize.md};
-    height: 50px;
+    height: 52px;
     font-weight: ${theme.typography.fontWeight.semibold};
   `,
 };
@@ -91,13 +92,15 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: ${(p) => tkn('spacing.xs')(p as any)};
+  gap: ${(p) => tkn('spacing.sm')(p as any)};
 
-  border-radius: ${(p) => tkn('radius.md')(p as any)};
+  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.sm')(p as any))};
   border: 1px solid transparent;
   font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
+  font-family: ${(p) => tkn('typography.fontFamily.sans')(p as any)};
 
   cursor: pointer;
+  white-space: nowrap;
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Size styles */
@@ -124,12 +127,12 @@ const ButtonContainer = styled.button<StyledButtonProps>`
       &::after {
         content: '';
         position: absolute;
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
         top: 50%;
         left: 50%;
-        margin-left: -9px;
-        margin-top: -9px;
+        margin-left: -10px;
+        margin-top: -10px;
         border: 2px solid currentColor;
         border-radius: 50%;
         border-top-color: transparent;
@@ -149,7 +152,17 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   /* Disabled state */
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.6;
+    background: ${tkn('colors.border.secondary')};
+    border-color: ${tkn('colors.border.primary')};
+    color: ${tkn('colors.text.tertiary')};
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px ${(p) => p.theme.colors.brand.secondary};
   }
 `;
 

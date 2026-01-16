@@ -8,33 +8,33 @@ export const Container = styled.div<{ $fullWidth?: boolean }>`
 
 export const StyledSelect = styled.select<{ $hasError?: boolean; $fullWidth?: boolean }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.xl')} ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  background-color: ${tkn('colors.background.secondary')};
+  padding: 0 ${tkn('spacing.xxl')} 0 ${tkn('spacing.md')};
+  background-color: transparent;
   border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)};
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${tkn('typography.fontFamily.sans')};
   appearance: none;
   outline: none;
   cursor: pointer;
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
-  height: 48px;
+  height: 38px;
 
   &:hover:not(:disabled) {
     border-color: ${tkn('colors.border.focus')};
-    background-color: ${tkn('colors.background.primary')};
   }
 
   &:focus {
-    border-color: ${tkn('colors.brand.primary')};
-    box-shadow: 0 0 0 4px ${tkn('colors.brand.primary')}15;
-    background-color: ${tkn('colors.background.primary')};
+    border-color: ${tkn('colors.border.focus')};
+    box-shadow: 0 0 0 3px ${tkn('colors.brand.secondary')};
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.7;
     background-color: ${tkn('colors.background.tertiary')};
+    border-color: ${tkn('colors.border.primary')};
   }
 `;
 
@@ -44,7 +44,7 @@ export const IconContainer = styled.div`
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: ${tkn('colors.text.tertiary')};
+  color: ${tkn('colors.text.secondary')};
   display: flex;
   align-items: center;
   transition: color ${tkn('transitions.fast')};

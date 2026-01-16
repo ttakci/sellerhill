@@ -3,13 +3,19 @@ import { tkn } from '../../theme/tkn';
 
 export const PaginationContainer = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: ${tkn('spacing.lg')};
   width: 100%;
   font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${tkn('typography.fontFamily.sans')};
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 `;
 
-import { Text } from '../../atoms/Text';
 
 export const RowsPerPage = styled.div`
   display: flex;
@@ -17,9 +23,10 @@ export const RowsPerPage = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-export const PaginationLabel = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+export const PaginationLabel = styled.span`
+  font-size: ${tkn('typography.fontSize.sm')};
+  color: ${tkn('colors.text.secondary')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
 `;
 
 export const SelectWrapper = styled.div`
@@ -41,21 +48,26 @@ export const NavButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: ${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.full')};
+  padding: 0 12px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${tkn('colors.text.secondary')};
   transition: all ${tkn('transitions.fast')};
-
+  font-weight: 500;
+  
   &:hover:not(:disabled) {
-    background: ${tkn('colors.background.secondary')};
-    color: ${tkn('colors.text.primary')};
+    background: ${tkn('colors.brand.primary')};
+    color: #FFFFFF;
   }
 
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.5;
     cursor: not-allowed;
+    background: transparent;
+    color: ${tkn('colors.text.tertiary')};
   }
 `;

@@ -1,9 +1,9 @@
-import React from 'react';
+import { Checkbox } from '../../atoms/Checkbox';
 import { Icon } from '../../atoms/Icon';
 import * as S from './Table.style';
 import type { TableProps } from './Table.types';
 
-export const Table = <T extends Record<string, unknown>>({
+export const Table = <T extends Record<string, any>>({
   columns,
   data,
   emptyMessage = 'No data available',
@@ -13,6 +13,9 @@ export const Table = <T extends Record<string, unknown>>({
   sortColumn,
   sortDirection,
   onSort,
+  selectable,
+  selectedRows = [],
+  onSelectionChange,
 }: TableProps<T>): React.ReactElement => {
   const handleRowClick = (row: T, index: number) => {
     if (onRowClick) {
@@ -26,28 +29,59 @@ export const Table = <T extends Record<string, unknown>>({
     }
   };
 
+  const isAllSelected = data.length > 0 && selectedRows.length === data.length;
+  const isSomeSelected = selectedRows.length > 0 && selectedRows.length < data.length;
+
+  const handleSelectAll = (checked: boolean) => {
+    if (!onSelectionChange) return;
+    if (checked) {
+      onSelectionChange(data);
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
+  const handleSelectRow = (row: T, checked: boolean) => {
+    if (!onSelectionChange) return;
+    if (checked) {
+      onSelectionChange([...selectedRows, row]);
+    } else {
+      onSelectionChange(selectedRows.filter((r) => r !== row));
+    }
+  };
+
   return (
     <S.TableContainer className={className}>
       <S.StyledTable>
         <S.Thead>
           <S.Tr>
+            {selectable && (
+              <S.Th style={{ width: '48px', paddingRight: 0 }}>
+                <Checkbox
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                />
+              </S.Th>
+            )}
             {columns.map((column) => (
               <S.Th
                 key={column.key}
                 $align={column.align}
                 $sortable={column.sortable}
                 onClick={column.sortable ? () => handleSort(column.key) : undefined}
+                style={{ width: column.width }}
               >
                 <S.ThContent $align={column.align}>
                   {column.header}
-                  {column.sortable && sortColumn === column.key && (
+                  {column.sortable && (
                     <S.SortIconWrapper>
-                      <Icon // This assumes Icon is imported or I need to import it. Wait, Icon IS imported in Table??? No. I need to check imports.
-                        name="chevron-down" // Using chevron-down. 
-                        size={12}
+                      <Icon
+                        name="chevron-down"
+                        size={14}
                         style={{
-                          transform: sortDirection === 'asc' ? 'rotate(180deg)' : 'none',
-                          transition: 'transform 0.2s',
+                          transform: sortColumn === column.key && sortDirection === 'asc' ? 'rotate(180deg)' : 'none',
+                          opacity: sortColumn === column.key ? 1 : 0.3,
+                          transition: 'all 0.2s',
                         }}
                       />
                     </S.SortIconWrapper>
@@ -60,24 +94,35 @@ export const Table = <T extends Record<string, unknown>>({
         <S.Tbody>
           {data.length === 0 ? (
             <S.EmptyRow>
-              <S.EmptyCell colSpan={columns.length}>{emptyMessage}</S.EmptyCell>
+              <S.EmptyCell colSpan={columns.length + (selectable ? 1 : 0)}>{emptyMessage}</S.EmptyCell>
             </S.EmptyRow>
           ) : (
-            data.map((row, rowIndex) => (
-              <S.Tr
-                key={rowIndex}
-                $clickable={!!onRowClick}
-                onClick={() => handleRowClick(row, rowIndex)}
-              >
-                {columns.map((column) => (
-                  <S.Td key={column.key} $align={column.align}>
-                    {column.render
-                      ? column.render(row[column.key], row, rowIndex)
-                      : (row[column.key] as React.ReactNode)}
-                  </S.Td>
-                ))}
-              </S.Tr>
-            ))
+            data.map((row, rowIndex) => {
+              const isSelected = selectedRows.includes(row);
+              return (
+                <S.Tr
+                  key={rowIndex}
+                  $clickable={!!onRowClick}
+                  onClick={() => handleRowClick(row, rowIndex)}
+                >
+                  {selectable && (
+                    <S.Td style={{ width: '48px', paddingRight: 0 }} onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isSelected}
+                        onChange={(checked) => handleSelectRow(row, checked)}
+                      />
+                    </S.Td>
+                  )}
+                  {columns.map((column) => (
+                    <S.Td key={column.key} $align={column.align}>
+                      {column.render
+                        ? column.render(row[column.key], row, rowIndex)
+                        : (row[column.key] as React.ReactNode)}
+                    </S.Td>
+                  ))}
+                </S.Tr>
+              );
+            })
           )}
         </S.Tbody>
       </S.StyledTable>

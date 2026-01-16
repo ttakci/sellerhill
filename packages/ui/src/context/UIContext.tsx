@@ -1,11 +1,11 @@
-import React, { createContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useCallback, useMemo, useState } from 'react';
 
 import type {
-  MessageState,
-  LoadingState,
-  ShowMessageOptions,
-  ShowLoadingOptions,
-  UIContextValue,
+    LoadingState,
+    MessageState,
+    ShowLoadingOptions,
+    ShowMessageOptions,
+    UIContextValue,
 } from './UIContext.types';
 
 /**
@@ -60,7 +60,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const showLoading = useCallback((options?: ShowLoadingOptions) => {
     setLoadingState({
       isLoading: true,
-      size: options?.size || 'medium',
+      size: options?.size || 'md',
       overlay: options?.overlay ?? true,
     });
   }, []);

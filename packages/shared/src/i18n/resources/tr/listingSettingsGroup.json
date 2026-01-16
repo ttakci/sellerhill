@@ -1,0 +1,156 @@
+{
+  "listingSettingsGroup": {
+    "title": "Listeleme Ayarları Grupları",
+    "subtitle": "Otomatik optimizasyon için ürün listelerinize strateji şablonları yönetin ve atayın.",
+    "createNewGroup": "Yeni Grup Oluştur",
+    "editGroup": "Listeleme Grubunu Düzenle",
+    "backToList": "Gruplara Dön",
+    "connectorSubtitle": "AMAZON'DAN EBAY'E BAĞLAYICI",
+    
+    "groupDetails": "Grup Detayları",
+    "groupName": "Grup Adı",
+    "groupNamePlaceholder": "örn., Premium Elektronik",
+    "description": "Açıklama",
+    "descriptionPlaceholder": "Grup iç notlarını girin...",
+    
+    "repricingStrategy": "Yeniden Fiyatlandırma Stratejisi",
+    "addPriceRange": "Fiyat Aralığı Ekle",
+    "removePriceRange": "Fiyat Aralığını Kaldır",
+    "minPrice": "Min Fiyat ($)",
+    "maxPrice": "Maks Fiyat ($)",
+    "profitMargin": "Kâr Marjı (%)",
+    "fixedProfit": "Sabit Kâr ($)",
+    "priceRangeLabel": "Fiyat Aralığı {{index}}",
+    
+    "stock": "Stok",
+    "defaultQuantity": "Varsayılan Miktar",
+    "autoRestock": "Satışta otomatik yeniden stokla",
+    "autoRestockDescription": "Ürünler satıldığında otomatik olarak yeniden stokla",
+    
+    "fees": "Ücretler",
+    "ebayFee": "eBay Ücreti",
+    "ebayFeePercent": "eBay Ücreti (%)",
+    "fixedFee": "Sabit Ücret",
+    "fixedFeeAmount": "Sabit Ücret ($)",
+    "tax": "Vergi",
+    "taxPercent": "Vergi (%)",
+    
+    "templates": "Şablon",
+    "customTemplate": "Özel",
+    "predefinedTemplate": "Öntanımlı",
+    "selectTemplate": "Şablon Seç",
+    "selectTemplatePlaceholder": "Öntanımlı bir şablon seçin...",
+    "htmlEditor": "HTML Editörü",
+    "templatePlaceholder": "Özel HTML şablonunuzu girin...",
+    "templateVariablesHelp": "{{product_title}}, {{product_price}}, {{product_image}}, {{product_description}} gibi değişkenler kullanın",
+    
+    "preview": "Önizleme",
+    "livePreview": "Canlı Önizleme",
+    "darkModePreview": "Karanlık Mod Önizlemesi",
+    "desktopView": "Masaüstü Görünümü",
+    "mobileView": "Mobil Görünüm",
+    "renderingPreview": "Önizleme oluşturuluyor...",
+    
+    "saveChanges": "Değişiklikleri Kaydet",
+    "saving": "Kaydediliyor...",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "deleteGroup": "Grubu Sil",
+    "confirmDelete": "Bu grubu silmek istediğinizden emin misiniz?",
+    "confirmDeleteMessage": "Bu işlem geri alınamaz. Bu grubu kullanan ürünlerin yeniden atanması gerekecek.",
+    "deleteSuccess": "Grup başarıyla silindi",
+    "deleteFailed": "Grup silinemedi",
+    
+    "productsCount_one": "{{count}} ürün",
+    "productsCount_other": "{{count}} ürün",
+    "noProducts": "Ürün yok",
+    
+    "statusActive": "Aktif",
+    "statusDraft": "Taslak",
+    "statusInactive": "Pasif",
+    
+    "emptyState": {
+      "title": "Henüz Listeleme Grubu Yok",
+      "description": "Listelerinizi organize etmeye başlamak için ilk grubunuzu oluşturun",
+      "action": "Yeni Grup Oluştur"
+    },
+    
+    "predefinedTemplates": {
+      "modernMinimalist": "Modern Minimalist",
+      "modernMinimalistDesc": "Ürün detaylarına odaklanan temiz ve profesyonel tasarım",
+      "premiumElectronics": "Premium Elektronik",
+      "premiumElectronicsDesc": "Teknik özelliklerle elektronik için üst düzey tasarım",
+      "ecommerceClassic": "E-ticaret Klasik",
+      "ecommerceClassicDesc": "Net bölümler ve harekete geçirici mesajlarla geleneksel düzen"
+    },
+    
+    "validation": {
+      "nameRequired": "Grup adı gereklidir",
+      "nameMinLength": "Grup adı en az 3 karakter olmalıdır",
+      "nameMaxLength": "Grup adı 100 karakteri geçmemelidir",
+      "minPrice": "Minimum fiyat 0'dan büyük olmalıdır",
+      "maxPrice": "Maksimum fiyat 0'dan büyük olmalıdır",
+      "maxPriceGreaterThanMin": "Maksimum fiyat minimum fiyattan büyük olmalıdır",
+      "profitRequired": "Kâr marjı veya sabit kâr gereklidir",
+      "profitMarginRange": "Kâr marjı 0 ile 100 arasında olmalıdır",
+      "fixedProfitMin": "Sabit kâr 0 veya daha büyük olmalıdır",
+      "minQuantity": "Miktar en az 1 olmalıdır",
+      "maxQuantity": "Miktar 9999'u geçmemelidir",
+      "maxFeePercent": "Ücret yüzdesi %100'ü geçemez",
+      "minFeePercent": "Ücret yüzdesi 0 veya daha büyük olmalıdır",
+      "minFixedFee": "Sabit ücret 0 veya daha büyük olmalıdır",
+      "maxTaxPercent": "Vergi yüzdesi %100'ü geçemez",
+      "minTaxPercent": "Vergi yüzdesi 0 veya daha büyük olmalıdır",
+      "templateRequired": "Şablon içeriği gereklidir",
+      "templateMinLength": "Şablon en az 10 karakter olmalıdır",
+      "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",
+      "minOnePriceRange": "En az bir fiyat aralığı gereklidir",
+      "maxPriceRanges": "Maksimum 10 fiyat aralığına izin verilir",
+      "overlappingPriceRanges": "Fiyat aralıkları örtüşemez"
+    },
+    
+    "errors": {
+      "loadFailed": "Listeleme grupları yüklenemedi",
+      "saveFailed": "Değişiklikler kaydedilemedi",
+      "createFailed": "Grup oluşturulamadı",
+      "updateFailed": "Grup güncellenemedi",
+      "deleteFailed": "Grup silinemedi",
+      "templateLoadFailed": "Öntanımlı şablonlar yüklenemedi",
+      "unauthorized": "Bu işlemi gerçekleştirme yetkiniz yok",
+      "notFound": "Listeleme grubu bulunamadı",
+      "networkError": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
+      "unknownError": "Beklenmeyen bir hata oluştu"
+    },
+    
+    "success": {
+      "created": "Listeleme grubu başarıyla oluşturuldu",
+      "updated": "Listeleme grubu başarıyla güncellendi",
+      "deleted": "Listeleme grubu başarıyla silindi",
+      "saved": "Değişiklikler başarıyla kaydedildi"
+    },
+    
+    "tooltips": {
+      "editGroup": "Grubu düzenle",
+      "deleteGroup": "Grubu sil",
+      "addPriceRange": "Başka bir fiyat aralığı ekle",
+      "removePriceRange": "Bu fiyat aralığını kaldır",
+      "toggleDarkMode": "Karanlık mod önizlemesini aç/kapat",
+      "switchToDesktop": "Masaüstü görünümüne geç",
+      "switchToMobile": "Mobil görünüme geç",
+      "copyTemplate": "Şablon HTML'ini kopyala",
+      "resetTemplate": "Varsayılan şablona sıfırla"
+    },
+    
+    "help": {
+      "repricingStrategy": "Farklı kâr marjlarıyla birden fazla fiyat aralığı tanımlayın. Ürünler maliyet aralıklarına göre fiyatlandırılacaktır.",
+      "profitMargin": "Ürün maliyetinden hesaplanan yüzde bazlı kâr.",
+      "fixedProfit": "Ürün maliyetine eklenen sabit dolar tutarı.",
+      "ebayFee": "eBay'in nihai değer ücreti yüzdesi (genellikle %10-15).",
+      "fixedFee": "eBay'in sabit listeleme ücreti (genellikle $0.30).",
+      "tax": "Konumunuz için satış vergisi yüzdesi.",
+      "customTemplate": "Özel stil ile kendi HTML şablonunuzu yazın.",
+      "predefinedTemplate": "Profesyonel olarak tasarlanmış şablonlardan seçim yapın.",
+      "templateVariables": "Şablonunuzda {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} kullanın."
+    }
+  }
+}

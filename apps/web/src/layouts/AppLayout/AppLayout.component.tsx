@@ -1,4 +1,4 @@
-import { Badge, GeneralLoading, GeneralMessage, Icon, Text, useTheme, useUI } from '@repo/ui';
+import { Badge, Button, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ import * as S from './AppLayout.style';
 export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
   const { themeMode, toggleTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,7 +56,7 @@ export const AppLayout: React.FC = () => {
         >
           <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => navigate('/dashboard')}>
             <S.LogoBox>
-              <Icon name="inbox" size={20} color="text.inverse" />
+              <Icon name="logo" size={24} color="white" />
             </S.LogoBox>
             {!sidebarCollapsed && (
               <Text variant="h3" weight="bold" color="brand.primary">
@@ -78,12 +78,12 @@ export const AppLayout: React.FC = () => {
               onClick={() => navigate('/dashboard')}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inbox" size={20} />
-                {!sidebarCollapsed && <Text variant="body">{t('menu.dashboard')}</Text>}
+                <Icon name="grid" size={18} />
+                {!sidebarCollapsed && t('menu.dashboard')}
               </S.NavItemContent>
               {!sidebarCollapsed && (
                 <S.ChevronWrapper $isOpen={false} $isCollapsed={sidebarCollapsed}>
-                  <Icon name="chevron-down" size={14} />
+                  <Icon name="chevron-down" size={20} />
                 </S.ChevronWrapper>
               )}
             </S.NavItem>
@@ -94,8 +94,8 @@ export const AppLayout: React.FC = () => {
               onClick={() => navigate('/inventory')}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="archive" size={20} />
-                {!sidebarCollapsed && <Text variant="body">{t('menu.inventory')}</Text>}
+                <Icon name="box" size={18} />
+                {!sidebarCollapsed && t('menu.inventory')}
               </S.NavItemContent>
               {!sidebarCollapsed && <Badge variant="success" size="sm">NEW</Badge>}
             </S.NavItem>
@@ -106,8 +106,8 @@ export const AppLayout: React.FC = () => {
               onClick={() => navigate('/orders')}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="calendar" size={20} />
-                {!sidebarCollapsed && <Text variant="body">{t('menu.orders')}</Text>}
+                <Icon name="shopping-cart" size={18} />
+                {!sidebarCollapsed && t('menu.orders')}
               </S.NavItemContent>
               {!sidebarCollapsed && <Badge variant="primary" size="sm">12</Badge>}
             </S.NavItem>
@@ -130,12 +130,12 @@ export const AppLayout: React.FC = () => {
                 }}
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="menu" size={20} />
-                  {!sidebarCollapsed && <Text variant="body">{t('menu.settings')}</Text>}
+                  <Icon name="settings" size={18} />
+                  {!sidebarCollapsed && t('menu.settings')}
                 </S.NavItemContent>
                 {!sidebarCollapsed && (
                   <S.ChevronWrapper $isOpen={settingsOpen} $isCollapsed={sidebarCollapsed}>
-                    <Icon name="chevron-down" size={14} />
+                    <Icon name="chevron-down" size={20} />
                   </S.ChevronWrapper>
                 )}
               </S.NavItem>
@@ -146,15 +146,19 @@ export const AppLayout: React.FC = () => {
                     $active={location.pathname === '/settings/store'} 
                     onClick={() => navigate('/settings/store')}
                   >
-                    <Text variant="caption">
-                      {t('menu.storeSettings')}
-                    </Text>
+                    {t('menu.storeSettings')}
+                  </S.SubNavItem>
+                  <S.SubNavItem 
+                    $active={location.pathname.startsWith('/settings/listing-groups')} 
+                    onClick={() => navigate('/settings/listing-groups')}
+                  >
+                    {t('menu.listingSettingsGroups')}
                   </S.SubNavItem>
                   <S.SubNavItem 
                     $active={location.pathname === '/settings/ebay'}
                     onClick={() => navigate('/settings/ebay')}
                   >
-                    <Text variant="caption">eBay Accounts</Text>
+                    eBay Accounts
                   </S.SubNavItem>
                 </S.SubNavContainer>
               )}
@@ -172,8 +176,8 @@ export const AppLayout: React.FC = () => {
               onClick={() => navigate('/reports')}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="bell" size={20} />
-                {!sidebarCollapsed && <Text variant="body">{t('menu.reports')}</Text>}
+                <Icon name="bell" size={18} />
+                {!sidebarCollapsed && t('menu.reports')}
               </S.NavItemContent>
             </S.NavItem>
           </S.NavSection>
@@ -184,39 +188,74 @@ export const AppLayout: React.FC = () => {
           <S.HeaderContainer>
             <S.HeaderLeft>
               <S.ToggleButton onClick={handleToggleSidebar}>
-                <Icon name="menu" size={20} />
+                <Icon name="menu" size={24} />
               </S.ToggleButton>
-              
-              <S.SearchArea>
-                <Icon name="search" size={18} />
-                <S.SearchInput placeholder="Search or type command..." />
-                <S.Kbd>⌘K</S.Kbd>
-              </S.SearchArea>
             </S.HeaderLeft>
             
             <S.HeaderRight>
-              <S.ActionIcon onClick={toggleTheme} title="Toggle Theme">
-                <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={18} />
+              <Dropdown 
+                align="right"
+                trigger={
+                  <S.ActionIcon title={t('header.selectLanguage')}>
+                     <Icon name={i18n.language === 'tr' ? 'flag-tr' : 'flag-us'} size={22} />
+                  </S.ActionIcon>
+                }
+                items={[
+                  { 
+                    label: t('languages.en'), 
+                    icon: 'flag-us', 
+                    onClick: () => i18n.changeLanguage('en') 
+                  },
+                  { 
+                    label: t('languages.tr'), 
+                    icon: 'flag-tr', 
+                    onClick: () => i18n.changeLanguage('tr') 
+                  }
+                ]}
+              />
+
+              <S.ActionIcon onClick={toggleTheme} title={t('header.toggleTheme')}>
+                <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={22} />
               </S.ActionIcon>
               
               <S.ActionIcon title="Notifications">
-                <Icon name="bell" size={18} />
+                <Icon name="bell" size={22} />
+                <S.NotificationBadge />
               </S.ActionIcon>
               
-              <S.ProfileArea onClick={() => navigate('/logout')}>
-                <S.ProfileInfo>
-                  <Text variant="caption" weight="bold" color="text.primary">
-                    {userName}
-                  </Text>
-                  <Text variant="caption" color="text.tertiary">
-                    {userRole}
-                  </Text>
-                </S.ProfileInfo>
-                <S.AvatarWrapper>
-                  <S.AvatarImg src={`https://ui-avatars.com/api/?name=${userName}&background=3b82f6&color=ffffff`} alt="Profile" />
-                </S.AvatarWrapper>
-                <Icon name="chevron-down" size={14} />
-              </S.ProfileArea>
+              <Dropdown
+                align="right"
+                trigger={(isOpen: boolean) => (
+                  <S.ProfileArea>
+                     <S.AvatarWrapper>
+                      <S.AvatarImg src={`https://ui-avatars.com/api/?name=${userName}&background=3b82f6&color=ffffff`} alt="Profile" />
+                    </S.AvatarWrapper>
+                    <S.ProfileInfo>
+                      <Text variant="caption" weight="bold" color="text.primary">
+                        {userName}
+                      </Text>
+                      <Text variant="caption" color="text.tertiary">
+                        {userRole}
+                      </Text>
+                    </S.ProfileInfo>
+                    <S.ChevronWrapper $isOpen={isOpen} $isCollapsed={false}>
+                      <Icon name="chevron-down" size={20} />
+                    </S.ChevronWrapper>
+                  </S.ProfileArea>
+                )}
+                header={
+                   <div style={{ display: 'flex', flexDirection: 'column' }}>
+                     <Text variant="body" weight="bold" color="text.primary">{userName}</Text>
+                     <Text variant="caption" color="text.tertiary">{user?.email ?? 'user@example.com'}</Text>
+                   </div>
+                }
+                items={[
+                  { label: 'Edit Profile', icon: 'user', onClick: () => navigate('/profile') },
+                  { label: 'Account Settings', icon: 'settings', onClick: () => navigate('/settings') },
+                  { label: 'Support', icon: 'info', onClick: () => console.log('Support') },
+                  { label: 'Sign Out', icon: 'log-out', variant: 'default', onClick: () => navigate('/logout') }
+                ]}
+              />
             </S.HeaderRight>
           </S.HeaderContainer>
 
@@ -224,25 +263,50 @@ export const AppLayout: React.FC = () => {
             <Outlet />
           </S.ContentArea>
         </S.MainContent>
-      </S.LayoutWrapper>
+        
+        {/* Global UI Overlays */}
+        <S.LoadingOverlay $visible={loadingState.isLoading}>
+          <Icon name="loader" size={48} />
+        </S.LoadingOverlay>
 
-      {/* Global Loading Overlay */}
-      {loadingState.isLoading && (
-        <GeneralLoading isLoading={loadingState.isLoading} size={loadingState.size} overlay={loadingState.overlay} />
-      )}
-
-      {/* Global Message Modal */}
-      {messageState.isOpen && (
-        <GeneralMessage
-          type={messageState.type}
+        <Modal
           isOpen={messageState.isOpen}
-          header={messageState.header}
-          description={messageState.description}
-          primaryButton={messageState.primaryButton}
-          secondaryButton={messageState.secondaryButton}
           onClose={closeMessage}
-        />
-      )}
+          title={messageState.header}
+          size="sm"
+          footer={
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', width: '100%' }}>
+              {messageState.secondaryButton && (
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    messageState.secondaryButton?.onClick();
+                    closeMessage();
+                  }}
+                >
+                  {messageState.secondaryButton.label}
+                </Button>
+              )}
+              {messageState.primaryButton && (
+                <Button 
+                  variant={messageState.type === 'error' ? 'danger' : 'primary'}
+                  onClick={() => {
+                    messageState.primaryButton?.onClick();
+                    closeMessage();
+                  }}
+                >
+                  {messageState.primaryButton.label}
+                </Button>
+              )}
+              {!messageState.primaryButton && !messageState.secondaryButton && (
+                <Button onClick={closeMessage}>OK</Button>
+              )}
+            </div>
+          }
+        >
+          <Text variant="body">{messageState.description}</Text>
+        </Modal>
+      </S.LayoutWrapper>
     </ErrorBoundary>
   );
 };

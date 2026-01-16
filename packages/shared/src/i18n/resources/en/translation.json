@@ -90,11 +90,20 @@
     "listings": "Listings",
     "settings": "Settings",
     "storeSettings": "Store Settings",
+    "listingSettingsGroups": "Listing Settings Groups",
     "other": "OTHER",
     "reports": "Reports",
     "users": "Users",
     "editProfile": "Edit Profile",
     "support": "Support",
     "logout": "Logout"
+  },
+  "header": {
+    "selectLanguage": "Select Language",
+    "toggleTheme": "Toggle Theme"
+  },
+  "languages": {
+    "en": "English",
+    "tr": "Türkçe"
   }
 }

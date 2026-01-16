@@ -4,47 +4,55 @@ import { tkn } from '../../theme/tkn';
 export const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
+  background: ${tkn('colors.background.secondary')};
+  border-radius: ${tkn('radius.lg')};
+  border: 1px solid ${tkn('colors.border.primary')};
 `;
 
 export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: ${tkn('typography.fontSize.sm')};
 `;
 
-export const Thead = styled.thead``;
+export const Thead = styled.thead`
+  border-bottom: 1px solid ${tkn('colors.border.primary')};
+`;
 
 export const Tbody = styled.tbody``;
 
 export const Tr = styled.tr<{ $clickable?: boolean }>`
+  background: transparent;
+  transition: all ${tkn('transitions.normal')} ease;
+  
+  &:hover {
+    background: ${tkn('colors.background.tertiary')};
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  }
+
   ${({ $clickable }) =>
     $clickable &&
     `
     cursor: pointer;
-    transition: background ${tkn('transitions.fast')};
-    
-    &:hover {
-      background: ${tkn('colors.background.secondary')};
-    }
   `}
 `;
 
 export const Th = styled.th<{ $align?: 'left' | 'center' | 'right'; $sortable?: boolean }>`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
-  background: ${tkn('colors.background.primary')};
+  padding: 1rem 1.5rem;
   color: ${tkn('colors.text.secondary')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  text-transform: uppercase;
+  font-weight: ${tkn('typography.fontWeight.medium')};
   font-size: ${tkn('typography.fontSize.xs')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  text-transform: uppercase;
+  letter-spacing: 1px;
   text-align: ${({ $align }) => $align || 'left'};
   cursor: ${({ $sortable }) => ($sortable ? 'pointer' : 'default')};
-  transition: background ${tkn('transitions.fast')};
+  white-space: nowrap;
 
   &:hover {
-    background: ${({ $sortable, theme }) =>
-      $sortable ? tkn('colors.background.secondary')({ theme }) : tkn('colors.background.primary')({ theme })};
+    color: ${({ $sortable, theme }) => ($sortable ? theme.colors.text.primary : theme.colors.text.secondary)};
   }
 `;
 
@@ -59,13 +67,14 @@ export const ThContent = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
 export const SortIconWrapper = styled.div`
   display: flex;
   align-items: center;
+  color: ${tkn('colors.brand.primary')};
 `;
 
 export const Td = styled.td<{ $align?: 'left' | 'center' | 'right' }>`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  padding: 1rem 1.5rem;
   vertical-align: middle;
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.normal')};
   color: ${tkn('colors.text.primary')};
   text-align: ${({ $align }) => $align || 'left'};
 `;
@@ -74,13 +83,14 @@ export const EmptyRow = styled.tr``;
 
 export const EmptyCell = styled(Td)`
   text-align: center;
-  color: ${tkn('colors.text.secondary')};
-  padding: ${tkn('spacing.xxl')};
-  font-weight: ${tkn('typography.fontWeight.normal')};
+  color: ${tkn('colors.text.tertiary')};
+  padding: 4rem 0;
 `;
 
 export const StyledFooter = styled.div`
-  background: ${tkn('colors.background.primary')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
+  padding: 1rem 1.5rem;
+  border-top: 1px solid ${tkn('colors.border.primary')};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;

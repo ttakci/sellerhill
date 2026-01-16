@@ -11,7 +11,7 @@ export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
     };
 
     return (
-      <S.Container disabled={disabled} className={className}>
+      <S.Container $disabled={disabled} className={className}>
         <S.HiddenCheckbox
           type="checkbox"
           ref={ref}
@@ -22,7 +22,7 @@ export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
           name={name}
           id={id}
         />
-        <S.Switch checked={checked || defaultChecked} disabled={disabled} />
+        <S.Switch $checked={checked || defaultChecked} $disabled={disabled} />
         {label && <S.Label>{label}</S.Label>}
       </S.Container>
     );
