@@ -11,32 +11,40 @@ import { useResendVerificationMutation } from '../api/authApi';
 import { CheckEmailPageComponent } from './CheckEmailPage.component';
 
 export const CheckEmailPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'translation']);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showMessage } = useUI();
 
   const email = searchParams.get('email') || '';
 
-  const [resend, { isLoading: isResending }] = useResendVerificationMutation();
+  const [resend, { isLoading: isResending, isSuccess, isError }] = useResendVerificationMutation();
 
-  const handleResend = async (): Promise<void> => {
-    if (!email) return;
-
-    try {
-      await resend({ email }).unwrap();
+  // Handle success
+  React.useEffect(() => {
+    if (isSuccess) {
       showMessage({
         type: 'success',
         headerKey: 'message.success.header',
         descriptionKey: 'auth.verification.resent',
       }, t);
-    } catch (err) {
+    }
+  }, [isSuccess, showMessage, t]);
+
+  // Handle error
+  React.useEffect(() => {
+    if (isError) {
       showMessage({
         type: 'error',
         headerKey: 'message.error.header',
         descriptionKey: 'auth.errors.verificationFailed',
       }, t);
     }
+  }, [isError, showMessage, t]);
+
+  const handleResend = (): void => {
+    if (!email) return;
+    void resend({ email });
   };
 
   const handleBackToLogin = (): void => {

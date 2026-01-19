@@ -103,7 +103,10 @@
     "users": "Users",
     "editProfile": "Edit Profile",
     "support": "Support",
-    "logout": "Logout"
+    "logout": "Logout",
+    "logoutConfirmTitle": "Confirm Logout",
+    "logoutConfirmDescription": "Are you sure you want to log out? You will need to sign in again to access your account.",
+    "logoutConfirmButton": "Logout"
   },
   "header": {
     "selectLanguage": "Select Language",

@@ -4,7 +4,7 @@ export interface ListingSettingsGroupFormProps {
   isEdit?: boolean;
   defaultValues?: Partial<ListingSettingsGroupFormData>;
   predefinedTemplates: PredefinedTemplateResponse[];
-  onSubmit: (data: ListingSettingsGroupFormData) => Promise<void>;
+  onSubmit: (data: ListingSettingsGroupFormData) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }

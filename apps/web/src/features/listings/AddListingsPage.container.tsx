@@ -8,7 +8,7 @@ import { AddListingsPageComponent } from './AddListingsPage.component';
 import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from './api/listings.api';
 
 export const AddListingsPageContainer: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['listings', 'translation']);
   const navigate = useNavigate();
   const { showMessage, closeMessage } = useUI();
   const [asins, setAsins] = useState('');
@@ -18,7 +18,42 @@ export const AddListingsPageContainer: React.FC = () => {
   const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
   
   // Create listings mutation
-  const [createListings, { isLoading: isSubmitting }] = useCreateListingsMutation();
+  const [createListings, { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData }] = useCreateListingsMutation();
+  
+  // Handle success
+  React.useEffect(() => {
+    if (isSuccess && submitData) {
+      showMessage({
+        type: 'success',
+        headerKey: 'translation:message.success.header',
+        descriptionKey: 'listings:listings.success.queued',
+        descriptionParams: { count: submitData.totalAsins },
+        primaryButton: {
+          labelKey: 'translation:message.success.ok',
+          onClick: closeMessage,
+        },
+      }, t);
+      // Navigate to listings
+      navigate('/listings');
+    }
+  }, [isSuccess, submitData, showMessage, closeMessage, t, navigate]);
+
+  // Handle error
+  React.useEffect(() => {
+    if (submitError) {
+      console.error('Failed to create listings:', submitError);
+      const errorMsg = (submitError as any)?.data?.message || 'listings.errors.createFailed';
+      showMessage({
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: errorMsg,
+        primaryButton: {
+          labelKey: 'translation:message.error.close',
+          onClick: closeMessage,
+        },
+      }, t);
+    }
+  }, [submitError, showMessage, closeMessage, t]);
   
   // Transform business policies into structured object
   const businessPolicies = useMemo(() => ({
@@ -39,37 +74,12 @@ export const AddListingsPageContainer: React.FC = () => {
     return new Set(lines).size;
   }, [asins]);
   
-  const handleSubmit = async (formData: any) => {
-    try {
-      const data: CreateListingsRequest = {
-        ...formData,
-        asins: parseAsins(formData.asins),
-      };
-      const result = await createListings(data).unwrap();
-      showMessage({
-        type: 'success',
-        headerKey: 'message.success.header',
-        descriptionKey: 'listings.success.queued',
-        descriptionParams: { count: result.totalAsins },
-        primaryButton: {
-          labelKey: 'message.success.ok',
-          onClick: closeMessage,
-        },
-      }, t);
-      // Navigate to listings
-      navigate('/listings');
-    } catch (error: any) {
-      console.error('Failed to create listings:', error);
-      showMessage({
-        type: 'error',
-        headerKey: 'message.error.header',
-        descriptionKey: error?.data?.message || 'listings.errors.createFailed',
-        primaryButton: {
-          labelKey: 'message.error.close',
-          onClick: closeMessage,
-        },
-      }, t);
-    }
+  const handleSubmit = (formData: any) => {
+    const data: CreateListingsRequest = {
+      ...formData,
+      asins: parseAsins(formData.asins),
+    };
+    void createListings(data);
   };
   
   const handleAsinChange = (value: string) => {

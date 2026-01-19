@@ -140,26 +140,28 @@ export class ListingStrategyService {
   }
 
   /**
-   * Add eBay fees and taxes to the target price
+   * Add eBay fees and taxes to the target price using a reverse calculation
+   * to ensure the desired profit margin is maintained after all deductions.
    */
-  private applyFees(price: number, fees: any): number {
-    const { ebayFeePercent, fixedFeeAmount, taxPercent } = fees;
+  private applyFees(netTarget: number, fees: any): number {
+    const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
+    const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
+    const taxPercent = Number(fees?.taxPercent) || 0;
     
-    let finalPrice = price;
+    // Formula: SalePrice = (NetTarget + FixedFee) / (1 - (EbayFee% + Tax%) / 100)
+    // This ensures that when eBay takes its percentage and the fixed fee, 
+    // we are left with exactly the netTarget.
     
-    // Add fixed fee
-    finalPrice += (fixedFeeAmount || 0);
+    const totalPercentageDeduction = (ebayFeePercent + taxPercent) / 100;
     
-    // Add eBay fee percent
-    if (ebayFeePercent) {
-      finalPrice *= (1 + ebayFeePercent / 100);
+    // Guard against division by zero if fees are 100% or more
+    if (totalPercentageDeduction >= 1) {
+      this.logger.error(`Total percentage deduction (${totalPercentageDeduction * 100}%) is 100% or more. Invalid fee config.`);
+      return netTarget * 1.5; // Fallback
     }
     
-    // Add tax
-    if (taxPercent) {
-      finalPrice *= (1 + taxPercent / 100);
-    }
-
+    const finalPrice = (netTarget + fixedFeeAmount) / (1 - totalPercentageDeduction);
+    
     // Round to 2 decimal places
     return Math.round(finalPrice * 100) / 100;
   }

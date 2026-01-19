@@ -15,7 +15,7 @@ import { useGetDashboardQuery } from '../api/dashboardApi';
 import { DashboardPageComponent } from './DashboardPage.component';
 
 export const DashboardPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['translation']);
   const navigate = useNavigate();
   const { showMessage, closeMessage } = useUI();
 
@@ -36,11 +36,11 @@ export const DashboardPageContainer = (): React.ReactElement => {
       showMessage(
         {
           type: 'error',
-          headerKey: 'message.error.header',
+          headerKey: 'translation:message.error.header',
           descriptionKey: key,
           descriptionParams: params,
           primaryButton: {
-            labelKey: 'message.error.ok',
+            labelKey: 'translation:message.error.close',
             onClick: closeMessage,
           },
         },

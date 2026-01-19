@@ -7,7 +7,7 @@ import { ProfilePageComponent } from './ProfilePage.component';
 import { useGetProfileQuery, useUpdateProfileMutation } from './api/profileApi';
 
 export const ProfilePageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['profile', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
   const { data: profile, isLoading: isProfileLoading } = useGetProfileQuery();
@@ -20,10 +20,10 @@ export const ProfilePageContainer = (): React.ReactElement => {
       showMessage(
         {
           type: 'success',
-          headerKey: 'common.success',
-          descriptionKey: 'profile.updateSuccess',
+          headerKey: 'translation:common.success',
+          descriptionKey: 'profile:profile.updateSuccess',
           primaryButton: {
-            labelKey: 'common.ok',
+            labelKey: 'translation:common.ok',
             onClick: closeMessage,
           },
         },
@@ -38,11 +38,11 @@ export const ProfilePageContainer = (): React.ReactElement => {
       showMessage(
         {
           type: 'error',
-          headerKey: 'common.error',
-          descriptionKey: key,
+          headerKey: 'translation:common.error',
+          descriptionKey: key, // getErrorMessage already handles namespace for some keys, but let's be careful
           descriptionParams: params,
           primaryButton: {
-            labelKey: 'common.ok',
+            labelKey: 'translation:common.ok',
             onClick: closeMessage,
           },
         },
@@ -51,17 +51,13 @@ export const ProfilePageContainer = (): React.ReactElement => {
     }
   }, [error, showMessage, closeMessage, t]);
 
-  const handleSubmit = async (data: UpdateProfileFormData): Promise<void> => {
-    try {
-      await updateProfile({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber || undefined,
-        avatarUrl: data.avatarUrl || undefined,
-      }).unwrap();
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-    }
+  const handleSubmit = (data: UpdateProfileFormData): void => {
+    void updateProfile({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phoneNumber || undefined,
+      avatarUrl: data.avatarUrl || undefined,
+    });
   };
 
   if (isProfileLoading || !profile) {

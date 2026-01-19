@@ -15,22 +15,23 @@ import { useRegisterMutation } from '../api/authApi';
 import { RegisterPageComponent } from './RegisterPage.component';
 
 export const RegisterPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'translation']);
   const navigate = useNavigate();
   const { showMessage, closeMessage } = useUI();
 
   const [register, { isLoading, isSuccess, error }] = useRegisterMutation();
+  const [submittedEmail, setSubmittedEmail] = React.useState<string>('');
 
   // Use RTK Query loading state with useLoading hook
   useLoading(isLoading);
 
   // Handle success
   useEffect(() => {
-    if (isSuccess) {
-      // Success redirection handled in handleSubmit or via useEffect
+    if (isSuccess && submittedEmail) {
+      // Redirect to check email page
+      navigate(`/auth/check-email?email=${encodeURIComponent(submittedEmail)}`);
     }
-  }, [isSuccess]);
-
+  }, [isSuccess, submittedEmail, navigate]);
   // Handle error
   useEffect(() => {
     if (error) {
@@ -42,7 +43,7 @@ export const RegisterPageContainer = (): React.ReactElement => {
           descriptionKey: key,
           descriptionParams: params,
           primaryButton: {
-            labelKey: 'message.error.ok',
+            labelKey: 'translation:message.error.close',
             onClick: closeMessage,
           },
         },
@@ -51,21 +52,14 @@ export const RegisterPageContainer = (): React.ReactElement => {
     }
   }, [error, showMessage, closeMessage, t]);
 
-  const handleSubmit = async (data: RegisterFormData): Promise<void> => {
-    try {
-      await register({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-      }).unwrap();
-
-      // Redirect to check email page
-      navigate(`/auth/check-email?email=${encodeURIComponent(data.email)}`);
-    } catch (err) {
-      // Error handled by useEffect
-      console.error('Registration failed:', err);
-    }
+  const handleSubmit = (data: RegisterFormData): void => {
+    setSubmittedEmail(data.email);
+    void register({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      password: data.password,
+    });
   };
 
   const handleNavigateToLogin = (): void => {

@@ -1,4 +1,5 @@
 import { useLoading, useUI } from '@repo/ui';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ListingSettingsGroupPageComponent } from './ListingSettingsGroupPage.component';
@@ -9,13 +10,28 @@ import {
 
 export const ListingSettingsGroupPageContainer = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
   const { data: groups = [], isLoading: isGroupsLoading } = useGetListingSettingsGroupsQuery();
-  const [deleteListingSettingsGroup, { isLoading: isDeleting }] = useDeleteListingSettingsGroupMutation();
+  const [deleteListingSettingsGroup, { isLoading: isDeleting, isSuccess: deleteSuccess }] = useDeleteListingSettingsGroupMutation();
 
   useLoading(isGroupsLoading || isDeleting);
+
+  // Handle delete success
+  React.useEffect(() => {
+    if (deleteSuccess) {
+      showMessage({
+        type: 'success',
+        headerKey: 'translation:message.success.header',
+        descriptionKey: 'listingSettingsGroup:listingSettingsGroup.success.deleted',
+        primaryButton: {
+          labelKey: 'translation:message.success.ok',
+          onClick: closeMessage,
+        },
+      }, t);
+    }
+  }, [deleteSuccess, showMessage, closeMessage, t]);
 
   const handleCreateGroup = () => {
     navigate('/settings/listing-groups/new');
@@ -28,30 +44,17 @@ export const ListingSettingsGroupPageContainer = () => {
   const handleDeleteGroup = (id: string) => {
     showMessage({
       type: 'error',
-      headerKey: 'listingSettingsGroup.confirmDelete',
-      descriptionKey: 'listingSettingsGroup.confirmDeleteMessage',
+      headerKey: 'listingSettingsGroup:listingSettingsGroup.confirmDelete',
+      descriptionKey: 'listingSettingsGroup:listingSettingsGroup.confirmDeleteMessage',
       primaryButton: {
-        labelKey: 'common.delete',
-        onClick: async () => {
-          try {
-            await deleteListingSettingsGroup(id).unwrap();
-            closeMessage();
-            showMessage({
-              type: 'success',
-              headerKey: 'message.success.header',
-              descriptionKey: 'listingSettingsGroup.success.deleted',
-              primaryButton: {
-                labelKey: 'message.success.ok',
-                onClick: closeMessage,
-              },
-            }, t);
-          } catch (error) {
-            console.error('Failed to delete group:', error);
-          }
+        labelKey: 'translation:common.delete',
+        onClick: () => {
+          void deleteListingSettingsGroup(id);
+          closeMessage();
         },
       },
       secondaryButton: {
-        labelKey: 'common.cancel',
+        labelKey: 'translation:common.cancel',
         onClick: closeMessage,
       },
     }, t);

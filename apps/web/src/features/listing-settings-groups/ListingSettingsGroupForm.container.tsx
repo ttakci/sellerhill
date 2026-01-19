@@ -1,13 +1,14 @@
 import { ListingSettingsGroupFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.component';
 import {
-  useCreateListingSettingsGroupMutation,
-  useGetListingSettingsGroupByIdQuery,
-  useGetPredefinedTemplatesQuery,
-  useUpdateListingSettingsGroupMutation
+    useCreateListingSettingsGroupMutation,
+    useGetListingSettingsGroupByIdQuery,
+    useGetPredefinedTemplatesQuery,
+    useUpdateListingSettingsGroupMutation
 } from './api/listing-settings-group.api';
 
 export const ListingSettingsGroupFormContainer = () => {
@@ -19,24 +20,39 @@ export const ListingSettingsGroupFormContainer = () => {
 
   const { data: group, isLoading: isGroupLoading } = useGetListingSettingsGroupByIdQuery(id!, { skip: !isEdit });
   const { data: templates = [], isLoading: isTemplatesLoading } = useGetPredefinedTemplatesQuery();
-  const [createListingSettingsGroup, { isLoading: isCreating }] = useCreateListingSettingsGroupMutation();
-  const [updateListingSettingsGroup, { isLoading: isUpdating }] = useUpdateListingSettingsGroupMutation();
+  const [createListingSettingsGroup, { isLoading: isCreating, isSuccess: createSuccess, isError: createError }] = useCreateListingSettingsGroupMutation();
+  const [updateListingSettingsGroup, { isLoading: isUpdating, isSuccess: updateSuccess, isError: updateError }] = useUpdateListingSettingsGroupMutation();
 
   useLoading(isGroupLoading || isTemplatesLoading);
 
-  const handleSubmit = async (data: ListingSettingsGroupFormData) => {
-    try {
-      if (isEdit) {
-        await updateListingSettingsGroup({ id: id!, data }).unwrap();
-        showMessage({ type: 'success', content: t('listingSettingsGroup.success.updated') });
-      } else {
-        await createListingSettingsGroup(data).unwrap();
-        showMessage({ type: 'success', content: t('listingSettingsGroup.success.created') });
-      }
+  // Handle success
+  React.useEffect(() => {
+    if (createSuccess || updateSuccess) {
+      showMessage({
+        type: 'success',
+        headerKey: 'translation:message.success.header',
+        descriptionKey: createSuccess ? 'listingSettingsGroup:listingSettingsGroup.success.created' : 'listingSettingsGroup:listingSettingsGroup.success.updated',
+      }, t);
       navigate('/settings/listing-groups');
-    } catch (error) {
-      console.error('Failed to save group:', error);
-      showMessage({ type: 'error', content: t('listingSettingsGroup.errors.saveFailed') });
+    }
+  }, [createSuccess, updateSuccess, showMessage, t, navigate]);
+
+  // Handle error
+  React.useEffect(() => {
+    if (createError || updateError) {
+      showMessage({
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: 'listingSettingsGroup:listingSettingsGroup.errors.saveFailed',
+      }, t);
+    }
+  }, [createError, updateError, showMessage, t]);
+
+  const handleSubmit = (data: ListingSettingsGroupFormData) => {
+    if (isEdit) {
+      void updateListingSettingsGroup({ id: id!, data });
+    } else {
+      void createListingSettingsGroup(data);
     }
   };
 

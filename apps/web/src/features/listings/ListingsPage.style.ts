@@ -1,135 +1,106 @@
 import styled from '@emotion/styled';
+import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
   margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.spacing.md};
+  padding: 0 ${tkn('spacing.md')};
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${tkn('spacing.lg')};
   box-sizing: border-box;
 
   @media (min-width: 768px) {
-    padding: 0 ${({ theme }) => theme.spacing.xl};
-    gap: ${({ theme }) => theme.spacing.lg};
+    padding: 0 ${tkn('spacing.xl')};
   }
 `;
 
 export const Header = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${tkn('spacing.md')};
   align-items: flex-start;
-  
-  position: sticky;
-  top: calc(-1 * ${({ theme }) => theme.spacing.md});
-  margin-top: calc(-1 * ${({ theme }) => theme.spacing.md}); 
-  
-  z-index: 99;
-  background-color: ${({ theme }) => theme.colors.background.secondary};
-  
-  margin-left: calc(-1 * ${({ theme }) => theme.spacing.md});
-  margin-right: calc(-1 * ${({ theme }) => theme.spacing.md});
-  padding: ${({ theme }) => theme.spacing.md};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.secondary};
+  margin-bottom: ${tkn('spacing.sm')};
 
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    
-    top: calc(-1 * ${({ theme }) => theme.spacing.xl});
-    margin-top: calc(-1 * ${({ theme }) => theme.spacing.xl});
-    
-    margin-left: calc(-1 * ${({ theme }) => theme.spacing.xl});
-    margin-right: calc(-1 * ${({ theme }) => theme.spacing.xl});
-    padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
   }
 `;
 
 export const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const Actions = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: ${tkn('spacing.sm')};
   width: 100%;
 
   @media (min-width: 768px) {
     width: auto;
   }
-  
-  button {
-    flex: 1;
-    @media (min-width: 768px) {
-      flex: none;
-    }
-  }
 `;
 
-export const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: ${({ theme }) => theme.spacing.lg};
-`;
-
-export const Card = styled.div`
-  background: ${({ theme }) => theme.colors.surface.primary};
-  border: 1px solid ${({ theme }) => theme.colors.border.secondary};
-  border-radius: ${({ theme }) => theme.radius.lg};
-  padding: ${({ theme }) => theme.spacing.lg};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
-
-export const TableCard = styled(Card)`
-  padding: 0;
+export const TableCard = styled.div`
+  background: white;
+  border: 1px solid ${tkn('colors.border.secondary')};
+  border-radius: 8px;
+  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07);
   overflow: hidden;
-`;
-
-export const TableContainer = styled.div`
-  width: 100%;
-  overflow-x: auto;
-`;
-
-export const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-`;
-
-export const Th = styled.th`
-  padding: ${({ theme }) => `${theme.spacing.md} ${theme.spacing.lg}`};
-  border-bottom: 2px solid ${({ theme }) => theme.colors.border.secondary};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  font-size: 0.875rem;
-  white-space: nowrap;
-`;
-
-export const Td = styled.td`
-  padding: ${({ theme }) => `${theme.spacing.lg} ${theme.spacing.lg}`};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.secondary};
-  vertical-align: middle;
 `;
 
 export const ProductInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: 16px;
+`;
+
+export const ProductImageWrapper = styled.div`
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: ${tkn('colors.background.tertiary')};
+  border: 1px solid ${tkn('colors.border.secondary')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 `;
 
 export const ProductImage = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.radius.md};
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  background: ${({ theme }) => theme.colors.background.tertiary};
-  border: 1px solid ${({ theme }) => theme.colors.border.secondary};
+`;
+
+export const ExternalLink = styled.a`
+  color: #3C50E0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    color: #2a3bb7;
+    text-decoration: underline;
+  }
+`;
+
+export const ASINBadge = styled.span`
+  font-family: ${tkn('typography.fontFamily.mono')};
+  background: #EFF4FB;
+  color: #3C50E0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
 `;
 
 export const EmptyState = styled.div`
@@ -137,13 +108,13 @@ export const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }) => theme.spacing.xxl} ${({ theme }) => theme.spacing.lg};
-  gap: ${({ theme }) => theme.spacing.lg};
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  padding: 80px 24px;
+  gap: 20px;
+  color: ${tkn('colors.text.tertiary')};
   text-align: center;
 
   svg {
-    color: ${({ theme }) => theme.colors.brand.primary};
+    color: ${tkn('colors.brand.primary')};
     opacity: 0.8;
   }
 `;
@@ -151,6 +122,6 @@ export const EmptyState = styled.div`
 export const EmptyStateText = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
+  gap: 8px;
   align-items: center;
 `;

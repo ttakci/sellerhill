@@ -102,7 +102,10 @@
     "reports": "Raporlar",
     "editProfile": "Profili Düzenle",
     "support": "Destek",
-    "logout": "Oturumu Kapat"
+    "logout": "Oturumu Kapat",
+    "logoutConfirmTitle": "Oturumu Kapat",
+    "logoutConfirmDescription": "Oturumu kapatmak istediğinizden emin misiniz? Hesabınıza erişmek için tekrar giriş yapmanız gerekecektir.",
+    "logoutConfirmButton": "Oturumu Kapat"
   },
   "header": {
     "selectLanguage": "Dil Seçimi",

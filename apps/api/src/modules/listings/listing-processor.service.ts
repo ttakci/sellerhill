@@ -29,14 +29,24 @@ export class ListingProcessorService extends WorkerHost {
     this.logger.log(`Processing ASIN ${asin} for job ${jobId}`);
 
     try {
-      // 1. Fetch product details from ScraperAPI
-      const productData = await this.scraperApiService.getProductDetails(asin);
-      if (!productData) {
-        throw new Error(`Failed to fetch product details for ${asin} from ScraperAPI`);
-      }
+      // 1. Check if product already exists in DB
+      let productData = await this.listingsService.getProductByAsin(asin);
+      let productId: string | null = null;
 
-      // 2. Cache/Find product in database
-      const productId = await this.listingsService.findOrCreateProduct(asin, productData);
+      if (productData) {
+        this.logger.log(`Using cached product data for ASIN ${asin}`);
+        // We still need the ID for listing creation
+        productId = await this.listingsService.findOrCreateProduct(asin, productData);
+      } else {
+        // 2. Fetch product details from ScraperAPI if not in DB
+        this.logger.log(`Scraping product data for ASIN ${asin} from ScraperAPI`);
+        productData = await this.scraperApiService.getProductDetails(asin);
+        if (!productData) {
+          throw new Error(`Failed to fetch product details for ${asin} from ScraperAPI`);
+        }
+        // 3. Cache/Find product in database
+        productId = await this.listingsService.findOrCreateProduct(asin, productData);
+      }
 
       // 3. Prepare listing data (Price, stock, etc. based on strategy group)
       const ebayAccountId = await this.ebayService.getActiveAccountId(userId);
@@ -86,18 +96,17 @@ export class ListingProcessorService extends WorkerHost {
       this.logger.log(`Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`);
 
     } catch (error: any) {
-      this.logger.error(`Error processing ASIN ${asin} in job ${jobId}: ${error.message}`);
+      this.logger.error(`Error processing ASIN ${asin} in job ${jobId}: ${error.message} (Attempt ${job.attemptsMade + 1})`);
       
-      // Update job item failure in database
+      const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
+
+      // Update job item status in database
       await this.listingsService.updateJobItemResult(jobId, asin, {
-        status: ListingStatus.ERROR,
+        status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
         errorMessage: error.message,
       });
 
-      // We don't rethrow here because we want to mark the item as failed in our DB
-      // But BullMQ might retry if we rethrow. Since we handle the "error" state in DB,
-      // we decide if we want BullMQ to retry.
-      if (job.attemptsMade < (job.opts.attempts || 1)) {
+      if (!isLastAttempt) {
         throw error; // Rethrow to trigger BullMQ retry
       }
     }

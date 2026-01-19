@@ -17,22 +17,30 @@ import { setCredentials } from '../store/authSlice';
 import { LoginPageComponent } from './LoginPage.component';
 
 export const LoginPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'translation']);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showMessage, closeMessage } = useUI();
 
-  const [login, { isLoading, isSuccess, error }] = useLoginMutation();
+  const [login, { isLoading, isSuccess, error, data }] = useLoginMutation();
 
   // Use RTK Query loading state with useLoading hook
   useLoading(isLoading);
 
   // Handle success
   useEffect(() => {
-    if (isSuccess) {
-      // Navigation is now handled in handleSubmit after token storage
+    if (isSuccess && data) {
+      // Store credentials in Redux (which also syncs to localStorage)
+      dispatch(setCredentials(data));
+
+      // Redirect based on whether user has connected accounts
+      if (data.user.hasConnectedAccounts) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding/ebay');
+      }
     }
-  }, [isSuccess]);
+  }, [isSuccess, data, dispatch, navigate]);
 
   // Handle error
   useEffect(() => {
@@ -45,7 +53,7 @@ export const LoginPageContainer = (): React.ReactElement => {
           descriptionKey: key,
           descriptionParams: params,
           primaryButton: {
-            labelKey: 'message.error.ok',
+            labelKey: 'translation:message.error.close',
             onClick: closeMessage,
           },
         },
@@ -54,26 +62,11 @@ export const LoginPageContainer = (): React.ReactElement => {
     }
   }, [error, showMessage, closeMessage, t]);
 
-  const handleSubmit = async (data: LoginFormData): Promise<void> => {
-    try {
-      const result = await login({
-        email: data.email,
-        password: data.password,
-      }).unwrap();
-
-      // Store credentials in Redux (which also syncs to localStorage)
-      dispatch(setCredentials(result));
-
-      // Redirect based on whether user has connected accounts
-      if (result.user.hasConnectedAccounts) {
-        navigate('/dashboard');
-      } else {
-        navigate('/onboarding/ebay');
-      }
-    } catch (err) {
-      // Error handled by useEffect
-      console.error('Login failed:', err);
-    }
+  const handleSubmit = (data: LoginFormData): void => {
+    void login({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   const handleNavigateToRegister = (): void => {

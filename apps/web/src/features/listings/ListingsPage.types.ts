@@ -7,4 +7,5 @@ export interface ListingsPageProps {
   isJobsLoading: boolean;
   onRefresh: () => void;
   onAddListing: () => void;
+  onEndListings: (listingIds: string[]) => void;
 }

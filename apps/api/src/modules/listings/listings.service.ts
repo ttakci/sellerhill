@@ -9,6 +9,7 @@ import {
   type ProductData,
 } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayService } from '../ebay/ebay.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class ListingsService implements OnModuleInit {
 
   constructor(
     private readonly databaseService: DatabaseService,
+    private readonly ebayService: EbayService,
   ) {}
 
   async onModuleInit() {
@@ -42,7 +44,7 @@ export class ListingsService implements OnModuleInit {
     // Insert default config if not exists
     await this.databaseService.query(`
       INSERT INTO system_config (key, value, description)
-      VALUES ('product_sync_interval_days', '7', 'Days between Keepa product data syncs')
+      VALUES ('product_sync_interval_days', '7', 'Days between product data syncs')
       ON CONFLICT (key) DO NOTHING
     `);
 
@@ -59,7 +61,7 @@ export class ListingsService implements OnModuleInit {
         brand VARCHAR(200),
         category VARCHAR(200),
         features JSONB,
-        raw_keepa_data JSONB,
+        raw_provider_data JSONB,
         last_sync_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -132,13 +134,19 @@ export class ListingsService implements OnModuleInit {
 
     // Migration: Add policy columns if missing (PostgreSQL specific)
     try {
+      // Products migration
+      await this.databaseService.query(`
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_provider_data JSONB;
+      `);
+
+      // Listings migration
       await this.databaseService.query(`
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS payment_policy_id VARCHAR(50);
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS shipping_policy_id VARCHAR(50);
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS return_policy_id VARCHAR(50);
       `);
     } catch (e) {
-      this.logger.warn('Failed to run migration for listings columns (might be normal if db not postgres or already exists)', e);
+      this.logger.warn('Failed to run migration for columns (might be normal if db not postgres or already exists)', e);
     }
   }
 
@@ -264,6 +272,14 @@ export class ListingsService implements OnModuleInit {
     }
 
     const row = results[0];
+
+    // If we have raw_provider_data (full ScraperAPI response), use it as it's more complete
+    if (row.raw_provider_data) {
+      return typeof row.raw_provider_data === 'string' 
+        ? JSON.parse(row.raw_provider_data) 
+        : row.raw_provider_data;
+    }
+
     return {
       asin: row.asin,
       title: row.title,
@@ -277,6 +293,7 @@ export class ListingsService implements OnModuleInit {
       brand: row.brand,
       category: row.category,
       manufacturer: row.brand, // Fallback
+      features: [],
     };
   }
 
@@ -364,7 +381,7 @@ export class ListingsService implements OnModuleInit {
   }
 
   /**
-   * Find product by ASIN or create it using Keepa data
+   * Find product by ASIN or create it using ScraperAPI data
    */
   async findOrCreateProduct(asin: string, productData: ProductData): Promise<string> {
     const existing = await this.databaseService.query<{ id: string }>(`
@@ -379,7 +396,7 @@ export class ListingsService implements OnModuleInit {
     const result = await this.databaseService.query<{ id: string }>(`
       INSERT INTO products (
         asin, title, price, image_urls, description, 
-        brand, category, features, raw_keepa_data
+        brand, category, features, raw_provider_data
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id
@@ -439,24 +456,32 @@ export class ListingsService implements OnModuleInit {
    */
   private async updateJobCounts(jobId: string): Promise<void> {
     const counts = await this.databaseService.query<{
-      total: number;
-      success: number;
-      failed: number;
+      total: string | number;
+      success: string | number;
+      failed: string | number;
+      retrying: string | number;
     }>(`
       SELECT 
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE status = 'active') as success,
-        COUNT(*) FILTER (WHERE status = 'error') as failed
+        COUNT(*) FILTER (WHERE status = 'error') as failed,
+        COUNT(*) FILTER (WHERE status = 'retrying') as retrying
       FROM listing_job_items
       WHERE job_id = $1
     `, [jobId]);
 
-    const { total, success, failed } = counts[0];
+    const total = Number(counts[0].total);
+    const success = Number(counts[0].success);
+    const failed = Number(counts[0].failed);
+    const retrying = Number(counts[0].retrying);
+    
+    // Processed count only includes FINAL terminal states
     const processed = success + failed;
 
     let jobStatus = ListingJobStatus.PROCESSING;
-    if (processed === total) {
+    if (processed >= total) {
       jobStatus = failed === total ? ListingJobStatus.FAILED : ListingJobStatus.COMPLETED;
+      this.logger.log(`Job ${jobId} finished with status: ${jobStatus} (${success} success, ${failed} failed)`);
     }
 
     await this.databaseService.query(`
@@ -503,5 +528,45 @@ export class ListingsService implements OnModuleInit {
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };
+  }
+
+  /**
+   * End multiple listings on eBay
+   */
+  async endListings(userId: string, listingIds: string[]): Promise<number> {
+    this.logger.log(`Ending ${listingIds.length} listings for user ${userId}`);
+    
+    let successCount = 0;
+    
+    for (const listingId of listingIds) {
+      try {
+        // 1. Get listing from DB to get the eBay item ID
+        const results = await this.databaseService.query(`
+          SELECT ebay_item_id FROM listings 
+          WHERE id = $1 AND user_id = $2
+        `, [listingId, userId]);
+        
+        if (results.length === 0) continue;
+        
+        const ebayItemId = results[0].ebay_item_id;
+        
+        // 2. Call eBay to end the item
+        await this.ebayService.withdrawOffer(userId, ebayItemId);
+        
+        // 3. Update status in DB
+        await this.databaseService.query(`
+          UPDATE listings 
+          SET status = 'inactive', updated_at = CURRENT_TIMESTAMP 
+          WHERE id = $1
+        `, [listingId]);
+        
+        successCount++;
+      } catch (error: any) {
+        this.logger.error(`Failed to end listing ${listingId}: ${error.message}`);
+        // Continue with others
+      }
+    }
+    
+    return successCount;
   }
 }

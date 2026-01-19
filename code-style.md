@@ -15,6 +15,7 @@
   - `[Feature]Page.component.tsx`: Markup, Props only, NO hooks.
 - **API**: Use RTK Query via `baseApi.injectEndpoints`. NO fetch/axios directly.
 - **Loading**: Use `useLoading(isLoading)` hook with RTK Query states.
+- **Error Handling**: NEVER use `try-catch` for API calls in the frontend. RTK Query handles errors in the `mutate().unwrap()` result or through the `isError`/`error` flags.
 
 ### 3️⃣ Styling & Theme (EMOTION ONLY)
 - **Provider**: Use `@emotion/styled`. NEVER `styled-components`.
@@ -24,11 +25,16 @@
 ### 4️⃣ Form Components (forwardRef REQUIRED)
 - **Form UI**: ALL inputs must use `React.forwardRef` and `value={value ?? ''}` to prevent uncontrolled component warnings.
 
-### 5️⃣ Localization & Assets
-- **i18n**: NO hardcoded strings. Use `t('key')` from `packages/shared/src/i18n/resources/{en|tr}/`.
-- **Namespaces**: ALWAYS explicitly specify the namespace in `useTranslation` for feature-specific translations.
-  - Example: `const { t } = useTranslation('storeSettings');`
-  - **NEVER** use `useTranslation()` without arguments for feature pages, as the default namespace does NOT contain feature-specific keys.
+### 5️⃣ Localization & Assets (STANDARD)
+- **Structure**: Root key in JSON MUST match the filename (e.g., `feature.json` -> `{ "feature": { ... } }`).
+- **Hook Pattern**: `useTranslation` MUST always include the feature namespace AND `translation` for common keys.
+  - ✅ `const { t } = useTranslation(['feature', 'translation']);`
+- **Key Usage**: ALWAYS use explicit namespace prefixes (`namespace:key.path`) to ensure correct resolution and prevent overlap.
+  - ✅ `t('feature:feature.title')`
+  - ✅ `t('translation:common.save')`
+  - ✅ `showMessage({ headerKey: 'translation:message.success.header', ... })`
+  - ❌ `t('title')` (Implicit: FORBIDDEN)
+  - ❌ `t('feature.title')` (Missing namespace: FORBIDDEN)
 - **Icons**: Use `@repo/ui` `Icon` component. NO inline SVG.
 
 ---
@@ -66,7 +72,9 @@ features/[feature]/
 - ❌ **Inline SVG** (use Icon component).
 - ❌ **Duplicate types** (use @repo/shared).
 - ❌ **Local state** for global modals/loading (use UIContext).
-- ❌ **Implicit i18n namespace** (always use `useTranslation('namespace')`).
+- ❌ **Implicit i18n namespace** (always use `useTranslation(['ns', 'translation'])`).
+- ❌ **Implicit i18n keys** (always use `namespace:key.path` prefix).
+- ❌ **`try-catch` for API calls** in frontend (use RTK Query error states).
 
 ## ✅ Success Criteria
 - ✅ Zero `any` types.

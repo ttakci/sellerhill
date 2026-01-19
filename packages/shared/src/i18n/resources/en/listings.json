@@ -80,7 +80,18 @@
       "cancel": "Cancel",
       "import": "Import & Create Listings",
       "importing": "Importing...",
-      "addListing": "Add Listing"
+      "addListing": "Add Listing",
+      "endListing": "End Listing"
+    },
+    "notifications": {
+      "endSuccessTitle": "Listings Ended",
+      "endSuccess": "Successfully ended {{count}} listings on eBay.",
+      "endErrorTitle": "Action Failed",
+      "endError": "Failed to end some listings. Please check eBay for details."
+    },
+    "modals": {
+      "endTitle": "End Selected Listings?",
+      "endDescription": "Are you sure you want to end {{count}} selected listings on eBay? They will be moved to inactive status."
     },
     "validation": {
       "invalidAsin": "Invalid ASIN format. Must start with 'B' followed by 9 alphanumeric characters.",

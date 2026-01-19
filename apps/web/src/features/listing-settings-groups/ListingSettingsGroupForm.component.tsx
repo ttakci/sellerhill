@@ -242,6 +242,40 @@ export const ListingSettingsGroupFormComponent = ({
           </CardBody>
         </Card>
 
+        {/* Fees & Taxes */}
+        <Card variant="bordered">
+          <S.SectionHeader>
+            <S.SectionTitleWrapper>
+              <S.HeaderIconWrapper>
+                <Icon name="percent" size={20} />
+              </S.HeaderIconWrapper>
+              <Text variant="h4" weight="bold">{t('listingSettingsGroup.feesAndTaxes')}</Text>
+            </S.SectionTitleWrapper>
+          </S.SectionHeader>
+          <CardBody>
+            <S.InputGrid columns={3}>
+              <TextInput<ListingSettingsGroupFormData>
+                name="fees.ebayFeePercent"
+                control={control}
+                type="number"
+                label={t('listingSettingsGroup.ebayFeePercent')}
+              />
+              <TextInput<ListingSettingsGroupFormData>
+                name="fees.fixedFeeAmount"
+                control={control}
+                type="number"
+                label={t('listingSettingsGroup.fixedFeeAmount')}
+              />
+              <TextInput<ListingSettingsGroupFormData>
+                name="fees.taxPercent"
+                control={control}
+                type="number"
+                label={t('listingSettingsGroup.taxRate')}
+              />
+            </S.InputGrid>
+          </CardBody>
+        </Card>
+
         {/* Split View: Template & Preview */}
         <S.SplitGrid>
            {/* Template Settings */}

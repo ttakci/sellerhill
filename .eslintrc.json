@@ -19,6 +19,7 @@
     "design-system/no-inline-styles": "error",
     "design-system/no-styled-typography": "error",
     "design-system/no-bare-text-in-button": "error",
+    "design-system/no-implicit-i18n-namespaces": "error",
 
     // Console & Debugging
     "no-console": ["warn", { "allow": ["warn", "error"] }],

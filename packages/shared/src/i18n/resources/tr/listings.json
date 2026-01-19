@@ -80,7 +80,18 @@
       "cancel": "İptal",
       "import": "İçe Aktar ve Listeleri Oluştur",
       "importing": "İçe Aktarılıyor...",
-      "addListing": "Liste Ekle"
+      "addListing": "Liste Ekle",
+      "endListing": "Listelemeyi Bitir"
+    },
+    "notifications": {
+      "endSuccessTitle": "Listelemeler Bitirildi",
+      "endSuccess": "{{count}} liste eBay'de başarıyla sonlandırıldı.",
+      "endErrorTitle": "İşlem Başarısız",
+      "endError": "Bazı listeler sonlandırılamadı. Lütfen detaylar için eBay'i kontrol edin."
+    },
+    "modals": {
+      "endTitle": "Seçilen Listeleri Bitir?",
+      "endDescription": "Seçilen {{count}} listeyi eBay'de sonlandırmak istediğinizden emin misiniz? Bu işlemden sonra listeler pasif duruma geçecektir."
     },
     "validation": {
       "invalidAsin": "Geçersiz ASIN formatı. 'B' ile başlamalı ve ardından 9 alfanümerik karakter gelmelidir.",

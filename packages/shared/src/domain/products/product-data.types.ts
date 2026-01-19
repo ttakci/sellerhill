@@ -1,6 +1,6 @@
 /**
  * Provider-Agnostic Product Data Types
- * These types represent normalized product data regardless of source (Keepa, ScraperAPI, etc.)
+ * These types represent normalized product data regardless of source (ScraperAPI, etc.)
  */
 
 /**
@@ -28,7 +28,7 @@ export interface ProductData {
 
 /**
  * Product data provider interface
- * All product data services (Keepa, ScraperAPI, etc.) must implement this
+ * All product data services (ScraperAPI, etc.) must implement this
  */
 export interface IProductDataProvider {
   /**

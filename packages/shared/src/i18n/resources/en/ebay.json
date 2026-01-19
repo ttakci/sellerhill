@@ -42,8 +42,9 @@
       "title": "Connect Your eBay Store",
       "header": "Marketplace Setup",
       "description": "To start syncing your items, you first need to connect your eBay store. Select your primary marketplace below.",
-      "connectButton": "Connect eBay Account",
-      "skipButton": "Skip for Now"
+      "connectButton": "eBay Account",
+      "skipButton": "Skip for Now",
+      "brandingDescription": "Link your eBay store to Zonds to manage all your sales processes from a single hub."
     }
   }
 }

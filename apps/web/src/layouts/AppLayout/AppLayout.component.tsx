@@ -78,7 +78,7 @@ export const AppLayout: React.FC = () => {
           <S.NavSection>
             <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
               <Text variant="caption" weight="bold" muted>
-                {t('menu.main')}
+                {t('translation:menu.main')}
               </Text>
             </S.NavLabelWrapper>
             
@@ -89,7 +89,7 @@ export const AppLayout: React.FC = () => {
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="grid" size={18} />
-                {!sidebarCollapsed && t('menu.dashboard')}
+                {!sidebarCollapsed && t('translation:menu.dashboard')}
               </S.NavItemContent>
               {!sidebarCollapsed && (
                 <S.ChevronWrapper $isOpen={false} $isCollapsed={sidebarCollapsed}>
@@ -105,7 +105,7 @@ export const AppLayout: React.FC = () => {
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="upload" size={18} />
-                {!sidebarCollapsed && t('menu.listings')}
+                {!sidebarCollapsed && t('translation:menu.listings')}
               </S.NavItemContent>
             </S.NavItem>
 
@@ -116,7 +116,7 @@ export const AppLayout: React.FC = () => {
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="box" size={18} />
-                {!sidebarCollapsed && t('menu.inventory')}
+                {!sidebarCollapsed && t('translation:menu.inventory')}
               </S.NavItemContent>
               {!sidebarCollapsed && <Badge variant="success" size="sm">NEW</Badge>}
             </S.NavItem>
@@ -128,14 +128,14 @@ export const AppLayout: React.FC = () => {
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="shopping-cart" size={18} />
-                {!sidebarCollapsed && t('menu.orders')}
+                {!sidebarCollapsed && t('translation:menu.orders')}
               </S.NavItemContent>
               {!sidebarCollapsed && <Badge variant="primary" size="sm">12</Badge>}
             </S.NavItem>
 
             <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
               <Text variant="caption" weight="bold" muted>
-                {t('menu.configuration')}
+                {t('translation:menu.configuration')}
               </Text>
             </S.NavLabelWrapper>
             
@@ -152,7 +152,7 @@ export const AppLayout: React.FC = () => {
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="settings" size={18} />
-                  {!sidebarCollapsed && t('menu.settings')}
+                  {!sidebarCollapsed && t('translation:menu.settings')}
                 </S.NavItemContent>
                 {!sidebarCollapsed && (
                   <S.ChevronWrapper $isOpen={settingsOpen} $isCollapsed={sidebarCollapsed}>
@@ -167,13 +167,13 @@ export const AppLayout: React.FC = () => {
                     $active={location.pathname === '/settings/store'} 
                     onClick={() => navigate('/settings/store')}
                   >
-                    {t('menu.storeSettings')}
+                    {t('translation:menu.storeSettings')}
                   </S.SubNavItem>
                   <S.SubNavItem 
                     $active={location.pathname.startsWith('/settings/listing-groups')} 
                     onClick={() => navigate('/settings/listing-groups')}
                   >
-                    {t('menu.listingSettingsGroups')}
+                    {t('translation:menu.listingSettingsGroups')}
                   </S.SubNavItem>
                 </S.SubNavContainer>
               )}
@@ -194,29 +194,29 @@ export const AppLayout: React.FC = () => {
               <Dropdown 
                 align="right"
                 trigger={
-                  <S.ActionIcon title={t('header.selectLanguage')}>
+                  <S.ActionIcon title={t('translation:header.selectLanguage')}>
                      <Icon name={i18n.language === 'tr' ? 'flag-tr' : 'flag-us'} size={22} />
                   </S.ActionIcon>
                 }
                 items={[
                   { 
-                    label: t('languages.en'), 
+                    label: t('translation:languages.en'), 
                     icon: 'flag-us', 
                     onClick: () => i18n.changeLanguage('en') 
                   },
                   { 
-                    label: t('languages.tr'), 
+                    label: t('translation:languages.tr'), 
                     icon: 'flag-tr', 
                     onClick: () => i18n.changeLanguage('tr') 
                   }
                 ]}
               />
 
-              <S.ActionIcon onClick={toggleTheme} title={t('header.toggleTheme')}>
+              <S.ActionIcon onClick={toggleTheme} title={t('translation:header.toggleTheme')}>
                 <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={22} />
               </S.ActionIcon>
               
-              <S.ActionIcon title={t('header.notifications')}>
+              <S.ActionIcon title={t('translation:header.notifications')}>
                 <Icon name="bell" size={22} />
                 <S.NotificationBadge />
               </S.ActionIcon>
@@ -248,10 +248,10 @@ export const AppLayout: React.FC = () => {
                    </S.DropdownHeaderWrapper>
                 }
                 items={[
-                  { label: t('menu.editProfile'), icon: 'user', onClick: () => navigate('/profile') },
-                  { label: t('profile.accountSettings'), icon: 'settings', onClick: () => navigate('/settings') },
-                  { label: t('menu.support'), icon: 'info', onClick: () => console.log('Support') },
-                   { label: t('menu.logout'), icon: 'log-out', variant: 'default', onClick: () => setIsLogoutConfirmOpen(true) }
+                  { label: t('translation:menu.editProfile'), icon: 'user', onClick: () => navigate('/profile') },
+                  { label: t('translation:profile.accountSettings'), icon: 'settings', onClick: () => navigate('/settings') },
+                  { label: t('translation:menu.support'), icon: 'info', onClick: () => console.log('Support') },
+                   { label: t('translation:menu.logout'), icon: 'log-out', variant: 'default', onClick: () => setIsLogoutConfirmOpen(true) }
                 ]}
               />
             </S.HeaderRight>
@@ -297,7 +297,7 @@ export const AppLayout: React.FC = () => {
                 </Button>
               )}
               {!messageState.primaryButton && !messageState.secondaryButton && (
-                <Button onClick={closeMessage}>{t('common.ok')}</Button>
+                <Button onClick={closeMessage}>{t('translation:common.ok')}</Button>
               )}
             </S.ModalFooterWrapper>
           }
@@ -308,10 +308,10 @@ export const AppLayout: React.FC = () => {
           isOpen={isLogoutConfirmOpen}
           onClose={() => setIsLogoutConfirmOpen(false)}
           onConfirm={handleLogout}
-          title={t('auth.logout.confirmTitle')}
-          description={t('auth.logout.confirmDescription')}
-          confirmLabel={t('auth.logout.confirmButton')}
-          cancelLabel={t('common.cancel')}
+          title={t('translation:menu.logoutConfirmTitle')}
+          description={t('translation:menu.logoutConfirmDescription')}
+          confirmLabel={t('translation:menu.logoutConfirmButton')}
+          cancelLabel={t('translation:common.cancel')}
           variant="danger"
         />
       </S.LayoutWrapper>

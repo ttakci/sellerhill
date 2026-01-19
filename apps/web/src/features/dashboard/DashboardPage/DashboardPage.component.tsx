@@ -16,13 +16,13 @@ export const DashboardPageComponent = ({
   isLoading,
   onConnectEbay,
 }: DashboardPageComponentProps): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard', 'translation', 'ebay']);
 
   if (isLoading) {
     return (
       <S.Container>
         <S.EmptyState>
-          <S.EmptyStateText>{t('common.loading')}</S.EmptyStateText>
+          <S.EmptyStateText>{t('translation:common.loading')}</S.EmptyStateText>
         </S.EmptyState>
       </S.Container>
     );
@@ -31,24 +31,24 @@ export const DashboardPageComponent = ({
   return (
     <S.Container>
       <S.Header>
-        <S.Title>{t('dashboard.title')}</S.Title>
-        <S.Subtitle>{t('dashboard.subtitle')}</S.Subtitle>
+        <S.Title>{t('dashboard:dashboard.title')}</S.Title>
+        <S.Subtitle>{t('dashboard:dashboard.subtitle')}</S.Subtitle>
       </S.Header>
 
       {user && (
         <S.Greeting>
-          {t('dashboard.greeting', { name: user.firstName })}
+          {t('dashboard:dashboard.greeting', { name: user.firstName })}
         </S.Greeting>
       )}
 
       <S.Content>
         <S.Card>
-          <S.CardTitle>{t('dashboard.comingSoon')}</S.CardTitle>
-          <S.CardDescription>{t('dashboard.description')}</S.CardDescription>
+          <S.CardTitle>{t('dashboard:dashboard.comingSoon')}</S.CardTitle>
+          <S.CardDescription>{t('dashboard:dashboard.description')}</S.CardDescription>
 
           <S.ButtonContainer>
             <Button variant="primary" fullWidth onClick={onConnectEbay}>
-              {t('ebay.connect.connectButton')}
+              {t('ebay:ebay.connect.connectButton')}
             </Button>
           </S.ButtonContainer>
         </S.Card>

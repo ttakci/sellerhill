@@ -10,6 +10,7 @@ export enum ListingStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   ERROR = 'error',
+  RETRYING = 'retrying',
 }
 
 /**

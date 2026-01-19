@@ -9,12 +9,12 @@ export interface MessageState {
   primaryButton?: {
     label: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'danger';
   };
   secondaryButton?: {
     label: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'danger';
   };
 }
 
@@ -32,12 +32,12 @@ export interface ShowMessageOptions {
   primaryButton?: {
     labelKey: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'danger';
   };
   secondaryButton?: {
     labelKey: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'danger';
   };
 }
 

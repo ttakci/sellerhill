@@ -3,7 +3,7 @@
  */
 
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Text, tkn } from '@repo/ui';
 
 
 export const Container = styled.div`
@@ -147,6 +147,8 @@ export const Header = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
 `;
+
+export const PageTitle = styled(Text)``;
 
 export const MarketplaceGrid = styled.div`
   display: grid;

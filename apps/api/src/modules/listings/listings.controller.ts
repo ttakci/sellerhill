@@ -114,4 +114,18 @@ export class ListingsController {
     }
     return listing;
   }
+
+  /**
+   * Bulk end listings on eBay
+   */
+  @ApiOperation({ summary: 'Bulk end active listings on eBay' })
+  @Post('bulk-end')
+  async bulkEnd(
+    @Request() req: any,
+    @Body() body: { listingIds: string[] },
+  ): Promise<{ success: boolean; count: number }> {
+    const userId = req.user.sub;
+    const count = await this.listingsService.endListings(userId, body.listingIds);
+    return { success: true, count };
+  }
 }

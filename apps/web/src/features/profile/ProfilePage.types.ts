@@ -2,6 +2,6 @@ import type { ProfileDto, UpdateProfileFormData } from '@repo/shared';
 
 export interface ProfilePageComponentProps {
   profile: ProfileDto;
-  onSubmit: (data: UpdateProfileFormData) => Promise<void>;
+  onSubmit: (data: UpdateProfileFormData) => void;
   isLoading: boolean;
 }

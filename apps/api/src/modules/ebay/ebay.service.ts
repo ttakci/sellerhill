@@ -1,13 +1,13 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  EBAY_ACCOUNT_STATUS,
-  EBAY_MARKETPLACE,
-  EBAY_MARKETPLACE_CONFIG,
-  type CreateEbayConnectUrlResponse,
-  type EbayAccountDto,
-  type EbayMarketplaceId,
-  type GetEbayAccountsResponse,
+    EBAY_ACCOUNT_STATUS,
+    EBAY_MARKETPLACE,
+    EBAY_MARKETPLACE_CONFIG,
+    type CreateEbayConnectUrlResponse,
+    type EbayAccountDto,
+    type EbayMarketplaceId,
+    type GetEbayAccountsResponse,
 } from '@repo/shared';
 import axios from 'axios';
 
@@ -773,6 +773,76 @@ export class EbayService {
       this.logger.error(`Failed to fetch business policies from eBay: ${error.message}`);
       // Fallback to empty if eBay API fails (e.g. business policies not enabled on account)
       return [];
+    }
+  }
+
+  /**
+   * Withdraw an offer on eBay (ends the active listing)
+   */
+  async withdrawOffer(userId: string, ebayItemId: string): Promise<void> {
+    this.logger.log(`Withdrawing offer for listing ID: ${ebayItemId}`);
+
+    // 1. Get user's active eBay account
+    const account = await this.getActiveAccount(userId);
+    if (!account) {
+      throw new Error('No active eBay account found for user');
+    }
+
+    // 2. Get fresh access token
+    const accessToken = await this.getAccessToken(account);
+
+    // 3. Find the offer associated with this listing ID
+    // Note: The ebay_item_id we store is the listingId return from publishOffer.
+    // In Inventory API, we treat withdrawing an offer as ending the listing.
+    // Since we don't store offerId, we might need to find it or use Trading API endItem.
+    // However, if we know the SKU, we can get the offer.
+    
+    // For now, let's use the Trading API EndItem as it's more direct when you only have listingId
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<EndItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <ErrorLanguage>en_US</ErrorLanguage>
+  <WarningLevel>High</WarningLevel>
+  <ItemID>${ebayItemId}</ItemID>
+  <EndingReason>NotAvailable</EndingReason>
+</EndItemRequest>`;
+
+    const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
+    const siteIdMap: Record<string, string> = {
+      'EBAY_US': '0',
+      'EBAY_UK': '3',
+      'EBAY_DE': '77',
+      'EBAY_FR': '71',
+      'EBAY_IT': '101',
+      'EBAY_ES': '186',
+    };
+    const siteId = siteIdMap[account.marketplace_id] || '0';
+
+    try {
+      const response = await axios.post(baseUrl, xml, {
+        headers: {
+          'Content-Type': 'text/xml',
+          'X-EBAY-API-SITEID': siteId,
+          'X-EBAY-API-COMPATIBILITY-LEVEL': '967',
+          'X-EBAY-API-CALL-NAME': 'EndItem',
+          'X-EBAY-API-IAF-TOKEN': accessToken,
+        },
+      });
+
+      if (response.data.includes('<Ack>Success</Ack>') || response.data.includes('<Ack>Warning</Ack>')) {
+        this.logger.log(`Successfully ended eBay item: ${ebayItemId}`);
+      } else {
+        const errorMatch = response.data.match(/<LongMessage>(.*?)<\/LongMessage>/);
+        this.logger.error(`Failed to end eBay item ${ebayItemId}: ${errorMatch ? errorMatch[1] : 'Unknown error'}`);
+        // If item is already ended, skip error
+        if (response.data.includes('291') || response.data.includes('already ended')) {
+            this.logger.warn(`Item ${ebayItemId} was already ended.`);
+            return;
+        }
+        throw new Error(errorMatch ? errorMatch[1] : 'Unknown eBay API error');
+      }
+    } catch (error: any) {
+      this.logger.error(`eBay endItem failed for ${ebayItemId}`, error.response?.data || error.message);
+      throw error;
     }
   }
 

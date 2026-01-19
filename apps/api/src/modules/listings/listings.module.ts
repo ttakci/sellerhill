@@ -27,7 +27,6 @@ import { ScraperApiService } from './scraper-api.service';
   providers: [
     ListingsService, 
     ScraperApiService, // Active product data provider
-    // KeepaService, // Deprecated - keeping for reference
     ListingProcessorService, 
     ListingQueueService,
     ListingStrategyService,

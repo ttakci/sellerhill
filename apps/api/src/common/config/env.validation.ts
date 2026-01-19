@@ -72,10 +72,6 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  KEEPA_API_KEY?: string;
-
-  @IsString()
-  @IsOptional()
   SCRAPER_API_KEY?: string;
 
   @IsString()
@@ -98,10 +94,6 @@ class EnvironmentVariables {
   @IsOptional()
   @IsIn(['sandbox', 'production'])
   EBAY_ENVIRONMENT: 'sandbox' | 'production' = 'sandbox';
-
-  @IsString()
-  @IsOptional()
-  KEEPA_API_URL: string = 'https://api.keepa.com/product';
 
   @IsString()
   @IsOptional()

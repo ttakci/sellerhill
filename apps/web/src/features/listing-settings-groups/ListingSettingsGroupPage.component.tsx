@@ -10,7 +10,7 @@ export const ListingSettingsGroupPageComponent = ({
   onEditGroup,
   onDeleteGroup,
 }: ListingSettingsGroupPageProps) => {
-  const { t } = useTranslation('listingSettingsGroup');
+  const { t } = useTranslation(['listingSettingsGroup', 'translation']);
 
   return (
     <S.Container>
@@ -19,18 +19,18 @@ export const ListingSettingsGroupPageComponent = ({
           <S.HeaderTitleWrapper>
             <Icon name="check-list" size={28} color="brand.primary" />
             <S.PageTitle variant="h3" weight="bold">
-              {t('listingSettingsGroup.title')}
+              {t('listingSettingsGroup:listingSettingsGroup.title')}
             </S.PageTitle>
           </S.HeaderTitleWrapper>
           <Text variant="body" color="text.secondary">
-            {t('listingSettingsGroup.subtitle')}
+            {t('listingSettingsGroup:listingSettingsGroup.subtitle')}
           </Text>
         </S.HeaderContent>
         <S.Actions>
           <Button variant="primary" size="md" onClick={onCreateGroup}>
             <Icon name="plus" size={18} />
             <Text variant="body" weight="medium" color="inherit">
-              {t('listingSettingsGroup.createNewGroup')}
+              {t('listingSettingsGroup:listingSettingsGroup.createNewGroup')}
             </Text>
           </Button>
         </S.Actions>
@@ -41,14 +41,14 @@ export const ListingSettingsGroupPageComponent = ({
           <Icon name="box" size={64} color="text.tertiary" />
           <S.EmptyStateContent>
             <Text variant="h4" weight="bold">
-              {t('listingSettingsGroup.emptyState.title')}
+              {t('listingSettingsGroup:listingSettingsGroup.emptyState.title')}
             </Text>
             <Text variant="body" color="text.secondary">
-              {t('listingSettingsGroup.emptyState.description')}
+              {t('listingSettingsGroup:listingSettingsGroup.emptyState.description')}
             </Text>
           </S.EmptyStateContent>
           <Button variant="secondary" onClick={onCreateGroup}>
-            {t('listingSettingsGroup.emptyState.action')}
+            {t('listingSettingsGroup:listingSettingsGroup.emptyState.action')}
           </Button>
         </S.EmptyState>
       ) : (
@@ -67,7 +67,7 @@ export const ListingSettingsGroupPageComponent = ({
                   }
                   actions={
                     <Badge variant="success" size="sm">
-                      {t('listingSettingsGroup.statusActive')}
+                      {t('listingSettingsGroup:listingSettingsGroup.statusActive')}
                     </Badge>
                   }
                 >
@@ -90,18 +90,18 @@ export const ListingSettingsGroupPageComponent = ({
                     <S.Stats>
                       <S.StatItem>
                         <Icon name="grid" size={14} />
-                        {t('listingSettingsGroup.productsCount', { count: 0 })}
+                        {t('listingSettingsGroup:listingSettingsGroup.productsCount', { count: 0 })}
                       </S.StatItem>
                     </S.Stats>
 
                     <S.CardActions onClick={(e) => e.stopPropagation()}>
-                      <S.IconButton onClick={() => onEditGroup(group.id)} title={t('listingSettingsGroup.tooltips.editGroup')}>
+                      <S.IconButton onClick={() => onEditGroup(group.id)} title={t('listingSettingsGroup:listingSettingsGroup.tooltips.editGroup')}>
                         <Icon name="edit" size={18} />
                       </S.IconButton>
                       <S.IconButton 
                         className="delete" 
                         onClick={() => onDeleteGroup(group.id)} 
-                        title={t('listingSettingsGroup.tooltips.deleteGroup')}
+                        title={t('listingSettingsGroup:listingSettingsGroup.tooltips.deleteGroup')}
                       >
                         <Icon name="trash" size={18} />
                       </S.IconButton>
@@ -114,7 +114,7 @@ export const ListingSettingsGroupPageComponent = ({
       )}
 
       <S.Copyright>
-        {t('listingSettingsGroup.copyright', { year: new Date().getFullYear() })}
+        {t('listingSettingsGroup:listingSettingsGroup.copyright', { year: new Date().getFullYear() })}
       </S.Copyright>
     </S.Container>
   );

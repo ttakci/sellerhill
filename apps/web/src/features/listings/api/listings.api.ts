@@ -62,6 +62,18 @@ export const listingsApi = baseApi.injectEndpoints({
       query: () => '/ebay/business-policies',
       providesTags: ['EbayPolicies'],
     }),
+
+    /**
+     * End listings on eBay (withdraw offers)
+     */
+    endListings: builder.mutation<{ success: boolean; count: number }, string[]>({
+      query: (listingIds) => ({
+        url: '/listings/bulk-end',
+        method: 'POST',
+        body: { listingIds },
+      }),
+      invalidatesTags: ['Listings'],
+    }),
   }),
 });
 
@@ -72,4 +84,5 @@ export const {
   useGetJobStatusQuery,
   useGetJobItemsQuery,
   useGetBusinessPoliciesQuery,
+  useEndListingsMutation,
 } = listingsApi;

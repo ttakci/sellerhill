@@ -13,6 +13,7 @@ import { ChevronRightIcon } from './chevron-right';
 import { CodeIcon } from './code';
 import { CopyIcon } from './copy';
 import { EditIcon } from './edit';
+import { ExternalLinkIcon } from './external-link';
 import { EyeIcon } from './eye';
 import { FacebookIcon } from './facebook';
 import { FlagTRIcon } from './flag-tr';
@@ -31,6 +32,7 @@ import { MapPinIcon } from './map-pin';
 import { MenuIcon } from './menu';
 import { MonitorIcon } from './monitor';
 import { MoonIcon } from './moon';
+import { PercentIcon } from './percent';
 import { PhoneIcon } from './phone';
 import { PlusIcon } from './plus';
 import { SearchIcon } from './search';
@@ -66,6 +68,7 @@ export { ChevronRightIcon } from './chevron-right';
 export { CodeIcon } from './code';
 export { CopyIcon } from './copy';
 export { EditIcon } from './edit';
+export { ExternalLinkIcon } from './external-link';
 export { EyeIcon } from './eye';
 export { FlagTRIcon } from './flag-tr';
 export { FlagUSIcon } from './flag-us';
@@ -83,6 +86,7 @@ export { MapPinIcon } from './map-pin';
 export { MenuIcon } from './menu';
 export { MonitorIcon } from './monitor';
 export { MoonIcon } from './moon';
+export { PercentIcon } from './percent';
 export { PhoneIcon } from './phone';
 export { PlusIcon } from './plus';
 export { SearchIcon } from './search';
@@ -157,6 +161,8 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   monitor: MonitorIcon as any,
   tablet: TabletIcon as any,
   smartphone: SmartphoneIcon as any,
+  percent: PercentIcon as any,
+  'external-link': ExternalLinkIcon as any,
 } as const;
 
 export type IconName = keyof typeof iconMap;

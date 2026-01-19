@@ -12,7 +12,7 @@ import {
 } from './api/storeSettingsApi';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['storeSettings', 'translation']);
   const { showMessage, closeMessage } = useUI();
   const [selectedStoreId, setSelectedStoreId] = useState<string | undefined>(undefined);
 
@@ -33,10 +33,10 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     if (saveSuccess) {
       showMessage({
         type: 'success',
-        headerKey: 'message.success.header',
-        descriptionKey: 'common.saveSuccess',
+        headerKey: 'translation:message.success.header',
+        descriptionKey: 'translation:common.saveSuccess',
         primaryButton: {
-          labelKey: 'message.success.ok',
+          labelKey: 'translation:message.success.ok',
           onClick: closeMessage,
         },
       }, t);
@@ -49,11 +49,11 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       const { key, params } = getErrorMessage(saveError);
       showMessage({
         type: 'error',
-        headerKey: 'message.error.header',
-        descriptionKey: key,
+        headerKey: 'translation:message.error.header',
+        descriptionKey: key, // getErrorMessage handles prefixing for global errors usually
         descriptionParams: params,
         primaryButton: {
-          labelKey: 'message.error.close',
+          labelKey: 'translation:message.error.close',
           onClick: closeMessage,
         },
       }, t);
@@ -68,7 +68,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   };
 
   if (settingsLoading || !settings) {
-    return <S.LoadingContainer>{t('common.loading')}</S.LoadingContainer>;
+    return <S.LoadingContainer>{t('translation:common.loading')}</S.LoadingContainer>;
   }
 
   const availableStores = ebayAccounts?.items.map(acc => ({

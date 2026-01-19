@@ -1,19 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StoreSettingsFormData, storeSettingsSchema } from '@repo/shared';
 import {
-    Badge,
-    Button,
-    Card,
-    CardBody,
-    Icon,
-    Select,
-    SwitchRow,
-    Table,
-    TablePagination,
-    Text,
-    TextInput,
-    Toggle,
-    useTheme
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  Icon,
+  Select,
+  SwitchRow,
+  Table,
+  TablePagination,
+  Text,
+  TextInput,
+  Toggle,
+  useTheme
 } from '@repo/ui';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -28,7 +28,7 @@ export const StoreSettingsPageComponent = ({
   onStoreChange,
   availableStores,
 }: StoreSettingsPageProps): React.ReactElement => {
-  const { t } = useTranslation('storeSettings');
+  const { t } = useTranslation(['storeSettings', 'translation']);
   const { theme } = useTheme();
   const [newKeyword, setNewKeyword] = useState('');
   const [newScope, setNewScope] = useState<'title' | 'description' | 'both'>('both');
@@ -102,13 +102,13 @@ export const StoreSettingsPageComponent = ({
   const blacklistColumns = [
     {
       key: 'keyword',
-      header: t('storeSettings.keyword'),
+      header: t('storeSettings:storeSettings.keyword'),
       sortable: true,
       render: (value: any) => <Text weight="semibold">{value}</Text>,
     },
     {
       key: 'scope',
-      header: t('storeSettings.scope'),
+      header: t('storeSettings:storeSettings.scope'),
       sortable: true,
       render: (value: any) => {
         const variantMap: Record<string, 'primary' | 'warning' | 'info'> = {
@@ -117,9 +117,9 @@ export const StoreSettingsPageComponent = ({
           description: 'info',
         };
         const labelMap: Record<string, string> = {
-          both: 'storeSettings.scope_both',
-          title: 'storeSettings.scope_title',
-          description: 'storeSettings.scope_description',
+          both: 'storeSettings:storeSettings.scope_both',
+          title: 'storeSettings:storeSettings.scope_title',
+          description: 'storeSettings:storeSettings.scope_description',
         };
         return (
           <Badge variant={variantMap[value] || 'secondary'}>
@@ -146,17 +146,17 @@ export const StoreSettingsPageComponent = ({
         <S.HeaderContent>
           <S.HeaderTitleWrapper>
              <Icon name="store" size={28} color="brand.primary" />
-             <S.PageTitle variant="h3" weight="bold">{t('storeSettings.title')}</S.PageTitle>
+             <S.PageTitle variant="h3" weight="bold">{t('storeSettings:storeSettings.title')}</S.PageTitle>
           </S.HeaderTitleWrapper>
           <Text variant="body" color="text.secondary">
-            {t('storeSettings.subtitle')}
+            {t('storeSettings:storeSettings.subtitle')}
           </Text>
         </S.HeaderContent>
         <S.Actions>
           <Button variant="primary" size="md" onClick={handleSubmit(onSave)}>
             <Icon name="archive" size={18} />
             <Text variant="body" weight="medium" color="inherit">
-              {t('storeSettings.saveChanges')}
+              {t('storeSettings:storeSettings.saveChanges')}
             </Text>
           </Button>
         </S.Actions>
@@ -177,27 +177,27 @@ export const StoreSettingsPageComponent = ({
                 )}
               />
               <S.SwitchLabelContent>
-                <Text variant="body" weight="semibold">{t('storeSettings.globalSettings')}</Text>
+                <Text variant="body" weight="semibold">{t('storeSettings:storeSettings.globalSettings')}</Text>
                 <S.DescriptionWrapper>
                   <S.DescriptionLine variant="caption" color="text.secondary">
-                     {t('storeSettings.globalDescription').split('. ')[0]}.
+                     {t('storeSettings:storeSettings.globalDescription').split('. ')[0]}.
                   </S.DescriptionLine>
                   <S.SecondaryDescriptionLine variant="caption" muted>
-                     {t('storeSettings.globalDescription').split('. ')[1]}.
+                     {t('storeSettings:storeSettings.globalDescription').split('. ')[1]}.
                   </S.SecondaryDescriptionLine>
                 </S.DescriptionWrapper>
               </S.SwitchLabelContent>
             </S.SwitchGroup>
 
             <S.StoreSelectWrapper $disabled={isGlobal}>
-              <S.StoreLabel>{t('storeSettings.selectStore')}</S.StoreLabel>
+              <S.StoreLabel>{t('storeSettings:storeSettings.selectStore')}</S.StoreLabel>
               <Select
                 options={availableStores.map(s => ({ value: s.id, label: s.name }))}
                 value={settings.storeId || ''}
                 onChange={(val) => onStoreChange(val)}
                 fullWidth
                 disabled={isGlobal}
-                placeholder={t('storeSettings.selectStorePlaceholder') || t('storeSettings.selectStore')}
+                placeholder={t('storeSettings:storeSettings.selectStorePlaceholder') || t('storeSettings:storeSettings.selectStore')}
               />
             </S.StoreSelectWrapper>
           </S.GlobalBanner>
@@ -210,8 +210,8 @@ export const StoreSettingsPageComponent = ({
                     <Icon name="map-pin" size={24} color="text.primary" />
                   </S.HeaderIconWrapper>
                   <S.SectionTitleContent>
-                    <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.locationSectionTitle')}</S.SectionTitle>
-                    <Text variant="caption" color="text.secondary">{t('storeSettings.locationSectionSubtitle')}</Text>
+                    <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.locationSectionTitle')}</S.SectionTitle>
+                    <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.locationSectionSubtitle')}</Text>
                   </S.SectionTitleContent>
                 </S.SectionTitleGroup>
               </S.SectionHeader>
@@ -222,7 +222,7 @@ export const StoreSettingsPageComponent = ({
                     control={control}
                     render={({ field }) => (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <S.StoreLabel>{t('storeSettings.country')}</S.StoreLabel>
+                        <S.StoreLabel>{t('storeSettings:storeSettings.country')}</S.StoreLabel>
                         <Select
                           options={[
                             { value: 'US', label: 'United States (US)' },
@@ -240,7 +240,7 @@ export const StoreSettingsPageComponent = ({
                           value={field.value}
                           onChange={field.onChange}
                           fullWidth
-                          placeholder={t('storeSettings.selectCountry') || 'Select Country'}
+                          placeholder={t('storeSettings:storeSettings.selectCountry') || 'Select Country'}
                         />
                       </div>
                     )}
@@ -248,14 +248,14 @@ export const StoreSettingsPageComponent = ({
                   <TextInput
                     name="state"
                     control={control}
-                    label={t('storeSettings.state')}
+                    label={t('storeSettings:storeSettings.state')}
                   />
                 </S.AddressGrid>
                 
                 <TextInput
                   name="zipCode"
                   control={control}
-                  label={t('storeSettings.zipCode')}
+                  label={t('storeSettings:storeSettings.zipCode')}
                 />
               </CardBody>
             </Card>
@@ -267,8 +267,8 @@ export const StoreSettingsPageComponent = ({
                     <Icon name="check-list" size={24} color="text.primary" />
                   </S.HeaderIconWrapper>
                   <S.SectionTitleContent>
-                     <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.validationSectionTitle')}</S.SectionTitle>
-                     <Text variant="caption" color="text.secondary">{t('storeSettings.validationSectionSubtitle')}</Text>
+                     <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.validationSectionTitle')}</S.SectionTitle>
+                     <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.validationSectionSubtitle')}</Text>
                   </S.SectionTitleContent>
                 </S.SectionTitleGroup>
               </S.SectionHeader>
@@ -278,8 +278,8 @@ export const StoreSettingsPageComponent = ({
                   control={control}
                   render={({ field }) => (
                     <SwitchRow
-                      title={t('storeSettings.validateTitle')}
-                      description={t('storeSettings.validateTitleDesc')}
+                      title={t('storeSettings:storeSettings.validateTitle')}
+                      description={t('storeSettings:storeSettings.validateTitleDesc')}
                       checked={field.value}
                       onChange={field.onChange}
                     />
@@ -291,8 +291,8 @@ export const StoreSettingsPageComponent = ({
                   control={control}
                   render={({ field }) => (
                     <SwitchRow
-                      title={t('storeSettings.validateDescription')}
-                      description={t('storeSettings.validateDescriptionDesc')}
+                      title={t('storeSettings:storeSettings.validateDescription')}
+                      description={t('storeSettings:storeSettings.validateDescriptionDesc')}
                       checked={field.value}
                       onChange={field.onChange}
                     />
@@ -309,8 +309,8 @@ export const StoreSettingsPageComponent = ({
                    <Icon name="block" size={24} color="text.primary" />
                 </S.HeaderIconWrapper>
                 <S.SectionTitleContent>
-                  <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.blacklistSectionTitle')}</S.SectionTitle>
-                  <Text variant="caption" color="text.secondary">{t('storeSettings.blacklistSubtitle')}</Text>
+                  <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.blacklistSectionTitle')}</S.SectionTitle>
+                  <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.blacklistSubtitle')}</Text>
                 </S.SectionTitleContent>
               </S.BlacklistTitleColumn>
               <S.BlacklistControls>
@@ -318,15 +318,15 @@ export const StoreSettingsPageComponent = ({
                   <S.BlacklistInput
                     value={newKeyword}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewKeyword(e.target.value)}
-                    placeholder={t('storeSettings.addKeyword')}
+                    placeholder={t('storeSettings:storeSettings.addKeyword')}
                   />
                   <S.BlacklistActionGroup>
                     <S.ScopeSelectContainer>
                       <Select
                         options={[
-                          { value: 'both', label: t('storeSettings.scope_both') },
-                          { value: 'title', label: t('storeSettings.scope_title') },
-                          { value: 'description', label: t('storeSettings.scope_description') },
+                          { value: 'both', label: t('storeSettings:storeSettings.scope_both') },
+                          { value: 'title', label: t('storeSettings:storeSettings.scope_title') },
+                          { value: 'description', label: t('storeSettings:storeSettings.scope_description') },
                         ]}
                         value={newScope}
                         onChange={(val) => setNewScope(val as any)}
@@ -348,7 +348,7 @@ export const StoreSettingsPageComponent = ({
             <Table
               columns={blacklistColumns}
               data={pagedBlacklist}
-              emptyMessage={t('storeSettings.noKeywords')}
+              emptyMessage={t('storeSettings:storeSettings.noKeywords')}
               sortColumn={sortColumn}
               sortDirection={sortDirection}
               onSort={handleSort}
@@ -360,7 +360,7 @@ export const StoreSettingsPageComponent = ({
                     rowsPerPage={rowsPerPage}
                     onPageChange={setPage}
                     onRowsPerPageChange={setRowsPerPage}
-                    labelRowsPerPage={t('common.rowsPerPage')}
+                    labelRowsPerPage={t('translation:common.rowsPerPage')}
                   />
                 )
               }
@@ -370,7 +370,7 @@ export const StoreSettingsPageComponent = ({
       </Card>
 
       <S.Copyright>
-        {t('storeSettings.copyright', { year: new Date().getFullYear() })}
+        {t('storeSettings:storeSettings.copyright', { year: new Date().getFullYear() })}
       </S.Copyright>
     </S.Container>
   );
