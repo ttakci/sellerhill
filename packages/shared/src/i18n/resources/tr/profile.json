@@ -1,0 +1,18 @@
+{
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Kişisel Bilgiler",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "emailAddress": "E-posta adresi",
+    "phone": "Telefon",
+    "bio": "Biyografi",
+    "address": "Adres",
+    "country": "Ülke",
+    "cityState": "Şehir/Eyalet",
+    "postalCode": "Posta Kodu",
+    "taxId": "Vergi Numarası",
+    "edit": "Düzenle",
+    "home": "Anasayfa"
+  }
+}

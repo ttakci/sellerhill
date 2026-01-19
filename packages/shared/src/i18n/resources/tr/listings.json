@@ -1,0 +1,103 @@
+{
+  "listings": {
+    "tabs": {
+      "active": "Aktif Listeler",
+      "jobs": "İçe Aktarma İşleri"
+    },
+    "jobs": {
+      "title": "İçe Aktarma İşleri",
+      "empty": "İçe aktarma işi bulunamadı.",
+      "status": {
+        "pending": "Bekliyor",
+        "processing": "İşleniyor",
+        "completed": "Tamamlandı",
+        "failed": "Hata"
+      },
+      "table": {
+        "id": "İş ID",
+        "date": "Tarih",
+        "progress": "İlerleme",
+        "results": "Sonuçlar",
+        "status": "Durum",
+        "actions": "İşlemler"
+      }
+    },
+    "overview": {
+      "title": "Aktif Listeler",
+      "subtitle": "eBay'de {{count}} aktif listeniz bulunuyor.",
+      "emptyTitle": "Liste Bulunamadı",
+      "emptySubtitle": "Amazon'dan eBay mağazanıza ürün ekleyerek başlayın."
+    },
+    "table": {
+      "product": "Ürün",
+      "asin": "ASIN",
+      "ebayId": "eBay Ürün ID",
+      "price": "Fiyat",
+      "stock": "Stok",
+      "status": "Durum",
+      "actions": "İşlemler",
+      "addedAt": "{{date}} tarihinde eklendi"
+    },
+    "status": {
+      "active": "Aktif",
+      "draft": "Taslak",
+      "inactive": "Pasif",
+      "error": "Hata"
+    },
+    "title": "Ürün Ekle",
+    "subtitle": "ASIN tanımlayıcılarını kullanarak ürünleri doğrudan Amazon'dan eBay mağazanıza aktarın. Görselleri, açıklamaları ve fiyat optimizasyonlarını biz hallederiz.",
+    "breadcrumb": {
+      "dashboard": "Panel",
+      "listings": "Listeler",
+      "addProducts": "Ürün Ekle"
+    },
+    "listingSettings": {
+      "title": "Listeleme Ayarları",
+      "strategyGroup": "Strateji Grubu",
+      "strategyGroupPlaceholder": "Bir Strateji Grubu Seçin",
+      "strategyGroupHelp": "Kâr marjlarını, yuvarlama kurallarını ve açıklama şablonlarını tanımlar."
+    },
+    "businessPolicies": {
+      "title": "eBay İş Politikaları",
+      "refreshPolicies": "Politikaları Yenile",
+      "paymentPolicy": "Ödeme Politikası",
+      "paymentPolicyPlaceholder": "Politika Seçin",
+      "shippingPolicy": "Kargo Politikası",
+      "shippingPolicyPlaceholder": "Politika Seçin",
+      "returnPolicy": "İade Politikası",
+      "returnPolicyPlaceholder": "Politika Seçin"
+    },
+    "asinEntry": {
+      "title": "ASIN Girişi",
+      "subtitle": "Amazon Standart Tanımlama Numaralarını Girin",
+      "counter": "{{count}} / 1000 ASIN",
+      "label": "Amazon ASIN'lerini girin (her satıra bir tane)",
+      "placeholder": "örn., B00X4WHP5E\nB08P2H5L8H\nB09G3NPT3G",
+      "accepts": "Kabul eder: B00..., B01...",
+      "helpText": "Toplu girişler desteklenir. Her ASIN'in yeni bir satırda olduğundan emin olun. Tekrarları otomatik olarak filtreleyeceğiz."
+    },
+    "actions": {
+      "cancel": "İptal",
+      "import": "İçe Aktar ve Listeleri Oluştur",
+      "importing": "İçe Aktarılıyor...",
+      "addListing": "Liste Ekle"
+    },
+    "validation": {
+      "invalidAsin": "Geçersiz ASIN formatı. 'B' ile başlamalı ve ardından 9 alfanümerik karakter gelmelidir.",
+      "minOneAsin": "Lütfen en az bir ASIN girin",
+      "maxAsins": "İçe aktarma başına maksimum 1000 ASIN'e izin verilir",
+      "paymentPolicyRequired": "Ödeme politikası gereklidir",
+      "shippingPolicyRequired": "Kargo politikası gereklidir",
+      "returnPolicyRequired": "İade politikası gereklidir"
+    },
+    "success": {
+      "created": "{{count}} liste başarıyla oluşturuldu",
+      "queued": "{{count}} liste işleme için sıraya alındı"
+    },
+    "errors": {
+      "createFailed": "Listeler oluşturulamadı",
+      "fetchPoliciesFailed": "eBay iş politikaları alınamadı",
+      "invalidAsins": "Bazı ASIN'ler geçersiz ve atlandı"
+    }
+  }
+}

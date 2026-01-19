@@ -8,6 +8,8 @@ import DashboardPage from './features/dashboard/DashboardPage';
 import EbayConnectPage from './features/ebay/EbayConnectPage';
 import OnboardingEbayPage from './features/ebay/OnboardingEbayPage';
 import { ListingSettingsGroupForm, ListingSettingsGroupPage } from './features/listing-settings-groups';
+import { AddListingsPage, ListingsPage } from './features/listings';
+import ProfilePage from './features/profile';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
 
@@ -30,6 +32,9 @@ export function App() {
           <Route path="/settings/listing-groups" element={<ListingSettingsGroupPage />} />
           <Route path="/settings/listing-groups/new" element={<ListingSettingsGroupForm />} />
           <Route path="/settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
+          <Route path="/listings" element={<ListingsPage />} />
+          <Route path="/listings/add" element={<AddListingsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/register" replace />} />

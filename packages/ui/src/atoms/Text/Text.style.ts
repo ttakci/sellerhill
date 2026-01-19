@@ -15,27 +15,27 @@ interface StyledTextProps {
 
 const variantStyles = {
   h1: (theme: any) => `
-    font-size: ${theme.typography.fontSize.xxxl};
-    line-height: ${theme.typography.lineHeight.tight};
-  `,
-  h2: (theme: any) => `
     font-size: ${theme.typography.fontSize.xxl};
     line-height: ${theme.typography.lineHeight.tight};
   `,
-  h3: (theme: any) => `
+  h2: (theme: any) => `
     font-size: ${theme.typography.fontSize.xl};
     line-height: ${theme.typography.lineHeight.tight};
   `,
-  h4: (theme: any) => `
+  h3: (theme: any) => `
     font-size: ${theme.typography.fontSize.lg};
     line-height: ${theme.typography.lineHeight.tight};
   `,
-  body: (theme: any) => `
+  h4: (theme: any) => `
     font-size: ${theme.typography.fontSize.md};
+    line-height: ${theme.typography.lineHeight.tight};
+  `,
+  body: (theme: any) => `
+    font-size: ${theme.typography.fontSize.sm};
     line-height: ${theme.typography.lineHeight.normal};
   `,
   caption: (theme: any) => `
-    font-size: ${theme.typography.fontSize.sm};
+    font-size: ${theme.typography.fontSize.xs};
     line-height: ${theme.typography.lineHeight.normal};
   `,
   overline: (theme: any) => `
@@ -45,7 +45,7 @@ const variantStyles = {
     font-weight: ${theme.typography.fontWeight.semibold};
   `,
   nav: (theme: any) => `
-    font-size: ${theme.typography.fontSize.md};
+    font-size: ${theme.typography.fontSize.sm};
     font-weight: ${theme.typography.fontWeight.medium};
   `,
 };

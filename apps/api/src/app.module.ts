@@ -1,5 +1,6 @@
+import { BullModule } from '@nestjs/bullmq';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
@@ -11,18 +12,32 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
 import { ListingSettingsGroupModule } from './modules/listing-settings-groups/listing-settings-group.module';
+import { ListingsModule } from './modules/listings/listings.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { StoreSettingsModule } from './modules/store-settings/store-settings.module';
 
 @Module({
   imports: [
-    // Environment variables validation
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.production' : '.env',
       validate: validateEnv,
       cache: true,
     }),
     // Database connection pool (Global)
     DatabaseModule,
+    // Queue processing configuration
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+          password: configService.get<string>('REDIS_PASSWORD'),
+          db: configService.get<number>('REDIS_DB', 0),
+        },
+      }),
+    }),
     // Rate limiting configuration
     ThrottlerModule.forRoot([
       {
@@ -47,6 +62,8 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     DashboardModule,
     StoreSettingsModule,
     ListingSettingsGroupModule,
+    ListingsModule,
+    ProfileModule,
   ],
   providers: [
     {

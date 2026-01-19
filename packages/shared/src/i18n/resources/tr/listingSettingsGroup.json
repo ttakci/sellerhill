@@ -151,6 +151,27 @@
       "customTemplate": "Özel stil ile kendi HTML şablonunuzu yazın.",
       "predefinedTemplate": "Profesyonel olarak tasarlanmış şablonlardan seçim yapın.",
       "templateVariables": "Şablonunuzda {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} kullanın."
-    }
+    },
+    "editorTitle": "Listeleme Grubu Editörü",
+    "editorDescription": "Listeleme ayarlarınızı, fiyatlandırma stratejilerinizi ve şablonlarınızı yapılandırın.",
+    "generalSettings": "Genel Ayarlar",
+    "pricingStrategy": "Yeniden Fiyatlandırma Stratejisi",
+    "addRange": "Aralık Ekle",
+    "feesAndTaxes": "Ücretler ve Vergiler",
+    "taxRate": "Vergi Oranı (%)",
+    "stockControl": "Stok Kontrolü",
+    "defaultStockQuantity": "Varsayılan Miktar",
+    "htmlTemplate": "HTML Şablonu",
+    "custom": "Özel",
+    "predefined": "Öntanımlı",
+    "activeTemplate": "AKTİF ŞABLON",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "EBAY FORMATI",
+    "sample": {
+      "productTitle": "Özel Şablon Ürünü",
+      "productDescription": "Bu sizin özel şablon açıklamanızdır.",
+      "productSpecs": "<ul><li>Özellik A</li><li>Özellik B</li></ul>"
+    },
+    "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır."
   }
 }

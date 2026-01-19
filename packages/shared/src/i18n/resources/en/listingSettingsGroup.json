@@ -151,6 +151,27 @@
       "customTemplate": "Write your own HTML template with custom styling.",
       "predefinedTemplate": "Choose from professionally designed templates.",
       "templateVariables": "Use {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} in your template."
-    }
+    },
+    "editorTitle": "Listing Group Editor",
+    "editorDescription": "Configure your listing settings, pricing strategies, and templates.",
+    "generalSettings": "General Settings",
+    "pricingStrategy": "Repricing Strategy",
+    "addRange": "Add Range",
+    "feesAndTaxes": "Fees & Taxes",
+    "taxRate": "Tax Rate (%)",
+    "stockControl": "Stock Control",
+    "defaultStockQuantity": "Default Quantity",
+    "htmlTemplate": "HTML Template",
+    "custom": "Custom",
+    "predefined": "Predefined",
+    "activeTemplate": "ACTIVE TEMPLATE",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "EBAY FORMAT",
+    "sample": {
+      "productTitle": "Custom Template Product",
+      "productDescription": "This is your custom template description.",
+      "productSpecs": "<ul><li>Feature A</li><li>Feature B</li></ul>"
+    },
+    "copyright": "© {{year}} Zonds Platform. All rights reserved."
   }
 }

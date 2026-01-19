@@ -5,86 +5,149 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
+
 export const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
   background: ${tkn('colors.background.primary')};
-  padding: ${tkn('spacing.md')};
-  position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
 
-  /* Premium background effect consistency */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -10%;
-    right: -10%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, ${tkn('colors.brand.primary')}15 0%, transparent 70%);
-    filter: blur(60px);
-    z-index: 0;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -10%;
-    left: -10%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, ${tkn('colors.brand.primary')}10 0%, transparent 70%);
-    filter: blur(60px);
-    z-index: 0;
+  * {
+    box-sizing: border-box;
   }
 `;
 
-export const AuthCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.xl')};
-  box-shadow: ${tkn('shadows.xl')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  padding: ${tkn('spacing.xl')};
+export const LayoutWrapper = styled.div`
+  display: flex;
   width: 100%;
-  max-width: 540px; /* Slightly wider for form rows */
-  position: relative;
+  flex-wrap: wrap;
+
+  @media (min-width: 1024px) {
+    flex-wrap: nowrap;
+  }
+`;
+
+export const LeftPanel = styled.div`
+  flex: 1 1 100%;
+  width: 100%;
+  background: ${tkn('colors.surface.primary')};
+  padding: ${tkn('spacing.xl')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
 
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
+    flex: 0 0 50%;
+    width: 50%;
     padding: ${tkn('spacing.xxxl')};
   }
 `;
 
-export const LogoWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: ${tkn('spacing.xl')};
-`;
-
-export const LogoIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  background: ${tkn('colors.brand.primary')};
-  border-radius: ${tkn('radius.lg')};
-  display: flex;
+export const RightPanel = styled.div`
+  flex: 1 1 100%;
+  width: 100%;
+  background: #020D23; /* Deep Navy from TailAdmin Demo */
+  padding: ${tkn('spacing.xxxl')};
+  display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: ${tkn('shadows.md')};
-  color: ${tkn('colors.text.inverse')};
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex: 0 0 50%;
+    width: 50%;
+  }
+
+  /* Decorative Grid Pattern */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+  }
+
+  /* Mosaic 'Tiled' effect like the image */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px);
+    background-size: 25px 25px;
+    z-index: 1;
+    opacity: 0.5;
+  }
+`;
+
+/* Additional Tiled decor elements to mimic the mosaic in the image */
+export const MosaicDecor = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  & > div {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+  }
+
+  .box-1 { width: 100px; height: 100px; top: 20%; left: 10%; }
+  .box-2 { width: 150px; height: 150px; top: 60%; left: 70%; background: rgba(255, 255, 255, 0.02); }
+  .box-3 { width: 80px; height: 80px; top: 10%; left: 80%; }
+  .box-4 { width: 120px; height: 120px; top: 80%; left: 20%; background: rgba(255, 255, 255, 0.04); }
+`;
+
+export const AuthCard = styled.div`
+  width: 100%;
+  max-width: 550px;
+  background: ${tkn('colors.surface.primary')};
+  
+  @media (max-width: 640px) {
+     padding: 0;
+  }
+`;
+
+export const BackLink = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  background: none;
+  border: none;
+  color: ${tkn('colors.text.secondary')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  cursor: pointer;
+  margin-bottom: ${tkn('spacing.xl')};
+  padding: 0;
+
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+  }
 `;
 
 export const Header = styled.div`
+  margin-bottom: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: ${tkn('spacing.xxl')};
-`;
-
-export const SubtitleWrapper = styled.div`
-  margin-top: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const Form = styled.form`
@@ -108,13 +171,12 @@ export const ButtonContainer = styled.div`
 `;
 
 export const Footer = styled.div`
-  text-align: center;
   margin-top: ${tkn('spacing.xl')};
-  padding-top: ${tkn('spacing.xl')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
+  text-align: center;
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  justify-content: center;
 `;
 
 export const FooterLink = styled.button`
@@ -124,11 +186,26 @@ export const FooterLink = styled.button`
   cursor: pointer;
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.sm')};
-  transition: all ${tkn('transitions.fast')};
   padding: 0;
   
   &:hover {
-    color: ${tkn('colors.brand.primaryHover')};
     text-decoration: underline;
   }
+`;
+
+export const BrandingContent = styled.div`
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.xl')};
+  z-index: 2;
+`;
+
+export const LogoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
 `;

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { listingSettingsGroupSchema, type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
-import { Button, Icon, Select, SwitchRow, Text, TextInput } from '@repo/ui';
+import { Button, Card, CardBody, Icon, Select, Text, TextInput } from '@repo/ui';
 import { useMemo, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,24 +8,27 @@ import * as S from './ListingSettingsGroupForm.style';
 import { ListingSettingsGroupFormProps } from './ListingSettingsGroupForm.types';
 
 export const ListingSettingsGroupFormComponent = ({
+  isEdit,
   defaultValues,
   predefinedTemplates,
   onSubmit,
   onCancel,
   isLoading,
 }: ListingSettingsGroupFormProps) => {
-  const { t } = useTranslation();
-  const [isPreviewDarkMode, setIsPreviewDarkMode] = useState(false);
-  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const { t } = useTranslation('listingSettingsGroup');
+
+
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   const {
     control,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<ListingSettingsGroupFormData>({
-    resolver: zodResolver(listingSettingsGroupSchema(t)),
+    resolver: zodResolver(listingSettingsGroupSchema(t)) as any,
     defaultValues: {
       name: '',
       description: '',
@@ -44,294 +47,322 @@ export const ListingSettingsGroupFormComponent = ({
 
   const watchedValues = watch();
 
-  const renderedPreview = useMemo(() => {
-    let html = '';
-    let sampleData: Record<string, string> = {};
+  const handleAddRange = () => {
+    const strategies = getValues('repricingStrategy');
+    const lastStrategy = strategies?.length ? strategies[strategies.length - 1] : null;
+    const lastMax = lastStrategy ? Number(lastStrategy.maxPrice) : 0;
+    const newMin = lastStrategy ? Number((lastMax + 0.1).toFixed(2)) : 0;
 
+    append({ 
+      id: crypto.randomUUID(), 
+      minPrice: newMin, 
+      maxPrice: 9999, 
+      profitMarginPercent: 15 
+    });
+  };
+
+  const activeTemplate = useMemo(() => {
     if (watchedValues.templates.type === 'custom') {
-      html = watchedValues.templates.customTemplateHtml || '';
-      // Fallback sample data for custom templates
-      sampleData = {
-        product_title: 'Custom Template Product',
-        product_price: '199.99',
-        product_image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
-        product_description: 'This is your custom template description.',
-        product_specs: '<ul><li>Feature A</li><li>Feature B</li></ul>',
+      return {
+        htmlContent: watchedValues.templates.customTemplateHtml || '',
+        sampleData: {
+          title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
+          main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
+          product_description: 'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
+          feature_bullets: ['Industry-leading noise cancellation', 'Up to 30-hour battery life', 'Touch sensor controls', 'Quick attention mode'],
+          product_details: ['Brand: Zonds Audio', 'Connectivity: Bluetooth 5.0', 'Noise Cancelling: Yes', 'Color: Silver']
+        }
       };
-    } else {
-      const template = predefinedTemplates.find((t: PredefinedTemplateResponse) => t.id === watchedValues.templates.predefinedTemplateId);
-      html = template?.htmlContent || '';
-      sampleData = template?.sampleData || {};
     }
+    const template = predefinedTemplates.find((t: PredefinedTemplateResponse) => t.id === watchedValues.templates.predefinedTemplateId);
+    return {
+      htmlContent: template?.htmlContent || '',
+      sampleData: template?.sampleData || {}
+    };
+  }, [watchedValues.templates.type, watchedValues.templates.predefinedTemplateId, watchedValues.templates.customTemplateHtml, predefinedTemplates]);
 
-    let processedHtml = html;
+  const renderedPreview = useMemo(() => {
+    const { htmlContent, sampleData } = activeTemplate;
+
+    let processedHtml = htmlContent || '';
     Object.entries(sampleData).forEach(([key, value]) => {
-      processedHtml = processedHtml.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      if (Array.isArray(value)) {
+        // Handle Mustache-like blocks for arrays
+        const blockRegex = new RegExp(`{{#${key}}}(.*?){{/${key}}}`, 'gs');
+        processedHtml = processedHtml.replace(blockRegex, (_, inner) => {
+          return value.map(item => inner.replace(/{{.}}/g, String(item))).join('\n');
+        });
+        
+        // Also support direct replacement if used without block (compact fallback)
+        const listHtml = value.map(item => `<li>${item}</li>`).join('\n');
+        processedHtml = processedHtml.replace(new RegExp(`{{${key}}}`, 'g'), `<ul>${listHtml}</ul>`);
+      } else {
+        // Support both {{key}} and {{{key}}}
+        const regex = new RegExp(`{{{?${key}}}?`, 'g');
+        processedHtml = processedHtml.replace(regex, String(value));
+      }
     });
 
     return processedHtml;
-  }, [watchedValues.templates, predefinedTemplates]);
+  }, [activeTemplate]);
+
+  const getPreviewWidth = () => {
+    switch(previewDevice) {
+        case 'mobile': return '375px';
+        case 'tablet': return '768px';
+        default: return '100%';
+    }
+  };
+
+  const renderPreviewContent = () => (
+    <S.PreviewContainer>
+      <S.PreviewViewport device={previewDevice}>
+        <S.PreviewContent 
+          width={getPreviewWidth()} 
+          device={previewDevice}
+        >
+          <S.PreviewHTMLContent dangerouslySetInnerHTML={{ __html: renderedPreview }} />
+        </S.PreviewContent>
+      </S.PreviewViewport>
+    </S.PreviewContainer>
+  );
 
   return (
-    <S.FormContainer onSubmit={handleSubmit(onSubmit)}>
-      <S.MainLayout>
-        <S.FormSections>
-          {/* Group Details */}
-          <S.SectionCard>
-            <S.SectionHeader>
-              <Icon name="settings" size={20} color="brand.primary" />
-              <Text variant="h4" weight="bold">{t('listingSettingsGroup.groupDetails')}</Text>
-            </S.SectionHeader>
-            <S.SectionContent>
-              <TextInput
+    <S.Container>
+      <S.Header>
+        <S.HeaderContent>
+          <S.HeaderTitleGroup>
+            <S.EditorTitle variant="h3" weight="bold">
+              {t('listingSettingsGroup.editorTitle')}
+            </S.EditorTitle>
+          </S.HeaderTitleGroup>
+          <Text variant="body" color="text.secondary">
+            {t('listingSettingsGroup.editorDescription')}
+          </Text>
+        </S.HeaderContent>
+        <S.Actions>
+          <Button variant="primary" size="md" onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
+            <Icon name="check" size={18} />
+            <Text variant="body" weight="medium" color="inherit">
+              {t('listingSettingsGroup.saveChanges')}
+            </Text>
+          </Button>
+        </S.Actions>
+      </S.Header>
+
+      <S.FormContainer onSubmit={handleSubmit(onSubmit)}>
+        {/* General Settings & Stock - Combined Card */}
+        <Card variant="bordered">
+          <S.SectionHeader>
+            <S.SectionTitleWrapper>
+              <S.HeaderIconWrapper>
+                <Icon name="settings" size={20} />
+              </S.HeaderIconWrapper>
+              <S.SectionTitleText>
+                <Text variant="h4" weight="bold">{t('listingSettingsGroup.generalSettings')}</Text>
+              </S.SectionTitleText>
+            </S.SectionTitleWrapper>
+          </S.SectionHeader>
+          <CardBody>
+            <S.InputGrid columns={3}>
+              <TextInput<ListingSettingsGroupFormData>
                 name="name"
                 control={control}
                 label={t('listingSettingsGroup.groupName')}
               />
-              <TextInput
+              <TextInput<ListingSettingsGroupFormData>
                 name="description"
                 control={control}
                 label={t('listingSettingsGroup.description')}
               />
-            </S.SectionContent>
-          </S.SectionCard>
-
-          {/* Repricing Strategy */}
-          <S.SectionCard>
-            <S.SectionHeader>
-              <Icon name="grid" size={20} color="brand.primary" />
-              <Text variant="h4" weight="bold">{t('listingSettingsGroup.repricingStrategy')}</Text>
-            </S.SectionHeader>
-            <S.SectionContent>
-              {fields.map((field, index) => (
-                <S.PriceRangeRow key={field.id}>
-                  <Text variant="caption" weight="bold" color="brand.primary">
-                    {t('listingSettingsGroup.priceRangeLabel', { index: index + 1 })}
-                  </Text>
-                  {fields.length > 1 && (
-                    <S.RemoveButton type="button" onClick={() => remove(index)}>
-                      <Icon name="trash" size={14} />
-                    </S.RemoveButton>
-                  )}
-                  <S.InputGrid>
-                    <TextInput
-                      name={`repricingStrategy.${index}.minPrice`}
-                      control={control}
-                      type="number"
-                      label={t('listingSettingsGroup.minPrice')}
-                    />
-                    <TextInput
-                      name={`repricingStrategy.${index}.maxPrice`}
-                      control={control}
-                      type="number"
-                      label={t('listingSettingsGroup.maxPrice')}
-                    />
-                    <TextInput
-                      name={`repricingStrategy.${index}.profitMarginPercent`}
-                      control={control}
-                      type="number"
-                      label={t('listingSettingsGroup.profitMargin')}
-                    />
-                    <TextInput
-                      name={`repricingStrategy.${index}.fixedProfitAmount`}
-                      control={control}
-                      type="number"
-                      label={t('listingSettingsGroup.fixedProfit')}
-                    />
-                  </S.InputGrid>
-                </S.PriceRangeRow>
-              ))}
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => append({ id: crypto.randomUUID(), minPrice: 0, maxPrice: 100, profitMarginPercent: 15 })}
-                style={{ width: 'fit-content' }}
-              >
-                <Icon name="plus" size={16} />
-                {t('listingSettingsGroup.addPriceRange')}
-              </Button>
-            </S.SectionContent>
-          </S.SectionCard>
-
-          {/* Stock & Fees */}
-          <S.InputGrid columns={2}>
-            <S.SectionCard>
-              <S.SectionHeader>
-                <Icon name="box" size={20} color="brand.primary" />
-                <Text variant="h4" weight="bold">{t('listingSettingsGroup.stock')}</Text>
-              </S.SectionHeader>
-              <S.SectionContent>
-                <TextInput
+              <S.StockInputWrapper>
+                <TextInput<ListingSettingsGroupFormData>
                   name="stock.defaultQuantity"
                   control={control}
                   type="number"
-                  label={t('listingSettingsGroup.defaultQuantity')}
+                  label={t('listingSettingsGroup.defaultStockQuantity')}
                 />
-                <Controller
-                  name="stock.autoRestock"
-                  control={control}
-                  render={({ field }) => (
-                    <SwitchRow
-                      title={t('listingSettingsGroup.autoRestock')}
-                      description={t('listingSettingsGroup.autoRestockDescription')}
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
-                  )}
-                />
-              </S.SectionContent>
-            </S.SectionCard>
+              </S.StockInputWrapper>
+            </S.InputGrid>
+          </CardBody>
+        </Card>
 
-            <S.SectionCard>
+        {/* Pricing Strategy */}
+        <Card variant="bordered">
+          <S.SectionHeader>
+             <S.SectionTitleWrapper>
+                <S.HeaderIconWrapper>
+                  <Icon name="trending-up" size={20} />
+                </S.HeaderIconWrapper>
+                <Text variant="h4" weight="bold">{t('listingSettingsGroup.pricingStrategy')}</Text>
+             </S.SectionTitleWrapper>
+             <S.AddButton variant="primary" size="sm" type="button" onClick={handleAddRange}>
+                <Icon name="plus" size={16} />
+                {t('listingSettingsGroup.addRange')}
+             </S.AddButton>
+          </S.SectionHeader>
+          <CardBody>
+             <S.PriceRangesContainer>
+              {fields.map((field, index) => (
+                  <S.PriceRangeRow key={field.id}>
+                      {index > 0 && (
+                          <S.RemoveButton type="button" onClick={() => remove(index)}>
+                             <Icon name="x" size={14} />
+                          </S.RemoveButton>
+                      )}
+                      <S.InputGrid columns={4}>
+                        <TextInput<ListingSettingsGroupFormData>
+                          name={`repricingStrategy.${index}.minPrice`}
+                          control={control}
+                          type="number"
+                          label={t('listingSettingsGroup.minPrice')}
+                        />
+                        <TextInput<ListingSettingsGroupFormData>
+                          name={`repricingStrategy.${index}.maxPrice`}
+                          control={control}
+                          type="number"
+                          label={t('listingSettingsGroup.maxPrice')}
+                        />
+                        <TextInput<ListingSettingsGroupFormData>
+                          name={`repricingStrategy.${index}.profitMarginPercent`}
+                          control={control}
+                          type="number"
+                          label={t('listingSettingsGroup.profitMargin')}
+                        />
+                        <TextInput<ListingSettingsGroupFormData>
+                          name={`repricingStrategy.${index}.fixedProfitAmount`}
+                          control={control}
+                          type="number"
+                          label={t('listingSettingsGroup.fixedProfit')}
+                        />
+                      </S.InputGrid>
+                  </S.PriceRangeRow>
+              ))}
+            </S.PriceRangesContainer>
+          </CardBody>
+        </Card>
+
+        {/* Split View: Template & Preview */}
+        <S.SplitGrid>
+           {/* Template Settings */}
+           <S.TemplateSettingsCard variant="bordered">
               <S.SectionHeader>
-                <Icon name="shopping-cart" size={20} color="brand.primary" />
-                <Text variant="h4" weight="bold">{t('listingSettingsGroup.fees')}</Text>
+                 <S.SectionTitleWrapper>
+                  <S.HeaderIconWrapper>
+                    <Icon name="code" size={20} />
+                  </S.HeaderIconWrapper>
+                  <Text variant="h4" weight="bold">{t('listingSettingsGroup.htmlTemplate')}</Text>
+                 </S.SectionTitleWrapper>
+                 <Controller
+                    name="templates.type"
+                    control={control}
+                    render={({ field }) => (
+                      <S.TemplateTypeToggle>
+                        <S.ToggleItem
+                          type="button"
+                          active={field.value === 'custom'}
+                          onClick={() => field.onChange('custom')}
+                        >
+                          {t('listingSettingsGroup.custom')}
+                        </S.ToggleItem>
+                        <S.ToggleItem
+                          type="button"
+                          active={field.value === 'predefined'}
+                          onClick={() => field.onChange('predefined')}
+                        >
+                          {t('listingSettingsGroup.predefined')}
+                        </S.ToggleItem>
+                      </S.TemplateTypeToggle>
+                    )}
+                  />
               </S.SectionHeader>
-              <S.SectionContent>
-                <S.InputGrid columns={2}>
-                  <TextInput
-                    name="fees.ebayFeePercent"
-                    control={control}
-                    type="number"
-                    label={t('listingSettingsGroup.ebayFeePercent')}
-                  />
-                  <TextInput
-                    name="fees.fixedFeeAmount"
-                    control={control}
-                    type="number"
-                    label={t('listingSettingsGroup.fixedFeeAmount')}
-                  />
-                </S.InputGrid>
-                <TextInput
-                  name="fees.taxPercent"
-                  control={control}
-                  type="number"
-                  label={t('listingSettingsGroup.taxPercent')}
-                />
-              </S.SectionContent>
-            </S.SectionCard>
-          </S.InputGrid>
+               <S.StyledCardBody>
+                  <S.TemplateSelectorWrapper>
+                    <S.TemplateLabel variant="caption" weight="bold" color="text.secondary">
+                        {t('listingSettingsGroup.activeTemplate')}
+                    </S.TemplateLabel>
+                     <Controller
+                        name="templates.predefinedTemplateId"
+                        control={control}
+                        render={({ field }) => (
+                           <Select
+                             placeholder={t('listingSettingsGroup.selectTemplate')}
+                             options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({ value: tmp.id, label: tmp.name }))}
+                             value={field.value || ''}
+                             onChange={field.onChange}
+                             fullWidth
+                             disabled={watchedValues.templates.type === 'custom'}
+                           />
+                        )}
+                     />
+                  </S.TemplateSelectorWrapper>
+                  
+                  <S.TemplateEditorContainer>
 
-          {/* Template Selection */}
-          <S.SectionCard>
-            <S.SectionHeader>
-              <Icon name="check-list" size={20} color="brand.primary" />
-              <Text variant="h4" weight="bold">{t('listingSettingsGroup.templates')}</Text>
-            </S.SectionHeader>
-            <S.SectionContent>
-              <S.TemplateTypeToggle>
-                <S.ToggleItem
-                  type="button"
-                  active={watchedValues.templates.type === 'predefined'}
-                  onClick={() => setValue('templates.type', 'predefined')}
-                >
-                  {t('listingSettingsGroup.predefinedTemplate')}
-                </S.ToggleItem>
-                <S.ToggleItem
-                  type="button"
-                  active={watchedValues.templates.type === 'custom'}
-                  onClick={() => setValue('templates.type', 'custom')}
-                >
-                  {t('listingSettingsGroup.customTemplate')}
-                </S.ToggleItem>
-              </S.TemplateTypeToggle>
+                    <S.EditorCodeArea>
+                        {watchedValues.templates.type === 'custom' ? (
+                           <S.CustomTemplateTextarea
+                              {...control.register('templates.customTemplateHtml')}
+                              placeholder={t('listingSettingsGroup.templatePlaceholder')}
+                           />
+                        ) : (
+                           <S.PredefinedTemplateWrapper>
+                              <S.CustomTemplateTextarea
+                                readOnly
+                                value={activeTemplate.htmlContent}
+                              />
+                           </S.PredefinedTemplateWrapper>
+                        )}
+                    </S.EditorCodeArea>
+                  </S.TemplateEditorContainer>
+               </S.StyledCardBody>
+           </S.TemplateSettingsCard>
 
-              {watchedValues.templates.type === 'predefined' ? (
-                <Controller
-                  name="templates.predefinedTemplateId"
-                  control={control}
-                  render={({ field }) => (
-                    <S.FormGroup>
-                      <Text variant="caption" weight="medium">{t('listingSettingsGroup.selectTemplate')}</Text>
-                      <Select
-                        options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({ value: tmp.id, label: tmp.name }))}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </S.FormGroup>
-                  )}
-                />
-              ) : (
-                <TextInput
-                  name="templates.customTemplateHtml"
-                  control={control}
-                  label={t('listingSettingsGroup.htmlEditor')}
-                />
-              )}
-            </S.SectionContent>
-          </S.SectionCard>
+           {/* Live Preview */}
+           <S.PreviewCard variant="bordered">
+              <S.LivePreviewHeader>
+                 <S.SectionTitleWrapper>
+                    <S.HeaderIconWrapper>
+                       <Icon name="eye" size={20} />
+                    </S.HeaderIconWrapper>
+                    <Text variant="h4" weight="bold">{t('listingSettingsGroup.livePreview')}</Text>
+                 </S.SectionTitleWrapper>
 
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '16px' }}>
-            <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
-              {t('listingSettingsGroup.cancel')}
-            </Button>
-            <Button variant="primary" type="submit" isLoading={isLoading}>
-              {t('listingSettingsGroup.saveChanges')}
-            </Button>
-          </div>
-        </S.FormSections>
+                 <S.DeviceControls>
+                   <S.IconButton 
+                     type="button" 
+                     $active={previewDevice === 'desktop'} 
+                     onClick={() => setPreviewDevice('desktop')}
+                   >
+                     <Icon name="monitor" size={16} />
+                   </S.IconButton>
+                   <S.IconButton 
+                     type="button"
+                     $active={previewDevice === 'tablet'}
+                     onClick={() => setPreviewDevice('tablet')}
+                   >
+                     <Icon name="tablet" size={16} />
+                   </S.IconButton>
+                   <S.IconButton 
+                     type="button"
+                     $active={previewDevice === 'mobile'}
+                     onClick={() => setPreviewDevice('mobile')}
+                   >
+                     <Icon name="smartphone" size={16} />
+                   </S.IconButton>
+                  </S.DeviceControls>
+               </S.LivePreviewHeader>
+              <CardBody>
+                 <S.PreviewCardContent>
+                    {renderPreviewContent()}
+                 </S.PreviewCardContent>
+              </CardBody>
+           </S.PreviewCard>
+        </S.SplitGrid>
+      </S.FormContainer>
 
-        {/* Live Preview Sidebar */}
-        <S.PreviewSidebar>
-          <Text variant="h4" weight="bold" style={{ marginBottom: '16px' }}>
-            {t('listingSettingsGroup.livePreview')}
-          </Text>
-          <S.PreviewContainer>
-            <S.PreviewToolbar>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <S.IconButton 
-                  type="button"
-                  onClick={() => setPreviewDevice('desktop')}
-                  title={t('listingSettingsGroup.tooltips.switchToDesktop')}
-                  $active={previewDevice === 'desktop'}
-                >
-                  <Icon name="grid" size={16} />
-                </S.IconButton>
-                <S.IconButton 
-                   type="button"
-                   onClick={() => setPreviewDevice('mobile')}
-                   title={t('listingSettingsGroup.tooltips.switchToMobile')}
-                   $active={previewDevice === 'mobile'}
-                >
-                  <Icon name="settings" size={16} />
-                </S.IconButton>
-              </div>
-              <S.IconButton 
-                 type="button"
-                 onClick={() => setIsPreviewDarkMode(!isPreviewDarkMode)}
-                 title={t('listingSettingsGroup.tooltips.toggleDarkMode')}
-              >
-                <Icon name={isPreviewDarkMode ? 'sun' : 'moon'} size={16} />
-              </S.IconButton>
-            </S.PreviewToolbar>
-            <div style={{ 
-              flex: 1, 
-              background: isPreviewDarkMode ? '#1a1a1a' : '#ffffff',
-              padding: previewDevice === 'mobile' ? '20px 40px' : '0',
-              overflow: 'hidden',
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-              <div style={{
-                width: previewDevice === 'mobile' ? '320px' : '100%',
-                height: '100%',
-                background: 'white',
-                boxShadow: previewDevice === 'mobile' ? '0 10px 40px rgba(0,0,0,0.2)' : 'none',
-                overflowY: 'auto'
-              }}>
-                <div dangerouslySetInnerHTML={{ __html: renderedPreview }} />
-              </div>
-            </div>
-          </S.PreviewContainer>
-          <div style={{ marginTop: '16px' }}>
-            <Text variant="caption" color="text.secondary">
-              <Icon name="info" size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-              {t('listingSettingsGroup.templateVariablesHelp')}
-            </Text>
-          </div>
-        </S.PreviewSidebar>
-      </S.MainLayout>
-    </S.FormContainer>
+      {/* Mobile Preview Modal - Keep existing if needed, though split grid usually hides this on desktop */}
+
+    </S.Container>
   );
 };

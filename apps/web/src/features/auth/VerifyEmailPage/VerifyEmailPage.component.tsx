@@ -1,5 +1,7 @@
 /**
- * VerifyEmailPage Component (Presentation)
+ * VerifyEmailPage Component
+ *
+ * Purpose: Email verification status display
  */
 
 import { Button, Icon, Text } from '@repo/ui';
@@ -14,30 +16,37 @@ export const VerifyEmailPageComponent = ({
   onResendVerification,
   onNavigateToLogin,
 }: VerifyEmailPageProps): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'translation']);
 
   const getStatusContent = () => {
     switch (status) {
       case 'loading':
         return {
-          icon: 'calendar' as const, // Placeholder for loading icon if no spinner atom
+          icon: <Icon name="loader" size={40} />,
           title: t('auth.verification.verifying'),
-          description: t('common.loading'),
+          description: t('auth.verification.waiting'),
           type: 'loading' as const,
         };
       case 'success':
         return {
-          icon: 'inbox' as const,
-          title: t('auth.verification.success'),
-          description: t('auth.verification.verified'),
+          icon: <Icon name="check" size={40} />,
+          title: t('auth.verification.title'),
+          description: t('auth.verification.success'),
           type: 'success' as const,
         };
       case 'error':
         return {
-          icon: 'alert-circle' as const,
-          title: t('auth.verification.title'),
-          description: t('auth.errors.verificationFailed'),
+          icon: <Icon name="alert-circle" size={40} />,
+          title: t('auth.verification.error'),
+          description: t('auth.verification.invalid'),
           type: 'error' as const,
+        };
+      default:
+        return {
+          icon: <Icon name="loader" size={40} />,
+          title: t('auth.verification.verifying'),
+          description: t('auth.verification.waiting'),
+          type: 'loading' as const,
         };
     }
   };
@@ -46,55 +55,73 @@ export const VerifyEmailPageComponent = ({
 
   return (
     <S.Container>
-      <S.AuthCard>
-        <S.StatusIconWrapper $type={content.type}>
-          <Icon name={content.icon} size={40} />
-        </S.StatusIconWrapper>
+      <S.LayoutWrapper>
+        {/* Left Panel: Content */}
+        <S.LeftPanel>
+          <S.AuthCard>
+            <S.LogoWrapper>
+              <Icon name="logo" size={48} color="brand.primary" />
+              <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
+                Zonds
+              </Text>
+            </S.LogoWrapper>
 
-        <Text variant="h2" weight="bold" color="text.primary">
-          {content.title}
-        </Text>
-        
-        <S.Description>
-          <Text variant="body" color="text.secondary">
-            {content.description}
-          </Text>
-        </S.Description>
+            <S.StatusIconWrapper $type={content.type}>
+              {content.icon}
+            </S.StatusIconWrapper>
 
-        <S.ActionGroup>
-          {status === 'success' && (
-            <Button onClick={onNavigateToLogin} variant="primary" fullWidth>
-              {t('auth.login.submitButton')}
-            </Button>
-          )}
+            <S.Header>
+              <Text variant="h2" weight="bold">
+                {content.title}
+              </Text>
+              <Text variant="body" color="text.secondary">
+                {content.description}
+              </Text>
+            </S.Header>
 
-          {status === 'error' && (
-            <>
-              <Button onClick={() => window.location.reload()} variant="primary" fullWidth>
-                {t('common.retry')}
+            <S.ActionGroup>
+              <Button onClick={onNavigateToLogin} variant="primary" fullWidth size="lg">
+                {t('auth.register.loginLink')}
               </Button>
-              <Button onClick={onNavigateToLogin} variant="secondary" fullWidth>
-                {t('auth.login.submitButton')}
-              </Button>
-              <S.ResendButton onClick={onResendVerification}>
-                {t('auth.verification.resendButton')}
-              </S.ResendButton>
-            </>
-          )}
+              {status === 'error' && (
+                <S.ResendButton onClick={onResendVerification}>
+                  {t('auth.verification.resendButton')}
+                </S.ResendButton>
+              )}
+            </S.ActionGroup>
+          </S.AuthCard>
+        </S.LeftPanel>
 
-          {status === 'loading' && (
-             <Text variant="caption" color="text.disabled">Please wait while we confirm your account...</Text>
-          )}
-        </S.ActionGroup>
+        {/* Right Panel: Branding */}
+        <S.RightPanel>
+          <S.MosaicDecor>
+            <div className="box-1" />
+            <div className="box-2" />
+            <div className="box-3" />
+            <div className="box-4" />
+          </S.MosaicDecor>
+          <S.BrandingContent>
+            <S.BrandingLogoWrapper>
+              <Icon name="logo" size={64} color="text.inverse" />
+              <Text variant="h1" weight="bold" color="text.inverse">
+                Zonds
+              </Text>
+            </S.BrandingLogoWrapper>
+            
+            <Text variant="h3" weight="medium" color="text.inverse">
+              {t('auth.verification.title')}
+            </Text>
+            
+            <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
+              E-posta adresinizi doğrulayarak Zonds dünyasına ilk adımı atın.
+            </Text>
 
-        {status === 'success' && (
-           <S.Footer>
-             <Text variant="caption" color="text.tertiary">
-               Welcome to the Zonds community! 🚀
-             </Text>
-           </S.Footer>
-        )}
-      </S.AuthCard>
+            <div style={{ marginTop: '2rem' }}>
+              <Icon name="mail" size={200} color="text.inverse" style={{ opacity: 0.1 }} />
+            </div>
+          </S.BrandingContent>
+        </S.RightPanel>
+      </S.LayoutWrapper>
     </S.Container>
   );
 };

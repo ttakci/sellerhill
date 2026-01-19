@@ -21,6 +21,11 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> 
    * Label text. Acting as placeholder when empty, and floating label when focused/filled.
    */
   label: string;
+  
+  /**
+   * Optional placeholder
+   */
+  placeholder?: string;
 
   /**
    * Input type

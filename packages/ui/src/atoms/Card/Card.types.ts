@@ -1,9 +1,9 @@
-export interface CardProps {
+import React from 'react';
+
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   variant?: 'default' | 'bordered' | 'elevated';
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  className?: string;
-  style?: React.CSSProperties;
 }
 
 export interface CardHeaderProps {

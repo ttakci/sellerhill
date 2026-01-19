@@ -1,9 +1,9 @@
 import React from 'react';
 import {
-  Controller,
-  type ControllerRenderProps,
-  type FieldError,
-  type FieldValues,
+    Controller,
+    type ControllerRenderProps,
+    type FieldError,
+    type FieldValues,
 } from 'react-hook-form';
 
 import { Icon, type IconName } from '../../atoms/Icon';
@@ -26,6 +26,7 @@ interface TextInputInnerProps<TFieldValues extends FieldValues> {
   id?: string;
   type?: string;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 const TextInputInner = <TFieldValues extends FieldValues>({
@@ -39,6 +40,7 @@ const TextInputInner = <TFieldValues extends FieldValues>({
   id,
   type,
   disabled,
+  placeholder,
 }: TextInputInnerProps<TFieldValues>) => {
   return (
     <S.Container>
@@ -60,7 +62,7 @@ const TextInputInner = <TFieldValues extends FieldValues>({
           $hasLeftIcon={!!leftIcon}
           $hasRightIcon={!!rightIcon}
           value={field.value ?? ''}
-          placeholder={label}
+          placeholder={placeholder || label}
         />
 
         {rightIcon && (
@@ -90,6 +92,7 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
   rightIcon,
   prefix,
   suffix,
+  placeholder,
 }: TextInputProps<TFieldValues>) => {
   const inputId = id || name;
 
@@ -113,6 +116,7 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
           id={inputId}
           type={type}
           disabled={disabled}
+          placeholder={placeholder}
         />
       )}
     />

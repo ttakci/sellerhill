@@ -48,11 +48,35 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  REDIS_HOST: string = 'localhost';
+
+  @IsNumber()
+  @IsOptional()
+  REDIS_PORT: number = 6379;
+
+  @IsString()
+  @IsOptional()
+  REDIS_PASSWORD?: string;
+
+  @IsNumber()
+  @IsOptional()
+  REDIS_DB: number = 0;
+
+  @IsString()
+  @IsOptional()
   SENTRY_DSN?: string;
 
   @IsString()
   @IsOptional()
   LOG_LEVEL?: string;
+
+  @IsString()
+  @IsOptional()
+  KEEPA_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  SCRAPER_API_KEY?: string;
 
   @IsString()
   @IsOptional()
@@ -74,6 +98,26 @@ class EnvironmentVariables {
   @IsOptional()
   @IsIn(['sandbox', 'production'])
   EBAY_ENVIRONMENT: 'sandbox' | 'production' = 'sandbox';
+
+  @IsString()
+  @IsOptional()
+  KEEPA_API_URL: string = 'https://api.keepa.com/product';
+
+  @IsString()
+  @IsOptional()
+  EBAY_AUTH_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  EBAY_TOKEN_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  EBAY_REST_API_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  EBAY_XML_API_URL?: string;
 }
 
 /**

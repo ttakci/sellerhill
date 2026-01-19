@@ -10,7 +10,14 @@
     "saveSuccess": "Değişiklikler başarıyla kaydedildi",
     "saveError": "Değişiklikler kaydedilemedi",
     "showing": "{{count}} kayıttan 1 - {{count}} arası gösteriliyor",
-    "rowsPerPage": "Sayfa başına satır:"
+    "rowsPerPage": "Sayfa başına satır:",
+    "success": "Başarılı",
+    "failed": "Hata",
+    "actions": {
+      "refresh": "Yenile",
+      "edit": "Düzenle",
+      "delete": "Sil"
+    }
   },
   "validation": {
     "required": "Bu alan zorunludur",
@@ -99,7 +106,11 @@
   },
   "header": {
     "selectLanguage": "Dil Seçimi",
-    "toggleTheme": "Temayı Değiştir"
+    "toggleTheme": "Temayı Değiştir",
+    "notifications": "Bildirimler"
+  },
+  "profile": {
+    "accountSettings": "Hesap Ayarları"
   },
   "languages": {
     "en": "English",

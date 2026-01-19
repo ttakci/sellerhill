@@ -12,14 +12,49 @@
  * - But both use the same translation resources
  */
 
-import { enTranslations, trTranslations } from '@repo/shared';
+import {
+    enAuth,
+    enDashboard,
+    enEbay,
+    enListings,
+    enListingSettingsGroup,
+    enProfile,
+    enStoreSettings,
+    enTranslation,
+    trAuth,
+    trTranslation as trCommon,
+    trDashboard,
+    trEbay,
+    trListings,
+    trListingSettingsGroup,
+    trProfile,
+    trStoreSettings,
+} from '@repo/shared';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 void i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: enTranslations },
-    tr: { translation: trTranslations },
+    en: {
+      translation: enTranslation,
+      auth: enAuth,
+      dashboard: enDashboard,
+      ebay: enEbay,
+      storeSettings: enStoreSettings,
+      listingSettingsGroup: enListingSettingsGroup,
+      listings: enListings,
+      profile: enProfile,
+    },
+    tr: {
+      translation: trCommon,
+      auth: trAuth,
+      dashboard: trDashboard,
+      ebay: trEbay,
+      storeSettings: trStoreSettings,
+      listingSettingsGroup: trListingSettingsGroup,
+      listings: trListings,
+      profile: trProfile,
+    },
   },
   lng: 'tr',
   fallbackLng: 'en',

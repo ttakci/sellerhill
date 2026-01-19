@@ -1,5 +1,5 @@
 import type { ListingSettingsGroupResponse } from '@repo/shared';
-import { Badge, Button, Icon, Text } from '@repo/ui';
+import { Badge, Button, CardBody, CardHeader, Icon, Text } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupPage.style';
 import { ListingSettingsGroupPageProps } from './ListingSettingsGroupPage.types';
@@ -10,18 +10,18 @@ export const ListingSettingsGroupPageComponent = ({
   onEditGroup,
   onDeleteGroup,
 }: ListingSettingsGroupPageProps) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('listingSettingsGroup');
 
   return (
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <S.HeaderTitleWrapper>
             <Icon name="check-list" size={28} color="brand.primary" />
-            <Text variant="h3" weight="bold" style={{ fontSize: '26px' }}>
+            <S.PageTitle variant="h3" weight="bold">
               {t('listingSettingsGroup.title')}
-            </Text>
-          </div>
+            </S.PageTitle>
+          </S.HeaderTitleWrapper>
           <Text variant="body" color="text.secondary">
             {t('listingSettingsGroup.subtitle')}
           </Text>
@@ -39,14 +39,14 @@ export const ListingSettingsGroupPageComponent = ({
       {groups.length === 0 ? (
         <S.EmptyState>
           <Icon name="box" size={64} color="text.tertiary" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <S.EmptyStateContent>
             <Text variant="h4" weight="bold">
               {t('listingSettingsGroup.emptyState.title')}
             </Text>
             <Text variant="body" color="text.secondary">
               {t('listingSettingsGroup.emptyState.description')}
             </Text>
-          </div>
+          </S.EmptyStateContent>
           <Button variant="secondary" onClick={onCreateGroup}>
             {t('listingSettingsGroup.emptyState.action')}
           </Button>
@@ -54,63 +54,68 @@ export const ListingSettingsGroupPageComponent = ({
       ) : (
         <S.CardGrid>
           {groups.map((group: ListingSettingsGroupResponse) => (
-            <S.GroupCard key={group.id} onClick={() => onEditGroup(group.id)}>
-              <S.CardHeader>
-                <S.CardIconWrapper>
-                  <Icon name="check-list" size={24} />
-                </S.CardIconWrapper>
-                <Badge variant="success" size="sm">
-                  {t('listingSettingsGroup.statusActive')}
-                </Badge>
-              </S.CardHeader>
-              
-              <S.CardContent>
-                <Text variant="h4" weight="bold">
-                  {group.name}
-                </Text>
-                {group.description && (
-                  <Text variant="caption" color="text.secondary" style={{
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}>
-                    {group.description}
-                  </Text>
-                )}
-              </S.CardContent>
+            <S.InteractiveCard 
+              key={group.id} 
+              variant="bordered"
+              onClick={() => onEditGroup(group.id)}
+            >
+                <CardHeader 
+                  icon={
+                    <S.CardIconWrapper>
+                      <Icon name="check-list" size={24} />
+                    </S.CardIconWrapper>
+                  }
+                  actions={
+                    <Badge variant="success" size="sm">
+                      {t('listingSettingsGroup.statusActive')}
+                    </Badge>
+                  }
+                >
+                  {null}
+                </CardHeader>
+                
+                <CardBody>
+                  <S.CardContent>
+                    <Text variant="h4" weight="bold">
+                      {group.name}
+                    </Text>
+                    {group.description && (
+                      <Text variant="caption" color="text.secondary" truncate>
+                        {group.description}
+                      </Text>
+                    )}
+                  </S.CardContent>
 
-              <S.CardFooter>
-                <S.Stats>
-                  <S.StatItem>
-                    <Icon name="grid" size={14} />
-                    {t('listingSettingsGroup.productsCount', { count: 0 })}
-                  </S.StatItem>
-                  <S.StatItem>
-                    <Icon name="settings" size={14} />
-                    {group.templates.type === 'custom' 
-                      ? t('listingSettingsGroup.customTemplate') 
-                      : t('listingSettingsGroup.predefinedTemplate')}
-                  </S.StatItem>
-                </S.Stats>
+                  <S.CardFooter>
+                    <S.Stats>
+                      <S.StatItem>
+                        <Icon name="grid" size={14} />
+                        {t('listingSettingsGroup.productsCount', { count: 0 })}
+                      </S.StatItem>
+                    </S.Stats>
 
-                <S.CardActions onClick={(e) => e.stopPropagation()}>
-                  <S.IconButton onClick={() => onEditGroup(group.id)} title={t('listingSettingsGroup.tooltips.editGroup')}>
-                    <Icon name="settings" size={18} />
-                  </S.IconButton>
-                  <S.IconButton 
-                    className="delete" 
-                    onClick={() => onDeleteGroup(group.id)} 
-                    title={t('listingSettingsGroup.tooltips.deleteGroup')}
-                  >
-                    <Icon name="trash" size={18} />
-                  </S.IconButton>
-                </S.CardActions>
-              </S.CardFooter>
-            </S.GroupCard>
+                    <S.CardActions onClick={(e) => e.stopPropagation()}>
+                      <S.IconButton onClick={() => onEditGroup(group.id)} title={t('listingSettingsGroup.tooltips.editGroup')}>
+                        <Icon name="edit" size={18} />
+                      </S.IconButton>
+                      <S.IconButton 
+                        className="delete" 
+                        onClick={() => onDeleteGroup(group.id)} 
+                        title={t('listingSettingsGroup.tooltips.deleteGroup')}
+                      >
+                        <Icon name="trash" size={18} />
+                      </S.IconButton>
+                    </S.CardActions>
+                  </S.CardFooter>
+                </CardBody>
+            </S.InteractiveCard>
           ))}
         </S.CardGrid>
       )}
+
+      <S.Copyright>
+        {t('listingSettingsGroup.copyright', { year: new Date().getFullYear() })}
+      </S.Copyright>
     </S.Container>
   );
 };

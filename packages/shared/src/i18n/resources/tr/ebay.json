@@ -37,6 +37,13 @@
       "tokenExchangeFailed": "Yetkilendirme kodunun token'a dönüştürülmesi başarısız",
       "accountAlreadyConnected": "Bu eBay hesabı zaten bağlı",
       "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı"
+    },
+    "onboarding": {
+      "title": "eBay Mağazanızı Bağlayın",
+      "header": "Pazar Yeri Kurulumu",
+      "description": "Ürünlerinizi senkronize etmeye başlamak için önce eBay mağazanızı bağlamanız gerekmektedir. Aşağıdan ana pazar yerinizi seçin.",
+      "connectButton": "eBay Hesabını Bağla",
+      "skipButton": "Şimdilik Atla"
     }
   }
 }

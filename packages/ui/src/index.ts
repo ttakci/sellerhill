@@ -56,6 +56,9 @@ export type { TabItem, TabsProps } from './atoms/Tabs';
 export { TextInput } from './molecules/TextInput';
 export type { TextInputProps } from './molecules/TextInput';
 
+export { ConfirmModal } from './molecules/ConfirmModal';
+export type { ConfirmModalProps } from './molecules/ConfirmModal';
+
 export { CheckboxGroup } from './molecules/CheckboxGroup';
 export type { CheckboxGroupProps, CheckboxOption } from './molecules/CheckboxGroup';
 

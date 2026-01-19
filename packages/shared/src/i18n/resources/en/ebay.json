@@ -37,6 +37,13 @@
       "tokenExchangeFailed": "Failed to exchange authorization code for tokens",
       "accountAlreadyConnected": "This eBay account is already connected",
       "noAuthorizationCode": "No authorization code received from eBay"
+    },
+    "onboarding": {
+      "title": "Connect Your eBay Store",
+      "header": "Marketplace Setup",
+      "description": "To start syncing your items, you first need to connect your eBay store. Select your primary marketplace below.",
+      "connectButton": "Connect eBay Account",
+      "skipButton": "Skip for Now"
     }
   }
 }

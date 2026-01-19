@@ -5,108 +5,183 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
+
 export const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
   background: ${tkn('colors.background.primary')};
-  padding: ${tkn('spacing.md')};
-  position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
 
-  /* Premium background effect consistency */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -10%;
-    right: -10%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, ${tkn('colors.brand.primary')}15 0%, transparent 70%);
-    filter: blur(60px);
-    z-index: 0;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -10%;
-    left: -10%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, ${tkn('colors.brand.primary')}10 0%, transparent 70%);
-    filter: blur(60px);
-    z-index: 0;
+  * {
+    box-sizing: border-box;
   }
 `;
 
-export const AuthCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.xl')};
-  box-shadow: ${tkn('shadows.xl')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  padding: ${tkn('spacing.xl')};
+export const LayoutWrapper = styled.div`
+  display: flex;
   width: 100%;
-  max-width: 480px;
-  position: relative;
-  z-index: 1;
-  text-align: center;
+  flex-wrap: wrap;
 
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
+    flex-wrap: nowrap;
+  }
+`;
+
+export const LeftPanel = styled.div`
+  flex: 1 1 100%;
+  width: 100%;
+  background: ${tkn('colors.surface.primary')};
+  padding: ${tkn('spacing.xl')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+
+  @media (min-width: 1024px) {
+    flex: 0 0 50%;
+    width: 50%;
     padding: ${tkn('spacing.xxxl')};
   }
 `;
 
-export const IconCircle = styled.div`
+export const RightPanel = styled.div`
+  flex: 1 1 100%;
+  width: 100%;
+  background: #020D23; /* Deep Navy from TailAdmin Demo */
+  padding: ${tkn('spacing.xxxl')};
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex: 0 0 50%;
+    width: 50%;
+  }
+
+  /* Decorative Grid Pattern */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+  }
+
+  /* Mosaic effect */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px);
+    background-size: 25px 25px;
+    z-index: 1;
+    opacity: 0.5;
+  }
+`;
+
+export const MosaicDecor = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  & > div {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+  }
+
+  .box-1 { width: 100px; height: 100px; top: 20%; left: 10%; }
+  .box-2 { width: 150px; height: 150px; top: 60%; left: 70%; background: rgba(255, 255, 255, 0.02); }
+  .box-3 { width: 80px; height: 80px; top: 10%; left: 80%; }
+  .box-4 { width: 120px; height: 120px; top: 80%; left: 20%; background: rgba(255, 255, 255, 0.04); }
+`;
+
+export const AuthCard = styled.div`
+  width: 100%;
+  max-width: 550px;
+  background: ${tkn('colors.surface.primary')};
+  text-align: center;
+`;
+
+export const LogoWrapper = styled.div`
+  margin-bottom: ${tkn('spacing.xl')};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const IconContainer = styled.div`
   width: 80px;
   height: 80px;
-  margin: 0 auto ${tkn('spacing.xl')};
+  background-color: ${tkn('colors.brand.primary')}15;
+  color: ${tkn('colors.brand.primary')};
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: ${tkn('radius.full')};
-  background-color: ${tkn('colors.brand.primary')}15;
-  color: ${tkn('colors.brand.primary')};
-  box-shadow: 0 0 20px ${tkn('colors.brand.primary')}10;
+  margin: 0 auto ${tkn('spacing.xl')};
 `;
 
-export const DescriptionWrapper = styled.div`
-  margin-top: ${tkn('spacing.sm')};
-  margin-bottom: ${tkn('spacing.xxl')};
+export const Header = styled.div`
+  margin-bottom: ${tkn('spacing.lg')};
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const ActionGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  margin-bottom: ${tkn('spacing.xl')};
-`;
-
-export const Footer = styled.div`
   margin-top: ${tkn('spacing.xl')};
-  padding-top: ${tkn('spacing.xl')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
-  color: ${tkn('colors.text.tertiary')};
-  font-size: ${tkn('typography.fontSize.sm')};
 `;
 
-export const TextButton = styled.button`
+export const ResendButton = styled.button`
   background: none;
   border: none;
-  color: ${tkn('colors.brand.primary')};
+  color: ${tkn('colors.text.tertiary')};
   cursor: pointer;
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  transition: all ${tkn('transitions.fast')};
-  padding: 0;
+  font-size: ${tkn('typography.fontSize.sm')};
+  margin-top: ${tkn('spacing.md')};
   
-  &:hover:not(:disabled) {
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
     text-decoration: underline;
-    opacity: 0.8;
   }
+`;
 
-  &:disabled {
-    color: ${tkn('colors.text.disabled')};
-    cursor: not-allowed;
-  }
+export const BrandingContent = styled.div`
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.xl')};
+  z-index: 2;
+`;
+
+export const BrandingLogoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
 `;

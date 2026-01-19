@@ -1,10 +1,12 @@
-import { Badge, Button, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
+import { Badge, Button, ConfirmModal, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
+import { logout } from '@/features/auth/store/authSlice';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import * as S from './AppLayout.style';
 
 /**
@@ -15,14 +17,16 @@ export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
   const { themeMode, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const { data: user } = useGetMeQuery();
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(location.pathname.startsWith('/settings'));
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -32,12 +36,18 @@ export const AppLayout: React.FC = () => {
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User';
   const userRole = 'Store Admin';
 
-  const handleToggleSidebar = () => {
+   const handleToggleSidebar = () => {
     if (window.innerWidth < 1024) {
       setMobileSidebarOpen(!mobileSidebarOpen);
     } else {
       setSidebarCollapsed(!sidebarCollapsed);
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+    setIsLogoutConfirmOpen(false);
   };
 
   return (
@@ -86,6 +96,17 @@ export const AppLayout: React.FC = () => {
                   <Icon name="chevron-down" size={20} />
                 </S.ChevronWrapper>
               )}
+            </S.NavItem>
+
+            <S.NavItem 
+              $isCollapsed={sidebarCollapsed} 
+              $active={location.pathname === '/listings'}
+              onClick={() => navigate('/listings')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="upload" size={18} />
+                {!sidebarCollapsed && t('menu.listings')}
+              </S.NavItemContent>
             </S.NavItem>
 
             <S.NavItem 
@@ -154,32 +175,9 @@ export const AppLayout: React.FC = () => {
                   >
                     {t('menu.listingSettingsGroups')}
                   </S.SubNavItem>
-                  <S.SubNavItem 
-                    $active={location.pathname === '/settings/ebay'}
-                    onClick={() => navigate('/settings/ebay')}
-                  >
-                    eBay Accounts
-                  </S.SubNavItem>
                 </S.SubNavContainer>
               )}
             </S.NavItemWrapper>
-
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              <Text variant="caption" weight="bold" muted>
-                {t('menu.other')}
-              </Text>
-            </S.NavLabelWrapper>
-            
-            <S.NavItem 
-              $isCollapsed={sidebarCollapsed} 
-              $active={location.pathname === '/reports'}
-              onClick={() => navigate('/reports')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="bell" size={18} />
-                {!sidebarCollapsed && t('menu.reports')}
-              </S.NavItemContent>
-            </S.NavItem>
           </S.NavSection>
         </S.SidebarContainer>
 
@@ -218,7 +216,7 @@ export const AppLayout: React.FC = () => {
                 <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={22} />
               </S.ActionIcon>
               
-              <S.ActionIcon title="Notifications">
+              <S.ActionIcon title={t('header.notifications')}>
                 <Icon name="bell" size={22} />
                 <S.NotificationBadge />
               </S.ActionIcon>
@@ -244,16 +242,16 @@ export const AppLayout: React.FC = () => {
                   </S.ProfileArea>
                 )}
                 header={
-                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                     <Text variant="body" weight="bold" color="text.primary">{userName}</Text>
+                   <S.DropdownHeaderWrapper>
+                     <S.PageTitle variant="body" weight="bold" color="text.primary">{userName}</S.PageTitle>
                      <Text variant="caption" color="text.tertiary">{user?.email ?? 'user@example.com'}</Text>
-                   </div>
+                   </S.DropdownHeaderWrapper>
                 }
                 items={[
-                  { label: 'Edit Profile', icon: 'user', onClick: () => navigate('/profile') },
-                  { label: 'Account Settings', icon: 'settings', onClick: () => navigate('/settings') },
-                  { label: 'Support', icon: 'info', onClick: () => console.log('Support') },
-                  { label: 'Sign Out', icon: 'log-out', variant: 'default', onClick: () => navigate('/logout') }
+                  { label: t('menu.editProfile'), icon: 'user', onClick: () => navigate('/profile') },
+                  { label: t('profile.accountSettings'), icon: 'settings', onClick: () => navigate('/settings') },
+                  { label: t('menu.support'), icon: 'info', onClick: () => console.log('Support') },
+                   { label: t('menu.logout'), icon: 'log-out', variant: 'default', onClick: () => setIsLogoutConfirmOpen(true) }
                 ]}
               />
             </S.HeaderRight>
@@ -275,7 +273,7 @@ export const AppLayout: React.FC = () => {
           title={messageState.header}
           size="sm"
           footer={
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', width: '100%' }}>
+            <S.ModalFooterWrapper>
               {messageState.secondaryButton && (
                 <Button 
                   variant="secondary" 
@@ -299,13 +297,23 @@ export const AppLayout: React.FC = () => {
                 </Button>
               )}
               {!messageState.primaryButton && !messageState.secondaryButton && (
-                <Button onClick={closeMessage}>OK</Button>
+                <Button onClick={closeMessage}>{t('common.ok')}</Button>
               )}
-            </div>
+            </S.ModalFooterWrapper>
           }
         >
           <Text variant="body">{messageState.description}</Text>
         </Modal>
+         <ConfirmModal
+          isOpen={isLogoutConfirmOpen}
+          onClose={() => setIsLogoutConfirmOpen(false)}
+          onConfirm={handleLogout}
+          title={t('auth.logout.confirmTitle')}
+          description={t('auth.logout.confirmDescription')}
+          confirmLabel={t('auth.logout.confirmButton')}
+          cancelLabel={t('common.cancel')}
+          variant="danger"
+        />
       </S.LayoutWrapper>
     </ErrorBoundary>
   );

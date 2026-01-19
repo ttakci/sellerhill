@@ -33,15 +33,9 @@ export class EbayOAuthService {
     this.environment = this.configService.get<'sandbox' | 'production'>('EBAY_ENVIRONMENT') || 'sandbox';
     this.scopes = EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
 
-    if (this.environment === 'production') {
-      this.authUrl = EBAY_OAUTH_CONSTANTS.AUTHORIZATION_URL_PROD;
-      this.tokenUrl = EBAY_OAUTH_CONSTANTS.TOKEN_URL_PROD;
-      this.apiBaseUrl = EBAY_OAUTH_CONSTANTS.PRODUCTION_API_BASE_URL;
-    } else {
-      this.authUrl = EBAY_OAUTH_CONSTANTS.AUTHORIZATION_URL_SANDBOX;
-      this.tokenUrl = EBAY_OAUTH_CONSTANTS.TOKEN_URL_SANDBOX;
-      this.apiBaseUrl = EBAY_OAUTH_CONSTANTS.SANDBOX_API_BASE_URL;
-    }
+    this.authUrl = this.configService.get<string>('EBAY_AUTH_URL') || '';
+    this.tokenUrl = this.configService.get<string>('EBAY_TOKEN_URL') || '';
+    this.apiBaseUrl = this.configService.get<string>('EBAY_REST_API_URL') || '';
 
     if (!this.clientId || !this.clientSecret) {
       this.logger.warn(`eBay OAuth credentials not configured for ${this.environment}. Please set EBAY_CLIENT_ID and EBAY_CLIENT_SECRET`);

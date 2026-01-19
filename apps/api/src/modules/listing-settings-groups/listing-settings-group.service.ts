@@ -104,6 +104,16 @@ export class ListingSettingsGroupService implements OnModuleInit {
         END IF;
       END $$;
     `);
+
+    // Fix schema mismatch: Drop store_id if it exists (as we use user_id scope)
+    await this.databaseService.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='listing_settings_groups' AND column_name='store_id') THEN
+          ALTER TABLE listing_settings_groups DROP COLUMN store_id;
+        END IF;
+      END $$;
+    `);
   }
 
   /**
@@ -115,124 +125,168 @@ export class ListingSettingsGroupService implements OnModuleInit {
     `);
 
     if (existingTemplates[0] && (existingTemplates[0] as any).count > 0) {
-      this.logger.log('Predefined templates already exist, skipping seed.');
-      return;
+      // Check if we need to refresh (e.g. if specific v2 template name exists)
+      const v2Check = await this.databaseService.query(`
+        SELECT id FROM predefined_templates WHERE name = 'Elite Trust'
+      `);
+      
+      if (v2Check.length > 0) {
+        this.logger.log('Predefined templates already exist and are up to date.');
+        return;
+      }
+
+      this.logger.log('Refreshing predefined templates to v2...');
+      await this.databaseService.query(`DELETE FROM predefined_templates`);
     }
 
     this.logger.log('Seeding predefined templates...');
 
     const templates = [
       {
-        name: 'Modern Minimalist',
-        description: 'Clean and professional design with focus on product details',
+        name: 'Modern Professional',
+        description: 'Clean typography and professional two-column layout for high-end products',
         htmlContent: `
-          <div class="listing-container">
-            <h1>{{product_title}}</h1>
-            <div class="product-image">
-              <img src="{{product_image}}" alt="{{product_title}}">
-            </div>
-            <div class="description">
-              <h2>Product Description</h2>
-              <p>{{product_description}}</p>
-            </div>
-            <div class="specifications">
-              <h2>Specifications</h2>
-              {{product_specs}}
-            </div>
-          </div>
-          <style>
-            .listing-container { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #333; }
-            h1 { font-size: 28px; }
-            .product-image img { width: 100%; border-radius: 8px; }
-            .description, .specifications { margin-top: 24px; }
-          </style>
+<div class="zonds-listing">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Outfit:300,400,600,700">
+  <div class="zonds-content">
+    <h1 class="zonds-title">{{title}}</h1>
+    <div class="zonds-grid">
+      <div class="zonds-image-col">
+        <div class="zonds-image-box">
+          <img src="{{main_image}}" alt="{{title}}">
+        </div>
+      </div>
+      <div class="zonds-details-col">
+        <div class="zonds-section">
+          <h2 class="zonds-section-title">Product Details</h2>
+          <ul class="zonds-list">
+            {{#product_details}}
+            <li>{{.}}</li>
+            {{/product_details}}
+          </ul>
+        </div>
+        <div class="zonds-section">
+          <h2 class="zonds-section-title">Key Features</h2>
+          <ul class="zonds-list">
+            {{#feature_bullets}}
+            <li>{{.}}</li>
+            {{/feature_bullets}}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="zonds-description">
+      <h2 class="zonds-section-title">Full Description</h2>
+      <p>{{{product_description}}}</p>
+    </div>
+  </div>
+</div>
+<style>
+.zonds-listing { font-family: 'Outfit', sans-serif; color: #1e293b; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 20px; }
+.zonds-title { font-size: 32px; font-weight: 700; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 32px; }
+.zonds-grid { display: flex; gap: 40px; margin-bottom: 40px; }
+.zonds-image-col { flex: 1; max-width: 450px; }
+.zonds-details-col { flex: 1.2; }
+.zonds-image-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
+.zonds-image-box img { max-width: 100%; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+.zonds-section-title { font-size: 18px; font-weight: 600; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-left: 4px solid #3b82f6; padding-left: 12px; }
+.zonds-list { list-style: none; padding: 0; }
+.zonds-list li { margin-bottom: 8px; position: relative; padding-left: 20px; }
+.zonds-list li::before { content: "•"; color: #3b82f6; position: absolute; left: 0; font-weight: bold; }
+.zonds-description { background: #f1f5f9; padding: 32px; border-radius: 12px; margin-top: 40px; }
+@media (max-width: 768px) { .zonds-grid { flex-direction: column; } .zonds-image-col { max-width: 100%; } }
+</style>
         `,
         sampleData: {
-          product_title: 'Sample Premium Product',
-          product_price: '299.99',
-          product_image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
-          product_description: 'This is a sample product description that showcases how your template will look in production.',
-          product_specs: '<ul><li>High Quality Materials</li><li>Environmentally Friendly</li><li>2-Year Warranty</li></ul>'
+          title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
+          main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
+          product_description: 'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
+          feature_bullets: ['Industry-leading noise cancellation', 'Up to 30-hour battery life', 'Touch sensor controls', 'Quick attention mode'],
+          product_details: ['Brand: Zonds Audio', 'Connectivity: Bluetooth 5.0', 'Noise Cancelling: Yes', 'Color: Silver']
         }
       },
       {
-        name: 'Premium Electronics',
-        description: 'High-end design for electronics with technical specifications',
+        name: 'Elite Trust',
+        description: 'Focus on shipping, returns, and buyer confidence with clear policy blocks',
         htmlContent: `
-          <div class="premium-listing">
-            <div class="header">
-              <span class="badge">TOP RATED PLUS</span>
-              <span class="badge new">NEW IN BOX</span>
-            </div>
-            <h1>{{product_title}}</h1>
-            <div class="gallery">
-              <img src="{{product_image}}" alt="{{product_title}}">
-            </div>
-            <div class="features">
-              <h2>Key Features</h2>
-              {{product_features}}
-            </div>
-            <div class="tech-specs">
-              <h2>Technical Specifications</h2>
-              {{product_specs}}
-            </div>
-            <div class="shipping-info">
-              <p>✓ Fast & Free Shipping</p>
-              <p>✓ 30-Day Returns</p>
-              <p>✓ 1-Year Warranty</p>
-            </div>
-          </div>
-          <style>
-            .premium-listing { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; }
-            .badge { background: #ffd700; color: #000; padding: 4px 12px; border-radius: 4px; margin-right: 8px; }
-            .gallery img { width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-          </style>
+<div class="elite-wrapper">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700">
+  <div class="elite-header">
+    <h1>{{title}}</h1>
+  </div>
+  <div class="elite-main">
+    <div class="elite-image-center">
+      <img src="{{main_image}}" alt="{{title}}">
+    </div>
+    <div class="elite-container">
+      <div class="elite-section">
+        <h3><span class="elite-icon">📋</span> Product Overview</h3>
+        <p>{{{product_description}}}</p>
+        <ul class="elite-features">
+          {{#feature_bullets}}
+          <li>{{.}}</li>
+          {{/feature_bullets}}
+        </ul>
+      </div>
+      <div class="elite-policies">
+        <div class="elite-policy-item">
+          <h4><span class="elite-icon">🚚</span> Fast Handling</h4>
+          <p>We process all orders within <strong>24-48 hours</strong> of payment confirmation.</p>
+        </div>
+        <div class="elite-policy-item">
+          <h4><span class="elite-icon">📦</span> Secure Delivery</h4>
+          <p>Orders are shipped with premium tracking. Continental US shipping only.</p>
+        </div>
+        <div class="elite-policy-item">
+          <h4><span class="elite-icon">🛡️</span> 30-Day Guarantee</h4>
+          <p>Not satisfied? Return within 30 days for a full refund. Peace of mind guaranteed.</p>
+        </div>
+        <div class="elite-policy-item">
+          <h4><span class="elite-icon">⭐</span> Reliable Feedback</h4>
+          <p>Our reputation is based on trust. Contact us first if you have any issues with your order.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.elite-wrapper { font-family: 'Inter', sans-serif; background: #fff; max-width: 900px; margin: 0 auto; color: #2d3748; }
+.elite-header { background: #1a202c; color: #fff; padding: 40px 20px; text-align: center; }
+.elite-header h1 { font-size: 24px; margin: 0; max-width: 800px; margin: 0 auto; line-height: 1.4; }
+.elite-main { padding: 40px 20px; }
+.elite-image-center { text-align: center; margin-bottom: 40px; }
+.elite-image-center img { max-width: 500px; border: 1px solid #edf2f7; border-radius: 8px; }
+.elite-container { display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
+.elite-section h3 { font-size: 18px; margin-top: 0; padding-bottom: 12px; border-bottom: 1px solid #edf2f7; }
+.elite-features { padding-left: 20px; margin-top: 20px; }
+.elite-features li { margin-bottom: 10px; }
+.elite-policies { background: #f7fafc; padding: 24px; border-radius: 8px; }
+.elite-policy-item { margin-bottom: 24px; }
+.elite-policy-item:last-child { margin-bottom: 0; }
+.elite-policy-item h4 { margin: 0 0 8px 0; display: flex; align-items: center; font-size: 14px; text-transform: uppercase; color: #4a5568; }
+.elite-policy-item p { font-size: 13px; margin: 0; color: #718096; }
+.elite-icon { margin-right: 8px; font-size: 18px; }
+@media (max-width: 768px) { .elite-container { grid-template-columns: 1fr; } }
+</style>
         `,
         sampleData: {
-          product_title: 'UltraSync Gamer Pro Z1',
-          product_features: '<ul><li>4K 144Hz Display</li><li>RTX 4090 Inside</li><li>Liquid Cooling</li></ul>',
-          product_specs: '<ul><li>CPU: Core i9-13900K</li><li>RAM: 64GB DDR5</li><li>SSD: 2TB NVMe</li></ul>'
-        }
-      },
-      {
-        name: 'E-commerce Classic',
-        description: 'Traditional layout with clear sections and call-to-action',
-        htmlContent: `
-          <div class="classic-template">
-            <div class="banner">
-              <h1>{{product_title}}</h1>
-              <p class="price">US {{product_price}}</p>
-            </div>
-            <div class="content">
-              <div class="image-section">
-                <img src="{{product_image}}" alt="{{product_title}}">
-              </div>
-              <div class="info-section">
-                <h2>About This Item</h2>
-                <p>{{product_description}}</p>
-                <div class="cta">
-                  <button>Buy It Now</button>
-                  <button>Add to Cart</button>
-                </div>
-              </div>
-            </div>
-            <div class="footer">
-              <p>Estimated delivery: {{delivery_date}}</p>
-            </div>
-          </div>
-          <style>
-            .classic-template { max-width: 1000px; margin: 0 auto; font-family: 'Helvetica Neue', sans-serif; }
-            .banner { background: #f7f7f7; padding: 20px; text-align: center; }
-            .content { display: flex; gap: 40px; margin-top: 20px; }
-            .cta button { background: #3665f3; color: white; padding: 12px 24px; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer; }
-          </style>
-        `,
-        sampleData: {
-          product_title: 'Classic Leather Bag',
-          product_price: '145.00',
-          product_image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=800',
-          product_description: 'Expertly crafted from genuine leather, this classic bag is perfect for daily use or travel.',
-          delivery_date: 'Jan 25 - Jan 28'
+          title: 'EliteBook X360 1040 G8 Laptop - 14" Touchscreen, Core i7, 16GB RAM, 512GB SSD',
+          main_image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=1000',
+          product_description: 'Experience professional performance with the EliteBook X360. This versatile 2-in-1 laptop features a stunning 14-inch touchscreen and powerful internals for maximum productivity.',
+          feature_bullets: [
+            '11th Gen Intel Core i7 processor for blazing fast speeds',
+            '16GB High-Speed RAM for seamless multitasking',
+            '512GB NVMe SSD storage for instant boot times',
+            '14-inch Full HD x360 Touchscreen display',
+            'Backlit Keyboard and Fingerprint reader for security'
+          ],
+          product_details: [
+            'Brand: HP',
+            'Model: EliteBook X360 1040 G8',
+            'Processor: Intel Core i7-1185G7',
+            'Operating System: Windows 11 Pro',
+            'Color: Silver'
+          ]
         }
       }
     ];

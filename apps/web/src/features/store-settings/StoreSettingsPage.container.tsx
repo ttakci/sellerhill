@@ -5,9 +5,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
 import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
+import * as S from './StoreSettingsPage.style';
 import {
-  useGetStoreSettingsQuery,
-  useSaveStoreSettingsMutation
+    useGetStoreSettingsQuery,
+    useSaveStoreSettingsMutation
 } from './api/storeSettingsApi';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
@@ -67,7 +68,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   };
 
   if (settingsLoading || !settings) {
-    return <div>{t('common.loading')}</div>; // Add a proper loading state later
+    return <S.LoadingContainer>{t('common.loading')}</S.LoadingContainer>;
   }
 
   const availableStores = ebayAccounts?.items.map(acc => ({

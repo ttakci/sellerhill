@@ -74,7 +74,7 @@ export const shadowTokens = {
 
 export const typographyTokens = {
   fontFamily: {
-    sans: "'Outfit', 'Inter', -apple-system, sans-serif", // TailAdmin uses Outfit
+    sans: "'Inter', 'Outfit', -apple-system, sans-serif", // TailAdmin can use Inter for a cleaner look
     mono: "'JetBrains Mono', 'Fira Code', monospace",
   },
   fontSize: {

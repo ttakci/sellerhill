@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Card, Text, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -55,6 +55,16 @@ export const HeaderContent = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
+export const HeaderTitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+export const PageTitle = styled(Text)`
+  font-size: 26px !important;
+`;
+
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
@@ -62,13 +72,6 @@ export const Actions = styled.div`
 
   @media (min-width: 768px) {
     width: auto;
-  }
-  
-  button {
-    flex: 1;
-    @media (min-width: 768px) {
-      flex: none;
-    }
   }
 `;
 
@@ -102,19 +105,18 @@ export const EmptyState = styled.div`
   margin-top: ${tkn('spacing.xl')};
 `;
 
-export const GroupCard = styled.div`
-  background: ${tkn('colors.background.secondary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.lg')};
+export const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  transition: all ${tkn('transitions.normal')};
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  gap: 8px;
+`;
 
+
+
+export const InteractiveCard = styled(Card)`
+  cursor: pointer;
+  transition: all ${tkn('transitions.normal')};
+  
   &:hover {
     border-color: ${tkn('colors.brand.primary')};
     box-shadow: ${tkn('shadows.md')};
@@ -196,4 +198,11 @@ export const IconButton = styled.button`
   &.delete:hover {
     color: ${tkn('colors.semantic.error')};
   }
+`;
+
+export const Copyright = styled.div`
+  text-align: center;
+  color: ${tkn('colors.text.tertiary')};
+  font-size: 13px;
+  padding: ${tkn('spacing.xl')} 0;
 `;

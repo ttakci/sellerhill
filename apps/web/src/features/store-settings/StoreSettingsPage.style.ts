@@ -1,11 +1,18 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Button, Card, Text, tkn } from '@repo/ui';
+
+export const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: ${tkn('colors.text.secondary')};
+`;
 
 export const Container = styled.div`
   width: 100%;
- 
-  margin: 0 auto;    /* Centers precisely in the available space */
-  padding: 0 ${tkn('spacing.md')}; /* Ensures equal gaps on both sides */
+  margin: 0 auto;
+  padding: 0 ${tkn('spacing.md')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
@@ -62,6 +69,16 @@ export const HeaderContent = styled.div`
   gap: ${tkn('spacing.xs')};
 `;
 
+export const HeaderTitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+export const PageTitle = styled(Text)`
+  font-size: 26px !important;
+`;
+
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
@@ -69,7 +86,6 @@ export const Actions = styled.div`
 
   @media (min-width: 768px) {
     width: auto;
-    margin-right: ${tkn('spacing.md')};
   }
   
   button {
@@ -115,6 +131,22 @@ export const SwitchLabelContent = styled.div`
   margin-top: -4px; /* Visual alignment with toggle switch */
 `;
 
+export const DescriptionWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+`;
+
+export const DescriptionLine = styled(Text)`
+  line-height: 1.4 !important;
+`;
+
+export const SecondaryDescriptionLine = styled(Text)`
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+`;
+
 export const StoreSelectWrapper = styled.div<{ $disabled?: boolean }>`
   width: 100%;
   max-width: 100%;
@@ -136,6 +168,22 @@ export const SectionHeader = styled.div`
   
   /* Ensure consistent height/alignment */
   min-height: 4.5rem;
+`;
+
+export const SectionTitleGroup = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+`;
+
+export const SectionTitleContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding-top: 2px;
+`;
+
+export const SectionTitle = styled(Text)`
+  font-size: 1.125rem !important;
 `;
 
 export const HeaderIconWrapper = styled.div`
@@ -234,6 +282,14 @@ export const BlacklistActionGroup = styled.div`
   @media (max-width: 767px) {
     display: none; /* Hide on mobile to keep it simple or adjust layout */
   }
+`;
+
+export const BlacklistCard = styled(Card)`
+  margin-top: 24px;
+`;
+
+export const AddButton = styled(Button)`
+  height: 44px;
 `;
 
 export const BlacklistTitleColumn = styled.div`

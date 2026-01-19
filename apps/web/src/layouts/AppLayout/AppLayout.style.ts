@@ -1,6 +1,6 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Text, tkn } from '@repo/ui';
 
 /**
  * LayoutWrapper - Root container
@@ -453,4 +453,19 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
     animation: ${spin} 1s linear infinite;
     color: ${tkn('colors.brand.primary')};
   }
+`;
+export const PageTitle = styled(Text)`
+  font-size: inherit;
+`;
+
+export const DropdownHeaderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ModalFooterWrapper = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  width: 100%;
 `;

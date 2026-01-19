@@ -26,6 +26,55 @@ export const EBAY_MARKETPLACE: Record<string, EbayMarketplaceId> = {
 } as const;
 
 /**
+ * eBay marketplace configuration
+ */
+export interface EbayMarketplaceConfig {
+  id: EbayMarketplaceId;
+  countryCode: string; // ISO 3166-1 alpha-2
+  currency: string;
+  siteId: string; // eBay Site ID (e.g., 0 for US, 3 for UK)
+}
+
+export const EBAY_MARKETPLACE_CONFIG: Record<EbayMarketplaceId, EbayMarketplaceConfig> = {
+  EBAY_US: {
+    id: 'EBAY_US',
+    countryCode: 'US',
+    currency: 'USD',
+    siteId: '0',
+  },
+  EBAY_UK: {
+    id: 'EBAY_UK',
+    countryCode: 'GB',
+    currency: 'GBP',
+    siteId: '3',
+  },
+  EBAY_DE: {
+    id: 'EBAY_DE',
+    countryCode: 'DE',
+    currency: 'EUR',
+    siteId: '77',
+  },
+  EBAY_FR: {
+    id: 'EBAY_FR',
+    countryCode: 'FR',
+    currency: 'EUR',
+    siteId: '71',
+  },
+  EBAY_IT: {
+    id: 'EBAY_IT',
+    countryCode: 'IT',
+    currency: 'EUR',
+    siteId: '101',
+  },
+  EBAY_ES: {
+    id: 'EBAY_ES',
+    countryCode: 'ES',
+    currency: 'EUR',
+    siteId: '186',
+  },
+};
+
+/**
  * eBay OAuth constants
  */
 export const EBAY_OAUTH_CONSTANTS = {

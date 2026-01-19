@@ -1,19 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StoreSettingsFormData, storeSettingsSchema } from '@repo/shared';
 import {
-  Badge,
-  Button,
-  Card,
-  CardBody,
-  Icon,
-  Select,
-  SwitchRow,
-  Table,
-  TablePagination,
-  Text,
-  TextInput,
-  Toggle,
-  useTheme
+    Badge,
+    Button,
+    Card,
+    CardBody,
+    Icon,
+    Select,
+    SwitchRow,
+    Table,
+    TablePagination,
+    Text,
+    TextInput,
+    Toggle,
+    useTheme
 } from '@repo/ui';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -28,7 +28,7 @@ export const StoreSettingsPageComponent = ({
   onStoreChange,
   availableStores,
 }: StoreSettingsPageProps): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('storeSettings');
   const { theme } = useTheme();
   const [newKeyword, setNewKeyword] = useState('');
   const [newScope, setNewScope] = useState<'title' | 'description' | 'both'>('both');
@@ -144,10 +144,10 @@ export const StoreSettingsPageComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <S.HeaderTitleWrapper>
              <Icon name="store" size={28} color="brand.primary" />
-             <Text variant="h3" weight="bold" style={{ fontSize: '26px' }}>{t('storeSettings.title')}</Text>
-          </div>
+             <S.PageTitle variant="h3" weight="bold">{t('storeSettings.title')}</S.PageTitle>
+          </S.HeaderTitleWrapper>
           <Text variant="body" color="text.secondary">
             {t('storeSettings.subtitle')}
           </Text>
@@ -178,14 +178,14 @@ export const StoreSettingsPageComponent = ({
               />
               <S.SwitchLabelContent>
                 <Text variant="body" weight="semibold">{t('storeSettings.globalSettings')}</Text>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
-                  <Text variant="caption" color="text.secondary" style={{ lineHeight: '1.4' }}>
+                <S.DescriptionWrapper>
+                  <S.DescriptionLine variant="caption" color="text.secondary">
                      {t('storeSettings.globalDescription').split('. ')[0]}.
-                  </Text>
-                  <Text variant="caption" muted style={{ fontSize: '13px', lineHeight: '1.4' }}>
+                  </S.DescriptionLine>
+                  <S.SecondaryDescriptionLine variant="caption" muted>
                      {t('storeSettings.globalDescription').split('. ')[1]}.
-                  </Text>
-                </div>
+                  </S.SecondaryDescriptionLine>
+                </S.DescriptionWrapper>
               </S.SwitchLabelContent>
             </S.SwitchGroup>
 
@@ -205,22 +205,45 @@ export const StoreSettingsPageComponent = ({
           <S.GlobalGrid>
             <Card variant="bordered">
               <S.SectionHeader>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                <S.SectionTitleGroup>
                   <S.HeaderIconWrapper>
                     <Icon name="map-pin" size={24} color="text.primary" />
                   </S.HeaderIconWrapper>
-                  <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
-                    <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.locationSectionTitle')}</Text>
+                  <S.SectionTitleContent>
+                    <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.locationSectionTitle')}</S.SectionTitle>
                     <Text variant="caption" color="text.secondary">{t('storeSettings.locationSectionSubtitle')}</Text>
-                  </div>
-                </div>
+                  </S.SectionTitleContent>
+                </S.SectionTitleGroup>
               </S.SectionHeader>
               <CardBody>
                 <S.AddressGrid>
-                  <TextInput
+                  <Controller
                     name="country"
                     control={control}
-                    label={t('storeSettings.country')}
+                    render={({ field }) => (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <S.StoreLabel>{t('storeSettings.country')}</S.StoreLabel>
+                        <Select
+                          options={[
+                            { value: 'US', label: 'United States (US)' },
+                            { value: 'GB', label: 'United Kingdom (GB)' },
+                            { value: 'DE', label: 'Germany (DE)' },
+                            { value: 'FR', label: 'France (FR)' },
+                            { value: 'IT', label: 'Italy (IT)' },
+                            { value: 'ES', label: 'Spain (ES)' },
+                            { value: 'CA', label: 'Canada (CA)' },
+                            { value: 'AU', label: 'Australia (AU)' },
+                            { value: 'CN', label: 'China (CN)' },
+                            { value: 'JP', label: 'Japan (JP)' },
+                            { value: 'TR', label: 'Turkey (TR)' },
+                          ]}
+                          value={field.value}
+                          onChange={field.onChange}
+                          fullWidth
+                          placeholder={t('storeSettings.selectCountry') || 'Select Country'}
+                        />
+                      </div>
+                    )}
                   />
                   <TextInput
                     name="state"
@@ -239,15 +262,15 @@ export const StoreSettingsPageComponent = ({
 
             <Card variant="bordered">
               <S.SectionHeader>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                <S.SectionTitleGroup>
                   <S.HeaderIconWrapper>
                     <Icon name="check-list" size={24} color="text.primary" />
                   </S.HeaderIconWrapper>
-                  <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
-                     <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.validationSectionTitle')}</Text>
+                  <S.SectionTitleContent>
+                     <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.validationSectionTitle')}</S.SectionTitle>
                      <Text variant="caption" color="text.secondary">{t('storeSettings.validationSectionSubtitle')}</Text>
-                  </div>
-                </div>
+                  </S.SectionTitleContent>
+                </S.SectionTitleGroup>
               </S.SectionHeader>
               <CardBody>
                 <Controller
@@ -279,16 +302,16 @@ export const StoreSettingsPageComponent = ({
             </Card>
           </S.GlobalGrid>
 
-          <Card variant="bordered" style={{ marginTop: '24px' }}>
+          <S.BlacklistCard variant="bordered">
             <S.SectionHeader>
               <S.BlacklistTitleColumn>
                 <S.HeaderIconWrapper>
                    <Icon name="block" size={24} color="text.primary" />
                 </S.HeaderIconWrapper>
-                <div style={{ display: 'flex', flexDirection: 'column', paddingTop: '2px' }}>
-                  <Text variant="h4" weight="bold" style={{ fontSize: '1.125rem' }}>{t('storeSettings.blacklistSectionTitle')}</Text>
+                <S.SectionTitleContent>
+                  <S.SectionTitle variant="h4" weight="bold">{t('storeSettings.blacklistSectionTitle')}</S.SectionTitle>
                   <Text variant="caption" color="text.secondary">{t('storeSettings.blacklistSubtitle')}</Text>
-                </div>
+                </S.SectionTitleContent>
               </S.BlacklistTitleColumn>
               <S.BlacklistControls>
                 <S.BlacklistInputWrapper>
@@ -310,14 +333,13 @@ export const StoreSettingsPageComponent = ({
                         fullWidth={true}
                       />
                     </S.ScopeSelectContainer>
-                    <Button
+                    <S.AddButton
                       variant="primary"
                       size="sm"
                       onClick={handleAddKeyword}
-                      style={{ height: '44px' }}
                     >
                       <Icon name="plus" size={14} />
-                    </Button>
+                    </S.AddButton>
                   </S.BlacklistActionGroup>
                 </S.BlacklistInputWrapper>
               </S.BlacklistControls>
@@ -343,7 +365,7 @@ export const StoreSettingsPageComponent = ({
                 )
               }
             />
-          </Card>
+          </S.BlacklistCard>
         </CardBody>
       </Card>
 

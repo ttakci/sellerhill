@@ -1,19 +1,20 @@
 import { ListingSettingsGroupFormData } from '@repo/shared';
-import { useLoading } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.component';
 import {
-    useCreateListingSettingsGroupMutation,
-    useGetListingSettingsGroupByIdQuery,
-    useGetPredefinedTemplatesQuery,
-    useUpdateListingSettingsGroupMutation
+  useCreateListingSettingsGroupMutation,
+  useGetListingSettingsGroupByIdQuery,
+  useGetPredefinedTemplatesQuery,
+  useUpdateListingSettingsGroupMutation
 } from './api/listing-settings-group.api';
 
 export const ListingSettingsGroupFormContainer = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useTranslation('listingSettingsGroup');
+  const { showMessage } = useUI();
   const isEdit = !!id;
 
   const { data: group, isLoading: isGroupLoading } = useGetListingSettingsGroupByIdQuery(id!, { skip: !isEdit });
@@ -27,12 +28,15 @@ export const ListingSettingsGroupFormContainer = () => {
     try {
       if (isEdit) {
         await updateListingSettingsGroup({ id: id!, data }).unwrap();
+        showMessage({ type: 'success', content: t('listingSettingsGroup.success.updated') });
       } else {
         await createListingSettingsGroup(data).unwrap();
+        showMessage({ type: 'success', content: t('listingSettingsGroup.success.created') });
       }
       navigate('/settings/listing-groups');
     } catch (error) {
       console.error('Failed to save group:', error);
+      showMessage({ type: 'error', content: t('listingSettingsGroup.errors.saveFailed') });
     }
   };
 
@@ -42,6 +46,7 @@ export const ListingSettingsGroupFormContainer = () => {
 
   return (
     <ListingSettingsGroupFormComponent
+      isEdit={isEdit}
       defaultValues={group}
       predefinedTemplates={templates}
       onSubmit={handleSubmit}

@@ -101,4 +101,15 @@ export class EbayController {
     const userId = req.user.sub;
     return this.ebayService.getAccountsByUserId(userId);
   }
+
+  @Get('business-policies')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get eBay business policies',
+    description: 'Fetch payment, shipping, and return policies from eBay',
+  })
+  async getBusinessPolicies(@Request() req: any) {
+    const userId = req.user.sub;
+    return this.ebayService.getBusinessPolicies(userId);
+  }
 }

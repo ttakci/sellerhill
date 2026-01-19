@@ -6,8 +6,10 @@
   "packageManager": "pnpm@8.6.12",
   "scripts": {
     "dev": "pnpm -r --parallel --filter @repo/* run build && pnpm -r --parallel --filter web --filter api run dev",
+    "dev:prod": "pnpm -r --parallel --filter @repo/* run build && pnpm -r --parallel --filter web run dev && pnpm -r --filter api run dev:prod",
     "dev:web": "pnpm -r --filter @repo/* run build && pnpm --filter web run dev",
     "dev:api": "pnpm -r --filter @repo/* run build && pnpm --filter api run dev",
+    "dev:api:prod": "pnpm -r --filter @repo/* run build && pnpm --filter api run dev:prod",
     "build": "pnpm -r run build",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0",

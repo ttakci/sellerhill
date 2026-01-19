@@ -1,0 +1,103 @@
+{
+  "listings": {
+    "tabs": {
+      "active": "Active Listings",
+      "jobs": "Import Jobs"
+    },
+    "jobs": {
+      "title": "Import Jobs",
+      "empty": "No import jobs found.",
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "table": {
+        "id": "Job ID",
+        "date": "Date",
+        "progress": "Progress",
+        "results": "Results",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "overview": {
+      "title": "Active Listings",
+      "subtitle": "You have {{count}} active listings on eBay.",
+      "emptyTitle": "No Listings Found",
+      "emptySubtitle": "Start by adding products from Amazon to your eBay store."
+    },
+    "table": {
+      "product": "Product",
+      "asin": "ASIN",
+      "ebayId": "eBay Item ID",
+      "price": "Price",
+      "stock": "Stock",
+      "status": "Status",
+      "actions": "Actions",
+      "addedAt": "Added {{date}}"
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "inactive": "Inactive",
+      "error": "Error"
+    },
+    "title": "Add Products",
+    "subtitle": "Import products directly from Amazon to your eBay storefront using ASIN identifiers. We'll handle the images, descriptions, and pricing optimizations.",
+    "breadcrumb": {
+      "dashboard": "Dashboard",
+      "listings": "Listings",
+      "addProducts": "Add Products"
+    },
+    "listingSettings": {
+      "title": "Listing Settings",
+      "strategyGroup": "Strategy Group",
+      "strategyGroupPlaceholder": "Select a Strategy Group",
+      "strategyGroupHelp": "Defines profit margins, rounding rules, and description templates."
+    },
+    "businessPolicies": {
+      "title": "eBay Business Policies",
+      "refreshPolicies": "Refresh Policies",
+      "paymentPolicy": "Payment Policy",
+      "paymentPolicyPlaceholder": "Select Policy",
+      "shippingPolicy": "Shipping Policy",
+      "shippingPolicyPlaceholder": "Select Policy",
+      "returnPolicy": "Return Policy",
+      "returnPolicyPlaceholder": "Select Policy"
+    },
+    "asinEntry": {
+      "title": "ASIN Entry",
+      "subtitle": "Enter Amazon Standard Identification Numbers",
+      "counter": "{{count}} / 1000 ASINs",
+      "label": "Enter Amazon ASINs (one per line)",
+      "placeholder": "e.g., B00X4WHP5E\nB08P2H5L8H\nB09G3NPT3G",
+      "accepts": "Accepts: B00..., B01...",
+      "helpText": "Bulk entries are supported. Ensure each ASIN is on a new line. We will automatically filter duplicates."
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "import": "Import & Create Listings",
+      "importing": "Importing...",
+      "addListing": "Add Listing"
+    },
+    "validation": {
+      "invalidAsin": "Invalid ASIN format. Must start with 'B' followed by 9 alphanumeric characters.",
+      "minOneAsin": "Please enter at least one ASIN",
+      "maxAsins": "Maximum 1000 ASINs allowed per import",
+      "paymentPolicyRequired": "Payment policy is required",
+      "shippingPolicyRequired": "Shipping policy is required",
+      "returnPolicyRequired": "Return policy is required"
+    },
+    "success": {
+      "created": "{{count}} listings created successfully",
+      "queued": "{{count}} listings queued for processing"
+    },
+    "errors": {
+      "createFailed": "Failed to create listings",
+      "fetchPoliciesFailed": "Failed to fetch eBay business policies",
+      "invalidAsins": "Some ASINs are invalid and were skipped"
+    }
+  }
+}

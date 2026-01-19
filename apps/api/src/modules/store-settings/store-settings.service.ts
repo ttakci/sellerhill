@@ -124,6 +124,22 @@ export class StoreSettingsService implements OnModuleInit {
   }
 
   /**
+   * Get resolved settings (Store specific > Global > Default)
+   */
+  async getResolvedSettings(userId: string, storeId: string | null): Promise<StoreSettingsResponse> {
+    // 1. Try Store Specific (if storeId provided)
+    if (storeId) {
+      const storeSettings = await this.getSettings(userId, storeId);
+      if (storeSettings.id) { // Found valid settings
+        return storeSettings;
+      }
+    }
+
+    // 2. Fallback to Global
+    return this.getSettings(userId);
+  }
+
+  /**
    * Save settings
    */
   async saveSettings(userId: string, dto: SaveStoreSettingsRequest): Promise<StoreSettingsResponse> {

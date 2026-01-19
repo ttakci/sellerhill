@@ -7,10 +7,10 @@ import { z } from 'zod';
 export const priceRangeSchema = (t: TFunction) =>
   z.object({
     id: z.string(),
-    minPrice: z.number().min(0, t('listingSettingsGroup.validation.minPrice')),
-    maxPrice: z.number().min(0, t('listingSettingsGroup.validation.maxPrice')),
-    profitMarginPercent: z.number().min(0).max(100).optional(),
-    fixedProfitAmount: z.number().min(0).optional(),
+    minPrice: z.coerce.number().min(0, t('listingSettingsGroup.validation.minPrice')),
+    maxPrice: z.coerce.number().min(0, t('listingSettingsGroup.validation.maxPrice')),
+    profitMarginPercent: z.coerce.number().min(0, t('listingSettingsGroup.validation.profitMarginRange')).max(100, t('listingSettingsGroup.validation.profitMarginRange')).optional(),
+    fixedProfitAmount: z.coerce.number().min(0, t('listingSettingsGroup.validation.fixedProfitMin')).optional(),
   }).refine(
     (data) => data.profitMarginPercent !== undefined || data.fixedProfitAmount !== undefined,
     { message: t('listingSettingsGroup.validation.profitRequired'), path: ['profitMarginPercent'] }
@@ -24,7 +24,7 @@ export const priceRangeSchema = (t: TFunction) =>
  */
 export const stockConfigSchema = (t: TFunction) =>
   z.object({
-    defaultQuantity: z.number().int().min(1, t('listingSettingsGroup.validation.minQuantity')),
+    defaultQuantity: z.coerce.number().int().min(1, t('listingSettingsGroup.validation.minQuantity')),
     autoRestock: z.boolean(),
   });
 
@@ -33,9 +33,9 @@ export const stockConfigSchema = (t: TFunction) =>
  */
 export const feeConfigSchema = (t: TFunction) =>
   z.object({
-    ebayFeePercent: z.number().min(0).max(100, t('listingSettingsGroup.validation.maxFeePercent')),
-    fixedFeeAmount: z.number().min(0, t('listingSettingsGroup.validation.minFixedFee')),
-    taxPercent: z.number().min(0).max(100, t('listingSettingsGroup.validation.maxTaxPercent')),
+    ebayFeePercent: z.coerce.number().min(0, t('listingSettingsGroup.validation.minFeePercent')).max(100, t('listingSettingsGroup.validation.maxFeePercent')),
+    fixedFeeAmount: z.coerce.number().min(0, t('listingSettingsGroup.validation.minFixedFee')),
+    taxPercent: z.coerce.number().min(0, t('listingSettingsGroup.validation.minTaxPercent')).max(100, t('listingSettingsGroup.validation.maxTaxPercent')),
   });
 
 /**
@@ -62,7 +62,19 @@ export const listingSettingsGroupSchema = (t: TFunction) =>
   z.object({
     name: z.string().min(1, t('listingSettingsGroup.validation.nameRequired')),
     description: z.string().optional(),
-    repricingStrategy: z.array(priceRangeSchema(t)).min(1, t('listingSettingsGroup.validation.minOnePriceRange')),
+    repricingStrategy: z.array(priceRangeSchema(t))
+      .min(1, t('listingSettingsGroup.validation.minOnePriceRange'))
+      .superRefine((items, ctx) => {
+        for (let i = 1; i < items.length; i++) {
+          if (items[i].minPrice <= items[i - 1].maxPrice) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t('listingSettingsGroup.validation.overlappingPriceRanges'),
+              path: [i, 'minPrice'],
+            });
+          }
+        }
+      }),
     stock: stockConfigSchema(t),
     fees: feeConfigSchema(t),
     templates: templateConfigSchema(t),

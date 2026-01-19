@@ -10,7 +10,14 @@
     "saveSuccess": "Changes saved successfully",
     "saveError": "Failed to save changes",
     "showing": "Showing 1 to {{count}} of {{count}} entries",
-    "rowsPerPage": "Rows per page:"
+    "rowsPerPage": "Rows per page:",
+    "success": "Success",
+    "failed": "Failed",
+    "actions": {
+      "refresh": "Refresh",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   },
   "validation": {
     "required": "This field is required",
@@ -100,7 +107,11 @@
   },
   "header": {
     "selectLanguage": "Select Language",
-    "toggleTheme": "Toggle Theme"
+    "toggleTheme": "Toggle Theme",
+    "notifications": "Notifications"
+  },
+  "profile": {
+    "accountSettings": "Account Settings"
   },
   "languages": {
     "en": "English",
