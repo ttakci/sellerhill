@@ -8,4 +8,16 @@ export interface ListingsPageProps {
   onRefresh: () => void;
   onAddListing: () => void;
   onEndListings: (listingIds: string[]) => void;
+  selectedListingIds: string[];
+  onSelectionChange: (ids: string[]) => void;
+  onEndSelected: () => void;
+  columns: any[];
+  selectedRows: any[];
+  pagination?: {
+    count: number;
+    page: number;
+    rowsPerPage: number;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rowsPerPage: number) => void;
+  };
 }

@@ -13,9 +13,9 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: '#F9FAFB',   // Page background (very light gray)
-    secondary: '#FFFFFF', // Cards, Sidebar, Header
-    tertiary: '#F2F4F7',  // Hover states, subtle backgrounds
+    primary: '#FFFFFF',   // Main background (White)
+    secondary: '#F8FAFC', // Sidebar/Surface background
+    tertiary: '#F1F5F9',  // Subtle background (slate-100)
   },
 
   surface: {
@@ -46,9 +46,9 @@ const lightColors: ThemeColors = {
   },
 
   brand: {
-    primary: '#3C50E0',      // TailAdmin Core Blue
-    primaryHover: '#3142B9', // Darker shade
-    secondary: '#EFF4FB',    // Lightest blue tint
+    primary: '#2563EB',      // Stitch Primary Blue
+    primaryHover: '#1D4ED8', // Darker blue
+    secondary: '#EFF6FF',    // Lightest blue tint
   },
 };
 

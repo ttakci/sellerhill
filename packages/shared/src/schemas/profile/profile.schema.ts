@@ -10,7 +10,6 @@ export const updateProfileSchema = (t: any) => z.object({
   country: z.string().optional().nullable(),
   cityState: z.string().optional().nullable(),
   postalCode: z.string().optional().nullable(),
-  taxId: z.string().optional().nullable(),
 });
 
 export type UpdateProfileFormData = z.infer<ReturnType<typeof updateProfileSchema>>;

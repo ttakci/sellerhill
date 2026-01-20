@@ -1,5 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { StoreSettingsFormData, storeSettingsSchema } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -7,7 +5,6 @@ import {
   CardBody,
   Icon,
   Select,
-  SwitchRow,
   Table,
   TablePagination,
   Text,
@@ -15,8 +12,8 @@ import {
   Toggle,
   useTheme
 } from '@repo/ui';
-import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import React from 'react';
+import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './StoreSettingsPage.style';
@@ -27,114 +24,69 @@ export const StoreSettingsPageComponent = ({
   onSave,
   onStoreChange,
   availableStores,
+  form,
+  newKeyword,
+  setNewKeyword,
+  newScope,
+  setNewScope,
+  onAddKeyword,
+  onRemoveKeyword,
+  pagedBlacklist,
+  page,
+  setPage,
+  rowsPerPage,
+  setRowsPerPage,
+  onSort,
+  sortColumn,
+  sortDirection,
+  blacklistCount,
 }: StoreSettingsPageProps): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
   const { theme } = useTheme();
-  const [newKeyword, setNewKeyword] = useState('');
-  const [newScope, setNewScope] = useState<'title' | 'description' | 'both'>('both');
 
   const {
     control,
     handleSubmit,
     watch,
-    setValue,
-  } = useForm<StoreSettingsFormData>({
-    resolver: zodResolver(storeSettingsSchema(t)),
-    defaultValues: {
-      isGlobal: settings.isGlobal,
-      storeId: settings.storeId,
-      country: settings.country,
-      state: settings.state,
-      zipCode: settings.zipCode,
-      validateTitle: settings.validateTitle,
-      validateDescription: settings.validateDescription,
-      blacklist: settings.blacklist,
-    },
-  });
+  } = form;
 
   const isGlobal = watch('isGlobal');
-  const blacklist = watch('blacklist');
-
-  // Pagination & Sorting State
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  const handleSort = (column: string) => {
-    const isAsc = sortColumn === column && sortDirection === 'asc';
-    setSortDirection(isAsc ? 'desc' : 'asc');
-    setSortColumn(column);
-  };
-
-  const sortedBlacklist = React.useMemo(() => {
-    if (!sortColumn) return blacklist;
-
-    return [...blacklist].sort((a, b) => {
-      const aValue = a[sortColumn as keyof typeof a];
-      const bValue = b[sortColumn as keyof typeof b];
-
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [blacklist, sortColumn, sortDirection]);
-
-  const pagedBlacklist = React.useMemo(() => {
-    const startIndex = (page - 1) * rowsPerPage;
-    return sortedBlacklist.slice(startIndex, startIndex + rowsPerPage);
-  }, [sortedBlacklist, page, rowsPerPage]);
-
-  const handleAddKeyword = () => {
-    if (!newKeyword.trim()) {
-      return;
-    }
-    const updatedBlacklist = [...blacklist, { keyword: newKeyword.trim(), scope: newScope }];
-    setValue('blacklist', updatedBlacklist);
-    setNewKeyword('');
-  };
-
-  const handleRemoveKeyword = (index: number) => {
-    const updatedBlacklist = blacklist.filter((_, i) => i !== index);
-    setValue('blacklist', updatedBlacklist);
-  };
 
   const blacklistColumns = [
     {
       key: 'keyword',
       header: t('storeSettings:storeSettings.keyword'),
       sortable: true,
-      render: (value: any) => <Text weight="semibold">{value}</Text>,
+      render: (value: any) => <Text weight="medium" color="text.primary">{value}</Text>,
     },
     {
       key: 'scope',
       header: t('storeSettings:storeSettings.scope'),
       sortable: true,
       render: (value: any) => {
-        const variantMap: Record<string, 'primary' | 'warning' | 'info'> = {
+        const variantMap: Record<string, 'primary' | 'secondary'> = {
           both: 'primary',
-          title: 'warning',
-          description: 'info',
-        };
-        const labelMap: Record<string, string> = {
-          both: 'storeSettings:storeSettings.scope_both',
-          title: 'storeSettings:storeSettings.scope_title',
-          description: 'storeSettings:storeSettings.scope_description',
+          title: 'secondary',
         };
         return (
-          <Badge variant={variantMap[value] || 'secondary'}>
-            {t(labelMap[value])}
+          <Badge variant={variantMap[value] || 'secondary'} size="sm">
+            {t(`storeSettings:storeSettings.scope_${value}`).toUpperCase()}
           </Badge>
         );
       },
     },
     {
+      key: 'date',
+      header: t('storeSettings:storeSettings.addedDate'),
+      render: () => <Text variant="caption" color="text.secondary">12 May 2024</Text>,
+    },
+    {
       key: 'actions',
-      header: '',
+      header: t('storeSettings:storeSettings.actions'),
       align: 'right' as const,
       render: (_: any, __: any, index: number) => (
-        <S.IconAction onClick={() => handleRemoveKeyword(index)}>
-          <Icon name="trash" size={16} />
+        <S.IconAction onClick={() => onRemoveKeyword(index)}>
+          <Icon name="trash" size={18} />
         </S.IconAction>
       ),
     },
@@ -144,234 +96,232 @@ export const StoreSettingsPageComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <S.HeaderTitleWrapper>
-             <Icon name="store" size={28} color="brand.primary" />
-             <S.PageTitle variant="h3" weight="bold">{t('storeSettings:storeSettings.title')}</S.PageTitle>
-          </S.HeaderTitleWrapper>
-          <Text variant="body" color="text.secondary">
+          <S.PageTitle>
+            {t('storeSettings:storeSettings.title')}
+          </S.PageTitle>
+          <Text color="text.secondary">
             {t('storeSettings:storeSettings.subtitle')}
           </Text>
         </S.HeaderContent>
         <S.Actions>
+          <Button variant="secondary" size="md">
+            {t('translation:common.cancel')}
+          </Button>
           <Button variant="primary" size="md" onClick={handleSubmit(onSave)}>
-            <Icon name="archive" size={18} />
-            <Text variant="body" weight="medium" color="inherit">
-              {t('storeSettings:storeSettings.saveChanges')}
-            </Text>
+            <Icon name="check-circle" size={18} />
+            {t('storeSettings:storeSettings.saveChanges')}
           </Button>
         </S.Actions>
       </S.Header>
 
-      <Card variant="bordered">
-        <CardBody>
-          <S.GlobalBanner>
-            <S.SwitchGroup>
-              <Controller
-                name="isGlobal"
-                control={control}
-                render={({ field }) => (
-                  <Toggle
-                    checked={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <S.SwitchLabelContent>
-                <Text variant="body" weight="semibold">{t('storeSettings:storeSettings.globalSettings')}</Text>
-                <S.DescriptionWrapper>
-                  <S.DescriptionLine variant="caption" color="text.secondary">
-                     {t('storeSettings:storeSettings.globalDescription').split('. ')[0]}.
-                  </S.DescriptionLine>
-                  <S.SecondaryDescriptionLine variant="caption" muted>
-                     {t('storeSettings:storeSettings.globalDescription').split('. ')[1]}.
-                  </S.SecondaryDescriptionLine>
-                </S.DescriptionWrapper>
-              </S.SwitchLabelContent>
-            </S.SwitchGroup>
-
-            <S.StoreSelectWrapper $disabled={isGlobal}>
-              <S.StoreLabel>{t('storeSettings:storeSettings.selectStore')}</S.StoreLabel>
-              <Select
-                options={availableStores.map(s => ({ value: s.id, label: s.name }))}
-                value={settings.storeId || ''}
-                onChange={(val) => onStoreChange(val)}
-                fullWidth
-                disabled={isGlobal}
-                placeholder={t('storeSettings:storeSettings.selectStorePlaceholder') || t('storeSettings:storeSettings.selectStore')}
-              />
-            </S.StoreSelectWrapper>
-          </S.GlobalBanner>
-
-          <S.GlobalGrid>
-            <Card variant="bordered">
-              <S.SectionHeader>
-                <S.SectionTitleGroup>
-                  <S.HeaderIconWrapper>
-                    <Icon name="map-pin" size={24} color="text.primary" />
-                  </S.HeaderIconWrapper>
-                  <S.SectionTitleContent>
-                    <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.locationSectionTitle')}</S.SectionTitle>
-                    <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.locationSectionSubtitle')}</Text>
-                  </S.SectionTitleContent>
-                </S.SectionTitleGroup>
-              </S.SectionHeader>
-              <CardBody>
-                <S.AddressGrid>
-                  <Controller
-                    name="country"
-                    control={control}
-                    render={({ field }) => (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <S.StoreLabel>{t('storeSettings:storeSettings.country')}</S.StoreLabel>
-                        <Select
-                          options={[
-                            { value: 'US', label: 'United States (US)' },
-                            { value: 'GB', label: 'United Kingdom (GB)' },
-                            { value: 'DE', label: 'Germany (DE)' },
-                            { value: 'FR', label: 'France (FR)' },
-                            { value: 'IT', label: 'Italy (IT)' },
-                            { value: 'ES', label: 'Spain (ES)' },
-                            { value: 'CA', label: 'Canada (CA)' },
-                            { value: 'AU', label: 'Australia (AU)' },
-                            { value: 'CN', label: 'China (CN)' },
-                            { value: 'JP', label: 'Japan (JP)' },
-                            { value: 'TR', label: 'Turkey (TR)' },
-                          ]}
-                          value={field.value}
-                          onChange={field.onChange}
-                          fullWidth
-                          placeholder={t('storeSettings:storeSettings.selectCountry') || 'Select Country'}
-                        />
-                      </div>
-                    )}
-                  />
-                  <TextInput
-                    name="state"
-                    control={control}
-                    label={t('storeSettings:storeSettings.state')}
-                  />
-                </S.AddressGrid>
-                
-                <TextInput
-                  name="zipCode"
-                  control={control}
-                  label={t('storeSettings:storeSettings.zipCode')}
+      <S.GlobalSettingsCard>
+        <S.GlobalBanner>
+          <S.SwitchGroup>
+            <Controller
+              name="isGlobal"
+              control={control}
+              render={({ field }) => (
+                <Toggle
+                  checked={field.value}
+                  onChange={field.onChange}
                 />
-              </CardBody>
-            </Card>
+              )}
+            />
+            <S.SwitchLabelContent>
+              <Text weight="bold" color="text.primary">{t('storeSettings:storeSettings.globalSettings')}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('storeSettings:storeSettings.globalDescription').split('.')[0]}
+              </Text>
+            </S.SwitchLabelContent>
+          </S.SwitchGroup>
 
-            <Card variant="bordered">
-              <S.SectionHeader>
-                <S.SectionTitleGroup>
-                  <S.HeaderIconWrapper>
-                    <Icon name="check-list" size={24} color="text.primary" />
-                  </S.HeaderIconWrapper>
-                  <S.SectionTitleContent>
-                     <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.validationSectionTitle')}</S.SectionTitle>
-                     <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.validationSectionSubtitle')}</Text>
-                  </S.SectionTitleContent>
-                </S.SectionTitleGroup>
-              </S.SectionHeader>
-              <CardBody>
+          <S.StoreSelectWrapper $disabled={isGlobal}>
+            <S.StoreLabel>{t('storeSettings:storeSettings.selectStore').toUpperCase()}</S.StoreLabel>
+            <Select
+              options={availableStores.map(s => ({ value: s.id, label: s.name }))}
+              value={settings.storeId || ''}
+              onChange={(val) => onStoreChange(val)}
+              fullWidth
+              disabled={isGlobal}
+              placeholder={t('storeSettings:storeSettings.selectStorePlaceholder')}
+            />
+          </S.StoreSelectWrapper>
+        </S.GlobalBanner>
+      </S.GlobalSettingsCard>
+
+      <S.GlobalGrid>
+        <Card variant="bordered" className="custom-shadow">
+          <S.SectionHeader>
+            <S.HeaderIconWrapper $type="location">
+              <Icon name="map-pin" size={20} />
+            </S.HeaderIconWrapper>
+            <S.SectionTitleContent>
+              <S.SectionTitle>{t('storeSettings:storeSettings.locationSectionTitle')}</S.SectionTitle>
+              <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.locationSectionSubtitle')}</Text>
+            </S.SectionTitleContent>
+          </S.SectionHeader>
+          <CardBody>
+            <S.PaddingContainer>
+              <S.AddressGrid>
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <S.InputGroup>
+                      <S.InputLabel>{t('storeSettings:storeSettings.country')}</S.InputLabel>
+                      <Select
+                        options={[{ value: 'TR', label: 'Turkey (TR)' }, { value: 'US', label: 'United States (US)' }]}
+                        value={field.value}
+                        onChange={field.onChange}
+                        fullWidth
+                      />
+                    </S.InputGroup>
+                  )}
+                />
+                <TextInput
+                  name="state"
+                  control={control}
+                  label={t('storeSettings:storeSettings.state')}
+                  placeholder="İstanbul"
+                />
+              </S.AddressGrid>
+              
+              <TextInput
+                name="zipCode"
+                control={control}
+                label={t('storeSettings:storeSettings.zipCode')}
+                placeholder="34000"
+              />
+
+              <S.InputGroup>
+                 <S.InputLabel>{t('storeSettings:storeSettings.address')}</S.InputLabel>
+                 <S.TextArea placeholder={t('storeSettings:storeSettings.addressPlaceholder')} />
+              </S.InputGroup>
+            </S.PaddingContainer>
+          </CardBody>
+        </Card>
+
+        <Card variant="bordered" className="custom-shadow">
+          <S.SectionHeader>
+            <S.HeaderIconWrapper $type="validation">
+              <Icon name="validation" size={20} />
+            </S.HeaderIconWrapper>
+            <S.SectionTitleContent>
+              <S.SectionTitle>{t('storeSettings:storeSettings.validationSectionTitle')}</S.SectionTitle>
+              <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.validationSectionSubtitle')}</Text>
+            </S.SectionTitleContent>
+          </S.SectionHeader>
+          <CardBody>
+            <S.PaddingContainer>
+              <S.ValidationList>
                 <Controller
                   name="validateTitle"
                   control={control}
                   render={({ field }) => (
-                    <SwitchRow
-                      title={t('storeSettings:storeSettings.validateTitle')}
-                      description={t('storeSettings:storeSettings.validateTitleDesc')}
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
+                    <S.SwitchItem>
+                      <S.SwitchLabelContent>
+                        <Text weight="semibold">{t('storeSettings:storeSettings.validateTitle')}</Text>
+                        <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.validateTitleDesc')}</Text>
+                      </S.SwitchLabelContent>
+                      <Toggle checked={field.value} onChange={field.onChange} />
+                    </S.SwitchItem>
                   )}
                 />
-
                 <Controller
                   name="validateDescription"
                   control={control}
                   render={({ field }) => (
-                    <SwitchRow
-                      title={t('storeSettings:storeSettings.validateDescription')}
-                      description={t('storeSettings:storeSettings.validateDescriptionDesc')}
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
+                    <S.SwitchItem>
+                      <S.SwitchLabelContent>
+                        <Text weight="semibold">{t('storeSettings:storeSettings.validateDescription')}</Text>
+                        <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.validateDescriptionDesc')}</Text>
+                      </S.SwitchLabelContent>
+                      <Toggle checked={field.value} onChange={field.onChange} />
+                    </S.SwitchItem>
                   )}
                 />
-              </CardBody>
-            </Card>
-          </S.GlobalGrid>
+                <S.SwitchItem>
+                  <S.SwitchLabelContent>
+                    <Text weight="semibold">{t('storeSettings:storeSettings.priceLimit')}</Text>
+                    <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.priceLimitDesc')}</Text>
+                  </S.SwitchLabelContent>
+                  <Toggle checked={false} />
+                </S.SwitchItem>
+              </S.ValidationList>
+            </S.PaddingContainer>
+          </CardBody>
+        </Card>
+      </S.GlobalGrid>
 
-          <S.BlacklistCard variant="bordered">
-            <S.SectionHeader>
-              <S.BlacklistTitleColumn>
-                <S.HeaderIconWrapper>
-                   <Icon name="block" size={24} color="text.primary" />
-                </S.HeaderIconWrapper>
-                <S.SectionTitleContent>
-                  <S.SectionTitle variant="h4" weight="bold">{t('storeSettings:storeSettings.blacklistSectionTitle')}</S.SectionTitle>
-                  <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.blacklistSubtitle')}</Text>
-                </S.SectionTitleContent>
-              </S.BlacklistTitleColumn>
-              <S.BlacklistControls>
-                <S.BlacklistInputWrapper>
-                  <S.BlacklistInput
-                    value={newKeyword}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewKeyword(e.target.value)}
-                    placeholder={t('storeSettings:storeSettings.addKeyword')}
-                  />
-                  <S.BlacklistActionGroup>
-                    <S.ScopeSelectContainer>
-                      <Select
-                        options={[
-                          { value: 'both', label: t('storeSettings:storeSettings.scope_both') },
-                          { value: 'title', label: t('storeSettings:storeSettings.scope_title') },
-                          { value: 'description', label: t('storeSettings:storeSettings.scope_description') },
-                        ]}
-                        value={newScope}
-                        onChange={(val) => setNewScope(val as any)}
-                        fullWidth={true}
-                      />
-                    </S.ScopeSelectContainer>
-                    <S.AddButton
-                      variant="primary"
-                      size="sm"
-                      onClick={handleAddKeyword}
-                    >
-                      <Icon name="plus" size={14} />
-                    </S.AddButton>
-                  </S.BlacklistActionGroup>
-                </S.BlacklistInputWrapper>
-              </S.BlacklistControls>
-            </S.SectionHeader>
-            
-            <Table
-              columns={blacklistColumns}
-              data={pagedBlacklist}
-              emptyMessage={t('storeSettings:storeSettings.noKeywords')}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-              footer={
-                sortedBlacklist.length > 0 && (
-                  <TablePagination
-                    count={sortedBlacklist.length}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    onPageChange={setPage}
-                    onRowsPerPageChange={setRowsPerPage}
-                    labelRowsPerPage={t('translation:common.rowsPerPage')}
-                  />
-                )
-              }
-            />
-          </S.BlacklistCard>
-        </CardBody>
-      </Card>
+      <S.BlacklistCard variant="bordered" className="custom-shadow">
+        <S.SectionHeader>
+          <S.BlacklistTitleColumn>
+            <S.HeaderIconWrapper $type="blacklist">
+              <Icon name="block" size={20} />
+            </S.HeaderIconWrapper>
+            <S.SectionTitleContent>
+              <S.SectionTitle>{t('storeSettings:storeSettings.blacklistSectionTitle')}</S.SectionTitle>
+              <Text variant="caption" color="text.secondary">{t('storeSettings:storeSettings.blacklistSubtitle')}</Text>
+            </S.SectionTitleContent>
+          </S.BlacklistTitleColumn>
+          <S.BlacklistControls>
+            <S.SearchContainer>
+               <input 
+                placeholder={t('storeSettings:storeSettings.addKeyword')} 
+                value={newKeyword}
+                onChange={(e) => setNewKeyword(e.target.value)}
+               />
+               <S.SearchActions>
+                  <S.MiniSelect>
+                    <Select
+                      options={[
+                        { value: 'both', label: t('storeSettings:storeSettings.scope_both').toUpperCase() },
+                        { value: 'title', label: t('storeSettings:storeSettings.scope_title').toUpperCase() },
+                        { value: 'description', label: t('storeSettings:storeSettings.scope_description').toUpperCase() },
+                      ]}
+                      value={newScope}
+                      onChange={(v) => setNewScope(v as any)}
+                    />
+                  </S.MiniSelect>
+                  <Button variant="primary" size="sm" onClick={onAddKeyword} style={{ minWidth: '32px', padding: 0 }}>
+                    <Icon name="plus" size={18} />
+                  </Button>
+               </S.SearchActions>
+            </S.SearchContainer>
+          </S.BlacklistControls>
+        </S.SectionHeader>
+        
+        <Table
+          columns={blacklistColumns}
+          data={pagedBlacklist}
+          emptyMessage={t('storeSettings:storeSettings.noKeywords')}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          footer={
+            blacklistCount > 0 && (
+              <TablePagination
+                count={blacklistCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={setPage}
+                onRowsPerPageChange={setRowsPerPage}
+              />
+            )
+          }
+        />
+      </S.BlacklistCard>
 
-      <S.Copyright>
-        {t('storeSettings:storeSettings.copyright', { year: new Date().getFullYear() })}
-      </S.Copyright>
+      <S.Footer>
+        <S.FooterLinks>
+           <a href="#">{t('translation:menu.support').toUpperCase()}</a>
+           <a href="#">{t('translation:common.privacy').toUpperCase()}</a>
+           <a href="#">{t('translation:common.support').toUpperCase()}</a>
+        </S.FooterLinks>
+        <S.Copyright>
+          {t('storeSettings:storeSettings.copyright', { year: new Date().getFullYear() })}
+        </S.Copyright>
+      </S.Footer>
     </S.Container>
   );
 };

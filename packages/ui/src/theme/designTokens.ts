@@ -6,9 +6,9 @@ export const colorTokens = {
   primary: {
     50: '#eff6ff',
     100: '#dbeafe',
-    500: '#2563EB', // Brand Primary Blue
+    500: '#2563EB', // Brand Primary Blue (Stitch Design)
     700: '#1D4ED8',
-    900: '#1E3A8A',
+    900: '#1e3a8a',
   },
   neutral: {
     0: '#FFFFFF',
@@ -66,10 +66,10 @@ export const radiusTokens = {
 } as const;
 
 export const shadowTokens = {
-  sm: '0px 1px 2px 0px rgba(16, 24, 40, 0.05)', // TailAdmin subtle shadow
-  md: '0px 2px 4px 0px rgba(16, 24, 40, 0.06)',
-  lg: '0px 4px 8px 0px rgba(16, 24, 40, 0.08)',
-  xl: '0px 8px 16px 0px rgba(16, 24, 40, 0.10)',
+  sm: '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)', // Stitch subtle shadow
+  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
 } as const;
 
 export const typographyTokens = {

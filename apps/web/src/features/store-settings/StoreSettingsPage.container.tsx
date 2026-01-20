@@ -1,20 +1,32 @@
 import { getErrorMessage } from '@/utils/errorHandler';
-import { type StoreSettingsFormData } from '@repo/shared';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { storeSettingsSchema, type StoreSettingsFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
 import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
 import * as S from './StoreSettingsPage.style';
 import {
-    useGetStoreSettingsQuery,
-    useSaveStoreSettingsMutation
+  useGetStoreSettingsQuery,
+  useSaveStoreSettingsMutation
 } from './api/storeSettingsApi';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
   const { showMessage, closeMessage } = useUI();
   const [selectedStoreId, setSelectedStoreId] = useState<string | undefined>(undefined);
+
+  // Blacklist Management State
+  const [newKeyword, setNewKeyword] = useState('');
+  const [newScope, setNewScope] = useState<'title' | 'description' | 'both'>('both');
+
+  // Pagination & Sorting State
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Fetch settings
   const { data: settings, isLoading: settingsLoading } = useGetStoreSettingsQuery({ storeId: selectedStoreId });
@@ -27,6 +39,40 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
 
   // Use RTK Query loading state with useLoading hook
   useLoading(settingsLoading || isSaving);
+
+  // Form Setup
+  const form = useForm<StoreSettingsFormData>({
+    resolver: zodResolver(storeSettingsSchema(t)) as any,
+    defaultValues: {
+      isGlobal: true,
+      storeId: undefined,
+      country: '',
+      state: '',
+      zipCode: '',
+      validateTitle: true,
+      validateDescription: true,
+      blacklist: [],
+    },
+  });
+
+  const { reset, watch, setValue } = form;
+  const blacklist = watch('blacklist') || [];
+
+  // Update form defaults when settings load
+  useEffect(() => {
+    if (settings) {
+      reset({
+        isGlobal: settings.isGlobal,
+        storeId: settings.storeId,
+        country: settings.country,
+        state: settings.state,
+        zipCode: settings.zipCode,
+        validateTitle: settings.validateTitle,
+        validateDescription: settings.validateDescription,
+        blacklist: settings.blacklist,
+      });
+    }
+  }, [settings, reset]);
 
   // Handle success
   useEffect(() => {
@@ -67,6 +113,45 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     });
   };
 
+  // Blacklist Handlers
+  const handleAddKeyword = () => {
+    if (!newKeyword.trim()) return;
+    const updatedBlacklist = [...blacklist, { keyword: newKeyword.trim(), scope: newScope }];
+    setValue('blacklist', updatedBlacklist, { shouldDirty: true });
+    setNewKeyword('');
+  };
+
+  const handleRemoveKeyword = (index: number) => {
+    const updatedBlacklist = blacklist.filter((_: any, i: number) => i !== index);
+    setValue('blacklist', updatedBlacklist, { shouldDirty: true });
+  };
+
+  // Sorting & Pagination Logic
+  const handleSort = (column: string) => {
+    const isAsc = sortColumn === column && sortDirection === 'asc';
+    setSortDirection(isAsc ? 'desc' : 'asc');
+    setSortColumn(column);
+  };
+
+  const sortedBlacklist = useMemo(() => {
+    if (!sortColumn) return blacklist;
+
+    return [...blacklist].sort((a, b) => {
+      const aKey = sortColumn as keyof typeof a;
+      const aValue = a[aKey];
+      const bValue = b[aKey];
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [blacklist, sortColumn, sortDirection]);
+
+  const pagedBlacklist = useMemo(() => {
+    const startIndex = (page - 1) * rowsPerPage;
+    return sortedBlacklist.slice(startIndex, startIndex + rowsPerPage);
+  }, [sortedBlacklist, page, rowsPerPage]);
+
   if (settingsLoading || !settings) {
     return <S.LoadingContainer>{t('translation:common.loading')}</S.LoadingContainer>;
   }
@@ -82,6 +167,28 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       onSave={handleSave}
       onStoreChange={(id) => setSelectedStoreId(id)}
       availableStores={availableStores}
+      
+      // Form
+      form={form}
+
+      // Blacklist Management
+      newKeyword={newKeyword}
+      setNewKeyword={setNewKeyword}
+      newScope={newScope}
+      setNewScope={setNewScope}
+      onAddKeyword={handleAddKeyword}
+      onRemoveKeyword={handleRemoveKeyword}
+
+      // Pagination & Sorting
+      pagedBlacklist={pagedBlacklist}
+      page={page}
+      setPage={setPage}
+      rowsPerPage={rowsPerPage}
+      setRowsPerPage={setRowsPerPage}
+      onSort={handleSort}
+      sortColumn={sortColumn}
+      sortDirection={sortDirection}
+      blacklistCount={sortedBlacklist.length}
     />
   );
 };

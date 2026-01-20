@@ -8,6 +8,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
   items,
   header,
   align = 'right',
+  direction = 'down',
+  width,
   className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +36,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   return (
     <S.Container ref={containerRef} className={className}>
       <div onClick={handleTrigger} style={{ cursor: 'pointer' }}>{renderedTrigger}</div>
-      <S.Menu $isOpen={isOpen} $align={align}>
+      <S.Menu $isOpen={isOpen} $align={align} $direction={direction} $width={width}>
         {header && <S.DropdownHeader>{header}</S.DropdownHeader>}
         {items.map((item, index) => (
           <S.MenuItem

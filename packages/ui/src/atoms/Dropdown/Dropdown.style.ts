@@ -3,26 +3,32 @@ import { tkn } from '../../theme/tkn';
 
 export const Container = styled.div`
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
 `;
 
-export const Menu = styled.div<{ $isOpen: boolean; $align: 'left' | 'right' }>`
+export const Menu = styled.div<{ $isOpen: boolean; $align: 'left' | 'right'; $direction?: 'up' | 'down'; $width?: string }>`
   position: absolute;
-  top: 120%; /* Slight offset from trigger */
+  ${({ $direction }) => ($direction === 'up' ? 'bottom: 120%;' : 'top: 120%;')}
   ${({ $align }) => ($align === 'left' ? 'left: 0;' : 'right: 0;')};
   z-index: 1000;
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   flex-direction: column;
-  min-width: 260px; /* Wider for full profile info */
+  ${({ $width }) => ($width ? `width: ${$width}; min-width: unset;` : 'min-width: 260px;')};
   background: ${tkn('colors.background.secondary')};
   border: 1px solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.sm')};
-  padding: 8px 0; /* Padding vertical only, items handle horizontal */
+  padding: 8px 0; /* Restored padding */
   box-shadow: ${tkn('shadows.xl')};
-  animation: fadeIn 0.2s ease-out;
+  animation: ${({ $direction }) => ($direction === 'up' ? 'fadeInUp' : 'fadeIn')} 0.2s ease-out;
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 `;
@@ -38,7 +44,7 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 10px 20px;
+  padding: 10px 12px; /* Reduced horizontal bulge */
   border: none;
   background: transparent;
   cursor: pointer;

@@ -41,7 +41,7 @@ export const CardContainer = styled.div<{ $variant: CardProps['variant']; $paddi
 `;
 
 export const CardHeaderContainer = styled.div`
-  padding: 1rem 1.625rem; /* py-4 px-6.5 */
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
   border-bottom: 1px solid ${tkn('colors.border.primary')};
   display: flex;
   align-items: center;
@@ -50,9 +50,9 @@ export const CardHeaderContainer = styled.div`
   background: transparent;
 
   h3, span {
-    font-weight: 500;
+    font-weight: 700;
     color: ${tkn('colors.text.primary')};
-    font-size: 1rem;
+    font-size: ${tkn('typography.fontSize.md')};
   }
 `;
 
@@ -73,6 +73,8 @@ export const CardHeaderActions = styled.div`
 `;
 
 export const CardBodyContainer = styled.div`
-  padding: 1.25rem 1.5rem;
+  padding: ${tkn('spacing.xl')};
   flex: 1;
+  display: flex;
+  flex-direction: column;
 `;

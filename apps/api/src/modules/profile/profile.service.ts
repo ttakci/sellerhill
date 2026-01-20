@@ -10,6 +10,11 @@ interface UserEntity {
   email: string;
   phone_number: string | null;
   avatar_url: string | null;
+  job_title: string | null;
+  bio: string | null;
+  country: string | null;
+  city_state: string | null;
+  postal_code: string | null;
   email_verified: boolean;
   status: UserStatus;
   created_at: Date;
@@ -24,21 +29,28 @@ export class ProfileService implements OnModuleInit {
 
   async onModuleInit() {
     await this.ensureColumnsExist();
+    await this.dropDeprecatedColumns();
   }
 
   private async ensureColumnsExist() {
     try {
       this.logger.log('Checking for profile-related columns in users table...');
       
-      // Add phone_number if not exists
-      await this.databaseService.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20)
-      `);
-      
-      // Add avatar_url if not exists
-      await this.databaseService.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT
-      `);
+      const columns = [
+        'phone_number VARCHAR(20)',
+        'avatar_url TEXT',
+        'job_title TEXT',
+        'bio TEXT',
+        'country TEXT',
+        'city_state TEXT',
+        'postal_code TEXT'
+      ];
+
+      for (const columnDef of columns) {
+         await this.databaseService.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS ${columnDef}
+         `);
+      }
       
       this.logger.log('Profile-related columns ensured.');
     } catch (error) {
@@ -46,9 +58,23 @@ export class ProfileService implements OnModuleInit {
     }
   }
 
+  private async dropDeprecatedColumns() {
+    try {
+      this.logger.log('Dropping deprecated columns (tax_id, social_links)...');
+      await this.databaseService.query(`
+        ALTER TABLE users 
+        DROP COLUMN IF EXISTS tax_id,
+        DROP COLUMN IF EXISTS social_links
+      `);
+      this.logger.log('Deprecated columns dropped.');
+    } catch (error) {
+      this.logger.error('Failed to drop deprecated columns', error);
+    }
+  }
+
   async getProfile(userId: string): Promise<ProfileDto> {
     const users = await this.databaseService.query<UserEntity>(
-      'SELECT id, first_name, last_name, email, phone_number, avatar_url, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, first_name, last_name, email, phone_number, avatar_url, job_title, bio, country, city_state, postal_code, email_verified, status, created_at, updated_at FROM users WHERE id = $1',
       [userId]
     );
 
@@ -64,25 +90,25 @@ export class ProfileService implements OnModuleInit {
     const values: any[] = [];
     let paramIndex = 1;
 
-    if (request.firstName !== undefined) {
-      updates.push(`first_name = $${paramIndex++}`);
-      values.push(request.firstName);
-    }
+    const fieldsTemplate: Record<keyof UpdateProfileRequest, string> = {
+        firstName: 'first_name',
+        lastName: 'last_name',
+        phoneNumber: 'phone_number',
+        avatarUrl: 'avatar_url',
+        jobTitle: 'job_title',
+        bio: 'bio',
+        country: 'country',
+        cityState: 'city_state',
+        postalCode: 'postal_code'
+    };
 
-    if (request.lastName !== undefined) {
-      updates.push(`last_name = $${paramIndex++}`);
-      values.push(request.lastName);
-    }
-
-    if (request.phoneNumber !== undefined) {
-      updates.push(`phone_number = $${paramIndex++}`);
-      values.push(request.phoneNumber);
-    }
-
-    if (request.avatarUrl !== undefined) {
-      updates.push(`avatar_url = $${paramIndex++}`);
-      values.push(request.avatarUrl);
-    }
+    Object.entries(request).forEach(([key, value]) => {
+        const dbField = fieldsTemplate[key as keyof UpdateProfileRequest];
+        if (dbField && value !== undefined) {
+             updates.push(`${dbField} = $${paramIndex++}`);
+             values.push(value);
+        }
+    });
 
     if (updates.length === 0) {
       return this.getProfile(userId);
@@ -109,6 +135,11 @@ export class ProfileService implements OnModuleInit {
       email: user.email,
       phoneNumber: user.phone_number || undefined,
       avatarUrl: user.avatar_url || undefined,
+      jobTitle: user.job_title || undefined,
+      bio: user.bio || undefined,
+      country: user.country || undefined,
+      cityState: user.city_state || undefined,
+      postalCode: user.postal_code || undefined,
       emailVerified: user.email_verified,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),

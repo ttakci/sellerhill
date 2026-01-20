@@ -17,7 +17,6 @@ export interface ProfileDto {
   country?: string;
   cityState?: string;
   postalCode?: string;
-  taxId?: string;
   emailVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -36,5 +35,4 @@ export interface UpdateProfileRequest {
   country?: string;
   cityState?: string;
   postalCode?: string;
-  taxId?: string;
 }

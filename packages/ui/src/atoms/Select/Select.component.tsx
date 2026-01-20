@@ -32,7 +32,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </S.StyledSelect>
         <S.IconContainer>
-          <Icon name="chevron-down" size={20} />
+          <Icon name="expand-more" size={20} />
         </S.IconContainer>
       </S.Container>
     );

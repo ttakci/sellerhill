@@ -6,6 +6,7 @@
     },
     "jobs": {
       "title": "Import Jobs",
+      "subtitle": "Track the status of your bulk import operations to eBay.",
       "empty": "No import jobs found.",
       "status": {
         "pending": "Pending",
@@ -17,14 +18,19 @@
         "id": "Job ID",
         "date": "Date",
         "progress": "Progress",
-        "results": "Results",
+        "stats": "Stats",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "createdAt": "Created At"
+      },
+      "stats": {
+        "success": "Success",
+        "failed": "Failed"
       }
     },
     "overview": {
       "title": "Active Listings",
-      "subtitle": "You have {{count}} active listings on eBay.",
+      "subtitle": "You have {{count}} active listings currently live in your store.",
       "emptyTitle": "No Listings Found",
       "emptySubtitle": "Start by adding products from Amazon to your eBay store."
     },
@@ -34,6 +40,8 @@
       "ebayId": "eBay Item ID",
       "price": "Price",
       "stock": "Stock",
+      "category": "Category",
+      "updatedAt": "Last Updated",
       "status": "Status",
       "actions": "Actions",
       "addedAt": "Added {{date}}"
@@ -104,6 +112,9 @@
     "success": {
       "created": "{{count}} listings created successfully",
       "queued": "{{count}} listings queued for processing"
+    },
+    "products": {
+      "subtitle": "View product details and Amazon data for all your active listings."
     },
     "errors": {
       "createFailed": "Failed to create listings",

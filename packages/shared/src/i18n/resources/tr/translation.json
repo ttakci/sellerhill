@@ -13,11 +13,23 @@
     "rowsPerPage": "Sayfa başına satır:",
     "success": "Başarılı",
     "failed": "Hata",
+    "products": {
+      "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
+    },
+    "unknownProduct": "Bilinmeyen Ürün",
     "actions": {
       "refresh": "Yenile",
       "edit": "Düzenle",
       "delete": "Sil"
-    }
+    },
+    "privacy": "Gizlilik",
+    "support": "Destek",
+    "notSet": "Ayarlanmadı",
+    "notProvided": "Belirtilmedi",
+    "noCategory": "Kategori Yok",
+    "details": "Detaylar",
+    "noBrand": "Marka Bilgisi Yok",
+    "languageCode": "tr-TR"
   },
   "validation": {
     "required": "Bu alan zorunludur",
@@ -91,10 +103,13 @@
   "menu": {
     "main": "ANA MENÜ",
     "dashboard": "Panel",
+    "listings": "Listelemeler",
+    "ebayListings": "Ebay Listeleri",
+    "listingJobs": "İş Takibi",
+    "products": "Ürünler",
     "inventory": "Envanter",
     "orders": "Siparişler",
     "configuration": "Yapılandırma",
-    "listings": "Listelemeler",
     "settings": "Ayarlar",
     "storeSettings": "Mağaza Ayarları",
     "listingSettingsGroups": "Listeleme Ayar Grupları",

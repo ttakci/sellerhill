@@ -61,6 +61,16 @@ export class ListingsController {
   }
 
   /**
+   * Get all products for user (from their listings)
+   */
+  @ApiOperation({ summary: 'Get all unique products from user listings' })
+  @Get('products')
+  async getProducts(@Request() req: any): Promise<ProductData[]> {
+    const userId = req.user.sub;
+    return this.listingsService.getUserProducts(userId);
+  }
+
+  /**
    * Get job status
    */
   @ApiOperation({ summary: 'Get status of a listing job' })

@@ -13,5 +13,7 @@ export interface DropdownProps {
   items: DropdownItem[];
   header?: React.ReactNode;
   align?: 'left' | 'right';
+  direction?: 'up' | 'down';
+  width?: string;
   className?: string;
 }

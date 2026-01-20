@@ -4,6 +4,7 @@ import type {
     ListingDto,
     ListingJobDto,
     ListingJobItemDto,
+    ProductData,
 } from '@repo/shared';
 import { baseApi } from '../../../api/baseApi';
 
@@ -24,6 +25,13 @@ export const listingsApi = baseApi.injectEndpoints({
      */
     getListingJobs: builder.query<ListingJobDto[], void>({
       query: () => '/listings/jobs',
+      providesTags: ['Listings'],
+    }),
+    /**
+     * Get all products for user
+     */
+    getUserProducts: builder.query<ProductData[], void>({
+      query: () => '/listings/products',
       providesTags: ['Listings'],
     }),
 
@@ -80,6 +88,7 @@ export const listingsApi = baseApi.injectEndpoints({
 export const {
   useGetListingsQuery,
   useGetListingJobsQuery,
+  useGetUserProductsQuery,
   useCreateListingsMutation,
   useGetJobStatusQuery,
   useGetJobItemsQuery,

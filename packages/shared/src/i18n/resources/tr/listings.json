@@ -6,6 +6,7 @@
     },
     "jobs": {
       "title": "İçe Aktarma İşleri",
+      "subtitle": "eBay'e yapılan toplu aktarma işlemlerinizin durumunu buradan takip edebilirsiniz.",
       "empty": "İçe aktarma işi bulunamadı.",
       "status": {
         "pending": "Bekliyor",
@@ -17,14 +18,19 @@
         "id": "İş ID",
         "date": "Tarih",
         "progress": "İlerleme",
-        "results": "Sonuçlar",
+        "stats": "İstatistikler",
         "status": "Durum",
-        "actions": "İşlemler"
+        "actions": "İşlemler",
+        "createdAt": "Oluşturulma"
+      },
+      "stats": {
+        "success": "Başarılı",
+        "failed": "Hata"
       }
     },
     "overview": {
       "title": "Aktif Listeler",
-      "subtitle": "eBay'de {{count}} aktif listeniz bulunuyor.",
+      "subtitle": "Şu anda mağazanızda yayında olan {{count}} aktif listeniz bulunuyor.",
       "emptyTitle": "Liste Bulunamadı",
       "emptySubtitle": "Amazon'dan eBay mağazanıza ürün ekleyerek başlayın."
     },
@@ -34,6 +40,8 @@
       "ebayId": "eBay Ürün ID",
       "price": "Fiyat",
       "stock": "Stok",
+      "category": "Kategori",
+      "updatedAt": "Son Güncelleme",
       "status": "Durum",
       "actions": "İşlemler",
       "addedAt": "{{date}} tarihinde eklendi"
@@ -104,6 +112,9 @@
     "success": {
       "created": "{{count}} liste başarıyla oluşturuldu",
       "queued": "{{count}} liste işleme için sıraya alındı"
+    },
+    "products": {
+      "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
     },
     "errors": {
       "createFailed": "Listeler oluşturulamadı",

@@ -1,93 +1,270 @@
 import styled from '@emotion/styled';
-import { Card, Text, tkn } from '@repo/ui';
+import { Badge, Button, Card, Text, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
   margin: 0 auto;
-  padding: 0 ${tkn('spacing.md')};
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xl')};
   box-sizing: border-box;
-
-  @media (min-width: 768px) {
-    padding: 0 ${tkn('spacing.xl')};
-    gap: ${tkn('spacing.lg')};
-  }
+  padding-bottom: 40px;
 `;
 
 export const Header = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  justify-content: space-between;
   align-items: flex-start;
-  
-  position: sticky;
-  top: calc(-1 * ${tkn('spacing.md')});
-  margin-top: calc(-1 * ${tkn('spacing.md')}); 
-  
-  z-index: 99;
-  background-color: ${tkn('colors.background.secondary')};
-  
-  margin-left: calc(-1 * ${tkn('spacing.md')});
-  margin-right: calc(-1 * ${tkn('spacing.md')});
-  padding: ${tkn('spacing.md')};
-  
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  padding: 0;
 
-  @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    top: calc(-1 * ${tkn('spacing.xl')});
-    margin-top: calc(-1 * ${tkn('spacing.xl')});
-    
-    margin-left: calc(-1 * ${tkn('spacing.xl')});
-    margin-right: calc(-1 * ${tkn('spacing.xl')});
-    padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: ${tkn('spacing.md')};
   }
 `;
 
 export const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: 4px;
 `;
 
-export const HeaderTitleWrapper = styled.div`
+export const BreadcrumbContainer = styled.nav`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 4px; /* mb-1 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* tracking-wider */
 `;
 
-export const PageTitle = styled(Text)`
-  font-size: 26px !important;
+export const BreadcrumbText = styled(Text)`
+  font-size: 11px; /* text-xs approximate */
+  font-weight: 500;
+  color: ${tkn('colors.text.tertiary')}; /* text-slate-400 */
+`;
+
+export const ActiveBreadcrumbText = styled(Text)`
+  font-size: 11px;
+  font-weight: 500;
+  color: ${tkn('colors.text.secondary')}; /* text-slate-500 */
+`;
+
+export const PageTitle = styled.h1`
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 800; /* font-extrabold */
+  color: ${tkn('colors.text.primary')};
+  margin: 0;
+  letter-spacing: -0.025em; /* tracking-tight */
+`;
+
+export const PageSubtitle = styled(Text)`
+  font-size: 0.875rem; /* text-sm */
+  color: ${tkn('colors.text.secondary')}; /* text-slate-500 */
+  margin-top: 8px; /* mt-2 */
 `;
 
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
-  width: 100%;
+`;
 
-  @media (min-width: 768px) {
-    width: auto;
+export const StyledCreateButton = styled(Button)`
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); /* shadow-lg shadow-blue-500/20 */
+  transition: all ${tkn('transitions.normal')};
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &:hover {
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.2);
   }
 `;
 
 export const CardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.lg')};
 
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: ${tkn('spacing.lg')};
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   @media (min-width: 1280px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
+/* refined and reordered below */
+export const CardHeader = styled.div`
+  padding: 20px; /* p-5 */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* items-start */
+  border-bottom: 1px solid ${tkn('colors.border.secondary')}; /* border-slate-50 */
+`;
+
+export const CardIconWrapper = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${tkn('colors.brand.secondary')}; /* #EFF6FF */
+  color: ${tkn('colors.brand.primary')}; /* #2563EB */
+  
+  & svg {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
+export const CardBodyContent = styled.div`
+  padding: 20px; /* p-5 */
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const CardTitleGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+export const CardTitleText = styled(Text)`
+  font-size: 1.25rem;
+  font-weight: 700;
+  transition: color ${tkn('transitions.normal')};
+`;
+
+export const CardDescText = styled(Text)`
+  font-size: 0.9rem;
+`;
+
+export const CardFooter = styled.div`
+  margin-top: auto;
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
+  background: #F8FAFC;
+  border-top: 1px solid ${tkn('colors.border.primary')};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const Stats = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+export const StatItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: ${tkn('colors.text.tertiary')};
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+export const CardActions = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+export const IconButton = styled.button<{ $type?: 'delete' | 'edit' }>`
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: ${tkn('colors.text.tertiary')};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${({ $type }) => ($type === 'delete' ? '#FEF2F2' : '#F1F5F9')};
+    color: ${({ $type }) => ($type === 'delete' ? '#EF4444' : '#2563EB')};
+  }
+`;
+
+/* refined and reordered below */
+export const ActiveBadge = styled(Badge)`
+  font-weight: 700;
+  font-size: 10px;
+  background-color: #F0FDF4 !important; /* bg-green-50 */
+  color: #16A34A !important; /* text-green-600 */
+  border: none;
+`;
+
+export const DashedCardIconWrapper = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: ${tkn('colors.background.secondary')}; /* #F8FAFC */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  transition: background-color ${tkn('transitions.normal')};
+`;
+
+export const InteractiveCard = styled(Card)`
+  cursor: pointer;
+  transition: all ${tkn('transitions.normal')};
+  border-radius: 16px !important;
+  box-shadow: ${tkn('shadows.sm')};
+  overflow: hidden;
+  border: 1px solid ${tkn('colors.border.primary')};
+  
+  &:hover {
+    border-color: ${tkn('colors.brand.primary')};
+    box-shadow: ${tkn('shadows.md')};
+    transform: translateY(-2px);
+  }
+
+  &:hover .card-title {
+    color: ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const DashedCard = styled.button`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  background: transparent;
+  border: 2px dashed ${tkn('colors.border.secondary')};
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all ${tkn('transitions.normal')};
+  gap: 12px;
+  padding: ${tkn('spacing.xl')};
+  color: ${tkn('colors.text.tertiary')};
+
+  & svg {
+    color: inherit;
+    transition: color 0.15s;
+  }
+
+  &:hover {
+    border-color: ${tkn('colors.brand.primary')};
+    color: ${tkn('colors.brand.primary')};
+  }
+
+  &:hover .dashed-icon-wrapper {
+    background: ${tkn('colors.brand.secondary')};
   }
 `;
 
@@ -96,113 +273,25 @@ export const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${tkn('spacing.xl')} * 3;
+  padding: 80px 40px;
   text-align: center;
-  background: ${tkn('colors.background.secondary')};
+  background: #FFFFFF;
   border: 1px dashed ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  gap: ${tkn('spacing.lg')};
-  margin-top: ${tkn('spacing.xl')};
+  border-radius: 16px;
+  gap: 24px;
+  grid-column: 1 / -1;
 `;
 
 export const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`;
-
-
-
-export const InteractiveCard = styled(Card)`
-  cursor: pointer;
-  transition: all ${tkn('transitions.normal')};
-  
-  &:hover {
-    border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${tkn('shadows.md')};
-    transform: translateY(-4px);
-  }
-`;
-
-export const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const CardIconWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: ${tkn('radius.lg')};
-  background-color: ${tkn('colors.background.tertiary')};
-  color: ${tkn('colors.brand.primary')};
-  flex-shrink: 0;
-  border: 1px solid ${tkn('colors.border.secondary')};
-`;
-
-export const CardContent = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const CardFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: ${tkn('spacing.sm')};
-  padding-top: ${tkn('spacing.md')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
-`;
-
-export const Stats = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const StatItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-`;
-
-export const CardActions = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const IconButton = styled.button`
-  background: none;
-  border: none;
-  color: ${tkn('colors.text.secondary')};
-  cursor: pointer;
-  padding: ${tkn('spacing.xs')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${tkn('radius.sm')};
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    color: ${tkn('colors.brand.primary')};
-    background: ${tkn('colors.background.tertiary')};
-  }
-
-  &.delete:hover {
-    color: ${tkn('colors.semantic.error')};
-  }
+  max-width: 400px;
 `;
 
 export const Copyright = styled.div`
+  padding: 40px 0;
   text-align: center;
-  color: ${tkn('colors.text.tertiary')};
   font-size: 13px;
-  padding: ${tkn('spacing.xl')} 0;
+  color: ${tkn('colors.text.tertiary')};
 `;

@@ -1,14 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import CheckEmailPage from './features/auth/CheckEmailPage';
-import LoginPage from './features/auth/LoginPage';
-import RegisterPage from './features/auth/RegisterPage';
-import VerifyEmailPage from './features/auth/VerifyEmailPage';
+import CheckEmailPage from './features/auth/check-email';
+import LoginPage from './features/auth/login';
+import RegisterPage from './features/auth/register';
+import VerifyEmailPage from './features/auth/verify-email';
 import DashboardPage from './features/dashboard/DashboardPage';
-import EbayConnectPage from './features/ebay/EbayConnectPage';
-import OnboardingEbayPage from './features/ebay/OnboardingEbayPage';
+import EbayConnectPage from './features/ebay/ebay-connect';
+import OnboardingEbayPage from './features/ebay/onboarding';
 import { ListingSettingsGroupForm, ListingSettingsGroupPage } from './features/listing-settings-groups';
-import { AddListingsPage, ListingsPage } from './features/listings';
+import { AddListingsPage, ListingJobsPage, ListingsPage, ProductsPage } from './features/listings';
 import ProfilePage from './features/profile';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
@@ -33,6 +33,8 @@ export function App() {
           <Route path="/settings/listing-groups/new" element={<ListingSettingsGroupForm />} />
           <Route path="/settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
           <Route path="/listings" element={<ListingsPage />} />
+          <Route path="/listings/jobs" element={<ListingJobsPage />} />
+          <Route path="/listings/products" element={<ProductsPage />} />
           <Route path="/listings/add" element={<AddListingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           

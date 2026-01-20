@@ -1,4 +1,4 @@
-import { Badge, Button, ConfirmModal, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
+import { Button, ConfirmModal, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -25,6 +25,7 @@ export const AppLayout: React.FC = () => {
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [listingsOpen, setListingsOpen] = useState(location.pathname.startsWith('/listings'));
   const [settingsOpen, setSettingsOpen] = useState(location.pathname.startsWith('/settings'));
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -34,7 +35,6 @@ export const AppLayout: React.FC = () => {
   }, [location.pathname]);
 
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User';
-  const userRole = 'Store Admin';
 
    const handleToggleSidebar = () => {
     if (window.innerWidth < 1024) {
@@ -66,7 +66,7 @@ export const AppLayout: React.FC = () => {
         >
           <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => navigate('/dashboard')}>
             <S.LogoBox>
-              <Icon name="logo" size={24} color="white" />
+              <Icon name="bolt" size={24} color="white" />
             </S.LogoBox>
             {!sidebarCollapsed && (
               <Text variant="h3" weight="bold" color="brand.primary">
@@ -77,9 +77,7 @@ export const AppLayout: React.FC = () => {
           
           <S.NavSection>
             <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              <Text variant="caption" weight="bold" muted>
-                {t('translation:menu.main')}
-              </Text>
+              {t('translation:menu.main')}
             </S.NavLabelWrapper>
             
             <S.NavItem 
@@ -88,39 +86,54 @@ export const AppLayout: React.FC = () => {
               onClick={() => navigate('/dashboard')}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="grid" size={18} />
+                <Icon name="dashboard" size={18} />
                 {!sidebarCollapsed && t('translation:menu.dashboard')}
               </S.NavItemContent>
-              {!sidebarCollapsed && (
-                <S.ChevronWrapper $isOpen={false} $isCollapsed={sidebarCollapsed}>
-                  <Icon name="chevron-down" size={20} />
-                </S.ChevronWrapper>
-              )}
             </S.NavItem>
+            
+            <S.NavItemWrapper>
+              <S.NavItem 
+                $active={location.pathname.startsWith('/listings')}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => {
+                  if (sidebarCollapsed) setSidebarCollapsed(false);
+                  setListingsOpen(!listingsOpen);
+                }}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="list-alt" size={18} />
+                  {!sidebarCollapsed && t('translation:menu.listings')}
+                </S.NavItemContent>
+                {!sidebarCollapsed && (
+                  <S.ChevronWrapper $isOpen={listingsOpen} $isCollapsed={sidebarCollapsed}>
+                    <Icon name="expand-more" size={16} />
+                  </S.ChevronWrapper>
+                )}
+              </S.NavItem>
 
-            <S.NavItem 
-              $isCollapsed={sidebarCollapsed} 
-              $active={location.pathname === '/listings'}
-              onClick={() => navigate('/listings')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="upload" size={18} />
-                {!sidebarCollapsed && t('translation:menu.listings')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem 
-              $isCollapsed={sidebarCollapsed} 
-              $active={location.pathname === '/inventory'}
-              onClick={() => navigate('/inventory')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="box" size={18} />
-                {!sidebarCollapsed && t('translation:menu.inventory')}
-              </S.NavItemContent>
-              {!sidebarCollapsed && <Badge variant="success" size="sm">NEW</Badge>}
-            </S.NavItem>
-
+              <S.SubNavContainer $isOpen={!sidebarCollapsed && listingsOpen}>
+                <S.SubNavItem 
+                  $active={location.pathname === '/listings'} 
+                  onClick={() => navigate('/listings')}
+                >
+                  {t('translation:menu.ebayListings')}
+                </S.SubNavItem>
+                <S.SubNavItem 
+                  $active={location.pathname === '/listings/jobs'} 
+                  onClick={() => navigate('/listings/jobs')}
+                >
+                  {t('translation:menu.listingJobs')}
+                </S.SubNavItem>
+                <S.SubNavItem 
+                  $active={location.pathname === '/listings/products'} 
+                  onClick={() => navigate('/listings/products')}
+                >
+                  {t('translation:menu.products')}
+                </S.SubNavItem>
+              </S.SubNavContainer>
+            </S.NavItemWrapper>
+            
+            
             <S.NavItem 
               $isCollapsed={sidebarCollapsed} 
               $active={location.pathname === '/orders'}
@@ -130,13 +143,11 @@ export const AppLayout: React.FC = () => {
                 <Icon name="shopping-cart" size={18} />
                 {!sidebarCollapsed && t('translation:menu.orders')}
               </S.NavItemContent>
-              {!sidebarCollapsed && <Badge variant="primary" size="sm">12</Badge>}
+              {!sidebarCollapsed && <S.BadgeWrapper variant="primary" size="sm">12</S.BadgeWrapper>}
             </S.NavItem>
-
+            
             <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              <Text variant="caption" weight="bold" muted>
-                {t('translation:menu.configuration')}
-              </Text>
+              {t('translation:menu.configuration')}
             </S.NavLabelWrapper>
             
             <S.NavItemWrapper>
@@ -144,9 +155,7 @@ export const AppLayout: React.FC = () => {
                 $active={location.pathname.startsWith('/settings')}
                 $isCollapsed={sidebarCollapsed}
                 onClick={() => {
-                  if (sidebarCollapsed) {
-                    setSidebarCollapsed(false);
-                  }
+                  if (sidebarCollapsed) setSidebarCollapsed(false);
                   setSettingsOpen(!settingsOpen);
                 }}
               >
@@ -156,109 +165,151 @@ export const AppLayout: React.FC = () => {
                 </S.NavItemContent>
                 {!sidebarCollapsed && (
                   <S.ChevronWrapper $isOpen={settingsOpen} $isCollapsed={sidebarCollapsed}>
-                    <Icon name="chevron-down" size={20} />
+                    <Icon name="expand-more" size={16} />
                   </S.ChevronWrapper>
                 )}
               </S.NavItem>
-
-              {!sidebarCollapsed && (
-                <S.SubNavContainer $isOpen={settingsOpen}>
-                  <S.SubNavItem 
-                    $active={location.pathname === '/settings/store'} 
-                    onClick={() => navigate('/settings/store')}
-                  >
-                    {t('translation:menu.storeSettings')}
-                  </S.SubNavItem>
-                  <S.SubNavItem 
-                    $active={location.pathname.startsWith('/settings/listing-groups')} 
-                    onClick={() => navigate('/settings/listing-groups')}
-                  >
-                    {t('translation:menu.listingSettingsGroups')}
-                  </S.SubNavItem>
-                </S.SubNavContainer>
-              )}
+              
+              <S.SubNavContainer $isOpen={!sidebarCollapsed && settingsOpen}>
+                <S.SubNavItem 
+                  $active={location.pathname === '/settings/store'} 
+                  onClick={() => navigate('/settings/store')}
+                >
+                  {t('translation:menu.storeSettings')}
+                </S.SubNavItem>
+                <S.SubNavItem 
+                  $active={location.pathname.startsWith('/settings/listing-groups')} 
+                  onClick={() => navigate('/settings/listing-groups')}
+                >
+                  {t('translation:menu.listingSettingsGroups')}
+                </S.SubNavItem>
+              </S.SubNavContainer>
             </S.NavItemWrapper>
           </S.NavSection>
+
+          <S.SidebarFooter>
+            <Dropdown
+              align="left"
+              direction="up"
+              width="240px"
+              trigger={
+                <S.ProfileSwitcher $isCollapsed={sidebarCollapsed}>
+                  <S.ProfileBadge>
+                    {user?.firstName?.charAt(0) || 'D'}{user?.lastName?.charAt(0) || 'U'}
+                  </S.ProfileBadge>
+                  {!sidebarCollapsed && (
+                    <>
+                      <S.ProfileDetails>
+                        <Text variant="caption" weight="bold" color="text.primary">
+                          {userName}
+                        </Text>
+                        <Text variant="caption" color="text.tertiary">
+                          {user?.email || 'admin@zonds.com'}
+                        </Text>
+                      </S.ProfileDetails>
+                      <S.ActionIcon as="div">
+                        <Icon name="chevron-up" size={16} />
+                      </S.ActionIcon>
+                    </>
+                  )}
+                </S.ProfileSwitcher>
+              }
+              items={[
+                {
+                  label: t('translation:menu.editProfile'),
+                  icon: 'user',
+                  onClick: () => navigate('/profile')
+                },
+                {
+                  label: t('translation:menu.logout'),
+                  icon: 'log-out',
+                  variant: 'danger',
+                  onClick: () => setIsLogoutConfirmOpen(true)
+                }
+              ]}
+            />
+          </S.SidebarFooter>
         </S.SidebarContainer>
 
         {/* Main Content Area */}
         <S.MainContent>
           <S.HeaderContainer>
-            <S.HeaderLeft>
-              <S.ToggleButton onClick={handleToggleSidebar}>
-                <Icon name="menu" size={24} />
-              </S.ToggleButton>
-            </S.HeaderLeft>
-            
-            <S.HeaderRight>
-              <Dropdown 
-                align="right"
-                trigger={
-                  <S.ActionIcon title={t('translation:header.selectLanguage')}>
-                     <Icon name={i18n.language === 'tr' ? 'flag-tr' : 'flag-us'} size={22} />
-                  </S.ActionIcon>
-                }
-                items={[
-                  { 
-                    label: t('translation:languages.en'), 
-                    icon: 'flag-us', 
-                    onClick: () => i18n.changeLanguage('en') 
-                  },
-                  { 
-                    label: t('translation:languages.tr'), 
-                    icon: 'flag-tr', 
-                    onClick: () => i18n.changeLanguage('tr') 
-                  }
-                ]}
-              />
+            <S.HeaderInner>
+              <S.HeaderLeft>
+                 <S.MobileMenuButton 
+                    onClick={() => setMobileSidebarOpen(true)}
+                 >
+                    <Icon name="menu" size={24} />
+                 </S.MobileMenuButton>
 
-              <S.ActionIcon onClick={toggleTheme} title={t('translation:header.toggleTheme')}>
-                <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={22} />
-              </S.ActionIcon>
+                <S.BreadcrumbArea>
+                   {location.pathname.startsWith('/listings') ? (
+                     <>
+                        <span className="hoverable" onClick={() => navigate('/listings')}>{t('translation:menu.listings')}</span>
+                        <Icon name="chevron_right" size={16} />
+                        <span className="active">
+                          {location.pathname === '/listings' && t('translation:menu.ebayListings')}
+                          {location.pathname === '/listings/jobs' && t('translation:menu.listingJobs')}
+                          {location.pathname === '/listings/products' && t('translation:menu.products')}
+                          {location.pathname === '/listings/add' && t('listings:breadcrumb.addProducts')}
+                        </span>
+                     </>
+                   ) : (
+                     <>
+                        <span><Icon name="home" size={16} /></span>
+                        <Icon name="chevron_right" size={16} />
+                        <span>{t('translation:menu.settings')}</span>
+                        <Icon name="chevron_right" size={16} />
+                        <span className="active">
+                            {location.pathname.includes('/settings/store') ? t('translation:menu.storeSettings') : t('translation:menu.listingSettingsGroups')}
+                        </span>
+                     </>
+                   )}
+                </S.BreadcrumbArea>
+              </S.HeaderLeft>
               
-              <S.ActionIcon title={t('translation:header.notifications')}>
-                <Icon name="bell" size={22} />
-                <S.NotificationBadge />
-              </S.ActionIcon>
-              
-              <Dropdown
-                align="right"
-                trigger={(isOpen: boolean) => (
-                  <S.ProfileArea>
-                     <S.AvatarWrapper>
-                      <S.AvatarImg src={`https://ui-avatars.com/api/?name=${userName}&background=3b82f6&color=ffffff`} alt="Profile" />
-                    </S.AvatarWrapper>
-                    <S.ProfileInfo>
-                      <Text variant="caption" weight="bold" color="text.primary">
-                        {userName}
-                      </Text>
-                      <Text variant="caption" color="text.tertiary">
-                        {userRole}
-                      </Text>
-                    </S.ProfileInfo>
-                    <S.ChevronWrapper $isOpen={isOpen} $isCollapsed={false}>
-                      <Icon name="chevron-down" size={20} />
-                    </S.ChevronWrapper>
-                  </S.ProfileArea>
-                )}
-                header={
-                   <S.DropdownHeaderWrapper>
-                     <S.PageTitle variant="body" weight="bold" color="text.primary">{userName}</S.PageTitle>
-                     <Text variant="caption" color="text.tertiary">{user?.email ?? 'user@example.com'}</Text>
-                   </S.DropdownHeaderWrapper>
-                }
-                items={[
-                  { label: t('translation:menu.editProfile'), icon: 'user', onClick: () => navigate('/profile') },
-                  { label: t('translation:profile.accountSettings'), icon: 'settings', onClick: () => navigate('/settings') },
-                  { label: t('translation:menu.support'), icon: 'info', onClick: () => console.log('Support') },
-                   { label: t('translation:menu.logout'), icon: 'log-out', variant: 'default', onClick: () => setIsLogoutConfirmOpen(true) }
-                ]}
-              />
-            </S.HeaderRight>
+              <S.HeaderRight>
+                <S.ActionIcon onClick={toggleTheme} title={t('translation:header.toggleTheme')}>
+                  <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
+                </S.ActionIcon>
+
+                <S.ActionIcon title={t('translation:header.notifications')}>
+                  <Icon name="bell" size={20} />
+                  <S.NotificationBadge />
+                </S.ActionIcon>
+
+                <S.VerticalDivider />
+
+                <Dropdown 
+                  align="right"
+                  width="100px"
+                  trigger={
+                    <S.LanguageSelectTrigger title={t('translation:header.selectLanguage')}>
+                      <S.LanguageText>{i18n.language.toUpperCase()}</S.LanguageText>
+                      <Icon name="chevron_down" size={12} />
+                    </S.LanguageSelectTrigger>
+                  }
+                  items={[
+                    { 
+                      label: 'English', 
+                      onClick: () => i18n.changeLanguage('en') 
+                    },
+                    { 
+                      label: 'Türkçe', 
+                      onClick: () => i18n.changeLanguage('tr') 
+                    }
+                  ]}
+                />
+
+                <S.VerticalDivider />
+              </S.HeaderRight>
+            </S.HeaderInner>
           </S.HeaderContainer>
 
           <S.ContentArea>
-            <Outlet />
+            <S.ContentInner>
+              <Outlet />
+            </S.ContentInner>
           </S.ContentArea>
         </S.MainContent>
         

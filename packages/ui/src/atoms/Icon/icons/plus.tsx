@@ -1,19 +1,14 @@
 import React from 'react';
 
-export const PlusIcon = ({ size = 24, color = 'currentColor', ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string; color?: string }) => (
+export const PlusIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ stroke, ...props }) => (
   <svg
+    width="24"
+    height="24"
+    viewBox="0 -960 960 960"
+    fill={stroke}
     xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
     {...props}
   >
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
   </svg>
 );

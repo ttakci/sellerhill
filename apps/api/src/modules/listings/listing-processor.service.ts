@@ -24,9 +24,28 @@ export class ListingProcessorService extends WorkerHost {
    * Process a listing job task from the queue
    */
   async process(job: Job<ListingQueueJobData>): Promise<void> {
-    const { jobId, userId, asin, listingSettingsGroupId, paymentPolicyId, shippingPolicyId, returnPolicyId } = job.data;
+    const { 
+      jobId, 
+      userId, 
+      asin, 
+      listingSettingsGroupId, 
+      paymentPolicyId, 
+      shippingPolicyId, 
+      returnPolicyId 
+    } = job.data;
     
     this.logger.log(`Processing ASIN ${asin} for job ${jobId}`);
+
+    // 0. Check if ASIN is already actively listed for this user
+    const isAlreadyListed = await this.listingsService.isAsinListed(userId, asin);
+    if (isAlreadyListed) {
+      this.logger.warn(`ASIN ${asin} is already listed for user ${userId}. Skipping.`);
+      await this.listingsService.updateJobItemResult(jobId, asin, {
+        status: ListingStatus.ERROR,
+        errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active listings.',
+      });
+      return;
+    }
 
     try {
       // 1. Check if product already exists in DB

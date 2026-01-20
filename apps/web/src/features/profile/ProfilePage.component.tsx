@@ -1,150 +1,131 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { updateProfileSchema, type UpdateProfileFormData } from '@repo/shared';
+import { type UpdateProfileFormData } from '@repo/shared';
 import { Button, Icon, Text } from '@repo/ui';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './ProfilePage.style';
 import type { ProfilePageComponentProps } from './ProfilePage.types';
 
 export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
   profile,
-  onSubmit,
+  register,
+  errors,
+  onSubmit, 
   isLoading,
+  isEditing,
+  onToggleEdit,
 }) => {
-  const { t } = useTranslation();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const {
-    handleSubmit,
-  } = useForm<UpdateProfileFormData>({
-    resolver: zodResolver(updateProfileSchema(t)),
-    defaultValues: {
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      phoneNumber: profile.phoneNumber || '',
-      avatarUrl: profile.avatarUrl || '',
-      jobTitle: profile.jobTitle || '',
-      bio: profile.bio || '',
-      country: profile.country || '',
-      cityState: profile.cityState || '',
-      postalCode: profile.postalCode || '',
-      taxId: profile.taxId || '',
-    },
-  });
+  const { t } = useTranslation(['profile', 'translation']);
 
   const userName = `${profile.firstName} ${profile.lastName}`;
+  const role = profile.jobTitle || 'Store Owner';
+  const location = profile.cityState || 'Phoenix, Arizona, USA';
+
+  // Helper to render field or input
+  const renderField = (label: string, value: string | undefined, fieldName: any, fullWidth = false) => (
+    <S.InfoItem style={fullWidth ? { gridColumn: '1 / -1' } : {}}>
+      <S.InfoLabel>{label}</S.InfoLabel>
+      {isEditing ? (
+        <>
+            <S.CleanInput {...register(fieldName as any)} defaultValue={value} />
+            {errors[fieldName as keyof UpdateProfileFormData] && (
+                <S.ErrorMessage>
+                    <Text variant="caption" color="text.error">
+                        {errors[fieldName as keyof UpdateProfileFormData]?.message}
+                    </Text>
+                </S.ErrorMessage>
+            )}
+        </>
+      ) : (
+        <S.InfoValue>{value || '-'}</S.InfoValue>
+      )}
+    </S.InfoItem>
+  );
 
   return (
     <S.Container>
-      {/* Page Header */}
       <S.Header>
-        <Text variant="h3" weight="bold">
-          {t('profile.title')}
-        </Text>
-        <S.BreadcrumbList>
-          <a href="/">{t('profile.home')}</a>
-          <span> &gt; </span>
-          <strong>{t('profile.title')}</strong>
-        </S.BreadcrumbList>
+        <S.TitleSection>
+             <h1>{t('profile.title')}</h1>
+             <p>{t('profile.subtitle')}</p>
+        </S.TitleSection>
+        <S.Actions>
+             <Button 
+                variant={isEditing ? 'secondary' : 'primary'}
+                onClick={onToggleEdit} 
+                disabled={isLoading}
+             >
+                <Icon name={isEditing ? 'x' : 'edit'} size={18} />
+                {isEditing ? t('translation:common.cancel') : t('profile.edit')}
+             </Button>
+        </S.Actions>
       </S.Header>
 
-      <S.MainCard>
-        <Text variant="h4" weight="bold">
-          {t('profile.title')}
-        </Text>
+      <form onSubmit={onSubmit}>
+          {/* Section 1: User Overview */}
+          <S.MainCard>
+            <S.UserOverview>
+                <S.UserOverviewLeft>
+                  <S.AvatarWrapper>
+                    {profile.avatarUrl ? (
+                      <S.AvatarImage src={profile.avatarUrl} alt={userName} />
+                    ) : (
+                       <S.FallbackAvatar>
+                          <Icon name="user" size={40} color="text.tertiary" />
+                       </S.FallbackAvatar>
+                    )}
+                  </S.AvatarWrapper>
+                  
+                  <S.ProfileHeaderContent>
+                     <Text variant="h3" weight="bold">{userName}</Text>
+                     <S.ProfileBadges>
+                        <S.BadgeItem>{role}</S.BadgeItem>
+                        <S.BadgeItem>
+                            <Icon name="map-pin" size={14} />
+                            {location}
+                        </S.BadgeItem>
+                     </S.ProfileBadges>
+                  </S.ProfileHeaderContent>
+                </S.UserOverviewLeft>
+            </S.UserOverview>
+          </S.MainCard>
 
-        {/* Section 1: Basic Info */}
-        <S.SectionCard>
-          <S.UserOverview>
-            <S.UserInfoWrapper>
-              <S.AvatarContainer>
-                {profile.avatarUrl ? (
-                  <img src={profile.avatarUrl} alt={userName} />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyItems: 'center', background: '#f3f4f6' }}>
-                     <Icon name="user" size={40} color="text.tertiary" />
-                  </div>
+          {/* Section 2: Personal Information */}
+          <S.PersonalInfoCard>
+             <S.SectionTitleWrapper>
+                 <Text variant="body" weight="bold">{t('profile.personalInfo')}</Text>
+             </S.SectionTitleWrapper>
+             <S.SectionContent>
+                 {renderField(t('profile.firstName'), profile.firstName, 'firstName')}
+                 {renderField(t('profile.lastName'), profile.lastName, 'lastName')}
+                 {renderField(t('profile.emailAddress'), profile.email, 'email' as any)}
+                 {renderField(t('profile.phone'), profile.phoneNumber, 'phoneNumber')}
+                 {renderField(t('profile.bio'), profile.bio, 'bio', true)}
+             </S.SectionContent>
+          </S.PersonalInfoCard>
+
+          {/* Section 3: Address */}
+          <S.AddressCard>
+             <S.SectionTitleWrapper>
+                 <Text variant="body" weight="bold">{t('profile.address')}</Text>
+             </S.SectionTitleWrapper>
+             <S.SectionContent>
+                 {renderField(t('profile.country'), profile.country, 'country')}
+                 {renderField(t('profile.cityState'), profile.cityState, 'cityState')}
+                 {renderField(t('profile.postalCode'), profile.postalCode, 'postalCode')}
+             </S.SectionContent>
+          </S.AddressCard>
+
+          {/* Footer Actions */}
+          <S.FooterActions>
+                <S.DeleteButton type="button">Deactivate Account</S.DeleteButton>
+                {isEditing && (
+                    <Button variant="primary" size="md" type="submit" isLoading={isLoading}>
+                        Save All Changes
+                    </Button>
                 )}
-              </S.AvatarContainer>
-              <S.UserTextInfo>
-                <Text variant="h4" weight="bold">{userName}</Text>
-                <Text variant="body" color="text.tertiary">
-                  {profile.jobTitle || 'Team Manager'} | {profile.cityState || 'Location not set'}
-                </Text>
-              </S.UserTextInfo>
-            </S.UserInfoWrapper>
-            <S.ActionGroup>
-               <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-                  <Icon name="edit" size={14} />
-                  <span>{t('profile.edit')}</span>
-               </Button>
-            </S.ActionGroup>
-          </S.UserOverview>
-        </S.SectionCard>
+          </S.FooterActions>
 
-        {/* Section 2: Personal Information */}
-        <S.SectionCard>
-          <S.SectionHeader>
-            <Text variant="body" weight="bold">{t('profile.personalInfo')}</Text>
-            <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-               <Icon name="edit" size={14} />
-               <span>{t('profile.edit')}</span>
-            </Button>
-          </S.SectionHeader>
-          <S.InfoGrid>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.firstName')}</S.InfoLabel>
-              <S.InfoValue>{profile.firstName}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.lastName')}</S.InfoLabel>
-              <S.InfoValue>{profile.lastName}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.emailAddress')}</S.InfoLabel>
-              <S.InfoValue>{profile.email}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.phone')}</S.InfoLabel>
-              <S.InfoValue>{profile.phoneNumber || 'Not provided'}</S.InfoValue>
-            </S.InfoItem>
-            <S.BioItem>
-              <S.InfoLabel>{t('profile.bio')}</S.InfoLabel>
-              <S.InfoValue>{profile.bio || 'Professional e-commerce manager.'}</S.InfoValue>
-            </S.BioItem>
-          </S.InfoGrid>
-        </S.SectionCard>
-
-        {/* Section 3: Address */}
-        <S.SectionCard>
-          <S.SectionHeader>
-            <Text variant="body" weight="bold">{t('profile.address')}</Text>
-            <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-               <Icon name="edit" size={14} />
-               <span>{t('profile.edit')}</span>
-            </Button>
-          </S.SectionHeader>
-          <S.InfoGrid>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.country')}</S.InfoLabel>
-              <S.InfoValue>{profile.country || 'Not set'}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.cityState')}</S.InfoLabel>
-              <S.InfoValue>{profile.cityState || 'Not set'}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.postalCode')}</S.InfoLabel>
-              <S.InfoValue>{profile.postalCode || 'Not set'}</S.InfoValue>
-            </S.InfoItem>
-            <S.InfoItem>
-              <S.InfoLabel>{t('profile.taxId')}</S.InfoLabel>
-              <S.InfoValue>{profile.taxId || 'Not set'}</S.InfoValue>
-            </S.InfoItem>
-          </S.InfoGrid>
-        </S.SectionCard>
-      </S.MainCard>
+      </form>
     </S.Container>
   );
 };

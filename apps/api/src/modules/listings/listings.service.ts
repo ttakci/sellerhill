@@ -224,6 +224,48 @@ export class ListingsService implements OnModuleInit {
   }
 
   /**
+   * Check if an ASIN is already listed for a user
+   */
+  async isAsinListed(userId: string, asin: string): Promise<boolean> {
+    const results = await this.databaseService.query(`
+      SELECT id FROM listings 
+      WHERE user_id = $1 AND asin = $2 AND status = 'active'
+    `, [userId, asin]);
+
+    return results.length > 0;
+  }
+
+  /**
+   * Get all unique products for a user from their listings
+   */
+  async getUserProducts(userId: string): Promise<ProductData[]> {
+    const results = await this.databaseService.query(`
+      SELECT DISTINCT p.* 
+      FROM products p
+      INNER JOIN listings l ON p.id = l.product_id
+      WHERE l.user_id = $1
+      ORDER BY p.created_at DESC
+    `, [userId]);
+
+    return results.map(row => ({
+      asin: row.asin,
+      title: row.title,
+      description: row.description,
+      price: {
+        current: typeof row.price === 'string' ? JSON.parse(row.price).current : row.price.current,
+        avg30: typeof row.price === 'string' ? JSON.parse(row.price).avg30 || 0 : row.price.avg30 || 0,
+        currency: row.currency || 'USD',
+      },
+      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : JSON.parse(row.image_urls || '[]'),
+      brand: row.brand,
+      category: row.category,
+      manufacturer: row.brand, // Fallback
+      features: Array.isArray(row.features) ? row.features : JSON.parse(row.features || '[]'),
+      updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
+    }));
+  }
+
+  /**
    * Get a single listing by ID
    */
   async getListing(userId: string, id: string): Promise<ListingDto | null> {
@@ -305,18 +347,37 @@ export class ListingsService implements OnModuleInit {
     request: CreateListingsRequest,
   ): Promise<ListingJobDto> {
     const { asins } = request;
+    
+    // Filter out ASINs that are already actively listed
+    const uniqueAsins = [...new Set(asins)];
+    const toProcess: string[] = [];
+    
+    for (const asin of uniqueAsins) {
+      const exists = await this.isAsinListed(userId, asin);
+      if (!exists) {
+        toProcess.push(asin);
+      } else {
+        this.logger.warn(`ASIN ${asin} already exists in active listings for user ${userId}. Skipping.`);
+      }
+    }
+
+    if (toProcess.length === 0) {
+      // Return a special object or throw error if all are duplicates?
+      // For now, let's create a job with 0 asins or throw.
+      // Better to return a job with 0 so the UI handles it normally.
+    }
 
     // Create job record
     const jobResult = await this.databaseService.query<ListingJobEntity>(`
       INSERT INTO listing_jobs (user_id, total_asins, status)
       VALUES ($1, $2, $3)
       RETURNING *
-    `, [userId, asins.length, ListingJobStatus.PENDING]);
+    `, [userId, toProcess.length, toProcess.length === 0 ? ListingJobStatus.COMPLETED : ListingJobStatus.PENDING]);
 
     const job = jobResult[0];
 
     // Create job items for each ASIN
-    for (const asin of asins) {
+    for (const asin of toProcess) {
       await this.databaseService.query(`
         INSERT INTO listing_job_items (job_id, asin, status)
         VALUES ($1, $2, $3)

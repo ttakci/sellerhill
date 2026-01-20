@@ -1,6 +1,7 @@
 {
   "profile": {
     "title": "Profile",
+    "subtitle": "Manage your account settings and personal information.",
     "personalInfo": "Personal Information",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -13,6 +14,13 @@
     "postalCode": "Postal Code",
     "taxId": "TAX ID",
     "edit": "Edit",
-    "home": "Home"
+    "home": "Home",
+    "defaultJobTitle": "Team Manager",
+    "locationNotSet": "Location not set",
+    "defaultBio": "Professional e-commerce manager.",
+    "updateSuccess": "Profile updated successfully.",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL"
   }
 }

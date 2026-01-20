@@ -9,6 +9,19 @@ export const ValidationIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <path d="M4 6h16M4 12h10M4 18h16M20 12l-2-2m2 2l-2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path
+      d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 12L11 14L15 10"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );

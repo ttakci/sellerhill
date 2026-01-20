@@ -3,9 +3,9 @@ import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useGetListingSettingsGroupsQuery } from '../listing-settings-groups/api/listing-settings-group.api';
+import { useGetListingSettingsGroupsQuery } from '../../listing-settings-groups/api/listing-settings-group.api';
+import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from '../api/listings.api';
 import { AddListingsPageComponent } from './AddListingsPage.component';
-import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from './api/listings.api';
 
 export const AddListingsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -33,8 +33,8 @@ export const AddListingsPageContainer: React.FC = () => {
           onClick: closeMessage,
         },
       }, t);
-      // Navigate to listings
-      navigate('/listings');
+      // Navigate to listing jobs
+      navigate('/listings/jobs');
     }
   }, [isSuccess, submitData, showMessage, closeMessage, t, navigate]);
 

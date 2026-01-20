@@ -24,6 +24,7 @@ export interface ProductData {
     avg30: number;
     currency: string;
   };
+  updatedAt?: string;
 }
 
 /**

@@ -17,7 +17,16 @@
       "refresh": "Refresh",
       "edit": "Edit",
       "delete": "Delete"
-    }
+    },
+    "privacy": "Privacy",
+    "support": "Support",
+    "notSet": "Not Set",
+    "notProvided": "Not Provided",
+    "noCategory": "No Category",
+    "details": "Details",
+    "noBrand": "No Brand Info",
+    "unknownProduct": "Unknown Product",
+    "languageCode": "en-US"
   },
   "validation": {
     "required": "This field is required",
@@ -65,10 +74,12 @@
     "forbidden": "Access forbidden",
     "serverError": "An error occurred. Please try again later."
   },
+  "products": {
+    "subtitle": "View product details and Amazon data for all your active listings."
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",
-      "subtitle": "Sign in to continue to your account",
       "emailLabel": "Email",
       "passwordLabel": "Password",
       "submitButton": "Sign In",
@@ -91,10 +102,13 @@
   "menu": {
     "main": "MAIN MENU",
     "dashboard": "Dashboard",
+    "listings": "Listings",
+    "ebayListings": "eBay Listings",
+    "listingJobs": "Listing Jobs",
+    "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
     "configuration": "Configuration",
-    "listings": "Listings",
     "settings": "Settings",
     "storeSettings": "Store Settings",
     "listingSettingsGroups": "Listing Settings Groups",

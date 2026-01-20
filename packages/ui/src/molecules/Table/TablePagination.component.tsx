@@ -37,7 +37,7 @@ export const TablePagination = ({
     <S.PaginationContainer className={className}>
       <S.RowsPerPage>
         <S.PaginationLabel>
-          {rowsPerPageLabel}
+          Rows per page:
         </S.PaginationLabel>
         <S.SelectWrapper>
           <Select
@@ -49,30 +49,36 @@ export const TablePagination = ({
         </S.SelectWrapper>
       </S.RowsPerPage>
 
-      <div style={{ flex: 1 }} />
+      <S.NavigationWrapper>
+        <S.PageInfo>
+          <S.PaginationLabel>
+            {count > 0 ? (
+              <>
+                Showing <span>{start}-{end}</span> of <span>{count}</span>
+              </>
+            ) : (
+              <>Showing <span>0-0</span> of <span>0</span></>
+            )}
+          </S.PaginationLabel>
+        </S.PageInfo>
 
-      <S.PageInfo>
-        <S.PaginationLabel>
-          {count > 0 ? `${start}-${end} of ${count}` : '0 of 0'}
-        </S.PaginationLabel>
-      </S.PageInfo>
-
-      <S.Navigation>
-        <S.NavButton
-          onClick={() => handlePageChange(page - 1)}
-          disabled={page <= 1}
-          type="button"
-        >
-          <Icon name="chevron-left" size={16} />
-        </S.NavButton>
-        <S.NavButton
-          onClick={() => handlePageChange(page + 1)}
-          disabled={page >= totalPages}
-          type="button"
-        >
-          <Icon name="chevron-right" size={16} />
-        </S.NavButton>
-      </S.Navigation>
+        <S.Navigation>
+          <S.NavButton
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page <= 1}
+            type="button"
+          >
+            <Icon name="chevron_left" size={20} />
+          </S.NavButton>
+          <S.NavButton
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+            type="button"
+          >
+            <Icon name="chevron_right" size={20} />
+          </S.NavButton>
+        </S.Navigation>
+      </S.NavigationWrapper>
     </S.PaginationContainer>
   );
 };

@@ -1,5 +1,5 @@
 import type { ListingSettingsGroupResponse } from '@repo/shared';
-import { Badge, Button, CardBody, CardHeader, Icon, Text } from '@repo/ui';
+import { Icon, Text } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupPage.style';
 import { ListingSettingsGroupPageProps } from './ListingSettingsGroupPage.types';
@@ -16,105 +16,97 @@ export const ListingSettingsGroupPageComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <S.HeaderTitleWrapper>
-            <Icon name="check-list" size={28} color="brand.primary" />
-            <S.PageTitle variant="h3" weight="bold">
-              {t('listingSettingsGroup:listingSettingsGroup.title')}
-            </S.PageTitle>
-          </S.HeaderTitleWrapper>
-          <Text variant="body" color="text.secondary">
-            {t('listingSettingsGroup:listingSettingsGroup.subtitle')}
-          </Text>
+          <S.BreadcrumbContainer aria-label="Breadcrumb">
+            <S.BreadcrumbText variant="caption">{t('translation:menu.settings')}</S.BreadcrumbText>
+            <Icon name="chevron-right" size={12} color="text.tertiary" />
+            <S.ActiveBreadcrumbText variant="caption">
+              {t('listingSettingsGroup.title').toUpperCase()}
+            </S.ActiveBreadcrumbText>
+          </S.BreadcrumbContainer>
+          <S.PageTitle>
+            {t('listingSettingsGroup.title')}
+          </S.PageTitle>
+          <S.PageSubtitle>
+            {t('listingSettingsGroup.subtitle')}
+          </S.PageSubtitle>
         </S.HeaderContent>
         <S.Actions>
-          <Button variant="primary" size="md" onClick={onCreateGroup}>
-            <Icon name="plus" size={18} />
-            <Text variant="body" weight="medium" color="inherit">
-              {t('listingSettingsGroup:listingSettingsGroup.createNewGroup')}
-            </Text>
-          </Button>
+          <S.StyledCreateButton variant="primary" size="md" onClick={onCreateGroup}>
+            <Icon name="plus" size={20} />
+            {t('listingSettingsGroup.createNewGroup')}
+          </S.StyledCreateButton>
         </S.Actions>
       </S.Header>
 
-      {groups.length === 0 ? (
-        <S.EmptyState>
-          <Icon name="box" size={64} color="text.tertiary" />
-          <S.EmptyStateContent>
-            <Text variant="h4" weight="bold">
-              {t('listingSettingsGroup:listingSettingsGroup.emptyState.title')}
-            </Text>
-            <Text variant="body" color="text.secondary">
-              {t('listingSettingsGroup:listingSettingsGroup.emptyState.description')}
-            </Text>
-          </S.EmptyStateContent>
-          <Button variant="secondary" onClick={onCreateGroup}>
-            {t('listingSettingsGroup:listingSettingsGroup.emptyState.action')}
-          </Button>
-        </S.EmptyState>
-      ) : (
-        <S.CardGrid>
-          {groups.map((group: ListingSettingsGroupResponse) => (
-            <S.InteractiveCard 
-              key={group.id} 
-              variant="bordered"
-              onClick={() => onEditGroup(group.id)}
-            >
-                <CardHeader 
-                  icon={
-                    <S.CardIconWrapper>
-                      <Icon name="check-list" size={24} />
-                    </S.CardIconWrapper>
-                  }
-                  actions={
-                    <Badge variant="success" size="sm">
-                      {t('listingSettingsGroup:listingSettingsGroup.statusActive')}
-                    </Badge>
-                  }
+      <S.CardGrid>
+        {groups.map((group: ListingSettingsGroupResponse) => (
+          <S.InteractiveCard 
+            key={group.id} 
+            variant="bordered"
+            onClick={() => onEditGroup(group.id)}
+          >
+            <S.CardHeader>
+              <S.CardIconWrapper>
+                <Icon name="view-list" size={24} />
+              </S.CardIconWrapper>
+              <S.ActiveBadge variant="success" size="sm">
+                {t('listingSettingsGroup.statusActive').toUpperCase()}
+              </S.ActiveBadge>
+            </S.CardHeader>
+            
+            <S.CardBodyContent>
+              <S.CardTitleGroup>
+                <S.CardTitleText variant="h4" weight="bold" className="card-title">
+                  {group.name}
+                </S.CardTitleText>
+                {group.description && (
+                  <S.CardDescText variant="caption" color="text.secondary" truncate>
+                    {group.description}
+                  </S.CardDescText>
+                )}
+              </S.CardTitleGroup>
+            </S.CardBodyContent>
+
+            <S.CardFooter>
+              <S.Stats>
+                <S.StatItem>
+                  <Icon name="grid-view" size={18} color="text.tertiary" />
+                  <span style={{ fontSize: '12px' }}>{t('listingSettingsGroup.productsCount', { count: 0 })}</span>
+                </S.StatItem>
+              </S.Stats>
+
+              <S.CardActions onClick={(e) => e.stopPropagation()}>
+                <S.IconButton 
+                  $type="edit" 
+                  onClick={() => onEditGroup(group.id)} 
+                  title={t('listingSettingsGroup.tooltips.editGroup')}
                 >
-                  {null}
-                </CardHeader>
-                
-                <CardBody>
-                  <S.CardContent>
-                    <Text variant="h4" weight="bold">
-                      {group.name}
-                    </Text>
-                    {group.description && (
-                      <Text variant="caption" color="text.secondary" truncate>
-                        {group.description}
-                      </Text>
-                    )}
-                  </S.CardContent>
+                  <Icon name="edit-note" size={20} />
+                </S.IconButton>
+                <S.IconButton 
+                  $type="delete" 
+                  onClick={() => onDeleteGroup(group.id)} 
+                  title={t('listingSettingsGroup.tooltips.deleteGroup')}
+                >
+                  <Icon name="delete" size={20} />
+                </S.IconButton>
+              </S.CardActions>
+            </S.CardFooter>
+          </S.InteractiveCard>
+        ))}
 
-                  <S.CardFooter>
-                    <S.Stats>
-                      <S.StatItem>
-                        <Icon name="grid" size={14} />
-                        {t('listingSettingsGroup:listingSettingsGroup.productsCount', { count: 0 })}
-                      </S.StatItem>
-                    </S.Stats>
-
-                    <S.CardActions onClick={(e) => e.stopPropagation()}>
-                      <S.IconButton onClick={() => onEditGroup(group.id)} title={t('listingSettingsGroup:listingSettingsGroup.tooltips.editGroup')}>
-                        <Icon name="edit" size={18} />
-                      </S.IconButton>
-                      <S.IconButton 
-                        className="delete" 
-                        onClick={() => onDeleteGroup(group.id)} 
-                        title={t('listingSettingsGroup:listingSettingsGroup.tooltips.deleteGroup')}
-                      >
-                        <Icon name="trash" size={18} />
-                      </S.IconButton>
-                    </S.CardActions>
-                  </S.CardFooter>
-                </CardBody>
-            </S.InteractiveCard>
-          ))}
-        </S.CardGrid>
-      )}
+        <S.DashedCard onClick={onCreateGroup}>
+           <S.DashedCardIconWrapper className="dashed-icon-wrapper">
+             <Icon name="plus" size={28} />
+           </S.DashedCardIconWrapper>
+            <Text weight="semibold" variant="caption" color="text.secondary">
+              {t('listingSettingsGroup.createNewGroup')}
+            </Text>
+        </S.DashedCard>
+      </S.CardGrid>
 
       <S.Copyright>
-        {t('listingSettingsGroup:listingSettingsGroup.copyright', { year: new Date().getFullYear() })}
+        {t('listingSettingsGroup.copyright', { year: new Date().getFullYear() })}
       </S.Copyright>
     </S.Container>
   );

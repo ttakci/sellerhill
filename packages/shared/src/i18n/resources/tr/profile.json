@@ -13,6 +13,14 @@
     "postalCode": "Posta Kodu",
     "taxId": "Vergi Numarası",
     "edit": "Düzenle",
-    "home": "Anasayfa"
+    "home": "Anasayfa",
+    "subtitle": "Hesap ayarlarınızı ve kişisel bilgilerinizi yönetin.",
+    "defaultJobTitle": "Takım Müdürü",
+    "locationNotSet": "Konum belirtilmedi",
+    "defaultBio": "Profesyonel e-ticaret yöneticisi.",
+    "updateSuccess": "Profil başarıyla güncellendi.",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL"
   }
 }

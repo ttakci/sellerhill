@@ -20,6 +20,13 @@ export interface TableProps<T = any> {
   selectable?: boolean;
   selectedRows?: T[];
   onSelectionChange?: (selectedRows: T[]) => void;
+  pagination?: {
+    count: number;
+    page: number;
+    rowsPerPage: number;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rowsPerPage: number) => void;
+  };
 }
 
 export interface TableHeaderProps {

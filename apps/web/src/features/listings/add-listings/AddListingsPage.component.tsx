@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createListingsSchema, type CreateListingsFormData } from '@repo/shared';
-import { Button, Icon, Select, Text } from '@repo/ui';
+import { Icon, Select } from '@repo/ui';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +26,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
   } = useForm<CreateListingsFormData>({
     resolver: zodResolver(createListingsSchema(t)),
     defaultValues: {
-      asins: '',
+      asins: asins,
       listingSettingsGroupId: '',
       paymentPolicyId: '',
       shippingPolicyId: '',
@@ -36,37 +36,21 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
 
   return (
     <S.Container>
-      {/* Header & Breadcrumbs */}
       <S.Header>
-        <S.Breadcrumb>
-          <a href="/">{t('translation:menu.dashboard')}</a>
-          <span> › </span>
-          <a href="/listings">{t('translation:menu.listings')}</a>
-          <span> › </span>
-          <strong>{t('listings.breadcrumb.addProducts')}</strong>
-        </S.Breadcrumb>
-        
-        <Text variant="h3" weight="bold">
-          {t('listings.title')}
-        </Text>
-        
-        <Text variant="body" color="text.secondary" style={{ maxWidth: '800px' }}>
-          {t('listings.subtitle')}
-        </Text>
+        <h1>{t('listings.title')}</h1>
+        <p>{t('listings.subtitle')}</p>
       </S.Header>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Configuration Section */}
+        {/* Top Section: Side-by-Side Cards */}
         <S.ConfigSection>
-          {/* Listing Settings Group */}
+          {/* Card 1: Listing Settings */}
           <S.Card>
             <S.CardHeader>
               <S.IconWrapper>
-                <Icon name="settings" size={18} />
+                <Icon name="settings_suggest" size={24} />
               </S.IconWrapper>
-              <Text variant="body" weight="bold">
-                {t('listings.listingSettings.title')}
-              </Text>
+              <h2>{t('listings.listingSettings.title')}</h2>
             </S.CardHeader>
 
             <Controller
@@ -74,9 +58,9 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
               control={control}
               render={({ field }) => (
                 <S.FormGroup>
-                  <Text variant="body" weight="semibold">
-                    {t('listings.listingSettings.strategyGroup')} <span style={{ color: 'red' }}>*</span>
-                  </Text>
+                  <S.Label>
+                    {t('listings.listingSettings.strategyGroup')} <S.RequiredStar>*</S.RequiredStar>
+                  </S.Label>
                   <Select
                     {...field}
                     placeholder={t('listings.listingSettings.strategyGroupPlaceholder')}
@@ -87,28 +71,21 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                       value: group.id
                     }))}
                   />
-                  {errors.listingSettingsGroupId && (
-                    <Text variant="caption" color="semantic.error">
-                      {String(errors.listingSettingsGroupId.message)}
-                    </Text>
-                  )}
-                  <Text variant="caption" color="text.tertiary" style={{ fontStyle: 'italic' }}>
+                  <S.ItalicHelp>
                     {t('listings.listingSettings.strategyGroupHelp')}
-                  </Text>
+                  </S.ItalicHelp>
                 </S.FormGroup>
               )}
             />
           </S.Card>
 
-          {/* Business Policies */}
+          {/* Card 2: Business Policies */}
           <S.Card>
             <S.CardHeader>
               <S.IconWrapper>
-                <Icon name="check-list" size={18} />
+                <Icon name="rule" size={24} />
               </S.IconWrapper>
-              <Text variant="body" weight="bold">
-                {t('listings.businessPolicies.title')}
-              </Text>
+              <h2>{t('listings.businessPolicies.title')}</h2>
             </S.CardHeader>
 
             <S.PolicyGrid>
@@ -117,9 +94,9 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                 control={control}
                 render={({ field }) => (
                   <S.FormGroup>
-                    <Text variant="body" weight="semibold">
-                      {t('listings.businessPolicies.paymentPolicy')} <span style={{ color: 'red' }}>*</span>
-                    </Text>
+                    <S.Label>
+                      {t('listings.businessPolicies.paymentPolicy')} <S.RequiredStar>*</S.RequiredStar>
+                    </S.Label>
                     <Select
                       {...field}
                       placeholder={t('listings.businessPolicies.paymentPolicyPlaceholder')}
@@ -130,11 +107,6 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                         value: policy.id
                       }))}
                     />
-                    {errors.paymentPolicyId && (
-                      <Text variant="caption" color="semantic.error">
-                        {String(errors.paymentPolicyId.message)}
-                      </Text>
-                    )}
                   </S.FormGroup>
                 )}
               />
@@ -144,9 +116,9 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                 control={control}
                 render={({ field }) => (
                   <S.FormGroup>
-                    <Text variant="body" weight="semibold">
-                      {t('listings.businessPolicies.shippingPolicy')} <span style={{ color: 'red' }}>*</span>
-                    </Text>
+                    <S.Label>
+                      {t('listings.businessPolicies.shippingPolicy')} <S.RequiredStar>*</S.RequiredStar>
+                    </S.Label>
                     <Select
                       {...field}
                       placeholder={t('listings.businessPolicies.shippingPolicyPlaceholder')}
@@ -157,22 +129,18 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                         value: policy.id
                       }))}
                     />
-                    {errors.shippingPolicyId && (
-                      <Text variant="caption" color="semantic.error">
-                        {String(errors.shippingPolicyId.message)}
-                      </Text>
-                    )}
                   </S.FormGroup>
                 )}
               />
+
               <Controller
                 name="returnPolicyId"
                 control={control}
                 render={({ field }) => (
                   <S.FormGroup>
-                    <Text variant="body" weight="semibold">
-                      {t('listings.businessPolicies.returnPolicy')} <span style={{ color: 'red' }}>*</span>
-                    </Text>
+                    <S.Label>
+                      {t('listings.businessPolicies.returnPolicy')} <S.RequiredStar>*</S.RequiredStar>
+                    </S.Label>
                     <Select
                       {...field}
                       placeholder={t('listings.businessPolicies.returnPolicyPlaceholder')}
@@ -183,11 +151,6 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                         value: policy.id
                       }))}
                     />
-                    {errors.returnPolicyId && (
-                      <Text variant="caption" color="semantic.error">
-                        {String(errors.returnPolicyId.message)}
-                      </Text>
-                    )}
                   </S.FormGroup>
                 )}
               />
@@ -195,36 +158,36 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
           </S.Card>
         </S.ConfigSection>
 
-        {/* ASIN Entry Section */}
+        {/* Bottom Section: Full Width ASIN Card */}
         <S.AsinCard>
           <S.AsinCardHeader>
             <S.AsinHeaderLeft>
               <S.IconWrapper>
-                <Icon name="grid" size={18} />
+                <Icon name="format_list_bulleted" size={24} />
               </S.IconWrapper>
               <div>
-                <Text variant="body" weight="bold">
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {t('listings.asinEntry.title')}
-                </Text>
-                <Text variant="caption" color="text.tertiary">
-                  {t('listings.asinEntry.subtitle')}
-                </Text>
+                  <span style={{ fontSize: '12px', fontWeight: 400, color: '#94a3b8' }}>
+                    {t('listings.asinEntry.subtitle')}
+                  </span>
+                </h2>
               </div>
             </S.AsinHeaderLeft>
             
             <S.AsinCounter>
-              <span>{asinCount}</span> / 1000 ASINs
+              {t('listings.asinEntry.counter', { count: asinCount })}
             </S.AsinCounter>
           </S.AsinCardHeader>
 
           <S.AsinInputWrapper>
             <S.AsinInputHeader>
-              <Text variant="caption" weight="semibold" color="text.secondary">
-                {t('listings.asinEntry.label')} <span style={{ color: 'red' }}>*</span>
-              </Text>
-              <Text variant="caption" color="text.tertiary" style={{ fontFamily: 'monospace' }}>
+              <S.Label>
+                {t('listings.asinEntry.label')} <S.RequiredStar>*</S.RequiredStar>
+              </S.Label>
+              <S.MonoCode>
                 {t('listings.asinEntry.accepts')}
-              </Text>
+              </S.MonoCode>
             </S.AsinInputHeader>
 
             <Controller
@@ -235,6 +198,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                   {...field}
                   placeholder={t('listings.asinEntry.placeholder')}
                   disabled={isLoading || isSubmitting}
+                  hasError={!!errors.asins}
                   onChange={(e) => {
                     field.onChange(e);
                     onAsinChange(e.target.value);
@@ -242,43 +206,18 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                 />
               )}
             />
-
-            {errors.asins && (
-              <Text variant="caption" color="semantic.error">
-                {String(errors.asins.message)}
-              </Text>
-            )}
-
-            <S.HelpText>
-              <Icon name="info" size={14} />
-              <Text variant="caption">
-                {t('listings.asinEntry.helpText')}
-              </Text>
-            </S.HelpText>
           </S.AsinInputWrapper>
-        </S.AsinCard>
 
-        {/* Actions */}
-        <S.Actions>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isSubmitting}
-            onClick={() => window.history.back()}
-          >
-            {t('translation:common.cancel')}
-          </Button>
-          
-          <Button
-            type="submit"
-            variant="primary"
-            isLoading={isSubmitting}
-            disabled={isLoading || asinCount === 0}
-          >
-            <Icon name="upload" size={16} />
-            {isSubmitting ? t('listings.actions.importing') : t('listings.actions.import')}
-          </Button>
-        </S.Actions>
+          <S.FormFooter>
+            <S.SubmitButton
+              type="submit"
+              disabled={isLoading || isSubmitting || asinCount === 0}
+            >
+              <span>{isSubmitting ? t('listings.actions.importing') : t('listings.actions.import')}</span>
+              <Icon name="play_arrow" size={20} />
+            </S.SubmitButton>
+          </S.FormFooter>
+        </S.AsinCard>
       </form>
     </S.Container>
   );
