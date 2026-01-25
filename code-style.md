@@ -5,27 +5,32 @@
 ## 🚨 CRITICAL RULES
 
 ### 1️⃣ Type Safety & Validation (MANDATORY)
+
 - **Shared Domain**: ALL domain types in `packages/shared/src/domain/`.
 - **Validation**: Frontend (React Hook Form + Zod) and Backend (class-validator) MUST use schemas from `packages/shared/src/schemas/`.
 - **Zero Tolerance**: NO `any`, NO type assertions without validation.
 
 ### 2️⃣ Architecture & Logic (STRICT)
-- **Pattern**: Container/Component split REQUIRED. 
+
+- **Pattern**: Container/Component split REQUIRED.
   - `[Feature]Page.container.tsx`: Logic, RTK Query, state.
   - `[Feature]Page.component.tsx`: Markup, Props only, NO hooks.
 - **API**: Use RTK Query via `baseApi.injectEndpoints`. NO fetch/axios directly.
-- **Loading**: Use `useLoading(isLoading)` hook with RTK Query states.
+- **Loading (MANDATORY)**: ALL API calls MUST trigger the global loading overlay. Use the `useLoading(isLoading)` hook with RTK Query's `isLoading` (or `isFetching` where appropriate) states. This is a non-negotiable standard for all containers.
 - **Error Handling**: NEVER use `try-catch` for API calls in the frontend. RTK Query handles errors in the `mutate().unwrap()` result or through the `isError`/`error` flags.
 
 ### 3️⃣ Styling & Theme (EMOTION ONLY)
+
 - **Provider**: Use `@emotion/styled`. NEVER `styled-components`.
 - **Tokens**: Use TailAdmin semantic tokens: `theme.colors.{category}.{primary|secondary}`, `theme.spacing.{md|lg}`, `theme.radius.{md}`, etc.
 - **Responsiveness**: ALL UI must be responsive. Sidebars hidden on mobile (<1024px). Mobile-first approach.
 
 ### 4️⃣ Form Components (forwardRef REQUIRED)
+
 - **Form UI**: ALL inputs must use `React.forwardRef` and `value={value ?? ''}` to prevent uncontrolled component warnings.
 
 ### 5️⃣ Localization & Assets (STANDARD)
+
 - **Structure**: Root key in JSON MUST match the filename (e.g., `feature.json` -> `{ "feature": { ... } }`).
 - **Hook Pattern**: `useTranslation` MUST always include the feature namespace AND `translation` for common keys.
   - ✅ `const { t } = useTranslation(['feature', 'translation']);`
@@ -40,6 +45,7 @@
 ---
 
 ## 📂 File Structure (STRICT PATTERN)
+
 ```
 features/[feature]/
 ├── [Feature]Page.container.tsx    # Logic & RTK Query
@@ -54,6 +60,7 @@ features/[feature]/
 ---
 
 ## 📘 REFERENCE IMPLEMENTATION (CANONICAL)
+
 **The `store-settings` module is the ONLY reference for all patterns.**
 
 - **Backend**: `apps/api/src/modules/store-settings/`
@@ -63,6 +70,7 @@ features/[feature]/
 ---
 
 ## 🚫 FORBIDDEN PATTERNS
+
 - ❌ **`any`** types.
 - ❌ **Hardcoded strings** in UI (STRICT: All text must be i18n keys).
 - ❌ **Inline styles** or `style={{...}}`. (STRICT: NO exceptions).
@@ -77,6 +85,7 @@ features/[feature]/
 - ❌ **`try-catch` for API calls** in frontend (use RTK Query error states).
 
 ## ✅ Success Criteria
+
 - ✅ Zero `any` types.
 - ✅ i18n for ALL text.
 - ✅ RTK Query for ALL API.

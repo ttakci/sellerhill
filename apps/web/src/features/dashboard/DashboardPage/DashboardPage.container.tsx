@@ -4,7 +4,7 @@
  * Purpose: Handle dashboard logic and authentication check
  */
 
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -19,8 +19,10 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const navigate = useNavigate();
   const { showMessage, closeMessage } = useUI();
 
-  const { data: dashboardData, error: dashboardError } = useGetDashboardQuery();
-  const { data: userData, isLoading, error: userError } = useGetMeQuery();
+  const { data: dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useGetDashboardQuery();
+  const { data: userData, isLoading: isUserLoading, error: userError } = useGetMeQuery();
+
+  useLoading(isDashboardLoading || isUserLoading);
 
   // Handle errors
   useEffect(() => {
@@ -53,11 +55,5 @@ export const DashboardPageContainer = (): React.ReactElement => {
     navigate('/ebay/connect');
   };
 
-  return (
-    <DashboardPageComponent
-      user={userData || null}
-      isLoading={isLoading}
-      onConnectEbay={handleConnectEbay}
-    />
-  );
+  return <DashboardPageComponent user={userData || null} isLoading={isUserLoading} onConnectEbay={handleConnectEbay} />;
 };

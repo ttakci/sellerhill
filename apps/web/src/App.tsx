@@ -8,7 +8,13 @@ import DashboardPage from './features/dashboard/DashboardPage';
 import EbayConnectPage from './features/ebay/ebay-connect';
 import OnboardingEbayPage from './features/ebay/onboarding';
 import { ListingSettingsGroupForm, ListingSettingsGroupPage } from './features/listing-settings-groups';
-import { AddListingsPage, ListingJobsPage, ListingsPage, ProductsPage } from './features/listings';
+import {
+  AddListingsPage,
+  ListingJobDetailsPage,
+  ListingJobsPage,
+  ListingsPage,
+  ProductsPage,
+} from './features/listings';
 import ProfilePage from './features/profile';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
@@ -22,7 +28,7 @@ export function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/auth/check-email" element={<CheckEmailPage />} />
-        
+
         {/* Protected routes with layout */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -34,10 +40,11 @@ export function App() {
           <Route path="/settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
           <Route path="/listings" element={<ListingsPage />} />
           <Route path="/listings/jobs" element={<ListingJobsPage />} />
+          <Route path="/listings/jobs/:jobId" element={<ListingJobDetailsPage />} />
           <Route path="/listings/products" element={<ProductsPage />} />
           <Route path="/listings/add" element={<AddListingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          
+
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/register" replace />} />
         </Route>

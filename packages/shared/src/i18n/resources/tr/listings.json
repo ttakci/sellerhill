@@ -26,6 +26,16 @@
       "stats": {
         "success": "Başarılı",
         "failed": "Hata"
+      },
+      "details": {
+        "title": "İş Detayları"
+      },
+      "items": {
+        "asin": "ASIN",
+        "status": "Durum",
+        "ebayId": "eBay ID",
+        "error": "Hata Mesajı",
+        "empty": "Bu işe ait ürün kaydı bulunamadı."
       }
     },
     "overview": {
@@ -37,12 +47,20 @@
     "table": {
       "product": "Ürün",
       "asin": "ASIN",
-      "ebayId": "eBay Ürün ID",
-      "price": "Fiyat",
+      "ebayId": "eBay ID",
+      "price": "Satış",
+      "purchasePrice": "Alış",
+      "estimatedProfit": "Kâr",
+      "profitMargin": "Marj",
+      "roi": "ROI",
       "stock": "Stok",
+      "sold": "Satılan",
+      "watch": "Takip",
+      "views": "İzlenme",
       "category": "Kategori",
-      "updatedAt": "Son Güncelleme",
+      "updatedAt": "Güncelleme",
       "status": "Durum",
+      "columns": "Sütunlar",
       "actions": "İşlemler",
       "addedAt": "{{date}} tarihinde eklendi"
     },
@@ -89,17 +107,25 @@
       "import": "İçe Aktar ve Listeleri Oluştur",
       "importing": "İçe Aktarılıyor...",
       "addListing": "Liste Ekle",
-      "endListing": "Listelemeyi Bitir"
+      "endListing": "Listelemeyi Bitir",
+      "deleteListings": "Listeleri Sil",
+      "bulkActions": "Toplu İşlemler"
     },
     "notifications": {
       "endSuccessTitle": "Listelemeler Bitirildi",
       "endSuccess": "{{count}} liste eBay'de başarıyla sonlandırıldı.",
       "endErrorTitle": "İşlem Başarısız",
-      "endError": "Bazı listeler sonlandırılamadı. Lütfen detaylar için eBay'i kontrol edin."
+      "endError": "Bazı listeler sonlandırılamadı. Lütfen detaylar için eBay'i kontrol edin.",
+      "deleteSuccessTitle": "Listeler Silindi",
+      "deleteSuccess": "{{count}} liste başarıyla silindi.",
+      "deleteErrorTitle": "İşlem Başarısız",
+      "deleteError": "Bazı listeler silinemedi."
     },
     "modals": {
       "endTitle": "Seçilen Listeleri Bitir?",
-      "endDescription": "Seçilen {{count}} listeyi eBay'de sonlandırmak istediğinizden emin misiniz? Bu işlemden sonra listeler pasif duruma geçecektir."
+      "endDescription": "Seçilen {{count}} listeyi eBay'de sonlandırmak istediğinizden emin misiniz? Bu işlemden sonra listeler pasif duruma geçecektir.",
+      "deleteTitle": "Seçili Listeleri Sil?",
+      "deleteDescription": "Seçili {{count}} listeyi silmek istediğinizden emin misiniz? Bu işlem listeleri eBay'de sonlandıracak ve mağazanızdan kaldıracaktır. Bu işlem geri alınamaz."
     },
     "validation": {
       "invalidAsin": "Geçersiz ASIN formatı. 'B' ile başlamalı ve ardından 9 alfanümerik karakter gelmelidir.",

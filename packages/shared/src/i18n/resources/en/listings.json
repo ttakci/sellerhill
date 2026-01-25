@@ -26,6 +26,16 @@
       "stats": {
         "success": "Success",
         "failed": "Failed"
+      },
+      "details": {
+        "title": "Job Details"
+      },
+      "items": {
+        "asin": "ASIN",
+        "status": "Status",
+        "ebayId": "eBay ID",
+        "error": "Error Message",
+        "empty": "No items found for this job."
       }
     },
     "overview": {
@@ -37,12 +47,20 @@
     "table": {
       "product": "Product",
       "asin": "ASIN",
-      "ebayId": "eBay Item ID",
-      "price": "Price",
+      "ebayId": "eBay ID",
+      "price": "Sell Price",
+      "purchasePrice": "Buy Price",
+      "estimatedProfit": "Profit",
+      "profitMargin": "Margin",
+      "roi": "ROI",
       "stock": "Stock",
+      "sold": "Sold",
+      "watch": "Watch",
+      "views": "Views",
       "category": "Category",
-      "updatedAt": "Last Updated",
+      "updatedAt": "Updated",
       "status": "Status",
+      "columns": "Columns",
       "actions": "Actions",
       "addedAt": "Added {{date}}"
     },
@@ -89,17 +107,25 @@
       "import": "Import & Create Listings",
       "importing": "Importing...",
       "addListing": "Add Listing",
-      "endListing": "End Listing"
+      "endListing": "End Listing",
+      "deleteListings": "Delete Listings",
+      "bulkActions": "Bulk Actions"
     },
     "notifications": {
       "endSuccessTitle": "Listings Ended",
       "endSuccess": "Successfully ended {{count}} listings on eBay.",
       "endErrorTitle": "Action Failed",
-      "endError": "Failed to end some listings. Please check eBay for details."
+      "endError": "Failed to end some listings. Please check eBay for details.",
+      "deleteSuccessTitle": "Listings Deleted",
+      "deleteSuccess": "Successfully deleted {{count}} listings.",
+      "deleteErrorTitle": "Action Failed",
+      "deleteError": "Failed to delete some listings."
     },
     "modals": {
       "endTitle": "End Selected Listings?",
-      "endDescription": "Are you sure you want to end {{count}} selected listings on eBay? They will be moved to inactive status."
+      "endDescription": "Are you sure you want to end {{count}} selected listings on eBay? They will be moved to inactive status.",
+      "deleteTitle": "Delete Selected Listings?",
+      "deleteDescription": "Are you sure you want to delete {{count}} selected listings? This will end them on eBay and remove them from your store. This action cannot be undone."
     },
     "validation": {
       "invalidAsin": "Invalid ASIN format. Must start with 'B' followed by 9 alphanumeric characters.",

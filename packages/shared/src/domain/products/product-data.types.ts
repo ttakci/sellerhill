@@ -21,9 +21,13 @@ export interface ProductData {
   specs?: Record<string, string>; // Structured specifications (e.g., "Processor": "Intel i5", "RAM": "8GB")
   price: {
     current: number;
-    avg30: number;
     currency: string;
+    avg30?: number; // 30-day average price
+    avg90?: number; // 90-day average price
   };
+  stock?: number;
+  raw?: any; // Original provider response for debugging (ScraperAPI)
+  rawKeepaData?: any; // Keepa API response for price/stock debugging
   updatedAt?: string;
 }
 

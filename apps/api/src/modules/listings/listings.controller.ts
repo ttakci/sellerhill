@@ -1,17 +1,6 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
-import {
-    ApiBearerAuth,
-    ApiOperation,
-    ApiResponse,
-    ApiTags,
-} from '@nestjs/swagger';
-import {
-    CreateListingsRequest,
-    ListingDto,
-    ListingJobDto,
-    ListingJobItemDto,
-    ProductData
-} from '@repo/shared';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateListingsRequest, ListingDto, ListingJobDto, ListingJobItemDto, ProductData } from '@repo/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ListingQueueService } from './listing-queue.service';
 import { ListingsService } from './listings.service';
@@ -23,7 +12,7 @@ import { ListingsService } from './listings.service';
 export class ListingsController {
   constructor(
     private readonly listingsService: ListingsService,
-    private readonly listingQueueService: ListingQueueService,
+    private readonly listingQueueService: ListingQueueService
   ) {}
 
   /**
@@ -42,10 +31,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Create bulk listings from a list of ASINs' })
   @Post('bulk-create')
-  async bulkCreate(
-    @Request() req: any,
-    @Body() body: CreateListingsRequest,
-  ): Promise<ListingJobDto> {
+  async bulkCreate(@Request() req: any, @Body() body: CreateListingsRequest): Promise<ListingJobDto> {
     const userId = req.user.sub;
     return this.listingQueueService.addListingJob(userId, body);
   }
@@ -75,10 +61,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get status of a listing job' })
   @Get('jobs/:jobId')
-  async getJobStatus(
-    @Request() req: any,
-    @Param('jobId') jobId: string,
-  ): Promise<ListingJobDto> {
+  async getJobStatus(@Request() req: any, @Param('jobId') jobId: string): Promise<ListingJobDto> {
     const userId = req.user.sub;
     const status = await this.listingsService.getJobStatus(userId, jobId);
     if (!status) {
@@ -92,10 +75,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get individual items of a listing job' })
   @Get('jobs/:jobId/items')
-  async getJobItems(
-    @Request() req: any,
-    @Param('jobId') jobId: string,
-  ): Promise<ListingJobItemDto[]> {
+  async getJobItems(@Request() req: any, @Param('jobId') jobId: string): Promise<ListingJobItemDto[]> {
     const userId = req.user.sub;
     return this.listingsService.getJobItems(userId, jobId);
   }
@@ -110,7 +90,7 @@ export class ListingsController {
     if (!product) {
       throw new Error('Product not found');
     }
-    return product;
+    return product.data;
   }
 
   @ApiOperation({ summary: 'Get a single listing by ID' })
@@ -132,10 +112,24 @@ export class ListingsController {
   @Post('bulk-end')
   async bulkEnd(
     @Request() req: any,
-    @Body() body: { listingIds: string[] },
+    @Body() body: { listingIds: string[] }
   ): Promise<{ success: boolean; count: number }> {
     const userId = req.user.sub;
     const count = await this.listingsService.endListings(userId, body.listingIds);
+    return { success: true, count };
+  }
+
+  /**
+   * Bulk delete listings
+   */
+  @ApiOperation({ summary: 'Bulk delete listings (ends them on eBay first)' })
+  @Post('bulk-delete')
+  async bulkDelete(
+    @Request() req: any,
+    @Body() body: { listingIds: string[] }
+  ): Promise<{ success: boolean; count: number }> {
+    const userId = req.user.sub;
+    const count = await this.listingsService.deleteListings(userId, body.listingIds);
     return { success: true, count };
   }
 }

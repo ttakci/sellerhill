@@ -1,15 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { listingSettingsGroupSchema, type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
+import {
+  listingSettingsGroupSchema,
+  type ListingSettingsGroupFormData,
+  type PredefinedTemplateResponse,
+} from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    useCreateListingSettingsGroupMutation,
-    useGetListingSettingsGroupByIdQuery,
-    useGetPredefinedTemplatesQuery,
-    useUpdateListingSettingsGroupMutation
+  useCreateListingSettingsGroupMutation,
+  useGetListingSettingsGroupByIdQuery,
+  useGetPredefinedTemplatesQuery,
+  useUpdateListingSettingsGroupMutation,
 } from '../api/listing-settings-group.api';
 import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.component';
 
@@ -24,10 +28,12 @@ export const ListingSettingsGroupFormContainer = () => {
 
   const { data: group, isLoading: isGroupLoading } = useGetListingSettingsGroupByIdQuery(id!, { skip: !isEdit });
   const { data: templates = [], isLoading: isTemplatesLoading } = useGetPredefinedTemplatesQuery();
-  const [createListingSettingsGroup, { isLoading: isCreating, isSuccess: createSuccess, isError: createError }] = useCreateListingSettingsGroupMutation();
-  const [updateListingSettingsGroup, { isLoading: isUpdating, isSuccess: updateSuccess, isError: updateError }] = useUpdateListingSettingsGroupMutation();
+  const [createListingSettingsGroup, { isLoading: isCreating, isSuccess: createSuccess, isError: createError }] =
+    useCreateListingSettingsGroupMutation();
+  const [updateListingSettingsGroup, { isLoading: isUpdating, isSuccess: updateSuccess, isError: updateError }] =
+    useUpdateListingSettingsGroupMutation();
 
-  useLoading(isGroupLoading || isTemplatesLoading);
+  useLoading(isGroupLoading || isTemplatesLoading || isCreating || isUpdating);
 
   // Form Initialization
   const form = useForm<ListingSettingsGroupFormData>({
@@ -47,12 +53,12 @@ export const ListingSettingsGroupFormContainer = () => {
   // Sync form with data
   useEffect(() => {
     if (group) {
-        // Ensure id is present for repricing strategy items if not provided by backend logic (though it should be)
-        const strategies = group.repricingStrategy.map(s => ({ ...s, id: s.id || crypto.randomUUID() }));
-        reset({ ...group, repricingStrategy: strategies });
+      // Ensure id is present for repricing strategy items if not provided by backend logic (though it should be)
+      const strategies = group.repricingStrategy.map((s) => ({ ...s, id: s.id || crypto.randomUUID() }));
+      reset({ ...group, repricingStrategy: strategies });
     } else if (templates.length > 0 && !getValues('templates.predefinedTemplateId')) {
-        // Set default template if creating new and templates loaded
-         form.setValue('templates.predefinedTemplateId', templates[0].id);
+      // Set default template if creating new and templates loaded
+      form.setValue('templates.predefinedTemplateId', templates[0].id);
     }
   }, [group, templates, reset, getValues, form]);
 
@@ -64,11 +70,16 @@ export const ListingSettingsGroupFormContainer = () => {
   // Handle success
   useEffect(() => {
     if (createSuccess || updateSuccess) {
-      showMessage({
-        type: 'success',
-        headerKey: 'translation:message.success.header',
-        descriptionKey: createSuccess ? 'listingSettingsGroup:listingSettingsGroup.success.created' : 'listingSettingsGroup:listingSettingsGroup.success.updated',
-      }, t);
+      showMessage(
+        {
+          type: 'success',
+          headerKey: 'translation:message.success.header',
+          descriptionKey: createSuccess
+            ? 'listingSettingsGroup:listingSettingsGroup.success.created'
+            : 'listingSettingsGroup:listingSettingsGroup.success.updated',
+        },
+        t
+      );
       navigate('/settings/listing-groups');
     }
   }, [createSuccess, updateSuccess, showMessage, t, navigate]);
@@ -76,22 +87,25 @@ export const ListingSettingsGroupFormContainer = () => {
   // Handle error
   useEffect(() => {
     if (createError || updateError) {
-      showMessage({
-        type: 'error',
-        headerKey: 'translation:message.error.header',
-        descriptionKey: 'listingSettingsGroup:listingSettingsGroup.errors.saveFailed',
-      }, t);
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: 'listingSettingsGroup:listingSettingsGroup.errors.saveFailed',
+        },
+        t
+      );
     }
   }, [createError, updateError, showMessage, t]);
 
   const handleSubmit = (data: ListingSettingsGroupFormData) => {
     // Remove ids from repricing strategy before sending if necessary, or backend handles it.
     // Assuming backend handles DTO transformation, we just pass the form data.
-    // However, the randomUUIDs are for frontend keys mostly. 
+    // However, the randomUUIDs are for frontend keys mostly.
     // Let's pass as is, assuming DTO handles it.
     const cleanData = {
-        ...data,
-        repricingStrategy: data.repricingStrategy.map(({ id, ...rest }) => rest)
+      ...data,
+      repricingStrategy: data.repricingStrategy.map(({ id, ...rest }) => rest),
     };
 
     if (isEdit) {
@@ -111,36 +125,54 @@ export const ListingSettingsGroupFormContainer = () => {
     const lastMax = lastStrategy ? Number(lastStrategy.maxPrice) : 0;
     const newMin = lastStrategy ? Number((lastMax + 0.1).toFixed(2)) : 0;
 
-    append({ 
-      id: crypto.randomUUID(), 
-      minPrice: newMin, 
-      maxPrice: 9999, 
-      profitMarginPercent: 15 
+    append({
+      id: crypto.randomUUID(),
+      minPrice: newMin,
+      maxPrice: 9999,
+      profitMarginPercent: 15,
     });
   };
 
   // Preview Logic
   const watchedValues = watch();
-  
+
   const activeTemplate = useMemo(() => {
     if (watchedValues.templates?.type === 'custom') {
       return {
         htmlContent: watchedValues.templates.customTemplateHtml || '',
         sampleData: {
-            title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
-            main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
-            product_description: 'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
-            feature_bullets: ['Industry-leading noise cancellation', 'Up to 30-hour battery life', 'Touch sensor controls', 'Quick attention mode'],
-            product_details: ['Brand: Zonds Audio', 'Connectivity: Bluetooth 5.0', 'Noise Cancelling: Yes', 'Color: Silver']
-        }
+          title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
+          main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
+          product_description:
+            'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
+          feature_bullets: [
+            'Industry-leading noise cancellation',
+            'Up to 30-hour battery life',
+            'Touch sensor controls',
+            'Quick attention mode',
+          ],
+          product_details: [
+            'Brand: Zonds Audio',
+            'Connectivity: Bluetooth 5.0',
+            'Noise Cancelling: Yes',
+            'Color: Silver',
+          ],
+        },
       };
     }
-    const template = templates.find((t: PredefinedTemplateResponse) => t.id === watchedValues.templates?.predefinedTemplateId);
+    const template = templates.find(
+      (t: PredefinedTemplateResponse) => t.id === watchedValues.templates?.predefinedTemplateId
+    );
     return {
       htmlContent: template?.htmlContent || '',
-      sampleData: template?.sampleData || {}
+      sampleData: template?.sampleData || {},
     };
-  }, [watchedValues.templates?.type, watchedValues.templates?.predefinedTemplateId, watchedValues.templates?.customTemplateHtml, templates]);
+  }, [
+    watchedValues.templates?.type,
+    watchedValues.templates?.predefinedTemplateId,
+    watchedValues.templates?.customTemplateHtml,
+    templates,
+  ]);
 
   const renderedPreview = useMemo(() => {
     const { htmlContent, sampleData } = activeTemplate;
@@ -152,10 +184,10 @@ export const ListingSettingsGroupFormContainer = () => {
       if (Array.isArray(value)) {
         const blockRegex = new RegExp(`{{#${key}}}(.*?){{/${key}}}`, 'gs');
         processedHtml = processedHtml.replace(blockRegex, (_, inner) => {
-          return value.map(item => inner.replace(/{{.}}/g, String(item))).join('\n');
+          return value.map((item) => inner.replace(/{{.}}/g, String(item))).join('\n');
         });
-        
-        const listHtml = value.map(item => `<li>${item}</li>`).join('\n');
+
+        const listHtml = value.map((item) => `<li>${item}</li>`).join('\n');
         processedHtml = processedHtml.replace(new RegExp(`{{${key}}}`, 'g'), `<ul>${listHtml}</ul>`);
       } else {
         const regex = new RegExp(`{{{?${key}}}?`, 'g');
@@ -167,10 +199,13 @@ export const ListingSettingsGroupFormContainer = () => {
   }, [activeTemplate]);
 
   const getPreviewWidth = () => {
-    switch(previewDevice) {
-        case 'mobile': return '375px';
-        case 'tablet': return '768px';
-        default: return '100%';
+    switch (previewDevice) {
+      case 'mobile':
+        return '375px';
+      case 'tablet':
+        return '768px';
+      default:
+        return '100%';
     }
   };
 
@@ -182,13 +217,11 @@ export const ListingSettingsGroupFormContainer = () => {
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isLoading={isCreating || isUpdating}
-      
       form={form}
       fields={fields}
       append={append}
       remove={remove}
       onAddRange={handleAddRange}
-      
       previewDevice={previewDevice}
       setPreviewDevice={setPreviewDevice}
       renderedPreview={renderedPreview}

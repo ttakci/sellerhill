@@ -8,7 +8,6 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   jobs,
   isLoading,
   onRefresh,
-  onViewDetails,
   pagination,
   columns,
 }) => {
@@ -29,12 +28,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
         </S.Actions>
       </S.Header>
 
-      <Table
-        columns={columns}
-        data={jobs}
-        emptyMessage={t('listings.jobs.empty')}
-        pagination={pagination}
-      />
+      <Table columns={columns} data={jobs} emptyMessage={t('listings.jobs.empty')} pagination={pagination} />
     </S.Container>
   );
 };

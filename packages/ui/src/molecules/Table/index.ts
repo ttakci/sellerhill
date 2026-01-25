@@ -1,3 +1,2 @@
 export { Table } from './Table.component';
-export type { TableColumn, TableProps } from './Table.types';
-
+export type { BulkAction, TableColumn, TableProps } from './Table.types';

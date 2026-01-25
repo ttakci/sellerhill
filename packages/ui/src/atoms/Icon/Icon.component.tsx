@@ -17,6 +17,9 @@ export const Icon = ({
   color = 'currentColor',
   stroke,
   strokeWidth = 2,
+  className,
+  style,
+  ...props
 }: IconProps): React.ReactElement => {
   const theme = useTheme() as any;
   const numericSize = typeof size === 'number' ? size : sizeMap[size];
@@ -39,11 +42,8 @@ export const Icon = ({
   }
 
   return (
-    <S.IconWrapper $size={numericSize} aria-hidden="true">
-      <IconComponent
-        stroke={stroke || resolvedColor}
-        strokeWidth={strokeWidth}
-      />
+    <S.IconWrapper $size={numericSize} aria-hidden="true" className={className} style={style} {...props}>
+      <IconComponent stroke={stroke || resolvedColor} strokeWidth={strokeWidth} />
     </S.IconWrapper>
   );
 };

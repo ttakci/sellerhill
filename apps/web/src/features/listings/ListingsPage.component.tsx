@@ -1,4 +1,4 @@
-import { Icon, Table } from '@repo/ui';
+import { Checkbox, Icon, Table } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingsPage.style';
@@ -12,29 +12,67 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
   onEndListings,
   selectedListingIds,
   onSelectionChange,
-  onEndSelected,
   columns,
   selectedRows,
+  bulkActions,
+  onDownload,
   pagination,
+  columnOptions,
+  visibleColumnKeys,
+  onToggleColumn,
+  sortColumn,
+  sortDirection,
+  onSort,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const filterRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const filterAction = (
+    <S.FilterWrapper ref={filterRef}>
+      <S.IconButton onClick={() => setIsFilterOpen(!isFilterOpen)} title={t('translation:common.actions.filter')}>
+        <Icon name="filter-list" size={20} />
+      </S.IconButton>
+      {isFilterOpen && (
+        <S.PopoverContainer>
+          <S.PopoverHeader>{t('translation:common.actions.filter')}</S.PopoverHeader>
+          <S.PopoverContent>
+            {columnOptions.map((opt) => (
+              <Checkbox
+                key={opt.key}
+                label={opt.label}
+                checked={visibleColumnKeys.includes(opt.key)}
+                onChange={() => onToggleColumn(opt.key)}
+                disabled={opt.alwaysVisible}
+              />
+            ))}
+          </S.PopoverContent>
+        </S.PopoverContainer>
+      )}
+    </S.FilterWrapper>
+  );
 
   return (
     <S.Container>
       <S.Header>
         <S.HeaderContent>
           <S.PageTitle>{t('listings.overview.title')}</S.PageTitle>
-          <S.PageSubtitle>
-            {t('listings.overview.subtitle', { count: listings.length })}
-          </S.PageSubtitle>
+          <S.PageSubtitle>{t('listings.overview.subtitle', { count: listings.length })}</S.PageSubtitle>
         </S.HeaderContent>
         <S.Actions>
-          {selectedListingIds.length > 0 && (
-            <S.StyledButton $variant="danger" onClick={onEndSelected}>
-              <Icon name="trash" />
-              {t('listings:listings.actions.endListing')} ({selectedListingIds.length})
-            </S.StyledButton>
-          )}
           <S.StyledButton onClick={onRefresh} disabled={isLoading}>
             <Icon name="sync" />
             {t('translation:common.actions.refresh')}
@@ -51,8 +89,15 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
         data={listings}
         selectable
         selectedRows={selectedRows}
-        onSelectionChange={(rows) => onSelectionChange(rows.map(r => r.id))}
+        onSelectionChange={(rows) => onSelectionChange(rows.map((r) => r.id))}
         emptyMessage={t('listings.overview.emptyTitle')}
+        bulkActions={bulkActions}
+        bulkActionsPlaceholder={t('listings.actions.bulkActions')}
+        onDownload={onDownload}
+        actions={filterAction}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={onSort}
         pagination={pagination}
       />
     </S.Container>

@@ -20,7 +20,8 @@
     "actions": {
       "refresh": "Yenile",
       "edit": "Düzenle",
-      "delete": "Sil"
+      "delete": "Sil",
+      "filter": "Filtrele"
     },
     "privacy": "Gizlilik",
     "support": "Destek",
@@ -133,5 +134,9 @@
   "languages": {
     "en": "English",
     "tr": "Türkçe"
+  },
+  "notifications": {
+    "comingSoonTitle": "Yakın Zamanda Gelecek",
+    "comingSoon": "Bu özellik şu anda geliştirme aşamasındadır ve yakında kullanıma sunulacaktır."
   }
 }

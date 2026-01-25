@@ -5,6 +5,13 @@ export interface TableColumn<T = any> {
   render?: (value: any, row: T, index: number) => React.ReactNode;
   sortable?: boolean;
   width?: string | number;
+  sticky?: boolean;
+}
+
+export interface BulkAction<T = any> {
+  label: string;
+  onClick: (selectedRows: T[]) => void;
+  variant?: 'default' | 'danger';
 }
 
 export interface TableProps<T = any> {
@@ -20,6 +27,11 @@ export interface TableProps<T = any> {
   selectable?: boolean;
   selectedRows?: T[];
   onSelectionChange?: (selectedRows: T[]) => void;
+  bulkActions?: BulkAction<T>[];
+  bulkActionsPlaceholder?: string;
+  onFilter?: () => void;
+  onDownload?: () => void;
+  actions?: React.ReactNode;
   pagination?: {
     count: number;
     page: number;

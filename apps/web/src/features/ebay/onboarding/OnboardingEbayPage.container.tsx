@@ -1,5 +1,5 @@
 import { EBAY_MARKETPLACE, type EbayMarketplaceId } from '@repo/shared';
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,8 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(EBAY_MARKETPLACE.US);
   const [getConnectUrl, { isLoading, isSuccess, data, error }] = useLazyGetEbayConnectUrlQuery();
 
+  useLoading(isLoading);
+
   // Handle success redirect
   React.useEffect(() => {
     if (isSuccess && data) {
@@ -27,16 +29,19 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   React.useEffect(() => {
     if (error) {
       const { key, params } = getErrorMessage(error as any);
-      showMessage({
-        type: 'error',
-        headerKey: 'translation:message.error.header',
-        descriptionKey: key,
-        descriptionParams: params,
-        primaryButton: {
-          labelKey: 'translation:message.error.close',
-          onClick: closeMessage,
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: key,
+          descriptionParams: params,
+          primaryButton: {
+            labelKey: 'translation:message.error.close',
+            onClick: closeMessage,
+          },
         },
-      }, t);
+        t
+      );
     }
   }, [error, showMessage, closeMessage, t]);
 

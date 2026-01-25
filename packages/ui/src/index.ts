@@ -68,7 +68,7 @@ export type { RadioGroupProps, RadioOption } from './molecules/RadioGroup';
 export { ThemeToggle } from './molecules/ThemeToggle';
 
 export { Table } from './molecules/Table';
-export type { TableColumn, TableProps } from './molecules/Table';
+export type { BulkAction, TableColumn, TableProps } from './molecules/Table';
 export { TablePagination } from './molecules/Table/TablePagination.component';
 export type { TablePaginationProps } from './molecules/Table/TablePagination.types';
 
@@ -77,8 +77,14 @@ export type { SwitchRowProps } from './molecules/SwitchRow';
 
 // Context exports
 export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';
-export type { LoadingState, MessageState, ShowLoadingOptions, ShowMessageOptions, ThemeContextValue, UIContextValue } from './context';
+export type {
+  LoadingState,
+  MessageState,
+  ShowLoadingOptions,
+  ShowMessageOptions,
+  ThemeContextValue,
+  UIContextValue,
+} from './context';
 
 // Hook exports
 export { useLoading, useTheme, useUI } from './hooks';
-

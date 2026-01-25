@@ -111,7 +111,7 @@ export const StyledTable = styled.table`
 
 export const THead = styled.thead`
   background: #f8fafc;
-  
+
   .dark & {
     background: rgba(30, 41, 59, 0.5);
   }
@@ -147,7 +147,7 @@ export const TBody = styled.tbody`
 
     .dark & {
       border-bottom: 1px solid #1e293b;
-      
+
       &:hover {
         background: rgba(30, 41, 59, 0.3);
       }
@@ -191,7 +191,7 @@ export const StatusBadge = styled.span<{ $status: string }>`
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
-  
+
   ${({ $status }) => {
     switch ($status.toLowerCase()) {
       case 'completed':
@@ -267,15 +267,19 @@ export const StatsContainer = styled.div`
 export const SuccessText = styled.span`
   color: #059669;
   font-weight: 700;
-  
-  .dark & { color: #34d399; }
+
+  .dark & {
+    color: #34d399;
+  }
 `;
 
 export const FailedText = styled.span`
   color: #dc2626;
   font-weight: 700;
 
-  .dark & { color: #f87171; }
+  .dark & {
+    color: #f87171;
+  }
 `;
 
 export const TotalText = styled.span`
@@ -344,7 +348,9 @@ export const PaginationInfo = styled.div`
 
   span {
     color: #0f172a;
-    .dark & { color: white; }
+    .dark & {
+      color: white;
+    }
   }
 `;
 
@@ -361,7 +367,7 @@ export const PageNavButton = styled.button`
   padding: 8px;
   color: #94a3b8;
   cursor: pointer;
-  
+
   &:hover:not(:disabled) {
     color: #2563eb;
   }
@@ -380,19 +386,22 @@ export const PageNumberButton = styled.button<{ $active?: boolean }>`
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  font-weight: ${({ $active }) => $active ? '700' : '500'};
-  background: ${({ $active }) => $active ? '#2563eb' : 'transparent'};
-  color: ${({ $active }) => $active ? 'white' : '#475569'};
+  font-weight: ${({ $active }) => ($active ? '700' : '500')};
+  background: ${({ $active }) => ($active ? '#2563eb' : 'transparent')};
+  color: ${({ $active }) => ($active ? 'white' : '#475569')};
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    background: ${({ $active }) => $active ? '#2563eb' : '#f1f5f9'};
-    .dark & { background: ${({ $active }) => $active ? '#2563eb' : '#1e293b'}; color: #e2e8f0; }
+    background: ${({ $active }) => ($active ? '#2563eb' : '#f1f5f9')};
+    .dark & {
+      background: ${({ $active }) => ($active ? '#2563eb' : '#1e293b')};
+      color: #e2e8f0;
+    }
   }
 
   .dark & {
-    color: ${({ $active }) => $active ? 'white' : '#94a3b8'};
+    color: ${({ $active }) => ($active ? 'white' : '#94a3b8')};
   }
 `;
 
@@ -404,4 +413,23 @@ export const EmptyState = styled.div`
   justify-content: center;
   gap: 16px;
   color: #94a3b8;
+`;
+
+export const AsinText = styled.span`
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+  color: #2563eb;
+`;
+
+export const ErrorText = styled.div`
+  font-size: 12px;
+  color: #dc2626;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .dark & {
+    color: #f87171;
+  }
 `;

@@ -16,7 +16,8 @@
     "actions": {
       "refresh": "Refresh",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "filter": "Filter"
     },
     "privacy": "Privacy",
     "support": "Support",
@@ -133,5 +134,9 @@
   "languages": {
     "en": "English",
     "tr": "Türkçe"
+  },
+  "notifications": {
+    "comingSoonTitle": "Action Coming Soon",
+    "comingSoon": "This feature is currently being implemented and will be available shortly."
   }
 }

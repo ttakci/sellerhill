@@ -1,10 +1,10 @@
 import type {
-    CreateListingsRequest,
-    EbayBusinessPolicyDto,
-    ListingDto,
-    ListingJobDto,
-    ListingJobItemDto,
-    ProductData,
+  CreateListingsRequest,
+  EbayBusinessPolicyDto,
+  ListingDto,
+  ListingJobDto,
+  ListingJobItemDto,
+  ProductData,
 } from '@repo/shared';
 import { baseApi } from '../../../api/baseApi';
 
@@ -82,6 +82,18 @@ export const listingsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Listings'],
     }),
+
+    /**
+     * Delete listings (withdraws them on eBay first)
+     */
+    deleteListings: builder.mutation<{ success: boolean; count: number }, string[]>({
+      query: (listingIds) => ({
+        url: '/listings/bulk-delete',
+        method: 'POST',
+        body: { listingIds },
+      }),
+      invalidatesTags: ['Listings'],
+    }),
   }),
 });
 
@@ -94,4 +106,5 @@ export const {
   useGetJobItemsQuery,
   useGetBusinessPoliciesQuery,
   useEndListingsMutation,
+  useDeleteListingsMutation,
 } = listingsApi;

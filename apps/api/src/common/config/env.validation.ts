@@ -8,8 +8,6 @@ enum Environment {
   Staging = 'staging',
 }
 
-
-
 /**
  * Environment Variables Validation Schema
  * Validates all required environment variables at startup
@@ -73,6 +71,10 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   SCRAPER_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  KEEPA_API_KEY?: string;
 
   @IsString()
   @IsOptional()

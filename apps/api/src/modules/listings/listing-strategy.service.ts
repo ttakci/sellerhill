@@ -9,7 +9,7 @@ export class ListingStrategyService {
 
   constructor(
     private readonly settingsGroupService: ListingSettingsGroupService,
-    private readonly storeSettingsService: StoreSettingsService,
+    private readonly storeSettingsService: StoreSettingsService
   ) {}
 
   /**
@@ -19,24 +19,38 @@ export class ListingStrategyService {
     userId: string,
     product: ProductData,
     settingsGroupId: string,
-    storeId: string | null = null,
+    storeId: string | null = null
   ) {
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
-    
+
     const description = this.processDescriptionTemplate(product, group);
-    
+
     // Validate listing against store settings (Blacklist, etc.)
     this.validateListing(product.title, description, storeSettings);
 
-    const price = this.calculatePrice(product.price.current, group);
-    // Use stock from settings group or default to 1
-    const quantity = group.stock?.defaultQuantity || 1;
+    const priceMetrics = this.calculatePrice(product.price.current, group);
+
+    // Stock Logic: Prevent overselling risk.
+    // If Amazon has less stock than our desired listing amount, mark as out of stock (0) on eBay.
+    const userPreferredStock = group.stock?.defaultQuantity || 1;
+    const amazonStock = product.stock ?? 0;
+    const quantity = amazonStock >= userPreferredStock ? userPreferredStock : 0;
+
+    this.logger.debug(
+      `Stock calculation for ${product.asin || 'product'}: ` +
+        `Amazon stock=${amazonStock}, User preferred=${userPreferredStock}, ` +
+        `Final quantity=${quantity} (${quantity === 0 ? 'OUT OF STOCK - Amazon stock < preferred' : 'IN STOCK'})`
+    );
 
     return {
       title: product.title,
       description,
-      price,
+      price: priceMetrics.finalPrice,
+      purchasePrice: priceMetrics.purchasePrice,
+      estimatedProfit: priceMetrics.estimatedProfit,
+      profitMargin: priceMetrics.profitMargin,
+      roi: priceMetrics.roi,
       quantity,
       imageUrls: product.imageUrls,
       currency: product.price.currency,
@@ -56,18 +70,20 @@ export class ListingStrategyService {
 
     // 3. Blacklist Validation Logic (merged into scope checks)
     const validateBlacklist = (text: string, scope: 'title' | 'description') => {
-        if (!blacklist || blacklist.length === 0) return;
-        
-        for (const item of blacklist) {
-            const keyword = item.keyword.toLowerCase();
-            // Check if item applies to this scope
-            if (item.scope === scope || item.scope === 'both') {
-                if (text.toLowerCase().includes(keyword)) {
-                    throw new BadRequestException(`${scope.charAt(0).toUpperCase() + scope.slice(1)} contains blacklisted keyword: ${item.keyword}`);
-                }
-            }
+      if (!blacklist || blacklist.length === 0) return;
+
+      for (const item of blacklist) {
+        const keyword = item.keyword.toLowerCase();
+        // Check if item applies to this scope
+        if (item.scope === scope || item.scope === 'both') {
+          if (text.toLowerCase().includes(keyword)) {
+            throw new BadRequestException(
+              `${scope.charAt(0).toUpperCase() + scope.slice(1)} contains blacklisted keyword: ${item.keyword}`
+            );
+          }
         }
-    }
+      }
+    };
 
     // 1. Title Validation
     if (validateTitle) {
@@ -80,7 +96,7 @@ export class ListingStrategyService {
     // 2. Description Validation
     if (validateDescription) {
       if (!description || description.trim().length === 0) {
-         throw new BadRequestException('Listing description cannot be empty');
+        throw new BadRequestException('Listing description cannot be empty');
       }
       validateBlacklist(description, 'description');
     }
@@ -91,11 +107,11 @@ export class ListingStrategyService {
    */
   private processDescriptionTemplate(product: ProductData, group: ListingSettingsGroup): string {
     let template = '{{description}}'; // Default
-    
+
     // Use custom template if available
     if (group.templates?.type === 'custom' && group.templates.customTemplateHtml) {
       template = group.templates.customTemplateHtml;
-    } 
+    }
     // TODO: Handle predefined templates if needed
 
     // Replace variables
@@ -104,39 +120,69 @@ export class ListingStrategyService {
       .replace(/{{description}}/g, product.description || '')
       .replace(/{{brand}}/g, product.brand || '')
       .replace(/{{features}}/g, (product.features || []).join('</li><li>')); // Simple list format
-      
+
     return finalDescription;
   }
 
   /**
    * Calculate final eBay price based on Amazon price and repricing strategy
    */
-  private calculatePrice(amazonPrice: number, group: ListingSettingsGroup): number {
+  private calculatePrice(
+    amazonPrice: number,
+    group: ListingSettingsGroup
+  ): {
+    finalPrice: number;
+    purchasePrice: number;
+    estimatedProfit: number;
+    profitMargin: number;
+    roi: number;
+  } {
     const { repricingStrategy, fees } = group;
 
     // 1. Find the applicable price range
-    const range = repricingStrategy.find(
-      (r) => amazonPrice >= r.minPrice && amazonPrice <= r.maxPrice
-    );
+    const range = repricingStrategy.find((r) => amazonPrice >= r.minPrice && amazonPrice <= r.maxPrice);
+
+    let netTarget = amazonPrice;
 
     if (!range) {
-      this.logger.warn(`No price range found for price ${amazonPrice} in group ${group.id}. Using fallback calculation.`);
-      // Fallback: use the last range or just a default 20% margin
-      const defaultMargin = 0.20;
-      return this.applyFees(amazonPrice * (1 + defaultMargin), fees);
-    }
-
-    // 2. Apply profit margin
-    let targetPrice = amazonPrice;
-    if (range.profitMarginPercent) {
-      targetPrice *= (1 + range.profitMarginPercent / 100);
-    }
-    if (range.fixedProfitAmount) {
-      targetPrice += range.fixedProfitAmount;
+      this.logger.warn(
+        `No price range found for price ${amazonPrice} in group ${group.id}. Using fallback calculation.`
+      );
+      // Fallback: use a default 20% margin
+      const defaultMargin = 0.2;
+      netTarget = amazonPrice * (1 + defaultMargin);
+    } else {
+      // 2. Apply profit margin
+      if (range.profitMarginPercent) {
+        netTarget *= 1 + range.profitMarginPercent / 100;
+      }
+      if (range.fixedProfitAmount) {
+        netTarget += range.fixedProfitAmount;
+      }
     }
 
     // 3. Apply eBay fees
-    return this.applyFees(targetPrice, fees);
+    let finalPrice = this.applyFees(netTarget, fees);
+
+    // 3.5. Enforce minimum price (eBay requirement: typically $0.99 for USD)
+    const minPrice = 0.99;
+    if (finalPrice < minPrice) {
+      this.logger.log(`Calculated price ${finalPrice} is below minimum. Adjusting to ${minPrice}.`);
+      finalPrice = minPrice;
+    }
+
+    // 4. Calculate metrics
+    const estimatedProfit = netTarget - amazonPrice;
+    const profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
+    const roi = amazonPrice > 0 ? (estimatedProfit / amazonPrice) * 100 : 0;
+
+    return {
+      finalPrice,
+      purchasePrice: amazonPrice,
+      estimatedProfit: Math.round(estimatedProfit * 100) / 100,
+      profitMargin: Math.round(profitMargin * 100) / 100,
+      roi: Math.round(roi * 100) / 100,
+    };
   }
 
   /**
@@ -147,21 +193,23 @@ export class ListingStrategyService {
     const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
     const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
     const taxPercent = Number(fees?.taxPercent) || 0;
-    
+
     // Formula: SalePrice = (NetTarget + FixedFee) / (1 - (EbayFee% + Tax%) / 100)
-    // This ensures that when eBay takes its percentage and the fixed fee, 
+    // This ensures that when eBay takes its percentage and the fixed fee,
     // we are left with exactly the netTarget.
-    
+
     const totalPercentageDeduction = (ebayFeePercent + taxPercent) / 100;
-    
+
     // Guard against division by zero if fees are 100% or more
     if (totalPercentageDeduction >= 1) {
-      this.logger.error(`Total percentage deduction (${totalPercentageDeduction * 100}%) is 100% or more. Invalid fee config.`);
+      this.logger.error(
+        `Total percentage deduction (${totalPercentageDeduction * 100}%) is 100% or more. Invalid fee config.`
+      );
       return netTarget * 1.5; // Fallback
     }
-    
+
     const finalPrice = (netTarget + fixedFeeAmount) / (1 - totalPercentageDeduction);
-    
+
     // Round to 2 decimal places
     return Math.round(finalPrice * 100) / 100;
   }

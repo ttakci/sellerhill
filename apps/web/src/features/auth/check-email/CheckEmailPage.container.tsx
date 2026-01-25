@@ -2,7 +2,7 @@
  * CheckEmailPage Container (Smart Component)
  */
 
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -20,25 +20,33 @@ export const CheckEmailPageContainer = (): React.ReactElement => {
 
   const [resend, { isLoading: isResending, isSuccess, isError }] = useResendVerificationMutation();
 
+  useLoading(isResending);
+
   // Handle success
   React.useEffect(() => {
     if (isSuccess) {
-      showMessage({
-        type: 'success',
-        headerKey: 'message.success.header',
-        descriptionKey: 'auth.verification.resent',
-      }, t);
+      showMessage(
+        {
+          type: 'success',
+          headerKey: 'message.success.header',
+          descriptionKey: 'auth.verification.resent',
+        },
+        t
+      );
     }
   }, [isSuccess, showMessage, t]);
 
   // Handle error
   React.useEffect(() => {
     if (isError) {
-      showMessage({
-        type: 'error',
-        headerKey: 'message.error.header',
-        descriptionKey: 'auth.errors.verificationFailed',
-      }, t);
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'message.error.header',
+          descriptionKey: 'auth.errors.verificationFailed',
+        },
+        t
+      );
     }
   }, [isError, showMessage, t]);
 

@@ -6,7 +6,7 @@ import axios from 'axios';
 /**
  * ScraperAPI Integration Service
  * Implements IProductDataProvider to fetch product data from ScraperAPI
- * 
+ *
  * ScraperAPI provides structured product data including:
  * - Full product details with specifications
  * - High-quality images
@@ -38,10 +38,10 @@ export class ScraperApiService implements IProductDataProvider {
         params: {
           api_key: this.apiKey,
           asin: asin,
-          country: 'us', // Default to US Amazon
+          country: 'us',
           tld: 'com',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 30000,
       });
 
       if (!response.data) {
@@ -50,95 +50,95 @@ export class ScraperApiService implements IProductDataProvider {
       }
 
       const product = response.data;
-      
-      // Debug logging to understand response structure
-      this.logger.debug(`ScraperAPI response keys: ${Object.keys(product).join(', ')}`);
-      this.logger.debug(`Image fields - main_image: ${!!product.main_image}, images: ${!!product.images}, image_data: ${!!product.image_data}`);
 
-      // Extract structured specifications from ScraperAPI response
+      // Extensive logging of keys for debugging
+      this.logger.debug(`ScraperAPI response for ${asin}: ${Object.keys(product).join(', ')}`);
+
+      // Extract structured specifications
       const specs = this.extractSpecifications(product);
 
-      // Transform ScraperAPI data to normalized ProductData
-      return {
-        asin: product.asin || asin,
-        title: product.title || 'Unknown Product',
-        description: product.description || product.feature_bullets?.join('\n') || '',
-        imageUrls: this.extractImages(product),
-        brand: product.brand || 'Unknown',
-        category: product.categories?.[0]?.name || product.product_category,
-        manufacturer: product.manufacturer || product.brand,
-        weight: this.parseWeight(product.item_weight),
-        dimensions: this.parseDimensions(product.product_dimensions),
-        features: product.feature_bullets || [],
-        specs: specs, // ✨ Structured specifications from ScraperAPI
-        price: {
-          current: this.parsePrice(product.buybox_winner?.price?.value || product.price),
-          avg30: this.parsePrice(product.buybox_winner?.price?.value || product.price), // ScraperAPI doesn't provide historical avg, use current
-          currency: product.buybox_winner?.price?.currency || 'USD',
-        },
-      };
-    } catch (error: any) {
-      if (error.response?.status === 404) {
-        this.logger.warn(`Product not found for ASIN ${asin}`);
-        return null;
-      }
-      
-      if (error.response?.status === 401) {
-        this.logger.error(`ScraperAPI authentication failed. Check SCRAPER_API_KEY`);
-        return null;
+      // Robust field extraction with fallbacks
+      const title = product.name || product.title || 'Unknown Product';
+      const rawPrice =
+        product.pricing || product.price || product.buybox_winner?.price?.value || product.buybox_winner?.price;
+      const currency = product.currency || product.buybox_winner?.price?.currency || 'USD';
+
+      // Brand Cleanup
+      let brand = product.brand || 'Unknown';
+      if (brand.startsWith('Visit the ') && brand.endsWith(' Store')) {
+        brand = brand.replace('Visit the ', '').replace(' Store', '').trim();
       }
 
-      if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-        this.logger.error(`ScraperAPI request timeout for ASIN ${asin}`);
-        return null;
-      }
-      
-      this.logger.error(`Failed to fetch product from ScraperAPI for ASIN ${asin}: ${error.message}`, error.stack);
-      
-      // Log response data if available for debugging
-      if (error.response?.data) {
-        this.logger.debug(`ScraperAPI error response: ${JSON.stringify(error.response.data).substring(0, 500)}`);
-      }
-      
+      const imageUrls = this.extractImages(product);
+
+      // Map to normalized ProductData
+      return {
+        asin: product.asin || asin,
+        title: title,
+        description: product.full_description || product.description || product.feature_bullets?.join('\n') || '',
+        imageUrls: imageUrls,
+        brand: brand,
+        category: product.product_category || product.categories?.[0]?.name || product.categories?.[0],
+        manufacturer: product.manufacturer || product.product_information?.manufacturer || brand,
+        weight: this.parseWeight(product.item_weight || product.product_information?.item_weight),
+        dimensions: this.parseDimensions(product.product_dimensions || product.product_information?.product_dimensions),
+        features: product.feature_bullets || [],
+        specs: specs,
+        price: {
+          current: this.parsePrice(rawPrice),
+          currency: currency,
+        },
+        stock:
+          product.availability?.quantity ||
+          product.buybox_winner?.availability?.quantity ||
+          (product.availability?.status?.includes('In Stock') ? 10 : 0),
+        raw: product,
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to fetch product from ScraperAPI for ASIN ${asin}: ${error.message}`);
       return null;
     }
   }
 
   /**
-   * Extract and normalize product images
+   * Extract and normalize product images from various possible formats
    */
   private extractImages(product: any): string[] {
-    const images: string[] = [];
+    const images: Set<string> = new Set();
 
-    // Main image
-    if (product.main_image?.link) {
-      images.push(product.main_image.link);
+    const addImage = (img: any) => {
+      if (!img) return;
+      if (typeof img === 'string' && img.startsWith('http')) {
+        images.add(img);
+      } else if (typeof img === 'object' && img.link && typeof img.link === 'string') {
+        images.add(img.link);
+      }
+    };
+
+    // Try 'images' array (can be strings or objects)
+    if (Array.isArray(product.images)) {
+      product.images.forEach(addImage);
     }
 
-    // Additional images
-    if (product.images && Array.isArray(product.images)) {
-      product.images.forEach((img: any) => {
-        if (img.link && !images.includes(img.link)) {
-          images.push(img.link);
-        }
-      });
+    // Try 'main_image'
+    addImage(product.main_image);
+
+    // Try 'image_data'
+    if (Array.isArray(product.image_data)) {
+      product.image_data.forEach(addImage);
     }
 
-    // Fallback: Try image_data field (alternative ScraperAPI format)
-    if (images.length === 0 && product.image_data && Array.isArray(product.image_data)) {
-      product.image_data.forEach((url: string) => {
-        if (url && typeof url === 'string' && url.startsWith('http')) {
-          images.push(url);
-        }
-      });
+    // Try 'image_links'
+    if (Array.isArray(product.image_links)) {
+      product.image_links.forEach(addImage);
     }
 
-    // Log warning if no images found
-    if (images.length === 0) {
-      this.logger.warn(`No images found for product. Available fields: ${Object.keys(product).join(', ')}`);
+    const finalImages = Array.from(images);
+    if (finalImages.length === 0) {
+      this.logger.warn(`No valid images found for product. Keys: ${Object.keys(product).join(', ')}`);
     }
 
-    return images;
+    return finalImages;
   }
 
   /**
@@ -182,12 +182,21 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse price from various formats
    */
   private parsePrice(priceValue: any): number {
+    if (priceValue === null || priceValue === undefined) return 0;
+
+    // Handle object format (sometimes buybox_winner.price)
+    if (typeof priceValue === 'object') {
+      const val = priceValue.value ?? priceValue.amount ?? priceValue.current_price;
+      if (val !== undefined) return this.parsePrice(val);
+      return 0;
+    }
+
     if (typeof priceValue === 'number') {
       return priceValue;
     }
-    
+
     if (typeof priceValue === 'string') {
-      // Remove currency symbols and parse
+      // Remove currency symbols, commas and parse
       const cleaned = priceValue.replace(/[^0-9.]/g, '');
       return parseFloat(cleaned) || 0;
     }
@@ -200,7 +209,7 @@ export class ScraperApiService implements IProductDataProvider {
    */
   private parseWeight(weight: string | undefined): number | undefined {
     if (!weight) return undefined;
-    
+
     const match = weight.match(/([0-9.]+)/);
     return match ? parseFloat(match[1]) : undefined;
   }
@@ -210,7 +219,7 @@ export class ScraperApiService implements IProductDataProvider {
    */
   private parseDimensions(dimensions: string | undefined): string | undefined {
     if (!dimensions) return undefined;
-    
+
     // Clean up and return standardized format
     return dimensions.replace(/\s+/g, ' ').trim();
   }

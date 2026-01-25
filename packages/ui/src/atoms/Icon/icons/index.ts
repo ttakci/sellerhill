@@ -11,6 +11,7 @@ import { CheckListIcon } from './check-list';
 import { ChevronDownIcon } from './chevron-down';
 import { ChevronLeftIcon } from './chevron-left';
 import { ChevronRightIcon } from './chevron-right';
+import { ChevronUpIcon } from './chevron-up';
 import { CodeIcon } from './code';
 import { CopyIcon } from './copy';
 import { DashboardIcon } from './dashboard';
@@ -19,7 +20,6 @@ import { DownloadIcon } from './download';
 import { EditIcon } from './edit';
 import { EditNoteIcon } from './edit-note';
 import { ExpandMoreIcon } from './expand-more';
-import { ExternalLinkIcon } from './external-link';
 import { EyeIcon } from './eye';
 import { FacebookIcon } from './facebook';
 import { FilterListIcon } from './filter-list';
@@ -45,6 +45,7 @@ import { MenuIcon } from './menu';
 import { MonitorIcon } from './monitor';
 import { MoonIcon } from './moon';
 import { MoreVertIcon } from './more-vert';
+import { OpenInNewIcon } from './open-in-new';
 import { PercentIcon } from './percent';
 import { PhoneIcon } from './phone';
 import { PlayArrowIcon } from './play-arrow';
@@ -85,6 +86,7 @@ export { CheckListIcon } from './check-list';
 export { ChevronDownIcon } from './chevron-down';
 export { ChevronLeftIcon } from './chevron-left';
 export { ChevronRightIcon } from './chevron-right';
+export { ChevronUpIcon } from './chevron-up';
 export { CodeIcon } from './code';
 export { CopyIcon } from './copy';
 export { DashboardIcon } from './dashboard';
@@ -118,6 +120,7 @@ export { MenuIcon } from './menu';
 export { MonitorIcon } from './monitor';
 export { MoonIcon } from './moon';
 export { MoreVertIcon } from './more-vert';
+export { OpenInNewIcon } from './open-in-new';
 export { PercentIcon } from './percent';
 export { PhoneIcon } from './phone';
 export { PlayArrowIcon } from './play-arrow';
@@ -160,9 +163,11 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   'chevron-down': ChevronDownIcon as any,
   'chevron-left': ChevronLeftIcon as any,
   'chevron-right': ChevronRightIcon as any,
+  'chevron-up': ChevronUpIcon as any,
   chevron_left: ChevronLeftIcon as any,
   chevron_right: ChevronRightIcon as any,
   chevron_down: ChevronDownIcon as any,
+  chevron_up: ChevronUpIcon as any,
   code: CodeIcon as any,
   copy: CopyIcon as any,
   dashboard: DashboardIcon as any,
@@ -173,7 +178,6 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   'edit-note': EditNoteIcon as any,
   'expand-more': ExpandMoreIcon as any,
   expand_more: ExpandMoreIcon as any,
-  'external-link': ExternalLinkIcon as any,
   eye: EyeIcon as any,
   facebook: FacebookIcon as any,
   'filter-list': FilterListIcon as any,
@@ -184,8 +188,6 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   format_list_bulleted: FormatListBulletedIcon as any,
   globe: GlobeIcon as any,
   grid: GridIcon as any,
-  'grid-view': GridViewIcon as any,
-  grid_view: GridViewIcon as any,
   help: InfoIcon as any,
   home: HomeIcon as any,
   image: ImageIcon as any,
@@ -242,6 +244,15 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   validation: ValidationIcon as any,
   'view-list': ViewListIcon as any,
   x: XIcon as any,
+  'open-in-new': OpenInNewIcon as any,
+  open_in_new: OpenInNewIcon as any,
+  'external-link': OpenInNewIcon as any,
+  'grid-view': GridViewIcon as any,
+  grid_view: GridViewIcon as any,
+  history: SyncIcon as any,
+  error: AlertCircleIcon as any,
+  error_outline: AlertCircleIcon as any,
+  'error-outline': AlertCircleIcon as any,
   zorro: ZorroIcon as any,
 } as const;
 

@@ -4,7 +4,7 @@
  * Purpose: Handle eBay connection logic
  */
 
-import { useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,8 +19,8 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
   const [getConnectUrl, { isLoading, error: urlError }] = useLazyGetEbayConnectUrlQuery();
   const { data: accountsData } = useGetEbayAccountsQuery();
 
-  // Note: useLoading not used here because we want the user to see the redirect happening
-  // The loading state is brief and followed by a full page redirect
+  // Use RTK Query loading state with useLoading hook
+  useLoading(isLoading);
 
   // Handle error
   useEffect(() => {
@@ -44,7 +44,7 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
 
   const handleConnect = async (): Promise<void> => {
     const result = await getConnectUrl({ marketplaceId: 'EBAY_US' }).unwrap();
-    
+
     // Redirect to eBay OAuth consent page
     // Error is handled by RTK Query and the useEffect above
     window.location.href = result.url;

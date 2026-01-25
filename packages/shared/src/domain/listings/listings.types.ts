@@ -42,6 +42,15 @@ export interface ListingDto {
   shippingPolicyId: string;
   returnPolicyId: string;
   status: ListingStatus;
+  purchasePrice?: number;
+  estimatedProfit?: number;
+  profitMargin?: number;
+  roi?: number;
+  soldCount?: number;
+  watchCount?: number;
+  viewCount?: number;
+  category?: string;
+  sourceStock?: number;
   createdAt: string;
   updatedAt: string;
 }

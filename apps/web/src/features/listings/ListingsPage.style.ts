@@ -41,7 +41,7 @@ export const PageSubtitle = styled.p`
   font-size: 14px;
   color: #64748b;
   margin-top: 4px;
-  
+
   span {
     font-weight: 600;
     color: #334155;
@@ -67,24 +67,29 @@ export const StyledButton = styled.button<{ $variant?: 'primary' | 'secondary' |
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   gap: 8px;
 
-  ${({ $variant }) => $variant === 'primary' ? `
+  ${({ $variant }) =>
+    $variant === 'primary'
+      ? `
     background: #2563eb;
     color: white;
     border: none;
     box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
     &:hover { background: #1d4ed8; }
-  ` : $variant === 'danger' ? `
+  `
+      : $variant === 'danger'
+        ? `
     background: #ef4444;
     color: white;
     border: none;
     &:hover { background: #dc2626; }
-  ` : `
+  `
+        : `
     background: white;
     color: #334155;
     border: 1px solid #e2e8f0;
     &:hover { background: #f8fafc; }
   `}
-  
+
   & svg {
     width: 20px;
     height: 20px;
@@ -95,7 +100,9 @@ export const TableWrapper = styled.div`
   background: white;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 `;
 
@@ -118,7 +125,7 @@ export const ToolbarGroup = styled.div`
 
 export const StyledSelect = styled.div`
   position: relative;
-  
+
   select {
     appearance: none;
     background: white;
@@ -130,7 +137,7 @@ export const StyledSelect = styled.div`
     color: #475569;
     cursor: pointer;
     outline: none;
-    
+
     &:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 0 1px #3b82f6;
@@ -166,7 +173,7 @@ export const IconButton = styled.button`
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     border-color: #e2e8f0;
   }
-  
+
   & svg {
     width: 20px;
     height: 20px;
@@ -195,9 +202,15 @@ export const TH = styled.th`
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  
-  &:first-of-type { padding-left: 24px; width: 48px; }
-  &:last-of-type { padding-right: 24px; text-align: right; }
+
+  &:first-of-type {
+    padding-left: 24px;
+    width: 48px;
+  }
+  &:last-of-type {
+    padding-right: 24px;
+    text-align: right;
+  }
 `;
 
 export const TBody = styled.tbody`
@@ -205,22 +218,27 @@ export const TBody = styled.tbody`
     border-bottom: 1px solid #f1f5f9;
     transition: background 0.2s;
     height: 72px;
-    
+
     &:hover {
-        background: rgba(248, 250, 252, 0.5);
+      background: rgba(248, 250, 252, 0.5);
     }
-    
+
     &:hover .more-btn {
-        opacity: 1;
+      opacity: 1;
     }
   }
 `;
 
 export const TD = styled.td`
   padding: 12px;
-  
-  &:first-of-type { padding-left: 24px; }
-  &:last-of-type { padding-right: 24px; text-align: right; }
+
+  &:first-of-type {
+    padding-left: 24px;
+  }
+  &:last-of-type {
+    padding-right: 24px;
+    text-align: right;
+  }
 `;
 
 export const ProductCell = styled.div`
@@ -240,7 +258,7 @@ export const ProductImageWrapper = styled.div`
   justify-content: center;
   padding: 6px;
   flex-shrink: 0;
-  
+
   svg {
     color: #cbd5e1;
   }
@@ -271,11 +289,18 @@ export const ProductSubtitle = styled.div`
   color: #94a3b8;
 `;
 
-export const ASINLink = styled.div`
+export const ProductMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+`;
+
+export const IDLink = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  
+
   span {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
@@ -285,7 +310,9 @@ export const ASINLink = styled.div`
   a {
     color: #93c5fd;
     transition: color 0.2s;
-    &:hover { color: #2563eb; }
+    &:hover {
+      color: #2563eb;
+    }
     display: flex;
     align-items: center;
   }
@@ -306,8 +333,8 @@ export const PriceText = styled.span`
 export const StockBadge = styled.span<{ $outOfStock?: boolean }>`
   font-size: 13px;
   font-weight: 500;
-  color: ${({ $outOfStock }) => $outOfStock ? '#94a3b8' : '#334155'};
-  background: ${({ $outOfStock }) => $outOfStock ? '#f8fafc' : '#f1f5f9'};
+  color: ${({ $outOfStock }) => ($outOfStock ? '#94a3b8' : '#334155')};
+  background: ${({ $outOfStock }) => ($outOfStock ? '#f8fafc' : '#f1f5f9')};
   padding: 2px 10px;
   border-radius: 9999px;
   display: inline-block;
@@ -326,22 +353,28 @@ export const StatusBadge = styled.span<{ $status: string }>`
   letter-spacing: 0.025em;
   border: 1px solid transparent;
 
-  ${({ $status }) => ($status === 'active' || $status === 'ACTIVE') ? `
+  ${({ $status }) =>
+    $status === 'active' || $status === 'ACTIVE'
+      ? `
     background: #ecfdf5;
     color: #059669;
     border-color: #d1fae5;
-  ` : `
+  `
+      : `
     background: #f1f5f9;
     color: #64748b;
     border-color: #e2e8f0;
   `}
 
   .dark & {
-    ${({ $status }) => ($status === 'active' || $status === 'ACTIVE') ? `
+    ${({ $status }) =>
+      $status === 'active' || $status === 'ACTIVE'
+        ? `
       background: rgba(16, 185, 129, 0.1);
       color: #34d399;
       border-color: rgba(16, 185, 129, 0.2);
-    ` : `
+    `
+        : `
       background: rgba(148, 163, 184, 0.1);
       color: #94a3b8;
       border-color: rgba(148, 163, 184, 0.2);
@@ -370,7 +403,7 @@ export const PaginationInfo = styled.div`
   gap: 12px;
   color: #64748b;
   font-size: 13px;
-  
+
   span {
     font-weight: 600;
     color: #334155;
@@ -409,7 +442,7 @@ export const PageButton = styled.button`
     opacity: 0.3;
     cursor: default;
   }
-  
+
   & svg {
     width: 20px;
     height: 20px;
@@ -433,4 +466,97 @@ export const MoreButton = styled.button`
     color: #475569;
     background: #f1f5f9;
   }
+`;
+
+export const MetricValue = styled.span<{ $positive?: boolean; $negative?: boolean; $bold?: boolean }>`
+  font-size: 13px;
+  font-weight: ${({ $bold }) => ($bold ? '700' : '600')};
+  color: ${({ $positive, $negative }) => ($positive ? '#059669' : $negative ? '#dc2626' : '#475569')};
+`;
+
+export const StatBadge = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+`;
+
+export const StatMain = styled.span`
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+`;
+
+export const StatSub = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-top: 2px;
+`;
+
+export const CompactText = styled.div`
+  font-size: 0.875rem;
+  color: ${({ theme }) => (theme as any).colors.text.secondary};
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const ColumnSettingsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+`;
+
+export const FilterWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+export const PopoverContainer = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  overflow: hidden;
+
+  .dark & {
+    background: #1e293b;
+    border-color: #334155;
+  }
+`;
+
+export const PopoverHeader = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 14px;
+  background: #f8fafc;
+
+  .dark & {
+    border-color: #334155;
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+`;
+
+export const PopoverContent = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
 `;
