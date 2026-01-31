@@ -8,7 +8,7 @@ import { TablePagination } from './TablePagination.component';
 export const Table = <T extends Record<string, any>>({
   columns,
   data,
-  emptyMessage = 'No data available',
+  emptyMessage,
   onRowClick,
   className,
   footer,
@@ -19,7 +19,7 @@ export const Table = <T extends Record<string, any>>({
   selectedRows = [],
   onSelectionChange,
   bulkActions,
-  bulkActionsPlaceholder = 'Bulk Actions',
+  bulkActionsPlaceholder,
   onFilter,
   onDownload,
   actions,
@@ -110,7 +110,7 @@ export const Table = <T extends Record<string, any>>({
           <S.Thead>
             <S.Tr>
               {selectable && (
-                <S.Th style={{ width: '48px', paddingRight: 0 }} $sticky={columns.some((c) => c.sticky)} $left={0}>
+                <S.Th style={{ width: '3rem', paddingRight: 0 }} $sticky={columns.some((c) => c.sticky)} $left={0}>
                   <Checkbox checked={isAllSelected} onChange={handleSelectAll} />
                 </S.Th>
               )}
@@ -167,7 +167,7 @@ export const Table = <T extends Record<string, any>>({
                   >
                     {selectable && (
                       <S.Td
-                        style={{ width: '48px', paddingRight: 0 }}
+                        style={{ width: '3rem', paddingRight: 0 }}
                         onClick={(e) => e.stopPropagation()}
                         $sticky={columns.some((c) => c.sticky)}
                         $left={0}
@@ -196,6 +196,8 @@ export const Table = <T extends Record<string, any>>({
           rowsPerPage={pagination.rowsPerPage}
           onPageChange={pagination.onPageChange}
           onRowsPerPageChange={pagination.onRowsPerPageChange}
+          labelRowsPerPage={pagination.labelRowsPerPage}
+          labelInfo={pagination.labelInfo}
         />
       )}
       {footer && <S.StyledFooter>{footer}</S.StyledFooter>}

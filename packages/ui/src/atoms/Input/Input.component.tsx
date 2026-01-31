@@ -24,6 +24,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       id,
       autoFocus,
       maxLength,
+      leftIcon,
+      rightIcon,
       style,
     },
     ref
@@ -39,54 +41,52 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
+    const inputContent = (
+      <S.ControlWrapper $fullWidth={fullWidth}>
+        {leftIcon && (
+          <S.IconWrapper $position="left" $size={size}>
+            {leftIcon}
+          </S.IconWrapper>
+        )}
+        <S.InputField
+          ref={ref}
+          value={value ?? ''}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          placeholder={placeholder}
+          disabled={disabled}
+          readOnly={readOnly}
+          type={type}
+          name={name}
+          id={id}
+          autoFocus={autoFocus}
+          maxLength={maxLength}
+          style={style}
+          $size={size}
+          $variant={computedVariant}
+          $fullWidth={fullWidth}
+          $hasLeftIcon={!!leftIcon}
+          $hasRightIcon={!!rightIcon}
+        />
+        {rightIcon && (
+          <S.IconWrapper $position="right" $size={size}>
+            {rightIcon}
+          </S.IconWrapper>
+        )}
+      </S.ControlWrapper>
+    );
+
     if (helperText) {
       return (
         <S.InputWrapper>
-          <S.InputField
-            ref={ref}
-            value={value ?? ''}
-            onChange={handleChange}
-            onBlur={onBlur}
-            onFocus={onFocus}
-            placeholder={placeholder}
-            disabled={disabled}
-            readOnly={readOnly}
-            type={type}
-            name={name}
-            id={id}
-            autoFocus={autoFocus}
-            maxLength={maxLength}
-            style={style}
-            $size={size}
-            $variant={computedVariant}
-            $fullWidth={fullWidth}
-          />
+          {inputContent}
           <S.HelperText $variant={error ? 'error' : 'success'}>{helperText}</S.HelperText>
         </S.InputWrapper>
       );
     }
 
-    return (
-      <S.InputField
-        ref={ref}
-        value={value ?? ''}
-        onChange={handleChange}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        placeholder={placeholder}
-        disabled={disabled}
-        readOnly={readOnly}
-        type={type}
-        name={name}
-        id={id}
-        autoFocus={autoFocus}
-        maxLength={maxLength}
-        style={style}
-        $size={size}
-        $variant={computedVariant}
-        $fullWidth={fullWidth}
-      />
-    );
+    return inputContent;
   }
 );
 

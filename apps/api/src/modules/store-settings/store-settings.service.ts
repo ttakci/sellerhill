@@ -1,9 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import {
-    type BlacklistKeyword,
-    type SaveStoreSettingsRequest,
-    type StoreSettingsResponse
-} from '@repo/shared';
+import { type BlacklistKeyword, type SaveStoreSettingsRequest, type StoreSettingsResponse } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
 
 /**
@@ -39,7 +35,7 @@ export class StoreSettingsService implements OnModuleInit {
    */
   private async ensureTableExists() {
     this.logger.log('Ensuring store_settings table exists...');
-    
+
     // Check if user_id column exists
     const columnCheck = await this.databaseService.query(`
       SELECT column_name 
@@ -89,37 +85,44 @@ export class StoreSettingsService implements OnModuleInit {
       ON store_settings (user_id, store_id) 
       WHERE (store_id IS NOT NULL);
     `);
+
+    // Drop deprecated columns (address, price_limit)
+    await this.databaseService.query(`
+      ALTER TABLE store_settings 
+      DROP COLUMN IF EXISTS address,
+      DROP COLUMN IF EXISTS price_limit;
+    `);
   }
 
   /**
    * Get settings for a specific store or global
    */
   async getSettings(userId: string, storeId?: string): Promise<StoreSettingsResponse> {
-    const query = storeId 
+    const query = storeId
       ? `SELECT * FROM store_settings WHERE user_id = $1 AND store_id = $2`
       : `SELECT * FROM store_settings WHERE user_id = $1 AND is_global = TRUE`;
-    
+
     const params = storeId ? [userId, storeId] : [userId];
-    
+
     const results = await this.databaseService.query<StoreSettingsEntity>(query, params);
-    
+
     if (results.length === 0) {
-        // Return default settings if none found
-        return {
-            id: '',
-            isGlobal: !storeId,
-            storeId,
-            country: '',
-            state: '',
-            zipCode: '',
-            validateTitle: true,
-            validateDescription: false,
-            blacklist: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
+      // Return default settings if none found
+      return {
+        id: '',
+        isGlobal: !storeId,
+        storeId,
+        country: '',
+        state: '',
+        zipCode: '',
+        validateTitle: true,
+        validateDescription: false,
+        blacklist: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
-    
+
     return this.mapToDto(results[0]);
   }
 
@@ -130,7 +133,8 @@ export class StoreSettingsService implements OnModuleInit {
     // 1. Try Store Specific (if storeId provided)
     if (storeId) {
       const storeSettings = await this.getSettings(userId, storeId);
-      if (storeSettings.id) { // Found valid settings
+      if (storeSettings.id) {
+        // Found valid settings
         return storeSettings;
       }
     }
@@ -144,14 +148,15 @@ export class StoreSettingsService implements OnModuleInit {
    */
   async saveSettings(userId: string, dto: SaveStoreSettingsRequest): Promise<StoreSettingsResponse> {
     const { isGlobal, storeId, country, state, zipCode, validateTitle, validateDescription, blacklist } = dto;
-    
+
     const blacklistJson = JSON.stringify(blacklist);
-    
+
     let result: StoreSettingsEntity[];
-    
+
     if (isGlobal) {
-        // Upsert global settings for THIS user
-        result = await this.databaseService.query<StoreSettingsEntity>(`
+      // Upsert global settings for THIS user
+      result = await this.databaseService.query<StoreSettingsEntity>(
+        `
             INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist)
             VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
@@ -164,10 +169,13 @@ export class StoreSettingsService implements OnModuleInit {
                 blacklist = EXCLUDED.blacklist,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
-        `, [userId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]);
+        `,
+        [userId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]
+      );
     } else {
-        // Upsert store-specific settings for THIS user
-        result = await this.databaseService.query<StoreSettingsEntity>(`
+      // Upsert store-specific settings for THIS user
+      result = await this.databaseService.query<StoreSettingsEntity>(
+        `
             INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist)
             VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
@@ -180,9 +188,11 @@ export class StoreSettingsService implements OnModuleInit {
                 blacklist = EXCLUDED.blacklist,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
-        `, [userId, storeId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]);
+        `,
+        [userId, storeId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]
+      );
     }
-    
+
     return this.mapToDto(result[0]);
   }
 
@@ -190,8 +200,9 @@ export class StoreSettingsService implements OnModuleInit {
    * Map database entity to DTO
    */
   private mapToDto(entity: StoreSettingsEntity): StoreSettingsResponse {
-    const blacklist = typeof entity.blacklist === 'string' 
-        ? JSON.parse(entity.blacklist) 
+    const blacklist =
+      typeof entity.blacklist === 'string'
+        ? JSON.parse(entity.blacklist)
         : (entity.blacklist as any as BlacklistKeyword[]);
 
     return {

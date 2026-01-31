@@ -5,11 +5,11 @@ export const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
   background: white;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border-radius: ${tkn('radius.lg')};
+  border: 0.0625rem solid #e2e8f0; /* 1px */
   box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    0 0.0625rem 0.1875rem 0 rgba(0, 0, 0, 0.1),
+    /* 1px 3px */ 0 0.0625rem 0.125rem -0.0625rem rgba(0, 0, 0, 0.1); /* 1px 2px 1px */
 
   .dark & {
     background: #0f172a;
@@ -23,14 +23,14 @@ export const OverflowWrapper = styled.div`
   overflow-y: visible;
 
   &::-webkit-scrollbar {
-    height: 8px;
+    height: 0.5rem; /* 8px */
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    border-radius: 4px;
+    border-radius: 0.25rem; /* 4px */
   }
   &::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
@@ -55,7 +55,7 @@ export const StyledTable = styled.table`
 
 export const Thead = styled.thead`
   background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 0.0625rem solid #e2e8f0; /* 1px */
   position: sticky;
   top: 0;
   z-index: 10;
@@ -73,8 +73,8 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
   transition:
     background-color 0.2s ease,
     box-shadow 0.2s ease;
-  height: 72px;
-  border-bottom: 1px solid #f1f5f9;
+  height: 3.75rem; /* 60px */
+  border-bottom: 0.0625rem solid #f1f5f9; /* 1px */
 
   /* Striped rows - alternating background */
   &:nth-of-type(even) {
@@ -84,7 +84,7 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
   /* Hover effect - smooth and subtle */
   &:hover {
     background: rgba(59, 130, 246, 0.04);
-    box-shadow: inset 3px 0 0 0 #3b82f6;
+    box-shadow: inset 0.1875rem 0 0 0 #3b82f6; /* 3px */
   }
 
   /* Selected row styling */
@@ -92,7 +92,7 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
     $selected &&
     `
     background: rgba(59, 130, 246, 0.08) !important;
-    box-shadow: inset 3px 0 0 0 #3b82f6;
+    box-shadow: inset 0.1875rem 0 0 0 #3b82f6; /* 3px */
     
     &:hover {
       background: rgba(59, 130, 246, 0.11) !important;
@@ -113,14 +113,14 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
 
     &:hover {
       background: rgba(59, 130, 246, 0.08);
-      box-shadow: inset 3px 0 0 0 #60a5fa;
+      box-shadow: inset 0.1875rem 0 0 0 #60a5fa; /* 3px */
     }
 
     ${({ $selected }) =>
       $selected &&
       `
       background: rgba(59, 130, 246, 0.12) !important;
-      box-shadow: inset 3px 0 0 0 #60a5fa;
+      box-shadow: inset 0.1875rem 0 0 0 #60a5fa; /* 3px */
       
       &:hover {
         background: rgba(59, 130, 246, 0.16) !important;
@@ -141,10 +141,10 @@ export const Th = styled.th<{
   $sticky?: boolean;
   $left?: number;
 }>`
-  padding: 16px 12px;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
   color: #64748b;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: ${({ $align }) => $align || 'left'};
@@ -162,12 +162,12 @@ export const Th = styled.th<{
   ${({ $sticky, $left }) =>
     $sticky &&
     `
-    left: ${$left ?? 0}px;
-    border-right: 1px solid #e2e8f0;
+    left: ${($left ?? 0) / 16}rem;
+    border-right: 0.0625rem solid #e2e8f0; /* 1px */
   `}
 
   &:first-of-type {
-    padding-left: 24px;
+    padding-left: 1.5rem; /* 24px */
     ${({ $sticky }) =>
       $sticky &&
       `
@@ -176,7 +176,7 @@ export const Th = styled.th<{
     `}
   }
   &:last-of-type {
-    padding-right: 24px;
+    padding-right: 1.5rem; /* 24px */
   }
 
   &:hover {
@@ -213,7 +213,7 @@ export const ThContent = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
   display: flex;
   align-items: center;
   justify-content: ${({ $align }) => ($align === 'right' ? 'flex-end' : $align === 'center' ? 'center' : 'flex-start')};
-  gap: 8px;
+  gap: 0.5rem; /* 8px */
 `;
 
 export const SortIconWrapper = styled.div`
@@ -227,9 +227,9 @@ export const Td = styled.td<{
   $sticky?: boolean;
   $left?: number;
 }>`
-  padding: 12px;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   vertical-align: middle;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #0f172a;
   text-align: ${({ $align }) => $align || 'left'};
   background: inherit;
@@ -239,9 +239,9 @@ export const Td = styled.td<{
     $sticky &&
     `
     position: sticky;
-    left: ${$left ?? 0}px;
+    left: ${($left ?? 0) / 16}rem;
     z-index: 20;
-    border-right: 1px solid #e2e8f0;
+    border-right: 0.0625rem solid #e2e8f0; /* 1px */
     background: white;
     
     /* Ensure sticky cells match row background on hover/selected */
@@ -259,10 +259,10 @@ export const Td = styled.td<{
   `}
 
   &:first-of-type {
-    padding-left: 24px;
+    padding-left: 1.5rem; /* 24px */
   }
   &:last-of-type {
-    padding-right: 24px;
+    padding-right: 1.5rem; /* 24px */
   }
 
   .dark & {
@@ -294,17 +294,17 @@ export const EmptyRow = styled.tr``;
 export const EmptyCell = styled(Td)`
   text-align: center;
   color: #94a3b8;
-  padding: 80px 0;
+  padding: 5rem 0; /* 80px */
 `;
 
 export const Toolbar = styled.div`
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid #f1f5f9; /* 1px */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem; /* 16px */
   background: rgba(248, 250, 252, 0.3);
 
   .dark & {
@@ -316,7 +316,7 @@ export const Toolbar = styled.div`
 export const ToolbarSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem; /* 8px */
 `;
 
 export const BulkSelectWrapper = styled.div`
@@ -326,10 +326,10 @@ export const BulkSelectWrapper = styled.div`
 export const BulkSelect = styled.select`
   appearance: none;
   background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 6px 32px 6px 12px;
-  font-size: 13px;
+  border: 0.0625rem solid #e2e8f0; /* 1px */
+  border-radius: ${tkn('radius.md')};
+  padding: 0.375rem 2rem 0.375rem 0.75rem; /* 6px 32px 6px 12px */
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   color: #475569;
   cursor: pointer;
@@ -338,7 +338,7 @@ export const BulkSelect = styled.select`
   &:focus {
     outline: none;
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: 0 0 0 2px ${tkn('colors.brand.primary')}20;
+    box-shadow: 0 0 0 0.125rem ${tkn('colors.brand.primary')}20; /* 2px */
   }
 
   .dark & {
@@ -350,7 +350,7 @@ export const BulkSelect = styled.select`
 
 export const BulkSelectIcon = styled.div`
   position: absolute;
-  right: 8px;
+  right: 0.5rem; /* 8px */
   top: 50%;
   transform: translateY(-50%);
   color: #94a3b8;
@@ -360,11 +360,11 @@ export const BulkSelectIcon = styled.div`
 `;
 
 export const ToolbarButton = styled.button`
-  padding: 8px;
+  padding: 0.5rem; /* 8px */
   color: #64748b;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  border: 0.0625rem solid transparent; /* 1px */
+  border-radius: ${tkn('radius.md')};
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -372,7 +372,7 @@ export const ToolbarButton = styled.button`
 
   &:hover {
     background: white;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0.0625rem 0.125rem 0 rgba(0, 0, 0, 0.05); /* 1px 2px */
     border-color: #e2e8f0;
     color: #475569;
   }
@@ -388,9 +388,9 @@ export const ToolbarButton = styled.button`
 `;
 
 export const StyledFooter = styled.div`
-  padding: 16px 24px;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   background: rgba(248, 250, 252, 0.3);
-  border-top: 1px solid #f1f5f9;
+  border-top: 0.0625rem solid #f1f5f9; /* 1px */
   display: flex;
   align-items: center;
   justify-content: space-between;

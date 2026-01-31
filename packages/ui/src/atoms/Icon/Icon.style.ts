@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 
 export const IconWrapper = styled.div<{ $size: number }>`
-  width: ${({ $size }) => $size}px;
-  height: ${({ $size }) => $size}px;
+  width: ${({ $size }) => $size / 16}rem;
+  height: ${({ $size }) => $size / 16}rem;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;

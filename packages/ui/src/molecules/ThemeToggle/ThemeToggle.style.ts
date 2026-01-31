@@ -5,11 +5,11 @@ export const ToggleButton = styled.button`
   align-items: center;
   justify-content: center;
 
-  width: 40px;
-  height: 40px;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
 
   background: ${({ theme }) => theme.colors.surface.secondary};
-  border: 1px solid ${({ theme }) => theme.colors.border.primary};
+  border: 0.0625rem solid ${({ theme }) => theme.colors.border.primary}; /* 1px */
   border-radius: ${({ theme }) => theme.radius.md};
 
   cursor: pointer;
@@ -20,12 +20,12 @@ export const ToggleButton = styled.button`
   &:hover {
     background: ${({ theme }) => theme.colors.surface.primary};
     border-color: ${({ theme }) => theme.colors.border.focus};
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem); /* 2px */
   }
 
   &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.border.focus};
-    outline-offset: 2px;
+    outline: 0.125rem solid ${({ theme }) => theme.colors.border.focus}; /* 2px */
+    outline-offset: 0.125rem; /* 2px */
   }
 
   &:active {

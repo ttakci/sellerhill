@@ -5,10 +5,10 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
-
 export const Container = styled.div`
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: ${tkn('colors.background.primary')};
   box-sizing: border-box;
 
@@ -20,14 +20,16 @@ export const Container = styled.div`
 export const LayoutWrapper = styled.div`
   display: flex;
   width: 100%;
+  height: 100%;
   flex-wrap: wrap;
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     flex-wrap: nowrap;
   }
 `;
 
-export const LeftPanel = styled.div`
+export const FormPanel = styled.div`
   flex: 1 1 100%;
   width: 100%;
   background: ${tkn('colors.surface.primary')};
@@ -35,19 +37,22 @@ export const LeftPanel = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  overflow-y: auto;
   z-index: 1;
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     flex: 0 0 50%;
     width: 50%;
     padding: ${tkn('spacing.xxxl')};
   }
 `;
 
-export const RightPanel = styled.div`
+export const BrandingPanel = styled.div`
   flex: 1 1 100%;
   width: 100%;
-  background: #020D23; /* Deep Navy from TailAdmin Demo */
+  height: 100%;
   padding: ${tkn('spacing.xxxl')};
   display: none;
   flex-direction: column;
@@ -57,67 +62,23 @@ export const RightPanel = styled.div`
   position: relative;
   overflow: hidden;
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     display: flex;
     flex: 0 0 50%;
     width: 50%;
   }
-
-  /* Decorative Grid Pattern */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: 0;
-  }
-
-  /* Mosaic 'Tiled' effect */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      radial-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px);
-    background-size: 25px 25px;
-    z-index: 1;
-    opacity: 0.5;
-  }
 `;
 
-export const MosaicDecor = styled.div`
+export const DecorationArea = styled.div`
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+  inset: 0;
   z-index: 0;
-
-  & > div {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 4px;
-  }
-
-  .box-1 { width: 100px; height: 100px; top: 20%; left: 10%; }
-  .box-2 { width: 150px; height: 150px; top: 60%; left: 70%; background: rgba(255, 255, 255, 0.02); }
-  .box-3 { width: 80px; height: 80px; top: 10%; left: 80%; }
-  .box-4 { width: 120px; height: 120px; top: 80%; left: 20%; background: rgba(255, 255, 255, 0.04); }
 `;
 
 export const AuthCard = styled.div`
   width: 100%;
-  max-width: 550px;
+  max-width: 34.375rem; /* 550px */
   background: ${tkn('colors.surface.primary')};
 `;
 
@@ -162,19 +123,19 @@ export const FooterLink = styled.button`
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.sm')};
   padding: 0;
-  
+
   &:hover {
     text-decoration: underline;
   }
 `;
 
 export const BrandingContent = styled.div`
-  max-width: 400px;
+  max-width: 25rem; /* 400px */
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
   z-index: 2;
 `;
 
@@ -182,5 +143,18 @@ export const BrandingLogoWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
+`;
+
+export const SloganWrapper = styled.div`
+  font-family: ${tkn('typography.fontFamily.sans')};
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  min-height: 6.5rem;
+  line-height: 1.3;
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+  justify-content: center;
 `;

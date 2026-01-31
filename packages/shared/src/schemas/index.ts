@@ -1,11 +1,11 @@
 /**
  * Form Schemas Package
- * 
+ *
  * Purpose:
  * - Contains all form validation schemas
  * - Use-case/page-based organization (not domain-based)
  * - Shared across all frontend platforms (web, mobile)
- * 
+ *
  * Structure:
  * - schemas/auth/       - Auth-related forms
  * - schemas/common/     - Reusable utilities
@@ -14,5 +14,5 @@
 
 export * from './auth';
 export * from './common/form.utils';
+export * from './orders';
 export * from './store-settings';
-

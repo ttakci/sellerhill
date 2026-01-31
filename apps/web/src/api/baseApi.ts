@@ -1,5 +1,11 @@
 import { logout, setCredentials } from '@/features/auth/store/authSlice';
-import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import {
+  createApi,
+  fetchBaseQuery,
+  type BaseQueryFn,
+  type FetchArgs,
+  type FetchBaseQueryError,
+} from '@reduxjs/toolkit/query/react';
 import { generateRequestId } from '@repo/shared';
 
 const baseQuery = fetchBaseQuery({
@@ -22,7 +28,7 @@ const baseQuery = fetchBaseQuery({
     if (!publicEndpoints.includes(endpoint || '')) {
       const state = getState() as any;
       const token = state.auth?.accessToken || localStorage.getItem('accessToken');
-      
+
       if (import.meta.env.DEV) {
         console.log(`[DEBUG] prepareHeaders - endpoint: ${endpoint}, requestId: ${requestId}`);
         if (token) {
@@ -53,10 +59,10 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
     if (import.meta.env.DEV) {
       console.log('[DEBUG] 401 detected, attempting reauth...');
     }
-    
+
     // try to get a new token
     const refreshToken = (api.getState() as any).auth?.refreshToken;
-    
+
     if (refreshToken) {
       if (import.meta.env.DEV) {
         console.log('[DEBUG] refreshing token...');
@@ -99,6 +105,18 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Example', 'Auth', 'Ebay', 'Dashboard', 'StoreSettings', 'ListingSettingsGroups', 'PredefinedTemplates', 'Profile', 'Listings', 'EbayPolicies'],
+  tagTypes: [
+    'Example',
+    'Auth',
+    'Ebay',
+    'Dashboard',
+    'StoreSettings',
+    'ListingSettingsGroups',
+    'PredefinedTemplates',
+    'Profile',
+    'Listings',
+    'EbayPolicies',
+    'Orders',
+  ],
   endpoints: () => ({}),
 });

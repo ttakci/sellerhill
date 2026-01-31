@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginFormDataSchema, type LoginFormData } from '@repo/shared';
-import { Button, Icon, Text, TextInput } from '@repo/ui';
+import { Logo, MeshBackground, ModernButton, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ export const LoginPageComponent = ({
   isLoading,
   onNavigateToRegister,
 }: LoginPageComponentProps): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
+  const { t } = useTranslation(['translation', 'auth']);
 
   const {
     control,
@@ -37,43 +37,76 @@ export const LoginPageComponent = ({
   return (
     <S.Container>
       <S.LayoutWrapper>
-        {/* Left Panel: Form */}
-        <S.LeftPanel>
+        {/* Left Panel: Branding */}
+        <S.BrandingPanel>
+          <S.DecorationArea>
+            <MeshBackground animate={true} />
+          </S.DecorationArea>
+
+          <S.BrandingContent>
+            <S.BrandingLogoWrapper>
+              <Logo size={520} />
+            </S.BrandingLogoWrapper>
+
+            <S.SloganWrapper>
+              <Typewriter
+                phrases={[
+                  t('auth.branding.slogan1'),
+                  t('auth.branding.slogan2'),
+                  t('auth.branding.slogan3'),
+                  t('auth.branding.slogan4'),
+                ]}
+                typingSpeed={70}
+                deletingSpeed={40}
+                pauseTime={2500}
+              />
+            </S.SloganWrapper>
+          </S.BrandingContent>
+        </S.BrandingPanel>
+
+        {/* Right Panel: Form */}
+        <S.FormPanel>
           <S.AuthCard>
             <S.Header>
               <Text variant="h2" weight="bold">
                 {t('auth.login.title')}
               </Text>
               <Text variant="body" color="text.secondary">
-                {t('auth.login.welcomeBack')}
+                {t('auth.login.subtitle')}
               </Text>
             </S.Header>
 
             <S.Form onSubmit={handleSubmit(onSubmit)}>
-              <TextInput
+              <ModernTextInput
                 name="email"
                 control={control}
                 label={t('auth.login.emailLabel')}
                 placeholder={t('auth.login.emailPlaceholder')}
                 type="email"
-                disabled={isLoading || isSubmitting}
-                leftIcon="mail"
+                isDisabled={isLoading || isSubmitting}
+                iconLeft="mail"
               />
 
-              <TextInput
+              <ModernTextInput
                 name="password"
                 control={control}
                 label={t('auth.login.passwordLabel')}
                 placeholder={t('auth.login.passwordPlaceholder')}
                 type="password"
-                disabled={isLoading || isSubmitting}
-                leftIcon="lock"
+                isDisabled={isLoading || isSubmitting}
+                iconLeft="lock"
               />
 
               <S.ButtonContainer>
-                <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting} size="lg">
+                <ModernButton
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isLoading={isLoading || isSubmitting}
+                  size="large"
+                >
                   {t('auth.login.submitButton')}
-                </Button>
+                </ModernButton>
               </S.ButtonContainer>
             </S.Form>
 
@@ -86,37 +119,7 @@ export const LoginPageComponent = ({
               </S.FooterLink>
             </S.Footer>
           </S.AuthCard>
-        </S.LeftPanel>
-
-        {/* Right Panel: Branding */}
-        <S.RightPanel>
-          <S.MosaicDecor>
-            <div className="box-1" />
-            <div className="box-2" />
-            <div className="box-3" />
-            <div className="box-4" />
-          </S.MosaicDecor>
-          <S.BrandingContent>
-            <S.BrandingLogoWrapper>
-              <Icon name="logo" size={64} color="text.inverse" />
-              <Text variant="h1" weight="bold" color="text.inverse">
-                Zonds
-              </Text>
-            </S.BrandingLogoWrapper>
-            
-            <Text variant="h3" weight="medium" color="text.inverse">
-              {t('auth.login.subtitle')}
-            </Text>
-            
-            <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
-              Tüm pazar yeri süreçlerinizi tek bir noktadan yöneterek işinizi kolaylaştırın.
-            </Text>
-
-            <div style={{ marginTop: '2rem' }}>
-              <Icon name="inbox" size={200} color="text.inverse" style={{ opacity: 0.1 }} />
-            </div>
-          </S.BrandingContent>
-        </S.RightPanel>
+        </S.FormPanel>
       </S.LayoutWrapper>
     </S.Container>
   );

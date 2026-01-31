@@ -1,10 +1,13 @@
+import { type IconName } from '../Icon';
+
 export interface BreadcrumbItem {
   label: string;
   path?: string;
+  icon?: IconName;
 }
 
 export interface BreadcrumbProps {
-  pageTitle: string;
   items: BreadcrumbItem[];
+  onNavigate?: (path: string) => void;
   className?: string;
 }

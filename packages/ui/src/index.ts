@@ -7,6 +7,9 @@ export { tkn } from './theme/tkn';
 export { Button } from './atoms/Button';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './atoms/Button';
 
+export { ModernButton } from './atoms/ModernButton';
+export type { ModernButtonProps, ModernButtonSize, ModernButtonVariant } from './atoms/ModernButton';
+
 export { Input } from './atoms/Input';
 export type { InputProps, InputSize, InputVariant } from './atoms/Input';
 
@@ -30,6 +33,9 @@ export type { TextAlign, TextElement, TextProps, TextVariant, TextWeight } from 
 
 export { Icon } from './atoms/Icon';
 export type { IconName, IconProps, IconSize } from './atoms/Icon';
+export { Logo } from './atoms/Logo';
+export { MeshBackground } from './atoms/MeshBackground';
+export { Typewriter } from './atoms/Typewriter';
 
 export { Card, CardBody, CardHeader } from './atoms/Card';
 export type { CardBodyProps, CardHeaderProps, CardProps } from './atoms/Card';
@@ -53,8 +59,11 @@ export { Tabs } from './atoms/Tabs';
 export type { TabItem, TabsProps } from './atoms/Tabs';
 
 // Molecule exports
-export { TextInput } from './molecules/TextInput';
-export type { TextInputProps } from './molecules/TextInput';
+export { ModernSelect } from './molecules/ModernSelect';
+export type { SelectOption as ModernSelectOption, ModernSelectProps } from './molecules/ModernSelect';
+
+export { ModernTextInput } from './molecules/ModernTextInput';
+export type { ModernTextInputProps } from './molecules/ModernTextInput';
 
 export { ConfirmModal } from './molecules/ConfirmModal';
 export type { ConfirmModalProps } from './molecules/ConfirmModal';
@@ -74,6 +83,9 @@ export type { TablePaginationProps } from './molecules/Table/TablePagination.typ
 
 export { SwitchRow } from './molecules/SwitchRow';
 export type { SwitchRowProps } from './molecules/SwitchRow';
+
+export { SettingsCard } from './molecules/SettingsCard';
+export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } from './molecules/SettingsCard';
 
 // Context exports
 export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';

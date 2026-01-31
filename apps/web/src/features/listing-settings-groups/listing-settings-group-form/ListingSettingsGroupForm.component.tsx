@@ -1,5 +1,5 @@
 import { type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
-import { Button, CardBody, Icon, Select, Text, TextInput } from '@repo/ui';
+import { CardBody, Icon, ModernButton, ModernSelect, ModernTextInput, Text } from '@repo/ui';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupForm.style';
@@ -29,38 +29,31 @@ export const ListingSettingsGroupFormComponent = ({
     control,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
   } = form;
 
   const watchedValues = watch(); // We still need watch for dynamic UI updates based on values
-
 
   return (
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Text variant="caption" color="text.tertiary" style={{ fontSize: 11, fontWeight: 500 }}>{t('translation:menu.settings')}</Text>
-            <Icon name="chevron-right" size={14} style={{ color: '#CBD5E1' }} />
-            <Text variant="caption" color="text.secondary" style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {t('listingSettingsGroup.editorTitle')}
-            </Text>
-          </div>
-          <S.PageTitle>
-            {t('listingSettingsGroup.editorTitle')}
-          </S.PageTitle>
-          <Text color="text.secondary">
-            {t('listingSettingsGroup.editorDescription')}
-          </Text>
+          <S.PageTitle>{t('listingSettingsGroup.editorTitle')}</S.PageTitle>
+          <Text color="text.secondary">{t('listingSettingsGroup.editorDescription')}</Text>
         </S.HeaderContent>
         <S.Actions>
-          <Button variant="secondary" size="md" onClick={onCancel}>
+          <ModernButton variant="danger" size="medium" onClick={onCancel} iconLeft="x">
             {t('translation:common.cancel')}
-          </Button>
-          <Button variant="primary" size="md" onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
-            <Icon name="save" size={18} />
-            {t('listingSettingsGroup.saveChanges')}
-          </Button>
+          </ModernButton>
+          <ModernButton
+            variant="primary"
+            size="medium"
+            onClick={handleSubmit(onSubmit)}
+            isLoading={isLoading}
+            iconLeft="save"
+          >
+            {t('translation:common.save')}
+          </ModernButton>
         </S.Actions>
       </S.Header>
 
@@ -78,33 +71,25 @@ export const ListingSettingsGroupFormComponent = ({
           <CardBody>
             <S.PaddingContainer>
               <S.InputGrid columns={3}>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.groupName')}</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="name"
-                    control={control}
-                    label=""
-                    placeholder="e.g. Electronics Premium"
-                  />
-                </S.InputGroup>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.description')}</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="description"
-                    control={control}
-                    label=""
-                    placeholder="Write description..."
-                  />
-                </S.InputGroup>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.defaultStockQuantity')}</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="stock.defaultQuantity"
-                    control={control}
-                    label=""
-                    type="number"
-                  />
-                </S.InputGroup>
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="name"
+                  control={control}
+                  label={t('listingSettingsGroup.groupName')}
+                  fullWidth
+                />
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="description"
+                  control={control}
+                  label={t('listingSettingsGroup.description')}
+                  fullWidth
+                />
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="stock.defaultQuantity"
+                  control={control}
+                  label={t('listingSettingsGroup.defaultStockQuantity')}
+                  type="number"
+                  fullWidth
+                />
               </S.InputGrid>
             </S.PaddingContainer>
           </CardBody>
@@ -135,43 +120,38 @@ export const ListingSettingsGroupFormComponent = ({
                       </S.RemoveButton>
                     )}
                     <S.InputGrid columns={4}>
-                      <S.InputGroup>
-                        <S.InputLabel>{t('listingSettingsGroup.minPrice')} ($)</S.InputLabel>
-                        <TextInput<ListingSettingsGroupFormData>
-                          name={`repricingStrategy.${index}.minPrice`}
-                          control={control}
-                          label=""
-                          type="number"
-                        />
-                      </S.InputGroup>
-                      <S.InputGroup>
-                        <S.InputLabel>{t('listingSettingsGroup.maxPrice')} ($)</S.InputLabel>
-                        <TextInput<ListingSettingsGroupFormData>
-                          name={`repricingStrategy.${index}.maxPrice`}
-                          control={control}
-                          label=""
-                          type="number"
-                        />
-                      </S.InputGroup>
-                      <S.InputGroup>
-                        <S.InputLabel>{t('listingSettingsGroup.profitMargin')} (%)</S.InputLabel>
-                        <TextInput<ListingSettingsGroupFormData>
-                          name={`repricingStrategy.${index}.profitMarginPercent`}
-                          control={control}
-                          label=""
-                          type="number"
-                        />
-                      </S.InputGroup>
-                      <S.InputGroup>
-                        <S.InputLabel>{t('listingSettingsGroup.fixedProfit')} ($)</S.InputLabel>
-                        <TextInput<ListingSettingsGroupFormData>
-                          name={`repricingStrategy.${index}.fixedProfitAmount`}
-                          control={control}
-                          label=""
-                          type="number"
-                          placeholder="0.00"
-                        />
-                      </S.InputGroup>
+                      <ModernTextInput<ListingSettingsGroupFormData>
+                        name={`repricingStrategy.${index}.minPrice`}
+                        control={control}
+                        label={t('listingSettingsGroup.minPrice')}
+                        type="number"
+                        suffixText="$"
+                        fullWidth
+                      />
+                      <ModernTextInput<ListingSettingsGroupFormData>
+                        name={`repricingStrategy.${index}.maxPrice`}
+                        control={control}
+                        label={t('listingSettingsGroup.maxPrice')}
+                        type="number"
+                        suffixText="$"
+                        fullWidth
+                      />
+                      <ModernTextInput<ListingSettingsGroupFormData>
+                        name={`repricingStrategy.${index}.profitMarginPercent`}
+                        control={control}
+                        label={t('listingSettingsGroup.profitMargin')}
+                        type="number"
+                        suffixText="%"
+                        fullWidth
+                      />
+                      <ModernTextInput<ListingSettingsGroupFormData>
+                        name={`repricingStrategy.${index}.fixedProfitAmount`}
+                        control={control}
+                        label={t('listingSettingsGroup.fixedProfit')}
+                        type="number"
+                        suffixText="$"
+                        fullWidth
+                      />
                     </S.InputGrid>
                   </S.PriceRangeRow>
                 ))}
@@ -193,33 +173,30 @@ export const ListingSettingsGroupFormComponent = ({
           <CardBody>
             <S.PaddingContainer>
               <S.InputGrid columns={3}>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.ebayFeePercent')} (%)</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="fees.ebayFeePercent"
-                    control={control}
-                    label=""
-                    type="number"
-                  />
-                </S.InputGroup>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.fixedFeeAmount')} ($)</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="fees.fixedFeeAmount"
-                    control={control}
-                    label=""
-                    type="number"
-                  />
-                </S.InputGroup>
-                <S.InputGroup>
-                  <S.InputLabel>{t('listingSettingsGroup.taxRate')} (%)</S.InputLabel>
-                  <TextInput<ListingSettingsGroupFormData>
-                    name="fees.taxPercent"
-                    control={control}
-                    label=""
-                    type="number"
-                  />
-                </S.InputGroup>
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="fees.ebayFeePercent"
+                  control={control}
+                  label={t('listingSettingsGroup.ebayFeePercent')}
+                  type="number"
+                  suffixText="%"
+                  fullWidth
+                />
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="fees.fixedFeeAmount"
+                  control={control}
+                  label={t('listingSettingsGroup.fixedFeeAmount')}
+                  type="number"
+                  suffixText="$"
+                  fullWidth
+                />
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="fees.taxPercent"
+                  control={control}
+                  label={t('listingSettingsGroup.taxRate')}
+                  type="number"
+                  suffixText="%"
+                  fullWidth
+                />
               </S.InputGrid>
             </S.PaddingContainer>
           </CardBody>
@@ -262,36 +239,34 @@ export const ListingSettingsGroupFormComponent = ({
             <CardBody>
               <S.PaddingContainer style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <S.TemplateSelectorWrapper>
-                  <S.InputLabel>{t('listingSettingsGroup.activeTemplate')}</S.InputLabel>
-                  <Controller
+                  <ModernSelect<ListingSettingsGroupFormData>
                     name="templates.predefinedTemplateId"
                     control={control}
-                    render={({ field }) => (
-                      <Select
-                        placeholder={t('listingSettingsGroup.selectTemplate')}
-                        options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({ value: tmp.id, label: tmp.name }))}
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        fullWidth
-                        disabled={watchedValues.templates.type === 'custom'}
-                      />
-                    )}
+                    label={t('listingSettingsGroup.activeTemplate')}
+                    placeholder={t('listingSettingsGroup.selectTemplate')}
+                    options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
+                      value: tmp.id,
+                      label: tmp.name,
+                    }))}
+                    fullWidth
+                    isDisabled={watchedValues.templates.type === 'custom'}
+                    searchPlaceholder={t('translation:common.search')}
+                    noResultsMessage={t('translation:common.noResults')}
                   />
                 </S.TemplateSelectorWrapper>
 
                 <S.TemplateEditorContainer>
                   <S.EditorCodeArea>
-                    <div style={{ color: '#64748b', marginBottom: 8, fontSize: 11 }}>&lt;!-- Listing Template --&gt;</div>
+                    <div style={{ color: '#64748b', marginBottom: '0.5rem', fontSize: '0.6875rem' }}>
+                      &lt;!-- Listing Template --&gt;
+                    </div>
                     {watchedValues.templates.type === 'custom' ? (
                       <S.CustomTemplateTextarea
                         {...control.register('templates.customTemplateHtml')}
                         placeholder={t('listingSettingsGroup.templatePlaceholder')}
                       />
                     ) : (
-                      <S.CustomTemplateTextarea
-                        readOnly
-                        value={activeTemplate.htmlContent}
-                      />
+                      <S.CustomTemplateTextarea readOnly value={activeTemplate.htmlContent} />
                     )}
                   </S.EditorCodeArea>
                 </S.TemplateEditorContainer>

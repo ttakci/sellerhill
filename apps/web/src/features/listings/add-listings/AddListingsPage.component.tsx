@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createListingsSchema, type CreateListingsFormData } from '@repo/shared';
-import { Icon, Select } from '@repo/ui';
+import { Icon, ModernSelect } from '@repo/ui';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -53,29 +53,19 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
               <h2>{t('listings.listingSettings.title')}</h2>
             </S.CardHeader>
 
-            <Controller
+            <ModernSelect<CreateListingsFormData>
               name="listingSettingsGroupId"
               control={control}
-              render={({ field }) => (
-                <S.FormGroup>
-                  <S.Label>
-                    {t('listings.listingSettings.strategyGroup')} <S.RequiredStar>*</S.RequiredStar>
-                  </S.Label>
-                  <Select
-                    {...field}
-                    placeholder={t('listings.listingSettings.strategyGroupPlaceholder')}
-                    disabled={isLoading || isSubmitting}
-                    hasError={!!errors.listingSettingsGroupId}
-                    options={listingSettingsGroups.map(group => ({
-                      label: group.name,
-                      value: group.id
-                    }))}
-                  />
-                  <S.ItalicHelp>
-                    {t('listings.listingSettings.strategyGroupHelp')}
-                  </S.ItalicHelp>
-                </S.FormGroup>
-              )}
+              label={t('listings.listingSettings.strategyGroup')}
+              placeholder={t('listings.listingSettings.strategyGroupPlaceholder')}
+              isDisabled={isLoading || isSubmitting}
+              options={listingSettingsGroups.map((group) => ({
+                label: group.name,
+                value: group.id,
+              }))}
+              fullWidth
+              searchPlaceholder={t('translation:common.search')}
+              noResultsMessage={t('translation:common.noResults')}
             />
           </S.Card>
 
@@ -89,70 +79,49 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
             </S.CardHeader>
 
             <S.PolicyGrid>
-              <Controller
+              <ModernSelect<CreateListingsFormData>
                 name="paymentPolicyId"
                 control={control}
-                render={({ field }) => (
-                  <S.FormGroup>
-                    <S.Label>
-                      {t('listings.businessPolicies.paymentPolicy')} <S.RequiredStar>*</S.RequiredStar>
-                    </S.Label>
-                    <Select
-                      {...field}
-                      placeholder={t('listings.businessPolicies.paymentPolicyPlaceholder')}
-                      disabled={isLoading || isSubmitting}
-                      hasError={!!errors.paymentPolicyId}
-                      options={businessPolicies.payment.map(policy => ({
-                        label: policy.name,
-                        value: policy.id
-                      }))}
-                    />
-                  </S.FormGroup>
-                )}
+                label={t('listings.businessPolicies.paymentPolicy')}
+                placeholder={t('listings.businessPolicies.paymentPolicyPlaceholder')}
+                isDisabled={isLoading || isSubmitting}
+                options={businessPolicies.payment.map((policy) => ({
+                  label: policy.name,
+                  value: policy.id,
+                }))}
+                fullWidth
+                searchPlaceholder={t('translation:common.search')}
+                noResultsMessage={t('translation:common.noResults')}
               />
 
-              <Controller
+              <ModernSelect<CreateListingsFormData>
                 name="shippingPolicyId"
                 control={control}
-                render={({ field }) => (
-                  <S.FormGroup>
-                    <S.Label>
-                      {t('listings.businessPolicies.shippingPolicy')} <S.RequiredStar>*</S.RequiredStar>
-                    </S.Label>
-                    <Select
-                      {...field}
-                      placeholder={t('listings.businessPolicies.shippingPolicyPlaceholder')}
-                      disabled={isLoading || isSubmitting}
-                      hasError={!!errors.shippingPolicyId}
-                      options={businessPolicies.shipping.map(policy => ({
-                        label: policy.name,
-                        value: policy.id
-                      }))}
-                    />
-                  </S.FormGroup>
-                )}
+                label={t('listings.businessPolicies.shippingPolicy')}
+                placeholder={t('listings.businessPolicies.shippingPolicyPlaceholder')}
+                isDisabled={isLoading || isSubmitting}
+                options={businessPolicies.shipping.map((policy) => ({
+                  label: policy.name,
+                  value: policy.id,
+                }))}
+                fullWidth
+                searchPlaceholder={t('translation:common.search')}
+                noResultsMessage={t('translation:common.noResults')}
               />
 
-              <Controller
+              <ModernSelect<CreateListingsFormData>
                 name="returnPolicyId"
                 control={control}
-                render={({ field }) => (
-                  <S.FormGroup>
-                    <S.Label>
-                      {t('listings.businessPolicies.returnPolicy')} <S.RequiredStar>*</S.RequiredStar>
-                    </S.Label>
-                    <Select
-                      {...field}
-                      placeholder={t('listings.businessPolicies.returnPolicyPlaceholder')}
-                      disabled={isLoading || isSubmitting}
-                      hasError={!!errors.returnPolicyId}
-                      options={businessPolicies.return.map(policy => ({
-                        label: policy.name,
-                        value: policy.id
-                      }))}
-                    />
-                  </S.FormGroup>
-                )}
+                label={t('listings.businessPolicies.returnPolicy')}
+                placeholder={t('listings.businessPolicies.returnPolicyPlaceholder')}
+                isDisabled={isLoading || isSubmitting}
+                options={businessPolicies.return.map((policy) => ({
+                  label: policy.name,
+                  value: policy.id,
+                }))}
+                fullWidth
+                searchPlaceholder={t('translation:common.search')}
+                noResultsMessage={t('translation:common.noResults')}
               />
             </S.PolicyGrid>
           </S.Card>
@@ -166,18 +135,16 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                 <Icon name="format_list_bulleted" size={24} />
               </S.IconWrapper>
               <div>
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   {t('listings.asinEntry.title')}
-                  <span style={{ fontSize: '12px', fontWeight: 400, color: '#94a3b8' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#94a3b8' }}>
                     {t('listings.asinEntry.subtitle')}
                   </span>
                 </h2>
               </div>
             </S.AsinHeaderLeft>
-            
-            <S.AsinCounter>
-              {t('listings.asinEntry.counter', { count: asinCount })}
-            </S.AsinCounter>
+
+            <S.AsinCounter>{t('listings.asinEntry.counter', { count: asinCount })}</S.AsinCounter>
           </S.AsinCardHeader>
 
           <S.AsinInputWrapper>
@@ -185,9 +152,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
               <S.Label>
                 {t('listings.asinEntry.label')} <S.RequiredStar>*</S.RequiredStar>
               </S.Label>
-              <S.MonoCode>
-                {t('listings.asinEntry.accepts')}
-              </S.MonoCode>
+              <S.MonoCode>{t('listings.asinEntry.accepts')}</S.MonoCode>
             </S.AsinInputHeader>
 
             <Controller
@@ -209,10 +174,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
           </S.AsinInputWrapper>
 
           <S.FormFooter>
-            <S.SubmitButton
-              type="submit"
-              disabled={isLoading || isSubmitting || asinCount === 0}
-            >
+            <S.SubmitButton type="submit" disabled={isLoading || isSubmitting || asinCount === 0}>
               <span>{isSubmitting ? t('listings.actions.importing') : t('listings.actions.import')}</span>
               <Icon name="play_arrow" size={20} />
             </S.SubmitButton>

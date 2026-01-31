@@ -5,7 +5,7 @@
   "types": "./dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p . && (if not exist dist\\assets mkdir dist\\assets) && xcopy /y /s src\\assets dist\\assets"
   },
   "peerDependencies": {
     "react": "^18.3.1",

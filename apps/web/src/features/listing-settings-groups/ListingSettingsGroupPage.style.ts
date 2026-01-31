@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
-import { Badge, Button, Card, Text, tkn } from '@repo/ui';
+import { Badge, Card, Text, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.lg')};
   box-sizing: border-box;
-  padding-bottom: 40px;
+  padding-bottom: 2.5rem; /* 40px */
 `;
 
 export const Header = styled.div`
@@ -17,7 +17,8 @@ export const Header = styled.div`
   align-items: flex-start;
   padding: 0;
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
+    /* 767px */
     flex-direction: column;
     gap: ${tkn('spacing.md')};
   }
@@ -26,59 +27,28 @@ export const Header = styled.div`
 export const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
-`;
-
-export const BreadcrumbContainer = styled.nav`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px; /* mb-1 */
-  text-transform: uppercase;
-  letter-spacing: 0.05em; /* tracking-wider */
-`;
-
-export const BreadcrumbText = styled(Text)`
-  font-size: 11px; /* text-xs approximate */
-  font-weight: 500;
-  color: ${tkn('colors.text.tertiary')}; /* text-slate-400 */
-`;
-
-export const ActiveBreadcrumbText = styled(Text)`
-  font-size: 11px;
-  font-weight: 500;
-  color: ${tkn('colors.text.secondary')}; /* text-slate-500 */
+  gap: 0.25rem; /* 4px */
 `;
 
 export const PageTitle = styled.h1`
-  font-size: 1.875rem; /* text-3xl */
-  font-weight: 800; /* font-extrabold */
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
   color: ${tkn('colors.text.primary')};
   margin: 0;
-  letter-spacing: -0.025em; /* tracking-tight */
-`;
-
-export const PageSubtitle = styled(Text)`
-  font-size: 0.875rem; /* text-sm */
-  color: ${tkn('colors.text.secondary')}; /* text-slate-500 */
-  margin-top: 8px; /* mt-2 */
 `;
 
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
-`;
 
-export const StyledCreateButton = styled(Button)`
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); /* shadow-lg shadow-blue-500/20 */
-  transition: all ${tkn('transitions.normal')};
-  
-  &:active {
-    transform: scale(0.95);
-  }
-  
-  &:hover {
-    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.2);
+  @media (max-width: 47.9375rem) {
+    /* 767px */
+    width: 100%;
+
+    & > button {
+      flex: 1;
+      justify-content: center;
+    }
   }
 `;
 
@@ -87,73 +57,82 @@ export const CardGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     grid-template-columns: repeat(3, 1fr);
   }
 
-  @media (min-width: 1280px) {
+  @media (min-width: 80rem) {
+    /* 1280px */
     grid-template-columns: repeat(4, 1fr);
   }
 `;
 
 /* refined and reordered below */
 export const CardHeader = styled.div`
-  padding: 20px; /* p-5 */
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* items-start */
-  border-bottom: 1px solid ${tkn('colors.border.secondary')}; /* border-slate-50 */
+  align-items: center;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
 export const CardIconWrapper = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
+  border-radius: 0.625rem; /* 10px */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${tkn('colors.brand.secondary')}; /* #EFF6FF */
-  color: ${tkn('colors.brand.primary')}; /* #2563EB */
-  
+  background: ${tkn('colors.brand.secondary')};
+  color: ${tkn('colors.brand.primary')};
+
   & svg {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem; /* 24px */
+    height: 1.5rem; /* 24px */
   }
 `;
 
 export const CardBodyContent = styled.div`
-  padding: 20px; /* p-5 */
-  min-height: 100px;
+  padding: ${tkn('spacing.lg')};
+  min-height: 6.25rem; /* 100px */
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem; /* 16px */
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
 export const CardTitleGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const CardTitleText = styled(Text)`
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   transition: color ${tkn('transitions.normal')};
 `;
 
-export const CardDescText = styled(Text)`
-  font-size: 0.9rem;
-`;
-
 export const CardFooter = styled.div`
   margin-top: auto;
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
-  background: #F8FAFC;
-  border-top: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  background: ${tkn('colors.background.primary')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -161,27 +140,27 @@ export const CardFooter = styled.div`
 
 export const Stats = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
 `;
 
 export const StatItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem; /* 6px */
   color: ${tkn('colors.text.tertiary')};
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
 `;
 
 export const CardActions = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const IconButton = styled.button<{ $type?: 'delete' | 'edit' }>`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
+  border-radius: 0.375rem; /* 6px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,44 +171,45 @@ export const IconButton = styled.button<{ $type?: 'delete' | 'edit' }>`
   transition: all 0.2s;
 
   &:hover {
-    background: ${({ $type }) => ($type === 'delete' ? '#FEF2F2' : '#F1F5F9')};
-    color: ${({ $type }) => ($type === 'delete' ? '#EF4444' : '#2563EB')};
+    background: ${({ $type, theme }) =>
+      $type === 'delete' ? theme.colors.semantic.error + '10' : theme.colors.background.tertiary};
+    color: ${({ $type, theme }) => ($type === 'delete' ? theme.colors.semantic.error : theme.colors.brand.primary)};
   }
 `;
 
 /* refined and reordered below */
 export const ActiveBadge = styled(Badge)`
   font-weight: 700;
-  font-size: 10px;
-  background-color: #F0FDF4 !important; /* bg-green-50 */
-  color: #16A34A !important; /* text-green-600 */
+  font-size: 0.625rem; /* 10px */
+  background-color: ${(p) => p.theme.colors.semantic.success}15 !important;
+  color: ${(p) => p.theme.colors.semantic.success} !important;
   border: none;
 `;
 
 export const DashedCardIconWrapper = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 3rem; /* 48px */
+  height: 3rem; /* 48px */
   border-radius: 50%;
   background: ${tkn('colors.background.secondary')}; /* #F8FAFC */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem; /* 4px */
   transition: background-color ${tkn('transitions.normal')};
 `;
 
 export const InteractiveCard = styled(Card)`
   cursor: pointer;
   transition: all ${tkn('transitions.normal')};
-  border-radius: 16px !important;
+  border-radius: ${tkn('radius.xl')} !important;
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
-  border: 1px solid ${tkn('colors.border.primary')};
-  
+  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+
   &:hover {
     border-color: ${tkn('colors.brand.primary')};
     box-shadow: ${tkn('shadows.md')};
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem); /* -2px */
   }
 
   &:hover .card-title {
@@ -243,13 +223,13 @@ export const DashedCard = styled.button`
   align-items: center;
   justify-content: center;
   height: 100%;
-  min-height: 200px;
+  min-height: 12.5rem; /* 200px */
   background: transparent;
-  border: 2px dashed ${tkn('colors.border.secondary')};
-  border-radius: 16px;
+  border: 0.125rem dashed ${tkn('colors.border.secondary')}; /* 2px */
+  border-radius: ${tkn('radius.xl')};
   cursor: pointer;
   transition: all ${tkn('transitions.normal')};
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
   padding: ${tkn('spacing.xl')};
   color: ${tkn('colors.text.tertiary')};
 
@@ -273,25 +253,25 @@ export const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 40px;
+  padding: 5rem 2.5rem; /* 80px 40px */
   text-align: center;
-  background: #FFFFFF;
-  border: 1px dashed ${tkn('colors.border.primary')};
-  border-radius: 16px;
-  gap: 24px;
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem dashed ${tkn('colors.border.primary')}; /* 1px */
+  border-radius: 1rem; /* 16px */
+  gap: 1.5rem; /* 24px */
   grid-column: 1 / -1;
 `;
 
 export const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: 400px;
+  gap: 0.5rem; /* 8px */
+  max-width: 25rem; /* 400px */
 `;
 
 export const Copyright = styled.div`
-  padding: 40px 0;
+  padding: 2.5rem 0; /* 40px 0 */
   text-align: center;
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   color: ${tkn('colors.text.tertiary')};
 `;

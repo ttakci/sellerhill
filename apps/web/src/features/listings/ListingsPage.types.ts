@@ -22,6 +22,8 @@ export interface ListingsPageProps {
     rowsPerPage: number;
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rowsPerPage: number) => void;
+    labelRowsPerPage?: string;
+    labelInfo?: string;
   };
   columnOptions: { key: string; label: string; alwaysVisible?: boolean }[];
   visibleColumnKeys: string[];
@@ -29,4 +31,6 @@ export interface ListingsPageProps {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (column: string) => void;
+  viewMode: 'table' | 'grid';
+  onViewModeChange: (mode: 'table' | 'grid') => void;
 }

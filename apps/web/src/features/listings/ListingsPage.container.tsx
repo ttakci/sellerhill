@@ -20,6 +20,9 @@ export const ListingsPageContainer: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // View mode state (default 'table' on desktop, 'grid' on mobile)
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
+
   // Selection state
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
 
@@ -466,6 +469,8 @@ export const ListingsPageContainer: React.FC = () => {
       sortColumn={sortColumn}
       sortDirection={sortDirection}
       onSort={handleSort}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
       pagination={{
         count: listings.length,
         page,
@@ -475,6 +480,8 @@ export const ListingsPageContainer: React.FC = () => {
           setRowsPerPage(val);
           setPage(1);
         },
+        labelRowsPerPage: t('translation:common.rowsPerPage'),
+        labelInfo: t('translation:common.showing_info'),
       }}
     />
   );

@@ -1,8 +1,22 @@
-import { Button, ConfirmModal, Dropdown, Icon, Modal, Text, useTheme, useUI } from '@repo/ui';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
+  ConfirmModal,
+  Dropdown,
+  Icon,
+  Logo,
+  MeshBackground,
+  Modal,
+  Text,
+  useTheme,
+  useUI,
+} from '@repo/ui';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Footer } from '@/components/Footer';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { logout } from '@/features/auth/store/authSlice';
 import { useTranslation } from 'react-i18next';
@@ -17,12 +31,12 @@ export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
   const { themeMode, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
   const { data: user } = useGetMeQuery();
-  
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [listingsOpen, setListingsOpen] = useState(location.pathname.startsWith('/listings'));
@@ -34,9 +48,9 @@ export const AppLayout: React.FC = () => {
     setMobileSidebarOpen(false);
   }, [location.pathname]);
 
-  const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User';
+  const userName = user ? `${user.firstName} ${user.lastName}` : t('translation:common.notSet');
 
-   const handleToggleSidebar = () => {
+  const handleToggleSidebar = () => {
     if (window.innerWidth < 1024) {
       setMobileSidebarOpen(!mobileSidebarOpen);
     } else {
@@ -50,37 +64,57 @@ export const AppLayout: React.FC = () => {
     setIsLogoutConfirmOpen(false);
   };
 
+  const getBreadcrumbItems = () => {
+    const items: BreadcrumbItem[] = [{ label: '', path: '/dashboard', icon: 'home' }];
+
+    if (location.pathname === '/dashboard' || location.pathname === '/') {
+      return items;
+    }
+
+    if (location.pathname.startsWith('/listings')) {
+      items.push({ label: t('translation:menu.listings'), path: '/listings' });
+      if (location.pathname === '/listings/jobs') {
+        items.push({ label: t('translation:menu.listingJobs') });
+      } else if (location.pathname === '/listings/products') {
+        items.push({ label: t('translation:menu.products') });
+      } else if (location.pathname === '/listings/add') {
+        items.push({ label: t('listings:breadcrumb.addProducts') });
+      } else if (location.pathname === '/listings') {
+        items.push({ label: t('translation:menu.ebayListings') });
+      }
+    } else if (location.pathname.startsWith('/orders')) {
+      items.push({ label: t('translation:menu.orders'), path: '/orders' });
+      if (location.pathname !== '/orders') {
+        items.push({ label: t('orders:detail.title') });
+      }
+    } else if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/listing-settings-groups')) {
+      items.push({ label: t('translation:menu.settings'), path: '/settings/store' });
+      if (location.pathname.includes('/settings/store')) {
+        items.push({ label: t('translation:menu.storeSettings') });
+      } else {
+        items.push({ label: t('translation:menu.listingSettingsGroups') });
+      }
+    }
+    return items;
+  };
+
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
         {/* Mobile Sidebar Overlay */}
-        <S.SidebarOverlay 
-            $isOpen={mobileSidebarOpen} 
-            onClick={() => setMobileSidebarOpen(false)} 
-        />
+        <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(false)} />
 
         {/* Sidebar */}
-        <S.SidebarContainer 
-            $isCollapsed={sidebarCollapsed} 
-            $isMobileOpen={mobileSidebarOpen}
-        >
+        <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
+          <MeshBackground animate={false} />
           <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => navigate('/dashboard')}>
-            <S.LogoBox>
-              <Icon name="bolt" size={24} color="white" />
-            </S.LogoBox>
-            {!sidebarCollapsed && (
-              <Text variant="h3" weight="bold" color="brand.primary">
-                Zonds
-              </Text>
-            )}
+            <Logo size={sidebarCollapsed ? 98 : 220} />
           </S.LogoArea>
-          
+
           <S.NavSection>
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              {t('translation:menu.main')}
-            </S.NavLabelWrapper>
-            
-            <S.NavItem 
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.main')}</S.NavLabelWrapper>
+
+            <S.NavItem
               $active={location.pathname === '/dashboard'}
               $isCollapsed={sidebarCollapsed}
               onClick={() => navigate('/dashboard')}
@@ -90,9 +124,9 @@ export const AppLayout: React.FC = () => {
                 {!sidebarCollapsed && t('translation:menu.dashboard')}
               </S.NavItemContent>
             </S.NavItem>
-            
+
             <S.NavItemWrapper>
-              <S.NavItem 
+              <S.NavItem
                 $active={location.pathname.startsWith('/listings')}
                 $isCollapsed={sidebarCollapsed}
                 onClick={() => {
@@ -112,30 +146,37 @@ export const AppLayout: React.FC = () => {
               </S.NavItem>
 
               <S.SubNavContainer $isOpen={!sidebarCollapsed && listingsOpen}>
-                <S.SubNavItem 
-                  $active={location.pathname === '/listings'} 
-                  onClick={() => navigate('/listings')}
-                >
+                <S.SubNavItem $active={location.pathname === '/listings'} onClick={() => navigate('/listings')}>
                   {t('translation:menu.ebayListings')}
                 </S.SubNavItem>
-                <S.SubNavItem 
-                  $active={location.pathname === '/listings/jobs'} 
+                <S.SubNavItem
+                  $active={location.pathname === '/listings/jobs'}
                   onClick={() => navigate('/listings/jobs')}
                 >
                   {t('translation:menu.listingJobs')}
                 </S.SubNavItem>
-                <S.SubNavItem 
-                  $active={location.pathname === '/listings/products'} 
+                <S.SubNavItem
+                  $active={location.pathname === '/listings/products'}
                   onClick={() => navigate('/listings/products')}
                 >
                   {t('translation:menu.products')}
                 </S.SubNavItem>
               </S.SubNavContainer>
             </S.NavItemWrapper>
-            
-            
-            <S.NavItem 
-              $isCollapsed={sidebarCollapsed} 
+
+            <S.NavItem
+              $isCollapsed={sidebarCollapsed}
+              $active={location.pathname === '/inventory'}
+              onClick={() => navigate('/inventory')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="archive" size={18} />
+                {!sidebarCollapsed && t('translation:menu.inventory')}
+              </S.NavItemContent>
+            </S.NavItem>
+
+            <S.NavItem
+              $isCollapsed={sidebarCollapsed}
               $active={location.pathname === '/orders'}
               onClick={() => navigate('/orders')}
             >
@@ -143,15 +184,17 @@ export const AppLayout: React.FC = () => {
                 <Icon name="shopping-cart" size={18} />
                 {!sidebarCollapsed && t('translation:menu.orders')}
               </S.NavItemContent>
-              {!sidebarCollapsed && <S.BadgeWrapper variant="primary" size="sm">12</S.BadgeWrapper>}
+              {!sidebarCollapsed && (
+                <S.BadgeWrapper variant="primary" size="sm">
+                  12
+                </S.BadgeWrapper>
+              )}
             </S.NavItem>
-            
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              {t('translation:menu.configuration')}
-            </S.NavLabelWrapper>
-            
+
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.configuration')}</S.NavLabelWrapper>
+
             <S.NavItemWrapper>
-              <S.NavItem 
+              <S.NavItem
                 $active={location.pathname.startsWith('/settings')}
                 $isCollapsed={sidebarCollapsed}
                 onClick={() => {
@@ -169,42 +212,66 @@ export const AppLayout: React.FC = () => {
                   </S.ChevronWrapper>
                 )}
               </S.NavItem>
-              
+
               <S.SubNavContainer $isOpen={!sidebarCollapsed && settingsOpen}>
-                <S.SubNavItem 
-                  $active={location.pathname === '/settings/store'} 
+                <S.SubNavItem
+                  $active={location.pathname === '/settings/store'}
                   onClick={() => navigate('/settings/store')}
                 >
                   {t('translation:menu.storeSettings')}
                 </S.SubNavItem>
-                <S.SubNavItem 
-                  $active={location.pathname.startsWith('/settings/listing-groups')} 
+                <S.SubNavItem
+                  $active={location.pathname.startsWith('/settings/listing-groups')}
                   onClick={() => navigate('/settings/listing-groups')}
                 >
                   {t('translation:menu.listingSettingsGroups')}
                 </S.SubNavItem>
               </S.SubNavContainer>
             </S.NavItemWrapper>
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.other')}</S.NavLabelWrapper>
+
+            <S.NavItem
+              $isCollapsed={sidebarCollapsed}
+              $active={location.pathname === '/reports'}
+              onClick={() => navigate('/reports')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="insert-chart" size={18} />
+                {!sidebarCollapsed && t('translation:menu.reports')}
+              </S.NavItemContent>
+            </S.NavItem>
+
+            <S.NavItem
+              $isCollapsed={sidebarCollapsed}
+              $active={location.pathname === '/profile'}
+              onClick={() => navigate('/profile')}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="user" size={18} />
+                {!sidebarCollapsed && t('translation:menu.editProfile')}
+              </S.NavItemContent>
+            </S.NavItem>
           </S.NavSection>
 
           <S.SidebarFooter>
             <Dropdown
               align="left"
               direction="up"
-              width="240px"
+              width="15rem" /* 240px */
               trigger={
                 <S.ProfileSwitcher $isCollapsed={sidebarCollapsed}>
                   <S.ProfileBadge>
-                    {user?.firstName?.charAt(0) || 'D'}{user?.lastName?.charAt(0) || 'U'}
+                    {user?.firstName?.charAt(0) || 'D'}
+                    {user?.lastName?.charAt(0) || 'U'}
                   </S.ProfileBadge>
                   {!sidebarCollapsed && (
                     <>
                       <S.ProfileDetails>
-                        <Text variant="caption" weight="bold" color="text.primary">
+                        <Text variant="caption" weight="bold" color="text.inverse">
                           {userName}
                         </Text>
-                        <Text variant="caption" color="text.tertiary">
-                          {user?.email || 'admin@zonds.com'}
+                        <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                          {user?.email || ''}
                         </Text>
                       </S.ProfileDetails>
                       <S.ActionIcon as="div">
@@ -218,14 +285,14 @@ export const AppLayout: React.FC = () => {
                 {
                   label: t('translation:menu.editProfile'),
                   icon: 'user',
-                  onClick: () => navigate('/profile')
+                  onClick: () => navigate('/profile'),
                 },
                 {
                   label: t('translation:menu.logout'),
                   icon: 'log-out',
                   variant: 'danger',
-                  onClick: () => setIsLogoutConfirmOpen(true)
-                }
+                  onClick: () => setIsLogoutConfirmOpen(true),
+                },
               ]}
             />
           </S.SidebarFooter>
@@ -236,38 +303,19 @@ export const AppLayout: React.FC = () => {
           <S.HeaderContainer>
             <S.HeaderInner>
               <S.HeaderLeft>
-                 <S.MobileMenuButton 
-                    onClick={() => setMobileSidebarOpen(true)}
-                 >
-                    <Icon name="menu" size={24} />
-                 </S.MobileMenuButton>
+                <S.MobileMenuButton onClick={handleToggleSidebar}>
+                  <Icon name="menu" size={24} />
+                </S.MobileMenuButton>
 
-                <S.BreadcrumbArea>
-                   {location.pathname.startsWith('/listings') ? (
-                     <>
-                        <span className="hoverable" onClick={() => navigate('/listings')}>{t('translation:menu.listings')}</span>
-                        <Icon name="chevron_right" size={16} />
-                        <span className="active">
-                          {location.pathname === '/listings' && t('translation:menu.ebayListings')}
-                          {location.pathname === '/listings/jobs' && t('translation:menu.listingJobs')}
-                          {location.pathname === '/listings/products' && t('translation:menu.products')}
-                          {location.pathname === '/listings/add' && t('listings:breadcrumb.addProducts')}
-                        </span>
-                     </>
-                   ) : (
-                     <>
-                        <span><Icon name="home" size={16} /></span>
-                        <Icon name="chevron_right" size={16} />
-                        <span>{t('translation:menu.settings')}</span>
-                        <Icon name="chevron_right" size={16} />
-                        <span className="active">
-                            {location.pathname.includes('/settings/store') ? t('translation:menu.storeSettings') : t('translation:menu.listingSettingsGroups')}
-                        </span>
-                     </>
-                   )}
-                </S.BreadcrumbArea>
+                <S.ToggleButton onClick={handleToggleSidebar}>
+                  <Icon name={sidebarCollapsed ? 'menu_open' : 'menu'} size={20} />
+                </S.ToggleButton>
               </S.HeaderLeft>
-              
+
+              <S.BreadcrumbArea>
+                <Breadcrumb items={getBreadcrumbItems()} onNavigate={(path) => navigate(path)} />
+              </S.BreadcrumbArea>
+
               <S.HeaderRight>
                 <S.ActionIcon onClick={toggleTheme} title={t('translation:header.toggleTheme')}>
                   <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
@@ -280,9 +328,9 @@ export const AppLayout: React.FC = () => {
 
                 <S.VerticalDivider />
 
-                <Dropdown 
+                <Dropdown
                   align="right"
-                  width="100px"
+                  width="6.25rem" /* 100px */
                   trigger={
                     <S.LanguageSelectTrigger title={t('translation:header.selectLanguage')}>
                       <S.LanguageText>{i18n.language.toUpperCase()}</S.LanguageText>
@@ -290,14 +338,14 @@ export const AppLayout: React.FC = () => {
                     </S.LanguageSelectTrigger>
                   }
                   items={[
-                    { 
-                      label: 'English', 
-                      onClick: () => i18n.changeLanguage('en') 
+                    {
+                      label: t('translation:languages.en'),
+                      onClick: () => i18n.changeLanguage('en'),
                     },
-                    { 
-                      label: 'Türkçe', 
-                      onClick: () => i18n.changeLanguage('tr') 
-                    }
+                    {
+                      label: t('translation:languages.tr'),
+                      onClick: () => i18n.changeLanguage('tr'),
+                    },
                   ]}
                 />
 
@@ -310,9 +358,10 @@ export const AppLayout: React.FC = () => {
             <S.ContentInner>
               <Outlet />
             </S.ContentInner>
+            <Footer />
           </S.ContentArea>
         </S.MainContent>
-        
+
         {/* Global UI Overlays */}
         <S.LoadingOverlay $visible={loadingState.isLoading}>
           <Icon name="loader" size={48} />
@@ -326,8 +375,8 @@ export const AppLayout: React.FC = () => {
           footer={
             <S.ModalFooterWrapper>
               {messageState.secondaryButton && (
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     messageState.secondaryButton?.onClick();
                     closeMessage();
@@ -337,7 +386,7 @@ export const AppLayout: React.FC = () => {
                 </Button>
               )}
               {messageState.primaryButton && (
-                <Button 
+                <Button
                   variant={messageState.type === 'error' ? 'danger' : 'primary'}
                   onClick={() => {
                     messageState.primaryButton?.onClick();
@@ -355,7 +404,7 @@ export const AppLayout: React.FC = () => {
         >
           <Text variant="body">{messageState.description}</Text>
         </Modal>
-         <ConfirmModal
+        <ConfirmModal
           isOpen={isLogoutConfirmOpen}
           onClose={() => setIsLogoutConfirmOpen(false)}
           onConfirm={handleLogout}

@@ -98,6 +98,16 @@ export interface InputProps {
   maxLength?: number;
 
   /**
+   * Icon at the start
+   */
+  leftIcon?: React.ReactNode;
+
+  /**
+   * Icon at the end
+   */
+  rightIcon?: React.ReactNode;
+
+  /**
    * Custom style
    */
   style?: React.CSSProperties;

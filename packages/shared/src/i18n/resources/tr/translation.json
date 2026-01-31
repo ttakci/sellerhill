@@ -1,5 +1,6 @@
 {
   "common": {
+    "brandName": "Zonds",
     "loading": "Yükleniyor...",
     "retry": "Yeniden Dene",
     "ok": "Tamam",
@@ -9,14 +10,23 @@
     "back": "Geri",
     "saveSuccess": "Değişiklikler başarıyla kaydedildi",
     "saveError": "Değişiklikler kaydedilemedi",
-    "showing": "{{count}} kayıttan 1 - {{count}} arası gösteriliyor",
+    "showing_info": "{{total}} kayıttan {{from}} - {{to}} arası gösteriliyor",
+    "showing": "Gösterilen",
+    "of": "üzerinden",
     "rowsPerPage": "Sayfa başına satır:",
+    "search": "Ara...",
+    "noResults": "Sonuç bulunamadı",
     "success": "Başarılı",
     "failed": "Hata",
     "products": {
       "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
     },
     "unknownProduct": "Bilinmeyen Ürün",
+    "views": {
+      "label": "Görünüm",
+      "grid": "Grid",
+      "table": "Tablo"
+    },
     "actions": {
       "refresh": "Yenile",
       "edit": "Düzenle",
@@ -138,5 +148,11 @@
   "notifications": {
     "comingSoonTitle": "Yakın Zamanda Gelecek",
     "comingSoon": "Bu özellik şu anda geliştirme aşamasındadır ve yakında kullanıma sunulacaktır."
+  },
+  "footer": {
+    "copyright": "© 2026 Zonds E-ticaret Çözümleri. Tüm hakları saklıdır.",
+    "privacyPolicy": "Gizlilik Politikası",
+    "termsOfService": "Hizmet Şartları",
+    "contactSupport": "Destek ile İletişim"
   }
 }

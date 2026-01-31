@@ -25,21 +25,40 @@
 - **Tokens**: Use TailAdmin semantic tokens: `theme.colors.{category}.{primary|secondary}`, `theme.spacing.{md|lg}`, `theme.radius.{md}`, etc.
 - **Responsiveness**: ALL UI must be responsive. Sidebars hidden on mobile (<1024px). Mobile-first approach.
 
-### 4️⃣ Form Components (forwardRef REQUIRED)
+### 4️⃣ Responsive Design (MANDATORY)
+
+- **Units**: Use `rem`, `em`, `%`, `vw`, `vh`, `fr`. NEVER `px` (except borders: `1px`, `2px`).
+- **Base**: `1rem = 16px` (browser default).
+- **Breakpoints** (Mobile-First):
+  - Mobile: `30rem` (480px)
+  - Tablet: `48rem` (768px)
+  - Desktop: `64rem` (1024px)
+  - Large: `80rem` (1280px)
+- **Approach**: Mobile-first media queries with `min-width`.
+- **Reference**: See `.agent/responsive-design-rules.md` for full guidelines.
+
+### 5️⃣ Form Components (forwardRef REQUIRED)
 
 - **Form UI**: ALL inputs must use `React.forwardRef` and `value={value ?? ''}` to prevent uncontrolled component warnings.
 
-### 5️⃣ Localization & Assets (STANDARD)
+### 6️⃣ Localization & Zero Hardcoded Strings (CRITICAL)
 
-- **Structure**: Root key in JSON MUST match the filename (e.g., `feature.json` -> `{ "feature": { ... } }`).
-- **Hook Pattern**: `useTranslation` MUST always include the feature namespace AND `translation` for common keys.
-  - ✅ `const { t } = useTranslation(['feature', 'translation']);`
-- **Key Usage**: ALWAYS use explicit namespace prefixes (`namespace:key.path`) to ensure correct resolution and prevent overlap.
-  - ✅ `t('feature:feature.title')`
-  - ✅ `t('translation:common.save')`
-  - ✅ `showMessage({ headerKey: 'translation:message.success.header', ... })`
+- **Zero Tolerance Policy**: NO hardcoded strings allowed in JSX/TSX. Every piece of user-visible text MUST be localized.
+- **UI Package Pattern (@repo/ui)**:
+  - Components MUST be pure and agnostic of the translation engine.
+  - **PROHIBITED**: Using `useTranslation()` or importing from `i18next` inside `@repo/ui`.
+  - **PATTERN**: Accept localized strings as props (e.g., `label?: string`, `emptyMessage?: string`).
+- **Web App Pattern (apps/web)**:
+  - Use `useTranslation(['namespace', 'translation'])` in components.
+  - Pass the translated strings down to the UI components.
+  - ✅ `<Table emptyMessage={t('translation:common.noData')} ... />`
+  - ✅ `const label = t('feature:settings.label');`
+- **Standard rules**:
+  - **Structure**: Root key in JSON MUST match the filename (e.g., `feature.json` -> `{ "feature": { ... } }`).
+  - **Key Usage**: ALWAYS use explicit namespace prefixes (`namespace:key.path`).
+    - ✅ `t('feature:feature.title')`
+    - ✅ `t('translation:common.save')`
   - ❌ `t('title')` (Implicit: FORBIDDEN)
-  - ❌ `t('feature.title')` (Missing namespace: FORBIDDEN)
 - **Icons**: Use `@repo/ui` `Icon` component. NO inline SVG.
 
 ---
@@ -72,11 +91,13 @@ features/[feature]/
 ## 🚫 FORBIDDEN PATTERNS
 
 - ❌ **`any`** types.
-- ❌ **Hardcoded strings** in UI (STRICT: All text must be i18n keys).
+- ❌ **`px` units** (except borders: `1px`, `2px`). Use `rem`, `%`, `vw`, `vh` instead.
+- ❌ **Hardcoded strings** in UI (STRICT: All text must be i18n keys). No exceptions for placeholders, tooltips, or default props.
+- ❌ **`useTranslation` inside @repo/ui**. UI components must receive localized strings via props.
 - ❌ **Inline styles** or `style={{...}}`. (STRICT: NO exceptions).
 - ❌ **Raw HTML elements (`div`, `span`, `p`, etc.)** for layout or styling. MUST use named Styled Components from `*.style.ts`.
 - ❌ **Direct flexbox/grid properties on native tags**. Define a styled component instead.
-- ❌ **Direct fetch/axios** calls.
+- ❌ **Direct fetch/axios** calls. Use RTK Query.
 - ❌ **Inline SVG** (use Icon component).
 - ❌ **Duplicate types** (use @repo/shared).
 - ❌ **Local state** for global modals/loading (use UIContext).

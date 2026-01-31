@@ -13,6 +13,8 @@ export interface ListingJobsPageComponentProps {
     rowsPerPage: number;
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rowsPerPage: number) => void;
+    labelRowsPerPage?: string;
+    labelInfo?: string;
   };
   columns: any[];
 }

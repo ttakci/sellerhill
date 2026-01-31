@@ -19,10 +19,11 @@ export const HiddenRadio = styled.input`
 `;
 
 export const StyledRadio = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
-  width: 18px;
-  height: 18px;
+  width: 1.125rem; /* 18px */
+  height: 1.125rem; /* 18px */
   background-color: ${tkn('colors.background.secondary')};
-  border: 1px solid ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)};
+  border: 0.0625rem solid
+    ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)}; /* 1px */
   border-radius: ${tkn('radius.full')};
   display: flex;
   align-items: center;
@@ -31,8 +32,8 @@ export const StyledRadio = styled.div<{ $checked?: boolean; $disabled?: boolean 
 
   &::after {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 0.5rem; /* 8px */
+    height: 0.5rem; /* 8px */
     background-color: ${tkn('colors.brand.primary')};
     border-radius: ${tkn('radius.full')};
     transform: scale(${({ $checked }) => ($checked ? 1 : 0)});

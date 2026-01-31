@@ -1,0 +1,96 @@
+{
+  "page": {
+    "title": "Siparişler"
+  },
+  "stats": {
+    "totalSales": "Toplam Satış",
+    "netProfit": "Net Kâr",
+    "activeOrders": "Aktif Siparişler",
+    "returnRate": "İade Oranı",
+    "last24Hours": "Son 24 Saat",
+    "growth": "%{{value}} geçen aya göre",
+    "profitGrowth": "%{{value}} geçen aya göre",
+    "decrease": "%{{value}} geçen aya göre"
+  },
+  "actions": {
+    "search": "Sipariş, alıcı veya ürün ara...",
+    "last30Days": "Son 30 Gün",
+    "export": "Dışa Aktar"
+  },
+  "table": {
+    "orderNumber": "Sipariş No",
+    "date": "Tarih",
+    "buyer": "Alıcı",
+    "status": "Durum",
+    "salePrice": "Satış Fiyatı",
+    "purchasePrice": "Alış Fiyatı",
+    "netProfit": "Net Kâr"
+  },
+  "status": {
+    "completed": "Tamamlandı",
+    "shipped": "Kargolandı",
+    "processing": "İşleniyor",
+    "cancelled": "İptal Edildi",
+    "pending": "Bekliyor",
+    "waiting_shipment": "Kargo Bekliyor"
+  },
+  "pagination": {
+    "showing": "{{total}} siparişten {{from}}-{{to}} arası gösteriliyor"
+  },
+  "detail": {
+    "title": "Sipariş Detayı",
+    "orderPlaced": "Sipariş Tarihi",
+    "viewInvoice": "Faturayı Gör",
+    "printLabels": "Etiket Yazdır",
+    "customerInfo": "Müşteri Bilgisi",
+    "buyerPayment": "Alıcı Ödemesi",
+    "ebaySummary": "eBay Satış Özeti",
+    "whatBuyerPaid": "Alıcının Ödediği",
+    "whatYouEarned": "Kazancınız",
+    "itemSubtotal": "Ürün Ara Toplamı",
+    "shippingHandling": "Kargo & İşlem",
+    "totalBeforeTax": "Vergi Öncesi Toplam",
+    "estimatedTax": "Tahmini Vergi",
+    "grandTotal": "Genel Toplam",
+    "paymentMethod": "Ödeme Yöntemi",
+    "subtotal": "Ara Toplam",
+    "shipping": "Kargo",
+    "salesTax": "Satış Vergisi*",
+    "orderTotal": "Sipariş Toplamı**",
+    "feesCollected": "Kesilen Ücretler",
+    "transactionFees": "İşlem Ücretleri",
+    "adFee": "Reklam Ücreti",
+    "orderEarnings": "Sipariş Kazancı",
+    "viewMore": "Daha Fazla Detay",
+    "updateAmazon": "Amazon Bilgisi Gir",
+    "netProfitAnalysis": "NET KÂR ANALİZİ",
+    "analysisDesc": "Bu hesaplama, tüm platform ücretleri ve vergiler düştükten sonraki eBay kazancınızdan, orijinal Amazon satın alma maliyetinin çıkarılmasıyla yapılır.",
+    "calculation": "Hesaplama",
+    "netProfitResult": "Net Kâr",
+    "roi": "Yatırım Getirisi (ROI)",
+    "shipTo": "Teslimat Adresi",
+    "contact": "İletişim",
+    "unknownProduct": "Bilinmeyen Ürün",
+    "asin": "ASIN:",
+    "ebayItemId": "eBay Ürün ID:",
+    "quantity": "Adet",
+    "unit": "adet",
+    "sku": "SKU",
+    "na": "Mevcut Değil"
+  },
+  "modal": {
+    "title": "Amazon Sipariş Bilgisi Gir",
+    "amazonUrl": "Amazon Sipariş Detay URL'i",
+    "trackingUrl": "Takip URL'i (İsteğe Bağlı)",
+    "taxAmount": "Vergi Tutarı ($)",
+    "shippingCost": "Kargo Maliyeti ($)",
+    "infoText": "Vergi ve kargo maliyetlerini girdiğinizde, bu sipariş için Net Kâr otomatik olarak yeniden hesaplanacaktır.",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+    "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+  },
+  "footer": {
+    "copyright": "© 2026 Zonds E-ticaret Çözümleri. Tüm hakları saklıdır."
+  }
+}

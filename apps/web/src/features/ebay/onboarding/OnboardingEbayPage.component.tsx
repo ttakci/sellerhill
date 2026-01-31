@@ -35,7 +35,7 @@ export const OnboardingEbayPageComponent = ({
             <S.LogoWrapper>
               <Icon name="logo" size={48} color="brand.primary" />
               <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.LogoWrapper>
 
@@ -98,14 +98,14 @@ export const OnboardingEbayPageComponent = ({
             <S.BrandingLogoWrapper>
               <Icon name="logo" size={64} color="text.inverse" />
               <Text variant="h1" weight="bold" color="text.inverse">
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.BrandingLogoWrapper>
-            
+
             <Text variant="h3" weight="medium" color="text.inverse">
               {t('ebay:ebay.onboarding.title')}
             </Text>
-            
+
             <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
               {t('ebay:ebay.onboarding.brandingDescription')}
             </Text>

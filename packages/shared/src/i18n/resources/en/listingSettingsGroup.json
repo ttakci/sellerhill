@@ -6,13 +6,13 @@
     "editGroup": "Edit Listing Group",
     "backToList": "Back to Groups",
     "connectorSubtitle": "AMAZON TO EBAY CONNECTOR",
-    
+
     "groupDetails": "Group Details",
     "groupName": "Group Name",
     "groupNamePlaceholder": "e.g., Premium Electronics",
     "description": "Description",
     "descriptionPlaceholder": "Enter group internal notes...",
-    
+
     "repricingStrategy": "Repricing Strategy",
     "addPriceRange": "Add Price Range",
     "removePriceRange": "Remove Price Range",
@@ -21,12 +21,12 @@
     "profitMargin": "Profit Margin (%)",
     "fixedProfit": "Fixed Profit ($)",
     "priceRangeLabel": "Price Range {{index}}",
-    
+
     "stock": "Stock",
     "defaultQuantity": "Default Quantity",
     "autoRestock": "Auto-restock on sale",
     "autoRestockDescription": "Automatically restock items when they are sold",
-    
+
     "fees": "Fees",
     "ebayFee": "eBay Fee",
     "ebayFeePercent": "eBay Fee (%)",
@@ -34,7 +34,7 @@
     "fixedFeeAmount": "Fixed Fee ($)",
     "tax": "Tax",
     "taxPercent": "Tax (%)",
-    
+
     "templates": "Template",
     "customTemplate": "Custom",
     "predefinedTemplate": "Predefined",
@@ -43,14 +43,14 @@
     "htmlEditor": "HTML Editor",
     "templatePlaceholder": "Enter your custom HTML template...",
     "templateVariablesHelp": "Use variables like {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}",
-    
+
     "preview": "Preview",
     "livePreview": "Live Preview",
     "darkModePreview": "Dark Mode Preview",
     "desktopView": "Desktop View",
     "mobileView": "Mobile View",
     "renderingPreview": "Rendering preview...",
-    
+
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "cancel": "Cancel",
@@ -60,21 +60,21 @@
     "confirmDeleteMessage": "This action cannot be undone. Products using this group will need to be reassigned.",
     "deleteSuccess": "Group deleted successfully",
     "deleteFailed": "Failed to delete group",
-    
+
     "productsCount_one": "{{count}} product",
     "productsCount_other": "{{count}} products",
     "noProducts": "No products",
-    
+
     "statusActive": "Active",
     "statusDraft": "Draft",
     "statusInactive": "Inactive",
-    
+
     "emptyState": {
       "title": "No Listing Groups Yet",
       "description": "Create your first group to start organizing your listings",
       "action": "Create New Group"
     },
-    
+
     "predefinedTemplates": {
       "modernMinimalist": "Modern Minimalist",
       "modernMinimalistDesc": "Clean and professional design with focus on product details",
@@ -83,7 +83,7 @@
       "ecommerceClassic": "E-commerce Classic",
       "ecommerceClassicDesc": "Traditional layout with clear sections and call-to-action"
     },
-    
+
     "validation": {
       "nameRequired": "Group name is required",
       "nameMinLength": "Group name must be at least 3 characters",
@@ -108,7 +108,7 @@
       "maxPriceRanges": "Maximum 10 price ranges allowed",
       "overlappingPriceRanges": "Price ranges cannot overlap"
     },
-    
+
     "errors": {
       "loadFailed": "Failed to load listing groups",
       "saveFailed": "Failed to save changes",
@@ -121,14 +121,14 @@
       "networkError": "Network error. Please check your connection.",
       "unknownError": "An unexpected error occurred"
     },
-    
+
     "success": {
       "created": "Listing group created successfully",
       "updated": "Listing group updated successfully",
       "deleted": "Listing group deleted successfully",
       "saved": "Changes saved successfully"
     },
-    
+
     "tooltips": {
       "editGroup": "Edit group",
       "deleteGroup": "Delete group",
@@ -140,7 +140,7 @@
       "copyTemplate": "Copy template HTML",
       "resetTemplate": "Reset to default template"
     },
-    
+
     "help": {
       "repricingStrategy": "Define multiple price ranges with different profit margins. Products will be priced according to their cost range.",
       "profitMargin": "Percentage-based profit calculated from the product cost.",
@@ -168,9 +168,9 @@
     "ebayLayoutFile": "EBAY_LAYOUT.HTML",
     "ebayFormat": "EBAY FORMAT",
     "sample": {
-      "productTitle": "Custom Template Product",
-      "productDescription": "This is your custom template description.",
-      "productSpecs": "<ul><li>Feature A</li><li>Feature B</li></ul>"
+      "productTitle": "Premium Wireless Noise Cancelling Headphones",
+      "productDescription": "Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.",
+      "productSpecs": "<ul><li>Active Noise Cancellation</li><li>40-hour battery life</li><li>Universal Bluetooth compatibility</li><li>Built-in microphone</li></ul>"
     },
     "copyright": "© {{year}} Zonds Platform. All rights reserved."
   }

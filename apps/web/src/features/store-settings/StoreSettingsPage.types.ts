@@ -6,18 +6,18 @@ export interface StoreSettingsPageProps {
   onSave: (data: StoreSettingsFormData) => void;
   onStoreChange: (storeId: string) => void;
   availableStores: Array<{ id: string; name: string }>;
-  
+
   // Form
   form: UseFormReturn<StoreSettingsFormData>;
-  
+
   // Blacklist Management
   newKeyword: string;
   setNewKeyword: (val: string) => void;
   newScope: 'title' | 'description' | 'both';
   setNewScope: (val: 'title' | 'description' | 'both') => void;
   onAddKeyword: () => void;
-  onRemoveKeyword: (index: number) => void;
-  
+  onRemoveKeyword: (keyword: string) => void;
+
   // Pagination & Sorting
   pagedBlacklist: Array<{ keyword: string; scope: 'title' | 'description' | 'both' }>;
   page: number;

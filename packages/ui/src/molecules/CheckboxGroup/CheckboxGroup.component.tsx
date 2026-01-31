@@ -21,7 +21,7 @@ export const CheckboxGroup = <TFieldValues extends FieldValues = FieldValues>({
       control={control}
       render={({ field: { value = [], onChange }, fieldState: { error } }) => {
         const selectedValues = Array.isArray(value) ? (value as string[]) : [];
-        
+
         const handleCheckboxChange = (optionValue: string, checked: boolean) => {
           const newValue = checked
             ? [...selectedValues, optionValue]
@@ -35,7 +35,7 @@ export const CheckboxGroup = <TFieldValues extends FieldValues = FieldValues>({
               <S.LabelText>
                 <Text variant="body" weight="medium">
                   {label}
-                  {required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
+                  {required && <span style={{ color: 'red', marginLeft: '0.25rem' }}>*</span>}
                 </Text>
               </S.LabelText>
             )}

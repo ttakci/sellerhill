@@ -13,6 +13,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
 import { ListingSettingsGroupModule } from './modules/listing-settings-groups/listing-settings-group.module';
 import { ListingsModule } from './modules/listings/listings.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { StoreSettingsModule } from './modules/store-settings/store-settings.module';
 
@@ -64,6 +65,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     ListingSettingsGroupModule,
     ListingsModule,
     ProfileModule,
+    OrdersModule,
   ],
   providers: [
     {

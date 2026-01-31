@@ -8,10 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
 import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
 import * as S from './StoreSettingsPage.style';
-import {
-  useGetStoreSettingsQuery,
-  useSaveStoreSettingsMutation
-} from './api/storeSettingsApi';
+import { useGetStoreSettingsQuery, useSaveStoreSettingsMutation } from './api/storeSettingsApi';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
@@ -30,12 +27,13 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
 
   // Fetch settings
   const { data: settings, isLoading: settingsLoading } = useGetStoreSettingsQuery({ storeId: selectedStoreId });
-  
+
   // Fetch eBay accounts for store selection
   const { data: ebayAccounts } = useGetEbayAccountsQuery();
-  
+
   // Save mutation
-  const [saveSettings, { isLoading: isSaving, isSuccess: saveSuccess, error: saveError }] = useSaveStoreSettingsMutation();
+  const [saveSettings, { isLoading: isSaving, isSuccess: saveSuccess, error: saveError }] =
+    useSaveStoreSettingsMutation();
 
   // Use RTK Query loading state with useLoading hook
   useLoading(settingsLoading || isSaving);
@@ -77,15 +75,18 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   // Handle success
   useEffect(() => {
     if (saveSuccess) {
-      showMessage({
-        type: 'success',
-        headerKey: 'translation:message.success.header',
-        descriptionKey: 'translation:common.saveSuccess',
-        primaryButton: {
-          labelKey: 'translation:message.success.ok',
-          onClick: closeMessage,
+      showMessage(
+        {
+          type: 'success',
+          headerKey: 'translation:message.success.header',
+          descriptionKey: 'translation:common.saveSuccess',
+          primaryButton: {
+            labelKey: 'translation:message.success.ok',
+            onClick: closeMessage,
+          },
         },
-      }, t);
+        t
+      );
     }
   }, [saveSuccess, showMessage, closeMessage, t]);
 
@@ -93,16 +94,19 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   useEffect(() => {
     if (saveError) {
       const { key, params } = getErrorMessage(saveError);
-      showMessage({
-        type: 'error',
-        headerKey: 'translation:message.error.header',
-        descriptionKey: key, // getErrorMessage handles prefixing for global errors usually
-        descriptionParams: params,
-        primaryButton: {
-          labelKey: 'translation:message.error.close',
-          onClick: closeMessage,
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: key, // getErrorMessage handles prefixing for global errors usually
+          descriptionParams: params,
+          primaryButton: {
+            labelKey: 'translation:message.error.close',
+            onClick: closeMessage,
+          },
         },
-      }, t);
+        t
+      );
     }
   }, [saveError, showMessage, closeMessage, t]);
 
@@ -121,8 +125,8 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     setNewKeyword('');
   };
 
-  const handleRemoveKeyword = (index: number) => {
-    const updatedBlacklist = blacklist.filter((_: any, i: number) => i !== index);
+  const handleRemoveKeyword = (keyword: string) => {
+    const updatedBlacklist = blacklist.filter((item: any) => item.keyword !== keyword);
     setValue('blacklist', updatedBlacklist, { shouldDirty: true });
   };
 
@@ -156,10 +160,11 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     return <S.LoadingContainer>{t('translation:common.loading')}</S.LoadingContainer>;
   }
 
-  const availableStores = ebayAccounts?.items.map(acc => ({
-    id: acc.id,
-    name: acc.storeName || acc.sellerId,
-  })) || [];
+  const availableStores =
+    ebayAccounts?.items.map((acc) => ({
+      id: acc.id,
+      name: acc.storeName || acc.sellerId,
+    })) || [];
 
   return (
     <StoreSettingsPageComponent
@@ -167,10 +172,8 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       onSave={handleSave}
       onStoreChange={(id) => setSelectedStoreId(id)}
       availableStores={availableStores}
-      
       // Form
       form={form}
-
       // Blacklist Management
       newKeyword={newKeyword}
       setNewKeyword={setNewKeyword}
@@ -178,7 +181,6 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       setNewScope={setNewScope}
       onAddKeyword={handleAddKeyword}
       onRemoveKeyword={handleRemoveKeyword}
-
       // Pagination & Sorting
       pagedBlacklist={pagedBlacklist}
       page={page}

@@ -6,32 +6,32 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : '4px')};
+  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.sm')(p as any))};
   font-weight: ${tkn('typography.fontWeight.medium')};
   white-space: nowrap;
-  
+
   ${({ $size }) => {
     switch ($size) {
       case 'sm':
         return `
-          padding: 2px 8px;
-          font-size: 11px;
+          padding: 0.125rem 0.5rem; /* 2px 8px */
+          font-size: 0.6875rem; /* 11px */
         `;
       case 'md':
         return `
-          padding: 4px 10px;
-          font-size: 12px;
+          padding: 0.25rem 0.625rem; /* 4px 10px */
+          font-size: 0.75rem; /* 12px */
         `;
       case 'lg':
         return `
-          padding: 6px 14px;
-          font-size: 13px;
+          padding: 0.3125rem 0.75rem; /* 5px 12px */
+          font-size: 0.8125rem; /* 13px */
         `;
       default:
         return '';
     }
   }}
-  
+
   ${({ $variant, theme }) => {
     switch ($variant) {
       case 'primary':

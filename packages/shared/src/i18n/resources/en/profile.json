@@ -21,6 +21,9 @@
     "updateSuccess": "Profile updated successfully.",
     "twitter": "Twitter URL",
     "linkedin": "LinkedIn URL",
-    "instagram": "Instagram URL"
+    "instagram": "Instagram URL",
+    "deactivateAccount": "Deactivate Account",
+    "saveChanges": "Save All Changes",
+    "storeOwner": "Store Owner"
   }
 }

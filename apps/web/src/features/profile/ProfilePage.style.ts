@@ -3,7 +3,7 @@ import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
-  max-width: 1440px;
+  max-width: 90rem; /* 1440px */
   margin: 0 auto;
   padding: 0;
   display: flex;
@@ -16,10 +16,11 @@ export const Header = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 1.5rem; /* 24px */
+  margin-bottom: 2rem; /* 32px */
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     flex-direction: row;
     align-items: flex-end;
   }
@@ -30,7 +31,7 @@ export const TitleSection = styled.div`
   flex-direction: column;
 
   h1 {
-    font-size: 24px;
+    font-size: 1.5rem; /* 24px */
     font-weight: 700;
     color: ${tkn('colors.text.primary')};
     letter-spacing: -0.025em;
@@ -38,21 +39,21 @@ export const TitleSection = styled.div`
   }
 
   p {
-    font-size: 14px;
+    font-size: 0.875rem; /* 14px */
     color: ${tkn('colors.text.secondary')};
-    margin-top: 4px;
+    margin-top: 0.25rem; /* 4px */
   }
 `;
 
 export const Actions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
 `;
 
 export const MainCard = styled.div`
   background: white;
   border-radius: ${tkn('radius.md')};
-  border: 1px solid ${tkn('colors.border.secondary')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   padding: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
@@ -61,7 +62,7 @@ export const MainCard = styled.div`
 `;
 
 export const SectionCard = styled.div`
-  border: 1px solid ${tkn('colors.border.secondary')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   border-radius: ${tkn('radius.lg')};
   padding: ${tkn('spacing.lg')};
   position: relative;
@@ -86,26 +87,26 @@ export const UserOverview = styled.div`
 /* Avatar Wrapper for overlapping edit button */
 export const AvatarWrapper = styled.div`
   position: relative;
-  width: 96px;
-  height: 96px;
-  
+  width: 6rem; /* 96px */
+  height: 6rem; /* 96px */
+
   /* Edit button absolute positioning */
   button {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 32px;
-    height: 32px;
+    width: 2rem; /* 32px */
+    height: 2rem; /* 32px */
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid white;
+    border: 0.125rem solid white; /* 2px */
     box-shadow: ${tkn('shadows.sm')};
     background: ${tkn('colors.brand.primary')};
     color: white;
-    
+
     &:hover {
       background: ${tkn('colors.brand.primary')};
       opacity: 0.9;
@@ -121,7 +122,8 @@ export const ProfileHeaderContent = styled.div`
   gap: ${tkn('spacing.xs')};
   text-align: center;
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     text-align: left;
   }
 `;
@@ -134,7 +136,8 @@ export const ProfileBadges = styled.div`
   gap: ${tkn('spacing.sm')};
   margin-top: ${tkn('spacing.xs')};
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     justify-content: flex-start;
   }
 `;
@@ -144,13 +147,13 @@ export const BadgeItem = styled.span`
   font-size: ${tkn('typography.fontSize.sm')};
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem; /* 6px */
 
   &::after {
     content: '';
     display: block;
-    width: 4px;
-    height: 4px;
+    width: 0.25rem; /* 4px */
+    height: 0.25rem; /* 4px */
     background: ${tkn('colors.border.secondary')}; /* Dot separator */
     border-radius: 50%;
   }
@@ -160,22 +163,22 @@ export const BadgeItem = styled.span`
   }
 `;
 
-
 export const SectionTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
 `;
 
 export const SectionContent = styled.div`
   padding: ${tkn('spacing.xl')};
   display: grid;
   grid-template-columns: 1fr;
-  gap: ${tkn('spacing.xl')} 48px; /* Hardcoded 48px for 3xl spacing */
+  gap: ${tkn('spacing.xl')} 3rem; /* 48px */
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     grid-template-columns: 1fr 1fr;
   }
 `;
@@ -188,7 +191,7 @@ export const FooterActions = styled.div`
 `;
 
 export const DeleteButton = styled.button`
-  color: #DC2626;
+  color: #dc2626;
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.sm')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
@@ -197,23 +200,23 @@ export const DeleteButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background: #FEF2F2;
+    background: #fef2f2;
   }
 `;
 
 /* Input overrides for clean look */
 export const CleanInput = styled.input`
-    width: 100%;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #1e293b;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    padding: 0.5rem 0.75rem;
-    &:focus {
-        outline: 2px solid #2563eb;
-        border-color: #2563eb;
-    }
+  width: 100%;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+  border: 0.0625rem solid #e2e8f0; /* 1px */
+  border-radius: 0.375rem; /* 6px */
+  padding: 0.5rem 0.75rem; /* 8px 12px */
+  &:focus {
+    outline: 0.125rem solid #2563eb; /* 2px */
+    border-color: #2563eb;
+  }
 `;
 
 // Re-exporting modified base components or adding new ones
@@ -230,11 +233,11 @@ export const UserInfoWrapper = styled.div`
 `;
 
 export const AvatarContainer = styled.div`
-  width: 80px;
-  height: 80px;
+  width: 5rem; /* 80px */
+  height: 5rem; /* 80px */
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid ${tkn('colors.border.secondary')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   background: ${tkn('colors.surface.secondary')};
   flex-shrink: 0;
 
@@ -248,7 +251,7 @@ export const AvatarContainer = styled.div`
 export const UserTextInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem; /* 2px */
 `;
 
 /* Info Grid Layout */
@@ -257,7 +260,8 @@ export const InfoGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.xl')};
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     grid-template-columns: 1fr 1fr;
   }
 `;
@@ -265,7 +269,7 @@ export const InfoGrid = styled.div`
 export const InfoItem = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const InfoLabel = styled.div`
@@ -302,7 +306,8 @@ export const FormRow = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     grid-template-columns: 1fr 1fr;
   }
 `;
@@ -310,7 +315,7 @@ export const FormRow = styled.div`
 export const HeaderTextWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const AvatarImage = styled.img`
@@ -341,13 +346,13 @@ export const EditButtonWrapper = styled.div`
 `;
 
 export const ErrorMessage = styled.div`
-  margin-top: 4px;
+  margin-top: 0.25rem; /* 4px */
 `;
 
 export const PersonalInfoCard = styled(MainCardHeaderless)`
-  margin-top: 32px;
+  margin-top: 2rem; /* 32px */
 `;
 
 export const AddressCard = styled(MainCardHeaderless)`
-  margin-top: 32px;
+  margin-top: 2rem; /* 32px */
 `;

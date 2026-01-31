@@ -6,9 +6,9 @@ export const Container = styled.div`
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.lg')};
   box-sizing: border-box;
-  padding-bottom: 40px;
+  padding-bottom: 2.5rem; /* 40px */
 `;
 
 export const Header = styled.div`
@@ -17,7 +17,8 @@ export const Header = styled.div`
   align-items: flex-start;
   padding: 0;
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
+    /* 767px */
     flex-direction: column;
     gap: ${tkn('spacing.md')};
   }
@@ -26,11 +27,11 @@ export const Header = styled.div`
 export const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const PageTitle = styled.h1`
-  font-size: 24px;
+  font-size: 1.5rem; /* 24px */
   font-weight: 700;
   color: ${tkn('colors.text.primary')};
   margin: 0;
@@ -39,70 +40,85 @@ export const PageTitle = styled.h1`
 export const Actions = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
+
+  @media (max-width: 47.9375rem) {
+    /* 767px */
+    width: 100%;
+
+    & > button {
+      flex: 1;
+      justify-content: center;
+    }
+  }
 `;
 
 export const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.lg')};
   width: 100%;
 `;
 
 export const StyledCard = styled(Card)`
-  border-radius: 16px !important;
+  border-radius: ${tkn('radius.xl')} !important;
   overflow: hidden;
   box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const SectionHeader = styled.div`
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
-  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: #FFFFFF;
+  gap: 1rem; /* 16px */
+  background: ${tkn('colors.surface.primary')};
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
 export const HeaderIconWrapper = styled.div<{ $type?: 'general' | 'repricing' | 'template' | 'preview' | 'fees' }>`
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
+  border-radius: 0.625rem; /* 10px */
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  ${({ $type }) => {
+  ${({ $type, theme }) => {
     switch ($type) {
       case 'general':
         return `
-          background: #EFF6FF;
-          color: #2563EB;
+          background: ${theme.colors.brand.secondary};
+          color: ${theme.colors.brand.primary};
         `;
       case 'repricing':
         return `
-          background: #ECFDF5;
-          color: #059669;
+          background: ${theme.colors.semantic.success}15;
+          color: ${theme.colors.semantic.success};
         `;
       case 'template':
         return `
-          background: #FFF7ED;
-          color: #EA580C;
+          background: ${theme.colors.semantic.warning}15;
+          color: ${theme.colors.semantic.warning};
         `;
       case 'preview':
         return `
-          background: #ECFEFF;
-          color: #0891B2;
+          background: ${theme.colors.semantic.info}15;
+          color: ${theme.colors.semantic.info};
         `;
       case 'fees':
         return `
-          background: #F8FAFC;
-          color: #64748B;
+          background: ${theme.colors.background.tertiary};
+          color: ${theme.colors.text.secondary};
         `;
       default:
         return `
-          background: ${tkn('colors.background.tertiary')};
-          color: ${tkn('colors.text.primary')};
+          background: ${theme.colors.background.tertiary};
+          color: ${theme.colors.text.primary};
         `;
     }
   }}
@@ -111,12 +127,12 @@ export const HeaderIconWrapper = styled.div<{ $type?: 'general' | 'repricing' | 
 export const SectionTitleContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem; /* 2px */
   flex: 1;
 `;
 
 export const SectionTitle = styled.h3`
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   font-weight: 700;
   color: ${tkn('colors.text.primary')};
   margin: 0;
@@ -126,15 +142,16 @@ export const PaddingContainer = styled.div`
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.lg')};
 `;
 
 export const InputGrid = styled.div<{ columns?: number }>`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
+    /* 768px */
     grid-template-columns: repeat(${({ columns }) => columns || 3}, 1fr);
   }
 `;
@@ -142,11 +159,11 @@ export const InputGrid = styled.div<{ columns?: number }>`
 export const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem; /* 8px */
 `;
 
 export const InputLabel = styled.label`
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   font-weight: 700;
   color: ${tkn('colors.text.tertiary')};
   text-transform: uppercase;
@@ -156,29 +173,34 @@ export const InputLabel = styled.label`
 export const PriceRangesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem; /* 16px */
 `;
 
 export const PriceRangeRow = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  background: #F8FAFC;
-  border-radius: 12px;
-  border: 1px solid ${tkn('colors.border.primary')};
+  gap: 1rem; /* 16px */
+  padding: ${tkn('spacing.lg')};
+  background: ${tkn('colors.background.tertiary')};
+  border-radius: ${tkn('radius.md')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   position: relative;
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
 export const RemoveButton = styled.button`
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
+  top: 0.75rem; /* 12px */
+  right: 0.75rem; /* 12px */
+  width: 1.75rem; /* 28px */
+  height: 1.75rem; /* 28px */
   border-radius: 50%;
-  background: #FEF2F2;
-  color: #EF4444;
+  background: ${(p) => p.theme.colors.semantic.error}15;
+  color: ${(p) => p.theme.colors.semantic.error};
   border: none;
   display: flex;
   align-items: center;
@@ -187,17 +209,18 @@ export const RemoveButton = styled.button`
   transition: all ${tkn('transitions.fast')};
 
   &:hover {
-    background: #FEE2E2;
+    background: ${(p) => p.theme.colors.semantic.error}25;
     transform: scale(1.05);
   }
 `;
 
 export const SplitGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: ${tkn('spacing.lg')};
 
-  @media (max-width: 1199px) {
+  @media (max-width: 74.9375rem) {
+    /* 1199px */
     grid-template-columns: 1fr;
   }
 `;
@@ -205,72 +228,79 @@ export const SplitGrid = styled.div`
 export const TemplateSettingsCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  min-height: 500px;
-  border-radius: 16px !important;
+  min-height: 31.25rem; /* 500px */
+  border-radius: ${tkn('radius.xl')} !important;
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
 `;
 
 export const TemplateTypeToggle = styled.div`
   display: flex;
-  background: #F1F5F9;
-  padding: 4px;
-  border-radius: 8px;
-  gap: 4px;
+  background: ${tkn('colors.background.tertiary')};
+  padding: 0.25rem; /* 4px */
+  border-radius: 0.5rem; /* 8px */
+  gap: 0.25rem; /* 4px */
 `;
 
 export const ToggleItem = styled.button<{ active?: boolean }>`
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 0.375rem 1rem; /* 6px 16px */
+  border-radius: 0.375rem; /* 6px */
   border: none;
-  background: ${({ active }) => (active ? '#FFFFFF' : 'transparent')};
-  color: ${({ active }) => (active ? '#2563EB' : '#64748B')};
+  background: ${({ active }) => (active ? tkn('colors.surface.primary') : 'transparent')};
+  color: ${({ active }) => (active ? tkn('colors.brand.primary') : tkn('colors.text.secondary'))};
   font-weight: 700;
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   cursor: pointer;
-  box-shadow: ${({ active }) => (active ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none')};
+  box-shadow: ${({ active }) => (active ? tkn('shadows.sm') : 'none')};
   transition: all 0.2s;
 
   &:hover {
-    color: ${({ active }) => (active ? '#2563EB' : '#1E293B')};
+    color: ${(p) => p.theme.colors.brand.primary};
   }
 `;
 
 export const TemplateSelectorWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 0.5rem; /* 8px */
+  margin-bottom: 1rem; /* 16px */
+  width: 100%;
+  max-width: 25rem; /* 400px */
+
+  @media (max-width: 47.9375rem) {
+    /* 767px */
+    max-width: 100%;
+  }
 `;
 
 export const TemplateEditorContainer = styled.div`
   flex: 1;
-  background: #0F172A;
-  border-radius: 12px;
-  border: 1px solid #1E293B;
+  background: #0f172a;
+  border-radius: ${tkn('radius.md')};
+  border: 0.0625rem solid #1e293b; /* 1px */
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 350px;
+  min-height: 21.875rem; /* 350px */
 `;
 
 export const EditorCodeArea = styled.div`
   flex: 1;
-  padding: 16px;
+  padding: 1rem; /* 16px */
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 13px;
-  color: #94A3B8;
+  font-size: 0.8125rem; /* 13px */
+  color: #94a3b8;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 0.375rem; /* 6px */
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
     background: #334155;
-    border-radius: 10px;
+    border-radius: 0.625rem; /* 10px */
   }
 `;
 
@@ -279,7 +309,7 @@ export const CustomTemplateTextarea = styled.textarea`
   height: 100%;
   background: transparent;
   border: none;
-  color: #CBD5E1;
+  color: #cbd5e1;
   font-family: inherit;
   font-size: inherit;
   outline: none;
@@ -290,61 +320,61 @@ export const CustomTemplateTextarea = styled.textarea`
 export const PreviewCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  min-height: 500px;
-  border-radius: 16px !important;
+  min-height: 31.25rem; /* 500px */
+  border-radius: ${tkn('radius.xl')} !important;
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
 `;
 
 export const DeviceControls = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
 `;
 
 export const IconButton = styled.button<{ $active?: boolean }>`
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
+  border-radius: 0.375rem; /* 6px */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ $active }) => ($active ? '#F1F5F9' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#2563EB' : '#94A3B8')};
+  background: ${({ $active, theme }) => ($active ? theme.colors.background.tertiary : 'transparent')};
+  color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.tertiary)};
   border: none;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #F1F5F9;
-    color: #2563EB;
+    background: ${(p) => p.theme.colors.background.tertiary};
+    color: ${(p) => p.theme.colors.brand.primary};
   }
 `;
 
 export const PreviewContainer = styled.div`
   flex: 1;
-  background: #F8FAFC;
-  border-radius: 12px;
-  border: 1px solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.background.tertiary')};
+  border-radius: ${tkn('radius.md')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   overflow: hidden;
   display: flex;
   flex-direction: column;
 `;
 
 export const PreviewBrowserHeader = styled.div`
-  height: 24px;
-  background: #F1F5F9;
-  border-bottom: 1px solid #E2E8F0;
+  height: 1.5rem; /* 24px */
+  background: ${(p) => p.theme.colors.background.tertiary};
+  border-bottom: 0.0625rem solid ${(p) => p.theme.colors.border.primary}; /* 1px */
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  gap: 4px;
+  padding: 0 0.75rem; /* 12px */
+  gap: 0.25rem; /* 4px */
 `;
 
 export const BrowserDot = styled.div`
-  width: 6px;
-  height: 6px;
+  width: 0.375rem; /* 6px */
+  height: 0.375rem; /* 6px */
   border-radius: 50%;
-  background: #CBD5E1;
+  background: #cbd5e1;
 `;
 
 export const PreviewViewport = styled.div<{ $device: 'desktop' | 'tablet' | 'mobile' }>`
@@ -352,23 +382,23 @@ export const PreviewViewport = styled.div<{ $device: 'desktop' | 'tablet' | 'mob
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  padding: ${({ $device }) => ($device === 'desktop' ? '0' : '20px')};
+  padding: ${({ $device }) => ($device === 'desktop' ? '0' : '1.25rem')}; /* 20px */
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 0.375rem; /* 6px */
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
-    border-radius: 10px;
+    background: #cbd5e1;
+    border-radius: 0.625rem; /* 10px */
   }
 `;
 
 export const PreviewContent = styled.div<{ $width: string }>`
   width: ${({ $width }) => $width};
-  background: #FFFFFF;
+  background: ${tkn('colors.surface.primary')};
   min-height: 100%;
   transition: width 0.3s ease;
 `;
@@ -381,16 +411,17 @@ export const PreviewHTMLContent = styled.div`
 export const AddButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: #2563EB;
-  font-size: 11px;
+  gap: 0.25rem; /* 4px */
+  color: #2563eb;
+  font-size: 0.6875rem; /* 11px */
   font-weight: 700;
   background: transparent;
   border: none;
   cursor: pointer;
   text-transform: uppercase;
-  
+
   &:hover {
+    color: ${(p) => p.theme.colors.brand.primaryHover};
     text-decoration: underline;
   }
 `;

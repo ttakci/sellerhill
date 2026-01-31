@@ -15,6 +15,8 @@ import {
   ListingsPage,
   ProductsPage,
 } from './features/listings';
+import { OrdersPage } from './features/orders/OrdersPage.container';
+import { OrderDetailsPage } from './features/orders/details';
 import ProfilePage from './features/profile';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
@@ -43,6 +45,8 @@ export function App() {
           <Route path="/listings/jobs/:jobId" element={<ListingJobDetailsPage />} />
           <Route path="/listings/products" element={<ProductsPage />} />
           <Route path="/listings/add" element={<AddListingsPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:id" element={<OrderDetailsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
 
           {/* Default redirect */}

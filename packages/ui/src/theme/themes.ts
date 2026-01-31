@@ -1,10 +1,4 @@
-import {
-  radiusTokens,
-  shadowTokens,
-  spacingTokens,
-  transitionTokens,
-  typographyTokens
-} from './designTokens';
+import { radiusTokens, shadowTokens, spacingTokens, transitionTokens, typographyTokens } from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
 /**
@@ -13,42 +7,42 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: '#FFFFFF',   // Main background (White)
-    secondary: '#F8FAFC', // Sidebar/Surface background
-    tertiary: '#F1F5F9',  // Subtle background (slate-100)
+    primary: '#F8FAFC', // Standard SaaS Light Gray Canvas
+    secondary: '#FFFFFF', // Surfaces
+    tertiary: '#F1F5F9', // Alternative subtle background
   },
 
   surface: {
-    primary: '#FFFFFF',   // Main surfaces
-    secondary: '#F1F5F9', // Subtle background for layout elements
-    overlay: 'rgba(16, 24, 40, 0.4)', // Modal overlays
+    primary: '#FFFFFF', // Pure white panels
+    secondary: '#F1F5F9',
+    overlay: 'rgba(16, 24, 40, 0.4)',
   },
 
   text: {
-    primary: '#1C2434',   // TailAdmin Deep Dark Blue/Gray
+    primary: '#1C2434', // TailAdmin Deep Dark Blue/Gray
     secondary: '#64748B', // Slates-500
-    tertiary: '#94A3B8',  // Slates-400
+    tertiary: '#94A3B8', // Slates-400
     disabled: '#E2E8F0',
     inverse: '#FFFFFF',
   },
 
   border: {
-    primary: '#E2E8F0',   // Main borders
-    secondary: '#F1F5F9', // Subtle dividers
-    focus: '#3C50E0',     // TailAdmin Primary Blue
+    primary: '#E2E8F0', // Neutral Slate Border
+    secondary: '#F1F5F9',
+    focus: '#3B82F6',
   },
 
   semantic: {
-    success: '#10B981',   // Emerald-500
-    error: '#FB4141',     // Red
-    warning: '#F59E0B',   // Amber-500
+    success: '#10B981', // Emerald-500
+    error: '#FB4141', // Red
+    warning: '#F59E0B', // Amber-500
     info: '#3C50E0',
   },
 
   brand: {
-    primary: '#2563EB',      // Stitch Primary Blue
-    primaryHover: '#1D4ED8', // Darker blue
-    secondary: '#EFF6FF',    // Lightest blue tint
+    primary: '#3B82F6', // Vibrant Mesh Blue
+    primaryHover: '#2563EB', // Hover state
+    secondary: '#EFF6FF', // Lightest blue tint
   },
 };
 
@@ -57,29 +51,29 @@ const lightColors: ThemeColors = {
  */
 const darkColors: ThemeColors = {
   background: {
-    primary: '#101828',   // Main dark background
-    secondary: '#101828', // Cards, Sidebar (same as primary for seamless look)
-    tertiary: '#1D2939',  // Hover states
+    primary: '#0c1427', // Main Deep Navy
+    secondary: '#0c1427', // Sidebar same as background
+    tertiary: '#15223F',
   },
 
   surface: {
-    primary: '#101828',
-    secondary: '#1D2939',
-    overlay: 'rgba(2, 6, 23, 0.7)',
+    primary: '#15223F', // Lighter navy for panels
+    secondary: '#0c1427',
+    overlay: 'rgba(2, 6, 23, 0.8)',
   },
 
   text: {
-    primary: '#FFFFFF',   // Main text
+    primary: '#FFFFFF', // Main text
     secondary: '#98A2B3', // Secondary text
-    tertiary: '#667085',  // Tertiary text
+    tertiary: '#667085', // Tertiary text
     disabled: '#475569',
     inverse: '#101828',
   },
 
   border: {
-    primary: '#1D2939',   // Dark borders
-    secondary: '#334155',
-    focus: '#465FFF',
+    primary: '#1E293B', // Standard Dark Border
+    secondary: '#0F172A',
+    focus: '#3B82F6',
   },
 
   semantic: {
@@ -90,9 +84,9 @@ const darkColors: ThemeColors = {
   },
 
   brand: {
-    primary: '#6172F3',      // Lighter brand for dark mode
-    primaryHover: '#7A8AF9',
-    secondary: 'rgba(97, 114, 243, 0.1)',
+    primary: '#3B82F6', // Consistent with Mesh & Light mode
+    primaryHover: '#60A5FA',
+    secondary: 'rgba(59, 130, 246, 0.1)',
   },
 };
 

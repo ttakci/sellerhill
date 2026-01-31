@@ -17,22 +17,25 @@ export const LayoutWrapper = styled.div`
  * SidebarContainer - Theme aware and responsive
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '80px' : '256px')};
-  background: ${tkn('colors.background.secondary')}; /* #F8FAFC */
-  color: ${tkn('colors.text.primary')};
-  border-right: 1px solid ${tkn('colors.border.primary')};
+  width: ${(props) => (props.$isCollapsed ? '5rem' : '16rem')};
+  background: #0c1427; /* Brand Navy */
+  color: #ffffff;
+  border-right: 0.0625rem solid rgba(255, 255, 255, 0.1); /* 1px */
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   z-index: 1000;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 
-  @media (max-width: 1023px) {
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
     position: fixed;
     top: 0;
-    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-256px')};
+    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-16rem')};
     height: 100vh;
-    width: 256px;
+    width: 16rem;
     box-shadow: ${tkn('shadows.xl')};
   }
 `;
@@ -42,8 +45,9 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
  */
 export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   display: none;
-  
-  @media (max-width: 1023px) {
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
     display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
     position: fixed;
     top: 0;
@@ -51,60 +55,69 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(0.125rem); /* 2px */
     z-index: 999;
     animation: fadeIn 0.15s ease-out;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 `;
 
 export const LogoArea = styled.div<{ $isCollapsed: boolean }>`
-  height: 80px;
-  padding: 0 ${tkn('spacing.lg')};
-  display: flex;
-  align-items: center;
-  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
-  gap: ${tkn('spacing.sm')};
-  cursor: pointer;
-  transition: opacity ${tkn('transitions.fast')};
-`;
-
-export const LogoBox = styled.div`
-  width: ${tkn('spacing.xl')};
-  height: ${tkn('spacing.xl')};
-  background: ${tkn('colors.brand.primary')};
-  border-radius: ${tkn('radius.md')};
+  height: 7.5rem; /* 120px */
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: all ${tkn('transitions.normal')};
+  position: relative;
+  z-index: 10; /* Ensure logo is always on top */
+
+  & img {
+    transition: all ${tkn('transitions.normal')};
+    /* Allow the logo to maintain its premium size even in collapsed state */
+    max-width: none;
+    filter: drop-shadow(0 0 1.25rem rgba(59, 130, 246, 0.3)); /* 20px */
+  }
 `;
 
 export const NavSection = styled.nav`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md')};
+  padding: 0 ${tkn('spacing.md')} ${tkn('spacing.md')};
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem; /* 4px */
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 
-  &::-webkit-scrollbar { width: 5px; }
-  &::-webkit-scrollbar-thumb { background: #333a48; border-radius: ${tkn('radius.full')}; }
+  &::-webkit-scrollbar {
+    width: 0.3125rem; /* 5px */
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: ${tkn('radius.full')};
+  }
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: 1.5rem 1rem 0.5rem;
+  padding: 0.75rem 1rem 0.5rem; /* 12px 16px 8px - assuming rem intended or fixed below */
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
-  color: ${tkn('colors.text.tertiary')}; /* #94A3B8 */
-  font-size: 11px;
+  color: #ffffff;
+  opacity: 0.6;
+  font-size: 0.6875rem; /* 11px */
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem; /* 1px */
 `;
 
 export const NavItemWrapper = styled.div`
@@ -116,19 +129,20 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: ${({ theme, $active }) => ($active ? theme.colors.brand.primary : theme.colors.text.secondary)};
-  background: ${({ $active }) => ($active ? '#EFF6FF' : 'transparent')};
+  padding: 0.625rem 0.875rem; /* 10px 14px */
+  border-radius: ${tkn('radius.md')};
+  color: ${({ theme, $active }) => ($active ? theme.colors.brand.primary : '#FFFFFF')};
+  background: ${({ $active }) => ($active ? 'rgba(255, 255, 255, 0.1)' : 'transparent')};
+  backdrop-filter: ${({ $active }) => ($active ? 'blur(0.625rem)' : 'none')}; /* 10px */
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
   font-weight: ${({ $active }) => ($active ? 600 : 500)};
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 
   &:hover {
-    background: ${tkn('colors.background.tertiary')};
-    color: ${({ theme }) => theme.colors.text.primary};
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
   }
 
   ${({ theme, $active }) =>
@@ -140,10 +154,10 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean }>`
       left: 0;
       top: 50%;
       transform: translateY(-50%);
-      width: 2px;
-      height: 20px;
+      width: 0.125rem; /* 2px */
+      height: 1.25rem; /* 20px */
       background: ${theme.colors.brand.primary};
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 0.25rem 0.25rem 0; /* 4px */
     }
   `}
 `;
@@ -151,12 +165,19 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean }>`
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
-  
+  gap: 0.75rem; /* 12px */
+
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+  flex: 1; /* Allow content to take available space */
+  min-width: 0; /* Ensure flex child can shrink below content size */
+
   & svg {
     color: inherit;
-    width: 18px;
-    height: 18px;
+    width: 1.125rem; /* 18px */
+    height: 1.125rem; /* 18px */
+    flex-shrink: 0; /* Prevent icon from shrinking */
   }
 `;
 
@@ -169,29 +190,30 @@ export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boole
 `;
 
 export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
-  max-height: ${({ $isOpen }) => ($isOpen ? '1000px' : '0')};
+  max-height: ${({ $isOpen }) => ($isOpen ? '62.5rem' : '0')}; /* 1000px */
   overflow: hidden;
   transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-top: ${({ $isOpen }) => ($isOpen ? '4px' : '0')};
+  gap: 0.125rem; /* 2px */
+  margin-top: ${({ $isOpen }) => ($isOpen ? '0.25rem' : '0')}; /* 4px */
 `;
 
 export const SidebarFooter = styled.div`
   padding: ${tkn('spacing.md')};
-  border-top: 1px solid ${tkn('colors.border.primary')};
+  border-top: 0.0625rem solid rgba(255, 255, 255, 0.1); /* 1px */
   box-sizing: border-box;
   position: relative;
+  z-index: 1;
 `;
 
 export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 12px;
+  gap: 0.75rem; /* 12px */
+  padding: 0.5rem; /* 8px */
+  border-radius: ${tkn('radius.md')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
@@ -202,33 +224,35 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
     background: ${tkn('colors.background.tertiary')};
   }
 
-  ${({ $isCollapsed }) => $isCollapsed && `
+  ${({ $isCollapsed }) =>
+    $isCollapsed &&
+    `
     justify-content: center;
-    padding: 8px 0;
+    padding: 0.5rem 0; /* 8px 0 */
   `}
 `;
 
 export const BadgeWrapper = styled.div<{ variant?: 'primary' | 'success'; size?: 'sm' | 'md' }>`
-  background: ${({ theme, variant }) => variant === 'success' ? '#ECFDF5' : '#EFF6FF'};
-  color: ${({ theme, variant }) => variant === 'success' ? '#059669' : theme.colors.brand.primary};
-  font-size: 10px;
+  background: ${({ theme, variant }) => (variant === 'success' ? '#ECFDF5' : '#EFF6FF')};
+  color: ${({ theme, variant }) => (variant === 'success' ? '#059669' : theme.colors.brand.primary)};
+  font-size: 0.625rem; /* 10px */
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid ${({ variant }) => variant === 'success' ? '#D1FAE5' : '#DBEAFE'};
+  padding: 0.125rem 0.375rem; /* 2px 6px */
+  border-radius: ${tkn('radius.sm')};
+  border: 0.0625rem solid ${({ variant }) => (variant === 'success' ? '#D1FAE5' : '#DBEAFE')}; /* 1px */
   text-transform: uppercase;
 `;
 
 export const ProfileBadge = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 2.25rem; /* 36px */
+  height: 2.25rem; /* 36px */
   border-radius: 50%;
   background: ${tkn('colors.brand.primary')};
-  color: #FFFFFF;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 700;
   flex-shrink: 0;
 `;
@@ -241,20 +265,38 @@ export const ProfileDetails = styled.div`
 `;
 
 export const SubNavItem = styled.div<{ $active?: boolean }>`
-  padding: 8px 12px 8px 42px;
+  padding: 0.625rem 0.75rem 0.625rem 2.625rem; /* 10px 12px 10px 42px */
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
-  color: ${({ theme, $active }) => ($active ? theme.colors.brand.primary : theme.colors.text.secondary)};
-  background: transparent;
-  border-radius: 8px;
-  margin: 0 4px;
-  font-size: 13px;
+  color: ${({ theme, $active }) => ($active ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)')};
+  background: ${({ $active }) => ($active ? 'rgba(59, 130, 246, 0.2)' : 'transparent')};
+  border-radius: ${tkn('radius.md')};
+  margin: 0 0.25rem; /* 0 4px */
+  font-size: 0.8125rem; /* 13px */
   font-weight: ${({ $active }) => ($active ? 600 : 400)};
+  position: relative;
+  z-index: 2;
 
   &:hover {
-    color: ${tkn('colors.text.primary')};
-    background: ${tkn('colors.background.tertiary')};
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
   }
+
+  ${({ $active }) =>
+    $active &&
+    `
+    &::before {
+      content: '';
+      position: absolute;
+      left: 1.25rem; /* 20px */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.25rem; /* 4px */
+      height: 0.25rem; /* 4px */
+      background: #3B82F6;
+      border-radius: 50%;
+    }
+  `}
 `;
 
 export const MainContent = styled.div`
@@ -266,9 +308,10 @@ export const MainContent = styled.div`
 `;
 
 export const HeaderContainer = styled.header`
-  height: 80px;
-  background: ${tkn('colors.background.secondary')};
-  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  height: auto;
+  min-height: 5rem; /* 80px */
+  background: ${tkn('colors.surface.primary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   position: sticky;
   top: 0;
   z-index: 99;
@@ -277,51 +320,58 @@ export const HeaderContainer = styled.header`
 `;
 
 export const HeaderInner = styled.div`
-  max-width: 1440px;
+  max-width: 90rem; /* 1440px */
   width: 100%;
   margin: 0 auto;
-  height: 100%;
+  min-height: 5rem;
   display: flex;
+  flex-wrap: wrap; /* Allow wrapping */
   align-items: center;
   justify-content: space-between;
-  padding: 0 ${tkn('spacing.md')};
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   box-sizing: border-box;
-  
-  @media (min-width: 768px) {
-    padding: 0 ${tkn('spacing.xl')};
+
+  @media (min-width: 48rem) {
+    /* 768px */
+    flex-wrap: nowrap; /* Prevent wrapping on desktop */
+    padding: 0 ${tkn('spacing.lg')};
+    gap: 0;
   }
 `;
 
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.md')};
-  flex: 1;
+  gap: ${tkn('spacing.sm')};
+  order: 1; /* First on mobile */
+
+  @media (min-width: 48rem) {
+    /* 768px */
+    width: auto;
+    gap: ${tkn('spacing.md')};
+    order: 0;
+    flex: 0; /* Let it shrink on desktop, breadcrumb takes focus or shared */
+  }
 `;
 
 export const BreadcrumbArea = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: ${tkn('colors.text.secondary')};
+  margin-left: 0; /* Reset margin */
+  width: 100%; /* Force new line on mobile */
+  flex-basis: 100%; /* Ensure it breaks to a new line and takes full width */
+  order: 3; /* Last on mobile (New Line) */
+  margin-top: ${tkn('spacing.xs')};
 
-  & span {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  & .active {
-    color: ${tkn('colors.text.primary')};
-    font-weight: 600;
-  }
-
-  & .hoverable {
-    cursor: pointer;
-    &:hover {
-        color: ${tkn('colors.brand.primary')};
-    }
+  @media (min-width: 48rem) {
+    /* 768px */
+    width: auto;
+    flex-basis: auto;
+    order: 2; /* Middle on desktop */
+    margin-top: 0;
+    margin-left: ${tkn('spacing.md')};
+    flex: 1; /* Take remaining space on desktop */
   }
 `;
 
@@ -341,23 +391,29 @@ export const MobileMenuButton = styled.button`
     background: ${tkn('colors.background.secondary')};
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     display: none;
   }
 `;
 
 export const ToggleButton = styled.button`
   background: transparent;
-  border: 1px solid ${tkn('colors.border.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   width: ${tkn('spacing.xl')};
   height: ${tkn('spacing.xl')};
-  display: flex;
+  display: none; /* Hidden by default on mobile */
   align-items: center;
   justify-content: center;
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
-  color: ${tkn('colors.text.secondary')};
+  color: ${tkn('colors.text.primary')}; /* Ensure high contrast */
   transition: all ${tkn('transitions.fast')};
+
+  @media (min-width: 64rem) {
+    /* 1024px */
+    display: flex; /* Show on desktop */
+  }
 
   &:hover {
     background: ${tkn('colors.background.tertiary')};
@@ -373,18 +429,19 @@ export const ToggleButton = styled.button`
 
 export const SearchArea = styled.div`
   display: none;
-  
-  @media (min-width: 768px) {
+
+  @media (min-width: 48rem) {
+    /* 768px */
     display: flex;
     align-items: center;
     gap: ${tkn('spacing.sm')};
     color: ${tkn('colors.text.tertiary')};
-    max-width: 400px;
+    max-width: 25rem; /* 400px */
     width: 100%;
     padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
     background: ${tkn('colors.background.primary')};
     border-radius: ${tkn('radius.md')};
-    border: 1px solid ${tkn('colors.border.secondary')};
+    border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
     transition: border-color ${tkn('transitions.fast')};
 
     &:focus-within {
@@ -411,24 +468,27 @@ export const Kbd = styled.kbd`
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.tertiary')};
   background: ${tkn('colors.background.secondary')};
-  padding: 2px ${tkn('spacing.sm')};
+  padding: 0.125rem ${tkn('spacing.sm')}; /* 2px */
   border-radius: ${tkn('radius.md')};
-  border: 1px solid ${tkn('colors.border.secondary')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
 `;
 
 export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 2px; /* significantly reduced gap */
-  
-  @media (min-width: 768px) {
-    gap: 4px;
+  gap: 0.125rem; /* 2px */
+  order: 2; /* Ensure it stays on top row with HeaderLeft */
+
+  @media (min-width: 48rem) {
+    /* 768px */
+    gap: 0.25rem; /* 4px */
+    order: 3;
   }
 `;
 
 export const ActionIcon = styled.button`
-  width: 40px;
-  height: 40px;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
   flex-shrink: 0;
   position: relative;
   display: flex;
@@ -447,51 +507,55 @@ export const ActionIcon = styled.button`
   }
 
   & svg {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem; /* 20px */
+    height: 1.25rem; /* 20px */
   }
 `;
 
 export const VerticalDivider = styled.div`
-  width: 1px;
-  height: 16px;
+  width: 0.0625rem; /* 1px */
+  height: 1rem; /* 16px */
   background: ${tkn('colors.border.primary')};
-  margin: 0 2px;
+  margin: 0 0.125rem; /* 2px */
   flex-shrink: 0;
 `;
 
 export const LanguageSelectTrigger = styled.div`
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0.125rem; /* 2px */
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 0.125rem 0.375rem; /* 2px 6px */
+  border-radius: ${tkn('radius.sm')};
   transition: background 0.2s;
 
   &:hover {
     background: #f1f5f9;
-    .dark & { background: #1e293b; }
+    .dark & {
+      background: #1e293b;
+    }
   }
 `;
 
 export const LanguageText = styled.span`
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   font-weight: 700;
   color: #475569;
   text-transform: uppercase;
-  .dark & { color: #94a3b8; }
+  .dark & {
+    color: #94a3b8;
+  }
 `;
 
 export const NotificationBadge = styled.span`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 6px;
-  height: 6px;
+  top: 0.625rem; /* 10px */
+  right: 0.625rem; /* 10px */
+  width: 0.375rem; /* 6px */
+  height: 0.375rem; /* 6px */
   border-radius: 50%;
-  background: #EF4444; /* Red dot */
-  border: 1.5px solid ${tkn('colors.background.secondary')};
+  background: #ef4444; /* Red dot */
+  border: 0.09375rem solid ${tkn('colors.background.secondary')}; /* 1.5px */
   box-sizing: content-box;
 `;
 
@@ -499,13 +563,14 @@ export const ProfileArea = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-  
-  @media (min-width: 768px) {
-    gap: 12px;
+
+  @media (min-width: 48rem) {
+    /* 768px */
+    gap: 0.75rem; /* 12px */
     padding-left: ${tkn('spacing.md')};
-    border-left: 1px solid ${tkn('colors.border.secondary')};
+    border-left: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   }
-  
+
   cursor: pointer;
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.md')};
@@ -519,7 +584,8 @@ export const ProfileArea = styled.div`
 export const ProfileInfo = styled.div`
   display: none;
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -529,15 +595,16 @@ export const ProfileInfo = styled.div`
 export const AvatarWrapper = styled.div`
   width: ${tkn('spacing.xl')};
   height: ${tkn('spacing.xl')};
-  
-  @media (min-width: 768px) {
+
+  @media (min-width: 48rem) {
+    /* 768px */
     width: ${tkn('spacing.xxl')};
     height: ${tkn('spacing.xxl')};
   }
-  
+
   border-radius: ${tkn('radius.full')};
   overflow: hidden;
-  border: 2px solid ${tkn('colors.border.primary')};
+  border: 0.125rem solid ${tkn('colors.border.primary')}; /* 2px */
   box-shadow: ${tkn('shadows.sm')};
 `;
 
@@ -551,18 +618,19 @@ export const ContentArea = styled.main`
   flex: 1;
   overflow-y: auto;
   width: 100%;
-  background: ${tkn('colors.background.primary')};
+  background: transparent;
 `;
 
 export const ContentInner = styled.div`
-  max-width: 1440px;
+  max-width: 90rem; /* 1440px */
   width: 100%;
   margin: 0 auto;
   padding: ${tkn('spacing.md')};
   box-sizing: border-box;
-  
-  @media (min-width: 768px) {
-    padding: ${tkn('spacing.xl')};
+
+  @media (min-width: 48rem) {
+    /* 768px */
+    padding: ${tkn('spacing.lg')};
   }
 `;
 
@@ -578,7 +646,7 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   right: 0;
   bottom: 0;
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(0.25rem); /* 4px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -607,7 +675,7 @@ export const DropdownHeaderWrapper = styled.div`
 
 export const ModalFooterWrapper = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
   justify-content: flex-end;
   width: 100%;
 `;

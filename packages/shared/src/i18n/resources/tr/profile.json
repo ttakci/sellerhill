@@ -21,6 +21,9 @@
     "updateSuccess": "Profil başarıyla güncellendi.",
     "twitter": "Twitter URL",
     "linkedin": "LinkedIn URL",
-    "instagram": "Instagram URL"
+    "instagram": "Instagram URL",
+    "deactivateAccount": "Hesabı Devre Dışı Bırak",
+    "saveChanges": "Tüm Değişiklikleri Kaydet",
+    "storeOwner": "Mağaza Sahibi"
   }
 }

@@ -6,13 +6,13 @@
     "editGroup": "Listeleme Grubunu Düzenle",
     "backToList": "Gruplara Dön",
     "connectorSubtitle": "AMAZON'DAN EBAY'E BAĞLAYICI",
-    
+
     "groupDetails": "Grup Detayları",
     "groupName": "Grup Adı",
     "groupNamePlaceholder": "örn., Premium Elektronik",
     "description": "Açıklama",
     "descriptionPlaceholder": "Grup iç notlarını girin...",
-    
+
     "repricingStrategy": "Yeniden Fiyatlandırma Stratejisi",
     "addPriceRange": "Fiyat Aralığı Ekle",
     "removePriceRange": "Fiyat Aralığını Kaldır",
@@ -21,12 +21,12 @@
     "profitMargin": "Kâr Marjı (%)",
     "fixedProfit": "Sabit Kâr ($)",
     "priceRangeLabel": "Fiyat Aralığı {{index}}",
-    
+
     "stock": "Stok",
     "defaultQuantity": "Varsayılan Miktar",
     "autoRestock": "Satışta otomatik yeniden stokla",
     "autoRestockDescription": "Ürünler satıldığında otomatik olarak yeniden stokla",
-    
+
     "fees": "Ücretler",
     "ebayFee": "eBay Ücreti",
     "ebayFeePercent": "eBay Ücreti (%)",
@@ -34,7 +34,7 @@
     "fixedFeeAmount": "Sabit Ücret ($)",
     "tax": "Vergi",
     "taxPercent": "Vergi (%)",
-    
+
     "templates": "Şablon",
     "customTemplate": "Özel",
     "predefinedTemplate": "Öntanımlı",
@@ -43,14 +43,14 @@
     "htmlEditor": "HTML Editörü",
     "templatePlaceholder": "Özel HTML şablonunuzu girin...",
     "templateVariablesHelp": "{{product_title}}, {{product_price}}, {{product_image}}, {{product_description}} gibi değişkenler kullanın",
-    
+
     "preview": "Önizleme",
     "livePreview": "Canlı Önizleme",
     "darkModePreview": "Karanlık Mod Önizlemesi",
     "desktopView": "Masaüstü Görünümü",
     "mobileView": "Mobil Görünüm",
     "renderingPreview": "Önizleme oluşturuluyor...",
-    
+
     "saveChanges": "Değişiklikleri Kaydet",
     "saving": "Kaydediliyor...",
     "cancel": "İptal",
@@ -60,21 +60,21 @@
     "confirmDeleteMessage": "Bu işlem geri alınamaz. Bu grubu kullanan ürünlerin yeniden atanması gerekecek.",
     "deleteSuccess": "Grup başarıyla silindi",
     "deleteFailed": "Grup silinemedi",
-    
+
     "productsCount_one": "{{count}} ürün",
     "productsCount_other": "{{count}} ürün",
     "noProducts": "Ürün yok",
-    
+
     "statusActive": "Aktif",
     "statusDraft": "Taslak",
     "statusInactive": "Pasif",
-    
+
     "emptyState": {
       "title": "Henüz Listeleme Grubu Yok",
       "description": "Listelerinizi organize etmeye başlamak için ilk grubunuzu oluşturun",
       "action": "Yeni Grup Oluştur"
     },
-    
+
     "predefinedTemplates": {
       "modernMinimalist": "Modern Minimalist",
       "modernMinimalistDesc": "Ürün detaylarına odaklanan temiz ve profesyonel tasarım",
@@ -83,7 +83,7 @@
       "ecommerceClassic": "E-ticaret Klasik",
       "ecommerceClassicDesc": "Net bölümler ve harekete geçirici mesajlarla geleneksel düzen"
     },
-    
+
     "validation": {
       "nameRequired": "Grup adı gereklidir",
       "nameMinLength": "Grup adı en az 3 karakter olmalıdır",
@@ -108,7 +108,7 @@
       "maxPriceRanges": "Maksimum 10 fiyat aralığına izin verilir",
       "overlappingPriceRanges": "Fiyat aralıkları örtüşemez"
     },
-    
+
     "errors": {
       "loadFailed": "Listeleme grupları yüklenemedi",
       "saveFailed": "Değişiklikler kaydedilemedi",
@@ -121,14 +121,14 @@
       "networkError": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
       "unknownError": "Beklenmeyen bir hata oluştu"
     },
-    
+
     "success": {
       "created": "Listeleme grubu başarıyla oluşturuldu",
       "updated": "Listeleme grubu başarıyla güncellendi",
       "deleted": "Listeleme grubu başarıyla silindi",
       "saved": "Değişiklikler başarıyla kaydedildi"
     },
-    
+
     "tooltips": {
       "editGroup": "Grubu düzenle",
       "deleteGroup": "Grubu sil",
@@ -140,7 +140,7 @@
       "copyTemplate": "Şablon HTML'ini kopyala",
       "resetTemplate": "Varsayılan şablona sıfırla"
     },
-    
+
     "help": {
       "repricingStrategy": "Farklı kâr marjlarıyla birden fazla fiyat aralığı tanımlayın. Ürünler maliyet aralıklarına göre fiyatlandırılacaktır.",
       "profitMargin": "Ürün maliyetinden hesaplanan yüzde bazlı kâr.",
@@ -168,9 +168,9 @@
     "ebayLayoutFile": "EBAY_LAYOUT.HTML",
     "ebayFormat": "EBAY FORMATI",
     "sample": {
-      "productTitle": "Özel Şablon Ürünü",
-      "productDescription": "Bu sizin özel şablon açıklamanızdır.",
-      "productSpecs": "<ul><li>Özellik A</li><li>Özellik B</li></ul>"
+      "productTitle": "Premium Kablosuz Gürültü Engelleyici Kulaklık",
+      "productDescription": "Bu üst düzey kablosuz kulaklıklarla dünya standartlarında gürültü engelleme ve birinci sınıf ses kalitesini deneyimleyin. Seyahat, iş veya saf dinleme keyfi için mükemmeldir.",
+      "productSpecs": "<ul><li>Aktif Gürültü Engelleme</li><li>40 saat pil ömrü</li><li>Evrensel Bluetooth uyumluluğu</li><li>Dahili mikrofon</li></ul>"
     },
     "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır."
   }

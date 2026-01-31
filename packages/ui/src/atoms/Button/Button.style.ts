@@ -22,7 +22,7 @@ const variantStyles = {
     &:hover:not(:disabled) {
       background: ${theme.colors.brand.primaryHover};
       border-color: ${theme.colors.brand.primaryHover};
-      transform: translateY(-1px);
+      transform: translateY(-0.0625rem); /* 1px */
       box-shadow: ${theme.shadows.sm};
     }
 
@@ -41,7 +41,7 @@ const variantStyles = {
       background: ${theme.colors.background.primary};
       border-color: ${theme.colors.border.primary};
       color: ${theme.colors.brand.primary};
-      transform: translateY(-1px);
+      transform: translateY(-0.0625rem); /* 1px */
       box-shadow: ${theme.shadows.sm};
     }
 
@@ -57,7 +57,23 @@ const variantStyles = {
 
     &:hover:not(:disabled) {
       opacity: 0.9;
-      transform: translateY(-1px);
+      transform: translateY(-0.0625rem); /* 1px */
+      box-shadow: ${theme.shadows.sm};
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  `,
+
+  success: (theme: Theme) => `
+    background: ${theme.colors.semantic.success};
+    color: ${theme.colors.text.inverse};
+    border-color: ${theme.colors.semantic.success};
+
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-0.0625rem); /* 1px */
       box-shadow: ${theme.shadows.sm};
     }
 
@@ -69,21 +85,21 @@ const variantStyles = {
 
 const sizeStyles = {
   sm: (theme: Theme) => `
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     font-size: ${theme.typography.fontSize.xs};
-    height: 34px;
+    height: 2.125rem;
   `,
 
   md: (theme: Theme) => `
-    padding: 10px 20px;
+    padding: 0.625rem 1.25rem;
     font-size: ${theme.typography.fontSize.sm};
-    height: 42px;
+    height: 2.625rem;
   `,
 
   lg: (theme: Theme) => `
-    padding: 14px 28px;
+    padding: 0.875rem 1.75rem;
     font-size: ${theme.typography.fontSize.md};
-    height: 52px;
+    height: 3.25rem;
     font-weight: ${theme.typography.fontWeight.semibold};
   `,
 };
@@ -95,13 +111,17 @@ const ButtonContainer = styled.button<StyledButtonProps>`
   gap: ${(p) => tkn('spacing.sm')(p as any)};
 
   border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.sm')(p as any))};
-  border: 1px solid transparent;
+  border: 0.0625rem solid transparent; /* 1px */
   font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
   font-family: ${(p) => tkn('typography.fontFamily.sans')(p as any)};
 
   cursor: pointer;
   white-space: nowrap;
-  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform ${tkn('transitions.normal')},
+    background-color ${tkn('transitions.normal')},
+    border-color ${tkn('transitions.normal')},
+    box-shadow ${tkn('transitions.normal')};
 
   /* Size styles */
   ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}
@@ -127,13 +147,13 @@ const ButtonContainer = styled.button<StyledButtonProps>`
       &::after {
         content: '';
         position: absolute;
-        width: 20px;
-        height: 20px;
+        width: 1.25rem;
+        height: 1.25rem;
         top: 50%;
         left: 50%;
-        margin-left: -10px;
-        margin-top: -10px;
-        border: 2px solid currentColor;
+        margin-left: -0.625rem;
+        margin-top: -0.625rem;
+        border: 0.125rem solid currentColor;
         border-radius: 50%;
         border-top-color: transparent;
         animation: button-loading-spinner 0.6s linear infinite;
@@ -162,7 +182,7 @@ const ButtonContainer = styled.button<StyledButtonProps>`
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px ${(p) => p.theme.colors.brand.secondary};
+    box-shadow: 0 0 0 0.1875rem ${(p) => p.theme.colors.brand.secondary}; /* 3px */
   }
 `;
 

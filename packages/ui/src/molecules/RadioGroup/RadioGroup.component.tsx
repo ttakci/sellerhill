@@ -25,7 +25,7 @@ export const RadioGroup = <TFieldValues extends FieldValues = FieldValues>({
             <S.LabelText>
               <Text variant="body" weight="medium">
                 {label}
-                {required && <span style={{ color: 'red', marginLeft: 4 }}>*</span>}
+                {required && <span style={{ color: 'red', marginLeft: '0.25rem' }}>*</span>}
               </Text>
             </S.LabelText>
           )}

@@ -1,55 +1,38 @@
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
 
-export const Container = styled.div`
+export const Container = styled.nav`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${tkn('spacing.xl')};
-  width: 100%;
-`;
-
-export const Title = styled.h2`
-  font-size: ${tkn('typography.fontSize.xxl')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-  margin: 0;
-`;
-
-export const List = styled.ol`
-  display: flex;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
   gap: ${tkn('spacing.xs')};
-`;
-
-export const ListItem = styled.li<{ $active?: boolean }>`
   font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.secondary)};
+  color: ${tkn('colors.text.secondary')};
+`;
+
+export const Item = styled.div<{ $active?: boolean; $hoverable?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-
-  &::after {
-    content: '/';
-    color: ${tkn('colors.text.tertiary')};
-    display: ${({ $active }) => ($active ? 'none' : 'block')};
-  }
-
-  &:last-child::after {
-    display: none;
-  }
-`;
-
-export const Link = styled.a`
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.2s;
+  color: ${({ theme, $active }) => ($active ? theme.colors.text.primary : theme.colors.text.secondary)};
+  font-weight: ${({ theme, $active }) =>
+    $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.medium};
+  transition: all ${tkn('transitions.fast')};
+  cursor: ${({ $hoverable }) => ($hoverable ? 'pointer' : 'default')};
 
   &:hover {
-    color: ${tkn('colors.brand.primary')};
+    color: ${({ theme, $hoverable }) => ($hoverable ? theme.colors.brand.primary : 'inherit')};
   }
+
+  & span {
+    line-height: 1;
+    white-space: nowrap;
+  }
+`;
+
+export const Separator = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${tkn('colors.text.tertiary')};
+  opacity: 0.8;
+  margin: 0 0.25rem; /* 4px */
 `;

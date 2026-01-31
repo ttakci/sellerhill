@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
+import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
-  max-width: 1280px;
+  max-width: 80rem; /* 1280px */
   margin: 0 auto;
-  padding: 32px;
+  padding: ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -12,19 +13,19 @@ export const Container = styled.div`
 `;
 
 export const Header = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: ${tkn('spacing.lg')};
 
   h1 {
-    font-size: 24px;
+    font-size: 1.5rem; /* 24px */
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem; /* 4px */
   }
 
   p {
-    font-size: 14px;
+    font-size: 0.875rem; /* 14px */
     color: #64748b;
-    max-width: 768px;
+    max-width: 48rem; /* 768px */
     line-height: 1.5;
   }
 `;
@@ -32,13 +33,14 @@ export const Header = styled.div`
 export const ConfigSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: ${tkn('spacing.lg')};
+  margin-bottom: ${tkn('spacing.lg')};
 
-  @media (min-width: 1024px) {
+  @media (min-width: 64rem) {
+    /* 1024px */
     flex-direction: row;
     align-items: stretch;
-    
+
     & > * {
       flex: 1;
       min-width: 0;
@@ -48,10 +50,11 @@ export const ConfigSection = styled.div`
 
 export const Card = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.lg')};
+
+  border: 0.0625rem solid #e5e7eb; /* 1px */
+  box-shadow: 0 0.0625rem 0.125rem 0 rgba(0, 0, 0, 0.05); /* 1px 2px */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -60,11 +63,11 @@ export const Card = styled.div`
 export const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 0.75rem; /* 12px */
+  margin-bottom: ${tkn('spacing.md')};
 
   h2 {
-    font-size: 16px;
+    font-size: 1rem; /* 16px */
     font-weight: 700;
     color: #1e293b;
     margin: 0;
@@ -72,20 +75,20 @@ export const CardHeader = styled.div`
 `;
 
 export const IconWrapper = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
   background: #eff6ff;
   color: #2563eb;
-  border-radius: 8px;
+  border-radius: ${tkn('radius.md')};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  
+
   /* Ensure the icon itself is visible and centered */
   svg {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem; /* 24px */
+    height: 1.5rem; /* 24px */
     display: block;
   }
 `;
@@ -93,34 +96,35 @@ export const IconWrapper = styled.div`
 export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem; /* 6px */
   width: 100%;
 `;
 
 export const PolicyGrid = styled.div`
   display: grid;
-  grid-template-cols: 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 1rem; /* 16px */
   width: 100%;
 
-  @media (min-width: 640px) {
-    grid-template-cols: repeat(3, 1fr);
+  @media (min-width: 40rem) {
+    /* 640px */
+    grid-template-columns: repeat(3, 1fr);
   }
 `;
 
 export const AsinCard = styled.div`
   background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-radius: ${tkn('radius.lg')};
+  border: 0.0625rem solid #e5e7eb; /* 1px */
+  box-shadow: 0 0.0625rem 0.125rem 0 rgba(0, 0, 0, 0.05); /* 1px 2px */
   overflow: hidden;
-  margin-top: 24px;
+  margin-top: 1.5rem; /* 24px */
   width: 100%;
 `;
 
 export const AsinCardHeader = styled.div`
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid #e5e7eb; /* 1px */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -130,38 +134,39 @@ export const AsinCardHeader = styled.div`
 export const AsinHeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
 `;
 
 export const AsinCounter = styled.div`
   background: #dbeafe;
   color: #1d4ed8;
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 9999px;
+  padding: 0.375rem 0.75rem; /* 6px 12px */
+  border-radius: 624.9375rem; /* 9999px */
 `;
 
 export const AsinInputWrapper = styled.div`
-  padding: 24px;
+  padding: ${tkn('spacing.lg')};
 `;
 
 export const AsinInputHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 1rem; /* 16px */
 `;
 
 export const AsinTextarea = styled.textarea<{ hasError?: boolean }>`
   width: 100%;
-  min-height: 240px;
+  min-height: 15rem; /* 240px */
   background: #f9fafb;
-  border: 1px solid ${({ hasError }) => hasError ? '#ef4444' : '#e5e7eb'};
-  border-radius: 12px;
-  padding: 24px;
+  border: 0.0625rem solid ${({ hasError }) => (hasError ? '#ef4444' : '#e5e7eb')}; /* 1px */
+  border-radius: ${tkn('radius.md')};
+  padding: ${tkn('spacing.lg')};
+
   font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   color: #475569;
   line-height: 1.5;
   outline: none;
@@ -171,7 +176,7 @@ export const AsinTextarea = styled.textarea<{ hasError?: boolean }>`
 
   &:focus {
     border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 0.125rem rgba(37, 99, 235, 0.1); /* 2px */
     background: white;
   }
 
@@ -181,9 +186,9 @@ export const AsinTextarea = styled.textarea<{ hasError?: boolean }>`
 `;
 
 export const FormFooter = styled.div`
-  padding: 16px 24px;
+  padding: 1rem 1.5rem; /* 16px 24px */
   background: rgba(248, 250, 252, 0.3);
-  border-top: 1px solid #e5e7eb;
+  border-top: 0.0625rem solid #e5e7eb; /* 1px */
   display: flex;
   justify-content: flex-end;
 `;
@@ -191,17 +196,17 @@ export const FormFooter = styled.div`
 export const SubmitButton = styled.button`
   background: #2563eb;
   color: white;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 600;
-  padding: 10px 32px;
-  border-radius: 8px;
+  padding: 0.625rem 2rem; /* 10px 32px */
+  border-radius: 0.5rem; /* 8px */
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem; /* 8px */
   transition: all 0.2s;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0.0625rem 0.125rem 0 rgba(0, 0, 0, 0.05); /* 1px 2px */
 
   &:hover:not(:disabled) {
     background: #1d4ed8;
@@ -215,10 +220,10 @@ export const SubmitButton = styled.button`
 
 export const Label = styled.label`
   display: block;
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 600;
   color: #334155;
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem; /* 6px */
 `;
 
 export const RequiredStar = styled.span`
@@ -226,15 +231,15 @@ export const RequiredStar = styled.span`
 `;
 
 export const ItalicHelp = styled.p`
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   color: #94a3b8;
   font-style: italic;
-  margin-top: 8px;
+  margin-top: 0.5rem; /* 8px */
 `;
 
 export const MonoCode = styled.span`
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;

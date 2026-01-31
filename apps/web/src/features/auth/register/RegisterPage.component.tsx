@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Button, Icon, Text, TextInput } from '@repo/ui';
+import { Icon, Logo, MeshBackground, ModernButton, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ export const RegisterPageComponent = ({
   isLoading,
   onNavigateToLogin,
 }: RegisterPageComponentProps): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
+  const { t } = useTranslation(['translation', 'auth']);
 
   const {
     control,
@@ -40,8 +40,35 @@ export const RegisterPageComponent = ({
   return (
     <S.Container>
       <S.LayoutWrapper>
-        {/* Left Panel: Form */}
-        <S.LeftPanel>
+        {/* Left Panel: Branding */}
+        <S.BrandingPanel>
+          <S.DecorationArea>
+            <MeshBackground animate={true} />
+          </S.DecorationArea>
+
+          <S.BrandingContent>
+            <S.BrandingLogoWrapper>
+              <Logo size={520} />
+            </S.BrandingLogoWrapper>
+
+            <S.SloganWrapper>
+              <Typewriter
+                phrases={[
+                  t('auth.branding.slogan1'),
+                  t('auth.branding.slogan2'),
+                  t('auth.branding.slogan3'),
+                  t('auth.branding.slogan4'),
+                ]}
+                typingSpeed={70}
+                deletingSpeed={40}
+                pauseTime={2500}
+              />
+            </S.SloganWrapper>
+          </S.BrandingContent>
+        </S.BrandingPanel>
+
+        {/* Right Panel: Form */}
+        <S.FormPanel>
           <S.AuthCard>
             <S.BackLink onClick={() => window.history.back()}>
               <Icon name="chevron-left" size="sm" />
@@ -59,102 +86,72 @@ export const RegisterPageComponent = ({
 
             <S.Form onSubmit={handleSubmit(onSubmit)}>
               <S.FormRow>
-                <TextInput
+                <ModernTextInput
                   name="firstName"
                   control={control}
                   label={t('auth.register.firstNameLabel')}
                   placeholder={t('auth.register.firstNamePlaceholder')}
-                  disabled={isLoading || isSubmitting}
+                  isDisabled={isLoading || isSubmitting}
                 />
-                <TextInput
+                <ModernTextInput
                   name="lastName"
                   control={control}
                   label={t('auth.register.lastNameLabel')}
                   placeholder={t('auth.register.lastNamePlaceholder')}
-                  disabled={isLoading || isSubmitting}
+                  isDisabled={isLoading || isSubmitting}
                 />
               </S.FormRow>
 
-              <TextInput
+              <ModernTextInput
                 name="email"
                 control={control}
                 label={t('auth.register.emailLabel')}
                 placeholder={t('auth.register.emailPlaceholder')}
                 type="email"
-                disabled={isLoading || isSubmitting}
+                isDisabled={isLoading || isSubmitting}
               />
 
-              <TextInput
+              <ModernTextInput
                 name="password"
                 control={control}
                 label={t('auth.register.passwordLabel')}
                 placeholder={t('auth.register.passwordPlaceholder')}
                 type="password"
-                disabled={isLoading || isSubmitting}
+                isDisabled={isLoading || isSubmitting}
               />
 
-              <TextInput
+              <ModernTextInput
                 name="confirmPassword"
                 control={control}
                 label={t('auth.register.confirmPasswordLabel')}
                 placeholder={t('auth.register.confirmPasswordPlaceholder')}
                 type="password"
-                disabled={isLoading || isSubmitting}
+                isDisabled={isLoading || isSubmitting}
               />
 
               <S.ButtonContainer>
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  fullWidth 
-                  isLoading={isLoading || isSubmitting} 
-                  size="lg"
+                <ModernButton
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isLoading={isLoading || isSubmitting}
+                  size="large"
                 >
                   {t('auth.register.submitButton')}
-                </Button>
+                </ModernButton>
               </S.ButtonContainer>
             </S.Form>
 
             <S.Footer>
               <Text variant="body" color="text.secondary">
-                {t('auth.register.haveAccount')}
+                {t('auth.register.alreadyHaveAccount')}
               </Text>
               <S.FooterLink type="button" onClick={onNavigateToLogin}>
                 {t('auth.register.loginLink')}
               </S.FooterLink>
             </S.Footer>
           </S.AuthCard>
-        </S.LeftPanel>
-
-        {/* Right Panel: Branding */}
-        <S.RightPanel>
-          <S.MosaicDecor>
-            <div className="box-1" />
-            <div className="box-2" />
-            <div className="box-3" />
-            <div className="box-4" />
-          </S.MosaicDecor>
-          <S.BrandingContent>
-            <S.LogoWrapper>
-              <Icon name="logo" size={64} color="text.inverse" />
-              <Text variant="h1" weight="bold" color="text.inverse">
-                Zonds
-              </Text>
-            </S.LogoWrapper>
-            
-            <Text variant="h3" weight="medium" color="text.inverse">
-              {t('auth.register.startFree')}
-            </Text>
-            
-            <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
-              Zonds ile e-ticaret sitelerinizi tek bir yerden yönetin, envanterinizi senkronize edin ve satışlarınızı artırın.
-            </Text>
-
-            <div style={{ marginTop: '2rem' }}>
-              <Icon name="zorro" size={200} color="text.inverse" style={{ opacity: 0.1 }} />
-            </div>
-          </S.BrandingContent>
-        </S.RightPanel>
+        </S.FormPanel>
       </S.LayoutWrapper>
     </S.Container>
   );

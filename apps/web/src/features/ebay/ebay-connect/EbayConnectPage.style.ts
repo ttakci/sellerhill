@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
 export const Container = styled.div`
-  max-width: 600px;
+  max-width: 37.5rem; /* 600px */
   margin: 0 auto;
   padding: ${tkn('spacing.xl')};
 `;
@@ -59,5 +59,5 @@ export const InfoText = styled.p`
 
 export const ButtonContainer = styled.div`
   width: 100%;
-  max-width: 320px;
+  max-width: 20rem; /* 320px */
 `;

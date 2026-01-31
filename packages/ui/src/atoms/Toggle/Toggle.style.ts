@@ -19,8 +19,8 @@ export const HiddenCheckbox = styled.input`
 
 export const Switch = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
   position: relative;
-  width: 48px;
-  height: 24px;
+  width: 3rem; /* 48px */
+  height: 1.5rem; /* 24px */
   background-color: ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)};
   border-radius: ${tkn('radius.full')};
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
@@ -28,13 +28,13 @@ export const Switch = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
   &::after {
     content: '';
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 1.125rem; /* 18px */
+    height: 1.125rem; /* 18px */
     background-color: ${tkn('colors.text.inverse')};
     border-radius: ${tkn('radius.full')};
-    top: 3px;
-    left: 3px;
-    transform: translateX(${({ $checked }) => ($checked ? '24px' : '0')});
+    top: 0.1875rem; /* 3px */
+    left: 0.1875rem; /* 3px */
+    transform: translateX(${({ $checked }) => ($checked ? '1.5rem' : '0')}); /* 24px */
     transition: transform ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: ${tkn('shadows.sm')};
   }

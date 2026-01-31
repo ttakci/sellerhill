@@ -12,13 +12,17 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 20px;
-  backdrop-filter: blur(4px);
+  padding: 1.25rem; /* 20px */
+  backdrop-filter: blur(0.25rem); /* 4px */
   animation: fadeIn 0.2s ease-out;
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 `;
 
@@ -28,11 +32,16 @@ export const ModalContainer = styled.div<{ $size: string }>`
   width: 100%;
   max-width: ${({ $size }) => {
     switch ($size) {
-      case 'sm': return '400px';
-      case 'md': return '600px';
-      case 'lg': return '800px';
-      case 'xl': return '1200px';
-      default: return '600px';
+      case 'sm':
+        return '25rem'; /* 400px */
+      case 'md':
+        return '37.5rem'; /* 600px */
+      case 'lg':
+        return '50rem'; /* 800px */
+      case 'xl':
+        return '75rem'; /* 1200px */
+      default:
+        return '37.5rem'; /* 600px */
     }
   }};
   display: flex;
@@ -42,31 +51,37 @@ export const ModalContainer = styled.div<{ $size: string }>`
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-1.25rem); /* 20px */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
 export const Header = styled.div`
-  padding: 20px 24px;
-  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   align-items: center;
   justify-content: space-between;
 `;
 
 export const Body = styled.div`
-  padding: 24px;
+  padding: ${tkn('spacing.lg')};
   overflow-y: auto;
   flex: 1;
 `;
 
 export const Footer = styled.div`
-  padding: 20px 24px;
-  border-top: 1px solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 0.75rem; /* 12px */
 `;
 
 export const CloseButton = styled.button`

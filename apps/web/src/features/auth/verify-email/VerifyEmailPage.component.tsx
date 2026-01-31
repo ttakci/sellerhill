@@ -62,13 +62,11 @@ export const VerifyEmailPageComponent = ({
             <S.LogoWrapper>
               <Icon name="logo" size={48} color="brand.primary" />
               <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.LogoWrapper>
 
-            <S.StatusIconWrapper $type={content.type}>
-              {content.icon}
-            </S.StatusIconWrapper>
+            <S.StatusIconWrapper $type={content.type}>{content.icon}</S.StatusIconWrapper>
 
             <S.Header>
               <Text variant="h2" weight="bold">
@@ -84,9 +82,7 @@ export const VerifyEmailPageComponent = ({
                 {t('auth.register.loginLink')}
               </Button>
               {status === 'error' && (
-                <S.ResendButton onClick={onResendVerification}>
-                  {t('auth.verification.resendButton')}
-                </S.ResendButton>
+                <S.ResendButton onClick={onResendVerification}>{t('auth.verification.resendButton')}</S.ResendButton>
               )}
             </S.ActionGroup>
           </S.AuthCard>
@@ -104,16 +100,16 @@ export const VerifyEmailPageComponent = ({
             <S.BrandingLogoWrapper>
               <Icon name="logo" size={64} color="text.inverse" />
               <Text variant="h1" weight="bold" color="text.inverse">
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.BrandingLogoWrapper>
-            
+
             <Text variant="h3" weight="medium" color="text.inverse">
               {t('auth.verification.title')}
             </Text>
-            
+
             <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
-              E-posta adresinizi doğrulayarak Zonds dünyasına ilk adımı atın.
+              {t('auth.verification.brandingText')}
             </Text>
 
             <div style={{ marginTop: '2rem' }}>

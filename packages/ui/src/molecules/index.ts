@@ -1,7 +1,9 @@
 export * from './CheckboxGroup';
 export * from './ConfirmModal';
+export * from './ModernSelect';
+export * from './ModernTextInput';
 export * from './RadioGroup';
 export * from './SwitchRow';
 export * from './Table';
 export * from './TextInput';
-
+export * from './ThemeToggle';

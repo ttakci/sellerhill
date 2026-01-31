@@ -1,0 +1,96 @@
+{
+  "page": {
+    "title": "Orders"
+  },
+  "stats": {
+    "totalSales": "Total Sales",
+    "netProfit": "Net Profit",
+    "activeOrders": "Active Orders",
+    "returnRate": "Return Rate",
+    "last24Hours": "Last 24 Hours",
+    "growth": "{{value}}% vs last month",
+    "profitGrowth": "{{value}}% vs last month",
+    "decrease": "{{value}}% vs last month"
+  },
+  "actions": {
+    "search": "Search orders, buyers or items...",
+    "last30Days": "Last 30 Days",
+    "export": "Export"
+  },
+  "table": {
+    "orderNumber": "Order #",
+    "date": "Date",
+    "buyer": "Buyer",
+    "status": "Status",
+    "salePrice": "Sale Price",
+    "purchasePrice": "Purchase Price",
+    "netProfit": "Net Profit"
+  },
+  "status": {
+    "completed": "Completed",
+    "shipped": "Shipped",
+    "processing": "Processing",
+    "cancelled": "Cancelled",
+    "pending": "Pending",
+    "waiting_shipment": "Waiting Shipment"
+  },
+  "pagination": {
+    "showing": "Showing {{from}}-{{to}} of {{total}} orders"
+  },
+  "detail": {
+    "title": "Order Details",
+    "orderPlaced": "Order placed",
+    "viewInvoice": "View Invoice",
+    "printLabels": "Print Labels",
+    "customerInfo": "Customer Info",
+    "buyerPayment": "Buyer Payment",
+    "ebaySummary": "eBay Sales Summary",
+    "whatBuyerPaid": "What your buyer paid",
+    "whatYouEarned": "What you earned",
+    "itemSubtotal": "Item(s) Subtotal",
+    "shippingHandling": "Shipping & Handling",
+    "totalBeforeTax": "Total before tax",
+    "estimatedTax": "Estimated tax",
+    "grandTotal": "Grand Total",
+    "paymentMethod": "Payment method",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "salesTax": "Sales tax*",
+    "orderTotal": "Order total**",
+    "feesCollected": "Fees collected",
+    "transactionFees": "Transaction fees",
+    "adFee": "Ad Fee General",
+    "orderEarnings": "Order earnings",
+    "viewMore": "View more details",
+    "updateAmazon": "Enter Amazon Info",
+    "netProfitAnalysis": "NET PROFIT ANALYSIS",
+    "analysisDesc": "This calculation factors in your actual earnings from eBay after all platform fees and taxes, subtracted by the original Amazon purchase cost.",
+    "calculation": "Calculation",
+    "netProfitResult": "Net Profit",
+    "roi": "ROI",
+    "shipTo": "Ship To",
+    "contact": "Contact",
+    "unknownProduct": "Unknown Product",
+    "asin": "ASIN:",
+    "ebayItemId": "eBay Item ID:",
+    "quantity": "Quantity",
+    "unit": "unit",
+    "sku": "SKU",
+    "na": "N/A"
+  },
+  "modal": {
+    "title": "Enter Amazon Order Info",
+    "amazonUrl": "Amazon Order Detail URL",
+    "trackingUrl": "Tracking URL (Optional)",
+    "taxAmount": "Tax Amount ($)",
+    "shippingCost": "Shipping Cost ($)",
+    "infoText": "Providing tax and shipping costs will automatically recalculate your Net Profit for this order.",
+    "save": "Save Details",
+    "cancel": "Cancel",
+    "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+    "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+  },
+  "footer": {
+    "copyright": "© 2026 Zonds E-commerce Solutions. All rights reserved."
+  }
+}

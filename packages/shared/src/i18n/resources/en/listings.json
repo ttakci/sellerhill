@@ -62,7 +62,15 @@
       "status": "Status",
       "columns": "Columns",
       "actions": "Actions",
-      "addedAt": "Added {{date}}"
+      "addedAt": "Added {{date}}",
+      "stockLabel": "Stock"
+    },
+    "card": {
+      "stock": "Stock",
+      "updated": "Updated {{time}}",
+      "editListing": "Edit Listing",
+      "deleteListing": "Delete Listing",
+      "ebayStore": "eBay Store"
     },
     "status": {
       "active": "Active",

@@ -1,5 +1,6 @@
 {
   "common": {
+    "brandName": "Zonds",
     "loading": "Loading...",
     "retry": "Retry",
     "ok": "OK",
@@ -9,10 +10,19 @@
     "back": "Back",
     "saveSuccess": "Changes saved successfully",
     "saveError": "Failed to save changes",
-    "showing": "Showing 1 to {{count}} of {{count}} entries",
+    "showing_info": "Showing {{from}}-{{to}} of {{total}} entries",
+    "showing": "Showing",
+    "of": "of",
     "rowsPerPage": "Rows per page:",
+    "search": "Search...",
+    "noResults": "No results found",
     "success": "Success",
     "failed": "Failed",
+    "views": {
+      "label": "View",
+      "grid": "Grid",
+      "table": "Table"
+    },
     "actions": {
       "refresh": "Refresh",
       "edit": "Edit",
@@ -81,6 +91,7 @@
   "auth": {
     "login": {
       "title": "Welcome Back",
+      "subtitle": "Log in to continue to your account",
       "emailLabel": "Email",
       "passwordLabel": "Password",
       "submitButton": "Sign In",
@@ -138,5 +149,11 @@
   "notifications": {
     "comingSoonTitle": "Action Coming Soon",
     "comingSoon": "This feature is currently being implemented and will be available shortly."
+  },
+  "footer": {
+    "copyright": "© 2026 Zonds E-commerce Solutions. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contactSupport": "Contact Support"
   }
 }

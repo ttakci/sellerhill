@@ -28,7 +28,7 @@ export const CheckEmailPageComponent = ({
             <S.LogoWrapper>
               <Icon name="logo" size={48} color="brand.primary" />
               <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.LogoWrapper>
 
@@ -49,11 +49,11 @@ export const CheckEmailPageComponent = ({
               <Button onClick={onBackToLogin} variant="primary" fullWidth size="lg">
                 {t('auth.checkEmail.loginButton')}
               </Button>
-              
+
               <Text variant="body" color="text.secondary" style={{ marginTop: '1.5rem' }}>
                 {t('auth.checkEmail.noEmail')}
               </Text>
-              
+
               <S.ResendButton onClick={onResend} disabled={isResending}>
                 {isResending ? t('common.loading') : t('auth.checkEmail.resendLink')}
               </S.ResendButton>
@@ -73,16 +73,16 @@ export const CheckEmailPageComponent = ({
             <S.BrandingLogoWrapper>
               <Icon name="logo" size={64} color="text.inverse" />
               <Text variant="h1" weight="bold" color="text.inverse">
-                Zonds
+                {t('translation:common.brandName')}
               </Text>
             </S.BrandingLogoWrapper>
-            
+
             <Text variant="h3" weight="medium" color="text.inverse">
               {t('auth.checkEmail.title')}
             </Text>
-            
+
             <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
-              E-posta kutunuzu kontrol edin. Size bir doğrulama bağlantısı gönderdik.
+              {t('auth.checkEmail.brandingText')}
             </Text>
 
             <div style={{ marginTop: '2rem' }}>

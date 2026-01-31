@@ -20,7 +20,7 @@ import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.co
 export const ListingSettingsGroupFormContainer = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation('listingSettingsGroup');
+  const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage } = useUI();
   const isEdit = !!id;
 
@@ -123,7 +123,7 @@ export const ListingSettingsGroupFormContainer = () => {
     const strategies = getValues('repricingStrategy');
     const lastStrategy = strategies?.length ? strategies[strategies.length - 1] : null;
     const lastMax = lastStrategy ? Number(lastStrategy.maxPrice) : 0;
-    const newMin = lastStrategy ? Number((lastMax + 0.1).toFixed(2)) : 0;
+    const newMin = lastMax; // Start exactly at the previous max price as requested
 
     append({
       id: crypto.randomUUID(),
@@ -141,10 +141,9 @@ export const ListingSettingsGroupFormContainer = () => {
       return {
         htmlContent: watchedValues.templates.customTemplateHtml || '',
         sampleData: {
-          title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
+          title: t('listingSettingsGroup.sample.productTitle'),
           main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
-          product_description:
-            'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
+          product_description: t('listingSettingsGroup.sample.productDescription'),
           feature_bullets: [
             'Industry-leading noise cancellation',
             'Up to 30-hour battery life',

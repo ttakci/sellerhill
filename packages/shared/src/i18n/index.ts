@@ -16,21 +16,32 @@ import trProfile from './resources/tr/profile.json';
 import trStoreSettings from './resources/tr/storeSettings.json';
 import trTranslation from './resources/tr/translation.json';
 
+import enOrders from './resources/en/orders.json';
+import trOrders from './resources/tr/orders.json';
+
 export {
   enAuth,
   enDashboard,
-  enEbay, enListings, enListingSettingsGroup, enProfile,
+  enEbay,
+  enListings,
+  enListingSettingsGroup,
+  enOrders,
+  enProfile,
   enStoreSettings,
   enTranslation,
   trAuth,
   trDashboard,
-  trEbay, trListings, trListingSettingsGroup, trProfile,
+  trEbay,
+  trListings,
+  trListingSettingsGroup,
+  trOrders,
+  trProfile,
   trStoreSettings,
-  trTranslation
+  trTranslation,
 };
 
 // Merged translations
-// We priorityze the domain-specific files over the main translation file
+// We prioritize the domain-specific files over the main translation file
 export const enTranslations = {
   ...enTranslation,
   ...enAuth,
@@ -39,6 +50,7 @@ export const enTranslations = {
   ...enListings,
   ...enStoreSettings,
   ...enListingSettingsGroup,
+  ...enOrders,
   // Ensure nested objects are merged if they exist in both
   auth: {
     ...(enTranslation as any).auth,
@@ -67,7 +79,11 @@ export const enTranslations = {
   profile: {
     ...(enTranslation as any).profile,
     ...(enProfile as any).profile,
-  }
+  },
+  orders: {
+    ...(enTranslation as any).orders,
+    ...enOrders,
+  },
 };
 
 export const trTranslations = {
@@ -77,6 +93,7 @@ export const trTranslations = {
   ...trDashboard,
   ...trStoreSettings,
   ...trListingSettingsGroup,
+  ...trOrders,
   auth: {
     ...(trTranslation as any).auth,
     ...(trAuth as any).auth,
@@ -104,8 +121,11 @@ export const trTranslations = {
   profile: {
     ...(trTranslation as any).profile,
     ...(trProfile as any).profile,
-  }
+  },
+  orders: {
+    ...(trTranslation as any).orders,
+    ...trOrders,
+  },
 };
 
 export * from './types';
-

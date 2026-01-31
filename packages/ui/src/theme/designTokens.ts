@@ -6,7 +6,8 @@ export const colorTokens = {
   primary: {
     50: '#eff6ff',
     100: '#dbeafe',
-    500: '#2563EB', // Brand Primary Blue (Stitch Design)
+    500: '#3B82F6', // Updated to Vibrant Mesh Blue
+    600: '#2563EB', // Traditional brand blue
     700: '#1D4ED8',
     900: '#1e3a8a',
   },
@@ -58,27 +59,27 @@ export const spacingTokens = {
 } as const;
 
 export const radiusTokens = {
-  sm: '8px',    // Buttons, Nav items
-  md: '8px',    // Inputs
-  lg: '16px',   // Cards (TailAdmin uses larger radius)
-  xl: '16px',   // Large containers
-  full: '9999px', // Pills, badges
+  sm: '0.25rem', // 4px - Buttons, Nav items
+  md: '0.375rem', // 6px - Inputs
+  lg: '0.5rem', // 8px - Cards, main containers
+  xl: '0.75rem', // 12px - Large modals, banners
+  full: '9999px', // Pills, badges (px is fine for full circle)
 } as const;
 
 export const shadowTokens = {
-  sm: '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)', // Stitch subtle shadow
-  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+  sm: '0 0.0625rem 0.1875rem 0 rgb(0 0 0 / 0.05), 0 0.0625rem 0.125rem -0.0625rem rgb(0 0 0 / 0.05)' /* 1px 3px 1px 2px 1px */,
+  md: '0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1)' /* 4px 6px 1px 2px 4px 2px */,
+  lg: '0 0.625rem 0.9375rem -0.1875rem rgb(0 0 0 / 0.1), 0 0.25rem 0.375rem -0.25rem rgb(0 0 0 / 0.1)' /* 10px 15px 3px 4px 6px 4px */,
+  xl: '0 1.25rem 1.5625rem -0.3125rem rgb(0 0 0 / 0.1), 0 0.5rem 0.625rem -0.375rem rgb(0 0 0 / 0.1)' /* 20px 25px 5px 8px 10px 6px */,
 } as const;
 
 export const typographyTokens = {
   fontFamily: {
-    sans: "'Inter', 'Outfit', -apple-system, sans-serif", // TailAdmin can use Inter for a cleaner look
-    mono: "'JetBrains Mono', 'Fira Code', monospace",
+    sans: "'Outfit', sans-serif",
+    mono: "'JetBrains Mono', monospace",
   },
   fontSize: {
-    xs: '0.75rem',  // 12px - Badges, small text
+    xs: '0.75rem', // 12px - Badges, small text
     sm: '0.875rem', // 14px - Body text (TailAdmin default)
     md: '1rem',
     lg: '1.125rem',

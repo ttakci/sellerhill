@@ -21,15 +21,18 @@ export const InputGroup = styled.div<{ $hasError?: boolean }>`
   align-items: center;
   width: 100%;
   background-color: ${tkn('colors.background.secondary')};
-  border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)};
+  border: 0.0625rem solid
+    ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
   border-radius: ${tkn('radius.sm')};
-  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    border-color ${tkn('transitions.normal')},
+    box-shadow ${tkn('transitions.normal')};
   overflow: hidden;
-  height: 44px;
+  height: 2.75rem; /* 44px */
 
   &:focus-within {
     border-color: ${tkn('colors.border.focus')};
-    box-shadow: 0 0 0 3px ${tkn('colors.brand.secondary')};
+    box-shadow: 0 0 0 0.25rem ${tkn('colors.brand.primary')}15; /* 4px */
   }
 
   &:hover:not(:focus-within) {
@@ -55,13 +58,14 @@ export const InnerInput = styled.input<{ $hasLeftIcon?: boolean; $hasRightIcon?:
   background: transparent;
   width: 100%;
   height: 100%;
-  padding-left: ${({ $hasLeftIcon, theme }) => ($hasLeftIcon ? '10px' : tkn('spacing.md')({ theme }))};
-  padding-right: ${({ $hasRightIcon, theme }) => ($hasRightIcon ? '10px' : tkn('spacing.md')({ theme }))};
+  padding-left: ${({ $hasLeftIcon, theme }) => ($hasLeftIcon ? '0.625rem' : tkn('spacing.md')({ theme }))}; /* 10px */
+  padding-right: ${({ $hasRightIcon, theme }) =>
+    $hasRightIcon ? '0.625rem' : tkn('spacing.md')({ theme })}; /* 10px */
   font-size: ${tkn('typography.fontSize.sm')};
   font-family: ${tkn('typography.fontFamily.sans')};
   color: ${tkn('colors.text.primary')};
   outline: none;
-  
+
   &::placeholder {
     color: ${tkn('colors.text.tertiary')};
   }

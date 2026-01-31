@@ -118,6 +118,8 @@ export const ListingJobsPageContainer: React.FC = () => {
           setRowsPerPage(val);
           setPage(1);
         },
+        labelRowsPerPage: t('translation:common.rowsPerPage'),
+        labelInfo: t('translation:common.showing_info'),
       }}
     />
   );

@@ -1,4 +1,3 @@
-
 export interface TablePaginationProps {
   count: number;
   page: number;
@@ -7,5 +6,6 @@ export interface TablePaginationProps {
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
   className?: string;
-  labelRowsPerPage?: string; // Optional for i18n later
+  labelRowsPerPage?: string;
+  labelInfo?: string;
 }

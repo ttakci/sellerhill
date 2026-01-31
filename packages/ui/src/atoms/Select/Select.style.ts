@@ -10,7 +10,8 @@ export const StyledSelect = styled.select<{ $hasError?: boolean; $fullWidth?: bo
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   padding: 0 ${tkn('spacing.xxl')} 0 ${tkn('spacing.md')};
   background-color: transparent;
-  border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)};
+  border: 0.0625rem solid
+    ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
   border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
@@ -18,8 +19,10 @@ export const StyledSelect = styled.select<{ $hasError?: boolean; $fullWidth?: bo
   appearance: none;
   outline: none;
   cursor: pointer;
-  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
-  height: 38px;
+  transition:
+    border-color ${tkn('transitions.normal')},
+    box-shadow ${tkn('transitions.normal')};
+  height: 2.375rem; /* 38px */
 
   &:hover:not(:disabled) {
     border-color: ${tkn('colors.border.focus')};
@@ -27,7 +30,7 @@ export const StyledSelect = styled.select<{ $hasError?: boolean; $fullWidth?: bo
 
   &:focus {
     border-color: ${tkn('colors.border.focus')};
-    box-shadow: 0 0 0 3px ${tkn('colors.brand.secondary')};
+    box-shadow: 0 0 0 0.25rem ${tkn('colors.brand.primary')}15; /* 4px */
   }
 
   &:disabled {

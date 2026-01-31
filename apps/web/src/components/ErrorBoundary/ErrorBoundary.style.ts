@@ -12,7 +12,7 @@ export const Container = styled.div`
 `;
 
 export const ErrorIcon = styled.div`
-  font-size: 64px;
+  font-size: 4rem; /* 64px */
   margin-bottom: ${tkn('spacing.lg')};
 `;
 
@@ -29,7 +29,7 @@ export const Message = styled.p`
   color: ${tkn('colors.text.secondary')};
   margin-bottom: ${tkn('spacing.xl')};
   text-align: center;
-  max-width: 500px;
+  max-width: 31.25rem; /* 500px */
 `;
 
 export const Details = styled.details`
@@ -37,7 +37,7 @@ export const Details = styled.details`
   padding: ${tkn('spacing.md')};
   background-color: ${tkn('colors.surface.primary')};
   border-radius: ${tkn('radius.md')};
-  max-width: 600px;
+  max-width: 37.5rem; /* 600px */
   width: 100%;
 `;
 

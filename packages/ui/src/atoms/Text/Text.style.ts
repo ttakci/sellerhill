@@ -1,7 +1,6 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-
 import type { TextAlign, TextVariant, TextWeight } from './Text.types';
 
 interface StyledTextProps {
@@ -41,7 +40,7 @@ const variantStyles = {
   overline: (theme: any) => `
     font-size: ${theme.typography.fontSize.xs};
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.0625rem; /* 1px */
     font-weight: ${theme.typography.fontWeight.semibold};
   `,
   nav: (theme: any) => `

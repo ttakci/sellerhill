@@ -38,6 +38,8 @@ export interface TableProps<T = any> {
     rowsPerPage: number;
     onPageChange: (page: number) => void;
     onRowsPerPageChange: (rowsPerPage: number) => void;
+    labelRowsPerPage?: string;
+    labelInfo?: string;
   };
 }
 

@@ -62,7 +62,15 @@
       "status": "Durum",
       "columns": "Sütunlar",
       "actions": "İşlemler",
-      "addedAt": "{{date}} tarihinde eklendi"
+      "addedAt": "{{date}} tarihinde eklendi",
+      "stockLabel": "Stok"
+    },
+    "card": {
+      "stock": "Stok",
+      "updated": "{{time}} güncellendi",
+      "editListing": "İlanı Düzenle",
+      "deleteListing": "İlanı Sil",
+      "ebayStore": "eBay Mağazası"
     },
     "status": {
       "active": "Aktif",
