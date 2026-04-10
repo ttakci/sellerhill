@@ -13,6 +13,11 @@ interface StyledTextProps {
 }
 
 const variantStyles = {
+  display: (theme: any) => `
+    font-size: ${theme.typography.fontSize['3xl']};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.bold};
+  `,
   h1: (theme: any) => `
     font-size: ${theme.typography.fontSize.xxl};
     line-height: ${theme.typography.lineHeight.tight};
@@ -29,9 +34,24 @@ const variantStyles = {
     font-size: ${theme.typography.fontSize.md};
     line-height: ${theme.typography.lineHeight.tight};
   `,
+  h5: (theme: any) => `
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.semibold};
+  `,
   body: (theme: any) => `
     font-size: ${theme.typography.fontSize.sm};
     line-height: ${theme.typography.lineHeight.normal};
+  `,
+  'body-sm': (theme: any) => `
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.normal};
+    font-weight: ${theme.typography.fontWeight.normal};
+  `,
+  'body-xs': (theme: any) => `
+    font-size: ${theme.typography.fontSize.xs};
+    line-height: ${theme.typography.lineHeight.normal};
+    font-weight: ${theme.typography.fontWeight.normal};
   `,
   caption: (theme: any) => `
     font-size: ${theme.typography.fontSize.xs};
@@ -42,6 +62,11 @@ const variantStyles = {
     text-transform: uppercase;
     letter-spacing: 0.0625rem; /* 1px */
     font-weight: ${theme.typography.fontWeight.semibold};
+  `,
+  mono: (theme: any) => `
+    font-size: ${theme.typography.fontSize.xs};
+    line-height: ${theme.typography.lineHeight.normal};
+    font-family: ${theme.typography.fontFamily.mono};
   `,
   nav: (theme: any) => `
     font-size: ${theme.typography.fontSize.sm};

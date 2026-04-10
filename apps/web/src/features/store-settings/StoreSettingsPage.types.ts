@@ -28,4 +28,6 @@ export interface StoreSettingsPageProps {
   sortColumn: string | undefined;
   sortDirection: 'asc' | 'desc';
   blacklistCount: number;
+  viewMode: 'grid' | 'table';
+  onViewModeChange: (mode: 'grid' | 'table') => void;
 }

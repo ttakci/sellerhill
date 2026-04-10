@@ -6,26 +6,31 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.sm')(p as any))};
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.md')(p as any))};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   white-space: nowrap;
+  letter-spacing: 0.01em;
+  border: 0.0625rem solid transparent;
 
   ${({ $size }) => {
     switch ($size) {
+      case 'xs':
+        return `
+          padding: 0.0625rem 0.375rem;
+          font-size: ${tkn('typography.fontSize.2xs')};
+          line-height: 1.5;
+        `;
       case 'sm':
         return `
-          padding: 0.125rem 0.5rem; /* 2px 8px */
-          font-size: 0.6875rem; /* 11px */
+          padding: 0.125rem 0.5rem;
+          font-size: ${tkn('typography.fontSize.xs')};
+          line-height: 1.5;
         `;
       case 'md':
         return `
-          padding: 0.25rem 0.625rem; /* 4px 10px */
-          font-size: 0.75rem; /* 12px */
-        `;
-      case 'lg':
-        return `
-          padding: 0.3125rem 0.75rem; /* 5px 12px */
-          font-size: 0.8125rem; /* 13px */
+          padding: 0.1875rem 0.625rem;
+          font-size: ${tkn('typography.fontSize.xs')};
+          line-height: 1.5;
         `;
       default:
         return '';
@@ -33,36 +38,49 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
   }}
 
   ${({ $variant, theme }) => {
+    const t = theme;
     switch ($variant) {
       case 'primary':
         return `
-          background: rgba(60, 80, 224, 0.08); /* brand.primary with opacity */
-          color: ${theme.colors.brand.primary};
+          background: ${t.colors.brand.secondary};
+          color: ${t.colors.brand.primary};
+          border-color: ${(t.colors.brand.primary as string) + '30'};
         `;
       case 'secondary':
         return `
-          background: ${theme.colors.background.tertiary};
-          color: ${theme.colors.text.secondary};
+          background: ${t.colors.background.tertiary};
+          color: ${t.colors.text.secondary};
+          border-color: ${t.colors.border.primary};
         `;
       case 'success':
         return `
-          background: rgba(33, 150, 83, 0.08);
-          color: #219653; /* TailAdmin Success Green */
+          background: ${t.colors.semanticTint.success};
+          color: ${t.colors.semantic.success};
+          border-color: ${t.colors.semanticTintBorder.success};
         `;
       case 'warning':
         return `
-          background: rgba(240, 149, 12, 0.08);
-          color: #F0950C; /* TailAdmin Warning Orange */
+          background: ${t.colors.semanticTint.warning};
+          color: ${t.colors.semantic.warning};
+          border-color: ${t.colors.semanticTintBorder.warning};
         `;
       case 'error':
         return `
-          background: rgba(211, 64, 83, 0.08);
-          color: #D34053; /* TailAdmin Error Red */
+          background: ${t.colors.semanticTint.error};
+          color: ${t.colors.semantic.error};
+          border-color: ${t.colors.semanticTintBorder.error};
         `;
       case 'info':
         return `
-          background: rgba(60, 80, 224, 0.08);
-          color: ${theme.colors.brand.primary};
+          background: ${t.colors.semanticTint.info};
+          color: ${t.colors.semantic.info};
+          border-color: ${t.colors.semanticTintBorder.info};
+        `;
+      case 'neutral':
+        return `
+          background: ${t.colors.semanticTint.neutral};
+          color: ${t.colors.text.secondary};
+          border-color: ${t.colors.semanticTintBorder.neutral};
         `;
       default:
         return '';

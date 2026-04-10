@@ -6,8 +6,8 @@ import type { BadgeProps } from './Badge.types';
 export const Badge = ({
   children,
   variant = 'secondary',
-  size = 'md',
-  isPill = false,
+  size = 'sm',
+  isPill = true,
   className,
 }: BadgeProps): React.ReactElement => {
   return (

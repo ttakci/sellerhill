@@ -34,9 +34,9 @@ export const OnboardingEbayPageComponent = ({
           <S.AuthCard>
             <S.LogoWrapper>
               <Icon name="logo" size={48} color="brand.primary" />
-              <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
+              <S.LogoText variant="h2" weight="bold" color="brand.primary">
                 {t('translation:common.brandName')}
-              </Text>
+              </S.LogoText>
             </S.LogoWrapper>
 
             <S.IconContainer>
@@ -58,14 +58,14 @@ export const OnboardingEbayPageComponent = ({
                 onClick={() => onMarketplaceChange(EBAY_MARKETPLACE.US)}
               >
                 <Icon name="flag-us" size={20} />
-                <S.MarketplaceName>{t('ebay:ebay.connect.marketplaceUS')}</S.MarketplaceName>
+                <S.MarketplaceName variant="body-sm" weight="medium">{t('ebay:ebay.connect.marketplaceUS')}</S.MarketplaceName>
               </S.MarketplaceItem>
               <S.MarketplaceItem
                 $selected={selectedMarketplace === EBAY_MARKETPLACE.UK}
                 onClick={() => onMarketplaceChange(EBAY_MARKETPLACE.UK)}
               >
                 <Icon name="flag-gb" size={20} />
-                <S.MarketplaceName>{t('ebay:ebay.connect.marketplaceUK')}</S.MarketplaceName>
+                <S.MarketplaceName variant="body-sm" weight="medium">{t('ebay:ebay.connect.marketplaceUK')}</S.MarketplaceName>
               </S.MarketplaceItem>
             </S.MarketplaceGrid>
 
@@ -74,12 +74,12 @@ export const OnboardingEbayPageComponent = ({
                 onClick={() => onConnect(selectedMarketplace)}
                 variant="primary"
                 fullWidth
-                size="lg"
+                size="large"
                 isLoading={isLoading}
               >
                 {t('ebay:ebay.onboarding.connectButton')}
               </Button>
-              <Button onClick={onSkip} variant="secondary" fullWidth size="lg">
+              <Button onClick={onSkip} variant="secondary" fullWidth size="large">
                 {t('ebay:ebay.onboarding.skipButton')}
               </Button>
             </S.ActionGroup>
@@ -106,13 +106,13 @@ export const OnboardingEbayPageComponent = ({
               {t('ebay:ebay.onboarding.title')}
             </Text>
 
-            <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
+            <S.BrandingDescription variant="body" color="text.inverse">
               {t('ebay:ebay.onboarding.brandingDescription')}
-            </Text>
+            </S.BrandingDescription>
 
-            <div style={{ marginTop: '2rem' }}>
-              <Icon name="store" size={200} color="text.inverse" style={{ opacity: 0.1 }} />
-            </div>
+            <S.BrandingIconContainer>
+              <Icon name="store" size={200} color="text.inverse" />
+            </S.BrandingIconContainer>
           </S.BrandingContent>
         </S.RightPanel>
       </S.LayoutWrapper>

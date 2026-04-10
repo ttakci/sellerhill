@@ -1,4 +1,4 @@
-import { useLoading } from '@repo/ui';
+import { StatusBadge, useLoading } from '@repo/ui';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -27,19 +27,19 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       {
         key: 'asin',
         header: t('listings.jobs.items.asin'),
-        render: (asin: string) => <S.AsinText>{asin}</S.AsinText>,
+        render: (asin: string) => <S.AsinText variant="mono" weight="semibold" color="brand.primary">{asin}</S.AsinText>,
       },
       {
         key: 'status',
         header: t('listings.jobs.items.status'),
         render: (status: string) => (
-          <S.StatusBadge $status={status}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</S.StatusBadge>
+          <StatusBadge status={status.toLowerCase()}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</StatusBadge>
         ),
       },
       {
         key: 'ebayItemId',
         header: t('listings.jobs.items.ebayId'),
-        render: (id: string) => (id ? <S.JobIdBadge>{id}</S.JobIdBadge> : '-'),
+        render: (id: string) => (id ? <S.JobIdBadge variant="neutral" size="sm">{id}</S.JobIdBadge> : '-'),
       },
       {
         key: 'errorMessage',

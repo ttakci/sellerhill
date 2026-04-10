@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 import { getErrorMessage } from '@/utils/errorHandler';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { storeSettingsSchema, type StoreSettingsFormData } from '@repo/shared';
@@ -22,6 +30,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   // Pagination & Sorting State
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -191,6 +200,8 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       sortColumn={sortColumn}
       sortDirection={sortDirection}
       blacklistCount={sortedBlacklist.length}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
     />
   );
 };

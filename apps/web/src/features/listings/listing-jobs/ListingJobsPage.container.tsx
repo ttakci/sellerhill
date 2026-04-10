@@ -1,4 +1,4 @@
-import { useLoading } from '@repo/ui';
+import { StatusBadge, useLoading } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ export const ListingJobsPageContainer: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
 
   // Dynamic polling from listingsApi
   const {
@@ -38,13 +39,13 @@ export const ListingJobsPageContainer: React.FC = () => {
       {
         key: 'id',
         header: t('listings.jobs.table.id'),
-        render: (id: string) => <S.JobIdBadge>{id.substring(0, 8)}...</S.JobIdBadge>,
+        render: (id: string) => <S.JobIdBadge variant="neutral" size="sm">{id.substring(0, 8)}...</S.JobIdBadge>,
       },
       {
         key: 'status',
         header: t('listings.jobs.table.status'),
         render: (status: string) => (
-          <S.StatusBadge $status={status}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</S.StatusBadge>
+          <StatusBadge status={status.toLowerCase()}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</StatusBadge>
         ),
       },
       {
@@ -69,13 +70,13 @@ export const ListingJobsPageContainer: React.FC = () => {
         header: t('listings.jobs.table.stats'),
         render: (_: any, job: any) => (
           <S.StatsContainer>
-            <S.SuccessText>
+            <S.SuccessText variant="body-sm" weight="bold" color="semantic.success">
               {job.successCount} {t('listings.jobs.stats.success')}
             </S.SuccessText>
-            <S.FailedText>
+            <S.FailedText variant="body-sm" weight="bold" color="semantic.error">
               {job.failedCount} {t('listings.jobs.stats.failed')}
             </S.FailedText>
-            <S.TotalText>/ {job.totalAsins}</S.TotalText>
+            <S.TotalText variant="body-sm" weight="medium" color="text.tertiary">/ {job.totalAsins}</S.TotalText>
           </S.StatsContainer>
         ),
       },
@@ -83,7 +84,7 @@ export const ListingJobsPageContainer: React.FC = () => {
         key: 'createdAt',
         header: t('listings.jobs.table.createdAt'),
         render: (date: string) => (
-          <S.DateText>{new Date(date).toLocaleString(t('translation:common.languageCode') || 'en-US')}</S.DateText>
+          <S.DateText variant="body-sm" weight="medium" color="text.secondary">{new Date(date).toLocaleString(t('translation:common.languageCode') || 'en-US')}</S.DateText>
         ),
       },
       {
@@ -91,15 +92,33 @@ export const ListingJobsPageContainer: React.FC = () => {
         header: t('listings.jobs.table.actions'),
         align: 'right' as const,
         render: (_: any, job: any) => (
-          <S.ActionButton onClick={() => handleViewDetails(job.id)}>{t('translation:common.details')}</S.ActionButton>
+          <S.ActionButton variant="secondary" onClick={() => handleViewDetails(job.id)}>{t('translation:common.details')}</S.ActionButton>
         ),
       },
     ],
     [t, navigate]
   );
 
-  const handleRefresh = () => {
-    void refetch();
+  const handleDownload = () => {
+    const headers = [
+      t('listings.jobs.table.id'),
+      t('listings.jobs.table.status'),
+      t('listings.jobs.table.total'),
+      t('listings.jobs.table.createdAt'),
+    ];
+    const rows = jobs.map((job) =>
+      [job.id, job.status, job.totalAsins, new Date(job.createdAt).toLocaleString()].map((v) => `"${v}"`).join(',')
+    );
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `zonds_jobs_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -107,8 +126,10 @@ export const ListingJobsPageContainer: React.FC = () => {
       columns={columns}
       jobs={paginatedJobs}
       isLoading={isLoading}
-      onRefresh={handleRefresh}
+      onDownload={handleDownload}
       onViewDetails={handleViewDetails}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
       pagination={{
         count: jobs.length,
         page,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from '../../atoms/Icon';
-import { ModernSelect } from '../ModernSelect';
+import { Select } from '../Select';
 import * as S from './TablePagination.style';
 import type { TablePaginationProps } from './TablePagination.types';
 
@@ -43,7 +43,7 @@ export const TablePagination = ({
       <S.RowsPerPage>
         <S.PaginationLabel>{rowsPerPageLabel}</S.PaginationLabel>
         <S.SelectWrapper>
-          <ModernSelect
+          <Select
             size="small"
             value={rowsPerPage.toString()}
             options={rowsPerPageOptions.map((opt) => ({ value: opt.toString(), label: opt.toString() }))}

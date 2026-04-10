@@ -1,5 +1,13 @@
 import styled from '@emotion/styled';
-import { Badge, Card, Text, tkn } from '@repo/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState as EmptyStateMolecule,
+  IconButton as IconButtonAtom,
+  Text,
+  tkn,
+} from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -9,47 +17,6 @@ export const Container = styled.div`
   gap: ${tkn('spacing.lg')};
   box-sizing: border-box;
   padding-bottom: 2.5rem; /* 40px */
-`;
-
-export const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 0;
-
-  @media (max-width: 47.9375rem) {
-    /* 767px */
-    flex-direction: column;
-    gap: ${tkn('spacing.md')};
-  }
-`;
-
-export const HeaderContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem; /* 4px */
-`;
-
-export const PageTitle = styled.h1`
-  font-size: 1.5rem; /* 24px */
-  font-weight: 700;
-  color: ${tkn('colors.text.primary')};
-  margin: 0;
-`;
-
-export const Actions = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-
-  @media (max-width: 47.9375rem) {
-    /* 767px */
-    width: 100%;
-
-    & > button {
-      flex: 1;
-      justify-content: center;
-    }
-  }
 `;
 
 export const CardGrid = styled.div`
@@ -123,8 +90,6 @@ export const CardTitleGroup = styled.div`
 `;
 
 export const CardTitleText = styled(Text)`
-  font-size: 1.125rem;
-  font-weight: 700;
   transition: color ${tkn('transitions.normal')};
 `;
 
@@ -157,18 +122,9 @@ export const CardActions = styled.div`
   gap: 0.25rem; /* 4px */
 `;
 
-export const IconButton = styled.button<{ $type?: 'delete' | 'edit' }>`
+export const IconButton = styled(IconButtonAtom)<{ $type?: 'delete' | 'edit' }>`
   width: 2rem; /* 32px */
   height: 2rem; /* 32px */
-  border-radius: 0.375rem; /* 6px */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: ${tkn('colors.text.tertiary')};
-  cursor: pointer;
-  transition: all 0.2s;
 
   &:hover {
     background: ${({ $type, theme }) =>
@@ -178,13 +134,7 @@ export const IconButton = styled.button<{ $type?: 'delete' | 'edit' }>`
 `;
 
 /* refined and reordered below */
-export const ActiveBadge = styled(Badge)`
-  font-weight: 700;
-  font-size: 0.625rem; /* 10px */
-  background-color: ${(p) => p.theme.colors.semantic.success}15 !important;
-  color: ${(p) => p.theme.colors.semantic.success} !important;
-  border: none;
-`;
+export const ActiveBadge = styled(Badge)``;
 
 export const DashedCardIconWrapper = styled.div`
   width: 3rem; /* 48px */
@@ -201,10 +151,7 @@ export const DashedCardIconWrapper = styled.div`
 export const InteractiveCard = styled(Card)`
   cursor: pointer;
   transition: all ${tkn('transitions.normal')};
-  border-radius: ${tkn('radius.xl')} !important;
-  box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
 
   &:hover {
     border-color: ${tkn('colors.brand.primary')};
@@ -217,21 +164,15 @@ export const InteractiveCard = styled(Card)`
   }
 `;
 
-export const DashedCard = styled.button`
+export const DashedCard = styled(Button)`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   min-height: 12.5rem; /* 200px */
-  background: transparent;
-  border: 0.125rem dashed ${tkn('colors.border.secondary')}; /* 2px */
-  border-radius: ${tkn('radius.xl')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.normal')};
   gap: 0.75rem; /* 12px */
   padding: ${tkn('spacing.xl')};
-  color: ${tkn('colors.text.tertiary')};
 
   & svg {
     color: inherit;
@@ -248,16 +189,11 @@ export const DashedCard = styled.button`
   }
 `;
 
-export const EmptyState = styled.div`
+export const EmptyState = styled(EmptyStateMolecule)`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5rem 2.5rem; /* 80px 40px */
-  text-align: center;
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem dashed ${tkn('colors.border.primary')}; /* 1px */
-  border-radius: 1rem; /* 16px */
   gap: 1.5rem; /* 24px */
   grid-column: 1 / -1;
 `;
@@ -267,11 +203,4 @@ export const EmptyStateContent = styled.div`
   flex-direction: column;
   gap: 0.5rem; /* 8px */
   max-width: 25rem; /* 400px */
-`;
-
-export const Copyright = styled.div`
-  padding: 2.5rem 0; /* 40px 0 */
-  text-align: center;
-  font-size: 0.8125rem; /* 13px */
-  color: ${tkn('colors.text.tertiary')};
 `;

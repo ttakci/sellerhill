@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Icon, Logo, MeshBackground, ModernButton, ModernTextInput, Text, Typewriter } from '@repo/ui';
+import { Button, Icon, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -54,10 +54,10 @@ export const RegisterPageComponent = ({
             <S.SloganWrapper>
               <Typewriter
                 phrases={[
-                  t('auth.branding.slogan1'),
-                  t('auth.branding.slogan2'),
-                  t('auth.branding.slogan3'),
-                  t('auth.branding.slogan4'),
+                  t('auth:auth.branding.slogan1'),
+                  t('auth:auth.branding.slogan2'),
+                  t('auth:auth.branding.slogan3'),
+                  t('auth:auth.branding.slogan4'),
                 ]}
                 typingSpeed={70}
                 deletingSpeed={40}
@@ -70,17 +70,17 @@ export const RegisterPageComponent = ({
         {/* Right Panel: Form */}
         <S.FormPanel>
           <S.AuthCard>
-            <S.BackLink onClick={() => window.history.back()}>
+            <S.BackLink variant="text" onClick={() => window.history.back()}>
               <Icon name="chevron-left" size="sm" />
-              {t('auth.register.backToDashboard')}
+              {t('auth:auth.register.backToDashboard')}
             </S.BackLink>
 
             <S.Header>
               <Text variant="h2" weight="bold">
-                {t('auth.register.title')}
+                {t('auth:auth.register.title')}
               </Text>
               <Text variant="body" color="text.secondary">
-                {t('auth.register.subtitle')}
+                {t('auth:auth.register.subtitle')}
               </Text>
             </S.Header>
 
@@ -89,15 +89,13 @@ export const RegisterPageComponent = ({
                 <ModernTextInput
                   name="firstName"
                   control={control}
-                  label={t('auth.register.firstNameLabel')}
-                  placeholder={t('auth.register.firstNamePlaceholder')}
+                  label={t('auth:auth.register.firstNameLabel')}
                   isDisabled={isLoading || isSubmitting}
                 />
                 <ModernTextInput
                   name="lastName"
                   control={control}
-                  label={t('auth.register.lastNameLabel')}
-                  placeholder={t('auth.register.lastNamePlaceholder')}
+                  label={t('auth:auth.register.lastNameLabel')}
                   isDisabled={isLoading || isSubmitting}
                 />
               </S.FormRow>
@@ -105,8 +103,7 @@ export const RegisterPageComponent = ({
               <ModernTextInput
                 name="email"
                 control={control}
-                label={t('auth.register.emailLabel')}
-                placeholder={t('auth.register.emailPlaceholder')}
+                label={t('auth:auth.register.emailLabel')}
                 type="email"
                 isDisabled={isLoading || isSubmitting}
               />
@@ -114,8 +111,7 @@ export const RegisterPageComponent = ({
               <ModernTextInput
                 name="password"
                 control={control}
-                label={t('auth.register.passwordLabel')}
-                placeholder={t('auth.register.passwordPlaceholder')}
+                label={t('auth:auth.register.passwordLabel')}
                 type="password"
                 isDisabled={isLoading || isSubmitting}
               />
@@ -123,31 +119,30 @@ export const RegisterPageComponent = ({
               <ModernTextInput
                 name="confirmPassword"
                 control={control}
-                label={t('auth.register.confirmPasswordLabel')}
-                placeholder={t('auth.register.confirmPasswordPlaceholder')}
+                label={t('auth:auth.register.confirmPasswordLabel')}
                 type="password"
                 isDisabled={isLoading || isSubmitting}
               />
 
               <S.ButtonContainer>
-                <ModernButton
+                <Button
                   type="submit"
                   variant="primary"
                   fullWidth
                   isLoading={isLoading || isSubmitting}
                   size="large"
                 >
-                  {t('auth.register.submitButton')}
-                </ModernButton>
+                  {t('auth:auth.register.submitButton')}
+                </Button>
               </S.ButtonContainer>
             </S.Form>
 
             <S.Footer>
               <Text variant="body" color="text.secondary">
-                {t('auth.register.alreadyHaveAccount')}
+                {t('auth:auth.register.alreadyHaveAccount')}
               </Text>
-              <S.FooterLink type="button" onClick={onNavigateToLogin}>
-                {t('auth.register.loginLink')}
+              <S.FooterLink type="button" variant="text" onClick={onNavigateToLogin}>
+                {t('auth:auth.register.loginLink')}
               </S.FooterLink>
             </S.Footer>
           </S.AuthCard>

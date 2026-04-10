@@ -1,35 +1,44 @@
-import React from 'react';
-
-import { S } from './Button.style';
-import type { ButtonProps } from './Button.types';
+import { Icon } from '../Icon';
+import * as S from './Button.style';
+import { ButtonProps } from './Button.types';
 
 export const Button = ({
   children,
-  onClick,
-  variant = 'secondary',
-  size = 'md',
-  fullWidth = false,
+  variant = 'primary',
+  size = 'medium',
   isLoading = false,
-  disabled = false,
-  type = 'button',
-  isPill = false,
-  className,
-  style,
-}: ButtonProps): React.ReactElement => {
+  iconLeft,
+  iconRight,
+  iconColor,
+  fullWidth = false,
+  disabled,
+  ...props
+}: ButtonProps) => {
   return (
-    <S.ButtonContainer
-      onClick={onClick}
-      type={type}
+    <S.ActionSurface
       $variant={variant}
       $size={size}
       $fullWidth={fullWidth}
       $isLoading={isLoading}
-      $isPill={isPill}
+      $iconColor={iconColor}
       disabled={disabled || isLoading}
-      className={className}
-      style={style}
+      {...props}
     >
-      {children}
-    </S.ButtonContainer>
+      {isLoading && (
+        <S.LoadingContainer className="loader">
+          <S.LoadingDot $delay="0s" />
+          <S.LoadingDot $delay="0.2s" />
+          <S.LoadingDot $delay="0.4s" />
+        </S.LoadingContainer>
+      )}
+
+      <S.ButtonLabel>
+        {iconLeft && <Icon name={iconLeft} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
+        {children}
+        {iconRight && <Icon name={iconRight} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
+      </S.ButtonLabel>
+    </S.ActionSurface>
   );
 };
+
+Button.displayName = 'Button';

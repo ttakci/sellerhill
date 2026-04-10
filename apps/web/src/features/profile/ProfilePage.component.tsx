@@ -1,5 +1,5 @@
 import { type UpdateProfileFormData } from '@repo/shared';
-import { Button, Icon, Text } from '@repo/ui';
+import { Button, Card, Icon, ModernTextInput, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './ProfilePage.style';
@@ -7,7 +7,7 @@ import type { ProfilePageComponentProps } from './ProfilePage.types';
 
 export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
   profile,
-  register,
+  control,
   errors,
   onSubmit,
   isLoading,
@@ -22,19 +22,16 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
 
   // Helper to render field or input
   const renderField = (label: string, value: string | undefined, fieldName: any, fullWidth = false) => (
-    <S.InfoItem style={fullWidth ? { gridColumn: '1 / -1' } : {}}>
-      <S.InfoLabel>{label}</S.InfoLabel>
+    <S.InfoItem $fullWidth={fullWidth || undefined}>
+      {!isEditing && <S.InfoLabel>{label}</S.InfoLabel>}
       {isEditing ? (
-        <>
-          <S.CleanInput {...register(fieldName as any)} defaultValue={value} />
-          {errors[fieldName as keyof UpdateProfileFormData] && (
-            <S.ErrorMessage>
-              <Text variant="caption" color="text.error">
-                {errors[fieldName as keyof UpdateProfileFormData]?.message}
-              </Text>
-            </S.ErrorMessage>
-          )}
-        </>
+        <ModernTextInput
+          name={fieldName}
+          control={control}
+          label={label}
+          fullWidth={fullWidth}
+          isDisabled={isLoading}
+        />
       ) : (
         <S.InfoValue>{value || '-'}</S.InfoValue>
       )}
@@ -43,22 +40,20 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
 
   return (
     <S.Container>
-      <S.Header>
-        <S.TitleSection>
-          <h1>{t('profile.title')}</h1>
-          <p>{t('profile.subtitle')}</p>
-        </S.TitleSection>
-        <S.Actions>
+      <PageHeader
+        title={t('profile.title')}
+        subtitle={t('profile.subtitle')}
+        actions={
           <Button variant={isEditing ? 'secondary' : 'primary'} onClick={onToggleEdit} disabled={isLoading}>
             <Icon name={isEditing ? 'x' : 'edit'} size={18} />
             {isEditing ? t('translation:common.cancel') : t('profile.edit')}
           </Button>
-        </S.Actions>
-      </S.Header>
+        }
+      />
 
       <form onSubmit={onSubmit}>
         {/* Section 1: User Overview */}
-        <S.MainCard>
+        <Card variant="default" padding="lg">
           <S.UserOverview>
             <S.UserOverviewLeft>
               <S.AvatarWrapper>
@@ -76,8 +71,8 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
                   {userName}
                 </Text>
                 <S.ProfileBadges>
-                  <S.BadgeItem>{role}</S.BadgeItem>
-                  <S.BadgeItem>
+                  <S.BadgeItem variant="neutral" size="xs">{role}</S.BadgeItem>
+                  <S.BadgeItem variant="neutral" size="xs">
                     <Icon name="map-pin" size={14} />
                     {location}
                   </S.BadgeItem>
@@ -85,27 +80,30 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
               </S.ProfileHeaderContent>
             </S.UserOverviewLeft>
           </S.UserOverview>
-        </S.MainCard>
+        </Card>
 
         {/* Section 2: Personal Information */}
-        <S.PersonalInfoCard>
-          <S.SectionTitleWrapper>
-            <Text variant="body" weight="bold">
-              {t('profile.personalInfo')}
-            </Text>
-          </S.SectionTitleWrapper>
-          <S.SectionContent>
-            {renderField(t('profile.firstName'), profile.firstName, 'firstName')}
-            {renderField(t('profile.lastName'), profile.lastName, 'lastName')}
-            {renderField(t('profile.emailAddress'), profile.email, 'email' as any)}
-            {renderField(t('profile.phone'), profile.phoneNumber, 'phoneNumber')}
-            {renderField(t('profile.bio'), profile.bio, 'bio', true)}
-          </S.SectionContent>
-        </S.PersonalInfoCard>
+        <S.SectionCard>
+          <Card variant="default" padding="none">
+            <S.SectionTitleWrapper>
+              <Text variant="body" weight="bold">
+                {t('profile.personalInfo')}
+              </Text>
+            </S.SectionTitleWrapper>
+            <S.SectionContent>
+              {renderField(t('profile.firstName'), profile.firstName, 'firstName')}
+              {renderField(t('profile.lastName'), profile.lastName, 'lastName')}
+              {renderField(t('profile.emailAddress'), profile.email, 'email' as any)}
+              {renderField(t('profile.phone'), profile.phoneNumber, 'phoneNumber')}
+              {renderField(t('profile.bio'), profile.bio, 'bio', true)}
+            </S.SectionContent>
+          </Card>
+        </S.SectionCard>
 
         {/* Section 3: Address */}
-        <S.AddressCard>
-          <S.SectionTitleWrapper>
+        <S.SectionCard>
+          <Card variant="default" padding="none">
+            <S.SectionTitleWrapper>
             <Text variant="body" weight="bold">
               {t('profile.address')}
             </Text>
@@ -115,13 +113,14 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
             {renderField(t('profile.cityState'), profile.cityState, 'cityState')}
             {renderField(t('profile.postalCode'), profile.postalCode, 'postalCode')}
           </S.SectionContent>
-        </S.AddressCard>
+        </Card>
+        </S.SectionCard>
 
         {/* Footer Actions */}
         <S.FooterActions>
-          <S.DeleteButton type="button">{t('profile.deactivateAccount')}</S.DeleteButton>
+          <S.DeleteButton variant="danger" type="button">{t('profile.deactivateAccount')}</S.DeleteButton>
           {isEditing && (
-            <Button variant="primary" size="md" type="submit" isLoading={isLoading}>
+            <Button variant="primary" size="medium" type="submit" isLoading={isLoading}>
               {t('profile.saveChanges')}
             </Button>
           )}

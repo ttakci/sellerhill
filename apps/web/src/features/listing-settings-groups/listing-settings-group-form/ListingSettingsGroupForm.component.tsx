@@ -1,5 +1,5 @@
 import { type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
-import { CardBody, Icon, ModernButton, ModernSelect, ModernTextInput, Text } from '@repo/ui';
+import { Button, CardBody, Icon, ModernSelect, ModernTextInput, Text } from '@repo/ui';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupForm.style';
@@ -38,14 +38,14 @@ export const ListingSettingsGroupFormComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <S.PageTitle>{t('listingSettingsGroup.editorTitle')}</S.PageTitle>
+          <S.PageTitle variant="h1" weight="bold">{t('listingSettingsGroup.editorTitle')}</S.PageTitle>
           <Text color="text.secondary">{t('listingSettingsGroup.editorDescription')}</Text>
         </S.HeaderContent>
         <S.Actions>
-          <ModernButton variant="danger" size="medium" onClick={onCancel} iconLeft="x">
+          <Button variant="danger" size="medium" onClick={onCancel} iconLeft="x">
             {t('translation:common.cancel')}
-          </ModernButton>
-          <ModernButton
+          </Button>
+          <Button
             variant="primary"
             size="medium"
             onClick={handleSubmit(onSubmit)}
@@ -53,7 +53,7 @@ export const ListingSettingsGroupFormComponent = ({
             iconLeft="save"
           >
             {t('translation:common.save')}
-          </ModernButton>
+          </Button>
         </S.Actions>
       </S.Header>
 
@@ -65,7 +65,7 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="settings" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle>{t('listingSettingsGroup.generalSettings')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.generalSettings')}</S.SectionTitle>
             </S.SectionTitleContent>
           </S.SectionHeader>
           <CardBody>
@@ -102,9 +102,9 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="trending-up" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle>{t('listingSettingsGroup.pricingStrategy')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.pricingStrategy')}</S.SectionTitle>
             </S.SectionTitleContent>
-            <S.AddButton type="button" onClick={onAddRange}>
+            <S.AddButton variant="text" size="xsmall" type="button" onClick={onAddRange}>
               <Icon name="plus" size={14} />
               {t('listingSettingsGroup.addRange')}
             </S.AddButton>
@@ -115,7 +115,7 @@ export const ListingSettingsGroupFormComponent = ({
                 {fields.map((field, index) => (
                   <S.PriceRangeRow key={field.id}>
                     {index > 0 && (
-                      <S.RemoveButton type="button" onClick={() => remove(index)}>
+                      <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
                         <Icon name="x" size={14} />
                       </S.RemoveButton>
                     )}
@@ -167,7 +167,7 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="percent" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle>{t('listingSettingsGroup.feesAndTaxes')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.feesAndTaxes')}</S.SectionTitle>
             </S.SectionTitleContent>
           </S.SectionHeader>
           <CardBody>
@@ -211,7 +211,7 @@ export const ListingSettingsGroupFormComponent = ({
                 <Icon name="code" size={20} />
               </S.HeaderIconWrapper>
               <S.SectionTitleContent>
-                <S.SectionTitle>{t('listingSettingsGroup.htmlTemplate')}</S.SectionTitle>
+                <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.htmlTemplate')}</S.SectionTitle>
               </S.SectionTitleContent>
               <Controller
                 name="templates.type"
@@ -220,6 +220,7 @@ export const ListingSettingsGroupFormComponent = ({
                   <S.TemplateTypeToggle>
                     <S.ToggleItem
                       type="button"
+                      variant="text"
                       active={field.value === 'custom'}
                       onClick={() => field.onChange('custom')}
                     >
@@ -227,6 +228,7 @@ export const ListingSettingsGroupFormComponent = ({
                     </S.ToggleItem>
                     <S.ToggleItem
                       type="button"
+                      variant="text"
                       active={field.value === 'predefined'}
                       onClick={() => field.onChange('predefined')}
                     >
@@ -237,13 +239,12 @@ export const ListingSettingsGroupFormComponent = ({
               />
             </S.SectionHeader>
             <CardBody>
-              <S.PaddingContainer style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <S.PaddingContainer $flex>
                 <S.TemplateSelectorWrapper>
                   <ModernSelect<ListingSettingsGroupFormData>
                     name="templates.predefinedTemplateId"
                     control={control}
                     label={t('listingSettingsGroup.activeTemplate')}
-                    placeholder={t('listingSettingsGroup.selectTemplate')}
                     options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
                       value: tmp.id,
                       label: tmp.name,
@@ -257,13 +258,12 @@ export const ListingSettingsGroupFormComponent = ({
 
                 <S.TemplateEditorContainer>
                   <S.EditorCodeArea>
-                    <div style={{ color: '#64748b', marginBottom: '0.5rem', fontSize: '0.6875rem' }}>
+                    <S.EditorComment>
                       &lt;!-- Listing Template --&gt;
-                    </div>
+                    </S.EditorComment>
                     {watchedValues.templates.type === 'custom' ? (
                       <S.CustomTemplateTextarea
                         {...control.register('templates.customTemplateHtml')}
-                        placeholder={t('listingSettingsGroup.templatePlaceholder')}
                       />
                     ) : (
                       <S.CustomTemplateTextarea readOnly value={activeTemplate.htmlContent} />
@@ -281,11 +281,12 @@ export const ListingSettingsGroupFormComponent = ({
                 <Icon name="eye" size={20} />
               </S.HeaderIconWrapper>
               <S.SectionTitleContent>
-                <S.SectionTitle>{t('listingSettingsGroup.livePreview')}</S.SectionTitle>
+                <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.livePreview')}</S.SectionTitle>
               </S.SectionTitleContent>
               <S.DeviceControls>
                 <S.IconButton
                   type="button"
+                  variant="ghost"
                   $active={previewDevice === 'desktop'}
                   onClick={() => setPreviewDevice('desktop')}
                 >
@@ -293,6 +294,7 @@ export const ListingSettingsGroupFormComponent = ({
                 </S.IconButton>
                 <S.IconButton
                   type="button"
+                  variant="ghost"
                   $active={previewDevice === 'tablet'}
                   onClick={() => setPreviewDevice('tablet')}
                 >
@@ -300,6 +302,7 @@ export const ListingSettingsGroupFormComponent = ({
                 </S.IconButton>
                 <S.IconButton
                   type="button"
+                  variant="ghost"
                   $active={previewDevice === 'mobile'}
                   onClick={() => setPreviewDevice('mobile')}
                 >
@@ -308,7 +311,7 @@ export const ListingSettingsGroupFormComponent = ({
               </S.DeviceControls>
             </S.SectionHeader>
             <CardBody>
-              <S.PaddingContainer style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <S.PaddingContainer $flex>
                 <S.PreviewContainer>
                   <S.PreviewBrowserHeader>
                     <S.BrowserDot />

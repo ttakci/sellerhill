@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ':*)",
+      "Bash(pnpm -r --parallel --filter @repo/* run build)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(npx tsc:*)",
+      "WebSearch"
+    ]
+  }
+}

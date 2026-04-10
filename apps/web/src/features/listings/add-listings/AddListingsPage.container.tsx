@@ -42,7 +42,7 @@ export const AddListingsPageContainer: React.FC = () => {
   React.useEffect(() => {
     if (submitError) {
       console.error('Failed to create listings:', submitError);
-      const errorMsg = (submitError as any)?.data?.message || 'listings.errors.createFailed';
+      const errorMsg = (submitError as any)?.data?.message || 'listings:listings.errors.createFailed';
       showMessage({
         type: 'error',
         headerKey: 'translation:message.error.header',

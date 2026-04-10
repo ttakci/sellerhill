@@ -1,3 +1,2 @@
-export { Card, CardBody, CardHeader } from './Card.component';
-export type { CardBodyProps, CardHeaderProps, CardProps } from './Card.types';
-
+export { Card, CardBody, CardFooter, CardHeader, CardStat } from './Card.component';
+export type { CardBodyProps, CardFooterProps, CardHeaderProps, CardPadding, CardProps, CardStatProps, CardVariant } from './Card.types';

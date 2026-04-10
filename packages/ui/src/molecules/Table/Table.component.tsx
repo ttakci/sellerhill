@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Checkbox } from '../../atoms/Checkbox';
 import { Icon } from '../../atoms/Icon';
+import { Select } from '../Select';
 import * as S from './Table.style';
 import type { TableProps } from './Table.types';
 import { TablePagination } from './TablePagination.component';
@@ -25,6 +26,8 @@ export const Table = <T extends Record<string, any>>({
   actions,
   pagination,
 }: TableProps<T>): React.ReactElement => {
+  const [bulkValue, setBulkValue] = useState<string | number>('');
+
   const handleRowClick = (row: T, index: number) => {
     if (onRowClick) {
       onRowClick(row, index);
@@ -59,12 +62,24 @@ export const Table = <T extends Record<string, any>>({
 
   const hasToolbar = (bulkActions && bulkActions.length > 0) || onFilter || onDownload || actions;
 
-  const handleBulkAction = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const actionIndex = parseInt(event.target.value, 10);
+  const bulkOptions = React.useMemo(
+    () => [
+      { value: '__placeholder__', label: bulkActionsPlaceholder || 'Bulk Actions' },
+      ...(bulkActions?.map((action, idx) => ({
+        value: idx.toString(),
+        label: action.label,
+      })) || []),
+    ],
+    [bulkActions, bulkActionsPlaceholder]
+  );
+
+  const handleBulkChange = (value: string | number) => {
+    if (value === '__placeholder__') return;
+    const actionIndex = parseInt(value as string, 10);
     if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
       bulkActions[actionIndex].onClick(selectedRows);
     }
-    event.target.value = 'default';
+    setBulkValue('');
   };
 
   return (
@@ -74,19 +89,14 @@ export const Table = <T extends Record<string, any>>({
           <S.ToolbarSection>
             {bulkActions && bulkActions.length > 0 && (
               <S.BulkSelectWrapper>
-                <S.BulkSelect onChange={handleBulkAction} defaultValue="default">
-                  <option value="default" disabled>
-                    {bulkActionsPlaceholder}
-                  </option>
-                  {bulkActions.map((action, index) => (
-                    <option key={index} value={index}>
-                      {action.label}
-                    </option>
-                  ))}
-                </S.BulkSelect>
-                <S.BulkSelectIcon>
-                  <Icon name="expand-more" size={18} />
-                </S.BulkSelectIcon>
+                <Select
+                  size="small"
+                  value={bulkValue}
+                  options={bulkOptions}
+                  onChange={handleBulkChange}
+                  placeholder={bulkActionsPlaceholder || 'Bulk Actions'}
+                  fullWidth={false}
+                />
               </S.BulkSelectWrapper>
             )}
           </S.ToolbarSection>
@@ -163,6 +173,7 @@ export const Table = <T extends Record<string, any>>({
                     $clickable={!!onRowClick}
                     $selected={isSelected}
                     $index={rowIndex}
+                    data-selected={isSelected}
                     onClick={() => handleRowClick(row, rowIndex)}
                   >
                     {selectable && (

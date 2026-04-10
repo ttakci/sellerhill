@@ -60,7 +60,7 @@ void i18n.use(initReactI18next).init({
       orders: trOrders,
     },
   },
-  lng: 'tr',
+  lng: navigator.language.startsWith('tr') ? 'tr' : 'en',
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
   defaultNS: 'translation',

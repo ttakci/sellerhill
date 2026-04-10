@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { IconButton as IconButtonAtom, StatusBadge as StatusBadgeMolecule, tkn } from '@repo/ui';
 
 export const CardWrapper = styled.div`
   width: 100%;
@@ -22,18 +22,14 @@ export const KeywordSection = styled.div`
   flex-wrap: wrap;
 `;
 
-export const ActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
+export const ScopeBadge = styled(StatusBadgeMolecule)`
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+`;
+
+export const ActionButton = styled(IconButtonAtom)`
   width: 2rem; /* 32px */
   height: 2rem; /* 32px */
-  border-radius: ${tkn('radius.sm')};
-  background: transparent;
-  border: none;
-  color: ${tkn('colors.text.tertiary')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
   flex-shrink: 0;
 
   &:hover {

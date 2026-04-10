@@ -21,7 +21,8 @@
         "stats": "Stats",
         "status": "Status",
         "actions": "Actions",
-        "createdAt": "Created At"
+        "createdAt": "Created At",
+        "total": "Total"
       },
       "stats": {
         "success": "Success",
@@ -63,7 +64,10 @@
       "columns": "Columns",
       "actions": "Actions",
       "addedAt": "Added {{date}}",
-      "stockLabel": "Stock"
+      "stockLabel": "Stock",
+      "asinLabel": "ASIN: {{asin}}",
+      "ebayIdLabel": "eBay: {{id}}",
+      "sourceStock": "Src: {{stock}}"
     },
     "card": {
       "stock": "Stock",
@@ -146,9 +150,6 @@
     "success": {
       "created": "{{count}} listings created successfully",
       "queued": "{{count}} listings queued for processing"
-    },
-    "products": {
-      "subtitle": "View product details and Amazon data for all your active listings."
     },
     "errors": {
       "createFailed": "Failed to create listings",

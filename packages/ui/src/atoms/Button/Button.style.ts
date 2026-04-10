@@ -1,191 +1,214 @@
-import { css, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-
 import { tkn } from '../../theme/tkn';
+import { ButtonSize, ButtonVariant } from './Button.types';
 
-import type { ButtonSize, ButtonVariant } from './Button.types';
-
-interface StyledButtonProps {
-  $variant?: ButtonVariant;
-  $size?: ButtonSize;
+interface ActionSurfaceProps {
+  $variant: ButtonVariant;
+  $size: ButtonSize;
   $fullWidth?: boolean;
   $isLoading?: boolean;
-  $isPill?: boolean;
+  $iconColor?: string;
 }
 
-const variantStyles = {
-  primary: (theme: Theme) => `
-    background: ${theme.colors.brand.primary};
-    color: ${theme.colors.text.inverse};
-    border-color: ${theme.colors.brand.primary};
-
-    &:hover:not(:disabled) {
-      background: ${theme.colors.brand.primaryHover};
-      border-color: ${theme.colors.brand.primaryHover};
-      transform: translateY(-0.0625rem); /* 1px */
-      box-shadow: ${theme.shadows.sm};
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-  `,
-
-  secondary: (theme: Theme) => `
-    background: ${theme.colors.background.secondary};
-    color: ${theme.colors.text.primary};
-    border-color: ${theme.colors.border.primary};
-
-    &:hover:not(:disabled) {
-      background: ${theme.colors.background.primary};
-      border-color: ${theme.colors.border.primary};
-      color: ${theme.colors.brand.primary};
-      transform: translateY(-0.0625rem); /* 1px */
-      box-shadow: ${theme.shadows.sm};
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  `,
-
-  danger: (theme: Theme) => `
-    background: ${theme.colors.semantic.error};
-    color: ${theme.colors.text.inverse};
-    border-color: ${theme.colors.semantic.error};
-
-    &:hover:not(:disabled) {
-      opacity: 0.9;
-      transform: translateY(-0.0625rem); /* 1px */
-      box-shadow: ${theme.shadows.sm};
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  `,
-
-  success: (theme: Theme) => `
-    background: ${theme.colors.semantic.success};
-    color: ${theme.colors.text.inverse};
-    border-color: ${theme.colors.semantic.success};
-
-    &:hover:not(:disabled) {
-      opacity: 0.9;
-      transform: translateY(-0.0625rem); /* 1px */
-      box-shadow: ${theme.shadows.sm};
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  `,
+const getBaseHeight = (size: ButtonSize) => {
+  switch (size) {
+    case 'xsmall':
+      return '2rem'; /* 32px */
+    case 'small':
+      return '2.5rem'; /* 40px */
+    case 'large':
+      return '3.25rem'; /* 52px */
+    case 'medium':
+    default:
+      return '2.75rem'; /* 44px */
+  }
 };
 
-const sizeStyles = {
-  sm: (theme: Theme) => `
-    padding: 0.5rem 1rem;
-    font-size: ${theme.typography.fontSize.xs};
-    height: 2.125rem;
-  `,
-
-  md: (theme: Theme) => `
-    padding: 0.625rem 1.25rem;
-    font-size: ${theme.typography.fontSize.sm};
-    height: 2.625rem;
-  `,
-
-  lg: (theme: Theme) => `
-    padding: 0.875rem 1.75rem;
-    font-size: ${theme.typography.fontSize.md};
-    height: 3.25rem;
-    font-weight: ${theme.typography.fontWeight.semibold};
-  `,
+const getPadding = (size: ButtonSize) => {
+  switch (size) {
+    case 'xsmall':
+      return '0 0.75rem'; /* 12px */
+    case 'small':
+      return '0 1rem'; /* 16px */
+    case 'large':
+      return '0 1.5rem'; /* 24px */
+    case 'medium':
+    default:
+      return '0 1.25rem'; /* 20px */
+  }
 };
 
-const ButtonContainer = styled.button<StyledButtonProps>`
+export const ActionSurface = styled.button<ActionSurfaceProps>`
+  all: unset;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: ${(p) => tkn('spacing.sm')(p as any)};
-
-  border-radius: ${(p) => (p.$isPill ? tkn('radius.full')(p as any) : tkn('radius.sm')(p as any))};
-  border: 0.0625rem solid transparent; /* 1px */
-  font-weight: ${(p) => tkn('typography.fontWeight.medium')(p as any)};
-  font-family: ${(p) => tkn('typography.fontFamily.sans')(p as any)};
-
+  box-sizing: border-box;
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    transform ${tkn('transitions.normal')},
-    background-color ${tkn('transitions.normal')},
-    border-color ${tkn('transitions.normal')},
-    box-shadow ${tkn('transitions.normal')};
+  position: relative;
+  overflow: hidden;
 
-  /* Size styles */
-  ${(p) => sizeStyles[p.$size || 'md'](p.theme as Theme)}
+  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
+  height: ${({ $size }) => getBaseHeight($size)};
+  padding: ${({ $size }) => getPadding($size)};
+  gap: ${tkn('spacing.sm')};
 
-  /* Variant styles */
-  ${(p) => variantStyles[p.$variant || 'secondary'](p.theme as Theme)}
-  
-  /* Full width */
-  ${(p) =>
-    p.$fullWidth &&
-    css`
-      width: 100%;
-    `}
-  
-  /* Loading state */
-  ${(p) =>
-    p.$isLoading &&
-    css`
-      position: relative;
-      color: transparent !important;
-      pointer-events: none;
+  border-radius: ${tkn('radius.md')};
+  font-family: ${tkn('typography.fontFamily.sans')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-size: ${({ $size }) => ($size === 'large' ? '1rem' : '0.875rem')};
 
-      &::after {
-        content: '';
-        position: absolute;
-        width: 1.25rem;
-        height: 1.25rem;
-        top: 50%;
-        left: 50%;
-        margin-left: -0.625rem;
-        margin-top: -0.625rem;
-        border: 0.125rem solid currentColor;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: button-loading-spinner 0.6s linear infinite;
-      }
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
-      @keyframes button-loading-spinner {
-        from {
-          transform: rotate(0turn);
-        }
-        to {
-          transform: rotate(1turn);
-        }
-      }
-    `}
-  
-  /* Disabled state */
+  ${({ $variant, theme }) => {
+    switch ($variant) {
+      case 'primary':
+        return css`
+          background-color: ${theme.colors.brand.primary};
+          color: ${theme.colors.text.inverse};
+          box-shadow: 0 0.25rem 0.875rem 0 ${theme.colors.brand.primary}40;
+
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.brand.primaryHover};
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.5rem 1.5rem 0 ${theme.colors.brand.primary}50;
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0.0625rem);
+            box-shadow: 0 0.125rem 0.5rem 0 ${theme.colors.brand.primary}40;
+            background-color: ${theme.colors.brand.primary};
+          }
+        `;
+      case 'secondary':
+        return css`
+          background-color: ${theme.colors.background.secondary};
+          color: ${theme.colors.text.primary};
+          border: 0.0625rem solid ${theme.colors.border.primary};
+
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.brand.secondary};
+            border-color: ${theme.colors.brand.primary};
+            color: ${theme.colors.brand.primary};
+            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
+            transform: translateY(-0.0625rem);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: none;
+            background-color: ${theme.colors.background.secondary};
+          }
+        `;
+      case 'tertiary':
+        return css`
+          background-color: transparent;
+          color: ${theme.colors.brand.primary};
+          border: 0.0625rem solid ${theme.colors.brand.primary};
+
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.brand.primary}15;
+            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
+            transform: translateY(-0.0625rem);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: none;
+            background-color: ${theme.colors.brand.primary}08;
+          }
+        `;
+      case 'text':
+        return css`
+          background-color: transparent;
+          color: ${theme.colors.text.secondary};
+          padding: 0 0.75rem;
+          height: auto;
+          min-height: 2rem;
+
+          &:hover:not(:disabled) {
+            color: ${theme.colors.brand.primary};
+            background-color: ${theme.colors.brand.primary}10;
+            transform: translateY(-0.0625rem);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            background-color: ${theme.colors.brand.primary}05;
+          }
+        `;
+      case 'danger':
+        return css`
+          background-color: ${theme.colors.background.secondary};
+          color: ${theme.colors.semantic.error};
+          border: 0.0625rem solid ${theme.colors.semantic.error}40;
+
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.semantic.error}10;
+            border-color: ${theme.colors.semantic.error};
+            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.semantic.error}20;
+            transform: translateY(-0.0625rem);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: none;
+          }
+        `;
+    }
+  }}
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
-    background: ${tkn('colors.border.secondary')};
-    border-color: ${tkn('colors.border.primary')};
-    color: ${tkn('colors.text.tertiary')};
+    filter: grayscale(0.5);
     box-shadow: none !important;
     transform: none !important;
   }
 
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 0.1875rem ${(p) => p.theme.colors.brand.secondary}; /* 3px */
-  }
+  ${({ $isLoading }) =>
+    $isLoading &&
+    css`
+      pointer-events: none;
+      & > *:not(.loader) {
+        opacity: 0;
+      }
+    `}
 `;
 
-export const S = {
-  ButtonContainer,
-};
+export const ButtonLabel = styled.span`
+  display: flex;
+  align-items: center;
+  gap: inherit;
+`;
+
+export const LoadingContainer = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 0.25rem; /* 4px */
+`;
+
+export const LoadingDot = styled.div<{ $delay: string }>`
+  width: 0.375rem; /* 6px */
+  height: 0.375rem; /* 6px */
+  background-color: currentColor;
+  border-radius: 50%;
+  animation: bounce 1.2s infinite ease-in-out both;
+  animation-delay: ${({ $delay }) => $delay};
+
+  @keyframes bounce {
+    0%,
+    80%,
+    100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+`;

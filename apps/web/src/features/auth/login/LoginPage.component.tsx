@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginFormDataSchema, type LoginFormData } from '@repo/shared';
-import { Logo, MeshBackground, ModernButton, ModernTextInput, Text, Typewriter } from '@repo/ui';
+import { Button, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -51,10 +51,10 @@ export const LoginPageComponent = ({
             <S.SloganWrapper>
               <Typewriter
                 phrases={[
-                  t('auth.branding.slogan1'),
-                  t('auth.branding.slogan2'),
-                  t('auth.branding.slogan3'),
-                  t('auth.branding.slogan4'),
+                  t('auth:auth.branding.slogan1'),
+                  t('auth:auth.branding.slogan2'),
+                  t('auth:auth.branding.slogan3'),
+                  t('auth:auth.branding.slogan4'),
                 ]}
                 typingSpeed={70}
                 deletingSpeed={40}
@@ -69,10 +69,10 @@ export const LoginPageComponent = ({
           <S.AuthCard>
             <S.Header>
               <Text variant="h2" weight="bold">
-                {t('auth.login.title')}
+                {t('auth:auth.login.title')}
               </Text>
               <Text variant="body" color="text.secondary">
-                {t('auth.login.subtitle')}
+                {t('auth:auth.login.subtitle')}
               </Text>
             </S.Header>
 
@@ -80,8 +80,7 @@ export const LoginPageComponent = ({
               <ModernTextInput
                 name="email"
                 control={control}
-                label={t('auth.login.emailLabel')}
-                placeholder={t('auth.login.emailPlaceholder')}
+                label={t('auth:auth.login.emailLabel')}
                 type="email"
                 isDisabled={isLoading || isSubmitting}
                 iconLeft="mail"
@@ -90,32 +89,31 @@ export const LoginPageComponent = ({
               <ModernTextInput
                 name="password"
                 control={control}
-                label={t('auth.login.passwordLabel')}
-                placeholder={t('auth.login.passwordPlaceholder')}
+                label={t('auth:auth.login.passwordLabel')}
                 type="password"
                 isDisabled={isLoading || isSubmitting}
                 iconLeft="lock"
               />
 
               <S.ButtonContainer>
-                <ModernButton
+                <Button
                   type="submit"
                   variant="primary"
                   fullWidth
                   isLoading={isLoading || isSubmitting}
                   size="large"
                 >
-                  {t('auth.login.submitButton')}
-                </ModernButton>
+                  {t('auth:auth.login.submitButton')}
+                </Button>
               </S.ButtonContainer>
             </S.Form>
 
             <S.Footer>
               <Text variant="body" color="text.secondary">
-                {t('auth.login.noAccount')}
+                {t('auth:auth.login.noAccount')}
               </Text>
-              <S.FooterLink type="button" onClick={onNavigateToRegister}>
-                {t('auth.login.registerLink')}
+              <S.FooterLink type="button" variant="text" onClick={onNavigateToRegister}>
+                {t('auth:auth.login.registerLink')}
               </S.FooterLink>
             </S.Footer>
           </S.AuthCard>

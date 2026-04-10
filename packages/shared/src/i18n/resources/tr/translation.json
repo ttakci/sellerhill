@@ -13,14 +13,11 @@
     "showing_info": "{{total}} kayıttan {{from}} - {{to}} arası gösteriliyor",
     "showing": "Gösterilen",
     "of": "üzerinden",
-    "rowsPerPage": "Sayfa başına satır:",
+    "rowsPerPage": "Sayfa başına kayıt:",
     "search": "Ara...",
     "noResults": "Sonuç bulunamadı",
     "success": "Başarılı",
     "failed": "Hata",
-    "products": {
-      "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
-    },
     "unknownProduct": "Bilinmeyen Ürün",
     "views": {
       "label": "Görünüm",
@@ -31,7 +28,8 @@
       "refresh": "Yenile",
       "edit": "Düzenle",
       "delete": "Sil",
-      "filter": "Filtrele"
+      "filter": "Filtrele",
+      "export": "Dışa Aktar"
     },
     "privacy": "Gizlilik",
     "support": "Destek",
@@ -40,6 +38,7 @@
     "noCategory": "Kategori Yok",
     "details": "Detaylar",
     "noBrand": "Marka Bilgisi Yok",
+    "amazonLink": "AMAZON",
     "languageCode": "tr-TR"
   },
   "validation": {
@@ -88,31 +87,10 @@
     "forbidden": "Erişim yasak",
     "serverError": "Bir hata oluştu. Lütfen tekrar deneyin."
   },
-  "auth": {
-    "login": {
-      "title": "Tekrar Hoşgeldiniz",
-      "subtitle": "Hesabınıza devam etmek için giriş yapın",
-      "emailLabel": "E-posta",
-      "passwordLabel": "Şifre",
-      "submitButton": "Giriş Yap",
-      "noAccount": "Hesabınız yok mu?",
-      "registerLink": "Kaydolun"
-    },
-    "register": {
-      "title": "Hesap Oluştur",
-      "subtitle": "Başlamak için kaydolun",
-      "firstNameLabel": "Ad",
-      "lastNameLabel": "Soyad",
-      "emailLabel": "E-posta",
-      "passwordLabel": "Şifre",
-      "confirmPasswordLabel": "Şifreyi Onayla",
-      "submitButton": "Hesap Oluştur",
-      "alreadyHaveAccount": "Zaten bir hesabınız var mı?",
-      "loginLink": "Giriş Yap"
-    }
+  "products": {
+    "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
   },
   "menu": {
-    "main": "ANA MENÜ",
     "dashboard": "Panel",
     "listings": "Listelemeler",
     "ebayListings": "Ebay Listeleri",
@@ -120,18 +98,16 @@
     "products": "Ürünler",
     "inventory": "Envanter",
     "orders": "Siparişler",
-    "configuration": "Yapılandırma",
     "settings": "Ayarlar",
     "storeSettings": "Mağaza Ayarları",
     "listingSettingsGroups": "Listeleme Ayar Grupları",
-    "other": "DİĞER",
     "reports": "Raporlar",
-    "editProfile": "Profili Düzenle",
     "support": "Destek",
     "logout": "Oturumu Kapat",
     "logoutConfirmTitle": "Oturumu Kapat",
     "logoutConfirmDescription": "Oturumu kapatmak istediğinizden emin misiniz? Hesabınıza erişmek için tekrar giriş yapmanız gerekecektir.",
-    "logoutConfirmButton": "Oturumu Kapat"
+    "logoutConfirmButton": "Oturumu Kapat",
+    "editProfile": "Profili Düzenle"
   },
   "header": {
     "selectLanguage": "Dil Seçimi",

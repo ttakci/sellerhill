@@ -4,7 +4,7 @@
  * Purpose: Display eBay connection interface
  */
 
-import { Button } from '@repo/ui';
+import { Button, Card, CardBody, PageHeader } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,20 +16,20 @@ export const EbayConnectPageComponent = ({
   isLoading,
   connectedAccounts,
 }: EbayConnectPageComponentProps): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['ebay', 'translation']);
 
   return (
     <S.Container>
-      <S.Card>
-        <S.Header>
-          <S.Title>{t('ebay.connect.title')}</S.Title>
-          <S.Subtitle>{t('ebay.connect.subtitle')}</S.Subtitle>
-        </S.Header>
+      <Card padding="lg">
+        <PageHeader
+          title={t('ebay.connect.title')}
+          subtitle={t('ebay.connect.subtitle')}
+        />
 
         <S.Content>
           {connectedAccounts > 0 && (
             <S.Info>
-              <S.InfoText>
+              <S.InfoText variant="body-sm" color="text.secondary">
                 {t('ebay.accounts.title')}: {connectedAccounts}
               </S.InfoText>
             </S.Info>
@@ -46,7 +46,7 @@ export const EbayConnectPageComponent = ({
             </Button>
           </S.ButtonContainer>
         </S.Content>
-      </S.Card>
+      </Card>
     </S.Container>
   );
 };

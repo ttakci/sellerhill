@@ -1,5 +1,13 @@
 import styled from '@emotion/styled';
-import { Card, tkn } from '@repo/ui';
+import {
+  AppTheme,
+  Button,
+  Card,
+  IconButton as IconButtonAtom,
+  StatusBadge as StatusBadgeMolecule,
+  Text,
+  tkn,
+} from '@repo/ui';
 
 export const LoadingContainer = styled.div`
   display: flex;
@@ -17,47 +25,6 @@ export const Container = styled.div`
   gap: ${tkn('spacing.lg')};
   box-sizing: border-box;
   padding-bottom: 2.5rem; /* 40px */
-`;
-
-export const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 0;
-
-  @media (max-width: 47.9375rem) {
-    /* 767px */
-    flex-direction: column;
-    gap: ${tkn('spacing.md')};
-  }
-`;
-
-export const HeaderContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem; /* 4px */
-`;
-
-export const PageTitle = styled.h1`
-  font-size: 1.5rem; /* 24px */
-  font-weight: 700;
-  color: ${tkn('colors.text.primary')};
-  margin: 0;
-`;
-
-export const Actions = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-
-  @media (max-width: 47.9375rem) {
-    /* 767px */
-    width: 100%;
-
-    & > button {
-      flex: 1;
-      justify-content: center;
-    }
-  }
 `;
 
 export const GlobalSettingsCard = styled.div`
@@ -206,12 +173,7 @@ export const SectionTitleContent = styled.div`
   flex: 1;
 `;
 
-export const SectionTitle = styled.h3`
-  font-size: 1rem; /* 16px */
-  font-weight: 700;
-  color: ${tkn('colors.text.primary')};
-  margin: 0;
-`;
+export const SectionTitle = styled(Text)``;
 
 export const PaddingContainer = styled.div`
   padding: 0;
@@ -249,8 +211,6 @@ export const SwitchItem = styled.div`
 `;
 
 export const BlacklistCard = styled(Card)`
-  box-shadow: ${tkn('shadows.sm')};
-  border-radius: ${tkn('radius.lg')} !important;
   overflow: hidden;
 `;
 
@@ -312,6 +272,113 @@ export const BlacklistActionGroup = styled.div`
   }
 `;
 
+export const HeaderActionsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* 24px */
+
+  @media (max-width: 63.9375rem) {
+    /* 1023px */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+`;
+
+export const ToolbarGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+`;
+
+export const ViewToggleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  background: ${tkn('colors.background.tertiary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  padding: 0.25rem; /* 4px */
+  border-radius: ${tkn('radius.md')};
+  gap: 0.25rem;
+
+  .dark & {
+    background: #0f172a;
+  }
+`;
+
+export const ToggleButton = styled(Button)<{ $active?: boolean }>`
+  background: ${({ $active, theme }: { $active?: boolean; theme: AppTheme }) =>
+    $active ? theme.colors.brand.secondary : 'transparent'};
+  color: ${({ $active, theme }: { $active?: boolean; theme: AppTheme }) =>
+    $active ? theme.colors.brand.primary : theme.colors.text.tertiary};
+
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const BadgeWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const StatusBadge = styled(StatusBadgeMolecule)`
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+`;
+
+export const SectionToolbar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+`;
+
+export const ToolbarLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+export const ToolbarRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+export const IconButton = styled(IconButtonAtom)`
+  &:hover {
+    background: ${tkn('colors.brand.secondary')};
+    color: ${tkn('colors.brand.primary')};
+    border-color: ${tkn('colors.brand.primary')}30;
+    transform: translateY(-0.0625rem);
+  }
+`;
+
+export const ActionGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
 export const BlacklistInputWrapper = styled.div`
   flex: 1;
   min-width: 15rem; /* 240px - Wider input like Stitch */
@@ -344,18 +411,9 @@ export const AddActionWrapper = styled.div`
   }
 `;
 
-export const IconAction = styled.button`
+export const IconAction = styled(IconButtonAtom)`
   width: 2rem; /* 32px */
   height: 2rem; /* 32px */
-  border-radius: 0.375rem; /* 6px */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: ${tkn('colors.text.tertiary')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
 
   &:hover {
     background: ${(p) => p.theme.colors.semantic.error}15;
@@ -363,32 +421,8 @@ export const IconAction = styled.button`
   }
 `;
 
-export const Footer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem; /* 16px */
-  margin-top: 1.5rem; /* 24px */
-`;
-
-export const FooterLinks = styled.div`
-  display: flex;
-  gap: 1.5rem; /* 24px */
-
-  a {
-    font-size: 0.6875rem; /* 11px */
-    font-weight: 700;
-    color: ${tkn('colors.text.tertiary')};
-    text-decoration: none;
-    letter-spacing: 0.05em;
-
-    &:hover {
-      color: ${tkn('colors.text.secondary')};
-    }
-  }
-`;
-
-export const Copyright = styled.div`
-  font-size: 0.8125rem; /* 13px */
-  color: ${tkn('colors.text.tertiary')};
+export const EmptyBlacklistText = styled(Text)`
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2rem;
 `;

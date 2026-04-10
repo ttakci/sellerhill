@@ -1,29 +1,55 @@
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
-import type { CardProps } from './Card.types';
+import type { CardPadding, CardProps, CardVariant } from './Card.types';
 
-export const CardContainer = styled.div<{ $variant: CardProps['variant']; $padding: CardProps['padding'] }>`
+export const CardContainer = styled.div<{
+  $variant: CardVariant;
+  $padding: CardPadding;
+  $hoverable?: boolean;
+}>`
   background: ${tkn('colors.surface.primary')};
   border-radius: ${tkn('radius.lg')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all ${tkn('transitions.normal')} ease;
+  transition: box-shadow ${tkn('transitions.fast')}, border-color ${tkn('transitions.fast')}, transform ${tkn('transitions.fast')};
 
+  /* Variant styles */
   ${(props) => {
     switch (props.$variant) {
       case 'bordered':
-        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`; /* 1px */
+        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
       case 'elevated':
+        return `box-shadow: ${tkn('shadows.sm')(props as any)};`;
+      case 'flat':
+        return '';
+      case 'interactive':
         return `
-          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)}; /* 1px */
+          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
+          cursor: pointer;
+          &:hover {
+            box-shadow: ${tkn('shadows.md')(props as any)};
+            border-color: ${tkn('colors.text.tertiary')(props as any)};
+            transform: translateY(-0.125rem);
+          }
+          &:active {
+            transform: translateY(0);
+            box-shadow: ${tkn('shadows.sm')(props as any)};
+          }
+        `;
+      case 'stat':
+        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+      case 'section':
+        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+      default:
+        return `
+          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
           box-shadow: ${tkn('shadows.sm')(props as any)};
         `;
-      default:
-        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`; /* 1px */
     }
   }}
 
+  /* Padding styles */
   ${(props) => {
     switch (props.$padding) {
       case 'none':
@@ -38,11 +64,24 @@ export const CardContainer = styled.div<{ $variant: CardProps['variant']; $paddi
         return '';
     }
   }}
+
+  /* Hoverable effect */
+  ${(props) =>
+    props.$hoverable &&
+    !props.$variant?.includes('interactive') &&
+    `
+    cursor: pointer;
+    &:hover {
+      box-shadow: ${tkn('shadows.md')(props as any)};
+      border-color: ${tkn('colors.text.tertiary')(props as any)};
+      transform: translateY(-0.0625rem);
+    }
+  `}
 `;
 
 export const CardHeaderContainer = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  padding: 1rem ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -51,7 +90,7 @@ export const CardHeaderContainer = styled.div`
 
   h3,
   span {
-    font-weight: 700;
+    font-weight: ${tkn('typography.fontWeight.bold')};
     color: ${tkn('colors.text.primary')};
     font-size: ${tkn('typography.fontSize.md')};
   }
@@ -69,6 +108,18 @@ export const CardHeaderContent = styled.div`
   }
 `;
 
+export const CardHeaderTextContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+`;
+
+export const CardHeaderDescription = styled.span`
+  font-size: ${tkn('typography.fontSize.xs')};
+  color: ${tkn('colors.text.secondary')};
+  line-height: ${tkn('typography.lineHeight.normal')};
+`;
+
 export const CardHeaderActions = styled.div`
   display: flex;
   align-items: center;
@@ -80,4 +131,77 @@ export const CardBodyContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+export const CardFooterContainer = styled.div`
+  padding: 0.75rem ${tkn('spacing.lg')};
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/* Stat Card styles */
+export const CardStatContainer = styled.div<{
+  $trend?: 'up' | 'down' | 'neutral';
+}>`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.md')};
+
+  .card-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: ${tkn('radius.md')};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${tkn('colors.brand.secondary')};
+    color: ${tkn('colors.brand.primary')};
+  }
+
+  .card-stat-value {
+    font-size: ${tkn('typography.fontSize.xxl')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
+    color: ${tkn('colors.text.primary')};
+    line-height: ${tkn('typography.lineHeight.tight')};
+  }
+
+  .card-stat-label {
+    font-size: ${tkn('typography.fontSize.xs')};
+    color: ${tkn('colors.text.secondary')};
+    font-weight: ${tkn('typography.fontWeight.medium')};
+  }
+
+  .card-stat-footer {
+    display: flex;
+    align-items: center;
+    gap: ${tkn('spacing.xs')};
+    margin-top: 0.125rem;
+  }
+
+  .card-stat-trend {
+    font-size: ${tkn('typography.fontSize.xs')};
+    font-weight: ${tkn('typography.fontWeight.medium')};
+    color: ${(props) => {
+      switch (props.$trend) {
+        case 'up': return tkn('colors.semantic.success')(props as any);
+        case 'down': return tkn('colors.semantic.error')(props as any);
+        default: return tkn('colors.text.tertiary')(props as any);
+      }
+    }};
+  }
+
+  .card-stat-subtitle {
+    font-size: ${(props: any) => props.theme.typography.fontSize['2xs']};
+    color: ${tkn('colors.text.tertiary')};
+  }
 `;

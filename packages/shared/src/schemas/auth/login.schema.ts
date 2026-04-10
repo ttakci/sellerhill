@@ -11,14 +11,14 @@ export const loginFormDataSchema = (t: TFunction) =>
   z.object({
     email: z
       .string()
-      .email(t('validation.invalidEmail'))
+      .email(t('translation:validation.invalidEmail'))
       .max(
         AUTH_CONSTANTS.EMAIL_MAX_LENGTH,
-        t('validation.maxLength', { max: AUTH_CONSTANTS.EMAIL_MAX_LENGTH })
+        t('translation:validation.maxLength', { max: AUTH_CONSTANTS.EMAIL_MAX_LENGTH })
       ),
     password: z
       .string()
-      .min(1, t('validation.required')),
+      .min(1, t('translation:validation.required')),
   });
 
 export type LoginFormData = z.infer<ReturnType<typeof loginFormDataSchema>>;

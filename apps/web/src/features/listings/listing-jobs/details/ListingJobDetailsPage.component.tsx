@@ -1,4 +1,4 @@
-import { Icon, Table } from '@repo/ui';
+import { Icon, PageHeader, Table } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingJobDetailsPage.style';
@@ -16,24 +16,19 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
   return (
     <S.Container>
-      <S.Header>
-        <S.TitleSection>
-          <S.BackButton onClick={onBack}>
-            <Icon name="arrow_back" size={20} />
-            {t('translation:common.back')}
-          </S.BackButton>
-          <S.Title>
-            {t('listings.jobs.details.title')}
-            <small>({jobId})</small>
-          </S.Title>
-        </S.TitleSection>
-        <S.Actions>
-          <S.RefreshButton onClick={onRefresh} disabled={isLoading}>
+      <S.BackButton variant="text" onClick={onBack}>
+        <Icon name="arrow_back" size={20} />
+        {t('translation:common.back')}
+      </S.BackButton>
+      <PageHeader
+        title={`${t('listings.jobs.details.title')} (${jobId})`}
+        actions={
+          <S.RefreshButton variant="secondary" size="small" onClick={onRefresh} disabled={isLoading}>
             <Icon name="sync" size={20} />
             {t('translation:common.actions.refresh')}
           </S.RefreshButton>
-        </S.Actions>
-      </S.Header>
+        }
+      />
 
       <Table columns={columns} data={items} emptyMessage={t('listings.jobs.items.empty')} />
     </S.Container>

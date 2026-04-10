@@ -1,84 +1,27 @@
-import type { Control, FieldValues, Path } from 'react-hook-form';
-import type { IconName } from '../../atoms/Icon';
+import { FieldValues, UseControllerProps } from 'react-hook-form';
+import { IconName } from '../../atoms/Icon';
 
-/**
- * TextInput Molecule Props
- * 
- * Controller-wrapped Input component with integrated Floating Label and Error display
- */
-export interface TextInputProps<TFieldValues extends FieldValues = FieldValues> {
-  /**
-   * Field name (must match schema property)
-   */
-  name: Path<TFieldValues>;
+export type TextInputSize = 'small' | 'medium' | 'large';
 
-  /**
-   * React Hook Form control object
-   */
-  control: Control<TFieldValues>;
-
-  /**
-   * Label text. Acting as placeholder when empty, and floating label when focused/filled.
-   */
-  label: string;
-  
-  /**
-   * Optional placeholder
-   */
+export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
+  extends Omit<Partial<UseControllerProps<TFieldValues>>, 'name'> {
+  name: any;
+  label?: string;
   placeholder?: string;
-
-  /**
-   * Input type
-   */
-  type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' | 'number';
-
-  /**
-   * Disabled state
-   */
-  disabled?: boolean;
-
-  /**
-   * Input size
-   */
-  size?: 'sm' | 'md' | 'lg';
-
-  /**
-   * Should display as full width
-   */
+  type?: string;
+  isDisabled?: boolean;
+  iconLeft?: IconName;
+  iconRight?: IconName;
+  suffixText?: string;
   fullWidth?: boolean;
-
-  /**
-   * Auto focus
-   */
-  autoFocus?: boolean;
-
-  /**
-   * Max length
-   */
-  maxLength?: number;
-
-  /**
-   * ID attribute (for accessibility)
-   */
+  className?: string;
   id?: string;
-
-  /**
-   * Left icon name
-   */
-  leftIcon?: IconName;
-
-  /**
-   * Right icon name
-   */
-  rightIcon?: IconName;
-
-  /**
-   * Prefix text/element
-   */
-  prefix?: React.ReactNode;
-
-  /**
-   * Suffix text/element
-   */
-  suffix?: React.ReactNode;
+  autoFocus?: boolean;
+  maxLength?: number;
+  autoComplete?: string;
+  onPressIcon?: () => void;
+  size?: TextInputSize;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }

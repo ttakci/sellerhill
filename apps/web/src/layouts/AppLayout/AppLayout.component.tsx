@@ -30,7 +30,7 @@ import * as S from './AppLayout.style';
 export const AppLayout: React.FC = () => {
   const { messageState, loadingState, closeMessage } = useUI();
   const { themeMode, toggleTheme } = useTheme();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['translation', 'listings', 'orders']);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -39,8 +39,6 @@ export const AppLayout: React.FC = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [listingsOpen, setListingsOpen] = useState(location.pathname.startsWith('/listings'));
-  const [settingsOpen, setSettingsOpen] = useState(location.pathname.startsWith('/settings'));
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   // Close mobile sidebar on route change
@@ -78,14 +76,14 @@ export const AppLayout: React.FC = () => {
       } else if (location.pathname === '/listings/products') {
         items.push({ label: t('translation:menu.products') });
       } else if (location.pathname === '/listings/add') {
-        items.push({ label: t('listings:breadcrumb.addProducts') });
+        items.push({ label: t('listings:listings.breadcrumb.addProducts') });
       } else if (location.pathname === '/listings') {
         items.push({ label: t('translation:menu.ebayListings') });
       }
     } else if (location.pathname.startsWith('/orders')) {
       items.push({ label: t('translation:menu.orders'), path: '/orders' });
       if (location.pathname !== '/orders') {
-        items.push({ label: t('orders:detail.title') });
+        items.push({ label: t('orders:orders.detail.title') });
       }
     } else if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/listing-settings-groups')) {
       items.push({ label: t('translation:menu.settings'), path: '/settings/store' });
@@ -112,12 +110,11 @@ export const AppLayout: React.FC = () => {
           </S.LogoArea>
 
           <S.NavSection>
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.main')}</S.NavLabelWrapper>
-
             <S.NavItem
               $active={location.pathname === '/dashboard'}
               $isCollapsed={sidebarCollapsed}
               onClick={() => navigate('/dashboard')}
+              title={sidebarCollapsed ? t('translation:menu.dashboard') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="dashboard" size={18} />
@@ -125,60 +122,56 @@ export const AppLayout: React.FC = () => {
               </S.NavItemContent>
             </S.NavItem>
 
-            <S.NavItemWrapper>
-              <S.NavItem
-                $active={location.pathname.startsWith('/listings')}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => {
-                  if (sidebarCollapsed) setSidebarCollapsed(false);
-                  setListingsOpen(!listingsOpen);
-                }}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="list-alt" size={18} />
-                  {!sidebarCollapsed && t('translation:menu.listings')}
-                </S.NavItemContent>
-                {!sidebarCollapsed && (
-                  <S.ChevronWrapper $isOpen={listingsOpen} $isCollapsed={sidebarCollapsed}>
-                    <Icon name="expand-more" size={16} />
-                  </S.ChevronWrapper>
-                )}
-              </S.NavItem>
+            <S.NavDivider />
 
-              <S.SubNavContainer $isOpen={!sidebarCollapsed && listingsOpen}>
-                <S.SubNavItem $active={location.pathname === '/listings'} onClick={() => navigate('/listings')}>
-                  {t('translation:menu.ebayListings')}
-                </S.SubNavItem>
-                <S.SubNavItem
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.inventory')}</S.NavLabelWrapper>
+
+            <S.NavItemWrapper>
+              <S.SubNavContainer $isOpen={true}>
+                <S.NavItem
+                  $active={location.pathname === '/listings'}
+                  $isCollapsed={sidebarCollapsed}
+                  $isSubItem={true}
+                  onClick={() => navigate('/listings')}
+                  title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
+                >
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name="store" size={18} />
+                    {!sidebarCollapsed && t('translation:menu.ebayListings')}
+                  </S.NavItemContent>
+                </S.NavItem>
+                <S.NavItem
                   $active={location.pathname === '/listings/jobs'}
+                  $isCollapsed={sidebarCollapsed}
+                  $isSubItem={true}
                   onClick={() => navigate('/listings/jobs')}
+                  title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
                 >
-                  {t('translation:menu.listingJobs')}
-                </S.SubNavItem>
-                <S.SubNavItem
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name="sync" size={18} />
+                    {!sidebarCollapsed && t('translation:menu.listingJobs')}
+                  </S.NavItemContent>
+                </S.NavItem>
+                <S.NavItem
                   $active={location.pathname === '/listings/products'}
+                  $isCollapsed={sidebarCollapsed}
+                  $isSubItem={true}
                   onClick={() => navigate('/listings/products')}
+                  title={sidebarCollapsed ? t('translation:menu.products') : undefined}
                 >
-                  {t('translation:menu.products')}
-                </S.SubNavItem>
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name="grid-view" size={18} />
+                    {!sidebarCollapsed && t('translation:menu.products')}
+                  </S.NavItemContent>
+                </S.NavItem>
               </S.SubNavContainer>
             </S.NavItemWrapper>
 
             <S.NavItem
               $isCollapsed={sidebarCollapsed}
-              $active={location.pathname === '/inventory'}
-              onClick={() => navigate('/inventory')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="archive" size={18} />
-                {!sidebarCollapsed && t('translation:menu.inventory')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
               $active={location.pathname === '/orders'}
               onClick={() => navigate('/orders')}
+              title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                 <Icon name="shopping-cart" size={18} />
@@ -191,66 +184,38 @@ export const AppLayout: React.FC = () => {
               )}
             </S.NavItem>
 
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.configuration')}</S.NavLabelWrapper>
+            <S.NavDivider />
+
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.settings')}</S.NavLabelWrapper>
 
             <S.NavItemWrapper>
-              <S.NavItem
-                $active={location.pathname.startsWith('/settings')}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => {
-                  if (sidebarCollapsed) setSidebarCollapsed(false);
-                  setSettingsOpen(!settingsOpen);
-                }}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name="settings" size={18} />
-                  {!sidebarCollapsed && t('translation:menu.settings')}
-                </S.NavItemContent>
-                {!sidebarCollapsed && (
-                  <S.ChevronWrapper $isOpen={settingsOpen} $isCollapsed={sidebarCollapsed}>
-                    <Icon name="expand-more" size={16} />
-                  </S.ChevronWrapper>
-                )}
-              </S.NavItem>
-
-              <S.SubNavContainer $isOpen={!sidebarCollapsed && settingsOpen}>
-                <S.SubNavItem
+              <S.SubNavContainer $isOpen={true}>
+                <S.NavItem
                   $active={location.pathname === '/settings/store'}
+                  $isCollapsed={sidebarCollapsed}
+                  $isSubItem={true}
                   onClick={() => navigate('/settings/store')}
+                  title={sidebarCollapsed ? t('translation:menu.storeSettings') : undefined}
                 >
-                  {t('translation:menu.storeSettings')}
-                </S.SubNavItem>
-                <S.SubNavItem
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name="settings" size={18} />
+                    {!sidebarCollapsed && t('translation:menu.storeSettings')}
+                  </S.NavItemContent>
+                </S.NavItem>
+                <S.NavItem
                   $active={location.pathname.startsWith('/settings/listing-groups')}
+                  $isCollapsed={sidebarCollapsed}
+                  $isSubItem={true}
                   onClick={() => navigate('/settings/listing-groups')}
+                  title={sidebarCollapsed ? t('translation:menu.listingSettingsGroups') : undefined}
                 >
-                  {t('translation:menu.listingSettingsGroups')}
-                </S.SubNavItem>
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name="check-list" size={18} />
+                    {!sidebarCollapsed && t('translation:menu.listingSettingsGroups')}
+                  </S.NavItemContent>
+                </S.NavItem>
               </S.SubNavContainer>
             </S.NavItemWrapper>
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.other')}</S.NavLabelWrapper>
-
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={location.pathname === '/reports'}
-              onClick={() => navigate('/reports')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="insert-chart" size={18} />
-                {!sidebarCollapsed && t('translation:menu.reports')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={location.pathname === '/profile'}
-              onClick={() => navigate('/profile')}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="user" size={18} />
-                {!sidebarCollapsed && t('translation:menu.editProfile')}
-              </S.NavItemContent>
-            </S.NavItem>
           </S.NavSection>
 
           <S.SidebarFooter>
@@ -270,7 +235,7 @@ export const AppLayout: React.FC = () => {
                         <Text variant="caption" weight="bold" color="text.inverse">
                           {userName}
                         </Text>
-                        <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                        <Text variant="caption" color="text.tertiary">
                           {user?.email || ''}
                         </Text>
                       </S.ProfileDetails>
@@ -308,7 +273,7 @@ export const AppLayout: React.FC = () => {
                 </S.MobileMenuButton>
 
                 <S.ToggleButton onClick={handleToggleSidebar}>
-                  <Icon name={sidebarCollapsed ? 'menu_open' : 'menu'} size={20} />
+                  <Icon name="menu" size={20} />
                 </S.ToggleButton>
               </S.HeaderLeft>
 
@@ -358,8 +323,8 @@ export const AppLayout: React.FC = () => {
             <S.ContentInner>
               <Outlet />
             </S.ContentInner>
-            <Footer />
           </S.ContentArea>
+          <Footer />
         </S.MainContent>
 
         {/* Global UI Overlays */}

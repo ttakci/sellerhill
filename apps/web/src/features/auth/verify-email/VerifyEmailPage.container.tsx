@@ -12,7 +12,7 @@ import { useResendVerificationMutation, useVerifyEmailMutation } from '../api/au
 import { VerifyEmailPageComponent } from './VerifyEmailPage.component';
 
 export const VerifyEmailPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'translation']);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showMessage, closeMessage } = useUI();

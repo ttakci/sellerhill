@@ -9,3 +9,6 @@ export type {
 
 export { ThemeContext, ThemeProvider } from './ThemeContext';
 export type { ThemeContextValue } from './ThemeContext.types';
+
+export { ToastContext, ToastProvider, useToastContext } from './ToastContext';
+export type { ToastContextValue } from './ToastContext';

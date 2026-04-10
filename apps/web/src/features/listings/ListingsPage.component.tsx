@@ -1,4 +1,4 @@
-import { Checkbox, Icon, Table, TablePagination } from '@repo/ui';
+import { Button, Checkbox, Icon, ModernSelect, PageHeader, Table, TablePagination } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingsPage.style';
@@ -9,8 +9,6 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
   isLoading,
   onRefresh,
   onAddListing,
-  onEndListings,
-  selectedListingIds,
   onSelectionChange,
   columns,
   selectedRows,
@@ -28,6 +26,7 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [bulkValue, setBulkValue] = React.useState<string | number>('');
   const filterRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -43,109 +42,106 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
     };
   }, []);
 
-  const filterAction = (
-    <S.FilterWrapper ref={filterRef}>
-      <S.IconButton onClick={() => setIsFilterOpen(!isFilterOpen)} title={t('translation:common.actions.filter')}>
-        <Icon name="filter-list" size={20} />
-      </S.IconButton>
-      {isFilterOpen && (
-        <S.PopoverContainer>
-          <S.PopoverHeader>{t('translation:common.actions.filter')}</S.PopoverHeader>
-          <S.PopoverContent>
-            {columnOptions.map((opt) => (
-              <Checkbox
-                key={opt.key}
-                label={opt.label}
-                checked={visibleColumnKeys.includes(opt.key)}
-                onChange={() => onToggleColumn(opt.key)}
-                disabled={opt.alwaysVisible}
-              />
-            ))}
-          </S.PopoverContent>
-        </S.PopoverContainer>
-      )}
-    </S.FilterWrapper>
+  const bulkOptions = React.useMemo(
+    () => [
+      { value: '__placeholder__', label: t('listings.actions.bulkActions') },
+      ...(bulkActions?.map((action, idx) => ({
+        value: idx.toString(),
+        label: action.label,
+      })) || []),
+    ],
+    [bulkActions, t]
   );
 
-  const viewToggle = (
-    <S.ToolbarGroup>
-      <S.ViewToggleGroup>
-        <S.ToggleButton
-          $active={viewMode === 'grid'}
-          onClick={() => onViewModeChange('grid')}
-          title={t('translation:common.views.grid')}
-        >
-          <Icon name="grid-view" size={20} />
-        </S.ToggleButton>
-        <S.ToggleButton
-          $active={viewMode === 'table'}
-          onClick={() => onViewModeChange('table')}
-          title={t('translation:common.views.table')}
-        >
-          <Icon name="format-list-bulleted" size={20} />
-        </S.ToggleButton>
-      </S.ViewToggleGroup>
-      <S.ViewLabel>
-        {t('translation:common.views.label')}: <strong>{t(`translation:common.views.${viewMode}`)}</strong>
-      </S.ViewLabel>
-    </S.ToolbarGroup>
-  );
+  const handleBulkChange = (value: string | number) => {
+    if (value === '__placeholder__') return;
+    const actionIndex = parseInt(value as string, 10);
+    if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
+      bulkActions[actionIndex].onClick(selectedRows);
+    }
+    setBulkValue('');
+  };
 
   return (
     <S.Container>
-      <S.Header>
-        <S.HeaderContent>
-          <S.PageTitle>{t('listings.overview.title')}</S.PageTitle>
-          <S.PageSubtitle>{t('listings.overview.subtitle', { count: listings.length })}</S.PageSubtitle>
-        </S.HeaderContent>
-        <S.Actions>
-          <S.StyledButton onClick={onRefresh} disabled={isLoading}>
-            <Icon name="sync" />
-            {t('translation:common.actions.refresh')}
-          </S.StyledButton>
-          <S.StyledButton $variant="primary" onClick={onAddListing}>
-            <Icon name="add" />
-            {t('listings.actions.addListing')}
-          </S.StyledButton>
-        </S.Actions>
-      </S.Header>
+      <PageHeader
+        title={t('listings.overview.title')}
+        subtitle={t('listings.overview.subtitle', { count: listings.length })}
+        actions={
+          <>
+            <Button variant="secondary" onClick={onRefresh} disabled={isLoading}>
+              <Icon name="sync" />
+              {t('translation:common.actions.refresh')}
+            </Button>
+            <Button variant="primary" onClick={onAddListing}>
+              <Icon name="plus" />
+              {t('listings.actions.addListing')}
+            </Button>
+          </>
+        }
+      />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {/* Bulk actions and search could go here if extracted from Table */}
+      <S.Toolbar>
+        <S.ToolbarLeft>
           {bulkActions && listings.length > 0 && viewMode === 'grid' && (
-            <select
-              style={{
-                padding: '0.5rem',
-                borderRadius: '0.5rem',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.875rem',
-              }}
-              onChange={(e) => {
-                const action = bulkActions.find((a) => a.label === e.target.value);
-                if (action) action.onClick(selectedRows);
-              }}
-              value=""
-            >
-              <option value="" disabled>
-                {t('listings.actions.bulkActions')}
-              </option>
-              {bulkActions.map((action) => (
-                <option key={action.label} value={action.label}>
-                  {action.label}
-                </option>
-              ))}
-            </select>
+            <S.BulkSelectWrapper>
+              <ModernSelect
+                size="small"
+                value={bulkValue}
+                options={bulkOptions}
+                onChange={handleBulkChange}
+                placeholder={t('listings.actions.bulkActions')}
+                fullWidth
+              />
+            </S.BulkSelectWrapper>
           )}
-          {viewToggle}
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {filterAction}
-          <S.IconButton onClick={onDownload} title={t('translation:common.actions.export')}>
-            <Icon name="download" size={20} />
+          <S.ToolbarGroup>
+            <S.ViewToggleGroup>
+              <S.ToggleButton
+                $active={viewMode === 'grid'}
+                onClick={() => onViewModeChange('grid')}
+                title={t('translation:common.views.grid')}
+              >
+                <Icon name="grid-view" size={16} />
+              </S.ToggleButton>
+              <S.ToggleButton
+                $active={viewMode === 'table'}
+                onClick={() => onViewModeChange('table')}
+                title={t('translation:common.views.table')}
+              >
+                <Icon name="format-list-bulleted" size={16} />
+              </S.ToggleButton>
+            </S.ViewToggleGroup>
+            <S.ViewLabel variant="caption" color="text.tertiary">{t(`translation:common.views.${viewMode}`)}</S.ViewLabel>
+          </S.ToolbarGroup>
+        </S.ToolbarLeft>
+        <S.ToolbarRight>
+          <S.FilterWrapper ref={filterRef}>
+            <S.IconButton variant="ghost" onClick={() => setIsFilterOpen(!isFilterOpen)} title={t('translation:common.actions.filter')}>
+              <Icon name="filter-list" size={18} />
+            </S.IconButton>
+            {isFilterOpen && (
+              <S.PopoverContainer>
+                <S.PopoverHeader>{t('translation:common.actions.filter')}</S.PopoverHeader>
+                <S.PopoverContent>
+                  {columnOptions.map((opt) => (
+                    <Checkbox
+                      key={opt.key}
+                      label={opt.label}
+                      checked={visibleColumnKeys.includes(opt.key)}
+                      onChange={() => onToggleColumn(opt.key)}
+                      disabled={opt.alwaysVisible}
+                    />
+                  ))}
+                </S.PopoverContent>
+              </S.PopoverContainer>
+            )}
+          </S.FilterWrapper>
+          <S.IconButton variant="ghost" onClick={onDownload} title={t('translation:common.actions.export')}>
+            <Icon name="download" size={18} />
           </S.IconButton>
-        </div>
-      </div>
+        </S.ToolbarRight>
+      </S.Toolbar>
 
       {viewMode === 'table' ? (
         <Table
@@ -157,8 +153,6 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
           emptyMessage={t('listings.overview.emptyTitle')}
           bulkActions={bulkActions}
           bulkActionsPlaceholder={t('listings.actions.bulkActions')}
-          onDownload={onDownload}
-          actions={filterAction}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
@@ -169,77 +163,70 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
           <S.GridContainer>
             {listings.map((listing) => (
               <S.ListingCard key={listing.id} variant="bordered">
-                <S.CardImageSection>
-                  {listing.imageUrls?.[0] ? (
-                    <S.ProductImage src={listing.imageUrls[0]} alt={listing.title} />
-                  ) : (
-                    <Icon name="image" size={48} />
-                  )}
+                <S.CardTopRow>
+                  <S.CardThumb>
+                    {listing.imageUrls?.[0] ? (
+                      <img src={listing.imageUrls[0]} alt={listing.title} />
+                    ) : (
+                      <Icon name="image" size={16} />
+                    )}
+                  </S.CardThumb>
+                  <S.CardHeaderInfo>
+                    <S.CardTitle>
+                      {listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title}
+                    </S.CardTitle>
+                    <S.CardIdLinks>
+                      <S.CardIdLink href={`https://www.amazon.com/dp/${listing.asin}`} target="_blank" rel="noreferrer">
+                        {listing.asin}
+                        <Icon name="open-in-new" size={10} />
+                      </S.CardIdLink>
+                      {listing.ebayListingId && (
+                        <>
+                          <S.CardIdDivider>&#183;</S.CardIdDivider>
+                          <S.CardIdLink
+                            href={`https://www.ebay.com/itm/${listing.ebayListingId}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {listing.ebayListingId}
+                            <Icon name="open-in-new" size={10} />
+                          </S.CardIdLink>
+                        </>
+                      )}
+                    </S.CardIdLinks>
+                  </S.CardHeaderInfo>
                   <S.CardStatusBadge>
                     <S.StatusBadge $status={listing.status}>
                       {t(`listings.status.${listing.status.toLowerCase()}`)}
                     </S.StatusBadge>
                   </S.CardStatusBadge>
-                </S.CardImageSection>
+                </S.CardTopRow>
 
                 <S.CardBody>
-                  <S.CardTitle href="#">
-                    {listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title}
-                  </S.CardTitle>
-
-                  <S.CardMetaList>
-                    <S.MetaBadge>
-                      {t('listings.table.asin')}: {listing.asin}
-                    </S.MetaBadge>
-                    {listing.ebayListingId && (
-                      <S.MetaBadge>
-                        {t('listings.table.ebayId')}: {listing.ebayListingId}
-                      </S.MetaBadge>
-                    )}
-                  </S.CardMetaList>
-
                   <S.CardStatsRow>
                     <S.StatItem>
-                      <S.StatLabel>{t('listings.table.price')}</S.StatLabel>
-                      <S.StatValue>${listing.price.toFixed(2)}</S.StatValue>
+                      <S.StatLabel variant="caption" weight="semibold" color="text.tertiary">{t('listings.table.price')}</S.StatLabel>
+                      <S.StatValue variant="body-sm" weight="bold">${listing.price.toFixed(2)}</S.StatValue>
                     </S.StatItem>
                     <S.StatItem>
-                      <S.StatLabel>{t('listings.table.estimatedProfit')}</S.StatLabel>
-                      <S.StatValue $type="profit">
+                      <S.StatLabel variant="caption" weight="semibold" color="text.tertiary">{t('listings.table.estimatedProfit')}</S.StatLabel>
+                      <S.StatValue variant="body-sm" weight="bold" $type="profit">
                         {(listing.estimatedProfit ?? 0) >= 0 ? '+' : ''}${(listing.estimatedProfit ?? 0).toFixed(2)}
                       </S.StatValue>
                     </S.StatItem>
                     <S.StatItem>
-                      <S.StatLabel>{t('listings.table.roi')}</S.StatLabel>
-                      <S.StatValue $type="roi">{listing.roi?.toFixed(1) || '0'}%</S.StatValue>
+                      <S.StatLabel variant="caption" weight="semibold" color="text.tertiary">{t('listings.table.roi')}</S.StatLabel>
+                      <S.StatValue variant="body-sm" weight="bold" $type="roi">{listing.roi?.toFixed(1) || '0'}%</S.StatValue>
                     </S.StatItem>
                   </S.CardStatsRow>
-
-                  <S.CardFooter>
-                    <S.StockInfo>
-                      <Icon name="inventory-2" size={18} />
-                      <span>
-                        {t('listings:card.stock')}: <span className="count">{listing.quantity}</span>
-                      </span>
-                    </S.StockInfo>
-                    <S.UpdateTime>{t('listings:card.updated', { time: '-' })}</S.UpdateTime>
-                  </S.CardFooter>
                 </S.CardBody>
 
-                <S.CardActions>
-                  <S.QuickActions>
-                    <S.IconButton title={t('listings:card.editListing')}>
-                      <Icon name="edit" size={20} />
-                    </S.IconButton>
-                    <S.IconButton title={t('listings:card.deleteListing')}>
-                      <Icon name="delete" size={20} />
-                    </S.IconButton>
-                  </S.QuickActions>
-                  <S.ExternalLink href={`https://www.ebay.com/itm/${listing.ebayListingId}`} target="_blank">
-                    <span>{t('listings:card.ebayStore')}</span>
-                    <Icon name="open-in-new" size={14} />
-                  </S.ExternalLink>
-                </S.CardActions>
+                <S.CardFooter>
+                  <S.StockInfo>
+                    <Icon name="inventory-2" size={14} />
+                    <span className="count">{listing.quantity}</span>
+                  </S.StockInfo>
+                </S.CardFooter>
               </S.ListingCard>
             ))}
           </S.GridContainer>

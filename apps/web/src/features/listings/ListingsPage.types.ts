@@ -9,7 +9,6 @@ export interface ListingsPageProps {
   onRefresh: () => void;
   onAddListing: () => void;
   onEndListings: (ids: string[]) => void;
-  selectedListingIds: string[];
   onSelectionChange: (ids: string[]) => void;
   columns: TableColumn<ListingDto>[];
   selectedRows: ListingDto[];

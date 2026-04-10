@@ -13,7 +13,7 @@
     "showing_info": "Showing {{from}}-{{to}} of {{total}} entries",
     "showing": "Showing",
     "of": "of",
-    "rowsPerPage": "Rows per page:",
+    "rowsPerPage": "Records per page:",
     "search": "Search...",
     "noResults": "No results found",
     "success": "Success",
@@ -27,7 +27,8 @@
       "refresh": "Refresh",
       "edit": "Edit",
       "delete": "Delete",
-      "filter": "Filter"
+      "filter": "Filter",
+      "export": "Export"
     },
     "privacy": "Privacy",
     "support": "Support",
@@ -36,6 +37,7 @@
     "noCategory": "No Category",
     "details": "Details",
     "noBrand": "No Brand Info",
+    "amazonLink": "AMAZON",
     "unknownProduct": "Unknown Product",
     "languageCode": "en-US"
   },
@@ -88,31 +90,7 @@
   "products": {
     "subtitle": "View product details and Amazon data for all your active listings."
   },
-  "auth": {
-    "login": {
-      "title": "Welcome Back",
-      "subtitle": "Log in to continue to your account",
-      "emailLabel": "Email",
-      "passwordLabel": "Password",
-      "submitButton": "Sign In",
-      "noAccount": "Don't have an account?",
-      "registerLink": "Sign up"
-    },
-    "register": {
-      "title": "Create Account",
-      "subtitle": "Sign up to get started",
-      "firstNameLabel": "First Name",
-      "lastNameLabel": "Last Name",
-      "emailLabel": "Email",
-      "passwordLabel": "Password",
-      "confirmPasswordLabel": "Confirm Password",
-      "submitButton": "Create Account",
-      "alreadyHaveAccount": "Already have an account?",
-      "loginLink": "Sign in"
-    }
-  },
   "menu": {
-    "main": "MAIN MENU",
     "dashboard": "Dashboard",
     "listings": "Listings",
     "ebayListings": "eBay Listings",
@@ -120,19 +98,16 @@
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
-    "configuration": "Configuration",
     "settings": "Settings",
     "storeSettings": "Store Settings",
     "listingSettingsGroups": "Listing Settings Groups",
-    "other": "OTHER",
     "reports": "Reports",
-    "users": "Users",
-    "editProfile": "Edit Profile",
     "support": "Support",
     "logout": "Logout",
     "logoutConfirmTitle": "Confirm Logout",
     "logoutConfirmDescription": "Are you sure you want to log out? You will need to sign in again to access your account.",
-    "logoutConfirmButton": "Logout"
+    "logoutConfirmButton": "Logout",
+    "editProfile": "Edit Profile"
   },
   "header": {
     "selectLanguage": "Select Language",

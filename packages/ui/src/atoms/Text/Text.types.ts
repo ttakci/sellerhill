@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 
-export type TextVariant = 'body' | 'caption' | 'overline' | 'h1' | 'h2' | 'h3' | 'h4' | 'nav';
+export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'body' | 'body-sm' | 'body-xs' | 'caption' | 'overline' | 'mono' | 'nav';
 
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 

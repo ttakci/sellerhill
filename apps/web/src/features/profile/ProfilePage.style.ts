@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Badge, Button, TextInput, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -9,72 +9,6 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-`;
-
-export const Header = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem; /* 24px */
-  margin-bottom: 2rem; /* 32px */
-
-  @media (min-width: 48rem) {
-    /* 768px */
-    flex-direction: row;
-    align-items: flex-end;
-  }
-`;
-
-export const TitleSection = styled.div`
-  display: flex;
-  flex-direction: column;
-
-  h1 {
-    font-size: 1.5rem; /* 24px */
-    font-weight: 700;
-    color: ${tkn('colors.text.primary')};
-    letter-spacing: -0.025em;
-    margin: 0;
-  }
-
-  p {
-    font-size: 0.875rem; /* 14px */
-    color: ${tkn('colors.text.secondary')};
-    margin-top: 0.25rem; /* 4px */
-  }
-`;
-
-export const Actions = styled.div`
-  display: flex;
-  gap: 0.75rem; /* 12px */
-`;
-
-export const MainCard = styled.div`
-  background: white;
-  border-radius: ${tkn('radius.md')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-  padding: ${tkn('spacing.xl')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xl')};
-  box-shadow: ${tkn('shadows.sm')};
-`;
-
-export const SectionCard = styled.div`
-  border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-  border-radius: ${tkn('radius.lg')};
-  padding: ${tkn('spacing.lg')};
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-`;
-
-export const SectionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 `;
 
 /* User Overview Section */
@@ -102,10 +36,10 @@ export const AvatarWrapper = styled.div`
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 0.125rem solid white; /* 2px */
+    border: 0.125rem solid ${tkn('colors.surface.primary')}; /* 2px */
     box-shadow: ${tkn('shadows.sm')};
     background: ${tkn('colors.brand.primary')};
-    color: white;
+    color: ${tkn('colors.surface.primary')};
 
     &:hover {
       background: ${tkn('colors.brand.primary')};
@@ -142,9 +76,7 @@ export const ProfileBadges = styled.div`
   }
 `;
 
-export const BadgeItem = styled.span`
-  color: ${tkn('colors.text.tertiary')};
-  font-size: ${tkn('typography.fontSize.sm')};
+export const BadgeItem = styled(Badge)`
   display: flex;
   align-items: center;
   gap: 0.375rem; /* 6px */
@@ -190,41 +122,14 @@ export const FooterActions = styled.div`
   padding-top: ${tkn('spacing.md')};
 `;
 
-export const DeleteButton = styled.button`
-  color: #dc2626;
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  background: transparent;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #fef2f2;
-  }
-`;
+export const DeleteButton = styled(Button)``;
 
 /* Input overrides for clean look */
-export const CleanInput = styled.input`
+export const CleanInput = styled(TextInput)`
   width: 100%;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1e293b;
-  border: 0.0625rem solid #e2e8f0; /* 1px */
-  border-radius: 0.375rem; /* 6px */
-  padding: 0.5rem 0.75rem; /* 8px 12px */
-  &:focus {
-    outline: 0.125rem solid #2563eb; /* 2px */
-    border-color: #2563eb;
-  }
 `;
 
 // Re-exporting modified base components or adding new ones
-export const MainCardHeaderless = styled(MainCard)`
-  padding: 0;
-  gap: 0;
-  overflow: hidden; /* For round corners */
-`;
 
 export const UserInfoWrapper = styled.div`
   display: flex;
@@ -266,10 +171,11 @@ export const InfoGrid = styled.div`
   }
 `;
 
-export const InfoItem = styled.div`
+export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.25rem; /* 4px */
+  ${({ $fullWidth }) => $fullWidth && 'grid-column: 1 / -1;'}
 `;
 
 export const InfoLabel = styled.div`
@@ -329,7 +235,7 @@ export const FallbackAvatar = styled.div`
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: ${tkn('colors.background.tertiary')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -349,10 +255,7 @@ export const ErrorMessage = styled.div`
   margin-top: 0.25rem; /* 4px */
 `;
 
-export const PersonalInfoCard = styled(MainCardHeaderless)`
-  margin-top: 2rem; /* 32px */
-`;
-
-export const AddressCard = styled(MainCardHeaderless)`
-  margin-top: 2rem; /* 32px */
+export const SectionCard = styled.div`
+  margin-top: 2rem;
+  overflow: hidden;
 `;

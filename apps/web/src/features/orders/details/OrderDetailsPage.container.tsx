@@ -1,10 +1,11 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
 export const OrderDetailsPageContainer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const { data: order, isLoading } = useGetOrderByIdQuery(id || '', {
     skip: !id,
@@ -22,12 +23,17 @@ export const OrderDetailsPageContainer: React.FC = () => {
     await updateOrder({ id, data });
   };
 
+  const handleBack = () => {
+    navigate('/orders');
+  };
+
   return (
     <OrderDetailsPageComponent
       order={order}
       isLoading={isLoading}
       isUpdating={isUpdating}
       onUpdateAmazonDetails={handleUpdateAmazonDetails}
+      onBack={handleBack}
     />
   );
 };

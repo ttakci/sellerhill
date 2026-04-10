@@ -10,13 +10,13 @@ import {
     UseGuards
 } from '@nestjs/common';
 import {
-    CreateListingSettingsGroupRequest,
     ListingSettingsGroupResponse,
     PredefinedTemplateResponse,
-    UpdateListingSettingsGroupRequest
 } from '@repo/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ListingSettingsGroupService } from './listing-settings-group.service';
+import { CreateListingSettingsGroupDto } from './dto/create-listing-settings-group.dto';
+import { UpdateListingSettingsGroupDto } from './dto/update-listing-settings-group.dto';
 
 @Controller({ path: 'listing-settings-group', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -41,7 +41,7 @@ export class ListingSettingsGroupController {
   @Post('groups')
   async createListingSettingsGroup(
     @Request() req: any,
-    @Body() dto: CreateListingSettingsGroupRequest
+    @Body() dto: CreateListingSettingsGroupDto
   ): Promise<ListingSettingsGroupResponse> {
     return this.listingSettingsService.createListingSettingsGroup(req.user.sub, dto);
   }
@@ -50,7 +50,7 @@ export class ListingSettingsGroupController {
   async updateListingSettingsGroup(
     @Request() req: any,
     @Param('id') id: string,
-    @Body() dto: UpdateListingSettingsGroupRequest
+    @Body() dto: UpdateListingSettingsGroupDto
   ): Promise<ListingSettingsGroupResponse> {
     return this.listingSettingsService.updateListingSettingsGroup(req.user.sub, id, dto);
   }

@@ -3,7 +3,7 @@
  */
 
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Button, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
@@ -115,19 +115,7 @@ export const Footer = styled.div`
   justify-content: center;
 `;
 
-export const FooterLink = styled.button`
-  background: none;
-  border: none;
-  color: ${tkn('colors.brand.primary')};
-  cursor: pointer;
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  padding: 0;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
+export const FooterLink = styled(Button)``;
 
 export const BrandingContent = styled.div`
   max-width: 25rem; /* 400px */

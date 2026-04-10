@@ -27,9 +27,9 @@ export const CheckEmailPageComponent = ({
           <S.AuthCard>
             <S.LogoWrapper>
               <Icon name="logo" size={48} color="brand.primary" />
-              <Text variant="h2" weight="bold" color="brand.primary" style={{ marginTop: '1rem' }}>
+              <S.LogoText variant="h2" weight="bold" color="brand.primary">
                 {t('translation:common.brandName')}
-              </Text>
+              </S.LogoText>
             </S.LogoWrapper>
 
             <S.IconContainer>
@@ -38,24 +38,24 @@ export const CheckEmailPageComponent = ({
 
             <S.Header>
               <Text variant="h2" weight="bold">
-                {t('auth.checkEmail.header')}
+                {t('auth:auth.checkEmail.header')}
               </Text>
               <Text variant="body" color="text.secondary">
-                {t('auth.checkEmail.description', { email })}
+                {t('auth:auth.checkEmail.description', { email })}
               </Text>
             </S.Header>
 
             <S.ActionGroup>
-              <Button onClick={onBackToLogin} variant="primary" fullWidth size="lg">
-                {t('auth.checkEmail.loginButton')}
+              <Button onClick={onBackToLogin} variant="primary" fullWidth size="large">
+                {t('auth:auth.checkEmail.loginButton')}
               </Button>
 
-              <Text variant="body" color="text.secondary" style={{ marginTop: '1.5rem' }}>
-                {t('auth.checkEmail.noEmail')}
-              </Text>
+              <S.ResendInfo variant="body" color="text.secondary">
+                {t('auth:auth.checkEmail.noEmail')}
+              </S.ResendInfo>
 
-              <S.ResendButton onClick={onResend} disabled={isResending}>
-                {isResending ? t('common.loading') : t('auth.checkEmail.resendLink')}
+              <S.ResendButton variant="text" onClick={onResend} disabled={isResending}>
+                {isResending ? t('translation:common.loading') : t('auth:auth.checkEmail.resendLink')}
               </S.ResendButton>
             </S.ActionGroup>
           </S.AuthCard>
@@ -78,16 +78,16 @@ export const CheckEmailPageComponent = ({
             </S.BrandingLogoWrapper>
 
             <Text variant="h3" weight="medium" color="text.inverse">
-              {t('auth.checkEmail.title')}
+              {t('auth:auth.checkEmail.title')}
             </Text>
 
-            <Text variant="body" color="text.inverse" style={{ opacity: 0.8 }}>
-              {t('auth.checkEmail.brandingText')}
-            </Text>
+            <S.BrandingDescription variant="body" color="text.inverse">
+              {t('auth:auth.checkEmail.brandingText')}
+            </S.BrandingDescription>
 
-            <div style={{ marginTop: '2rem' }}>
-              <Icon name="mail" size={200} color="text.inverse" style={{ opacity: 0.1 }} />
-            </div>
+            <S.BrandingIconContainer>
+              <Icon name="mail" size={200} color="text.inverse" />
+            </S.BrandingIconContainer>
           </S.BrandingContent>
         </S.RightPanel>
       </S.LayoutWrapper>

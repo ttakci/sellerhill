@@ -197,10 +197,7 @@ export const MarketplaceItem = styled.div<{ $selected: boolean }>`
   }
 `;
 
-export const MarketplaceName = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-`;
+export const MarketplaceName = styled(Text)``;
 
 export const ActionGroup = styled.div`
   display: flex;
@@ -224,4 +221,17 @@ export const BrandingLogoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: ${tkn('spacing.sm')};
+`;
+
+export const LogoText = styled(Text)`
+  margin-top: 1rem;
+`;
+
+export const BrandingDescription = styled(Text)`
+  opacity: 0.8;
+`;
+
+export const BrandingIconContainer = styled.div`
+  margin-top: 2rem;
+  opacity: 0.1;
 `;

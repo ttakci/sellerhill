@@ -7,11 +7,8 @@ export { tkn } from './theme/tkn';
 export { Button } from './atoms/Button';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './atoms/Button';
 
-export { ModernButton } from './atoms/ModernButton';
-export type { ModernButtonProps, ModernButtonSize, ModernButtonVariant } from './atoms/ModernButton';
-
-export { Input } from './atoms/Input';
-export type { InputProps, InputSize, InputVariant } from './atoms/Input';
+export { IconButton } from './atoms/IconButton';
+export type { IconButtonProps, IconButtonVariant } from './atoms/IconButton';
 
 export { Checkbox } from './atoms/Checkbox';
 export type { CheckboxProps } from './atoms/Checkbox';
@@ -21,9 +18,6 @@ export type { RadioProps } from './atoms/Radio';
 
 export { Toggle } from './atoms/Toggle';
 export type { ToggleProps } from './atoms/Toggle';
-
-export { Select } from './atoms/Select';
-export type { SelectOption, SelectProps } from './atoms/Select';
 
 export { Textarea } from './atoms/Textarea';
 export type { TextareaProps } from './atoms/Textarea';
@@ -37,8 +31,8 @@ export { Logo } from './atoms/Logo';
 export { MeshBackground } from './atoms/MeshBackground';
 export { Typewriter } from './atoms/Typewriter';
 
-export { Card, CardBody, CardHeader } from './atoms/Card';
-export type { CardBodyProps, CardHeaderProps, CardProps } from './atoms/Card';
+export { Card, CardBody, CardFooter, CardHeader, CardStat } from './atoms/Card';
+export type { CardBodyProps, CardFooterProps, CardHeaderProps, CardPadding, CardProps, CardStatProps, CardVariant } from './atoms/Card';
 
 export { Badge } from './atoms/Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from './atoms/Badge';
@@ -58,12 +52,21 @@ export type { DropdownItem, DropdownProps } from './atoms/Dropdown';
 export { Tabs } from './atoms/Tabs';
 export type { TabItem, TabsProps } from './atoms/Tabs';
 
-// Molecule exports
-export { ModernSelect } from './molecules/ModernSelect';
-export type { SelectOption as ModernSelectOption, ModernSelectProps } from './molecules/ModernSelect';
+export { ProgressBar } from './atoms/ProgressBar';
+export type { ProgressBarProps } from './atoms/ProgressBar';
 
-export { ModernTextInput } from './molecules/ModernTextInput';
-export type { ModernTextInputProps } from './molecules/ModernTextInput';
+// Molecule exports
+export { Select } from './molecules/Select';
+export type { SelectOption, SelectProps, SelectSize } from './molecules/Select';
+
+export { TextInput } from './molecules/TextInput';
+export type { TextInputProps, TextInputSize } from './molecules/TextInput';
+
+// Backward-compatible aliases (deprecated - will be removed)
+export { Select as ModernSelect } from './molecules/Select';
+export type { SelectOption as ModernSelectOption, SelectProps as ModernSelectProps } from './molecules/Select';
+export { TextInput as ModernTextInput } from './molecules/TextInput';
+export type { TextInputProps as ModernTextInputProps } from './molecules/TextInput';
 
 export { ConfirmModal } from './molecules/ConfirmModal';
 export type { ConfirmModalProps } from './molecules/ConfirmModal';
@@ -87,6 +90,49 @@ export type { SwitchRowProps } from './molecules/SwitchRow';
 export { SettingsCard } from './molecules/SettingsCard';
 export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } from './molecules/SettingsCard';
 
+export { StatusBadge } from './molecules/StatusBadge';
+export type { StatusBadgeProps, StatusSize, StatusType } from './molecules/StatusBadge';
+
+export { ViewToggle } from './molecules/ViewToggle';
+export type { ViewMode, ViewToggleProps } from './molecules/ViewToggle';
+export { ViewToggleGroup, ToggleButton, ViewLabel } from './molecules/ViewToggle';
+
+export { PageHeader } from './molecules/PageHeader';
+export type { PageHeaderProps } from './molecules/PageHeader';
+
+export { SearchField } from './molecules/SearchField';
+export type { SearchFieldProps } from './molecules/SearchField';
+
+export { QuickActionCard } from './molecules/QuickActionCard';
+export type { QuickActionCardProps } from './molecules/QuickActionCard';
+
+export { EmptyState } from './molecules/EmptyState';
+export type { EmptyStateProps } from './molecules/EmptyState';
+
+export { ErrorState } from './molecules/ErrorState';
+export type { ErrorStateProps } from './molecules/ErrorState';
+
+export { Popover } from './molecules/Popover';
+export type { PopoverPosition, PopoverProps } from './molecules/Popover';
+
+export { Tooltip } from './molecules/Tooltip';
+export type { TooltipPosition, TooltipProps, TooltipVariant } from './molecules/Tooltip';
+
+export { Toast } from './molecules/Toast';
+export type { ToastItem, ToastProps, ToastType } from './molecules/Toast';
+
+export { Collapsible } from './molecules/Collapsible';
+export type { CollapsibleProps } from './molecules/Collapsible';
+
+export { Stepper } from './molecules/Stepper';
+export type { StepItem, StepperOrientation, StepperProps, StepStatus } from './molecules/Stepper';
+
+export { SegmentedControl } from './molecules/SegmentedControl';
+export type { SegmentedControlOption, SegmentedControlProps } from './molecules/SegmentedControl';
+
+export { ListItem } from './molecules/ListItem';
+export type { ListItemProps } from './molecules/ListItem';
+
 // Context exports
 export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';
 export type {
@@ -98,5 +144,8 @@ export type {
   UIContextValue,
 } from './context';
 
+export { ToastContext, ToastProvider, useToastContext } from './context';
+export type { ToastContextValue } from './context';
+
 // Hook exports
-export { useLoading, useTheme, useUI } from './hooks';
+export { useLoading, useTheme, useUI, useToast } from './hooks';

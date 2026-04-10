@@ -1,44 +1,44 @@
 import styled from '@emotion/styled';
 import { tkn } from '../../theme/tkn';
-import { AlertVariant } from './Alert.types';
+import type { AlertVariant } from './Alert.types';
 
 export const AlertContainer = styled.div<{ $variant: AlertVariant }>`
   display: flex;
-  padding: 0.75rem 1rem; /* 12px 16px */
+  padding: 0.75rem 1rem;
   border-radius: ${tkn('radius.sm')};
   position: relative;
   overflow: hidden;
-  gap: 1rem; /* 16px */
+  gap: 1rem;
 
   ${({ $variant, theme }) => {
     switch ($variant) {
       case 'success':
         return `
-          background: #EBFDF5;
-          border-left: 0.375rem solid #34D399; /* 6px */
-          color: #064E3B;
-          & svg { color: #34D399; }
+          background: ${theme.colors.semantic.success}14;
+          border-left: 0.375rem solid ${theme.colors.semantic.success};
+          color: ${theme.colors.text.primary};
+          & svg { color: ${theme.colors.semantic.success}; }
         `;
       case 'error':
         return `
-          background: #FEE2E2;
-          border-left: 0.375rem solid #F87171; /* 6px */
-          color: #7F1D1D;
-          & svg { color: #F87171; }
+          background: ${theme.colors.semantic.error}14;
+          border-left: 0.375rem solid ${theme.colors.semantic.error};
+          color: ${theme.colors.text.primary};
+          & svg { color: ${theme.colors.semantic.error}; }
         `;
       case 'warning':
         return `
-          background: #FFFBEB;
-          border-left: 0.375rem solid #FBBF24; /* 6px */
-          color: #78350F;
-          & svg { color: #FBBF24; }
+          background: ${theme.colors.semantic.warning}14;
+          border-left: 0.375rem solid ${theme.colors.semantic.warning};
+          color: ${theme.colors.text.primary};
+          & svg { color: ${theme.colors.semantic.warning}; }
         `;
       case 'info':
         return `
-          background: #EFF6FF;
-          border-left: 0.375rem solid #60A5FA; /* 6px */
-          color: #1E3A8A;
-          & svg { color: #60A5FA; }
+          background: ${theme.colors.brand.primary}14;
+          border-left: 0.375rem solid ${theme.colors.brand.primary};
+          color: ${theme.colors.text.primary};
+          & svg { color: ${theme.colors.brand.primary}; }
         `;
       default:
         return '';
@@ -51,17 +51,16 @@ export const IconSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem; /* 28px */
-  height: 1.75rem; /* 28px */
-
-  background: white;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: ${tkn('colors.surface.primary')};
   border-radius: ${tkn('radius.full')};
 `;
 
 export const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: 0.25rem;
   flex: 1;
 `;
 
@@ -69,10 +68,10 @@ export const CloseButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0.25rem; /* 4px */
+  padding: 0.25rem;
   color: inherit;
   opacity: 0.6;
-  transition: opacity 0.2s;
+  transition: opacity ${tkn('transitions.fast')};
   display: flex;
   align-items: center;
   justify-content: center;

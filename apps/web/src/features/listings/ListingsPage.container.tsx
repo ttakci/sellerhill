@@ -69,17 +69,12 @@ export const ListingsPageContainer: React.FC = () => {
 
   useLoading(isLoading);
 
-  // Sorting handler
   const handleSort = (columnKey: string) => {
-    console.log('Sort clicked:', columnKey, 'Current:', sortColumn, sortDirection);
     if (sortColumn === columnKey) {
-      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-      setSortDirection(newDirection);
-      console.log('Toggle direction:', newDirection);
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortColumn(columnKey);
       setSortDirection('asc');
-      console.log('New column, set to asc');
     }
   };
 
@@ -265,14 +260,14 @@ export const ListingsPageContainer: React.FC = () => {
               </S.ProductTitle>
               <S.ProductMeta>
                 <S.IDLink>
-                  <S.MonoText>ASIN: {listing.asin}</S.MonoText>
+                  <S.MonoText variant="mono" color="text.tertiary">{t('listings.table.asinLabel', { asin: listing.asin })}</S.MonoText>
                   <a href={`https://www.amazon.com/dp/${listing.asin}`} target="_blank" rel="noreferrer">
                     <Icon name="open-in-new" size={14} />
                   </a>
                 </S.IDLink>
                 {listing.ebayListingId && (
                   <S.IDLink>
-                    <S.MonoText>eBay: {listing.ebayListingId}</S.MonoText>
+                    <S.MonoText variant="mono" color="text.tertiary">{t('listings.table.ebayIdLabel', { id: listing.ebayListingId })}</S.MonoText>
                     <a href={`https://www.ebay.com/itm/${listing.ebayListingId}`} target="_blank" rel="noreferrer">
                       <Icon name="open-in-new" size={14} />
                     </a>
@@ -295,7 +290,7 @@ export const ListingsPageContainer: React.FC = () => {
         header: t('listings.table.price'),
         render: (_: any, listing: any) => (
           <S.StatBadge>
-            <S.MetricValue $bold>${listing.price.toFixed(2)}</S.MetricValue>
+            <S.MetricValue variant="body-sm" weight="bold" $bold>${listing.price.toFixed(2)}</S.MetricValue>
             <S.StatSub>
               {t('listings.table.purchasePrice')}: ${listing.purchasePrice?.toFixed(2) || '0.00'}
             </S.StatSub>
@@ -309,7 +304,7 @@ export const ListingsPageContainer: React.FC = () => {
         render: (_: any, listing: any) => {
           const profit = listing.estimatedProfit || 0;
           return (
-            <S.MetricValue $positive={profit > 0} $negative={profit < 0}>
+            <S.MetricValue variant="body-sm" weight="semibold" $positive={profit > 0} $negative={profit < 0}>
               {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
             </S.MetricValue>
           );
@@ -321,7 +316,7 @@ export const ListingsPageContainer: React.FC = () => {
         header: t('listings.table.roi'),
         render: (_: any, listing: any) => (
           <S.StatBadge>
-            <S.MetricValue $positive={(listing.roi || 0) > 0} $negative={(listing.roi || 0) < 0}>
+            <S.MetricValue variant="body-sm" weight="semibold" $positive={(listing.roi || 0) > 0} $negative={(listing.roi || 0) < 0}>
               ROI: {listing.roi?.toFixed(1) || '0'}%
             </S.MetricValue>
             <S.StatSub>
@@ -335,21 +330,21 @@ export const ListingsPageContainer: React.FC = () => {
         sortable: true,
         header: t('listings.table.sold'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain>{listing.soldCount || 0}</S.StatMain>,
+        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.soldCount || 0}</S.StatMain>,
       },
       {
         key: 'watch',
         sortable: true,
         header: t('listings.table.watch'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain>{listing.watchCount || 0}</S.StatMain>,
+        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.watchCount || 0}</S.StatMain>,
       },
       {
         key: 'views',
         sortable: true,
         header: t('listings.table.views'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain>{listing.viewCount || 0}</S.StatMain>,
+        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.viewCount || 0}</S.StatMain>,
       },
       {
         key: 'quantity',
@@ -358,8 +353,8 @@ export const ListingsPageContainer: React.FC = () => {
         align: 'center' as const,
         render: (_: any, listing: any) => (
           <S.StatBadge>
-            <S.StockBadge $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockBadge>
-            <S.StatSub title="Amazon Stock">Src: {listing.sourceStock ?? '—'}</S.StatSub>
+            <S.StockBadge variant="neutral" size="xs" $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockBadge>
+            <S.StatSub title="Amazon Stock">{t('listings.table.sourceStock', { stock: listing.sourceStock ?? '—' })}</S.StatSub>
           </S.StatBadge>
         ),
       },
@@ -367,7 +362,9 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'status',
         sortable: true,
         header: t('listings.table.status'),
-        render: (status: string) => <S.StatusBadge $status={status}>{status}</S.StatusBadge>,
+        render: (status: string) => (
+          <S.StatusBadge $status={status}>{t(`listings.status.${status.toLowerCase()}`)}</S.StatusBadge>
+        ),
       },
     ],
     [t]
@@ -457,7 +454,6 @@ export const ListingsPageContainer: React.FC = () => {
       onRefresh={handleRefresh}
       onAddListing={handleAddListing}
       onEndListings={handleEndListings}
-      selectedListingIds={selectedListingIds}
       onSelectionChange={setSelectedListingIds}
       columns={filteredColumns}
       selectedRows={selectedRows}

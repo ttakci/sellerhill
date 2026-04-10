@@ -110,7 +110,7 @@ export const NavSection = styled.nav`
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: 0.75rem 1rem 0.5rem; /* 12px 16px 8px - assuming rem intended or fixed below */
+  padding: 0.75rem 1rem 0.5rem; /* 12px 16px 8px */
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
   color: #ffffff;
   opacity: 0.6;
@@ -120,44 +120,51 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
   letter-spacing: 0.0625rem; /* 1px */
 `;
 
+export const NavDivider = styled.div`
+  height: 0.0625rem; /* 1px */
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.75rem 0.5rem;
+`;
+
 export const NavItemWrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean }>`
+export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $isSubItem?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
-  padding: 0.625rem 0.875rem; /* 10px 14px */
+  padding: ${({ $isCollapsed, $isSubItem }) =>
+    $isCollapsed ? '0.625rem 0.875rem' : $isSubItem ? '0.625rem 0.875rem 0.625rem 1.75rem' : '0.625rem 0.875rem'};
   border-radius: ${tkn('radius.md')};
   color: ${({ theme, $active }) => ($active ? theme.colors.brand.primary : '#FFFFFF')};
   background: ${({ $active }) => ($active ? 'rgba(255, 255, 255, 0.1)' : 'transparent')};
-  backdrop-filter: ${({ $active }) => ($active ? 'blur(0.625rem)' : 'none')}; /* 10px */
+  backdrop-filter: ${({ $active }) => ($active ? 'blur(0.625rem)' : 'none')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
   font-weight: ${({ $active }) => ($active ? 600 : 500)};
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.875rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #ffffff;
   }
 
-  ${({ theme, $active }) =>
+  ${({ theme, $active, $isCollapsed, $isSubItem }) =>
     $active &&
     `
     &::before {
       content: '';
       position: absolute;
-      left: 0;
+      left: ${$isCollapsed ? '0' : $isSubItem ? '0.5rem' : '0'};
       top: 50%;
       transform: translateY(-50%);
-      width: 0.125rem; /* 2px */
-      height: 1.25rem; /* 20px */
+      width: 0.125rem;
+      height: 1.25rem;
       background: ${theme.colors.brand.primary};
-      border-radius: 0 0.25rem 0.25rem 0; /* 4px */
+      border-radius: 0 0.25rem 0.25rem 0;
     }
   `}
 `;
@@ -264,41 +271,6 @@ export const ProfileDetails = styled.div`
   flex-direction: column;
 `;
 
-export const SubNavItem = styled.div<{ $active?: boolean }>`
-  padding: 0.625rem 0.75rem 0.625rem 2.625rem; /* 10px 12px 10px 42px */
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-  color: ${({ theme, $active }) => ($active ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)')};
-  background: ${({ $active }) => ($active ? 'rgba(59, 130, 246, 0.2)' : 'transparent')};
-  border-radius: ${tkn('radius.md')};
-  margin: 0 0.25rem; /* 0 4px */
-  font-size: 0.8125rem; /* 13px */
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  position: relative;
-  z-index: 2;
-
-  &:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  ${({ $active }) =>
-    $active &&
-    `
-    &::before {
-      content: '';
-      position: absolute;
-      left: 1.25rem; /* 20px */
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0.25rem; /* 4px */
-      height: 0.25rem; /* 4px */
-      background: #3B82F6;
-      border-radius: 50%;
-    }
-  `}
-`;
-
 export const MainContent = styled.div`
   flex: 1;
   display: flex;
@@ -309,9 +281,9 @@ export const MainContent = styled.div`
 
 export const HeaderContainer = styled.header`
   height: auto;
-  min-height: 5rem; /* 80px */
+  min-height: 5rem;
   background: ${tkn('colors.surface.primary')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   position: sticky;
   top: 0;
   z-index: 99;
@@ -388,7 +360,8 @@ export const MobileMenuButton = styled.button`
   border-radius: ${tkn('radius.md')};
 
   &:hover {
-    background: ${tkn('colors.background.secondary')};
+    background: ${tkn('colors.brand.secondary')};
+    color: ${tkn('colors.brand.primary')};
   }
 
   @media (min-width: 64rem) {
@@ -416,9 +389,9 @@ export const ToggleButton = styled.button`
   }
 
   &:hover {
-    background: ${tkn('colors.background.tertiary')};
-    border-color: ${tkn('colors.border.focus')};
-    color: ${tkn('colors.text.primary')};
+    background: ${tkn('colors.brand.secondary')};
+    border-color: ${tkn('colors.brand.primary')};
+    color: ${tkn('colors.brand.primary')};
     transform: scale(1.05);
   }
 
@@ -502,8 +475,9 @@ export const ActionIcon = styled.button`
   transition: all ${tkn('transitions.fast')};
 
   &:hover {
-    background: ${tkn('colors.background.secondary')};
-    color: ${tkn('colors.text.primary')};
+    background: ${tkn('colors.brand.secondary')};
+    color: ${tkn('colors.brand.primary')};
+    transform: translateY(-0.0625rem);
   }
 
   & svg {
@@ -530,9 +504,12 @@ export const LanguageSelectTrigger = styled.div`
   transition: background 0.2s;
 
   &:hover {
-    background: #f1f5f9;
-    .dark & {
-      background: #1e293b;
+    background: ${tkn('colors.brand.secondary')};
+    & > span {
+      color: ${tkn('colors.brand.primary')};
+    }
+    & svg {
+      color: ${tkn('colors.brand.primary')};
     }
   }
 `;
@@ -540,11 +517,9 @@ export const LanguageSelectTrigger = styled.div`
 export const LanguageText = styled.span`
   font-size: 0.75rem; /* 12px */
   font-weight: 700;
-  color: #475569;
+  color: ${tkn('colors.text.secondary')};
+  transition: color ${tkn('transitions.fast')};
   text-transform: uppercase;
-  .dark & {
-    color: #94a3b8;
-  }
 `;
 
 export const NotificationBadge = styled.span`
@@ -619,6 +594,8 @@ export const ContentArea = styled.main`
   overflow-y: auto;
   width: 100%;
   background: transparent;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const ContentInner = styled.div`
@@ -627,6 +604,7 @@ export const ContentInner = styled.div`
   margin: 0 auto;
   padding: ${tkn('spacing.md')};
   box-sizing: border-box;
+  flex: 1;
 
   @media (min-width: 48rem) {
     /* 768px */

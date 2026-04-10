@@ -4,6 +4,7 @@ import { OrderDto, OrderStatsDto, OrderStatus, UpdateOrderAmazonDetailsDto } fro
 @Injectable()
 export class OrdersService {
   // Mock data for demonstration - in a real app this would come from a database/eBay API
+  // TODO: When DB integration happens, filter by userId in queries
   private orders: OrderDto[] = [
     {
       id: '1',
@@ -54,14 +55,15 @@ export class OrdersService {
         salesTax: 2.14,
       },
     },
-    // Add more mock orders as needed...
   ];
 
-  async findAll(): Promise<OrderDto[]> {
+  async findAll(_userId: string): Promise<OrderDto[]> {
+    // TODO: Filter by userId when DB integration is implemented
     return this.orders;
   }
 
-  async getStats(): Promise<OrderStatsDto> {
+  async getStats(_userId: string): Promise<OrderStatsDto> {
+    // TODO: Calculate stats scoped to userId when DB integration is implemented
     return {
       totalSales: 15420.5,
       netProfit: 4230.8,
@@ -72,7 +74,8 @@ export class OrdersService {
     };
   }
 
-  async findOne(id: string): Promise<OrderDto> {
+  async findOne(_userId: string, id: string): Promise<OrderDto> {
+    // TODO: Verify order belongs to userId when DB integration is implemented
     const order = this.orders.find((o) => o.id === id);
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -80,7 +83,12 @@ export class OrdersService {
     return order;
   }
 
-  async updateAmazonDetails(id: string, updateDto: UpdateOrderAmazonDetailsDto): Promise<OrderDto> {
+  async updateAmazonDetails(
+    _userId: string,
+    id: string,
+    updateDto: UpdateOrderAmazonDetailsDto,
+  ): Promise<OrderDto> {
+    // TODO: Verify order belongs to userId when DB integration is implemented
     const orderIndex = this.orders.findIndex((o) => o.id === id);
     if (orderIndex === -1) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -88,14 +96,12 @@ export class OrdersService {
 
     const order = this.orders[orderIndex];
 
-    // Update Amazon details
     const updatedOrder = {
       ...order,
       ...updateDto,
       status: updateDto.amazonOrderUrl ? OrderStatus.WAITING_SHIPMENT : order.status,
     };
 
-    // Recalculate profit if costs changed
     if (updateDto.amazonTax !== undefined || updateDto.amazonShipping !== undefined) {
       const amazonTotal = order.purchasePrice + (updateDto.amazonTax || 0) + (updateDto.amazonShipping || 0);
       const ebayEarnings = order.details?.ebaySummary.earnings || 0;

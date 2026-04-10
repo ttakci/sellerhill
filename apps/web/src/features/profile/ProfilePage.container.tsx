@@ -19,7 +19,7 @@ export const ProfilePageContainer = (): React.ReactElement => {
   const [updateProfile, { isLoading: isUpdating, isSuccess, error }] = useUpdateProfileMutation();
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -135,7 +135,7 @@ export const ProfilePageContainer = (): React.ReactElement => {
   return (
     <ProfilePageComponent
       profile={profile}
-      register={register}
+      control={control}
       errors={errors}
       onSubmit={handleSubmit(onFormSubmit)}
       isLoading={isUpdating}

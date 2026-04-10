@@ -1,126 +1,163 @@
-import React from 'react';
-import {
-    Controller,
-    type ControllerRenderProps,
-    type FieldError,
-    type FieldValues,
-} from 'react-hook-form';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
 
-import { Icon, type IconName } from '../../atoms/Icon';
-
+import { Icon } from '../../atoms/Icon';
 import * as S from './TextInput.style';
 import type { TextInputProps } from './TextInput.types';
 
-interface TextInputInnerProps<TFieldValues extends FieldValues> {
-  field: ControllerRenderProps<TFieldValues, any>;
-  error?: FieldError;
-  label: string;
-  leftIcon?: IconName;
-  rightIcon?: IconName;
-  prefix?: React.ReactNode;
-  suffix?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
-  autoFocus?: boolean;
-  maxLength?: number;
-  id?: string;
-  type?: string;
-  disabled?: boolean;
-  placeholder?: string;
-}
+const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
+  const {
+    field,
+    error,
+    label,
+    iconLeft,
+    iconRight,
+    isDisabled,
+    fullWidth,
+    type = 'text',
+    autoFocus,
+    maxLength,
+    id,
+    autoComplete,
+    onPressIcon,
+    size = 'medium',
+    ...rest
+  } = props;
 
-const TextInputInner = <TFieldValues extends FieldValues>({
-  field,
-  error,
-  label,
-  leftIcon,
-  rightIcon,
-  autoFocus,
-  maxLength,
-  id,
-  type,
-  disabled,
-  placeholder,
-}: TextInputInnerProps<TFieldValues>) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const isPassword = type === 'password';
+  const effectiveType = isPassword ? (isPasswordVisible ? 'text' : 'password') : type;
+  const effectiveIconRight = isPassword ? (isPasswordVisible ? 'eye-off' : 'eye') : iconRight;
+
+  // Expose the input element for refs
+  useImperativeHandle(ref, () => inputRef.current!);
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    field.onFocus?.(e);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    field.onBlur?.(e);
+  };
+
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
+
+  const hasValue = field.value !== undefined && field.value !== null && field.value !== '';
+
   return (
-    <S.Container>
-      {label && <S.LabelText htmlFor={id}>{label}</S.LabelText>}
-      <S.InputGroup $hasError={!!error}>
-        {leftIcon && (
-          <S.IconWrapper side="left">
-            <Icon name={leftIcon} size={18} />
-          </S.IconWrapper>
+    <S.Container $fullWidth={fullWidth}>
+      <S.FieldWrapper
+        $isFocused={isFocused}
+        $hasError={!!error}
+        $isDisabled={!!isDisabled}
+        $fullWidth={fullWidth}
+        $size={size}
+        onClick={handleContainerClick}
+      >
+        {iconLeft && (
+          <S.DecorationWrapper $side="left" $size={size}>
+            <Icon name={iconLeft} size={size === 'small' ? 16 : 20} />
+          </S.DecorationWrapper>
         )}
-        
-        <S.InnerInput
+
+        <S.Input
           {...field}
+          {...rest}
+          ref={inputRef}
           id={id}
-          type={type}
-          disabled={disabled}
+          type={effectiveType}
+          disabled={isDisabled}
           autoFocus={autoFocus}
           maxLength={maxLength}
-          $hasLeftIcon={!!leftIcon}
-          $hasRightIcon={!!rightIcon}
+          autoComplete={autoComplete}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          $hasIconLeft={!!iconLeft}
+          $hasIconRight={!!effectiveIconRight}
+          $hasLabel={!!label}
+          $size={size}
           value={field.value ?? ''}
-          placeholder={placeholder || label}
         />
 
-        {rightIcon && (
-          <S.IconWrapper side="right">
-            <Icon name={rightIcon} size={18} />
-          </S.IconWrapper>
+        {label && (
+          <S.FloatingLabel
+            htmlFor={id}
+            $isFocused={isFocused}
+            $hasValue={hasValue}
+            $isDisabled={!!isDisabled}
+            $hasIconLeft={!!iconLeft}
+            $hasError={!!error}
+            $size={size}
+          >
+            {label}
+          </S.FloatingLabel>
         )}
-      </S.InputGroup>
+
+        {iconRight && !isPassword && (
+          <S.DecorationWrapper $side="right" $size={size}>
+            <Icon name={iconRight} size={size === 'small' ? 16 : 20} />
+          </S.DecorationWrapper>
+        )}
+
+        {isPassword && effectiveIconRight && (
+          <S.DecorationWrapper $side="right" $size={size}>
+            <S.ToggleButton
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsPasswordVisible(!isPasswordVisible);
+              }}
+            >
+              <Icon name={effectiveIconRight as any} size={size === 'small' ? 16 : 20} />
+            </S.ToggleButton>
+          </S.DecorationWrapper>
+        )}
+
+        {props.suffixText && (
+          <S.DecorationWrapper $side="right" $size={size}>
+            <S.SuffixText>{props.suffixText}</S.SuffixText>
+          </S.DecorationWrapper>
+        )}
+      </S.FieldWrapper>
 
       {error && <S.ErrorText>{error.message}</S.ErrorText>}
     </S.Container>
   );
-};
+});
 
-export const TextInput = <TFieldValues extends FieldValues = FieldValues>({
-  name,
-  control,
-  label,
-  type = 'text',
-  disabled = false,
-  size = 'md',
-  fullWidth = true,
-  autoFocus = false,
-  maxLength,
-  id,
-  leftIcon,
-  rightIcon,
-  prefix,
-  suffix,
-  placeholder,
-}: TextInputProps<TFieldValues>) => {
-  const inputId = id || name;
+ModernTextInputInner.displayName = 'ModernTextInputInner';
+
+export const TextInput = <TFieldValues extends FieldValues = FieldValues>(
+  props: TextInputProps<TFieldValues>
+) => {
+  const { name, control, rules, ...rest } = props;
+
+  // Manual usage support
+  if (!control) {
+    const manualField = {
+      name,
+      value: (props as any).value,
+      onChange: (props as any).onChange,
+      onBlur: (props as any).onBlur,
+    };
+    return <ModernTextInputInner {...rest} field={manualField} />;
+  }
 
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) => (
-        <TextInputInner
-          field={field}
-          error={error}
-          label={label}
-          leftIcon={leftIcon}
-          rightIcon={rightIcon}
-          prefix={prefix}
-          suffix={suffix}
-          size={size}
-          fullWidth={fullWidth}
-          autoFocus={autoFocus}
-          maxLength={maxLength}
-          id={inputId}
-          type={type}
-          disabled={disabled}
-          placeholder={placeholder}
-        />
-      )}
+      rules={rules}
+      render={({ field, fieldState: { error } }) => <ModernTextInputInner {...rest} field={field} error={error} />}
     />
   );
 };
 
-TextInput.displayName = 'TextInput';
+TextInput.displayName = 'ModernTextInput';

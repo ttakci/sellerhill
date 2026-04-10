@@ -1,5 +1,12 @@
 import styled from '@emotion/styled';
-import { Card, tkn } from '@repo/ui';
+import {
+  Button,
+  Card,
+  IconButton as IconButtonAtom,
+  Text,
+  Textarea,
+  tkn,
+} from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -30,10 +37,7 @@ export const HeaderContent = styled.div`
   gap: 0.25rem; /* 4px */
 `;
 
-export const PageTitle = styled.h1`
-  font-size: 1.5rem; /* 24px */
-  font-weight: 700;
-  color: ${tkn('colors.text.primary')};
+export const PageTitle = styled(Text)`
   margin: 0;
 `;
 
@@ -60,9 +64,7 @@ export const FormContainer = styled.form`
 `;
 
 export const StyledCard = styled(Card)`
-  border-radius: ${tkn('radius.xl')} !important;
   overflow: hidden;
-  box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const SectionHeader = styled.div`
@@ -112,8 +114,8 @@ export const HeaderIconWrapper = styled.div<{ $type?: 'general' | 'repricing' | 
         `;
       case 'fees':
         return `
-          background: ${theme.colors.background.tertiary};
-          color: ${theme.colors.text.secondary};
+          background: ${theme.colors.semantic.error}15;
+          color: ${theme.colors.semantic.error};
         `;
       default:
         return `
@@ -131,18 +133,16 @@ export const SectionTitleContent = styled.div`
   flex: 1;
 `;
 
-export const SectionTitle = styled.h3`
-  font-size: 1rem; /* 16px */
-  font-weight: 700;
-  color: ${tkn('colors.text.primary')};
+export const SectionTitle = styled(Text)`
   margin: 0;
 `;
 
-export const PaddingContainer = styled.div`
+export const PaddingContainer = styled.div<{ $flex?: boolean }>`
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
+  ${({ $flex }) => $flex && 'flex: 1;'}
 `;
 
 export const InputGrid = styled.div<{ columns?: number }>`
@@ -162,13 +162,7 @@ export const InputGroup = styled.div`
   gap: 0.5rem; /* 8px */
 `;
 
-export const InputLabel = styled.label`
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 700;
-  color: ${tkn('colors.text.tertiary')};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-`;
+export const InputLabel = styled(Text)``;
 
 export const PriceRangesContainer = styled.div`
   display: flex;
@@ -192,26 +186,16 @@ export const PriceRangeRow = styled.div`
   }
 `;
 
-export const RemoveButton = styled.button`
+export const RemoveButton = styled(Button)`
   position: absolute;
   top: 0.75rem; /* 12px */
   right: 0.75rem; /* 12px */
   width: 1.75rem; /* 28px */
   height: 1.75rem; /* 28px */
   border-radius: 50%;
-  background: ${(p) => p.theme.colors.semantic.error}15;
-  color: ${(p) => p.theme.colors.semantic.error};
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${(p) => p.theme.colors.semantic.error}25;
-    transform: scale(1.05);
-  }
 `;
 
 export const SplitGrid = styled.div`
@@ -229,8 +213,6 @@ export const TemplateSettingsCard = styled(Card)`
   display: flex;
   flex-direction: column;
   min-height: 31.25rem; /* 500px */
-  border-radius: ${tkn('radius.xl')} !important;
-  box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
 `;
 
@@ -242,17 +224,10 @@ export const TemplateTypeToggle = styled.div`
   gap: 0.25rem; /* 4px */
 `;
 
-export const ToggleItem = styled.button<{ active?: boolean }>`
-  padding: 0.375rem 1rem; /* 6px 16px */
-  border-radius: 0.375rem; /* 6px */
-  border: none;
+export const ToggleItem = styled(Button)<{ active?: boolean }>`
   background: ${({ active }) => (active ? tkn('colors.surface.primary') : 'transparent')};
   color: ${({ active }) => (active ? tkn('colors.brand.primary') : tkn('colors.text.secondary'))};
-  font-weight: 700;
-  font-size: 0.6875rem; /* 11px */
-  cursor: pointer;
   box-shadow: ${({ active }) => (active ? tkn('shadows.sm') : 'none')};
-  transition: all 0.2s;
 
   &:hover {
     color: ${(p) => p.theme.colors.brand.primary};
@@ -304,15 +279,15 @@ export const EditorCodeArea = styled.div`
   }
 `;
 
-export const CustomTemplateTextarea = styled.textarea`
+export const EditorComment = styled.div`
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+`;
+
+export const CustomTemplateTextarea = styled(Textarea)`
   width: 100%;
   height: 100%;
-  background: transparent;
-  border: none;
-  color: #cbd5e1;
-  font-family: inherit;
-  font-size: inherit;
-  outline: none;
   resize: none;
   line-height: 1.6;
 `;
@@ -321,8 +296,6 @@ export const PreviewCard = styled(Card)`
   display: flex;
   flex-direction: column;
   min-height: 31.25rem; /* 500px */
-  border-radius: ${tkn('radius.xl')} !important;
-  box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
 `;
 
@@ -331,18 +304,9 @@ export const DeviceControls = styled.div`
   gap: 0.25rem; /* 4px */
 `;
 
-export const IconButton = styled.button<{ $active?: boolean }>`
-  width: 2rem; /* 32px */
-  height: 2rem; /* 32px */
-  border-radius: 0.375rem; /* 6px */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+export const IconButton = styled(IconButtonAtom)<{ $active?: boolean }>`
   background: ${({ $active, theme }) => ($active ? theme.colors.background.tertiary : 'transparent')};
   color: ${({ $active, theme }) => ($active ? theme.colors.brand.primary : theme.colors.text.tertiary)};
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
 
   &:hover {
     background: ${(p) => p.theme.colors.background.tertiary};
@@ -408,17 +372,10 @@ export const PreviewHTMLContent = styled.div`
   height: 100%;
 `;
 
-export const AddButton = styled.button`
+export const AddButton = styled(Button)`
   display: flex;
   align-items: center;
   gap: 0.25rem; /* 4px */
-  color: #2563eb;
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 700;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-transform: uppercase;
 
   &:hover {
     color: ${(p) => p.theme.colors.brand.primaryHover};

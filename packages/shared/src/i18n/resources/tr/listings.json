@@ -21,7 +21,8 @@
         "stats": "İstatistikler",
         "status": "Durum",
         "actions": "İşlemler",
-        "createdAt": "Oluşturulma"
+        "createdAt": "Oluşturulma",
+        "total": "Toplam"
       },
       "stats": {
         "success": "Başarılı",
@@ -63,7 +64,10 @@
       "columns": "Sütunlar",
       "actions": "İşlemler",
       "addedAt": "{{date}} tarihinde eklendi",
-      "stockLabel": "Stok"
+      "stockLabel": "Stok",
+      "asinLabel": "ASIN: {{asin}}",
+      "ebayIdLabel": "eBay: {{id}}",
+      "sourceStock": "Kaynak: {{stock}}"
     },
     "card": {
       "stock": "Stok",
@@ -78,16 +82,16 @@
       "inactive": "Pasif",
       "error": "Hata"
     },
-    "title": "Ürün Ekle",
+    "title": "Liste Ekle",
     "subtitle": "ASIN tanımlayıcılarını kullanarak ürünleri doğrudan Amazon'dan eBay mağazanıza aktarın. Görselleri, açıklamaları ve fiyat optimizasyonlarını biz hallederiz.",
     "breadcrumb": {
       "dashboard": "Panel",
       "listings": "Listeler",
-      "addProducts": "Ürün Ekle"
+      "addProducts": "Liste Ekle"
     },
     "listingSettings": {
       "title": "Listeleme Ayarları",
-      "strategyGroup": "Strateji Grubu",
+      "strategyGroup": "Listeleme Ayar Grubu Seç",
       "strategyGroupPlaceholder": "Bir Strateji Grubu Seçin",
       "strategyGroupHelp": "Kâr marjlarını, yuvarlama kurallarını ve açıklama şablonlarını tanımlar."
     },
@@ -102,53 +106,50 @@
       "returnPolicyPlaceholder": "Politika Seçin"
     },
     "asinEntry": {
-      "title": "ASIN Girişi",
+      "title": "Ürün Girişi (ASIN)",
       "subtitle": "Amazon Standart Tanımlama Numaralarını Girin",
       "counter": "{{count}} / 1000 ASIN",
-      "label": "Amazon ASIN'lerini girin (her satıra bir tane)",
-      "placeholder": "örn., B00X4WHP5E\nB08P2H5L8H\nB09G3NPT3G",
+      "label": "Amazon ASIN Numaraları (her satıra bir adet)",
+      "placeholder": "Örn: B00X4WHP5E\nB08P2H5L8H\nB09G3NPT3G",
       "accepts": "Kabul eder: B00..., B01...",
-      "helpText": "Toplu girişler desteklenir. Her ASIN'in yeni bir satırda olduğundan emin olun. Tekrarları otomatik olarak filtreleyeceğiz."
+      "helpText": "Toplu giriş desteklenir. Her ASIN ayrı satırda olmalıdır. Tekrar edenler otomatik filtrelenir."
     },
     "actions": {
       "cancel": "İptal",
-      "import": "İçe Aktar ve Listeleri Oluştur",
-      "importing": "İçe Aktarılıyor...",
+      "import": "Listeleri Oluştur",
+      "importing": "Listeler Oluşturuluyor...",
       "addListing": "Liste Ekle",
-      "endListing": "Listelemeyi Bitir",
+      "endListing": "İlanı Bitir",
       "deleteListings": "Listeleri Sil",
       "bulkActions": "Toplu İşlemler"
     },
     "notifications": {
-      "endSuccessTitle": "Listelemeler Bitirildi",
-      "endSuccess": "{{count}} liste eBay'de başarıyla sonlandırıldı.",
+      "endSuccessTitle": "İlanlar Bitirildi",
+      "endSuccess": "{{count}} ilan eBay'de başarıyla bitirildi.",
       "endErrorTitle": "İşlem Başarısız",
-      "endError": "Bazı listeler sonlandırılamadı. Lütfen detaylar için eBay'i kontrol edin.",
-      "deleteSuccessTitle": "Listeler Silindi",
-      "deleteSuccess": "{{count}} liste başarıyla silindi.",
+      "endError": "Bazı ilanlar bitirilemedi. Detaylar için eBay'i kontrol edin.",
+      "deleteSuccessTitle": "İlanlar Silindi",
+      "deleteSuccess": "{{count}} ilan başarıyla silindi.",
       "deleteErrorTitle": "İşlem Başarısız",
-      "deleteError": "Bazı listeler silinemedi."
+      "deleteError": "Bazı ilanlar silinemedi."
     },
     "modals": {
-      "endTitle": "Seçilen Listeleri Bitir?",
-      "endDescription": "Seçilen {{count}} listeyi eBay'de sonlandırmak istediğinizden emin misiniz? Bu işlemden sonra listeler pasif duruma geçecektir.",
-      "deleteTitle": "Seçili Listeleri Sil?",
-      "deleteDescription": "Seçili {{count}} listeyi silmek istediğinizden emin misiniz? Bu işlem listeleri eBay'de sonlandıracak ve mağazanızdan kaldıracaktır. Bu işlem geri alınamaz."
+      "endTitle": "Seçili İlanlar Bitirilsin mi?",
+      "endDescription": "{{count}} seçili ilanı eBay'de bitirmek istediğinizden emin misiniz? Pasif duruma geçirilecektir.",
+      "deleteTitle": "Seçili İlanlar Silinsin mi?",
+      "deleteDescription": "{{count}} seçili ilanı silmek istediğinizden emin misiniz? eBay'den kaldırılacak ve mağazanızdan silinecektir. Bu işlem geri alınamaz."
     },
     "validation": {
-      "invalidAsin": "Geçersiz ASIN formatı. 'B' ile başlamalı ve ardından 9 alfanümerik karakter gelmelidir.",
-      "minOneAsin": "Lütfen en az bir ASIN girin",
-      "maxAsins": "İçe aktarma başına maksimum 1000 ASIN'e izin verilir",
-      "paymentPolicyRequired": "Ödeme politikası gereklidir",
-      "shippingPolicyRequired": "Kargo politikası gereklidir",
-      "returnPolicyRequired": "İade politikası gereklidir"
+      "invalidAsin": "Geçersiz ASIN formatı. 'B' harfiyle başlayıp 9 alfanümerik karakterle devam etmelidir.",
+      "minOneAsin": "En az bir ASIN giriniz",
+      "maxAsins": "İçe aktarma başına maksimum 1000 ASIN izin verilir",
+      "paymentPolicyRequired": "Ödeme politikası zorunludur",
+      "shippingPolicyRequired": "Kargo politikası zorunludur",
+      "returnPolicyRequired": "İade politikası zorunludur"
     },
     "success": {
-      "created": "{{count}} liste başarıyla oluşturuldu",
-      "queued": "{{count}} liste işleme için sıraya alındı"
-    },
-    "products": {
-      "subtitle": "Aktif listelerinize ait ürünleri ve Amazon verilerini buradan görüntüleyebilirsiniz."
+      "created": "{{count}} ilan başarıyla oluşturuldu",
+      "queued": "{{count}} ürün içe aktarma sırasına alındı. Durumu 'İçe Aktarma İşleri' sekmesinden takip edebilirsiniz."
     },
     "errors": {
       "createFailed": "Listeler oluşturulamadı",

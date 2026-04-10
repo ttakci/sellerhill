@@ -47,6 +47,24 @@ export interface ThemeColors {
     primaryHover: string;
     secondary: string;
   };
+
+  // Semantic tint backgrounds (for badges, tags)
+  semanticTint: {
+    success: string;
+    error: string;
+    warning: string;
+    info: string;
+    neutral: string;
+  };
+
+  // Semantic border tints
+  semanticTintBorder: {
+    success: string;
+    error: string;
+    warning: string;
+    info: string;
+    neutral: string;
+  };
 }
 
 export interface AppTheme {

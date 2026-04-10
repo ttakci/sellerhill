@@ -10,6 +10,7 @@ export const ProductsPageContainer: React.FC = () => {
   const { data: products = [], isLoading, refetch } = useGetUserProductsQuery();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
 
   useLoading(isLoading);
 
@@ -44,19 +45,19 @@ export const ProductsPageContainer: React.FC = () => {
       {
         key: 'asin',
         header: t('listings.table.asin'),
-        render: (asin: string) => <S.ASINBadge>{asin}</S.ASINBadge>,
+        render: (asin: string) => <S.ASINBadge variant="neutral" size="xs">{asin}</S.ASINBadge>,
       },
       {
         key: 'category',
         header: t('listings.table.category'),
-        render: (category: string) => <S.CategoryText>{category || t('translation:common.noCategory')}</S.CategoryText>,
+        render: (category: string) => <S.CategoryText variant="body-sm" color="text.secondary">{category || t('translation:common.noCategory')}</S.CategoryText>,
       },
       {
         key: 'price',
         header: t('listings.table.price'),
         align: 'right' as const,
         render: (price: any) => (
-          <S.PriceText>
+          <S.PriceText variant="body" weight="bold" color="semantic.success">
             {price.currency === 'USD' ? '$' : price.currency}
             {price.current.toFixed(2)}
           </S.PriceText>
@@ -67,7 +68,7 @@ export const ProductsPageContainer: React.FC = () => {
         header: t('listings.table.updatedAt'),
         align: 'right' as const,
         render: (updatedAt: string) => (
-          <S.DateText>
+          <S.DateText variant="body-sm" color="text.secondary">
             {updatedAt ? new Date(updatedAt).toLocaleString(t('translation:common.languageCode') || 'en-US') : '—'}
           </S.DateText>
         ),
@@ -77,38 +78,50 @@ export const ProductsPageContainer: React.FC = () => {
         header: t('listings.table.actions'),
         align: 'right' as const,
         render: (_: any, product: any) => (
-          <a
+          <S.AmazonLink
             href={`https://www.amazon.com/dp/${product.asin}`}
             target="_blank"
             rel="noreferrer"
-            style={{
-              color: '#2563eb',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              justifyContent: 'flex-end',
-            }}
           >
             Amazon <Icon name="open-in-new" size={14} />
-          </a>
+          </S.AmazonLink>
         ),
       },
     ],
     [t]
   );
 
-  const handleRefresh = () => {
-    void refetch();
+  const handleDownload = () => {
+    const headers = [
+      t('listings.table.asin'),
+      t('listings.table.product'),
+      t('listings.table.brand'),
+      t('listings.table.category'),
+      t('listings.table.price'),
+    ];
+    const rows = products.map((p) =>
+      [p.asin, p.title, p.brand, p.category, p.price.current].map((v) => `"${v}"`).join(',')
+    );
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `zonds_products_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <ProductsPageComponent
       products={paginatedProducts}
       isLoading={isLoading}
-      onRefresh={handleRefresh}
+      onDownload={handleDownload}
       columns={columns}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
       pagination={{
         count: products.length,
         page,

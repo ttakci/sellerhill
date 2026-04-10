@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Patch, Request, UseGuards } from '@nestjs/common';
-import { ProfileDto, UpdateProfileRequest } from '@repo/shared';
+import { ProfileDto } from '@repo/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProfileService } from './profile.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller({ path: 'profile', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -16,7 +17,7 @@ export class ProfileController {
   @Patch()
   async updateProfile(
     @Request() req: any,
-    @Body() dto: UpdateProfileRequest
+    @Body() dto: UpdateProfileDto
   ): Promise<ProfileDto> {
     return this.profileService.updateProfile(req.user.sub, dto);
   }

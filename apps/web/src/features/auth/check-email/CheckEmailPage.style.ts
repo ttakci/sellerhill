@@ -3,7 +3,7 @@
  */
 
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Button, Text, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
@@ -177,18 +177,8 @@ export const ActionGroup = styled.div`
   margin-top: ${tkn('spacing.xl')};
 `;
 
-export const ResendButton = styled.button`
-  background: none;
-  border: none;
-  color: ${tkn('colors.text.tertiary')};
-  cursor: pointer;
-  font-size: ${tkn('typography.fontSize.sm')};
+export const ResendButton = styled(Button)`
   margin-top: ${tkn('spacing.md')};
-
-  &:hover {
-    color: ${tkn('colors.brand.primary')};
-    text-decoration: underline;
-  }
 `;
 
 export const BrandingContent = styled.div`
@@ -206,4 +196,21 @@ export const BrandingLogoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: ${tkn('spacing.sm')};
+`;
+
+export const LogoText = styled(Text)`
+  margin-top: 1rem;
+`;
+
+export const ResendInfo = styled(Text)`
+  margin-top: 1.5rem;
+`;
+
+export const BrandingDescription = styled(Text)`
+  opacity: 0.8;
+`;
+
+export const BrandingIconContainer = styled.div`
+  margin-top: 2rem;
+  opacity: 0.1;
 `;

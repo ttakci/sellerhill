@@ -1,0 +1,117 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { type CreateListingSettingsGroupRequest, type PriceRange, type StockConfig, type FeeConfig, type TemplateConfig } from '@repo/shared';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  Min,
+  IsIn,
+} from 'class-validator';
+
+class PriceRangeDto implements Omit<PriceRange, 'id'> {
+  @ApiProperty({ description: 'Minimum price', example: 10.0 })
+  @IsNumber()
+  @Min(0)
+  minPrice!: number;
+
+  @ApiProperty({ description: 'Maximum price', example: 100.0 })
+  @IsNumber()
+  @Min(0)
+  maxPrice!: number;
+
+  @ApiPropertyOptional({ description: 'Profit margin percentage', example: 15 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  profitMarginPercent?: number;
+
+  @ApiPropertyOptional({ description: 'Fixed profit amount', example: 5.0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fixedProfitAmount?: number;
+}
+
+class StockConfigDto implements StockConfig {
+  @ApiProperty({ description: 'Default stock quantity', example: 10 })
+  @IsNumber()
+  @Min(0)
+  defaultQuantity!: number;
+
+  @ApiProperty({ description: 'Whether auto-restock is enabled', example: true })
+  @IsBoolean()
+  autoRestock!: boolean;
+}
+
+class FeeConfigDto implements FeeConfig {
+  @ApiProperty({ description: 'eBay fee percentage', example: 13.0 })
+  @IsNumber()
+  @Min(0)
+  ebayFeePercent!: number;
+
+  @ApiProperty({ description: 'Fixed fee amount', example: 0.3 })
+  @IsNumber()
+  @Min(0)
+  fixedFeeAmount!: number;
+
+  @ApiProperty({ description: 'Tax percentage', example: 10.0 })
+  @IsNumber()
+  @Min(0)
+  taxPercent!: number;
+}
+
+class TemplateConfigDto implements TemplateConfig {
+  @ApiProperty({ description: 'Template type', example: 'custom', enum: ['custom', 'predefined'] })
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['custom', 'predefined'])
+  type!: 'custom' | 'predefined';
+
+  @ApiPropertyOptional({ description: 'Custom template HTML' })
+  @IsOptional()
+  @IsString()
+  customTemplateHtml?: string;
+
+  @ApiPropertyOptional({ description: 'Predefined template ID' })
+  @IsOptional()
+  @IsString()
+  predefinedTemplateId?: string;
+}
+
+export class CreateListingSettingsGroupDto implements CreateListingSettingsGroupRequest {
+  @ApiProperty({ description: 'Settings group name', example: 'Default Repricing' })
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiPropertyOptional({ description: 'Settings group description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ description: 'Repricing strategy price ranges', type: [PriceRangeDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PriceRangeDto)
+  repricingStrategy!: Omit<PriceRange, 'id'>[];
+
+  @ApiProperty({ description: 'Stock configuration', type: StockConfigDto })
+  @ValidateNested()
+  @Type(() => StockConfigDto)
+  stock!: StockConfig;
+
+  @ApiProperty({ description: 'Fee configuration', type: FeeConfigDto })
+  @ValidateNested()
+  @Type(() => FeeConfigDto)
+  fees!: FeeConfig;
+
+  @ApiProperty({ description: 'Template configuration', type: TemplateConfigDto })
+  @ValidateNested()
+  @Type(() => TemplateConfigDto)
+  templates!: TemplateConfig;
+}

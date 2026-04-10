@@ -1,5 +1,16 @@
-import { OrderDto, OrderStatsDto } from '@repo/shared';
-import { Button, Icon, Input, TablePagination as Pagination } from '@repo/ui';
+import { OrderDto, OrderStatus, OrderStatsDto } from '@repo/shared';
+import {
+  Button,
+  Icon,
+  PageHeader,
+  StatusBadge,
+  TablePagination as Pagination,
+  ToggleButton,
+  useTheme,
+  ViewLabel,
+  ViewToggleGroup,
+  ModernTextInput,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './OrdersPage.style';
@@ -15,7 +26,24 @@ interface OrdersPageComponentProps {
   onOrderClick: (order: OrderDto) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  viewMode: 'table' | 'grid';
+  onViewModeChange: (mode: 'table' | 'grid') => void;
+  onDownload: () => void;
+  totalCount: number;
 }
+
+/** Map OrderStatus enum values to StatusBadge-compatible status strings */
+const orderStatusToBadgeStatus = (status: OrderStatus): string => {
+  const map: Record<OrderStatus, string> = {
+    [OrderStatus.COMPLETED]: 'completed',
+    [OrderStatus.SHIPPED]: 'shipped',
+    [OrderStatus.PROCESSING]: 'processing',
+    [OrderStatus.CANCELLED]: 'cancelled',
+    [OrderStatus.PENDING]: 'pending',
+    [OrderStatus.WAITING_SHIPMENT]: 'warning',
+  };
+  return map[status] || 'default';
+};
 
 export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
   orders,
@@ -28,8 +56,37 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
   onOrderClick,
   searchQuery,
   onSearchChange,
+  viewMode,
+  onViewModeChange,
+  onDownload,
+  totalCount,
 }) => {
   const { t, i18n } = useTranslation(['orders', 'translation']);
+  const { theme } = useTheme();
+
+  const viewToggle = (
+    <S.ToolbarGroup>
+      <ViewToggleGroup>
+        <ToggleButton
+          $active={viewMode === 'grid'}
+          onClick={() => onViewModeChange('grid')}
+          title={t('translation:common.views.grid')}
+        >
+          <Icon name="grid-view" size={20} />
+        </ToggleButton>
+        <ToggleButton
+          $active={viewMode === 'table'}
+          onClick={() => onViewModeChange('table')}
+          title={t('translation:common.views.table')}
+        >
+          <Icon name="format-list-bulleted" size={20} />
+        </ToggleButton>
+      </ViewToggleGroup>
+      <ViewLabel>
+        {t('translation:common.views.label')}: <strong>{t(`translation:common.views.${viewMode}`)}</strong>
+      </ViewLabel>
+    </S.ToolbarGroup>
+  );
 
   const getInitials = (name: string) => {
     return name
@@ -42,11 +99,11 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
 
   const getAvatarColor = (name: string) => {
     const colors = [
-      'rgba(99, 102, 241, 0.1)', // indigo
-      'rgba(245, 158, 11, 0.1)', // amber
-      'rgba(16, 185, 129, 0.1)', // emerald
-      'rgba(239, 68, 68, 0.1)', // rose
-      'rgba(148, 163, 184, 0.1)', // slate
+      theme.colors.semanticTint.info,
+      theme.colors.semanticTint.warning,
+      theme.colors.semanticTint.success,
+      theme.colors.semanticTint.error,
+      theme.colors.semanticTint.neutral,
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
@@ -70,46 +127,48 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
   const columns = [
     {
       key: 'orderNumber',
-      header: t('table.orderNumber'),
-      render: (_: any, order: OrderDto) => <S.OrderNumber>{order.orderNumber}</S.OrderNumber>,
+      header: t('orders:orders.table.orderNumber'),
+      render: (_: any, order: OrderDto) => <S.OrderNumber variant="mono" weight="medium" color="semantic.info">{order.orderNumber}</S.OrderNumber>,
     },
     {
       key: 'createdAt',
-      header: t('table.date'),
-      render: (_: any, order: OrderDto) => <S.SecondaryText>{formatDate(order.createdAt)}</S.SecondaryText>,
+      header: t('orders.table.date'),
+      render: (_: any, order: OrderDto) => <S.SecondaryText variant="body" muted>{formatDate(order.createdAt)}</S.SecondaryText>,
     },
     {
       key: 'buyer',
-      header: t('table.buyer'),
+      header: t('orders.table.buyer'),
       render: (_: any, order: OrderDto) => (
         <S.BuyerInfo>
           <S.BuyerAvatar $color={getAvatarColor(order.buyerName)}>{getInitials(order.buyerName)}</S.BuyerAvatar>
-          <S.BuyerName>{order.buyerName}</S.BuyerName>
+          <S.BuyerName variant="body" weight="medium">{order.buyerName}</S.BuyerName>
         </S.BuyerInfo>
       ),
     },
     {
       key: 'status',
-      header: t('table.status'),
+      header: t('orders.table.status'),
       render: (_: any, order: OrderDto) => (
-        <S.StatusBadge $status={order.status}>{t(`status.${order.status}`)}</S.StatusBadge>
+        <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
+          {t(`orders.status.${order.status}`)}
+        </StatusBadge>
       ),
     },
     {
       key: 'salePrice',
-      header: t('table.salePrice'),
-      render: (_: any, order: OrderDto) => <S.PriceText>{formatCurrency(order.salePrice)}</S.PriceText>,
+      header: t('orders.table.salePrice'),
+      render: (_: any, order: OrderDto) => <S.PriceText variant="body">{formatCurrency(order.salePrice)}</S.PriceText>,
     },
     {
       key: 'purchasePrice',
-      header: t('table.purchasePrice'),
-      render: (_: any, order: OrderDto) => <S.SecondaryText>{formatCurrency(order.purchasePrice)}</S.SecondaryText>,
+      header: t('orders.table.purchasePrice'),
+      render: (_: any, order: OrderDto) => <S.SecondaryText variant="body" muted>{formatCurrency(order.purchasePrice)}</S.SecondaryText>,
     },
     {
       key: 'netProfit',
-      header: t('table.netProfit'),
+      header: t('orders.table.netProfit'),
       render: (_: any, order: OrderDto) => (
-        <S.PriceText $profit={order.netProfit > 0} $loss={order.netProfit < 0}>
+        <S.PriceText variant="body" $profit={order.netProfit > 0} $loss={order.netProfit < 0}>
           {order.netProfit >= 0 ? '+' : ''}
           {formatCurrency(order.netProfit)}
         </S.PriceText>
@@ -120,150 +179,178 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
       header: '',
       align: 'right' as const,
       render: () => (
-        <Button variant="secondary" size="sm">
+        <Button variant="secondary" size="small">
           <Icon name="more-horiz" size={20} />
         </Button>
       ),
     },
   ];
 
+  const headerActions = (
+    <S.ActionsWrapper>
+      <S.SearchBoxWrapper>
+        <ModernTextInput
+          name="search"
+          placeholder={t('orders.actions.search')}
+          value={searchQuery}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
+          iconLeft="search"
+          fullWidth
+        />
+      </S.SearchBoxWrapper>
+      <S.IconButton variant="elevated" title={t('translation:common.actions.filter')}>
+        <Icon name="filter-list" size={20} />
+      </S.IconButton>
+      <S.IconButton variant="elevated" onClick={onDownload} title={t('translation:common.actions.export')}>
+        <Icon name="download" size={20} />
+      </S.IconButton>
+    </S.ActionsWrapper>
+  );
+
   return (
     <S.PageContainer>
+      <PageHeader
+        title={t('orders.title')}
+        subtitle={t('orders.subtitle', { count: orders.length })}
+        actions={headerActions}
+      />
+
       {/* Stats Cards */}
       <S.StatsGrid>
-        <S.StatCard>
+        <S.StatCard variant="bordered">
           <S.StatHeader>
-            <S.StatLabel>{t('stats.totalSales')}</S.StatLabel>
-            <S.StatIconWrapper $color="rgba(99, 102, 241, 0.1)">
-              <Icon name="payments" size={20} color="#6366f1" />
+            <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('orders.stats.totalSales')}</S.StatLabel>
+            <S.StatIconWrapper $color={theme.colors.semanticTint.info}>
+              <Icon name="payments" size={20} color={theme.colors.semantic.info} />
             </S.StatIconWrapper>
           </S.StatHeader>
           <S.StatValue>{formatCurrency(stats?.totalSales || 0)}</S.StatValue>
           <S.StatChange $positive>
             <Icon name="trending-up" size={14} />
-            {t('stats.growth', { value: stats?.salesGrowth || 0 })}
+            {t('orders.stats.growth', { value: stats?.salesGrowth || 0 })}
           </S.StatChange>
         </S.StatCard>
 
-        <S.StatCard>
+        <S.StatCard variant="bordered">
           <S.StatHeader>
-            <S.StatLabel>{t('stats.netProfit')}</S.StatLabel>
-            <S.StatIconWrapper $color="rgba(16, 185, 129, 0.1)">
-              <Icon name="account-balance-wallet" size={20} color="#10b981" />
+            <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('orders.stats.netProfit')}</S.StatLabel>
+            <S.StatIconWrapper $color={theme.colors.semanticTint.success}>
+              <Icon name="account-balance-wallet" size={20} color={theme.colors.semantic.success} />
             </S.StatIconWrapper>
           </S.StatHeader>
           <S.StatValue>{formatCurrency(stats?.netProfit || 0)}</S.StatValue>
           <S.StatChange $positive>
             <Icon name="trending-up" size={14} />
-            {t('stats.profitGrowth', { value: stats?.profitGrowth || 0 })}
+            {t('orders.stats.profitGrowth', { value: stats?.profitGrowth || 0 })}
           </S.StatChange>
         </S.StatCard>
 
-        <S.StatCard>
+        <S.StatCard variant="bordered">
           <S.StatHeader>
-            <S.StatLabel>{t('stats.activeOrders')}</S.StatLabel>
-            <S.StatIconWrapper $color="rgba(245, 158, 11, 0.1)">
-              <Icon name="local-shipping" size={20} color="#f59e0b" />
+            <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('orders.stats.activeOrders')}</S.StatLabel>
+            <S.StatIconWrapper $color={theme.colors.semanticTint.warning}>
+              <Icon name="local-shipping" size={20} color={theme.colors.semantic.warning} />
             </S.StatIconWrapper>
           </S.StatHeader>
           <S.StatValue>{stats?.activeOrders || 0}</S.StatValue>
-          <S.SecondaryText style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
-            {t('stats.last24Hours')}
-          </S.SecondaryText>
+          <S.StatSubText variant="body-xs" muted>{t('orders.stats.last24Hours')}</S.StatSubText>
         </S.StatCard>
 
-        <S.StatCard>
+        <S.StatCard variant="bordered">
           <S.StatHeader>
-            <S.StatLabel>{t('stats.returnRate')}</S.StatLabel>
-            <S.StatIconWrapper $color="rgba(239, 68, 68, 0.1)">
-              <Icon name="assignment-return" size={20} color="#ef4444" />
+            <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('orders.stats.returnRate')}</S.StatLabel>
+            <S.StatIconWrapper $color={theme.colors.semanticTint.error}>
+              <Icon name="assignment-return" size={20} color={theme.colors.semantic.error} />
             </S.StatIconWrapper>
           </S.StatHeader>
           <S.StatValue>%{stats?.returnRate || 0}</S.StatValue>
           <S.StatChange>
             <Icon name="trending-down" size={14} />
-            {t('stats.decrease', { value: 0.3 })}
+            {t('orders.stats.decrease', { value: 0.3 })}
           </S.StatChange>
         </S.StatCard>
       </S.StatsGrid>
 
       {/* Filters and Actions */}
-      <S.FiltersRow>
-        <S.SearchWrapper>
-          <Input
-            placeholder={t('actions.search')}
-            value={searchQuery}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
-            leftIcon={<Icon name="search" size={20} />}
-            fullWidth
-          />
-          <Button variant="secondary">
-            <Icon name="calendar-today" size={18} />
-            {t('actions.last30Days')}
-            <Icon name="expand-more" size={18} />
-          </Button>
-        </S.SearchWrapper>
+      <S.FiltersBar>
+        <S.FiltersLeft>{viewToggle}</S.FiltersLeft>
+      </S.FiltersBar>
 
-        <S.ActionsWrapper>
-          <Button variant="secondary" size="md">
-            <Icon name="filter-list" size={20} />
-          </Button>
-          <Button variant="secondary">
-            <Icon name="file-download" size={20} />
-            {t('actions.export')}
-          </Button>
-        </S.ActionsWrapper>
-      </S.FiltersRow>
-
-      {/* Orders Table */}
-      <S.TableContainer>
-        <S.TableWrapper>
-          <S.Table>
-            <S.TableHead>
-              <tr>
-                {columns.map((col) => (
-                  <S.TableHeaderCell key={col.key} style={{ textAlign: col.align || 'left' }}>
-                    {col.header}
-                  </S.TableHeaderCell>
-                ))}
-              </tr>
-            </S.TableHead>
-            <S.TableBody>
-              {orders.map((order) => (
-                <S.TableRow key={order.id} onClick={() => onOrderClick(order)}>
+      {/* Orders View */}
+      {viewMode === 'table' ? (
+        <S.TableContainer>
+          <S.TableWrapper>
+            <S.Table>
+              <S.TableHead>
+                <tr>
                   {columns.map((col) => (
-                    <S.TableCell key={col.key} style={{ textAlign: col.align || 'left' }}>
-                      {col.render(order[col.key as keyof OrderDto], order)}
-                    </S.TableCell>
+                    <S.AlignedHeaderCell key={col.key} $align={col.align || 'left'}>
+                      {col.header}
+                    </S.AlignedHeaderCell>
                   ))}
-                </S.TableRow>
-              ))}
-            </S.TableBody>
-          </S.Table>
-        </S.TableWrapper>
+                </tr>
+              </S.TableHead>
+              <S.TableBody>
+                {orders.map((order) => (
+                  <S.TableRow key={order.id} onClick={() => onOrderClick(order)}>
+                    {columns.map((col) => (
+                      <S.AlignedTableCell key={col.key} $align={col.align || 'left'}>
+                        {col.render(order[col.key as keyof OrderDto], order)}
+                      </S.AlignedTableCell>
+                    ))}
+                  </S.TableRow>
+                ))}
+              </S.TableBody>
+            </S.Table>
+          </S.TableWrapper>
+        </S.TableContainer>
+      ) : (
+        <S.GridContainer>
+          {orders.map((order) => (
+            <S.GridCard key={order.id} onClick={() => onOrderClick(order)} hoverable>
+              <S.GridCardHeader>
+                <S.OrderNumber variant="mono" weight="medium" color="semantic.info">{order.orderNumber}</S.OrderNumber>
+                <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
+                  {t(`orders.status.${order.status}`)}
+                </StatusBadge>
+              </S.GridCardHeader>
+              <S.GridCardContent>
+                <S.BuyerInfo>
+                  <S.BuyerAvatar $color={getAvatarColor(order.buyerName)}>{getInitials(order.buyerName)}</S.BuyerAvatar>
+                  <S.BuyerDetails>
+                    <S.BuyerName variant="body" weight="medium">{order.buyerName}</S.BuyerName>
+                    <S.BuyerEmailText variant="body-xs" muted>{order.buyerEmail}</S.BuyerEmailText>
+                  </S.BuyerDetails>
+                </S.BuyerInfo>
+                <S.CardPriceRow>
+                  <S.SecondaryText variant="body" muted>{formatDate(order.createdAt)}</S.SecondaryText>
+                  <S.PriceText variant="body">{formatCurrency(order.salePrice)}</S.PriceText>
+                </S.CardPriceRow>
+              </S.GridCardContent>
+              <S.GridCardFooter>
+                <S.SecondaryText variant="body" muted>{t('orders.table.netProfit')}</S.SecondaryText>
+                <S.PriceText variant="body" $profit={order.netProfit > 0} $loss={order.netProfit < 0}>
+                  {order.netProfit >= 0 ? '+' : ''}
+                  {formatCurrency(order.netProfit)}
+                </S.PriceText>
+              </S.GridCardFooter>
+            </S.GridCard>
+          ))}
+        </S.GridContainer>
+      )}
 
-        {/* Pagination */}
-        <div
-          style={{
-            padding: '1rem 1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            borderTop: '0.0625rem solid rgba(148, 163, 184, 0.1)',
-            background: 'rgba(248, 250, 252, 0.5)',
-          }}
-        >
-          <Pagination
-            count={orders.length}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            onPageChange={onPageChange}
-            onRowsPerPageChange={onRowsPerPageChange}
-            labelRowsPerPage={t('translation:common.rowsPerPage')}
-            labelInfo={t('translation:common.showing_info')}
-          />
-        </div>
-      </S.TableContainer>
+      {/* Pagination */}
+      <S.PaginationWrapper>
+        <Pagination
+          count={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={onPageChange}
+          onRowsPerPageChange={onRowsPerPageChange}
+          labelRowsPerPage={t('translation:common.rowsPerPage')}
+          labelInfo={t('translation:common.showing_info')}
+        />
+      </S.PaginationWrapper>
     </S.PageContainer>
   );
 };

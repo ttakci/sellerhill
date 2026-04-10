@@ -1,66 +1,17 @@
-import type { ReactNode } from 'react';
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { IconName } from '../Icon';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'text' | 'danger';
 
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 
-/**
- * Platform-agnostic Button props
- * Works for both web and mobile
- */
-export interface ButtonProps {
-  /**
-   * Button content
-   */
-  children: ReactNode;
-
-  /**
-   * Click handler
-   */
-  onClick?: () => void;
-
-  /**
-   * Button visual variant
-   */
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'size'> {
   variant?: ButtonVariant;
-
-  /**
-   * Button size
-   */
   size?: ButtonSize;
-
-  /**
-   * Should display as full width
-   */
-  fullWidth?: boolean;
-
-  /**
-   * Loading state
-   */
   isLoading?: boolean;
-
-  /**
-   * Disabled state
-   */
-  disabled?: boolean;
-
-  /**
-   * Button type (button, submit, reset)
-   */
-  type?: 'button' | 'submit' | 'reset';
-
-  /**
-   * Pill-shaped (fully rounded) style
-   */
-  isPill?: boolean;
-
-  /**
-   * Additional CSS classes
-   */
-  className?: string;
-
-  /**
-   * Inline styles
-   */
-  style?: React.CSSProperties;
+  iconLeft?: IconName;
+  iconRight?: IconName;
+  iconColor?: string;
+  children?: ReactNode;
+  fullWidth?: boolean;
 }

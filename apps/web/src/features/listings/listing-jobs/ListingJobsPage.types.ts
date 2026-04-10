@@ -5,7 +5,6 @@ export interface ListingJobsPageContainerProps {}
 export interface ListingJobsPageComponentProps {
   jobs: ListingJobDto[];
   isLoading: boolean;
-  onRefresh: () => void;
   onViewDetails: (jobId: string) => void;
   pagination?: {
     count: number;
@@ -17,4 +16,7 @@ export interface ListingJobsPageComponentProps {
     labelInfo?: string;
   };
   columns: any[];
+  viewMode: 'table' | 'grid';
+  onViewModeChange: (mode: 'table' | 'grid') => void;
+  onDownload: () => void;
 }

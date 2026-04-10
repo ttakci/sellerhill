@@ -3,7 +3,7 @@
  */
 
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Button, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
@@ -88,21 +88,11 @@ export const AuthCard = styled.div`
   }
 `;
 
-export const BackLink = styled.button`
+export const BackLink = styled(Button)`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-  background: none;
-  border: none;
-  color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  cursor: pointer;
   margin-bottom: ${tkn('spacing.xl')};
-  padding: 0;
-
-  &:hover {
-    color: ${tkn('colors.brand.primary')};
-  }
 `;
 
 export const Header = styled.div`
@@ -142,19 +132,7 @@ export const Footer = styled.div`
   justify-content: center;
 `;
 
-export const FooterLink = styled.button`
-  background: none;
-  border: none;
-  color: ${tkn('colors.brand.primary')};
-  cursor: pointer;
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  padding: 0;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
+export const FooterLink = styled(Button)``;
 
 export const BrandingContent = styled.div`
   max-width: 25rem; /* 400px */

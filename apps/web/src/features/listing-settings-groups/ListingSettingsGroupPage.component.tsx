@@ -1,5 +1,5 @@
 import type { ListingSettingsGroupResponse } from '@repo/shared';
-import { Icon, ModernButton, Text } from '@repo/ui';
+import { Button, Icon, PageHeader, Text } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupPage.style';
 import { ListingSettingsGroupPageProps } from './ListingSettingsGroupPage.types';
@@ -14,26 +14,24 @@ export const ListingSettingsGroupPageComponent = ({
 
   return (
     <S.Container>
-      <S.Header>
-        <S.HeaderContent>
-          <S.PageTitle>{t('listingSettingsGroup.title')}</S.PageTitle>
-          <Text color="text.secondary">{t('listingSettingsGroup.subtitle')}</Text>
-        </S.HeaderContent>
-        <S.Actions>
-          <ModernButton variant="primary" size="medium" onClick={onCreateGroup} iconLeft="plus">
+      <PageHeader
+        title={t('listingSettingsGroup.title')}
+        subtitle={<Text color="text.secondary">{t('listingSettingsGroup.subtitle')}</Text>}
+        actions={
+          <Button variant="primary" size="medium" onClick={onCreateGroup} iconLeft="plus">
             {t('listingSettingsGroup.createNewGroup')}
-          </ModernButton>
-        </S.Actions>
-      </S.Header>
+          </Button>
+        }
+      />
 
       <S.CardGrid>
         {groups.map((group: ListingSettingsGroupResponse) => (
-          <S.InteractiveCard key={group.id} variant="bordered" onClick={() => onEditGroup(group.id)}>
+          <S.InteractiveCard key={group.id} variant="interactive" onClick={() => onEditGroup(group.id)}>
             <S.CardHeader>
               <S.CardIconWrapper>
                 <Icon name="view-list" size={24} />
               </S.CardIconWrapper>
-              <S.ActiveBadge variant="success" size="sm">
+              <S.ActiveBadge variant="success" size="sm" isPill>
                 {t('listingSettingsGroup.statusActive').toUpperCase()}
               </S.ActiveBadge>
             </S.CardHeader>
@@ -55,12 +53,13 @@ export const ListingSettingsGroupPageComponent = ({
               <S.Stats>
                 <S.StatItem>
                   <Icon name="grid-view" size={18} color="text.tertiary" />
-                  <span style={{ fontSize: '0.75rem' }}>{t('listingSettingsGroup.productsCount', { count: 0 })}</span>
+                  <Text variant="caption" color="text.tertiary">{t('listingSettingsGroup.productsCount', { count: 0 })}</Text>
                 </S.StatItem>
               </S.Stats>
 
               <S.CardActions onClick={(e) => e.stopPropagation()}>
                 <S.IconButton
+                  variant="ghost"
                   $type="edit"
                   onClick={() => onEditGroup(group.id)}
                   title={t('listingSettingsGroup.tooltips.editGroup')}
@@ -68,6 +67,7 @@ export const ListingSettingsGroupPageComponent = ({
                   <Icon name="edit-note" size={20} />
                 </S.IconButton>
                 <S.IconButton
+                  variant="ghost"
                   $type="delete"
                   onClick={() => onDeleteGroup(group.id)}
                   title={t('listingSettingsGroup.tooltips.deleteGroup')}
@@ -79,7 +79,7 @@ export const ListingSettingsGroupPageComponent = ({
           </S.InteractiveCard>
         ))}
 
-        <S.DashedCard onClick={onCreateGroup}>
+        <S.DashedCard variant="text" onClick={onCreateGroup}>
           <S.DashedCardIconWrapper className="dashed-icon-wrapper">
             <Icon name="plus" size={28} />
           </S.DashedCardIconWrapper>
@@ -88,8 +88,6 @@ export const ListingSettingsGroupPageComponent = ({
           </Text>
         </S.DashedCard>
       </S.CardGrid>
-
-      <S.Copyright>{t('listingSettingsGroup.copyright', { year: new Date().getFullYear() })}</S.Copyright>
     </S.Container>
   );
 };

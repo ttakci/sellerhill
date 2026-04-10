@@ -4,7 +4,7 @@
  * Purpose: Display dashboard home page (empty state for now)
  */
 
-import { Button } from '@repo/ui';
+import { Button, Card, PageHeader } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,11 +18,15 @@ export const DashboardPageComponent = ({
 }: DashboardPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'translation', 'ebay']);
 
+  const greetingSubtitle = user
+    ? t('dashboard:dashboard.greeting', { name: user.firstName })
+    : t('dashboard:dashboard.subtitle');
+
   if (isLoading) {
     return (
       <S.Container>
         <S.EmptyState>
-          <S.EmptyStateText>{t('translation:common.loading')}</S.EmptyStateText>
+          <S.EmptyStateText variant="body" color="text.secondary">{t('translation:common.loading')}</S.EmptyStateText>
         </S.EmptyState>
       </S.Container>
     );
@@ -30,28 +34,22 @@ export const DashboardPageComponent = ({
 
   return (
     <S.Container>
-      <S.Header>
-        <S.Title>{t('dashboard:dashboard.title')}</S.Title>
-        <S.Subtitle>{t('dashboard:dashboard.subtitle')}</S.Subtitle>
-      </S.Header>
-
-      {user && (
-        <S.Greeting>
-          {t('dashboard:dashboard.greeting', { name: user.firstName })}
-        </S.Greeting>
-      )}
+      <PageHeader
+        title={t('dashboard:dashboard.title')}
+        subtitle={greetingSubtitle}
+      />
 
       <S.Content>
-        <S.Card>
-          <S.CardTitle>{t('dashboard:dashboard.comingSoon')}</S.CardTitle>
-          <S.CardDescription>{t('dashboard:dashboard.description')}</S.CardDescription>
+        <Card variant="bordered" padding="lg">
+          <S.CardTitle variant="h3" weight="semibold">{t('dashboard:dashboard.comingSoon')}</S.CardTitle>
+          <S.CardDescription variant="body" color="text.secondary">{t('dashboard:dashboard.description')}</S.CardDescription>
 
           <S.ButtonContainer>
             <Button variant="primary" fullWidth onClick={onConnectEbay}>
               {t('ebay:ebay.connect.connectButton')}
             </Button>
           </S.ButtonContainer>
-        </S.Card>
+        </Card>
       </S.Content>
     </S.Container>
   );

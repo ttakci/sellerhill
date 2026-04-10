@@ -1,5 +1,5 @@
-import { OrderDto } from '@repo/shared';
-import { Button, Icon, useLoading } from '@repo/ui';
+import { OrderDto, OrderStatus } from '@repo/shared';
+import { Badge, Button, Icon, PageHeader, StatusBadge, useLoading } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as S from './OrderDetailsPage.style';
@@ -15,13 +15,28 @@ interface OrderDetailsPageComponentProps {
     amazonTax?: number;
     amazonShipping?: number;
   }) => void;
+  onBack: () => void;
 }
+
+/** Map OrderStatus enum values to StatusBadge-compatible status strings */
+const orderStatusToBadgeStatus = (status: OrderStatus): string => {
+  const map: Record<OrderStatus, string> = {
+    [OrderStatus.COMPLETED]: 'completed',
+    [OrderStatus.SHIPPED]: 'shipped',
+    [OrderStatus.PROCESSING]: 'processing',
+    [OrderStatus.CANCELLED]: 'cancelled',
+    [OrderStatus.PENDING]: 'pending',
+    [OrderStatus.WAITING_SHIPMENT]: 'warning',
+  };
+  return map[status] || 'default';
+};
 
 export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps> = ({
   order,
   isLoading,
   isUpdating,
   onUpdateAmazonDetails,
+  onBack,
 }) => {
   const { t, i18n } = useTranslation(['orders', 'translation']);
   useLoading(isLoading);
@@ -59,98 +74,99 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
     return `${((profit / cost) * 100).toFixed(1)}%`;
   };
 
+  const headerSubtitle = (
+    <S.Metadata>
+      <S.MetadataItem>
+        <Icon name="calendar-today" size={16} />
+        {t('orders.detail.orderPlaced')}: {formatDate(order.createdAt)}
+      </S.MetadataItem>
+      <S.Separator>|</S.Separator>
+      <S.MetadataItem>
+        <Icon name="tag" size={16} />
+        {t('orders.table.orderNumber')}: {order.orderNumber}
+      </S.MetadataItem>
+    </S.Metadata>
+  );
+
+  const headerActions = (
+    <S.Actions>
+      <Button variant="secondary" size="medium">
+        <Icon name="receipt" size={18} />
+        {t('orders.detail.viewInvoice')}
+      </Button>
+      <Button variant="primary" size="medium">
+        <Icon name="print" size={18} />
+        {t('orders.detail.printLabels')}
+      </Button>
+    </S.Actions>
+  );
+
   return (
     <S.PageWrapper>
+      <S.BackLink variant="text" onClick={onBack}>
+        <Icon name="chevron-left" size={20} />
+        {t('translation:common.back')}
+      </S.BackLink>
+
       {/* Header */}
-      <S.Header>
-        <S.TitleWrapper>
-          <S.PageTitle>{t('detail.title')}</S.PageTitle>
-          <S.Metadata>
-            <S.MetadataItem>
-              <Icon name="calendar-today" size={16} />
-              {t('detail.orderPlaced')}: {formatDate(order.createdAt)}
-            </S.MetadataItem>
-            <S.Separator>|</S.Separator>
-            <S.MetadataItem>
-              <Icon name="tag" size={16} />
-              {t('table.orderNumber')}: {order.orderNumber}
-            </S.MetadataItem>
-          </S.Metadata>
-        </S.TitleWrapper>
-        <S.Actions>
-          <Button variant="secondary" size="md">
-            <Icon name="receipt" size={18} />
-            {t('detail.viewInvoice')}
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            style={{
-              boxShadow:
-                '0 0.25rem 0.375rem -0.0625rem rgb(59 130 246 / 0.1), 0 0.125rem 0.25rem -0.125rem rgb(59 130 246 / 0.1)',
-            }}
-          >
-            <Icon name="print" size={18} />
-            {t('detail.printLabels')}
-          </Button>
-        </S.Actions>
-      </S.Header>
+      <PageHeader title={t('orders.detail.title')} subtitle={headerSubtitle} actions={headerActions} />
 
       {/* Product Info Card */}
-      <S.Card>
+      <S.ProductCard variant="bordered">
         <S.ProductWrapper>
           <S.ProductImage>
             {order.product?.imageUrl ? (
               <img src={order.product.imageUrl} alt={order.product.title} />
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <Icon name="image" size={48} color="#94a3b8" />
-              </div>
+              <S.EmptyImagePlaceholder>
+                <Icon name="image" size={48} color="text.tertiary" />
+              </S.EmptyImagePlaceholder>
             )}
           </S.ProductImage>
           <S.ProductInfo>
-            <S.ProductTitle>{order.product?.title || t('detail.unknownProduct')}</S.ProductTitle>
+            <S.ProductTitle variant="h2" weight="semibold">{order.product?.title || t('orders.detail.unknownProduct')}</S.ProductTitle>
             <S.ProductMetadata>
-              <S.Badge $bg="rgba(241, 245, 249, 1)" $color="#334155">
-                <span style={{ fontWeight: 600 }}>{t('detail.asin')}</span> {order.product?.asin || '-'}
-              </S.Badge>
-              <S.Badge $bg="rgba(241, 245, 249, 1)" $color="#334155">
-                <span style={{ fontWeight: 600 }}>{t('detail.ebayItemId')}</span> {order.product?.ebayItemId || '-'}
-              </S.Badge>
-              <S.Badge $bg="rgba(209, 250, 229, 1)" $color="#059669">
+              <Badge variant="neutral" size="sm">
+                <S.BadgeLabel>{t('orders.detail.asin')}</S.BadgeLabel> {order.product?.asin || '-'}
+              </Badge>
+              <Badge variant="neutral" size="sm">
+                <S.BadgeLabel>{t('orders.detail.ebayItemId')}</S.BadgeLabel>{' '}
+                {order.product?.ebayItemId || '-'}
+              </Badge>
+              <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
                 <Icon name="check_circle" size={14} />
-                {t(`status.${order.status}`)}
-              </S.Badge>
+                {t(`orders.status.${order.status}`)}
+              </StatusBadge>
             </S.ProductMetadata>
             <S.LabelValueGroup>
               <S.LabelValue>
-                <div className="label">{t('detail.quantity')}</div>
+                <div className="label">{t('orders.detail.quantity')}</div>
                 <div className="value">
-                  {order.product?.quantity || 1} {t('detail.unit')}
+                  {order.product?.quantity || 1} {t('orders.detail.unit')}
                 </div>
               </S.LabelValue>
               <S.LabelValue>
-                <div className="label">{t('detail.sku')}</div>
-                <div className="value">{order.product?.sku || t('detail.na')}</div>
+                <div className="label">{t('orders.detail.sku')}</div>
+                <div className="value">{order.product?.sku || t('orders.detail.na')}</div>
               </S.LabelValue>
             </S.LabelValueGroup>
           </S.ProductInfo>
         </S.ProductWrapper>
-      </S.Card>
+      </S.ProductCard>
 
       {/* Main Content Grid */}
       <S.Grid>
         {/* Receiver Info */}
-        <S.SectionCard>
-          <S.SectionTitle>
-            <Icon name="user" size={20} color="#64748b" />
-            {t('detail.customerInfo')}
+        <S.SectionCard variant="bordered">
+          <S.SectionTitle variant="h3" weight="bold">
+            <Icon name="user" size={20} color="text.tertiary" />
+            {t('orders.detail.customerInfo')}
           </S.SectionTitle>
           <S.ContentRow>
-            <div className="label">{t('detail.shipTo')}</div>
-            <S.BoldText style={{ marginBottom: '0.25rem' }}>{order.buyerName}</S.BoldText>
+            <div className="label">{t('orders.detail.shipTo')}</div>
+            <S.BoldText variant="body" weight="semibold">{order.buyerName}</S.BoldText>
             {order.shippingAddress && (
-              <S.AddressText>
+              <S.AddressText variant="body" muted>
                 {order.shippingAddress.street}
                 <br />
                 {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
@@ -160,209 +176,148 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
             )}
           </S.ContentRow>
           <S.ContentRow>
-            <div className="label">{t('detail.contact')}</div>
-            <S.AddressText>{order.buyerEmail}</S.AddressText>
-            {order.buyerPhone && <S.AddressText>{order.buyerPhone}</S.AddressText>}
+            <div className="label">{t('orders.detail.contact')}</div>
+            <S.AddressText variant="body" muted>{order.buyerEmail}</S.AddressText>
+            {order.buyerPhone && <S.AddressText variant="body" muted>{order.buyerPhone}</S.AddressText>}
           </S.ContentRow>
         </S.SectionCard>
 
         {/* Purchase Summary */}
-        <S.SectionCard>
-          <S.SectionTitle>
-            <Icon name="shopping_cart" size={20} color="#64748b" />
-            {t('detail.buyerPayment')}
+        <S.SectionCard variant="bordered">
+          <S.SectionTitle variant="h3" weight="bold">
+            <Icon name="shopping_cart" size={20} color="text.tertiary" />
+            {t('orders.detail.buyerPayment')}
           </S.SectionTitle>
-          <div style={{ flex: 1 }}>
+          <S.SummaryFlex>
             <S.SummaryRow>
-              <span>{t('detail.itemSubtotal')}:</span>
+              <span>{t('orders.detail.itemSubtotal')}:</span>
               <span>{formatCurrency(order.details?.purchaseSummary?.subtotal || order.purchasePrice)}</span>
             </S.SummaryRow>
             <S.SummaryRow>
-              <span>{t('detail.shippingHandling')}:</span>
+              <span>{t('orders.detail.shippingHandling')}:</span>
               <span>{formatCurrency(order.details?.purchaseSummary?.shipping || 0)}</span>
             </S.SummaryRow>
             <S.SummaryRow>
-              <span>{t('detail.totalBeforeTax')}:</span>
+              <span>{t('orders.detail.totalBeforeTax')}:</span>
               <span>
                 {formatCurrency(
                   (order.details?.purchaseSummary?.subtotal || order.purchasePrice) +
-                    (order.details?.purchaseSummary?.shipping || 0)
+                    (order.details?.purchaseSummary?.shipping || 0),
                 )}
               </span>
             </S.SummaryRow>
             <S.SummaryRow>
-              <span>{t('detail.estimatedTax')}:</span>
+              <span>{t('orders.detail.estimatedTax')}:</span>
               <span>{formatCurrency(order.details?.purchaseSummary?.tax || 0)}</span>
             </S.SummaryRow>
             <S.SummaryRow $total>
-              <span>{t('detail.grandTotal')}:</span>
+              <span>{t('orders.detail.grandTotal')}:</span>
               <span>{formatCurrency(order.details?.purchaseSummary?.total || order.purchasePrice)}</span>
             </S.SummaryRow>
-          </div>
+          </S.SummaryFlex>
           <S.PaymentMethod>
-            {/* Example image for Mastercard as in stitch */}
-            <div
-              style={{
-                width: 40,
-                height: 24,
-                background: '#f1f5f9',
-                borderRadius: 4,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Icon name="payments" size={16} color="#64748b" />
-            </div>
+            <S.PaymentIconWrapper>
+              <Icon name="payments" size={16} color="text.tertiary" />
+            </S.PaymentIconWrapper>
             <div>
-              <p className="label">{t('detail.paymentMethod')}</p>
+              <p className="label">{t('orders.detail.paymentMethod')}</p>
               <p className="value">{order.details?.purchaseSummary?.paymentMethod || '-'}</p>
             </div>
           </S.PaymentMethod>
         </S.SectionCard>
 
         {/* eBay Sales Summary */}
-        <S.SectionCard>
-          <S.SectionTitle>
-            <Icon name="tag" size={20} color="#64748b" />
-            {t('detail.ebaySummary', { defaultValue: 'eBay Sales Summary' })}
+        <S.SectionCard variant="bordered">
+          <S.SectionTitle variant="h3" weight="bold">
+            <Icon name="tag" size={20} color="text.tertiary" />
+            {t('orders.detail.ebaySummary', { defaultValue: 'eBay Sales Summary' })}
           </S.SectionTitle>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                color: '#94a3b8',
-                marginBottom: '0.75rem',
-              }}
-            >
-              {t('detail.whatBuyerPaid')}
-            </div>
+          <S.SummarySection>
+            <S.SectionHeader>{t('orders.detail.whatBuyerPaid')}</S.SectionHeader>
             <S.SummaryRow>
-              <span>{t('detail.subtotal')}</span>
+              <span>{t('orders.detail.subtotal')}</span>
               <span>{formatCurrency(order.details?.ebaySummary?.subtotal || order.salePrice)}</span>
             </S.SummaryRow>
             <S.SummaryRow>
-              <span>{t('detail.shipping')}</span>
+              <span>{t('orders.detail.shipping')}</span>
               <span>{formatCurrency(order.details?.ebaySummary?.shipping || 0)}</span>
             </S.SummaryRow>
             <S.SummaryRow>
-              <span>{t('detail.salesTax')}</span>
+              <span>{t('orders.detail.salesTax')}</span>
               <span>{formatCurrency(order.details?.ebaySummary?.tax || 0)}</span>
             </S.SummaryRow>
-            <S.SummaryRow $bold style={{ paddingTop: '0.5rem', borderTop: '0.0625rem solid #f1f5f9' }}>
-              <span>{t('detail.orderTotal')}</span>
+            <S.SummaryRow $bold $bordered>
+              <span>{t('orders.detail.orderTotal')}</span>
               <span>{formatCurrency(order.details?.ebaySummary?.total || order.salePrice)}</span>
             </S.SummaryRow>
-          </div>
+          </S.SummarySection>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '0.75rem',
-              }}
-            >
-              <div style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8' }}>
-                {t('detail.whatYouEarned')}
-              </div>
-              <Icon name="chevron-up" size={14} color="#94a3b8" />
-            </div>
+          <S.SummarySectionSmall>
+            <S.SectionHeaderRow>
+              <S.SectionHeader>{t('orders.detail.whatYouEarned')}</S.SectionHeader>
+              <Icon name="chevron-up" size={14} color="text.tertiary" />
+            </S.SectionHeaderRow>
             <S.SummaryRow $bold>
-              <span>{t('detail.orderTotal')}</span>
+              <span>{t('orders.detail.orderTotal')}</span>
               <span>{formatCurrency(order.details?.ebaySummary?.total || order.salePrice)}</span>
             </S.SummaryRow>
             <S.FeesSection>
-              <div className="fees-label">{t('detail.feesCollected')}</div>
+              <div className="fees-label">{t('orders.detail.feesCollected')}</div>
               <S.FeeRow>
-                <span>{t('detail.salesTax')}</span>
+                <span>{t('orders.detail.salesTax')}</span>
                 <span>-{formatCurrency(order.details?.ebaySummary?.tax || 0)}</span>
               </S.FeeRow>
               <S.FeeRow>
-                <span style={{ textDecoration: 'underline dotted', cursor: 'help' }}>
-                  {t('detail.transactionFees')}
-                </span>
+                <S.DottedUnderline>
+                  {t('orders.detail.transactionFees')}
+                </S.DottedUnderline>
                 <span>-{formatCurrency(order.fees?.transactionFee || 0)}</span>
               </S.FeeRow>
               <S.FeeRow>
-                <span>{t('detail.adFee')}</span>
+                <span>{t('orders.detail.adFee')}</span>
                 <span>-{formatCurrency(order.fees?.advertisingFee || 0)}</span>
               </S.FeeRow>
             </S.FeesSection>
             <S.EarningsLink>
-              <span style={{ textDecoration: 'underline dotted', cursor: 'help' }}>{t('detail.orderEarnings')}</span>
+              <S.DottedUnderline>{t('orders.detail.orderEarnings')}</S.DottedUnderline>
               <span>{formatCurrency(order.details?.ebaySummary?.earnings || order.netProfit)}</span>
             </S.EarningsLink>
-          </div>
+          </S.SummarySectionSmall>
 
-          <Button
+          <S.AmazonUpdateButton
             variant="secondary"
-            size="sm"
+            size="small"
             fullWidth
-            style={{
-              marginTop: 'auto',
-              background: '#f8fafc',
-              color: '#3b82f6',
-              fontSize: '0.625rem',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-            }}
             onClick={() => setIsAmazonModalOpen(true)}
           >
-            {t('detail.updateAmazon')}
-          </Button>
+            {t('orders.detail.updateAmazon')}
+          </S.AmazonUpdateButton>
         </S.SectionCard>
       </S.Grid>
 
       {/* Net Profit Analysis */}
       <S.AnalysisCard>
-        <div
-          style={{
-            position: 'absolute',
-            right: -48,
-            top: -48,
-            width: '12rem',
-            height: '12rem',
-            background: 'rgba(52, 211, 153, 0.1)',
-            borderRadius: '50%',
-            filter: 'blur(4rem)',
-          }}
-        ></div>
-        <div
-          style={{
-            position: 'absolute',
-            left: -48,
-            bottom: -48,
-            width: '12rem',
-            height: '12rem',
-            background: 'rgba(59, 130, 246, 0.1)',
-            borderRadius: '50%',
-            filter: 'blur(4rem)',
-          }}
-        ></div>
+        <S.DecorativeBlur $position="top-right" />
+        <S.DecorativeBlur $position="bottom-left" />
 
         <S.AnalysisMetadata>
           <div>
             <S.AnalysisTitle>
-              <Icon name="insights" size={24} color="#3b82f6" />
-              {t('detail.netProfitAnalysis')}
+              <Icon name="insights" size={24} color="semantic.info" />
+              {t('orders.detail.netProfitAnalysis')}
             </S.AnalysisTitle>
-            <p style={{ fontSize: '0.8125rem', color: '#64748b', maxWidth: '27.5rem', lineHeight: 1.5 }}>
-              {t('detail.analysisDesc')}
-            </p>
+            <S.AnalysisDescription>
+              {t('orders.detail.analysisDesc')}
+            </S.AnalysisDescription>
           </div>
 
           <S.AnalysisValues>
             <S.Calculation>
-              <div className="label">{t('detail.calculation')}</div>
+              <div className="label">{t('orders.detail.calculation')}</div>
               <div className="formula">
                 <span>{formatCurrency(order.details?.ebaySummary?.earnings || order.netProfit)}</span>
-                <span style={{ color: '#cbd5e1' }}>-</span>
+                <S.FormulaMinus>-</S.FormulaMinus>
                 <span>{formatCurrency(order.purchasePrice)}</span>
               </div>
             </S.Calculation>
@@ -370,16 +325,16 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
             <S.Divider />
 
             <S.ProfitResult>
-              <div className="label">{t('detail.netProfitResult')}</div>
+              <div className="label">{t('orders.detail.netProfitResult')}</div>
               <div className="value">
                 <span>$</span>
                 {order.netProfit.toFixed(2)}
-                <Icon name="trending-up" size={32} color="#10b981" />
+                <Icon name="trending-up" size={32} color="semantic.success" />
               </div>
             </S.ProfitResult>
 
             <S.Roi>
-              <div className="label">{t('detail.roi')}</div>
+              <div className="label">{t('orders.detail.roi')}</div>
               <div className="value">{calculateRoi(order.netProfit, order.purchasePrice)}</div>
             </S.Roi>
           </S.AnalysisValues>

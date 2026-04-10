@@ -49,6 +49,7 @@ export const colorTokens = {
 } as const;
 
 export const spacingTokens = {
+  '2xs': '0.125rem', // 2px
   xs: '0.25rem', // 4px
   sm: '0.5rem', // 8px
   md: '1rem', // 16px
@@ -63,29 +64,32 @@ export const radiusTokens = {
   md: '0.375rem', // 6px - Inputs
   lg: '0.5rem', // 8px - Cards, main containers
   xl: '0.75rem', // 12px - Large modals, banners
+  '2xl': '1rem', // 16px - Extra large containers
   full: '9999px', // Pills, badges (px is fine for full circle)
 } as const;
 
 export const shadowTokens = {
-  sm: '0 0.0625rem 0.1875rem 0 rgb(0 0 0 / 0.05), 0 0.0625rem 0.125rem -0.0625rem rgb(0 0 0 / 0.05)' /* 1px 3px 1px 2px 1px */,
-  md: '0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1)' /* 4px 6px 1px 2px 4px 2px */,
-  lg: '0 0.625rem 0.9375rem -0.1875rem rgb(0 0 0 / 0.1), 0 0.25rem 0.375rem -0.25rem rgb(0 0 0 / 0.1)' /* 10px 15px 3px 4px 6px 4px */,
-  xl: '0 1.25rem 1.5625rem -0.3125rem rgb(0 0 0 / 0.1), 0 0.5rem 0.625rem -0.375rem rgb(0 0 0 / 0.1)' /* 20px 25px 5px 8px 10px 6px */,
+  sm: '0 0.0625rem 0.125rem 0 rgb(0 0 0 / 0.04)',
+  md: '0 0.125rem 0.25rem 0 rgb(0 0 0 / 0.06)',
+  lg: '0 0.25rem 0.5rem -0.0625rem rgb(0 0 0 / 0.08), 0 0.0625rem 0.125rem 0 rgb(0 0 0 / 0.04)',
+  xl: '0 0.5rem 1rem -0.125rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem 0 rgb(0 0 0 / 0.04)',
 } as const;
 
 export const typographyTokens = {
   fontFamily: {
-    sans: "'Outfit', sans-serif",
+    sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   fontSize: {
-    xs: '0.75rem', // 12px - Badges, small text
-    sm: '0.875rem', // 14px - Body text (TailAdmin default)
-    md: '1rem',
-    lg: '1.125rem',
-    xl: '1.25rem',
-    xxl: '1.5rem',
-    xxxl: '1.875rem',
+    '2xs': '0.625rem', // 10px - Micro labels, tiny badges
+    xs: '0.75rem', // 12px - Badges, small labels
+    sm: '0.875rem', // 14px - Body text, table cells
+    md: '1rem', // 16px - Default body
+    lg: '1.125rem', // 18px - Section titles
+    xl: '1.25rem', // 20px - Page subtitles
+    xxl: '1.5rem', // 24px - Page titles
+    xxxl: '1.875rem', // 30px - Hero headings
+    '3xl': '2.25rem', // 36px - Large hero headings
   },
   fontWeight: {
     normal: 400,

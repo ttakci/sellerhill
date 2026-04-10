@@ -5,7 +5,6 @@ export interface ProductsPageContainerProps {}
 export interface ProductsPageComponentProps {
   products: ProductData[];
   isLoading: boolean;
-  onRefresh: () => void;
   pagination?: {
     count: number;
     page: number;
@@ -16,4 +15,7 @@ export interface ProductsPageComponentProps {
     labelInfo?: string;
   };
   columns: any[];
+  viewMode: 'table' | 'grid';
+  onViewModeChange: (mode: 'table' | 'grid') => void;
+  onDownload: () => void;
 }
