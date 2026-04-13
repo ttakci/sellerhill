@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import * as S from './Footer.style';
 
 export const Footer: React.FC = () => {

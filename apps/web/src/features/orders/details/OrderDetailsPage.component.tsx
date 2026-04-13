@@ -1,9 +1,10 @@
 import { OrderDto, OrderStatus } from '@repo/shared';
-import { Badge, Button, Icon, PageHeader, StatusBadge, useLoading } from '@repo/ui';
+import { Badge, Button, Icon, IdBadge, PageHeader, StatusBadge, useLoading } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import * as S from './OrderDetailsPage.style';
+
 import { AmazonDetailsModal } from './components/AmazonDetailsModal';
+import * as S from './OrderDetailsPage.style';
 
 interface OrderDetailsPageComponentProps {
   order: OrderDto | undefined;
@@ -70,7 +71,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
   };
 
   const calculateRoi = (profit: number, cost: number) => {
-    if (cost === 0) return '0.0%';
+    if (cost === 0) {return '0.0%';}
     return `${((profit / cost) * 100).toFixed(1)}%`;
   };
 
@@ -126,13 +127,20 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
           <S.ProductInfo>
             <S.ProductTitle variant="h2" weight="semibold">{order.product?.title || t('orders.detail.unknownProduct')}</S.ProductTitle>
             <S.ProductMetadata>
-              <Badge variant="neutral" size="sm">
-                <S.BadgeLabel>{t('orders.detail.asin')}</S.BadgeLabel> {order.product?.asin || '-'}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                <S.BadgeLabel>{t('orders.detail.ebayItemId')}</S.BadgeLabel>{' '}
-                {order.product?.ebayItemId || '-'}
-              </Badge>
+              {order.product?.asin ? (
+                <IdBadge id={order.product.asin} storeType="amazon" size="sm" />
+              ) : (
+                <Badge variant="neutral" size="sm">
+                  <S.BadgeLabel>{t('orders.detail.asin')}</S.BadgeLabel> -
+                </Badge>
+              )}
+              {order.product?.ebayItemId ? (
+                <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" />
+              ) : (
+                <Badge variant="neutral" size="sm">
+                  <S.BadgeLabel>{t('orders.detail.ebayItemId')}</S.BadgeLabel> -
+                </Badge>
+              )}
               <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
                 <Icon name="check_circle" size={14} />
                 {t(`orders.status.${order.status}`)}

@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   listingSettingsGroupSchema,
+  TemplateType,
   type ListingSettingsGroupFormData,
   type PredefinedTemplateResponse,
 } from '@repo/shared';
@@ -9,12 +10,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import {
   useCreateListingSettingsGroupMutation,
   useGetListingSettingsGroupByIdQuery,
   useGetPredefinedTemplatesQuery,
   useUpdateListingSettingsGroupMutation,
 } from '../api/listing-settings-group.api';
+
 import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.component';
 
 export const ListingSettingsGroupFormContainer = () => {
@@ -42,9 +45,9 @@ export const ListingSettingsGroupFormContainer = () => {
       name: '',
       description: '',
       repricingStrategy: [{ id: crypto.randomUUID(), minPrice: 0, maxPrice: 100, profitMarginPercent: 15 }],
-      stock: { defaultQuantity: 1, autoRestock: true },
+      stock: { defaultQuantity: 1, autoRestock: true, stockBuffer: 0 },
       fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3, taxPercent: 0 },
-      templates: { type: 'predefined', predefinedTemplateId: templates[0]?.id },
+      templates: { type: TemplateType.PREDEFINED, predefinedTemplateId: templates[0]?.id },
     },
   });
 
@@ -109,7 +112,7 @@ export const ListingSettingsGroupFormContainer = () => {
     };
 
     if (isEdit) {
-      void updateListingSettingsGroup({ id: id!, data: cleanData });
+      void updateListingSettingsGroup({ id: id, data: cleanData });
     } else {
       void createListingSettingsGroup(cleanData);
     }
@@ -137,7 +140,7 @@ export const ListingSettingsGroupFormContainer = () => {
   const watchedValues = watch();
 
   const activeTemplate = useMemo(() => {
-    if (watchedValues.templates?.type === 'custom') {
+    if (watchedValues.templates?.type === TemplateType.CUSTOM) {
       return {
         htmlContent: watchedValues.templates.customTemplateHtml || '',
         sampleData: {
@@ -177,7 +180,7 @@ export const ListingSettingsGroupFormContainer = () => {
     const { htmlContent, sampleData } = activeTemplate;
 
     let processedHtml = htmlContent || '';
-    if (!sampleData) return processedHtml;
+    if (!sampleData) {return processedHtml;}
 
     Object.entries(sampleData).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -211,7 +214,7 @@ export const ListingSettingsGroupFormContainer = () => {
   return (
     <ListingSettingsGroupFormComponent
       isEdit={isEdit}
-      defaultValues={group}
+      defaultValues={group ? { ...group, stock: { ...group.stock, stockBuffer: group.stock?.stockBuffer ?? 0 } } : undefined}
       predefinedTemplates={templates}
       onSubmit={handleSubmit}
       onCancel={handleCancel}

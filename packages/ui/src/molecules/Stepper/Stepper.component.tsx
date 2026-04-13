@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './Stepper.style';
 import type { StepperProps, StepStatus } from './Stepper.types';
 
@@ -11,8 +12,8 @@ export const Stepper = ({
   className,
 }: StepperProps): React.ReactElement => {
   const getStatus = (index: number): StepStatus => {
-    if (index < currentStep) return 'completed';
-    if (index === currentStep) return 'current';
+    if (index < currentStep) {return 'completed';}
+    if (index === currentStep) {return 'current';}
     return 'upcoming';
   };
 

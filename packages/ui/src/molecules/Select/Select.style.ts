@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
 
 export const Container = styled.div<{ $fullWidth?: boolean }>`
@@ -21,7 +22,7 @@ export const FieldWrapper = styled.div<{
   display: flex;
   align-items: center;
   position: relative;
-  height: ${({ $size }) => ($size === 'small' ? '2.25rem' : $size === 'large' ? '3rem' : '2.5rem')};
+  height: ${({ $size }) => ($size === 'small' ? '2.75rem' : $size === 'large' ? '3.5rem' : '3rem')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid
     ${({ $isFocused, $hasError, theme }) =>
@@ -51,10 +52,10 @@ export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boole
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
   padding-top: ${({ $hasLabel, $size }) => {
-    if (!$hasLabel) return '0';
-    if ($size === 'small') return '0.75rem';
-    if ($size === 'large') return '1rem';
-    return '0.875rem';
+    if (!$hasLabel) {return '0';}
+    if ($size === 'small') {return '1rem';}
+    if ($size === 'large') {return '1.375rem';}
+    return '1.125rem';
   }};
   padding-left: ${({ $hasIconLeft, $size }) => ($hasIconLeft ? ($size === 'small' ? '1.5rem' : '2rem') : '0')};
   white-space: nowrap;
@@ -93,9 +94,9 @@ export const FloatingLabel = styled.label<{
   z-index: 1;
 
   color: ${({ theme, $isFocused, $hasError, $isDisabled }) => {
-    if ($isDisabled) return theme.colors.text.disabled;
-    if ($hasError) return theme.colors.semantic.error;
-    if ($isFocused) return theme.colors.brand.primary;
+    if ($isDisabled) {return theme.colors.text.disabled;}
+    if ($hasError) {return theme.colors.semantic.error;}
+    if ($isFocused) {return theme.colors.brand.primary;}
     return theme.colors.text.tertiary;
   }};
 

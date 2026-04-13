@@ -1,9 +1,11 @@
 import type { FieldValues } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+
 import { Radio } from '../../atoms/Radio';
 import { Text } from '../../atoms/Text';
-import * as LocalS from '../CheckboxGroup/CheckboxGroup.style'; // Reusing options container style
 import * as S from '../../styles/Form.style';
+import * as LocalS from '../CheckboxGroup/CheckboxGroup.style'; // Reusing options container style
+
 import type { RadioGroupProps } from './RadioGroup.types';
 
 export const RadioGroup = <TFieldValues extends FieldValues = FieldValues>({

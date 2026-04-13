@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './SearchField.style';
 import type { SearchFieldProps } from './SearchField.types';
 

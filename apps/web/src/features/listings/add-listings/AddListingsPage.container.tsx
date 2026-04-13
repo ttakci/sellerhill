@@ -1,10 +1,12 @@
-import { parseAsins, type CreateListingsRequest } from '@repo/shared';
+import { parseAsins, PolicyType, type CreateListingsRequest } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+
 import { useGetListingSettingsGroupsQuery } from '../../listing-settings-groups/api/listing-settings-group.api';
 import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from '../api/listings.api';
+
 import { AddListingsPageComponent } from './AddListingsPage.component';
 
 export const AddListingsPageContainer: React.FC = () => {
@@ -24,7 +26,7 @@ export const AddListingsPageContainer: React.FC = () => {
   React.useEffect(() => {
     if (isSuccess && submitData) {
       showMessage({
-        type: 'success',
+        type: 'info',
         headerKey: 'translation:message.success.header',
         descriptionKey: 'listings:listings.success.queued',
         descriptionParams: { count: submitData.totalAsins },
@@ -57,9 +59,9 @@ export const AddListingsPageContainer: React.FC = () => {
   
   // Transform business policies into structured object
   const businessPolicies = useMemo(() => ({
-    payment: policiesMap.filter(p => p.type === 'payment'),
-    shipping: policiesMap.filter(p => p.type === 'shipping'),
-    return: policiesMap.filter(p => p.type === 'return'),
+    payment: policiesMap.filter(p => p.type === PolicyType.PAYMENT),
+    shipping: policiesMap.filter(p => p.type === PolicyType.SHIPPING),
+    return: policiesMap.filter(p => p.type === PolicyType.RETURN),
   }), [policiesMap]);
   
   const isLoading = isLoadingSettings || isLoadingPolicies;
@@ -67,7 +69,7 @@ export const AddListingsPageContainer: React.FC = () => {
   useLoading(isLoading || isSubmitting);
   
   const asinCount = useMemo(() => {
-    if (!asins.trim()) return 0;
+    if (!asins.trim()) {return 0;}
     const lines = asins.split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
@@ -86,6 +88,10 @@ export const AddListingsPageContainer: React.FC = () => {
     setAsins(value);
   };
   
+  const handleCancel = () => {
+    navigate('/listings');
+  };
+
   return (
     <AddListingsPageComponent
       asins={asins}
@@ -96,6 +102,7 @@ export const AddListingsPageContainer: React.FC = () => {
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit}
       onAsinChange={handleAsinChange}
+      onCancel={handleCancel}
     />
   );
 };

@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import { SettingsCardVariant } from './SettingsCard.types';
 
 export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`

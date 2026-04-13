@@ -71,6 +71,9 @@ export type { TextInputProps as ModernTextInputProps } from './molecules/TextInp
 export { ConfirmModal } from './molecules/ConfirmModal';
 export type { ConfirmModalProps } from './molecules/ConfirmModal';
 
+export { MessageModal } from './molecules/MessageModal/index';
+export type { MessageModalProps } from './molecules/MessageModal/index';
+
 export { CheckboxGroup } from './molecules/CheckboxGroup';
 export type { CheckboxGroupProps, CheckboxOption } from './molecules/CheckboxGroup';
 
@@ -112,11 +115,12 @@ export type { EmptyStateProps } from './molecules/EmptyState';
 export { ErrorState } from './molecules/ErrorState';
 export type { ErrorStateProps } from './molecules/ErrorState';
 
-export { Popover } from './molecules/Popover';
-export type { PopoverPosition, PopoverProps } from './molecules/Popover';
 
 export { Tooltip } from './molecules/Tooltip';
 export type { TooltipPosition, TooltipProps, TooltipVariant } from './molecules/Tooltip';
+
+export { Popover } from './molecules/Popover';
+export type { PopoverPosition, PopoverProps } from './molecules/Popover';
 
 export { Toast } from './molecules/Toast';
 export type { ToastItem, ToastProps, ToastType } from './molecules/Toast';
@@ -133,6 +137,13 @@ export type { SegmentedControlOption, SegmentedControlProps } from './molecules/
 export { ListItem } from './molecules/ListItem';
 export type { ListItemProps } from './molecules/ListItem';
 
+export { IdBadge } from './molecules/IdBadge';
+export type { IdBadgeProps, StoreType } from './molecules/IdBadge';
+
+// Organisms
+export { DataTable } from './organisms/DataTable';
+export type { ColumnOption, DataTableProps } from './organisms/DataTable';
+
 // Context exports
 export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';
 export type {
@@ -148,4 +159,7 @@ export { ToastContext, ToastProvider, useToastContext } from './context';
 export type { ToastContextValue } from './context';
 
 // Hook exports
-export { useLoading, useTheme, useUI, useToast } from './hooks';
+export { useLoading, useMediaQuery, useIsMobile, useTheme, useUI, useToast } from './hooks';
+
+// Utility exports
+export { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig } from './utils/format';

@@ -1,6 +1,7 @@
 import type { ListingSettingsGroupResponse } from '@repo/shared';
 import { Button, Icon, PageHeader, Text } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
+
 import * as S from './ListingSettingsGroupPage.style';
 import { ListingSettingsGroupPageProps } from './ListingSettingsGroupPage.types';
 

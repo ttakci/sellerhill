@@ -1,5 +1,7 @@
-import { Icon } from '../../atoms/Icon';
 import React from 'react';
+
+import { Icon } from '../../atoms/Icon';
+
 import * as S from './ViewToggle.style';
 import type { ViewToggleProps } from './ViewToggle.types';
 

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
+
 import type { ShowLoadingOptions } from '../context/UIContext.types';
+
 import { useUI } from './useUI';
 
 /**

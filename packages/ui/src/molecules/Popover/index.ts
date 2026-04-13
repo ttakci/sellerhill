@@ -1,2 +1,2 @@
 export { Popover } from './Popover.component';
-export type { PopoverPosition, PopoverProps } from './Popover.types';
+export type { PopoverProps, PopoverPosition } from './Popover.types';

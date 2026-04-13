@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { ProgressBarSize, ProgressBarVariant } from './ProgressBar.types';
 
 export const ProgressBarWrapper = styled.div`

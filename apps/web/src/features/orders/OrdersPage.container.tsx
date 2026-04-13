@@ -3,6 +3,7 @@ import { useLoading } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+
 import { useGetOrdersQuery, useGetOrderStatsQuery } from './api/orders.api';
 import { OrdersPageComponent } from './OrdersPage.component';
 
@@ -12,10 +13,11 @@ export const OrdersPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
 
-  const { data: orders = [], isLoading: isOrdersLoading, refetch } = useGetOrdersQuery();
+  const { data, isLoading: isOrdersLoading } = useGetOrdersQuery();
   const { data: stats, isLoading: isStatsLoading } = useGetOrderStatsQuery();
+
+  const orders = data?.orders ?? [];
 
   const isLoading = isOrdersLoading || isStatsLoading;
   useLoading(isLoading);
@@ -24,9 +26,9 @@ export const OrdersPage: React.FC = () => {
   const filteredOrders = orders.filter((order: OrderDto) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      order.orderNumber.toLowerCase().includes(searchLower) ||
-      order.buyerName.toLowerCase().includes(searchLower) ||
-      order.buyerEmail.toLowerCase().includes(searchLower)
+      (order.orderNumber ?? '').toLowerCase().includes(searchLower) ||
+      (order.buyerName ?? '').toLowerCase().includes(searchLower) ||
+      (order.buyerEmail ?? '').toLowerCase().includes(searchLower)
     );
   });
 
@@ -34,7 +36,7 @@ export const OrdersPage: React.FC = () => {
   const paginatedOrders = filteredOrders.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   const handleOrderClick = (order: OrderDto) => {
-    navigate(`/orders/${order.id}`);
+    void navigate(`/orders/${order.id}`);
   };
 
   const handleSearchChange = (query: string) => {
@@ -83,8 +85,6 @@ export const OrdersPage: React.FC = () => {
       onOrderClick={handleOrderClick}
       searchQuery={searchQuery}
       onSearchChange={handleSearchChange}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
       onDownload={handleDownload}
       totalCount={filteredOrders.length}
     />

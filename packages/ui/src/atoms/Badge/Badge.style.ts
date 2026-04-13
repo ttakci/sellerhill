@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { BadgeSize, BadgeVariant } from './Badge.types';
 
 export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: BadgeSize; $isPill: boolean }>`
@@ -44,7 +46,7 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
         return `
           background: ${t.colors.brand.secondary};
           color: ${t.colors.brand.primary};
-          border-color: ${(t.colors.brand.primary as string) + '30'};
+          border-color: ${(t.colors.brand.primary ) + '30'};
         `;
       case 'secondary':
         return `

@@ -11,9 +11,10 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: '#F8FAFC',   // Canvas - page background
+    primary: '#F8FAFC',   // Canvas - page background (used by theme system)
     secondary: '#FFFFFF',  // Clean white divider areas
     tertiary: '#F1F5F9',  // Inner elements - stat rows, table headers
+    gradient: 'linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 40%, #F0F4FF 100%)', // Soft white-to-blue gradient
   },
 
   surface: {
@@ -44,9 +45,9 @@ const lightColors: ThemeColors = {
   },
 
   brand: {
-    primary: '#3B82F6',
-    primaryHover: '#2563EB',
-    secondary: '#EFF6FF',
+    primary: '#4263EB',
+    primaryHover: '#3B5BD9',
+    secondary: '#EEF2FF',
   },
 
   semanticTint: {
@@ -63,6 +64,16 @@ const lightColors: ThemeColors = {
     warning: '#FDE68A',
     info: '#BFDBFE',
     neutral: '#E5E7EB',
+  },
+
+  sidebar: {
+    background: '#0c1427',
+    text: '#FFFFFF',
+    textMuted: 'rgba(255, 255, 255, 0.6)',
+    hover: 'rgba(255, 255, 255, 0.1)',
+    active: 'rgba(255, 255, 255, 0.15)',
+    accent: '#4263EB',
+    divider: 'rgba(255, 255, 255, 0.1)',
   },
 };
 
@@ -123,6 +134,16 @@ const darkColors: ThemeColors = {
     warning: 'rgba(251, 191, 36, 0.2)',
     info: 'rgba(96, 165, 250, 0.2)',
     neutral: 'rgba(107, 114, 128, 0.2)',
+  },
+
+  sidebar: {
+    background: '#0c1427',
+    text: '#FFFFFF',
+    textMuted: 'rgba(255, 255, 255, 0.6)',
+    hover: 'rgba(255, 255, 255, 0.1)',
+    active: 'rgba(255, 255, 255, 0.15)',
+    accent: '#4263EB',
+    divider: 'rgba(255, 255, 255, 0.1)',
   },
 };
 

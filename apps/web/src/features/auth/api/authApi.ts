@@ -7,8 +7,9 @@
  * - getMe: Get current user information
  */
 
-import { baseApi } from '@/api/baseApi';
 import type { AuthResponse, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
+
+import { baseApi } from '@/api/baseApi';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

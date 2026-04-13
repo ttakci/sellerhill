@@ -2,7 +2,9 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { ListingStatus, type ListingQueueJobData, type ProductData } from '@repo/shared';
 import { Job } from 'bullmq';
+
 import { EbayService } from '../ebay/ebay.service';
+
 import { KeepaService } from './keepa.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';

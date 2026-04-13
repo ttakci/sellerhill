@@ -1,12 +1,14 @@
-import { getErrorMessage } from '@/utils/errorHandler';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateProfileSchema, type UpdateProfileFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ProfilePageComponent } from './ProfilePage.component';
+
 import { useGetProfileQuery, useUpdateProfileMutation } from './api/profileApi';
+import { ProfilePageComponent } from './ProfilePage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const ProfilePageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['profile', 'translation']);

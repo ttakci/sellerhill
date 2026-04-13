@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Badge as UIBadge, Button, Text as UIText, tkn } from '@repo/ui';
+import { Badge as UIBadge, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -9,18 +9,18 @@ export const Container = styled.div`
   flex-direction: column;
 `;
 
-export const BackButton = styled(Button)`
-  display: inline-flex;
+export const HeaderRow = styled.div`
+  display: flex;
   align-items: center;
-  gap: 0.5rem; /* 8px */
-  margin-bottom: 0.5rem; /* 8px */
+  justify-content: flex-end;
+  gap: ${tkn('spacing.sm')};
+  margin-bottom: 1.5rem; /* 24px */
 `;
 
-export const RefreshButton = styled(Button)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem; /* 8px */
+export const HeaderRowTitle = styled.div`
+  margin-bottom: 2rem; /* 32px */
 `;
+
 
 export const AsinText = styled(UIText)``;
 

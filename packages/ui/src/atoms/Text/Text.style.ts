@@ -13,64 +13,95 @@ interface StyledTextProps {
 }
 
 const variantStyles = {
+  /* ── Headings: Inter Bold ── */
   display: (theme: any) => `
-    font-size: ${theme.typography.fontSize['3xl']};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 2.5rem;
+    line-height: 3rem;
     font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: 0;
   `,
   h1: (theme: any) => `
-    font-size: ${theme.typography.fontSize.xxl};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: 0;
   `,
   h2: (theme: any) => `
-    font-size: ${theme.typography.fontSize.xl};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: 0;
   `,
   h3: (theme: any) => `
-    font-size: ${theme.typography.fontSize.lg};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: 0;
   `,
   h4: (theme: any) => `
-    font-size: ${theme.typography.fontSize.md};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: ${theme.typography.fontWeight.bold};
+    letter-spacing: 0;
   `,
   h5: (theme: any) => `
-    font-size: ${theme.typography.fontSize.sm};
-    line-height: ${theme.typography.lineHeight.tight};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: 0;
   `,
+  /* ── Body: Lexend Regular ── */
   body: (theme: any) => `
-    font-size: ${theme.typography.fontSize.sm};
-    line-height: ${theme.typography.lineHeight.normal};
+    font-family: ${theme.typography.fontFamily.body};
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: ${theme.typography.fontWeight.normal};
+    letter-spacing: 0;
   `,
   'body-sm': (theme: any) => `
-    font-size: ${theme.typography.fontSize.sm};
-    line-height: ${theme.typography.lineHeight.normal};
+    font-family: ${theme.typography.fontFamily.body};
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: ${theme.typography.fontWeight.normal};
+    letter-spacing: 0;
   `,
   'body-xs': (theme: any) => `
-    font-size: ${theme.typography.fontSize.xs};
-    line-height: ${theme.typography.lineHeight.normal};
+    font-family: ${theme.typography.fontFamily.body};
+    font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: ${theme.typography.fontWeight.normal};
+    letter-spacing: 0;
   `,
   caption: (theme: any) => `
-    font-size: ${theme.typography.fontSize.xs};
-    line-height: ${theme.typography.lineHeight.normal};
+    font-family: ${theme.typography.fontFamily.body};
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: ${theme.typography.fontWeight.normal};
+    letter-spacing: 0;
   `,
   overline: (theme: any) => `
-    font-size: ${theme.typography.fontSize.xs};
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.0625rem; /* 1px */
+    letter-spacing: ${theme.typography.letterSpacing.widest};
     font-weight: ${theme.typography.fontWeight.semibold};
   `,
   mono: (theme: any) => `
+    font-family: ${theme.typography.fontFamily.mono};
     font-size: ${theme.typography.fontSize.xs};
     line-height: ${theme.typography.lineHeight.normal};
-    font-family: ${theme.typography.fontFamily.mono};
   `,
   nav: (theme: any) => `
-    font-size: ${theme.typography.fontSize.sm};
+    font-family: ${theme.typography.fontFamily.body};
+    font-size: 0.875rem;
     font-weight: ${theme.typography.fontWeight.medium};
+    letter-spacing: 0;
   `,
 };
 
@@ -100,7 +131,7 @@ const TextElement = styled.span<StyledTextProps>`
     }
     return p.$muted ? (p.theme as any).colors.text.secondary : (p.theme as any).colors.text.primary;
   }};
-  font-family: ${({ theme }) => (theme as any).typography.fontFamily.sans};
+  font-family: ${({ theme }) => (theme as any).typography.fontFamily.body};
 
   /* Variant styles */
   ${(p) => (variantStyles[p.$variant || 'body'] || variantStyles.body)(p.theme)}

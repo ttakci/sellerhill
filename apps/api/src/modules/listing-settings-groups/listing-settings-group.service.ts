@@ -9,6 +9,7 @@ import {
     type TemplateConfig,
     type UpdateListingSettingsGroupRequest
 } from '@repo/shared';
+
 import { DatabaseService } from '../../common/database/database.service';
 
 /**

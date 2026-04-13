@@ -18,12 +18,12 @@
 import type auth from './resources/en/auth.json';
 import type dashboard from './resources/en/dashboard.json';
 import type ebay from './resources/en/ebay.json';
-import type en from './resources/en/translation.json';
 import type listings from './resources/en/listings.json';
 import type listingSettingsGroup from './resources/en/listingSettingsGroup.json';
 import type orders from './resources/en/orders.json';
 import type profile from './resources/en/profile.json';
 import type storeSettings from './resources/en/storeSettings.json';
+import type en from './resources/en/translation.json';
 
 /**
  * Translation resource structure

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import * as S from './IconButton.style';
 import type { IconButtonProps } from './IconButton.types';
 

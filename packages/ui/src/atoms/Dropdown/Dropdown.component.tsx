@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+
 import { Icon } from '../Icon';
+
 import * as S from './Dropdown.style';
 import type { DropdownProps } from './Dropdown.types';
 

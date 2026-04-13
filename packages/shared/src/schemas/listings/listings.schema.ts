@@ -28,7 +28,7 @@ export const createListingsSchema = (t: any) => z.object({
       const parsed = parseAsins(val);
       return parsed.length <= 1000;
     }, t('listings.validation.maxAsins')),
-  listingSettingsGroupId: z.string().uuid(t('common.validation.invalidUuid')),
+  listingSettingsGroupId: z.string().min(1, t('listings.validation.listingSettingsGroupRequired')),
   paymentPolicyId: z.string().min(1, t('listings.validation.paymentPolicyRequired')),
   shippingPolicyId: z.string().min(1, t('listings.validation.shippingPolicyRequired')),
   returnPolicyId: z.string().min(1, t('listings.validation.returnPolicyRequired')),

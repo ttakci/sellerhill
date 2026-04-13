@@ -4,10 +4,11 @@
  */
 export const colorTokens = {
   primary: {
-    50: '#eff6ff',
-    100: '#dbeafe',
-    500: '#3B82F6', // Updated to Vibrant Mesh Blue
-    600: '#2563EB', // Traditional brand blue
+    50: '#eef2ff',
+    100: '#e0e7ff',
+    500: '#4263EB', // Insure Design System Primary
+    600: '#3B5BD9', // Hover state
+    650: '#3658D9', // Pressed state
     700: '#1D4ED8',
     900: '#1e3a8a',
   },
@@ -69,14 +70,16 @@ export const radiusTokens = {
 } as const;
 
 export const shadowTokens = {
-  sm: '0 0.0625rem 0.125rem 0 rgb(0 0 0 / 0.04)',
-  md: '0 0.125rem 0.25rem 0 rgb(0 0 0 / 0.06)',
-  lg: '0 0.25rem 0.5rem -0.0625rem rgb(0 0 0 / 0.08), 0 0.0625rem 0.125rem 0 rgb(0 0 0 / 0.04)',
-  xl: '0 0.5rem 1rem -0.125rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem 0 rgb(0 0 0 / 0.04)',
+  sm: '0 1px 2px 0 rgb(0 0 0 / 0.04)',
+  md: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
+  lg: '0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04)',
+  xl: '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04)',
 } as const;
 
 export const typographyTokens = {
   fontFamily: {
+    heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    body: "'Lexend', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
@@ -101,6 +104,14 @@ export const typographyTokens = {
     tight: 1.2,
     normal: 1.5,
     relaxed: 1.625,
+  },
+  letterSpacing: {
+    tighter: '-0.02em',
+    tight: '-0.01em',
+    normal: '0',
+    wide: '0.01em',
+    wider: '0.02em',
+    widest: '0.05em',
   },
 } as const;
 

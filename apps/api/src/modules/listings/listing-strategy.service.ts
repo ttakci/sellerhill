@@ -1,5 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import type { ListingSettingsGroup, ProductData, StoreSettingsResponse } from '@repo/shared';
+import type { FeeConfig, ListingSettingsGroup, ProductData, StoreSettingsResponse } from '@repo/shared';
+import { TemplateType } from '@repo/shared';
+
+import { sanitizeHtml, sanitizeStringArray } from '../../common/utils/sanitize';
 import { ListingSettingsGroupService } from '../listing-settings-groups/listing-settings-group.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
@@ -31,16 +34,20 @@ export class ListingStrategyService {
 
     const priceMetrics = this.calculatePrice(product.price.current, group);
 
-    // Stock Logic: Prevent overselling risk.
-    // If Amazon has less stock than our desired listing amount, mark as out of stock (0) on eBay.
-    const userPreferredStock = group.stock?.defaultQuantity || 1;
+    // Stock Logic: Subtract buffer from Amazon stock, cap at user's max listing quantity.
+    // e.g. defaultQuantity=3, buffer=5:
+    //   Amazon=25 → min(max(25-5,0),3)=3  |  Amazon=7 → min(max(7-5,0),3)=2
+    //   Amazon=6 → min(max(6-5,0),3)=1    |  Amazon=5 → min(max(5-5,0),3)=0 (out of stock)
+    const defaultQuantity = group.stock?.defaultQuantity || 1;
+    const stockBuffer = group.stock?.stockBuffer ?? 0;
     const amazonStock = product.stock ?? 0;
-    const quantity = amazonStock >= userPreferredStock ? userPreferredStock : 0;
+    const quantity = Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity);
 
     this.logger.debug(
       `Stock calculation for ${product.asin || 'product'}: ` +
-        `Amazon stock=${amazonStock}, User preferred=${userPreferredStock}, ` +
-        `Final quantity=${quantity} (${quantity === 0 ? 'OUT OF STOCK - Amazon stock < preferred' : 'IN STOCK'})`
+        `Amazon stock=${amazonStock}, Buffer=${stockBuffer}, ` +
+        `Available=${Math.max(amazonStock - stockBuffer, 0)}, Max listing qty=${defaultQuantity}, ` +
+        `Final quantity=${quantity} (${quantity === 0 ? 'OUT OF STOCK' : 'IN STOCK'})`
     );
 
     return {
@@ -70,7 +77,7 @@ export class ListingStrategyService {
 
     // 3. Blacklist Validation Logic (merged into scope checks)
     const validateBlacklist = (text: string, scope: 'title' | 'description') => {
-      if (!blacklist || blacklist.length === 0) return;
+      if (!blacklist || blacklist.length === 0) {return;}
 
       for (const item of blacklist) {
         const keyword = item.keyword.toLowerCase();
@@ -109,17 +116,17 @@ export class ListingStrategyService {
     let template = '{{description}}'; // Default
 
     // Use custom template if available
-    if (group.templates?.type === 'custom' && group.templates.customTemplateHtml) {
+    if (group.templates?.type === TemplateType.CUSTOM && group.templates.customTemplateHtml) {
       template = group.templates.customTemplateHtml;
     }
     // TODO: Handle predefined templates if needed
 
-    // Replace variables
-    let finalDescription = template
-      .replace(/{{title}}/g, product.title)
-      .replace(/{{description}}/g, product.description || '')
-      .replace(/{{brand}}/g, product.brand || '')
-      .replace(/{{features}}/g, (product.features || []).join('</li><li>')); // Simple list format
+    // Replace variables with sanitized content
+    const finalDescription = template
+      .replace(/{{title}}/g, sanitizeHtml(product.title))
+      .replace(/{{description}}/g, sanitizeHtml(product.description || ''))
+      .replace(/{{brand}}/g, sanitizeHtml(product.brand || ''))
+      .replace(/{{features}}/g, sanitizeStringArray(product.features || []).join('</li><li>'));
 
     return finalDescription;
   }
@@ -189,7 +196,7 @@ export class ListingStrategyService {
    * Add eBay fees and taxes to the target price using a reverse calculation
    * to ensure the desired profit margin is maintained after all deductions.
    */
-  private applyFees(netTarget: number, fees: any): number {
+  private applyFees(netTarget: number, fees: FeeConfig): number {
     const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
     const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
     const taxPercent = Number(fees?.taxPercent) || 0;

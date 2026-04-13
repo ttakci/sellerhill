@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { getErrorMessage } from '@/utils/errorHandler';
 import { useLazyGetEbayConnectUrlQuery } from '../api/ebayApi';
+
 import { OnboardingEbayPageComponent } from './OnboardingEbayPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const OnboardingEbayPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['ebay', 'translation']);
@@ -28,7 +30,7 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   // Handle error
   React.useEffect(() => {
     if (error) {
-      const { key, params } = getErrorMessage(error as any);
+      const { key, params } = getErrorMessage(error );
       showMessage(
         {
           type: 'error',

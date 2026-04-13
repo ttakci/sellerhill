@@ -5,7 +5,15 @@
       "Bash(pnpm -r --parallel --filter @repo/* run build)",
       "Bash(pnpm typecheck:*)",
       "Bash(npx tsc:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm lint:fix)",
+      "Bash(xxd D:/dev/projects/zonds/zonds/apps/web/src/features/dashboard/DashboardPage/DashboardPage.style.ts)",
+      "Bash(node -e \"const fs = require\\('fs'\\); const c = fs.readFileSync\\('apps/web/src/features/dashboard/DashboardPage/DashboardPage.style.ts', 'utf8'\\); console.log\\(JSON.stringify\\(c.substring\\(c.indexOf\\('OrderList'\\)-20, c.indexOf\\('OrderList'\\)+200\\)\\)\\)\")",
+      "Bash(grep -h \"import.*@repo/ui\" apps/web/src/**/*.tsx)",
+      "Bash(xxd \"apps/web/src/features/dashboard/DashboardPage/DashboardPage.component.tsx\")",
+      "Bash(python3 -c ':*)",
+      "Bash(python -c ':*)"
     ]
   }
 }

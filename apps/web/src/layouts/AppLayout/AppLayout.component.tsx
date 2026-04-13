@@ -1,27 +1,28 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  Button,
   ConfirmModal,
   Dropdown,
   Icon,
   Logo,
   MeshBackground,
-  Modal,
+  MessageModal,
   Text,
   useTheme,
   useUI,
 } from '@repo/ui';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+
+import * as S from './AppLayout.style';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { logout } from '@/features/auth/store/authSlice';
-import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
-import * as S from './AppLayout.style';
+
 
 /**
  * TailAdmin Inspired Layout - Fully Responsive Design
@@ -136,7 +137,7 @@ export const AppLayout: React.FC = () => {
                   title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
                 >
                   <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="store" size={18} />
+                    <Icon name="storefront" size={18} />
                     {!sidebarCollapsed && t('translation:menu.ebayListings')}
                   </S.NavItemContent>
                 </S.NavItem>
@@ -148,7 +149,7 @@ export const AppLayout: React.FC = () => {
                   title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
                 >
                   <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="sync" size={18} />
+                    <Icon name="bolt" size={18} />
                     {!sidebarCollapsed && t('translation:menu.listingJobs')}
                   </S.NavItemContent>
                 </S.NavItem>
@@ -160,7 +161,7 @@ export const AppLayout: React.FC = () => {
                   title={sidebarCollapsed ? t('translation:menu.products') : undefined}
                 >
                   <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="grid-view" size={18} />
+                    <Icon name="inventory-2" size={18} />
                     {!sidebarCollapsed && t('translation:menu.products')}
                   </S.NavItemContent>
                 </S.NavItem>
@@ -174,7 +175,7 @@ export const AppLayout: React.FC = () => {
               title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="shopping-cart" size={18} />
+                <Icon name="inbox" size={18} />
                 {!sidebarCollapsed && t('translation:menu.orders')}
               </S.NavItemContent>
               {!sidebarCollapsed && (
@@ -210,7 +211,7 @@ export const AppLayout: React.FC = () => {
                   title={sidebarCollapsed ? t('translation:menu.listingSettingsGroups') : undefined}
                 >
                   <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="check-list" size={18} />
+                    <Icon name="rule" size={18} />
                     {!sidebarCollapsed && t('translation:menu.listingSettingsGroups')}
                   </S.NavItemContent>
                 </S.NavItem>
@@ -235,7 +236,7 @@ export const AppLayout: React.FC = () => {
                         <Text variant="caption" weight="bold" color="text.inverse">
                           {userName}
                         </Text>
-                        <Text variant="caption" color="text.tertiary">
+                        <Text variant="caption" color="sidebar.textMuted">
                           {user?.email || ''}
                         </Text>
                       </S.ProfileDetails>
@@ -332,43 +333,19 @@ export const AppLayout: React.FC = () => {
           <Icon name="loader" size={48} />
         </S.LoadingOverlay>
 
-        <Modal
+        <MessageModal
           isOpen={messageState.isOpen}
           onClose={closeMessage}
+          type={messageState.type}
           title={messageState.header}
-          size="sm"
-          footer={
-            <S.ModalFooterWrapper>
-              {messageState.secondaryButton && (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    messageState.secondaryButton?.onClick();
-                    closeMessage();
-                  }}
-                >
-                  {messageState.secondaryButton.label}
-                </Button>
-              )}
-              {messageState.primaryButton && (
-                <Button
-                  variant={messageState.type === 'error' ? 'danger' : 'primary'}
-                  onClick={() => {
-                    messageState.primaryButton?.onClick();
-                    closeMessage();
-                  }}
-                >
-                  {messageState.primaryButton.label}
-                </Button>
-              )}
-              {!messageState.primaryButton && !messageState.secondaryButton && (
-                <Button onClick={closeMessage}>{t('translation:common.ok')}</Button>
-              )}
-            </S.ModalFooterWrapper>
-          }
-        >
-          <Text variant="body">{messageState.description}</Text>
-        </Modal>
+          description={messageState.description}
+          primaryButton={messageState.primaryButton || {
+            label: t('translation:common.ok'),
+            onClick: closeMessage,
+            variant: messageState.type === 'error' ? 'danger' : 'primary',
+          }}
+          secondaryButton={messageState.secondaryButton || undefined}
+        />
         <ConfirmModal
           isOpen={isLogoutConfirmOpen}
           onClose={() => setIsLogoutConfirmOpen(false)}

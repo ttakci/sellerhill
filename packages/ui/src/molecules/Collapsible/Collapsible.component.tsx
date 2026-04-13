@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './Collapsible.style';
 import type { CollapsibleProps } from './Collapsible.types';
 

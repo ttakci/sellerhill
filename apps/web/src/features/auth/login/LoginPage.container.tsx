@@ -8,13 +8,15 @@ import type { LoginFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { getErrorMessage } from '@/utils/errorHandler';
-import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../api/authApi';
 import { setCredentials } from '../store/authSlice';
+
 import { LoginPageComponent } from './LoginPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const LoginPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['auth', 'translation']);

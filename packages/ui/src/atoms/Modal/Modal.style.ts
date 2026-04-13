@@ -1,20 +1,22 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
 
 export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 1.25rem; /* 20px */
+  padding: ${tkn('spacing.md')};
   backdrop-filter: blur(0.25rem); /* 4px */
   animation: fadeIn 0.2s ease-out;
+
+  @media (max-width: 48rem) { /* 768px */
+    padding: ${tkn('spacing.sm')};
+  }
 
   @keyframes fadeIn {
     from {
@@ -28,8 +30,9 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
 
 export const ModalContainer = styled.div<{ $size: string }>`
   background: ${tkn('colors.background.secondary')};
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.xl')};
   width: 100%;
+  margin: auto;
   max-width: ${({ $size }) => {
     switch ($size) {
       case 'sm':
@@ -46,9 +49,14 @@ export const ModalContainer = styled.div<{ $size: string }>`
   }};
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  max-height: calc(100% - 2rem);
   box-shadow: ${tkn('shadows.xl')};
   animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (max-width: 48rem) {
+    max-width: calc(100% - ${tkn('spacing.md')});
+    border-radius: ${tkn('radius.lg')};
+  }
 
   @keyframes slideDown {
     from {
@@ -62,23 +70,25 @@ export const ModalContainer = styled.div<{ $size: string }>`
   }
 `;
 
-export const Header = styled.div`
+export const Header = styled.div<{ $showDivider?: boolean }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border-bottom: ${({ $showDivider }) =>
+    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')}` : 'none'}; /* 1px */
   display: flex;
   align-items: center;
   justify-content: space-between;
 `;
 
-export const Body = styled.div`
-  padding: ${tkn('spacing.lg')};
+export const Body = styled.div<{ $noPadding?: boolean }>`
+  padding: ${({ $noPadding }) => ($noPadding ? '0' : tkn('spacing.lg'))};
   overflow-y: auto;
   flex: 1;
 `;
 
-export const Footer = styled.div`
+export const Footer = styled.div<{ $showDivider?: boolean }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border-top: ${({ $showDivider }) =>
+    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')}` : 'none'}; /* 1px */
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem; /* 12px */

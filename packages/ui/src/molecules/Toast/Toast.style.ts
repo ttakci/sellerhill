@@ -1,6 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { ToastType } from './Toast.types';
 
 const slideIn = keyframes`

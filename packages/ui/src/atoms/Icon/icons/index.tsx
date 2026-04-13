@@ -1,0 +1,212 @@
+/**
+ * Icon mapping: our semantic names → Lucide React icons
+ *
+ * All icons use lucide-react (tree-shakeable, 1500+ icons).
+ * Only brand-specific icons (logo, zorro) remain custom SVGs.
+ * Country flags use Globe as fallback.
+ */
+import type { LucideIcon } from 'lucide-react';
+import React from 'react';
+
+import {
+  LayoutDashboard, Store, Zap, Package, Inbox, Settings, SlidersHorizontal,
+  Home, Menu, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, LogOut, User,
+  ShoppingBag, DollarSign, TrendingUp, TrendingDown, CreditCard, Wallet,
+  Receipt, Truck, RotateCcw, Tag, Printer, BarChart3, ShoppingCart,
+  Plus, X, Pencil, Trash2, Copy, Save, Download, Upload,
+  ExternalLink, Link2, RefreshCw, Search, Filter, Eye, EyeOff, Play, Ban,
+  Check, CheckCircle, AlertCircle, Info, Bell, Mail, Phone, Lock, Code,
+  Percent, Globe, MapPin, MoreHorizontal, MoreVertical, Calendar, CalendarDays,
+  List, LayoutGrid, ListChecks, Image, Camera, Monitor, Tablet, Smartphone,
+  Loader2, Sun, Moon, Rocket, Bolt, Archive, Box, FileText, Flag,
+  ListFilter, Settings2, UnfoldVertical, BadgeCheck, ArrowLeft,
+} from 'lucide-react';
+
+import { ZorroIcon } from './zorro';
+import { AmazonIcon } from './amazon';
+import { EbayIcon } from './ebay';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyIcon = any;
+
+const lucide = (IconComp: LucideIcon) =>
+  (props: React.SVGProps<SVGSVGElement>) => {
+    const { stroke, strokeWidth } = props;
+    return React.createElement(IconComp as AnyIcon, {
+      size: 24,
+      color: stroke as string,
+      strokeWidth: Number(strokeWidth) || 2,
+    });
+  };
+
+export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  // Navigation
+  dashboard: lucide(LayoutDashboard),
+  home: lucide(Home),
+  store: lucide(Store),
+  storefront: lucide(Store),
+  'shopping-cart': lucide(ShoppingCart),
+  shopping_cart: lucide(ShoppingCart),
+  inbox: lucide(Inbox),
+  settings: lucide(Settings),
+  'settings-suggest': lucide(Settings2),
+  settings_suggest: lucide(Settings2),
+  'edit-note': lucide(Pencil),
+  edit_note: lucide(Pencil),
+
+  // Finance & E-commerce
+  payments: lucide(CreditCard),
+  'account-balance-wallet': lucide(Wallet),
+  account_balance_wallet: lucide(Wallet),
+  receipt: lucide(Receipt),
+  tag: lucide(Tag),
+  percent: lucide(Percent),
+  'trending-up': lucide(TrendingUp),
+  trending_up: lucide(TrendingUp),
+  'trending-down': lucide(TrendingDown),
+  trending_down: lucide(TrendingDown),
+  bolt: lucide(Bolt),
+  'local-shipping': lucide(Truck),
+  local_shipping: lucide(Truck),
+  'assignment-return': lucide(RotateCcw),
+  assignment_return: lucide(RotateCcw),
+  'shopping-bag': lucide(ShoppingBag),
+  shopping_bag: lucide(ShoppingBag),
+  'bar-chart': lucide(BarChart3),
+  insights: lucide(BarChart3),
+
+  // Actions
+  plus: lucide(Plus),
+  add: lucide(Plus),
+  x: lucide(X),
+  edit: lucide(Pencil),
+  delete: lucide(Trash2),
+  trash: lucide(Trash2),
+  copy: lucide(Copy),
+  save: lucide(Save),
+  download: lucide(Download),
+  'file-download': lucide(Download),
+  file_download: lucide(Download),
+  upload: lucide(Upload),
+  'open-in-new': lucide(ExternalLink),
+  open_in_new: lucide(ExternalLink),
+  'external-link': lucide(ExternalLink),
+  link: lucide(Link2),
+  search: lucide(Search),
+  filter: lucide(Filter),
+  'filter-list': lucide(ListFilter),
+  filter_list: lucide(ListFilter),
+  eye: lucide(Eye),
+  'eye-off': lucide(EyeOff),
+  'play-arrow': lucide(Play),
+  play_arrow: lucide(Play),
+  'play-circle': lucide(Play),
+  block: lucide(Ban),
+  print: lucide(Printer),
+  sync: lucide(RefreshCw),
+  refresh: lucide(RefreshCw),
+  history: lucide(RefreshCw),
+  code: lucide(Code),
+
+  // Chevron & Navigation
+  'chevron-down': lucide(ChevronDown),
+  chevron_down: lucide(ChevronDown),
+  'chevron-up': lucide(ChevronUp),
+  chevron_up: lucide(ChevronUp),
+  'chevron-left': lucide(ChevronLeft),
+  chevron_left: lucide(ChevronLeft),
+  'chevron-right': lucide(ChevronRight),
+  chevron_right: lucide(ChevronRight),
+  'expand-more': lucide(ChevronDown),
+  expand_more: lucide(ChevronDown),
+  'unfold-more': lucide(UnfoldVertical),
+  unfold_more: lucide(UnfoldVertical),
+  keyboard_arrow_down: lucide(ChevronDown),
+  menu: lucide(Menu),
+
+  // Status & Feedback
+  check: lucide(Check),
+  check_circle: lucide(CheckCircle),
+  'check-circle': lucide(CheckCircle),
+  'check-list': lucide(ListChecks),
+  'alert-circle': lucide(AlertCircle),
+  error: lucide(AlertCircle),
+  error_outline: lucide(AlertCircle),
+  'error-outline': lucide(AlertCircle),
+  info: lucide(Info),
+  help: lucide(Info),
+  loader: lucide(Loader2),
+  bell: lucide(Bell),
+  notifications: lucide(Bell),
+  validation: lucide(BadgeCheck),
+
+  // Communication
+  mail: lucide(Mail),
+  phone: lucide(Phone),
+  'map-pin': lucide(MapPin),
+  globe: lucide(Globe),
+
+  // Theme
+  sun: lucide(Sun),
+  moon: lucide(Moon),
+  dark_mode: lucide(Moon),
+  'light-mode': lucide(Sun),
+
+  // Content & Media
+  image: lucide(Image),
+  camera: lucide(Camera),
+  'inventory-2': lucide(Package),
+  inventory_2: lucide(Package),
+  inventory: lucide(Package),
+  archive: lucide(Archive),
+  box: lucide(Box),
+  calendar: lucide(Calendar),
+  'calendar-today': lucide(CalendarDays),
+  calendar_today: lucide(CalendarDays),
+  table: lucide(FileText),
+
+  // View toggles
+  'grid-view': lucide(LayoutGrid),
+  grid_view: lucide(LayoutGrid),
+  grid: lucide(LayoutGrid),
+  'format-list-bulleted': lucide(List),
+  format_list_bulleted: lucide(List),
+  list: lucide(List),
+  'view-list': lucide(List),
+  view_list: lucide(List),
+  'list-alt': lucide(List),
+  list_alt: lucide(List),
+
+  // Devices
+  monitor: lucide(Monitor),
+  tablet: lucide(Tablet),
+  smartphone: lucide(Smartphone),
+
+  // Lock
+  lock: lucide(Lock),
+
+  // Other
+  'more-horiz': lucide(MoreHorizontal),
+  more_horiz: lucide(MoreHorizontal),
+  'more-vert': lucide(MoreVertical),
+  more_vert: lucide(MoreVertical),
+  rule: lucide(SlidersHorizontal),
+
+  // Brand (custom)
+  logo: ZorroIcon as any,
+  zorro: ZorroIcon as any,
+  amazon: AmazonIcon as any,
+  ebay: EbayIcon as any,
+
+  // Flags (use Globe + text fallback)
+  'flag-us': lucide(Flag),
+  'flag-tr': lucide(Flag),
+
+  // Misc
+  rocket: lucide(Rocket),
+  'rocket-launch': lucide(Rocket),
+  'log-out': lucide(LogOut),
+  'arrow-left': lucide(ArrowLeft),
+} as const;
+
+export type IconName = keyof typeof iconMap;

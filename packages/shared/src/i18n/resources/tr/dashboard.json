@@ -1,9 +1,26 @@
 {
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Kontrol Paneli",
     "subtitle": "Satıcı panelinize hoş geldiniz",
     "greeting": "Merhaba, {{name}}!",
-    "comingSoon": "Dashboard özellikleri yakında...",
-    "description": "Burada eBay listelerinizi yönetebilecek, siparişleri takip edebilecek ve analizleri görüntüleyebileceksiniz."
+    "comingSoon": "Başlayalım",
+    "description": "eBay hesabınızı bağlayarak liste yönetimi ve sipariş takibine başlayın.",
+    "connectEbay": "eBay Hesabını Bağla",
+    "todayOrders": "Bugünün Siparişleri",
+    "todayRevenue": "Gelir: {{amount}}",
+    "totalRevenue": "Toplam Gelir",
+    "totalOrdersCount": "Toplam {{count}} sipariş",
+    "totalProfit": "Toplam Kar",
+    "netProfitLabel": "Kesintiler sonrası net kar",
+    "activeListings": "Aktif Listeler",
+    "onEbay": "eBay'de aktif",
+    "revenueTrend": "Gelir & Kar (14 gün)",
+    "revenue": "Gelir",
+    "profit": "Kar",
+    "recentOrders": "Son Siparişler",
+    "viewAllOrders": "Tümünü gör",
+    "unknownProduct": "Bilinmeyen Ürün",
+    "untracked": "Harici liste",
+    "asin": "ASIN: {{asin}}"
   }
 }

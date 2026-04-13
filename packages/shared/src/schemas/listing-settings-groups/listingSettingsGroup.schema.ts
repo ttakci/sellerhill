@@ -1,6 +1,8 @@
 import type { TFunction } from 'i18next';
 import { z } from 'zod';
 
+import { TemplateType } from '../../domain/listing-settings-groups/listing-settings-group.types';
+
 /**
  * Price Range Schema
  */
@@ -26,6 +28,7 @@ export const stockConfigSchema = (t: TFunction) =>
   z.object({
     defaultQuantity: z.coerce.number().int().min(1, t('listingSettingsGroup.validation.minQuantity')),
     autoRestock: z.boolean(),
+    stockBuffer: z.coerce.number().int().min(0, t('listingSettingsGroup.validation.minStockBuffer')).optional().default(0),
   });
 
 /**
@@ -43,13 +46,13 @@ export const feeConfigSchema = (t: TFunction) =>
  */
 export const templateConfigSchema = (t: TFunction) =>
   z.object({
-    type: z.enum(['custom', 'predefined']),
+    type: z.enum([TemplateType.CUSTOM, TemplateType.PREDEFINED]),
     customTemplateHtml: z.string().optional(),
     predefinedTemplateId: z.string().optional(),
   }).refine(
     (data) => {
-      if (data.type === 'custom') return !!data.customTemplateHtml;
-      if (data.type === 'predefined') return !!data.predefinedTemplateId;
+      if (data.type === TemplateType.CUSTOM) {return !!data.customTemplateHtml;}
+      if (data.type === TemplateType.PREDEFINED) {return !!data.predefinedTemplateId;}
       return true;
     },
     { message: t('listingSettingsGroup.validation.templateRequired'), path: ['customTemplateHtml'] }

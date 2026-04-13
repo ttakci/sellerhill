@@ -15,8 +15,8 @@ import {
   ListingsPage,
   ProductsPage,
 } from './features/listings';
-import { OrdersPage } from './features/orders/OrdersPage.container';
 import { OrderDetailsPage } from './features/orders/details';
+import { OrdersPage } from './features/orders/OrdersPage.container';
 import ProfilePage from './features/profile';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';

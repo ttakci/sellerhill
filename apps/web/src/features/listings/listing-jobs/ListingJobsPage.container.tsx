@@ -2,7 +2,9 @@ import { StatusBadge, useLoading } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+
 import { useGetListingJobsQuery } from '../api/listings.api';
+
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
 
@@ -11,7 +13,6 @@ export const ListingJobsPageContainer: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
 
   // Dynamic polling from listingsApi
   const {
@@ -128,8 +129,6 @@ export const ListingJobsPageContainer: React.FC = () => {
       isLoading={isLoading}
       onDownload={handleDownload}
       onViewDetails={handleViewDetails}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
       pagination={{
         count: jobs.length,
         page,

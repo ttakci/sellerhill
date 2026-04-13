@@ -106,7 +106,8 @@
       "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",
       "minOnePriceRange": "En az bir fiyat aralığı gereklidir",
       "maxPriceRanges": "Maksimum 10 fiyat aralığına izin verilir",
-      "overlappingPriceRanges": "Fiyat aralıkları örtüşemez"
+      "overlappingPriceRanges": "Fiyat aralıkları örtüşemez",
+      "minStockBuffer": "Stok tamponu 0 veya daha büyük olmalıdır"
     },
 
     "errors": {
@@ -161,6 +162,8 @@
     "taxRate": "Vergi Oranı (%)",
     "stockControl": "Stok Kontrolü",
     "defaultStockQuantity": "Varsayılan Miktar",
+    "stockBuffer": "Stok Tamponu",
+    "stockBufferDescription": "Tampon olarak tutulacak minimum Amazon stoku. Amazon stoğu (miktar + tampon) seviyesine düşerse veya altına inerse liste stok dışı olur",
     "htmlTemplate": "HTML Şablonu",
     "custom": "Özel",
     "predefined": "Öntanımlı",

@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { CardPadding, CardProps, CardVariant } from './Card.types';
 
 export const CardContainer = styled.div<{
@@ -8,7 +10,7 @@ export const CardContainer = styled.div<{
   $hoverable?: boolean;
 }>`
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.xl')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -18,18 +20,18 @@ export const CardContainer = styled.div<{
   ${(props) => {
     switch (props.$variant) {
       case 'bordered':
-        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
       case 'elevated':
-        return `box-shadow: ${tkn('shadows.sm')(props as any)};`;
+        return `box-shadow: ${tkn('shadows.md')(props as any)}; border: 1px solid rgba(0, 0, 0, 0.04);`;
       case 'flat':
         return '';
       case 'interactive':
         return `
-          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
+          border: 1px solid rgba(0, 0, 0, 0.06);
           cursor: pointer;
           &:hover {
-            box-shadow: ${tkn('shadows.md')(props as any)};
-            border-color: ${tkn('colors.text.tertiary')(props as any)};
+            box-shadow: ${tkn('shadows.lg')(props as any)};
+            border-color: rgba(0, 0, 0, 0.1);
             transform: translateY(-0.125rem);
           }
           &:active {
@@ -38,12 +40,12 @@ export const CardContainer = styled.div<{
           }
         `;
       case 'stat':
-        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
       case 'section':
-        return `border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
       default:
         return `
-          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
+          border: 1px solid rgba(0, 0, 0, 0.06);
           box-shadow: ${tkn('shadows.sm')(props as any)};
         `;
     }
@@ -73,7 +75,7 @@ export const CardContainer = styled.div<{
     cursor: pointer;
     &:hover {
       box-shadow: ${tkn('shadows.md')(props as any)};
-      border-color: ${tkn('colors.text.tertiary')(props as any)};
+      border-color: rgba(0, 0, 0, 0.1);
       transform: translateY(-0.0625rem);
     }
   `}

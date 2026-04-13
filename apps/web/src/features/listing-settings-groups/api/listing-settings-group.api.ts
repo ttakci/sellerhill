@@ -1,10 +1,11 @@
-import { baseApi } from '@/api/baseApi';
 import type {
     CreateListingSettingsGroupRequest,
     ListingSettingsGroupResponse,
     PredefinedTemplateResponse,
     UpdateListingSettingsGroupRequest
 } from '@repo/shared';
+
+import { baseApi } from '@/api/baseApi';
 
 export const listingSettingsGroupApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

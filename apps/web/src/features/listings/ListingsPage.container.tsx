@@ -1,15 +1,16 @@
-import { Icon, useLoading, useUI } from '@repo/ui';
-import React, { useMemo, useState } from 'react';
+import { IdBadge, Icon, useLoading, useUI } from '@repo/ui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ListingsPageComponent } from './ListingsPage.component';
-import * as S from './ListingsPage.style';
+
 import {
   useDeleteListingsMutation,
   useEndListingsMutation,
   useGetListingJobsQuery,
   useGetListingsQuery,
 } from './api/listings.api';
+import { ListingsPageComponent } from './ListingsPage.component';
+import * as S from './ListingsPage.style';
 
 export const ListingsPageContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ export const ListingsPageContainer: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // View mode state (default 'table' on desktop, 'grid' on mobile)
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
+  // Refresh trigger state
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Selection state
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
@@ -48,16 +49,14 @@ export const ListingsPageContainer: React.FC = () => {
   const {
     data: listings = [],
     isLoading: isListingsLoading,
-    refetch: refetchListings,
-  } = useGetListingsQuery(undefined, {
-    pollingInterval: 5000,
+  } = useGetListingsQuery(refreshTrigger, {
+    refetchOnMountOrArgChange: true,
   });
   const {
     data: jobs = [],
     isLoading: isJobsLoading,
-    refetch: refetchJobs,
-  } = useGetListingJobsQuery(undefined, {
-    pollingInterval: 5000,
+  } = useGetListingJobsQuery(refreshTrigger, {
+    refetchOnMountOrArgChange: true,
   });
 
   const [endListings, { isLoading: isEnding, isSuccess: isEndSuccess, error: endError, data: endData }] =
@@ -80,7 +79,7 @@ export const ListingsPageContainer: React.FC = () => {
 
   // Sorted listings
   const sortedListings = useMemo(() => {
-    if (!sortColumn) return listings;
+    if (!sortColumn) {return listings;}
 
     return [...listings].sort((a, b) => {
       let aValue: any = a[sortColumn as keyof typeof a];
@@ -165,17 +164,16 @@ export const ListingsPageContainer: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    refetchListings();
-    refetchJobs();
+    setRefreshTrigger(Date.now());
   };
 
-  const handleEndListings = (listingIds: string[]) => {
-    void endListings(listingIds);
-  };
+  const handleEndListings = useCallback((listingIds: string[]) => {
+    return endListings(listingIds);
+  }, [endListings]);
 
-  const handleDeleteListings = (listingIds: string[]) => {
-    void deleteListings(listingIds);
-  };
+  const handleDeleteListings = useCallback((listingIds: string[]) => {
+    return deleteListings(listingIds);
+  }, [deleteListings]);
 
   const handleDownload = () => {
     // Define all data columns for export (regardless of visibility)
@@ -242,7 +240,6 @@ export const ListingsPageContainer: React.FC = () => {
     () => [
       {
         key: 'product',
-        sticky: true,
         sortable: true,
         header: t('listings.table.product'),
         render: (_: any, listing: any) => (
@@ -259,19 +256,9 @@ export const ListingsPageContainer: React.FC = () => {
                 {listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title}
               </S.ProductTitle>
               <S.ProductMeta>
-                <S.IDLink>
-                  <S.MonoText variant="mono" color="text.tertiary">{t('listings.table.asinLabel', { asin: listing.asin })}</S.MonoText>
-                  <a href={`https://www.amazon.com/dp/${listing.asin}`} target="_blank" rel="noreferrer">
-                    <Icon name="open-in-new" size={14} />
-                  </a>
-                </S.IDLink>
+                <IdBadge id={listing.asin} storeType="amazon" size="sm" />
                 {listing.ebayListingId && (
-                  <S.IDLink>
-                    <S.MonoText variant="mono" color="text.tertiary">{t('listings.table.ebayIdLabel', { id: listing.ebayListingId })}</S.MonoText>
-                    <a href={`https://www.ebay.com/itm/${listing.ebayListingId}`} target="_blank" rel="noreferrer">
-                      <Icon name="open-in-new" size={14} />
-                    </a>
-                  </S.IDLink>
+                  <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
                 )}
               </S.ProductMeta>
             </S.ProductMainInfo>
@@ -381,8 +368,8 @@ export const ListingsPageContainer: React.FC = () => {
     [paginatedListings, selectedListingIds]
   );
 
-  const handleEndSelected = () => {
-    if (selectedListingIds.length === 0) return;
+  const handleEndSelected = useCallback(() => {
+    if (selectedListingIds.length === 0) {return;}
     showMessage(
       {
         type: 'warning',
@@ -392,8 +379,8 @@ export const ListingsPageContainer: React.FC = () => {
         primaryButton: {
           labelKey: 'listings:listings.actions.endListing',
           variant: 'danger',
-          onClick: async () => {
-            await handleEndListings(selectedListingIds);
+          onClick: () => {
+            void handleEndListings(selectedListingIds);
             setSelectedListingIds([]);
           },
         },
@@ -404,10 +391,10 @@ export const ListingsPageContainer: React.FC = () => {
       },
       t
     );
-  };
+  }, [selectedListingIds, handleEndListings, showMessage, t]);
 
-  const handleDeleteSelected = () => {
-    if (selectedListingIds.length === 0) return;
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedListingIds.length === 0) {return;}
     showMessage(
       {
         type: 'warning',
@@ -417,8 +404,8 @@ export const ListingsPageContainer: React.FC = () => {
         primaryButton: {
           labelKey: 'translation:common.delete',
           variant: 'danger',
-          onClick: async () => {
-            await handleDeleteListings(selectedListingIds);
+          onClick: () => {
+            void handleDeleteListings(selectedListingIds);
             setSelectedListingIds([]);
           },
         },
@@ -429,7 +416,7 @@ export const ListingsPageContainer: React.FC = () => {
       },
       t
     );
-  };
+  }, [selectedListingIds, handleDeleteListings, showMessage, t]);
 
   const bulkActions = useMemo(
     () => [
@@ -465,8 +452,6 @@ export const ListingsPageContainer: React.FC = () => {
       sortColumn={sortColumn}
       sortDirection={sortDirection}
       onSort={handleSort}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
       pagination={{
         count: listings.length,
         page,

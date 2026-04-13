@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { QuickActionCardVariant } from './QuickActionCard.types';
 
 export const QuickActionCardContainer = styled.div<{ $variant: QuickActionCardVariant }>`

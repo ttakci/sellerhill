@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../api/orders.api';
+
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
 export const OrderDetailsPageContainer: React.FC = () => {
@@ -19,7 +21,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
     amazonTax?: number;
     amazonShipping?: number;
   }) => {
-    if (!id) return;
+    if (!id) {return;}
     await updateOrder({ id, data });
   };
 

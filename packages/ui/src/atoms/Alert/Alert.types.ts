@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { IconName } from '../Icon';
 
 export type AlertVariant = 'success' | 'warning' | 'error' | 'info';

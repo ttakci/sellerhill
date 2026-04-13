@@ -106,7 +106,8 @@
       "predefinedTemplateRequired": "Please select a predefined template",
       "minOnePriceRange": "At least one price range is required",
       "maxPriceRanges": "Maximum 10 price ranges allowed",
-      "overlappingPriceRanges": "Price ranges cannot overlap"
+      "overlappingPriceRanges": "Price ranges cannot overlap",
+      "minStockBuffer": "Stock buffer must be 0 or greater"
     },
 
     "errors": {
@@ -161,6 +162,8 @@
     "taxRate": "Tax Rate (%)",
     "stockControl": "Stock Control",
     "defaultStockQuantity": "Default Quantity",
+    "stockBuffer": "Stock Buffer",
+    "stockBufferDescription": "Minimum Amazon stock to keep as buffer. Listing goes out of stock when Amazon stock drops to or below (quantity + buffer)",
     "htmlTemplate": "HTML Template",
     "custom": "Custom",
     "predefined": "Predefined",

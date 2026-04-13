@@ -31,6 +31,9 @@ export * from './domain/keepa/index';
 // Domain - Orders
 export * from './domain/orders/index';
 
+// Domain - Dashboard
+export * from './domain/dashboard/index';
+
 // API Error Types
 export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
 

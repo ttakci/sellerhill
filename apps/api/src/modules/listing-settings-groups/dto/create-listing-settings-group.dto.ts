@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { type CreateListingSettingsGroupRequest, type PriceRange, type StockConfig, type FeeConfig, type TemplateConfig } from '@repo/shared';
+import { type CreateListingSettingsGroupRequest, type PriceRange, type StockConfig, type FeeConfig, type TemplateConfig, TemplateType } from '@repo/shared';
 import { Type } from 'class-transformer';
 import {
   IsString,
@@ -46,6 +46,12 @@ class StockConfigDto implements StockConfig {
   @ApiProperty({ description: 'Whether auto-restock is enabled', example: true })
   @IsBoolean()
   autoRestock!: boolean;
+
+  @ApiPropertyOptional({ description: 'Stock buffer threshold — Amazon stock must exceed defaultQuantity + buffer to list', example: 5 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  stockBuffer?: number;
 }
 
 class FeeConfigDto implements FeeConfig {
@@ -66,11 +72,11 @@ class FeeConfigDto implements FeeConfig {
 }
 
 class TemplateConfigDto implements TemplateConfig {
-  @ApiProperty({ description: 'Template type', example: 'custom', enum: ['custom', 'predefined'] })
+  @ApiProperty({ description: 'Template type', example: 'custom', enum: [TemplateType.CUSTOM, TemplateType.PREDEFINED] })
   @IsString()
   @IsNotEmpty()
-  @IsIn(['custom', 'predefined'])
-  type!: 'custom' | 'predefined';
+  @IsIn([TemplateType.CUSTOM, TemplateType.PREDEFINED])
+  type!: TemplateType;
 
   @ApiPropertyOptional({ description: 'Custom template HTML' })
   @IsOptional()

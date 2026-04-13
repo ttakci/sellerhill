@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { EmptyStateSize } from './EmptyState.types';
 
 export const EmptyStateWrapper = styled.div<{ $size: EmptyStateSize }>`

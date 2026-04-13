@@ -1,8 +1,9 @@
-import { baseApi } from '@/api/baseApi';
 import {
     SaveStoreSettingsRequest,
     StoreSettingsResponse
 } from '@repo/shared';
+
+import { baseApi } from '@/api/baseApi';
 
 export const storeSettingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

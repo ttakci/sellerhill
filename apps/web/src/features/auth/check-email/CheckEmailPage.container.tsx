@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useResendVerificationMutation } from '../api/authApi';
+
 import { CheckEmailPageComponent } from './CheckEmailPage.component';
 
 export const CheckEmailPageContainer = (): React.ReactElement => {
@@ -51,7 +52,7 @@ export const CheckEmailPageContainer = (): React.ReactElement => {
   }, [isError, showMessage, t]);
 
   const handleResend = (): void => {
-    if (!email) return;
+    if (!email) {return;}
     void resend({ email });
   };
 

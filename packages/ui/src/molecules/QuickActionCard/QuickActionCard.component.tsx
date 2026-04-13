@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './QuickActionCard.style';
 import type { QuickActionCardProps } from './QuickActionCard.types';
 

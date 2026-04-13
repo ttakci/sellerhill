@@ -1,7 +1,9 @@
-import { Queue } from 'bullmq';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+import { Queue } from 'bullmq';
+import dotenv from 'dotenv';
+
 import { AMAZON_SCRAPE_QUEUE, getQueueOptions } from '../src/queue/scrapeQueue.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

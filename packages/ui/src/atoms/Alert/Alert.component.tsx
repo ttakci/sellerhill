@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Icon } from '../Icon';
 import { Text } from '../Text';
+
 import * as S from './Alert.style';
 import type { AlertProps } from './Alert.types';
 

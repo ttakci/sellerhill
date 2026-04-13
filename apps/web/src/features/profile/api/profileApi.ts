@@ -1,5 +1,6 @@
-import { baseApi } from '@/api/baseApi';
 import type { ProfileDto, UpdateProfileRequest } from '@repo/shared';
+
+import { baseApi } from '@/api/baseApi';
 
 export const profileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

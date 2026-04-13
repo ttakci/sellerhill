@@ -1,75 +1,5 @@
 import styled from '@emotion/styled';
-import { Card as RepoCard, IconButton as RepoIconButton, Text, tkn } from '@repo/ui';
-
-export const IconButton = styled(RepoIconButton)`
-  & svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-`;
-
-export const ToolbarGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem; /* 8px */
-`;
-
-export const GridContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: ${tkn('spacing.lg')};
-
-  @media (min-width: 48rem) {
-    /* 768px */
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 64rem) {
-    /* 1024px */
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (min-width: 80rem) {
-    /* 1280px */
-    grid-template-columns: repeat(4, 1fr);
-  }
-`;
-
-export const GridCard = styled(RepoCard)`
-  padding: ${tkn('spacing.lg')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  position: relative;
-  transition: all ${tkn('transitions.normal')};
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-0.25rem);
-    box-shadow: ${tkn('shadows.md')};
-  }
-`;
-
-export const GridCardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-export const GridCardContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const GridCardFooter = styled.div`
-  margin-top: auto;
-  padding-top: ${tkn('spacing.md')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
+import { Card as RepoCard, Text, tkn } from '@repo/ui';
 
 export const PageContainer = styled.div`
   display: flex;
@@ -124,88 +54,14 @@ export const StatChange = styled.div<{ $positive?: boolean }>`
   margin-top: ${tkn('spacing.xs')};
 `;
 
-export const FiltersRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.md')};
-  flex-wrap: wrap;
-`;
-
-export const SearchWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  flex: 1;
-  min-width: 18.75rem; /* 300px */
-`;
-
 export const ActionsWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
 `;
 
-export const TableContainer = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  border-radius: ${tkn('radius.lg')};
-  overflow: hidden;
-  box-shadow: ${tkn('shadows.sm')};
-`;
-
-export const TableWrapper = styled.div`
-  overflow-x: auto;
-
-  &::-webkit-scrollbar {
-    height: 0.375rem; /* 6px */
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${tkn('colors.border.secondary')};
-    border-radius: 0.625rem; /* 10px */
-  }
-`;
-
-export const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-export const TableHead = styled.thead`
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-`;
-
-export const TableHeaderCell = styled.th`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  text-align: left;
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.secondary')};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-`;
-
-export const TableBody = styled.tbody``;
-
-export const TableRow = styled.tr`
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-  cursor: pointer;
-  transition: background-color ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.background.tertiary')};
-  }
-`;
-
-export const TableCell = styled.td`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.primary')};
+export const SearchBoxWrapper = styled.div`
+  width: 18.75rem; /* 300px */
 `;
 
 export const OrderNumber = styled(Text)``;
@@ -240,29 +96,8 @@ export const PriceText = styled(Text)<{ $profit?: boolean; $loss?: boolean }>`
 
 export const SecondaryText = styled(Text)``;
 
-/* --- Styled components extracted from inline styles in OrdersPage.component.tsx --- */
-
 export const StatSubText = styled(SecondaryText)`
   margin-top: ${tkn('spacing.xs')};
-`;
-
-export const FiltersBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${tkn('spacing.lg')};
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const FiltersLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const SearchBoxWrapper = styled.div`
-  width: 18.75rem; /* 300px */
 `;
 
 export const BuyerDetails = styled.div`
@@ -272,6 +107,35 @@ export const BuyerDetails = styled.div`
 
 export const BuyerEmailText = styled(SecondaryText)``;
 
+// --- Grid Card Styles ---
+
+export const GridCard = styled(RepoCard)`
+  padding: ${tkn('spacing.lg')};
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  position: relative;
+  transition: all ${tkn('transitions.normal')};
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: ${tkn('shadows.md')};
+  }
+`;
+
+export const GridCardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+`;
+
+export const GridCardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
 export const CardPriceRow = styled.div`
   margin-top: ${tkn('spacing.sm')};
   display: flex;
@@ -279,21 +143,11 @@ export const CardPriceRow = styled.div`
   align-items: center;
 `;
 
-export const PaginationWrapper = styled.div`
-  margin-top: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+export const GridCardFooter = styled.div`
+  margin-top: auto;
+  padding-top: ${tkn('spacing.md')};
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-end;
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.lg')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
-`;
-
-export const AlignedTableCell = styled(TableCell)<{ $align?: string }>`
-  text-align: ${({ $align }) => $align || 'left'};
-`;
-
-export const AlignedHeaderCell = styled(TableHeaderCell)<{ $align?: string }>`
-  text-align: ${({ $align }) => $align || 'left'};
 `;

@@ -27,7 +27,7 @@ export const Popover = ({
   }, [onOpenChange]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
 
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -36,7 +36,7 @@ export const Popover = ({
     };
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {close();}
     };
 
     document.addEventListener('mousedown', handleClickOutside);

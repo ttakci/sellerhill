@@ -3,17 +3,28 @@
  * Single source of truth for eBay integration types across frontend/backend
  */
 
-import type { EbayAccountDto } from './ebay.dto';
+import type { EbayAccountPublicDto } from './ebay.dto';
 
 /**
  * eBay account status
  */
-export type EbayAccountStatus = 'active' | 'revoked' | 'error';
+export enum EbayAccountStatus {
+  ACTIVE = 'active',
+  REVOKED = 'revoked',
+  ERROR = 'error',
+}
 
 /**
  * eBay marketplace identifiers
  */
-export type EbayMarketplaceId = 'EBAY_US' | 'EBAY_UK' | 'EBAY_DE' | 'EBAY_FR' | 'EBAY_IT' | 'EBAY_ES';
+export enum EbayMarketplaceId {
+  EBAY_US = 'EBAY_US',
+  EBAY_UK = 'EBAY_UK',
+  EBAY_DE = 'EBAY_DE',
+  EBAY_FR = 'EBAY_FR',
+  EBAY_IT = 'EBAY_IT',
+  EBAY_ES = 'EBAY_ES',
+}
 
 /**
  * Create eBay connect URL request
@@ -31,10 +42,10 @@ export interface CreateEbayConnectUrlResponse {
 }
 
 /**
- * Get eBay accounts response
+ * Get eBay accounts response - uses public DTO (no tokens)
  */
 export interface GetEbayAccountsResponse {
-  items: EbayAccountDto[];
+  items: EbayAccountPublicDto[];
   total: number;
 }
 

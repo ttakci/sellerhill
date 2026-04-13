@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import type { ProfileDto, UpdateProfileRequest } from '@repo/shared';
 import { UserStatus } from '@repo/shared';
+
 import { DatabaseService } from '../../common/database/database.service';
 
 interface UserEntity {

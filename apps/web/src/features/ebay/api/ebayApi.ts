@@ -6,8 +6,9 @@
  * - getAccounts: Get connected eBay accounts
  */
 
-import { baseApi } from '@/api/baseApi';
 import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsResponse } from '@repo/shared';
+
+import { baseApi } from '@/api/baseApi';
 
 export const ebayApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

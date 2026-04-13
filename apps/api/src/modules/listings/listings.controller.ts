@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateListingsRequest, ListingDto, ListingJobDto, ListingJobItemDto, ProductData } from '@repo/shared';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 import { ListingQueueService } from './listing-queue.service';
 import { ListingsService } from './listings.service';
 

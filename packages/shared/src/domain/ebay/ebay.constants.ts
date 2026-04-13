@@ -2,27 +2,27 @@
  * eBay Domain Constants
  */
 
-import type { EbayAccountStatus, EbayMarketplaceId } from './ebay.types';
+import { EbayAccountStatus, EbayMarketplaceId } from './ebay.types';
 
 /**
  * eBay account statuses
  */
 export const EBAY_ACCOUNT_STATUS: Record<string, EbayAccountStatus> = {
-  ACTIVE: 'active',
-  REVOKED: 'revoked',
-  ERROR: 'error',
+  ACTIVE: EbayAccountStatus.ACTIVE,
+  REVOKED: EbayAccountStatus.REVOKED,
+  ERROR: EbayAccountStatus.ERROR,
 } as const;
 
 /**
  * eBay marketplace identifiers
  */
 export const EBAY_MARKETPLACE: Record<string, EbayMarketplaceId> = {
-  US: 'EBAY_US',
-  UK: 'EBAY_UK',
-  DE: 'EBAY_DE',
-  FR: 'EBAY_FR',
-  IT: 'EBAY_IT',
-  ES: 'EBAY_ES',
+  US: EbayMarketplaceId.EBAY_US,
+  UK: EbayMarketplaceId.EBAY_UK,
+  DE: EbayMarketplaceId.EBAY_DE,
+  FR: EbayMarketplaceId.EBAY_FR,
+  IT: EbayMarketplaceId.EBAY_IT,
+  ES: EbayMarketplaceId.EBAY_ES,
 } as const;
 
 /**
@@ -36,38 +36,38 @@ export interface EbayMarketplaceConfig {
 }
 
 export const EBAY_MARKETPLACE_CONFIG: Record<EbayMarketplaceId, EbayMarketplaceConfig> = {
-  EBAY_US: {
-    id: 'EBAY_US',
+  [EbayMarketplaceId.EBAY_US]: {
+    id: EbayMarketplaceId.EBAY_US,
     countryCode: 'US',
     currency: 'USD',
     siteId: '0',
   },
-  EBAY_UK: {
-    id: 'EBAY_UK',
+  [EbayMarketplaceId.EBAY_UK]: {
+    id: EbayMarketplaceId.EBAY_UK,
     countryCode: 'GB',
     currency: 'GBP',
     siteId: '3',
   },
-  EBAY_DE: {
-    id: 'EBAY_DE',
+  [EbayMarketplaceId.EBAY_DE]: {
+    id: EbayMarketplaceId.EBAY_DE,
     countryCode: 'DE',
     currency: 'EUR',
     siteId: '77',
   },
-  EBAY_FR: {
-    id: 'EBAY_FR',
+  [EbayMarketplaceId.EBAY_FR]: {
+    id: EbayMarketplaceId.EBAY_FR,
     countryCode: 'FR',
     currency: 'EUR',
     siteId: '71',
   },
-  EBAY_IT: {
-    id: 'EBAY_IT',
+  [EbayMarketplaceId.EBAY_IT]: {
+    id: EbayMarketplaceId.EBAY_IT,
     countryCode: 'IT',
     currency: 'EUR',
     siteId: '101',
   },
-  EBAY_ES: {
-    id: 'EBAY_ES',
+  [EbayMarketplaceId.EBAY_ES]: {
+    id: EbayMarketplaceId.EBAY_ES,
     countryCode: 'ES',
     currency: 'EUR',
     siteId: '186',
@@ -93,6 +93,7 @@ export const EBAY_OAUTH_CONSTANTS = {
     'https://api.ebay.com/oauth/api_scope/sell.marketing',
     'https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
     'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly',
+    'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
   ],
   
   // Token expiration (in seconds)

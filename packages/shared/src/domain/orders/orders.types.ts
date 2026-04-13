@@ -9,27 +9,52 @@ export enum OrderStatus {
 
 export interface OrderDto {
   id: string;
-  orderNumber: string;
+  ebayOrderId: string;
+  orderNumber?: string;
   createdAt: string;
-  buyerName: string;
-  buyerEmail: string;
+  isTracked: boolean;
+
+  // Buyer
+  buyerName?: string;
+  buyerEmail?: string;
   buyerPhone?: string;
+  buyerUsername?: string;
+
+  // Status
   status: OrderStatus;
+  orderFulfillmentStatus?: string;
+  paymentStatus?: string;
+
+  // Product
+  product?: {
+    title: string;
+    asin?: string;
+    ebayItemId?: string;
+    sku?: string;
+    quantity: number;
+    imageUrl?: string;
+  };
+
+  // Financial - eBay side
   salePrice: number;
+  saleShipping: number;
+  saleTax: number;
+  saleTotal: number;
+  ebayEarnings: number;
+
+  // Financial - Amazon side
   purchasePrice: number;
-  netProfit: number;
   amazonOrderUrl?: string;
   amazonTrackingUrl?: string;
   amazonTax?: number;
   amazonShipping?: number;
-  product?: {
-    title: string;
-    asin: string;
-    ebayItemId: string;
-    sku: string;
-    quantity: number;
-    imageUrl: string;
-  };
+
+  // Financial - Calculated
+  netProfit: number;
+  transactionFee: number;
+  adFee: number;
+
+  // Shipping
   shippingAddress?: {
     street: string;
     city: string;
@@ -37,34 +62,50 @@ export interface OrderDto {
     zipCode: string;
     country: string;
   };
+
+  // Detailed breakdown (from eBay order API)
   details?: {
-    purchaseSummary: {
-      subtotal: number;
-      shipping: number;
-      tax: number;
-      total: number;
+    purchaseSummary?: {
+      subtotal?: number;
+      shipping?: number;
+      tax?: number;
+      total?: number;
       paymentMethod?: string;
     };
-    ebaySummary: {
-      subtotal: number;
-      shipping: number;
-      tax: number;
-      total: number;
-      earnings: number;
+    ebaySummary?: {
+      subtotal?: number;
+      shipping?: number;
+      tax?: number;
+      total?: number;
+      earnings?: number;
     };
   };
+
+  // Fee breakdown
   fees?: {
-    transactionFee: number;
-    advertisingFee: number;
-    salesTax: number;
+    transactionFee?: number;
+    advertisingFee?: number;
   };
 }
 
 export interface OrderStatsDto {
   totalSales: number;
-  netProfit: number;
+  totalProfit: number;
+  totalOrders: number;
   activeOrders: number;
-  returnRate: number;
-  salesGrowth: number;
-  profitGrowth: number;
+  todayOrders: number;
+  todayRevenue: number;
+  salesGrowth?: number;
+  profitGrowth?: number;
+  returnRate?: number;
+}
+
+export interface OrderFiltersDto {
+  dateFrom?: string;
+  dateTo?: string;
+  status?: OrderStatus;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

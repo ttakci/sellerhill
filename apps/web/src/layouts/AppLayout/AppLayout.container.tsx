@@ -1,8 +1,10 @@
-import { selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
+
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
+
+import { selectIsAuthenticated } from '@/features/auth/store/authSlice';
 
 export const AppLayout: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);

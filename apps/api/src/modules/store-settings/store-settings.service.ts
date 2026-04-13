@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { type BlacklistKeyword, type SaveStoreSettingsRequest, type StoreSettingsResponse } from '@repo/shared';
+
 import { DatabaseService } from '../../common/database/database.service';
 
 /**

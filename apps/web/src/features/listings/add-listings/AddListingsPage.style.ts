@@ -148,9 +148,16 @@ export const FormFooter = styled.div`
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   justify-content: flex-end;
+  gap: ${tkn('spacing.sm')};
 `;
 
 export const SubmitButton = styled(Button)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const CancelButton = styled(Button)`
   display: flex;
   align-items: center;
   gap: 0.5rem;

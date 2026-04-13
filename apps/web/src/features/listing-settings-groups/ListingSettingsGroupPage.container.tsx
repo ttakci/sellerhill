@@ -2,11 +2,12 @@ import { useLoading, useUI } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ListingSettingsGroupPageComponent } from './ListingSettingsGroupPage.component';
+
 import {
     useDeleteListingSettingsGroupMutation,
     useGetListingSettingsGroupsQuery
 } from './api/listing-settings-group.api';
+import { ListingSettingsGroupPageComponent } from './ListingSettingsGroupPage.component';
 
 export const ListingSettingsGroupPageContainer = () => {
   const navigate = useNavigate();

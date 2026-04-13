@@ -2,9 +2,11 @@ import { Body, Controller, Get, Post, Query, Request, UseGuards } from '@nestjs/
 import {
     StoreSettingsResponse
 } from '@repo/shared';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { StoreSettingsService } from './store-settings.service';
+
 import { SaveStoreSettingsDto } from './dto/save-store-settings.dto';
+import { StoreSettingsService } from './store-settings.service';
 
 @Controller({ path: 'store-settings', version: '1' })
 @UseGuards(JwtAuthGuard)

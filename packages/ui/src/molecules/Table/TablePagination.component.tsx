@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Icon } from '../../atoms/Icon';
 import { Select } from '../Select';
+
 import * as S from './TablePagination.style';
 import type { TablePaginationProps } from './TablePagination.types';
 
@@ -30,7 +32,7 @@ export const TablePagination = ({
   const totalPages = Math.ceil(count / rowsPerPage);
 
   const renderLabelInfo = () => {
-    if (!labelInfo) return null;
+    if (!labelInfo) {return null;}
 
     return labelInfo
       .replace('{{from}}', start.toString())

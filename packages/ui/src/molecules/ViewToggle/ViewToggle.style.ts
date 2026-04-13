@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { tkn } from '../../theme/tkn';
+
 import type { AppTheme } from '../../theme/theme.types';
+import { tkn } from '../../theme/tkn';
 
 export const ViewToggleGroup = styled.div`
   display: flex;
@@ -28,6 +29,7 @@ export const ToggleButton = styled.button<{ $active?: boolean }>`
 
   &:hover {
     color: ${tkn('colors.brand.primary')};
+    transform: none;
   }
 `;
 

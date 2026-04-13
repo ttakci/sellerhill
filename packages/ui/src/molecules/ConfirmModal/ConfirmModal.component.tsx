@@ -1,7 +1,9 @@
 import React from 'react';
+
 import { Button } from '../../atoms/Button';
 import { Modal } from '../../atoms/Modal';
 import { Text } from '../../atoms/Text';
+
 import * as S from './ConfirmModal.style';
 import type { ConfirmModalProps } from './ConfirmModal.types';
 

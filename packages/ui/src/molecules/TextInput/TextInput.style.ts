@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
 
 interface FieldContainerProps {
@@ -28,8 +29,8 @@ export const FieldWrapper = styled.div<FieldContainerProps>`
   border-radius: ${tkn('radius.md')};
   border: 0.0625rem solid; /* 1px */
   border-color: ${({ theme, $hasError, $isFocused }) => {
-    if ($hasError && !$isFocused) return theme.colors.semantic.error;
-    if ($isFocused) return theme.colors.brand.primary;
+    if ($hasError && !$isFocused) {return theme.colors.semantic.error;}
+    if ($isFocused) {return theme.colors.brand.primary;}
     return theme.colors.border.primary;
   }};
   transition:
@@ -72,9 +73,9 @@ export const FloatingLabel = styled.label<LabelProps>`
   transform-origin: top left;
 
   color: ${({ theme, $isFocused, $hasError, $isDisabled }) => {
-    if ($isDisabled) return theme.colors.text.disabled;
-    if ($hasError) return theme.colors.semantic.error;
-    if ($isFocused) return theme.colors.brand.primary;
+    if ($isDisabled) {return theme.colors.text.disabled;}
+    if ($hasError) {return theme.colors.semantic.error;}
+    if ($isFocused) {return theme.colors.brand.primary;}
     return theme.colors.text.tertiary;
   }};
 
@@ -112,9 +113,9 @@ export const Input = styled.input<{
   width: 100%;
   height: 100%;
   padding-top: ${({ $hasLabel, $size }) => {
-    if (!$hasLabel) return '0';
-    if ($size === 'small') return '0.75rem';
-    if ($size === 'large') return '1.125rem';
+    if (!$hasLabel) {return '0';}
+    if ($size === 'small') {return '0.75rem';}
+    if ($size === 'large') {return '1.125rem';}
     return '0.875rem';
   }};
   padding-bottom: 0;

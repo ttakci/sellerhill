@@ -13,10 +13,12 @@ import {
     ListingSettingsGroupResponse,
     PredefinedTemplateResponse,
 } from '@repo/shared';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ListingSettingsGroupService } from './listing-settings-group.service';
+
 import { CreateListingSettingsGroupDto } from './dto/create-listing-settings-group.dto';
 import { UpdateListingSettingsGroupDto } from './dto/update-listing-settings-group.dto';
+import { ListingSettingsGroupService } from './listing-settings-group.service';
 
 @Controller({ path: 'listing-settings-group', version: '1' })
 @UseGuards(JwtAuthGuard)

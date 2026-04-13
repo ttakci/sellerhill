@@ -2,6 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Controller, FieldValues } from 'react-hook-form';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './TextInput.style';
 import type { TextInputProps } from './TextInput.types';
 
@@ -115,7 +116,7 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
                 setIsPasswordVisible(!isPasswordVisible);
               }}
             >
-              <Icon name={effectiveIconRight as any} size={size === 'small' ? 16 : 20} />
+              <Icon name={effectiveIconRight } size={size === 'small' ? 16 : 20} />
             </S.ToggleButton>
           </S.DecorationWrapper>
         )}

@@ -1,12 +1,12 @@
 import {
+  DataTable,
   Icon,
+  IconButton,
   Button,
   ModernSelect,
   ModernTextInput,
   PageHeader,
   SettingsCard,
-  Table,
-  TablePagination,
   Text,
   Toggle,
 } from '@repo/ui';
@@ -14,9 +14,9 @@ import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { BlacklistCard } from './components/BlacklistCard';
 import * as S from './StoreSettingsPage.style';
 import { StoreSettingsPageProps } from './StoreSettingsPage.types';
-import { BlacklistCard } from './components/BlacklistCard';
 
 export const StoreSettingsPageComponent = ({
   settings,
@@ -39,37 +39,12 @@ export const StoreSettingsPageComponent = ({
   sortColumn,
   sortDirection,
   blacklistCount,
-  viewMode,
-  onViewModeChange,
 }: StoreSettingsPageProps): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
 
   const { control, handleSubmit, watch } = form;
 
   const isGlobal = watch('isGlobal');
-
-  const viewToggle = (
-    <S.ToolbarGroup>
-      <S.ViewToggleGroup>
-        <S.ToggleButton
-          variant="text"
-          $active={viewMode === 'grid'}
-          onClick={() => onViewModeChange('grid')}
-          title={t('translation:common.views.grid')}
-        >
-          <Icon name="grid-view" size={20} />
-        </S.ToggleButton>
-        <S.ToggleButton
-          variant="text"
-          $active={viewMode === 'table'}
-          onClick={() => onViewModeChange('table')}
-          title={t('translation:common.views.table')}
-        >
-          <Icon name="format-list-bulleted" size={20} />
-        </S.ToggleButton>
-      </S.ViewToggleGroup>
-    </S.ToolbarGroup>
-  );
 
   const columns = [
     {
@@ -97,12 +72,65 @@ export const StoreSettingsPageComponent = ({
       header: '',
       align: 'right' as const,
       render: (_: any, item: { keyword: string }) => (
-        <S.IconAction variant="ghost" onClick={() => onRemoveKeyword(item.keyword)} aria-label={t('translation:common.delete')}>
+        <IconButton variant="ghost" onClick={() => onRemoveKeyword(item.keyword)} aria-label={t('translation:common.delete')}>
           <Icon name="trash" size={18} />
-        </S.IconAction>
+        </IconButton>
       ),
     },
   ];
+
+  const renderGridCard = (item: any) => (
+    <BlacklistCard
+      key={item.keyword}
+      keyword={item.keyword}
+      scope={item.scope }
+      onRemove={() => onRemoveKeyword(item.keyword)}
+    />
+  );
+
+  const blacklistToolbarLeft = (
+    <S.BlacklistActionGroup>
+      <S.BlacklistInputWrapper>
+        <ModernTextInput
+          name="newKeyword"
+          label={t('storeSettings:storeSettings.blacklistKeyword')}
+          value={newKeyword}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewKeyword(e.target.value)}
+          size="medium"
+        />
+      </S.BlacklistInputWrapper>
+      <S.ScopeActionWrapper>
+        <ModernSelect
+          options={[
+            { value: 'both', label: t('storeSettings:storeSettings.scope_both').toUpperCase() },
+            { value: 'title', label: t('storeSettings:storeSettings.scope_title').toUpperCase() },
+            {
+              value: 'description',
+              label: t('storeSettings:storeSettings.scope_description').toUpperCase(),
+            },
+          ]}
+          value={newScope}
+          onChange={(v) => setNewScope(v as any)}
+          size="medium"
+          searchPlaceholder={t('translation:common.search')}
+          noResultsMessage={t('translation:common.noResults')}
+        />
+      </S.ScopeActionWrapper>
+      <S.AddActionWrapper>
+        <Button variant="primary" onClick={onAddKeyword} size="medium" iconLeft="plus" />
+      </S.AddActionWrapper>
+    </S.BlacklistActionGroup>
+  );
+
+  const pagination = blacklistCount > 0 ? {
+    count: blacklistCount,
+    page,
+    rowsPerPage,
+    onPageChange: setPage,
+    onRowsPerPageChange: setRowsPerPage,
+    labelRowsPerPage: t('translation:common.rowsPerPage'),
+    labelInfo: t('translation:common.showing_info'),
+  } : undefined;
 
   return (
     <S.Container>
@@ -242,90 +270,17 @@ export const StoreSettingsPageComponent = ({
           </S.BlacklistTitleColumn>
         }
       >
-        <S.BlacklistContainer>
-          <S.SectionToolbar>
-            <S.ToolbarLeft>{viewToggle}</S.ToolbarLeft>
-            <S.ToolbarRight>
-              <S.ActionGroup>
-                <S.BlacklistActionGroup>
-                  <S.BlacklistInputWrapper>
-                    <ModernTextInput
-                      name="newKeyword"
-                      label={t('storeSettings:storeSettings.blacklistKeyword')}
-                      value={newKeyword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewKeyword(e.target.value)}
-                      size="medium"
-                    />
-                  </S.BlacklistInputWrapper>
-                  <S.ScopeActionWrapper>
-                    <ModernSelect
-                      options={[
-                        { value: 'both', label: t('storeSettings:storeSettings.scope_both').toUpperCase() },
-                        { value: 'title', label: t('storeSettings:storeSettings.scope_title').toUpperCase() },
-                        {
-                          value: 'description',
-                          label: t('storeSettings:storeSettings.scope_description').toUpperCase(),
-                        },
-                      ]}
-                      value={newScope}
-                      onChange={(v) => setNewScope(v as any)}
-                      size="medium"
-                      searchPlaceholder={t('translation:common.search')}
-                      noResultsMessage={t('translation:common.noResults')}
-                    />
-                  </S.ScopeActionWrapper>
-                  <S.AddActionWrapper>
-                    <Button variant="primary" onClick={onAddKeyword} size="medium" iconLeft="plus" />
-                  </S.AddActionWrapper>
-                </S.BlacklistActionGroup>
-                <S.IconButton variant="ghost" title={t('translation:common.actions.filter')}>
-                  <Icon name="filter-list" size={20} />
-                </S.IconButton>
-                <S.IconButton variant="ghost" title={t('translation:common.actions.export')}>
-                  <Icon name="download" size={20} />
-                </S.IconButton>
-              </S.ActionGroup>
-            </S.ToolbarRight>
-          </S.SectionToolbar>
-          {viewMode === 'grid' ? (
-            <S.BlacklistGrid>
-              {pagedBlacklist.map((item) => (
-                <BlacklistCard
-                  key={item.keyword}
-                  keyword={item.keyword}
-                  scope={item.scope as any}
-                  onRemove={() => onRemoveKeyword(item.keyword)}
-                />
-              ))}
-              {pagedBlacklist.length === 0 && (
-                <S.EmptyBlacklistText color="text.secondary">
-                  {t('storeSettings:storeSettings.noKeywords')}
-                </S.EmptyBlacklistText>
-              )}
-            </S.BlacklistGrid>
-          ) : (
-            <Table
-              columns={columns}
-              data={pagedBlacklist}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
-              emptyMessage={t('storeSettings:storeSettings.noKeywords')}
-            />
-          )}
-
-          {blacklistCount > 0 && (
-            <TablePagination
-              count={blacklistCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              onPageChange={setPage}
-              onRowsPerPageChange={setRowsPerPage}
-              labelRowsPerPage={t('translation:common.rowsPerPage')}
-              labelInfo={t('translation:common.showing_info')}
-            />
-          )}
-        </S.BlacklistContainer>
+        <DataTable
+          columns={columns}
+          data={pagedBlacklist}
+          renderGridCard={renderGridCard}
+          emptyMessage={t('storeSettings:storeSettings.noKeywords')}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          toolbarLeft={blacklistToolbarLeft}
+          pagination={pagination}
+        />
       </SettingsCard>
     </S.Container>
   );

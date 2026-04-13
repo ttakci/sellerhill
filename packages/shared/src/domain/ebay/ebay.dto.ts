@@ -5,6 +5,9 @@
 
 import type { EbayAccountStatus, EbayMarketplaceId } from './ebay.types';
 
+/**
+ * Internal DTO - contains sensitive tokens. NEVER send to frontend.
+ */
 export class EbayAccountDto {
   id!: string;
   userId!: string;
@@ -14,6 +17,20 @@ export class EbayAccountDto {
   accessToken!: string;
   refreshToken!: string;
   accessTokenExpiresAt!: string;
+  status!: EbayAccountStatus;
+  createdAt!: string;
+  updatedAt!: string;
+}
+
+/**
+ * Public DTO - safe to send to frontend. No tokens exposed.
+ */
+export class EbayAccountPublicDto {
+  id!: string;
+  userId!: string;
+  sellerId!: string;
+  storeName?: string;
+  marketplaceId!: EbayMarketplaceId;
   status!: EbayAccountStatus;
   createdAt!: string;
   updatedAt!: string;
@@ -29,6 +46,6 @@ export class CreateEbayConnectUrlResponseDto {
 }
 
 export class GetEbayAccountsResponseDto {
-  items!: EbayAccountDto[];
+  items!: EbayAccountPublicDto[];
   total!: number;
 }

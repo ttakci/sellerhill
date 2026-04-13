@@ -107,7 +107,7 @@ export class ScraperApiService implements IProductDataProvider {
     const images: Set<string> = new Set();
 
     const addImage = (img: any) => {
-      if (!img) return;
+      if (!img) {return;}
       if (typeof img === 'string' && img.startsWith('http')) {
         images.add(img);
       } else if (typeof img === 'object' && img.link && typeof img.link === 'string') {
@@ -182,12 +182,12 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse price from various formats
    */
   private parsePrice(priceValue: any): number {
-    if (priceValue === null || priceValue === undefined) return 0;
+    if (priceValue === null || priceValue === undefined) {return 0;}
 
     // Handle object format (sometimes buybox_winner.price)
     if (typeof priceValue === 'object') {
       const val = priceValue.value ?? priceValue.amount ?? priceValue.current_price;
-      if (val !== undefined) return this.parsePrice(val);
+      if (val !== undefined) {return this.parsePrice(val);}
       return 0;
     }
 
@@ -208,7 +208,7 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse weight from string format (e.g., "2.5 pounds")
    */
   private parseWeight(weight: string | undefined): number | undefined {
-    if (!weight) return undefined;
+    if (!weight) {return undefined;}
 
     const match = weight.match(/([0-9.]+)/);
     return match ? parseFloat(match[1]) : undefined;
@@ -218,7 +218,7 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse dimensions from string format (e.g., "10 x 8 x 2 inches")
    */
   private parseDimensions(dimensions: string | undefined): string | undefined {
-    if (!dimensions) return undefined;
+    if (!dimensions) {return undefined;}
 
     // Clean up and return standardized format
     return dimensions.replace(/\s+/g, ' ').trim();

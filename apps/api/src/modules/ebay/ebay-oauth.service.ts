@@ -1,8 +1,9 @@
+import { randomBytes } from 'crypto';
+
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EBAY_MARKETPLACE, EBAY_OAUTH_CONSTANTS, type EbayMarketplaceId } from '@repo/shared';
 import axios from 'axios';
-import { randomBytes } from 'crypto';
 
 interface EbayTokenResponse {
   access_token: string;

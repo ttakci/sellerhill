@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Get, Logger, Query, Redirect, Request, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
     ApiBearerAuth,
     ApiForbiddenResponse,
@@ -12,6 +13,7 @@ import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsRe
 
 import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 import { EbayService } from './ebay.service';
 
 @ApiTags('ebay')
@@ -19,7 +21,10 @@ import { EbayService } from './ebay.service';
 export class EbayController {
   private readonly logger = new Logger(EbayController.name);
 
-  constructor(private readonly ebayService: EbayService) {}
+  constructor(
+    private readonly ebayService: EbayService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Get('connect-url')
   @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
@@ -62,7 +67,7 @@ export class EbayController {
     if (error) {
       this.logger.error(`eBay OAuth error: ${error} - ${errorDescription}`);
       // Redirect to frontend with error
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
       return { url: `${frontendUrl}/ebay/callback?error=${encodeURIComponent(error)}` };
     }
 
@@ -76,13 +81,13 @@ export class EbayController {
       const { userId } = await this.ebayService.handleCallback(code, state);
 
       // Redirect to frontend success page
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
       this.logger.log(`eBay account connected successfully for user: ${userId}`);
       
       return { url: `${frontendUrl}/dashboard?ebay_connected=success` };
     } catch (err: any) {
       this.logger.error('Failed to handle eBay callback', err);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
       return { url: `${frontendUrl}/ebay/callback?error=${encodeURIComponent(err.message || 'callback_failed')}` };
     }
   }

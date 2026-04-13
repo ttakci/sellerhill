@@ -8,20 +8,21 @@
     "build": "tsc -p . && (if not exist dist\\assets mkdir dist\\assets) && xcopy /y /s src\\assets dist\\assets"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1"
+    "@emotion/styled": "^11.14.1",
+    "react": "^18.3.1"
   },
   "devDependencies": {
-    "@types/react": "18.3.27",
-    "@types/react-dom": "18.3.7",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1"
+    "@emotion/styled": "^11.14.1",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/serialize": "^1.3.3",
     "@emotion/utils": "^1.4.2",
+    "lucide-react": "^1.8.0",
     "react-hook-form": "^7.70.0"
   }
 }

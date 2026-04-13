@@ -10,17 +10,21 @@ export const LayoutWrapper = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: ${tkn('colors.background.primary')};
+  background: ${({ theme }: any) =>
+    theme.mode === 'dark'
+      ? theme.colors.background.primary
+      : theme.colors.background.gradient || theme.colors.background.primary
+  };
 `;
 
 /**
  * SidebarContainer - Theme aware and responsive
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '5rem' : '16rem')};
-  background: #0c1427; /* Brand Navy */
-  color: #ffffff;
-  border-right: 0.0625rem solid rgba(255, 255, 255, 0.1); /* 1px */
+  width: ${(props) => (props.$isCollapsed ? '5rem' : '18rem')};
+  background: ${tkn('colors.sidebar.background')};
+  color: ${tkn('colors.sidebar.text')};
+  border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -33,9 +37,9 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
     /* 1023px */
     position: fixed;
     top: 0;
-    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-16rem')};
+    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-18rem')};
     height: 100vh;
-    width: 16rem;
+    width: 18rem;
     box-shadow: ${tkn('shadows.xl')};
   }
 `;
@@ -54,7 +58,7 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    background: ${tkn('colors.surface.overlay')};
     backdrop-filter: blur(0.125rem); /* 2px */
     z-index: 999;
     animation: fadeIn 0.15s ease-out;
@@ -104,16 +108,15 @@ export const NavSection = styled.nav`
     width: 0.3125rem; /* 5px */
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: ${tkn('colors.sidebar.active')};
     border-radius: ${tkn('radius.full')};
   }
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: 0.75rem 1rem 0.5rem; /* 12px 16px 8px */
+  padding: 0.75rem 1rem 0.5rem;
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
-  color: #ffffff;
-  opacity: 0.6;
+  color: ${tkn('colors.sidebar.textMuted')};
   font-size: 0.6875rem; /* 11px */
   font-weight: 700;
   text-transform: uppercase;
@@ -121,8 +124,8 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 `;
 
 export const NavDivider = styled.div`
-  height: 0.0625rem; /* 1px */
-  background: rgba(255, 255, 255, 0.1);
+  height: 0.0625rem;
+  background: ${tkn('colors.sidebar.divider')};
   margin: 0.75rem 0.5rem;
 `;
 
@@ -138,21 +141,19 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   padding: ${({ $isCollapsed, $isSubItem }) =>
     $isCollapsed ? '0.625rem 0.875rem' : $isSubItem ? '0.625rem 0.875rem 0.625rem 1.75rem' : '0.625rem 0.875rem'};
   border-radius: ${tkn('radius.md')};
-  color: ${({ theme, $active }) => ($active ? theme.colors.brand.primary : '#FFFFFF')};
-  background: ${({ $active }) => ($active ? 'rgba(255, 255, 255, 0.1)' : 'transparent')};
-  backdrop-filter: ${({ $active }) => ($active ? 'blur(0.625rem)' : 'none')};
+  color: ${tkn('colors.sidebar.text')};
+  background: ${({ $active }) => ($active ? tkn('colors.sidebar.active') : 'transparent')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
-  font-weight: ${({ $active }) => ($active ? 600 : 500)};
+  font-weight: ${({ $active }) => ($active ? 600 : 400)};
   font-size: 0.875rem;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    background: ${tkn('colors.sidebar.hover')};
   }
 
-  ${({ theme, $active, $isCollapsed, $isSubItem }) =>
+  ${({ $active, $isCollapsed, $isSubItem }) =>
     $active &&
     `
     &::before {
@@ -161,9 +162,9 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
       left: ${$isCollapsed ? '0' : $isSubItem ? '0.5rem' : '0'};
       top: 50%;
       transform: translateY(-50%);
-      width: 0.125rem;
-      height: 1.25rem;
-      background: ${theme.colors.brand.primary};
+      width: 0.1875rem;
+      height: 1.5rem;
+      background: ${tkn('colors.sidebar.accent')};
       border-radius: 0 0.25rem 0.25rem 0;
     }
   `}
@@ -209,7 +210,7 @@ export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
 
 export const SidebarFooter = styled.div`
   padding: ${tkn('spacing.md')};
-  border-top: 0.0625rem solid rgba(255, 255, 255, 0.1); /* 1px */
+  border-top: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   box-sizing: border-box;
   position: relative;
   z-index: 1;
@@ -218,8 +219,8 @@ export const SidebarFooter = styled.div`
 export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px */
-  padding: 0.5rem; /* 8px */
+  gap: 0.75rem;
+  padding: 0.5rem;
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
@@ -228,34 +229,34 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   overflow: hidden;
 
   &:hover {
-    background: ${tkn('colors.background.tertiary')};
+    background: ${tkn('colors.sidebar.hover')};
   }
 
   ${({ $isCollapsed }) =>
     $isCollapsed &&
     `
     justify-content: center;
-    padding: 0.5rem 0; /* 8px 0 */
+    padding: 0.5rem 0;
   `}
 `;
 
 export const BadgeWrapper = styled.div<{ variant?: 'primary' | 'success'; size?: 'sm' | 'md' }>`
-  background: ${({ theme, variant }) => (variant === 'success' ? '#ECFDF5' : '#EFF6FF')};
-  color: ${({ theme, variant }) => (variant === 'success' ? '#059669' : theme.colors.brand.primary)};
+  background: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTint.success : theme.colors.semanticTint.info)};
+  color: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semantic.success : theme.colors.brand.primary)};
   font-size: 0.625rem; /* 10px */
   font-weight: 700;
   padding: 0.125rem 0.375rem; /* 2px 6px */
   border-radius: ${tkn('radius.sm')};
-  border: 0.0625rem solid ${({ variant }) => (variant === 'success' ? '#D1FAE5' : '#DBEAFE')}; /* 1px */
+  border: 0.0625rem solid ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.info)};
   text-transform: uppercase;
 `;
 
 export const ProfileBadge = styled.div`
-  width: 2.25rem; /* 36px */
-  height: 2.25rem; /* 36px */
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
   background: ${tkn('colors.brand.primary')};
-  color: #ffffff;
+  color: ${tkn('colors.sidebar.text')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,6 +270,14 @@ export const ProfileDetails = styled.div`
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+
+  & > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10rem;
+  }
 `;
 
 export const MainContent = styled.div`
@@ -276,7 +285,7 @@ export const MainContent = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: ${tkn('colors.background.primary')};
+  background: transparent;
 `;
 
 export const HeaderContainer = styled.header`
@@ -649,11 +658,4 @@ export const PageTitle = styled(Text)`
 export const DropdownHeaderWrapper = styled.div`
   display: flex;
   flex-direction: column;
-`;
-
-export const ModalFooterWrapper = styled.div`
-  display: flex;
-  gap: 0.75rem; /* 12px */
-  justify-content: flex-end;
-  width: 100%;
 `;

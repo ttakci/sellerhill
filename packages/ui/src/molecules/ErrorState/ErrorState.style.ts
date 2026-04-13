@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
 
 export const ErrorStateWrapper = styled.div`

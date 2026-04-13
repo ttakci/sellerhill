@@ -8,8 +8,10 @@ import {
   type ListingJobItemDto,
   type ProductData,
 } from '@repo/shared';
+
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
+
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
@@ -79,7 +81,7 @@ export class ListingsService implements OnModuleInit {
         processed_count INT DEFAULT 0,
         success_count INT DEFAULT 0,
         failed_count INT DEFAULT 0,
-        status VARCHAR(20) DEFAULT 'pending',
+        status VARCHAR(20) DEFAULT '${ListingJobStatus.PENDING}',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
@@ -93,7 +95,7 @@ export class ListingsService implements OnModuleInit {
         asin VARCHAR(10) NOT NULL,
         product_id UUID REFERENCES products(id) ON DELETE SET NULL,
         listing_id UUID,
-        status VARCHAR(20) DEFAULT 'draft',
+        status VARCHAR(20) DEFAULT '${ListingStatus.DRAFT}',
         ebay_item_id VARCHAR(50),
         error_message TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -139,7 +141,7 @@ export class ListingsService implements OnModuleInit {
         watch_count INT DEFAULT 0,
         view_count INT DEFAULT 0,
         quantity INT NOT NULL DEFAULT 1,
-        status VARCHAR(20) DEFAULT 'active',
+        status VARCHAR(20) DEFAULT '${ListingStatus.ACTIVE}',
         ebay_category_name TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -220,7 +222,7 @@ export class ListingsService implements OnModuleInit {
         purchase_price, estimated_profit, profit_margin, roi,
         sold_count, watch_count, view_count, ebay_category_name
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', $12, $13, $14, $15, $16, $17, $18, $19)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, '${ListingStatus.ACTIVE}', $12, $13, $14, $15, $16, $17, $18, $19)
       RETURNING id
     `,
       [
@@ -300,7 +302,7 @@ export class ListingsService implements OnModuleInit {
     const results = await this.databaseService.query(
       `
       SELECT id FROM listings 
-      WHERE user_id = $1 AND asin = $2 AND status = 'active'
+      WHERE user_id = $1 AND asin = $2 AND status = '${ListingStatus.ACTIVE}'
     `,
       [userId, asin]
     );
@@ -635,9 +637,9 @@ export class ListingsService implements OnModuleInit {
       `
       SELECT 
         COUNT(*) as total,
-        COUNT(*) FILTER (WHERE status = 'active') as success,
-        COUNT(*) FILTER (WHERE status = 'error') as failed,
-        COUNT(*) FILTER (WHERE status = 'retrying') as retrying
+        COUNT(*) FILTER (WHERE status = '${ListingStatus.ACTIVE}') as success,
+        COUNT(*) FILTER (WHERE status = '${ListingStatus.ERROR}') as failed,
+        COUNT(*) FILTER (WHERE status = '${ListingStatus.RETRYING}') as retrying
       FROM listing_job_items
       WHERE job_id = $1
     `,
@@ -726,7 +728,7 @@ export class ListingsService implements OnModuleInit {
           [listingId, userId]
         );
 
-        if (results.length === 0) continue;
+        if (results.length === 0) {continue;}
 
         const ebayItemId = results[0].ebay_item_id;
 
@@ -737,7 +739,7 @@ export class ListingsService implements OnModuleInit {
         await this.databaseService.query(
           `
           UPDATE listings 
-          SET status = 'inactive', updated_at = CURRENT_TIMESTAMP 
+          SET status = '${ListingStatus.INACTIVE}', updated_at = CURRENT_TIMESTAMP
           WHERE id = $1
         `,
           [listingId]
@@ -773,12 +775,12 @@ export class ListingsService implements OnModuleInit {
             [listingId, userId]
           );
 
-          if (results.rows.length === 0) return;
+          if (results.rows.length === 0) {return;}
 
           const { ebay_item_id: ebayItemId, status, product_id: productId } = results.rows[0];
 
           // 2. If it's active, try to end it on eBay first
-          if (status === 'active' && ebayItemId) {
+          if (status === ListingStatus.ACTIVE && ebayItemId) {
             try {
               await this.ebayService.withdrawOffer(userId, ebayItemId);
             } catch (ebayError: any) {

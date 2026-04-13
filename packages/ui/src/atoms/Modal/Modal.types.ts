@@ -8,4 +8,6 @@ export interface ModalProps {
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  showCloseButton?: boolean;
+  showDivider?: boolean;
 }

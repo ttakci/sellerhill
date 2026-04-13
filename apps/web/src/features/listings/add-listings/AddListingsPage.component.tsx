@@ -4,6 +4,7 @@ import { Icon, ModernSelect, PageHeader } from '@repo/ui';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+
 import * as S from './AddListingsPage.style';
 import type { AddListingsPageComponentProps } from './AddListingsPage.types';
 
@@ -16,6 +17,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
   isSubmitting,
   onSubmit,
   onAsinChange,
+  onCancel,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -170,6 +172,9 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
           </S.AsinInputWrapper>
 
           <S.FormFooter>
+            <S.CancelButton variant="secondary" type="button" disabled={isLoading || isSubmitting} onClick={onCancel}>
+              <span>{t('listings:listings.actions.cancel')}</span>
+            </S.CancelButton>
             <S.SubmitButton variant="primary" type="submit" disabled={isLoading || isSubmitting || asinCount === 0}>
               <span>{isSubmitting ? t('listings:listings.actions.importing') : t('listings:listings.actions.import')}</span>
               <Icon name="play_arrow" size={20} />

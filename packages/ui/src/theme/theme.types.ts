@@ -8,6 +8,7 @@ export interface ThemeColors {
     primary: string;
     secondary: string;
     tertiary: string;
+    gradient?: string;
   };
 
   // Surface (cards, modals)
@@ -64,6 +65,17 @@ export interface ThemeColors {
     warning: string;
     info: string;
     neutral: string;
+  };
+
+  // Sidebar-specific (dark panel tokens)
+  sidebar: {
+    background: string;
+    text: string;
+    textMuted: string;
+    hover: string;
+    active: string;
+    accent: string;
+    divider: string;
   };
 }
 

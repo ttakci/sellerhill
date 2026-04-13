@@ -10,9 +10,11 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { getErrorMessage } from '@/utils/errorHandler';
 import { useRegisterMutation } from '../api/authApi';
+
 import { RegisterPageComponent } from './RegisterPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const RegisterPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['auth', 'translation']);

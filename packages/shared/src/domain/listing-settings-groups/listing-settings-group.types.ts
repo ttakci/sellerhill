@@ -1,4 +1,12 @@
 /**
+ * Template Type
+ */
+export enum TemplateType {
+  CUSTOM = 'custom',
+  PREDEFINED = 'predefined',
+}
+
+/**
  * Price Range for Repricing Strategy
  */
 export interface PriceRange {
@@ -15,6 +23,7 @@ export interface PriceRange {
 export interface StockConfig {
   defaultQuantity: number;
   autoRestock: boolean;
+  stockBuffer?: number;
 }
 
 /**
@@ -30,7 +39,7 @@ export interface FeeConfig {
  * Template Configuration
  */
 export interface TemplateConfig {
-  type: 'custom' | 'predefined';
+  type: TemplateType;
   customTemplateHtml?: string;
   predefinedTemplateId?: string;
 }

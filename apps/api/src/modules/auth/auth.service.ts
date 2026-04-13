@@ -122,8 +122,8 @@ export class AuthService {
 
     try {
       // Verify JWT token
-      const payload = this.jwtService.verify(token) as { email: string; type: string };
-      this.logger.debug(`Token verified, payload: ${JSON.stringify(payload)}`);
+      const payload = this.jwtService.verify(token) ;
+      this.logger.debug('Token verified for email verification');
 
       if (payload.type !== 'email_verification') {
         throw new UnauthorizedException('auth.errors.invalid');
@@ -138,14 +138,8 @@ export class AuthService {
         [payload.email, token]
       );
 
-      this.logger.debug(`Found ${users.length} users for email ${payload.email} and provided token`);
+      this.logger.debug(`Found ${users.length} users for email verification`);
       if (users.length === 0) {
-        // Log more details to debug why it failed
-        const allUsersWithEmail = await this.databaseService.query<UserEntity>(
-          'SELECT email, email_verified, status, email_verification_token, email_verification_expiry FROM users WHERE LOWER(email) = LOWER($1)',
-          [payload.email]
-        );
-        this.logger.debug(`All users with email ${payload.email}: ${JSON.stringify(allUsersWithEmail)}`);
         throw new UnauthorizedException('auth.errors.verificationFailed');
       }
 
@@ -257,10 +251,12 @@ export class AuthService {
   async login(request: LoginRequest): Promise<AuthResponse> {
     this.logger.log(`Login attempt for email: ${request.email}`);
 
-    // Find user by email
-    const users = await this.databaseService.query<UserEntity>('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [
-      request.email,
-    ]);
+    // Find user by email (with connected accounts check in single query)
+    const users = await this.databaseService.query<UserEntity>(
+      `SELECT u.*, EXISTS(SELECT 1 FROM ebay_accounts WHERE user_id = u.id) as has_connected_accounts
+       FROM users u WHERE LOWER(u.email) = LOWER($1)`,
+      [request.email]
+    );
 
     if (users.length === 0) {
       throw new UnauthorizedException('auth.errors.invalidCredentials');
@@ -306,13 +302,17 @@ export class AuthService {
    * Get current user
    */
   async getMe(userId: string): Promise<UserDto> {
-    const users = await this.databaseService.query<UserEntity>('SELECT * FROM users WHERE id = $1', [userId]);
+    const users = await this.databaseService.query<UserEntity>(
+      `SELECT u.*, EXISTS(SELECT 1 FROM ebay_accounts WHERE user_id = u.id) as has_connected_accounts
+       FROM users u WHERE u.id = $1`,
+      [userId]
+    );
 
     if (users.length === 0) {
       throw new UnauthorizedException('auth.errors.userNotFound');
     }
 
-    return await this.mapToUserDto(users[0]);
+    return this.mapToUserDto(users[0]);
   }
 
   /**
@@ -323,7 +323,7 @@ export class AuthService {
 
     try {
       // Verify refresh token
-      const payload = this.jwtService.verify(token) as JwtPayload;
+      const payload = this.jwtService.verify(token) ;
       this.logger.debug(`Refresh token verified for user: ${payload.sub}`);
 
       // Find user
@@ -376,15 +376,9 @@ export class AuthService {
   }
 
   /**
-   * Map user entity to DTO
+   * Map user entity to DTO (with N+1 fix - single query instead of two)
    */
   private async mapToUserDto(user: UserEntity): Promise<UserDto> {
-    // Check if user has any connected accounts
-    const accounts = await this.databaseService.query(
-      'SELECT id FROM ebay_accounts WHERE user_id = $1 LIMIT 1',
-      [user.id]
-    );
-
     return {
       id: user.id,
       firstName: user.first_name,
@@ -392,7 +386,7 @@ export class AuthService {
       email: user.email,
       emailVerified: user.email_verified,
       status: user.status,
-      hasConnectedAccounts: accounts.length > 0,
+      hasConnectedAccounts: (user as any).has_connected_accounts ?? false,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),
     };

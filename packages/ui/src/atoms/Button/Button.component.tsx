@@ -1,4 +1,5 @@
 import { Icon } from '../Icon';
+
 import * as S from './Button.style';
 import { ButtonProps } from './Button.types';
 
@@ -11,9 +12,12 @@ export const Button = ({
   iconRight,
   iconColor,
   fullWidth = false,
+  iconOnly = false,
   disabled,
   ...props
 }: ButtonProps) => {
+  const isIconOnly = iconOnly || (!children && !!(iconLeft || iconRight));
+
   return (
     <S.ActionSurface
       $variant={variant}
@@ -21,6 +25,7 @@ export const Button = ({
       $fullWidth={fullWidth}
       $isLoading={isLoading}
       $iconColor={iconColor}
+      $iconOnly={isIconOnly}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -34,7 +39,7 @@ export const Button = ({
 
       <S.ButtonLabel>
         {iconLeft && <Icon name={iconLeft} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
-        {children}
+        {!isIconOnly && children}
         {iconRight && <Icon name={iconRight} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
       </S.ButtonLabel>
     </S.ActionSurface>

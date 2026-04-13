@@ -13,4 +13,5 @@ export interface AddListingsPageComponentProps {
   isSubmitting: boolean;
   onSubmit: (data: CreateListingsFormData) => void;
   onAsinChange: (value: string) => void;
+  onCancel: () => void;
 }

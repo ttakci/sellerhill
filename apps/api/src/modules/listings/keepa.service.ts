@@ -3,6 +3,34 @@ import { ConfigService } from '@nestjs/config';
 import { IProductDataProvider, KeepaProduct, ProductData } from '@repo/shared';
 import axios from 'axios';
 
+/**
+ * Raw Keepa API product response shape for type safety
+ */
+interface KeepaProductRaw {
+  asin?: string;
+  title?: string;
+  description?: string;
+  brand?: string;
+  manufacturer?: string;
+  model?: string;
+  categoryTree?: Array<{ name: string }>;
+  imagesCSV?: string;
+  features?: string[];
+  stats?: {
+    buyBoxPrice?: number;
+    buyBoxShipping?: number;
+    buyBoxSellerId?: string;
+    buyBoxAvailabilityMessage?: string;
+    stockBuyBox?: number;
+    stockAmazon?: number;
+    availabilityAmazon?: number;
+    totalOfferCount?: number;
+    avg30?: number[];
+    avg90?: number[];
+    current?: number[];
+  };
+}
+
 @Injectable()
 export class KeepaService implements IProductDataProvider {
   private readonly logger = new Logger(KeepaService.name);
@@ -27,10 +55,10 @@ export class KeepaService implements IProductDataProvider {
       const response = await axios.get(this.baseUrl, {
         params: {
           key: this.apiKey,
-          domain: 1, // 1 = Amazon.com
+          domain: 1,
           asin: asin,
-          stock: 1, // 1 token total: Essential for stats.stockBuyBox field
-          stats: 90, // Included in the same token: Vital for current price snapshots
+          stock: 1,
+          stats: 90,
         },
         timeout: 30000,
       });
@@ -41,40 +69,34 @@ export class KeepaService implements IProductDataProvider {
         return null;
       }
 
-      const product = products[0];
+      const product: KeepaProductRaw = products[0];
 
-      // 1. Extract Images
       const imageUrls = this.extractImages(product.imagesCSV);
-
-      // 2. Extract Price and Stock
       const { price, stock, sellerId } = this.extractPriceAndStock(product);
-
-      // 3. Extract Category
       const category = product.categoryTree ? product.categoryTree[product.categoryTree.length - 1]?.name : undefined;
 
-      // 4. Extract Specs (Keepa doesn't provide structured specs like ScraperAPI, but we can try)
       const specs: Record<string, string> = {};
-      if (product.brand) specs['Brand'] = product.brand;
-      if (product.manufacturer) specs['Manufacturer'] = product.manufacturer;
-      if (product.model) specs['Model'] = product.model;
+      if (product.brand) {specs['Brand'] = product.brand;}
+      if (product.manufacturer) {specs['Manufacturer'] = product.manufacturer;}
+      if (product.model) {specs['Model'] = product.model;}
 
       return {
         asin,
         title: product.title || 'Unknown Product',
         description: product.description || '',
-        imageUrls: imageUrls,
+        imageUrls,
         brand: product.brand || 'Unknown',
-        category: category,
+        category,
         manufacturer: product.manufacturer || product.brand || 'Unknown',
         features: product.features || [],
-        specs: specs,
+        specs,
         price: {
           current: price,
           currency: 'USD',
           avg30: product.stats?.avg30?.[0] ? product.stats.avg30[0] / 100 : undefined,
           avg90: product.stats?.avg90?.[0] ? product.stats.avg90[0] / 100 : undefined,
         },
-        stock: stock,
+        stock,
         raw: product,
       };
     } catch (error: any) {
@@ -85,44 +107,70 @@ export class KeepaService implements IProductDataProvider {
 
   /**
    * Fetch product price and stock for 1 ASIN (1 token)
-   * Simple version for sync tasks
    */
   async getProduct(asin: string): Promise<KeepaProduct | null> {
     const details = await this.getProductDetails(asin);
-    if (!details) return null;
+    if (!details) {return null;}
 
     return {
       asin: details.asin,
       price: details.price.current,
       stock: details.stock || 0,
-      sellerId: undefined, // Seller ID is handled during extraction if needed
+      sellerId: undefined,
       lastSync: new Date(),
       raw: details.raw,
     };
   }
 
   /**
-   * Bulk Fetch (max 100 ASIN, parallel)
+   * Bulk Fetch (max 100 ASIN, SINGLE API CALL)
+   * Keepa accepts comma-separated ASINs in a single request.
+   * This uses only 1 token instead of N tokens.
    */
   async getProducts(asins: string[]): Promise<KeepaProduct[]> {
-    this.logger.log(`Fetching Keepa data for ${asins.length} ASINs`);
-
     const targetAsins = asins.slice(0, 100);
-    const results = await Promise.allSettled(targetAsins.map((asin) => this.getProduct(asin)));
 
-    return results
-      .filter((r): r is PromiseFulfilledResult<KeepaProduct> => r.status === 'fulfilled' && r.value !== null)
-      .map((r) => r.value);
+    if (targetAsins.length === 0) {return [];}
+
+    this.logger.log(`Fetching Keepa data for ${targetAsins.length} ASINs in a single request`);
+
+    try {
+      const response = await axios.get(this.baseUrl, {
+        params: {
+          key: this.apiKey,
+          domain: 1,
+          asin: targetAsins.join(','), // Single request with bulk ASINs
+          stock: 1,
+          stats: 90,
+        },
+        timeout: 60000, // Longer timeout for bulk requests
+      });
+
+      const products: KeepaProductRaw[] = response.data?.products || [];
+
+      return products
+        .filter((p) => p && p.asin)
+        .map((product) => {
+          const { price, stock } = this.extractPriceAndStock(product);
+          return {
+            asin: product.asin!,
+            price,
+            stock,
+            sellerId: undefined,
+            lastSync: new Date(),
+            raw: product,
+          };
+        });
+    } catch (error: any) {
+      this.logger.error(`Failed to fetch Keepa bulk data for ${targetAsins.length} ASINs: ${error.message}`);
+      return [];
+    }
   }
 
   /**
    * Helper to extract price and stock from Keepa product object
    */
-  /**
-   * Helper to extract price and stock from Keepa product object
-   * Token-optimized version: uses stats object directly.
-   */
-  private extractPriceAndStock(product: any): { price: number; stock: number; sellerId?: string } {
+  private extractPriceAndStock(product: KeepaProductRaw): { price: number; stock: number; sellerId?: string } {
     let price = 0;
     let stock = 0;
     let sellerId: string | undefined;
@@ -132,36 +180,28 @@ export class KeepaService implements IProductDataProvider {
       return { price, stock, sellerId };
     }
 
-    // 1. EXTRACT STOCK (Priority: stats.stockBuyBox from 'stock' parameter)
+    // 1. EXTRACT STOCK
     if (typeof stats.stockBuyBox === 'number' && stats.stockBuyBox >= 0) {
       stock = stats.stockBuyBox;
-      this.logger.debug(`Stock read from stats.stockBuyBox: ${stock}`);
     } else if (typeof stats.stockAmazon === 'number' && stats.stockAmazon >= 0) {
       stock = stats.stockAmazon;
-      this.logger.debug(`Stock read from stats.stockAmazon: ${stock}`);
     } else {
-      // Conservative estimate if exact number is missing
-      stock = this.extractStockFromStats(stats, product.asin);
+      stock = this.extractStockFromStats(stats, product.asin || '');
     }
 
-    // 2. EXTRACT PRICE (Primary: Buy Box summary, Fallback: Price index 1 from current snapshot)
+    // 2. EXTRACT PRICE
     if (typeof stats.buyBoxPrice === 'number' && stats.buyBoxPrice > 0) {
-      const shipping = stats.buyBoxShipping > 0 ? stats.buyBoxShipping : 0;
+      const shipping = (stats.buyBoxShipping ?? 0) > 0 ? stats.buyBoxShipping! : 0;
       price = (stats.buyBoxPrice + shipping) / 100;
       sellerId = stats.buyBoxSellerId;
-      this.logger.debug(`Price read from buyBox stats: ${price} (Seller: ${sellerId})`);
     } else {
-      // stats.buyBoxPrice is -2 when buybox param is not used.
-      // Fallback: Check 'current' snapshot (Index 1=New, 30=BuyBox, 0=Amazon)
-      const newPrice = stats.current?.[1];
-      const bbPriceCurrent = stats.current?.[30];
-      const amzPrice = stats.current?.[0];
+      const newPrice = stats.current?.[1] ?? 0;
+      const bbPriceCurrent = stats.current?.[30] ?? 0;
+      const amzPrice = stats.current?.[0] ?? 0;
 
-      // Prefer New Price (index 1) as it's typically available with basic 1-token queries
       const rawPrice = newPrice > 0 ? newPrice : bbPriceCurrent > 0 ? bbPriceCurrent : amzPrice > 0 ? amzPrice : 0;
       price = rawPrice / 100;
       sellerId = stats.buyBoxSellerId || undefined;
-      this.logger.debug(`Price read from stats index 1 (New): ${price}`);
     }
 
     return { price, stock, sellerId };
@@ -170,25 +210,18 @@ export class KeepaService implements IProductDataProvider {
   /**
    * Helper to extract stock from product.stats
    */
-  private extractStockFromStats(stats: any, asin: string): number {
-    if (!stats) return 0;
+  private extractStockFromStats(stats: KeepaProductRaw['stats'], asin: string): number {
+    if (!stats) {return 0;}
 
-    // Check availabilityAmazon (0: In Stock, 1: Out of Stock, etc.)
     if (stats.availabilityAmazon === 1) {
-      return 0; // Explicitly out of stock
+      return 0;
     }
 
-    // Index 3 in stats.current is Sales Rank, not Stock.
-    // Real-time stock for Amazon is not always exported in stats.current.
-
-    // Conservative proxy: use offer count (assume each seller has only 1 unit)
     const offerCount = stats.totalOfferCount || stats.current?.[17] || stats.current?.[11];
     if (typeof offerCount === 'number' && offerCount > 0) {
-      this.logger.debug(`Exact stock unknown for ${asin}, assuming 1 unit per offer for ${offerCount} offers.`);
-      return offerCount; // 1 unit per offer
+      return offerCount;
     }
 
-    // If Amazon is in stock but exact count unknown, return 1 as worst-case
     if (stats.availabilityAmazon === 0 || stats.buyBoxAvailabilityMessage === 'In Stock') {
       return 1;
     }
@@ -199,8 +232,8 @@ export class KeepaService implements IProductDataProvider {
   /**
    * Helper to convert Keepa imagesCSV to full URLs
    */
-  private extractImages(imagesCSV: string): string[] {
-    if (!imagesCSV) return [];
+  private extractImages(imagesCSV: string | undefined): string[] {
+    if (!imagesCSV) {return [];}
     return imagesCSV.split(',').map((img) => `https://images-na.ssl-images-amazon.com/images/I/${img}`);
   }
 }

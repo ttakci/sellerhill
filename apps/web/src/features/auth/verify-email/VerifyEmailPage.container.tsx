@@ -7,9 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { getErrorMessage } from '@/utils/errorHandler';
 import { useResendVerificationMutation, useVerifyEmailMutation } from '../api/authApi';
+
 import { VerifyEmailPageComponent } from './VerifyEmailPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const VerifyEmailPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['auth', 'translation']);

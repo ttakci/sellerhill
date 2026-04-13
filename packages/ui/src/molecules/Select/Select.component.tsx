@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Controller, FieldValues } from 'react-hook-form';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './Select.style';
 import type { SelectProps, SelectOption } from './Select.types';
 
@@ -78,7 +79,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
   useLayoutEffect(() => {
     if (isOpen && !isMobile && containerRef.current) {
       const updatePosition = () => {
-        if (!containerRef.current) return;
+        if (!containerRef.current) {return;}
 
         const rect = containerRef.current.getBoundingClientRect();
         const margin = 4;
@@ -110,7 +111,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
   }, [isOpen, isMobile, options.length]);
 
   const renderDropdown = () => {
-    if (!isOpen) return null;
+    if (!isOpen) {return null;}
 
     const content = (
       <>

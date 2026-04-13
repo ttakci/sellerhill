@@ -6,17 +6,19 @@
 
 
 
-import { getErrorMessage } from '@/utils/errorHandler';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { storeSettingsSchema, type StoreSettingsFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
-import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
-import * as S from './StoreSettingsPage.style';
+
 import { useGetStoreSettingsQuery, useSaveStoreSettingsMutation } from './api/storeSettingsApi';
+import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
@@ -30,7 +32,6 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   // Pagination & Sorting State
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [sortColumn, setSortColumn] = useState<string | undefined>(undefined);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -128,7 +129,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
 
   // Blacklist Handlers
   const handleAddKeyword = () => {
-    if (!newKeyword.trim()) return;
+    if (!newKeyword.trim()) {return;}
     const updatedBlacklist = [...blacklist, { keyword: newKeyword.trim(), scope: newScope }];
     setValue('blacklist', updatedBlacklist, { shouldDirty: true });
     setNewKeyword('');
@@ -147,15 +148,15 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   };
 
   const sortedBlacklist = useMemo(() => {
-    if (!sortColumn) return blacklist;
+    if (!sortColumn) {return blacklist;}
 
     return [...blacklist].sort((a, b) => {
       const aKey = sortColumn as keyof typeof a;
       const aValue = a[aKey];
       const bValue = b[aKey];
 
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      if (aValue < bValue) {return sortDirection === 'asc' ? -1 : 1;}
+      if (aValue > bValue) {return sortDirection === 'asc' ? 1 : -1;}
       return 0;
     });
   }, [blacklist, sortColumn, sortDirection]);
@@ -166,7 +167,7 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   }, [sortedBlacklist, page, rowsPerPage]);
 
   if (settingsLoading || !settings) {
-    return <S.LoadingContainer>{t('translation:common.loading')}</S.LoadingContainer>;
+    return <div>{t('translation:common.loading')}</div>;
   }
 
   const availableStores =
@@ -200,8 +201,6 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
       sortColumn={sortColumn}
       sortDirection={sortDirection}
       blacklistCount={sortedBlacklist.length}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
     />
   );
 };

@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Icon } from '../../atoms/Icon';
 import { Text } from '../../atoms/Text';
+
 import * as S from './SettingsCard.style';
 import { SettingsCardProps } from './SettingsCard.types';
 

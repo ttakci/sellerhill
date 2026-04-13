@@ -3,6 +3,15 @@
  */
 
 /**
+ * eBay Business Policy Type
+ */
+export enum PolicyType {
+  PAYMENT = 'payment',
+  SHIPPING = 'shipping',
+  RETURN = 'return',
+}
+
+/**
  * Listing Status
  */
 export enum ListingStatus {
@@ -104,7 +113,7 @@ export interface EbayBusinessPolicyDto {
   id: string;
   name: string;
   description?: string;
-  type: 'payment' | 'shipping' | 'return';
+  type: PolicyType;
 }
 
 /**
@@ -118,4 +127,29 @@ export interface ListingQueueJobData {
   paymentPolicyId: string;
   shippingPolicyId: string;
   returnPolicyId: string;
+}
+
+/**
+ * Listing Creation Data - used by eBay service for creating listings
+ * Replaces `any` types in eBay service methods
+ */
+export interface ListingCreationData {
+  title: string;
+  description: string;
+  brand: string;
+  specs?: Record<string, string>;
+  features?: string[];
+  quantity: number;
+  imageUrls: string[];
+  price: number;
+  currency: string;
+  country: string;
+  postalCode?: string;
+  location?: string;
+  address1?: string;
+  // Calculated metrics
+  purchasePrice?: number;
+  estimatedProfit?: number;
+  profitMargin?: number;
+  roi?: number;
 }

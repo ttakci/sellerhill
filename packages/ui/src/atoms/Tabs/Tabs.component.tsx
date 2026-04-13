@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+
 import { Icon } from '../Icon';
+
 import * as S from './Tabs.style';
 import type { TabsProps } from './Tabs.types';
 

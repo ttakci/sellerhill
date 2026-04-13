@@ -32,9 +32,9 @@ export class DatabaseService implements OnModuleInit {
 
     this.pool = new Pool({
       connectionString: databaseUrl,
-      max: 20, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 2000, // Return an error if connection takes longer than 2 seconds
+      max: parseInt(this.configService.get<string>('DB_POOL_MAX', '20'), 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
     });
 
     this.pool.on('error', (err) => {
@@ -66,10 +66,10 @@ export class DatabaseService implements OnModuleInit {
     try {
       const result = await this.pool.query(text, params);
       const duration = Date.now() - start;
-      this.logger.debug(`Query executed in ${duration}ms: ${text}`);
+      this.logger.debug(`Query executed in ${duration}ms`);
       return result.rows as T[];
     } catch (error) {
-      this.logger.error(`Query failed: ${text}`, error);
+      this.logger.error(`Query failed in ${Date.now() - start}ms`, error);
       throw error;
     }
   }

@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { StepperOrientation } from './Stepper.types';
 
 export const StepperContainer = styled.div<{ $orientation: StepperOrientation }>`

@@ -1,7 +1,8 @@
+import { amazonDetailsSchema } from '@repo/shared';
 import { Button, Modal, ModernTextInput } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { amazonDetailsSchema } from '@repo/shared';
+
 import * as S from '../OrderDetailsPage.style';
 
 interface AmazonValues {
@@ -34,7 +35,7 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, 
       const fieldErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         const field = issue.path[0]?.toString();
-        if (field) fieldErrors[field] = issue.message;
+        if (field) {fieldErrors[field] = issue.message;}
       });
       setErrors(fieldErrors);
       return;

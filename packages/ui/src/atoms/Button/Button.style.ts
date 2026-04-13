@@ -1,6 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import { ButtonSize, ButtonVariant } from './Button.types';
 
 interface ActionSurfaceProps {
@@ -9,6 +11,7 @@ interface ActionSurfaceProps {
   $fullWidth?: boolean;
   $isLoading?: boolean;
   $iconColor?: string;
+  $iconOnly?: boolean;
 }
 
 const getBaseHeight = (size: ButtonSize) => {
@@ -39,6 +42,20 @@ const getPadding = (size: ButtonSize) => {
   }
 };
 
+const getMinWidth = (size: ButtonSize): string => {
+  switch (size) {
+    case 'xsmall':
+      return '5rem'; /* 80px */
+    case 'small':
+      return '6.25rem'; /* 100px */
+    case 'large':
+      return '9rem'; /* 144px */
+    case 'medium':
+    default:
+      return '7.5rem'; /* 120px */
+  }
+};
+
 export const ActionSurface = styled.button<ActionSurfaceProps>`
   all: unset;
   display: inline-flex;
@@ -50,9 +67,14 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
   position: relative;
   overflow: hidden;
 
-  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
+  ${({ $fullWidth, $iconOnly, $size, $variant }) => {
+    if ($fullWidth) {return 'width: 100%;';}
+    if ($iconOnly) {return `width: ${getBaseHeight($size)};`;}
+    if ($variant === 'text') {return 'width: auto;';}
+    return `min-width: ${getMinWidth($size)}; width: auto;`;
+  }}
   height: ${({ $size }) => getBaseHeight($size)};
-  padding: ${({ $size }) => getPadding($size)};
+  padding: ${({ $iconOnly, $size }) => ($iconOnly ? '0' : getPadding($size))};
   gap: ${tkn('spacing.sm')};
 
   border-radius: ${tkn('radius.md')};

@@ -1,6 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ListingStatus } from '@repo/shared';
+
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
+
 import { KeepaService } from './keepa.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
@@ -48,7 +51,7 @@ export class ProductSyncService implements OnModuleInit {
       SELECT DISTINCT p.id, p.asin 
       FROM products p
       INNER JOIN listings l ON p.id = l.product_id
-      WHERE l.status = 'active'
+      WHERE l.status = '${ListingStatus.ACTIVE}'
     `);
 
     if (products.length === 0) {
@@ -77,7 +80,7 @@ export class ProductSyncService implements OnModuleInit {
 
           await this.databaseService.query(
             `
-            UPDATE products 
+            UPDATE products
             SET price = jsonb_set(price, '{current}', $1),
                 stock = $2,
                 raw_keepa_data = $3,
@@ -102,10 +105,10 @@ export class ProductSyncService implements OnModuleInit {
    */
   private async syncMetadata() {
     const products = await this.databaseService.query(`
-      SELECT DISTINCT p.id, p.asin 
+      SELECT DISTINCT p.id, p.asin
       FROM products p
       INNER JOIN listings l ON p.id = l.product_id
-      WHERE l.status = 'active'
+      WHERE l.status = '${ListingStatus.ACTIVE}'
       AND (p.last_sync_at < NOW() - INTERVAL '30 days' OR p.last_sync_at IS NULL)
       LIMIT 50
     `);
@@ -115,7 +118,7 @@ export class ProductSyncService implements OnModuleInit {
     for (const product of products) {
       try {
         const data = await this.scraperApiService.getProductDetails(product.asin);
-        if (!data) continue;
+        if (!data) {continue;}
 
         await this.listingsService.findOrCreateProduct(product.asin, data);
       } catch (error: any) {
@@ -125,68 +128,74 @@ export class ProductSyncService implements OnModuleInit {
   }
 
   /**
-   * Recalculate and push updates to eBay for all listings linked to a product
+   * Recalculate and push updates to eBay for all listings linked to a product.
+   * Groups listings by user for batch processing.
    */
   private async updateAllListingsForProduct(productId: string, asin: string) {
     const listings = await this.databaseService.query(
-      `
-      SELECT id, user_id, listing_settings_group_id, ebay_item_id FROM listings 
-      WHERE product_id = $1 AND status = 'active'
-    `,
+      `SELECT id, user_id, listing_settings_group_id, ebay_item_id FROM listings
+       WHERE product_id = $1 AND status = '${ListingStatus.ACTIVE}'`,
       [productId]
     );
 
-    if (listings.length === 0) return;
+    if (listings.length === 0) {return;}
 
     const productInfo = await this.listingsService.getProductByAsin(asin);
-    if (!productInfo) return;
+    if (!productInfo) {return;}
 
+    // Group by user for parallel processing
+    const byUser = new Map<string, typeof listings>();
     for (const listing of listings) {
-      try {
-        const strategyResult = await this.strategyService.prepareListingData(
-          listing.user_id,
-          productInfo.data,
-          listing.listing_settings_group_id
-        );
+      const group = byUser.get(listing.user_id) || [];
+      group.push(listing);
+      byUser.set(listing.user_id, group);
+    }
 
-        const sku = `${asin}-NEW`;
-        await this.ebayService.updatePriceAndStock(
-          listing.user_id,
-          sku,
-          strategyResult.price,
-          strategyResult.quantity,
-          listing.ebay_item_id
-        );
+    // Process each user's listings in parallel
+    const userPromises = Array.from(byUser.entries()).map(async ([userId, userListings]) => {
+      for (const listing of userListings) {
+        try {
+          const strategyResult = await this.strategyService.prepareListingData(
+            userId,
+            productInfo.data,
+            listing.listing_settings_group_id
+          );
 
-        await this.databaseService.query(
-          `
-          UPDATE listings 
-          SET price = $1, 
-              quantity = $2,
-              purchase_price = $3,
-              estimated_profit = $4,
-              profit_margin = $5,
-              roi = $6,
-              updated_at = CURRENT_TIMESTAMP
-          WHERE id = $7
-        `,
-          [
+          const sku = `${asin}-NEW`;
+          await this.ebayService.updatePriceAndStock(
+            userId,
+            sku,
             strategyResult.price,
             strategyResult.quantity,
-            strategyResult.purchasePrice,
-            strategyResult.estimatedProfit,
-            strategyResult.profitMargin,
-            strategyResult.roi,
-            listing.id,
-          ]
-        );
+            listing.ebay_item_id
+          );
 
-        this.logger.debug(
-          `Repriced listing ${listing.ebay_item_id} for user ${listing.user_id} (New Price: ${strategyResult.price}, New Stock: ${strategyResult.quantity})`
-        );
-      } catch (error: any) {
-        this.logger.error(`Failed to reprice listing ${listing.id}: ${error.message}`);
+          await this.databaseService.query(
+            `UPDATE listings
+             SET price = $1, quantity = $2, purchase_price = $3,
+                 estimated_profit = $4, profit_margin = $5, roi = $6,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $7`,
+            [
+              strategyResult.price,
+              strategyResult.quantity,
+              strategyResult.purchasePrice,
+              strategyResult.estimatedProfit,
+              strategyResult.profitMargin,
+              strategyResult.roi,
+              listing.id,
+            ]
+          );
+
+          this.logger.debug(
+            `Repriced listing ${listing.ebay_item_id} (Price: ${strategyResult.price}, Stock: ${strategyResult.quantity})`
+          );
+        } catch (error: any) {
+          this.logger.error(`Failed to reprice listing ${listing.id}: ${error.message}`);
+        }
       }
-    }
+    });
+
+    await Promise.allSettled(userPromises);
   }
 }

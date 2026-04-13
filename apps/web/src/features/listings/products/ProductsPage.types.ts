@@ -15,7 +15,5 @@ export interface ProductsPageComponentProps {
     labelInfo?: string;
   };
   columns: any[];
-  viewMode: 'table' | 'grid';
-  onViewModeChange: (mode: 'table' | 'grid') => void;
   onDownload: () => void;
 }

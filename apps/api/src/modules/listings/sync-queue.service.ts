@@ -42,6 +42,18 @@ export class SyncQueueService implements OnModuleInit {
       }
     );
 
+    // 3. Order Sync (every 15 minutes)
+    // Fetches new orders from eBay for all active accounts
+    await this.syncQueue.add(
+      'sync-orders',
+      {},
+      {
+        repeat: { pattern: '*/15 * * * *' },
+        jobId: 'order-sync-cron',
+        removeOnComplete: true,
+      }
+    );
+
     this.logger.log('Repeatable sync jobs configured.');
   }
 

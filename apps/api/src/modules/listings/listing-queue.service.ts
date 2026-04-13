@@ -6,6 +6,7 @@ import {
     type ListingQueueJobData
 } from '@repo/shared';
 import { Queue } from 'bullmq';
+
 import { ListingsService } from './listings.service';
 
 @Injectable()

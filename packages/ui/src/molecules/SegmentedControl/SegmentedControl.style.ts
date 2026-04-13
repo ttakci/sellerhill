@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
 
 export const SegmentedControlContainer = styled.div<{ $size: 'sm' | 'md' }>`

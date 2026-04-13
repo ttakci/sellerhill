@@ -5,6 +5,7 @@
 
 import type { TFunction } from 'i18next';
 import { z } from 'zod';
+
 import { AUTH_CONSTANTS } from '../../domain/auth/auth.constants';
 
 export const loginFormDataSchema = (t: TFunction) =>

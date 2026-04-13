@@ -1,10 +1,28 @@
+import { type OrderDto, type OrderStatsDto, type OrderFiltersDto } from '@repo/shared';
+
 import { baseApi } from '@/api/baseApi';
-import { OrderDto, OrderStatsDto } from '@repo/shared';
+
+interface OrdersResponse {
+  orders: OrderDto[];
+  total: number;
+}
 
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getOrders: builder.query<OrderDto[], void>({
-      query: () => '/orders',
+    getOrders: builder.query<OrdersResponse, OrderFiltersDto | void>({
+      query: (filters) => {
+        const params: Record<string, string> = {};
+        if (filters) {
+          if (filters.page) {params.page = String(filters.page);}
+          if (filters.limit) {params.limit = String(filters.limit);}
+          if (filters.status) {params.status = filters.status;}
+          if (filters.dateFrom) {params.dateFrom = filters.dateFrom;}
+          if (filters.dateTo) {params.dateTo = filters.dateTo;}
+          if (filters.sortBy) {params.sortBy = filters.sortBy;}
+          if (filters.sortOrder) {params.sortOrder = filters.sortOrder;}
+        }
+        return { url: '/orders', params };
+      },
       providesTags: ['Orders'],
     }),
     getOrderStats: builder.query<OrderStatsDto, void>({
@@ -24,13 +42,25 @@ export const ordersApi = baseApi.injectEndpoints({
     >({
       query: ({ id, data }) => ({
         url: `/orders/${id}/amazon-details`,
-        method: 'PUT',
+        method: 'POST',
         body: data,
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'Orders', id }, 'Orders'],
     }),
+    triggerOrderSync: builder.mutation<{ message: string }, void>({
+      query: () => ({
+        url: '/orders/sync',
+        method: 'POST',
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
-export const { useGetOrdersQuery, useGetOrderStatsQuery, useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } =
-  ordersApi;
+export const {
+  useGetOrdersQuery,
+  useGetOrderStatsQuery,
+  useGetOrderByIdQuery,
+  useUpdateOrderAmazonDetailsMutation,
+  useTriggerOrderSyncMutation,
+} = ordersApi;

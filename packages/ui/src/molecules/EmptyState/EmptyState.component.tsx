@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Button } from '../../atoms/Button';
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './EmptyState.style';
 import type { EmptyStateProps } from './EmptyState.types';
 

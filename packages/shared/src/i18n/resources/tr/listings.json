@@ -80,7 +80,8 @@
       "active": "Aktif",
       "draft": "Taslak",
       "inactive": "Pasif",
-      "error": "Hata"
+      "error": "Hata",
+      "retrying": "Tekrar Deniyor"
     },
     "title": "Liste Ekle",
     "subtitle": "ASIN tanımlayıcılarını kullanarak ürünleri doğrudan Amazon'dan eBay mağazanıza aktarın. Görselleri, açıklamaları ve fiyat optimizasyonlarını biz hallederiz.",
@@ -115,7 +116,7 @@
       "helpText": "Toplu giriş desteklenir. Her ASIN ayrı satırda olmalıdır. Tekrar edenler otomatik filtrelenir."
     },
     "actions": {
-      "cancel": "İptal",
+      "cancel": "Geri",
       "import": "Listeleri Oluştur",
       "importing": "Listeler Oluşturuluyor...",
       "addListing": "Liste Ekle",
@@ -145,7 +146,8 @@
       "maxAsins": "İçe aktarma başına maksimum 1000 ASIN izin verilir",
       "paymentPolicyRequired": "Ödeme politikası zorunludur",
       "shippingPolicyRequired": "Kargo politikası zorunludur",
-      "returnPolicyRequired": "İade politikası zorunludur"
+      "returnPolicyRequired": "İade politikası zorunludur",
+      "listingSettingsGroupRequired": "Liste strateji grubu zorunludur"
     },
     "success": {
       "created": "{{count}} ilan başarıyla oluşturuldu",

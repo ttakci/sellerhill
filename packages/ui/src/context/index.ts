@@ -7,6 +7,8 @@ export type {
   UIContextValue,
 } from './UIContext.types';
 
+export type { MessageType } from './UIContext.types';
+
 export { ThemeContext, ThemeProvider } from './ThemeContext';
 export type { ThemeContextValue } from './ThemeContext.types';
 

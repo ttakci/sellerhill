@@ -16,7 +16,5 @@ export interface ListingJobsPageComponentProps {
     labelInfo?: string;
   };
   columns: any[];
-  viewMode: 'table' | 'grid';
-  onViewModeChange: (mode: 'table' | 'grid') => void;
   onDownload: () => void;
 }

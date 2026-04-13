@@ -1,13 +1,19 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
+
+import { OrderSyncService } from '../orders/order-sync.service';
+
 import { ProductSyncService } from './product-sync.service';
 
 @Processor('sync')
 export class SyncProcessorService extends WorkerHost {
   private readonly logger = new Logger(SyncProcessorService.name);
 
-  constructor(private readonly syncService: ProductSyncService) {
+  constructor(
+    private readonly syncService: ProductSyncService,
+    private readonly orderSyncService: OrderSyncService
+  ) {
     super();
   }
 
@@ -22,6 +28,8 @@ export class SyncProcessorService extends WorkerHost {
         await this.syncService.runSyncCycle('prices');
       } else if (job.name === 'sync-metadata') {
         await this.syncService.runSyncCycle('metadata');
+      } else if (job.name === 'sync-orders') {
+        await this.orderSyncService.syncOrdersForAllUsers();
       } else {
         this.logger.warn(`Unknown job name: ${job.name}`);
       }

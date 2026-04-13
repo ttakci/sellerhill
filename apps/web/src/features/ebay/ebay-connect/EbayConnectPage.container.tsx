@@ -5,12 +5,15 @@
  */
 
 import { useLoading, useUI } from '@repo/ui';
+import { EbayMarketplaceId } from '@repo/shared';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getErrorMessage } from '@/utils/errorHandler';
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '../api/ebayApi';
+
 import { EbayConnectPageComponent } from './EbayConnectPage.component';
+
+import { getErrorMessage } from '@/utils/errorHandler';
 
 export const EbayConnectPageContainer = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -43,7 +46,7 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
   }, [urlError, showMessage, closeMessage, t]);
 
   const handleConnect = async (): Promise<void> => {
-    const result = await getConnectUrl({ marketplaceId: 'EBAY_US' }).unwrap();
+    const result = await getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US }).unwrap();
 
     // Redirect to eBay OAuth consent page
     // Error is handled by RTK Query and the useEffect above

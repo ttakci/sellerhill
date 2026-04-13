@@ -1,8 +1,10 @@
-import { StatusBadge, useLoading } from '@repo/ui';
+import { IdBadge, StatusBadge, useLoading } from '@repo/ui';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import { useGetJobItemsQuery } from '../../api/listings.api';
+
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
 
@@ -27,19 +29,19 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       {
         key: 'asin',
         header: t('listings.jobs.items.asin'),
-        render: (asin: string) => <S.AsinText variant="mono" weight="semibold" color="brand.primary">{asin}</S.AsinText>,
+        render: (asin: string) => <IdBadge id={asin} storeType="amazon" size="sm" />,
       },
       {
         key: 'status',
         header: t('listings.jobs.items.status'),
         render: (status: string) => (
-          <StatusBadge status={status.toLowerCase()}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</StatusBadge>
+          <StatusBadge status={status.toLowerCase()}>{t(`listings.status.${status.toLowerCase()}`)}</StatusBadge>
         ),
       },
       {
         key: 'ebayItemId',
         header: t('listings.jobs.items.ebayId'),
-        render: (id: string) => (id ? <S.JobIdBadge variant="neutral" size="sm">{id}</S.JobIdBadge> : '-'),
+        render: (id: string) => (id ? <IdBadge id={id} storeType="ebay" size="sm" /> : '-'),
       },
       {
         key: 'errorMessage',
@@ -47,7 +49,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         render: (msg: string) =>
           msg ? (
             <S.ErrorContainer>
-              <S.ErrorText>{msg.split(' | ')[0]}</S.ErrorText>
               <S.ExceptionBadge>{msg}</S.ExceptionBadge>
             </S.ErrorContainer>
           ) : (
@@ -66,7 +67,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     void refetch();
   };
 
-  if (!jobId) return null;
+  if (!jobId) {return null;}
 
   return (
     <ListingJobDetailsPageComponent

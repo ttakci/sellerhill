@@ -4,18 +4,20 @@
  * Purpose: Handle dashboard logic and authentication check
  */
 
-import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect } from 'react';
+import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { useGetMeQuery } from '@/features/auth/api/authApi';
-import { getErrorMessage } from '@/utils/errorHandler';
 import { useGetDashboardQuery } from '../api/dashboardApi';
+
 import { DashboardPageComponent } from './DashboardPage.component';
 
+import { useGetMeQuery } from '@/features/auth/api/authApi';
+import { getErrorMessage } from '@/utils/errorHandler';
+
 export const DashboardPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
+  const { t, i18n } = useTranslation(['translation']);
   const navigate = useNavigate();
   const { showMessage, closeMessage } = useUI();
 
@@ -24,16 +26,32 @@ export const DashboardPageContainer = (): React.ReactElement => {
 
   useLoading(isDashboardLoading || isUserLoading);
 
+  const isTR = i18n.language === 'tr';
+  const { locale, currency } = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
+
+  const handleFormatCurrency = useCallback(
+    (value: number) => formatCurrency(value, locale, currency),
+    [locale, currency],
+  );
+
+  const handleFormatCompactCurrency = useCallback(
+    (value: number) => formatCompactNumber(value, locale),
+    [locale],
+  );
+
+  const handleFormatDate = useCallback(
+    (dateString: string) => formatDate(dateString, locale),
+    [locale],
+  );
+
   // Handle errors
   useEffect(() => {
     const error = dashboardError || userError;
     if (error) {
-      // Ignore 401 as it's handled by baseApi and AppLayout
       if ('status' in error && error.status === 401) {
         return;
       }
 
-      // Show other errors
       const { key, params } = getErrorMessage(error);
       showMessage(
         {
@@ -55,5 +73,21 @@ export const DashboardPageContainer = (): React.ReactElement => {
     navigate('/ebay/connect');
   };
 
-  return <DashboardPageComponent user={userData || null} isLoading={isUserLoading} onConnectEbay={handleConnectEbay} />;
+  const handleViewAllOrders = (): void => {
+    navigate('/orders');
+  };
+
+  return (
+    <DashboardPageComponent
+      user={userData || null}
+      dashboardData={dashboardData}
+      isLoading={isUserLoading}
+      onConnectEbay={handleConnectEbay}
+      onViewAllOrders={handleViewAllOrders}
+      isTR={isTR}
+      formatCurrency={handleFormatCurrency}
+      formatCompactCurrency={handleFormatCompactCurrency}
+      formatDate={handleFormatDate}
+    />
+  );
 };

@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { AlertVariant } from './Alert.types';
 
 export const AlertContainer = styled.div<{ $variant: AlertVariant }>`

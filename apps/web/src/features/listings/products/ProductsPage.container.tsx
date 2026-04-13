@@ -1,7 +1,9 @@
-import { Icon, useLoading } from '@repo/ui';
+import { IdBadge, Icon, useLoading } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { useGetUserProductsQuery } from '../api/listings.api';
+
 import { ProductsPageComponent } from './ProductsPage.component';
 import * as S from './ProductsPage.style';
 
@@ -10,7 +12,6 @@ export const ProductsPageContainer: React.FC = () => {
   const { data: products = [], isLoading, refetch } = useGetUserProductsQuery();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(window.innerWidth < 768 ? 'grid' : 'table');
 
   useLoading(isLoading);
 
@@ -45,7 +46,7 @@ export const ProductsPageContainer: React.FC = () => {
       {
         key: 'asin',
         header: t('listings.table.asin'),
-        render: (asin: string) => <S.ASINBadge variant="neutral" size="xs">{asin}</S.ASINBadge>,
+        render: (asin: string) => <IdBadge id={asin} storeType="amazon" size="sm" />,
       },
       {
         key: 'category',
@@ -77,15 +78,7 @@ export const ProductsPageContainer: React.FC = () => {
         key: 'actions',
         header: t('listings.table.actions'),
         align: 'right' as const,
-        render: (_: any, product: any) => (
-          <S.AmazonLink
-            href={`https://www.amazon.com/dp/${product.asin}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Amazon <Icon name="open-in-new" size={14} />
-          </S.AmazonLink>
-        ),
+        render: (_: any, product: any) => <IdBadge id={product.asin} storeType="amazon" size="sm" />,
       },
     ],
     [t]
@@ -120,8 +113,6 @@ export const ProductsPageContainer: React.FC = () => {
       isLoading={isLoading}
       onDownload={handleDownload}
       columns={columns}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
       pagination={{
         count: products.length,
         page,

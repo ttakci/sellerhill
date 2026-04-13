@@ -1,12 +1,12 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 export type PopoverPosition = 'top' | 'bottom' | 'left' | 'right';
 
 export interface PopoverProps {
-  trigger: React.ReactNode;
-  content: React.ReactNode;
+  trigger: ReactNode;
+  content: ReactNode;
   position?: PopoverPosition;
   isOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange?: (isOpen: boolean) => void;
   className?: string;
 }

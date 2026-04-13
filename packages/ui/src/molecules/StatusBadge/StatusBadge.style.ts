@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { StatusSize } from './StatusBadge.types';
 import { getStatusColors } from './StatusBadge.types';
 

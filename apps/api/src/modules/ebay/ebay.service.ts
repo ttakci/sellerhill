@@ -4,14 +4,18 @@ import {
   EBAY_ACCOUNT_STATUS,
   EBAY_MARKETPLACE,
   EBAY_MARKETPLACE_CONFIG,
+  EbayAccountStatus,
   type CreateEbayConnectUrlResponse,
   type EbayAccountDto,
+  type EbayAccountPublicDto,
   type EbayMarketplaceId,
   type GetEbayAccountsResponse,
+  type ListingCreationData,
 } from '@repo/shared';
 import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
+
 import { EbayOAuthService } from './ebay-oauth.service';
 
 /**
@@ -26,7 +30,7 @@ interface EbayAccountEntity {
   access_token: string;
   refresh_token: string;
   access_token_expires_at: Date;
-  status: 'active' | 'revoked' | 'error';
+  status: EbayAccountStatus;
   created_at: Date;
   updated_at: Date;
 }
@@ -126,7 +130,7 @@ export class EbayService {
     );
 
     return {
-      items: accounts.map((account) => this.mapToDto(account)),
+      items: accounts.map((account) => this.mapToPublicDto(account)),
       total: accounts.length,
     };
   }
@@ -141,7 +145,7 @@ export class EbayService {
   async createListingWithRest(
     userId: string,
     productId: string,
-    listingData: any, // Enriched data from strategy (including country, currency, etc)
+    listingData: ListingCreationData,
     policies: { paymentId: string; shippingId: string; returnId: string },
     asin: string
   ): Promise<{ listingId: string; categoryName: string }> {
@@ -222,7 +226,7 @@ export class EbayService {
           if (!missingKey) {
             // Fallback extraction from message: "The item specific X is missing."
             const msgMatch = missingAspectError.message.match(/item specific (.*?) is missing/);
-            if (msgMatch) missingKey = msgMatch[1];
+            if (msgMatch) {missingKey = msgMatch[1];}
           }
 
           if (missingKey) {
@@ -250,7 +254,7 @@ export class EbayService {
   private async createOrReplaceInventoryItem(
     accessToken: string,
     sku: string,
-    data: any,
+    data: ListingCreationData,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US'],
     requiredAspects: string[] = []
   ): Promise<void> {
@@ -352,7 +356,7 @@ export class EbayService {
   private async createOffer(
     accessToken: string,
     sku: string,
-    data: any,
+    data: ListingCreationData,
     policies: { paymentId: string; shippingId: string; returnId: string },
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US'],
     marketplaceId: string,
@@ -422,7 +426,7 @@ export class EbayService {
   private async updateOffer(
     accessToken: string,
     offerId: string,
-    payload: any,
+    payload: Record<string, unknown>,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US']
   ): Promise<void> {
     try {
@@ -474,7 +478,7 @@ export class EbayService {
   private async ensureInventoryLocation(
     accessToken: string,
     merchantLocationKey: string,
-    data: any,
+    data: ListingCreationData,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US']
   ): Promise<void> {
     // Try retrieval first to avoid overwriting if exists
@@ -485,7 +489,7 @@ export class EbayService {
       );
       return; // Exists
     } catch (e: any) {
-      if (e.response?.status !== 404) throw e;
+      if (e.response?.status !== 404) {throw e;}
     }
 
     // Create if 404
@@ -597,16 +601,26 @@ export class EbayService {
     productId: string,
     settingsGroupId: string,
     policies: { paymentId: string; shippingId: string; returnId: string },
-    listingData?: any // Optional data from strategy
+    listingData?: ListingCreationData
   ): Promise<string> {
     // ... Legacy implementation ...
     this.logger.warn('Use createListingWithRest instead of createListing');
+    const data = listingData || {
+      title: 'Product',
+      description: '',
+      brand: '',
+      price: 0,
+      currency: 'USD',
+      country: 'US',
+      quantity: 1,
+      imageUrls: [],
+    };
     const result = await this.createListingWithRest(
       userId,
       productId,
-      listingData,
+      data,
       policies,
-      listingData.asin || 'UNKNOWN'
+      'UNKNOWN'
     );
     return result.listingId;
   }
@@ -624,7 +638,7 @@ export class EbayService {
     this.logger.log(`Updating price and stock for user ${userId}, SKU ${sku}, Listing ${ebayListingId}`);
 
     const account = await this.getActiveAccount(userId);
-    if (!account) throw new Error('No active eBay account');
+    if (!account) {throw new Error('No active eBay account');}
 
     const accessToken = await this.getAccessToken(account);
     const marketplaceId = account.marketplace_id as EbayMarketplaceId;
@@ -705,11 +719,21 @@ export class EbayService {
   }
 
   /**
+   * Get a fresh access token for a user's active eBay account (Public helper)
+   * Used by OrderSyncService and other services that need direct API access
+   */
+  async getActiveAccountAccessToken(userId: string): Promise<string | null> {
+    const account = await this.getActiveAccount(userId);
+    if (!account) {return null;}
+    return this.getAccessToken(account);
+  }
+
+  /**
    * Get active eBay account for user
    */
   private async getActiveAccount(userId: string): Promise<EbayAccountEntity | null> {
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = 'active' LIMIT 1`,
+      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = '${EbayAccountStatus.ACTIVE}' LIMIT 1`,
       [userId]
     );
     return accounts[0] || null;
@@ -768,7 +792,7 @@ export class EbayService {
     <ListingDuration>GTC</ListingDuration>
     <ListingType>FixedPriceItem</ListingType>
     <PaymentMethods>PayPal</PaymentMethods>
-    <PayPalEmailAddress>test@example.com</PayPalEmailAddress>
+    <!-- Payment handled via payment policy -->
     <PictureDetails>
       ${(imageUrls || []).map((url: string) => `<PictureURL>${url}</PictureURL>`).join('\n      ')}
     </PictureDetails>
@@ -946,7 +970,7 @@ export class EbayService {
 <EndItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
   <ErrorLanguage>en_US</ErrorLanguage>
   <WarningLevel>High</WarningLevel>
-  <ItemID>${ebayItemId}</ItemID>
+  <ItemID>${this.escapeXml(ebayItemId)}</ItemID>
   <EndingReason>NotAvailable</EndingReason>
 </EndItemRequest>`;
 
@@ -1019,7 +1043,7 @@ export class EbayService {
   }
 
   /**
-   * Map entity to DTO
+   * Map entity to DTO (internal - includes tokens)
    */
   private mapToDto(entity: EbayAccountEntity): EbayAccountDto {
     return {
@@ -1031,6 +1055,22 @@ export class EbayService {
       accessToken: entity.access_token,
       refreshToken: entity.refresh_token,
       accessTokenExpiresAt: entity.access_token_expires_at.toISOString(),
+      status: entity.status,
+      createdAt: entity.created_at.toISOString(),
+      updatedAt: entity.updated_at.toISOString(),
+    };
+  }
+
+  /**
+   * Map entity to public DTO (safe for frontend - no tokens)
+   */
+  private mapToPublicDto(entity: EbayAccountEntity): EbayAccountPublicDto {
+    return {
+      id: entity.id,
+      userId: entity.user_id,
+      sellerId: entity.seller_id,
+      storeName: entity.store_name,
+      marketplaceId: entity.marketplace_id,
       status: entity.status,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),

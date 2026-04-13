@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+
 import { Checkbox } from '../../atoms/Checkbox';
 import { Icon } from '../../atoms/Icon';
 import { Select } from '../Select';
+
 import * as S from './Table.style';
 import type { TableProps } from './Table.types';
 import { TablePagination } from './TablePagination.component';
@@ -27,9 +29,14 @@ export const Table = <T extends Record<string, any>>({
   pagination,
 }: TableProps<T>): React.ReactElement => {
   const [bulkValue, setBulkValue] = useState<string | number>('');
+  const overflowRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [wasDragging, setWasDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleRowClick = (row: T, index: number) => {
-    if (onRowClick) {
+    if (onRowClick && !wasDragging) {
       onRowClick(row, index);
     }
   };
@@ -43,7 +50,7 @@ export const Table = <T extends Record<string, any>>({
   const isAllSelected = data.length > 0 && selectedRows.length === data.length;
 
   const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) return;
+    if (!onSelectionChange) {return;}
     if (checked) {
       onSelectionChange(data);
     } else {
@@ -52,7 +59,7 @@ export const Table = <T extends Record<string, any>>({
   };
 
   const handleSelectRow = (row: T, checked: boolean) => {
-    if (!onSelectionChange) return;
+    if (!onSelectionChange) {return;}
     if (checked) {
       onSelectionChange([...selectedRows, row]);
     } else {
@@ -74,12 +81,37 @@ export const Table = <T extends Record<string, any>>({
   );
 
   const handleBulkChange = (value: string | number) => {
-    if (value === '__placeholder__') return;
+    if (value === '__placeholder__') {return;}
     const actionIndex = parseInt(value as string, 10);
     if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
       bulkActions[actionIndex].onClick(selectedRows);
     }
     setBulkValue('');
+  };
+
+  // Drag to scroll handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!overflowRef.current) {return;}
+    setIsDragging(true);
+    setWasDragging(false);
+    setStartX(e.pageX - overflowRef.current.offsetLeft);
+    setScrollLeft(overflowRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !overflowRef.current) {return;}
+    e.preventDefault();
+    const x = e.pageX - overflowRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    overflowRef.current.scrollLeft = scrollLeft - walk;
+    if (Math.abs(walk) > 5) {
+      setWasDragging(true);
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+    setTimeout(() => setWasDragging(false), 0);
   };
 
   return (
@@ -115,7 +147,13 @@ export const Table = <T extends Record<string, any>>({
           </S.ToolbarSection>
         </S.Toolbar>
       )}
-      <S.OverflowWrapper>
+      <S.OverflowWrapper
+        ref={overflowRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+      >
         <S.StyledTable>
           <S.Thead>
             <S.Tr>
@@ -128,16 +166,14 @@ export const Table = <T extends Record<string, any>>({
                 <S.Th
                   key={column.key}
                   $align={column.align}
-                  $sortable={column.sortable}
                   $sticky={column.sticky}
                   $left={selectable ? 48 : 0}
-                  onClick={column.sortable ? () => handleSort(column.key) : undefined}
                   style={{ width: column.width }}
                 >
                   <S.ThContent $align={column.align}>
                     {column.header}
                     {column.sortable && (
-                      <S.SortIconWrapper>
+                      <S.SortIconWrapper onClick={() => handleSort(column.key)}>
                         <Icon
                           name="chevron-down"
                           size={16}
@@ -187,7 +223,13 @@ export const Table = <T extends Record<string, any>>({
                       </S.Td>
                     )}
                     {columns.map((column) => (
-                      <S.Td key={column.key} $align={column.align} $sticky={column.sticky} $left={selectable ? 48 : 0}>
+                      <S.Td
+                        key={column.key}
+                        $align={column.align}
+                        $sticky={column.sticky}
+                        $left={selectable ? 48 : 0}
+                        style={{ width: column.width }}
+                      >
                         {column.render
                           ? column.render(row[column.key], row, rowIndex)
                           : (row[column.key] as React.ReactNode)}

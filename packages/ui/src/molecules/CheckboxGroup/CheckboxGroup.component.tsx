@@ -1,8 +1,10 @@
 import type { FieldValues } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+
 import { Checkbox } from '../../atoms/Checkbox';
 import { Text } from '../../atoms/Text';
 import * as S from '../../styles/Form.style';
+
 import * as LocalS from './CheckboxGroup.style';
 import type { CheckboxGroupProps } from './CheckboxGroup.types';
 

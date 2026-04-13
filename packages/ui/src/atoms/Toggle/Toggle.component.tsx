@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+
 import * as S from './Toggle.style';
 import type { ToggleProps } from './Toggle.types';
 

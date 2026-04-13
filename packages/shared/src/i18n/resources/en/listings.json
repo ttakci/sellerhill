@@ -80,7 +80,8 @@
       "active": "Active",
       "draft": "Draft",
       "inactive": "Inactive",
-      "error": "Error"
+      "error": "Error",
+      "retrying": "Retrying"
     },
     "title": "Add Products",
     "subtitle": "Import products directly from Amazon to your eBay storefront using ASIN identifiers. We'll handle the images, descriptions, and pricing optimizations.",
@@ -145,7 +146,8 @@
       "maxAsins": "Maximum 1000 ASINs allowed per import",
       "paymentPolicyRequired": "Payment policy is required",
       "shippingPolicyRequired": "Shipping policy is required",
-      "returnPolicyRequired": "Return policy is required"
+      "returnPolicyRequired": "Return policy is required",
+      "listingSettingsGroupRequired": "Listing strategy group is required"
     },
     "success": {
       "created": "{{count}} listings created successfully",

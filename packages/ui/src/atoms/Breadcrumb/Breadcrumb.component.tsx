@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { Icon } from '../Icon';
+
 import * as S from './Breadcrumb.style';
 import type { BreadcrumbProps } from './Breadcrumb.types';
 

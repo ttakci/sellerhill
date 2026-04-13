@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './Toast.style';
 import type { ToastProps } from './Toast.types';
 

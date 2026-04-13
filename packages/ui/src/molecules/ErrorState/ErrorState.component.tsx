@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Button } from '../../atoms/Button';
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './ErrorState.style';
 import type { ErrorStateProps } from './ErrorState.types';
 

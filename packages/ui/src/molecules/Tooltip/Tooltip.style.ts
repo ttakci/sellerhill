@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
+
 import { tkn } from '../../theme/tkn';
+
 import type { TooltipPosition, TooltipVariant } from './Tooltip.types';
 
 export const TooltipWrapper = styled.div`

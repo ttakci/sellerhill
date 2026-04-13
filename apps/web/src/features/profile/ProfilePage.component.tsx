@@ -2,6 +2,7 @@ import { type UpdateProfileFormData } from '@repo/shared';
 import { Button, Card, Icon, ModernTextInput, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import * as S from './ProfilePage.style';
 import type { ProfilePageComponentProps } from './ProfilePage.types';
 

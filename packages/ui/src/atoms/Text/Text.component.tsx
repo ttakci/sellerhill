@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { S } from './Text.style';
 import type { TextProps } from './Text.types';
 

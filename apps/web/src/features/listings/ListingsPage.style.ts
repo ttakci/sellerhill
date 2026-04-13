@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { Badge as UIBadge, Button, Card, IconButton as UIIconButton, Text as UIText, tkn } from '@repo/ui';
+import { ListingStatus } from '@repo/shared';
+import { Badge as UIBadge, Card, Text as UIText, tkn } from '@repo/ui';
 
 // --- Layout ---
 
@@ -13,90 +14,6 @@ export const Container = styled.div`
   box-sizing: border-box;
 `;
 
-// --- Toolbar ---
-
-export const Toolbar = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.md')};
-  margin-bottom: ${tkn('spacing.lg')};
-`;
-
-export const ToolbarLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const ToolbarRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const BulkSelectWrapper = styled.div`
-  min-width: 10rem;
-`;
-
-export const ToolbarGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-`;
-
-// --- Icon Buttons ---
-
-export const IconButton = styled(UIIconButton)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  & svg {
-    width: 1.125rem;
-    height: 1.125rem;
-  }
-`;
-
-// --- View Toggle ---
-
-export const ViewToggleGroup = styled.div`
-  display: flex;
-  align-items: center;
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  padding: 0.125rem;
-  border-radius: ${tkn('radius.md')};
-  gap: 0.0625rem;
-`;
-
-export const ToggleButton = styled(Button)<{ $active?: boolean }>`
-  padding: 0.375rem;
-  border-radius: ${tkn('radius.sm')};
-  border: none;
-  background: ${({ $active, theme }) =>
-    $active ? (theme as any).colors.brand.primary : 'transparent'};
-  color: ${({ $active, theme }) =>
-    $active ? (theme as any).colors.text.inverse : (theme as any).colors.text.tertiary};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    color: ${({ $active, theme }) =>
-      !$active ? (theme as any).colors.text.primary : (theme as any).colors.text.inverse};
-  }
-`;
-
-export const ViewLabel = styled(UIText)`
-  margin-left: ${tkn('spacing.sm')};
-`;
-
-// --- Filter Popover ---
-
 // --- Table Cell Styles (used by container column renders) ---
 
 export const ProductCell = styled.div`
@@ -106,20 +23,20 @@ export const ProductCell = styled.div`
 `;
 
 export const ProductImageWrapper = styled.div`
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 4rem; /* 64px */
+  height: 4rem; /* 64px */
   border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.background.tertiary')};
+  background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.1875rem;
+  padding: 0.375rem; /* 6px padding */
   flex-shrink: 0;
   overflow: hidden;
 
   svg {
-    color: ${tkn('colors.text.disabled')};
+    color: ${tkn('colors.text.tertiary')};
   }
 `;
 
@@ -192,8 +109,8 @@ export const MonoText = styled(UIText)``;
 export const MetricValue = styled(UIText)<{ $positive?: boolean; $negative?: boolean; $bold?: boolean }>`
   color: ${({ $positive, $negative, theme }) => {
     const t = theme as any;
-    if ($positive) return t.colors.semantic?.success;
-    if ($negative) return t.colors.semantic?.error;
+    if ($positive) {return t.colors.semantic?.success;}
+    if ($negative) {return t.colors.semantic?.error;}
     return t.colors.text?.primary;
   }};
 `;
@@ -234,57 +151,6 @@ export const CompactText = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-// --- Filter Popover ---
-
-export const FilterWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
-export const PopoverContainer = styled.div`
-  position: absolute;
-  top: calc(100% + 0.375rem);
-  right: 0;
-  width: 15rem;
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.lg')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  box-shadow: ${tkn('shadows.lg')};
-  z-index: 50;
-  overflow: hidden;
-  animation: popoverFadeIn 0.12s ease-out;
-
-  @keyframes popoverFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-0.25rem);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-
-export const PopoverHeader = styled.div`
-  padding: 0.5rem 0.75rem;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-`;
-
-export const PopoverContent = styled.div`
-  padding: 0.5rem 0.625rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  max-height: 22rem;
-  overflow-y: auto;
 `;
 
 // --- Grid View ---
@@ -451,8 +317,8 @@ export const StatLabel = styled(UIText)`
 
 export const StatValue = styled(UIText)<{ $type?: 'price' | 'profit' | 'roi' }>`
   color: ${({ $type, theme }) => {
-    if ($type === 'profit') return (theme as any).colors.semantic.success;
-    if ($type === 'roi') return (theme as any).colors.semantic.info;
+    if ($type === 'profit') {return (theme as any).colors.semantic.success;}
+    if ($type === 'roi') {return (theme as any).colors.semantic.info;}
     return (theme as any).colors.text.primary;
   }};
 `;
@@ -491,7 +357,7 @@ export const StatusBadge = styled(UIBadge)<{ $status: string }>`
   ${({ $status, theme }) => {
     const t = theme as any;
     const s = $status.toLowerCase();
-    if (s === 'active') {
+    if (s === ListingStatus.ACTIVE) {
       return `
         background: ${t.colors.semanticTint?.success || '#ECFDF5'};
         color: ${t.colors.semantic?.success || '#059669'};

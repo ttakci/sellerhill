@@ -1,7 +1,8 @@
-import { type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
+import { type ListingSettingsGroupFormData, type PredefinedTemplateResponse, TemplateType } from '@repo/shared';
 import { Button, CardBody, Icon, ModernSelect, ModernTextInput, Text } from '@repo/ui';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+
 import * as S from './ListingSettingsGroupForm.style';
 import { ListingSettingsGroupFormProps } from './ListingSettingsGroupForm.types';
 
@@ -70,7 +71,7 @@ export const ListingSettingsGroupFormComponent = ({
           </S.SectionHeader>
           <CardBody>
             <S.PaddingContainer>
-              <S.InputGrid columns={3}>
+              <S.InputGrid columns={4}>
                 <ModernTextInput<ListingSettingsGroupFormData>
                   name="name"
                   control={control}
@@ -87,6 +88,13 @@ export const ListingSettingsGroupFormComponent = ({
                   name="stock.defaultQuantity"
                   control={control}
                   label={t('listingSettingsGroup.defaultStockQuantity')}
+                  type="number"
+                  fullWidth
+                />
+                <ModernTextInput<ListingSettingsGroupFormData>
+                  name="stock.stockBuffer"
+                  control={control}
+                  label={t('listingSettingsGroup.stockBuffer')}
                   type="number"
                   fullWidth
                 />
@@ -221,7 +229,7 @@ export const ListingSettingsGroupFormComponent = ({
                     <S.ToggleItem
                       type="button"
                       variant="text"
-                      active={field.value === 'custom'}
+                      active={field.value === TemplateType.CUSTOM}
                       onClick={() => field.onChange('custom')}
                     >
                       {t('listingSettingsGroup.custom')}
@@ -229,7 +237,7 @@ export const ListingSettingsGroupFormComponent = ({
                     <S.ToggleItem
                       type="button"
                       variant="text"
-                      active={field.value === 'predefined'}
+                      active={field.value === TemplateType.PREDEFINED}
                       onClick={() => field.onChange('predefined')}
                     >
                       {t('listingSettingsGroup.predefined')}
@@ -250,7 +258,7 @@ export const ListingSettingsGroupFormComponent = ({
                       label: tmp.name,
                     }))}
                     fullWidth
-                    isDisabled={watchedValues.templates.type === 'custom'}
+                    isDisabled={watchedValues.templates.type === TemplateType.CUSTOM}
                     searchPlaceholder={t('translation:common.search')}
                     noResultsMessage={t('translation:common.noResults')}
                   />
@@ -261,7 +269,7 @@ export const ListingSettingsGroupFormComponent = ({
                     <S.EditorComment>
                       &lt;!-- Listing Template --&gt;
                     </S.EditorComment>
-                    {watchedValues.templates.type === 'custom' ? (
+                    {watchedValues.templates.type === TemplateType.CUSTOM ? (
                       <S.CustomTemplateTextarea
                         {...control.register('templates.customTemplateHtml')}
                       />

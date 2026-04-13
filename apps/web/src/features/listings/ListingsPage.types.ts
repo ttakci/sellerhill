@@ -13,7 +13,6 @@ export interface ListingsPageProps {
   columns: TableColumn<ListingDto>[];
   selectedRows: ListingDto[];
   bulkActions?: BulkAction<ListingDto>[];
-  onFilter?: () => void;
   onDownload?: () => void;
   pagination: {
     count: number;
@@ -30,6 +29,4 @@ export interface ListingsPageProps {
   sortColumn?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (column: string) => void;
-  viewMode: 'table' | 'grid';
-  onViewModeChange: (mode: 'table' | 'grid') => void;
 }

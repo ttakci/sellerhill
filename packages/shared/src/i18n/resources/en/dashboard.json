@@ -3,7 +3,24 @@
     "title": "Dashboard",
     "subtitle": "Welcome to your seller dashboard",
     "greeting": "Hello, {{name}}!",
-    "comingSoon": "Dashboard features coming soon...",
-    "description": "Here you'll be able to manage your eBay listings, track orders, and view analytics."
+    "comingSoon": "Get started",
+    "description": "Connect your eBay account to start managing listings and tracking orders.",
+    "connectEbay": "Connect eBay Account",
+    "todayOrders": "Today's Orders",
+    "todayRevenue": "Revenue: {{amount}}",
+    "totalRevenue": "Total Revenue",
+    "totalOrdersCount": "{{count}} total orders",
+    "totalProfit": "Total Profit",
+    "netProfitLabel": "Net profit after fees",
+    "activeListings": "Active Listings",
+    "onEbay": "Active on eBay",
+    "revenueTrend": "Revenue & Profit (14 days)",
+    "revenue": "Revenue",
+    "profit": "Profit",
+    "recentOrders": "Recent Orders",
+    "viewAllOrders": "View all",
+    "unknownProduct": "Unknown Product",
+    "untracked": "External listing",
+    "asin": "ASIN: {{asin}}"
   }
 }
