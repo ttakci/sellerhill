@@ -84,7 +84,7 @@ export const RegisterPageComponent = ({
               </Text>
             </S.Header>
 
-            <S.Form onSubmit={handleSubmit(onSubmit)}>
+            <S.Form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
               <S.FormRow>
                 <ModernTextInput
                   name="firstName"

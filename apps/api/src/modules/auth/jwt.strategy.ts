@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     this.logger.debug('JwtStrategy initialized with dynamic secret');
   }
 
-  async validate(payload: JwtPayload): Promise<JwtPayload> {
+  validate(payload: JwtPayload): JwtPayload {
     this.logger.debug(`Validating JWT for user: ${payload.sub}`);
     return {
       sub: payload.sub,

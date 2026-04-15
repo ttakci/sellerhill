@@ -54,5 +54,8 @@ coverage/
 
 # OS/editor
 .DS_Store
+# ESLint cache
+.eslintcache
+
 # Keep VS Code workspace settings for Copilot configuration
 # .vscode/

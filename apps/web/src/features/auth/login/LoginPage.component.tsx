@@ -76,7 +76,7 @@ export const LoginPageComponent = ({
               </Text>
             </S.Header>
 
-            <S.Form onSubmit={handleSubmit(onSubmit)}>
+            <S.Form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
               <ModernTextInput
                 name="email"
                 control={control}

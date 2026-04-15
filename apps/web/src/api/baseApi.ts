@@ -34,7 +34,10 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+// Note: Using `any` as the Result type so that endpoint-level type annotations
+// (e.g. builder.query<UserDto, void>) propagate correctly to generated hooks.
+// Without this, RTK Query cannot substitute the generic and all hook data becomes `unknown`.
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, any, FetchBaseQueryError> = async (
   args,
   api,
   extraOptions

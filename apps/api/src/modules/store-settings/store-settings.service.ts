@@ -201,10 +201,10 @@ export class StoreSettingsService implements OnModuleInit {
    * Map database entity to DTO
    */
   private mapToDto(entity: StoreSettingsEntity): StoreSettingsResponse {
-    const blacklist =
+    const parsedBlacklist =
       typeof entity.blacklist === 'string'
-        ? JSON.parse(entity.blacklist)
-        : (entity.blacklist as any as BlacklistKeyword[]);
+        ? (JSON.parse(entity.blacklist) as BlacklistKeyword[])
+        : (entity.blacklist as unknown as BlacklistKeyword[]);
 
     return {
       id: entity.id,
@@ -215,7 +215,7 @@ export class StoreSettingsService implements OnModuleInit {
       zipCode: entity.zip_code,
       validateTitle: entity.validate_title,
       validateDescription: entity.validate_description,
-      blacklist: blacklist,
+      blacklist: parsedBlacklist,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

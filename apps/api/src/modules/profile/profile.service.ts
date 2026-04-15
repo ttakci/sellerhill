@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
-import type { ProfileDto, UpdateProfileRequest } from '@repo/shared';
-import { UserStatus } from '@repo/shared';
+import { UserStatus, type ProfileDto, type UpdateProfileRequest } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 
@@ -88,7 +87,7 @@ export class ProfileService implements OnModuleInit {
 
   async updateProfile(userId: string, request: UpdateProfileRequest): Promise<ProfileDto> {
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
 
     const fieldsTemplate: Record<keyof UpdateProfileRequest, string> = {
@@ -107,7 +106,7 @@ export class ProfileService implements OnModuleInit {
         const dbField = fieldsTemplate[key as keyof UpdateProfileRequest];
         if (dbField && value !== undefined) {
              updates.push(`${dbField} = $${paramIndex++}`);
-             values.push(value);
+             values.push(value as string | number | boolean | null);
         }
     });
 

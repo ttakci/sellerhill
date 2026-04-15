@@ -4,11 +4,11 @@ import { tkn } from '../../theme/tkn';
 
 export const TableContainer = styled.div`
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   background: ${tkn('colors.surface.primary')};
   border-radius: ${tkn('radius.xl')};
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid ${tkn('colors.border.secondary')};
+  box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const OverflowWrapper = styled.div`
@@ -41,12 +41,12 @@ export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  table-layout: fixed;
+  table-layout: auto;
 `;
 
 export const Thead = styled.thead`
   background: ${tkn('colors.background.primary')};
-  border-bottom: 2px solid #E2E8F0;
+  border-bottom: 2px solid ${tkn('colors.border.secondary')};
   position: sticky;
   top: 0;
   z-index: 10;
@@ -58,20 +58,20 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
   background: ${tkn('colors.surface.primary')};
   transition: background-color 0.12s ease;
   height: 3.25rem;
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 1px solid ${tkn('colors.border.secondary')};
 
   &:nth-of-type(even) {
-    background: rgba(248, 250, 252, 0.8);
+    background: ${tkn('colors.background.tertiary')};
   }
 
   &:hover {
-    background: rgba(66, 99, 235, 0.04);
+    background: ${tkn('colors.background.secondary')};
   }
 
-  ${({ $selected }) =>
+  ${({ $selected, theme }) =>
     $selected &&
     `
-    background: rgba(66, 99, 235, 0.08) !important;
+    background: ${tkn('colors.semanticTint.info')({ theme })} !important;
   `}
 
   &:last-child {
@@ -91,12 +91,12 @@ export const Th = styled.th<{
   $left?: number;
 }>`
   padding: 0.875rem ${tkn('spacing.md')};
-  color: #64748B;
+  color: ${tkn('colors.text.tertiary')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.xs')};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  text-align: ${({ $align }) => $align || 'left'};
+  text-align: left;
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
@@ -104,6 +104,7 @@ export const Th = styled.th<{
   background: ${tkn('colors.background.primary')};
   transition: color 0.12s ease;
   position: relative;
+  border-right: 1px solid ${tkn('colors.border.secondary')};
 
   position: sticky;
   top: 0;
@@ -113,7 +114,6 @@ export const Th = styled.th<{
     $sticky &&
     `
     left: ${($left ?? 0) / 16}rem;
-    border-right: 1px solid #E2E8F0;
   `}
 
   &:first-of-type {
@@ -127,13 +127,14 @@ export const Th = styled.th<{
   }
   &:last-of-type {
     padding-right: ${tkn('spacing.lg')};
+    border-right: none;
   }
 `;
 
 export const ThContent = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
   display: flex;
   align-items: center;
-  justify-content: ${({ $align }) => ($align === 'right' ? 'flex-end' : $align === 'center' ? 'center' : 'flex-start')};
+  justify-content: flex-start;
   gap: ${tkn('spacing.2xs')};
 `;
 
@@ -166,28 +167,26 @@ export const Td = styled.td<{
   vertical-align: middle;
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
-  text-align: ${({ $align }) => $align || 'left'};
+  text-align: left;
   background: inherit;
   transition: background-color 0.12s ease;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  border-right: 1px solid ${tkn('colors.border.secondary')};
 
-  ${({ $sticky, $left }) =>
+  ${({ $sticky, $left, theme }) =>
     $sticky &&
     `
     position: sticky;
     left: ${($left ?? 0) / 16}rem;
     z-index: 20;
-    border-right: 1px solid #E2E8F0;
-    background: ${tkn('colors.surface.primary')};
+    background: ${tkn('colors.surface.primary')({ theme })};
 
     tr:hover & {
-      background: rgba(66, 99, 235, 0.04);
+      background: ${tkn('colors.background.secondary')({ theme })};
     }
 
     tr[data-selected="true"] & {
-      background: rgba(66, 99, 235, 0.08);
+      background: ${tkn('colors.semanticTint.info')({ theme })};
     }
   `}
 
@@ -196,6 +195,7 @@ export const Td = styled.td<{
   }
   &:last-of-type {
     padding-right: ${tkn('spacing.lg')};
+    border-right: none;
   }
 `;
 

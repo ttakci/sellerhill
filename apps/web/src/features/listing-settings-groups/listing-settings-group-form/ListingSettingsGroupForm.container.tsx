@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  listingSettingsGroupSchema,
   TemplateType,
+  listingSettingsGroupSchema,
   type ListingSettingsGroupFormData,
   type PredefinedTemplateResponse,
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -51,7 +51,7 @@ export const ListingSettingsGroupFormContainer = () => {
     },
   });
 
-  const { reset, watch, control, getValues } = form;
+  const { reset, control, getValues } = form;
 
   // Sync form with data
   useEffect(() => {
@@ -83,7 +83,7 @@ export const ListingSettingsGroupFormContainer = () => {
         },
         t
       );
-      navigate('/settings/listing-groups');
+      void navigate('/settings/listing-groups');
     }
   }, [createSuccess, updateSuccess, showMessage, t, navigate]);
 
@@ -108,7 +108,7 @@ export const ListingSettingsGroupFormContainer = () => {
     // Let's pass as is, assuming DTO handles it.
     const cleanData = {
       ...data,
-      repricingStrategy: data.repricingStrategy.map(({ id, ...rest }) => rest),
+      repricingStrategy: data.repricingStrategy.map(({ id: _id, ...rest }) => rest),
     };
 
     if (isEdit) {
@@ -119,7 +119,7 @@ export const ListingSettingsGroupFormContainer = () => {
   };
 
   const handleCancel = () => {
-    navigate('/settings/listing-groups');
+    void navigate('/settings/listing-groups');
   };
 
   const handleAddRange = () => {
@@ -137,12 +137,12 @@ export const ListingSettingsGroupFormContainer = () => {
   };
 
   // Preview Logic
-  const watchedValues = watch();
+  const watchedTemplates = useWatch({ control, name: 'templates' });
 
   const activeTemplate = useMemo(() => {
-    if (watchedValues.templates?.type === TemplateType.CUSTOM) {
+    if (watchedTemplates?.type === TemplateType.CUSTOM) {
       return {
-        htmlContent: watchedValues.templates.customTemplateHtml || '',
+        htmlContent: watchedTemplates.customTemplateHtml || '',
         sampleData: {
           title: t('listingSettingsGroup.sample.productTitle'),
           main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
@@ -162,17 +162,16 @@ export const ListingSettingsGroupFormContainer = () => {
         },
       };
     }
-    const template = templates.find(
-      (t: PredefinedTemplateResponse) => t.id === watchedValues.templates?.predefinedTemplateId
-    );
+    const template = templates.find((t: PredefinedTemplateResponse) => t.id === watchedTemplates?.predefinedTemplateId);
     return {
       htmlContent: template?.htmlContent || '',
       sampleData: template?.sampleData || {},
     };
   }, [
-    watchedValues.templates?.type,
-    watchedValues.templates?.predefinedTemplateId,
-    watchedValues.templates?.customTemplateHtml,
+    t,
+    watchedTemplates?.type,
+    watchedTemplates?.predefinedTemplateId,
+    watchedTemplates?.customTemplateHtml,
     templates,
   ]);
 
@@ -180,7 +179,9 @@ export const ListingSettingsGroupFormContainer = () => {
     const { htmlContent, sampleData } = activeTemplate;
 
     let processedHtml = htmlContent || '';
-    if (!sampleData) {return processedHtml;}
+    if (!sampleData) {
+      return processedHtml;
+    }
 
     Object.entries(sampleData).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -214,7 +215,9 @@ export const ListingSettingsGroupFormContainer = () => {
   return (
     <ListingSettingsGroupFormComponent
       isEdit={isEdit}
-      defaultValues={group ? { ...group, stock: { ...group.stock, stockBuffer: group.stock?.stockBuffer ?? 0 } } : undefined}
+      defaultValues={
+        group ? { ...group, stock: { ...group.stock, stockBuffer: group.stock?.stockBuffer ?? 0 } } : undefined
+      }
       predefinedTemplates={templates}
       onSubmit={handleSubmit}
       onCancel={handleCancel}

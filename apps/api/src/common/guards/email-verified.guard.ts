@@ -16,10 +16,10 @@ export class EmailVerifiedGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<{ user: { sub: string } }>();
     const user = request.user;
 
-    if (!user || !user.sub) {
+    if (!user?.sub) {
       throw new ForbiddenException('auth.errors.unauthorized');
     }
 

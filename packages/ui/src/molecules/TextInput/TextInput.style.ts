@@ -79,7 +79,7 @@ export const FloatingLabel = styled.label<LabelProps>`
     return theme.colors.text.tertiary;
   }};
 
-  ${({ $isFocused, $hasValue, $size }) => {
+  ${({ $isFocused, $hasValue, $size, theme }) => {
     const isSmall = $size === 'small';
     const isLarge = $size === 'large';
     const isActive = $isFocused || $hasValue;
@@ -88,14 +88,14 @@ export const FloatingLabel = styled.label<LabelProps>`
       const y = isSmall ? '0.375rem' : isLarge ? '0.625rem' : '0.5rem';
       return `
         transform: translateY(${y}) scale(0.75);
-        font-weight: ${tkn('typography.fontWeight.semibold')};
+        font-weight: ${tkn('typography.fontWeight.semibold')({ theme })};
       `;
     }
 
     const y = isSmall ? '0.75rem' : isLarge ? '1.25rem' : '1rem';
     return `
       transform: translateY(${y}) scale(1);
-      font-weight: ${tkn('typography.fontWeight.normal')};
+      font-weight: ${tkn('typography.fontWeight.normal')({ theme })};
     `;
   }}
 

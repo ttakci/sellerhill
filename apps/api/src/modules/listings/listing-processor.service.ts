@@ -74,9 +74,13 @@ export class ListingProcessorService extends WorkerHost {
             currency: 'USD',
           };
           productData.stock = keepaData.stock;
-          productData.rawKeepaData = keepaData.raw;
-        } catch (keepaError: any) {
-          throw new Error(`Listing failed: Keepa data unavailable - ${keepaError.message}`);
+          productData.rawKeepaData = keepaData.raw as Record<string, unknown>;
+        } catch (keepaError: unknown) {
+          throw new Error(
+            `Listing failed: Keepa data unavailable - ${
+              keepaError instanceof Error ? keepaError.message : String(keepaError)
+            }`
+          );
         }
       } else {
         // 2. Fetch product details from ScraperAPI if not in DB OR cached data is broken
@@ -112,9 +116,13 @@ export class ListingProcessorService extends WorkerHost {
             currency: 'USD',
           };
           productData.stock = keepaData.stock;
-          productData.rawKeepaData = keepaData.raw;
-        } catch (keepaError: any) {
-          throw new Error(`Listing failed: Keepa data unavailable - ${keepaError.message}`);
+          productData.rawKeepaData = keepaData.raw as Record<string, unknown>;
+        } catch (keepaError: unknown) {
+          throw new Error(
+            `Listing failed: Keepa data unavailable - ${
+              keepaError instanceof Error ? keepaError.message : String(keepaError)
+            }`
+          );
         }
 
         // 3. Cache/Find product in database
@@ -181,20 +189,33 @@ export class ListingProcessorService extends WorkerHost {
       });
 
       this.logger.log(`Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
 
       // Extract detailed error message if available from eBay REST API
-      let errorMessage = error.message;
-      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-        errorMessage = error.response.data.errors
-          .map((e: any) => {
-            const params = e.parameters ? ` (${e.parameters.map((p: any) => `${p.name}: ${p.value}`).join(', ')})` : '';
+      let errorMessage = error instanceof Error ? error.message : String(error);
+      const axiosErr =
+        error instanceof Error && 'response' in error
+          ? (error as {
+              response?: {
+                data?: {
+                  errors?: Array<{ message?: string; parameters?: Array<{ name?: string; value?: string }> }>;
+                  error_description?: string;
+                };
+              };
+            })
+          : null;
+      if (axiosErr?.response?.data?.errors && Array.isArray(axiosErr.response.data.errors)) {
+        errorMessage = axiosErr.response.data.errors
+          .map((e: { message?: string; parameters?: Array<{ name?: string; value?: string }> }) => {
+            const params = e.parameters
+              ? ` (${e.parameters.map((p: { name?: string; value?: string }) => `${p.name}: ${p.value}`).join(', ')})`
+              : '';
             return `${e.message}${params}`;
           })
           .join(' | ');
-      } else if (error.response?.data?.error_description) {
-        errorMessage = error.response.data.error_description;
+      } else if (axiosErr?.response?.data?.error_description) {
+        errorMessage = axiosErr.response.data.error_description;
       }
 
       this.logger.error(

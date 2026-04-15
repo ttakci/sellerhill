@@ -26,8 +26,8 @@ export interface ProductData {
     avg90?: number; // 90-day average price
   };
   stock?: number;
-  raw?: any; // Original provider response for debugging (ScraperAPI)
-  rawKeepaData?: any; // Keepa API response for price/stock debugging
+  raw?: Record<string, unknown>; // Original provider response for debugging (ScraperAPI)
+  rawKeepaData?: Record<string, unknown>; // Keepa API response for price/stock debugging
   updatedAt?: string;
 }
 

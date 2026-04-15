@@ -125,7 +125,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       SELECT COUNT(*) as count FROM predefined_templates
     `);
 
-    if (existingTemplates[0] && (existingTemplates[0] as any).count > 0) {
+    if (existingTemplates[0] && (existingTemplates[0] as unknown as { count: number }).count > 0) {
       // Check if we need to refresh (e.g. if specific v2 template name exists)
       const v2Check = await this.databaseService.query(`
         SELECT id FROM predefined_templates WHERE name = 'Elite Trust'
@@ -292,7 +292,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       }
     ];
 
-    for (const template of templates as any[]) {
+    for (const template of templates) {
       await this.databaseService.query(`
         INSERT INTO predefined_templates (name, description, html_content, sample_data)
         VALUES ($1, $2, $3, $4)
@@ -373,7 +373,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
     await this.getListingSettingsGroupById(userId, id);
 
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
 
     if (dto.name !== undefined) {
@@ -451,7 +451,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       name: entity.name,
       description: entity.description,
       htmlContent: entity.html_content,
-      sampleData: typeof entity.sample_data === 'string' ? JSON.parse(entity.sample_data) : entity.sample_data,
+      sampleData: typeof entity.sample_data === 'string' ? (JSON.parse(entity.sample_data) as Record<string, unknown>) : entity.sample_data,
       previewImage: entity.preview_image || undefined,
       createdAt: entity.created_at
     }));
@@ -462,20 +462,20 @@ export class ListingSettingsGroupService implements OnModuleInit {
    */
   private mapToDto(entity: ListingSettingsGroupEntity): ListingSettingsGroupResponse {
     const repricingStrategy = typeof entity.repricing_strategy === 'string'
-      ? JSON.parse(entity.repricing_strategy)
-      : (entity.repricing_strategy as any as PriceRange[]);
+      ? (JSON.parse(entity.repricing_strategy) as PriceRange[])
+      : (entity.repricing_strategy as unknown as PriceRange[]);
 
     const stock = typeof entity.stock === 'string'
-      ? JSON.parse(entity.stock)
-      : (entity.stock as any as StockConfig);
+      ? (JSON.parse(entity.stock) as StockConfig)
+      : (entity.stock as unknown as StockConfig);
 
     const fees = typeof entity.fees === 'string'
-      ? JSON.parse(entity.fees)
-      : (entity.fees as any as FeeConfig);
+      ? (JSON.parse(entity.fees) as FeeConfig)
+      : (entity.fees as unknown as FeeConfig);
 
     const templates = typeof entity.templates === 'string'
-      ? JSON.parse(entity.templates)
-      : (entity.templates as any as TemplateConfig);
+      ? (JSON.parse(entity.templates) as TemplateConfig)
+      : (entity.templates as unknown as TemplateConfig);
 
     return {
       id: entity.id,

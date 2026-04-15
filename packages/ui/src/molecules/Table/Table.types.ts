@@ -1,20 +1,22 @@
-export interface TableColumn<T = any> {
+import type React from 'react';
+
+export interface TableColumn<T = unknown> {
   key: string;
   header: string;
   align?: 'left' | 'center' | 'right';
-  render?: (value: any, row: T, index: number) => React.ReactNode;
+  render?: (value: unknown, row: T, index: number) => React.ReactNode;
   sortable?: boolean;
   width?: string | number;
   sticky?: boolean;
 }
 
-export interface BulkAction<T = any> {
+export interface BulkAction<T = unknown> {
   label: string;
   onClick: (selectedRows: T[]) => void;
   variant?: 'default' | 'danger';
 }
 
-export interface TableProps<T = any> {
+export interface TableProps<T = unknown> {
   columns: TableColumn<T>[];
   data: T[];
   emptyMessage?: string;

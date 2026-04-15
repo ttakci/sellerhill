@@ -47,7 +47,8 @@ export class ProductSyncService implements OnModuleInit {
    */
   private async syncPricesAndStock() {
     // Fetch ALL active products that need syncing
-    const products = await this.databaseService.query(`
+    interface ProductRow { id: string; asin: string; }
+    const products = await this.databaseService.query<ProductRow>(`
       SELECT DISTINCT p.id, p.asin 
       FROM products p
       INNER JOIN listings l ON p.id = l.product_id
@@ -92,8 +93,8 @@ export class ProductSyncService implements OnModuleInit {
           );
 
           await this.updateAllListingsForProduct(product.id, product.asin);
-        } catch (error: any) {
-          this.logger.error(`Keepa sync failed for ASIN ${product.asin}: ${error.message}`);
+        } catch (error: unknown) {
+          this.logger.error(`Keepa sync failed for ASIN ${product.asin}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }
@@ -104,7 +105,8 @@ export class ProductSyncService implements OnModuleInit {
    * Frequency: Every 30 days
    */
   private async syncMetadata() {
-    const products = await this.databaseService.query(`
+    interface ProductRow { id: string; asin: string; }
+    const products = await this.databaseService.query<ProductRow>(`
       SELECT DISTINCT p.id, p.asin
       FROM products p
       INNER JOIN listings l ON p.id = l.product_id
@@ -121,8 +123,8 @@ export class ProductSyncService implements OnModuleInit {
         if (!data) {continue;}
 
         await this.listingsService.findOrCreateProduct(product.asin, data);
-      } catch (error: any) {
-        this.logger.error(`Metadata sync failed for ASIN ${product.asin}: ${error.message}`);
+      } catch (error: unknown) {
+        this.logger.error(`Metadata sync failed for ASIN ${product.asin}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }
@@ -132,7 +134,8 @@ export class ProductSyncService implements OnModuleInit {
    * Groups listings by user for batch processing.
    */
   private async updateAllListingsForProduct(productId: string, asin: string) {
-    const listings = await this.databaseService.query(
+    interface ListingRow { id: string; user_id: string; listing_settings_group_id: string; ebay_item_id: string; }
+    const listings = await this.databaseService.query<ListingRow>(
       `SELECT id, user_id, listing_settings_group_id, ebay_item_id FROM listings
        WHERE product_id = $1 AND status = '${ListingStatus.ACTIVE}'`,
       [productId]
@@ -190,8 +193,8 @@ export class ProductSyncService implements OnModuleInit {
           this.logger.debug(
             `Repriced listing ${listing.ebay_item_id} (Price: ${strategyResult.price}, Stock: ${strategyResult.quantity})`
           );
-        } catch (error: any) {
-          this.logger.error(`Failed to reprice listing ${listing.id}: ${error.message}`);
+        } catch (error: unknown) {
+          this.logger.error(`Failed to reprice listing ${listing.id}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     });

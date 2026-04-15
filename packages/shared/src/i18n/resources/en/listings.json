@@ -39,6 +39,28 @@
         "empty": "No items found for this job."
       }
     },
+    "filters": {
+      "searchPlaceholder": "Search by title or ASIN...",
+      "allCategories": "All Categories",
+      "allStatuses": "All Statuses",
+      "advancedFilters": "Advanced Filters",
+      "clearAll": "Clear All",
+      "resultCount": "{{count}} results",
+      "min": "Min",
+      "max": "Max",
+      "fields": {
+        "price": "Sell Price",
+        "purchasePrice": "Buy Price",
+        "estimatedProfit": "Profit",
+        "roi": "ROI (%)",
+        "profitMargin": "Margin (%)",
+        "soldCount": "Sold",
+        "watchCount": "Watch",
+        "viewCount": "Views",
+        "quantity": "Stock",
+        "sourceStock": "Amazon Stock"
+      }
+    },
     "overview": {
       "title": "Active Listings",
       "subtitle": "You have {{count}} active listings currently live in your store.",
@@ -67,7 +89,8 @@
       "stockLabel": "Stock",
       "asinLabel": "ASIN: {{asin}}",
       "ebayIdLabel": "eBay: {{id}}",
-      "sourceStock": "Src: {{stock}}"
+      "sourceStock": "Src: {{stock}}",
+      "amazonStock": "Amazon Stock"
     },
     "card": {
       "stock": "Stock",

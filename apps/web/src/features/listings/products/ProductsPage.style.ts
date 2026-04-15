@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Badge as UIBadge, Card as RepoCard, Text as UIText, tkn } from '@repo/ui';
+import { Card as RepoCard, Badge as UIBadge, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -64,6 +64,7 @@ export const ProductCell = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem; /* 16px */
+  min-width: 0;
 `;
 
 export const ProductImageWrapper = styled.div`
@@ -75,7 +76,7 @@ export const ProductImageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${tkn('colors.surface.primary')};
+  background: ${tkn('colors.background.tertiary')};
   flex-shrink: 0;
   padding: 0.375rem; /* 6px padding */
 
@@ -93,6 +94,8 @@ export const ProductImage = styled.img`
 `;
 
 export const ProductMainInfo = styled.div`
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
 `;
@@ -101,21 +104,38 @@ export const ProductTitle = styled.div`
   font-size: 0.875rem; /* 14px */
   font-weight: 700;
   color: ${tkn('colors.text.primary')};
-  max-width: 25rem; /* 400px */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: default;
 `;
 
 export const ProductBrand = styled.div`
   font-size: 0.75rem; /* 12px */
   color: ${tkn('colors.text.secondary')};
   margin-top: 0.125rem; /* 2px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const ASINBadge = styled(UIBadge)``;
 
 export const CategoryText = styled(UIText)``;
+
+export const CategoryCell = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: ${tkn('colors.text.secondary')};
+`;
+
+export const CategoryChevron = styled.span`
+  color: ${tkn('colors.text.tertiary')};
+  font-size: 1rem;
+  line-height: 1;
+`;
 
 export const PriceText = styled(UIText)``;
 

@@ -15,6 +15,79 @@ import { EbayService } from '../ebay/ebay.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
+/** Row type for getListings / getListing queries (listings JOIN products) */
+interface ListingQueryRow {
+  id: string;
+  user_id: string;
+  asin: string;
+  product_id: string;
+  title: string;
+  price: string;
+  purchase_price: string | null;
+  estimated_profit: string | null;
+  profit_margin: string | null;
+  roi: string | null;
+  sold_count: string | number;
+  watch_count: string | number;
+  view_count: string | number;
+  quantity: number;
+  source_stock: number | null;
+  image_urls: string[] | null;
+  ebay_item_id: string;
+  listing_settings_group_id: string;
+  ebay_category_name: string | null;
+  product_category: string | null;
+  brand: string | null;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+  payment_policy_id: string | null;
+  shipping_policy_id: string | null;
+  return_policy_id: string | null;
+}
+
+/** Row type for getUserProducts query */
+interface ProductQueryRow {
+  id: string;
+  asin: string;
+  title: string;
+  description: string | null;
+  price: string | ProductPriceData;
+  currency: string;
+  image_urls: string[] | string;
+  brand: string | null;
+  category: string | null;
+  features: string[] | string | null;
+  stock: number;
+  raw_provider_data: string | Record<string, unknown> | null;
+  created_at: Date;
+  updated_at: Date | string;
+}
+
+/** Price data stored in JSONB price column */
+interface ProductPriceData {
+  current: number;
+  avg30?: number;
+  currency?: string;
+}
+
+/** Row type for endListings query */
+interface EbayItemIdRow {
+  ebay_item_id: string;
+}
+
+/** Row type for deleteListings transaction query */
+interface DeleteListingRow {
+  ebay_item_id: string;
+  status: ListingStatus;
+  product_id: string | null;
+}
+
+/** Helper to safely extract error message from unknown errors */
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 @Injectable()
 export class ListingsService implements OnModuleInit {
   private readonly logger = new Logger(ListingsService.name);
@@ -255,9 +328,9 @@ export class ListingsService implements OnModuleInit {
    * Get all listings for a user
    */
   async getListings(userId: string): Promise<ListingDto[]> {
-    const results = await this.databaseService.query(
+    const results = await this.databaseService.query<ListingQueryRow>(
       `
-      SELECT l.*, p.image_urls, p.category as product_category, p.stock as source_stock
+      SELECT l.*, p.image_urls, p.category as product_category, p.stock as source_stock, p.brand
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
       WHERE l.user_id = $1
@@ -277,15 +350,16 @@ export class ListingsService implements OnModuleInit {
       estimatedProfit: row.estimated_profit ? parseFloat(row.estimated_profit) : 0,
       profitMargin: row.profit_margin ? parseFloat(row.profit_margin) : 0,
       roi: row.roi ? parseFloat(row.roi) : 0,
-      soldCount: parseInt(row.sold_count, 10) || 0,
-      watchCount: parseInt(row.watch_count, 10) || 0,
-      viewCount: parseInt(row.view_count, 10) || 0,
+      soldCount: parseInt(String(row.sold_count), 10) || 0,
+      watchCount: parseInt(String(row.watch_count), 10) || 0,
+      viewCount: parseInt(String(row.view_count), 10) || 0,
       quantity: row.quantity,
       sourceStock: row.source_stock,
       imageUrls: row.image_urls || [],
       ebayListingId: row.ebay_item_id,
       listingSettingsGroupId: row.listing_settings_group_id,
       category: row.ebay_category_name || row.product_category || '',
+      brand: row.brand || '',
       status: row.status as ListingStatus,
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
@@ -314,9 +388,9 @@ export class ListingsService implements OnModuleInit {
    * Get all unique products for a user from their listings
    */
   async getUserProducts(userId: string): Promise<ProductData[]> {
-    const results = await this.databaseService.query(
+    const results = await this.databaseService.query<ProductQueryRow>(
       `
-      SELECT DISTINCT p.* 
+      SELECT DISTINCT p.*
       FROM products p
       INNER JOIN listings l ON p.id = l.product_id
       WHERE l.user_id = $1
@@ -330,16 +404,16 @@ export class ListingsService implements OnModuleInit {
       title: row.title,
       description: row.description,
       price: {
-        current: typeof row.price === 'string' ? JSON.parse(row.price).current : row.price.current,
-        avg30: typeof row.price === 'string' ? JSON.parse(row.price).avg30 || 0 : row.price.avg30 || 0,
+        current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
+        avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
-      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : JSON.parse(row.image_urls || '[]'),
+      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(row.image_urls || '[]') as string[]),
       brand: row.brand,
       category: row.category,
       manufacturer: row.brand, // Fallback
-      features: Array.isArray(row.features) ? row.features : JSON.parse(row.features || '[]'),
-      updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
+      features: Array.isArray(row.features) ? row.features : (JSON.parse(row.features || '[]') as string[]),
+      updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
     }));
   }
 
@@ -347,7 +421,7 @@ export class ListingsService implements OnModuleInit {
    * Get a single listing by ID
    */
   async getListing(userId: string, id: string): Promise<ListingDto | null> {
-    const results = await this.databaseService.query(
+    const results = await this.databaseService.query<ListingQueryRow>(
       `
       SELECT l.*, p.image_urls
       FROM listings l
@@ -386,9 +460,9 @@ export class ListingsService implements OnModuleInit {
    * Get cached product info by ASIN
    */
   async getProductByAsin(asin: string): Promise<{ id: string; data: ProductData } | null> {
-    const results = await this.databaseService.query(
+    const results = await this.databaseService.query<ProductQueryRow>(
       `
-      SELECT id, asin, title, description, price, image_urls, brand, category, stock, raw_provider_data 
+      SELECT id, asin, title, description, price, image_urls, brand, category, stock, raw_provider_data
       FROM products WHERE asin = $1
     `,
       [asin]
@@ -405,19 +479,19 @@ export class ListingsService implements OnModuleInit {
       title: row.title,
       description: row.description,
       price: {
-        current: typeof row.price === 'string' ? JSON.parse(row.price).current : row.price.current,
-        avg30: typeof row.price === 'string' ? JSON.parse(row.price).avg30 || 0 : row.price.avg30 || 0,
+        current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
+        avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
-      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : JSON.parse(row.image_urls || '[]'),
+      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(String(row.image_urls) || '[]') as string[]),
       brand: row.brand,
       category: row.category,
       manufacturer: row.brand, // Fallback
-      features: row.features ? (Array.isArray(row.features) ? row.features : JSON.parse(row.features)) : [],
+      features: row.features ? (Array.isArray(row.features) ? row.features : (JSON.parse(String(row.features)) as string[])) : [],
       stock: row.stock || 0,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
-          ? JSON.parse(row.raw_provider_data)
+          ? JSON.parse(row.raw_provider_data) as Record<string, unknown>
           : row.raw_provider_data
         : undefined,
     };
@@ -649,7 +723,7 @@ export class ListingsService implements OnModuleInit {
     const total = Number(counts[0].total);
     const success = Number(counts[0].success);
     const failed = Number(counts[0].failed);
-    const retrying = Number(counts[0].retrying);
+    const _retrying = Number(counts[0].retrying);
 
     // Processed count only includes FINAL terminal states
     const processed = success + failed;
@@ -720,9 +794,9 @@ export class ListingsService implements OnModuleInit {
     for (const listingId of listingIds) {
       try {
         // 1. Get listing from DB to get the eBay item ID
-        const results = await this.databaseService.query(
+        const results = await this.databaseService.query<EbayItemIdRow>(
           `
-          SELECT ebay_item_id FROM listings 
+          SELECT ebay_item_id FROM listings
           WHERE id = $1 AND user_id = $2
         `,
           [listingId, userId]
@@ -738,7 +812,7 @@ export class ListingsService implements OnModuleInit {
         // 3. Update status in DB
         await this.databaseService.query(
           `
-          UPDATE listings 
+          UPDATE listings
           SET status = '${ListingStatus.INACTIVE}', updated_at = CURRENT_TIMESTAMP
           WHERE id = $1
         `,
@@ -746,8 +820,8 @@ export class ListingsService implements OnModuleInit {
         );
 
         successCount++;
-      } catch (error: any) {
-        this.logger.error(`Failed to end listing ${listingId}: ${error.message}`);
+      } catch (error: unknown) {
+        this.logger.error(`Failed to end listing ${listingId}: ${getErrorMessage(error)}`);
         // Continue with others
       }
     }
@@ -767,9 +841,9 @@ export class ListingsService implements OnModuleInit {
       try {
         await this.databaseService.transaction(async (client) => {
           // 1. Get listing from DB (including product_id)
-          const results = await client.query(
+          const results = await client.query<DeleteListingRow>(
             `
-            SELECT ebay_item_id, status, product_id FROM listings 
+            SELECT ebay_item_id, status, product_id FROM listings
             WHERE id = $1 AND user_id = $2
           `,
             [listingId, userId]
@@ -783,9 +857,9 @@ export class ListingsService implements OnModuleInit {
           if (status === ListingStatus.ACTIVE && ebayItemId) {
             try {
               await this.ebayService.withdrawOffer(userId, ebayItemId);
-            } catch (ebayError: any) {
+            } catch (ebayError: unknown) {
               this.logger.error(
-                `Failed to end listing ${listingId} on eBay, but proceeding with DB deletion: ${ebayError.message}`
+                `Failed to end listing ${listingId} on eBay, but proceeding with DB deletion: ${getErrorMessage(ebayError)}`
               );
             }
           }
@@ -816,8 +890,8 @@ export class ListingsService implements OnModuleInit {
         });
 
         successCount++;
-      } catch (error: any) {
-        this.logger.error(`Failed to delete listing ${listingId}: ${error.message}`);
+      } catch (error: unknown) {
+        this.logger.error(`Failed to delete listing ${listingId}: ${getErrorMessage(error)}`);
       }
     }
 

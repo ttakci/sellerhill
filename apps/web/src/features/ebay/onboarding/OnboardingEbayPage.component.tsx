@@ -21,11 +21,6 @@ export const OnboardingEbayPageComponent = ({
 }: OnboardingEbayPageProps): React.ReactElement => {
   const { t } = useTranslation(['ebay', 'translation']);
 
-  const marketplaces = [
-    { id: EBAY_MARKETPLACE.US, name: 'eBay US' },
-    { id: EBAY_MARKETPLACE.TR, name: 'eBay TR (GittiGidiyor)' },
-  ];
-
   return (
     <S.Container>
       <S.LayoutWrapper>
@@ -58,14 +53,18 @@ export const OnboardingEbayPageComponent = ({
                 onClick={() => onMarketplaceChange(EBAY_MARKETPLACE.US)}
               >
                 <Icon name="flag-us" size={20} />
-                <S.MarketplaceName variant="body-sm" weight="medium">{t('ebay:ebay.connect.marketplaceUS')}</S.MarketplaceName>
+                <S.MarketplaceName variant="body-sm" weight="medium">
+                  {t('ebay:ebay.connect.marketplaceUS')}
+                </S.MarketplaceName>
               </S.MarketplaceItem>
               <S.MarketplaceItem
                 $selected={selectedMarketplace === EBAY_MARKETPLACE.UK}
                 onClick={() => onMarketplaceChange(EBAY_MARKETPLACE.UK)}
               >
                 <Icon name="flag-gb" size={20} />
-                <S.MarketplaceName variant="body-sm" weight="medium">{t('ebay:ebay.connect.marketplaceUK')}</S.MarketplaceName>
+                <S.MarketplaceName variant="body-sm" weight="medium">
+                  {t('ebay:ebay.connect.marketplaceUK')}
+                </S.MarketplaceName>
               </S.MarketplaceItem>
             </S.MarketplaceGrid>
 

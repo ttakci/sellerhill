@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
 
-import { Icon } from '../../atoms/Icon';
+import { Icon, type IconName } from '../../atoms/Icon';
 
 import * as S from './Toast.style';
 import type { ToastProps } from './Toast.types';
 
-const toastIcons: Record<string, string> = {
+const toastIcons: Record<string, IconName> = {
   success: 'check-circle',
   error: 'x-circle',
   warning: 'alert-triangle',
@@ -28,7 +28,7 @@ export const Toast = ({ toast, onClose }: ToastProps): React.ReactElement => {
   return (
     <S.ToastContainer $type={toast.type}>
       <S.ToastIconWrapper $type={toast.type}>
-        <Icon name={toastIcons[toast.type] as any} size="sm" />
+        <Icon name={toastIcons[toast.type]} size="sm" />
       </S.ToastIconWrapper>
       <S.ToastMessage>{toast.message}</S.ToastMessage>
       <S.ToastCloseButton onClick={handleClose}>

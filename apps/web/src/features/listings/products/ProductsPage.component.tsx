@@ -7,14 +7,19 @@ import type { ProductsPageComponentProps } from './ProductsPage.types';
 
 export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
   products,
-  isLoading,
   pagination,
   columns,
   onDownload,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
-  const renderGridCard = (product: any) => (
+  const renderGridCard = (product: {
+    asin: string;
+    imageUrls?: string[];
+    title: string;
+    brand?: string;
+    price: { currency: string; current: number };
+  }) => (
     <S.GridCard key={product.asin} variant="interactive">
       <S.CardImageSection>
         {product.imageUrls?.[0] ? (
@@ -41,10 +46,7 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
 
   return (
     <S.Container>
-      <PageHeader
-        title={t('translation:menu.products')}
-        subtitle={t('translation:products.subtitle')}
-      />
+      <PageHeader title={t('translation:menu.products')} subtitle={t('translation:products.subtitle')} />
 
       <DataTable
         columns={columns}

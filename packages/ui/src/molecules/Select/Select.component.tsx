@@ -18,7 +18,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
   isDisabled,
   fullWidth = true,
   isSearchable,
-  id,
+  id: _id,
   size = 'medium',
   searchPlaceholder,
   noResultsMessage,
@@ -83,8 +83,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
 
         const rect = containerRef.current.getBoundingClientRect();
         const margin = 4;
-        
-        const absoluteTop = rect.top + window.scrollY;
+
         const absoluteBottom = rect.bottom + window.scrollY;
 
         setPlacement('bottom');
@@ -231,12 +230,13 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
 
   // Manual usage support
   if (!control) {
-    return <ModernSelectStandalone {...(rest as any)} value={(rest as any).value} onChange={(rest as any).onChange} />;
+    const { value, onChange } = rest as SelectProps<TFieldValues>;
+    return <ModernSelectStandalone {...rest} value={value} onChange={onChange} />;
   }
 
   return (
     <Controller
-      name={name as any}
+      name={name!}
       control={control}
       rules={rules}
       render={({ field, fieldState: { error } }) => (

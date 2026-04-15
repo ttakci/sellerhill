@@ -6,7 +6,7 @@ export type TextInputSize = 'small' | 'medium' | 'large';
 
 export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
   extends Omit<Partial<UseControllerProps<TFieldValues>>, 'name'> {
-  name: any;
+  name: string;
   label?: string;
   placeholder?: string;
   type?: string;

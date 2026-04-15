@@ -22,3 +22,15 @@
 # Misc
 **/*.min.js
 **/*.bundle.js
+
+# TypeScript build artifacts in src
+**/*.js
+**/*.js.map
+**/*.d.ts
+**/*.d.ts.map
+!*.config.js
+!*.config.cjs
+!*.config.mjs
+!scripts/**/*.js
+!scripts/**/*.mjs
+

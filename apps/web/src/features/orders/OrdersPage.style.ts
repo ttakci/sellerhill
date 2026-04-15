@@ -115,35 +115,56 @@ export const GridCard = styled(RepoCard)`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   position: relative;
-  transition: all ${tkn('transitions.normal')};
-  cursor: pointer;
+`;
 
-  &:hover {
-    transform: translateY(-0.25rem);
-    box-shadow: ${tkn('shadows.md')};
+export const CardImageSection = styled.div`
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.md')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  background: ${tkn('colors.background.tertiary')};
+
+  svg,
+  .material-symbols-outlined {
+    font-size: 2.5rem;
+    color: ${tkn('colors.text.tertiary')};
   }
 `;
 
-export const GridCardHeader = styled.div`
+export const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  flex: 1;
+`;
+
+export const CardTitleRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-`;
-
-export const GridCardContent = styled.div`
-  display: flex;
-  flex-direction: column;
   gap: ${tkn('spacing.sm')};
 `;
 
+export const CardInfoRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.xs')};
+`;
+
 export const CardPriceRow = styled.div`
-  margin-top: ${tkn('spacing.sm')};
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: ${tkn('spacing.sm')};
 `;
 
-export const GridCardFooter = styled.div`
+export const CardFooter = styled.div`
   margin-top: auto;
   padding-top: ${tkn('spacing.md')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};

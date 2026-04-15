@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Badge as UIBadge, Button, Card as RepoCard, Text as UIText, tkn } from '@repo/ui';
+import { Button, Card as RepoCard, Badge as UIBadge, Text as UIText, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -47,9 +47,18 @@ export const ProgressFill = styled.div<{ $percent: number }>`
 export const StatsContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
+  gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
 `;
+
+export const StatItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+`;
+
+export const StatLabel = styled(UIText)``;
 
 export const SuccessText = styled(UIText)``;
 
@@ -64,6 +73,7 @@ export const ActionButton = styled(Button)``;
 // --- Grid Card Styles ---
 
 export const GridCard = styled(RepoCard)`
+  padding: ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
@@ -79,7 +89,8 @@ export const GridCardHeader = styled.div`
 export const CardContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
+  flex: 1;
 `;
 
 export const CardFooter = styled.div`
@@ -90,3 +101,21 @@ export const CardFooter = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
+
+// --- Progress Section Styles ---
+
+export const ProgressSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;
+
+export const ProgressHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const ProgressLabel = styled(UIText)``;
+
+export const ProgressValue = styled(UIText)``;

@@ -1,15 +1,16 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type {
-    AuthResponse,
-    JwtPayload,
-    LoginRequest,
-    RegisterRequest,
-    RegistrationResponse,
-    UserDto,
+import {
+  AUTH_CONSTANTS,
+  UserStatus,
+  type AuthResponse,
+  type JwtPayload,
+  type LoginRequest,
+  type RegisterRequest,
+  type RegistrationResponse,
+  type UserDto,
 } from '@repo/shared';
-import { AUTH_CONSTANTS, UserStatus } from '@repo/shared';
 import * as bcrypt from 'bcrypt';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -122,7 +123,7 @@ export class AuthService {
 
     try {
       // Verify JWT token
-      const payload = this.jwtService.verify(token) ;
+      const payload = this.jwtService.verify<JwtPayload & { type: string }>(token);
       this.logger.debug('Token verified for email verification');
 
       if (payload.type !== 'email_verification') {
@@ -153,7 +154,7 @@ export class AuthService {
         return {
           accessToken,
           refreshToken,
-          user: await this.mapToUserDto(user),
+          user: this.mapToUserDto(user),
         };
       }
 
@@ -188,7 +189,7 @@ export class AuthService {
       return {
         accessToken,
         refreshToken,
-        user: await this.mapToUserDto(user),
+        user: this.mapToUserDto(user),
       };
     } catch (error) {
       this.logger.error('Email verification failed', error);
@@ -294,7 +295,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: await this.mapToUserDto(user),
+      user: this.mapToUserDto(user),
     };
   }
 
@@ -323,7 +324,7 @@ export class AuthService {
 
     try {
       // Verify refresh token
-      const payload = this.jwtService.verify(token) ;
+      const payload = this.jwtService.verify<JwtPayload>(token);
       this.logger.debug(`Refresh token verified for user: ${payload.sub}`);
 
       // Find user
@@ -346,7 +347,7 @@ export class AuthService {
       return {
         accessToken,
         refreshToken: newRefreshToken,
-        user: await this.mapToUserDto(user),
+        user: this.mapToUserDto(user),
       };
     } catch (error) {
       this.logger.error('Token refresh failed', error);
@@ -357,28 +358,26 @@ export class AuthService {
   /**
    * Generate JWT tokens
    */
-  private async generateTokens(userId: string, email: string): Promise<{ accessToken: string; refreshToken: string }> {
+  private generateTokens(userId: string, email: string): Promise<{ accessToken: string; refreshToken: string }> {
     const payload: JwtPayload = {
       sub: userId,
       email,
     };
 
-    const [accessToken, refreshToken] = await Promise.all([
+    return Promise.all([
       this.jwtService.signAsync(payload, {
         expiresIn: AUTH_CONSTANTS.JWT_ACCESS_TOKEN_EXPIRES_IN,
       }),
       this.jwtService.signAsync(payload, {
         expiresIn: AUTH_CONSTANTS.JWT_REFRESH_TOKEN_EXPIRES_IN,
       }),
-    ]);
-
-    return { accessToken, refreshToken };
+    ]).then(([accessToken, refreshToken]) => ({ accessToken, refreshToken }));
   }
 
   /**
    * Map user entity to DTO (with N+1 fix - single query instead of two)
    */
-  private async mapToUserDto(user: UserEntity): Promise<UserDto> {
+  private mapToUserDto(user: UserEntity & { has_connected_accounts?: boolean }): UserDto {
     return {
       id: user.id,
       firstName: user.first_name,
@@ -386,7 +385,7 @@ export class AuthService {
       email: user.email,
       emailVerified: user.email_verified,
       status: user.status,
-      hasConnectedAccounts: (user as any).has_connected_accounts ?? false,
+      hasConnectedAccounts: user.has_connected_accounts ?? false,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),
     };

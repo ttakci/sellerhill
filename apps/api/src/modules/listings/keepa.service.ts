@@ -52,7 +52,10 @@ export class KeepaService implements IProductDataProvider {
     this.logger.log(`Fetching full Keepa data for ASIN: ${asin}`);
 
     try {
-      const response = await axios.get(this.baseUrl, {
+      interface KeepaResponse {
+        products?: KeepaProductRaw[];
+      }
+      const response = await axios.get<KeepaResponse>(this.baseUrl, {
         params: {
           key: this.apiKey,
           domain: 1,
@@ -72,13 +75,19 @@ export class KeepaService implements IProductDataProvider {
       const product: KeepaProductRaw = products[0];
 
       const imageUrls = this.extractImages(product.imagesCSV);
-      const { price, stock, sellerId } = this.extractPriceAndStock(product);
+      const { price, stock, _sellerId } = this.extractPriceAndStock(product);
       const category = product.categoryTree ? product.categoryTree[product.categoryTree.length - 1]?.name : undefined;
 
       const specs: Record<string, string> = {};
-      if (product.brand) {specs['Brand'] = product.brand;}
-      if (product.manufacturer) {specs['Manufacturer'] = product.manufacturer;}
-      if (product.model) {specs['Model'] = product.model;}
+      if (product.brand) {
+        specs['Brand'] = product.brand;
+      }
+      if (product.manufacturer) {
+        specs['Manufacturer'] = product.manufacturer;
+      }
+      if (product.model) {
+        specs['Model'] = product.model;
+      }
 
       return {
         asin,
@@ -99,8 +108,10 @@ export class KeepaService implements IProductDataProvider {
         stock,
         raw: product,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to fetch Keepa product details for ${asin}: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to fetch Keepa product details for ${asin}: ${error instanceof Error ? error.message : String(error)}`
+      );
       return null;
     }
   }
@@ -110,7 +121,9 @@ export class KeepaService implements IProductDataProvider {
    */
   async getProduct(asin: string): Promise<KeepaProduct | null> {
     const details = await this.getProductDetails(asin);
-    if (!details) {return null;}
+    if (!details) {
+      return null;
+    }
 
     return {
       asin: details.asin,
@@ -118,7 +131,7 @@ export class KeepaService implements IProductDataProvider {
       stock: details.stock || 0,
       sellerId: undefined,
       lastSync: new Date(),
-      raw: details.raw,
+      raw: details.raw as Record<string, unknown>,
     };
   }
 
@@ -130,12 +143,17 @@ export class KeepaService implements IProductDataProvider {
   async getProducts(asins: string[]): Promise<KeepaProduct[]> {
     const targetAsins = asins.slice(0, 100);
 
-    if (targetAsins.length === 0) {return [];}
+    if (targetAsins.length === 0) {
+      return [];
+    }
 
     this.logger.log(`Fetching Keepa data for ${targetAsins.length} ASINs in a single request`);
 
     try {
-      const response = await axios.get(this.baseUrl, {
+      interface KeepaBulkResponse {
+        products?: KeepaProductRaw[];
+      }
+      const response = await axios.get<KeepaBulkResponse>(this.baseUrl, {
         params: {
           key: this.apiKey,
           domain: 1,
@@ -161,8 +179,12 @@ export class KeepaService implements IProductDataProvider {
             raw: product,
           };
         });
-    } catch (error: any) {
-      this.logger.error(`Failed to fetch Keepa bulk data for ${targetAsins.length} ASINs: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to fetch Keepa bulk data for ${targetAsins.length} ASINs: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   }
@@ -210,8 +232,10 @@ export class KeepaService implements IProductDataProvider {
   /**
    * Helper to extract stock from product.stats
    */
-  private extractStockFromStats(stats: KeepaProductRaw['stats'], asin: string): number {
-    if (!stats) {return 0;}
+  private extractStockFromStats(stats: KeepaProductRaw['stats'], _asin: string): number {
+    if (!stats) {
+      return 0;
+    }
 
     if (stats.availabilityAmazon === 1) {
       return 0;
@@ -233,7 +257,9 @@ export class KeepaService implements IProductDataProvider {
    * Helper to convert Keepa imagesCSV to full URLs
    */
   private extractImages(imagesCSV: string | undefined): string[] {
-    if (!imagesCSV) {return [];}
+    if (!imagesCSV) {
+      return [];
+    }
     return imagesCSV.split(',').map((img) => `https://images-na.ssl-images-amazon.com/images/I/${img}`);
   }
 }

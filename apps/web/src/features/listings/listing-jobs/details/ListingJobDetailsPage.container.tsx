@@ -60,14 +60,16 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   );
 
   const handleBack = () => {
-    navigate('/listings/jobs');
+    void navigate('/listings/jobs');
   };
 
   const handleRefresh = () => {
     void refetch();
   };
 
-  if (!jobId) {return null;}
+  if (!jobId) {
+    return null;
+  }
 
   return (
     <ListingJobDetailsPageComponent

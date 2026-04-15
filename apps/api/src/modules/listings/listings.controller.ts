@@ -23,7 +23,7 @@ export class ListingsController {
   @ApiOperation({ summary: 'Get all listings for current user' })
   @ApiResponse({ status: 200, description: 'List of listings', type: [Object] })
   @Get()
-  async getListings(@Request() req: any): Promise<ListingDto[]> {
+  async getListings(@Request() req: { user: { sub: string } }): Promise<ListingDto[]> {
     const userId = req.user.sub;
     return this.listingsService.getListings(userId);
   }
@@ -33,7 +33,10 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Create bulk listings from a list of ASINs' })
   @Post('bulk-create')
-  async bulkCreate(@Request() req: any, @Body() body: CreateListingsRequest): Promise<ListingJobDto> {
+  async bulkCreate(
+    @Request() req: { user: { sub: string } },
+    @Body() body: CreateListingsRequest
+  ): Promise<ListingJobDto> {
     const userId = req.user.sub;
     return this.listingQueueService.addListingJob(userId, body);
   }
@@ -43,7 +46,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get all listing jobs for current user' })
   @Get('jobs')
-  async getJobs(@Request() req: any): Promise<ListingJobDto[]> {
+  async getJobs(@Request() req: { user: { sub: string } }): Promise<ListingJobDto[]> {
     const userId = req.user.sub;
     return this.listingsService.getJobs(userId);
   }
@@ -53,7 +56,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get all unique products from user listings' })
   @Get('products')
-  async getProducts(@Request() req: any): Promise<ProductData[]> {
+  async getProducts(@Request() req: { user: { sub: string } }): Promise<ProductData[]> {
     const userId = req.user.sub;
     return this.listingsService.getUserProducts(userId);
   }
@@ -63,7 +66,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get status of a listing job' })
   @Get('jobs/:jobId')
-  async getJobStatus(@Request() req: any, @Param('jobId') jobId: string): Promise<ListingJobDto> {
+  async getJobStatus(@Request() req: { user: { sub: string } }, @Param('jobId') jobId: string): Promise<ListingJobDto> {
     const userId = req.user.sub;
     const status = await this.listingsService.getJobStatus(userId, jobId);
     if (!status) {
@@ -77,7 +80,10 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Get individual items of a listing job' })
   @Get('jobs/:jobId/items')
-  async getJobItems(@Request() req: any, @Param('jobId') jobId: string): Promise<ListingJobItemDto[]> {
+  async getJobItems(
+    @Request() req: { user: { sub: string } },
+    @Param('jobId') jobId: string
+  ): Promise<ListingJobItemDto[]> {
     const userId = req.user.sub;
     return this.listingsService.getJobItems(userId, jobId);
   }
@@ -98,7 +104,7 @@ export class ListingsController {
   @ApiOperation({ summary: 'Get a single listing by ID' })
   @ApiResponse({ status: 200, description: 'Listing details' })
   @Get(':id')
-  async getListing(@Request() req: any, @Param('id') id: string): Promise<ListingDto> {
+  async getListing(@Request() req: { user: { sub: string } }, @Param('id') id: string): Promise<ListingDto> {
     const userId = req.user.sub;
     const listing = await this.listingsService.getListing(userId, id);
     if (!listing) {
@@ -113,7 +119,7 @@ export class ListingsController {
   @ApiOperation({ summary: 'Bulk end active listings on eBay' })
   @Post('bulk-end')
   async bulkEnd(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Body() body: { listingIds: string[] }
   ): Promise<{ success: boolean; count: number }> {
     const userId = req.user.sub;
@@ -127,7 +133,7 @@ export class ListingsController {
   @ApiOperation({ summary: 'Bulk delete listings (ends them on eBay first)' })
   @Post('bulk-delete')
   async bulkDelete(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Body() body: { listingIds: string[] }
   ): Promise<{ success: boolean; count: number }> {
     const userId = req.user.sub;

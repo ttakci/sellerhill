@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import { Toast as ToastComponent, ToastListContainer } from '../molecules/Toast';
-import type { ToastItem, ToastType } from '../molecules/Toast';
+import { Toast as ToastComponent, ToastListContainer, type ToastItem, type ToastType } from '../molecules/Toast';
 
 export interface ToastContextValue {
   toast: {

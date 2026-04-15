@@ -4,6 +4,44 @@ import type { IProductDataProvider, ProductData } from '@repo/shared';
 import axios from 'axios';
 
 /**
+ * ScraperAPI product response shape (subset of fields we use)
+ */
+interface ScraperApiProduct {
+  asin?: string;
+  name?: string;
+  title?: string;
+  pricing?: unknown;
+  price?: unknown;
+  currency?: string;
+  brand?: string;
+  full_description?: string;
+  description?: string;
+  feature_bullets?: string[];
+  product_category?: string;
+  categories?: Array<{ name?: string } | string>;
+  manufacturer?: string;
+  product_information?: {
+    manufacturer?: string;
+    item_weight?: string;
+    product_dimensions?: string;
+  };
+  item_weight?: string;
+  product_dimensions?: string;
+  availability?: { quantity?: number; status?: string };
+  buybox_winner?: {
+    price?: { value?: unknown; currency?: string; amount?: number };
+    availability?: { quantity?: number; status?: string };
+  };
+  images?: unknown[];
+  main_image?: unknown;
+  image_data?: unknown[];
+  image_links?: unknown[];
+  product_details?: Record<string, unknown>;
+  technical_details?: Record<string, unknown>;
+  additional_info?: Record<string, unknown>;
+}
+
+/**
  * ScraperAPI Integration Service
  * Implements IProductDataProvider to fetch product data from ScraperAPI
  *
@@ -34,7 +72,7 @@ export class ScraperApiService implements IProductDataProvider {
 
     try {
       // ScraperAPI Amazon Product endpoint
-      const response = await axios.get(`${this.baseUrl}/structured/amazon/product`, {
+      const response = await axios.get<ScraperApiProduct>(`${this.baseUrl}/structured/amazon/product`, {
         params: {
           api_key: this.apiKey,
           asin: asin,
@@ -55,7 +93,7 @@ export class ScraperApiService implements IProductDataProvider {
       this.logger.debug(`ScraperAPI response for ${asin}: ${Object.keys(product).join(', ')}`);
 
       // Extract structured specifications
-      const specs = this.extractSpecifications(product);
+      const specs = this.extractSpecifications(product as unknown as Record<string, unknown>);
 
       // Robust field extraction with fallbacks
       const title = product.name || product.title || 'Unknown Product';
@@ -69,7 +107,7 @@ export class ScraperApiService implements IProductDataProvider {
         brand = brand.replace('Visit the ', '').replace(' Store', '').trim();
       }
 
-      const imageUrls = this.extractImages(product);
+      const imageUrls = this.extractImages(product as unknown as Record<string, unknown>);
 
       // Map to normalized ProductData
       return {
@@ -78,7 +116,11 @@ export class ScraperApiService implements IProductDataProvider {
         description: product.full_description || product.description || product.feature_bullets?.join('\n') || '',
         imageUrls: imageUrls,
         brand: brand,
-        category: product.product_category || product.categories?.[0]?.name || product.categories?.[0],
+        category:
+          ((product as Record<string, unknown>).product_category as string) ||
+          (typeof product.categories?.[0] === 'object' && product.categories[0] !== null
+            ? (product.categories[0] as { name?: string }).name
+            : undefined),
         manufacturer: product.manufacturer || product.product_information?.manufacturer || brand,
         weight: this.parseWeight(product.item_weight || product.product_information?.item_weight),
         dimensions: this.parseDimensions(product.product_dimensions || product.product_information?.product_dimensions),
@@ -92,10 +134,14 @@ export class ScraperApiService implements IProductDataProvider {
           product.availability?.quantity ||
           product.buybox_winner?.availability?.quantity ||
           (product.availability?.status?.includes('In Stock') ? 10 : 0),
-        raw: product,
+        raw: product as unknown as Record<string, unknown>,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to fetch product from ScraperAPI for ASIN ${asin}: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to fetch product from ScraperAPI for ASIN ${asin}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return null;
     }
   }
@@ -103,15 +149,22 @@ export class ScraperApiService implements IProductDataProvider {
   /**
    * Extract and normalize product images from various possible formats
    */
-  private extractImages(product: any): string[] {
+  private extractImages(product: Record<string, unknown>): string[] {
     const images: Set<string> = new Set();
 
-    const addImage = (img: any) => {
-      if (!img) {return;}
+    const addImage = (img: unknown) => {
+      if (!img) {
+        return;
+      }
       if (typeof img === 'string' && img.startsWith('http')) {
         images.add(img);
-      } else if (typeof img === 'object' && img.link && typeof img.link === 'string') {
-        images.add(img.link);
+      } else if (
+        typeof img === 'object' &&
+        img !== null &&
+        'link' in img &&
+        typeof (img as { link: unknown }).link === 'string'
+      ) {
+        images.add((img as { link: string }).link);
       }
     };
 
@@ -145,7 +198,7 @@ export class ScraperApiService implements IProductDataProvider {
    * Extract structured specifications from product data
    * ScraperAPI provides these in various formats, we normalize them
    */
-  private extractSpecifications(product: any): Record<string, string> {
+  private extractSpecifications(product: Record<string, unknown>): Record<string, string> {
     const specs: Record<string, string> = {};
 
     // Product details section (most reliable source)
@@ -181,13 +234,18 @@ export class ScraperApiService implements IProductDataProvider {
   /**
    * Parse price from various formats
    */
-  private parsePrice(priceValue: any): number {
-    if (priceValue === null || priceValue === undefined) {return 0;}
+  private parsePrice(priceValue: unknown): number {
+    if (priceValue === null || priceValue === undefined) {
+      return 0;
+    }
 
     // Handle object format (sometimes buybox_winner.price)
-    if (typeof priceValue === 'object') {
-      const val = priceValue.value ?? priceValue.amount ?? priceValue.current_price;
-      if (val !== undefined) {return this.parsePrice(val);}
+    if (typeof priceValue === 'object' && priceValue !== null) {
+      const obj = priceValue as Record<string, unknown>;
+      const val = obj.value ?? obj.amount ?? obj.current_price;
+      if (val !== undefined) {
+        return this.parsePrice(val);
+      }
       return 0;
     }
 
@@ -208,7 +266,9 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse weight from string format (e.g., "2.5 pounds")
    */
   private parseWeight(weight: string | undefined): number | undefined {
-    if (!weight) {return undefined;}
+    if (!weight) {
+      return undefined;
+    }
 
     const match = weight.match(/([0-9.]+)/);
     return match ? parseFloat(match[1]) : undefined;
@@ -218,7 +278,9 @@ export class ScraperApiService implements IProductDataProvider {
    * Parse dimensions from string format (e.g., "10 x 8 x 2 inches")
    */
   private parseDimensions(dimensions: string | undefined): string | undefined {
-    if (!dimensions) {return undefined;}
+    if (!dimensions) {
+      return undefined;
+    }
 
     // Clean up and return standardized format
     return dimensions.replace(/\s+/g, ' ').trim();
@@ -229,7 +291,10 @@ export class ScraperApiService implements IProductDataProvider {
    */
   async checkCredits(): Promise<{ remaining: number; total: number } | null> {
     try {
-      const response = await axios.get(`${this.baseUrl}/account`, {
+      interface CreditsResponse {
+        requestCount?: { remaining?: number; total?: number };
+      }
+      const response = await axios.get<CreditsResponse>(`${this.baseUrl}/account`, {
         params: {
           api_key: this.apiKey,
         },
@@ -239,8 +304,10 @@ export class ScraperApiService implements IProductDataProvider {
         remaining: response.data.requestCount?.remaining || 0,
         total: response.data.requestCount?.total || 0,
       };
-    } catch (error: any) {
-      this.logger.error(`Failed to check ScraperAPI credits: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to check ScraperAPI credits: ${error instanceof Error ? error.message : String(error)}`
+      );
       return null;
     }
   }

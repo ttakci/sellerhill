@@ -1,3 +1,4 @@
+import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
@@ -11,18 +12,18 @@ export const BadgeContainer = styled.a<{ $size: 'sm' | 'md'; $isHovered?: boolea
   transition: all ${tkn('transitions.fast')};
 
   &:hover {
-    color: ${(p) => (p.theme as any).colors?.brand?.primary};
+    color: ${(p) => p.theme.colors.brand.primary};
   }
 
-  ${({ $size }) => {
+  ${({ $size, theme }) => {
     switch ($size) {
       case 'sm':
-        return `
-          font-size: ${tkn('typography.fontSize.xs')};
+        return css`
+          font-size: ${tkn('typography.fontSize.xs')({ theme })};
         `;
       case 'md':
-        return `
-          font-size: ${tkn('typography.fontSize.sm')};
+        return css`
+          font-size: ${tkn('typography.fontSize.sm')({ theme })};
         `;
       default:
         return '';
@@ -34,7 +35,7 @@ export const IdText = styled.span<{ $size: 'sm' | 'md'; $isHovered?: boolean }>`
   font-family: ${tkn('typography.fontFamily.mono')};
   font-weight: ${tkn('typography.fontWeight.normal')};
   color: ${({ $isHovered }) =>
-    $isHovered ? (p: any) => (p.theme as any).colors?.brand?.primary : tkn('colors.text.secondary')};
+    $isHovered ? (p: { theme: Theme }) => p.theme.colors.brand.primary : tkn('colors.text.secondary')};
   transition: color ${tkn('transitions.fast')};
 `;
 
@@ -42,7 +43,7 @@ export const ExternalIcon = styled.span<{ $size: 'sm' | 'md'; $isHovered?: boole
   display: inline-flex;
   align-items: center;
   color: ${({ $isHovered }) =>
-    $isHovered ? (p: any) => (p.theme as any).colors?.brand?.primary : tkn('colors.text.tertiary')};
+    $isHovered ? (p: { theme: Theme }) => p.theme.colors.brand.primary : tkn('colors.text.tertiary')};
   opacity: ${({ $isHovered }) => ($isHovered ? 1 : 0.6)};
   transition: all ${tkn('transitions.fast')};
 
@@ -53,14 +54,14 @@ export const ExternalIcon = styled.span<{ $size: 'sm' | 'md'; $isHovered?: boole
   ${({ $size }) => {
     switch ($size) {
       case 'sm':
-        return `
+        return css`
           svg {
             width: 0.875rem;
             height: 0.875rem;
           }
         `;
       case 'md':
-        return `
+        return css`
           svg {
             width: 1rem;
             height: 1rem;

@@ -1,5 +1,3 @@
-import React from 'react';
-
 export type StepperOrientation = 'horizontal' | 'vertical';
 export type StepStatus = 'completed' | 'current' | 'upcoming';
 

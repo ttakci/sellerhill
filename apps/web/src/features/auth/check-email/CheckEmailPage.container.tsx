@@ -57,7 +57,7 @@ export const CheckEmailPageContainer = (): React.ReactElement => {
   };
 
   const handleBackToLogin = (): void => {
-    navigate('/login');
+    void navigate('/login');
   };
 
   return (

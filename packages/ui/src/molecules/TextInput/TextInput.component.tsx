@@ -1,12 +1,37 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { Controller, FieldValues } from 'react-hook-form';
+import { Controller, type FieldError, type FieldPath, type FieldValues } from 'react-hook-form';
 
 import { Icon } from '../../atoms/Icon';
 
 import * as S from './TextInput.style';
-import type { TextInputProps } from './TextInput.types';
+import type { TextInputProps, TextInputSize } from './TextInput.types';
 
-const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
+interface InnerFieldProps {
+  name: string;
+  value: string;
+  onChange: (...event: unknown[]) => void;
+  onBlur: () => void;
+}
+
+interface ModernTextInputInnerProps {
+  field: InnerFieldProps;
+  error?: FieldError;
+  label?: string;
+  iconLeft?: string;
+  iconRight?: string;
+  isDisabled?: boolean;
+  fullWidth?: boolean;
+  type?: string;
+  autoFocus?: boolean;
+  maxLength?: number;
+  id?: string;
+  autoComplete?: string;
+  onPressIcon?: () => void;
+  size?: TextInputSize;
+  suffixText?: string;
+}
+
+const ModernTextInputInner = forwardRef<HTMLInputElement, ModernTextInputInnerProps>((props, ref) => {
   const {
     field,
     error,
@@ -20,8 +45,9 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
     maxLength,
     id,
     autoComplete,
-    onPressIcon,
+    onPressIcon: _onPressIcon,
     size = 'medium',
+    suffixText,
     ...rest
   } = props;
 
@@ -38,12 +64,12 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    field.onFocus?.(e);
+    void e;
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = () => {
     setIsFocused(false);
-    field.onBlur?.(e);
+    field.onBlur();
   };
 
   const handleContainerClick = () => {
@@ -121,9 +147,9 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, any>((props, ref) => {
           </S.DecorationWrapper>
         )}
 
-        {props.suffixText && (
+        {suffixText && (
           <S.DecorationWrapper $side="right" $size={size}>
-            <S.SuffixText>{props.suffixText}</S.SuffixText>
+            <S.SuffixText>{suffixText}</S.SuffixText>
           </S.DecorationWrapper>
         )}
       </S.FieldWrapper>
@@ -142,21 +168,30 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>(
 
   // Manual usage support
   if (!control) {
-    const manualField = {
+    const { value, onChange, onBlur } = props;
+    const manualField: InnerFieldProps = {
       name,
-      value: (props as any).value,
-      onChange: (props as any).onChange,
-      onBlur: (props as any).onBlur,
+      value: value ?? '',
+      onChange: (e: unknown) => onChange?.(e as React.ChangeEvent<HTMLInputElement>),
+      onBlur: () => onBlur?.({} as React.FocusEvent<HTMLInputElement>),
     };
     return <ModernTextInputInner {...rest} field={manualField} />;
   }
 
   return (
     <Controller
-      name={name}
+      name={name as FieldPath<TFieldValues>}
       control={control}
       rules={rules}
-      render={({ field, fieldState: { error } }) => <ModernTextInputInner {...rest} field={field} error={error} />}
+      render={({ field, fieldState: { error } }) => {
+        const adaptedField: InnerFieldProps = {
+          name: field.name,
+          value: field.value ?? '',
+          onChange: (...args: unknown[]) => field.onChange(...args),
+          onBlur: field.onBlur,
+        };
+        return <ModernTextInputInner {...rest} field={adaptedField} error={error} />;
+      }}
     />
   );
 };

@@ -3,7 +3,7 @@
  */
 
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ export const VerifyEmailPageContainer = (): React.ReactElement => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showMessage, closeMessage } = useUI();
-  
+
   const token = searchParams.get('token');
   const email = searchParams.get('email'); // Optional, mainly for display
 
@@ -28,26 +28,26 @@ export const VerifyEmailPageContainer = (): React.ReactElement => {
   // Use RTK Query loading states with useLoading hook
   useLoading(isLoading || isResending);
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  // Derive status from query state instead of using setState in effects
+  const status = useMemo(() => {
+    if (verifyError || (!token && !isLoading)) {
+      return 'error';
+    }
+    if (isSuccess) {
+      return 'success';
+    }
+    return 'loading';
+  }, [verifyError, token, isLoading, isSuccess]);
 
-  // Handle verification success
+  // Handle verification success - redirect to login
   useEffect(() => {
     if (isSuccess) {
-      setStatus('success');
-      
       // Redirect to login page after success
       setTimeout(() => {
-        navigate('/login', { replace: true });
+        void navigate('/login', { replace: true });
       }, 2000);
     }
   }, [isSuccess, navigate]);
-
-  // Handle verification error
-  useEffect(() => {
-    if (verifyError) {
-      setStatus('error');
-    }
-  }, [verifyError]);
 
   // Handle resend success
   useEffect(() => {
@@ -84,7 +84,6 @@ export const VerifyEmailPageContainer = (): React.ReactElement => {
   useEffect(() => {
     const performVerification = (): void => {
       if (!token) {
-        setStatus('error');
         return;
       }
 
@@ -112,7 +111,7 @@ export const VerifyEmailPageContainer = (): React.ReactElement => {
   };
 
   const handleNavigateToLogin = () => {
-    navigate('/login');
+    void navigate('/login');
   };
 
   return (

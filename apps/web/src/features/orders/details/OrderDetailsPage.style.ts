@@ -208,7 +208,7 @@ export const SummaryRow = styled.div<{ $bold?: boolean; $total?: boolean; $borde
     `
     padding-top: 0.75rem; /* 12px */
     border-top: 0.0625rem solid currentColor;
-    border-top-color: ${tkn('colors.border.secondary')};
+    border-top-color: ${String(tkn('colors.border.secondary'))};
     font-weight: 700;
     font-size: 1rem; /* 16px */
   `}
@@ -217,12 +217,12 @@ export const SummaryRow = styled.div<{ $bold?: boolean; $total?: boolean; $borde
     $bordered &&
     `
     padding-top: 0.5rem;
-    border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+    border-top: 0.0625rem solid ${String(tkn('colors.border.secondary'))};
   `}
 
   span:first-child {
     color: ${({ $bold, $total }) =>
-      $bold || $total ? tkn('colors.text.primary') : tkn('colors.text.secondary')};
+      $bold || $total ? String(tkn('colors.text.primary')) : String(tkn('colors.text.secondary'))};
   }
 `;
 
@@ -535,12 +535,12 @@ export const DecorativeBlur = styled.div<{ $position: 'top-right' | 'bottom-left
       ? `
     right: -3rem;
     top: -3rem;
-    background: ${tkn('colors.semanticTint.success')};
+    background: ${String(tkn('colors.semanticTint.success'))};
   `
       : `
     left: -3rem;
     bottom: -3rem;
-    background: ${tkn('colors.semanticTint.info')};
+    background: ${String(tkn('colors.semanticTint.info'))};
   `}
 `;
 

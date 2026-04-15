@@ -2,9 +2,10 @@
  * VerifyEmailPage Component
  *
  * Purpose: Email verification status display
+ * Two-panel layout — consistent with Login / Register / CheckEmail pages.
  */
 
-import { Button, Icon, Text } from '@repo/ui';
+import { Button, Icon, Logo, MeshBackground, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,28 +23,28 @@ export const VerifyEmailPageComponent = ({
     switch (status) {
       case 'loading':
         return {
-          icon: <Icon name="loader" size={40} />,
+          icon: <Icon name="loader" size={44} />,
           title: t('auth:auth.verification.verifying'),
           description: t('auth:auth.verification.waiting'),
           type: 'loading' as const,
         };
       case 'success':
         return {
-          icon: <Icon name="check" size={40} />,
+          icon: <Icon name="check" size={44} />,
           title: t('auth:auth.verification.title'),
           description: t('auth:auth.verification.success'),
           type: 'success' as const,
         };
       case 'error':
         return {
-          icon: <Icon name="alert-circle" size={40} />,
+          icon: <Icon name="alert-circle" size={44} />,
           title: t('auth:auth.verification.error'),
           description: t('auth:auth.verification.invalid'),
           type: 'error' as const,
         };
       default:
         return {
-          icon: <Icon name="loader" size={40} />,
+          icon: <Icon name="loader" size={44} />,
           title: t('auth:auth.verification.verifying'),
           description: t('auth:auth.verification.waiting'),
           type: 'loading' as const,
@@ -56,20 +57,40 @@ export const VerifyEmailPageComponent = ({
   return (
     <S.Container>
       <S.LayoutWrapper>
-        {/* Left Panel: Content */}
-        <S.LeftPanel>
-          <S.AuthCard>
-            <S.LogoWrapper>
-              <Icon name="logo" size={48} color="brand.primary" />
-              <S.LogoText variant="h2" weight="bold" color="brand.primary">
-                {t('translation:common.brandName')}
-              </S.LogoText>
-            </S.LogoWrapper>
+        {/* Left Panel: Branding */}
+        <S.BrandingPanel>
+          <S.DecorationArea>
+            <MeshBackground animate={true} />
+          </S.DecorationArea>
 
+          <S.BrandingContent>
+            <S.BrandingLogoWrapper>
+              <Logo size={520} />
+            </S.BrandingLogoWrapper>
+
+            <S.SloganWrapper>
+              <Typewriter
+                phrases={[
+                  t('auth:auth.branding.slogan1'),
+                  t('auth:auth.branding.slogan2'),
+                  t('auth:auth.branding.slogan3'),
+                  t('auth:auth.branding.slogan4'),
+                ]}
+                typingSpeed={70}
+                deletingSpeed={40}
+                pauseTime={2500}
+              />
+            </S.SloganWrapper>
+          </S.BrandingContent>
+        </S.BrandingPanel>
+
+        {/* Right Panel: Content */}
+        <S.FormPanel>
+          <S.AuthCard>
             <S.StatusIconWrapper $type={content.type}>{content.icon}</S.StatusIconWrapper>
 
             <S.Header>
-              <Text variant="h2" weight="bold">
+              <Text variant="h3" weight="bold">
                 {content.title}
               </Text>
               <Text variant="body" color="text.secondary">
@@ -79,44 +100,20 @@ export const VerifyEmailPageComponent = ({
 
             <S.ActionGroup>
               <Button onClick={onNavigateToLogin} variant="primary" fullWidth size="large">
-                {t('auth:auth.register.loginLink')}
+                <Text variant="body" weight="medium" color="text.inverse">
+                  {t('auth:auth.register.loginLink')}
+                </Text>
               </Button>
               {status === 'error' && (
-                <S.ResendButton variant="text" onClick={onResendVerification}>{t('auth:auth.verification.resendButton')}</S.ResendButton>
+                <S.ResendButton variant="text" onClick={onResendVerification}>
+                  <Text variant="body" weight="medium" color="brand.primary">
+                    {t('auth:auth.verification.resendButton')}
+                  </Text>
+                </S.ResendButton>
               )}
             </S.ActionGroup>
           </S.AuthCard>
-        </S.LeftPanel>
-
-        {/* Right Panel: Branding */}
-        <S.RightPanel>
-          <S.MosaicDecor>
-            <div className="box-1" />
-            <div className="box-2" />
-            <div className="box-3" />
-            <div className="box-4" />
-          </S.MosaicDecor>
-          <S.BrandingContent>
-            <S.BrandingLogoWrapper>
-              <Icon name="logo" size={64} color="text.inverse" />
-              <Text variant="h1" weight="bold" color="text.inverse">
-                {t('translation:common.brandName')}
-              </Text>
-            </S.BrandingLogoWrapper>
-
-            <Text variant="h3" weight="medium" color="text.inverse">
-              {t('auth:auth.verification.title')}
-            </Text>
-
-            <S.BrandingDescription variant="body" color="text.inverse">
-              {t('auth:auth.verification.brandingText')}
-            </S.BrandingDescription>
-
-            <S.BrandingIconContainer>
-              <Icon name="mail" size={200} color="text.inverse" />
-            </S.BrandingIconContainer>
-          </S.BrandingContent>
-        </S.RightPanel>
+        </S.FormPanel>
       </S.LayoutWrapper>
     </S.Container>
   );

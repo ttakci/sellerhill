@@ -18,6 +18,51 @@ import { DatabaseService } from '../../common/database/database.service';
 
 import { EbayOAuthService } from './ebay-oauth.service';
 
+/** Helper to safely extract error message from unknown errors */
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/** Axios error shape used for response data access */
+interface AxiosErrorData {
+  response?: {
+    data?: {
+      errors?: Array<{
+        errorId?: number;
+        message?: string;
+        parameters?: Array<{ name?: string; value?: string }>;
+      }>;
+      error_description?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+}
+
+function isAxiosErrorWithData(error: unknown): error is AxiosErrorData {
+  return typeof error === 'object' && error !== null && 'response' in error && 'message' in error;
+}
+
+/** Typed axios response interfaces */
+interface EbayOfferResponse {
+  offerId: string;
+}
+interface EbayPublishResponse {
+  listingId: string;
+}
+interface _EbayCategorySuggestion {
+  categorySuggestions?: Array<{ category: { categoryId: string; categoryName?: string } }>;
+}
+interface _EbayAspectResponse {
+  aspects?: Array<{ aspectConstraint?: { aspectMode?: string; aspectUsage?: string }; localizedAspectName: string }>;
+}
+interface _EbayOffersResponse {
+  offers?: Array<Record<string, unknown>>;
+}
+interface _EbayInventoryResponse {
+  availability?: { shipToLocationAvailability?: { quantity?: number } };
+}
+
 /**
  * eBay account entity from database
  */
@@ -48,7 +93,7 @@ export class EbayService {
   /**
    * Generate eBay connect URL
    */
-  async createConnectUrl(userId: string, marketplaceId?: EbayMarketplaceId): Promise<CreateEbayConnectUrlResponse> {
+  createConnectUrl(userId: string, marketplaceId?: EbayMarketplaceId): CreateEbayConnectUrlResponse {
     const marketplace = marketplaceId || EBAY_MARKETPLACE.US;
     this.logger.log(`Creating eBay connect URL for user ${userId}, marketplace: ${marketplace}`);
 
@@ -103,7 +148,7 @@ export class EbayService {
         marketplaceId,
         tokenResponse.access_token,
         tokenResponse.refresh_token,
-        expiresAt,
+        expiresAt.toISOString(),
         EBAY_ACCOUNT_STATUS.ACTIVE,
       ]
     );
@@ -209,24 +254,30 @@ export class EbayService {
 
         this.logger.log(`Successfully created eBay listing (REST): ${listingId}`);
         return { listingId, categoryName };
-      } catch (error: any) {
+      } catch (error: unknown) {
         attempts++;
 
         // Check for "Missing Item Specific" error (25002 with specific message pattern)
         // Error format: "The item specific Screen Size is missing."
         // Parameters usually contain the missing key in value or explicitly.
-        const errors = error.response?.data?.errors || [];
-        const missingAspectError = errors.find((e: any) => e.errorId === 25002 && e.message.includes('item specific'));
+        const axiosErr = isAxiosErrorWithData(error) ? error : null;
+        const errors = axiosErr?.response?.data?.errors || [];
+        const missingAspectError = errors.find(
+          (e: { errorId?: number; message?: string }) =>
+            e.errorId === 25002 && (e.message?.includes('item specific') ?? false)
+        );
 
         if (missingAspectError && attempts < maxAttempts) {
           // Try to extract the missing aspect name
           // Usually param '2' holds the key name, or we extract from message
-          let missingKey = missingAspectError.parameters?.find((p: any) => p.name === '2')?.value; // Verified from logs
+          let missingKey = missingAspectError.parameters?.find((p: { name?: string }) => p.name === '2')?.value; // Verified from logs
 
           if (!missingKey) {
             // Fallback extraction from message: "The item specific X is missing."
-            const msgMatch = missingAspectError.message.match(/item specific (.*?) is missing/);
-            if (msgMatch) {missingKey = msgMatch[1];}
+            const msgMatch = missingAspectError.message?.match(/item specific (.*?) is missing/);
+            if (msgMatch) {
+              missingKey = msgMatch[1];
+            }
           }
 
           if (missingKey) {
@@ -278,7 +329,7 @@ export class EbayService {
     if (data.features && Array.isArray(data.features)) {
       data.features.forEach((feature: string) => {
         // Regex to find "Key: Value" or "Key - Value" patterns
-        const match = feature.match(/(?:^|\.\s+)([A-Za-z0-9\s\-\/\.]{2,30})[:]\s*(.+?)(?=\.|$)/);
+        const match = feature.match(/(?:^|\.\s+)([A-Za-z0-9\-/.]{2,30})[:]\s*(.+?)(?=\.|$)/);
         if (match) {
           const key = match[1].trim();
           const value = match[2].trim();
@@ -344,8 +395,9 @@ export class EbayService {
           'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB', // Simplified language logic
         },
       });
-    } catch (e: any) {
-      this.logger.error(`Create inventory item failed for ${sku}`, e.response?.data || e.message);
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      this.logger.error(`Create inventory item failed for ${sku}`, axiosErr?.response?.data || getErrorMessage(e));
       throw e;
     }
   }
@@ -390,7 +442,7 @@ export class EbayService {
     this.logger.debug(`Creating offer for ${sku}. URL: ${url}, Payload: ${JSON.stringify(payload)}`);
 
     try {
-      const response = await axios.post(url, payload, {
+      const response = await axios.post<EbayOfferResponse>(url, payload, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
@@ -398,17 +450,20 @@ export class EbayService {
         },
       });
       return response.data.offerId;
-    } catch (e: any) {
-      this.logger.error(`Create offer failed for ${sku}`, e.response?.data || e.message);
-      if (e.response?.data?.errors) {
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      this.logger.error(`Create offer failed for ${sku}`, axiosErr?.response?.data || getErrorMessage(e));
+      if (axiosErr?.response?.data?.errors) {
         // Handle specific errors like "Location not found"
-        this.logger.error('Create offer failed details', JSON.stringify(e.response.data));
+        this.logger.error('Create offer failed details', JSON.stringify(axiosErr.response.data));
 
         // Handle "Offer entity already exists" (Error 25002)
-        const existingOfferError = e.response.data.errors.find((err: any) => err.errorId === 25002);
+        const existingOfferError = axiosErr.response.data.errors.find(
+          (err: { errorId?: number }) => err.errorId === 25002
+        );
         if (existingOfferError) {
-          const offerIdParam = existingOfferError.parameters?.find((p: any) => p.name === 'offerId');
-          if (offerIdParam) {
+          const offerIdParam = existingOfferError.parameters?.find((p: { name?: string }) => p.name === 'offerId');
+          if (offerIdParam?.value) {
             this.logger.warn(`Offer already exists for SKU ${sku}. Using existing offer ID: ${offerIdParam.value}`);
             // Update the existing offer to ensure it has latest price/quantity
             await this.updateOffer(accessToken, offerIdParam.value, payload, config);
@@ -439,8 +494,9 @@ export class EbayService {
         },
       });
       this.logger.log(`Updated existing offer ${offerId}`);
-    } catch (e: any) {
-      this.logger.warn(`Failed to update existing offer ${offerId}`, e.response?.data || e.message);
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      this.logger.warn(`Failed to update existing offer ${offerId}`, axiosErr?.response?.data || getErrorMessage(e));
       // Non-fatal, return the original ID so we can try to publish
     }
   }
@@ -454,7 +510,7 @@ export class EbayService {
     this.logger.debug(`Publishing offer ${offerId}. URL: ${url}`);
 
     try {
-      const response = await axios.post(
+      const response = await axios.post<EbayPublishResponse>(
         url,
         {},
         {
@@ -466,8 +522,9 @@ export class EbayService {
       );
 
       return response.data.listingId;
-    } catch (e: any) {
-      this.logger.error(`Publish offer failed for ${offerId}`, e.response?.data || e.message);
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      this.logger.error(`Publish offer failed for ${offerId}`, axiosErr?.response?.data || getErrorMessage(e));
       throw e;
     }
   }
@@ -488,8 +545,11 @@ export class EbayService {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       return; // Exists
-    } catch (e: any) {
-      if (e.response?.status !== 404) {throw e;}
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      if (axiosErr?.response?.status !== 404) {
+        throw e;
+      }
     }
 
     // Create if 404
@@ -520,8 +580,9 @@ export class EbayService {
           'Content-Type': 'application/json',
         },
       });
-    } catch (e: any) {
-      this.logger.error(`Create inventory location failed`, e.response?.data || e.message);
+    } catch (e: unknown) {
+      const axiosErr = isAxiosErrorWithData(e) ? e : null;
+      this.logger.error(`Create inventory location failed`, axiosErr?.response?.data || getErrorMessage(e));
       throw e;
     }
   }
@@ -546,8 +607,14 @@ export class EbayService {
       });
 
       // Return first suggestion's leaf category
-      if (response.data?.categorySuggestions?.length > 0) {
-        const leaf = response.data.categorySuggestions[0].category;
+      interface CategorySuggestionResponse {
+        categorySuggestions?: Array<{
+          category: { categoryId: string; categoryName?: string };
+        }>;
+      }
+      const data = response.data as CategorySuggestionResponse | undefined;
+      if (data?.categorySuggestions?.length && data.categorySuggestions.length > 0) {
+        const leaf = data.categorySuggestions[0].category;
         return {
           categoryId: leaf.categoryId,
           categoryName: leaf.categoryName || 'Unknown Category',
@@ -578,12 +645,20 @@ export class EbayService {
       });
 
       // Filter for aspects that are mandatory (usage: 'REQUIRED')
+      interface AspectData {
+        aspectConstraint?: { aspectMode?: string; aspectUsage?: string };
+        localizedAspectName: string;
+      }
+      interface AspectsResponse {
+        aspects?: AspectData[];
+      }
+      const aspectsData = response.data as AspectsResponse | undefined;
       const requiredAspects =
-        response.data?.aspects
+        aspectsData?.aspects
           ?.filter(
-            (a: any) => a.aspectConstraint?.aspectMode === 'REQUIRED' || a.aspectConstraint?.aspectUsage === 'REQUIRED'
+            (a) => a.aspectConstraint?.aspectMode === 'REQUIRED' || a.aspectConstraint?.aspectUsage === 'REQUIRED'
           )
-          .map((a: any) => a.localizedAspectName) || [];
+          .map((a) => a.localizedAspectName) || [];
 
       return requiredAspects;
     } catch (e) {
@@ -615,13 +690,7 @@ export class EbayService {
       quantity: 1,
       imageUrls: [],
     };
-    const result = await this.createListingWithRest(
-      userId,
-      productId,
-      data,
-      policies,
-      'UNKNOWN'
-    );
+    const result = await this.createListingWithRest(userId, productId, data, policies, 'UNKNOWN');
     return result.listingId;
   }
 
@@ -638,7 +707,9 @@ export class EbayService {
     this.logger.log(`Updating price and stock for user ${userId}, SKU ${sku}, Listing ${ebayListingId}`);
 
     const account = await this.getActiveAccount(userId);
-    if (!account) {throw new Error('No active eBay account');}
+    if (!account) {
+      throw new Error('No active eBay account');
+    }
 
     const accessToken = await this.getAccessToken(account);
     const marketplaceId = account.marketplace_id as EbayMarketplaceId;
@@ -656,16 +727,21 @@ export class EbayService {
     // We need the offerId. We can find it by SKU or store it in DB.
     // Since we don't store offerId, we'll fetch offers for the SKU.
     const offersUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer?sku=${sku}`;
-    const offersResponse = await axios.get(offersUrl, {
+    interface OffersData {
+      offers?: Array<Record<string, unknown>>;
+    }
+    const offersResponse = await axios.get<OffersData>(offersUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    const offer = offersResponse.data.offers?.find((o: any) => o.marketplaceId === marketplaceId);
+    const offer = offersResponse.data?.offers?.find((o) => o.marketplaceId === marketplaceId);
     if (!offer) {
       this.logger.warn(`No offer found for SKU ${sku} on ${marketplaceId}. Cannot update price.`);
     } else {
-      const updateOfferUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${offer.offerId}`;
-      const payload = {
+      const updateOfferUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${String(
+        offer.offerId
+      )}`;
+      const payload: Record<string, unknown> = {
         ...offer,
         availableQuantity: quantity,
         pricingSummary: {
@@ -692,12 +768,19 @@ export class EbayService {
     // Update Quantity via Inventory Item
     const inventoryUrl = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/inventory_item/${sku}`;
     // Fetch existing to get full data (required for PUT)
-    const invResponse = await axios.get(inventoryUrl, {
+    interface InventoryItemResponse {
+      availability?: {
+        shipToLocationAvailability?: { quantity?: number };
+      };
+    }
+    const invResponse = await axios.get<InventoryItemResponse>(inventoryUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     const inventoryItem = invResponse.data;
-    inventoryItem.availability.shipToLocationAvailability.quantity = quantity;
+    if (inventoryItem?.availability?.shipToLocationAvailability) {
+      inventoryItem.availability.shipToLocationAvailability.quantity = quantity;
+    }
 
     await axios.put(inventoryUrl, inventoryItem, {
       headers: {
@@ -724,7 +807,9 @@ export class EbayService {
    */
   async getActiveAccountAccessToken(userId: string): Promise<string | null> {
     const account = await this.getActiveAccount(userId);
-    if (!account) {return null;}
+    if (!account) {
+      return null;
+    }
     return this.getAccessToken(account);
   }
 
@@ -758,7 +843,7 @@ export class EbayService {
 
     await this.databaseService.query(
       `UPDATE ebay_accounts SET access_token = $1, access_token_expires_at = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
-      [tokenResponse.access_token, newExpiresAt, account.id]
+      [tokenResponse.access_token, newExpiresAt.toISOString(), account.id]
     );
 
     return tokenResponse.access_token;
@@ -767,8 +852,16 @@ export class EbayService {
   /**
    * Build eBay AddItem XML request
    */
-  private buildAddItemXml(data: any, policies: { paymentId: string; shippingId: string; returnId: string }): string {
-    const { title, description, price, quantity, imageUrls, currency } = data;
+  private buildAddItemXml(
+    data: Record<string, unknown>,
+    policies: { paymentId: string; shippingId: string; returnId: string }
+  ): string {
+    const title = data.title as string | undefined;
+    const description = data.description as string | undefined;
+    const price = data.price as number | undefined;
+    const quantity = data.quantity as number | undefined;
+    const imageUrls = data.imageUrls as string[] | undefined;
+    const currency = data.currency as string | undefined;
 
     // Basic XML structure for AddItem
     // Note: In a real app, we'd use a robust XML builder and handle all fields
@@ -781,13 +874,13 @@ export class EbayService {
     <Description><![CDATA[${description || ''}]]></Description>
     <PrimaryCategory>
       <CategoryID>1</CategoryID> <!-- TODO: Category Mapping -->
-    </PrimaryCategory>
-    <StartPrice>${price || 0}</StartPrice>
-    <CategoryMappingAllowed>true</CategoryMappingAllowed>
-    <ConditionID>1000</ConditionID> <!-- New -->
-    <Currency>${currency}</Currency>
-    <Country>${data.country || 'US'}</Country>
-    <Location>${data.country || 'US'}</Location>
+      </PrimaryCategory>
+      <StartPrice>${price || 0}</StartPrice>
+      <CategoryMappingAllowed>true</CategoryMappingAllowed>
+      <ConditionID>1000</ConditionID> <!-- New -->
+      <Currency>${currency}</Currency>
+      <Country>${String(data.country || 'US')}</Country>
+      <Location>${String(data.country || 'US')}</Location>
     <DispatchTimeMax>3</DispatchTimeMax>
     <ListingDuration>GTC</ListingDuration>
     <ListingType>FixedPriceItem</ListingType>
@@ -857,15 +950,17 @@ export class EbayService {
 
       // Simple parsing logic for mock/initial version
       // In production, use fast-xml-parser
-      if (response.data.includes('<Ack>Success</Ack>') || response.data.includes('<Ack>Warning</Ack>')) {
-        const match = response.data.match(/<ItemID>(\d+)<\/ItemID>/);
+      const responseBody = response.data as string;
+      if (responseBody.includes('<Ack>Success</Ack>') || responseBody.includes('<Ack>Warning</Ack>')) {
+        const match = responseBody.match(/<ItemID>(\d+)<\/ItemID>/);
         return match ? match[1] : `EBAY-MOCK-${Date.now()}`;
       } else {
-        const errorMatch = response.data.match(/<LongMessage>(.*?)<\/LongMessage>/);
+        const errorMatch = responseBody.match(/<LongMessage>(.*?)<\/LongMessage>/);
         throw new Error(errorMatch ? errorMatch[1] : 'Unknown eBay API error');
       }
-    } catch (error: any) {
-      this.logger.error('eBay API request failed', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const axiosErr = isAxiosErrorWithData(error) ? error : null;
+      this.logger.error('eBay API request failed', axiosErr?.response?.data || getErrorMessage(error));
       throw error;
     }
   }
@@ -915,30 +1010,30 @@ export class EbayService {
       ]);
 
       const allPolicies = [
-        ...fulfillment.map((p: any) => ({
-          id: p.fulfillmentPolicyId,
-          name: p.name,
-          type: 'shipping',
-          description: p.description,
+        ...fulfillment.map((p: Record<string, unknown>) => ({
+          id: String(p.fulfillmentPolicyId ?? ''),
+          name: String(p.name ?? ''),
+          type: 'shipping' as const,
+          description: String(p.description ?? ''),
         })),
-        ...payment.map((p: any) => ({
-          id: p.paymentPolicyId,
-          name: p.name,
-          type: 'payment',
-          description: p.description,
+        ...payment.map((p: Record<string, unknown>) => ({
+          id: String(p.paymentPolicyId ?? ''),
+          name: String(p.name ?? ''),
+          type: 'payment' as const,
+          description: String(p.description ?? ''),
         })),
-        ...returns.map((p: any) => ({
-          id: p.returnPolicyId,
-          name: p.name,
-          type: 'return',
-          description: p.description,
+        ...returns.map((p: Record<string, unknown>) => ({
+          id: String(p.returnPolicyId ?? ''),
+          name: String(p.name ?? ''),
+          type: 'return' as const,
+          description: String(p.description ?? ''),
         })),
       ];
 
       this.logger.log(`Fetched ${allPolicies.length} business policies from eBay for ${userId}`);
       return allPolicies;
-    } catch (error: any) {
-      this.logger.error(`Failed to fetch business policies from eBay: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(`Failed to fetch business policies from eBay: ${getErrorMessage(error)}`);
       // Fallback to empty if eBay API fails (e.g. business policies not enabled on account)
       return [];
     }
@@ -996,20 +1091,22 @@ export class EbayService {
         },
       });
 
-      if (response.data.includes('<Ack>Success</Ack>') || response.data.includes('<Ack>Warning</Ack>')) {
+      const responseBody = response.data as string;
+      if (responseBody.includes('<Ack>Success</Ack>') || responseBody.includes('<Ack>Warning</Ack>')) {
         this.logger.log(`Successfully ended eBay item: ${ebayItemId}`);
       } else {
-        const errorMatch = response.data.match(/<LongMessage>(.*?)<\/LongMessage>/);
+        const errorMatch = responseBody.match(/<LongMessage>(.*?)<\/LongMessage>/);
         this.logger.error(`Failed to end eBay item ${ebayItemId}: ${errorMatch ? errorMatch[1] : 'Unknown error'}`);
         // If item is already ended, skip error
-        if (response.data.includes('291') || response.data.includes('already ended')) {
+        if (responseBody.includes('291') || responseBody.includes('already ended')) {
           this.logger.warn(`Item ${ebayItemId} was already ended.`);
           return;
         }
         throw new Error(errorMatch ? errorMatch[1] : 'Unknown eBay API error');
       }
-    } catch (error: any) {
-      this.logger.error(`eBay endItem failed for ${ebayItemId}`, error.response?.data || error.message);
+    } catch (error: unknown) {
+      const axiosErr = isAxiosErrorWithData(error) ? error : null;
+      this.logger.error(`eBay endItem failed for ${ebayItemId}`, axiosErr?.response?.data || getErrorMessage(error));
       throw error;
     }
   }
@@ -1017,7 +1114,11 @@ export class EbayService {
   /**
    * Helper to fetch policies from specific eBay REST endpoint
    */
-  private async fetchPoliciesFromEbay(accessToken: string, policyType: string, marketplaceId: string): Promise<any[]> {
+  private async fetchPoliciesFromEbay(
+    accessToken: string,
+    policyType: string,
+    marketplaceId: string
+  ): Promise<Record<string, unknown>[]> {
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || '';
 
     try {
@@ -1029,13 +1130,14 @@ export class EbayService {
       });
 
       // The response has a field like 'fulfillmentPolicies', 'paymentPolicies', etc.
-      const key = policyType.replace('_', 's').replace('policy', 'Policies');
       const policiesKey = policyType.split('_')[0] + 'Policies';
-      return response.data[policiesKey] || [];
-    } catch (error: any) {
-      if (error.response?.status === 404 || error.response?.status === 403) {
+      const responseData = response.data as Record<string, unknown>;
+      return (responseData[policiesKey] as Record<string, unknown>[]) || [];
+    } catch (error: unknown) {
+      const axiosErr = isAxiosErrorWithData(error) ? error : null;
+      if (axiosErr?.response?.status === 404 || axiosErr?.response?.status === 403) {
         // Business policies might not be enabled on this account
-        this.logger.warn(`Business policies (${policyType}) not accessible for account: ${error.message}`);
+        this.logger.warn(`Business policies (${policyType}) not accessible for account: ${getErrorMessage(error)}`);
         return [];
       }
       throw error;

@@ -4,27 +4,24 @@ import { fileURLToPath } from 'url';
 import { Queue } from 'bullmq';
 import dotenv from 'dotenv';
 
-import { AMAZON_SCRAPE_QUEUE, getQueueOptions } from '../src/queue/scrapeQueue.js';
+import { ZON_SCRAPPER_QUEUE, getQueueOptions } from '../src/queue/scrapeQueue.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
-async function enqueueTestJob() {
+async function enqueueTestJob(): Promise<void> {
   const queueOptions = getQueueOptions(REDIS_URL);
-  const queue = new Queue(AMAZON_SCRAPE_QUEUE, queueOptions);
+  const queue = new Queue(ZON_SCRAPPER_QUEUE, queueOptions);
 
-  const asin = process.argv[2] || 'B0BMGFTY7N'; // Default to a known ASIN if none provided
+  const asin = process.argv[2] ?? 'B0BMGFTY7N';
 
-  console.log(`📡 Enqueueing job for ASIN: ${asin}`);
-
-  const job = await queue.add('scrape', {
+  await queue.add('scrape', {
     asin,
     marketplace: 'US',
   });
 
-  console.log(`✅ Job enqueued with ID: ${job.id}`);
   await queue.close();
 }
 

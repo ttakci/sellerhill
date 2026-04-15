@@ -1,3 +1,4 @@
+import { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
@@ -14,7 +15,9 @@ export const QuickActionCardContainer = styled.div<{ $variant: QuickActionCardVa
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
   cursor: pointer;
-  transition: box-shadow ${tkn('transitions.fast')}, border-color ${tkn('transitions.fast')},
+  transition:
+    box-shadow ${tkn('transitions.fast')},
+    border-color ${tkn('transitions.fast')},
     transform ${tkn('transitions.fast')};
   user-select: none;
 
@@ -29,7 +32,7 @@ export const QuickActionCardContainer = styled.div<{ $variant: QuickActionCardVa
   }
 `;
 
-export const IconArea = styled.div<{ $variant: QuickActionCardVariant }>`
+export const IconArea = styled.div<{ $variant: QuickActionCardVariant; $isPill?: boolean }>`
   width: 2.5rem;
   height: 2.5rem;
   border-radius: ${tkn('radius.md')};
@@ -38,21 +41,21 @@ export const IconArea = styled.div<{ $variant: QuickActionCardVariant }>`
   justify-content: center;
   flex-shrink: 0;
 
-  ${(props) => {
+  ${(props: { $variant: QuickActionCardVariant; theme: Theme }) => {
     switch (props.$variant) {
       case 'brand':
         return `
-          background: ${(props.theme as any).colors?.brand?.primary + '15'};
-          color: ${tkn('colors.brand.primary')(props as any)};
-          border: 0.0625rem solid ${(props.theme as any).colors?.brand?.primary + '30'};
-        `;
+  background: ${props.theme.colors.brand.primary + '15'};
+  color: ${tkn('colors.brand.primary')(props)};
+  border: 0.0625rem solid ${props.theme.colors.brand.primary + '30'};
+  `;
       case 'default':
       default:
         return `
-          background: ${tkn('colors.background.tertiary')(props as any)};
-          color: ${tkn('colors.text.secondary')(props as any)};
-          border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
-        `;
+  background: ${tkn('colors.background.tertiary')(props)};
+  color: ${tkn('colors.text.secondary')(props)};
+  border: 0.0625rem solid ${tkn('colors.border.primary')(props)};
+  `;
     }
   }}
 `;

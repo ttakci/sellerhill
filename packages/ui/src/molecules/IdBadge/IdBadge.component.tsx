@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+
 import * as S from './IdBadge.style';
 import type { IdBadgeProps, StoreType } from './IdBadge.types';
 

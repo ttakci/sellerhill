@@ -15,8 +15,7 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 
-import { OrderSyncService } from './order-sync.service';
-import type { EbayAccountForSync } from './order-sync.service';
+import { OrderSyncService, type EbayAccountForSync } from './order-sync.service';
 
 interface OrderRow {
   id: string;
@@ -62,6 +61,15 @@ interface OrderRow {
   } | null;
   created_at: Date;
   updated_at: Date;
+}
+
+/** Shape of a parsed shipping address */
+interface ShippingAddressData {
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
 }
 
 @Injectable()
@@ -157,7 +165,7 @@ export class OrdersService implements OnModuleInit {
 
     // Build WHERE clause
     const conditions: string[] = ['o.user_id = $1'];
-    const params: any[] = [userId];
+    const params: (string | number | boolean | null)[] = [userId];
     let paramIndex = 2;
 
     if (filters?.status) {
@@ -288,7 +296,7 @@ export class OrdersService implements OnModuleInit {
 
     // Build update query dynamically
     const updates: string[] = [];
-    const params: any[] = [];
+    const params: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
 
     if (updateDto.amazonOrderUrl !== undefined) {
@@ -388,8 +396,8 @@ export class OrdersService implements OnModuleInit {
   private mapRowToDto(row: OrderRow): OrderDto {
     const shippingAddress = row.shipping_address
       ? typeof row.shipping_address === 'string'
-        ? JSON.parse(row.shipping_address)
-        : row.shipping_address
+        ? (JSON.parse(row.shipping_address) as ShippingAddressData)
+        : (row.shipping_address as ShippingAddressData)
       : undefined;
 
     return {

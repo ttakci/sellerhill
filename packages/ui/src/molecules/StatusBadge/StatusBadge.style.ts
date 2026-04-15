@@ -1,27 +1,28 @@
+import { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-import type { StatusSize } from './StatusBadge.types';
-import { getStatusColors } from './StatusBadge.types';
+import { getStatusColors, type StatusSize } from './StatusBadge.types';
 
-const sizeStyles = ($size: StatusSize) => {
+const sizeStyles = ($size: StatusSize, theme: Theme) => {
+  const t = (path: Parameters<typeof tkn>[0]) => tkn(path)({ theme });
   switch ($size) {
     case 'sm':
       return `
         padding: 0.0625rem 0.5rem;
-        font-size: ${tkn('typography.fontSize.2xs')};
+        font-size: ${t('typography.fontSize.2xs')};
       `;
     case 'lg':
       return `
         padding: 0.25rem 0.75rem;
-        font-size: ${tkn('typography.fontSize.sm')};
+        font-size: ${t('typography.fontSize.sm')};
       `;
     case 'md':
     default:
       return `
         padding: 0.125rem 0.625rem;
-        font-size: ${tkn('typography.fontSize.xs')};
+        font-size: ${t('typography.fontSize.xs')};
       `;
   }
 };
@@ -41,7 +42,7 @@ export const StatusBadgeContainer = styled.span<{
   white-space: nowrap;
   line-height: 1.5;
 
-  ${({ $size }) => sizeStyles($size)}
+  ${({ $size, theme }) => sizeStyles($size, theme)}
 
   ${({ $status, theme }) => {
     const colors = getStatusColors($status, theme);

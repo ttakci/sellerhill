@@ -37,9 +37,9 @@ export const LoginPageContainer = (): React.ReactElement => {
 
       // Redirect based on whether user has connected accounts
       if (data.user.hasConnectedAccounts) {
-        navigate('/dashboard');
+        void navigate('/dashboard');
       } else {
-        navigate('/onboarding/ebay');
+        void navigate('/onboarding/ebay');
       }
     }
   }, [isSuccess, data, dispatch, navigate]);
@@ -72,7 +72,7 @@ export const LoginPageContainer = (): React.ReactElement => {
   };
 
   const handleNavigateToRegister = (): void => {
-    navigate('/register');
+    void navigate('/register');
   };
 
   return (

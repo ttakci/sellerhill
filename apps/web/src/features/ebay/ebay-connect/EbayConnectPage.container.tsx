@@ -4,8 +4,8 @@
  * Purpose: Handle eBay connection logic
  */
 
-import { useLoading, useUI } from '@repo/ui';
 import { EbayMarketplaceId } from '@repo/shared';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -45,12 +45,12 @@ export const EbayConnectPageContainer = (): React.ReactElement => {
     }
   }, [urlError, showMessage, closeMessage, t]);
 
-  const handleConnect = async (): Promise<void> => {
-    const result = await getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US }).unwrap();
-
-    // Redirect to eBay OAuth consent page
-    // Error is handled by RTK Query and the useEffect above
-    window.location.href = result.url;
+  const handleConnect = (): void => {
+    void getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US })
+      .unwrap()
+      .then((result) => {
+        window.location.href = result.url;
+      });
   };
 
   return (

@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
@@ -35,31 +36,31 @@ export const IconButtonContainer = styled.button<{ $variant: IconButtonVariant }
     cursor: not-allowed;
   }
 
-  ${({ $variant }) => {
+  ${({ $variant, theme }) => {
     switch ($variant) {
       case 'outlined':
-        return `
-          border-color: ${tkn('colors.border.primary')};
+        return css`
+          border-color: ${tkn('colors.border.primary')({ theme })};
           &:hover {
-            background: ${tkn('colors.background.tertiary')};
-            border-color: ${tkn('colors.text.tertiary')};
+            background: ${tkn('colors.background.tertiary')({ theme })};
+            border-color: ${tkn('colors.text.tertiary')({ theme })};
           }
         `;
       case 'elevated':
-        return `
-          background: ${tkn('colors.surface.primary')};
-          box-shadow: ${tkn('shadows.sm')};
-          border-color: ${tkn('colors.border.primary')};
+        return css`
+          background: ${tkn('colors.surface.primary')({ theme })};
+          box-shadow: ${tkn('shadows.sm')({ theme })};
+          border-color: ${tkn('colors.border.primary')({ theme })};
           &:hover {
-            background: ${tkn('colors.background.tertiary')};
-            box-shadow: ${tkn('shadows.md')};
+            background: ${tkn('colors.background.tertiary')({ theme })};
+            box-shadow: ${tkn('shadows.md')({ theme })};
           }
         `;
       case 'ghost':
       default:
-        return `
+        return css`
           &:hover {
-            background: ${tkn('colors.background.tertiary')};
+            background: ${tkn('colors.background.tertiary')({ theme })};
           }
         `;
     }

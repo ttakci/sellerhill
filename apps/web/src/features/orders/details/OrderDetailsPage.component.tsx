@@ -48,9 +48,14 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
     return null;
   }
 
-  const handleUpdateAmazonDetails = async (values: any) => {
+  const handleUpdateAmazonDetails = (values: {
+    amazonOrderUrl?: string;
+    amazonTrackingUrl?: string;
+    amazonTax?: number;
+    amazonShipping?: number;
+  }) => {
     if (onUpdateAmazonDetails) {
-      await onUpdateAmazonDetails(values);
+      onUpdateAmazonDetails(values);
       setIsAmazonModalOpen(false);
     }
   };

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import type { FeeConfig, ListingSettingsGroup, ProductData, StoreSettingsResponse } from '@repo/shared';
-import { TemplateType } from '@repo/shared';
+import { TemplateType, type FeeConfig, type ListingSettingsGroup, type ProductData, type StoreSettingsResponse } from '@repo/shared';
 
 import { sanitizeHtml, sanitizeStringArray } from '../../common/utils/sanitize';
 import { ListingSettingsGroupService } from '../listing-settings-groups/listing-settings-group.service';

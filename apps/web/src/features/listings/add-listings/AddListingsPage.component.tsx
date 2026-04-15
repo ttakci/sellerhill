@@ -38,12 +38,14 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
 
   return (
     <S.Container>
-      <PageHeader
-        title={t('listings:listings.title')}
-        subtitle={t('listings:listings.subtitle')}
-      />
+      <PageHeader title={t('listings:listings.title')} subtitle={t('listings:listings.subtitle')} />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSubmit(onSubmit)();
+        }}
+      >
         {/* Top Section: Side-by-Side Cards */}
         <S.ConfigSection>
           {/* Card 1: Listing Settings */}
@@ -137,9 +139,7 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
                 <Icon name="format_list_bulleted" size={24} />
               </S.IconWrapper>
               <div>
-                <S.AsinTitle>
-                  {t('listings:listings.asinEntry.title')}
-                </S.AsinTitle>
+                <S.AsinTitle>{t('listings:listings.asinEntry.title')}</S.AsinTitle>
               </div>
             </S.AsinHeaderLeft>
 
@@ -176,7 +176,9 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
               <span>{t('listings:listings.actions.cancel')}</span>
             </S.CancelButton>
             <S.SubmitButton variant="primary" type="submit" disabled={isLoading || isSubmitting || asinCount === 0}>
-              <span>{isSubmitting ? t('listings:listings.actions.importing') : t('listings:listings.actions.import')}</span>
+              <span>
+                {isSubmitting ? t('listings:listings.actions.importing') : t('listings:listings.actions.import')}
+              </span>
               <Icon name="play_arrow" size={20} />
             </S.SubmitButton>
           </S.FormFooter>

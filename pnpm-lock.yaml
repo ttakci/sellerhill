@@ -301,6 +301,9 @@ importers:
       bullmq:
         specifier: ^5.66.5
         version: 5.66.5
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       uuid:
         specifier: ^13.0.0
         version: 13.0.0

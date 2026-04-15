@@ -1,10 +1,11 @@
 /**
  * CheckEmailPage Component
  *
- * Purpose: Verification link sent confirmation
+ * Purpose: Verification link sent confirmation.
+ * Two-panel layout — consistent with Login / Register branding.
  */
 
-import { Button, Icon, Text } from '@repo/ui';
+import { Button, Icon, Logo, MeshBackground, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,74 +23,69 @@ export const CheckEmailPageComponent = ({
   return (
     <S.Container>
       <S.LayoutWrapper>
-        {/* Left Panel: Content */}
-        <S.LeftPanel>
-          <S.AuthCard>
-            <S.LogoWrapper>
-              <Icon name="logo" size={48} color="brand.primary" />
-              <S.LogoText variant="h2" weight="bold" color="brand.primary">
-                {t('translation:common.brandName')}
-              </S.LogoText>
-            </S.LogoWrapper>
+        {/* Left Panel: Branding */}
+        <S.BrandingPanel>
+          <S.DecorationArea>
+            <MeshBackground animate={true} />
+          </S.DecorationArea>
 
+          <S.BrandingContent>
+            <S.BrandingLogoWrapper>
+              <Logo size={520} />
+            </S.BrandingLogoWrapper>
+
+            <S.SloganWrapper>
+              <Typewriter
+                phrases={[
+                  t('auth:auth.branding.slogan1'),
+                  t('auth:auth.branding.slogan2'),
+                  t('auth:auth.branding.slogan3'),
+                  t('auth:auth.branding.slogan4'),
+                ]}
+                typingSpeed={70}
+                deletingSpeed={40}
+                pauseTime={2500}
+              />
+            </S.SloganWrapper>
+          </S.BrandingContent>
+        </S.BrandingPanel>
+
+        {/* Right Panel: Content */}
+        <S.FormPanel>
+          <S.AuthCard>
             <S.IconContainer>
-              <Icon name="mail" size={40} />
+              <Icon name="mail" size={44} />
             </S.IconContainer>
 
             <S.Header>
-              <Text variant="h2" weight="bold">
+              <Text variant="h3" weight="bold">
                 {t('auth:auth.checkEmail.header')}
               </Text>
               <Text variant="body" color="text.secondary">
-                {t('auth:auth.checkEmail.description', { email })}
+                {t('auth:auth.checkEmail.description', { email: email || '' })}
               </Text>
             </S.Header>
 
             <S.ActionGroup>
               <Button onClick={onBackToLogin} variant="primary" fullWidth size="large">
-                {t('auth:auth.checkEmail.loginButton')}
+                <Text variant="body" weight="medium" color="text.inverse">
+                  {t('auth:auth.checkEmail.loginButton')}
+                </Text>
               </Button>
-
-              <S.ResendInfo variant="body" color="text.secondary">
-                {t('auth:auth.checkEmail.noEmail')}
-              </S.ResendInfo>
-
-              <S.ResendButton variant="text" onClick={onResend} disabled={isResending}>
-                {isResending ? t('translation:common.loading') : t('auth:auth.checkEmail.resendLink')}
-              </S.ResendButton>
             </S.ActionGroup>
-          </S.AuthCard>
-        </S.LeftPanel>
 
-        {/* Right Panel: Branding */}
-        <S.RightPanel>
-          <S.MosaicDecor>
-            <div className="box-1" />
-            <div className="box-2" />
-            <div className="box-3" />
-            <div className="box-4" />
-          </S.MosaicDecor>
-          <S.BrandingContent>
-            <S.BrandingLogoWrapper>
-              <Icon name="logo" size={64} color="text.inverse" />
-              <Text variant="h1" weight="bold" color="text.inverse">
-                {t('translation:common.brandName')}
+            <S.ResendRow>
+              <Text variant="body" color="text.secondary">
+                {t('auth:auth.checkEmail.noEmail')}
               </Text>
-            </S.BrandingLogoWrapper>
-
-            <Text variant="h3" weight="medium" color="text.inverse">
-              {t('auth:auth.checkEmail.title')}
-            </Text>
-
-            <S.BrandingDescription variant="body" color="text.inverse">
-              {t('auth:auth.checkEmail.brandingText')}
-            </S.BrandingDescription>
-
-            <S.BrandingIconContainer>
-              <Icon name="mail" size={200} color="text.inverse" />
-            </S.BrandingIconContainer>
-          </S.BrandingContent>
-        </S.RightPanel>
+              <S.ResendButton variant="text" onClick={onResend} disabled={isResending}>
+                <Text variant="body" weight="medium" color="brand.primary">
+                  {isResending ? t('translation:common.loading') : t('auth:auth.checkEmail.resendLink')}
+                </Text>
+              </S.ResendButton>
+            </S.ResendRow>
+          </S.AuthCard>
+        </S.FormPanel>
       </S.LayoutWrapper>
     </S.Container>
   );

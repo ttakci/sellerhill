@@ -1,7 +1,5 @@
 import { Body, Controller, Get, Post, Query, Request, UseGuards } from '@nestjs/common';
-import {
-    StoreSettingsResponse
-} from '@repo/shared';
+import { StoreSettingsResponse } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -15,7 +13,7 @@ export class StoreSettingsController {
 
   @Get()
   async getSettings(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Query('storeId') storeId?: string
   ): Promise<StoreSettingsResponse> {
     return this.storeSettingsService.getSettings(req.user.sub, storeId);
@@ -23,7 +21,7 @@ export class StoreSettingsController {
 
   @Post()
   async saveSettings(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Body() dto: SaveStoreSettingsDto
   ): Promise<StoreSettingsResponse> {
     return this.storeSettingsService.saveSettings(req.user.sub, dto);

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 
+import type { AppTheme } from '../../theme/theme.types';
 import { tkn } from '../../theme/tkn';
 
 import type { TooltipPosition, TooltipVariant } from './Tooltip.types';
@@ -9,56 +10,110 @@ export const TooltipWrapper = styled.div`
   display: inline-flex;
 `;
 
-const positionStyles: Record<TooltipPosition, string> = {
-  top: `
-    bottom: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  `,
-  bottom: `
-    top: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  `,
-  left: `
-    right: calc(100% + 0.5rem);
-    top: 50%;
-    transform: translateY(-50%);
-  `,
-  right: `
-    left: calc(100% + 0.5rem);
-    top: 50%;
-    transform: translateY(-50%);
-  `,
-};
-
-export const TooltipContent = styled.div<{
+export const TooltipPortal = styled.div<{
   $position: TooltipPosition;
   $variant: TooltipVariant;
+  $top: number;
+  $left: number;
 }>`
-  position: absolute;
-  z-index: 1100;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  position: fixed;
+  z-index: 9999;
+  padding: 0.5rem 0.75rem;
   border-radius: ${tkn('radius.md')};
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
   line-height: ${tkn('typography.lineHeight.normal')};
-  white-space: nowrap;
+  white-space: normal;
   pointer-events: none;
+  max-width: 20rem;
+  word-break: break-word;
+  transition: opacity 0.15s ease;
 
-  ${(props) => positionStyles[props.$position]}
+  /* Arrow */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0.375rem;
+  }
 
-  ${(props) => {
-    if (props.$variant === 'dark') {
+  /* Positioning */
+  ${({ $position, $top, $left }) => {
+    switch ($position) {
+      case 'top':
+        return `
+          top: ${$top}px;
+          left: ${$left}px;
+          transform: translate(-50%, -100%);
+          &::after {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+        `;
+      case 'bottom':
+        return `
+          top: ${$top}px;
+          left: ${$left}px;
+          transform: translate(-50%, 0);
+          &::after {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+        `;
+      case 'left':
+        return `
+          top: ${$top}px;
+          left: ${$left}px;
+          transform: translate(-100%, -50%);
+          &::after {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+          }
+        `;
+      case 'right':
+        return `
+          top: ${$top}px;
+          left: ${$left}px;
+          transform: translate(0, -50%);
+          &::after {
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+          }
+        `;
+    }
+  }}
+
+  /* Variant */
+  ${({ $position, $variant, theme }) => {
+    const t = theme as AppTheme;
+    const bg = $variant === 'dark'
+      ? t.colors.text.primary
+      : t.colors.surface.primary;
+    const arrowMap: Record<TooltipPosition, string> = {
+      top: `${bg} transparent transparent transparent`,
+      bottom: `transparent transparent ${bg} transparent`,
+      left: `transparent transparent transparent ${bg}`,
+      right: `transparent ${bg} transparent transparent`,
+    };
+    if ($variant === 'dark') {
       return `
-        background: ${tkn('colors.text.primary')(props as any)};
-        color: ${tkn('colors.text.inverse')(props as any)};
+        background: ${bg};
+        color: ${t.colors.text.inverse};
+        &::after { border-color: ${arrowMap[$position]}; }
       `;
     }
     return `
-      background: ${tkn('colors.surface.primary')(props as any)};
-      color: ${tkn('colors.text.primary')(props as any)};
-      border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};
-      box-shadow: ${tkn('shadows.sm')(props as any)};
+      background: ${bg};
+      color: ${t.colors.text.primary};
+      border: 0.0625rem solid ${t.colors.border.primary};
+      box-shadow: ${t.shadows.sm};
+      &::after { border-color: ${arrowMap[$position]}; }
     `;
   }}
 `;

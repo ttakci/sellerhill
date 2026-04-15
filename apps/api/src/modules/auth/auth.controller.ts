@@ -1,12 +1,12 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import {
-    ApiBadRequestResponse,
-    ApiBearerAuth,
-    ApiCreatedResponse,
-    ApiOkResponse,
-    ApiOperation,
-    ApiTags,
-    ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { AuthResponse, RegistrationResponse, UserDto } from '@repo/shared';
 
@@ -94,7 +94,7 @@ export class AuthController {
   })
   @ApiOkResponse({ description: 'User information retrieved successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token' })
-  async getMe(@Request() req: any): Promise<UserDto> {
+  async getMe(@Request() req: { user: { sub: string } }): Promise<UserDto> {
     const userId = req.user.sub;
     return this.authService.getMe(userId);
   }

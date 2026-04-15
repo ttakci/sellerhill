@@ -16,7 +16,8 @@
     "actions": {
       "search": "Sipariş, alıcı veya ürün ara...",
       "last30Days": "Son 30 Gün",
-      "export": "Dışa Aktar"
+      "export": "Dışa Aktar",
+      "refresh": "Yenile"
     },
     "table": {
       "orderNumber": "Sipariş No",

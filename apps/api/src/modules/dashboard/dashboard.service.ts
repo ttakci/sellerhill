@@ -121,7 +121,20 @@ export class DashboardService {
    * Get 3 most recent orders
    */
   private async getRecentOrders(userId: string): Promise<OrderDto[]> {
-    const results = await this.databaseService.query(
+    interface RecentOrderRow {
+      id: string;
+      ebay_order_id: string;
+      product_title: string | null;
+      sale_total: string;
+      net_profit: string;
+      status: string;
+      is_tracked: boolean;
+      created_at: Date;
+      quantity: number;
+      asin: string | null;
+      product_image_url: string | null;
+    }
+    const results = await this.databaseService.query<RecentOrderRow>(
       `SELECT
         o.id, o.ebay_order_id, o.product_title, o.sale_total, o.net_profit,
         o.status, o.is_tracked, o.created_at, o.quantity, o.asin, o.product_image_url

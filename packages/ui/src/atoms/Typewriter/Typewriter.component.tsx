@@ -47,14 +47,16 @@ export const Typewriter: React.FC<TypewriterProps> = ({
 
   useEffect(() => {
     if (subIndex === phrases[index].length + 1 && !isDeleting) {
-      setTimeout(() => setIsDeleting(true), pauseTime);
-      return;
+      const timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+      return () => clearTimeout(timeout);
     }
 
     if (subIndex === 0 && isDeleting) {
-      setIsDeleting(false);
-      setIndex((prev) => (prev + 1) % phrases.length);
-      return;
+      const timeout = setTimeout(() => {
+        setIndex((prev) => (prev + 1) % phrases.length);
+        setIsDeleting(false);
+      }, typingSpeed);
+      return () => clearTimeout(timeout);
     }
 
     const timeout = setTimeout(

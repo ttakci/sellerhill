@@ -50,9 +50,9 @@ export class DatabaseService implements OnModuleInit {
   private async testConnection(): Promise<void> {
     try {
       const client = await this.pool.connect();
-      const result = await client.query('SELECT NOW()');
+      const result = await client.query<{ now: Date }>('SELECT NOW()');
       client.release();
-      this.logger.log(`Database connection successful. Server time: ${result.rows[0].now}`);
+      this.logger.log(`Database connection successful. Server time: ${result.rows[0].now.toISOString()}`);
     } catch (error) {
       this.logger.error('Failed to connect to database', error);
     }
@@ -61,7 +61,7 @@ export class DatabaseService implements OnModuleInit {
   /**
    * Execute a query
    */
-  async query<T = any>(text: string, params?: any[]): Promise<T[]> {
+  async query<T>(text: string, params?: (string | number | boolean | null | undefined)[]): Promise<T[]> {
     const start = Date.now();
     try {
       const result = await this.pool.query(text, params);

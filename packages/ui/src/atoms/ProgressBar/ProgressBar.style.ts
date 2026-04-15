@@ -46,14 +46,14 @@ export const ProgressBarFill = styled.div<{
   ${(props) => {
     switch (props.$variant) {
       case 'success':
-        return `background: ${tkn('colors.semantic.success')(props as any)};`;
+        return `background: ${tkn('colors.semantic.success')(props)};`;
       case 'warning':
-        return `background: ${tkn('colors.semantic.warning')(props as any)};`;
+        return `background: ${tkn('colors.semantic.warning')(props)};`;
       case 'error':
-        return `background: ${tkn('colors.semantic.error')(props as any)};`;
+        return `background: ${tkn('colors.semantic.error')(props)};`;
       case 'default':
       default:
-        return `background: ${tkn('colors.brand.primary')(props as any)};`;
+        return `background: ${tkn('colors.brand.primary')(props)};`;
     }
   }}
 `;

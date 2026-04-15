@@ -95,7 +95,7 @@ export class EbayFulfillmentService {
       cursor?: string;
     } = {}
   ): Promise<FetchOrdersResult> {
-    const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
+    const _config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
 
     const params: Record<string, string> = {
@@ -119,7 +119,12 @@ export class EbayFulfillmentService {
     this.logger.debug(`Fetching eBay orders from ${url}`);
 
     try {
-      const response = await axios.get(url, {
+      interface FetchOrdersResponse {
+        orders?: EbayFulfillmentOrder[];
+        next?: string;
+        total?: number;
+      }
+      const response = await axios.get<FetchOrdersResponse>(url, {
         params,
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -129,14 +134,19 @@ export class EbayFulfillmentService {
         timeout: 30000,
       });
 
-      const orders = response.data?.orders || [];
-      const nextCursor = response.data?.next ?? undefined;
-      const total = response.data?.total ?? orders.length;
+      const data = response.data;
+      const orders = data?.orders || [];
+      const nextCursor = data?.next ?? undefined;
+      const total = data?.total ?? orders.length;
 
       return { orders, nextCursor, total };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosErr = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { errors?: Array<{ message?: string }> } }; message?: string })
+        : null;
+      const errMsg = axiosErr?.response?.data?.errors?.[0]?.message || (error instanceof Error ? error.message : String(error));
       this.logger.error(
-        `Failed to fetch eBay orders: ${error.response?.data?.errors?.[0]?.message || error.message}`
+        `Failed to fetch eBay orders: ${errMsg}`
       );
       throw error;
     }
@@ -154,7 +164,7 @@ export class EbayFulfillmentService {
     const url = `${baseUrl}/sell/fulfillment/v1/order/${ebayOrderId}`;
 
     try {
-      const response = await axios.get(url, {
+      const response = await axios.get<EbayFulfillmentOrder>(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
@@ -163,11 +173,14 @@ export class EbayFulfillmentService {
       });
 
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      const axiosErr = error instanceof Error && 'response' in error
+        ? (error as { response?: { status?: number }; message?: string })
+        : null;
+      if (axiosErr?.response?.status === 404) {
         return null;
       }
-      this.logger.error(`Failed to fetch eBay order ${ebayOrderId}: ${error.message}`);
+      this.logger.error(`Failed to fetch eBay order ${ebayOrderId}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

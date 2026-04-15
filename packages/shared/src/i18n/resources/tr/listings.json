@@ -39,6 +39,28 @@
         "empty": "Bu işe ait ürün kaydı bulunamadı."
       }
     },
+    "filters": {
+      "searchPlaceholder": "Başlık veya ASIN ile ara...",
+      "allCategories": "Tüm Kategoriler",
+      "allStatuses": "Tüm Durumlar",
+      "advancedFilters": "Gelişmiş Filtreler",
+      "clearAll": "Tümünü Temizle",
+      "resultCount": "{{count}} sonuç",
+      "min": "Min",
+      "max": "Maks",
+      "fields": {
+        "price": "Satış Fiyatı",
+        "purchasePrice": "Alış Fiyatı",
+        "estimatedProfit": "Kâr",
+        "roi": "ROI (%)",
+        "profitMargin": "Marj (%)",
+        "soldCount": "Satılan",
+        "watchCount": "İzlenen",
+        "viewCount": "Görüntülenme",
+        "quantity": "Stok",
+        "sourceStock": "Amazon Stok"
+      }
+    },
     "overview": {
       "title": "Aktif Listeler",
       "subtitle": "Şu anda mağazanızda yayında olan {{count}} aktif listeniz bulunuyor.",
@@ -67,7 +89,8 @@
       "stockLabel": "Stok",
       "asinLabel": "ASIN: {{asin}}",
       "ebayIdLabel": "eBay: {{id}}",
-      "sourceStock": "Kaynak: {{stock}}"
+      "sourceStock": "Kaynak: {{stock}}",
+      "amazonStock": "Amazon Stok"
     },
     "card": {
       "stock": "Stok",

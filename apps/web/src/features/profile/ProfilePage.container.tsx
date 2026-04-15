@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateProfileSchema, type UpdateProfileFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -59,6 +59,11 @@ export const ProfilePageContainer = (): React.ReactElement => {
     }
   }, [profile, reset]);
 
+  const handleSuccessClose = useCallback(() => {
+    closeMessage();
+    setIsEditing(false);
+  }, [closeMessage]);
+
   useEffect(() => {
     if (isSuccess) {
       showMessage(
@@ -68,14 +73,13 @@ export const ProfilePageContainer = (): React.ReactElement => {
           descriptionKey: 'profile:profile.updateSuccess',
           primaryButton: {
             labelKey: 'translation:common.ok',
-            onClick: closeMessage,
+            onClick: handleSuccessClose,
           },
         },
         t
       );
-      setIsEditing(false); // Exit edit mode on success
     }
-  }, [isSuccess, showMessage, closeMessage, t]);
+  }, [isSuccess, showMessage, handleSuccessClose, t]);
 
   useEffect(() => {
     if (error) {
@@ -84,7 +88,7 @@ export const ProfilePageContainer = (): React.ReactElement => {
         {
           type: 'error',
           headerKey: 'translation:common.error',
-          descriptionKey: key, 
+          descriptionKey: key,
           descriptionParams: params,
           primaryButton: {
             labelKey: 'translation:common.ok',

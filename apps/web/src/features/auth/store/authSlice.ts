@@ -9,7 +9,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  user: JSON.parse(localStorage.getItem('user') || 'null') as UserDto | null,
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
   isAuthenticated: !!localStorage.getItem('accessToken'),
@@ -21,7 +21,9 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      { payload: { user, accessToken, refreshToken } }: PayloadAction<{ user: UserDto; accessToken: string; refreshToken: string }>
+      {
+        payload: { user, accessToken, refreshToken },
+      }: PayloadAction<{ user: UserDto; accessToken: string; refreshToken: string }>
     ) => {
       state.user = user;
       state.accessToken = accessToken;

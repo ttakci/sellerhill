@@ -12,15 +12,12 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Get()
-  async getProfile(@Request() req: any): Promise<ProfileDto> {
+  async getProfile(@Request() req: { user: { sub: string } }): Promise<ProfileDto> {
     return this.profileService.getProfile(req.user.sub);
   }
 
   @Patch()
-  async updateProfile(
-    @Request() req: any,
-    @Body() dto: UpdateProfileDto
-  ): Promise<ProfileDto> {
+  async updateProfile(@Request() req: { user: { sub: string } }, @Body() dto: UpdateProfileDto): Promise<ProfileDto> {
     return this.profileService.updateProfile(req.user.sub, dto);
   }
 }

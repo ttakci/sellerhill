@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { useGetOrdersQuery, useGetOrderStatsQuery } from './api/orders.api';
+import { useGetOrdersQuery, useGetOrderStatsQuery, useTriggerOrderSyncMutation } from './api/orders.api';
 import { OrdersPageComponent } from './OrdersPage.component';
 
 export const OrdersPage: React.FC = () => {
@@ -14,8 +14,9 @@ export const OrdersPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data, isLoading: isOrdersLoading } = useGetOrdersQuery();
-  const { data: stats, isLoading: isStatsLoading } = useGetOrderStatsQuery();
+  const { data, isLoading: isOrdersLoading, refetch: refetchOrders } = useGetOrdersQuery();
+  const { data: stats, isLoading: isStatsLoading, refetch: refetchStats } = useGetOrderStatsQuery();
+  const [triggerSync, { isLoading: isSyncing }] = useTriggerOrderSyncMutation();
 
   const orders = data?.orders ?? [];
 
@@ -42,6 +43,12 @@ export const OrdersPage: React.FC = () => {
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     setPage(1); // Reset to first page when searching
+  };
+
+  const handleRefresh = async () => {
+    await triggerSync();
+    await refetchOrders();
+    await refetchStats();
   };
 
   const handleDownload = () => {
@@ -74,7 +81,6 @@ export const OrdersPage: React.FC = () => {
     <OrdersPageComponent
       orders={paginatedOrders}
       stats={stats}
-      isLoading={isLoading}
       page={page}
       rowsPerPage={rowsPerPage}
       onPageChange={setPage}
@@ -86,6 +92,8 @@ export const OrdersPage: React.FC = () => {
       searchQuery={searchQuery}
       onSearchChange={handleSearchChange}
       onDownload={handleDownload}
+      onRefresh={handleRefresh}
+      isRefreshing={isSyncing}
       totalCount={filteredOrders.length}
     />
   );

@@ -106,7 +106,12 @@ export const tkn = (path: ThemePath) => (p: { theme: Theme }) => {
 
   // Path'i parçalara ayır (örn: 'colors.text.primary' -> ['colors', 'text', 'primary'])
   // ve objenin içinde derinlere inerek değeri bul.
-  const value = path.split('.').reduce((obj: any, key) => obj && obj[key], t);
+  const value = path
+    .split('.')
+    .reduce<unknown>(
+      (obj, key) => (obj !== null && typeof obj === 'object' ? (obj as Record<string, unknown>)[key] : undefined),
+      t as unknown
+    ) as string | undefined;
 
   if (value === undefined) {
     console.warn(`[tkn] Path "${path}" not found in theme.`);

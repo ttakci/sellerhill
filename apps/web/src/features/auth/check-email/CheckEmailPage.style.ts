@@ -1,13 +1,18 @@
 /**
  * CheckEmailPage Styles
+ *
+ * Two-panel layout — consistent with Login / Register pages.
+ * Left panel: Branding (logo + MeshBackground)
+ * Right panel: Check-email content
  */
 
 import styled from '@emotion/styled';
-import { Button, Text, tkn } from '@repo/ui';
+import { Button, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: ${tkn('colors.background.primary')};
   box-sizing: border-box;
 
@@ -19,6 +24,7 @@ export const Container = styled.div`
 export const LayoutWrapper = styled.div`
   display: flex;
   width: 100%;
+  height: 100%;
   flex-wrap: wrap;
 
   @media (min-width: 64rem) {
@@ -27,28 +33,10 @@ export const LayoutWrapper = styled.div`
   }
 `;
 
-export const LeftPanel = styled.div`
+export const BrandingPanel = styled.div`
   flex: 1 1 100%;
   width: 100%;
-  background: ${tkn('colors.surface.primary')};
-  padding: ${tkn('spacing.xl')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-
-  @media (min-width: 64rem) {
-    /* 1024px */
-    flex: 0 0 50%;
-    width: 50%;
-    padding: ${tkn('spacing.xxxl')};
-  }
-`;
-
-export const RightPanel = styled.div`
-  flex: 1 1 100%;
-  width: 100%;
-  background: #020d23; /* Deep Navy from TailAdmin Demo */
+  height: 100%;
   padding: ${tkn('spacing.xxxl')};
   display: none;
   flex-direction: column;
@@ -64,121 +52,12 @@ export const RightPanel = styled.div`
     flex: 0 0 50%;
     width: 50%;
   }
-
-  /* Decorative Grid Pattern */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.05) 0.0625rem, transparent 0.0625rem),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0.0625rem, transparent 0.0625rem); /* 1px */
-    background-size: 3.125rem 3.125rem; /* 50px 50px */
-    z-index: 0;
-  }
-
-  /* Mosaic effect */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.02) 0.125rem, transparent 0.125rem); /* 2px */
-    background-size: 1.5625rem 1.5625rem; /* 25px 25px */
-    z-index: 1;
-    opacity: 0.5;
-  }
 `;
 
-export const MosaicDecor = styled.div`
+export const DecorationArea = styled.div`
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+  inset: 0;
   z-index: 0;
-
-  & > div {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 0.25rem; /* 4px */
-  }
-
-  .box-1 {
-    width: 6.25rem;
-    height: 6.25rem;
-    top: 20%;
-    left: 10%;
-  } /* 100px */
-  .box-2 {
-    width: 9.375rem;
-    height: 9.375rem;
-    top: 60%;
-    left: 70%;
-    background: rgba(255, 255, 255, 0.02);
-  } /* 150px */
-  .box-3 {
-    width: 5rem;
-    height: 5rem;
-    top: 10%;
-    left: 80%;
-  } /* 80px */
-  .box-4 {
-    width: 7.5rem;
-    height: 7.5rem;
-    top: 80%;
-    left: 20%;
-    background: rgba(255, 255, 255, 0.04);
-  } /* 120px */
-`;
-
-export const AuthCard = styled.div`
-  width: 100%;
-  max-width: 34.375rem; /* 550px */
-  background: ${tkn('colors.surface.primary')};
-  text-align: center;
-`;
-
-export const LogoWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.xl')};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-export const IconContainer = styled.div`
-  width: 5rem; /* 80px */
-  height: 5rem; /* 80px */
-  background-color: ${tkn('colors.brand.primary')}15;
-  color: ${tkn('colors.brand.primary')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${tkn('radius.full')};
-  margin: 0 auto ${tkn('spacing.xl')};
-`;
-
-export const Header = styled.div`
-  margin-bottom: ${tkn('spacing.lg')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const ActionGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.xl')};
-`;
-
-export const ResendButton = styled(Button)`
-  margin-top: ${tkn('spacing.md')};
 `;
 
 export const BrandingContent = styled.div`
@@ -187,7 +66,7 @@ export const BrandingContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
   z-index: 2;
 `;
 
@@ -195,22 +74,96 @@ export const BrandingLogoWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const SloganWrapper = styled.div`
+  font-family: ${tkn('typography.fontFamily.sans')};
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  min-height: 6.5rem;
+  line-height: 1.3;
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+  justify-content: center;
+`;
+
+export const FormPanel = styled.div`
+  flex: 1 1 100%;
+  width: 100%;
+  background: ${tkn('colors.surface.primary')};
+  padding: ${tkn('spacing.xl')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow-y: auto;
+  z-index: 1;
+
+  @media (min-width: 64rem) {
+    /* 1024px */
+    flex: 0 0 50%;
+    width: 50%;
+    padding: ${tkn('spacing.xxxl')};
+  }
+`;
+
+export const AuthCard = styled.div`
+  width: 100%;
+  max-width: 34.375rem; /* 550px */
+  background: ${tkn('colors.surface.primary')};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+`;
+
+export const IconContainer = styled.div`
+  width: 5.5rem; /* 88px */
+  height: 5.5rem; /* 88px */
+  background-color: ${tkn('colors.semanticTint.info')};
+  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')};
+  color: ${tkn('colors.semantic.info')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${tkn('radius.full')};
+  margin-bottom: ${tkn('spacing.xl')};
+
+  @media (max-width: 40rem) {
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: ${tkn('spacing.lg')};
+  }
+`;
+
+export const Header = styled.div`
+  margin-bottom: ${tkn('spacing.xxl')};
+  display: flex;
+  flex-direction: column;
   gap: ${tkn('spacing.sm')};
+  align-items: center;
 `;
 
-export const LogoText = styled(Text)`
-  margin-top: 1rem;
+export const ActionGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  width: 100%;
+  max-width: 20rem; /* 320px */
 `;
 
-export const ResendInfo = styled(Text)`
-  margin-top: 1.5rem;
+export const ResendRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.xs')};
+  margin-top: ${tkn('spacing.xl')};
 `;
 
-export const BrandingDescription = styled(Text)`
-  opacity: 0.8;
-`;
-
-export const BrandingIconContainer = styled.div`
-  margin-top: 2rem;
-  opacity: 0.1;
+export const ResendButton = styled(Button)`
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  min-width: auto;
 `;

@@ -20,7 +20,7 @@ export class SyncProcessorService extends WorkerHost {
   /**
    * Process background sync tasks
    */
-  async process(job: Job<any>): Promise<void> {
+  async process(job: Job<{ manual?: boolean }>): Promise<void> {
     this.logger.log(`Processing background sync job: ${job.name}`);
 
     try {
@@ -33,8 +33,9 @@ export class SyncProcessorService extends WorkerHost {
       } else {
         this.logger.warn(`Unknown job name: ${job.name}`);
       }
-    } catch (error: any) {
-      this.logger.error(`Error in sync processor job ${job.name}: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error in sync processor job ${job.name}: ${message}`);
       throw error;
     }
   }

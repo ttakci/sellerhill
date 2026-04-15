@@ -13,7 +13,7 @@ import { ColumnManager } from './ColumnManager';
 import * as S from './DataTable.style';
 import type { DataTableProps } from './DataTable.types';
 
-export const DataTable = <T extends Record<string, any>>({
+export const DataTable = <T extends Record<string, unknown>>({
   columns,
   data,
   renderGridCard,
@@ -42,9 +42,7 @@ export const DataTable = <T extends Record<string, any>>({
   className,
 }: DataTableProps<T>): React.ReactElement => {
   const isMobile = useIsMobile();
-  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(
-    defaultViewMode ?? (isMobile ? 'grid' : 'table')
-  );
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(defaultViewMode ?? (isMobile ? 'grid' : 'table'));
 
   const viewMode = controlledViewMode ?? internalViewMode;
 
@@ -74,7 +72,9 @@ export const DataTable = <T extends Record<string, any>>({
 
   const handleBulkChange = useCallback(
     (value: string | number) => {
-      if (value === '__placeholder__') {return;}
+      if (value === '__placeholder__') {
+        return;
+      }
       const actionIndex = parseInt(value as string, 10);
       if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
         bulkActions[actionIndex].onClick(selectedRows);
@@ -93,6 +93,7 @@ export const DataTable = <T extends Record<string, any>>({
       {hasToolbar && (
         <S.Toolbar>
           <S.ToolbarLeft>
+            {!hideViewToggle && <ViewToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />}
             {hasBulkActions && (
               <S.BulkSelectWrapper>
                 <Select
@@ -104,9 +105,6 @@ export const DataTable = <T extends Record<string, any>>({
                   fullWidth={false}
                 />
               </S.BulkSelectWrapper>
-            )}
-            {!hideViewToggle && (
-              <ViewToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
             )}
             {toolbarLeft}
           </S.ToolbarLeft>
@@ -145,7 +143,9 @@ export const DataTable = <T extends Record<string, any>>({
       ) : (
         <S.GridContainer>
           {data.length === 0 ? (
-            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-tertiary)' }}>
+            <div
+              style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-tertiary)' }}
+            >
               {emptyMessage || 'No data'}
             </div>
           ) : (

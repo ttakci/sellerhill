@@ -20,7 +20,7 @@ export class DashboardController {
   })
   @ApiOkResponse({ description: 'Dashboard data retrieved successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
-  async getDashboard(@Request() req: any): Promise<DashboardDataDto> {
+  async getDashboard(@Request() req: { user: { sub: string } }): Promise<DashboardDataDto> {
     const userId = req.user.sub;
     return this.dashboardService.getDashboard(userId);
   }

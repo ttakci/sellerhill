@@ -186,7 +186,7 @@ export const MarketplaceItem = styled.div<{ $selected: boolean }>`
   border-radius: ${tkn('radius.lg')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
-  background: ${({ $selected }) => ($selected ? `${tkn('colors.brand.primary')}05` : 'transparent')};
+  background: ${({ $selected }) => ($selected ? `${String(tkn('colors.brand.primary'))}05` : 'transparent')};
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};

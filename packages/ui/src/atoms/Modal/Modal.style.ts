@@ -72,8 +72,8 @@ export const ModalContainer = styled.div<{ $size: string }>`
 
 export const Header = styled.div<{ $showDivider?: boolean }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-bottom: ${({ $showDivider }) =>
-    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')}` : 'none'}; /* 1px */
+  border-bottom: ${({ $showDivider, theme }) =>
+    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')({ theme })}` : 'none'}; /* 1px */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -87,8 +87,8 @@ export const Body = styled.div<{ $noPadding?: boolean }>`
 
 export const Footer = styled.div<{ $showDivider?: boolean }>`
   padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  border-top: ${({ $showDivider }) =>
-    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')}` : 'none'}; /* 1px */
+  border-top: ${({ $showDivider, theme }) =>
+    $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')({ theme })}` : 'none'}; /* 1px */
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem; /* 12px */

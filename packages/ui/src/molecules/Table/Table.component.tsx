@@ -8,7 +8,7 @@ import * as S from './Table.style';
 import type { TableProps } from './Table.types';
 import { TablePagination } from './TablePagination.component';
 
-export const Table = <T extends Record<string, any>>({
+export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
   emptyMessage,
@@ -50,7 +50,9 @@ export const Table = <T extends Record<string, any>>({
   const isAllSelected = data.length > 0 && selectedRows.length === data.length;
 
   const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) {return;}
+    if (!onSelectionChange) {
+      return;
+    }
     if (checked) {
       onSelectionChange(data);
     } else {
@@ -59,7 +61,9 @@ export const Table = <T extends Record<string, any>>({
   };
 
   const handleSelectRow = (row: T, checked: boolean) => {
-    if (!onSelectionChange) {return;}
+    if (!onSelectionChange) {
+      return;
+    }
     if (checked) {
       onSelectionChange([...selectedRows, row]);
     } else {
@@ -81,7 +85,9 @@ export const Table = <T extends Record<string, any>>({
   );
 
   const handleBulkChange = (value: string | number) => {
-    if (value === '__placeholder__') {return;}
+    if (value === '__placeholder__') {
+      return;
+    }
     const actionIndex = parseInt(value as string, 10);
     if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
       bulkActions[actionIndex].onClick(selectedRows);
@@ -91,7 +97,9 @@ export const Table = <T extends Record<string, any>>({
 
   // Drag to scroll handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!overflowRef.current) {return;}
+    if (!overflowRef.current) {
+      return;
+    }
     setIsDragging(true);
     setWasDragging(false);
     setStartX(e.pageX - overflowRef.current.offsetLeft);
@@ -99,7 +107,9 @@ export const Table = <T extends Record<string, any>>({
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !overflowRef.current) {return;}
+    if (!isDragging || !overflowRef.current) {
+      return;
+    }
     e.preventDefault();
     const x = e.pageX - overflowRef.current.offsetLeft;
     const walk = (x - startX) * 1.5; // Scroll speed multiplier

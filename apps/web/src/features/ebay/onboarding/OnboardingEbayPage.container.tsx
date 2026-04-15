@@ -30,7 +30,7 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   // Handle error
   React.useEffect(() => {
     if (error) {
-      const { key, params } = getErrorMessage(error );
+      const { key, params } = getErrorMessage(error);
       showMessage(
         {
           type: 'error',
@@ -52,7 +52,7 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   };
 
   const handleSkip = (): void => {
-    navigate('/dashboard');
+    void navigate('/dashboard');
   };
 
   return (

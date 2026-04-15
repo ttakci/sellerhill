@@ -31,8 +31,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
     setIsOpen(!isOpen);
   };
 
-  const renderedTrigger = typeof trigger === 'function' 
-    ? (trigger as any)(isOpen) // React 18 / TS might need generic, but this is safe for now
+  const renderedTrigger = typeof trigger === 'function'
+    ? trigger(isOpen)
     : trigger;
 
   return (

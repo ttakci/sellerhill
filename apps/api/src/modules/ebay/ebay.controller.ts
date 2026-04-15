@@ -1,13 +1,13 @@
 import { BadRequestException, Controller, Get, Logger, Query, Redirect, Request, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-    ApiBearerAuth,
-    ApiForbiddenResponse,
-    ApiOkResponse,
-    ApiOperation,
-    ApiQuery,
-    ApiTags,
-    ApiUnauthorizedResponse
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { CreateEbayConnectUrlResponse, EbayMarketplaceId, GetEbayAccountsResponse } from '@repo/shared';
 
@@ -37,10 +37,10 @@ export class EbayController {
   @ApiOkResponse({ description: 'Consent URL generated successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   @ApiForbiddenResponse({ description: 'Email not verified' })
-  async getConnectUrl(
-    @Request() req: any,
+  getConnectUrl(
+    @Request() req: { user: { sub: string } },
     @Query('marketplaceId') marketplaceId?: EbayMarketplaceId
-  ): Promise<CreateEbayConnectUrlResponse> {
+  ): CreateEbayConnectUrlResponse {
     const userId = req.user.sub;
     return this.ebayService.createConnectUrl(userId, marketplaceId);
   }
@@ -83,12 +83,13 @@ export class EbayController {
       // Redirect to frontend success page
       const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
       this.logger.log(`eBay account connected successfully for user: ${userId}`);
-      
+
       return { url: `${frontendUrl}/dashboard?ebay_connected=success` };
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger.error('Failed to handle eBay callback', err);
       const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
-      return { url: `${frontendUrl}/ebay/callback?error=${encodeURIComponent(err.message || 'callback_failed')}` };
+      const message = err instanceof Error ? err.message : 'callback_failed';
+      return { url: `${frontendUrl}/ebay/callback?error=${encodeURIComponent(message)}` };
     }
   }
 
@@ -102,7 +103,7 @@ export class EbayController {
   @ApiOkResponse({ description: 'eBay accounts retrieved successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   @ApiForbiddenResponse({ description: 'Email not verified' })
-  async getAccounts(@Request() req: any): Promise<GetEbayAccountsResponse> {
+  async getAccounts(@Request() req: { user: { sub: string } }): Promise<GetEbayAccountsResponse> {
     const userId = req.user.sub;
     return this.ebayService.getAccountsByUserId(userId);
   }
@@ -113,7 +114,7 @@ export class EbayController {
     summary: 'Get eBay business policies',
     description: 'Fetch payment, shipping, and return policies from eBay',
   })
-  async getBusinessPolicies(@Request() req: any) {
+  async getBusinessPolicies(@Request() req: { user: { sub: string } }) {
     const userId = req.user.sub;
     return this.ebayService.getBusinessPolicies(userId);
   }

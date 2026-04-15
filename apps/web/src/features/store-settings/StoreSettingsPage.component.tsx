@@ -71,7 +71,7 @@ export const StoreSettingsPageComponent = ({
       key: 'actions',
       header: '',
       align: 'right' as const,
-      render: (_: any, item: { keyword: string }) => (
+      render: (_value: unknown, item: { keyword: string }) => (
         <IconButton variant="ghost" onClick={() => onRemoveKeyword(item.keyword)} aria-label={t('translation:common.delete')}>
           <Icon name="trash" size={18} />
         </IconButton>
@@ -79,11 +79,11 @@ export const StoreSettingsPageComponent = ({
     },
   ];
 
-  const renderGridCard = (item: any) => (
+  const renderGridCard = (item: { keyword: string; scope: 'title' | 'description' | 'both' }) => (
     <BlacklistCard
       key={item.keyword}
       keyword={item.keyword}
-      scope={item.scope }
+      scope={item.scope}
       onRemove={() => onRemoveKeyword(item.keyword)}
     />
   );
@@ -110,7 +110,7 @@ export const StoreSettingsPageComponent = ({
             },
           ]}
           value={newScope}
-          onChange={(v) => setNewScope(v as any)}
+          onChange={(v) => setNewScope(v as 'title' | 'description' | 'both')}
           size="medium"
           searchPlaceholder={t('translation:common.search')}
           noResultsMessage={t('translation:common.noResults')}
@@ -138,7 +138,7 @@ export const StoreSettingsPageComponent = ({
         title={t('storeSettings:storeSettings.title')}
         subtitle={<Text color="text.secondary">{t('storeSettings:storeSettings.subtitle')}</Text>}
         actions={
-          <Button variant="primary" size="medium" onClick={handleSubmit(onSave)} iconLeft="save">
+          <Button variant="primary" size="medium" onClick={() => void handleSubmit(onSave)()} iconLeft="save">
             {t('translation:common.save')}
           </Button>
         }

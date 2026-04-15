@@ -15,7 +15,7 @@ interface EbayTokenResponse {
 @Injectable()
 export class EbayOAuthService {
   private readonly logger = new Logger(EbayOAuthService.name);
-  
+
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly redirectUri: string;
@@ -29,7 +29,8 @@ export class EbayOAuthService {
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.get<string>('EBAY_CLIENT_ID') || '';
     this.clientSecret = this.configService.get<string>('EBAY_CLIENT_SECRET') || '';
-    this.redirectUri = this.configService.get<string>('EBAY_REDIRECT_URI') || 'http://localhost:3000/api/v1/ebay/callback';
+    this.redirectUri =
+      this.configService.get<string>('EBAY_REDIRECT_URI') || 'http://localhost:3000/api/v1/ebay/callback';
     this.ruName = this.configService.get<string>('EBAY_RUNAME') || '';
     this.environment = this.configService.get<'sandbox' | 'production'>('EBAY_ENVIRONMENT') || 'sandbox';
     this.scopes = EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
@@ -39,7 +40,9 @@ export class EbayOAuthService {
     this.apiBaseUrl = this.configService.get<string>('EBAY_REST_API_URL') || '';
 
     if (!this.clientId || !this.clientSecret) {
-      this.logger.warn(`eBay OAuth credentials not configured for ${this.environment}. Please set EBAY_CLIENT_ID and EBAY_CLIENT_SECRET`);
+      this.logger.warn(
+        `eBay OAuth credentials not configured for ${this.environment}. Please set EBAY_CLIENT_ID and EBAY_CLIENT_SECRET`
+      );
     } else {
       this.logger.log(`eBay OAuth Service initialized in ${this.environment} mode`);
     }
@@ -48,9 +51,12 @@ export class EbayOAuthService {
   /**
    * Generate OAuth consent URL
    */
-  generateConsentUrl(marketplaceId: EbayMarketplaceId = EBAY_MARKETPLACE.US, userId: string): { url: string; state: string } {
+  generateConsentUrl(
+    marketplaceId: EbayMarketplaceId = EBAY_MARKETPLACE.US,
+    userId: string
+  ): { url: string; state: string } {
     const state = this.generateState(userId, marketplaceId);
-    
+
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.ruName || this.redirectUri,
@@ -65,7 +71,7 @@ export class EbayOAuthService {
     if (this.environment === 'sandbox') {
       this.logger.debug(`Final OAuth URL: ${url}`);
     }
-    
+
     return { url, state };
   }
 
@@ -88,15 +94,22 @@ export class EbayOAuthService {
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${credentials}`,
+            Authorization: `Basic ${credentials}`,
           },
         }
       );
 
       this.logger.log('Successfully exchanged code for tokens');
       return response.data;
-    } catch (error: any) {
-      this.logger.error('Failed to exchange code for tokens', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const axiosErr =
+        error instanceof Error && 'response' in error
+          ? (error as { response?: { data?: unknown }; message?: string })
+          : null;
+      this.logger.error(
+        'Failed to exchange code for tokens',
+        axiosErr?.response?.data || (error instanceof Error ? error.message : String(error))
+      );
       throw new InternalServerErrorException('ebay.errors.tokenExchangeFailed');
     }
   }
@@ -119,15 +132,22 @@ export class EbayOAuthService {
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${credentials}`,
+            Authorization: `Basic ${credentials}`,
           },
         }
       );
 
       this.logger.log('Successfully refreshed access token');
       return response.data;
-    } catch (error: any) {
-      this.logger.error('Failed to refresh access token', error.response?.data || error.message);
+    } catch (error: unknown) {
+      const axiosErr =
+        error instanceof Error && 'response' in error
+          ? (error as { response?: { data?: unknown }; message?: string })
+          : null;
+      this.logger.error(
+        'Failed to refresh access token',
+        axiosErr?.response?.data || (error instanceof Error ? error.message : String(error))
+      );
       throw new InternalServerErrorException('ebay.errors.tokenExchangeFailed');
     }
   }
@@ -143,57 +163,66 @@ export class EbayOAuthService {
 
     try {
       // 1. Get User/Identity info
-      const identityResponse = await axios.get(
-        `${this.apiBaseUrl}/commerce/identity/v1/user`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      const identityResponse = await axios.get(`${this.apiBaseUrl}/commerce/identity/v1/user`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      interface IdentityData {
+        username?: string;
+        userId?: string;
+        businessName?: string;
+      }
+      const identityData = identityResponse.data as IdentityData | undefined;
+      sellerId = identityData?.username || identityData?.userId || 'unknown';
+      storeName = identityData?.businessName || identityData?.username || '';
+
+      this.logger.debug('Identity API Response:', identityData);
+    } catch (error: unknown) {
+      this.logger.warn(
+        'Identity API failed, will try fallback',
+        error instanceof Error ? error.message : String(error)
       );
-      
-      sellerId = identityResponse.data?.username || identityResponse.data?.userId || 'unknown';
-      storeName = identityResponse.data?.businessName || identityResponse.data?.username || '';
-      
-      this.logger.debug('Identity API Response:', identityResponse.data);
-    } catch (error: any) {
-      this.logger.warn('Identity API failed, will try fallback', error.message);
     }
 
     try {
       // 2. Try to get Store specific info (more accurate for store name)
-      const storeResponse = await axios.get(
-        `${this.apiBaseUrl}/sell/account/v1/store`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
+      interface StoreData {
+        name?: string;
+      }
+      const storeResponse = await axios.get<StoreData>(`${this.apiBaseUrl}/sell/account/v1/store`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (storeResponse.data?.name) {
         storeName = storeResponse.data.name;
         this.logger.log(`Found official eBay store name: ${storeName}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Many sellers don't have a "Store" subscription, so 404 is common and expected
-      this.logger.debug('Store API failed (likely no store subscription):', error.message);
+      this.logger.debug(
+        'Store API failed (likely no store subscription):',
+        error instanceof Error ? error.message : String(error)
+      );
     }
 
     // Final fallback for sellerId if still unknown
     if (sellerId === 'unknown') {
       try {
-        const fallbackResponse = await axios.get(
-          `${this.apiBaseUrl}/sell/account/v1/privilege`,
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        interface PrivilegeData {
+          userId?: string;
+        }
+        const fallbackResponse = await axios.get<PrivilegeData>(`${this.apiBaseUrl}/sell/account/v1/privilege`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
         sellerId = fallbackResponse.data?.userId || `ebay_user_${Date.now()}`;
       } catch (e) {
         sellerId = `ebay_user_${Date.now()}`;
@@ -224,7 +253,13 @@ export class EbayOAuthService {
   decodeState(state: string): { userId: string; marketplaceId: EbayMarketplaceId; random: string; timestamp: number } {
     try {
       const decoded = Buffer.from(state, 'base64url').toString('utf-8');
-      return JSON.parse(decoded);
+      const parsed = JSON.parse(decoded) as {
+        userId: string;
+        marketplaceId: EbayMarketplaceId;
+        random: string;
+        timestamp: number;
+      };
+      return parsed;
     } catch (error) {
       throw new BadRequestException('ebay.errors.invalidState');
     }
@@ -235,7 +270,7 @@ export class EbayOAuthService {
    */
   validateState(state: string): { userId: string; marketplaceId: EbayMarketplaceId } {
     const decoded = this.decodeState(state);
-    
+
     // Check if state is not too old (15 minutes)
     const maxAge = 15 * 60 * 1000;
     if (Date.now() - decoded.timestamp > maxAge) {

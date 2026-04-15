@@ -1,18 +1,5 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Post,
-    Put,
-    Request,
-    UseGuards
-} from '@nestjs/common';
-import {
-    ListingSettingsGroupResponse,
-    PredefinedTemplateResponse,
-} from '@repo/shared';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { ListingSettingsGroupResponse, PredefinedTemplateResponse } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -26,15 +13,13 @@ export class ListingSettingsGroupController {
   constructor(private readonly listingSettingsService: ListingSettingsGroupService) {}
 
   @Get('groups')
-  async getListingSettingsGroups(
-    @Request() req: any
-  ): Promise<ListingSettingsGroupResponse[]> {
+  async getListingSettingsGroups(@Request() req: { user: { sub: string } }): Promise<ListingSettingsGroupResponse[]> {
     return this.listingSettingsService.getListingSettingsGroups(req.user.sub);
   }
 
   @Get('groups/:id')
   async getListingSettingsGroupById(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Param('id') id: string
   ): Promise<ListingSettingsGroupResponse> {
     return this.listingSettingsService.getListingSettingsGroupById(req.user.sub, id);
@@ -42,7 +27,7 @@ export class ListingSettingsGroupController {
 
   @Post('groups')
   async createListingSettingsGroup(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Body() dto: CreateListingSettingsGroupDto
   ): Promise<ListingSettingsGroupResponse> {
     return this.listingSettingsService.createListingSettingsGroup(req.user.sub, dto);
@@ -50,7 +35,7 @@ export class ListingSettingsGroupController {
 
   @Put('groups/:id')
   async updateListingSettingsGroup(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Param('id') id: string,
     @Body() dto: UpdateListingSettingsGroupDto
   ): Promise<ListingSettingsGroupResponse> {
@@ -59,7 +44,7 @@ export class ListingSettingsGroupController {
 
   @Delete('groups/:id')
   async deleteListingSettingsGroup(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Param('id') id: string
   ): Promise<{ success: boolean }> {
     return this.listingSettingsService.deleteListingSettingsGroup(req.user.sub, id);

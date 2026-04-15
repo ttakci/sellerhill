@@ -34,11 +34,11 @@ export const StepCircle = styled.div<{ $status: 'completed' | 'current' | 'upcom
   ${(props) => {
     switch (props.$status) {
       case 'completed':
-        return `background: ${tkn('colors.semantic.success')(props as any)}; color: white;`;
+        return `background: ${tkn('colors.semantic.success')(props)}; color: white;`;
       case 'current':
-        return `background: ${tkn('colors.brand.primary')(props as any)}; color: white;`;
+        return `background: ${tkn('colors.brand.primary')(props)}; color: white;`;
       case 'upcoming':
-        return `background: ${tkn('colors.background.tertiary')(props as any)}; color: ${tkn('colors.text.tertiary')(props as any)}; border: 0.0625rem solid ${tkn('colors.border.primary')(props as any)};`;
+        return `background: ${tkn('colors.background.tertiary')(props)}; color: ${tkn('colors.text.tertiary')(props)}; border: 0.0625rem solid ${tkn('colors.border.primary')(props)};`;
     }
   }}
 `;
@@ -46,8 +46,8 @@ export const StepCircle = styled.div<{ $status: 'completed' | 'current' | 'upcom
 export const StepConnector = styled.div<{ $active: boolean; $orientation: StepperOrientation }>`
   ${(props) =>
     props.$orientation === 'horizontal'
-      ? `flex: 1; height: 0.125rem; background: ${props.$active ? tkn('colors.semantic.success')(props as any) : tkn('colors.border.primary')(props as any)}; margin: 1rem 0.25rem;`
-      : `width: 0.125rem; min-height: 1.5rem; background: ${props.$active ? tkn('colors.semantic.success')(props as any) : tkn('colors.border.primary')(props as any)}; margin: 0.25rem 0.875rem;`}
+      ? `flex: 1; height: 0.125rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: 1rem 0.25rem;`
+      : `width: 0.125rem; min-height: 1.5rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: 0.25rem 0.875rem;`}
 `;
 
 export const StepLabel = styled.div`

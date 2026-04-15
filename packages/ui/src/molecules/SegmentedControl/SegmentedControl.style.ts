@@ -19,7 +19,7 @@ export const SegmentButton = styled.button<{ $active: boolean; $size: 'sm' | 'md
   border-radius: ${tkn('radius.sm')};
   cursor: pointer;
   font-size: ${(props) =>
-    props.$size === 'sm' ? tkn('typography.fontSize.xs')(props as any) : tkn('typography.fontSize.sm')(props as any)};
+    props.$size === 'sm' ? tkn('typography.fontSize.xs')(props) : tkn('typography.fontSize.sm')(props)};
   font-weight: ${tkn('typography.fontWeight.medium')};
   transition: all ${tkn('transitions.fast')};
   white-space: nowrap;
@@ -32,16 +32,16 @@ export const SegmentButton = styled.button<{ $active: boolean; $size: 'sm' | 'md
   ${(props) =>
     props.$active
       ? `
-    background: ${tkn('colors.surface.primary')(props as any)};
-    color: ${tkn('colors.text.primary')(props as any)};
-    box-shadow: ${tkn('shadows.sm')(props as any)};
+    background: ${tkn('colors.surface.primary')(props)};
+    color: ${tkn('colors.text.primary')(props)};
+    box-shadow: ${tkn('shadows.sm')(props)};
   `
       : `
     background: transparent;
-    color: ${tkn('colors.text.secondary')(props as any)};
+    color: ${tkn('colors.text.secondary')(props)};
 
     &:hover {
-      color: ${tkn('colors.text.primary')(props as any)};
+      color: ${tkn('colors.text.primary')(props)};
     }
   `}
 `;

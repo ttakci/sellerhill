@@ -71,3 +71,11 @@ export interface ResendVerificationRequest {
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
+
+/**
+ * Authenticated request with JWT user payload
+ * Used by NestJS controllers with @Request() decorator
+ */
+export interface AuthenticatedRequest {
+  user: { sub: string; email: string };
+}

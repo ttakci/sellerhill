@@ -4,5 +4,5 @@ export interface KeepaProduct {
   stock: number; // 0=out of stock, >0=quantity
   sellerId?: string; // Cheapest seller ID
   lastSync: Date;
-  raw?: any; // Raw API response
+  raw?: Record<string, unknown>; // Raw API response
 }

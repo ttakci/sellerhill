@@ -1,6 +1,11 @@
-import { Body, Controller, Get, Post, Query, Param, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { type OrderDto, type OrderFiltersDto, type OrderStatsDto, type UpdateOrderAmazonDetailsDto } from '@repo/shared';
+import {
+  type OrderDto,
+  type OrderFiltersDto,
+  type OrderStatsDto,
+  type UpdateOrderAmazonDetailsDto,
+} from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -17,7 +22,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get all orders for the authenticated user' })
   @ApiResponse({ status: 200, description: 'Return orders with pagination.' })
   findAll(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('status') status?: string,
@@ -29,7 +34,7 @@ export class OrdersController {
     const filters: OrderFiltersDto = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
-      status: status as any,
+      status: status as OrderFiltersDto['status'],
       dateFrom,
       dateTo,
       sortBy,
@@ -41,21 +46,21 @@ export class OrdersController {
   @Get('stats')
   @ApiOperation({ summary: 'Get order statistics for the authenticated user' })
   @ApiResponse({ status: 200, description: 'Return order statistics.' })
-  getStats(@Request() req: any): Promise<OrderStatsDto> {
+  getStats(@Request() req: { user: { sub: string } }): Promise<OrderStatsDto> {
     return this.ordersService.getStats(req.user.sub);
   }
 
   @Post('sync')
   @ApiOperation({ summary: 'Trigger manual order sync from eBay' })
   @ApiResponse({ status: 200, description: 'Order sync triggered.' })
-  triggerSync(@Request() req: any): Promise<{ message: string }> {
+  triggerSync(@Request() req: { user: { sub: string } }): Promise<{ message: string }> {
     return this.ordersService.triggerSync(req.user.sub);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get order by ID' })
   @ApiResponse({ status: 200, description: 'Return order details.' })
-  findOne(@Request() req: any, @Param('id') id: string): Promise<OrderDto> {
+  findOne(@Request() req: { user: { sub: string } }, @Param('id') id: string): Promise<OrderDto> {
     return this.ordersService.findOne(req.user.sub, id);
   }
 
@@ -63,7 +68,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Update Amazon order details' })
   @ApiResponse({ status: 200, description: 'Order updated successfully.' })
   updateAmazonDetails(
-    @Request() req: any,
+    @Request() req: { user: { sub: string } },
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderAmazonDetailsDto
   ): Promise<OrderDto> {

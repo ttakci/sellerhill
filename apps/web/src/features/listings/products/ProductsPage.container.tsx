@@ -1,4 +1,4 @@
-import { IdBadge, Icon, useLoading } from '@repo/ui';
+import { Icon, IdBadge, Tooltip, useLoading } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ import * as S from './ProductsPage.style';
 
 export const ProductsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
-  const { data: products = [], isLoading, refetch } = useGetUserProductsQuery();
+  const { data: products = [], isLoading } = useGetUserProductsQuery();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -25,23 +25,31 @@ export const ProductsPageContainer: React.FC = () => {
       {
         key: 'product',
         header: t('listings.table.product'),
-        render: (_: any, product: any) => (
-          <S.ProductCell>
-            <S.ProductImageWrapper>
-              {product.imageUrls?.[0] ? (
-                <S.ProductImage src={product.imageUrls[0]} alt={product.title} />
-              ) : (
-                <Icon name="image" />
-              )}
-            </S.ProductImageWrapper>
-            <S.ProductMainInfo>
-              <S.ProductTitle title={product.title}>
-                {product.title || t('translation:common.unknownProduct')}
-              </S.ProductTitle>
-              <S.ProductBrand>{product.brand || t('translation:common.notProvided')}</S.ProductBrand>
-            </S.ProductMainInfo>
-          </S.ProductCell>
-        ),
+        render: (_: any, product: any) => {
+          const displayName = product.title || t('translation:common.unknownProduct');
+          const truncated = displayName.length > 40 ? displayName.slice(0, 40) + '...' : displayName;
+          return (
+            <S.ProductCell>
+              <S.ProductImageWrapper>
+                {product.imageUrls?.[0] ? (
+                  <S.ProductImage src={product.imageUrls[0]} alt={product.title} />
+                ) : (
+                  <Icon name="image" />
+                )}
+              </S.ProductImageWrapper>
+              <S.ProductMainInfo>
+                {displayName.length > 40 ? (
+                  <Tooltip content={displayName} position="top" variant="dark">
+                    <S.ProductTitle>{truncated}</S.ProductTitle>
+                  </Tooltip>
+                ) : (
+                  <S.ProductTitle>{truncated}</S.ProductTitle>
+                )}
+                <S.ProductBrand>{product.brand || t('translation:common.notProvided')}</S.ProductBrand>
+              </S.ProductMainInfo>
+            </S.ProductCell>
+          );
+        },
       },
       {
         key: 'asin',
@@ -51,7 +59,28 @@ export const ProductsPageContainer: React.FC = () => {
       {
         key: 'category',
         header: t('listings.table.category'),
-        render: (category: string) => <S.CategoryText variant="body-sm" color="text.secondary">{category || t('translation:common.noCategory')}</S.CategoryText>,
+        render: (category: string) => {
+          if (!category) {
+            return (
+              <S.CategoryText variant="body-sm" color="text.secondary">
+                {t('translation:common.noCategory')}
+              </S.CategoryText>
+            );
+          }
+          const parts = category.split(' > ');
+          return (
+            <S.CategoryCell>
+              {parts.map((part, index) => (
+                <React.Fragment key={index}>
+                  {index > 0 && <S.CategoryChevron>›</S.CategoryChevron>}
+                  <S.CategoryText variant="body-sm" color="text.secondary">
+                    {part}
+                  </S.CategoryText>
+                </React.Fragment>
+              ))}
+            </S.CategoryCell>
+          );
+        },
       },
       {
         key: 'price',
@@ -73,12 +102,6 @@ export const ProductsPageContainer: React.FC = () => {
             {updatedAt ? new Date(updatedAt).toLocaleString(t('translation:common.languageCode') || 'en-US') : '—'}
           </S.DateText>
         ),
-      },
-      {
-        key: 'actions',
-        header: t('listings.table.actions'),
-        align: 'right' as const,
-        render: (_: any, product: any) => <IdBadge id={product.asin} storeType="amazon" size="sm" />,
       },
     ],
     [t]

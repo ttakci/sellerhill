@@ -15,18 +15,20 @@ export const OrderDetailsPageContainer: React.FC = () => {
 
   const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderAmazonDetailsMutation();
 
-  const handleUpdateAmazonDetails = async (data: {
+  const handleUpdateAmazonDetails = (data: {
     amazonOrderUrl?: string;
     amazonTrackingUrl?: string;
     amazonTax?: number;
     amazonShipping?: number;
-  }) => {
-    if (!id) {return;}
-    await updateOrder({ id, data });
+  }): void => {
+    if (!id) {
+      return;
+    }
+    void updateOrder({ id, data });
   };
 
   const handleBack = () => {
-    navigate('/orders');
+    void navigate('/orders');
   };
 
   return (

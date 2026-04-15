@@ -11,15 +11,15 @@ export interface ListingSettingsGroupFormProps {
 
   // Form
   form: UseFormReturn<ListingSettingsGroupFormData>;
-  fields: FieldArrayWithId<ListingSettingsGroupFormData, "repricingStrategy", "id">[];
-  append: UseFieldArrayAppend<ListingSettingsGroupFormData, "repricingStrategy">;
+  fields: FieldArrayWithId<ListingSettingsGroupFormData, 'repricingStrategy', 'id'>[];
+  append: UseFieldArrayAppend<ListingSettingsGroupFormData, 'repricingStrategy'>;
   remove: UseFieldArrayRemove;
   onAddRange: () => void;
-  
+
   // Preview
   previewDevice: 'desktop' | 'tablet' | 'mobile';
   setPreviewDevice: (val: 'desktop' | 'tablet' | 'mobile') => void;
   renderedPreview: string;
   getPreviewWidth: () => string;
-  activeTemplate: { htmlContent: string; sampleData: any };
+  activeTemplate: { htmlContent: string; sampleData: Record<string, string | string[]> };
 }

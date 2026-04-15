@@ -59,6 +59,7 @@ export interface ListingDto {
   watchCount?: number;
   viewCount?: number;
   category?: string;
+  brand?: string;
   sourceStock?: number;
   createdAt: string;
   updatedAt: string;

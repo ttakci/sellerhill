@@ -12,7 +12,7 @@ export const ListItemContainer = styled.div<{ $clickable: boolean; $selected: bo
 
   ${(props) => {
     if (props.$selected) {
-      return `background: ${tkn('colors.brand.secondary')(props as any)};`;
+      return `background: ${tkn('colors.brand.secondary')(props)};`;
     }
     return '';
   }}
@@ -22,7 +22,7 @@ export const ListItemContainer = styled.div<{ $clickable: boolean; $selected: bo
       ? `
     cursor: pointer;
     &:hover {
-      background: ${tkn('colors.surface.secondary')(props as any)};
+      background: ${tkn('colors.surface.secondary')(props)};
     }
   `
       : ''}

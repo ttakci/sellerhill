@@ -31,18 +31,12 @@ export const DashboardPageContainer = (): React.ReactElement => {
 
   const handleFormatCurrency = useCallback(
     (value: number) => formatCurrency(value, locale, currency),
-    [locale, currency],
+    [locale, currency]
   );
 
-  const handleFormatCompactCurrency = useCallback(
-    (value: number) => formatCompactNumber(value, locale),
-    [locale],
-  );
+  const handleFormatCompactCurrency = useCallback((value: number) => formatCompactNumber(value, locale), [locale]);
 
-  const handleFormatDate = useCallback(
-    (dateString: string) => formatDate(dateString, locale),
-    [locale],
-  );
+  const handleFormatDate = useCallback((dateString: string) => formatDate(dateString, locale), [locale]);
 
   // Handle errors
   useEffect(() => {
@@ -70,11 +64,11 @@ export const DashboardPageContainer = (): React.ReactElement => {
   }, [dashboardError, userError, navigate, showMessage, closeMessage, t]);
 
   const handleConnectEbay = (): void => {
-    navigate('/ebay/connect');
+    void navigate('/ebay/connect');
   };
 
   const handleViewAllOrders = (): void => {
-    navigate('/orders');
+    void navigate('/orders');
   };
 
   return (

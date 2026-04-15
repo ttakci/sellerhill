@@ -31,7 +31,7 @@ export const RegisterPageContainer = (): React.ReactElement => {
   useEffect(() => {
     if (isSuccess && submittedEmail) {
       // Redirect to check email page
-      navigate(`/auth/check-email?email=${encodeURIComponent(submittedEmail)}`);
+      void navigate(`/auth/check-email?email=${encodeURIComponent(submittedEmail)}`);
     }
   }, [isSuccess, submittedEmail, navigate]);
   // Handle error
@@ -65,7 +65,7 @@ export const RegisterPageContainer = (): React.ReactElement => {
   };
 
   const handleNavigateToLogin = (): void => {
-    navigate('/login');
+    void navigate('/login');
   };
 
   return (

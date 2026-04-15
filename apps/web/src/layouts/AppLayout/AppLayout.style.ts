@@ -1,4 +1,4 @@
-import { keyframes } from '@emotion/react';
+import { keyframes, Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Text, tkn } from '@repo/ui';
 
@@ -10,7 +10,7 @@ export const LayoutWrapper = styled.div`
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: ${({ theme }: any) =>
+  background: ${({ theme }: { theme: Theme }) =>
     theme.mode === 'dark'
       ? theme.colors.background.primary
       : theme.colors.background.gradient || theme.colors.background.primary
@@ -153,7 +153,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
     background: ${tkn('colors.sidebar.hover')};
   }
 
-  ${({ $active, $isCollapsed, $isSubItem }) =>
+  ${({ $active, $isCollapsed, $isSubItem, theme }) =>
     $active &&
     `
     &::before {
@@ -164,7 +164,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
       transform: translateY(-50%);
       width: 0.1875rem;
       height: 1.5rem;
-      background: ${tkn('colors.sidebar.accent')};
+      background: ${tkn('colors.sidebar.accent')({ theme })};
       border-radius: 0 0.25rem 0.25rem 0;
     }
   `}

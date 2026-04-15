@@ -1,4 +1,4 @@
-import { type ListingSettingsGroupFormData, type PredefinedTemplateResponse, TemplateType } from '@repo/shared';
+import { TemplateType, type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
 import { Button, CardBody, Icon, ModernSelect, ModernTextInput, Text } from '@repo/ui';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -7,15 +7,12 @@ import * as S from './ListingSettingsGroupForm.style';
 import { ListingSettingsGroupFormProps } from './ListingSettingsGroupForm.types';
 
 export const ListingSettingsGroupFormComponent = ({
-  isEdit,
-  defaultValues,
   predefinedTemplates,
   onSubmit,
   onCancel,
   isLoading,
   form,
   fields,
-  append,
   remove,
   onAddRange,
   previewDevice,
@@ -26,12 +23,7 @@ export const ListingSettingsGroupFormComponent = ({
 }: ListingSettingsGroupFormProps) => {
   const { t } = useTranslation('listingSettingsGroup');
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = form;
+  const { control, handleSubmit, watch } = form;
 
   const watchedValues = watch(); // We still need watch for dynamic UI updates based on values
 
@@ -39,7 +31,9 @@ export const ListingSettingsGroupFormComponent = ({
     <S.Container>
       <S.Header>
         <S.HeaderContent>
-          <S.PageTitle variant="h1" weight="bold">{t('listingSettingsGroup.editorTitle')}</S.PageTitle>
+          <S.PageTitle variant="h1" weight="bold">
+            {t('listingSettingsGroup.editorTitle')}
+          </S.PageTitle>
           <Text color="text.secondary">{t('listingSettingsGroup.editorDescription')}</Text>
         </S.HeaderContent>
         <S.Actions>
@@ -49,7 +43,9 @@ export const ListingSettingsGroupFormComponent = ({
           <Button
             variant="primary"
             size="medium"
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => {
+              void handleSubmit(onSubmit)();
+            }}
             isLoading={isLoading}
             iconLeft="save"
           >
@@ -58,7 +54,12 @@ export const ListingSettingsGroupFormComponent = ({
         </S.Actions>
       </S.Header>
 
-      <S.FormContainer onSubmit={handleSubmit(onSubmit)}>
+      <S.FormContainer
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleSubmit(onSubmit)();
+        }}
+      >
         {/* General Settings */}
         <S.StyledCard variant="bordered">
           <S.SectionHeader>
@@ -66,7 +67,9 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="settings" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.generalSettings')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">
+                {t('listingSettingsGroup.generalSettings')}
+              </S.SectionTitle>
             </S.SectionTitleContent>
           </S.SectionHeader>
           <CardBody>
@@ -110,7 +113,9 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="trending-up" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.pricingStrategy')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">
+                {t('listingSettingsGroup.pricingStrategy')}
+              </S.SectionTitle>
             </S.SectionTitleContent>
             <S.AddButton variant="text" size="xsmall" type="button" onClick={onAddRange}>
               <Icon name="plus" size={14} />
@@ -175,7 +180,9 @@ export const ListingSettingsGroupFormComponent = ({
               <Icon name="percent" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.feesAndTaxes')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">
+                {t('listingSettingsGroup.feesAndTaxes')}
+              </S.SectionTitle>
             </S.SectionTitleContent>
           </S.SectionHeader>
           <CardBody>
@@ -219,7 +226,9 @@ export const ListingSettingsGroupFormComponent = ({
                 <Icon name="code" size={20} />
               </S.HeaderIconWrapper>
               <S.SectionTitleContent>
-                <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.htmlTemplate')}</S.SectionTitle>
+                <S.SectionTitle variant="h3" weight="bold">
+                  {t('listingSettingsGroup.htmlTemplate')}
+                </S.SectionTitle>
               </S.SectionTitleContent>
               <Controller
                 name="templates.type"
@@ -266,13 +275,9 @@ export const ListingSettingsGroupFormComponent = ({
 
                 <S.TemplateEditorContainer>
                   <S.EditorCodeArea>
-                    <S.EditorComment>
-                      &lt;!-- Listing Template --&gt;
-                    </S.EditorComment>
+                    <S.EditorComment>&lt;!-- Listing Template --&gt;</S.EditorComment>
                     {watchedValues.templates.type === TemplateType.CUSTOM ? (
-                      <S.CustomTemplateTextarea
-                        {...control.register('templates.customTemplateHtml')}
-                      />
+                      <S.CustomTemplateTextarea {...control.register('templates.customTemplateHtml')} />
                     ) : (
                       <S.CustomTemplateTextarea readOnly value={activeTemplate.htmlContent} />
                     )}
@@ -289,7 +294,9 @@ export const ListingSettingsGroupFormComponent = ({
                 <Icon name="eye" size={20} />
               </S.HeaderIconWrapper>
               <S.SectionTitleContent>
-                <S.SectionTitle variant="h3" weight="bold">{t('listingSettingsGroup.livePreview')}</S.SectionTitle>
+                <S.SectionTitle variant="h3" weight="bold">
+                  {t('listingSettingsGroup.livePreview')}
+                </S.SectionTitle>
               </S.SectionTitleContent>
               <S.DeviceControls>
                 <S.IconButton

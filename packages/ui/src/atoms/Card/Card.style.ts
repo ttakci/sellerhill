@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-import type { CardPadding, CardProps, CardVariant } from './Card.types';
+import type { CardPadding, CardVariant } from './Card.types';
 
 export const CardContainer = styled.div<{
   $variant: CardVariant;
@@ -22,7 +22,7 @@ export const CardContainer = styled.div<{
       case 'bordered':
         return `border: 1px solid rgba(0, 0, 0, 0.06);`;
       case 'elevated':
-        return `box-shadow: ${tkn('shadows.md')(props as any)}; border: 1px solid rgba(0, 0, 0, 0.04);`;
+        return `box-shadow: ${tkn('shadows.md')(props)}; border: 1px solid rgba(0, 0, 0, 0.04);`;
       case 'flat':
         return '';
       case 'interactive':
@@ -30,13 +30,13 @@ export const CardContainer = styled.div<{
           border: 1px solid rgba(0, 0, 0, 0.06);
           cursor: pointer;
           &:hover {
-            box-shadow: ${tkn('shadows.lg')(props as any)};
+            box-shadow: ${tkn('shadows.lg')(props)};
             border-color: rgba(0, 0, 0, 0.1);
             transform: translateY(-0.125rem);
           }
           &:active {
             transform: translateY(0);
-            box-shadow: ${tkn('shadows.sm')(props as any)};
+            box-shadow: ${tkn('shadows.sm')(props)};
           }
         `;
       case 'stat':
@@ -46,7 +46,7 @@ export const CardContainer = styled.div<{
       default:
         return `
           border: 1px solid rgba(0, 0, 0, 0.06);
-          box-shadow: ${tkn('shadows.sm')(props as any)};
+          box-shadow: ${tkn('shadows.sm')(props)};
         `;
     }
   }}
@@ -57,11 +57,11 @@ export const CardContainer = styled.div<{
       case 'none':
         return 'padding: 0;';
       case 'sm':
-        return `padding: ${tkn('spacing.sm')(props as any)};`;
+        return `padding: ${tkn('spacing.sm')(props)};`;
       case 'md':
-        return `padding: ${tkn('spacing.md')(props as any)};`;
+        return `padding: ${tkn('spacing.md')(props)};`;
       case 'lg':
-        return `padding: ${tkn('spacing.lg')(props as any)};`;
+        return `padding: ${tkn('spacing.lg')(props)};`;
       default:
         return '';
     }
@@ -74,7 +74,7 @@ export const CardContainer = styled.div<{
     `
     cursor: pointer;
     &:hover {
-      box-shadow: ${tkn('shadows.md')(props as any)};
+      box-shadow: ${tkn('shadows.md')(props)};
       border-color: rgba(0, 0, 0, 0.1);
       transform: translateY(-0.0625rem);
     }
@@ -195,15 +195,15 @@ export const CardStatContainer = styled.div<{
     font-weight: ${tkn('typography.fontWeight.medium')};
     color: ${(props) => {
       switch (props.$trend) {
-        case 'up': return tkn('colors.semantic.success')(props as any);
-        case 'down': return tkn('colors.semantic.error')(props as any);
-        default: return tkn('colors.text.tertiary')(props as any);
+        case 'up': return tkn('colors.semantic.success')(props);
+        case 'down': return tkn('colors.semantic.error')(props);
+        default: return tkn('colors.text.tertiary')(props);
       }
     }};
   }
 
   .card-stat-subtitle {
-    font-size: ${(props: any) => props.theme.typography.fontSize['2xs']};
+    font-size: ${(props) => props.theme.typography.fontSize['2xs']};
     color: ${tkn('colors.text.tertiary')};
   }
 `;

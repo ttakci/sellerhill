@@ -1,4 +1,4 @@
-import { keyframes } from '@emotion/react';
+import { keyframes, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
@@ -19,24 +19,24 @@ const slideIn = keyframes`
 const getTypeStyles = (type: ToastType) => {
   const map = {
     success: {
-      bg: (p: any) => p.theme.colors.semanticTint.success,
-      border: (p: any) => p.theme.colors.semanticTintBorder.success,
-      icon: (p: any) => p.theme.colors.semantic.success,
+      bg: (p: { theme: Theme }) => p.theme.colors.semanticTint.success,
+      border: (p: { theme: Theme }) => p.theme.colors.semanticTintBorder.success,
+      icon: (p: { theme: Theme }) => p.theme.colors.semantic.success,
     },
     error: {
-      bg: (p: any) => p.theme.colors.semanticTint.error,
-      border: (p: any) => p.theme.colors.semanticTintBorder.error,
-      icon: (p: any) => p.theme.colors.semantic.error,
+      bg: (p: { theme: Theme }) => p.theme.colors.semanticTint.error,
+      border: (p: { theme: Theme }) => p.theme.colors.semanticTintBorder.error,
+      icon: (p: { theme: Theme }) => p.theme.colors.semantic.error,
     },
     warning: {
-      bg: (p: any) => p.theme.colors.semanticTint.warning,
-      border: (p: any) => p.theme.colors.semanticTintBorder.warning,
-      icon: (p: any) => p.theme.colors.semantic.warning,
+      bg: (p: { theme: Theme }) => p.theme.colors.semanticTint.warning,
+      border: (p: { theme: Theme }) => p.theme.colors.semanticTintBorder.warning,
+      icon: (p: { theme: Theme }) => p.theme.colors.semantic.warning,
     },
     info: {
-      bg: (p: any) => p.theme.colors.semanticTint.info,
-      border: (p: any) => p.theme.colors.semanticTintBorder.info,
-      icon: (p: any) => p.theme.colors.semantic.info,
+      bg: (p: { theme: Theme }) => p.theme.colors.semanticTint.info,
+      border: (p: { theme: Theme }) => p.theme.colors.semanticTintBorder.info,
+      icon: (p: { theme: Theme }) => p.theme.colors.semantic.info,
     },
   };
   return map[type];

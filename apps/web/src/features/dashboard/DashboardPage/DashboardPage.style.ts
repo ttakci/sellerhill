@@ -27,8 +27,11 @@ export const StatCard = styled(RepoCard)`
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  transition: box-shadow ${tkn('transitions.normal')}, transform ${tkn('transitions.normal')};
-  border-top: 3px solid ${({ theme }: any) => theme.colors.brand.primary};
+  transition:
+    box-shadow ${tkn('transitions.normal')},
+    transform ${tkn('transitions.normal')};
+  border-top: 3px solid
+    ${({ theme }: { theme: { colors: { brand: { primary: string } } } }) => theme.colors.brand.primary};
 
   &:hover {
     box-shadow: ${tkn('shadows.lg')};

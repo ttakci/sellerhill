@@ -5,13 +5,11 @@
  * Only brand-specific icons (logo, zorro) remain custom SVGs.
  * Country flags use Globe as fallback.
  */
-import type { LucideIcon } from 'lucide-react';
-import React from 'react';
-
 import {
-  LayoutDashboard, Store, Zap, Package, Inbox, Settings, SlidersHorizontal,
-  Home, Menu, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, LogOut, User,
-  ShoppingBag, DollarSign, TrendingUp, TrendingDown, CreditCard, Wallet,
+  type LucideIcon,
+  LayoutDashboard, Store, Package, Inbox, Settings, SlidersHorizontal,
+  Home, Menu, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, LogOut,
+  ShoppingBag, TrendingUp, TrendingDown, CreditCard, Wallet,
   Receipt, Truck, RotateCcw, Tag, Printer, BarChart3, ShoppingCart,
   Plus, X, Pencil, Trash2, Copy, Save, Download, Upload,
   ExternalLink, Link2, RefreshCw, Search, Filter, Eye, EyeOff, Play, Ban,
@@ -21,23 +19,24 @@ import {
   Loader2, Sun, Moon, Rocket, Bolt, Archive, Box, FileText, Flag,
   ListFilter, Settings2, UnfoldVertical, BadgeCheck, ArrowLeft,
 } from 'lucide-react';
+import React from 'react';
 
-import { ZorroIcon } from './zorro';
 import { AmazonIcon } from './amazon';
 import { EbayIcon } from './ebay';
+import { ZorroIcon } from './zorro';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyIcon = any;
-
-const lucide = (IconComp: LucideIcon) =>
-  (props: React.SVGProps<SVGSVGElement>) => {
+const lucide = (IconComp: LucideIcon) => {
+  const Wrapped = (props: React.SVGProps<SVGSVGElement>) => {
     const { stroke, strokeWidth } = props;
-    return React.createElement(IconComp as AnyIcon, {
+    return React.createElement(IconComp, {
       size: 24,
       color: stroke as string,
       strokeWidth: Number(strokeWidth) || 2,
     });
   };
+  Wrapped.displayName = `LucideIcon(${IconComp.displayName || IconComp.name || 'Unknown'})`;
+  return Wrapped;
+};
 
 export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   // Navigation
@@ -193,10 +192,10 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   rule: lucide(SlidersHorizontal),
 
   // Brand (custom)
-  logo: ZorroIcon as any,
-  zorro: ZorroIcon as any,
-  amazon: AmazonIcon as any,
-  ebay: EbayIcon as any,
+  logo: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  zorro: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  amazon: AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  ebay: EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
 
   // Flags (use Globe + text fallback)
   'flag-us': lucide(Flag),

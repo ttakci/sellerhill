@@ -1,5 +1,4 @@
-import type { FieldValues } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
+import { type FieldValues, Controller } from 'react-hook-form';
 
 import { Checkbox } from '../../atoms/Checkbox';
 import { Text } from '../../atoms/Text';

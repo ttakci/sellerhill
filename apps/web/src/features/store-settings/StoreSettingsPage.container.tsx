@@ -1,16 +1,8 @@
-
-
-
-
-
-
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { storeSettingsSchema, type StoreSettingsFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
@@ -63,8 +55,9 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     },
   });
 
-  const { reset, watch, setValue } = form;
-  const blacklist = watch('blacklist') || [];
+  const { reset, setValue } = form;
+  const rawBlacklist = useWatch({ control: form.control, name: 'blacklist' });
+  const safeBlacklist = useMemo(() => rawBlacklist || [], [rawBlacklist]);
 
   // Update form defaults when settings load
   useEffect(() => {
@@ -129,14 +122,16 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
 
   // Blacklist Handlers
   const handleAddKeyword = () => {
-    if (!newKeyword.trim()) {return;}
-    const updatedBlacklist = [...blacklist, { keyword: newKeyword.trim(), scope: newScope }];
+    if (!newKeyword.trim()) {
+      return;
+    }
+    const updatedBlacklist = [...safeBlacklist, { keyword: newKeyword.trim(), scope: newScope }];
     setValue('blacklist', updatedBlacklist, { shouldDirty: true });
     setNewKeyword('');
   };
 
   const handleRemoveKeyword = (keyword: string) => {
-    const updatedBlacklist = blacklist.filter((item: any) => item.keyword !== keyword);
+    const updatedBlacklist = safeBlacklist.filter((item: { keyword: string }) => item.keyword !== keyword);
     setValue('blacklist', updatedBlacklist, { shouldDirty: true });
   };
 
@@ -148,18 +143,24 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   };
 
   const sortedBlacklist = useMemo(() => {
-    if (!sortColumn) {return blacklist;}
+    if (!sortColumn) {
+      return safeBlacklist;
+    }
 
-    return [...blacklist].sort((a, b) => {
+    return [...safeBlacklist].sort((a, b) => {
       const aKey = sortColumn as keyof typeof a;
       const aValue = a[aKey];
       const bValue = b[aKey];
 
-      if (aValue < bValue) {return sortDirection === 'asc' ? -1 : 1;}
-      if (aValue > bValue) {return sortDirection === 'asc' ? 1 : -1;}
+      if (aValue < bValue) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
       return 0;
     });
-  }, [blacklist, sortColumn, sortDirection]);
+  }, [safeBlacklist, sortColumn, sortDirection]);
 
   const pagedBlacklist = useMemo(() => {
     const startIndex = (page - 1) * rowsPerPage;

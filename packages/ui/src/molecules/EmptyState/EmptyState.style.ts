@@ -10,10 +10,10 @@ export const EmptyStateWrapper = styled.div<{ $size: EmptyStateSize }>`
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: ${({ $size }) =>
+  padding: ${({ $size, theme }) =>
     $size === 'sm'
-      ? `${tkn('spacing.md')} ${tkn('spacing.sm')}`
-      : `${tkn('spacing.xl')} ${tkn('spacing.md')}`};
+      ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.sm')({ theme })}`
+      : `${tkn('spacing.xl')({ theme })} ${tkn('spacing.md')({ theme })}`};
   gap: ${({ $size }) =>
     $size === 'sm' ? tkn('spacing.sm') : $size === 'lg' ? tkn('spacing.lg') : tkn('spacing.md')};
 `;

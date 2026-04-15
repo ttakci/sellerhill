@@ -51,31 +51,32 @@ export const PopoverArrow = styled.div<{ $position: string }>`
   height: 0;
   border: 0.375rem solid transparent;
 
-  ${({ $position }) => {
+  ${({ $position, theme }) => {
+    const surface = tkn('colors.surface.primary')({ theme });
     const arrowStyles = {
       top: `
         bottom: -0.75rem;
         left: 50%;
         transform: translateX(-50%);
-        border-top-color: ${tkn('colors.surface.primary')};
+        border-top-color: ${surface};
       `,
       bottom: `
         top: -0.75rem;
         left: 50%;
         transform: translateX(-50%);
-        border-bottom-color: ${tkn('colors.surface.primary')};
+        border-bottom-color: ${surface};
       `,
       left: `
         right: -0.75rem;
         top: 50%;
         transform: translateY(-50%);
-        border-left-color: ${tkn('colors.surface.primary')};
+        border-left-color: ${surface};
       `,
       right: `
         left: -0.75rem;
         top: 50%;
         transform: translateY(-50%);
-        border-right-color: ${tkn('colors.surface.primary')};
+        border-right-color: ${surface};
       `,
     };
     return arrowStyles[$position as keyof typeof arrowStyles] || arrowStyles.bottom;

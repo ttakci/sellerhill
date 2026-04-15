@@ -41,6 +41,6 @@ export const CollapsibleContent = styled.div<{ $isOpen: boolean; $maxHeight: num
   transition: max-height ${tkn('transitions.normal')}, padding ${tkn('transitions.normal')};
   ${(props) =>
     props.$isOpen
-      ? `max-height: ${props.$maxHeight ?? 2000}px; padding: 0 ${tkn('spacing.md')} ${tkn('spacing.md')};`
+      ? `max-height: ${props.$maxHeight ?? 2000}px; padding: 0 ${tkn('spacing.md')(props)} ${tkn('spacing.md')(props)};`
       : 'max-height: 0; padding: 0;'}
 `;

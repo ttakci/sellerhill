@@ -36,11 +36,11 @@ export const FooterWrapper = styled.div`
   }
 
   button {
-    min-width: 10rem; /* ~160px - Middle length as requested */
+    min-width: 16rem; /* ~256px - large */
     max-width: 100%;
-    
+
     @media (max-width: 48rem) {
-      min-width: 8rem;
+      min-width: 12rem;
     }
   }
 `;

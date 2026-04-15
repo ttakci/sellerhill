@@ -6,7 +6,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EbayAccountStatus, ListingStatus } from '@repo/shared';
+import { EbayAccountStatus, ListingStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
@@ -56,9 +56,10 @@ export class OrderSyncService {
     for (const account of accounts) {
       try {
         await this.syncOrdersForAccount(account);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
         this.logger.error(
-          `Order sync failed for account ${account.id} (user: ${account.user_id}): ${error.message}`
+          `Order sync failed for account ${account.id} (user: ${account.user_id}): ${message}`
         );
       }
     }
@@ -72,7 +73,7 @@ export class OrderSyncService {
   async syncOrdersForAccount(account: EbayAccountForSync): Promise<number> {
     const userId = account.user_id;
     const ebayAccountId = account.id;
-    const marketplaceId = account.marketplace_id as any;
+    const marketplaceId = account.marketplace_id as EbayMarketplaceId;
 
     this.logger.log(`Syncing orders for user ${userId}, account ${ebayAccountId}`);
 
@@ -103,7 +104,7 @@ export class OrderSyncService {
           let asin: string | null = null;
 
           if (lineItem?.itemId) {
-            const match = await this.databaseService.query(
+            const match = await this.databaseService.query<{ id: string; asin: string | null }>(
               `SELECT id, asin FROM listings
                WHERE ebay_item_id = $1 AND user_id = $2 AND status = '${ListingStatus.ACTIVE}'
                LIMIT 1`,
@@ -132,9 +133,10 @@ export class OrderSyncService {
           }
 
           totalSynced++;
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : String(error);
           this.logger.error(
-            `Failed to sync eBay order ${ebayOrder.orderId}: ${error.message}`
+            `Failed to sync eBay order ${ebayOrder.orderId}: ${msg}`
           );
         }
       }
@@ -253,9 +255,14 @@ export class OrderSyncService {
     const order = orders[0];
 
     // Get fee config from the listing's settings group
-    const settingsGroups = await this.databaseService.query<{
-      fees: any;
-    }>(
+    interface FeeRow {
+      fees: {
+        ebayFeePercent?: number;
+        fixedFeeAmount?: number;
+        taxPercent?: number;
+      } | null;
+    }
+    const settingsGroups = await this.databaseService.query<FeeRow>(
       `SELECT lsg.fees FROM listing_settings_groups lsg
        INNER JOIN listings l ON l.listing_settings_group_id = lsg.id
        WHERE l.id = $1`,
@@ -271,7 +278,7 @@ export class OrderSyncService {
     // Calculate fees
     const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
     const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
-    const taxPercent = Number(fees?.taxPercent) || 0;
+    const _taxPercent = Number(fees?.taxPercent) || 0;
 
     const transactionFee = Math.round(saleTotal * (ebayFeePercent / 100) * 100) / 100;
     const adFee = fixedFeeAmount;

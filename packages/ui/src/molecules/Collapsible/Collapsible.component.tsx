@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Icon } from '../../atoms/Icon';
 
@@ -14,15 +14,20 @@ export const Collapsible = ({
   className,
 }: CollapsibleProps): React.ReactElement => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [maxHeight, setMaxHeight] = useState<number | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setMaxHeight(contentRef.current.scrollHeight);
+    }
+  }, [children]);
 
   const toggle = () => {
     const next = !isOpen;
     setIsOpen(next);
     onChange?.(next);
   };
-
-  const maxHeight = isOpen && contentRef.current ? contentRef.current.scrollHeight : null;
 
   return (
     <S.CollapsibleContainer className={className}>
@@ -35,7 +40,7 @@ export const Collapsible = ({
           <Icon name="chevron-down" size="sm" />
         </span>
       </S.CollapsibleHeader>
-      <S.CollapsibleContent $isOpen={isOpen} $maxHeight={maxHeight} ref={contentRef}>
+      <S.CollapsibleContent $isOpen={isOpen} $maxHeight={isOpen ? maxHeight : null} ref={contentRef}>
         {children}
       </S.CollapsibleContent>
     </S.CollapsibleContainer>

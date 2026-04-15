@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from '../../atoms/Button';
-import { Icon } from '../../atoms/Icon';
+import { Icon, type IconName } from '../../atoms/Icon';
 import { Modal } from '../../atoms/Modal';
 import { Text } from '../../atoms/Text';
 import type { MessageType } from '../../context';
@@ -9,7 +9,7 @@ import type { MessageType } from '../../context';
 import * as S from './MessageModal.style';
 import type { MessageModalProps } from './MessageModal.types';
 
-const messageIcons: Record<MessageType, string> = {
+const messageIcons: Record<MessageType, IconName> = {
   success: 'info',
   error: 'error',
   warning: 'alert-circle',
@@ -70,7 +70,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     >
       <S.ContentWrapper>
         <S.IconWrapper>
-          <Icon name={iconName as any} size={48} color={iconColor} />
+          <Icon name={iconName} size={48} color={iconColor} />
         </S.IconWrapper>
         <S.TitleWrapper>
           <Text variant="h3" weight="bold">
