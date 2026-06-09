@@ -42,7 +42,8 @@
       "Bash(openssl rand *)",
       "Bash(pnpm --filter @repo/ui add -D shx)",
       "Bash(pnpm --filter @repo/ui run build)",
-      "Bash(pnpm --filter @repo/ui remove shx)"
+      "Bash(pnpm --filter @repo/ui remove shx)",
+      "Bash(docker build *)"
     ]
   }
 }
