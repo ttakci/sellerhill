@@ -5,7 +5,7 @@
   "types": "./dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc -p . && (if not exist dist\\assets mkdir dist\\assets) && xcopy /y /s src\\assets dist\\assets"
+    "build": "tsc -p . && shx mkdir -p dist/assets && shx cp -r src/assets/* dist/assets/"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -16,7 +16,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@types/react": "18.3.27",
-    "@types/react-dom": "18.3.7"
+    "@types/react-dom": "18.3.7",
+    "shx": "^0.4.0"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
