@@ -5,7 +5,7 @@
   "types": "./dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc -p . && node -e \"const fs=require('fs');fs.mkdirSync('dist/assets',{recursive:true});fs.cpSync('src/assets','dist/assets',{recursive:true})\""
+    "build": "tsc -p . && node scripts/copy-assets.js"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",

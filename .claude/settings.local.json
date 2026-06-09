@@ -38,7 +38,11 @@
       "Bash(git commit -m 'feat: Amazon integration, Docker, products module, and UI improvements' -m '- Add Amazon buyer accounts module \\(CRUD, scraping, tracking\\) *)",
       "Bash(pnpm validate *)",
       "Bash(git push *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(openssl rand *)",
+      "Bash(pnpm --filter @repo/ui add -D shx)",
+      "Bash(pnpm --filter @repo/ui run build)",
+      "Bash(pnpm --filter @repo/ui remove shx)"
     ]
   }
 }

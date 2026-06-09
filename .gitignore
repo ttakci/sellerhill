@@ -18,6 +18,7 @@ packages/*/dist/
 !*.config.mjs
 !scripts/**/*.js
 !scripts/**/*.mjs
+!packages/*/scripts/*.js
 
 # Env files
 .env
