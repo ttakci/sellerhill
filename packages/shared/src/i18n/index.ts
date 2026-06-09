@@ -1,3 +1,4 @@
+import enAmazon from './resources/en/amazon.json';
 import enAuth from './resources/en/auth.json';
 import enDashboard from './resources/en/dashboard.json';
 import enEbay from './resources/en/ebay.json';
@@ -7,6 +8,7 @@ import enOrders from './resources/en/orders.json';
 import enProfile from './resources/en/profile.json';
 import enStoreSettings from './resources/en/storeSettings.json';
 import enTranslation from './resources/en/translation.json';
+import trAmazon from './resources/tr/amazon.json';
 import trAuth from './resources/tr/auth.json';
 import trDashboard from './resources/tr/dashboard.json';
 import trEbay from './resources/tr/ebay.json';
@@ -19,6 +21,7 @@ import trTranslation from './resources/tr/translation.json';
 
 
 export {
+  enAmazon,
   enAuth,
   enDashboard,
   enEbay,
@@ -28,6 +31,7 @@ export {
   enProfile,
   enStoreSettings,
   enTranslation,
+  trAmazon,
   trAuth,
   trDashboard,
   trEbay,

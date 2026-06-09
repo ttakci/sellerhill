@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Button, Icon, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
+import { Button, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -70,11 +70,6 @@ export const RegisterPageComponent = ({
         {/* Right Panel: Form */}
         <S.FormPanel>
           <S.AuthCard>
-            <S.BackLink variant="text" onClick={() => window.history.back()}>
-              <Icon name="chevron-left" size="sm" />
-              {t('auth:auth.register.backToDashboard')}
-            </S.BackLink>
-
             <S.Header>
               <Text variant="h2" weight="bold">
                 {t('auth:auth.register.title')}
@@ -84,7 +79,11 @@ export const RegisterPageComponent = ({
               </Text>
             </S.Header>
 
-            <S.Form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
+            <S.Form
+              onSubmit={(e) => {
+                void handleSubmit(onSubmit)(e);
+              }}
+            >
               <S.FormRow>
                 <ModernTextInput
                   name="firstName"
@@ -125,13 +124,7 @@ export const RegisterPageComponent = ({
               />
 
               <S.ButtonContainer>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  fullWidth
-                  isLoading={isLoading || isSubmitting}
-                  size="large"
-                >
+                <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting} size="large">
                   {t('auth:auth.register.submitButton')}
                 </Button>
               </S.ButtonContainer>

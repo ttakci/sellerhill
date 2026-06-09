@@ -1,14 +1,25 @@
 /**
  * Dashboard Domain Types
+ * Sellerboard-style period-based metrics
  */
 
+/** Metrics for a single time period */
+export interface PeriodMetricsDto {
+  sales: number;
+  orders: number;
+  netProfit: number;
+  margin: number;
+  /** Percentage change vs comparable previous period, null when no baseline */
+  trend: number | null;
+}
+
 export interface DashboardMetricsDto {
-  totalRevenue: number;
-  totalProfit: number;
-  totalOrders: number;
+  today: PeriodMetricsDto;
+  yesterday: PeriodMetricsDto;
+  thisMonth: PeriodMetricsDto;
+  thisMonthForecast: PeriodMetricsDto | null;
+  lastMonth: PeriodMetricsDto;
   activeListings: number;
-  todayOrders: number;
-  todayRevenue: number;
 }
 
 export interface RevenueTrendPoint {

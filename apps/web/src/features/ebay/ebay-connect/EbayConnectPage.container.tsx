@@ -13,37 +13,29 @@ import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '../api/e
 
 import { EbayConnectPageComponent } from './EbayConnectPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 
 export const EbayConnectPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation();
   const { showMessage, closeMessage } = useUI();
+  const { i18n } = useTranslation();
 
   const [getConnectUrl, { isLoading, error: urlError }] = useLazyGetEbayConnectUrlQuery();
   const { data: accountsData } = useGetEbayAccountsQuery();
 
-  // Use RTK Query loading state with useLoading hook
   useLoading(isLoading);
 
-  // Handle error
   useEffect(() => {
-    if (urlError) {
-      const { key, params } = getErrorMessage(urlError);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'message.error.header',
-          descriptionKey: key,
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'message.error.ok',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
-  }, [urlError, showMessage, closeMessage, t]);
+    if (!urlError) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(urlError),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      i18n.t.bind(i18n)
+    );
+  }, [urlError, showMessage, closeMessage, i18n]);
 
   const handleConnect = (): void => {
     void getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US })

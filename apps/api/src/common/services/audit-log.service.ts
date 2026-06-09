@@ -3,7 +3,7 @@
  * Tracks security-sensitive operations for compliance and debugging
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
 
@@ -29,41 +29,10 @@ export interface AuditLogEntry {
 }
 
 @Injectable()
-export class AuditLogService implements OnModuleInit {
+export class AuditLogService {
   private readonly logger = new Logger(AuditLogService.name);
 
   constructor(private readonly databaseService: DatabaseService) {}
-
-  async onModuleInit() {
-    await this.ensureTable();
-  }
-
-  private async ensureTable() {
-    try {
-      await this.databaseService.query(`
-        CREATE TABLE IF NOT EXISTS audit_logs (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-          action VARCHAR(50) NOT NULL,
-          resource_type VARCHAR(50),
-          resource_id VARCHAR(255),
-          details JSONB,
-          ip_address VARCHAR(45),
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-
-      await this.databaseService.query(`
-        CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
-        CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
-        CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
-      `);
-
-      this.logger.log('Audit logs table ensured');
-    } catch (error) {
-      this.logger.error('Failed to create audit_logs table', error);
-    }
-  }
 
   /**
    * Log an audit event

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { type BlacklistKeyword, type SaveStoreSettingsRequest, type StoreSettingsResponse } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -22,78 +22,10 @@ interface StoreSettingsEntity {
 }
 
 @Injectable()
-export class StoreSettingsService implements OnModuleInit {
+export class StoreSettingsService {
   private readonly logger = new Logger(StoreSettingsService.name);
 
   constructor(private readonly databaseService: DatabaseService) {}
-
-  async onModuleInit() {
-    await this.ensureTableExists();
-  }
-
-  /**
-   * Ensure store_settings table exists with correct schema
-   */
-  private async ensureTableExists() {
-    this.logger.log('Ensuring store_settings table exists...');
-
-    // Check if user_id column exists
-    const columnCheck = await this.databaseService.query(`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'store_settings' AND column_name = 'user_id'
-    `);
-
-    if (columnCheck.length === 0) {
-      this.logger.warn('Schema mismatch: store_settings lacks user_id. Recreating table for multi-tenancy.');
-      await this.databaseService.query(`DROP TABLE IF EXISTS store_settings CASCADE;`);
-    }
-
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        store_id UUID,
-        is_global BOOLEAN DEFAULT FALSE,
-        country VARCHAR(100) NOT NULL,
-        state VARCHAR(100) NOT NULL,
-        zip_code VARCHAR(20) NOT NULL,
-        validate_title BOOLEAN DEFAULT TRUE,
-        validate_description BOOLEAN DEFAULT FALSE,
-        blacklist JSONB DEFAULT '[]',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Ensure idx on user and store
-    await this.databaseService.query(`
-      CREATE INDEX IF NOT EXISTS idx_store_settings_user_id ON store_settings(user_id);
-      CREATE INDEX IF NOT EXISTS idx_store_settings_store_id ON store_settings(store_id);
-    `);
-
-    // UNIQUE constraints scoped to user
-    // 1. One global setting per user
-    await this.databaseService.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_store_settings_user_global 
-      ON store_settings (user_id, is_global) 
-      WHERE (is_global = TRUE);
-    `);
-
-    // 2. One specific setting per store per user
-    await this.databaseService.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_store_settings_user_store 
-      ON store_settings (user_id, store_id) 
-      WHERE (store_id IS NOT NULL);
-    `);
-
-    // Drop deprecated columns (address, price_limit)
-    await this.databaseService.query(`
-      ALTER TABLE store_settings 
-      DROP COLUMN IF EXISTS address,
-      DROP COLUMN IF EXISTS price_limit;
-    `);
-  }
 
   /**
    * Get settings for a specific store or global

@@ -4,55 +4,46 @@
  * Purpose: Handle registration logic and API calls
  */
 
-import type { RegisterFormData } from '@repo/shared';
+import type { RegisterFormData, SupportedLocale } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useRegisterMutation } from '../api/authApi';
 
 import { RegisterPageComponent } from './RegisterPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
+import { useLocale } from '@/utils/useLocale';
 
 export const RegisterPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
-  const navigate = useNavigate();
+  const { locale, localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  const { i18n } = useTranslation();
 
   const [register, { isLoading, isSuccess, error }] = useRegisterMutation();
   const [submittedEmail, setSubmittedEmail] = React.useState<string>('');
 
-  // Use RTK Query loading state with useLoading hook
   useLoading(isLoading);
 
-  // Handle success
   useEffect(() => {
     if (isSuccess && submittedEmail) {
-      // Redirect to check email page
-      void navigate(`/auth/check-email?email=${encodeURIComponent(submittedEmail)}`);
+      localeNavigate(`/auth/check-email?email=${encodeURIComponent(submittedEmail)}`);
     }
-  }, [isSuccess, submittedEmail, navigate]);
-  // Handle error
+  }, [isSuccess, submittedEmail, localeNavigate]);
+
   useEffect(() => {
-    if (error) {
-      const { key, params } = getErrorMessage(error);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'message.error.header',
-          descriptionKey: key,
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'translation:message.error.close',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
-  }, [error, showMessage, closeMessage, t]);
+    if (!error) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(error),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      i18n.t.bind(i18n)
+    );
+  }, [error, showMessage, closeMessage, i18n]);
 
   const handleSubmit = (data: RegisterFormData): void => {
     setSubmittedEmail(data.email);
@@ -61,11 +52,12 @@ export const RegisterPageContainer = (): React.ReactElement => {
       lastName: data.lastName,
       email: data.email,
       password: data.password,
+      locale: locale as SupportedLocale,
     });
   };
 
   const handleNavigateToLogin = (): void => {
-    void navigate('/login');
+    localeNavigate('/login');
   };
 
   return (

@@ -12,6 +12,7 @@
  * - schemas/store-settings/ - Store settings forms
  */
 
+export * from './amazon';
 export * from './auth';
 export * from './common/form.utils';
 export * from './orders';

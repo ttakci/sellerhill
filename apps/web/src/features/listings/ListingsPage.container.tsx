@@ -1,8 +1,7 @@
-import { ListingStatus } from '@repo/shared';
-import { IdBadge, Icon, Tooltip, useLoading, useUI } from '@repo/ui';
+import { ListingStatus, type ListingDto } from '@repo/shared';
+import { Icon, IdBadge, Tooltip, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import {
   useDeleteListingsMutation,
@@ -13,6 +12,9 @@ import {
 import { ListingsPageComponent } from './ListingsPage.component';
 import * as S from './ListingsPage.style';
 import type { ListingsFilterState } from './ListingsPage.types';
+
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useLocale } from '@/utils/useLocale';
 
 const DEFAULT_FILTERS: ListingsFilterState = {
   search: '',
@@ -31,7 +33,7 @@ const DEFAULT_FILTERS: ListingsFilterState = {
 };
 
 export const ListingsPageContainer: React.FC = () => {
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const { t } = useTranslation(['listings', 'translation']);
   const { showMessage } = useUI();
 
@@ -70,16 +72,10 @@ export const ListingsPageContainer: React.FC = () => {
   const [filters, setFilters] = useState<ListingsFilterState>(DEFAULT_FILTERS);
 
   // Fetch listings and jobs
-  const {
-    data: listings = [],
-    isLoading: isListingsLoading,
-  } = useGetListingsQuery(refreshTrigger, {
+  const { data: listings = [], isLoading: isListingsLoading } = useGetListingsQuery(refreshTrigger, {
     refetchOnMountOrArgChange: true,
   });
-  const {
-    data: jobs = [],
-    isLoading: isJobsLoading,
-  } = useGetListingJobsQuery(refreshTrigger, {
+  const { data: jobs = [], isLoading: isJobsLoading } = useGetListingJobsQuery(refreshTrigger, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -104,8 +100,12 @@ export const ListingsPageContainer: React.FC = () => {
   // Filtered listings
   const filteredListings = useMemo(() => {
     const inRange = (val: number | undefined, range: { min: string; max: string }) => {
-      if (range.min !== '' && (val ?? 0) < Number(range.min)) {return false;}
-      if (range.max !== '' && (val ?? 0) > Number(range.max)) {return false;}
+      if (range.min !== '' && (val ?? 0) < Number(range.min)) {
+        return false;
+      }
+      if (range.max !== '' && (val ?? 0) > Number(range.max)) {
+        return false;
+      }
       return true;
     };
 
@@ -116,25 +116,51 @@ export const ListingsPageContainer: React.FC = () => {
           return false;
         }
       }
-      if (filters.category && listing.category !== filters.category) {return false;}
-      if (filters.status && listing.status !== (filters.status as ListingStatus)) {return false;}
-      if (!inRange(listing.price, filters.price)) {return false;}
-      if (!inRange(listing.purchasePrice, filters.purchasePrice)) {return false;}
-      if (!inRange(listing.estimatedProfit, filters.estimatedProfit)) {return false;}
-      if (!inRange(listing.roi, filters.roi)) {return false;}
-      if (!inRange(listing.profitMargin, filters.profitMargin)) {return false;}
-      if (!inRange(listing.soldCount, filters.soldCount)) {return false;}
-      if (!inRange(listing.watchCount, filters.watchCount)) {return false;}
-      if (!inRange(listing.viewCount, filters.viewCount)) {return false;}
-      if (!inRange(listing.quantity, filters.quantity)) {return false;}
-      if (!inRange(listing.sourceStock, filters.sourceStock)) {return false;}
+      if (filters.category && listing.category !== filters.category) {
+        return false;
+      }
+      if (filters.status && listing.status !== (filters.status as ListingStatus)) {
+        return false;
+      }
+      if (!inRange(listing.price, filters.price)) {
+        return false;
+      }
+      if (!inRange(listing.purchasePrice, filters.purchasePrice)) {
+        return false;
+      }
+      if (!inRange(listing.estimatedProfit, filters.estimatedProfit)) {
+        return false;
+      }
+      if (!inRange(listing.roi, filters.roi)) {
+        return false;
+      }
+      if (!inRange(listing.profitMargin, filters.profitMargin)) {
+        return false;
+      }
+      if (!inRange(listing.soldCount, filters.soldCount)) {
+        return false;
+      }
+      if (!inRange(listing.watchCount, filters.watchCount)) {
+        return false;
+      }
+      if (!inRange(listing.viewCount, filters.viewCount)) {
+        return false;
+      }
+      if (!inRange(listing.quantity, filters.quantity)) {
+        return false;
+      }
+      if (!inRange(listing.sourceStock, filters.sourceStock)) {
+        return false;
+      }
       return true;
     });
   }, [listings, filters]);
 
   // Sorted listings
   const sortedListings = useMemo(() => {
-    if (!sortColumn) {return filteredListings;}
+    if (!sortColumn) {
+      return filteredListings;
+    }
 
     return [...filteredListings].sort((a, b) => {
       let aValue: any = a[sortColumn as keyof typeof a];
@@ -221,20 +247,26 @@ export const ListingsPageContainer: React.FC = () => {
   }, [isDeleteSuccess, deleteData, showMessage, t]);
 
   const handleAddListing = () => {
-    void navigate('/listings/add');
+    localeNavigate('/listings/add');
   };
 
   const handleRefresh = () => {
     setRefreshTrigger(Date.now());
   };
 
-  const handleEndListings = useCallback((listingIds: string[]) => {
-    void endListings(listingIds);
-  }, [endListings]);
+  const handleEndListings = useCallback(
+    (listingIds: string[]) => {
+      void endListings(listingIds);
+    },
+    [endListings]
+  );
 
-  const handleDeleteListings = useCallback((listingIds: string[]) => {
-    return deleteListings(listingIds);
-  }, [deleteListings]);
+  const handleDeleteListings = useCallback(
+    (listingIds: string[]) => {
+      return deleteListings(listingIds);
+    },
+    [deleteListings]
+  );
 
   const handleDownload = () => {
     // Define all data columns for export (regardless of visibility)
@@ -330,9 +362,7 @@ export const ListingsPageContainer: React.FC = () => {
                 <S.ProductBrand>{listing.brand || ''}</S.ProductBrand>
                 <S.ProductMeta>
                   <IdBadge id={listing.asin} storeType="amazon" size="sm" />
-                  {listing.ebayListingId && (
-                    <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
-                  )}
+                  {listing.ebayListingId && <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />}
                 </S.ProductMeta>
               </S.ProductMainInfo>
             </S.ProductCell>
@@ -343,21 +373,26 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'category',
         sortable: true,
         header: t('listings.table.category'),
-        render: (category: string) => <S.CompactText title={category}>{category || '—'}</S.CompactText>,
+        render: (category: unknown) => {
+          const str = String(category ?? '');
+          return <S.CompactText title={str}>{str || '—'}</S.CompactText>;
+        },
       },
       {
         key: 'prices',
         sortable: true,
         header: t('listings.table.price'),
-        render: (_: any, listing: any) => (
-          <S.MetricValue variant="body-sm" weight="bold">${listing.price.toFixed(2)}</S.MetricValue>
+        render: (_: unknown, listing: ListingDto) => (
+          <S.MetricValue variant="body-sm" weight="bold">
+            ${listing.price.toFixed(2)}
+          </S.MetricValue>
         ),
       },
       {
         key: 'purchasePrice',
         sortable: true,
         header: t('listings.table.purchasePrice'),
-        render: (_: any, listing: any) => (
+        render: (_: unknown, listing: ListingDto) => (
           <S.MetricValue variant="body-sm">${listing.purchasePrice?.toFixed(2) || '0.00'}</S.MetricValue>
         ),
       },
@@ -378,8 +413,13 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'roi',
         sortable: true,
         header: t('listings.table.roi'),
-        render: (_: any, listing: any) => (
-          <S.MetricValue variant="body-sm" weight="semibold" $positive={(listing.roi || 0) > 0} $negative={(listing.roi || 0) < 0}>
+        render: (_: unknown, listing: ListingDto) => (
+          <S.MetricValue
+            variant="body-sm"
+            weight="semibold"
+            $positive={(listing.roi || 0) > 0}
+            $negative={(listing.roi || 0) < 0}
+          >
             {listing.roi?.toFixed(1) || '0'}%
           </S.MetricValue>
         ),
@@ -388,10 +428,8 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'profitMargin',
         sortable: true,
         header: t('listings.table.profitMargin'),
-        render: (_: any, listing: any) => (
-          <S.MetricValue variant="body-sm">
-            {listing.profitMargin?.toFixed(1) || '0'}%
-          </S.MetricValue>
+        render: (_: unknown, listing: ListingDto) => (
+          <S.MetricValue variant="body-sm">{listing.profitMargin?.toFixed(1) || '0'}%</S.MetricValue>
         ),
       },
       {
@@ -399,27 +437,39 @@ export const ListingsPageContainer: React.FC = () => {
         sortable: true,
         header: t('listings.table.sold'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.soldCount || 0}</S.StatMain>,
+        render: (_: unknown, listing: ListingDto) => (
+          <S.StatMain variant="body-sm" weight="bold">
+            {listing.soldCount || 0}
+          </S.StatMain>
+        ),
       },
       {
         key: 'watch',
         sortable: true,
         header: t('listings.table.watch'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.watchCount || 0}</S.StatMain>,
+        render: (_: unknown, listing: ListingDto) => (
+          <S.StatMain variant="body-sm" weight="bold">
+            {listing.watchCount || 0}
+          </S.StatMain>
+        ),
       },
       {
         key: 'views',
         sortable: true,
         header: t('listings.table.views'),
         align: 'center' as const,
-        render: (_: any, listing: any) => <S.StatMain variant="body-sm" weight="bold">{listing.viewCount || 0}</S.StatMain>,
+        render: (_: unknown, listing: ListingDto) => (
+          <S.StatMain variant="body-sm" weight="bold">
+            {listing.viewCount || 0}
+          </S.StatMain>
+        ),
       },
       {
         key: 'quantity',
         sortable: true,
         header: t('listings.table.stock'),
-        render: (_: any, listing: any) => (
+        render: (_: unknown, listing: ListingDto) => (
           <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
         ),
       },
@@ -427,7 +477,7 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'sourceStock',
         sortable: true,
         header: t('listings.table.amazonStock'),
-        render: (_: any, listing: any) => (
+        render: (_: unknown, listing: ListingDto) => (
           <S.StockValue $outOfStock={listing.sourceStock === 0}>{listing.sourceStock ?? '—'}</S.StockValue>
         ),
       },
@@ -435,9 +485,12 @@ export const ListingsPageContainer: React.FC = () => {
         key: 'status',
         sortable: true,
         header: t('listings.table.status'),
-        render: (status: string) => (
-          <S.StatusBadge $status={status}>{t(`listings.status.${status.toLowerCase()}`)}</S.StatusBadge>
-        ),
+        render: (status: unknown) => {
+          const statusStr = String(status);
+          return (
+            <S.StatusBadge $status={statusStr as ListingStatus}>{t(`listings.status.${statusStr.toLowerCase()}`)}</S.StatusBadge>
+          );
+        },
       },
     ],
     [t]
@@ -455,7 +508,9 @@ export const ListingsPageContainer: React.FC = () => {
   );
 
   const handleEndSelected = useCallback(() => {
-    if (selectedListingIds.length === 0) {return;}
+    if (selectedListingIds.length === 0) {
+      return;
+    }
     showMessage(
       {
         type: 'warning',
@@ -480,7 +535,9 @@ export const ListingsPageContainer: React.FC = () => {
   }, [selectedListingIds, handleEndListings, showMessage, t]);
 
   const handleDeleteSelected = useCallback(() => {
-    if (selectedListingIds.length === 0) {return;}
+    if (selectedListingIds.length === 0) {
+      return;
+    }
     showMessage(
       {
         type: 'warning',
@@ -520,16 +577,13 @@ export const ListingsPageContainer: React.FC = () => {
 
   // --- Filter handlers ---
 
-  const categoryOptions = useMemo(
-    () => {
-      const cats = [...new Set(listings.map((l) => l.category).filter(Boolean))] as string[];
-      return [
-        { value: '', label: t('listings.filters.allCategories') },
-        ...cats.sort().map((c) => ({ value: c, label: c })),
-      ];
-    },
-    [listings, t]
-  );
+  const categoryOptions = useMemo(() => {
+    const cats = [...new Set(listings.map((l) => l.category).filter(Boolean))] as string[];
+    return [
+      { value: '', label: t('listings.filters.allCategories') },
+      ...cats.sort().map((c) => ({ value: c, label: c })),
+    ];
+  }, [listings, t]);
 
   const statusOptions = useMemo(
     () => [
@@ -542,40 +596,30 @@ export const ListingsPageContainer: React.FC = () => {
     [t]
   );
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilters((prev) => ({ ...prev, search: e.target.value }));
-      setPage(1);
-    },
-    []
-  );
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
+    setPage(1);
+  }, []);
 
-  const handleCategoryChange = useCallback(
-    (value: string | number) => {
-      setFilters((prev) => ({ ...prev, category: String(value) }));
-      setPage(1);
-    },
-    []
-  );
+  const handleCategoryChange = useCallback((value: string | number) => {
+    setFilters((prev) => ({ ...prev, category: String(value) }));
+    setPage(1);
+  }, []);
 
-  const handleStatusChange = useCallback(
-    (value: string | number) => {
-      setFilters((prev) => ({ ...prev, status: String(value) }));
-      setPage(1);
-    },
-    []
-  );
+  const handleStatusChange = useCallback((value: string | number) => {
+    setFilters((prev) => ({ ...prev, status: String(value) }));
+    setPage(1);
+  }, []);
 
   const handleRangeChange = useCallback(
-    (field: keyof ListingsFilterState, bound: 'min' | 'max') =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        setFilters((prev) => ({
-          ...prev,
-          [field]: { ...(prev[field] as { min: string; max: string }), [bound]: val },
-        }));
-        setPage(1);
-      },
+    (field: keyof ListingsFilterState, bound: 'min' | 'max') => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value;
+      setFilters((prev) => ({
+        ...prev,
+        [field]: { ...(prev[field] as { min: string; max: string }), [bound]: val },
+      }));
+      setPage(1);
+    },
     []
   );
 
@@ -585,36 +629,51 @@ export const ListingsPageContainer: React.FC = () => {
   }, []);
 
   const hasActiveFilters = useMemo(() => {
-    if (filters.search || filters.category || filters.status) {return true;}
-    const rangeKeys = ['price', 'purchasePrice', 'estimatedProfit', 'roi', 'profitMargin', 'soldCount', 'watchCount', 'viewCount', 'quantity', 'sourceStock'] as const;
+    if (filters.search || filters.category || filters.status) {
+      return true;
+    }
+    const rangeKeys = [
+      'price',
+      'purchasePrice',
+      'estimatedProfit',
+      'roi',
+      'profitMargin',
+      'soldCount',
+      'watchCount',
+      'viewCount',
+      'quantity',
+      'sourceStock',
+    ] as const;
     return rangeKeys.some((k) => filters[k].min !== '' || filters[k].max !== '');
   }, [filters]);
 
   const numericFilters = useMemo(
-    () => [
-      { key: 'price', label: t('listings.filters.fields.price') },
-      { key: 'purchasePrice', label: t('listings.filters.fields.purchasePrice') },
-      { key: 'estimatedProfit', label: t('listings.filters.fields.estimatedProfit') },
-      { key: 'roi', label: t('listings.filters.fields.roi') },
-      { key: 'profitMargin', label: t('listings.filters.fields.profitMargin') },
-      { key: 'soldCount', label: t('listings.filters.fields.soldCount') },
-      { key: 'watchCount', label: t('listings.filters.fields.watchCount') },
-      { key: 'viewCount', label: t('listings.filters.fields.viewCount') },
-      { key: 'quantity', label: t('listings.filters.fields.quantity') },
-      { key: 'sourceStock', label: t('listings.filters.fields.sourceStock') },
-    ].map(({ key, label }) => ({
-      key,
-      label,
-      min: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).min,
-      max: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).max,
-      onMinChange: handleRangeChange(key as keyof ListingsFilterState, 'min'),
-      onMaxChange: handleRangeChange(key as keyof ListingsFilterState, 'max'),
-    })),
+    () =>
+      [
+        { key: 'price', label: t('listings.filters.fields.price') },
+        { key: 'purchasePrice', label: t('listings.filters.fields.purchasePrice') },
+        { key: 'estimatedProfit', label: t('listings.filters.fields.estimatedProfit') },
+        { key: 'roi', label: t('listings.filters.fields.roi') },
+        { key: 'profitMargin', label: t('listings.filters.fields.profitMargin') },
+        { key: 'soldCount', label: t('listings.filters.fields.soldCount') },
+        { key: 'watchCount', label: t('listings.filters.fields.watchCount') },
+        { key: 'viewCount', label: t('listings.filters.fields.viewCount') },
+        { key: 'quantity', label: t('listings.filters.fields.quantity') },
+        { key: 'sourceStock', label: t('listings.filters.fields.sourceStock') },
+      ].map(({ key, label }) => ({
+        key,
+        label,
+        min: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).min,
+        max: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).max,
+        onMinChange: handleRangeChange(key as keyof ListingsFilterState, 'min'),
+        onMaxChange: handleRangeChange(key as keyof ListingsFilterState, 'max'),
+      })),
     [filters, t, handleRangeChange]
   );
 
   return (
-    <ListingsPageComponent
+    <EbayAccountGuard>
+      <ListingsPageComponent
       listings={paginatedListings}
       isLoading={isListingsLoading}
       jobs={jobs}
@@ -656,5 +715,6 @@ export const ListingsPageContainer: React.FC = () => {
       hasActiveFilters={hasActiveFilters}
       resultCount={filteredListings.length}
     />
+    </EbayAccountGuard>
   );
 };

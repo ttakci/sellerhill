@@ -33,12 +33,12 @@ export const formatCompactNumber = (
   }).format(value);
 
 /**
- * Format a date string into a localized short date.
+ * Format a date string into a localized date(time).
  */
 export const formatDate = (
   dateString: string,
   locale: string = 'en-US',
-  options?: { day?: 'numeric' | '2-digit'; month?: 'numeric' | '2-digit' | 'short' | 'long' | 'narrow'; year?: 'numeric' | '2-digit' },
+  options?: Intl.DateTimeFormatOptions,
 ): string =>
   new Intl.DateTimeFormat(locale, {
     day: 'numeric',

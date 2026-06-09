@@ -47,7 +47,7 @@ const lightColors: ThemeColors = {
   brand: {
     primary: '#4263EB',
     primaryHover: '#3B5BD9',
-    secondary: '#EEF2FF',
+    secondary: '#EFF6FF',
   },
 
   semanticTint: {

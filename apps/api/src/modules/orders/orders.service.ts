@@ -3,7 +3,7 @@
  * Database-backed order management with real eBay order data
  */
 
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   EbayAccountStatus,
   OrderStatus,
@@ -15,14 +15,14 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 
-import { OrderSyncService, type EbayAccountForSync } from './order-sync.service';
+import { OrderSyncQueueService } from './order-sync-queue.service';
+import { OrderSyncService } from './order-sync.service';
 
 interface OrderRow {
   id: string;
   user_id: string;
   ebay_account_id: string;
   ebay_order_id: string;
-  order_number: string;
   buyer_username: string;
   buyer_name: string;
   buyer_email: string;
@@ -30,14 +30,8 @@ interface OrderRow {
   status: string;
   order_fulfillment_status: string;
   payment_status: string;
-  listing_id: string;
-  asin: string;
-  ebay_item_id: string;
-  sku: string;
-  product_title: string;
-  product_image_url: string;
+  listing_id: string | null;
   quantity: number;
-  is_tracked: boolean;
   sale_price: string;
   sale_shipping: string;
   sale_tax: string;
@@ -59,8 +53,14 @@ interface OrderRow {
     country?: string;
     [key: string]: unknown;
   } | null;
-  created_at: Date;
+  order_date: Date | null;
+  last_ebay_event_at: Date | null;
   updated_at: Date;
+  // Listing/Product JOIN fields (from findOne)
+  listing_asin?: string;
+  listing_ebay_item_id?: string;
+  listing_title?: string;
+  product_image_urls?: string[] | string;
 }
 
 /** Shape of a parsed shipping address */
@@ -73,85 +73,12 @@ interface ShippingAddressData {
 }
 
 @Injectable()
-export class OrdersService implements OnModuleInit {
-  private readonly logger = new Logger(OrdersService.name);
-
+export class OrdersService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly orderSyncService: OrderSyncService
+    private readonly orderSyncService: OrderSyncService,
+    private readonly orderSyncQueueService: OrderSyncQueueService
   ) {}
-
-  async onModuleInit() {
-    await this.ensureTablesExist();
-  }
-
-  private async ensureTablesExist() {
-    this.logger.log('Ensuring orders table exists...');
-
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS orders (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        ebay_account_id UUID NOT NULL REFERENCES ebay_accounts(id) ON DELETE CASCADE,
-        ebay_order_id VARCHAR(50) NOT NULL UNIQUE,
-        order_number VARCHAR(100),
-
-        buyer_username VARCHAR(255),
-        buyer_name VARCHAR(255),
-        buyer_email VARCHAR(255),
-        buyer_phone VARCHAR(50),
-
-        status VARCHAR(30) NOT NULL DEFAULT '${OrderStatus.PENDING}',
-        order_fulfillment_status VARCHAR(30),
-        payment_status VARCHAR(30),
-
-        listing_id UUID REFERENCES listings(id) ON DELETE SET NULL,
-        asin VARCHAR(10),
-        ebay_item_id VARCHAR(50),
-        sku VARCHAR(100),
-        product_title TEXT,
-        product_image_url TEXT,
-        quantity INT DEFAULT 1,
-        is_tracked BOOLEAN DEFAULT FALSE,
-
-        sale_price DECIMAL(12,2) NOT NULL DEFAULT 0,
-        sale_shipping DECIMAL(12,2) DEFAULT 0,
-        sale_tax DECIMAL(12,2) DEFAULT 0,
-        sale_total DECIMAL(12,2) NOT NULL DEFAULT 0,
-        ebay_earnings DECIMAL(12,2) DEFAULT 0,
-
-        purchase_price DECIMAL(12,2) DEFAULT 0,
-        amazon_tax DECIMAL(12,2) DEFAULT 0,
-        amazon_shipping DECIMAL(12,2) DEFAULT 0,
-        amazon_order_url TEXT,
-        amazon_tracking_url TEXT,
-
-        transaction_fee DECIMAL(12,2) DEFAULT 0,
-        ad_fee DECIMAL(12,2) DEFAULT 0,
-        net_profit DECIMAL(12,2) DEFAULT 0,
-
-        shipping_address JSONB,
-
-        last_synced_at TIMESTAMP WITH TIME ZONE,
-        ebay_created_at TIMESTAMP WITH TIME ZONE,
-        ebay_updated_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Indexes
-    await this.databaseService.query(`
-      CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
-      CREATE INDEX IF NOT EXISTS idx_orders_ebay_order_id ON orders(ebay_order_id);
-      CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
-      CREATE INDEX IF NOT EXISTS idx_orders_ebay_account_id ON orders(ebay_account_id);
-      CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_orders_is_tracked ON orders(is_tracked);
-    `);
-
-    this.logger.log('Orders table ensured');
-  }
 
   /**
    * Get all orders for a user with optional filters
@@ -160,7 +87,7 @@ export class OrdersService implements OnModuleInit {
     const page = filters?.page || 1;
     const limit = filters?.limit || 20;
     const offset = (page - 1) * limit;
-    const sortBy = filters?.sortBy || 'created_at';
+    const sortBy = filters?.sortBy || 'order_date';
     const sortOrder = filters?.sortOrder || 'desc';
 
     // Build WHERE clause
@@ -174,14 +101,20 @@ export class OrdersService implements OnModuleInit {
       paramIndex++;
     }
 
+    if (filters?.search) {
+      conditions.push(`(o.ebay_order_id ILIKE $${paramIndex} OR o.buyer_name ILIKE $${paramIndex} OR o.buyer_email ILIKE $${paramIndex})`);
+      params.push(`%${filters.search}%`);
+      paramIndex++;
+    }
+
     if (filters?.dateFrom) {
-      conditions.push(`o.created_at >= $${paramIndex}`);
+      conditions.push(`o.order_date >= $${paramIndex}`);
       params.push(filters.dateFrom);
       paramIndex++;
     }
 
     if (filters?.dateTo) {
-      conditions.push(`o.created_at <= $${paramIndex}`);
+      conditions.push(`o.order_date <= $${paramIndex}`);
       params.push(filters.dateTo);
       paramIndex++;
     }
@@ -189,8 +122,8 @@ export class OrdersService implements OnModuleInit {
     const whereClause = conditions.join(' AND ');
 
     // Validate sort column to prevent SQL injection
-    const allowedSortColumns = ['created_at', 'sale_total', 'net_profit', 'status', 'product_title'];
-    const safeSortBy = allowedSortColumns.includes(sortBy) ? sortBy : 'created_at';
+    const allowedSortColumns = ['order_date', 'sale_total', 'net_profit', 'status'];
+    const safeSortBy = allowedSortColumns.includes(sortBy) ? sortBy : 'order_date';
     const safeSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     // Count query
@@ -244,7 +177,7 @@ export class OrdersService implements OnModuleInit {
         COUNT(*) as today_orders,
         COALESCE(SUM(sale_total), 0) as today_revenue
        FROM orders
-       WHERE user_id = $1 AND created_at >= CURRENT_DATE`,
+       WHERE user_id = $1 AND order_date >= CURRENT_DATE`,
       [userId]
     );
 
@@ -259,11 +192,19 @@ export class OrdersService implements OnModuleInit {
   }
 
   /**
-   * Get a single order by ID
+   * Get a single order by ID with listing→product enrichment
    */
   async findOne(userId: string, id: string): Promise<OrderDto> {
     const results = await this.databaseService.query<OrderRow>(
-      `SELECT * FROM orders WHERE id = $1 AND user_id = $2`,
+      `SELECT o.*,
+              l.asin as listing_asin,
+              l.ebay_item_id as listing_ebay_item_id,
+              l.title as listing_title,
+              p.image_urls as product_image_urls
+       FROM orders o
+       LEFT JOIN listings l ON o.listing_id = l.id
+       LEFT JOIN products p ON l.product_id = p.id
+       WHERE o.id = $1 AND o.user_id = $2`,
       [id, userId]
     );
 
@@ -311,6 +252,12 @@ export class OrdersService implements OnModuleInit {
       paramIndex++;
     }
 
+    if (updateDto.purchasePrice !== undefined) {
+      updates.push(`purchase_price = $${paramIndex}`);
+      params.push(updateDto.purchasePrice);
+      paramIndex++;
+    }
+
     if (updateDto.amazonTax !== undefined) {
       updates.push(`amazon_tax = $${paramIndex}`);
       params.push(updateDto.amazonTax);
@@ -355,39 +302,44 @@ export class OrdersService implements OnModuleInit {
   }
 
   /**
-   * Trigger manual order sync for a user
+   * Trigger manual order sync for a user via queue and return fresh data
    */
-  async triggerSync(userId: string): Promise<{ message: string }> {
-    const accounts = await this.databaseService.query<{
-      id: string;
-      marketplace_id: string;
-      created_at: Date;
-      status: string;
-    }>(
-      `SELECT id, marketplace_id, created_at, status
-       FROM ebay_accounts WHERE user_id = $1 AND status = '${EbayAccountStatus.ACTIVE}'`,
-      [userId]
+  async triggerSync(userId: string): Promise<{ orders: OrderDto[]; total: number; stats: OrderStatsDto; message: string }> {
+    const accounts = await this.databaseService.query<{ id: string }>(
+      `SELECT id FROM ebay_accounts WHERE user_id = $1 AND status = $2`,
+      [userId, EbayAccountStatus.ACTIVE]
     );
 
     if (accounts.length === 0) {
-      return { message: 'No active eBay accounts found' };
+      const { orders, total } = await this.findAll(userId);
+      const stats = await this.getStats(userId);
+      return { orders, total, stats, message: 'No active eBay accounts found' };
     }
 
-    let totalSynced = 0;
-    for (const account of accounts) {
-      // Get full account with tokens for sync
-      const fullAccount = await this.databaseService.query<EbayAccountForSync>(
-        `SELECT * FROM ebay_accounts WHERE id = $1`,
-        [account.id]
-      );
+    // Queue the sync job (high priority) and wait for it to complete
+    await this.orderSyncQueueService.triggerUserSync(userId);
 
-      if (fullAccount.length > 0) {
-        const count = await this.orderSyncService.syncOrdersForAccount(fullAccount[0]);
-        totalSynced += count;
+    // Give the processor time to pick up and complete the job
+    // The queue processes with concurrency=3, so this is typically fast
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Return fresh data from DB
+    const { orders, total } = await this.findAll(userId);
+    const stats = await this.getStats(userId);
+    return { orders, total, stats, message: 'Orders synced' };
+  }
+
+  private resolveImageUrl(raw: string[] | string | undefined): string | undefined {
+    if (!raw) {return undefined;}
+    const urls = Array.isArray(raw) ? raw : (() => {
+      try {
+        const parsed: unknown = JSON.parse(String(raw));
+        return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+      } catch {
+        return [];
       }
-    }
-
-    return { message: `Synced ${totalSynced} orders` };
+    })();
+    return urls[0] || undefined;
   }
 
   /**
@@ -400,12 +352,13 @@ export class OrdersService implements OnModuleInit {
         : (row.shipping_address as ShippingAddressData)
       : undefined;
 
+    const hasListing = !!row.listing_id;
+
     return {
       id: row.id,
       ebayOrderId: row.ebay_order_id,
-      orderNumber: row.order_number || undefined,
-      createdAt: row.created_at.toISOString(),
-      isTracked: row.is_tracked,
+      createdAt: (row.order_date || row.updated_at).toISOString(),
+      isTracked: !!row.listing_id,
       buyerName: row.buyer_name || undefined,
       buyerEmail: row.buyer_email || undefined,
       buyerPhone: row.buyer_phone || undefined,
@@ -413,14 +366,13 @@ export class OrdersService implements OnModuleInit {
       status: row.status as OrderStatus,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
-      product: row.product_title
+      product: hasListing
         ? {
-            title: row.product_title,
-            asin: row.asin || undefined,
-            ebayItemId: row.ebay_item_id || undefined,
-            sku: row.sku || undefined,
+            title: row.listing_title || 'Unknown Product',
+            asin: row.listing_asin || undefined,
+            ebayItemId: row.listing_ebay_item_id || undefined,
             quantity: row.quantity || 1,
-            imageUrl: row.product_image_url || undefined,
+            imageUrl: this.resolveImageUrl(row.product_image_urls),
           }
         : undefined,
       salePrice: parseFloat(row.sale_price) || 0,
@@ -436,6 +388,25 @@ export class OrdersService implements OnModuleInit {
       netProfit: parseFloat(row.net_profit) || 0,
       transactionFee: parseFloat(row.transaction_fee) || 0,
       adFee: parseFloat(row.ad_fee) || 0,
+      details: {
+        purchaseSummary: {
+          subtotal: parseFloat(row.sale_price) || 0,
+          shipping: parseFloat(row.sale_shipping) || 0,
+          tax: parseFloat(row.sale_tax) || 0,
+          total: parseFloat(row.sale_total) || 0,
+        },
+        ebaySummary: {
+          subtotal: parseFloat(row.sale_price) || 0,
+          shipping: parseFloat(row.sale_shipping) || 0,
+          tax: parseFloat(row.sale_tax) || 0,
+          total: parseFloat(row.sale_total) || 0,
+          earnings: parseFloat(row.ebay_earnings) || 0,
+        },
+      },
+      fees: {
+        transactionFee: parseFloat(row.transaction_fee) || 0,
+        advertisingFee: parseFloat(row.ad_fee) || 0,
+      },
       shippingAddress: shippingAddress
         ? {
             street: shippingAddress.street || '',

@@ -1,0 +1,42 @@
+# ============================================
+# Zonds API - Production Docker Image
+# Includes: NestJS + Playwright (Chromium)
+# ============================================
+FROM node:20-bookworm
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8.6.12 --activate
+
+WORKDIR /app
+
+# Copy all source (filtered by .dockerignore)
+COPY . .
+
+# 1. Install all dependencies
+RUN pnpm install --frozen-lockfile
+
+# 2. Build packages in dependency order
+RUN pnpm --filter @repo/shared run build
+RUN pnpm --filter api run build
+
+# 3. Remove dev dependencies to reduce image size
+RUN pnpm prune --prod
+
+# 4. Install Playwright Chromium + system dependencies
+#    (must run AFTER prune so it uses the prod version)
+RUN cd apps/api && pnpm exec playwright install --with-deps chromium
+
+# 5. Create browser state directory for Playwright sessions
+RUN mkdir -p /app/.browser-state
+
+# Make entrypoint executable
+RUN chmod +x /app/docker/api-entrypoint.sh
+
+WORKDIR /app/apps/api
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+# Entrypoint: runs migrations first, then starts the server
+ENTRYPOINT ["/app/docker/api-entrypoint.sh"]
+CMD ["node", "dist/main.js"]

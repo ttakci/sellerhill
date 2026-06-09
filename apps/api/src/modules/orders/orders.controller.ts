@@ -5,6 +5,7 @@ import {
   type OrderFiltersDto,
   type OrderStatsDto,
   type UpdateOrderAmazonDetailsDto,
+  type OrderSyncResponseDto,
 } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -26,6 +27,7 @@ export class OrdersController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('status') status?: string,
+    @Query('search') search?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
     @Query('sortBy') sortBy?: string,
@@ -35,6 +37,7 @@ export class OrdersController {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
       status: status as OrderFiltersDto['status'],
+      search,
       dateFrom,
       dateTo,
       sortBy,
@@ -52,8 +55,8 @@ export class OrdersController {
 
   @Post('sync')
   @ApiOperation({ summary: 'Trigger manual order sync from eBay' })
-  @ApiResponse({ status: 200, description: 'Order sync triggered.' })
-  triggerSync(@Request() req: { user: { sub: string } }): Promise<{ message: string }> {
+  @ApiResponse({ status: 200, description: 'Order sync completed with fresh data.' })
+  triggerSync(@Request() req: { user: { sub: string } }): Promise<OrderSyncResponseDto> {
     return this.ordersService.triggerSync(req.user.sub);
   }
 

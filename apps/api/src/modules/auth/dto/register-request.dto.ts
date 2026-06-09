@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AUTH_CONSTANTS, type RegisterRequest } from '@repo/shared';
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  AUTH_CONSTANTS,
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  type RegisterRequest,
+  type SupportedLocale,
+} from '@repo/shared';
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterRequestDto implements RegisterRequest {
   @ApiProperty({
@@ -48,4 +54,16 @@ export class RegisterRequestDto implements RegisterRequest {
   @MinLength(AUTH_CONSTANTS.PASSWORD_MIN_LENGTH)
   @MaxLength(AUTH_CONSTANTS.PASSWORD_MAX_LENGTH)
   password!: string;
+
+  @ApiProperty({
+    description: 'User preferred locale/language',
+    example: 'en',
+    enum: SUPPORTED_LOCALES,
+    required: false,
+    default: DEFAULT_LOCALE,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(SUPPORTED_LOCALES)
+  locale?: SupportedLocale;
 }

@@ -1,9 +1,9 @@
-import type { EbayMarketplaceId } from '@repo/shared';
+/**
+ * OnboardingEbayPage Types
+ */
 
 export interface OnboardingEbayPageProps {
-  onConnect: (marketplaceId: EbayMarketplaceId) => void;
+  onConnect: () => void;
   isLoading: boolean;
-  selectedMarketplace: EbayMarketplaceId;
-  onMarketplaceChange: (marketplaceId: EbayMarketplaceId) => void;
   onSkip: () => void;
 }

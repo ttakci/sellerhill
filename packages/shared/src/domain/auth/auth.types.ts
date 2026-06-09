@@ -3,6 +3,8 @@
  * Single source of truth for authentication types across frontend/backend
  */
 
+import type { SupportedLocale } from '../common/common.constants';
+
 import type { UserDto } from './auth.dto';
 
 /**
@@ -13,6 +15,7 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
+  locale?: SupportedLocale;
 }
 
 /**
@@ -63,6 +66,7 @@ export interface VerifyEmailRequest {
  */
 export interface ResendVerificationRequest {
   email: string;
+  locale?: SupportedLocale;
 }
 
 /**

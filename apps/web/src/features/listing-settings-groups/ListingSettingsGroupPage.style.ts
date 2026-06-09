@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import {
   Badge,
-  Button,
   Card,
   EmptyState as EmptyStateMolecule,
   IconButton as IconButtonAtom,
@@ -136,18 +135,6 @@ export const IconButton = styled(IconButtonAtom)<{ $type?: 'delete' | 'edit' }>`
 /* refined and reordered below */
 export const ActiveBadge = styled(Badge)``;
 
-export const DashedCardIconWrapper = styled.div`
-  width: 3rem; /* 48px */
-  height: 3rem; /* 48px */
-  border-radius: 50%;
-  background: ${tkn('colors.background.secondary')}; /* #F8FAFC */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.25rem; /* 4px */
-  transition: background-color ${tkn('transitions.normal')};
-`;
-
 export const InteractiveCard = styled(Card)`
   cursor: pointer;
   transition: all ${tkn('transitions.normal')};
@@ -164,38 +151,19 @@ export const InteractiveCard = styled(Card)`
   }
 `;
 
-export const DashedCard = styled(Button)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 12.5rem; /* 200px */
-  gap: 0.75rem; /* 12px */
-  padding: ${tkn('spacing.xl')};
-
-  & svg {
-    color: inherit;
-    transition: color 0.15s;
-  }
-
-  &:hover {
-    border-color: ${tkn('colors.brand.primary')};
-    color: ${tkn('colors.brand.primary')};
-  }
-
-  &:hover .dashed-icon-wrapper {
-    background: ${tkn('colors.brand.secondary')};
-  }
-`;
-
 export const EmptyState = styled(EmptyStateMolecule)`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1.5rem; /* 24px */
-  grid-column: 1 / -1;
+`;
+
+export const EmptyStateWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${tkn('spacing.lg')};
 `;
 
 export const EmptyStateContent = styled.div`

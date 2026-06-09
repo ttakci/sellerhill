@@ -33,7 +33,7 @@ export const EbayConnectPageComponent = ({
           )}
 
           <S.ButtonContainer>
-            <Button variant="primary" fullWidth onClick={onConnect} disabled={isLoading}>
+            <Button variant="primary" fullWidth onClick={onConnect} isLoading={isLoading}>
               {isLoading ? t('ebay.connect.connectingButton') : t('ebay.connect.connectButton')}
             </Button>
           </S.ButtonContainer>

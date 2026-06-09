@@ -5,113 +5,87 @@
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { useResendVerificationMutation, useVerifyEmailMutation } from '../api/authApi';
 
 import { VerifyEmailPageComponent } from './VerifyEmailPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
+import { useLocale } from '@/utils/useLocale';
 
 export const VerifyEmailPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
-  const navigate = useNavigate();
+  const { i18n } = useTranslation(['auth', 'translation']);
   const [searchParams] = useSearchParams();
   const { showMessage, closeMessage } = useUI();
+  const { locale, localeNavigate } = useLocale();
 
   const token = searchParams.get('token');
-  const email = searchParams.get('email'); // Optional, mainly for display
+  const email = searchParams.get('email');
 
   const [verifyEmail, { isLoading, isSuccess, error: verifyError }] = useVerifyEmailMutation();
-  const [resendVerification, { isLoading: isResending, isSuccess: resendSuccess, error: resendError }] = useResendVerificationMutation();
+  const [resendVerification, { isLoading: isResending, isSuccess: resendSuccess, error: resendError }] =
+    useResendVerificationMutation();
 
-  // Use RTK Query loading states with useLoading hook
   useLoading(isLoading || isResending);
 
-  // Derive status from query state instead of using setState in effects
   const status = useMemo(() => {
-    if (verifyError || (!token && !isLoading)) {
-      return 'error';
-    }
-    if (isSuccess) {
-      return 'success';
-    }
+    if (verifyError || (!token && !isLoading)) {return 'error';}
+    if (isSuccess) {return 'success';}
     return 'loading';
   }, [verifyError, token, isLoading, isSuccess]);
 
-  // Handle verification success - redirect to login
   useEffect(() => {
     if (isSuccess) {
-      // Redirect to login page after success
-      setTimeout(() => {
-        void navigate('/login', { replace: true });
-      }, 2000);
+      setTimeout(() => localeNavigate('/login', { replace: true }), 2000);
     }
-  }, [isSuccess, navigate]);
+  }, [isSuccess, localeNavigate]);
 
-  // Handle resend success
   useEffect(() => {
     if (resendSuccess) {
-      showMessage({
-        type: 'success',
-        headerKey: 'message.success.header',
-        descriptionKey: 'auth.verification.resent',
-        primaryButton: {
-          labelKey: 'message.success.ok',
-          onClick: closeMessage,
+      showMessage(
+        {
+          type: 'success',
+          headerKey: 'translation:message.success.header',
+          descriptionKey: 'auth:auth.verification.resent',
+          primaryButton: { labelKey: 'translation:message.success.ok', onClick: closeMessage },
         },
-      }, t);
+        i18n.t.bind(i18n)
+      );
     }
-  }, [resendSuccess, showMessage, closeMessage, t]);
+  }, [resendSuccess, showMessage, closeMessage, i18n]);
 
-  // Handle resend error
   useEffect(() => {
-    if (resendError) {
-      const { key, params } = getErrorMessage(resendError);
-      showMessage({
+    if (!resendError) {return;}
+    showMessage(
+      {
         type: 'error',
-        headerKey: 'message.error.header',
-        descriptionKey: key,
-        descriptionParams: params,
-        primaryButton: {
-          labelKey: 'message.error.close',
-          onClick: closeMessage,
-        },
-      }, t);
-    }
-  }, [resendError, showMessage, closeMessage, t]);
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(resendError),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      i18n.t.bind(i18n)
+    );
+  }, [resendError, showMessage, closeMessage, i18n]);
 
   useEffect(() => {
-    const performVerification = (): void => {
-      if (!token) {
-        return;
-      }
-
-      void verifyEmail({ token });
-    };
-
-    performVerification();
+    if (token) {void verifyEmail({ token });}
   }, [token, verifyEmail]);
 
   const handleResendVerification = (): void => {
     if (!email) {
-      showMessage({
-        type: 'error',
-        headerKey: 'message.error.header',
-        descriptionKey: 'auth.errors.userNotFound',
-        primaryButton: {
-          labelKey: 'message.error.close',
-          onClick: closeMessage,
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: 'auth:auth.errors.userNotFound',
+          primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
         },
-      }, t);
+        i18n.t.bind(i18n)
+      );
       return;
     }
-
-    void resendVerification({ email });
-  };
-
-  const handleNavigateToLogin = () => {
-    void navigate('/login');
+    void resendVerification({ email, locale });
   };
 
   return (
@@ -119,7 +93,7 @@ export const VerifyEmailPageContainer = (): React.ReactElement => {
       status={status}
       email={email || undefined}
       onResendVerification={handleResendVerification}
-      onNavigateToLogin={handleNavigateToLogin}
+      onNavigateToLogin={() => localeNavigate('/login')}
     />
   );
 };

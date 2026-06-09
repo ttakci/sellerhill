@@ -18,7 +18,16 @@
       "Read(//c/Users/2B/AppData/Local/Temp/claude/d--dev/projects-zonds-zonds/6c744d38-bd56-4e8d-9dab-ffbf6a3b1e4b/tasks/**)",
       "Bash(pnpm --filter @repo/ui lint)",
       "Bash(pnpm --filter=@repo/web build)",
-      "Bash(curl -s http://localhost:5173)"
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(grep -v '^\\\\s*$' \"d:/dev/projects/zonds/zonds/packages/ui/src/assets/logo.svg\")",
+      "Bash(pnpm --filter @repo/web build)",
+      "Bash(pnpm --filter @repo/shared build)",
+      "Bash(pnpm --filter web build)",
+      "Bash(pnpm --filter web typecheck)",
+      "Bash(pnpm --filter @repo/ui exec tsc --noEmit)",
+      "Bash(pnpm --filter web exec tsc --noEmit)",
+      "Bash(docker exec *)",
+      "Bash(tasklist)"
     ],
     "additionalDirectories": [
       "d:\\dev\\projects\\zonds\\zonds\\packages\\ui\\src\\molecules\\RichTooltip"

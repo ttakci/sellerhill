@@ -1,5 +1,5 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import type { DashboardDataDto } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,10 +18,14 @@ export class DashboardController {
     summary: 'Get dashboard data',
     description: 'Retrieve dashboard metrics, revenue trend, and recent orders',
   })
+  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Number of days for revenue trend (default: 14)' })
   @ApiOkResponse({ description: 'Dashboard data retrieved successfully' })
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
-  async getDashboard(@Request() req: { user: { sub: string } }): Promise<DashboardDataDto> {
+  async getDashboard(
+    @Request() req: { user: { sub: string } },
+    @Query('days') days?: number,
+  ): Promise<DashboardDataDto> {
     const userId = req.user.sub;
-    return this.dashboardService.getDashboard(userId);
+    return this.dashboardService.getDashboard(userId, days);
   }
 }

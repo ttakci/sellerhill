@@ -17,6 +17,7 @@ export class DatabaseService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.testConnection();
+    await this.runMigrations();
   }
 
   /**
@@ -55,6 +56,27 @@ export class DatabaseService implements OnModuleInit {
       this.logger.log(`Database connection successful. Server time: ${result.rows[0].now.toISOString()}`);
     } catch (error) {
       this.logger.error('Failed to connect to database', error);
+    }
+  }
+
+  /**
+   * Run pending database migrations
+   */
+  private async runMigrations(): Promise<void> {
+    const client = await this.getClient();
+    try {
+      await client.query('BEGIN');
+      const { MigrationRunner } = await import('./migration-runner');
+      const runner = new MigrationRunner(client);
+      await runner.run();
+      await client.query('COMMIT');
+      this.logger.log('Database migrations completed');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      this.logger.error('Migration failed, rolled back', error);
+      throw error;
+    } finally {
+      client.release();
     }
   }
 

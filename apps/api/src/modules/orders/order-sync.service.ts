@@ -6,10 +6,11 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EbayAccountStatus, ListingStatus, type EbayMarketplaceId } from '@repo/shared';
+import { EbayAccountStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
+import { ProductsService } from '../products/products.service';
 
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
 
@@ -22,6 +23,7 @@ export interface EbayAccountForSync {
   access_token_expires_at: Date;
   created_at: Date;
   status: string;
+  last_ebay_sync_at: Date | null;
 }
 
 @Injectable()
@@ -31,7 +33,8 @@ export class OrderSyncService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly ebayService: EbayService,
-    private readonly fulfillmentService: EbayFulfillmentService
+    private readonly fulfillmentService: EbayFulfillmentService,
+    private readonly productsService: ProductsService,
   ) {}
 
   /**
@@ -42,8 +45,9 @@ export class OrderSyncService {
 
     const accounts = await this.databaseService.query<EbayAccountForSync>(
       `SELECT id, user_id, marketplace_id, access_token, refresh_token,
-              access_token_expires_at, created_at, status
-       FROM ebay_accounts WHERE status = '${EbayAccountStatus.ACTIVE}'`
+              access_token_expires_at, created_at, status, last_ebay_sync_at
+       FROM ebay_accounts WHERE status = $1`,
+      [EbayAccountStatus.ACTIVE]
     );
 
     if (accounts.length === 0) {
@@ -84,36 +88,46 @@ export class OrderSyncService {
       return 0;
     }
 
-    // Only fetch orders created after the account was connected
-    const connectedDate = account.created_at.toISOString();
+    // Only fetch orders since last sync (or account creation if never synced)
+    const syncFromDate = account.last_ebay_sync_at
+      ? new Date(account.last_ebay_sync_at).toISOString()
+      : account.created_at.toISOString();
     let totalSynced = 0;
     let cursor: string | undefined;
 
     do {
       const result = await this.fulfillmentService.fetchOrders(accessToken, marketplaceId, {
-        fromDateString: connectedDate,
+        fromDateString: syncFromDate,
         limit: 50,
         cursor,
       });
 
       for (const ebayOrder of result.orders) {
         try {
-          // Try to match this order's line items to our listings
+          // Match order to listing using legacyItemId → listings.ebay_item_id
           const lineItem = ebayOrder.lineItems?.[0];
           let listingId: string | null = null;
-          let asin: string | null = null;
 
-          if (lineItem?.itemId) {
-            const match = await this.databaseService.query<{ id: string; asin: string | null }>(
-              `SELECT id, asin FROM listings
-               WHERE ebay_item_id = $1 AND user_id = $2 AND status = '${ListingStatus.ACTIVE}'
+          if (lineItem?.legacyItemId) {
+            const match = await this.databaseService.query<{ id: string }>(
+              `SELECT id FROM listings
+               WHERE ebay_item_id = $1 AND user_id = $2
                LIMIT 1`,
-              [lineItem.itemId, userId]
+              [lineItem.legacyItemId, userId]
             );
 
             if (match.length > 0) {
               listingId = match[0].id;
-              asin = match[0].asin;
+            }
+          }
+
+          // Get purchase price from product via listing
+          let purchasePrice: number | undefined;
+
+          if (listingId) {
+            const productData = await this.productsService.getProductPriceAndImageByListingId(listingId);
+            if (productData) {
+              purchasePrice = productData.purchasePrice;
             }
           }
 
@@ -122,7 +136,7 @@ export class OrderSyncService {
             userId,
             ebayAccountId,
             listingId || undefined,
-            asin || undefined
+            purchasePrice,
           );
 
           await this.upsertOrder(entity);
@@ -151,6 +165,13 @@ export class OrderSyncService {
       [ebayAccountId]
     );
 
+    // Update last_ebay_sync_at on the account itself
+    await this.databaseService.query(
+      `UPDATE ebay_accounts SET last_ebay_sync_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [ebayAccountId]
+    );
+
     this.logger.log(`Synced ${totalSynced} orders for user ${userId}`);
     return totalSynced;
   }
@@ -161,20 +182,21 @@ export class OrderSyncService {
   private async upsertOrder(entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>): Promise<string> {
     const result = await this.databaseService.query<{ id: string }>(
       `INSERT INTO orders (
-        user_id, ebay_account_id, ebay_order_id, order_number,
+        user_id, ebay_account_id, ebay_order_id,
         buyer_username, buyer_name, buyer_email, buyer_phone,
         status, order_fulfillment_status, payment_status,
-        listing_id, asin, ebay_item_id, sku, product_title, product_image_url,
-        quantity, is_tracked,
+        listing_id,
+        quantity,
         sale_price, sale_shipping, sale_tax, sale_total, ebay_earnings,
         purchase_price, transaction_fee, ad_fee, net_profit,
         shipping_address,
-        ebay_created_at, ebay_updated_at
+        order_date, last_ebay_event_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-        $12, $13, $14, $15, $16, $17, $18, $19,
-        $20, $21, $22, $23, $24, $25, $26, $27, $28,
-        $29, $30, $31
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+        $11, $12,
+        $13, $14, $15, $16, $17,
+        $18, $19, $20, $21,
+        $22, $23, $24
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -187,7 +209,7 @@ export class OrderSyncService {
         ebay_earnings = EXCLUDED.ebay_earnings,
         quantity = EXCLUDED.quantity,
         shipping_address = EXCLUDED.shipping_address,
-        ebay_updated_at = EXCLUDED.ebay_updated_at,
+        last_ebay_event_at = EXCLUDED.last_ebay_event_at,
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id`,
@@ -195,7 +217,6 @@ export class OrderSyncService {
         entity.userId,
         entity.ebayAccountId,
         entity.ebayOrderId,
-        entity.orderNumber,
         entity.buyerUsername,
         entity.buyerName,
         entity.buyerEmail,
@@ -204,13 +225,7 @@ export class OrderSyncService {
         entity.orderFulfillmentStatus,
         entity.paymentStatus,
         entity.listingId,
-        entity.asin,
-        entity.ebayItemId,
-        entity.sku,
-        entity.productTitle,
-        entity.productImageUrl,
         entity.quantity,
-        entity.isTracked,
         entity.salePrice,
         entity.saleShipping,
         entity.saleTax,
@@ -221,8 +236,8 @@ export class OrderSyncService {
         entity.adFee,
         entity.netProfit,
         entity.shippingAddress ? JSON.stringify(entity.shippingAddress) : null,
-        entity.ebayCreatedAt,
-        entity.ebayUpdatedAt,
+        entity.orderDate ? entity.orderDate.toISOString() : null,
+        entity.lastEbayEventAt ? entity.lastEbayEventAt.toISOString() : null,
       ]
     );
 
@@ -233,7 +248,6 @@ export class OrderSyncService {
    * Recalculate profit for an order based on its linked listing's fee config
    */
   async recalculateProfit(ebayOrderId: string): Promise<void> {
-    // Get order with its listing's fee configuration
     const orders = await this.databaseService.query<{
       id: string;
       sale_total: number;
@@ -246,13 +260,29 @@ export class OrderSyncService {
       `SELECT o.id, o.sale_total, o.ebay_earnings, o.purchase_price,
               o.amazon_tax, o.amazon_shipping, o.listing_id
        FROM orders o
-       WHERE o.ebay_order_id = $1 AND o.is_tracked = true AND o.listing_id IS NOT NULL`,
+       WHERE o.ebay_order_id = $1 AND o.listing_id IS NOT NULL`,
       [ebayOrderId]
     );
 
     if (orders.length === 0) {return;}
 
     const order = orders[0];
+
+    let purchasePrice = parseFloat(String(order.purchase_price)) || 0;
+
+    // Fallback: if purchase_price is still 0, look up from product
+    if (purchasePrice === 0) {
+      const productData = await this.productsService.getProductPriceAndImageByListingId(order.listing_id);
+      if (productData) {
+        purchasePrice = productData.purchasePrice;
+
+        await this.databaseService.query(
+          `UPDATE orders SET purchase_price = $1, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $2 AND purchase_price = 0`,
+          [purchasePrice, order.id]
+        );
+      }
+    }
 
     // Get fee config from the listing's settings group
     interface FeeRow {
@@ -275,22 +305,18 @@ export class OrderSyncService {
     const saleTotal = parseFloat(String(order.sale_total)) || 0;
     const ebayEarnings = parseFloat(String(order.ebay_earnings)) || 0;
 
-    // Calculate fees
     const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
     const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
-    const _taxPercent = Number(fees?.taxPercent) || 0;
 
     const transactionFee = Math.round(saleTotal * (ebayFeePercent / 100) * 100) / 100;
     const adFee = fixedFeeAmount;
 
-    // Purchase side
-    const purchasePrice = parseFloat(String(order.purchase_price)) || 0;
     const amazonTax = parseFloat(String(order.amazon_tax)) || 0;
     const amazonShipping = parseFloat(String(order.amazon_shipping)) || 0;
-    const amazonTotal = purchasePrice + amazonTax + amazonShipping;
 
-    // Net profit = eBay earnings - Amazon total - fees
-    const netProfit = Math.round((ebayEarnings - amazonTotal - transactionFee - adFee) * 100) / 100;
+    // Net profit = actual eBay earnings - Amazon costs
+    // ebayEarnings (totalDueSeller) already has eBay commission deducted
+    const netProfit = Math.round((ebayEarnings - purchasePrice - amazonTax - amazonShipping) * 100) / 100;
 
     await this.databaseService.query(
       `UPDATE orders SET

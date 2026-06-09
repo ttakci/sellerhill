@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (will be installed fresh in Docker)
+node_modules
+**/node_modules
+
+# Build outputs (will be regenerated)
+dist
+**/dist
+build
+
+# IDE
+.vscode
+.idea
+*.swp
+*.suo
+
+# Environment files (Coolify provides env vars)
+.env
+.env.local
+.env.*.local
+
+# Docker dev files
+docker/postgres
+docker-compose.yml
+
+# Husky git hooks
+.husky
+
+# Playwright browser state (uses Docker volume instead)
+.browser-state
+
+# Test & coverage
+coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in image)
+CLAUDE.md

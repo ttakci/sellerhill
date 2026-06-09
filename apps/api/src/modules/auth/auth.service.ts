@@ -1,14 +1,16 @@
-import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   AUTH_CONSTANTS,
+  DEFAULT_LOCALE,
   UserStatus,
   type AuthResponse,
   type JwtPayload,
   type LoginRequest,
   type RegisterRequest,
   type RegistrationResponse,
+  type SupportedLocale,
   type UserDto,
 } from '@repo/shared';
 import * as bcrypt from 'bcrypt';
@@ -27,6 +29,7 @@ interface UserEntity {
   password_hash: string;
   email_verified: boolean;
   status: UserStatus;
+  locale: string;
   email_verification_token?: string;
   email_verification_expiry?: Date;
   created_at: Date;
@@ -72,10 +75,13 @@ export class AuthService {
 
     const verificationExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
+    // Determine locale (use provided locale or default)
+    const userLocale = request.locale || DEFAULT_LOCALE;
+
     // Insert user into database
     const users = await this.databaseService.query<UserEntity>(
-      `INSERT INTO users (first_name, last_name, email, password_hash, email_verified, status, email_verification_token, email_verification_expiry)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO users (first_name, last_name, email, password_hash, email_verified, status, locale, email_verification_token, email_verification_expiry)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         request.firstName,
@@ -84,21 +90,22 @@ export class AuthService {
         passwordHash,
         false,
         UserStatus.PENDING,
+        userLocale,
         verificationToken,
-        verificationExpiry,
+        verificationExpiry.toISOString(),
       ]
     );
 
     const user = users[0];
     this.logger.log(`User created in database: ${user.id}`);
 
-    // Send verification email
+    // Send verification email in user's locale
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
-    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${frontendUrl}/${userLocale}/verify-email?token=${verificationToken}&email=${encodeURIComponent(request.email)}`;
 
     let message = 'auth.verification.emailSent';
     try {
-      await this.emailService.sendVerificationEmail(user.email, user.first_name, verificationUrl);
+      await this.emailService.sendVerificationEmail(user.email, user.first_name, verificationUrl, userLocale);
       this.logger.log(`Verification email sent to: ${user.email}`);
     } catch (error) {
       this.logger.error(`Failed to send verification email to ${user.email}`, {
@@ -141,6 +148,16 @@ export class AuthService {
 
       this.logger.debug(`Found ${users.length} users for email verification`);
       if (users.length === 0) {
+        // Idempotency: if already verified (React Strict Mode / retries), return success
+        const verifiedUsers = await this.databaseService.query<UserEntity>(
+          `SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND email_verified = true`,
+          [payload.email]
+        );
+        if (verifiedUsers.length > 0) {
+          const verifiedUser = verifiedUsers[0];
+          const { accessToken, refreshToken } = await this.generateTokens(verifiedUser.id, verifiedUser.email);
+          return { accessToken, refreshToken, user: this.mapToUserDto(verifiedUser) };
+        }
         throw new UnauthorizedException('auth.errors.verificationFailed');
       }
 
@@ -172,9 +189,9 @@ export class AuthService {
 
       this.logger.log(`Email verified successfully: ${user.email}`);
 
-      // Send welcome email
+      // Send welcome email in user's locale
       try {
-        await this.emailService.sendWelcomeEmail(user.email, user.first_name);
+        await this.emailService.sendWelcomeEmail(user.email, user.first_name, user.locale as SupportedLocale);
       } catch (error) {
         this.logger.error(`Failed to send welcome email to ${user.email}`, error);
         // Don't fail verification if welcome email fails
@@ -192,6 +209,10 @@ export class AuthService {
         user: this.mapToUserDto(user),
       };
     } catch (error) {
+      if (error instanceof HttpException) {throw error;}
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('auth.verification.expired');
+      }
       this.logger.error('Email verification failed', error);
       throw new UnauthorizedException('auth.verification.invalid');
     }
@@ -200,7 +221,7 @@ export class AuthService {
   /**
    * Resend verification email
    */
-  async resendVerification(email: string): Promise<void> {
+  async resendVerification(email: string, locale?: string): Promise<void> {
     this.logger.log(`Resending verification email to: ${email}`);
 
     // Find user
@@ -234,14 +255,15 @@ export class AuthService {
            email_verification_expiry = $2,
            updated_at = NOW()
        WHERE id = $3`,
-      [verificationToken, verificationExpiry, user.id]
+      [verificationToken, verificationExpiry.toISOString(), user.id]
     );
 
-    // Send verification email
+    // Send verification email in user's locale (prefer DB locale, fallback to request locale, then default)
+    const userLocale = locale || user.locale || DEFAULT_LOCALE;
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
-    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${frontendUrl}/${userLocale}/verify-email?token=${verificationToken}&email=${encodeURIComponent(user.email)}`;
 
-    await this.emailService.sendVerificationEmail(user.email, user.first_name, verificationUrl);
+    await this.emailService.sendVerificationEmail(user.email, user.first_name, verificationUrl, userLocale);
     this.logger.log(`Verification email resent to: ${user.email}`);
   }
 
@@ -385,6 +407,7 @@ export class AuthService {
       email: user.email,
       emailVerified: user.email_verified,
       status: user.status,
+      locale: (user.locale as SupportedLocale) || DEFAULT_LOCALE,
       hasConnectedAccounts: user.has_connected_accounts ?? false,
       createdAt: user.created_at.toISOString(),
       updatedAt: user.updated_at.toISOString(),

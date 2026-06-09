@@ -7,6 +7,8 @@ import { useGetUserProductsQuery } from '../api/listings.api';
 import { ProductsPageComponent } from './ProductsPage.component';
 import * as S from './ProductsPage.style';
 
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+
 export const ProductsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
   const { data: products = [], isLoading } = useGetUserProductsQuery();
@@ -131,7 +133,8 @@ export const ProductsPageContainer: React.FC = () => {
   };
 
   return (
-    <ProductsPageComponent
+    <EbayAccountGuard>
+      <ProductsPageComponent
       products={paginatedProducts}
       isLoading={isLoading}
       onDownload={handleDownload}
@@ -149,5 +152,6 @@ export const ProductsPageContainer: React.FC = () => {
         labelInfo: t('translation:common.showing_info'),
       }}
     />
+    </EbayAccountGuard>
   );
 };

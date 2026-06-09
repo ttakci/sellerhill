@@ -2,14 +2,31 @@
  * DashboardPage Types
  */
 
-import type { DashboardDataDto, UserDto } from '@repo/shared';
+import type { DashboardDataDto, ListingDto, UserDto } from '@repo/shared';
+
+export type PeriodKey = 'today' | 'yesterday' | 'thisMonth' | 'thisMonthForecast' | 'lastMonth';
+
+export type PeriodPreset = 'today' | 'week' | 'month';
+
+export interface PeriodDateInfo {
+  dateRange: string;
+}
 
 export interface DashboardPageComponentProps {
   user: UserDto | null;
   dashboardData?: DashboardDataDto;
-  isLoading: boolean;
-  onConnectEbay: () => void;
-  onViewAllOrders: () => void;
+  selectedPeriod: PeriodKey;
+  onPeriodSelect: (period: PeriodKey) => void;
+  periodPreset: PeriodPreset;
+  onPeriodPresetChange: (preset: PeriodPreset) => void;
+  selectedDays: number;
+  onDaysChange: (days: number) => void;
+  periodDates: Record<PeriodKey, PeriodDateInfo>;
+  listings: ListingDto[];
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  filteredListingId: string | null;
+  onListingSelect: (listingId: string | null) => void;
   isTR: boolean;
   formatCurrency: (value: number) => string;
   formatCompactCurrency: (value: number) => string;

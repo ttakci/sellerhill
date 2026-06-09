@@ -8,6 +8,7 @@ import { validateEnv } from './common/config/env.validation';
 import { DatabaseModule } from './common/database/database.module';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { HealthModule } from './health/health.module';
+import { AmazonModule } from './modules/amazon/amazon.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
@@ -65,6 +66,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     ListingSettingsGroupModule,
     ListingsModule,
     ProfileModule,
+    AmazonModule,
     OrdersModule,
   ],
   providers: [

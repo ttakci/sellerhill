@@ -1,21 +1,17 @@
-import { type OrderDto, type OrderStatsDto, type OrderFiltersDto } from '@repo/shared';
+import { type OrderDto, type OrderStatsDto, type OrderFiltersDto, type OrderSyncResponseDto } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
-interface OrdersResponse {
-  orders: OrderDto[];
-  total: number;
-}
-
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getOrders: builder.query<OrdersResponse, OrderFiltersDto | void>({
+    getOrders: builder.query<{ orders: OrderDto[]; total: number }, OrderFiltersDto | void>({
       query: (filters) => {
         const params: Record<string, string> = {};
         if (filters) {
           if (filters.page) {params.page = String(filters.page);}
           if (filters.limit) {params.limit = String(filters.limit);}
           if (filters.status) {params.status = filters.status;}
+          if (filters.search) {params.search = filters.search;}
           if (filters.dateFrom) {params.dateFrom = filters.dateFrom;}
           if (filters.dateTo) {params.dateTo = filters.dateTo;}
           if (filters.sortBy) {params.sortBy = filters.sortBy;}
@@ -47,7 +43,7 @@ export const ordersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'Orders', id }, 'Orders'],
     }),
-    triggerOrderSync: builder.mutation<{ message: string }, void>({
+    triggerOrderSync: builder.mutation<OrderSyncResponseDto, void>({
       query: () => ({
         url: '/orders/sync',
         method: 'POST',

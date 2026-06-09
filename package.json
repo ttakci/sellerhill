@@ -20,7 +20,8 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
-    "docker:clean": "docker-compose down -v"
+    "docker:clean": "docker-compose down -v",
+    "migrate": "pnpm --filter api run migrate"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",

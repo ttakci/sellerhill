@@ -15,6 +15,7 @@
  * ```
  */
 
+import type amazon from './resources/en/amazon.json';
 import type auth from './resources/en/auth.json';
 import type dashboard from './resources/en/dashboard.json';
 import type ebay from './resources/en/ebay.json';
@@ -30,6 +31,7 @@ import type en from './resources/en/translation.json';
  * Combined from all resource files
  */
 export type TranslationResource = typeof en &
+  typeof amazon &
   typeof auth &
   typeof ebay &
   typeof dashboard &

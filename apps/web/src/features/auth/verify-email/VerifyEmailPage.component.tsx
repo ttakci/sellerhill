@@ -105,7 +105,7 @@ export const VerifyEmailPageComponent = ({
                 </Text>
               </Button>
               {status === 'error' && (
-                <S.ResendButton variant="text" onClick={onResendVerification}>
+                <S.ResendButton variant="secondary" onClick={onResendVerification}>
                   <Text variant="body" weight="medium" color="brand.primary">
                     {t('auth:auth.verification.resendButton')}
                   </Text>

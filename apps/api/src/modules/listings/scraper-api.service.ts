@@ -109,11 +109,19 @@ export class ScraperApiService implements IProductDataProvider {
 
       const imageUrls = this.extractImages(product as unknown as Record<string, unknown>);
 
+      // Build description with extensive fallbacks
+      const description =
+        product.full_description ||
+        product.description ||
+        product.feature_bullets?.join('\n') ||
+        this.extractDescriptionFromSpecs(product) ||
+        title;
+
       // Map to normalized ProductData
       return {
         asin: product.asin || asin,
         title: title,
-        description: product.full_description || product.description || product.feature_bullets?.join('\n') || '',
+        description: description,
         imageUrls: imageUrls,
         brand: brand,
         category:
@@ -192,6 +200,30 @@ export class ScraperApiService implements IProductDataProvider {
     }
 
     return finalImages;
+  }
+
+  /**
+   * Build a description from product specs when primary fields are empty
+   */
+  private extractDescriptionFromSpecs(product: ScraperApiProduct): string | null {
+    const parts: string[] = [];
+
+    const addSection = (section: Record<string, unknown> | undefined) => {
+      if (!section) {
+        return;
+      }
+      for (const [key, value] of Object.entries(section)) {
+        if (typeof value === 'string' && value.length > 0 && value.length < 500) {
+          parts.push(`${key}: ${value}`);
+        }
+      }
+    };
+
+    addSection(product.product_details );
+    addSection(product.technical_details );
+    addSection(product.additional_info );
+
+    return parts.length > 0 ? parts.join('\n') : null;
   }
 
   /**

@@ -13,7 +13,7 @@ import axios from 'axios';
  */
 interface EbayOrderLineItem {
   lineItemId?: string;
-  itemId?: string;
+  legacyItemId?: string;
   title?: string;
   quantity?: number;
   lineItemCost?: { value: string; currency: string };
@@ -103,7 +103,6 @@ export class EbayFulfillmentService {
     };
 
     if (options.fromDateString) {
-      // eBay expects ISO 8601 format: 2024-01-01T00:00:00.000Z
       params.filter = `creationdate:[${options.fromDateString}..]`;
       if (options.toDateString) {
         params.filter = `creationdate:[${options.fromDateString}..${options.toDateString}]`;
@@ -193,7 +192,7 @@ export class EbayFulfillmentService {
     userId: string,
     ebayAccountId: string,
     listingId?: string,
-    asin?: string
+    purchasePrice?: number,
   ) {
     const lineItem = ebayOrder.lineItems?.[0];
     const pricing = ebayOrder.pricingSummary;
@@ -206,7 +205,6 @@ export class EbayFulfillmentService {
       userId,
       ebayAccountId,
       ebayOrderId: ebayOrder.orderId || '',
-      orderNumber: ebayOrder.legacyOrderId || ebayOrder.orderId,
       buyerUsername: buyer?.username,
       buyerName: buyer?.buyerRegistrationAddress?.fullName || shipTo?.fullName,
       buyerEmail: buyer?.buyerRegistrationAddress?.email,
@@ -215,13 +213,7 @@ export class EbayFulfillmentService {
       orderFulfillmentStatus: ebayOrder.orderFulfillmentStatus,
       paymentStatus: ebayOrder.orderPaymentStatus,
       listingId: listingId || null,
-      asin: asin || null,
-      ebayItemId: lineItem?.itemId || null,
-      sku: lineItem?.sku || null,
-      productTitle: lineItem?.title || 'Unknown Product',
-      productImageUrl: lineItem?.itemUrl || null,
       quantity: lineItem?.quantity || 1,
-      isTracked: !!listingId,
       salePrice: parseFloat(pricing?.priceSubtotal?.value || '0'),
       saleShipping: parseFloat(ebayOrder.pricingSummary?.deliveryCost?.value || '0'),
       saleTax: parseFloat(pricing?.tax?.value || '0'),
@@ -230,7 +222,7 @@ export class EbayFulfillmentService {
       transactionFee: 0,
       adFee: 0,
       netProfit: 0,
-      purchasePrice: 0,
+      purchasePrice: purchasePrice || 0,
       shippingAddress: address
         ? {
             street: address.addressLine1 || '',
@@ -240,9 +232,60 @@ export class EbayFulfillmentService {
             country: address.countryCode || '',
           }
         : null,
-      ebayCreatedAt: ebayOrder.creationDate ? new Date(ebayOrder.creationDate) : null,
-      ebayUpdatedAt: ebayOrder.lastModifiedDate ? new Date(ebayOrder.lastModifiedDate) : null,
+      orderDate: ebayOrder.creationDate ? new Date(ebayOrder.creationDate) : null,
+      lastEbayEventAt: ebayOrder.lastModifiedDate ? new Date(ebayOrder.lastModifiedDate) : null,
     };
+  }
+
+  /**
+   * Create a shipping fulfillment on eBay (marks order as shipped)
+   */
+  async createShippingFulfillment(
+    accessToken: string,
+    ebayOrderId: string,
+    lineItemId: string,
+    quantity: number,
+    options?: {
+      trackingNumber?: string;
+      shippingCarrierCode?: string;
+      shippedDate?: string;
+    }
+  ): Promise<string | null> {
+    const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
+    const url = `${baseUrl}/sell/fulfillment/v1/order/${ebayOrderId}/shipping_fulfillment`;
+
+    const body: Record<string, unknown> = {
+      lineItems: [{ lineItemId, quantity }],
+    };
+
+    if (options?.shippedDate) {
+      body.shippedDate = options.shippedDate;
+    }
+
+    if (options?.trackingNumber && options?.shippingCarrierCode) {
+      body.trackingNumber = options.trackingNumber;
+      body.shippingCarrierCode = options.shippingCarrierCode;
+    }
+
+    try {
+      const response = await axios.post(url, body, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 30000,
+        validateStatus: (status) => status === 201,
+      });
+      const location = response.headers['location'] as string | undefined;
+      return location || null;
+    } catch (error: unknown) {
+      const axiosErr = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { errors?: Array<{ message?: string }> } }; message?: string })
+        : null;
+      const errMsg = axiosErr?.response?.data?.errors?.[0]?.message || (error instanceof Error ? error.message : String(error));
+      this.logger.error(`Failed to create shipping fulfillment for ${ebayOrderId}: ${errMsg}`);
+      throw error;
+    }
   }
 
   /**

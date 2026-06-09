@@ -2,16 +2,18 @@ import { PolicyType, parseAsins, type CreateListingsRequest } from '@repo/shared
 import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useGetListingSettingsGroupsQuery } from '../../listing-settings-groups/api/listing-settings-group.api';
 import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from '../api/listings.api';
 
 import { AddListingsPageComponent } from './AddListingsPage.component';
 
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useLocale } from '@/utils/useLocale';
+
 export const AddListingsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
   const [asins, setAsins] = useState('');
 
@@ -20,12 +22,13 @@ export const AddListingsPageContainer: React.FC = () => {
   const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
 
   // Create listings mutation
-  const [createListings, { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData }] =
+  const [createListings, { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData, reset }] =
     useCreateListingsMutation();
 
   // Handle success
   React.useEffect(() => {
     if (isSuccess && submitData) {
+      reset();
       showMessage(
         {
           type: 'info',
@@ -34,21 +37,23 @@ export const AddListingsPageContainer: React.FC = () => {
           descriptionParams: { count: submitData.totalAsins },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
-            onClick: closeMessage,
+            onClick: () => {
+              closeMessage();
+              localeNavigate('/listings/jobs');
+            },
           },
         },
         t
       );
-      // Navigate to listing jobs
-      void navigate('/listings/jobs');
     }
-  }, [isSuccess, submitData, showMessage, closeMessage, t, navigate]);
+  }, [isSuccess, submitData, showMessage, closeMessage, t, localeNavigate, reset]);
 
   // Handle error
   React.useEffect(() => {
     if (submitError) {
       console.error('Failed to create listings:', submitError);
       const errorMsg = (submitError as any)?.data?.message || 'listings:listings.errors.createFailed';
+      reset();
       showMessage(
         {
           type: 'error',
@@ -62,7 +67,7 @@ export const AddListingsPageContainer: React.FC = () => {
         t
       );
     }
-  }, [submitError, showMessage, closeMessage, t]);
+  }, [submitError, showMessage, closeMessage, t, reset]);
 
   // Transform business policies into structured object
   const businessPolicies = useMemo(
@@ -102,11 +107,12 @@ export const AddListingsPageContainer: React.FC = () => {
   };
 
   const handleCancel = () => {
-    void navigate('/listings');
+    localeNavigate('/listings');
   };
 
   return (
-    <AddListingsPageComponent
+    <EbayAccountGuard>
+      <AddListingsPageComponent
       asins={asins}
       asinCount={asinCount}
       listingSettingsGroups={listingSettingsGroups}
@@ -117,5 +123,6 @@ export const AddListingsPageContainer: React.FC = () => {
       onAsinChange={handleAsinChange}
       onCancel={handleCancel}
     />
+    </EbayAccountGuard>
   );
 };

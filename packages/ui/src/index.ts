@@ -32,7 +32,15 @@ export { MeshBackground } from './atoms/MeshBackground';
 export { Typewriter } from './atoms/Typewriter';
 
 export { Card, CardBody, CardFooter, CardHeader, CardStat } from './atoms/Card';
-export type { CardBodyProps, CardFooterProps, CardHeaderProps, CardPadding, CardProps, CardStatProps, CardVariant } from './atoms/Card';
+export type {
+  CardBodyProps,
+  CardFooterProps,
+  CardHeaderProps,
+  CardPadding,
+  CardProps,
+  CardStatProps,
+  CardVariant,
+} from './atoms/Card';
 
 export { Badge } from './atoms/Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from './atoms/Badge';
@@ -96,9 +104,8 @@ export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } 
 export { StatusBadge } from './molecules/StatusBadge';
 export type { StatusBadgeProps, StatusSize, StatusType } from './molecules/StatusBadge';
 
-export { ViewToggle } from './molecules/ViewToggle';
+export { ToggleButton, ViewLabel, ViewToggle, ViewToggleGroup } from './molecules/ViewToggle';
 export type { ViewMode, ViewToggleProps } from './molecules/ViewToggle';
-export { ViewToggleGroup, ToggleButton, ViewLabel } from './molecules/ViewToggle';
 
 export { PageHeader } from './molecules/PageHeader';
 export type { PageHeaderProps } from './molecules/PageHeader';
@@ -115,7 +122,6 @@ export type { EmptyStateProps } from './molecules/EmptyState';
 export { ErrorState } from './molecules/ErrorState';
 export type { ErrorStateProps } from './molecules/ErrorState';
 
-
 export { Tooltip } from './molecules/Tooltip';
 export type { TooltipPosition, TooltipProps, TooltipVariant } from './molecules/Tooltip';
 
@@ -129,7 +135,7 @@ export { Collapsible } from './molecules/Collapsible';
 export type { CollapsibleProps } from './molecules/Collapsible';
 
 export { Stepper } from './molecules/Stepper';
-export type { StepItem, StepperOrientation, StepperProps, StepStatus } from './molecules/Stepper';
+export type { StepItem, StepStatus, StepperOrientation, StepperProps } from './molecules/Stepper';
 
 export { SegmentedControl } from './molecules/SegmentedControl';
 export type { SegmentedControlOption, SegmentedControlProps } from './molecules/SegmentedControl';
@@ -139,6 +145,12 @@ export type { ListItemProps } from './molecules/ListItem';
 
 export { IdBadge } from './molecules/IdBadge';
 export type { IdBadgeProps, StoreType } from './molecules/IdBadge';
+
+export { LanguageSwitcher } from './molecules/LanguageSwitcher';
+export type { LanguageSwitcherProps, LocaleOption } from './molecules/LanguageSwitcher';
+
+export { ConnectEbayPrompt } from './molecules/ConnectEbayPrompt';
+export type { ConnectEbayPromptProps } from './molecules/ConnectEbayPrompt';
 
 // Organisms
 export { DataTable } from './organisms/DataTable';
@@ -159,7 +171,7 @@ export { ToastContext, ToastProvider, useToastContext } from './context';
 export type { ToastContextValue } from './context';
 
 // Hook exports
-export { useLoading, useMediaQuery, useIsMobile, useTheme, useUI, useToast } from './hooks';
+export { useIsMobile, useLoading, useMediaQuery, useTheme, useToast, useUI } from './hooks';
 
 // Utility exports
 export { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig } from './utils/format';

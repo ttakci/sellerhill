@@ -57,7 +57,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'User not found or email already verified' })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   async resendVerification(@Body() body: ResendVerificationDto): Promise<void> {
-    return this.authService.resendVerification(body.email);
+    return this.authService.resendVerification(body.email, body.locale);
   }
 
   @Post('login')

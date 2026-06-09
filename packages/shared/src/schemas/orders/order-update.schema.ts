@@ -13,6 +13,10 @@ export class UpdateOrderAmazonDetailsDto {
 
   @IsOptional()
   @IsNumber()
+  purchasePrice?: number;
+
+  @IsOptional()
+  @IsNumber()
   amazonTax?: number;
 
   @IsOptional()
@@ -32,6 +36,11 @@ export const amazonDetailsSchema = z.object({
     .url('Please enter a valid URL')
     .or(z.literal(''))
     .optional(),
+  purchasePrice: z
+    .number()
+    .min(0, 'Must be a positive number')
+    .optional()
+    .or(z.nan().transform(() => undefined)),
   amazonTax: z
     .number()
     .min(0, 'Must be a positive number')

@@ -75,7 +75,7 @@ export class KeepaService implements IProductDataProvider {
       const product: KeepaProductRaw = products[0];
 
       const imageUrls = this.extractImages(product.imagesCSV);
-      const { price, stock, _sellerId } = this.extractPriceAndStock(product);
+      const { price, stock } = this.extractPriceAndStock(product);
       const category = product.categoryTree ? product.categoryTree[product.categoryTree.length - 1]?.name : undefined;
 
       const specs: Record<string, string> = {};
@@ -106,7 +106,7 @@ export class KeepaService implements IProductDataProvider {
           avg90: product.stats?.avg90?.[0] ? product.stats.avg90[0] / 100 : undefined,
         },
         stock,
-        raw: product,
+        raw: product as unknown as Record<string, unknown>,
       };
     } catch (error: unknown) {
       this.logger.error(
@@ -176,7 +176,7 @@ export class KeepaService implements IProductDataProvider {
             stock,
             sellerId: undefined,
             lastSync: new Date(),
-            raw: product,
+            raw: product as unknown as Record<string, unknown>,
           };
         });
     } catch (error: unknown) {

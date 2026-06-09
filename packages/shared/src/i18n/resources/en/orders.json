@@ -1,7 +1,8 @@
 {
   "orders": {
     "page": {
-      "title": "Orders"
+      "title": "Orders",
+      "subtitle": "{{count}} orders"
     },
     "stats": {
       "totalSales": "Total Sales",
@@ -73,6 +74,19 @@
       "shipTo": "Ship To",
       "contact": "Contact",
       "unknownProduct": "Unknown Product",
+      "copyAddress": "Copy Address",
+      "addressCopied": "Address copied!",
+      "amazonCosts": "Amazon Order Summary",
+      "purchasePrice": "Purchase Price",
+      "amazonTax": "Amazon Tax",
+      "amazonShipping": "Amazon Shipping",
+      "totalAmazonCost": "Total Amazon Cost",
+      "amazonOrder": "Amazon Order",
+      "linkAmazon": "Link Amazon Order",
+      "calcEarnings": "Earnings",
+      "calcPurchase": "Purchase",
+      "calcTax": "Tax",
+      "calcShipping": "Shipping",
       "asin": "ASIN:",
       "ebayItemId": "eBay Item ID:",
       "quantity": "Quantity",

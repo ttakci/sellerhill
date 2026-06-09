@@ -1,3 +1,4 @@
+import type { SupportedLocale } from '../common/common.constants';
 import { UserStatus } from '../user/user.types';
 
 /**
@@ -10,6 +11,7 @@ export class RegisterRequestDto {
   lastName!: string;
   email!: string;
   password!: string;
+  locale?: SupportedLocale;
 }
 
 export class LoginRequestDto {
@@ -24,6 +26,7 @@ export class UserDto {
   email!: string;
   emailVerified!: boolean;
   status!: UserStatus;
+  locale!: SupportedLocale;
   hasConnectedAccounts!: boolean;
   createdAt!: string;
   updatedAt!: string;

@@ -29,8 +29,7 @@ export class EbayOAuthService {
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.get<string>('EBAY_CLIENT_ID') || '';
     this.clientSecret = this.configService.get<string>('EBAY_CLIENT_SECRET') || '';
-    this.redirectUri =
-      this.configService.get<string>('EBAY_REDIRECT_URI') || 'http://localhost:3000/api/v1/ebay/callback';
+    this.redirectUri = this.configService.get<string>('EBAY_REDIRECT_URI') || '';
     this.ruName = this.configService.get<string>('EBAY_RUNAME') || '';
     this.environment = this.configService.get<'sandbox' | 'production'>('EBAY_ENVIRONMENT') || 'sandbox';
     this.scopes = EBAY_OAUTH_CONSTANTS.DEFAULT_SCOPES;
@@ -161,8 +160,20 @@ export class EbayOAuthService {
     let sellerId = 'unknown';
     let storeName = '';
 
+    // Try extracting seller ID from the JWT access token first (most reliable)
     try {
-      // 1. Get User/Identity info
+      const tokenParts = accessToken.split('.');
+      if (tokenParts.length === 3) {
+        const decoded = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString('utf-8')) as Record<string, string>;
+        sellerId = decoded.sub || decoded.username || decoded.user_id || 'unknown';
+        this.logger.debug(`Extracted seller ID from JWT: ${sellerId}`);
+      }
+    } catch {
+      this.logger.debug('Could not decode access token JWT');
+    }
+
+    try {
+      // Get User/Identity info
       const identityResponse = await axios.get(`${this.apiBaseUrl}/commerce/identity/v1/user`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -176,7 +187,9 @@ export class EbayOAuthService {
         businessName?: string;
       }
       const identityData = identityResponse.data as IdentityData | undefined;
-      sellerId = identityData?.username || identityData?.userId || 'unknown';
+      if (identityData?.username || identityData?.userId) {
+        sellerId = identityData.username || identityData.userId || sellerId;
+      }
       storeName = identityData?.businessName || identityData?.username || '';
 
       this.logger.debug('Identity API Response:', identityData);
@@ -188,7 +201,7 @@ export class EbayOAuthService {
     }
 
     try {
-      // 2. Try to get Store specific info (more accurate for store name)
+      // Try to get Store specific info (more accurate for store name)
       interface StoreData {
         name?: string;
       }
@@ -223,9 +236,9 @@ export class EbayOAuthService {
             'Content-Type': 'application/json',
           },
         });
-        sellerId = fallbackResponse.data?.userId || `ebay_user_${Date.now()}`;
-      } catch (e) {
-        sellerId = `ebay_user_${Date.now()}`;
+        sellerId = fallbackResponse.data?.userId || 'unknown';
+      } catch {
+        // No reliable fallback — keep as 'unknown'
       }
     }
 

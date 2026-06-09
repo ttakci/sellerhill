@@ -22,4 +22,5 @@ export interface ListingSettingsGroupFormProps {
   renderedPreview: string;
   getPreviewWidth: () => string;
   activeTemplate: { htmlContent: string; sampleData: Record<string, string | string[]> };
+  onOpenPreview: () => void;
 }

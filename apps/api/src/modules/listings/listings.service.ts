@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   ListingJobStatus,
   ListingStatus,
@@ -89,7 +89,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 @Injectable()
-export class ListingsService implements OnModuleInit {
+export class ListingsService {
   private readonly logger = new Logger(ListingsService.name);
 
   constructor(
@@ -97,170 +97,6 @@ export class ListingsService implements OnModuleInit {
     private readonly ebayService: EbayService,
     private readonly strategyService: ListingStrategyService
   ) {}
-
-  async onModuleInit() {
-    await this.ensureTablesExist();
-  }
-
-  /**
-   * Ensure listings tables exist
-   */
-  private async ensureTablesExist() {
-    this.logger.log('Ensuring listings tables exist...');
-
-    // Create system_config table
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS system_config (
-        key VARCHAR(100) PRIMARY KEY,
-        value TEXT NOT NULL,
-        description VARCHAR(200),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Insert default config if not exists
-    await this.databaseService.query(`
-      INSERT INTO system_config (key, value, description)
-      VALUES ('product_sync_interval_days', '7', 'Days between product data syncs')
-      ON CONFLICT (key) DO NOTHING
-    `);
-
-    // Create products table
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS products (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        asin VARCHAR(10) UNIQUE NOT NULL,
-        title VARCHAR(500) NOT NULL,
-        description TEXT,
-        price JSONB NOT NULL,
-        currency VARCHAR(3) DEFAULT 'USD',
-        image_urls JSONB NOT NULL,
-        brand VARCHAR(200),
-        category VARCHAR(200),
-        features JSONB,
-        raw_provider_data JSONB,
-        last_sync_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create listing_jobs table
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS listing_jobs (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        total_asins INT NOT NULL,
-        processed_count INT DEFAULT 0,
-        success_count INT DEFAULT 0,
-        failed_count INT DEFAULT 0,
-        status VARCHAR(20) DEFAULT '${ListingJobStatus.PENDING}',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create listing_job_items table
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS listing_job_items (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        job_id UUID NOT NULL REFERENCES listing_jobs(id) ON DELETE CASCADE,
-        asin VARCHAR(10) NOT NULL,
-        product_id UUID REFERENCES products(id) ON DELETE SET NULL,
-        listing_id UUID,
-        status VARCHAR(20) DEFAULT '${ListingStatus.DRAFT}',
-        ebay_item_id VARCHAR(50),
-        error_message TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Migration: Update existing listing_job_items to have ON DELETE SET NULL
-    await this.databaseService.query(`
-      DO $$ 
-      BEGIN 
-        IF EXISTS (
-          SELECT 1 FROM information_schema.table_constraints 
-          WHERE constraint_name = 'listing_job_items_product_id_fkey' 
-          AND table_name = 'listing_job_items'
-        ) THEN
-          ALTER TABLE listing_job_items DROP CONSTRAINT listing_job_items_product_id_fkey;
-          ALTER TABLE listing_job_items ADD CONSTRAINT listing_job_items_product_id_fkey 
-            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL;
-        END IF;
-      END $$;
-    `);
-
-    // Create listings table (Final active listings)
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS listings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        asin VARCHAR(10) NOT NULL,
-        product_id UUID NOT NULL REFERENCES products(id),
-        listing_settings_group_id UUID NOT NULL REFERENCES listing_settings_groups(id),
-        ebay_item_id VARCHAR(50) UNIQUE NOT NULL,
-        payment_policy_id VARCHAR(50),
-        shipping_policy_id VARCHAR(50),
-        return_policy_id VARCHAR(50),
-        title TEXT NOT NULL,
-        price DECIMAL(10,2) NOT NULL,
-        purchase_price DECIMAL(10,2),
-        estimated_profit DECIMAL(10,2),
-        profit_margin DECIMAL(10,2),
-        roi DECIMAL(10,2),
-        sold_count INT DEFAULT 0,
-        watch_count INT DEFAULT 0,
-        view_count INT DEFAULT 0,
-        quantity INT NOT NULL DEFAULT 1,
-        status VARCHAR(20) DEFAULT '${ListingStatus.ACTIVE}',
-        ebay_category_name TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create indexes
-    await this.databaseService.query(`
-      CREATE INDEX IF NOT EXISTS idx_products_asin ON products(asin);
-      CREATE INDEX IF NOT EXISTS idx_products_last_sync ON products(last_sync_at);
-      CREATE INDEX IF NOT EXISTS idx_listing_jobs_user_id ON listing_jobs(user_id);
-      CREATE INDEX IF NOT EXISTS idx_listing_jobs_status ON listing_jobs(status);
-      CREATE INDEX IF NOT EXISTS idx_listing_job_items_job_id ON listing_job_items(job_id);
-      CREATE INDEX IF NOT EXISTS idx_listing_job_items_asin ON listing_job_items(asin);
-      CREATE INDEX IF NOT EXISTS idx_listings_user_id ON listings(user_id);
-      CREATE INDEX IF NOT EXISTS idx_listings_ebay_item_id ON listings(ebay_item_id);
-    `);
-
-    // Migration: Add policy columns if missing (PostgreSQL specific)
-    try {
-      // Products migration
-      await this.databaseService.query(`
-        ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_provider_data JSONB;
-        ALTER TABLE products ADD COLUMN IF NOT EXISTS raw_keepa_data JSONB;
-        ALTER TABLE products ADD COLUMN IF NOT EXISTS last_repriced_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
-        ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
-      `);
-
-      // Listings migration
-      await this.databaseService.query(`
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS payment_policy_id VARCHAR(50);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS shipping_policy_id VARCHAR(50);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS return_policy_id VARCHAR(50);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS purchase_price DECIMAL(10,2);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS estimated_profit DECIMAL(10,2);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS profit_margin DECIMAL(10,2);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS roi DECIMAL(10,2);
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS sold_count INT DEFAULT 0;
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS watch_count INT DEFAULT 0;
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS view_count INT DEFAULT 0;
-        ALTER TABLE listings ADD COLUMN IF NOT EXISTS ebay_category_name TEXT;
-      `);
-    } catch (e) {
-      this.logger.warn('Failed to run migration for columns (might be normal if db not postgres or already exists)', e);
-    }
-  }
 
   /**
    * Create a final listing record after successful eBay creation
@@ -354,7 +190,7 @@ export class ListingsService implements OnModuleInit {
       watchCount: parseInt(String(row.watch_count), 10) || 0,
       viewCount: parseInt(String(row.view_count), 10) || 0,
       quantity: row.quantity,
-      sourceStock: row.source_stock,
+      sourceStock: row.source_stock ?? undefined,
       imageUrls: row.image_urls || [],
       ebayListingId: row.ebay_item_id,
       listingSettingsGroupId: row.listing_settings_group_id,
@@ -402,16 +238,16 @@ export class ListingsService implements OnModuleInit {
     return results.map((row) => ({
       asin: row.asin,
       title: row.title,
-      description: row.description,
+      description: row.description ?? '',
       price: {
         current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
         avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
       imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(row.image_urls || '[]') as string[]),
-      brand: row.brand,
-      category: row.category,
-      manufacturer: row.brand, // Fallback
+      brand: row.brand ?? '',
+      category: row.category ?? undefined,
+      manufacturer: row.brand ?? undefined, // Fallback
       features: Array.isArray(row.features) ? row.features : (JSON.parse(row.features || '[]') as string[]),
       updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
     }));
@@ -477,16 +313,16 @@ export class ListingsService implements OnModuleInit {
     const data: ProductData = {
       asin: row.asin,
       title: row.title,
-      description: row.description,
+      description: row.description ?? '',
       price: {
         current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
         avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
       imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(String(row.image_urls) || '[]') as string[]),
-      brand: row.brand,
-      category: row.category,
-      manufacturer: row.brand, // Fallback
+      brand: row.brand ?? '',
+      category: row.category ?? undefined,
+      manufacturer: row.brand ?? undefined, // Fallback
       features: row.features ? (Array.isArray(row.features) ? row.features : (JSON.parse(String(row.features)) as string[])) : [],
       stock: row.stock || 0,
       raw: row.raw_provider_data

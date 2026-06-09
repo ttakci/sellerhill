@@ -1,69 +1,56 @@
-import { EBAY_MARKETPLACE, type EbayMarketplaceId } from '@repo/shared';
+/**
+ * OnboardingEbayPage Container (Smart Component)
+ *
+ * Purpose: Handle eBay onboarding logic — US marketplace only.
+ */
+
+import { EBAY_MARKETPLACE } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useLazyGetEbayConnectUrlQuery } from '../api/ebayApi';
 
 import { OnboardingEbayPageComponent } from './OnboardingEbayPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
+import { useLocale } from '@/utils/useLocale';
 
 export const OnboardingEbayPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['ebay', 'translation']);
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  const { i18n } = useTranslation();
 
-  const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(EBAY_MARKETPLACE.US);
   const [getConnectUrl, { isLoading, isSuccess, data, error }] = useLazyGetEbayConnectUrlQuery();
 
   useLoading(isLoading);
 
-  // Handle success redirect
-  React.useEffect(() => {
-    if (isSuccess && data) {
-      window.location.href = data.url;
-    }
+  useEffect(() => {
+    if (isSuccess && data) {window.location.href = data.url;}
   }, [isSuccess, data]);
 
-  // Handle error
-  React.useEffect(() => {
-    if (error) {
-      const { key, params } = getErrorMessage(error);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'translation:message.error.header',
-          descriptionKey: key,
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'translation:message.error.close',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
-  }, [error, showMessage, closeMessage, t]);
+  useEffect(() => {
+    if (!error) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(error),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      i18n.t.bind(i18n)
+    );
+  }, [error, showMessage, closeMessage, i18n]);
 
-  const handleConnect = (marketplaceId: EbayMarketplaceId): void => {
-    void getConnectUrl({ marketplaceId });
+  const handleConnect = (): void => {
+    void getConnectUrl({ marketplaceId: EBAY_MARKETPLACE.US });
   };
 
   const handleSkip = (): void => {
-    void navigate('/dashboard');
+    localeNavigate('/dashboard');
   };
 
-  return (
-    <OnboardingEbayPageComponent
-      onConnect={handleConnect}
-      isLoading={isLoading}
-      selectedMarketplace={selectedMarketplace}
-      onMarketplaceChange={setSelectedMarketplace}
-      onSkip={handleSkip}
-    />
-  );
+  return <OnboardingEbayPageComponent onConnect={handleConnect} isLoading={isLoading} onSkip={handleSkip} />;
 };
 
 export default OnboardingEbayPageContainer;

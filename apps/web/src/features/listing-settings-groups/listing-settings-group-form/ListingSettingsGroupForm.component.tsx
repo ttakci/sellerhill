@@ -6,6 +6,10 @@ import { useTranslation } from 'react-i18next';
 import * as S from './ListingSettingsGroupForm.style';
 import { ListingSettingsGroupFormProps } from './ListingSettingsGroupForm.types';
 
+const blockNonNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {e.preventDefault();}
+};
+
 export const ListingSettingsGroupFormComponent = ({
   predefinedTemplates,
   onSubmit,
@@ -20,12 +24,13 @@ export const ListingSettingsGroupFormComponent = ({
   renderedPreview,
   getPreviewWidth,
   activeTemplate,
+  onOpenPreview,
 }: ListingSettingsGroupFormProps) => {
   const { t } = useTranslation('listingSettingsGroup');
 
   const { control, handleSubmit, watch } = form;
 
-  const watchedValues = watch(); // We still need watch for dynamic UI updates based on values
+  const watchedValues = watch();
 
   return (
     <S.Container>
@@ -36,22 +41,6 @@ export const ListingSettingsGroupFormComponent = ({
           </S.PageTitle>
           <Text color="text.secondary">{t('listingSettingsGroup.editorDescription')}</Text>
         </S.HeaderContent>
-        <S.Actions>
-          <Button variant="danger" size="medium" onClick={onCancel} iconLeft="x">
-            {t('translation:common.cancel')}
-          </Button>
-          <Button
-            variant="primary"
-            size="medium"
-            onClick={() => {
-              void handleSubmit(onSubmit)();
-            }}
-            isLoading={isLoading}
-            iconLeft="save"
-          >
-            {t('translation:common.save')}
-          </Button>
-        </S.Actions>
       </S.Header>
 
       <S.FormContainer
@@ -93,6 +82,7 @@ export const ListingSettingsGroupFormComponent = ({
                   label={t('listingSettingsGroup.defaultStockQuantity')}
                   type="number"
                   fullWidth
+                  onKeyDown={blockNonNumeric}
                 />
                 <ModernTextInput<ListingSettingsGroupFormData>
                   name="stock.stockBuffer"
@@ -100,6 +90,7 @@ export const ListingSettingsGroupFormComponent = ({
                   label={t('listingSettingsGroup.stockBuffer')}
                   type="number"
                   fullWidth
+                  onKeyDown={blockNonNumeric}
                 />
               </S.InputGrid>
             </S.PaddingContainer>
@@ -117,21 +108,18 @@ export const ListingSettingsGroupFormComponent = ({
                 {t('listingSettingsGroup.pricingStrategy')}
               </S.SectionTitle>
             </S.SectionTitleContent>
-            <S.AddButton variant="text" size="xsmall" type="button" onClick={onAddRange}>
-              <Icon name="plus" size={14} />
+            <Button variant="primary" size="small" type="button" onClick={onAddRange} iconLeft="plus">
               {t('listingSettingsGroup.addRange')}
-            </S.AddButton>
+            </Button>
           </S.SectionHeader>
           <CardBody>
             <S.PaddingContainer>
               <S.PriceRangesContainer>
                 {fields.map((field, index) => (
                   <S.PriceRangeRow key={field.id}>
-                    {index > 0 && (
-                      <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
-                        <Icon name="x" size={14} />
-                      </S.RemoveButton>
-                    )}
+                    <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
+                      <Icon name="x" size={14} />
+                    </S.RemoveButton>
                     <S.InputGrid columns={4}>
                       <ModernTextInput<ListingSettingsGroupFormData>
                         name={`repricingStrategy.${index}.minPrice`}
@@ -140,6 +128,7 @@ export const ListingSettingsGroupFormComponent = ({
                         type="number"
                         suffixText="$"
                         fullWidth
+                        onKeyDown={blockNonNumeric}
                       />
                       <ModernTextInput<ListingSettingsGroupFormData>
                         name={`repricingStrategy.${index}.maxPrice`}
@@ -148,6 +137,7 @@ export const ListingSettingsGroupFormComponent = ({
                         type="number"
                         suffixText="$"
                         fullWidth
+                        onKeyDown={blockNonNumeric}
                       />
                       <ModernTextInput<ListingSettingsGroupFormData>
                         name={`repricingStrategy.${index}.profitMarginPercent`}
@@ -156,6 +146,7 @@ export const ListingSettingsGroupFormComponent = ({
                         type="number"
                         suffixText="%"
                         fullWidth
+                        onKeyDown={blockNonNumeric}
                       />
                       <ModernTextInput<ListingSettingsGroupFormData>
                         name={`repricingStrategy.${index}.fixedProfitAmount`}
@@ -164,6 +155,7 @@ export const ListingSettingsGroupFormComponent = ({
                         type="number"
                         suffixText="$"
                         fullWidth
+                        onKeyDown={blockNonNumeric}
                       />
                     </S.InputGrid>
                   </S.PriceRangeRow>
@@ -195,6 +187,7 @@ export const ListingSettingsGroupFormComponent = ({
                   type="number"
                   suffixText="%"
                   fullWidth
+                  onKeyDown={blockNonNumeric}
                 />
                 <ModernTextInput<ListingSettingsGroupFormData>
                   name="fees.fixedFeeAmount"
@@ -203,6 +196,7 @@ export const ListingSettingsGroupFormComponent = ({
                   type="number"
                   suffixText="$"
                   fullWidth
+                  onKeyDown={blockNonNumeric}
                 />
                 <ModernTextInput<ListingSettingsGroupFormData>
                   name="fees.taxPercent"
@@ -211,6 +205,7 @@ export const ListingSettingsGroupFormComponent = ({
                   type="number"
                   suffixText="%"
                   fullWidth
+                  onKeyDown={blockNonNumeric}
                 />
               </S.InputGrid>
             </S.PaddingContainer>
@@ -255,36 +250,30 @@ export const ListingSettingsGroupFormComponent = ({
                 )}
               />
             </S.SectionHeader>
-            <CardBody>
-              <S.PaddingContainer $flex>
-                <S.TemplateSelectorWrapper>
-                  <ModernSelect<ListingSettingsGroupFormData>
-                    name="templates.predefinedTemplateId"
-                    control={control}
-                    label={t('listingSettingsGroup.activeTemplate')}
-                    options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
-                      value: tmp.id,
-                      label: tmp.name,
-                    }))}
-                    fullWidth
-                    isDisabled={watchedValues.templates.type === TemplateType.CUSTOM}
-                    searchPlaceholder={t('translation:common.search')}
-                    noResultsMessage={t('translation:common.noResults')}
-                  />
-                </S.TemplateSelectorWrapper>
-
-                <S.TemplateEditorContainer>
-                  <S.EditorCodeArea>
-                    <S.EditorComment>&lt;!-- Listing Template --&gt;</S.EditorComment>
-                    {watchedValues.templates.type === TemplateType.CUSTOM ? (
-                      <S.CustomTemplateTextarea {...control.register('templates.customTemplateHtml')} />
-                    ) : (
-                      <S.CustomTemplateTextarea readOnly value={activeTemplate.htmlContent} />
-                    )}
-                  </S.EditorCodeArea>
-                </S.TemplateEditorContainer>
-              </S.PaddingContainer>
-            </CardBody>
+            <S.TemplateBody>
+              <S.TemplateSelectWrapper>
+                <ModernSelect<ListingSettingsGroupFormData>
+                  name="templates.predefinedTemplateId"
+                  control={control}
+                  label={t('listingSettingsGroup.activeTemplate')}
+                  options={predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
+                    value: tmp.id,
+                    label: tmp.name,
+                  }))}
+                  fullWidth
+                  isDisabled={watchedValues.templates.type === TemplateType.CUSTOM}
+                  searchPlaceholder={t('translation:common.search')}
+                  noResultsMessage={t('translation:common.noResults')}
+                />
+              </S.TemplateSelectWrapper>
+              <S.CustomTemplateTextarea
+                {...(watchedValues.templates.type === TemplateType.CUSTOM
+                  ? control.register('templates.customTemplateHtml')
+                  : {})}
+                readOnly={watchedValues.templates.type !== TemplateType.CUSTOM}
+                value={watchedValues.templates.type === TemplateType.CUSTOM ? undefined : activeTemplate.htmlContent}
+              />
+            </S.TemplateBody>
           </S.TemplateSettingsCard>
 
           {/* Live Preview */}
@@ -299,6 +288,9 @@ export const ListingSettingsGroupFormComponent = ({
                 </S.SectionTitle>
               </S.SectionTitleContent>
               <S.DeviceControls>
+                <S.IconButton type="button" variant="ghost" onClick={onOpenPreview}>
+                  <Icon name="external-link" size={16} />
+                </S.IconButton>
                 <S.IconButton
                   type="button"
                   variant="ghost"
@@ -343,6 +335,23 @@ export const ListingSettingsGroupFormComponent = ({
             </CardBody>
           </S.PreviewCard>
         </S.SplitGrid>
+
+        <S.Actions>
+          <Button variant="danger" size="large" onClick={onCancel} iconLeft="x">
+            {t('translation:common.cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            size="large"
+            onClick={() => {
+              void handleSubmit(onSubmit)();
+            }}
+            isLoading={isLoading}
+            iconLeft="save"
+          >
+            {t('translation:common.save')}
+          </Button>
+        </S.Actions>
       </S.FormContainer>
     </S.Container>
   );

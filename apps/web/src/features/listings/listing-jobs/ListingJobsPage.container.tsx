@@ -1,16 +1,18 @@
 import { StatusBadge, useLoading } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useGetListingJobsQuery } from '../api/listings.api';
 
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
 
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useLocale } from '@/utils/useLocale';
+
 export const ListingJobsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -24,9 +26,9 @@ export const ListingJobsPageContainer: React.FC = () => {
 
   const handleViewDetails = useCallback(
     (jobId: string) => {
-      void navigate(`/listings/jobs/${jobId}`);
+      localeNavigate(`/listings/jobs/${jobId}`);
     },
-    [navigate]
+    [localeNavigate]
   );
 
   const paginatedJobs = useMemo(() => {
@@ -132,7 +134,8 @@ export const ListingJobsPageContainer: React.FC = () => {
   };
 
   return (
-    <ListingJobsPageComponent
+    <EbayAccountGuard>
+      <ListingJobsPageComponent
       columns={columns}
       jobs={paginatedJobs}
       isLoading={isLoading}
@@ -151,5 +154,6 @@ export const ListingJobsPageContainer: React.FC = () => {
         labelInfo: t('translation:common.showing_info'),
       }}
     />
+    </EbayAccountGuard>
   );
 };

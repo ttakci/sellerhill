@@ -13,7 +13,7 @@ import { ColumnManager } from './ColumnManager';
 import * as S from './DataTable.style';
 import type { DataTableProps } from './DataTable.types';
 
-export const DataTable = <T extends Record<string, unknown>>({
+export const DataTable = <T,>({
   columns,
   data,
   renderGridCard,

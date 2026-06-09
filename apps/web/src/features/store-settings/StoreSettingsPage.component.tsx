@@ -1,8 +1,8 @@
 import {
+  Button,
   DataTable,
   Icon,
   IconButton,
-  Button,
   ModernSelect,
   ModernTextInput,
   PageHeader,
@@ -51,28 +51,40 @@ export const StoreSettingsPageComponent = ({
       key: 'keyword',
       header: t('storeSettings:storeSettings.blacklistKeyword'),
       sortable: true,
-      render: (value: string) => (
-        <Text weight="semibold" color="text.primary">
-          {value}
-        </Text>
-      ),
+      render: (value: unknown) => {
+        const str = String(value);
+        return (
+          <Text weight="semibold" color="text.primary">
+            {str}
+          </Text>
+        );
+      },
     },
     {
       key: 'scope',
       header: t('storeSettings:storeSettings.scope'),
       sortable: true,
-      render: (value: string) => (
-        <S.BadgeWrapper>
-          <S.StatusBadge status={value} size="sm">{t(`storeSettings:storeSettings.scope_${value}`).toUpperCase()}</S.StatusBadge>
-        </S.BadgeWrapper>
-      ),
+      render: (value: unknown) => {
+        const str = String(value);
+        return (
+          <S.BadgeWrapper>
+            <S.StatusBadge status={str} size="sm">
+              {t(`storeSettings:storeSettings.scope_${str}`).toUpperCase()}
+            </S.StatusBadge>
+          </S.BadgeWrapper>
+        );
+      },
     },
     {
       key: 'actions',
       header: '',
       align: 'right' as const,
-      render: (_value: unknown, item: { keyword: string }) => (
-        <IconButton variant="ghost" onClick={() => onRemoveKeyword(item.keyword)} aria-label={t('translation:common.delete')}>
+      render: (_value: unknown, item: { keyword: string; scope: string }) => (
+        <IconButton
+          variant="ghost"
+          onClick={() => onRemoveKeyword(item.keyword)}
+          aria-label={t('translation:common.delete')}
+        >
           <Icon name="trash" size={18} />
         </IconButton>
       ),
@@ -102,11 +114,11 @@ export const StoreSettingsPageComponent = ({
       <S.ScopeActionWrapper>
         <ModernSelect
           options={[
-            { value: 'both', label: t('storeSettings:storeSettings.scope_both').toUpperCase() },
-            { value: 'title', label: t('storeSettings:storeSettings.scope_title').toUpperCase() },
+            { value: 'both', label: t('storeSettings:storeSettings.scope_both') },
+            { value: 'title', label: t('storeSettings:storeSettings.scope_title') },
             {
               value: 'description',
-              label: t('storeSettings:storeSettings.scope_description').toUpperCase(),
+              label: t('storeSettings:storeSettings.scope_description'),
             },
           ]}
           value={newScope}
@@ -122,15 +134,18 @@ export const StoreSettingsPageComponent = ({
     </S.BlacklistActionGroup>
   );
 
-  const pagination = blacklistCount > 0 ? {
-    count: blacklistCount,
-    page,
-    rowsPerPage,
-    onPageChange: setPage,
-    onRowsPerPageChange: setRowsPerPage,
-    labelRowsPerPage: t('translation:common.rowsPerPage'),
-    labelInfo: t('translation:common.showing_info'),
-  } : undefined;
+  const pagination =
+    blacklistCount > 0
+      ? {
+          count: blacklistCount,
+          page,
+          rowsPerPage,
+          onPageChange: setPage,
+          onRowsPerPageChange: setRowsPerPage,
+          labelRowsPerPage: t('translation:common.rowsPerPage'),
+          labelInfo: t('translation:common.showing_info'),
+        }
+      : undefined;
 
   return (
     <S.Container>
@@ -198,16 +213,8 @@ export const StoreSettingsPageComponent = ({
                 { value: 'US', label: 'United States (US)' },
               ]}
             />
-            <ModernTextInput
-              name="state"
-              control={control}
-              label={t('storeSettings:storeSettings.state')}
-            />
-            <ModernTextInput
-              name="zipCode"
-              control={control}
-              label={t('storeSettings:storeSettings.zipCode')}
-            />
+            <ModernTextInput name="state" control={control} label={t('storeSettings:storeSettings.state')} />
+            <ModernTextInput name="zipCode" control={control} label={t('storeSettings:storeSettings.zipCode')} />
           </S.LocationColumnGrid>
         </SettingsCard>
 
@@ -262,7 +269,9 @@ export const StoreSettingsPageComponent = ({
               <Icon name="block" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle variant="h3" weight="bold">{t('storeSettings:storeSettings.blacklistSectionTitle')}</S.SectionTitle>
+              <S.SectionTitle variant="h3" weight="bold">
+                {t('storeSettings:storeSettings.blacklistSectionTitle')}
+              </S.SectionTitle>
               <Text variant="caption" color="text.secondary">
                 {t('storeSettings:storeSettings.blacklistSubtitle')}
               </Text>

@@ -117,10 +117,10 @@ export class EbayService {
     // Get seller information
     const { sellerId, storeName } = await this.oauthService.getSellerInfo(tokenResponse.access_token);
 
-    // Check if this seller account is already connected
+    // Check if this seller account is already connected (by seller_id or user token)
     const existingAccounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT id FROM ebay_accounts 
-       WHERE seller_id = $1 AND marketplace_id = $2 
+      `SELECT id FROM ebay_accounts
+       WHERE seller_id = $1 AND marketplace_id = $2
        LIMIT 1`,
       [sellerId, marketplaceId]
     );
@@ -209,8 +209,9 @@ export class EbayService {
     const marketplaceId = account.marketplace_id as EbayMarketplaceId;
     const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
 
-    // 4. Generate SKU (e.g. ASIN-NEW)
-    const sku = `${asin}-NEW`;
+    // 4. Generate SKU (e.g. ASIN-NEW-timestamp for sandbox to avoid conflicts)
+    const isSandbox = this.configService.get('EBAY_ENVIRONMENT') === 'sandbox';
+    const sku = isSandbox ? `${asin}-NEW-${Date.now().toString().slice(-6)}` : `${asin}-NEW`;
 
     // 5. Create or Replace Inventory Item (PUT)
     await this.createOrReplaceInventoryItem(accessToken, sku, listingData, config);
@@ -221,9 +222,11 @@ export class EbayService {
 
     // 7. Get Suggested Category (Dynamic)
     const { categoryId, categoryName } = await this.getSuggestedCategory(accessToken, listingData.title, config.siteId);
+    this.logger.log(`Suggested category for "${listingData.title}": ${categoryName} (${categoryId})`);
 
     // 8. Fetch Required Aspects for this Category
     const requiredAspects = await this.getItemAspectsForCategory(accessToken, categoryId, config.siteId);
+    this.logger.log(`Required aspects for category ${categoryId}: ${requiredAspects.join(', ') || 'None'}`);
 
     // Self-Healing Loop:
     // If Publish fails due to "Missing Aspect", we catch it, add the missing aspect to 'requiredAspects', and retry.
@@ -233,12 +236,13 @@ export class EbayService {
     const maxAttempts = 5; // Increased slightly for safety
 
     while (attempts < maxAttempts) {
+      let currentOfferId: string | undefined;
       try {
         // 9. Create or Replace Inventory Item (PUT) with dynamic aspects
         await this.createOrReplaceInventoryItem(accessToken, sku, listingData, config, requiredAspects);
 
         // 10. Create Offer (POST)
-        const offerId = await this.createOffer(
+        currentOfferId = await this.createOffer(
           accessToken,
           sku,
           listingData,
@@ -250,7 +254,7 @@ export class EbayService {
         );
 
         // 11. Publish Offer (POST)
-        listingId = await this.publishOffer(accessToken, offerId);
+        listingId = await this.publishOffer(accessToken, currentOfferId);
 
         this.logger.log(`Successfully created eBay listing (REST): ${listingId}`);
         return { listingId, categoryName };
@@ -291,7 +295,19 @@ export class EbayService {
           }
         }
 
-        // If not a missing aspect error, or we can't parse it, throw original error
+        // Handle "System error" on publish — cleanup orphan offer and retry
+        const systemError = errors.find(
+          (e: { errorId?: number; message?: string }) =>
+            e.errorId === 25002 && (e.message?.includes('System error') ?? false)
+        );
+
+        if (systemError && currentOfferId && attempts < maxAttempts) {
+          this.logger.warn(`Publish failed with system error. Deleting orphan offer ${currentOfferId} and retrying... (Attempt ${attempts})`);
+          await this.deleteOffer(accessToken, currentOfferId);
+          continue;
+        }
+
+        // If not a recoverable error, throw original error
         throw error;
       }
     }
@@ -356,13 +372,26 @@ export class EbayService {
       }
     });
 
+    // Determine condition based on title
+    let condition = 'NEW';
+    const lowerTitle = data.title.toLowerCase();
+    if (lowerTitle.includes('renewed') || lowerTitle.includes('refurbished')) {
+      // In eBay REST API, for many categories, refurbished items use specific strings
+      // For Sandbox and generic purposes, we'll try a common one or keep as NEW but log it
+      this.logger.log(`Detected Renewed/Refurbished item: ${sku}. Adjusting condition logic.`);
+      // Note: eBay REST Inventory API uses condition values like:
+      // NEW, LIKE_NEW, VERY_GOOD, GOOD, ACCEPTABLE
+      // For "Renewed" on Amazon, 'LIKE_NEW' or 'VERY_GOOD' is often more accurate for eBay
+      condition = 'LIKE_NEW'; 
+    }
+
     const payload = {
       availability: {
         shipToLocationAvailability: {
           quantity: data.quantity || 1,
         },
       },
-      condition: 'NEW',
+      condition: condition,
       product: {
         // eBay title limit is 80 characters. Truncate to ensure success.
         title: data.title ? data.title.substring(0, 80) : 'New Product',
@@ -386,6 +415,7 @@ export class EbayService {
     };
 
     this.logger.debug(`Creating inventory item ${sku}. URL: ${url}`);
+    this.logger.debug(`Payload for ${sku}: ${JSON.stringify(payload)}`);
 
     try {
       await axios.put(url, payload, {
@@ -397,7 +427,7 @@ export class EbayService {
       });
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
-      this.logger.error(`Create inventory item failed for ${sku}`, axiosErr?.response?.data || getErrorMessage(e));
+      this.logger.error(`Create inventory item failed for ${sku}. Response: ${JSON.stringify(axiosErr?.response?.data || getErrorMessage(e))}`);
       throw e;
     }
   }
@@ -502,6 +532,21 @@ export class EbayService {
   }
 
   /**
+   * Delete an offer (cleanup orphan offers before retry)
+   */
+  private async deleteOffer(accessToken: string, offerId: string): Promise<void> {
+    const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${offerId}`;
+    try {
+      await axios.delete(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      this.logger.log(`Deleted orphan offer ${offerId}`);
+    } catch (e: unknown) {
+      this.logger.warn(`Failed to delete offer ${offerId}: ${getErrorMessage(e)}`);
+    }
+  }
+
+  /**
    * Publish Offer (REST API)
    */
   private async publishOffer(accessToken: string, offerId: string): Promise<string> {
@@ -524,7 +569,13 @@ export class EbayService {
       return response.data.listingId;
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
-      this.logger.error(`Publish offer failed for ${offerId}`, axiosErr?.response?.data || getErrorMessage(e));
+      const errorData = axiosErr?.response?.data;
+      
+      this.logger.error(
+        `Publish offer failed for ${offerId}. Status: ${axiosErr?.response?.status || 'Unknown'}. ` +
+        `Response: ${JSON.stringify(errorData, null, 2)}`
+      );
+      
       throw e;
     }
   }

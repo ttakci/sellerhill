@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UserStatus, type ProfileDto, type UpdateProfileRequest } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -22,55 +22,10 @@ interface UserEntity {
 }
 
 @Injectable()
-export class ProfileService implements OnModuleInit {
+export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
   constructor(private readonly databaseService: DatabaseService) {}
-
-  async onModuleInit() {
-    await this.ensureColumnsExist();
-    await this.dropDeprecatedColumns();
-  }
-
-  private async ensureColumnsExist() {
-    try {
-      this.logger.log('Checking for profile-related columns in users table...');
-      
-      const columns = [
-        'phone_number VARCHAR(20)',
-        'avatar_url TEXT',
-        'job_title TEXT',
-        'bio TEXT',
-        'country TEXT',
-        'city_state TEXT',
-        'postal_code TEXT'
-      ];
-
-      for (const columnDef of columns) {
-         await this.databaseService.query(`
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS ${columnDef}
-         `);
-      }
-      
-      this.logger.log('Profile-related columns ensured.');
-    } catch (error) {
-      this.logger.error('Failed to ensure profile-related columns', error);
-    }
-  }
-
-  private async dropDeprecatedColumns() {
-    try {
-      this.logger.log('Dropping deprecated columns (tax_id, social_links)...');
-      await this.databaseService.query(`
-        ALTER TABLE users 
-        DROP COLUMN IF EXISTS tax_id,
-        DROP COLUMN IF EXISTS social_links
-      `);
-      this.logger.log('Deprecated columns dropped.');
-    } catch (error) {
-      this.logger.error('Failed to drop deprecated columns', error);
-    }
-  }
 
   async getProfile(userId: string): Promise<ProfileDto> {
     const users = await this.databaseService.query<UserEntity>(

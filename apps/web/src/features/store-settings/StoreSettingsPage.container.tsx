@@ -10,7 +10,8 @@ import { useGetEbayAccountsQuery } from '../../features/ebay/api/ebayApi';
 import { useGetStoreSettingsQuery, useSaveStoreSettingsMutation } from './api/storeSettingsApi';
 import { StoreSettingsPageComponent } from './StoreSettingsPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 
 export const StoreSettingsPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['storeSettings', 'translation']);
@@ -93,24 +94,17 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     }
   }, [saveSuccess, showMessage, closeMessage, t]);
 
-  // Handle errors
   useEffect(() => {
-    if (saveError) {
-      const { key, params } = getErrorMessage(saveError);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'translation:message.error.header',
-          descriptionKey: key, // getErrorMessage handles prefixing for global errors usually
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'translation:message.error.close',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
+    if (!saveError) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(saveError),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      t
+    );
   }, [saveError, showMessage, closeMessage, t]);
 
   const handleSave = (data: StoreSettingsFormData): void => {
@@ -178,31 +172,33 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
     })) || [];
 
   return (
-    <StoreSettingsPageComponent
-      settings={settings}
-      onSave={handleSave}
-      onStoreChange={(id) => setSelectedStoreId(id)}
-      availableStores={availableStores}
-      // Form
-      form={form}
-      // Blacklist Management
-      newKeyword={newKeyword}
-      setNewKeyword={setNewKeyword}
-      newScope={newScope}
-      setNewScope={setNewScope}
-      onAddKeyword={handleAddKeyword}
-      onRemoveKeyword={handleRemoveKeyword}
-      // Pagination & Sorting
-      pagedBlacklist={pagedBlacklist}
-      page={page}
-      setPage={setPage}
-      rowsPerPage={rowsPerPage}
-      setRowsPerPage={setRowsPerPage}
-      onSort={handleSort}
-      sortColumn={sortColumn}
-      sortDirection={sortDirection}
-      blacklistCount={sortedBlacklist.length}
-    />
+    <EbayAccountGuard>
+      <StoreSettingsPageComponent
+        settings={settings}
+        onSave={handleSave}
+        onStoreChange={(id) => setSelectedStoreId(id)}
+        availableStores={availableStores}
+        // Form
+        form={form}
+        // Blacklist Management
+        newKeyword={newKeyword}
+        setNewKeyword={setNewKeyword}
+        newScope={newScope}
+        setNewScope={setNewScope}
+        onAddKeyword={handleAddKeyword}
+        onRemoveKeyword={handleRemoveKeyword}
+        // Pagination & Sorting
+        pagedBlacklist={pagedBlacklist}
+        page={page}
+        setPage={setPage}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
+        onSort={handleSort}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        blacklistCount={sortedBlacklist.length}
+      />
+    </EbayAccountGuard>
   );
 };
 

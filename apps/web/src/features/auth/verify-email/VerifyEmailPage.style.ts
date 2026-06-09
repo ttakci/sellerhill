@@ -188,5 +188,6 @@ export const ActionGroup = styled.div`
 
 export const ResendButton = styled(Button)`
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  min-width: auto;
+  width: 100%;
+  transition: background-color 0.2s ease-in-out;
 `;

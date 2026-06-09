@@ -5,14 +5,29 @@ import { useTranslation } from 'react-i18next';
 
 import * as S from './OrdersPage.style';
 
+interface FormattedOrder extends OrderDto {
+  formattedDate: string;
+  formattedSalePrice: string;
+  formattedPurchasePrice: string;
+  formattedNetProfit: string;
+  buyerInitials: string;
+  avatarColorKey: number;
+}
+
+interface FormattedStats extends OrderStatsDto {
+  formattedTotalSales: string;
+  formattedTotalProfit: string;
+  formattedTodayRevenue: string;
+}
+
 interface OrdersPageComponentProps {
-  orders: OrderDto[];
-  stats: OrderStatsDto | undefined;
+  orders: FormattedOrder[];
+  stats: FormattedStats | undefined;
   page: number;
   rowsPerPage: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rows: number) => void;
-  onOrderClick: (order: OrderDto) => void;
+  onOrderClick: (order: FormattedOrder) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onDownload: () => void;
@@ -48,74 +63,42 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
   isRefreshing = false,
   totalCount,
 }) => {
-  const { t, i18n } = useTranslation(['orders', 'translation']);
+  const { t } = useTranslation(['orders', 'translation']);
   const { theme } = useTheme();
 
-  const getInitials = (name?: string) => {
-    if (!name) {
-      return '?';
-    }
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const getAvatarColor = (name?: string) => {
-    const safeName = name || 'X';
-    const colors = [
-      theme.colors.semanticTint.info,
-      theme.colors.semanticTint.warning,
-      theme.colors.semanticTint.success,
-      theme.colors.semanticTint.error,
-      theme.colors.semanticTint.neutral,
-    ];
-    const index = safeName.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
-      style: 'currency',
-      currency: i18n.language === 'tr' ? 'TRY' : 'USD',
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(new Date(dateString));
-  };
+  const avatarColors = [
+    theme.colors.semanticTint.info,
+    theme.colors.semanticTint.warning,
+    theme.colors.semanticTint.success,
+    theme.colors.semanticTint.error,
+    theme.colors.semanticTint.neutral,
+  ];
 
   const columns = [
     {
-      key: 'orderNumber',
+      key: 'ebayOrderId',
       header: t('orders:orders.table.orderNumber'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <S.OrderNumber variant="mono" weight="medium" color="semantic.info">
-          {order.orderNumber}
+          {order.ebayOrderId}
         </S.OrderNumber>
       ),
     },
     {
       key: 'createdAt',
       header: t('orders.table.date'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <S.SecondaryText variant="body" muted>
-          {formatDate(order.createdAt)}
+          {order.formattedDate}
         </S.SecondaryText>
       ),
     },
     {
       key: 'buyer',
       header: t('orders.table.buyer'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <S.BuyerInfo>
-          <S.BuyerAvatar $color={getAvatarColor(order.buyerName)}>{getInitials(order.buyerName)}</S.BuyerAvatar>
+          <S.BuyerAvatar $color={avatarColors[order.avatarColorKey]}>{order.buyerInitials}</S.BuyerAvatar>
           <S.BuyerName variant="body" weight="medium">
             {order.buyerName}
           </S.BuyerName>
@@ -125,39 +108,39 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
     {
       key: 'status',
       header: t('orders.table.status'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <StatusBadge status={orderStatusToBadgeStatus(order.status)}>{t(`orders.status.${order.status}`)}</StatusBadge>
       ),
     },
     {
       key: 'salePrice',
       header: t('orders.table.salePrice'),
-      render: (_: unknown, order: OrderDto) => (
-        <S.PriceText variant="body">{formatCurrency(order.salePrice)}</S.PriceText>
+      render: (_: unknown, order: FormattedOrder) => (
+        <S.PriceText variant="body">{order.formattedSalePrice}</S.PriceText>
       ),
     },
     {
       key: 'purchasePrice',
       header: t('orders.table.purchasePrice'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <S.SecondaryText variant="body" muted>
-          {formatCurrency(order.purchasePrice)}
+          {order.formattedPurchasePrice}
         </S.SecondaryText>
       ),
     },
     {
       key: 'netProfit',
       header: t('orders.table.netProfit'),
-      render: (_: unknown, order: OrderDto) => (
+      render: (_: unknown, order: FormattedOrder) => (
         <S.PriceText variant="body" $profit={order.netProfit > 0} $loss={order.netProfit < 0}>
           {order.netProfit >= 0 ? '+' : ''}
-          {formatCurrency(order.netProfit)}
+          {order.formattedNetProfit}
         </S.PriceText>
       ),
     },
   ];
 
-  const renderGridCard = (order: OrderDto) => (
+  const renderGridCard = (order: FormattedOrder) => (
     <S.GridCard key={order.id} variant="interactive" onClick={() => onOrderClick(order)}>
       <S.CardImageSection>
         <Icon name="receipt-long" size={48} />
@@ -165,14 +148,14 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
       <S.CardContent>
         <S.CardTitleRow>
           <S.OrderNumber variant="mono" weight="medium" color="semantic.info">
-            {order.orderNumber}
+            {order.ebayOrderId}
           </S.OrderNumber>
           <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
             {t(`orders.status.${order.status}`)}
           </StatusBadge>
         </S.CardTitleRow>
         <S.CardInfoRow>
-          <S.BuyerAvatar $color={getAvatarColor(order.buyerName)}>{getInitials(order.buyerName)}</S.BuyerAvatar>
+          <S.BuyerAvatar $color={avatarColors[order.avatarColorKey]}>{order.buyerInitials}</S.BuyerAvatar>
           <S.BuyerDetails>
             <S.BuyerName variant="body" weight="medium">
               {order.buyerName}
@@ -184,9 +167,9 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
         </S.CardInfoRow>
         <S.CardPriceRow>
           <S.SecondaryText variant="body" muted>
-            {formatDate(order.createdAt)}
+            {order.formattedDate}
           </S.SecondaryText>
-          <S.PriceText variant="body">{formatCurrency(order.salePrice)}</S.PriceText>
+          <S.PriceText variant="body">{order.formattedSalePrice}</S.PriceText>
         </S.CardPriceRow>
       </S.CardContent>
       <S.CardFooter>
@@ -195,7 +178,7 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
         </S.SecondaryText>
         <S.PriceText variant="body" $profit={order.netProfit > 0} $loss={order.netProfit < 0}>
           {order.netProfit >= 0 ? '+' : ''}
-          {formatCurrency(order.netProfit)}
+          {order.formattedNetProfit}
         </S.PriceText>
       </S.CardFooter>
     </S.GridCard>
@@ -214,8 +197,8 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
   return (
     <S.PageContainer>
       <PageHeader
-        title={t('orders.title')}
-        subtitle={t('orders.subtitle', { count: orders.length })}
+        title={t('orders.page.title')}
+        subtitle={t('orders.page.subtitle', { count: totalCount })}
         actions={
           <S.ActionsWrapper>
             <Button variant="secondary" size="medium" iconLeft="refresh" onClick={onRefresh} isLoading={isRefreshing}>
@@ -246,7 +229,7 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
               <Icon name="payments" size={20} color={theme.colors.semantic.info} />
             </S.StatIconWrapper>
           </S.StatHeader>
-          <S.StatValue>{formatCurrency(stats?.totalSales || 0)}</S.StatValue>
+          <S.StatValue>{stats?.formattedTotalSales || '$0'}</S.StatValue>
           <S.StatChange $positive>
             <Icon name="trending-up" size={14} />
             {t('orders.stats.growth', { value: stats?.salesGrowth || 0 })}
@@ -262,7 +245,7 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
               <Icon name="account-balance-wallet" size={20} color={theme.colors.semantic.success} />
             </S.StatIconWrapper>
           </S.StatHeader>
-          <S.StatValue>{formatCurrency(stats?.totalProfit || 0)}</S.StatValue>
+          <S.StatValue>{stats?.formattedTotalProfit || '$0'}</S.StatValue>
           <S.StatChange $positive>
             <Icon name="trending-up" size={14} />
             {t('orders.stats.profitGrowth', { value: stats?.profitGrowth || 0 })}

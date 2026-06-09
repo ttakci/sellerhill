@@ -146,7 +146,6 @@ export const Grid = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
-  margin-bottom: ${tkn('spacing.xl')};
   width: 100%;
 
   @media (min-width: 64rem) {
@@ -189,6 +188,31 @@ export const BoldText = styled(Text)``;
 
 export const AddressText = styled(Text)`
   line-height: 1.6;
+`;
+
+export const AddressBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  margin-top: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.sm')};
+  background: ${tkn('colors.surface.elevated')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.md')};
+  position: relative;
+`;
+
+export const AddressLine = styled(Text)`
+  line-height: 1.5;
+  user-select: text;
+`;
+
+export const CopyButton = styled(RepoButton)`
+  align-self: flex-end;
+  margin-top: ${tkn('spacing.xs')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
 `;
 
 export const SummaryRow = styled.div<{ $bold?: boolean; $total?: boolean; $bordered?: boolean }>`
@@ -284,20 +308,13 @@ export const EarningsLink = styled.div`
 `;
 
 // Analysis Section
-export const AnalysisCard = styled.div`
-  background: linear-gradient(
-    135deg,
-    ${tkn('colors.semanticTint.info')} 0%,
-    ${tkn('colors.semanticTint.success')} 100%
-  );
-  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.info')}; /* 1px */
-  border-radius: ${tkn('radius.xl')};
+export const AnalysisCard = styled(RepoCard)`
   padding: ${tkn('spacing.xl')};
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: ${tkn('spacing.xl')};
+  margin-bottom: ${tkn('spacing.xl')};
+
+  @media (max-width: 48rem) {
+    padding: ${tkn('spacing.lg')};
+  }
 `;
 
 export const AnalysisMetadata = styled.div`
@@ -524,28 +541,8 @@ export const AmazonUpdateButton = styled(RepoButton)`
   letter-spacing: 0.1em;
 `;
 
-export const DecorativeBlur = styled.div<{ $position: 'top-right' | 'bottom-left' }>`
-  position: absolute;
-  width: 12rem;
-  height: 12rem;
-  border-radius: 50%;
-  filter: blur(4rem);
-  ${({ $position }) =>
-    $position === 'top-right'
-      ? `
-    right: -3rem;
-    top: -3rem;
-    background: ${String(tkn('colors.semanticTint.success'))};
-  `
-      : `
-    left: -3rem;
-    bottom: -3rem;
-    background: ${String(tkn('colors.semanticTint.info'))};
-  `}
-`;
-
 export const AnalysisDescription = styled.p`
-  font-size: 0.8125rem;
+  font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.tertiary')};
   max-width: 27.5rem;
   line-height: 1.5;
@@ -554,12 +551,13 @@ export const AnalysisDescription = styled.p`
 
 export const FormulaMinus = styled.span`
   color: ${tkn('colors.border.secondary')};
+  margin: 0 ${tkn('spacing.xs')};
 `;
 
 export const SummarySection = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: ${tkn('spacing.lg')};
 `;
 
 export const SummarySectionSmall = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: ${tkn('spacing.md')};
 `;

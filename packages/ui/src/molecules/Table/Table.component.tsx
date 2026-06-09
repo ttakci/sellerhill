@@ -8,7 +8,7 @@ import * as S from './Table.style';
 import type { TableProps } from './Table.types';
 import { TablePagination } from './TablePagination.component';
 
-export const Table = <T extends Record<string, unknown>>({
+export const Table = <T,>({
   columns,
   data,
   emptyMessage,
@@ -241,8 +241,8 @@ export const Table = <T extends Record<string, unknown>>({
                         style={{ width: column.width }}
                       >
                         {column.render
-                          ? column.render(row[column.key], row, rowIndex)
-                          : (row[column.key] as React.ReactNode)}
+                          ? column.render((row as Record<string, unknown>)[column.key], row, rowIndex)
+                          : ((row as Record<string, unknown>)[column.key] as React.ReactNode)}
                       </S.Td>
                     ))}
                   </S.Tr>

@@ -13,7 +13,30 @@
       "Bash(grep -h \"import.*@repo/ui\" apps/web/src/**/*.tsx)",
       "Bash(xxd \"apps/web/src/features/dashboard/DashboardPage/DashboardPage.component.tsx\")",
       "Bash(python3 -c ':*)",
-      "Bash(python -c ':*)"
+      "Bash(python -c ':*)",
+      "Bash(claude mcp:*)",
+      "Bash(xxd \"d:/dev/projects/zonds/zonds/apps/api/src/modules/dashboard/dashboard.service.ts\")",
+      "Bash(sed -i 's/        quantity, is_tracked,$/        quantity,/' apps/api/src/modules/orders/order-sync.service.ts)",
+      "Bash(sed -i 's/        \\\\$11, \\\\$12, \\\\$13,$/        $11, $12,/' apps/api/src/modules/orders/order-sync.service.ts)",
+      "Bash(sed -i 's/\\\\$14,/\\\\$13,/; s/\\\\$15,/\\\\$14,/; s/\\\\$16,/\\\\$15,/; s/\\\\$17,/\\\\$18,/; s/\\\\$18,/\\\\$17,/; s/\\\\$19,/\\\\$18,/; s/\\\\$20,/\\\\$19,/; s/\\\\$21,/\\\\$22,/; s/\\\\$22,/\\\\$21,/; s/\\\\$23,/\\\\$22,/; s/\\\\$24$/\\\\$23/' apps/api/src/modules/orders/order-sync.service.ts)",
+      "Bash(xxd \"d:/dev/projects/zonds/zonds/apps/api/src/modules/orders/order-sync.service.ts\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(pnpm dev:api)",
+      "Bash(curl -s http://localhost:3000/api/docs)",
+      "Bash(curl -s http://localhost:3000/api)",
+      "Bash(curl -s http://localhost:3000/auth/login -X POST -H 'Content-Type: application/json' -d '{\"email\":\"zondsxseller01@gmail.com\",\"password\":\"test1234\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/v1/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"zondsxseller01@gmail.com\",\"password\":\"test1234\"}')",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 15196)",
+      "Bash(taskkill //F //PID 12028)",
+      "Bash(curl -s http://localhost:3000/api/docs -o /dev/null -w \"%{http_code}\")",
+      "mcp__web-search-prime__web_search_prime",
+      "mcp__web-reader__webReader",
+      "mcp__zai-mcp-server__analyze_image",
+      "Bash(git commit -m 'feat: Amazon integration, Docker, products module, and UI improvements *)",
+      "Bash(git commit -m 'feat: Amazon integration, Docker, products module, and UI improvements' -m '- Add Amazon buyer accounts module \\(CRUD, scraping, tracking\\) *)",
+      "Bash(pnpm validate *)"
     ]
   }
 }

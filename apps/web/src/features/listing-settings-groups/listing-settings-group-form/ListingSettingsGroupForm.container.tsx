@@ -9,7 +9,7 @@ import { useLoading, useUI } from '@repo/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import {
   useCreateListingSettingsGroupMutation,
@@ -20,9 +20,11 @@ import {
 
 import { ListingSettingsGroupFormComponent } from './ListingSettingsGroupForm.component';
 
+import { useLocale } from '@/utils/useLocale';
+
 export const ListingSettingsGroupFormContainer = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage } = useUI();
   const isEdit = !!id;
@@ -31,9 +33,9 @@ export const ListingSettingsGroupFormContainer = () => {
 
   const { data: group, isLoading: isGroupLoading } = useGetListingSettingsGroupByIdQuery(id!, { skip: !isEdit });
   const { data: templates = [], isLoading: isTemplatesLoading } = useGetPredefinedTemplatesQuery();
-  const [createListingSettingsGroup, { isLoading: isCreating, isSuccess: createSuccess, isError: createError }] =
+  const [createListingSettingsGroup, { isLoading: isCreating, isSuccess: createSuccess, isError: createError, reset: resetCreate }] =
     useCreateListingSettingsGroupMutation();
-  const [updateListingSettingsGroup, { isLoading: isUpdating, isSuccess: updateSuccess, isError: updateError }] =
+  const [updateListingSettingsGroup, { isLoading: isUpdating, isSuccess: updateSuccess, isError: updateError, reset: resetUpdate }] =
     useUpdateListingSettingsGroupMutation();
 
   useLoading(isGroupLoading || isTemplatesLoading || isCreating || isUpdating);
@@ -73,6 +75,8 @@ export const ListingSettingsGroupFormContainer = () => {
   // Handle success
   useEffect(() => {
     if (createSuccess || updateSuccess) {
+      resetCreate();
+      resetUpdate();
       showMessage(
         {
           type: 'success',
@@ -80,12 +84,15 @@ export const ListingSettingsGroupFormContainer = () => {
           descriptionKey: createSuccess
             ? 'listingSettingsGroup:listingSettingsGroup.success.created'
             : 'listingSettingsGroup:listingSettingsGroup.success.updated',
+          primaryButton: {
+            labelKey: 'translation:common.ok',
+            onClick: () => localeNavigate('/settings/listing-groups'),
+          },
         },
         t
       );
-      void navigate('/settings/listing-groups');
     }
-  }, [createSuccess, updateSuccess, showMessage, t, navigate]);
+  }, [createSuccess, updateSuccess, showMessage, t, localeNavigate, resetCreate, resetUpdate]);
 
   // Handle error
   useEffect(() => {
@@ -119,7 +126,7 @@ export const ListingSettingsGroupFormContainer = () => {
   };
 
   const handleCancel = () => {
-    void navigate('/settings/listing-groups');
+    localeNavigate('/settings/listing-groups');
   };
 
   const handleAddRange = () => {
@@ -201,6 +208,22 @@ export const ListingSettingsGroupFormContainer = () => {
     return processedHtml;
   }, [activeTemplate]);
 
+  const handleOpenPreview = () => {
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>${t('listingSettingsGroup.livePreview')}</title></head>
+        <body style="margin:0;padding:0;">
+          ${renderedPreview}
+        </body>
+        </html>
+      `);
+      win.document.close();
+    }
+  };
+
   const getPreviewWidth = () => {
     switch (previewDevice) {
       case 'mobile':
@@ -232,6 +255,7 @@ export const ListingSettingsGroupFormContainer = () => {
       renderedPreview={renderedPreview}
       getPreviewWidth={getPreviewWidth}
       activeTemplate={activeTemplate}
+      onOpenPreview={handleOpenPreview}
     />
   );
 };

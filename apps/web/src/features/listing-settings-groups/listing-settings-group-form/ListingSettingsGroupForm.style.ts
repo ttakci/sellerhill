@@ -1,12 +1,5 @@
 import styled from '@emotion/styled';
-import {
-  Button,
-  Card,
-  IconButton as IconButtonAtom,
-  Text,
-  Textarea,
-  tkn,
-} from '@repo/ui';
+import { Button, Card, IconButton as IconButtonAtom, Text, tkn } from '@repo/ui';
 
 export const Container = styled.div`
   width: 100%;
@@ -43,14 +36,16 @@ export const PageTitle = styled(Text)`
 
 export const Actions = styled.div`
   display: flex;
-  gap: ${tkn('spacing.sm')};
+  justify-content: flex-end;
+  gap: ${tkn('spacing.md')};
 
   @media (max-width: 47.9375rem) {
     /* 767px */
+    flex-direction: column;
     width: 100%;
 
     & > button {
-      flex: 1;
+      width: 100%;
       justify-content: center;
     }
   }
@@ -142,7 +137,6 @@ export const PaddingContainer = styled.div<{ $flex?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
-  ${({ $flex }) => $flex && 'flex: 1;'}
 `;
 
 export const InputGrid = styled.div<{ columns?: number }>`
@@ -188,14 +182,18 @@ export const PriceRangeRow = styled.div`
 
 export const RemoveButton = styled(Button)`
   position: absolute;
-  top: 0.75rem; /* 12px */
-  right: 0.75rem; /* 12px */
+  top: 0.5rem; /* 8px */
+  right: 0.5rem; /* 8px */
   width: 1.75rem; /* 28px */
   height: 1.75rem; /* 28px */
+  min-width: unset;
+  min-height: unset;
+  padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 `;
 
 export const SplitGrid = styled.div`
@@ -234,62 +232,39 @@ export const ToggleItem = styled(Button)<{ active?: boolean }>`
   }
 `;
 
-export const TemplateSelectorWrapper = styled.div`
+export const TemplateBody = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 8px */
-  margin-bottom: 1rem; /* 16px */
-  width: 100%;
-  max-width: 25rem; /* 400px */
-
-  @media (max-width: 47.9375rem) {
-    /* 767px */
-    max-width: 100%;
-  }
-`;
-
-export const TemplateEditorContainer = styled.div`
-  flex: 1;
-  background: #0f172a;
-  border-radius: ${tkn('radius.md')};
-  border: 0.0625rem solid #1e293b; /* 1px */
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 21.875rem; /* 350px */
 `;
 
-export const EditorCodeArea = styled.div`
+export const TemplateSelectWrapper = styled.div`
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')} ${tkn('spacing.sm')};
+
+  @media (max-width: 63.9375rem) {
+    padding: ${tkn('spacing.md')} ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  }
+`;
+
+export const CustomTemplateTextarea = styled.textarea`
   flex: 1;
-  padding: 1rem; /* 16px */
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 0.8125rem; /* 13px */
-  color: #94a3b8;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 0.375rem; /* 6px */
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 0.625rem; /* 10px */
-  }
-`;
-
-export const EditorComment = styled.div`
-  color: #64748b;
-  margin-bottom: 0.5rem;
-  font-size: 0.6875rem;
-`;
-
-export const CustomTemplateTextarea = styled(Textarea)`
   width: 100%;
-  height: 100%;
-  resize: none;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  background-color: transparent;
+  border: none;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  color: ${tkn('colors.text.primary')};
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
   line-height: 1.6;
+  resize: none;
+  outline: none;
+  overflow: auto;
+
+  @media (max-width: 63.9375rem) {
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
 export const PreviewCard = styled(Card)`
@@ -370,17 +345,6 @@ export const PreviewContent = styled.div<{ $width: string }>`
 export const PreviewHTMLContent = styled.div`
   width: 100%;
   height: 100%;
-`;
-
-export const AddButton = styled(Button)`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem; /* 4px */
-
-  &:hover {
-    color: ${(p) => p.theme.colors.brand.primaryHover};
-    text-decoration: underline;
-  }
 `;
 
 export const StockInputWrapper = styled.div`

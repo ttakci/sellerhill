@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useGetProfileQuery, useUpdateProfileMutation } from './api/profileApi';
 import { ProfilePageComponent } from './ProfilePage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 
 export const ProfilePageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['profile', 'translation']);
@@ -82,22 +82,16 @@ export const ProfilePageContainer = (): React.ReactElement => {
   }, [isSuccess, showMessage, handleSuccessClose, t]);
 
   useEffect(() => {
-    if (error) {
-      const { key, params } = getErrorMessage(error);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'translation:common.error',
-          descriptionKey: key,
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'translation:common.ok',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
+    if (!error) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(error),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      t
+    );
   }, [error, showMessage, closeMessage, t]);
 
   const onFormSubmit = (data: UpdateProfileFormData): void => {

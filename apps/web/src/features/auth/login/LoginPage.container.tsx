@@ -9,70 +9,68 @@ import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 import { useLoginMutation } from '../api/authApi';
 import { setCredentials } from '../store/authSlice';
 
 import { LoginPageComponent } from './LoginPage.component';
 
-import { getErrorMessage } from '@/utils/errorHandler';
+import { getErrorI18nKey } from '@/utils/errorHandler';
+import { useLocale } from '@/utils/useLocale';
 
 export const LoginPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  const { i18n } = useTranslation();
 
   const [login, { isLoading, isSuccess, error, data }] = useLoginMutation();
 
-  // Use RTK Query loading state with useLoading hook
   useLoading(isLoading);
 
-  // Handle success
   useEffect(() => {
     if (isSuccess && data) {
-      // Store credentials in Redux (which also syncs to localStorage)
       dispatch(setCredentials(data));
-
-      // Redirect based on whether user has connected accounts
       if (data.user.hasConnectedAccounts) {
-        void navigate('/dashboard');
+        localeNavigate('/dashboard');
       } else {
-        void navigate('/onboarding/ebay');
+        localeNavigate('/onboarding/ebay');
       }
     }
-  }, [isSuccess, data, dispatch, navigate]);
+  }, [isSuccess, data, dispatch, localeNavigate]);
 
-  // Handle error
   useEffect(() => {
-    if (error) {
-      const { key, params } = getErrorMessage(error);
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'message.error.header',
-          descriptionKey: key,
-          descriptionParams: params,
-          primaryButton: {
-            labelKey: 'translation:message.error.close',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
-    }
-  }, [error, showMessage, closeMessage, t]);
+    if (!error) {return;}
+    const key = getErrorI18nKey(error);
+    const header = i18n.t('translation:message.error.header');
+    const description = i18n.t(key);
+    const closeLabel = i18n.t('translation:message.error.close');
+
+    // Pass pre-translated strings via fake t function
+    const translations: Record<string, string> = {
+      'translation:message.error.header': header,
+      'translation:message.error.close': closeLabel,
+      [key]: description,
+    };
+    const fakeT = (k: string) => translations[k] ?? k;
+
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: key,
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      fakeT
+    );
+  }, [error, showMessage, closeMessage, i18n]);
 
   const handleSubmit = (data: LoginFormData): void => {
-    void login({
-      email: data.email,
-      password: data.password,
-    });
+    void login({ email: data.email, password: data.password });
   };
 
   const handleNavigateToRegister = (): void => {
-    void navigate('/register');
+    localeNavigate('/register');
   };
 
   return (

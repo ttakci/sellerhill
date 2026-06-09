@@ -1,7 +1,8 @@
 {
   "orders": {
     "page": {
-      "title": "Siparişler"
+      "title": "Siparişler",
+      "subtitle": "{{count}} sipariş"
     },
     "stats": {
       "totalSales": "Toplam Satış",
@@ -73,6 +74,19 @@
       "shipTo": "Teslimat Adresi",
       "contact": "İletişim",
       "unknownProduct": "Bilinmeyen Ürün",
+      "copyAddress": "Adresi Kopyala",
+      "addressCopied": "Adres kopyalandı!",
+      "amazonCosts": "Amazon Sipariş Özeti",
+      "purchasePrice": "Satın Alma Fiyatı",
+      "amazonTax": "Amazon Vergisi",
+      "amazonShipping": "Amazon Kargosu",
+      "totalAmazonCost": "Toplam Amazon Maliyeti",
+      "amazonOrder": "Amazon Siparişi",
+      "linkAmazon": "Amazon Siparişi Bağla",
+      "calcEarnings": "Kazanç",
+      "calcPurchase": "Alış",
+      "calcTax": "Vergi",
+      "calcShipping": "Kargo",
       "asin": "ASIN:",
       "ebayItemId": "eBay Ürün ID:",
       "quantity": "Adet",

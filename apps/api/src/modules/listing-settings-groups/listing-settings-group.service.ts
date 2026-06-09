@@ -50,71 +50,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async onModuleInit() {
-    await this.ensureTablesExist();
     await this.seedPredefinedTemplates();
-  }
-
-  /**
-   * Ensure listing_settings_groups and predefined_templates tables exist
-   */
-  private async ensureTablesExist() {
-    this.logger.log('Ensuring listing_settings_groups table exists...');
-
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS listing_settings_groups (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        repricing_strategy JSONB NOT NULL,
-        stock JSONB NOT NULL,
-        fees JSONB NOT NULL,
-        templates JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        created_by UUID NOT NULL,
-        updated_by UUID NOT NULL
-      )
-    `);
-
-    await this.databaseService.query(`
-      CREATE INDEX IF NOT EXISTS idx_listing_settings_groups_user_id ON listing_settings_groups(user_id);
-      CREATE INDEX IF NOT EXISTS idx_listing_settings_groups_created_by ON listing_settings_groups(created_by);
-    `);
-
-    this.logger.log('Ensuring predefined_templates table exists...');
-
-    await this.databaseService.query(`
-      CREATE TABLE IF NOT EXISTS predefined_templates (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        name VARCHAR(255) NOT NULL,
-        description TEXT NOT NULL,
-        html_content TEXT NOT NULL,
-        sample_data JSONB NOT NULL DEFAULT '{}',
-        preview_image VARCHAR(500),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Add sample_data column if it doesn't exist (for existing databases)
-    await this.databaseService.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='predefined_templates' AND column_name='sample_data') THEN
-          ALTER TABLE predefined_templates ADD COLUMN sample_data JSONB NOT NULL DEFAULT '{}';
-        END IF;
-      END $$;
-    `);
-
-    // Fix schema mismatch: Drop store_id if it exists (as we use user_id scope)
-    await this.databaseService.query(`
-      DO $$
-      BEGIN
-        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='listing_settings_groups' AND column_name='store_id') THEN
-          ALTER TABLE listing_settings_groups DROP COLUMN store_id;
-        END IF;
-      END $$;
-    `);
   }
 
   /**
@@ -451,7 +387,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       name: entity.name,
       description: entity.description,
       htmlContent: entity.html_content,
-      sampleData: typeof entity.sample_data === 'string' ? (JSON.parse(entity.sample_data) as Record<string, unknown>) : entity.sample_data,
+      sampleData: typeof entity.sample_data === 'string' ? (JSON.parse(entity.sample_data) as Record<string, string>) : (entity.sample_data as unknown as Record<string, string>),
       previewImage: entity.preview_image || undefined,
       createdAt: entity.created_at
     }));

@@ -12,19 +12,13 @@ import { logout, setCredentials } from '@/features/auth/store/authSlice';
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
   prepareHeaders: (headers, { getState, endpoint }) => {
-    // Generate and attach X-Request-ID header for tracking
     const requestId = generateRequestId();
     headers.set('X-Request-ID', requestId);
 
-    // List of endpoints that don't require authorization
     const publicEndpoints = ['login', 'register', 'verifyEmail', 'resendVerification'];
-
-    // Add auth token if available from state or localStorage as fallback
-    // But skip it for public endpoints
     if (!publicEndpoints.includes(endpoint || '')) {
       const state = getState() as any;
       const token = state.auth?.accessToken || localStorage.getItem('accessToken');
-
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
@@ -34,9 +28,6 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Note: Using `any` as the Result type so that endpoint-level type annotations
-// (e.g. builder.query<UserDto, void>) propagate correctly to generated hooks.
-// Without this, RTK Query cannot substitute the generic and all hook data becomes `unknown`.
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, any, FetchBaseQueryError> = async (
   args,
   api,
@@ -45,24 +36,17 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, any, FetchBaseQueryEr
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
-    // try to get a new token
     const refreshToken = (api.getState() as any).auth?.refreshToken;
 
     if (refreshToken) {
       const refreshResult = await baseQuery(
-        {
-          url: '/auth/refresh',
-          method: 'POST',
-          body: { refreshToken },
-        },
+        { url: '/auth/refresh', method: 'POST', body: { refreshToken } },
         api,
         extraOptions
       );
 
       if (refreshResult.data) {
-        // store the new token
         api.dispatch(setCredentials(refreshResult.data as any));
-        // retry the initial query
         result = await baseQuery(args, api, extraOptions);
       } else {
         api.dispatch(logout());
@@ -71,6 +55,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, any, FetchBaseQueryEr
       api.dispatch(logout());
     }
   }
+
   return result;
 };
 
@@ -78,7 +63,6 @@ export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
   tagTypes: [
-    'Example',
     'Auth',
     'Ebay',
     'Dashboard',
@@ -88,6 +72,7 @@ export const baseApi = createApi({
     'Profile',
     'Listings',
     'EbayPolicies',
+    'Amazon',
     'Orders',
   ],
   endpoints: () => ({}),

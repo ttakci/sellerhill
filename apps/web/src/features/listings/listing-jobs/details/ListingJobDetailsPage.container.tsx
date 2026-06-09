@@ -1,17 +1,19 @@
 import { IdBadge, StatusBadge, useLoading } from '@repo/ui';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useGetJobItemsQuery } from '../../api/listings.api';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
 
+import { useLocale } from '@/utils/useLocale';
+
 export const ListingJobDetailsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
   const { jobId } = useParams<{ jobId: string }>();
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
 
   const {
     data: items = [],
@@ -60,7 +62,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   );
 
   const handleBack = () => {
-    void navigate('/listings/jobs');
+    localeNavigate('/listings/jobs');
   };
 
   const handleRefresh = () => {

@@ -98,9 +98,11 @@
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
+    "stores": "Stores",
     "settings": "Settings",
     "storeSettings": "Store Settings",
     "listingSettingsGroups": "Listing Settings Groups",
+    "amazonAccounts": "Amazon Accounts",
     "reports": "Reports",
     "support": "Support",
     "logout": "Logout",
@@ -130,5 +132,194 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contactSupport": "Contact Support"
+  },
+  "landing": {
+    "title": "Welcome to Zonds",
+    "subtitle": "Please select your language to get started.",
+    "navbar": {
+      "features": "Features",
+      "howItWorks": "How It Works",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "login": "Login",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "headline": "Sell Amazon Products on eBay — On Full Autopilot",
+      "subheading": "From listing to delivery — pricing, stock, orders and tracking all automated.",
+      "ctaPrimary": "Start Free",
+      "ctaSecondary": "See how it works"
+    },
+    "socialProof": {
+      "label": "Trusted by {{count}}+ sellers worldwide",
+      "badges": {
+        "automation": "Full Automation",
+        "uptime": "99.9% Uptime",
+        "support": "24/7 Support"
+      }
+    },
+    "features": {
+      "sectionTitle": "Everything Automated",
+      "sectionSubtitle": "Every part of your Amazon-to-eBay business, running without you.",
+      "asinListing": {
+        "title": "ASIN-Based Listing",
+        "description": "Paste an Amazon ASIN, go live on eBay in minutes. No manual data entry."
+      },
+      "stockPriceSync": {
+        "title": "Real-Time Stock & Price Sync",
+        "description": "eBay listings automatically update when Amazon prices or stock change."
+      },
+      "autoOrder": {
+        "title": "Automatic Order Fulfillment",
+        "description": "When an eBay order comes in, it's placed on Amazon automatically. Hands-free."
+      },
+      "manualOrder": {
+        "title": "Manual Order Override",
+        "description": "Need full control? Step in and handle any order manually at any time."
+      },
+      "tracking": {
+        "title": "Automatic Tracking & Shipping",
+        "description": "Tracking numbers are fetched and pushed to eBay automatically. Shipped → Delivered without lifting a finger."
+      },
+      "perProduct": {
+        "title": "Per-Product Settings",
+        "description": "Most tools apply one rule to everything. We don't. Set profit margin, stock quantity, and listing template per product — individually.",
+        "badge": "Our Edge"
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "How It Works",
+      "sectionSubtitle": "Three steps. Zero hassle.",
+      "step1": {
+        "title": "Connect Your Accounts",
+        "description": "Link your Amazon and eBay seller accounts securely in seconds."
+      },
+      "step2": {
+        "title": "Paste ASINs & Configure",
+        "description": "Add products by ASIN and set per-product rules: margin, stock, template."
+      },
+      "step3": {
+        "title": "Sit Back & Scale",
+        "description": "Listings go live, orders flow in, tracking updates automatically. You grow."
+      }
+    },
+    "perProduct": {
+      "sectionTitle": "Your Rules. Per Product. Not Per Account.",
+      "sectionSubtitle": "Other tools force one strategy on your entire catalog. We give you individual control over every ASIN you sell.",
+      "productA": {
+        "name": "Wireless Earbuds Pro",
+        "margin": "10%",
+        "stock": "2",
+        "template": "Electronics Standard"
+      },
+      "productB": {
+        "name": "USB-C Fast Charger",
+        "margin": "20%",
+        "stock": "1",
+        "template": "Fast Shipping"
+      },
+      "productC": {
+        "name": "Phone Case Bundle",
+        "margin": "15%",
+        "stock": "5",
+        "template": "Bundle Deal"
+      },
+      "labels": {
+        "margin": "Margin",
+        "stock": "Stock",
+        "template": "Template"
+      }
+    },
+    "pricing": {
+      "sectionTitle": "Simple, Transparent Pricing",
+      "sectionSubtitle": "Start free. Scale when you're ready.",
+      "starter": {
+        "name": "Starter",
+        "price": "$0",
+        "period": "/month",
+        "description": "Perfect for trying things out.",
+        "features": {
+          "listings": "Up to 25 listings",
+          "sync": "Stock & price sync",
+          "orders": "Automatic ordering",
+          "tracking": "Tracking updates",
+          "support": "Email support"
+        },
+        "cta": "Start Free"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$49",
+        "period": "/month",
+        "description": "For serious sellers scaling up.",
+        "features": {
+          "listings": "Up to 500 listings",
+          "sync": "Real-time sync & alerts",
+          "orders": "Automatic + manual ordering",
+          "tracking": "Auto tracking & shipping",
+          "settings": "Per-product settings",
+          "support": "Priority support"
+        },
+        "cta": "Start Pro Trial",
+        "badge": "Most Popular"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "$149",
+        "period": "/month",
+        "description": "For high-volume operations.",
+        "features": {
+          "listings": "Unlimited listings",
+          "sync": "Instant sync & monitoring",
+          "orders": "Full order automation",
+          "tracking": "Complete tracking suite",
+          "settings": "Advanced per-product rules",
+          "api": "API access",
+          "support": "Dedicated account manager"
+        },
+        "cta": "Contact Sales"
+      }
+    },
+    "faq": {
+      "sectionTitle": "Frequently Asked Questions",
+      "q1": {
+        "question": "How does automatic ordering work?",
+        "answer": "When a customer buys from your eBay listing, Zonds automatically places the corresponding order on Amazon using your configured settings. No manual intervention needed."
+      },
+      "q2": {
+        "question": "What if I want to place an order manually?",
+        "answer": "You can step in at any time. Every order can be handled manually through our dashboard — automatic ordering is the default, but you always have full control."
+      },
+      "q3": {
+        "question": "How are tracking numbers handled?",
+        "answer": "Once Amazon ships your order, Zonds fetches the tracking number and pushes it to your eBay order automatically. The order status updates from Shipped to Delivered without any manual work."
+      },
+      "q4": {
+        "question": "Can I set different margins per product?",
+        "answer": "Absolutely. This is our key differentiator. Set individual profit margins, stock quantities, and listing templates for every single product — not a blanket rule for your whole account."
+      },
+      "q5": {
+        "question": "Which Amazon marketplaces are supported?",
+        "answer": "We currently support Amazon US, UK, DE, FR, IT, and ES. More marketplaces are added regularly based on seller demand."
+      },
+      "q6": {
+        "question": "Is there a free trial?",
+        "answer": "Yes! Our Starter plan is completely free with up to 25 listings. When you're ready to scale, you can try Pro free for 14 days."
+      }
+    },
+    "cta": {
+      "headline": "Start selling smarter on eBay today.",
+      "subheading": "Join thousands of sellers who automated their Amazon-to-eBay business.",
+      "button": "Get Started Free"
+    },
+    "footer": {
+      "copyright": "© {{year}} Zonds. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "support": "Support",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal"
+    }
   }
 }

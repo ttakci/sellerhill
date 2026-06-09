@@ -112,6 +112,14 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   EBAY_XML_API_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  AMAZON_ENCRYPTION_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  BROWSER_STATE_DIR?: string;
 }
 
 /**

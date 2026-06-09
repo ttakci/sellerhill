@@ -10,4 +10,5 @@ export * from './StatusBadge';
 export * from './SwitchRow';
 export * from './ViewToggle';
 export * from './Table';
+export * from './ConnectEbayPrompt';
 export * from './ThemeToggle';

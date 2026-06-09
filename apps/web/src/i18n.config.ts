@@ -13,6 +13,7 @@
  */
 
 import {
+  enAmazon,
   enAuth,
   enDashboard,
   enEbay,
@@ -22,6 +23,7 @@ import {
   enProfile,
   enStoreSettings,
   enTranslation,
+  trAmazon,
   trAuth,
   trTranslation as trCommon,
   trDashboard,
@@ -35,10 +37,16 @@ import {
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import { detectBrowserLocale, getStoredLocalePreference } from './utils/locale';
+
+// Resolve initial locale: stored preference > browser detection > default
+const initialLocale = getStoredLocalePreference() || detectBrowserLocale();
+
 void i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: enTranslation,
+      amazon: enAmazon,
       auth: enAuth,
       dashboard: enDashboard,
       ebay: enEbay,
@@ -50,6 +58,7 @@ void i18n.use(initReactI18next).init({
     },
     tr: {
       translation: trCommon,
+      amazon: trAmazon,
       auth: trAuth,
       dashboard: trDashboard,
       ebay: trEbay,
@@ -60,7 +69,7 @@ void i18n.use(initReactI18next).init({
       orders: trOrders,
     },
   },
-  lng: navigator.language.startsWith('tr') ? 'tr' : 'en',
+  lng: initialLocale,
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
   defaultNS: 'translation',

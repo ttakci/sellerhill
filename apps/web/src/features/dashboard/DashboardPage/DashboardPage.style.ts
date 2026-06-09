@@ -1,10 +1,12 @@
 /**
- * DashboardPage Styles
- * Follows OrdersPage design patterns with StatCard, Icon, etc.
+ * DashboardPage Styles — Sellerboard-style
+ * Toolbar (search + period) → Period cards → Chart → Listings table
  */
 
 import styled from '@emotion/styled';
-import { Card as RepoCard, Text, tkn } from '@repo/ui';
+import { Card, Text, tkn } from '@repo/ui';
+
+/* ─── Main Layout ─── */
 
 export const Container = styled.div`
   display: flex;
@@ -17,73 +19,116 @@ export const Container = styled.div`
   }
 `;
 
-export const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
-  gap: ${tkn('spacing.lg')};
+/* ─── Toolbar (search + period selector) ─── */
+
+export const Toolbar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
 `;
 
-export const StatCard = styled(RepoCard)`
-  padding: 1.25rem;
+export const SearchWrapper = styled.div`
+  flex: 1;
+  min-width: 12rem;
+  max-width: 20rem;
+`;
+
+export const ToolbarRight = styled.div`
   display: flex;
-  flex-direction: column;
-  transition:
-    box-shadow ${tkn('transitions.normal')},
-    transform ${tkn('transitions.normal')};
-  border-top: 3px solid
-    ${({ theme }: { theme: { colors: { brand: { primary: string } } } }) => theme.colors.brand.primary};
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/* ─── Period Cards Grid ─── */
+
+export const PeriodCardsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: ${tkn('spacing.sm')};
+
+  @media (max-width: 75rem) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 30rem) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+/* ─── Period Card ─── */
+
+export const PeriodCard = styled(Card)<{ $accentColor: string; $active: boolean }>`
+  border-top: 3px solid ${({ $accentColor }) => $accentColor};
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow ${tkn('transitions.fast')}, transform ${tkn('transitions.fast')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.lg')};
+    box-shadow: ${tkn('shadows.md')};
     transform: translateY(-0.0625rem);
   }
 `;
 
-export const StatHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${tkn('spacing.sm')};
+export const PeriodCardHeader = styled.div<{ $bgColor: string }>`
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  background: ${({ $bgColor }) => $bgColor};
 `;
 
-export const StatLabel = styled(Text)``;
+export const PeriodTitle = styled(Text)``;
 
-export const StatIconWrapper = styled.div<{ $color?: string }>`
-  width: 3rem;
-  height: 3rem;
-  background: ${({ $color, theme }) => $color || theme.colors.surface.secondary};
-  border-radius: ${tkn('radius.lg')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
+export const PeriodDate = styled(Text)`
+  margin-top: 0.125rem;
 `;
 
-export const StatValue = styled.div`
-  font-size: 1.75rem;
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-`;
-
-export const StatSubText = styled(Text)`
-  margin-top: ${tkn('spacing.xs')};
-`;
-
-export const ChartCard = styled(RepoCard)`
+export const PeriodCardBody = styled.div`
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')} ${tkn('spacing.sm')};
   display: flex;
   flex-direction: column;
 `;
 
-export const ChartHeader = styled.div`
-  padding: ${tkn('spacing.lg')};
-  padding-bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+export const HeroMetricLabel = styled(Text)``;
+
+export const HeroMetricValue = styled.div`
+  font-size: ${tkn('typography.fontSize.xl')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  color: ${tkn('colors.text.primary')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+  letter-spacing: -0.02em;
+  margin-bottom: ${tkn('spacing.xs')};
 `;
 
-export const ChartTitle = styled(Text)``;
+export const MetricRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: ${tkn('spacing.2xs')} 0;
+  border-top: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const MetricLabel = styled(Text)`
+  flex-shrink: 0;
+`;
+
+export const MetricValue = styled(Text)`
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  text-align: right;
+`;
+
+export const TrendBadge = styled.span<{ $positive: boolean }>`
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${({ $positive, theme }) =>
+    $positive ? theme.colors.semantic.success : theme.colors.semantic.error};
+  margin-left: ${tkn('spacing.xs')};
+`;
+
+/* ─── Chart ─── */
 
 export const ChartLegend = styled.div`
   display: flex;
@@ -104,197 +149,84 @@ export const LegendDot = styled.div<{ $color: string }>`
   background: ${({ $color }) => $color};
 `;
 
-export const LegendLabel = styled(Text)``;
-
 export const ChartContainer = styled.div`
   width: 100%;
-  height: 18rem;
+  height: 16rem;
   padding: ${tkn('spacing.md')};
 
   @media (max-width: 48rem) {
-    height: 14rem;
+    height: 12rem;
   }
 `;
 
-export const RecentOrdersCard = styled(RepoCard)``;
+/* ─── Listings Table ─── */
 
-export const RecentOrdersHeader = styled.div`
-  padding: ${tkn('spacing.lg')};
-  padding-bottom: ${tkn('spacing.md')};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+export const ListingsTableWrapper = styled.div`
+  overflow-x: auto;
 `;
 
-export const RecentOrdersTitle = styled(Text)``;
-
-export const OrderList = styled.div`
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+export const ListingsTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${tkn('typography.fontSize.sm')};
 `;
 
-export const OrderRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+export const Th = styled.th`
+  text-align: left;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  color: ${tkn('colors.text.secondary')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-size: ${tkn('typography.fontSize.xs')};
   border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  white-space: nowrap;
+`;
+
+export const Td = styled.td`
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  white-space: nowrap;
+`;
+
+export const Tr = styled.tr`
   cursor: pointer;
   transition: background ${tkn('transitions.fast')};
-  border-radius: ${tkn('radius.sm')};
 
   &:hover {
     background: ${tkn('colors.surface.secondary')};
   }
 
-  &:last-child {
+  &:last-child td {
     border-bottom: none;
-  }
-
-  @media (max-width: 48rem) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: ${tkn('spacing.sm')};
   }
 `;
 
-export const OrderLeft = styled.div`
+export const ListingTitleCell = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.md')};
-  flex: 1;
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
-export const OrderImage = styled.div<{ $imageUrl?: string }>`
-  width: 2.5rem;
-  height: 2.5rem;
+export const ListingThumb = styled.div<{ $imageUrl?: string }>`
+  width: 2rem;
+  height: 2rem;
   border-radius: ${tkn('radius.sm')};
   background: ${({ $imageUrl, theme }) =>
     $imageUrl ? `url(${$imageUrl}) center/cover` : theme.colors.surface.secondary};
   flex-shrink: 0;
 `;
 
-export const OrderInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  min-width: 0;
-`;
-
-export const OrderTitle = styled(Text)`
+export const ListingName = styled(Text)`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 20rem;
-
-  @media (max-width: 48rem) {
-    max-width: 100%;
-  }
+  max-width: 16rem;
 `;
 
-export const OrderMeta = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
+export const ProfitPositive = styled(Text)`
+  color: ${tkn('colors.semantic.success')};
 `;
 
-export const OrderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.lg')};
-  flex-shrink: 0;
-
-  @media (max-width: 48rem) {
-    width: 100%;
-    justify-content: space-between;
-  }
-`;
-
-export const UntrackedBadge = styled.div`
-  background: ${tkn('colors.semanticTint.warning')};
-  color: ${tkn('colors.semantic.warning')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.sm')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  white-space: nowrap;
-`;
-
-export const EmptyState = styled.div`
-  text-align: center;
-  padding: ${tkn('spacing.xxl')};
-  background: ${tkn('colors.background.secondary')};
-  border-radius: ${tkn('radius.md')};
-`;
-
-export const EmptyStateText = styled(Text)`
-  margin: 0 0 ${tkn('spacing.lg')} 0;
-`;
-
-export const EmptyStateCard = styled(RepoCard)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: ${tkn('spacing.xxl')} ${tkn('spacing.lg')};
-  text-align: center;
-`;
-
-export const EmptyStateIconWrapper = styled.div`
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 50%;
-  background: ${tkn('colors.semanticTint.info')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: ${tkn('spacing.lg')};
-`;
-
-export const EmptyStateDesc = styled(Text)`
-  margin: ${tkn('spacing.sm')} 0 ${tkn('spacing.lg')} 0;
-  max-width: 26rem;
-`;
-
-export const ButtonContainer = styled.div`
-  max-width: 20rem;
-  width: 100%;
-`;
-
-export const ConnectButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.sm')};
-  width: 100%;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  background: ${tkn('colors.brand.primary')};
-  color: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.md')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  cursor: pointer;
-  transition: opacity ${tkn('transitions.fast')};
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-export const ViewAllButton = styled.button`
-  background: none;
-  border: none;
-  color: ${tkn('colors.brand.primary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  cursor: pointer;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.sm')};
-  transition: background ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.semanticTint.info')};
-  }
+export const ProfitNegative = styled(Text)`
+  color: ${tkn('colors.semantic.error')};
 `;

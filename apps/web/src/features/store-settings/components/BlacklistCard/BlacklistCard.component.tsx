@@ -16,7 +16,9 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({ keyword, scope, on
             <Text weight="semibold" color="text.primary">
               {keyword}
             </Text>
-            <S.ScopeBadge status={scope} size="sm">{t(`storeSettings:storeSettings.scope_${scope}`).toUpperCase()}</S.ScopeBadge>
+            <S.ScopeBadge status={scope} size="sm">
+              {t(`storeSettings:storeSettings.scope_${scope}`).toUpperCase()}
+            </S.ScopeBadge>
           </S.KeywordSection>
           <S.ActionButton variant="ghost" onClick={onRemove} aria-label={t('translation:common.delete')}>
             <Icon name="trash" size={16} />

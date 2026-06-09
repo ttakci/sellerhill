@@ -1,12 +1,22 @@
 /**
  * DashboardPage Component (Presentation)
- * Uses @repo/ui design system components: Card, Icon, Text, StatusBadge
- * i18n with 'dashboard' namespace
+ * Sellerboard layout: Toolbar (search + period) → Cards → Chart → Listings table
  */
 
-import type { OrderDto } from '@repo/shared';
-import { Icon, PageHeader, StatusBadge, Text, useTheme } from '@repo/ui';
-import React from 'react';
+import type { ListingDto, PeriodMetricsDto } from '@repo/shared';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Icon,
+  PageHeader,
+  SearchField,
+  SegmentedControl,
+  Text,
+  useTheme,
+} from '@repo/ui';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
@@ -19,223 +29,317 @@ import {
 } from 'recharts';
 
 import * as S from './DashboardPage.style';
-import type { DashboardPageComponentProps } from './DashboardPage.types';
+import type { DashboardPageComponentProps, PeriodKey } from './DashboardPage.types';
+
+/* ─── Helpers ─── */
+
+const fmtTrend = (trend: number | null | undefined): string | undefined => {
+  if (trend === null || trend === undefined) { return undefined; }
+  const abs = Math.abs(Math.round(trend * 10) / 10);
+  return `${trend >= 0 ? '+' : '-'}${abs}%`;
+};
+
+const EMPTY_PERIOD: PeriodMetricsDto = { sales: 0, orders: 0, netProfit: 0, margin: 0, trend: null };
+const PERIOD_KEYS: PeriodKey[] = ['today', 'yesterday', 'thisMonth', 'thisMonthForecast', 'lastMonth'];
+
+/* ─── Period Card ─── */
+
+interface PeriodCardProps {
+  title: string;
+  dateRange: string;
+  metrics: PeriodMetricsDto;
+  accentColor: string;
+  headerBg: string;
+  isActive: boolean;
+  onClick: () => void;
+  formatCurrency: (v: number) => string;
+  labels: { sales: string; orders: string; netProfit: string; margin: string };
+}
+
+const PeriodCardComponent = ({
+  title, dateRange, metrics, accentColor, headerBg, isActive, onClick, formatCurrency, labels,
+}: PeriodCardProps): React.ReactElement => (
+  <S.PeriodCard variant="bordered" $accentColor={accentColor} $active={isActive} onClick={onClick}>
+    <S.PeriodCardHeader $bgColor={headerBg}>
+      <S.PeriodTitle variant="body-sm" weight="semibold">{title}</S.PeriodTitle>
+      <S.PeriodDate variant="caption" color="text.tertiary">{dateRange}</S.PeriodDate>
+    </S.PeriodCardHeader>
+    <S.PeriodCardBody>
+      <S.HeroMetricLabel variant="caption" color="text.secondary">{labels.sales}</S.HeroMetricLabel>
+      <S.HeroMetricValue>
+        {formatCurrency(metrics.sales)}
+        {metrics.trend !== null && metrics.trend !== undefined && (
+          <S.TrendBadge $positive={metrics.trend >= 0}>{fmtTrend(metrics.trend)}</S.TrendBadge>
+        )}
+      </S.HeroMetricValue>
+      <S.MetricRow>
+        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.orders}</S.MetricLabel>
+        <S.MetricValue variant="body-xs">{metrics.orders}</S.MetricValue>
+      </S.MetricRow>
+      <S.MetricRow>
+        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.netProfit}</S.MetricLabel>
+        <S.MetricValue variant="body-xs" color={metrics.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}>
+          {formatCurrency(metrics.netProfit)}
+        </S.MetricValue>
+      </S.MetricRow>
+      <S.MetricRow>
+        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.margin}</S.MetricLabel>
+        <S.MetricValue variant="body-xs">{metrics.margin}%</S.MetricValue>
+      </S.MetricRow>
+    </S.PeriodCardBody>
+  </S.PeriodCard>
+);
+
+/* ─── Search Dropdown ─── */
+
+interface SearchDropdownProps {
+  listings: ListingDto[];
+  onSelect: (id: string | null) => void;
+  formatCurrency: (v: number) => string;
+}
+
+const SearchDropdown = ({ listings, onSelect, formatCurrency }: SearchDropdownProps): React.ReactElement => (
+  <S.ListingsTableWrapper style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, maxHeight: '20rem', overflowY: 'auto', background: 'white', borderRadius: '0 0 8px 8px', border: '1px solid #e5e7eb', borderTop: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+    <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb' }}>
+      <Text variant="body-xs" weight="medium" color="text.secondary">{listings.length} results</Text>
+      <Button variant="text" onClick={() => onSelect(null)}>Clear</Button>
+    </div>
+    {listings.slice(0, 10).map((l) => (
+      <div key={l.id} onClick={() => onSelect(l.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
+        <S.ListingThumb $imageUrl={l.imageUrls?.[0]} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <Text variant="body-sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</Text>
+          <Text variant="caption" color="text.tertiary">{l.asin}</Text>
+        </div>
+        <Text variant="body-sm" weight="medium">{formatCurrency(l.price)}</Text>
+      </div>
+    ))}
+  </S.ListingsTableWrapper>
+);
+
+/* ─── Main Component ─── */
 
 export const DashboardPageComponent = ({
-  user,
-  dashboardData,
-  isLoading,
-  onConnectEbay,
-  onViewAllOrders,
-  isTR,
-  formatCurrency,
-  formatCompactCurrency,
-  formatDate,
+  user, dashboardData, selectedPeriod, onPeriodSelect,
+  periodPreset, onPeriodPresetChange, selectedDays: _selectedDays, onDaysChange: _onDaysChange,
+  periodDates, listings, searchQuery, onSearchChange,
+  filteredListingId, onListingSelect,
+  isTR, formatCurrency, formatCompactCurrency, formatDate,
 }: DashboardPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'translation']);
   const { theme } = useTheme();
-
-  // Chart colors from theme
-  const revenueColor = theme.colors.brand.primary;
-  const profitColor = theme.colors.semantic.success;
-
-  if (isLoading) {
-    return (
-      <S.Container>
-        <S.EmptyState>
-          <S.EmptyStateText variant="body" color="text.secondary">{t('translation:common.loading')}</S.EmptyStateText>
-        </S.EmptyState>
-      </S.Container>
-    );
-  }
+  const [showSearch, setShowSearch] = useState(false);
 
   const metrics = dashboardData?.metrics;
   const trend = dashboardData?.revenueTrend || [];
-  const recentOrders = dashboardData?.recentOrders || [];
+  const revenueColor = theme.colors.brand.primary;
+  const profitColor = theme.colors.semantic.success;
 
-  const hasNoData = !metrics || (metrics.totalOrders === 0 && metrics.activeListings === 0);
+  const cardColors = useMemo(() => ({
+    today: theme.colors.semantic.info,
+    yesterday: theme.colors.brand.primary,
+    thisMonth: theme.colors.semantic.success,
+    thisMonthForecast: theme.colors.semantic.success,
+    lastMonth: theme.colors.brand.primary,
+  }), [theme]);
+
+  const cardHeaders = useMemo(() => ({
+    today: theme.colors.semanticTint.info,
+    yesterday: theme.colors.brand.secondary,
+    thisMonth: theme.colors.semanticTint.success,
+    thisMonthForecast: theme.colors.semanticTint.success,
+    lastMonth: theme.colors.brand.secondary,
+  }), [theme]);
+
+  const labels = useMemo(() => ({
+    sales: t('dashboard.sales'), orders: t('dashboard.orders'),
+    netProfit: t('dashboard.netProfit'), margin: t('dashboard.margin'),
+  }), [t]);
+
+  const periodTitles = useMemo(() => ({
+    today: t('dashboard.today'), yesterday: t('dashboard.yesterday'),
+    thisMonth: t('dashboard.thisMonth'), thisMonthForecast: t('dashboard.thisMonthForecast'),
+    lastMonth: t('dashboard.lastMonth'),
+  }), [t]);
+
+  const periodPresetOptions = useMemo(() => [
+    { label: t('dashboard.periodToday'), value: 'today' },
+    { label: t('dashboard.periodWeek'), value: 'week' },
+    { label: t('dashboard.periodMonth'), value: 'month' },
+  ], [t]);
 
   return (
     <S.Container>
       <PageHeader
-        title={t('dashboard:title')}
-        subtitle={user ? t('dashboard:greeting', { name: user.firstName }) : t('dashboard:subtitle')}
+        title={t('dashboard.title')}
+        subtitle={user ? t('dashboard.greeting', { name: user.firstName }) : t('dashboard.subtitle')}
       />
 
-      {hasNoData ? (
-        <S.EmptyStateCard variant="bordered">
-          <S.EmptyStateIconWrapper>
-            <Icon name="rocket-launch" size={40} color={theme.colors.brand.primary} />
-          </S.EmptyStateIconWrapper>
-          <Text variant="h3" weight="semibold">{t('dashboard:comingSoon')}</Text>
-          <S.EmptyStateDesc variant="body" color="text.secondary">
-            {t('dashboard:description')}
-          </S.EmptyStateDesc>
-          <S.ButtonContainer>
-            <S.ConnectButton onClick={onConnectEbay}>
-              <Icon name="link" size={16} color={theme.colors.surface.primary} />
-              {t('dashboard:connectEbay')}
-            </S.ConnectButton>
-          </S.ButtonContainer>
-        </S.EmptyStateCard>
-      ) : (
-        <>
-          {/* Stats Cards */}
-          <S.StatsGrid>
-            <S.StatCard variant="bordered">
-              <S.StatHeader>
-                <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('dashboard:todayOrders')}</S.StatLabel>
-                <S.StatIconWrapper $color={theme.colors.semanticTint.info}>
-                  <Icon name="shopping-cart" size={20} color={theme.colors.semantic.info} />
-                </S.StatIconWrapper>
-              </S.StatHeader>
-              <S.StatValue>{metrics.todayOrders}</S.StatValue>
-              <S.StatSubText variant="body-xs" color="text.tertiary">{t('dashboard:todayRevenue', { amount: formatCurrency(metrics.todayRevenue) })}</S.StatSubText>
-            </S.StatCard>
-
-            <S.StatCard variant="bordered">
-              <S.StatHeader>
-                <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('dashboard:totalRevenue')}</S.StatLabel>
-                <S.StatIconWrapper $color={theme.colors.semanticTint.success}>
-                  <Icon name="payments" size={20} color={theme.colors.semantic.success} />
-                </S.StatIconWrapper>
-              </S.StatHeader>
-              <S.StatValue>{formatCurrency(metrics.totalRevenue)}</S.StatValue>
-              <S.StatSubText variant="body-xs" color="text.tertiary">{t('dashboard:totalOrdersCount', { count: metrics.totalOrders })}</S.StatSubText>
-            </S.StatCard>
-
-            <S.StatCard variant="bordered">
-              <S.StatHeader>
-                <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('dashboard:totalProfit')}</S.StatLabel>
-                <S.StatIconWrapper $color={theme.colors.brand.secondary}>
-                  <Icon name="account-balance-wallet" size={20} color={theme.colors.brand.primary} />
-                </S.StatIconWrapper>
-              </S.StatHeader>
-              <S.StatValue>{formatCurrency(metrics.totalProfit)}</S.StatValue>
-              <S.StatSubText variant="body-xs" color="text.tertiary">{t('dashboard:netProfitLabel')}</S.StatSubText>
-            </S.StatCard>
-
-            <S.StatCard variant="bordered">
-              <S.StatHeader>
-                <S.StatLabel variant="body-sm" weight="medium" color="text.secondary">{t('dashboard:activeListings')}</S.StatLabel>
-                <S.StatIconWrapper $color={theme.colors.semanticTint.warning}>
-                  <Icon name="storefront" size={20} color={theme.colors.semantic.warning} />
-                </S.StatIconWrapper>
-              </S.StatHeader>
-              <S.StatValue>{metrics.activeListings}</S.StatValue>
-              <S.StatSubText variant="body-xs" color="text.tertiary">{t('dashboard:onEbay')}</S.StatSubText>
-            </S.StatCard>
-          </S.StatsGrid>
-
-          {/* Revenue Chart */}
-          <S.ChartCard variant="bordered">
-            <S.ChartHeader>
-              <S.ChartTitle variant="h4" weight="semibold">{t('dashboard:revenueTrend')}</S.ChartTitle>
-              <S.ChartLegend>
-                <S.LegendItem>
-                  <S.LegendDot $color={revenueColor} />
-                  <S.LegendLabel variant="caption" color="text.secondary">{t('dashboard:revenue')}</S.LegendLabel>
-                </S.LegendItem>
-                <S.LegendItem>
-                  <S.LegendDot $color={profitColor} />
-                  <S.LegendLabel variant="caption" color="text.secondary">{t('dashboard:profit')}</S.LegendLabel>
-                </S.LegendItem>
-              </S.ChartLegend>
-            </S.ChartHeader>
-            <S.ChartContainer>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={revenueColor} stopOpacity={0.2} />
-                      <stop offset="95%" stopColor={revenueColor} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={profitColor} stopOpacity={0.2} />
-                      <stop offset="95%" stopColor={profitColor} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.secondary} vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(v: string) => formatDate(v)}
-                    tick={{ fontSize: 11, fill: theme.colors.text.tertiary }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: theme.colors.text.tertiary }}
-                    tickFormatter={(v: number) => formatCompactCurrency(v)}
-                    axisLine={false}
-                    tickLine={false}
-                    width={50}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: theme.colors.surface.primary,
-                      border: `1px solid ${theme.colors.border.primary}`,
-                      borderRadius: theme.radius?.md || '8px',
-                      boxShadow: theme.shadows?.md || '0 4px 12px rgba(0,0,0,0.1)',
-                      fontSize: '13px',
-                    }}
-                    formatter={(value: unknown, name: unknown) => [
-                      formatCurrency(Number(value ?? 0)),
-                      name === 'revenue' ? t('dashboard:revenue') : t('dashboard:profit'),
-                    ]}
-                    labelFormatter={(label: unknown) =>
-                      new Date(String(label)).toLocaleDateString(isTR ? 'tr-TR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                    }
-                  />
-                  <Area type="monotone" dataKey="revenue" stroke={revenueColor} strokeWidth={2} fill="url(#revenueGrad)" />
-                  <Area type="monotone" dataKey="profit" stroke={profitColor} strokeWidth={2} fill="url(#profitGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </S.ChartContainer>
-          </S.ChartCard>
-
-          {/* Recent Orders */}
-          {recentOrders.length > 0 && (
-            <S.RecentOrdersCard variant="bordered">
-              <S.RecentOrdersHeader>
-                <S.RecentOrdersTitle variant="h4" weight="semibold">{t('dashboard:recentOrders')}</S.RecentOrdersTitle>
-                <S.ViewAllButton onClick={onViewAllOrders}>{t('dashboard:viewAllOrders')}</S.ViewAllButton>
-              </S.RecentOrdersHeader>
-              <S.OrderList>
-                {recentOrders.map((order: OrderDto) => (
-                  <S.OrderRow key={order.id}>
-                    <S.OrderLeft>
-                      <S.OrderImage $imageUrl={order.product?.imageUrl} />
-                      <S.OrderInfo>
-                        <S.OrderTitle variant="body" weight="medium">
-                          {order.product?.title || t('dashboard:unknownProduct')}
-                        </S.OrderTitle>
-                        <S.OrderMeta>
-                          <Text variant="caption" color="text.tertiary">{formatDate(order.createdAt)}</Text>
-                          {!order.isTracked && <S.UntrackedBadge>{t('dashboard:untracked')}</S.UntrackedBadge>}
-                          {order.isTracked && order.product?.asin && (
-                            <Text variant="caption" color="text.tertiary">{t('dashboard:asin', { asin: order.product.asin })}</Text>
-                          )}
-                        </S.OrderMeta>
-                      </S.OrderInfo>
-                    </S.OrderLeft>
-                    <S.OrderRight>
-                      <Text variant="body" weight="semibold">{formatCurrency(order.saleTotal)}</Text>
-                      <Text
-                        variant="body-sm"
-                        weight="medium"
-                        color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
-                      >
-                        {order.netProfit >= 0 ? '+' : ''}{formatCurrency(order.netProfit)}
-                      </Text>
-                      <StatusBadge status={(['shipped', 'completed'].includes(order.status) ? order.status : 'processing') as 'shipped' | 'completed' | 'processing'} size="sm" />
-                    </S.OrderRight>
-                  </S.OrderRow>
-                ))}
-              </S.OrderList>
-            </S.RecentOrdersCard>
+      {/* Toolbar: Search + Period Preset */}
+      <S.Toolbar>
+        <S.SearchWrapper style={{ position: 'relative' }}>
+          <SearchField
+            value={searchQuery}
+            onChange={(e) => { onSearchChange(e.target.value); setShowSearch(true); }}
+            placeholder={t('dashboard.searchPlaceholder')}
+            onFocus={() => setShowSearch(true)}
+            size="medium"
+            variant="gray"
+            fullWidth
+          />
+          {showSearch && searchQuery.trim() && (
+            <SearchDropdown listings={listings} onSelect={(id) => { onListingSelect(id); setShowSearch(false); }} formatCurrency={formatCurrency} />
           )}
-        </>
-      )}
+        </S.SearchWrapper>
+
+        {filteredListingId && (
+          <Button variant="text" onClick={() => onListingSelect(null)}>
+            <Icon name="x" size={14} /> {t('dashboard.clearFilter')}
+          </Button>
+        )}
+
+        <S.ToolbarRight>
+          <SegmentedControl
+            options={periodPresetOptions}
+            value={periodPreset}
+            onChange={(v) => onPeriodPresetChange(v as 'today' | 'week' | 'month')}
+            size="sm"
+          />
+        </S.ToolbarRight>
+      </S.Toolbar>
+
+      {/* Active filter banner */}
+      {filteredListingId && (() => {
+        const listing = listings.find((l) => l.id === filteredListingId);
+        return listing ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', background: theme.colors.semanticTint.info, borderRadius: theme.radius?.md || '6px' }}>
+            <Icon name="filter" size={14} color={theme.colors.semantic.info} />
+            <Text variant="body-xs" weight="medium">{t('dashboard.filteredBy', { title: listing.title })}</Text>
+            <Button variant="text" onClick={() => onListingSelect(null)}>
+              <Icon name="x" size={14} />
+            </Button>
+          </div>
+        ) : null;
+      })()}
+
+      {/* Period Cards */}
+      <S.PeriodCardsGrid>
+        {PERIOD_KEYS.map((key) => (
+          <PeriodCardComponent
+            key={key}
+            title={periodTitles[key]}
+            dateRange={periodDates[key].dateRange}
+            metrics={metrics?.[key] ?? EMPTY_PERIOD}
+            accentColor={cardColors[key]}
+            headerBg={cardHeaders[key]}
+            isActive={selectedPeriod === key}
+            onClick={() => onPeriodSelect(key)}
+            formatCurrency={formatCurrency}
+            labels={labels}
+          />
+        ))}
+      </S.PeriodCardsGrid>
+
+      {/* Revenue Chart — full width */}
+      <Card variant="bordered">
+        <CardHeader
+          actions={
+            <S.ChartLegend>
+              <S.LegendItem>
+                <S.LegendDot $color={revenueColor} />
+                <Text variant="caption" color="text.secondary">{t('dashboard.revenue')}</Text>
+              </S.LegendItem>
+              <S.LegendItem>
+                <S.LegendDot $color={profitColor} />
+                <Text variant="caption" color="text.secondary">{t('dashboard.profit')}</Text>
+              </S.LegendItem>
+            </S.ChartLegend>
+          }
+        >
+          {t('dashboard.revenueTrend')}
+        </CardHeader>
+        <CardBody>
+          <S.ChartContainer>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={revenueColor} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={revenueColor} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={profitColor} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={profitColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.secondary} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={(v: string) => formatDate(v)} tick={{ fontSize: 11, fill: theme.colors.text.tertiary }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: theme.colors.text.tertiary }} tickFormatter={(v: number) => formatCompactCurrency(v)} axisLine={false} tickLine={false} width={50} />
+                <Tooltip
+                  contentStyle={{ background: theme.colors.surface.primary, border: `1px solid ${theme.colors.border.primary}`, borderRadius: theme.radius?.md || '8px', boxShadow: theme.shadows?.md || '0 4px 12px rgba(0,0,0,0.1)', fontSize: '13px' }}
+                  formatter={(value: unknown, name: unknown) => [formatCurrency(Number(value ?? 0)), name === 'revenue' ? t('dashboard.revenue') : t('dashboard.profit')]}
+                  labelFormatter={(label: unknown) => new Date(String(label)).toLocaleDateString(isTR ? 'tr-TR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                />
+                <Area type="monotone" dataKey="revenue" stroke={revenueColor} strokeWidth={2} fill="url(#revenueGrad)" />
+                <Area type="monotone" dataKey="profit" stroke={profitColor} strokeWidth={2} fill="url(#profitGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </S.ChartContainer>
+        </CardBody>
+      </Card>
+
+      {/* Listings Table — Sellerboard-style product breakdown */}
+      <Card variant="bordered">
+        <CardHeader>
+          {t('dashboard.listings')}
+        </CardHeader>
+        <CardBody>
+          <S.ListingsTableWrapper>
+            <S.ListingsTable>
+              <thead>
+                <tr>
+                  <S.Th>{t('dashboard.listingTitle')}</S.Th>
+                  <S.Th>{t('dashboard.listingPrice')}</S.Th>
+                  <S.Th>{t('dashboard.listingCost')}</S.Th>
+                  <S.Th>{t('dashboard.listingProfit')}</S.Th>
+                  <S.Th>{t('dashboard.listingMargin')}</S.Th>
+                  <S.Th>{t('dashboard.listingRoi')}</S.Th>
+                  <S.Th>{t('dashboard.listingSold')}</S.Th>
+                  <S.Th>{t('dashboard.listingStatus')}</S.Th>
+                </tr>
+              </thead>
+              <tbody>
+                {(filteredListingId ? listings.filter((l) => l.id === filteredListingId) : listings).map((listing) => (
+                  <S.Tr key={listing.id} onClick={() => onListingSelect(filteredListingId === listing.id ? null : listing.id)}>
+                    <S.Td>
+                      <S.ListingTitleCell>
+                        <S.ListingThumb $imageUrl={listing.imageUrls?.[0]} />
+                        <div style={{ minWidth: 0 }}>
+                          <S.ListingName variant="body-sm" weight="medium">{listing.title}</S.ListingName>
+                          <Text variant="caption" color="text.tertiary">{listing.asin}</Text>
+                        </div>
+                      </S.ListingTitleCell>
+                    </S.Td>
+                    <S.Td><Text variant="body-sm">{formatCurrency(listing.price)}</Text></S.Td>
+                    <S.Td><Text variant="body-sm">{listing.purchasePrice ? formatCurrency(listing.purchasePrice) : '—'}</Text></S.Td>
+                    <S.Td>
+                      {listing.estimatedProfit !== null && listing.estimatedProfit !== undefined ? (
+                        listing.estimatedProfit >= 0
+                          ? <S.ProfitPositive variant="body-sm" weight="medium">{formatCurrency(listing.estimatedProfit)}</S.ProfitPositive>
+                          : <S.ProfitNegative variant="body-sm" weight="medium">{formatCurrency(listing.estimatedProfit)}</S.ProfitNegative>
+                      ) : <Text variant="body-sm" color="text.tertiary">—</Text>}
+                    </S.Td>
+                    <S.Td><Text variant="body-sm">{listing.profitMargin !== null && listing.profitMargin !== undefined ? `${listing.profitMargin}%` : '—'}</Text></S.Td>
+                    <S.Td><Text variant="body-sm">{listing.roi !== null && listing.roi !== undefined ? `${listing.roi}%` : '—'}</Text></S.Td>
+                    <S.Td><Text variant="body-sm">{listing.soldCount ?? 0}</Text></S.Td>
+                    <S.Td><Text variant="body-sm">{listing.status}</Text></S.Td>
+                  </S.Tr>
+                ))}
+              </tbody>
+            </S.ListingsTable>
+          </S.ListingsTableWrapper>
+        </CardBody>
+      </Card>
     </S.Container>
   );
 };

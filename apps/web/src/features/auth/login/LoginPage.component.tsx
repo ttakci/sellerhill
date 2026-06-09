@@ -76,7 +76,11 @@ export const LoginPageComponent = ({
               </Text>
             </S.Header>
 
-            <S.Form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
+            <S.Form
+              onSubmit={(e) => {
+                void handleSubmit(onSubmit)(e);
+              }}
+            >
               <ModernTextInput
                 name="email"
                 control={control}
@@ -96,13 +100,7 @@ export const LoginPageComponent = ({
               />
 
               <S.ButtonContainer>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  fullWidth
-                  isLoading={isLoading || isSubmitting}
-                  size="large"
-                >
+                <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting} size="large">
                   {t('auth:auth.login.submitButton')}
                 </Button>
               </S.ButtonContainer>

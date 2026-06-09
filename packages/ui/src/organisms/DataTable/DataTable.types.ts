@@ -9,7 +9,7 @@ export interface ColumnOption {
   alwaysVisible?: boolean;
 }
 
-export interface DataTableProps<T extends Record<string, unknown>> {
+export interface DataTableProps<T> {
   /** Table column definitions */
   columns: TableColumn<T>[];
   /** Row data array */

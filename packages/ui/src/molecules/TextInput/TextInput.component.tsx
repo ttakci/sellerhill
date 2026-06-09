@@ -29,6 +29,7 @@ interface ModernTextInputInnerProps {
   onPressIcon?: () => void;
   size?: TextInputSize;
   suffixText?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 const ModernTextInputInner = forwardRef<HTMLInputElement, ModernTextInputInnerProps>((props, ref) => {
@@ -48,6 +49,7 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, ModernTextInputInnerPr
     onPressIcon: _onPressIcon,
     size = 'medium',
     suffixText,
+    onKeyDown,
     ...rest
   } = props;
 
@@ -106,6 +108,7 @@ const ModernTextInputInner = forwardRef<HTMLInputElement, ModernTextInputInnerPr
           autoComplete={autoComplete}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onKeyDown={onKeyDown}
           $hasIconLeft={!!iconLeft}
           $hasIconRight={!!effectiveIconRight}
           $hasLabel={!!label}

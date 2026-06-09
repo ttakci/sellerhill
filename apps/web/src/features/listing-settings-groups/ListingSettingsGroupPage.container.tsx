@@ -1,7 +1,6 @@
 import { useLoading, useUI } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import {
   useDeleteListingSettingsGroupMutation,
@@ -9,8 +8,11 @@ import {
 } from './api/listing-settings-group.api';
 import { ListingSettingsGroupPageComponent } from './ListingSettingsGroupPage.component';
 
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { useLocale } from '@/utils/useLocale';
+
 export const ListingSettingsGroupPageContainer = () => {
-  const navigate = useNavigate();
+  const { localeNavigate } = useLocale();
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
@@ -39,11 +41,11 @@ export const ListingSettingsGroupPageContainer = () => {
   }, [deleteSuccess, showMessage, closeMessage, t]);
 
   const handleCreateGroup = () => {
-    void navigate('/settings/listing-groups/new');
+    localeNavigate('/settings/listing-groups/new');
   };
 
   const handleEditGroup = (id: string) => {
-    void navigate(`/settings/listing-groups/${id}/edit`);
+    localeNavigate(`/settings/listing-groups/${id}/edit`);
   };
 
   const handleDeleteGroup = (id: string) => {
@@ -69,11 +71,13 @@ export const ListingSettingsGroupPageContainer = () => {
   };
 
   return (
-    <ListingSettingsGroupPageComponent
+    <EbayAccountGuard>
+      <ListingSettingsGroupPageComponent
       groups={groups}
       onCreateGroup={handleCreateGroup}
       onEditGroup={handleEditGroup}
       onDeleteGroup={handleDeleteGroup}
     />
+    </EbayAccountGuard>
   );
 };

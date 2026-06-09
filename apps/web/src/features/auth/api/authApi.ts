@@ -40,7 +40,7 @@ export const authApi = baseApi.injectEndpoints({
     /**
      * Resend verification email
      */
-    resendVerification: builder.mutation<void, { email: string }>({
+    resendVerification: builder.mutation<void, { email: string; locale?: string }>({
       query: (body) => ({
         url: '/auth/resend-verification',
         method: 'POST',

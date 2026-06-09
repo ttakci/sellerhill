@@ -5,21 +5,24 @@
 import { useLoading, useUI } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { useResendVerificationMutation } from '../api/authApi';
 
 import { CheckEmailPageComponent } from './CheckEmailPage.component';
 
+import { getErrorI18nKey } from '@/utils/errorHandler';
+import { useLocale } from '@/utils/useLocale';
+
 export const CheckEmailPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['auth', 'translation']);
-  const navigate = useNavigate();
+  const { i18n } = useTranslation(['auth', 'translation']);
   const [searchParams] = useSearchParams();
-  const { showMessage } = useUI();
+  const { showMessage, closeMessage } = useUI();
+  const { locale, localeNavigate } = useLocale();
 
   const email = searchParams.get('email') || '';
 
-  const [resend, { isLoading: isResending, isSuccess, isError }] = useResendVerificationMutation();
+  const [resend, { isLoading: isResending, isSuccess, error: resendError }] = useResendVerificationMutation();
 
   useLoading(isResending);
 
@@ -29,35 +32,38 @@ export const CheckEmailPageContainer = (): React.ReactElement => {
       showMessage(
         {
           type: 'success',
-          headerKey: 'message.success.header',
-          descriptionKey: 'auth.verification.resent',
+          headerKey: 'translation:message.success.header',
+          descriptionKey: 'auth:auth.verification.resent',
+          primaryButton: { labelKey: 'translation:message.success.ok', onClick: closeMessage },
         },
-        t
+        i18n.t.bind(i18n)
       );
     }
-  }, [isSuccess, showMessage, t]);
+  }, [isSuccess, showMessage, closeMessage, i18n]);
 
   // Handle error
   React.useEffect(() => {
-    if (isError) {
-      showMessage(
-        {
-          type: 'error',
-          headerKey: 'message.error.header',
-          descriptionKey: 'auth.errors.verificationFailed',
-        },
-        t
-      );
-    }
-  }, [isError, showMessage, t]);
+    if (!resendError) {return;}
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(resendError),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      i18n.t.bind(i18n)
+    );
+  }, [resendError, showMessage, closeMessage, i18n]);
 
   const handleResend = (): void => {
-    if (!email) {return;}
-    void resend({ email });
+    if (!email) {
+      return;
+    }
+    void resend({ email, locale });
   };
 
   const handleBackToLogin = (): void => {
-    void navigate('/login');
+    localeNavigate('/login');
   };
 
   return (

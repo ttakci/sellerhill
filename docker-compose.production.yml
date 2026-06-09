@@ -1,0 +1,113 @@
+# ============================================
+# Zonds - Production Docker Compose
+# For Coolify / standalone deployment
+# ============================================
+
+services:
+  # ---- PostgreSQL 16 ----
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zonds_db
+      POSTGRES_USER: zonds_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U zonds_user -d zonds_db']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---- Redis 7 ----
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- NestJS API ----
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      # Database (uses Docker internal hostname 'postgres')
+      DATABASE_URL: postgresql://zonds_user:${POSTGRES_PASSWORD}@postgres:5432/zonds_db
+
+      # Redis (uses Docker internal hostname 'redis')
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+
+      # CORS & Frontend
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+
+      # Logging
+      LOG_LEVEL: info
+
+      # eBay OAuth (fill in Coolify env vars)
+      EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:-}
+      EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:-}
+      EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:-}
+      EBAY_RUNAME: ${EBAY_RUNAME:-}
+      EBAY_ENVIRONMENT: ${EBAY_ENVIRONMENT:-sandbox}
+
+      # Keepa
+      KEEPA_API_KEY: ${KEEPA_API_KEY:-}
+
+      # Amazon
+      AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:-}
+
+      # Email (SMTP)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    volumes:
+      - browser_state:/app/.browser-state
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ---- React Web (nginx) ----
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_NODE_ENV: production
+        VITE_ENABLE_AUTH: "true"
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-80}:80'
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+  browser_state:

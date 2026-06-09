@@ -6,21 +6,17 @@ import { Queue } from 'bullmq';
 export class SyncQueueService implements OnModuleInit {
   private readonly logger = new Logger(SyncQueueService.name);
 
-  constructor(@InjectQueue('sync') private readonly syncQueue: Queue) {}
+  constructor(@InjectQueue('price-sync') private readonly priceSyncQueue: Queue) {}
 
   async onModuleInit() {
     await this.setupRepeatableJobs();
   }
 
-  /**
-   * Setup production-ready repeatable jobs (Cron) using BullMQ
-   */
   private async setupRepeatableJobs() {
-    this.logger.log('Configuring repeatable sync jobs...');
+    this.logger.log('Configuring price sync repeatable jobs...');
 
-    // 1. Price + Stock Sync (2x daily)
-    // Scheduled at 09:00 and 21:00 as per requirements.
-    await this.syncQueue.add(
+    // Price + Stock Sync (2x daily) — Keepa API token budget constraint
+    await this.priceSyncQueue.add(
       'sync-prices',
       {},
       {
@@ -30,9 +26,8 @@ export class SyncQueueService implements OnModuleInit {
       }
     );
 
-    // 2. Metadata Sync (1x monthly)
-    // Runs on the 1st of every month at 03:00.
-    await this.syncQueue.add(
+    // Metadata Sync (1x monthly)
+    await this.priceSyncQueue.add(
       'sync-metadata',
       {},
       {
@@ -42,32 +37,14 @@ export class SyncQueueService implements OnModuleInit {
       }
     );
 
-    // 3. Order Sync (every 15 minutes)
-    // Fetches new orders from eBay for all active accounts
-    await this.syncQueue.add(
-      'sync-orders',
-      {},
-      {
-        repeat: { pattern: '*/15 * * * *' },
-        jobId: 'order-sync-cron',
-        removeOnComplete: true,
-      }
-    );
-
-    this.logger.log('Repeatable sync jobs configured.');
+    this.logger.log('Price sync repeatable jobs configured.');
   }
 
-  /**
-   * Manually trigger a price sync cycle
-   */
   async triggerPriceSync() {
-    await this.syncQueue.add('sync-prices', { manual: true });
+    await this.priceSyncQueue.add('sync-prices', { manual: true });
   }
 
-  /**
-   * Manually trigger a metadata sync cycle
-   */
   async triggerMetadataSync() {
-    await this.syncQueue.add('sync-metadata', { manual: true });
+    await this.priceSyncQueue.add('sync-metadata', { manual: true });
   }
 }

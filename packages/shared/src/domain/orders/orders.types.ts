@@ -10,7 +10,6 @@ export enum OrderStatus {
 export interface OrderDto {
   id: string;
   ebayOrderId: string;
-  orderNumber?: string;
   createdAt: string;
   isTracked: boolean;
 
@@ -101,6 +100,7 @@ export interface OrderStatsDto {
 }
 
 export interface OrderFiltersDto {
+  search?: string;
   dateFrom?: string;
   dateTo?: string;
   status?: OrderStatus;
@@ -108,4 +108,11 @@ export interface OrderFiltersDto {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface OrderSyncResponseDto {
+  orders: OrderDto[];
+  total: number;
+  stats: OrderStatsDto;
+  message: string;
 }

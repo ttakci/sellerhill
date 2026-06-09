@@ -41,9 +41,10 @@
     "onboarding": {
       "title": "eBay Mağazanızı Bağlayın",
       "header": "Pazar Yeri Kurulumu",
-      "description": "Ürünlerinizi senkronize etmeye başlamak için önce eBay mağazanızı bağlamanız gerekmektedir. Aşağıdan ana pazar yerinizi seçin.",
+      "description": "Ürünlerinizi senkronize etmeye başlamak için önce eBay mağazanızı bağlamanız gerekmektedir.",
       "connectButton": "eBay Hesabı Bağla",
       "skipButton": "Şimdilik Atla",
+      "usOnlyNote": "Şu anda yalnızca ABD pazar yeri desteklenmektedir. Yakında diğer bölgeler de eklenecektir.",
       "brandingDescription": "eBay mağazanızı Zonds'a bağlayarak tüm satış süreçlerinizi tek bir merkezden yönetmeye başlayın."
     }
   }
