@@ -70,12 +70,26 @@ services:
       EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:-}
       EBAY_RUNAME: ${EBAY_RUNAME:-}
       EBAY_ENVIRONMENT: ${EBAY_ENVIRONMENT:-sandbox}
+      EBAY_AUTH_URL: ${EBAY_AUTH_URL:-https://auth.sandbox.ebay.com/oauth2/authorize}
+      EBAY_TOKEN_URL: ${EBAY_TOKEN_URL:-https://api.sandbox.ebay.com/identity/v1/oauth2/token}
+      EBAY_REST_API_URL: ${EBAY_REST_API_URL:-https://api.sandbox.ebay.com}
+      EBAY_XML_API_URL: ${EBAY_XML_API_URL:-https://api.sandbox.ebay.com/ws/api.dll}
 
       # Keepa
       KEEPA_API_KEY: ${KEEPA_API_KEY:-}
 
       # Amazon
       AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:-}
+
+      # Scraper Configuration
+      SCRAPER_API_KEY: ${SCRAPER_API_KEY:-}
+      ZON_SCRAPPER_CONCURRENCY: ${ZON_SCRAPPER_CONCURRENCY:-1}
+      ZON_SCRAPPER_TIMEOUT_MS: ${ZON_SCRAPPER_TIMEOUT_MS:-60000}
+      ZON_SCRAPPER_USE_PROXY: ${ZON_SCRAPPER_USE_PROXY:-false}
+
+      # Rate Limiting
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
 
       # Email (SMTP)
       SMTP_HOST: ${SMTP_HOST:-}
