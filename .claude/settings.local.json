@@ -36,7 +36,8 @@
       "mcp__zai-mcp-server__analyze_image",
       "Bash(git commit -m 'feat: Amazon integration, Docker, products module, and UI improvements *)",
       "Bash(git commit -m 'feat: Amazon integration, Docker, products module, and UI improvements' -m '- Add Amazon buyer accounts module \\(CRUD, scraping, tracking\\) *)",
-      "Bash(pnpm validate *)"
+      "Bash(pnpm validate *)",
+      "Bash(git push *)"
     ]
   }
 }
