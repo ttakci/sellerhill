@@ -53,8 +53,9 @@ async function bootstrap() {
   );
 
   // CORS configuration - production-ready
-  const allowedOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+  const corsOriginsEnv = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN;
+  const allowedOrigins = corsOriginsEnv
+    ? corsOriginsEnv.split(',').map((o) => o.trim())
     : ['http://localhost:5173'];
 
   app.enableCors({
