@@ -12,11 +12,17 @@ const LOCALE_OPTIONS: LocaleOption[] = [
 
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 
+const TESTIMONIAL_KEYS = ['t1', 't2', 't3'] as const;
+
 export const LandingPageComponent = ({
   currentLocale,
+  scrolled,
+  mobileMenuOpen,
   onLocaleChange,
   onNavigateLogin,
   onNavigateRegister,
+  onToggleMobileMenu,
+  onCloseMobileMenu,
 }: LandingPageProps): React.ReactElement => {
   const { t } = useTranslation('translation');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -52,14 +58,15 @@ export const LandingPageComponent = ({
 
   const scrollTo = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+    onCloseMobileMenu();
+  }, [onCloseMobileMenu]);
 
   return (
     <S.Page>
       {/* ── Navbar ────────────────────────────────────── */}
-      <S.Navbar>
+      <S.Navbar $scrolled={scrolled}>
         <S.NavLeft>
-          <Logo size={100} />
+          <Logo height={40} />
         </S.NavLeft>
         <S.NavCenter>
           <S.NavLink type="button" onClick={() => scrollTo('features')}>
@@ -91,30 +98,57 @@ export const LandingPageComponent = ({
           <S.NavCTAPrimary type="button" onClick={onNavigateRegister}>
             {t('translation:landing.navbar.getStarted')}
           </S.NavCTAPrimary>
+          <S.HamburgerButton $open={mobileMenuOpen} type="button" onClick={onToggleMobileMenu}>
+            <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={24} />
+          </S.HamburgerButton>
         </S.NavRight>
       </S.Navbar>
+
+      {/* ── Mobile Menu ───────────────────────────────── */}
+      <S.MobileMenuOverlay $open={mobileMenuOpen} onClick={onCloseMobileMenu} />
+      <S.MobileMenu $open={mobileMenuOpen}>
+        <S.MobileMenuClose type="button" onClick={onCloseMobileMenu}>
+          <Icon name="x" size={24} />
+        </S.MobileMenuClose>
+        <S.MobileNavLinks>
+          <S.MobileNavLink type="button" onClick={() => scrollTo('features')}>
+            {t('translation:landing.navbar.features')}
+          </S.MobileNavLink>
+          <S.MobileNavLink type="button" onClick={() => scrollTo('how-it-works')}>
+            {t('translation:landing.navbar.howItWorks')}
+          </S.MobileNavLink>
+          <S.MobileNavLink type="button" onClick={() => scrollTo('pricing')}>
+            {t('translation:landing.navbar.pricing')}
+          </S.MobileNavLink>
+          <S.MobileNavLink type="button" onClick={() => scrollTo('faq')}>
+            {t('translation:landing.navbar.faq')}
+          </S.MobileNavLink>
+        </S.MobileNavLinks>
+        <S.MobileCTAGroup>
+          <S.NavCTASecondary type="button" onClick={onNavigateLogin}>
+            {t('translation:landing.navbar.login')}
+          </S.NavCTASecondary>
+          <S.NavCTAPrimary type="button" onClick={onNavigateRegister}>
+            {t('translation:landing.navbar.getStarted')}
+          </S.NavCTAPrimary>
+        </S.MobileCTAGroup>
+      </S.MobileMenu>
 
       {/* ── Hero ──────────────────────────────────────── */}
       <S.HeroSection>
         <S.HeroMesh>
-          <S.HeroGradientOrb
-            $x="-10%"
-            $y="-20%"
-            $color="rgba(66, 99, 235, 0.4)"
-          />
-          <S.HeroGradientOrb
-            $x="60%"
-            $y="20%"
-            $color="rgba(59, 130, 246, 0.3)"
-          />
-          <S.HeroGradientOrb
-            $x="30%"
-            $y="60%"
-            $color="rgba(37, 99, 235, 0.2)"
-          />
+          <S.HeroGradientOrb $x="-10%" $y="-20%" $color="rgba(66, 99, 235, 0.4)" />
+          <S.HeroGradientOrb $x="60%" $y="20%" $color="rgba(99, 102, 241, 0.3)" />
+          <S.HeroGradientOrb $x="30%" $y="60%" $color="rgba(59, 130, 246, 0.2)" />
           <S.HeroGrid />
         </S.HeroMesh>
         <S.HeroContent>
+          <S.HeroBadge>
+            <S.HeroBadgeIcon>
+              <Icon name="zap" size={12} />
+            </S.HeroBadgeIcon>
+            {t('translation:landing.hero.badge')}
+          </S.HeroBadge>
           <S.HeroHeadline>{t('translation:landing.hero.headline')}</S.HeroHeadline>
           <S.HeroSubheading>{t('translation:landing.hero.subheading')}</S.HeroSubheading>
           <S.HeroCTAGroup>
@@ -127,27 +161,73 @@ export const LandingPageComponent = ({
               <Icon name="chevron-down" size={16} />
             </S.SecondaryCTA>
           </S.HeroCTAGroup>
+          <S.HeroStatsRow>
+            <S.HeroStat>
+              <S.HeroStatValue>{t('translation:landing.stats.sellers.value')}</S.HeroStatValue>
+              <S.HeroStatLabel>{t('translation:landing.stats.sellers.label')}</S.HeroStatLabel>
+            </S.HeroStat>
+            <S.HeroStat>
+              <S.HeroStatValue>{t('translation:landing.stats.orders.value')}</S.HeroStatValue>
+              <S.HeroStatLabel>{t('translation:landing.stats.orders.label')}</S.HeroStatLabel>
+            </S.HeroStat>
+            <S.HeroStat>
+              <S.HeroStatValue>{t('translation:landing.stats.uptime.value')}</S.HeroStatValue>
+              <S.HeroStatLabel>{t('translation:landing.stats.uptime.label')}</S.HeroStatLabel>
+            </S.HeroStat>
+            <S.HeroStat>
+              <S.HeroStatValue>{t('translation:landing.stats.countries.value')}</S.HeroStatValue>
+              <S.HeroStatLabel>{t('translation:landing.stats.countries.label')}</S.HeroStatLabel>
+            </S.HeroStat>
+          </S.HeroStatsRow>
         </S.HeroContent>
+
+        {/* ── Dashboard Mockup ──────────────────────── */}
+        <S.DashboardMockup>
+          <S.MockupTitleBar>
+            <S.MockupDot $color="#EF4444" />
+            <S.MockupDot $color="#F59E0B" />
+            <S.MockupDot $color="#10B981" />
+          </S.MockupTitleBar>
+          <S.MockupBody>
+            <S.MockupSidebar>
+              <S.MockupSidebarItem $active />
+              <S.MockupSidebarItem />
+              <S.MockupSidebarItem />
+              <S.MockupSidebarItem $active />
+              <S.MockupSidebarItem />
+            </S.MockupSidebar>
+            <S.MockupContent>
+              <S.MockupCardRow>
+                <S.MockupCard />
+                <S.MockupCard />
+                <S.MockupCard />
+              </S.MockupCardRow>
+              <S.MockupChart>
+                <S.MockupBar $height="30%" />
+                <S.MockupBar $height="55%" />
+                <S.MockupBar $height="40%" />
+                <S.MockupBar $height="70%" />
+                <S.MockupBar $height="50%" />
+                <S.MockupBar $height="85%" />
+                <S.MockupBar $height="60%" />
+              </S.MockupChart>
+            </S.MockupContent>
+          </S.MockupBody>
+        </S.DashboardMockup>
       </S.HeroSection>
 
-      {/* ── Social Proof ──────────────────────────────── */}
-      <S.SocialProofSection>
-        <S.SocialProofLabel>{t('translation:landing.socialProof.label', { count: 2500 })}</S.SocialProofLabel>
-        <S.BadgeRow>
-          <S.TrustBadge>
-            <Icon name="bolt" size={14} />
-            {t('translation:landing.socialProof.badges.automation')}
-          </S.TrustBadge>
-          <S.TrustBadge>
-            <Icon name="check-circle" size={14} />
-            {t('translation:landing.socialProof.badges.uptime')}
-          </S.TrustBadge>
-          <S.TrustBadge>
-            <Icon name="globe" size={14} />
-            {t('translation:landing.socialProof.badges.support')}
-          </S.TrustBadge>
-        </S.BadgeRow>
-      </S.SocialProofSection>
+      {/* ── Platforms ──────────────────────────────────── */}
+      <S.PlatformsSection>
+        <S.PlatformsTitle>{t('translation:landing.platforms.title')}</S.PlatformsTitle>
+        <S.PlatformLogos>
+          <S.PlatformLogo>
+            <Icon name="brand-amazon" size={28} />
+          </S.PlatformLogo>
+          <S.PlatformLogo>
+            <Icon name="brand-ebay" size={28} />
+          </S.PlatformLogo>
+        </S.PlatformLogos>
+      </S.PlatformsSection>
 
       {/* ── Features ──────────────────────────────────── */}
       <S.Section data-reveal="features" id="features">
@@ -222,7 +302,7 @@ export const LandingPageComponent = ({
       </S.Section>
 
       {/* ── How It Works ──────────────────────────────── */}
-      <S.Section data-reveal="how-it-works" id="how-it-works" style={{ background: 'transparent' }}>
+      <S.Section data-reveal="how-it-works" id="how-it-works">
         <S.RevealWrapper $visible={revealState['how-it-works'] ?? false}>
           <S.SectionHeader>
             <S.SectionTitle>{t('translation:landing.howItWorks.sectionTitle')}</S.SectionTitle>
@@ -231,21 +311,13 @@ export const LandingPageComponent = ({
         </S.RevealWrapper>
         <S.RevealWrapper $visible={revealState['how-it-works'] ?? false}>
           <S.StepsRow>
-            <S.StepCard>
-              <S.StepNumber>1</S.StepNumber>
-              <S.StepTitle>{t('translation:landing.howItWorks.step1.title')}</S.StepTitle>
-              <S.StepDesc>{t('translation:landing.howItWorks.step1.description')}</S.StepDesc>
-            </S.StepCard>
-            <S.StepCard>
-              <S.StepNumber>2</S.StepNumber>
-              <S.StepTitle>{t('translation:landing.howItWorks.step2.title')}</S.StepTitle>
-              <S.StepDesc>{t('translation:landing.howItWorks.step2.description')}</S.StepDesc>
-            </S.StepCard>
-            <S.StepCard>
-              <S.StepNumber>3</S.StepNumber>
-              <S.StepTitle>{t('translation:landing.howItWorks.step3.title')}</S.StepTitle>
-              <S.StepDesc>{t('translation:landing.howItWorks.step3.description')}</S.StepDesc>
-            </S.StepCard>
+            {(['step1', 'step2', 'step3'] as const).map((step, index) => (
+              <S.StepCard key={step}>
+                <S.StepNumber>{index + 1}</S.StepNumber>
+                <S.StepTitle>{t(`translation:landing.howItWorks.${step}.title`)}</S.StepTitle>
+                <S.StepDesc>{t(`translation:landing.howItWorks.${step}.description`)}</S.StepDesc>
+              </S.StepCard>
+            ))}
           </S.StepsRow>
         </S.RevealWrapper>
       </S.Section>
@@ -260,59 +332,82 @@ export const LandingPageComponent = ({
         </S.RevealWrapper>
         <S.RevealWrapper $visible={revealState['per-product'] ?? false}>
           <S.PerProductGrid>
-            <S.ProductSettingsCard>
-              <S.ProductName>{t('translation:landing.perProduct.productA.name')}</S.ProductName>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.margin')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productA.margin')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.stock')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productA.stock')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.template')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productA.template')}</S.SettingValue>
-              </S.SettingRow>
-            </S.ProductSettingsCard>
-
-            <S.ProductSettingsCard>
-              <S.ProductName>{t('translation:landing.perProduct.productB.name')}</S.ProductName>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.margin')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productB.margin')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.stock')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productB.stock')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.template')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productB.template')}</S.SettingValue>
-              </S.SettingRow>
-            </S.ProductSettingsCard>
-
-            <S.ProductSettingsCard>
-              <S.ProductName>{t('translation:landing.perProduct.productC.name')}</S.ProductName>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.margin')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productC.margin')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.stock')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productC.stock')}</S.SettingValue>
-              </S.SettingRow>
-              <S.SettingRow>
-                <S.SettingLabel>{t('translation:landing.perProduct.labels.template')}</S.SettingLabel>
-                <S.SettingValue>{t('translation:landing.perProduct.productC.template')}</S.SettingValue>
-              </S.SettingRow>
-            </S.ProductSettingsCard>
+            {(['productA', 'productB', 'productC'] as const).map((product) => (
+              <S.ProductSettingsCard key={product}>
+                <S.ProductName>{t(`translation:landing.perProduct.${product}.name`)}</S.ProductName>
+                {(['margin', 'stock', 'template'] as const).map((setting) => (
+                  <S.SettingRow key={setting}>
+                    <S.SettingLabel>{t(`translation:landing.perProduct.labels.${setting}`)}</S.SettingLabel>
+                    <S.SettingValue>{t(`translation:landing.perProduct.${product}.${setting}`)}</S.SettingValue>
+                  </S.SettingRow>
+                ))}
+              </S.ProductSettingsCard>
+            ))}
           </S.PerProductGrid>
         </S.RevealWrapper>
       </S.PerProductSection>
 
+      {/* ── Stats ──────────────────────────────────────── */}
+      <S.StatsSection data-reveal="stats">
+        <S.RevealWrapper $visible={revealState['stats'] ?? false}>
+          <S.StatItem>
+            <S.StatValue>{t('translation:landing.stats.sellers.value')}</S.StatValue>
+            <S.StatLabel>{t('translation:landing.stats.sellers.label')}</S.StatLabel>
+          </S.StatItem>
+        </S.RevealWrapper>
+        <S.RevealWrapper $visible={revealState['stats'] ?? false}>
+          <S.StatItem>
+            <S.StatValue>{t('translation:landing.stats.orders.value')}</S.StatValue>
+            <S.StatLabel>{t('translation:landing.stats.orders.label')}</S.StatLabel>
+          </S.StatItem>
+        </S.RevealWrapper>
+        <S.RevealWrapper $visible={revealState['stats'] ?? false}>
+          <S.StatItem>
+            <S.StatValue>{t('translation:landing.stats.uptime.value')}</S.StatValue>
+            <S.StatLabel>{t('translation:landing.stats.uptime.label')}</S.StatLabel>
+          </S.StatItem>
+        </S.RevealWrapper>
+        <S.RevealWrapper $visible={revealState['stats'] ?? false}>
+          <S.StatItem>
+            <S.StatValue>{t('translation:landing.stats.countries.value')}</S.StatValue>
+            <S.StatLabel>{t('translation:landing.stats.countries.label')}</S.StatLabel>
+          </S.StatItem>
+        </S.RevealWrapper>
+      </S.StatsSection>
+
+      {/* ── Testimonials ──────────────────────────────── */}
+      <S.Section data-reveal="testimonials">
+        <S.RevealWrapper $visible={revealState['testimonials'] ?? false}>
+          <S.SectionHeader>
+            <S.SectionTitle>{t('translation:landing.testimonials.sectionTitle')}</S.SectionTitle>
+            <S.SectionSubtitle>{t('translation:landing.testimonials.sectionSubtitle')}</S.SectionSubtitle>
+          </S.SectionHeader>
+        </S.RevealWrapper>
+        <S.RevealWrapper $visible={revealState['testimonials'] ?? false}>
+          <S.TestimonialsGrid>
+            {TESTIMONIAL_KEYS.map((key) => {
+              const rating = parseInt(t(`translation:landing.testimonials.${key}.rating`), 10);
+              return (
+                <S.TestimonialCard key={key}>
+                  <S.TestimonialStars>
+                    {Array.from({ length: rating }, (_, i) => (
+                      <Icon key={i} name="star" size={16} />
+                    ))}
+                  </S.TestimonialStars>
+                  <S.TestimonialText>{t(`translation:landing.testimonials.${key}.text`)}</S.TestimonialText>
+                  <S.TestimonialAuthor>
+                    <S.TestimonialName>{t(`translation:landing.testimonials.${key}.name`)}</S.TestimonialName>
+                    <S.TestimonialRole>{t(`translation:landing.testimonials.${key}.role`)}</S.TestimonialRole>
+                  </S.TestimonialAuthor>
+                </S.TestimonialCard>
+              );
+            })}
+          </S.TestimonialsGrid>
+        </S.RevealWrapper>
+      </S.Section>
+
       {/* ── Pricing ───────────────────────────────────── */}
-      <S.Section data-reveal="pricing" id="pricing">
+      <S.PerProductSection data-reveal="pricing" id="pricing">
         <S.RevealWrapper $visible={revealState['pricing'] ?? false}>
           <S.SectionHeader>
             <S.SectionTitle>{t('translation:landing.pricing.sectionTitle')}</S.SectionTitle>
@@ -380,7 +475,7 @@ export const LandingPageComponent = ({
             </S.PricingCard>
           </S.PricingGrid>
         </S.RevealWrapper>
-      </S.Section>
+      </S.PerProductSection>
 
       {/* ── FAQ ───────────────────────────────────────── */}
       <S.Section data-reveal="faq" id="faq">
@@ -392,8 +487,8 @@ export const LandingPageComponent = ({
         <S.RevealWrapper $visible={revealState['faq'] ?? false}>
           <S.FAQGrid>
             {FAQ_KEYS.map((key, index) => (
-              <S.FAQItem key={key}>
-                <S.FAQQuestion type="button" $isOpen={openFaq === index} onClick={() => toggleFaq(index)}>
+              <S.FAQItem key={key} $isOpen={openFaq === index}>
+                <S.FAQQuestion $isOpen={openFaq === index} type="button" onClick={() => toggleFaq(index)}>
                   <span>{t(`translation:landing.faq.${key}.question`)}</span>
                   <Icon name={openFaq === index ? 'chevron-up' : 'chevron-down'} size={18} />
                 </S.FAQQuestion>
@@ -418,15 +513,44 @@ export const LandingPageComponent = ({
 
       {/* ── Footer ────────────────────────────────────── */}
       <S.Footer>
-        <S.FooterContent>
-          <Logo size={80} />
-          <S.FooterLinks>
-            <S.FooterLink type="button">{t('translation:landing.footer.privacy')}</S.FooterLink>
-            <S.FooterLink type="button">{t('translation:landing.footer.terms')}</S.FooterLink>
-            <S.FooterLink type="button">{t('translation:landing.footer.support')}</S.FooterLink>
-          </S.FooterLinks>
-        </S.FooterContent>
-        <S.FooterCopyright>{t('translation:landing.footer.copyright', { year: new Date().getFullYear() })}</S.FooterCopyright>
+        <S.FooterGrid>
+          <S.FooterBrand>
+            <Logo height={32} />
+            <S.FooterDescription>{t('translation:landing.footer.description')}</S.FooterDescription>
+          </S.FooterBrand>
+          <S.FooterColumn>
+            <S.FooterColumnTitle>{t('translation:landing.footer.product')}</S.FooterColumnTitle>
+            <S.FooterLink type="button" onClick={() => scrollTo('features')}>
+              {t('translation:landing.footer.links.features')}
+            </S.FooterLink>
+            <S.FooterLink type="button" onClick={() => scrollTo('pricing')}>
+              {t('translation:landing.footer.links.pricing')}
+            </S.FooterLink>
+            <S.FooterLink type="button" onClick={() => scrollTo('how-it-works')}>
+              {t('translation:landing.footer.links.howItWorks')}
+            </S.FooterLink>
+            <S.FooterLink type="button" onClick={() => scrollTo('faq')}>
+              {t('translation:landing.footer.links.faq')}
+            </S.FooterLink>
+          </S.FooterColumn>
+          <S.FooterColumn>
+            <S.FooterColumnTitle>{t('translation:landing.footer.company')}</S.FooterColumnTitle>
+            <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.about')}</S.FooterLink>
+            <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.blog')}</S.FooterLink>
+            <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.careers')}</S.FooterLink>
+            <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.contact')}</S.FooterLink>
+          </S.FooterColumn>
+          <S.FooterColumn>
+            <S.FooterColumnTitle>{t('translation:landing.footer.legal')}</S.FooterColumnTitle>
+            <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.privacy')}</S.FooterLink>
+            <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.terms')}</S.FooterLink>
+            <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.cookies')}</S.FooterLink>
+          </S.FooterColumn>
+        </S.FooterGrid>
+        <S.FooterDivider />
+        <S.FooterBottom>
+          <S.FooterCopyright>{t('translation:landing.footer.copyright', { year: new Date().getFullYear() })}</S.FooterCopyright>
+        </S.FooterBottom>
       </S.Footer>
     </S.Page>
   );

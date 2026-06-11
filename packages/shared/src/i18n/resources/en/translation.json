@@ -148,7 +148,8 @@
       "headline": "Sell Amazon Products on eBay — On Full Autopilot",
       "subheading": "From listing to delivery — pricing, stock, orders and tracking all automated.",
       "ctaPrimary": "Start Free",
-      "ctaSecondary": "See how it works"
+      "ctaSecondary": "See how it works",
+      "badge": "Trusted by 2,500+ dropshippers"
     },
     "socialProof": {
       "label": "Trusted by {{count}}+ sellers worldwide",
@@ -319,7 +320,69 @@
       "support": "Support",
       "product": "Product",
       "company": "Company",
-      "legal": "Legal"
+      "legal": "Legal",
+      "description": "Automate your Amazon-to-eBay dropshipping business with powerful tools.",
+      "links": {
+        "features": "Features",
+        "pricing": "Pricing",
+        "howItWorks": "How It Works",
+        "faq": "FAQ"
+      },
+      "companyLinks": {
+        "about": "About",
+        "blog": "Blog",
+        "careers": "Careers",
+        "contact": "Contact"
+      },
+      "legalLinks": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "cookies": "Cookie Policy"
+      }
+    },
+    "platforms": {
+      "title": "Works With the Platforms You Already Use",
+      "subtitle": "Seamlessly integrates with Amazon and eBay"
+    },
+    "stats": {
+      "sellers": {
+        "value": "2,500+",
+        "label": "Active Sellers"
+      },
+      "orders": {
+        "value": "50K+",
+        "label": "Orders Processed"
+      },
+      "uptime": {
+        "value": "99.9%",
+        "label": "Uptime"
+      },
+      "countries": {
+        "value": "6",
+        "label": "Marketplaces"
+      }
+    },
+    "testimonials": {
+      "sectionTitle": "Loved by Dropshippers",
+      "sectionSubtitle": "See what sellers are saying about Zonds.",
+      "t1": {
+        "text": "Zonds completely transformed my dropshipping business. I used to spend hours manually managing orders and pricing. Now everything runs on autopilot.",
+        "name": "Marcus J.",
+        "role": "eBay Top Seller",
+        "rating": "5"
+      },
+      "t2": {
+        "text": "The per-product settings are a game changer. I can set different margins for each item instead of a blanket rule. My profits went up 35% in the first month.",
+        "name": "Sarah K.",
+        "role": "Full-time Dropshipper",
+        "rating": "5"
+      },
+      "t3": {
+        "text": "I tried 4 other tools before Zonds. The automatic tracking sync alone saves me 2 hours every day. Support team is incredibly responsive too.",
+        "name": "David R.",
+        "role": "Multi-store Operator",
+        "rating": "5"
+      }
     }
   }
 }

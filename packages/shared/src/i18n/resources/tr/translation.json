@@ -148,7 +148,8 @@
       "headline": "Amazon Ürünlerini eBay'de Satın — Tam Otomatik",
       "subheading": "Listelemeden teslimata — fiyat, stok, sipariş ve takip hepsi otomatik.",
       "ctaPrimary": "Ücretsiz Başla",
-      "ctaSecondary": "Nasıl çalıştığını gör"
+      "ctaSecondary": "Nasıl çalıştığını gör",
+      "badge": "2,500+ dropshipper'ın güvencesi"
     },
     "socialProof": {
       "label": "Dünya genelinde {{count}}+ satıcının güvencesi",
@@ -319,7 +320,69 @@
       "support": "Destek",
       "product": "Ürün",
       "company": "Şirket",
-      "legal": "Yasal"
+      "legal": "Yasal",
+      "description": "Güçlü araçlarla Amazon'dan eBay'e dropshipping işinizi otomatikleştirin.",
+      "links": {
+        "features": "Özellikler",
+        "pricing": "Fiyatlandırma",
+        "howItWorks": "Nasıl Çalışır",
+        "faq": "SSS"
+      },
+      "companyLinks": {
+        "about": "Hakkımızda",
+        "blog": "Blog",
+        "careers": "Kariyer",
+        "contact": "İletişim"
+      },
+      "legalLinks": {
+        "privacy": "Gizlilik Politikası",
+        "terms": "Kullanım Şartları",
+        "cookies": "Çerez Politikası"
+      }
+    },
+    "platforms": {
+      "title": "Zaten Kullandığınız Platformlarla Çalışır",
+      "subtitle": "Amazon ve eBay ile sorunsuz entegrasyon"
+    },
+    "stats": {
+      "sellers": {
+        "value": "2,500+",
+        "label": "Aktif Satıcı"
+      },
+      "orders": {
+        "value": "50K+",
+        "label": "İşlenen Sipariş"
+      },
+      "uptime": {
+        "value": "%99.9",
+        "label": "Çalışma Süresi"
+      },
+      "countries": {
+        "value": "6",
+        "label": "Pazar Yeri"
+      }
+    },
+    "testimonials": {
+      "sectionTitle": "Dropshipper'ların Gözdesi",
+      "sectionSubtitle": "Satıcılar Zonds hakkında ne diyor görün.",
+      "t1": {
+        "text": "Zonds dropshipping işimi tamamen dönüştürdü. Eskiden siparişleri ve fiyatları manuel yönetmek için saatler harcardım. Şimdi her şey otomatik çalışıyor.",
+        "name": "Marcus J.",
+        "role": "eBay En İyi Satıcı",
+        "rating": "5"
+      },
+      "t2": {
+        "text": "Ürün bazlı ayarlar oyun değiştirici. Her ürün için farklı marj ayarlayabiliyorum. İlk ayda kârım %35 arttı.",
+        "name": "Sarah K.",
+        "role": "Tam Zamanlı Dropshipper",
+        "rating": "5"
+      },
+      "t3": {
+        "text": "Zonds'tan önce 4 farklı araç denedim. Sadece otomatik takip senkronizasyonu her gün 2 saat kazandırıyor. Destek ekibi de inanılmaz hızlı.",
+        "name": "David R.",
+        "role": "Çoklu Mağaza İşletmecisi",
+        "rating": "5"
+      }
     }
   }
 }

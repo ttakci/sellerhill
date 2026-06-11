@@ -77,6 +77,16 @@ export interface ThemeColors {
     accent: string;
     divider: string;
   };
+
+  // Landing page specific tokens
+  landing: {
+    heroGradient: string;
+    statsBg: string;
+    accentPurple: string;
+    gradientText: string;
+    cardGlow: string;
+    sectionAlt: string;
+  };
 }
 
 export interface AppTheme {

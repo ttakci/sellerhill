@@ -75,6 +75,15 @@ const lightColors: ThemeColors = {
     accent: '#4263EB',
     divider: 'rgba(255, 255, 255, 0.1)',
   },
+
+  landing: {
+    heroGradient: 'linear-gradient(135deg, #4263EB 0%, #3B82F6 50%, #6366F1 100%)',
+    statsBg: '#0F172A',
+    accentPurple: '#818CF8',
+    gradientText: 'linear-gradient(135deg, #4263EB, #818CF8)',
+    cardGlow: 'rgba(66, 99, 235, 0.08)',
+    sectionAlt: '#F8FAFC',
+  },
 };
 
 /**
@@ -144,6 +153,15 @@ const darkColors: ThemeColors = {
     active: 'rgba(255, 255, 255, 0.15)',
     accent: '#4263EB',
     divider: 'rgba(255, 255, 255, 0.1)',
+  },
+
+  landing: {
+    heroGradient: 'linear-gradient(135deg, #1E3A8A 0%, #312E81 50%, #1E1B4B 100%)',
+    statsBg: '#020617',
+    accentPurple: '#A78BFA',
+    gradientText: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+    cardGlow: 'rgba(96, 165, 250, 0.06)',
+    sectionAlt: '#1E293B',
   },
 };
 
