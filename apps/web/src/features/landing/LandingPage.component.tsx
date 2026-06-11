@@ -66,7 +66,7 @@ export const LandingPageComponent = ({
       {/* ── Navbar ────────────────────────────────────── */}
       <S.Navbar $scrolled={scrolled}>
         <S.NavLeft>
-          <Logo compact height={40} />
+          <Logo height={40} />
         </S.NavLeft>
         <S.NavCenter>
           <S.NavLink type="button" onClick={() => scrollTo('features')}>
@@ -515,7 +515,7 @@ export const LandingPageComponent = ({
       <S.Footer>
         <S.FooterGrid>
           <S.FooterBrand>
-            <Logo compact height={32} />
+            <Logo height={32} />
             <S.FooterDescription>{t('translation:landing.footer.description')}</S.FooterDescription>
           </S.FooterBrand>
           <S.FooterColumn>
