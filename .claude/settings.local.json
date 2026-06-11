@@ -43,7 +43,9 @@
       "Bash(pnpm --filter @repo/ui add -D shx)",
       "Bash(pnpm --filter @repo/ui run build)",
       "Bash(pnpm --filter @repo/ui remove shx)",
-      "Bash(docker build *)"
+      "Bash(docker build *)",
+      "Bash(docker compose *)",
+      "Bash(JWT_REFRESH_SECRET=test JWT_SECRET=test POSTGRES_PASSWORD=test docker compose --progress=plain -f docker-compose.production.yml build web --no-cache)"
     ]
   }
 }
