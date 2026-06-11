@@ -20,11 +20,16 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_NODE_ENV=$VITE_NODE_ENV
 ENV VITE_ENABLE_AUTH=$VITE_ENABLE_AUTH
 
-# Install dependencies and build in order
-RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @repo/shared run build
-RUN pnpm --filter @repo/ui run build
-RUN pnpm --filter web run build
+# Install dependencies and build in order (single layer for verbose error output)
+RUN set -ex && \
+    pnpm install --frozen-lockfile && \
+    echo "=== INSTALL DONE ===" && \
+    pnpm --filter @repo/shared run build && \
+    echo "=== SHARED DONE ===" && \
+    pnpm --filter @repo/ui run build && \
+    echo "=== UI DONE ===" && \
+    pnpm --filter web run build && \
+    echo "=== WEB DONE ==="
 
 # ---- Production Stage ----
 FROM nginx:alpine
