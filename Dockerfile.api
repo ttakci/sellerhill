@@ -19,14 +19,18 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @repo/shared run build
 RUN pnpm --filter api run build
 
-# 3. Remove dev dependencies to reduce image size
+# 3. Copy migration SQL files into dist so MigrationRunner can find them
+#    (MigrationRunner resolves relative to __dirname in dist/common/database)
+RUN cp -r /app/apps/api/migrations /app/apps/api/dist/migrations
+
+# 4. Remove dev dependencies to reduce image size
 RUN pnpm prune --prod
 
-# 4. Install Playwright Chromium + system dependencies
+# 5. Install Playwright Chromium + system dependencies
 #    (must run AFTER prune so it uses the prod version)
 RUN cd apps/api && pnpm exec playwright install --with-deps chromium
 
-# 5. Create browser state directory for Playwright sessions
+# 6. Create browser state directory for Playwright sessions
 RUN mkdir -p /app/.browser-state
 
 # Make entrypoint executable
