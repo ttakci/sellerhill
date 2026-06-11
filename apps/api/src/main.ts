@@ -132,10 +132,11 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
+  const host = process.env.HOST || '0.0.0.0';
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-  await app.listen(port);
+  await app.listen(port, host);
 
-  winstonLogger.log(`🚀 API is running on: http://localhost:${port}/api`);
+  winstonLogger.log(`🚀 API is running on: http://${host}:${port}/api`);
   winstonLogger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
 
   // Graceful shutdown handlers

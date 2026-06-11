@@ -45,7 +45,8 @@
       "Bash(pnpm --filter @repo/ui remove shx)",
       "Bash(docker build *)",
       "Bash(docker compose *)",
-      "Bash(JWT_REFRESH_SECRET=test JWT_SECRET=test POSTGRES_PASSWORD=test docker compose --progress=plain -f docker-compose.production.yml build web --no-cache)"
+      "Bash(JWT_REFRESH_SECRET=test JWT_SECRET=test POSTGRES_PASSWORD=test docker compose --progress=plain -f docker-compose.production.yml build web --no-cache)",
+      "mcp__zai-mcp-server__extract_text_from_screenshot"
     ]
   }
 }
