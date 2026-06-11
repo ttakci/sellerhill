@@ -1,15 +1,17 @@
 import styled from '@emotion/styled';
 import React from 'react';
 
-import logoSvg from '../../assets/logo.svg';
+import logoMarkSvg from '../../assets/logo-mark.svg';
+import logoVectorSvg from '../../assets/logo-vector.svg';
 
 interface LogoProps {
-  /** Logo height in pixels. Width is calculated automatically to preserve aspect ratio. */
+  /** Logo height in pixels. Width scales automatically. */
   height?: number;
-  /** @deprecated Use `height` instead. Maps to height for backward compat. */
+  /** @deprecated Use `height` instead. */
   size?: number;
   className?: string;
-  variant?: 'light' | 'dark';
+  /** Show compact Z icon mark only (for navbar, footer). Default shows full logo. */
+  compact?: boolean;
 }
 
 const Image = styled.img<{ $height: number }>`
@@ -18,10 +20,10 @@ const Image = styled.img<{ $height: number }>`
   max-width: 100%;
   object-fit: contain;
   display: block;
-  aspect-ratio: 1 / 1;
 `;
 
-export const Logo: React.FC<LogoProps> = ({ height, size, className }) => {
+export const Logo: React.FC<LogoProps> = ({ height, size, className, compact }) => {
   const resolvedHeight = height ?? size ?? 40;
-  return <Image src={logoSvg} $height={resolvedHeight} alt="Zonds Logo" className={className} />;
+  const src = compact ? logoMarkSvg : logoVectorSvg;
+  return <Image src={src} $height={resolvedHeight} alt="Zonds Logo" className={className} />;
 };
