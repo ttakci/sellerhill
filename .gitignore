@@ -13,8 +13,7 @@ packages/*/dist/
 **/*.js.map
 **/*.d.ts
 **/*.d.ts.map
-!packages/ui/src/theme/emotion.d.ts
-!packages/ui/src/theme/styled.d.ts
+!packages/ui/src/**/*.d.ts
 !*.config.js
 !*.config.cjs
 !*.config.mjs
