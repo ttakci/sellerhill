@@ -19,6 +19,8 @@ const Image = styled.img<{ $height: number }>`
   object-fit: contain;
   display: block;
   aspect-ratio: 1 / 1;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 `;
 
 export const Logo: React.FC<LogoProps> = ({ height, size, className }) => {
