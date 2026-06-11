@@ -1,0 +1,1 @@
+ALTER TABLE ebay_accounts ADD COLUMN IF NOT EXISTS store_name VARCHAR(255);

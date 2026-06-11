@@ -21,7 +21,10 @@ RUN pnpm --filter api run build
 
 # 3. Copy migration SQL files into dist so MigrationRunner can find them
 #    (MigrationRunner resolves relative to __dirname in dist/common/database)
-RUN cp -r /app/apps/api/migrations /app/apps/api/dist/migrations
+#    We list files explicitly so the build fails early if any are missing.
+WORKDIR /app/apps/api
+COPY apps/api/migrations/ ./dist/migrations/
+WORKDIR /app
 
 # 4. Remove dev dependencies to reduce image size
 RUN pnpm prune --prod
