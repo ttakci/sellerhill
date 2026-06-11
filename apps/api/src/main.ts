@@ -53,10 +53,22 @@ async function bootstrap() {
   );
 
   // CORS configuration - production-ready
-  const corsOriginsEnv = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN;
+  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL > localhost fallback
+  const corsOriginsEnv =
+    process.env.CORS_ORIGINS ||
+    process.env.CORS_ORIGIN ||
+    process.env.FRONTEND_URL;
   const allowedOrigins = corsOriginsEnv
     ? corsOriginsEnv.split(',').map((o) => o.trim())
     : ['http://localhost:5173'];
+
+  if (allowedOrigins.length > 0 && allowedOrigins[0] !== 'http://localhost:5173') {
+    winstonLogger.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
+  } else {
+    winstonLogger.warn(
+      'No CORS_ORIGINS/CORS_ORIGIN/FRONTEND_URL set — falling back to localhost. Set FRONTEND_URL in production!',
+    );
+  }
 
   app.enableCors({
     origin: (origin, callback) => {
