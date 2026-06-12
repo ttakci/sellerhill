@@ -39,8 +39,6 @@ services:
       context: .
       dockerfile: Dockerfile.api
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -59,48 +57,12 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
 
-      # CORS & Frontend — injected directly by Coolify at container level.
-      # Do NOT declare them here: ${VAR:-} substitutes to empty string when
-      # Coolify doesn't provide the var through compose .env, and that empty
-      # string blocks dotenv from loading .env.production fallback values.
-
       # Logging
       LOG_LEVEL: info
 
-      # eBay OAuth (fill in Coolify env vars)
-      EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:-}
-      EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:-}
-      EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:-}
-      EBAY_RUNAME: ${EBAY_RUNAME:-}
-      EBAY_ENVIRONMENT: ${EBAY_ENVIRONMENT:-sandbox}
-      EBAY_AUTH_URL: ${EBAY_AUTH_URL:-https://auth.sandbox.ebay.com/oauth2/authorize}
-      EBAY_TOKEN_URL: ${EBAY_TOKEN_URL:-https://api.sandbox.ebay.com/identity/v1/oauth2/token}
-      EBAY_REST_API_URL: ${EBAY_REST_API_URL:-https://api.sandbox.ebay.com}
-      EBAY_XML_API_URL: ${EBAY_XML_API_URL:-https://api.sandbox.ebay.com/ws/api.dll}
-
-      # Keepa
-      KEEPA_API_KEY: ${KEEPA_API_KEY:-}
-
-      # Amazon
-      AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:-}
-
-      # Scraper Configuration
-      SCRAPER_API_KEY: ${SCRAPER_API_KEY:-}
-      ZON_SCRAPPER_CONCURRENCY: ${ZON_SCRAPPER_CONCURRENCY:-1}
-      ZON_SCRAPPER_TIMEOUT_MS: ${ZON_SCRAPPER_TIMEOUT_MS:-60000}
-      ZON_SCRAPPER_USE_PROXY: ${ZON_SCRAPPER_USE_PROXY:-false}
-
       # Rate Limiting
-      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
-
-      # Email (SMTP)
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_SECURE: ${SMTP_SECURE:-false}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_FROM: ${SMTP_FROM:-}
+      RATE_LIMIT_TTL: 60
+      RATE_LIMIT_MAX: 100
     volumes:
       - browser_state:/app/.browser-state
     depends_on:
