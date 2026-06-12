@@ -53,7 +53,7 @@ async function bootstrap() {
   );
 
   // CORS configuration
-  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL > reflect origin (allow all)
+  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL
   const corsOriginsEnv =
     process.env.CORS_ORIGINS ||
     process.env.CORS_ORIGIN ||
@@ -63,11 +63,9 @@ async function bootstrap() {
         .split(',')
         .map((o) => o.trim())
         .filter(Boolean)
-    : [];
+    : ['http://localhost:5173'];
 
-  winstonLogger.log(
-    `CORS config — env: ${corsOriginsEnv || '(none)'}, allowed: [${allowedOrigins.join(', ') || 'reflect-origin'}]`,
-  );
+  winstonLogger.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -77,19 +75,12 @@ async function bootstrap() {
         return;
       }
 
-      // If explicit origins configured, enforce whitelist
-      if (allowedOrigins.length > 0) {
-        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-          callback(null, true);
-        } else {
-          winstonLogger.warn(`CORS blocked origin: ${origin}`);
-          callback(new Error('Not allowed by CORS'));
-        }
-        return;
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        callback(null, true);
+      } else {
+        winstonLogger.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
       }
-
-      // No explicit config — reflect requesting origin (allow all)
-      callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
