@@ -52,23 +52,22 @@ async function bootstrap() {
     })
   );
 
-  // CORS configuration - production-ready
-  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL > localhost fallback
+  // CORS configuration
+  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL > reflect origin (allow all)
   const corsOriginsEnv =
     process.env.CORS_ORIGINS ||
     process.env.CORS_ORIGIN ||
     process.env.FRONTEND_URL;
   const allowedOrigins = corsOriginsEnv
-    ? corsOriginsEnv.split(',').map((o) => o.trim())
-    : ['http://localhost:5173'];
+    ? corsOriginsEnv
+        .split(',')
+        .map((o) => o.trim())
+        .filter(Boolean)
+    : [];
 
-  if (allowedOrigins.length > 0 && allowedOrigins[0] !== 'http://localhost:5173') {
-    winstonLogger.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
-  } else {
-    winstonLogger.warn(
-      'No CORS_ORIGINS/CORS_ORIGIN/FRONTEND_URL set — falling back to localhost. Set FRONTEND_URL in production!',
-    );
-  }
+  winstonLogger.log(
+    `CORS config — env: ${corsOriginsEnv || '(none)'}, allowed: [${allowedOrigins.join(', ') || 'reflect-origin'}]`,
+  );
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -78,13 +77,19 @@ async function bootstrap() {
         return;
       }
 
-      // Check if origin is allowed
-      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-        callback(null, true);
-      } else {
-        winstonLogger.warn(`CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+      // If explicit origins configured, enforce whitelist
+      if (allowedOrigins.length > 0) {
+        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+          callback(null, true);
+        } else {
+          winstonLogger.warn(`CORS blocked origin: ${origin}`);
+          callback(new Error('Not allowed by CORS'));
+        }
+        return;
       }
+
+      // No explicit config — reflect requesting origin (allow all)
+      callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
