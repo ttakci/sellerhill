@@ -57,9 +57,6 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
 
-      # Frontend URL (also used as CORS fallback)
-      FRONTEND_URL: ${FRONTEND_URL:-}
-
       # Logging
       LOG_LEVEL: info
 
