@@ -65,7 +65,10 @@ async function bootstrap() {
         .filter(Boolean)
     : ['http://localhost:5173'];
 
-  winstonLogger.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
+  // eslint-disable-next-line no-console
+  console.log(`[CORS] CORS_ORIGINS=${process.env.CORS_ORIGINS ?? '(unset)'}, CORS_ORIGIN=${process.env.CORS_ORIGIN ?? '(unset)'}, FRONTEND_URL=${process.env.FRONTEND_URL ?? '(unset)'}`);
+  // eslint-disable-next-line no-console
+  console.log(`[CORS] Allowed origins: [${allowedOrigins.join(', ')}]`);
 
   app.enableCors({
     origin: (origin, callback) => {
