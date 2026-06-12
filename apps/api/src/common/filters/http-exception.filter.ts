@@ -38,6 +38,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // Handle CORS errors — return 403 with clear message instead of generic 500
+    if (exception instanceof Error && exception.message?.includes('Not allowed by CORS')) {
+      const requestId = request.headers['x-request-id'] as string | undefined;
+      const origin = request.headers['origin'];
+
+      this.logger.warn(`CORS rejected origin: ${origin ?? '(none)'} on ${request.method} ${request.url}`);
+
+      const errorResponse: ErrorResponse = {
+        statusCode: HttpStatus.FORBIDDEN,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+        method: request.method,
+        message: `CORS policy: Origin '${origin ?? 'unknown'}' is not allowed`,
+        error: 'Forbidden',
+      };
+      if (requestId) {
+        errorResponse.requestId = requestId;
+      }
+
+      response.status(HttpStatus.FORBIDDEN).json(errorResponse);
+      return;
+    }
+
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const message = exception instanceof HttpException ? exception.getResponse() : 'Internal server error';

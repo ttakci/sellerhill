@@ -39,6 +39,8 @@ services:
       context: .
       dockerfile: Dockerfile.api
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -57,9 +59,10 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
 
-      # CORS & Frontend (set in Coolify env vars)
-      CORS_ORIGIN: ${CORS_ORIGIN:-}
-      FRONTEND_URL: ${FRONTEND_URL:-}
+      # CORS & Frontend — injected directly by Coolify at container level.
+      # Do NOT declare them here: ${VAR:-} substitutes to empty string when
+      # Coolify doesn't provide the var through compose .env, and that empty
+      # string blocks dotenv from loading .env.production fallback values.
 
       # Logging
       LOG_LEVEL: info

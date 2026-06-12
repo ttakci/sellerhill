@@ -52,36 +52,22 @@ async function bootstrap() {
     })
   );
 
-  // CORS configuration
-  // Priority: CORS_ORIGINS > CORS_ORIGIN > FRONTEND_URL
-  const corsOriginsEnv =
-    process.env.CORS_ORIGINS ||
-    process.env.CORS_ORIGIN ||
-    process.env.FRONTEND_URL;
-  const allowedOrigins = corsOriginsEnv
-    ? corsOriginsEnv
-        .split(',')
-        .map((o) => o.trim())
-        .filter(Boolean)
-    : ['http://localhost:5173'];
-
-  // eslint-disable-next-line no-console
-  console.log(`[CORS] CORS_ORIGINS=${process.env.CORS_ORIGINS ?? '(unset)'}, CORS_ORIGIN=${process.env.CORS_ORIGIN ?? '(unset)'}, FRONTEND_URL=${process.env.FRONTEND_URL ?? '(unset)'}`);
-  // eslint-disable-next-line no-console
-  console.log(`[CORS] Allowed origins: [${allowedOrigins.join(', ')}]`);
+  // CORS configuration — hardcoded per environment
+  const allowedOrigins =
+    process.env.NODE_ENV === 'production'
+      ? ['https://zonds.takci.cloud']
+      : ['http://localhost:5173'];
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) {
         callback(null, true);
         return;
       }
-
-      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        winstonLogger.warn(`CORS blocked origin: ${origin}`);
+        winstonLogger.warn(`[CORS] Blocked origin: ${origin} (allowed: [${allowedOrigins.join(', ')}])`);
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -89,7 +75,7 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-API-Version'],
     exposedHeaders: ['X-Request-ID', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
-    maxAge: 86400, // Cache preflight requests for 24 hours
+    maxAge: 86400,
   });
 
   // Global exception filter
