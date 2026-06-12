@@ -57,8 +57,7 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
 
-      # CORS & Frontend
-      CORS_ORIGIN: ${CORS_ORIGIN:-}
+      # Frontend URL (also used for CORS when CORS_ORIGINS is not set)
       FRONTEND_URL: ${FRONTEND_URL:-}
 
       # Logging
