@@ -68,7 +68,7 @@ services:
       # eBay OAuth
       EBAY_CLIENT_ID: CHANGE_ME_EBAY_CLIENT_ID
       EBAY_CLIENT_SECRET: CHANGE_ME_EBAY_CLIENT_SECRET
-      EBAY_REDIRECT_URI: https://zonds.takci.cloud/api/v1/ebay/callback
+      EBAY_REDIRECT_URI: https://zonds-api.takci.cloud/api/v1/ebay/callback
       EBAY_RUNAME: CHANGE_ME_EBAY_RUNAME
       EBAY_ENVIRONMENT: production
       EBAY_AUTH_URL: https://auth.ebay.com/oauth2/authorize
@@ -114,7 +114,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        VITE_API_BASE_URL: /api/v1
+        VITE_API_BASE_URL: https://zonds-api.takci.cloud/api/v1
         VITE_NODE_ENV: production
         VITE_ENABLE_AUTH: "true"
     restart: unless-stopped
