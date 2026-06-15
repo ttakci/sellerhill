@@ -13,6 +13,9 @@ services:
       POSTGRES_DB: zonds_db
       POSTGRES_USER: zonds_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify env vars}
+    # Exposed for DBeaver access (protected by strong POSTGRES_PASSWORD)
+    ports:
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
