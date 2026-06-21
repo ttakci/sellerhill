@@ -52,11 +52,14 @@ async function bootstrap() {
     })
   );
 
-  // CORS configuration — hardcoded per environment
-  const allowedOrigins =
-    process.env.NODE_ENV === 'production'
-      ? ['https://zonds.takci.cloud']
-      : ['http://localhost:5173'];
+  // CORS configuration — allowed origins from CORS_ORIGINS env var (comma-separated).
+  // Same-origin requests (no Origin header) are always allowed, so under the
+  // same-origin nginx proxy this rarely matters — but it stays correct for any
+  // cross-origin caller. Defaults to the Vite dev server when unset.
+  const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.enableCors({
     origin: (origin, callback) => {

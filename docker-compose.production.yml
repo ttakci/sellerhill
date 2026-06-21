@@ -1,39 +1,20 @@
 # ============================================
 # Zonds - Production Docker Compose (TEST / SANDBOX)
 # For Coolify deployment
-# Secrets (passwords, API keys) injected via Coolify env vars.
+#
+# Architecture: SAME-ORIGIN nginx proxy
+#   - web (nginx) serves the React SPA and proxies /api/* → api:3000
+#   - ONE public domain (set in Coolify UI). No CORS, no second domain.
+#
+# Stateful services (PostgreSQL, Redis) are NOT defined here.
+# They are managed by Coolify as separate Database resources, on the same
+# Docker network. Their connection strings are injected via env vars:
+#   DATABASE_URL  → copy internal connection string from the PostgreSQL resource
+#   REDIS_*       → host/port (and optional password) from the Redis resource
+# See docs/deployment-guide.md.
 # ============================================
 
 services:
-  # ---- PostgreSQL 16 ----
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: zonds_db
-      POSTGRES_USER: zonds_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify env vars}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U zonds_user -d zonds_db']
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  # ---- Redis 7 ----
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # ---- NestJS API ----
   api:
     build:
@@ -45,17 +26,23 @@ services:
       PORT: 3000
       HOST: 0.0.0.0
 
-      # Database
-      DATABASE_URL: postgresql://zonds_user:${POSTGRES_PASSWORD}@postgres:5432/zonds_db
+      # Database — Coolify-managed PostgreSQL.
+      # Copy the INTERNAL connection string from the PostgreSQL resource panel.
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in Coolify (internal conn string from PostgreSQL resource)}
       DB_POOL_MAX: 20
 
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      # Redis — Coolify-managed Redis (host/port from the Redis resource).
+      REDIS_HOST: ${REDIS_HOST:?Set REDIS_HOST in Coolify (from Redis resource)}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_DB: 0
 
-      # Frontend URL (OAuth redirects + email links)
-      FRONTEND_URL: https://zonds.takci.cloud
+      # Frontend URL (OAuth redirects + email links) — same domain as web.
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://zonds.takci.cloud)}
+
+      # CORS — allowed origins (comma-separated). Same-origin SPA requests carry
+      # no Origin header so this rarely matters, but set it for correctness.
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
 
       # JWT
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in Coolify env vars}
@@ -69,7 +56,7 @@ services:
       # eBay OAuth (SANDBOX)
       EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:?Set EBAY_CLIENT_ID in Coolify env vars}
       EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:?Set EBAY_CLIENT_SECRET in Coolify env vars}
-      EBAY_REDIRECT_URI: https://zonds-api.takci.cloud/api/v1/ebay/callback
+      EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:?Set EBAY_REDIRECT_URI in Coolify (https://<domain>/api/v1/ebay/callback)}
       EBAY_RUNAME: ${EBAY_RUNAME:?Set EBAY_RUNAME in Coolify env vars}
       EBAY_ENVIRONMENT: sandbox
       EBAY_AUTH_URL: https://auth.sandbox.ebay.com/oauth2/authorize
@@ -81,7 +68,7 @@ services:
       KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
       KEEPA_API_URL: https://api.keepa.com/product
 
-      # Amazon
+      # Amazon (32-byte hex key for AES-256-GCM credential encryption)
       AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:?Set AMAZON_ENCRYPTION_KEY in Coolify env vars}
 
       # Scraper
@@ -102,12 +89,12 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:?Set SMTP_PASSWORD in Coolify env vars}
       SMTP_FROM: ${SMTP_FROM:?Set SMTP_FROM in Coolify env vars}
     volumes:
+      # Playwright/Amazon session cookies — persistent, app-specific state.
       - browser_state:/app/.browser-state
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+    # NOTE: no depends_on for postgres/redis — they live in separate Coolify
+    # resources. Create + start the DB resources BEFORE the first app deploy
+    # (see deployment guide). If the API boots before the DB is ready, the
+    # migration fails and `restart: unless-stopped` retries until it connects.
 
   # ---- React Web (nginx) ----
   web:
@@ -115,7 +102,9 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        VITE_API_BASE_URL: https://zonds-api.takci.cloud/api/v1
+        # SAME-ORIGIN: relative path. nginx proxies /api → api:3000,
+        # so the SPA calls <same-domain>/api/v1/* with no CORS.
+        VITE_API_BASE_URL: /api/v1
         VITE_NODE_ENV: production
         VITE_ENABLE_AUTH: "true"
     restart: unless-stopped
@@ -123,6 +112,4 @@ services:
       - api
 
 volumes:
-  postgres_data:
-  redis_data:
   browser_state:
