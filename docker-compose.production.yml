@@ -113,3 +113,11 @@ services:
 
 volumes:
   browser_state:
+
+# Attach to Coolify's shared network so the app reaches the managed PostgreSQL
+# and Redis resources (which live on the external `coolify` network) by hostname.
+# Verify the name with `docker network ls` on the VPS; rename if it differs.
+networks:
+  default:
+    name: coolify
+    external: true
