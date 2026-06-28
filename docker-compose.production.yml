@@ -91,6 +91,8 @@ services:
     volumes:
       # Playwright/Amazon session cookies — persistent, app-specific state.
       - browser_state:/app/.browser-state
+    networks:
+      - coolify
     # NOTE: no depends_on for postgres/redis — they live in separate Coolify
     # resources. Create + start the DB resources BEFORE the first app deploy
     # (see deployment guide). If the API boots before the DB is ready, the
@@ -110,14 +112,16 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    networks:
+      - coolify
 
 volumes:
   browser_state:
 
-# Attach to Coolify's shared network so the app reaches the managed PostgreSQL
-# and Redis resources (which live on the external `coolify` network) by hostname.
+# Attach both services to Coolify's shared network so they reach the managed
+# PostgreSQL and Redis resources (which live on the external `coolify` network)
+# by hostname, AND so nginx (web) can resolve the `api` service name.
 # Verify the name with `docker network ls` on the VPS; rename if it differs.
 networks:
-  default:
-    name: coolify
+  coolify:
     external: true
