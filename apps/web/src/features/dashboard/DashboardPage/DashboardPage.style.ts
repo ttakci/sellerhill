@@ -83,7 +83,7 @@ export const PeriodCardHeader = styled.div<{ $bgColor: string }>`
 export const PeriodTitle = styled(Text)``;
 
 export const PeriodDate = styled(Text)`
-  margin-top: 0.125rem;
+  margin-top: ${tkn('spacing.2xs')};
 `;
 
 export const PeriodCardBody = styled.div`
@@ -99,7 +99,7 @@ export const HeroMetricValue = styled.div`
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   line-height: ${tkn('typography.lineHeight.tight')};
-  letter-spacing: -0.02em;
+  letter-spacing: ${tkn('typography.letterSpacing.tighter')};
   margin-bottom: ${tkn('spacing.xs')};
 `;
 
