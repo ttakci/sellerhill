@@ -1,9 +1,14 @@
+import styled from '@emotion/styled';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Icon } from '../Icon';
 
 import * as S from './Dropdown.style';
 import type { DropdownProps } from './Dropdown.types';
+
+const TriggerWrapper = styled.div`
+  cursor: pointer;
+`;
 
 export const Dropdown: React.FC<DropdownProps> = ({
   trigger,
@@ -37,7 +42,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <S.Container ref={containerRef} className={className}>
-      <div onClick={handleTrigger} style={{ cursor: 'pointer' }}>{renderedTrigger}</div>
+      <TriggerWrapper onClick={handleTrigger}>{renderedTrigger}</TriggerWrapper>
       <S.Menu $isOpen={isOpen} $align={align} $direction={direction} $width={width}>
         {header && <S.DropdownHeader>{header}</S.DropdownHeader>}
         {items.map((item, index) => (

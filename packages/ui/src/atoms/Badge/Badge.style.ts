@@ -20,19 +20,19 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
     switch ($size) {
       case 'xs':
         return `
-          padding: 0.0625rem 0.375rem;
+          padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.xs+')({ theme })};
           font-size: ${tkn('typography.fontSize.2xs')({ theme })};
           line-height: 1.5;
         `;
       case 'sm':
         return `
-          padding: 0.125rem 0.5rem;
+          padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.sm')({ theme })};
           font-size: ${tkn('typography.fontSize.xs')({ theme })};
           line-height: 1.5;
         `;
       case 'md':
         return `
-          padding: 0.1875rem 0.625rem;
+          padding: ${tkn('spacing.2xs+')({ theme })} ${tkn('spacing.sm+')({ theme })};
           font-size: ${tkn('typography.fontSize.xs')({ theme })};
           line-height: 1.5;
         `;

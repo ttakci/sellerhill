@@ -45,7 +45,14 @@ export const Icon = ({
   }
 
   return (
-    <S.IconWrapper $size={numericSize} aria-hidden="true" className={className} style={style} {...props}>
+    <S.IconWrapper
+      $size={numericSize}
+      aria-hidden="true"
+      className={className}
+      // eslint-disable-next-line design-system/no-inline-styles -- pass-through style prop for consumer overrides
+      style={style}
+      {...props}
+    >
       <IconComponent stroke={stroke || resolvedColor} strokeWidth={strokeWidth} />
     </S.IconWrapper>
   );

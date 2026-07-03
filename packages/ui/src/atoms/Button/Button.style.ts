@@ -212,7 +212,7 @@ export const LoadingContainer = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const LoadingDot = styled.div<{ $delay: string }>`

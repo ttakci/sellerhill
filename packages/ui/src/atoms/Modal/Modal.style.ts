@@ -5,7 +5,7 @@ import { tkn } from '../../theme/tkn';
 export const Overlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: ${tkn('colors.surface.overlay')};
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
@@ -91,7 +91,7 @@ export const Footer = styled.div<{ $showDivider?: boolean }>`
     $showDivider ? `0.0625rem solid ${tkn('colors.border.primary')({ theme })}` : 'none'}; /* 1px */
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem; /* 12px */
+  gap: ${tkn('spacing.sm-md')};
 `;
 
 export const CloseButton = styled.button`

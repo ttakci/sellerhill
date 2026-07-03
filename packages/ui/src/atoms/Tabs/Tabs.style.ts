@@ -19,7 +19,7 @@ export const TabList = styled.div<{ $variant: 'underline' | 'pill' }>`
 export const TabButton = styled.button<{ $isActive: boolean; $variant: 'underline' | 'pill' }>`
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* 8px */
+  gap: ${tkn('spacing.sm')};
   background: transparent;
   border: none;
   cursor: pointer;

@@ -2,6 +2,8 @@ import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 
+import { tkn } from '../../theme/tkn';
+
 const fluidAnimation = keyframes`
   0% { transform: scale(1) translate(0, 0); }
   33% { transform: scale(1.1) translate(-2%, 2%); }
@@ -23,7 +25,7 @@ const Container = styled.div`
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background: #0c1427; /* Deep navy instead of pure black */
+  background: ${tkn('colors.landing.heroBg')};
   z-index: 0;
   pointer-events: none;
 `;
@@ -84,6 +86,16 @@ const Particle = styled.div<{
         `}
 `;
 
+const Overlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, transparent 0%, ${tkn('colors.surface.overlay')} 100%);
+  pointer-events: none;
+`;
+
 const particlesCount = 15;
 const generateParticles = () =>
   Array.from({ length: particlesCount }).map((_, i) => ({
@@ -120,17 +132,7 @@ export const MeshBackground: React.FC<MeshBackgroundProps> = ({ animate = true }
           $animate={animate}
         />
       ))}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'radial-gradient(circle at center, transparent 0%, rgba(12, 20, 39, 0.4) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
+      <Overlay />
     </Container>
   );
 };

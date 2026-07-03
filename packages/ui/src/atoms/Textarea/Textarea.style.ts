@@ -4,7 +4,7 @@ import { tkn } from '../../theme/tkn';
 
 export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?: boolean }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  padding: 0.75rem 1rem; /* 12px 16px */
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   background-color: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid
     ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
@@ -43,7 +43,7 @@ export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?
 export const HelperText = styled.span`
   font-size: ${tkn('typography.fontSize.xs')};
   color: ${tkn('colors.semantic.error')};
-  margin-top: 0.25rem; /* 4px */
+  margin-top: ${tkn('spacing.xs')};
 `;
 
 export const Container = styled.div`

@@ -24,7 +24,7 @@ export const Menu = styled.div<{
   background: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.sm')};
-  padding: 0.5rem 0; /* 8px */
+  padding: ${tkn('spacing.sm')} 0;
   box-shadow: ${tkn('shadows.xl')};
   animation: ${({ $direction }) => ($direction === 'up' ? 'fadeInUp' : 'fadeIn')} 0.2s ease-out;
 
@@ -52,17 +52,17 @@ export const Menu = styled.div<{
 `;
 
 export const DropdownHeader = styled.div`
-  padding: 0.75rem 1rem; /* 12px 16px */
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  margin-bottom: 0.5rem; /* 8px */
+  margin-bottom: ${tkn('spacing.sm')};
 `;
 
 export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px */
+  gap: ${tkn('spacing.sm-md')};
   width: 100%;
-  padding: 0.625rem 0.75rem; /* 10px 12px */
+  padding: ${tkn('spacing.sm+')} ${tkn('spacing.sm-md')};
   border: none;
   background: transparent;
   cursor: pointer;

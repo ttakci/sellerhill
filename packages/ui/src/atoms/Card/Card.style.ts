@@ -20,18 +20,18 @@ export const CardContainer = styled.div<{
   ${(props) => {
     switch (props.$variant) {
       case 'bordered':
-        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
+        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
       case 'elevated':
-        return `box-shadow: ${tkn('shadows.md')(props)}; border: 1px solid rgba(0, 0, 0, 0.04);`;
+        return `box-shadow: ${tkn('shadows.md')(props)}; border: 1px solid ${tkn('colors.border.secondary')(props)};`;
       case 'flat':
         return '';
       case 'interactive':
         return `
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid ${tkn('colors.border.primary')(props)};
           cursor: pointer;
           &:hover {
             box-shadow: ${tkn('shadows.lg')(props)};
-            border-color: rgba(0, 0, 0, 0.1);
+            border-color: ${tkn('colors.border.focus')(props)};
             transform: translateY(-0.125rem);
           }
           &:active {
@@ -40,12 +40,12 @@ export const CardContainer = styled.div<{
           }
         `;
       case 'stat':
-        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
+        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
       case 'section':
-        return `border: 1px solid rgba(0, 0, 0, 0.06);`;
+        return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
       default:
         return `
-          border: 1px solid rgba(0, 0, 0, 0.06);
+          border: 1px solid ${tkn('colors.border.primary')(props)};
           box-shadow: ${tkn('shadows.sm')(props)};
         `;
     }
@@ -75,14 +75,14 @@ export const CardContainer = styled.div<{
     cursor: pointer;
     &:hover {
       box-shadow: ${tkn('shadows.md')(props)};
-      border-color: rgba(0, 0, 0, 0.1);
+      border-color: ${tkn('colors.border.focus')(props)};
       transform: translateY(-0.0625rem);
     }
   `}
 `;
 
 export const CardHeaderContainer = styled.div`
-  padding: 1rem ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;
@@ -113,7 +113,7 @@ export const CardHeaderContent = styled.div`
 export const CardHeaderTextContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const CardHeaderDescription = styled.span`
@@ -136,7 +136,7 @@ export const CardBodyContainer = styled.div`
 `;
 
 export const CardFooterContainer = styled.div`
-  padding: 0.75rem ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.lg')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;

@@ -18,6 +18,7 @@ export const Card = ({
       $padding={padding ?? 'none'}
       $hoverable={hoverable}
       className={className}
+      // eslint-disable-next-line design-system/no-inline-styles -- pass-through style prop for consumer overrides
       style={style}
       {...rest}
     >

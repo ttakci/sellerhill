@@ -6,7 +6,7 @@ import { tkn } from '../../theme/tkn';
 import type { IconButtonVariant } from './IconButton.types';
 
 export const IconButtonContainer = styled.button<{ $variant: IconButtonVariant }>`
-  padding: 0.5rem;
+  padding: ${tkn('spacing.sm')};
   background: transparent;
   border: 0.0625rem solid transparent;
   border-radius: ${tkn('radius.md')};

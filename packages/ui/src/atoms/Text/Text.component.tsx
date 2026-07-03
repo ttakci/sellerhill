@@ -22,6 +22,7 @@ export const Text = ({
     $truncate={truncate}
     $color={color}
     className={className}
+    // eslint-disable-next-line design-system/no-inline-styles -- pass-through style prop for consumer overrides
     style={style}
   >
     {children}
