@@ -11,69 +11,77 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: '#F8FAFC',   // Canvas - page background (used by theme system)
-    secondary: '#FFFFFF',  // Clean white divider areas
-    tertiary: '#F1F5F9',  // Inner elements - stat rows, table headers
-    gradient: 'linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 40%, #F0F4FF 100%)', // Soft white-to-blue gradient
+    primary: '#f4f7ff',
+    secondary: '#FFFFFF',
+    tertiary: '#eef3ff',
+    gradient: 'linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 40%, #F0F4FF 100%)',
   },
 
   surface: {
-    primary: '#FFFFFF',    // Panels - cards, tables, inputs
-    secondary: '#F9FAFB',  // Panel accent - subtle section backgrounds
+    primary: '#FFFFFF',
+    secondary: '#f8fafc',
     overlay: 'rgba(16, 24, 40, 0.4)',
   },
 
   text: {
-    primary: '#111827',
-    secondary: '#6B7280',
-    tertiary: '#9CA3AF',
-    disabled: '#D1D5DB',
+    primary: '#0d1526',
+    secondary: '#475569',
+    tertiary: '#94a3b8',
+    disabled: '#cbd5e1',
     inverse: '#FFFFFF',
   },
 
   border: {
-    primary: '#E5E7EB',
-    secondary: '#F3F4F6',
-    focus: '#3B82F6',
+    primary: '#00000014',
+    secondary: '#0000000a',
+    focus: '#2563eb',
   },
 
   semantic: {
     success: '#059669',
-    error: '#DC2626',
-    warning: '#D97706',
-    info: '#2563EB',
+    error: '#dc2626',
+    warning: '#d97706',
+    info: '#2563eb',
   },
 
   brand: {
-    primary: '#4263EB',
-    primaryHover: '#3B5BD9',
-    secondary: '#EFF6FF',
+    primary: '#2563eb',
+    primaryHover: '#1d4ed8',
+    secondary: '#eef3ff',
+  },
+
+  accent: {
+    primary: '#10b981',
+    primaryHover: '#059669',
+    secondary: '#ecfdf5',
+    foreground: '#047857',
   },
 
   semanticTint: {
-    success: '#ECFDF5',
-    error: '#FEF2F2',
-    warning: '#FFFBEB',
-    info: '#EFF6FF',
-    neutral: '#F3F4F6',
+    success: '#ecfdf5',
+    error: '#fef2f2',
+    warning: '#fffbeb',
+    info: '#eff6ff',
+    neutral: '#f3f4f6',
   },
 
   semanticTintBorder: {
-    success: '#A7F3D0',
-    error: '#FECACA',
-    warning: '#FDE68A',
-    info: '#BFDBFE',
-    neutral: '#E5E7EB',
+    success: '#a7f3d0',
+    error: '#fecaca',
+    warning: '#fde68a',
+    info: '#bfdbfe',
+    neutral: '#e5e7eb',
   },
 
   sidebar: {
-    background: '#0c1427',
-    text: '#FFFFFF',
-    textMuted: 'rgba(255, 255, 255, 0.6)',
-    hover: 'rgba(255, 255, 255, 0.1)',
-    active: 'rgba(255, 255, 255, 0.15)',
-    accent: '#4263EB',
-    divider: 'rgba(255, 255, 255, 0.1)',
+    background: '#0c1f52',
+    foreground: '#93c5fd',
+    text: '#93c5fd',
+    textMuted: 'rgba(147, 197, 253, 0.7)',
+    hover: '#162b6e',
+    active: '#162b6e',
+    accent: '#2563eb',
+    divider: '#ffffff14',
   },
 
   landing: {
