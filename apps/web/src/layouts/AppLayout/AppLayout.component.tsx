@@ -24,6 +24,10 @@ import * as S from './AppLayout.style';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
 
+// TODO(Plan 2 — Dashboard): wire to real RTK Query counts (eBay listings + pending orders)
+const EBAY_LISTINGS_COUNT_PLACEHOLDER = 20;
+const ORDERS_COUNT_PLACEHOLDER = 12;
+
 interface AppLayoutProps {
   user?: UserDto;
   onLogout: () => void;
@@ -165,7 +169,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
               </S.NavItemContent>
               {!sidebarCollapsed && (
                 <S.BadgeWrapper variant="primary" size="sm">
-                  20
+                  {EBAY_LISTINGS_COUNT_PLACEHOLDER}
                 </S.BadgeWrapper>
               )}
             </S.NavItem>
@@ -206,7 +210,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
               </S.NavItemContent>
               {!sidebarCollapsed && (
                 <S.BadgeWrapper variant="primary" size="sm">
-                  12
+                  {ORDERS_COUNT_PLACEHOLDER}
                 </S.BadgeWrapper>
               )}
             </S.NavItem>

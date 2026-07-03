@@ -11,7 +11,6 @@ export interface LogoProps {
   /** @deprecated Use `height` instead. Maps to height for backward compat. */
   size?: number;
   className?: string;
-  variant?: 'light' | 'dark';
   /** Layout variant: 'default' renders the horizontal logo, 'stacked' renders logo mark + stacked text */
   layout?: 'default' | 'stacked';
   onClick?: () => void;
