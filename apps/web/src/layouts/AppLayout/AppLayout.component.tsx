@@ -132,7 +132,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
           <MeshBackground animate={false} />
           <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => localeNavigate('/dashboard')}>
-            <Logo size={sidebarCollapsed ? 98 : 220} />
+            {sidebarCollapsed ? <Logo size={32} /> : <Logo layout="stacked" />}
           </S.LogoArea>
 
           <S.NavSection>
