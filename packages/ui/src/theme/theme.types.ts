@@ -16,6 +16,7 @@ export interface ThemeColors {
     primary: string;
     secondary: string;
     overlay: string;
+    loadingOverlay: string;
   };
 
   // Text
@@ -85,6 +86,7 @@ export interface ThemeColors {
     active: string;
     accent: string;
     divider: string;
+    logoGlow: string;
   };
 
   // Landing page specific tokens

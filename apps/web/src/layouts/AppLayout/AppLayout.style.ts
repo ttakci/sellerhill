@@ -89,7 +89,7 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean }>`
     transition: all ${tkn('transitions.normal')};
     /* Allow the logo to maintain its premium size even in collapsed state */
     max-width: none;
-    filter: drop-shadow(0 0 1.25rem rgba(59, 130, 246, 0.3)); /* 20px */
+    filter: drop-shadow(0 0 1.25rem ${tkn('colors.sidebar.logoGlow')}); /* 20px */
   }
 `;
 
@@ -194,7 +194,7 @@ export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boole
   align-items: center;
   transition: transform ${tkn('transitions.normal')};
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
-  color: #8a99af;
+  color: ${tkn('colors.sidebar.textMuted')};
 `;
 
 export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
@@ -538,7 +538,7 @@ export const NotificationBadge = styled.span`
   width: 0.375rem; /* 6px */
   height: 0.375rem; /* 6px */
   border-radius: 50%;
-  background: #ef4444; /* Red dot */
+  background: ${tkn('colors.semantic.error')}; /* Red dot */
   border: 0.09375rem solid ${tkn('colors.background.secondary')}; /* 1.5px */
   box-sizing: content-box;
 `;
@@ -632,7 +632,7 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.7);
+  background: ${tkn('colors.surface.loadingOverlay')};
   backdrop-filter: blur(0.25rem); /* 4px */
   display: flex;
   align-items: center;
@@ -641,10 +641,6 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   visibility: ${({ $visible }) => ($visible ? 'visible' : 'hidden')};
   transition: all ${tkn('transitions.normal')};
-
-  .dark & {
-    background: rgba(0, 0, 0, 0.7);
-  }
 
   svg {
     animation: ${spin} 1s linear infinite;

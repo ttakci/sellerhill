@@ -21,6 +21,7 @@ const lightColors: ThemeColors = {
     primary: '#FFFFFF',
     secondary: '#f8fafc',
     overlay: 'rgba(16, 24, 40, 0.4)',
+    loadingOverlay: 'rgba(255, 255, 255, 0.7)',
   },
 
   text: {
@@ -82,6 +83,7 @@ const lightColors: ThemeColors = {
     active: '#162b6e',
     accent: '#2563eb',
     divider: '#ffffff14',
+    logoGlow: 'rgba(37, 99, 235, 0.3)',
   },
 
   landing: {
@@ -119,6 +121,7 @@ const darkColors: ThemeColors = {
     primary: '#111318',
     secondary: '#1c1f2e',
     overlay: 'rgba(2, 6, 23, 0.8)',
+    loadingOverlay: 'rgba(0, 0, 0, 0.7)',
   },
 
   text: {
@@ -180,6 +183,7 @@ const darkColors: ThemeColors = {
     active: '#1c1f2e',
     accent: '#6366f1',
     divider: '#ffffff12',
+    logoGlow: 'rgba(99, 102, 241, 0.3)',
   },
 
   landing: {
