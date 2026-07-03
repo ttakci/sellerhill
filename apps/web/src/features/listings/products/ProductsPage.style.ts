@@ -13,7 +13,7 @@ export const Container = styled.div`
 
 export const Card = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border-radius: 0.75rem; /* 12px */
+  border-radius: ${tkn('radius.xl')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
@@ -35,12 +35,12 @@ export const THead = styled.thead`
 `;
 
 export const TH = styled.th`
-  padding: 1rem 1.5rem; /* 16px 24px */
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 700;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.tertiary')};
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
 `;
 
 export const TBody = styled.tbody`
@@ -55,7 +55,7 @@ export const TBody = styled.tbody`
 `;
 
 export const TD = styled.td`
-  padding: 1.25rem 1.5rem; /* 20px 24px */
+  padding: 1.25rem ${tkn('spacing.lg')}; /* 20px has no exact token */
   vertical-align: middle;
   color: ${tkn('colors.text.primary')};
 `;
@@ -63,7 +63,7 @@ export const TD = styled.td`
 export const ProductCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   min-width: 0;
 `;
 
@@ -78,11 +78,11 @@ export const ProductImageWrapper = styled.div`
   justify-content: center;
   background: ${tkn('colors.background.tertiary')};
   flex-shrink: 0;
-  padding: 0.375rem; /* 6px padding */
+  padding: 0.375rem; /* 6px — no exact token */
 
   svg,
   .material-symbols-outlined {
-    font-size: 1.5rem; /* 24px */
+    font-size: ${tkn('typography.fontSize.xxl')};
     color: ${tkn('colors.text.tertiary')};
   }
 `;
@@ -101,8 +101,8 @@ export const ProductMainInfo = styled.div`
 `;
 
 export const ProductTitle = styled.div`
-  font-size: 0.875rem; /* 14px */
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   white-space: nowrap;
   overflow: hidden;
@@ -111,9 +111,9 @@ export const ProductTitle = styled.div`
 `;
 
 export const ProductBrand = styled.div`
-  font-size: 0.75rem; /* 12px */
+  font-size: ${tkn('typography.fontSize.xs')};
   color: ${tkn('colors.text.secondary')};
-  margin-top: 0.125rem; /* 2px */
+  margin-top: ${tkn('spacing.2xs')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -126,14 +126,14 @@ export const CategoryText = styled(UIText)``;
 export const CategoryCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
+  gap: ${tkn('spacing.sm')};
+  font-size: ${tkn('typography.fontSize.xs')};
   color: ${tkn('colors.text.secondary')};
 `;
 
 export const CategoryChevron = styled.span`
   color: ${tkn('colors.text.tertiary')};
-  font-size: 1rem;
+  font-size: ${tkn('typography.fontSize.md')};
   line-height: 1;
 `;
 
@@ -170,10 +170,10 @@ export const CardContent = styled.div`
 `;
 
 export const CardTitleText = styled.div`
-  font-size: 0.9375rem;
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.sm')}; /* 0.9375rem (15px) → sm (14px) closest */
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
-  line-height: 1.4;
+  line-height: ${tkn('typography.lineHeight.normal')};
   height: 2.625rem; /* 2 lines */
   overflow: hidden;
   display: -webkit-box;
@@ -191,16 +191,16 @@ export const CardFooter = styled.div`
 `;
 
 export const ASINContainer = styled.div`
-  margin-top: 0.5rem;
+  margin-top: ${tkn('spacing.sm')};
 `;
 
 export const AmazonLink = styled.a`
   color: ${tkn('colors.brand.primary')};
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
+  gap: ${tkn('spacing.xs')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   text-decoration: none;
 
   &:hover {

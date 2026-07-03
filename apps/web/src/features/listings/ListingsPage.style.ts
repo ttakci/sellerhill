@@ -90,7 +90,7 @@ export const FilterActions = styled.div`
 export const ResultCount = styled(UIText)`
   white-space: nowrap;
   font-size: ${tkn('typography.fontSize.xs')};
-  padding: 0.25rem 0.625rem;
+  padding: ${tkn('spacing.xs')} 0.625rem; /* 4px 10px — 10px no exact token */
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.full')};
 `;
@@ -158,7 +158,7 @@ export const RangeSeparator = styled(UIText)`
 export const ProductCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.625rem; /* 10px — no exact token, between xs(4) and sm(8) */
 `;
 
 export const ProductImageWrapper = styled.div`
@@ -170,7 +170,7 @@ export const ProductImageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.375rem; /* 6px padding */
+  padding: 0.375rem; /* 6px — no exact token */ /* 6px padding */
   flex-shrink: 0;
   overflow: hidden;
 
@@ -190,7 +190,7 @@ export const ProductMainInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const ProductTitle = styled.div`
@@ -200,7 +200,7 @@ export const ProductTitle = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.4;
+  line-height: ${tkn('typography.lineHeight.normal')}; /* 1.4 → normal(1.5) closest */
   cursor: default;
 `;
 
@@ -208,7 +208,7 @@ export const ProductBrand = styled.div`
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.tertiary')};
-  line-height: 1.3;
+  line-height: ${tkn('typography.lineHeight.normal')}; /* 1.3 → normal(1.5) closest */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -217,13 +217,13 @@ export const ProductBrand = styled.div`
 export const ProductMeta = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const IDLink = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: ${tkn('spacing.xs')};
 
   span {
     font-family: ${tkn('typography.fontFamily.mono')};
@@ -269,7 +269,7 @@ export const StatBadge = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StockSource = styled.span`
@@ -378,7 +378,7 @@ export const CardBadgeRow = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const CardStatsRow = styled.div`
@@ -387,15 +387,15 @@ export const CardStatsRow = styled.div`
   gap: 0;
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.md')};
-  padding: 0.375rem;
+  padding: 0.375rem; /* 6px — no exact token */
 `;
 
 export const StatItem = styled.div`
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
-  padding: 0.125rem 0.25rem;
+  gap: ${tkn('spacing.2xs')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
 
   &:not(:last-child) {
     border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
@@ -429,7 +429,7 @@ export const CardFooter = styled.div`
 export const StockInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StockLabel = styled.span`

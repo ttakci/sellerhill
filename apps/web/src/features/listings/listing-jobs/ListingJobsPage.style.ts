@@ -16,15 +16,15 @@ export const JobIdBadge = styled(UIBadge)``;
 export const ProgressContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.375rem; /* 6px — no exact token */
   min-width: 7.5rem;
 `;
 
 export const ProgressInfo = styled.div`
   display: flex;
   justify-content: space-between;
-  font-size: 0.625rem;
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.2xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.secondary')};
 `;
 
@@ -55,7 +55,7 @@ export const StatItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StatLabel = styled(UIText)``;

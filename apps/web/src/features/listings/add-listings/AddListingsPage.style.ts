@@ -46,12 +46,12 @@ export const Card = styled.div`
 export const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px */
+  gap: 0.75rem; /* 12px — no exact token */
   margin-bottom: ${tkn('spacing.md')};
 
   h2 {
-    font-size: 1rem; /* 16px */
-    font-weight: 700;
+    font-size: ${tkn('typography.fontSize.md')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
     color: ${tkn('colors.text.primary')};
     margin: 0;
   }
@@ -79,14 +79,14 @@ export const IconWrapper = styled.div`
 export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.375rem; /* 6px */
+  gap: 0.375rem; /* 6px — no exact token */
   width: 100%;
 `;
 
 export const PolicyGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* 24px */
+  gap: ${tkn('spacing.lg')};
   width: 100%;
 `;
 
@@ -96,7 +96,7 @@ export const AsinCard = styled.div`
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
-  margin-top: 1.5rem; /* 24px */
+  margin-top: ${tkn('spacing.lg')};
   width: 100%;
 `;
 
@@ -112,15 +112,15 @@ export const AsinCardHeader = styled.div`
 export const AsinHeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px */
+  gap: 0.75rem; /* 12px — no exact token */
 `;
 
 export const AsinCounter = styled.div`
   background: ${tkn('colors.brand.secondary')};
   color: ${tkn('colors.brand.primaryHover')};
-  font-size: 0.75rem; /* 12px */
-  font-weight: 700;
-  padding: 0.375rem 0.75rem; /* 6px 12px */
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  padding: 0.375rem 0.75rem; /* 6px 12px — no exact tokens */
   border-radius: 9999px;
 `;
 
@@ -132,7 +132,7 @@ export const AsinInputHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem; /* 16px */
+  margin-bottom: ${tkn('spacing.md')};
 `;
 
 export const AsinTextarea = styled(UITextarea)<{ hasError?: boolean }>`
@@ -154,18 +154,18 @@ export const FormFooter = styled.div`
 export const SubmitButton = styled(Button)`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${tkn('spacing.sm')};
 `;
 
 export const CancelButton = styled(Button)`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${tkn('spacing.sm')};
 `;
 
 export const Label = styled(UIText)`
   display: block;
-  margin-bottom: 0.375rem; /* 6px */
+  margin-bottom: 0.375rem; /* 6px — no exact token */
 `;
 
 export const RequiredStar = styled.span`
@@ -174,20 +174,20 @@ export const RequiredStar = styled.span`
 
 export const ItalicHelp = styled(UIText)`
   font-style: italic;
-  margin-top: 0.5rem; /* 8px */
+  margin-top: ${tkn('spacing.sm')};
 `;
 
 export const MonoCode = styled(UIText)`
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
 `;
 
-export const AsinTitle = styled.h2`
+export const AsinTitle = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 700;
+  gap: ${tkn('spacing.sm')};
+  font-size: ${tkn('typography.fontSize.md')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
 `;
