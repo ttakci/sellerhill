@@ -3,6 +3,10 @@
  *
  * Purpose: Display a language toggle/selector for switching between supported locales.
  * Pure presentation component — locale change logic is handled by the parent container.
+ *
+ * Visual: a compact "segmented control" — a single frosted track containing one segment
+ * per locale, with the active segment elevated (surface + shadow). This keeps it visually
+ * consistent with the ThemeToggle icon button it usually sits next to.
  */
 
 import styled from '@emotion/styled';
@@ -12,34 +16,49 @@ import { tkn } from '../../theme/tkn';
 
 import type { LanguageSwitcherProps } from './LanguageSwitcher.types';
 
-const SwitcherContainer = styled.div`
-  display: flex;
+const Segmented = styled.div`
+  display: inline-flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
+  gap: 2px;
+  padding: 2px;
+  background: color-mix(in srgb, ${tkn('colors.surface.primary')} 55%, transparent);
+  border: 1px solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.md')};
+  backdrop-filter: blur(8px);
 `;
 
-const LangButton = styled.button<{ $active?: boolean }>`
-  font-size: 0.8125rem;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  border: 1px solid ${({ $active }) => ($active ? tkn('colors.brand.primary') : tkn('colors.border.secondary'))};
-  background: ${({ $active }) => ($active ? tkn('colors.semanticTint.info') : 'transparent')};
-  color: ${({ $active }) => ($active ? tkn('colors.brand.primary') : tkn('colors.text.secondary'))};
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  min-width: 2.5rem;
+const Segment = styled.button<{ $active?: boolean }>`
+  appearance: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
   font-family: inherit;
+  font-size: ${tkn('typography.fontSize.xs')};
+  letter-spacing: ${tkn('typography.letterSpacing.wide')};
+  line-height: 1;
+  height: 1.75rem; /* 28px */
+  min-width: 2.25rem;
+  padding: 0 0.625rem;
+  border-radius: ${tkn('radius.sm')};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ $active }) => ($active ? tkn('colors.text.primary') : tkn('colors.text.tertiary'))};
+  background: ${({ $active }) => ($active ? tkn('colors.surface.primary') : 'transparent')};
+  font-weight: ${({ $active }) => ($active ? 600 : 500)};
+  box-shadow: ${({ $active }) => ($active ? tkn('shadows.sm') : 'none')};
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? tkn('colors.semanticTint.info') : tkn('colors.background.tertiary'))};
+    color: ${tkn('colors.text.primary')};
   }
-`;
 
-const Divider = styled.span`
-  color: ${tkn('colors.text.tertiary')};
-  font-size: 0.75rem;
-  user-select: none;
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.border.focus')};
+    outline-offset: 1px;
+  }
 `;
 
 export const LanguageSwitcher = ({
@@ -48,35 +67,22 @@ export const LanguageSwitcher = ({
   onLocaleChange,
   variant = 'default',
 }: LanguageSwitcherProps): React.ReactElement => {
-  if (variant === 'compact') {
-    return (
-      <SwitcherContainer>
-        {locales.map((locale, index) => (
-          <React.Fragment key={locale.code}>
-            {index > 0 && <Divider>|</Divider>}
-            <LangButton
-              type="button"
-              $active={currentLocale === locale.code}
-              onClick={() => onLocaleChange(locale.code)}
-            >
-              {locale.code.toUpperCase()}
-            </LangButton>
-          </React.Fragment>
-        ))}
-      </SwitcherContainer>
-    );
-  }
+  const label = (locale: (typeof locales)[number]) =>
+    variant === 'compact' ? locale.code.toUpperCase() : locale.displayName;
 
   return (
-    <SwitcherContainer>
-      {locales.map((locale, index) => (
-        <React.Fragment key={locale.code}>
-          {index > 0 && <Divider>|</Divider>}
-          <LangButton type="button" $active={currentLocale === locale.code} onClick={() => onLocaleChange(locale.code)}>
-            {locale.displayName}
-          </LangButton>
-        </React.Fragment>
+    <Segmented role="group" aria-label="Language">
+      {locales.map((locale) => (
+        <Segment
+          key={locale.code}
+          type="button"
+          $active={currentLocale === locale.code}
+          aria-pressed={currentLocale === locale.code}
+          onClick={() => onLocaleChange(locale.code)}
+        >
+          {label(locale)}
+        </Segment>
       ))}
-    </SwitcherContainer>
+    </Segmented>
   );
 };

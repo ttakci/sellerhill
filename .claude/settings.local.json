@@ -46,7 +46,20 @@
       "Bash(docker build *)",
       "Bash(docker compose *)",
       "Bash(JWT_REFRESH_SECRET=test JWT_SECRET=test POSTGRES_PASSWORD=test docker compose --progress=plain -f docker-compose.production.yml build web --no-cache)",
-      "mcp__zai-mcp-server__extract_text_from_screenshot"
+      "mcp__zai-mcp-server__extract_text_from_screenshot",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(git ls-remote *)",
+      "Bash(node scripts/rewrite-landing-i18n.cjs)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm --filter @repo/shared build)",
+      "Bash(pnpm --filter @repo/ui build)",
+      "Bash(perl -0pi -e 's/transform: translateY\\\\\\(-3px\\\\\\);/transform: translateY\\(-2px\\);/g' apps/web/src/features/landing/LandingPage.style.ts)",
+      "Bash(python -c \"import re,sys,base64; d=open\\('packages/ui/src/assets/logo.svg','rb'\\).read\\(\\); print\\('has base64 png:', 'base64' in d.decode\\('utf-8','ignore'\\)\\); print\\('size bytes:', len\\(d\\)\\)\")",
+      "Bash(grep -n \" \\\\* Hero$\\\\| \\\\* Platform strip$\\\\| \\\\* Generic section$\\\\|export const Hero =\\\\|export const HeroMesh\\\\|export const DashboardMock\\\\|export const MockRow\" apps/web/src/features/landing/LandingPage.style.ts)",
+      "Bash(perl -0pi -e \"s/tkn\\\\\\('colors\\\\.landing\\\\.heroGradient'\\\\\\)/tkn\\('colors.brand.primary'\\)/g; s/tkn\\\\\\('colors\\\\.landing\\\\.accentPurple'\\\\\\)/tkn\\('colors.brand.primary'\\)/g\" apps/web/src/features/landing/LandingPage.style.ts)",
+      "Bash(perl -0pi -e \"s/color: \\\\\\\\\\\\$\\\\{tkn\\\\\\('colors\\\\.text\\\\.inverse'\\\\\\)\\\\}/color: \\\\${tkn\\('colors.landing.heroText'\\)}/g\" apps/web/src/features/landing/LandingPage.style.ts)",
+      "Bash(node scripts/crop-logo.cjs)"
     ]
   }
 }

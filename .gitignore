@@ -62,3 +62,6 @@ coverage/
 
 # Keep VS Code workspace settings for Copilot configuration
 # .vscode/
+
+# Backup files
+*.bak

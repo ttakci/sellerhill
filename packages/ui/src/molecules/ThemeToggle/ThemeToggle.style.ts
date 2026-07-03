@@ -1,34 +1,34 @@
 import styled from '@emotion/styled';
 
+import { tkn } from '../../theme/tkn';
+
 export const ToggleButton = styled.button`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  width: 2.5rem; /* 40px */
-  height: 2.5rem; /* 40px */
+  width: 2.125rem; /* 34px — matches the LanguageSwitcher track height */
+  height: 2.125rem;
 
-  background: ${({ theme }) => theme.colors.surface.secondary};
-  border: 0.0625rem solid ${({ theme }) => theme.colors.border.primary}; /* 1px */
-  border-radius: ${({ theme }) => theme.radius.md};
+  background: color-mix(in srgb, ${tkn('colors.surface.primary')} 55%, transparent);
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.md')};
+  backdrop-filter: blur(8px);
 
+  color: ${tkn('colors.text.secondary')};
   cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.normal};
-
-  color: ${({ theme }) => theme.colors.text.primary};
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.surface.primary};
-    border-color: ${({ theme }) => theme.colors.border.focus};
-    transform: translateY(-0.125rem); /* 2px */
+    color: ${tkn('colors.text.primary')};
+    border-color: ${tkn('colors.border.primary')};
   }
 
   &:focus-visible {
-    outline: 0.125rem solid ${({ theme }) => theme.colors.border.focus}; /* 2px */
-    outline-offset: 0.125rem; /* 2px */
-  }
-
-  &:active {
-    transform: translateY(0);
+    outline: 0.125rem solid ${tkn('colors.border.focus')};
+    outline-offset: 0.125rem;
   }
 `;

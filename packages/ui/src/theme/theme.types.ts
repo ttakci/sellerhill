@@ -81,11 +81,25 @@ export interface ThemeColors {
   // Landing page specific tokens
   landing: {
     heroGradient: string;
+    heroBg: string;
+    heroGlow: string;
+    heroGlowAlt: string;
+    heroGrid: string;
+    heroText: string;
+    heroTextMuted: string;
+    heroBorder: string;
     statsBg: string;
     accentPurple: string;
+    accentCyan: string;
     gradientText: string;
     cardGlow: string;
+    cardBorder: string;
+    cardBorderHover: string;
+    chipBg: string;
+    chipBorder: string;
     sectionAlt: string;
+    sectionDeep: string;
+    ring: string;
   };
 }
 

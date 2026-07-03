@@ -1,733 +1,748 @@
-import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
-/* ── Animations ────────────────────────────────────────── */
+/* =========================================================================
+ * Shared primitives
+ * ========================================================================= */
 
-const fadeInUp = keyframes`
-  from { opacity: 0; transform: translateY(1.5rem); }
-  to { opacity: 1; transform: translateY(0); }
+const CONTENT_MAX = '1180px';
+const NARROW_MAX = '940px';
+
+const RevealBase = styled.div<{ $visible: boolean; $delay?: number }>`
+  opacity: ${(p) => (p.$visible ? 1 : 0)};
+  transform: translateY(${(p) => (p.$visible ? '0' : '26px')});
+  transition:
+    opacity ${tkn('transitions.slow')} cubic-bezier(0.22, 1, 0.36, 1),
+    transform ${tkn('transitions.slow')} cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: ${(p) => (p.$delay ? `${p.$delay * 90}ms` : '0ms')};
+  will-change: opacity, transform;
 `;
 
-const float = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-0.5rem); }
-`;
-
-const pulse = keyframes`
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
-`;
-
-/* ── Page ──────────────────────────────────────────────── */
+/* =========================================================================
+ * Page shell
+ * ========================================================================= */
 
 export const Page = styled.div`
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   background: ${tkn('colors.background.primary')};
-  position: relative;
+  color: ${tkn('colors.text.primary')};
+  font-family: ${tkn('typography.fontFamily.body')};
   overflow-x: hidden;
 `;
 
-/* ── Navbar ────────────────────────────────────────────── */
+/* =========================================================================
+ * Navbar
+ * ========================================================================= */
 
-export const Navbar = styled.nav<{ $scrolled: boolean }>`
+export const Navbar = styled.header<{ $scrolled: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 50;
+  background: ${(p) =>
+    p.$scrolled ? `color-mix(in srgb, ${tkn('colors.background.primary')(p)} 82%, transparent)` : 'transparent'};
+  backdrop-filter: ${(p) => (p.$scrolled ? 'saturate(160%) blur(14px)' : 'none')};
+  border-bottom: 1px solid ${(p) => (p.$scrolled ? tkn('colors.border.secondary')(p) : 'transparent')};
+  transition:
+    background ${tkn('transitions.normal')},
+    backdrop-filter ${tkn('transitions.normal')},
+    border-color ${tkn('transitions.normal')};
+`;
+
+export const NavInner = styled.nav`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
-  background: ${({ $scrolled }) =>
-    $scrolled ? 'rgba(248, 250, 252, 0.92)' : 'transparent'};
-  backdrop-filter: ${({ $scrolled }) => ($scrolled ? 'blur(20px)' : 'none')};
-  border-bottom: 1px solid ${({ $scrolled, theme }) =>
-    $scrolled ? theme.colors.border.secondary : 'transparent'};
-  transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
+  gap: ${tkn('spacing.lg')};
 
-  [data-theme='dark'] & {
-    background: ${({ $scrolled }) =>
-      $scrolled ? 'rgba(15, 23, 42, 0.92)' : 'transparent'};
-    border-bottom-color: ${({ $scrolled, theme }) =>
-      $scrolled ? theme.colors.border.secondary : 'transparent'};
-  }
-
-  @media (max-width: 768px) {
-    padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  @media (max-width: 1080px) {
+    padding: ${tkn('spacing.md')};
   }
 `;
 
-export const NavLeft = styled.div`
+export const NavBrand = styled.button`
   display: flex;
   align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 `;
 
-export const NavCenter = styled.div`
+export const NavLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.xs')};
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     display: none;
-  }
-`;
-
-export const NavRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-
-  @media (max-width: 768px) {
-    gap: ${tkn('spacing.sm')};
   }
 `;
 
 export const NavLink = styled.button`
   background: none;
   border: none;
+  cursor: pointer;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.secondary')};
-  cursor: pointer;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  transition: color ${tkn('transitions.fast')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.lg')};
+  transition: color ${tkn('transitions.fast')}, background ${tkn('transitions.fast')};
 
   &:hover {
     color: ${tkn('colors.text.primary')};
+    background: ${tkn('colors.surface.secondary')};
   }
 `;
 
-export const NavCTA = styled.button`
-  display: inline-flex;
+export const NavActions = styled.div`
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.lg')};
-  border-radius: ${tkn('radius.lg')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+  gap: ${tkn('spacing.sm')};
 `;
 
-export const NavCTAPrimary = styled(NavCTA)`
-  background: ${tkn('colors.brand.primary')};
-  color: ${tkn('colors.text.inverse')};
-  border: none;
-
-  &:hover {
-    background: ${tkn('colors.brand.primaryHover')};
-    box-shadow: ${tkn('shadows.md')};
-  }
-`;
-
-export const NavCTASecondary = styled(NavCTA)`
-  background: transparent;
-  color: ${tkn('colors.text.primary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-
-  &:hover {
-    border-color: ${tkn('colors.brand.primary')};
-    color: ${tkn('colors.brand.primary')};
-  }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
-`;
-
-export const ToggleGroup = styled.div`
+export const UtilityGroup = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
 `;
 
-export const HamburgerButton = styled.button<{ $open: boolean }>`
-  display: none;
+export const LoginButton = styled.button<{ $block?: boolean }>`
   background: none;
-  border: none;
+  border: 1px solid ${tkn('colors.border.primary')};
   cursor: pointer;
-  padding: ${tkn('spacing.xs')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
+  min-width: 5.5rem;
+  border-radius: ${tkn('radius.lg')};
+  transition:
+    border-color ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
+  ${(p) => (p.$block ? 'width: 100%; justify-content: center;' : '')}
 
-  @media (max-width: 768px) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  &:hover {
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    background: ${tkn('colors.surface.secondary')};
+    color: ${tkn('colors.brand.primary')};
+  }
+
+  @media (max-width: 900px) {
+    display: ${(p) => (p.$block ? 'block' : 'none')};
   }
 `;
 
-/* ── Mobile Menu ───────────────────────────────────────── */
+export const NavCta = styled.button<{ $block?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.xs')};
+  background: ${tkn('colors.brand.primary')};
+  border: none;
+  cursor: pointer;
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.landing.heroText')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
+  min-width: 7.5rem;
+  border-radius: ${tkn('radius.lg')};
+  box-shadow: ${tkn('shadows.sm')};
+  transition:
+    background ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
+  ${(p) => (p.$block ? 'width: 100%;' : '')}
+
+  &:hover {
+    background: ${tkn('colors.brand.primaryHover')};
+    transform: translateY(-1px);
+    box-shadow: ${tkn('shadows.md')};
+  }
+
+  @media (max-width: 900px) {
+    display: ${(p) => (p.$block ? 'inline-flex' : 'none')};
+  }
+`;
+
+export const Hamburger = styled.button<{ $open: boolean }>`
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid ${tkn('colors.border.primary')};
+  cursor: pointer;
+  color: ${tkn('colors.text.primary')};
+  width: 40px;
+  height: 40px;
+  border-radius: ${tkn('radius.lg')};
+  transition: border-color ${tkn('transitions.fast')}, background ${tkn('transitions.fast')};
+
+  &:hover {
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    background: ${tkn('colors.surface.secondary')};
+  }
+
+  @media (max-width: 900px) {
+    display: inline-flex;
+  }
+`;
+
+/* =========================================================================
+ * Mobile menu
+ * ========================================================================= */
 
 export const MobileMenuOverlay = styled.div<{ $open: boolean }>`
   position: fixed;
   inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.5);
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  transition: opacity 0.3s ease;
+  z-index: 60;
+  background: ${tkn('colors.surface.overlay')};
+  backdrop-filter: blur(4px);
+  opacity: ${(p) => (p.$open ? 1 : 0)};
+  pointer-events: ${(p) => (p.$open ? 'auto' : 'none')};
+  transition: opacity ${tkn('transitions.normal')};
 `;
 
-export const MobileMenu = styled.div<{ $open: boolean }>`
+export const MobileMenu = styled.aside<{ $open: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 201;
-  width: 80%;
-  max-width: 20rem;
+  z-index: 61;
+  width: min(86vw, 360px);
   background: ${tkn('colors.surface.primary')};
+  border-left: 1px solid ${tkn('colors.border.primary')};
+  box-shadow: ${tkn('shadows.xl')};
   display: flex;
   flex-direction: column;
-  padding: ${tkn('spacing.xl')};
-  transform: translateX(${({ $open }) => ($open ? '0' : '100%')});
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: ${tkn('shadows.xl')};
   gap: ${tkn('spacing.lg')};
-  overflow-y: auto;
+  padding: ${tkn('spacing.lg')};
+  transform: translateX(${(p) => (p.$open ? '0' : '100%')});
+  transition: transform ${tkn('transitions.normal')};
 `;
 
-export const MobileMenuClose = styled.button`
-  align-self: flex-end;
+export const MobileMenuHead = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+export const MobileClose = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid ${tkn('colors.border.primary')};
+  cursor: pointer;
+  color: ${tkn('colors.text.primary')};
+  width: 40px;
+  height: 40px;
+  border-radius: ${tkn('radius.lg')};
+`;
+
+export const MobileLinks = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+`;
+
+export const MobileLink = styled.button`
+  text-align: left;
   background: none;
   border: none;
   cursor: pointer;
-  color: ${tkn('colors.text.primary')};
-  padding: ${tkn('spacing.xs')};
-`;
-
-export const MobileNavLinks = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const MobileNavLink = styled.button`
-  background: none;
-  border: none;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.lg')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.primary')};
-  cursor: pointer;
-  padding: ${tkn('spacing.sm')} 0;
-  text-align: left;
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
-`;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.lg')};
 
-export const MobileCTAGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  margin-top: ${tkn('spacing.md')};
-`;
-
-/* ── Hero ──────────────────────────────────────────────── */
-
-export const HeroSection = styled.section`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8rem ${tkn('spacing.xl')} ${tkn('spacing.xxxl')};
-  min-height: 100vh;
-  overflow: hidden;
-
-  @media (max-width: 768px) {
-    padding: 6rem ${tkn('spacing.md')} ${tkn('spacing.xxl')};
-    min-height: auto;
+  &:hover {
+    background: ${tkn('colors.surface.secondary')};
   }
 `;
 
-export const HeroMesh = styled.div`
+export const MobileCtas = styled.div`
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/* =========================================================================
+ * Hero
+ * ========================================================================= */
+
+export const Hero = styled.section`
+  position: relative;
+  background: ${tkn('colors.background.primary')};
+  color: ${tkn('colors.text.primary')};
+  padding: 140px ${tkn('spacing.xl')} ${tkn('spacing.xxxl')};
+  overflow: hidden;
+  isolation: isolate;
+
+  @media (max-width: 768px) {
+    padding: 120px ${tkn('spacing.md')} ${tkn('spacing.xxl')};
+  }
+`;
+
+/* Single, restrained brand tint — replaces the old multi-orb / grid-mesh look. */
+export const HeroGlow = styled.div`
   position: absolute;
-  inset: 0;
+  top: -25%;
+  right: -10%;
+  width: 70vw;
+  height: 70vw;
+  max-width: 900px;
+  max-height: 900px;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
+  background: radial-gradient(circle at center, ${tkn('colors.landing.heroGlow')} 0%, transparent 62%);
+  filter: blur(8px);
+  opacity: 0.45;
 `;
 
-export const HeroGradientOrb = styled.div<{ $x: string; $y: string; $color: string }>`
-  position: absolute;
-  width: 40rem;
-  height: 40rem;
-  border-radius: 50%;
-  background: ${({ $color }) => $color};
-  filter: blur(8rem);
-  opacity: 0.35;
-  left: ${({ $x }) => $x};
-  top: ${({ $y }) => $y};
-  animation: ${pulse} 8s ease-in-out infinite;
-`;
+export const HeroInner = styled.div`
+  position: relative;
+  z-index: 1;
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: ${tkn('spacing.xxxl')};
+  align-items: center;
 
-export const HeroGrid = styled.div`
-  position: absolute;
-  inset: 0;
-  background-size: 3.75rem 3.75rem;
-  background-image: linear-gradient(to right, ${tkn('colors.border.secondary')} 1px, transparent 1px),
-    linear-gradient(to bottom, ${tkn('colors.border.secondary')} 1px, transparent 1px);
-  opacity: 0.4;
-  mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xxl')};
+    text-align: center;
+  }
 `;
 
 export const HeroContent = styled.div`
-  position: relative;
-  z-index: 1;
-  max-width: 48rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: ${tkn('spacing.xl')};
+  align-items: flex-start;
+
+  @media (max-width: 980px) {
+    align-items: center;
+  }
 `;
 
-export const HeroBadge = styled.div`
+export const Eyebrow = styled.span<{ $onDark?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')} ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.full')};
   font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.text.secondary')};
-  animation: ${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0s both;
-  box-shadow: ${tkn('shadows.sm')};
-`;
-
-export const HeroBadgeIcon = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.semanticTint.info')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  text-transform: uppercase;
   color: ${tkn('colors.brand.primary')};
+  background: ${tkn('colors.brand.secondary')};
+  border: 1px solid ${tkn('colors.border.secondary')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.full')};
 `;
 
-export const HeroHeadline = styled.h1`
+export const EyebrowDot = styled.span`
+  width: 7px;
+  height: 7px;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.primary')};
+`;
+
+export const HeroTitle = styled.h1`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
+  font-size: clamp(2.4rem, 5.2vw, ${tkn('typography.fontSize.6xl')});
   line-height: ${tkn('typography.lineHeight.tight')};
   letter-spacing: ${tkn('typography.letterSpacing.tighter')};
-  margin: 0;
-  animation: ${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
-`;
-
-export const HeroSubheading = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: clamp(1rem, 2vw, ${tkn('typography.fontSize.lg')});
-  color: ${tkn('colors.text.secondary')};
-  line-height: ${tkn('typography.lineHeight.relaxed')};
-  margin: 0;
-  max-width: 36rem;
-  animation: ${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-`;
-
-export const HeroCTAGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  animation: ${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    width: 100%;
-  }
-`;
-
-export const PrimaryCTA = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
-  background: ${tkn('colors.brand.primary')};
-  color: ${tkn('colors.text.inverse')};
-  border: none;
-  border-radius: ${tkn('radius.lg')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.brand.primaryHover')};
-    box-shadow: 0 0 0 4px rgba(66, 99, 235, 0.15);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-export const SecondaryCTA = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
-  background: transparent;
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  margin: ${tkn('spacing.lg')} 0 ${tkn('spacing.md')};
   color: ${tkn('colors.text.primary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
+`;
 
-  &:hover {
-    border-color: ${tkn('colors.brand.primary')};
-    color: ${tkn('colors.brand.primary')};
+export const HeroSubtitle = styled.p`
+  font-size: clamp(${tkn('typography.fontSize.md')}, 2vw, ${tkn('typography.fontSize.xl')});
+  line-height: ${tkn('typography.lineHeight.relaxed')};
+  color: ${tkn('colors.text.secondary')};
+  max-width: 560px;
+  margin: 0 0 ${tkn('spacing.xl')};
+
+  @media (max-width: 980px) {
+    margin-left: auto;
+    margin-right: auto;
   }
 `;
 
-export const HeroStatsRow = styled.div`
+export const HeroCtas = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.md')};
   align-items: center;
-  gap: ${tkn('spacing.xxl')};
-  margin-top: ${tkn('spacing.lg')};
-  animation: ${fadeInUp} 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
 
-  @media (max-width: 640px) {
-    flex-wrap: wrap;
-    gap: ${tkn('spacing.lg')};
+  @media (max-width: 980px) {
     justify-content: center;
   }
 `;
 
-export const HeroStat = styled.div`
-  display: flex;
-  flex-direction: column;
+export const PrimaryButton = styled.button<{ $lg?: boolean }>`
+  display: inline-flex;
   align-items: center;
-  gap: ${tkn('spacing.2xs')};
-`;
-
-export const HeroStatValue = styled.span`
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.xl')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-`;
-
-export const HeroStatLabel = styled.span`
+  justify-content: center;
+  gap: ${tkn('spacing.sm')};
+  background: ${tkn('colors.brand.primary')};
+  border: none;
+  cursor: pointer;
   font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.tertiary')};
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
-`;
+  font-size: ${(p) => (p.$lg ? tkn('typography.fontSize.md')(p) : tkn('typography.fontSize.sm')(p))};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.landing.heroText')};
+  padding: ${(p) =>
+    p.$lg
+      ? `${tkn('spacing.md')(p)} ${tkn('spacing.xxl')(p)}`
+      : `${tkn('spacing.md')(p)} ${tkn('spacing.xl')(p)}`};
+  border-radius: ${tkn('radius.lg')};
+  box-shadow: ${tkn('shadows.md')};
+  transition:
+    background ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
 
-/* ── Dashboard Mockup ──────────────────────────────────── */
-
-export const DashboardMockup = styled.div`
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 56rem;
-  margin-top: ${tkn('spacing.xxxl')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.xl')};
-  overflow: hidden;
-  box-shadow: ${tkn('shadows.xl')};
-  animation: ${fadeInUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both, ${float} 6s ease-in-out infinite;
-  opacity: 0.9;
-
-  [data-theme='dark'] & {
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.5);
+  &:hover {
+    background: ${tkn('colors.brand.primaryHover')};
+    transform: translateY(-1px);
+    box-shadow: ${tkn('shadows.lg')};
   }
 `;
 
-export const MockupTitleBar = styled.div`
+export const GhostButton = styled.button<{ $onDark?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.xs')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.border.primary')};
+  cursor: pointer;
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.xl')};
+  border-radius: ${tkn('radius.lg')};
+  transition:
+    border-color ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
+
+  &:hover {
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    background: ${tkn('colors.surface.secondary')};
+    color: ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const HeroNote = styled.p`
+  margin-top: ${tkn('spacing.md')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  color: ${tkn('colors.text.tertiary')};
+`;
+
+/* ---- Dashboard mockup (theme-adaptive surface card) ---- */
+
+export const HeroPreview = styled.div`
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 980px) {
+    max-width: 620px;
+    width: 100%;
+    margin: 0 auto;
+  }
+`;
+
+export const DashboardMock = styled.div`
+  position: relative;
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.2xl')};
+  box-shadow: ${tkn('shadows.xl')};
+  overflow: hidden;
+  font-family: ${tkn('typography.fontFamily.body')};
+`;
+
+export const MockBar = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.secondary')};
   border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  background: ${tkn('colors.surface.secondary')};
 `;
 
-export const MockupDot = styled.div<{ $color: string }>`
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: 50%;
-  background: ${({ $color }) => $color};
+export const MockDot = styled.span<{ $c: 'error' | 'warning' | 'success' }>`
+  width: 10px;
+  height: 10px;
+  border-radius: ${tkn('radius.full')};
+  background: ${(p) => {
+    const map = {
+      error: tkn('colors.semantic.error'),
+      warning: tkn('colors.semantic.warning'),
+      success: tkn('colors.semantic.success'),
+    };
+    return map[p.$c](p);
+  }};
 `;
 
-export const MockupBody = styled.div`
-  display: flex;
-  min-height: 14rem;
+export const MockUrl = styled.span`
+  margin-left: ${tkn('spacing.md')};
+  font-size: ${tkn('typography.fontSize.2xs')};
+  color: ${tkn('colors.text.tertiary')};
 `;
 
-export const MockupSidebar = styled.div`
-  width: 10rem;
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.sidebar.background')};
+export const MockBody = styled.div`
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  min-height: 340px;
+`;
+
+export const MockSidebar = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
-
-  @media (max-width: 640px) {
-    display: none;
-  }
+  padding: ${tkn('spacing.md')} ${tkn('spacing.sm')};
+  border-right: 1px solid ${tkn('colors.border.secondary')};
 `;
 
-export const MockupSidebarItem = styled.div<{ $active?: boolean }>`
-  height: 0.5rem;
-  border-radius: ${tkn('radius.sm')};
-  background: ${({ $active }) =>
-    $active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'};
-  width: ${({ $active }) => ($active ? '80%' : '60%')};
+export const MockSideItem = styled.span<{ $active?: boolean }>`
+  height: 28px;
+  border-radius: ${tkn('radius.md')};
+  background: ${(p) => (p.$active ? tkn('colors.brand.secondary')(p) : 'transparent')};
+  border: 1px solid ${(p) => (p.$active ? tkn('colors.border.secondary')(p) : 'transparent')};
 `;
 
-export const MockupContent = styled.div`
-  flex: 1;
-  padding: ${tkn('spacing.md')};
+export const MockMain = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
 `;
 
-export const MockupCardRow = styled.div`
-  display: flex;
+export const MockKpis = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: ${tkn('spacing.md')};
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-  }
 `;
 
-export const MockupCard = styled.div`
-  flex: 1;
-  height: 3rem;
+export const MockKpi = styled.div`
+  height: 64px;
   border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.semanticTint.info')};
-  border: 1px solid ${tkn('colors.semanticTintBorder.info')};
-`;
-
-export const MockupChart = styled.div`
-  flex: 1;
-  height: 5rem;
-  border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.surface.secondary')};
+  background: ${tkn('colors.background.tertiary')};
   border: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const MockChart = styled.div`
   display: flex;
   align-items: flex-end;
-  justify-content: space-around;
-  padding: ${tkn('spacing.sm')};
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
+  height: 120px;
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.background.tertiary')};
+  border: 1px solid ${tkn('colors.border.secondary')};
 `;
 
-export const MockupBar = styled.div<{ $height: string }>`
-  width: 1.5rem;
-  height: ${({ $height }) => $height};
+export const MockBar2 = styled.span<{ $h: string }>`
+  flex: 1;
+  height: ${(p) => p.$h};
   border-radius: ${tkn('radius.sm')} ${tkn('radius.sm')} 0 0;
   background: ${tkn('colors.brand.primary')};
-  opacity: 0.6;
+  opacity: 0.85;
 `;
 
-/* ── Platforms ─────────────────────────────────────────── */
+export const MockTable = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
 
-export const PlatformsSection = styled.section`
+export const MockRow = styled.div`
+  height: 22px;
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.background.tertiary')};
+`;
+
+/* =========================================================================
+ * Platform strip
+ * ========================================================================= */
+
+export const Platforms = styled.div`
+  background: ${tkn('colors.background.primary')};
+  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  padding: ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.xl')};
-  padding: ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  gap: ${tkn('spacing.lg')};
 
   @media (max-width: 768px) {
     padding: ${tkn('spacing.xl')} ${tkn('spacing.md')};
   }
 `;
 
-export const PlatformsTitle = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.text.tertiary')};
+export const PlatformLabel = styled.p`
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  color: ${tkn('colors.text.tertiary')};
   margin: 0;
 `;
 
-export const PlatformLogos = styled.div`
+export const PlatformFlow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xxl')};
-
-  @media (max-width: 640px) {
-    gap: ${tkn('spacing.xl')};
-  }
+  gap: ${tkn('spacing.lg')};
 `;
 
-export const PlatformLogo = styled.div`
-  display: flex;
+export const PlatformChip = styled.div`
+  display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.lg')};
+  color: ${tkn('colors.text.secondary')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.tertiary')};
-  opacity: 0.5;
-  transition: opacity ${tkn('transitions.fast')};
-
-  &:hover {
-    opacity: 0.8;
-  }
+  font-size: ${tkn('typography.fontSize.lg')};
+  opacity: 0.9;
 `;
 
-/* ── Section wrappers ──────────────────────────────────── */
+export const PlatformArrow = styled.div`
+  color: ${tkn('colors.brand.primary')};
+`;
 
-export const Section = styled.section`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* =========================================================================
+ * Generic section
+ * ========================================================================= */
+
+export const Section = styled.section<{ $alt?: boolean; $narrow?: boolean }>`
   padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')};
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
+  background: ${(p) => (p.$alt ? tkn('colors.landing.sectionAlt')(p) : 'transparent')};
 
   @media (max-width: 768px) {
     padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')};
   }
 `;
 
-export const SectionHeader = styled.div`
+export const Reveal = RevealBase;
+
+export const SectionHead = styled.div`
+  max-width: 720px;
+  margin: 0 auto ${tkn('spacing.xxxl')};
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: ${tkn('spacing.sm')};
-  max-width: 36rem;
-  margin-bottom: ${tkn('spacing.xxl')};
+  gap: ${tkn('spacing.md')};
 `;
 
 export const SectionTitle = styled.h2`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(1.5rem, 3vw, ${tkn('typography.fontSize.3xl')});
+  font-size: clamp(${tkn('typography.fontSize.xxl')}, 4vw, ${tkn('typography.fontSize.4xl')});
+  line-height: ${tkn('typography.lineHeight.tight')};
+  letter-spacing: ${tkn('typography.letterSpacing.tight')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
-  letter-spacing: ${tkn('typography.letterSpacing.tight')};
 `;
 
 export const SectionSubtitle = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.md')};
+  line-height: ${tkn('typography.lineHeight.relaxed')};
   color: ${tkn('colors.text.secondary')};
   margin: 0;
-  line-height: ${tkn('typography.lineHeight.relaxed')};
 `;
 
-/* ── Features Grid ─────────────────────────────────────── */
+/* =========================================================================
+ * Features (bento)
+ * ========================================================================= */
 
 export const FeaturesGrid = styled.div`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: ${tkn('spacing.lg')};
-  max-width: 72rem;
-  width: 100%;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 900px) {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  @media (max-width: 640px) {
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
   }
 `;
 
 export const FeatureCard = styled.div<{ $highlight?: boolean }>`
+  position: relative;
+  background: ${(p) =>
+    p.$highlight
+      ? `linear-gradient(135deg, color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 6%, ${tkn('colors.surface.primary')(p)}), ${tkn('colors.surface.primary')(p)})`
+      : tkn('colors.surface.primary')(p)};
+  border: 1px solid ${(p) => (p.$highlight ? tkn('colors.landing.cardBorderHover')(p) : tkn('colors.landing.cardBorder')(p))};
+  border-radius: ${tkn('radius.2xl')};
+  padding: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xl')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.xl')};
-  transition: all ${tkn('transitions.normal')};
-  position: relative;
-  overflow: hidden;
-
-  ${({ $highlight }) =>
-    $highlight &&
-    css`
-      grid-column: 1 / -1;
-
-      @media (min-width: 769px) {
-        flex-direction: row;
-        align-items: flex-start;
-      }
-    `}
+  gap: ${tkn('spacing.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  transition:
+    transform ${tkn('transitions.normal')},
+    border-color ${tkn('transitions.normal')},
+    box-shadow ${tkn('transitions.normal')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.lg')}, 0 0 0 1px ${tkn('colors.landing.cardGlow')};
     transform: translateY(-2px);
-    border-color: ${tkn('colors.brand.primary')};
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    box-shadow: ${tkn('shadows.lg')};
   }
 `;
 
-export const FeatureIconWrap = styled.div<{ $highlight?: boolean }>`
+export const FeatureHeadRow = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: ${tkn('radius.lg')};
-  background: ${({ $highlight }) =>
-    $highlight ? tkn('colors.brand.primary') : tkn('colors.semanticTint.info')};
-  color: ${({ $highlight }) =>
-    $highlight ? tkn('colors.text.inverse') : tkn('colors.brand.primary')};
-  flex-shrink: 0;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
 `;
 
-export const FeatureContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-  flex: 1;
+export const FeatureIconWrap = styled.div<{ $highlight?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: ${tkn('radius.lg')};
+  background: ${(p) => (p.$highlight ? tkn('colors.brand.primary')(p) : tkn('colors.landing.chipBg')(p))};
+  border: 1px solid ${(p) => (p.$highlight ? 'transparent' : tkn('colors.landing.chipBorder')(p))};
 `;
 
 export const FeatureBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
-  background: ${tkn('colors.semanticTint.info')};
-  color: ${tkn('colors.brand.primary')};
-  border-radius: ${tkn('radius.full')};
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.2xs')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  text-transform: uppercase;
   letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  text-transform: uppercase;
+  color: ${tkn('colors.brand.primary')};
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.full')};
 `;
 
 export const FeatureTitle = styled.h3`
@@ -738,340 +753,397 @@ export const FeatureTitle = styled.h3`
   margin: 0;
 `;
 
-export const FeatureDesc = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
-  margin: 0;
-  line-height: ${tkn('typography.lineHeight.relaxed')};
-`;
-
-/* ── How It Works ──────────────────────────────────────── */
-
-export const StepsRow = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.xl')};
-  max-width: 64rem;
-  width: 100%;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 2.5rem;
-    left: calc(16.67% + 1.5rem);
-    right: calc(16.67% + 1.5rem);
-    height: 2px;
-    background: ${tkn('colors.border.primary')};
-    z-index: 0;
-
-    @media (max-width: 768px) {
-      display: none;
-    }
-  }
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: ${tkn('spacing.lg')};
-  }
-`;
-
-export const StepCard = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xl')};
-  position: relative;
-  z-index: 1;
-`;
-
-export const StepNumber = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 5rem;
-  height: 5rem;
-  border-radius: ${tkn('radius.full')};
-  background: ${tkn('colors.semanticTint.info')};
-  color: ${tkn('colors.brand.primary')};
+export const FeatureTitleLarge = styled.h3`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.xxxl')};
+  font-size: clamp(${tkn('typography.fontSize.xl')}, 2.6vw, ${tkn('typography.fontSize.xxxl')});
+  line-height: ${tkn('typography.lineHeight.tight')};
   font-weight: ${tkn('typography.fontWeight.bold')};
-  border: 3px solid ${tkn('colors.surface.primary')};
-  box-shadow: 0 0 0 2px ${tkn('colors.brand.primary')};
-`;
-
-export const StepTitle = styled.h3`
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.lg')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
 `;
 
-export const StepDesc = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
+export const FeatureDesc = styled.p`
   font-size: ${tkn('typography.fontSize.sm')};
+  line-height: ${tkn('typography.lineHeight.relaxed')};
   color: ${tkn('colors.text.secondary')};
   margin: 0;
-  line-height: ${tkn('typography.lineHeight.relaxed')};
-  max-width: 16rem;
 `;
 
-/* ── Per-Product Deep Dive ─────────────────────────────── */
+/* =========================================================================
+ * How it works
+ * ========================================================================= */
 
-export const PerProductSection = styled(Section)`
-  background: ${tkn('colors.landing.sectionAlt')};
-
-  [data-theme='dark'] & {
-    background: ${tkn('colors.surface.secondary')};
-  }
-`;
-
-export const PerProductGrid = styled.div`
+export const Steps = styled.div`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: ${tkn('spacing.lg')};
-  max-width: 56rem;
-  width: 100%;
+  gap: ${tkn('spacing.xl')};
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
-export const ProductSettingsCard = styled.div`
+export const StepCard = styled.div`
+  position: relative;
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.2xl')};
+  padding: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+`;
+
+export const StepNumber = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.brand.primary')};
+  color: ${tkn('colors.landing.heroText')};
+  font-family: ${tkn('typography.fontFamily.heading')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-size: ${tkn('typography.fontSize.lg')};
+`;
+
+export const StepTitle = styled.h3`
+  font-family: ${tkn('typography.fontFamily.heading')};
+  font-size: ${tkn('typography.fontSize.xl')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
+  margin: ${tkn('spacing.sm')} 0 0;
+`;
+
+export const StepDesc = styled.p`
+  font-size: ${tkn('typography.fontSize.sm')};
+  line-height: ${tkn('typography.lineHeight.relaxed')};
+  color: ${tkn('colors.text.secondary')};
+  margin: 0;
+`;
+
+export const StepConnector = styled.div`
+  position: absolute;
+  right: -${tkn('spacing.xl')};
+  top: calc(${tkn('spacing.xl')} + 10px);
+  color: ${tkn('colors.brand.primary')};
+  opacity: 0.5;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+/* =========================================================================
+ * Per-product deep dive
+ * ========================================================================= */
+
+export const ProductGrid = styled.div`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${tkn('spacing.lg')};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ProductCard = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.xl')};
-  transition: all ${tkn('transitions.normal')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.2xl')};
+  padding: ${tkn('spacing.xl')};
+  box-shadow: ${tkn('shadows.sm')};
+  transition:
+    transform ${tkn('transitions.normal')},
+    border-color ${tkn('transitions.normal')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.lg')};
     transform: translateY(-2px);
+    border-color: ${tkn('colors.landing.cardBorderHover')};
   }
 `;
 
 export const ProductName = styled.div`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.lg')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
-  padding-bottom: ${tkn('spacing.sm')};
+  padding-bottom: ${tkn('spacing.md')};
   border-bottom: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const ProductSettings = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  padding-top: ${tkn('spacing.md')};
 `;
 
 export const SettingRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 `;
 
 export const SettingLabel = styled.span`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.tertiary')};
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  color: ${tkn('colors.text.secondary')};
 `;
 
 export const SettingValue = styled.span`
-  font-family: ${tkn('typography.fontFamily.mono')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.brand.primary')};
+  color: ${tkn('colors.text.primary')};
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
 `;
 
-/* ── Stats Section ─────────────────────────────────────── */
+/* =========================================================================
+ * CTA banner
+ * ========================================================================= */
 
-export const StatsSection = styled.section`
+export const CtaBanner = styled.div<{ $dark?: boolean }>`
+  position: relative;
+  max-width: ${NARROW_MAX};
+  margin: 0 auto;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.xxxl')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')};
-  background: ${tkn('colors.landing.statsBg')};
-  width: 100%;
-  box-sizing: border-box;
-  flex-wrap: wrap;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xxl')};
+  border-radius: ${tkn('radius.2xl')};
+  background: ${(p) =>
+    p.$dark
+      ? tkn('colors.landing.heroBg')(p)
+      : `linear-gradient(135deg, color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 8%, ${tkn('colors.surface.primary')(p)}), ${tkn('colors.surface.primary')(p)})`};
+  border: 1px solid ${(p) => (p.$dark ? tkn('colors.landing.heroBorder')(p) : tkn('colors.landing.cardBorderHover')(p))};
+  color: ${(p) => (p.$dark ? tkn('colors.landing.heroText')(p) : tkn('colors.text.primary')(p))};
+  box-shadow: ${tkn('shadows.lg')};
 
   @media (max-width: 768px) {
-    gap: ${tkn('spacing.xxl')};
-    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')};
+    padding: ${tkn('spacing.xxl')} ${tkn('spacing.lg')};
+  }
+`;
+
+export const CtaGlow = styled.div<{ $strong?: boolean }>`
+  position: absolute;
+  z-index: -1;
+  width: ${(p) => (p.$strong ? '420px' : '300px')};
+  height: ${(p) => (p.$strong ? '420px' : '300px')};
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, ${tkn('colors.landing.heroGlow')} 0%, transparent 70%);
+  filter: blur(50px);
+  opacity: ${(p) => (p.$strong ? 0.9 : 0.5)};
+`;
+
+export const CtaTitle = styled.h3`
+  font-family: ${tkn('typography.fontFamily.heading')};
+  font-size: clamp(${tkn('typography.fontSize.xxl')}, 4vw, ${tkn('typography.fontSize.4xl')});
+  line-height: ${tkn('typography.lineHeight.tight')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  margin: 0;
+`;
+
+export const CtaSub = styled.p`
+  font-size: ${tkn('typography.fontSize.md')};
+  line-height: ${tkn('typography.lineHeight.relaxed')};
+  opacity: 0.8;
+  max-width: 560px;
+  margin: 0;
+`;
+
+/* =========================================================================
+ * Stats band
+ * ========================================================================= */
+
+export const StatsBand = styled.div`
+  background: ${tkn('colors.landing.statsBg')};
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${tkn('spacing.xl')};
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
+  padding: ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: ${tkn('spacing.lg')};
+    padding: ${tkn('spacing.xl')} ${tkn('spacing.md')};
   }
 `;
 
 export const StatItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
   text-align: center;
 `;
 
 export const StatValue = styled.div`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(2rem, 4vw, ${tkn('typography.fontSize.3xl')});
+  font-size: clamp(${tkn('typography.fontSize.xxl')}, 3.4vw, ${tkn('typography.fontSize.4xl')});
   font-weight: ${tkn('typography.fontWeight.bold')};
-  color: #FFFFFF;
-  letter-spacing: ${tkn('typography.letterSpacing.tight')};
+  color: ${tkn('colors.landing.heroText')};
 `;
 
 export const StatLabel = styled.div`
-  font-family: ${tkn('typography.fontFamily.body')};
+  margin-top: ${tkn('spacing.xs')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
-/* ── Testimonials ──────────────────────────────────────── */
+/* =========================================================================
+ * Testimonials
+ * ========================================================================= */
 
-export const TestimonialsGrid = styled.div`
+export const Testimonials = styled.div`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: ${tkn('spacing.lg')};
-  max-width: 72rem;
-  width: 100%;
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    max-width: 28rem;
   }
 `;
 
 export const TestimonialCard = styled.div`
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.2xl')};
+  padding: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xl')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.xl')};
-  transition: all ${tkn('transitions.normal')};
+  box-shadow: ${tkn('shadows.sm')};
+  transition:
+    transform ${tkn('transitions.normal')},
+    box-shadow ${tkn('transitions.normal')};
 
   &:hover {
-    box-shadow: ${tkn('shadows.lg')};
     transform: translateY(-2px);
+    box-shadow: ${tkn('shadows.lg')};
   }
 `;
 
-export const TestimonialStars = styled.div`
+export const Stars = styled.div`
   display: flex;
-  gap: ${tkn('spacing.2xs')};
-  color: ${tkn('colors.semantic.warning')};
+  gap: 2px;
 `;
 
 export const TestimonialText = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
-  margin: 0;
+  font-size: ${tkn('typography.fontSize.md')};
   line-height: ${tkn('typography.lineHeight.relaxed')};
-  font-style: italic;
+  color: ${tkn('colors.text.primary')};
+  margin: 0;
 `;
 
 export const TestimonialAuthor = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+  align-items: center;
+  gap: ${tkn('spacing.md')};
   margin-top: auto;
-  padding-top: ${tkn('spacing.md')};
-  border-top: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const TestimonialAvatar = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: ${tkn('radius.full')};
+  background: ${tkn('colors.brand.primary')};
+  color: ${tkn('colors.landing.heroText')};
+  font-family: ${tkn('typography.fontFamily.heading')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-size: ${tkn('typography.fontSize.md')};
+`;
+
+export const TestimonialMeta = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 export const TestimonialName = styled.span`
-  font-family: ${tkn('typography.fontFamily.heading')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
 `;
 
 export const TestimonialRole = styled.span`
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.tertiary')};
+  color: ${tkn('colors.text.secondary')};
 `;
 
-/* ── Pricing ───────────────────────────────────────────── */
+/* =========================================================================
+ * Pricing
+ * ========================================================================= */
 
 export const PricingGrid = styled.div`
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: ${tkn('spacing.lg')};
-  max-width: 60rem;
-  width: 100%;
+  align-items: stretch;
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    max-width: 24rem;
+    max-width: 460px;
   }
 `;
 
 export const PricingCard = styled.div<{ $highlight?: boolean }>`
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
   background: ${tkn('colors.surface.primary')};
-  border: 2px solid ${({ $highlight }) => ($highlight ? tkn('colors.brand.primary') : tkn('colors.border.secondary'))};
-  border-radius: ${tkn('radius.xl')};
-  position: relative;
-  transition: all ${tkn('transitions.normal')};
+  border: 1px solid ${(p) => (p.$highlight ? tkn('colors.landing.cardBorderHover')(p) : tkn('colors.landing.cardBorder')(p))};
+  border-radius: ${tkn('radius.2xl')};
+  padding: ${tkn('spacing.xl')};
+  box-shadow: ${(p) => (p.$highlight ? tkn('shadows.xl')(p) : tkn('shadows.sm')(p))};
+  ${(p) => (p.$highlight ? `transform: translateY(-6px);` : '')}
+  transition: transform ${tkn('transitions.normal')};
 
-  &:hover {
-    box-shadow: ${tkn('shadows.xl')};
-    transform: translateY(-2px);
+  @media (max-width: 900px) {
+    transform: none;
   }
-
-  ${({ $highlight, theme }) =>
-    $highlight &&
-    css`
-      box-shadow: ${theme.shadows.xl};
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #4263EB, #6366F1, #818CF8);
-        border-radius: ${theme.radius.xl} ${theme.radius.xl} 0 0;
-      }
-    `}
 `;
 
 export const PlanBadge = styled.span`
   position: absolute;
-  top: -0.75rem;
+  top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.md')};
-  background: ${tkn('colors.brand.primary')};
-  color: ${tkn('colors.text.inverse')};
-  border-radius: ${tkn('radius.full')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.wider')};
   white-space: nowrap;
+  font-size: ${tkn('typography.fontSize.2xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  text-transform: uppercase;
+  color: ${tkn('colors.landing.heroText')};
+  background: ${tkn('colors.brand.primary')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.full')};
 `;
 
-export const PlanName = styled.h3`
+export const PlanName = styled.div`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.xl')};
+  font-size: ${tkn('typography.fontSize.lg')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
-  margin: 0;
+  color: ${tkn('colors.text.secondary')};
 `;
 
 export const PlanPrice = styled.div`
@@ -1082,28 +1154,27 @@ export const PlanPrice = styled.div`
 
 export const PlanAmount = styled.span`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.3xl')};
+  font-size: ${tkn('typography.fontSize.4xl')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
 `;
 
 export const PlanPeriod = styled.span`
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.tertiary')};
 `;
 
 export const PlanDesc = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.secondary')};
   margin: 0;
+  min-height: 40px;
 `;
 
 export const PlanFeatures = styled.ul`
   list-style: none;
-  margin: 0;
   padding: 0;
+  margin: ${tkn('spacing.sm')} 0 0;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -1111,230 +1182,166 @@ export const PlanFeatures = styled.ul`
 
 export const PlanFeature = styled.li`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: ${tkn('spacing.sm')};
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
+  color: ${tkn('colors.text.primary')};
+  line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
-export const PlanCTA = styled.button<{ $highlight?: boolean }>`
-  width: 100%;
-  padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.lg')};
+export const PlanCta = styled.button<{ $highlight?: boolean }>`
+  margin-top: ${tkn('spacing.sm')};
+  background: ${(p) => (p.$highlight ? tkn('colors.brand.primary')(p) : tkn('colors.surface.secondary')(p))};
+  color: ${(p) => (p.$highlight ? tkn('colors.landing.heroText')(p) : tkn('colors.text.primary')(p))};
+  border: 1px solid ${(p) => (p.$highlight ? 'transparent' : tkn('colors.border.primary')(p))};
+  cursor: pointer;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-  margin-top: auto;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-radius: ${tkn('radius.lg')};
+  transition:
+    transform ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')},
+    border-color ${tkn('transitions.fast')};
 
-  ${({ $highlight, theme }) =>
-    $highlight
-      ? css`
-          background: ${theme.colors.brand.primary};
-          color: ${theme.colors.text.inverse};
-          border: none;
-
-          &:hover {
-            background: ${theme.colors.brand.primaryHover};
-            box-shadow: 0 0 0 4px rgba(66, 99, 235, 0.15);
-          }
-        `
-      : css`
-          background: transparent;
-          color: ${theme.colors.text.primary};
-          border: 1px solid ${theme.colors.border.primary};
-
-          &:hover {
-            border-color: ${theme.colors.brand.primary};
-            color: ${theme.colors.brand.primary};
-          }
-        `}
+  &:hover {
+    transform: translateY(-2px);
+    ${(p) => (p.$highlight ? `background: ${tkn('colors.brand.primaryHover')(p)};` : `border-color: ${tkn('colors.landing.cardBorderHover')(p)};`)}
+  }
 `;
 
-/* ── FAQ ─────────────────────────────────────────────────── */
+export const BillingNote = styled.p`
+  text-align: center;
+  margin-top: ${tkn('spacing.xl')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  color: ${tkn('colors.text.tertiary')};
+`;
 
-export const FAQGrid = styled.div`
+/* =========================================================================
+ * FAQ
+ * ========================================================================= */
+
+export const FaqList = styled.div`
+  max-width: ${NARROW_MAX};
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  max-width: 48rem;
-  width: 100%;
 `;
 
-export const FAQItem = styled.div<{ $isOpen: boolean }>`
-  border: 1px solid ${tkn('colors.border.secondary')};
+export const FaqItem = styled.div<{ $open: boolean }>`
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${(p) => (p.$open ? tkn('colors.landing.cardBorderHover')(p) : tkn('colors.landing.cardBorder')(p))};
   border-radius: ${tkn('radius.xl')};
   overflow: hidden;
-  background: ${tkn('colors.surface.primary')};
   transition: border-color ${tkn('transitions.fast')};
-
-  ${({ $isOpen, theme }) =>
-    $isOpen &&
-    css`
-      border-color: ${theme.colors.brand.primary};
-      border-left: 3px solid ${theme.colors.brand.primary};
-    `}
 `;
 
-export const FAQQuestion = styled.button<{ $isOpen: boolean }>`
+export const FaqQuestion = styled.button<{ $open: boolean }>`
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.md')};
   background: none;
   border: none;
+  cursor: pointer;
+  text-align: left;
   font-family: ${tkn('typography.fontFamily.heading')};
   font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
-  text-align: left;
-  cursor: pointer;
-  transition: background ${tkn('transitions.fast')};
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
 
-  &:hover {
-    background: ${tkn('colors.surface.secondary')};
+  @media (max-width: 560px) {
+    padding: ${tkn('spacing.md')};
+    font-size: ${tkn('typography.fontSize.sm')};
   }
 `;
 
-export const FAQAnswer = styled.div<{ $isOpen: boolean }>`
-  max-height: ${({ $isOpen }) => ($isOpen ? '30rem' : '0')};
+export const FaqAnswer = styled.div<{ $open: boolean }>`
+  max-height: ${(p) => (p.$open ? '400px' : '0')};
   overflow: hidden;
-  transition: all ${tkn('transitions.normal')};
-
-  ${({ $isOpen, theme }) =>
-    $isOpen &&
-    css`
-      padding: 0 ${theme.spacing.xl} ${theme.spacing.lg};
-    `}
+  transition: max-height ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
-export const FAQAnswerText = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
+export const FaqAnswerText = styled.p`
+  padding: 0 ${tkn('spacing.xl')} ${tkn('spacing.lg')};
   font-size: ${tkn('typography.fontSize.sm')};
+  line-height: ${tkn('typography.lineHeight.relaxed')};
   color: ${tkn('colors.text.secondary')};
   margin: 0;
-  line-height: ${tkn('typography.lineHeight.relaxed')};
-`;
 
-/* ── CTA Banner ──────────────────────────────────────────── */
-
-export const CTABanner = styled.section`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')};
-  background: ${tkn('colors.landing.heroGradient')};
-  width: 100%;
-  box-sizing: border-box;
-`;
-
-export const CTABannerHeadline = styled.h2`
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(1.5rem, 3vw, ${tkn('typography.fontSize.3xl')});
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: #FFFFFF;
-  margin: 0;
-  letter-spacing: ${tkn('typography.letterSpacing.tight')};
-`;
-
-export const CTABannerSub = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.md')};
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  max-width: 36rem;
-`;
-
-export const CTABannerButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.xxl')};
-  background: #FFFFFF;
-  color: ${tkn('colors.brand.primary')};
-  border: none;
-  border-radius: ${tkn('radius.lg')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    box-shadow: ${tkn('shadows.xl')};
-    transform: translateY(-1px);
-    background: #F8FAFC;
+  @media (max-width: 560px) {
+    padding: 0 ${tkn('spacing.md')} ${tkn('spacing.md')};
   }
 `;
 
-/* ── Footer ──────────────────────────────────────────────── */
+/* =========================================================================
+ * Footer
+ * ========================================================================= */
 
 export const Footer = styled.footer`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xxl')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};
+  background: ${tkn('colors.landing.sectionDeep')};
   border-top: 1px solid ${tkn('colors.border.secondary')};
-  width: 100%;
-  box-sizing: border-box;
-  background: ${tkn('colors.landing.sectionAlt')};
-
-  [data-theme='dark'] & {
-    background: ${tkn('colors.surface.secondary')};
-  }
+  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};
 
   @media (max-width: 768px) {
-    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')} ${tkn('spacing.md')};
+    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')} ${tkn('spacing.lg')};
   }
 `;
 
-export const FooterGrid = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: ${tkn('spacing.xl')};
-  max-width: 72rem;
-  width: 100%;
+export const FooterInner = styled.div`
+  max-width: ${CONTENT_MAX};
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 2fr;
+  gap: ${tkn('spacing.xxxl')};
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xl')};
   }
 `;
 
 export const FooterBrand = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: ${tkn('spacing.md')};
 `;
 
 export const FooterDescription = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.tertiary')};
-  margin: 0;
   line-height: ${tkn('typography.lineHeight.relaxed')};
-  max-width: 20rem;
+  color: ${tkn('colors.text.secondary')};
+  margin: 0;
+  max-width: 340px;
+`;
+
+export const FooterColumns = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${tkn('spacing.xl')};
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
 export const FooterColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
 `;
 
-export const FooterColumnTitle = styled.h4`
+export const FooterColTitle = styled.h4`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  text-transform: uppercase;
   color: ${tkn('colors.text.primary')};
   margin: 0;
 `;
@@ -1342,52 +1349,34 @@ export const FooterColumnTitle = styled.h4`
 export const FooterLink = styled.button`
   background: none;
   border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.tertiary')};
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
+  color: ${tkn('colors.text.secondary')};
+  transition: color ${tkn('transitions.fast')};
 
   &:hover {
-    color: ${tkn('colors.text.secondary')};
+    color: ${tkn('colors.brand.primary')};
   }
 `;
 
 export const FooterDivider = styled.div`
-  width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  max-width: ${CONTENT_MAX};
+  margin: ${tkn('spacing.xxl')} auto ${tkn('spacing.lg')};
   height: 1px;
   background: ${tkn('colors.border.secondary')};
 `;
 
 export const FooterBottom = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 72rem;
-  width: 100%;
+  max-width: ${CONTENT_MAX};
   margin: 0 auto;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: ${tkn('spacing.md')};
-    text-align: center;
-  }
 `;
 
-export const FooterCopyright = styled.p`
-  font-family: ${tkn('typography.fontFamily.body')};
+export const Copyright = styled.p`
   font-size: ${tkn('typography.fontSize.xs')};
   color: ${tkn('colors.text.tertiary')};
   margin: 0;
-`;
-
-/* ── Scroll reveal ──────────────────────────────────────── */
-
-export const RevealWrapper = styled.div<{ $visible: boolean }>`
-  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
-  transform: translateY(${({ $visible }) => ($visible ? '0' : '1.5rem')});
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
 `;

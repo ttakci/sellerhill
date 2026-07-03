@@ -93,6 +93,9 @@ export const typographyTokens = {
     xxl: '1.5rem', // 24px - Page titles
     xxxl: '1.875rem', // 30px - Hero headings
     '3xl': '2.25rem', // 36px - Large hero headings
+    '4xl': '3rem', // 48px - Display headings
+    '5xl': '3.75rem', // 60px - Hero display
+    '6xl': '4.5rem', // 72px - Massive hero
   },
   fontWeight: {
     normal: 400,

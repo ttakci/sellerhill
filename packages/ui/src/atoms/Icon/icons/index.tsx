@@ -17,7 +17,8 @@ import {
   Percent, Globe, MapPin, MoreHorizontal, MoreVertical, Calendar, CalendarDays,
   List, LayoutGrid, ListChecks, Image, Camera, Monitor, Tablet, Smartphone,
   Loader2, Sun, Moon, Rocket, Bolt, Archive, Box, FileText, Flag,
-  ListFilter, Settings2, UnfoldVertical, BadgeCheck, ArrowLeft,
+  ListFilter, Settings2, UnfoldVertical, BadgeCheck, ArrowLeft, ArrowRight,
+  Star, Sparkles, ShieldCheck, Clock, Layers, Repeat, Gauge,
 } from 'lucide-react';
 import React from 'react';
 
@@ -191,11 +192,26 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   more_vert: lucide(MoreVertical),
   rule: lucide(SlidersHorizontal),
 
+  // Landing / marketing
+  'arrow-right': lucide(ArrowRight),
+  arrow_right: lucide(ArrowRight),
+  star: lucide(Star),
+  'star-filled': lucide(Star),
+  zap: lucide(Sparkles),
+  sparkles: lucide(Sparkles),
+  'shield-check': lucide(ShieldCheck),
+  clock: lucide(Clock),
+  layers: lucide(Layers),
+  repeat: lucide(Repeat),
+  gauge: lucide(Gauge),
+
   // Brand (custom)
   logo: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   zorro: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   amazon: AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   ebay: EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  'brand-amazon': AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  'brand-ebay': EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
 
   // Flags (use Globe + text fallback)
   'flag-us': lucide(Flag),

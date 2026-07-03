@@ -14,7 +14,7 @@ export const ThemeToggle: React.FC = () => {
       aria-label="Toggle theme"
       title={`Switch to ${themeMode === 'light' ? 'dark' : 'light'} mode`}
     >
-      <Icon name={themeMode === 'light' ? 'moon' : 'sun'} size={20} />
+      <Icon name={themeMode === 'light' ? 'moon' : 'sun'} size={18} />
     </S.ToggleButton>
   );
 };

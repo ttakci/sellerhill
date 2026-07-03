@@ -134,198 +134,240 @@
     "contactSupport": "Destek ile İletişim"
   },
   "landing": {
-    "title": "Zonds'a Hoş Geldiniz",
-    "subtitle": "Başlamak için lütfen dilinizi seçin.",
     "navbar": {
       "features": "Özellikler",
-      "howItWorks": "Nasıl Çalışır",
+      "howItWorks": "Nasıl çalışır",
       "pricing": "Fiyatlandırma",
       "faq": "SSS",
-      "login": "Giriş",
+      "login": "Giriş yap",
       "getStarted": "Başla"
     },
     "hero": {
-      "headline": "Amazon Ürünlerini eBay'de Satın — Tam Otomatik",
-      "subheading": "Listelemeden teslimata — fiyat, stok, sipariş ve takip hepsi otomatik.",
-      "ctaPrimary": "Ücretsiz Başla",
-      "ctaSecondary": "Nasıl çalıştığını gör",
-      "badge": "2,500+ dropshipper'ın güvencesi"
+      "badge": "2.500+ dropshipper tarafından tercih ediliyor",
+      "headline": "Amazon ürünlerini eBay'de sat — tam otomatik",
+      "subheading": "Listelemeden teslimata kadar her şeyi Zonds yönetir: yeniden fiyatlandırma, stok senkronizasyonu, otomatik sipariş ve takip. Kuralları ürün bazında sen belirlersin — işletmeyi biz yürütürüz.",
+      "ctaPrimary": "Ücretsiz başla",
+      "ctaSecondary": "Nasıl çalışır?",
+      "note": "Kredi kartı gerekmez • Ücretsiz plan daima geçerli"
     },
-    "socialProof": {
-      "label": "Dünya genelinde {{count}}+ satıcının güvencesi",
-      "badges": {
-        "automation": "Tam Otomasyon",
-        "uptime": "%99.9 Çalışma Süresi",
-        "support": "7/24 Destek"
-      }
+    "logos": {
+      "title": "Amazon → eBay dropshipping akışı için tasarlandı"
     },
     "features": {
-      "sectionTitle": "Her Şey Otomatik",
-      "sectionSubtitle": "Amazon'dan eBay'e işinizin her aşaması, sizin yerinize çalışıyor.",
+      "sectionEyebrow": "Her şey otomatik",
+      "sectionTitle": "Tüm operasyonun, sensiz çalışır",
+      "sectionSubtitle": "Amazon'dan eBay'e bir işin hareketli her parçası — otomatik, izlenir ve gece gündüz senkron tutulur.",
       "asinListing": {
-        "title": "ASIN ile Listeleme",
-        "description": "Bir Amazon ASIN yapıştırın, dakikalar içinde eBay'de yayında olun. Manuel veri girişi yok."
+        "title": "ASIN bazlı listeleme",
+        "description": "Bir Amazon ASIN'i yapıştır, dakikalar içinde eBay'de yayına al. Başlık, görsel ve özellikler otomatik çekilir — manuel veri girişi yok."
       },
       "stockPriceSync": {
-        "title": "Anlık Stok & Fiyat Senkronizasyonu",
-        "description": "Amazon fiyatları veya stokları değiştiğinde eBay listelemeleri otomatik güncellenir."
+        "title": "Gerçek zamanlı stok & fiyat senkronu",
+        "description": "Amazon fiyatı veya stoğu değiştiği an eBay listelerin anında güncellenir. Asla tükenmiş ürün satma, asla düşük fiyatla kalma."
       },
       "autoOrder": {
-        "title": "Otomatik Sipariş Karşılama",
-        "description": "eBay'de bir sipariş geldiğinde, Amazon'da otomatik olarak verilir. Elleriniz bağlı değil."
+        "title": "Otomatik sipariş karşılama",
+        "description": "eBay'den bir sipariş geldiğinde, Amazon'da otomatik olarak verilir — sen uyurken bile 7/24 el değmeden."
       },
       "manualOrder": {
-        "title": "Manuel Sipariş Kontrolü",
-        "description": "Tam kontrol mü istiyorsunuz? İstediğiniz zaman herhangi bir siparişi manuel olarak yönetin."
+        "title": "Manuel sipariş kontrolü",
+        "description": "Belirli bir siparişte tam kontrol mü istiyorsun? İstediğin an devreye girip manuel halledebilirsin. Otomasyon senin kurallarınla."
       },
       "tracking": {
-        "title": "Otomatik Takip & Kargo",
-        "description": "Takip numaraları otomatik alınır ve eBay'e iletilir. Kargolandı → Teslim Edildi, parmağınızı bile kıpırdatmadan."
+        "title": "Otomatik takip & kargo",
+        "description": "Takip numaraları göründüğü an çekilir ve eBay'e aktılır. Kargolandı → Teslim edildi, parmağını kaldırmadan."
       },
       "perProduct": {
-        "title": "Ürün Bazlı Ayarlar",
-        "description": "Çoğu araç her şeye tek bir kural uygular. Biz uygulamıyoruz. Her ürün için kâr marjı, stok miktarı ve listeleme şablonunu ayrı ayrı belirleyin.",
-        "badge": "Farkımız"
+        "badge": "Farkımız",
+        "title": "Ürün bazlı ayarlar",
+        "description": "Çoğu araç tüm kataloğa tek bir kural uygular. Biz değil. Kar marjı, stok limiti ve listeleme şablonunu sattığın her ASIN için tek tek belirle."
       }
     },
     "howItWorks": {
-      "sectionTitle": "Nasıl Çalışır",
-      "sectionSubtitle": "Üç adım. Sıfır zahmet.",
+      "sectionEyebrow": "Nasıl çalışır",
+      "sectionTitle": "Üç basit adımda yayında",
+      "sectionSubtitle": "Bir kez bağla, bir kez yapılandır, sonra çalışsın.",
       "step1": {
-        "title": "Hesaplarınızı Bağlayın",
-        "description": "Amazon ve eBay satıcı hesaplarınızı saniyeler içinde güvenli bir şekilde bağlayın."
+        "title": "Hesaplarını bağla",
+        "description": "Amazon alıcı hesabını ve eBay satıcı hesabını saniyeler içinde güvenle bağla."
       },
       "step2": {
-        "title": "ASIN Yapıştırın & Yapılandırın",
-        "description": "ASIN ile ürün ekleyin ve ürün bazlı kuralları belirleyin: marj, stok, şablon."
+        "title": "ASIN yapıştır & kuralları belirle",
+        "description": "Ürünleri ASIN ile ekle ve ürün bazlı kuralları tanımla: marj, stok limiti, listeleme şablonu."
       },
       "step3": {
-        "title": "Geriye Yaslanın & Büyütün",
-        "description": "Listelemeler yayında, siparişler akıyor, takipler otomatik güncelleniyor. Siz büyüyorsunuz."
+        "title": "Arkana yaslan & büyü",
+        "description": "Listeler yayına girer, siparişler otomatik akar, takip kendiliğinden güncellenir. Sen büyümeye odaklan."
       }
     },
     "perProduct": {
-      "sectionTitle": "Sizin Kurallarınız. Ürün Bazlı. Hesap Bazlı Değil.",
-      "sectionSubtitle": "Diğer araçlar tüm kataloğunuza tek strateji dayatır. Biz her ASIN için bireysel kontrol veriyoruz.",
+      "sectionEyebrow": "İnce ayar kontrolü",
+      "sectionTitle": "Kuralların. Ürün bazında. Hesap bazında değil.",
+      "sectionSubtitle": "Diğer araçlar tüm kataloğuna tek strateji dayatır. Zonds sattığın her ASIN üzerinde bireysel kontrol verir.",
       "productA": {
         "name": "Kablosuz Kulaklık Pro",
-        "margin": "%10",
-        "stock": "2",
-        "template": "Elektronik Standart"
+        "margin": "%12",
+        "stock": "3",
+        "template": "Elektronik — Standart"
       },
       "productB": {
         "name": "USB-C Hızlı Şarj",
-        "margin": "%20",
+        "margin": "%22",
         "stock": "1",
         "template": "Hızlı Kargo"
       },
       "productC": {
         "name": "Telefon Kılıfı Paketi",
-        "margin": "%15",
+        "margin": "%18",
         "stock": "5",
-        "template": "Fırsat Paketi"
+        "template": "Paket Fırsatı"
       },
       "labels": {
-        "margin": "Marj",
-        "stock": "Stok",
-        "template": "Şablon"
+        "margin": "Kar marjı",
+        "stock": "Stok limiti",
+        "template": "Listeleme şablonu"
+      }
+    },
+    "stats": {
+      "sellers": {
+        "value": "2.500+",
+        "label": "Aktif satıcı"
+      },
+      "orders": {
+        "value": "50B+",
+        "label": "İşlenen sipariş"
+      },
+      "uptime": {
+        "value": "%99.9",
+        "label": "Çalışma süresi"
+      },
+      "marketplaces": {
+        "value": "6",
+        "label": "Amazon pazarı"
+      }
+    },
+    "ctaBanner": {
+      "variant1": {
+        "headline": "Mağazanı otopilota almaya hazır mısın?",
+        "subheading": "Bugün ücretsiz başla. Hesaplarını bağla, ilk ürününü dakikalar içinde listele.",
+        "button": "Ücretsiz başla"
+      },
+      "variant2": {
+        "headline": "Bunu manuel yapmayı bırak.",
+        "subheading": "Amazon → eBay işini Zonds ile otomatikleştiren binlerce satıcıya katıl.",
+        "button": "Ücretsiz başla"
+      }
+    },
+    "testimonials": {
+      "sectionTitle": "Dünyaca seviliyor",
+      "sectionSubtitle": "Gerçek satıcılar, gerçek sonuçlar. Otopilotta çalıştırmanın ne demek olduğunu onlar anlatıyor.",
+      "t1": {
+        "rating": "5",
+        "text": "Zonds üç araç ve bir asistanın yerini aldı. Listelerim senkronize kalıyor, siparişler kendiliğinden veriliyor — kelimenin tam anlamıyla satışlara uyanıyorum.",
+        "name": "Marcus J.",
+        "role": "eBay İnce Satıcı"
+      },
+      "t2": {
+        "rating": "5",
+        "text": "Ürün bazlı ayarlar oyunun kurallarını değiştirdi. Tek düz kural yerine her ASIN için ayrı marj ve stok limiti kullanabiliyorum artık.",
+        "name": "Sarah K.",
+        "role": "Tam zamanlı dropshipper"
+      },
+      "t3": {
+        "rating": "5",
+        "text": "Sadece takip senkronu her gün saatlerimi kurtarıyor. Amazon güncellendiği an sipariş eBay’de otomatik kargolanır. Çalışma süresi de kaya gibi sağlam.",
+        "name": "David R.",
+        "role": "Çoklu mağaza operatörü"
       }
     },
     "pricing": {
-      "sectionTitle": "Basit, Şeffaf Fiyatlandırma",
-      "sectionSubtitle": "Ücretsiz başlayın. Hazır olduğunuzda büyüyün.",
+      "sectionEyebrow": "Fiyatlandırma",
+      "sectionTitle": "Basit, şeffaf fiyatlandırma",
+      "sectionSubtitle": "Ücretsiz başla. Yalnızca büyümeye hazır olduğunda yükselt.",
+      "billingNote": "Başlamak için kredi kartı gerekmez. İstediğin zaman iptal et.",
       "starter": {
         "name": "Başlangıç",
         "price": "$0",
         "period": "/ay",
-        "description": "Denemek için mükemmel.",
-        "features": {
-          "listings": "25 listeleme kadar",
-          "sync": "Stok & fiyat senkronizasyonu",
-          "orders": "Otomatik sipariş",
-          "tracking": "Takip güncellemeleri",
-          "support": "E-posta desteği"
-        },
-        "cta": "Ücretsiz Başla"
+        "description": "Denemek için ihtiyacın olan her şey.",
+        "features": [
+          "25 listeye kadar",
+          "Amazon → eBay stok & fiyat senkronu",
+          "Otomatik sipariş",
+          "Takip güncellemeleri",
+          "E-posta desteği"
+        ],
+        "cta": "Ücretsiz başla"
       },
       "pro": {
+        "badge": "En popüler",
         "name": "Pro",
         "price": "$49",
         "period": "/ay",
-        "description": "Büyüyen ciddi satıcılar için.",
-        "features": {
-          "listings": "500 listeleme kadar",
-          "sync": "Anlık senkronizasyon & uyarılar",
-          "orders": "Otomatik + manuel sipariş",
-          "tracking": "Otomatik takip & kargo",
-          "settings": "Ürün bazlı ayarlar",
-          "support": "Öncelikli destek"
-        },
-        "cta": "Pro Denemesine Başla",
-        "badge": "En Popüler"
+        "description": "Büyümeye hazır ciddi satıcılar için.",
+        "features": [
+          "500 listeye kadar",
+          "Gerçek zamanlı senkron & uyarılar",
+          "Otomatik + manuel sipariş",
+          "Otomatik takip & kargo",
+          "Ürün bazlı ayarlar",
+          "Öncelikli destek"
+        ],
+        "cta": "Ücretsiz dene"
       },
       "enterprise": {
         "name": "Kurumsal",
         "price": "$149",
         "period": "/ay",
-        "description": "Yüksek hacimli operasyonlar için.",
-        "features": {
-          "listings": "Sınırsız listeleme",
-          "sync": "Anlık senkronizasyon & izleme",
-          "orders": "Tam sipariş otomasyonu",
-          "tracking": "Kapsamlı takip paketi",
-          "settings": "Gelişmiş ürün bazlı kurallar",
-          "api": "API erişimi",
-          "support": "Özel hesap yöneticisi"
-        },
-        "cta": "Satış ile İletişim"
+        "description": "Yüksek hacimli operasyonlar ve ajanslar için.",
+        "features": [
+          "Sınırsız listeleme",
+          "Pro'daki her şey",
+          "API erişimi",
+          "Özel hesap yöneticisi",
+          "Özel otomasyonlar",
+          "7/24 öncelikli destek"
+        ],
+        "cta": "Satışla iletişime geç"
       }
     },
     "faq": {
-      "sectionTitle": "Sıkça Sorulan Sorular",
+      "sectionTitle": "Sık sorulan sorular",
+      "sectionSubtitle": "Başlamadan önce bilmen gereken her şey.",
       "q1": {
-        "question": "Otomatik sipariş verme nasıl çalışır?",
-        "answer": "Bir müşteri eBay listelemenizden satın aldığında, Zonds yapılandırılmış ayarlarınızı kullanarak Amazon'da ilgili siparişi otomatik olarak verir. Manuel müdahale gerekmez."
+        "question": "Otomatik sipariş nasıl çalışır?",
+        "answer": "eBay'den bir alıcı sipariş verdiğinde, Zonds bağlı alıcı hesabını kullanarak alıcının kargo adresiyle Amazon'da ilgili siparişi otomatik verir. Manuel tıklama gerekmez."
       },
       "q2": {
-        "question": "Siparişi manuel vermek istersem ne olur?",
-        "answer": "İstediğiniz zaman devreye girebilirsiniz. Her sipariş panelimiz üzerinden manuel olarak yönetilebilir — otomatik sipariş varsayılandır, ancak her zaman tam kontrole sahipsiniz."
+        "question": "Siparişleri yine de manuel halledebilir miyim?",
+        "answer": "Kesinlikle. Otomatik sipariş sipariş bazında isteğe bağlıdır — tam kontrol istediğin her an devreye girip herhangi bir siparişi manuel işleyebilirsin."
       },
       "q3": {
         "question": "Takip numaraları nasıl işlenir?",
-        "answer": "Amazon siparişinizi kargaladığında, Zonds takip numarasını alır ve eBay siparişinize otomatik olarak iletir. Sipariş durumu Kargolandı'dan Teslim Edildi'ye manuel bir iş olmadan güncellenir."
+        "answer": "Zonds her Amazon siparişini izler ve bir takip numarası belirdiği an onu eBay'e aktararak siparişi otomatik kargolandı olarak işaretler."
       },
       "q4": {
-        "question": "Her ürün için farklı marj ayarlayabilir miyim?",
-        "answer": "Kesinlikle. Bu bizim temel farklılığımız. Her ürün için ayrı kâr marjı, stok miktarı ve listeleme şablonu belirleyebilirsiniz — hesabınızın tamamı için tek bir kural değil."
+        "question": "Ürün başına farklı marj belirleyebilir miyim?",
+        "answer": "Evet. Çoğu aracın aksine Zonds kar marjı, stok limiti ve listeleme şablonunu her ASIN için tek tek belirlemene izin verir — tüm hesabın için tek bir kural değil."
       },
       "q5": {
         "question": "Hangi Amazon pazarları destekleniyor?",
-        "answer": "Şu anda Amazon ABD, İngiltere, Almanya, Fransa, İtalya ve İspanya'yı destekliyoruz. Satıcı talebine göre düzenli olarak yeni pazarlar ekleniyor."
+        "answer": "ABD, İngiltere, Almanya, Fransa, İtalya ve İspanya — tek panelden altı Amazon pazarında satış yap."
       },
       "q6": {
-        "question": "Ücretsiz deneme var mı?",
-        "answer": "Evet! Başlangıç planımız 25 listeleme ile tamamen ücretsiz. Büyümeye hazır olduğunuzda Pro'yu 14 gün ücretsiz deneyebilirsiniz."
+        "question": "Ücretsiz plan var mı?",
+        "answer": "Evet. Başlangıç planı 25 listeye kadar daima ücretsizdir; böylece kredi kartı olmadan tüm otomasyon akışını deneyebilirsin."
       }
     },
-    "cta": {
-      "headline": "Bugün eBay'de daha akıllı satışa başlayın.",
-      "subheading": "Amazon'dan eBay'e işini otomatikleştiren binlerce satıcıya katılın.",
-      "button": "Ücretsiz Başla"
-    },
     "footer": {
-      "copyright": "© {{year}} Zonds. Tüm hakları saklıdır.",
-      "privacy": "Gizlilik",
-      "terms": "Şartlar",
-      "support": "Destek",
+      "description": "Zonds, Amazon → eBay dropshipping işini uçtan uca otomatikleştirir — listeleme, yeniden fiyatlandırma, sipariş ve takip, tam otopilotta.",
       "product": "Ürün",
       "company": "Şirket",
       "legal": "Yasal",
-      "description": "Güçlü araçlarla Amazon'dan eBay'e dropshipping işinizi otomatikleştirin.",
       "links": {
         "features": "Özellikler",
         "pricing": "Fiyatlandırma",
-        "howItWorks": "Nasıl Çalışır",
+        "howItWorks": "Nasıl çalışır",
         "faq": "SSS"
       },
       "companyLinks": {
@@ -337,52 +379,9 @@
       "legalLinks": {
         "privacy": "Gizlilik Politikası",
         "terms": "Kullanım Şartları",
-        "cookies": "Çerez Politikası"
-      }
-    },
-    "platforms": {
-      "title": "Zaten Kullandığınız Platformlarla Çalışır",
-      "subtitle": "Amazon ve eBay ile sorunsuz entegrasyon"
-    },
-    "stats": {
-      "sellers": {
-        "value": "2,500+",
-        "label": "Aktif Satıcı"
+        "cookies": "Çerezler"
       },
-      "orders": {
-        "value": "50K+",
-        "label": "İşlenen Sipariş"
-      },
-      "uptime": {
-        "value": "%99.9",
-        "label": "Çalışma Süresi"
-      },
-      "countries": {
-        "value": "6",
-        "label": "Pazar Yeri"
-      }
-    },
-    "testimonials": {
-      "sectionTitle": "Dropshipper'ların Gözdesi",
-      "sectionSubtitle": "Satıcılar Zonds hakkında ne diyor görün.",
-      "t1": {
-        "text": "Zonds dropshipping işimi tamamen dönüştürdü. Eskiden siparişleri ve fiyatları manuel yönetmek için saatler harcardım. Şimdi her şey otomatik çalışıyor.",
-        "name": "Marcus J.",
-        "role": "eBay En İyi Satıcı",
-        "rating": "5"
-      },
-      "t2": {
-        "text": "Ürün bazlı ayarlar oyun değiştirici. Her ürün için farklı marj ayarlayabiliyorum. İlk ayda kârım %35 arttı.",
-        "name": "Sarah K.",
-        "role": "Tam Zamanlı Dropshipper",
-        "rating": "5"
-      },
-      "t3": {
-        "text": "Zonds'tan önce 4 farklı araç denedim. Sadece otomatik takip senkronizasyonu her gün 2 saat kazandırıyor. Destek ekibi de inanılmaz hızlı.",
-        "name": "David R.",
-        "role": "Çoklu Mağaza İşletmecisi",
-        "rating": "5"
-      }
+      "copyright": "© {{year}} Zonds. Tüm hakları saklıdır."
     }
   }
 }
