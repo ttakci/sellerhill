@@ -187,3 +187,15 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 4. `pnpm dev`
 
 API: `http://localhost:3000` (Swagger at `/api/docs`). Web: Vite dev server (default :5173).
+
+## Figma Redesign — Per-Theme Tokens
+
+The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced tonal shifts:
+- **Primary is per-theme**: light uses `#2563eb` (blue-600), dark uses `#6366f1` (indigo-500). Do NOT expect them to match.
+- **Sidebar background is per-theme**: light deep blue `#0c1f52`, dark near-black `#0d0f18`.
+- **Borders are alpha-based**: `#00000014` (light) / `#ffffff12` (dark) — not solid hex.
+- **`accent` token category** (emerald `#10b981`) is for "Active" status badges and success emphasis. Distinct from `semantic.success` (system success states).
+- **Font**: Plus Jakarta Sans (was Inter/Lexend).
+- **Sidebar nav**: Inventory section (Dashboard, eBay Listings, Listing Jobs, Products, Orders, Stores) + Configuration section (Settings). Single Settings nav item (hub consolidation TBD in Plan 5).
+
+Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`.
