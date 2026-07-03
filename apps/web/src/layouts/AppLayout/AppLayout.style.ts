@@ -98,7 +98,7 @@ export const NavSection = styled.nav`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -114,19 +114,19 @@ export const NavSection = styled.nav`
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: 0.75rem 1rem 0.5rem;
+  padding: 0.75rem ${tkn('spacing.md')} ${tkn('spacing.sm')}; /* 12px — no exact token */
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
   color: ${tkn('colors.sidebar.textMuted')};
-  font-size: 0.6875rem; /* 11px */
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
+  font-weight: ${tkn('typography.fontWeight.bold')};
   text-transform: uppercase;
-  letter-spacing: 0.0625rem; /* 1px */
+  letter-spacing: ${tkn('typography.letterSpacing.wide')};
 `;
 
 export const NavDivider = styled.div`
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
-  margin: 0.75rem 0.5rem;
+  margin: 0.75rem ${tkn('spacing.sm')}; /* 12px — no exact token */
 `;
 
 export const NavItemWrapper = styled.div`
@@ -146,8 +146,8 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
-  font-weight: ${({ $active }) => ($active ? 600 : 400)};
-  font-size: 0.875rem;
+  font-weight: ${({ $active, theme }) => ($active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.normal)};
+  font-size: ${tkn('typography.fontSize.sm')};
 
   &:hover {
     background: ${tkn('colors.sidebar.hover')};
@@ -173,7 +173,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px */
+  gap: 0.75rem; /* 12px — no exact token */
 
   white-space: nowrap; /* Prevent text wrapping */
   overflow: hidden; /* Hide overflow */
@@ -204,8 +204,8 @@ export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
-  margin-top: ${({ $isOpen }) => ($isOpen ? '0.25rem' : '0')}; /* 4px */
+  gap: ${tkn('spacing.2xs')};
+  margin-top: ${({ $isOpen, theme }) => ($isOpen ? theme.spacing.xs : '0')};
 `;
 
 export const SidebarFooter = styled.div`
@@ -219,8 +219,8 @@ export const SidebarFooter = styled.div`
 export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
+  gap: 0.75rem; /* 12px — no exact token */
+  padding: ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
@@ -232,20 +232,20 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
     background: ${tkn('colors.sidebar.hover')};
   }
 
-  ${({ $isCollapsed }) =>
+  ${({ $isCollapsed, theme }) =>
     $isCollapsed &&
     `
     justify-content: center;
-    padding: 0.5rem 0;
+    padding: ${theme.spacing.sm} 0;
   `}
 `;
 
 export const BadgeWrapper = styled.div<{ variant?: 'primary' | 'success'; size?: 'sm' | 'md' }>`
   background: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTint.success : theme.colors.semanticTint.info)};
   color: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semantic.success : theme.colors.brand.primary)};
-  font-size: 0.625rem; /* 10px */
-  font-weight: 700;
-  padding: 0.125rem 0.375rem; /* 2px 6px */
+  font-size: ${tkn('typography.fontSize.2xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
   border-radius: ${tkn('radius.sm')};
   border: 0.0625rem solid ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.info)};
   text-transform: uppercase;
@@ -260,8 +260,8 @@ export const ProfileBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem; /* 14px */
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   flex-shrink: 0;
 `;
 
@@ -450,7 +450,7 @@ export const Kbd = styled.kbd`
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.tertiary')};
   background: ${tkn('colors.background.secondary')};
-  padding: 0.125rem ${tkn('spacing.sm')}; /* 2px */
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.md')};
   border: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
 `;
@@ -458,12 +458,12 @@ export const Kbd = styled.kbd`
 export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
   order: 2; /* Ensure it stays on top row with HeaderLeft */
 
   @media (min-width: 48rem) {
     /* 768px */
-    gap: 0.25rem; /* 4px */
+    gap: ${tkn('spacing.xs')};
     order: 3;
   }
 `;
@@ -499,16 +499,16 @@ export const VerticalDivider = styled.div`
   width: 0.0625rem; /* 1px */
   height: 1rem; /* 16px */
   background: ${tkn('colors.border.primary')};
-  margin: 0 0.125rem; /* 2px */
+  margin: 0 ${tkn('spacing.2xs')};
   flex-shrink: 0;
 `;
 
 export const LanguageSelectTrigger = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
   cursor: pointer;
-  padding: 0.125rem 0.375rem; /* 2px 6px */
+  padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
   border-radius: ${tkn('radius.sm')};
   transition: background 0.2s;
 
@@ -524,8 +524,8 @@ export const LanguageSelectTrigger = styled.div`
 `;
 
 export const LanguageText = styled.span`
-  font-size: 0.75rem; /* 12px */
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.secondary')};
   transition: color ${tkn('transitions.fast')};
   text-transform: uppercase;
@@ -550,7 +550,7 @@ export const ProfileArea = styled.div`
 
   @media (min-width: 48rem) {
     /* 768px */
-    gap: 0.75rem; /* 12px */
+    gap: 0.75rem; /* 12px — no exact token */
     padding-left: ${tkn('spacing.md')};
     border-left: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   }
