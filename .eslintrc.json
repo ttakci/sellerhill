@@ -12,15 +12,16 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
-  "plugins": ["@typescript-eslint", "import"],
+  "plugins": ["@typescript-eslint", "import", "design-system"],
   "rules": {
-    // Design System Enforcement (temporarily disabled - plugin needs proper setup)
+    // Design System Enforcement — enabled in Task 11 after violations cleaned
     // "design-system/no-hardcoded-colors": "error",
-    // "design-system/no-hardcoded-spacing": "warn",
+    // "design-system/no-hardcoded-spacing": "error",
     // "design-system/no-inline-styles": "error",
     // "design-system/no-styled-typography": "error",
     // "design-system/no-bare-text-in-button": "error",
     // "design-system/no-implicit-i18n-namespaces": "error",
+    // "design-system/no-native-select": "error",
 
     // Console & Debugging
     "no-console": ["warn", { "allow": ["warn", "error"] }],

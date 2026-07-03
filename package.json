@@ -44,6 +44,7 @@
     "@typescript-eslint/parser": "^6.13.2",
     "@vitejs/plugin-react": "^4.2.0",
     "eslint": "^8.55.0",
+    "eslint-plugin-design-system": "file:packages\\ui\\src\\eslint-plugin",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",

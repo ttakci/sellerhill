@@ -72,6 +72,9 @@ importers:
       eslint:
         specifier: ^8.55.0
         version: 8.55.0
+      eslint-plugin-design-system:
+        specifier: file:packages\ui\src\eslint-plugin
+        version: file:packages/ui/src/eslint-plugin
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@6.13.2)(eslint@8.55.0)
@@ -9274,3 +9277,8 @@ packages:
 
   /zod@4.3.5:
     resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
+
+  file:packages/ui/src/eslint-plugin:
+    resolution: {directory: packages/ui/src/eslint-plugin, type: directory}
+    name: eslint-plugin-design-system
+    dev: true
