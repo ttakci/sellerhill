@@ -72,15 +72,17 @@ module.exports = {
           TemplateElement(node) {
             const value = node.value.raw;
             
-            // Check for hardcoded px/rem values in common CSS properties
-            // Exclude: font-size, line-height, border-width (1px is acceptable)
-            const spacingPattern = /(?:padding|margin|gap|width|height|top|bottom|left|right):\s*(?:\$\{[^}]*\}\s+)?(\d+(?:\.\d+)?(?:px|rem))/g;
+            // Check for hardcoded px/rem values in spacing CSS properties
+            // Scope: padding/margin/gap ONLY (genuine spacing).
+            // width/height/top/bottom/left/right are layout dimensions, not spacing tokens.
+            // Exclude: font-size, line-height (covered by typography), border-width (1px is acceptable)
+            const spacingPattern = /(?:padding|margin|gap):\s*(?:\$\{[^}]*\}\s+)?(\d+(?:\.\d+)?(?:px|rem))/g;
             let match;
-            
+
             while ((match = spacingPattern.exec(value)) !== null) {
               const spacingValue = match[1];
-              // Allow 1px for borders
-              if (spacingValue !== '1px') {
+              // Allow 1px (and equivalent 0.0625rem) for borders
+              if (spacingValue !== '1px' && spacingValue !== '0.0625rem') {
                 context.report({
                   node,
                   messageId: 'hardcodedSpacing',
