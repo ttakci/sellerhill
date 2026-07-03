@@ -12,7 +12,7 @@ export const Container = styled.div`
 `;
 
 export const ErrorIcon = styled.div`
-  font-size: ${tkn('spacing.xxxl')};
+  font-size: ${tkn('typography.fontSize.5xl')};
   margin-bottom: ${tkn('spacing.lg')};
 `;
 
