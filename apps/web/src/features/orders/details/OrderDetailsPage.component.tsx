@@ -1,5 +1,5 @@
 import { OrderDto, OrderStatus } from '@repo/shared';
-import { Icon, IdBadge, PageHeader, StatusBadge, useLoading } from '@repo/ui';
+import { Icon, IdBadge, PageHeader, StatusBadge, Text, useLoading } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -153,7 +153,9 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
               {t('orders.detail.netProfitAnalysis')}
             </S.AnalysisTitle>
             <S.AnalysisDescription>
-              {t('orders.detail.analysisDesc')}
+              <Text variant="body-sm" color="text.tertiary">
+                {t('orders.detail.analysisDesc')}
+              </Text>
             </S.AnalysisDescription>
           </div>
 

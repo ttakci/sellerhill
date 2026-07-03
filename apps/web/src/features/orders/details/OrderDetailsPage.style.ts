@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button as RepoButton, Card as RepoCard, Text, tkn } from '@repo/ui';
+import { Button as RepoButton, Card as RepoCard, Text, tkn, type AppTheme } from '@repo/ui';
 
 export const BackLink = styled(RepoButton)`
   display: flex;
@@ -109,7 +109,7 @@ export const ProductInfo = styled.div`
 
 export const ProductTitle = styled(Text)`
   @media (max-width: 48rem) {
-    font-size: 1rem;
+    font-size: ${tkn('typography.fontSize.md')};
   }
 `;
 
@@ -133,7 +133,7 @@ export const LabelValue = styled.div`
   .label {
     font-size: ${tkn('typography.fontSize.xs')};
     color: ${tkn('colors.text.secondary')};
-    margin-bottom: 0.125rem; /* 2px */
+    margin-bottom: ${tkn('spacing.2xs')};
   }
   .value {
     font-size: ${tkn('typography.fontSize.sm')};
@@ -178,16 +178,16 @@ export const ContentRow = styled.div`
     font-size: ${tkn('typography.fontSize.xs')};
     font-weight: ${tkn('typography.fontWeight.bold')};
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: ${tkn('typography.letterSpacing.widest')};
     color: ${tkn('colors.text.secondary')};
-    margin-bottom: 0.25rem; /* 4px */
+    margin-bottom: ${tkn('spacing.xs')};
   }
 `;
 
 export const BoldText = styled(Text)``;
 
 export const AddressText = styled(Text)`
-  line-height: 1.6;
+  line-height: ${tkn('typography.lineHeight.relaxed')}; /* 1.6 → relaxed(1.625) closest */
 `;
 
 export const AddressBlock = styled.div`
@@ -203,7 +203,7 @@ export const AddressBlock = styled.div`
 `;
 
 export const AddressLine = styled(Text)`
-  line-height: 1.5;
+  line-height: ${tkn('typography.lineHeight.normal')};
   user-select: text;
 `;
 
@@ -221,32 +221,32 @@ export const SummaryRow = styled.div<{ $bold?: boolean; $total?: boolean; $borde
   font-size: ${tkn('typography.fontSize.sm')};
   margin-bottom: ${tkn('spacing.md')};
 
-  ${({ $bold }) =>
+  ${({ $bold, theme }) =>
     $bold &&
-    `
-    font-weight: 600;
-  `}
+    `font-weight: ${(theme as AppTheme).typography.fontWeight.semibold};`}
 
-  ${({ $total }) =>
+  ${({ $total, theme }) =>
     $total &&
     `
-    padding-top: 0.75rem; /* 12px */
+    padding-top: 0.75rem; /* 12px — no exact token */
     border-top: 0.0625rem solid currentColor;
-    border-top-color: ${String(tkn('colors.border.secondary'))};
-    font-weight: 700;
-    font-size: 1rem; /* 16px */
+    border-top-color: ${(theme as AppTheme).colors.border.secondary};
+    font-weight: ${(theme as AppTheme).typography.fontWeight.bold};
+    font-size: ${(theme as AppTheme).typography.fontSize.md};
   `}
 
-  ${({ $bordered }) =>
+  ${({ $bordered, theme }) =>
     $bordered &&
     `
-    padding-top: 0.5rem;
-    border-top: 0.0625rem solid ${String(tkn('colors.border.secondary'))};
+    padding-top: ${(theme as AppTheme).spacing.sm};
+    border-top: 0.0625rem solid ${(theme as AppTheme).colors.border.secondary};
   `}
 
   span:first-child {
-    color: ${({ $bold, $total }) =>
-      $bold || $total ? String(tkn('colors.text.primary')) : String(tkn('colors.text.secondary'))};
+    color: ${({ $bold, $total, theme }) =>
+      $bold || $total
+        ? (theme as AppTheme).colors.text.primary
+        : (theme as AppTheme).colors.text.secondary};
   }
 `;
 
@@ -260,13 +260,13 @@ export const PaymentMethod = styled.div`
   gap: ${tkn('spacing.md')};
 
   .label {
-    font-size: 0.625rem; /* 10px */
+    font-size: ${tkn('typography.fontSize.2xs')};
     color: ${tkn('colors.text.secondary')};
-    font-weight: 500;
+    font-weight: ${tkn('typography.fontWeight.medium')};
   }
   .value {
     font-size: ${tkn('typography.fontSize.xs')};
-    font-weight: 500;
+    font-weight: ${tkn('typography.fontWeight.medium')};
   }
 `;
 
@@ -279,11 +279,11 @@ export const FeesSection = styled.div`
   gap: ${tkn('spacing.xs')};
 
   .fees-label {
-    font-size: 0.6875rem; /* 11px */
+    font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
     color: ${tkn('colors.text.secondary')};
     text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 0.25rem; /* 4px */
+    font-weight: ${tkn('typography.fontWeight.bold')};
+    margin-bottom: ${tkn('spacing.xs')};
   }
 `;
 
@@ -301,7 +301,7 @@ export const FeeRow = styled.div`
 export const EarningsLink = styled.div`
   display: flex;
   justify-content: space-between;
-  font-weight: 700;
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.semantic.info')};
   padding-top: ${tkn('spacing.md')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
@@ -334,13 +334,13 @@ export const AnalysisMetadata = styled.div`
 
 export const AnalysisTitle = styled.div`
   color: ${tkn('colors.semantic.info')};
-  font-weight: 800;
+  font-weight: 800; /* no token (beyond bold=700) */
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
   margin-bottom: ${tkn('spacing.xs')};
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
 `;
 
 export const AnalysisValues = styled.div`
@@ -352,7 +352,7 @@ export const AnalysisValues = styled.div`
   @media (min-width: 48rem) {
     /* 768px */
     flex-direction: row;
-    gap: 3rem; /* 48px */
+    gap: ${tkn('spacing.xxl')};
   }
 `;
 
@@ -364,18 +364,18 @@ export const Calculation = styled.div`
   }
 
   .label {
-    font-size: 0.625rem; /* 10px */
-    font-weight: 700;
+    font-size: ${tkn('typography.fontSize.2xs')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1em; /* no exact token — wider than widest(0.05em) */
     color: ${tkn('colors.text.secondary')};
-    margin-bottom: 0.25rem; /* 4px */
+    margin-bottom: ${tkn('spacing.xs')};
   }
   .formula {
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* 8px */
-    font-weight: 500;
+    gap: ${tkn('spacing.sm')};
+    font-weight: ${tkn('typography.fontWeight.medium')};
     color: ${tkn('colors.text.secondary')};
   }
 `;
@@ -388,23 +388,23 @@ export const ProfitResult = styled.div`
   }
 
   .label {
-    font-size: 0.625rem; /* 10px */
-    font-weight: 700;
+    font-size: ${tkn('typography.fontSize.2xs')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1em; /* no exact token — wider than widest(0.05em) */
     color: ${tkn('colors.semantic.success')};
-    margin-bottom: 0.25rem; /* 4px */
+    margin-bottom: ${tkn('spacing.xs')};
   }
   .value {
     font-size: ${tkn('typography.fontSize.xxxl')};
-    font-weight: 900;
+    font-weight: 900; /* no token (beyond bold=700) */
     color: ${tkn('colors.semantic.success')};
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* 8px */
+    gap: ${tkn('spacing.sm')};
 
     span {
-      font-size: 1.5rem; /* 24px */
+      font-size: ${tkn('typography.fontSize.xxl')};
     }
   }
 `;
@@ -417,16 +417,16 @@ export const Roi = styled.div`
   }
 
   .label {
-    font-size: 0.625rem; /* 10px */
-    font-weight: 700;
+    font-size: ${tkn('typography.fontSize.2xs')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1em; /* no exact token — wider than widest(0.05em) */
     color: ${tkn('colors.text.secondary')};
-    margin-bottom: 0.25rem; /* 4px */
+    margin-bottom: ${tkn('spacing.xs')};
   }
   .value {
     font-size: ${tkn('typography.fontSize.xl')};
-    font-weight: 700;
+    font-weight: ${tkn('typography.fontWeight.bold')};
     color: ${tkn('colors.text.primary')};
   }
 `;
@@ -445,7 +445,7 @@ export const Divider = styled.div`
 // Amazon Details Modal
 export const ModalFooter = styled.div`
   display: flex;
-  gap: 0.75rem;
+  gap: 0.75rem; /* 12px — no exact token */
   justify-content: flex-end;
   width: 100%;
 `;
@@ -453,7 +453,7 @@ export const ModalFooter = styled.div`
 export const ModalBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: ${tkn('spacing.md')};
 `;
 
 export const FormGroup = styled.div`
@@ -462,17 +462,17 @@ export const FormGroup = styled.div`
 `;
 
 export const FormLabel = styled(Text)`
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.375rem; /* 6px — no exact token */
   display: block;
 `;
 
 export const ErrorText = styled(Text)`
-  margin-top: 0.25rem;
+  margin-top: ${tkn('spacing.xs')};
 `;
 
 export const FormRow = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: ${tkn('spacing.md')};
   flex-wrap: wrap;
 
   > ${FormGroup} {
@@ -481,9 +481,9 @@ export const FormRow = styled.div`
 `;
 
 export const InfoText = styled.div`
-  font-size: 0.8125rem;
+  font-size: ${tkn('typography.fontSize.sm')}; /* 0.8125rem (13px) → sm (14px) closest */
   color: ${tkn('colors.text.secondary')};
-  margin-top: 0.5rem;
+  margin-top: ${tkn('spacing.sm')};
 `;
 
 export const EmptyImagePlaceholder = styled.div`
@@ -494,7 +494,7 @@ export const EmptyImagePlaceholder = styled.div`
 `;
 
 export const BadgeLabel = styled.span`
-  font-weight: 600;
+  font-weight: ${tkn('typography.fontWeight.semibold')};
 `;
 
 export const SummaryFlex = styled.div`
@@ -505,25 +505,25 @@ export const PaymentIconWrapper = styled.div`
   width: 2.5rem;
   height: 1.5rem;
   background: ${tkn('colors.background.tertiary')};
-  border-radius: 0.25rem;
+  border-radius: ${tkn('radius.sm')};
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
 export const SectionHeader = styled.div`
-  font-size: 0.6875rem;
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
+  font-weight: ${tkn('typography.fontWeight.bold')};
   text-transform: uppercase;
   color: ${tkn('colors.text.tertiary')};
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem; /* 12px — no exact token */
 `;
 
 export const SectionHeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem; /* 12px — no exact token */
 `;
 
 export const DottedUnderline = styled.span`
@@ -535,17 +535,14 @@ export const AmazonUpdateButton = styled(RepoButton)`
   margin-top: auto;
   background: ${tkn('colors.background.tertiary')};
   color: ${tkn('colors.semantic.info')};
-  font-size: 0.625rem;
-  font-weight: 800;
+  font-size: ${tkn('typography.fontSize.2xs')};
+  font-weight: 800; /* no token (beyond bold=700) */
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.1em; /* no exact token — wider than widest(0.05em) */
 `;
 
-export const AnalysisDescription = styled.p`
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.tertiary')};
+export const AnalysisDescription = styled.div`
   max-width: 27.5rem;
-  line-height: 1.5;
   margin: 0;
 `;
 
