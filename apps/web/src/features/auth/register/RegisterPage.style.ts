@@ -153,11 +153,11 @@ export const BrandingLogoWrapper = styled.div`
 
 export const SloganWrapper = styled.div`
   font-family: ${tkn('typography.fontFamily.sans')};
-  color: #ffffff;
-  font-size: 2rem;
+  color: ${tkn('colors.text.inverse')};
+  font-size: ${tkn('typography.fontSize.xxxl')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   min-height: 6.5rem;
-  line-height: 1.3;
+  line-height: ${tkn('typography.lineHeight.tight')};
   display: flex;
   align-items: flex-start;
   text-align: center;

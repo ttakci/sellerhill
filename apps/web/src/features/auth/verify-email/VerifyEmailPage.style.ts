@@ -79,11 +79,11 @@ export const BrandingLogoWrapper = styled.div`
 
 export const SloganWrapper = styled.div`
   font-family: ${tkn('typography.fontFamily.sans')};
-  color: #ffffff;
-  font-size: 2rem;
+  color: ${tkn('colors.text.inverse')};
+  font-size: ${tkn('typography.fontSize.xxxl')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   min-height: 6.5rem;
-  line-height: 1.3;
+  line-height: ${tkn('typography.lineHeight.tight')};
   display: flex;
   align-items: flex-start;
   text-align: center;
@@ -189,5 +189,5 @@ export const ActionGroup = styled.div`
 export const ResendButton = styled(Button)`
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   width: 100%;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color ${tkn('transitions.fast')};
 `;
