@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui';
+import { Button, Text } from '@repo/ui';
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
@@ -65,8 +65,16 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
       return (
         <S.Container>
           <S.ErrorIcon>⚠️</S.ErrorIcon>
-          <S.Title>{t('errorBoundary.title')}</S.Title>
-          <S.Message>{t('errorBoundary.message')}</S.Message>
+          <S.TitleWrapper>
+            <Text variant="h2" weight="semibold" color="text.primary" align="center">
+              {t('errorBoundary.title')}
+            </Text>
+          </S.TitleWrapper>
+          <S.MessageWrapper>
+            <Text variant="body" color="text.secondary" align="center">
+              {t('errorBoundary.message')}
+            </Text>
+          </S.MessageWrapper>
 
           <S.ButtonGroup>
             <Button variant="primary" onClick={this.handleReload}>

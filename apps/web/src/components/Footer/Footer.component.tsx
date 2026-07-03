@@ -1,3 +1,4 @@
+import { Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +9,9 @@ export const Footer: React.FC = () => {
 
   return (
     <S.FooterWrapper>
-      <S.Copyright>{t('footer.copyright')}</S.Copyright>
+      <Text variant="body-xs" weight="medium" color="text.tertiary">
+        {t('footer.copyright')}
+      </Text>
       <S.Links>
         <S.LinkItem href="#">{t('footer.privacyPolicy')}</S.LinkItem>
         <S.LinkItem href="#">{t('footer.termsOfService')}</S.LinkItem>

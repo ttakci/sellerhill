@@ -12,23 +12,16 @@ export const Container = styled.div`
 `;
 
 export const ErrorIcon = styled.div`
-  font-size: 4rem; /* 64px */
+  font-size: ${tkn('spacing.xxxl')};
   margin-bottom: ${tkn('spacing.lg')};
 `;
 
-export const Title = styled.h1`
-  font-size: ${tkn('typography.fontSize.lg')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
+export const TitleWrapper = styled.div`
   margin-bottom: ${tkn('spacing.md')};
-  text-align: center;
 `;
 
-export const Message = styled.p`
-  font-size: ${tkn('typography.fontSize.md')};
-  color: ${tkn('colors.text.secondary')};
+export const MessageWrapper = styled.div`
   margin-bottom: ${tkn('spacing.xl')};
-  text-align: center;
   max-width: 31.25rem; /* 500px */
 `;
 
