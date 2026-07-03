@@ -27,7 +27,7 @@ export const Header = styled.div`
 export const HeaderContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const PageTitle = styled(Text)`
@@ -67,7 +67,7 @@ export const SectionHeader = styled.div`
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   background: ${tkn('colors.surface.primary')};
 
   @media (max-width: 63.9375rem) {
@@ -79,7 +79,7 @@ export const SectionHeader = styled.div`
 export const HeaderIconWrapper = styled.div<{ $type?: 'general' | 'repricing' | 'template' | 'preview' | 'fees' }>`
   width: 2.5rem; /* 40px */
   height: 2.5rem; /* 40px */
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem; /* 10px — no exact token */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +124,7 @@ export const HeaderIconWrapper = styled.div<{ $type?: 'general' | 'repricing' | 
 export const SectionTitleContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
   flex: 1;
 `;
 
@@ -153,7 +153,7 @@ export const InputGrid = styled.div<{ columns?: number }>`
 export const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 8px */
+  gap: ${tkn('spacing.sm')};
 `;
 
 export const InputLabel = styled(Text)``;
@@ -161,13 +161,13 @@ export const InputLabel = styled(Text)``;
 export const PriceRangesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
 `;
 
 export const PriceRangeRow = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.lg')};
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.md')};
@@ -217,9 +217,9 @@ export const TemplateSettingsCard = styled(Card)`
 export const TemplateTypeToggle = styled.div`
   display: flex;
   background: ${tkn('colors.background.tertiary')};
-  padding: 0.25rem; /* 4px */
-  border-radius: 0.5rem; /* 8px */
-  gap: 0.25rem; /* 4px */
+  padding: ${tkn('spacing.xs')};
+  border-radius: ${tkn('radius.lg')};
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const ToggleItem = styled(Button)<{ active?: boolean }>`
@@ -256,8 +256,8 @@ export const CustomTemplateTextarea = styled.textarea`
   border-top: 0.0625rem solid ${tkn('colors.border.primary')};
   color: ${tkn('colors.text.primary')};
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 0.8125rem;
-  line-height: 1.6;
+  font-size: ${tkn('typography.fontSize.sm')}; /* 0.8125rem (13px) → sm (14px) closest */
+  line-height: ${tkn('typography.lineHeight.relaxed')}; /* 1.6 → relaxed(1.625) closest */
   resize: none;
   outline: none;
   overflow: auto;
@@ -276,7 +276,7 @@ export const PreviewCard = styled(Card)`
 
 export const DeviceControls = styled.div`
   display: flex;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const IconButton = styled(IconButtonAtom)<{ $active?: boolean }>`
@@ -305,15 +305,15 @@ export const PreviewBrowserHeader = styled.div`
   border-bottom: 0.0625rem solid ${(p) => p.theme.colors.border.primary}; /* 1px */
   display: flex;
   align-items: center;
-  padding: 0 0.75rem; /* 12px */
-  gap: 0.25rem; /* 4px */
+  padding: 0 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const BrowserDot = styled.div`
   width: 0.375rem; /* 6px */
   height: 0.375rem; /* 6px */
   border-radius: 50%;
-  background: #cbd5e1;
+  background: ${tkn('colors.text.disabled')};
 `;
 
 export const PreviewViewport = styled.div<{ $device: 'desktop' | 'tablet' | 'mobile' }>`
@@ -330,8 +330,8 @@ export const PreviewViewport = styled.div<{ $device: 'desktop' | 'tablet' | 'mob
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 0.625rem; /* 10px */
+    background: ${tkn('colors.text.disabled')};
+    border-radius: 0.625rem; /* 10px — no exact token */
   }
 `;
 

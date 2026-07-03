@@ -19,7 +19,7 @@ export const Container = styled.div`
 export const SwitchGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   min-width: 0;
   flex: 1;
 `;
@@ -27,7 +27,7 @@ export const SwitchGroup = styled.div`
 export const SwitchLabelContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const StoreSelectWrapper = styled.div<{ $disabled?: boolean }>`
@@ -72,7 +72,7 @@ export const GlobalGrid = styled.div`
 export const HeaderIconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'blacklist' }>`
   width: 2.5rem; /* 40px */
   height: 2.5rem; /* 40px */
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem; /* 10px — no exact token */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +107,7 @@ export const HeaderIconWrapper = styled.div<{ $type?: 'location' | 'validation' 
 export const SectionTitleContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
   flex: 1;
 `;
 
@@ -116,20 +116,20 @@ export const SectionTitle = styled(Text)``;
 export const LocationColumnGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.625rem; /* 10px */
+  gap: 0.625rem; /* 10px — no exact token */
 `;
 
 export const ValidationList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
 `;
 
 export const SwitchItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
 `;
 
 export const BlacklistCard = styled(Card)`
@@ -139,7 +139,7 @@ export const BlacklistCard = styled(Card)`
 export const BlacklistTitleColumn = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   flex: 1;
   min-width: 0;
 `;
@@ -147,7 +147,7 @@ export const BlacklistTitleColumn = styled.div`
 export const BlacklistActionGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${tkn('spacing.sm')};
   width: fit-content;
 
   @media (max-width: 40rem) {
@@ -155,7 +155,7 @@ export const BlacklistActionGroup = styled.div`
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: 0.75rem;
+    gap: 0.75rem; /* 12px — no exact token */
   }
 `;
 
@@ -198,11 +198,11 @@ export const BadgeWrapper = styled.div`
 
 export const StatusBadge = styled(StatusBadgeMolecule)`
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.025em; /* no exact token (between wider=0.02em and widest=0.05em) */
 `;
 
 export const EmptyBlacklistText = styled(Text)`
   text-align: center;
   grid-column: 1 / -1;
-  padding: 2rem;
+  padding: ${tkn('spacing.xl')};
 `;

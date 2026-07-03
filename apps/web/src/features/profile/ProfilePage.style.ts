@@ -79,7 +79,7 @@ export const ProfileBadges = styled.div`
 export const BadgeItem = styled(Badge)`
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* 6px */
+  gap: 0.375rem; /* 6px — no exact token */
 
   &::after {
     content: '';
@@ -107,7 +107,7 @@ export const SectionContent = styled.div`
   padding: ${tkn('spacing.xl')};
   display: grid;
   grid-template-columns: 1fr;
-  gap: ${tkn('spacing.xl')} 3rem; /* 48px */
+  gap: ${tkn('spacing.xl')} ${tkn('spacing.xxl')};
 
   @media (min-width: 48rem) {
     /* 768px */
@@ -156,7 +156,7 @@ export const AvatarContainer = styled.div`
 export const UserTextInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
 `;
 
 /* Info Grid Layout */
@@ -174,7 +174,7 @@ export const InfoGrid = styled.div`
 export const InfoItem = styled.div<{ $fullWidth?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
   ${({ $fullWidth }) => $fullWidth && 'grid-column: 1 / -1;'}
 `;
 
@@ -221,7 +221,7 @@ export const FormRow = styled.div`
 export const HeaderTextWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const AvatarImage = styled.img`
@@ -252,10 +252,10 @@ export const EditButtonWrapper = styled.div`
 `;
 
 export const ErrorMessage = styled.div`
-  margin-top: 0.25rem; /* 4px */
+  margin-top: ${tkn('spacing.xs')};
 `;
 
 export const SectionCard = styled.div`
-  margin-top: 2rem;
+  margin-top: ${tkn('spacing.xl')};
   overflow: hidden;
 `;

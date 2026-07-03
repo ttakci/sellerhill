@@ -56,7 +56,7 @@ export const CardHeader = styled.div`
 export const CardIconWrapper = styled.div`
   width: 2.5rem; /* 40px */
   height: 2.5rem; /* 40px */
-  border-radius: 0.625rem; /* 10px */
+  border-radius: 0.625rem; /* 10px — no exact token */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,7 +74,7 @@ export const CardBodyContent = styled.div`
   min-height: 6.25rem; /* 100px */
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
 
   @media (max-width: 63.9375rem) {
     /* 1023px */
@@ -85,7 +85,7 @@ export const CardBodyContent = styled.div`
 export const CardTitleGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const CardTitleText = styled(Text)`
@@ -104,21 +104,21 @@ export const CardFooter = styled.div`
 
 export const Stats = styled.div`
   display: flex;
-  gap: 0.75rem; /* 12px */
+  gap: 0.75rem; /* 12px — no exact token */
 `;
 
 export const StatItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* 6px */
+  gap: 0.375rem; /* 6px — no exact token */
   color: ${tkn('colors.text.tertiary')};
-  font-size: 0.8125rem; /* 13px */
-  font-weight: 500;
+  font-size: ${tkn('typography.fontSize.sm')}; /* 0.8125rem (13px) → sm (14px) closest */
+  font-weight: ${tkn('typography.fontWeight.medium')};
 `;
 
 export const CardActions = styled.div`
   display: flex;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const IconButton = styled(IconButtonAtom)<{ $type?: 'delete' | 'edit' }>`
@@ -156,7 +156,7 @@ export const EmptyState = styled(EmptyStateMolecule)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem; /* 24px */
+  gap: ${tkn('spacing.lg')};
 `;
 
 export const EmptyStateWrapper = styled.div`
@@ -169,6 +169,6 @@ export const EmptyStateWrapper = styled.div`
 export const EmptyStateContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 8px */
+  gap: ${tkn('spacing.sm')};
   max-width: 25rem; /* 400px */
 `;
