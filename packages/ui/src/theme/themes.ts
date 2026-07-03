@@ -108,47 +108,51 @@ const lightColors: ThemeColors = {
   },
 };
 
-/**
- * TailAdmin-Inspired Dark Mode
- */
 const darkColors: ThemeColors = {
   background: {
-    primary: '#0F172A',
-    secondary: '#0F172A',
-    tertiary: '#1E293B',
+    primary: '#09090f',
+    secondary: '#0c1018',
+    tertiary: '#1c1f2e',
   },
 
   surface: {
-    primary: '#1E293B',
-    secondary: '#0F172A',
+    primary: '#111318',
+    secondary: '#1c1f2e',
     overlay: 'rgba(2, 6, 23, 0.8)',
   },
 
   text: {
-    primary: '#F9FAFB',
-    secondary: '#9CA3AF',
-    tertiary: '#6B7280',
-    disabled: '#4B5563',
-    inverse: '#111827',
+    primary: '#f1f5f9',
+    secondary: '#94a3b8',
+    tertiary: '#64748b',
+    disabled: '#4b5563',
+    inverse: '#0d1526',
   },
 
   border: {
-    primary: '#374151',
-    secondary: '#1F2937',
-    focus: '#3B82F6',
+    primary: '#ffffff12',
+    secondary: '#ffffff0a',
+    focus: '#6366f1',
   },
 
   semantic: {
-    success: '#34D399',
-    error: '#F87171',
-    warning: '#FBBF24',
-    info: '#60A5FA',
+    success: '#34d399',
+    error: '#f87171',
+    warning: '#fbbf24',
+    info: '#60a5fa',
   },
 
   brand: {
-    primary: '#3B82F6',
-    primaryHover: '#60A5FA',
-    secondary: 'rgba(59, 130, 246, 0.1)',
+    primary: '#6366f1',
+    primaryHover: '#818cf8',
+    secondary: 'rgba(99, 102, 241, 0.12)',
+  },
+
+  accent: {
+    primary: '#10b981',
+    primaryHover: '#34d399',
+    secondary: 'rgba(16, 185, 129, 0.12)',
+    foreground: '#6ee7b7',
   },
 
   semanticTint: {
@@ -168,13 +172,14 @@ const darkColors: ThemeColors = {
   },
 
   sidebar: {
-    background: '#0c1427',
-    text: '#FFFFFF',
-    textMuted: 'rgba(255, 255, 255, 0.6)',
-    hover: 'rgba(255, 255, 255, 0.1)',
-    active: 'rgba(255, 255, 255, 0.15)',
-    accent: '#4263EB',
-    divider: 'rgba(255, 255, 255, 0.1)',
+    background: '#0d0f18',
+    foreground: '#94a3b8',
+    text: '#94a3b8',
+    textMuted: 'rgba(148, 163, 184, 0.7)',
+    hover: '#1c1f2e',
+    active: '#1c1f2e',
+    accent: '#6366f1',
+    divider: '#ffffff12',
   },
 
   landing: {
