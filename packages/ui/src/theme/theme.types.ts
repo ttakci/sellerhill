@@ -49,6 +49,14 @@ export interface ThemeColors {
     secondary: string;
   };
 
+  // Accent (emerald — for "Active" status, success emphasis, distinct from semantic.success)
+  accent: {
+    primary: string;
+    primaryHover: string;
+    secondary: string;
+    foreground: string;
+  };
+
   // Semantic tint backgrounds (for badges, tags)
   semanticTint: {
     success: string;
@@ -70,7 +78,8 @@ export interface ThemeColors {
   // Sidebar-specific (dark panel tokens)
   sidebar: {
     background: string;
-    text: string;
+    foreground: string;     // NEW — sidebar primary text color
+    text: string;           // Alias of foreground (legacy compat — same value)
     textMuted: string;
     hover: string;
     active: string;
