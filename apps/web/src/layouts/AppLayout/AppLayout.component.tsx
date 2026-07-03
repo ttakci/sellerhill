@@ -136,6 +136,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
           </S.LogoArea>
 
           <S.NavSection>
+            {/* INVENTORY section */}
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              {t('translation:menu.inventory')}
+            </S.NavLabelWrapper>
+
             <S.NavItem
               $active={pathWithoutLocale === '/dashboard'}
               $isCollapsed={sidebarCollapsed}
@@ -148,50 +153,46 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
               </S.NavItemContent>
             </S.NavItem>
 
-            <S.NavDivider />
+            <S.NavItem
+              $active={pathWithoutLocale === '/listings'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => localeNavigate('/listings')}
+              title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="storefront" size={18} />
+                {!sidebarCollapsed && t('translation:menu.ebayListings')}
+              </S.NavItemContent>
+              {!sidebarCollapsed && (
+                <S.BadgeWrapper variant="primary" size="sm">
+                  20
+                </S.BadgeWrapper>
+              )}
+            </S.NavItem>
 
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.inventory')}</S.NavLabelWrapper>
+            <S.NavItem
+              $active={pathWithoutLocale === '/listings/jobs'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => localeNavigate('/listings/jobs')}
+              title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="bolt" size={18} />
+                {!sidebarCollapsed && t('translation:menu.listingJobs')}
+              </S.NavItemContent>
+            </S.NavItem>
 
-            <S.NavItemWrapper>
-              <S.SubNavContainer $isOpen={true}>
-                <S.NavItem
-                  $active={pathWithoutLocale === '/listings'}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/listings')}
-                  title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="storefront" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.ebayListings')}
-                  </S.NavItemContent>
-                </S.NavItem>
-                <S.NavItem
-                  $active={pathWithoutLocale === '/listings/jobs'}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/listings/jobs')}
-                  title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="bolt" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.listingJobs')}
-                  </S.NavItemContent>
-                </S.NavItem>
-                <S.NavItem
-                  $active={pathWithoutLocale === '/listings/products'}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/listings/products')}
-                  title={sidebarCollapsed ? t('translation:menu.products') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="inventory-2" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.products')}
-                  </S.NavItemContent>
-                </S.NavItem>
-              </S.SubNavContainer>
-            </S.NavItemWrapper>
+            <S.NavItem
+              $active={pathWithoutLocale === '/listings/products'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => localeNavigate('/listings/products')}
+              title={sidebarCollapsed ? t('translation:menu.products') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="inventory-2" size={18} />
+                {!sidebarCollapsed && t('translation:menu.products')}
+              </S.NavItemContent>
+            </S.NavItem>
 
             <S.NavItem
               $isCollapsed={sidebarCollapsed}
@@ -224,48 +225,22 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
 
             <S.NavDivider />
 
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>{t('translation:menu.settings')}</S.NavLabelWrapper>
+            {/* CONFIGURATION section */}
+            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+              {t('translation:menu.configuration')}
+            </S.NavLabelWrapper>
 
-            <S.NavItemWrapper>
-              <S.SubNavContainer $isOpen={true}>
-                <S.NavItem
-                  $active={pathWithoutLocale === '/settings/store'}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/settings/store')}
-                  title={sidebarCollapsed ? t('translation:menu.storeSettings') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="settings" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.storeSettings')}
-                  </S.NavItemContent>
-                </S.NavItem>
-                <S.NavItem
-                  $active={pathWithoutLocale === '/settings/amazon-accounts'}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/settings/amazon-accounts')}
-                  title={sidebarCollapsed ? t('translation:menu.amazonAccounts') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="shopping-bag" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.amazonAccounts')}
-                  </S.NavItemContent>
-                </S.NavItem>
-                <S.NavItem
-                  $active={pathWithoutLocale.startsWith('/settings/listing-groups')}
-                  $isCollapsed={sidebarCollapsed}
-                  $isSubItem={true}
-                  onClick={() => localeNavigate('/settings/listing-groups')}
-                  title={sidebarCollapsed ? t('translation:menu.listingSettingsGroups') : undefined}
-                >
-                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                    <Icon name="rule" size={18} />
-                    {!sidebarCollapsed && t('translation:menu.listingSettingsGroups')}
-                  </S.NavItemContent>
-                </S.NavItem>
-              </S.SubNavContainer>
-            </S.NavItemWrapper>
+            <S.NavItem
+              $active={pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => localeNavigate('/settings/store')}
+              title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="settings" size={18} />
+                {!sidebarCollapsed && t('translation:menu.settings')}
+              </S.NavItemContent>
+            </S.NavItem>
           </S.NavSection>
 
           <S.SidebarFooter>
