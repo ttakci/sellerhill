@@ -20,6 +20,7 @@ packages/*/dist/
 !scripts/**/*.js
 !scripts/**/*.mjs
 !packages/*/scripts/*.js
+!packages/ui/src/eslint-plugin/*.js
 
 # Env files
 .env
