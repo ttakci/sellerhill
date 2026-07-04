@@ -5,6 +5,7 @@ import { Icon } from '../../atoms/Icon';
 import { IconButton } from '../../atoms/IconButton';
 import { Popover } from '../../molecules/Popover';
 
+import { ColumnManagerContent } from './DataTable.style';
 import type { ColumnOption } from './DataTable.types';
 
 interface ColumnManagerProps {
@@ -27,7 +28,7 @@ export const ColumnManager: React.FC<ColumnManagerProps> = ({
   );
 
   const content = (
-    <div style={{ padding: '0.5rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+    <ColumnManagerContent>
       {columnOptions.map((opt) => (
         <Checkbox
           key={opt.key}
@@ -37,7 +38,7 @@ export const ColumnManager: React.FC<ColumnManagerProps> = ({
           disabled={opt.alwaysVisible}
         />
       ))}
-    </div>
+    </ColumnManagerContent>
   );
 
   return <Popover trigger={trigger} content={content} />;

@@ -51,3 +51,17 @@ export const GridContainer = styled.div`
     grid-template-columns: repeat(4, 1fr);
   }
 `;
+
+export const GridEmptyState = styled.div`
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: ${tkn('spacing.xxxl')} 0;
+  color: ${tkn('colors.text.tertiary')};
+`;
+
+export const ColumnManagerContent = styled.div`
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;

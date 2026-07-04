@@ -143,11 +143,7 @@ export const DataTable = <T,>({
       ) : (
         <S.GridContainer>
           {data.length === 0 ? (
-            <div
-              style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0', color: 'var(--text-tertiary)' }}
-            >
-              {emptyMessage || 'No data'}
-            </div>
+            <S.GridEmptyState>{emptyMessage || 'No data'}</S.GridEmptyState>
           ) : (
             data.map((item, index) => renderGridCard(item, index))
           )}
