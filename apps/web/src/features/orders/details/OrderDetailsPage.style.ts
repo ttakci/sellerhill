@@ -196,7 +196,7 @@ export const AddressBlock = styled.div`
   gap: ${tkn('spacing.xs')};
   margin-top: ${tkn('spacing.xs')};
   padding: ${tkn('spacing.sm')};
-  background: ${tkn('colors.surface.elevated')};
+  background: ${tkn('colors.surface.secondary')};
   border: 0.0625rem solid ${tkn('colors.border.secondary')};
   border-radius: ${tkn('radius.md')};
   position: relative;
