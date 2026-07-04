@@ -1,5 +1,5 @@
 import type { ListingDto } from '@repo/shared';
-import { Button, DataTable, Icon, IdBadge, PageHeader, SearchField, Select, TextInput } from '@repo/ui';
+import { Button, DataTable, Icon, IdBadge, PageHeader, SearchField, Select, Text, TextInput } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -110,11 +110,11 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
           <>
             <Button variant="secondary" onClick={onRefresh} disabled={isLoading}>
               <Icon name="sync" />
-              {t('translation:common.actions.refresh')}
+              <Text>{t('translation:common.actions.refresh')}</Text>
             </Button>
             <Button variant="primary" onClick={onAddListing}>
               <Icon name="plus" />
-              {t('listings.actions.addListing')}
+              <Text>{t('listings.actions.addListing')}</Text>
             </Button>
           </>
         }
@@ -158,7 +158,7 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
               {hasActiveFilters && (
                 <Button variant="text" size="small" onClick={onClearFilters}>
                   <Icon name="x" size={14} />
-                  {t('listings.filters.clearAll')}
+                  <Text>{t('listings.filters.clearAll')}</Text>
                 </Button>
               )}
             </S.FilterActions>

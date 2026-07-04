@@ -1,4 +1,4 @@
-import { Button, Icon, PageHeader, Table } from '@repo/ui';
+import { Button, Icon, PageHeader, Table, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -20,11 +20,11 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
       <S.HeaderRow>
         <Button variant="secondary" onClick={onBack}>
           <Icon name="arrow_back" size={20} />
-          {t('translation:common.back')}
+          <Text>{t('translation:common.back')}</Text>
         </Button>
         <Button variant="primary" onClick={onRefresh} disabled={isLoading}>
           <Icon name="sync" size={20} />
-          {t('translation:common.actions.refresh')}
+          <Text>{t('translation:common.actions.refresh')}</Text>
         </Button>
       </S.HeaderRow>
       <S.HeaderRowTitle>

@@ -101,7 +101,7 @@ export const LoginPageComponent = ({
 
               <S.ButtonContainer>
                 <Button type="submit" variant="primary" fullWidth isLoading={isLoading || isSubmitting} size="large">
-                  {t('auth:auth.login.submitButton')}
+                  <Text>{t('auth:auth.login.submitButton')}</Text>
                 </Button>
               </S.ButtonContainer>
             </S.Form>

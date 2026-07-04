@@ -99,22 +99,22 @@ interface SearchDropdownProps {
 }
 
 const SearchDropdown = ({ listings, onSelect, formatCurrency }: SearchDropdownProps): React.ReactElement => (
-  <S.ListingsTableWrapper style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, maxHeight: '20rem', overflowY: 'auto', background: 'white', borderRadius: '0 0 8px 8px', border: '1px solid #e5e7eb', borderTop: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-    <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb' }}>
+  <S.SearchDropdownPanel>
+    <S.SearchDropdownHeader>
       <Text variant="body-xs" weight="medium" color="text.secondary">{listings.length} results</Text>
-      <Button variant="text" onClick={() => onSelect(null)}>Clear</Button>
-    </div>
+      <Button variant="text" onClick={() => onSelect(null)}><Text>Clear</Text></Button>
+    </S.SearchDropdownHeader>
     {listings.slice(0, 10).map((l) => (
-      <div key={l.id} onClick={() => onSelect(l.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
+      <S.SearchDropdownRow key={l.id} onClick={() => onSelect(l.id)}>
         <S.ListingThumb $imageUrl={l.imageUrls?.[0]} />
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <Text variant="body-sm" weight="medium" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</Text>
+        <S.SearchDropdownInfo>
+          <S.SearchDropdownTitle variant="body-sm" weight="medium">{l.title}</S.SearchDropdownTitle>
           <Text variant="caption" color="text.tertiary">{l.asin}</Text>
-        </div>
+        </S.SearchDropdownInfo>
         <Text variant="body-sm" weight="medium">{formatCurrency(l.price)}</Text>
-      </div>
+      </S.SearchDropdownRow>
     ))}
-  </S.ListingsTableWrapper>
+  </S.SearchDropdownPanel>
 );
 
 /* ─── Main Component ─── */
@@ -177,7 +177,7 @@ export const DashboardPageComponent = ({
 
       {/* Toolbar: Search + Period Preset */}
       <S.Toolbar>
-        <S.SearchWrapper style={{ position: 'relative' }}>
+        <S.SearchWrapper>
           <SearchField
             value={searchQuery}
             onChange={(e) => { onSearchChange(e.target.value); setShowSearch(true); }}
@@ -194,7 +194,7 @@ export const DashboardPageComponent = ({
 
         {filteredListingId && (
           <Button variant="text" onClick={() => onListingSelect(null)}>
-            <Icon name="x" size={14} /> {t('dashboard.clearFilter')}
+            <Icon name="x" size={14} /> <Text>{t('dashboard.clearFilter')}</Text>
           </Button>
         )}
 
@@ -212,13 +212,13 @@ export const DashboardPageComponent = ({
       {filteredListingId && (() => {
         const listing = listings.find((l) => l.id === filteredListingId);
         return listing ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', background: theme.colors.semanticTint.info, borderRadius: theme.radius?.md || '6px' }}>
+          <S.FilterBanner $bg={theme.colors.semanticTint.info}>
             <Icon name="filter" size={14} color={theme.colors.semantic.info} />
             <Text variant="body-xs" weight="medium">{t('dashboard.filteredBy', { title: listing.title })}</Text>
             <Button variant="text" onClick={() => onListingSelect(null)}>
               <Icon name="x" size={14} />
             </Button>
-          </div>
+          </S.FilterBanner>
         ) : null;
       })()}
 
@@ -314,10 +314,10 @@ export const DashboardPageComponent = ({
                     <S.Td>
                       <S.ListingTitleCell>
                         <S.ListingThumb $imageUrl={listing.imageUrls?.[0]} />
-                        <div style={{ minWidth: 0 }}>
+                        <S.ListingInfo>
                           <S.ListingName variant="body-sm" weight="medium">{listing.title}</S.ListingName>
                           <Text variant="caption" color="text.tertiary">{listing.asin}</Text>
-                        </div>
+                        </S.ListingInfo>
                       </S.ListingTitleCell>
                     </S.Td>
                     <S.Td><Text variant="body-sm">{formatCurrency(listing.price)}</Text></S.Td>

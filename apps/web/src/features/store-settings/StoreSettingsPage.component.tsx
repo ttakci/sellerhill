@@ -154,7 +154,7 @@ export const StoreSettingsPageComponent = ({
         subtitle={<Text color="text.secondary">{t('storeSettings:storeSettings.subtitle')}</Text>}
         actions={
           <Button variant="primary" size="medium" onClick={() => void handleSubmit(onSave)()} iconLeft="save">
-            {t('translation:common.save')}
+            <Text>{t('translation:common.save')}</Text>
           </Button>
         }
       />

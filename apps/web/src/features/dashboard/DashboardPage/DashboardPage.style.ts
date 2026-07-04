@@ -29,9 +29,69 @@ export const Toolbar = styled.div`
 `;
 
 export const SearchWrapper = styled.div`
+  position: relative;
   flex: 1;
   min-width: 12rem;
   max-width: 20rem;
+`;
+
+/* ─── Search Dropdown (overlay) ─── */
+
+export const SearchDropdownPanel = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 20rem;
+  overflow-y: auto;
+  background: ${tkn('colors.surface.primary')};
+  border-radius: 0 0 ${tkn('radius.sm')} ${tkn('radius.sm')};
+  border: 1px solid ${tkn('colors.border.primary')};
+  border-top: none;
+  box-shadow: ${tkn('shadows.lg')};
+`;
+
+export const SearchDropdownHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  border-bottom: 1px solid ${tkn('colors.border.primary')};
+`;
+
+export const SearchDropdownRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  cursor: pointer;
+`;
+
+export const SearchDropdownInfo = styled.div`
+  min-width: 0;
+  flex: 1;
+`;
+
+export const SearchDropdownTitle = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+/* ─── Active Filter Banner ─── */
+
+export const FilterBanner = styled.div<{ $bg: string }>`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm+')};
+  background: ${({ $bg }) => $bg};
+  border-radius: ${tkn('radius.md')};
+`;
+
+export const ListingInfo = styled.div`
+  min-width: 0;
 `;
 
 export const ToolbarRight = styled.div`

@@ -104,13 +104,13 @@ export const CardFooter = styled.div`
 
 export const Stats = styled.div`
   display: flex;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
 `;
 
 export const StatItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* 6px — no exact token */
+  gap: ${tkn('spacing.xs+')}; /* 6px */
   color: ${tkn('colors.text.tertiary')};
   font-size: ${tkn('typography.fontSize.sm')}; /* 0.8125rem (13px) → sm (14px) closest */
   font-weight: ${tkn('typography.fontWeight.medium')};

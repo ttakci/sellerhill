@@ -1,5 +1,5 @@
 import { OrderDto, OrderStatsDto, OrderStatus } from '@repo/shared';
-import { Button, DataTable, Icon, ModernTextInput, PageHeader, StatusBadge, useTheme } from '@repo/ui';
+import { Button, DataTable, Icon, ModernTextInput, PageHeader, StatusBadge, Text, useTheme } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -202,7 +202,7 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
         actions={
           <S.ActionsWrapper>
             <Button variant="secondary" size="medium" iconLeft="refresh" onClick={onRefresh} isLoading={isRefreshing}>
-              {t('orders.actions.refresh')}
+              <Text>{t('orders.actions.refresh')}</Text>
             </Button>
             <S.SearchBoxWrapper>
               <ModernTextInput

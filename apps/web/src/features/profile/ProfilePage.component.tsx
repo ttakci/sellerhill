@@ -121,7 +121,7 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
           <S.DeleteButton variant="danger" type="button">{t('profile.deactivateAccount')}</S.DeleteButton>
           {isEditing && (
             <Button variant="primary" size="medium" type="submit" isLoading={isLoading}>
-              {t('profile.saveChanges')}
+              <Text>{t('profile.saveChanges')}</Text>
             </Button>
           )}
         </S.FooterActions>

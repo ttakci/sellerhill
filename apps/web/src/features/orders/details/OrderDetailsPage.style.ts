@@ -445,7 +445,7 @@ export const Divider = styled.div`
 // Amazon Details Modal
 export const ModalFooter = styled.div`
   display: flex;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
   justify-content: flex-end;
   width: 100%;
 `;

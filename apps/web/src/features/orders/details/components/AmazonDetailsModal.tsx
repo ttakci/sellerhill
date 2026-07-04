@@ -1,5 +1,5 @@
 import { amazonDetailsSchema } from '@repo/shared';
-import { Button, Modal, ModernTextInput } from '@repo/ui';
+import { Button, Modal, ModernTextInput, Text } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -51,10 +51,10 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, 
       footer={
         <S.ModalFooter>
           <Button variant="secondary" onClick={onClose} disabled={isLoading}>
-            {t('orders.modal.cancel')}
+            <Text>{t('orders.modal.cancel')}</Text>
           </Button>
           <Button variant="primary" onClick={handleSave} isLoading={isLoading} disabled={!values.amazonOrderUrl}>
-            {t('orders.modal.save')}
+            <Text>{t('orders.modal.save')}</Text>
           </Button>
         </S.ModalFooter>
       }

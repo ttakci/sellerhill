@@ -109,7 +109,7 @@ export const ListingSettingsGroupFormComponent = ({
               </S.SectionTitle>
             </S.SectionTitleContent>
             <Button variant="primary" size="small" type="button" onClick={onAddRange} iconLeft="plus">
-              {t('listingSettingsGroup.addRange')}
+              <Text>{t('listingSettingsGroup.addRange')}</Text>
             </Button>
           </S.SectionHeader>
           <CardBody>
@@ -338,7 +338,7 @@ export const ListingSettingsGroupFormComponent = ({
 
         <S.Actions>
           <Button variant="danger" size="large" onClick={onCancel} iconLeft="x">
-            {t('translation:common.cancel')}
+            <Text>{t('translation:common.cancel')}</Text>
           </Button>
           <Button
             variant="primary"
@@ -349,7 +349,7 @@ export const ListingSettingsGroupFormComponent = ({
             isLoading={isLoading}
             iconLeft="save"
           >
-            {t('translation:common.save')}
+            <Text>{t('translation:common.save')}</Text>
           </Button>
         </S.Actions>
       </S.FormContainer>

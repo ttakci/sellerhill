@@ -116,7 +116,7 @@ export const SectionTitle = styled(Text)``;
 export const LocationColumnGrid = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.625rem; /* 10px — no exact token */
+  gap: ${tkn('spacing.sm+')}; /* 10px */
 `;
 
 export const ValidationList = styled.div`
@@ -155,7 +155,7 @@ export const BlacklistActionGroup = styled.div`
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: 0.75rem; /* 12px — no exact token */
+    gap: ${tkn('spacing.sm-md')}; /* 12px */
   }
 `;
 

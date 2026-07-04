@@ -79,7 +79,7 @@ export const ProfileBadges = styled.div`
 export const BadgeItem = styled(Badge)`
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* 6px — no exact token */
+  gap: ${tkn('spacing.xs+')}; /* 6px */
 
   &::after {
     content: '';

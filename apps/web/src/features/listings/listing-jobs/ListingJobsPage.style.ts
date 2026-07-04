@@ -16,7 +16,7 @@ export const JobIdBadge = styled(UIBadge)``;
 export const ProgressContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.375rem; /* 6px — no exact token */
+  gap: ${tkn('spacing.xs+')}; /* 6px */
   min-width: 7.5rem;
 `;
 

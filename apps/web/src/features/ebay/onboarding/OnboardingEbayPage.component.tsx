@@ -5,7 +5,7 @@
  * Follows the same container pattern as EbayConnectPage / StoreSettingsPage.
  */
 
-import { Button, Card, Icon, PageHeader } from '@repo/ui';
+import { Button, Card, Icon, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,10 +31,10 @@ export const OnboardingEbayPageComponent = ({
 
           <S.ActionGroup>
             <Button onClick={onConnect} variant="primary" fullWidth size="large" isLoading={isLoading} iconLeft="link">
-              {t('ebay:ebay.onboarding.connectButton')}
+              <Text>{t('ebay:ebay.onboarding.connectButton')}</Text>
             </Button>
             <Button onClick={onSkip} variant="secondary" fullWidth size="large">
-              {t('ebay:ebay.onboarding.skipButton')}
+              <Text>{t('ebay:ebay.onboarding.skipButton')}</Text>
             </Button>
           </S.ActionGroup>
 

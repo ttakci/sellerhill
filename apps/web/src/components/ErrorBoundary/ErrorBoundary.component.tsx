@@ -78,10 +78,10 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
 
           <S.ButtonGroup>
             <Button variant="primary" onClick={this.handleReload}>
-              {t('errorBoundary.reload')}
+              <Text>{t('errorBoundary.reload')}</Text>
             </Button>
             <Button variant="secondary" onClick={this.handleGoHome}>
-              {t('errorBoundary.goHome')}
+              <Text>{t('errorBoundary.goHome')}</Text>
             </Button>
           </S.ButtonGroup>
 

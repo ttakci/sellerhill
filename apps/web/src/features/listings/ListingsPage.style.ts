@@ -158,7 +158,7 @@ export const RangeSeparator = styled(UIText)`
 export const ProductCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.625rem; /* 10px — no exact token, between xs(4) and sm(8) */
+  gap: ${tkn('spacing.sm+')}; /* 10px */
 `;
 
 export const ProductImageWrapper = styled.div`
@@ -170,7 +170,7 @@ export const ProductImageWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.375rem; /* 6px — no exact token */ /* 6px padding */
+  padding: ${tkn('spacing.xs+')}; /* 6px */
   flex-shrink: 0;
   overflow: hidden;
 
@@ -387,7 +387,7 @@ export const CardStatsRow = styled.div`
   gap: 0;
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.md')};
-  padding: 0.375rem; /* 6px — no exact token */
+  padding: ${tkn('spacing.xs+')}; /* 6px */
 `;
 
 export const StatItem = styled.div`

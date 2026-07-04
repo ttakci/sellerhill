@@ -9,7 +9,7 @@ export const CardContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
   min-height: 2.5rem; /* 40px */
 `;
 

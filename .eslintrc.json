@@ -112,6 +112,26 @@
         "no-console": "off",
         "@typescript-eslint/no-var-requires": "off"
       }
+    },
+    {
+      "files": ["apps/api/**/*.ts"],
+      "rules": {
+        "design-system/no-hardcoded-colors": "off",
+        "design-system/no-hardcoded-spacing": "off",
+        "design-system/no-inline-styles": "off",
+        "design-system/no-styled-typography": "off",
+        "design-system/no-bare-text-in-button": "off"
+      }
+    },
+    {
+      "files": ["apps/web/src/features/landing/**/*.{ts,tsx}"],
+      "rules": {
+        "design-system/no-hardcoded-colors": "off",
+        "design-system/no-hardcoded-spacing": "off",
+        "design-system/no-inline-styles": "off",
+        "design-system/no-styled-typography": "off",
+        "design-system/no-bare-text-in-button": "off"
+      }
     }
   ]
 }

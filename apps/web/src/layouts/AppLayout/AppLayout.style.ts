@@ -114,7 +114,7 @@ export const NavSection = styled.nav`
 `;
 
 export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
-  padding: 0.75rem ${tkn('spacing.md')} ${tkn('spacing.sm')}; /* 12px — no exact token */
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')} ${tkn('spacing.sm')}; /* 12px */
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'block')};
   color: ${tkn('colors.sidebar.textMuted')};
   font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
@@ -126,7 +126,7 @@ export const NavLabelWrapper = styled.div<{ $isCollapsed: boolean }>`
 export const NavDivider = styled.div`
   height: 0.0625rem;
   background: ${tkn('colors.sidebar.divider')};
-  margin: 0.75rem ${tkn('spacing.sm')}; /* 12px — no exact token */
+  margin: ${tkn('spacing.sm-md')} ${tkn('spacing.sm')}; /* 12px */
 `;
 
 export const NavItemWrapper = styled.div`
@@ -173,7 +173,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
 
   white-space: nowrap; /* Prevent text wrapping */
   overflow: hidden; /* Hide overflow */
@@ -219,7 +219,7 @@ export const SidebarFooter = styled.div`
 export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
   padding: ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
@@ -550,7 +550,7 @@ export const ProfileArea = styled.div`
 
   @media (min-width: 48rem) {
     /* 768px */
-    gap: 0.75rem; /* 12px — no exact token */
+    gap: ${tkn('spacing.sm-md')}; /* 12px */
     padding-left: ${tkn('spacing.md')};
     border-left: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
   }

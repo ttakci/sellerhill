@@ -46,7 +46,7 @@ export const Card = styled.div`
 export const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
   margin-bottom: ${tkn('spacing.md')};
 
   h2 {
@@ -79,7 +79,7 @@ export const IconWrapper = styled.div`
 export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.375rem; /* 6px — no exact token */
+  gap: ${tkn('spacing.xs+')}; /* 6px */
   width: 100%;
 `;
 
@@ -112,7 +112,7 @@ export const AsinCardHeader = styled.div`
 export const AsinHeaderLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem; /* 12px — no exact token */
+  gap: ${tkn('spacing.sm-md')}; /* 12px */
 `;
 
 export const AsinCounter = styled.div`
@@ -120,7 +120,7 @@ export const AsinCounter = styled.div`
   color: ${tkn('colors.brand.primaryHover')};
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.bold')};
-  padding: 0.375rem 0.75rem; /* 6px 12px — no exact tokens */
+  padding: ${tkn('spacing.xs+')} ${tkn('spacing.sm-md')}; /* 6px 12px */
   border-radius: 9999px;
 `;
 
@@ -165,7 +165,7 @@ export const CancelButton = styled(Button)`
 
 export const Label = styled(UIText)`
   display: block;
-  margin-bottom: 0.375rem; /* 6px — no exact token */
+  margin-bottom: ${tkn('spacing.xs+')}; /* 6px */
 `;
 
 export const RequiredStar = styled.span`

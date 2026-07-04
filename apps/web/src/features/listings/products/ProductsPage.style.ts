@@ -55,7 +55,7 @@ export const TBody = styled.tbody`
 `;
 
 export const TD = styled.td`
-  padding: 1.25rem ${tkn('spacing.lg')}; /* 20px has no exact token */
+  padding: ${tkn('spacing.md+')} ${tkn('spacing.lg')}; /* 20px */
   vertical-align: middle;
   color: ${tkn('colors.text.primary')};
 `;
@@ -78,7 +78,7 @@ export const ProductImageWrapper = styled.div`
   justify-content: center;
   background: ${tkn('colors.background.tertiary')};
   flex-shrink: 0;
-  padding: 0.375rem; /* 6px — no exact token */
+  padding: ${tkn('spacing.xs+')}; /* 6px */
 
   svg,
   .material-symbols-outlined {

@@ -37,7 +37,7 @@ export const AmazonAccountsPageComponent = ({
         subtitle={t('amazon.accounts.subtitle')}
         action={
           <Button variant="primary" iconLeft="plus" onClick={onOpenAddModal}>
-            {t('amazon.accounts.addButton')}
+            <Text>{t('amazon.accounts.addButton')}</Text>
           </Button>
         }
       />
@@ -73,7 +73,7 @@ export const AmazonAccountsPageComponent = ({
                   onClick={() => onVerify(account.id)}
                   isLoading={isVerifying === account.id}
                 >
-                  {t('amazon.accounts.verifyButton')}
+                  <Text>{t('amazon.accounts.verifyButton')}</Text>
                 </Button>
                 <Button
                   variant="ghost"
@@ -81,7 +81,7 @@ export const AmazonAccountsPageComponent = ({
                   iconLeft="edit"
                   onClick={() => {}}
                 >
-                  {t('amazon.accounts.editButton')}
+                  <Text>{t('amazon.accounts.editButton')}</Text>
                 </Button>
                 <Button
                   variant="ghost"
@@ -89,7 +89,7 @@ export const AmazonAccountsPageComponent = ({
                   iconLeft="trash"
                   onClick={() => onDelete(account.id)}
                 >
-                  {t('amazon.accounts.deleteButton')}
+                  <Text>{t('amazon.accounts.deleteButton')}</Text>
                 </Button>
               </S.CardActions>
             </Card>
@@ -106,7 +106,7 @@ export const AmazonAccountsPageComponent = ({
               {t('amazon.accounts.noAccountsDescription')}
             </S.EmptyDesc>
             <Button variant="primary" iconLeft="plus" onClick={onOpenAddModal}>
-              {t('amazon.accounts.addButton')}
+              <Text>{t('amazon.accounts.addButton')}</Text>
             </Button>
           </S.EmptyStateInner>
         </Card>
@@ -190,10 +190,10 @@ const AccountFormModal = ({ isOpen, onClose, onSubmit, isSaving, defaultValues, 
           </S.InfoText>
           <S.FormActions>
             <Button variant="ghost" onClick={onClose} type="button">
-              {t('translation:common.cancel')}
+              <Text>{t('translation:common.cancel')}</Text>
             </Button>
             <Button variant="primary" type="submit" isLoading={isSaving}>
-              {t('amazon.accounts.saveButton')}
+              <Text>{t('amazon.accounts.saveButton')}</Text>
             </Button>
           </S.FormActions>
         </S.FormFields>
