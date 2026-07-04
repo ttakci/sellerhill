@@ -14,14 +14,14 @@
   ],
   "plugins": ["@typescript-eslint", "import", "design-system"],
   "rules": {
-    // Design System Enforcement — Plan 1b cleaned apps/web/src/features/* + apps/web/src/components/* + apps/web/src/layouts/AppLayout/*.
-    // NOT YET ENABLED as `error`: ~589 violations remain in packages/ui/src/{atoms,molecules,organisms}/ + i18n keys (383) + inline-styles.
-    // See docs/superpowers/plans/2026-07-03-plan-1b-style-consistency-pass.md + memory project-figma-redesign for Plan 1c scope.
-    // "design-system/no-hardcoded-colors": "error",
-    // "design-system/no-hardcoded-spacing": "error",
-    // "design-system/no-inline-styles": "error",
-    // "design-system/no-styled-typography": "error",
-    // "design-system/no-bare-text-in-button": "error",
+    // Design System Enforcement — enabled 2026-07-04 after Plan 1c cleanup.
+    // 5 in-scope styling rules enforced; landing + apps/api exempt via overrides.
+    // Out of scope (separate efforts): no-implicit-i18n-namespaces, no-native-select.
+    "design-system/no-hardcoded-colors": "error",
+    "design-system/no-hardcoded-spacing": "error",
+    "design-system/no-inline-styles": "error",
+    "design-system/no-styled-typography": "error",
+    "design-system/no-bare-text-in-button": "error",
     // "design-system/no-implicit-i18n-namespaces": "error",
     // "design-system/no-native-select": "error",
 
