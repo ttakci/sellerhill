@@ -1,11 +1,18 @@
+import styled from '@emotion/styled';
 import { type FieldValues, Controller } from 'react-hook-form';
 
 import { Radio } from '../../atoms/Radio';
 import { Text } from '../../atoms/Text';
 import * as S from '../../styles/Form.style';
+import { tkn } from '../../theme/tkn';
 import * as LocalS from '../CheckboxGroup/CheckboxGroup.style'; // Reusing options container style
 
 import type { RadioGroupProps } from './RadioGroup.types';
+
+const RequiredAsterisk = styled.span`
+  color: ${tkn('colors.semantic.error')};
+  margin-left: ${tkn('spacing.xs')};
+`;
 
 export const RadioGroup = <TFieldValues extends FieldValues = FieldValues>({
   name,
@@ -26,7 +33,7 @@ export const RadioGroup = <TFieldValues extends FieldValues = FieldValues>({
             <S.LabelText>
               <Text variant="body" weight="medium">
                 {label}
-                {required && <span style={{ color: 'red', marginLeft: '0.25rem' }}>*</span>}
+                {required && <RequiredAsterisk>*</RequiredAsterisk>}
               </Text>
             </S.LabelText>
           )}

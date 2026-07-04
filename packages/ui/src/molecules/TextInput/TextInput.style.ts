@@ -36,13 +36,13 @@ export const FieldWrapper = styled.div<FieldContainerProps>`
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease;
-  box-shadow: inset 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.02); /* 1px 2px */
+  box-shadow: inset 0 0.0625rem 0.125rem ${tkn('colors.border.secondary')}; /* 1px 2px */
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'text')};
 
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
     box-shadow:
-      inset 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.02),
+      inset 0 0.0625rem 0.125rem ${tkn('colors.border.secondary')},
       /* 1px 2px */ 0 0 0 0.0625rem ${tkn('colors.brand.primary')}20; /* 1px */
   }
 `;

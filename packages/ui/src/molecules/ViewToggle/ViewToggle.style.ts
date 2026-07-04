@@ -8,13 +8,13 @@ export const ViewToggleGroup = styled.div`
   align-items: center;
   background: ${tkn('colors.background.tertiary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  padding: 0.25rem;
+  padding: ${tkn('spacing.xs')};
   border-radius: ${tkn('radius.md')};
-  gap: 0.25rem;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const ToggleButton = styled.button<{ $active?: boolean }>`
-  padding: 0.375rem;
+  padding: ${tkn('spacing.xs+')};
   border-radius: 0.375rem;
   border: none;
   background: ${({ $active, theme }: { $active?: boolean; theme: AppTheme }) =>
@@ -34,7 +34,7 @@ export const ToggleButton = styled.button<{ $active?: boolean }>`
 `;
 
 export const ViewLabel = styled.span`
-  font-size: 0.875rem;
+  font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.secondary')};
   margin-left: ${tkn('spacing.sm')};
 

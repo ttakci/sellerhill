@@ -1,9 +1,17 @@
+import styled from '@emotion/styled';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+import { tkn } from '../../theme/tkn';
 
 import * as S from './Collapsible.style';
 import type { CollapsibleProps } from './Collapsible.types';
+
+const TitleWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;
 
 export const Collapsible = ({
   title,
@@ -32,10 +40,10 @@ export const Collapsible = ({
   return (
     <S.CollapsibleContainer className={className}>
       <S.CollapsibleHeader $isOpen={isOpen} onClick={toggle}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <TitleWrapper>
           {icon}
           {title}
-        </span>
+        </TitleWrapper>
         <span className="collapsible-chevron">
           <Icon name="chevron-down" size="sm" />
         </span>

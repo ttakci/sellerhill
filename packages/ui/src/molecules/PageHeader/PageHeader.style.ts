@@ -22,7 +22,7 @@ export const TitleArea = styled.div`
   min-width: 0;
 `;
 
-export const Title = styled.h1`
+export const Title = styled.div`
   font-size: ${tkn('typography.fontSize.xxl')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
@@ -31,7 +31,7 @@ export const Title = styled.h1`
   line-height: 1.2;
 `;
 
-export const Subtitle = styled.p`
+export const Subtitle = styled.div`
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.secondary')};
   margin-top: ${tkn('spacing.xs')};

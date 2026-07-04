@@ -47,7 +47,7 @@ export const Stepper = ({
               {status === 'completed' ? <Icon name="check" size="sm" /> : index + 1}
             </S.StepCircle>
             <div>
-              <S.StepLabel style={{ marginTop: 0 }}>
+              <S.StepLabel $noMargin>
                 <span className="step-label">{step.label}</span>
                 {step.description && <span className="step-description">{step.description}</span>}
               </S.StepLabel>

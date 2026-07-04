@@ -6,7 +6,7 @@ export const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0; /* 12px */
+  padding: ${tkn('spacing.sm-md')} 0;
   background: transparent;
   gap: ${tkn('spacing.md')};
   transition: all ${tkn('transitions.normal')} ease;
@@ -19,5 +19,5 @@ export const Container = styled.div`
 export const TextContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.125rem; /* 2px */
+  gap: ${tkn('spacing.2xs')};
 `;

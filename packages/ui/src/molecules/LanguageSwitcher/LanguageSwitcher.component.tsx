@@ -19,8 +19,8 @@ import type { LanguageSwitcherProps } from './LanguageSwitcher.types';
 const Segmented = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
+  gap: ${tkn('spacing.2xs')};
+  padding: ${tkn('spacing.2xs')};
   background: color-mix(in srgb, ${tkn('colors.surface.primary')} 55%, transparent);
   border: 1px solid ${tkn('colors.border.secondary')};
   border-radius: ${tkn('radius.md')};

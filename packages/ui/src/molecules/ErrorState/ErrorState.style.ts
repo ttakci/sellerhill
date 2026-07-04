@@ -28,7 +28,7 @@ export const ErrorIconCircle = styled.div`
   }
 `;
 
-export const Title = styled.h3`
+export const Title = styled.div`
   margin: 0;
   font-size: ${tkn('typography.fontSize.lg')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
@@ -36,7 +36,7 @@ export const Title = styled.h3`
   line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
-export const Description = styled.p`
+export const Description = styled.div`
   margin: 0;
   font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.normal')};

@@ -18,7 +18,7 @@ export const TooltipPortal = styled.div<{
 }>`
   position: fixed;
   z-index: 9999;
-  padding: 0.5rem 0.75rem;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   border-radius: ${tkn('radius.md')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};

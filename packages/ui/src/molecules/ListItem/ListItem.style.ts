@@ -41,7 +41,7 @@ export const ListItemContent = styled.div`
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  gap: 0.125rem;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const ListItemTitle = styled.span`

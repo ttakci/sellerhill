@@ -35,7 +35,7 @@ export const IconCircle = styled.div<{ $size: EmptyStateSize }>`
   }
 `;
 
-export const Title = styled.h3<{ $size: EmptyStateSize }>`
+export const Title = styled.div<{ $size: EmptyStateSize }>`
   margin: 0;
   font-size: ${({ $size }) =>
     $size === 'sm' ? tkn('typography.fontSize.sm') : $size === 'lg' ? tkn('typography.fontSize.lg') : tkn('typography.fontSize.md')};
@@ -44,7 +44,7 @@ export const Title = styled.h3<{ $size: EmptyStateSize }>`
   line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
-export const Description = styled.p<{ $size: EmptyStateSize }>`
+export const Description = styled.div<{ $size: EmptyStateSize }>`
   margin: 0;
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.normal')};

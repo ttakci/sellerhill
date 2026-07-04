@@ -6,8 +6,8 @@ export const SegmentedControlContainer = styled.div<{ $size: 'sm' | 'md' }>`
   display: inline-flex;
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.md')};
-  padding: 0.125rem;
-  gap: 0.125rem;
+  padding: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const SegmentButton = styled.button<{ $active: boolean; $size: 'sm' | 'md' }>`

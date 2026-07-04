@@ -1,11 +1,18 @@
+import styled from '@emotion/styled';
 import { type FieldValues, Controller } from 'react-hook-form';
 
 import { Checkbox } from '../../atoms/Checkbox';
 import { Text } from '../../atoms/Text';
 import * as S from '../../styles/Form.style';
+import { tkn } from '../../theme/tkn';
 
 import * as LocalS from './CheckboxGroup.style';
 import type { CheckboxGroupProps } from './CheckboxGroup.types';
+
+const RequiredAsterisk = styled.span`
+  color: ${tkn('colors.semantic.error')};
+  margin-left: ${tkn('spacing.xs')};
+`;
 
 export const CheckboxGroup = <TFieldValues extends FieldValues = FieldValues>({
   name,
@@ -36,7 +43,7 @@ export const CheckboxGroup = <TFieldValues extends FieldValues = FieldValues>({
               <S.LabelText>
                 <Text variant="body" weight="medium">
                   {label}
-                  {required && <span style={{ color: 'red', marginLeft: '0.25rem' }}>*</span>}
+                  {required && <RequiredAsterisk>*</RequiredAsterisk>}
                 </Text>
               </S.LabelText>
             )}

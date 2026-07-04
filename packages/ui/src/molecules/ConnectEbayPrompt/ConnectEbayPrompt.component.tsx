@@ -33,7 +33,7 @@ export const ConnectEbayPrompt = ({
         </S.Description>
 
         <Button onClick={onConnect} variant="primary" isLoading={isLoading} iconLeft="link">
-          {t('ebay:ebay.connect.connectButton')}
+          <Text>{t('ebay:ebay.connect.connectButton')}</Text>
         </Button>
       </S.Inner>
     </Card>

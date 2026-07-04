@@ -17,27 +17,27 @@ export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
 `;
 
 export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
-  padding: 1rem;
+  padding: ${tkn('spacing.md')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   background: ${tkn('colors.surface.primary')};
 
   @media (max-width: 63.9375rem) {
     /* < 1024px */
     flex-direction: ${({ $variant }) => ($variant === 'panel' ? 'column' : 'row')};
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
-    padding: 1.25rem 1rem;
-    gap: ${({ $variant }) => ($variant === 'panel' ? '1.25rem' : '1rem')};
+    padding: ${tkn('spacing.md+')} ${tkn('spacing.md')};
+    gap: ${({ $variant, theme }) => ($variant === 'panel' ? tkn('spacing.md+')({ theme }) : tkn('spacing.md')({ theme }))};
   }
 `;
 
 export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: ${tkn('spacing.md')};
   flex: ${({ $variant }) => ($variant === 'panel' ? '1' : 'initial')};
   max-width: ${({ $variant }) => ($variant === 'panel' ? '50%' : 'none')};
   min-width: 0;
@@ -98,11 +98,11 @@ export const IconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'bla
 export const TitleContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px */
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 
-export const Title = styled.h3`
+export const Title = styled.div`
   font-size: 1.125rem;
   font-weight: 700;
   color: ${tkn('colors.text.primary')};

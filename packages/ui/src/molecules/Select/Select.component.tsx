@@ -142,9 +142,9 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
               </S.OptionItem>
             ))
           ) : (
-            <div style={{ padding: '1rem', textAlign: 'center', opacity: 0.5, fontSize: '0.8125rem' }}>
+            <S.NoResultsMessage>
               {noResultsMessage}
-            </div>
+            </S.NoResultsMessage>
           )}
         </S.OptionsList>
       </>
@@ -162,7 +162,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
               </S.CloseButton>
             </S.BottomSheetHeader>
             {content}
-            <div style={{ height: '2rem', flexShrink: 0 }} /> {/* Safe area spacer */}
+            <S.SafeAreaSpacer />
           </S.BottomSheet>
         </S.Overlay>,
         document.body
@@ -170,7 +170,12 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
     }
 
     return createPortal(
-      <S.DropdownContainer ref={dropdownRef} style={dropdownStyle} $placement={placement}>
+      <S.DropdownContainer
+        ref={dropdownRef}
+        // eslint-disable-next-line design-system/no-inline-styles -- dynamic dropdown positioning computed at runtime
+        style={dropdownStyle}
+        $placement={placement}
+      >
         {content}
       </S.DropdownContainer>,
       document.body

@@ -89,8 +89,10 @@ export const Th = styled.th<{
   $align?: 'left' | 'center' | 'right';
   $sticky?: boolean;
   $left?: number;
+  $width?: string | number;
+  $noPadding?: boolean;
 }>`
-  padding: 0.875rem ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md+')} ${tkn('spacing.md')};
   color: ${tkn('colors.text.tertiary')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.xs')};
@@ -115,6 +117,14 @@ export const Th = styled.th<{
     `
     left: ${($left ?? 0) / 16}rem;
   `}
+
+  ${({ $width }) =>
+    $width &&
+    `width: ${$width};`}
+
+  ${({ $noPadding }) =>
+    $noPadding &&
+    `padding-right: 0;`}
 
   &:first-of-type {
     padding-left: ${tkn('spacing.lg')};
@@ -158,12 +168,23 @@ export const SortIconWrapper = styled.div<{ $sortable?: boolean }>`
   }
 `;
 
+export const SortIcon = styled.div<{ $active: boolean; $rotated: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: ${(props) => (props.$rotated ? 'rotate(180deg)' : 'rotate(0deg)')};
+  opacity: ${(props) => (props.$active ? 1 : 0.3)};
+  transition: transform 0.2s ease, opacity 0.2s ease;
+`;
+
 export const Td = styled.td<{
   $align?: 'left' | 'center' | 'right';
   $sticky?: boolean;
   $left?: number;
+  $width?: string | number;
+  $noPadding?: boolean;
 }>`
-  padding: 0.75rem ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   vertical-align: middle;
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
@@ -190,6 +211,14 @@ export const Td = styled.td<{
     }
   `}
 
+  ${({ $width }) =>
+    $width &&
+    `width: ${$width};`}
+
+  ${({ $noPadding }) =>
+    $noPadding &&
+    `padding-right: 0;`}
+
   &:first-of-type {
     padding-left: ${tkn('spacing.lg')};
   }
@@ -204,7 +233,7 @@ export const EmptyRow = styled.tr``;
 export const EmptyCell = styled(Td)`
   text-align: center;
   color: ${tkn('colors.text.tertiary')};
-  padding: 4rem 0;
+  padding: ${tkn('spacing.xxxl')} 0;
 `;
 
 export const Toolbar = styled.div`

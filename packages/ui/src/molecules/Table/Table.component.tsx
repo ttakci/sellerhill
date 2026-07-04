@@ -168,7 +168,7 @@ export const Table = <T,>({
           <S.Thead>
             <S.Tr>
               {selectable && (
-                <S.Th style={{ width: '3rem', paddingRight: 0 }} $sticky={columns.some((c) => c.sticky)} $left={0}>
+                <S.Th $width="3rem" $noPadding $sticky={columns.some((c) => c.sticky)} $left={0}>
                   <Checkbox checked={isAllSelected} onChange={handleSelectAll} />
                 </S.Th>
               )}
@@ -178,26 +178,18 @@ export const Table = <T,>({
                   $align={column.align}
                   $sticky={column.sticky}
                   $left={selectable ? 48 : 0}
-                  style={{ width: column.width }}
+                  $width={column.width}
                 >
                   <S.ThContent $align={column.align}>
                     {column.header}
                     {column.sortable && (
                       <S.SortIconWrapper onClick={() => handleSort(column.key)}>
-                        <Icon
-                          name="chevron-down"
-                          size={16}
-                          style={{
-                            transform:
-                              sortColumn === column.key && sortDirection === 'desc'
-                                ? 'rotate(0deg)'
-                                : sortColumn === column.key && sortDirection === 'asc'
-                                  ? 'rotate(180deg)'
-                                  : 'rotate(0deg)',
-                            opacity: sortColumn === column.key ? 1 : 0.3,
-                            transition: 'transform 0.2s ease, opacity 0.2s ease',
-                          }}
-                        />
+                        <S.SortIcon
+                          $active={sortColumn === column.key}
+                          $rotated={sortColumn === column.key && sortDirection === 'asc'}
+                        >
+                          <Icon name="chevron-down" size={16} />
+                        </S.SortIcon>
                       </S.SortIconWrapper>
                     )}
                   </S.ThContent>
@@ -224,7 +216,8 @@ export const Table = <T,>({
                   >
                     {selectable && (
                       <S.Td
-                        style={{ width: '3rem', paddingRight: 0 }}
+                        $width="3rem"
+                        $noPadding
                         onClick={(e) => e.stopPropagation()}
                         $sticky={columns.some((c) => c.sticky)}
                         $left={0}
@@ -238,7 +231,7 @@ export const Table = <T,>({
                         $align={column.align}
                         $sticky={column.sticky}
                         $left={selectable ? 48 : 0}
-                        style={{ width: column.width }}
+                        $width={column.width}
                       >
                         {column.render
                           ? column.render((row as Record<string, unknown>)[column.key], row, rowIndex)

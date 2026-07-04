@@ -46,15 +46,15 @@ export const StepCircle = styled.div<{ $status: 'completed' | 'current' | 'upcom
 export const StepConnector = styled.div<{ $active: boolean; $orientation: StepperOrientation }>`
   ${(props) =>
     props.$orientation === 'horizontal'
-      ? `flex: 1; height: 0.125rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: 1rem 0.25rem;`
-      : `width: 0.125rem; min-height: 1.5rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: 0.25rem 0.875rem;`}
+      ? `flex: 1; height: 0.125rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: ${tkn('spacing.md')(props)} ${tkn('spacing.xs')(props)};`
+      : `width: 0.125rem; min-height: 1.5rem; background: ${props.$active ? tkn('colors.semantic.success')(props) : tkn('colors.border.primary')(props)}; margin: ${tkn('spacing.xs')(props)} ${tkn('spacing.sm-md+')(props)};`}
 `;
 
-export const StepLabel = styled.div`
+export const StepLabel = styled.div<{ $noMargin?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-top: ${tkn('spacing.xs')};
+  margin-top: ${(props) => (props.$noMargin ? '0' : tkn('spacing.xs')(props))};
   gap: 0.0625rem;
 
   .step-label {

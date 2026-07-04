@@ -1,7 +1,12 @@
+import styled from '@emotion/styled';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as S from './Popover.style';
 import type { PopoverProps } from './Popover.types';
+
+const TriggerWrapper = styled.div`
+  display: inline-flex;
+`;
 
 export const Popover = ({
   trigger,
@@ -49,9 +54,9 @@ export const Popover = ({
 
   return (
     <S.PopoverWrapper ref={wrapperRef} className={className}>
-      <div onClick={toggle} style={{ display: 'inline-flex' }}>
+      <TriggerWrapper onClick={toggle}>
         {trigger}
-      </div>
+      </TriggerWrapper>
       {isOpen && (
         <S.PopoverContent $position={position}>
           <S.PopoverArrow $position={position} />

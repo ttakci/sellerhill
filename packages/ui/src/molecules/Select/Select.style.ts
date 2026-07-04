@@ -180,7 +180,7 @@ export const SearchWrapper = styled.div`
 
 export const SearchInput = styled.input`
   width: 100%;
-  padding: 0.375rem 0.625rem;
+  padding: ${tkn('spacing.xs+')} ${tkn('spacing.sm+')};
   border-radius: ${tkn('radius.sm')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   background: ${tkn('colors.background.tertiary')};
@@ -196,7 +196,7 @@ export const SearchInput = styled.input`
 export const OptionsList = styled.div`
   max-height: 15rem;
   overflow-y: auto;
-  padding: 0.25rem;
+  padding: ${tkn('spacing.xs')};
 
   &::-webkit-scrollbar {
     width: 0.25rem;
@@ -211,7 +211,7 @@ export const OptionItem = styled.div<{ $isSelected: boolean; $isFocused: boolean
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.625rem;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm+')};
   border-radius: ${tkn('radius.sm')};
   cursor: pointer;
   background: ${({ $isSelected, $isFocused, theme }) =>
@@ -228,7 +228,7 @@ export const OptionItem = styled.div<{ $isSelected: boolean; $isFocused: boolean
 export const OptionContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${tkn('spacing.sm')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
 `;
@@ -240,11 +240,22 @@ export const ErrorText = styled.span`
   margin-left: ${tkn('spacing.xs')};
 `;
 
+export const NoResultsMessage = styled.div`
+  padding: ${tkn('spacing.md')};
+  text-align: center;
+  opacity: 0.5;
+`;
+
+export const SafeAreaSpacer = styled.div`
+  height: 2rem;
+  flex-shrink: 0;
+`;
+
 /* Bottom Sheet Styles */
 export const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: ${tkn('colors.surface.overlay')};
   z-index: 2000;
   display: flex;
   align-items: flex-end;
@@ -288,7 +299,7 @@ export const BottomSheetHeader = styled.div`
   justify-content: space-between;
 `;
 
-export const BottomSheetTitle = styled.h3`
+export const BottomSheetTitle = styled.div`
   font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
@@ -318,5 +329,5 @@ export const Handle = styled.div`
   height: 0.25rem;
   background: ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
-  margin: 0.625rem auto 0;
+  margin: ${tkn('spacing.sm+')} auto 0;
 `;
