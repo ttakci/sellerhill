@@ -66,3 +66,6 @@ coverage/
 
 # Backup files
 *.bak
+
+# Playwright MCP session artifacts (logs/page snapshots)
+.playwright-mcp/
