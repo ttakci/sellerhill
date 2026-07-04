@@ -1,5 +1,6 @@
 export * from './CheckboxGroup';
 export * from './ConfirmModal';
+export * from './Drawer';
 export * from './EmptyState';
 export * from './ErrorState';
 export * from './Select';

@@ -128,6 +128,168 @@
     "comingSoonTitle": "Action Coming Soon",
     "comingSoon": "This feature is currently being implemented and will be available shortly."
   },
+  "settingsHub": {
+    "title": "Settings",
+    "subtitle": "Manage your account, integrations, and automation",
+    "sections": {
+      "profile": {
+        "title": "Profile",
+        "subtitle": "Your personal information and avatar",
+        "edit": "Edit Personal Information",
+        "tabs": {
+          "personalInfo": "Personal Information",
+          "connectedStores": "Connected Stores"
+        },
+        "plan": "Pro Plan"
+      },
+      "ebay": {
+        "title": "eBay Account",
+        "subtitle": "Connected eBay seller account and token status",
+        "manage": "Manage",
+        "status": "Status",
+        "sellerId": "Seller ID",
+        "marketplace": "Marketplace",
+        "tokenExpires": "Token Expires",
+        "lastSync": "Last Sync",
+        "connected": "Connected",
+        "notConnected": "Not Connected",
+        "connect": "Connect eBay Account"
+      },
+      "amazon": {
+        "title": "Amazon Accounts",
+        "subtitle": "Buyer accounts used for order scraping",
+        "add": "Add Account",
+        "accountCount": "{{count}} account(s)",
+        "noAccounts": "No Amazon accounts connected"
+      },
+      "storeConfig": {
+        "title": "Store Configuration",
+        "subtitle": "Global location, validation, and regional settings",
+        "edit": "Edit Configuration",
+        "country": "Country",
+        "region": "Region",
+        "zipCode": "Zip Code"
+      },
+      "blacklist": {
+        "title": "Blacklist Management",
+        "subtitle": "Forbidden keywords for product listings",
+        "manage": "Manage",
+        "keywordCount": "{{count}} keyword(s)"
+      },
+      "listingGroups": {
+        "title": "Listing Settings Groups",
+        "subtitle": "Repricing strategies, stock logic, profit margins",
+        "new": "New Group",
+        "groupCount": "{{count}} group(s)",
+        "noGroups": "No groups defined yet"
+      },
+      "account": {
+        "title": "Account & Security",
+        "subtitle": "Password, 2FA, API access, language",
+        "changePassword": "Change Password",
+        "twoFactor": "Two-Factor Authentication",
+        "apiAccess": "API Access",
+        "language": "Language & Region"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "subtitle": "Email and in-app notification preferences",
+        "edit": "Edit Preferences"
+      },
+      "plan": {
+        "title": "Plan & Billing",
+        "subtitle": "Subscription, renewal, and payment method",
+        "manage": "Manage Plan",
+        "currentPlan": "Current Plan",
+        "renewalDate": "Renewal Date",
+        "paymentMethod": "Payment Method"
+      },
+      "danger": {
+        "title": "Danger Zone",
+        "subtitle": "Irreversible account actions",
+        "deactivate": "Deactivate Account",
+        "deactivateDescription": "Permanently delete your account and all associated data. This action cannot be undone."
+      }
+    },
+    "drawer": {
+      "profile": {
+        "title": "Edit Personal Information",
+        "subtitle": "Update your name, contact, and bio details",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "bio": "Bio",
+        "address": "Address"
+      },
+      "amazonAdd": {
+        "title": "Add Amazon Account",
+        "subtitle": "Provide credentials for order scraping",
+        "label": "Account Label",
+        "email": "Email",
+        "password": "Password",
+        "twoFactorSecret": "2FA Secret (optional)"
+      },
+      "storeConfig": {
+        "title": "Edit Store Configuration",
+        "subtitle": "Global location and validation rules"
+      },
+      "listingGroup": {
+        "titleNew": "New Listing Settings Group",
+        "titleEdit": "Edit Listing Settings Group"
+      },
+      "password": {
+        "title": "Change Password",
+        "subtitle": "Choose a strong, unique password",
+        "current": "Current Password",
+        "new": "New Password",
+        "confirm": "Confirm Password",
+        "mismatch": "Passwords do not match",
+        "tooShort": "Password must be at least 8 characters"
+      },
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "subtitle": "Add an extra layer of security to your account",
+        "enabled": "2FA is currently enabled",
+        "disabled": "2FA is currently disabled",
+        "enable": "Enable 2FA",
+        "disable": "Disable 2FA",
+        "scanQr": "Scan this QR code with your authenticator app",
+        "enterCode": "Enter the 6-digit verification code"
+      },
+      "apiAccess": {
+        "title": "API Access",
+        "subtitle": "Manage API keys for programmatic access",
+        "createKey": "Create New Key",
+        "noKeys": "No API keys. Create one to get started.",
+        "keyLabel": "Label",
+        "createdAt": "Created",
+        "lastUsed": "Last Used",
+        "copyToken": "Copy Token",
+        "revoke": "Revoke"
+      },
+      "language": {
+        "title": "Language & Region",
+        "subtitle": "Choose your interface language",
+        "language": "Language",
+        "en": "English",
+        "tr": "Türkçe"
+      },
+      "notifications": {
+        "title": "Notification Preferences",
+        "subtitle": "Choose what you want to be notified about",
+        "emailNotifications": "Email Notifications",
+        "orderAlerts": "Order Alerts",
+        "syncFailures": "Sync Failures",
+        "weeklyReport": "Weekly Summary Report",
+        "productUpdates": "Product Updates"
+      }
+    },
+    "notImplemented": {
+      "title": "Not Implemented",
+      "description": "This feature's backend has not been implemented yet. Your input will not be saved. The form below is for UI preview only."
+    }
+  },
   "footer": {
     "copyright": "© 2026 Zonds E-commerce Solutions. All rights reserved.",
     "privacyPolicy": "Privacy Policy",

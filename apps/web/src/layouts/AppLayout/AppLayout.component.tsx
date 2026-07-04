@@ -112,8 +112,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
         items.push({ label: t('orders:orders.detail.title') });
       }
     } else if (pathWithoutLocale.startsWith('/settings') || pathWithoutLocale.startsWith('/listing-settings-groups')) {
-      items.push({ label: t('translation:menu.settings'), path: '/settings/store' });
-      if (pathWithoutLocale.includes('/settings/store')) {
+      items.push({ label: t('translation:menu.settings'), path: '/settings' });
+      if (pathWithoutLocale.startsWith('/settings')) {
         items.push({ label: t('translation:menu.storeSettings') });
       } else if (pathWithoutLocale.includes('/settings/amazon-accounts')) {
         items.push({ label: t('translation:menu.amazonAccounts') });
@@ -237,7 +237,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/settings/store')}
+              onClick={() => localeNavigate('/settings')}
               title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>

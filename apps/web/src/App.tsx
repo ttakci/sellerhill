@@ -20,7 +20,7 @@ import {
 } from './features/listings';
 import { OrderDetailsPage } from './features/orders/details';
 import { OrdersPage } from './features/orders/OrdersPage.container';
-import ProfilePage from './features/profile';
+import { SettingsHubPage } from './features/settings/SettingsPage';
 import StoreSettingsPage from './features/store-settings';
 import { AppLayout } from './layouts/AppLayout';
 import { LocaleRedirect } from './utils/LocaleRedirect';
@@ -46,11 +46,16 @@ export function App() {
             <Route path="stores" element={<StoresPage />} />
             <Route path="ebay/connect" element={<EbayConnectPage />} />
             <Route path="onboarding/ebay" element={<OnboardingEbayPage />} />
+
+            {/* Settings hub (new consolidated) */}
+            <Route path="settings" element={<SettingsHubPage />} />
+            {/* Legacy settings routes — kept for deep-link compatibility (edit forms still useful) */}
             <Route path="settings/store" element={<StoreSettingsPage />} />
             <Route path="settings/amazon-accounts" element={<AmazonAccountsPageContainer />} />
             <Route path="settings/listing-groups" element={<ListingSettingsGroupPage />} />
             <Route path="settings/listing-groups/new" element={<ListingSettingsGroupForm />} />
             <Route path="settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
+
             <Route path="listings" element={<ListingsPage />} />
             <Route path="listings/jobs" element={<ListingJobsPage />} />
             <Route path="listings/jobs/:jobId" element={<ListingJobDetailsPage />} />
@@ -58,7 +63,8 @@ export function App() {
             <Route path="listings/add" element={<AddListingsPage />} />
             <Route path="orders" element={<OrdersPage />} />
             <Route path="orders/:id" element={<OrderDetailsPage />} />
-            <Route path="profile" element={<ProfilePage />} />
+            {/* Profile route redirects to settings hub */}
+            <Route path="profile" element={<Navigate to="../settings" replace />} />
 
             {/* Default redirect within locale */}
             <Route index element={<Navigate to="register" replace />} />

@@ -79,6 +79,9 @@ export type { TextInputProps as ModernTextInputProps } from './molecules/TextInp
 export { ConfirmModal } from './molecules/ConfirmModal';
 export type { ConfirmModalProps } from './molecules/ConfirmModal';
 
+export { Drawer } from './molecules/Drawer';
+export type { DrawerProps, DrawerSize } from './molecules/Drawer';
+
 export { MessageModal } from './molecules/MessageModal/index';
 export type { MessageModalProps } from './molecules/MessageModal/index';
 

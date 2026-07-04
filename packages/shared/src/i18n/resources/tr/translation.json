@@ -128,6 +128,168 @@
     "comingSoonTitle": "Yakın Zamanda Gelecek",
     "comingSoon": "Bu özellik şu anda geliştirme aşamasındadır ve yakında kullanıma sunulacaktır."
   },
+  "settingsHub": {
+    "title": "Ayarlar",
+    "subtitle": "Hesabınızı, entegrasyonlarınızı ve otomasyonunuzu yönetin",
+    "sections": {
+      "profile": {
+        "title": "Profil",
+        "subtitle": "Kişisel bilgileriniz ve avatarınız",
+        "edit": "Kişisel Bilgileri Düzenle",
+        "tabs": {
+          "personalInfo": "Kişisel Bilgiler",
+          "connectedStores": "Bağlı Mağazalar"
+        },
+        "plan": "Pro Plan"
+      },
+      "ebay": {
+        "title": "eBay Hesabı",
+        "subtitle": "Bağlı eBay satıcı hesabı ve token durumu",
+        "manage": "Yönet",
+        "status": "Durum",
+        "sellerId": "Satıcı ID",
+        "marketplace": "Pazaryeri",
+        "tokenExpires": "Token Bitiş Tarihi",
+        "lastSync": "Son Senkronizasyon",
+        "connected": "Bağlı",
+        "notConnected": "Bağlı Değil",
+        "connect": "eBay Hesabını Bağla"
+      },
+      "amazon": {
+        "title": "Amazon Hesapları",
+        "subtitle": "Sipariş taraması için kullanılan alıcı hesapları",
+        "add": "Hesap Ekle",
+        "accountCount": "{{count}} hesap",
+        "noAccounts": "Bağlı Amazon hesabı yok"
+      },
+      "storeConfig": {
+        "title": "Mağaza Yapılandırması",
+        "subtitle": "Genel konum, doğrulama ve bölgesel ayarlar",
+        "edit": "Yapılandırmayı Düzenle",
+        "country": "Ülke",
+        "region": "Bölge",
+        "zipCode": "Posta Kodu"
+      },
+      "blacklist": {
+        "title": "Kara Liste Yönetimi",
+        "subtitle": "Ürün listeleri için yasaklı anahtar kelimeler",
+        "manage": "Yönet",
+        "keywordCount": "{{count}} anahtar kelime"
+      },
+      "listingGroups": {
+        "title": "Liste Ayar Grupları",
+        "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
+        "new": "Yeni Grup",
+        "groupCount": "{{count}} grup",
+        "noGroups": "Henüz tanımlanmış grup yok"
+      },
+      "account": {
+        "title": "Hesap ve Güvenlik",
+        "subtitle": "Şifre, 2FA, API erişimi, dil",
+        "changePassword": "Şifre Değiştir",
+        "twoFactor": "İki Faktörlü Kimlik Doğrulama",
+        "apiAccess": "API Erişimi",
+        "language": "Dil ve Bölge"
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "subtitle": "E-posta ve uygulama içi bildirim tercihleri",
+        "edit": "Tercihleri Düzenle"
+      },
+      "plan": {
+        "title": "Plan ve Faturalandırma",
+        "subtitle": "Abonelik, yenileme ve ödeme yöntemi",
+        "manage": "Planı Yönet",
+        "currentPlan": "Mevcut Plan",
+        "renewalDate": "Yenileme Tarihi",
+        "paymentMethod": "Ödeme Yöntemi"
+      },
+      "danger": {
+        "title": "Tehlikeli Bölge",
+        "subtitle": "Geri alınamaz hesap işlemleri",
+        "deactivate": "Hesabı Devre Dışı Bırak",
+        "deactivateDescription": "Hesabınızı ve ilişkili tüm verileri kalıcı olarak silin. Bu işlem geri alınamaz."
+      }
+    },
+    "drawer": {
+      "profile": {
+        "title": "Kişisel Bilgileri Düzenle",
+        "subtitle": "Ad, iletişim ve biyografi bilgilerinizi güncelleyin",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "phone": "Telefon",
+        "bio": "Biyografi",
+        "address": "Adres"
+      },
+      "amazonAdd": {
+        "title": "Amazon Hesabı Ekle",
+        "subtitle": "Sipariş taraması için kimlik bilgilerini sağlayın",
+        "label": "Hesap Etiketi",
+        "email": "E-posta",
+        "password": "Şifre",
+        "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)"
+      },
+      "storeConfig": {
+        "title": "Mağaza Yapılandırmasını Düzenle",
+        "subtitle": "Genel konum ve doğrulama kuralları"
+      },
+      "listingGroup": {
+        "titleNew": "Yeni Liste Ayar Grubu",
+        "titleEdit": "Liste Ayar Grubunu Düzenle"
+      },
+      "password": {
+        "title": "Şifre Değiştir",
+        "subtitle": "Güçlü ve benzersiz bir şifre seçin",
+        "current": "Mevcut Şifre",
+        "new": "Yeni Şifre",
+        "confirm": "Şifreyi Onayla",
+        "mismatch": "Şifreler eşleşmiyor",
+        "tooShort": "Şifre en az 8 karakter olmalıdır"
+      },
+      "twoFactor": {
+        "title": "İki Faktörlü Kimlik Doğrulama",
+        "subtitle": "Hesabınıza ekstra bir güvenlik katmanı ekleyin",
+        "enabled": "2FA şu anda etkin",
+        "disabled": "2FA şu anda devre dışı",
+        "enable": "2FA'yı Etkinleştir",
+        "disable": "2FA'yı Devre Dışı Bırak",
+        "scanQr": "Bu QR kodunu kimlik doğrulama uygulamanızla tarayın",
+        "enterCode": "6 haneli doğrulama kodunu girin"
+      },
+      "apiAccess": {
+        "title": "API Erişimi",
+        "subtitle": "Programatik erişim için API anahtarlarını yönetin",
+        "createKey": "Yeni Anahtar Oluştur",
+        "noKeys": "API anahtarı yok. Başlamak için bir tane oluşturun.",
+        "keyLabel": "Etiket",
+        "createdAt": "Oluşturulma",
+        "lastUsed": "Son Kullanım",
+        "copyToken": "Token'ı Kopyala",
+        "revoke": "İptal Et"
+      },
+      "language": {
+        "title": "Dil ve Bölge",
+        "subtitle": "Arayüz dilinizi seçin",
+        "language": "Dil",
+        "en": "English",
+        "tr": "Türkçe"
+      },
+      "notifications": {
+        "title": "Bildirim Tercihleri",
+        "subtitle": "Hangi konularda bildirim almak istediğinizi seçin",
+        "emailNotifications": "E-posta Bildirimleri",
+        "orderAlerts": "Sipariş Uyarıları",
+        "syncFailures": "Senkronizasyon Hataları",
+        "weeklyReport": "Haftalık Özet Rapor",
+        "productUpdates": "Ürün Güncellemeleri"
+      }
+    },
+    "notImplemented": {
+      "title": "Uygulanmadı",
+      "description": "Bu özelliğin backend'i henüz uygulanmadı. Girdiğiniz bilgiler kaydedilmeyecek. Aşağıdaki form yalnızca önizleme içindir."
+    }
+  },
   "footer": {
     "copyright": "© 2026 Zonds E-ticaret Çözümleri. Tüm hakları saklıdır.",
     "privacyPolicy": "Gizlilik Politikası",
