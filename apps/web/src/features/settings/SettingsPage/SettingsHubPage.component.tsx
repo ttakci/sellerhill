@@ -157,7 +157,7 @@ const ListingGroupsSection = ({
               {g.description && <Text variant="caption" color="text.tertiary">{g.description}</Text>}
             </S.AccountRowInfo>
             <Button variant="text" size="sm" onClick={() => onEdit(g.id)}>
-              <Text>{t('translation:settingsHub.sections.listingGroups.new')}</Text>
+              <Text>{t('translation:settingsHub.sections.listingGroups.edit')}</Text>
             </Button>
           </S.AccountRow>
         ))

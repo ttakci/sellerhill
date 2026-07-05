@@ -113,13 +113,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
       }
     } else if (pathWithoutLocale.startsWith('/settings') || pathWithoutLocale.startsWith('/listing-settings-groups')) {
       items.push({ label: t('translation:menu.settings'), path: '/settings' });
-      if (pathWithoutLocale.startsWith('/settings')) {
+      if (pathWithoutLocale === '/settings/store') {
         items.push({ label: t('translation:menu.storeSettings') });
       } else if (pathWithoutLocale.includes('/settings/amazon-accounts')) {
         items.push({ label: t('translation:menu.amazonAccounts') });
-      } else {
+      } else if (pathWithoutLocale.includes('/listing-settings-groups') || pathWithoutLocale.includes('/settings/listing-groups')) {
         items.push({ label: t('translation:menu.listingSettingsGroups') });
       }
+      // /settings (hub) shows just "Settings" — no second breadcrumb item
     } else if (pathWithoutLocale === '/stores') {
       items.push({ label: t('translation:menu.stores') });
     }

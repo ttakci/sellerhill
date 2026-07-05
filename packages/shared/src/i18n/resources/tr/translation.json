@@ -180,6 +180,7 @@
         "title": "Liste Ayar Grupları",
         "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
         "new": "Yeni Grup",
+        "edit": "Düzenle",
         "groupCount": "{{count}} grup",
         "noGroups": "Henüz tanımlanmış grup yok"
       },
