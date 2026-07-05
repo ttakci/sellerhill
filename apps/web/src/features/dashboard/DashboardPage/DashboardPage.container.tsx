@@ -6,6 +6,7 @@
 import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import { useGetDashboardQuery } from '../api/dashboardApi';
 
@@ -14,6 +15,7 @@ import type { PeriodDateInfo, PeriodKey, PeriodPreset } from './DashboardPage.ty
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
+import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingsQuery } from '@/features/listings/api/listings.api';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
@@ -48,6 +50,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const { t, i18n } = useTranslation(['translation']);
   const { localeNavigate: _localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('week');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('today');
@@ -55,8 +58,22 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const [filteredListingId, setFilteredListingId] = useState<string | null>(null);
 
   const selectedDays = PRESET_DAYS[periodPreset];
+  const selectedStoreId = searchParams.get('store') ?? 'all';
 
   const { data: dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useGetDashboardQuery(selectedDays);
+  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
+
+  const ebayAccounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData]);
+
+  const handleStoreSelect = useCallback((storeId: string): void => {
+    const next = new URLSearchParams(searchParams);
+    if (storeId === 'all') {
+      next.delete('store');
+    } else {
+      next.set('store', storeId);
+    }
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   const { data: userData, isLoading: isUserLoading, error: userError } = useGetMeQuery();
   const { data: listings = [] } = useGetListingsQuery(undefined, { skip: false });
 
@@ -127,6 +144,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
         onSearchChange={setSearchQuery}
         filteredListingId={filteredListingId}
         onListingSelect={handleListingSelect}
+        ebayAccounts={ebayAccounts}
+        selectedStoreId={selectedStoreId}
+        onStoreSelect={handleStoreSelect}
         isTR={isTR}
         formatCurrency={handleFormatCurrency}
         formatCompactCurrency={handleFormatCompactCurrency}

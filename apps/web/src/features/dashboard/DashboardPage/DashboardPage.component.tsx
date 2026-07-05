@@ -9,6 +9,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Dropdown,
   Icon,
   PageHeader,
   SearchField,
@@ -124,6 +125,7 @@ export const DashboardPageComponent = ({
   periodPreset, onPeriodPresetChange, selectedDays: _selectedDays, onDaysChange: _onDaysChange,
   periodDates, listings, searchQuery, onSearchChange,
   filteredListingId, onListingSelect,
+  ebayAccounts, selectedStoreId, onStoreSelect,
   isTR, formatCurrency, formatCompactCurrency, formatDate,
 }: DashboardPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'translation']);
@@ -199,6 +201,37 @@ export const DashboardPageComponent = ({
         )}
 
         <S.ToolbarRight>
+          {ebayAccounts.length > 0 && (
+            <Dropdown
+              align="right"
+              width="14rem" /* 224px */
+              trigger={
+                <S.StoreSelectorTrigger title={t('dashboard.selectStore')}>
+                  <Icon name="storefront" size={16} />
+                  <S.StoreSelectorLabel variant="body-sm" weight="medium">
+                    {selectedStoreId === 'all'
+                      ? t('dashboard.allStores')
+                      : (ebayAccounts.find((a) => a.id === selectedStoreId)?.storeName
+                        || ebayAccounts.find((a) => a.id === selectedStoreId)?.sellerId
+                        || t('dashboard.allStores'))}
+                  </S.StoreSelectorLabel>
+                  <Icon name="chevron-down" size={14} color="text.tertiary" />
+                </S.StoreSelectorTrigger>
+              }
+              items={[
+                {
+                  label: t('dashboard.allStores'),
+                  icon: selectedStoreId === 'all' ? 'check' : undefined,
+                  onClick: () => onStoreSelect('all'),
+                },
+                ...ebayAccounts.map((acc) => ({
+                  label: acc.storeName || acc.sellerId,
+                  icon: selectedStoreId === acc.id ? ('check' as const) : undefined,
+                  onClick: () => onStoreSelect(acc.id),
+                })),
+              ]}
+            />
+          )}
           <SegmentedControl
             options={periodPresetOptions}
             value={periodPreset}

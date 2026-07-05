@@ -100,6 +100,33 @@ export const ToolbarRight = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
+export const StoreSelectorTrigger = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  cursor: pointer;
+  color: ${tkn('colors.text.primary')};
+  font: inherit;
+  transition: border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${tkn('colors.surface.secondary')};
+    border-color: ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const StoreSelectorLabel = styled(Text)`
+  max-width: 9.375rem; /* 150px */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 /* ─── Period Cards Grid ─── */
 
 export const PeriodCardsGrid = styled.div`

@@ -2,7 +2,7 @@
  * DashboardPage Types
  */
 
-import type { DashboardDataDto, ListingDto, UserDto } from '@repo/shared';
+import type { DashboardDataDto, EbayAccountPublicDto, ListingDto, UserDto } from '@repo/shared';
 
 export type PeriodKey = 'today' | 'yesterday' | 'thisMonth' | 'thisMonthForecast' | 'lastMonth';
 
@@ -27,6 +27,9 @@ export interface DashboardPageComponentProps {
   onSearchChange: (query: string) => void;
   filteredListingId: string | null;
   onListingSelect: (listingId: string | null) => void;
+  ebayAccounts: EbayAccountPublicDto[];
+  selectedStoreId: string;
+  onStoreSelect: (storeId: string) => void;
   isTR: boolean;
   formatCurrency: (value: number) => string;
   formatCompactCurrency: (value: number) => string;

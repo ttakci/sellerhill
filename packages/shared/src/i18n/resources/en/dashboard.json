@@ -8,6 +8,8 @@
     "selectAll": "Select all",
     "filter": "Filter",
     "clearFilter": "Clear filter",
+    "selectStore": "Select store",
+    "allStores": "All Stores",
     "filteredBy": "Filtered: {{title}}",
     "periodToday": "Today / Yesterday",
     "periodWeek": "This Week",

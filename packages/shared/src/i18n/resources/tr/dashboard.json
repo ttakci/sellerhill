@@ -8,6 +8,8 @@
     "selectAll": "Tümünü seç",
     "filter": "Filtrele",
     "clearFilter": "Filtreyi kaldır",
+    "selectStore": "Mağaza seç",
+    "allStores": "Tüm Mağazalar",
     "filteredBy": "Filtre: {{title}}",
     "periodToday": "Bugün / Dün",
     "periodWeek": "Bu Hafta",
