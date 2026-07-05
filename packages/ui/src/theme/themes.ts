@@ -76,9 +76,9 @@ const lightColors: ThemeColors = {
 
   sidebar: {
     background: '#0c1f52',
-    foreground: '#93c5fd',
-    text: '#93c5fd',
-    textMuted: 'rgba(147, 197, 253, 0.7)',
+    foreground: '#ffffff',
+    text: '#ffffff',
+    textMuted: 'rgba(255, 255, 255, 0.65)',
     hover: '#162b6e',
     active: '#162b6e',
     accent: '#2563eb',
@@ -176,8 +176,8 @@ const darkColors: ThemeColors = {
 
   sidebar: {
     background: '#0d0f18',
-    foreground: '#94a3b8',
-    text: '#94a3b8',
+    foreground: '#f1f5f9',
+    text: '#f1f5f9',
     textMuted: 'rgba(148, 163, 184, 0.7)',
     hover: '#1c1f2e',
     active: '#1c1f2e',

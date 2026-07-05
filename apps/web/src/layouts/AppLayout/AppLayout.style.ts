@@ -214,6 +214,28 @@ export const SidebarFooter = styled.div`
   box-sizing: border-box;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const LogoutButton = styled.button<{ $isCollapsed: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm-md')};
+  padding: ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: ${tkn('colors.sidebar.text')};
+  transition: background 0.2s, color 0.2s;
+  ${({ $isCollapsed }) => $isCollapsed && `justify-content: center;`}
+
+  &:hover {
+    background: ${tkn('colors.sidebar.hover')};
+    color: ${tkn('colors.semantic.error')};
+  }
 `;
 
 export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
@@ -222,15 +244,10 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
   gap: ${tkn('spacing.sm-md')}; /* 12px */
   padding: ${tkn('spacing.sm')};
   border-radius: ${tkn('radius.md')};
-  cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
   max-width: 100%;
   overflow: hidden;
-
-  &:hover {
-    background: ${tkn('colors.sidebar.hover')};
-  }
 
   ${({ $isCollapsed, theme }) =>
     $isCollapsed &&

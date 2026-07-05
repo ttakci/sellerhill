@@ -249,47 +249,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
           </S.NavSection>
 
           <S.SidebarFooter>
-            <Dropdown
-              align="left"
-              direction="up"
-              width="15rem" /* 240px */
-              trigger={
-                <S.ProfileSwitcher $isCollapsed={sidebarCollapsed}>
-                  <S.ProfileBadge>
-                    {user?.firstName?.charAt(0) || 'D'}
-                    {user?.lastName?.charAt(0) || 'U'}
-                  </S.ProfileBadge>
-                  {!sidebarCollapsed && (
-                    <>
-                      <S.ProfileDetails>
-                        <Text variant="caption" weight="bold" color="text.inverse">
-                          {userName}
-                        </Text>
-                        <Text variant="caption" color="sidebar.textMuted">
-                          {user?.email || ''}
-                        </Text>
-                      </S.ProfileDetails>
-                      <S.ActionIcon as="div">
-                        <Icon name="chevron-up" size={16} />
-                      </S.ActionIcon>
-                    </>
-                  )}
-                </S.ProfileSwitcher>
-              }
-              items={[
-                {
-                  label: t('translation:menu.editProfile'),
-                  icon: 'user',
-                  onClick: () => localeNavigate('/profile'),
-                },
-                {
-                  label: t('translation:menu.logout'),
-                  icon: 'log-out',
-                  variant: 'danger',
-                  onClick: () => setIsLogoutConfirmOpen(true),
-                },
-              ]}
-            />
+            <S.ProfileSwitcher $isCollapsed={sidebarCollapsed}>
+              <S.ProfileBadge>
+                {user?.firstName?.charAt(0) || 'D'}
+                {user?.lastName?.charAt(0) || 'U'}
+              </S.ProfileBadge>
+              {!sidebarCollapsed && (
+                <S.ProfileDetails>
+                  <Text variant="caption" weight="bold" color="text.inverse">
+                    {userName}
+                  </Text>
+                  <Text variant="caption" color="sidebar.textMuted">
+                    {user?.email || ''}
+                  </Text>
+                </S.ProfileDetails>
+              )}
+            </S.ProfileSwitcher>
+            <S.LogoutButton
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => setIsLogoutConfirmOpen(true)}
+              title={sidebarCollapsed ? t('translation:menu.logout') : undefined}
+              aria-label={t('translation:menu.logout')}
+            >
+              <Icon name="log-out" size={18} />
+              {!sidebarCollapsed && (
+                <Text variant="body-sm" weight="medium" color="sidebar.text">
+                  {t('translation:menu.logout')}
+                </Text>
+              )}
+            </S.LogoutButton>
           </S.SidebarFooter>
         </S.SidebarContainer>
 

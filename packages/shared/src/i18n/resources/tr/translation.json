@@ -233,11 +233,13 @@
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırmasını Düzenle",
-        "subtitle": "Genel konum ve doğrulama kuralları"
+        "subtitle": "Genel konum ve doğrulama kuralları",
+        "openFull": "Tam Ayarları Aç"
       },
       "listingGroup": {
         "titleNew": "Yeni Liste Ayar Grubu",
-        "titleEdit": "Liste Ayar Grubunu Düzenle"
+        "titleEdit": "Liste Ayar Grubunu Düzenle",
+        "openFull": "Tam Formu Aç"
       },
       "password": {
         "title": "Şifre Değiştir",

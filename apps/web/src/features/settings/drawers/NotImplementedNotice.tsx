@@ -23,7 +23,7 @@ export const NotImplementedNotice: React.FC = () => {
   const { t } = useTranslation();
   return (
     <Notice role="status">
-      <Icon name="error" color="semantic.warning" size={20} />
+      <Icon name="alert-triangle" color="semantic.warning" size={20} />
       <NoticeText>
         <Text variant="body" weight="semibold">
           {t('translation:settingsHub.notImplemented.title')}

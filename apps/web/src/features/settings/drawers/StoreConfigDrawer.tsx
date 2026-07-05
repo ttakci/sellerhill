@@ -41,7 +41,7 @@ export const StoreConfigDrawer: React.FC<StoreConfigDrawerProps> = ({
           {t('translation:settingsHub.drawer.storeConfig.subtitle')}
         </Text>
         <Button variant="primary" onClick={handleOpen}>
-          <Text>{t('translation:common.open')}</Text>
+          <Text>{t('translation:settingsHub.drawer.storeConfig.openFull')}</Text>
         </Button>
       </BodyStack>
     </Drawer>

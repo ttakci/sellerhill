@@ -45,7 +45,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({
           {t('translation:settingsHub.drawer.listingGroup.titleNew')}
         </Text>
         <Button variant="primary" onClick={handleOpen}>
-          <Text>{t('translation:common.open')}</Text>
+          <Text>{t('translation:settingsHub.drawer.listingGroup.openFull')}</Text>
         </Button>
       </BodyStack>
     </Drawer>

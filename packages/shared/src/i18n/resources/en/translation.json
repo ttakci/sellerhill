@@ -232,11 +232,13 @@
       },
       "storeConfig": {
         "title": "Edit Store Configuration",
-        "subtitle": "Global location and validation rules"
+        "subtitle": "Global location and validation rules",
+        "openFull": "Open Full Settings"
       },
       "listingGroup": {
         "titleNew": "New Listing Settings Group",
-        "titleEdit": "Edit Listing Settings Group"
+        "titleEdit": "Edit Listing Settings Group",
+        "openFull": "Open Full Form"
       },
       "password": {
         "title": "Change Password",
