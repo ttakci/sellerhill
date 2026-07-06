@@ -16,7 +16,7 @@ Every feature component has 4 files:
 | `[Name].style.ts` | All `styled(...)` calls | JSX, logic |
 | `[Name].types.ts` | `interface`, `type`, `enum` | implementations |
 
-Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow same rules **except** they have no `.container.tsx`. Logic in an atom/molecule is a design smell — promote to molecule or push to parent.
+Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **Stateful** atoms/molecules (Select, Dropdown, Tooltip, etc.) MUST split into `.container.tsx` + `.component.tsx` like features. **Stateless** atoms/molecules (Button, Badge, Icon) only need `.component.tsx` + `.style.ts` + `.types.ts`.
 
 ### Exempt paths
 - `apps/web/src/features/landing/**`

@@ -656,7 +656,7 @@ Every feature component has 4 files:
 | `[Name].style.ts` | All `styled(...)` calls | JSX, logic |
 | `[Name].types.ts` | `interface`, `type`, `enum` | implementations |
 
-Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow same rules **except** they have no `.container.tsx`. Logic in an atom/molecule is a design smell — promote to molecule or push to parent.
+Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **Stateful** atoms/molecules (Select, Dropdown, Tooltip, etc.) MUST split into `.container.tsx` + `.component.tsx` like features. **Stateless** atoms/molecules (Button, Badge, Icon) only need `.component.tsx` + `.style.ts` + `.types.ts`.
 
 ### Exempt paths
 - `apps/web/src/features/landing/**`
@@ -764,7 +764,7 @@ Replace with:
    - `[Name].style.ts` — All `styled(...)` calls.
    - `[Name].types.ts` — `interface`/`type`/`enum` declarations only.
 
-   **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/`) follow the same rules **except** they have no `.container.tsx`. Logic in an atom/molecule is a design smell — promote to molecule or push to parent.
+   **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **Stateful** atoms/molecules (Select, Dropdown, Tooltip, etc.) MUST split into `.container.tsx` + `.component.tsx` like features. **Stateless** atoms/molecules (Button, Badge) stay as `.component.tsx` + `.style.ts` + `.types.ts`.
 
    **Exempt:** `apps/web/src/features/landing/**`, `apps/web/src/**/api/*.ts(x)`, `apps/web/src/app/store.ts`, `apps/api/**`, `*.config.{ts,js,mjs,cjs}`.
 
@@ -780,7 +780,7 @@ Replace with:
 See `.claude/skills/frontend-rules/SKILL.md` for the canonical version.
 
 ### File organization
-4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Atoms/Molecules: no `.container.tsx`. Exempt: landing, RTK api files, store.ts, configs.
+4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Stateful atoms/molecules (Select, Dropdown, etc.) also need `.container.tsx` + `.component.tsx` split. Stateless atoms (Button, Badge) stay as `.component.tsx` + `.style.ts` + `.types.ts`. Exempt: landing, RTK api files, store.ts, configs.
 
 ### Anti-patterns (will be blocked by hook + lint)
 - `styled(...)` outside `.style.ts`
@@ -1219,13 +1219,15 @@ git commit -m "refactor(auth,profile): comply with structural frontend rules"
 **Files:**
 - Modify: `packages/ui/src/atoms/**/*.tsx` and `packages/ui/src/molecules/**/*.tsx`
 
-**Special scope:** Atoms/Molecules have **no `.container.tsx`**. The 4 rules apply differently:
-- `styled-only-in-style-files` is OFF for atom/molecule paths (rule has built-in exemption).
-- `types-only-in-types-files` is ON — types must still live in `.types.ts`.
-- `logic-only-in-container` doesn't apply (no `.component.tsx` triggers it because atom/molecule components aren't named that way).
-- `no-styled-in-container` doesn't apply (no `.container.tsx`).
+**Special scope:** Atoms/Molecules follow the same rules as features. Stateful atoms/molecules (those with `useState`/`useEffect`/`useRef`/etc. — Select, Tooltip, Dropdown, Typewriter, Table, Popover, Collapsible identified in audit) MUST split into `.container.tsx` (logic) + `.component.tsx` (presentation). Stateless atoms (Button, Badge, Icon) stay as `.component.tsx` + `.style.ts` + `.types.ts`.
 
-So the only expected violations here: `interface`/`type` declared in `.component.tsx`/`.style.ts` instead of `.types.ts`.
+The 4 rules apply uniformly:
+- `styled-only-in-style-files` is OFF for atom/molecule paths (rule has built-in exemption — atom/molecule files have not historically split styled into .style.ts; ESLint will catch new violations but Task 16 doesn't need to refactor existing styled locations)
+- `types-only-in-types-files` is ON — types must live in `.types.ts`
+- `logic-only-in-container` is ON — stateful atoms/molecules split into container+component
+- `no-styled-in-container` is ON
+
+Expected violations to fix in Task 16: 41 `logic-only-in-container` across 7 atom/molecule files (Select, Tooltip, Dropdown, Typewriter, Table, Popover, Collapsible) — each needs new `.container.tsx` created.
 
 - [ ] **Step 1: Scope violations**
 
@@ -1233,7 +1235,9 @@ So the only expected violations here: `interface`/`type` declared in `.component
 npx eslint --rule '{"design-system/types-only-in-types-files":"error"}' --ext .ts,.tsx packages/ui/src/atoms packages/ui/src/molecules 2>&1
 ```
 
-- [ ] **Step 2: Fix per atom/molecule** — move stray `interface`/`type` declarations into existing `.types.ts` (or create one if missing). Re-import.
+- [ ] **Step 2: Fix per atom/molecule**
+  - **Stateful atoms/molecules** (Select, Tooltip, Dropdown, Typewriter, Table, Popover, Collapsible): split each into `.container.tsx` (state, refs, effects, handlers) + `.component.tsx` (JSX markup only — receives props). Create new `.container.tsx` file, move stateful logic there, update imports in `index.ts`.
+  - **Stateless atoms/molecules**: move stray `interface`/`type` declarations into `.types.ts` if any exist outside.
 
 - [ ] **Step 3: Verify clean** — re-run.
 
@@ -1355,6 +1359,6 @@ git push
 - Rule keys: `styled-only-in-style-files`, `types-only-in-types-files`, `logic-only-in-container`, `no-styled-in-container` — used identically in plugin (Task 1), eslintrc (Task 2, 17), audit CLI (Task 6), refactor tasks (7-16), and hook (Task 3 indirectly via path patterns).
 - Hook exit codes: `0` allow, `2` block — consistent across spec + plan.
 - Exempt paths: identical list everywhere (landing, api/, store.ts, configs, apps/api/).
-- Atom/molecule carve-out: identical (no `.container.tsx`, logic = smell).
+- Atom/molecule carve-out: identical (stateful atoms/molecules split into container+component; stateless stay component-only).
 
 **No placeholders:** Every step has exact commands or exact code. Refactor steps are pattern-based (move styled to .style.ts) but explicit about which file each violation type moves to. The "fix violations" step is intentionally generic because exact line numbers are unknown until Phase 2 audit runs — but the pattern is fixed and testable.

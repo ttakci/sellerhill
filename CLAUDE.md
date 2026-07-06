@@ -178,7 +178,7 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
    - `[Name].style.ts` — All `styled(...)` calls.
    - `[Name].types.ts` — `interface`/`type`/`enum` declarations only.
 
-   **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/`) follow the same rules **except** they have no `.container.tsx`. Logic in an atom/molecule is a design smell — promote to molecule or push to parent.
+   **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **Stateful** atoms/molecules (Select, Dropdown, Tooltip, etc.) MUST split into `.container.tsx` + `.component.tsx` like features. **Stateless** atoms/molecules (Button, Badge) stay as `.component.tsx` + `.style.ts` + `.types.ts`.
 
    **Exempt:** `apps/web/src/features/landing/**`, `apps/web/src/**/api/*.ts(x)`, `apps/web/src/app/store.ts`, `apps/api/**`, `*.config.{ts,js,mjs,cjs}`.
 
@@ -215,7 +215,7 @@ Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`
 See `.claude/skills/frontend-rules/SKILL.md` for the canonical version.
 
 ### File organization
-4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Atoms/Molecules: no `.container.tsx`. Exempt: landing, RTK api files, store.ts, configs.
+4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Stateful atoms/molecules (Select, Dropdown, etc.) also need `.container.tsx` + `.component.tsx` split. Stateless atoms (Button, Badge) stay as `.component.tsx` + `.style.ts` + `.types.ts`. Exempt: landing, RTK api files, store.ts, configs.
 
 ### Anti-patterns (will be blocked by hook + lint)
 - `styled(...)` outside `.style.ts`

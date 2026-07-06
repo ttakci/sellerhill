@@ -40,10 +40,7 @@ Her feature ve atom/molecule için 4 dosya deseni:
 
 ### Kapsam
 - **Feature'lar** (`apps/web/src/features/**`) — 4 dosya deseni zorunlu
-- **Atoms/Molecules** (`packages/ui/src/atoms|molecules/**`) — aynı kurallara tabi, **container dosyası yok**
-  - `Button.component.tsx`, `Button.style.ts`, `Button.types.ts` mevcut
-  - Logic barındıran atom/molecule = kötü koku; logic parent'a taşınmalı veya molecule'a yükseltilmeli
-  - `useState`/`useEffect` atom/molecule'da yasak
+- **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/**`) — **aynı kurallara tabi**. State barındıran atom/molecule (Select, Dropdown, Tooltip, vb.) `.container.tsx` + `.component.tsx` split yapmak zorunda — feature'lar gibi. Stateless atom/molecule (Button, Badge) sadece `.component.tsx` + `.style.ts` + `.types.ts`'e ihtiyaç duyar.
 
 ### İstisnalar (muaf dosyalar)
 - `apps/web/src/**/api/*.ts(x)` — RTK Query endpoints
@@ -177,7 +174,7 @@ Silinecek:
 | Hook false-positive (regex yaml/markdown'i yakalasa) | Path filtreleri sıkı; `apps/web/src/` ve `packages/ui/src/{atoms,molecules}/` dışına çıkma |
 | ESLint `logic-only-in-container` hook adlarını kaçırır | Liste güncel tutulacak (`useQuery`, `useMutation`, `dispatch`, vs.) |
 | Büyük refactor bir feature'ı bozabilir | Her feature sonrası typecheck + lint + build kapısı; feature-feature commit |
-| Atom/molecule'da gerçekten state gerekirse | Muafiyet yok; tasarım yeniden düşünülmeli (parent'a taşı veya molecule'e yükselt) |
+| Atom/molecule'da gerçekten state gerekirse | Stateful atom/molecule `.container.tsx` + `.component.tsx` split yapar (Select, Dropdown, Tooltip, vb.) |
 | `tkn()` path string'leri yanlış olabilir | Bu spec dışı; ileride tip güvenliği ayrı çalışma |
 
 ## Kabul Kriterleri
