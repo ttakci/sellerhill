@@ -3,7 +3,7 @@
  * Search, period preset, listing filter, data fetching
  */
 
-import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useLoading, useTheme, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -47,15 +47,17 @@ const computePeriodDates = (locale: string): Record<PeriodKey, PeriodDateInfo> =
 };
 
 export const DashboardPageContainer = (): React.ReactElement => {
-  const { t, i18n } = useTranslation(['translation']);
+  const { t, i18n } = useTranslation(['translation', 'dashboard']);
   const { localeNavigate: _localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  const { theme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('week');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('today');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredListingId, setFilteredListingId] = useState<string | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
 
   const selectedDays = PRESET_DAYS[periodPreset];
   const selectedStoreId = searchParams.get('store') ?? 'all';
@@ -122,6 +124,42 @@ export const DashboardPageContainer = (): React.ReactElement => {
     );
   }, [listings, searchQuery]);
 
+  /* presentation-only derived values (computed in container) */
+  const cardColors = useMemo(() => ({
+    today: theme.colors.semantic.info,
+    yesterday: theme.colors.brand.primary,
+    thisMonth: theme.colors.semantic.success,
+    thisMonthForecast: theme.colors.semantic.success,
+    lastMonth: theme.colors.brand.primary,
+  }), [theme]);
+
+  const cardHeaders = useMemo(() => ({
+    today: theme.colors.semanticTint.info,
+    yesterday: theme.colors.brand.secondary,
+    thisMonth: theme.colors.semanticTint.success,
+    thisMonthForecast: theme.colors.semanticTint.success,
+    lastMonth: theme.colors.brand.secondary,
+  }), [theme]);
+
+  const labels = useMemo(() => ({
+    sales: t('dashboard.sales'), orders: t('dashboard.orders'),
+    netProfit: t('dashboard.netProfit'), margin: t('dashboard.margin'),
+  }), [t]);
+
+  const periodTitles = useMemo(() => ({
+    today: t('dashboard.today'), yesterday: t('dashboard.yesterday'),
+    thisMonth: t('dashboard.thisMonth'), thisMonthForecast: t('dashboard.thisMonthForecast'),
+    lastMonth: t('dashboard.lastMonth'),
+  }), [t]);
+
+  const periodPresetOptions = useMemo(() => [
+    { label: t('dashboard.periodToday'), value: 'today' },
+    { label: t('dashboard.periodWeek'), value: 'week' },
+    { label: t('dashboard.periodMonth'), value: 'month' },
+  ], [t]);
+
+  const handleShowSearchChange = useCallback((show: boolean) => setShowSearch(show), []);
+
   return (
     <EbayAccountGuard>
       <DashboardPageComponent
@@ -151,6 +189,13 @@ export const DashboardPageContainer = (): React.ReactElement => {
         formatCurrency={handleFormatCurrency}
         formatCompactCurrency={handleFormatCompactCurrency}
         formatDate={handleFormatDate}
+        showSearch={showSearch}
+        onShowSearchChange={handleShowSearchChange}
+        cardColors={cardColors}
+        cardHeaders={cardHeaders}
+        labels={labels}
+        periodTitles={periodTitles}
+        periodPresetOptions={periodPresetOptions}
       />
     </EbayAccountGuard>
   );

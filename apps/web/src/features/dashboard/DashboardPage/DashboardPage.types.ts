@@ -34,4 +34,12 @@ export interface DashboardPageComponentProps {
   formatCurrency: (value: number) => string;
   formatCompactCurrency: (value: number) => string;
   formatDate: (dateString: string) => string;
+  /* presentation-only derived values (computed in container) */
+  showSearch: boolean;
+  onShowSearchChange: (show: boolean) => void;
+  cardColors: Record<PeriodKey, string>;
+  cardHeaders: Record<PeriodKey, string>;
+  labels: { sales: string; orders: string; netProfit: string; margin: string };
+  periodTitles: Record<PeriodKey, string>;
+  periodPresetOptions: { label: string; value: string }[];
 }

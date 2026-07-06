@@ -17,7 +17,7 @@ import {
   Text,
   useTheme,
 } from '@repo/ui';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
@@ -127,48 +127,16 @@ export const DashboardPageComponent = ({
   filteredListingId, onListingSelect,
   ebayAccounts, selectedStoreId, onStoreSelect,
   isTR, formatCurrency, formatCompactCurrency, formatDate,
+  showSearch, onShowSearchChange,
+  cardColors, cardHeaders, labels, periodTitles, periodPresetOptions,
 }: DashboardPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'translation']);
   const { theme } = useTheme();
-  const [showSearch, setShowSearch] = useState(false);
 
   const metrics = dashboardData?.metrics;
   const trend = dashboardData?.revenueTrend || [];
   const revenueColor = theme.colors.brand.primary;
   const profitColor = theme.colors.semantic.success;
-
-  const cardColors = useMemo(() => ({
-    today: theme.colors.semantic.info,
-    yesterday: theme.colors.brand.primary,
-    thisMonth: theme.colors.semantic.success,
-    thisMonthForecast: theme.colors.semantic.success,
-    lastMonth: theme.colors.brand.primary,
-  }), [theme]);
-
-  const cardHeaders = useMemo(() => ({
-    today: theme.colors.semanticTint.info,
-    yesterday: theme.colors.brand.secondary,
-    thisMonth: theme.colors.semanticTint.success,
-    thisMonthForecast: theme.colors.semanticTint.success,
-    lastMonth: theme.colors.brand.secondary,
-  }), [theme]);
-
-  const labels = useMemo(() => ({
-    sales: t('dashboard.sales'), orders: t('dashboard.orders'),
-    netProfit: t('dashboard.netProfit'), margin: t('dashboard.margin'),
-  }), [t]);
-
-  const periodTitles = useMemo(() => ({
-    today: t('dashboard.today'), yesterday: t('dashboard.yesterday'),
-    thisMonth: t('dashboard.thisMonth'), thisMonthForecast: t('dashboard.thisMonthForecast'),
-    lastMonth: t('dashboard.lastMonth'),
-  }), [t]);
-
-  const periodPresetOptions = useMemo(() => [
-    { label: t('dashboard.periodToday'), value: 'today' },
-    { label: t('dashboard.periodWeek'), value: 'week' },
-    { label: t('dashboard.periodMonth'), value: 'month' },
-  ], [t]);
 
   return (
     <S.Container>
@@ -182,15 +150,15 @@ export const DashboardPageComponent = ({
         <S.SearchWrapper>
           <SearchField
             value={searchQuery}
-            onChange={(e) => { onSearchChange(e.target.value); setShowSearch(true); }}
+            onChange={(e) => { onSearchChange(e.target.value); onShowSearchChange(true); }}
             placeholder={t('dashboard.searchPlaceholder')}
-            onFocus={() => setShowSearch(true)}
+            onFocus={() => onShowSearchChange(true)}
             size="medium"
             variant="gray"
             fullWidth
           />
           {showSearch && searchQuery.trim() && (
-            <SearchDropdown listings={listings} onSelect={(id) => { onListingSelect(id); setShowSearch(false); }} formatCurrency={formatCurrency} />
+            <SearchDropdown listings={listings} onSelect={(id) => { onListingSelect(id); onShowSearchChange(false); }} formatCurrency={formatCurrency} />
           )}
         </S.SearchWrapper>
 
