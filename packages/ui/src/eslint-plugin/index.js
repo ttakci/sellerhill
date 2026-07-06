@@ -287,5 +287,178 @@ module.exports = {
         };
       },
     },
+
+    // ============================================================
+    // Structural rules — file organization (added 2026-07-06)
+    // ============================================================
+
+    'styled-only-in-style-files': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'styled() must only be used inside *.style.ts(x) files',
+          category: 'Design System',
+          recommended: true,
+        },
+        messages: {
+          styledOutsideStyleFile:
+            'styled() must live in *.style.ts. Move to a *.style.ts file.',
+        },
+        schema: [],
+      },
+      create(context) {
+        const filename = context.getFilename().replace(/\\/g, '/');
+
+        // Exempt checks
+        if (filename.endsWith('.style.ts') || filename.endsWith('.style.tsx')) return {};
+        if (filename.includes('packages/ui/src/atoms/')) return {};
+        if (filename.includes('packages/ui/src/molecules/')) return {};
+        if (filename.includes('apps/web/src/features/landing/')) return {};
+        if (/\/api\//.test(filename)) return {};
+        if (/\/store\.ts$/.test(filename)) return {};
+        if (/\.config\.[tj]s(x|mjs|cjs)?$/.test(filename)) return {};
+        if (!filename.includes('apps/web/src/')) return {};
+
+        return {
+          CallExpression(node) {
+            const callee = node.callee;
+            const isStyled =
+              (callee.type === 'Identifier' && callee.name === 'styled') ||
+              (callee.type === 'MemberExpression' &&
+                callee.object.type === 'Identifier' &&
+                callee.object.name === 'styled');
+            if (isStyled) {
+              context.report({ node, messageId: 'styledOutsideStyleFile' });
+            }
+          },
+        };
+      },
+    },
+
+    'types-only-in-types-files': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'interface/type/enum declarations must live in *.types.ts',
+          category: 'Design System',
+          recommended: true,
+        },
+        messages: {
+          typeOutsideTypesFile:
+            'Type/interface/enum declaration must live in *.types.ts. Move it to [Name].types.ts.',
+        },
+        schema: [],
+      },
+      create(context) {
+        const filename = context.getFilename().replace(/\\/g, '/');
+
+        if (filename.endsWith('.types.ts') || filename.endsWith('.types.tsx')) return {};
+        if (filename.includes('apps/web/src/features/landing/')) return {};
+        if (/\/api\//.test(filename)) return {};
+        if (/\/store\.ts$/.test(filename)) return {};
+        if (/\.config\.[tj]s(x|mjs|cjs)?$/.test(filename)) return {};
+        if (!filename.includes('apps/web/src/') &&
+            !filename.includes('packages/ui/src/atoms/') &&
+            !filename.includes('packages/ui/src/molecules/')) return {};
+
+        const DECL_KINDS = new Set([
+          'TSInterfaceDeclaration',
+          'TSTypeAliasDeclaration',
+          'TSEnumDeclaration',
+        ]);
+
+        return {
+          ExportNamedDeclaration(node) {
+            if (node.declaration && DECL_KINDS.has(node.declaration.type)) {
+              // Allow re-exports of types: `export type { X } from '...'`
+              if (node.exportKind === 'type') return;
+              context.report({ node, messageId: 'typeOutsideTypesFile' });
+            }
+          },
+          ExportDefaultDeclaration(node) {
+            if (node.declaration && DECL_KINDS.has(node.declaration.type)) {
+              context.report({ node, messageId: 'typeOutsideTypesFile' });
+            }
+          },
+        };
+      },
+    },
+
+    'logic-only-in-container': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Logic hooks must live in *.container.tsx, not *.component.tsx',
+          category: 'Design System',
+          recommended: true,
+        },
+        messages: {
+          logicInComponent:
+            'Logic hook \'{{hook}}\' is not allowed in *.component.tsx. Move to *.container.tsx.',
+        },
+        schema: [],
+      },
+      create(context) {
+        const filename = context.getFilename().replace(/\\/g, '/');
+
+        if (!filename.endsWith('.component.tsx')) return {};
+        if (filename.includes('apps/web/src/features/landing/')) return {};
+
+        const LOGIC_HOOKS = new Set([
+          'useState', 'useEffect', 'useMemo', 'useCallback', 'useReducer',
+          'useRef', 'useQuery', 'useMutation', 'useLazyQuery',
+          'useSelector', 'useDispatch', 'useNavigate',
+        ]);
+
+        return {
+          CallExpression(node) {
+            const callee = node.callee;
+            if (callee.type === 'Identifier' && LOGIC_HOOKS.has(callee.name)) {
+              context.report({
+                node,
+                messageId: 'logicInComponent',
+                data: { hook: callee.name },
+              });
+            }
+          },
+        };
+      },
+    },
+
+    'no-styled-in-container': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'styled() is not allowed in *.container.tsx',
+          category: 'Design System',
+          recommended: true,
+        },
+        messages: {
+          styledInContainer:
+            'styled() not allowed in *.container.tsx. Move to *.style.ts.',
+        },
+        schema: [],
+      },
+      create(context) {
+        const filename = context.getFilename().replace(/\\/g, '/');
+
+        if (!filename.endsWith('.container.tsx')) return {};
+        if (filename.includes('apps/web/src/features/landing/')) return {};
+
+        return {
+          CallExpression(node) {
+            const callee = node.callee;
+            const isStyled =
+              (callee.type === 'Identifier' && callee.name === 'styled') ||
+              (callee.type === 'MemberExpression' &&
+                callee.object.type === 'Identifier' &&
+                callee.object.name === 'styled');
+            if (isStyled) {
+              context.report({ node, messageId: 'styledInContainer' });
+            }
+          },
+        };
+      },
+    },
   },
 };
