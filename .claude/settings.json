@@ -32,5 +32,18 @@
     "additionalDirectories": [
       "d:\\dev\\projects\\zonds\\zonds\\packages\\ui\\src\\molecules\\RichTooltip"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pretooluse-frontend-rules.js"
+          }
+        ]
+      }
+    ]
   }
 }
