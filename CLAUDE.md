@@ -172,7 +172,17 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 3. **UI & Styling** — Emotion with semantic tokens. No inline styles. No hardcoded colors (`#fff`, `rgba(...)`, etc.), spacing (`16px`, etc.), or magic numbers. Everything must be a theme token via `tkn()`. If a new color/spacing/value is needed, add it to `packages/ui/src/theme/` (designTokens, themes, tkn paths) first. Use `Icon` component, no inline SVGs.
 4. **Forms** — Use `ModernTextInput` molecule. Inputs must use `React.forwardRef` and `value={value ?? ''}`.
 5. **Loading & Errors** — `useLoading(isLoading)` for global UI overlay. `showMessage` from `UIContext` for errors. Loading state is business logic — it belongs in container files (`.container.tsx`), never in component files (`.component.tsx`). Component files must NOT render loading spinners or conditional loading UI; the container handles loading via the `useLoading` hook which shows a global overlay. The only exception is passing an `isLoading` prop to a Button atom for inline button spinner.
-6. **Container/Component Split (strict)** — Component files (`.component.tsx`) must contain ONLY JSX/markup and `useTranslation`. ALL logic (formatting, computed values, event handlers, hooks beyond `useTranslation`/`useTheme`) belongs in container files (`.container.tsx`). Utilities like `formatCurrency`, `formatDate`, `isTR` checks are logic — they go in the container.
+6. **Container/Component Split (strict, enforced by ESLint + PreToolUse hook)** — Every feature component is split into 4 files:
+   - `[Name].component.tsx` — JSX markup only. Allowed hooks: `useTranslation`, `useTheme`. Forbidden: `useState`, `useEffect`, `useMemo`, `useCallback`, `useReducer`, `useRef`, RTK Query hooks (`useQuery`/`useMutation`/`useLazyQuery`), `useSelector`, `useDispatch`, `useNavigate`, formatters (`formatCurrency`, etc.), event handlers. Forbidden: `styled(...)`.
+   - `[Name].container.tsx` — All logic. Forbidden: `styled(...)`. JSX is allowed only as `<Component .../>` return.
+   - `[Name].style.ts` — All `styled(...)` calls.
+   - `[Name].types.ts` — `interface`/`type`/`enum` declarations only.
+
+   **Atoms/Molecules** (`packages/ui/src/{atoms,molecules}/`) follow the same rules **except** they have no `.container.tsx`. Logic in an atom/molecule is a design smell — promote to molecule or push to parent.
+
+   **Exempt:** `apps/web/src/features/landing/**`, `apps/web/src/**/api/*.ts(x)`, `apps/web/src/app/store.ts`, `apps/api/**`, `*.config.{ts,js,mjs,cjs}`.
+
+   Enforced by `design-system/styled-only-in-style-files`, `design-system/types-only-in-types-files`, `design-system/logic-only-in-container`, `design-system/no-styled-in-container` ESLint rules, and by `.claude/hooks/pretooluse-frontend-rules.js` (Write/Edit/MultiEdit).
 7. **Shared Utilities** — Reusable formatting and locale utilities (e.g., `formatCurrency`, `formatCompactNumber`, `formatDate`, `getLocaleConfig`) live in `packages/ui/src/utils/`. Import from `@repo/ui`. Never define them locally in component or container files.
 8. **Design System Only (no custom UI primitives)** — All UI primitives (inputs, selects, checkboxes, buttons, modals, dropdowns, toggles, date pickers, etc.) MUST come from `packages/ui` (atoms or molecules). Never use native HTML elements (`<select>`, `<input>`, `<button>`, etc.) or build custom form controls directly in feature code. If a needed component doesn't exist in the design system, create it there first as an atom/molecule, then use it. This ensures consistency and reusability across all screens.
 9. **MessageModal for success/error/info/warning messages** — All informational and error messages MUST use the `MessageModal` molecule via `showMessage` from `UIContext`. Never use native `alert()`/`confirm()`, create custom modal implementations, or bypass this pattern. `MessageModal` provides consistent styling with type-appropriate icons (success=check-circle, error=x-circle, warning=alert-triangle, info=info) and proper button handling.
@@ -199,3 +209,26 @@ The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced ton
 - **Sidebar nav**: Inventory section (Dashboard, eBay Listings, Listing Jobs, Products, Orders, Stores) + Configuration section (Settings). Single Settings nav item (hub consolidation TBD in Plan 5).
 
 Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`.
+
+## Frontend Rules (Quick Reference)
+
+See `.claude/skills/frontend-rules/SKILL.md` for the canonical version.
+
+### File organization
+4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Atoms/Molecules: no `.container.tsx`. Exempt: landing, RTK api files, store.ts, configs.
+
+### Anti-patterns (will be blocked by hook + lint)
+- `styled(...)` outside `.style.ts`
+- `useState`/`useEffect`/RTK Query/etc. in `.component.tsx`
+- `interface`/`type`/`enum` outside `.types.ts`
+- Hardcoded hex/rgb colors (use `tkn('colors.*')`)
+- Hardcoded px/rem spacing (use `tkn('spacing.*')`)
+- `style={{ }}` inline styles
+- `styled.h1`/`styled.p` (use `<Text variant="...">`)
+- Raw `<select>`, `<input>`, `<button>`, native HTML form controls
+- `alert()`/`confirm()` (use `MessageModal` via `showMessage`)
+- Hardcoded status strings like `'active'` (use enums from `packages/shared`)
+- Hardcoded UI strings (use i18n `t()`)
+
+### Atom extension pattern in `.style.ts`
+Empty template literal + variant/weight/size props in JSX. Layout CSS only in template (margin/gap/flex/grid/position/dimensions). No font-size/font-weight/color/background/border/shadow in template — those go in props.
