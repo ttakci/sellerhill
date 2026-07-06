@@ -21,6 +21,7 @@ packages/*/dist/
 !scripts/**/*.mjs
 !packages/*/scripts/*.js
 !packages/ui/src/eslint-plugin/*.js
+!.claude/hooks/*.js
 
 # Env files
 .env
