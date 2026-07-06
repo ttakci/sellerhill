@@ -1,32 +1,19 @@
-import styled from '@emotion/styled';
 import {
   Button,
   Drawer,
   ModernTextInput,
   Text,
-  tkn,
   useUI,
 } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import {
+  BodyStack,
+  ErrorText,
+  FooterRow,
+} from './ChangePasswordDrawer.style';
 import { NotImplementedNotice } from './NotImplementedNotice';
-
-const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-`;
-
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.xs')};
-`;
-
-const ErrorText = styled(Text)`
-  color: ${tkn('colors.semantic.error')};
-`;
 
 export interface ChangePasswordDrawerProps {
   isOpen: boolean;
