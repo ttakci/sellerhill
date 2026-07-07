@@ -4,11 +4,11 @@ import { tkn } from '../../theme/tkn';
 
 export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?: boolean }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md+')} 1.125rem;
   background-color: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid
     ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
-  border-radius: ${tkn('radius.sm')};
+  border-radius: 0.5rem; /* 8px — matches Button */
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-family: ${tkn('typography.fontFamily.sans')};
@@ -16,7 +16,7 @@ export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?
   transition:
     border-color ${tkn('transitions.normal')},
     box-shadow ${tkn('transitions.normal')};
-  min-height: 7.5rem; /* 120px */
+  min-height: 8.75rem; /* 140px */
   resize: vertical;
 
   &::placeholder {
