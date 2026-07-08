@@ -32,7 +32,7 @@ export const ConnectEbayPrompt = ({
           {t('ebay:ebay.onboarding.description')}
         </S.Description>
 
-        <Button onClick={onConnect} variant="primary" isLoading={isLoading} iconLeft="link">
+        <Button onClick={onConnect} variant="primary" isLoading={isLoading}>
           <Text>{t('ebay:ebay.connect.connectButton')}</Text>
         </Button>
       </S.Inner>
