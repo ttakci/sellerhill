@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Button } from '../../atoms/Button';
 import { Icon, type IconName } from '../../atoms/Icon';
-import { Modal } from '../../atoms/Modal';
 import { Text } from '../../atoms/Text';
 import type { MessageType } from '../../context';
 
@@ -36,52 +35,50 @@ export const MessageModal: React.FC<MessageModalProps> = ({
   const iconColor = messageIconColors[type];
 
   return (
-    <Modal
+    <S.PopupModal
       isOpen={isOpen}
       onClose={onClose}
       title=""
       size="sm"
       showCloseButton={false}
       showDivider={false}
-      footer={
-        <S.FooterWrapper>
-          {secondaryButton && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                secondaryButton.onClick();
-                onClose();
-              }}
-            >
-              {secondaryButton.label}
-            </Button>
-          )}
+    >
+      <S.Content>
+        <S.IconCircle $type={type}>
+          <Icon name={iconName} size={32} color={iconColor} />
+        </S.IconCircle>
+        <Text variant="h3" weight="semibold">
+          {title}
+        </Text>
+        <Text variant="body-sm" color="text.secondary">
+          {description}
+        </Text>
+        <S.ButtonStack>
           <Button
             variant={primaryButton.variant || (type === 'error' ? 'danger' : 'primary')}
+            fullWidth
             onClick={() => {
               primaryButton.onClick();
               onClose();
             }}
           >
-            {primaryButton.label}
+            <Text>{primaryButton.label}</Text>
           </Button>
-        </S.FooterWrapper>
-      }
-    >
-      <S.ContentWrapper>
-        <S.IconWrapper>
-          <Icon name={iconName} size={48} color={iconColor} />
-        </S.IconWrapper>
-        <S.TitleWrapper>
-          <Text variant="h3" weight="bold">
-            {title}
-          </Text>
-        </S.TitleWrapper>
-        <Text variant="body" color="text.secondary">
-          {description}
-        </Text>
-      </S.ContentWrapper>
-    </Modal>
+          {secondaryButton && (
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                secondaryButton.onClick();
+                onClose();
+              }}
+            >
+              <Text>{secondaryButton.label}</Text>
+            </Button>
+          )}
+        </S.ButtonStack>
+      </S.Content>
+    </S.PopupModal>
   );
 };
 
