@@ -283,7 +283,7 @@ export const SettingsHubPageComponent = ({
             aria-label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
           >
             <Text>{t('translation:settingsHub.sections.profile.tabs.personalInfo')}</Text>
-            <Icon name="chevron-right" size={16} />
+            <Icon name="chevron-right" size={22} color="brand.primary" />
           </S.ProfileNavItem>
         </S.ProfileHeroActions>
       </S.ProfileHeroCard>

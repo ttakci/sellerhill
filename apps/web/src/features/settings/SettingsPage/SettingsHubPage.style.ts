@@ -92,10 +92,8 @@ export const ProfileNavItem = styled.button`
 
   &:hover {
     background-color: ${tkn('colors.background.tertiary')};
-    color: ${tkn('colors.brand.primary')};
 
     & > svg {
-      color: ${tkn('colors.brand.primary')};
       transform: translateX(0.125rem); /* 2px nudge */
     }
   }
@@ -106,11 +104,8 @@ export const ProfileNavItem = styled.button`
   }
 
   & > svg {
-    color: ${tkn('colors.text.tertiary')};
     flex-shrink: 0;
-    transition:
-      color 0.18s ease,
-      transform 0.18s ease;
+    transition: transform 0.18s ease;
   }
 
   @media (max-width: 36rem) {
