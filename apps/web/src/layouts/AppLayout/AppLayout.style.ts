@@ -21,7 +21,7 @@ export const LayoutWrapper = styled.div`
  * SidebarContainer - Theme aware and responsive
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '5rem' : '18rem')};
+  width: ${(props) => (props.$isCollapsed ? '4rem' : '15rem')};
   background: ${tkn('colors.sidebar.background')};
   color: ${tkn('colors.sidebar.text')};
   border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
@@ -37,9 +37,9 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
     /* 1023px */
     position: fixed;
     top: 0;
-    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-18rem')};
+    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-15rem')};
     height: 100vh;
-    width: 18rem;
+    width: 15rem;
     box-shadow: ${tkn('shadows.xl')};
   }
 `;
@@ -59,7 +59,6 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
     width: 100vw;
     height: 100vh;
     background: ${tkn('colors.surface.overlay')};
-    backdrop-filter: blur(0.125rem); /* 2px */
     z-index: 999;
     animation: fadeIn 0.15s ease-out;
   }
