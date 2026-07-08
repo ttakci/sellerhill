@@ -71,6 +71,9 @@ export const ListingsPageContainer: React.FC = () => {
   // Filter state
   const [filters, setFilters] = useState<ListingsFilterState>(DEFAULT_FILTERS);
 
+  // Advanced filter panel toggle (UI state)
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
   // Fetch listings and jobs
   const { data: listings = [], isLoading: isListingsLoading } = useGetListingsQuery(refreshTrigger, {
     refetchOnMountOrArgChange: true,
@@ -714,6 +717,8 @@ export const ListingsPageContainer: React.FC = () => {
       onClearFilters={handleClearFilters}
       hasActiveFilters={hasActiveFilters}
       resultCount={filteredListings.length}
+      advancedOpen={advancedOpen}
+      onToggleAdvanced={() => setAdvancedOpen((v) => !v)}
     />
     </EbayAccountGuard>
   );

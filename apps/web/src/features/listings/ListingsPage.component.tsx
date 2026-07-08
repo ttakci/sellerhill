@@ -1,6 +1,6 @@
 import type { ListingDto } from '@repo/shared';
 import { Button, DataTable, Icon, IdBadge, PageHeader, SearchField, Select, Text, TextInput } from '@repo/ui';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingsPage.style';
@@ -33,10 +33,10 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
   onClearFilters,
   hasActiveFilters,
   resultCount,
+  advancedOpen,
+  onToggleAdvanced,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
-
-  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const renderGridCard = (listing: ListingDto) => (
     <S.ListingCard key={listing.id} variant="interactive">
@@ -165,7 +165,7 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
           </S.FilterBarRow>
 
           <S.AdvancedDivider />
-          <S.AdvancedHeader $isOpen={advancedOpen} onClick={() => setAdvancedOpen((v) => !v)}>
+          <S.AdvancedHeader $isOpen={advancedOpen} onClick={onToggleAdvanced}>
             <Icon name="sliders-horizontal" size={16} />
             {t('listings.filters.advancedFilters')}
             <Icon name="chevron-down" size={16} />

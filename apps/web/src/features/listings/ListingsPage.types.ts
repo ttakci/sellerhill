@@ -68,4 +68,6 @@ export interface ListingsPageProps {
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;
+  advancedOpen: boolean;
+  onToggleAdvanced: () => void;
 }
