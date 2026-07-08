@@ -1,28 +1,18 @@
-import React, { useState } from 'react';
+import type React from 'react';
 
 import { Icon } from '../Icon';
 
 import * as S from './Tabs.style';
-import type { TabsProps } from './Tabs.types';
+import type { TabsComponentProps } from './Tabs.types';
 
-export const Tabs: React.FC<TabsProps> = ({
+export const TabsComponent: React.FC<TabsComponentProps> = ({
   items,
-  defaultActiveTab,
-  onChange,
   className,
   variant = 'underline',
+  activeTab,
+  activeContent,
+  onTabClick,
 }) => {
-  const [activeTab, setActiveTab] = useState(defaultActiveTab || items[0]?.id);
-
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    if (onChange) {
-      onChange(tabId);
-    }
-  };
-
-  const activeContent = items.find((item) => item.id === activeTab)?.content;
-
   return (
     <S.Container className={className}>
       <S.TabList $variant={variant}>
@@ -31,7 +21,7 @@ export const Tabs: React.FC<TabsProps> = ({
             key={item.id}
             $isActive={activeTab === item.id}
             $variant={variant}
-            onClick={() => handleTabClick(item.id)}
+            onClick={() => onTabClick(item.id)}
           >
             {item.icon && <Icon name={item.icon} size={18} />}
             {item.label}
@@ -42,3 +32,5 @@ export const Tabs: React.FC<TabsProps> = ({
     </S.Container>
   );
 };
+
+TabsComponent.displayName = 'TabsComponent';

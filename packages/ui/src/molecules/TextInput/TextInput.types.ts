@@ -1,8 +1,47 @@
-import { FieldValues, UseControllerProps } from 'react-hook-form';
+import type { FieldError, FieldValues, UseControllerProps } from 'react-hook-form';
 
 import { IconName } from '../../atoms/Icon';
 
+export interface InnerFieldProps {
+  name: string;
+  value: string;
+  onChange: (...event: unknown[]) => void;
+  onBlur: () => void;
+}
+
 export type TextInputSize = 'small' | 'medium' | 'large';
+
+export interface TextInputInnerComponentProps {
+  field: InnerFieldProps;
+  error?: FieldError;
+  label?: string;
+  iconLeft?: IconName;
+  iconRight?: IconName;
+  isDisabled?: boolean;
+  fullWidth?: boolean;
+  type?: string;
+  autoFocus?: boolean;
+  maxLength?: number;
+  id?: string;
+  autoComplete?: string;
+  onPressIcon?: () => void;
+  size?: TextInputSize;
+  suffixText?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  // State from container
+  isFocused: boolean;
+  isPasswordVisible: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+  hasValue: boolean;
+  effectiveType: string;
+  effectiveIconRight?: IconName;
+  isPassword: boolean;
+  // Handlers from container
+  onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlurField: () => void;
+  onContainerClick: () => void;
+  onTogglePasswordVisibility: () => void;
+}
 
 export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
   extends Omit<Partial<UseControllerProps<TFieldValues>>, 'name'> {

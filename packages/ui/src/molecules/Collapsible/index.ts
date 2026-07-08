@@ -1,2 +1,2 @@
-export { Collapsible } from './Collapsible.component';
-export type { CollapsibleProps } from './Collapsible.types';
+export { Collapsible } from './Collapsible.container';
+export type { CollapsibleComponentProps, CollapsibleProps } from './Collapsible.types';

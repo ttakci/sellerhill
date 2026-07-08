@@ -2,6 +2,12 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
+export const TitleWrapper = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;
+
 export const CollapsibleContainer = styled.div`
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.lg')};

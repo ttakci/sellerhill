@@ -1,2 +1,2 @@
-export { Tooltip } from './Tooltip.component';
-export type { TooltipPosition, TooltipProps, TooltipVariant } from './Tooltip.types';
+export { Tooltip } from './Tooltip.container';
+export type { TooltipComponentProps, TooltipPosition, TooltipProps, TooltipVariant } from './Tooltip.types';

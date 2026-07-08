@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect } from 'react';
+import type React from 'react';
 
 import { Icon, type IconName } from '../../atoms/Icon';
 
 import * as S from './Toast.style';
-import type { ToastProps } from './Toast.types';
+import type { ToastComponentProps } from './Toast.types';
 
 const toastIcons: Record<string, IconName> = {
   success: 'check-circle',
@@ -12,30 +12,18 @@ const toastIcons: Record<string, IconName> = {
   info: 'info',
 };
 
-export const Toast = ({ toast, onClose }: ToastProps): React.ReactElement => {
-  const handleClose = useCallback(() => {
-    onClose(toast.id);
-  }, [onClose, toast.id]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose(toast.id);
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [toast.id, onClose]);
-
+export const ToastComponent = ({ toast, onClose }: ToastComponentProps): React.ReactElement => {
   return (
     <S.ToastContainer $type={toast.type}>
       <S.ToastIconWrapper $type={toast.type}>
         <Icon name={toastIcons[toast.type]} size="sm" />
       </S.ToastIconWrapper>
       <S.ToastMessage>{toast.message}</S.ToastMessage>
-      <S.ToastCloseButton onClick={handleClose}>
+      <S.ToastCloseButton onClick={onClose}>
         <Icon name="x" size="sm" />
       </S.ToastCloseButton>
     </S.ToastContainer>
   );
 };
 
-Toast.displayName = 'Toast';
+ToastComponent.displayName = 'ToastComponent';

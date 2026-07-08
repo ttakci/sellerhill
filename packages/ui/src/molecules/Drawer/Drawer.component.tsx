@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
 
 import { Icon } from '../../atoms/Icon';
 import { Text } from '../../atoms/Text';
 
 import * as S from './Drawer.style';
-import type { DrawerProps } from './Drawer.types';
+import type { DrawerComponentProps } from './Drawer.types';
 
-export const Drawer: React.FC<DrawerProps> = ({
+export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   isOpen,
   onClose,
   title,
@@ -16,26 +16,6 @@ export const Drawer: React.FC<DrawerProps> = ({
   size = 'md',
   className,
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {return;}
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') { onClose(); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
-
   if (!isOpen) {return null;}
 
   return (
@@ -73,3 +53,5 @@ export const Drawer: React.FC<DrawerProps> = ({
     </>
   );
 };
+
+DrawerComponent.displayName = 'DrawerComponent';

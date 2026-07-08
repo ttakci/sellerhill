@@ -1,32 +1,20 @@
-import React, { useState } from 'react';
+import type React from 'react';
 
 import { Icon } from '../../atoms/Icon';
 
 import * as S from './IdBadge.style';
-import type { IdBadgeProps, StoreType } from './IdBadge.types';
+import type { IdBadgeComponentProps } from './IdBadge.types';
 
-/** Generate the appropriate URL based on store type and ID */
-const getStoreUrl = (storeType: StoreType, id: string): string => {
-  switch (storeType) {
-    case 'amazon':
-      return `https://www.amazon.com/dp/${id}`;
-    case 'ebay':
-      return `https://www.ebay.com/itm/${id}`;
-    default:
-      return '#';
-  }
-};
-
-export const IdBadge = ({
+export const IdBadgeComponent = ({
+  url,
   id,
-  storeType,
   size = 'sm',
   className,
   onClick,
-}: IdBadgeProps): React.ReactElement => {
-  const url = getStoreUrl(storeType, id);
-  const [isHovered, setIsHovered] = useState(false);
-
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+}: IdBadgeComponentProps): React.ReactElement => {
   return (
     <S.BadgeContainer
       href={url}
@@ -35,8 +23,8 @@ export const IdBadge = ({
       $size={size}
       className={className}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       $isHovered={isHovered}
     >
       <S.IdText $size={size} $isHovered={isHovered}>
@@ -49,4 +37,4 @@ export const IdBadge = ({
   );
 };
 
-IdBadge.displayName = 'IdBadge';
+IdBadgeComponent.displayName = 'IdBadgeComponent';

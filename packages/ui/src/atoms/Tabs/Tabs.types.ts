@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import { IconName } from '../Icon';
 
@@ -15,4 +15,13 @@ export interface TabsProps {
   onChange?: (tabId: string) => void;
   className?: string;
   variant?: 'underline' | 'pill';
+}
+
+export interface TabsComponentProps {
+  items: TabItem[];
+  className?: string;
+  variant?: 'underline' | 'pill';
+  activeTab: string;
+  activeContent: React.ReactNode;
+  onTabClick: (tabId: string) => void;
 }

@@ -1,129 +1,43 @@
-import React, { useRef, useState } from 'react';
+import type React from 'react';
 
 import { Checkbox } from '../../atoms/Checkbox';
 import { Icon } from '../../atoms/Icon';
 import { Select } from '../Select';
 
 import * as S from './Table.style';
-import type { TableProps } from './Table.types';
+import type { TableComponentProps } from './Table.types';
 import { TablePagination } from './TablePagination.component';
 
-export const Table = <T,>({
+export const TableComponent = <T,>({
   columns,
   data,
   emptyMessage,
-  onRowClick,
   className,
   footer,
   sortColumn,
   sortDirection,
-  onSort,
   selectable,
   selectedRows = [],
-  onSelectionChange,
   bulkActions,
   bulkActionsPlaceholder,
   onFilter,
   onDownload,
   actions,
   pagination,
-}: TableProps<T>): React.ReactElement => {
-  const [bulkValue, setBulkValue] = useState<string | number>('');
-  const overflowRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [wasDragging, setWasDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
-  const handleRowClick = (row: T, index: number) => {
-    if (onRowClick && !wasDragging) {
-      onRowClick(row, index);
-    }
-  };
-
-  const handleSort = (columnKey: string) => {
-    if (onSort) {
-      onSort(columnKey);
-    }
-  };
-
-  const isAllSelected = data.length > 0 && selectedRows.length === data.length;
-
-  const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) {
-      return;
-    }
-    if (checked) {
-      onSelectionChange(data);
-    } else {
-      onSelectionChange([]);
-    }
-  };
-
-  const handleSelectRow = (row: T, checked: boolean) => {
-    if (!onSelectionChange) {
-      return;
-    }
-    if (checked) {
-      onSelectionChange([...selectedRows, row]);
-    } else {
-      onSelectionChange(selectedRows.filter((r) => r !== row));
-    }
-  };
-
-  const hasToolbar = (bulkActions && bulkActions.length > 0) || onFilter || onDownload || actions;
-
-  const bulkOptions = React.useMemo(
-    () => [
-      { value: '__placeholder__', label: bulkActionsPlaceholder || 'Bulk Actions' },
-      ...(bulkActions?.map((action, idx) => ({
-        value: idx.toString(),
-        label: action.label,
-      })) || []),
-    ],
-    [bulkActions, bulkActionsPlaceholder]
-  );
-
-  const handleBulkChange = (value: string | number) => {
-    if (value === '__placeholder__') {
-      return;
-    }
-    const actionIndex = parseInt(value as string, 10);
-    if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
-      bulkActions[actionIndex].onClick(selectedRows);
-    }
-    setBulkValue('');
-  };
-
-  // Drag to scroll handlers
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!overflowRef.current) {
-      return;
-    }
-    setIsDragging(true);
-    setWasDragging(false);
-    setStartX(e.pageX - overflowRef.current.offsetLeft);
-    setScrollLeft(overflowRef.current.scrollLeft);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !overflowRef.current) {
-      return;
-    }
-    e.preventDefault();
-    const x = e.pageX - overflowRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5; // Scroll speed multiplier
-    overflowRef.current.scrollLeft = scrollLeft - walk;
-    if (Math.abs(walk) > 5) {
-      setWasDragging(true);
-    }
-  };
-
-  const handleMouseUpOrLeave = () => {
-    setIsDragging(false);
-    setTimeout(() => setWasDragging(false), 0);
-  };
-
+  bulkValue,
+  bulkOptions,
+  overflowRef,
+  onRowClick,
+  onSort,
+  onSelectAll,
+  onSelectRow,
+  onBulkChange,
+  onMouseDown,
+  onMouseMove,
+  onMouseUpOrLeave,
+  isAllSelected,
+  hasToolbar,
+}: TableComponentProps<T>): React.ReactElement => {
   return (
     <S.TableContainer className={className}>
       {hasToolbar && (
@@ -135,7 +49,7 @@ export const Table = <T,>({
                   size="small"
                   value={bulkValue}
                   options={bulkOptions}
-                  onChange={handleBulkChange}
+                  onChange={onBulkChange}
                   placeholder={bulkActionsPlaceholder || 'Bulk Actions'}
                   fullWidth={false}
                 />
@@ -159,17 +73,17 @@ export const Table = <T,>({
       )}
       <S.OverflowWrapper
         ref={overflowRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUpOrLeave}
-        onMouseLeave={handleMouseUpOrLeave}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUpOrLeave}
+        onMouseLeave={onMouseUpOrLeave}
       >
         <S.StyledTable>
           <S.Thead>
             <S.Tr>
               {selectable && (
                 <S.Th $width="3rem" $noPadding $sticky={columns.some((c) => c.sticky)} $left={0}>
-                  <Checkbox checked={isAllSelected} onChange={handleSelectAll} />
+                  <Checkbox checked={isAllSelected} onChange={onSelectAll} />
                 </S.Th>
               )}
               {columns.map((column) => (
@@ -183,7 +97,7 @@ export const Table = <T,>({
                   <S.ThContent $align={column.align}>
                     {column.header}
                     {column.sortable && (
-                      <S.SortIconWrapper onClick={() => handleSort(column.key)}>
+                      <S.SortIconWrapper onClick={() => onSort(column.key)}>
                         <S.SortIcon
                           $active={sortColumn === column.key}
                           $rotated={sortColumn === column.key && sortDirection === 'asc'}
@@ -212,7 +126,7 @@ export const Table = <T,>({
                     $selected={isSelected}
                     $index={rowIndex}
                     data-selected={isSelected}
-                    onClick={() => handleRowClick(row, rowIndex)}
+                    onClick={() => onRowClick(row, rowIndex)}
                   >
                     {selectable && (
                       <S.Td
@@ -222,7 +136,7 @@ export const Table = <T,>({
                         $sticky={columns.some((c) => c.sticky)}
                         $left={0}
                       >
-                        <Checkbox checked={isSelected} onChange={(checked) => handleSelectRow(row, checked)} />
+                        <Checkbox checked={isSelected} onChange={(checked) => onSelectRow(row, checked)} />
                       </S.Td>
                     )}
                     {columns.map((column) => (
@@ -261,4 +175,4 @@ export const Table = <T,>({
   );
 };
 
-Table.displayName = 'Table';
+TableComponent.displayName = 'TableComponent';

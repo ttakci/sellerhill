@@ -1,3 +1,3 @@
-export { Toast } from './Toast.component';
+export { Toast } from './Toast.container';
 export { ToastListContainer } from './Toast.style';
-export type { ToastItem, ToastProps, ToastType } from './Toast.types';
+export type { ToastComponentProps, ToastItem, ToastProps, ToastType } from './Toast.types';

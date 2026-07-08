@@ -1,57 +1,32 @@
-import styled from '@emotion/styled';
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 
 import { Icon } from '../Icon';
 
 import * as S from './Dropdown.style';
-import type { DropdownProps } from './Dropdown.types';
+import type { DropdownComponentProps } from './Dropdown.types';
 
-const TriggerWrapper = styled.div`
-  cursor: pointer;
-`;
-
-export const Dropdown: React.FC<DropdownProps> = ({
+export const DropdownComponent: React.FC<DropdownComponentProps> = ({
   trigger,
   items,
   header,
-  align = 'right',
-  direction = 'down',
+  align,
+  direction,
   width,
   className,
+  isOpen,
+  containerRef,
+  onTriggerClick,
+  onItemClick,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleTrigger = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const renderedTrigger = typeof trigger === 'function'
-    ? trigger(isOpen)
-    : trigger;
-
   return (
     <S.Container ref={containerRef} className={className}>
-      <TriggerWrapper onClick={handleTrigger}>{renderedTrigger}</TriggerWrapper>
+      <S.TriggerWrapper onClick={onTriggerClick}>{trigger}</S.TriggerWrapper>
       <S.Menu $isOpen={isOpen} $align={align} $direction={direction} $width={width}>
         {header && <S.DropdownHeader>{header}</S.DropdownHeader>}
         {items.map((item, index) => (
           <S.MenuItem
             key={index}
-            onClick={() => {
-              item.onClick();
-              setIsOpen(false);
-            }}
+            onClick={() => onItemClick(item)}
             $variant={item.variant}
           >
             {item.icon && <Icon name={item.icon} size={18} />}
@@ -62,3 +37,5 @@ export const Dropdown: React.FC<DropdownProps> = ({
     </S.Container>
   );
 };
+
+DropdownComponent.displayName = 'DropdownComponent';

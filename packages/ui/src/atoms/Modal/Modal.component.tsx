@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
 
 import { Icon } from '../Icon';
 import { Text } from '../Text';
 
 import * as S from './Modal.style';
-import type { ModalProps } from './Modal.types';
+import type { ModalComponentProps } from './Modal.types';
 
-export const Modal: React.FC<ModalProps> = ({
+export const ModalComponent: React.FC<ModalComponentProps> = ({
   isOpen,
   onClose,
   title,
@@ -17,17 +17,6 @@ export const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   showDivider = true,
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
-
   if (!isOpen) {return null;}
 
   return (
@@ -57,3 +46,5 @@ export const Modal: React.FC<ModalProps> = ({
     </S.Overlay>
   );
 };
+
+ModalComponent.displayName = 'ModalComponent';

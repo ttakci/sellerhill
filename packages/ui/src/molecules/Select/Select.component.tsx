@@ -1,113 +1,38 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Controller, FieldValues } from 'react-hook-form';
 
 import { Icon } from '../../atoms/Icon';
 
 import * as S from './Select.style';
-import type { SelectProps, SelectOption } from './Select.types';
+import type { SelectStandaloneComponentProps } from './Select.types';
 
-export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldValues>({
+export const ModernSelectStandalone = ({
   value,
-  onChange,
   error,
   label,
-  options,
+  options: _options,
   placeholder,
   iconLeft,
   isDisabled,
   fullWidth = true,
-  isSearchable,
-  id: _id,
   size = 'medium',
   searchPlaceholder,
   noResultsMessage,
-}: Omit<SelectProps<TFieldValues>, 'name' | 'control' | 'rules'>) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isMobile, setIsMobile] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen && !isMobile) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, isMobile]);
-
-  const selectedOption = options.find((opt: SelectOption) => opt.value === value);
+  isOpen,
+  searchQuery,
+  isMobile,
+  dropdownStyle,
+  placement,
+  selectedOption,
+  filteredOptions,
+  containerRef,
+  dropdownRef,
+  onToggleDropdown,
+  onSelect,
+  onSearchChange,
+  onClose,
+  isSearchable,
+}: SelectStandaloneComponentProps) => {
   const hasValue = !!selectedOption;
-
-  const filteredOptions = options.filter((opt: SelectOption) =>
-    opt.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSelect = (option: SelectOption) => {
-    onChange?.(option.value);
-    setIsOpen(false);
-    setSearchQuery('');
-  };
-
-  const toggleDropdown = () => {
-    if (!isDisabled) {
-      setIsOpen(!isOpen);
-    }
-  };
-
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
-  const [placement, setPlacement] = useState<'bottom' | 'top'>('bottom');
-
-  useLayoutEffect(() => {
-    if (isOpen && !isMobile && containerRef.current) {
-      const updatePosition = () => {
-        if (!containerRef.current) {return;}
-
-        const rect = containerRef.current.getBoundingClientRect();
-        const margin = 4;
-
-        const absoluteBottom = rect.bottom + window.scrollY;
-
-        setPlacement('bottom');
-
-        setDropdownStyle({
-          position: 'absolute',
-          top: absoluteBottom + margin,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          transform: 'none',
-          zIndex: 9999,
-        });
-      };
-
-      updatePosition();
-      window.addEventListener('resize', updatePosition);
-      window.addEventListener('scroll', updatePosition, true);
-
-      return () => {
-        window.removeEventListener('resize', updatePosition);
-        window.removeEventListener('scroll', updatePosition, true);
-      };
-    }
-  }, [isOpen, isMobile, options.length]);
 
   const renderDropdown = () => {
     if (!isOpen) {return null;}
@@ -120,19 +45,19 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
               autoFocus
               placeholder={searchPlaceholder}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
               onClick={(e) => e.stopPropagation()}
             />
           </S.SearchWrapper>
         )}
         <S.OptionsList>
           {filteredOptions.length > 0 ? (
-            filteredOptions.map((option: SelectOption) => (
+            filteredOptions.map((option) => (
               <S.OptionItem
                 key={option.value}
                 $isSelected={value === option.value}
                 $isFocused={false}
-                onClick={() => handleSelect(option)}
+                onClick={() => onSelect(option)}
               >
                 <S.OptionContent>
                   {option.icon && <Icon name={option.icon} size={18} />}
@@ -152,12 +77,12 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
 
     if (isMobile) {
       return createPortal(
-        <S.Overlay onClick={() => setIsOpen(false)}>
+        <S.Overlay onClick={onClose}>
           <S.BottomSheet onClick={(e) => e.stopPropagation()}>
             <S.Handle />
             <S.BottomSheetHeader>
               <S.BottomSheetTitle>{label || placeholder}</S.BottomSheetTitle>
-              <S.CloseButton onClick={() => setIsOpen(false)}>
+              <S.CloseButton onClick={onClose}>
                 <Icon name="x" size={20} />
               </S.CloseButton>
             </S.BottomSheetHeader>
@@ -191,7 +116,7 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
         $fullWidth={fullWidth}
         $size={size}
         $hasLabel={!!label}
-        onClick={toggleDropdown}
+        onClick={onToggleDropdown}
       >
         {iconLeft && (
           <S.DecorationWrapper $side="left" $size={size}>
@@ -227,28 +152,3 @@ export const ModernSelectStandalone = <TFieldValues extends FieldValues = FieldV
     </S.Container>
   );
 };
-
-export const Select = <TFieldValues extends FieldValues = FieldValues>(
-  props: SelectProps<TFieldValues>
-) => {
-  const { name, control, rules, ...rest } = props;
-
-  // Manual usage support
-  if (!control) {
-    const { value, onChange } = rest as SelectProps<TFieldValues>;
-    return <ModernSelectStandalone {...rest} value={value} onChange={onChange} />;
-  }
-
-  return (
-    <Controller
-      name={name!}
-      control={control}
-      rules={rules}
-      render={({ field, fieldState: { error } }) => (
-        <ModernSelectStandalone {...rest} value={field.value} onChange={field.onChange} error={error} />
-      )}
-    />
-  );
-};
-
-Select.displayName = 'Select';

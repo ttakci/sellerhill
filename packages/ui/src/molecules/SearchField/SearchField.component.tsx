@@ -1,15 +1,14 @@
-import React, { useCallback } from 'react';
+import type React from 'react';
 
 import { Icon } from '../../atoms/Icon';
 
 import * as S from './SearchField.style';
-import type { SearchFieldProps } from './SearchField.types';
+import type { SearchFieldComponentProps } from './SearchField.types';
 
-export const SearchField: React.FC<SearchFieldProps> = ({
+export const SearchFieldComponent: React.FC<SearchFieldComponentProps> = ({
   value,
   onChange,
   placeholder,
-  onSearch,
   size = 'medium',
   variant = 'default',
   fullWidth = false,
@@ -19,16 +18,8 @@ export const SearchField: React.FC<SearchFieldProps> = ({
   disabled,
   name,
   'aria-label': ariaLabel,
+  onKeyDown,
 }) => {
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && onSearch) {
-        onSearch();
-      }
-    },
-    [onSearch],
-  );
-
   return (
     <S.SearchContainer
       $size={size}
@@ -45,7 +36,7 @@ export const SearchField: React.FC<SearchFieldProps> = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        onKeyDown={handleKeyDown}
+        onKeyDown={onKeyDown}
         autoFocus={autoFocus}
         disabled={disabled}
         name={name}
@@ -55,4 +46,4 @@ export const SearchField: React.FC<SearchFieldProps> = ({
   );
 };
 
-SearchField.displayName = 'SearchField';
+SearchFieldComponent.displayName = 'SearchFieldComponent';

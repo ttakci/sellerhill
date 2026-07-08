@@ -2,6 +2,10 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
+export const TriggerWrapper = styled.div`
+  cursor: pointer;
+`;
+
 export const Container = styled.div`
   position: relative;
   display: block;

@@ -1,2 +1,2 @@
-export * from './Drawer.component';
-export * from './Drawer.types';
+export { Drawer } from './Drawer.container';
+export type { DrawerComponentProps, DrawerProps, DrawerSize } from './Drawer.types';

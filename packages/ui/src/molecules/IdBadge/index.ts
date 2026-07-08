@@ -1,2 +1,2 @@
-export { IdBadge } from './IdBadge.component';
-export type { IdBadgeProps, StoreType } from './IdBadge.types';
+export { IdBadge } from './IdBadge.container';
+export type { IdBadgeComponentProps, IdBadgeProps, StoreType } from './IdBadge.types';

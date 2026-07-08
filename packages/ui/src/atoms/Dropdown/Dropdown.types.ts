@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import { IconName } from '../Icon';
 
@@ -17,4 +17,18 @@ export interface DropdownProps {
   direction?: 'up' | 'down';
   width?: string;
   className?: string;
+}
+
+export interface DropdownComponentProps {
+  trigger: React.ReactNode;
+  items: DropdownItem[];
+  header?: React.ReactNode;
+  align: 'left' | 'right';
+  direction?: 'up' | 'down';
+  width?: string;
+  className?: string;
+  isOpen: boolean;
+  containerRef: React.RefObject<HTMLDivElement>;
+  onTriggerClick: () => void;
+  onItemClick: (item: DropdownItem) => void;
 }

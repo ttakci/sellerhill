@@ -7,6 +7,10 @@ export const PopoverWrapper = styled.div`
   position: relative;
 `;
 
+export const TriggerWrapper = styled.div`
+  display: inline-flex;
+`;
+
 export const PopoverContent = styled.div<{ $position: string }>`
   position: absolute;
   z-index: 1000;

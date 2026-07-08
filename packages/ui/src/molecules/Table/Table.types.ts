@@ -1,5 +1,36 @@
 import type React from 'react';
 
+export interface TableComponentProps<T = unknown> {
+  columns: TableColumn<T>[];
+  data: T[];
+  emptyMessage?: string;
+  className?: string;
+  footer?: React.ReactNode;
+  sortColumn?: string;
+  sortDirection?: 'asc' | 'desc';
+  selectable?: boolean;
+  selectedRows?: T[];
+  bulkActions?: BulkAction<T>[];
+  bulkActionsPlaceholder?: string;
+  onFilter?: () => void;
+  onDownload?: () => void;
+  actions?: React.ReactNode;
+  pagination?: TableProps<T>['pagination'];
+  bulkValue: string | number;
+  bulkOptions: { value: string; label: string }[];
+  overflowRef: React.RefObject<HTMLDivElement>;
+  onRowClick: (row: T, index: number) => void;
+  onSort: (columnKey: string) => void;
+  onSelectAll: (checked: boolean) => void;
+  onSelectRow: (row: T, checked: boolean) => void;
+  onBulkChange: (value: string | number) => void;
+  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseUpOrLeave: () => void;
+  isAllSelected: boolean;
+  hasToolbar: boolean;
+}
+
 export interface TableColumn<T = unknown> {
   key: string;
   header: string;

@@ -1,49 +1,27 @@
-import styled from '@emotion/styled';
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 
 import { Icon } from '../../atoms/Icon';
-import { tkn } from '../../theme/tkn';
 
 import * as S from './Collapsible.style';
-import type { CollapsibleProps } from './Collapsible.types';
+import type { CollapsibleComponentProps } from './Collapsible.types';
 
-const TitleWrapper = styled.span`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const Collapsible = ({
+export const CollapsibleComponent = ({
   title,
   children,
-  defaultOpen = false,
   icon,
-  onChange,
   className,
-}: CollapsibleProps): React.ReactElement => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [maxHeight, setMaxHeight] = useState<number | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setMaxHeight(contentRef.current.scrollHeight);
-    }
-  }, [children]);
-
-  const toggle = () => {
-    const next = !isOpen;
-    setIsOpen(next);
-    onChange?.(next);
-  };
-
+  isOpen,
+  maxHeight,
+  contentRef,
+  onToggle,
+}: CollapsibleComponentProps): React.ReactElement => {
   return (
     <S.CollapsibleContainer className={className}>
-      <S.CollapsibleHeader $isOpen={isOpen} onClick={toggle}>
-        <TitleWrapper>
+      <S.CollapsibleHeader $isOpen={isOpen} onClick={onToggle}>
+        <S.TitleWrapper>
           {icon}
           {title}
-        </TitleWrapper>
+        </S.TitleWrapper>
         <span className="collapsible-chevron">
           <Icon name="chevron-down" size="sm" />
         </span>
@@ -55,4 +33,4 @@ export const Collapsible = ({
   );
 };
 
-Collapsible.displayName = 'Collapsible';
+CollapsibleComponent.displayName = 'CollapsibleComponent';
