@@ -89,6 +89,13 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
 
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* Force children (Text spans, Icon wrappers) to inherit button color
+     so Text's default text.primary doesn't override variant colors */
+  & > span,
+  & > div {
+    color: inherit;
+  }
+
   ${({ $variant, theme }) => {
     switch ($variant) {
       case 'primary':

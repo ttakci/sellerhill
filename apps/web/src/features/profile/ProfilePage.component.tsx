@@ -45,7 +45,6 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
         subtitle={t('profile.subtitle')}
         actions={
           <Button variant={isEditing ? 'secondary' : 'primary'} onClick={onToggleEdit} disabled={isLoading}>
-            <Icon name={isEditing ? 'x' : 'edit'} size={18} />
             {isEditing ? t('translation:common.cancel') : t('profile.edit')}
           </Button>
         }

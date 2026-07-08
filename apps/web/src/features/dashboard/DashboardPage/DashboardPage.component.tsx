@@ -164,7 +164,7 @@ export const DashboardPageComponent = ({
 
         {filteredListingId && (
           <Button variant="text" onClick={() => onListingSelect(null)}>
-            <Icon name="x" size={14} /> <Text>{t('dashboard.clearFilter')}</Text>
+            <Text>{t('dashboard.clearFilter')}</Text>
           </Button>
         )}
 
@@ -217,7 +217,7 @@ export const DashboardPageComponent = ({
             <Icon name="filter" size={14} color={theme.colors.semantic.info} />
             <Text variant="body-xs" weight="medium">{t('dashboard.filteredBy', { title: listing.title })}</Text>
             <Button variant="text" onClick={() => onListingSelect(null)}>
-              <Icon name="x" size={14} />
+              <Text>{t('dashboard.clearFilter')}</Text>
             </Button>
           </S.FilterBanner>
         ) : null;

@@ -109,11 +109,9 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
         actions={
           <>
             <Button variant="secondary" onClick={onRefresh} disabled={isLoading}>
-              <Icon name="sync" />
               <Text>{t('translation:common.actions.refresh')}</Text>
             </Button>
             <Button variant="primary" onClick={onAddListing}>
-              <Icon name="plus" />
               <Text>{t('listings.actions.addListing')}</Text>
             </Button>
           </>
@@ -157,7 +155,6 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
               </S.ResultCount>
               {hasActiveFilters && (
                 <Button variant="text" size="small" onClick={onClearFilters}>
-                  <Icon name="x" size={14} />
                   <Text>{t('listings.filters.clearAll')}</Text>
                 </Button>
               )}
