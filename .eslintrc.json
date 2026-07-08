@@ -22,11 +22,11 @@
     "design-system/no-inline-styles": "error",
     "design-system/no-styled-typography": "error",
     "design-system/no-bare-text-in-button": "error",
-    // Structural rules (Task 2) — off by default; on via audit CLI in Task 6.
-    "design-system/styled-only-in-style-files": "off",
-    "design-system/types-only-in-types-files": "off",
-    "design-system/logic-only-in-container": "off",
-    "design-system/no-styled-in-container": "off",
+    // Structural rules (Task 2) — activated Task 17 after Phase 3 refactor complete.
+    "design-system/styled-only-in-style-files": "error",
+    "design-system/types-only-in-types-files": "error",
+    "design-system/logic-only-in-container": "error",
+    "design-system/no-styled-in-container": "error",
     // "design-system/no-implicit-i18n-namespaces": "error",
     // "design-system/no-native-select": "error",
 

@@ -9,6 +9,16 @@ export interface ColumnOption {
   alwaysVisible?: boolean;
 }
 
+export interface DataTablePagination {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (rowsPerPage: number) => void;
+  labelRowsPerPage?: string;
+  labelInfo?: string;
+}
+
 export interface DataTableProps<T> {
   /** Table column definitions */
   columns: TableColumn<T>[];
@@ -64,17 +74,41 @@ export interface DataTableProps<T> {
   actions?: ReactNode;
 
   // --- Pagination ---
-  pagination?: {
-    count: number;
-    page: number;
-    rowsPerPage: number;
-    onPageChange: (page: number) => void;
-    onRowsPerPageChange: (rowsPerPage: number) => void;
-    labelRowsPerPage?: string;
-    labelInfo?: string;
-  };
+  pagination?: DataTablePagination;
 
   // --- Misc ---
+  emptyMessage?: string;
+  onRowClick?: (row: T, index: number) => void;
+  className?: string;
+}
+
+/** Internal props for the presentation component (computed by container). */
+export interface DataTableComponentProps<T> {
+  columns: TableColumn<T>[];
+  data: T[];
+  renderGridCard: (item: T, index: number) => ReactNode;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  hideViewToggle: boolean;
+  selectable?: boolean;
+  selectedRows?: T[];
+  onSelectionChange?: (selectedRows: T[]) => void;
+  bulkActions?: BulkAction<T>[];
+  bulkActionsPlaceholder?: string;
+  bulkValue: string | number;
+  bulkOptions: { value: string; label: string }[];
+  onBulkChange: (value: string | number) => void;
+  columnOptions?: ColumnOption[];
+  visibleColumnKeys?: string[];
+  onToggleColumn?: (key: string) => void;
+  columnManagerLabel?: string;
+  sortColumn?: string;
+  sortDirection?: 'asc' | 'desc';
+  onSort?: (column: string) => void;
+  onDownload?: () => void;
+  toolbarLeft?: ReactNode;
+  actions?: ReactNode;
+  pagination?: DataTablePagination;
   emptyMessage?: string;
   onRowClick?: (row: T, index: number) => void;
   className?: string;

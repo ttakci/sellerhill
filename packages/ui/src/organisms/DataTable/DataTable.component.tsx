@@ -1,31 +1,31 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 
 import { Icon } from '../../atoms/Icon';
 import { IconButton } from '../../atoms/IconButton';
-import { useIsMobile } from '../../hooks/useMediaQuery';
 import { Select } from '../../molecules/Select';
 import { Table } from '../../molecules/Table';
 import { TablePagination } from '../../molecules/Table/TablePagination.component';
 import { ViewToggle } from '../../molecules/ViewToggle/ViewToggle.component';
-import type { ViewMode } from '../../molecules/ViewToggle/ViewToggle.types';
 
 import { ColumnManager } from './ColumnManager';
 import * as S from './DataTable.style';
-import type { DataTableProps } from './DataTable.types';
+import type { DataTableComponentProps } from './DataTable.types';
 
-export const DataTable = <T,>({
+export const DataTableComponent = <T,>({
   columns,
   data,
   renderGridCard,
-  viewMode: controlledViewMode,
-  defaultViewMode,
+  viewMode,
   onViewModeChange,
-  hideViewToggle = false,
+  hideViewToggle,
   selectable,
-  selectedRows = [],
+  selectedRows,
   onSelectionChange,
   bulkActions,
   bulkActionsPlaceholder,
+  bulkValue,
+  bulkOptions,
+  onBulkChange,
   columnOptions,
   visibleColumnKeys,
   onToggleColumn,
@@ -40,50 +40,7 @@ export const DataTable = <T,>({
   emptyMessage,
   onRowClick,
   className,
-}: DataTableProps<T>): React.ReactElement => {
-  const isMobile = useIsMobile();
-  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(defaultViewMode ?? (isMobile ? 'grid' : 'table'));
-
-  const viewMode = controlledViewMode ?? internalViewMode;
-
-  const handleViewModeChange = useCallback(
-    (mode: ViewMode) => {
-      if (!controlledViewMode) {
-        setInternalViewMode(mode);
-      }
-      onViewModeChange?.(mode);
-    },
-    [controlledViewMode, onViewModeChange]
-  );
-
-  // Bulk actions state
-  const [bulkValue, setBulkValue] = useState<string | number>('');
-
-  const bulkOptions = useMemo(
-    () => [
-      { value: '__placeholder__', label: bulkActionsPlaceholder || 'Bulk Actions' },
-      ...(bulkActions?.map((action, idx) => ({
-        value: idx.toString(),
-        label: action.label,
-      })) || []),
-    ],
-    [bulkActions, bulkActionsPlaceholder]
-  );
-
-  const handleBulkChange = useCallback(
-    (value: string | number) => {
-      if (value === '__placeholder__') {
-        return;
-      }
-      const actionIndex = parseInt(value as string, 10);
-      if (!isNaN(actionIndex) && bulkActions?.[actionIndex]) {
-        bulkActions[actionIndex].onClick(selectedRows);
-      }
-      setBulkValue('');
-    },
-    [bulkActions, selectedRows]
-  );
-
+}: DataTableComponentProps<T>): React.ReactElement => {
   const hasBulkActions = bulkActions && bulkActions.length > 0 && data.length > 0;
   const showColumnManager = viewMode === 'table' && columnOptions && columnOptions.length > 0;
   const hasToolbar = hasBulkActions || !hideViewToggle || onDownload || actions || showColumnManager || toolbarLeft;
@@ -93,14 +50,14 @@ export const DataTable = <T,>({
       {hasToolbar && (
         <S.Toolbar>
           <S.ToolbarLeft>
-            {!hideViewToggle && <ViewToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />}
+            {!hideViewToggle && <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />}
             {hasBulkActions && (
               <S.BulkSelectWrapper>
                 <Select
                   size="small"
                   value={bulkValue}
                   options={bulkOptions}
-                  onChange={handleBulkChange}
+                  onChange={onBulkChange}
                   placeholder={bulkActionsPlaceholder || 'Bulk Actions'}
                   fullWidth={false}
                 />
@@ -165,4 +122,4 @@ export const DataTable = <T,>({
   );
 };
 
-DataTable.displayName = 'DataTable';
+DataTableComponent.displayName = 'DataTableComponent';

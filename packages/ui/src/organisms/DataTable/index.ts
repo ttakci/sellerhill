@@ -1,2 +1,2 @@
-export { DataTable } from './DataTable.component';
+export { DataTable } from './DataTable.container';
 export type { ColumnOption, DataTableProps } from './DataTable.types';
