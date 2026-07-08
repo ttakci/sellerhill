@@ -65,6 +65,9 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
     opt.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // handleSelect is created per-render so it always closes over the latest
+  // `onChange` — whether from user props (manual mode) or field.onChange
+  // (Controller mode, where standaloneProps.onChange is overridden below).
   const handleSelect = (option: SelectOption) => {
     onChange?.(option.value);
     setIsOpen(false);
@@ -157,6 +160,11 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
           {...rest}
           value={field.value}
           onChange={field.onChange}
+          onSelect={(option: SelectOption) => {
+            field.onChange(option.value);
+            setIsOpen(false);
+            setSearchQuery('');
+          }}
           error={controllerError}
         />
       )}

@@ -11,6 +11,7 @@ import type {
 const TextInputInnerContainer = (
   props: Omit<TextInputInnerComponentProps, 'isFocused' | 'isPasswordVisible' | 'inputRef' | 'hasValue' | 'effectiveType' | 'effectiveIconRight' | 'isPassword' | 'onFocus' | 'onBlurField' | 'onContainerClick' | 'onTogglePasswordVisibility'>
 ) => {
+  // hasValue is omitted from props and computed by TextInputInner itself.
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +44,6 @@ const TextInputInnerContainer = (
       isFocused={isFocused}
       isPasswordVisible={isPasswordVisible}
       inputRef={inputRef}
-      hasValue={false}
       effectiveType={effectiveType}
       effectiveIconRight={effectiveIconRight}
       isPassword={isPassword}

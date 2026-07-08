@@ -32,7 +32,8 @@ export interface TextInputInnerComponentProps {
   isFocused: boolean;
   isPasswordVisible: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
-  hasValue: boolean;
+  /** @deprecated computed internally from field.value — do not pass */
+  hasValue?: boolean;
   effectiveType: string;
   effectiveIconRight?: IconName;
   isPassword: boolean;
