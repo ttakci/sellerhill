@@ -1,5 +1,7 @@
 export { AmazonAccountDrawer } from './AmazonAccountDrawer';
 export type { AmazonAccountDrawerProps } from './AmazonAccountDrawer';
+export { EbayAccountDrawer } from './EbayAccountDrawer/EbayAccountDrawer.component';
+export type { EbayAccountDrawerProps } from './EbayAccountDrawer/EbayAccountDrawer.types';
 export { ApiAccessDrawer } from './ApiAccessDrawer';
 export type { ApiAccessDrawerProps } from './ApiAccessDrawer';
 export { ChangePasswordDrawer } from './ChangePasswordDrawer';

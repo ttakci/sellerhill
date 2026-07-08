@@ -3,7 +3,6 @@
  * Single scrolling page consolidating all settings sections.
  */
 
-import { EbayAccountStatus } from '@repo/shared';
 import {
   Button,
   Card,
@@ -21,6 +20,7 @@ import {
   AmazonAccountDrawer,
   ApiAccessDrawer,
   ChangePasswordDrawer,
+  EbayAccountDrawer,
   LanguageDrawer,
   ListingGroupDrawer,
   NotificationsDrawer,
@@ -31,60 +31,6 @@ import {
 
 import * as S from './SettingsHubPage.style';
 import type { SettingsHubPageComponentProps } from './SettingsHubPage.types';
-
-const EbayAccountSection = ({
-  accounts,
-  onManage,
-  onConnect,
-}: {
-  accounts: SettingsHubPageComponentProps['ebayAccounts'];
-  onManage: () => void;
-  onConnect: () => void;
-}): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
-  const connected = accounts.find((a) => a.status === EbayAccountStatus.ACTIVE);
-
-  return (
-    <SettingsCard
-      variant="section"
-      header={{
-        icon: 'storefront',
-        title: t('translation:settingsHub.sections.ebay.title'),
-        subtitle: t('translation:settingsHub.sections.ebay.subtitle'),
-      }}
-      headerRight={
-        connected ? (
-          <Button variant="text" onClick={onManage}>
-            <Text>{t('translation:settingsHub.sections.ebay.manage')}</Text>
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={onConnect}>
-            <Text>{t('translation:settingsHub.sections.ebay.connect')}</Text>
-          </Button>
-        )
-      }
-    >
-      {connected ? (
-        <S.MetaGrid>
-          <S.MetaItem>
-            <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.ebay.sellerId')}</Text>
-            <Text variant="body-sm" weight="medium">{connected.sellerId}</Text>
-          </S.MetaItem>
-          <S.MetaItem>
-            <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.ebay.marketplace')}</Text>
-            <Text variant="body-sm" weight="medium">{connected.marketplaceId}</Text>
-          </S.MetaItem>
-          <S.MetaItem>
-            <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.ebay.status')}</Text>
-            <StatusBadge status={connected.status} size="sm" />
-          </S.MetaItem>
-        </S.MetaGrid>
-      ) : (
-        <Text variant="body-sm" color="text.secondary">{t('translation:settingsHub.sections.ebay.notConnected')}</Text>
-      )}
-    </SettingsCard>
-  );
-};
 
 const AmazonAccountsSection = ({
   accounts,
@@ -284,18 +230,19 @@ export const SettingsHubPageComponent = ({
             <Text>{t('translation:settingsHub.sections.profile.tabs.personalInfo')}</Text>
             <Icon name="chevron-right" size={22} color="brand.primary" />
           </S.ProfileNavItem>
+          <S.ProfileNavItem
+            type="button"
+            onClick={() => onOpenDrawer('ebay')}
+            aria-label={t('translation:settingsHub.sections.ebay.title')}
+          >
+            <Text>{t('translation:settingsHub.sections.ebay.title')}</Text>
+            <Icon name="chevron-right" size={22} color="brand.primary" />
+          </S.ProfileNavItem>
         </S.ProfileHeroActions>
       </S.ProfileHeroCard>
 
-      {/* eBay + Amazon row */}
-      <S.TwoColGrid>
-        <EbayAccountSection
-          accounts={ebayAccounts}
-          onManage={() => onOpenDrawer('ebay')}
-          onConnect={onNavigateToEbayConnect}
-        />
-        <AmazonAccountsSection accounts={amazonAccounts} onAdd={() => onOpenDrawer('amazonAdd')} />
-      </S.TwoColGrid>
+      {/* Amazon row (eBay moved to profile hero nav item) */}
+      <AmazonAccountsSection accounts={amazonAccounts} onAdd={() => onOpenDrawer('amazonAdd')} />
 
       {/* Store config + Listing groups row */}
       <S.TwoColGrid>
@@ -358,6 +305,12 @@ export const SettingsHubPageComponent = ({
 
       {/* Drawers */}
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile} />
+      <EbayAccountDrawer
+        isOpen={activeDrawer === 'ebay'}
+        onClose={onCloseDrawer}
+        accounts={ebayAccounts}
+        onConnect={onNavigateToEbayConnect}
+      />
       <AmazonAccountDrawer isOpen={activeDrawer === 'amazonAdd'} onClose={onCloseDrawer} />
       <StoreConfigDrawer isOpen={activeDrawer === 'storeConfig'} onClose={onCloseDrawer} />
       <ListingGroupDrawer
