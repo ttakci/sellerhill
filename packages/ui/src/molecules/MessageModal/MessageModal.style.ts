@@ -6,14 +6,17 @@ import { tkn } from '../../theme/tkn';
 /**
  * Override Modal's size prop — popup is always 390px (24.375rem).
  * 12px border-radius (radius.xl) distinct from Modal's default 8px (radius.lg).
+ *
+ * PopupModal = styled(Modal) → className lands on ModalContainer itself
+ * (ModalContainer applies className={className}), so we style & directly.
+ * The previous &>div selector targeted Header/Body/Footer children, not the container.
  */
 export const PopupModal = styled(Modal)`
-  & > div {
-    max-width: 24.375rem !important;
-    border-radius: ${tkn('radius.xl')};
-    min-height: 12.5rem;
-    max-height: 80vh;
-  }
+  width: 24.375rem; /* 390px */
+  max-width: 90vw; /* responsive cap */
+  border-radius: ${tkn('radius.xl')};
+  min-height: 12.5rem; /* 200px */
+  max-height: 80vh;
 `;
 
 export const Content = styled.div`
