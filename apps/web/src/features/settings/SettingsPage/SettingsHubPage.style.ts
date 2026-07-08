@@ -26,6 +26,7 @@ export const ProfileHeroCard = styled.div`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.xl')};
+  box-shadow: ${tkn('shadows.sm')};
 
   @media (max-width: 36rem) { /* 576px */
     flex-direction: column;
@@ -75,7 +76,7 @@ export const ProfileNavItem = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.lg')};
   cursor: pointer;
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   border-radius: ${tkn('radius.md')};
@@ -83,11 +84,20 @@ export const ProfileNavItem = styled.button`
   font-weight: ${tkn('typography.fontWeight.medium')};
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
-  transition: background-color 0.18s ease;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
   white-space: nowrap;
+  min-width: 14rem;
 
   &:hover {
     background-color: ${tkn('colors.background.tertiary')};
+    color: ${tkn('colors.brand.primary')};
+
+    & > svg {
+      color: ${tkn('colors.brand.primary')};
+      transform: translateX(0.125rem); /* 2px nudge */
+    }
   }
 
   &:focus-visible {
@@ -98,6 +108,14 @@ export const ProfileNavItem = styled.button`
   & > svg {
     color: ${tkn('colors.text.tertiary')};
     flex-shrink: 0;
+    transition:
+      color 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  @media (max-width: 36rem) {
+    width: 100%;
+    min-width: 0;
   }
 `;
 

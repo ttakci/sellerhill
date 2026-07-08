@@ -280,10 +280,10 @@ export const SettingsHubPageComponent = ({
           <S.ProfileNavItem
             type="button"
             onClick={() => onOpenDrawer('profile')}
-            aria-label={t('translation:settingsHub.sections.profile.edit')}
+            aria-label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
           >
-            <Text>{t('translation:settingsHub.sections.profile.edit')}</Text>
-            <Icon name="chevron-right" size={20} />
+            <Text>{t('translation:settingsHub.sections.profile.tabs.personalInfo')}</Text>
+            <Icon name="chevron-right" size={16} />
           </S.ProfileNavItem>
         </S.ProfileHeroActions>
       </S.ProfileHeroCard>
