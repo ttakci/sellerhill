@@ -91,8 +91,6 @@ export const ProfileNavItem = styled.button`
   min-width: 14rem;
 
   &:hover {
-    background-color: ${tkn('colors.background.tertiary')};
-
     & > svg {
       transform: translateX(0.125rem); /* 2px nudge */
     }

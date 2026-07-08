@@ -272,9 +272,8 @@ export const SettingsHubPageComponent = ({
       <S.ProfileHeroCard>
         <S.Avatar>{initials}</S.Avatar>
         <S.ProfileHeroInfo>
-          <Text variant="h4" weight="bold">{displayName || t('translation:settingsHub.sections.profile.title')}</Text>
+          <Text variant="h1" weight="bold">{displayName || t('translation:settingsHub.sections.profile.title')}</Text>
           {profile?.email && <Text variant="body-sm" color="text.secondary">{profile.email}</Text>}
-          <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.profile.plan')}</Text>
         </S.ProfileHeroInfo>
         <S.ProfileHeroActions>
           <S.ProfileNavItem
