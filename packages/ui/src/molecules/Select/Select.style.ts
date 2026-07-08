@@ -22,7 +22,7 @@ export const FieldWrapper = styled.div<{
   display: flex;
   align-items: center;
   position: relative;
-  height: ${({ $size }) => ($size === 'small' ? '2.75rem' : $size === 'large' ? '3.5rem' : '3rem')};
+  height: ${({ $size }) => ($size === 'small' ? '3.25rem' : $size === 'large' ? '4.25rem' : '3.75rem')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid
     ${({ $isFocused, $hasError, theme }) =>
@@ -32,7 +32,7 @@ export const FieldWrapper = styled.div<{
           ? theme.colors.brand.primary
           : theme.colors.border.primary};
   border-radius: ${tkn('radius.md')};
-  padding: 0 ${({ $size }) => ($size === 'small' ? tkn('spacing.sm') : tkn('spacing.md'))};
+  padding: 0 1.125rem;
   transition: all ${tkn('transitions.fast')};
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'pointer')};
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
@@ -57,7 +57,7 @@ export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boole
     if ($size === 'large') {return '1.375rem';}
     return '1.125rem';
   }};
-  padding-left: ${({ $hasIconLeft, $size }) => ($hasIconLeft ? ($size === 'small' ? '1.5rem' : '2rem') : '0')};
+  padding-left: ${({ $hasIconLeft }) => ($hasIconLeft ? '3rem' : '0')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -74,14 +74,8 @@ export const FloatingLabel = styled.label<{
 }>`
   position: absolute;
   top: 0;
-  left: ${({ $hasIconLeft, $size }) =>
-    $hasIconLeft
-      ? $size === 'small'
-        ? '2rem'
-        : '2.75rem'
-      : $size === 'small'
-        ? tkn('spacing.sm')
-        : tkn('spacing.md')};
+  left: ${({ $hasIconLeft }) =>
+    $hasIconLeft ? '3rem' : '1.125rem'};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -102,17 +96,18 @@ export const FloatingLabel = styled.label<{
 
   ${({ $isFocused, $hasValue, $size, theme }) => {
     const isSmall = $size === 'small';
+    const isLarge = $size === 'large';
     const isActive = $isFocused || $hasValue;
 
     if (isActive) {
-      const y = isSmall ? '0.375rem' : '0.5rem';
+      const y = isSmall ? '0.625rem' : isLarge ? '0.875rem' : '0.75rem';
       return `
         transform: translateY(${y}) scale(0.75);
         font-weight: ${tkn('typography.fontWeight.semibold')({ theme })};
       `;
     }
 
-    const y = isSmall ? '0.5rem' : '1rem';
+    const y = isSmall ? '1rem' : isLarge ? '1.5rem' : '1.25rem';
     return `
       transform: translateY(${y}) scale(1);
       font-weight: ${tkn('typography.fontWeight.normal')({ theme })};
@@ -126,13 +121,12 @@ export const DecorationWrapper = styled.div<{ $side: 'left' | 'right'; $size?: s
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  ${({ $side, $size }) =>
-    $side === 'left'
-      ? `left: ${$size === 'small' ? '0.5rem' : '0.75rem'};`
-      : `right: ${$size === 'small' ? '0.5rem' : '0.75rem'};`}
+  ${({ $side }) =>
+    $side === 'left' ? 'left: 0;' : 'right: 0;'}
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 3rem;
   color: ${tkn('colors.text.tertiary')};
   pointer-events: none;
 `;
@@ -276,7 +270,7 @@ export const BottomSheet = styled.div`
   background: ${tkn('colors.surface.primary')};
   border-top-left-radius: ${tkn('radius.xl')};
   border-top-right-radius: ${tkn('radius.xl')};
-  max-height: 80vh;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
   animation: slideUp ${tkn('transitions.normal')};
@@ -325,9 +319,29 @@ export const CloseButton = styled.button`
 `;
 
 export const Handle = styled.div`
-  width: 2.5rem;
+  width: 2rem;
   height: 0.25rem;
-  background: ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.md')};
-  margin: ${tkn('spacing.sm+')} auto 0;
+  background: ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.full')};
+  margin: ${tkn('spacing.sm')} auto ${tkn('spacing.md')};
+  flex-shrink: 0;
+`;
+
+export const MobileOption = styled.div<{ $isSelected: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  padding: 0 ${tkn('spacing.sm')};
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.colors.brand.primary : theme.colors.text.primary};
+  font-size: ${tkn('typography.fontSize.md')};
+  cursor: pointer;
+
+  &:active {
+    background-color: ${({ theme }) => theme.colors.background.tertiary};
+  }
 `;

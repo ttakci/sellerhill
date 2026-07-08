@@ -37,19 +37,66 @@ export const ModernSelectStandalone = ({
   const renderDropdown = () => {
     if (!isOpen) {return null;}
 
-    const content = (
-      <>
-        {isSearchable && (
-          <S.SearchWrapper>
-            <S.SearchInput
-              autoFocus
-              placeholder={searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </S.SearchWrapper>
-        )}
+    const searchEl = isSearchable && (
+      <S.SearchWrapper>
+        <S.SearchInput
+          autoFocus
+          placeholder={searchPlaceholder}
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      </S.SearchWrapper>
+    );
+
+    if (isMobile) {
+      return createPortal(
+        <S.Overlay onClick={onClose}>
+          <S.BottomSheet onClick={(e) => e.stopPropagation()}>
+            <S.Handle />
+            <S.BottomSheetHeader>
+              <S.BottomSheetTitle>{label || placeholder}</S.BottomSheetTitle>
+              <S.CloseButton onClick={onClose}>
+                <Icon name="x" size={20} />
+              </S.CloseButton>
+            </S.BottomSheetHeader>
+            {searchEl}
+            <S.OptionsList>
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <S.MobileOption
+                    key={option.value}
+                    $isSelected={value === option.value}
+                    onClick={() => onSelect(option)}
+                  >
+                    <S.OptionContent>
+                      {option.icon && <Icon name={option.icon} size={20} />}
+                      <span>{option.label}</span>
+                    </S.OptionContent>
+                    {value === option.value && <Icon name="check" size={20} />}
+                  </S.MobileOption>
+                ))
+              ) : (
+                <S.NoResultsMessage>
+                  {noResultsMessage}
+                </S.NoResultsMessage>
+              )}
+            </S.OptionsList>
+            <S.SafeAreaSpacer />
+          </S.BottomSheet>
+        </S.Overlay>,
+        document.body
+      );
+    }
+
+    return createPortal(
+      <S.DropdownContainer
+        ref={dropdownRef}
+        // eslint-disable-next-line design-system/no-inline-styles -- dynamic dropdown positioning computed at runtime
+        style={dropdownStyle}
+        $placement={placement}
+      >
+        {searchEl}
         <S.OptionsList>
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option) => (
@@ -72,36 +119,6 @@ export const ModernSelectStandalone = ({
             </S.NoResultsMessage>
           )}
         </S.OptionsList>
-      </>
-    );
-
-    if (isMobile) {
-      return createPortal(
-        <S.Overlay onClick={onClose}>
-          <S.BottomSheet onClick={(e) => e.stopPropagation()}>
-            <S.Handle />
-            <S.BottomSheetHeader>
-              <S.BottomSheetTitle>{label || placeholder}</S.BottomSheetTitle>
-              <S.CloseButton onClick={onClose}>
-                <Icon name="x" size={20} />
-              </S.CloseButton>
-            </S.BottomSheetHeader>
-            {content}
-            <S.SafeAreaSpacer />
-          </S.BottomSheet>
-        </S.Overlay>,
-        document.body
-      );
-    }
-
-    return createPortal(
-      <S.DropdownContainer
-        ref={dropdownRef}
-        // eslint-disable-next-line design-system/no-inline-styles -- dynamic dropdown positioning computed at runtime
-        style={dropdownStyle}
-        $placement={placement}
-      >
-        {content}
       </S.DropdownContainer>,
       document.body
     );
