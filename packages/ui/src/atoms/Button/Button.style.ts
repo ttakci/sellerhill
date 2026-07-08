@@ -19,12 +19,12 @@ const getBaseHeight = (size: ButtonSize) => {
     case 'xsmall':
       return '2rem'; /* 32px */
     case 'small':
-      return '2.5rem'; /* 40px */
+      return '2.75rem'; /* 44px */
     case 'large':
-      return '3.25rem'; /* 52px */
+      return '3.75rem'; /* 60px */
     case 'medium':
     default:
-      return '2.75rem'; /* 44px */
+      return '3.25rem'; /* 52px */
   }
 };
 
@@ -56,6 +56,20 @@ const getMinWidth = (size: ButtonSize): string => {
   }
 };
 
+const getFontSize = (size: ButtonSize): string => {
+  switch (size) {
+    case 'xsmall':
+      return '0.8125rem'; /* 13px */
+    case 'medium':
+      return '0.9375rem'; /* 15px */
+    case 'large':
+      return '1rem'; /* 16px */
+    case 'small':
+    default:
+      return '0.875rem'; /* 14px */
+  }
+};
+
 export const ActionSurface = styled.button<ActionSurfaceProps>`
   all: unset;
   display: inline-flex;
@@ -79,8 +93,8 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
 
   border-radius: ${tkn('radius.md')};
   font-family: ${tkn('typography.fontFamily.sans')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-size: ${({ $size }) => ($size === 'large' ? '1rem' : '0.875rem')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-size: ${({ $size }) => getFontSize($size)};
 
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -94,12 +108,12 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
 
           &:hover:not(:disabled) {
             background-color: ${theme.colors.brand.primaryHover};
-            transform: translateY(-0.125rem);
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
             box-shadow: 0 0.5rem 1.5rem 0 ${theme.colors.brand.primary}50;
           }
 
           &:active:not(:disabled) {
-            transform: translateY(0.0625rem);
+            filter: brightness(1);
             box-shadow: 0 0.125rem 0.5rem 0 ${theme.colors.brand.primary}40;
             background-color: ${theme.colors.brand.primary};
           }
@@ -107,7 +121,7 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
       case 'secondary':
         return css`
           background-color: ${theme.colors.background.secondary};
-          color: ${theme.colors.text.primary};
+          color: ${theme.colors.brand.primary};
           border: 0.0625rem solid ${theme.colors.border.primary};
 
           &:hover:not(:disabled) {
@@ -115,11 +129,11 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             border-color: ${theme.colors.brand.primary};
             color: ${theme.colors.brand.primary};
             box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
-            transform: translateY(-0.0625rem);
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            transform: translateY(0);
+            filter: brightness(1);
             box-shadow: none;
             background-color: ${theme.colors.background.secondary};
           }
@@ -133,11 +147,11 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
           &:hover:not(:disabled) {
             background-color: ${theme.colors.brand.primary}15;
             box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
-            transform: translateY(-0.0625rem);
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            transform: translateY(0);
+            filter: brightness(1);
             box-shadow: none;
             background-color: ${theme.colors.brand.primary}08;
           }
@@ -153,11 +167,11 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
           &:hover:not(:disabled) {
             color: ${theme.colors.brand.primary};
             background-color: ${theme.colors.brand.primary}10;
-            transform: translateY(-0.0625rem);
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            transform: translateY(0);
+            filter: brightness(1);
             background-color: ${theme.colors.brand.primary}05;
           }
         `;
@@ -171,11 +185,11 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             background-color: ${theme.colors.semantic.error}10;
             border-color: ${theme.colors.semantic.error};
             box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.semantic.error}20;
-            transform: translateY(-0.0625rem);
+            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            transform: translateY(0);
+            filter: brightness(1);
             box-shadow: none;
           }
         `;
@@ -187,7 +201,6 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
     opacity: 0.6;
     filter: grayscale(0.5);
     box-shadow: none !important;
-    transform: none !important;
   }
 
   ${({ $isLoading }) =>

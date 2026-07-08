@@ -10,6 +10,9 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  // NOTE: iconLeft/iconRight/iconColor kept despite Task 1 brief requesting removal.
+  // Brief claimed these were unused, but 8 feature files pass iconLeft to <Button>.
+  // Removal requires a follow-up task to clean up feature code first.
   iconLeft?: IconName;
   iconRight?: IconName;
   iconColor?: string;

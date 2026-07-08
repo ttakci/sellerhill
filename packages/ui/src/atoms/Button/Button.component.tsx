@@ -16,6 +16,7 @@ export const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
+  // iconLeft/iconRight/iconColor retained: 8 feature files pass iconLeft to <Button>.
   const isIconOnly = iconOnly || (!children && !!(iconLeft || iconRight));
 
   return (
