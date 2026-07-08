@@ -50,8 +50,7 @@ function isInScope(filePath) {
   const f = normalize(filePath);
   return (
     f.includes('apps/web/src/') ||
-    f.includes('packages/ui/src/atoms/') ||
-    f.includes('packages/ui/src/molecules/')
+    f.includes('packages/ui/src/')
   );
 }
 
@@ -84,11 +83,9 @@ function check(filename, content) {
     violations.push('styled() found in *.container.tsx — move to *.style.ts');
   }
 
-  // styled only in .style.ts (skip atom/molecule historical for hook; ESLint catches)
+  // styled only in .style.ts
   if (!isStyle && !isComponent && !isContainer && STYLED_RE.test(content)) {
-    if (!f.includes('packages/ui/src/atoms/') && !f.includes('packages/ui/src/molecules/')) {
-      violations.push('styled() must live in *.style.ts');
-    }
+    violations.push('styled() must live in *.style.ts');
   }
 
   // type decls only in .types.ts

@@ -311,13 +311,12 @@ module.exports = {
 
         // Exempt checks
         if (filename.endsWith('.style.ts') || filename.endsWith('.style.tsx')) return {};
-        if (filename.includes('packages/ui/src/atoms/')) return {};
-        if (filename.includes('packages/ui/src/molecules/')) return {};
         if (filename.includes('apps/web/src/features/landing/')) return {};
         if (/\/api\//.test(filename)) return {};
         if (/\/store\.ts$/.test(filename)) return {};
         if (/\.config\.[tj]s(x|mjs|cjs)?$/.test(filename)) return {};
-        if (!filename.includes('apps/web/src/')) return {};
+        if (!filename.includes('apps/web/src/') &&
+            !filename.includes('packages/ui/src/')) return {};
 
         return {
           CallExpression(node) {
@@ -358,8 +357,7 @@ module.exports = {
         if (/\/store\.ts$/.test(filename)) return {};
         if (/\.config\.[tj]s(x|mjs|cjs)?$/.test(filename)) return {};
         if (!filename.includes('apps/web/src/') &&
-            !filename.includes('packages/ui/src/atoms/') &&
-            !filename.includes('packages/ui/src/molecules/')) return {};
+            !filename.includes('packages/ui/src/')) return {};
 
         const DECL_KINDS = new Set([
           'TSInterfaceDeclaration',
