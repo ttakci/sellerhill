@@ -20,7 +20,7 @@ const lightColors: ThemeColors = {
   surface: {
     primary: '#FFFFFF',
     secondary: '#f8fafc',
-    overlay: 'rgba(16, 24, 40, 0.4)',
+    overlay: 'rgba(0, 0, 0, 0.5)',
     loadingOverlay: 'rgba(255, 255, 255, 0.7)',
   },
 
@@ -120,7 +120,7 @@ const darkColors: ThemeColors = {
   surface: {
     primary: '#111318',
     secondary: '#1c1f2e',
-    overlay: 'rgba(2, 6, 23, 0.8)',
+    overlay: 'rgba(0, 0, 0, 0.7)',
     loadingOverlay: 'rgba(0, 0, 0, 0.7)',
   },
 
