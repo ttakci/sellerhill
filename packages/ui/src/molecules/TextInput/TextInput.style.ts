@@ -23,7 +23,7 @@ export const FieldWrapper = styled.div<FieldContainerProps>`
   flex-direction: column;
   width: 100%;
   overflow: hidden;
-  height: ${({ $size }) => ($size === 'small' ? '2.75rem' : $size === 'large' ? '3.75rem' : '3.25rem')};
+  height: ${({ $size }) => ($size === 'small' ? '3.25rem' : $size === 'large' ? '4.25rem' : '3.75rem')};
   background-color: ${({ theme, $isDisabled }) =>
     $isDisabled ? theme.colors.background.tertiary : theme.colors.background.secondary};
   border-radius: ${tkn('radius.md')};
@@ -61,7 +61,7 @@ const ICON_CONTAINER_WIDTH = '3rem'; /* 48px */
 export const FloatingLabel = styled.label<LabelProps>`
   position: absolute;
   top: 0;
-  left: ${({ $hasIconLeft }) => ($hasIconLeft ? ICON_CONTAINER_WIDTH : '1rem')};
+  left: ${({ $hasIconLeft }) => ($hasIconLeft ? ICON_CONTAINER_WIDTH : '1.125rem')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -85,14 +85,14 @@ export const FloatingLabel = styled.label<LabelProps>`
     const isActive = $isFocused || $hasValue;
 
     if (isActive) {
-      const y = isSmall ? '0.375rem' : isLarge ? '0.625rem' : '0.5rem';
+      const y = isSmall ? '0.625rem' : isLarge ? '0.875rem' : '0.75rem';
       return `
         transform: translateY(${y}) scale(0.75);
         font-weight: ${tkn('typography.fontWeight.semibold')({ theme })};
       `;
     }
 
-    const y = isSmall ? '0.75rem' : isLarge ? '1.25rem' : '1rem';
+    const y = isSmall ? '1rem' : isLarge ? '1.5rem' : '1.25rem';
     return `
       transform: translateY(${y}) scale(1);
       font-weight: ${tkn('typography.fontWeight.normal')({ theme })};
@@ -114,13 +114,13 @@ export const Input = styled.input<{
   height: 100%;
   padding-top: ${({ $hasLabel, $size }) => {
     if (!$hasLabel) {return '0';}
-    if ($size === 'small') {return '0.75rem';}
-    if ($size === 'large') {return '1.125rem';}
-    return '0.875rem';
+    if ($size === 'small') {return '1rem';}
+    if ($size === 'large') {return '1.375rem';}
+    return '1.125rem';
   }};
   padding-bottom: 0;
-  padding-left: ${({ $hasIconLeft }) => ($hasIconLeft ? ICON_CONTAINER_WIDTH : '1rem')};
-  padding-right: ${({ $hasIconRight }) => ($hasIconRight ? ICON_CONTAINER_WIDTH : '1rem')};
+  padding-left: ${({ $hasIconLeft }) => ($hasIconLeft ? ICON_CONTAINER_WIDTH : '1.125rem')};
+  padding-right: ${({ $hasIconRight }) => ($hasIconRight ? ICON_CONTAINER_WIDTH : '1.125rem')};
 
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
