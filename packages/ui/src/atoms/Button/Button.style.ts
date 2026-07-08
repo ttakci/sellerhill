@@ -3,16 +3,7 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-import { ButtonSize, ButtonVariant } from './Button.types';
-
-interface ActionSurfaceProps {
-  $variant: ButtonVariant;
-  $size: ButtonSize;
-  $fullWidth?: boolean;
-  $isLoading?: boolean;
-  $iconColor?: string;
-  $iconOnly?: boolean;
-}
+import { ActionSurfaceProps, ButtonSize } from './Button.types';
 
 const getBaseHeight = (size: ButtonSize) => {
   switch (size) {

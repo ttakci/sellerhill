@@ -1,5 +1,3 @@
-import { Icon } from '../Icon';
-
 import * as S from './Button.style';
 import { ButtonProps } from './Button.types';
 
@@ -8,16 +6,12 @@ export const Button = ({
   variant = 'primary',
   size = 'medium',
   isLoading = false,
-  iconLeft,
-  iconRight,
-  iconColor,
   fullWidth = false,
   iconOnly = false,
   disabled,
   ...props
 }: ButtonProps) => {
-  // iconLeft/iconRight/iconColor retained: 8 feature files pass iconLeft to <Button>.
-  const isIconOnly = iconOnly || (!children && !!(iconLeft || iconRight));
+  const isIconOnly = iconOnly || !children;
 
   return (
     <S.ActionSurface
@@ -25,7 +19,6 @@ export const Button = ({
       $size={size}
       $fullWidth={fullWidth}
       $isLoading={isLoading}
-      $iconColor={iconColor}
       $iconOnly={isIconOnly}
       disabled={disabled || isLoading}
       {...props}
@@ -38,11 +31,7 @@ export const Button = ({
         </S.LoadingContainer>
       )}
 
-      <S.ButtonLabel>
-        {iconLeft && <Icon name={iconLeft} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
-        {!isIconOnly && children}
-        {iconRight && <Icon name={iconRight} size={size === 'xsmall' ? 16 : 20} color={iconColor} />}
-      </S.ButtonLabel>
+      <S.ButtonLabel>{!isIconOnly && children}</S.ButtonLabel>
     </S.ActionSurface>
   );
 };

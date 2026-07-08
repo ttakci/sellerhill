@@ -37,7 +37,7 @@ export const AmazonAccountsPageComponent = ({
         title={t('amazon.accounts.title')}
         subtitle={t('amazon.accounts.subtitle')}
         action={
-          <Button variant="primary" iconLeft="plus" onClick={onOpenAddModal}>
+          <Button variant="primary" onClick={onOpenAddModal}>
             <Text>{t('amazon.accounts.addButton')}</Text>
           </Button>
         }
@@ -70,7 +70,6 @@ export const AmazonAccountsPageComponent = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  iconLeft="check-circle"
                   onClick={() => onVerify(account.id)}
                   isLoading={isVerifying === account.id}
                 >
@@ -79,7 +78,6 @@ export const AmazonAccountsPageComponent = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  iconLeft="edit"
                   onClick={() => {}}
                 >
                   <Text>{t('amazon.accounts.editButton')}</Text>
@@ -87,7 +85,6 @@ export const AmazonAccountsPageComponent = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  iconLeft="trash"
                   onClick={() => onDelete(account.id)}
                 >
                   <Text>{t('amazon.accounts.deleteButton')}</Text>
@@ -106,7 +103,7 @@ export const AmazonAccountsPageComponent = ({
             <S.EmptyDesc variant="body" color="text.secondary">
               {t('amazon.accounts.noAccountsDescription')}
             </S.EmptyDesc>
-            <Button variant="primary" iconLeft="plus" onClick={onOpenAddModal}>
+            <Button variant="primary" onClick={onOpenAddModal}>
               <Text>{t('amazon.accounts.addButton')}</Text>
             </Button>
           </S.EmptyStateInner>

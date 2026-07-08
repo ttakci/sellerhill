@@ -20,7 +20,7 @@ export const ListingSettingsGroupPageComponent = ({
         subtitle={<Text color="text.secondary">{t('listingSettingsGroup.subtitle')}</Text>}
         actions={
           groups.length > 0 ? (
-            <Button variant="primary" size="medium" onClick={onCreateGroup} iconLeft="plus">
+            <Button variant="primary" size="medium" onClick={onCreateGroup}>
               <Text>{t('listingSettingsGroup.createNewGroup')}</Text>
             </Button>
           ) : undefined
@@ -90,7 +90,7 @@ export const ListingSettingsGroupPageComponent = ({
             title={t('listingSettingsGroup.emptyState.title')}
             description={t('listingSettingsGroup.emptyState.description')}
           />
-          <Button variant="primary" size="medium" onClick={onCreateGroup} iconLeft="plus">
+          <Button variant="primary" size="medium" onClick={onCreateGroup}>
             <Text>{t('listingSettingsGroup.createNewGroup')}</Text>
           </Button>
         </S.EmptyStateWrapper>

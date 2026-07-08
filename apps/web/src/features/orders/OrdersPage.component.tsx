@@ -201,7 +201,7 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
         subtitle={t('orders.page.subtitle', { count: totalCount })}
         actions={
           <S.ActionsWrapper>
-            <Button variant="secondary" size="medium" iconLeft="refresh" onClick={onRefresh} isLoading={isRefreshing}>
+            <Button variant="secondary" size="medium" onClick={onRefresh} isLoading={isRefreshing}>
               <Text>{t('orders.actions.refresh')}</Text>
             </Button>
             <S.SearchBoxWrapper>
@@ -210,7 +210,6 @@ export const OrdersPageComponent: React.FC<OrdersPageComponentProps> = ({
                 placeholder={t('orders.actions.search')}
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
-                iconLeft="search"
                 fullWidth
               />
             </S.SearchBoxWrapper>

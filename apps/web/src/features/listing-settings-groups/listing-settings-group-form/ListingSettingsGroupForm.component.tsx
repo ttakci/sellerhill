@@ -108,7 +108,7 @@ export const ListingSettingsGroupFormComponent = ({
                 {t('listingSettingsGroup.pricingStrategy')}
               </S.SectionTitle>
             </S.SectionTitleContent>
-            <Button variant="primary" size="small" type="button" onClick={onAddRange} iconLeft="plus">
+            <Button variant="primary" size="small" type="button" onClick={onAddRange}>
               <Text>{t('listingSettingsGroup.addRange')}</Text>
             </Button>
           </S.SectionHeader>
@@ -337,7 +337,7 @@ export const ListingSettingsGroupFormComponent = ({
         </S.SplitGrid>
 
         <S.Actions>
-          <Button variant="danger" size="large" onClick={onCancel} iconLeft="x">
+          <Button variant="danger" size="large" onClick={onCancel}>
             <Text>{t('translation:common.cancel')}</Text>
           </Button>
           <Button
@@ -347,7 +347,6 @@ export const ListingSettingsGroupFormComponent = ({
               void handleSubmit(onSubmit)();
             }}
             isLoading={isLoading}
-            iconLeft="save"
           >
             <Text>{t('translation:common.save')}</Text>
           </Button>

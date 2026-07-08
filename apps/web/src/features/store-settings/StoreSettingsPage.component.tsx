@@ -129,7 +129,9 @@ export const StoreSettingsPageComponent = ({
         />
       </S.ScopeActionWrapper>
       <S.AddActionWrapper>
-        <Button variant="primary" onClick={onAddKeyword} size="medium" iconLeft="plus" />
+        <Button variant="primary" onClick={onAddKeyword} size="medium">
+          <Text>{t('storeSettings:storeSettings.addKeyword')}</Text>
+        </Button>
       </S.AddActionWrapper>
     </S.BlacklistActionGroup>
   );
@@ -153,7 +155,7 @@ export const StoreSettingsPageComponent = ({
         title={t('storeSettings:storeSettings.title')}
         subtitle={<Text color="text.secondary">{t('storeSettings:storeSettings.subtitle')}</Text>}
         actions={
-          <Button variant="primary" size="medium" onClick={() => void handleSubmit(onSave)()} iconLeft="save">
+          <Button variant="primary" size="medium" onClick={() => void handleSubmit(onSave)()}>
             <Text>{t('translation:common.save')}</Text>
           </Button>
         }

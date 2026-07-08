@@ -50,7 +50,7 @@ export const StoresPageComponent = ({
             <S.EmptyDesc variant="body" color="text.secondary">
               {t('ebay.onboarding.description')}
             </S.EmptyDesc>
-            <Button variant="primary" iconLeft="link" onClick={onConnect} isLoading={isConnecting}>
+            <Button variant="primary" onClick={onConnect} isLoading={isConnecting}>
               <Text>{t('ebay.connect.connectButton')}</Text>
             </Button>
           </S.EmptyStateInner>

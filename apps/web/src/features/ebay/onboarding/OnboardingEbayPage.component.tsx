@@ -30,7 +30,7 @@ export const OnboardingEbayPageComponent = ({
           </S.IconWrapper>
 
           <S.ActionGroup>
-            <Button onClick={onConnect} variant="primary" fullWidth size="large" isLoading={isLoading} iconLeft="link">
+            <Button onClick={onConnect} variant="primary" fullWidth size="large" isLoading={isLoading}>
               <Text>{t('ebay:ebay.onboarding.connectButton')}</Text>
             </Button>
             <Button onClick={onSkip} variant="secondary" fullWidth size="large">

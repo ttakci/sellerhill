@@ -87,7 +87,6 @@ export const LoginPageComponent = ({
                 label={t('auth:auth.login.emailLabel')}
                 type="email"
                 isDisabled={isLoading || isSubmitting}
-                iconLeft="mail"
               />
 
               <ModernTextInput
@@ -96,7 +95,6 @@ export const LoginPageComponent = ({
                 label={t('auth:auth.login.passwordLabel')}
                 type="password"
                 isDisabled={isLoading || isSubmitting}
-                iconLeft="lock"
               />
 
               <S.ButtonContainer>
