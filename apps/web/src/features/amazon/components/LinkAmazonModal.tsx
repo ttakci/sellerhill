@@ -1,6 +1,5 @@
-import styled from '@emotion/styled';
 import { type AmazonAccountPublicDto } from '@repo/shared';
-import { Button, Modal, ModernTextInput, Text, tkn } from '@repo/ui';
+import { Button, Modal, ModernTextInput, Text } from '@repo/ui';
 import React, { type ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,44 +8,8 @@ import {
   useLinkAmazonOrderMutation,
 } from '../api/amazon.api';
 
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.xs')};
-`;
-
-const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  min-width: 20rem;
-`;
-
-const AccountLabel = styled(Text)`
-  margin-bottom: ${tkn('spacing.xs')};
-`;
-
-const NativeSelect = styled.select`
-  width: 100%;
-  padding: ${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.sm')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  background: ${tkn('colors.surface.primary')};
-  color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-`;
-
-interface LinkResult {
-  success: boolean;
-  message: string;
-}
-
-interface LinkAmazonModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  orderId: string;
-  onLinked: () => void;
-}
+import * as S from './LinkAmazonModal.style';
+import type { LinkAmazonModalProps, LinkResult } from './LinkAmazonModal.types';
 
 export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClose, orderId, onLinked }) => {
   const { t } = useTranslation(['amazon', 'translation']);
@@ -110,7 +73,7 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
       onClose={onClose}
       title={t('amazon.linking.title')}
       footer={
-        <FooterRow>
+        <S.FooterRow>
           <Button variant="secondary" onClick={onClose} disabled={isLinking as boolean}>
             <Text>{t('translation:common.cancel')}</Text>
           </Button>
@@ -122,10 +85,10 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
           >
             <Text>{isLinking ? t('amazon.linking.linkingButton') : t('amazon.linking.linkButton')}</Text>
           </Button>
-        </FooterRow>
+        </S.FooterRow>
       }
     >
-      <BodyStack>
+      <S.BodyStack>
         {!hasAccounts ? (
           <>
             <Text variant="h4" weight="semibold">{t('amazon.linking.noAccountsTitle')}</Text>
@@ -137,10 +100,10 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
         ) : (
           <>
             <div>
-              <AccountLabel variant="h5" weight="medium">
+              <S.AccountLabel variant="h5" weight="medium">
                 {t('amazon.linking.selectAccount')}
-              </AccountLabel>
-              <NativeSelect
+              </S.AccountLabel>
+              <S.NativeSelect
                 value={selectedAccountId}
                 onChange={handleSelectChange}
               >
@@ -150,7 +113,7 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
                     {account.label || account.email} ({account.status})
                   </option>
                 ))}
-              </NativeSelect>
+              </S.NativeSelect>
             </div>
 
             <ModernTextInput
@@ -176,7 +139,7 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
             )}
           </>
         )}
-      </BodyStack>
+      </S.BodyStack>
     </Modal>
   );
 };

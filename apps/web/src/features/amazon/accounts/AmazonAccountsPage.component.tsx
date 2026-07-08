@@ -1,9 +1,9 @@
 import { Button, Card, Icon, Modal, ModernTextInput, PageHeader, StatusBadge, Text, useTheme } from '@repo/ui';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './AmazonAccountsPage.style';
-import type { AmazonAccountsPageComponentProps } from './AmazonAccountsPage.types';
+import type { AmazonAccountsPageComponentProps, AccountFormModalProps } from './AmazonAccountsPage.types';
 
 const STATUS_VARIANT_MAP: Record<string, 'success' | 'warning' | 'error' | 'info'> = {
   active: 'success',
@@ -16,14 +16,15 @@ export const AmazonAccountsPageComponent = ({
   accounts,
   isSaving,
   isVerifying,
-  onAdd,
-  onEdit,
   onDelete,
   onVerify,
   editingAccount,
   isAddModalOpen,
   onOpenAddModal,
   onCloseModal,
+  formValues,
+  onFormChange,
+  onSubmitForm,
 }: AmazonAccountsPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['amazon', 'translation']);
   const { theme } = useTheme();
@@ -115,59 +116,38 @@ export const AmazonAccountsPageComponent = ({
       <AccountFormModal
         isOpen={isAddModalOpen || isEditing}
         onClose={onCloseModal}
-        onSubmit={isEditing ? (data) => onEdit(editingAccount.id, data) : onAdd}
         isSaving={isSaving}
         defaultValues={editingAccount}
         title={isEditing ? t('amazon.accounts.editTitle') : t('amazon.accounts.addTitle')}
+        formValues={formValues}
+        onFormChange={onFormChange}
+        onSubmitForm={onSubmitForm}
       />
     </S.Container>
   );
 };
 
-interface AccountFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: { label?: string; email?: string; password?: string; twoFactorSecret?: string }) => void;
-  isSaving: boolean;
-  defaultValues?: { label?: string; email?: string } | null;
-  title: string;
-}
-
-const AccountFormModal = ({ isOpen, onClose, onSubmit, isSaving, defaultValues, title }: AccountFormModalProps) => {
+const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, formValues, onFormChange, onSubmitForm }: AccountFormModalProps) => {
   const { t } = useTranslation(['amazon', 'translation']);
-  const [label, setLabel] = useState(defaultValues?.label || '');
-  const [email, setEmail] = useState(defaultValues?.email || '');
-  const [password, setPassword] = useState('');
-  const [twoFactorSecret, setTwoFactorSecret] = useState('');
   const isEditing = !!defaultValues;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const data: Record<string, string> = {};
-    if (label) {data.label = label;}
-    if (email) {data.email = email;}
-    if (password) {data.password = password;}
-    if (twoFactorSecret) {data.twoFactorSecret = twoFactorSecret;}
-    onSubmit(data);
-  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => { e.preventDefault(); onSubmitForm(); }}>
         <S.FormFields>
           <ModernTextInput
             label={t('amazon.accounts.labelField')}
             placeholder={t('amazon.accounts.labelPlaceholder')}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
+            value={formValues.label}
+            onChange={(e) => onFormChange('label', e.target.value)}
           />
           {!isEditing && (
             <ModernTextInput
               label={t('amazon.accounts.emailField')}
               placeholder={t('amazon.accounts.emailPlaceholder')}
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formValues.email}
+              onChange={(e) => onFormChange('email', e.target.value)}
               required
             />
           )}
@@ -175,15 +155,15 @@ const AccountFormModal = ({ isOpen, onClose, onSubmit, isSaving, defaultValues, 
             label={isEditing ? t('amazon.accounts.passwordField') : t('amazon.accounts.passwordField')}
             placeholder={t('amazon.accounts.passwordPlaceholder')}
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formValues.password}
+            onChange={(e) => onFormChange('password', e.target.value)}
             required={!isEditing}
           />
           <ModernTextInput
             label={t('amazon.accounts.twoFactorField')}
             placeholder={t('amazon.accounts.twoFactorPlaceholder')}
-            value={twoFactorSecret}
-            onChange={(e) => setTwoFactorSecret(e.target.value)}
+            value={formValues.twoFactorSecret}
+            onChange={(e) => onFormChange('twoFactorSecret', e.target.value)}
           />
           <S.InfoText variant="caption" color="text.tertiary">
             {t('amazon.accounts.twoFactorInfo')}
