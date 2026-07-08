@@ -58,8 +58,47 @@ export const ProfileHeroInfo = styled.div`
 
 export const ProfileHeroActions = styled.div`
   display: flex;
-  gap: ${tkn('spacing.sm')};
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
   flex-shrink: 0;
+  min-width: 12rem;
+
+  @media (max-width: 36rem) {
+    /* 576px — full-width below this breakpoint */
+    width: 100%;
+    min-width: 0;
+  }
+`;
+
+export const ProfileNavItem = styled.button`
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  cursor: pointer;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  font-family: ${tkn('typography.fontFamily.sans')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  color: ${tkn('colors.text.primary')};
+  transition: background-color 0.18s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: ${tkn('colors.background.tertiary')};
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
+
+  & > svg {
+    color: ${tkn('colors.text.tertiary')};
+    flex-shrink: 0;
+  }
 `;
 
 export const AccountRow = styled.div`

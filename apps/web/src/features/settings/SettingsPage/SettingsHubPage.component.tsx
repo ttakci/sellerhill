@@ -277,9 +277,14 @@ export const SettingsHubPageComponent = ({
           <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.profile.plan')}</Text>
         </S.ProfileHeroInfo>
         <S.ProfileHeroActions>
-          <Button variant="primary" onClick={() => onOpenDrawer('profile')}>
+          <S.ProfileNavItem
+            type="button"
+            onClick={() => onOpenDrawer('profile')}
+            aria-label={t('translation:settingsHub.sections.profile.edit')}
+          >
             <Text>{t('translation:settingsHub.sections.profile.edit')}</Text>
-          </Button>
+            <Icon name="chevron-right" size={20} />
+          </S.ProfileNavItem>
         </S.ProfileHeroActions>
       </S.ProfileHeroCard>
 
