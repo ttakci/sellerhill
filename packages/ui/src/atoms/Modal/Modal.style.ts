@@ -11,7 +11,6 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   justify-content: center;
   z-index: 9999;
   padding: ${tkn('spacing.md')};
-  backdrop-filter: blur(0.25rem); /* 4px */
   animation: fadeIn 0.2s ease-out;
 
   @media (max-width: 48rem) { /* 768px */
@@ -36,15 +35,15 @@ export const ModalContainer = styled.div<{ $size: string }>`
   max-width: ${({ $size }) => {
     switch ($size) {
       case 'sm':
-        return '25rem'; /* 400px */
+        return '22.5rem'; /* 360px */
       case 'md':
-        return '37.5rem'; /* 600px */
+        return '30rem'; /* 480px */
       case 'lg':
-        return '50rem'; /* 800px */
+        return '40rem'; /* 640px */
       case 'xl':
-        return '75rem'; /* 1200px */
+        return '60rem'; /* 960px */
       default:
-        return '37.5rem'; /* 600px */
+        return '30rem'; /* 480px */
     }
   }};
   display: flex;
