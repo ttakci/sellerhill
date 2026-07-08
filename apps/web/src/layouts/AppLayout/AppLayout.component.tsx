@@ -1,25 +1,18 @@
-import { type SupportedLocale, type UserDto } from '@repo/shared';
 import {
   Breadcrumb,
-  BreadcrumbItem,
   ConfirmModal,
   Dropdown,
   Icon,
   Logo,
   MeshBackground,
   Text,
-  useTheme,
-  useUI,
 } from '@repo/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet, useLocation } from 'react-router-dom';
-
-
-import { stripLocaleFromPath } from '../../utils/locale';
-import { type UseLocaleReturn, useLocale } from '../../utils/useLocale';
+import { Outlet } from 'react-router-dom';
 
 import * as S from './AppLayout.style';
+import type { AppLayoutProps } from './AppLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
@@ -28,115 +21,43 @@ import { Footer } from '@/components/Footer';
 const EBAY_LISTINGS_COUNT_PLACEHOLDER = 20;
 const ORDERS_COUNT_PLACEHOLDER = 12;
 
-interface AppLayoutProps {
-  user?: UserDto;
-  onLogout: () => void;
-}
-
 /**
  * TailAdmin Inspired Layout - Fully Responsive Design
  * Features a collapsible sidebar for desktop and overlay sidebar for mobile.
  */
-export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
-  const { loadingState } = useUI();
-  const { themeMode, toggleTheme } = useTheme();
-  const { t, i18n } = useTranslation(['translation', 'listings', 'orders']);
-  const { locale: _locale, localeNavigate, changeLocale }: UseLocaleReturn = useLocale();
-  const location = useLocation();
-
-  // Strip locale prefix for path comparisons
-  const pathWithoutLocale: string = stripLocaleFromPath(location.pathname);
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setMobileSidebarOpen(false);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [location.pathname]);
-
-  const userName = user ? `${user.firstName} ${user.lastName}` : t('translation:common.notSet');
-
-  const handleToggleSidebar = useCallback(() => {
-    if (window.innerWidth < 1024) {
-      setMobileSidebarOpen((prev) => !prev);
-    } else {
-      setSidebarCollapsed((prev) => !prev);
-    }
-  }, []);
-
-  const handleNavigate = useCallback(
-    (path: string) => {
-      localeNavigate(path);
-    },
-    [localeNavigate]
-  );
-
-  const handleLogout = useCallback(() => {
-    onLogout();
-    localeNavigate('/login');
-    setIsLogoutConfirmOpen(false);
-  }, [onLogout, localeNavigate, setIsLogoutConfirmOpen]);
-
-  const handleChangeLanguage = useCallback(
-    (lang: string) => {
-      changeLocale(lang as SupportedLocale);
-    },
-    [changeLocale]
-  );
-
-  const getBreadcrumbItems = () => {
-    const items: BreadcrumbItem[] = [{ label: '', path: '/dashboard', icon: 'home' }];
-
-    if (pathWithoutLocale === '/dashboard' || pathWithoutLocale === '/') {
-      return items;
-    }
-
-    if (pathWithoutLocale.startsWith('/listings')) {
-      items.push({ label: t('translation:menu.listings'), path: '/listings' });
-      if (pathWithoutLocale === '/listings/jobs') {
-        items.push({ label: t('translation:menu.listingJobs') });
-      } else if (pathWithoutLocale === '/listings/products') {
-        items.push({ label: t('translation:menu.products') });
-      } else if (pathWithoutLocale === '/listings/add') {
-        items.push({ label: t('listings:listings.breadcrumb.addProducts') });
-      } else if (pathWithoutLocale === '/listings') {
-        items.push({ label: t('translation:menu.ebayListings') });
-      }
-    } else if (pathWithoutLocale.startsWith('/orders')) {
-      items.push({ label: t('translation:menu.orders'), path: '/orders' });
-      if (pathWithoutLocale !== '/orders') {
-        items.push({ label: t('orders:orders.detail.title') });
-      }
-    } else if (pathWithoutLocale.startsWith('/settings') || pathWithoutLocale.startsWith('/listing-settings-groups')) {
-      items.push({ label: t('translation:menu.settings'), path: '/settings' });
-      if (pathWithoutLocale === '/settings/store') {
-        items.push({ label: t('translation:menu.storeSettings') });
-      } else if (pathWithoutLocale.includes('/settings/amazon-accounts')) {
-        items.push({ label: t('translation:menu.amazonAccounts') });
-      } else if (pathWithoutLocale.includes('/listing-settings-groups') || pathWithoutLocale.includes('/settings/listing-groups')) {
-        items.push({ label: t('translation:menu.listingSettingsGroups') });
-      }
-      // /settings (hub) shows just "Settings" — no second breadcrumb item
-    } else if (pathWithoutLocale === '/stores') {
-      items.push({ label: t('translation:menu.stores') });
-    }
-    return items;
-  };
+export const AppLayout: React.FC<AppLayoutProps> = ({
+  user,
+  sidebarCollapsed,
+  mobileSidebarOpen,
+  isLogoutConfirmOpen,
+  pathWithoutLocale,
+  userName,
+  loadingIsLoading,
+  themeMode,
+  breadcrumbItems,
+  onToggleSidebar,
+  onNavigate,
+  onLogoutConfirm,
+  onChangeLanguage,
+  onToggleTheme,
+  onCloseMobileSidebar,
+  onOpenLogoutConfirm,
+  onCloseLogoutConfirm,
+  onLocaleNavigate,
+  i18nLanguage,
+}) => {
+  const { t } = useTranslation(['translation', 'listings', 'orders']);
 
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
         {/* Mobile Sidebar Overlay */}
-        <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(false)} />
+        <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={onCloseMobileSidebar} />
 
         {/* Sidebar */}
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
           <MeshBackground animate={false} />
-          <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => localeNavigate('/dashboard')}>
+          <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => onLocaleNavigate('/dashboard')}>
             {sidebarCollapsed ? <Logo size={32} /> : <Logo layout="stacked" />}
           </S.LogoArea>
 
@@ -149,7 +70,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale === '/dashboard'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/dashboard')}
+              onClick={() => onLocaleNavigate('/dashboard')}
               title={sidebarCollapsed ? t('translation:menu.dashboard') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -161,7 +82,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale === '/listings'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/listings')}
+              onClick={() => onLocaleNavigate('/listings')}
               title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -178,7 +99,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale === '/listings/jobs'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/listings/jobs')}
+              onClick={() => onLocaleNavigate('/listings/jobs')}
               title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -190,7 +111,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale === '/listings/products'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/listings/products')}
+              onClick={() => onLocaleNavigate('/listings/products')}
               title={sidebarCollapsed ? t('translation:menu.products') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -202,7 +123,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $isCollapsed={sidebarCollapsed}
               $active={pathWithoutLocale === '/orders'}
-              onClick={() => localeNavigate('/orders')}
+              onClick={() => onLocaleNavigate('/orders')}
               title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -219,7 +140,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $isCollapsed={sidebarCollapsed}
               $active={pathWithoutLocale === '/stores'}
-              onClick={() => localeNavigate('/stores')}
+              onClick={() => onLocaleNavigate('/stores')}
               title={sidebarCollapsed ? t('translation:menu.stores') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -238,7 +159,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             <S.NavItem
               $active={pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile'}
               $isCollapsed={sidebarCollapsed}
-              onClick={() => localeNavigate('/settings')}
+              onClick={() => onLocaleNavigate('/settings')}
               title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
@@ -267,7 +188,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
             </S.ProfileSwitcher>
             <S.LogoutButton
               $isCollapsed={sidebarCollapsed}
-              onClick={() => setIsLogoutConfirmOpen(true)}
+              onClick={onOpenLogoutConfirm}
               title={sidebarCollapsed ? t('translation:menu.logout') : undefined}
               aria-label={t('translation:menu.logout')}
             >
@@ -286,21 +207,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
           <S.HeaderContainer>
             <S.HeaderInner>
               <S.HeaderLeft>
-                <S.MobileMenuButton onClick={handleToggleSidebar}>
+                <S.MobileMenuButton onClick={onToggleSidebar}>
                   <Icon name="menu" size={24} />
                 </S.MobileMenuButton>
 
-                <S.ToggleButton onClick={handleToggleSidebar}>
+                <S.ToggleButton onClick={onToggleSidebar}>
                   <Icon name="menu" size={20} />
                 </S.ToggleButton>
               </S.HeaderLeft>
 
               <S.BreadcrumbArea>
-                <Breadcrumb items={getBreadcrumbItems()} onNavigate={handleNavigate} />
+                <Breadcrumb items={breadcrumbItems} onNavigate={onNavigate} />
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <S.ActionIcon onClick={toggleTheme} title={t('translation:header.toggleTheme')}>
+                <S.ActionIcon onClick={onToggleTheme} title={t('translation:header.toggleTheme')}>
                   <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
                 </S.ActionIcon>
 
@@ -316,18 +237,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
                   width="6.25rem" /* 100px */
                   trigger={
                     <S.LanguageSelectTrigger title={t('translation:header.selectLanguage')}>
-                      <S.LanguageText>{i18n.language.toUpperCase()}</S.LanguageText>
+                      <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
                       <Icon name="chevron_down" size={12} />
                     </S.LanguageSelectTrigger>
                   }
                   items={[
                     {
                       label: t('translation:languages.en'),
-                      onClick: () => handleChangeLanguage('en'),
+                      onClick: () => onChangeLanguage('en'),
                     },
                     {
                       label: t('translation:languages.tr'),
-                      onClick: () => handleChangeLanguage('tr'),
+                      onClick: () => onChangeLanguage('tr'),
                     },
                   ]}
                 />
@@ -346,14 +267,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user, onLogout }) => {
         </S.MainContent>
 
         {/* Global UI Overlays */}
-        <S.LoadingOverlay $visible={loadingState.isLoading}>
+        <S.LoadingOverlay $visible={loadingIsLoading}>
           <Icon name="loader" size={48} />
         </S.LoadingOverlay>
 
         <ConfirmModal
           isOpen={isLogoutConfirmOpen}
-          onClose={() => setIsLogoutConfirmOpen(false)}
-          onConfirm={handleLogout}
+          onClose={onCloseLogoutConfirm}
+          onConfirm={onLogoutConfirm}
           title={t('translation:menu.logoutConfirmTitle')}
           description={t('translation:menu.logoutConfirmDescription')}
           confirmLabel={t('translation:menu.logoutConfirmButton')}
