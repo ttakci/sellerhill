@@ -8,6 +8,7 @@
     "serve": "node dist/main.js",
     "serve:prod": "set NODE_ENV=production&& node dist/main.js",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "migrate": "tsx src/scripts/migrate.ts",
     "migrate:prod": "node dist/scripts/migrate.js"
   },

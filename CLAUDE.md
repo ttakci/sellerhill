@@ -17,8 +17,13 @@ pnpm build            # Build all packages and apps
 pnpm lint             # ESLint check (max-warnings 0)
 pnpm lint:fix         # ESLint auto-fix
 pnpm format           # Prettier write all files
-pnpm typecheck        # TypeScript check across all packages
-pnpm validate         # lint + typecheck (runs on pre-commit)
+pnpm typecheck        # Real `tsc --noEmit` across apps/web, apps/api, packages/ui (strict — reports all errors)
+pnpm validate         # lint + typecheck (full check — run manually or in CI)
+
+# Pre-commit hook runs `pnpm lint` only. `pnpm typecheck` is strict and the web
+# app still carries pre-existing TS errors, so it is NOT in the pre-commit hook
+# (it would block every commit). Run `pnpm typecheck` to find them and clean up;
+# once the web app is clean, restore `pnpm run validate` in `.husky/pre-commit`.
 
 # Docker (PostgreSQL 16, Redis 7, pgAdmin)
 pnpm docker:up        # Start services

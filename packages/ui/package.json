@@ -5,7 +5,8 @@
   "types": "./dist/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc -p . && node scripts/copy-assets.js"
+    "build": "tsc -p . && node scripts/copy-assets.js",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
