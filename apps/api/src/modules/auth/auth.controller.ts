@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -8,9 +8,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { AuthResponse, RegistrationResponse, UserDto } from '@repo/shared';
+import type { AuthResponse, GenericSuccessResponse, RegistrationResponse, UserDto } from '@repo/shared';
 
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
@@ -97,5 +98,37 @@ export class AuthController {
   async getMe(@Request() req: { user: { sub: string } }): Promise<UserDto> {
     const userId = req.user.sub;
     return this.authService.getMe(userId);
+  }
+
+  @Patch('password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Change password',
+    description: 'Change password for the authenticated user. Requires current password verification.',
+  })
+  @ApiOkResponse({ description: 'Password changed successfully' })
+  @ApiUnauthorizedResponse({ description: 'Invalid current password or not authenticated' })
+  @ApiBadRequestResponse({ description: 'New password is same as current, or invalid input' })
+  async changePassword(
+    @Request() req: { user: { sub: string } },
+    @Body() body: ChangePasswordDto
+  ): Promise<GenericSuccessResponse> {
+    return this.authService.changePassword(req.user.sub, body.currentPassword, body.newPassword);
+  }
+
+  @Post('deactivate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Deactivate account',
+    description: 'Soft-deletes the authenticated user account. User can no longer sign in. Data preserved.',
+  })
+  @ApiOkResponse({ description: 'Account deactivated successfully' })
+  @ApiUnauthorizedResponse({ description: 'Not authenticated' })
+  async deactivate(@Request() req: { user: { sub: string } }): Promise<GenericSuccessResponse> {
+    return this.authService.deactivateAccount(req.user.sub);
   }
 }
