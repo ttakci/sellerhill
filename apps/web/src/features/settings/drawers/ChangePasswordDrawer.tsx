@@ -1,3 +1,4 @@
+import { AUTH_CONSTANTS } from '@repo/shared';
 import {
   Button,
   Drawer,
@@ -13,49 +14,99 @@ import {
   ErrorText,
   FooterRow,
 } from './ChangePasswordDrawer.style';
-import { NotImplementedNotice } from './NotImplementedNotice';
+import type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
 
-export interface ChangePasswordDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import { useChangePasswordMutation } from '@/features/auth/api/authApi';
 
-const MIN_PASSWORD_LENGTH = 8;
 
 export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
   isOpen,
   onClose,
 }) => {
   const { t } = useTranslation();
-  const { showMessage } = useUI();
+  const { showMessage, closeMessage } = useUI();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = (): void => {
-    if (next !== confirm) {
-      setError(t('translation:settingsHub.drawer.password.mismatch'));
-      return;
+  const reset = (): void => {
+    setCurrent('');
+    setNext('');
+    setConfirm('');
+    setError(null);
+  };
+
+  const handleClose = (): void => {
+    reset();
+    onClose();
+  };
+
+  const validate = (): string | null => {
+    if (!current || !next || !confirm) {
+      return t('translation:validation.required');
     }
-    if (next.length < MIN_PASSWORD_LENGTH) {
-      setError(t('translation:settingsHub.drawer.password.tooShort'));
+    if (next.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
+      return t('translation:settingsHub.drawer.password.tooShort');
+    }
+    if (next !== confirm) {
+      return t('translation:settingsHub.drawer.password.mismatch');
+    }
+    if (next === current) {
+      return t('translation:settingsHub.drawer.password.sameAsCurrent');
+    }
+    return null;
+  };
+
+  const handleSubmit = (): void => {
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
     setError(null);
-    showMessage({
-      type: 'error',
-      message: t('translation:settingsHub.notImplemented.title'),
-    });
+
+    /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+    void changePassword({ currentPassword: current, newPassword: next })
+      .unwrap()
+      .then(() => {
+        reset();
+        onClose();
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:settingsHub.drawer.password.successHeader',
+            descriptionKey: 'translation:settingsHub.drawer.password.successDescription',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t,
+        );
+      })
+      .catch(() => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: 'translation:error.serverError',
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t,
+        );
+      });
+    /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
 
   const footer = (
     <FooterRow>
-      <Button variant="ghost" onClick={onClose}>
+      {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
+      <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
         <Text>{t('translation:common.cancel')}</Text>
       </Button>
-      <Button variant="primary" onClick={handleSave}>
+      <Button variant="primary" onClick={handleSubmit} isLoading={isLoading}>
+        {/* eslint-enable @typescript-eslint/no-unsafe-assignment */}
         <Text>{t('translation:common.save')}</Text>
       </Button>
     </FooterRow>
@@ -64,14 +115,13 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
   return (
     <Drawer
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={t('translation:settingsHub.drawer.password.title')}
       subtitle={t('translation:settingsHub.drawer.password.subtitle')}
       footer={footer}
       size="md"
     >
       <BodyStack>
-        <NotImplementedNotice />
         <ModernTextInput
           label={t('translation:settingsHub.drawer.password.current')}
           value={current}

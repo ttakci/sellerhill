@@ -3,7 +3,7 @@ export type { AmazonAccountDrawerProps } from './AmazonAccountDrawer';
 export { EbayAccountDrawer } from './EbayAccountDrawer/EbayAccountDrawer.component';
 export type { EbayAccountDrawerProps } from './EbayAccountDrawer/EbayAccountDrawer.types';
 export { ChangePasswordDrawer } from './ChangePasswordDrawer';
-export type { ChangePasswordDrawerProps } from './ChangePasswordDrawer';
+export type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
 export { LanguageDrawer } from './LanguageDrawer';
 export type { LanguageDrawerProps } from './LanguageDrawer';
 export { ListingGroupDrawer } from './ListingGroupDrawer';
