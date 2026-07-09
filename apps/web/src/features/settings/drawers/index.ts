@@ -6,6 +6,8 @@ export { BlacklistAddDrawer } from './BlacklistAddDrawer';
 export type { BlacklistAddDrawerProps } from './BlacklistAddDrawer';
 export { BlacklistListDrawer } from './BlacklistListDrawer';
 export type { BlacklistListDrawerProps } from './BlacklistListDrawer';
+export { StoreSettingsDrawer } from './StoreSettingsDrawer';
+export type { StoreSettingsDrawerProps } from './StoreSettingsDrawer';
 export { EbayAccountDrawer } from './EbayAccountDrawer/EbayAccountDrawer.container';
 export type { EbayAccountDrawerProps } from './EbayAccountDrawer/EbayAccountDrawer.types';
 export { ChangePasswordDrawer } from './ChangePasswordDrawer';
