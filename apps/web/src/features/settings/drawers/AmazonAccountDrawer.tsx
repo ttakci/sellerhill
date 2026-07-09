@@ -1,35 +1,12 @@
-import styled from '@emotion/styled';
 import type { CreateAmazonAccountFormData } from '@repo/shared';
-import {
-  Button,
-  Drawer,
-  ModernTextInput,
-  Text,
-  Textarea,
-  tkn,
-  useUI,
-} from '@repo/ui';
+import { Drawer, ModernTextInput, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { BodyStack } from './AmazonAccountDrawer.style';
+import type { AmazonAccountDrawerProps } from './AmazonAccountDrawer.types';
+
 import { useCreateAmazonAccountMutation } from '@/features/amazon/api/amazon.api';
-
-const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-`;
-
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export interface AmazonAccountDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
   isOpen,
@@ -67,27 +44,18 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
     /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
 
-  const footer = (
-    <FooterRow>
-      {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
-      <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-        <Text>{t('translation:common.cancel')}</Text>
-      </Button>
-      <Button variant="primary" onClick={handleSave} isLoading={isLoading}>
-        {/* eslint-enable @typescript-eslint/no-unsafe-assignment */}
-        <Text>{t('translation:common.save')}</Text>
-      </Button>
-    </FooterRow>
-  );
-
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
       title={t('translation:settingsHub.drawer.amazonAdd.title')}
       subtitle={t('translation:settingsHub.drawer.amazonAdd.subtitle')}
-      footer={footer}
       size="md"
+      primaryAction={{
+        label: t('translation:common.save'),
+        onClick: handleSave,
+        isLoading: !!isLoading,
+      }}
     >
       <BodyStack>
         <ModernTextInput
@@ -113,10 +81,10 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
             setPassword(e.target.value)
           }
         />
-        <Textarea
+        <ModernTextInput
           label={t('translation:settingsHub.drawer.amazonAdd.twoFactorSecret')}
           value={twoFactorSecret}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setTwoFactorSecret(e.target.value)
           }
         />

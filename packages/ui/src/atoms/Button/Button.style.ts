@@ -89,10 +89,12 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
 
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Force children (Text spans, Icon wrappers) to inherit button color
-     so Text's default text.primary doesn't override variant colors */
-  & > span,
-  & > div {
+  /* Force nested content (Text spans, Icon wrappers) to inherit the button's
+     variant color, so Text's default text.primary doesn't override it.
+     Descendant combinator (not direct-child) because children are wrapped in
+     ButtonLabel — a direct-child selector would miss the Text span inside. */
+  & span,
+  & div {
     color: inherit;
   }
 

@@ -27,7 +27,19 @@
       "Bash(pnpm --filter @repo/ui exec tsc --noEmit)",
       "Bash(pnpm --filter web exec tsc --noEmit)",
       "Bash(docker exec *)",
-      "Bash(tasklist)"
+      "Bash(tasklist)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm exec *)",
+      "mcp__zai-mcp-server__analyze_image",
+      "Bash(pnpm --filter @repo/ui run build)",
+      "Bash(pnpm --filter @repo/shared run build)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('packages/shared/src/i18n/resources/en/translation.json','utf8'\\)\\); JSON.parse\\(require\\('fs'\\).readFileSync\\('packages/shared/src/i18n/resources/tr/translation.json','utf8'\\)\\); console.log\\('BOTH JSON VALID'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('packages/shared/src/i18n/resources/en/translation.json','utf8'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('packages/shared/src/i18n/resources/tr/translation.json','utf8'\\)\\);console.log\\('OK'\\)\")",
+      "Bash(rm -f StoreConfigDrawer.tsx StoreConfigDrawer.style.ts StoreConfigDrawer.types.ts)",
+      "Bash(ls StoreConfigDrawer*)",
+      "Bash(pnpm validate *)",
+      "Bash(pnpm run *)",
+      "Bash(echo \"exit: $?\")"
     ],
     "additionalDirectories": [
       "d:\\dev\\projects\\zonds\\zonds\\packages\\ui\\src\\molecules\\RichTooltip"

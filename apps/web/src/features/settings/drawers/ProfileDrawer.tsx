@@ -1,36 +1,12 @@
-import styled from '@emotion/styled';
-import type { ProfileDto, UpdateProfileRequest } from '@repo/shared';
-import {
-  Button,
-  Drawer,
-  ModernTextInput,
-  Text,
-  Textarea,
-  tkn,
-  useUI,
-} from '@repo/ui';
+import type { UpdateProfileRequest } from '@repo/shared';
+import { Drawer, ModernTextInput, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { BodyStack } from './ProfileDrawer.style';
+import type { ProfileDrawerProps } from './ProfileDrawer.types';
+
 import { useUpdateProfileMutation } from '@/features/profile/api/profileApi';
-
-const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-`;
-
-const FooterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export interface ProfileDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  profile: ProfileDto | undefined;
-}
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   isOpen,
@@ -45,14 +21,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [firstName, setFirstName] = useState(profile?.firstName ?? '');
   const [lastName, setLastName] = useState(profile?.lastName ?? '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phoneNumber ?? '');
-  const [bio, setBio] = useState(profile?.bio ?? '');
 
   const handleSave = (): void => {
     const payload: UpdateProfileRequest = {
       firstName,
       lastName,
       phoneNumber,
-      bio,
     };
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     void updateProfile(payload)
@@ -69,27 +43,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
 
-  const footer = (
-    <FooterRow>
-      {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
-      <Button variant="text" onClick={onClose} disabled={isLoading}>
-        <Text>{t('translation:common.cancel')}</Text>
-      </Button>
-      <Button variant="primary" onClick={handleSave} isLoading={isLoading}>
-        {/* eslint-enable @typescript-eslint/no-unsafe-assignment */}
-        <Text>{t('translation:common.save')}</Text>
-      </Button>
-    </FooterRow>
-  );
-
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
       title={t('translation:settingsHub.drawer.profile.title')}
       subtitle={t('translation:settingsHub.drawer.profile.subtitle')}
-      footer={footer}
       size="md"
+      primaryAction={{
+        label: t('translation:common.save'),
+        onClick: handleSave,
+        isLoading: !!isLoading,
+      }}
     >
       <BodyStack>
         <ModernTextInput
@@ -116,13 +81,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           value={phoneNumber}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setPhoneNumber(e.target.value)
-          }
-        />
-        <Textarea
-          label={t('translation:settingsHub.drawer.profile.bio')}
-          value={bio}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setBio(e.target.value)
           }
         />
       </BodyStack>

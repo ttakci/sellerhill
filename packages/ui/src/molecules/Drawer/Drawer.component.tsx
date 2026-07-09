@@ -1,5 +1,6 @@
 import type React from 'react';
 
+import { Button } from '../../atoms/Button';
 import { Icon } from '../../atoms/Icon';
 import { Text } from '../../atoms/Text';
 
@@ -12,6 +13,7 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   title,
   subtitle,
   children,
+  primaryAction,
   footer,
   size = 'md',
   className,
@@ -32,7 +34,7 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
           <S.Header>
             <S.HeaderText>
               {title && (
-                <Text variant="h3" weight="bold">
+                <Text variant="h2" weight="bold">
                   {title}
                 </Text>
               )}
@@ -48,7 +50,22 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
           </S.Header>
         )}
         <S.Body>{children}</S.Body>
-        {footer && <S.Footer>{footer}</S.Footer>}
+        {primaryAction ? (
+          <S.Footer>
+            <Button
+              variant="primary"
+              size="large"
+              fullWidth
+              onClick={primaryAction.onClick}
+              isLoading={primaryAction.isLoading}
+              disabled={primaryAction.disabled}
+            >
+              <Text weight="bold">{primaryAction.label}</Text>
+            </Button>
+          </S.Footer>
+        ) : (
+          footer && <S.Footer>{footer}</S.Footer>
+        )}
       </S.Panel>
     </>
   );

@@ -7,12 +7,6 @@ export const BodyStack = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
-export const FooterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.xs')};
-`;
-
 export const ErrorText = styled(Text)`
   color: ${tkn('colors.semantic.error')};
 `;

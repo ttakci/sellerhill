@@ -17,12 +17,14 @@ import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { useGetProfileQuery } from '@/features/profile/api/profileApi';
+import { useGetAllStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
 
 const DRAWER_PARAM = 'drawer';
 const EDIT_GROUP_PARAM = 'editGroup';
+const EDIT_STORE_CONFIG_PARAM = 'editStoreConfig';
 
 export const SettingsHubPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['translation']);
@@ -32,6 +34,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
   const editingListingGroupId = searchParams.get(EDIT_GROUP_PARAM);
+  const editingStoreConfigId = searchParams.get(EDIT_STORE_CONFIG_PARAM);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
 
   const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery();
@@ -39,11 +42,12 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const { data: ebayData, isLoading: isEbayLoading, error: ebayError } = useGetEbayAccountsQuery();
   const { data: amazonData, isLoading: isAmazonLoading, error: amazonError } = useGetAmazonAccountsQuery();
   const { data: listingGroupsData, isLoading: isGroupsLoading, error: groupsError } = useGetListingSettingsGroupsQuery();
+  const { data: storeConfigsData, isLoading: isStoreConfigsLoading, error: storeConfigsError } = useGetAllStoreSettingsQuery();
 
-  useLoading(isUserLoading || isProfileLoading || isEbayLoading || isAmazonLoading || isGroupsLoading);
+  useLoading(isUserLoading || isProfileLoading || isEbayLoading || isAmazonLoading || isGroupsLoading || isStoreConfigsLoading);
 
   useEffect(() => {
-    const error = userError || profileError || ebayError || amazonError || groupsError;
+    const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError;
     if (!error) {return;}
     if ('status' in error && error.status === 401) {return;}
     showMessage(
@@ -55,7 +59,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       },
       t,
     );
-  }, [userError, profileError, ebayError, amazonError, groupsError, showMessage, closeMessage, t]);
+  }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, showMessage, closeMessage, t]);
 
   const handleOpenDrawer = (drawer: SettingsDrawerKey): void => {
     const next = new URLSearchParams(searchParams);
@@ -71,6 +75,21 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     const next = new URLSearchParams(searchParams);
     next.delete(DRAWER_PARAM);
     next.delete(EDIT_GROUP_PARAM);
+    next.delete(EDIT_STORE_CONFIG_PARAM);
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleNewStoreConfig = (): void => {
+    const next = new URLSearchParams(searchParams);
+    next.delete(EDIT_STORE_CONFIG_PARAM);
+    next.set(DRAWER_PARAM, 'storeConfig');
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleEditStoreConfig = (id: string): void => {
+    const next = new URLSearchParams(searchParams);
+    next.set(EDIT_STORE_CONFIG_PARAM, id);
+    next.set(DRAWER_PARAM, 'storeConfig');
     setSearchParams(next, { replace: true });
   };
 
@@ -91,6 +110,20 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
 
   const isImpersonatingAdmin = useMemo(() => Boolean(user) && (user as unknown as { role?: string }).role === 'admin', [user]);
 
+  const storeConfigs = useMemo(() => storeConfigsData ?? [], [storeConfigsData]);
+  const availableStores = useMemo(
+    () =>
+      (ebayData?.items ?? []).map((acc) => ({
+        id: acc.id,
+        name: acc.storeName || acc.sellerId,
+      })),
+    [ebayData],
+  );
+  const editingStoreConfig = useMemo(
+    () => storeConfigs.find((c) => c.id === editingStoreConfigId) ?? null,
+    [storeConfigs, editingStoreConfigId],
+  );
+
   return (
     <SettingsHubPageComponent
       profile={profile ?? null}
@@ -107,6 +140,11 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       isDeactivateModalOpen={isDeactivateModalOpen}
       onOpenDeactivateModal={handleOpenDeactivateModal}
       onCloseDeactivateModal={handleCloseDeactivateModal}
+      storeConfigs={storeConfigs}
+      availableStores={availableStores}
+      editingStoreConfig={editingStoreConfig}
+      onNewStoreConfig={handleNewStoreConfig}
+      onEditStoreConfig={handleEditStoreConfig}
     />
   );
 };

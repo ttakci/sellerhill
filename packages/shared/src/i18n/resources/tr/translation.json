@@ -148,26 +148,51 @@
         "status": "Durum",
         "sellerId": "Satıcı ID",
         "marketplace": "Pazaryeri",
+        "currencyLabel": "Para Birimi",
+        "connectedSince": "Bağlanma Tarihi",
         "tokenExpires": "Token Bitiş Tarihi",
         "lastSync": "Son Senkronizasyon",
         "connected": "Bağlı",
         "notConnected": "Bağlı Değil",
-        "connect": "eBay Hesabını Bağla"
+        "connect": "eBay Hesabını Bağla",
+        "connectNew": {
+          "title": "Yeni Store Bağla",
+          "subtitle": "eBay güvenli girişi ile yeni bir satıcı hesabı yetkilendir",
+          "action": "Store Bağla"
+        },
+        "manageStores": {
+          "title": "Bağlı Store'lar",
+          "subtitle": "Bağlı eBay store'larınızı görüntüleyin ve yönetin",
+          "action": "Store'ları Görüntüle",
+          "count": "{{count}} store bağlı",
+          "none": "Henüz store bağlı değil",
+          "empty": "Henüz bağlı eBay store yok"
+        }
       },
       "amazon": {
         "title": "Amazon Hesapları",
         "subtitle": "Sipariş taraması için kullanılan alıcı hesapları",
         "add": "Hesap Ekle",
         "accountCount": "{{count}} hesap",
-        "noAccounts": "Bağlı Amazon hesabı yok"
+        "noAccounts": "Bağlı Amazon hesabı yok",
+        "emailLabel": "E-posta",
+        "connectedSince": "Bağlanma Tarihi",
+        "manage": {
+          "title": "Bağlı Hesaplar",
+          "subtitle": "Bağlı Amazon hesaplarınızı görüntüleyin ve yönetin"
+        }
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırması",
         "subtitle": "Genel konum, doğrulama ve bölgesel ayarlar",
-        "edit": "Yapılandırmayı Düzenle",
+        "edit": "Düzenle",
+        "new": "Yeni",
+        "global": "Genel",
         "country": "Ülke",
         "region": "Bölge",
-        "zipCode": "Posta Kodu"
+        "zipCode": "Posta Kodu",
+        "noLocation": "Konum ayarlanmadı",
+        "noConfigs": "Henüz mağaza yapılandırması yok"
       },
       "blacklist": {
         "title": "Kara Liste Yönetimi",
@@ -216,9 +241,14 @@
         "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)"
       },
       "storeConfig": {
-        "title": "Mağaza Yapılandırmasını Düzenle",
-        "subtitle": "Genel konum ve doğrulama kuralları",
-        "openFull": "Tam Ayarları Aç"
+        "titleEdit": "Mağaza Yapılandırmasını Düzenle",
+        "titleNew": "Yeni Mağaza Yapılandırması",
+        "subtitle": "Konum ve doğrulama kuralları",
+        "global": "Genel (tüm mağazalar)",
+        "appliesTo": "Uygulandığı yer",
+        "validation": "Liste doğrulama",
+        "validateTitle": "Ürün başlıklarını doğrula",
+        "validateDescription": "Ürün açıklamalarını doğrula"
       },
       "listingGroup": {
         "titleNew": "Yeni Liste Ayar Grubu",

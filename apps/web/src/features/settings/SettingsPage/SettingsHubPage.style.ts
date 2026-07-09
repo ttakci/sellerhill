@@ -19,19 +19,62 @@ export const TwoColGrid = styled.div`
 `;
 
 export const ProfileHeroCard = styled.div`
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.xl')};
+  align-items: center;
+  padding: ${tkn('spacing.lg')};
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.xl')};
   box-shadow: ${tkn('shadows.sm')};
 
-  @media (max-width: 36rem) { /* 576px */
-    flex-direction: column;
-    align-items: flex-start;
-    gap: ${tkn('spacing.md')};
+  /* Same geometry as the two-column grid below so the edit button's hover
+     box left edge aligns with the Amazon accounts column left edge. */
+  @media (max-width: 48rem) { /* 768px */
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ProfileHeroLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  flex: 1;
+  min-width: 0;
+`;
+
+export const ProfileHeroRight = styled.button`
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  flex: 1;
+  min-width: 0;
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  cursor: pointer;
+  font-family: ${tkn('typography.fontFamily.sans')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  transition: background-color ${tkn('transitions.fast')};
+
+  &:hover {
+    background: ${tkn('colors.surface.secondary')};
+    & > svg {
+      transform: translateX(0.125rem); /* 2px nudge */
+    }
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
+
+  & > svg {
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
   }
 `;
 
@@ -54,62 +97,6 @@ export const ProfileHeroInfo = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
   min-width: 0;
-  flex: 1;
-`;
-
-export const ProfileHeroActions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs')};
-  flex-shrink: 0;
-  min-width: 12rem;
-
-  @media (max-width: 36rem) {
-    /* 576px — full-width below this breakpoint */
-    width: 100%;
-    min-width: 0;
-  }
-`;
-
-export const ProfileNavItem = styled.button`
-  all: unset;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.lg')};
-  cursor: pointer;
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  font-family: ${tkn('typography.fontFamily.sans')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.primary')};
-  transition:
-    background-color 0.18s ease,
-    color 0.18s ease;
-  white-space: nowrap;
-  min-width: 14rem;
-
-  &:hover {
-    & > svg {
-      transform: translateX(0.125rem); /* 2px nudge */
-    }
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid ${tkn('colors.brand.primary')};
-    outline-offset: 0.125rem;
-  }
-
-  & > svg {
-    flex-shrink: 0;
-    transition: transform 0.18s ease;
-  }
-
-  @media (max-width: 36rem) {
-    width: 100%;
-    min-width: 0;
-  }
 `;
 
 export const AccountRow = styled.div`
@@ -147,16 +134,6 @@ export const MetaItem = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
-export const DangerNotice = styled.div`
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.semanticTint.error')};
-  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.error')}; /* 1px */
-  border-radius: ${tkn('radius.md')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-`;
-
 export const NotImplementedNotice = styled.div`
   padding: ${tkn('spacing.md')};
   background: ${tkn('colors.semanticTint.warning')};
@@ -166,36 +143,4 @@ export const NotImplementedNotice = styled.div`
   display: flex;
   gap: ${tkn('spacing.sm')};
   align-items: flex-start;
-`;
-
-export const AccountActionRow = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${tkn('spacing.sm')} 0;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: ${tkn('colors.surface.secondary')};
-  }
-`;
-
-export const AccountActionRowInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm-md')};
-  min-width: 0;
 `;

@@ -5,12 +5,10 @@
 
 import {
   Button,
-  Card,
-  CardBody,
   Icon,
   PageHeader,
+  SettingsActionRow,
   SettingsCard,
-  StatusBadge,
   Text,
 } from '@repo/ui';
 import React from 'react';
@@ -19,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
+  AmazonAccountsDrawer,
   ChangePasswordDrawer,
   EbayAccountDrawer,
   LanguageDrawer,
@@ -31,10 +30,10 @@ import * as S from './SettingsHubPage.style';
 import type { SettingsHubPageComponentProps } from './SettingsHubPage.types';
 
 const AmazonAccountsSection = ({
-  accounts,
+  onView,
   onAdd,
 }: {
-  accounts: SettingsHubPageComponentProps['amazonAccounts'];
+  onView: () => void;
   onAdd: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
@@ -46,24 +45,75 @@ const AmazonAccountsSection = ({
         title: t('translation:settingsHub.sections.amazon.title'),
         subtitle: t('translation:settingsHub.sections.amazon.subtitle'),
       }}
+    >
+      <SettingsActionRow
+        icon="list"
+        label={t('translation:settingsHub.sections.amazon.manage.title')}
+        onClick={onView}
+      />
+      <SettingsActionRow
+        icon="plus"
+        label={t('translation:settingsHub.sections.amazon.add')}
+        onClick={onAdd}
+      />
+    </SettingsCard>
+  );
+};
+
+const StoreConfigSection = ({
+  configs,
+  availableStores,
+  onNew,
+  onEdit,
+}: {
+  configs: SettingsHubPageComponentProps['storeConfigs'];
+  availableStores: SettingsHubPageComponentProps['availableStores'];
+  onNew: () => void;
+  onEdit: (id: string) => void;
+}): React.ReactElement => {
+  const { t } = useTranslation(['translation']);
+
+  const scopeLabel = (storeId?: string): string => {
+    if (!storeId) {
+      return t('translation:settingsHub.sections.storeConfig.global');
+    }
+    const match = availableStores.find((s) => s.id === storeId);
+    return match?.name ?? storeId;
+  };
+
+  return (
+    <SettingsCard
+      variant="section"
+      header={{
+        icon: 'map-pin',
+        title: t('translation:settingsHub.sections.storeConfig.title'),
+        subtitle: t('translation:settingsHub.sections.storeConfig.subtitle'),
+      }}
       headerRight={
-        <Button variant="text" onClick={onAdd}>
-          <Text>{t('translation:settingsHub.sections.amazon.add')}</Text>
+        <Button variant="text" onClick={onNew}>
+          <Text>{t('translation:settingsHub.sections.storeConfig.new')}</Text>
         </Button>
       }
     >
-      {accounts.length > 0 ? (
-        accounts.slice(0, 3).map((acc) => (
-          <S.AccountRow key={acc.id}>
+      {configs.length > 0 ? (
+        configs.map((c) => (
+          <S.AccountRow key={c.id}>
             <S.AccountRowInfo>
-              <Text variant="body-sm" weight="medium">{acc.label || acc.email}</Text>
-              {acc.label && <Text variant="caption" color="text.tertiary">{acc.email}</Text>}
+              <Text variant="body-sm" weight="medium">{scopeLabel(c.storeId)}</Text>
+              <Text variant="caption" color="text.tertiary">
+                {[c.country, c.state, c.zipCode].filter(Boolean).join(' · ') ||
+                  t('translation:settingsHub.sections.storeConfig.noLocation')}
+              </Text>
             </S.AccountRowInfo>
-            <StatusBadge status={acc.status} size="sm" />
+            <Button variant="text" onClick={() => onEdit(c.id)}>
+              <Text>{t('translation:settingsHub.sections.storeConfig.edit')}</Text>
+            </Button>
           </S.AccountRow>
         ))
       ) : (
-        <Text variant="body-sm" color="text.secondary">{t('translation:settingsHub.sections.amazon.noAccounts')}</Text>
+        <Text variant="body-sm" color="text.secondary">
+          {t('translation:settingsHub.sections.storeConfig.noConfigs')}
+        </Text>
       )}
     </SettingsCard>
   );
@@ -112,7 +162,12 @@ const ListingGroupsSection = ({
   );
 };
 
-const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password' | 'language') => void }): React.ReactElement => {
+const AccountSecuritySection = ({
+  onAction,
+  onDeactivate,}: {
+  onAction: (key: 'password' | 'language') => void;
+  onDeactivate: () => void;
+}): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const items: Array<{ key: 'password' | 'language'; icon: string; labelKey: string }> = [
     { key: 'password', icon: 'lock', labelKey: 'translation:settingsHub.sections.account.changePassword' },
@@ -128,34 +183,49 @@ const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password' | 'la
       }}
     >
       {items.map(({ key, icon, labelKey }) => (
-        <S.AccountActionRow key={key} onClick={() => onAction(key)}>
-          <S.AccountActionRowInfo>
-            <Icon name={icon as never} size={18} color="text.secondary" />
-            <Text variant="body-sm" weight="medium">{t(labelKey)}</Text>
-          </S.AccountActionRowInfo>
-          <Icon name="chevron-right" size={18} color="text.tertiary" />
-        </S.AccountActionRow>
+        <SettingsActionRow key={key} icon={icon as never} label={t(labelKey)} onClick={() => onAction(key)} />
       ))}
+      {/* Deactivate (merged danger zone) — same row geometry as the rows above */}
+      <SettingsActionRow
+        icon="trash"
+        variant="danger"
+        label={t('translation:settingsHub.sections.danger.deactivate')}
+        onClick={onDeactivate}
+      />
     </SettingsCard>
   );
 };
 
-const DangerZoneSection = ({ onDeactivate }: { onDeactivate: () => void }): React.ReactElement => {
+const EbaySection = ({
+  onConnect,
+  onView,
+}: {
+  onConnect: () => void;
+  onView: () => void;
+}): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
-    <S.DangerNotice>
-      <Text variant="body-sm" weight="semibold" color="semantic.error">
-        {t('translation:settingsHub.sections.danger.title')}
-      </Text>
-      <Text variant="caption" color="text.secondary">
-        {t('translation:settingsHub.sections.danger.deactivateDescription')}
-      </Text>
-      <div>
-        <Button variant="danger" onClick={onDeactivate}>
-          <Text>{t('translation:settingsHub.sections.danger.deactivate')}</Text>
-        </Button>
-      </div>
-    </S.DangerNotice>
+    <SettingsCard
+      variant="section"
+      header={{
+        icon: 'storefront',
+        title: t('translation:settingsHub.sections.ebay.title'),
+        subtitle: t('translation:settingsHub.sections.ebay.subtitle'),
+      }}
+    >
+      {/* View connected stores */}
+      <SettingsActionRow
+        icon="list"
+        label={t('translation:settingsHub.sections.ebay.manageStores.title')}
+        onClick={onView}
+      />
+      {/* Connect a new eBay store */}
+      <SettingsActionRow
+        icon="plus"
+        label={t('translation:settingsHub.sections.ebay.connectNew.title')}
+        onClick={onConnect}
+      />
+    </SettingsCard>
   );
 };
 
@@ -173,6 +243,11 @@ export const SettingsHubPageComponent = ({
   isDeactivateModalOpen,
   onOpenDeactivateModal,
   onCloseDeactivateModal,
+  storeConfigs,
+  availableStores,
+  editingStoreConfig,
+  onNewStoreConfig,
+  onEditStoreConfig,
 }: SettingsHubPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const displayName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : '';
@@ -187,55 +262,48 @@ export const SettingsHubPageComponent = ({
         subtitle={t('translation:settingsHub.subtitle')}
       />
 
-      {/* Profile Hero */}
+      {/* Profile Hero — split: profile left, edit right */}
       <S.ProfileHeroCard>
-        <S.Avatar>{initials}</S.Avatar>
-        <S.ProfileHeroInfo>
-          <Text variant="h1" weight="bold">{displayName || t('translation:settingsHub.sections.profile.title')}</Text>
-          {profile?.email && <Text variant="body-sm" color="text.secondary">{profile.email}</Text>}
-        </S.ProfileHeroInfo>
-        <S.ProfileHeroActions>
-          <S.ProfileNavItem
-            type="button"
-            onClick={() => onOpenDrawer('profile')}
-            aria-label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
-          >
-            <Text>{t('translation:settingsHub.sections.profile.tabs.personalInfo')}</Text>
-            <Icon name="chevron-right" size={22} color="brand.primary" />
-          </S.ProfileNavItem>
-          <S.ProfileNavItem
-            type="button"
-            onClick={() => onOpenDrawer('ebay')}
-            aria-label={t('translation:settingsHub.sections.ebay.title')}
-          >
-            <Text>{t('translation:settingsHub.sections.ebay.title')}</Text>
-            <Icon name="chevron-right" size={22} color="brand.primary" />
-          </S.ProfileNavItem>
-        </S.ProfileHeroActions>
+        <S.ProfileHeroLeft>
+          <S.Avatar>{initials}</S.Avatar>
+          <S.ProfileHeroInfo>
+            <Text variant="h1" weight="bold">{displayName || t('translation:settingsHub.sections.profile.title')}</Text>
+            {profile?.email && <Text variant="body-sm" color="text.secondary">{profile.email}</Text>}
+          </S.ProfileHeroInfo>
+        </S.ProfileHeroLeft>
+        <S.ProfileHeroRight
+          type="button"
+          onClick={() => onOpenDrawer('profile')}
+          aria-label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
+        >
+          <Text>{t('translation:settingsHub.sections.profile.tabs.personalInfo')}</Text>
+          <Icon name="chevron-right" size={18} color="brand.primary" />
+        </S.ProfileHeroRight>
       </S.ProfileHeroCard>
 
-      {/* Amazon row */}
-      <AmazonAccountsSection accounts={amazonAccounts} onAdd={() => onOpenDrawer('amazonAdd')} />
+      {/* eBay + Amazon accounts — two columns on desktop, single column on mobile */}
+      <S.TwoColGrid>
+        {/* eBay — connect new store + view existing stores */}
+        <EbaySection
+          onConnect={onNavigateToEbayConnect}
+          onView={() => onOpenDrawer('ebay')}
+        />
+
+        {/* Amazon — view connected accounts + add new */}
+        <AmazonAccountsSection
+          onView={() => onOpenDrawer('amazonList')}
+          onAdd={() => onOpenDrawer('amazonAdd')}
+        />
+      </S.TwoColGrid>
 
       {/* Store config + Listing groups */}
       <S.TwoColGrid>
-        <SettingsCard
-          variant="section"
-          header={{
-            icon: 'map-pin',
-            title: t('translation:settingsHub.sections.storeConfig.title'),
-            subtitle: t('translation:settingsHub.sections.storeConfig.subtitle'),
-          }}
-          headerRight={
-            <Button variant="text" onClick={() => onOpenDrawer('storeConfig')}>
-              <Text>{t('translation:settingsHub.sections.storeConfig.edit')}</Text>
-            </Button>
-          }
-        >
-          <Text variant="body-sm" color="text.secondary">
-            {t('translation:settingsHub.sections.storeConfig.subtitle')}
-          </Text>
-        </SettingsCard>
+        <StoreConfigSection
+          configs={storeConfigs}
+          availableStores={availableStores}
+          onNew={onNewStoreConfig}
+          onEdit={onEditStoreConfig}
+        />
 
         <ListingGroupsSection
           groups={listingGroups}
@@ -244,15 +312,11 @@ export const SettingsHubPageComponent = ({
         />
       </S.TwoColGrid>
 
-      {/* Security + Danger Zone */}
-      <S.TwoColGrid>
-        <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} />
-        <Card variant="bordered">
-          <CardBody>
-            <DangerZoneSection onDeactivate={onOpenDeactivateModal} />
-          </CardBody>
-        </Card>
-      </S.TwoColGrid>
+      {/* Account & Security — change password, language, and deactivate (merged) */}
+      <AccountSecuritySection
+        onAction={(key) => onOpenDrawer(key)}
+        onDeactivate={onOpenDeactivateModal}
+      />
 
       {/* Drawers */}
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
@@ -263,7 +327,20 @@ export const SettingsHubPageComponent = ({
         onConnect={onNavigateToEbayConnect}
       />
       <AmazonAccountDrawer isOpen={activeDrawer === 'amazonAdd'} onClose={onCloseDrawer} />
-      <StoreConfigDrawer isOpen={activeDrawer === 'storeConfig'} onClose={onCloseDrawer} />
+      <AmazonAccountsDrawer
+        isOpen={activeDrawer === 'amazonList'}
+        onClose={onCloseDrawer}
+        accounts={amazonAccounts}
+        onAdd={() => onOpenDrawer('amazonAdd')}
+      />
+      <StoreConfigDrawer
+        key={`storeConfig-${editingStoreConfig?.id ?? 'new'}-${activeDrawer === 'storeConfig'}`}
+        isOpen={activeDrawer === 'storeConfig'}
+        onClose={onCloseDrawer}
+        editingConfig={editingStoreConfig}
+        availableStores={availableStores}
+        existingConfigs={storeConfigs}
+      />
       <ListingGroupDrawer
         isOpen={activeDrawer === 'listingGroupNew' || activeDrawer === 'listingGroupEdit'}
         onClose={onCloseDrawer}

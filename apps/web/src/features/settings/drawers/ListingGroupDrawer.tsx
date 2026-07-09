@@ -1,21 +1,10 @@
-import styled from '@emotion/styled';
-import { Button, Drawer, Text, tkn } from '@repo/ui';
+import { Drawer, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  align-items: flex-start;
-`;
-
-export interface ListingGroupDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  editingId?: string | null;
-}
+import { BodyStack } from './ListingGroupDrawer.style';
+import type { ListingGroupDrawerProps } from './ListingGroupDrawer.types';
 
 export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({
   isOpen,
@@ -39,14 +28,20 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} title={t(titleKey)} size="sm">
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t(titleKey)}
+      size="md"
+      primaryAction={{
+        label: t('translation:settingsHub.drawer.listingGroup.openFull'),
+        onClick: handleOpen,
+      }}
+    >
       <BodyStack>
         <Text variant="body" color="text.secondary">
           {t('translation:settingsHub.drawer.listingGroup.titleNew')}
         </Text>
-        <Button variant="primary" onClick={handleOpen}>
-          <Text>{t('translation:settingsHub.drawer.listingGroup.openFull')}</Text>
-        </Button>
       </BodyStack>
     </Drawer>
   );

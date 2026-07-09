@@ -11,6 +11,13 @@ import { StoreSettingsService } from './store-settings.service';
 export class StoreSettingsController {
   constructor(private readonly storeSettingsService: StoreSettingsService) {}
 
+  @Get('all')
+  async listSettings(
+    @Request() req: { user: { sub: string } },
+  ): Promise<StoreSettingsResponse[]> {
+    return this.storeSettingsService.listSettings(req.user.sub);
+  }
+
   @Get()
   async getSettings(
     @Request() req: { user: { sub: string } },

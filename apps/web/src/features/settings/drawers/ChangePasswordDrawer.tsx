@@ -1,9 +1,7 @@
 import { AUTH_CONSTANTS } from '@repo/shared';
 import {
-  Button,
   Drawer,
   ModernTextInput,
-  Text,
   useUI,
 } from '@repo/ui';
 import React, { useState } from 'react';
@@ -12,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import {
   BodyStack,
   ErrorText,
-  FooterRow,
 } from './ChangePasswordDrawer.style';
 import type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
 
@@ -99,27 +96,18 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
     /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
 
-  const footer = (
-    <FooterRow>
-      {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
-      <Button variant="text" onClick={handleClose} disabled={isLoading}>
-        <Text>{t('translation:common.cancel')}</Text>
-      </Button>
-      <Button variant="primary" onClick={handleSubmit} isLoading={isLoading}>
-        {/* eslint-enable @typescript-eslint/no-unsafe-assignment */}
-        <Text>{t('translation:common.save')}</Text>
-      </Button>
-    </FooterRow>
-  );
-
   return (
     <Drawer
       isOpen={isOpen}
       onClose={handleClose}
       title={t('translation:settingsHub.drawer.password.title')}
       subtitle={t('translation:settingsHub.drawer.password.subtitle')}
-      footer={footer}
       size="md"
+      primaryAction={{
+        label: t('translation:common.save'),
+        onClick: handleSubmit,
+        isLoading: !!isLoading,
+      }}
     >
       <BodyStack>
         <ModernTextInput

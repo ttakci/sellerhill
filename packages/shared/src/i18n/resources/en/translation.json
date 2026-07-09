@@ -148,26 +148,51 @@
         "status": "Status",
         "sellerId": "Seller ID",
         "marketplace": "Marketplace",
+        "currencyLabel": "Currency",
+        "connectedSince": "Connected Since",
         "tokenExpires": "Token Expires",
         "lastSync": "Last Sync",
         "connected": "Connected",
         "notConnected": "Not Connected",
-        "connect": "Connect eBay Account"
+        "connect": "Connect eBay Account",
+        "connectNew": {
+          "title": "Connect a New Store",
+          "subtitle": "Authorize a new eBay seller account via eBay's secure login",
+          "action": "Connect Store"
+        },
+        "manageStores": {
+          "title": "Connected Stores",
+          "subtitle": "View and manage your linked eBay stores",
+          "action": "View Stores",
+          "count": "{{count}} store(s) connected",
+          "none": "No stores connected yet",
+          "empty": "No eBay stores connected yet"
+        }
       },
       "amazon": {
         "title": "Amazon Accounts",
         "subtitle": "Buyer accounts used for order scraping",
         "add": "Add Account",
         "accountCount": "{{count}} account(s)",
-        "noAccounts": "No Amazon accounts connected"
+        "noAccounts": "No Amazon accounts connected",
+        "emailLabel": "Email",
+        "connectedSince": "Connected Since",
+        "manage": {
+          "title": "Connected Accounts",
+          "subtitle": "View and manage your linked Amazon accounts"
+        }
       },
       "storeConfig": {
         "title": "Store Configuration",
         "subtitle": "Global location, validation, and regional settings",
-        "edit": "Edit Configuration",
+        "edit": "Edit",
+        "new": "New",
+        "global": "Global",
         "country": "Country",
         "region": "Region",
-        "zipCode": "Zip Code"
+        "zipCode": "Zip Code",
+        "noLocation": "No location set",
+        "noConfigs": "No store configurations yet"
       },
       "blacklist": {
         "title": "Blacklist Management",
@@ -215,9 +240,14 @@
         "twoFactorSecret": "2FA Secret (optional)"
       },
       "storeConfig": {
-        "title": "Edit Store Configuration",
-        "subtitle": "Global location and validation rules",
-        "openFull": "Open Full Settings"
+        "titleEdit": "Edit Store Configuration",
+        "titleNew": "New Store Configuration",
+        "subtitle": "Location and validation rules",
+        "global": "Global (all stores)",
+        "appliesTo": "Applies to",
+        "validation": "Listing validation",
+        "validateTitle": "Validate product titles",
+        "validateDescription": "Validate product descriptions"
       },
       "listingGroup": {
         "titleNew": "New Listing Settings Group",

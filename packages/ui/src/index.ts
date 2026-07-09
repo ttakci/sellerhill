@@ -104,6 +104,9 @@ export type { SwitchRowProps } from './molecules/SwitchRow';
 export { SettingsCard } from './molecules/SettingsCard';
 export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } from './molecules/SettingsCard';
 
+export { SettingsActionRow } from './molecules/SettingsActionRow';
+export type { SettingsActionRowProps, SettingsActionRowVariant } from './molecules/SettingsActionRow';
+
 export { StatusBadge } from './molecules/StatusBadge';
 export type { StatusBadgeProps, StatusSize, StatusType } from './molecules/StatusBadge';
 

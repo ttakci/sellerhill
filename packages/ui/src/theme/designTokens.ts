@@ -84,9 +84,9 @@ export const shadowTokens = {
 
 export const typographyTokens = {
   fontFamily: {
-    heading: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    body: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    sans: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    body: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    sans: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   fontSize: {

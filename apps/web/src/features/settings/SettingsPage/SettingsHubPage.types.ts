@@ -3,12 +3,16 @@ import type {
   EbayAccountPublicDto,
   ListingSettingsGroupResponse,
   ProfileDto,
+  StoreSettingsResponse,
 } from '@repo/shared';
+
+import type { StoreConfigStoreOption } from '../drawers/StoreConfigDrawer';
 
 export type SettingsDrawerKey =
   | 'profile'
   | 'ebay'
   | 'amazonAdd'
+  | 'amazonList'
   | 'storeConfig'
   | 'listingGroupNew'
   | 'listingGroupEdit'
@@ -31,4 +35,10 @@ export interface SettingsHubPageComponentProps {
   isDeactivateModalOpen: boolean;
   onOpenDeactivateModal: () => void;
   onCloseDeactivateModal: () => void;
+  // Store configuration
+  storeConfigs: StoreSettingsResponse[];
+  availableStores: StoreConfigStoreOption[];
+  editingStoreConfig: StoreSettingsResponse | null;
+  onNewStoreConfig: () => void;
+  onEditStoreConfig: (id: string) => void;
 }

@@ -28,6 +28,18 @@ export class StoreSettingsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   /**
+   * List ALL settings rows for a user (global + per-store).
+   * Used by the Settings hub to render each configuration as a card.
+   */
+  async listSettings(userId: string): Promise<StoreSettingsResponse[]> {
+    const results = await this.databaseService.query<StoreSettingsEntity>(
+      `SELECT * FROM store_settings WHERE user_id = $1 ORDER BY is_global DESC, updated_at DESC`,
+      [userId],
+    );
+    return results.map((row) => this.mapToDto(row));
+  }
+
+  /**
    * Get settings for a specific store or global
    */
   async getSettings(userId: string, storeId?: string): Promise<StoreSettingsResponse> {

@@ -205,7 +205,7 @@ The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced ton
 - **Sidebar background is per-theme**: light deep blue `#0c1f52`, dark near-black `#0d0f18`.
 - **Borders are alpha-based**: `#00000014` (light) / `#ffffff12` (dark) — not solid hex.
 - **`accent` token category** (emerald `#10b981`) is for "Active" status badges and success emphasis. Distinct from `semantic.success` (system success states).
-- **Font**: Plus Jakarta Sans (was Inter/Lexend).
+- **Font**: Inter (headings) + Lexend (body/UI). Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts` (`fontFamily.heading` = Inter, `fontFamily.body`/`sans` = Lexend, `mono` = JetBrains Mono).
 - **Sidebar nav**: Inventory section (Dashboard, eBay Listings, Listing Jobs, Products, Orders, Stores) + Configuration section (Settings). Single Settings nav item (hub consolidation TBD in Plan 5).
 
 Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`.

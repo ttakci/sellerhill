@@ -30,10 +30,10 @@ export const Panel = styled.aside<{ $size: string; $isOpen: boolean }>`
         return '35rem'; /* 560px */
       case 'md':
       default:
-        return '26.25rem'; /* 420px */
+        return '36rem'; /* 576px */
     }
   }};
-  background: ${tkn('colors.background.secondary')};
+  background: ${tkn('colors.background.primary')};
   box-shadow: ${tkn('shadows.xl')};
   display: flex;
   flex-direction: column;
@@ -48,7 +48,7 @@ export const Panel = styled.aside<{ $size: string; $isOpen: boolean }>`
 `;
 
 export const Header = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.lg')} ${tkn('spacing.md+')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   align-items: flex-start;
@@ -60,19 +60,19 @@ export const Header = styled.div`
 export const HeaderText = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
   flex: 1;
 `;
 
 export const Body = styled.div`
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
   overflow-y: auto;
   flex: 1;
 `;
 
 export const Footer = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')} ${tkn('spacing.lg')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   justify-content: flex-end;
