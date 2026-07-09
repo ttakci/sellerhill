@@ -18,5 +18,3 @@ export { ListingGroupDrawer } from './ListingGroupDrawer';
 export type { ListingGroupDrawerProps } from './ListingGroupDrawer.types';
 export { ProfileDrawer } from './ProfileDrawer';
 export type { ProfileDrawerProps } from './ProfileDrawer.types';
-export { StoreConfigDrawer } from './StoreConfigDrawer';
-export type { StoreConfigDrawerProps } from './StoreConfigDrawer';

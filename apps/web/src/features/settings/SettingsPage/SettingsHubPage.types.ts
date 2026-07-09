@@ -6,14 +6,14 @@ import type {
   StoreSettingsResponse,
 } from '@repo/shared';
 
-import type { StoreConfigStoreOption } from '../drawers/StoreConfigDrawer';
-
 export type SettingsDrawerKey =
   | 'profile'
   | 'ebay'
   | 'amazonAdd'
   | 'amazonList'
-  | 'storeConfig'
+  | 'storeSettings'
+  | 'blacklistAdd'
+  | 'blacklistList'
   | 'listingGroupNew'
   | 'listingGroupEdit'
   | 'password'
@@ -37,8 +37,5 @@ export interface SettingsHubPageComponentProps {
   onCloseDeactivateModal: () => void;
   // Store configuration
   storeConfigs: StoreSettingsResponse[];
-  availableStores: StoreConfigStoreOption[];
-  editingStoreConfig: StoreSettingsResponse | null;
-  onNewStoreConfig: () => void;
-  onEditStoreConfig: (id: string) => void;
+  availableStores: Array<{ id: string; name: string }>;
 }

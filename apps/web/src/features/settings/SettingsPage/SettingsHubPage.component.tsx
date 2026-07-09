@@ -18,12 +18,14 @@ import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
   AmazonAccountsDrawer,
+  BlacklistAddDrawer,
+  BlacklistListDrawer,
   ChangePasswordDrawer,
   EbayAccountDrawer,
   LanguageDrawer,
   ListingGroupDrawer,
   ProfileDrawer,
-  StoreConfigDrawer,
+  StoreSettingsDrawer,
 } from '../drawers';
 
 import * as S from './SettingsHubPage.style';
@@ -60,61 +62,33 @@ const AmazonAccountsSection = ({
   );
 };
 
-const StoreConfigSection = ({
-  configs,
-  availableStores,
-  onNew,
-  onEdit,
+const StoreManagementSection = ({
+  onAction,
 }: {
-  configs: SettingsHubPageComponentProps['storeConfigs'];
-  availableStores: SettingsHubPageComponentProps['availableStores'];
-  onNew: () => void;
-  onEdit: (id: string) => void;
+  onAction: (key: 'storeSettings' | 'blacklistAdd' | 'blacklistList') => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
-
-  const scopeLabel = (storeId?: string): string => {
-    if (!storeId) {
-      return t('translation:settingsHub.sections.storeConfig.global');
-    }
-    const match = availableStores.find((s) => s.id === storeId);
-    return match?.name ?? storeId;
-  };
-
+  const items: Array<{
+    key: 'storeSettings' | 'blacklistAdd' | 'blacklistList';
+    icon: string;
+    labelKey: string;
+  }> = [
+    { key: 'storeSettings', icon: 'settings', labelKey: 'translation:settingsHub.sections.storeManagement.storeSettings' },
+    { key: 'blacklistAdd', icon: 'plus', labelKey: 'translation:settingsHub.sections.storeManagement.blacklistAdd' },
+    { key: 'blacklistList', icon: 'list', labelKey: 'translation:settingsHub.sections.storeManagement.blacklistList' },
+  ];
   return (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'map-pin',
-        title: t('translation:settingsHub.sections.storeConfig.title'),
-        subtitle: t('translation:settingsHub.sections.storeConfig.subtitle'),
+        icon: 'store',
+        title: t('translation:settingsHub.sections.storeManagement.title'),
+        subtitle: t('translation:settingsHub.sections.storeManagement.subtitle'),
       }}
-      headerRight={
-        <Button variant="text" onClick={onNew}>
-          <Text>{t('translation:settingsHub.sections.storeConfig.new')}</Text>
-        </Button>
-      }
     >
-      {configs.length > 0 ? (
-        configs.map((c) => (
-          <S.AccountRow key={c.id}>
-            <S.AccountRowInfo>
-              <Text variant="body-sm" weight="medium">{scopeLabel(c.storeId)}</Text>
-              <Text variant="caption" color="text.tertiary">
-                {[c.country, c.state, c.zipCode].filter(Boolean).join(' · ') ||
-                  t('translation:settingsHub.sections.storeConfig.noLocation')}
-              </Text>
-            </S.AccountRowInfo>
-            <Button variant="text" onClick={() => onEdit(c.id)}>
-              <Text>{t('translation:settingsHub.sections.storeConfig.edit')}</Text>
-            </Button>
-          </S.AccountRow>
-        ))
-      ) : (
-        <Text variant="body-sm" color="text.secondary">
-          {t('translation:settingsHub.sections.storeConfig.noConfigs')}
-        </Text>
-      )}
+      {items.map(({ key, icon, labelKey }) => (
+        <SettingsActionRow key={key} icon={icon as never} label={t(labelKey)} onClick={() => onAction(key)} />
+      ))}
     </SettingsCard>
   );
 };
@@ -245,9 +219,6 @@ export const SettingsHubPageComponent = ({
   onCloseDeactivateModal,
   storeConfigs,
   availableStores,
-  editingStoreConfig,
-  onNewStoreConfig,
-  onEditStoreConfig,
 }: SettingsHubPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const displayName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : '';
@@ -296,21 +267,15 @@ export const SettingsHubPageComponent = ({
         />
       </S.TwoColGrid>
 
-      {/* Store config + Listing groups */}
-      <S.TwoColGrid>
-        <StoreConfigSection
-          configs={storeConfigs}
-          availableStores={availableStores}
-          onNew={onNewStoreConfig}
-          onEdit={onEditStoreConfig}
-        />
+      {/* Listing groups */}
+      <ListingGroupsSection
+        groups={listingGroups}
+        onNew={() => onOpenDrawer('listingGroupNew')}
+        onEdit={onEditListingGroup}
+      />
 
-        <ListingGroupsSection
-          groups={listingGroups}
-          onNew={() => onOpenDrawer('listingGroupNew')}
-          onEdit={onEditListingGroup}
-        />
-      </S.TwoColGrid>
+      {/* Store configuration — settings, add blacklist, view blacklist */}
+      <StoreManagementSection onAction={(key) => onOpenDrawer(key)} />
 
       {/* Account & Security — change password, language, and deactivate (merged) */}
       <AccountSecuritySection
@@ -333,13 +298,23 @@ export const SettingsHubPageComponent = ({
         accounts={amazonAccounts}
         onAdd={() => onOpenDrawer('amazonAdd')}
       />
-      <StoreConfigDrawer
-        key={`storeConfig-${editingStoreConfig?.id ?? 'new'}-${activeDrawer === 'storeConfig'}`}
-        isOpen={activeDrawer === 'storeConfig'}
+      <StoreSettingsDrawer
+        isOpen={activeDrawer === 'storeSettings'}
         onClose={onCloseDrawer}
-        editingConfig={editingStoreConfig}
         availableStores={availableStores}
-        existingConfigs={storeConfigs}
+        storeConfigs={storeConfigs}
+      />
+      <BlacklistAddDrawer
+        isOpen={activeDrawer === 'blacklistAdd'}
+        onClose={onCloseDrawer}
+        availableStores={availableStores}
+        storeConfigs={storeConfigs}
+      />
+      <BlacklistListDrawer
+        isOpen={activeDrawer === 'blacklistList'}
+        onClose={onCloseDrawer}
+        availableStores={availableStores}
+        storeConfigs={storeConfigs}
       />
       <ListingGroupDrawer
         isOpen={activeDrawer === 'listingGroupNew' || activeDrawer === 'listingGroupEdit'}

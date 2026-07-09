@@ -24,7 +24,6 @@ import { useLocale } from '@/utils/useLocale';
 
 const DRAWER_PARAM = 'drawer';
 const EDIT_GROUP_PARAM = 'editGroup';
-const EDIT_STORE_CONFIG_PARAM = 'editStoreConfig';
 
 export const SettingsHubPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['translation']);
@@ -34,7 +33,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
   const editingListingGroupId = searchParams.get(EDIT_GROUP_PARAM);
-  const editingStoreConfigId = searchParams.get(EDIT_STORE_CONFIG_PARAM);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
 
   const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery();
@@ -75,21 +73,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     const next = new URLSearchParams(searchParams);
     next.delete(DRAWER_PARAM);
     next.delete(EDIT_GROUP_PARAM);
-    next.delete(EDIT_STORE_CONFIG_PARAM);
-    setSearchParams(next, { replace: true });
-  };
-
-  const handleNewStoreConfig = (): void => {
-    const next = new URLSearchParams(searchParams);
-    next.delete(EDIT_STORE_CONFIG_PARAM);
-    next.set(DRAWER_PARAM, 'storeConfig');
-    setSearchParams(next, { replace: true });
-  };
-
-  const handleEditStoreConfig = (id: string): void => {
-    const next = new URLSearchParams(searchParams);
-    next.set(EDIT_STORE_CONFIG_PARAM, id);
-    next.set(DRAWER_PARAM, 'storeConfig');
     setSearchParams(next, { replace: true });
   };
 
@@ -119,10 +102,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       })),
     [ebayData],
   );
-  const editingStoreConfig = useMemo(
-    () => storeConfigs.find((c) => c.id === editingStoreConfigId) ?? null,
-    [storeConfigs, editingStoreConfigId],
-  );
 
   return (
     <SettingsHubPageComponent
@@ -142,9 +121,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       onCloseDeactivateModal={handleCloseDeactivateModal}
       storeConfigs={storeConfigs}
       availableStores={availableStores}
-      editingStoreConfig={editingStoreConfig}
-      onNewStoreConfig={handleNewStoreConfig}
-      onEditStoreConfig={handleEditStoreConfig}
     />
   );
 };
