@@ -139,8 +139,7 @@
         "tabs": {
           "personalInfo": "Kişisel Bilgiler",
           "connectedStores": "Bağlı Mağazalar"
-        },
-        "plan": "Pro Plan"
+        }
       },
       "ebay": {
         "title": "eBay Hesabı",
@@ -186,24 +185,9 @@
       },
       "account": {
         "title": "Hesap ve Güvenlik",
-        "subtitle": "Şifre, 2FA, API erişimi, dil",
+        "subtitle": "Şifre ve dil tercihleri",
         "changePassword": "Şifre Değiştir",
-        "twoFactor": "İki Faktörlü Kimlik Doğrulama",
-        "apiAccess": "API Erişimi",
         "language": "Dil ve Bölge"
-      },
-      "notifications": {
-        "title": "Bildirimler",
-        "subtitle": "E-posta ve uygulama içi bildirim tercihleri",
-        "edit": "Tercihleri Düzenle"
-      },
-      "plan": {
-        "title": "Plan ve Faturalandırma",
-        "subtitle": "Abonelik, yenileme ve ödeme yöntemi",
-        "manage": "Planı Yönet",
-        "currentPlan": "Mevcut Plan",
-        "renewalDate": "Yenileme Tarihi",
-        "paymentMethod": "Ödeme Yöntemi"
       },
       "danger": {
         "title": "Tehlikeli Bölge",
@@ -248,28 +232,10 @@
         "new": "Yeni Şifre",
         "confirm": "Şifreyi Onayla",
         "mismatch": "Şifreler eşleşmiyor",
-        "tooShort": "Şifre en az 8 karakter olmalıdır"
-      },
-      "twoFactor": {
-        "title": "İki Faktörlü Kimlik Doğrulama",
-        "subtitle": "Hesabınıza ekstra bir güvenlik katmanı ekleyin",
-        "enabled": "2FA şu anda etkin",
-        "disabled": "2FA şu anda devre dışı",
-        "enable": "2FA'yı Etkinleştir",
-        "disable": "2FA'yı Devre Dışı Bırak",
-        "scanQr": "Bu QR kodunu kimlik doğrulama uygulamanızla tarayın",
-        "enterCode": "6 haneli doğrulama kodunu girin"
-      },
-      "apiAccess": {
-        "title": "API Erişimi",
-        "subtitle": "Programatik erişim için API anahtarlarını yönetin",
-        "createKey": "Yeni Anahtar Oluştur",
-        "noKeys": "API anahtarı yok. Başlamak için bir tane oluşturun.",
-        "keyLabel": "Etiket",
-        "createdAt": "Oluşturulma",
-        "lastUsed": "Son Kullanım",
-        "copyToken": "Token'ı Kopyala",
-        "revoke": "İptal Et"
+        "tooShort": "Şifre en az 8 karakter olmalıdır",
+        "sameAsCurrent": "Yeni şifre mevcut şifreden farklı olmalı",
+        "successHeader": "Şifre güncellendi",
+        "successDescription": "Şifreniz başarıyla değiştirildi."
       },
       "language": {
         "title": "Dil ve Bölge",
@@ -277,20 +243,19 @@
         "language": "Dil",
         "en": "English",
         "tr": "Türkçe"
-      },
-      "notifications": {
-        "title": "Bildirim Tercihleri",
-        "subtitle": "Hangi konularda bildirim almak istediğinizi seçin",
-        "emailNotifications": "E-posta Bildirimleri",
-        "orderAlerts": "Sipariş Uyarıları",
-        "syncFailures": "Senkronizasyon Hataları",
-        "weeklyReport": "Haftalık Özet Rapor",
-        "productUpdates": "Ürün Güncellemeleri"
       }
     },
-    "notImplemented": {
-      "title": "Uygulanmadı",
-      "description": "Bu özelliğin backend'i henüz uygulanmadı. Girdiğiniz bilgiler kaydedilmeyecek. Aşağıdaki form yalnızca önizleme içindir."
+    "modal": {
+      "deactivate": {
+        "title": "Hesabı devre dışı bırak",
+        "warning": "Zonds erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
+        "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
+        "emailPlaceholder": "{{email}}",
+        "confirmLabel": "Hesabı devre dışı bırak",
+        "cancelLabel": "İptal",
+        "successHeader": "Hesap devre dışı bırakıldı",
+        "successDescription": "Hesabınız devre dışı bırakıldı. Oturumunuz kapatılacak."
+      }
     }
   },
   "footer": {

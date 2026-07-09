@@ -139,8 +139,7 @@
         "tabs": {
           "personalInfo": "Personal Information",
           "connectedStores": "Connected Stores"
-        },
-        "plan": "Pro Plan"
+        }
       },
       "ebay": {
         "title": "eBay Account",
@@ -185,24 +184,9 @@
       },
       "account": {
         "title": "Account & Security",
-        "subtitle": "Password, 2FA, API access, language",
+        "subtitle": "Password and language preferences",
         "changePassword": "Change Password",
-        "twoFactor": "Two-Factor Authentication",
-        "apiAccess": "API Access",
         "language": "Language & Region"
-      },
-      "notifications": {
-        "title": "Notifications",
-        "subtitle": "Email and in-app notification preferences",
-        "edit": "Edit Preferences"
-      },
-      "plan": {
-        "title": "Plan & Billing",
-        "subtitle": "Subscription, renewal, and payment method",
-        "manage": "Manage Plan",
-        "currentPlan": "Current Plan",
-        "renewalDate": "Renewal Date",
-        "paymentMethod": "Payment Method"
       },
       "danger": {
         "title": "Danger Zone",
@@ -247,28 +231,10 @@
         "new": "New Password",
         "confirm": "Confirm Password",
         "mismatch": "Passwords do not match",
-        "tooShort": "Password must be at least 8 characters"
-      },
-      "twoFactor": {
-        "title": "Two-Factor Authentication",
-        "subtitle": "Add an extra layer of security to your account",
-        "enabled": "2FA is currently enabled",
-        "disabled": "2FA is currently disabled",
-        "enable": "Enable 2FA",
-        "disable": "Disable 2FA",
-        "scanQr": "Scan this QR code with your authenticator app",
-        "enterCode": "Enter the 6-digit verification code"
-      },
-      "apiAccess": {
-        "title": "API Access",
-        "subtitle": "Manage API keys for programmatic access",
-        "createKey": "Create New Key",
-        "noKeys": "No API keys. Create one to get started.",
-        "keyLabel": "Label",
-        "createdAt": "Created",
-        "lastUsed": "Last Used",
-        "copyToken": "Copy Token",
-        "revoke": "Revoke"
+        "tooShort": "Password must be at least 8 characters",
+        "sameAsCurrent": "New password must be different from current",
+        "successHeader": "Password updated",
+        "successDescription": "Your password has been changed successfully."
       },
       "language": {
         "title": "Language & Region",
@@ -276,20 +242,19 @@
         "language": "Language",
         "en": "English",
         "tr": "Türkçe"
-      },
-      "notifications": {
-        "title": "Notification Preferences",
-        "subtitle": "Choose what you want to be notified about",
-        "emailNotifications": "Email Notifications",
-        "orderAlerts": "Order Alerts",
-        "syncFailures": "Sync Failures",
-        "weeklyReport": "Weekly Summary Report",
-        "productUpdates": "Product Updates"
       }
     },
-    "notImplemented": {
-      "title": "Not Implemented",
-      "description": "This feature's backend has not been implemented yet. Your input will not be saved. The form below is for UI preview only."
+    "modal": {
+      "deactivate": {
+        "title": "Deactivate account",
+        "warning": "This will revoke your access to Zonds. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
+        "typeEmail": "To confirm, type your email address below:",
+        "emailPlaceholder": "{{email}}",
+        "confirmLabel": "Deactivate account",
+        "cancelLabel": "Cancel",
+        "successHeader": "Account deactivated",
+        "successDescription": "Your account has been deactivated. You will be signed out."
+      }
     }
   },
   "footer": {
