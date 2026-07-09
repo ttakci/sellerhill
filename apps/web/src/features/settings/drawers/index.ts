@@ -4,6 +4,8 @@ export { AmazonAccountsDrawer } from './AmazonAccountsDrawer';
 export type { AmazonAccountsDrawerProps } from './AmazonAccountsDrawer';
 export { BlacklistAddDrawer } from './BlacklistAddDrawer';
 export type { BlacklistAddDrawerProps } from './BlacklistAddDrawer';
+export { BlacklistListDrawer } from './BlacklistListDrawer';
+export type { BlacklistListDrawerProps } from './BlacklistListDrawer';
 export { EbayAccountDrawer } from './EbayAccountDrawer/EbayAccountDrawer.container';
 export type { EbayAccountDrawerProps } from './EbayAccountDrawer/EbayAccountDrawer.types';
 export { ChangePasswordDrawer } from './ChangePasswordDrawer';
