@@ -1,4 +1,4 @@
-import { ConflictException, HttpException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -336,6 +336,61 @@ export class AuthService {
     }
 
     return this.mapToUserDto(users[0]);
+  }
+
+  /**
+   * Change password for authenticated user
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ success: boolean }> {
+    this.logger.log(`Change password attempt for user: ${userId}`);
+
+    const users = await this.databaseService.query<UserEntity>(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      throw new UnauthorizedException('auth.errors.userNotFound');
+    }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, users[0].password_hash);
+    if (!isCurrentValid) {
+      throw new UnauthorizedException('auth.errors.wrongPassword');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('auth.errors.samePassword');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await this.databaseService.query(
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [newHash, userId]
+    );
+
+    this.logger.log(`Password changed successfully for user: ${userId}`);
+    return { success: true };
+  }
+
+  /**
+   * Deactivate (soft-delete) user account
+   * Sets status to INACTIVE — user can no longer log in.
+   * Referential integrity preserved (orders, listings kept).
+   */
+  async deactivateAccount(userId: string): Promise<{ success: boolean }> {
+    this.logger.log(`Deactivating account: ${userId}`);
+
+    await this.databaseService.query(
+      'UPDATE users SET status = $1, updated_at = NOW() WHERE id = $2',
+      [UserStatus.INACTIVE, userId]
+    );
+
+    this.logger.log(`Account deactivated: ${userId}`);
+    return { success: true };
   }
 
   /**
