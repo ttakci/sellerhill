@@ -200,6 +200,13 @@
         "manage": "Yönet",
         "keywordCount": "{{count}} anahtar kelime"
       },
+      "storeManagement": {
+        "title": "Mağaza Yapılandırması",
+        "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
+        "storeSettings": "Mağaza Ayarları",
+        "blacklistAdd": "Yeni Blacklist Gir",
+        "blacklistList": "Blacklist'leri Göster"
+      },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
         "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
@@ -249,6 +256,38 @@
         "validation": "Liste doğrulama",
         "validateTitle": "Ürün başlıklarını doğrula",
         "validateDescription": "Ürün açıklamalarını doğrula"
+      },
+      "storeSettings": {
+        "title": "Mağaza Ayarları",
+        "subtitle": "Seçili kapsam için konum ve listing doğrulaması",
+        "global": "Global (tüm mağazalar)",
+        "appliesTo": "Uygulandığı yer",
+        "validation": "Listing doğrulaması",
+        "validateTitle": "Ürün başlıklarını doğrula",
+        "validateDescription": "Ürün açıklamalarını doğrula",
+        "country": "Ülke",
+        "region": "Bölge",
+        "zipCode": "Posta Kodu"
+      },
+      "blacklist": {
+        "add": {
+          "title": "Yeni Blacklist Kelimesi",
+          "subtitle": "Seçili kapsam için yasaklı kelime",
+          "keyword": "Kelime",
+          "scope": "Kapsam",
+          "scopeBoth": "Başlık & Açıklama",
+          "scopeTitle": "Yalnızca başlık",
+          "scopeDescription": "Yalnızca açıklama",
+          "add": "Kelime Ekle",
+          "duplicate": "Bu kelime seçili kapsam için zaten var",
+          "empty": "Kelime boş olamaz"
+        },
+        "list": {
+          "title": "Blacklist Kelimeleri",
+          "subtitle": "Seçili kapsam için yasaklı kelimeler",
+          "empty": "Seçili kapsam için blacklist kelimesi yok",
+          "removeLabel": "Kelimeyi kaldır"
+        }
       },
       "listingGroup": {
         "titleNew": "Yeni Liste Ayar Grubu",

@@ -200,6 +200,13 @@
         "manage": "Manage",
         "keywordCount": "{{count}} keyword(s)"
       },
+      "storeManagement": {
+        "title": "Store Configuration",
+        "subtitle": "Store settings and listing keyword blacklist",
+        "storeSettings": "Store Settings",
+        "blacklistAdd": "Add Blacklist Keyword",
+        "blacklistList": "View Blacklist"
+      },
       "listingGroups": {
         "title": "Listing Settings Groups",
         "subtitle": "Repricing strategies, stock logic, profit margins",
@@ -248,6 +255,38 @@
         "validation": "Listing validation",
         "validateTitle": "Validate product titles",
         "validateDescription": "Validate product descriptions"
+      },
+      "storeSettings": {
+        "title": "Store Settings",
+        "subtitle": "Location and listing validation for the selected scope",
+        "global": "Global (all stores)",
+        "appliesTo": "Applies to",
+        "validation": "Listing validation",
+        "validateTitle": "Validate product titles",
+        "validateDescription": "Validate product descriptions",
+        "country": "Country",
+        "region": "Region",
+        "zipCode": "Zip Code"
+      },
+      "blacklist": {
+        "add": {
+          "title": "Add Blacklist Keyword",
+          "subtitle": "Forbidden keyword for the selected scope",
+          "keyword": "Keyword",
+          "scope": "Scope",
+          "scopeBoth": "Title & Description",
+          "scopeTitle": "Title only",
+          "scopeDescription": "Description only",
+          "add": "Add Keyword",
+          "duplicate": "This keyword already exists for the selected scope",
+          "empty": "Keyword cannot be empty"
+        },
+        "list": {
+          "title": "Blacklist Keywords",
+          "subtitle": "Forbidden keywords for the selected scope",
+          "empty": "No blacklist keywords for the selected scope",
+          "removeLabel": "Remove keyword"
+        }
       },
       "listingGroup": {
         "titleNew": "New Listing Settings Group",
