@@ -49,7 +49,7 @@ export const BlacklistListDrawer: React.FC<BlacklistListDrawerProps> = ({
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     void saveSettings(payload)
       .unwrap()
-      .catch((error: unknown) => {
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         showMessage(
           {
             type: 'error',

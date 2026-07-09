@@ -78,7 +78,7 @@ export const BlacklistAddDrawer: React.FC<BlacklistAddDrawerProps> = ({
         setKeyword('');
         onClose();
       })
-      .catch((error: unknown) => {
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         showMessage(
           {
             type: 'error',

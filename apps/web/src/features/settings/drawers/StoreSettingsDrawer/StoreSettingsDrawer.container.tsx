@@ -79,7 +79,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         );
         onClose();
       })
-      .catch((error: unknown) => {
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         showMessage(
           {
             type: 'error',
