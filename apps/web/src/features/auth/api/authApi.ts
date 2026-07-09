@@ -7,7 +7,7 @@
  * - getMe: Get current user information
  */
 
-import type { AuthResponse, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
+import type { AuthResponse, ChangePasswordRequest, GenericSuccessResponse, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -70,6 +70,29 @@ export const authApi = baseApi.injectEndpoints({
       }),
       providesTags: ['Auth'],
     }),
+
+    /**
+     * Change password for authenticated user
+     */
+    changePassword: builder.mutation<GenericSuccessResponse, ChangePasswordRequest>({
+      query: (body) => ({
+        url: '/auth/password',
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    /**
+     * Deactivate (soft-delete) the authenticated account
+     */
+    deactivateAccount: builder.mutation<GenericSuccessResponse, void>({
+      query: () => ({
+        url: '/auth/deactivate',
+        method: 'POST',
+      }),
+      invalidatesTags: ['Auth'],
+    }),
   }),
 });
 
@@ -80,4 +103,6 @@ export const {
   useResendVerificationMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
+  useChangePasswordMutation,
+  useDeactivateAccountMutation,
 } = authApi;
