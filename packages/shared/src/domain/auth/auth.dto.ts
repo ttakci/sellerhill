@@ -41,3 +41,12 @@ export class AuthResponseDto {
 export class RefreshTokenRequestDto {
   refreshToken!: string;
 }
+
+export class ChangePasswordRequestDto {
+  currentPassword!: string;
+  newPassword!: string;
+}
+
+export class GenericSuccessResponseDto {
+  success!: boolean;
+}

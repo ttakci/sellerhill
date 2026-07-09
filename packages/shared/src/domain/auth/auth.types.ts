@@ -83,3 +83,18 @@ export interface RefreshTokenRequest {
 export interface AuthenticatedRequest {
   user: { sub: string; email: string };
 }
+
+/**
+ * Change password request payload
+ */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * Generic success response (no data)
+ */
+export interface GenericSuccessResponse {
+  success: boolean;
+}
