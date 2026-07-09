@@ -72,7 +72,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const footer = (
     <FooterRow>
       {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
-      <Button variant="ghost" onClick={onClose} disabled={isLoading}>
+      <Button variant="text" onClick={onClose} disabled={isLoading}>
         <Text>{t('translation:common.cancel')}</Text>
       </Button>
       <Button variant="primary" onClick={handleSave} isLoading={isLoading}>

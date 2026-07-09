@@ -102,7 +102,7 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
   const footer = (
     <FooterRow>
       {/* eslint-disable @typescript-eslint/no-unsafe-assignment */}
-      <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+      <Button variant="text" onClick={handleClose} disabled={isLoading}>
         <Text>{t('translation:common.cancel')}</Text>
       </Button>
       <Button variant="primary" onClick={handleSubmit} isLoading={isLoading}>

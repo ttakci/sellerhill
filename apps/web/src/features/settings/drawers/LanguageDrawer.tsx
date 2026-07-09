@@ -45,7 +45,7 @@ export const LanguageDrawer: React.FC<LanguageDrawerProps> = ({
 
   const footer = (
     <FooterRow>
-      <Button variant="ghost" onClick={onClose}>
+      <Button variant="text" onClick={onClose}>
         <Text>{t('translation:common.cancel')}</Text>
       </Button>
       <Button variant="primary" onClick={handleSave}>

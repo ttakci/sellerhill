@@ -5,7 +5,7 @@
  */
 
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
@@ -32,6 +32,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
   const editingListingGroupId = searchParams.get(EDIT_GROUP_PARAM);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
 
   const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery();
   const { data: profile, isLoading: isProfileLoading, error: profileError } = useGetProfileQuery();
@@ -85,6 +86,9 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     localeNavigate('/ebay/connect');
   };
 
+  const handleOpenDeactivateModal = (): void => setIsDeactivateModalOpen(true);
+  const handleCloseDeactivateModal = (): void => setIsDeactivateModalOpen(false);
+
   const isImpersonatingAdmin = useMemo(() => Boolean(user) && (user as unknown as { role?: string }).role === 'admin', [user]);
 
   return (
@@ -100,6 +104,9 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       onEditListingGroup={handleEditListingGroup}
       onNavigateToEbayConnect={handleNavigateToEbayConnect}
       isImpersonatingAdmin={isImpersonatingAdmin}
+      isDeactivateModalOpen={isDeactivateModalOpen}
+      onOpenDeactivateModal={handleOpenDeactivateModal}
+      onCloseDeactivateModal={handleCloseDeactivateModal}
     />
   );
 };

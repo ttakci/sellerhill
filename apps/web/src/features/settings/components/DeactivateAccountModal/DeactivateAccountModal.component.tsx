@@ -20,7 +20,7 @@ export const DeactivateAccountModalComponent = ({
 
   const footer = (
     <S.FooterRow>
-      <Button variant="ghost" onClick={onClose} disabled={isLoading}>
+      <Button variant="text" onClick={onClose} disabled={isLoading}>
         <Text>{t('translation:settingsHub.modal.deactivate.cancelLabel')}</Text>
       </Button>
       <Button variant="danger" onClick={onConfirm} isLoading={isLoading} disabled={!isMatch}>

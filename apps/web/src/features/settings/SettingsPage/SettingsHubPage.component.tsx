@@ -16,17 +16,15 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
-  ApiAccessDrawer,
   ChangePasswordDrawer,
   EbayAccountDrawer,
   LanguageDrawer,
   ListingGroupDrawer,
-  NotificationsDrawer,
   ProfileDrawer,
   StoreConfigDrawer,
-  TwoFactorDrawer,
 } from '../drawers';
 
 import * as S from './SettingsHubPage.style';
@@ -102,7 +100,7 @@ const ListingGroupsSection = ({
               <Text variant="body-sm" weight="medium">{g.name}</Text>
               {g.description && <Text variant="caption" color="text.tertiary">{g.description}</Text>}
             </S.AccountRowInfo>
-            <Button variant="text" size="sm" onClick={() => onEdit(g.id)}>
+            <Button variant="text" onClick={() => onEdit(g.id)}>
               <Text>{t('translation:settingsHub.sections.listingGroups.edit')}</Text>
             </Button>
           </S.AccountRow>
@@ -114,12 +112,10 @@ const ListingGroupsSection = ({
   );
 };
 
-const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password' | 'twoFactor' | 'apiAccess' | 'language') => void }): React.ReactElement => {
+const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password' | 'language') => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
-  const items: Array<{ key: 'password' | 'twoFactor' | 'apiAccess' | 'language'; icon: string; labelKey: string }> = [
+  const items: Array<{ key: 'password' | 'language'; icon: string; labelKey: string }> = [
     { key: 'password', icon: 'lock', labelKey: 'translation:settingsHub.sections.account.changePassword' },
-    { key: 'twoFactor', icon: 'shield-check', labelKey: 'translation:settingsHub.sections.account.twoFactor' },
-    { key: 'apiAccess', icon: 'key', labelKey: 'translation:settingsHub.sections.account.apiAccess' },
     { key: 'language', icon: 'globe', labelKey: 'translation:settingsHub.sections.account.language' },
   ];
   return (
@@ -144,32 +140,6 @@ const AccountSecuritySection = ({ onAction }: { onAction: (key: 'password' | 'tw
   );
 };
 
-const PlanSection = ({ onManage }: { onManage: () => void }): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
-  return (
-    <SettingsCard
-      variant="section"
-      header={{
-        icon: 'star',
-        title: t('translation:settingsHub.sections.plan.title'),
-        subtitle: t('translation:settingsHub.sections.plan.subtitle'),
-      }}
-      headerRight={
-        <Button variant="text" onClick={onManage}>
-          <Text>{t('translation:settingsHub.sections.plan.manage')}</Text>
-        </Button>
-      }
-    >
-      <S.MetaGrid>
-        <S.MetaItem>
-          <Text variant="caption" color="text.tertiary">{t('translation:settingsHub.sections.plan.currentPlan')}</Text>
-          <Text variant="body-sm" weight="semibold">{t('translation:settingsHub.sections.profile.plan')}</Text>
-        </S.MetaItem>
-      </S.MetaGrid>
-    </SettingsCard>
-  );
-};
-
 const DangerZoneSection = ({ onDeactivate }: { onDeactivate: () => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
@@ -178,7 +148,7 @@ const DangerZoneSection = ({ onDeactivate }: { onDeactivate: () => void }): Reac
         {t('translation:settingsHub.sections.danger.title')}
       </Text>
       <Text variant="caption" color="text.secondary">
-        {t('translation:settingsHub.sections.danger.subtitle')}
+        {t('translation:settingsHub.sections.danger.deactivateDescription')}
       </Text>
       <div>
         <Button variant="danger" onClick={onDeactivate}>
@@ -200,6 +170,9 @@ export const SettingsHubPageComponent = ({
   editingListingGroupId,
   onEditListingGroup,
   onNavigateToEbayConnect,
+  isDeactivateModalOpen,
+  onOpenDeactivateModal,
+  onCloseDeactivateModal,
 }: SettingsHubPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const displayName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : '';
@@ -241,10 +214,10 @@ export const SettingsHubPageComponent = ({
         </S.ProfileHeroActions>
       </S.ProfileHeroCard>
 
-      {/* Amazon row (eBay moved to profile hero nav item) */}
+      {/* Amazon row */}
       <AmazonAccountsSection accounts={amazonAccounts} onAdd={() => onOpenDrawer('amazonAdd')} />
 
-      {/* Store config + Listing groups row */}
+      {/* Store config + Listing groups */}
       <S.TwoColGrid>
         <SettingsCard
           variant="section"
@@ -271,40 +244,18 @@ export const SettingsHubPageComponent = ({
         />
       </S.TwoColGrid>
 
-      {/* Account & Security + Notifications */}
+      {/* Security + Danger Zone */}
       <S.TwoColGrid>
         <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} />
-        <SettingsCard
-          variant="section"
-          header={{
-            icon: 'bell',
-            title: t('translation:settingsHub.sections.notifications.title'),
-            subtitle: t('translation:settingsHub.sections.notifications.subtitle'),
-          }}
-          headerRight={
-            <Button variant="text" onClick={() => onOpenDrawer('notifications')}>
-              <Text>{t('translation:settingsHub.sections.notifications.edit')}</Text>
-            </Button>
-          }
-        >
-          <Text variant="body-sm" color="text.secondary">
-            {t('translation:settingsHub.sections.notifications.subtitle')}
-          </Text>
-        </SettingsCard>
-      </S.TwoColGrid>
-
-      {/* Plan + Danger */}
-      <S.TwoColGrid>
-        <PlanSection onManage={() => onOpenDrawer('apiAccess')} />
         <Card variant="bordered">
           <CardBody>
-            <DangerZoneSection onDeactivate={() => onOpenDrawer('apiAccess')} />
+            <DangerZoneSection onDeactivate={onOpenDeactivateModal} />
           </CardBody>
         </Card>
       </S.TwoColGrid>
 
       {/* Drawers */}
-      <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile} />
+      <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountDrawer
         isOpen={activeDrawer === 'ebay'}
         onClose={onCloseDrawer}
@@ -319,10 +270,10 @@ export const SettingsHubPageComponent = ({
         editingId={activeDrawer === 'listingGroupEdit' ? editingListingGroupId : null}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
-      <TwoFactorDrawer isOpen={activeDrawer === 'twoFactor'} onClose={onCloseDrawer} />
-      <ApiAccessDrawer isOpen={activeDrawer === 'apiAccess'} onClose={onCloseDrawer} />
       <LanguageDrawer isOpen={activeDrawer === 'language'} onClose={onCloseDrawer} />
-      <NotificationsDrawer isOpen={activeDrawer === 'notifications'} onClose={onCloseDrawer} />
+
+      {/* Deactivate modal */}
+      <DeactivateAccountModal isOpen={isDeactivateModalOpen} onClose={onCloseDeactivateModal} />
     </S.Container>
   );
 };
