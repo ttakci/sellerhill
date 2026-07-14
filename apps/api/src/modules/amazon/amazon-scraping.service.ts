@@ -149,6 +149,34 @@ export class AmazonScrapingService {
     }
   }
 
+  /**
+   * Verifies that stored credentials can log into Amazon (2FA-aware).
+   * Runs under the per-account rate limiter, reuses performLogin (the only
+   * login code path), and never throws — callers get a result object.
+   */
+  async testLogin(
+    userId: string,
+    amazonAccountId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    return this.rateLimiter.schedule(amazonAccountId, async () => {
+      const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+      try {
+        const page = await this.performLogin(
+          amazonAccountId,
+          account.email,
+          account.decryptedPassword,
+          account.decryptedTwoFactorSecret
+        );
+        await page.close();
+        return { success: true };
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Verify login failed for account ${amazonAccountId}: ${message}`);
+        return { success: false, error: message };
+      }
+    });
+  }
+
   private async performLogin(
     amazonAccountId: string,
     email: string,
