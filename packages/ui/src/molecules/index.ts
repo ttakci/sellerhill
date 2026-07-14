@@ -3,6 +3,7 @@ export * from './ConfirmModal';
 export * from './Drawer';
 export * from './EmptyState';
 export * from './ErrorState';
+export * from './ListingCard';
 export * from './Select';
 export * from './TextInput';
 export * from './RadioGroup';

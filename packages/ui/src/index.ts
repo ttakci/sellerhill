@@ -152,6 +152,16 @@ export type { ListItemProps } from './molecules/ListItem';
 export { IdBadge } from './molecules/IdBadge';
 export type { IdBadgeProps, StoreType } from './molecules/IdBadge';
 
+export { ListingCard } from './molecules/ListingCard';
+export type {
+  ListingCardBadge,
+  ListingCardOrientation,
+  ListingCardProps,
+  ListingCardStat,
+  ListingCardStatus,
+  StatTone,
+} from './molecules/ListingCard';
+
 export { LanguageSwitcher } from './molecules/LanguageSwitcher';
 export type { LanguageSwitcherProps, LocaleOption } from './molecules/LanguageSwitcher';
 
