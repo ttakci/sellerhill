@@ -6,6 +6,8 @@ export class AmazonAccountPublicDto {
   label?: string;
   email!: string;
   status!: AmazonAccountStatus;
+  hasTwoFactor?: boolean;
+  lastVerificationError?: string | null;
   lastVerifiedAt?: string;
   lastUsedAt?: string;
   createdAt!: string;

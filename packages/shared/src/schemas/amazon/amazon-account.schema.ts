@@ -28,6 +28,10 @@ export class UpdateAmazonAccountDto {
   label?: string;
 
   @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
   @IsString()
   @MinLength(6)
   password?: string;
@@ -56,6 +60,7 @@ export const createAmazonAccountSchema = z.object({
 
 export const updateAmazonAccountSchema = z.object({
   label: z.string().max(100).optional(),
+  email: z.string().email('Please enter a valid email').optional(),
   password: z.string().min(6, 'Password must be at least 6 characters').optional(),
   twoFactorSecret: z.string().optional(),
 });
