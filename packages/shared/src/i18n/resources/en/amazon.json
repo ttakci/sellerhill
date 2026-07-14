@@ -7,6 +7,7 @@
       "noAccounts": "No Amazon accounts connected yet",
       "noAccountsDescription": "Add your Amazon buyer account to automatically track order prices and shipping status",
       "statusActive": "Active",
+      "statusVerifying": "Verifying",
       "statusInvalid": "Invalid Credentials",
       "statusNeedsReauth": "Needs Re-authentication",
       "statusLocked": "Locked",

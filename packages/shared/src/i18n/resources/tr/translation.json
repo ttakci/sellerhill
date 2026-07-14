@@ -8,6 +8,8 @@
     "save": "Kaydet",
     "delete": "Sil",
     "back": "Geri",
+    "next": "İleri",
+    "continue": "Devam Et",
     "saveSuccess": "Değişiklikler başarıyla kaydedildi",
     "saveError": "Değişiklikler kaydedilemedi",
     "showing_info": "{{total}} kayıttan {{from}} - {{to}} arası gösteriliyor",
@@ -39,7 +41,8 @@
     "details": "Detaylar",
     "noBrand": "Marka Bilgisi Yok",
     "amazonLink": "AMAZON",
-    "languageCode": "tr-TR"
+    "languageCode": "tr-TR",
+    "select": "Seç"
   },
   "validation": {
     "required": "Bu alan zorunludur",
@@ -156,17 +159,17 @@
         "notConnected": "Bağlı Değil",
         "connect": "eBay Hesabını Bağla",
         "connectNew": {
-          "title": "Yeni Store Bağla",
+          "title": "Yeni Mağaza Bağla",
           "subtitle": "eBay güvenli girişi ile yeni bir satıcı hesabı yetkilendir",
-          "action": "Store Bağla"
+          "action": "Mağaza Bağla"
         },
         "manageStores": {
-          "title": "Bağlı Store'lar",
-          "subtitle": "Bağlı eBay store'larınızı görüntüleyin ve yönetin",
-          "action": "Store'ları Görüntüle",
-          "count": "{{count}} store bağlı",
-          "none": "Henüz store bağlı değil",
-          "empty": "Henüz bağlı eBay store yok"
+          "title": "Bağlı Mağazalar",
+          "subtitle": "Bağlı eBay mağazalarınızı görüntüleyin ve yönetin",
+          "action": "Mağazaları Görüntüle",
+          "count": "{{count}} mağaza bağlı",
+          "none": "Henüz mağaza bağlı değil",
+          "empty": "Henüz bağlı eBay mağaza yok"
         }
       },
       "amazon": {
@@ -203,23 +206,20 @@
       "storeManagement": {
         "title": "Mağaza Yapılandırması",
         "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
-        "storeSettings": "Mağaza Ayarları",
-        "blacklistAdd": "Yeni Blacklist Gir",
-        "blacklistList": "Blacklist'leri Göster"
+        "storeSettings": "Mağaza Ayarları"
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
         "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
-        "new": "Yeni Grup",
-        "edit": "Düzenle",
-        "groupCount": "{{count}} grup",
-        "noGroups": "Henüz tanımlanmış grup yok"
+        "manage": "Grupları Yönet",
+        "viewAll": "Tümü",
+        "create": "Yeni Grup Oluştur",
+        "groupCount": "{{count}} grup"
       },
       "account": {
         "title": "Hesap ve Güvenlik",
-        "subtitle": "Şifre ve dil tercihleri",
-        "changePassword": "Şifre Değiştir",
-        "language": "Dil ve Bölge"
+        "subtitle": "Şifre tercihleri",
+        "changePassword": "Şifre Değiştir"
       },
       "danger": {
         "title": "Tehlikeli Bölge",
@@ -247,6 +247,19 @@
         "password": "Şifre",
         "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)"
       },
+      "amazonEdit": {
+        "title": "Amazon Hesabını Düzenle",
+        "subtitle": "Etiket veya kimlik bilgilerini güncelleyin",
+        "label": "Hesap Etiketi",
+        "email": "E-posta",
+        "emailReadOnly": "E-posta oluşturulduktan sonra değiştirilemez",
+        "password": "Yeni Şifre",
+        "passwordHint": "Mevcut şifreyi korumak için boş bırakın",
+        "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)",
+        "twoFactorHint": "Mevcut 2FA secret'ını korumak için boş bırakın",
+        "twoFactorBadgeSet": "2FA kurulu",
+        "twoFactorBadgeNotSet": "2FA yok"
+      },
       "storeConfig": {
         "titleEdit": "Mağaza Yapılandırmasını Düzenle",
         "titleNew": "Yeni Mağaza Yapılandırması",
@@ -267,32 +280,51 @@
         "validateDescription": "Ürün açıklamalarını doğrula",
         "country": "Ülke",
         "region": "Bölge",
-        "zipCode": "Posta Kodu"
+        "zipCode": "Posta Kodu",
+        "blacklistSection": {
+          "label": "Kara Liste",
+          "keywordCount": "{{count}} anahtar",
+          "empty": "Anahtar yok"
+        }
       },
       "blacklist": {
+        "manage": {
+          "title": "Kara Listeyi Yönet",
+          "subtitle": "Seçili kapsam için yasaklı kelimeler"
+        },
         "add": {
-          "title": "Yeni Blacklist Kelimesi",
-          "subtitle": "Seçili kapsam için yasaklı kelime",
+          "title": "Blacklist Kelimeleri Ekle",
+          "subtitle": "Seçili kapsam için yasaklı kelimeler",
           "keyword": "Kelime",
+          "keywordsLabel": "Kelimeler",
+          "keywordsPlaceholder": "Kelimeleri girin...",
+          "keywordsHint": "Kelimeleri alt alta veya virgülle ayırarak girebilirsiniz",
           "scope": "Kapsam",
           "scopeBoth": "Başlık & Açıklama",
           "scopeTitle": "Yalnızca başlık",
           "scopeDescription": "Yalnızca açıklama",
-          "add": "Kelime Ekle",
-          "duplicate": "Bu kelime seçili kapsam için zaten var",
-          "empty": "Kelime boş olamaz"
+          "add": "Kelimeleri Ekle",
+          "duplicate": "Tüm kelimeler seçili kapsam için zaten mevcut",
+          "empty": "Lütfen en az bir kelime girin"
         },
         "list": {
           "title": "Blacklist Kelimeleri",
           "subtitle": "Seçili kapsam için yasaklı kelimeler",
           "empty": "Seçili kapsam için blacklist kelimesi yok",
-          "removeLabel": "Kelimeyi kaldır"
+          "removeLabel": "Kelimeyi kaldır",
+          "searchPlaceholder": "Kelime ara...",
+          "selectAll": "Tümünü seç",
+          "selectedCount": "{{count}} seçili",
+          "bulkDelete": "Seçilenleri Sil",
+          "confirmBulkDeleteTitle": "Seçili Kelimeler Silinsin mi?",
+          "confirmBulkDeleteDescription": "{{count}} seçili kelimeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
         }
       },
       "listingGroup": {
-        "titleNew": "Yeni Liste Ayar Grubu",
-        "titleEdit": "Liste Ayar Grubunu Düzenle",
-        "openFull": "Tam Formu Aç"
+        "list": {
+          "title": "Liste Ayar Grupları",
+          "subtitle": "Yeniden fiyatlandırma gruplarınızı görüntüleyin, düzenleyin veya oluşturun"
+        }
       },
       "password": {
         "title": "Şifre Değiştir",
@@ -305,13 +337,6 @@
         "sameAsCurrent": "Yeni şifre mevcut şifreden farklı olmalı",
         "successHeader": "Şifre güncellendi",
         "successDescription": "Şifreniz başarıyla değiştirildi."
-      },
-      "language": {
-        "title": "Dil ve Bölge",
-        "subtitle": "Arayüz dilinizi seçin",
-        "language": "Dil",
-        "en": "English",
-        "tr": "Türkçe"
       }
     },
     "modal": {

@@ -7,6 +7,7 @@
       "noAccounts": "Henüz Amazon hesabı bağlı değil",
       "noAccountsDescription": "Sipariş fiyatlarını ve kargo durumunu otomatik takip etmek için Amazon alışveriş hesabınızı ekleyin",
       "statusActive": "Aktif",
+      "statusVerifying": "Doğrulanıyor",
       "statusInvalid": "Geçersiz Bilgiler",
       "statusNeedsReauth": "Yeniden Giriş Gerekli",
       "statusLocked": "Kilitli",

@@ -8,6 +8,8 @@
     "save": "Save",
     "delete": "Delete",
     "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
     "saveSuccess": "Changes saved successfully",
     "saveError": "Failed to save changes",
     "showing_info": "Showing {{from}}-{{to}} of {{total}} entries",
@@ -39,7 +41,8 @@
     "noBrand": "No Brand Info",
     "amazonLink": "AMAZON",
     "unknownProduct": "Unknown Product",
-    "languageCode": "en-US"
+    "languageCode": "en-US",
+    "select": "Select"
   },
   "validation": {
     "required": "This field is required",
@@ -203,22 +206,20 @@
       "storeManagement": {
         "title": "Store Configuration",
         "subtitle": "Store settings and listing keyword blacklist",
-        "storeSettings": "Store Settings",
-        "blacklistAdd": "Add Blacklist Keyword",
-        "blacklistList": "View Blacklist"
+        "storeSettings": "Store Settings"
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
         "subtitle": "Repricing strategies, stock logic, profit margins",
-        "new": "New Group",
-        "groupCount": "{{count}} group(s)",
-        "noGroups": "No groups defined yet"
+        "manage": "Manage Groups",
+        "viewAll": "View All",
+        "create": "Create New Group",
+        "groupCount": "{{count}} group(s)"
       },
       "account": {
         "title": "Account & Security",
-        "subtitle": "Password and language preferences",
-        "changePassword": "Change Password",
-        "language": "Language & Region"
+        "subtitle": "Password preferences",
+        "changePassword": "Change Password"
       },
       "danger": {
         "title": "Danger Zone",
@@ -246,6 +247,19 @@
         "password": "Password",
         "twoFactorSecret": "2FA Secret (optional)"
       },
+      "amazonEdit": {
+        "title": "Edit Amazon Account",
+        "subtitle": "Update label or credentials",
+        "label": "Account Label",
+        "email": "Email",
+        "emailReadOnly": "Email cannot be changed after creation",
+        "password": "New Password",
+        "passwordHint": "Leave blank to keep current password",
+        "twoFactorSecret": "2FA Secret (optional)",
+        "twoFactorHint": "Leave blank to keep the current 2FA secret",
+        "twoFactorBadgeSet": "2FA set",
+        "twoFactorBadgeNotSet": "2FA not set"
+      },
       "storeConfig": {
         "titleEdit": "Edit Store Configuration",
         "titleNew": "New Store Configuration",
@@ -266,32 +280,51 @@
         "validateDescription": "Validate product descriptions",
         "country": "Country",
         "region": "Region",
-        "zipCode": "Zip Code"
+        "zipCode": "Zip Code",
+        "blacklistSection": {
+          "label": "Blacklist",
+          "keywordCount": "{{count}} keyword(s)",
+          "empty": "No keywords"
+        }
       },
       "blacklist": {
+        "manage": {
+          "title": "Manage Blacklist",
+          "subtitle": "Forbidden keywords for the selected scope"
+        },
         "add": {
-          "title": "Add Blacklist Keyword",
-          "subtitle": "Forbidden keyword for the selected scope",
+          "title": "Add Blacklist Keywords",
+          "subtitle": "Forbidden keywords for the selected scope",
           "keyword": "Keyword",
+          "keywordsLabel": "Keywords",
+          "keywordsPlaceholder": "Enter keywords...",
+          "keywordsHint": "Enter keywords one per line or separate with commas",
           "scope": "Scope",
           "scopeBoth": "Title & Description",
           "scopeTitle": "Title only",
           "scopeDescription": "Description only",
-          "add": "Add Keyword",
-          "duplicate": "This keyword already exists for the selected scope",
-          "empty": "Keyword cannot be empty"
+          "add": "Add Keywords",
+          "duplicate": "All keywords already exist for the selected scope",
+          "empty": "Please enter at least one keyword"
         },
         "list": {
           "title": "Blacklist Keywords",
           "subtitle": "Forbidden keywords for the selected scope",
           "empty": "No blacklist keywords for the selected scope",
-          "removeLabel": "Remove keyword"
+          "removeLabel": "Remove keyword",
+          "searchPlaceholder": "Search keywords...",
+          "selectAll": "Select all",
+          "selectedCount": "{{count}} selected",
+          "bulkDelete": "Delete Selected",
+          "confirmBulkDeleteTitle": "Delete Selected Keywords?",
+          "confirmBulkDeleteDescription": "Are you sure you want to delete {{count}} selected keyword(s)? This action cannot be undone."
         }
       },
       "listingGroup": {
-        "titleNew": "New Listing Settings Group",
-        "titleEdit": "Edit Listing Settings Group",
-        "openFull": "Open Full Form"
+        "list": {
+          "title": "Listing Settings Groups",
+          "subtitle": "View, edit, or create your repricing groups"
+        }
       },
       "password": {
         "title": "Change Password",
@@ -304,13 +337,6 @@
         "sameAsCurrent": "New password must be different from current",
         "successHeader": "Password updated",
         "successDescription": "Your password has been changed successfully."
-      },
-      "language": {
-        "title": "Language & Region",
-        "subtitle": "Choose your interface language",
-        "language": "Language",
-        "en": "English",
-        "tr": "Türkçe"
       }
     },
     "modal": {
