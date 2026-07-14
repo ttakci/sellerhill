@@ -1,4 +1,4 @@
-import { Card, Drawer, Icon, StatusBadge, Text } from '@repo/ui';
+import { Drawer, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,10 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
   isOpen,
   onClose,
   accounts,
-  onAdd,
+  selectedId,
+  isContinueDisabled,
+  onSelect,
+  onContinue,
 }) => {
   const { t } = useTranslation();
 
@@ -21,22 +24,36 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
       subtitle={t('translation:settingsHub.sections.amazon.subtitle')}
       size="md"
       primaryAction={{
-        label: t('translation:settingsHub.sections.amazon.add'),
-        onClick: onAdd,
+        label: t('translation:common.continue'),
+        onClick: onContinue,
+        disabled: isContinueDisabled,
       }}
     >
       {accounts.length > 0 ? (
         <S.AccountList>
           {accounts.map((a) => (
-            <Card key={a.id} variant="elevated" padding="none">
+            <S.SelectableCard
+              key={a.id}
+              variant="bordered"
+              padding="none"
+              $selected={a.id === selectedId}
+              role="button"
+              tabIndex={0}
+              aria-pressed={a.id === selectedId}
+              aria-label={t('translation:settingsHub.sections.amazon.manage.title')}
+              onClick={() => onSelect(a.id)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(a.id);
+                }
+              }}
+            >
               <S.AccountMain>
                 <S.AccountHead>
                   <S.AccountIdentity>
-                    <Icon name="mail" size={20} color="brand.primary" />
+                    <Icon name="amazon" size={20} color="brand.primary" />
                     <S.AccountIdText>
-                      {a.displayName !== a.email && (
-                        <Text variant="caption" color="text.tertiary">{a.email}</Text>
-                      )}
                       <Text variant="body" weight="semibold">{a.displayName}</Text>
                     </S.AccountIdText>
                   </S.AccountIdentity>
@@ -45,6 +62,12 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
 
                 <S.AccountMetaList>
                   <S.AccountMetaLine>
+                    <Icon name="mail" size={14} color="text.tertiary" />
+                    <Text variant="caption" color="text.secondary">
+                      {a.email}
+                    </Text>
+                  </S.AccountMetaLine>
+                  <S.AccountMetaLine>
                     <Icon name="calendar" size={14} color="text.tertiary" />
                     <Text variant="caption" color="text.secondary">
                       {t('translation:settingsHub.sections.amazon.connectedSince')}: {a.connectedSince}
@@ -52,7 +75,7 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
                   </S.AccountMetaLine>
                 </S.AccountMetaList>
               </S.AccountMain>
-            </Card>
+            </S.SelectableCard>
           ))}
         </S.AccountList>
       ) : (
