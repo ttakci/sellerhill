@@ -11,6 +11,8 @@ import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingProcessorService } from './amazon-tracking-processor.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
+import { AmazonVerifyProcessorService } from './amazon-verify-processor.service';
+import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
 import { BrowserStateManager } from './browser-state-manager.service';
 
@@ -19,7 +21,7 @@ import { BrowserStateManager } from './browser-state-manager.service';
     DatabaseModule,
     EbayModule,
     OrdersModule,
-    BullModule.registerQueue({ name: 'amazon-tracking' }),
+    BullModule.registerQueue({ name: 'amazon-tracking' }, { name: 'amazon-verify' }),
   ],
   controllers: [AmazonController],
   providers: [
@@ -30,7 +32,9 @@ import { BrowserStateManager } from './browser-state-manager.service';
     AmazonOrderParserService,
     AmazonTrackingQueueService,
     AmazonTrackingProcessorService,
+    AmazonVerifyQueueService,
+    AmazonVerifyProcessorService,
   ],
-  exports: [AmazonAccountsService, AmazonTrackingQueueService],
+  exports: [AmazonAccountsService, AmazonTrackingQueueService, AmazonVerifyQueueService],
 })
 export class AmazonModule {}
