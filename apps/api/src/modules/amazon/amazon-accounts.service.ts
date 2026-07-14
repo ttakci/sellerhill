@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AmazonAccountStatus } from '@repo/shared';
+import { AmazonAccountStatus, type AmazonAccountPublicDto } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
@@ -13,6 +13,7 @@ export interface AmazonAccountRow {
   encrypted_password: string;
   two_factor_secret: string;
   status: string;
+  last_verification_error: string | null;
   last_verified_at: Date;
   last_used_at: Date;
   created_at: Date;
@@ -86,7 +87,7 @@ export class AmazonAccountsService {
       `INSERT INTO amazon_accounts (user_id, label, email, encrypted_password, two_factor_secret, status)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [userId, data.label || null, data.email, encryptedPassword, encryptedTwoFactor, AmazonAccountStatus.ACTIVE]
+      [userId, data.label || null, data.email, encryptedPassword, encryptedTwoFactor, AmazonAccountStatus.VERIFYING]
     );
 
     return this.toPublicDto(rows[0]);
@@ -95,11 +96,15 @@ export class AmazonAccountsService {
   async update(
     userId: string,
     id: string,
-    data: { label?: string; password?: string; twoFactorSecret?: string }
-  ) {
+    data: { label?: string; email?: string; password?: string; twoFactorSecret?: string }
+  ): Promise<{ account: AmazonAccountPublicDto; credentialsChanged: boolean }> {
+    const existing = await this.findOne(userId, id);
+
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const params: (string | number | boolean | null)[] = [];
     let paramIndex = 1;
+
+    let credentialsChanged = false;
 
     if (data.label !== undefined) {
       updates.push(`label = $${paramIndex}`);
@@ -107,16 +112,33 @@ export class AmazonAccountsService {
       paramIndex++;
     }
 
+    if (data.email !== undefined && data.email !== existing.email) {
+      updates.push(`email = $${paramIndex}`);
+      params.push(data.email);
+      paramIndex++;
+      credentialsChanged = true;
+    }
+
     if (data.password !== undefined) {
       updates.push(`encrypted_password = $${paramIndex}`);
       params.push(this.encryption.encrypt(data.password));
       paramIndex++;
+      credentialsChanged = true;
     }
 
     if (data.twoFactorSecret !== undefined) {
       updates.push(`two_factor_secret = $${paramIndex}`);
       params.push(data.twoFactorSecret ? this.encryption.encrypt(data.twoFactorSecret) : null);
       paramIndex++;
+      credentialsChanged = true;
+    }
+
+    if (credentialsChanged) {
+      // Re-verify against Amazon; clear any stale failure reason while in-flight.
+      updates.push(`status = $${paramIndex}`);
+      params.push(AmazonAccountStatus.VERIFYING);
+      paramIndex++;
+      updates.push(`last_verification_error = NULL`);
     }
 
     params.push(id, userId);
@@ -130,7 +152,7 @@ export class AmazonAccountsService {
       throw new NotFoundException(`Amazon account ${id} not found`);
     }
 
-    return this.toPublicDto(rows[0]);
+    return { account: this.toPublicDto(rows[0]), credentialsChanged };
   }
 
   async delete(userId: string, id: string): Promise<void> {
@@ -153,9 +175,19 @@ export class AmazonAccountsService {
 
   async markVerified(userId: string, id: string): Promise<void> {
     await this.databaseService.query(
-      `UPDATE amazon_accounts SET status = $1, last_verified_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      `UPDATE amazon_accounts
+         SET status = $1, last_verified_at = CURRENT_TIMESTAMP, last_verification_error = NULL, updated_at = CURRENT_TIMESTAMP
        WHERE id = $2 AND user_id = $3`,
       [AmazonAccountStatus.ACTIVE, id, userId]
+    );
+  }
+
+  async markInvalid(userId: string, id: string, reason: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE amazon_accounts
+         SET status = $1, last_verification_error = $2, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3 AND user_id = $4`,
+      [AmazonAccountStatus.INVALID, reason, id, userId]
     );
   }
 
@@ -167,17 +199,17 @@ export class AmazonAccountsService {
   }
 
   private toPublicDto(row: AmazonAccountRow) {
-    const [localPart, domain] = row.email.split('@');
-    const maskedLocal = localPart.length > 2
-      ? localPart[0] + '***' + localPart[localPart.length - 1]
-      : localPart[0] + '***';
-
+    // GET /amazon/accounts is user-scoped (findAll(req.user.sub)) — the caller
+    // only ever receives their own accounts, so the email is returned unmasked.
+    // This lets the owner identify and manage each connected account.
     return {
       id: row.id,
       userId: row.user_id,
       label: row.label || undefined,
-      email: `${maskedLocal}@${domain}`,
+      email: row.email,
       status: row.status as AmazonAccountStatus,
+      hasTwoFactor: !!row.two_factor_secret,
+      lastVerificationError: row.last_verification_error ?? undefined,
       lastVerifiedAt: row.last_verified_at?.toISOString() || undefined,
       lastUsedAt: row.last_used_at?.toISOString() || undefined,
       createdAt: row.created_at.toISOString(),
