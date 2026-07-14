@@ -14,6 +14,7 @@ import { OrderSyncService } from '../orders/order-sync.service';
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
+import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 
 interface AuthenticatedRequest extends Request {
   user: { sub: string };
@@ -28,6 +29,7 @@ export class AmazonController {
     private readonly accountsService: AmazonAccountsService,
     private readonly scrapingService: AmazonScrapingService,
     private readonly trackingQueueService: AmazonTrackingQueueService,
+    private readonly verifyQueueService: AmazonVerifyQueueService,
     private readonly databaseService: DatabaseService,
     private readonly orderSyncService: OrderSyncService
   ) {}
@@ -42,12 +44,14 @@ export class AmazonController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: CreateAmazonAccountDto
   ): Promise<AmazonAccountPublicDto> {
-    return this.accountsService.create(req.user.sub, {
+    const account = await this.accountsService.create(req.user.sub, {
       label: dto.label,
       email: dto.email,
       password: dto.password,
       twoFactorSecret: dto.twoFactorSecret,
     });
+    await this.verifyQueueService.enqueue(req.user.sub, account.id);
+    return account;
   }
 
   @Put('accounts/:id')
@@ -56,11 +60,16 @@ export class AmazonController {
     @Param('id') id: string,
     @Body() dto: UpdateAmazonAccountDto
   ): Promise<AmazonAccountPublicDto> {
-    return this.accountsService.update(req.user.sub, id, {
+    const { account, credentialsChanged } = await this.accountsService.update(req.user.sub, id, {
       label: dto.label,
+      email: dto.email,
       password: dto.password,
       twoFactorSecret: dto.twoFactorSecret,
     });
+    if (credentialsChanged) {
+      await this.verifyQueueService.enqueue(req.user.sub, id);
+    }
+    return account;
   }
 
   @Delete('accounts/:id')
@@ -77,38 +86,11 @@ export class AmazonController {
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string
   ): Promise<{ success: boolean; message: string }> {
-    try {
-      const account = await this.accountsService.getDecrypted(req.user.sub, id);
-
-      const { chromium } = await import('playwright');
-      const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
-
-      try {
-        const page = await browser.newPage();
-        await page.goto('https://www.amazon.com/ap/signin', { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.locator('#ap_email').fill(account.email);
-        await page.locator('#continue').click();
-        await page.waitForTimeout(2000);
-        await page.locator('#ap_password').fill(account.decryptedPassword);
-        await page.locator('#signInSubmit').click();
-        await page.waitForTimeout(3000);
-
-        const loginError = page.locator('#auth-error-message-box .a-alert-content');
-        if (await loginError.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await this.accountsService.updateStatus(req.user.sub, id, AmazonAccountStatus.INVALID);
-          return { success: false, message: 'Invalid credentials' };
-        }
-
-        await this.accountsService.markVerified(req.user.sub, id);
-        return { success: true, message: 'Account verified successfully' };
-      } finally {
-        await browser.close();
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Account verification failed: ${message}`);
-      return { success: false, message: 'Verification failed' };
-    }
+    // Mark verifying + enqueue a background login. The account resolves to
+    // active/invalid asynchronously (see AmazonVerifyProcessorService).
+    await this.accountsService.updateStatus(req.user.sub, id, AmazonAccountStatus.VERIFYING);
+    await this.verifyQueueService.enqueue(req.user.sub, id);
+    return { success: true, message: 'Verification started' };
   }
 
   @Post('orders/:orderId/link-amazon')
