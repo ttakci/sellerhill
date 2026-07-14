@@ -4,48 +4,79 @@
  * account/security, notifications, plan, and danger zone into single page.
  */
 
+import { AmazonAccountStatus, EBAY_MARKETPLACE } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
+
+import { GLOBAL_SCOPE } from '../drawers/storeScope';
 
 import { SettingsHubPageComponent } from './SettingsHubPage.component';
 import type { SettingsDrawerKey } from './SettingsHubPage.types';
 
 import { useGetAmazonAccountsQuery } from '@/features/amazon/api/amazon.api';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
-import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
-import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '@/features/ebay/api/ebayApi';
+import {
+  useGetListingSettingsGroupsQuery,
+  useGetPredefinedTemplatesQuery,
+} from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { useGetProfileQuery } from '@/features/profile/api/profileApi';
 import { useGetAllStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
-import { useLocale } from '@/utils/useLocale';
 
 
 const DRAWER_PARAM = 'drawer';
-const EDIT_GROUP_PARAM = 'editGroup';
 
 export const SettingsHubPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const { showMessage, closeMessage } = useUI();
-  const { localeNavigate } = useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
-  const editingListingGroupId = searchParams.get(EDIT_GROUP_PARAM);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingAmazonId, setEditingAmazonId] = useState<string | null>(null);
+  // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
+  const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
 
   const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery();
   const { data: profile, isLoading: isProfileLoading, error: profileError } = useGetProfileQuery();
   const { data: ebayData, isLoading: isEbayLoading, error: ebayError } = useGetEbayAccountsQuery();
-  const { data: amazonData, isLoading: isAmazonLoading, error: amazonError } = useGetAmazonAccountsQuery();
-  const { data: listingGroupsData, isLoading: isGroupsLoading, error: groupsError } = useGetListingSettingsGroupsQuery();
-  const { data: storeConfigsData, isLoading: isStoreConfigsLoading, error: storeConfigsError } = useGetAllStoreSettingsQuery();
+  const {
+    data: amazonData,
+    isLoading: isAmazonLoading,
+    error: amazonError,
+    refetch: refetchAmazonAccounts,
+  } = useGetAmazonAccountsQuery();
 
-  useLoading(isUserLoading || isProfileLoading || isEbayLoading || isAmazonLoading || isGroupsLoading || isStoreConfigsLoading);
+  // While any Amazon account is mid-verification, poll so the card resolves
+  // to active/invalid without a manual refresh.
+  const amazonHasVerifying = amazonData?.some(
+    (a) => a.status === AmazonAccountStatus.VERIFYING,
+  );
+  useEffect(() => {
+    if (!amazonHasVerifying) {
+      return;
+    }
+    const id = setInterval(() => {
+      void refetchAmazonAccounts();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [amazonHasVerifying, refetchAmazonAccounts]);
+  const { data: listingGroupsData, isLoading: isGroupsLoading, error: groupsError } = useGetListingSettingsGroupsQuery();
+  // Reuses the RTK-Query-cached predefined templates (same hook the edit form uses);
+  // resolves each group's predefinedTemplateId to its display name. Not a new endpoint.
+  const { data: predefinedTemplatesData } = useGetPredefinedTemplatesQuery();
+  const { data: storeConfigsData, isLoading: isStoreConfigsLoading, error: storeConfigsError } = useGetAllStoreSettingsQuery();
+  // Lazy: only fires when the user clicks "Connect". Fetches the eBay OAuth consent URL.
+  const [getConnectUrl, { isLoading: isConnectLoading, error: connectError }] = useLazyGetEbayConnectUrlQuery();
+
+  useLoading(isUserLoading || isProfileLoading || isEbayLoading || isAmazonLoading || isGroupsLoading || isStoreConfigsLoading || isConnectLoading);
 
   useEffect(() => {
-    const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError;
+    const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError || connectError;
     if (!error) {return;}
     if ('status' in error && error.status === 401) {return;}
     showMessage(
@@ -57,7 +88,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       },
       t,
     );
-  }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, showMessage, closeMessage, t]);
+  }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, connectError, showMessage, closeMessage, t]);
 
   const handleOpenDrawer = (drawer: SettingsDrawerKey): void => {
     const next = new URLSearchParams(searchParams);
@@ -72,20 +103,60 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const handleCloseDrawer = (): void => {
     const next = new URLSearchParams(searchParams);
     next.delete(DRAWER_PARAM);
-    next.delete(EDIT_GROUP_PARAM);
     setSearchParams(next, { replace: true });
+  };
+
+  // Listing groups — open the list drawer (cards inside); create/edit open
+  // their own drawer flows. The single activeDrawer param closes this list
+  // automatically when edit/create opens.
+  const handleViewAllListingGroups = (): void => {
+    handleOpenDrawer('listingGroupList');
+  };
+
+  const handleCreateListingGroup = (): void => {
+    setEditingGroupId(null);
+    handleOpenDrawer('listingGroupCreate');
   };
 
   const handleEditListingGroup = (id: string): void => {
-    const next = new URLSearchParams(searchParams);
-    next.set(EDIT_GROUP_PARAM, id);
-    next.set(DRAWER_PARAM, 'listingGroupEdit');
-    setSearchParams(next, { replace: true });
+    setEditingGroupId(id);
+    handleOpenDrawer('listingGroupEdit');
   };
 
-  const handleNavigateToEbayConnect = (): void => {
+  // Amazon accounts — open the list drawer (cards inside); clicking a card opens
+  // the edit flow, the "Add" action opens the create flow. Back from edit/create
+  // returns to the list. The single activeDrawer param closes the list when the
+  // edit/create drawer opens, and vice-versa.
+  const handleEditAmazon = (id: string): void => {
+    setEditingAmazonId(id);
+    handleOpenDrawer('amazonEdit');
+  };
+
+  const handleBackToAmazonList = (): void => {
+    setEditingAmazonId(null);
+    handleOpenDrawer('amazonList');
+  };
+
+  // Store settings flow: hub (location/validation) → nested blacklist management.
+  // The shared storeScope is preserved across the navigation so both drawers
+  // operate on the same scope.
+  const handleManageBlacklist = (): void => {
+    handleOpenDrawer('storeBlacklist');
+  };
+
+  const handleBackToStoreSettings = (): void => {
+    handleOpenDrawer('storeSettings');
+  };
+
+  // Connect directly from settings — no intermediate page. Same inline pattern as
+  // OnboardingEbayPage: fetch eBay OAuth consent URL, redirect the browser there.
+  const handleConnectEbay = (): void => {
     handleCloseDrawer();
-    localeNavigate('/ebay/connect');
+    void getConnectUrl({ marketplaceId: EBAY_MARKETPLACE.US })
+      .unwrap()
+      .then((result) => {
+        window.location.href = result.url;
+      });
   };
 
   const handleOpenDeactivateModal = (): void => setIsDeactivateModalOpen(true);
@@ -94,6 +165,13 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const isImpersonatingAdmin = useMemo(() => Boolean(user) && (user as unknown as { role?: string }).role === 'admin', [user]);
 
   const storeConfigs = useMemo(() => storeConfigsData ?? [], [storeConfigsData]);
+  const predefinedTemplateNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const tpl of predefinedTemplatesData ?? []) {
+      map[tpl.id] = tpl.name;
+    }
+    return map;
+  }, [predefinedTemplatesData]);
   const availableStores = useMemo(
     () =>
       (ebayData?.items ?? []).map((acc) => ({
@@ -101,6 +179,10 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
         name: acc.storeName || acc.sellerId,
       })),
     [ebayData],
+  );
+  const editingAmazonAccount = useMemo(
+    () => (amazonData ?? []).find((acc) => acc.id === editingAmazonId) ?? null,
+    [amazonData, editingAmazonId],
   );
 
   return (
@@ -112,15 +194,25 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       activeDrawer={activeDrawer}
       onOpenDrawer={handleOpenDrawer}
       onCloseDrawer={handleCloseDrawer}
-      editingListingGroupId={editingListingGroupId}
       onEditListingGroup={handleEditListingGroup}
-      onNavigateToEbayConnect={handleNavigateToEbayConnect}
+      onEditAmazon={handleEditAmazon}
+      onViewAllListingGroups={handleViewAllListingGroups}
+      onCreateListingGroup={handleCreateListingGroup}
+      onConnectEbay={handleConnectEbay}
       isImpersonatingAdmin={isImpersonatingAdmin}
       isDeactivateModalOpen={isDeactivateModalOpen}
       onOpenDeactivateModal={handleOpenDeactivateModal}
       onCloseDeactivateModal={handleCloseDeactivateModal}
       storeConfigs={storeConfigs}
       availableStores={availableStores}
+      predefinedTemplateNames={predefinedTemplateNames}
+      editingGroupId={editingGroupId}
+      editingAmazonAccount={editingAmazonAccount}
+      onBackToAmazonList={handleBackToAmazonList}
+      storeScope={storeScope}
+      onSelectStoreScope={setStoreScope}
+      onManageBlacklist={handleManageBlacklist}
+      onBackToStoreSettings={handleBackToStoreSettings}
     />
   );
 };

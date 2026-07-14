@@ -1,3 +1,4 @@
+import { AmazonAccountStatus } from '@repo/shared';
 import { Drawer, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -73,6 +74,14 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
                       {t('translation:settingsHub.sections.amazon.connectedSince')}: {a.connectedSince}
                     </Text>
                   </S.AccountMetaLine>
+                  {a.status === AmazonAccountStatus.INVALID && a.lastVerificationError && (
+                    <S.AccountMetaLine>
+                      <Icon name="alert-triangle" size={14} color="semantic.error" />
+                      <Text variant="caption" color="semantic.error">
+                        {a.lastVerificationError}
+                      </Text>
+                    </S.AccountMetaLine>
+                  )}
                 </S.AccountMetaList>
               </S.AccountMain>
             </S.SelectableCard>

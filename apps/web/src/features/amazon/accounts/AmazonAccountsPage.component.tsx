@@ -7,6 +7,7 @@ import type { AmazonAccountsPageComponentProps, AccountFormModalProps } from './
 
 const STATUS_VARIANT_MAP: Record<string, 'success' | 'warning' | 'error' | 'info'> = {
   active: 'success',
+  verifying: 'info',
   invalid: 'error',
   needs_reauth: 'warning',
   locked: 'error',
