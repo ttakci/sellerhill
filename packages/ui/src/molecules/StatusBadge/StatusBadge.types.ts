@@ -2,6 +2,7 @@ import type { AppTheme } from '../../theme/theme.types';
 
 export type StatusType =
   | 'active'
+  | 'verifying'
   | 'completed'
   | 'success'
   | 'processing'
@@ -44,6 +45,11 @@ export const getStatusColors = (status: string, theme: AppTheme): StatusColorCon
       background: t.colors.semanticTint.success,
       color: t.colors.semantic.success,
       border: t.colors.semanticTintBorder.success,
+    },
+    verifying: {
+      background: t.colors.semanticTint.info,
+      color: t.colors.semantic.info,
+      border: t.colors.semanticTintBorder.info,
     },
     completed: {
       background: t.colors.semanticTint.success,
