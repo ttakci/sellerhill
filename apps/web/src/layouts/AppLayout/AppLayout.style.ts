@@ -13,15 +13,14 @@ export const LayoutWrapper = styled.div`
   background: ${({ theme }: { theme: Theme }) =>
     theme.mode === 'dark'
       ? theme.colors.background.primary
-      : theme.colors.background.gradient || theme.colors.background.primary
-  };
+      : theme.colors.background.gradient || theme.colors.background.primary};
 `;
 
 /**
  * SidebarContainer - Theme aware and responsive
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '4rem' : '15rem')};
+  width: ${(props) => (props.$isCollapsed ? '5rem' : '15rem')};
   background: ${tkn('colors.sidebar.background')};
   color: ${tkn('colors.sidebar.text')};
   border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
@@ -92,8 +91,11 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean }>`
   }
 `;
 
-export const NavSection = styled.nav`
-  padding: 0 ${tkn('spacing.md')} ${tkn('spacing.md')};
+export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
+  padding: ${({ $isCollapsed, theme }) =>
+    $isCollapsed
+      ? `0 ${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`
+      : `0 ${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })}`};
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -145,7 +147,8 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   cursor: pointer;
   transition: all ${tkn('transitions.fast')};
   position: relative;
-  font-weight: ${({ $active, theme }) => ($active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.normal)};
+  font-weight: ${({ $active, theme }) =>
+    $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.normal};
   font-size: ${tkn('typography.fontSize.sm')};
 
   &:hover {
@@ -172,6 +175,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
+  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
   gap: ${tkn('spacing.sm-md')}; /* 12px */
 
   white-space: nowrap; /* Prevent text wrapping */
@@ -228,7 +232,9 @@ export const LogoutButton = styled.button<{ $isCollapsed: boolean }>`
   background: transparent;
   border: none;
   color: ${tkn('colors.sidebar.text')};
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   ${({ $isCollapsed }) => $isCollapsed && `justify-content: center;`}
 
   &:hover {
@@ -257,13 +263,17 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
 `;
 
 export const BadgeWrapper = styled.div<{ variant?: 'primary' | 'success'; size?: 'sm' | 'md' }>`
-  background: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTint.success : theme.colors.semanticTint.info)};
-  color: ${({ theme, variant }) => (variant === 'success' ? theme.colors.semantic.success : theme.colors.brand.primary)};
+  background: ${({ theme, variant }) =>
+    variant === 'success' ? theme.colors.semanticTint.success : theme.colors.semanticTint.info};
+  color: ${({ theme, variant }) =>
+    variant === 'success' ? theme.colors.semantic.success : theme.colors.brand.primary};
   font-size: ${tkn('typography.fontSize.2xs')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
   border-radius: ${tkn('radius.sm')};
-  border: 0.0625rem solid ${({ theme, variant }) => (variant === 'success' ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.info)};
+  border: 0.0625rem solid
+    ${({ theme, variant }) =>
+      variant === 'success' ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.info};
   text-transform: uppercase;
 `;
 
@@ -612,6 +622,82 @@ export const AvatarImg = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+`;
+
+/**
+ * HeaderProfileArea - User profile display in the top-right header
+ */
+export const HeaderProfileArea = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
+  cursor: pointer;
+  transition: background ${tkn('transitions.fast')};
+  max-width: 15rem; /* 240px */
+
+  &:hover {
+    background: ${tkn('colors.background.primary')};
+  }
+
+  @media (max-width: 47.9375rem) {
+    /* 767px — hide text on mobile, show only avatar */
+    .profile-info {
+      display: none;
+    }
+  }
+`;
+
+/**
+ * HeaderProfileInfo - Name + email text block (hidden on mobile)
+ */
+export const HeaderProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
+
+  & > span {
+    max-width: 12rem; /* 192px */
+    line-height: ${tkn('typography.lineHeight.tight')};
+  }
+
+  @media (max-width: 47.9375rem) {
+    /* 767px */
+    display: none;
+  }
+`;
+
+/**
+ * ProfileDropdownHeader - Name + email header inside the profile dropdown
+ */
+export const ProfileDropdownHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+
+  & > span {
+    line-height: ${tkn('typography.lineHeight.tight')};
+  }
+`;
+
+/**
+ * HeaderProfileBadge - Circular initials avatar for header
+ */
+export const HeaderProfileBadge = styled.div`
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
+  border-radius: 50%;
+  background: ${tkn('colors.brand.primary')};
+  color: ${tkn('colors.text.inverse')};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
+  flex-shrink: 0;
 `;
 
 export const ContentArea = styled.main`

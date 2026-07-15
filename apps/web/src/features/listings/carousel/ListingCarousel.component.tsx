@@ -94,12 +94,12 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
         })}
       </S.CarouselViewport>
       {currentSlide > 0 && (
-        <S.CarouselArrow $side="left" className="carousel-arrow" onClick={onPrev} aria-label="Previous">
+        <S.CarouselArrow $side="left" className="carousel-arrow" onClick={onPrev} aria-label={t('listings.carousel.previous')}>
           <Icon name="chevron-left" size={20} />
         </S.CarouselArrow>
       )}
       {currentSlide < listings.length - 1 && (
-        <S.CarouselArrow $side="right" className="carousel-arrow" onClick={onNext} aria-label="Next">
+        <S.CarouselArrow $side="right" className="carousel-arrow" onClick={onNext} aria-label={t('listings.carousel.next')}>
           <Icon name="chevron-right" size={20} />
         </S.CarouselArrow>
       )}

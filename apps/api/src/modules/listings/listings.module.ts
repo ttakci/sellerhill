@@ -7,6 +7,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
+import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ListingProcessorService } from './listing-processor.service';
 import { ListingQueueService } from './listing-queue.service';
@@ -14,9 +15,9 @@ import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsController } from './listings.controller';
 import { ListingsService } from './listings.service';
 import { ProductSyncService } from './product-sync.service';
-import { ScraperApiService } from './scraper-api.service';
-import { SyncProcessorService } from './sync-processor.service';
-import { SyncQueueService } from './sync-queue.service';
+import { RefreshProcessorService } from './refresh-processor.service';
+import { RefreshSchedulerService } from './refresh-scheduler.service';
+import { StockSyncProcessorService } from './stock-sync-processor.service';
 
 @Module({
   imports: [
@@ -25,19 +26,24 @@ import { SyncQueueService } from './sync-queue.service';
     EbayModule,
     ListingSettingsGroupModule,
     StoreSettingsModule,
-    BullModule.registerQueue({ name: 'listings' }, { name: 'price-sync' }),
+    BullModule.registerQueue(
+      { name: 'listings' },
+      { name: 'stock-sync' },
+      { name: 'keepa-refresh' }
+    ),
   ],
   controllers: [ListingsController],
   providers: [
     ListingsService,
-    ScraperApiService,
     KeepaService,
+    KeepaUsageService,
     ProductSyncService,
-    SyncQueueService,
-    SyncProcessorService,
+    RefreshSchedulerService,
+    RefreshProcessorService,
     ListingProcessorService,
     ListingQueueService,
     ListingStrategyService,
+    StockSyncProcessorService,
   ],
   exports: [ListingsService, ListingQueueService],
 })

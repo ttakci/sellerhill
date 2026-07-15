@@ -97,7 +97,7 @@ export const Th = styled.th<{
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.xs')};
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
   text-align: left;
   cursor: default;
   white-space: nowrap;

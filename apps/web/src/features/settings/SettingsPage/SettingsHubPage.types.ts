@@ -10,14 +10,14 @@ export type SettingsDrawerKey =
   | 'profile'
   | 'ebay'
   | 'amazonAdd'
+  | 'amazonEdit'
   | 'amazonList'
   | 'storeSettings'
-  | 'blacklistAdd'
-  | 'blacklistList'
-  | 'listingGroupNew'
-  | 'listingGroupEdit'
+  | 'storeBlacklist'
   | 'password'
-  | 'language'
+  | 'listingGroupCreate'
+  | 'listingGroupEdit'
+  | 'listingGroupList'
   | null;
 
 export interface SettingsHubPageComponentProps {
@@ -28,9 +28,11 @@ export interface SettingsHubPageComponentProps {
   activeDrawer: SettingsDrawerKey;
   onOpenDrawer: (drawer: SettingsDrawerKey) => void;
   onCloseDrawer: () => void;
-  editingListingGroupId: string | null;
+  onEditAmazon: (id: string) => void;
   onEditListingGroup: (id: string) => void;
-  onNavigateToEbayConnect: () => void;
+  onViewAllListingGroups: () => void;
+  onCreateListingGroup: () => void;
+  onConnectEbay: () => void;
   isImpersonatingAdmin: boolean;
   isDeactivateModalOpen: boolean;
   onOpenDeactivateModal: () => void;
@@ -38,4 +40,17 @@ export interface SettingsHubPageComponentProps {
   // Store configuration
   storeConfigs: StoreSettingsResponse[];
   availableStores: Array<{ id: string; name: string }>;
+  // predefinedTemplateId → display name (for the template badge on each card)
+  predefinedTemplateNames: Record<string, string>;
+  // Editing group id (for listing group drawer edit mode)
+  editingGroupId?: string | null;
+  // Editing amazon account (for amazon drawer edit mode)
+  editingAmazonAccount?: AmazonAccountPublicDto | null;
+  // Return from the amazon add/edit drawer to the accounts list drawer.
+  onBackToAmazonList?: () => void;
+  // Store settings flow: shared scope + nested blacklist navigation.
+  storeScope: string;
+  onSelectStoreScope: (value: string) => void;
+  onManageBlacklist: () => void;
+  onBackToStoreSettings: () => void;
 }

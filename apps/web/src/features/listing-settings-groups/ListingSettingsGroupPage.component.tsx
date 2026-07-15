@@ -31,15 +31,6 @@ export const ListingSettingsGroupPageComponent = ({
         <S.CardGrid>
           {groups.map((group: ListingSettingsGroupResponse) => (
             <S.InteractiveCard key={group.id} variant="interactive" onClick={() => onEditGroup(group.id)}>
-              <S.CardHeader>
-                <S.CardIconWrapper>
-                  <Icon name="view-list" size={24} />
-                </S.CardIconWrapper>
-                <S.ActiveBadge variant="success" size="sm" isPill>
-                  {t('listingSettingsGroup.statusActive').toUpperCase()}
-                </S.ActiveBadge>
-              </S.CardHeader>
-
               <S.CardBodyContent>
                 <S.CardTitleGroup>
                   <S.CardTitleText variant="h4" weight="bold" className="card-title">

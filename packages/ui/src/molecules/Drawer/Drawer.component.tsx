@@ -12,6 +12,8 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   onClose,
   title,
   subtitle,
+  onBack,
+  backAriaLabel,
   children,
   primaryAction,
   footer,
@@ -19,6 +21,8 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   className,
 }) => {
   if (!isOpen) {return null;}
+
+  const showHeader = title || subtitle || onBack;
 
   return (
     <>
@@ -30,8 +34,13 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
         role="dialog"
         aria-modal="true"
       >
-        {(title || subtitle) && (
+        {showHeader && (
           <S.Header>
+            {onBack && (
+              <S.BackButton onClick={onBack} aria-label={backAriaLabel ?? 'Back'}>
+                <Icon name="arrow-left" size={24} />
+              </S.BackButton>
+            )}
             <S.HeaderText>
               {title && (
                 <Text variant="h2" weight="bold">

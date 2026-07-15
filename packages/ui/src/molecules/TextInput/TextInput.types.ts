@@ -66,4 +66,6 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  readOnly?: boolean;
 }

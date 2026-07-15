@@ -20,6 +20,12 @@ export interface DrawerProps {
   onClose: () => void;
   title?: string;
   subtitle?: string;
+  /**
+   * When provided, renders a left-arrow back button to the left of the title
+   * (for nested drawer flows). The Save action still uses `primaryAction`.
+   */
+  onBack?: () => void;
+  backAriaLabel?: string;
   children: React.ReactNode;
   primaryAction?: DrawerPrimaryAction;
   footer?: React.ReactNode;
@@ -32,6 +38,8 @@ export interface DrawerComponentProps {
   onClose: () => void;
   title?: string;
   subtitle?: string;
+  onBack?: () => void;
+  backAriaLabel?: string;
   children: React.ReactNode;
   primaryAction?: DrawerPrimaryAction;
   footer?: React.ReactNode;

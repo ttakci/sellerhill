@@ -6,11 +6,10 @@ import LoginPage from './features/auth/login';
 import RegisterPage from './features/auth/register';
 import VerifyEmailPage from './features/auth/verify-email';
 import DashboardPage from './features/dashboard/DashboardPage';
-import EbayConnectPage from './features/ebay/ebay-connect';
 import OnboardingEbayPage from './features/ebay/onboarding';
 import StoresPage from './features/ebay/stores';
 import LandingPage from './features/landing';
-import { ListingSettingsGroupForm, ListingSettingsGroupPage } from './features/listing-settings-groups';
+import { ListingSettingsGroupPage } from './features/listing-settings-groups';
 import {
   AddListingsPage,
   ListingJobDetailsPage,
@@ -44,7 +43,6 @@ export function App() {
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="stores" element={<StoresPage />} />
-            <Route path="ebay/connect" element={<EbayConnectPage />} />
             <Route path="onboarding/ebay" element={<OnboardingEbayPage />} />
 
             {/* Settings hub (new consolidated) */}
@@ -53,8 +51,6 @@ export function App() {
             <Route path="settings/store" element={<StoreSettingsPage />} />
             <Route path="settings/amazon-accounts" element={<AmazonAccountsPageContainer />} />
             <Route path="settings/listing-groups" element={<ListingSettingsGroupPage />} />
-            <Route path="settings/listing-groups/new" element={<ListingSettingsGroupForm />} />
-            <Route path="settings/listing-groups/:id/edit" element={<ListingSettingsGroupForm />} />
 
             <Route path="listings" element={<ListingsPage />} />
             <Route path="listings/jobs" element={<ListingJobsPage />} />
@@ -78,7 +74,7 @@ export function App() {
         <Route path="/auth/check-email" element={<LocaleRedirect to="auth/check-email" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
-        <Route path="/ebay/callback" element={<LocaleRedirect to="ebay/connect" preserveQuery />} />
+        <Route path="/ebay/callback" element={<LocaleRedirect to="settings" />} />
 
         {/* Catch-all: redirect to landing */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -25,9 +25,9 @@
     "blacklistKeyword": "Anahtar Kelime",
     "keyword": "Anahtar Kelime",
     "scope": "Doğrulama Kapsamı",
-    "scope_both": "Her İkisi",
-    "scope_title": "Başlık",
-    "scope_description": "Açıklama",
+    "scope_both": "Başlık ve Açıklama",
+    "scope_title": "Yalnızca Başlık",
+    "scope_description": "Yalnızca Açıklama",
     "noBlacklist": "Henüz kara listeye alınmış anahtar kelime yok",
     "noKeywords": "Anahtar kelime bulunamadı",
     "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır."

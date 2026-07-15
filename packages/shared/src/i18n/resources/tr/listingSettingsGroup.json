@@ -13,7 +13,7 @@
     "description": "Açıklama",
     "descriptionPlaceholder": "Grup iç notlarını girin...",
 
-    "repricingStrategy": "Yeniden Fiyatlandırma Stratejisi",
+    "repricingStrategy": "Yeniden Fiyatlandırma",
     "addPriceRange": "Fiyat Aralığı Ekle",
     "removePriceRange": "Fiyat Aralığını Kaldır",
     "minPrice": "Min Fiyat ($)",
@@ -24,8 +24,6 @@
 
     "stock": "Stok",
     "defaultQuantity": "Varsayılan Miktar",
-    "autoRestock": "Satışta otomatik yeniden stokla",
-    "autoRestockDescription": "Ürünler satıldığında otomatik olarak yeniden stokla",
 
     "fees": "Ücretler",
     "ebayFee": "eBay Ücreti",
@@ -68,6 +66,16 @@
     "statusActive": "Aktif",
     "statusDraft": "Taslak",
     "statusInactive": "Pasif",
+
+    "card": {
+      "generalTitle": "Genel Ayarlar",
+      "deductionsTitle": "Kesintiler",
+      "stock": "Stok",
+      "buffer": "Buffer",
+      "fee": "Komisyon",
+      "tax": "Vergi",
+      "customTemplate": "Özelleştirilmiş Şablon"
+    },
 
     "emptyState": {
       "title": "Henüz Listeleme Grubu Yok",
@@ -156,7 +164,7 @@
     "editorTitle": "Listeleme Grubu Editörü",
     "editorDescription": "Listeleme ayarlarınızı, fiyatlandırma stratejilerinizi ve şablonlarınızı yapılandırın.",
     "generalSettings": "Genel Ayarlar",
-    "pricingStrategy": "Yeniden Fiyatlandırma Stratejisi",
+    "pricingStrategy": "Yeniden Fiyatlandırma",
     "addRange": "Aralık Ekle",
     "feesAndTaxes": "Ücretler ve Vergiler",
     "taxRate": "Vergi Oranı (%)",
@@ -174,6 +182,9 @@
       "productTitle": "Premium Kablosuz Gürültü Engelleyici Kulaklık",
       "productDescription": "Bu üst düzey kablosuz kulaklıklarla dünya standartlarında gürültü engelleme ve birinci sınıf ses kalitesini deneyimleyin. Seyahat, iş veya saf dinleme keyfi için mükemmeldir.",
       "productSpecs": "<ul><li>Aktif Gürültü Engelleme</li><li>40 saat pil ömrü</li><li>Evrensel Bluetooth uyumluluğu</li><li>Dahili mikrofon</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Kesintiler"
     },
     "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır."
   }

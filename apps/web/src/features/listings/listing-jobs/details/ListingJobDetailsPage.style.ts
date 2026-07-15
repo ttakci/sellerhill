@@ -21,7 +21,6 @@ export const HeaderRowTitle = styled.div`
   margin-bottom: ${tkn('spacing.xl')};
 `;
 
-
 export const AsinText = styled(UIText)``;
 
 export const ErrorContainer = styled.div`
@@ -39,7 +38,7 @@ export const ErrorText = styled.div`
 
 export const ExceptionBadge = styled.div`
   font-size: ${tkn('typography.fontSize.2xs')};
-  font-family: ui-monospace, monospace;
+  font-family: ${tkn('typography.fontFamily.mono')};
   background: ${tkn('colors.background.tertiary')};
   color: ${tkn('colors.semantic.error')};
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};

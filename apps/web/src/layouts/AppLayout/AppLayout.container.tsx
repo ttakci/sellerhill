@@ -30,13 +30,30 @@ export const AppLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [openSections, setOpenSections] = useState({ inventory: true, configuration: true });
 
-  // Close mobile sidebar on route change
+  // Close mobile sidebar on route change & auto-open the section containing the current route
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
     setMobileSidebarOpen(false);
+
+    const isInventoryRoute =
+      pathWithoutLocale === '/dashboard' ||
+      pathWithoutLocale.startsWith('/listings') ||
+      pathWithoutLocale.startsWith('/orders');
+    const isConfigurationRoute =
+      pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile' || pathWithoutLocale === '/stores';
+
+    setOpenSections((prev) => ({
+      inventory: isInventoryRoute ? true : prev.inventory,
+      configuration: isConfigurationRoute ? true : prev.configuration,
+    }));
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [location.pathname]);
+  }, [location.pathname, pathWithoutLocale]);
+
+  const handleToggleSection = useCallback((section: 'inventory' | 'configuration') => {
+    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  }, []);
 
   const userName = user ? `${user.firstName} ${user.lastName}` : t('translation:common.notSet');
 
@@ -97,7 +114,10 @@ export const AppLayout: React.FC = () => {
         items.push({ label: t('translation:menu.storeSettings') });
       } else if (pathWithoutLocale.includes('/settings/amazon-accounts')) {
         items.push({ label: t('translation:menu.amazonAccounts') });
-      } else if (pathWithoutLocale.includes('/listing-settings-groups') || pathWithoutLocale.includes('/settings/listing-groups')) {
+      } else if (
+        pathWithoutLocale.includes('/listing-settings-groups') ||
+        pathWithoutLocale.includes('/settings/listing-groups')
+      ) {
         items.push({ label: t('translation:menu.listingSettingsGroups') });
       }
       // /settings (hub) shows just "Settings" — no second breadcrumb item
@@ -123,6 +143,7 @@ export const AppLayout: React.FC = () => {
       loadingIsLoading={loadingState.isLoading}
       themeMode={themeMode}
       breadcrumbItems={breadcrumbItems}
+      openSections={openSections}
       onToggleSidebar={handleToggleSidebar}
       onNavigate={handleNavigate}
       onLogoutConfirm={handleLogout}
@@ -132,6 +153,7 @@ export const AppLayout: React.FC = () => {
       onOpenLogoutConfirm={() => setIsLogoutConfirmOpen(true)}
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}
       onLocaleNavigate={localeNavigate}
+      onToggleSection={handleToggleSection}
       i18nLanguage={i18n.language}
     />
   );

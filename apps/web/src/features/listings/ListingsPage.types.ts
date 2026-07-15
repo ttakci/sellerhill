@@ -22,13 +22,19 @@ export interface ListingsFilterState {
   sourceStock: NumericRange;
 }
 
+export type ListingsViewMode = 'slider' | 'full';
+
 export interface ListingsPageProps {
   listings: ListingDto[];
-  isLoading: boolean;
+  allListings: ListingDto[];
   jobs: ListingJobDto[];
   isJobsLoading: boolean;
-  onRefresh: () => void;
   onAddListing: () => void;
+  onViewAll: () => void;
+  onViewJobs: () => void;
+  viewMode: ListingsViewMode;
+  isAddDrawerOpen: boolean;
+  onAddDrawerClose: () => void;
   onEndListings: (ids: string[]) => void;
   onSelectionChange: (ids: string[]) => void;
   columns: TableColumn<ListingDto>[];

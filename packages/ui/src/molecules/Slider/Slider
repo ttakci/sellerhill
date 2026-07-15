@@ -1,0 +1,56 @@
+import styled from '@emotion/styled';
+import { IconButton as IconButtonAtom, tkn } from '../../atoms';
+
+export const SliderWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  width: 100%;
+`;
+
+export const SliderNavButton = styled(IconButtonAtom)<{ $disabled?: boolean }>`
+  flex-shrink: 0;
+  opacity: ${({ $disabled }) => ($disabled ? 0.35 : 1)};
+  cursor: ${({ $disabled }) => ($disabled ? 'default' : 'pointer')};
+  transition: opacity ${tkn('transitions.fast')};
+
+  &:hover {
+    opacity: ${({ $disabled }) => ($disabled ? 0.35 : 1)};
+  }
+
+  @media (max-width: 48rem) {
+    display: none;
+  }
+`;
+
+export const SliderScrollContainer = styled.div<{ $itemsToShow: number }>`
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: ${tkn('spacing.md')};
+  width: 100%;
+  padding-bottom: ${tkn('spacing.xs')};
+
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Each direct child gets a fixed width based on itemsToShow */
+  & > * {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: calc(
+      (100% - ${({ $itemsToShow }) => $itemsToShow - 1} * ${tkn('spacing.md')}) / ${({ $itemsToShow }) => $itemsToShow}
+    );
+  }
+
+  @media (max-width: 48rem) {
+    & > * {
+      width: 80%;
+    }
+  }
+`;

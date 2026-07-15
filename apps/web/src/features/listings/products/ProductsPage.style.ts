@@ -134,7 +134,7 @@ export const CategoryCell = styled.div`
 export const CategoryChevron = styled.span`
   color: ${tkn('colors.text.tertiary')};
   font-size: ${tkn('typography.fontSize.md')};
-  line-height: 1;
+  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
 export const PriceText = styled(UIText)``;

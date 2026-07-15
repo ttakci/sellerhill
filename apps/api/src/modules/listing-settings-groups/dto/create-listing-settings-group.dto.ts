@@ -1,17 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { type CreateListingSettingsGroupRequest, type PriceRange, type StockConfig, type FeeConfig, type TemplateConfig, TemplateType } from '@repo/shared';
-import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsNumber,
-  IsBoolean,
-  IsArray,
-  ValidateNested,
-  Min,
-  IsIn,
-} from 'class-validator';
+  type CreateListingSettingsGroupRequest,
+  type PriceRange,
+  type StockConfig,
+  type FeeConfig,
+  type TemplateConfig,
+  TemplateType,
+} from '@repo/shared';
+import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, ValidateNested, Min, IsIn } from 'class-validator';
 
 class PriceRangeDto implements Omit<PriceRange, 'id'> {
   @ApiProperty({ description: 'Minimum price', example: 10.0 })
@@ -43,11 +40,10 @@ class StockConfigDto implements StockConfig {
   @Min(0)
   defaultQuantity!: number;
 
-  @ApiProperty({ description: 'Whether auto-restock is enabled', example: true })
-  @IsBoolean()
-  autoRestock!: boolean;
-
-  @ApiPropertyOptional({ description: 'Stock buffer threshold — Amazon stock must exceed defaultQuantity + buffer to list', example: 5 })
+  @ApiPropertyOptional({
+    description: 'Stock buffer threshold — Amazon stock must exceed defaultQuantity + buffer to list',
+    example: 5,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -72,7 +68,11 @@ class FeeConfigDto implements FeeConfig {
 }
 
 class TemplateConfigDto implements TemplateConfig {
-  @ApiProperty({ description: 'Template type', example: 'custom', enum: [TemplateType.CUSTOM, TemplateType.PREDEFINED] })
+  @ApiProperty({
+    description: 'Template type',
+    example: 'custom',
+    enum: [TemplateType.CUSTOM, TemplateType.PREDEFINED],
+  })
   @IsString()
   @IsNotEmpty()
   @IsIn([TemplateType.CUSTOM, TemplateType.PREDEFINED])

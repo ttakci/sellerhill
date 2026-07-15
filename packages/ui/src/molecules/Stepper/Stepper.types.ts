@@ -11,4 +11,8 @@ export interface StepperProps {
   currentStep: number;
   orientation?: StepperOrientation;
   className?: string;
+  /** Whether steps are clickable. When true, dots render as buttons. */
+  clickable?: boolean;
+  /** Called with the zero-based step index when a step is clicked. */
+  onStepClick?: (index: number) => void;
 }

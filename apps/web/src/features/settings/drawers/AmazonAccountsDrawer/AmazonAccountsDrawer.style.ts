@@ -1,5 +1,23 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Card, tkn } from '@repo/ui';
+
+/**
+ * Clickable account card. Selection (not navigation) happens on click; the
+ * drawer footer "Continue" action opens the edit flow. The `$selected`
+ * transient drives the persistent highlight (dynamic state the Card atom
+ * can't express via variants).
+ */
+export const SelectableCard = styled(Card, {
+  shouldForwardProp: (prop) => prop !== '$selected',
+})<{ $selected?: boolean }>`
+  cursor: pointer;
+  transition: all ${tkn('transitions.normal')};
+
+  ${({ $selected, theme }) =>
+    $selected
+      ? `border-color: ${tkn('colors.brand.primary')({ theme })}; box-shadow: ${tkn('shadows.sm')({ theme })};`
+      : ''}
+`;
 
 export const AccountList = styled.div`
   display: flex;

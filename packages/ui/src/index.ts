@@ -141,13 +141,16 @@ export { Collapsible } from './molecules/Collapsible';
 export type { CollapsibleProps } from './molecules/Collapsible';
 
 export { Stepper } from './molecules/Stepper';
-export type { StepItem, StepStatus, StepperOrientation, StepperProps } from './molecules/Stepper';
+export type { StepItem, StepperOrientation, StepperProps, StepStatus } from './molecules/Stepper';
 
 export { SegmentedControl } from './molecules/SegmentedControl';
 export type { SegmentedControlOption, SegmentedControlProps } from './molecules/SegmentedControl';
 
 export { ListItem } from './molecules/ListItem';
 export type { ListItemProps } from './molecules/ListItem';
+
+export { Slider } from './molecules/Slider';
+export type { SliderProps } from './molecules/Slider';
 
 export { IdBadge } from './molecules/IdBadge';
 export type { IdBadgeProps, StoreType } from './molecules/IdBadge';

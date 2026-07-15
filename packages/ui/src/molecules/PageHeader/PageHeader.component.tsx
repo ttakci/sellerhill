@@ -8,9 +8,10 @@ export const PageHeader = ({
   subtitle,
   actions,
   className,
+  noMargin,
 }: PageHeaderProps): React.ReactElement => {
   return (
-    <S.HeaderWrapper className={className}>
+    <S.HeaderWrapper className={className} $noMargin={noMargin}>
       <S.TitleArea>
         <S.Title>{title}</S.Title>
         {subtitle && <S.Subtitle>{subtitle}</S.Subtitle>}

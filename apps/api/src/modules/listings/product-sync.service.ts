@@ -1,150 +1,77 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ListingStatus } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
 
-import { KeepaService } from './keepa.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
-import { ScraperApiService } from './scraper-api.service';
 
+/**
+ * Fan-out helper for product data changes.
+ *
+ * The stale-driven refresh pipeline (`RefreshProcessorService`) and the
+ * sale-driven stock sync both delegate here: given a product whose Amazon
+ * data changed, recompute every active listing sharing it (each per its own
+ * settings group) and push to eBay — but only when a listing's price or
+ * quantity actually changed (eBay rate-limit hygiene).
+ */
 @Injectable()
-export class ProductSyncService implements OnModuleInit {
+export class ProductSyncService {
   private readonly logger = new Logger(ProductSyncService.name);
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly keepaService: KeepaService,
-    private readonly scraperApiService: ScraperApiService,
     private readonly strategyService: ListingStrategyService,
     private readonly ebayService: EbayService,
     private readonly listingsService: ListingsService
   ) {}
 
-  onModuleInit() {
-    // Sync logic triggered via BullMQ SyncProcessor
-  }
-
   /**
-   * Main sync task. Scans for products needing updates.
+   * Public entry point used by the sale-driven stock-sync queue.
+   * Resolves the ASIN for a product, then recomputes + pushes every active
+   * listing that shares it (each per its own settings group).
    */
-  async runSyncCycle(type: 'prices' | 'metadata') {
-    this.logger.log(`Starting background sync task: ${type}`);
-
-    if (type === 'prices') {
-      await this.syncPricesAndStock();
-    } else if (type === 'metadata') {
-      await this.syncMetadata();
-    }
-
-    this.logger.log(`Sync task ${type} completed.`);
-  }
-
-  /**
-   * Sync prices and stock using Keepa API
-   * Frequency: Every 12 hours (Configured via Cron at 09:00 and 21:00)
-   */
-  private async syncPricesAndStock() {
-    // Fetch ALL active products that need syncing
-    interface ProductRow { id: string; asin: string; }
-    const products = await this.databaseService.query<ProductRow>(`
-      SELECT DISTINCT p.id, p.asin 
-      FROM products p
-      INNER JOIN listings l ON p.id = l.product_id
-      WHERE l.status = '${ListingStatus.ACTIVE}'
-    `);
-
-    if (products.length === 0) {
-      this.logger.log('No active products found for sync.');
+  async syncListingsForProduct(productId: string): Promise<void> {
+    const rows = await this.databaseService.query<{ asin: string }>(`SELECT asin FROM products WHERE id = $1`, [
+      productId,
+    ]);
+    if (rows.length === 0) {
+      this.logger.debug(`syncListingsForProduct: product ${productId} not found`);
       return;
     }
-
-    this.logger.log(`Found ${products.length} products needing Price/Stock sync via Keepa API.`);
-
-    // Process in chunks of 100 (Keepa bulk limit)
-    const chunkSize = 100;
-    for (let i = 0; i < products.length; i += chunkSize) {
-      const chunk = products.slice(i, i + chunkSize);
-      const asins = chunk.map((p) => p.asin);
-
-      this.logger.log(`Processing chunk ${i / chunkSize + 1} (${chunk.length} ASINs)`);
-      const keepaResults = await this.keepaService.getProducts(asins);
-
-      for (const product of chunk) {
-        try {
-          const data = keepaResults.find((k) => k.asin === product.asin);
-          if (!data) {
-            this.logger.warn(`No Keepa data found for ASIN ${product.asin} during sync`);
-            continue;
-          }
-
-          await this.databaseService.query(
-            `
-            UPDATE products
-            SET price = jsonb_set(price, '{current}', $1),
-                stock = $2,
-                raw_keepa_data = $3,
-                last_repriced_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $4
-          `,
-            [data.price, data.stock, JSON.stringify(data.raw), product.id]
-          );
-
-          await this.updateAllListingsForProduct(product.id, product.asin);
-        } catch (error: unknown) {
-          this.logger.error(`Keepa sync failed for ASIN ${product.asin}: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      }
-    }
-  }
-
-  /**
-   * Sync metadata using ScraperAPI
-   * Frequency: Every 30 days
-   */
-  private async syncMetadata() {
-    interface ProductRow { id: string; asin: string; }
-    const products = await this.databaseService.query<ProductRow>(`
-      SELECT DISTINCT p.id, p.asin
-      FROM products p
-      INNER JOIN listings l ON p.id = l.product_id
-      WHERE l.status = '${ListingStatus.ACTIVE}'
-      AND (p.last_sync_at < NOW() - INTERVAL '30 days' OR p.last_sync_at IS NULL)
-      LIMIT 50
-    `);
-
-    this.logger.log(`Found ${products.length} products needing metadata refresh via ScraperAPI.`);
-
-    for (const product of products) {
-      try {
-        const data = await this.scraperApiService.getProductDetails(product.asin);
-        if (!data) {continue;}
-
-        await this.listingsService.findOrCreateProduct(product.asin, data);
-      } catch (error: unknown) {
-        this.logger.error(`Metadata sync failed for ASIN ${product.asin}: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
+    await this.updateAllListingsForProduct(productId, rows[0].asin);
   }
 
   /**
    * Recalculate and push updates to eBay for all listings linked to a product.
-   * Groups listings by user for batch processing.
+   * Groups listings by user for batch processing. Skips the eBay push (and the
+   * listing row update) when neither price nor quantity changed — this keeps
+   * eBay API call volume proportional to real changes, not to refresh frequency.
    */
-  private async updateAllListingsForProduct(productId: string, asin: string) {
-    interface ListingRow { id: string; user_id: string; listing_settings_group_id: string; ebay_item_id: string; }
+  async updateAllListingsForProduct(productId: string, asin: string): Promise<void> {
+    interface ListingRow {
+      id: string;
+      user_id: string;
+      listing_settings_group_id: string;
+      ebay_item_id: string;
+      price: string | null;
+      quantity: number | null;
+    }
     const listings = await this.databaseService.query<ListingRow>(
-      `SELECT id, user_id, listing_settings_group_id, ebay_item_id FROM listings
+      `SELECT id, user_id, listing_settings_group_id, ebay_item_id, price, quantity FROM listings
        WHERE product_id = $1 AND status = '${ListingStatus.ACTIVE}'`,
       [productId]
     );
 
-    if (listings.length === 0) {return;}
+    if (listings.length === 0) {
+      return;
+    }
 
     const productInfo = await this.listingsService.getProductByAsin(asin);
-    if (!productInfo) {return;}
+    if (!productInfo) {
+      return;
+    }
 
     // Group by user for parallel processing
     const byUser = new Map<string, typeof listings>();
@@ -163,6 +90,17 @@ export class ProductSyncService implements OnModuleInit {
             productInfo.data,
             listing.listing_settings_group_id
           );
+
+          const priceChanged = String(listing.price) !== String(strategyResult.price);
+          const quantityChanged = Number(listing.quantity) !== Number(strategyResult.quantity);
+
+          // No price/quantity delta → nothing to push to eBay, nothing to persist.
+          if (!priceChanged && !quantityChanged) {
+            this.logger.debug(
+              `Listing ${listing.ebay_item_id} unchanged (price=${strategyResult.price}, qty=${strategyResult.quantity}); skipping eBay push`
+            );
+            continue;
+          }
 
           const sku = `${asin}-NEW`;
           await this.ebayService.updatePriceAndStock(
@@ -194,7 +132,9 @@ export class ProductSyncService implements OnModuleInit {
             `Repriced listing ${listing.ebay_item_id} (Price: ${strategyResult.price}, Stock: ${strategyResult.quantity})`
           );
         } catch (error: unknown) {
-          this.logger.error(`Failed to reprice listing ${listing.id}: ${error instanceof Error ? error.message : String(error)}`);
+          this.logger.error(
+            `Failed to reprice listing ${listing.id}: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
       }
     });

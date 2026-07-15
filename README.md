@@ -74,8 +74,7 @@ cp apps/api/.env.example apps/api/.env
 | `EBAY_CLIENT_SECRET` | eBay OAuth Client Secret | ✅ |
 | `EBAY_ENVIRONMENT` | `sandbox` veya `production` | ✅ |
 | `AMAZON_ENCRYPTION_KEY` | 64 karakter hex (AES-256-GCM) | ✅ |
-| `SCRAPER_API_KEY` | ScraperAPI anahtarı | ⬜ |
-| `KEEPA_API_KEY` | Keepa API anahtarı | ⬜ |
+| `KEEPA_API_KEY` | Keepa API anahtarı (tek ürün verisi sağlayıcısı) | ⬜ |
 | `SMTP_HOST` | Email SMTP host | ⬜ |
 | `SMTP_USER` | SMTP kullanıcı adı | ⬜ |
 | `SMTP_PASSWORD` | SMTP şifresi | ⬜ |

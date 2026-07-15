@@ -4,7 +4,6 @@ export interface EbayAccountDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   accounts: EbayAccountPublicDto[];
-  onConnect: () => void;
 }
 
 /**
@@ -26,5 +25,4 @@ export interface EbayAccountDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
   stores: EbayStoreCardView[];
-  onConnect: () => void;
 }

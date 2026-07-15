@@ -48,6 +48,7 @@ export const DeactivateAccountModalComponent = ({
           {t('translation:settingsHub.modal.deactivate.typeEmail')}
         </Text>
         <ModernTextInput
+          name="confirmText"
           label={t('translation:settingsHub.modal.deactivate.emailPlaceholder', { email: userEmail })}
           value={confirmInput}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onConfirmInputChange(e.target.value)}

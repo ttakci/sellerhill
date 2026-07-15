@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import {
-  Badge,
   Card,
   EmptyState as EmptyStateMolecule,
   IconButton as IconButtonAtom,
@@ -40,35 +39,6 @@ export const CardGrid = styled.div`
 `;
 
 /* refined and reordered below */
-export const CardHeader = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
-
-  @media (max-width: 63.9375rem) {
-    /* 1023px */
-    padding: ${tkn('spacing.md')};
-  }
-`;
-
-export const CardIconWrapper = styled.div`
-  width: 2.5rem; /* 40px */
-  height: 2.5rem; /* 40px */
-  border-radius: 0.625rem; /* 10px — no exact token */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${tkn('colors.brand.secondary')};
-  color: ${tkn('colors.brand.primary')};
-
-  & svg {
-    width: 1.5rem; /* 24px */
-    height: 1.5rem; /* 24px */
-  }
-`;
-
 export const CardBodyContent = styled.div`
   padding: ${tkn('spacing.lg')};
   min-height: 6.25rem; /* 100px */
@@ -133,15 +103,12 @@ export const IconButton = styled(IconButtonAtom)<{ $type?: 'delete' | 'edit' }>`
 `;
 
 /* refined and reordered below */
-export const ActiveBadge = styled(Badge)``;
-
 export const InteractiveCard = styled(Card)`
   cursor: pointer;
   transition: all ${tkn('transitions.normal')};
   overflow: hidden;
 
   &:hover {
-    border-color: ${tkn('colors.brand.primary')};
     box-shadow: ${tkn('shadows.md')};
     transform: translateY(-0.125rem); /* -2px */
   }

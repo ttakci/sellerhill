@@ -9,7 +9,6 @@ export const EbayAccountDrawerComponent: React.FC<EbayAccountDrawerComponentProp
   isOpen,
   onClose,
   stores,
-  onConnect,
 }) => {
   const { t } = useTranslation();
 
@@ -20,10 +19,6 @@ export const EbayAccountDrawerComponent: React.FC<EbayAccountDrawerComponentProp
       title={t('translation:settingsHub.sections.ebay.manageStores.title')}
       subtitle={t('translation:settingsHub.sections.ebay.subtitle')}
       size="md"
-      primaryAction={{
-        label: t('translation:settingsHub.sections.ebay.connectNew.action'),
-        onClick: onConnect,
-      }}
     >
       {stores.length > 0 ? (
         <S.StoreList>

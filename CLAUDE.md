@@ -94,6 +94,54 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 - **Order**: An eBay sale. Linked to a Listing (via `listing_id`). Product info (title, image, ASIN) resolved via listing→product JOIN, not stored in orders. Contains eBay-side financials (saleTotal, ebayEarnings) and Amazon-side costs (purchasePrice, amazonTax, amazonShipping).
 - **Amazon Account**: A buyer Amazon account used for order scraping. Credentials encrypted with AES-256-GCM. One user can have multiple Amazon accounts.
 
+## Product Refresh Pipeline
+
+Amazon product data (metadata + buy-box price + stock) is sourced **exclusively from the Keepa API** — one provider, one token per ASIN (`history=0`, `stock=1`, `stats=90`). ScraperAPI was removed: its per-request credit model is 10–100× more expensive than Keepa's token pool under bulk-add/churn. Keepa returns title/images/brand/description/features/price/stock in a single token, so there is no second fetch.
+
+> **Strengths:** zero-waste token utilization, linear scalability to millions of products, per-user cost attribution, self-healing failure handling. Frequency is a config knob, not an architecture.
+
+### Shared product cache
+`products` is a global ASIN-keyed cache — one ASIN exists once regardless of how many users list it. One customer's data fetch serves every customer listing that ASIN. There is **no per-user Keepa cost isolation**; costs are attributed via fair-split (see Token tracking below).
+
+### Stale-driven scheduler + batch worker
+There is **no "refresh everything every N hours" cron**. Instead a `keepa-refresh` BullMQ queue with two roles:
+- **Scheduler** (`RefreshSchedulerService`, repeatable tick every minute by default): runs a single query — `SELECT id FROM products WHERE next_refresh_at <= NOW() ORDER BY next_refresh_at ASC LIMIT $batchSize` — and enqueues **one** `refresh-batch` job. The scheduler knows nothing about Keepa.
+- **Worker** (`RefreshProcessorService`): one bulk Keepa call per batch (Keepa's 100-ASIN bulk limit is chunked internally) → captures `tokensConsumed`/`tokensLeft` → per-product compare + update → fan-out for changed products. Per-product failures are isolated inside the batch (try/catch); a transport failure (Keepa 429/5xx/network) propagates so BullMQ retries the whole batch idempotently.
+
+### Field change-detection
+The worker updates the `products` row only when buy-box price, stock, or title changed. The fan-out (`ProductSyncService.updateAllListingsForProduct`) recomputes each active listing's strategy and pushes to eBay **only when that listing's price or quantity actually changed** (buffer/rounding may absorb an Amazon change). eBay API volume stays proportional to real changes, not to refresh frequency.
+
+### Failure handling & poison-product quarantine
+- **Transport failure**: BullMQ exponential backoff retries the batch; `next_refresh_at` is **not** advanced, so products stay due.
+- **Data failure** (ASIN missing/broken in Keepa response): `consecutive_failures++`; below `KEEPA_REFRESH_MAX_FAILURES` the product is retried on a near-future tick (next_refresh_at untouched); at/above the threshold it is **quarantined** (`next_refresh_at = NOW() + KEEPA_REFRESH_QUARANTINE_MINUTES`) so a permanently-dead ASIN cannot starve the refresh queue.
+
+### Config-driven frequency (no rewrite to change cadence)
+All env (defaults shown), all optional:
+- `KEEPA_REFRESH_INTERVAL_MINUTES=720` (12h). Dial to 360 (6h) / 180 (3h) by env only.
+- `KEEPA_REFRESH_BATCH_SIZE=50` — products per tick (one bulk Keepa call).
+- `KEEPA_REFRESH_SCHEDULER_CRON=* * * * *` — tick cadence.
+- `KEEPA_REFRESH_WORKER_CONCURRENCY=1` — parallel refresh jobs.
+- `KEEPA_REFRESH_QUARANTINE_MINUTES=1440`, `KEEPA_REFRESH_MAX_FAILURES=5`.
+
+Throughput = batch_size × ticks/min; bounded by Keepa's token-generation rate (plan tier). Refresh interval ≈ `total_unique_asins / (token_rate × utilization)`.
+
+### Token tracking (cost attribution)
+- `keepa_usage_log` — one row per ASIN per refresh: `asin, tokens (fair share = batch tokensConsumed / products_in_batch), source ('refresh'|'create'), user_ids (JSONB array of users actively listing the ASIN), requested_at`. Append-only.
+- `keepa_balance` — `tokensLeft`/`refillIn` snapshots from each Keepa response (time series).
+- **Admin per-user monthly cost (fair-split):** `SELECT uid, SUM(tokens / jsonb_array_length(user_ids)) AS tokens FROM keepa_usage_log CROSS JOIN LATERAL jsonb_array_elements_text(user_ids) AS uid WHERE requested_at >= date_trunc('month', NOW()) GROUP BY uid ORDER BY tokens DESC;`
+- No UI yet (admin reads tables directly). Token-balance-driven worker throttling is intentionally deferred until real utilization data is collected.
+
+### Listing creation path
+`ListingProcessorService` (the `listings` queue worker) uses a **single** `KeepaService.getProductDetailsWithMeta(asin)` per new product (full metadata + price + stock + token meta in one call). Re-listing a cached ASIN makes **no** Keepa call (0 tokens) — the product is already on the refresh schedule. New product rows get `next_refresh_at = NOW() + 12h` on insert (`findOrCreateProduct`); subsequent rescheduling uses the config interval.
+
+### Key product-refresh files
+- `src/modules/listings/keepa.service.ts` — Keepa API, `history=0`, token-meta capture, bulk `getProducts()` + `getProductDetailsWithMeta()`.
+- `src/modules/listings/refresh-scheduler.service.ts` — repeatable tick, selects overdue products.
+- `src/modules/listings/refresh-processor.service.ts` — batch worker (compare/update/fan-out/quarantine/token-log).
+- `src/modules/listings/keepa-usage.service.ts` — `keepa_usage_log` + `keepa_balance` persistence.
+- `src/modules/listings/product-sync.service.ts` — `updateAllListingsForProduct()` (change-detected fan-out) + `syncListingsForProduct()` (sale-driven entry point).
+- DB: `products` (next_refresh_at, last_refresh_attempt_at, last_successful_refresh_at, consecutive_failures), `keepa_usage_log`, `keepa_balance`. Migrations `025`/`026`/`027`.
+
 ## Order Management
 
 ### Data Flow
@@ -101,6 +149,8 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 eBay Order → Order Sync (BullMQ, every 15 min) → orders table
   ↕ (matched via lineItem.legacyItemId → listings.ebay_item_id)
 orders.listing_id → listings → products (title, image, ASIN via JOIN)
+  ↓ (NEW order only, xmax-detected insert)
+Sale-Driven Stock Sync → products.stock decremented → stock-sync queue → recompute + push eBay
   ↓ (user links Amazon order)
 Amazon Account + Amazon Order ID → Playwright scraping → order costs updated
   ↓ (automatic)
@@ -127,6 +177,16 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 - **Manual refresh**: `POST /orders/sync` queues high-priority job, waits, returns fresh data
 - **Cache tracking**: `ebay_accounts.last_ebay_sync_at` — sync fetches only orders since last sync
 - **Listing matching**: Uses `lineItem.legacyItemId` → `listings.ebay_item_id` to establish `listing_id`
+- **Idempotency**: `upsertOrder()` uses Postgres `RETURNING id, (xmax = 0) AS inserted` to detect brand-new orders vs re-synced updates — one-time side effects (stock decrement) only fire on genuine inserts
+
+### Sale-Driven Stock Sync (between Keepa refresh cycles)
+- **Why**: A confirmed eBay sale is real signal that Amazon stock dropped, so we don't wait for the next Keepa refresh cycle to correct eBay quantities.
+- **Queue**: `stock-sync` (BullMQ). Producer = `StockSyncQueueService` (orders module, `@InjectQueue`), consumer = `StockSyncProcessorService` (listings module, `@Processor`, concurrency 3). Same queue name registered in both modules → same Redis queue.
+- **Flow on new matched order**: `products.stock` decremented by order quantity (`ProductsService.decrementStock`, floors at 0) → enqueue `{ productId }` → worker calls `ProductSyncService.syncListingsForProduct(productId)` → reuses the same fan-out as the refresh pipeline: recomputes `quantity` per listing's own settings group and pushes to eBay (`updatePriceAndStock`) + DB.
+- **Quantity formula** (single source of truth, `ListingStrategyService.calculateQuantity`): `quantity = min(max(amazonStock − buffer, 0), defaultQuantity)`. Used by listing creation, the Keepa refresh pipeline, and the sale-driven queue identically.
+- **Shared product stock**: `products.stock` is an ASIN-level cache shared across all customers. One customer's sale depletes it, so ALL listings sharing that ASIN are recomputed — each with its own group's `buffer`/`defaultQuantity` → different eBay quantities per seller.
+- **Best-effort & idempotent**: stock sync is wrapped so it never fails order sync; the worker re-reads `products.stock` at execution time, so delayed/coalesced jobs re-push the correct current value. The Keepa refresh pipeline resets `products.stock` to Amazon ground truth.
+- **Rate-limit hygiene**: BullMQ `jobId` bucketed per 5s window per product collapses a burst of sales into one job; `attempts: 3` + exponential backoff; `EbayService.withRateLimitRetry` honours `Retry-After` on 429/5xx.
 
 ### Amazon Order Linking
 - User provides Amazon Order ID + selects an Amazon Account
@@ -165,7 +225,9 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 ### Key Files
 - **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService, EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService
 - **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService, AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService, AmazonRateLimiter, BrowserStateManager
-- **Backend products**: `src/modules/products/` — ProductsService (price/image lookup)
+- **Backend products**: `src/modules/products/` — ProductsService (price/image lookup, `decrementStock` for sale-driven stock sync)
+- **Product refresh pipeline** (Keepa sole provider): `keepa.service.ts`, `refresh-scheduler.service.ts`, `refresh-processor.service.ts`, `keepa-usage.service.ts`, `product-sync.service.ts` — see "Product Refresh Pipeline" section above.
+- **Sale-driven stock sync**: `src/modules/orders/stock-sync-queue.service.ts` (producer) + `src/modules/listings/stock-sync-processor.service.ts` (consumer) + `ProductSyncService.syncListingsForProduct()` + `ListingStrategyService.calculateQuantity()` (canonical quantity formula)
 - **Frontend orders**: `apps/web/src/features/orders/` — list page, detail page, Amazon linking
 - **Frontend Amazon**: `apps/web/src/features/amazon/` — accounts page, linking modal, RTK Query API
 - **Shared**: `packages/shared/src/domain/orders/`, `packages/shared/src/domain/amazon/`, `packages/shared/src/schemas/orders/`, `packages/shared/src/schemas/amazon/`
@@ -192,6 +254,7 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 8. **Design System Only (no custom UI primitives)** — All UI primitives (inputs, selects, checkboxes, buttons, modals, dropdowns, toggles, date pickers, etc.) MUST come from `packages/ui` (atoms or molecules). Never use native HTML elements (`<select>`, `<input>`, `<button>`, etc.) or build custom form controls directly in feature code. If a needed component doesn't exist in the design system, create it there first as an atom/molecule, then use it. This ensures consistency and reusability across all screens.
 9. **MessageModal for success/error/info/warning messages** — All informational and error messages MUST use the `MessageModal` molecule via `showMessage` from `UIContext`. Never use native `alert()`/`confirm()`, create custom modal implementations, or bypass this pattern. `MessageModal` provides consistent styling with type-appropriate icons (success=check-circle, error=x-circle, warning=alert-triangle, info=info) and proper button handling.
 10. **No hardcoded status/constant strings** — All status values, type discriminators, and constant strings MUST be defined as enums in `packages/shared/src/domain/`. Never use string literals like `'active'`, `'draft'`, `'custom'`, `'predefined'`, etc. directly in code. Use the corresponding enum (e.g., `ListingStatus.ACTIVE`, `TemplateType.CUSTOM`, `PolicyType.PAYMENT`, `OrderStatus.SHIPPED`, `EbayAccountStatus.ACTIVE`). If a new constant is needed, create or extend an enum in the shared package first.
+12. **No hardcoded UI strings — all text via i18n** — Every user-visible string (labels, buttons, messages, placeholders, tooltips, table headers, empty states, counts, etc.) MUST use i18n `t()` with keys defined in `packages/shared/src/i18n/resources/{en,tr}/`. Never write raw text like `<Text>Clear</Text>` or `{listings.length} results` directly in JSX. The only exceptions are: (a) universal symbols like `—` (em dash) used as empty-value placeholders, (b) numeric/format values produced by formatters (`formatCurrency`, `formatDate`, etc.), and (c) string literals passed to `t()` as keys. If a new string is needed, add the key to **both** `en/` and `tr/` JSON files first, then use `t('namespace.key')` in the component.
 11. **Keep CLAUDE.md up to date** — When changes are made that affect project conventions, architecture, commands, patterns, or rules, CLAUDE.md MUST be updated to reflect the current state. This includes new packages, changed file paths, updated tooling, new architectural patterns, or modified workflows. Do not let CLAUDE.md become stale.
 
 ## Environment Setup

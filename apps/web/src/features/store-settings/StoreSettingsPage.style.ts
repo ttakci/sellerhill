@@ -72,7 +72,7 @@ export const GlobalGrid = styled.div`
 export const HeaderIconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'blacklist' }>`
   width: 2.5rem; /* 40px */
   height: 2.5rem; /* 40px */
-  border-radius: 0.625rem; /* 10px — no exact token */
+  border-radius: ${tkn('radius.sm')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,7 +198,7 @@ export const BadgeWrapper = styled.div`
 
 export const StatusBadge = styled(StatusBadgeMolecule)`
   text-transform: uppercase;
-  letter-spacing: 0.025em; /* no exact token (between wider=0.02em and widest=0.05em) */
+  letter-spacing: ${tkn('typography.letterSpacing.wider')}; /* no exact token (between wider=0.02em and widest=0.05em) */
 `;
 
 export const EmptyBlacklistText = styled(Text)`

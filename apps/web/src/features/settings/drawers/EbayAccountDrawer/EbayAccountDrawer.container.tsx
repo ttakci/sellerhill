@@ -17,7 +17,6 @@ export const EbayAccountDrawer: React.FC<EbayAccountDrawerProps> = ({
   isOpen,
   onClose,
   accounts,
-  onConnect,
 }) => {
   const { i18n } = useTranslation();
   const { locale } = getLocaleConfig(i18n.language);
@@ -37,7 +36,6 @@ export const EbayAccountDrawer: React.FC<EbayAccountDrawerProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       stores={stores}
-      onConnect={onConnect}
     />
   );
 };

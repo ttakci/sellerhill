@@ -8,6 +8,8 @@ export const Drawer: React.FC<DrawerProps> = ({
   onClose,
   title,
   subtitle,
+  onBack,
+  backAriaLabel,
   children,
   primaryAction,
   footer,
@@ -40,6 +42,8 @@ export const Drawer: React.FC<DrawerProps> = ({
       onClose={onClose}
       title={title}
       subtitle={subtitle}
+      onBack={onBack}
+      backAriaLabel={backAriaLabel}
       primaryAction={primaryAction}
       footer={footer}
       size={size}

@@ -14,20 +14,31 @@ import type { SettingsActionRowProps } from './SettingsActionRow.types';
 export const SettingsActionRow = ({
   icon,
   label,
+  subtitle,
   onClick,
   variant = 'default',
   ariaLabel,
 }: SettingsActionRowProps): React.ReactElement => {
   const isDanger = variant === 'danger';
+  const tone = isDanger ? 'semantic.error' : 'brand.primary';
   return (
     <S.Row type="button" onClick={onClick} aria-label={ariaLabel ?? label}>
       <S.Info>
-        <Icon name={icon} size={18} color={isDanger ? 'semantic.error' : 'text.secondary'} />
-        <Text variant="body-sm" weight="medium" color={isDanger ? 'semantic.error' : undefined}>
-          {label}
-        </Text>
+        {icon && <Icon name={icon} size={18} color={tone} />}
+        <S.TextStack>
+          <Text variant="body-sm" weight="medium" color={isDanger ? 'semantic.error' : undefined}>
+            {label}
+          </Text>
+          {subtitle && (
+            <Text variant="caption" color="text.tertiary">
+              {subtitle}
+            </Text>
+          )}
+        </S.TextStack>
       </S.Info>
-      <Icon name="chevron-right" size={18} color={isDanger ? 'semantic.error' : 'brand.primary'} />
+      <S.Arrow>
+        <Icon name="arrow-right" size={18} color={tone} />
+      </S.Arrow>
     </S.Row>
   );
 };

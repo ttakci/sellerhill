@@ -21,9 +21,9 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
   onZipCodeChange,
   onToggleValidateTitle,
   onToggleValidateDescription,
-  onSave,
+  onContinue,
   isSaving,
-  isSaveDisabled,
+  isContinueDisabled,
 }) => {
   const { t } = useTranslation(['translation']);
   return (
@@ -34,10 +34,10 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
       subtitle={t('translation:settingsHub.drawer.storeSettings.subtitle')}
       size="md"
       primaryAction={{
-        label: t('translation:common.save'),
-        onClick: onSave,
+        label: t('translation:common.continue'),
+        onClick: onContinue,
         isLoading: isSaving,
-        disabled: isSaveDisabled,
+        disabled: isContinueDisabled,
       }}
     >
       <BodyStack>

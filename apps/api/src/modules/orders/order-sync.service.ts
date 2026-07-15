@@ -13,6 +13,7 @@ import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
+import { StockSyncQueueService } from './stock-sync-queue.service';
 
 export interface EbayAccountForSync {
   id: string;
@@ -35,6 +36,7 @@ export class OrderSyncService {
     private readonly ebayService: EbayService,
     private readonly fulfillmentService: EbayFulfillmentService,
     private readonly productsService: ProductsService,
+    private readonly stockSyncQueue: StockSyncQueueService
   ) {}
 
   /**
@@ -62,9 +64,7 @@ export class OrderSyncService {
         await this.syncOrdersForAccount(account);
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.error(
-          `Order sync failed for account ${account.id} (user: ${account.user_id}): ${message}`
-        );
+        this.logger.error(`Order sync failed for account ${account.id} (user: ${account.user_id}): ${message}`);
       }
     }
 
@@ -109,8 +109,8 @@ export class OrderSyncService {
           let listingId: string | null = null;
 
           if (lineItem?.legacyItemId) {
-            const match = await this.databaseService.query<{ id: string }>(
-              `SELECT id FROM listings
+            const match = await this.databaseService.query<{ id: string; product_id: string }>(
+              `SELECT id, product_id FROM listings
                WHERE ebay_item_id = $1 AND user_id = $2
                LIMIT 1`,
               [lineItem.legacyItemId, userId]
@@ -136,22 +136,42 @@ export class OrderSyncService {
             userId,
             ebayAccountId,
             listingId || undefined,
-            purchasePrice,
+            purchasePrice
           );
 
-          await this.upsertOrder(entity);
+          const { inserted } = await this.upsertOrder(entity);
 
           // Calculate profit for tracked orders
           if (listingId) {
             await this.recalculateProfit(entity.ebayOrderId);
           }
 
+          // Sale-driven stock sync: only for a genuinely NEW order matched to one
+          // of our listings. We KNOW this sale happened, so deplete the shared
+          // product stock by the sold quantity (best estimate until the next 12h
+          // Keepa sync), then trigger per-listing quantity recompute + eBay push.
+          if (inserted && listingId && entity.quantity > 0) {
+            try {
+              const match = await this.databaseService.query<{ product_id: string }>(
+                `SELECT product_id FROM listings WHERE id = $1`,
+                [listingId]
+              );
+              const productId = match[0]?.product_id;
+              if (productId) {
+                await this.productsService.decrementStock(productId, entity.quantity);
+                await this.stockSyncQueue.enqueueProductStockSync(productId);
+              }
+            } catch (error: unknown) {
+              // Stock sync is best-effort — never fail the order sync because of it.
+              const msg = error instanceof Error ? error.message : String(error);
+              this.logger.warn(`Stock sync for order ${entity.ebayOrderId} skipped: ${msg}`);
+            }
+          }
+
           totalSynced++;
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : String(error);
-          this.logger.error(
-            `Failed to sync eBay order ${ebayOrder.orderId}: ${msg}`
-          );
+          this.logger.error(`Failed to sync eBay order ${ebayOrder.orderId}: ${msg}`);
         }
       }
 
@@ -177,10 +197,15 @@ export class OrderSyncService {
   }
 
   /**
-   * Insert or update an order from eBay data
+   * Insert or update an order from eBay data.
+   * Returns whether the row was a brand-new INSERT (`inserted`) vs. an UPDATE of
+   * an existing order — detected via Postgres `xmax` so we never double-process a
+   * re-synced order. Used to gate one-time side effects (stock decrement).
    */
-  private async upsertOrder(entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>): Promise<string> {
-    const result = await this.databaseService.query<{ id: string }>(
+  private async upsertOrder(
+    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
+  ): Promise<{ id: string; inserted: boolean }> {
+    const result = await this.databaseService.query<{ id: string; inserted: boolean }>(
       `INSERT INTO orders (
         user_id, ebay_account_id, ebay_order_id,
         buyer_username, buyer_name, buyer_email, buyer_phone,
@@ -212,7 +237,7 @@ export class OrderSyncService {
         last_ebay_event_at = EXCLUDED.last_ebay_event_at,
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
-      RETURNING id`,
+      RETURNING id, (xmax = 0) AS inserted`,
       [
         entity.userId,
         entity.ebayAccountId,
@@ -241,7 +266,8 @@ export class OrderSyncService {
       ]
     );
 
-    return result[0]?.id;
+    const row = result[0];
+    return { id: row?.id, inserted: row?.inserted ?? false };
   }
 
   /**
@@ -264,7 +290,9 @@ export class OrderSyncService {
       [ebayOrderId]
     );
 
-    if (orders.length === 0) {return;}
+    if (orders.length === 0) {
+      return;
+    }
 
     const order = orders[0];
 
@@ -299,7 +327,9 @@ export class OrderSyncService {
       [order.listing_id]
     );
 
-    if (settingsGroups.length === 0) {return;}
+    if (settingsGroups.length === 0) {
+      return;
+    }
 
     const fees = settingsGroups[0].fees;
     const saleTotal = parseFloat(String(order.sale_total)) || 0;

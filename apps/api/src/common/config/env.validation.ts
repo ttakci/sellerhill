@@ -70,11 +70,37 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  SCRAPER_API_KEY?: string;
+  KEEPA_API_KEY?: string;
+
+  // --- Keepa stale-driven refresh pipeline (all optional, sensible defaults) ---
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_INTERVAL_MINUTES: number = 720; // 12h
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_BATCH_SIZE: number = 50;
 
   @IsString()
   @IsOptional()
-  KEEPA_API_KEY?: string;
+  KEEPA_REFRESH_SCHEDULER_CRON: string = '* * * * *';
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_WORKER_CONCURRENCY: number = 1;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_QUARANTINE_MINUTES: number = 1440; // 1 day
+
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_MAX_FAILURES: number = 5;
 
   @IsString()
   @IsOptional()

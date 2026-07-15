@@ -111,6 +111,7 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
     >
       <BodyStack>
         <ModernTextInput
+          name="currentPassword"
           label={t('translation:settingsHub.drawer.password.current')}
           value={current}
           type="password"
@@ -119,6 +120,7 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
           }
         />
         <ModernTextInput
+          name="newPassword"
           label={t('translation:settingsHub.drawer.password.new')}
           value={next}
           type="password"
@@ -127,6 +129,7 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
           }
         />
         <ModernTextInput
+          name="confirmPassword"
           label={t('translation:settingsHub.drawer.password.confirm')}
           value={confirm}
           type="password"

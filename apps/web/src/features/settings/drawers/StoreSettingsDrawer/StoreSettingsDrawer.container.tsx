@@ -15,6 +15,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   onClose,
   availableStores,
   storeConfigs,
+  selectedScope,
+  onSelectScope,
+  onManageBlacklist,
 }) => {
   const { t } = useTranslation(['translation']);
   const { showMessage, closeMessage } = useUI();
@@ -22,32 +25,40 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [saveSettings, { isLoading: isSaving }] = useSaveStoreSettingsMutation();
   useLoading(isSaving);
 
-  const [selectedScope, setSelectedScope] = useState<string>(GLOBAL_SCOPE);
-  const initial = resolveScopeConfig(storeConfigs, selectedScope);
-  const [country, setCountry] = useState(initial?.country ?? '');
-  const [stateField, setStateField] = useState(initial?.state ?? '');
-  const [zipCode, setZipCode] = useState(initial?.zipCode ?? '');
-  const [validateTitle, setValidateTitle] = useState(initial?.validateTitle ?? true);
-  const [validateDescription, setValidateDescription] = useState(initial?.validateDescription ?? false);
+  const config = resolveScopeConfig(storeConfigs, selectedScope);
 
-  // Reload fields from the chosen scope's config when the user switches scope.
-  const handleSelectScope = (value: string): void => {
-    setSelectedScope(value);
-    const next = resolveScopeConfig(storeConfigs, value);
-    setCountry(next?.country ?? '');
-    setStateField(next?.state ?? '');
-    setZipCode(next?.zipCode ?? '');
-    setValidateTitle(next?.validateTitle ?? true);
-    setValidateDescription(next?.validateDescription ?? false);
-  };
+  const [country, setCountry] = useState(config?.country ?? '');
+  const [stateField, setStateField] = useState(config?.state ?? '');
+  const [zipCode, setZipCode] = useState(config?.zipCode ?? '');
+  const [validateTitle, setValidateTitle] = useState(config?.validateTitle ?? true);
+  const [validateDescription, setValidateDescription] = useState(config?.validateDescription ?? false);
+
+  // Reload fields when the drawer opens or the (hoisted) scope changes.
+  // React-recommended render-time state adjustment.
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+  const [prevScope, setPrevScope] = useState(selectedScope);
+  if (isOpen !== prevOpen || selectedScope !== prevScope) {
+    setPrevOpen(isOpen);
+    setPrevScope(selectedScope);
+    if (isOpen) {
+      const next = resolveScopeConfig(storeConfigs, selectedScope);
+      setCountry(next?.country ?? '');
+      setStateField(next?.state ?? '');
+      setZipCode(next?.zipCode ?? '');
+      setValidateTitle(next?.validateTitle ?? true);
+      setValidateDescription(next?.validateDescription ?? false);
+    }
+  }
 
   const scopeOptions = buildScopeOptions(availableStores, t('translation:settingsHub.drawer.storeSettings.global'));
-  const config = resolveScopeConfig(storeConfigs, selectedScope);
-  const isSaveDisabled =
+  const isContinueDisabled =
     isSaving || country.trim().length === 0 || stateField.trim().length === 0 || zipCode.trim().length === 0;
 
-  const handleSave = (): void => {
-    if (isSaveDisabled) {
+  // "Continue" commits step 1 (location + validation) for the selected scope,
+  // then advances to the blacklist step. Saving here is what carries the user's
+  // location edits forward — the next step reads fresh config from the cache.
+  const handleContinue = (): void => {
+    if (isContinueDisabled) {
       return;
     }
     // Preserve the selected scope's existing blacklist (this drawer doesn't manage it).
@@ -68,16 +79,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
     void saveSettings(payload)
       .unwrap()
       .then(() => {
-        showMessage(
-          {
-            type: 'success',
-            headerKey: 'translation:message.success.header',
-            descriptionKey: 'translation:common.saveSuccess',
-            primaryButton: { labelKey: 'translation:message.success.ok', onClick: closeMessage },
-          },
-          t,
-        );
-        onClose();
+        onManageBlacklist();
       })
       .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         showMessage(
@@ -99,7 +101,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onClose={onClose}
       scopeOptions={scopeOptions}
       selectedScope={selectedScope}
-      onSelectScope={handleSelectScope}
+      onSelectScope={onSelectScope}
       country={country}
       state={stateField}
       zipCode={zipCode}
@@ -110,9 +112,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onZipCodeChange={(e) => setZipCode(e.target.value)}
       onToggleValidateTitle={setValidateTitle}
       onToggleValidateDescription={setValidateDescription}
-      onSave={handleSave}
+      onContinue={handleContinue}
       isSaving={isSaving}
-      isSaveDisabled={isSaveDisabled}
+      isContinueDisabled={isContinueDisabled}
     />
   );
 };

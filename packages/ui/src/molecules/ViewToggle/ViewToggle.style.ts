@@ -15,7 +15,7 @@ export const ViewToggleGroup = styled.div`
 
 export const ToggleButton = styled.button<{ $active?: boolean }>`
   padding: ${tkn('spacing.xs+')};
-  border-radius: 0.375rem;
+  border-radius: ${tkn('radius.sm')};
   border: none;
   background: ${({ $active, theme }: { $active?: boolean; theme: AppTheme }) =>
     $active ? theme.colors.brand.secondary : 'transparent'};
@@ -40,6 +40,6 @@ export const ViewLabel = styled.span`
 
   strong {
     color: ${tkn('colors.text.primary')};
-    font-weight: 600;
+    font-weight: ${tkn('typography.fontWeight.semibold')};
   }
 `;

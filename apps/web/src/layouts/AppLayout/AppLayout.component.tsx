@@ -1,12 +1,4 @@
-import {
-  Breadcrumb,
-  ConfirmModal,
-  Dropdown,
-  Icon,
-  Logo,
-  MeshBackground,
-  Text,
-} from '@repo/ui';
+import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -61,12 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             {sidebarCollapsed ? <Logo size={32} /> : <Logo layout="stacked" />}
           </S.LogoArea>
 
-          <S.NavSection>
-            {/* INVENTORY section */}
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              {t('translation:menu.inventory')}
-            </S.NavLabelWrapper>
-
+          <S.NavSection $isCollapsed={sidebarCollapsed}>
             <S.NavItem
               $active={pathWithoutLocale === '/dashboard'}
               $isCollapsed={sidebarCollapsed}
@@ -138,25 +125,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </S.NavItem>
 
             <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={pathWithoutLocale === '/stores'}
-              onClick={() => onLocaleNavigate('/stores')}
-              title={sidebarCollapsed ? t('translation:menu.stores') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="storefront" size={18} />
-                {!sidebarCollapsed && t('translation:menu.stores')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavDivider />
-
-            {/* CONFIGURATION section */}
-            <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
-              {t('translation:menu.configuration')}
-            </S.NavLabelWrapper>
-
-            <S.NavItem
               $active={pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile'}
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/settings')}
@@ -167,25 +135,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 {!sidebarCollapsed && t('translation:menu.settings')}
               </S.NavItemContent>
             </S.NavItem>
+
+            <S.NavItem
+              $active={pathWithoutLocale === '/stores'}
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => onLocaleNavigate('/stores')}
+              title={sidebarCollapsed ? t('translation:menu.stores') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="storefront" size={18} />
+                {!sidebarCollapsed && t('translation:menu.stores')}
+              </S.NavItemContent>
+            </S.NavItem>
           </S.NavSection>
 
           <S.SidebarFooter>
-            <S.ProfileSwitcher $isCollapsed={sidebarCollapsed}>
-              <S.ProfileBadge>
-                {user?.firstName?.charAt(0) || 'D'}
-                {user?.lastName?.charAt(0) || 'U'}
-              </S.ProfileBadge>
-              {!sidebarCollapsed && (
-                <S.ProfileDetails>
-                  <Text variant="caption" weight="bold" color="text.inverse">
-                    {userName}
-                  </Text>
-                  <Text variant="caption" color="sidebar.textMuted">
-                    {user?.email || ''}
-                  </Text>
-                </S.ProfileDetails>
-              )}
-            </S.ProfileSwitcher>
             <S.LogoutButton
               $isCollapsed={sidebarCollapsed}
               onClick={onOpenLogoutConfirm}
@@ -254,6 +218,52 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 />
 
                 <S.VerticalDivider />
+
+                <Dropdown
+                  align="right"
+                  width="12rem"
+                  header={
+                    <S.ProfileDropdownHeader>
+                      <Text variant="body-sm" weight="semibold" color="text.primary">
+                        {userName}
+                      </Text>
+                      <Text variant="caption" color="text.tertiary">
+                        {user?.email || ''}
+                      </Text>
+                    </S.ProfileDropdownHeader>
+                  }
+                  trigger={
+                    <S.HeaderProfileArea title={user?.email || ''}>
+                      <S.HeaderProfileBadge>
+                        {user?.firstName?.charAt(0) || 'D'}
+                        {user?.lastName?.charAt(0) || 'U'}
+                      </S.HeaderProfileBadge>
+                      <S.HeaderProfileInfo>
+                        <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
+                          {userName}
+                        </Text>
+                      </S.HeaderProfileInfo>
+                    </S.HeaderProfileArea>
+                  }
+                  items={[
+                    {
+                      label: t('translation:menu.dashboard'),
+                      icon: 'dashboard',
+                      onClick: () => onLocaleNavigate('/dashboard'),
+                    },
+                    {
+                      label: t('translation:menu.settings'),
+                      icon: 'settings',
+                      onClick: () => onLocaleNavigate('/settings'),
+                    },
+                    {
+                      label: t('translation:menu.logout'),
+                      icon: 'log-out',
+                      variant: 'danger',
+                      onClick: onOpenLogoutConfirm,
+                    },
+                  ]}
+                />
               </S.HeaderRight>
             </S.HeaderInner>
           </S.HeaderContainer>

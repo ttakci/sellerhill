@@ -1,30 +1,60 @@
 import styled from '@emotion/styled';
-import { IconButton as IconButtonAtom, StatusBadge as StatusBadgeMolecule, tkn } from '@repo/ui';
+import { IconButton as IconButtonAtom, tkn } from '@repo/ui';
 
-export const CardWrapper = styled.div`
+export const CardWrapper = styled.div<{ $selectable?: boolean }>`
   width: 100%;
+  cursor: ${({ $selectable }) => ($selectable ? 'pointer' : 'default')};
 `;
 
 export const CardContent = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: ${tkn('spacing.sm-md')}; /* 12px */
   min-height: 2.5rem; /* 40px */
+`;
+
+export const CheckboxSection = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 `;
 
 export const KeywordSection = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
-  flex: 1;
   min-width: 0;
-  flex-wrap: wrap;
+  flex: 0 0 50%;
+  overflow: hidden;
+
+  > span,
+  > p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;
 
-export const ScopeBadge = styled(StatusBadgeMolecule)`
+export const ScopeSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 45%;
+  min-width: 0;
+`;
+
+export const ScopeTag = styled.div<{ $status: string }>`
+  display: inline-flex;
+  align-items: center;
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.sm')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  background: ${tkn('colors.background.tertiary')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.text.secondary')};
   text-transform: uppercase;
-  letter-spacing: 0.025em; /* no exact token (between wider=0.02em and widest=0.05em) */
+  letter-spacing: ${tkn('typography.letterSpacing.wider')};
+  white-space: nowrap;
 `;
 
 export const ActionButton = styled(IconButtonAtom)`

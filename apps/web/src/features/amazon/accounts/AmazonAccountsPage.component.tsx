@@ -37,7 +37,7 @@ export const AmazonAccountsPageComponent = ({
       <PageHeader
         title={t('amazon.accounts.title')}
         subtitle={t('amazon.accounts.subtitle')}
-        action={
+        actions={
           <Button variant="primary" onClick={onOpenAddModal}>
             <Text>{t('amazon.accounts.addButton')}</Text>
           </Button>
@@ -69,23 +69,23 @@ export const AmazonAccountsPageComponent = ({
               </S.CardMeta>
               <S.CardActions>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="text"
+                  size="small"
                   onClick={() => onVerify(account.id)}
                   isLoading={isVerifying === account.id}
                 >
                   <Text>{t('amazon.accounts.verifyButton')}</Text>
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="text"
+                  size="small"
                   onClick={() => {}}
                 >
                   <Text>{t('amazon.accounts.editButton')}</Text>
                 </Button>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="text"
+                  size="small"
                   onClick={() => onDelete(account.id)}
                 >
                   <Text>{t('amazon.accounts.deleteButton')}</Text>
@@ -134,6 +134,7 @@ const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, for
       <form onSubmit={(e) => { e.preventDefault(); onSubmitForm(); }}>
         <S.FormFields>
           <ModernTextInput
+          name="label"
             label={t('amazon.accounts.labelField')}
             placeholder={t('amazon.accounts.labelPlaceholder')}
             value={formValues.label}
@@ -141,6 +142,7 @@ const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, for
           />
           {!isEditing && (
             <ModernTextInput
+            name="email"
               label={t('amazon.accounts.emailField')}
               placeholder={t('amazon.accounts.emailPlaceholder')}
               type="email"
@@ -150,6 +152,7 @@ const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, for
             />
           )}
           <ModernTextInput
+          name="password"
             label={isEditing ? t('amazon.accounts.passwordField') : t('amazon.accounts.passwordField')}
             placeholder={t('amazon.accounts.passwordPlaceholder')}
             type="password"
@@ -158,6 +161,7 @@ const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, for
             required={!isEditing}
           />
           <ModernTextInput
+          name="twoFactorSecret"
             label={t('amazon.accounts.twoFactorField')}
             placeholder={t('amazon.accounts.twoFactorPlaceholder')}
             value={formValues.twoFactorSecret}
@@ -167,7 +171,7 @@ const AccountFormModal = ({ isOpen, onClose, isSaving, defaultValues, title, for
             {t('amazon.accounts.twoFactorInfo')}
           </S.InfoText>
           <S.FormActions>
-            <Button variant="ghost" onClick={onClose} type="button">
+            <Button variant="text" onClick={onClose} type="button">
               <Text>{t('translation:common.cancel')}</Text>
             </Button>
             <Button variant="primary" type="submit" isLoading={isSaving}>

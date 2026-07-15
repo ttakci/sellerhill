@@ -4,11 +4,12 @@ import { tkn } from '../../theme/tkn';
 
 export const StyledTextarea = styled.textarea<{ $fullWidth?: boolean; $hasError?: boolean }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
+  box-sizing: border-box;
   padding: ${tkn('spacing.sm-md+')} 1.125rem;
   background-color: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid
     ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
-  border-radius: 0.5rem; /* 8px — matches Button */
+  border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-family: ${tkn('typography.fontFamily.sans')};

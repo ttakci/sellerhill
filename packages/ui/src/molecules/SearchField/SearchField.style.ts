@@ -17,6 +17,7 @@ export const SearchContainer = styled.div<SearchContainerProps>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   height: ${({ $size }) => ($size === 'large' ? '3rem' : '2.5rem')};
   padding: 0 ${tkn('spacing.md')};
+  box-sizing: border-box;
   background-color: ${({ $variant }) =>
     $variant === 'gray' ? tkn('colors.background.tertiary') : tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};

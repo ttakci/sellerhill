@@ -16,78 +16,78 @@ const variantStyles = {
   /* ── Headings: Inter Bold ── */
   display: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 2.5rem;
-    line-height: 3rem;
+    font-size: ${theme.typography.fontSize['3xl']};
+    line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h1: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 1.5rem;
-    line-height: 2rem;
+    font-size: ${theme.typography.fontSize.xxl};
+    line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h2: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 1.25rem;
-    line-height: 1.75rem;
+    font-size: ${theme.typography.fontSize.xl};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h3: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 1.125rem;
-    line-height: 1.5rem;
+    font-size: ${theme.typography.fontSize.lg};
+    line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h4: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 1rem;
-    line-height: 1.5rem;
+    font-size: ${theme.typography.fontSize.md};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h5: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.semibold};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   /* ── Body: Lexend Regular ── */
   body: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.normal};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   'body-sm': (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: ${theme.typography.fontSize.sm};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.normal};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   'body-xs': (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: 0.75rem;
-    line-height: 1rem;
+    font-size: ${theme.typography.fontSize.xs};
+    line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.normal};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   caption: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: 0.75rem;
-    line-height: 1rem;
+    font-size: ${theme.typography.fontSize.xs};
+    line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.normal};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   overline: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: 0.75rem;
+    font-size: ${theme.typography.fontSize.xs};
     text-transform: uppercase;
     letter-spacing: ${theme.typography.letterSpacing.widest};
     font-weight: ${theme.typography.fontWeight.semibold};
@@ -99,9 +99,9 @@ const variantStyles = {
   `,
   nav: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: 0.875rem;
+    font-size: ${theme.typography.fontSize.sm};
     font-weight: ${theme.typography.fontWeight.medium};
-    letter-spacing: 0;
+    letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
 };
 

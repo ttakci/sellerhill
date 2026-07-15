@@ -226,14 +226,18 @@ EBAY_RUNAME=
 ### 5.3 Diğer entegrasyonlar
 
 ```env
-# Keepa
+# Keepa — sole product data provider (metadata + price + stock)
 KEEPA_API_KEY=
+# Stale-driven refresh pipeline (all optional — defaults shown)
+KEEPA_REFRESH_INTERVAL_MINUTES=720
+KEEPA_REFRESH_BATCH_SIZE=50
+KEEPA_REFRESH_SCHEDULER_CRON=* * * * *
+KEEPA_REFRESH_WORKER_CONCURRENCY=1
+KEEPA_REFRESH_QUARANTINE_MINUTES=1440
+KEEPA_REFRESH_MAX_FAILURES=5
 
 # Amazon (32 byte hex — AES-256-GCM)
 AMAZON_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-
-# Scraper
-SCRAPER_API_KEY=
 
 # Email (SMTP)
 SMTP_USER=

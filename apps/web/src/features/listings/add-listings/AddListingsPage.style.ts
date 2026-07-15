@@ -121,7 +121,7 @@ export const AsinCounter = styled.div`
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   padding: ${tkn('spacing.xs+')} ${tkn('spacing.sm-md')}; /* 6px 12px */
-  border-radius: 9999px;
+  border-radius: ${tkn('radius.sm')};
 `;
 
 export const AsinInputWrapper = styled.div`

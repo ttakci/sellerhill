@@ -1,14 +1,19 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { ListingStatus, type ListingQueueJobData, type ProductData } from '@repo/shared';
+import {
+  KeepaUsageSource,
+  ListingStatus,
+  type ListingQueueJobData,
+  type ProductData,
+} from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { EbayService } from '../ebay/ebay.service';
 
+import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
-import { ScraperApiService } from './scraper-api.service';
 
 @Processor('listings')
 export class ListingProcessorService extends WorkerHost {
@@ -16,8 +21,8 @@ export class ListingProcessorService extends WorkerHost {
 
   constructor(
     private readonly listingsService: ListingsService,
-    private readonly scraperApiService: ScraperApiService,
     private readonly keepaService: KeepaService,
+    private readonly keepaUsageService: KeepaUsageService,
     private readonly ebayService: EbayService,
     private readonly listingStrategyService: ListingStrategyService
   ) {
@@ -55,77 +60,44 @@ export class ListingProcessorService extends WorkerHost {
         existingProduct.data.title !== 'Unknown Product' &&
         existingProduct.data.imageUrls?.length > 0
       ) {
-        this.logger.log(`Using cached product data for ASIN ${asin}`);
+        // Cached product: reuse as-is. No Keepa call (0 tokens) — the product is
+        // already on the stale-driven refresh schedule and will be freshened
+        // within its refresh interval. Re-listing must never block on Keepa.
+        this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
         productId = existingProduct.id;
         productData = existingProduct.data;
-
-        // Refresh price and stock from Keepa
-        try {
-          this.logger.log(`Refreshing price and stock from Keepa for cached product ${asin}`);
-          const keepaData = await this.keepaService.getProduct(asin);
-
-          if (!keepaData) {
-            throw new Error(`Failed to fetch current price/stock from Keepa for ASIN ${asin}`);
-          }
-
-          this.logger.log(`Keepa data received: price=${keepaData.price} USD, stock=${keepaData.stock}`);
-          productData.price = {
-            current: keepaData.price,
-            currency: 'USD',
-          };
-          productData.stock = keepaData.stock;
-          productData.rawKeepaData = keepaData.raw as Record<string, unknown>;
-        } catch (keepaError: unknown) {
-          throw new Error(
-            `Listing failed: Keepa data unavailable - ${
-              keepaError instanceof Error ? keepaError.message : String(keepaError)
-            }`
-          );
-        }
       } else {
-        // 2. Fetch product details from ScraperAPI if not in DB OR cached data is broken
+        // New (or incomplete) product: one Keepa fetch yields metadata + price +
+        // stock in a single token. Keepa is the sole provider (ScraperAPI removed).
         this.logger.log(
-          `${
-            existingProduct ? 'Cached data is incomplete. ' : ''
-          }Scraping product metadata for ASIN ${asin} from ScraperAPI`
+          `${existingProduct ? 'Cached data is incomplete. ' : ''}Fetching product data for ASIN ${asin} from Keepa`
         );
-        productData = await this.scraperApiService.getProductDetails(asin);
-        if (!productData) {
-          throw new Error(`Failed to fetch product details for ${asin} from ScraperAPI`);
-        }
+        const { product: keepaProduct, meta } = await this.keepaService.getProductDetailsWithMeta(asin);
 
-        if (!productData.title || productData.title === 'Unknown Product') {
+        if (!keepaProduct) {
           throw new Error(
-            `ScraperAPI could not find a valid title for ASIN ${asin}. Amazon might be blocking the request or ASIN is invalid.`
+            `Keepa returned no product for ASIN ${asin}. The ASIN may be invalid or Amazon is blocking the request.`
           );
         }
 
-        // 2.5. Fetch real-time price and stock from Keepa
-        try {
-          this.logger.log(`Fetching current price and stock from Keepa for ASIN ${asin}`);
-          const keepaData = await this.keepaService.getProduct(asin);
-
-          if (!keepaData) {
-            throw new Error(`Failed to fetch price/stock from Keepa for ASIN ${asin}`);
-          }
-
-          // Override ScraperAPI price/stock with Keepa's real-time data
-          this.logger.log(`Keepa data received: price=${keepaData.price} USD, stock=${keepaData.stock}`);
-          productData.price = {
-            current: keepaData.price,
-            currency: 'USD',
-          };
-          productData.stock = keepaData.stock;
-          productData.rawKeepaData = keepaData.raw as Record<string, unknown>;
-        } catch (keepaError: unknown) {
-          throw new Error(
-            `Listing failed: Keepa data unavailable - ${
-              keepaError instanceof Error ? keepaError.message : String(keepaError)
-            }`
-          );
+        if (!keepaProduct.title || keepaProduct.title === 'Unknown Product') {
+          throw new Error(`Keepa could not resolve a valid title for ASIN ${asin}.`);
         }
 
-        // 3. Cache/Find product in database
+        keepaProduct.rawKeepaData = keepaProduct.raw;
+        productData = keepaProduct;
+
+        this.logger.log(`Keepa data received: price=${keepaProduct.price.current} USD, stock=${keepaProduct.stock ?? 0}`);
+
+        // Attribute this create-path token spend to the creating user.
+        await this.keepaUsageService.logUsage({
+          asin,
+          tokens: meta.tokensConsumed,
+          source: KeepaUsageSource.CREATE,
+          userIds: [userId],
+        });
+
+        // 2. Cache/Find product in database (sets next_refresh_at for new rows)
         productId = await this.listingsService.findOrCreateProduct(asin, productData);
       }
 

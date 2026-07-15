@@ -7,7 +7,7 @@ import { SettingsCardVariant } from './SettingsCard.types';
 export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.sm')};
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
   display: flex;
@@ -17,8 +17,12 @@ export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
 `;
 
 export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
-  padding: ${tkn('spacing.md')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  padding: ${({ $variant, theme }) =>
+    $variant === 'section'
+      ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.lg')({ theme })}`
+      : tkn('spacing.md')({ theme })};
+  border-bottom: ${({ $variant, theme }) =>
+    $variant === 'section' ? 'none' : `0.0625rem solid ${tkn('colors.border.primary')({ theme })}`};
   display: flex;
   justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
   align-items: center;
@@ -29,9 +33,19 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
     /* < 1024px */
     flex-direction: ${({ $variant }) => ($variant === 'panel' ? 'column' : 'row')};
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
-    padding: ${tkn('spacing.md+')} ${tkn('spacing.md')};
-    gap: ${({ $variant, theme }) => ($variant === 'panel' ? tkn('spacing.md+')({ theme }) : tkn('spacing.md')({ theme }))};
+    padding: ${({ $variant, theme }) =>
+      $variant === 'section'
+        ? `${tkn('spacing.md+')({ theme })} ${tkn('spacing.lg')({ theme })}`
+        : `${tkn('spacing.md+')({ theme })} ${tkn('spacing.md')({ theme })}`};
+    gap: ${({ $variant, theme }) =>
+      $variant === 'panel' ? tkn('spacing.md+')({ theme }) : tkn('spacing.md')({ theme })};
   }
+`;
+
+export const HeaderDivider = styled.div<{ $variant: SettingsCardVariant }>`
+  height: 0.0625rem; /* 1px */
+  background: ${tkn('colors.border.primary')};
+  margin: 0 ${tkn('spacing.lg')};
 `;
 
 export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
@@ -103,11 +117,11 @@ export const TitleContent = styled.div`
 `;
 
 export const Title = styled.div`
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: ${tkn('typography.fontSize.lg')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
-  line-height: 1.4;
+  line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
 export const HeaderRight = styled.div<{ $variant: SettingsCardVariant }>`
@@ -126,8 +140,11 @@ export const HeaderRight = styled.div<{ $variant: SettingsCardVariant }>`
   }
 `;
 
-export const CardBody = styled.div`
-  padding: ${tkn('spacing.lg')};
+export const CardBody = styled.div<{ $variant: SettingsCardVariant; $hasHeader: boolean }>`
+  padding: ${({ $variant, $hasHeader, theme }) =>
+    $variant === 'section' && $hasHeader
+      ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.lg')({ theme })} ${tkn('spacing.lg')({ theme })}`
+      : tkn('spacing.lg')({ theme })};
   flex: 1;
   display: flex;
   flex-direction: column;

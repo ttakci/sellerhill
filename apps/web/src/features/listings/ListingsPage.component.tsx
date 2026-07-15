@@ -1,16 +1,31 @@
 import type { ListingDto } from '@repo/shared';
-import { Button, DataTable, Icon, IdBadge, PageHeader, SearchField, Select, Text, TextInput } from '@repo/ui';
+import {
+  Button,
+  DataTable,
+  Icon,
+  IdBadge,
+  PageHeader,
+  QuickActionCard,
+  SearchField,
+  Select,
+  SettingsActionRow,
+  SettingsCard,
+  Text,
+  TextInput,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ListingCarousel } from './ListingCarousel';
 import * as S from './ListingsPage.style';
 import { ListingsPageProps } from './ListingsPage.types';
 
 export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
   listings,
-  isLoading,
-  onRefresh,
   onAddListing,
+  onViewAll,
+  onViewJobs,
+  viewMode,
   onSelectionChange,
   columns,
   selectedRows,
@@ -107,124 +122,165 @@ export const ListingsPageComponent: React.FC<ListingsPageProps> = ({
         title={t('listings.overview.title')}
         subtitle={t('listings.overview.subtitle', { count: resultCount })}
         actions={
-          <>
-            <Button variant="secondary" onClick={onRefresh} disabled={isLoading}>
-              <Text>{t('translation:common.actions.refresh')}</Text>
-            </Button>
+          viewMode === 'full' ? (
             <Button variant="primary" onClick={onAddListing}>
-              <Text>{t('listings.actions.addListing')}</Text>
+              <Text>{t('listings.actions.addNewList')}</Text>
             </Button>
-          </>
+          ) : undefined
         }
       />
 
-      <S.FilterBarWrapper>
-        <S.FilterBar>
-          <S.FilterBarRow>
-            <S.SearchWrapper>
-              <SearchField
-                value={filters.search}
-                onChange={onSearchChange}
-                placeholder={t('listings.filters.searchPlaceholder')}
-                size="medium"
+      {viewMode === 'slider' && (
+        <S.TwoColumnLayout>
+          <S.SliderColumn>
+            <S.SliderContent>
+              <ListingCarousel
+                listings={listings}
+                onViewAll={onViewAll}
+                viewAllLabel={t('listings.actions.viewAll')}
+                showViewAll={listings.length > 3}
               />
-            </S.SearchWrapper>
-            <S.SelectWrapper>
-              <Select
-                value={filters.category}
-                onChange={onCategoryChange}
-                options={categoryOptions}
-                placeholder={t('listings.filters.allCategories')}
-                size="small"
-                fullWidth
+            </S.SliderContent>
+          </S.SliderColumn>
+
+          <S.AddColumn>
+            <S.AddCardStack>
+              <QuickActionCard
+                variant="brand"
+                title={t('listings.addSection.title')}
+                subtitle={t('listings.addSection.subtitle')}
+                onClick={onAddListing}
               />
-            </S.SelectWrapper>
-            <S.SelectWrapper>
-              <Select
-                value={filters.status}
-                onChange={onStatusChange}
-                options={statusOptions}
-                placeholder={t('listings.filters.allStatuses')}
-                size="small"
-                fullWidth
-              />
-            </S.SelectWrapper>
-            <S.FilterActions>
-              <S.ResultCount variant="body-sm" color="text.tertiary">
-                {t('listings.filters.resultCount', { count: resultCount })}
-              </S.ResultCount>
-              {hasActiveFilters && (
-                <Button variant="text" size="small" onClick={onClearFilters}>
-                  <Text>{t('listings.filters.clearAll')}</Text>
-                </Button>
+              <SettingsCard
+                variant="section"
+                className="other-actions-card"
+                header={{
+                  title: t('listings.otherActions.title'),
+                }}
+              >
+                <SettingsActionRow
+                  label={t('listings.otherActions.jobsTitle')}
+                  subtitle={t('listings.otherActions.jobsSubtitle')}
+                  onClick={onViewJobs}
+                />
+              </SettingsCard>
+            </S.AddCardStack>
+          </S.AddColumn>
+        </S.TwoColumnLayout>
+      )}
+
+      {/* Full view (filters + table) — reachable via "View All" from the slider overview */}
+      {viewMode === 'full' && (
+        <>
+          <S.FilterBarWrapper>
+            <S.FilterBar>
+              <S.FilterBarRow>
+                <S.SearchWrapper>
+                  <SearchField
+                    value={filters.search}
+                    onChange={onSearchChange}
+                    placeholder={t('listings.filters.searchPlaceholder')}
+                    size="medium"
+                  />
+                </S.SearchWrapper>
+                <S.SelectWrapper>
+                  <Select
+                    value={filters.category}
+                    onChange={onCategoryChange}
+                    options={categoryOptions}
+                    placeholder={t('listings.filters.allCategories')}
+                    size="small"
+                    fullWidth
+                  />
+                </S.SelectWrapper>
+                <S.SelectWrapper>
+                  <Select
+                    value={filters.status}
+                    onChange={onStatusChange}
+                    options={statusOptions}
+                    placeholder={t('listings.filters.allStatuses')}
+                    size="small"
+                    fullWidth
+                  />
+                </S.SelectWrapper>
+                <S.FilterActions>
+                  <S.ResultCount variant="body-sm" color="text.tertiary">
+                    {t('listings.filters.resultCount', { count: resultCount })}
+                  </S.ResultCount>
+                  {hasActiveFilters && (
+                    <Button variant="text" size="small" onClick={onClearFilters}>
+                      <Text>{t('listings.filters.clearAll')}</Text>
+                    </Button>
+                  )}
+                </S.FilterActions>
+              </S.FilterBarRow>
+
+              <S.AdvancedDivider />
+              <S.AdvancedHeader $isOpen={advancedOpen} onClick={onToggleAdvanced}>
+                <Icon name="sliders-horizontal" size={16} />
+                {t('listings.filters.advancedFilters')}
+                <Icon name="chevron-down" size={16} />
+              </S.AdvancedHeader>
+
+              {advancedOpen && (
+                <S.NumericFilterGrid>
+                  {numericFilters.map((field) => (
+                    <S.NumericFilterField key={field.key}>
+                      <S.NumericFilterLabel variant="caption" weight="medium" color="text.secondary">
+                        {field.label}
+                      </S.NumericFilterLabel>
+                      <S.NumericRangeRow>
+                        <TextInput
+                          name={`${field.key}-min`}
+                          value={field.min}
+                          onChange={field.onMinChange}
+                          placeholder={t('listings.filters.min')}
+                          type="number"
+                          size="small"
+                          fullWidth
+                        />
+                        <S.RangeSeparator variant="body-sm" color="text.tertiary">
+                          -
+                        </S.RangeSeparator>
+                        <TextInput
+                          name={`${field.key}-max`}
+                          value={field.max}
+                          onChange={field.onMaxChange}
+                          placeholder={t('listings.filters.max')}
+                          type="number"
+                          size="small"
+                          fullWidth
+                        />
+                      </S.NumericRangeRow>
+                    </S.NumericFilterField>
+                  ))}
+                </S.NumericFilterGrid>
               )}
-            </S.FilterActions>
-          </S.FilterBarRow>
+            </S.FilterBar>
+          </S.FilterBarWrapper>
 
-          <S.AdvancedDivider />
-          <S.AdvancedHeader $isOpen={advancedOpen} onClick={onToggleAdvanced}>
-            <Icon name="sliders-horizontal" size={16} />
-            {t('listings.filters.advancedFilters')}
-            <Icon name="chevron-down" size={16} />
-          </S.AdvancedHeader>
-
-          {advancedOpen && (
-            <S.NumericFilterGrid>
-              {numericFilters.map((field) => (
-                <S.NumericFilterField key={field.key}>
-                  <S.NumericFilterLabel variant="caption" weight="medium" color="text.secondary">
-                    {field.label}
-                  </S.NumericFilterLabel>
-                  <S.NumericRangeRow>
-                    <TextInput
-                      name={`${field.key}-min`}
-                      value={field.min}
-                      onChange={field.onMinChange}
-                      placeholder={t('listings.filters.min')}
-                      type="number"
-                      size="small"
-                      fullWidth
-                    />
-                    <S.RangeSeparator variant="body-sm" color="text.tertiary">
-                      -
-                    </S.RangeSeparator>
-                    <TextInput
-                      name={`${field.key}-max`}
-                      value={field.max}
-                      onChange={field.onMaxChange}
-                      placeholder={t('listings.filters.max')}
-                      type="number"
-                      size="small"
-                      fullWidth
-                    />
-                  </S.NumericRangeRow>
-                </S.NumericFilterField>
-              ))}
-            </S.NumericFilterGrid>
-          )}
-        </S.FilterBar>
-      </S.FilterBarWrapper>
-
-      <DataTable
-        columns={columns}
-        data={listings}
-        renderGridCard={renderGridCard}
-        selectable
-        selectedRows={selectedRows}
-        onSelectionChange={(rows) => onSelectionChange(rows.map((r) => r.id))}
-        emptyMessage={t('listings.overview.emptyTitle')}
-        bulkActions={bulkActions}
-        bulkActionsPlaceholder={t('listings.actions.bulkActions')}
-        columnOptions={columnOptions}
-        visibleColumnKeys={visibleColumnKeys}
-        onToggleColumn={onToggleColumn}
-        columnManagerLabel={t('translation:common.actions.filter')}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={onSort}
-        onDownload={onDownload}
-        pagination={pagination}
-      />
+          <DataTable
+            columns={columns}
+            data={listings}
+            renderGridCard={renderGridCard}
+            selectable
+            selectedRows={selectedRows}
+            onSelectionChange={(rows) => onSelectionChange(rows.map((r) => r.id))}
+            emptyMessage={t('listings.overview.emptyTitle')}
+            bulkActions={bulkActions}
+            bulkActionsPlaceholder={t('listings.actions.bulkActions')}
+            columnOptions={columnOptions}
+            visibleColumnKeys={visibleColumnKeys}
+            onToggleColumn={onToggleColumn}
+            columnManagerLabel={t('translation:common.actions.filter')}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onDownload={onDownload}
+            pagination={pagination}
+          />
+        </>
+      )}
     </S.Container>
   );
 };

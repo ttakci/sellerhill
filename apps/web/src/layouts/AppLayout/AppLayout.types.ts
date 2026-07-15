@@ -22,4 +22,6 @@ export interface AppLayoutProps {
   onCloseLogoutConfirm: () => void;
   onLocaleNavigate: (path: string) => void;
   i18nLanguage: string;
+  openSections: { inventory: boolean; configuration: boolean };
+  onToggleSection: (section: 'inventory' | 'configuration') => void;
 }

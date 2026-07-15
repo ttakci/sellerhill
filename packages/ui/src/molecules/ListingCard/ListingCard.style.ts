@@ -112,8 +112,8 @@ export const StatCell = styled.div`
 
 export const StatLabel = styled(Text)`
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
 export const StatValue = styled(Text)<{ $tone: StatTone }>`

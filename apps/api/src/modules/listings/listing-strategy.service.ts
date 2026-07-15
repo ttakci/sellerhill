@@ -1,5 +1,11 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { TemplateType, type FeeConfig, type ListingSettingsGroup, type ProductData, type StoreSettingsResponse } from '@repo/shared';
+import {
+  TemplateType,
+  type FeeConfig,
+  type ListingSettingsGroup,
+  type ProductData,
+  type StoreSettingsResponse,
+} from '@repo/shared';
 
 import { sanitizeHtml, sanitizeStringArray } from '../../common/utils/sanitize';
 import { ListingSettingsGroupService } from '../listing-settings-groups/listing-settings-group.service';
@@ -34,14 +40,12 @@ export class ListingStrategyService {
     const priceMetrics = this.calculatePrice(product.price.current, group);
 
     // Stock Logic: Subtract buffer from Amazon stock, cap at user's max listing quantity.
-    // e.g. defaultQuantity=3, buffer=5:
-    //   Amazon=25 → min(max(25-5,0),3)=3  |  Amazon=7 → min(max(7-5,0),3)=2
-    //   Amazon=6 → min(max(6-5,0),3)=1    |  Amazon=5 → min(max(5-5,0),3)=0 (out of stock)
+    // See calculateQuantity() for the canonical formula (shared by all stock-compute paths).
+    const amazonStock = product.stock ?? 0;
+    const quantity = this.calculateQuantity(amazonStock, group);
+
     const defaultQuantity = group.stock?.defaultQuantity || 1;
     const stockBuffer = group.stock?.stockBuffer ?? 0;
-    const amazonStock = product.stock ?? 0;
-    const quantity = Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity);
-
     this.logger.debug(
       `Stock calculation for ${product.asin || 'product'}: ` +
         `Amazon stock=${amazonStock}, Buffer=${stockBuffer}, ` +
@@ -76,7 +80,9 @@ export class ListingStrategyService {
 
     // 3. Blacklist Validation Logic (merged into scope checks)
     const validateBlacklist = (text: string, scope: 'title' | 'description') => {
-      if (!blacklist || blacklist.length === 0) {return;}
+      if (!blacklist || blacklist.length === 0) {
+        return;
+      }
 
       for (const item of blacklist) {
         const keyword = item.keyword.toLowerCase();
@@ -128,6 +134,22 @@ export class ListingStrategyService {
       .replace(/{{features}}/g, sanitizeStringArray(product.features || []).join('</li><li>'));
 
     return finalDescription;
+  }
+
+  /**
+   * Canonical eBay listing quantity from (shared) Amazon stock + a group's stock policy.
+   * quantity = min(max(amazonStock − buffer, 0), defaultQuantity)
+   * e.g. defaultQuantity=3, buffer=5:
+   *   Amazon=25 → min(max(25-5,0),3)=3  |  Amazon=7 → min(max(7-5,0),3)=2
+   *   Amazon=6 → min(max(6-5,0),3)=1    |  Amazon=5 → min(max(5-5,0),3)=0 (out of stock)
+   *
+   * Single source of truth — used by listing creation, the 12h Keepa sync, and the
+   * sale-driven stock-sync queue so every path computes quantity identically.
+   */
+  calculateQuantity(amazonStock: number, group: Pick<ListingSettingsGroup, 'stock'>): number {
+    const defaultQuantity = group.stock?.defaultQuantity || 1;
+    const stockBuffer = group.stock?.stockBuffer ?? 0;
+    return Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity);
   }
 
   /**

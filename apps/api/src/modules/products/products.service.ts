@@ -24,7 +24,7 @@ export class ProductsService {
        FROM products p
        INNER JOIN listings l ON l.product_id = p.id
        WHERE l.id = $1`,
-      [listingId],
+      [listingId]
     );
 
     if (results.length === 0) {
@@ -37,7 +37,7 @@ export class ProductsService {
   async getProductPriceAndImageByAsin(asin: string): Promise<ProductPriceAndImage | null> {
     const results = await this.databaseService.query<ProductPriceRow>(
       `SELECT price, image_urls FROM products WHERE asin = $1`,
-      [asin],
+      [asin]
     );
 
     if (results.length === 0) {
@@ -52,14 +52,35 @@ export class ProductsService {
     return result?.purchasePrice ?? null;
   }
 
-  private extractPriceAndImage(row: ProductPriceRow): ProductPriceAndImage {
-    const priceObj = typeof row.price === 'string'
-      ? (JSON.parse(row.price) as { current?: number })
-      : row.price;
+  /**
+   * Decrement a product's cached Amazon stock by a confirmed sale quantity.
+   * `products.stock` is an ASIN-level shared cache — our customers' eBay sales
+   * correspond to real Amazon purchases, so we deplete the shared stock between
+   * 12h Keepa syncs. The next Keepa sync resets it to ground truth. Floors at 0.
+   * Returns the new stock, or null if the product doesn't exist.
+   */
+  async decrementStock(productId: string, quantity: number): Promise<number | null> {
+    if (quantity <= 0) {
+      return null;
+    }
+    const result = await this.databaseService.query<{ stock: number }>(
+      `UPDATE products
+       SET stock = GREATEST(COALESCE(stock, 0) - $2, 0),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1
+       RETURNING stock`,
+      [productId, quantity]
+    );
+    if (result.length === 0) {
+      return null;
+    }
+    return Number(result[0].stock);
+  }
 
-    const imageUrls = Array.isArray(row.image_urls)
-      ? row.image_urls
-      : this.safeParseJsonArray(row.image_urls);
+  private extractPriceAndImage(row: ProductPriceRow): ProductPriceAndImage {
+    const priceObj = typeof row.price === 'string' ? (JSON.parse(row.price) as { current?: number }) : row.price;
+
+    const imageUrls = Array.isArray(row.image_urls) ? row.image_urls : this.safeParseJsonArray(row.image_urls);
 
     return {
       purchasePrice: priceObj?.current || 0,
@@ -68,7 +89,9 @@ export class ProductsService {
   }
 
   private safeParseJsonArray(value: string | string[] | null): string[] {
-    if (!value) {return [];}
+    if (!value) {
+      return [];
+    }
     try {
       const parsed: unknown = JSON.parse(String(value));
       if (Array.isArray(parsed)) {

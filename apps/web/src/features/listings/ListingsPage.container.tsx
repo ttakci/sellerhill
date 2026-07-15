@@ -3,6 +3,7 @@ import { Icon, IdBadge, Tooltip, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AddListingsDrawer } from './add-listings/drawer';
 import {
   useDeleteListingsMutation,
   useEndListingsMutation,
@@ -11,7 +12,7 @@ import {
 } from './api/listings.api';
 import { ListingsPageComponent } from './ListingsPage.component';
 import * as S from './ListingsPage.style';
-import type { ListingsFilterState } from './ListingsPage.types';
+import type { ListingsFilterState, ListingsViewMode } from './ListingsPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useLocale } from '@/utils/useLocale';
@@ -37,12 +38,15 @@ export const ListingsPageContainer: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
   const { showMessage } = useUI();
 
+  // View mode state (slider vs full)
+  const [viewMode, setViewMode] = useState<ListingsViewMode>('slider');
+
+  // Add drawer state
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // Refresh trigger state
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Selection state
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
@@ -75,10 +79,10 @@ export const ListingsPageContainer: React.FC = () => {
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Fetch listings and jobs
-  const { data: listings = [], isLoading: isListingsLoading } = useGetListingsQuery(refreshTrigger, {
+  const { data: listings = [], isLoading: isListingsLoading } = useGetListingsQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
-  const { data: jobs = [], isLoading: isJobsLoading } = useGetListingJobsQuery(refreshTrigger, {
+  const { data: jobs = [], isLoading: isJobsLoading } = useGetListingJobsQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -169,7 +173,6 @@ export const ListingsPageContainer: React.FC = () => {
       let aValue: any = a[sortColumn as keyof typeof a];
       let bValue: any = b[sortColumn as keyof typeof b];
 
-      // Handle nested values for specific columns
       if (sortColumn === 'product') {
         aValue = a.title?.toLowerCase() || '';
         bValue = b.title?.toLowerCase() || '';
@@ -199,12 +202,10 @@ export const ListingsPageContainer: React.FC = () => {
         bValue = b.viewCount || 0;
       }
 
-      // Handle string comparison
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       }
 
-      // Handle numeric comparison
       if (sortDirection === 'asc') {
         return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
       } else {
@@ -250,11 +251,19 @@ export const ListingsPageContainer: React.FC = () => {
   }, [isDeleteSuccess, deleteData, showMessage, t]);
 
   const handleAddListing = () => {
-    localeNavigate('/listings/add');
+    setIsAddDrawerOpen(true);
   };
 
-  const handleRefresh = () => {
-    setRefreshTrigger(Date.now());
+  const handleAddDrawerClose = () => {
+    setIsAddDrawerOpen(false);
+  };
+
+  const handleAddSuccess = () => {
+    localeNavigate('/listings/jobs');
+  };
+
+  const handleViewAll = () => {
+    setViewMode('full');
   };
 
   const handleEndListings = useCallback(
@@ -272,7 +281,6 @@ export const ListingsPageContainer: React.FC = () => {
   );
 
   const handleDownload = () => {
-    // Define all data columns for export (regardless of visibility)
     const options = [
       { key: 'title', label: t('listings.table.product') },
       { key: 'asin', label: t('listings.table.asin') },
@@ -335,7 +343,6 @@ export const ListingsPageContainer: React.FC = () => {
     setVisibleColumnKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
 
-  // All available columns
   const allColumns = useMemo(
     () => [
       {
@@ -491,7 +498,9 @@ export const ListingsPageContainer: React.FC = () => {
         render: (status: unknown) => {
           const statusStr = String(status);
           return (
-            <S.StatusBadge $status={statusStr as ListingStatus}>{t(`listings.status.${statusStr.toLowerCase()}`)}</S.StatusBadge>
+            <S.StatusBadge $status={statusStr as ListingStatus}>
+              {t(`listings.status.${statusStr.toLowerCase()}`)}
+            </S.StatusBadge>
           );
         },
       },
@@ -504,7 +513,6 @@ export const ListingsPageContainer: React.FC = () => {
     [allColumns, visibleColumnKeys]
   );
 
-  // Selected rows computation
   const selectedRows = useMemo(
     () => paginatedListings.filter((l) => selectedListingIds.includes(l.id)),
     [paginatedListings, selectedListingIds]
@@ -577,8 +585,6 @@ export const ListingsPageContainer: React.FC = () => {
     ],
     [t, handleEndSelected, handleDeleteSelected]
   );
-
-  // --- Filter handlers ---
 
   const categoryOptions = useMemo(() => {
     const cats = [...new Set(listings.map((l) => l.category).filter(Boolean))] as string[];
@@ -677,49 +683,54 @@ export const ListingsPageContainer: React.FC = () => {
   return (
     <EbayAccountGuard>
       <ListingsPageComponent
-      listings={paginatedListings}
-      isLoading={isListingsLoading}
-      jobs={jobs}
-      isJobsLoading={isJobsLoading}
-      onRefresh={handleRefresh}
-      onAddListing={handleAddListing}
-      onEndListings={handleEndListings}
-      onSelectionChange={setSelectedListingIds}
-      columns={filteredColumns}
-      selectedRows={selectedRows}
-      bulkActions={bulkActions}
-      onDownload={handleDownload}
-      columnOptions={columnOptions}
-      visibleColumnKeys={visibleColumnKeys}
-      onToggleColumn={toggleColumn}
-      sortColumn={sortColumn}
-      sortDirection={sortDirection}
-      onSort={handleSort}
-      pagination={{
-        count: filteredListings.length,
-        page,
-        rowsPerPage,
-        onPageChange: setPage,
-        onRowsPerPageChange: (val) => {
-          setRowsPerPage(val);
-          setPage(1);
-        },
-        labelRowsPerPage: t('translation:common.rowsPerPage'),
-        labelInfo: t('translation:common.showing_info'),
-      }}
-      filters={filters}
-      onSearchChange={handleSearchChange}
-      onCategoryChange={handleCategoryChange}
-      categoryOptions={categoryOptions}
-      onStatusChange={handleStatusChange}
-      statusOptions={statusOptions}
-      numericFilters={numericFilters}
-      onClearFilters={handleClearFilters}
-      hasActiveFilters={hasActiveFilters}
-      resultCount={filteredListings.length}
-      advancedOpen={advancedOpen}
-      onToggleAdvanced={() => setAdvancedOpen((v) => !v)}
-    />
+        listings={paginatedListings}
+        allListings={filteredListings}
+        jobs={jobs}
+        isJobsLoading={isJobsLoading}
+        onAddListing={handleAddListing}
+        onViewAll={handleViewAll}
+        onViewJobs={() => localeNavigate('/listings/jobs')}
+        viewMode={viewMode}
+        isAddDrawerOpen={isAddDrawerOpen}
+        onAddDrawerClose={handleAddDrawerClose}
+        onEndListings={handleEndListings}
+        onSelectionChange={setSelectedListingIds}
+        columns={filteredColumns}
+        selectedRows={selectedRows}
+        bulkActions={bulkActions}
+        onDownload={handleDownload}
+        columnOptions={columnOptions}
+        visibleColumnKeys={visibleColumnKeys}
+        onToggleColumn={toggleColumn}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        pagination={{
+          count: filteredListings.length,
+          page,
+          rowsPerPage,
+          onPageChange: setPage,
+          onRowsPerPageChange: (val) => {
+            setRowsPerPage(val);
+            setPage(1);
+          },
+          labelRowsPerPage: t('translation:common.rowsPerPage'),
+          labelInfo: t('translation:common.showing_info'),
+        }}
+        filters={filters}
+        onSearchChange={handleSearchChange}
+        onCategoryChange={handleCategoryChange}
+        categoryOptions={categoryOptions}
+        onStatusChange={handleStatusChange}
+        statusOptions={statusOptions}
+        numericFilters={numericFilters}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+        resultCount={filteredListings.length}
+        advancedOpen={advancedOpen}
+        onToggleAdvanced={() => setAdvancedOpen((v) => !v)}
+      />
+      <AddListingsDrawer isOpen={isAddDrawerOpen} onClose={handleAddDrawerClose} onSuccess={handleAddSuccess} />
     </EbayAccountGuard>
   );
 };

@@ -7,7 +7,7 @@ export const Badge = ({
   children,
   variant = 'secondary',
   size = 'sm',
-  isPill = true,
+  isPill = false,
   className,
 }: BadgeProps): React.ReactElement => {
   return (

@@ -10,10 +10,10 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
   align-items: center;
   justify-content: center;
   border-radius: ${({ $isPill, theme }: { $isPill: boolean; theme: Theme }) =>
-    $isPill ? tkn('radius.full')({ theme }) : tkn('radius.md')({ theme })};
+    $isPill ? tkn('radius.full')({ theme }) : tkn('radius.sm')({ theme })};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   white-space: nowrap;
-  letter-spacing: 0.01em;
+  letter-spacing: ${tkn('typography.letterSpacing.wide')};
   border: 0.0625rem solid transparent;
 
   ${({ $size, theme }: { $size: BadgeSize; theme: Theme }) => {
@@ -22,19 +22,19 @@ export const BadgeContainer = styled.span<{ $variant: BadgeVariant; $size: Badge
         return `
           padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.xs+')({ theme })};
           font-size: ${tkn('typography.fontSize.2xs')({ theme })};
-          line-height: 1.5;
+          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
         `;
       case 'sm':
         return `
           padding: ${tkn('spacing.2xs')({ theme })} ${tkn('spacing.sm')({ theme })};
           font-size: ${tkn('typography.fontSize.xs')({ theme })};
-          line-height: 1.5;
+          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
         `;
       case 'md':
         return `
           padding: ${tkn('spacing.2xs+')({ theme })} ${tkn('spacing.sm+')({ theme })};
           font-size: ${tkn('typography.fontSize.xs')({ theme })};
-          line-height: 1.5;
+          line-height: ${tkn('typography.lineHeight.normal')({ theme })};
         `;
       default:
         return '';

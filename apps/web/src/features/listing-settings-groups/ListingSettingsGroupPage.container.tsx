@@ -1,6 +1,8 @@
 import { useLoading, useUI } from '@repo/ui';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { ListingGroupDrawer } from '../settings/drawers/ListingGroupDrawer';
 
 import {
   useDeleteListingSettingsGroupMutation,
@@ -9,16 +11,16 @@ import {
 import { ListingSettingsGroupPageComponent } from './ListingSettingsGroupPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-import { useLocale } from '@/utils/useLocale';
 
 export const ListingSettingsGroupPageContainer = () => {
-  const { localeNavigate } = useLocale();
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
   const { data: groups = [], isLoading: isGroupsLoading } = useGetListingSettingsGroupsQuery();
   const [deleteListingSettingsGroup, { isLoading: isDeleting, isSuccess: deleteSuccess }] =
     useDeleteListingSettingsGroupMutation();
+  const [isGroupDrawerOpen, setIsGroupDrawerOpen] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
   useLoading(isGroupsLoading || isDeleting);
 
@@ -41,11 +43,13 @@ export const ListingSettingsGroupPageContainer = () => {
   }, [deleteSuccess, showMessage, closeMessage, t]);
 
   const handleCreateGroup = () => {
-    localeNavigate('/settings/listing-groups/new');
+    setEditingGroupId(null);
+    setIsGroupDrawerOpen(true);
   };
 
   const handleEditGroup = (id: string) => {
-    localeNavigate(`/settings/listing-groups/${id}/edit`);
+    setEditingGroupId(id);
+    setIsGroupDrawerOpen(true);
   };
 
   const handleDeleteGroup = (id: string) => {
@@ -73,11 +77,16 @@ export const ListingSettingsGroupPageContainer = () => {
   return (
     <EbayAccountGuard>
       <ListingSettingsGroupPageComponent
-      groups={groups}
-      onCreateGroup={handleCreateGroup}
-      onEditGroup={handleEditGroup}
-      onDeleteGroup={handleDeleteGroup}
-    />
+        groups={groups}
+        onCreateGroup={handleCreateGroup}
+        onEditGroup={handleEditGroup}
+        onDeleteGroup={handleDeleteGroup}
+      />
+      <ListingGroupDrawer
+        isOpen={isGroupDrawerOpen}
+        onClose={() => setIsGroupDrawerOpen(false)}
+        editingGroupId={editingGroupId}
+      />
     </EbayAccountGuard>
   );
 };

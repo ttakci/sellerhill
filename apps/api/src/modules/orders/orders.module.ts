@@ -11,13 +11,14 @@ import { OrderSyncQueueService } from './order-sync-queue.service';
 import { OrderSyncService } from './order-sync.service';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
+import { StockSyncQueueService } from './stock-sync-queue.service';
 
 @Module({
   imports: [
     DatabaseModule,
     EbayModule,
     ProductsModule,
-    BullModule.registerQueue({ name: 'order-sync' }),
+    BullModule.registerQueue({ name: 'order-sync' }, { name: 'stock-sync' }),
   ],
   controllers: [OrdersController],
   providers: [
@@ -26,6 +27,7 @@ import { OrdersService } from './orders.service';
     EbayFulfillmentService,
     OrderSyncQueueService,
     OrderSyncProcessorService,
+    StockSyncQueueService,
   ],
   exports: [OrdersService, OrderSyncService],
 })

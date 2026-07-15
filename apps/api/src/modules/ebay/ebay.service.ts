@@ -43,6 +43,43 @@ function isAxiosErrorWithData(error: unknown): error is AxiosErrorData {
   return typeof error === 'object' && error !== null && 'response' in error && 'message' in error;
 }
 
+/** Axios error with response status + headers, for rate-limit retry decisions. */
+interface RetryableAxiosError {
+  response?: { status?: number; headers?: Record<string, string> };
+}
+
+function isRetryableAxiosError(error: unknown): error is RetryableAxiosError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof (error as RetryableAxiosError).response?.status === 'number'
+  );
+}
+
+/** True for transient failures that are safe to retry after a backoff. */
+function isTransientStatus(status: number): boolean {
+  return status === 429 || status >= 500;
+}
+
+/** Parse an HTTP `Retry-After` header into ms (delta-seconds form only). */
+function parseRetryAfterMs(value: string | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds)) {
+    return null;
+  }
+  return Math.max(0, seconds) * 1000;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 /** Typed axios response interfaces */
 interface EbayOfferResponse {
   offerId: string;
@@ -302,7 +339,9 @@ export class EbayService {
         );
 
         if (systemError && currentOfferId && attempts < maxAttempts) {
-          this.logger.warn(`Publish failed with system error. Deleting orphan offer ${currentOfferId} and retrying... (Attempt ${attempts})`);
+          this.logger.warn(
+            `Publish failed with system error. Deleting orphan offer ${currentOfferId} and retrying... (Attempt ${attempts})`
+          );
           await this.deleteOffer(accessToken, currentOfferId);
           continue;
         }
@@ -382,7 +421,7 @@ export class EbayService {
       // Note: eBay REST Inventory API uses condition values like:
       // NEW, LIKE_NEW, VERY_GOOD, GOOD, ACCEPTABLE
       // For "Renewed" on Amazon, 'LIKE_NEW' or 'VERY_GOOD' is often more accurate for eBay
-      condition = 'LIKE_NEW'; 
+      condition = 'LIKE_NEW';
     }
 
     const payload = {
@@ -427,7 +466,11 @@ export class EbayService {
       });
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
-      this.logger.error(`Create inventory item failed for ${sku}. Response: ${JSON.stringify(axiosErr?.response?.data || getErrorMessage(e))}`);
+      this.logger.error(
+        `Create inventory item failed for ${sku}. Response: ${JSON.stringify(
+          axiosErr?.response?.data || getErrorMessage(e)
+        )}`
+      );
       throw e;
     }
   }
@@ -570,12 +613,12 @@ export class EbayService {
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
       const errorData = axiosErr?.response?.data;
-      
+
       this.logger.error(
         `Publish offer failed for ${offerId}. Status: ${axiosErr?.response?.status || 'Unknown'}. ` +
-        `Response: ${JSON.stringify(errorData, null, 2)}`
+          `Response: ${JSON.stringify(errorData, null, 2)}`
       );
-      
+
       throw e;
     }
   }
@@ -746,6 +789,34 @@ export class EbayService {
   }
 
   /**
+   * Run an eBay REST call with exponential backoff on 429 / 5xx.
+   * Honours `Retry-After` (delta-seconds) when eBay sends it; otherwise backs
+   * off 500ms → 1s → 2s. Non-transient errors (4xx other than 429) throw as-is.
+   */
+  private async withRateLimitRetry<T>(request: () => Promise<T>, maxAttempts = 4): Promise<T> {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await request();
+      } catch (error: unknown) {
+        lastError = error;
+        if (!isRetryableAxiosError(error) || !isTransientStatus(error.response!.status!)) {
+          throw error;
+        }
+        if (attempt === maxAttempts) {
+          break;
+        }
+        const status = error.response!.status!;
+        const retryAfterMs = parseRetryAfterMs(error.response!.headers?.['retry-after']);
+        const backoffMs = retryAfterMs ?? 500 * 2 ** (attempt - 1);
+        this.logger.warn(`eBay API ${status} (attempt ${attempt}/${maxAttempts}) — backing off for ${backoffMs}ms`);
+        await sleep(backoffMs);
+      }
+    }
+    throw lastError;
+  }
+
+  /**
    * Update price and stock for an existing listing using REST API
    */
   async updatePriceAndStock(
@@ -781,9 +852,11 @@ export class EbayService {
     interface OffersData {
       offers?: Array<Record<string, unknown>>;
     }
-    const offersResponse = await axios.get<OffersData>(offersUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const offersResponse = await this.withRateLimitRetry(() =>
+      axios.get<OffersData>(offersUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+    );
 
     const offer = offersResponse.data?.offers?.find((o) => o.marketplaceId === marketplaceId);
     if (!offer) {
@@ -807,13 +880,15 @@ export class EbayService {
       delete payload.listing;
       delete payload.status;
 
-      await axios.put(updateOfferUrl, payload, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
-        },
-      });
+      await this.withRateLimitRetry(() =>
+        axios.put(updateOfferUrl, payload, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
+          },
+        })
+      );
     }
 
     // Update Quantity via Inventory Item
@@ -824,22 +899,26 @@ export class EbayService {
         shipToLocationAvailability?: { quantity?: number };
       };
     }
-    const invResponse = await axios.get<InventoryItemResponse>(inventoryUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const invResponse = await this.withRateLimitRetry(() =>
+      axios.get<InventoryItemResponse>(inventoryUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+    );
 
     const inventoryItem = invResponse.data;
     if (inventoryItem?.availability?.shipToLocationAvailability) {
       inventoryItem.availability.shipToLocationAvailability.quantity = quantity;
     }
 
-    await axios.put(inventoryUrl, inventoryItem, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
-      },
-    });
+    await this.withRateLimitRetry(() =>
+      axios.put(inventoryUrl, inventoryItem, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
+        },
+      })
+    );
 
     this.logger.log(`Price and stock updated for eBay listing ${ebayListingId}`);
   }

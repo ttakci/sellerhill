@@ -95,3 +95,23 @@ export const CloseButton = styled.button`
     color: ${tkn('colors.text.primary')};
   }
 `;
+
+/**
+ * Left-side back arrow for nested drawer flows. Same geometry as CloseButton
+ * so the title stays vertically centered against both affordances.
+ */
+export const BackButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: ${tkn('colors.text.tertiary')};
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover {
+    color: ${tkn('colors.text.primary')};
+  }
+`;

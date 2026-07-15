@@ -131,7 +131,7 @@ export const CardImageSection = styled.div`
 
   svg,
   .material-symbols-outlined {
-    font-size: 2.5rem; /* 40px — no exact token (between xxxl=30px and 3xl=36px) */
+    font-size: ${tkn('typography.fontSize.4xl')};
     color: ${tkn('colors.text.tertiary')};
   }
 `;

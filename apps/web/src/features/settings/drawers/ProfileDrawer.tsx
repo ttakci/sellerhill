@@ -37,8 +37,9 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       .catch(() => {
         showMessage({
           type: 'error',
-          message: t('translation:common.error'),
-        });
+          headerKey: 'translation:common.error',
+          descriptionKey: 'translation:common.error',
+        }, t);
       });
     /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
@@ -58,6 +59,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     >
       <BodyStack>
         <ModernTextInput
+          name="firstName"
           label={t('translation:settingsHub.drawer.profile.firstName')}
           value={firstName}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -65,6 +67,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           }
         />
         <ModernTextInput
+          name="lastName"
           label={t('translation:settingsHub.drawer.profile.lastName')}
           value={lastName}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -72,11 +75,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           }
         />
         <ModernTextInput
+          name="email"
           label={t('translation:settingsHub.drawer.profile.email')}
           value={profile?.email ?? ''}
           readOnly
         />
         <ModernTextInput
+          name="phoneNumber"
           label={t('translation:settingsHub.drawer.profile.phone')}
           value={phoneNumber}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

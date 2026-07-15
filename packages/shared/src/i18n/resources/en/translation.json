@@ -141,6 +141,7 @@
         "edit": "Edit Personal Information",
         "tabs": {
           "personalInfo": "Personal Information",
+          "personalInfoSubtitle": "Your name, contact, and avatar",
           "connectedStores": "Connected Stores"
         }
       },
@@ -176,6 +177,7 @@
         "title": "Amazon Accounts",
         "subtitle": "Buyer accounts used for order scraping",
         "add": "Add Account",
+        "addSubtitle": "Connect a new buyer account for order scraping",
         "accountCount": "{{count}} account(s)",
         "noAccounts": "No Amazon accounts connected",
         "emailLabel": "Email",
@@ -206,20 +208,24 @@
       "storeManagement": {
         "title": "Store Configuration",
         "subtitle": "Store settings and listing keyword blacklist",
-        "storeSettings": "Store Settings"
+        "storeSettings": "Store Settings",
+        "storeSettingsSubtitle": "Location, validation, and regional preferences"
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
         "subtitle": "Repricing strategies, stock logic, profit margins",
         "manage": "Manage Groups",
+        "manageSubtitle": "View and edit existing pricing and stock groups",
         "viewAll": "View All",
         "create": "Create New Group",
+        "createSubtitle": "Define a new repricing strategy and profit margin",
         "groupCount": "{{count}} group(s)"
       },
       "account": {
         "title": "Account & Security",
         "subtitle": "Password preferences",
-        "changePassword": "Change Password"
+        "changePassword": "Change Password",
+        "changePasswordSubtitle": "Update your login password"
       },
       "danger": {
         "title": "Danger Zone",

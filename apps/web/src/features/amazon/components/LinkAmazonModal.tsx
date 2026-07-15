@@ -117,7 +117,8 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
             </div>
 
             <ModernTextInput
-              label={t('amazon.linking.orderId')}
+            name="amazonOrderId"
+            label={t('amazon.linking.orderId')}
               placeholder={t('amazon.linking.orderIdPlaceholder')}
               value={amazonOrderId}
               onChange={handleInputChange}

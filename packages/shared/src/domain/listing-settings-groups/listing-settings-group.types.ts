@@ -22,7 +22,6 @@ export interface PriceRange {
  */
 export interface StockConfig {
   defaultQuantity: number;
-  autoRestock: boolean;
   stockBuffer?: number;
 }
 
@@ -51,19 +50,19 @@ export interface ListingSettingsGroup {
   id: string;
   name: string;
   description?: string;
-  
+
   // Repricing Strategy
   repricingStrategy: PriceRange[];
-  
+
   // Stock
   stock: StockConfig;
-  
+
   // Fees
   fees: FeeConfig;
-  
+
   // Templates
   templates: TemplateConfig;
-  
+
   // Audit
   createdAt: Date;
   updatedAt: Date;

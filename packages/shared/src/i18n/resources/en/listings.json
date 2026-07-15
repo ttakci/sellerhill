@@ -69,6 +69,7 @@
     },
     "table": {
       "product": "Product",
+      "brand": "Brand",
       "asin": "ASIN",
       "ebayId": "eBay ID",
       "price": "Sell Price",
@@ -79,6 +80,7 @@
       "stock": "Stock",
       "sold": "Sold",
       "watch": "Watch",
+      "watchers": "Watchers",
       "views": "Views",
       "category": "Category",
       "updatedAt": "Updated",
@@ -143,9 +145,27 @@
       "import": "Import & Create Listings",
       "importing": "Importing...",
       "addListing": "Add Listing",
+      "addNewList": "Add New List",
+      "viewAll": "View All",
       "endListing": "End Listing",
       "deleteListings": "Delete Listings",
       "bulkActions": "Bulk Actions"
+    },
+    "addSection": {
+      "title": "Add New Listing",
+      "subtitle": "Import products from Amazon to your eBay store using ASINs.",
+      "create": "Create New Listing",
+      "jobs": "View Import Jobs"
+    },
+    "otherActions": {
+      "title": "Other Actions",
+      "subtitle": "Manage additional operations related to your listings.",
+      "jobsTitle": "View Import Jobs",
+      "jobsSubtitle": "Track the status of your bulk import operations."
+    },
+    "drawer": {
+      "step1": "Settings & Policies",
+      "step2": "Product Entry"
     },
     "notifications": {
       "endSuccessTitle": "Listings Ended",

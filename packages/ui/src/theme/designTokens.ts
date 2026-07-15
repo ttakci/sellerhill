@@ -67,12 +67,12 @@ export const spacingTokens = {
 } as const;
 
 export const radiusTokens = {
-  sm: '0.25rem', // 4px - Buttons, Nav items
-  md: '0.375rem', // 6px - Inputs
-  lg: '0.5rem', // 8px - Cards, main containers
-  xl: '0.75rem', // 12px - Large modals, banners
-  '2xl': '1rem', // 16px - Extra large containers
-  full: '9999px', // Pills, badges (px is fine for full circle)
+  sm: '0.25rem', // 4px — default corner for every rectangular surface (uniform square design)
+  md: '0.25rem', // 4px — alias of sm
+  lg: '0.25rem', // 4px — alias of sm
+  xl: '0.25rem', // 4px — alias of sm
+  '2xl': '0.25rem', // 4px — alias of sm
+  full: '9999px', // fully circular — avatars, toggles, knobs, radios, progress bars, dots
 } as const;
 
 export const shadowTokens = {

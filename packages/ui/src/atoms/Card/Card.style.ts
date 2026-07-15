@@ -10,7 +10,7 @@ export const CardContainer = styled.div<{
   $hoverable?: boolean;
 }>`
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.xl')};
+  border-radius: ${tkn('radius.sm')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -31,7 +31,6 @@ export const CardContainer = styled.div<{
           cursor: pointer;
           &:hover {
             box-shadow: ${tkn('shadows.lg')(props)};
-            border-color: ${tkn('colors.border.focus')(props)};
             transform: translateY(-0.125rem);
           }
           &:active {
@@ -75,7 +74,6 @@ export const CardContainer = styled.div<{
     cursor: pointer;
     &:hover {
       box-shadow: ${tkn('shadows.md')(props)};
-      border-color: ${tkn('colors.border.focus')(props)};
       transform: translateY(-0.0625rem);
     }
   `}

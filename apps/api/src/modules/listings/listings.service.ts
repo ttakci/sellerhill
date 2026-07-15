@@ -456,10 +456,10 @@ export class ListingsService {
     const result = await this.databaseService.query<{ id: string }>(
       `
       INSERT INTO products (
-        asin, title, price, currency, image_urls, description, 
-        brand, category, features, stock, raw_provider_data, raw_keepa_data
+        asin, title, price, currency, image_urls, description,
+        brand, category, features, stock, raw_provider_data, raw_keepa_data, next_refresh_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW() + INTERVAL '12 hours')
       ON CONFLICT (asin) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,

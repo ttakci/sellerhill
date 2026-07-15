@@ -69,6 +69,7 @@
     },
     "table": {
       "product": "Ürün",
+      "brand": "Marka",
       "asin": "ASIN",
       "ebayId": "eBay ID",
       "price": "Satış",
@@ -79,6 +80,7 @@
       "stock": "Stok",
       "sold": "Satılan",
       "watch": "Takip",
+      "watchers": "Takip Edenler",
       "views": "İzlenme",
       "category": "Kategori",
       "updatedAt": "Güncelleme",
@@ -143,9 +145,27 @@
       "import": "Listeleri Oluştur",
       "importing": "Listeler Oluşturuluyor...",
       "addListing": "Liste Ekle",
+      "addNewList": "Yeni Liste Ekle",
+      "viewAll": "Tümü",
       "endListing": "İlanı Bitir",
       "deleteListings": "Listeleri Sil",
       "bulkActions": "Toplu İşlemler"
+    },
+    "addSection": {
+      "title": "Yeni Liste Ekle",
+      "subtitle": "ASIN ile Amazon ürünlerini eBay mağazanıza aktarın.",
+      "create": "Yeni Liste Oluştur",
+      "jobs": "İçe Aktarma İşlerini Gör"
+    },
+    "otherActions": {
+      "title": "Diğer İşlemler",
+      "subtitle": "Listelerinizle ilgili ek işlemleri buradan yapabilirsiniz.",
+      "jobsTitle": "İçe Aktarma İşlerini Gör",
+      "jobsSubtitle": "Toplu içe aktarma işlemlerinin durumunu takip edin."
+    },
+    "drawer": {
+      "step1": "Ayarlar & Politikalar",
+      "step2": "Ürün Girişi"
     },
     "notifications": {
       "endSuccessTitle": "İlanlar Bitirildi",
@@ -180,6 +200,10 @@
       "createFailed": "Listeler oluşturulamadı",
       "fetchPoliciesFailed": "eBay iş politikaları alınamadı",
       "invalidAsins": "Bazı ASIN'ler geçersiz ve atlandı"
+    },
+    "carousel": {
+      "previous": "Önceki",
+      "next": "Sonraki"
     }
   }
 }

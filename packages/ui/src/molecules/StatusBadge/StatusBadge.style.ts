@@ -34,13 +34,13 @@ export const StatusBadgeContainer = styled.span<{
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.full')};
+  border-radius: ${tkn('radius.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   text-transform: capitalize;
-  letter-spacing: 0.01em;
+  letter-spacing: ${tkn('typography.letterSpacing.wide')};
   border: 0.0625rem solid transparent;
   white-space: nowrap;
-  line-height: 1.5;
+  line-height: ${tkn('typography.lineHeight.normal')};
 
   ${({ $size, theme }) => sizeStyles($size, theme)}
 

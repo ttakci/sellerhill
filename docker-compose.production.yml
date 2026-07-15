@@ -64,15 +64,22 @@ services:
       EBAY_REST_API_URL: https://api.sandbox.ebay.com
       EBAY_XML_API_URL: https://api.sandbox.ebay.com/ws/api.dll
 
-      # Keepa
+      # Keepa — sole product data provider (metadata + price + stock in one token).
       KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
       KEEPA_API_URL: https://api.keepa.com/product
+      # Stale-driven refresh pipeline (all optional — defaults shown; override in
+      # Coolify to tune cadence/cost on the test env). Changing cadence is env-only.
+      KEEPA_REFRESH_INTERVAL_MINUTES: ${KEEPA_REFRESH_INTERVAL_MINUTES:-720}
+      KEEPA_REFRESH_BATCH_SIZE: ${KEEPA_REFRESH_BATCH_SIZE:-50}
+      KEEPA_REFRESH_SCHEDULER_CRON: "${KEEPA_REFRESH_SCHEDULER_CRON:-* * * * *}"
+      KEEPA_REFRESH_WORKER_CONCURRENCY: ${KEEPA_REFRESH_WORKER_CONCURRENCY:-1}
+      KEEPA_REFRESH_QUARANTINE_MINUTES: ${KEEPA_REFRESH_QUARANTINE_MINUTES:-1440}
+      KEEPA_REFRESH_MAX_FAILURES: ${KEEPA_REFRESH_MAX_FAILURES:-5}
 
       # Amazon (32-byte hex key for AES-256-GCM credential encryption)
       AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:?Set AMAZON_ENCRYPTION_KEY in Coolify env vars}
 
-      # Scraper
-      SCRAPER_API_KEY: ${SCRAPER_API_KEY:?Set SCRAPER_API_KEY in Coolify env vars}
+      # ZON internal scraper queue (packages/shared zon-scrapper) — NOT ScraperAPI.
       ZON_SCRAPPER_CONCURRENCY: 1
       ZON_SCRAPPER_TIMEOUT_MS: 60000
       ZON_SCRAPPER_USE_PROXY: 'false'

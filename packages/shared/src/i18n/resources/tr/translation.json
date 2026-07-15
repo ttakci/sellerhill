@@ -141,6 +141,7 @@
         "edit": "Kişisel Bilgileri Düzenle",
         "tabs": {
           "personalInfo": "Kişisel Bilgiler",
+          "personalInfoSubtitle": "Adınız, iletişim bilgileriniz ve avatarınız",
           "connectedStores": "Bağlı Mağazalar"
         }
       },
@@ -176,6 +177,7 @@
         "title": "Amazon Hesapları",
         "subtitle": "Sipariş taraması için kullanılan alıcı hesapları",
         "add": "Hesap Ekle",
+        "addSubtitle": "Sipariş taraması için yeni bir alıcı hesabı bağla",
         "accountCount": "{{count}} hesap",
         "noAccounts": "Bağlı Amazon hesabı yok",
         "emailLabel": "E-posta",
@@ -206,20 +208,24 @@
       "storeManagement": {
         "title": "Mağaza Yapılandırması",
         "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
-        "storeSettings": "Mağaza Ayarları"
+        "storeSettings": "Mağaza Ayarları",
+        "storeSettingsSubtitle": "Konum, doğrulama ve bölgesel tercihler"
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
         "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
         "manage": "Grupları Yönet",
+        "manageSubtitle": "Mevcut fiyatlandırma ve stok gruplarını görüntüle ve düzenle",
         "viewAll": "Tümü",
         "create": "Yeni Grup Oluştur",
+        "createSubtitle": "Yeni bir yeniden fiyatlandırma stratejisi ve kâr marjı tanımla",
         "groupCount": "{{count}} grup"
       },
       "account": {
         "title": "Hesap ve Güvenlik",
         "subtitle": "Şifre tercihleri",
-        "changePassword": "Şifre Değiştir"
+        "changePassword": "Şifre Değiştir",
+        "changePasswordSubtitle": "Giriş şifrenizi güncelleyin"
       },
       "danger": {
         "title": "Tehlikeli Bölge",

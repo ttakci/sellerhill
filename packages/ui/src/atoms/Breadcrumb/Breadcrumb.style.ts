@@ -25,7 +25,7 @@ export const Item = styled.div<{ $active?: boolean; $hoverable?: boolean }>`
   }
 
   & span {
-    line-height: 1;
+    line-height: ${tkn('typography.lineHeight.tight')};
     white-space: nowrap;
   }
 `;

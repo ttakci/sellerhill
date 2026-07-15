@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-export const HeaderWrapper = styled.div`
+export const HeaderWrapper = styled.div<{ $noMargin?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -14,6 +14,8 @@ export const HeaderWrapper = styled.div`
     flex-direction: row;
     align-items: flex-end;
   }
+
+  ${({ $noMargin }) => $noMargin && `margin-bottom: 0;`}
 `;
 
 export const TitleArea = styled.div`
@@ -28,7 +30,7 @@ export const Title = styled.div`
   color: ${tkn('colors.text.primary')};
   letter-spacing: -0.025em;
   margin: 0;
-  line-height: 1.2;
+  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
 export const Subtitle = styled.div`
@@ -36,7 +38,7 @@ export const Subtitle = styled.div`
   color: ${tkn('colors.text.secondary')};
   margin-top: ${tkn('spacing.xs')};
   margin-bottom: 0;
-  line-height: 1.5;
+  line-height: ${tkn('typography.lineHeight.normal')};
 
   strong, b {
     font-weight: ${tkn('typography.fontWeight.semibold')};

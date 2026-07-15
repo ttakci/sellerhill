@@ -24,8 +24,6 @@
 
     "stock": "Stock",
     "defaultQuantity": "Default Quantity",
-    "autoRestock": "Auto-restock on sale",
-    "autoRestockDescription": "Automatically restock items when they are sold",
 
     "fees": "Fees",
     "ebayFee": "eBay Fee",
@@ -68,6 +66,16 @@
     "statusActive": "Active",
     "statusDraft": "Draft",
     "statusInactive": "Inactive",
+
+    "card": {
+      "generalTitle": "General",
+      "deductionsTitle": "Deductions",
+      "stock": "Stock",
+      "buffer": "Buffer",
+      "fee": "Fee",
+      "tax": "Tax",
+      "customTemplate": "Customized Template"
+    },
 
     "emptyState": {
       "title": "No Listing Groups Yet",
@@ -174,6 +182,9 @@
       "productTitle": "Premium Wireless Noise Cancelling Headphones",
       "productDescription": "Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.",
       "productSpecs": "<ul><li>Active Noise Cancellation</li><li>40-hour battery life</li><li>Universal Bluetooth compatibility</li><li>Built-in microphone</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Deductions"
     },
     "copyright": "© {{year}} Zonds Platform. All rights reserved."
   }

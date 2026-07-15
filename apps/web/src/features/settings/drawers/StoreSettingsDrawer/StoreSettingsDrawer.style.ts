@@ -9,7 +9,7 @@ export const BodyStack = styled.div`
 
 export const FieldGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: ${tkn('spacing.md')};
 `;
 

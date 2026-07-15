@@ -209,8 +209,8 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps>
               <S.AddressLine>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</S.AddressLine>
               <S.AddressLine>{order.shippingAddress.country}</S.AddressLine>
               <S.CopyButton
-                variant="ghost"
-                size="sm"
+                variant="text"
+                size="small"
                 onClick={() => {
                   const addr = [
                     order.buyerName,

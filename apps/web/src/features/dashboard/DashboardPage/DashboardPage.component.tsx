@@ -19,15 +19,7 @@ import {
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import * as S from './DashboardPage.style';
 import type { DashboardPageComponentProps, PeriodKey } from './DashboardPage.types';
@@ -35,7 +27,9 @@ import type { DashboardPageComponentProps, PeriodKey } from './DashboardPage.typ
 /* ─── Helpers ─── */
 
 const fmtTrend = (trend: number | null | undefined): string | undefined => {
-  if (trend === null || trend === undefined) { return undefined; }
+  if (trend === null || trend === undefined) {
+    return undefined;
+  }
   const abs = Math.abs(Math.round(trend * 10) / 10);
   return `${trend >= 0 ? '+' : '-'}${abs}%`;
 };
@@ -58,15 +52,29 @@ interface PeriodCardProps {
 }
 
 const PeriodCardComponent = ({
-  title, dateRange, metrics, accentColor, headerBg, isActive, onClick, formatCurrency, labels,
+  title,
+  dateRange,
+  metrics,
+  accentColor,
+  headerBg,
+  isActive,
+  onClick,
+  formatCurrency,
+  labels,
 }: PeriodCardProps): React.ReactElement => (
   <S.PeriodCard variant="bordered" $accentColor={accentColor} $active={isActive} onClick={onClick}>
     <S.PeriodCardHeader $bgColor={headerBg}>
-      <S.PeriodTitle variant="body-sm" weight="semibold">{title}</S.PeriodTitle>
-      <S.PeriodDate variant="caption" color="text.tertiary">{dateRange}</S.PeriodDate>
+      <S.PeriodTitle variant="body-sm" weight="semibold">
+        {title}
+      </S.PeriodTitle>
+      <S.PeriodDate variant="caption" color="text.tertiary">
+        {dateRange}
+      </S.PeriodDate>
     </S.PeriodCardHeader>
     <S.PeriodCardBody>
-      <S.HeroMetricLabel variant="caption" color="text.secondary">{labels.sales}</S.HeroMetricLabel>
+      <S.HeroMetricLabel variant="caption" color="text.secondary">
+        {labels.sales}
+      </S.HeroMetricLabel>
       <S.HeroMetricValue>
         {formatCurrency(metrics.sales)}
         {metrics.trend !== null && metrics.trend !== undefined && (
@@ -74,17 +82,23 @@ const PeriodCardComponent = ({
         )}
       </S.HeroMetricValue>
       <S.MetricRow>
-        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.orders}</S.MetricLabel>
+        <S.MetricLabel variant="body-xs" color="text.secondary">
+          {labels.orders}
+        </S.MetricLabel>
         <S.MetricValue variant="body-xs">{metrics.orders}</S.MetricValue>
       </S.MetricRow>
       <S.MetricRow>
-        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.netProfit}</S.MetricLabel>
+        <S.MetricLabel variant="body-xs" color="text.secondary">
+          {labels.netProfit}
+        </S.MetricLabel>
         <S.MetricValue variant="body-xs" color={metrics.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}>
           {formatCurrency(metrics.netProfit)}
         </S.MetricValue>
       </S.MetricRow>
       <S.MetricRow>
-        <S.MetricLabel variant="body-xs" color="text.secondary">{labels.margin}</S.MetricLabel>
+        <S.MetricLabel variant="body-xs" color="text.secondary">
+          {labels.margin}
+        </S.MetricLabel>
         <S.MetricValue variant="body-xs">{metrics.margin}%</S.MetricValue>
       </S.MetricRow>
     </S.PeriodCardBody>
@@ -99,36 +113,69 @@ interface SearchDropdownProps {
   formatCurrency: (v: number) => string;
 }
 
-const SearchDropdown = ({ listings, onSelect, formatCurrency }: SearchDropdownProps): React.ReactElement => (
+const SearchDropdown = ({ listings, onSelect, formatCurrency }: SearchDropdownProps): React.ReactElement => {
+  const { t } = useTranslation(['dashboard', 'translation']);
+  return (
   <S.SearchDropdownPanel>
     <S.SearchDropdownHeader>
-      <Text variant="body-xs" weight="medium" color="text.secondary">{listings.length} results</Text>
-      <Button variant="text" onClick={() => onSelect(null)}><Text>Clear</Text></Button>
+      <Text variant="body-xs" weight="medium" color="text.secondary">
+        {t('dashboard.searchResultsCount', { count: listings.length })}
+      </Text>
+      <Button variant="text" onClick={() => onSelect(null)}>
+        <Text>{t('dashboard.clear')}</Text>
+      </Button>
     </S.SearchDropdownHeader>
     {listings.slice(0, 10).map((l) => (
       <S.SearchDropdownRow key={l.id} onClick={() => onSelect(l.id)}>
         <S.ListingThumb $imageUrl={l.imageUrls?.[0]} />
         <S.SearchDropdownInfo>
-          <S.SearchDropdownTitle variant="body-sm" weight="medium">{l.title}</S.SearchDropdownTitle>
-          <Text variant="caption" color="text.tertiary">{l.asin}</Text>
+          <S.SearchDropdownTitle variant="body-sm" weight="medium">
+            {l.title}
+          </S.SearchDropdownTitle>
+          <Text variant="caption" color="text.tertiary">
+            {l.asin}
+          </Text>
         </S.SearchDropdownInfo>
-        <Text variant="body-sm" weight="medium">{formatCurrency(l.price)}</Text>
+        <Text variant="body-sm" weight="medium">
+          {formatCurrency(l.price)}
+        </Text>
       </S.SearchDropdownRow>
     ))}
   </S.SearchDropdownPanel>
-);
+  );
+};
 
 /* ─── Main Component ─── */
 
 export const DashboardPageComponent = ({
-  user, dashboardData, selectedPeriod, onPeriodSelect,
-  periodPreset, onPeriodPresetChange, selectedDays: _selectedDays, onDaysChange: _onDaysChange,
-  periodDates, listings, searchQuery, onSearchChange,
-  filteredListingId, onListingSelect,
-  ebayAccounts, selectedStoreId, onStoreSelect,
-  isTR, formatCurrency, formatCompactCurrency, formatDate,
-  showSearch, onShowSearchChange,
-  cardColors, cardHeaders, labels, periodTitles, periodPresetOptions,
+  user,
+  dashboardData,
+  selectedPeriod,
+  onPeriodSelect,
+  periodPreset,
+  onPeriodPresetChange,
+  selectedDays: _selectedDays,
+  onDaysChange: _onDaysChange,
+  periodDates,
+  listings,
+  searchQuery,
+  onSearchChange,
+  filteredListingId,
+  onListingSelect,
+  ebayAccounts,
+  selectedStoreId,
+  onStoreSelect,
+  isTR,
+  formatCurrency,
+  formatCompactCurrency,
+  formatDate,
+  showSearch,
+  onShowSearchChange,
+  cardColors,
+  cardHeaders,
+  labels,
+  periodTitles,
+  periodPresetOptions,
 }: DashboardPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['dashboard', 'translation']);
   const { theme } = useTheme();
@@ -150,7 +197,10 @@ export const DashboardPageComponent = ({
         <S.SearchWrapper>
           <SearchField
             value={searchQuery}
-            onChange={(e) => { onSearchChange(e.target.value); onShowSearchChange(true); }}
+            onChange={(e) => {
+              onSearchChange(e.target.value);
+              onShowSearchChange(true);
+            }}
             placeholder={t('dashboard.searchPlaceholder')}
             onFocus={() => onShowSearchChange(true)}
             size="medium"
@@ -158,7 +208,14 @@ export const DashboardPageComponent = ({
             fullWidth
           />
           {showSearch && searchQuery.trim() && (
-            <SearchDropdown listings={listings} onSelect={(id) => { onListingSelect(id); onShowSearchChange(false); }} formatCurrency={formatCurrency} />
+            <SearchDropdown
+              listings={listings}
+              onSelect={(id) => {
+                onListingSelect(id);
+                onShowSearchChange(false);
+              }}
+              formatCurrency={formatCurrency}
+            />
           )}
         </S.SearchWrapper>
 
@@ -179,9 +236,9 @@ export const DashboardPageComponent = ({
                   <S.StoreSelectorLabel variant="body-sm" weight="medium">
                     {selectedStoreId === 'all'
                       ? t('dashboard.allStores')
-                      : (ebayAccounts.find((a) => a.id === selectedStoreId)?.storeName
-                        || ebayAccounts.find((a) => a.id === selectedStoreId)?.sellerId
-                        || t('dashboard.allStores'))}
+                      : ebayAccounts.find((a) => a.id === selectedStoreId)?.storeName ||
+                        ebayAccounts.find((a) => a.id === selectedStoreId)?.sellerId ||
+                        t('dashboard.allStores')}
                   </S.StoreSelectorLabel>
                   <Icon name="chevron-down" size={14} color="text.tertiary" />
                 </S.StoreSelectorTrigger>
@@ -210,18 +267,21 @@ export const DashboardPageComponent = ({
       </S.Toolbar>
 
       {/* Active filter banner */}
-      {filteredListingId && (() => {
-        const listing = listings.find((l) => l.id === filteredListingId);
-        return listing ? (
-          <S.FilterBanner $bg={theme.colors.semanticTint.info}>
-            <Icon name="filter" size={14} color={theme.colors.semantic.info} />
-            <Text variant="body-xs" weight="medium">{t('dashboard.filteredBy', { title: listing.title })}</Text>
-            <Button variant="text" onClick={() => onListingSelect(null)}>
-              <Text>{t('dashboard.clearFilter')}</Text>
-            </Button>
-          </S.FilterBanner>
-        ) : null;
-      })()}
+      {filteredListingId &&
+        (() => {
+          const listing = listings.find((l) => l.id === filteredListingId);
+          return listing ? (
+            <S.FilterBanner $bg={theme.colors.semanticTint.info}>
+              <Icon name="filter" size={14} color={theme.colors.semantic.info} />
+              <Text variant="body-xs" weight="medium">
+                {t('dashboard.filteredBy', { title: listing.title })}
+              </Text>
+              <Button variant="text" onClick={() => onListingSelect(null)}>
+                <Text>{t('dashboard.clearFilter')}</Text>
+              </Button>
+            </S.FilterBanner>
+          ) : null;
+        })()}
 
       {/* Period Cards */}
       <S.PeriodCardsGrid>
@@ -248,11 +308,15 @@ export const DashboardPageComponent = ({
             <S.ChartLegend>
               <S.LegendItem>
                 <S.LegendDot $color={revenueColor} />
-                <Text variant="caption" color="text.secondary">{t('dashboard.revenue')}</Text>
+                <Text variant="caption" color="text.secondary">
+                  {t('dashboard.revenue')}
+                </Text>
               </S.LegendItem>
               <S.LegendItem>
                 <S.LegendDot $color={profitColor} />
-                <Text variant="caption" color="text.secondary">{t('dashboard.profit')}</Text>
+                <Text variant="caption" color="text.secondary">
+                  {t('dashboard.profit')}
+                </Text>
               </S.LegendItem>
             </S.ChartLegend>
           }
@@ -274,14 +338,47 @@ export const DashboardPageComponent = ({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.secondary} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={(v: string) => formatDate(v)} tick={{ fontSize: 11, fill: theme.colors.text.tertiary }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: theme.colors.text.tertiary }} tickFormatter={(v: number) => formatCompactCurrency(v)} axisLine={false} tickLine={false} width={50} />
-                <Tooltip
-                  contentStyle={{ background: theme.colors.surface.primary, border: `1px solid ${theme.colors.border.primary}`, borderRadius: theme.radius?.md || '8px', boxShadow: theme.shadows?.md || '0 4px 12px rgba(0,0,0,0.1)', fontSize: '13px' }}
-                  formatter={(value: unknown, name: unknown) => [formatCurrency(Number(value ?? 0)), name === 'revenue' ? t('dashboard.revenue') : t('dashboard.profit')]}
-                  labelFormatter={(label: unknown) => new Date(String(label)).toLocaleDateString(isTR ? 'tr-TR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(v: string) => formatDate(v)}
+                  tick={{ fontSize: theme.typography.fontSize.xs, fill: theme.colors.text.tertiary }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Area type="monotone" dataKey="revenue" stroke={revenueColor} strokeWidth={2} fill="url(#revenueGrad)" />
+                <YAxis
+                  tick={{ fontSize: theme.typography.fontSize.xs, fill: theme.colors.text.tertiary }}
+                  tickFormatter={(v: number) => formatCompactCurrency(v)}
+                  axisLine={false}
+                  tickLine={false}
+                  width={50}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: theme.colors.surface.primary,
+                    border: `1px solid ${theme.colors.border.primary}`,
+                    borderRadius: theme.radius.md,
+                    boxShadow: theme.shadows.md,
+                    fontSize: theme.typography.fontSize.sm,
+                  }}
+                  formatter={(value: unknown, name: unknown) => [
+                    formatCurrency(Number(value ?? 0)),
+                    name === 'revenue' ? t('dashboard.revenue') : t('dashboard.profit'),
+                  ]}
+                  labelFormatter={(label: unknown) =>
+                    new Date(String(label)).toLocaleDateString(isTR ? 'tr-TR' : 'en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  }
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke={revenueColor}
+                  strokeWidth={2}
+                  fill="url(#revenueGrad)"
+                />
                 <Area type="monotone" dataKey="profit" stroke={profitColor} strokeWidth={2} fill="url(#profitGrad)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -291,9 +388,7 @@ export const DashboardPageComponent = ({
 
       {/* Listings Table — Sellerboard-style product breakdown */}
       <Card variant="bordered">
-        <CardHeader>
-          {t('dashboard.listings')}
-        </CardHeader>
+        <CardHeader>{t('dashboard.listings')}</CardHeader>
         <CardBody>
           <S.ListingsTableWrapper>
             <S.ListingsTable>
@@ -311,29 +406,66 @@ export const DashboardPageComponent = ({
               </thead>
               <tbody>
                 {(filteredListingId ? listings.filter((l) => l.id === filteredListingId) : listings).map((listing) => (
-                  <S.Tr key={listing.id} onClick={() => onListingSelect(filteredListingId === listing.id ? null : listing.id)}>
+                  <S.Tr
+                    key={listing.id}
+                    onClick={() => onListingSelect(filteredListingId === listing.id ? null : listing.id)}
+                  >
                     <S.Td>
                       <S.ListingTitleCell>
                         <S.ListingThumb $imageUrl={listing.imageUrls?.[0]} />
                         <S.ListingInfo>
-                          <S.ListingName variant="body-sm" weight="medium">{listing.title}</S.ListingName>
-                          <Text variant="caption" color="text.tertiary">{listing.asin}</Text>
+                          <S.ListingName variant="body-sm" weight="medium">
+                            {listing.title}
+                          </S.ListingName>
+                          <Text variant="caption" color="text.tertiary">
+                            {listing.asin}
+                          </Text>
                         </S.ListingInfo>
                       </S.ListingTitleCell>
                     </S.Td>
-                    <S.Td><Text variant="body-sm">{formatCurrency(listing.price)}</Text></S.Td>
-                    <S.Td><Text variant="body-sm">{listing.purchasePrice ? formatCurrency(listing.purchasePrice) : '—'}</Text></S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">{formatCurrency(listing.price)}</Text>
+                    </S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">
+                        {listing.purchasePrice ? formatCurrency(listing.purchasePrice) : '—'}
+                      </Text>
+                    </S.Td>
                     <S.Td>
                       {listing.estimatedProfit !== null && listing.estimatedProfit !== undefined ? (
-                        listing.estimatedProfit >= 0
-                          ? <S.ProfitPositive variant="body-sm" weight="medium">{formatCurrency(listing.estimatedProfit)}</S.ProfitPositive>
-                          : <S.ProfitNegative variant="body-sm" weight="medium">{formatCurrency(listing.estimatedProfit)}</S.ProfitNegative>
-                      ) : <Text variant="body-sm" color="text.tertiary">—</Text>}
+                        listing.estimatedProfit >= 0 ? (
+                          <S.ProfitPositive variant="body-sm" weight="medium">
+                            {formatCurrency(listing.estimatedProfit)}
+                          </S.ProfitPositive>
+                        ) : (
+                          <S.ProfitNegative variant="body-sm" weight="medium">
+                            {formatCurrency(listing.estimatedProfit)}
+                          </S.ProfitNegative>
+                        )
+                      ) : (
+                        <Text variant="body-sm" color="text.tertiary">
+                          —
+                        </Text>
+                      )}
                     </S.Td>
-                    <S.Td><Text variant="body-sm">{listing.profitMargin !== null && listing.profitMargin !== undefined ? `${listing.profitMargin}%` : '—'}</Text></S.Td>
-                    <S.Td><Text variant="body-sm">{listing.roi !== null && listing.roi !== undefined ? `${listing.roi}%` : '—'}</Text></S.Td>
-                    <S.Td><Text variant="body-sm">{listing.soldCount ?? 0}</Text></S.Td>
-                    <S.Td><Text variant="body-sm">{listing.status}</Text></S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">
+                        {listing.profitMargin !== null && listing.profitMargin !== undefined
+                          ? `${listing.profitMargin}%`
+                          : '—'}
+                      </Text>
+                    </S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">
+                        {listing.roi !== null && listing.roi !== undefined ? `${listing.roi}%` : '—'}
+                      </Text>
+                    </S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">{listing.soldCount ?? 0}</Text>
+                    </S.Td>
+                    <S.Td>
+                      <Text variant="body-sm">{listing.status}</Text>
+                    </S.Td>
                   </S.Tr>
                 ))}
               </tbody>

@@ -8,6 +8,7 @@ export interface SearchFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   onSearch?: () => void;
+  onFocus?: () => void;
   size?: SearchFieldSize;
   variant?: SearchFieldVariant;
   fullWidth?: boolean;

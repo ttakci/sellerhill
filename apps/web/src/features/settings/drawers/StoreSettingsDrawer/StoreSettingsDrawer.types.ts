@@ -5,6 +5,11 @@ export interface StoreSettingsDrawerProps {
   onClose: () => void;
   availableStores: Array<{ id: string; name: string }>;
   storeConfigs: StoreSettingsResponse[];
+  /** Hoisted scope — shared with the nested blacklist drawer so both stay in sync. */
+  selectedScope: string;
+  onSelectScope: (value: string) => void;
+  /** Open the nested blacklist management drawer for the selected scope. */
+  onManageBlacklist: () => void;
 }
 
 export interface StoreSettingsDrawerComponentProps {
@@ -23,7 +28,7 @@ export interface StoreSettingsDrawerComponentProps {
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleValidateTitle: (checked: boolean) => void;
   onToggleValidateDescription: (checked: boolean) => void;
-  onSave: () => void;
+  onContinue: () => void;
   isSaving: boolean;
-  isSaveDisabled: boolean;
+  isContinueDisabled: boolean;
 }

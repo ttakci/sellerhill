@@ -25,9 +25,9 @@
     "blacklistKeyword": "Keyword",
     "keyword": "Keyword",
     "scope": "Validation Scope",
-    "scope_both": "Both",
-    "scope_title": "Title",
-    "scope_description": "Description",
+    "scope_both": "Title and Description",
+    "scope_title": "Title only",
+    "scope_description": "Description only",
     "noBlacklist": "No blacklisted keywords yet",
     "noKeywords": "No keywords found",
     "copyright": "© {{year}} Zonds Platform. All rights reserved."
