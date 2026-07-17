@@ -4,28 +4,16 @@ import { OrderCostCaptureStatus } from '@repo/shared';
 import { DatabaseService } from '../../common/database/database.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
-import { AmazonScrapingService, type AmazonListOrderRow } from './amazon-scraping.service';
-import { scoreAmazonOrderMatch } from './order-matcher';
+import { AmazonScrapingService } from './amazon-scraping.service';
+import {
+  pickBestMatch,
+  type CandidateEbayOrderRow,
+} from './pick-best-match';
 
 interface AmazonAccountSyncRow {
   id: string;
   user_id: string;
   last_orders_sync_at: Date | null;
-}
-
-interface CandidateEbayOrderRow {
-  id: string;
-  ebay_order_id: string;
-  asin: string | null;
-  quantity: number;
-  sale_total: string | number;
-  order_date: Date;
-}
-
-interface MatchPick {
-  orderId: string;
-  ebayOrderId: string;
-  score: number;
 }
 
 /**
@@ -80,7 +68,13 @@ export class AmazonOrderSyncService {
     // purchase lag) — subsequent runs use the previous successful timestamp.
     const since = account.last_orders_sync_at ?? new Date(Date.now() - 30 * 86_400_000);
 
-    let amazonOrders: AmazonListOrderRow[];
+    // Discriminated scrape result: rows + suspect flag. `suspect` marks a
+    // 0-row scrape that we cannot confidently call "legit empty" (Amazon
+    // redirected off the orders page, or page-1 order-card lookup returned
+    // zero matches — broken selector / unrendered DOM). A suspect 0-row
+    // result MUST NOT advance the watermark — next tick re-pulls the same
+    // window so we don't silently drop orders forever.
+    let amazonOrders;
     try {
       amazonOrders = await this.scraping.scrapeAccountOrders(account.user_id, accountId, since);
     } catch (err) {
@@ -92,7 +86,19 @@ export class AmazonOrderSyncService {
       throw err;
     }
 
-    if (amazonOrders.length === 0) {
+    if (amazonOrders.rows.length === 0) {
+      if (amazonOrders.suspect) {
+        // Data-failure analog (mirrors Keepa refresh pipeline discipline): a
+        // 0-row scrape on a suspect page is NOT a legit empty — do NOT advance
+        // the watermark, let the next scheduler tick retry the same window.
+        // We do not throw (avoids a BullMQ retry storm on a persistent Amazon
+        // layout change; the 30-min scheduler cadence naturally re-tries).
+        this.logger.warn(
+          `Account ${accountId}: suspect 0-row scrape (page not orders or no cards on page 1) ` +
+            `— NOT advancing watermark; next tick will retry since ${since.toISOString()}.`,
+        );
+        return;
+      }
       this.logger.debug(`Account ${accountId}: no orders since ${since.toISOString()}.`);
       await this.advanceSyncedAt(accountId);
       return;
@@ -118,17 +124,36 @@ export class AmazonOrderSyncService {
 
     if (candidates.length === 0) {
       this.logger.debug(
-        `Account ${accountId}: ${amazonOrders.length} Amazon orders but no pending eBay candidates.`,
+        `Account ${accountId}: ${amazonOrders.rows.length} Amazon orders but no pending eBay candidates.`,
       );
       await this.advanceSyncedAt(accountId);
       return;
     }
 
+    // Track eBay candidate order IDs already consumed by a prior Amazon order
+    // in this run, so two Amazon rows can't both write to the same eBay order.
+    // (The strict matcher could otherwise pick the same eBay row twice when
+    // two Amazon orders have identical ASIN/qty/amount/date signatures.)
+    const consumedEbayOrderIds = new Set<string>();
     let linked = 0;
-    for (const ao of amazonOrders) {
+    for (const ao of amazonOrders.rows) {
       try {
-        const best = this.pickBestMatch(ao, candidates);
+        const best = pickBestMatch({
+          amazon: ao,
+          candidates,
+          tolerancePct: this.tolerancePct,
+          windowDays: this.windowDays,
+        });
         if (!best) {continue;} // strict matcher — never force-link
+        if (consumedEbayOrderIds.has(best.ebayOrderId)) {
+          // Already linked to an earlier Amazon order this run — skip rather
+          // than overwrite the prior write.
+          this.logger.warn(
+            `Account ${accountId}: eBay order ${best.ebayOrderId} already consumed ` +
+              `this run — skipping Amazon order ${ao.amazonOrderId}.`,
+          );
+          continue;
+        }
 
         await this.databaseService.query(
           `UPDATE orders SET
@@ -152,6 +177,10 @@ export class AmazonOrderSyncService {
           ],
         );
 
+        // Mark this eBay candidate as consumed BEFORE recompute so any later
+        // Amazon row in this loop can't pick the same one.
+        consumedEbayOrderIds.add(best.ebayOrderId);
+
         // Recompute net_profit + fees from the freshly-persisted costs. Sets
         // cost_capture_status authoritatively (matches what we just wrote).
         await this.orderSync.recomputeProfit(best.ebayOrderId);
@@ -165,44 +194,10 @@ export class AmazonOrderSyncService {
     }
 
     this.logger.log(
-      `Account ${accountId}: linked ${linked}/${amazonOrders.length} Amazon orders ` +
+      `Account ${accountId}: linked ${linked}/${amazonOrders.rows.length} Amazon orders ` +
         `(candidates: ${candidates.length}).`,
     );
     await this.advanceSyncedAt(accountId);
-  }
-
-  /**
-   * Pick the highest-scoring eBay candidate for an Amazon order. Returns null
-   * when no candidate passes the strict matcher — caller MUST treat that as a
-   * no-op (never force-link).
-   */
-  private pickBestMatch(
-    ao: AmazonListOrderRow,
-    candidates: CandidateEbayOrderRow[],
-  ): MatchPick | null {
-    let best: MatchPick | null = null;
-    for (const c of candidates) {
-      const result = scoreAmazonOrderMatch({
-        amazon: {
-          asin: ao.asin,
-          quantity: ao.quantity,
-          grandTotal: ao.grandTotal,
-          orderDate: ao.orderDate.toISOString(),
-        },
-        ebay: {
-          asin: c.asin ?? undefined,
-          quantity: c.quantity,
-          saleTotal: Number(c.sale_total),
-          orderDate: c.order_date.toISOString(),
-        },
-        tolerancePct: this.tolerancePct,
-        windowDays: this.windowDays,
-      });
-      if (result.match && (!best || result.score > best.score)) {
-        best = { orderId: c.id, ebayOrderId: c.ebay_order_id, score: result.score };
-      }
-    }
-    return best;
   }
 
   private async advanceSyncedAt(accountId: string): Promise<void> {

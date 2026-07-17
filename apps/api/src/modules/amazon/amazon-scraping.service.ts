@@ -32,6 +32,19 @@ export interface AmazonListOrderRow {
   orderDate: Date;
 }
 
+/**
+ * Discriminated scrape result for `scrapeAccountOrders`. `suspect` flags a
+ * 0-row scrape that we cannot confidently call "legit empty" — either Amazon
+ * redirected away from the orders URL (captcha / signin / soft-block) OR the
+ * first page had zero order cards (broken selector or unrendered DOM). In both
+ * cases the caller MUST NOT advance `last_orders_sync_at` — next tick re-pulls
+ * the same window. A non-empty `rows` always implies `suspect = false`.
+ */
+export interface ScrapedAccountOrders {
+  rows: AmazonListOrderRow[];
+  suspect: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // FRAGILE: Amazon "Your Orders" list-page DOM selectors.
 //
@@ -255,7 +268,7 @@ export class AmazonScrapingService {
     userId: string,
     amazonAccountId: string,
     since: Date,
-  ): Promise<AmazonListOrderRow[]> {
+  ): Promise<ScrapedAccountOrders> {
     return this.rateLimiter.schedule(amazonAccountId, () =>
       this.doScrapeAccountOrders(userId, amazonAccountId, since),
     );
@@ -265,7 +278,7 @@ export class AmazonScrapingService {
     userId: string,
     amazonAccountId: string,
     since: Date,
-  ): Promise<AmazonListOrderRow[]> {
+  ): Promise<ScrapedAccountOrders> {
     const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
 
     const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
@@ -309,6 +322,13 @@ export class AmazonScrapingService {
         await page.waitForTimeout(1500);
       }
 
+      // Redirect-recheck: after signin recovery, if the URL still doesn't look
+      // like the orders page (captcha / verify-email / soft-block / wrong-path
+      // redirect), mark the scrape suspect so the caller does NOT advance the
+      // watermark. A 0-row result from a non-orders page is NOT a legit empty.
+      const postNavUrl = page.url();
+      let suspect = !postNavUrl.includes('/your-orders/orders');
+
       const results: AmazonListOrderRow[] = [];
       const sinceMs = since.getTime();
       let walkedPastSince = false;
@@ -318,9 +338,21 @@ export class AmazonScrapingService {
         const cards = await this.locateOrderCards(page);
         const cardCount = await cards.count().catch(() => 0);
         if (cardCount === 0) {
-          this.logger.debug(
-            `Account ${amazonAccountId}: no order cards on page ${pageNum} — stopping.`,
-          );
+          // 0 cards on page 1 is the canary for a broken-selector regression
+          // or unrendered DOM — treat as suspect so the watermark isn't
+          // advanced. 0 cards on later pages is the natural end of pagination
+          // and is NOT suspect.
+          if (pageNum === 1) {
+            suspect = true;
+            this.logger.warn(
+              `Account ${amazonAccountId}: no order cards on page 1 — ` +
+                `possible DOM/selector regression (suspect scrape).`,
+            );
+          } else {
+            this.logger.debug(
+              `Account ${amazonAccountId}: no order cards on page ${pageNum} — stopping.`,
+            );
+          }
           break;
         }
 
@@ -367,10 +399,15 @@ export class AmazonScrapingService {
       await this.browserStateManager.saveState(amazonAccountId);
       await this.accountsService.markUsed(amazonAccountId);
 
+      // A non-empty result cannot be suspect by construction — we found real
+      // order cards and parsed them. Clear any transient suspect flag set
+      // before the loop navigated to a good page.
+      const finalSuspect = results.length > 0 ? false : suspect;
       this.logger.log(
-        `Account ${amazonAccountId}: scraped ${results.length} orders since ${since.toISOString()}`,
+        `Account ${amazonAccountId}: scraped ${results.length} orders since ${since.toISOString()}` +
+          (finalSuspect ? ' (SUSPECT — watermark will not advance)' : ''),
       );
-      return results;
+      return { rows: results, suspect: finalSuspect };
     } finally {
       await page.close();
     }
