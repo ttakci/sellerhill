@@ -113,6 +113,7 @@
     },
     {
       "files": ["*.config.js", "*.config.ts", "*.config.mjs"],
+      "env": { "node": true },
       "rules": {
         "no-console": "off",
         "@typescript-eslint/no-var-requires": "off"
