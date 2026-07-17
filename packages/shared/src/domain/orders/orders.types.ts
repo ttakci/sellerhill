@@ -35,6 +35,8 @@ export interface OrderDto {
   status: OrderStatus;
   orderFulfillmentStatus?: string;
   paymentStatus?: string;
+  /** Confidence tier of Amazon cost capture (drives dashboard profit aggregation). */
+  costCaptureStatus?: OrderCostCaptureStatus;
 
   // Product
   product?: {

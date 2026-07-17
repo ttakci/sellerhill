@@ -13,6 +13,7 @@ export interface PeriodMetricsDto {
   refunds: number;
   /** SUM(ebay_earnings - purchase_price) on non-cancelled */
   grossProfit: number;
+  /** Headline net profit = linked (trusted) only. Equals profitConfirmed. */
   netProfit: number;
   /** SUM(ebay_earnings) on non-cancelled */
   estimatedPayout: number;
@@ -24,6 +25,21 @@ export interface PeriodMetricsDto {
   trend: number | null;
   /** Net profit % change vs comparable previous period */
   profitTrend: number | null;
+  /**
+   * Tiered profit aggregates by cost-capture confidence.
+   * Headline `netProfit` = `profitConfirmed` (linked orders only, trusted costs).
+   */
+  profitConfirmed: number;
+  /** SUM(net_profit) where cost_capture_status = 'provisional' (product-only costs). */
+  profitProvisional: number;
+  /** SUM(sale_total) where cost_capture_status in ('pending','failed','untracked'). */
+  revenueUncosted: number;
+  /** # of non-cancelled orders with cost_capture_status = 'pending'. */
+  ordersPendingCapture: number;
+  /** # of non-cancelled orders with cost_capture_status = 'failed'. */
+  ordersCaptureFailed: number;
+  /** # of non-cancelled orders with cost_capture_status = 'untracked'. */
+  ordersUntracked: number;
 }
 
 export type DashboardPeriodKey = 'today' | 'thisWeek' | 'thisMonth' | 'thisYear';
@@ -69,6 +85,10 @@ export interface DashboardHistoryMonth {
   ebayEarnings: number;
   grossProfit: number;
   netProfit: number;
+  /** Linked-only net profit (trusted costs) — same definition as PeriodMetricsDto.profitConfirmed. */
+  profitConfirmed: number;
+  /** Provisional net profit (product-only costs). */
+  profitProvisional: number;
   estimatedPayout: number;
   margin: number;
 }

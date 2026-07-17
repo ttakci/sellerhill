@@ -51,6 +51,12 @@ const EMPTY_PERIOD: PeriodMetricsDto = {
   avgOrderValue: 0,
   trend: null,
   profitTrend: null,
+  profitConfirmed: 0,
+  profitProvisional: 0,
+  revenueUncosted: 0,
+  ordersPendingCapture: 0,
+  ordersCaptureFailed: 0,
+  ordersUntracked: 0,
 };
 
 const PERIOD_KEYS: DashboardPeriodKey[] = ['today', 'thisWeek', 'thisMonth', 'thisYear'];
