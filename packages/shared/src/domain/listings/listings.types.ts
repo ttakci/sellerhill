@@ -166,8 +166,14 @@ export interface EbayBusinessPolicyDto {
  * Server-side listings list query (pagination + filter + sort).
  * Mirrors orders list pattern — never load the full catalog for table UIs.
  */
-/** Stock/preset filter used by listings all (easync-style). */
-export type ListingsStockPreset = 'all' | 'in_stock' | 'oos';
+/** Stock/preset filter used by listings all (easync-style). in_stock = quantity > 0, oos = quantity = 0. */
+export const LISTINGS_STOCK_PRESETS = ['all', 'in_stock', 'oos'] as const;
+export type ListingsStockPreset = (typeof LISTINGS_STOCK_PRESETS)[number];
+
+/** Type guard for query-param parsing (raw string -> ListingsStockPreset | undefined). */
+export function isListingsStockPreset(value: unknown): value is ListingsStockPreset {
+  return typeof value === 'string' && (LISTINGS_STOCK_PRESETS as readonly string[]).includes(value);
+}
 
 export interface ListingsQueryDto {
   page?: number;

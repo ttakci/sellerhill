@@ -21,6 +21,7 @@ import {
   type PaginatedListingsDto,
   ProductData,
   type UpdateListingRequest,
+  isListingsStockPreset,
 } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -86,7 +87,7 @@ export class ListingsController {
       limit: num(limit),
       search,
       status,
-      stockPreset,
+      stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
       ebayAccountId,
       category,
       sortBy,
@@ -163,7 +164,7 @@ export class ListingsController {
     const query: ListingsQueryDto = {
       search,
       status,
-      stockPreset,
+      stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
       ebayAccountId,
       category,
       sortBy,
