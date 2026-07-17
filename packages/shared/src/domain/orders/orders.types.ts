@@ -7,6 +7,18 @@ export enum OrderStatus {
   WAITING_SHIPMENT = 'waiting_shipment',
 }
 
+/**
+ * Confidence/state of Amazon cost capture for an order.
+ * Drives which profit tier an order belongs to on the dashboard.
+ */
+export enum OrderCostCaptureStatus {
+  PENDING = 'pending', // eBay order in, nothing captured yet, product cost unknown
+  LINKED = 'linked', // Amazon costs fully captured (scraped from a real Amazon order) — TRUSTED
+  PROVISIONAL = 'provisional', // product/purchase cost known, Amazon tax+shipping not yet captured
+  FAILED = 'failed', // Amazon scrape ran but returned no usable data; prior values retained
+  UNTRACKED = 'untracked', // no listing match; source cost can never be known
+}
+
 export interface OrderDto {
   id: string;
   ebayOrderId: string;
