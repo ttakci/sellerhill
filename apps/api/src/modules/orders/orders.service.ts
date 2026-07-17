@@ -6,6 +6,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   EbayAccountStatus,
+  OrderCostCaptureStatus,
   OrderStatus,
   type OrderDto,
   type OrderFiltersDto,
@@ -45,6 +46,7 @@ interface OrderRow {
   transaction_fee: string;
   ad_fee: string;
   net_profit: string;
+  cost_capture_status: string;
   shipping_address: {
     street?: string;
     city?: string;
@@ -387,6 +389,9 @@ export class OrdersService {
       buyerPhone: row.buyer_phone || undefined,
       buyerUsername: row.buyer_username || undefined,
       status: row.status as OrderStatus,
+      costCaptureStatus: row.cost_capture_status
+        ? (row.cost_capture_status as OrderCostCaptureStatus)
+        : undefined,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
       product: hasListing

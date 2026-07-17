@@ -142,10 +142,16 @@ export class OrderSyncService {
 
           const { inserted } = await this.upsertOrder(entity);
 
-          // Recompute net_profit + cost_capture_status for every order —
-          // untracked orders get UNTRACKED + NULL net_profit rather than
-          // silently being skipped.
-          await this.recomputeProfit(entity.ebayOrderId);
+          // Recompute net_profit + cost_capture_status only for brand-new
+          // inserts. Re-syncs that changed ebay_earnings are already handled
+          // inside upsertOrder (conditional recompute on earnings delta), and
+          // unchanged re-syncs have no recompute-triggering field: listing_id
+          // and purchase_price are excluded from ON CONFLICT DO UPDATE SET, so
+          // only earnings can move on an existing row. Gating here avoids one
+          // redundant recompute roundtrip per changed-earnings re-sync.
+          if (inserted) {
+            await this.recomputeProfit(entity.ebayOrderId);
+          }
 
           // Sale-driven stock sync: only for a genuinely NEW order matched to one
           // of our listings. We KNOW this sale happened, so deplete the shared

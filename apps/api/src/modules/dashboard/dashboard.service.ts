@@ -116,6 +116,11 @@ export class DashboardService {
    */
   private periodSelect(): string {
     const c = OrderStatus.CANCELLED;
+    const linked = OrderCostCaptureStatus.LINKED;
+    const provisional = OrderCostCaptureStatus.PROVISIONAL;
+    const pending = OrderCostCaptureStatus.PENDING;
+    const failed = OrderCostCaptureStatus.FAILED;
+    const untracked = OrderCostCaptureStatus.UNTRACKED;
     return `
       COALESCE(SUM(sale_total) FILTER (WHERE status <> '${c}'), 0) AS sales,
       COUNT(*) FILTER (WHERE status <> '${c}') AS orders,
@@ -124,12 +129,12 @@ export class DashboardService {
       COALESCE(SUM(COALESCE(ebay_earnings, 0) - COALESCE(purchase_price, 0))
         FILTER (WHERE status <> '${c}'), 0) AS gross_profit,
       COALESCE(SUM(COALESCE(ebay_earnings, 0)) FILTER (WHERE status <> '${c}'), 0) AS payout,
-      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = 'linked'), 0) AS profit_confirmed,
-      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = 'provisional'), 0) AS profit_provisional,
-      COALESCE(SUM(sale_total) FILTER (WHERE status <> '${c}' AND cost_capture_status IN ('pending','failed','untracked')), 0) AS revenue_uncosted,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = 'pending') AS orders_pending_capture,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = 'failed') AS orders_capture_failed,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = 'untracked') AS orders_untracked
+      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${linked}'), 0) AS profit_confirmed,
+      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${provisional}'), 0) AS profit_provisional,
+      COALESCE(SUM(sale_total) FILTER (WHERE status <> '${c}' AND cost_capture_status IN ('${pending}','${failed}','${untracked}')), 0) AS revenue_uncosted,
+      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${pending}') AS orders_pending_capture,
+      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${failed}') AS orders_capture_failed,
+      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${untracked}') AS orders_untracked
     `;
   }
 
@@ -357,6 +362,7 @@ export class DashboardService {
     }
 
     const cancelled = OrderStatus.CANCELLED;
+    const linked = OrderCostCaptureStatus.LINKED;
     const results = await this.databaseService.query<{
       date: Date;
       revenue: string;
@@ -366,7 +372,7 @@ export class DashboardService {
       `SELECT
         DATE(order_date) as date,
         COALESCE(SUM(sale_total) FILTER (WHERE status <> '${cancelled}'), 0) as revenue,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = 'linked'), 0) as profit,
+        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${linked}'), 0) as profit,
         COUNT(*) FILTER (WHERE status <> '${cancelled}') as orders
        FROM orders
        WHERE user_id = $1 AND order_date >= CURRENT_DATE - INTERVAL '1 day' * $2 ${store.sql}
@@ -557,6 +563,8 @@ export class DashboardService {
       params.push(ebayAccountId);
     }
     const cancelled = OrderStatus.CANCELLED;
+    const linked = OrderCostCaptureStatus.LINKED;
+    const provisional = OrderCostCaptureStatus.PROVISIONAL;
 
     const results = await this.databaseService.query<{
       period: Date;
@@ -589,8 +597,8 @@ export class DashboardService {
         COALESCE(SUM(CASE WHEN status <> '${cancelled}'
           THEN COALESCE(ebay_earnings, 0) - COALESCE(purchase_price, 0) ELSE 0 END), 0) as gross_profit,
         COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN net_profit ELSE 0 END), 0) as profit,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = 'linked'), 0) as profit_confirmed,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = 'provisional'), 0) as profit_provisional,
+        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${linked}'), 0) as profit_confirmed,
+        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${provisional}'), 0) as profit_provisional,
         COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(ebay_earnings, 0) ELSE 0 END), 0) as payout
        FROM orders
        WHERE user_id = $1
