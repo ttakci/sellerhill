@@ -73,6 +73,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       validateTitle,
       validateDescription,
       blacklist,
+      // Preserve existing tax rate through this drawer (UI for editing lands in a later task).
+      amazonTaxRate: config?.amazonTaxRate ?? 0,
     };
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */

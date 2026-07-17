@@ -155,6 +155,8 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       validateTitle: config?.validateTitle ?? true,
       validateDescription: config?.validateDescription ?? false,
       blacklist: blacklist.map((b) => ({ keyword: b.keyword, scope: b.scope })),
+      // Preserve existing tax rate through this drawer (UI for editing lands in a later task).
+      amazonTaxRate: config?.amazonTaxRate ?? 0,
     };
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */

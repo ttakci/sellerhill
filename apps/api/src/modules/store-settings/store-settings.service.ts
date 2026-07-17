@@ -17,6 +17,7 @@ interface StoreSettingsEntity {
   validate_title: boolean;
   validate_description: boolean;
   blacklist: string; // JSON string in DB
+  amazon_tax_rate: string | number; // NUMERIC(5,2) — coerced via Number() in mapper
   created_at: Date;
   updated_at: Date;
 }
@@ -63,6 +64,7 @@ export class StoreSettingsService {
         validateTitle: true,
         validateDescription: false,
         blacklist: [],
+        amazonTaxRate: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -92,7 +94,17 @@ export class StoreSettingsService {
    * Save settings
    */
   async saveSettings(userId: string, dto: SaveStoreSettingsRequest): Promise<StoreSettingsResponse> {
-    const { isGlobal, storeId, country, state, zipCode, validateTitle, validateDescription, blacklist } = dto;
+    const {
+      isGlobal,
+      storeId,
+      country,
+      state,
+      zipCode,
+      validateTitle,
+      validateDescription,
+      blacklist,
+      amazonTaxRate,
+    } = dto;
 
     const blacklistJson = JSON.stringify(blacklist);
 
@@ -102,39 +114,41 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist)
-            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate)
+            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
-            DO UPDATE SET 
+            DO UPDATE SET
                 country = EXCLUDED.country,
                 state = EXCLUDED.state,
                 zip_code = EXCLUDED.zip_code,
                 validate_title = EXCLUDED.validate_title,
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
+                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
-        [userId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]
+        [userId, country, state, zipCode, validateTitle, validateDescription, blacklistJson, amazonTaxRate]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist)
-            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate)
+            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
-            DO UPDATE SET 
+            DO UPDATE SET
                 country = EXCLUDED.country,
                 state = EXCLUDED.state,
                 zip_code = EXCLUDED.zip_code,
                 validate_title = EXCLUDED.validate_title,
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
+                amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
-        [userId, storeId, country, state, zipCode, validateTitle, validateDescription, blacklistJson]
+        [userId, storeId, country, state, zipCode, validateTitle, validateDescription, blacklistJson, amazonTaxRate]
       );
     }
 
@@ -160,6 +174,7 @@ export class StoreSettingsService {
       validateTitle: entity.validate_title,
       validateDescription: entity.validate_description,
       blacklist: parsedBlacklist,
+      amazonTaxRate: Number(entity.amazon_tax_rate) || 0,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

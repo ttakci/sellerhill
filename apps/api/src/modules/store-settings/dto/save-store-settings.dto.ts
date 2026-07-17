@@ -9,6 +9,9 @@ import {
   IsArray,
   ValidateNested,
   IsIn,
+  IsNumber,
+  Min,
+  Max,
 } from 'class-validator';
 
 class BlacklistKeywordDto implements Omit<BlacklistKeyword, 'id'> {
@@ -52,6 +55,15 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsString()
   @IsNotEmpty()
   zipCode!: string;
+
+  @ApiProperty({
+    description: 'Default Amazon tax rate (percent 0–100) used to estimate provisional order profit',
+    example: 7,
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  amazonTaxRate!: number;
 
   @ApiProperty({ description: 'Whether to validate titles', example: true })
   @IsBoolean()

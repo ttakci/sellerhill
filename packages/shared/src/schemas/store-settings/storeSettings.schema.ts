@@ -15,15 +15,17 @@ export const blacklistKeywordSchema = (t: TFunction) => z.object({
 export const storeSettingsSchema = (t: TFunction) => z.object({
   isGlobal: z.boolean(),
   storeId: z.string().optional(),
-  
+
   country: z.string().min(1, t('validation.countryRequired')),
   state: z.string().min(1, t('validation.stateRequired')),
   zipCode: z.string().min(1, t('validation.zipCodeRequired')),
-  
+
   validateTitle: z.boolean(),
   validateDescription: z.boolean(),
-  
+
   blacklist: z.array(blacklistKeywordSchema(t)),
+
+  amazonTaxRate: z.number().min(0).max(100),
 });
 
 export type StoreSettingsFormData = z.infer<ReturnType<typeof storeSettingsSchema>>;
