@@ -32,7 +32,7 @@ pnpm docker:logs      # Follow logs
 pnpm docker:clean     # Remove containers and volumes
 ```
 
-Packages must be built before apps can run (`pnpm dev` handles this automatically). No tests exist yet — Jest and ts-jest are installed but unused.
+Packages must be built before apps can run (`pnpm dev` handles this automatically). `apps/api` has a **minimal Jest harness** for pure-logic helpers only: `pnpm --filter api test` (config at `apps/api/jest.config.js`, CJS + ts-jest, with a `@repo/shared → dist/cjs` moduleNameMapper and a `uuid` CJS shim for uuid@13 ESM). Covered: `profit-calculation.ts`, `order-matcher.ts`, `pick-best-match.ts`, `amazon-order-parser.service.ts`. DB/queue/NestJS layer is still manual-verified — integration tests are deferred (deliberate, not a gap). `apps/web` has no tests yet.
 
 ## Architecture
 
@@ -171,8 +171,11 @@ eBay Order → Order Sync (BullMQ, every 15 min) → orders table
 orders.listing_id → listings → products (title, image, ASIN via JOIN)
   ↓ (NEW order only, xmax-detected insert)
 Sale-Driven Stock Sync → products.stock decremented → stock-sync queue → recompute + push eBay
-  ↓ (user links Amazon order)
-Amazon Account + Amazon Order ID → Playwright scraping → order costs updated
+  ↓ (automatic, every 30 min per Amazon account)
+Amazon Order Auto Cost-Capture (amazon-order-sync queue) → scrape account order list
+  → strict-match ASIN+qty+amount+date to pending/provisional eBay orders → write real costs → LINKED
+  ↓ (or user manually links an Amazon Order ID)
+Amazon Account + Amazon Order ID → Playwright scraping → order costs updated → recomputeProfit
   ↓ (automatic)
 Amazon Order Tracking (BullMQ, per-order scheduler) → Amazon status polling → eBay status sync
 ```
@@ -190,6 +193,19 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 ```
 - `ebayEarnings` = eBay's `totalDueSeller` (already deducts all eBay fees)
 - `transactionFee` and `adFee` are calculated and stored for display only, NOT deducted again
+- **`net_profit` is NULLABLE** (migration `033`): `NULL` = unknown cost (never faked); `0` = a computed real zero (trusted Amazon link with costs that legitimately sum to zero, e.g. free shipping + no tax). Aggregations `FILTER` out NULL rows rather than treating them as 0.
+- **`cost_capture_status` enum** (`packages/shared` `OrderCostCaptureStatus`, DB type `order_cost_capture_status`) drives profit confidence. Values:
+  - `pending` — eBay order ingested, nothing captured yet, product cost unknown.
+  - `linked` — Amazon costs fully scraped from a real Amazon order. **TRUSTED**: only status that produces a headline `net_profit`.
+  - `provisional` — listing matched so product/purchase cost is known, but Amazon tax+shipping not yet captured (awaiting auto cost-capture or manual link).
+  - `failed` — Amazon scrape ran but returned no usable financials; prior values retained, `net_profit` stays NULL.
+  - `untracked` — no listing match (`listing_id IS NULL`); source cost can never be resolved. Stays NULL forever.
+- **Single writer**: `OrderSyncService.recomputeProfit(ebayOrderId, { scrapeFailed? })` is the only method that sets `cost_capture_status`. Called on order insert, on `ebay_earnings` change during re-sync, and after every Amazon link / cost-capture path. Renamed from `recalculateProfit` (old name still appears in git history only).
+- **Dashboard profit tiers** (`GET /dashboard`, `dashboard.service.ts buildPeriod`):
+  - `confirmed` = `SUM(net_profit) FILTER (status <> cancelled AND cost_capture_status = 'linked')` — the **headline** `netProfit` shown on period cards. Trusted only.
+  - `provisional` = same filter with `cost_capture_status = 'provisional'` — shown separately as a lower-confidence addendum.
+  - `uncosted` = `SUM(sale_total) FILTER (cost_capture_status IN ('pending','failed','untracked'))` — **revenue only**, no profit implied.
+- **ASIN availability for untracked fallback (open question — resolved)**: eBay's inbound order payload does **not** expose the item ASIN; the listing-match path uses `lineItems[].legacyItemId` → `listings.ebay_item_id`. The `recomputeProfit` ASIN fallback resolves via `orders.listing_id → listings → products.asin` JOIN, which is only available when a listing matched. For truly untracked orders (no listing) the ASIN is **not resolvable** from the eBay payload — those rows correctly stay `untracked` + `NULL net_profit`. The auto cost-capture matcher's ASIN signal comes from the same JOIN on the eBay candidate side (Amazon side ASIN comes from the scrape).
 
 ### Order Sync (eBay → Local)
 - **Queue**: `order-sync` (BullMQ), cron every 15 min
@@ -198,6 +214,7 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 - **Cache tracking**: `ebay_accounts.last_ebay_sync_at` — sync fetches only orders since last sync
 - **Listing matching**: Uses `lineItem.legacyItemId` → `listings.ebay_item_id` to establish `listing_id`
 - **Idempotency**: `upsertOrder()` uses Postgres `RETURNING id, (xmax = 0) AS inserted` to detect brand-new orders vs re-synced updates — one-time side effects (stock decrement) only fire on genuine inserts
+- **Re-sync cost recompute**: when an existing order's `ebay_earnings` changes on re-sync (delta > $0.001), `OrderSyncService.recomputeProfit(ebayOrderId)` is re-invoked so `net_profit` + fees reflect the corrected earnings. `cost_capture_status` is preserved/advanced, never reset to `pending`.
 
 ### Sale-Driven Stock Sync (between Keepa refresh cycles)
 - **Why**: A confirmed eBay sale is real signal that Amazon stock dropped, so we don't wait for the next Keepa refresh cycle to correct eBay quantities.
@@ -208,12 +225,35 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 - **Best-effort & idempotent**: stock sync is wrapped so it never fails order sync; the worker re-reads `products.stock` at execution time, so delayed/coalesced jobs re-push the correct current value. The Keepa refresh pipeline resets `products.stock` to Amazon ground truth.
 - **Rate-limit hygiene**: BullMQ `jobId` bucketed per 5s window per product collapses a burst of sales into one job; `attempts: 3` + exponential backoff; `EbayService.withRateLimitRetry` honours `Retry-After` on 429/5xx.
 
-### Amazon Order Linking
+### Amazon Order Linking (manual)
 - User provides Amazon Order ID + selects an Amazon Account
 - `AmazonScrapingService` scrapes the Amazon order detail page via Playwright
-- Scraped data (purchase price, tax, shipping, tracking) written to order
-- `recalculateProfit()` triggered with actual Amazon costs
+- Scraped data (purchase price, tax, shipping, tracking) written to order, `amazon_linked_at` set
+- If the scrape reached the page but the financial DOM was empty, the caller preserves prior costs and invokes `OrderSyncService.recomputeProfit(ebayOrderId, { scrapeFailed: true })` to mark `cost_capture_status = failed` (never silently zero-fills)
+- On a successful link, `recomputeProfit(ebayOrderId)` runs with the real costs already on the row → sets `cost_capture_status = linked` and computes a trusted `net_profit`
 - Tracking job started immediately for the order
+
+### Amazon Order Auto Cost-Capture (`amazon-order-sync` queue)
+Automatically links Amazon costs to pending/provisional eBay orders without manual order-ID entry. One BullMQ job per Amazon buyer account scrapes that account's "Your Orders" list, then strict-matches each scraped Amazon order to an eBay candidate and writes real costs.
+
+- **Queue**: `amazon-order-sync` (BullMQ, `AMAZON_ORDER_SYNC_QUEUE`). Cron `AMAZON_ORDER_SYNC_CRON` (default `*/30 * * * *` — every 30 min), one job per Amazon account. Concurrency: `AMAZON_ORDER_SYNC_CONCURRENCY` (default 2).
+- **Per-account flow** (`AmazonOrderSyncService.runForAccount`):
+  1. Select candidate eBay orders for the user with `cost_capture_status IN ('pending','provisional')` and `order_date >= NOW() - 60 days` (ASIN resolved via `orders → listings → products` JOIN).
+  2. `AmazonScrapingService.scrapeAccountOrders(userId, accountId, since)` — Playwright scrape of the account's order list since `amazon_accounts.last_orders_sync_at` (first sync defaults to 30-day look-back). Returns `{ rows, suspect }`.
+  3. For each Amazon order, `pickBestMatch` (pure helper) picks the highest-scoring eBay candidate via `scoreAmazonOrderMatch` (**strict**: requires ALL of same ASIN + same quantity + amount within tolerance + date within window; any miss → no match, never force-link).
+  4. On a confident match: write Amazon `purchase_price`/`amazon_tax`/`amazon_shipping`, set `amazon_linked_at`, set `cost_capture_status = linked`, call `recomputeProfit(ebayOrderId)` → trusted `net_profit`.
+  5. Misses stay `pending`/`provisional` for the next tick or manual linking.
+- **Watermark discipline** (Keepa-aligned, no silent drops):
+  - **Transport failure** (Playwright crash, Amazon 5xx, network): `scrapeAccountOrders` throws → BullMQ retries the whole job with exponential backoff; `last_orders_sync_at` is NOT advanced so the same window is re-pulled.
+  - **Suspect 0-row scrape** (page redirected off "Your Orders", or zero order-cards on page 1 — likely a layout/selector break): treated as a data failure, NOT a legit empty. Watermark is held (no advance) and the run returns without throwing — the 30-min scheduler naturally retries on the next tick, avoiding a BullMQ retry storm on a persistent Amazon layout change.
+  - **Legit empty / no candidates**: watermark advances normally.
+  - **Per-Amazon-order failure** in the match/write loop: logged and skipped, never fails the run (watermark still advances for the rest).
+- **Matching strictness** (`order-matcher.ts`): `scoreAmazonOrderMatch` requires identical ASIN (`+40`), identical quantity (`+20`), amount within `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT` percent (`+up to 40`, scaled by closeness), date within `AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS` (`+up to 20`, scaled by closeness). Score is informational; `match: true` requires ALL four gates to pass. Wrong cost attribution is treated as worse than no attribution — there is no "best effort" force-link path.
+- **Config (all optional, defaults shown):**
+  - `AMAZON_ORDER_SYNC_CRON='*/30 * * * *'` — scheduler tick (every 30 min).
+  - `AMAZON_ORDER_SYNC_CONCURRENCY=2` — parallel jobs (one per Amazon account).
+  - `AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT=5` — max percent diff between Amazon `grandTotal` and eBay `sale_total`.
+  - `AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS=7` — max day-delta between Amazon and eBay order dates (candidate pool itself is 60-day to cover slow ship paths).
 
 ### Amazon Order Tracking (Amazon → eBay Status Sync)
 - **Queue**: `amazon-tracking` (BullMQ, per-order schedulers)
@@ -243,8 +283,8 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
 - Currently forwards Amazon's real tracking number. Future: replace with generated fake tracking IDs for dropshipping.
 
 ### Key Files
-- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService, EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService
-- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService, AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService, AmazonRateLimiter, BrowserStateManager
+- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService. Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`), `*.spec.ts` unit tests.
+- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService, AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService, AmazonRateLimiter, BrowserStateManager, **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests).
 - **Backend products**: `src/modules/products/` — ProductsService (price/image lookup, `decrementStock` for sale-driven stock sync)
 - **Product refresh pipeline** (Keepa sole provider): `keepa.service.ts`, `refresh-scheduler.service.ts`, `refresh-processor.service.ts`, `keepa-usage.service.ts`, `product-sync.service.ts` — see "Product Refresh Pipeline" section above.
 - **Sale-driven stock sync**: `src/modules/orders/stock-sync-queue.service.ts` (producer) + `src/modules/listings/stock-sync-processor.service.ts` (consumer) + `ProductSyncService.syncListingsForProduct()` + `ListingStrategyService.calculateQuantity()` (canonical quantity formula)
@@ -374,6 +414,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 - **Chart tab**: monthly ComposedChart (units bar + sales/profit lines) + summary sidebar.
 - **History tab**: P&L matrix (metrics × months) from `dashboard.history.months`.
 - API: `GET /dashboard?ebayAccountId=` — metrics + chart + history. No day/week/month segmented control; no active-listings chip.
+- **Tiered profit** (per period): headline `netProfit` is **confirmed-only** (`cost_capture_status = 'linked'`, trusted Amazon costs). `profitProvisional` (product-only costs) and `revenueUncosted` (pending/failed/untracked — revenue only, no profit) are surfaced separately so users never confuse an unknown cost with a real zero. See "Net Profit Formula" for the enum semantics.
 
 ### Listings UX chrome (mobile-first SaaS)
 - Prefer **no** dense PageHeader action button clusters (Create / Export / End) on list/detail. Use overview QuickActions, SettingsCard rows, drawers, DataTable toolbar download, or a single mobile **Manage** sheet.
@@ -434,6 +475,8 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `030` | `listings.ebay_account_id` + backfill |
 | `031` | `listing_settings_groups.content` JSONB |
 | `032` | `listings.ebay_item_id` nullable (drafts before eBay publish) |
+| `033` | `orders.net_profit` nullable (NULL = unknown, 0 = real zero) + `cost_capture_status` enum + index + backfill from `amazon_linked_at`/`listing_id` |
+| `034` | `amazon_accounts.last_orders_sync_at` (watermark for the auto cost-capture scraper — migration `034`) |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
