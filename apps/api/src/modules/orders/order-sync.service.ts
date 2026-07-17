@@ -305,9 +305,15 @@ export class OrderSyncService {
    * - Resolves purchase cost by listing_id, then by ASIN fallback (eBay line item ASIN).
    * - Never fakes unknown costs: unknown -> net_profit NULL.
    * - Always sets cost_capture_status in the same UPDATE.
+   * - `opts.scrapeFailed: true` forces FAILED (used by linkAmazonOrder when the
+   *   scrape reached the page but the financial DOM was empty). The caller still
+   *   owns preserving prior costs; this method only reads what's already on the row.
    * Best-effort: logs and swallows errors so sync never fails.
    */
-  async recomputeProfit(ebayOrderId: string): Promise<void> {
+  async recomputeProfit(
+    ebayOrderId: string,
+    opts: { scrapeFailed?: boolean } = {},
+  ): Promise<void> {
     try {
       // Pull the order + product ASIN + settings-group fees in one go.
       const rows = await this.databaseService.query<{
@@ -341,14 +347,17 @@ export class OrderSyncService {
       const hasListingMatch = !!o.listing_id;
       const asinResolved = !!o.asin;
       const amazonLinked = !!o.amazon_linked_at;
-      const amazonCostsCaptured = amazonLinked && (Number(o.amazon_tax) > 0 || Number(o.amazon_shipping) > 0);
+      // A successful Amazon link genuinely captured costs — even if both tax and
+      // shipping legitimately sum to $0 (free shipping, no tax). Threshold is
+      // "is there a trusted link at all", not "did the sum exceed zero".
+      const amazonCostsCaptured = amazonLinked;
 
       const status = deriveCostCaptureStatus({
         hasListingMatch,
         asinResolved,
         amazonLinked,
         amazonCostsCaptured,
-        scrapeFailed: false, // scrape failure path sets this via linkAmazonOrder (Task 5) -> separate UPDATE
+        scrapeFailed: opts.scrapeFailed === true,
       });
 
       const purchasePrice = Number(o.purchase_price) || 0;

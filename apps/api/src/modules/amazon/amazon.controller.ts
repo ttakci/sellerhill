@@ -4,7 +4,6 @@ import {
   type AmazonAccountPublicDto,
   type CreateAmazonAccountDto,
   type LinkAmazonOrderDto,
-  OrderCostCaptureStatus,
   type UpdateAmazonAccountDto,
 } from '@repo/shared';
 
@@ -128,17 +127,13 @@ export class AmazonController {
       // Scrape reached the order page but the financial-summary DOM was missing
       // (or all values were 0/NaN). NEVER silently overwrite existing costs with
       // zeros — that would understate Amazon costs and overstate net profit.
-      // Mark the order FAILED, preserve prior values, recompute (so net_profit
-      // reflects the last known costs), and tell the FE via a structured reason.
+      // Preserve prior values; recompute with scrapeFailed:true so the row is
+      // authoritatively marked FAILED while net_profit reflects last-known costs.
+      // (No separate status UPDATE — recompute owns cost_capture_status now.)
       if (scrapedData.costCaptureFailed) {
-        await this.databaseService.query(
-          `UPDATE orders
-           SET cost_capture_status = $1,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE id = $2`,
-          [OrderCostCaptureStatus.FAILED, orderId]
-        );
-        await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id);
+        await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id, {
+          scrapeFailed: true,
+        });
         return {
           success: false,
           linked: false,
@@ -179,22 +174,11 @@ export class AmazonController {
         ]
       );
 
-      // Recalculate profit (writes net_profit + fees + cost_capture_status).
+      // Recompute net_profit + fees + cost_capture_status. The costs UPDATE above
+      // set amazon_linked_at, so the recomputer now derives LINKED directly
+      // (amazonCostsCaptured = amazonLinked) — even for a legitimate-$0 capture
+      // (free shipping + no tax). No force-LINKED UPDATE needed.
       await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id);
-
-      // Refinement (Task 5 review): a successful scrape genuinely captured
-      // Amazon costs — even if they legitimately sum to $0 (free shipping, no
-      // tax). The recomputer's "tax>0 || shipping>0" threshold would otherwise
-      // downgrade such orders to PROVISIONAL. Override to LINKED here so the
-      // order is correctly classified as a trusted capture. The recomputer's
-      // threshold logic itself is out of scope and unchanged.
-      await this.databaseService.query(
-        `UPDATE orders
-         SET cost_capture_status = $1,
-             updated_at = CURRENT_TIMESTAMP
-         WHERE id = $2`,
-        [OrderCostCaptureStatus.LINKED, orderId]
-      );
 
       // Start tracking this order
       await this.trackingQueueService.scheduleOrderTracking(orderId, dto.amazonAccountId);
