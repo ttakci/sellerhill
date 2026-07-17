@@ -45,7 +45,12 @@ export const amazonApi = baseApi.injectEndpoints({
       invalidatesTags: ['Amazon'],
     }),
     linkAmazonOrder: builder.mutation<
-      { success: boolean; message: string },
+      {
+        success: boolean;
+        message: string;
+        linked?: boolean;
+        reason?: 'cost_capture_failed';
+      },
       { orderId: string; amazonAccountId: string; amazonOrderId: string }
     >({
       query: ({ orderId, ...body }) => ({

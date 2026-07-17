@@ -47,7 +47,24 @@ export interface AmazonScrapedOrderData {
   trackingNumber?: string;
   trackingCarrier?: string;
   trackingUrl?: string;
+  /**
+   * True when the order page was reached but the financial summary could not be
+   * parsed (DOM changed or all values were zero/NaN). Consumers MUST NOT
+   * overwrite existing cost fields when this is true — see
+   * `AmazonController.linkAmazonOrder` (Task 5: scrape integrity).
+   */
+  costCaptureFailed: boolean;
 }
+
+/**
+ * Tagged result of Amazon order-financials extraction.
+ * - `ok: true` — at least one non-zero value was parsed.
+ * - `ok: false` — the summary selectors missed or every parsed value was 0/NaN;
+ *   callers must treat this as a scrape failure and never silently zero costs.
+ */
+export type AmazonFinancials =
+  | { ok: true; subtotal: number; shipping: number; tax: number; grandTotal: number }
+  | { ok: false };
 
 export interface AmazonOrderStatusResult {
   amazonOrderId: string;

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { AmazonScrapedOrderData } from '@repo/shared';
+import { type AmazonFinancials, type AmazonScrapedOrderData } from '@repo/shared';
 import type { Page } from 'playwright';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class AmazonOrderParserService {
     // Extract line items
     const items = await this.extractItems(page);
 
-    // Extract financial summary
+    // Extract financial summary (tagged result — ok:false means DOM miss)
     const financials = await this.extractFinancials(page);
 
     // Extract tracking info
@@ -24,13 +24,14 @@ export class AmazonOrderParserService {
       orderDate: await this.extractOrderDate(page),
       status: statusText,
       items,
-      subtotal: financials.subtotal,
-      shipping: financials.shipping,
-      tax: financials.tax,
-      grandTotal: financials.grandTotal,
+      subtotal: financials.ok ? financials.subtotal : 0,
+      shipping: financials.ok ? financials.shipping : 0,
+      tax: financials.ok ? financials.tax : 0,
+      grandTotal: financials.ok ? financials.grandTotal : 0,
       trackingNumber: tracking.trackingNumber,
       trackingCarrier: tracking.trackingCarrier,
       trackingUrl: tracking.trackingUrl,
+      costCaptureFailed: !financials.ok,
     };
   }
 
@@ -111,33 +112,54 @@ export class AmazonOrderParserService {
     return items;
   }
 
-  private async extractFinancials(page: Page): Promise<{
-    subtotal: number;
-    shipping: number;
-    tax: number;
-    grandTotal: number;
-  }> {
-    const defaultFinancials = { subtotal: 0, shipping: 0, tax: 0, grandTotal: 0 };
-
+  /**
+   * Extract the order financial summary from the page.
+   * Returns `{ ok: false }` when the summary section is missing OR every parsed
+   * value is zero/NaN — callers MUST treat this as a scrape failure and never
+   * overwrite existing cost fields with zeros (Task 5: scrape integrity).
+   * Tracking extraction is separate and unaffected.
+   */
+  private async extractFinancials(page: Page): Promise<AmazonFinancials> {
     // Financial summary is in an order-summary or payment-breakdown section
     const summarySection = page.locator('#orderSummary, .payment-breakdown, [data-component="orderSummary"]').first();
 
     if (!(await summarySection.isVisible({ timeout: 3000 }).catch(() => false))) {
       this.logger.warn('Could not find order summary section');
-      return defaultFinancials;
+      return { ok: false };
     }
 
-    const text = await summarySection.textContent().catch(() => '');
-    if (!text) {return defaultFinancials;}
+    const text = (await summarySection.textContent().catch(() => '')) ?? '';
+    return this.parseFinancialsFromText(text);
+  }
 
-    return {
-      subtotal: this.extractAmount(text, /subtotal[:\s]*\$?([\d,]+\.?\d*)/i),
-      shipping: this.extractAmount(text, /shipping[:\s]*\$?([\d,]+\.?\d*)/i),
-      tax: this.extractAmount(text, /tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
-        this.extractAmount(text, /estimated tax[:\s]*\$?([\d,]+\.?\d*)/i),
-      grandTotal: this.extractAmount(text, /grand total[:\s]*\$?([\d,]+\.?\d*)/i) ||
-        this.extractAmount(text, /total[:\s]*\$?([\d,]+\.?\d*)/i),
-    };
+  /**
+   * Pure text parser that backs `extractFinancials`. Exposed for unit tests
+   * (no Playwright Page dependency). Returns `{ ok: false }` when the text is
+   * empty or every parsed amount is 0/NaN — i.e. the DOM did not yield a
+   * trustworthy cost breakdown.
+   */
+  parseFinancialsFromText(text: string): AmazonFinancials {
+    if (!text) {
+      this.logger.warn('Amazon financials could not be parsed (empty summary text)');
+      return { ok: false };
+    }
+
+    const subtotal = this.extractAmount(text, /subtotal[:\s]*\$?([\d,]+\.?\d*)/i);
+    const shipping = this.extractAmount(text, /shipping[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tax =
+      this.extractAmount(text, /tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      this.extractAmount(text, /estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+    const grandTotal =
+      this.extractAmount(text, /grand total[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      this.extractAmount(text, /total[:\s]*\$?([\d,]+\.?\d*)/i);
+
+    const allZero = !subtotal && !shipping && !tax && !grandTotal;
+    if (allZero) {
+      this.logger.warn('Amazon financials could not be parsed (all values zero/NaN)');
+      return { ok: false };
+    }
+
+    return { ok: true, subtotal, shipping, tax, grandTotal };
   }
 
   private async extractTracking(page: Page): Promise<{

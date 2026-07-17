@@ -61,7 +61,11 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
           handleClose();
         } else {
           setProgress(null);
-          setError(res.message);
+          setError(
+            res.reason === 'cost_capture_failed'
+              ? t('amazon.linking.costCaptureFailed')
+              : res.message,
+          );
         }
       })
       .catch((err: { data?: { message?: string } }) => {

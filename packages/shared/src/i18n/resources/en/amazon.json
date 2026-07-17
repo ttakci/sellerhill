@@ -59,6 +59,7 @@
       "errorScraping": "Could not scrape Amazon order details. Please check the order ID and try again.",
       "errorInvalidCredentials": "Amazon credentials are invalid. Please update your account.",
       "errorRateLimit": "Too many requests. Please try again later.",
+      "costCaptureFailed": "Amazon order was found but the cost details couldn't be read. Profit kept at last known value.",
       "noAccountsTitle": "No Amazon Accounts",
       "noAccountsMessage": "You need to add an Amazon buyer account first to link orders.",
       "addAccountLink": "Add Amazon Account"

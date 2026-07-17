@@ -59,6 +59,7 @@
       "errorScraping": "Amazon sipariş detayları çekilemedi. Lütfen sipariş numarasını kontrol edip tekrar deneyin.",
       "errorInvalidCredentials": "Amazon bilgileri geçersiz. Lütfen hesabınızı güncelleyin.",
       "errorRateLimit": "Çok fazla istek. Lütfen daha sonra tekrar deneyin.",
+      "costCaptureFailed": "Amazon siparişi bulundu ancak maliyet detayları okunamadı. Kâr son bilinen değerde korundu.",
       "noAccountsTitle": "Amazon Hesabı Yok",
       "noAccountsMessage": "Sipariş bağlamak için önce bir Amazon alışveriş hesabı eklemeniz gerekiyor.",
       "addAccountLink": "Amazon Hesabı Ekle"
