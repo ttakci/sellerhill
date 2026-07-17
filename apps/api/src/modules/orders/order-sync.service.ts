@@ -13,6 +13,7 @@ import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
+import { computeNetProfit, deriveCostCaptureStatus } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
 export interface EbayAccountForSync {
@@ -141,10 +142,10 @@ export class OrderSyncService {
 
           const { inserted } = await this.upsertOrder(entity);
 
-          // Calculate profit for tracked orders
-          if (listingId) {
-            await this.recalculateProfit(entity.ebayOrderId);
-          }
+          // Recompute net_profit + cost_capture_status for every order —
+          // untracked orders get UNTRACKED + NULL net_profit rather than
+          // silently being skipped.
+          await this.recomputeProfit(entity.ebayOrderId);
 
           // Sale-driven stock sync: only for a genuinely NEW order matched to one
           // of our listings. We KNOW this sale happened, so deplete the shared
@@ -215,13 +216,15 @@ export class OrderSyncService {
         sale_price, sale_shipping, sale_tax, sale_total, ebay_earnings,
         purchase_price, transaction_fee, ad_fee, net_profit,
         shipping_address,
-        order_date, last_ebay_event_at
+        order_date, last_ebay_event_at,
+        cost_capture_status
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
         $13, $14, $15, $16, $17,
         $18, $19, $20, $21,
-        $22, $23, $24
+        $22, $23, $24,
+        $25
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -263,6 +266,7 @@ export class OrderSyncService {
         entity.shippingAddress ? JSON.stringify(entity.shippingAddress) : null,
         entity.orderDate ? entity.orderDate.toISOString() : null,
         entity.lastEbayEventAt ? entity.lastEbayEventAt.toISOString() : null,
+        entity.costCaptureStatus,
       ]
     );
 
@@ -271,91 +275,103 @@ export class OrderSyncService {
   }
 
   /**
-   * Recalculate profit for an order based on its linked listing's fee config
+   * Recompute net_profit + cost_capture_status for an order.
+   * - Resolves purchase cost by listing_id, then by ASIN fallback (eBay line item ASIN).
+   * - Never fakes unknown costs: unknown -> net_profit NULL.
+   * - Always sets cost_capture_status in the same UPDATE.
+   * Best-effort: logs and swallows errors so sync never fails.
    */
-  async recalculateProfit(ebayOrderId: string): Promise<void> {
-    const orders = await this.databaseService.query<{
-      id: string;
-      sale_total: number;
-      ebay_earnings: number;
-      purchase_price: number;
-      amazon_tax: number;
-      amazon_shipping: number;
-      listing_id: string;
-    }>(
-      `SELECT o.id, o.sale_total, o.ebay_earnings, o.purchase_price,
-              o.amazon_tax, o.amazon_shipping, o.listing_id
-       FROM orders o
-       WHERE o.ebay_order_id = $1 AND o.listing_id IS NOT NULL`,
-      [ebayOrderId]
-    );
-
-    if (orders.length === 0) {
-      return;
-    }
-
-    const order = orders[0];
-
-    let purchasePrice = parseFloat(String(order.purchase_price)) || 0;
-
-    // Fallback: if purchase_price is still 0, look up from product
-    if (purchasePrice === 0) {
-      const productData = await this.productsService.getProductPriceAndImageByListingId(order.listing_id);
-      if (productData) {
-        purchasePrice = productData.purchasePrice;
-
-        await this.databaseService.query(
-          `UPDATE orders SET purchase_price = $1, updated_at = CURRENT_TIMESTAMP
-           WHERE id = $2 AND purchase_price = 0`,
-          [purchasePrice, order.id]
-        );
+  async recomputeProfit(ebayOrderId: string): Promise<void> {
+    try {
+      // Pull the order + product ASIN + settings-group fees in one go.
+      const rows = await this.databaseService.query<{
+        id: string;
+        sale_total: string | number;
+        ebay_earnings: string | number | null;
+        purchase_price: string | number | null;
+        amazon_tax: string | number | null;
+        amazon_shipping: string | number | null;
+        amazon_linked_at: Date | null;
+        listing_id: string | null;
+        asin: string | null;
+        fees: { ebayFeePercent?: number; fixedFeeAmount?: number; taxPercent?: number } | null;
+      }>(
+        `SELECT o.id, o.sale_total, o.ebay_earnings, o.purchase_price,
+                o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
+                o.listing_id, p.asin,
+                lsg.fees
+         FROM orders o
+         LEFT JOIN listings l ON l.id = o.listing_id
+         LEFT JOIN products p ON p.id = l.product_id
+         LEFT JOIN listing_settings_groups lsg ON lsg.id = l.listing_settings_group_id
+         WHERE o.ebay_order_id = $1`,
+        [ebayOrderId],
+      );
+      if (rows.length === 0) {
+        return;
       }
+      const o = rows[0];
+
+      const hasListingMatch = !!o.listing_id;
+      const asinResolved = !!o.asin;
+      const amazonLinked = !!o.amazon_linked_at;
+      const amazonCostsCaptured = amazonLinked && (Number(o.amazon_tax) > 0 || Number(o.amazon_shipping) > 0);
+
+      const status = deriveCostCaptureStatus({
+        hasListingMatch,
+        asinResolved,
+        amazonLinked,
+        amazonCostsCaptured,
+        scrapeFailed: false, // scrape failure path sets this via linkAmazonOrder (Task 5) -> separate UPDATE
+      });
+
+      const purchasePrice = Number(o.purchase_price) || 0;
+
+      // Fallback: resolve purchase price from product if still unknown.
+      let resolvedPurchase = purchasePrice;
+      if (resolvedPurchase <= 0 && hasListingMatch) {
+        const productData = await this.productsService.getProductPriceAndImageByListingId(o.listing_id as string);
+        if (productData?.purchasePrice) {
+          resolvedPurchase = productData.purchasePrice;
+        }
+      }
+
+      const finalNetProfit =
+        resolvedPurchase > 0
+          ? computeNetProfit({
+              ebayEarnings: Number(o.ebay_earnings) || 0,
+              purchasePrice: resolvedPurchase,
+              amazonTax: Number(o.amazon_tax) || 0,
+              amazonShipping: Number(o.amazon_shipping) || 0,
+            })
+          : null;
+
+      const saleTotal = Number(o.sale_total) || 0;
+      const ebayFeePercent = Number(o.fees?.ebayFeePercent) || 0;
+      const fixedFeeAmount = Number(o.fees?.fixedFeeAmount) || 0;
+      const transactionFee = Math.round(saleTotal * (ebayFeePercent / 100) * 100) / 100;
+      const adFee = fixedFeeAmount;
+
+      await this.databaseService.query(
+        `UPDATE orders SET
+           transaction_fee = $1,
+           ad_fee = $2,
+           net_profit = $3,
+           purchase_price = COALESCE(NULLIF($4, 0), purchase_price),
+           cost_capture_status = $5,
+           updated_at = CURRENT_TIMESTAMP
+         WHERE id = $6`,
+        [
+          transactionFee,
+          adFee,
+          finalNetProfit, // null when unknown
+          resolvedPurchase,
+          status,
+          o.id,
+        ],
+      );
+    } catch (err) {
+      this.logger.error(`recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`, (err as Error).stack);
     }
-
-    // Get fee config from the listing's settings group
-    interface FeeRow {
-      fees: {
-        ebayFeePercent?: number;
-        fixedFeeAmount?: number;
-        taxPercent?: number;
-      } | null;
-    }
-    const settingsGroups = await this.databaseService.query<FeeRow>(
-      `SELECT lsg.fees FROM listing_settings_groups lsg
-       INNER JOIN listings l ON l.listing_settings_group_id = lsg.id
-       WHERE l.id = $1`,
-      [order.listing_id]
-    );
-
-    if (settingsGroups.length === 0) {
-      return;
-    }
-
-    const fees = settingsGroups[0].fees;
-    const saleTotal = parseFloat(String(order.sale_total)) || 0;
-    const ebayEarnings = parseFloat(String(order.ebay_earnings)) || 0;
-
-    const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
-    const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
-
-    const transactionFee = Math.round(saleTotal * (ebayFeePercent / 100) * 100) / 100;
-    const adFee = fixedFeeAmount;
-
-    const amazonTax = parseFloat(String(order.amazon_tax)) || 0;
-    const amazonShipping = parseFloat(String(order.amazon_shipping)) || 0;
-
-    // Net profit = actual eBay earnings - Amazon costs
-    // ebayEarnings (totalDueSeller) already has eBay commission deducted
-    const netProfit = Math.round((ebayEarnings - purchasePrice - amazonTax - amazonShipping) * 100) / 100;
-
-    await this.databaseService.query(
-      `UPDATE orders SET
-        transaction_fee = $1,
-        ad_fee = $2,
-        net_profit = $3,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $4`,
-      [transactionFee, adFee, netProfit, order.id]
-    );
   }
 }

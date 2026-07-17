@@ -152,7 +152,7 @@ export class AmazonController {
       );
 
       // Recalculate profit
-      await this.orderSyncService.recalculateProfit(orders[0].ebay_order_id);
+      await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id);
 
       // Start tracking this order
       await this.trackingQueueService.scheduleOrderTracking(orderId, dto.amazonAccountId);

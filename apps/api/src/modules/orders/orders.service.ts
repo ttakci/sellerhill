@@ -313,7 +313,7 @@ export class OrdersService {
     );
 
     // Recalculate profit
-    await this.orderSyncService.recalculateProfit(order.ebay_order_id);
+    await this.orderSyncService.recomputeProfit(order.ebay_order_id);
 
     // Fetch updated order
     const updated = await this.databaseService.query<OrderRow>(

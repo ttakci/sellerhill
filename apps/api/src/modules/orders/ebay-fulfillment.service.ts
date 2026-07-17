@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EBAY_MARKETPLACE_CONFIG, type EbayMarketplaceId, OrderStatus } from '@repo/shared';
+import { EBAY_MARKETPLACE_CONFIG, type EbayMarketplaceId, OrderCostCaptureStatus, OrderStatus } from '@repo/shared';
 import axios from 'axios';
 
 /**
@@ -221,7 +221,8 @@ export class EbayFulfillmentService {
       ebayEarnings: parseFloat(totalDueSeller?.value || '0'),
       transactionFee: 0,
       adFee: 0,
-      netProfit: 0,
+      netProfit: null,
+      costCaptureStatus: OrderCostCaptureStatus.PENDING,
       purchasePrice: purchasePrice || 0,
       shippingAddress: address
         ? {
