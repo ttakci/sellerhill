@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AmazonAccountStatus, type AmazonScrapedOrderData } from '@repo/shared';
+import type { Locator, Page } from 'playwright';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonOrderParserService } from './amazon-order-parser.service';
@@ -10,6 +11,65 @@ export interface ScrapingProgress {
   stage: 'logging_in' | 'navigating' | 'scraping' | 'saving' | 'done' | 'error';
   message: string;
 }
+
+/**
+ * One row from the account "Your Orders" list page (Amazon order-list scrape).
+ * Returned by `AmazonScrapingService.scrapeAccountOrders`. Mirrors what the
+ * per-order detail-page scrape produces, but limited to the fields the auto
+ * cost-capture matcher needs. `asin` is optional because the list view may
+ * hide it behind a navigation; the matcher rejects candidates without ASIN
+ * equality, so a missing ASIN here simply means that Amazon order can't be
+ * auto-linked from the list (it'll still be linkable manually).
+ */
+export interface AmazonListOrderRow {
+  amazonOrderId: string;
+  asin?: string;
+  quantity: number;
+  grandTotal: number;
+  tax: number;
+  shipping: number;
+  purchasePrice: number;
+  orderDate: Date;
+}
+
+// ---------------------------------------------------------------------------
+// FRAGILE: Amazon "Your Orders" list-page DOM selectors.
+//
+// Keep ALL selectors in this one block so a DOM change on Amazon's side is a
+// one-place patch. These mirror Amazon's modernized React orders page
+// (https://www.amazon.com/your-orders/orders) as observed in 2024-2025.
+// Amazon rotates obfuscated class names frequently; the data-component /
+// data-testid attributes are more stable but not guaranteed. VERIFY against a
+// live session before relying on output (controller-deferred — see task brief).
+// Per-row extraction is wrapped in try/catch so one bad card never fails the
+// whole batch.
+// ---------------------------------------------------------------------------
+const ORDER_LIST_SELECTORS = {
+  // Each order is a card. Amazon has shipped multiple layouts — try each.
+  orderCard: [
+    '[data-component="order-card"]',
+    '.yo1JGqUWoy0k__order-card',
+    '.order-card',
+    '[data-testid="order-card"]',
+  ],
+  // "View order details" / invoice link carries the orderId in the URL.
+  orderDetailsLink:
+    'a[href*="orderID="], a[href*="order-details"], a[href*="/gp/your-account/order-details"]',
+  // Order id literal fallback ("Order # 111-2222222-3333333").
+  orderIdText: '[data-testid="order-id"], .order-id',
+  // "Placed on January 15, 2025" — date the order was placed.
+  orderDate: '[data-testid="order-date"], .order-date, [data-component="orderDate"]',
+  // Total amount row ("Total: $42.99" or "Order Total: $42.99").
+  total: '[data-testid="order-total"], .order-total, .yo1JGqUWoy0k__order-total',
+  // Financial sub-rows inside the card's cost summary.
+  financialSummary: '[data-testid="order-summary"], .order-summary, .payment-breakdown',
+  // First product link in the card — usually carries ASIN in /dp/ASIN or /gp/product/ASIN.
+  productLink: 'a[href*="/dp/"], a[href*="/gp/product/"], a[href*="/gp/product/"]',
+  // Quantity inputs (rare on list view — default to 1 when missing).
+  quantity: '.item-view-qty, .quantity, [data-testid="quantity"]',
+  // Pagination "next" button to walk back through history.
+  nextPageButton: 'ul.a-pagination li.a-last a, a[aria-label="Next"]',
+} as const;
 
 @Injectable()
 export class AmazonScrapingService {
@@ -175,6 +235,293 @@ export class AmazonScrapingService {
         return { success: false, error: message };
       }
     });
+  }
+
+  /**
+   * Scrape the account's "Your Orders" list page and return all orders placed
+   * since `since`. Powers the auto cost-capture job (Task 7).
+   *
+   * Reuses the same stealth/rate-limit/browser-state stack as `scrapeOrder`:
+   * session-isolated per account, scheduled through the per-account limiter
+   * (1 concurrent, 3s apart). Walks pagination backwards from the most recent
+   * order until it sees an order older than `since`, then stops.
+   *
+   * SELECTORS ARE FRAGILE — see `ORDER_LIST_SELECTORS` above. This method is
+   * best-effort: per-order try/catch means a single broken card is logged and
+   * skipped; transport failures bubble up so BullMQ retries the whole job.
+   * Returns an empty array if no recent orders — never throws on DOM misses.
+   */
+  async scrapeAccountOrders(
+    userId: string,
+    amazonAccountId: string,
+    since: Date,
+  ): Promise<AmazonListOrderRow[]> {
+    return this.rateLimiter.schedule(amazonAccountId, () =>
+      this.doScrapeAccountOrders(userId, amazonAccountId, since),
+    );
+  }
+
+  private async doScrapeAccountOrders(
+    userId: string,
+    amazonAccountId: string,
+    since: Date,
+  ): Promise<AmazonListOrderRow[]> {
+    const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+
+    const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
+
+    let page: Page;
+    if (hasValidSession) {
+      const context = await this.browserStateManager.getContext(amazonAccountId);
+      page = await context.newPage();
+    } else {
+      page = await this.performLogin(
+        amazonAccountId,
+        account.email,
+        account.decryptedPassword,
+        account.decryptedTwoFactorSecret,
+      );
+    }
+
+    try {
+      // The modernized orders page. `timeFilter` broadens the window; we still
+      // filter by exact `since` cutoff in code so the matcher only sees fresh
+      // rows. The page itself only paginates so far back — if the user hasn't
+      // synced in >1 year, we miss older orders (acceptable: cost-capture is
+      // best-effort, controller-mediated for any gap).
+      const ordersUrl = 'https://www.amazon.com/your-orders/orders?timeFilter=year-' +
+        new Date().getFullYear();
+      await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+      await page.waitForTimeout(1500);
+
+      // If Amazon bounced us to signin, the cached session is stale — re-login
+      // once and retry navigation. Same recovery as `doScrapeOrder`.
+      if (page.url().includes('/signin') || page.url().includes('/ap/signin')) {
+        await page.close();
+        await this.browserStateManager.clearState(amazonAccountId);
+        page = await this.performLogin(
+          amazonAccountId,
+          account.email,
+          account.decryptedPassword,
+          account.decryptedTwoFactorSecret,
+        );
+        await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+        await page.waitForTimeout(1500);
+      }
+
+      const results: AmazonListOrderRow[] = [];
+      const sinceMs = since.getTime();
+      let walkedPastSince = false;
+      const maxPages = 10; // hard stop — don't walk forever on a malformed DOM
+
+      for (let pageNum = 1; pageNum <= maxPages && !walkedPastSince; pageNum++) {
+        const cards = await this.locateOrderCards(page);
+        const cardCount = await cards.count().catch(() => 0);
+        if (cardCount === 0) {
+          this.logger.debug(
+            `Account ${amazonAccountId}: no order cards on page ${pageNum} — stopping.`,
+          );
+          break;
+        }
+
+        for (let i = 0; i < cardCount; i++) {
+          try {
+            const row = await this.extractListOrderRow(page, i);
+            if (!row) {continue;}
+
+            if (row.orderDate.getTime() < sinceMs) {
+              // Hit history older than the cutoff — no need to keep paging.
+              walkedPastSince = true;
+              break;
+            }
+            results.push(row);
+          } catch (err) {
+            // Per-card failure isolation — never fail the whole job for one row.
+            const msg = err instanceof Error ? err.message : String(err);
+            this.logger.warn(
+              `Account ${amazonAccountId}: card ${i} on page ${pageNum} skipped: ${msg}`,
+            );
+          }
+        }
+
+        if (walkedPastSince) {break;}
+
+        // Try to advance to the next page. If there's no next button (or it's
+        // disabled), we've reached the end of the visible history.
+        const next = page.locator(ORDER_LIST_SELECTORS.nextPageButton).first();
+        const hasNext = await next.isVisible({ timeout: 1000 }).catch(() => false);
+        if (!hasNext) {break;}
+        try {
+          await Promise.all([
+            page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15_000 }).catch(() => {}),
+            next.click(),
+          ]);
+          await page.waitForTimeout(1000);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`Account ${amazonAccountId}: pagination stopped: ${msg}`);
+          break;
+        }
+      }
+
+      await this.browserStateManager.saveState(amazonAccountId);
+      await this.accountsService.markUsed(amazonAccountId);
+
+      this.logger.log(
+        `Account ${amazonAccountId}: scraped ${results.length} orders since ${since.toISOString()}`,
+      );
+      return results;
+    } finally {
+      await page.close();
+    }
+  }
+
+  /**
+   * Locate all order-card elements on the current page, trying each known
+   * selector in order. Returns the first matching Locator (callers `.count()`
+   * to surface zero = no cards = end of history / DOM change).
+   */
+  private async locateOrderCards(page: Page): Promise<Locator> {
+    for (const sel of ORDER_LIST_SELECTORS.orderCard) {
+      const locator = page.locator(sel);
+      const count = await locator.count().catch(() => 0);
+      if (count > 0) {
+        return locator;
+      }
+    }
+    return page.locator(ORDER_LIST_SELECTORS.orderCard[0]);
+  }
+
+  /**
+   * Best-effort extraction of a single order-list row. Returns `null` when the
+   * card was missing the orderId (the only field we can't fake). Missing
+   * financials default to 0 — the matcher will then fail amount-tolerance and
+   * simply not link that row (no harm done; controller-mediated re-link still
+   * works via the order-detail scraper).
+   */
+  private async extractListOrderRow(
+    page: Page,
+    cardIndex: number,
+  ): Promise<AmazonListOrderRow | null> {
+    // Re-resolve the card locator so the helper works regardless of which
+    // alternate selector matched above.
+    const cards = await this.locateOrderCards(page);
+    const card = cards.nth(cardIndex);
+
+    // Order ID — prefer URL-bearing link, fall back to literal text.
+    let amazonOrderId: string | undefined;
+    const detailsLink = card.locator(ORDER_LIST_SELECTORS.orderDetailsLink).first();
+    if (await detailsLink.isVisible({ timeout: 500 }).catch(() => false)) {
+      const href = await detailsLink.getAttribute('href').catch(() => null);
+      const m = href?.match(/orderID=([0-9A-Z-]+)/i);
+      amazonOrderId = m?.[1];
+    }
+    if (!amazonOrderId) {
+      const idEl = card.locator(ORDER_LIST_SELECTORS.orderIdText).first();
+      if (await idEl.isVisible({ timeout: 500 }).catch(() => false)) {
+        const txt = (await idEl.textContent()) ?? '';
+        const m = txt.match(/(\d{3}-\d{7}-\d{7})/);
+        amazonOrderId = m?.[1];
+      }
+    }
+    if (!amazonOrderId) {return null;}
+
+    // Order date — "Placed on January 15, 2025".
+    let orderDate = new Date();
+    const dateEl = card.locator(ORDER_LIST_SELECTORS.orderDate).first();
+    if (await dateEl.isVisible({ timeout: 500 }).catch(() => false)) {
+      const txt = (await dateEl.textContent()) ?? '';
+      const parsed = new Date(txt.replace(/.*placed on/i, '').trim());
+      if (!Number.isNaN(parsed.getTime())) {orderDate = parsed;}
+    }
+
+    // ASIN from the first product link.
+    let asin: string | undefined;
+    const productLink = card.locator(ORDER_LIST_SELECTORS.productLink).first();
+    if (await productLink.isVisible({ timeout: 500 }).catch(() => false)) {
+      const href = await productLink.getAttribute('href').catch(() => null);
+      const m = href?.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
+      asin = m?.[1];
+    }
+
+    // Quantity — list view rarely exposes this; default to 1 (the matcher
+    // requires exact equality, so an unknown qty means no link — safe miss).
+    let quantity = 1;
+    const qtyEl = card.locator(ORDER_LIST_SELECTORS.quantity).first();
+    if (await qtyEl.isVisible({ timeout: 500 }).catch(() => false)) {
+      const txt = (await qtyEl.textContent()) ?? '';
+      const m = txt.match(/\d+/);
+      if (m) {quantity = parseInt(m[0], 10) || 1;}
+    }
+
+    // Financials — try the card-local summary; fall back to the total line.
+    let grandTotal = 0;
+    let tax = 0;
+    let shipping = 0;
+    let purchasePrice = 0;
+
+    const summary = card.locator(ORDER_LIST_SELECTORS.financialSummary).first();
+    if (await summary.isVisible({ timeout: 500 }).catch(() => false)) {
+      const txt = (await summary.textContent()) ?? '';
+      const parsed = this.parseListFinancials(txt);
+      grandTotal = parsed.grandTotal;
+      tax = parsed.tax;
+      shipping = parsed.shipping;
+      purchasePrice = parsed.subtotal || grandTotal - tax - shipping;
+    }
+    if (grandTotal === 0) {
+      const totalEl = card.locator(ORDER_LIST_SELECTORS.total).first();
+      if (await totalEl.isVisible({ timeout: 500 }).catch(() => false)) {
+        const txt = (await totalEl.textContent()) ?? '';
+        const m = txt.match(/\$?([\d,]+(?:\.\d{2})?)/);
+        if (m) {grandTotal = parseFloat(m[1].replace(/,/g, '')) || 0;}
+      }
+    }
+    if (purchasePrice === 0 && grandTotal > 0) {
+      purchasePrice = Math.max(0, grandTotal - tax - shipping);
+    }
+
+    return {
+      amazonOrderId,
+      asin,
+      quantity,
+      grandTotal,
+      tax,
+      shipping,
+      purchasePrice,
+      orderDate,
+    };
+  }
+
+  /**
+   * Parse the financial summary block from an order card. Same shape as the
+   * single-order parser but operates on the smaller list-view summary text.
+   * Returns zeros on miss — caller decides whether to fall back to the total
+   * line.
+   */
+  private parseListFinancials(text: string): {
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    grandTotal: number;
+  } {
+    const grab = (pattern: RegExp): number => {
+      const m = text.match(pattern);
+      if (!m?.[1]) {return 0;}
+      return parseFloat(m[1].replace(/,/g, '')) || 0;
+    };
+    const subtotal =
+      grab(/subtotal[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      grab(/merchandise[:\s]*\$?([\d,]+\.?\d*)/i);
+    const shipping = grab(/shipping[:\s]*\$?([\d,]+\.?\d*)/i);
+    const tax =
+      grab(/tax[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      grab(/estimated tax[:\s]*\$?([\d,]+\.?\d*)/i);
+    const grandTotal =
+      grab(/grand total[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      grab(/total[:\s]*\$?([\d,]+\.?\d*)/i) ||
+      grab(/order total[:\s]*\$?([\d,]+\.?\d*)/i);
+    return { subtotal, shipping, tax, grandTotal };
   }
 
   private async performLogin(

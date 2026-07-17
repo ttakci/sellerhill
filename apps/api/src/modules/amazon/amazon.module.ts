@@ -7,6 +7,10 @@ import { OrdersModule } from '../orders/orders.module';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonOrderParserService } from './amazon-order-parser.service';
+import { AmazonOrderSyncSchedulerService } from './amazon-order-sync-scheduler.service';
+import { AmazonOrderSyncProcessor } from './amazon-order-sync.processor';
+import { AMAZON_ORDER_SYNC_QUEUE, AmazonOrderSyncQueueService } from './amazon-order-sync.queue';
+import { AmazonOrderSyncService } from './amazon-order-sync.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingProcessorService } from './amazon-tracking-processor.service';
@@ -21,7 +25,11 @@ import { BrowserStateManager } from './browser-state-manager.service';
     DatabaseModule,
     EbayModule,
     OrdersModule,
-    BullModule.registerQueue({ name: 'amazon-tracking' }, { name: 'amazon-verify' }),
+    BullModule.registerQueue(
+      { name: 'amazon-tracking' },
+      { name: 'amazon-verify' },
+      { name: AMAZON_ORDER_SYNC_QUEUE },
+    ),
   ],
   controllers: [AmazonController],
   providers: [
@@ -34,7 +42,20 @@ import { BrowserStateManager } from './browser-state-manager.service';
     AmazonTrackingProcessorService,
     AmazonVerifyQueueService,
     AmazonVerifyProcessorService,
+    // Auto cost-capture (Task 7) — scrapes each Amazon account's order list,
+    // matches to pending eBay orders, writes real Amazon costs. Scheduler
+    // owns the repeatable tick; processor fans out one job per account;
+    // service owns scrape → match → write → recompute.
+    AmazonOrderSyncService,
+    AmazonOrderSyncProcessor,
+    AmazonOrderSyncQueueService,
+    AmazonOrderSyncSchedulerService,
   ],
-  exports: [AmazonAccountsService, AmazonTrackingQueueService, AmazonVerifyQueueService],
+  exports: [
+    AmazonAccountsService,
+    AmazonTrackingQueueService,
+    AmazonVerifyQueueService,
+    AmazonOrderSyncQueueService,
+  ],
 })
 export class AmazonModule {}
