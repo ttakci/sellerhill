@@ -12,8 +12,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
-    "allowJs": true,
-    "noEmit": true,
     "paths": {
       "@repo/shared": ["packages/shared/src"],
       "@repo/ui": ["packages/ui/src"],
@@ -22,7 +20,6 @@
   },
   "include": [
     "apps/web/vite.config.ts",
-    "apps/api/jest.config.js",
     "packages/shared/scripts/*.ts"
   ],
   "exclude": ["node_modules", "dist", "build"]

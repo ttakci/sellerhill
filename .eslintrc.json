@@ -114,6 +114,7 @@
     {
       "files": ["*.config.js", "*.config.ts", "*.config.mjs"],
       "env": { "node": true },
+      "extends": ["plugin:@typescript-eslint/disable-type-checked"],
       "rules": {
         "no-console": "off",
         "@typescript-eslint/no-var-requires": "off"
