@@ -51,3 +51,41 @@ export function deriveCostCaptureStatus(input: CostCaptureStatusInput): OrderCos
   // No product match at all — if there's no listing AND no asin, source cost is unknowable.
   return OrderCostCaptureStatus.UNTRACKED;
 }
+
+export interface EstimateInput {
+  ebayEarnings: number;
+  purchasePrice: number;
+  amazonTaxRatePct: number;
+}
+
+/**
+ * Estimated net profit for provisional orders (Amazon order not yet placed).
+ * Uses the product's last known Amazon price + a user-configured tax rate.
+ * Shipping is NOT estimated (variable; often $0 on Prime) — disclosed in UI.
+ * Returns null when purchase price is unknown (<=0).
+ */
+export function estimateProvisionalNetProfit(input: EstimateInput): number | null {
+  const { ebayEarnings, purchasePrice, amazonTaxRatePct } = input;
+  if (!purchasePrice || purchasePrice <= 0) {
+    return null;
+  }
+  const estimatedTax = purchasePrice * (Math.max(0, amazonTaxRatePct) / 100);
+  return Math.round((ebayEarnings - purchasePrice - estimatedTax) * 100) / 100;
+}
+
+/**
+ * Maps a cost-capture status to the profit basis label shown in the UI.
+ * - LINKED    -> 'confirmed'  (Amazon costs fully scraped)
+ * - PROVISIONAL -> 'estimated' (purchase price known, tax estimated from store setting)
+ * - anything else -> null      (no meaningful profit number to label)
+ */
+export function deriveProfitBasis(status: OrderCostCaptureStatus): 'confirmed' | 'estimated' | null {
+  switch (status) {
+    case OrderCostCaptureStatus.LINKED:
+      return 'confirmed';
+    case OrderCostCaptureStatus.PROVISIONAL:
+      return 'estimated';
+    default:
+      return null;
+  }
+}

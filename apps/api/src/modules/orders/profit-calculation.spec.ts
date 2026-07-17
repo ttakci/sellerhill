@@ -3,6 +3,8 @@ import { OrderCostCaptureStatus } from '@repo/shared';
 import {
   computeNetProfit,
   deriveCostCaptureStatus,
+  deriveProfitBasis,
+  estimateProvisionalNetProfit,
 } from './profit-calculation';
 
 describe('computeNetProfit', () => {
@@ -46,5 +48,39 @@ describe('deriveCostCaptureStatus', () => {
   it('provisional when product cost known but amazon not linked', () => {
     expect(deriveCostCaptureStatus({ ...T, amazonLinked: false }))
       .toBe(OrderCostCaptureStatus.PROVISIONAL);
+  });
+});
+
+describe('estimateProvisionalNetProfit', () => {
+  it('returns null when purchase price unknown', () => {
+    expect(estimateProvisionalNetProfit({ ebayEarnings: 100, purchasePrice: 0, amazonTaxRatePct: 7 })).toBeNull();
+  });
+  it('subtracts estimated Amazon tax (on purchase price)', () => {
+    // 100 - 60 - (60 * 0.07) = 100 - 60 - 4.2 = 35.8
+    expect(estimateProvisionalNetProfit({ ebayEarnings: 100, purchasePrice: 60, amazonTaxRatePct: 7 })).toBe(35.8);
+  });
+  it('tax rate 0 -> no tax deducted', () => {
+    expect(estimateProvisionalNetProfit({ ebayEarnings: 100, purchasePrice: 60, amazonTaxRatePct: 0 })).toBe(40);
+  });
+  it('rounds to 2 decimals', () => {
+    expect(estimateProvisionalNetProfit({ ebayEarnings: 50, purchasePrice: 33.333, amazonTaxRatePct: 7 })).toBe(14.33);
+  });
+});
+
+describe('deriveProfitBasis', () => {
+  it("returns 'confirmed' for LINKED", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.LINKED)).toBe('confirmed');
+  });
+  it("returns 'estimated' for PROVISIONAL", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.PROVISIONAL)).toBe('estimated');
+  });
+  it("returns null for PENDING (neither confirmed nor estimated)", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.PENDING)).toBeNull();
+  });
+  it("returns null for FAILED", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.FAILED)).toBeNull();
+  });
+  it("returns null for UNTRACKED", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.UNTRACKED)).toBeNull();
   });
 });
