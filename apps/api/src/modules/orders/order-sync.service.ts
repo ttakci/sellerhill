@@ -206,6 +206,19 @@ export class OrderSyncService {
   private async upsertOrder(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
   ): Promise<{ id: string; inserted: boolean }> {
+    // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
+    // the seller's payout (partial refund, adjusted shipping, etc.). When the
+    // value changes we must recompute net_profit — the ON CONFLICT SET clause
+    // intentionally excludes profit fields. Brand-new inserts (no existing row)
+    // yield prevEbayEarnings = null and are handled by the unconditional
+    // recomputeProfit call in the sync loop above.
+    const existing = await this.databaseService.query<{ ebay_earnings: string | number | null }>(
+      `SELECT ebay_earnings FROM orders WHERE ebay_order_id = $1`,
+      [entity.ebayOrderId],
+    );
+    const prevEbayEarnings =
+      existing.length > 0 ? Number(existing[0].ebay_earnings) : null;
+
     const result = await this.databaseService.query<{ id: string; inserted: boolean }>(
       `INSERT INTO orders (
         user_id, ebay_account_id, ebay_order_id,
@@ -271,6 +284,19 @@ export class OrderSyncService {
     );
 
     const row = result[0];
+
+    // Re-sync freshness: if an existing order's ebay_earnings changed, the
+    // persisted net_profit is now stale. Trigger a recompute. Skipped for
+    // brand-new inserts (prevEbayEarnings === null) — the sync loop already
+    // recomputes those unconditionally.
+    const incomingEarnings = Number(entity.ebayEarnings) || 0;
+    if (
+      prevEbayEarnings !== null &&
+      Math.abs(prevEbayEarnings - incomingEarnings) > 0.001
+    ) {
+      await this.recomputeProfit(entity.ebayOrderId);
+    }
+
     return { id: row?.id, inserted: row?.inserted ?? false };
   }
 
