@@ -1,117 +1,79 @@
 /**
- * DashboardPage Styles — Sellerboard-style
- * Toolbar (search + period) → Period cards → Chart → Listings table
+ * DashboardPage Styles
+ * Layout wrappers. Surfaces via Card/Text/Badge + shared carousels.
  */
 
 import styled from '@emotion/styled';
-import { Card, Text, tkn } from '@repo/ui';
+import { Card, PageContainer, tkn } from '@repo/ui';
 
-/* ─── Main Layout ─── */
+/** AppLayout ContentInner owns page gutter — do not pad here */
+export const Container = PageContainer;
 
-export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.lg')};
-
-  @media (max-width: 48rem) {
-    padding: ${tkn('spacing.md')};
-  }
-`;
-
-/* ─── Toolbar (search + period selector) ─── */
-
-export const Toolbar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  flex-wrap: wrap;
-`;
-
-export const SearchWrapper = styled.div`
-  position: relative;
-  flex: 1;
-  min-width: 12rem;
-  max-width: 20rem;
-`;
-
-/* ─── Search Dropdown (overlay) ─── */
-
-export const SearchDropdownPanel = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  max-height: 20rem;
-  overflow-y: auto;
-  background: ${tkn('colors.surface.primary')};
-  border-radius: 0 0 ${tkn('radius.sm')} ${tkn('radius.sm')};
-  border: 1px solid ${tkn('colors.border.primary')};
-  border-top: none;
-  box-shadow: ${tkn('shadows.lg')};
-`;
-
-export const SearchDropdownHeader = styled.div`
+/** Tabs on the left, store filter on the right — shared across all 3 tabs */
+export const TabsHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
-  border-bottom: 1px solid ${tkn('colors.border.primary')};
+  gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  margin-bottom: ${tkn('spacing.lg')};
 `;
 
-export const SearchDropdownRow = styled.div`
+export const TabList = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+`;
+
+export const TabButton = styled.button<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
   cursor: pointer;
-`;
+  font: inherit;
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  padding: ${tkn('spacing.sm')} 0;
+  margin-bottom: -0.0625rem;
+  position: relative;
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.brand.primary : theme.colors.text.secondary};
+  transition: color ${tkn('transitions.fast')};
 
-export const SearchDropdownInfo = styled.div`
-  min-width: 0;
-  flex: 1;
-`;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0.125rem;
+    background: ${({ $active, theme }) =>
+      $active ? theme.colors.brand.primary : 'transparent'};
+    transition: background ${tkn('transitions.fast')};
+  }
 
-export const SearchDropdownTitle = styled(Text)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-/* ─── Active Filter Banner ─── */
-
-export const FilterBanner = styled.div<{ $bg: string }>`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm+')};
-  background: ${({ $bg }) => $bg};
-  border-radius: ${tkn('radius.md')};
-`;
-
-export const ListingInfo = styled.div`
-  min-width: 0;
-`;
-
-export const ToolbarRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+  }
 `;
 
 export const StoreSelectorTrigger = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
-  border-radius: ${tkn('radius.md')};
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.sm')};
   background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   cursor: pointer;
   color: ${tkn('colors.text.primary')};
   font: inherit;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')};
   white-space: nowrap;
 
   &:hover {
@@ -120,26 +82,13 @@ export const StoreSelectorTrigger = styled.button`
   }
 `;
 
-export const StoreSelectorLabel = styled(Text)`
-  max-width: 9.375rem; /* 150px */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-/* ─── Period Cards Grid ─── */
-
 export const PeriodCardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: ${tkn('spacing.sm')};
 
   @media (max-width: 75rem) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 48rem) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @media (max-width: 30rem) {
@@ -147,14 +96,16 @@ export const PeriodCardsGrid = styled.div`
   }
 `;
 
-/* ─── Period Card ─── */
-
-export const PeriodCard = styled(Card)<{ $accentColor: string; $active: boolean }>`
-  border-top: 3px solid ${({ $accentColor }) => $accentColor};
+export const PeriodCard = styled(Card)<{ $active: boolean }>`
   cursor: pointer;
-  position: relative;
   overflow: hidden;
-  transition: box-shadow ${tkn('transitions.fast')}, transform ${tkn('transitions.fast')};
+  border-bottom: ${({ $active, theme }) =>
+    $active ? `0.1875rem solid ${theme.colors.brand.primary}` : `0.0625rem solid ${theme.colors.border.primary}`};
+  box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.md : 'none')};
+  transition:
+    box-shadow ${tkn('transitions.fast')},
+    transform ${tkn('transitions.fast')},
+    border-color ${tkn('transitions.fast')};
 
   &:hover {
     box-shadow: ${tkn('shadows.md')};
@@ -163,64 +114,138 @@ export const PeriodCard = styled(Card)<{ $accentColor: string; $active: boolean 
 `;
 
 export const PeriodCardHeader = styled.div<{ $bgColor: string }>`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   background: ${({ $bgColor }) => $bgColor};
-`;
-
-export const PeriodTitle = styled(Text)``;
-
-export const PeriodDate = styled(Text)`
-  margin-top: ${tkn('spacing.2xs')};
+  min-height: 3.5rem;
+  justify-content: center;
 `;
 
 export const PeriodCardBody = styled.div`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')} ${tkn('spacing.sm')};
   display: flex;
   flex-direction: column;
+  gap: 0;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')} ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.primary')};
 `;
 
-export const HeroMetricLabel = styled(Text)``;
-
-export const HeroMetricValue = styled.div`
-  font-size: ${tkn('typography.fontSize.xl')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-  line-height: ${tkn('typography.lineHeight.tight')};
-  letter-spacing: ${tkn('typography.letterSpacing.tighter')};
-  margin-bottom: ${tkn('spacing.xs')};
+export const HeroBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  padding-bottom: ${tkn('spacing.sm')};
 `;
 
-export const MetricRow = styled.div`
+export const HeroLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.xs')};
+`;
+
+export const MetricPair = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} 0;
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+export const MetricCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+export const MetricCellValue = styled.div`
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.2xs')};
+  font-variant-numeric: tabular-nums;
+`;
+
+export const FullMetricRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  padding-top: ${tkn('spacing.sm')};
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+`;
+
+/** Side-by-side carousels on desktop */
+export const CarouselRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+
+  @media (max-width: 56rem) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const CarouselSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+export const CarouselSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: ${tkn('spacing.2xs')} 0;
-  border-top: 1px solid ${tkn('colors.border.secondary')};
+  gap: ${tkn('spacing.sm')};
 `;
 
-export const MetricLabel = styled(Text)`
-  flex-shrink: 0;
+export const ChartLayout = styled.div`
+  display: grid;
+  grid-template-columns: 1fr minmax(12rem, 16rem);
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+
+  @media (max-width: 56rem) {
+    grid-template-columns: 1fr;
+  }
 `;
 
-export const MetricValue = styled(Text)`
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  text-align: right;
+export const ChartMain = styled.div`
+  min-width: 0;
 `;
 
-export const TrendBadge = styled.span<{ $positive: boolean }>`
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${({ $positive, theme }) =>
-    $positive ? theme.colors.semantic.success : theme.colors.semantic.error};
-  margin-left: ${tkn('spacing.xs')};
+export const ChartSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  background: ${tkn('colors.surface.primary')};
+  overflow: hidden;
 `;
 
-/* ─── Chart ─── */
+export const ChartSummaryRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  font-variant-numeric: tabular-nums;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
 
 export const ChartLegend = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.md')};
+  flex-wrap: wrap;
 `;
 
 export const LegendItem = styled.div`
@@ -238,82 +263,86 @@ export const LegendDot = styled.div<{ $color: string }>`
 
 export const ChartContainer = styled.div`
   width: 100%;
-  height: 16rem;
-  padding: ${tkn('spacing.md')};
+  height: 20rem;
+  padding: ${tkn('spacing.sm')};
 
   @media (max-width: 48rem) {
-    height: 12rem;
+    height: 14rem;
   }
 `;
 
-/* ─── Listings Table ─── */
-
-export const ListingsTableWrapper = styled.div`
-  overflow-x: auto;
+export const EmptyState = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 8rem;
+  padding: ${tkn('spacing.lg')};
 `;
 
-export const ListingsTable = styled.table`
+export const HistoryScroll = styled.div`
   width: 100%;
+  overflow-x: auto;
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  background: ${tkn('colors.surface.primary')};
+`;
+
+export const HistoryTable = styled.table`
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-variant-numeric: tabular-nums;
 `;
 
-export const Th = styled.th`
-  text-align: left;
+export const HistoryTh = styled.th`
+  position: sticky;
+  top: 0;
+  z-index: 1;
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  color: ${tkn('colors.text.secondary')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  text-align: right;
+  background: ${tkn('colors.surface.secondary')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   white-space: nowrap;
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+
+  &:first-of-type {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    text-align: left;
+    min-width: 10rem;
+  }
 `;
 
-export const Td = styled.td`
+export const HistoryTd = styled.td`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
+  text-align: right;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   white-space: nowrap;
+
+  &:first-of-type {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    text-align: left;
+    background: ${tkn('colors.surface.primary')};
+    font-weight: ${tkn('typography.fontWeight.medium')};
+  }
 `;
 
-export const Tr = styled.tr`
-  cursor: pointer;
-  transition: background ${tkn('transitions.fast')};
-
-  &:hover {
+export const HistoryTr = styled.tr`
+  &:hover td {
     background: ${tkn('colors.surface.secondary')};
   }
 
-  &:last-child td {
-    border-bottom: none;
+  &:hover td:first-of-type {
+    background: ${tkn('colors.surface.secondary')};
   }
 `;
 
-export const ListingTitleCell = styled.div`
+export const TabPanel = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
+  flex-direction: column;
+  gap: ${tkn('spacing.lg')};
   min-width: 0;
-`;
-
-export const ListingThumb = styled.div<{ $imageUrl?: string }>`
-  width: 2rem;
-  height: 2rem;
-  border-radius: ${tkn('radius.sm')};
-  background: ${({ $imageUrl, theme }) =>
-    $imageUrl ? `url(${$imageUrl}) center/cover` : theme.colors.surface.secondary};
-  flex-shrink: 0;
-`;
-
-export const ListingName = styled(Text)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 16rem;
-`;
-
-export const ProfitPositive = styled(Text)`
-  color: ${tkn('colors.semantic.success')};
-`;
-
-export const ProfitNegative = styled(Text)`
-  color: ${tkn('colors.semantic.error')};
 `;

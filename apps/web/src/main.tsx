@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { App } from './App';
 import { store } from './app/store';
 import { GlobalMessageModal } from './components/GlobalMessageModal';
+import { AuthBootstrap } from './features/auth/AuthBootstrap';
 import './i18n.config';
 import './index.css';
 
@@ -14,8 +15,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <ThemeProvider>
         <UIProvider>
-          <App />
-          <GlobalMessageModal />
+          <AuthBootstrap>
+            <App />
+            <GlobalMessageModal />
+          </AuthBootstrap>
         </UIProvider>
       </ThemeProvider>
     </Provider>

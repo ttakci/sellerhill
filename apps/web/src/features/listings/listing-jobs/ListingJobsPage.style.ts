@@ -1,121 +1,174 @@
 import styled from '@emotion/styled';
-import { Button, Card as RepoCard, Badge as UIBadge, Text as UIText, tkn } from '@repo/ui';
+import { Card, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: 90rem;
-  margin: 0 auto;
-  padding: 0;
+export const Container = PageContainer;
+
+export const FilterBarWrapper = styled.div`
+  margin-bottom: 0;
+`;
+
+export const FilterBar = styled.div`
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  gap: ${tkn('spacing.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  overflow: visible;
+
+  @media (max-width: 64rem) {
+    padding: ${tkn('spacing.md')};
+  }
 `;
 
-export const JobIdBadge = styled(UIBadge)``;
-
-export const ProgressContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.xs+')}; /* 6px */
-  min-width: 7.5rem;
-`;
-
-export const ProgressInfo = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.secondary')};
-`;
-
-export const ProgressBar = styled.div`
-  width: 100%;
-  height: 0.375rem;
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: 9999px;
-  overflow: hidden;
-`;
-
-export const ProgressFill = styled.div<{ $percent: number }>`
-  width: ${({ $percent }) => $percent}%;
-  height: 100%;
-  background: ${tkn('colors.brand.primary')};
-  border-radius: 9999px;
-  transition: width 0.3s ease;
-`;
-
-export const StatsContainer = styled.div`
+export const FilterBarRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.md')};
   flex-wrap: wrap;
+
+  @media (max-width: 64rem) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: ${tkn('spacing.sm')};
+  }
 `;
 
-export const StatItem = styled.div`
+export const SearchWrapper = styled.div`
+  min-width: 0;
+  width: 16rem;
+  flex-shrink: 0;
+
+  @media (max-width: 64rem) {
+    width: 100%;
+  }
+`;
+
+export const SelectWrapper = styled.div`
+  width: 12rem;
+  flex-shrink: 0;
+
+  @media (max-width: 64rem) {
+    width: 100%;
+  }
+`;
+
+export const FilterActions = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.md')};
+  margin-left: auto;
+  min-height: ${tkn('controls.height.medium')};
+
+  @media (max-width: 64rem) {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
 `;
 
-export const StatLabel = styled(UIText)``;
+export const ResultCount = styled(UIText)``;
 
-export const SuccessText = styled(UIText)``;
-
-export const FailedText = styled(UIText)``;
-
-export const TotalText = styled(UIText)``;
-
-export const DateText = styled(UIText)``;
-
-export const ActionButton = styled(Button)``;
-
-// --- Grid Card Styles ---
-
-export const GridCard = styled(RepoCard)`
-  padding: ${tkn('spacing.lg')};
+/**
+ * Dense job card — compact padding, inline stats, no large empty metric tiles.
+ * Horizontal feel on tablet+ (meta left, progress fills).
+ */
+export const JobCard = styled(Card)`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  position: relative;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  cursor: pointer;
+  transition:
+    border-color ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
+
+  &:hover {
+    box-shadow: ${tkn('shadows.md')};
+    border-color: ${tkn('colors.border.focus')};
+  }
 `;
 
-export const GridCardHeader = styled.div`
+export const JobCardHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-export const CardContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  flex: 1;
-`;
-
-export const CardFooter = styled.div`
-  margin-top: auto;
-  padding-top: ${tkn('spacing.md')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
 `;
 
-// --- Progress Section Styles ---
+export const JobCardTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  flex-wrap: wrap;
+`;
 
-export const ProgressSection = styled.div`
+export const JobCardBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
+  min-width: 0;
 `;
 
-export const ProgressHeader = styled.div`
+export const ProgressMeta = styled.div`
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  align-items: center;
+  gap: ${tkn('spacing.sm')};
 `;
 
-export const ProgressLabel = styled(UIText)``;
+/** Inline chips for success / failed / total — dense, not tile grid */
+export const StatsInline = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+`;
 
-export const ProgressValue = styled(UIText)``;
+export const StatInline = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+export const JobCardFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+`;
+
+/** Compact progress cell for table */
+export const TableProgress = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 7.5rem;
+  max-width: 11rem;
+`;
+
+export const TableStats = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const MonoId = styled(UIText)`
+  font-family: ${tkn('typography.fontFamily.mono')};
+`;
+
+export const DotSep = styled.span`
+  color: ${tkn('colors.text.tertiary')};
+  user-select: none;
+`;

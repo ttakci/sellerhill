@@ -13,40 +13,40 @@ interface StyledTextProps {
 }
 
 const variantStyles = {
-  /* ── Headings: Inter Bold ── */
+  /* ── Headings: Inter, semibold/bold, tight tracking ── */
   display: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize['3xl']};
     line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    letter-spacing: ${theme.typography.letterSpacing.tighter};
   `,
   h1: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xxl};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   h2: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.xl};
-    line-height: ${theme.typography.lineHeight.normal};
-    font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   h3: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.lg};
     line-height: ${theme.typography.lineHeight.tight};
-    font-weight: ${theme.typography.fontWeight.bold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   h4: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.md};
     line-height: ${theme.typography.lineHeight.normal};
-    font-weight: ${theme.typography.fontWeight.bold};
+    font-weight: ${theme.typography.fontWeight.semibold};
     letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   h5: (theme: Theme) => `
@@ -56,10 +56,10 @@ const variantStyles = {
     font-weight: ${theme.typography.fontWeight.semibold};
     letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
-  /* ── Body: Lexend Regular ── */
+  /* ── Body scale (must stay distinct — never collapse body === body-sm) ── */
   body: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: ${theme.typography.fontSize.sm};
+    font-size: ${theme.typography.fontSize.md};
     line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.normal};
     letter-spacing: ${theme.typography.letterSpacing.normal};
@@ -73,7 +73,7 @@ const variantStyles = {
   `,
   'body-xs': (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: ${theme.typography.fontSize.xs};
+    font-size: ${theme.typography.fontSize['2xs']};
     line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.normal};
     letter-spacing: ${theme.typography.letterSpacing.normal};
@@ -81,16 +81,17 @@ const variantStyles = {
   caption: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
     font-size: ${theme.typography.fontSize.xs};
-    line-height: ${theme.typography.lineHeight.tight};
+    line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.normal};
     letter-spacing: ${theme.typography.letterSpacing.normal};
   `,
   overline: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
-    font-size: ${theme.typography.fontSize.xs};
+    font-size: ${theme.typography.fontSize['2xs']};
     text-transform: uppercase;
     letter-spacing: ${theme.typography.letterSpacing.widest};
     font-weight: ${theme.typography.fontWeight.semibold};
+    line-height: ${theme.typography.lineHeight.tight};
   `,
   mono: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.mono};

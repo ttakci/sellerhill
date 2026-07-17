@@ -1,353 +1,392 @@
-import { OrderDto, OrderStatus } from '@repo/shared';
-import { Icon, IdBadge, PageHeader, StatusBadge, Text, useLoading } from '@repo/ui';
+import {
+  Button,
+  Icon,
+  IdBadge,
+  PageHeader,
+  StatusBadge,
+  Text,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AmazonDetailsModal } from './components/AmazonDetailsModal';
+import { orderStatusToBadgeStatus } from '../shared/order-status';
+
 import * as S from './OrderDetailsPage.style';
+import type { OrderDetailsPageProps } from './OrderDetailsPage.types';
 
-interface OrderDetailsPageComponentProps {
-  order: OrderDto | undefined;
-  isLoading: boolean;
-  isUpdating?: boolean;
-  formatCurrency: (value: number) => string;
-  formatDate: (value: string) => string;
-  onUpdateAmazonDetails?: (data: {
-    amazonOrderUrl?: string;
-    amazonTrackingUrl?: string;
-    purchasePrice?: number;
-    amazonTax?: number;
-    amazonShipping?: number;
-  }) => void;
-  onOpenLinkAmazonModal?: () => void;
-  onBack: () => void;
-}
+const Meta = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}): React.ReactElement => (
+  <S.MetaRow>
+    <Text variant="caption" color="text.secondary" weight="medium">
+      {label}
+    </Text>
+    <div>{children}</div>
+  </S.MetaRow>
+);
 
-const orderStatusToBadgeStatus = (status: OrderStatus): string => {
-  const map: Record<OrderStatus, string> = {
-    [OrderStatus.COMPLETED]: 'completed',
-    [OrderStatus.SHIPPED]: 'shipped',
-    [OrderStatus.PROCESSING]: 'processing',
-    [OrderStatus.CANCELLED]: 'cancelled',
-    [OrderStatus.PENDING]: 'pending',
-    [OrderStatus.WAITING_SHIPMENT]: 'warning',
-  };
-  return map[status] || 'default';
-};
-
-export const OrderDetailsPageComponent: React.FC<OrderDetailsPageComponentProps> = ({
+export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   order,
   isLoading,
   isUpdating,
   formatCurrency,
   formatDate,
-  onUpdateAmazonDetails,
-  onOpenLinkAmazonModal,
+  statusLabel,
+  roiLabel,
+  totalAmazonCost,
   onBack,
+  onCopyAddress,
+  onOpenLinkAmazon,
+  onOpenAmazonOrderUrl,
+  canCopyAddress,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
-  useLoading(isLoading);
 
-  const [isAmazonModalOpen, setIsAmazonModalOpen] = React.useState(false);
-
-  if (!order || isLoading) {
-    return null;
+  if (isLoading) {
+    return (
+      <S.Container>
+        <S.EmptyState>
+          <Text variant="body" color="text.secondary">
+            {t('translation:common.loading')}
+          </Text>
+        </S.EmptyState>
+      </S.Container>
+    );
   }
 
-  const handleUpdateAmazonDetails = (values: {
-    amazonOrderUrl?: string;
-    amazonTrackingUrl?: string;
-    purchasePrice?: number;
-    amazonTax?: number;
-    amazonShipping?: number;
-  }) => {
-    if (onUpdateAmazonDetails) {
-      onUpdateAmazonDetails(values);
-      setIsAmazonModalOpen(false);
-    }
-  };
+  if (!order) {
+    return (
+      <S.Container>
+        <S.EmptyState>
+          <Icon name="inbox" size={40} />
+          <Text variant="h4" weight="semibold">
+            {t('orders.detail.notFoundTitle')}
+          </Text>
+          <Text variant="body-sm" color="text.secondary">
+            {t('orders.detail.notFoundSubtitle')}
+          </Text>
+          <Button variant="secondary" onClick={onBack}>
+            <Text variant="body">{t('translation:common.back')}</Text>
+          </Button>
+        </S.EmptyState>
+      </S.Container>
+    );
+  }
 
-  const calculateRoi = (profit: number, cost: number) => {
-    if (cost === 0) {return '0.0%';}
-    return `${((profit / cost) * 100).toFixed(1)}%`;
-  };
+  const profitPositive = order.netProfit >= 0;
+  const productTitle = order.product?.title || t('orders.detail.unknownProduct');
 
-  const headerSubtitle = (
-    <S.Metadata>
-      <S.MetadataItem>
-        <Icon name="calendar-today" size={16} />
-        {t('orders.detail.orderPlaced')}: {formatDate(order.createdAt)}
-      </S.MetadataItem>
-      <S.Separator>|</S.Separator>
-      <S.MetadataItem>
-        <Icon name="tag" size={16} />
-        {t('orders.table.orderNumber')}: {order.ebayOrderId}
-      </S.MetadataItem>
-    </S.Metadata>
+  const desktopActions = (
+    <S.HeaderActions>
+      <Button variant="primary" size="small" onClick={onOpenLinkAmazon} isLoading={isUpdating}>
+        <Icon name="link" size={16} />
+        <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
+      </Button>
+      {canCopyAddress && (
+        <Button variant="secondary" size="small" onClick={onCopyAddress}>
+          <Icon name="copy" size={16} />
+          <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
+        </Button>
+      )}
+    </S.HeaderActions>
   );
 
-  const totalAmazonCost = order.purchasePrice + (order.amazonTax || 0) + (order.amazonShipping || 0);
-
   return (
-    <S.PageWrapper>
-      <S.BackLink variant="text" onClick={onBack}>
-        <Icon name="chevron-left" size={20} />
-        {t('translation:common.back')}
-      </S.BackLink>
+    <S.Container>
+      <PageHeader
+        title={t('orders.detail.title')}
+        subtitle={`${order.ebayOrderId} · ${formatDate(order.createdAt)}`}
+        onBack={onBack}
+        backAriaLabel={t('translation:common.back')}
+        actions={desktopActions}
+      />
 
-      {/* Header */}
-      <PageHeader title={t('orders.detail.title')} subtitle={headerSubtitle} />
-
-      {/* Product Info Card */}
-      <S.ProductCard variant="bordered">
-        <S.ProductWrapper>
-          <S.ProductImage>
-            {order.product?.imageUrl ? (
-              <img src={order.product.imageUrl} alt={order.product.title} />
-            ) : (
-              <S.EmptyImagePlaceholder>
-                <Icon name="image" size={48} color="text.tertiary" />
-              </S.EmptyImagePlaceholder>
-            )}
-          </S.ProductImage>
-          <S.ProductInfo>
-            <S.ProductTitle variant="h2" weight="semibold">{order.product?.title || t('orders.detail.unknownProduct')}</S.ProductTitle>
-            <S.ProductMetadata>
-              {order.product?.asin ? (
-                <IdBadge id={order.product.asin} storeType="amazon" size="sm" />
-              ) : (
-                <IdBadge id="—" storeType="amazon" size="sm" />
-              )}
-              {order.product?.ebayItemId ? (
-                <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" />
-              ) : (
-                <IdBadge id="—" storeType="ebay" size="sm" />
-              )}
-              <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
-                <Icon name="check_circle" size={14} />
-                {t(`orders.status.${order.status}`)}
-              </StatusBadge>
-            </S.ProductMetadata>
-            <S.LabelValueGroup>
-              <S.LabelValue>
-                <div className="label">{t('orders.detail.quantity')}</div>
-                <div className="value">
-                  {order.product?.quantity || 1} {t('orders.detail.unit')}
-                </div>
-              </S.LabelValue>
-              <S.LabelValue>
-                <div className="label">{t('orders.detail.sku')}</div>
-                <div className="value">{order.product?.sku || t('orders.detail.na')}</div>
-              </S.LabelValue>
-            </S.LabelValueGroup>
-          </S.ProductInfo>
-        </S.ProductWrapper>
-      </S.ProductCard>
-
-      {/* Net Profit Analysis */}
-      <S.AnalysisCard variant="bordered">
-        <S.AnalysisMetadata>
-          <div>
-            <S.AnalysisTitle>
-              <Icon name="insights" size={24} color="semantic.info" />
-              {t('orders.detail.netProfitAnalysis')}
-            </S.AnalysisTitle>
-            <S.AnalysisDescription>
-              <Text variant="body-sm" color="text.tertiary">
-                {t('orders.detail.analysisDesc')}
-              </Text>
-            </S.AnalysisDescription>
-          </div>
-
-          <S.AnalysisValues>
-            <S.Calculation>
-              <div className="label">{t('orders.detail.calculation')}</div>
-              <div className="formula">
-                <span>{t('orders.detail.calcEarnings')} {formatCurrency(order.ebayEarnings)}</span>
-                <S.FormulaMinus>-</S.FormulaMinus>
-                <span>{t('orders.detail.calcPurchase')} {formatCurrency(order.purchasePrice)}</span>
-                <S.FormulaMinus>-</S.FormulaMinus>
-                <span>{t('orders.detail.calcTax')} {formatCurrency(order.amazonTax || 0)}</span>
-                <S.FormulaMinus>-</S.FormulaMinus>
-                <span>{t('orders.detail.calcShipping')} {formatCurrency(order.amazonShipping || 0)}</span>
-              </div>
-            </S.Calculation>
-
-            <S.Divider />
-
-            <S.ProfitResult>
-              <div className="label">{t('orders.detail.netProfitResult')}</div>
-              <div className="value">
-                <span>$</span>
-                {order.netProfit.toFixed(2)}
-                <Icon name={order.netProfit >= 0 ? 'trending-up' : 'trending-down'} size={32} color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'} />
-              </div>
-            </S.ProfitResult>
-
-            <S.Roi>
-              <div className="label">{t('orders.detail.roi')}</div>
-              <div className="value">{calculateRoi(order.netProfit, totalAmazonCost)}</div>
-            </S.Roi>
-          </S.AnalysisValues>
-        </S.AnalysisMetadata>
-      </S.AnalysisCard>
-
-      {/* 3-column grid */}
-      <S.Grid>
-        {/* Customer Info */}
-        <S.SectionCard variant="bordered">
-          <S.SectionTitle variant="h3" weight="bold">
-            <Icon name="user" size={20} color="text.tertiary" />
-          {t('orders.detail.customerInfo')}
-        </S.SectionTitle>
-        <S.ContentRow>
-          <div className="label">{t('orders.detail.shipTo')}</div>
-          <S.BoldText variant="body" weight="semibold">{order.buyerName}</S.BoldText>
-          {order.shippingAddress && (
-            <S.AddressBlock>
-              <S.AddressLine>{order.shippingAddress.street}</S.AddressLine>
-              <S.AddressLine>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</S.AddressLine>
-              <S.AddressLine>{order.shippingAddress.country}</S.AddressLine>
-              <S.CopyButton
-                variant="text"
-                size="small"
-                onClick={() => {
-                  const addr = [
-                    order.buyerName,
-                    order.shippingAddress!.street,
-                    `${order.shippingAddress!.city}, ${order.shippingAddress!.state} ${order.shippingAddress!.zipCode}`,
-                    order.shippingAddress!.country,
-                  ].join('\n');
-                  void navigator.clipboard.writeText(addr);
-                }}
-              >
-                <Icon name="copy" size={14} />
-                {t('orders.detail.copyAddress')}
-              </S.CopyButton>
-            </S.AddressBlock>
+      <S.Hero>
+        <S.ProductImage>
+          {order.product?.imageUrl ? (
+            <img src={order.product.imageUrl} alt={productTitle} />
+          ) : (
+            <Icon name="image" size={48} />
           )}
-        </S.ContentRow>
-        <S.ContentRow>
-          <div className="label">{t('orders.detail.contact')}</div>
-          <S.AddressText variant="body" muted>{order.buyerEmail}</S.AddressText>
-          {order.buyerPhone && <S.AddressText variant="body" muted>{order.buyerPhone}</S.AddressText>}
-        </S.ContentRow>
-      </S.SectionCard>
+        </S.ProductImage>
 
-      {/* eBay Sales Summary */}
-      <S.SectionCard variant="bordered">
-        <S.SectionTitle variant="h3" weight="bold">
-          <Icon name="tag" size={20} color="text.tertiary" />
-          {t('orders.detail.ebaySummary')}
-        </S.SectionTitle>
+        <S.HeroInfo>
+          <S.BadgeRow>
+            <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
+              {statusLabel}
+            </StatusBadge>
+            <Text variant="caption" color="text.secondary">
+              {formatDate(order.createdAt)}
+            </Text>
+          </S.BadgeRow>
 
-        <S.SummarySection>
-          <S.SectionHeader>{t('orders.detail.whatBuyerPaid')}</S.SectionHeader>
-          <S.SummaryRow>
-            <span>{t('orders.detail.subtotal')}</span>
-            <span>{formatCurrency(order.salePrice)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow>
-            <span>{t('orders.detail.shipping')}</span>
-            <span>{formatCurrency(order.saleShipping)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow>
-            <span>{t('orders.detail.salesTax')}</span>
-            <span>{formatCurrency(order.saleTax)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow $bold $bordered>
-            <span>{t('orders.detail.orderTotal')}</span>
-            <span>{formatCurrency(order.saleTotal)}</span>
-          </S.SummaryRow>
-        </S.SummarySection>
+          <Text variant="h3" weight="semibold">
+            {productTitle}
+          </Text>
 
-        <S.SummarySectionSmall>
-          <S.SectionHeaderRow>
-            <S.SectionHeader>{t('orders.detail.whatYouEarned')}</S.SectionHeader>
-            <Icon name="chevron-up" size={14} color="text.tertiary" />
-          </S.SectionHeaderRow>
-          <S.SummaryRow $bold>
-            <span>{t('orders.detail.orderTotal')}</span>
-            <span>{formatCurrency(order.saleTotal)}</span>
-          </S.SummaryRow>
-          <S.FeesSection>
-            <div className="fees-label">{t('orders.detail.feesCollected')}</div>
-            <S.FeeRow>
-              <span>{t('orders.detail.salesTax')}</span>
-              <span>-{formatCurrency(order.saleTax)}</span>
-            </S.FeeRow>
-            <S.FeeRow>
-              <S.DottedUnderline>
-                {t('orders.detail.transactionFees')}
-              </S.DottedUnderline>
-              <span>-{formatCurrency(order.transactionFee)}</span>
-            </S.FeeRow>
-            <S.FeeRow>
-              <span>{t('orders.detail.adFee')}</span>
-              <span>-{formatCurrency(order.adFee)}</span>
-            </S.FeeRow>
-          </S.FeesSection>
-          <S.EarningsLink>
-            <S.DottedUnderline>{t('orders.detail.orderEarnings')}</S.DottedUnderline>
-            <span>{formatCurrency(order.ebayEarnings)}</span>
-          </S.EarningsLink>
-        </S.SummarySectionSmall>
-      </S.SectionCard>
+          <S.IdRow>
+            {order.product?.asin ? (
+              <IdBadge id={order.product.asin} storeType="amazon" size="sm" />
+            ) : null}
+            {order.product?.ebayItemId ? (
+              <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" />
+            ) : null}
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {order.ebayOrderId}
+            </Text>
+          </S.IdRow>
 
-      {/* Amazon Order Summary */}
-      <S.SectionCard variant="bordered">
-        <S.SectionTitle variant="h3" weight="bold">
-          <Icon name="shopping-bag" size={20} color="text.tertiary" />
-          {t('orders.detail.amazonCosts')}
-        </S.SectionTitle>
+          <S.ProfitHighlight $positive={profitPositive}>
+            <Text variant="caption" color="text.secondary" weight="medium">
+              {t('orders.detail.netProfitResult')}
+            </Text>
+            <Text
+              variant="h3"
+              weight="semibold"
+              color={profitPositive ? 'semantic.success' : 'semantic.error'}
+            >
+              {formatCurrency(order.netProfit)}
+            </Text>
+            <Text variant="body-sm" color="text.secondary">
+              {t('orders.detail.roi')}: {roiLabel}
+            </Text>
+          </S.ProfitHighlight>
+        </S.HeroInfo>
+      </S.Hero>
 
-        <S.SummaryFlex>
-          <S.SummaryRow>
-            <span>{t('orders.detail.purchasePrice')}</span>
-            <span>{formatCurrency(order.purchasePrice)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow>
-            <span>{t('orders.detail.amazonTax')}</span>
-            <span>{formatCurrency(order.amazonTax || 0)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow>
-            <span>{t('orders.detail.amazonShipping')}</span>
-            <span>{formatCurrency(order.amazonShipping || 0)}</span>
-          </S.SummaryRow>
-          <S.SummaryRow $bold $bordered>
-            <span>{t('orders.detail.totalAmazonCost')}</span>
-            <span>{formatCurrency(totalAmazonCost)}</span>
-          </S.SummaryRow>
-        </S.SummaryFlex>
+      <S.KpiStrip>
+        <S.KpiCard>
+          <Text variant="caption" color="text.secondary">
+            {t('orders.detail.orderTotal')}
+          </Text>
+          <Text variant="body" weight="semibold">
+            {formatCurrency(order.saleTotal)}
+          </Text>
+        </S.KpiCard>
+        <S.KpiCard>
+          <Text variant="caption" color="text.secondary">
+            {t('orders.detail.orderEarnings')}
+          </Text>
+          <Text variant="body" weight="semibold">
+            {formatCurrency(order.ebayEarnings)}
+          </Text>
+        </S.KpiCard>
+        <S.KpiCard>
+          <Text variant="caption" color="text.secondary">
+            {t('orders.detail.totalAmazonCost')}
+          </Text>
+          <Text variant="body" weight="semibold">
+            {formatCurrency(totalAmazonCost)}
+          </Text>
+        </S.KpiCard>
+        <S.KpiCard>
+          <Text variant="caption" color="text.secondary">
+            {t('orders.detail.roi')}
+          </Text>
+          <Text
+            variant="body"
+            weight="semibold"
+            color={profitPositive ? 'semantic.success' : 'semantic.error'}
+          >
+            {roiLabel}
+          </Text>
+        </S.KpiCard>
+      </S.KpiStrip>
 
-        <S.AmazonUpdateButton
-          variant="secondary"
-          size="small"
-          fullWidth
-          onClick={() => onOpenLinkAmazonModal?.()}
-        >
-          {t('orders.detail.linkAmazon')}
-        </S.AmazonUpdateButton>
+      {/* Net profit formula */}
+      <S.Card>
+        <S.CardHeader>
+          <S.CardHeaderLeft>
+            <Icon name="insights" size={20} color="brand.primary" />
+            <Text variant="h4" weight="semibold">
+              {t('orders.detail.netProfitAnalysis')}
+            </Text>
+          </S.CardHeaderLeft>
+        </S.CardHeader>
+        <Text variant="body-sm" color="text.secondary">
+          {t('orders.detail.analysisDesc')}
+        </Text>
+        <S.FormulaRow>
+          <Text variant="body-sm">
+            {t('orders.detail.calcEarnings')} {formatCurrency(order.ebayEarnings)}
+          </Text>
+          <Text variant="body-sm" color="text.secondary">
+            −
+          </Text>
+          <Text variant="body-sm">
+            {t('orders.detail.calcPurchase')} {formatCurrency(order.purchasePrice)}
+          </Text>
+          <Text variant="body-sm" color="text.secondary">
+            −
+          </Text>
+          <Text variant="body-sm">
+            {t('orders.detail.calcTax')} {formatCurrency(order.amazonTax || 0)}
+          </Text>
+          <Text variant="body-sm" color="text.secondary">
+            −
+          </Text>
+          <Text variant="body-sm">
+            {t('orders.detail.calcShipping')} {formatCurrency(order.amazonShipping || 0)}
+          </Text>
+        </S.FormulaRow>
+      </S.Card>
 
-        {order.amazonOrderUrl && (
-          <S.ContentRow>
-            <div className="label">{t('orders.detail.amazonOrder')}</div>
-            <S.AddressText variant="body" muted>
-              <a href={order.amazonOrderUrl} target="_blank" rel="noreferrer">{order.amazonOrderUrl}</a>
-            </S.AddressText>
-          </S.ContentRow>
+      <S.SectionGrid>
+        {/* Customer */}
+        <S.Card>
+          <S.CardHeader>
+            <S.CardHeaderLeft>
+              <Icon name="user" size={20} color="brand.primary" />
+              <Text variant="h4" weight="semibold">
+                {t('orders.detail.customerInfo')}
+              </Text>
+            </S.CardHeaderLeft>
+          </S.CardHeader>
+          <S.MetaList>
+            <Meta label={t('orders.detail.shipTo')}>
+              <Text variant="body" weight="semibold">
+                {order.buyerName || '—'}
+              </Text>
+              {order.shippingAddress ? (
+                <S.AddressBlock>
+                  <Text variant="body-sm" color="text.secondary">
+                    {order.shippingAddress.street}
+                  </Text>
+                  <Text variant="body-sm" color="text.secondary">
+                    {`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`}
+                  </Text>
+                  <Text variant="body-sm" color="text.secondary">
+                    {order.shippingAddress.country}
+                  </Text>
+                </S.AddressBlock>
+              ) : null}
+            </Meta>
+            <Meta label={t('orders.detail.contact')}>
+              <Text variant="body-sm">{order.buyerEmail || '—'}</Text>
+              {order.buyerPhone ? (
+                <Text variant="body-sm" color="text.secondary">
+                  {order.buyerPhone}
+                </Text>
+              ) : null}
+            </Meta>
+            <Meta label={t('orders.detail.quantity')}>
+              <Text variant="body" weight="semibold">
+                {order.product?.quantity || 1} {t('orders.detail.unit')}
+              </Text>
+            </Meta>
+            <Meta label={t('orders.detail.sku')}>
+              <Text variant="body-sm">{order.product?.sku || t('orders.detail.na')}</Text>
+            </Meta>
+          </S.MetaList>
+          {canCopyAddress && (
+            <Button variant="secondary" size="small" onClick={onCopyAddress} fullWidth>
+              <Icon name="copy" size={16} />
+              <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
+            </Button>
+          )}
+        </S.Card>
+
+        {/* eBay summary */}
+        <S.Card>
+          <S.CardHeader>
+            <S.CardHeaderLeft>
+              <Icon name="tag" size={20} color="brand.primary" />
+              <Text variant="h4" weight="semibold">
+                {t('orders.detail.ebaySummary')}
+              </Text>
+            </S.CardHeaderLeft>
+          </S.CardHeader>
+          <Text variant="caption" color="text.secondary" weight="semibold">
+            {t('orders.detail.whatBuyerPaid')}
+          </Text>
+          <S.MetaList>
+            <Meta label={t('orders.detail.subtotal')}>
+              <Text variant="body">{formatCurrency(order.salePrice)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.shipping')}>
+              <Text variant="body">{formatCurrency(order.saleShipping)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.salesTax')}>
+              <Text variant="body">{formatCurrency(order.saleTax)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.orderTotal')}>
+              <Text variant="body" weight="semibold">
+                {formatCurrency(order.saleTotal)}
+              </Text>
+            </Meta>
+          </S.MetaList>
+          <Text variant="caption" color="text.secondary" weight="semibold">
+            {t('orders.detail.whatYouEarned')}
+          </Text>
+          <S.MetaList>
+            <Meta label={t('orders.detail.transactionFees')}>
+              <Text variant="body-sm">−{formatCurrency(order.transactionFee)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.adFee')}>
+              <Text variant="body-sm">−{formatCurrency(order.adFee)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.orderEarnings')}>
+              <Text variant="body" weight="semibold">
+                {formatCurrency(order.ebayEarnings)}
+              </Text>
+            </Meta>
+          </S.MetaList>
+        </S.Card>
+
+        {/* Amazon costs */}
+        <S.Card>
+          <S.CardHeader>
+            <S.CardHeaderLeft>
+              <Icon name="shopping-bag" size={20} color="brand.primary" />
+              <Text variant="h4" weight="semibold">
+                {t('orders.detail.amazonCosts')}
+              </Text>
+            </S.CardHeaderLeft>
+          </S.CardHeader>
+          <S.MetaList>
+            <Meta label={t('orders.detail.purchasePrice')}>
+              <Text variant="body">{formatCurrency(order.purchasePrice)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.amazonTax')}>
+              <Text variant="body">{formatCurrency(order.amazonTax || 0)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.amazonShipping')}>
+              <Text variant="body">{formatCurrency(order.amazonShipping || 0)}</Text>
+            </Meta>
+            <Meta label={t('orders.detail.totalAmazonCost')}>
+              <Text variant="body" weight="semibold">
+                {formatCurrency(totalAmazonCost)}
+              </Text>
+            </Meta>
+          </S.MetaList>
+          <Button variant="primary" size="small" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
+            <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
+          </Button>
+          {order.amazonOrderUrl && onOpenAmazonOrderUrl ? (
+            <Button variant="text" size="small" onClick={onOpenAmazonOrderUrl}>
+              <Icon name="external-link" size={16} />
+              <Text variant="body-sm">{t('orders.detail.amazonOrder')}</Text>
+            </Button>
+          ) : null}
+        </S.Card>
+      </S.SectionGrid>
+
+      <S.MobileActionBar>
+        <Button variant="primary" size="medium" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
+          <Text variant="body" weight="semibold">
+            {t('orders.detail.linkAmazon')}
+          </Text>
+        </Button>
+        {canCopyAddress && (
+          <Button variant="secondary" size="medium" onClick={onCopyAddress}>
+            <Icon name="copy" size={16} />
+          </Button>
         )}
-      </S.SectionCard>
-    </S.Grid>
-
-      {order && (
-        <AmazonDetailsModal
-          isOpen={isAmazonModalOpen}
-          onClose={() => setIsAmazonModalOpen(false)}
-          onSave={handleUpdateAmazonDetails}
-          isLoading={isUpdating}
-        />
-      )}
-    </S.PageWrapper>
+      </S.MobileActionBar>
+    </S.Container>
   );
 };

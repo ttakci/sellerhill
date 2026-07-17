@@ -2,31 +2,52 @@
  * DashboardPage Types
  */
 
-import type { DashboardDataDto, EbayAccountPublicDto, ListingDto, UserDto } from '@repo/shared';
+import type {
+  DashboardDataDto,
+  DashboardPeriodKey,
+  EbayAccountPublicDto,
+  ListingDto,
+  OrderDto,
+  PeriodMetricsDto,
+  UserDto,
+} from '@repo/shared';
 
-export type PeriodKey = 'today' | 'yesterday' | 'thisMonth' | 'thisMonthForecast' | 'lastMonth';
-
-export type PeriodPreset = 'today' | 'week' | 'month';
+export type { DashboardPeriodKey };
 
 export interface PeriodDateInfo {
   dateRange: string;
+  from: string;
+  to: string;
 }
+
+export interface PeriodCardLabels {
+  sales: string;
+  ordersUnits: string;
+  refunds: string;
+  grossProfit: string;
+  netProfit: string;
+  estimatedPayout: string;
+}
+
+export type DashboardTabId = 'cards' | 'chart' | 'history';
 
 export interface DashboardPageComponentProps {
   user: UserDto | null;
   dashboardData?: DashboardDataDto;
-  selectedPeriod: PeriodKey;
-  onPeriodSelect: (period: PeriodKey) => void;
-  periodPreset: PeriodPreset;
-  onPeriodPresetChange: (preset: PeriodPreset) => void;
-  selectedDays: number;
-  onDaysChange: (days: number) => void;
-  periodDates: Record<PeriodKey, PeriodDateInfo>;
+  isLoading: boolean;
+  activeTab: DashboardTabId;
+  onTabChange: (tab: DashboardTabId) => void;
+  selectedPeriod: DashboardPeriodKey;
+  onPeriodSelect: (period: DashboardPeriodKey) => void;
+  periodDates: Record<DashboardPeriodKey, PeriodDateInfo>;
   listings: ListingDto[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  filteredListingId: string | null;
-  onListingSelect: (listingId: string | null) => void;
+  listingsTotal: number;
+  orders: OrderDto[];
+  ordersTotal: number;
+  onListingOpen: (listingId: string) => void;
+  onListingsViewAll: () => void;
+  onOrderOpen: (orderId: string) => void;
+  onOrdersViewAll: () => void;
   ebayAccounts: EbayAccountPublicDto[];
   selectedStoreId: string;
   onStoreSelect: (storeId: string) => void;
@@ -34,12 +55,27 @@ export interface DashboardPageComponentProps {
   formatCurrency: (value: number) => string;
   formatCompactCurrency: (value: number) => string;
   formatDate: (dateString: string) => string;
-  /* presentation-only derived values (computed in container) */
-  showSearch: boolean;
-  onShowSearchChange: (show: boolean) => void;
-  cardColors: Record<PeriodKey, string>;
-  cardHeaders: Record<PeriodKey, string>;
-  labels: { sales: string; orders: string; netProfit: string; margin: string };
-  periodTitles: Record<PeriodKey, string>;
-  periodPresetOptions: { label: string; value: string }[];
+  formatTrend: (trend: number | null | undefined) => string | undefined;
+  cardHeaderColors: Record<DashboardPeriodKey, string>;
+  labels: PeriodCardLabels;
+  periodTitles: Record<DashboardPeriodKey, string>;
+  listingsViewAllLabel: string;
+  ordersViewAllLabel: string;
+  listingsEmptyTitle: string;
+  listingsEmptySubtitle: string;
+  ordersEmptyTitle: string;
+  ordersEmptySubtitle: string;
+  tabLabels: Record<DashboardTabId, string>;
+}
+
+export interface PeriodCardViewProps {
+  title: string;
+  dateRange: string;
+  metrics: PeriodMetricsDto;
+  headerBg: string;
+  isActive: boolean;
+  onClick: () => void;
+  formatCurrency: (v: number) => string;
+  formatTrend: (trend: number | null | undefined) => string | undefined;
+  labels: PeriodCardLabels;
 }

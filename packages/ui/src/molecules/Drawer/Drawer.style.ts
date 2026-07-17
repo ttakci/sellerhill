@@ -33,7 +33,7 @@ export const Panel = styled.aside<{ $size: string; $isOpen: boolean }>`
         return '36rem'; /* 576px */
     }
   }};
-  background: ${tkn('colors.background.primary')};
+  background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('shadows.xl')};
   display: flex;
   flex-direction: column;
@@ -55,29 +55,41 @@ export const Header = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
   flex-shrink: 0;
+  background: ${tkn('colors.surface.primary')};
 `;
 
 export const HeaderText = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.2xs')};
   min-width: 0;
   flex: 1;
 `;
 
+/**
+ * Soft canvas (not pure white) so white borderless cards read clearly.
+ * Light: background.primary ≈ #f4f7ff · cards: surface.primary #fff
+ * Header + footer stay surface.primary.
+ */
 export const Body = styled.div`
   padding: ${tkn('spacing.lg')};
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  background: ${tkn('colors.background.primary')};
 `;
 
 export const Footer = styled.div`
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   border-top: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   display: flex;
   justify-content: flex-end;
   gap: ${tkn('spacing.sm-md')};
   flex-shrink: 0;
+  background: ${tkn('colors.surface.primary')};
 `;
 
 export const CloseButton = styled.button`

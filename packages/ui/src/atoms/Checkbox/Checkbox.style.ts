@@ -20,28 +20,35 @@ export const HiddenCheckbox = styled.input`
 `;
 
 export const StyledCheckbox = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
-  width: 1.125rem; /* 18px */
-  height: 1.125rem; /* 18px */
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 1.125rem; /* 18px including border */
+  height: 1.125rem;
   border: 0.0625rem solid
-    ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)}; /* 1px */
-  border-radius: 0.25rem; /* 4px */
+    ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)};
+  border-radius: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    border-color ${tkn('transitions.fast')},
+    background-color ${tkn('transitions.fast')};
   background-color: ${({ theme, $checked }) =>
     $checked ? theme.colors.brand.primary : theme.colors.background.secondary};
 
   &::after {
     content: '';
-    width: 0.3125rem; /* 5px */
-    height: 0.5625rem; /* 9px */
+    box-sizing: border-box;
+    width: 0.3125rem;
+    height: 0.5625rem;
     border: solid ${tkn('colors.text.inverse')};
-    border-width: 0 0.09375rem 0.09375rem 0; /* 1.5px */
+    border-width: 0 0.09375rem 0.09375rem 0;
     transform: rotate(45deg) scale(${({ $checked }) => ($checked ? 1 : 0.5)});
     opacity: ${({ $checked }) => ($checked ? 1 : 0)};
-    transition: all ${tkn('transitions.fast')};
-    margin-bottom: 0.125rem; /* 2px */
+    transition:
+      opacity ${tkn('transitions.fast')},
+      transform ${tkn('transitions.fast')};
+    margin-bottom: 0.125rem;
   }
 
   &:hover {

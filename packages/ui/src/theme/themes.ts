@@ -1,13 +1,15 @@
-import { radiusTokens, shadowTokens, spacingTokens, transitionTokens, typographyTokens } from './designTokens';
+import {
+  controlTokens,
+  radiusTokens,
+  shadowTokens,
+  spacingTokens,
+  transitionTokens,
+  typographyTokens,
+} from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
 /*
- * Color Hierarchy (Light):
- * Canvas:        background.primary   (#F8FAFC) — page background
- * Panel:         surface.primary      (#FFFFFF) — cards, tables, inputs
- * Panel accent:  surface.secondary    (#F9FAFB) — subtle panel sections
- * Inner element: background.tertiary  (#F1F5F9) — stat rows, nested boxes, table headers
- * Divider:       background.secondary (#FFFFFF) + border.primary (#E5E7EB)
+ * Color Hierarchy (Light) — clear contrast, crisp UI (user preference).
  */
 const lightColors: ThemeColors = {
   background: {
@@ -25,9 +27,10 @@ const lightColors: ThemeColors = {
   },
 
   text: {
-    primary: '#0d1526',
+    // Strong readable ink — not washed/silky
+    primary: '#0f172a',
     secondary: '#475569',
-    tertiary: '#94a3b8',
+    tertiary: '#64748b',
     disabled: '#cbd5e1',
     inverse: '#FFFFFF',
   },
@@ -86,6 +89,13 @@ const lightColors: ThemeColors = {
     logoGlow: 'rgba(37, 99, 235, 0.3)',
   },
 
+  dashboard: {
+    periodToday: '#5b7fd6',
+    periodThisWeek: '#5b9bb8',
+    periodThisMonth: '#2a9d8f',
+    periodLastMonth: '#3d9b6e',
+  },
+
   landing: {
     heroGradient: 'linear-gradient(135deg, #4263EB 0%, #6366F1 50%, #818CF8 100%)',
     heroBg: '#070B1A',
@@ -125,11 +135,11 @@ const darkColors: ThemeColors = {
   },
 
   text: {
-    primary: '#f1f5f9',
+    primary: '#e2e8f0',
     secondary: '#94a3b8',
     tertiary: '#64748b',
     disabled: '#4b5563',
-    inverse: '#0d1526',
+    inverse: '#1e293b',
   },
 
   border: {
@@ -146,9 +156,9 @@ const darkColors: ThemeColors = {
   },
 
   brand: {
-    primary: '#6366f1',
-    primaryHover: '#818cf8',
-    secondary: 'rgba(99, 102, 241, 0.12)',
+    primary: '#4f6ef7',
+    primaryHover: '#6b85f8',
+    secondary: 'rgba(79, 110, 247, 0.14)',
   },
 
   accent: {
@@ -172,6 +182,13 @@ const darkColors: ThemeColors = {
     warning: 'rgba(251, 191, 36, 0.2)',
     info: 'rgba(96, 165, 250, 0.2)',
     neutral: 'rgba(107, 114, 128, 0.2)',
+  },
+
+  dashboard: {
+    periodToday: '#6b8fe8',
+    periodThisWeek: '#6aadc4',
+    periodThisMonth: '#34b3a4',
+    periodLastMonth: '#4cba88',
   },
 
   sidebar: {
@@ -218,6 +235,7 @@ export const lightTheme: AppTheme = {
   shadows: shadowTokens,
   typography: typographyTokens,
   transitions: transitionTokens,
+  controls: controlTokens,
 };
 
 export const darkTheme: AppTheme = {
@@ -228,4 +246,5 @@ export const darkTheme: AppTheme = {
   shadows: shadowTokens,
   typography: typographyTokens,
   transitions: transitionTokens,
+  controls: controlTokens,
 };

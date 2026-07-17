@@ -49,13 +49,35 @@ export const authApi = baseApi.injectEndpoints({
     }),
 
     /**
-     * Login user
+     * Login user (sets HttpOnly refresh cookie; body has accessToken + user only)
      */
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
         url: '/auth/login',
         method: 'POST',
         body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    /**
+     * Silent session restore / token refresh via HttpOnly cookie
+     */
+    refresh: builder.mutation<AuthResponse, void>({
+      query: () => ({
+        url: '/auth/refresh',
+        method: 'POST',
+        body: {},
+      }),
+    }),
+
+    /**
+     * Clear HttpOnly refresh cookie on the server
+     */
+    logout: builder.mutation<{ success: boolean }, void>({
+      query: () => ({
+        url: '/auth/logout',
+        method: 'POST',
       }),
       invalidatesTags: ['Auth'],
     }),
@@ -101,6 +123,8 @@ export const {
   useLoginMutation,
   useVerifyEmailMutation,
   useResendVerificationMutation,
+  useRefreshMutation,
+  useLogoutMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
   useChangePasswordMutation,

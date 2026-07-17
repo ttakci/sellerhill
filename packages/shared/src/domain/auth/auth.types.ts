@@ -27,11 +27,14 @@ export interface LoginRequest {
 }
 
 /**
- * Authentication response with tokens
+ * Authentication response with tokens.
+ * Refresh token is delivered via HttpOnly cookie (`zonds_rt`) and is **not**
+ * returned in the JSON body in the cookie-auth path (optional for legacy only).
  */
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
+  /** @deprecated Prefer HttpOnly cookie; omitted when cookie auth is enabled */
+  refreshToken?: string;
   user: UserDto;
 }
 
@@ -70,10 +73,11 @@ export interface ResendVerificationRequest {
 }
 
 /**
- * Refresh token request
+ * Refresh token request body (optional — cookie is preferred).
  */
 export interface RefreshTokenRequest {
-  refreshToken: string;
+  /** @deprecated Prefer HttpOnly cookie `zonds_rt` */
+  refreshToken?: string;
 }
 
 /**

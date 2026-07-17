@@ -35,7 +35,7 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
           {accounts.map((a) => (
             <S.SelectableCard
               key={a.id}
-              variant="bordered"
+              variant="elevated"
               padding="none"
               $selected={a.id === selectedId}
               role="button"

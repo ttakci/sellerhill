@@ -5,17 +5,18 @@ import { tkn } from '../../theme/tkn';
 
 import { ActionSurfaceProps, ButtonSize } from './Button.types';
 
+/** Align medium/small with compact form-control heights (SearchField / Select). */
 const getBaseHeight = (size: ButtonSize) => {
   switch (size) {
     case 'xsmall':
       return '2rem'; /* 32px */
     case 'small':
-      return '2.75rem'; /* 44px */
+      return '2.5rem'; /* 40px — matches control small compact */
     case 'large':
-      return '3.75rem'; /* 60px */
+      return '3.25rem'; /* 52px — matches control medium labeled */
     case 'medium':
     default:
-      return '3.25rem'; /* 52px */
+      return '2.75rem'; /* 44px — matches control medium compact */
   }
 };
 
@@ -50,14 +51,14 @@ const getMinWidth = (size: ButtonSize): string => {
 const getFontSize = (size: ButtonSize): string => {
   switch (size) {
     case 'xsmall':
-      return '0.8125rem'; /* 13px */
-    case 'medium':
+      return '0.875rem'; /* 14px */
+    case 'small':
       return '0.9375rem'; /* 15px */
     case 'large':
-      return '1rem'; /* 16px */
-    case 'small':
+      return '1.0625rem'; /* 17px */
+    case 'medium':
     default:
-      return '0.875rem'; /* 14px */
+      return '1rem'; /* 16px — primary UI actions */
   }
 };
 
@@ -84,8 +85,9 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
 
   border-radius: ${tkn('radius.md')};
   font-family: ${tkn('typography.fontFamily.sans')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${({ $size }) => getFontSize($size)};
+  letter-spacing: ${tkn('typography.letterSpacing.normal')};
 
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -119,41 +121,47 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
           }
         `;
       case 'secondary':
+        /* Outline: blue border + blue text, transparent/surface fill (dialog reference) */
         return css`
-          background-color: ${theme.colors.background.secondary};
+          background-color: ${theme.colors.surface.primary};
           color: ${theme.colors.brand.primary};
-          border: 0.0625rem solid ${theme.colors.border.primary};
+          border: 0.0625rem solid ${theme.colors.brand.primary};
 
           &:hover:not(:disabled) {
-            background-color: ${theme.colors.brand.secondary};
-            border-color: ${theme.colors.brand.primary};
-            color: ${theme.colors.brand.primary};
+            background-color: ${theme.mode === 'dark'
+              ? `${theme.colors.brand.primary}18`
+              : theme.colors.brand.secondary};
+            border-color: ${theme.colors.brand.primaryHover};
+            color: ${theme.colors.brand.primaryHover};
             box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
-            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            filter: brightness(1);
             box-shadow: none;
-            background-color: ${theme.colors.background.secondary};
+            background-color: ${theme.mode === 'dark'
+              ? `${theme.colors.brand.primary}12`
+              : theme.colors.brand.secondary};
           }
         `;
       case 'tertiary':
+        /* Alias of outline secondary — keep for existing call sites */
         return css`
           background-color: transparent;
           color: ${theme.colors.brand.primary};
           border: 0.0625rem solid ${theme.colors.brand.primary};
 
           &:hover:not(:disabled) {
-            background-color: ${theme.colors.brand.primary}15;
+            background-color: ${theme.mode === 'dark'
+              ? `${theme.colors.brand.primary}18`
+              : `${theme.colors.brand.primary}15`};
             box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
-            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
           }
 
           &:active:not(:disabled) {
-            filter: brightness(1);
             box-shadow: none;
-            background-color: ${theme.colors.brand.primary}08;
+            background-color: ${theme.mode === 'dark'
+              ? `${theme.colors.brand.primary}12`
+              : `${theme.colors.brand.primary}08`};
           }
         `;
       case 'text':
@@ -176,21 +184,21 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
           }
         `;
       case 'danger':
+        /* Filled danger (solid) — white label on error tone */
         return css`
-          background-color: ${theme.colors.background.secondary};
-          color: ${theme.colors.semantic.error};
-          border: 0.0625rem solid ${theme.colors.semantic.error}40;
+          background-color: ${theme.colors.semantic.error};
+          color: ${theme.colors.text.inverse};
+          border: 0.0625rem solid ${theme.colors.semantic.error};
+          box-shadow: 0 0.25rem 0.875rem 0 ${theme.colors.semantic.error}40;
 
           &:hover:not(:disabled) {
-            background-color: ${theme.colors.semantic.error}10;
-            border-color: ${theme.colors.semantic.error};
-            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.semantic.error}20;
-            filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
+            filter: ${theme.mode === 'dark' ? 'brightness(1.1)' : 'brightness(0.92)'};
+            box-shadow: 0 0.5rem 1.5rem 0 ${theme.colors.semantic.error}45;
           }
 
           &:active:not(:disabled) {
             filter: brightness(1);
-            box-shadow: none;
+            box-shadow: 0 0.125rem 0.5rem 0 ${theme.colors.semantic.error}35;
           }
         `;
     }

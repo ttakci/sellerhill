@@ -6,13 +6,14 @@ import { SettingsCardVariant } from './SettingsCard.types';
 
 export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
   background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.sm')};
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
 `;
 
@@ -21,8 +22,7 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
     $variant === 'section'
       ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.lg')({ theme })}`
       : tkn('spacing.md')({ theme })};
-  border-bottom: ${({ $variant, theme }) =>
-    $variant === 'section' ? 'none' : `0.0625rem solid ${tkn('colors.border.primary')({ theme })}`};
+  border-bottom: none;
   display: flex;
   justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
   align-items: center;
@@ -30,20 +30,17 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
   background: ${tkn('colors.surface.primary')};
 
   @media (max-width: 63.9375rem) {
-    /* < 1024px */
     flex-direction: ${({ $variant }) => ($variant === 'panel' ? 'column' : 'row')};
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
     padding: ${({ $variant, theme }) =>
       $variant === 'section'
         ? `${tkn('spacing.md+')({ theme })} ${tkn('spacing.lg')({ theme })}`
         : `${tkn('spacing.md+')({ theme })} ${tkn('spacing.md')({ theme })}`};
-    gap: ${({ $variant, theme }) =>
-      $variant === 'panel' ? tkn('spacing.md+')({ theme }) : tkn('spacing.md')({ theme })};
   }
 `;
 
 export const HeaderDivider = styled.div<{ $variant: SettingsCardVariant }>`
-  height: 0.0625rem; /* 1px */
+  height: 0.0625rem;
   background: ${tkn('colors.border.primary')};
   margin: 0 ${tkn('spacing.lg')};
 `;
@@ -57,14 +54,13 @@ export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
   min-width: 0;
 
   @media (max-width: 63.9375rem) {
-    /* < 1024px */
     max-width: 100%;
   }
 `;
 
 export const IconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'blacklist' }>`
-  width: 3rem; /* 48px */
-  height: 3rem; /* 48px */
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: ${tkn('radius.md')};
   display: flex;
   align-items: center;
@@ -94,7 +90,7 @@ export const IconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'bla
         default:
           return theme.colors.brand.primary + '30';
       }
-    }}; /* 1px */
+    }};
   color: ${({ theme, $type }) => {
     switch ($type) {
       case 'location':
@@ -112,16 +108,19 @@ export const IconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'bla
 export const TitleContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.2xs')};
   min-width: 0;
 `;
 
+/** Section title — clear and readable (18px / semibold) */
 export const Title = styled.div`
+  font-family: ${tkn('typography.fontFamily.heading')};
   font-size: ${tkn('typography.fontSize.lg')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
-  line-height: ${tkn('typography.lineHeight.normal')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+  letter-spacing: ${tkn('typography.letterSpacing.tight')};
 `;
 
 export const HeaderRight = styled.div<{ $variant: SettingsCardVariant }>`
@@ -133,10 +132,8 @@ export const HeaderRight = styled.div<{ $variant: SettingsCardVariant }>`
   flex-shrink: 0;
 
   @media (max-width: 63.9375rem) {
-    /* < 1024px */
     flex: 1;
     max-width: 100%;
-    justify-content: ${({ $variant }) => ($variant === 'panel' ? 'flex-start' : 'flex-start')};
   }
 `;
 

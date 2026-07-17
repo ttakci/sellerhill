@@ -51,6 +51,10 @@ type ThemePath =
   | 'colors.sidebar.accent'
   | 'colors.sidebar.divider'
   | 'colors.sidebar.logoGlow'
+  | 'colors.dashboard.periodToday'
+  | 'colors.dashboard.periodThisWeek'
+  | 'colors.dashboard.periodThisMonth'
+  | 'colors.dashboard.periodLastMonth'
   | 'colors.landing.heroGradient'
   | 'colors.landing.heroBg'
   | 'colors.landing.heroGlow'
@@ -126,7 +130,17 @@ type ThemePath =
   | 'shadows.xl'
   | 'transitions.fast'
   | 'transitions.normal'
-  | 'transitions.slow';
+  | 'transitions.slow'
+  | 'controls.height.small'
+  | 'controls.height.medium'
+  | 'controls.height.large'
+  | 'controls.height.smallLabeled'
+  | 'controls.height.mediumLabeled'
+  | 'controls.height.largeLabeled'
+  | 'controls.paddingX'
+  | 'controls.iconWidth'
+  | 'controls.fontSize'
+  | 'controls.radius';
 
 /**
  * tkn Fonksiyonu:

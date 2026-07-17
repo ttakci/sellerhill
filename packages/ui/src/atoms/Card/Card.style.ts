@@ -22,7 +22,8 @@ export const CardContainer = styled.div<{
       case 'bordered':
         return `border: 1px solid ${tkn('colors.border.primary')(props)};`;
       case 'elevated':
-        return `box-shadow: ${tkn('shadows.md')(props)}; border: 1px solid ${tkn('colors.border.secondary')(props)};`;
+        /* Borderless white card on soft canvas — shadow defines the edge */
+        return `box-shadow: ${tkn('shadows.sm')(props)}; border: none;`;
       case 'flat':
         return '';
       case 'interactive':

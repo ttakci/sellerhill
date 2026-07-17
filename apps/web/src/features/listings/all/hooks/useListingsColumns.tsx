@@ -1,0 +1,237 @@
+import type { ListingDto } from '@repo/shared';
+import { Icon, IdBadge, Tooltip, type TableColumn } from '@repo/ui';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import * as S from '../ListingsAllPage.style';
+
+/**
+ * Column definitions for ListingsAll table view.
+ * Extracted so the page container stays orchestration-only.
+ */
+export function useListingsColumns() {
+  const { t } = useTranslation(['listings', 'translation']);
+
+  const columnOptions = useMemo(
+    () => [
+      { key: 'product', label: t('listings.table.product'), alwaysVisible: true },
+      { key: 'prices', label: t('listings.table.price') },
+      { key: 'quantity', label: t('listings.table.stock') },
+      { key: 'sold', label: t('listings.table.sold') },
+      { key: 'lastSale', label: t('listings.table.lastSale') },
+      { key: 'profit', label: t('listings.table.estimatedProfit') },
+      { key: 'createdAt', label: t('listings.table.added') },
+      { key: 'category', label: t('listings.table.category') },
+      { key: 'purchasePrice', label: t('listings.table.purchasePrice') },
+      { key: 'roi', label: t('listings.table.roi') },
+      { key: 'profitMargin', label: t('listings.table.profitMargin') },
+      { key: 'watch', label: t('listings.table.watch') },
+      { key: 'views', label: t('listings.table.views') },
+      { key: 'sourceStock', label: t('listings.table.amazonStock') },
+    ],
+    [t]
+  );
+
+  const allColumns = useMemo<TableColumn<ListingDto>[]>(
+    () => [
+      {
+        key: 'product',
+        sortable: true,
+        header: t('listings.table.product'),
+        width: '20.5rem',
+        render: (_value, listing) => {
+          const displayName =
+            listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
+          return (
+            <S.ProductCell>
+              <S.ProductImageWrapper>
+                {listing.imageUrls?.[0] ? (
+                  <S.ProductImage src={listing.imageUrls[0]} alt={listing.title} />
+                ) : (
+                  <Icon name="image" size={28} />
+                )}
+              </S.ProductImageWrapper>
+              <S.ProductMainInfo>
+                <Tooltip content={displayName} position="top" variant="dark">
+                  <S.ProductTitle>{displayName}</S.ProductTitle>
+                </Tooltip>
+                <S.ProductMeta>
+                  <S.ProductMetaRow>
+                    <S.ProductMetaLabel>{t('listings.table.asin')}</S.ProductMetaLabel>
+                    <IdBadge id={listing.asin} storeType="amazon" size="sm" />
+                  </S.ProductMetaRow>
+                  {listing.ebayListingId ? (
+                    <S.ProductMetaRow>
+                      <S.ProductMetaLabel>{t('listings.table.ebayId')}</S.ProductMetaLabel>
+                      <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
+                    </S.ProductMetaRow>
+                  ) : null}
+                </S.ProductMeta>
+              </S.ProductMainInfo>
+            </S.ProductCell>
+          );
+        },
+      },
+      {
+        key: 'category',
+        sortable: true,
+        header: t('listings.table.category'),
+        width: '7rem',
+        render: (category) => {
+          const str = String(category ?? '');
+          return <S.CompactText title={str}>{str || '—'}</S.CompactText>;
+        },
+      },
+      {
+        key: 'prices',
+        sortable: true,
+        header: t('listings.table.price'),
+        width: '5.25rem',
+        render: (_value, listing) => (
+          <S.CompactMetric>
+            <S.MetricValue variant="body-sm" weight="semibold">
+              ${listing.price.toFixed(2)}
+            </S.MetricValue>
+          </S.CompactMetric>
+        ),
+      },
+      {
+        key: 'createdAt',
+        sortable: true,
+        header: t('listings.table.added'),
+        width: '5.75rem',
+        render: (_value, listing) => (
+          <S.CompactText>
+            {listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—'}
+          </S.CompactText>
+        ),
+      },
+      {
+        key: 'lastSale',
+        sortable: true,
+        header: t('listings.table.lastSale'),
+        width: '5.75rem',
+        render: (_value, listing) => (
+          <S.CompactText>
+            {listing.lastSaleAt ? new Date(listing.lastSaleAt).toLocaleDateString() : '—'}
+          </S.CompactText>
+        ),
+      },
+      {
+        key: 'purchasePrice',
+        sortable: true,
+        header: t('listings.table.purchasePrice'),
+        width: '5.25rem',
+        render: (_value, listing) => (
+          <S.CompactMetric>
+            <S.MetricValue variant="body-sm">${listing.purchasePrice?.toFixed(2) || '0.00'}</S.MetricValue>
+          </S.CompactMetric>
+        ),
+      },
+      {
+        key: 'profit',
+        sortable: true,
+        header: t('listings.table.estimatedProfit'),
+        width: '5.5rem',
+        render: (_value, listing) => {
+          const profit = listing.estimatedProfit || 0;
+          return (
+            <S.CompactMetric>
+              <S.MetricValue variant="body-sm" weight="semibold" $positive={profit > 0} $negative={profit < 0}>
+                {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
+              </S.MetricValue>
+            </S.CompactMetric>
+          );
+        },
+      },
+      {
+        key: 'roi',
+        sortable: true,
+        header: t('listings.table.roi'),
+        width: '4.5rem',
+        render: (_value, listing) => (
+          <S.CompactMetric>
+            <S.MetricValue
+              variant="body-sm"
+              weight="semibold"
+              $positive={(listing.roi || 0) > 0}
+              $negative={(listing.roi || 0) < 0}
+            >
+              {listing.roi?.toFixed(1) || '0'}%
+            </S.MetricValue>
+          </S.CompactMetric>
+        ),
+      },
+      {
+        key: 'profitMargin',
+        sortable: true,
+        header: t('listings.table.profitMargin'),
+        width: '4.5rem',
+        render: (_value, listing) => (
+          <S.CompactMetric>
+            <S.MetricValue variant="body-sm">{listing.profitMargin?.toFixed(1) || '0'}%</S.MetricValue>
+          </S.CompactMetric>
+        ),
+      },
+      {
+        key: 'sold',
+        sortable: true,
+        header: t('listings.table.sold'),
+        align: 'center',
+        width: '4.25rem',
+        render: (_value, listing) => (
+          <S.StatMain variant="body-sm" weight="semibold">
+            {listing.soldCount || 0}
+          </S.StatMain>
+        ),
+      },
+      {
+        key: 'watch',
+        sortable: true,
+        header: t('listings.table.watch'),
+        align: 'center',
+        width: '3.5rem',
+        render: (_value, listing) => (
+          <S.StatMain variant="body-sm" weight="semibold">
+            {listing.watchCount || 0}
+          </S.StatMain>
+        ),
+      },
+      {
+        key: 'views',
+        sortable: true,
+        header: t('listings.table.views'),
+        align: 'center',
+        width: '3.5rem',
+        render: (_value, listing) => (
+          <S.StatMain variant="body-sm" weight="semibold">
+            {listing.viewCount || 0}
+          </S.StatMain>
+        ),
+      },
+      {
+        key: 'quantity',
+        sortable: true,
+        header: t('listings.table.stock'),
+        width: '3.75rem',
+        align: 'center',
+        render: (_value, listing) => (
+          <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
+        ),
+      },
+      {
+        key: 'sourceStock',
+        sortable: true,
+        header: t('listings.table.amazonStock'),
+        width: '4.25rem',
+        align: 'center',
+        render: (_value, listing) => (
+          <S.StockValue $outOfStock={listing.sourceStock === 0}>{listing.sourceStock ?? '—'}</S.StockValue>
+        ),
+      },
+    ],
+    [t]
+  );
+
+  return { columnOptions, allColumns };
+}

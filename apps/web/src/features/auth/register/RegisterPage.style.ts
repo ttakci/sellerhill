@@ -148,7 +148,19 @@ export const BrandingLogoWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: ${tkn('spacing.md')};
+  width: 100%;
+  max-width: 22rem;
+  overflow: visible;
+
+  & img {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 18rem !important;
+    object-fit: contain !important;
+  }
 `;
 
 export const SloganWrapper = styled.div`

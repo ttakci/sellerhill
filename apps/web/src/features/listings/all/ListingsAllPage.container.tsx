@@ -1,218 +1,147 @@
-import { ListingStatus, type ListingDto } from '@repo/shared';
-import { Icon, IdBadge, Tooltip, useLoading, useUI, type ViewMode } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { ListingStatus } from '@repo/shared';
+import { useLoading, useUI, type ViewMode } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   useDeleteListingsMutation,
   useEndListingsMutation,
+  useExportListingsCsvMutation,
   useGetListingsQuery,
+  usePublishListingsMutation,
 } from '../api/listings.api';
-import type { ListingsFilterState } from '../shared/listings-filter.types';
 
+import { useListingsColumns } from './hooks/useListingsColumns';
+import { useListingsFilters } from './hooks/useListingsFilters';
 import { ListingsAllPageComponent } from './ListingsAllPage.component';
-import * as S from './ListingsAllPage.style';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
-
-const DEFAULT_FILTERS: ListingsFilterState = {
-  search: '',
-  category: '',
-  status: '',
-  price: { min: '', max: '' },
-  purchasePrice: { min: '', max: '' },
-  estimatedProfit: { min: '', max: '' },
-  roi: { min: '', max: '' },
-  profitMargin: { min: '', max: '' },
-  soldCount: { min: '', max: '' },
-  watchCount: { min: '', max: '' },
-  viewCount: { min: '', max: '' },
-  quantity: { min: '', max: '' },
-  sourceStock: { min: '', max: '' },
-};
+import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { useLocale } from '@/utils/useLocale';
 
 export const ListingsAllPage: React.FC = () => {
   const { t } = useTranslation(['listings', 'translation']);
   const { showMessage } = useUI();
+  const { localeNavigate } = useLocale();
 
-  // Table view mode state (grid default, toggleable to table)
   const [tableView, setTableView] = useState<ViewMode>('grid');
-
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // Selection state
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
-
-  // Column visibility state
   const [visibleColumnKeys, setVisibleColumnKeys] = useState<string[]>([
     'product',
-    'category',
     'prices',
-    'purchasePrice',
-    'profit',
-    'roi',
-    'profitMargin',
-    'sold',
-    'watch',
-    'views',
     'quantity',
-    'sourceStock',
-    'status',
+    'sold',
+    'lastSale',
+    'profit',
+    'createdAt',
   ]);
 
-  // Sorting state
-  const [sortColumn, setSortColumn] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const {
+    page,
+    setPage,
+    rowsPerPage,
+    handleRowsPerPageChange,
+    sortColumn,
+    sortDirection,
+    handleSort,
+    filters,
+    serverQuery,
+    advancedOpen,
+    setAdvancedOpen,
+    handleSearchChange,
+    handleCategoryChange,
+    handleStatusChange,
+    handleEbayAccountChange,
+    handleClearFilters,
+    hasActiveFilters,
+    statusOptions,
+    numericFilters,
+    fromDashboard,
+  } = useListingsFilters();
 
-  // Filter state
-  const [filters, setFilters] = useState<ListingsFilterState>(DEFAULT_FILTERS);
+  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
 
-  // Advanced filter panel toggle (UI state)
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const storeOptions = useMemo(
+    () => [
+      { value: '', label: t('listings.filters.allStores') },
+      ...(ebayAccountsData?.items ?? []).map((acc) => ({
+        value: acc.id,
+        label: acc.storeName || acc.sellerId || acc.id,
+      })),
+    ],
+    [ebayAccountsData?.items, t]
+  );
 
-  // Fetch listings
-  const { data: listings = [], isLoading: isListingsLoading } = useGetListingsQuery(undefined, {
+  const {
+    data,
+    isLoading: isListingsLoading,
+    isError: isListingsError,
+    error: listingsError,
+  } = useGetListingsQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
   });
 
-  const [endListings, { isLoading: isEnding, isSuccess: isEndSuccess, error: _endError, data: endData }] =
-    useEndListingsMutation();
-  const [deleteListings, { isLoading: isDeleting, isSuccess: isDeleteSuccess, error: _deleteError, data: deleteData }] =
+  // Support both paginated shape and accidental legacy array responses
+  const listings = useMemo(() => (Array.isArray(data) ? data : (data?.items ?? [])), [data]);
+  const total = Array.isArray(data) ? data.length : (data?.total ?? 0);
+  const categories = useMemo(() => (Array.isArray(data) ? [] : (data?.categories ?? [])), [data]);
+
+  useEffect(() => {
+    if (!isListingsError || !listingsError) {
+      return;
+    }
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: 'listings:listings.errors.loadFailed',
+      },
+      t
+    );
+  }, [isListingsError, listingsError, showMessage, t]);
+
+  const isDraftMode = serverQuery.status === ListingStatus.DRAFT;
+
+  const [endListings, { isLoading: isEnding, isSuccess: isEndSuccess, data: endData }] = useEndListingsMutation();
+  const [deleteListings, { isLoading: isDeleting, isSuccess: isDeleteSuccess, data: deleteData }] =
     useDeleteListingsMutation();
+  const [publishListings, { isLoading: isPublishing, isSuccess: isPublishSuccess, data: publishData }] =
+    usePublishListingsMutation();
+  const [exportCsv, { isLoading: isExporting }] = useExportListingsCsvMutation();
 
-  const isLoading = isListingsLoading || isEnding || isDeleting;
+  // Global overlay only for mutations — list fetch is inline
+  useLoading(isEnding || isDeleting || isExporting || isPublishing);
 
-  useLoading(isLoading);
+  const { columnOptions, allColumns } = useListingsColumns();
 
-  const handleSort = (columnKey: string) => {
-    if (sortColumn === columnKey) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortColumn(columnKey);
-      setSortDirection('asc');
-    }
-  };
+  const filteredColumns = useMemo(
+    () => allColumns.filter((col) => visibleColumnKeys.includes(col.key || '')),
+    [allColumns, visibleColumnKeys]
+  );
 
-  // Filtered listings
-  const filteredListings = useMemo(() => {
-    const inRange = (val: number | undefined, range: { min: string; max: string }) => {
-      if (range.min !== '' && (val ?? 0) < Number(range.min)) {
-        return false;
-      }
-      if (range.max !== '' && (val ?? 0) > Number(range.max)) {
-        return false;
-      }
-      return true;
-    };
+  const selectedRows = useMemo(
+    () => listings.filter((l) => selectedListingIds.includes(l.id)),
+    [listings, selectedListingIds]
+  );
 
-    return listings.filter((listing) => {
-      if (filters.search) {
-        const q = filters.search.toLowerCase();
-        if (!listing.title?.toLowerCase().includes(q) && !listing.asin?.toLowerCase().includes(q)) {
-          return false;
-        }
-      }
-      if (filters.category && listing.category !== filters.category) {
-        return false;
-      }
-      if (filters.status && listing.status !== (filters.status as ListingStatus)) {
-        return false;
-      }
-      if (!inRange(listing.price, filters.price)) {
-        return false;
-      }
-      if (!inRange(listing.purchasePrice, filters.purchasePrice)) {
-        return false;
-      }
-      if (!inRange(listing.estimatedProfit, filters.estimatedProfit)) {
-        return false;
-      }
-      if (!inRange(listing.roi, filters.roi)) {
-        return false;
-      }
-      if (!inRange(listing.profitMargin, filters.profitMargin)) {
-        return false;
-      }
-      if (!inRange(listing.soldCount, filters.soldCount)) {
-        return false;
-      }
-      if (!inRange(listing.watchCount, filters.watchCount)) {
-        return false;
-      }
-      if (!inRange(listing.viewCount, filters.viewCount)) {
-        return false;
-      }
-      if (!inRange(listing.quantity, filters.quantity)) {
-        return false;
-      }
-      if (!inRange(listing.sourceStock, filters.sourceStock)) {
-        return false;
-      }
-      return true;
-    });
-  }, [listings, filters]);
+  const categoryOptions = useMemo(
+    () => [
+      { value: '', label: t('listings.filters.allCategories') },
+      ...categories.map((c) => ({ value: c, label: c })),
+    ],
+    [categories, t]
+  );
 
-  // Sorted listings
-  const sortedListings = useMemo(() => {
-    if (!sortColumn) {
-      return filteredListings;
-    }
+  // Clear selection when the page of results changes. Implemented as render-time
+  // state adjustment (React-recommended) rather than setState-in-effect.
+  const selectionResetKey = `${page}|${rowsPerPage}|${serverQuery.search ?? ''}|${serverQuery.status ?? ''}|${serverQuery.category ?? ''}|${serverQuery.ebayAccountId ?? ''}`;
+  const [lastSelectionResetKey, setLastSelectionResetKey] = useState(selectionResetKey);
+  if (lastSelectionResetKey !== selectionResetKey) {
+    setLastSelectionResetKey(selectionResetKey);
+    setSelectedListingIds([]);
+  }
 
-    return [...filteredListings].sort((a, b) => {
-      let aValue: any = a[sortColumn as keyof typeof a];
-      let bValue: any = b[sortColumn as keyof typeof b];
-
-      if (sortColumn === 'product') {
-        aValue = a.title?.toLowerCase() || '';
-        bValue = b.title?.toLowerCase() || '';
-      } else if (sortColumn === 'prices') {
-        aValue = a.price || 0;
-        bValue = b.price || 0;
-      } else if (sortColumn === 'purchasePrice') {
-        aValue = a.purchasePrice || 0;
-        bValue = b.purchasePrice || 0;
-      } else if (sortColumn === 'profit') {
-        aValue = a.estimatedProfit || 0;
-        bValue = b.estimatedProfit || 0;
-      } else if (sortColumn === 'roi') {
-        aValue = a.roi || 0;
-        bValue = b.roi || 0;
-      } else if (sortColumn === 'profitMargin') {
-        aValue = a.profitMargin || 0;
-        bValue = b.profitMargin || 0;
-      } else if (sortColumn === 'sold') {
-        aValue = a.soldCount || 0;
-        bValue = b.soldCount || 0;
-      } else if (sortColumn === 'watch') {
-        aValue = a.watchCount || 0;
-        bValue = b.watchCount || 0;
-      } else if (sortColumn === 'views') {
-        aValue = a.viewCount || 0;
-        bValue = b.viewCount || 0;
-      }
-
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-      }
-
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-      }
-    });
-  }, [filteredListings, sortColumn, sortDirection]);
-
-  // Pagination logic
-  const paginatedListings = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return sortedListings.slice(start, start + rowsPerPage);
-  }, [sortedListings, page, rowsPerPage]);
-
-  // Handle end listings success
-  React.useEffect(() => {
+  useEffect(() => {
     if (isEndSuccess && endData?.success) {
       showMessage(
         {
@@ -226,8 +155,7 @@ export const ListingsAllPage: React.FC = () => {
     }
   }, [isEndSuccess, endData, showMessage, t]);
 
-  // Handle delete listings success
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDeleteSuccess && deleteData?.success) {
       showMessage(
         {
@@ -241,257 +169,51 @@ export const ListingsAllPage: React.FC = () => {
     }
   }, [isDeleteSuccess, deleteData, showMessage, t]);
 
-  const handleEndListings = useCallback(
-    (listingIds: string[]) => {
-      void endListings(listingIds);
-    },
-    [endListings]
-  );
+  useEffect(() => {
+    if (isPublishSuccess && publishData?.success) {
+      showMessage(
+        {
+          type: publishData.count > 0 ? 'success' : 'warning',
+          headerKey:
+            publishData.count > 0
+              ? 'listings:listings.notifications.publishSuccessTitle'
+              : 'listings:listings.notifications.publishErrorTitle',
+          descriptionKey:
+            publishData.count > 0
+              ? 'listings:listings.notifications.publishSuccess'
+              : 'listings:listings.notifications.publishError',
+          descriptionParams: { count: publishData.count.toString() },
+        },
+        t
+      );
+    }
+  }, [isPublishSuccess, publishData, showMessage, t]);
 
-  const handleDeleteListings = useCallback(
-    (listingIds: string[]) => {
-      return deleteListings(listingIds);
-    },
-    [deleteListings]
-  );
+  const handleToggleListingSelection = useCallback((id: string, selected: boolean) => {
+    setSelectedListingIds((prev) => {
+      if (selected) {
+        return prev.includes(id) ? prev : [...prev, id];
+      }
+      return prev.filter((x) => x !== id);
+    });
+  }, []);
 
-  const handleDownload = () => {
-    const options = [
-      { key: 'title', label: t('listings.table.product') },
-      { key: 'asin', label: t('listings.table.asin') },
-      { key: 'ebayListingId', label: t('listings.table.ebayId') },
-      { key: 'category', label: t('listings.table.category') },
-      { key: 'price', label: t('listings.table.price') },
-      { key: 'purchasePrice', label: t('listings.table.purchasePrice') },
-      { key: 'estimatedProfit', label: t('listings.table.estimatedProfit') },
-      { key: 'roi', label: t('listings.table.roi') },
-      { key: 'profitMargin', label: t('listings.table.profitMargin') },
-      { key: 'soldCount', label: t('listings.table.sold') },
-      { key: 'watchCount', label: t('listings.table.watch') },
-      { key: 'viewCount', label: t('listings.table.views') },
-      { key: 'quantity', label: t('listings.table.stock') },
-      { key: 'sourceStock', label: t('listings.table.amazonStock') },
-      { key: 'status', label: t('listings.table.status') },
-    ];
+  const handleBack = useCallback(() => {
+    if (fromDashboard) {
+      localeNavigate('/dashboard');
+      return;
+    }
+    localeNavigate('/listings');
+  }, [localeNavigate, fromDashboard]);
 
-    const headers = options.map((opt) => opt.label);
-    const rows = listings.map((l) =>
-      options
-        .map((opt) => {
-          const value = l[opt.key as keyof typeof l] ?? '';
-          return `"${String(value)}"`;
-        })
-        .join(',')
-    );
+  const handleAddListing = useCallback(() => {
+    // Overview owns the add-listings drawer — land there to create
+    localeNavigate('/listings');
+  }, [localeNavigate]);
 
-    const csvContent = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `zonds_listings_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const columnOptions = useMemo(
-    () => [
-      { key: 'product', label: t('listings.table.product'), alwaysVisible: true },
-      { key: 'category', label: t('listings.table.category') },
-      { key: 'prices', label: t('listings.table.price') },
-      { key: 'purchasePrice', label: t('listings.table.purchasePrice') },
-      { key: 'profit', label: t('listings.table.estimatedProfit') },
-      { key: 'roi', label: t('listings.table.roi') },
-      { key: 'profitMargin', label: t('listings.table.profitMargin') },
-      { key: 'sold', label: t('listings.table.sold') },
-      { key: 'watch', label: t('listings.table.watch') },
-      { key: 'views', label: t('listings.table.views') },
-      { key: 'quantity', label: t('listings.table.stock') },
-      { key: 'sourceStock', label: t('listings.table.amazonStock') },
-      { key: 'status', label: t('listings.table.status') },
-    ],
-    [t]
-  );
-
-  const toggleColumn = (key: string) => {
+  const toggleColumn = useCallback((key: string) => {
     setVisibleColumnKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
-  };
-
-  const allColumns = useMemo(
-    () => [
-      {
-        key: 'product',
-        sortable: true,
-        header: t('listings.table.product'),
-        render: (_: any, listing: any) => {
-          const displayName = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
-          const truncated = displayName.length > 40 ? displayName.slice(0, 40) + '...' : displayName;
-          return (
-            <S.ProductCell>
-              <S.ProductImageWrapper>
-                {listing.imageUrls?.[0] ? (
-                  <S.ProductImage src={listing.imageUrls[0]} alt={listing.title} />
-                ) : (
-                  <Icon name="image" size={24} />
-                )}
-              </S.ProductImageWrapper>
-              <S.ProductMainInfo>
-                {displayName.length > 40 ? (
-                  <Tooltip content={displayName} position="top" variant="dark">
-                    <S.ProductTitle>{truncated}</S.ProductTitle>
-                  </Tooltip>
-                ) : (
-                  <S.ProductTitle>{truncated}</S.ProductTitle>
-                )}
-                <S.ProductBrand>{listing.brand || ''}</S.ProductBrand>
-                <S.ProductMeta>
-                  <IdBadge id={listing.asin} storeType="amazon" size="sm" />
-                  {listing.ebayListingId && <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />}
-                </S.ProductMeta>
-              </S.ProductMainInfo>
-            </S.ProductCell>
-          );
-        },
-      },
-      {
-        key: 'category',
-        sortable: true,
-        header: t('listings.table.category'),
-        render: (category: unknown) => {
-          const str = String(category ?? '');
-          return <S.CompactText title={str}>{str || '—'}</S.CompactText>;
-        },
-      },
-      {
-        key: 'prices',
-        sortable: true,
-        header: t('listings.table.price'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.MetricValue variant="body-sm" weight="bold">
-            ${listing.price.toFixed(2)}
-          </S.MetricValue>
-        ),
-      },
-      {
-        key: 'purchasePrice',
-        sortable: true,
-        header: t('listings.table.purchasePrice'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.MetricValue variant="body-sm">${listing.purchasePrice?.toFixed(2) || '0.00'}</S.MetricValue>
-        ),
-      },
-      {
-        key: 'profit',
-        sortable: true,
-        header: t('listings.table.estimatedProfit'),
-        render: (_: any, listing: any) => {
-          const profit = listing.estimatedProfit || 0;
-          return (
-            <S.MetricValue variant="body-sm" weight="semibold" $positive={profit > 0} $negative={profit < 0}>
-              {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
-            </S.MetricValue>
-          );
-        },
-      },
-      {
-        key: 'roi',
-        sortable: true,
-        header: t('listings.table.roi'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.MetricValue
-            variant="body-sm"
-            weight="semibold"
-            $positive={(listing.roi || 0) > 0}
-            $negative={(listing.roi || 0) < 0}
-          >
-            {listing.roi?.toFixed(1) || '0'}%
-          </S.MetricValue>
-        ),
-      },
-      {
-        key: 'profitMargin',
-        sortable: true,
-        header: t('listings.table.profitMargin'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.MetricValue variant="body-sm">{listing.profitMargin?.toFixed(1) || '0'}%</S.MetricValue>
-        ),
-      },
-      {
-        key: 'sold',
-        sortable: true,
-        header: t('listings.table.sold'),
-        align: 'center' as const,
-        render: (_: unknown, listing: ListingDto) => (
-          <S.StatMain variant="body-sm" weight="bold">
-            {listing.soldCount || 0}
-          </S.StatMain>
-        ),
-      },
-      {
-        key: 'watch',
-        sortable: true,
-        header: t('listings.table.watch'),
-        align: 'center' as const,
-        render: (_: unknown, listing: ListingDto) => (
-          <S.StatMain variant="body-sm" weight="bold">
-            {listing.watchCount || 0}
-          </S.StatMain>
-        ),
-      },
-      {
-        key: 'views',
-        sortable: true,
-        header: t('listings.table.views'),
-        align: 'center' as const,
-        render: (_: unknown, listing: ListingDto) => (
-          <S.StatMain variant="body-sm" weight="bold">
-            {listing.viewCount || 0}
-          </S.StatMain>
-        ),
-      },
-      {
-        key: 'quantity',
-        sortable: true,
-        header: t('listings.table.stock'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
-        ),
-      },
-      {
-        key: 'sourceStock',
-        sortable: true,
-        header: t('listings.table.amazonStock'),
-        render: (_: unknown, listing: ListingDto) => (
-          <S.StockValue $outOfStock={listing.sourceStock === 0}>{listing.sourceStock ?? '—'}</S.StockValue>
-        ),
-      },
-      {
-        key: 'status',
-        sortable: true,
-        header: t('listings.table.status'),
-        render: (status: unknown) => {
-          const statusStr = String(status);
-          return (
-            <S.StatusBadge $status={statusStr as ListingStatus}>
-              {t(`listings.status.${statusStr.toLowerCase()}`)}
-            </S.StatusBadge>
-          );
-        },
-      },
-    ],
-    [t]
-  );
-
-  const filteredColumns = useMemo(
-    () => allColumns.filter((col) => visibleColumnKeys.includes(col.key || '')),
-    [allColumns, visibleColumnKeys]
-  );
-
-  const selectedRows = useMemo(
-    () => paginatedListings.filter((l) => selectedListingIds.includes(l.id)),
-    [paginatedListings, selectedListingIds]
-  );
+  }, []);
 
   const handleEndSelected = useCallback(() => {
     if (selectedListingIds.length === 0) {
@@ -507,7 +229,7 @@ export const ListingsAllPage: React.FC = () => {
           labelKey: 'listings:listings.actions.endListing',
           variant: 'danger',
           onClick: () => {
-            void handleEndListings(selectedListingIds);
+            void endListings(selectedListingIds);
             setSelectedListingIds([]);
           },
         },
@@ -518,7 +240,7 @@ export const ListingsAllPage: React.FC = () => {
       },
       t
     );
-  }, [selectedListingIds, handleEndListings, showMessage, t]);
+  }, [selectedListingIds, endListings, showMessage, t]);
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedListingIds.length === 0) {
@@ -534,7 +256,7 @@ export const ListingsAllPage: React.FC = () => {
           labelKey: 'translation:common.delete',
           variant: 'danger',
           onClick: () => {
-            void handleDeleteListings(selectedListingIds);
+            void deleteListings(selectedListingIds);
             setSelectedListingIds([]);
           },
         },
@@ -545,136 +267,137 @@ export const ListingsAllPage: React.FC = () => {
       },
       t
     );
-  }, [selectedListingIds, handleDeleteListings, showMessage, t]);
+  }, [selectedListingIds, deleteListings, showMessage, t]);
+
+  const handlePublishSelected = useCallback(() => {
+    if (selectedListingIds.length === 0) {
+      return;
+    }
+    showMessage(
+      {
+        type: 'info',
+        headerKey: 'listings:listings.modals.publishTitle',
+        descriptionKey: 'listings:listings.modals.publishDescription',
+        descriptionParams: { count: selectedListingIds.length },
+        primaryButton: {
+          labelKey: 'listings:listings.actions.publishSelected',
+          onClick: () => {
+            void publishListings(selectedListingIds);
+            setSelectedListingIds([]);
+          },
+        },
+        secondaryButton: {
+          labelKey: 'translation:common.cancel',
+          onClick: () => {},
+        },
+      },
+      t
+    );
+  }, [selectedListingIds, publishListings, showMessage, t]);
 
   const bulkActions = useMemo(
-    () => [
-      {
-        label: t('listings.actions.endListing'),
-        onClick: handleEndSelected,
-      },
-      {
-        label: t('listings.actions.deleteListings'),
-        onClick: handleDeleteSelected,
-      },
-    ],
-    [t, handleEndSelected, handleDeleteSelected]
-  );
-
-  const categoryOptions = useMemo(() => {
-    const cats = [...new Set(listings.map((l) => l.category).filter(Boolean))] as string[];
-    return [
-      { value: '', label: t('listings.filters.allCategories') },
-      ...cats.sort().map((c) => ({ value: c, label: c })),
-    ];
-  }, [listings, t]);
-
-  const statusOptions = useMemo(
-    () => [
-      { value: '', label: t('listings.filters.allStatuses') },
-      ...Object.values(ListingStatus).map((s) => ({
-        value: s,
-        label: t(`listings.status.${s.toLowerCase()}`),
-      })),
-    ],
-    [t]
-  );
-
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({ ...prev, search: e.target.value }));
-    setPage(1);
-  }, []);
-
-  const handleCategoryChange = useCallback((value: string | number) => {
-    setFilters((prev) => ({ ...prev, category: String(value) }));
-    setPage(1);
-  }, []);
-
-  const handleStatusChange = useCallback((value: string | number) => {
-    setFilters((prev) => ({ ...prev, status: String(value) }));
-    setPage(1);
-  }, []);
-
-  const handleRangeChange = useCallback(
-    (field: keyof ListingsFilterState, bound: 'min' | 'max') => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      setFilters((prev) => ({
-        ...prev,
-        [field]: { ...(prev[field] as { min: string; max: string }), [bound]: val },
-      }));
-      setPage(1);
-    },
-    []
-  );
-
-  const handleClearFilters = useCallback(() => {
-    setFilters(DEFAULT_FILTERS);
-    setPage(1);
-  }, []);
-
-  const hasActiveFilters = useMemo(() => {
-    if (filters.search || filters.category || filters.status) {
-      return true;
-    }
-    const rangeKeys = [
-      'price',
-      'purchasePrice',
-      'estimatedProfit',
-      'roi',
-      'profitMargin',
-      'soldCount',
-      'watchCount',
-      'viewCount',
-      'quantity',
-      'sourceStock',
-    ] as const;
-    return rangeKeys.some((k) => filters[k].min !== '' || filters[k].max !== '');
-  }, [filters]);
-
-  const numericFilters = useMemo(
     () =>
-      [
-        { key: 'price', label: t('listings.filters.fields.price') },
-        { key: 'purchasePrice', label: t('listings.filters.fields.purchasePrice') },
-        { key: 'estimatedProfit', label: t('listings.filters.fields.estimatedProfit') },
-        { key: 'roi', label: t('listings.filters.fields.roi') },
-        { key: 'profitMargin', label: t('listings.filters.fields.profitMargin') },
-        { key: 'soldCount', label: t('listings.filters.fields.soldCount') },
-        { key: 'watchCount', label: t('listings.filters.fields.watchCount') },
-        { key: 'viewCount', label: t('listings.filters.fields.viewCount') },
-        { key: 'quantity', label: t('listings.filters.fields.quantity') },
-        { key: 'sourceStock', label: t('listings.filters.fields.sourceStock') },
-      ].map(({ key, label }) => ({
-        key,
-        label,
-        min: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).min,
-        max: (filters[key as keyof ListingsFilterState] as { min: string; max: string }).max,
-        onMinChange: handleRangeChange(key as keyof ListingsFilterState, 'min'),
-        onMaxChange: handleRangeChange(key as keyof ListingsFilterState, 'max'),
-      })),
-    [filters, t, handleRangeChange]
+      isDraftMode
+        ? [
+            {
+              label: t('listings.actions.publishSelected'),
+              onClick: handlePublishSelected,
+            },
+            {
+              label: t('listings.actions.deleteListings'),
+              onClick: handleDeleteSelected,
+            },
+          ]
+        : [
+            {
+              label: t('listings.actions.endListing'),
+              onClick: handleEndSelected,
+            },
+            {
+              label: t('listings.actions.deleteListings'),
+              onClick: handleDeleteSelected,
+            },
+          ],
+    [t, isDraftMode, handleEndSelected, handleDeleteSelected, handlePublishSelected]
   );
+
+  /** Dedicated export endpoint — server builds CSV with current filters. */
+  const handleDownload = useCallback(async () => {
+    try {
+      const csvContent = await exportCsv({
+        search: serverQuery.search,
+        status: serverQuery.status,
+        category: serverQuery.category,
+        ebayAccountId: serverQuery.ebayAccountId,
+        sortBy: serverQuery.sortBy,
+        sortOrder: serverQuery.sortOrder,
+        priceMin: serverQuery.priceMin,
+        priceMax: serverQuery.priceMax,
+        purchasePriceMin: serverQuery.purchasePriceMin,
+        purchasePriceMax: serverQuery.purchasePriceMax,
+        estimatedProfitMin: serverQuery.estimatedProfitMin,
+        estimatedProfitMax: serverQuery.estimatedProfitMax,
+        roiMin: serverQuery.roiMin,
+        roiMax: serverQuery.roiMax,
+        profitMarginMin: serverQuery.profitMarginMin,
+        profitMarginMax: serverQuery.profitMarginMax,
+        soldCountMin: serverQuery.soldCountMin,
+        soldCountMax: serverQuery.soldCountMax,
+        watchCountMin: serverQuery.watchCountMin,
+        watchCountMax: serverQuery.watchCountMax,
+        viewCountMin: serverQuery.viewCountMin,
+        viewCountMax: serverQuery.viewCountMax,
+        quantityMin: serverQuery.quantityMin,
+        quantityMax: serverQuery.quantityMax,
+        sourceStockMin: serverQuery.sourceStockMin,
+        sourceStockMax: serverQuery.sourceStockMax,
+      }).unwrap();
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `zonds_listings_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      showMessage(
+        {
+          type: 'error',
+          headerKey: 'translation:message.error.header',
+          descriptionKey: 'translation:message.error.header',
+        },
+        t
+      );
+    }
+  }, [exportCsv, serverQuery, showMessage, t]);
 
   return (
     <EbayAccountGuard>
       <ListingsAllPageComponent
-        listings={paginatedListings}
+        listings={listings}
         onSelectionChange={setSelectedListingIds}
         columns={filteredColumns}
         selectedRows={selectedRows}
+        selectedIds={selectedListingIds}
+        onToggleListingSelection={handleToggleListingSelection}
         bulkActions={bulkActions}
-        onDownload={handleDownload}
+        onDownload={() => {
+          void handleDownload();
+        }}
         tableView={tableView}
         onTableViewChange={setTableView}
+        onBack={handleBack}
+        isInitialLoading={isListingsLoading}
+        onListingClick={(id) => localeNavigate(`/listings/${id}`)}
         pagination={{
-          count: filteredListings.length,
+          count: total,
           page,
           rowsPerPage,
           onPageChange: setPage,
-          onRowsPerPageChange: (val) => {
-            setRowsPerPage(val);
-            setPage(1);
-          },
+          onRowsPerPageChange: handleRowsPerPageChange,
           labelRowsPerPage: t('translation:common.rowsPerPage'),
           labelInfo: t('translation:common.showing_info'),
         }}
@@ -690,12 +413,17 @@ export const ListingsAllPage: React.FC = () => {
         categoryOptions={categoryOptions}
         onStatusChange={handleStatusChange}
         statusOptions={statusOptions}
+        onEbayAccountChange={handleEbayAccountChange}
+        storeOptions={storeOptions}
         numericFilters={numericFilters}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
-        resultCount={filteredListings.length}
+        resultCount={total}
         advancedOpen={advancedOpen}
         onToggleAdvanced={() => setAdvancedOpen((v) => !v)}
+        isDraftMode={isDraftMode}
+        hideStatusFilter={isDraftMode}
+        onAddListing={handleAddListing}
       />
     </EbayAccountGuard>
   );

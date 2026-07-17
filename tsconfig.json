@@ -18,5 +18,9 @@
       "@repo/mcp": ["packages/mcp/src"]
     }
   },
+  "include": [
+    "apps/web/vite.config.ts",
+    "packages/shared/scripts/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "build"]
 }

@@ -3,7 +3,7 @@ import { Drawer, ModernTextInput, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { BodyStack } from './ProfileDrawer.style';
+import { BodyStack, FormCard } from './ProfileDrawer.style';
 import type { ProfileDrawerProps } from './ProfileDrawer.types';
 
 import { useUpdateProfileMutation } from '@/features/profile/api/profileApi';
@@ -58,36 +58,38 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       }}
     >
       <BodyStack>
-        <ModernTextInput
-          name="firstName"
-          label={t('translation:settingsHub.drawer.profile.firstName')}
-          value={firstName}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFirstName(e.target.value)
-          }
-        />
-        <ModernTextInput
-          name="lastName"
-          label={t('translation:settingsHub.drawer.profile.lastName')}
-          value={lastName}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setLastName(e.target.value)
-          }
-        />
-        <ModernTextInput
-          name="email"
-          label={t('translation:settingsHub.drawer.profile.email')}
-          value={profile?.email ?? ''}
-          readOnly
-        />
-        <ModernTextInput
-          name="phoneNumber"
-          label={t('translation:settingsHub.drawer.profile.phone')}
-          value={phoneNumber}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPhoneNumber(e.target.value)
-          }
-        />
+        <FormCard>
+          <ModernTextInput
+            name="firstName"
+            label={t('translation:settingsHub.drawer.profile.firstName')}
+            value={firstName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFirstName(e.target.value)
+            }
+          />
+          <ModernTextInput
+            name="lastName"
+            label={t('translation:settingsHub.drawer.profile.lastName')}
+            value={lastName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setLastName(e.target.value)
+            }
+          />
+          <ModernTextInput
+            name="email"
+            label={t('translation:settingsHub.drawer.profile.email')}
+            value={profile?.email ?? ''}
+            readOnly
+          />
+          <ModernTextInput
+            name="phoneNumber"
+            label={t('translation:settingsHub.drawer.profile.phone')}
+            value={phoneNumber}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setPhoneNumber(e.target.value)
+            }
+          />
+        </FormCard>
       </BodyStack>
     </Drawer>
   );

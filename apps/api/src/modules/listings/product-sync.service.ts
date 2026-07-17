@@ -57,9 +57,23 @@ export class ProductSyncService {
       ebay_item_id: string;
       price: string | null;
       quantity: number | null;
+      disable_ordering: boolean;
+      disable_repricing: boolean;
+      lock_price: boolean;
+      lock_quantity: boolean;
+      price_override: string | null;
+      quantity_override: number | null;
+      margin_percent_override: string | null;
+      margin_fixed_override: string | null;
     }
     const listings = await this.databaseService.query<ListingRow>(
-      `SELECT id, user_id, listing_settings_group_id, ebay_item_id, price, quantity FROM listings
+      `SELECT id, user_id, listing_settings_group_id, ebay_item_id, price, quantity,
+              COALESCE(disable_ordering, false) as disable_ordering,
+              COALESCE(disable_repricing, false) as disable_repricing,
+              COALESCE(lock_price, false) as lock_price,
+              COALESCE(lock_quantity, false) as lock_quantity,
+              price_override, quantity_override, margin_percent_override, margin_fixed_override
+       FROM listings
        WHERE product_id = $1 AND status = '${ListingStatus.ACTIVE}'`,
       [productId]
     );
@@ -91,13 +105,59 @@ export class ProductSyncService {
             listing.listing_settings_group_id
           );
 
-          const priceChanged = String(listing.price) !== String(strategyResult.price);
-          const quantityChanged = Number(listing.quantity) !== Number(strategyResult.quantity);
+          // Apply per-listing overrides (easync-style locks / disable flags)
+          let finalPrice = strategyResult.price;
+          let finalQty = strategyResult.quantity;
+          let purchasePrice = strategyResult.purchasePrice;
+          let estimatedProfit = strategyResult.estimatedProfit;
+          let profitMargin = strategyResult.profitMargin;
+          let roi = strategyResult.roi;
+
+          if (listing.disable_ordering) {
+            finalQty = 0;
+          } else if (listing.lock_quantity) {
+            finalQty =
+              listing.quantity_override !== null && listing.quantity_override !== undefined
+                ? Number(listing.quantity_override)
+                : Number(listing.quantity ?? 0);
+          }
+
+          if (listing.disable_repricing || listing.lock_price) {
+            if (listing.price_override !== null && listing.price_override !== undefined) {
+              finalPrice = parseFloat(String(listing.price_override));
+            } else if (listing.price !== null && listing.price !== undefined) {
+              finalPrice = parseFloat(String(listing.price));
+            }
+            // Recompute profit metrics vs Amazon cost when price is locked/overridden
+            purchasePrice = strategyResult.purchasePrice;
+            estimatedProfit = finalPrice - purchasePrice;
+            profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
+            roi = purchasePrice > 0 ? (estimatedProfit / purchasePrice) * 100 : 0;
+          } else if (
+            listing.margin_percent_override !== null ||
+            listing.margin_fixed_override !== null
+          ) {
+            // Optional margin overrides on top of Amazon cost
+            const amazon = strategyResult.purchasePrice;
+            const pct = listing.margin_percent_override
+              ? parseFloat(String(listing.margin_percent_override))
+              : 0;
+            const fixed = listing.margin_fixed_override
+              ? parseFloat(String(listing.margin_fixed_override))
+              : 0;
+            finalPrice = amazon * (1 + pct / 100) + fixed;
+            estimatedProfit = finalPrice - amazon;
+            profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
+            roi = amazon > 0 ? (estimatedProfit / amazon) * 100 : 0;
+          }
+
+          const priceChanged = String(listing.price) !== String(finalPrice);
+          const quantityChanged = Number(listing.quantity) !== Number(finalQty);
 
           // No price/quantity delta → nothing to push to eBay, nothing to persist.
           if (!priceChanged && !quantityChanged) {
             this.logger.debug(
-              `Listing ${listing.ebay_item_id} unchanged (price=${strategyResult.price}, qty=${strategyResult.quantity}); skipping eBay push`
+              `Listing ${listing.ebay_item_id} unchanged (price=${finalPrice}, qty=${finalQty}); skipping eBay push`
             );
             continue;
           }
@@ -106,8 +166,8 @@ export class ProductSyncService {
           await this.ebayService.updatePriceAndStock(
             userId,
             sku,
-            strategyResult.price,
-            strategyResult.quantity,
+            finalPrice,
+            finalQty,
             listing.ebay_item_id
           );
 
@@ -118,18 +178,18 @@ export class ProductSyncService {
                  updated_at = CURRENT_TIMESTAMP
              WHERE id = $7`,
             [
-              strategyResult.price,
-              strategyResult.quantity,
-              strategyResult.purchasePrice,
-              strategyResult.estimatedProfit,
-              strategyResult.profitMargin,
-              strategyResult.roi,
+              finalPrice,
+              finalQty,
+              purchasePrice,
+              estimatedProfit,
+              profitMargin,
+              roi,
               listing.id,
             ]
           );
 
           this.logger.debug(
-            `Repriced listing ${listing.ebay_item_id} (Price: ${strategyResult.price}, Stock: ${strategyResult.quantity})`
+            `Repriced listing ${listing.ebay_item_id} (Price: ${finalPrice}, Stock: ${finalQty})`
           );
         } catch (error: unknown) {
           this.logger.error(

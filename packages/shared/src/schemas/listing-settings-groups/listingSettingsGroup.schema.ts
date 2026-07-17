@@ -82,6 +82,16 @@ export const templateConfigSchema = (t: TFunction) =>
     );
 
 /**
+ * Content policy (title strip / AI scaffold)
+ */
+export const listingContentConfigSchema = () =>
+  z.object({
+    stripBrandFromTitle: z.boolean().default(false),
+    aiTitleEnabled: z.boolean().default(false),
+    aiDescriptionEnabled: z.boolean().default(false),
+  });
+
+/**
  * Listing Settings Group Form Schema
  */
 export const listingSettingsGroupSchema = (t: TFunction) =>
@@ -109,6 +119,11 @@ export const listingSettingsGroupSchema = (t: TFunction) =>
     stock: stockConfigSchema(t),
     fees: feeConfigSchema(t),
     templates: templateConfigSchema(t),
+    content: listingContentConfigSchema().default({
+      stripBrandFromTitle: false,
+      aiTitleEnabled: false,
+      aiDescriptionEnabled: false,
+    }),
   });
 
 export type ListingSettingsGroupFormData = z.infer<ReturnType<typeof listingSettingsGroupSchema>>;

@@ -43,12 +43,12 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
             )}
             <S.HeaderText>
               {title && (
-                <Text variant="h2" weight="bold">
+                <Text variant="h3" weight="semibold" color="text.primary">
                   {title}
                 </Text>
               )}
               {subtitle && (
-                <Text variant="caption" color="text.secondary">
+                <Text variant="body-sm" color="text.secondary">
                   {subtitle}
                 </Text>
               )}
@@ -63,13 +63,15 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
           <S.Footer>
             <Button
               variant="primary"
-              size="large"
+              size="medium"
               fullWidth
               onClick={primaryAction.onClick}
               isLoading={primaryAction.isLoading}
               disabled={primaryAction.disabled}
             >
-              <Text weight="bold">{primaryAction.label}</Text>
+              <Text variant="body" weight="semibold">
+                {primaryAction.label}
+              </Text>
             </Button>
           </S.Footer>
         ) : (

@@ -1,15 +1,7 @@
 import styled from '@emotion/styled';
-import { Badge, Button, TextInput, tkn } from '@repo/ui';
+import { Badge, Button, PageContainer, TextInput, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: 90rem; /* 1440px */
-  margin: 0 auto;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-`;
+export const Container = PageContainer;
 
 /* User Overview Section */
 export const UserOverview = styled.div`

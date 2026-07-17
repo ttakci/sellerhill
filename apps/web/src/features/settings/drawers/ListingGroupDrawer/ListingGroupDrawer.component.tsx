@@ -1,5 +1,5 @@
 import { TemplateType, type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
-import { Drawer, Icon, ModernSelect, ModernTextInput, Stepper, Text } from '@repo/ui';
+import { Drawer, Icon, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -55,66 +55,121 @@ export const ListingGroupDrawerComponent = ({
 
   const renderGeneralStep = () => (
     <S.BodyStack>
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="name"
-        control={control}
-        label={t('listingSettingsGroup.groupName')}
-        fullWidth
-      />
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="description"
-        control={control}
-        label={t('listingSettingsGroup.description')}
-        fullWidth
-      />
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="stock.defaultQuantity"
-        control={control}
-        label={t('listingSettingsGroup.defaultStockQuantity')}
-        type="number"
-        fullWidth
-        onKeyDown={blockNonNumeric}
-      />
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="stock.stockBuffer"
-        control={control}
-        label={t('listingSettingsGroup.stockBuffer')}
-        type="number"
-        fullWidth
-        onKeyDown={blockNonNumeric}
-      />
+      <S.FormCard>
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="name"
+          control={control}
+          label={t('listingSettingsGroup.groupName')}
+          fullWidth
+        />
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="description"
+          control={control}
+          label={t('listingSettingsGroup.description')}
+          fullWidth
+        />
+        <Text variant="body-sm" weight="semibold">
+          {t('listingSettingsGroup.contentSection')}
+        </Text>
+        <Controller
+          name="content.stripBrandFromTitle"
+          control={control}
+          render={({ field }) => (
+            <>
+              <Toggle
+                checked={Boolean(field.value)}
+                onChange={field.onChange}
+                label={t('listingSettingsGroup.stripBrandFromTitle')}
+              />
+              <Text variant="caption" color="text.secondary">
+                {t('listingSettingsGroup.stripBrandFromTitleHint')}
+              </Text>
+            </>
+          )}
+        />
+        <Controller
+          name="content.aiTitleEnabled"
+          control={control}
+          render={({ field }) => (
+            <>
+              <Toggle
+                checked={Boolean(field.value)}
+                onChange={field.onChange}
+                label={t('listingSettingsGroup.aiTitleEnabled')}
+              />
+              <Text variant="caption" color="text.secondary">
+                {t('listingSettingsGroup.aiTitleEnabledHint')}
+              </Text>
+            </>
+          )}
+        />
+        <Controller
+          name="content.aiDescriptionEnabled"
+          control={control}
+          render={({ field }) => (
+            <>
+              <Toggle
+                checked={Boolean(field.value)}
+                onChange={field.onChange}
+                label={t('listingSettingsGroup.aiDescriptionEnabled')}
+              />
+              <Text variant="caption" color="text.secondary">
+                {t('listingSettingsGroup.aiDescriptionEnabledHint')}
+              </Text>
+            </>
+          )}
+        />
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="stock.defaultQuantity"
+          control={control}
+          label={t('listingSettingsGroup.defaultStockQuantity')}
+          type="number"
+          fullWidth
+          onKeyDown={blockNonNumeric}
+        />
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="stock.stockBuffer"
+          control={control}
+          label={t('listingSettingsGroup.stockBuffer')}
+          type="number"
+          fullWidth
+          onKeyDown={blockNonNumeric}
+        />
+      </S.FormCard>
     </S.BodyStack>
   );
 
   const renderDeductionsStep = () => (
     <S.BodyStack>
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="fees.ebayFeePercent"
-        control={control}
-        label={t('listingSettingsGroup.ebayFeePercent')}
-        type="number"
-        suffixText="%"
-        fullWidth
-        onKeyDown={blockNonNumeric}
-      />
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="fees.fixedFeeAmount"
-        control={control}
-        label={t('listingSettingsGroup.fixedFeeAmount')}
-        type="number"
-        suffixText="$"
-        fullWidth
-        onKeyDown={blockNonNumeric}
-      />
-      <ModernTextInput<ListingSettingsGroupFormData>
-        name="fees.taxPercent"
-        control={control}
-        label={t('listingSettingsGroup.taxRate')}
-        type="number"
-        suffixText="%"
-        fullWidth
-        onKeyDown={blockNonNumeric}
-      />
+      <S.FormCard>
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="fees.ebayFeePercent"
+          control={control}
+          label={t('listingSettingsGroup.ebayFeePercent')}
+          type="number"
+          suffixText="%"
+          fullWidth
+          onKeyDown={blockNonNumeric}
+        />
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="fees.fixedFeeAmount"
+          control={control}
+          label={t('listingSettingsGroup.fixedFeeAmount')}
+          type="number"
+          suffixText="$"
+          fullWidth
+          onKeyDown={blockNonNumeric}
+        />
+        <ModernTextInput<ListingSettingsGroupFormData>
+          name="fees.taxPercent"
+          control={control}
+          label={t('listingSettingsGroup.taxRate')}
+          type="number"
+          suffixText="%"
+          fullWidth
+          onKeyDown={blockNonNumeric}
+        />
+      </S.FormCard>
     </S.BodyStack>
   );
 
@@ -124,15 +179,14 @@ export const ListingGroupDrawerComponent = ({
         {fields.map((field, index) => (
           <S.RepricingCard key={field.id}>
             <S.RepricingCardHeader>
-              <S.RepricingCardIndex>
-                <Text variant="caption" weight="bold">{index + 1}</Text>
-              </S.RepricingCardIndex>
               <Text variant="body" weight="semibold">
                 {t('listingSettingsGroup.priceRangeLabel', { index: index + 1 })}
               </Text>
-              <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
-                <Icon name="x" size={14} />
-              </S.RemoveButton>
+              {fields.length > 1 && (
+                <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
+                  <Icon name="x" size={14} />
+                </S.RemoveButton>
+              )}
             </S.RepricingCardHeader>
             <S.RepricingCardBody>
               <S.RepricingFieldGrid>
@@ -188,49 +242,51 @@ export const ListingGroupDrawerComponent = ({
 
   const renderTemplateStep = () => (
     <S.BodyStack>
-      <Controller
-        name="templates.predefinedTemplateId"
-        control={control}
-        render={({ field }) => (
-          <ModernSelect
-            label={t('listingSettingsGroup.activeTemplate')}
-            value={watchedValues.templates?.type === TemplateType.CUSTOM ? '__custom__' : field.value}
-            options={[
-              ...predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
-                value: tmp.id,
-                label: tmp.name,
-              })),
-              { value: '__custom__', label: t('listingSettingsGroup.custom') },
-            ]}
-            fullWidth
-            searchPlaceholder={t('translation:common.search')}
-            noResultsMessage={t('translation:common.noResults')}
-            onChange={(value: string | number) => {
-              if (value === '__custom__') {
-                field.onChange(undefined);
-                setValue('templates.type', TemplateType.CUSTOM, { shouldValidate: true });
-              } else {
-                field.onChange(value);
-                setValue('templates.type', TemplateType.PREDEFINED, { shouldValidate: true });
-              }
-            }}
-          />
-        )}
-      />
-      {watchedValues.templates?.type === TemplateType.CUSTOM && (
+      <S.FormCard>
         <Controller
-          name="templates.customTemplateHtml"
+          name="templates.predefinedTemplateId"
           control={control}
           render={({ field }) => (
-            <S.CustomTemplateTextarea
-              value={field.value ?? ''}
-              onChange={field.onChange}
-              placeholder={t('listingSettingsGroup.templatePlaceholder')}
+            <ModernSelect
+              label={t('listingSettingsGroup.activeTemplate')}
+              value={watchedValues.templates?.type === TemplateType.CUSTOM ? '__custom__' : field.value}
+              options={[
+                ...predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
+                  value: tmp.id,
+                  label: tmp.name,
+                })),
+                { value: '__custom__', label: t('listingSettingsGroup.custom') },
+              ]}
+              fullWidth
+              searchPlaceholder={t('translation:common.search')}
+              noResultsMessage={t('translation:common.noResults')}
+              onChange={(value: string | number) => {
+                if (value === '__custom__') {
+                  field.onChange(undefined);
+                  setValue('templates.type', TemplateType.CUSTOM, { shouldValidate: true });
+                } else {
+                  field.onChange(value);
+                  setValue('templates.type', TemplateType.PREDEFINED, { shouldValidate: true });
+                }
+              }}
             />
           )}
         />
-      )}
-      <S.PreviewCard variant="bordered">
+        {watchedValues.templates?.type === TemplateType.CUSTOM && (
+          <Controller
+            name="templates.customTemplateHtml"
+            control={control}
+            render={({ field }) => (
+              <S.CustomTemplateTextarea
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                placeholder={t('listingSettingsGroup.templatePlaceholder')}
+              />
+            )}
+          />
+        )}
+      </S.FormCard>
+      <S.PreviewCard variant="elevated">
         <S.StepHeader>
           <S.StepIconWrapper $type="template">
             <Icon name="eye" size={20} />

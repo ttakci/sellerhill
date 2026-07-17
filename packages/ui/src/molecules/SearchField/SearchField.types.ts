@@ -1,6 +1,7 @@
 import type React from 'react';
 
-export type SearchFieldSize = 'medium' | 'large';
+/** Aligns with TextInput / Select control sizes (compact heights — no floating label). */
+export type SearchFieldSize = 'small' | 'medium' | 'large';
 export type SearchFieldVariant = 'default' | 'gray';
 
 export interface SearchFieldProps {

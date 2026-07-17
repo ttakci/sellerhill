@@ -1,10 +1,13 @@
-import { Button, Icon, Modal, ModernTextInput, Text } from '@repo/ui';
+import { Dialog, ModernTextInput, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './DeactivateAccountModal.style';
 import type { DeactivateAccountModalComponentProps } from './DeactivateAccountModal.types';
 
+/**
+ * Account deactivation prompt — uses shared Dialog molecule (same shell as MessageModal / ConfirmModal).
+ */
 export const DeactivateAccountModalComponent = ({
   isOpen,
   onClose,
@@ -15,36 +18,31 @@ export const DeactivateAccountModalComponent = ({
   isLoading,
 }: DeactivateAccountModalComponentProps): React.ReactElement => {
   const { t } = useTranslation();
-  const isMatch =
-    confirmInput.trim().toLowerCase() === userEmail.trim().toLowerCase();
-
-  const footer = (
-    <S.FooterRow>
-      <Button variant="text" onClick={onClose} disabled={isLoading}>
-        <Text>{t('translation:settingsHub.modal.deactivate.cancelLabel')}</Text>
-      </Button>
-      <Button variant="danger" onClick={onConfirm} isLoading={isLoading} disabled={!isMatch}>
-        <Text>{t('translation:settingsHub.modal.deactivate.confirmLabel')}</Text>
-      </Button>
-    </S.FooterRow>
-  );
+  const isMatch = confirmInput.trim().toLowerCase() === userEmail.trim().toLowerCase();
 
   return (
-    <Modal
+    <Dialog
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={isLoading ? () => undefined : onClose}
+      type="error"
       title={t('translation:settingsHub.modal.deactivate.title')}
-      size="sm"
-      footer={footer}
+      description={t('translation:settingsHub.modal.deactivate.warning')}
+      primaryAction={{
+        label: t('translation:settingsHub.modal.deactivate.confirmLabel'),
+        onClick: onConfirm,
+        variant: 'primary',
+        isLoading,
+        disabled: !isMatch || isLoading,
+      }}
+      secondaryAction={{
+        label: t('translation:settingsHub.modal.deactivate.cancelLabel'),
+        onClick: onClose,
+        variant: 'secondary',
+        disabled: isLoading,
+      }}
     >
-      <S.BodyStack>
-        <S.WarningBlock>
-          <Icon name="alert-triangle" color="semantic.error" size={20} />
-          <Text variant="body-sm" color="text.secondary">
-            {t('translation:settingsHub.modal.deactivate.warning')}
-          </Text>
-        </S.WarningBlock>
-        <Text variant="body-sm" weight="medium">
+      <S.FieldBlock>
+        <Text variant="body-sm" weight="medium" color="text.primary">
           {t('translation:settingsHub.modal.deactivate.typeEmail')}
         </Text>
         <ModernTextInput
@@ -54,7 +52,7 @@ export const DeactivateAccountModalComponent = ({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onConfirmInputChange(e.target.value)}
           placeholder={userEmail}
         />
-      </S.BodyStack>
-    </Modal>
+      </S.FieldBlock>
+    </Dialog>
   );
 };

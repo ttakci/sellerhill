@@ -3,7 +3,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { ListingCarouselComponent } from './ListingCarousel.component';
 import type { ListingCarouselProps } from './ListingCarousel.types';
 
-export const ListingCarousel: React.FC<ListingCarouselProps> = ({ listings, onViewAll, viewAllLabel, showViewAll }) => {
+export const ListingCarousel: React.FC<ListingCarouselProps> = ({
+  listings,
+  onViewAll,
+  viewAllLabel,
+  showViewAll,
+  onListingClick,
+  emptyTitle,
+  emptySubtitle,
+}) => {
   // Last 3 added listings sorted by createdAt descending.
   const recentListings = useMemo(
     () => [...listings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3),
@@ -26,6 +34,9 @@ export const ListingCarousel: React.FC<ListingCarouselProps> = ({ listings, onVi
       onViewAll={onViewAll}
       viewAllLabel={viewAllLabel}
       showViewAll={showViewAll}
+      onListingClick={onListingClick}
+      emptyTitle={emptyTitle}
+      emptySubtitle={emptySubtitle}
       currentSlide={currentSlide}
       onNext={nextSlide}
       onPrev={prevSlide}

@@ -25,21 +25,27 @@ export const AddListingsPageContainer: React.FC = () => {
   const [createListings, { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData, reset }] =
     useCreateListingsMutation();
 
+  // Capture draft flag for success message (mutation payload is not on submitData)
+  const lastAsDraftRef = React.useRef(false);
+
   // Handle success
   React.useEffect(() => {
     if (isSuccess && submitData) {
+      const wasDraft = lastAsDraftRef.current;
       reset();
       showMessage(
         {
           type: 'info',
           headerKey: 'translation:message.success.header',
-          descriptionKey: 'listings:listings.success.queued',
+          descriptionKey: wasDraft
+            ? 'listings:listings.success.queuedDraft'
+            : 'listings:listings.success.queued',
           descriptionParams: { count: submitData.totalAsins },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
             onClick: () => {
               closeMessage();
-              localeNavigate('/listings/jobs');
+              localeNavigate(wasDraft ? `/listings/all?status=draft` : '/listings/jobs');
             },
           },
         },
@@ -94,10 +100,22 @@ export const AddListingsPageContainer: React.FC = () => {
     return new Set(lines).size;
   }, [asins]);
 
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = (formData: {
+    asins: string;
+    listingSettingsGroupId: string;
+    paymentPolicyId: string;
+    shippingPolicyId: string;
+    returnPolicyId: string;
+    asDraft?: boolean;
+  }) => {
+    lastAsDraftRef.current = Boolean(formData.asDraft);
     const data: CreateListingsRequest = {
-      ...formData,
       asins: parseAsins(formData.asins),
+      listingSettingsGroupId: formData.listingSettingsGroupId,
+      paymentPolicyId: formData.paymentPolicyId,
+      shippingPolicyId: formData.shippingPolicyId,
+      returnPolicyId: formData.returnPolicyId,
+      asDraft: Boolean(formData.asDraft),
     };
     void createListings(data);
   };

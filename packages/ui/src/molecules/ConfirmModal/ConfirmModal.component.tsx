@@ -1,12 +1,14 @@
 import React from 'react';
 
-import { Button } from '../../atoms/Button';
-import { Modal } from '../../atoms/Modal';
-import { Text } from '../../atoms/Text';
+import { Dialog } from '../Dialog';
 
-import * as S from './ConfirmModal.style';
 import type { ConfirmModalProps } from './ConfirmModal.types';
 
+/**
+ * Thin wrapper over Dialog for confirm / cancel flows.
+ * Always brand-blue buttons (Dialog coerces danger → primary).
+ * Stack: outline cancel on top, filled confirm below.
+ */
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
   onClose,
@@ -18,24 +20,30 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   variant = 'primary',
   isLoading = false,
 }) => {
+  // `variant` only affects icon tone; Dialog always renders brand-blue buttons
+  const dialogType = variant === 'danger' ? 'warning' : 'info';
+
   return (
-    <Modal
+    <Dialog
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={isLoading ? () => undefined : onClose}
+      type={dialogType}
       title={title}
-      size="sm"
-      footer={
-        <S.FooterWrapper>
-          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
-            {cancelLabel}
-          </Button>
-          <Button variant={variant} onClick={onConfirm} isLoading={isLoading}>
-            {confirmLabel}
-          </Button>
-        </S.FooterWrapper>
-      }
-    >
-      <Text variant="body">{description}</Text>
-    </Modal>
+      description={description}
+      primaryAction={{
+        label: confirmLabel,
+        onClick: onConfirm,
+        variant: 'primary',
+        isLoading,
+      }}
+      secondaryAction={{
+        label: cancelLabel,
+        onClick: onClose,
+        variant: 'secondary',
+        disabled: isLoading,
+      }}
+    />
   );
 };
+
+ConfirmModal.displayName = 'ConfirmModal';

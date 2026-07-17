@@ -33,7 +33,7 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
 
   return (
     <S.InteractiveCard
-      variant="interactive"
+      variant="elevated"
       $selected={selected}
       role="button"
       tabIndex={0}

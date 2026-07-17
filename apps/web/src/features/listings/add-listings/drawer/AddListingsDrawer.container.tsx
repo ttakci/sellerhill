@@ -7,7 +7,7 @@ import {
   type CreateListingsRequest,
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -18,16 +18,12 @@ import type { AddListingsDrawerProps, AddListingsDrawerStep } from './AddListing
 
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 
-const STEP_FIELDS: Record<AddListingsDrawerStep, string[]> = {
-  0: ['listingSettingsGroupId', 'paymentPolicyId', 'shippingPolicyId', 'returnPolicyId'],
-  1: ['asins'],
-};
-
 export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation(['listings', 'translation']);
   const { showMessage, closeMessage } = useUI();
 
   const [currentStep, setCurrentStep] = useState<AddListingsDrawerStep>(0);
+  const lastSubmittedAsDraft = useRef(false);
 
   const { data: listingSettingsGroups = [], isLoading: isLoadingSettings } = useGetListingSettingsGroupsQuery();
   const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
@@ -41,50 +37,57 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   useLoading(isLoading || isSubmitting);
 
   const form = useForm<CreateListingsFormData>({
-    resolver: zodResolver(createListingsSchema(t)) as any,
+    resolver: zodResolver(createListingsSchema(t)) as never,
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
     defaultValues: {
       asins: '',
       listingSettingsGroupId: '',
       paymentPolicyId: '',
       shippingPolicyId: '',
       returnPolicyId: '',
+      asDraft: false,
     },
   });
 
-  const { reset, control, trigger, handleSubmit: rhfSubmit } = form;
+  const { reset, control, handleSubmit: rhfSubmit, clearErrors } = form;
 
-  // Reset step when drawer opens
+  // Reset step + form when drawer opens
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   if (isOpen !== prevIsOpen) {
     setPrevIsOpen(isOpen);
     if (isOpen) {
       setCurrentStep(0);
+      clearErrors();
       reset({
         asins: '',
         listingSettingsGroupId: '',
         paymentPolicyId: '',
         shippingPolicyId: '',
         returnPolicyId: '',
+        asDraft: false,
       });
     }
   }
 
-  // Handle success
   React.useEffect(() => {
     if (isSuccess && submitData) {
+      const wasDraft = lastSubmittedAsDraft.current;
       resetMutation();
       showMessage(
         {
           type: 'info',
           headerKey: 'translation:message.success.header',
-          descriptionKey: 'listings:listings.success.queued',
+          descriptionKey: wasDraft
+            ? 'listings:listings.success.queuedDraft'
+            : 'listings:listings.success.queued',
           descriptionParams: { count: submitData.totalAsins },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
             onClick: () => {
               closeMessage();
               onClose();
-              onSuccess();
+              onSuccess({ asDraft: wasDraft });
             },
           },
         },
@@ -93,10 +96,10 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     }
   }, [isSuccess, submitData, showMessage, closeMessage, t, onClose, onSuccess, resetMutation]);
 
-  // Handle error
   React.useEffect(() => {
     if (submitError) {
-      const errorMsg = (submitError as any)?.data?.message || 'listings:listings.errors.createFailed';
+      const errorMsg =
+        (submitError as { data?: { message?: string } })?.data?.message || 'listings:listings.errors.createFailed';
       resetMutation();
       showMessage(
         {
@@ -113,7 +116,6 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     }
   }, [submitError, showMessage, closeMessage, t, resetMutation]);
 
-  // Transform business policies
   const businessPolicies = useMemo(
     () => ({
       payment: policiesMap.filter((p) => p.type === PolicyType.PAYMENT),
@@ -123,57 +125,56 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     [policiesMap]
   );
 
-  // ASIN count
   const watchedAsins = useWatch({ control, name: 'asins' });
   const asinCount = useMemo(() => {
     if (!watchedAsins?.trim()) {
       return 0;
     }
-    const parsed = parseAsins(watchedAsins);
-    return parsed.length;
+    return parseAsins(watchedAsins).length;
   }, [watchedAsins]);
 
   const handleAsinChange = (value: string) => {
-    form.setValue('asins', value, { shouldValidate: true });
+    form.setValue('asins', value, { shouldValidate: false, shouldDirty: true });
   };
 
-  // Step validation
-  const [canProceed, setCanProceed] = useState(true);
+  // Soft gate per step — no red field errors until final submit
   const watchedValues = useWatch({ control });
-  useEffect(() => {
-    if (!isOpen) {
-      return;
+  const canProceed = useMemo(() => {
+    if (currentStep === 0) {
+      return Boolean(
+        watchedValues.listingSettingsGroupId &&
+          watchedValues.paymentPolicyId &&
+          watchedValues.shippingPolicyId &&
+          watchedValues.returnPolicyId
+      );
     }
-    void (async () => {
-      const fieldsToValidate = STEP_FIELDS[currentStep];
-      const valid = await trigger(fieldsToValidate as any, { shouldFocus: false });
-      setCanProceed(valid);
-    })();
-  }, [currentStep, watchedValues, trigger, isOpen]);
+    return asinCount > 0;
+  }, [currentStep, watchedValues, asinCount]);
 
   const handleNext = () => {
-    if (currentStep < 1) {
-      setCurrentStep((currentStep + 1) as AddListingsDrawerStep);
+    if (currentStep < 1 && canProceed) {
+      setCurrentStep(1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep((currentStep - 1) as AddListingsDrawerStep);
+      setCurrentStep(0);
     } else {
       onClose();
     }
   };
 
-  const handleStepChange = (step: AddListingsDrawerStep) => {
-    setCurrentStep(step);
-  };
-
   const handleSubmit = () => {
     void rhfSubmit((data: CreateListingsFormData) => {
+      lastSubmittedAsDraft.current = Boolean(data.asDraft);
       const cleanData: CreateListingsRequest = {
-        ...data,
         asins: parseAsins(data.asins),
+        listingSettingsGroupId: data.listingSettingsGroupId,
+        paymentPolicyId: data.paymentPolicyId,
+        shippingPolicyId: data.shippingPolicyId,
+        returnPolicyId: data.returnPolicyId,
+        asDraft: Boolean(data.asDraft),
       };
       void createListings(cleanData);
     })();
@@ -184,7 +185,6 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       isOpen={isOpen}
       onClose={onClose}
       currentStep={currentStep}
-      onStepChange={handleStepChange}
       isSubmitting={isSubmitting}
       isLoading={isLoading}
       form={form}

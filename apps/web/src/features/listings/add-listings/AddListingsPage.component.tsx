@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createListingsSchema, type CreateListingsFormData } from '@repo/shared';
-import { Icon, ModernSelect, PageHeader } from '@repo/ui';
+import { Icon, ModernSelect, PageHeader, Text, Toggle } from '@repo/ui';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './AddListingsPage.style';
@@ -26,15 +26,18 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
     handleSubmit,
     formState: { errors },
   } = useForm<CreateListingsFormData>({
-    resolver: zodResolver(createListingsSchema(t)),
+    resolver: zodResolver(createListingsSchema(t)) as never,
     defaultValues: {
       asins: asins,
       listingSettingsGroupId: '',
       paymentPolicyId: '',
       shippingPolicyId: '',
       returnPolicyId: '',
+      asDraft: false,
     },
   });
+
+  const asDraft = Boolean(useWatch({ control, name: 'asDraft' }));
 
   return (
     <S.Container>
@@ -171,13 +174,35 @@ export const AddListingsPageComponent: React.FC<AddListingsPageComponentProps> =
             />
           </S.AsinInputWrapper>
 
+          <S.DraftOption>
+            <Controller
+              name="asDraft"
+              control={control}
+              render={({ field }) => (
+                <Toggle
+                  checked={Boolean(field.value)}
+                  onChange={field.onChange}
+                  label={t('listings:listings.draftMode.title')}
+                  disabled={isLoading || isSubmitting}
+                />
+              )}
+            />
+            <Text variant="caption" color="text.secondary">
+              {t('listings:listings.draftMode.hint')}
+            </Text>
+          </S.DraftOption>
+
           <S.FormFooter>
             <S.CancelButton variant="secondary" type="button" disabled={isLoading || isSubmitting} onClick={onCancel}>
               <span>{t('listings:listings.actions.cancel')}</span>
             </S.CancelButton>
             <S.SubmitButton variant="primary" type="submit" disabled={isLoading || isSubmitting || asinCount === 0}>
               <span>
-                {isSubmitting ? t('listings:listings.actions.importing') : t('listings:listings.actions.import')}
+                {isSubmitting
+                  ? t('listings:listings.actions.importing')
+                  : asDraft
+                    ? t('listings:listings.actions.importDraft')
+                    : t('listings:listings.actions.import')}
               </span>
               <Icon name="play_arrow" size={20} />
             </S.SubmitButton>

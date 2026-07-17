@@ -1,15 +1,7 @@
 import styled from '@emotion/styled';
-import { Button, Text as UIText, Textarea as UITextarea, tkn } from '@repo/ui';
+import { Button, PageContainer, Text as UIText, Textarea as UITextarea, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: ${tkn('spacing.lg')};
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-`;
+export const Container = PageContainer;
 
 export const ConfigSection = styled.div`
   display: flex;
@@ -140,6 +132,13 @@ export const AsinTextarea = styled(UITextarea)<{ hasError?: boolean }>`
   min-height: 15rem;
   box-sizing: border-box;
   resize: none;
+`;
+
+export const DraftOption = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  padding: 0 ${tkn('spacing.lg')} ${tkn('spacing.md')};
 `;
 
 export const FormFooter = styled.div`

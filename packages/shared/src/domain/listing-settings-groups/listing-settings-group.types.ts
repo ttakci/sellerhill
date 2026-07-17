@@ -44,6 +44,25 @@ export interface TemplateConfig {
 }
 
 /**
+ * Listing content policy (title/description pipeline at create time).
+ * AI flags are scaffold only until CONTENT_AI_API_KEY is wired.
+ */
+export interface ListingContentConfig {
+  /** Remove brand token from Amazon title before eBay list. */
+  stripBrandFromTitle: boolean;
+  /** Scaffold: rewrite title via AI when provider is configured. */
+  aiTitleEnabled: boolean;
+  /** Scaffold: rewrite description via AI when provider is configured. */
+  aiDescriptionEnabled: boolean;
+}
+
+export const DEFAULT_LISTING_CONTENT_CONFIG: ListingContentConfig = {
+  stripBrandFromTitle: false,
+  aiTitleEnabled: false,
+  aiDescriptionEnabled: false,
+};
+
+/**
  * Listing Settings Group Domain Interface
  */
 export interface ListingSettingsGroup {
@@ -62,6 +81,9 @@ export interface ListingSettingsGroup {
 
   // Templates
   templates: TemplateConfig;
+
+  /** Title/description content policy */
+  content: ListingContentConfig;
 
   // Audit
   createdAt: Date;

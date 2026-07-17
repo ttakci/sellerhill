@@ -1,16 +1,7 @@
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { PageContainer, Text, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.lg')};
-
-  @media (max-width: 48rem) {
-    padding: ${tkn('spacing.md')};
-  }
-`;
+export const Container = PageContainer;
 
 export const AccountsGrid = styled.div`
   display: grid;

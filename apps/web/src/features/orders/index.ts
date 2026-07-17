@@ -1,2 +1,3 @@
-export * from './OrdersPage.container';
-export * from './details';
+export { OrdersOverviewPage } from './overview';
+export { OrdersAllPage } from './all';
+export { OrderDetailsPage } from './details';

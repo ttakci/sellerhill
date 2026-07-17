@@ -1,7 +1,9 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import {
+    DEFAULT_LISTING_CONTENT_CONFIG,
     type CreateListingSettingsGroupRequest,
     type FeeConfig,
+    type ListingContentConfig,
     type ListingSettingsGroupResponse,
     type PredefinedTemplateResponse,
     type PriceRange,
@@ -24,6 +26,7 @@ interface ListingSettingsGroupEntity {
   stock: string; // JSON string in DB
   fees: string; // JSON string in DB
   templates: string; // JSON string in DB
+  content?: string | ListingContentConfig | null;
   created_at: Date;
   updated_at: Date;
   created_by: string;
@@ -279,12 +282,16 @@ export class ListingSettingsGroupService implements OnModuleInit {
     const stockJson = JSON.stringify(dto.stock);
     const feesJson = JSON.stringify(dto.fees);
     const templatesJson = JSON.stringify(dto.templates);
+    const contentJson = JSON.stringify({
+      ...DEFAULT_LISTING_CONTENT_CONFIG,
+      ...(dto.content ?? {}),
+    });
 
     const results = await this.databaseService.query<ListingSettingsGroupEntity>(`
       INSERT INTO listing_settings_groups (
-        user_id, name, description, repricing_strategy, stock, fees, templates, created_by, updated_by
+        user_id, name, description, repricing_strategy, stock, fees, templates, content, created_by, updated_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `, [
       userId,
@@ -294,6 +301,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       stockJson,
       feesJson,
       templatesJson,
+      contentJson,
       userId,
       userId
     ]);
@@ -340,6 +348,11 @@ export class ListingSettingsGroupService implements OnModuleInit {
     if (dto.templates !== undefined) {
       updates.push(`templates = $${paramIndex++}`);
       values.push(JSON.stringify(dto.templates));
+    }
+
+    if (dto.content !== undefined) {
+      updates.push(`content = $${paramIndex++}`);
+      values.push(JSON.stringify({ ...DEFAULT_LISTING_CONTENT_CONFIG, ...dto.content }));
     }
 
     updates.push(`updated_by = $${paramIndex++}`);
@@ -413,6 +426,15 @@ export class ListingSettingsGroupService implements OnModuleInit {
       ? (JSON.parse(entity.templates) as TemplateConfig)
       : (entity.templates as unknown as TemplateConfig);
 
+    let content: ListingContentConfig = { ...DEFAULT_LISTING_CONTENT_CONFIG };
+    if (entity.content) {
+      const parsed =
+        typeof entity.content === 'string'
+          ? (JSON.parse(entity.content) as Partial<ListingContentConfig>)
+          : (entity.content as Partial<ListingContentConfig>);
+      content = { ...DEFAULT_LISTING_CONTENT_CONFIG, ...parsed };
+    }
+
     return {
       id: entity.id,
       name: entity.name,
@@ -421,6 +443,7 @@ export class ListingSettingsGroupService implements OnModuleInit {
       stock,
       fees,
       templates,
+      content,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
       createdBy: entity.created_by,

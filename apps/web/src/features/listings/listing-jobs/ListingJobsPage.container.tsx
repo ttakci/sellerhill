@@ -1,4 +1,13 @@
-import { StatusBadge, useLoading } from '@repo/ui';
+import { ListingJobStatus, type ListingJobDto } from '@repo/shared';
+import {
+  ProgressBar,
+  StatusBadge,
+  Text,
+  formatDate,
+  getLocaleConfig,
+  type TableColumn,
+  type ViewMode,
+} from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,118 +19,195 @@ import * as S from './ListingJobsPage.style';
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useLocale } from '@/utils/useLocale';
 
+const jobPercent = (job: ListingJobDto): number =>
+  job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
+
 export const ListingJobsPageContainer: React.FC = () => {
-  const { t } = useTranslation(['listings', 'translation']);
+  const { t, i18n } = useTranslation(['listings', 'translation']);
   const { localeNavigate } = useLocale();
+  const { locale } = getLocaleConfig(i18n.language);
+
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
-  // Dynamic polling from listingsApi
   const { data: jobs = [], isLoading } = useGetListingJobsQuery(undefined, {
     pollingInterval: 5000,
     refetchOnMountOrArgChange: true,
   });
 
-  useLoading(isLoading);
+  const isInitialLoading = isLoading && jobs.length === 0;
 
-  const handleViewDetails = useCallback(
-    (jobId: string) => {
-      localeNavigate(`/listings/jobs/${jobId}`);
+  const statusLabel = useCallback(
+    (status: ListingJobStatus | string) => {
+      const key = String(status).toLowerCase();
+      const path = `listings.jobs.status.${key}`;
+      const translated = t(path);
+      return translated === path ? key : translated;
     },
-    [localeNavigate]
+    [t]
   );
+
+  const formatJobDate = useCallback(
+    (iso: string) =>
+      formatDate(iso, locale, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [locale]
+  );
+
+  const statusOptions = useMemo(
+    () => [
+      { value: '', label: t('listings.jobs.filters.allStatuses') },
+      { value: ListingJobStatus.PENDING, label: t('listings.jobs.status.pending') },
+      { value: ListingJobStatus.PROCESSING, label: t('listings.jobs.status.processing') },
+      { value: ListingJobStatus.COMPLETED, label: t('listings.jobs.status.completed') },
+      { value: ListingJobStatus.FAILED, label: t('listings.jobs.status.failed') },
+    ],
+    [t]
+  );
+
+  const filteredJobs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return jobs.filter((job) => {
+      if (statusFilter && String(job.status).toLowerCase() !== statusFilter.toLowerCase()) {
+        return false;
+      }
+      if (!q) {
+        return true;
+      }
+      return job.id.toLowerCase().includes(q);
+    });
+  }, [jobs, search, statusFilter]);
 
   const paginatedJobs = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
-    return jobs.slice(start, start + rowsPerPage);
-  }, [jobs, page, rowsPerPage]);
+    return filteredJobs.slice(start, start + rowsPerPage);
+  }, [filteredJobs, page, rowsPerPage]);
 
-  const columns = useMemo(
+  const hasActiveFilters = Boolean(search.trim() || statusFilter);
+
+  const columns: TableColumn<ListingJobDto>[] = useMemo(
     () => [
       {
         key: 'id',
         header: t('listings.jobs.table.id'),
-        render: (id: string) => (
-          <S.JobIdBadge variant="neutral" size="sm">
-            {id.substring(0, 8)}...
-          </S.JobIdBadge>
+        render: (_value, job) => (
+          <S.MonoId variant="body-sm" weight="semibold" color="text.primary">
+            {job.id.slice(0, 8)}…
+          </S.MonoId>
         ),
       },
       {
         key: 'status',
         header: t('listings.jobs.table.status'),
-        render: (status: string) => (
-          <StatusBadge status={status.toLowerCase()}>{t(`listings.jobs.status.${status.toLowerCase()}`)}</StatusBadge>
+        render: (_value, job) => (
+          <StatusBadge status={String(job.status).toLowerCase()} size="sm">
+            {statusLabel(job.status)}
+          </StatusBadge>
         ),
       },
       {
         key: 'progress',
         header: t('listings.jobs.table.progress'),
-        render: (_: any, job: any) => {
-          const percent = job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
+        render: (_value, job) => {
+          const percent = jobPercent(job);
           return (
-            <S.ProgressContainer>
-              <S.ProgressInfo>
-                <span>{percent}%</span>
-              </S.ProgressInfo>
-              <S.ProgressBar>
-                <S.ProgressFill $percent={percent} />
-              </S.ProgressBar>
-            </S.ProgressContainer>
+            <S.TableProgress>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {percent}% · {job.processedCount}/{job.totalAsins}
+              </Text>
+              <ProgressBar value={percent} size="sm" />
+            </S.TableProgress>
           );
         },
       },
       {
         key: 'stats',
         header: t('listings.jobs.table.stats'),
-        render: (_: any, job: any) => (
-          <S.StatsContainer>
-            <S.SuccessText variant="body-sm" weight="bold" color="semantic.success">
+        render: (_value, job) => (
+          <S.TableStats>
+            <Text color="semantic.success" weight="semibold" variant="body-sm">
               {job.successCount} {t('listings.jobs.stats.success')}
-            </S.SuccessText>
-            <S.FailedText variant="body-sm" weight="bold" color="semantic.error">
+            </Text>
+            <Text color="semantic.error" weight="semibold" variant="body-sm">
               {job.failedCount} {t('listings.jobs.stats.failed')}
-            </S.FailedText>
-            <S.TotalText variant="body-sm" weight="medium" color="text.tertiary">
+            </Text>
+            <Text color="text.tertiary" variant="body-sm">
               / {job.totalAsins}
-            </S.TotalText>
-          </S.StatsContainer>
+            </Text>
+          </S.TableStats>
         ),
       },
       {
         key: 'createdAt',
         header: t('listings.jobs.table.createdAt'),
-        render: (date: string) => (
-          <S.DateText variant="body-sm" weight="medium" color="text.secondary">
-            {new Date(date).toLocaleString(t('translation:common.languageCode') || 'en-US')}
-          </S.DateText>
-        ),
-      },
-      {
-        key: 'actions',
-        header: t('listings.jobs.table.actions'),
-        align: 'right' as const,
-        render: (_: any, job: any) => (
-          <S.ActionButton variant="secondary" onClick={() => handleViewDetails(job.id)}>
-            {t('translation:common.details')}
-          </S.ActionButton>
+        render: (_value, job) => (
+          <Text variant="body-sm" color="text.secondary">
+            {formatJobDate(job.createdAt)}
+          </Text>
         ),
       },
     ],
-    [t, handleViewDetails]
+    [t, statusLabel, formatJobDate]
   );
 
-  const handleDownload = () => {
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage(1);
+  }, []);
+
+  const handleStatusFilterChange = useCallback((value: string | number) => {
+    setStatusFilter(String(value));
+    setPage(1);
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setSearch('');
+    setStatusFilter('');
+    setPage(1);
+  }, []);
+
+  const handleJobClick = useCallback(
+    (jobId: string) => {
+      localeNavigate(`/listings/jobs/${jobId}`);
+    },
+    [localeNavigate]
+  );
+
+  const handleBack = useCallback(() => {
+    localeNavigate('/listings');
+  }, [localeNavigate]);
+
+  const handleDownload = useCallback(() => {
     const headers = [
       t('listings.jobs.table.id'),
       t('listings.jobs.table.status'),
+      t('listings.jobs.table.processed'),
+      t('listings.jobs.stats.success'),
+      t('listings.jobs.stats.failed'),
       t('listings.jobs.table.total'),
       t('listings.jobs.table.createdAt'),
     ];
-    const rows = jobs.map((job) =>
-      [job.id, job.status, job.totalAsins, new Date(job.createdAt).toLocaleString()].map((v) => `"${v}"`).join(',')
+    const rows = filteredJobs.map((job) =>
+      [
+        job.id,
+        job.status,
+        job.processedCount,
+        job.successCount,
+        job.failedCount,
+        job.totalAsins,
+        new Date(job.createdAt).toISOString(),
+      ]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(',')
     );
-
     const csvContent = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -131,29 +217,44 @@ export const ListingJobsPageContainer: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+    URL.revokeObjectURL(url);
+  }, [filteredJobs, t]);
 
   return (
     <EbayAccountGuard>
       <ListingJobsPageComponent
-      columns={columns}
-      jobs={paginatedJobs}
-      isLoading={isLoading}
-      onDownload={handleDownload}
-      onViewDetails={handleViewDetails}
-      pagination={{
-        count: jobs.length,
-        page,
-        rowsPerPage,
-        onPageChange: setPage,
-        onRowsPerPageChange: (val) => {
-          setRowsPerPage(val);
-          setPage(1);
-        },
-        labelRowsPerPage: t('translation:common.rowsPerPage'),
-        labelInfo: t('translation:common.showing_info'),
-      }}
-    />
+        jobs={paginatedJobs}
+        totalCount={jobs.length}
+        isInitialLoading={isInitialLoading}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        search={search}
+        onSearchChange={handleSearchChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={handleStatusFilterChange}
+        statusOptions={statusOptions}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearFilters}
+        columns={columns}
+        onJobClick={handleJobClick}
+        onDownload={handleDownload}
+        onBack={handleBack}
+        formatPercent={jobPercent}
+        formatJobDate={formatJobDate}
+        statusLabel={statusLabel}
+        pagination={{
+          count: filteredJobs.length,
+          page,
+          rowsPerPage,
+          onPageChange: setPage,
+          onRowsPerPageChange: (val) => {
+            setRowsPerPage(val);
+            setPage(1);
+          },
+          labelRowsPerPage: t('translation:common.rowsPerPage'),
+          labelInfo: t('translation:common.showing_info'),
+        }}
+      />
     </EbayAccountGuard>
   );
 };

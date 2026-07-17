@@ -2,7 +2,13 @@ import styled from '@emotion/styled';
 import { Button, Card, CardBody, IconButton as IconButtonAtom, Text, tkn } from '@repo/ui';
 
 export const StepperWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.xl')};
+  margin-bottom: 0;
+  background: ${tkn('colors.surface.primary')};
+  border: none;
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  box-sizing: border-box;
 `;
 
 /**
@@ -16,6 +22,8 @@ export const StepperWrapper = styled.div`
 export const StepPanel = styled.div<{ $active: boolean }>`
   display: ${({ $active }) => ($active ? 'block' : 'none')};
 `;
+
+export { FormCard } from '../shared/drawerSurfaces.style';
 
 export const BodyStack = styled.div`
   display: flex;
@@ -91,17 +99,15 @@ export const RepricingCardList = styled.div`
 `;
 
 export const RepricingCard = styled.div`
-  background: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.surface.primary')};
+  border: none;
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: box-shadow ${tkn('transitions.fast')};
 
   &:hover {
-    border-color: ${tkn('colors.brand.primary')};
-    box-shadow: 0 0 0 0.0625rem ${tkn('colors.brand.primary')}20;
+    box-shadow: ${tkn('shadows.md')};
   }
 `;
 
@@ -109,25 +115,14 @@ export const RepricingCardHeader = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   background: ${tkn('colors.surface.primary')};
 `;
 
-export const RepricingCardIndex = styled.div`
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${tkn('colors.brand.primary')};
-  color: white;
-  flex-shrink: 0;
-`;
-
 export const RepricingCardBody = styled.div`
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
+  background: ${tkn('colors.surface.primary')};
 `;
 
 export const RepricingFieldGrid = styled.div`

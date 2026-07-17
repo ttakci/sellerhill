@@ -48,9 +48,11 @@ export const formatDate = (
 
 /**
  * Get locale and currency based on language code.
+ * Accepts bare codes (`tr`, `en`) or BCP-47 tags (`tr-TR`, `en-US`).
  */
 export const getLocaleConfig = (language: string) => {
-  const isTR = language === 'tr';
+  const code = (language || 'en').toLowerCase().split('-')[0];
+  const isTR = code === 'tr';
   return {
     locale: isTR ? 'tr-TR' : 'en-US',
     currency: isTR ? 'TRY' : 'USD',

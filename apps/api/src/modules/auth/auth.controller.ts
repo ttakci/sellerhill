@@ -1,4 +1,17 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  Req,
+  Res,
+  Request,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -9,7 +22,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { AuthResponse, GenericSuccessResponse, RegistrationResponse, UserDto } from '@repo/shared';
+import type { Request as ExpressRequest, Response } from 'express';
 
+import { clearRefreshTokenCookie, REFRESH_COOKIE_NAME, setRefreshTokenCookie } from './auth-cookies';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
@@ -18,10 +33,23 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
+type CookieRequest = ExpressRequest & { cookies?: Record<string, string> };
+
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  /** Issue tokens: refresh goes in HttpOnly cookie; body only has accessToken + user. */
+  private attachSession(res: Response, auth: AuthResponse): Omit<AuthResponse, 'refreshToken'> {
+    if (auth.refreshToken) {
+      setRefreshTokenCookie(res, auth.refreshToken);
+    }
+    return {
+      accessToken: auth.accessToken,
+      user: auth.user,
+    };
+  }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -44,8 +72,12 @@ export class AuthController {
   @ApiOkResponse({ description: 'Email verified successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired verification token' })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
-  async verifyEmail(@Body() body: VerifyEmailDto): Promise<AuthResponse> {
-    return this.authService.verifyEmail(body.token);
+  async verifyEmail(
+    @Body() body: VerifyEmailDto,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<Omit<AuthResponse, 'refreshToken'>> {
+    const auth = await this.authService.verifyEmail(body.token);
+    return this.attachSession(res, auth);
   }
 
   @Post('resend-verification')
@@ -65,25 +97,53 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login user',
-    description: 'Authenticate user and receive access tokens (requires verified email)',
+    description: 'Authenticate user; access token in body, refresh token in HttpOnly cookie',
   })
   @ApiOkResponse({ description: 'User logged in successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid email or password, or email not verified' })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
-  async login(@Body() body: LoginRequestDto): Promise<AuthResponse> {
-    return this.authService.login(body);
+  async login(
+    @Body() body: LoginRequestDto,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<Omit<AuthResponse, 'refreshToken'>> {
+    const auth = await this.authService.login(body);
+    return this.attachSession(res, auth);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh authentication tokens',
-    description: 'Get new access and refresh tokens using a valid refresh token',
+    description: 'Uses HttpOnly refresh cookie (preferred) or body.refreshToken (legacy)',
   })
   @ApiOkResponse({ description: 'Tokens refreshed successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token' })
-  async refresh(@Body() body: { refreshToken: string }): Promise<AuthResponse> {
-    return this.authService.refreshToken(body.refreshToken);
+  async refresh(
+    @Req() req: CookieRequest,
+    @Body() body: { refreshToken?: string },
+    @Res({ passthrough: true }) res: Response
+  ): Promise<Omit<AuthResponse, 'refreshToken'>> {
+    // `req.cookies` is `any` from cookie-parser's type augment — narrow explicitly.
+    const rawCookie: unknown = req.cookies?.[REFRESH_COOKIE_NAME];
+    const cookieToken = typeof rawCookie === 'string' ? rawCookie : '';
+    const token = cookieToken || body?.refreshToken;
+    if (!token) {
+      throw new UnauthorizedException('auth.errors.invalidToken');
+    }
+    const auth = await this.authService.refreshToken(token);
+    return this.attachSession(res, auth);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Logout',
+    description: 'Clears the HttpOnly refresh cookie',
+  })
+  @ApiOkResponse({ description: 'Logged out' })
+  logout(@Res({ passthrough: true }) res: Response): GenericSuccessResponse {
+    clearRefreshTokenCookie(res);
+    return { success: true };
   }
 
   @Get('me')
@@ -128,7 +188,12 @@ export class AuthController {
   })
   @ApiOkResponse({ description: 'Account deactivated successfully' })
   @ApiUnauthorizedResponse({ description: 'Not authenticated' })
-  async deactivate(@Request() req: { user: { sub: string } }): Promise<GenericSuccessResponse> {
-    return this.authService.deactivateAccount(req.user.sub);
+  async deactivate(
+    @Request() req: { user: { sub: string } },
+    @Res({ passthrough: true }) res: Response
+  ): Promise<GenericSuccessResponse> {
+    const result = await this.authService.deactivateAccount(req.user.sub);
+    clearRefreshTokenCookie(res);
+    return result;
   }
 }

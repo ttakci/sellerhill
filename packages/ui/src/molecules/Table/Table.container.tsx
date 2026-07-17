@@ -8,6 +8,7 @@ export const Table = <T,>(props: TableProps<T>) => {
     columns,
     data,
     emptyMessage,
+    emptyContent,
     onRowClick,
     className,
     footer,
@@ -126,6 +127,7 @@ export const Table = <T,>(props: TableProps<T>) => {
       columns={columns}
       data={data}
       emptyMessage={emptyMessage}
+      emptyContent={emptyContent}
       className={className}
       footer={footer}
       sortColumn={sortColumn}

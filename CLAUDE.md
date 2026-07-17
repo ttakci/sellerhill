@@ -88,11 +88,12 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 
 ## Domain Concepts
 
-- **Product**: Source of truth from Amazon (ASIN, images, price). Cached to save API costs.
-- **Listing**: An active offer on eBay. Always linked to a Listing Setting Group.
-- **Listing Setting Group**: Defines repricing strategy, stock logic, eBay fees, profit margins. Multiple listings share one group — adjusting a group instantly changes all its listings.
-- **Order**: An eBay sale. Linked to a Listing (via `listing_id`). Product info (title, image, ASIN) resolved via listing→product JOIN, not stored in orders. Contains eBay-side financials (saleTotal, ebayEarnings) and Amazon-side costs (purchasePrice, amazonTax, amazonShipping).
-- **Amazon Account**: A buyer Amazon account used for order scraping. Credentials encrypted with AES-256-GCM. One user can have multiple Amazon accounts.
+- **Product**: Source of truth from Amazon (ASIN, images, price, features). Cached to save API costs. Shared ASIN-keyed across all users.
+- **Listing**: An active offer on eBay. Linked to a Listing Setting Group **and** an eBay account (`listings.ebay_account_id`, multi-store). Per-listing automation overrides live on the listing row (pause sales, fixed price/qty, margins).
+- **Listing Setting Group**: Repricing strategy, stock buffer, fees, HTML templates, plus **content policy** (`content` JSONB: strip brand from title, optional AI title/description flags). Multiple listings share one group.
+- **Order**: An eBay sale. Linked to a Listing (`listing_id`) and eBay account (`ebay_account_id`). Product info via listing→product JOIN. Financials on both eBay and Amazon sides.
+- **Amazon Account**: Buyer Amazon account for order scraping. AES-256-GCM credentials. Multiple per user.
+- **eBay Account**: Connected store(s). Multi-store filtering on listings + orders by `ebayAccountId`.
 
 ## Product Refresh Pipeline
 
@@ -134,13 +135,32 @@ Throughput = batch_size × ticks/min; bounded by Keepa's token-generation rate (
 ### Listing creation path
 `ListingProcessorService` (the `listings` queue worker) uses a **single** `KeepaService.getProductDetailsWithMeta(asin)` per new product (full metadata + price + stock + token meta in one call). Re-listing a cached ASIN makes **no** Keepa call (0 tokens) — the product is already on the refresh schedule. New product rows get `next_refresh_at = NOW() + 12h` on insert (`findOrCreateProduct`); subsequent rescheduling uses the config interval.
 
-### Key product-refresh files
+### Listing content policy (title / description)
+Configured per **listing settings group** (`content` JSONB on `listing_settings_groups`, migration `031`):
+- `stripBrandFromTitle` — deterministic remove of Amazon brand tokens from eBay title at **create**.
+- `aiTitleEnabled` / `aiDescriptionEnabled` — optional rewrite via **local free LLM (Ollama)** at **create only**.
+
+**Scale (100k+ listings):** AI must **never** run on Keepa refresh / product-sync. `ListingStrategyService.prepareListingData(..., { applyContentAi: true })` is only used by the create worker. Refresh paths omit AI and only recompute price/qty.
+
+**Local AI setup (optional):**
+1. Install [Ollama](https://ollama.com), pull a small model: `ollama pull llama3.2:1b` (or `3b` if you have RAM/GPU).
+2. `CONTENT_AI_ENABLED=true` in `apps/api/.env` (+ optional `CONTENT_AI_OLLAMA_URL`, `CONTENT_AI_OLLAMA_MODEL`, timeouts).
+3. Enable AI toggles on the listing settings group. If Ollama is down or times out, create falls back to deterministic title/description (job does not fail).
+
+**Throughput:** ~ listing worker concurrency × model speed. For mass historical rewrites of existing listings, do not flip AI on and re-queue 100k creates — use strip-brand + templates for bulk, or a dedicated offline batch later.
+
+Key files: `content-generation.service.ts`, `listing-strategy.service.ts`, group `content` in shared types + Listing Group drawer.
+
+### Key product / listing files
 - `src/modules/listings/keepa.service.ts` — Keepa API, `history=0`, token-meta capture, bulk `getProducts()` + `getProductDetailsWithMeta()`.
 - `src/modules/listings/refresh-scheduler.service.ts` — repeatable tick, selects overdue products.
 - `src/modules/listings/refresh-processor.service.ts` — batch worker (compare/update/fan-out/quarantine/token-log).
 - `src/modules/listings/keepa-usage.service.ts` — `keepa_usage_log` + `keepa_balance` persistence.
-- `src/modules/listings/product-sync.service.ts` — `updateAllListingsForProduct()` (change-detected fan-out) + `syncListingsForProduct()` (sale-driven entry point).
-- DB: `products` (next_refresh_at, last_refresh_attempt_at, last_successful_refresh_at, consecutive_failures), `keepa_usage_log`, `keepa_balance`. Migrations `025`/`026`/`027`.
+- `src/modules/listings/product-sync.service.ts` — `updateAllListingsForProduct()` (overrides + change-detected fan-out) + `syncListingsForProduct()`.
+- `src/modules/listings/content-generation.service.ts` — optional Ollama title/description rewrite (create only).
+- `src/modules/listings/listing-strategy.service.ts` — price/qty formula, strip brand, templates, AI gate.
+- FE listings: `apps/web/src/features/listings/` — `overview/`, `all/` (+ hooks), `detail/`, `api/listings.api.ts`, domain `ListingCard` under `apps/web/src/domain-ui/`.
+- DB: `products` refresh columns; `listings` overrides + `ebay_account_id`; `listing_settings_groups.content`. Migrations `025`–`031`.
 
 ## Order Management
 
@@ -273,10 +293,158 @@ The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced ton
 - **Sidebar background is per-theme**: light deep blue `#0c1f52`, dark near-black `#0d0f18`.
 - **Borders are alpha-based**: `#00000014` (light) / `#ffffff12` (dark) — not solid hex.
 - **`accent` token category** (emerald `#10b981`) is for "Active" status badges and success emphasis. Distinct from `semantic.success` (system success states).
-- **Font**: Inter (headings) + Lexend (body/UI). Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts` (`fontFamily.heading` = Inter, `fontFamily.body`/`sans` = Lexend, `mono` = JetBrains Mono).
-- **Sidebar nav**: Inventory section (Dashboard, eBay Listings, Listing Jobs, Products, Orders, Stores) + Configuration section (Settings). Single Settings nav item (hub consolidation TBD in Plan 5).
+- **Font**: **Source Sans 3** for headings + body/UI (institutional / insurance-grade readability; TR-friendly). Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts`. Mono = JetBrains Mono.
+- **Text ink**: strong slate primary (`#0f172a`), secondary (`#475569`). Brand blue `#2563eb`.
+- **Weights**: headings / card titles **semibold**; row labels **semibold** for clarity.
+- **Radii**: crisp **4px** surfaces (user preference — no soft rounded cards).
+- **Sidebar nav**: Inventory + Configuration. Route breadcrumbs from `apps/web/src/app/routeMeta.ts`.
+- **Settings hub**: full-width 2-col grid; **header icons restored** on section cards; account rows keep row icons.
 
 Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`.
+
+## Frontend Architecture Notes (2026-07)
+
+### Typography scale (use `<Text variant>` — never raw font-size in feature CSS)
+| Variant | Size | Use for |
+|---|---|---|
+| `h1` | 24px / semibold | Page titles (`PageHeader`) |
+| `h2` | 20px / semibold | Rare large section titles |
+| `h3` | 18px / semibold | Drawer titles, major section |
+| `h4` | 16px / semibold | Card titles (`SettingsCard`, `QuickActionCard`) |
+| `h5` | 14px / semibold | Small section labels |
+| `body` | 14px / regular | Primary UI text, table cells, control text, row labels |
+| `body-sm` | 12px / regular | Secondary denser text, drawer subtitles |
+| `caption` / `overline` | 12px / 10px | Meta, helper, chips |
+| `mono` | 12px | Codes / IDs only |
+
+**Title → subtitle gap**: `PageHeader` uses `spacing.xs` between title and subtitle. Title is always `Text variant="h1" weight="semibold"`; subtitle is `body-sm` secondary. **Do not** invent ad-hoc page titles.
+
+**Page shell (mandatory alignment)**:
+- Outer gutter is **only** `AppLayout` `ContentInner` (responsive padding). Feature pages must **not** add their own outer `padding`.
+- Root of every authenticated page: `PageContainer` from `@repo/ui` (or `PageContainerWithMobileBar` for detail pages with sticky mobile action bars). Gap between title and sections = `spacing.lg`.
+- Pattern: `<PageContainer><PageHeader title={…} subtitle={…} />…</PageContainer>`. Export as `Container = PageContainer` in feature `*.style.ts` if preferred.
+- Never double-pad (ContentInner + page Container) — that misaligns titles across screens.
+
+### Form controls (must stay aligned)
+Shared geometry: `packages/ui/src/styles/formControl.ts` + `controlTokens` on theme.
+
+| Size | Compact (no floating label) | Labeled (floating label) |
+|---|---|---|
+| small | 2.5rem | 3rem |
+| medium | 2.75rem | 3.25rem |
+| large | 3rem | 3.75rem |
+
+- **TextInput**, **Select**, **SearchField** share the same heights, `surface.primary` fill, `border.primary`, and **brand.primary** focus ring (`controlFocusShadow`). Never black/neutral focus borders.
+- **Floating labels are mandatory** for form fields (drawers, settings, auth). Do **not** place an external `<Text>` label above a TextInput/Select — use the `label` prop.
+- Toolbar/filter rows may use compact controls with `placeholder` only (no label) so Search + Select share one height.
+- Button `medium` = 2.75rem (matches compact medium); form primary actions in drawers use `medium` not `large`.
+
+### Container logic extraction
+God containers are forbidden. Extract feature hooks under `features/<feature>/hooks/`:
+- Example: `listings/all/hooks/useListingsFilters.ts`, `useListingsColumns.tsx`.
+- Container orchestrates data + hooks and returns only `<Component .../>`.
+- `useForm` lives in container or `useXxxForm` hook — never in `.component.tsx`.
+
+### Loading UX
+- `useLoading(...)` is for **blocking mutations** only (save/delete/bulk), not initial page fetches.
+- Initial list load → empty state / table message (or future skeleton), not full-app overlay.
+
+### Routing
+- Route-level `React.lazy` + `Suspense` in `App.tsx` for app pages. Landing stays eager.
+
+### Domain vs design system
+- Keep domain composites (`ListingCard`, `ConnectEbayPrompt`) generic where possible; prefer app-level wrappers if they grow domain-specific. Do not add more product/domain molecules to `@repo/ui` without review.
+
+### Listings list (server-side — mandatory)
+- `GET /listings` returns `PaginatedListingsDto` `{ items, total, page, limit, categories }` — **never** the full catalog for table UIs.
+- Query: `ListingsQueryDto` — `page`, `limit`, `search`, `status`, `category`, `ebayAccountId` (store filter), `sortBy`/`sortOrder`, numeric range mins/maxes. Deprecated `stockPreset` still accepted for API compat; **FE does not send it** — use advanced `quantityMin`/`quantityMax` only (avoid dual stock filters).
+- `lastSaleAt` on list rows: `MAX(orders.order_date)` correlated subquery via `orders.listing_id` (cheap with index). Sort keys `lastSale` / `lastSaleAt`.
+- FE: `useGetListingsQuery(query)`; ListingsAll URL params via `useListingsFilters` (`q`, `page`, `limit`, `sort`, `dir`, `store` → `ebayAccountId`, `status` default **active**).
+- Status filter options: **all / active / inactive** only on operational list chrome. **Drafts** are a dedicated view (`?status=draft`) from overview → Other actions → View drafts; not mixed into carousel or default “all” (API excludes `draft` when status is omitted). **No status column** on the all table by default.
+- **Draft create**: `CreateListingsRequest.asDraft` → queue worker prepares product/pricing, inserts `listings` with `status=draft` and **no** eBay publish (`ebay_item_id` nullable). Publish later via `POST /listings/:id/publish` or bulk `POST /listings/bulk-publish`. Shared detail page for drafts + live listings.
+- Default visible columns: product, price, quantity, sold, **lastSale**, profit, createdAt — **not** source/listingId/status (ASIN + eBay id live inside product cell).
+- Product cell: transparent image (no gray plate), title 2-line clamp, ASIN/eBay label rows; selection column is narrow (`Table` `$selection` + `colgroup`, `@repo/ui` must be **rebuilt** after Table style changes — package loads from `dist/`).
+- Overview/Dashboard: small pages (`limit: 12` / `50`). Client-side filter/sort/slice of the full catalog is **forbidden**.
+
+### Dashboard panel (Sellerboard-style)
+- **Tabs** (`?tab=cards|chart|history`): Cards · Chart · History.
+- **Period cards** (Tab 1): `today` | `thisWeek` | `thisMonth` | `thisYear` — solid header bands (`colors.dashboard.period*`). Click filters carousels below.
+- **Carousels**: standard `ListingCarousel` + `OrderCarousel` side-by-side; listings via `soldFrom`/`soldTo`, orders via `dateFrom`/`dateTo`.
+- **View all** → `/listings/all?soldFrom&soldTo&from=dashboard` or `/orders/all?dateFrom&dateTo&from=dashboard`; back returns to `/dashboard`.
+- **Chart tab**: monthly ComposedChart (units bar + sales/profit lines) + summary sidebar.
+- **History tab**: P&L matrix (metrics × months) from `dashboard.history.months`.
+- API: `GET /dashboard?ebayAccountId=` — metrics + chart + history. No day/week/month segmented control; no active-listings chip.
+
+### Listings UX chrome (mobile-first SaaS)
+- Prefer **no** dense PageHeader action button clusters (Create / Export / End) on list/detail. Use overview QuickActions, SettingsCard rows, drawers, DataTable toolbar download, or a single mobile **Manage** sheet.
+- Product images on cards/detail/table: **`background: transparent`** (match `ListingCard`).
+- Avoid duplicate facts: ASIN/eBay once; economics once; do not triple KPI + facts + economics.
+
+### Listing detail (`apps/web/src/features/listings/detail/`)
+- Layout: hero (gallery + ids + chips) → economics card → stock/performance → **automation** → configuration (edit drawer) → system → product content (description / features / specs).
+- Automation UI maps to DB overrides (migration `029`):
+  - **Pause sales** → `disable_ordering` (force qty 0)
+  - **Fixed price** → `lock_price` + `disable_repricing` (+ optional `price_override`)
+  - **Fixed quantity** → `lock_quantity` (+ optional `quantity_override`)
+  - **Custom margin** → `margin_*_override` only when fixed price is off
+- Worker: `product-sync.service.ts` applies overrides on refresh fan-out.
+- Detail payload joins product `features` + builds `specs` (Brand + parsed `Key: Value` features); description from product.
+
+### Multi-store (`ebay_account_id`)
+- Migration `030`: `listings.ebay_account_id` (backfill from user's eBay account). Create path sets it via `EbayService.getActiveAccountId`.
+- Filter: listings `?ebayAccountId=`; orders already had `orders.ebay_account_id` + same query param.
+- FE store Select options from `useGetEbayAccountsQuery`.
+
+### Listing settings group — content policy
+- Migration `031`: `listing_settings_groups.content` JSONB default `{ stripBrandFromTitle, aiTitleEnabled, aiDescriptionEnabled }` all false.
+- UI: Settings → Listing Group drawer general step (toggles + hints). Shared: `ListingContentConfig`, Zod `listingContentConfigSchema`.
+- Apply strip-brand + optional AI in `ListingStrategyService` at **create** only — see "Listing content policy" above.
+
+### Auth / session security (implemented)
+- **Refresh token**: HttpOnly cookie `zonds_rt` (`path=/api`, `SameSite=Lax`, `Secure` in production). JS cannot read it.
+- **Access token**: memory only (Redux) — never `localStorage` / `sessionStorage`.
+- **Boot**: `AuthBootstrap` calls `POST /auth/refresh` with `credentials: 'include'`; on success hydrates access token.
+- **401**: `baseApi` single-flight cookie refresh, then retry; failure → logout.
+- **Logout**: `POST /auth/logout` clears cookie + Redux wipe. Legacy `localStorage` token keys are purged on load.
+- Do **not** reintroduce `localStorage.setItem('accessToken'|'refreshToken')`.
+- **CORS**: API reads `CORS_ORIGINS` (comma-separated) or legacy `CORS_ORIGIN`. Production must list the real web origin(s).
+- **Cookie env**: optional `COOKIE_DOMAIN` (e.g. `.takci.cloud`), `COOKIE_SAMESITE=lax|none`.
+- Listings URL: `{VITE_API_BASE_URL}/listings?page=1&limit=…` — bare `/listings` without page still works (server defaults) but FE always sends page/limit.
+
+### Domain UI vs design system
+- Product-specific composites live in `apps/web/src/domain-ui/` (`ListingCard`, `ConnectEbayPrompt`).
+- `@repo/ui` is design-system only (atoms/molecules/organisms + tokens). Do not re-add domain widgets there.
+
+### Route metadata
+- Breadcrumbs + nav section: `apps/web/src/app/routeMeta.ts` (`resolveBreadcrumbs`, `resolveNavSection`).
+- Do not hardcode path→label maps in `AppLayout`.
+
+### Settings surface
+- Canonical UI: `/settings` hub + drawers only.
+- Legacy full pages (`/settings/store`, `/amazon-accounts`, `/listing-groups`) redirect to the hub.
+
+### Listings CSV export
+- `GET /listings/export` — same filters as list (incl. store/status/ranges), server-built CSV, max 5000 rows.
+- FE: `useExportListingsCsvMutation` (not client-side CSV from a page of items).
+
+### Migrations (listings-related recent)
+| # | Purpose |
+|---|---|
+| `029` | Per-listing overrides (`disable_ordering`, locks, price/qty/margin overrides) |
+| `030` | `listings.ebay_account_id` + backfill |
+| `031` | `listing_settings_groups.content` JSONB |
+| `032` | `listings.ebay_item_id` nullable (drafts before eBay publish) |
+
+API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
+
+### Package builds agents must remember
+- `@repo/shared` and **`@repo/ui` load from `dist/`** — after editing icons, Table selection width, Checkbox, etc., run `pnpm --filter @repo/ui build` (and shared when types/i18n change) or `pnpm dev` package build step.
+- Icon names must exist in `packages/ui/src/atoms/Icon/icons/index.tsx` (e.g. `sliders-horizontal` alias). Emotion **must not** use component selectors like `${Other}:hover &` without babel plugin (crashes at runtime).
+
+### Deferred (optional / env-dependent)
+- CSRF token layer if API is ever cross-site with `SameSite=None`.
+- Bulk offline AI rewrite of existing 100k listings (not in online create path).
+- Push title/policy edits from listing detail to eBay Inventory API (DB is source of truth for group/policies today; price/qty still driven by refresh + strategy).
 
 ## Frontend Rules (Quick Reference)
 
@@ -284,6 +452,8 @@ See `.claude/skills/frontend-rules/SKILL.md` for the canonical version.
 
 ### File organization
 4 files per feature component: `.component.tsx` (markup only) / `.container.tsx` (logic) / `.style.ts` (styled) / `.types.ts` (types). Stateful atoms/molecules (Select, Dropdown, etc.) also need `.container.tsx` + `.component.tsx` split. Stateless atoms (Button, Badge) stay as `.component.tsx` + `.style.ts` + `.types.ts`. Exempt: landing, RTK api files, store.ts, configs.
+
+Heavy page logic belongs in `features/<x>/hooks/` — not a 600-line container.
 
 ### Anti-patterns (will be blocked by hook + lint)
 - `styled(...)` outside `.style.ts`
@@ -294,9 +464,12 @@ See `.claude/skills/frontend-rules/SKILL.md` for the canonical version.
 - `style={{ }}` inline styles
 - `styled.h1`/`styled.p` (use `<Text variant="...">`)
 - Raw `<select>`, `<input>`, `<button>`, native HTML form controls
+- External labels above TextInput/Select (use floating `label` prop)
+- Mismatched control heights or non-brand focus rings on form controls
 - `alert()`/`confirm()` (use `MessageModal` via `showMessage`)
 - Hardcoded status strings like `'active'` (use enums from `packages/shared`)
 - Hardcoded UI strings (use i18n `t()`)
+- Dual body typefaces (use Source Sans 3 tokens only)
 
 ### Atom extension pattern in `.style.ts`
 Empty template literal + variant/weight/size props in JSX. Layout CSS only in template (margin/gap/flex/grid/position/dimensions). No font-size/font-weight/color/background/border/shadow in template — those go in props.

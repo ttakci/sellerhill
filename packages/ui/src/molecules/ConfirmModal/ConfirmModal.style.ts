@@ -1,10 +1,5 @@
-import styled from '@emotion/styled';
-
-import { tkn } from '../../theme/tkn';
-
-export const FooterWrapper = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.md')};
-  width: 100%;
-`;
+/**
+ * Visual styles live on Dialog molecule.
+ * ConfirmModal is a thin semantic wrapper — this file kept for import stability.
+ */
+export {};

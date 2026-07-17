@@ -12,6 +12,7 @@ export const TableComponent = <T,>({
   columns,
   data,
   emptyMessage,
+  emptyContent,
   className,
   footer,
   sortColumn,
@@ -79,11 +80,19 @@ export const TableComponent = <T,>({
         onMouseLeave={onMouseUpOrLeave}
       >
         <S.StyledTable>
+          <colgroup>
+            {selectable ? <S.ColSelection /> : null}
+            {columns.map((column) => (
+              <S.ColAuto key={`col-${column.key}`} $width={column.width} />
+            ))}
+          </colgroup>
           <S.Thead>
             <S.Tr>
               {selectable && (
-                <S.Th $width="3rem" $noPadding $sticky={columns.some((c) => c.sticky)} $left={0}>
-                  <Checkbox checked={isAllSelected} onChange={onSelectAll} />
+                <S.Th $selection $sticky={columns.some((c) => c.sticky)} $left={0}>
+                  <S.CheckboxCell>
+                    <Checkbox checked={isAllSelected} onChange={onSelectAll} />
+                  </S.CheckboxCell>
                 </S.Th>
               )}
               {columns.map((column) => (
@@ -91,7 +100,7 @@ export const TableComponent = <T,>({
                   key={column.key}
                   $align={column.align}
                   $sticky={column.sticky}
-                  $left={selectable ? 48 : 0}
+                  $left={selectable ? 52 : 0}
                   $width={column.width}
                 >
                   <S.ThContent $align={column.align}>
@@ -114,7 +123,9 @@ export const TableComponent = <T,>({
           <S.Tbody>
             {data.length === 0 ? (
               <S.EmptyRow>
-                <S.EmptyCell colSpan={columns.length + (selectable ? 1 : 0)}>{emptyMessage}</S.EmptyCell>
+                <S.EmptyCell colSpan={columns.length + (selectable ? 1 : 0)}>
+                  {emptyContent ?? emptyMessage}
+                </S.EmptyCell>
               </S.EmptyRow>
             ) : (
               data.map((row, rowIndex) => {
@@ -130,13 +141,14 @@ export const TableComponent = <T,>({
                   >
                     {selectable && (
                       <S.Td
-                        $width="3rem"
-                        $noPadding
+                        $selection
                         onClick={(e) => e.stopPropagation()}
                         $sticky={columns.some((c) => c.sticky)}
                         $left={0}
                       >
-                        <Checkbox checked={isSelected} onChange={(checked) => onSelectRow(row, checked)} />
+                        <S.CheckboxCell>
+                          <Checkbox checked={isSelected} onChange={(checked) => onSelectRow(row, checked)} />
+                        </S.CheckboxCell>
                       </S.Td>
                     )}
                     {columns.map((column) => (
@@ -144,7 +156,7 @@ export const TableComponent = <T,>({
                         key={column.key}
                         $align={column.align}
                         $sticky={column.sticky}
-                        $left={selectable ? 48 : 0}
+                        $left={selectable ? 52 : 0}
                         $width={column.width}
                       >
                         {column.render

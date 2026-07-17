@@ -1,4 +1,12 @@
-import { FeeConfig, ListingSettingsGroup, PredefinedTemplate, PriceRange, StockConfig, TemplateConfig } from './listing-settings-group.types';
+import {
+  FeeConfig,
+  ListingContentConfig,
+  ListingSettingsGroup,
+  PredefinedTemplate,
+  PriceRange,
+  StockConfig,
+  TemplateConfig,
+} from './listing-settings-group.types';
 
 /**
  * Request DTO for creating Listing Settings Group
@@ -10,6 +18,7 @@ export interface CreateListingSettingsGroupRequest {
   stock: StockConfig;
   fees: FeeConfig;
   templates: TemplateConfig;
+  content?: ListingContentConfig;
 }
 
 /**
@@ -22,6 +31,7 @@ export interface UpdateListingSettingsGroupRequest {
   stock?: StockConfig;
   fees?: FeeConfig;
   templates?: TemplateConfig;
+  content?: ListingContentConfig;
 }
 
 /**

@@ -33,17 +33,26 @@ export class ListingProcessorService extends WorkerHost {
    * Process a listing job task from the queue
    */
   async process(job: Job<ListingQueueJobData>): Promise<void> {
-    const { jobId, userId, asin, listingSettingsGroupId, paymentPolicyId, shippingPolicyId, returnPolicyId } = job.data;
+    const {
+      jobId,
+      userId,
+      asin,
+      listingSettingsGroupId,
+      paymentPolicyId,
+      shippingPolicyId,
+      returnPolicyId,
+      asDraft = false,
+    } = job.data;
 
-    this.logger.log(`Processing ASIN ${asin} for job ${jobId}`);
+    this.logger.log(`Processing ASIN ${asin} for job ${jobId}${asDraft ? ' (draft)' : ''}`);
 
-    // 0. Check if ASIN is already actively listed for this user
+    // 0. Check if ASIN is already active or draft for this user
     const isAlreadyListed = await this.listingsService.isAsinListed(userId, asin);
     if (isAlreadyListed) {
-      this.logger.warn(`ASIN ${asin} is already listed for user ${userId}. Skipping.`);
+      this.logger.warn(`ASIN ${asin} is already listed/draft for user ${userId}. Skipping.`);
       await this.listingsService.updateJobItemResult(jobId, asin, {
         status: ListingStatus.ERROR,
-        errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active listings.',
+        errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active or draft listings.',
       });
       return;
     }
@@ -103,36 +112,46 @@ export class ListingProcessorService extends WorkerHost {
 
       // 3. Prepare listing data (Price, stock, etc. based on strategy group)
       const ebayAccountId = await this.ebayService.getActiveAccountId(userId);
+      // applyContentAi: create path only (local Ollama when group flags + CONTENT_AI_ENABLED)
       const listingData = await this.listingStrategyService.prepareListingData(
         userId,
         productData,
         listingSettingsGroupId,
-        ebayAccountId
+        ebayAccountId,
+        { applyContentAi: true }
       );
 
-      // 3.5. Validate stock - Do not list products with 0 stock
-      if (listingData.quantity === 0) {
+      // Drafts: allow zero stock so users can prepare OOS ASINs and publish later.
+      // Live publish: block zero stock so we never push qty 0 to eBay on create.
+      if (!asDraft && listingData.quantity === 0) {
         throw new Error(
           `Cannot list ASIN ${asin}: Stock is 0. ` +
             `Amazon stock (${productData.stock}) is less than user preferred quantity. ` +
-            `Please adjust your listing settings group stock preferences or wait for Amazon to restock.`
+            `Please adjust your listing settings group stock preferences, wait for Amazon to restock, or save as draft.`
         );
       }
 
-      // 4. Create eBay listing (REST API)
-      const { listingId: ebayItemId, categoryName } = await this.ebayService.createListingWithRest(
-        userId,
-        productId,
-        listingData,
-        {
-          paymentId: paymentPolicyId,
-          shippingId: shippingPolicyId,
-          returnId: returnPolicyId,
-        },
-        asin
-      );
+      let ebayItemId: string | undefined;
+      let categoryName = productData.category ?? '';
 
-      // 5. Create final listing record in our database
+      if (!asDraft) {
+        // 4. Create eBay listing (REST API)
+        const created = await this.ebayService.createListingWithRest(
+          userId,
+          productId,
+          listingData,
+          {
+            paymentId: paymentPolicyId,
+            shippingId: shippingPolicyId,
+            returnId: returnPolicyId,
+          },
+          asin
+        );
+        ebayItemId = created.listingId;
+        categoryName = created.categoryName;
+      }
+
+      // 5. Create listing record (ACTIVE with eBay id, or DRAFT without)
       const listingId = await this.listingsService.createListing({
         userId,
         asin,
@@ -141,7 +160,7 @@ export class ListingProcessorService extends WorkerHost {
         paymentPolicyId,
         shippingPolicyId,
         returnPolicyId,
-        ebayItemId,
+        ebayItemId: ebayItemId ?? null,
         title: listingData.title,
         price: listingData.price,
         purchasePrice: listingData.purchasePrice,
@@ -150,9 +169,11 @@ export class ListingProcessorService extends WorkerHost {
         roi: listingData.roi,
         quantity: listingData.quantity,
         ebayCategoryName: categoryName,
+        ebayAccountId: ebayAccountId || undefined,
+        status: asDraft ? ListingStatus.DRAFT : ListingStatus.ACTIVE,
       });
 
-      // 6. Update job item success
+      // 6. Update job item success (job-item ACTIVE = processed successfully)
       await this.listingsService.updateJobItemResult(jobId, asin, {
         productId,
         listingId,
@@ -160,7 +181,11 @@ export class ListingProcessorService extends WorkerHost {
         ebayItemId,
       });
 
-      this.logger.log(`Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`);
+      this.logger.log(
+        asDraft
+          ? `Successfully created draft listing ${listingId} for ASIN ${asin}`
+          : `Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`
+      );
     } catch (error: unknown) {
       const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
 

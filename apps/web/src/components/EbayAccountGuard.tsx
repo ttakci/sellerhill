@@ -1,5 +1,5 @@
 import { EBAY_MARKETPLACE, type CreateEbayConnectUrlResponse, type GetEbayAccountsResponse } from '@repo/shared';
-import { ConnectEbayPrompt, useLoading, useUI } from '@repo/ui';
+import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '../features/ebay/api/ebayApi';
 import { getErrorI18nKey } from '../utils/errorHandler';
 import { useLocale } from '../utils/useLocale';
+
+import { ConnectEbayPrompt } from '@/domain-ui';
 
 interface EbayAccountGuardProps {
   children: React.ReactNode;

@@ -8,14 +8,10 @@ import type { AppLayoutProps } from './AppLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
-
-// TODO(Plan 2 — Dashboard): wire to real RTK Query counts (eBay listings + pending orders)
-const EBAY_LISTINGS_COUNT_PLACEHOLDER = 20;
-const ORDERS_COUNT_PLACEHOLDER = 12;
+import { AssistantWidget } from '@/features/assistant/AssistantWidget';
 
 /**
- * TailAdmin Inspired Layout - Fully Responsive Design
- * Features a collapsible sidebar for desktop and overlay sidebar for mobile.
+ * App shell: collapsible sidebar (desktop) + overlay drawer (mobile).
  */
 export const AppLayout: React.FC<AppLayoutProps> = ({
   user,
@@ -49,9 +45,33 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         {/* Sidebar */}
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
           <MeshBackground animate={false} />
-          <S.LogoArea $isCollapsed={sidebarCollapsed} onClick={() => onLocaleNavigate('/dashboard')}>
-            {sidebarCollapsed ? <Logo size={32} /> : <Logo layout="stacked" />}
-          </S.LogoArea>
+          {/* Sellerboard strip: [menu] [logo] one row — divider = border-bottom */}
+          <S.SidebarBrandRow $isCollapsed={sidebarCollapsed}>
+            <S.SidebarCollapseButton
+              type="button"
+              $isCollapsed={sidebarCollapsed}
+              onClick={onToggleSidebar}
+              title={
+                sidebarCollapsed
+                  ? t('translation:header.expandSidebar')
+                  : t('translation:header.collapseSidebar')
+              }
+              aria-label={
+                sidebarCollapsed
+                  ? t('translation:header.expandSidebar')
+                  : t('translation:header.collapseSidebar')
+              }
+            >
+              <Icon name="menu" size={20} />
+            </S.SidebarCollapseButton>
+            <S.LogoArea
+              $isCollapsed={sidebarCollapsed}
+              onClick={() => onLocaleNavigate('/dashboard')}
+              title={t('translation:menu.dashboard')}
+            >
+              <Logo layout="nav" height={80} />
+            </S.LogoArea>
+          </S.SidebarBrandRow>
 
           <S.NavSection $isCollapsed={sidebarCollapsed}>
             <S.NavItem
@@ -61,26 +81,40 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               title={sidebarCollapsed ? t('translation:menu.dashboard') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="dashboard" size={18} />
+                <Icon name="dashboard" size={20} />
                 {!sidebarCollapsed && t('translation:menu.dashboard')}
               </S.NavItemContent>
             </S.NavItem>
 
             <S.NavItem
-              $active={pathWithoutLocale === '/listings'}
+              $isCollapsed={sidebarCollapsed}
+              $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
+              onClick={() => onLocaleNavigate('/orders')}
+              title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
+            >
+              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                <Icon name="inbox" size={20} />
+                {!sidebarCollapsed && t('translation:menu.orders')}
+              </S.NavItemContent>
+            </S.NavItem>
+
+            <S.NavItem
+              $active={
+                pathWithoutLocale === '/listings' ||
+                pathWithoutLocale === '/listings/all' ||
+                (pathWithoutLocale.startsWith('/listings/') &&
+                  !pathWithoutLocale.startsWith('/listings/jobs') &&
+                  pathWithoutLocale !== '/listings/products' &&
+                  pathWithoutLocale !== '/listings/add')
+              }
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/listings')}
               title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="storefront" size={18} />
+                <Icon name="storefront" size={20} />
                 {!sidebarCollapsed && t('translation:menu.ebayListings')}
               </S.NavItemContent>
-              {!sidebarCollapsed && (
-                <S.BadgeWrapper variant="primary" size="sm">
-                  {EBAY_LISTINGS_COUNT_PLACEHOLDER}
-                </S.BadgeWrapper>
-              )}
             </S.NavItem>
 
             <S.NavItem
@@ -90,75 +124,39 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="bolt" size={18} />
+                <Icon name="bolt" size={20} />
                 {!sidebarCollapsed && t('translation:menu.listingJobs')}
               </S.NavItemContent>
             </S.NavItem>
 
             <S.NavItem
-              $active={pathWithoutLocale === '/listings/products'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/listings/products')}
-              title={sidebarCollapsed ? t('translation:menu.products') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inventory-2" size={18} />
-                {!sidebarCollapsed && t('translation:menu.products')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={pathWithoutLocale === '/orders'}
-              onClick={() => onLocaleNavigate('/orders')}
-              title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inbox" size={18} />
-                {!sidebarCollapsed && t('translation:menu.orders')}
-              </S.NavItemContent>
-              {!sidebarCollapsed && (
-                <S.BadgeWrapper variant="primary" size="sm">
-                  {ORDERS_COUNT_PLACEHOLDER}
-                </S.BadgeWrapper>
-              )}
-            </S.NavItem>
-
-            <S.NavItem
-              $active={pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile'}
+              $active={
+                pathWithoutLocale.startsWith('/settings') ||
+                pathWithoutLocale === '/profile' ||
+                pathWithoutLocale === '/stores'
+              }
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/settings')}
               title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="settings" size={18} />
+                <Icon name="settings" size={20} />
                 {!sidebarCollapsed && t('translation:menu.settings')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $active={pathWithoutLocale === '/stores'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/stores')}
-              title={sidebarCollapsed ? t('translation:menu.stores') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="storefront" size={18} />
-                {!sidebarCollapsed && t('translation:menu.stores')}
               </S.NavItemContent>
             </S.NavItem>
           </S.NavSection>
 
           <S.SidebarFooter>
+            <AssistantWidget sidebarCollapsed={sidebarCollapsed} />
             <S.LogoutButton
               $isCollapsed={sidebarCollapsed}
               onClick={onOpenLogoutConfirm}
               title={sidebarCollapsed ? t('translation:menu.logout') : undefined}
               aria-label={t('translation:menu.logout')}
             >
-              <Icon name="log-out" size={18} />
+              <Icon name="log-out" size={20} />
               {!sidebarCollapsed && (
-                <Text variant="body-sm" weight="medium" color="sidebar.text">
+                <Text variant="body" weight="medium" color="sidebar.text">
                   {t('translation:menu.logout')}
                 </Text>
               )}
@@ -171,13 +169,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <S.HeaderContainer>
             <S.HeaderInner>
               <S.HeaderLeft>
-                <S.MobileMenuButton onClick={onToggleSidebar}>
+                {/* Mobile only — opens the off-canvas sidebar */}
+                <S.MobileMenuButton
+                  type="button"
+                  onClick={onToggleSidebar}
+                  aria-label={t('translation:header.openMenu')}
+                >
                   <Icon name="menu" size={24} />
                 </S.MobileMenuButton>
-
-                <S.ToggleButton onClick={onToggleSidebar}>
-                  <Icon name="menu" size={20} />
-                </S.ToggleButton>
               </S.HeaderLeft>
 
               <S.BreadcrumbArea>
@@ -185,22 +184,25 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <S.ActionIcon onClick={onToggleTheme} title={t('translation:header.toggleTheme')}>
+                <S.ActionIcon
+                  type="button"
+                  onClick={onToggleTheme}
+                  title={t('translation:header.toggleTheme')}
+                  aria-label={t('translation:header.toggleTheme')}
+                >
                   <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
-                </S.ActionIcon>
-
-                <S.ActionIcon title={t('translation:header.notifications')}>
-                  <Icon name="bell" size={20} />
-                  <S.NotificationBadge />
                 </S.ActionIcon>
 
                 <S.VerticalDivider />
 
                 <Dropdown
                   align="right"
-                  width="6.25rem" /* 100px */
+                  width="6.25rem"
                   trigger={
-                    <S.LanguageSelectTrigger title={t('translation:header.selectLanguage')}>
+                    <S.LanguageSelectTrigger
+                      title={t('translation:header.selectLanguage')}
+                      aria-label={t('translation:header.selectLanguage')}
+                    >
                       <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
                       <Icon name="chevron_down" size={12} />
                     </S.LanguageSelectTrigger>
@@ -289,7 +291,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           description={t('translation:menu.logoutConfirmDescription')}
           confirmLabel={t('translation:menu.logoutConfirmButton')}
           cancelLabel={t('translation:common.cancel')}
-          variant="danger"
+          variant="primary"
         />
       </S.LayoutWrapper>
     </ErrorBoundary>

@@ -37,6 +37,34 @@ export const createListingsSchema = (t: TranslationFunction) =>
     paymentPolicyId: z.string().min(1, t('listings.validation.paymentPolicyRequired')),
     shippingPolicyId: z.string().min(1, t('listings.validation.shippingPolicyRequired')),
     returnPolicyId: z.string().min(1, t('listings.validation.returnPolicyRequired')),
+    /** Save prepared listings without publishing to eBay. */
+    asDraft: z.boolean().optional(),
   });
 
 export type CreateListingsFormData = z.infer<ReturnType<typeof createListingsSchema>>;
+
+/** Zod schema for listing detail settings form (title + strategy + policies). */
+export const updateListingSchema = (t: TranslationFunction) =>
+  z.object({
+    title: z.string().min(1, t('listings.validation.titleRequired')).max(80, t('listings.validation.titleMax')),
+    listingSettingsGroupId: z.string().min(1, t('listings.validation.listingSettingsGroupRequired')),
+    paymentPolicyId: z.string().min(1, t('listings.validation.paymentPolicyRequired')),
+    shippingPolicyId: z.string().min(1, t('listings.validation.shippingPolicyRequired')),
+    returnPolicyId: z.string().min(1, t('listings.validation.returnPolicyRequired')),
+  });
+
+export type UpdateListingFormData = z.infer<ReturnType<typeof updateListingSchema>>;
+
+/** Per-listing override form (easync Listing Settings). */
+export const listingOverridesSchema = z.object({
+  disableOrdering: z.boolean(),
+  disableRepricing: z.boolean(),
+  lockPrice: z.boolean(),
+  lockQuantity: z.boolean(),
+  priceOverride: z.string().optional(),
+  quantityOverride: z.string().optional(),
+  marginPercentOverride: z.string().optional(),
+  marginFixedOverride: z.string().optional(),
+});
+
+export type ListingOverridesFormData = z.infer<typeof listingOverridesSchema>;

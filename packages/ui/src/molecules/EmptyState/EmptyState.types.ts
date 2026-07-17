@@ -9,10 +9,14 @@ export interface EmptyStateProps {
   title: string;
   /** Description text displayed below the title */
   description: string;
-  /** Label for the optional action button */
+  /** Label for the optional primary action button */
   action?: string;
-  /** Click handler for the action button */
+  /** Click handler for the primary action */
   onAction?: () => void;
+  /** Label for optional secondary action (e.g. clear filters) */
+  secondaryAction?: string;
+  /** Click handler for the secondary action */
+  onSecondaryAction?: () => void;
   /** Size variant controlling icon and spacing scale */
   size?: EmptyStateSize;
   /** Additional CSS class */

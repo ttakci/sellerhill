@@ -1,5 +1,5 @@
 import { type SupportedLocale } from '@repo/shared';
-import { type BreadcrumbItem, useTheme, useUI } from '@repo/ui';
+import { useTheme, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,7 +7,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
-import { useGetMeQuery } from '@/features/auth/api/authApi';
+import { resolveBreadcrumbs, resolveNavSection } from '@/app/routeMeta';
+import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
@@ -16,6 +17,7 @@ export const AppLayout: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
   const dispatch = useDispatch();
+  const [apiLogout] = useLogoutMutation();
 
   const { buildPath } = useLocale();
   const { data: user } = useGetMeQuery();
@@ -37,16 +39,10 @@ export const AppLayout: React.FC = () => {
     /* eslint-disable react-hooks/set-state-in-effect */
     setMobileSidebarOpen(false);
 
-    const isInventoryRoute =
-      pathWithoutLocale === '/dashboard' ||
-      pathWithoutLocale.startsWith('/listings') ||
-      pathWithoutLocale.startsWith('/orders');
-    const isConfigurationRoute =
-      pathWithoutLocale.startsWith('/settings') || pathWithoutLocale === '/profile' || pathWithoutLocale === '/stores';
-
+    const section = resolveNavSection(pathWithoutLocale);
     setOpenSections((prev) => ({
-      inventory: isInventoryRoute ? true : prev.inventory,
-      configuration: isConfigurationRoute ? true : prev.configuration,
+      inventory: section === 'inventory' ? true : prev.inventory,
+      configuration: section === 'configuration' ? true : prev.configuration,
     }));
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [location.pathname, pathWithoutLocale]);
@@ -73,10 +69,17 @@ export const AppLayout: React.FC = () => {
   );
 
   const handleLogout = useCallback(() => {
-    void dispatch(logout());
-    localeNavigate('/login');
-    setIsLogoutConfirmOpen(false);
-  }, [dispatch, localeNavigate]);
+    void (async () => {
+      try {
+        await apiLogout().unwrap();
+      } catch {
+        // Still clear local session even if cookie clear fails
+      }
+      dispatch(logout());
+      localeNavigate('/login');
+      setIsLogoutConfirmOpen(false);
+    })();
+  }, [apiLogout, dispatch, localeNavigate]);
 
   const handleChangeLanguage = useCallback(
     (lang: SupportedLocale) => {
@@ -85,47 +88,10 @@ export const AppLayout: React.FC = () => {
     [changeLocale]
   );
 
-  const breadcrumbItems = useMemo<BreadcrumbItem[]>(() => {
-    const items: BreadcrumbItem[] = [{ label: '', path: '/dashboard', icon: 'home' }];
-
-    if (pathWithoutLocale === '/dashboard' || pathWithoutLocale === '/') {
-      return items;
-    }
-
-    if (pathWithoutLocale.startsWith('/listings')) {
-      items.push({ label: t('translation:menu.listings'), path: '/listings' });
-      if (pathWithoutLocale === '/listings/jobs') {
-        items.push({ label: t('translation:menu.listingJobs') });
-      } else if (pathWithoutLocale === '/listings/products') {
-        items.push({ label: t('translation:menu.products') });
-      } else if (pathWithoutLocale === '/listings/add') {
-        items.push({ label: t('listings:listings.breadcrumb.addProducts') });
-      } else if (pathWithoutLocale === '/listings') {
-        items.push({ label: t('translation:menu.ebayListings') });
-      }
-    } else if (pathWithoutLocale.startsWith('/orders')) {
-      items.push({ label: t('translation:menu.orders'), path: '/orders' });
-      if (pathWithoutLocale !== '/orders') {
-        items.push({ label: t('orders:orders.detail.title') });
-      }
-    } else if (pathWithoutLocale.startsWith('/settings') || pathWithoutLocale.startsWith('/listing-settings-groups')) {
-      items.push({ label: t('translation:menu.settings'), path: '/settings' });
-      if (pathWithoutLocale === '/settings/store') {
-        items.push({ label: t('translation:menu.storeSettings') });
-      } else if (pathWithoutLocale.includes('/settings/amazon-accounts')) {
-        items.push({ label: t('translation:menu.amazonAccounts') });
-      } else if (
-        pathWithoutLocale.includes('/listing-settings-groups') ||
-        pathWithoutLocale.includes('/settings/listing-groups')
-      ) {
-        items.push({ label: t('translation:menu.listingSettingsGroups') });
-      }
-      // /settings (hub) shows just "Settings" — no second breadcrumb item
-    } else if (pathWithoutLocale === '/stores') {
-      items.push({ label: t('translation:menu.stores') });
-    }
-    return items;
-  }, [pathWithoutLocale, t]);
+  const breadcrumbItems = useMemo(
+    () => resolveBreadcrumbs(pathWithoutLocale, t),
+    [pathWithoutLocale, t]
+  );
 
   if (!isAuthenticated) {
     return <Navigate to={buildPath('/login')} state={{ from: location }} replace />;
@@ -154,7 +120,7 @@ export const AppLayout: React.FC = () => {
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}
       onLocaleNavigate={localeNavigate}
       onToggleSection={handleToggleSection}
-      i18nLanguage={i18n.language}
+      i18nLanguage={(i18n.language || 'en').split('-')[0]}
     />
   );
 };

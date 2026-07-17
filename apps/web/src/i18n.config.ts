@@ -71,8 +71,15 @@ void i18n.use(initReactI18next).init({
   },
   lng: initialLocale,
   fallbackLng: 'en',
+  // Keep language as bare codes (en / tr), never en-US / tr-TR
+  load: 'languageOnly',
+  supportedLngs: ['en', 'tr'],
+  nonExplicitSupportedLngs: true,
   interpolation: { escapeValue: false },
   defaultNS: 'translation',
+  // Missing keys: try other loaded namespaces only when using ns:key form;
+  // feature hooks must put their domain ns first in useTranslation([...]).
+  returnNull: false,
 });
 
 export default i18n;

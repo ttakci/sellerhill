@@ -1,5 +1,5 @@
 import { amazonDetailsSchema } from '@repo/shared';
-import { Button, Modal, ModernTextInput, Text } from '@repo/ui';
+import { Dialog, ModernTextInput } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,7 +19,12 @@ interface AmazonDetailsModalProps {
   isLoading?: boolean;
 }
 
-export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, onClose, onSave, isLoading }) => {
+export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  isLoading,
+}) => {
   const { t } = useTranslation(['orders', 'translation']);
   const [values, setValues] = useState<AmazonValues>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,7 +40,9 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, 
       const fieldErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         const field = issue.path[0]?.toString();
-        if (field) {fieldErrors[field] = issue.message;}
+        if (field) {
+          fieldErrors[field] = issue.message;
+        }
       });
       setErrors(fieldErrors);
       return;
@@ -44,61 +51,72 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, 
   };
 
   return (
-    <Modal
+    <Dialog
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={isLoading ? () => undefined : onClose}
+      type="info"
       title={t('orders.modal.title')}
-      footer={
-        <S.ModalFooter>
-          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
-            <Text>{t('orders.modal.cancel')}</Text>
-          </Button>
-          <Button variant="primary" onClick={handleSave} isLoading={isLoading} disabled={!values.amazonOrderUrl}>
-            <Text>{t('orders.modal.save')}</Text>
-          </Button>
-        </S.ModalFooter>
-      }
+      description={t('orders.modal.infoText')}
+      primaryAction={{
+        label: t('orders.modal.save'),
+        onClick: handleSave,
+        variant: 'primary',
+        isLoading: Boolean(isLoading),
+        disabled: !values.amazonOrderUrl || Boolean(isLoading),
+      }}
+      secondaryAction={{
+        label: t('orders.modal.cancel'),
+        onClick: onClose,
+        variant: 'secondary',
+        disabled: Boolean(isLoading),
+      }}
     >
       <S.ModalBody>
         <S.FormGroup>
-          <S.FormLabel variant="h5">{t('orders.modal.amazonUrl')}</S.FormLabel>
           <ModernTextInput
             name="amazonOrderUrl"
+            label={t('orders.modal.amazonUrl')}
             placeholder={t('orders.modal.amazonUrlPlaceholder')}
             value={values.amazonOrderUrl ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('amazonOrderUrl', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange('amazonOrderUrl', e.target.value)
+            }
             fullWidth
           />
-          {errors.amazonOrderUrl && <S.ErrorText variant="caption" color="semantic.error">{errors.amazonOrderUrl}</S.ErrorText>}
+          {errors.amazonOrderUrl ? <S.ErrorText>{errors.amazonOrderUrl}</S.ErrorText> : null}
         </S.FormGroup>
         <S.FormGroup>
-          <S.FormLabel variant="h5">{t('orders.modal.trackingUrl')}</S.FormLabel>
           <ModernTextInput
             name="amazonTrackingUrl"
+            label={t('orders.modal.trackingUrl')}
             placeholder={t('orders.modal.trackingUrlPlaceholder')}
             value={values.amazonTrackingUrl ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('amazonTrackingUrl', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange('amazonTrackingUrl', e.target.value)
+            }
             fullWidth
           />
-          {errors.amazonTrackingUrl && <S.ErrorText variant="caption" color="semantic.error">{errors.amazonTrackingUrl}</S.ErrorText>}
+          {errors.amazonTrackingUrl ? <S.ErrorText>{errors.amazonTrackingUrl}</S.ErrorText> : null}
         </S.FormGroup>
         <S.FormRow>
           <S.FormGroup>
-            <S.FormLabel variant="h5">{t('orders.modal.taxAmount')}</S.FormLabel>
             <ModernTextInput
               name="amazonTax"
+              label={t('orders.modal.taxAmount')}
               type="number"
               placeholder="0.00"
               value={values.amazonTax?.toString() ?? ''}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('amazonTax', parseFloat(e.target.value))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange('amazonTax', parseFloat(e.target.value))
+              }
               fullWidth
             />
-            {errors.amazonTax && <S.ErrorText variant="caption" color="semantic.error">{errors.amazonTax}</S.ErrorText>}
+            {errors.amazonTax ? <S.ErrorText>{errors.amazonTax}</S.ErrorText> : null}
           </S.FormGroup>
           <S.FormGroup>
-            <S.FormLabel variant="h5">{t('orders.modal.shippingCost')}</S.FormLabel>
             <ModernTextInput
               name="amazonShipping"
+              label={t('orders.modal.shippingCost')}
               type="number"
               placeholder="0.00"
               value={values.amazonShipping?.toString() ?? ''}
@@ -107,11 +125,10 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({ isOpen, 
               }
               fullWidth
             />
-            {errors.amazonShipping && <S.ErrorText variant="caption" color="semantic.error">{errors.amazonShipping}</S.ErrorText>}
+            {errors.amazonShipping ? <S.ErrorText>{errors.amazonShipping}</S.ErrorText> : null}
           </S.FormGroup>
         </S.FormRow>
-        <S.InfoText>{t('orders.modal.infoText')}</S.InfoText>
       </S.ModalBody>
-    </Modal>
+    </Dialog>
   );
 };

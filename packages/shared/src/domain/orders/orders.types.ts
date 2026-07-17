@@ -104,6 +104,8 @@ export interface OrderFiltersDto {
   dateFrom?: string;
   dateTo?: string;
   status?: OrderStatus;
+  /** Filter by connected eBay store (ebay_accounts.id). */
+  ebayAccountId?: string;
   page?: number;
   limit?: number;
   sortBy?: string;

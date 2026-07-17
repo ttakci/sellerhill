@@ -8,10 +8,13 @@ export interface ListingsAllPageProps {
   onSelectionChange: (ids: string[]) => void;
   columns: TableColumn<ListingDto>[];
   selectedRows: ListingDto[];
+  selectedIds: string[];
+  onToggleListingSelection: (id: string, selected: boolean) => void;
   bulkActions?: BulkAction<ListingDto>[];
   onDownload?: () => void;
   tableView: ViewMode;
   onTableViewChange: (mode: ViewMode) => void;
+  onBack?: () => void;
   pagination: {
     count: number;
     page: number;
@@ -33,6 +36,8 @@ export interface ListingsAllPageProps {
   categoryOptions: { value: string | number; label: string }[];
   onStatusChange: (value: string | number) => void;
   statusOptions: { value: string | number; label: string }[];
+  onEbayAccountChange: (value: string | number) => void;
+  storeOptions: { value: string | number; label: string }[];
   numericFilters: {
     key: string;
     label: string;
@@ -46,4 +51,13 @@ export interface ListingsAllPageProps {
   resultCount: number;
   advancedOpen: boolean;
   onToggleAdvanced: () => void;
+  /** True while first listings fetch is in flight (inline empty state, not global overlay). */
+  isInitialLoading?: boolean;
+  onListingClick: (listingId: string) => void;
+  /** Draft list mode — different title and bulk actions (publish instead of end). */
+  isDraftMode?: boolean;
+  /** Hide status filter when locked to drafts (or other fixed status views). */
+  hideStatusFilter?: boolean;
+  /** Empty catalog CTA (not used for draft empty). */
+  onAddListing?: () => void;
 }

@@ -3,19 +3,12 @@ import {
   Card,
   EmptyState as EmptyStateMolecule,
   IconButton as IconButtonAtom,
+  PageContainer,
   Text,
   tkn,
 } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  box-sizing: border-box;
-  padding-bottom: 2.5rem; /* 40px */
-`;
+export const Container = PageContainer;
 
 export const CardGrid = styled.div`
   display: grid;

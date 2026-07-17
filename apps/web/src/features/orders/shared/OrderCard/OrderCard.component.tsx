@@ -1,0 +1,78 @@
+import { Icon, IdBadge, StatusBadge } from '@repo/ui';
+import React from 'react';
+
+import { orderStatusToBadgeStatus } from '../order-status';
+
+import * as S from './OrderCard.style';
+import type { OrderCardProps } from './OrderCard.types';
+
+export const OrderCard: React.FC<OrderCardProps> = ({
+  productTitle,
+  imageUrl,
+  ebayOrderId,
+  status,
+  statusLabel,
+  meta,
+  stats,
+  onClick,
+  className,
+}) => {
+  return (
+    <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId}>
+      <S.Image>
+        {imageUrl ? (
+          <img src={imageUrl} alt={productTitle} />
+        ) : (
+          <Icon name="image" size={40} />
+        )}
+      </S.Image>
+
+      <S.Content>
+        <S.HeaderBlock>
+          <S.TitleRow>
+            <S.Title variant="body" weight="semibold" color="text.primary">
+              {productTitle}
+            </S.Title>
+            <StatusBadge status={orderStatusToBadgeStatus(status)}>{statusLabel}</StatusBadge>
+          </S.TitleRow>
+
+          {meta.length > 0 && (
+            <S.MetaList>
+              {meta.map((item) => (
+                <S.MetaRow key={`${item.label}-${item.value}`}>
+                  <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
+                    {item.label}
+                  </S.MetaLabel>
+                  <S.MetaValue>
+                    {item.storeType ? (
+                      <IdBadge id={item.value} storeType={item.storeType} size="sm" />
+                    ) : (
+                      <S.MetaValueText variant="caption" weight="bold" color="text.primary">
+                        {item.value}
+                      </S.MetaValueText>
+                    )}
+                  </S.MetaValue>
+                </S.MetaRow>
+              ))}
+            </S.MetaList>
+          )}
+        </S.HeaderBlock>
+
+        <S.StatsGrid>
+          {stats.map((stat) => (
+            <S.StatCell key={stat.label}>
+              <S.StatLabel variant="caption" color="text.tertiary">
+                {stat.label}
+              </S.StatLabel>
+              <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
+                {stat.value}
+              </S.StatValue>
+            </S.StatCell>
+          ))}
+        </S.StatsGrid>
+      </S.Content>
+    </S.Wrapper>
+  );
+};
+
+OrderCard.displayName = 'OrderCard';

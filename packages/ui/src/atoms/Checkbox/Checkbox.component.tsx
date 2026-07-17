@@ -4,7 +4,7 @@ import * as S from './Checkbox.style';
 import type { CheckboxProps } from './Checkbox.types';
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ checked, defaultChecked, onChange, label, disabled, name, id, className }, ref) => {
+  ({ checked, defaultChecked, onChange, label, disabled, name, id, className, 'aria-label': ariaLabel }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (onChange) {
         onChange(e.target.checked);
@@ -22,6 +22,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           disabled={disabled}
           name={name}
           id={id}
+          aria-label={ariaLabel}
         />
         <S.StyledCheckbox $checked={checked || defaultChecked} $disabled={disabled} />
         {label && <S.Label>{label}</S.Label>}

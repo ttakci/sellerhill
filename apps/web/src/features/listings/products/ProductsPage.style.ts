@@ -1,15 +1,7 @@
 import styled from '@emotion/styled';
-import { Card as RepoCard, Badge as UIBadge, Text as UIText, tkn } from '@repo/ui';
+import { Card as RepoCard, Badge as UIBadge, PageContainer, Text as UIText, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: 90rem; /* 1440px */
-  margin: 0 auto;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-`;
+export const Container = PageContainer;
 
 export const Card = styled.div`
   background: ${tkn('colors.surface.primary')};

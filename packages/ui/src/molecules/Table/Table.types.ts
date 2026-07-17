@@ -4,6 +4,7 @@ export interface TableComponentProps<T = unknown> {
   columns: TableColumn<T>[];
   data: T[];
   emptyMessage?: string;
+  emptyContent?: React.ReactNode;
   className?: string;
   footer?: React.ReactNode;
   sortColumn?: string;
@@ -51,6 +52,8 @@ export interface TableProps<T = unknown> {
   columns: TableColumn<T>[];
   data: T[];
   emptyMessage?: string;
+  /** Rich empty state; takes precedence over emptyMessage when set. */
+  emptyContent?: React.ReactNode;
   onRowClick?: (row: T, index: number) => void;
   className?: string;
   footer?: React.ReactNode;

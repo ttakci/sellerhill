@@ -1,12 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   ListingJobStatus,
   ListingStatus,
+  OrderStatus,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
   type ListingJobItemDto,
+  type ListingsQueryDto,
+  type PaginatedListingsDto,
   type ProductData,
+  type UpdateListingRequest,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -33,17 +37,31 @@ interface ListingQueryRow {
   quantity: number;
   source_stock: number | null;
   image_urls: string[] | null;
-  ebay_item_id: string;
+  ebay_item_id: string | null;
   listing_settings_group_id: string;
   ebay_category_name: string | null;
   product_category: string | null;
   brand: string | null;
+  manufacturer?: string | null;
+  features?: string[] | string | null;
   status: string;
   created_at: Date;
   updated_at: Date;
   payment_policy_id: string | null;
   shipping_policy_id: string | null;
   return_policy_id: string | null;
+  product_description?: string | null;
+  group_name?: string | null;
+  ebay_account_id?: string | null;
+  last_sale_at?: Date | null;
+  disable_ordering?: boolean;
+  disable_repricing?: boolean;
+  lock_price?: boolean;
+  lock_quantity?: boolean;
+  price_override?: string | null;
+  quantity_override?: number | null;
+  margin_percent_override?: string | null;
+  margin_fixed_override?: string | null;
 }
 
 /** Row type for getUserProducts query */
@@ -109,7 +127,8 @@ export class ListingsService {
     paymentPolicyId: string;
     shippingPolicyId: string;
     returnPolicyId: string;
-    ebayItemId: string;
+    /** Null for draft listings not yet published to eBay. */
+    ebayItemId?: string | null;
     title: string;
     price: number;
     quantity: number;
@@ -121,7 +140,10 @@ export class ListingsService {
     watchCount?: number;
     viewCount?: number;
     ebayCategoryName?: string;
+    ebayAccountId?: string;
+    status?: ListingStatus;
   }): Promise<string> {
+    const status = data.status ?? ListingStatus.ACTIVE;
     const result = await this.databaseService.query<{ id: string }>(
       `
       INSERT INTO listings (
@@ -129,9 +151,10 @@ export class ListingsService {
         payment_policy_id, shipping_policy_id, return_policy_id,
         ebay_item_id, title, price, quantity, status,
         purchase_price, estimated_profit, profit_margin, roi,
-        sold_count, watch_count, view_count, ebay_category_name
+        sold_count, watch_count, view_count, ebay_category_name,
+        ebay_account_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, '${ListingStatus.ACTIVE}', $12, $13, $14, $15, $16, $17, $18, $19)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       RETURNING id
     `,
       [
@@ -142,10 +165,11 @@ export class ListingsService {
         data.paymentPolicyId,
         data.shippingPolicyId,
         data.returnPolicyId,
-        data.ebayItemId,
+        data.ebayItemId ?? null,
         data.title,
         data.price,
         data.quantity,
+        status,
         data.purchasePrice || 0,
         data.estimatedProfit || 0,
         data.profitMargin || 0,
@@ -154,33 +178,21 @@ export class ListingsService {
         data.watchCount || 0,
         data.viewCount || 0,
         data.ebayCategoryName || '',
+        data.ebayAccountId || null,
       ]
     );
 
     return result[0].id;
   }
 
-  /**
-   * Get all listings for a user
-   */
-  async getListings(userId: string): Promise<ListingDto[]> {
-    const results = await this.databaseService.query<ListingQueryRow>(
-      `
-      SELECT l.*, p.image_urls, p.category as product_category, p.stock as source_stock, p.brand
-      FROM listings l
-      LEFT JOIN products p ON l.product_id = p.id
-      WHERE l.user_id = $1
-      ORDER BY l.created_at DESC
-    `,
-      [userId]
-    );
-
-    return results.map((row) => ({
+  private mapListingRow(row: ListingQueryRow): ListingDto {
+    return {
       id: row.id,
       userId: row.user_id,
       asin: row.asin,
       productId: row.product_id,
       title: row.title,
+      description: row.product_description ?? undefined,
       price: parseFloat(row.price),
       purchasePrice: row.purchase_price ? parseFloat(row.purchase_price) : 0,
       estimatedProfit: row.estimated_profit ? parseFloat(row.estimated_profit) : 0,
@@ -192,27 +204,342 @@ export class ListingsService {
       quantity: row.quantity,
       sourceStock: row.source_stock ?? undefined,
       imageUrls: row.image_urls || [],
-      ebayListingId: row.ebay_item_id,
+      ebayListingId: row.ebay_item_id ?? undefined,
       listingSettingsGroupId: row.listing_settings_group_id,
+      listingSettingsGroupName: row.group_name ?? undefined,
       category: row.ebay_category_name || row.product_category || '',
       brand: row.brand || '',
+      features: this.parseFeatures(row.features),
+      specs: this.buildSpecs(row),
       status: row.status as ListingStatus,
+      ebayAccountId: row.ebay_account_id ?? undefined,
+      lastSaleAt: row.last_sale_at ? row.last_sale_at.toISOString() : null,
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
       paymentPolicyId: row.payment_policy_id || '',
       shippingPolicyId: row.shipping_policy_id || '',
       returnPolicyId: row.return_policy_id || '',
-    }));
+      disableOrdering: Boolean(row.disable_ordering),
+      disableRepricing: Boolean(row.disable_repricing),
+      lockPrice: Boolean(row.lock_price),
+      lockQuantity: Boolean(row.lock_quantity),
+      priceOverride:
+        row.price_override !== undefined && row.price_override !== null
+          ? parseFloat(String(row.price_override))
+          : null,
+      quantityOverride: row.quantity_override ?? null,
+      marginPercentOverride:
+        row.margin_percent_override !== undefined && row.margin_percent_override !== null
+          ? parseFloat(String(row.margin_percent_override))
+          : null,
+      marginFixedOverride:
+        row.margin_fixed_override !== undefined && row.margin_fixed_override !== null
+          ? parseFloat(String(row.margin_fixed_override))
+          : null,
+    };
+  }
+
+  private parseFeatures(raw: string[] | string | null | undefined): string[] {
+    if (!raw) {
+      return [];
+    }
+    if (Array.isArray(raw)) {
+      return raw.map(String).filter(Boolean);
+    }
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return Array.isArray(parsed) ? parsed.map(String).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private buildSpecs(row: ListingQueryRow): Record<string, string> {
+    const specs: Record<string, string> = {};
+    if (row.brand) {
+      specs.Brand = row.brand;
+    }
+    // Parse "Key: Value" style features into specs
+    for (const feature of this.parseFeatures(row.features)) {
+      const match = feature.match(/^([^:]{2,40}):\s*(.+)$/);
+      if (match) {
+        const key = match[1].trim();
+        const value = match[2].trim();
+        if (key && value && value.length < 65 && !specs[key]) {
+          specs[key] = value;
+        }
+      }
+    }
+    return specs;
   }
 
   /**
-   * Check if an ASIN is already listed for a user
+   * Resolve FE sort keys to safe SQL expressions (whitelist only).
+   */
+  private resolveListingsSort(sortBy?: string): string {
+    const map: Record<string, string> = {
+      product: 'l.title',
+      title: 'l.title',
+      prices: 'l.price',
+      price: 'l.price',
+      purchasePrice: 'l.purchase_price',
+      profit: 'l.estimated_profit',
+      estimatedProfit: 'l.estimated_profit',
+      roi: 'l.roi',
+      profitMargin: 'l.profit_margin',
+      sold: 'l.sold_count',
+      soldCount: 'l.sold_count',
+      watch: 'l.watch_count',
+      watchCount: 'l.watch_count',
+      views: 'l.view_count',
+      viewCount: 'l.view_count',
+      quantity: 'l.quantity',
+      sourceStock: 'p.stock',
+      category: 'COALESCE(l.ebay_category_name, p.category)',
+      status: 'l.status',
+      createdAt: 'l.created_at',
+      updatedAt: 'l.updated_at',
+      lastSale: 'last_sale_at',
+      lastSaleAt: 'last_sale_at',
+    };
+    return (sortBy && map[sortBy]) || 'l.created_at';
+  }
+
+  /**
+   * Paginated, filterable listings for the current user.
+   * Server-side only — clients must not load the full catalog for table UIs.
+   */
+  async getListings(
+    userId: string,
+    query: ListingsQueryDto = {},
+    options?: { maxLimit?: number }
+  ): Promise<PaginatedListingsDto> {
+    const page = Math.max(1, Number(query.page) || 1);
+    const maxLimit = options?.maxLimit ?? 100;
+    const limit = Math.min(maxLimit, Math.max(1, Number(query.limit) || 20));
+    const offset = (page - 1) * limit;
+    const sortExpr = this.resolveListingsSort(query.sortBy);
+    const sortOrder = query.sortOrder?.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+    const conditions: string[] = ['l.user_id = $1'];
+    const params: (string | number | null)[] = [userId];
+    let paramIndex = 2;
+
+    const pushEq = (sql: string, value: string | number | undefined) => {
+      if (value === undefined || value === null || value === '') {
+        return;
+      }
+      conditions.push(`${sql} = $${paramIndex}`);
+      params.push(value);
+      paramIndex++;
+    };
+
+    const pushRange = (column: string, min?: number, max?: number) => {
+      if (min !== undefined && !Number.isNaN(min)) {
+        conditions.push(`${column} >= $${paramIndex}`);
+        params.push(min);
+        paramIndex++;
+      }
+      if (max !== undefined && !Number.isNaN(max)) {
+        conditions.push(`${column} <= $${paramIndex}`);
+        params.push(max);
+        paramIndex++;
+      }
+    };
+
+    if (query.search?.trim()) {
+      conditions.push(
+        `(l.title ILIKE $${paramIndex} OR l.asin ILIKE $${paramIndex} OR l.ebay_item_id ILIKE $${paramIndex})`
+      );
+      params.push(`%${query.search.trim()}%`);
+      paramIndex++;
+    }
+
+    if (query.status) {
+      pushEq('l.status', query.status);
+    } else {
+      // Operational lists never mix drafts — drafts only via status=draft
+      conditions.push(`l.status <> '${ListingStatus.DRAFT}'`);
+    }
+
+    // stockPreset kept for API compat — prefer quantityMin/Max from advanced filters
+    if (query.stockPreset === 'in_stock') {
+      conditions.push('l.quantity > 0');
+    } else if (query.stockPreset === 'oos') {
+      conditions.push('l.quantity = 0');
+    }
+
+    if (query.ebayAccountId?.trim()) {
+      pushEq('l.ebay_account_id', query.ebayAccountId.trim());
+    }
+
+    if (query.category?.trim()) {
+      conditions.push(
+        `(COALESCE(l.ebay_category_name, p.category) = $${paramIndex})`
+      );
+      params.push(query.category.trim());
+      paramIndex++;
+    }
+
+    pushRange('l.price', query.priceMin, query.priceMax);
+    pushRange('l.purchase_price', query.purchasePriceMin, query.purchasePriceMax);
+    pushRange('l.estimated_profit', query.estimatedProfitMin, query.estimatedProfitMax);
+    pushRange('l.roi', query.roiMin, query.roiMax);
+    pushRange('l.profit_margin', query.profitMarginMin, query.profitMarginMax);
+    pushRange('l.sold_count', query.soldCountMin, query.soldCountMax);
+    pushRange('l.watch_count', query.watchCountMin, query.watchCountMax);
+    pushRange('l.view_count', query.viewCountMin, query.viewCountMax);
+    pushRange('l.quantity', query.quantityMin, query.quantityMax);
+    pushRange('p.stock', query.sourceStockMin, query.sourceStockMax);
+
+    // Listings with ≥1 non-cancelled order in [soldFrom, soldTo] (soldTo inclusive as date)
+    if (query.soldFrom?.trim() || query.soldTo?.trim()) {
+      const soldConds: string[] = [
+        'o_sold.listing_id = l.id',
+        'o_sold.user_id = l.user_id',
+        `o_sold.status <> '${OrderStatus.CANCELLED}'`,
+      ];
+      if (query.soldFrom?.trim()) {
+        soldConds.push(`o_sold.order_date >= $${paramIndex}::date`);
+        params.push(query.soldFrom.trim());
+        paramIndex++;
+      }
+      if (query.soldTo?.trim()) {
+        soldConds.push(`o_sold.order_date < ($${paramIndex}::date + INTERVAL '1 day')`);
+        params.push(query.soldTo.trim());
+        paramIndex++;
+      }
+      conditions.push(`EXISTS (SELECT 1 FROM orders o_sold WHERE ${soldConds.join(' AND ')})`);
+    }
+
+    const whereClause = conditions.join(' AND ');
+    const fromJoin = `
+      FROM listings l
+      LEFT JOIN products p ON l.product_id = p.id
+      WHERE ${whereClause}
+    `;
+
+    const countResult = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count ${fromJoin}`,
+      params
+    );
+    const total = parseInt(countResult[0]?.count || '0', 10);
+
+    const results = await this.databaseService.query<ListingQueryRow>(
+      `
+      SELECT l.*,
+             p.image_urls,
+             p.category as product_category,
+             p.stock as source_stock,
+             p.brand,
+             (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
+      ${fromJoin}
+      ORDER BY ${sortExpr} ${sortOrder}, l.id ASC
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `,
+      [...params, limit, offset]
+    );
+
+    const categoryRows = await this.databaseService.query<{ category: string }>(
+      `
+      SELECT DISTINCT COALESCE(l.ebay_category_name, p.category) AS category
+      FROM listings l
+      LEFT JOIN products p ON l.product_id = p.id
+      WHERE l.user_id = $1
+        AND COALESCE(l.ebay_category_name, p.category) IS NOT NULL
+        AND COALESCE(l.ebay_category_name, p.category) <> ''
+      ORDER BY category ASC
+      `,
+      [userId]
+    );
+
+    return {
+      items: results.map((row) => this.mapListingRow(row)),
+      total,
+      page,
+      limit,
+      categories: categoryRows.map((r) => r.category),
+    };
+  }
+
+  /**
+   * CSV export for current filters (dedicated endpoint — not the UI page size).
+   * Cap at 5_000 rows to protect the API; clients should narrow filters for large catalogs.
+   */
+  async exportListingsCsv(userId: string, query: ListingsQueryDto = {}): Promise<string> {
+    const result = await this.getListings(
+      userId,
+      { ...query, page: 1, limit: 5000 },
+      { maxLimit: 5000 }
+    );
+
+    const headers = [
+      'id',
+      'title',
+      'asin',
+      'ebayListingId',
+      'category',
+      'brand',
+      'price',
+      'purchasePrice',
+      'estimatedProfit',
+      'roi',
+      'profitMargin',
+      'soldCount',
+      'watchCount',
+      'viewCount',
+      'quantity',
+      'sourceStock',
+      'status',
+      'createdAt',
+    ] as const;
+
+    const escape = (v: string | number | undefined | null): string => {
+      const s = v === undefined || v === null ? '' : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+
+    const lines = [headers.join(',')];
+    for (const item of result.items) {
+      lines.push(
+        [
+          item.id,
+          item.title,
+          item.asin,
+          item.ebayListingId ?? '',
+          item.category ?? '',
+          item.brand ?? '',
+          item.price,
+          item.purchasePrice ?? '',
+          item.estimatedProfit ?? '',
+          item.roi ?? '',
+          item.profitMargin ?? '',
+          item.soldCount ?? '',
+          item.watchCount ?? '',
+          item.viewCount ?? '',
+          item.quantity,
+          item.sourceStock ?? '',
+          item.status,
+          item.createdAt,
+        ]
+          .map(escape)
+          .join(',')
+      );
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Check if an ASIN is already active or draft for a user (blocks re-import).
+   * Inactive/error rows do not block creating a new listing.
    */
   async isAsinListed(userId: string, asin: string): Promise<boolean> {
     const results = await this.databaseService.query(
       `
       SELECT id FROM listings 
-      WHERE user_id = $1 AND asin = $2 AND status = '${ListingStatus.ACTIVE}'
+      WHERE user_id = $1 AND asin = $2
+        AND status IN ('${ListingStatus.ACTIVE}', '${ListingStatus.DRAFT}')
     `,
       [userId, asin]
     );
@@ -259,9 +586,19 @@ export class ListingsService {
   async getListing(userId: string, id: string): Promise<ListingDto | null> {
     const results = await this.databaseService.query<ListingQueryRow>(
       `
-      SELECT l.*, p.image_urls
+      SELECT
+        l.*,
+        p.image_urls,
+        p.category AS product_category,
+        p.stock AS source_stock,
+        p.brand,
+        p.features,
+        p.description AS product_description,
+        g.name AS group_name,
+        (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
+      LEFT JOIN listing_settings_groups g ON l.listing_settings_group_id = g.id
       WHERE l.id = $1 AND l.user_id = $2
     `,
       [id, userId]
@@ -271,25 +608,98 @@ export class ListingsService {
       return null;
     }
 
-    const row = results[0];
-    return {
-      id: row.id,
-      userId: row.user_id,
-      asin: row.asin,
-      productId: row.product_id,
-      title: row.title,
-      price: parseFloat(row.price),
-      quantity: row.quantity,
-      imageUrls: row.image_urls || [],
-      ebayListingId: row.ebay_item_id,
-      listingSettingsGroupId: row.listing_settings_group_id,
-      status: row.status as ListingStatus,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-      paymentPolicyId: row.payment_policy_id || '',
-      shippingPolicyId: row.shipping_policy_id || '',
-      returnPolicyId: row.return_policy_id || '',
-    };
+    return this.mapListingRow(results[0]);
+  }
+
+  /**
+   * Update listing customizations (title, strategy group, eBay policies).
+   * Does not push title/policy changes to eBay Inventory API yet — DB source of truth
+   * for group/policies; price/qty still driven by Keepa refresh + strategy group.
+   */
+  async updateListing(userId: string, id: string, body: UpdateListingRequest): Promise<ListingDto> {
+    const existing = await this.getListing(userId, id);
+    if (!existing) {
+      throw new NotFoundException('Listing not found');
+    }
+
+    const title = body.title?.trim();
+    if (title !== undefined && title.length === 0) {
+      throw new BadRequestException('Title cannot be empty');
+    }
+
+    const sets: string[] = [];
+    const params: (string | number | null | boolean)[] = [];
+    let i = 1;
+
+    if (title !== undefined) {
+      sets.push(`title = $${i++}`);
+      params.push(title.slice(0, 80));
+    }
+    if (body.listingSettingsGroupId !== undefined) {
+      sets.push(`listing_settings_group_id = $${i++}`);
+      params.push(body.listingSettingsGroupId);
+    }
+    if (body.paymentPolicyId !== undefined) {
+      sets.push(`payment_policy_id = $${i++}`);
+      params.push(body.paymentPolicyId);
+    }
+    if (body.shippingPolicyId !== undefined) {
+      sets.push(`shipping_policy_id = $${i++}`);
+      params.push(body.shippingPolicyId);
+    }
+    if (body.returnPolicyId !== undefined) {
+      sets.push(`return_policy_id = $${i++}`);
+      params.push(body.returnPolicyId);
+    }
+
+    const boolFields: Array<[keyof UpdateListingRequest, string]> = [
+      ['disableOrdering', 'disable_ordering'],
+      ['disableRepricing', 'disable_repricing'],
+      ['lockPrice', 'lock_price'],
+      ['lockQuantity', 'lock_quantity'],
+    ];
+    for (const [key, col] of boolFields) {
+      if (body[key] !== undefined) {
+        sets.push(`${col} = $${i++}`);
+        params.push(Boolean(body[key]));
+      }
+    }
+
+    const numNullable: Array<[keyof UpdateListingRequest, string]> = [
+      ['priceOverride', 'price_override'],
+      ['quantityOverride', 'quantity_override'],
+      ['marginPercentOverride', 'margin_percent_override'],
+      ['marginFixedOverride', 'margin_fixed_override'],
+    ];
+    for (const [key, col] of numNullable) {
+      if (body[key] !== undefined) {
+        sets.push(`${col} = $${i++}`);
+        const v = body[key] as number | null | undefined;
+        params.push(v === null || v === undefined ? null : v);
+      }
+    }
+
+    if (sets.length === 0) {
+      return existing;
+    }
+
+    sets.push('updated_at = CURRENT_TIMESTAMP');
+    params.push(id, userId);
+
+    await this.databaseService.query(
+      `
+      UPDATE listings
+      SET ${sets.join(', ')}
+      WHERE id = $${i++} AND user_id = $${i}
+      `,
+      params
+    );
+
+    const updated = await this.getListing(userId, id);
+    if (!updated) {
+      throw new NotFoundException('Listing not found after update');
+    }
+    return updated;
   }
 
   /**
@@ -617,6 +1027,163 @@ export class ListingsService {
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };
+  }
+
+  /**
+   * Publish a draft listing to eBay (create live offer + mark ACTIVE).
+   */
+  async publishListing(userId: string, listingId: string): Promise<ListingDto> {
+    const listing = await this.getListing(userId, listingId);
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+    if (listing.status !== ListingStatus.DRAFT) {
+      throw new BadRequestException('Only draft listings can be published');
+    }
+
+    // Block if another ACTIVE listing already exists for this ASIN
+    const activeDup = await this.databaseService.query(
+      `
+      SELECT id FROM listings
+      WHERE user_id = $1 AND asin = $2 AND status = '${ListingStatus.ACTIVE}' AND id <> $3
+      LIMIT 1
+    `,
+      [userId, listing.asin, listingId]
+    );
+    if (activeDup.length > 0) {
+      throw new BadRequestException('An active listing for this ASIN already exists');
+    }
+
+    const product = await this.getProductByAsin(listing.asin);
+    if (!product) {
+      throw new BadRequestException('Product data missing for this draft — cannot publish');
+    }
+
+    const ebayAccountId =
+      listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
+
+    // Recompute price/qty from strategy (no AI on publish — draft already has prepared title)
+    const prepared = await this.strategyService.prepareListingData(
+      userId,
+      product.data,
+      listing.listingSettingsGroupId,
+      ebayAccountId,
+      { applyContentAi: false }
+    );
+
+    // Prefer user-edited draft title; keep draft economics if lock overrides apply
+    let finalPrice = prepared.price;
+    let finalQty = prepared.quantity;
+    let purchasePrice = prepared.purchasePrice;
+    let estimatedProfit = prepared.estimatedProfit;
+    let profitMargin = prepared.profitMargin;
+    let roi = prepared.roi;
+
+    if (listing.disableOrdering) {
+      finalQty = 0;
+    } else if (listing.lockQuantity) {
+      finalQty =
+        listing.quantityOverride !== null && listing.quantityOverride !== undefined
+          ? Number(listing.quantityOverride)
+          : Number(listing.quantity ?? 0);
+    }
+
+    if (listing.disableRepricing || listing.lockPrice) {
+      if (listing.priceOverride !== null && listing.priceOverride !== undefined) {
+        finalPrice = Number(listing.priceOverride);
+      } else {
+        finalPrice = Number(listing.price);
+      }
+      purchasePrice = prepared.purchasePrice;
+      estimatedProfit = finalPrice - (purchasePrice ?? 0);
+      profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
+      roi = purchasePrice && purchasePrice > 0 ? (estimatedProfit / purchasePrice) * 100 : 0;
+    }
+
+    if (finalQty === 0) {
+      throw new BadRequestException(
+        'Cannot publish: quantity is 0. Adjust stock settings or wait for Amazon restock.'
+      );
+    }
+
+    const listingData = {
+      ...prepared,
+      title: listing.title?.trim() || prepared.title,
+      price: finalPrice,
+      quantity: finalQty,
+      purchasePrice,
+      estimatedProfit,
+      profitMargin,
+      roi,
+    };
+
+    const { listingId: ebayItemId, categoryName } = await this.ebayService.createListingWithRest(
+      userId,
+      product.id,
+      listingData,
+      {
+        paymentId: listing.paymentPolicyId,
+        shippingId: listing.shippingPolicyId,
+        returnId: listing.returnPolicyId,
+      },
+      listing.asin
+    );
+
+    await this.databaseService.query(
+      `
+      UPDATE listings SET
+        ebay_item_id = $1,
+        status = '${ListingStatus.ACTIVE}',
+        price = $2,
+        quantity = $3,
+        purchase_price = $4,
+        estimated_profit = $5,
+        profit_margin = $6,
+        roi = $7,
+        title = $8,
+        ebay_category_name = COALESCE(NULLIF($9, ''), ebay_category_name),
+        ebay_account_id = COALESCE(ebay_account_id, $10),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $11 AND user_id = $12
+    `,
+      [
+        ebayItemId,
+        finalPrice,
+        finalQty,
+        purchasePrice ?? 0,
+        estimatedProfit ?? 0,
+        profitMargin ?? 0,
+        roi ?? 0,
+        listingData.title,
+        categoryName || '',
+        ebayAccountId,
+        listingId,
+        userId,
+      ]
+    );
+
+    const updated = await this.getListing(userId, listingId);
+    if (!updated) {
+      throw new NotFoundException('Listing not found after publish');
+    }
+    this.logger.log(`Published draft ${listingId} as eBay item ${ebayItemId}`);
+    return updated;
+  }
+
+  /**
+   * Bulk publish draft listings. Continues on individual failures.
+   */
+  async publishListings(userId: string, listingIds: string[]): Promise<number> {
+    let successCount = 0;
+    for (const id of listingIds) {
+      try {
+        await this.publishListing(userId, id);
+        successCount++;
+      } catch (error: unknown) {
+        this.logger.error(`Failed to publish listing ${id}: ${getErrorMessage(error)}`);
+      }
+    }
+    return successCount;
   }
 
   /**

@@ -156,20 +156,29 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
       name={name!}
       control={control}
       rules={rules}
-      render={({ field, fieldState: { error: controllerError } }) => (
-        <ModernSelectStandalone
-          {...standaloneProps}
-          {...rest}
-          value={field.value}
-          onChange={field.onChange}
-          onSelect={(option: SelectOption) => {
-            field.onChange(option.value);
-            setIsOpen(false);
-            setSearchQuery('');
-          }}
-          error={controllerError}
-        />
-      )}
+      render={({ field, fieldState: { error: controllerError } }) => {
+        const fieldSelectedOption = options.find((opt: SelectOption) => opt.value === field.value);
+        const fieldFilteredOptions = options.filter((opt: SelectOption) =>
+          opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        return (
+          <ModernSelectStandalone
+            {...standaloneProps}
+            {...rest}
+            value={field.value}
+            onChange={field.onChange}
+            selectedOption={fieldSelectedOption}
+            filteredOptions={fieldFilteredOptions}
+            onSelect={(option: SelectOption) => {
+              field.onChange(option.value);
+              setIsOpen(false);
+              setSearchQuery('');
+            }}
+            error={controllerError}
+          />
+        );
+      }}
     />
   );
 };

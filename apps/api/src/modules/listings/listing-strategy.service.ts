@@ -11,31 +11,60 @@ import { sanitizeHtml, sanitizeStringArray } from '../../common/utils/sanitize';
 import { ListingSettingsGroupService } from '../listing-settings-groups/listing-settings-group.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
+import { ContentGenerationService } from './content-generation.service';
+
 @Injectable()
 export class ListingStrategyService {
   private readonly logger = new Logger(ListingStrategyService.name);
 
   constructor(
     private readonly settingsGroupService: ListingSettingsGroupService,
-    private readonly storeSettingsService: StoreSettingsService
+    private readonly storeSettingsService: StoreSettingsService,
+    private readonly contentGeneration: ContentGenerationService
   ) {}
 
   /**
-   * Calculate final price and stock based on product data and settings group
+   * Calculate final price and stock based on product data and settings group.
+   *
+   * @param options.applyContentAi — **create path only**. When true and group AI flags
+   * are on, may call local Ollama. Product-sync / Keepa refresh must pass false (default)
+   * so we never rewrite 100k titles on every price tick.
    */
   async prepareListingData(
     userId: string,
     product: ProductData,
     settingsGroupId: string,
-    storeId: string | null = null
+    storeId: string | null = null,
+    options?: { applyContentAi?: boolean }
   ) {
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 
-    const description = this.processDescriptionTemplate(product, group);
+    let title = this.buildListingTitle(product, group);
+    let description = this.processDescriptionTemplate(product, group);
 
-    // Validate listing against store settings (Blacklist, etc.)
-    this.validateListing(product.title, description, storeSettings);
+    const applyAi = Boolean(options?.applyContentAi);
+    const wantAiTitle = applyAi && Boolean(group.content?.aiTitleEnabled);
+    const wantAiDescription = applyAi && Boolean(group.content?.aiDescriptionEnabled);
+    if ((wantAiTitle || wantAiDescription) && this.contentGeneration.isEnabled()) {
+      const base = { product, baseTitle: title, baseDescription: description };
+      if (wantAiTitle) {
+        title = await this.contentGeneration.rewriteTitle(base);
+      }
+      if (wantAiDescription) {
+        description = await this.contentGeneration.rewriteDescription({
+          ...base,
+          baseTitle: title,
+        });
+      }
+    } else if (applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
+      this.logger.debug(
+        `Content AI flags on for group but CONTENT_AI_ENABLED is false — using deterministic title/description`
+      );
+    }
+
+    // Validate listing against store settings (Blacklist, etc.) — after AI so blacklist still applies
+    this.validateListing(title, description, storeSettings);
 
     const priceMetrics = this.calculatePrice(product.price.current, group);
 
@@ -54,7 +83,7 @@ export class ListingStrategyService {
     );
 
     return {
-      title: product.title,
+      title,
       description,
       price: priceMetrics.finalPrice,
       purchasePrice: priceMetrics.purchasePrice,
@@ -65,11 +94,45 @@ export class ListingStrategyService {
       imageUrls: product.imageUrls,
       currency: product.price.currency,
       brand: product.brand,
+      features: product.features || [],
+      specs: product.specs || {},
       // Location data from Store Settings
       country: storeSettings.country || 'US',
       postalCode: storeSettings.zipCode,
       location: storeSettings.state, // Using state as location, or could be city+state
     };
+  }
+
+  /**
+   * Deterministic eBay title (brand strip + length). AI rewrite is applied later if enabled.
+   */
+  private buildListingTitle(
+    product: ProductData,
+    group: ListingSettingsGroup
+  ): string {
+    let title = (product.title || '').trim();
+    if (group.content?.stripBrandFromTitle && product.brand) {
+      title = this.stripBrandFromTitle(title, product.brand);
+    }
+    // eBay title max 80 chars
+    if (title.length > 80) {
+      title = title.slice(0, 80).trim();
+    }
+    return title || product.asin || 'Product';
+  }
+
+  /** Case-insensitive brand strip (whole token / leading brand + separators). */
+  private stripBrandFromTitle(title: string, brand: string): string {
+    const b = brand.trim();
+    if (!b) {
+      return title;
+    }
+    const escaped = b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Leading "Brand - " / "Brand:" / "Brand "
+    let next = title.replace(new RegExp(`^${escaped}\\s*[-–:|]?\\s*`, 'i'), '');
+    // Remaining whole-word brand occurrences
+    next = next.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), ' ');
+    return next.replace(/\s{2,}/g, ' ').replace(/^[-–:|,\s]+|[-–:|,\s]+$/g, '').trim() || title;
   }
 
   /**
@@ -115,7 +178,8 @@ export class ListingStrategyService {
   }
 
   /**
-   * Process description using template from settings group
+   * Process description using template from settings group.
+   * When Keepa description is empty, fall back to features as an HTML list.
    */
   private processDescriptionTemplate(product: ProductData, group: ListingSettingsGroup): string {
     let template = '{{description}}'; // Default
@@ -126,12 +190,25 @@ export class ListingStrategyService {
     }
     // TODO: Handle predefined templates if needed
 
+    const features = sanitizeStringArray(product.features || []);
+    const rawDescription = (product.description || '').trim();
+    const descriptionBody =
+      rawDescription ||
+      (features.length > 0
+        ? `<ul><li>${features.join('</li><li>')}</li></ul>`
+        : '');
+
     // Replace variables with sanitized content
     const finalDescription = template
       .replace(/{{title}}/g, sanitizeHtml(product.title))
-      .replace(/{{description}}/g, sanitizeHtml(product.description || ''))
+      .replace(/{{description}}/g, rawDescription ? sanitizeHtml(rawDescription) : descriptionBody)
       .replace(/{{brand}}/g, sanitizeHtml(product.brand || ''))
-      .replace(/{{features}}/g, sanitizeStringArray(product.features || []).join('</li><li>'));
+      .replace(/{{features}}/g, features.join('</li><li>'));
+
+    // If template only had empty description and no features placeholders, still return features fallback
+    if (!finalDescription.trim() && features.length > 0) {
+      return `<ul><li>${features.join('</li><li>')}</li></ul>`;
+    }
 
     return finalDescription;
   }

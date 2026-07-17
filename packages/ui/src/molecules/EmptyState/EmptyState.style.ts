@@ -22,33 +22,37 @@ export const IconCircle = styled.div<{ $size: EmptyStateSize }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${({ $size }) => ($size === 'sm' ? '3rem' : $size === 'lg' ? '6rem' : '4.5rem')};
-  height: ${({ $size }) => ($size === 'sm' ? '3rem' : $size === 'lg' ? '6rem' : '4.5rem')};
+  width: ${({ $size }) => ($size === 'sm' ? '3rem' : $size === 'lg' ? '5.5rem' : '4.5rem')};
+  height: ${({ $size }) => ($size === 'sm' ? '3rem' : $size === 'lg' ? '5.5rem' : '4.5rem')};
   border-radius: ${tkn('radius.full')};
-  background-color: ${tkn('colors.background.tertiary')};
-  color: ${tkn('colors.text.tertiary')};
-  margin-bottom: ${tkn('spacing.sm')};
+  background: ${({ theme }) => `${theme.colors.brand.primary}14`};
+  border: 0.0625rem solid ${({ theme }) => `${theme.colors.brand.primary}28`};
+  color: ${tkn('colors.brand.primary')};
+  margin-bottom: ${tkn('spacing.xs')};
 
   svg {
-    width: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.5rem' : '2rem')};
-    height: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.5rem' : '2rem')};
+    width: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.25rem' : '2rem')};
+    height: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.25rem' : '2rem')};
   }
 `;
 
+/** Layout wrappers — typography lives on nested Text atoms */
 export const Title = styled.div<{ $size: EmptyStateSize }>`
   margin: 0;
-  font-size: ${({ $size }) =>
-    $size === 'sm' ? tkn('typography.fontSize.sm') : $size === 'lg' ? tkn('typography.fontSize.lg') : tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
-  line-height: ${tkn('typography.lineHeight.normal')};
+  max-width: 28rem;
 `;
 
 export const Description = styled.div<{ $size: EmptyStateSize }>`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.normal')};
-  color: ${tkn('colors.text.secondary')};
-  line-height: ${tkn('typography.lineHeight.relaxed')};
   max-width: 28rem;
+  line-height: ${tkn('typography.lineHeight.relaxed')};
+`;
+
+export const Actions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.xs')};
 `;

@@ -6,18 +6,13 @@
  */
 
 import styled from '@emotion/styled';
-import { Text, tkn } from '@repo/ui';
+import { PageContainer, Text, tkn } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
+/** Narrow onboarding column — still uses standard page gap / no outer pad */
+export const Container = styled(PageContainer)`
   max-width: 37.5rem; /* 600px */
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  box-sizing: border-box;
 `;
-
 export const Content = styled.div`
   display: flex;
   flex-direction: column;

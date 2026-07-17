@@ -1,59 +1,23 @@
-import { ListingStatus, type ListingDto } from '@repo/shared';
-import { Icon, ListingCard, type ListingCardProps } from '@repo/ui';
-import type { TFunction } from 'i18next';
+import { Icon } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+
+import { toListingCardProps } from '../shared/listing-card.mapper';
 
 import * as S from './ListingCarousel.style';
 import type { ListingCarouselComponentProps } from './ListingCarousel.types';
 
-/**
- * Pure presentation mapping from ListingDto → ListingCardProps.
- * Omits `orientation` (the component sets it on the JSX). Takes `t` as a
- * parameter so it stays hook-free and testable.
- */
-const toCardProps = (listing: ListingDto, t: TFunction): Omit<ListingCardProps, 'orientation'> => {
-  const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
-  const profit = listing.estimatedProfit ?? 0;
-  const roi = listing.roi ?? 0;
-  const isActive = listing.status === ListingStatus.ACTIVE;
-  return {
-    title,
-    imageUrl: listing.imageUrls?.[0],
-    brand: listing.brand,
-    primaryBadge: { id: listing.asin, storeType: 'amazon' },
-    secondaryBadge: listing.ebayListingId ? { id: listing.ebayListingId, storeType: 'ebay' } : undefined,
-    soldCount: listing.soldCount,
-    watchCount: listing.watchCount,
-    stats: [
-      {
-        label: t('listings.table.estimatedProfit'),
-        value: `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`,
-        tone: profit >= 0 ? 'positive' : 'negative',
-      },
-      {
-        label: t('listings.table.roi'),
-        value: `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`,
-        tone: roi >= 0 ? 'positive' : 'negative',
-      },
-      {
-        label: t('listings.table.stock'),
-        value: String(listing.quantity),
-        tone: listing.quantity === 0 ? 'negative' : 'default',
-      },
-    ],
-    status: {
-      label: t(`listings.status.${listing.status.toLowerCase()}`),
-      tone: isActive ? 'active' : 'neutral',
-    },
-  };
-};
+import { ListingCard } from '@/domain-ui';
 
 export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> = ({
   listings,
   onViewAll,
   viewAllLabel,
   showViewAll,
+  onListingClick,
+  emptyTitle,
+  emptySubtitle,
   currentSlide,
   onNext,
   onPrev,
@@ -65,11 +29,11 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
     return (
       <S.SliderEmpty>
         <Icon name="inventory" size={40} />
-        <S.SliderEmptyText variant="body" weight="semibold">
-          {t('listings.overview.emptyTitle')}
+        <S.SliderEmptyText variant="body" weight="semibold" color="text.primary">
+          {emptyTitle ?? t('listings.overview.emptyTitle')}
         </S.SliderEmptyText>
-        <S.SliderEmptyText variant="body-sm" color="text.tertiary">
-          {t('listings.overview.emptySubtitle')}
+        <S.SliderEmptyText variant="body-sm" color="text.secondary">
+          {emptySubtitle ?? t('listings.overview.emptySubtitle')}
         </S.SliderEmptyText>
       </S.SliderEmpty>
     );
@@ -85,10 +49,14 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
       <S.CarouselViewport>
         {listings.map((listing, index) => {
           const slideClass = index === currentSlide ? 'active' : index < currentSlide ? 'prev' : '';
-          const card = toCardProps(listing, t);
+          const card = toListingCardProps(listing, t);
           return (
             <S.CarouselSlide key={listing.id} className={slideClass} $isActive={index === currentSlide}>
-              <ListingCard {...card} orientation="horizontal" />
+              <ListingCard
+                {...card}
+                orientation="horizontal"
+                onClick={onListingClick ? () => onListingClick(listing.id) : undefined}
+              />
             </S.CarouselSlide>
           );
         })}

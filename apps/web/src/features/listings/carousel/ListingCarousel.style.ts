@@ -1,14 +1,13 @@
 import styled from '@emotion/styled';
 import { Text as UIText, tkn, type AppTheme } from '@repo/ui';
 
-// --- Custom paginated carousel ---
+// --- Custom paginated carousel (content-height, not stretch-to-sibling) ---
 
 export const CarouselWrapper = styled.div`
   position: relative;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-width: 0;
 
   &:hover .carousel-arrow {
     opacity: 1;
@@ -17,32 +16,42 @@ export const CarouselWrapper = styled.div`
 
 export const CarouselViewport = styled.div`
   position: relative;
-  flex: 1;
   overflow: hidden;
-  min-height: 0;
+  min-width: 0;
 `;
 
+/**
+ * Active slide stays in document flow so the viewport gets natural card height.
+ * Inactive slides are absolutely positioned for enter/exit animation only.
+ */
 export const CarouselSlide = styled.div<{ $isActive?: boolean }>`
-  position: absolute;
-  inset: 0;
   width: 100%;
   display: flex;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
-  opacity: 0;
-  transform: translateX(100%);
-  pointer-events: none;
 
-  &.active {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
+  &:not(.active) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
   }
 
   &.prev {
+    position: absolute;
+    inset: 0;
     opacity: 0;
     transform: translateX(-100%);
+    pointer-events: none;
+  }
+
+  &.active {
+    position: relative;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
   }
 `;
 
@@ -51,20 +60,20 @@ export const CarouselArrow = styled.button<{ $side: 'left' | 'right' }>`
   top: 50%;
   ${({ $side }) => ($side === 'left' ? 'left: -1.125rem' : 'right: -1.125rem')};
   transform: translateY(-50%);
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${tkn('radius.full')};
   border: none;
   background: ${tkn('colors.brand.primary')};
-  color: white;
+  color: ${tkn('colors.text.inverse')};
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   opacity: 0;
   transition:
-    opacity 0.2s ease,
-    background 0.2s ease;
+    opacity ${tkn('transitions.fast')},
+    background ${tkn('transitions.fast')};
   z-index: 10;
   box-shadow: ${tkn('shadows.md')};
 
@@ -119,15 +128,17 @@ export const SliderEmpty = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.xxl')} ${tkn('spacing.lg')};
   text-align: center;
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem dashed ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.xl')};
+  min-height: 12rem;
+  background: ${tkn('colors.background.tertiary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-style: dashed;
+  border-radius: ${tkn('radius.sm')};
 
   svg {
-    color: ${tkn('colors.text.tertiary')};
+    color: ${tkn('colors.text.secondary')};
   }
 `;
 
@@ -138,7 +149,7 @@ export const ViewAllButton = styled.button`
   border: none;
   cursor: pointer;
   color: ${tkn('colors.brand.primary')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-family: ${tkn('typography.fontFamily.body')};
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};

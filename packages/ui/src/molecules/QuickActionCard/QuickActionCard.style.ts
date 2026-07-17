@@ -45,7 +45,7 @@ export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
 export const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs+')};
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 

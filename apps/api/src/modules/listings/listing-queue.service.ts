@@ -42,6 +42,7 @@ export class ListingQueueService {
         paymentPolicyId: request.paymentPolicyId,
         shippingPolicyId: request.shippingPolicyId,
         returnPolicyId: request.returnPolicyId,
+        asDraft: Boolean(request.asDraft),
       } as ListingQueueJobData,
       opts: {
         attempts: 3,

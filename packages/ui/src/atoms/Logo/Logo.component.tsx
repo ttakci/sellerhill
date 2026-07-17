@@ -1,18 +1,24 @@
 import React from 'react';
 
-import logoSvg from '../../assets/logo.svg';
-import { Text } from '../Text';
+/** Full mark with tagline — auth / landing */
+import logoFull from '../../assets/logo-mark.svg';
+/** ZonDS only (no slogan) — app sidebar / navbar */
+import logoNav from '../../assets/logo-nav.svg';
 
 import * as S from './Logo.style';
 
 export interface LogoProps {
-  /** Logo height in pixels. Width is calculated automatically to preserve aspect ratio. */
+  /** Render height in px; width scales with aspect ratio. */
   height?: number;
-  /** @deprecated Use `height` instead. Maps to height for backward compat. */
+  /** @deprecated Use `height`. */
   size?: number;
   className?: string;
-  /** Layout variant: 'default' renders the horizontal logo, 'stacked' renders logo mark + stacked text */
-  layout?: 'default' | 'stacked';
+  /**
+   * - `default` / `full` — original mark + slogan (login, register, landing)
+   * - `nav` — ZonDS only, no slogan (sidebar)
+   * - `wordmark` / `stacked` — aliases of `nav` (compat)
+   */
+  layout?: 'default' | 'full' | 'nav' | 'wordmark' | 'stacked';
   onClick?: () => void;
 }
 
@@ -23,27 +29,17 @@ export const Logo: React.FC<LogoProps> = ({
   layout = 'default',
   onClick,
 }) => {
-  if (layout === 'stacked') {
-    const markHeight = height ?? size ?? 32;
-    return (
-      <S.StackedWrapper onClick={onClick}>
-        <S.LogoImage src={logoSvg} $height={markHeight} alt="Zonds Logo" className={className} />
-        <S.StackedText>
-          <Text variant="h4" weight="bold" color="sidebar.foreground">
-            ZonDS
-          </Text>
-          <Text variant="caption" color="sidebar.textMuted">
-            Dropship Automation
-          </Text>
-        </S.StackedText>
-      </S.StackedWrapper>
-    );
-  }
-
   const resolvedHeight = height ?? size ?? 40;
+  const useNav = layout === 'nav' || layout === 'wordmark' || layout === 'stacked';
+
   return (
     <S.DefaultWrapper onClick={onClick}>
-      <S.LogoImage src={logoSvg} $height={resolvedHeight} alt="Zonds Logo" className={className} />
+      <S.LogoImage
+        src={useNav ? logoNav : logoFull}
+        $height={resolvedHeight}
+        alt="Zonds Logo"
+        className={className}
+      />
     </S.DefaultWrapper>
   );
 };

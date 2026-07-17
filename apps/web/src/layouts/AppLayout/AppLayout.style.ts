@@ -17,14 +17,15 @@ export const LayoutWrapper = styled.div`
 `;
 
 /**
- * SidebarContainer - Theme aware and responsive
+ * SidebarContainer — dense Sellerboard-style rail
+ * Expanded ~13rem · collapsed icon rail ~3.75rem
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '5rem' : '15rem')};
+  width: ${(props) => (props.$isCollapsed ? '3.75rem' : '13rem')};
   background: ${tkn('colors.sidebar.background')};
   color: ${tkn('colors.sidebar.text')};
   border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
-  transition: all ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -36,9 +37,9 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
     /* 1023px */
     position: fixed;
     top: 0;
-    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-15rem')};
+    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-13rem')};
     height: 100vh;
-    width: 15rem;
+    width: 13rem;
     box-shadow: ${tkn('shadows.xl')};
   }
 `;
@@ -72,34 +73,91 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   }
 `;
 
-export const LogoArea = styled.div<{ $isCollapsed: boolean }>`
-  height: 7.5rem; /* 120px */
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all ${tkn('transitions.normal')};
-  position: relative;
-  z-index: 10; /* Ensure logo is always on top */
+/**
+ * Top chrome height — sidebar brand strip and app page header share this
+ * so their bottom borders (dividers) sit on one horizontal line.
+ * 80px logo → 4rem chrome (matches page header).
+ */
+const APP_CHROME_HEIGHT = '4rem';
 
+/**
+ * Sellerboard brand strip: [ ☰ ] [ logo 80px ]
+ * Fixed height matches HeaderContainer / HeaderInner.
+ */
+export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  /* Top-align: logo + menu sit high; tight gap = closer to button */
+  align-items: flex-start;
+  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
+  gap: ${tkn('spacing.2xs')};
+  flex-shrink: 0;
+  height: ${APP_CHROME_HEIGHT};
+  min-height: ${APP_CHROME_HEIGHT};
+  max-height: ${APP_CHROME_HEIGHT};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')} 0 ${tkn('spacing.sm')};
+  box-sizing: border-box;
+  border-bottom: 0.0625rem solid ${tkn('colors.sidebar.divider')};
+  overflow: visible;
+
+  @media (max-width: 63.9375rem) {
+    padding: ${tkn('spacing.2xs')} ${tkn('spacing.md')} 0 ${tkn('spacing.md')};
+    justify-content: flex-start;
+  }
+`;
+
+export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollapsed?: boolean }>`
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  cursor: pointer;
+  line-height: 0;
+  background: transparent;
+  ${({ $isCollapsed }) => $isCollapsed && `display: none;`}
+
+  @media (max-width: 63.9375rem) {
+    display: flex;
+  }
+
+  &:hover {
+    opacity: 0.92;
+  }
+
+  & > * {
+    justify-content: flex-start !important;
+    width: auto;
+    max-width: 100%;
+  }
+
+  /* Logo 80px */
   & img {
-    transition: all ${tkn('transitions.normal')};
-    /* Allow the logo to maintain its premium size even in collapsed state */
-    max-width: none;
-    filter: drop-shadow(0 0 1.25rem ${tkn('colors.sidebar.logoGlow')}); /* 20px */
+    display: block;
+    height: 5rem !important; /* 80px */
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: 5rem !important;
+    margin: 0 !important;
+    margin-left: -${tkn('spacing.2xs')} !important; /* nudge toward button */
+    object-fit: contain !important;
+    object-position: left top;
+    background: transparent !important;
   }
 `;
 
 export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
   padding: ${({ $isCollapsed, theme }) =>
     $isCollapsed
-      ? `0 ${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`
-      : `0 ${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })}`};
+      ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.xs')({ theme })}`
+      : `${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`};
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.2xs')};
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -140,34 +198,39 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
   padding: ${({ $isCollapsed, $isSubItem }) =>
-    $isCollapsed ? '0.625rem 0.875rem' : $isSubItem ? '0.625rem 0.875rem 0.625rem 1.75rem' : '0.625rem 0.875rem'};
-  border-radius: ${tkn('radius.md')};
+    $isCollapsed
+      ? '0.5rem 0'
+      : $isSubItem
+        ? '0.5rem 0.75rem 0.5rem 1.25rem'
+        : '0.5rem 1rem'};
+  border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.sidebar.text')};
   background: ${({ $active }) => ($active ? tkn('colors.sidebar.active') : 'transparent')};
   cursor: pointer;
-  transition: all ${tkn('transitions.fast')};
+  transition: background ${tkn('transitions.fast')};
   position: relative;
   font-weight: ${({ $active, theme }) =>
-    $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.normal};
-  font-size: ${tkn('typography.fontSize.sm')};
+    $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.medium};
+  font-size: ${tkn('typography.fontSize.md')};
+  min-height: 2.5rem;
 
   &:hover {
     background: ${tkn('colors.sidebar.hover')};
   }
 
-  ${({ $active, $isCollapsed, $isSubItem, theme }) =>
+  ${({ $active, theme }) =>
     $active &&
     `
     &::before {
       content: '';
       position: absolute;
-      left: ${$isCollapsed ? '0' : $isSubItem ? '0.5rem' : '0'};
+      left: 0;
       top: 50%;
       transform: translateY(-50%);
       width: 0.1875rem;
-      height: 1.5rem;
-      background: ${tkn('colors.sidebar.accent')({ theme })};
-      border-radius: 0 0.25rem 0.25rem 0;
+      height: 1.25rem;
+      background: ${theme.colors.sidebar.accent};
+      border-radius: 0 0.125rem 0.125rem 0;
     }
   `}
 `;
@@ -176,22 +239,21 @@ export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
-  gap: ${tkn('spacing.sm-md')}; /* 12px */
-
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for overflow text */
-  flex: 1; /* Allow content to take available space */
-  min-width: 0; /* Ensure flex child can shrink below content size */
+  gap: ${tkn('spacing.sm-md')};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  font-size: ${tkn('typography.fontSize.md')};
 
   & svg {
     color: inherit;
-    width: 1.125rem; /* 18px */
-    height: 1.125rem; /* 18px */
-    flex-shrink: 0; /* Prevent icon from shrinking */
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
   }
 `;
-
 export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boolean }>`
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'flex')};
   align-items: center;
@@ -212,7 +274,7 @@ export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
 `;
 
 export const SidebarFooter = styled.div`
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   border-top: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   box-sizing: border-box;
   position: relative;
@@ -222,20 +284,68 @@ export const SidebarFooter = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-export const LogoutButton = styled.button<{ $isCollapsed: boolean }>`
-  display: flex;
+/**
+ * Hamburger LEFT of logo — top-aligned with mark, small gap via row gap.
+ */
+export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
+  display: none;
+  position: static;
+  flex: 0 0 auto;
+  align-self: flex-start;
   align-items: center;
-  gap: ${tkn('spacing.sm-md')};
-  padding: ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  margin: ${tkn('spacing.sm')} 0 0 0;
+  border-radius: ${tkn('radius.sm')};
   cursor: pointer;
   background: transparent;
   border: none;
   color: ${tkn('colors.sidebar.text')};
+  box-sizing: border-box;
   transition:
-    background 0.2s,
-    color 0.2s;
-  ${({ $isCollapsed }) => $isCollapsed && `justify-content: center;`}
+    background ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
+
+  @media (min-width: 64rem) {
+    display: inline-flex;
+  }
+
+  @media (max-width: 63.9375rem) {
+    display: none;
+  }
+
+  &:hover {
+    background: ${tkn('colors.sidebar.hover')};
+    color: ${tkn('colors.sidebar.foreground')};
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.sidebar.accent')};
+    outline-offset: 0.125rem;
+  }
+`;
+
+export const LogoutButton = styled.button<{ $isCollapsed: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm-md')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.sm')};
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: ${tkn('colors.sidebar.text')};
+  font-size: ${tkn('typography.fontSize.md')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  min-height: 2.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition:
+    background ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
+  ${({ $isCollapsed }) => $isCollapsed && `justify-content: center; padding-left: 0; padding-right: 0;`}
 
   &:hover {
     background: ${tkn('colors.sidebar.hover')};
@@ -260,21 +370,6 @@ export const ProfileSwitcher = styled.div<{ $isCollapsed: boolean }>`
     justify-content: center;
     padding: ${theme.spacing.sm} 0;
   `}
-`;
-
-export const BadgeWrapper = styled.div<{ variant?: 'primary' | 'success'; size?: 'sm' | 'md' }>`
-  background: ${({ theme, variant }) =>
-    variant === 'success' ? theme.colors.semanticTint.success : theme.colors.semanticTint.info};
-  color: ${({ theme, variant }) =>
-    variant === 'success' ? theme.colors.semantic.success : theme.colors.brand.primary};
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
-  border-radius: ${tkn('radius.sm')};
-  border: 0.0625rem solid
-    ${({ theme, variant }) =>
-      variant === 'success' ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.info};
-  text-transform: uppercase;
 `;
 
 export const ProfileBadge = styled.div`
@@ -315,8 +410,10 @@ export const MainContent = styled.div`
 `;
 
 export const HeaderContainer = styled.header`
-  height: auto;
-  min-height: 5rem;
+  /* Same height as SidebarBrandRow so dividers align */
+  height: 4rem;
+  min-height: 4rem;
+  max-height: 4rem;
   background: ${tkn('colors.surface.primary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   position: sticky;
@@ -324,26 +421,32 @@ export const HeaderContainer = styled.header`
   z-index: 99;
   box-shadow: ${tkn('shadows.sm')};
   width: 100%;
+  box-sizing: border-box;
 `;
 
 export const HeaderInner = styled.div`
   max-width: 90rem; /* 1440px */
   width: 100%;
+  height: 100%;
+  min-height: 0;
   margin: 0 auto;
-  min-height: 5rem;
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping */
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  /* Vertical: none — height comes from HeaderContainer; H-pad matches ContentInner */
+  padding: 0 ${tkn('spacing.lg')};
   box-sizing: border-box;
 
   @media (min-width: 48rem) {
-    /* 768px */
-    flex-wrap: nowrap; /* Prevent wrapping on desktop */
-    padding: 0 ${tkn('spacing.lg')};
+    flex-wrap: nowrap;
+    padding: 0 ${tkn('spacing.xl')};
     gap: 0;
+  }
+
+  @media (min-width: 64rem) {
+    padding: 0 ${tkn('spacing.xxl')};
   }
 `;
 
@@ -400,28 +503,24 @@ export const MobileMenuButton = styled.button`
   }
 
   @media (min-width: 64rem) {
-    /* 1024px */
+    /* 1024px — desktop uses in-sidebar collapse control */
     display: none;
   }
 `;
 
+/** @deprecated Desktop toggle moved into sidebar footer — kept only if referenced */
 export const ToggleButton = styled.button`
   background: transparent;
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   width: ${tkn('spacing.xl')};
   height: ${tkn('spacing.xl')};
-  display: none; /* Hidden by default on mobile */
+  display: none;
   align-items: center;
   justify-content: center;
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
-  color: ${tkn('colors.text.primary')}; /* Ensure high contrast */
+  color: ${tkn('colors.text.primary')};
   transition: all ${tkn('transitions.fast')};
-
-  @media (min-width: 64rem) {
-    /* 1024px */
-    display: flex; /* Show on desktop */
-  }
 
   &:hover {
     background: ${tkn('colors.brand.secondary')};
@@ -709,20 +808,27 @@ export const ContentArea = styled.main`
   flex-direction: column;
 `;
 
+/**
+ * Sole page gutter for authenticated app screens.
+ * Feature pages use `PageContainer` with padding: 0 — never double-pad.
+ * Title starts at the same inset on every route.
+ */
 export const ContentInner = styled.div`
   max-width: 90rem; /* 1440px */
   width: 100%;
   margin: 0 auto;
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
   box-sizing: border-box;
   flex: 1;
 
   @media (min-width: 48rem) {
-    /* 768px */
-    padding: ${tkn('spacing.lg')};
+    padding: ${tkn('spacing.xl')};
+  }
+
+  @media (min-width: 64rem) {
+    padding: ${tkn('spacing.xl')} ${tkn('spacing.xxl')};
   }
 `;
-
 const spin = keyframes`
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

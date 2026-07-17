@@ -3,7 +3,7 @@ import { Drawer, EmptyState } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { BodyStack, CardGrid } from './ListingGroupsDrawer.style';
+import { BodyStack, CardGrid, FormCard } from './ListingGroupsDrawer.style';
 import type { ListingGroupsDrawerComponentProps } from './ListingGroupsDrawer.types';
 
 import { ListingGroupCard } from '@/features/settings/components/ListingGroupCard';
@@ -62,7 +62,9 @@ export const ListingGroupsDrawerComponent: React.FC<ListingGroupsDrawerComponent
             ))}
           </CardGrid>
         ) : (
-          <EmptyState icon="layers" title={emptyTitle} description={emptyDescription} />
+          <FormCard>
+            <EmptyState icon="layers" title={emptyTitle} description={emptyDescription} />
+          </FormCard>
         )}
       </BodyStack>
     </Drawer>

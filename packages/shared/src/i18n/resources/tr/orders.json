@@ -4,6 +4,33 @@
       "title": "Siparişler",
       "subtitle": "{{count}} sipariş"
     },
+    "overview": {
+      "title": "Siparişler",
+      "subtitle": "{{count}} sipariş",
+      "viewAll": "Tümü",
+      "emptyTitle": "Henüz sipariş yok",
+      "emptySubtitle": "eBay satışları senkronize edilince burada görünür.",
+      "syncTitle": "eBay'den siparişleri senkronize et",
+      "syncSubtitle": "En son satış, alıcı ve finansalları çekin.",
+      "actionsTitle": "Diğer işlemler",
+      "viewAllTitle": "Tüm siparişler",
+      "viewAllSubtitle": "{{count}} siparişi filtrele ve dışa aktar"
+    },
+    "carousel": {
+      "previous": "Önceki",
+      "next": "Sonraki"
+    },
+    "all": {
+      "title": "Tüm siparişler",
+      "subtitle": "{{count}} sonuç",
+      "emptyTitle": "Filtrelere uyan sipariş yok"
+    },
+    "filters": {
+      "allStatuses": "Tüm durumlar",
+      "allStores": "Tüm mağazalar",
+      "clearAll": "Temizle",
+      "resultCount": "{{count}} sonuç"
+    },
     "stats": {
       "totalSales": "Toplam Satış",
       "netProfit": "Net Kâr",
@@ -22,12 +49,15 @@
     },
     "table": {
       "orderNumber": "Sipariş No",
+      "product": "Ürün",
       "date": "Tarih",
       "buyer": "Alıcı",
       "status": "Durum",
-      "salePrice": "Satış Fiyatı",
-      "purchasePrice": "Alış Fiyatı",
-      "netProfit": "Net Kâr"
+      "salePrice": "Satış",
+      "purchasePrice": "Maliyet",
+      "netProfit": "Kâr",
+      "asin": "ASIN",
+      "ebayId": "eBay"
     },
     "status": {
       "completed": "Tamamlandı",
@@ -42,6 +72,8 @@
     },
     "detail": {
       "title": "Sipariş Detayı",
+      "notFoundTitle": "Sipariş bulunamadı",
+      "notFoundSubtitle": "Bu sipariş silinmiş olabilir veya erişim yetkiniz yok.",
       "orderPlaced": "Sipariş Tarihi",
       "viewInvoice": "Faturayı Gör",
       "printLabels": "Etiket Yazdır",

@@ -1,20 +1,13 @@
 import styled from '@emotion/styled';
 import {
   Card,
+  PageContainer,
   StatusBadge as StatusBadgeMolecule,
   Text,
   tkn,
 } from '@repo/ui';
 
-export const Container = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-  box-sizing: border-box;
-  padding-bottom: 2.5rem; /* 40px */
-`;
+export const Container = PageContainer;
 
 export const SwitchGroup = styled.div`
   display: flex;

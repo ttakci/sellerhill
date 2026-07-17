@@ -1,5 +1,12 @@
 import styled from '@emotion/styled';
 
+import {
+  CONTROL_ICON_WIDTH,
+  CONTROL_PADDING_X,
+  controlFocusShadow,
+  controlHeight,
+  type ControlSize,
+} from '../../styles/formControl';
 import { tkn } from '../../theme/tkn';
 
 export const Container = styled.div<{ $fullWidth?: boolean }>`
@@ -16,14 +23,15 @@ export const FieldWrapper = styled.div<{
   $hasError: boolean;
   $isDisabled: boolean;
   $fullWidth?: boolean;
-  $size?: 'small' | 'medium' | 'large';
+  $size?: ControlSize;
   $hasLabel?: boolean;
 }>`
   display: flex;
   align-items: center;
   position: relative;
-  height: ${({ $size }) => ($size === 'small' ? '3.25rem' : $size === 'large' ? '4.25rem' : '3.75rem')};
-  background: ${tkn('colors.surface.primary')};
+  height: ${({ $size = 'medium', $hasLabel }) => controlHeight($size, !!$hasLabel)};
+  background: ${({ theme, $isDisabled }) =>
+    $isDisabled ? theme.colors.background.tertiary : theme.colors.surface.primary};
   border: 0.0625rem solid
     ${({ $isFocused, $hasError, theme }) =>
       $hasError
@@ -32,32 +40,44 @@ export const FieldWrapper = styled.div<{
           ? theme.colors.brand.primary
           : theme.colors.border.primary};
   border-radius: ${tkn('radius.md')};
-  padding: 0 1.125rem;
-  transition: all ${tkn('transitions.fast')};
+  padding: 0 ${CONTROL_PADDING_X};
+  transition:
+    border-color ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'pointer')};
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   opacity: ${({ $isDisabled }) => ($isDisabled ? 0.5 : 1)};
   box-shadow: ${({ $isFocused, theme }) =>
-    $isFocused ? `0 0 0 0.1875rem ${theme.colors.brand.primary}15` : 'none'};
+    $isFocused ? controlFocusShadow(theme.colors.brand.primary) : 'none'};
   box-sizing: border-box;
 
   &:hover {
     border-color: ${({ $isFocused, $hasError, $isDisabled, theme }) =>
-      !$isDisabled && !$isFocused && !$hasError ? theme.colors.text.tertiary : 'inherit'};
+      !$isDisabled && !$isFocused && !$hasError ? theme.colors.text.tertiary : undefined};
   }
 `;
 
 export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boolean; $size?: string }>`
   flex: 1;
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-size: ${tkn('typography.fontSize.md')};
+  font-family: ${tkn('typography.fontFamily.body')};
   color: ${tkn('colors.text.primary')};
+  /* Push value down so it clears the floated label with comfortable gap */
   padding-top: ${({ $hasLabel, $size }) => {
-    if (!$hasLabel) {return '0';}
-    if ($size === 'small') {return '1rem';}
-    if ($size === 'large') {return '1.375rem';}
-    return '1.125rem';
+    if (!$hasLabel) {
+      return '0';
+    }
+    if ($size === 'small') {
+      return '1.125rem';
+    }
+    if ($size === 'large') {
+      return '1.5rem';
+    }
+    return '1.375rem'; /* medium — ~8–10px below scaled label */
   }};
-  padding-left: ${({ $hasIconLeft }) => ($hasIconLeft ? '3rem' : '0')};
+  padding-bottom: ${({ $hasLabel }) => ($hasLabel ? '0.25rem' : '0')};
+  padding-left: ${({ $hasIconLeft }) => ($hasIconLeft ? CONTROL_ICON_WIDTH : '0')};
+  line-height: ${tkn('typography.lineHeight.tight')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -74,23 +94,31 @@ export const FloatingLabel = styled.label<{
 }>`
   position: absolute;
   top: 0;
-  left: ${({ $hasIconLeft }) =>
-    $hasIconLeft ? '3rem' : '1.125rem'};
+  left: ${({ $hasIconLeft }) => ($hasIconLeft ? CONTROL_ICON_WIDTH : CONTROL_PADDING_X)};
+  right: ${CONTROL_PADDING_X};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
   transition:
-    transform 0.15s ease,
-    color 0.15s ease,
-    font-size 0.15s ease;
+    transform ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')},
+    font-size ${tkn('transitions.fast')};
   transform-origin: top left;
   z-index: 1;
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
 
   color: ${({ theme, $isFocused, $hasError, $isDisabled }) => {
-    if ($isDisabled) {return theme.colors.text.disabled;}
-    if ($hasError) {return theme.colors.semantic.error;}
-    if ($isFocused) {return theme.colors.brand.primary;}
+    if ($isDisabled) {
+      return theme.colors.text.disabled;
+    }
+    if ($hasError) {
+      return theme.colors.semantic.error;
+    }
+    if ($isFocused) {
+      return theme.colors.brand.primary;
+    }
     return theme.colors.text.tertiary;
   }};
 
@@ -100,33 +128,31 @@ export const FloatingLabel = styled.label<{
     const isActive = $isFocused || $hasValue;
 
     if (isActive) {
-      const y = isSmall ? '0.625rem' : isLarge ? '0.875rem' : '0.75rem';
+      /* Sit near the top edge so value has clear breathing room below */
+      const y = isSmall ? '0.375rem' : isLarge ? '0.5rem' : '0.4375rem';
       return `
         transform: translateY(${y}) scale(0.75);
         font-weight: ${tkn('typography.fontWeight.semibold')({ theme })};
       `;
     }
 
-    const y = isSmall ? '1rem' : isLarge ? '1.5rem' : '1.25rem';
+    const y = isSmall ? '0.875rem' : isLarge ? '1.375rem' : '1.125rem';
     return `
       transform: translateY(${y}) scale(1);
       font-weight: ${tkn('typography.fontWeight.normal')({ theme })};
     `;
   }}
-
-  font-size: ${tkn('typography.fontSize.sm')};
 `;
 
 export const DecorationWrapper = styled.div<{ $side: 'left' | 'right'; $size?: string }>`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  ${({ $side }) =>
-    $side === 'left' ? 'left: 0;' : 'right: 0;'}
+  ${({ $side }) => ($side === 'left' ? 'left: 0;' : 'right: 0;')}
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
+  width: ${CONTROL_ICON_WIDTH};
   color: ${tkn('colors.text.tertiary')};
   pointer-events: none;
 `;
@@ -229,9 +255,11 @@ export const OptionContent = styled.div`
 
 export const ErrorText = styled.span`
   color: ${tkn('colors.semantic.error')};
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  margin-left: ${tkn('spacing.xs')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  margin-top: ${tkn('spacing.2xs')};
+  margin-left: ${tkn('spacing.2xs')};
 `;
 
 export const NoResultsMessage = styled.div`

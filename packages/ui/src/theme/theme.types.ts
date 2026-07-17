@@ -89,6 +89,14 @@ export interface ThemeColors {
     logoGlow: string;
   };
 
+  // Dashboard period card headers (Sellerboard-style solid bands)
+  dashboard: {
+    periodToday: string;
+    periodThisWeek: string;
+    periodThisMonth: string;
+    periodLastMonth: string;
+  };
+
   // Landing page specific tokens
   landing: {
     heroGradient: string;
@@ -122,4 +130,5 @@ export interface AppTheme {
   shadows: typeof tokens.shadowTokens;
   typography: typeof tokens.typographyTokens;
   transitions: typeof tokens.transitionTokens;
+  controls: typeof tokens.controlTokens;
 }

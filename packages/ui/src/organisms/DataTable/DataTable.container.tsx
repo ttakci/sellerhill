@@ -91,6 +91,7 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       actions={props.actions}
       pagination={props.pagination}
       emptyMessage={props.emptyMessage}
+      emptyContent={props.emptyContent}
       onRowClick={props.onRowClick}
       className={props.className}
     />

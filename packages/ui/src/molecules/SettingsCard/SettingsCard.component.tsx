@@ -44,7 +44,7 @@ export const SettingsCard: React.FC<SettingsCardProps> = ({
                   <S.TitleContent>
                     <S.Title>{header.title}</S.Title>
                     {header.subtitle && (
-                      <Text variant="caption" color="text.secondary">
+                      <Text variant="body-sm" color="text.secondary">
                         {header.subtitle}
                       </Text>
                     )}

@@ -33,8 +33,9 @@ export const useLocale = (): UseLocaleReturn => {
   const locale: SupportedLocale =
     urlLocale && isValidLocale(urlLocale) ? (urlLocale as SupportedLocale) : DEFAULT_LOCALE;
 
-  // Sync i18next language with URL locale
-  if (i18n.language !== locale) {
+  // Sync i18next language with URL locale (compare language only — ignore region tags)
+  const activeLang = (i18n.language || '').split('-')[0];
+  if (activeLang !== locale) {
     void i18n.changeLanguage(locale);
   }
 

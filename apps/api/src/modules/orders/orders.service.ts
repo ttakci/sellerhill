@@ -101,41 +101,64 @@ export class OrdersService {
       paramIndex++;
     }
 
+    if (filters?.ebayAccountId) {
+      conditions.push(`o.ebay_account_id = $${paramIndex}`);
+      params.push(filters.ebayAccountId);
+      paramIndex++;
+    }
+
     if (filters?.search) {
-      conditions.push(`(o.ebay_order_id ILIKE $${paramIndex} OR o.buyer_name ILIKE $${paramIndex} OR o.buyer_email ILIKE $${paramIndex})`);
+      conditions.push(
+        `(o.ebay_order_id ILIKE $${paramIndex}
+          OR o.buyer_name ILIKE $${paramIndex}
+          OR o.buyer_email ILIKE $${paramIndex}
+          OR l.title ILIKE $${paramIndex}
+          OR l.asin ILIKE $${paramIndex})`
+      );
       params.push(`%${filters.search}%`);
       paramIndex++;
     }
 
     if (filters?.dateFrom) {
-      conditions.push(`o.order_date >= $${paramIndex}`);
+      conditions.push(`o.order_date >= $${paramIndex}::date`);
       params.push(filters.dateFrom);
       paramIndex++;
     }
 
     if (filters?.dateTo) {
-      conditions.push(`o.order_date <= $${paramIndex}`);
+      // Inclusive end date: treat as full calendar day
+      conditions.push(`o.order_date < ($${paramIndex}::date + INTERVAL '1 day')`);
       params.push(filters.dateTo);
       paramIndex++;
     }
 
     const whereClause = conditions.join(' AND ');
+    const fromJoin = `
+      FROM orders o
+      LEFT JOIN listings l ON o.listing_id = l.id
+      LEFT JOIN products p ON l.product_id = p.id
+    `;
 
     // Validate sort column to prevent SQL injection
     const allowedSortColumns = ['order_date', 'sale_total', 'net_profit', 'status'];
     const safeSortBy = allowedSortColumns.includes(sortBy) ? sortBy : 'order_date';
     const safeSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    // Count query
+    // Count query (same joins so search on listing fields works)
     const countResult = await this.databaseService.query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM orders o WHERE ${whereClause}`,
+      `SELECT COUNT(*) as count ${fromJoin} WHERE ${whereClause}`,
       params
     );
     const total = parseInt(countResult[0]?.count || '0', 10);
 
-    // Data query
+    // Data query — enrich with listing + product (title, ASIN, eBay item, image)
     const results = await this.databaseService.query<OrderRow>(
-      `SELECT o.* FROM orders o
+      `SELECT o.*,
+              l.asin as listing_asin,
+              l.ebay_item_id as listing_ebay_item_id,
+              l.title as listing_title,
+              p.image_urls as product_image_urls
+       ${fromJoin}
        WHERE ${whereClause}
        ORDER BY o.${safeSortBy} ${safeSortOrder}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,

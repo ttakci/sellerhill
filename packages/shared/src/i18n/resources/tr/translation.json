@@ -4,7 +4,7 @@
     "loading": "Yükleniyor...",
     "retry": "Yeniden Dene",
     "ok": "Tamam",
-    "cancel": "İptal",
+    "cancel": "Vazgeç",
     "save": "Kaydet",
     "delete": "Sil",
     "back": "Geri",
@@ -109,16 +109,34 @@
     "amazonAccounts": "Amazon Hesapları",
     "reports": "Raporlar",
     "support": "Destek",
-    "logout": "Oturumu Kapat",
-    "logoutConfirmTitle": "Oturumu Kapat",
-    "logoutConfirmDescription": "Oturumu kapatmak istediğinizden emin misiniz? Hesabınıza erişmek için tekrar giriş yapmanız gerekecektir.",
-    "logoutConfirmButton": "Oturumu Kapat",
+    "logout": "Çıkış Yap",
+    "logoutConfirmTitle": "Çıkış Yap",
+    "logoutConfirmDescription": "Çıkış yapmak istediğinizden emin misiniz? Hesabınıza erişmek için tekrar giriş yapmanız gerekecektir.",
+    "logoutConfirmButton": "Çıkış Yap",
     "editProfile": "Profili Düzenle"
+  },
+  "chatbot": {
+    "sidebarTitle": "Sorularınız mı var?",
+    "sidebarSubtitle": "AI destekli asistanımızla size yardımcı olalım.",
+    "ctaLabel": "Zon",
+    "openAria": "Asistan sohbetini aç",
+    "panelTitle": "Zon",
+    "welcomeMessage": "Merhaba, size nasıl yardımcı olabilirim?",
+    "placeholder": "Mesajınızı yazın…",
+    "placeholderReply": "Mesajınız alındı. Yapay zekâ yanıtları yakında aktif olacak.",
+    "send": "Gönder",
+    "refresh": "Sohbeti yenile",
+    "minimize": "Küçült",
+    "expand": "Genişlet",
+    "close": "Kapat"
   },
   "header": {
     "selectLanguage": "Dil Seçimi",
     "toggleTheme": "Temayı Değiştir",
-    "notifications": "Bildirimler"
+    "notifications": "Bildirimler",
+    "openMenu": "Menüyü aç",
+    "collapseSidebar": "Kenar çubuğunu daralt",
+    "expandSidebar": "Kenar çubuğunu genişlet"
   },
   "profile": {
     "accountSettings": "Hesap Ayarları"
@@ -352,7 +370,7 @@
         "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
         "emailPlaceholder": "{{email}}",
         "confirmLabel": "Hesabı devre dışı bırak",
-        "cancelLabel": "İptal",
+        "cancelLabel": "Vazgeç",
         "successHeader": "Hesap devre dışı bırakıldı",
         "successDescription": "Hesabınız devre dışı bırakıldı. Oturumunuz kapatılacak."
       }

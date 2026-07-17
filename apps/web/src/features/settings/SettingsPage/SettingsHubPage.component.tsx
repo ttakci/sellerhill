@@ -1,6 +1,7 @@
 /**
  * SettingsHubPage Component (Presentation)
  * Single scrolling page consolidating all settings sections.
+ * Section cards keep header icons; account rows keep row icons.
  */
 
 import { PageHeader, SettingsActionRow, SettingsCard } from '@repo/ui';
@@ -29,17 +30,16 @@ const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: (
     <SettingsCard
       variant="section"
       header={{
+        icon: 'box',
         title: t('translation:settingsHub.sections.amazon.title'),
       }}
     >
       <SettingsActionRow
-        icon="list"
         label={t('translation:settingsHub.sections.amazon.manage.title')}
         subtitle={t('translation:settingsHub.sections.amazon.manage.subtitle')}
         onClick={onView}
       />
       <SettingsActionRow
-        icon="plus"
         label={t('translation:settingsHub.sections.amazon.add')}
         subtitle={t('translation:settingsHub.sections.amazon.addSubtitle')}
         onClick={onAdd}
@@ -54,13 +54,11 @@ const StoreManagementSection = ({ onOpenStoreSettings }: { onOpenStoreSettings: 
     <SettingsCard
       variant="section"
       header={{
+        icon: 'settings',
         title: t('translation:settingsHub.sections.storeManagement.title'),
       }}
     >
-      {/* Single entry — opens the store settings hub drawer; blacklist is managed
-          as a nested flow from within the hub. */}
       <SettingsActionRow
-        icon="settings"
         label={t('translation:settingsHub.sections.storeManagement.storeSettings')}
         subtitle={t('translation:settingsHub.sections.storeManagement.storeSettingsSubtitle')}
         onClick={onOpenStoreSettings}
@@ -81,19 +79,16 @@ const ListingGroupsSection = ({
     <SettingsCard
       variant="section"
       header={{
+        icon: 'layers',
         title: t('translation:settingsHub.sections.listingGroups.title'),
       }}
     >
-      {/* View / manage existing groups — opens the list drawer */}
       <SettingsActionRow
-        icon="list"
         label={t('translation:settingsHub.sections.listingGroups.manage')}
         subtitle={t('translation:settingsHub.sections.listingGroups.manageSubtitle')}
         onClick={onManage}
       />
-      {/* Create a new group */}
       <SettingsActionRow
-        icon="plus"
         label={t('translation:settingsHub.sections.listingGroups.create')}
         subtitle={t('translation:settingsHub.sections.listingGroups.createSubtitle')}
         onClick={onCreate}
@@ -112,38 +107,26 @@ const AccountSecuritySection = ({
   onDeactivate: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
-  const items: Array<{ key: 'password'; icon: string; labelKey: string; subtitleKey: string }> = [
-    {
-      key: 'password',
-      icon: 'lock',
-      labelKey: 'translation:settingsHub.sections.account.changePassword',
-      subtitleKey: 'translation:settingsHub.sections.account.changePasswordSubtitle',
-    },
-  ];
   return (
     <SettingsCard
       variant="section"
       header={{
+        icon: 'shield-check',
         title: t('translation:settingsHub.sections.account.title'),
       }}
     >
-      {/* Personal info — opens the profile drawer */}
       <SettingsActionRow
         icon="user"
         label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
         subtitle={t('translation:settingsHub.sections.profile.tabs.personalInfoSubtitle')}
         onClick={onPersonalInfo}
       />
-      {items.map(({ key, icon, labelKey, subtitleKey }) => (
-        <SettingsActionRow
-          key={key}
-          icon={icon as never}
-          label={t(labelKey)}
-          subtitle={t(subtitleKey)}
-          onClick={() => onAction(key)}
-        />
-      ))}
-      {/* Deactivate (merged danger zone) — same row geometry as the rows above */}
+      <SettingsActionRow
+        icon="lock"
+        label={t('translation:settingsHub.sections.account.changePassword')}
+        subtitle={t('translation:settingsHub.sections.account.changePasswordSubtitle')}
+        onClick={() => onAction('password')}
+      />
       <SettingsActionRow
         icon="trash"
         variant="danger"
@@ -161,19 +144,16 @@ const EbaySection = ({ onConnect, onView }: { onConnect: () => void; onView: () 
     <SettingsCard
       variant="section"
       header={{
+        icon: 'storefront',
         title: t('translation:settingsHub.sections.ebay.title'),
       }}
     >
-      {/* View connected stores */}
       <SettingsActionRow
-        icon="list"
         label={t('translation:settingsHub.sections.ebay.manageStores.title')}
         subtitle={t('translation:settingsHub.sections.ebay.manageStores.subtitle')}
         onClick={onView}
       />
-      {/* Connect a new eBay store */}
       <SettingsActionRow
-        icon="plus"
         label={t('translation:settingsHub.sections.ebay.connectNew.title')}
         subtitle={t('translation:settingsHub.sections.ebay.connectNew.subtitle')}
         onClick={onConnect}
@@ -219,29 +199,22 @@ export const SettingsHubPageComponent = ({
         subtitle={t('translation:settingsHub.subtitle')}
       />
 
-      {/* eBay + Amazon accounts — two columns on desktop, single column on mobile */}
       <S.TwoColGrid>
-        {/* eBay — connect new store + view existing stores */}
         <EbaySection onConnect={onConnectEbay} onView={() => onOpenDrawer('ebay')} />
-
-        {/* Amazon — view connected accounts + add new */}
         <AmazonAccountsSection onView={() => onOpenDrawer('amazonList')} onAdd={() => onOpenDrawer('amazonAdd')} />
       </S.TwoColGrid>
 
-      {/* Store configuration (left) + Listing groups (right) — two columns, stacked on mobile */}
       <S.TwoColGrid>
         <StoreManagementSection onOpenStoreSettings={() => onOpenDrawer('storeSettings')} />
         <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
       </S.TwoColGrid>
 
-      {/* Account & Security — personal info, change password, and deactivate (merged) */}
       <AccountSecuritySection
         onAction={(key) => onOpenDrawer(key)}
         onPersonalInfo={() => onOpenDrawer('profile')}
         onDeactivate={onOpenDeactivateModal}
       />
 
-      {/* Drawers */}
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountDrawer isOpen={activeDrawer === 'ebay'} onClose={onCloseDrawer} accounts={ebayAccounts} />
       <AmazonAccountDrawer
@@ -288,7 +261,6 @@ export const SettingsHubPageComponent = ({
         onEdit={onEditListingGroup}
       />
 
-      {/* Deactivate modal */}
       <DeactivateAccountModal isOpen={isDeactivateModalOpen} onClose={onCloseDeactivateModal} />
     </S.Container>
   );

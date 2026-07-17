@@ -7,7 +7,13 @@ import type { ListingDto } from '@repo/shared';
  */
 export interface ListingsOverviewPageProps {
   listings: ListingDto[];
+  /** Total live listings for the user (from paginated API), not just the carousel page. */
+  totalCount: number;
+  /** Draft count for optional chrome (overview other-actions). */
+  draftCount: number;
   onAddListing: () => void;
   onViewAll: () => void;
   onViewJobs: () => void;
+  onViewDrafts: () => void;
+  onListingClick: (listingId: string) => void;
 }

@@ -36,27 +36,39 @@ export const BulkSelectWrapper = styled.div`
 
 export const GridContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr) prevents grid items from overflowing / stacking into each other */
+  grid-template-columns: minmax(0, 1fr);
   gap: ${tkn('spacing.md')};
+  align-items: stretch;
+  width: 100%;
 
-  @media (min-width: 48rem) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 40rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (min-width: 64rem) {
-    grid-template-columns: repeat(3, 1fr);
+  @media (min-width: 75rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  @media (min-width: 80rem) {
-    grid-template-columns: repeat(4, 1fr);
+  & > * {
+    min-width: 0;
+    max-width: 100%;
   }
 `;
 
 export const GridEmptyState = styled.div`
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: ${tkn('spacing.xxxl')} 0;
+  min-height: 18rem;
+  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
   color: ${tkn('colors.text.tertiary')};
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  box-sizing: border-box;
 `;
 
 export const ColumnManagerContent = styled.div`

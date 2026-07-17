@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import {
   BodyStack,
   ErrorText,
+  FormCard,
 } from './ChangePasswordDrawer.style';
 import type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
 
@@ -110,34 +111,36 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({
       }}
     >
       <BodyStack>
-        <ModernTextInput
-          name="currentPassword"
-          label={t('translation:settingsHub.drawer.password.current')}
-          value={current}
-          type="password"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setCurrent(e.target.value)
-          }
-        />
-        <ModernTextInput
-          name="newPassword"
-          label={t('translation:settingsHub.drawer.password.new')}
-          value={next}
-          type="password"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setNext(e.target.value)
-          }
-        />
-        <ModernTextInput
-          name="confirmPassword"
-          label={t('translation:settingsHub.drawer.password.confirm')}
-          value={confirm}
-          type="password"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setConfirm(e.target.value)
-          }
-        />
-        {error && <ErrorText variant="caption">{error}</ErrorText>}
+        <FormCard>
+          <ModernTextInput
+            name="currentPassword"
+            label={t('translation:settingsHub.drawer.password.current')}
+            value={current}
+            type="password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCurrent(e.target.value)
+            }
+          />
+          <ModernTextInput
+            name="newPassword"
+            label={t('translation:settingsHub.drawer.password.new')}
+            value={next}
+            type="password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNext(e.target.value)
+            }
+          />
+          <ModernTextInput
+            name="confirmPassword"
+            label={t('translation:settingsHub.drawer.password.confirm')}
+            value={confirm}
+            type="password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setConfirm(e.target.value)
+            }
+          />
+          {error && <ErrorText variant="caption">{error}</ErrorText>}
+        </FormCard>
       </BodyStack>
     </Drawer>
   );

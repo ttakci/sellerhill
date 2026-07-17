@@ -6,8 +6,16 @@
     },
     "jobs": {
       "title": "Import Jobs",
-      "subtitle": "Track the status of your bulk import operations to eBay.",
+      "subtitle": "Track bulk import progress to eBay. Tap a job for item-level detail.",
       "empty": "No import jobs found.",
+      "emptyTitle": "No import jobs yet",
+      "emptySubtitle": "When you create listings, jobs appear here so you can follow progress and errors.",
+      "emptyLoading": "Loading jobs…",
+      "filters": {
+        "searchPlaceholder": "Search by job ID…",
+        "allStatuses": "All statuses",
+        "resultCount": "{{count}} jobs"
+      },
       "status": {
         "pending": "Pending",
         "processing": "Processing",
@@ -18,31 +26,50 @@
         "id": "Job ID",
         "date": "Date",
         "progress": "Progress",
-        "stats": "Stats",
+        "stats": "Results",
         "status": "Status",
         "actions": "Actions",
-        "createdAt": "Created At",
-        "total": "Total"
+        "createdAt": "Created",
+        "updatedAt": "Updated",
+        "total": "Total",
+        "processed": "Processed"
       },
       "stats": {
         "success": "Success",
-        "failed": "Failed"
+        "failed": "Failed",
+        "remaining": "Remaining"
+      },
+      "card": {
+        "progressLabel": "{{percent}}% complete",
+        "asinsTotal": "{{count}} ASINs",
+        "openDetail": "View details"
       },
       "details": {
-        "title": "Job Details"
+        "title": "Job details",
+        "subtitle": "Item-level status for this import job",
+        "summary": "Summary",
+        "itemsTitle": "Job items",
+        "itemsSubtitle": "{{count}} ASINs in this job",
+        "notFoundTitle": "Job not found",
+        "notFoundSubtitle": "This job may have been removed or you do not have access.",
+        "jobId": "Job ID",
+        "refresh": "Refresh"
       },
       "items": {
         "asin": "ASIN",
         "status": "Status",
         "ebayId": "eBay ID",
-        "error": "Error Message",
-        "empty": "No items found for this job."
+        "error": "Error",
+        "empty": "No items found for this job.",
+        "emptyTitle": "No items yet",
+        "emptySubtitle": "Items appear as the job starts processing ASINs."
       }
     },
     "filters": {
       "searchPlaceholder": "Search by title or ASIN...",
       "allCategories": "All Categories",
       "allStatuses": "All Statuses",
+      "allStores": "All Stores",
       "advancedFilters": "Advanced Filters",
       "clearAll": "Clear All",
       "resultCount": "{{count}} results",
@@ -67,8 +94,25 @@
       "emptyTitle": "No Listings Found",
       "emptySubtitle": "Start by adding products from Amazon to your eBay store."
     },
+    "empty": {
+      "loadingTitle": "Loading listings",
+      "loadingSubtitle": "Fetching your catalog…",
+      "catalogTitle": "No listings yet",
+      "catalogSubtitle": "Import Amazon ASINs to create eBay listings. Pricing and stock stay in sync automatically.",
+      "catalogAction": "Add listings",
+      "filtersTitle": "No matching listings",
+      "filtersSubtitle": "Nothing matches your current search or filters. Try broadening the query or clearing filters.",
+      "filtersAction": "Clear filters",
+      "draftTitle": "No drafts yet",
+      "draftSubtitle": "Save listings as drafts when adding products, then review and publish them to eBay when ready.",
+      "draftAction": "Add as draft",
+      "backToOverview": "Back to overview"
+    },
     "table": {
       "product": "Product",
+      "source": "Source",
+      "listingCol": "Listing",
+      "added": "Added",
       "brand": "Brand",
       "asin": "ASIN",
       "ebayId": "eBay ID",
@@ -79,6 +123,7 @@
       "roi": "ROI",
       "stock": "Stock",
       "sold": "Sold",
+      "lastSale": "Last Sale",
       "watch": "Watch",
       "watchers": "Watchers",
       "views": "Views",
@@ -143,13 +188,19 @@
     "actions": {
       "cancel": "Cancel",
       "import": "Import & Create Listings",
+      "importDraft": "Save as Drafts",
       "importing": "Importing...",
       "addListing": "Add Listing",
       "addNewList": "Add New List",
+      "createListings": "Create Listings",
+      "export": "Export",
       "viewAll": "View All",
       "endListing": "End Listing",
+      "delist": "Delist",
       "deleteListings": "Delete Listings",
-      "bulkActions": "Bulk Actions"
+      "bulkActions": "Bulk Actions",
+      "publish": "Publish to eBay",
+      "publishSelected": "Publish selected"
     },
     "addSection": {
       "title": "Add New Listing",
@@ -157,11 +208,20 @@
       "create": "Create New Listing",
       "jobs": "View Import Jobs"
     },
+    "draftMode": {
+      "title": "Save as drafts",
+      "hint": "Prepare products and pricing without publishing to eBay. You can review and publish later from Drafts.",
+      "pageTitle": "Draft listings",
+      "pageSubtitle": "{{count}} draft listings ready to review or publish.",
+      "empty": "No drafts yet. Save listings as drafts when adding products."
+    },
     "otherActions": {
       "title": "Other Actions",
       "subtitle": "Manage additional operations related to your listings.",
       "jobsTitle": "View Import Jobs",
-      "jobsSubtitle": "Track the status of your bulk import operations."
+      "jobsSubtitle": "Track the status of your bulk import operations.",
+      "draftsTitle": "View drafts",
+      "draftsSubtitle": "Review prepared listings before publishing them to eBay."
     },
     "drawer": {
       "step1": "Settings & Policies",
@@ -175,13 +235,21 @@
       "deleteSuccessTitle": "Listings Deleted",
       "deleteSuccess": "Successfully deleted {{count}} listings.",
       "deleteErrorTitle": "Action Failed",
-      "deleteError": "Failed to delete some listings."
+      "deleteError": "Failed to delete some listings.",
+      "publishSuccessTitle": "Published",
+      "publishSuccess": "Successfully published {{count}} listing(s) to eBay.",
+      "publishErrorTitle": "Publish failed",
+      "publishError": "Could not publish one or more drafts. Check stock and eBay account."
     },
     "modals": {
       "endTitle": "End Selected Listings?",
       "endDescription": "Are you sure you want to end {{count}} selected listings on eBay? They will be moved to inactive status.",
       "deleteTitle": "Delete Selected Listings?",
-      "deleteDescription": "Are you sure you want to delete {{count}} selected listings? This will end them on eBay and remove them from your store. This action cannot be undone."
+      "deleteDescription": "Are you sure you want to delete {{count}} selected listings? This will end them on eBay and remove them from your store. This action cannot be undone.",
+      "publishTitle": "Publish selected drafts?",
+      "publishDescription": "Publish {{count}} draft listing(s) to eBay now. Each item will go live with current strategy pricing and stock.",
+      "publishOneTitle": "Publish this draft?",
+      "publishOneDescription": "This listing will be created on eBay and become active. You can still edit automation and settings afterward."
     },
     "validation": {
       "invalidAsin": "Invalid ASIN format. Must start with 'B' followed by 9 alphanumeric characters.",
@@ -190,16 +258,74 @@
       "paymentPolicyRequired": "Payment policy is required",
       "shippingPolicyRequired": "Shipping policy is required",
       "returnPolicyRequired": "Return policy is required",
-      "listingSettingsGroupRequired": "Listing strategy group is required"
+      "listingSettingsGroupRequired": "Listing strategy group is required",
+      "titleRequired": "Title is required",
+      "titleMax": "Title must be 80 characters or less"
     },
     "success": {
       "created": "{{count}} listings created successfully",
-      "queued": "{{count}} listings queued for processing"
+      "queued": "{{count}} listings queued for processing",
+      "queuedDraft": "{{count}} draft listings queued — they will not go live until you publish them"
     },
     "errors": {
       "createFailed": "Failed to create listings",
       "fetchPoliciesFailed": "Failed to fetch eBay business policies",
-      "invalidAsins": "Some ASINs are invalid and were skipped"
+      "invalidAsins": "Some ASINs are invalid and were skipped",
+      "loadFailed": "Failed to load listings. Please try again."
+    },
+    "detail": {
+      "breadcrumb": "Listing detail",
+      "subtitle": "Pricing, stock, automation, and product content",
+      "economics": "Pricing & profit",
+      "performance": "Stock & performance",
+      "settings": "Configuration",
+      "editConfig": "Edit configuration",
+      "system": "System",
+      "productContent": "Product content",
+      "description": "Description",
+      "descriptionEmpty": "No Amazon description for this product. Features are shown below when available.",
+      "features": "Features",
+      "featuresEmpty": "No feature bullets available.",
+      "specs": "Item specifics",
+      "specsEmpty": "No structured specs available.",
+      "titleField": "eBay title",
+      "listingId": "Internal ID",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "notSet": "Not set",
+      "openAmazon": "View on Amazon",
+      "openEbay": "View on eBay",
+      "editSettings": "Edit",
+      "editDrawerTitle": "Edit listing",
+      "editDrawerSubtitle": "Update title, strategy group, and eBay policies",
+      "manage": "Manage",
+      "endShort": "End listing",
+      "deleteShort": "Delete",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "imageThumb": "Image {{index}}",
+      "notFoundTitle": "Listing not found",
+      "notFoundSubtitle": "This listing may have been deleted or you do not have access.",
+      "loadFailed": "Failed to load listing details.",
+      "saveSuccess": "Listing settings saved.",
+      "saveFailed": "Failed to save listing settings.",
+      "automationTitle": "Automation",
+      "pauseSales": "Pause sales",
+      "pauseSalesHint": "Sets eBay quantity to 0 so buyers cannot purchase. Listing stays active.",
+      "fixedPrice": "Fixed price",
+      "fixedPriceHint": "Stops auto-repricing. Uses the price below (or current price if empty).",
+      "fixedQuantity": "Fixed quantity",
+      "fixedQuantityHint": "Stops stock sync from changing quantity. Uses the quantity below.",
+      "priceOverride": "Fixed sell price",
+      "quantityOverride": "Fixed quantity",
+      "customMargin": "Custom margin (when price is not fixed)",
+      "customMarginHint": "Optional margin on Amazon cost for this listing only. Ignored while Fixed price is on.",
+      "marginPercentOverride": "Margin %",
+      "marginFixedOverride": "Margin fixed $",
+      "saveOverrides": "Save automation",
+      "publish": "Publish to eBay",
+      "publishHint": "This draft is not live on eBay yet. Publish when pricing and stock look right.",
+      "draftBanner": "Draft — not published to eBay"
     }
   }
 }

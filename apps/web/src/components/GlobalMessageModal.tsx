@@ -17,7 +17,8 @@ export const GlobalMessageModal: React.FC = () => {
         messageState.primaryButton || {
           label: t('common.ok'),
           onClick: closeMessage,
-          variant: messageState.type === 'error' ? 'danger' : 'primary',
+          // Always brand primary — Dialog never uses red action buttons
+          variant: 'primary',
         }
       }
       secondaryButton={messageState.secondaryButton || undefined}

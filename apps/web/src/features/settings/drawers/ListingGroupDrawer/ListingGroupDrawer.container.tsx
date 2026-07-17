@@ -20,15 +20,6 @@ import {
   useUpdateListingSettingsGroupMutation,
 } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 
-/** Fields validated per wizard step. Hoisted to module scope so the
- *  step-validation effect can reference it without re-running every render. */
-const STEP_FIELDS: Record<ListingGroupDrawerStep, string[]> = {
-  0: ['name', 'stock.defaultQuantity', 'stock.stockBuffer'],
-  1: ['fees.ebayFeePercent', 'fees.fixedFeeAmount', 'fees.taxPercent'],
-  2: ['repricingStrategy'],
-  3: ['templates'],
-};
-
 export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, onClose, editingGroupId }) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
   const { showMessage, closeMessage } = useUI();
@@ -59,6 +50,9 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   // Form Initialization
   const form = useForm<ListingSettingsGroupFormData>({
     resolver: zodResolver(listingSettingsGroupSchema(t)) as any,
+    // Only show field errors after explicit Next/Submit — never on drawer open
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
     defaultValues: {
       name: '',
       description: '',
@@ -66,10 +60,15 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       stock: { defaultQuantity: 1, stockBuffer: 0 },
       fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3, taxPercent: 0 },
       templates: { type: TemplateType.PREDEFINED, predefinedTemplateId: undefined },
+      content: {
+        stripBrandFromTitle: false,
+        aiTitleEnabled: false,
+        aiDescriptionEnabled: false,
+      },
     },
   });
 
-  const { reset, control, getValues, trigger, handleSubmit: rhfSubmit } = form;
+  const { reset, control, getValues, clearErrors, handleSubmit: rhfSubmit } = form;
 
   // Sync form with data when editing
   useEffect(() => {
@@ -78,7 +77,15 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     }
     if (group) {
       const strategies = group.repricingStrategy.map((s) => ({ ...s, id: s.id || crypto.randomUUID() }));
-      reset({ ...group, repricingStrategy: strategies });
+      reset({
+        ...group,
+        repricingStrategy: strategies,
+        content: {
+          stripBrandFromTitle: group.content?.stripBrandFromTitle ?? false,
+          aiTitleEnabled: group.content?.aiTitleEnabled ?? false,
+          aiDescriptionEnabled: group.content?.aiDescriptionEnabled ?? false,
+        },
+      });
     } else if (!isEdit) {
       // Reset to defaults for create mode
       reset({
@@ -88,6 +95,11 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
         stock: { defaultQuantity: 1, stockBuffer: 0 },
         fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3, taxPercent: 0 },
         templates: { type: TemplateType.PREDEFINED, predefinedTemplateId: templates[0]?.id },
+        content: {
+          stripBrandFromTitle: false,
+          aiTitleEnabled: false,
+          aiDescriptionEnabled: false,
+        },
       });
     }
   }, [group, templates, reset, isEdit, isOpen]);
@@ -250,26 +262,64 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     }
   };
 
-  // Step validation — validate only the fields relevant to the current step
-  const [canProceed, setCanProceed] = useState(true);
-
-  // Re-check validity whenever step or form values change
+  // Soft gate for Continue — values only, never RHF trigger() (trigger paints red errors)
   const watchedValues = useWatch({ control });
-  useEffect(() => {
-    if (!isOpen) {
-      return;
+  const canProceed = useMemo(() => {
+    const v = watchedValues;
+    if (!v) {
+      return false;
     }
-    void (async () => {
-      const fieldsToValidate = STEP_FIELDS[currentStep];
-      const valid = await trigger(fieldsToValidate as any, { shouldFocus: false });
-      setCanProceed(valid);
-    })();
-  }, [currentStep, watchedValues, trigger, isOpen]);
+    switch (currentStep) {
+      case 0: {
+        const qty = Number(v.stock?.defaultQuantity);
+        const buf = Number(v.stock?.stockBuffer ?? 0);
+        return Boolean(v.name?.trim()) && Number.isFinite(qty) && qty >= 1 && Number.isFinite(buf) && buf >= 0;
+      }
+      case 1: {
+        const fee = Number(v.fees?.ebayFeePercent);
+        const fixed = Number(v.fees?.fixedFeeAmount);
+        const tax = Number(v.fees?.taxPercent);
+        return (
+          Number.isFinite(fee) &&
+          fee >= 0 &&
+          fee <= 100 &&
+          Number.isFinite(fixed) &&
+          fixed >= 0 &&
+          Number.isFinite(tax) &&
+          tax >= 0 &&
+          tax <= 100
+        );
+      }
+      case 2: {
+        const ranges = v.repricingStrategy ?? [];
+        if (ranges.length === 0) {
+          return false;
+        }
+        return ranges.every((r) => {
+          const min = Number(r.minPrice);
+          const max = Number(r.maxPrice);
+          const hasMargin = r.profitMarginPercent !== undefined && r.profitMarginPercent !== null && !Number.isNaN(Number(r.profitMarginPercent));
+          const hasFixed = r.fixedProfitAmount !== undefined && r.fixedProfitAmount !== null && !Number.isNaN(Number(r.fixedProfitAmount));
+          return Number.isFinite(min) && Number.isFinite(max) && max > min && (hasMargin || hasFixed);
+        });
+      }
+      case 3: {
+        if (v.templates?.type === TemplateType.CUSTOM) {
+          return Boolean(v.templates?.customTemplateHtml?.trim());
+        }
+        return Boolean(v.templates?.predefinedTemplateId);
+      }
+      default:
+        return false;
+    }
+  }, [currentStep, watchedValues]);
 
   const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep((currentStep + 1) as ListingGroupDrawerStep);
+    if (!canProceed || currentStep >= 3) {
+      return;
     }
+    clearErrors();
+    setCurrentStep((currentStep + 1) as ListingGroupDrawerStep);
   };
 
   const handleBack = () => {
@@ -282,6 +332,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   };
 
   const handleStepChange = (step: ListingGroupDrawerStep) => {
+    clearErrors();
     setCurrentStep(step);
   };
 

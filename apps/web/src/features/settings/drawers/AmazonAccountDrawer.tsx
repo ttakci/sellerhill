@@ -6,7 +6,7 @@ import { Badge, Drawer, ModernTextInput, Text, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { BodyStack } from './AmazonAccountDrawer.style';
+import { BodyStack, FormCard } from './AmazonAccountDrawer.style';
 import type { AmazonAccountDrawerProps } from './AmazonAccountDrawer.types';
 
 import {
@@ -132,49 +132,51 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
       }}
     >
       <BodyStack>
-        <ModernTextInput
-          name="label"
-          label={t(`${prefix}.label`)}
-          value={label}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
-        />
-        <ModernTextInput
-          name="email"
-          label={t(`${prefix}.email`)}
-          value={email}
-          type="email"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-        />
-        <ModernTextInput
-          name="password"
-          label={t(`${prefix}.password`)}
-          value={password}
-          type="password"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-        />
-        {isEdit && (
-          <Text variant="caption" color="text.tertiary">
-            {t('translation:settingsHub.drawer.amazonEdit.passwordHint')}
-          </Text>
-        )}
-        <ModernTextInput
-          name="twoFactorSecret"
-          label={t(`${prefix}.twoFactorSecret`)}
-          value={twoFactorSecret}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTwoFactorSecret(e.target.value)}
-        />
-        {isEdit && (
-          <Text variant="caption" color="text.tertiary">
-            <Badge variant={editingAccount?.hasTwoFactor ? 'success' : 'neutral'} size="sm">
-              {t(
-                editingAccount?.hasTwoFactor
-                  ? 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeSet'
-                  : 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeNotSet',
-              )}
-            </Badge>{' '}
-            {t('translation:settingsHub.drawer.amazonEdit.twoFactorHint')}
-          </Text>
-        )}
+        <FormCard>
+          <ModernTextInput
+            name="label"
+            label={t(`${prefix}.label`)}
+            value={label}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
+          />
+          <ModernTextInput
+            name="email"
+            label={t(`${prefix}.email`)}
+            value={email}
+            type="email"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+          />
+          <ModernTextInput
+            name="password"
+            label={t(`${prefix}.password`)}
+            value={password}
+            type="password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+          />
+          {isEdit && (
+            <Text variant="caption" color="text.tertiary">
+              {t('translation:settingsHub.drawer.amazonEdit.passwordHint')}
+            </Text>
+          )}
+          <ModernTextInput
+            name="twoFactorSecret"
+            label={t(`${prefix}.twoFactorSecret`)}
+            value={twoFactorSecret}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTwoFactorSecret(e.target.value)}
+          />
+          {isEdit && (
+            <Text variant="caption" color="text.tertiary">
+              <Badge variant={editingAccount?.hasTwoFactor ? 'success' : 'neutral'} size="sm">
+                {t(
+                  editingAccount?.hasTwoFactor
+                    ? 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeSet'
+                    : 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeNotSet',
+                )}
+              </Badge>{' '}
+              {t('translation:settingsHub.drawer.amazonEdit.twoFactorHint')}
+            </Text>
+          )}
+        </FormCard>
       </BodyStack>
     </Drawer>
   );

@@ -38,12 +38,15 @@ export const DataTableComponent = <T,>({
   actions,
   pagination,
   emptyMessage,
+  emptyContent,
   onRowClick,
   className,
 }: DataTableComponentProps<T>): React.ReactElement => {
   const hasBulkActions = bulkActions && bulkActions.length > 0 && data.length > 0;
   const showColumnManager = viewMode === 'table' && columnOptions && columnOptions.length > 0;
   const hasToolbar = hasBulkActions || !hideViewToggle || onDownload || actions || showColumnManager || toolbarLeft;
+  const isEmpty = data.length === 0;
+  const resolvedEmpty = emptyContent ?? emptyMessage ?? 'No data';
 
   return (
     <S.DataTableContainer className={className}>
@@ -91,7 +94,8 @@ export const DataTableComponent = <T,>({
           selectable={selectable}
           selectedRows={selectedRows}
           onSelectionChange={onSelectionChange}
-          emptyMessage={emptyMessage}
+          emptyMessage={typeof resolvedEmpty === 'string' ? resolvedEmpty : undefined}
+          emptyContent={typeof resolvedEmpty !== 'string' ? resolvedEmpty : undefined}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
@@ -99,15 +103,15 @@ export const DataTableComponent = <T,>({
         />
       ) : (
         <S.GridContainer>
-          {data.length === 0 ? (
-            <S.GridEmptyState>{emptyMessage || 'No data'}</S.GridEmptyState>
+          {isEmpty ? (
+            <S.GridEmptyState>{resolvedEmpty}</S.GridEmptyState>
           ) : (
             data.map((item, index) => renderGridCard(item, index))
           )}
         </S.GridContainer>
       )}
 
-      {pagination && (
+      {pagination && !isEmpty && (
         <TablePagination
           count={pagination.count}
           page={pagination.page}

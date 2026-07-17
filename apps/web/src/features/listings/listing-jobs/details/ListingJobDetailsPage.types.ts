@@ -1,13 +1,29 @@
-import type { ListingJobItemDto } from '@repo/shared';
-
-export interface ListingJobDetailsPageContainerProps {}
+import type { ListingJobDto, ListingJobItemDto, ListingJobStatus, ListingStatus } from '@repo/shared';
+import type { TableColumn, ViewMode } from '@repo/ui';
 
 export interface ListingJobDetailsPageComponentProps {
   jobId: string;
+  job: ListingJobDto | undefined;
   items: ListingJobItemDto[];
   isLoading: boolean;
-  onRefresh: () => void;
+  isRefreshing: boolean;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  columns: TableColumn<ListingJobItemDto>[];
   onBack: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: any[];
+  onRefresh: () => void;
+  formatPercent: (job: ListingJobDto) => number;
+  formatJobDate: (iso: string) => string;
+  jobStatusLabel: (status: ListingJobStatus | string) => string;
+  itemStatusLabel: (status: ListingStatus | string) => string;
+  pagination: {
+    count: number;
+    page: number;
+    rowsPerPage: number;
+    onPageChange: (page: number) => void;
+    onRowsPerPageChange: (rowsPerPage: number) => void;
+    labelRowsPerPage?: string;
+    labelInfo?: string;
+  };
+  paginatedItems: ListingJobItemDto[];
 }

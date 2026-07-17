@@ -4,6 +4,33 @@
       "title": "Orders",
       "subtitle": "{{count}} orders"
     },
+    "overview": {
+      "title": "Orders",
+      "subtitle": "{{count}} orders",
+      "viewAll": "View All",
+      "emptyTitle": "No orders yet",
+      "emptySubtitle": "Synced eBay sales will show up here.",
+      "syncTitle": "Sync orders from eBay",
+      "syncSubtitle": "Pull the latest sales, buyers, and financials.",
+      "actionsTitle": "Other actions",
+      "viewAllTitle": "All orders",
+      "viewAllSubtitle": "Browse, filter, and export {{count}} orders"
+    },
+    "carousel": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "all": {
+      "title": "All orders",
+      "subtitle": "{{count}} results",
+      "emptyTitle": "No orders match your filters"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "allStores": "All stores",
+      "clearAll": "Clear all",
+      "resultCount": "{{count}} results"
+    },
     "stats": {
       "totalSales": "Total Sales",
       "netProfit": "Net Profit",
@@ -22,12 +49,15 @@
     },
     "table": {
       "orderNumber": "Order #",
+      "product": "Product",
       "date": "Date",
       "buyer": "Buyer",
       "status": "Status",
-      "salePrice": "Sale Price",
-      "purchasePrice": "Purchase Price",
-      "netProfit": "Net Profit"
+      "salePrice": "Sale",
+      "purchasePrice": "Cost",
+      "netProfit": "Profit",
+      "asin": "ASIN",
+      "ebayId": "eBay"
     },
     "status": {
       "completed": "Completed",
@@ -42,6 +72,8 @@
     },
     "detail": {
       "title": "Order Details",
+      "notFoundTitle": "Order not found",
+      "notFoundSubtitle": "This order may have been removed or you do not have access.",
       "orderPlaced": "Order placed",
       "viewInvoice": "View Invoice",
       "printLabels": "Print Labels",

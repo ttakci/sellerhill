@@ -38,4 +38,9 @@ export interface CheckboxProps {
    * Custom className
    */
   className?: string;
+
+  /**
+   * Accessible label when no visible label is provided
+   */
+  'aria-label'?: string;
 }

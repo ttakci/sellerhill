@@ -1,10 +1,9 @@
-import { ListingStatus, type ListingDto } from '@repo/shared';
+import type { ListingDto } from '@repo/shared';
 import {
   Button,
   DataTable,
+  EmptyState,
   Icon,
-  ListingCard,
-  type ListingCardProps,
   PageHeader,
   SearchField,
   Select,
@@ -14,14 +13,21 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+
+import { toListingCardProps } from '../shared/listing-card.mapper';
+
 import * as S from './ListingsAllPage.style';
 import type { ListingsAllPageProps } from './ListingsAllPage.types';
+
+import { ListingCard } from '@/domain-ui';
 
 export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   listings,
   onSelectionChange,
   columns,
   selectedRows,
+  selectedIds,
+  onToggleListingSelection,
   bulkActions,
   onDownload,
   tableView,
@@ -39,163 +45,234 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   categoryOptions,
   onStatusChange,
   statusOptions,
+  onEbayAccountChange,
+  storeOptions,
   numericFilters,
   onClearFilters,
   hasActiveFilters,
   resultCount,
   advancedOpen,
   onToggleAdvanced,
+  onBack,
+  isInitialLoading,
+  onListingClick,
+  isDraftMode = false,
+  hideStatusFilter = false,
+  onAddListing,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
+  const pageTitle = isDraftMode ? t('listings.draftMode.pageTitle') : t('listings.overview.title');
+  const pageSubtitle = isDraftMode
+    ? t('listings.draftMode.pageSubtitle', { count: resultCount })
+    : t('listings.overview.subtitle', { count: resultCount });
+
+  const isEmpty = !isInitialLoading && listings.length === 0;
+  /** True empty catalog/drafts or filter miss — chrome (filters/toolbar) is noise next to EmptyState. */
+  const showListChrome = !isEmpty;
+
   const renderGridCard = (listing: ListingDto) => {
-    const title = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
-    const profit = listing.estimatedProfit ?? 0;
-    const roi = listing.roi ?? 0;
-    const isActive = listing.status === ListingStatus.ACTIVE;
-    const card: ListingCardProps = {
-      orientation: 'vertical',
-      title,
-      imageUrl: listing.imageUrls?.[0],
-      brand: listing.brand,
-      primaryBadge: { id: listing.asin, storeType: 'amazon' },
-      secondaryBadge: listing.ebayListingId ? { id: listing.ebayListingId, storeType: 'ebay' } : undefined,
-      soldCount: listing.soldCount,
-      watchCount: listing.watchCount,
-      stats: [
-        { label: t('listings.table.price'), value: `$${listing.price.toFixed(2)}` },
-        {
-          label: t('listings.table.estimatedProfit'),
-          value: `${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`,
-          tone: profit >= 0 ? 'positive' : 'negative',
-        },
-        {
-          label: t('listings.table.roi'),
-          value: `${roi.toFixed(1)}%`,
-          tone: roi >= 0 ? 'positive' : 'negative',
-        },
-      ],
-      status: {
-        label: t(`listings.status.${listing.status.toLowerCase()}`),
-        tone: isActive ? 'active' : 'neutral',
-      },
-    };
-    return <ListingCard key={listing.id} {...card} orientation="vertical" />;
+    const card = toListingCardProps(listing, t);
+    return (
+      <ListingCard
+        key={listing.id}
+        {...card}
+        orientation="horizontal"
+        selectable
+        selected={selectedIds.includes(listing.id)}
+        onSelectedChange={(selected) => onToggleListingSelection(listing.id, selected)}
+        selectionAriaLabel={t('listings.actions.bulkActions')}
+        onClick={() => onListingClick(listing.id)}
+      />
+    );
   };
+
+  const emptyState = (() => {
+    if (isInitialLoading) {
+      return (
+        <EmptyState
+          icon="loader"
+          title={t('listings.empty.loadingTitle')}
+          description={t('listings.empty.loadingSubtitle')}
+          size="md"
+        />
+      );
+    }
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          icon="search"
+          title={t('listings.empty.filtersTitle')}
+          description={t('listings.empty.filtersSubtitle')}
+          action={t('listings.empty.filtersAction')}
+          onAction={onClearFilters}
+          size="lg"
+        />
+      );
+    }
+    if (isDraftMode) {
+      return (
+        <EmptyState
+          icon="layers"
+          title={t('listings.empty.draftTitle')}
+          description={t('listings.empty.draftSubtitle')}
+          size="lg"
+        />
+      );
+    }
+    return (
+      <EmptyState
+        icon="inventory"
+        title={t('listings.empty.catalogTitle')}
+        description={t('listings.empty.catalogSubtitle')}
+        action={onAddListing ? t('listings.empty.catalogAction') : undefined}
+        onAction={onAddListing}
+        size="lg"
+      />
+    );
+  })();
 
   return (
     <S.Container>
       <PageHeader
-        title={t('listings.overview.title')}
-        subtitle={t('listings.overview.subtitle', { count: resultCount })}
+        title={pageTitle}
+        subtitle={pageSubtitle}
+        onBack={onBack}
+        backAriaLabel={t('translation:common.back')}
       />
-      <S.FilterBarWrapper>
-        <S.FilterBar>
-          <S.FilterBarRow>
-            <S.SearchWrapper>
-              <SearchField
-                value={filters.search}
-                onChange={onSearchChange}
-                placeholder={t('listings.filters.searchPlaceholder')}
-                size="medium"
-              />
-            </S.SearchWrapper>
-            <S.SelectWrapper>
-              <Select
-                value={filters.category}
-                onChange={onCategoryChange}
-                options={categoryOptions}
-                placeholder={t('listings.filters.allCategories')}
-                size="small"
-                fullWidth
-              />
-            </S.SelectWrapper>
-            <S.SelectWrapper>
-              <Select
-                value={filters.status}
-                onChange={onStatusChange}
-                options={statusOptions}
-                placeholder={t('listings.filters.allStatuses')}
-                size="small"
-                fullWidth
-              />
-            </S.SelectWrapper>
-            <S.FilterActions>
-              <S.ResultCount variant="body-sm" color="text.tertiary">
-                {t('listings.filters.resultCount', { count: resultCount })}
-              </S.ResultCount>
-              {hasActiveFilters && (
-                <Button variant="text" size="small" onClick={onClearFilters}>
-                  <Text>{t('listings.filters.clearAll')}</Text>
-                </Button>
+
+      {showListChrome && (
+        <S.FilterBarWrapper>
+          <S.FilterBar>
+            <S.FilterBarRow>
+              <S.SearchWrapper>
+                <SearchField
+                  value={filters.search}
+                  onChange={onSearchChange}
+                  placeholder={t('listings.filters.searchPlaceholder')}
+                  size="medium"
+                  fullWidth
+                />
+              </S.SearchWrapper>
+              <S.SelectWrapper>
+                {/* No floating label here — toolbar row uses compact control height to match SearchField */}
+                <Select
+                  value={filters.category}
+                  onChange={onCategoryChange}
+                  options={categoryOptions}
+                  placeholder={t('listings.filters.allCategories')}
+                  size="medium"
+                  fullWidth
+                />
+              </S.SelectWrapper>
+              {!hideStatusFilter && (
+                <S.SelectWrapper>
+                  <Select
+                    value={filters.status}
+                    onChange={onStatusChange}
+                    options={statusOptions}
+                    placeholder={t('listings.filters.allStatuses')}
+                    size="medium"
+                    fullWidth
+                  />
+                </S.SelectWrapper>
               )}
-            </S.FilterActions>
-          </S.FilterBarRow>
+              <S.SelectWrapper>
+                <Select
+                  value={filters.ebayAccountId}
+                  onChange={onEbayAccountChange}
+                  options={storeOptions}
+                  placeholder={t('listings.filters.allStores')}
+                  size="medium"
+                  fullWidth
+                />
+              </S.SelectWrapper>
+              <S.FilterActions>
+                <S.ResultCount variant="caption" weight="medium" color="text.secondary">
+                  {t('listings.filters.resultCount', { count: resultCount })}
+                </S.ResultCount>
+                {hasActiveFilters && (
+                  <Button variant="text" size="small" onClick={onClearFilters}>
+                    <Text variant="body">{t('listings.filters.clearAll')}</Text>
+                  </Button>
+                )}
+              </S.FilterActions>
+            </S.FilterBarRow>
 
-          <S.AdvancedDivider />
-          <S.AdvancedHeader $isOpen={advancedOpen} onClick={onToggleAdvanced}>
-            <Icon name="sliders-horizontal" size={16} />
-            {t('listings.filters.advancedFilters')}
-            <Icon name="chevron-down" size={16} />
-          </S.AdvancedHeader>
+            <S.AdvancedDivider />
+            <S.AdvancedHeader type="button" $isOpen={advancedOpen} onClick={onToggleAdvanced}>
+              <Icon name="sliders-horizontal" size={18} />
+              <Text variant="body-sm" weight="semibold" color="text.primary">
+                {t('listings.filters.advancedFilters')}
+              </Text>
+              <S.AdvancedChevron $isOpen={advancedOpen}>
+                <Icon name="chevron-down" size={18} />
+              </S.AdvancedChevron>
+            </S.AdvancedHeader>
 
-          {advancedOpen && (
-            <S.NumericFilterGrid>
-              {numericFilters.map((field) => (
-                <S.NumericFilterField key={field.key}>
-                  <S.NumericFilterLabel variant="caption" weight="medium" color="text.secondary">
-                    {field.label}
-                  </S.NumericFilterLabel>
-                  <S.NumericRangeRow>
-                    <TextInput
-                      name={`${field.key}-min`}
-                      value={field.min}
-                      onChange={field.onMinChange}
-                      placeholder={t('listings.filters.min')}
-                      type="number"
-                      size="small"
-                      fullWidth
-                    />
-                    <S.RangeSeparator variant="body-sm" color="text.tertiary">
-                      -
-                    </S.RangeSeparator>
-                    <TextInput
-                      name={`${field.key}-max`}
-                      value={field.max}
-                      onChange={field.onMaxChange}
-                      placeholder={t('listings.filters.max')}
-                      type="number"
-                      size="small"
-                      fullWidth
-                    />
-                  </S.NumericRangeRow>
-                </S.NumericFilterField>
-              ))}
-            </S.NumericFilterGrid>
-          )}
-        </S.FilterBar>
-      </S.FilterBarWrapper>
+            {advancedOpen && (
+              <S.NumericFilterGrid>
+                {numericFilters.map((field) => (
+                  <S.NumericFilterField key={field.key}>
+                    <S.NumericRangeRow>
+                      <TextInput
+                        name={`${field.key}-min`}
+                        value={field.min}
+                        onChange={field.onMinChange}
+                        label={`${field.label} · ${t('listings.filters.min')}`}
+                        type="number"
+                        size="medium"
+                        fullWidth
+                      />
+                      <S.RangeSeparator variant="body" color="text.tertiary">
+                        –
+                      </S.RangeSeparator>
+                      <TextInput
+                        name={`${field.key}-max`}
+                        value={field.max}
+                        onChange={field.onMaxChange}
+                        label={`${field.label} · ${t('listings.filters.max')}`}
+                        type="number"
+                        size="medium"
+                        fullWidth
+                      />
+                    </S.NumericRangeRow>
+                  </S.NumericFilterField>
+                ))}
+              </S.NumericFilterGrid>
+            )}
+          </S.FilterBar>
+        </S.FilterBarWrapper>
+      )}
+
       <DataTable
         columns={columns}
         data={listings}
         renderGridCard={renderGridCard}
         viewMode={tableView}
         onViewModeChange={onTableViewChange}
+        hideViewToggle={isEmpty}
         selectable
         selectedRows={selectedRows}
         onSelectionChange={(rows) => onSelectionChange(rows.map((r) => r.id))}
-        emptyMessage={t('listings.overview.emptyTitle')}
+        emptyContent={emptyState}
+        emptyMessage={
+          isInitialLoading
+            ? t('translation:common.loading')
+            : t('listings.overview.emptyTitle')
+        }
         bulkActions={bulkActions}
         bulkActionsPlaceholder={t('listings.actions.bulkActions')}
-        columnOptions={columnOptions}
+        columnOptions={isEmpty ? undefined : columnOptions}
         visibleColumnKeys={visibleColumnKeys}
         onToggleColumn={onToggleColumn}
         columnManagerLabel={t('translation:common.actions.filter')}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={onSort}
-        onDownload={onDownload}
+        onDownload={isEmpty ? undefined : onDownload}
         pagination={pagination}
+        onRowClick={(row) => onListingClick(row.id)}
       />
     </S.Container>
   );

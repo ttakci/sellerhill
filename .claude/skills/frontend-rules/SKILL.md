@@ -30,22 +30,39 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 ### Tokens
 - All colors, spacing, shadows, radii, typography → `tkn('path')` from `@repo/ui`. Never hardcoded hex/rgb, never raw `16px`/`1rem`.
 - Inline `style={{ }}` is forbidden.
+- Typeface: **Source Sans 3** for UI (`heading` / `body` / `sans`). `mono` = JetBrains Mono. Institutional / insurance-grade readability; no dual typeface stacks.
 
 ### Text
 - All visible text uses `<Text variant="...">` from `@repo/ui`. Never `styled.h1`, `styled.p`, etc.
-- Variants: `display`, `h1`, `h2`, `h3`, `h4`, `h5`, `body`, `body-sm`, `body-xs`, `caption`, `mono`, `overline`.
+- Variants (hierarchy — keep sizes distinct):
+  - `h1` 24px page title · `h2` 20px · `h3` 18px drawer · `h4` 16px card · `h5` 14px
+  - `body` 14px primary UI · `body-sm` 12px secondary · `body-xs` 10px · `caption` 12px · `overline` 10px uppercase
+- Page titles: use `PageHeader` (not ad-hoc title stacks). Title→subtitle gap is built into `PageHeader` / Drawer — do not invent per-page gaps.
+- Prefer `weight="semibold"` on headings; avoid bold everywhere.
 
 ### Form controls
-- Buttons → `Button`, `ModernButton`, `IconButton`. Never raw `<button>`.
-- Text inputs → `TextInput`. Never `<input>`.
-- Selects → `Select`. Never `<select>`.
+- Buttons → `Button`, `IconButton`. Never raw `<button>`.
+- Text inputs → `TextInput` with **floating `label` prop**. Never `<input>`, never external label above the field.
+- Selects → `Select` with floating `label` (forms) or `placeholder` only (compact toolbars). Never `<select>`.
 - Checkboxes → `Checkbox`. Toggles → `Toggle`.
+- Shared geometry: `packages/ui/src/styles/formControl.ts`. TextInput / Select / SearchField must share heights and **brand.primary** focus rings (never black borders on focus/open).
+- Heights: compact medium `2.75rem`, labeled medium `3.25rem`. See `controlTokens` on theme.
+- Toolbar rows (filters): all compact same size so Search + Select + Button align.
 
 ### Layout
 - Cards → `Card` variants: `default | bordered | elevated | flat | interactive | stat | section`.
-- Tables → `Table` molecule. Never `styled.table`.
+- Settings sections → `SettingsCard` + `SettingsActionRow` (row label = `body`, subtitle = `caption`/`body-sm`).
+- Tables → `Table` / `DataTable`. Never `styled.table`.
 - Page header → `PageHeader` molecule.
+- Drawers → `Drawer` (title `h3` semibold, subtitle `body-sm`).
 - Dropdowns → `Dropdown` atom.
+
+### Loading
+- `useLoading` only for blocking mutations. Initial page data → empty/skeleton state, not global overlay.
+
+### Logic extraction
+- Feature hooks under `features/<feature>/hooks/` when container would exceed ~150–200 lines.
+- `useForm` in container or `useXxxForm` hook — never in `.component.tsx`.
 
 ### Notifications
 - Toasts: `useToast()` → `toast.success(...)`, `toast.error(...)`.
@@ -78,3 +95,9 @@ All status values, type discriminators, and constant strings come from enums in 
 
 ## Hover effects
 All interactive elements must have visible hover (color change, lift, or shadow), using `transition: all ${tkn('transitions.fast')}`.
+
+## Listings / product chrome (project conventions)
+- Prefer **few or no** PageHeader action buttons on list/detail (mobile-first). Prefer overview QuickActions, SettingsCard/SettingsActionRow, drawers, DataTable toolbar, or one mobile Manage action.
+- Product images: **transparent** background (no gray plate) on cards, table product column, and listing detail gallery.
+- Do not duplicate ASIN / eBay ID / price blocks across multiple sections on the same page.
+- After changing `@repo/ui` (Table selection col, Icon map, Checkbox), rebuild: `pnpm --filter @repo/ui build` — web resolves package `dist/`.

@@ -7,9 +7,8 @@ import * as S from './SettingsActionRow.style';
 import type { SettingsActionRowProps } from './SettingsActionRow.types';
 
 /**
- * A full-width settings list row: icon + label on the left, a chevron on the
- * right, a divider between rows. Used inside `SettingsCard` to build consistent
- * navigable settings sections across the app.
+ * Settings list row — clear type hierarchy (readable, not washed out).
+ * Avoid Emotion component selectors (`${Arrow}`) — no babel plugin in this monorepo.
  */
 export const SettingsActionRow = ({
   icon,
@@ -22,21 +21,25 @@ export const SettingsActionRow = ({
   const isDanger = variant === 'danger';
   const tone = isDanger ? 'semantic.error' : 'brand.primary';
   return (
-    <S.Row type="button" onClick={onClick} aria-label={ariaLabel ?? label}>
+    <S.Row type="button" onClick={onClick} aria-label={ariaLabel ?? label} $danger={isDanger}>
       <S.Info>
-        {icon && <Icon name={icon} size={18} color={tone} />}
+        {icon && (
+          <S.RowIcon $danger={isDanger}>
+            <Icon name={icon} size={18} color={tone} />
+          </S.RowIcon>
+        )}
         <S.TextStack>
-          <Text variant="body-sm" weight="medium" color={isDanger ? 'semantic.error' : undefined}>
+          <Text variant="body" weight="semibold" color={isDanger ? 'semantic.error' : 'text.primary'}>
             {label}
           </Text>
           {subtitle && (
-            <Text variant="caption" color="text.tertiary">
+            <Text variant="body-sm" color="text.secondary">
               {subtitle}
             </Text>
           )}
         </S.TextStack>
       </S.Info>
-      <S.Arrow>
+      <S.Arrow $danger={isDanger}>
         <Icon name="arrow-right" size={18} color={tone} />
       </S.Arrow>
     </S.Row>

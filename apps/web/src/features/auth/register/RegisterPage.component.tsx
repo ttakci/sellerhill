@@ -48,7 +48,7 @@ export const RegisterPageComponent = ({
 
           <S.BrandingContent>
             <S.BrandingLogoWrapper>
-              <Logo size={520} />
+              <Logo height={280} />
             </S.BrandingLogoWrapper>
 
             <S.SloganWrapper>

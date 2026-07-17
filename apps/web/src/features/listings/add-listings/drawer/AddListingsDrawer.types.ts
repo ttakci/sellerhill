@@ -6,14 +6,14 @@ export type AddListingsDrawerStep = 0 | 1;
 export interface AddListingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  /** Called after successful queue; `asDraft` reflects the submitted mode. */
+  onSuccess: (result?: { asDraft: boolean }) => void;
 }
 
 export interface AddListingsDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
   currentStep: AddListingsDrawerStep;
-  onStepChange: (step: AddListingsDrawerStep) => void;
   isSubmitting: boolean;
   isLoading: boolean;
   form: UseFormReturn<CreateListingsFormData>;

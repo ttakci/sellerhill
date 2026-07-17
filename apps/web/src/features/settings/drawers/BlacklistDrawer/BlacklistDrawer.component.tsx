@@ -2,7 +2,15 @@ import { Button, Checkbox, ConfirmModal, Drawer, ModernSelect, SearchField, Text
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AddStack, BodyStack, CardGrid, ToolbarLeft, ToolbarRight, ToolbarRow } from './BlacklistDrawer.style';
+import {
+  AddStack,
+  BodyStack,
+  CardGrid,
+  FormCard,
+  ToolbarLeft,
+  ToolbarRight,
+  ToolbarRow,
+} from './BlacklistDrawer.style';
 import type { BlacklistDrawerComponentProps, BlacklistScope } from './BlacklistDrawer.types';
 
 import { BlacklistCard } from '@/features/store-settings/components/BlacklistCard';
@@ -76,72 +84,75 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
       }}
     >
       <BodyStack>
-        {/* Inline add */}
-        <AddStack>
-          <ModernSelect
-            label={scopeLabel}
-            options={[
-              { value: 'both', label: scopeBothLabel },
-              { value: 'title', label: scopeTitleLabel },
-              { value: 'description', label: scopeDescriptionLabel },
-            ]}
-            value={selectedScopeValue}
-            onChange={(v) => onSelectScopeValue(v as BlacklistScope)}
-            fullWidth
-            searchPlaceholder={t('translation:common.search')}
-            noResultsMessage={t('translation:common.noResults')}
-          />
-          <Textarea
-            value={keywords}
-            onChange={onKeywordsChange}
-            placeholder={keywordsPlaceholder}
-            fullWidth
-            rows={4}
-            aria-label={keywordsLabel}
-          />
-          <Text variant="caption" color="text.tertiary">
-            {keywordsHint}
-          </Text>
-          <Button variant="secondary" onClick={onAdd}>
-            <Text weight="bold">{addLabel}</Text>
-          </Button>
-          {errorMessage && (
-            <Text variant="caption" color="semantic.error">
-              {errorMessage}
+        <FormCard>
+          <AddStack>
+            <ModernSelect
+              label={scopeLabel}
+              options={[
+                { value: 'both', label: scopeBothLabel },
+                { value: 'title', label: scopeTitleLabel },
+                { value: 'description', label: scopeDescriptionLabel },
+              ]}
+              value={selectedScopeValue}
+              onChange={(v) => onSelectScopeValue(v as BlacklistScope)}
+              fullWidth
+              searchPlaceholder={t('translation:common.search')}
+              noResultsMessage={t('translation:common.noResults')}
+            />
+            <Textarea
+              value={keywords}
+              onChange={onKeywordsChange}
+              placeholder={keywordsPlaceholder}
+              fullWidth
+              rows={4}
+              aria-label={keywordsLabel}
+            />
+            <Text variant="caption" color="text.tertiary">
+              {keywordsHint}
+            </Text>
+            <Button variant="secondary" onClick={onAdd}>
+              <Text weight="bold">{addLabel}</Text>
+            </Button>
+            {errorMessage && (
+              <Text variant="caption" color="semantic.error">
+                {errorMessage}
+              </Text>
+            )}
+          </AddStack>
+          {hasItems ? (
+            <>
+              <SearchField
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder={searchPlaceholder}
+                fullWidth
+                aria-label={searchPlaceholder}
+              />
+              <ToolbarRow>
+                <ToolbarLeft>
+                  <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
+                  {hasSelection && (
+                    <Text variant="caption" color="text.secondary">
+                      {selectedCountLabel}
+                    </Text>
+                  )}
+                </ToolbarLeft>
+                {hasSelection && (
+                  <ToolbarRight>
+                    <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
+                      <Text weight="bold">{bulkDeleteLabel}</Text>
+                    </Button>
+                  </ToolbarRight>
+                )}
+              </ToolbarRow>
+            </>
+          ) : (
+            <Text variant="body-sm" color="text.secondary">
+              {emptyMessage}
             </Text>
           )}
-        </AddStack>
-
-        {/* List */}
+        </FormCard>
         {hasItems && (
-          <SearchField
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
-            fullWidth
-            aria-label={searchPlaceholder}
-          />
-        )}
-        {hasItems && (
-          <ToolbarRow>
-            <ToolbarLeft>
-              <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
-              {hasSelection && (
-                <Text variant="caption" color="text.secondary">
-                  {selectedCountLabel}
-                </Text>
-              )}
-            </ToolbarLeft>
-            {hasSelection && (
-              <ToolbarRight>
-                <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
-                  <Text weight="bold">{bulkDeleteLabel}</Text>
-                </Button>
-              </ToolbarRight>
-            )}
-          </ToolbarRow>
-        )}
-        {hasItems ? (
           <CardGrid>
             {items.map((item) => (
               <BlacklistCard
@@ -155,10 +166,6 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
               />
             ))}
           </CardGrid>
-        ) : (
-          <Text variant="body-sm" color="text.secondary">
-            {emptyMessage}
-          </Text>
         )}
       </BodyStack>
 

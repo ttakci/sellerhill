@@ -1,12 +1,27 @@
-import type { ListingJobDto } from '@repo/shared';
-
-export interface ListingJobsPageContainerProps {}
+import type { ListingJobDto, ListingJobStatus } from '@repo/shared';
+import type { TableColumn, ViewMode } from '@repo/ui';
 
 export interface ListingJobsPageComponentProps {
   jobs: ListingJobDto[];
-  isLoading: boolean;
-  onViewDetails: (jobId: string) => void;
-  pagination?: {
+  totalCount: number;
+  isInitialLoading: boolean;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  search: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  statusFilter: string;
+  onStatusFilterChange: (value: string | number) => void;
+  statusOptions: Array<{ value: string; label: string }>;
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+  columns: TableColumn<ListingJobDto>[];
+  onJobClick: (jobId: string) => void;
+  onDownload: () => void;
+  onBack: () => void;
+  formatPercent: (job: ListingJobDto) => number;
+  formatJobDate: (iso: string) => string;
+  statusLabel: (status: ListingJobStatus | string) => string;
+  pagination: {
     count: number;
     page: number;
     rowsPerPage: number;
@@ -15,7 +30,4 @@ export interface ListingJobsPageComponentProps {
     labelRowsPerPage?: string;
     labelInfo?: string;
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: any[];
-  onDownload: () => void;
 }

@@ -1,44 +1,33 @@
 import styled from '@emotion/styled';
-import { ListingStatus } from '@repo/shared';
-import { Badge as UIBadge, Text as UIText, tkn, type AppTheme } from '@repo/ui';
+import { PageContainer, Text as UIText, tkn, type AppTheme } from '@repo/ui';
 
-// --- Layout ---
+export const Container = PageContainer;
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: 90rem;
-  margin: 0 auto;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-`;
-
-// --- Filter Bar ---
+// --- Filter Bar (SettingsCard surface language) ---
 
 export const FilterBarWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.lg')};
+  margin-bottom: 0;
 `;
 
 export const FilterBar = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.xl')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  padding: ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
   box-shadow: ${tkn('shadows.sm')};
-  overflow: hidden;
+  overflow: visible;
 
   @media (max-width: 64rem) {
-    padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+    padding: ${tkn('spacing.md')};
   }
 `;
 
 export const FilterBarRow = styled.div`
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: ${tkn('spacing.md')};
   flex-wrap: wrap;
 
@@ -56,17 +45,13 @@ export const SearchWrapper = styled.div`
   position: relative;
   z-index: 1;
 
-  & > div {
-    height: 2.75rem;
-  }
-
   @media (max-width: 64rem) {
     width: 100%;
   }
 `;
 
 export const SelectWrapper = styled.div`
-  width: 10.5rem;
+  width: 12rem;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -81,26 +66,29 @@ export const FilterActions = styled.div`
   align-items: center;
   gap: ${tkn('spacing.md')};
   margin-left: auto;
+  min-height: ${tkn('controls.height.medium')};
 
   @media (max-width: 64rem) {
     margin-left: 0;
+    min-height: auto;
   }
 `;
 
 export const ResultCount = styled(UIText)`
   white-space: nowrap;
-  font-size: ${tkn('typography.fontSize.xs')};
-  padding: ${tkn('spacing.xs')} 0.625rem; /* 4px 10px — 10px no exact token */
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.full')};
+  border-radius: ${tkn('radius.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
 `;
 
 export const AdvancedDivider = styled.div`
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
-  margin: ${tkn('spacing.sm')} 0;
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+  margin: 0;
 `;
 
-export const AdvancedHeader = styled.button`
+export const AdvancedHeader = styled.button<{ $isOpen: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
@@ -108,26 +96,30 @@ export const AdvancedHeader = styled.button`
   border: none;
   cursor: pointer;
   padding: ${tkn('spacing.sm')} 0;
-  color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.text.primary')};
   font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  transition: color ${tkn('transitions.fast')};
 
   &:hover {
-    color: ${tkn('colors.text.primary')};
+    color: ${tkn('colors.brand.primary')};
   }
+`;
 
-  svg {
-    transition: transform ${tkn('transitions.fast')};
-    transform: rotate(${({ $isOpen }: { $isOpen: boolean }) => ($isOpen ? '180deg' : '0deg')});
-  }
+export const AdvancedChevron = styled.span<{ $isOpen: boolean }>`
+  display: inline-flex;
+  transition: transform ${tkn('transitions.fast')};
+  transform: rotate(${({ $isOpen }) => ($isOpen ? '180deg' : '0deg')});
+  color: inherit;
+  margin-left: auto;
 `;
 
 export const NumericFilterGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  padding-top: ${tkn('spacing.md')};
+  padding-top: ${tkn('spacing.sm')};
 
   @media (max-width: 48rem) {
     grid-template-columns: 1fr;
@@ -138,39 +130,45 @@ export const NumericFilterField = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.xs')};
+  min-width: 0;
 `;
-
-export const NumericFilterLabel = styled(UIText)``;
 
 export const NumericRangeRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
 `;
 
 export const RangeSeparator = styled(UIText)`
   flex-shrink: 0;
-  color: ${tkn('colors.text.tertiary')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.secondary')};
 `;
 
-// --- Table Cell Styles (used by container column renders) ---
+// --- Table Cell Styles ---
 
 export const ProductCell = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm+')}; /* 10px */
+  align-items: flex-start;
+  /* Image ↔ copy separation (was tight at spacing.sm) */
+  gap: ${tkn('spacing.md')};
+  /* Primary column — title needs room for 2-line clamp */
+  width: 20.5rem;
+  min-width: 20.5rem;
+  max-width: 22rem;
 `;
 
+/** Transparent shell — match grid ListingCard image (no gray plate / border). */
 export const ProductImageWrapper = styled.div`
-  width: 4rem; /* 64px */
-  height: 4rem; /* 64px */
-  border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: ${tkn('radius.sm')};
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${tkn('spacing.xs+')}; /* 6px */
+  padding: 0;
   flex-shrink: 0;
   overflow: hidden;
 
@@ -190,59 +188,76 @@ export const ProductMainInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
 `;
 
+/** Two-line clamp; overflow becomes ellipsis. */
 export const ProductTitle = styled.div`
+  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: ${tkn('typography.lineHeight.normal')}; /* 1.4 → normal(1.5) closest */
+  line-height: ${tkn('typography.lineHeight.normal')};
   cursor: default;
-`;
-
-export const ProductBrand = styled.div`
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.text.tertiary')};
-  line-height: ${tkn('typography.lineHeight.normal')}; /* 1.3 → normal(1.5) closest */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 `;
 
 export const ProductMeta = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+export const ProductMetaRow = styled.div`
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  column-gap: ${tkn('spacing.xs')};
+  align-items: center;
+  min-width: 0;
+`;
+
+export const ProductMetaLabel = styled.span`
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.text.secondary')};
+  line-height: ${tkn('typography.lineHeight.tight')};
 `;
 
 export const MetricValue = styled(UIText)<{ $positive?: boolean; $negative?: boolean; $bold?: boolean }>`
+  font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${({ $positive, $negative, theme }) => {
-    const t = theme as AppTheme;
+    const th = theme as AppTheme;
     if ($positive) {
-      return t.colors.semantic.success;
+      return th.colors.semantic.success;
     }
     if ($negative) {
-      return t.colors.semantic.error;
+      return th.colors.semantic.error;
     }
-    return t.colors.text.primary;
+    return th.colors.text.primary;
   }};
 `;
 
 export const StatMain = styled(UIText)`
   line-height: ${tkn('typography.lineHeight.tight')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
 `;
 
 export const StockValue = styled.span<{ $outOfStock?: boolean }>`
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${({ $outOfStock, theme }) => {
-    const t = theme as AppTheme;
-    return $outOfStock ? t.colors.text.tertiary : t.colors.text.primary;
+    const th = theme as AppTheme;
+    return $outOfStock ? th.colors.text.secondary : th.colors.text.primary;
   }};
 `;
 
@@ -253,36 +268,26 @@ export const StockInfo = styled.div`
 `;
 
 export const StockLabel = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.text.tertiary')};
+  color: ${tkn('colors.text.secondary')};
 `;
 
 export const CompactText = styled.div`
+  font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
-  max-width: 9.375rem;
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.text.primary')};
+  max-width: 6.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
-export const StatusBadge = styled(UIBadge)<{ $status: ListingStatus }>`
+/** Numeric / date cells — keep secondary columns tight */
+export const CompactMetric = styled.div`
   white-space: nowrap;
-
-  ${({ $status, theme }) => {
-    const t = theme as AppTheme;
-    if ($status === ListingStatus.ACTIVE) {
-      return `
-        background: ${t.colors.semanticTint.success};
-        color: ${t.colors.semantic.success};
-        border-color: ${t.colors.semanticTintBorder.success};
-      `;
-    }
-    return `
-      background: ${t.colors.semanticTint.neutral};
-      color: ${t.colors.text.secondary};
-      border-color: ${t.colors.semanticTintBorder.neutral};
-    `;
-  }}
+  font-variant-numeric: tabular-nums;
 `;
+

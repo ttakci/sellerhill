@@ -10,6 +10,8 @@ export const InteractiveCard = styled(Card, {
   display: flex;
   flex-direction: column;
   height: 100%;
+  /* White surface on drawer canvas (elevated = surface.primary + border + sm shadow) */
+  background: ${tkn('colors.surface.primary')};
 
   &:hover {
     box-shadow: ${tkn('shadows.md')};
@@ -27,7 +29,7 @@ export const InteractiveCard = styled(Card, {
 
   ${({ $selected, theme }) =>
     $selected
-      ? `border-color: ${tkn('colors.brand.primary')({ theme })}; box-shadow: ${tkn('shadows.sm')({ theme })};`
+      ? `border-color: ${tkn('colors.brand.primary')({ theme })}; box-shadow: ${tkn('shadows.md')({ theme })};`
       : ''}
 `;
 

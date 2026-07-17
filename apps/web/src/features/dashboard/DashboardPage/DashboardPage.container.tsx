@@ -1,187 +1,306 @@
 /**
- * DashboardPage Container (Smart Component)
- * Search, period preset, listing filter, data fetching
+ * DashboardPage Container
+ * Tabs: period cards + carousels | chart | history
  */
 
-import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useLoading, useTheme, useUI } from '@repo/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { DashboardPeriodKey } from '@repo/shared';
+import { formatCompactNumber, formatCurrency, formatDate, getLocaleConfig, useTheme, useUI } from '@repo/ui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { useGetDashboardQuery } from '../api/dashboardApi';
+import { getAllPeriodRanges, getPeriodRange } from '../utils/periodRanges';
 
 import { DashboardPageComponent } from './DashboardPage.component';
-import type { PeriodDateInfo, PeriodKey, PeriodPreset } from './DashboardPage.types';
+import type { DashboardTabId, PeriodDateInfo } from './DashboardPage.types';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingsQuery } from '@/features/listings/api/listings.api';
+import { useGetOrdersQuery } from '@/features/orders/api/orders.api';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
-/** Map period preset to chart days */
-const PRESET_DAYS: Record<PeriodPreset, number> = { today: 7, week: 14, month: 30 };
-
-const computePeriodDates = (locale: string): Record<PeriodKey, PeriodDateInfo> => {
-  const now = new Date();
-  const fmt = (d: Date, opts?: Intl.DateTimeFormatOptions) =>
-    d.toLocaleDateString(locale, opts);
-
-  const today = fmt(now);
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-  return {
-    today: { dateRange: today },
-    yesterday: { dateRange: fmt(yesterday) },
-    thisMonth: { dateRange: `${fmt(monthStart, { day: '2-digit', month: 'short' })} – ${fmt(now, { day: '2-digit', month: 'short' })}` },
-    thisMonthForecast: { dateRange: `${fmt(monthStart, { day: '2-digit', month: 'short' })} – ${fmt(monthEnd, { day: '2-digit', month: 'short' })}` },
-    lastMonth: { dateRange: `${fmt(lastMonthStart, { day: '2-digit', month: 'short' })} – ${fmt(lastMonthEnd, { day: '2-digit', month: 'short' })}` },
-  };
-};
+const VALID_TABS: DashboardTabId[] = ['cards', 'chart', 'history'];
+const VALID_PERIODS: DashboardPeriodKey[] = ['today', 'thisWeek', 'thisMonth', 'thisYear'];
 
 export const DashboardPageContainer = (): React.ReactElement => {
-  const { t, i18n } = useTranslation(['translation', 'dashboard']);
-  const { localeNavigate: _localeNavigate } = useLocale();
+  const { t, i18n } = useTranslation(['dashboard', 'listings', 'orders', 'translation']);
+  const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
   const { theme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [periodPreset, setPeriodPreset] = useState<PeriodPreset>('week');
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('today');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredListingId, setFilteredListingId] = useState<string | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
+  const tabParam = searchParams.get('tab') as DashboardTabId | null;
+  const activeTab: DashboardTabId =
+    tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'cards';
 
-  const selectedDays = PRESET_DAYS[periodPreset];
+  const periodParam = searchParams.get('period') as DashboardPeriodKey | null;
+  const selectedPeriod: DashboardPeriodKey =
+    periodParam && VALID_PERIODS.includes(periodParam) ? periodParam : 'today';
+
   const selectedStoreId = searchParams.get('store') ?? 'all';
+  const storeFilter = selectedStoreId !== 'all' ? selectedStoreId : undefined;
 
-  const { data: dashboardData, isLoading: isDashboardLoading, error: dashboardError } = useGetDashboardQuery(selectedDays);
+  const {
+    data: dashboardData,
+    isLoading: isDashboardLoading,
+    error: dashboardError,
+  } = useGetDashboardQuery({ ebayAccountId: storeFilter });
+
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
-
   const ebayAccounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData]);
 
-  const handleStoreSelect = useCallback((storeId: string): void => {
-    const next = new URLSearchParams(searchParams);
-    if (storeId === 'all') {
-      next.delete('store');
-    } else {
-      next.set('store', storeId);
-    }
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
-  const { data: userData, isLoading: isUserLoading, error: userError } = useGetMeQuery();
-  const { data: listings = [] } = useGetListingsQuery(undefined, { skip: false });
+  const { data: userData, error: userError } = useGetMeQuery();
 
-  useLoading(isDashboardLoading || isUserLoading);
+  const languageCode = (i18n.language || 'en').split('-')[0];
+  const isTR = languageCode === 'tr';
+  const { locale, currency } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
 
-  const isTR = i18n.language === 'tr';
-  const { locale, currency } = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
-  const periodDates = useMemo(() => computePeriodDates(locale), [locale]);
+  const periodDates = useMemo((): Record<DashboardPeriodKey, PeriodDateInfo> => {
+    const all = getAllPeriodRanges(locale);
+    return {
+      today: { dateRange: all.today.dateRangeLabel, from: all.today.from, to: all.today.to },
+      thisWeek: {
+        dateRange: all.thisWeek.dateRangeLabel,
+        from: all.thisWeek.from,
+        to: all.thisWeek.to,
+      },
+      thisMonth: {
+        dateRange: all.thisMonth.dateRangeLabel,
+        from: all.thisMonth.from,
+        to: all.thisMonth.to,
+      },
+      thisYear: {
+        dateRange: all.thisYear.dateRangeLabel,
+        from: all.thisYear.from,
+        to: all.thisYear.to,
+      },
+    };
+  }, [locale]);
+
+  const activeRange = periodDates[selectedPeriod];
+
+  // Period-filtered carousels (cards tab)
+  const { data: listingsPage } = useGetListingsQuery({
+    page: 1,
+    limit: 12,
+    soldFrom: activeRange.from,
+    soldTo: activeRange.to,
+    sortBy: 'lastSale',
+    sortOrder: 'desc',
+    ebayAccountId: storeFilter,
+  });
+
+  const { data: ordersPage } = useGetOrdersQuery({
+    page: 1,
+    limit: 12,
+    dateFrom: activeRange.from,
+    dateTo: activeRange.to,
+    sortBy: 'order_date',
+    sortOrder: 'desc',
+    ebayAccountId: storeFilter,
+  });
+
+  const listings = listingsPage?.items ?? [];
+  const listingsTotal = listingsPage?.total ?? 0;
+  const orders = ordersPage?.orders ?? [];
+  const ordersTotal = ordersPage?.total ?? 0;
 
   const handleFormatCurrency = useCallback(
     (value: number) => formatCurrency(value, locale, currency),
     [locale, currency],
   );
-  const handleFormatCompactCurrency = useCallback((value: number) => formatCompactNumber(value, locale), [locale]);
-  const handleFormatDate = useCallback((dateString: string) => formatDate(dateString, locale), [locale]);
-
-  const handlePeriodPresetChange = useCallback((preset: PeriodPreset) => {
-    setPeriodPreset(preset);
-    // Auto-select matching period card
-    if (preset === 'today') { setSelectedPeriod('today'); }
-    else if (preset === 'week') { setSelectedPeriod('thisMonth'); }
-    else { setSelectedPeriod('thisMonth'); }
+  const handleFormatCompactCurrency = useCallback(
+    (value: number) => formatCompactNumber(value, locale),
+    [locale],
+  );
+  const handleFormatDate = useCallback(
+    (dateString: string) =>
+      formatDate(dateString, locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }),
+    [locale],
+  );
+  const handleFormatTrend = useCallback((trend: number | null | undefined): string | undefined => {
+    if (trend === null || trend === undefined) {
+      return undefined;
+    }
+    const abs = Math.abs(Math.round(trend * 10) / 10);
+    return `${trend >= 0 ? '+' : '−'}${abs}%`;
   }, []);
 
-  const handleListingSelect = useCallback((listingId: string | null) => {
-    setFilteredListingId(listingId);
-    setSearchQuery('');
-  }, []);
+  const patchSearchParams = useCallback(
+    (mutate: (next: URLSearchParams) => void) => {
+      const next = new URLSearchParams(searchParams);
+      mutate(next);
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const handleStoreSelect = useCallback(
+    (storeId: string): void => {
+      patchSearchParams((next) => {
+        if (storeId === 'all') {
+          next.delete('store');
+        } else {
+          next.set('store', storeId);
+        }
+      });
+    },
+    [patchSearchParams],
+  );
+
+  const handleTabChange = useCallback(
+    (tab: DashboardTabId) => {
+      patchSearchParams((next) => {
+        if (tab === 'cards') {
+          next.delete('tab');
+        } else {
+          next.set('tab', tab);
+        }
+      });
+    },
+    [patchSearchParams],
+  );
+
+  const handlePeriodSelect = useCallback(
+    (period: DashboardPeriodKey) => {
+      patchSearchParams((next) => {
+        if (period === 'today') {
+          next.delete('period');
+        } else {
+          next.set('period', period);
+        }
+      });
+    },
+    [patchSearchParams],
+  );
+
+  const handleListingOpen = useCallback(
+    (listingId: string) => {
+      localeNavigate(`/listings/${listingId}`);
+    },
+    [localeNavigate],
+  );
+
+  const handleListingsViewAll = useCallback(() => {
+    const range = getPeriodRange(selectedPeriod, locale);
+    const params = new URLSearchParams({
+      soldFrom: range.from,
+      soldTo: range.to,
+      from: 'dashboard',
+    });
+    if (storeFilter) {
+      params.set('store', storeFilter);
+    }
+    localeNavigate(`/listings/all?${params.toString()}`);
+  }, [localeNavigate, selectedPeriod, locale, storeFilter]);
+
+  const handleOrderOpen = useCallback(
+    (orderId: string) => {
+      localeNavigate(`/orders/${orderId}`);
+    },
+    [localeNavigate],
+  );
+
+  const handleOrdersViewAll = useCallback(() => {
+    const range = getPeriodRange(selectedPeriod, locale);
+    const params = new URLSearchParams({
+      dateFrom: range.from,
+      dateTo: range.to,
+      from: 'dashboard',
+    });
+    if (storeFilter) {
+      params.set('store', storeFilter);
+    }
+    localeNavigate(`/orders/all?${params.toString()}`);
+  }, [localeNavigate, selectedPeriod, locale, storeFilter]);
 
   useEffect(() => {
     const error = dashboardError || userError;
-    if (!error) { return; }
-    if ('status' in error && error.status === 401) { return; }
+    if (!error) {
+      return;
+    }
+    if ('status' in error && error.status === 401) {
+      return;
+    }
     showMessage(
-      { type: 'error', headerKey: 'translation:message.error.header', descriptionKey: getErrorI18nKey(error), primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage } },
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: getErrorI18nKey(error),
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
       t,
     );
   }, [dashboardError, userError, showMessage, closeMessage, t]);
 
-  // Filter listings by search
-  const filteredListings = useMemo(() => {
-    if (!searchQuery.trim()) { return listings; }
-    const q = searchQuery.toLowerCase();
-    return listings.filter((l) =>
-      l.title.toLowerCase().includes(q) || l.asin.toLowerCase().includes(q)
-    );
-  }, [listings, searchQuery]);
+  const cardHeaderColors = useMemo(
+    () => ({
+      today: theme.colors.dashboard.periodToday,
+      thisWeek: theme.colors.dashboard.periodThisWeek,
+      thisMonth: theme.colors.dashboard.periodThisMonth,
+      thisYear: theme.colors.dashboard.periodLastMonth,
+    }),
+    [theme],
+  );
 
-  /* presentation-only derived values (computed in container) */
-  const cardColors = useMemo(() => ({
-    today: theme.colors.semantic.info,
-    yesterday: theme.colors.brand.primary,
-    thisMonth: theme.colors.semantic.success,
-    thisMonthForecast: theme.colors.semantic.success,
-    lastMonth: theme.colors.brand.primary,
-  }), [theme]);
+  const labels = useMemo(
+    () => ({
+      sales: t('dashboard.sales'),
+      ordersUnits: t('dashboard.ordersUnits'),
+      refunds: t('dashboard.refunds'),
+      grossProfit: t('dashboard.grossProfit'),
+      netProfit: t('dashboard.netProfit'),
+      estimatedPayout: t('dashboard.estimatedPayout'),
+    }),
+    [t],
+  );
 
-  const cardHeaders = useMemo(() => ({
-    today: theme.colors.semanticTint.info,
-    yesterday: theme.colors.brand.secondary,
-    thisMonth: theme.colors.semanticTint.success,
-    thisMonthForecast: theme.colors.semanticTint.success,
-    lastMonth: theme.colors.brand.secondary,
-  }), [theme]);
+  const periodTitles = useMemo(
+    () => ({
+      today: t('dashboard.today'),
+      thisWeek: t('dashboard.thisWeek'),
+      thisMonth: t('dashboard.thisMonth'),
+      thisYear: t('dashboard.thisYear'),
+    }),
+    [t],
+  );
 
-  const labels = useMemo(() => ({
-    sales: t('dashboard.sales'), orders: t('dashboard.orders'),
-    netProfit: t('dashboard.netProfit'), margin: t('dashboard.margin'),
-  }), [t]);
-
-  const periodTitles = useMemo(() => ({
-    today: t('dashboard.today'), yesterday: t('dashboard.yesterday'),
-    thisMonth: t('dashboard.thisMonth'), thisMonthForecast: t('dashboard.thisMonthForecast'),
-    lastMonth: t('dashboard.lastMonth'),
-  }), [t]);
-
-  const periodPresetOptions = useMemo(() => [
-    { label: t('dashboard.periodToday'), value: 'today' },
-    { label: t('dashboard.periodWeek'), value: 'week' },
-    { label: t('dashboard.periodMonth'), value: 'month' },
-  ], [t]);
-
-  const handleShowSearchChange = useCallback((show: boolean) => setShowSearch(show), []);
+  const tabLabels = useMemo(
+    () => ({
+      cards: t('dashboard.tabs.cards'),
+      chart: t('dashboard.tabs.chart'),
+      history: t('dashboard.tabs.history'),
+    }),
+    [t],
+  );
 
   return (
     <EbayAccountGuard>
       <DashboardPageComponent
         user={userData || null}
         dashboardData={dashboardData}
+        isLoading={isDashboardLoading}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
         selectedPeriod={selectedPeriod}
-        onPeriodSelect={setSelectedPeriod}
-        periodPreset={periodPreset}
-        onPeriodPresetChange={handlePeriodPresetChange}
-        selectedDays={selectedDays}
-        onDaysChange={(days) => {
-          // Map days back to closest preset
-          if (days <= 7) { setPeriodPreset('today'); }
-          else if (days <= 14) { setPeriodPreset('week'); }
-          else { setPeriodPreset('month'); }
-        }}
+        onPeriodSelect={handlePeriodSelect}
         periodDates={periodDates}
-        listings={filteredListings}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filteredListingId={filteredListingId}
-        onListingSelect={handleListingSelect}
+        listings={listings}
+        listingsTotal={listingsTotal}
+        orders={orders}
+        ordersTotal={ordersTotal}
+        onListingOpen={handleListingOpen}
+        onListingsViewAll={handleListingsViewAll}
+        onOrderOpen={handleOrderOpen}
+        onOrdersViewAll={handleOrdersViewAll}
         ebayAccounts={ebayAccounts}
         selectedStoreId={selectedStoreId}
         onStoreSelect={handleStoreSelect}
@@ -189,13 +308,17 @@ export const DashboardPageContainer = (): React.ReactElement => {
         formatCurrency={handleFormatCurrency}
         formatCompactCurrency={handleFormatCompactCurrency}
         formatDate={handleFormatDate}
-        showSearch={showSearch}
-        onShowSearchChange={handleShowSearchChange}
-        cardColors={cardColors}
-        cardHeaders={cardHeaders}
+        formatTrend={handleFormatTrend}
+        cardHeaderColors={cardHeaderColors}
         labels={labels}
         periodTitles={periodTitles}
-        periodPresetOptions={periodPresetOptions}
+        listingsViewAllLabel={t('dashboard.viewAllListings')}
+        ordersViewAllLabel={t('dashboard.viewAllOrders')}
+        listingsEmptyTitle={t('dashboard.listingsEmptyTitle')}
+        listingsEmptySubtitle={t('dashboard.listingsEmptySubtitle')}
+        ordersEmptyTitle={t('dashboard.ordersEmptyTitle')}
+        ordersEmptySubtitle={t('dashboard.ordersEmptySubtitle')}
+        tabLabels={tabLabels}
       />
     </EbayAccountGuard>
   );

@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 
+import { compactControlHeight, controlFocusShadow, type ControlSize } from '../../styles/formControl';
 import { tkn } from '../../theme/tkn';
 
-import type { SearchFieldSize, SearchFieldVariant } from './SearchField.types';
+import type { SearchFieldVariant } from './SearchField.types';
 
 interface SearchContainerProps {
-  $size: SearchFieldSize;
+  $size: ControlSize;
   $variant: SearchFieldVariant;
   $fullWidth: boolean;
 }
@@ -15,13 +16,13 @@ export const SearchContainer = styled.div<SearchContainerProps>`
   align-items: center;
   gap: ${tkn('spacing.sm')};
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
-  height: ${({ $size }) => ($size === 'large' ? '3rem' : '2.5rem')};
+  height: ${({ $size }) => compactControlHeight($size)};
   padding: 0 ${tkn('spacing.md')};
   box-sizing: border-box;
-  background-color: ${({ $variant }) =>
-    $variant === 'gray' ? tkn('colors.background.tertiary') : tkn('colors.surface.primary')};
+  background-color: ${({ $variant, theme }) =>
+    $variant === 'gray' ? theme.colors.background.tertiary : theme.colors.surface.primary};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
+  border-radius: ${tkn('radius.md')};
   transition:
     border-color ${tkn('transitions.fast')},
     box-shadow ${tkn('transitions.fast')};
@@ -32,7 +33,7 @@ export const SearchContainer = styled.div<SearchContainerProps>`
 
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: 0 0 0 0.1875rem ${tkn('colors.brand.primary')}15;
+    box-shadow: ${({ theme }) => controlFocusShadow(theme.colors.brand.primary)};
   }
 `;
 
@@ -51,8 +52,9 @@ export const SearchInput = styled.input`
   height: 100%;
   padding: 0;
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-family: ${tkn('typography.fontFamily.sans')};
+  font-size: ${tkn('typography.fontSize.md')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-weight: ${tkn('typography.fontWeight.normal')};
   outline: none;
 
   &::placeholder {

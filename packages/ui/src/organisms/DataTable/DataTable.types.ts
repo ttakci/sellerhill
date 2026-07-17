@@ -77,7 +77,10 @@ export interface DataTableProps<T> {
   pagination?: DataTablePagination;
 
   // --- Misc ---
+  /** Plain-text empty fallback (table + grid). Prefer emptyContent for rich UI. */
   emptyMessage?: string;
+  /** Rich empty state (icon, actions). Takes precedence over emptyMessage when data is empty. */
+  emptyContent?: ReactNode;
   onRowClick?: (row: T, index: number) => void;
   className?: string;
 }
@@ -110,6 +113,7 @@ export interface DataTableComponentProps<T> {
   actions?: ReactNode;
   pagination?: DataTablePagination;
   emptyMessage?: string;
+  emptyContent?: ReactNode;
   onRowClick?: (row: T, index: number) => void;
   className?: string;
 }

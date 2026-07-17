@@ -58,11 +58,15 @@ import {
   Mail,
   MapPin,
   Menu,
+  Minus,
   Monitor,
   Moon,
   MoreHorizontal,
   MoreVertical,
   Package,
+  PanelLeft,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
   Percent,
   Phone,
@@ -76,6 +80,7 @@ import {
   RotateCcw,
   Save,
   Search,
+  Send,
   Settings,
   Settings2,
   ShieldCheck,
@@ -186,6 +191,8 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   refresh: lucide(RefreshCw),
   history: lucide(RefreshCw),
   code: lucide(Code),
+  send: lucide(Send),
+  minus: lucide(Minus),
 
   // Chevron & Navigation
   'chevron-down': lucide(ChevronDown),
@@ -202,6 +209,13 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   unfold_more: lucide(UnfoldVertical),
   keyboard_arrow_down: lucide(ChevronDown),
   menu: lucide(Menu),
+  /** Sidebar rail collapse / expand (desktop shells) */
+  'panel-left': lucide(PanelLeft),
+  panel_left: lucide(PanelLeft),
+  'panel-left-close': lucide(PanelLeftClose),
+  panel_left_close: lucide(PanelLeftClose),
+  'panel-left-open': lucide(PanelLeftOpen),
+  panel_left_open: lucide(PanelLeftOpen),
 
   // Status & Feedback
   check: lucide(Check),
@@ -277,6 +291,8 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   'more-vert': lucide(MoreVertical),
   more_vert: lucide(MoreVertical),
   rule: lucide(SlidersHorizontal),
+  'sliders-horizontal': lucide(SlidersHorizontal),
+  sliders: lucide(SlidersHorizontal),
 
   // Landing / marketing
   'arrow-right': lucide(ArrowRight),

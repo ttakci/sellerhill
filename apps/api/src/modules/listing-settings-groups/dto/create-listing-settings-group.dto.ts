@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   type CreateListingSettingsGroupRequest,
+  type ListingContentConfig,
   type PriceRange,
   type StockConfig,
   type FeeConfig,
@@ -8,7 +9,17 @@ import {
   TemplateType,
 } from '@repo/shared';
 import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, ValidateNested, Min, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  Min,
+  IsIn,
+  IsBoolean,
+} from 'class-validator';
 
 class PriceRangeDto implements Omit<PriceRange, 'id'> {
   @ApiProperty({ description: 'Minimum price', example: 10.0 })
@@ -89,6 +100,23 @@ class TemplateConfigDto implements TemplateConfig {
   predefinedTemplateId?: string;
 }
 
+class ListingContentConfigDto implements ListingContentConfig {
+  @ApiPropertyOptional({ description: 'Strip brand from eBay title on create' })
+  @IsOptional()
+  @IsBoolean()
+  stripBrandFromTitle!: boolean;
+
+  @ApiPropertyOptional({ description: 'AI title rewrite scaffold flag' })
+  @IsOptional()
+  @IsBoolean()
+  aiTitleEnabled!: boolean;
+
+  @ApiPropertyOptional({ description: 'AI description rewrite scaffold flag' })
+  @IsOptional()
+  @IsBoolean()
+  aiDescriptionEnabled!: boolean;
+}
+
 export class CreateListingSettingsGroupDto implements CreateListingSettingsGroupRequest {
   @ApiProperty({ description: 'Settings group name', example: 'Default Repricing' })
   @IsString()
@@ -120,4 +148,10 @@ export class CreateListingSettingsGroupDto implements CreateListingSettingsGroup
   @ValidateNested()
   @Type(() => TemplateConfigDto)
   templates!: TemplateConfig;
+
+  @ApiPropertyOptional({ description: 'Listing content policy', type: ListingContentConfigDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ListingContentConfigDto)
+  content?: ListingContentConfig;
 }

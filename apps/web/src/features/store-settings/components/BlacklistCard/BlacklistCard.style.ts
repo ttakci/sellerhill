@@ -2,15 +2,21 @@ import styled from '@emotion/styled';
 import { IconButton as IconButtonAtom, tkn } from '@repo/ui';
 
 export const CardWrapper = styled.div<{ $selectable?: boolean }>`
+  background: ${tkn('colors.surface.primary')};
+  border: none;
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  box-sizing: border-box;
   width: 100%;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   cursor: ${({ $selectable }) => ($selectable ? 'pointer' : 'default')};
 `;
 
 export const CardContent = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm-md')}; /* 12px */
-  min-height: 2.5rem; /* 40px */
+  gap: ${tkn('spacing.sm-md')};
+  min-height: 2.5rem;
 `;
 
 export const CheckboxSection = styled.div`

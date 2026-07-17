@@ -48,6 +48,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
         $isDisabled={!!isDisabled}
         $fullWidth={fullWidth}
         $size={size}
+        $hasLabel={!!label}
         onClick={onContainerClick}
       >
         {iconLeft && (

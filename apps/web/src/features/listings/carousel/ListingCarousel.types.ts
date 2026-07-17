@@ -9,6 +9,10 @@ export interface ListingCarouselProps {
   onViewAll: () => void;
   viewAllLabel: string;
   showViewAll: boolean;
+  onListingClick?: (listingId: string) => void;
+  /** Override empty-state copy (e.g. dashboard period sales context) */
+  emptyTitle?: string;
+  emptySubtitle?: string;
 }
 
 /**

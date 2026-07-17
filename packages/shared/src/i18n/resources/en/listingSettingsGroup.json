@@ -13,6 +13,15 @@
     "description": "Description",
     "descriptionPlaceholder": "Enter group internal notes...",
 
+    "contentSection": "Listing content",
+    "stripBrandFromTitle": "Remove brand from title",
+    "stripBrandFromTitleHint": "Strip the Amazon brand name from eBay titles when creating listings (dropshipping-friendly).",
+    "aiTitleEnabled": "AI-assisted title (local Ollama)",
+    "aiTitleEnabledHint": "On new listing create only: rewrite title via local Ollama if CONTENT_AI_ENABLED=true. Timeout falls back to normal title. Not used on stock/price refresh (scales for large catalogs).",
+    "aiDescriptionEnabled": "AI-assisted description (local Ollama)",
+    "aiDescriptionEnabledHint": "On new listing create only: rewrite description via local Ollama. Falls back to template/features. Do not use for bulk reprocessing hundreds of thousands of existing listings.",
+
+
     "repricingStrategy": "Repricing Strategy",
     "addPriceRange": "Add Price Range",
     "removePriceRange": "Remove Price Range",

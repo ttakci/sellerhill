@@ -16,6 +16,8 @@ export interface LanguageSwitcherProps {
   locales: LocaleOption[];
   /** Callback when user selects a new locale */
   onLocaleChange: (locale: string) => void;
-  /** Display variant */
+  /** Display variant: compact = EN/TR codes; default = full display names */
   variant?: 'default' | 'compact';
+  /** Accessible name for the control group */
+  'aria-label'?: string;
 }

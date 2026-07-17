@@ -1,13 +1,15 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
+export { FormCard } from '../shared/drawerSurfaces.style';
+
 export const BodyStack = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
 `;
 
-/** Inline add form: scope-value select + textarea + hint + error. */
+/** Inline add form: scope-value select + textarea + hint + error (use inside FormCard). */
 export const AddStack = styled.div`
   display: flex;
   flex-direction: column;

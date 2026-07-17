@@ -6,8 +6,16 @@
     },
     "jobs": {
       "title": "İçe Aktarma İşleri",
-      "subtitle": "eBay'e yapılan toplu aktarma işlemlerinizin durumunu buradan takip edebilirsiniz.",
+      "subtitle": "eBay toplu aktarma ilerlemesini takip edin. Detay için bir işe dokunun.",
       "empty": "İçe aktarma işi bulunamadı.",
+      "emptyTitle": "Henüz içe aktarma işi yok",
+      "emptySubtitle": "Liste oluşturduğunuzda işler burada görünür; ilerleme ve hataları takip edebilirsiniz.",
+      "emptyLoading": "İşler yükleniyor…",
+      "filters": {
+        "searchPlaceholder": "İş ID ile ara…",
+        "allStatuses": "Tüm durumlar",
+        "resultCount": "{{count}} iş"
+      },
       "status": {
         "pending": "Bekliyor",
         "processing": "İşleniyor",
@@ -18,31 +26,50 @@
         "id": "İş ID",
         "date": "Tarih",
         "progress": "İlerleme",
-        "stats": "İstatistikler",
+        "stats": "Sonuçlar",
         "status": "Durum",
         "actions": "İşlemler",
         "createdAt": "Oluşturulma",
-        "total": "Toplam"
+        "updatedAt": "Güncellenme",
+        "total": "Toplam",
+        "processed": "İşlenen"
       },
       "stats": {
         "success": "Başarılı",
-        "failed": "Hata"
+        "failed": "Hata",
+        "remaining": "Kalan"
+      },
+      "card": {
+        "progressLabel": "%{{percent}} tamamlandı",
+        "asinsTotal": "{{count}} ASIN",
+        "openDetail": "Detayı gör"
       },
       "details": {
-        "title": "İş Detayları"
+        "title": "İş detayı",
+        "subtitle": "Bu aktarma işinin ürün bazlı durumu",
+        "summary": "Özet",
+        "itemsTitle": "İş kalemleri",
+        "itemsSubtitle": "Bu işte {{count}} ASIN",
+        "notFoundTitle": "İş bulunamadı",
+        "notFoundSubtitle": "Bu iş silinmiş olabilir veya erişim yetkiniz yok.",
+        "jobId": "İş ID",
+        "refresh": "Yenile"
       },
       "items": {
         "asin": "ASIN",
         "status": "Durum",
         "ebayId": "eBay ID",
-        "error": "Hata Mesajı",
-        "empty": "Bu işe ait ürün kaydı bulunamadı."
+        "error": "Hata",
+        "empty": "Bu işe ait ürün kaydı bulunamadı.",
+        "emptyTitle": "Henüz kalem yok",
+        "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir."
       }
     },
     "filters": {
       "searchPlaceholder": "Başlık veya ASIN ile ara...",
       "allCategories": "Tüm Kategoriler",
       "allStatuses": "Tüm Durumlar",
+      "allStores": "Tüm Mağazalar",
       "advancedFilters": "Gelişmiş Filtreler",
       "clearAll": "Tümünü Temizle",
       "resultCount": "{{count}} sonuç",
@@ -67,8 +94,25 @@
       "emptyTitle": "Liste Bulunamadı",
       "emptySubtitle": "Amazon'dan eBay mağazanıza ürün ekleyerek başlayın."
     },
+    "empty": {
+      "loadingTitle": "Listeler yükleniyor",
+      "loadingSubtitle": "Kataloğunuz getiriliyor…",
+      "catalogTitle": "Henüz liste yok",
+      "catalogSubtitle": "Amazon ASIN’lerini içe aktararak eBay listeleri oluşturun. Fiyat ve stok otomatik senkron kalır.",
+      "catalogAction": "Liste ekle",
+      "filtersTitle": "Eşleşen liste yok",
+      "filtersSubtitle": "Arama veya filtrelerinize uyan sonuç yok. Sorguyu genişletin veya filtreleri temizleyin.",
+      "filtersAction": "Filtreleri temizle",
+      "draftTitle": "Henüz taslak yok",
+      "draftSubtitle": "Ürün eklerken taslak olarak kaydedin; hazır olunca eBay’de yayınlayın.",
+      "draftAction": "Taslak ekle",
+      "backToOverview": "Genel bakışa dön"
+    },
     "table": {
       "product": "Ürün",
+      "source": "Kaynak",
+      "listingCol": "İlan",
+      "added": "Eklenme",
       "brand": "Marka",
       "asin": "ASIN",
       "ebayId": "eBay ID",
@@ -79,6 +123,7 @@
       "roi": "ROI",
       "stock": "Stok",
       "sold": "Satılan",
+      "lastSale": "Son Satış",
       "watch": "Takip",
       "watchers": "Takip Edenler",
       "views": "İzlenme",
@@ -143,13 +188,19 @@
     "actions": {
       "cancel": "Geri",
       "import": "Listeleri Oluştur",
+      "importDraft": "Taslak Olarak Kaydet",
       "importing": "Listeler Oluşturuluyor...",
       "addListing": "Liste Ekle",
       "addNewList": "Yeni Liste Ekle",
+      "createListings": "Liste Oluştur",
+      "export": "Dışa Aktar",
       "viewAll": "Tümü",
       "endListing": "İlanı Bitir",
+      "delist": "İlanı Kaldır",
       "deleteListings": "Listeleri Sil",
-      "bulkActions": "Toplu İşlemler"
+      "bulkActions": "Toplu İşlemler",
+      "publish": "eBay'de Yayınla",
+      "publishSelected": "Seçilenleri yayınla"
     },
     "addSection": {
       "title": "Yeni Liste Ekle",
@@ -157,11 +208,20 @@
       "create": "Yeni Liste Oluştur",
       "jobs": "İçe Aktarma İşlerini Gör"
     },
+    "draftMode": {
+      "title": "Taslak olarak kaydet",
+      "hint": "Ürün ve fiyatı eBay'e göndermeden hazırlayın. Daha sonra Taslaklar'dan inceleyip yayınlayabilirsiniz.",
+      "pageTitle": "Taslak listeler",
+      "pageSubtitle": "İncelemeye veya yayına hazır {{count}} taslak liste.",
+      "empty": "Henüz taslak yok. Ürün eklerken taslak olarak kaydedebilirsiniz."
+    },
     "otherActions": {
       "title": "Diğer İşlemler",
       "subtitle": "Listelerinizle ilgili ek işlemleri buradan yapabilirsiniz.",
       "jobsTitle": "İçe Aktarma İşlerini Gör",
-      "jobsSubtitle": "Toplu içe aktarma işlemlerinin durumunu takip edin."
+      "jobsSubtitle": "Toplu içe aktarma işlemlerinin durumunu takip edin.",
+      "draftsTitle": "Taslakları gör",
+      "draftsSubtitle": "eBay'e yayınlamadan önce hazırlanan listeleri inceleyin."
     },
     "drawer": {
       "step1": "Ayarlar & Politikalar",
@@ -175,13 +235,21 @@
       "deleteSuccessTitle": "İlanlar Silindi",
       "deleteSuccess": "{{count}} ilan başarıyla silindi.",
       "deleteErrorTitle": "İşlem Başarısız",
-      "deleteError": "Bazı ilanlar silinemedi."
+      "deleteError": "Bazı ilanlar silinemedi.",
+      "publishSuccessTitle": "Yayınlandı",
+      "publishSuccess": "{{count}} ilan eBay'de başarıyla yayınlandı.",
+      "publishErrorTitle": "Yayın başarısız",
+      "publishError": "Bir veya daha fazla taslak yayınlanamadı. Stok ve eBay hesabını kontrol edin."
     },
     "modals": {
       "endTitle": "Seçili İlanlar Bitirilsin mi?",
       "endDescription": "{{count}} seçili ilanı eBay'de bitirmek istediğinizden emin misiniz? Pasif duruma geçirilecektir.",
       "deleteTitle": "Seçili İlanlar Silinsin mi?",
-      "deleteDescription": "{{count}} seçili ilanı silmek istediğinizden emin misiniz? eBay'den kaldırılacak ve mağazanızdan silinecektir. Bu işlem geri alınamaz."
+      "deleteDescription": "{{count}} seçili ilanı silmek istediğinizden emin misiniz? eBay'den kaldırılacak ve mağazanızdan silinecektir. Bu işlem geri alınamaz.",
+      "publishTitle": "Seçili taslaklar yayınlansın mı?",
+      "publishDescription": "{{count}} taslak ilan şimdi eBay'de yayınlanacak. Her ürün güncel strateji fiyatı ve stok ile canlıya alınır.",
+      "publishOneTitle": "Bu taslak yayınlansın mı?",
+      "publishOneDescription": "Bu ilan eBay'de oluşturulacak ve aktif olacak. Yayın sonrası otomasyon ve ayarları düzenleyebilirsiniz."
     },
     "validation": {
       "invalidAsin": "Geçersiz ASIN formatı. 'B' harfiyle başlayıp 9 alfanümerik karakterle devam etmelidir.",
@@ -190,16 +258,74 @@
       "paymentPolicyRequired": "Ödeme politikası zorunludur",
       "shippingPolicyRequired": "Kargo politikası zorunludur",
       "returnPolicyRequired": "İade politikası zorunludur",
-      "listingSettingsGroupRequired": "Liste strateji grubu zorunludur"
+      "listingSettingsGroupRequired": "Liste strateji grubu zorunludur",
+      "titleRequired": "Başlık zorunludur",
+      "titleMax": "Başlık en fazla 80 karakter olabilir"
     },
     "success": {
       "created": "{{count}} ilan başarıyla oluşturuldu",
-      "queued": "{{count}} ürün içe aktarma sırasına alındı. Durumu 'İçe Aktarma İşleri' sekmesinden takip edebilirsiniz."
+      "queued": "{{count}} ürün içe aktarma sırasına alındı. Durumu 'İçe Aktarma İşleri' sekmesinden takip edebilirsiniz.",
+      "queuedDraft": "{{count}} taslak sıraya alındı — yayınlayana kadar eBay'de canlı olmayacak"
     },
     "errors": {
       "createFailed": "Listeler oluşturulamadı",
       "fetchPoliciesFailed": "eBay iş politikaları alınamadı",
-      "invalidAsins": "Bazı ASIN'ler geçersiz ve atlandı"
+      "invalidAsins": "Bazı ASIN'ler geçersiz ve atlandı",
+      "loadFailed": "Listeler yüklenemedi. Lütfen tekrar deneyin."
+    },
+    "detail": {
+      "breadcrumb": "İlan detayı",
+      "subtitle": "Fiyat, stok, otomasyon ve ürün içeriği",
+      "economics": "Fiyat & kâr",
+      "performance": "Stok & performans",
+      "settings": "Yapılandırma",
+      "editConfig": "Yapılandırmayı düzenle",
+      "system": "Sistem",
+      "productContent": "Ürün içeriği",
+      "description": "Açıklama",
+      "descriptionEmpty": "Bu ürün için Amazon açıklaması yok. Varsa özellikler aşağıda listelenir.",
+      "features": "Özellikler",
+      "featuresEmpty": "Özellik maddesi yok.",
+      "specs": "Ürün özellikleri",
+      "specsEmpty": "Yapılandırılmış özellik yok.",
+      "titleField": "eBay başlığı",
+      "listingId": "Dahili ID",
+      "createdAt": "Oluşturulma",
+      "updatedAt": "Güncellenme",
+      "notSet": "Ayarlanmadı",
+      "openAmazon": "Amazon’da gör",
+      "openEbay": "eBay’de gör",
+      "editSettings": "Düzenle",
+      "editDrawerTitle": "İlanı düzenle",
+      "editDrawerSubtitle": "Başlık, strateji grubu ve eBay politikalarını güncelleyin",
+      "manage": "Yönet",
+      "endShort": "İlanı bitir",
+      "deleteShort": "Sil",
+      "showMore": "Daha fazla",
+      "showLess": "Daha az",
+      "imageThumb": "Görsel {{index}}",
+      "notFoundTitle": "İlan bulunamadı",
+      "notFoundSubtitle": "Bu ilan silinmiş olabilir veya erişim yetkiniz yok.",
+      "loadFailed": "İlan detayları yüklenemedi.",
+      "saveSuccess": "İlan ayarları kaydedildi.",
+      "saveFailed": "İlan ayarları kaydedilemedi.",
+      "automationTitle": "Otomasyon",
+      "pauseSales": "Satışı duraklat",
+      "pauseSalesHint": "eBay stokunu 0 yapar; alıcı sipariş veremez. İlan aktif kalır.",
+      "fixedPrice": "Sabit fiyat",
+      "fixedPriceHint": "Otomatik yeniden fiyatlamayı durdurur. Aşağıdaki fiyatı (veya boşsa mevcut fiyatı) kullanır.",
+      "fixedQuantity": "Sabit stok",
+      "fixedQuantityHint": "Stok senkronunun adedi değiştirmesini engeller. Aşağıdaki adedi kullanır.",
+      "priceOverride": "Sabit satış fiyatı",
+      "quantityOverride": "Sabit adet",
+      "customMargin": "Özel marj (sabit fiyat kapalıyken)",
+      "customMarginHint": "Yalnızca bu ilan için Amazon maliyetine marj. Sabit fiyat açıkken yok sayılır.",
+      "marginPercentOverride": "Marj %",
+      "marginFixedOverride": "Sabit marj $",
+      "saveOverrides": "Otomasyonu kaydet",
+      "publish": "eBay'de Yayınla",
+      "publishHint": "Bu taslak henüz eBay'de canlı değil. Fiyat ve stok uygunsa yayınlayın.",
+      "draftBanner": "Taslak — eBay'de yayınlanmadı"
     },
     "carousel": {
       "previous": "Önceki",

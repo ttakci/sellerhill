@@ -120,4 +120,8 @@ export class UpdateListingSettingsGroupDto implements UpdateListingSettingsGroup
   @ValidateNested()
   @Type(() => TemplateConfigDto)
   templates?: TemplateConfig;
+
+  @ApiPropertyOptional({ description: 'Listing content policy' })
+  @IsOptional()
+  content?: UpdateListingSettingsGroupRequest['content'];
 }

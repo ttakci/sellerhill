@@ -115,10 +115,28 @@
     "logoutConfirmButton": "Logout",
     "editProfile": "Edit Profile"
   },
+  "chatbot": {
+    "sidebarTitle": "Have questions?",
+    "sidebarSubtitle": "Get help from our AI-powered assistant.",
+    "ctaLabel": "Zon",
+    "openAria": "Open assistant chat",
+    "panelTitle": "Zon",
+    "welcomeMessage": "Hello, how can I help you?",
+    "placeholder": "Type your message…",
+    "placeholderReply": "Thanks for your message. Full AI replies will be available soon.",
+    "send": "Send",
+    "refresh": "Refresh chat",
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "close": "Close"
+  },
   "header": {
     "selectLanguage": "Select Language",
     "toggleTheme": "Toggle Theme",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "openMenu": "Open menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "profile": {
     "accountSettings": "Account Settings"

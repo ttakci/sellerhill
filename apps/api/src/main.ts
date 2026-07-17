@@ -2,6 +2,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -13,6 +14,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: winstonLogger,
   });
+
+  // HttpOnly refresh-token cookies (auth)
+  app.use(cookieParser());
 
   // Enable API versioning
   app.enableVersioning({
@@ -52,11 +56,9 @@ async function bootstrap() {
     })
   );
 
-  // CORS configuration — allowed origins from CORS_ORIGINS env var (comma-separated).
-  // Same-origin requests (no Origin header) are always allowed, so under the
-  // same-origin nginx proxy this rarely matters — but it stays correct for any
-  // cross-origin caller. Defaults to the Vite dev server when unset.
-  const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  // CORS: prefer CORS_ORIGINS (comma-separated); fall back to legacy CORS_ORIGIN.
+  // Same-origin requests (no Origin header) are always allowed (nginx same-host proxy).
+  const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);

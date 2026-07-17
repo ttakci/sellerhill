@@ -13,6 +13,14 @@
     "description": "Açıklama",
     "descriptionPlaceholder": "Grup iç notlarını girin...",
 
+    "contentSection": "İlan içeriği",
+    "stripBrandFromTitle": "Başlıkta markayı kaldır",
+    "stripBrandFromTitleHint": "İlan oluştururken Amazon marka adını eBay başlığından çıkarır (dropshipping için).",
+    "aiTitleEnabled": "YZ başlık (yerel Ollama)",
+    "aiTitleEnabledHint": "Yalnızca yeni ilan oluştururken: CONTENT_AI_ENABLED=true ise yerel Ollama ile başlığı yeniden yazar. Zaman aşımında normal başlık. Stok/fiyat yenilemede kullanılmaz (büyük kataloglar için).",
+    "aiDescriptionEnabled": "YZ açıklama (yerel Ollama)",
+    "aiDescriptionEnabledHint": "Yalnızca yeni ilan oluştururken: Ollama ile açıklamayı yeniden yazar. Yoksa şablon/özellikler. Yüzbinlerce mevcut ilanı toplu yeniden yazmak için kullanmayın.",
+
     "repricingStrategy": "Yeniden Fiyatlandırma",
     "addPriceRange": "Fiyat Aralığı Ekle",
     "removePriceRange": "Fiyat Aralığını Kaldır",

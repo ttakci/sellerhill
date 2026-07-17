@@ -48,6 +48,11 @@ export const EmptyState = styled.div`
   text-align: center;
   padding: ${tkn('spacing.xl')} ${tkn('spacing.md')};
   gap: ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.primary')};
+  border: none;
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
+  box-sizing: border-box;
 `;
 
 export const EmptyIconCircle = styled.div`

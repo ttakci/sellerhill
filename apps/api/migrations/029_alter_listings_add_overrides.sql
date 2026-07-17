@@ -1,0 +1,10 @@
+-- Per-listing overrides (easync-style listing settings)
+ALTER TABLE listings
+  ADD COLUMN IF NOT EXISTS disable_ordering BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS disable_repricing BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS lock_price BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS lock_quantity BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS price_override DECIMAL(10, 2),
+  ADD COLUMN IF NOT EXISTS quantity_override INT,
+  ADD COLUMN IF NOT EXISTS margin_percent_override DECIMAL(10, 2),
+  ADD COLUMN IF NOT EXISTS margin_fixed_override DECIMAL(10, 2);

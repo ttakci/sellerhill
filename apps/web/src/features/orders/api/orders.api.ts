@@ -12,6 +12,7 @@ export const ordersApi = baseApi.injectEndpoints({
           if (filters.limit) {params.limit = String(filters.limit);}
           if (filters.status) {params.status = filters.status;}
           if (filters.search) {params.search = filters.search;}
+          if (filters.ebayAccountId) {params.ebayAccountId = filters.ebayAccountId;}
           if (filters.dateFrom) {params.dateFrom = filters.dateFrom;}
           if (filters.dateTo) {params.dateTo = filters.dateTo;}
           if (filters.sortBy) {params.sortBy = filters.sortBy;}

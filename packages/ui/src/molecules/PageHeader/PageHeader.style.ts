@@ -2,48 +2,57 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
+/**
+ * Page title block — spacing below is owned by the parent page stack
+ * (`PageContainer` gap), not margin here, so every screen aligns identically.
+ */
 export const HeaderWrapper = styled.div<{ $noMargin?: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  gap: ${tkn('spacing.sm')};
-  margin-bottom: ${tkn('spacing.lg')};
+  gap: ${tkn('spacing.md')};
+  width: 100%;
+  margin: 0;
+  /* $noMargin kept for API compat; margin is always 0 (parent gap) */
+  margin-bottom: 0;
 
   @media (min-width: 48rem) {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
   }
+`;
 
-  ${({ $noMargin }) => $noMargin && `margin-bottom: 0;`}
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  flex: 1;
+`;
+
+export const BackButtonWrap = styled.div<{ $mobileOnly?: boolean }>`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  /* Align with h1 cap height */
+  margin-top: ${tkn('spacing.2xs')};
+
+  ${({ $mobileOnly }) =>
+    $mobileOnly &&
+    `
+    @media (min-width: 48rem) {
+      display: none;
+    }
+  `}
 `;
 
 export const TitleArea = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
-`;
-
-export const Title = styled.div`
-  font-size: ${tkn('typography.fontSize.xxl')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-  letter-spacing: -0.025em;
-  margin: 0;
-  line-height: ${tkn('typography.lineHeight.tight')};
-`;
-
-export const Subtitle = styled.div`
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
-  margin-top: ${tkn('spacing.xs')};
-  margin-bottom: 0;
-  line-height: ${tkn('typography.lineHeight.normal')};
-
-  strong, b {
-    font-weight: ${tkn('typography.fontWeight.semibold')};
-    color: ${tkn('colors.text.primary')};
-  }
+  flex: 1;
 `;
 
 export const ActionsArea = styled.div`
@@ -51,4 +60,8 @@ export const ActionsArea = styled.div`
   align-items: center;
   gap: ${tkn('spacing.sm')};
   flex-shrink: 0;
+  /* Align actions to title baseline row on desktop */
+  @media (min-width: 48rem) {
+    padding-top: ${tkn('spacing.2xs')};
+  }
 `;

@@ -5,20 +5,42 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { generateRequestId } from '@repo/shared';
+import { generateRequestId, type UserDto } from '@repo/shared';
 
 import { logout, setCredentials } from '@/features/auth/store/authSlice';
 
-const baseQuery = fetchBaseQuery({
+/** Minimal auth slice shape used by baseQuery (avoids circular import with store). */
+interface AuthSliceState {
+  auth: {
+    accessToken: string | null;
+  };
+}
+
+interface RefreshResponse {
+  user: UserDto;
+  accessToken: string;
+  refreshToken?: string;
+}
+
+const rawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1',
+  // Required so the browser sends/receives the HttpOnly refresh cookie
+  credentials: 'include',
   prepareHeaders: (headers, { getState, endpoint }) => {
     const requestId = generateRequestId();
     headers.set('X-Request-ID', requestId);
 
-    const publicEndpoints = ['login', 'register', 'verifyEmail', 'resendVerification'];
+    const publicEndpoints = [
+      'login',
+      'register',
+      'verifyEmail',
+      'resendVerification',
+      'refresh',
+      'logout',
+    ];
     if (!publicEndpoints.includes(endpoint || '')) {
-      const state = getState() as any;
-      const token = state.auth?.accessToken || localStorage.getItem('accessToken');
+      const state = getState() as AuthSliceState;
+      const token = state.auth?.accessToken;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
@@ -28,31 +50,44 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, any, FetchBaseQueryError> = async (
+/** Single-flight refresh so concurrent 401s don't stampede. */
+let refreshPromise: Promise<boolean> | null = null;
+
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
   extraOptions
 ) => {
-  let result = await baseQuery(args, api, extraOptions);
+  let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
-    const refreshToken = (api.getState() as any).auth?.refreshToken;
+    const url = typeof args === 'string' ? args : args.url;
+    // Don't retry refresh/login endpoints
+    if (url.includes('/auth/refresh') || url.includes('/auth/login') || url.includes('/auth/logout')) {
+      return result;
+    }
 
-    if (refreshToken) {
-      const refreshResult = await baseQuery(
-        { url: '/auth/refresh', method: 'POST', body: { refreshToken } },
-        api,
-        extraOptions
-      );
-
-      if (refreshResult.data) {
-        api.dispatch(setCredentials(refreshResult.data as any));
-        result = await baseQuery(args, api, extraOptions);
-      } else {
+    if (!refreshPromise) {
+      refreshPromise = (async () => {
+        const refreshResult = await rawBaseQuery(
+          { url: '/auth/refresh', method: 'POST', body: {} },
+          api,
+          extraOptions
+        );
+        if (refreshResult.data) {
+          api.dispatch(setCredentials(refreshResult.data as RefreshResponse));
+          return true;
+        }
         api.dispatch(logout());
-      }
-    } else {
-      api.dispatch(logout());
+        return false;
+      })().finally(() => {
+        refreshPromise = null;
+      });
+    }
+
+    const ok = await refreshPromise;
+    if (ok) {
+      result = await rawBaseQuery(args, api, extraOptions);
     }
   }
 

@@ -34,12 +34,14 @@ export class UserDto {
 
 export class AuthResponseDto {
   accessToken!: string;
-  refreshToken!: string;
+  /** Omitted when refresh is set via HttpOnly cookie */
+  refreshToken?: string;
   user!: UserDto;
 }
 
 export class RefreshTokenRequestDto {
-  refreshToken!: string;
+  /** Optional — HttpOnly cookie is preferred */
+  refreshToken?: string;
 }
 
 export class ChangePasswordRequestDto {

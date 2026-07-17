@@ -7,6 +7,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
+import { ContentGenerationService } from './content-generation.service';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ListingProcessorService } from './listing-processor.service';
@@ -43,6 +44,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     ListingProcessorService,
     ListingQueueService,
     ListingStrategyService,
+    ContentGenerationService,
     StockSyncProcessorService,
   ],
   exports: [ListingsService, ListingQueueService],

@@ -1,4 +1,4 @@
-import { Button, PageHeader, QuickActionCard, SettingsActionRow, SettingsCard, Text } from '@repo/ui';
+import { PageHeader, QuickActionCard, SettingsActionRow, SettingsCard } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,22 +9,26 @@ import type { ListingsOverviewPageProps } from './ListingsOverviewPage.types';
 
 export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> = ({
   listings,
+  totalCount,
+  draftCount,
   onAddListing,
   onViewAll,
   onViewJobs,
+  onViewDrafts,
+  onListingClick,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
+
+  const draftsSubtitle =
+    draftCount > 0
+      ? t('listings.draftMode.pageSubtitle', { count: draftCount })
+      : t('listings.otherActions.draftsSubtitle');
 
   return (
     <S.Container>
       <PageHeader
         title={t('listings.overview.title')}
-        subtitle={t('listings.overview.subtitle', { count: listings.length })}
-        actions={
-          <Button variant="primary" onClick={onAddListing}>
-            <Text>{t('listings.actions.addNewList')}</Text>
-          </Button>
-        }
+        subtitle={t('listings.overview.subtitle', { count: totalCount })}
       />
 
       <S.TwoColumnLayout>
@@ -34,7 +38,8 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
               listings={listings}
               onViewAll={onViewAll}
               viewAllLabel={t('listings.actions.viewAll')}
-              showViewAll={listings.length > 3}
+              showViewAll={totalCount > 3}
+              onListingClick={onListingClick}
             />
           </S.SliderContent>
         </S.SliderColumn>
@@ -49,11 +54,15 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
             />
             <SettingsCard
               variant="section"
-              className="other-actions-card"
               header={{
                 title: t('listings.otherActions.title'),
               }}
             >
+              <SettingsActionRow
+                label={t('listings.otherActions.draftsTitle')}
+                subtitle={draftsSubtitle}
+                onClick={onViewDrafts}
+              />
               <SettingsActionRow
                 label={t('listings.otherActions.jobsTitle')}
                 subtitle={t('listings.otherActions.jobsSubtitle')}

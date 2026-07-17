@@ -2,24 +2,21 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-/** Wraps the trailing arrow so it can nudge on row hover (no background change). */
-export const Arrow = styled.span`
+export const Arrow = styled.span<{ $danger?: boolean }>`
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
   transition: transform ${tkn('transitions.fast')};
 `;
 
-export const Row = styled.button`
+export const Row = styled.button<{ $danger?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
-  /* No horizontal padding: the icon left-edge aligns with the card header via the
-     parent CardBody padding. Vertical padding keeps the touch target. */
   padding: ${tkn('spacing.md')} 0;
   border: none;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   background: transparent;
   width: 100%;
   text-align: left;
@@ -32,7 +29,7 @@ export const Row = styled.button`
   }
 
   &:hover > :last-child {
-    transform: translateX(0.125rem); /* 2px nudge — background stays put */
+    transform: translateX(0.125rem);
   }
 
   &:focus-visible {
@@ -49,7 +46,20 @@ export const Info = styled.div`
   min-width: 0;
 `;
 
-/** Vertically stacked title + subtitle. */
+export const RowIcon = styled.span<{ $danger?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${tkn('radius.sm')};
+  background: ${({ $danger, theme }) =>
+    $danger ? `${theme.colors.semantic.error}15` : theme.colors.brand.secondary};
+  color: ${({ $danger, theme }) =>
+    $danger ? theme.colors.semantic.error : theme.colors.brand.primary};
+`;
+
 export const TextStack = styled.span`
   display: flex;
   flex-direction: column;
