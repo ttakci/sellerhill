@@ -3,7 +3,11 @@ import * as path from 'path';
 
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { Browser, BrowserContext } from 'playwright';
+import type { BrowserContext } from 'playwright';
+
+import { DatabaseService } from '../../common/database/database.service';
+
+import { ProxyService } from './proxy.service';
 
 const VIEWPORTS = [
   { width: 1920, height: 1080 },
@@ -35,19 +39,44 @@ interface Fingerprint {
   timezoneId: string;
 }
 
+/**
+ * Per-account persistent browser-context manager.
+ *
+ * Each Amazon buyer account gets its own `user_data_dir` under
+ * `${BROWSER_STATE_DIR}/profiles/${accountId}/` (cookies + localStorage + cache
+ * survive across runs) and its own deterministic fingerprint (UA / viewport /
+ * timezone from `hashCode(accountId)`). Contexts are launched via
+ * `playwright-extra`'s chromium + stealth plugin.
+ *
+ * Proxy-aware: when `ProxyService` is configured (env), each context launches
+ * with the injected residential proxy (sticky session per Zonds user by
+ * default). When proxy env is absent, the `proxy` option is omitted entirely —
+ * network behavior is identical to a direct connection (no scraping regression).
+ *
+ * Public method signatures are preserved so existing callers
+ * (AmazonScrapingService etc.) do not break.
+ */
 @Injectable()
 export class BrowserStateManager implements OnModuleDestroy {
   private readonly logger = new Logger(BrowserStateManager.name);
   private readonly stateDir: string;
-  private browser: Browser | null = null;
+  private readonly profilesDir: string;
   private activeContexts = new Map<string, BrowserContext>();
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly databaseService: DatabaseService,
+    private readonly proxyService: ProxyService,
+  ) {
     this.stateDir = this.configService.get<string>('BROWSER_STATE_DIR')
       || path.resolve(process.cwd(), '.browser-state');
+    this.profilesDir = path.join(this.stateDir, 'profiles');
 
     if (!fs.existsSync(this.stateDir)) {
       fs.mkdirSync(this.stateDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.profilesDir)) {
+      fs.mkdirSync(this.profilesDir, { recursive: true });
     }
   }
 
@@ -55,69 +84,69 @@ export class BrowserStateManager implements OnModuleDestroy {
     await this.closeAll();
   }
 
-  private async getBrowser(): Promise<Browser> {
-    if (!this.browser || !this.browser.isConnected()) {
-      const playwrightExtra = await import('playwright-extra');
-      const chromium = playwrightExtra.chromium;
-      const StealthPlugin = (await import('puppeteer-extra-plugin-stealth')).default;
-      chromium.use(StealthPlugin());
-
-      this.browser = await chromium.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-features=IsolateOrigins,site-per-process',
-        ],
-      });
-    }
-    return this.browser;
-  }
-
   async getContext(amazonAccountId: string): Promise<BrowserContext> {
     if (this.activeContexts.has(amazonAccountId)) {
-      const ctx = this.activeContexts.get(amazonAccountId)!;
-      if (!ctx.pages().length || !ctx.browser()?.isConnected()) {
-        this.activeContexts.delete(amazonAccountId);
-      } else {
-        return ctx;
+      const cached = this.activeContexts.get(amazonAccountId)!;
+      // Persistent contexts own their Browser; `browser()` returns null once
+      // closed. Re-launch only if the underlying browser is gone/disconnected.
+      const browser = cached.browser();
+      if (browser && browser.isConnected()) {
+        return cached;
       }
+      this.activeContexts.delete(amazonAccountId);
     }
 
-    const browser = await this.getBrowser();
-    const stateFile = this.getStateFilePath(amazonAccountId);
+    const profileDir = this.getProfileDir(amazonAccountId);
+    await fs.promises.mkdir(profileDir, { recursive: true });
+
+    const proxy = await this.resolveProxy(amazonAccountId);
     const fingerprint = this.getFingerprint(amazonAccountId);
 
-    const contextOptions: Record<string, unknown> = {
+    const playwrightExtra = await import('playwright-extra');
+    const chromium = playwrightExtra.chromium;
+    const StealthPlugin = (await import('puppeteer-extra-plugin-stealth')).default;
+    chromium.use(StealthPlugin());
+
+    const launchOptions: Parameters<typeof chromium.launchPersistentContext>[1] = {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-features=IsolateOrigins,site-per-process',
+      ],
       userAgent: fingerprint.userAgent,
       viewport: fingerprint.viewport,
       locale: 'en-US',
       timezoneId: fingerprint.timezoneId,
     };
 
-    if (fs.existsSync(stateFile)) {
-      contextOptions.storageState = stateFile;
+    if (proxy) {
+      launchOptions.proxy = proxy;
+      this.logger.debug(
+        `Launching persistent context for account ${amazonAccountId} via proxy ${proxy.server}`,
+      );
     }
 
-    const context = await browser.newContext(contextOptions);
+    const context = await chromium.launchPersistentContext(profileDir, launchOptions);
     this.activeContexts.set(amazonAccountId, context);
-
     return context;
   }
 
+  /**
+   * Persistent contexts write cookies/localStorage to the user_data_dir
+   * continuously, so this is a no-op for state persistence. Kept for back-compat
+   * with existing callers; ensures the profile dir exists.
+   */
   async saveState(amazonAccountId: string): Promise<void> {
-    const context = this.activeContexts.get(amazonAccountId);
-    if (!context) {return;}
-
-    const stateFile = this.getStateFilePath(amazonAccountId);
-    const dir = path.dirname(stateFile);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    const profileDir = this.getProfileDir(amazonAccountId);
+    if (!fs.existsSync(profileDir)) {
+      try {
+        await fs.promises.mkdir(profileDir, { recursive: true });
+      } catch {
+        // best-effort
+      }
     }
-
-    await context.storageState({ path: stateFile });
-    this.logger.debug(`Saved browser state for account ${amazonAccountId}`);
   }
 
   async releaseContext(amazonAccountId: string): Promise<void> {
@@ -125,28 +154,23 @@ export class BrowserStateManager implements OnModuleDestroy {
     if (!context) {return;}
 
     try {
-      await this.saveState(amazonAccountId);
+      // Persistent context flushes to disk on close — no explicit saveState needed.
+      await context.close();
     } catch {
-      this.logger.warn(`Failed to save state for account ${amazonAccountId}`);
+      this.logger.warn(`Failed to close persistent context for account ${amazonAccountId}`);
     }
-
-    await context.close().catch(() => {});
     this.activeContexts.delete(amazonAccountId);
   }
 
   async isSessionValid(amazonAccountId: string): Promise<boolean> {
-    const stateFile = this.getStateFilePath(amazonAccountId);
-    if (!fs.existsSync(stateFile)) {return false;}
+    // With persistent contexts the cookie state lives in the user_data_dir, not
+    // a JSON storageState file. A profile dir that exists is a candidate for a
+    // valid session — the only definitive check is a navigation to Amazon that
+    // does not redirect to /signin.
+    const profileDir = this.getProfileDir(amazonAccountId);
+    if (!fs.existsSync(profileDir)) {return false;}
 
     try {
-      const state = JSON.parse(fs.readFileSync(stateFile, 'utf-8')) as { cookies?: Array<{ expires: number }> };
-      const now = Date.now() / 1000;
-      const hasValidCookies = state.cookies?.some(
-        (c) => c.expires === -1 || c.expires === 0 || c.expires > now
-      );
-      if (!hasValidCookies) {return false;}
-
-      // Validate by navigating to Amazon
       const context = await this.getContext(amazonAccountId);
       const page = await context.newPage();
       try {
@@ -166,21 +190,61 @@ export class BrowserStateManager implements OnModuleDestroy {
   }
 
   async clearState(amazonAccountId: string): Promise<void> {
+    // Close the live context first so no file handle holds the profile dir.
+    await this.releaseContext(amazonAccountId);
+
+    const profileDir = this.getProfileDir(amazonAccountId);
+    if (fs.existsSync(profileDir)) {
+      try {
+        await fs.promises.rm(profileDir, { recursive: true, force: true });
+      } catch {
+        this.logger.warn(`Failed to remove profile dir for account ${amazonAccountId}`);
+      }
+    }
+
+    // Legacy .json storageState files (pre-persistent) — remove if present.
     const stateFile = this.getStateFilePath(amazonAccountId);
     if (fs.existsSync(stateFile)) {
-      fs.unlinkSync(stateFile);
+      try {
+        fs.unlinkSync(stateFile);
+      } catch {
+        // best-effort
+      }
     }
-    await this.releaseContext(amazonAccountId);
   }
 
   async closeAll(): Promise<void> {
     for (const [id] of this.activeContexts) {
       await this.releaseContext(id);
     }
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
+  }
+
+  private async resolveProxy(
+    amazonAccountId: string,
+  ): Promise<{ server: string; username: string; password: string } | null> {
+    if (!this.proxyService.isConfigured()) {return null;}
+    try {
+      const rows = await this.databaseService.query<{ user_id: string }>(
+        'SELECT user_id FROM amazon_accounts WHERE id = $1',
+        [amazonAccountId],
+      );
+      if (rows.length === 0) {
+        this.logger.warn(
+          `Amazon account ${amazonAccountId} not found — launching direct (no proxy).`,
+        );
+        return null;
+      }
+      return this.proxyService.resolve(rows[0].user_id, amazonAccountId);
+    } catch (err) {
+      this.logger.warn(
+        `Proxy resolution failed for account ${amazonAccountId}: ${(err as Error).message} — launching direct.`,
+      );
+      return null;
     }
+  }
+
+  private getProfileDir(amazonAccountId: string): string {
+    return path.join(this.profilesDir, amazonAccountId);
   }
 
   private getStateFilePath(amazonAccountId: string): string {

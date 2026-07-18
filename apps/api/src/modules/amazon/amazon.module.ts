@@ -19,6 +19,7 @@ import { AmazonVerifyProcessorService } from './amazon-verify-processor.service'
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
 import { BrowserStateManager } from './browser-state-manager.service';
+import { ProxyService } from './proxy.service';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { BrowserStateManager } from './browser-state-manager.service';
   ],
   controllers: [AmazonController],
   providers: [
+    // Per-account persistent + proxy-aware browser context manager.
+    // Resolves sticky residential proxy per Zonds user (or per account) and
+    // launches contexts that share a per-account user-data-dir.
+    ProxyService,
     BrowserStateManager,
     AmazonRateLimiter,
     AmazonAccountsService,
@@ -56,6 +61,7 @@ import { BrowserStateManager } from './browser-state-manager.service';
     AmazonTrackingQueueService,
     AmazonVerifyQueueService,
     AmazonOrderSyncQueueService,
+    ProxyService,
   ],
 })
 export class AmazonModule {}
