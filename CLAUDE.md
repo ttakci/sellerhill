@@ -70,6 +70,7 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 - Backend: `apps/api/src/modules/store-settings/`
 - Frontend: `apps/web/src/features/store-settings/`
 - Shared: `packages/shared/src/domain/store-settings/`
+- **`amazonTaxRate`** (`store_settings.amazon_tax_rate`, migration `035`): per-user global percent 0–100, default `0`. User-configurable in Settings → StoreSettingsDrawer. Used by `OrderSyncService.recomputeProfit` to estimate provisional order profit when the real Amazon tax is unknown (see "Net Profit Formula" below). The Save handler writes the column for ALL of the user's `store_settings` rows (global + per-store) so the resolved value is consistent everywhere — the upsert path must NOT skip the column on the `UPDATE` branch.
 
 **Landing page** (`apps/web/src/features/landing/`) — public marketing page at `/` (no locale prefix). Professional dark-premium SaaS design, TR/EN + light/dark aware.
 - Container (`LandingPage.container.tsx`) owns all state/logic: scroll detection, mobile menu, locale switching, navigation to `/{locale}/login|register`. Component (`LandingPage.component.tsx`) is presentation-only (`useTranslation` + the scroll-reveal `IntersectionObserver`, which is a visual concern).
@@ -189,7 +190,8 @@ Amazon Order Tracking (BullMQ, per-order scheduler) → Amazon status polling �
 
 ### Net Profit Formula
 ```
-netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
+netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping         (confirmed/linked)
+netProfit = ebayEarnings - purchasePrice - (purchasePrice × amazonTaxRate/100) (provisional estimate)
 ```
 - `ebayEarnings` = eBay's `totalDueSeller` (already deducts all eBay fees)
 - `transactionFee` and `adFee` are calculated and stored for display only, NOT deducted again
@@ -200,11 +202,13 @@ netProfit = ebayEarnings - purchasePrice - amazonTax - amazonShipping
   - `provisional` — listing matched so product/purchase cost is known, but Amazon tax+shipping not yet captured (awaiting auto cost-capture or manual link).
   - `failed` — Amazon scrape ran but returned no usable financials; prior values retained, `net_profit` stays NULL.
   - `untracked` — no listing match (`listing_id IS NULL`); source cost can never be resolved. Stays NULL forever.
-- **Single writer**: `OrderSyncService.recomputeProfit(ebayOrderId, { scrapeFailed? })` is the only method that sets `cost_capture_status`. Called on order insert, on `ebay_earnings` change during re-sync, and after every Amazon link / cost-capture path. Renamed from `recalculateProfit` (old name still appears in git history only).
+- **Provisional estimate (A1.1)**: when `cost_capture_status = provisional`, `recomputeProfit` computes an **estimate** via the pure `estimateProvisionalNetProfit({ ebayEarnings, purchasePrice, amazonTaxRatePct })` helper in `profit-calculation.ts`. Uses the product's last-known Amazon price (resolved via `orders.listing_id → listings → products`); Amazon shipping is **not** estimated (variable; often $0 on Prime — disclosed in UI). The tax percent comes from the per-user global `amazonTaxRate` store setting (migration `035`, default `0`). On any store-settings failure, `recomputeProfit` falls back to `0%` (gross) — settings resolution never breaks profit compute.
+- **`profitBasis`** (`'confirmed' | 'estimated' | null`) on `OrderDto` + dashboard rows: derived from `cost_capture_status` by `deriveProfitBasis` (`linked→'confirmed'`, `provisional→'estimated'`, else `null`). The FE uses it to label estimates; the **confirmed (linked) dashboard headline stays pure/trusted** — provisional rows are surfaced separately, never blended into the headline total.
+- **Single writer**: `OrderSyncService.recomputeProfit(ebayOrderId, { scrapeFailed? })` is the only method that sets `cost_capture_status`. Called on order insert, on `ebay_earnings` change during re-sync, and after every Amazon link / cost-capture path. Renamed from `recalculateProfit` (old name still appears in git history only). Resolves the user's global store settings best-effort via `StoreSettingsService.getResolvedSettings(userId, null)` when computing the provisional estimate.
 - **Dashboard profit tiers** (`GET /dashboard`, `dashboard.service.ts buildPeriod`):
-  - `confirmed` = `SUM(net_profit) FILTER (status <> cancelled AND cost_capture_status = 'linked')` — the **headline** `netProfit` shown on period cards. Trusted only.
-  - `provisional` = same filter with `cost_capture_status = 'provisional'` — shown separately as a lower-confidence addendum.
-  - `uncosted` = `SUM(sale_total) FILTER (cost_capture_status IN ('pending','failed','untracked'))` — **revenue only**, no profit implied.
+  - `confirmed` = `SUM(net_profit) FILTER (status <> cancelled AND cost_capture_status = 'linked')` — the **headline** `netProfit` shown on period cards. Trusted only; `profitBasis = 'confirmed'`.
+  - `provisional` = same filter with `cost_capture_status = 'provisional'` — shown separately as a lower-confidence addendum, labeled "Estimated" in the FE (`profitBasis = 'estimated'`). Never blended into the headline total.
+  - `uncosted` = `SUM(sale_total) FILTER (cost_capture_status IN ('pending','failed','untracked'))` — **revenue only**, no profit implied (`profitBasis = null`).
 - **ASIN availability for untracked fallback (open question — resolved)**: eBay's inbound order payload does **not** expose the item ASIN; the listing-match path uses `lineItems[].legacyItemId` → `listings.ebay_item_id`. The `recomputeProfit` ASIN fallback resolves via `orders.listing_id → listings → products.asin` JOIN, which is only available when a listing matched. For truly untracked orders (no listing) the ASIN is **not resolvable** from the eBay payload — those rows correctly stay `untracked` + `NULL net_profit`. The auto cost-capture matcher's ASIN signal comes from the same JOIN on the eBay candidate side (Amazon side ASIN comes from the scrape).
 
 ### Order Sync (eBay → Local)
@@ -283,7 +287,7 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
 - Currently forwards Amazon's real tracking number. Future: replace with generated fake tracking IDs for dropshipping.
 
 ### Key Files
-- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService. Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`), `*.spec.ts` unit tests.
+- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService. Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`, `estimateProvisionalNetProfit`, `deriveProfitBasis`), `*.spec.ts` unit tests.
 - **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService, AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService, AmazonRateLimiter, BrowserStateManager, **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests).
 - **Backend products**: `src/modules/products/` — ProductsService (price/image lookup, `decrementStock` for sale-driven stock sync)
 - **Product refresh pipeline** (Keepa sole provider): `keepa.service.ts`, `refresh-scheduler.service.ts`, `refresh-processor.service.ts`, `keepa-usage.service.ts`, `product-sync.service.ts` — see "Product Refresh Pipeline" section above.
@@ -477,6 +481,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `032` | `listings.ebay_item_id` nullable (drafts before eBay publish) |
 | `033` | `orders.net_profit` nullable (NULL = unknown, 0 = real zero) + `cost_capture_status` enum + index + backfill from `amazon_linked_at`/`listing_id` |
 | `034` | `amazon_accounts.last_orders_sync_at` (watermark for the auto cost-capture scraper — migration `034`) |
+| `035` | `store_settings.amazon_tax_rate` `NUMERIC(5,2)` default `0` (per-user global percent for provisional-profit estimate) |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
