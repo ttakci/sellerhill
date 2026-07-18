@@ -251,6 +251,38 @@ export class AmazonScrapingService {
   }
 
   /**
+   * Open an authenticated page for the given Amazon account, reusing an existing
+   * persistent session when valid and falling back to a full login (incl. 2FA)
+   * otherwise. Returns a fresh Page that the caller MUST `close()` in a
+   * `finally` block. Used by the auto-fulfill checkout flow (Task 6) so it does
+   * not reimplement login/session handling — single login code path.
+   *
+   * Same rate-limit + browser-state invariants as `doScrapeOrder`: the caller
+   * must already be inside `AmazonRateLimiter.schedule(accountId, …)` (the
+   * checkout service wraps the whole flow in one schedule call). On a signin
+   * redirect detected after the page opens, the caller is expected to re-login
+   * by calling this method again; that recovery path is intentionally NOT
+   * duplicated here.
+   */
+  async ensureAuthenticatedPage(
+    userId: string,
+    amazonAccountId: string,
+  ): Promise<Page> {
+    const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+    const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
+    if (hasValidSession) {
+      const context = await this.browserStateManager.getContext(amazonAccountId);
+      return context.newPage();
+    }
+    return this.performLogin(
+      amazonAccountId,
+      account.email,
+      account.decryptedPassword,
+      account.decryptedTwoFactorSecret,
+    );
+  }
+
+  /**
    * Scrape the account's "Your Orders" list page and return all orders placed
    * since `since`. Powers the auto cost-capture job (Task 7).
    *

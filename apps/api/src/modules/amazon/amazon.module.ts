@@ -6,6 +6,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { OrdersModule } from '../orders/orders.module';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
+import { AmazonCheckoutService } from './amazon-checkout.service';
 import { AmazonOrderParserService } from './amazon-order-parser.service';
 import { AmazonOrderSyncSchedulerService } from './amazon-order-sync-scheduler.service';
 import { AmazonOrderSyncProcessor } from './amazon-order-sync.processor';
@@ -55,6 +56,11 @@ import { ProxyService } from './proxy.service';
     AmazonOrderSyncProcessor,
     AmazonOrderSyncQueueService,
     AmazonOrderSyncSchedulerService,
+    // A2 auto-fulfillment (Task 6) — step-structured Playwright checkout with
+    // review-step hard cap, dry-run mode, and fail-closed typed blocked
+    // reasons. BullMQ processor (Task 8) calls runForOrder; runForOrder is
+    // idempotent and re-checks auto_fulfill_status to prevent double ordering.
+    AmazonCheckoutService,
   ],
   exports: [
     AmazonAccountsService,
