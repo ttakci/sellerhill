@@ -1,4 +1,4 @@
-import { OrderCostCaptureStatus } from '@repo/shared';
+import { OrderCostCaptureStatus, ProfitBasis } from '@repo/shared';
 
 export interface NetProfitInput {
   ebayEarnings: number;
@@ -75,16 +75,16 @@ export function estimateProvisionalNetProfit(input: EstimateInput): number | nul
 
 /**
  * Maps a cost-capture status to the profit basis label shown in the UI.
- * - LINKED    -> 'confirmed'  (Amazon costs fully scraped)
- * - PROVISIONAL -> 'estimated' (purchase price known, tax estimated from store setting)
+ * - LINKED    -> CONFIRMED  (Amazon costs fully scraped)
+ * - PROVISIONAL -> ESTIMATED (purchase price known, tax estimated from store setting)
  * - anything else -> null      (no meaningful profit number to label)
  */
-export function deriveProfitBasis(status: OrderCostCaptureStatus): 'confirmed' | 'estimated' | null {
+export function deriveProfitBasis(status: OrderCostCaptureStatus): ProfitBasis | null {
   switch (status) {
     case OrderCostCaptureStatus.LINKED:
-      return 'confirmed';
+      return ProfitBasis.CONFIRMED;
     case OrderCostCaptureStatus.PROVISIONAL:
-      return 'estimated';
+      return ProfitBasis.ESTIMATED;
     default:
       return null;
   }

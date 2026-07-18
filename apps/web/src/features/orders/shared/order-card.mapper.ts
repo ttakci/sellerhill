@@ -1,4 +1,4 @@
-import type { OrderDto } from '@repo/shared';
+import { ProfitBasis, type OrderDto } from '@repo/shared';
 import type { TFunction } from 'i18next';
 
 import type { OrderCardProps } from './OrderCard';
@@ -84,7 +84,7 @@ export const toOrderCardProps = (
         value: `${order.netProfit >= 0 ? '+' : ''}${formatCurrency(order.netProfit)}`,
         tone: profitTone,
         badge:
-          order.profitBasis === 'estimated'
+          order.profitBasis === ProfitBasis.ESTIMATED
             ? { label: t('orders.estimateBadge'), variant: 'warning' }
             : undefined,
       },

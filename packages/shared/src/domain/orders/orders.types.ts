@@ -19,6 +19,16 @@ export enum OrderCostCaptureStatus {
   UNTRACKED = 'untracked', // no listing match; source cost can never be known
 }
 
+/**
+ * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
+ * at read time (no DB column). CONFIRMED = LINKED (real Amazon costs);
+ * ESTIMATED = PROVISIONAL (purchase price + configured tax rate).
+ */
+export enum ProfitBasis {
+  CONFIRMED = 'confirmed',
+  ESTIMATED = 'estimated',
+}
+
 export interface OrderDto {
   id: string;
   ebayOrderId: string;
@@ -39,10 +49,10 @@ export interface OrderDto {
   costCaptureStatus?: OrderCostCaptureStatus;
   /**
    * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
-   * at read time (no DB column). 'confirmed' = LINKED (real Amazon costs);
-   * 'estimated' = PROVISIONAL (purchase price + configured tax rate); else null.
+   * at read time (no DB column). CONFIRMED = LINKED (real Amazon costs);
+   * ESTIMATED = PROVISIONAL (purchase price + configured tax rate); else null.
    */
-  profitBasis?: 'confirmed' | 'estimated' | null;
+  profitBasis?: ProfitBasis | null;
 
   // Product
   product?: {

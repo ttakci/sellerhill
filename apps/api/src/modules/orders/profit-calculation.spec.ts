@@ -1,4 +1,4 @@
-import { OrderCostCaptureStatus } from '@repo/shared';
+import { OrderCostCaptureStatus, ProfitBasis } from '@repo/shared';
 
 import {
   computeNetProfit,
@@ -68,11 +68,11 @@ describe('estimateProvisionalNetProfit', () => {
 });
 
 describe('deriveProfitBasis', () => {
-  it("returns 'confirmed' for LINKED", () => {
-    expect(deriveProfitBasis(OrderCostCaptureStatus.LINKED)).toBe('confirmed');
+  it("returns CONFIRMED for LINKED", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.LINKED)).toBe(ProfitBasis.CONFIRMED);
   });
-  it("returns 'estimated' for PROVISIONAL", () => {
-    expect(deriveProfitBasis(OrderCostCaptureStatus.PROVISIONAL)).toBe('estimated');
+  it("returns ESTIMATED for PROVISIONAL", () => {
+    expect(deriveProfitBasis(OrderCostCaptureStatus.PROVISIONAL)).toBe(ProfitBasis.ESTIMATED);
   });
   it("returns null for PENDING (neither confirmed nor estimated)", () => {
     expect(deriveProfitBasis(OrderCostCaptureStatus.PENDING)).toBeNull();

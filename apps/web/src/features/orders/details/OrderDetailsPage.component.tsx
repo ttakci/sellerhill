@@ -1,3 +1,4 @@
+import { ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -80,7 +81,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
-  const isEstimated = order.profitBasis === 'estimated';
+  const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
 
   const desktopActions = (
     <S.HeaderActions>

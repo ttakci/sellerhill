@@ -1,4 +1,4 @@
-import type { OrderDto } from '@repo/shared';
+import { ProfitBasis, type OrderDto } from '@repo/shared';
 import { Badge, Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -112,7 +112,7 @@ export function useOrdersColumns(
               {order.netProfit >= 0 ? '+' : ''}
               {formatCurrency(order.netProfit)}
             </Text>
-            {order.profitBasis === 'estimated' && (
+            {order.profitBasis === ProfitBasis.ESTIMATED && (
               <Badge variant="warning" size="xs">
                 {t('orders.estimateBadge')}
               </Badge>

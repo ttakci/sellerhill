@@ -1,10 +1,11 @@
 import type { OrderStatus } from '@repo/shared';
+import type { BadgeVariant } from '@repo/ui';
 
 export type OrderCardStatTone = 'default' | 'positive' | 'negative';
 
 export interface OrderCardStatBadge {
   label: string;
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  variant?: BadgeVariant;
 }
 
 export interface OrderCardStat {
