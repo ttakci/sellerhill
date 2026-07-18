@@ -19,6 +19,7 @@ import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AmazonVerifyProcessorService } from './amazon-verify-processor.service';
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
+import { AutoFulfillProcessor } from './auto-fulfill-processor.service';
 import { BrowserStateManager } from './browser-state-manager.service';
 import { ProxyService } from './proxy.service';
 
@@ -61,6 +62,10 @@ import { ProxyService } from './proxy.service';
     // reasons. BullMQ processor (Task 8) calls runForOrder; runForOrder is
     // idempotent and re-checks auto_fulfill_status to prevent double ordering.
     AmazonCheckoutService,
+    // Task 8 — drains the `auto-fulfill` queue (produced in OrdersModule,
+    // Task 5). Worker connects to Redis by name; no `registerQueue` needed on
+    // the consumer side. Idempotency + jobId dedup keep retries safe.
+    AutoFulfillProcessor,
   ],
   exports: [
     AmazonAccountsService,
