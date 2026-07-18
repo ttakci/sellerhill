@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { OrderStatus } from '@repo/shared';
+import { OrderStatus, TrackingConversionProvider } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -8,6 +8,7 @@ import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
+import { resolveConverter } from './tracking-converter';
 
 interface TrackAmazonOrderData {
   orderId: string;
@@ -165,17 +166,31 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         return;
       }
 
-      // Create shipping fulfillment on eBay
-      // For now: forward the Amazon tracking number directly
-      // Future: replace with generated fake tracking ID for dropshipping
+      // Create shipping fulfillment on eBay.
+      // Tracking number/carrier go through the pluggable TrackingConverter:
+      //   - Real carriers (UPS/USPS/FedEx/DHL) are remapped to eBay's enum.
+      //   - TBA/TBM/TBC (Amazon Logistics) pass through UNCHANGED as
+      //     Amazon_Logistics — never fabricated into a fake USPS/UPS number
+      //     (eBay deprecated Bluecare/Aquiline validation; fabrication is fraud).
+      // The provider is resolved per-order from store_settings (default LOCAL).
+      const provider = await this.resolveProvider(order.user_id);
+      const converter = resolveConverter(provider);
+      const { trackingNumber, shippingCarrierCode } = converter.convert(
+        order.amazon_tracking_number || '',
+        order.amazon_tracking_carrier || '',
+      );
+
       await this.ebayFulfillmentService.createShippingFulfillment(
         ebayAccount.access_token,
         order.ebay_order_id,
         lineItemId,
         order.quantity || 1,
         {
-          trackingNumber: order.amazon_tracking_number || undefined,
-          shippingCarrierCode: this.mapCarrierForEbay(order.amazon_tracking_carrier),
+          // Preserve "no tracking number = no tracking body" semantic —
+          // EbayFulfillmentService only attaches tracking when BOTH fields
+          // are truthy, so empty strings collapse to undefined here.
+          trackingNumber: trackingNumber || undefined,
+          shippingCarrierCode: shippingCarrierCode || undefined,
           shippedDate: new Date().toISOString(),
         }
       );
@@ -223,5 +238,41 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     if (lower.includes('dhl')) {return 'DHL_Express';}
     if (lower.includes('amazon')) {return 'Amazon_Logistics';}
     return carrier;
+  }
+
+  /**
+   * Resolve the user's tracking-conversion provider from store_settings.
+   *
+   * Fail-closed: returns LOCAL on any miss/error/unknown value — settings
+   * resolution must never break the tracking pipeline. Direct query (instead
+   * of injecting StoreSettingsService) because (a) StoreSettingsResponse does
+   * not yet expose `trackingConversionProvider` (added in Task 5), so the
+   * typed-API path would require a cast; and (b) handleShipped already runs
+   * direct queries against orders/ebay_accounts — this stays consistent and
+   * avoids growing the AmazonModule import graph for a single column read.
+   * Migration `036` provides the column (default 'local').
+   */
+  private async resolveProvider(userId: string): Promise<TrackingConversionProvider> {
+    try {
+      const rows = await this.databaseService.query<{ tracking_conversion_provider: string }>(
+        `SELECT tracking_conversion_provider
+           FROM store_settings
+          WHERE user_id = $1 AND is_global = TRUE
+          LIMIT 1`,
+        [userId],
+      );
+      const raw = rows[0]?.tracking_conversion_provider;
+      // Compare to the string literal `'api'` (not the enum) to avoid
+      // `no-unsafe-enum-comparison` between the DB-side string and the enum.
+      if (raw === 'api') {
+        return TrackingConversionProvider.API;
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Failed to resolve tracking provider for user ${userId}: ${message}; defaulting to LOCAL`,
+      );
+    }
+    return TrackingConversionProvider.LOCAL;
   }
 }
