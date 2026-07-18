@@ -191,6 +191,8 @@ Step-structured — one private method per step, each able to throw `AutoFulfill
 
 The step structure makes the blocked-reason taxonomy exhaustive and each step independently unit-testable. The alternative (one monolithic method) was rejected — the typed-reason-per-step shape is what makes fail-closed reliable and the "needs attention" surface precise.
 
+**Evidence capture (admin-only):** on any `blocked` step and on `dry_run`, `AmazonCheckoutService` saves a screenshot (PNG) of the current Amazon page to `${EVIDENCE_DIR || process.cwd()}/fulfillment-evidence/${ebayOrderId}/${stage}-${timestamp}.png`. This evidence is **admin-only** — it is never surfaced in the customer FE (which shows only the status + `blocked_reason` text). Rationale: the screenshot depicts the customer's Amazon buyer-account page (sensitive), and it exists for the operator to investigate failures. Access in v1 is via the filesystem (or a minimal admin-guarded endpoint), consistent with how Keepa admin attribution is read today ("admin reads tables directly, no UI yet"). A proper admin panel / account-impersonation mode is **out of scope for A2** — a separate future spec. Evidence files TTL-clean (default 7 days, `FULFILLMENT_EVIDENCE_TTL_DAYS`).
+
 ### 5. Post-purchase: link + tracking (mostly reuse)
 
 On `placed`, in a single transactional UPDATE on `orders`:
@@ -247,7 +249,7 @@ Wired in at the single call site: `AmazonTrackingProcessorService.handleShipped`
 
 - **`StoreSettingsDrawer`** (`apps/web/src/features/settings/drawers/StoreSettingsDrawer/`): master `auto_fulfill_enabled` toggle; `tracking_conversion_provider` select (`local` only, disabled `api`). The rotation pool is configured indirectly — per account via the Amazon-account edit form (§ below) — so no account picker is needed here. The `amazonTaxRate` field (A1.1) is the template for adding a new field end-to-end.
 - **Amazon Account edit form** (`apps/web/src/features/amazon/`): per-account `auto_fulfill_enabled`, `auto_fulfill_cap_total`, `auto_fulfill_dry_run` — alongside the existing email/password/2FA fields.
-- **Orders surface** (`apps/web/src/features/orders/`): an `auto_fulfill_status` chip on order rows/detail (using the `AutoFulfillStatus` enum → i18n labels, EN + TR) and a "needs attention" filter for `blocked`/`failed` rows so the user can fall back to manual linking.
+- **Orders surface** (`apps/web/src/features/orders/`): an `auto_fulfill_status` chip on order rows/detail (using the `AutoFulfillStatus` enum → i18n labels, EN + TR) and a "needs attention" filter for `blocked`/`failed` rows so the user can fall back to manual linking. **Customers see only the status + reason text — never screenshots** (see Evidence below).
 - All strings via i18n; all status values via the shared enum (rules 10 + 12). No native form controls — all from `@repo/ui`.
 
 ### 9. Config / env (all optional, defaults shown)
@@ -283,10 +285,10 @@ The Playwright checkout flow itself stays **manual-verified** (consistent with h
 
 ---
 
-## Open questions (to resolve in the implementation plan)
+## Open questions (resolved during review, 2026-07-18)
 
-1. **Module placement of the `auto-fulfill` queue + `AmazonCheckoutService`** — Amazon module (alongside other Amazon queues/processor) vs Orders module (alongside the producer). Lean: Amazon module (service + processor co-located with scraping/rate-limit/browser-state they depend on); producer stays in Orders (where the `xmax = 0` hook lives) and enqueues cross-module.
+1. **Module placement** — `auto-fulfill` queue + `AmazonCheckoutService` + processor live in the **Amazon module** (co-located with `AmazonScrapingService`/`AmazonRateLimiter`/`BrowserStateManager` they depend on). The producer stays in **Orders** (where the `xmax = 0` hook lives) and enqueues cross-module.
 2. **Proxy provider final selection** — Smartproxy vs Bright Data vs IPRoyal. Env-only; confirm sticky-session-token format during implementation.
-3. **Notification channel for `blocked` orders** — in-app "needs attention" list is in scope; whether to also send email is a separate, smaller decision.
-4. **Screenshot capture storage** for dry-run / blocked diagnostics — local FS path vs DB bytea vs object storage. Lean: local FS under a `fulfillment-evidence/` dir keyed by `ebayOrderId` (matches `.browser-state/` local-artifact pattern), with a TTL cleanup.
-5. **Whether `auto_fulfill_status` should also be set on orders that pre-date enabling the feature** (backfill `skipped`) or left `pending`. Lean: leave existing rows `pending`; the field is meaningful only going forward.
+3. **Notification channel for `blocked` orders** — in-app "needs attention" list is in scope; email is **out of scope for A2** (separate decision later).
+4. **Screenshot/evidence storage** — **resolved:** local FS under `fulfillment-evidence/${ebayOrderId}/`, **admin-only**, TTL-cleaned (`FULFILLMENT_EVIDENCE_TTL_DAYS`, default 7). Never surfaced to the customer FE. A full admin panel / impersonation mode is out of scope (separate future spec); v1 admin access is filesystem / minimal admin endpoint.
+5. **Backfill of `auto_fulfill_status` on pre-existing orders** — **resolved:** do not backfill; leave existing rows `pending`. The field is meaningful only going forward.
