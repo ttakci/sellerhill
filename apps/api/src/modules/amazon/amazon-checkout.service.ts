@@ -299,12 +299,27 @@ export class AmazonCheckoutService {
       }
 
       await this.humanDelay();
-      await this.clickFirstAvailable(
-        page,
-        CHECKOUT_SELECTORS.placeYourOrderButton,
-        'place-your-order',
-      );
-      await page.waitForLoadState('domcontentloaded', { timeout: 30_000 });
+      // I-2 (money-safety): if clickFirstAvailable / waitForLoadState throw
+      // AFTER the browser already received the click event (navigation-
+      // intercepted / element-detached race), rethrow → BullMQ retry →
+      // idempotency sees RUNNING → checkout() re-enters → a SECOND Place Order
+      // click on the live session = double-order. Swallow the click+wait error
+      // (log at warn) and unconditionally fall through to parseConfirmation,
+      // which either proves the order (→ PLACED) or throws 'no_confirmation'
+      // (→ blocked, no retry). Any click-transport error becomes a fail-closed
+      // block instead of a retriable propagation.
+      try {
+        await this.clickFirstAvailable(
+          page,
+          CHECKOUT_SELECTORS.placeYourOrderButton,
+          'place-your-order',
+        );
+      } catch (err) {
+        this.logger.warn(
+          `place-order click threw; falling through to confirmation parse: ${(err as Error).message}`,
+        );
+      }
+      await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => undefined);
       const placed = await this.parseConfirmation(page); // throws 'no_confirmation'
       await this.onPlaced(ebayOrderId, amazonAccountId, placed);
       await this.setStatus(ebayOrderId, AutoFulfillStatus.PLACED);
@@ -742,13 +757,24 @@ export class AmazonCheckoutService {
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
          LEFT JOIN products p ON p.id = l.product_id
-         JOIN amazon_accounts a ON a.id = $2
+         JOIN amazon_accounts a ON a.id = $2 AND a.user_id = o.user_id
         WHERE o.ebay_order_id = $1`,
       [ebayOrderId, accountId],
     );
     if (!row) {throw new AutoFulfillBlockedError('no_asin');}
 
     const rawCap = row.auto_fulfill_cap_total;
+    // Fail-closed on unparseable cap: Number('xyz') is NaN, and NaN comparisons
+    // are always false → the cap check would silently never fire (fail-open on
+    // the money path). Throw at the source so no caller ever sees a NaN cap.
+    // null is the legitimate "no cap configured" signal → Infinity backstop
+    // (the producer already skips null-cap accounts; this is defence-in-depth).
+    if (rawCap !== null && !Number.isFinite(Number(rawCap))) {
+      throw new AutoFulfillBlockedError(
+        'cap',
+        `unparseable auto_fulfill_cap_total: ${rawCap}`,
+      );
+    }
     const capTotal = rawCap === null ? Number.POSITIVE_INFINITY : Number(rawCap);
     return {
       userId: row.user_id,
