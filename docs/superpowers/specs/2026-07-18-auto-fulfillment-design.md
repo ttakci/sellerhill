@@ -46,10 +46,11 @@ What A2 adds:
 
 Explicitly **out of scope / deferred:**
 - Human-in-the-loop mid-checkout (live browser sharing / VNC / resume tokens). v1 is **fail-closed + manual fallback** via the existing manual `linkAmazonOrder` flow.
-- Multi-account rotation / load-balancing across buyer accounts (v1 = one designated primary fulfillment account per user).
-- Per-eBay-store → Amazon-account mapping (v1 = one account per user).
+- Per-eBay-store → Amazon-account mapping (v1 = one rotation pool per user, not per store).
 - A sanctioned paid tracking-conversion API (interface reserved, provider inactive).
 - Captcha/OTP auto-solving services (out of scope; those obstacles fail closed).
+
+**In scope (added during review):** round-robin account rotation across the user's enabled buyer accounts (§1g, §3).
 
 ---
 
@@ -89,7 +90,10 @@ Per-account rate limit stays at `maxConcurrent: 1`. Add a **per-user** concurren
 **1f. Human-like checkout behavior.**
 Within `AmazonCheckoutService` only: human-scale delays between steps, tapered/curved mouse movement, bounded-random typing cadence. Not applied to scrape code.
 
-**1g. Swappable proxy granularity — the seam that protects the feature.**
+**1g. Round-robin across the user's enabled accounts.**
+Orders are assigned across the user's `auto_fulfill_enabled` accounts in rotation (oldest-`last_used_at`-first), so purchase velocity is spread across accounts rather than concentrated on one. This lowers the per-account "abnormal buying pattern" signal and is the natural multi-account fulfillment behavior. Round-robin operates within the sequential per-user gate (§1e): jobs still run one-at-a-time per user, each assigned to the next account in rotation.
+
+**1h. Swappable proxy granularity — the seam that protects the feature.**
 ```ts
 interface ProxyAssignmentStrategy {
   sessionTokenFor(userId: string, amazonAccountId: string): string;
@@ -107,11 +111,10 @@ interface ProxyAssignmentStrategy {
 ```sql
 ALTER TABLE store_settings
   ADD COLUMN IF NOT EXISTS auto_fulfill_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS auto_fulfill_account_id UUID NULL REFERENCES amazon_accounts(id) ON DELETE SET NULL,
   ADD COLUMN IF NOT EXISTS tracking_conversion_provider VARCHAR(20) NOT NULL DEFAULT 'local';
 ```
 
-`auto_fulfill_account_id` is the designated primary buyer account. `tracking_conversion_provider` only accepts `'local'` for now (`'api'` is reserved — the `ApiTrackingConverter` is a no-op stub).
+No single "designated account" column — the fulfillment pool is **all of the user's `amazon_accounts` rows with `auto_fulfill_enabled = true`**, and orders are assigned **round-robin** across them (§3). `tracking_conversion_provider` only accepts `'local'` for now (`'api'` is reserved — the `ApiTrackingConverter` is a no-op stub).
 
 **Migration `037_alter_amazon_accounts_add_auto_fulfill.sql`** — per-account guardrails (no proxy column — Zonds provides the proxy):
 
@@ -158,7 +161,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_auto_fulfill_status
 **Producer** — in `OrderSyncService.upsertOrder`, immediately after the existing `xmax = 0` genuine-insert stock-sync block (the same hook sale-driven stock sync uses). On a brand-new matched order:
 
 1. Resolve `store_settings.auto_fulfill_enabled`; if off → status `skipped`, stop.
-2. Resolve the designated account (`auto_fulfill_account_id`); require `amazon_accounts.auto_fulfill_enabled` and `auto_fulfill_cap_total IS NOT NULL`; else `skipped`.
+2. **Pick the fulfillment account round-robin:** among the user's `amazon_accounts` with `auto_fulfill_enabled = true` AND `auto_fulfill_cap_total IS NOT NULL`, select the one with the **oldest `last_used_at`** (ties broken by `id`). If none → `skipped`. The chosen account's `last_used_at` is stamped at assignment, so the next order rotates to the next account. This spreads purchase velocity across accounts (anti-ban positive) and needs no new cursor column. The chosen `amazonAccountId` rides in the job payload.
 3. **Coarse gate:** if `order.sale_total > auto_fulfill_cap_total` → `skipped` (pre-filter only; the hard check is the Amazon review step).
 4. Else enqueue `{ ebayOrderId }` on the `auto-fulfill` queue. Job id `fulfill-${ebayOrderId}` (**dedup** — one attempt per order), `attempts: 3`, exponential backoff 60s, `removeOnComplete: 100`.
 
@@ -242,7 +245,7 @@ Wired in at the single call site: `AmazonTrackingProcessorService.handleShipped`
 
 ### 8. Settings UI placement
 
-- **`StoreSettingsDrawer`** (`apps/web/src/features/settings/drawers/StoreSettingsDrawer/`): master `auto_fulfill_enabled` toggle; fulfillment-account select (options from `useGetAmazonAccountsQuery`); `tracking_conversion_provider` select (`local` only, disabled `api`). The `amazonTaxRate` field (A1.1) is the template for adding a new field end-to-end.
+- **`StoreSettingsDrawer`** (`apps/web/src/features/settings/drawers/StoreSettingsDrawer/`): master `auto_fulfill_enabled` toggle; `tracking_conversion_provider` select (`local` only, disabled `api`). The rotation pool is configured indirectly — per account via the Amazon-account edit form (§ below) — so no account picker is needed here. The `amazonTaxRate` field (A1.1) is the template for adding a new field end-to-end.
 - **Amazon Account edit form** (`apps/web/src/features/amazon/`): per-account `auto_fulfill_enabled`, `auto_fulfill_cap_total`, `auto_fulfill_dry_run` — alongside the existing email/password/2FA fields.
 - **Orders surface** (`apps/web/src/features/orders/`): an `auto_fulfill_status` chip on order rows/detail (using the `AutoFulfillStatus` enum → i18n labels, EN + TR) and a "needs attention" filter for `blocked`/`failed` rows so the user can fall back to manual linking.
 - All strings via i18n; all status values via the shared enum (rules 10 + 12). No native form controls — all from `@repo/ui`.
@@ -271,7 +274,7 @@ The Playwright checkout flow itself stays **manual-verified** (consistent with h
 
 ### 11. Risks & trade-offs
 
-- **Ban risk is real and unquantified.** Rotating ship-to addresses + automation is the top suspension vector. Per-user IP links a user's accounts; we mitigate with full per-account browser-profile + fingerprint isolation, sequential usage, conservative volume, and a swappable strategy to per-account IP. **Mitigation, not elimination.** Ship behind dry-run first, single primary account, low volume.
+- **Ban risk is real and unquantified.** Rotating ship-to addresses + automation is the top suspension vector. Per-user IP links a user's accounts; we mitigate with full per-account browser-profile + fingerprint isolation, sequential usage, round-robin across accounts (spreads velocity), conservative volume, and a swappable strategy to per-account IP. **Mitigation, not elimination.** Ship behind dry-run first, low volume.
 - **Captcha/OTP frequency may limit autonomy** by design (fail-closed). If autonomy is too low, a v2 hybrid (pause on captcha/OTP) or a sanctioned solver is a separate decision.
 - **Proxy bandwidth cost** (residential, per-GB). Amazon pages are heavy; checkout is heavier than status scrapes. `ProxyService` logs per-user token/bandwidth attribution (fair-split, `keepa_usage_log`-style) for observation; throttling deferred until real data exists.
 - **Checkout DOM fragility** (same class of risk as scraping today). Mitigated by typed blocked-reasons — a broken selector degrades to `blocked('no_confirmation')` etc., never to a silent wrong order.
