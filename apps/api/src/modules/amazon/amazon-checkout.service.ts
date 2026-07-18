@@ -6,9 +6,11 @@ import { AutoFulfillStatus } from '@repo/shared';
 import type { Page } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
+import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AutoFulfillBlockedReason, shouldSkipFulfillStart } from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
 
@@ -187,6 +189,8 @@ export class AmazonCheckoutService {
     private readonly scraping: AmazonScrapingService,
     private readonly rateLimiter: AmazonRateLimiter,
     private readonly browserState: BrowserStateManager,
+    private readonly orderSync: OrderSyncService,
+    private readonly trackingQueue: AmazonTrackingQueueService,
   ) {}
 
   /**
@@ -787,17 +791,138 @@ export class AmazonCheckoutService {
   }
 
   /**
-   * Task 7 implements the real post-purchase DB write (write amazon_order_id,
-   * purchase_price, amazon_tax, amazon_shipping, set cost_capture_status =
-   * 'linked', queue recomputeProfit). This stub exists so the checkout flow
-   * compiles and is wired end-to-end today; Task 7 replaces the body.
+   * Post-purchase DB write + profit recompute + tracking kickoff.
+   *
+   * MONEY-SAFETY HARD CONTRACT (I-3): this method MUST be fail-soft. After a
+   * confirmed placement (parseConfirmation proved an Amazon order id), NO path
+   * may propagate a non-blocked error — a thrown error → BullMQ retry →
+   * `runForOrder` idempotency re-check sees `RUNNING` (not PLACED) → checkout()
+   * re-enters → a SECOND Place Order click on the live session = double-order.
+   *
+   * Layering (every layer is wrapped to NEVER throw):
+   *   1. Atomic UPDATE writing real costs + `amazon_order_id` +
+   *      `cost_capture_status='linked'` + `auto_fulfill_status='placed'`.
+   *      Including `auto_fulfill_status='placed'` in THIS update means the
+   *      order is terminal the instant the write commits.
+   *   2. On Layer 1 failure: minimal fallback UPDATE setting just
+   *      `amazon_order_id` + `auto_fulfill_status='placed'` (+ attempted_at)
+   *      so the order is marked PLACED and will NOT be re-clicked even if the
+   *      costs write failed. The tracker + cost-capture paths can reconcile
+   *      costs later from the amazon_order_id.
+   *   3. `recomputeProfit` (A1 single-writer → trusted net_profit) in its own
+   *      best-effort try/catch.
+   *   4. `scheduleOrderTracking` (existing tracker keys off amazon_order_id)
+   *      in its own best-effort try/catch.
+   *
+   * Only if even Layer 2 throws do we log a critical error — but still DO NOT
+   * rethrow. The operator will see the row stuck at RUNNING + can investigate;
+   * that's better than a guaranteed double-order from a re-click.
    */
   private async onPlaced(
-    _ebayOrderId: string,
-    _accountId: string,
-    _placed: PlacedResult,
+    ebayOrderId: string,
+    amazonAccountId: string,
+    placed: PlacedResult,
   ): Promise<void> {
-    // implemented in Task 7
+    let orderId: string | null = null;
+
+    // Layer 1: atomic UPDATE — real costs + amazon_order_id + linked + placed.
+    try {
+      const rows = await this.db.query<{ id: string }>(
+        `UPDATE orders SET
+           amazon_account_id          = $1,
+           amazon_order_id            = $2,
+           purchase_price             = $3,
+           amazon_tax                 = $4,
+           amazon_shipping            = $5,
+           amazon_linked_at           = CURRENT_TIMESTAMP,
+           cost_capture_status        = 'linked',
+           auto_fulfill_status        = 'placed',
+           auto_fulfill_attempted_at  = CURRENT_TIMESTAMP,
+           updated_at                 = CURRENT_TIMESTAMP
+         WHERE ebay_order_id = $6
+         RETURNING id`,
+        [
+          amazonAccountId,
+          placed.amazonOrderId,
+          placed.purchasePrice,
+          placed.tax,
+          placed.shipping,
+          ebayOrderId,
+        ],
+      );
+      orderId = rows[0]?.id ?? null;
+    } catch (err) {
+      // Layer 2: minimal fallback — mark PLACED so a retry cannot re-click.
+      this.logger.error(
+        `onPlaced primary UPDATE failed for ${ebayOrderId}; attempting minimal PLACED fallback: ${(err as Error).message}`,
+        (err as Error).stack,
+      );
+      try {
+        const rows = await this.db.query<{ id: string }>(
+          `UPDATE orders SET
+             amazon_order_id           = $1,
+             auto_fulfill_status       = 'placed',
+             auto_fulfill_attempted_at = CURRENT_TIMESTAMP,
+             updated_at                = CURRENT_TIMESTAMP
+           WHERE ebay_order_id = $2
+           RETURNING id`,
+          [placed.amazonOrderId, ebayOrderId],
+        );
+        orderId = rows[0]?.id ?? null;
+      } catch (fallbackErr) {
+        // Worst case: even the minimal fallback threw. DO NOT rethrow —
+        // surface as critical log; operator sees the row stuck at RUNNING.
+        this.logger.error(
+          `onPlaced minimal fallback ALSO failed for ${ebayOrderId} — row stuck at RUNNING, manual investigation required (costs/tracking will not auto-reconcile): ${(fallbackErr as Error).message}`,
+          (fallbackErr as Error).stack,
+        );
+      }
+    }
+
+    // Layer 3 (best-effort): A1 trusted net_profit recompute. Costs are
+    // already on the row; this just computes + persists net_profit. Owns its
+    // own try/catch so it can never propagate to runForOrder's catch.
+    try {
+      await this.orderSync.recomputeProfit(ebayOrderId);
+    } catch (err) {
+      this.logger.error(
+        `onPlaced recomputeProfit failed for ${ebayOrderId} (costs already written; recompute can be re-run): ${(err as Error).message}`,
+        (err as Error).stack,
+      );
+    }
+
+    // Layer 4 (best-effort): Amazon tracking scheduler kickoff — the existing
+    // tracker polls Amazon status (shipped→eBay shipped, delivered→completed).
+    // Keys off order.id (UUID), not ebay_order_id. Owns its own try/catch.
+    try {
+      const id = orderId ?? (await this.orderIdFor(ebayOrderId));
+      if (id) {
+        await this.trackingQueue.scheduleOrderTracking(id, amazonAccountId);
+      } else {
+        this.logger.warn(
+          `onPlaced could not resolve order id for ${ebayOrderId} — tracking scheduler skipped (reconcile manually)`,
+        );
+      }
+    } catch (err) {
+      this.logger.error(
+        `onPlaced scheduleOrderTracking failed for ${ebayOrderId} (tracking can be reconciled later via reconcileSchedulers): ${(err as Error).message}`,
+        (err as Error).stack,
+      );
+    }
+  }
+
+  /**
+   * Resolve the internal order UUID from the eBay order id. Used by onPlaced
+   * to key the Amazon tracking scheduler (which keys off `order.id`, not
+   * `ebay_order_id`). Returns null if the order is gone (shouldn't happen
+   * mid-onPlaced, but defensive — caller skips the tracking kickoff).
+   */
+  private async orderIdFor(ebayOrderId: string): Promise<string | null> {
+    const [row] = await this.db.query<{ id: string }>(
+      `SELECT id FROM orders WHERE ebay_order_id = $1`,
+      [ebayOrderId],
+    );
+    return row?.id ?? null;
   }
 
   /** Update auto_fulfill status + attempted_at. Optional blocked_reason. */
