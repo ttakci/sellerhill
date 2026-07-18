@@ -40,6 +40,30 @@ interface Fingerprint {
 }
 
 /**
+ * Shape of the pre-persistent storageState JSON written by the legacy
+ * `storageState`-only BrowserStateManager (pre-Task-4). Used for one-shot
+ * cookie migration into the new persistent user_data_dir. Only `cookies` is
+ * consumed — Amazon session state is cookie-only; localStorage is intentionally
+ * not migrated.
+ */
+interface LegacyStorageState {
+  cookies: Array<{
+    name: string;
+    value: string;
+    domain?: string;
+    path?: string;
+    expires?: number;
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: 'Strict' | 'Lax' | 'None';
+  }>;
+  origins?: Array<{
+    origin: string;
+    localStorage: Array<{ name: string; value: string }>;
+  }>;
+}
+
+/**
  * Per-account persistent browser-context manager.
  *
  * Each Amazon buyer account gets its own `user_data_dir` under
@@ -84,6 +108,10 @@ export class BrowserStateManager implements OnModuleDestroy {
     await this.closeAll();
   }
 
+  // INVARIANT: callers must go through `AmazonRateLimiter.schedule(accountId, …)`
+  // (per-account 1-concurrent) so two `launchPersistentContext` calls never
+  // race on the same user_data_dir `SingletonLock`. Auto-fulfill checkout
+  // (Task 6) must reuse the same rate limiter — do not call `getContext` directly.
   async getContext(amazonAccountId: string): Promise<BrowserContext> {
     if (this.activeContexts.has(amazonAccountId)) {
       const cached = this.activeContexts.get(amazonAccountId)!;
@@ -97,6 +125,16 @@ export class BrowserStateManager implements OnModuleDestroy {
     }
 
     const profileDir = this.getProfileDir(amazonAccountId);
+    // First launch for this account = profile dir does NOT yet exist. Only on
+    // first launch do we attempt a one-shot migration from the legacy
+    // storageState JSON. Re-running migration once the dir exists would
+    // clobber the persistent profile with stale cookies. The legacy file is
+    // left in place — `clearState` already cleans it; never unlink on the
+    // happy path (in case migration is partial and we need to retry).
+    const isFirstLaunch = !fs.existsSync(profileDir);
+    const legacyStateFile = this.getStateFilePath(amazonAccountId);
+    const hasLegacyState = isFirstLaunch && fs.existsSync(legacyStateFile);
+
     await fs.promises.mkdir(profileDir, { recursive: true });
 
     const proxy = await this.resolveProxy(amazonAccountId);
@@ -129,8 +167,46 @@ export class BrowserStateManager implements OnModuleDestroy {
     }
 
     const context = await chromium.launchPersistentContext(profileDir, launchOptions);
+
+    // One-shot legacy session migration. NOTE: Playwright 1.59's
+    // `launchPersistentContext` does NOT accept a `storageState` option in its
+    // launch params (verified from playwright-core types — it would also race
+    // with the user_data_dir's own cookie store). The supported pattern is to
+    // import via `context.addCookies` after launch. Only cookies are migrated —
+    // Amazon's session-bearing state (`at-main`/`sess-at-main`/`session-id`/
+    // `ubid-main`) is cookie-only; localStorage is intentionally not migrated.
+    if (hasLegacyState) {
+      await this.migrateLegacyStorageState(amazonAccountId, context, legacyStateFile);
+    }
+
     this.activeContexts.set(amazonAccountId, context);
     return context;
+  }
+
+  /**
+   * Best-effort migration of a pre-persistent storageState JSON (cookies only)
+   * into a freshly-launched persistent context. Failures are logged and
+   * swallowed — the user simply re-logs in if migration misses.
+   */
+  private async migrateLegacyStorageState(
+    amazonAccountId: string,
+    context: BrowserContext,
+    legacyStateFile: string,
+  ): Promise<void> {
+    try {
+      const raw = await fs.promises.readFile(legacyStateFile, 'utf8');
+      const parsed = JSON.parse(raw) as LegacyStorageState;
+      if (Array.isArray(parsed.cookies) && parsed.cookies.length > 0) {
+        await context.addCookies(parsed.cookies);
+        this.logger.log(
+          `Migrated ${parsed.cookies.length} cookies from legacy state for account ${amazonAccountId} into ${this.getProfileDir(amazonAccountId)}.`,
+        );
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Legacy storageState migration failed for account ${amazonAccountId} (${(err as Error).message}) — continuing with a fresh session.`,
+      );
+    }
   }
 
   /**
