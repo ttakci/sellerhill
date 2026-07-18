@@ -30,6 +30,8 @@
     "scope_description": "Description only",
     "noBlacklist": "No blacklisted keywords yet",
     "noKeywords": "No keywords found",
-    "copyright": "© {{year}} Zonds Platform. All rights reserved."
+    "copyright": "© {{year}} Zonds Platform. All rights reserved.",
+    "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
+    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost when an order's profit is still provisional (Amazon order not yet placed). Set to your buyer account's state rate (e.g. 7). 0 = no tax estimated."
   }
 }

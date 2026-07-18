@@ -30,6 +30,8 @@
     "scope_description": "Yalnızca Açıklama",
     "noBlacklist": "Henüz kara listeye alınmış anahtar kelime yok",
     "noKeywords": "Anahtar kelime bulunamadı",
-    "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır."
+    "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır.",
+    "amazonTaxRate": "Amazon Satış Alış Vergi Oranı (%)",
+    "amazonTaxRateDesc": "Bir siparişin kârı hala geçiciyken (Amazon siparişi henüz verilmediğinde) alış maliyetine uygulanan tahmini Amazon satış vergisi oranı. Alıcı hesabınızın eyalet oranına ayarlayın (ör. 7). 0 = vergi tahmin edilmez."
   }
 }

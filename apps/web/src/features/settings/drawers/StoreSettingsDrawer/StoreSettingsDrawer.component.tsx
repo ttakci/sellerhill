@@ -16,16 +16,18 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
   zipCode,
   validateTitle,
   validateDescription,
+  amazonTaxRate,
   onCountryChange,
   onStateChange,
   onZipCodeChange,
   onToggleValidateTitle,
   onToggleValidateDescription,
+  onAmazonTaxRateChange,
   onContinue,
   isSaving,
   isContinueDisabled,
 }) => {
-  const { t } = useTranslation(['translation']);
+  const { t } = useTranslation(['translation', 'storeSettings']);
   return (
     <Drawer
       isOpen={isOpen}
@@ -71,6 +73,16 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               onChange={onZipCodeChange}
             />
           </FieldGrid>
+          <ModernTextInput
+            name="amazonTaxRate"
+            type="number"
+            label={t('storeSettings:storeSettings.amazonTaxRate')}
+            value={String(amazonTaxRate)}
+            onChange={onAmazonTaxRateChange}
+          />
+          <Text variant="caption">
+            {t('storeSettings:storeSettings.amazonTaxRateDesc')}
+          </Text>
           <Text variant="body-sm" weight="semibold">
             {t('translation:settingsHub.drawer.storeSettings.validation')}
           </Text>

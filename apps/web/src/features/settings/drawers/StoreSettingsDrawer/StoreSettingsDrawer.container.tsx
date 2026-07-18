@@ -32,6 +32,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [zipCode, setZipCode] = useState(config?.zipCode ?? '');
   const [validateTitle, setValidateTitle] = useState(config?.validateTitle ?? true);
   const [validateDescription, setValidateDescription] = useState(config?.validateDescription ?? false);
+  const [amazonTaxRate, setAmazonTaxRate] = useState<number>(config?.amazonTaxRate ?? 0);
 
   // Reload fields when the drawer opens or the (hoisted) scope changes.
   // React-recommended render-time state adjustment.
@@ -47,6 +48,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setZipCode(next?.zipCode ?? '');
       setValidateTitle(next?.validateTitle ?? true);
       setValidateDescription(next?.validateDescription ?? false);
+      setAmazonTaxRate(next?.amazonTaxRate ?? 0);
     }
   }
 
@@ -73,8 +75,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       validateTitle,
       validateDescription,
       blacklist,
-      // Preserve existing tax rate through this drawer (UI for editing lands in a later task).
-      amazonTaxRate: config?.amazonTaxRate ?? 0,
+      amazonTaxRate,
     };
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
@@ -109,11 +110,21 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       zipCode={zipCode}
       validateTitle={validateTitle}
       validateDescription={validateDescription}
+      amazonTaxRate={amazonTaxRate}
       onCountryChange={(e) => setCountry(e.target.value)}
       onStateChange={(e) => setStateField(e.target.value)}
       onZipCodeChange={(e) => setZipCode(e.target.value)}
       onToggleValidateTitle={setValidateTitle}
       onToggleValidateDescription={setValidateDescription}
+      onAmazonTaxRateChange={(e) => {
+        const raw = e.target.value;
+        if (raw === '') {
+          setAmazonTaxRate(0);
+          return;
+        }
+        const parsed = Number(raw);
+        setAmazonTaxRate(Number.isFinite(parsed) ? parsed : 0);
+      }}
       onContinue={handleContinue}
       isSaving={isSaving}
       isContinueDisabled={isContinueDisabled}

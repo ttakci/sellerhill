@@ -23,11 +23,13 @@ export interface StoreSettingsDrawerComponentProps {
   zipCode: string;
   validateTitle: boolean;
   validateDescription: boolean;
+  amazonTaxRate: number;
   onCountryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleValidateTitle: (checked: boolean) => void;
   onToggleValidateDescription: (checked: boolean) => void;
+  onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onContinue: () => void;
   isSaving: boolean;
   isContinueDisabled: boolean;
