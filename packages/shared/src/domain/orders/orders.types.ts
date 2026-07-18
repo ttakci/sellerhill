@@ -20,6 +20,26 @@ export enum OrderCostCaptureStatus {
 }
 
 /**
+ * Lifecycle of automated Amazon fulfillment for an order.
+ * pending  -> new order, not yet attempted / not eligible
+ * running  -> checkout job in progress
+ * placed   -> Amazon order placed, costs + amazon_order_id written, recomputeProfit queued
+ * blocked  -> checkout attempted, hit a fail-closed obstacle (no charge); see blocked_reason
+ * failed   -> unexpected error (transport/infra); BullMQ may retry
+ * dry_run  -> dry-run account: full flow up to (not incl.) Place Order; review total captured
+ * skipped  -> not eligible (auto off / no enabled account / coarse cap gate failed)
+ */
+export enum AutoFulfillStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  PLACED = 'placed',
+  BLOCKED = 'blocked',
+  FAILED = 'failed',
+  DRY_RUN = 'dry_run',
+  SKIPPED = 'skipped',
+}
+
+/**
  * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
  * at read time (no DB column). CONFIRMED = LINKED (real Amazon costs);
  * ESTIMATED = PROVISIONAL (purchase price + configured tax rate).

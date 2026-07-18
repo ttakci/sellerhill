@@ -1,0 +1,4 @@
+ALTER TABLE amazon_accounts
+  ADD COLUMN IF NOT EXISTS auto_fulfill_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS auto_fulfill_cap_total NUMERIC(10,2),
+  ADD COLUMN IF NOT EXISTS auto_fulfill_dry_run BOOLEAN NOT NULL DEFAULT FALSE;

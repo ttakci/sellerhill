@@ -80,3 +80,9 @@ export type AmazonOrderStatus =
   | 'delivered'
   | 'cancelled'
   | 'returned';
+
+/** Tracking-number conversion provider. Only LOCAL is active; API is reserved (no-op stub). */
+export enum TrackingConversionProvider {
+  LOCAL = 'local',
+  API = 'api',
+}
