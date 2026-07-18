@@ -20,6 +20,7 @@ import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingsQuery } from '@/features/listings/api/listings.api';
 import { useGetOrdersQuery } from '@/features/orders/api/orders.api';
+import { useGetStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
@@ -52,6 +53,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
 
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
   const ebayAccounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData]);
+
+  const { data: storeSettings } = useGetStoreSettingsQuery({ storeId: storeFilter });
+  const amazonTaxRate = storeSettings?.amazonTaxRate ?? 0;
 
   const { data: userData, error: userError } = useGetMeQuery();
 
@@ -259,8 +263,12 @@ export const DashboardPageContainer = (): React.ReactElement => {
       grossProfit: t('dashboard.grossProfit'),
       netProfit: t('dashboard.netProfit'),
       estimatedPayout: t('dashboard.estimatedPayout'),
+      provisionalEstimatedLabel: t('dashboard.provisionalEstimatedLabel'),
+      provisionalEstimatedTooltip: t('dashboard.provisionalEstimatedTooltip', {
+        rate: amazonTaxRate,
+      }),
     }),
-    [t],
+    [t, amazonTaxRate],
   );
 
   const periodTitles = useMemo(

@@ -71,6 +71,8 @@
       "estimatedPayout": "Est. payout",
       "margin": "Margin"
     },
+    "provisionalEstimatedLabel": "Estimated (pending Amazon fulfillment)",
+    "provisionalEstimatedTooltip": "Orders awaiting Amazon fulfillment use an estimated cost (Amazon tax at your configured rate of {{rate}}%).",
     "backToDashboard": "Back to dashboard"
   }
 }

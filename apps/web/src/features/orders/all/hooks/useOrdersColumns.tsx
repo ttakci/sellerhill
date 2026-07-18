@@ -1,5 +1,5 @@
 import type { OrderDto } from '@repo/shared';
-import { Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
+import { Badge, Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -103,14 +103,21 @@ export function useOrdersColumns(
         header: t('orders.table.netProfit'),
         sortable: true,
         render: (_value, order) => (
-          <Text
-            variant="body"
-            weight="semibold"
-            color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
-          >
-            {order.netProfit >= 0 ? '+' : ''}
-            {formatCurrency(order.netProfit)}
-          </Text>
+          <S.ProfitCell>
+            <Text
+              variant="body"
+              weight="semibold"
+              color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
+            >
+              {order.netProfit >= 0 ? '+' : ''}
+              {formatCurrency(order.netProfit)}
+            </Text>
+            {order.profitBasis === 'estimated' && (
+              <Badge variant="warning" size="xs">
+                {t('orders.estimateBadge')}
+              </Badge>
+            )}
+          </S.ProfitCell>
         ),
       },
     ],

@@ -27,6 +27,8 @@ export interface PeriodCardLabels {
   grossProfit: string;
   netProfit: string;
   estimatedPayout: string;
+  provisionalEstimatedLabel: string;
+  provisionalEstimatedTooltip: string;
 }
 
 export type DashboardTabId = 'cards' | 'chart' | 'history';

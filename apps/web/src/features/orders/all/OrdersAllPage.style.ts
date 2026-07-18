@@ -82,6 +82,14 @@ export const BuyerCell = styled.div`
   min-width: 0;
 `;
 
+export const ProfitCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
 export const ProductCell = styled.div`
   display: flex;
   align-items: center;

@@ -83,6 +83,10 @@ export const toOrderCardProps = (
         label: t('orders.table.netProfit'),
         value: `${order.netProfit >= 0 ? '+' : ''}${formatCurrency(order.netProfit)}`,
         tone: profitTone,
+        badge:
+          order.profitBasis === 'estimated'
+            ? { label: t('orders.estimateBadge'), variant: 'warning' }
+            : undefined,
       },
     ],
   };

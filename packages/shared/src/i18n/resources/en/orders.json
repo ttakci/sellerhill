@@ -138,6 +138,8 @@
       "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
       "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
     },
+    "estimateBadge": "Estimated",
+    "estimateNote": "Estimated profit — finalizes when the Amazon order is placed. Based on the last known Amazon price; Amazon shipping not included.",
     "footer": {
       "copyright": "© 2026 Zonds E-commerce Solutions. All rights reserved."
     }

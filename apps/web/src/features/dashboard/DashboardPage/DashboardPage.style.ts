@@ -176,6 +176,13 @@ export const FullMetricRow = styled.div`
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
+export const ProvisionalLabelRow = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+  color: ${tkn('colors.text.secondary')};
+`;
+
 /** Side-by-side carousels on desktop */
 export const CarouselRow = styled.div`
   display: grid;

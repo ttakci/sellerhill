@@ -2,10 +2,17 @@ import type { OrderStatus } from '@repo/shared';
 
 export type OrderCardStatTone = 'default' | 'positive' | 'negative';
 
+export interface OrderCardStatBadge {
+  label: string;
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
+}
+
 export interface OrderCardStat {
   label: string;
   value: string;
   tone?: OrderCardStatTone;
+  /** Optional small badge rendered under the stat value (e.g. "Estimated"). */
+  badge?: OrderCardStatBadge;
 }
 
 export interface OrderCardMetaItem {

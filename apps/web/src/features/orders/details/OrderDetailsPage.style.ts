@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainerWithMobileBar, tkn } from '@repo/ui';
+import { PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
@@ -81,6 +81,17 @@ export const ProfitHighlight = styled.div<{ $positive: boolean }>`
   border-radius: ${tkn('radius.sm')};
   background: ${({ $positive, theme }) =>
     $positive ? `${theme.colors.semantic.success}12` : `${theme.colors.semantic.error}12`};
+`;
+
+export const ProfitLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const EstimateNote = styled(Text)`
+  line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
 export const KpiStrip = styled.div`

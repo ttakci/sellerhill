@@ -13,6 +13,7 @@ import {
   Icon,
   PageHeader,
   Text,
+  Tooltip as UITooltip,
   useTheme,
 } from '@repo/ui';
 import React from 'react';
@@ -190,6 +191,22 @@ const PeriodCardComponent = ({
             {formatCurrency(metrics.estimatedPayout)}
           </Text>
         </S.FullMetricRow>
+
+        {metrics.profitProvisional !== 0 && (
+          <S.FullMetricRow>
+            <S.ProvisionalLabelRow>
+              <Text variant="caption" color="text.secondary">
+                {labels.provisionalEstimatedLabel}
+              </Text>
+              <UITooltip content={labels.provisionalEstimatedTooltip} position="top" variant="dark">
+                <Icon name="info" size={14} color="text.tertiary" />
+              </UITooltip>
+            </S.ProvisionalLabelRow>
+            <Text variant="body-sm" weight="semibold" color="semantic.warning">
+              {formatCurrency(metrics.profitProvisional)}
+            </Text>
+          </S.FullMetricRow>
+        )}
       </S.PeriodCardBody>
     </S.PeriodCard>
   );

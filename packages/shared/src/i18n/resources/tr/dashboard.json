@@ -71,6 +71,8 @@
       "estimatedPayout": "Tahmini ödeme",
       "margin": "Marj"
     },
+    "provisionalEstimatedLabel": "Tahmini (Amazon karşılama bekleniyor)",
+    "provisionalEstimatedTooltip": "Amazon karşılaması beklenen siparişler tahmini maliyet kullanır (Amazon vergisi, yapılandırılan {{rate}}% oranında).",
     "backToDashboard": "Panele dön"
   }
 }

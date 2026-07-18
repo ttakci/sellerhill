@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Icon,
   IdBadge,
@@ -79,6 +80,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
+  const isEstimated = order.profitBasis === 'estimated';
 
   const desktopActions = (
     <S.HeaderActions>
@@ -141,9 +143,16 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
           </S.IdRow>
 
           <S.ProfitHighlight $positive={profitPositive}>
-            <Text variant="caption" color="text.secondary" weight="medium">
-              {t('orders.detail.netProfitResult')}
-            </Text>
+            <S.ProfitLabelRow>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {t('orders.detail.netProfitResult')}
+              </Text>
+              {isEstimated && (
+                <Badge variant="warning" size="xs">
+                  {t('orders.estimateBadge')}
+                </Badge>
+              )}
+            </S.ProfitLabelRow>
             <Text
               variant="h3"
               weight="semibold"
@@ -154,6 +163,11 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <Text variant="body-sm" color="text.secondary">
               {t('orders.detail.roi')}: {roiLabel}
             </Text>
+            {isEstimated && (
+              <S.EstimateNote variant="caption" color="text.tertiary">
+                {t('orders.estimateNote')}
+              </S.EstimateNote>
+            )}
           </S.ProfitHighlight>
         </S.HeroInfo>
       </S.Hero>

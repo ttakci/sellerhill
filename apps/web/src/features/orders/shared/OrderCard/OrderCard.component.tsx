@@ -1,4 +1,4 @@
-import { Icon, IdBadge, StatusBadge } from '@repo/ui';
+import { Badge, Icon, IdBadge, StatusBadge } from '@repo/ui';
 import React from 'react';
 
 import { orderStatusToBadgeStatus } from '../order-status';
@@ -67,6 +67,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
                 {stat.value}
               </S.StatValue>
+              {stat.badge && (
+                <Badge variant={stat.badge.variant ?? 'warning'} size="xs">
+                  {stat.badge.label}
+                </Badge>
+              )}
             </S.StatCell>
           ))}
         </S.StatsGrid>
