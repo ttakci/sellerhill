@@ -18,6 +18,7 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { deriveProfitBasis } from '../orders/profit-calculation';
 
 @Injectable()
 export class DashboardService {
@@ -767,6 +768,9 @@ export class DashboardService {
         isTracked: !!row.listing_id,
         status: row.status as OrderStatus,
         costCaptureStatus: (row.cost_capture_status as OrderCostCaptureStatus) ?? undefined,
+        profitBasis: deriveProfitBasis(
+          row.cost_capture_status as OrderCostCaptureStatus,
+        ),
         salePrice: num(row.sale_price),
         saleShipping: num(row.sale_shipping),
         saleTax: num(row.sale_tax),

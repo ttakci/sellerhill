@@ -18,6 +18,7 @@ import { DatabaseService } from '../../common/database/database.service';
 
 import { OrderSyncQueueService } from './order-sync-queue.service';
 import { OrderSyncService } from './order-sync.service';
+import { deriveProfitBasis } from './profit-calculation';
 
 interface OrderRow {
   id: string;
@@ -392,6 +393,9 @@ export class OrdersService {
       costCaptureStatus: row.cost_capture_status
         ? (row.cost_capture_status as OrderCostCaptureStatus)
         : undefined,
+      profitBasis: deriveProfitBasis(
+        row.cost_capture_status as OrderCostCaptureStatus,
+      ),
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
       product: hasListing

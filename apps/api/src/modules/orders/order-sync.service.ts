@@ -6,14 +6,15 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EbayAccountStatus, type EbayMarketplaceId } from '@repo/shared';
+import { EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
-import { computeNetProfit, deriveCostCaptureStatus } from './profit-calculation';
+import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
 
 export interface EbayAccountForSync {
@@ -37,7 +38,8 @@ export class OrderSyncService {
     private readonly ebayService: EbayService,
     private readonly fulfillmentService: EbayFulfillmentService,
     private readonly productsService: ProductsService,
-    private readonly stockSyncQueue: StockSyncQueueService
+    private readonly stockSyncQueue: StockSyncQueueService,
+    private readonly storeSettingsService: StoreSettingsService
   ) {}
 
   /**
@@ -324,6 +326,7 @@ export class OrderSyncService {
       // Pull the order + product ASIN + settings-group fees in one go.
       const rows = await this.databaseService.query<{
         id: string;
+        user_id: string;
         sale_total: string | number;
         ebay_earnings: string | number | null;
         purchase_price: string | number | null;
@@ -334,7 +337,7 @@ export class OrderSyncService {
         asin: string | null;
         fees: { ebayFeePercent?: number; fixedFeeAmount?: number; taxPercent?: number } | null;
       }>(
-        `SELECT o.id, o.sale_total, o.ebay_earnings, o.purchase_price,
+        `SELECT o.id, o.user_id, o.sale_total, o.ebay_earnings, o.purchase_price,
                 o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
                 o.listing_id, p.asin,
                 lsg.fees
@@ -377,15 +380,42 @@ export class OrderSyncService {
         }
       }
 
-      const finalNetProfit =
-        resolvedPurchase > 0
-          ? computeNetProfit({
-              ebayEarnings: Number(o.ebay_earnings) || 0,
-              purchasePrice: resolvedPurchase,
-              amazonTax: Number(o.amazon_tax) || 0,
-              amazonShipping: Number(o.amazon_shipping) || 0,
-            })
-          : null;
+      // Persisted net_profit depends on the cost-capture tier:
+      //   LINKED      — real scraped amazon_tax + amazon_shipping via computeNetProfit.
+      //   PROVISIONAL — estimated via estimateProvisionalNetProfit using the user's
+      //                 global amazonTaxRate store setting (Amazon not yet linked).
+      //   other tiers — unchanged fallback (computeNetProfit with whatever's on the row,
+      //                 typically 0 for unlinked orders); null when purchase unknown.
+      let finalNetProfit: number | null = null;
+      if (resolvedPurchase > 0) {
+        const ebayEarnings = Number(o.ebay_earnings) || 0;
+        if (status === OrderCostCaptureStatus.PROVISIONAL) {
+          // Resolve user's global tax rate (best-effort — settings must never
+          // break recompute; on failure fall back to 0% which equals gross).
+          let amazonTaxRatePct = 0;
+          try {
+            const settings = await this.storeSettingsService.getResolvedSettings(o.user_id, null);
+            amazonTaxRatePct = Number(settings.amazonTaxRate) || 0;
+          } catch (settingsErr) {
+            this.logger.warn(
+              `store settings resolve failed for order ${ebayOrderId} (user ${o.user_id}): ${(settingsErr as Error).message}`,
+            );
+          }
+          finalNetProfit = estimateProvisionalNetProfit({
+            ebayEarnings,
+            purchasePrice: resolvedPurchase,
+            amazonTaxRatePct,
+          });
+        } else {
+          // LINKED (real amazon costs) or PENDING/FAILED/UNTRACKED (unchanged).
+          finalNetProfit = computeNetProfit({
+            ebayEarnings,
+            purchasePrice: resolvedPurchase,
+            amazonTax: Number(o.amazon_tax) || 0,
+            amazonShipping: Number(o.amazon_shipping) || 0,
+          });
+        }
+      }
 
       const saleTotal = Number(o.sale_total) || 0;
       const ebayFeePercent = Number(o.fees?.ebayFeePercent) || 0;

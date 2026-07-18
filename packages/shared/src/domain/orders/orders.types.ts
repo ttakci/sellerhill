@@ -37,6 +37,12 @@ export interface OrderDto {
   paymentStatus?: string;
   /** Confidence tier of Amazon cost capture (drives dashboard profit aggregation). */
   costCaptureStatus?: OrderCostCaptureStatus;
+  /**
+   * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
+   * at read time (no DB column). 'confirmed' = LINKED (real Amazon costs);
+   * 'estimated' = PROVISIONAL (purchase price + configured tax rate); else null.
+   */
+  profitBasis?: 'confirmed' | 'estimated' | null;
 
   // Product
   product?: {
