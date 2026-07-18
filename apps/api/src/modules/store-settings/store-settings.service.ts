@@ -18,6 +18,9 @@ interface StoreSettingsEntity {
   validate_description: boolean;
   blacklist: string; // JSON string in DB
   amazon_tax_rate: string | number; // NUMERIC(5,2) — coerced via Number() in mapper
+  // A2 auto-fulfillment master toggle (migration 036). Read-only here; the
+  // full upsert + guardrails land with the settings-backend task.
+  auto_fulfill_enabled: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -65,6 +68,7 @@ export class StoreSettingsService {
         validateDescription: false,
         blacklist: [],
         amazonTaxRate: 0,
+        autoFulfillEnabled: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -175,6 +179,7 @@ export class StoreSettingsService {
       validateDescription: entity.validate_description,
       blacklist: parsedBlacklist,
       amazonTaxRate: Number(entity.amazon_tax_rate) || 0,
+      autoFulfillEnabled: !!entity.auto_fulfill_enabled,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

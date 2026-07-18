@@ -6,13 +6,15 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
+import { AutoFulfillStatus, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { meetsCoarseCapGate, pickRoundRobinAccount } from '../amazon/auto-fulfill-helpers';
 import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
+import { AutoFulfillQueueService } from './auto-fulfill-queue.service';
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
 import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
@@ -39,7 +41,8 @@ export class OrderSyncService {
     private readonly fulfillmentService: EbayFulfillmentService,
     private readonly productsService: ProductsService,
     private readonly stockSyncQueue: StockSyncQueueService,
-    private readonly storeSettingsService: StoreSettingsService
+    private readonly storeSettingsService: StoreSettingsService,
+    private readonly autoFulfillQueue: AutoFulfillQueueService,
   ) {}
 
   /**
@@ -174,6 +177,18 @@ export class OrderSyncService {
               // Stock sync is best-effort — never fail the order sync because of it.
               const msg = error instanceof Error ? error.message : String(error);
               this.logger.warn(`Stock sync for order ${entity.ebayOrderId} skipped: ${msg}`);
+            }
+          }
+
+          // Auto-fulfill (best-effort; never fails order sync). Fires only on a
+          // genuine new matched order — same gate as sale-driven stock sync. See
+          // `maybeEnqueueAutoFulfill` for the toggle/cap/round-robin resolution.
+          if (inserted && listingId && entity.quantity > 0) {
+            try {
+              await this.maybeEnqueueAutoFulfill(entity);
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : String(err);
+              this.logger.warn(`Auto-fulfill enqueue skipped for ${entity.ebayOrderId}: ${msg}`);
             }
           }
 
@@ -444,5 +459,77 @@ export class OrderSyncService {
     } catch (err) {
       this.logger.error(`recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`, (err as Error).stack);
     }
+  }
+
+  /**
+   * Producer for the `auto-fulfill` queue (A2). Runs only on a brand-new matched
+   * eBay order. Best-effort — caller wraps in try/catch so a failure here never
+   * breaks order sync.
+   *
+   * Resolution order:
+   *  1. Master toggle (`store_settings.auto_fulfill_enabled`, resolved per-user
+   *     global). Off → status `skipped`, no enqueue.
+   *  2. Pool of enabled Amazon accounts (`auto_fulfill_enabled = true` AND a
+   *     non-null `auto_fulfill_cap_total`). Empty pool → `skipped`.
+   *  3. Round-robin pick (oldest `last_used_at` first) across the pool.
+   *  4. Coarse cap gate (Task 2's `meetsCoarseCapGate`) using `sale_total` vs
+   *     the picked account's cap. Over cap → `skipped`. The HARD cap is the
+   *     Amazon review-step grand-total check (Task 6 checkout service).
+   *  5. Stamp `last_used_at` on the picked account so the next order rotates.
+   *  6. Enqueue one BullMQ job (deduped per eBay order id).
+   *
+   * Note: `auto_fulfill_status` defaults to `pending` on order insert
+   * (migration 038), so the enqueued path leaves the row at `pending` for the
+   * processor (Task 8) to pick up. Only the skip paths write `skipped` here.
+   */
+  private async maybeEnqueueAutoFulfill(
+    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
+  ): Promise<void> {
+    // 1. Master toggle (global per-user settings).
+    const settings = await this.storeSettingsService.getResolvedSettings(entity.userId, null);
+    if (!settings.autoFulfillEnabled) {
+      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      return;
+    }
+    // 2. Round-robin across enabled accounts with a cap.
+    const enabled = await this.databaseService.query<{
+      id: string;
+      last_used_at: Date | null;
+      auto_fulfill_cap_total: string | number | null;
+    }>(
+      `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts
+        WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
+      [entity.userId],
+    );
+    if (enabled.length === 0) {
+      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      return;
+    }
+    const pick = pickRoundRobinAccount(
+      enabled.map((a) => ({ id: a.id, lastUsedAt: a.last_used_at })),
+    );
+    if (!pick) {
+      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      return;
+    }
+    const cap = Number(enabled.find((a) => a.id === pick.id)!.auto_fulfill_cap_total);
+    // 3. Coarse pre-filter (hard check is the Amazon review step in the checkout service).
+    if (!meetsCoarseCapGate(Number(entity.saleTotal) || 0, cap)) {
+      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      return;
+    }
+    // Stamp last_used_at so the next order rotates to the next account.
+    await this.databaseService.query(
+      `UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`,
+      [pick.id],
+    );
+    await this.autoFulfillQueue.enqueue(entity.ebayOrderId, pick.id);
+  }
+
+  private async setAutoFulfillStatus(ebayOrderId: string, status: AutoFulfillStatus): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+      [status, ebayOrderId],
+    );
   }
 }

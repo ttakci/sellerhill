@@ -1,0 +1,44 @@
+import { InjectQueue } from '@nestjs/bullmq';
+import { Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
+
+/**
+ * Producer for the `auto-fulfill` queue. The producer (OrderSyncService, this
+ * module) enqueues one job per brand-new matched eBay order when the user has
+ * the master toggle on and a round-robin-eligible Amazon account exists.
+ *
+ * The consumer (Task 8 processor) lives in the Amazon module and connects to
+ * the same Redis queue BY NAME — BullMQ workers need no `registerQueue` on the
+ * consumer side. Keeping the queue registered in OrdersModule avoids a circular
+ * module dep (AmazonModule already imports OrdersModule for `recomputeProfit`).
+ *
+ * jobId is keyed per eBay order id so BullMQ dedupes across retries: one
+ * fulfillment attempt per order, even if the producer fires twice or the
+ * processor exhausts its attempts and the queue is re-enqueued.
+ */
+export const AUTO_FULFILL_QUEUE = 'auto-fulfill';
+
+@Injectable()
+export class AutoFulfillQueueService {
+  private readonly logger = new Logger(AutoFulfillQueueService.name);
+
+  constructor(@InjectQueue(AUTO_FULFILL_QUEUE) private readonly queue: Queue) {}
+
+  async enqueue(ebayOrderId: string, amazonAccountId: string): Promise<void> {
+    // jobId per order => dedup; one fulfillment attempt per order across BullMQ retries.
+    await this.queue.add(
+      'fulfill-order',
+      { ebayOrderId, amazonAccountId },
+      {
+        jobId: `fulfill-${ebayOrderId}`,
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 60_000 },
+        removeOnComplete: 100,
+        removeOnFail: { age: 86_400 },
+      },
+    );
+    this.logger.log(
+      `enqueued auto-fulfill for ${ebayOrderId} on account ${amazonAccountId}`,
+    );
+  }
+}

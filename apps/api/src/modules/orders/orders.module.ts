@@ -6,6 +6,7 @@ import { EbayModule } from '../ebay/ebay.module';
 import { ProductsModule } from '../products/products.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
+import { AutoFulfillQueueService, AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.service';
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
 import { OrderSyncProcessorService } from './order-sync-processor.service';
 import { OrderSyncQueueService } from './order-sync-queue.service';
@@ -20,7 +21,11 @@ import { StockSyncQueueService } from './stock-sync-queue.service';
     EbayModule,
     ProductsModule,
     StoreSettingsModule,
-    BullModule.registerQueue({ name: 'order-sync' }, { name: 'stock-sync' }),
+    BullModule.registerQueue(
+      { name: 'order-sync' },
+      { name: 'stock-sync' },
+      { name: AUTO_FULFILL_QUEUE },
+    ),
   ],
   controllers: [OrdersController],
   providers: [
@@ -30,7 +35,8 @@ import { StockSyncQueueService } from './stock-sync-queue.service';
     OrderSyncQueueService,
     OrderSyncProcessorService,
     StockSyncQueueService,
+    AutoFulfillQueueService,
   ],
-  exports: [OrdersService, OrderSyncService],
+  exports: [OrdersService, OrderSyncService, AutoFulfillQueueService],
 })
 export class OrdersModule {}
