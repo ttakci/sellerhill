@@ -49,6 +49,9 @@ export class AmazonController {
       email: dto.email,
       password: dto.password,
       twoFactorSecret: dto.twoFactorSecret,
+      autoFulfillEnabled: dto.autoFulfillEnabled,
+      autoFulfillCapTotal: dto.autoFulfillCapTotal,
+      autoFulfillDryRun: dto.autoFulfillDryRun,
     });
     await this.verifyQueueService.enqueue(req.user.sub, account.id);
     return account;
@@ -65,6 +68,9 @@ export class AmazonController {
       email: dto.email,
       password: dto.password,
       twoFactorSecret: dto.twoFactorSecret,
+      autoFulfillEnabled: dto.autoFulfillEnabled,
+      autoFulfillCapTotal: dto.autoFulfillCapTotal,
+      autoFulfillDryRun: dto.autoFulfillDryRun,
     });
     if (credentialsChanged) {
       await this.verifyQueueService.enqueue(req.user.sub, id);

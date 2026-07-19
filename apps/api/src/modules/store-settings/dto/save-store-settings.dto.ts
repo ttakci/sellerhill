@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { type SaveStoreSettingsRequest, type BlacklistKeyword } from '@repo/shared';
+import { TrackingConversionProvider, type SaveStoreSettingsRequest, type BlacklistKeyword } from '@repo/shared';
 import { Type } from 'class-transformer';
 import {
   IsString,
@@ -64,6 +64,23 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @Min(0)
   @Max(100)
   amazonTaxRate!: number;
+
+  @ApiPropertyOptional({
+    description: 'A2 master toggle. When off, no eBay order is auto-purchased on Amazon.',
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  autoFulfillEnabled?: boolean;
+
+  @ApiPropertyOptional({
+    description: "Carrier-mapping provider used when relaying tracking to eBay. Persisted LOWERCASE ('local' | 'api').",
+    default: 'local',
+    enum: ['local', 'api'],
+  })
+  @IsIn([TrackingConversionProvider.LOCAL, TrackingConversionProvider.API])
+  @IsOptional()
+  trackingConversionProvider?: TrackingConversionProvider;
 
   @ApiProperty({ description: 'Whether to validate titles', example: true })
   @IsBoolean()

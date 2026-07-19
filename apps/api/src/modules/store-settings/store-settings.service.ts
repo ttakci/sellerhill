@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { type BlacklistKeyword, type SaveStoreSettingsRequest, type StoreSettingsResponse } from '@repo/shared';
+import {
+  TrackingConversionProvider,
+  type BlacklistKeyword,
+  type SaveStoreSettingsRequest,
+  type StoreSettingsResponse,
+} from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 
@@ -18,9 +23,11 @@ interface StoreSettingsEntity {
   validate_description: boolean;
   blacklist: string; // JSON string in DB
   amazon_tax_rate: string | number; // NUMERIC(5,2) — coerced via Number() in mapper
-  // A2 auto-fulfillment master toggle (migration 036). Read-only here; the
-  // full upsert + guardrails land with the settings-backend task.
+  // A2 auto-fulfillment master toggle (migration 036).
   auto_fulfill_enabled: boolean;
+  // Carrier-mapping provider; persisted LOWERCASE — the tracking processor
+  // compares the raw DB string case-sensitively (migration 036, default 'local').
+  tracking_conversion_provider: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -69,6 +76,7 @@ export class StoreSettingsService {
         blacklist: [],
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
+        trackingConversionProvider: TrackingConversionProvider.LOCAL,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -108,9 +116,15 @@ export class StoreSettingsService {
       validateDescription,
       blacklist,
       amazonTaxRate,
+      autoFulfillEnabled,
+      // Default to LOCAL when omitted so existing callers that don't send the
+      // field don't blow away a prior value with NULL. Persisted LOWERCASE — the
+      // tracking processor compares the raw DB string case-sensitively.
+      trackingConversionProvider = TrackingConversionProvider.LOCAL,
     } = dto;
 
     const blacklistJson = JSON.stringify(blacklist);
+    const autoFulfillBool = autoFulfillEnabled ?? false;
 
     let result: StoreSettingsEntity[];
 
@@ -118,8 +132,8 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate)
-            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider)
+            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -129,17 +143,30 @@ export class StoreSettingsService {
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
+                tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
-        [userId, country, state, zipCode, validateTitle, validateDescription, blacklistJson, amazonTaxRate]
+        [
+          userId,
+          country,
+          state,
+          zipCode,
+          validateTitle,
+          validateDescription,
+          blacklistJson,
+          amazonTaxRate,
+          autoFulfillBool,
+          trackingConversionProvider,
+        ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate)
-            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider)
+            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -149,10 +176,24 @@ export class StoreSettingsService {
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
+                auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
+                tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
-        [userId, storeId, country, state, zipCode, validateTitle, validateDescription, blacklistJson, amazonTaxRate]
+        [
+          userId,
+          storeId,
+          country,
+          state,
+          zipCode,
+          validateTitle,
+          validateDescription,
+          blacklistJson,
+          amazonTaxRate,
+          autoFulfillBool,
+          trackingConversionProvider,
+        ]
       );
     }
 
@@ -180,6 +221,14 @@ export class StoreSettingsService {
       blacklist: parsedBlacklist,
       amazonTaxRate: Number(entity.amazon_tax_rate) || 0,
       autoFulfillEnabled: !!entity.auto_fulfill_enabled,
+      // Normalize: tolerate any stray uppercase from older rows; persist LOWERCASE.
+      // Compare to the string literal `'api'` (not the enum) to avoid
+      // `no-unsafe-enum-comparison` between the DB-side string and the enum,
+      // mirroring the tracking processor's case-sensitive check.
+      trackingConversionProvider:
+        entity.tracking_conversion_provider === 'api'
+          ? TrackingConversionProvider.API
+          : TrackingConversionProvider.LOCAL,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

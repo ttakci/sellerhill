@@ -1,3 +1,5 @@
+import type { TrackingConversionProvider } from '../amazon';
+
 /**
  * Blacklist Keyword Interface
  */
@@ -33,9 +35,13 @@ export interface StoreSettings {
 
     // A2 auto-fulfillment master toggle (per-user global store setting,
     // `store_settings.auto_fulfill_enabled`). When off, no new eBay order is
-    // auto-purchased on Amazon. Read path here; upsert + proxy/cap guardrails
-    // land with the settings-backend task.
+    // auto-purchased on Amazon.
     autoFulfillEnabled: boolean;
+
+    // Carrier-mapping provider used when an auto-fulfilled order ships and the
+    // tracking number must be relayed to eBay. Persisted LOWERCASE ('local' | 'api')
+    // — the tracking processor compares case-sensitively. Default 'local'.
+    trackingConversionProvider: TrackingConversionProvider;
 
     createdAt: Date;
     updatedAt: Date;

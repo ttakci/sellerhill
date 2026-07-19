@@ -1,4 +1,15 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { z } from 'zod';
 
 export class CreateAmazonAccountDto {
@@ -19,6 +30,22 @@ export class CreateAmazonAccountDto {
   @IsOptional()
   @IsString()
   twoFactorSecret?: string;
+
+  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
+  // configured and a non-null cap; the guardrail is enforced in AmazonAccountsService.
+  @IsOptional()
+  @IsBoolean()
+  autoFulfillEnabled?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1_000_000)
+  autoFulfillCapTotal?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  autoFulfillDryRun?: boolean;
 }
 
 export class UpdateAmazonAccountDto {
@@ -39,6 +66,22 @@ export class UpdateAmazonAccountDto {
   @IsOptional()
   @IsString()
   twoFactorSecret?: string;
+
+  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
+  // configured and a non-null cap; the guardrail is enforced in AmazonAccountsService.
+  @IsOptional()
+  @IsBoolean()
+  autoFulfillEnabled?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1_000_000)
+  autoFulfillCapTotal?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  autoFulfillDryRun?: boolean;
 }
 
 export class LinkAmazonOrderDto {

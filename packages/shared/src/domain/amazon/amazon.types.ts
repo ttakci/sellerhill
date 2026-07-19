@@ -17,12 +17,22 @@ export interface CreateAmazonAccountRequest {
   email: string;
   password: string;
   twoFactorSecret?: string;
+  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
+  // configured and a non-null cap (enforced in AmazonAccountsService).
+  autoFulfillEnabled?: boolean;
+  autoFulfillCapTotal?: number | null;
+  autoFulfillDryRun?: boolean;
 }
 
 export interface UpdateAmazonAccountRequest {
   label?: string;
   password?: string;
   twoFactorSecret?: string;
+  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
+  // configured and a non-null cap (enforced in AmazonAccountsService).
+  autoFulfillEnabled?: boolean;
+  autoFulfillCapTotal?: number | null;
+  autoFulfillDryRun?: boolean;
 }
 
 export interface AmazonOrderLinkRequest {

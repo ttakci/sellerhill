@@ -1,9 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AmazonAccountStatus, type AmazonAccountPublicDto } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
+
+import { ProxyService } from './proxy.service';
 
 export interface AmazonAccountRow {
   id: string;
@@ -18,11 +20,22 @@ export interface AmazonAccountRow {
   last_used_at: Date;
   created_at: Date;
   updated_at: Date;
+  // A2 auto-fulfillment (migration 037). NUMERIC(10,2) arrives from pg as a string.
+  auto_fulfill_enabled: boolean;
+  auto_fulfill_cap_total: string | number | null;
+  auto_fulfill_dry_run: boolean;
 }
 
 export interface DecryptedAmazonAccount extends AmazonAccountRow {
   decryptedPassword: string;
   decryptedTwoFactorSecret: string | null;
+}
+
+/** Per-account auto-fulfillment write payload. `undefined` = leave unchanged. */
+export interface AmazonAccountAutoFulfillData {
+  autoFulfillEnabled?: boolean;
+  autoFulfillCapTotal?: number | null;
+  autoFulfillDryRun?: boolean;
 }
 
 @Injectable()
@@ -32,7 +45,8 @@ export class AmazonAccountsService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly proxyService: ProxyService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -76,18 +90,50 @@ export class AmazonAccountsService {
 
   async create(
     userId: string,
-    data: { label?: string; email: string; password: string; twoFactorSecret?: string }
+    data: {
+      label?: string;
+      email: string;
+      password: string;
+      twoFactorSecret?: string;
+    } & AmazonAccountAutoFulfillData
   ) {
+    // Guardrail: enabling auto-fulfill requires a configured proxy AND a non-null
+    // per-account spend cap. Money/ban safety — fail closed at the API boundary
+    // so the auto-fulfill processor never picks an account that would route over
+    // the user's residential IP or spend without a ceiling. The FE maps this
+    // BadRequestException to `showMessage` via the standard error interceptor;
+    // i18n keys land in Task 10/11.
+    if (data.autoFulfillEnabled) {
+      this.assertCanEnable(data.autoFulfillCapTotal ?? null);
+    }
+
     const encryptedPassword = this.encryption.encrypt(data.password);
     const encryptedTwoFactor = data.twoFactorSecret
       ? this.encryption.encrypt(data.twoFactorSecret)
       : null;
 
+    // Defaults match migration 037 (FALSE / NULL / FALSE) when fields are omitted.
+    const autoFulfillEnabled = data.autoFulfillEnabled ?? false;
+    const autoFulfillCapTotal = data.autoFulfillCapTotal ?? null;
+    const autoFulfillDryRun = data.autoFulfillDryRun ?? false;
+
     const rows = await this.databaseService.query<AmazonAccountRow>(
-      `INSERT INTO amazon_accounts (user_id, label, email, encrypted_password, two_factor_secret, status)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO amazon_accounts
+         (user_id, label, email, encrypted_password, two_factor_secret, status,
+          auto_fulfill_enabled, auto_fulfill_cap_total, auto_fulfill_dry_run)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [userId, data.label || null, data.email, encryptedPassword, encryptedTwoFactor, AmazonAccountStatus.VERIFYING]
+      [
+        userId,
+        data.label || null,
+        data.email,
+        encryptedPassword,
+        encryptedTwoFactor,
+        AmazonAccountStatus.VERIFYING,
+        autoFulfillEnabled,
+        autoFulfillCapTotal,
+        autoFulfillDryRun,
+      ]
     );
 
     return this.toPublicDto(rows[0]);
@@ -96,9 +142,28 @@ export class AmazonAccountsService {
   async update(
     userId: string,
     id: string,
-    data: { label?: string; email?: string; password?: string; twoFactorSecret?: string }
+    data: {
+      label?: string;
+      email?: string;
+      password?: string;
+      twoFactorSecret?: string;
+    } & AmazonAccountAutoFulfillData
   ): Promise<{ account: AmazonAccountPublicDto; credentialsChanged: boolean }> {
     const existing = await this.findOne(userId, id);
+
+    // Resolve the *effective* cap after this update — the guardrail must consider
+    // the new value being set, not just the existing row.
+    const rawCap =
+      data.autoFulfillCapTotal !== undefined ? data.autoFulfillCapTotal : existing.auto_fulfill_cap_total;
+    // NUMERIC(10,2) arrives from pg as a string — normalize for the guardrail.
+    const effectiveCap = rawCap === null || rawCap === undefined ? null : Number(rawCap);
+    // Effective enabled flag: dto wins if provided, otherwise the existing row.
+    const enablingNow = data.autoFulfillEnabled === true
+      || (data.autoFulfillEnabled === undefined && !!existing.auto_fulfill_enabled);
+
+    if (enablingNow) {
+      this.assertCanEnable(effectiveCap);
+    }
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const params: (string | number | boolean | null)[] = [];
@@ -133,6 +198,24 @@ export class AmazonAccountsService {
       credentialsChanged = true;
     }
 
+    if (data.autoFulfillEnabled !== undefined) {
+      updates.push(`auto_fulfill_enabled = $${paramIndex}`);
+      params.push(data.autoFulfillEnabled);
+      paramIndex++;
+    }
+
+    if (data.autoFulfillCapTotal !== undefined) {
+      updates.push(`auto_fulfill_cap_total = $${paramIndex}`);
+      params.push(data.autoFulfillCapTotal);
+      paramIndex++;
+    }
+
+    if (data.autoFulfillDryRun !== undefined) {
+      updates.push(`auto_fulfill_dry_run = $${paramIndex}`);
+      params.push(data.autoFulfillDryRun);
+      paramIndex++;
+    }
+
     if (credentialsChanged) {
       // Re-verify against Amazon; clear any stale failure reason while in-flight.
       updates.push(`status = $${paramIndex}`);
@@ -153,6 +236,25 @@ export class AmazonAccountsService {
     }
 
     return { account: this.toPublicDto(rows[0]), credentialsChanged };
+  }
+
+  /**
+   * Guardrail for enabling auto-fulfill on an Amazon account.
+   * Throws `BadRequestException` (FE maps to `showMessage`) when:
+   *   - no proxy is configured (would route Amazon checkout over the user's
+   *     residential IP = ban risk); OR
+   *   - the per-account spend cap is null (no ceiling = unbounded spend).
+   * Money/ban safety — fail closed.
+   */
+  private assertCanEnable(capTotal: number | null): void {
+    if (!this.proxyService.isConfigured()) {
+      // i18n key lands in Task 10/11: amazon.errors.autoFulfillProxyRequired
+      throw new BadRequestException('auto_fulfill requires a configured proxy');
+    }
+    if (capTotal === null || capTotal === undefined) {
+      // i18n key lands in Task 10/11: amazon.errors.autoFulfillCapRequired
+      throw new BadRequestException('auto_fulfill requires a per-account spend cap');
+    }
   }
 
   async delete(userId: string, id: string): Promise<void> {
@@ -198,10 +300,12 @@ export class AmazonAccountsService {
     );
   }
 
-  private toPublicDto(row: AmazonAccountRow) {
+  private toPublicDto(row: AmazonAccountRow): AmazonAccountPublicDto {
     // GET /amazon/accounts is user-scoped (findAll(req.user.sub)) — the caller
     // only ever receives their own accounts, so the email is returned unmasked.
     // This lets the owner identify and manage each connected account.
+    // NUMERIC(10,2) arrives from pg as a string — coerce for the JSON payload.
+    const capNum = row.auto_fulfill_cap_total === null ? null : Number(row.auto_fulfill_cap_total);
     return {
       id: row.id,
       userId: row.user_id,
@@ -214,6 +318,9 @@ export class AmazonAccountsService {
       lastUsedAt: row.last_used_at?.toISOString() || undefined,
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
+      autoFulfillEnabled: !!row.auto_fulfill_enabled,
+      autoFulfillCapTotal: capNum !== null && Number.isFinite(capNum) ? capNum : null,
+      autoFulfillDryRun: !!row.auto_fulfill_dry_run,
     };
   }
 }
