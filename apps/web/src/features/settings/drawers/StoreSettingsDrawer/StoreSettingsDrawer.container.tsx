@@ -1,6 +1,8 @@
+import { TrackingConversionProvider } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 
 import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
@@ -33,6 +35,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [validateTitle, setValidateTitle] = useState(config?.validateTitle ?? true);
   const [validateDescription, setValidateDescription] = useState(config?.validateDescription ?? false);
   const [amazonTaxRate, setAmazonTaxRate] = useState<number>(config?.amazonTaxRate ?? 0);
+  const [autoFulfillEnabled, setAutoFulfillEnabled] = useState<boolean>(config?.autoFulfillEnabled ?? false);
+  const [trackingConversionProvider, setTrackingConversionProvider] = useState<TrackingConversionProvider>(
+    config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL,
+  );
 
   // Reload fields when the drawer opens or the (hoisted) scope changes.
   // React-recommended render-time state adjustment.
@@ -49,6 +55,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setValidateTitle(next?.validateTitle ?? true);
       setValidateDescription(next?.validateDescription ?? false);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
+      setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
+      setTrackingConversionProvider(next?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL);
     }
   }
 
@@ -76,6 +84,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       validateDescription,
       blacklist,
       amazonTaxRate,
+      autoFulfillEnabled,
+      trackingConversionProvider,
     };
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
@@ -111,6 +121,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       validateTitle={validateTitle}
       validateDescription={validateDescription}
       amazonTaxRate={amazonTaxRate}
+      autoFulfillEnabled={autoFulfillEnabled}
+      trackingConversionProvider={trackingConversionProvider}
       onCountryChange={(e) => setCountry(e.target.value)}
       onStateChange={(e) => setStateField(e.target.value)}
       onZipCodeChange={(e) => setZipCode(e.target.value)}
@@ -125,6 +137,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         const parsed = Number(raw);
         setAmazonTaxRate(Number.isFinite(parsed) ? parsed : 0);
       }}
+      onAutoFulfillEnabledChange={setAutoFulfillEnabled}
+      onTrackingConversionProviderChange={setTrackingConversionProvider}
       onContinue={handleContinue}
       isSaving={isSaving}
       isContinueDisabled={isContinueDisabled}

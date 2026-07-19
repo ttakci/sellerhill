@@ -99,6 +99,11 @@ export const createAmazonAccountSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   twoFactorSecret: z.string().optional(),
+  // A2 auto-fulfillment per-account overrides (optional on create; backend
+  // guardrail enforces proxy + cap when autoFulfillEnabled = true).
+  autoFulfillEnabled: z.boolean().optional(),
+  autoFulfillCapTotal: z.number().min(0).max(1_000_000).nullable().optional(),
+  autoFulfillDryRun: z.boolean().optional(),
 });
 
 export const updateAmazonAccountSchema = z.object({
@@ -106,6 +111,11 @@ export const updateAmazonAccountSchema = z.object({
   email: z.string().email('Please enter a valid email').optional(),
   password: z.string().min(6, 'Password must be at least 6 characters').optional(),
   twoFactorSecret: z.string().optional(),
+  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to
+  // be configured and a non-null cap; enforced in AmazonAccountsService.
+  autoFulfillEnabled: z.boolean().optional(),
+  autoFulfillCapTotal: z.number().min(0).max(1_000_000).nullable().optional(),
+  autoFulfillDryRun: z.boolean().optional(),
 });
 
 export const linkAmazonOrderSchema = z.object({

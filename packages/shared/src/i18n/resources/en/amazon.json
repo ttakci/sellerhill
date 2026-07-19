@@ -73,6 +73,21 @@
       "statusReturned": "Returned",
       "eBaySyncShipped": "eBay order marked as shipped",
       "eBaySyncDelivered": "eBay order marked as delivered"
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Use this account for auto-fulfillment",
+      "autoFulfillEnabledHint": "When on, this account may be picked to auto-purchase eBay sales on Amazon. Requires operator-configured proxy and a spend cap.",
+      "autoFulfillCapTotal": "Max order total (auto-fulfill cap)",
+      "autoFulfillCapTotalHint": "Per-account spend ceiling (USD). Orders above this total skip this account. Required to enable auto-fulfillment.",
+      "autoFulfillCapTotalPlaceholder": "e.g., 250",
+      "autoFulfillDryRun": "Dry-run (run the flow without placing the order)",
+      "autoFulfillDryRunHint": "Runs the full checkout flow up to (not including) Place Order so the review total can be captured and surfaced for review.",
+      "sectionTitle": "Auto-fulfillment (A2)",
+      "sectionSubtitle": "Per-account overrides for automated Amazon fulfillment of eBay sales."
+    },
+    "errors": {
+      "autoFulfillProxyRequired": "Auto-fulfillment requires a proxy to be configured by the operator.",
+      "autoFulfillCapRequired": "Set a max order total to enable auto-fulfillment on this account."
     }
   }
 }

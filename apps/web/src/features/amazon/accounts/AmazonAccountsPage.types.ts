@@ -5,6 +5,10 @@ export interface AccountFormState {
   email: string;
   password: string;
   twoFactorSecret: string;
+  // A2 auto-fulfillment per-account overrides
+  autoFulfillEnabled: boolean;
+  autoFulfillCapTotal: string; // string for input binding; parsed on submit
+  autoFulfillDryRun: boolean;
 }
 
 export interface AmazonAccountsPageComponentProps {
@@ -15,12 +19,13 @@ export interface AmazonAccountsPageComponentProps {
   onEdit: (id: string, data: { label?: string; password?: string; twoFactorSecret?: string }) => void;
   onDelete: (id: string) => void;
   onVerify: (id: string) => void;
+  onSelectAccountForEdit: (account: AmazonAccountPublicDto) => void;
   editingAccount: AmazonAccountPublicDto | null;
   isAddModalOpen: boolean;
   onOpenAddModal: () => void;
   onCloseModal: () => void;
   formValues: AccountFormState;
-  onFormChange: (field: keyof AccountFormState, value: string) => void;
+  onFormChange: (field: keyof AccountFormState, value: string | boolean) => void;
   onSubmitForm: () => void;
 }
 
@@ -28,9 +33,9 @@ export interface AccountFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   isSaving: boolean;
-  defaultValues?: { label?: string; email?: string } | null;
+  defaultValues?: AmazonAccountPublicDto | null;
   title: string;
   formValues: AccountFormState;
-  onFormChange: (field: keyof AccountFormState, value: string) => void;
+  onFormChange: (field: keyof AccountFormState, value: string | boolean) => void;
   onSubmitForm: () => void;
 }

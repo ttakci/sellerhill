@@ -1,3 +1,4 @@
+import type { AmazonAccountPublicDto } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,13 +22,35 @@ const EMPTY_FORM: AccountFormState = {
   email: '',
   password: '',
   twoFactorSecret: '',
+  autoFulfillEnabled: false,
+  autoFulfillCapTotal: '',
+  autoFulfillDryRun: false,
 };
+
+/** Hydrate the form from an existing account (edit mode). */
+function formFromAccount(account: AmazonAccountPublicDto | null): AccountFormState {
+  if (!account) {
+    return EMPTY_FORM;
+  }
+  return {
+    label: account.label ?? '',
+    email: account.email ?? '',
+    password: '',
+    twoFactorSecret: '',
+    autoFulfillEnabled: account.autoFulfillEnabled ?? false,
+    autoFulfillCapTotal:
+      account.autoFulfillCapTotal === null || account.autoFulfillCapTotal === undefined
+        ? ''
+        : String(account.autoFulfillCapTotal),
+    autoFulfillDryRun: account.autoFulfillDryRun ?? false,
+  };
+}
 
 export const AmazonAccountsPageContainer = (): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
   const { i18n } = useTranslation(['amazon', 'translation']);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<import('@repo/shared').AmazonAccountPublicDto | null>(null);
+  const [editingAccount, setEditingAccount] = useState<AmazonAccountPublicDto | null>(null);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<AccountFormState>(EMPTY_FORM);
 
@@ -41,16 +64,25 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
 
   const isSaving = isCreating || isUpdating;
 
-  const handleFormChange = useCallback((field: keyof AccountFormState, value: string) => {
+  const handleFormChange = useCallback((field: keyof AccountFormState, value: string | boolean) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const buildSubmitData = useCallback(() => {
-    const data: Record<string, string> = {};
+    // Shared payload builder for both create + update. Only carry auto-fulfill
+    // fields when the user has touched them via the form (the FE always sends
+    // them once the form is saved — the backend guardrail enforces proxy+cap
+    // when autoFulfillEnabled = true).
+    const data: Record<string, string | boolean | number | null> = {};
     if (formValues.label) {data.label = formValues.label;}
     if (formValues.email) {data.email = formValues.email;}
     if (formValues.password) {data.password = formValues.password;}
     if (formValues.twoFactorSecret) {data.twoFactorSecret = formValues.twoFactorSecret;}
+    data.autoFulfillEnabled = formValues.autoFulfillEnabled;
+    // Empty string → null (disable cap). Otherwise parse to a number.
+    const capRaw = formValues.autoFulfillCapTotal.trim();
+    data.autoFulfillCapTotal = capRaw === '' ? null : Number(capRaw);
+    data.autoFulfillDryRun = formValues.autoFulfillDryRun;
     return data;
   }, [formValues]);
 
@@ -230,6 +262,12 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
     [verifyAccount, closeMessage, i18n, showMessage]
   );
 
+  const handleSelectAccountForEdit = useCallback((account: AmazonAccountPublicDto) => {
+    setEditingAccount(account);
+    setFormValues(formFromAccount(account));
+    setIsAddModalOpen(false);
+  }, []);
+
   return (
     <AmazonAccountsPageComponent
       accounts={accounts || []}
@@ -239,6 +277,7 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onVerify={handleVerify}
+      onSelectAccountForEdit={handleSelectAccountForEdit}
       editingAccount={editingAccount}
       isAddModalOpen={isAddModalOpen}
       onOpenAddModal={() => {

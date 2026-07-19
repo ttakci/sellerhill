@@ -248,12 +248,12 @@ export class AmazonAccountsService {
    */
   private assertCanEnable(capTotal: number | null): void {
     if (!this.proxyService.isConfigured()) {
-      // i18n key lands in Task 10/11: amazon.errors.autoFulfillProxyRequired
-      throw new BadRequestException('auto_fulfill requires a configured proxy');
+      // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillProxyRequired
+      throw new BadRequestException('amazon.errors.autoFulfillProxyRequired');
     }
     if (capTotal === null || capTotal === undefined) {
-      // i18n key lands in Task 10/11: amazon.errors.autoFulfillCapRequired
-      throw new BadRequestException('auto_fulfill requires a per-account spend cap');
+      // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillCapRequired
+      throw new BadRequestException('amazon.errors.autoFulfillCapRequired');
     }
   }
 

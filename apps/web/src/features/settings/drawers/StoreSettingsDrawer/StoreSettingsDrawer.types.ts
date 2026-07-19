@@ -1,4 +1,4 @@
-import type { StoreSettingsResponse } from '@repo/shared';
+import type { StoreSettingsResponse, TrackingConversionProvider } from '@repo/shared';
 
 export interface StoreSettingsDrawerProps {
   isOpen: boolean;
@@ -24,12 +24,16 @@ export interface StoreSettingsDrawerComponentProps {
   validateTitle: boolean;
   validateDescription: boolean;
   amazonTaxRate: number;
+  autoFulfillEnabled: boolean;
+  trackingConversionProvider: TrackingConversionProvider;
   onCountryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleValidateTitle: (checked: boolean) => void;
   onToggleValidateDescription: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAutoFulfillEnabledChange: (checked: boolean) => void;
+  onTrackingConversionProviderChange: (value: TrackingConversionProvider) => void;
   onContinue: () => void;
   isSaving: boolean;
   isContinueDisabled: boolean;

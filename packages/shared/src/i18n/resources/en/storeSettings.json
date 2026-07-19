@@ -32,6 +32,12 @@
     "noKeywords": "No keywords found",
     "copyright": "© {{year}} Zonds Platform. All rights reserved.",
     "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
-    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost when an order's profit is still provisional (Amazon order not yet placed). Set to your buyer account's state rate (e.g. 7). 0 = no tax estimated."
+    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost when an order's profit is still provisional (Amazon order not yet placed). Set to your buyer account's state rate (e.g. 7). 0 = no tax estimated.",
+    "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
+    "autoFulfillEnabledHint": "When on, Zonds buys the item on Amazon with your linked buyer account. Disable to order manually.",
+    "trackingConversionProvider": "Tracking-number conversion",
+    "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged.",
+    "trackingConversionProviderLocal": "Built-in (local)",
+    "trackingConversionProviderApi": "API (coming soon)"
   }
 }

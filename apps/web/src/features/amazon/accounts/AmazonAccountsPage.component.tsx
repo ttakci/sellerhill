@@ -1,4 +1,4 @@
-import { Button, Card, Dialog, Icon, ModernTextInput, PageHeader, StatusBadge, Text, useTheme } from '@repo/ui';
+import { Button, Card, Dialog, Icon, ModernTextInput, PageHeader, StatusBadge, Text, Toggle, useTheme } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +19,7 @@ export const AmazonAccountsPageComponent = ({
   isVerifying,
   onDelete,
   onVerify,
+  onSelectAccountForEdit,
   editingAccount,
   isAddModalOpen,
   onOpenAddModal,
@@ -79,7 +80,7 @@ export const AmazonAccountsPageComponent = ({
                 <Button
                   variant="text"
                   size="small"
-                  onClick={() => {}}
+                  onClick={() => onSelectAccountForEdit(account)}
                 >
                   <Text>{t('amazon.accounts.editButton')}</Text>
                 </Button>
@@ -194,6 +195,43 @@ const AccountFormModal = ({
           value={formValues.twoFactorSecret}
           onChange={(e) => onFormChange('twoFactorSecret', e.target.value)}
         />
+        <Text variant="body-sm" weight="semibold">
+          {t('amazon.autoFulfill.sectionTitle')}
+        </Text>
+        <Text variant="caption" color="text.secondary">
+          {t('amazon.autoFulfill.sectionSubtitle')}
+        </Text>
+        <S.ToggleRow>
+          <Text variant="body-sm">{t('amazon.autoFulfill.autoFulfillEnabled')}</Text>
+          <Toggle
+            checked={formValues.autoFulfillEnabled}
+            onChange={(checked) => onFormChange('autoFulfillEnabled', checked)}
+          />
+        </S.ToggleRow>
+        <Text variant="caption" color="text.secondary">
+          {t('amazon.autoFulfill.autoFulfillEnabledHint')}
+        </Text>
+        <ModernTextInput
+          name="autoFulfillCapTotal"
+          type="number"
+          label={t('amazon.autoFulfill.autoFulfillCapTotal')}
+          placeholder={t('amazon.autoFulfill.autoFulfillCapTotalPlaceholder')}
+          value={formValues.autoFulfillCapTotal}
+          onChange={(e) => onFormChange('autoFulfillCapTotal', e.target.value)}
+        />
+        <Text variant="caption" color="text.secondary">
+          {t('amazon.autoFulfill.autoFulfillCapTotalHint')}
+        </Text>
+        <S.ToggleRow>
+          <Text variant="body-sm">{t('amazon.autoFulfill.autoFulfillDryRun')}</Text>
+          <Toggle
+            checked={formValues.autoFulfillDryRun}
+            onChange={(checked) => onFormChange('autoFulfillDryRun', checked)}
+          />
+        </S.ToggleRow>
+        <Text variant="caption" color="text.secondary">
+          {t('amazon.autoFulfill.autoFulfillDryRunHint')}
+        </Text>
       </S.FormFields>
     </Dialog>
   );

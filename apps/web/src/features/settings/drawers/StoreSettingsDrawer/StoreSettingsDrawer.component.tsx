@@ -1,6 +1,8 @@
+import { TrackingConversionProvider } from '@repo/shared';
 import { Drawer, ModernSelect, ModernTextInput, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 
 import { BodyStack, FieldGrid, FormCard, ToggleRow } from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
@@ -17,17 +19,25 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
   validateTitle,
   validateDescription,
   amazonTaxRate,
+  autoFulfillEnabled,
+  trackingConversionProvider,
   onCountryChange,
   onStateChange,
   onZipCodeChange,
   onToggleValidateTitle,
   onToggleValidateDescription,
   onAmazonTaxRateChange,
+  onAutoFulfillEnabledChange,
+  onTrackingConversionProviderChange,
   onContinue,
   isSaving,
   isContinueDisabled,
 }) => {
   const { t } = useTranslation(['translation', 'storeSettings']);
+  const providerOptions = [
+    { value: TrackingConversionProvider.LOCAL, label: t('storeSettings:storeSettings.trackingConversionProviderLocal') },
+    { value: TrackingConversionProvider.API, label: t('storeSettings:storeSettings.trackingConversionProviderApi') },
+  ];
   return (
     <Drawer
       isOpen={isOpen}
@@ -94,6 +104,26 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             <Text variant="body-sm">{t('translation:settingsHub.drawer.storeSettings.validateDescription')}</Text>
             <Toggle checked={validateDescription} onChange={onToggleValidateDescription} />
           </ToggleRow>
+          <ToggleRow>
+            <Text variant="body-sm">{t('storeSettings:storeSettings.autoFulfillEnabled')}</Text>
+            <Toggle checked={autoFulfillEnabled} onChange={onAutoFulfillEnabledChange} />
+          </ToggleRow>
+          <Text variant="caption">
+            {t('storeSettings:storeSettings.autoFulfillEnabledHint')}
+          </Text>
+          <ModernSelect
+            label={t('storeSettings:storeSettings.trackingConversionProvider')}
+            options={providerOptions}
+            value={trackingConversionProvider}
+            onChange={(v) => onTrackingConversionProviderChange(String(v) as TrackingConversionProvider)}
+            fullWidth
+          />
+          <Text variant="caption">
+            {t('storeSettings:storeSettings.trackingConversionProviderHint')}
+          </Text>
+          <Text variant="caption" color="text.tertiary">
+            {t('storeSettings:storeSettings.trackingConversionProviderApi')}
+          </Text>
         </FormCard>
       </BodyStack>
     </Drawer>
