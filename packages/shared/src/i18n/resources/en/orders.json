@@ -67,6 +67,34 @@
       "pending": "Pending",
       "waiting_shipment": "Waiting Shipment"
     },
+    "autoFulfill": {
+      "column": "Auto-Fulfill",
+      "status": {
+        "pending": "Queued",
+        "running": "Running",
+        "placed": "Placed",
+        "blocked": "Blocked",
+        "failed": "Failed",
+        "dry_run": "Dry Run",
+        "skipped": "Skipped"
+      },
+      "reason": {
+        "no_asin": "ASIN unavailable",
+        "captcha": "Captcha required",
+        "otp": "MFA/OTP challenge",
+        "login": "Login failed",
+        "out_of_stock": "Out of stock",
+        "address": "Address problem",
+        "payment": "Payment declined",
+        "cap": "Over cost cap",
+        "no_confirmation": "No confirmation"
+      },
+      "reasonLabel": "Reason: {{reason}}",
+      "filter": {
+        "all": "All auto-fulfill",
+        "needsAttention": "Needs attention"
+      }
+    },
     "pagination": {
       "showing": "Showing {{from}}-{{to}} of {{total}} orders"
     },

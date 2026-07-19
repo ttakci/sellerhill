@@ -23,6 +23,9 @@ export interface OrdersAllPageProps {
   ebayAccountId: string;
   onEbayAccountChange: (value: string | number) => void;
   storeOptions: { value: string | number; label: string }[];
+  needsAttention: boolean;
+  onNeedsAttentionChange: (value: string | number) => void;
+  needsAttentionOptions: { value: string | number; label: string }[];
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;

@@ -11,6 +11,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { autoFulfillStatusToBadgeVariant } from '../shared/auto-fulfill-status';
 import { orderStatusToBadgeStatus } from '../shared/order-status';
 
 import * as S from './OrderDetailsPage.style';
@@ -82,6 +83,13 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const profitPositive = order.netProfit >= 0;
   const productTitle = order.product?.title || t('orders.detail.unknownProduct');
   const isEstimated = order.profitBasis === ProfitBasis.ESTIMATED;
+  const autoFulfillReasonLabel = order.autoFulfillBlockedReason
+    ? t('orders.autoFulfill.reasonLabel', {
+        reason: t(
+          `orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`,
+        ),
+      })
+    : undefined;
 
   const desktopActions = (
     <S.HeaderActions>
@@ -122,10 +130,24 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
               {statusLabel}
             </StatusBadge>
+            {order.autoFulfillStatus && (
+              <Badge
+                variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
+                size="xs"
+                isPill
+              >
+                {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
+              </Badge>
+            )}
             <Text variant="caption" color="text.secondary">
               {formatDate(order.createdAt)}
             </Text>
           </S.BadgeRow>
+          {autoFulfillReasonLabel && (
+            <Text variant="caption" color="text.secondary">
+              {autoFulfillReasonLabel}
+            </Text>
+          )}
 
           <Text variant="h3" weight="semibold">
             {productTitle}

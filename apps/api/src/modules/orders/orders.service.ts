@@ -5,6 +5,8 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  AutoFulfillBlockedReason,
+  AutoFulfillStatus,
   EbayAccountStatus,
   OrderCostCaptureStatus,
   OrderStatus,
@@ -48,6 +50,8 @@ interface OrderRow {
   ad_fee: string;
   net_profit: string;
   cost_capture_status: string;
+  auto_fulfill_status: string | null;
+  auto_fulfill_blocked_reason: string | null;
   shipping_address: {
     street?: string;
     city?: string;
@@ -133,6 +137,14 @@ export class OrdersService {
       conditions.push(`o.order_date < ($${paramIndex}::date + INTERVAL '1 day')`);
       params.push(filters.dateTo);
       paramIndex++;
+    }
+
+    if (filters?.autoFulfillNeedsAttention) {
+      // Surface orders whose automated Amazon fulfillment hit a fail-closed
+      // obstacle so the operator can fall back to manual linking.
+      conditions.push(
+        `o.auto_fulfill_status IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}')`
+      );
     }
 
     const whereClause = conditions.join(' AND ');
@@ -396,6 +408,12 @@ export class OrdersService {
       profitBasis: deriveProfitBasis(
         row.cost_capture_status as OrderCostCaptureStatus,
       ),
+      autoFulfillStatus: row.auto_fulfill_status
+        ? (row.auto_fulfill_status as AutoFulfillStatus)
+        : undefined,
+      autoFulfillBlockedReason: row.auto_fulfill_blocked_reason
+        ? (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReason)
+        : null,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
       product: hasListing

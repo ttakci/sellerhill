@@ -3,6 +3,7 @@ import { Badge, Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { autoFulfillStatusToBadgeVariant } from '../../shared/auto-fulfill-status';
 import { orderStatusToBadgeStatus } from '../../shared/order-status';
 import * as S from '../OrdersAllPage.style';
 
@@ -77,6 +78,42 @@ export function useOrdersColumns(
             {t(`orders.status.${order.status}`)}
           </StatusBadge>
         ),
+      },
+      {
+        key: 'autoFulfill',
+        header: t('orders.autoFulfill.column'),
+        render: (_value, order) => {
+          if (!order.autoFulfillStatus) {
+            return (
+              <Text variant="body-sm" color="text.secondary">
+                —
+              </Text>
+            );
+          }
+          const reasonLabel = order.autoFulfillBlockedReason
+            ? t('orders.autoFulfill.reasonLabel', {
+                reason: t(
+                  `orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`,
+                ),
+              })
+            : undefined;
+          return (
+            <S.AutoFulfillCell>
+              <Badge
+                variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
+                size="xs"
+                isPill
+              >
+                {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
+              </Badge>
+              {reasonLabel && (
+                <Text variant="caption" color="text.secondary">
+                  {reasonLabel}
+                </Text>
+              )}
+            </S.AutoFulfillCell>
+          );
+        },
       },
       {
         key: 'salePrice',

@@ -21,6 +21,7 @@ export function useOrdersFilters() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
+  const [needsAttention, setNeedsAttention] = useState(false);
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
@@ -46,7 +47,17 @@ export function useOrdersFilters() {
     [t]
   );
 
-  const hasActiveFilters = Boolean(search || status || ebayAccountId || dateFrom || dateTo);
+  const needsAttentionOptions = useMemo(
+    () => [
+      { value: 'false', label: t('orders.autoFulfill.filter.all') },
+      { value: 'true', label: t('orders.autoFulfill.filter.needsAttention') },
+    ],
+    [t]
+  );
+
+  const hasActiveFilters = Boolean(
+    search || status || ebayAccountId || dateFrom || dateTo || needsAttention,
+  );
 
   const serverQuery: OrderFiltersDto = useMemo(
     () => ({
@@ -57,10 +68,11 @@ export function useOrdersFilters() {
       ebayAccountId: ebayAccountId || undefined,
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
+      autoFulfillNeedsAttention: needsAttention || undefined,
       sortBy: 'order_date',
       sortOrder: 'desc',
     }),
-    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo]
+    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, needsAttention]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,11 +100,17 @@ export function useOrdersFilters() {
     [searchParams, setSearchParams]
   );
 
+  const handleNeedsAttentionChange = useCallback((value: string | number) => {
+    setNeedsAttention(String(value) === 'true');
+    setPage(1);
+  }, []);
+
   const handleClearFilters = useCallback(() => {
     setSearchInput('');
     setSearch('');
     setStatus('');
     setEbayAccountId('');
+    setNeedsAttention(false);
     setPage(1);
     const next = new URLSearchParams();
     if (dateFrom) {
@@ -124,6 +142,9 @@ export function useOrdersFilters() {
     statusOptions,
     ebayAccountId,
     handleEbayAccountChange,
+    needsAttention,
+    needsAttentionOptions,
+    handleNeedsAttentionChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,

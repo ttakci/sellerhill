@@ -67,6 +67,34 @@
       "pending": "Bekliyor",
       "waiting_shipment": "Kargo Bekliyor"
     },
+    "autoFulfill": {
+      "column": "Otomatik Sipariş",
+      "status": {
+        "pending": "Sırada",
+        "running": "Çalışıyor",
+        "placed": "Verildi",
+        "blocked": "Engellendi",
+        "failed": "Başarısız",
+        "dry_run": "Deneme",
+        "skipped": "Atlandı"
+      },
+      "reason": {
+        "no_asin": "ASIN bulunamadı",
+        "captcha": "Captcha gerekti",
+        "otp": "MFA/OTP doğrulaması",
+        "login": "Giriş başarısız",
+        "out_of_stock": "Stokta yok",
+        "address": "Adres sorunu",
+        "payment": "Ödeme reddedildi",
+        "cap": "Tavan aşıldı",
+        "no_confirmation": "Onyok alınamadı"
+      },
+      "reasonLabel": "Sebep: {{reason}}",
+      "filter": {
+        "all": "Tümü",
+        "needsAttention": "İlgilenilecek"
+      }
+    },
     "pagination": {
       "showing": "{{total}} siparişten {{from}}-{{to}} arası gösteriliyor"
     },

@@ -40,6 +40,24 @@ export enum AutoFulfillStatus {
 }
 
 /**
+ * Fail-closed obstacle reasons for automated Amazon fulfillment.
+ * Persisted on `orders.auto_fulfill_blocked_reason` when
+ * `auto_fulfill_status = blocked`. String values mirror the writer in
+ * `apps/api/src/modules/amazon/auto-fulfill-helpers.ts`.
+ */
+export enum AutoFulfillBlockedReason {
+  NO_ASIN = 'no_asin',
+  CAPTCHA = 'captcha',
+  OTP = 'otp',
+  LOGIN = 'login',
+  OUT_OF_STOCK = 'out_of_stock',
+  ADDRESS = 'address',
+  PAYMENT = 'payment',
+  CAP = 'cap',
+  NO_CONFIRMATION = 'no_confirmation',
+}
+
+/**
  * Basis of the persisted `netProfit` value, derived from `costCaptureStatus`
  * at read time (no DB column). CONFIRMED = LINKED (real Amazon costs);
  * ESTIMATED = PROVISIONAL (purchase price + configured tax rate).
@@ -73,6 +91,13 @@ export interface OrderDto {
    * ESTIMATED = PROVISIONAL (purchase price + configured tax rate); else null.
    */
   profitBasis?: ProfitBasis | null;
+  /** Lifecycle state of automated Amazon fulfillment for this order. */
+  autoFulfillStatus?: AutoFulfillStatus;
+  /**
+   * When `autoFulfillStatus = BLOCKED`, the fail-closed obstacle encountered.
+   * Null/undefined otherwise. Drives the "needs attention" filter + chip tooltip.
+   */
+  autoFulfillBlockedReason?: AutoFulfillBlockedReason | null;
 
   // Product
   product?: {
@@ -156,6 +181,12 @@ export interface OrderFiltersDto {
   status?: OrderStatus;
   /** Filter by connected eBay store (ebay_accounts.id). */
   ebayAccountId?: string;
+  /**
+   * When true, restrict to orders whose automated Amazon fulfillment hit a
+   * fail-closed obstacle (`auto_fulfill_status IN ('blocked','failed')`) so
+   * the operator can fall back to manual linking.
+   */
+  autoFulfillNeedsAttention?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

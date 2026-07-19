@@ -31,6 +31,7 @@ export class OrdersController {
     @Query('ebayAccountId') ebayAccountId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('autoFulfillNeedsAttention') autoFulfillNeedsAttention?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
   ): Promise<{ orders: OrderDto[]; total: number }> {
@@ -42,6 +43,8 @@ export class OrdersController {
       ebayAccountId,
       dateFrom,
       dateTo,
+      autoFulfillNeedsAttention:
+        autoFulfillNeedsAttention === 'true' ? true : undefined,
       sortBy,
       sortOrder,
     };

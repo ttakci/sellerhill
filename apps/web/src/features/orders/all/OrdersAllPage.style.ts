@@ -90,6 +90,14 @@ export const ProfitCell = styled.div`
   min-width: 0;
 `;
 
+export const AutoFulfillCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
 export const ProductCell = styled.div`
   display: flex;
   align-items: center;

@@ -30,6 +30,9 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   ebayAccountId,
   onEbayAccountChange,
   storeOptions,
+  needsAttention,
+  onNeedsAttentionChange,
+  needsAttentionOptions,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -90,6 +93,16 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               onChange={onEbayAccountChange}
               options={storeOptions}
               placeholder={t('orders.filters.allStores')}
+              size="medium"
+              fullWidth
+            />
+          </S.SelectWrapper>
+          <S.SelectWrapper>
+            <Select
+              value={needsAttention ? 'true' : 'false'}
+              onChange={onNeedsAttentionChange}
+              options={needsAttentionOptions}
+              placeholder={t('orders.autoFulfill.filter.all')}
               size="medium"
               fullWidth
             />
