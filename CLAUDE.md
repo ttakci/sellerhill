@@ -177,6 +177,9 @@ Amazon Order Auto Cost-Capture (amazon-order-sync queue) → scrape account orde
   → strict-match ASIN+qty+amount+date to pending/provisional eBay orders → write real costs → LINKED
   ↓ (or user manually links an Amazon Order ID)
 Amazon Account + Amazon Order ID → Playwright scraping → order costs updated → recomputeProfit
+  ↓ (automatic, when store_settings.auto_fulfill_enabled + per-account enable+cap; A2)
+Automated Amazon Fulfillment (`auto-fulfill` queue) → Playwright checkout on round-robin buyer account
+  → review-step hard cap → place order → atomic write real costs + LINKED + schedule tracking
   ↓ (automatic)
 Amazon Order Tracking (BullMQ, per-order scheduler) → Amazon status polling → eBay status sync
 ```
@@ -270,13 +273,66 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
   - Amazon `delivered` → Order status set to `completed`
 - **On startup**: `reconcileSchedulers()` cleans up orphaned schedulers and creates missing ones for active orders
 
+### Automated Amazon Fulfillment (A2)
+
+When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order automatically triggers an Amazon purchase on a round-robin buyer account. Fires from the **same `upsertOrder` `xmax = 0` genuine-insert seam** as sale-driven stock-sync — A2 only runs on the first ingest of an order, never on re-syncs. Intended for the dropshipping flow: eBay sale → buy on Amazon → ship-to buyer → Amazon tracking forwarded to eBay.
+
+- **Queue**: `auto-fulfill` (BullMQ, literal `AUTO_FULFILL_QUEUE = 'auto-fulfill'`, registered in `OrdersModule` via `BullModule.registerQueue`). Producer = `AutoFulfillQueueService` (orders module) invoked from `OrderSyncService.maybeEnqueueAutoFulfill` on the genuine-insert path. Processor = `AutoFulfillProcessor extends WorkerHost` (amazon module). `jobId = fulfill-${ebayOrderId}` dedup, `attempts: 3`, exponential backoff 60s. Concurrency: `AUTO_FULFILL_QUEUE_CONCURRENCY` (default 1) — sequential per the rate-limiter contract.
+- **Producer resolution** (`OrderSyncService.maybeEnqueueAutoFulfill`, pure helpers in `auto-fulfill-helpers.ts`):
+  1. `StoreSettingsService.getResolvedSettings(userId, null)` → if `!autoFulfillEnabled` → status `skipped`, no enqueue.
+  2. `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts WHERE user_id=$1 AND auto_fulfill_enabled=TRUE AND auto_fulfill_cap_total IS NOT NULL` → empty → `skipped`.
+  3. `pickRoundRobinAccount` picks oldest-`last_used_at`-first (NULL treated as oldest); ties broken by id ASC.
+  4. `meetsCoarseCapGate(saleTotal, cap)` pre-filter — `saleTotal > 0 && saleTotal <= cap`. Obvious over-cap orders never enqueue.
+  5. `UPDATE amazon_accounts SET last_used_at = NOW` on the picked account → `enqueue(ebayOrderId, amazonAccountId)`.
+- **Checkout service** (`AmazonCheckoutService`, step-structured Playwright). Every browser action goes through `AmazonRateLimiter.schedule(accountId, …)`. Step sequence inside `runForOrder → checkout`:
+  1. **Idempotency re-check** — re-reads `orders.auto_fulfill_status`; `shouldSkipFulfillStart` (PLACED/BLOCKED/DRY_RUN/SKIPPED) → log + return. Prevents double-order on BullMQ retries.
+  2. `loadInputs` (joins amazon_accounts + listings + products) — throws `no_asin` if no row, `cap` on non-finite cap.
+  3. `ensureLoggedIn` via `AmazonScrapingService.ensureAuthenticatedPage` → maps captcha/OTP/login signals to `captcha`/`otp`/`login`.
+  4. Add-to-cart with quantity — `out_of_stock` if ASIN unavailable or no visible add-to-cart button.
+  5. `selectShipToAddress` (throws `address`), `selectDefaultPayment` (throws `payment` on decline signals).
+  6. **Review-step HARD CAP** — reads grand total on the review page (the last step before "Place Order"); non-finite/≤0 → `cap`; `> capTotal` when `AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false'` (default ON) → `cap`. Aborts BEFORE the click, never over-spends.
+  7. **Dry-run** (`amazon_accounts.auto_fulfill_dry_run`) → snap `dry_run_review` + set status `dry_run` + return. NO click.
+  8. Else click "Place Order" (click errors swallowed at warn-log to prevent double-order races), `parseConfirmation` (throws `no_confirmation` on missing confirmation DOM), `onPlaced`, set status `placed`.
+- **Money safety — `onPlaced` (fail-soft layered)**: after a confirmed placement, NO path rethrows into the processor's failure branch.
+  - **Layer 1** (single atomic UPDATE): `auto_fulfill_status='placed'` + `cost_capture_status='linked'` + real `purchase_price`/`amazon_tax`/`amazon_shipping` + `amazon_order_id` + `amazon_linked_at=NOW` in one statement.
+  - **Layer 2** (fallback if layer 1 throws): minimal UPDATE setting `amazon_order_id` + `placed` only.
+  - **Layer 3** (best-effort try/catch): `OrderSyncService.recomputeProfit(ebayOrderId)` → trusted `net_profit` (A1 reuse — single writer invariant preserved).
+  - **Layer 4** (best-effort try/catch): `AmazonTrackingQueueService.scheduleOrderTracking(orderId, amazonAccountId)` → existing tracker drives shipped→eBay shipped, delivered→completed.
+- **Fail-closed typed errors**: `AutoFulfillBlockedError` carries one of 9 reasons (`no_asin`, `captcha`, `otp`, `login`, `out_of_stock`, `address`, `payment`, `cap`, `no_confirmation`). `AmazonCheckoutService.runForOrder` catches its OWN blocked errors → sets `auto_fulfill_status='blocked'` + `auto_fulfill_blocked_reason` + returns (NO BullMQ retry — blocked is a permanent data/state condition, not transport). Any error that ESCAPES to `AutoFulfillProcessor.process` is transport/infra: on the final attempt it sets `auto_fulfill_status='failed'` then rethrows so BullMQ applies backoff. The idempotency re-check inside `runForOrder` is what keeps retries safe across the producer→processor boundary.
+- **Evidence screenshots**: full-page PNGs at `fulfillment-evidence/{ebayOrderId}/{stage}-{timestamp}.png` via `snap(page, ebayOrderId, stage)` (path overridable via `FULFILLMENT_EVIDENCE_DIR`, default `$CWD/fulfillment-evidence`). Stages include each blocked-reason, `dry_run_review`, and the order confirmation. **No admin-role gating is enforced in code** — the directory is treated as admin-only via filesystem perms on the server.
+- **Guardrails (defense-in-depth)**: master toggle (store settings) + per-account enable/cap/dry-run (amazon_accounts) + **proxy-required-to-enable** (server-side `AmazonAccountsService.assertCanEnable` throws `amazon.errors.autoFulfillProxyRequired` if `!proxyService.isConfigured()` and `amazon.errors.autoFulfillCapRequired` if `capTotal == null` when the flag is on) + review-step hard cap + coarse pre-filter + dry-run + fail-closed typed errors + idempotency re-check.
+- **Config (all optional, defaults shown):**
+  - `AUTO_FULFILL_QUEUE_CONCURRENCY=1` — parallel checkout jobs (keep at 1 to honour per-account rate limiting).
+  - `AUTO_FULFILL_CHECKOUT_MIN_TIME_MS=4500` — minimum spacing between checkout steps (human-like pacing).
+  - `AUTO_FULFILL_REVIEW_CAP_HARD_STOP=true` — any value ≠ literal `'false'` keeps the review-step cap on (default ON).
+  - `FULFILLMENT_EVIDENCE_DIR=$CWD/fulfillment-evidence` — screenshot output dir.
+  - `FULFILLMENT_EVIDENCE_TTL_DAYS=7` — **`.env.example` placeholder only; no runtime consumer yet** (reserved for a future cleanup job).
+  - `PROXY_PROVIDER` — **`.env.example` placeholder only; no runtime branch** — the provider format is encoded entirely in `PROXY_USER`/`PROXY_PASS_TEMPLATE`.
+  - `PROXY_ENDPOINT`, `PROXY_USER` (supports `{session}` placeholder), `PROXY_PASS_TEMPLATE` (supports `{session}`), `PROXY_STRATEGY` (`perUser` default | `perAccount` reserved) — see "Amazon Scraping — Anti-Ban Strategy" below.
+- **Settings UI**: master toggle + tracking-conversion provider Select in the live `StoreSettingsDrawer` (only `local` visible; `api` labeled "coming soon"). Per-account enable/cap-total/dry-run live **on the `AmazonAccountsPage` form** (NOT in `AmazonAccountDrawer`, which holds credentials only). Orders list surfaces `auto_fulfill_status` as a Badge column + reason tooltip (`autoFulfillStatusToBadgeVariant`) and a "needs attention" filter (blocked/failed → backend filter `o.auto_fulfill_status IN ('blocked','failed')`). Reason/column/filter labels all i18n'd under `orders.autoFulfill.*` and `amazon.autoFulfill.*` (EN + TR).
+- **Shared enums**: `AutoFulfillStatus` (`pending|running|placed|blocked|failed|dry_run|skipped`) + `AutoFulfillBlockedReason` (9 values) in `packages/shared/src/domain/orders/orders.types.ts`; `TrackingConversionProvider` (`local|api`) in `packages/shared/src/domain/amazon/amazon.types.ts`. Note: a duplicated `AutoFulfillBlockedReason` union currently lives in `apps/api/src/modules/amazon/auto-fulfill-helpers.ts` — should be collapsed to the shared enum.
+
+### Tracking Converter (real-only, pluggable)
+
+Introduced by A2 so post-purchase shipped events map Amazon carrier strings to eBay's enum without fabricating tracking data. **Used by every shipped order** (auto-fulfill, manual link, auto cost-capture alike). Wired in `AmazonTrackingProcessorService.handleShipped` — resolves the per-user `store_settings.tracking_conversion_provider` and fails closed to `LOCAL` on any miss/error.
+
+- `TrackingConverter` interface + `resolveConverter(provider)` (`tracking-converter.ts`).
+- **`LocalTrackingConverter`** (active): `TB[A-Z]*` number prefix OR `amazon` carrier string → eBay `Amazon_Logistics` pass-through. Otherwise map known carriers via `EBAY_CARRIER_MAP` (`ups→UPS`, `usps`/`u.s. postal service`/`united states postal service`→USPS, `fedex`/`federal express`→FedEx, `dhl`/`dhl express`→DHL_Express); unknown → passthrough with `shippingCarrierCode = car || 'Other'`.
+- **`ApiTrackingConverter`** (reserved stub): `convert()` throws — no sanctioned 3rd-party provider configured.
+- **No fabrication policy**: eBay deprecated Bluecare/Aquiline network support across 2024–2026, so TBA/TBM/TBC tracking numbers are passed through as `Amazon_Logistics` rather than remapped to an invented carrier. The legacy `mapCarrierForEbay` helper still exists in the tracking processor file but is superseded by the converter path.
+- **Provider restriction**: UI exposes only `local` (the `api` option is hidden behind a "coming soon" label); backend `@IsIn([TrackingConversionProvider.LOCAL])` enforces it on write.
+
 ### Amazon Scraping — Anti-Ban Strategy
-- **Session isolation**: Each Amazon account gets its own browser state file (`.browser-state/{accountId}.json`) with separate cookies, localStorage
-- **Fingerprint isolation**: Deterministic per-account fingerprint (user-agent, viewport, timezone) — same account always looks the same
-- **Rate limiting** (Bottleneck):
+- **Session isolation**: Each Amazon account gets its own browser state. **Legacy** (pre-A2): `.browser-state/{accountId}.json` storage-state files. **Current** (A2+): per-account persistent user-data-dir at `${BROWSER_STATE_DIR || $CWD/.browser-state}/profiles/{accountId}/` via `chromium.launchPersistentContext` — one full browser profile per account, cached in-process by `BrowserStateManager.getContext`. Legacy `.browser-state/{accountId}.json` sessions are migrated on first launch of the new profile via post-launch `context.addCookies(...)` (cookies only — localStorage intentionally NOT migrated; errors swallowed).
+- **Fingerprint isolation**: Deterministic per-account fingerprint (user-agent, viewport, timezoneId from `hashCode(accountId)`) — same account always looks the same across restarts.
+- **Proxy stack (A2)**: `ProxyService` resolves `{ server, username, password }` from `PROXY_ENDPOINT`/`PROXY_USER`/`PROXY_PASS_TEMPLATE` with a per-session token via `proxySessionToken(strategy, userId, amazonAccountId)`. Session token = `userId` under `PROXY_STRATEGY=perUser` (default) or `amazonAccountId` under `perAccount` (reserved). Username/password may embed `{session}` (or get `-session-{token}` appended if no placeholder). All Amazon browser traffic (scrape + A2 checkout) is routed through the user proxy when configured.
+  - **Proxy fallback discipline**: `BrowserStateManager.resolveProxy()` returns null when `!proxyService.isConfigured()` → existing scraping runs **direct** (no regression when proxy env is absent). **Auto-fulfill is hard-blocked without a proxy** — `AmazonAccountsService.assertCanEnable` throws on any create/update that turns the flag on while `!proxyService.isConfigured()` or `capTotal == null`.
+  - **Strategy seam**: `PROXY_STRATEGY` is an env-swappable `'perUser' | 'perAccount'` literal + the `proxySessionToken` helper — no separate strategy class. `perUser` keeps IP stable across a user's accounts (round-robin friendly); `perAccount` (reserved) would isolate IP per buyer account.
+- **Rate limiting** (Bottleneck via `AmazonRateLimiter.schedule(accountId, …)`):
   - Global: max 5 concurrent browser actions
   - Per-account: 1 concurrent, 3 seconds between requests, 20 requests/minute
   - Exponential backoff on 429/captcha/block responses
+  - **Invariant**: callers MUST go through `AmazonRateLimiter.schedule(accountId, …)` so two `launchPersistentContext` calls never race the SingletonLock on the same user_data_dir.
 - **Session reuse**: Existing cookies restored on repeat visits. Full login only when session expires.
 - **Stealth**: `playwright-extra` + `puppeteer-extra-plugin-stealth` (patches navigator.webdriver, plugins, WebGL, etc.)
 - **2FA support**: TOTP via `otplib` — user provides the secret key from Amazon's 2FA settings
@@ -287,8 +343,8 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
 - Currently forwards Amazon's real tracking number. Future: replace with generated fake tracking IDs for dropshipping.
 
 ### Key Files
-- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService. Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`, `estimateProvisionalNetProfit`, `deriveProfitBasis`), `*.spec.ts` unit tests.
-- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService, AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService, AmazonRateLimiter, BrowserStateManager, **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests).
+- **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit` + `maybeEnqueueAutoFulfill`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService, **AutoFulfillQueueService** (A2 producer). Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`, `estimateProvisionalNetProfit`, `deriveProfitBasis`), `*.spec.ts` unit tests.
+- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService (owns `assertCanEnable` A2 guard), AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService (wires the tracking converter), AmazonRateLimiter, BrowserStateManager (persistent context + proxy), **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests), **AmazonCheckoutService + AutoFulfillProcessor + auto-fulfill-helpers.ts (.spec.ts)** (A2 checkout/processor/pure helpers), **proxy.service.ts** (Zonds sticky residential proxy), **tracking-converter.ts (.spec.ts)** (`LocalTrackingConverter` + `ApiTrackingConverter` stub + `resolveConverter`).
 - **Backend products**: `src/modules/products/` — ProductsService (price/image lookup, `decrementStock` for sale-driven stock sync)
 - **Product refresh pipeline** (Keepa sole provider): `keepa.service.ts`, `refresh-scheduler.service.ts`, `refresh-processor.service.ts`, `keepa-usage.service.ts`, `product-sync.service.ts` — see "Product Refresh Pipeline" section above.
 - **Sale-driven stock sync**: `src/modules/orders/stock-sync-queue.service.ts` (producer) + `src/modules/listings/stock-sync-processor.service.ts` (consumer) + `ProductSyncService.syncListingsForProduct()` + `ListingStrategyService.calculateQuantity()` (canonical quantity formula)
@@ -482,6 +538,9 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `033` | `orders.net_profit` nullable (NULL = unknown, 0 = real zero) + `cost_capture_status` enum + index + backfill from `amazon_linked_at`/`listing_id` |
 | `034` | `amazon_accounts.last_orders_sync_at` (watermark for the auto cost-capture scraper — migration `034`) |
 | `035` | `store_settings.amazon_tax_rate` `NUMERIC(5,2)` default `0` (per-user global percent for provisional-profit estimate) |
+| `036` | `store_settings.auto_fulfill_enabled` (master toggle, default `false`) + `tracking_conversion_provider VARCHAR(20)` default `'local'` (A2) |
+| `037` | `amazon_accounts.auto_fulfill_enabled` (default `false`) + `auto_fulfill_cap_total NUMERIC(10,2)` (nullable) + `auto_fulfill_dry_run` (default `false`) (A2 per-account) |
+| `038` | `orders.auto_fulfill_status` enum (`pending|running|placed|blocked|failed|dry_run|skipped`) + `auto_fulfill_blocked_reason VARCHAR(200)` + `auto_fulfill_attempted_at TIMESTAMPTZ` + partial index `idx_orders_auto_fulfill_status WHERE status IN ('blocked','failed')` (A2) |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
