@@ -33,13 +33,3 @@ export const autoFulfillStatusToBadgeVariant = (
   };
   return map[status] ?? 'secondary';
 };
-
-/**
- * Whether a given status should drive the "needs attention" filter
- * (blocked or failed — both require operator intervention to recover).
- */
-export const isAutoFulfillNeedsAttention = (
-  status: AutoFulfillStatus | undefined | null,
-): boolean =>
-  status === AutoFulfillStatus.BLOCKED ||
-  status === AutoFulfillStatus.FAILED;

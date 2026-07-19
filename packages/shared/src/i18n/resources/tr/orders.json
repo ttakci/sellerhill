@@ -87,7 +87,7 @@
         "address": "Adres sorunu",
         "payment": "Ödeme reddedildi",
         "cap": "Tavan aşıldı",
-        "no_confirmation": "Onyok alınamadı"
+        "no_confirmation": "Onay alınamadı"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "filter": {
