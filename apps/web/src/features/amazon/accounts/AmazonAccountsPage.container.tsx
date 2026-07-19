@@ -1,4 +1,4 @@
-import type { AmazonAccountPublicDto } from '@repo/shared';
+import type { AmazonAccountPublicDto, CreateAmazonAccountFormData } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -69,10 +69,9 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
   }, []);
 
   const buildSubmitData = useCallback(() => {
-    // Shared payload builder for both create + update. Only carry auto-fulfill
-    // fields when the user has touched them via the form (the FE always sends
-    // them once the form is saved — the backend guardrail enforces proxy+cap
-    // when autoFulfillEnabled = true).
+    // Shared payload builder for both create + update. Auto-fulfill fields are
+    // carried UNCONDITIONALLY (the FE always sends them once the form is saved
+    // — the backend guardrail enforces proxy+cap when autoFulfillEnabled = true).
     const data: Record<string, string | boolean | number | null> = {};
     if (formValues.label) {data.label = formValues.label;}
     if (formValues.email) {data.email = formValues.email;}
@@ -116,7 +115,7 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
           );
         });
     } else {
-      void createAccount(data as { label?: string; email: string; password: string; twoFactorSecret?: string })
+      void createAccount(data as CreateAmazonAccountFormData)
         .unwrap()
         .then(() => {
           setIsAddModalOpen(false);

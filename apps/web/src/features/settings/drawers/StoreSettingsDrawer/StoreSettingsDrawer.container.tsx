@@ -3,7 +3,6 @@ import { useLoading, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-
 import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { StoreSettingsDrawerComponent } from './StoreSettingsDrawer.component';

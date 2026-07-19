@@ -76,9 +76,13 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @ApiPropertyOptional({
     description: "Carrier-mapping provider used when relaying tracking to eBay. Persisted LOWERCASE ('local' | 'api').",
     default: 'local',
-    enum: ['local', 'api'],
+    enum: ['local'],
   })
-  @IsIn([TrackingConversionProvider.LOCAL, TrackingConversionProvider.API])
+  // Intentionally restricted to LOCAL until the API converter is wired.
+  // ApiTrackingConverter.convert() currently throws, so allowing 'api' to
+  // persist via any path (direct API, FE bug) would silently break per-account
+  // tracking. Remove this guard when a real API provider ships.
+  @IsIn([TrackingConversionProvider.LOCAL])
   @IsOptional()
   trackingConversionProvider?: TrackingConversionProvider;
 

@@ -38,6 +38,6 @@
     "trackingConversionProvider": "Tracking-number conversion",
     "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged.",
     "trackingConversionProviderLocal": "Built-in (local)",
-    "trackingConversionProviderApi": "API (coming soon)"
+    "trackingConversionApiComingSoon": "An API-based conversion provider is on the roadmap."
   }
 }

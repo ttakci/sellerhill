@@ -3,7 +3,6 @@ import { Drawer, ModernSelect, ModernTextInput, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-
 import { BodyStack, FieldGrid, FormCard, ToggleRow } from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
 
@@ -34,9 +33,11 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
   isContinueDisabled,
 }) => {
   const { t } = useTranslation(['translation', 'storeSettings']);
+  // 'api' is intentionally omitted — the ApiTrackingConverter is a no-op stub
+  // that throws, so allowing it would silently break tracking. Surfaced as a
+  // caption below the select instead. See `trackingConversionApiComingSoon`.
   const providerOptions = [
     { value: TrackingConversionProvider.LOCAL, label: t('storeSettings:storeSettings.trackingConversionProviderLocal') },
-    { value: TrackingConversionProvider.API, label: t('storeSettings:storeSettings.trackingConversionProviderApi') },
   ];
   return (
     <Drawer
@@ -122,7 +123,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             {t('storeSettings:storeSettings.trackingConversionProviderHint')}
           </Text>
           <Text variant="caption" color="text.tertiary">
-            {t('storeSettings:storeSettings.trackingConversionProviderApi')}
+            {t('storeSettings:storeSettings.trackingConversionApiComingSoon')}
           </Text>
         </FormCard>
       </BodyStack>

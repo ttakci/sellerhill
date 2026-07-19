@@ -38,6 +38,6 @@
     "trackingConversionProvider": "Takip numarası dönüştürme",
     "trackingConversionProviderHint": "Gerçek kargo takip numaraları olduğu gibi iletilir. Amazon Logistics (TBA) numaraları değiştirilmeden geçer.",
     "trackingConversionProviderLocal": "Yerleşik (yerel)",
-    "trackingConversionProviderApi": "API (yakında)"
+    "trackingConversionApiComingSoon": "API tabanlı dönüştürme sağlayıcısı yol haritasındadır."
   }
 }
