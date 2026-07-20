@@ -110,8 +110,8 @@
     "reports": "Raporlar",
     "support": "Destek",
     "logout": "Çıkış Yap",
-    "logoutConfirmTitle": "Çıkış Yap",
-    "logoutConfirmDescription": "Çıkış yapmak istediğinizden emin misiniz? Hesabınıza erişmek için tekrar giriş yapmanız gerekecektir.",
+    "logoutConfirmTitle": "Uyarı",
+    "logoutConfirmDescription": "Çıkış yapmak istediğinizden emin misiniz?",
     "logoutConfirmButton": "Çıkış Yap",
     "editProfile": "Profili Düzenle"
   },

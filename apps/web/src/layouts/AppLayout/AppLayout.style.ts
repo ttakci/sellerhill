@@ -198,11 +198,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
   padding: ${({ $isCollapsed, $isSubItem }) =>
-    $isCollapsed
-      ? '0.5rem 0'
-      : $isSubItem
-        ? '0.5rem 0.75rem 0.5rem 1.25rem'
-        : '0.5rem 1rem'};
+    $isCollapsed ? '0.5rem 0' : $isSubItem ? '0.5rem 0.75rem 0.5rem 1.25rem' : '0.5rem 1rem'};
   border-radius: ${tkn('radius.sm')};
   color: ${tkn('colors.sidebar.text')};
   background: ${({ $active }) => ($active ? tkn('colors.sidebar.active') : 'transparent')};
@@ -230,7 +226,7 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
       width: 0.1875rem;
       height: 1.25rem;
       background: ${theme.colors.sidebar.accent};
-      border-radius: 0 0.125rem 0.125rem 0;
+      border-radius: 0 ${tkn('radius.sm')({ theme })} ${tkn('radius.sm')({ theme })} 0;
     }
   `}
 `;

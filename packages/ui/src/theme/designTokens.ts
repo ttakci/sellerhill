@@ -67,14 +67,23 @@ export const spacingTokens = {
 } as const;
 
 /**
- * Crisp corners (user preference) — uniform square surfaces.
+ * Corner rounding scale — a tick rounder, progressive across surfaces.
+ * Single source of truth for every atom, molecule and screen.
+ *
+ * Scale:
+ *   sm  → 6px  : badges, checkboxes, alerts, table cells
+ *   md  → 8px  : buttons, inputs, selects, icon buttons
+ *   lg  → 12px : cards, dialogs, toasts, collapsibles
+ *   xl  → 16px : modals, large surfaces
+ *   2xl → 20px : hero containers
+ *   full → pill / circle
  */
 export const radiusTokens = {
-  sm: '0.25rem', // 4px
-  md: '0.25rem',
-  lg: '0.25rem',
-  xl: '0.25rem',
-  '2xl': '0.25rem',
+  sm: '0.375rem', // 6px — slight
+  md: '0.5rem', // 8px — controls (buttons, inputs)
+  lg: '0.75rem', // 12px — cards, dialogs
+  xl: '1rem', // 16px — modals
+  '2xl': '1.25rem', // 20px — large surfaces
   full: '9999px',
 } as const;
 
@@ -151,7 +160,7 @@ export const controlTokens = {
   paddingX: '1rem', // 16px
   iconWidth: '2.75rem', // 44px
   fontSize: '0.875rem', // 14px — always match body/sm
-  radius: '0.25rem',
+  radius: '0.5rem', // 8px — matches radiusTokens.md
 } as const;
 
 export const transitionTokens = {

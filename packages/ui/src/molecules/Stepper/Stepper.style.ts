@@ -30,10 +30,14 @@ export const StepWrapper = styled.div<{ $orientation: StepperOrientation }>`
 export const StepConnector = styled.div<{ $active: boolean; $orientation: StepperOrientation }>`
   ${(props) =>
     props.$orientation === 'horizontal'
-      ? `position: absolute; top: 50%; transform: translateY(-50%); left: calc(50% + 0.375rem); right: calc(-50% + 0.375rem); height: 0.1875rem; border-radius: 0.09375rem; background: ${
+      ? `position: absolute; top: 50%; transform: translateY(-50%); left: calc(50% + 0.375rem); right: calc(-50% + 0.375rem); height: 0.1875rem; border-radius: ${tkn(
+          'radius.sm'
+        )({ theme: props.theme })}; background: ${
           props.$active ? tkn('colors.brand.primary')(props) : tkn('colors.border.primary')(props)
         }; z-index: 0;`
-      : `width: 0.1875rem; min-height: 1.5rem; border-radius: 0.09375rem; background: ${
+      : `width: 0.1875rem; min-height: 1.5rem; border-radius: ${tkn('radius.sm')({
+          theme: props.theme,
+        })}; background: ${
           props.$active ? tkn('colors.brand.primary')(props) : tkn('colors.border.primary')(props)
         }; margin: ${tkn('spacing.xs')(props)} ${tkn('spacing.sm-md+')(props)};`}
 `;

@@ -34,11 +34,7 @@ export const FieldWrapper = styled.div<{
     $isDisabled ? theme.colors.background.tertiary : theme.colors.surface.primary};
   border: 0.0625rem solid
     ${({ $isFocused, $hasError, theme }) =>
-      $hasError
-        ? theme.colors.semantic.error
-        : $isFocused
-          ? theme.colors.brand.primary
-          : theme.colors.border.primary};
+      $hasError ? theme.colors.semantic.error : $isFocused ? theme.colors.brand.primary : theme.colors.border.primary};
   border-radius: ${tkn('radius.md')};
   padding: 0 ${CONTROL_PADDING_X};
   transition:
@@ -47,8 +43,7 @@ export const FieldWrapper = styled.div<{
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'pointer')};
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   opacity: ${({ $isDisabled }) => ($isDisabled ? 0.5 : 1)};
-  box-shadow: ${({ $isFocused, theme }) =>
-    $isFocused ? controlFocusShadow(theme.colors.brand.primary) : 'none'};
+  box-shadow: ${({ $isFocused, theme }) => ($isFocused ? controlFocusShadow(theme.colors.brand.primary) : 'none')};
   box-sizing: border-box;
 
   &:hover {
@@ -223,7 +218,7 @@ export const OptionsList = styled.div`
   }
   &::-webkit-scrollbar-thumb {
     background: ${tkn('colors.border.primary')};
-    border-radius: 0.5rem;
+    border-radius: ${tkn('radius.full')};
   }
 `;
 
@@ -364,8 +359,7 @@ export const MobileOption = styled.div<{ $isSelected: boolean }>`
   width: 100%;
   border: none;
   background: transparent;
-  color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.colors.brand.primary : theme.colors.text.primary};
+  color: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.brand.primary : theme.colors.text.primary)};
   font-size: ${tkn('typography.fontSize.md')};
   cursor: pointer;
 

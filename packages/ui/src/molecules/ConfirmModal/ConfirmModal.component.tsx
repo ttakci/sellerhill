@@ -1,5 +1,6 @@
 import React from 'react';
 
+import type { MessageType } from '../../context';
 import { Dialog } from '../Dialog';
 
 import type { ConfirmModalProps } from './ConfirmModal.types';
@@ -8,6 +9,9 @@ import type { ConfirmModalProps } from './ConfirmModal.types';
  * Thin wrapper over Dialog for confirm / cancel flows.
  * Always brand-blue buttons (Dialog coerces danger → primary).
  * Stack: outline cancel on top, filled confirm below.
+ *
+ * Icon + disc color come from `type` (default `warning` — confirmations are cautionary).
+ * Legacy `variant: 'danger'` maps to `warning`; `variant: 'primary'` maps to `info`.
  */
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
@@ -17,11 +21,13 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   description,
   confirmLabel,
   cancelLabel,
-  variant = 'primary',
+  variant,
+  type,
   isLoading = false,
 }) => {
-  // `variant` only affects icon tone; Dialog always renders brand-blue buttons
-  const dialogType = variant === 'danger' ? 'warning' : 'info';
+  // Resolve dialog type: explicit `type` wins; fall back to legacy `variant` mapping; default `warning`.
+  const dialogType: MessageType =
+    type ?? (variant === 'danger' ? 'warning' : variant === 'primary' ? 'info' : 'warning');
 
   return (
     <Dialog

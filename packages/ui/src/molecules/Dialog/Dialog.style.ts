@@ -6,11 +6,12 @@ import { tkn } from '../../theme/tkn';
 
 /**
  * Horizontal rectangle (wider than tall) — not square.
- * Overrides Modal size max-width so the dialog can sit ~28rem wide.
+ * Overrides Modal size max-width so the dialog can sit ~24rem wide.
+ * Responsive: shrinks to viewport on small screens.
  */
 export const Shell = styled(Modal)`
-  width: min(28rem, calc(100vw - ${tkn('spacing.xl')}));
-  max-width: min(28rem, calc(100vw - ${tkn('spacing.xl')})) !important;
+  width: min(24rem, calc(100vw - ${tkn('spacing.xl')}));
+  max-width: min(24rem, calc(100vw - ${tkn('spacing.xl')})) !important;
   border-radius: ${tkn('radius.lg')};
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('shadows.xl')};
@@ -23,16 +24,27 @@ export const Content = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: ${tkn('spacing.xl')} ${tkn('spacing.xl')} ${tkn('spacing.lg')};
+  /* Padding (xl/lg/xl = 32/24/32px). */
+  padding: ${tkn('spacing.xl')} ${tkn('spacing.lg')} ${tkn('spacing.xl')};
   gap: 0;
   box-sizing: border-box;
   min-width: 0;
+
+  @media (max-width: 30rem) {
+    padding: ${tkn('spacing.lg')} ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  }
 `;
 
-/** Solid filled circle; icon is white on top */
+/**
+ * Solid filled circle; icon is white on top.
+ * Color by dialog type:
+ *   success → green, error → red, warning → red (cautionary = red per design),
+ *   info → brand blue (primary)
+ */
 export const IconCircle = styled.div<{ $type: string }>`
-  width: 3.5rem;
-  height: 3.5rem;
+  /* Icon disc (4rem = 64px). */
+  width: 4rem;
+  height: 4rem;
   border-radius: ${tkn('radius.full')};
   display: flex;
   align-items: center;
@@ -59,14 +71,23 @@ export const IconCircle = styled.div<{ $type: string }>`
     color: ${tkn('colors.text.inverse')};
     stroke: ${tkn('colors.text.inverse')};
   }
+
+  @media (max-width: 30rem) {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
 `;
 
 export const Title = styled(UIText)`
   margin: 0 0 ${tkn('spacing.sm')};
   max-width: 100%;
   line-height: ${tkn('typography.lineHeight.tight')};
-  /* Larger than body/card titles — dialog headline (h1 scale) */
+  /* Headline (xxl = 24px). */
   font-size: ${tkn('typography.fontSize.xxl')};
+
+  @media (max-width: 30rem) {
+    font-size: ${tkn('typography.fontSize.xl')};
+  }
 `;
 
 export const Description = styled.div`
@@ -98,7 +119,14 @@ export const ButtonStack = styled.div`
 
   & > button {
     width: 100%;
-    min-height: 2.75rem;
+    /* Buttons (controls.height.medium = 44px). */
+    min-height: ${tkn('controls.height.medium')};
     border-radius: ${tkn('radius.md')};
+  }
+
+  @media (max-width: 30rem) {
+    & > button {
+      min-height: ${tkn('controls.height.medium')};
+    }
   }
 `;

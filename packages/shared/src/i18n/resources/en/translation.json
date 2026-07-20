@@ -110,8 +110,8 @@
     "reports": "Reports",
     "support": "Support",
     "logout": "Logout",
-    "logoutConfirmTitle": "Confirm Logout",
-    "logoutConfirmDescription": "Are you sure you want to log out? You will need to sign in again to access your account.",
+    "logoutConfirmTitle": "Warning",
+    "logoutConfirmDescription": "Are you sure you want to log out?",
     "logoutConfirmButton": "Logout",
     "editProfile": "Edit Profile"
   },

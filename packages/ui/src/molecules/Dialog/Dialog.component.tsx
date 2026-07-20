@@ -56,17 +56,10 @@ export const Dialog: React.FC<DialogProps> = ({
   const secondaryVariant = resolveOutlineVariant(secondaryAction?.variant);
 
   return (
-    <S.Shell
-      isOpen={isOpen}
-      onClose={onClose}
-      title=""
-      size="md"
-      showCloseButton={showCloseButton}
-      showDivider={false}
-    >
+    <S.Shell isOpen={isOpen} onClose={onClose} title="" size="md" showCloseButton={showCloseButton} showDivider={false}>
       <S.Content>
         <S.IconCircle $type={type}>
-          <Icon name={iconName} size={22} color="text.inverse" />
+          <Icon name={iconName} size={24} color="text.inverse" />
         </S.IconCircle>
 
         <S.Title variant="h1" weight="semibold" color="brand.primary">
@@ -95,11 +88,7 @@ export const Dialog: React.FC<DialogProps> = ({
               size="medium"
               fullWidth
               isLoading={secondaryAction.isLoading}
-              disabled={
-                secondaryAction.disabled ||
-                secondaryAction.isLoading ||
-                primaryAction.isLoading
-              }
+              disabled={secondaryAction.disabled || secondaryAction.isLoading || primaryAction.isLoading}
               onClick={secondaryAction.onClick}
             >
               <Text variant="body" weight="semibold">

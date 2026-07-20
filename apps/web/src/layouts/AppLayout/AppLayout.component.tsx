@@ -51,15 +51,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               type="button"
               $isCollapsed={sidebarCollapsed}
               onClick={onToggleSidebar}
-              title={
-                sidebarCollapsed
-                  ? t('translation:header.expandSidebar')
-                  : t('translation:header.collapseSidebar')
-              }
+              title={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
               aria-label={
-                sidebarCollapsed
-                  ? t('translation:header.expandSidebar')
-                  : t('translation:header.collapseSidebar')
+                sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
               }
             >
               <Icon name="menu" size={20} />
@@ -287,11 +281,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           isOpen={isLogoutConfirmOpen}
           onClose={onCloseLogoutConfirm}
           onConfirm={onLogoutConfirm}
+          type="warning"
           title={t('translation:menu.logoutConfirmTitle')}
           description={t('translation:menu.logoutConfirmDescription')}
           confirmLabel={t('translation:menu.logoutConfirmButton')}
           cancelLabel={t('translation:common.cancel')}
-          variant="primary"
         />
       </S.LayoutWrapper>
     </ErrorBoundary>
