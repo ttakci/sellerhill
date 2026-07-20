@@ -447,6 +447,24 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 5. Only then flip `auto_fulfill_dry_run=false` on a low-value test order and watch the placed/blocked status + evidence.
 6. Monitor: BullMQ queue depth (`auto-fulfill`, `amazon-tracking`), `orders.auto_fulfill_status` (watch `blocked`/`failed`), memory (Chromium), proxy bandwidth.
 
+### A2 enablement status & gating (read this before touching auto-fulfill)
+
+> **State as of 2026-07-20:** A2 code is COMPLETE and reviewed on `development`, but **auto-fulfill is NOT yet usable end-to-end** because two prerequisites are external to the codebase. Do not tell the user "A2 works / is done" without checking these — the code compiles and unit-tests pass, but no live checkout has ever been run.
+
+**The single remaining gate before any real Amazon purchase is `dry-run selector tuning`. It is NOT a code task — it is a live, operator-driven verification that must happen once, against real Amazon, before real money is allowed to leave. The reason it cannot be done in code is:** the Playwright selectors in `AmazonCheckoutService.CHECKOUT_SELECTORS` (add-to-cart, address selection, review grand-total, confirmation parse) are written against Amazon's DOM, which Amazon rotates frequently and which differs by account/region. There is no way to validate them without an actual logged-in Amazon buyer session. Selectors that look correct in code routinely miss on the live page → the flow blocks (`out_of_stock` / `address` / `no_confirmation`) or worse, proceeds to the wrong step. Dry-run mode (`auto_fulfill_dry_run=true`) runs the ENTIRE checkout up to (but not including) the "Place Order" click and screenshots every step, so you can confirm each selector resolves and the review-step total is read correctly — **without spending money**.
+
+**Prerequisites the user must provide (cannot be coded):**
+1. **Residential proxy** — `PROXY_ENDPOINT` / `PROXY_USER` / `PROXY_PASS_TEMPLATE` env set to a sticky residential provider (Smartproxy / Bright Data / IPRoyal). **Status: NOT purchased yet (2026-07-20).** Without it, `AmazonCheckoutService.runForOrder` hard-blocks every order with `auto_fulfill_blocked_reason='proxy_required'` (the runtime guard). This is by design — auto-fulfill over the bare server IP bans Amazon buyer accounts.
+2. **A real Amazon buyer account** connected in Zonds (email + password + 2FA secret), with `auto_fulfill_enabled=true` + `auto_fulfill_cap_total` set + `auto_fulfill_dry_run=true`.
+
+**How to guide the user when they want to "turn on auto-fulfill" / "test it" / "go live":**
+- **No proxy purchased yet → A2 cannot run.** Tell them the proxy is the first purchase (residential, sticky-session, per-GB). Do NOT suggest enabling `auto_fulfill_enabled` on any account — it will be rejected by `assertCanEnable` (proxy + cap required) and/or block every order at runtime. There is no code workaround; the proxy is a hard safety floor.
+- **Proxy purchased + Amazon account added → run dry-run first.** Set `auto_fulfill_dry_run=true` on the account, ingest one new matched eBay order (or wait for the order-sync cron), then read `orders.auto_fulfill_status` (expect `dry_run`) and the screenshots under `fulfillment-evidence/{ebayOrderId}/`. If any step shows a wrong page / missing total / blocked reason other than `cap`, the `CHECKOUT_SELECTORS` for that step need a live-DOM patch — that is the "selector tuning" task. Repeat until `dry_run_review-*.png` shows the correct review page with a readable grand total and the cap behaves.
+- **Dry-run clean → one low-value live order.** Flip `auto_fulfill_dry_run=false`, set a tight `auto_fulfill_cap_total` (e.g. $10), and watch `auto_fulfill_status` flip to `placed` + a real `amazon_order_id` + `net_profit` (trusted, LINKED). Only then widen to normal caps / more accounts.
+- **Never skip dry-run.** The review-step hard cap is only as good as `readReviewGrandTotal`; if that selector misses on the live DOM, the cap check fails closed (`cap` block) — safe, but it means auto-fulfill is silently not working. Dry-run is how you prove the selectors resolve before money is at stake.
+
+**What is safe to do right now without a proxy:** everything in the code, the settings UI, the FE chip/filter, and `auto_fulfill_status='skipped'`/`'proxy_required'` behavior. You can connect Amazon buyer accounts, configure caps/dry-run flags, and watch the producer enqueue → processor block with `proxy_required`. That exercises the entire pipeline except the Playwright checkout, which is the part that needs the proxy + live tuning.
+
 ### Backups & monitoring (prod)
 
 - **Postgres:** daily logical backup (pg_dump) + point-in-time if managed.
@@ -464,7 +482,7 @@ The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced ton
 - **Font**: **Source Sans 3** for headings + body/UI (institutional / insurance-grade readability; TR-friendly). Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts`. Mono = JetBrains Mono.
 - **Text ink**: strong slate primary (`#0f172a`), secondary (`#475569`). Brand blue `#2563eb`.
 - **Weights**: headings / card titles **semibold**; row labels **semibold** for clarity.
-- **Radii**: crisp **4px** surfaces (user preference — no soft rounded cards).
+- **Radii**: progressive scale — sm 6px (badges/checkboxes/table cells), md 8px (buttons/inputs/selects), lg 12px (cards/dialogs), xl 16px (modals), 2xl 20px (hero). Tokens in `packages/ui/src/theme/designTokens.ts` (`radiusTokens`); `controlTokens.radius` matches `radiusTokens.md`.
 - **Sidebar nav**: Inventory + Configuration. Route breadcrumbs from `apps/web/src/app/routeMeta.ts`.
 - **Settings hub**: full-width 2-col grid; **header icons restored** on section cards; account rows keep row icons.
 
