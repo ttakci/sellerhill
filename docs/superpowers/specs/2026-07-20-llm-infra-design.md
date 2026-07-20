@@ -112,29 +112,39 @@ export interface LlmChatResult {
 
 `CONTENT_AI_ENABLED` / `CONTENT_AI_OLLAMA_URL` / `CONTENT_AI_OLLAMA_MODEL` / `CONTENT_AI_TITLE_TIMEOUT_MS` / `CONTENT_AI_DESCRIPTION_TIMEOUT_MS` are **removed** — folded into the LLM env above. The content-gen service no longer reads its own base URL/model/timeout; it passes `purpose: 'content'` and per-call `temperature`/`maxTokens`/`timeoutMs` to `LlmService`.
 
-**Provider choice (the bulk-scale decision):**
+**Provider choice (architect decision — fast + cheap, multi-tenant):**
 
-The LlmClient is provider-agnostic by env, so the provider is a deployment decision, not a code one. Two free options, picked per workload:
+The LlmClient is provider-agnostic by env, so the provider is a deployment decision, not a code one. **Free tiers are NOT viable at the user's stated scale** (10 of 100 users bulk-adding 2000 listings simultaneously = 20,000 listings = ~40,000 LLM calls in a burst). Any free tier rate-limits that to multi-hour. So: **paid, cheap, fast** — and the decision is which.
 
-| Workload | Provider | Why |
-|---|---|---|
-| **Bulk add (e.g. 2000 listings at once)** | **Groq free tier** (hosted, OpenAI-compatible) | Local Ollama on CPU cannot do 2000×2=4000 calls in reasonable time (~6–7h sequential, concurrency-1 because CPU Ollama collapses at 5+ in-flight) AND it adds ~3–4 GB RAM pressure on the already-loaded test VPS. Groq is free (signup, no payment), ~instant per call, and rate-limited (~30 req/min on the free tier — check current limits). 4000 calls at the rate limit ≈ a ~2h batch: queue it, walk away, listings publish as jobs complete. Product data (Amazon title/features) sent to Groq is **public, non-sensitive** — acceptable. |
-| **Dev / trickle (a few listings/day from refresh)** | **Local Ollama** (CPU, in docker-compose) | Free, private, no rate limit, no network egress. Fine when volume is low. |
+| Workload | Provider | Model | Why |
+|---|---|---|---|
+| **Prod / bulk (default)** | **OpenAI** (paid, OpenAI-compatible) | **gpt-4o-mini** (or its current cheapest successor) | Best TR instruction-following at the cheap tier (Zonds is EN+TR; description cleanup in Turkish is where small models stumble). Rock-solid reliability + predictable rate-limit tiering — matters under the 10×2000 burst. Cheap: ~$0.15/M input, ~$0.60/M output ⇒ a 2000-listing batch (4000 calls, ~400 tok avg) ≈ **~$0.40**, i.e. ~$0.0002/listing. Fast: ~1–2s/call. The task (keyword-preserving title ≤80 chars + description cleanup) is light — this model is purpose-built for high-volume light work. |
+| **Prod / bulk (alt — max speed/cost)** | **Groq** (paid, OpenAI-compatible) | `llama-3.1-8b-instant` | Fastest inference (LPU, sub-second/call) and cheapest (~5–10× cheaper than gpt-4o-mini). One-line env swap. Trade-off: weaker Turkish quality than gpt-4o-mini + Groq has historically queued/capacity-throttled under burst load — risky for exactly the 10×2000 case. Use when raw speed/cost beats TR-quality/reliability for the user's listings. |
+| **Dev / trickle** | **Local Ollama** (free, in docker-compose) | `qwen3:1.7b` | Free, private, no rate limit, no egress. Fine for a few listings/day. NOT for bulk (CPU ~7h for 4000 calls + RAM pressure). |
 
-Groq env (bulk):
+**Default env (prod/bulk):**
+```
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_API_KEY=<openai key>
+LLM_CONTENT_MODEL=gpt-4o-mini
+LLM_ASSISTANT_MODEL=gpt-4o-mini
+```
+**Alt (Groq, faster/cheaper, weaker TR):**
 ```
 LLM_BASE_URL=https://api.groq.com/openai/v1
-LLM_API_KEY=<groq free key>
+LLM_API_KEY=<groq key>
 LLM_CONTENT_MODEL=llama-3.1-8b-instant
 ```
-Local Ollama env (dev/trickle, default):
+**Dev (local Ollama, free):**
 ```
 LLM_BASE_URL=http://localhost:11434/v1
 LLM_API_KEY=
 LLM_CONTENT_MODEL=qwen3:1.7b
 ```
 
-The architecture handles both identically — the only difference is env. A future GPU box switches to vLLM the same way. **Recommendation: default the compose + docs to local Ollama (zero-setup dev), and document the Groq env swap as the bulk path.**
+The architecture handles all three identically — only env differs. A future GPU box switches to vLLM the same way. **Decision: ship the client + docs defaulting prod to OpenAI gpt-4o-mini; document the Groq env swap as the faster/cheaper alt; keep local Ollama as the zero-setup dev default.** The user picks per deployment; no code change to switch.
+
+**Why gpt-4o-mini over Groq as the default** (the user asked for fast+cheap and to decide): both are fast+cheap; the per-batch cost difference is cents (~$0.40 vs ~$0.08) — negligible. gpt-4o-mini wins on (a) Turkish listing quality, which directly affects sales, and (b) reliability under the exact multi-tenant burst the user described (Groq has capacity-queueing under burst). Groq remains a one-line env flip if the user later prioritizes raw speed/cost over TR quality.
 
 ### 2. `LlmService` interface
 
@@ -185,31 +195,56 @@ The SSE byte→event parsing is extracted into a **pure** helper `parseSseChunk(
 
 `ListingStrategyService` and `listing-processor.service.ts` are **untouched** — they call `contentGeneration.rewriteTitle`/`rewriteDescription` with the same signatures. Net effect: behavior identical, transport swapped, provider now env-swappable, streaming seam ready for C.
 
-### 4. Bulk scale (2000 listings at once) — the orchestration decision
+### 4. Bulk scale (2000 listings at once, 10 concurrent users) — the orchestration decision
 
-The user's stated scale: a user may add ~2000 listings in one bulk action and want AI-rewritten title + description for each. That is **2000 listings × 2 LLM calls = 4000 calls** per bulk add.
+The user's stated scale: a user may add ~2000 listings in one bulk action and want AI-rewritten title + description for each. **Worst case: 10 of 100 users bulk-adding simultaneously = 20,000 listings = ~40,000 LLM calls in a burst.** That is the design target.
 
-**Decision: keep AI inline in the listings create worker; do NOT build a separate `content-rewrite` queue or an eBay revise path in B.** Rationale:
+**First key clarification — AI is OPTIONAL, brand-strip is NOT:**
 
-- The listings create path is **already a BullMQ queue** (`listings` queue, `ListingProcessorService`). 2000-at-once is naturally a batch that trickles out as jobs complete — each job: deterministic content → AI rewrite (if group flags on) → publish to eBay. No new queue needed.
+- **Brand stripping is deterministic and already built** (`stripBrandFromTitle`, `listing_settings_groups.content` JSONB, migration `031`). It runs on every create when the group flag is on — instant, free, no LLM. So "remove brand from title/description" is **not** an AI task and never touches the LLM bill.
+- **AI title/description rewrite is a separate, opt-in quality layer** (`aiTitleEnabled` / `aiDescriptionEnabled` on the same group). It optimizes keywords and rewrites prose. It is **off by default**. A user who only wants brand-stripped, eBay-compliant titles gets that with zero LLM cost and zero queue time — the bulk batch is then instant (deterministic only).
+- **Implication:** the 40,000-call burst only happens if users explicitly enable AI on the bulk group. Most bulk adds (just "list these 2000 ASINs, strip brand, comply with eBay") hit the LLM **zero times**. AI is the premium knob, not the default path.
+
+This dramatically lowers the realistic LLM load and the cost ceiling. The user controls it per bulk action via the group flags.
+
+**Decision for the AI-enabled case: keep AI inline in the listings create worker; do NOT build a separate `content-rewrite` queue or an eBay revise path in B.** Rationale:
+
+- The listings create path is **already a BullMQ queue** (`listings` queue, `ListingProcessorService`). 2000-at-once (×10 users) is naturally a batch that trickles out as jobs complete — each job: deterministic content (always) → AI rewrite (only if group flags on) → publish to eBay. No new queue needed.
 - Decoupling (deterministic + publish now, AI revise async) would require an **eBay title/desc revise** call (Inventory/Trading API) that does **not exist yet** (CLAUDE.md lists it under "Deferred"). Building it would bloat B. Inline AI avoids it — the listing is published once, with the AI title already in hand.
-- The only reason inline AI was a problem at bulk scale was **local Ollama CPU throughput**. Switching the provider to Groq (env, free) fixes that without touching orchestration: per-call is ~instant, and the LlmService's internal 429 backoff self-paces the batch to the free-tier rate limit.
 
-**Honest throughput numbers:**
+**Honest throughput (the AI-enabled worst case, 40,000 calls):**
 
-| Provider | Per-call | 4000-call batch wall-clock | RAM |
+Bulk is a **queue-throughput** problem, not a concurrent-call problem — you never fire 40k in parallel (that 429s instantly on every provider). You process at the provider's rate limit. The binding constraint is tokens-per-minute (TPM), not requests-per-minute, because each call carries product context.
+
+| Provider (paid) | Per-call | 40,000-call burst wall-clock | Cost (≈16M tokens) |
 |---|---|---|---|
-| Groq free tier | ~instant (network-bound) | ~2h (dominated by free-tier rate limit ~30 req/min; check current) | 0 (hosted) |
-| Local Ollama (qwen3:1.7b, CPU) | ~1–3s generation | ~6–7h sequential (concurrency-1; CPU collapses at 5+ in-flight) | ~2–3 GB resident |
-| Local Ollama (qwen3:4b, CPU) | ~3–6s | ~13h+ | ~3–4 GB resident |
+| **OpenAI gpt-4o-mini** (Tier 1: 500 RPM / 90k TPM) | ~1–2s | ~3h at Tier 1 (TPM-bound: 16M / 90k) | ~$0.40/batch → ~$4 for 10 users |
+| **OpenAI gpt-4o-mini** (Tier 2+: 350k TPM, reached after ~$50 historical spend) | ~1–2s | **~45 min** | same |
+| **Groq llama-3.1-8b-instant** (paid, higher throughput) | <1s | ~20–30 min if not capacity-throttled | ~$0.08/batch → ~$0.80 for 10 users |
+| Local Ollama (any model, CPU) | 1–6s | **not viable** (~7h for ONE 2000-batch; 10× is days) + RAM | free |
 
-**So: bulk = Groq (free, ~2h batch, queue-and-walk-away); dev/trickle = local Ollama.** Both via env, no code difference. The create worker's existing BullMQ retry/backoff + the LlmService's 429 backoff handle Groq rate limits. Listings appear on eBay as each job completes over the batch window.
+**Reading the table:**
+- **Free is not an option at this scale** — the user already accepts paying ("para veririz"). The question is how cheap + how fast.
+- **Under ~2h for the 10×2000 AI-enabled burst needs a paid tier with real throughput.** OpenAI Tier 1 is ~3h (TPM-bound); Tier 2+ is ~45 min. Groq paid is ~20–30 min if it doesn't capacity-throttle (its historical weakness under burst).
+- **Cost is trivial either way** — even the worst case (10 users, all AI-enabled, OpenAI) is ~$4 for the whole burst. Realistically far less because most bulk adds leave AI off (deterministic brand-strip only).
 
-**Concurrency knob:** the listings create worker concurrency should stay low for AI+bulk (1–2) so parallel jobs don't burst past the rate limit and all back off at once. If the worker concurrency is higher today, an env knob (`LISTINGS_WORKER_CONCURRENCY` if not already present) tunes it — verify in the plan.
+**So the practical answer: prod/bulk defaults to OpenAI gpt-4o-mini (reliable, TR-quality, cheap).** If a specific bulk run needs max speed, the user flips `LLM_BASE_URL` to Groq for that run — one env change. If they outgrow Tier 1, OpenAI auto-tiers up with spend (Tier 2 ≈ $50 lifetime). The LlmService's internal 429 Retry-After backoff paces every call to whichever rate limit applies.
 
-**Failure isolation:** a single listing's AI failure (any `LlmError`, including `LlmRateLimitError` after the internal budget is exhausted) → fallback to deterministic content for that listing → publish proceeds. One bad/timeout listing does not stall the batch; BullMQ moves to the next job. This preserves the existing "AI never blocks the create queue" invariant.
+**Concurrency knob:** the listings create worker concurrency must stay modest for AI+bulk (e.g. 2–4) so parallel jobs don't all 429 at once. Verify whether the worker already has an env concurrency knob in the plan; if not, add `LISTINGS_WORKER_CONCURRENCY`. This is a tune, not new architecture.
 
-### 5. Ollama in docker-compose
+**Failure isolation:** a single listing's AI failure (any `LlmError`, including `LlmRateLimitError` after the internal backoff budget is exhausted) → fallback to deterministic content for that listing → publish proceeds. One bad/timeout listing does not stall the batch; BullMQ moves to the next job. This preserves the existing "AI never blocks the create queue" invariant.
+
+**Cost attribution (deferred to plan / C):** per-user LLM spend tracking (an `llm_usage_log` table mirroring `keepa_usage_log`'s fair-split pattern) is the natural multi-tenant answer to "who owes what." It is **out of scope for B** (B has no billing surface); it belongs in the plan or in C when multi-tenant credit/billing is designed. B's `LlmService` should **log usage** (user_id, purpose, model, tokens in/out, latency, success) to a cheap append-only log so the data exists when attribution is built — but no aggregation/billing UI in B.
+
+### 5. Chatbot (C) — confirm B supports the described design
+
+The user's chatbot ("Zon") has two modes, both served by B's `LlmService`:
+1. **App-internal AI assistant** — answers app-usage questions, RAG over app docs. **Sync**, streaming UX → uses `LlmService.chatStream()`.
+2. **Support handoff** — when AI can't help or the user wants a human, route to support. **Async**: if support is offline, the message holds; support comes online and replies. Sync chat is also possible when support is online.
+
+B's contract supports both: `chat()` (sync, non-streaming) + `chatStream()` (sync streaming) for the AI assistant; the async support-handoff is a **persistence/presence** concern (message store, support-agent queue, online/offline state) that is squarely **C's scope**, not B's. B only guarantees the LLM transport + streaming seam are correct and tested. **C will design:** conversation storage, support-agent presence, offline-message hold, the RAG doc ingestion, and the FE widget wiring. This is noted here so B's `chatStream()` contract is validated against the real consumer before B ships.
+
+### 6. Ollama in docker-compose
 
 Add to `docker-compose.yml` (dev) and `docker-compose.production.yml` (test/prod):
 
@@ -236,7 +271,7 @@ docker compose exec ollama ollama pull qwen3:4b-instruct
 
 **RAM note (important for the loaded test VPS):** `qwen3:4b-instruct` inference needs ~3–4 GB free RAM. On the 16 GB test VPS, Ollama competes with Postgres + Redis + Playwright (Amazon scraping, resident Chromium contexts) + api + web. This is only feasible at **low concurrency**: content-gen is create-only and the listings worker is concurrency-1, so content rewrites are not a heavy concurrent load. The assistant (C) will need a concurrency/rate-limit decision of its own. If RAM is tight, keep `LLM_CONTENT_ENABLED=false` (deterministic fallback) until capacity is confirmed, or point `LLM_BASE_URL` at a hosted provider (Groq free tier) via env — no code change.
 
-### 6. Error handling & fallback
+### 7. Error handling & fallback
 
 - `LlmService` **never retries** and **never swallows**. Every failure throws a typed `LlmError` subclass.
 - **Content-gen:** every `llm.chat(...)` call is wrapped in try/catch; on any `LlmError` (or a result that fails the length/quality check) it returns `baseTitle`/`baseDescription`. The listing create job never stalls because of AI — same invariant as today.
@@ -245,7 +280,7 @@ docker compose exec ollama ollama pull qwen3:4b-instruct
 - **Timeout:** each call gets its own `AbortController`; `opts.timeoutMs` overrides `LLM_TIMEOUT_MS`. A caller-supplied `opts.signal` (e.g. an HTTP request abort) is honored alongside the timeout.
 - **Malformed model output** (empty, non-string, missing `choices`) → `LlmResponseError` → caller fallback.
 
-### 7. Testing
+### 8. Testing
 
 Jest (existing `apps/api` harness). Pure logic only — no live Ollama (integration deferred per A1/A2 policy):
 
@@ -257,7 +292,7 @@ Jest (existing `apps/api` harness). Pure logic only — no live Ollama (integrat
 
 Manual verification (documented, not automated): `pnpm docker:up`, pull the models, set `LLM_CONTENT_ENABLED=true`, create one listing with the AI group flag on, confirm a rewritten title/description and that disabling the flag or stopping Ollama falls back to deterministic.
 
-### 8. Files
+### 9. Files
 
 **Backend (`apps/api`):**
 - `src/modules/llm/llm.module.ts` — new; provides + exports `LlmService`.
@@ -303,19 +338,24 @@ Pure + mocked-fetch unit tests in the existing Jest harness. No live-Ollama inte
 
 ## Risks & trade-offs
 
-- **RAM pressure on the test VPS (local Ollama only).** `qwen3:4b-instruct` inference (~3–4 GB) + Postgres + Redis + Playwright (resident Chromium) + api + web on 16 GB. Only a concern when `LLM_BASE_URL` points at local Ollama. Mitigated by: bulk path uses Groq (hosted, zero local RAM); `LLM_CONTENT_ENABLED=false` default; local Ollama reserved for dev/trickle. The assistant (C) will need its own concurrency/rate decision.
+- **RAM pressure on the test VPS (local Ollama only).** `qwen3:4b-instruct` inference (~3–4 GB) + Postgres + Redis + Playwright (resident Chromium) + api + web on 16 GB. Only a concern when `LLM_BASE_URL` points at local Ollama. Mitigated by: prod/bulk uses hosted OpenAI/Groq (zero local RAM); `LLM_CONTENT_ENABLED=false` default; local Ollama reserved for dev/trickle. The assistant (C) will need its own concurrency/rate decision.
+- **Multi-tenant burst cost/time.** 10 users × 2000 AI-enabled listings = ~40,000 calls. Free tiers cannot; paid Tier 1 OpenAI is ~3h (TPM-bound), Tier 2+ ~45 min, Groq paid ~20–30 min. Mitigated by: (a) AI is opt-in per group — deterministic brand-strip is the free/instant default, so most bulk adds hit the LLM zero times; (b) the LlmService's internal 429 backoff paces every call; (c) provider is env-swappable per deployment/run. The user accepts paying; cost is trivial (~$4 worst case).
+- **Groq capacity-throttling under burst.** Groq is fastest+cheapest but has historically queued/throttled under burst load — risky for the 10×2000 case. Mitigated by: gpt-4o-mini is the default (reliable); Groq is the opt-in alt for users who accept the tradeoff.
 - **SSE parser fragility.** OpenAI-compatible SSE is simple but providers differ in keep-alive comments, partial-JSON framing, and `[DONE]` variants. Mitigated by a pure, unit-tested `parseSseChunk` helper that carries leftover bytes and ignores keep-alives.
-- **Ollama OpenAI-compat quirks.** Ollama's `/v1/chat/completions` is compatible but historically has small divergences (e.g. `max_tokens` vs `max_predict`). Mitigated by sending both common shapes if needed; the transport test covers the exact body. If a provider diverges, env-swap to a conformant one — no code change.
-- **Content-gen behavior drift.** Migrating transport could subtly change output (e.g. `qwen3:1.7b` vs `llama3.2:1b` produce different titles). Accepted — content-gen already has a quality gate (length checks) + fallback, and AI output is non-deterministic by nature. The deterministic fallback is unchanged, so a regression in AI quality degrades gracefully, not silently.
-- **Retry policy.** The only internal retry is for HTTP 429 (rate limit), bounded by the call's `timeoutMs` budget + max 3 attempts, so a single `chat()` self-paces through a Groq rate-limit window. All other failures (network, timeout, bad body) throw immediately — the create worker's BullMQ retry/backoff handles job-level retries, and content-gen falls back to deterministic on any `LlmError`. Deliberate — broader retry would complicate the seam and risk double-calling under the create path.
+- **Ollama OpenAI-compat quirks.** Ollama's `/v1/chat/completions` is compatible but historically has small divergences (e.g. `max_tokens` vs `max_predict`). Mitigated by sending both common shapes if needed; the transport test covers the exact body. OpenAI/Groq accept `max_tokens` natively — no issue on the prod path.
+- **Content-gen behavior drift.** Migrating transport + model (llama3.2:1b → gpt-4o-mini or qwen3:1.7b) will change AI output. Accepted — content-gen already has a quality gate (length checks) + fallback, and AI output is non-deterministic by nature. The deterministic fallback (brand-strip + templates) is unchanged, so a regression in AI quality degrades gracefully, not silently. gpt-4o-mini is a quality upgrade over llama3.2:1b for TR, not a regression.
+- **Retry policy.** The only internal retry is for HTTP 429 (rate limit), bounded by the call's `timeoutMs` budget + max 3 attempts, so a single `chat()` self-paces through a rate-limit window. All other failures (network, timeout, bad body) throw immediately — the create worker's BullMQ retry/backoff handles job-level retries, and content-gen falls back to deterministic on any `LlmError`. Deliberate — broader retry would complicate the seam and risk double-calling under the create path.
 
 ---
 
 ## Open questions (to resolve in the implementation plan)
 
 1. **Errors location** — `LlmError` subclasses api-local (`apps/api/src/modules/llm/llm.errors.ts`) vs shared (`packages/shared/src/domain/llm/`). Lean: api-local (thrown/caught inside the API; not a wire DTO). Promote to shared only if C needs them serialized.
-2. **`max_tokens` vs `max_predict`** — confirm Ollama's `/v1/chat/completions` accepts `max_tokens` (OpenAI field) and maps it. If not, send `max_predict` too or use `max_tokens` only and verify. Resolved during implementation against a live pull.
-3. **Content-gen timeouts** — keep 8s title / 15s description as per-call `timeoutMs` (preserving current behavior) vs unify under `LLM_TIMEOUT_MS`. Lean: keep per-call **but raise for bulk** — the 8s title timeout is too tight for Groq 429 backoff; use a generous per-call timeout (e.g. 60s) so the internal rate-limit backoff has budget. Title vs description can still differ on `maxTokens`/`temperature`, just not on a tiny timeout.
+2. **`max_tokens` vs `max_predict`** — confirm Ollama's `/v1/chat/completions` accepts `max_tokens` (OpenAI field) and maps it. OpenAI/Groq accept `max_tokens` natively (the prod path). Only Ollama needs verifying; send `max_predict` too if Ollama rejects `max_tokens`. Resolved during implementation against a live pull.
+3. **Content-gen timeouts** — keep 8s title / 15s description as per-call `timeoutMs` (preserving current behavior) vs unify under `LLM_TIMEOUT_MS`. Lean: keep per-call **but raise for bulk** — the 8s title timeout is too tight for 429 backoff; use a generous per-call timeout (e.g. 60s) so the internal rate-limit backoff has budget. Title vs description can still differ on `maxTokens`/`temperature`, just not on a tiny timeout.
 4. **`LlmChatChunk.delta` shape** — accumulated-so-far (chosen) vs raw incremental delta. Chosen accumulated to spare consumers reassembly; revisit if C's SSE endpoint would prefer incremental (cheap to add an `incremental` field later without breaking).
+5. **`LLM_ASSISTANT_MODEL` env now** — define it now (env-only, zero runtime cost) so C does not need new env and the per-use-case contract is visible. (Decided: yes.)
+6. **Listings worker concurrency** — confirm whether the `listings` create worker has an env concurrency knob; if not, add `LISTINGS_WORKER_CONCURRENCY` so bulk+AI stays at 2–4 to avoid bursting the provider rate limit. Resolve in the plan by reading `listing-processor.service.ts`.
+7. **LLM usage log shape** — B should append a cheap usage row (user_id, purpose, model, tokens_in, tokens_out, latency_ms, success, error?) on every `chat()`/`chatStream()` call so per-user cost attribution data exists when C/billing is designed. Confirm the table name + columns in the plan (mirror `keepa_usage_log`). No aggregation/billing UI in B.
 5. **`LLM_ASSISTANT_MODEL` env now** — define it now (env-only, zero runtime cost) so C does not need new env and the per-use-case contract is visible. (Decided: yes.)
 6. **Listings worker concurrency** — confirm whether the `listings` create worker has an env concurrency knob; if not, whether to add one (`LISTINGS_WORKER_CONCURRENCY`) so bulk+AI stays at 1–2 to avoid bursting Groq's rate limit. Resolve in the plan by reading `listing-processor.service.ts`.
