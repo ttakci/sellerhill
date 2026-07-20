@@ -324,6 +324,7 @@ Introduced by A2 so post-purchase shipped events map Amazon carrier strings to e
 
 ### Amazon Scraping — Anti-Ban Strategy
 - **Session isolation**: Each Amazon account gets its own browser state. **Legacy** (pre-A2): `.browser-state/{accountId}.json` storage-state files. **Current** (A2+): per-account persistent user-data-dir at `${BROWSER_STATE_DIR || $CWD/.browser-state}/profiles/{accountId}/` via `chromium.launchPersistentContext` — one full browser profile per account, cached in-process by `BrowserStateManager.getContext`. Legacy `.browser-state/{accountId}.json` sessions are migrated on first launch of the new profile via post-launch `context.addCookies(...)` (cookies only — localStorage intentionally NOT migrated; errors swallowed).
+- **Idle eviction (I2 memory bound)**: each persistent context owns a Chromium process (~150–300 MB RSS). `BrowserStateManager` runs a periodic sweep (`BROWSER_CONTEXT_SWEEP_INTERVAL_MS`, default 2 min) and closes contexts that are **provably idle**: `context.pages().length === 0` **and** untouched longer than `BROWSER_CONTEXT_IDLE_TTL_MS` (default 10 min). The zero-page guard is non-negotiable — in-flight scrape/checkout always holds ≥1 page, so eviction cannot crash active work. Callers must still go through `AmazonRateLimiter.schedule(accountId, …)`.
 - **Fingerprint isolation**: Deterministic per-account fingerprint (user-agent, viewport, timezoneId from `hashCode(accountId)`) — same account always looks the same across restarts.
 - **Proxy stack (A2)**: `ProxyService` resolves `{ server, username, password }` from `PROXY_ENDPOINT`/`PROXY_USER`/`PROXY_PASS_TEMPLATE` with a per-session token via `proxySessionToken(strategy, userId, amazonAccountId)`. Session token = `userId` under `PROXY_STRATEGY=perUser` (default) or `amazonAccountId` under `perAccount` (reserved). Username/password may embed `{session}` (or get `-session-{token}` appended if no placeholder). All Amazon browser traffic (scrape + A2 checkout) is routed through the user proxy when configured.
   - **Proxy fallback discipline**: `BrowserStateManager.resolveProxy()` returns null when `!proxyService.isConfigured()` → existing scraping runs **direct** (no regression when proxy env is absent). **Auto-fulfill is hard-blocked without a proxy** — `AmazonAccountsService.assertCanEnable` throws on any create/update that turns the flag on while `!proxyService.isConfigured()` or `capTotal == null`.
@@ -385,6 +386,73 @@ Introduced by A2 so post-purchase shipped events map Amazon carrier strings to e
 4. `pnpm dev`
 
 API: `http://localhost:3000` (Swagger at `/api/docs`). Web: Vite dev server (default :5173).
+
+## System Requirements & Deployment (local / test / prod)
+
+Zonds runs the same code in every environment — only config (env vars) and capacity differ. Three runtimes: **local** (developer machine), **test** (Coolify on a VPS), **prod**. There is no environment-specific code path.
+
+### Shared stack (all environments)
+
+| Component | Purpose | Notes |
+|---|---|---|
+| **PostgreSQL 16** | primary DB (`pg` driver, no ORM) | schema in `docker/postgres/init.sql` + `apps/api/migrations/`; auto-run on API boot |
+| **Redis 7** | BullMQ job queues | `order-sync`, `stock-sync`, `amazon-*`, `auto-fulfill`, `keepa-refresh`, etc. |
+| **Node 20+ / pnpm 9+** | api + web + packages | monorepo workspace |
+| **Playwright Chromium** | Amazon scraping + A2 checkout | headless; needs OS libs (see below) |
+| **(A2) Residential proxy** | Amazon anti-ban | REQUIRED for A2 auto-fulfill; optional-but-recommended for scraping. `PROXY_*` env |
+
+**Playwright/Chromium OS deps** (Linux servers, not needed on local Docker which bundles them): `libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2`. Install once: `npx playwright install --with-deps chromium`.
+
+### Local dev
+
+- **Machine:** your PC. **8 GB RAM minimum** (Chromium for scraping is the heaviest single process).
+- **Services:** `pnpm docker:up` runs PostgreSQL + Redis + pgAdmin in Docker — nothing else to install.
+- **A2 here:** runs, but **auto-fulfill is hard-blocked without a proxy** (`ProxyService.isConfigured()` false). That's fine for testing flow logic. To exercise a live checkout you need a real Amazon buyer account + residential proxy env set — then use **dry-run mode** on the account.
+- No GPU needed (A2 uses Playwright CPU; local LLM is a separate B-spec concern).
+
+### Test (Coolify / VPS)
+
+- **Current Hostinger VPS:** 4 vCPU, 16 GB RAM, 200 GB disk, **no GPU** — runs api + web + postgres + redis + Playwright. This is adequate for test.
+- Run Postgres + Redis as containers (Coolify stack or `docker-compose`). api + web as Coolify services behind the Coolify reverse proxy.
+- **Set the residential proxy env** if you want scraping ban-resistance and to test A2 dry-run/live checkout.
+- Add real Amazon buyer accounts (encrypted at rest via `AMAZON_ENCRYPTION_KEY`).
+- 16 GB is comfortable for a handful of accounts; the I2 idle-eviction (`BROWSER_CONTEXT_IDLE_TTL_MS`) bounds resident Chromium so even ~10–20 accounts won't pile up.
+
+### Prod
+
+- **PostgreSQL 16** (managed recommended) + **Redis 7**, both with persistence + backups.
+- **API + Web** behind a reverse proxy (Coolify / Nginx / Caddy) with TLS.
+- **CPU:** 4+ vCPU (Playwright is CPU-bound; the per-account rate limiter caps concurrency, but headroom matters).
+- **RAM — the key dimension, driven by concurrent Amazon accounts:** ~150–300 MB per resident Chromium context + ~1–1.5 GB base (api + web + Postgres + Redis). I2 idle-eviction means resident contexts are bounded by **active** concurrency, not total account count. **Minimum 16 GB; 32 GB for multi-tenant scale.** Set OOM/alerting on memory.
+- **Disk:** 50 GB+ (Postgres, logs, `fulfillment-evidence/` screenshots — TTL-cleaned via `FULFILLMENT_EVIDENCE_TTL_DAYS`, traffic browser-state profiles under `.browser-state/profiles/`).
+- **Residential proxy:** **required** for A2 (sticky session per user). Budget per-GB; Amazon pages are heavy.
+- **GPU:** not required (Playwright + local-LLM-via-Ollama are CPU; GPU only if a future hosted LLM/vLLM is chosen — B-spec decision).
+
+### Secrets / env checklist (per environment)
+
+- `AMAZON_ENCRYPTION_KEY` — 32-byte hex (AES-256-GCM for buyer-account credentials). **Required wherever amazon_accounts are used.**
+- JWT/auth secrets (access + refresh-cookie signing).
+- `KEEPA_API_KEY` (product refresh pipeline).
+- eBay app credentials (per connected store).
+- `PROXY_ENDPOINT` / `PROXY_USER` / `PROXY_PASS_TEMPLATE` / `PROXY_STRATEGY` (A2; test/prod).
+- `CORS_ORIGINS` / `COOKIE_DOMAIN` / `COOKIE_SAMESITE` (prod web origin).
+- A2 tunables (all optional, defaults safe): `AUTO_FULFILL_*`, `BROWSER_CONTEXT_*`, `FULFILLMENT_EVIDENCE_*`, Keepa refresh tunables.
+
+### A2 operational checklist (before enabling real-money auto-fulfill in any environment)
+
+1. Residential proxy configured + reachable (`ProxyService.isConfigured()` true).
+2. ≥1 Amazon buyer account with `auto_fulfill_enabled=true` + `auto_fulfill_cap_total` set.
+3. **Run `auto_fulfill_dry_run=true` first** — confirms the full checkout flow reaches the Amazon review step and the cap behaves, **without charging**. Inspect `fulfillment-evidence/{ebayOrderId}/dry_run_review-*.png`.
+4. **Tune the Playwright selectors** in `AmazonCheckoutService` against live Amazon DOM during dry-run (selectors are best-effort and DOM-drift is the main fragility). Keep selectors in the `CHECKOUT_SELECTORS` constant.
+5. Only then flip `auto_fulfill_dry_run=false` on a low-value test order and watch the placed/blocked status + evidence.
+6. Monitor: BullMQ queue depth (`auto-fulfill`, `amazon-tracking`), `orders.auto_fulfill_status` (watch `blocked`/`failed`), memory (Chromium), proxy bandwidth.
+
+### Backups & monitoring (prod)
+
+- **Postgres:** daily logical backup (pg_dump) + point-in-time if managed.
+- **`fulfillment-evidence/`:** ephemeral, TTL-cleaned — not backed up.
+- **`.browser-state/profiles/`:** ephemeral session profiles — not backed up (re-login on loss).
+- **Alert on:** API OOM / restart, BullMQ dead-letter growth, proxy bandwidth quota, spike in `auto_fulfill_status='blocked'`.
 
 ## Figma Redesign — Per-Theme Tokens
 

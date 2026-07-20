@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { BrowserContext } from 'playwright';
 
@@ -81,11 +81,18 @@ interface LegacyStorageState {
  * (AmazonScrapingService etc.) do not break.
  */
 @Injectable()
-export class BrowserStateManager implements OnModuleDestroy {
+export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(BrowserStateManager.name);
   private readonly stateDir: string;
   private readonly profilesDir: string;
+  private readonly idleTtl: number;
+  private readonly sweepInterval: number;
   private activeContexts = new Map<string, BrowserContext>();
+  // Last-touch timestamp (ms) per account — refreshed on every getContext hit.
+  // Used by `evictIdle` alongside the zero-page guard to decide which cached
+  // contexts can be safely closed to bound resident Chromium memory.
+  private readonly lastUsedAt = new Map<string, number>();
+  private sweepTimer: NodeJS.Timeout | null = null;
 
   constructor(
     private readonly configService: ConfigService,
@@ -96,6 +103,22 @@ export class BrowserStateManager implements OnModuleDestroy {
       || path.resolve(process.cwd(), '.browser-state');
     this.profilesDir = path.join(this.stateDir, 'profiles');
 
+    // Each persistent context owns a Chromium process (~150-300MB RSS). To
+    // bound resident memory at scale (many accounts), zero-page idle contexts
+    // are evicted by a periodic sweep. Defaults: a context must have zero open
+    // pages AND be untouched for 10 min before it is eligible; sweep runs every
+    // 2 min. Both guards are required — see `evictIdle`.
+    this.idleTtl = this.parsePositiveInt(
+      this.configService.get<string>('BROWSER_CONTEXT_IDLE_TTL_MS'),
+      600_000,
+      'BROWSER_CONTEXT_IDLE_TTL_MS',
+    );
+    this.sweepInterval = this.parsePositiveInt(
+      this.configService.get<string>('BROWSER_CONTEXT_SWEEP_INTERVAL_MS'),
+      120_000,
+      'BROWSER_CONTEXT_SWEEP_INTERVAL_MS',
+    );
+
     if (!fs.existsSync(this.stateDir)) {
       fs.mkdirSync(this.stateDir, { recursive: true });
     }
@@ -104,8 +127,78 @@ export class BrowserStateManager implements OnModuleDestroy {
     }
   }
 
+  onModuleInit() {
+    // Start the idle-context sweep. `setInterval` is fine here — Node keeps the
+    // event loop alive only while the API is up; `onModuleDestroy` clears it.
+    this.sweepTimer = setInterval(() => {
+      void this.evictIdle();
+    }, this.sweepInterval);
+  }
+
   async onModuleDestroy() {
+    if (this.sweepTimer) {
+      clearInterval(this.sweepTimer);
+      this.sweepTimer = null;
+    }
     await this.closeAll();
+  }
+
+  /**
+   * Periodic sweep that closes cached contexts which are PROVABLY idle:
+   *   1. `context.pages()` returns length === 0 (no operation is using it —
+   *      any in-flight scrape/checkout holds ≥1 page on its context), AND
+   *   2. untouched for longer than `idleTtl`.
+   *
+   * Safety relies on `AmazonRateLimiter`'s per-account 1-concurrent contract:
+   * if a context has zero open pages, no operation is mid-flight on it, so
+   * closing it cannot crash another account's work. The `pages.length === 0`
+   * guard is non-negotiable — never evict a context with open pages even if
+   * the idle TTL has elapsed.
+   *
+   * Never throws — per-account failures are isolated so one bad context
+   * doesn't kill the sweep.
+   */
+  private async evictIdle(): Promise<void> {
+    for (const [accountId, context] of this.activeContexts) {
+      try {
+        // Playwright's pages() is sync — do not await (lint: await-thenable).
+        const pages = context.pages();
+        if (pages.length > 0) {
+          continue;
+        }
+        const lastUsed = this.lastUsedAt.get(accountId) ?? 0;
+        const idleFor = Date.now() - lastUsed;
+        if (idleFor <= this.idleTtl) {
+          continue;
+        }
+        await context.close();
+        this.activeContexts.delete(accountId);
+        this.lastUsedAt.delete(accountId);
+        this.logger.log(
+          `Evicted idle browser context for account ${accountId} (unused for ${idleFor}ms, no open pages).`,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Idle-context sweep failed for account ${accountId}: ${(err as Error).message}`,
+        );
+      }
+    }
+  }
+
+  private parsePositiveInt(
+    raw: string | undefined,
+    fallback: number,
+    envName: string,
+  ): number {
+    if (raw === undefined || raw === '') {return fallback;}
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      this.logger.warn(
+        `Invalid ${envName}="${raw}" — falling back to ${fallback}.`,
+      );
+      return fallback;
+    }
+    return parsed;
   }
 
   // INVARIANT: callers must go through `AmazonRateLimiter.schedule(accountId, …)`
@@ -119,6 +212,7 @@ export class BrowserStateManager implements OnModuleDestroy {
       // closed. Re-launch only if the underlying browser is gone/disconnected.
       const browser = cached.browser();
       if (browser && browser.isConnected()) {
+        this.lastUsedAt.set(amazonAccountId, Date.now());
         return cached;
       }
       this.activeContexts.delete(amazonAccountId);
@@ -180,6 +274,7 @@ export class BrowserStateManager implements OnModuleDestroy {
     }
 
     this.activeContexts.set(amazonAccountId, context);
+    this.lastUsedAt.set(amazonAccountId, Date.now());
     return context;
   }
 
@@ -236,6 +331,7 @@ export class BrowserStateManager implements OnModuleDestroy {
       this.logger.warn(`Failed to close persistent context for account ${amazonAccountId}`);
     }
     this.activeContexts.delete(amazonAccountId);
+    this.lastUsedAt.delete(amazonAccountId);
   }
 
   async isSessionValid(amazonAccountId: string): Promise<boolean> {
@@ -290,9 +386,14 @@ export class BrowserStateManager implements OnModuleDestroy {
   }
 
   async closeAll(): Promise<void> {
+    if (this.sweepTimer) {
+      clearInterval(this.sweepTimer);
+      this.sweepTimer = null;
+    }
     for (const [id] of this.activeContexts) {
       await this.releaseContext(id);
     }
+    this.lastUsedAt.clear();
   }
 
   private async resolveProxy(
