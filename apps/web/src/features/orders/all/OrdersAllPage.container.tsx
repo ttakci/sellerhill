@@ -91,6 +91,7 @@ export const OrdersAllPageContainer: React.FC = () => {
       t('orders.table.salePrice'),
       t('orders.table.purchasePrice'),
       t('orders.table.netProfit'),
+      t('orders.autoFulfill.column'),
     ];
     const rows = orders.map((o) =>
       [
@@ -101,6 +102,7 @@ export const OrdersAllPageContainer: React.FC = () => {
         o.salePrice,
         o.purchasePrice,
         o.netProfit,
+        o.autoFulfillStatus ?? '',
       ]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`)
         .join(',')

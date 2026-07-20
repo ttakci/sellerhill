@@ -144,68 +144,6 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
     }
   }, [editingAccount, buildSubmitData, createAccount, updateAccount, closeMessage, i18n, showMessage]);
 
-  const handleAdd = useCallback(
-    (data: { label?: string; email: string; password: string; twoFactorSecret?: string }) => {
-      void createAccount(data)
-        .unwrap()
-        .then(() => {
-          setIsAddModalOpen(false);
-          showMessage(
-            {
-              type: 'success',
-              headerKey: 'translation:message.success.header',
-              descriptionKey: 'amazon.accounts.saveSuccess',
-              primaryButton: { labelKey: 'translation:message.success.close', onClick: closeMessage },
-            },
-            i18n.t.bind(i18n)
-          );
-        })
-        .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-          showMessage(
-            {
-              type: 'error',
-              headerKey: 'translation:message.error.header',
-              descriptionKey: getErrorI18nKey(error),
-              primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
-            },
-            i18n.t.bind(i18n)
-          );
-        });
-    },
-    [createAccount, closeMessage, i18n, showMessage]
-  );
-
-  const handleEdit = useCallback(
-    (id: string, data: { label?: string; password?: string; twoFactorSecret?: string }) => {
-      void updateAccount({ id, data })
-        .unwrap()
-        .then(() => {
-          setEditingAccount(null);
-          showMessage(
-            {
-              type: 'success',
-              headerKey: 'translation:message.success.header',
-              descriptionKey: 'amazon.accounts.saveSuccess',
-              primaryButton: { labelKey: 'translation:message.success.close', onClick: closeMessage },
-            },
-            i18n.t.bind(i18n)
-          );
-        })
-        .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-          showMessage(
-            {
-              type: 'error',
-              headerKey: 'translation:message.error.header',
-              descriptionKey: getErrorI18nKey(error),
-              primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
-            },
-            i18n.t.bind(i18n)
-          );
-        });
-    },
-    [updateAccount, closeMessage, i18n, showMessage]
-  );
-
   const handleDelete = useCallback(
     (id: string) => {
       void deleteAccount(id)
@@ -272,8 +210,6 @@ export const AmazonAccountsPageContainer = (): React.ReactElement => {
       accounts={accounts || []}
       isSaving={isSaving}
       isVerifying={isVerifying}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
       onDelete={handleDelete}
       onVerify={handleVerify}
       onSelectAccountForEdit={handleSelectAccountForEdit}

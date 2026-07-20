@@ -251,7 +251,7 @@ export class AmazonAccountsService {
       // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillProxyRequired
       throw new BadRequestException('amazon.errors.autoFulfillProxyRequired');
     }
-    if (capTotal === null || capTotal === undefined) {
+    if (capTotal === null) {
       // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillCapRequired
       throw new BadRequestException('amazon.errors.autoFulfillCapRequired');
     }

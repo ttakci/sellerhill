@@ -6,13 +6,7 @@ import { Job } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 
 import { AmazonCheckoutService } from './amazon-checkout.service';
-
-// Same queue name as the producer in OrdersModule (Task 5) — one Redis queue,
-// two modules. BullMQ workers need NO `registerQueue` on the consumer side:
-// they connect by name. The producer's `jobId: fulfill-${ebayOrderId}` is the
-// I-4 dedup guarantee that two processors never run the same order
-// concurrently — `concurrency` below is across DIFFERENT orders.
-export const AUTO_FULFILL_QUEUE = 'auto-fulfill';
+import { AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.constants';
 
 interface AutoFulfillJobData {
   ebayOrderId: string;
@@ -73,11 +67,26 @@ export class AutoFulfillProcessor extends WorkerHost {
       // (the checkout runner catches them internally and returns cleanly).
       const isLast = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
       if (isLast) {
-        this.logger.error(`fulfill failed (final) ${ebayOrderId}: ${(err as Error).message}`);
-        await this.db.query(
-          `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
-          [AutoFulfillStatus.FAILED, ebayOrderId],
+        const failedErr = err as Error;
+        this.logger.error(
+          `fulfill failed (final) ${ebayOrderId}: ${failedErr.message}`,
+          failedErr.stack,
         );
+        // Self-protect the final-attempt status write: if the DB itself caused
+        // the transport failure, this UPDATE would throw and mask the original
+        // error (and skip the `throw err` below). Swallow the status-write
+        // failure so the original error reaches BullMQ intact. A row stuck at
+        // `running` is the correct safe degradation here — operator investigates.
+        try {
+          await this.db.query(
+            `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+            [AutoFulfillStatus.FAILED, ebayOrderId],
+          );
+        } catch (markErr) {
+          this.logger.warn(
+            `failed to mark order ${ebayOrderId} as FAILED: ${(markErr as Error).message} — row stays at running`,
+          );
+        }
       }
       throw err; // let BullMQ apply backoff/retry (or give up on final attempt)
     }

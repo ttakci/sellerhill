@@ -87,7 +87,8 @@
         "address": "Adres sorunu",
         "payment": "Ödeme reddedildi",
         "cap": "Tavan aşıldı",
-        "no_confirmation": "Onay alınamadı"
+        "no_confirmation": "Onay alınamadı",
+        "proxy_required": "Proxy yapılandırılmamış"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "filter": {

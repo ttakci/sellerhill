@@ -1,16 +1,15 @@
-import { AutoFulfillStatus } from '@repo/shared';
+import { AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum, AutoFulfillStatus } from '@repo/shared';
 
-/** Fail-closed obstacle reasons. Each maps to a blocked_reason string + a UI message. */
-export type AutoFulfillBlockedReason =
-  | 'no_asin'
-  | 'captcha'
-  | 'otp'
-  | 'login'
-  | 'out_of_stock'
-  | 'address'
-  | 'payment'
-  | 'cap'
-  | 'no_confirmation';
+/**
+ * Fail-closed obstacle reasons. Derived from the shared enum
+ * (`packages/shared/src/domain/orders/orders.types.ts`) so the writer (this
+ * module), the persisted `orders.auto_fulfill_blocked_reason` column, and the
+ * FE chip mapping all reference ONE source of truth — a future enum edit can
+ * never silently desync the union. String values mirror the enum members
+ * (`no_asin` | `captcha` | `otp` | `login` | `out_of_stock` | `address` |
+ * `payment` | `cap` | `no_confirmation`).
+ */
+export type AutoFulfillBlockedReason = `${AutoFulfillBlockedReasonEnum}`;
 
 /**
  * Coarse pre-filter using the eBay sale_total. This is NOT the hard cap — the

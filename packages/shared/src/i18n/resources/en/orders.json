@@ -87,7 +87,8 @@
         "address": "Address problem",
         "payment": "Payment declined",
         "cap": "Over cost cap",
-        "no_confirmation": "No confirmation"
+        "no_confirmation": "No confirmation",
+        "proxy_required": "No proxy configured"
       },
       "reasonLabel": "Reason: {{reason}}",
       "filter": {

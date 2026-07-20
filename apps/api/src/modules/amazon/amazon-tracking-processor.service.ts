@@ -229,17 +229,6 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     return OrderStatus.WAITING_SHIPMENT;
   }
 
-  private mapCarrierForEbay(carrier?: string): string | undefined {
-    if (!carrier) {return undefined;}
-    const lower = carrier.toLowerCase();
-    if (lower.includes('usps')) {return 'USPS';}
-    if (lower.includes('ups')) {return 'UPS';}
-    if (lower.includes('fedex')) {return 'FedEx';}
-    if (lower.includes('dhl')) {return 'DHL_Express';}
-    if (lower.includes('amazon')) {return 'Amazon_Logistics';}
-    return carrier;
-  }
-
   /**
    * Resolve the user's tracking-conversion provider from store_settings.
    *

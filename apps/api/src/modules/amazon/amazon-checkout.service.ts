@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { AutoFulfillStatus } from '@repo/shared';
 import type { Page } from 'playwright';
 
@@ -13,6 +13,7 @@ import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AutoFulfillBlockedReason, shouldSkipFulfillStart } from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
+import { ProxyService } from './proxy.service';
 
 /**
  * Fail-closed obstacle. Thrown by every step helper in this service to signal
@@ -175,14 +176,33 @@ const CHECKOUT_SELECTORS = {
  * button is clicked once. Blocked/dry_run paths never reach the click.
  */
 @Injectable()
-export class AmazonCheckoutService {
+export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(AmazonCheckoutService.name);
-  /** Min inter-action delay — human-like pacing, also slows the whole flow. */
-  private readonly minTimeMs = Number(process.env.AUTO_FULFILL_CHECKOUT_MIN_TIME_MS || 4500);
+  /**
+   * Min inter-action delay — human-like pacing, also slows the whole flow.
+   * Clamped to [1000, 60000] ms so a typo'd env value cannot stall the
+   * concurrency-1 worker (R9 — the worker is single-threaded across orders).
+   */
+  private readonly minTimeMs = clampInt(
+    process.env.AUTO_FULFILL_CHECKOUT_MIN_TIME_MS,
+    4500,
+    1000,
+    60_000,
+  );
   /** Hard cap can be disabled per-env (emergencies). Defaults ON. */
   private readonly hardStop = process.env.AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false';
   private readonly evidenceDir =
     process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
+  /** Evidence PNG retention; per-order dirs older than this are swept. */
+  private readonly evidenceTtlDays = clampInt(
+    process.env.FULFILLMENT_EVIDENCE_TTL_DAYS,
+    7,
+    1,
+    365,
+  );
+  /** How often the evidence-TTL sweep runs (ms). Default: hourly. */
+  private readonly evidenceSweepIntervalMs = 60 * 60 * 1000;
+  private evidenceSweepTimer: NodeJS.Timeout | null = null;
 
   constructor(
     private readonly db: DatabaseService,
@@ -191,7 +211,24 @@ export class AmazonCheckoutService {
     private readonly browserState: BrowserStateManager,
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
+    private readonly proxyService: ProxyService,
   ) {}
+
+  onModuleInit(): void {
+    // Evidence screenshots accumulate (one per blocked stage per order). Sweep
+    // per-order dirs older than the TTL so `fulfillment-evidence/` cannot fill
+    // the disk. Best-effort — failures are logged, never thrown.
+    this.evidenceSweepTimer = setInterval(() => {
+      void this.sweepEvidence();
+    }, this.evidenceSweepIntervalMs);
+  }
+
+  onModuleDestroy(): void {
+    if (this.evidenceSweepTimer) {
+      clearInterval(this.evidenceSweepTimer);
+      this.evidenceSweepTimer = null;
+    }
+  }
 
   /**
    * Entry point for the auto-fulfill BullMQ processor (Task 8 wires the queue).
@@ -208,6 +245,19 @@ export class AmazonCheckoutService {
     );
     if (!order || shouldSkipFulfillStart(order.auto_fulfill_status)) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
+      return;
+    }
+    // R1 — runtime proxy guard (defense-in-depth). `assertCanEnable` checks at
+    // enable time, but an operator can remove the proxy env afterwards. Auto-
+    // fulfill MUST NOT run over the bare server IP (ban + money risk); fail
+    // closed here before any browser action. Existing scraping still falls back
+    // to direct (no regression) — only checkout is hard-blocked.
+    if (!this.proxyService.isConfigured()) {
+      await this.block(
+        ebayOrderId,
+        'proxy_required',
+        'no residential proxy configured — auto-fulfill hard-blocked',
+      );
       return;
     }
     await this.setStatus(ebayOrderId, AutoFulfillStatus.RUNNING);
@@ -732,6 +782,44 @@ export class AmazonCheckoutService {
   }
 
   /**
+   * Periodic best-effort sweep of `fulfillment-evidence/<ebayOrderId>/` dirs.
+   * Removes any per-order dir whose newest file is older than
+   * `FULFILLMENT_EVIDENCE_TTL_DAYS`. Never throws — disk cleanup is ops, not
+   * correctness. `fulfillment-evidence/` is admin-only (filesystem perms) and
+   * not backed up; see CLAUDE.md "Backups & monitoring".
+   */
+  private async sweepEvidence(): Promise<void> {
+    let root: string[];
+    try {
+      root = await fs.readdir(this.evidenceDir);
+    } catch {
+      // Dir doesn't exist yet (no blocked/dry-run orders) — nothing to sweep.
+      return;
+    }
+    const ttlMs = this.evidenceTtlDays * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    for (const entry of root) {
+      const dir = path.join(this.evidenceDir, entry);
+      try {
+        const stat = await fs.stat(dir);
+        if (!stat.isDirectory()) {
+          continue;
+        }
+        // Use the directory's mtime as the "last touched" proxy. Screenshots
+        // are written into the dir, which updates mtime on most filesystems.
+        if (now - stat.mtimeMs > ttlMs) {
+          await fs.rm(dir, { recursive: true, force: true });
+          this.logger.log(`swept evidence dir ${entry} (older than ${this.evidenceTtlDays}d)`);
+        }
+      } catch (err) {
+        this.logger.warn(
+          `evidence sweep skipped ${entry}: ${(err as Error).message}`,
+        );
+      }
+    }
+  }
+
+  /**
    * Load everything the checkout flow needs from the DB in one query. Joins
    * amazon_accounts for the per-account cap + dry-run flag and resolves the
    * ASIN via listings → products. Throws `no_asin` if no row at all (order
@@ -951,4 +1039,26 @@ export class AmazonCheckoutService {
     // Notification (in-app needs-attention list reads blocked status directly)
     // — no email in scope.
   }
+}
+
+/**
+ * Parse an env int with a fallback + inclusive clamps. Guards against a typo'd
+ * env value stalling the concurrency-1 worker (`minTimeMs`) or filling disk
+ * (`evidenceTtlDays`). Invalid/empty → `fallback`; parsed value clamped to
+ * `[min, max]`.
+ */
+function clampInt(
+  raw: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  if (raw === undefined || raw === '') {
+    return fallback;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, parsed));
 }

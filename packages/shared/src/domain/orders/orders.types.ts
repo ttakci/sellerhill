@@ -55,6 +55,8 @@ export enum AutoFulfillBlockedReason {
   PAYMENT = 'payment',
   CAP = 'cap',
   NO_CONFIRMATION = 'no_confirmation',
+  /** Runtime proxy guard — auto-fulfill requires a configured residential proxy. */
+  PROXY_REQUIRED = 'proxy_required',
 }
 
 /**
