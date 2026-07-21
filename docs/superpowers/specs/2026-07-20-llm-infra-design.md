@@ -182,7 +182,7 @@ export class LlmService {
 
 **Typed errors** (`packages/shared/src/domain/llm/` or api-local — see Files): `LlmUnavailableError` (network / cannot reach), `LlmTimeoutError` (abort/timeout), `LlmResponseError` (2xx but bad body, or non-2xx), `LlmRateLimitError` (HTTP 429; carries `retryAfterMs?` parsed from the `Retry-After` header). All extend a base `LlmError`. Callers can branch on type.
 
-**429 / rate-limit handling (bulk path):** `chat()` and `chatStream()` handle HTTP 429 **inside the service** — read `Retry-After` (seconds → ms, default a short backoff if absent), and if the wait fits within the call's remaining `timeoutMs` budget (and a max of 3 internal retries), sleep and retry; otherwise throw `LlmRateLimitError`. This keeps callers simple: a single `chat()` call self-paces through a rate-limit window instead of every caller reimplementing backoff. For bulk (Groq free tier), set a generous per-call `timeoutMs` (e.g. 60s) so the service can absorb a 429 wait, and keep the listings create worker concurrency low (1–2) so parallel calls don't all slam the rate limit at once. A proactive token-bucket rate limiter (Bottleneck, like `AmazonRateLimiter`) is **deferred to C** — the internal 429 backoff is enough for B's bulk path.
+**429 / rate-limit handling (bulk path):** `chat()` and `chatStream()` handle HTTP 429 **inside the service** — read `Retry-After` (seconds → ms, default a short backoff if absent), and if the wait fits within the call's remaining `timeoutMs` budget (and a max of 3 internal retries), sleep and retry; otherwise throw `LlmRateLimitError`. This keeps callers simple: a single `chat()` call self-paces through a rate-limit window instead of every caller reimplementing backoff. For bulk (OpenAI gpt-4o-mini paid / Groq paid alt), set a generous per-call `timeoutMs` (e.g. 60s) so the service can absorb a 429 wait, and keep the listings create worker concurrency modest (2–4) so parallel calls don't all slam the rate limit at once. A proactive token-bucket rate limiter (Bottleneck, like `AmazonRateLimiter`) is **deferred to C** — the internal 429 backoff is enough for B's bulk path.
 
 The SSE byte→event parsing is extracted into a **pure** helper `parseSseChunk(buffer: string): { events: ParsedSseEvent[]; rest: string }` so it is unit-testable without a network. `chatStream` feeds it bytes as they arrive, carrying over `rest` between reads.
 
@@ -288,7 +288,7 @@ docker compose exec ollama ollama pull qwen3:1.7b
 docker compose exec ollama ollama pull qwen3:4b-instruct
 ```
 
-**RAM note (important for the loaded test VPS):** `qwen3:4b-instruct` inference needs ~3–4 GB free RAM. On the 16 GB test VPS, Ollama competes with Postgres + Redis + Playwright (Amazon scraping, resident Chromium contexts) + api + web. This is only feasible at **low concurrency**: content-gen is create-only and the listings worker is concurrency-1, so content rewrites are not a heavy concurrent load. The assistant (C) will need a concurrency/rate-limit decision of its own. If RAM is tight, keep `LLM_CONTENT_ENABLED=false` (deterministic fallback) until capacity is confirmed, or point `LLM_BASE_URL` at a hosted provider (Groq free tier) via env — no code change.
+**RAM note (important for the loaded test VPS):** `qwen3:4b-instruct` inference needs ~3–4 GB free RAM. On the 16 GB test VPS, Ollama competes with Postgres + Redis + Playwright (Amazon scraping, resident Chromium contexts) + api + web. This is only a concern when `LLM_BASE_URL` points at local Ollama (dev/trickle). Prod/bulk uses hosted OpenAI/Groq (zero local RAM). Content-gen is create-only and the listings worker is concurrency-modest, so content rewrites are not a heavy concurrent load even on local Ollama. The assistant (C) will need a concurrency/rate-limit decision of its own. If RAM is tight in dev, keep `LLM_CONTENT_ENABLED=false` (deterministic fallback) until capacity is confirmed, or point `LLM_BASE_URL` at the hosted provider via env — no code change.
 
 ### 7. Error handling & fallback
 
@@ -349,9 +349,9 @@ Manual verification (documented, not automated): `pnpm docker:up`, pull the mode
 
 ## Testing
 
-(Same as §6, consolidated.)
+(Same as §8, consolidated.)
 
-Pure + mocked-fetch unit tests in the existing Jest harness. No live-Ollama integration tests (deferred per project policy). Manual verification steps documented for a one-time live smoke (docker up → pull → enable → create listing → confirm rewrite + fallback).
+Pure + mocked-fetch unit tests in the existing Jest harness. No live-provider integration tests (deferred per project policy). Manual verification steps documented for a one-time live smoke (docker up → pull Ollama / set OpenAI key → enable → create listing → confirm rewrite + fallback). Must include the create-only AI regression guard (product-sync does not pass `applyContentAi: true`).
 
 ---
 
