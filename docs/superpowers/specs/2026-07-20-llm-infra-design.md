@@ -1,8 +1,8 @@
 # B — Shared LLM Infra + Content-AI Refactor (Design)
 
 **Date:** 2026-07-20
-**Status:** Draft, awaiting user review
-**Scope:** Backend (`apps/api`) — new `LlmModule` + `LlmService`, migrate `ContentGenerationService` off Ollama-native `/api/generate` onto an OpenAI-compatible client, bundle Ollama into docker-compose. No frontend, no DB, no assistant (that is spec C).
+**Status:** Approved (2026-07-21) — implementation plan: `docs/superpowers/plans/2026-07-20-llm-infra.md`
+**Scope:** Backend (`apps/api`) — new `LlmModule` + `LlmService`, migrate `ContentGenerationService` off Ollama-native `/api/generate` onto an OpenAI-compatible client, bundle Ollama into docker-compose. No frontend, no assistant (that is spec C). DB: append-only `llm_usage_log` only.
 
 ---
 
