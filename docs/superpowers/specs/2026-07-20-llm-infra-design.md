@@ -46,8 +46,9 @@ What B adds:
 1. **Provider-swappable by env only** — `LLM_BASE_URL` + optional `LLM_API_KEY`. Ollama (no key) today; hosted OpenAI-compatible (bearer token) or vLLM (GPU) later, no code change.
 2. **Reuse for C** — `chatStream()` ready now so the assistant does not reopen the transport.
 3. **No regression to content-gen** — same prompts, same `cleanTitle`/`cleanDescription`, same fail-to-base fallback, same create-only gate. Only the transport changes.
-4. **Lean** — one `@Injectable` service + one small pure SSE parser. No provider registry, no `forRoot` config module, no DB, no retry layer. YAGNI.
-5. **Honest failure** — `LlmService` throws typed errors; callers decide fallback. Never silently swallow.
+4. **AI content is create-only — NEVER on Keepa refresh / product-sync.** The existing `applyContentAi` gate stays. Refresh rewrites only price/qty; AI-rewritten (or deterministic) titles/descriptions from create are left alone. Cost + eBay thrash + user intent. Locked by a regression test in the plan.
+5. **Lean** — one `@Injectable` service + one small pure SSE parser. No provider registry, no `forRoot` config module, no DB, no retry layer. YAGNI.
+6. **Honest failure** — `LlmService` throws typed errors; callers decide fallback. Never silently swallow.
 
 Explicitly **out of scope / deferred to C:**
 - Assistant backend (chat API, conversation persistence, RAG, streaming endpoint, FE wiring).
@@ -194,6 +195,24 @@ The SSE byte→event parsing is extracted into a **pure** helper `parseSseChunk(
 - **Keep identical:** `ContentRewriteInput`, `rewriteTitle`/`rewriteDescription` signatures, the create-only gate (`ListingStrategyService.prepareListingData(..., { applyContentAi: true })` unchanged), the "never on refresh/sync" scale guard.
 
 `ListingStrategyService` and `listing-processor.service.ts` are **untouched** — they call `contentGeneration.rewriteTitle`/`rewriteDescription` with the same signatures. Net effect: behavior identical, transport swapped, provider now env-swappable, streaming seam ready for C.
+
+**HARD RULE — AI content is create-only, NEVER on Keepa refresh / product-sync (already true, must stay true):**
+
+Verified in current code and locked as an architectural invariant for B and all future work:
+
+| Path | Call site | `applyContentAi` | What happens to title/description |
+|---|---|---|---|
+| **Listing create** (`ListingProcessorService`) | `listing-processor.service.ts:115-121` | **`true`** | Deterministic (brand-strip + template) → optional AI rewrite if group flags on + `LLM_CONTENT_ENABLED` → publish once. |
+| **Keepa refresh / product-sync** (`ProductSyncService`) | `product-sync.service.ts:102` | **omitted (= `false`)** | Only price/qty recomputed + pushed to eBay. Title and description are **not** rewritten — not deterministically, not by AI. Existing eBay listing content (including any AI-rewritten title/desc from create) is left alone. |
+| **Sale-driven stock sync** | reuses `ProductSyncService.syncListingsForProduct` | **omitted** | Same — qty only. |
+
+**Why this is non-negotiable:**
+1. **Cost** — a Keepa refresh cycle over 100k unique ASINs × AI rewrite = tens of thousands of LLM calls per cycle. At gpt-4o-mini rates that is dollars per hour of pure waste, and at any scale it is the dominant bill.
+2. **eBay content thrash** — rewriting a live listing's title/description on every Amazon price tick would re-index the listing, risk keyword-rank volatility, and look like spam to eBay's content quality signals.
+3. **User intent** — the AI rewrite at create is a one-time quality pass. Subsequent Keepa updates are about **price and stock**, not content. If the user wants a content re-rewrite later, that is a deliberate action (future offline batch / eBay revise path — out of scope for B).
+4. **Already enforced** — `ListingStrategyService.prepareListingData(..., { applyContentAi })` defaults the flag to `false`. Only the create worker passes `true`. Product-sync never does. **B must not change this.** The migration of content-gen onto `LlmService` does not touch the call sites; the gate stays.
+
+**Implication for B:** the `LlmService` is only invoked from the create path (via content-gen). Refresh/sync never reach it. Tests should lock this: a unit/integration assertion that `ProductSyncService`'s `prepareListingData` call does **not** pass `applyContentAi: true` (and/or that content-gen is not injected into the refresh path). The plan must include this regression guard.
 
 ### 4. Bulk scale (2000 listings at once, 10 concurrent users) — the orchestration decision
 
@@ -357,5 +376,6 @@ Pure + mocked-fetch unit tests in the existing Jest harness. No live-Ollama inte
 5. **`LLM_ASSISTANT_MODEL` env now** — define it now (env-only, zero runtime cost) so C does not need new env and the per-use-case contract is visible. (Decided: yes.)
 6. **Listings worker concurrency** — confirm whether the `listings` create worker has an env concurrency knob; if not, add `LISTINGS_WORKER_CONCURRENCY` so bulk+AI stays at 2–4 to avoid bursting the provider rate limit. Resolve in the plan by reading `listing-processor.service.ts`.
 7. **LLM usage log shape** — B should append a cheap usage row (user_id, purpose, model, tokens_in, tokens_out, latency_ms, success, error?) on every `chat()`/`chatStream()` call so per-user cost attribution data exists when C/billing is designed. Confirm the table name + columns in the plan (mirror `keepa_usage_log`). No aggregation/billing UI in B.
+8. **Create-only AI regression guard** — the plan MUST include a test (unit or a thin call-site assertion) that `ProductSyncService` does not pass `applyContentAi: true` to `prepareListingData`, and that the create worker does. This locks the hard rule against future accidental AI-on-refresh.
 5. **`LLM_ASSISTANT_MODEL` env now** — define it now (env-only, zero runtime cost) so C does not need new env and the per-use-case contract is visible. (Decided: yes.)
 6. **Listings worker concurrency** — confirm whether the `listings` create worker has an env concurrency knob; if not, whether to add one (`LISTINGS_WORKER_CONCURRENCY`) so bulk+AI stays at 1–2 to avoid bursting Groq's rate limit. Resolve in the plan by reading `listing-processor.service.ts`.
