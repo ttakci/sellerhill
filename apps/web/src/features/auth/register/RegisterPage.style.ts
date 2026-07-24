@@ -134,6 +134,29 @@ export const Footer = styled.div`
 
 export const FooterLink = styled(Button)``;
 
+export const GoogleButtonRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: ${tkn('spacing.lg')};
+`;
+
+export const OrDivider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  margin-bottom: ${tkn('spacing.lg')};
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: ${tkn('colors.border.primary')};
+  }
+`;
+
 export const BrandingContent = styled.div`
   max-width: 25rem; /* 400px */
   width: 100%;

@@ -6,7 +6,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Button, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
+import { Button, Icon, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,9 @@ export const RegisterPageComponent = ({
   onSubmit,
   isLoading,
   onNavigateToLogin,
+  onGoogleSignIn,
+  isGoogleLoading,
+  googleEnabled,
 }: RegisterPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation', 'auth']);
 
@@ -78,6 +81,30 @@ export const RegisterPageComponent = ({
                 {t('auth:auth.register.subtitle')}
               </Text>
             </S.Header>
+
+            {googleEnabled ? (
+              <>
+                <S.GoogleButtonRow>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    fullWidth
+                    size="large"
+                    isLoading={isGoogleLoading}
+                    disabled={isLoading || isSubmitting || isGoogleLoading}
+                    onClick={onGoogleSignIn}
+                  >
+                    <Icon name="brand-google" size="md" />
+                    <Text>{t('auth:auth.register.signUpWithGoogle')}</Text>
+                  </Button>
+                </S.GoogleButtonRow>
+                <S.OrDivider>
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('auth:auth.register.orDivider')}
+                  </Text>
+                </S.OrDivider>
+              </>
+            ) : null}
 
             <S.Form
               onSubmit={(e) => {

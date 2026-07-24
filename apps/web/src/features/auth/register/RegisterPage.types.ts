@@ -8,4 +8,7 @@ export interface RegisterPageComponentProps {
   onSubmit: (data: RegisterFormData) => void;
   isLoading: boolean;
   onNavigateToLogin: () => void;
+  onGoogleSignIn: () => void;
+  isGoogleLoading: boolean;
+  googleEnabled: boolean;
 }
