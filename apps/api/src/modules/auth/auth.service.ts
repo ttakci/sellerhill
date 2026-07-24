@@ -26,7 +26,7 @@ interface UserEntity {
   first_name: string;
   last_name: string;
   email: string;
-  password_hash: string;
+  password_hash: string | null;
   email_verified: boolean;
   status: UserStatus;
   locale: string;
@@ -287,6 +287,11 @@ export class AuthService {
 
     const user = users[0];
 
+    // Google-only users (no local password) cannot log in with a password.
+    if (!user.password_hash) {
+      throw new UnauthorizedException('auth.errors.invalidCredentials');
+    }
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(request.password, user.password_hash);
     if (!isPasswordValid) {
@@ -339,6 +344,39 @@ export class AuthService {
   }
 
   /**
+   * Issue access+refresh tokens + UserDto for an already-authenticated user id.
+   * Used by password login/verify and by GoogleAuthService after link/create.
+   */
+  async issueSession(userId: string): Promise<AuthResponse> {
+    const users = await this.databaseService.query<UserEntity & { has_connected_accounts?: boolean }>(
+      `SELECT u.*, EXISTS(SELECT 1 FROM ebay_accounts WHERE user_id = u.id) as has_connected_accounts
+       FROM users u WHERE u.id = $1`,
+      [userId]
+    );
+
+    if (users.length === 0) {
+      throw new UnauthorizedException('auth.errors.userNotFound');
+    }
+
+    const user = users[0];
+
+    if (user.status === UserStatus.BANNED) {
+      throw new UnauthorizedException('auth.errors.banned');
+    }
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException('auth.errors.inactive');
+    }
+
+    const { accessToken, refreshToken } = await this.generateTokens(user.id, user.email);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: this.mapToUserDto(user),
+    };
+  }
+
+  /**
    * Change password for authenticated user
    */
   async changePassword(
@@ -355,6 +393,11 @@ export class AuthService {
 
     if (users.length === 0) {
       throw new UnauthorizedException('auth.errors.userNotFound');
+    }
+
+    // Google-only users have no local password to verify against.
+    if (!users[0].password_hash) {
+      throw new UnauthorizedException('auth.errors.wrongPassword');
     }
 
     const isCurrentValid = await bcrypt.compare(currentPassword, users[0].password_hash);
