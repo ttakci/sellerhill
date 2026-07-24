@@ -108,6 +108,7 @@ import React from 'react';
 
 import { AmazonIcon } from './amazon';
 import { EbayIcon } from './ebay';
+import { GoogleIcon } from './google';
 import { ZorroIcon } from './zorro';
 
 const lucide = (IconComp: LucideIcon) => {
@@ -312,8 +313,10 @@ export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   zorro: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   amazon: AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   ebay: EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  google: GoogleIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   'brand-amazon': AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
   'brand-ebay': EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
+  'brand-google': GoogleIcon as React.FC<React.SVGProps<SVGSVGElement>>,
 
   // Flags (use Globe + text fallback)
   'flag-us': lucide(Flag),
