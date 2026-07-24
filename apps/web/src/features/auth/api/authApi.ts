@@ -7,7 +7,7 @@
  * - getMe: Get current user information
  */
 
-import type { AuthResponse, ChangePasswordRequest, GenericSuccessResponse, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
+import type { AuthResponse, ChangePasswordRequest, GenericSuccessResponse, GoogleAuthRequest, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -54,6 +54,18 @@ export const authApi = baseApi.injectEndpoints({
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
         url: '/auth/login',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    /**
+     * Sign in / register with Google (GIS popup auth-code → server exchange)
+     */
+    googleLogin: builder.mutation<AuthResponse, GoogleAuthRequest>({
+      query: (body) => ({
+        url: '/auth/google',
         method: 'POST',
         body,
       }),
@@ -121,6 +133,7 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useRegisterMutation,
   useLoginMutation,
+  useGoogleLoginMutation,
   useVerifyEmailMutation,
   useResendVerificationMutation,
   useRefreshMutation,
