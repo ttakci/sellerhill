@@ -102,3 +102,19 @@ export interface ChangePasswordRequest {
 export interface GenericSuccessResponse {
   success: boolean;
 }
+
+/**
+ * OAuth identity providers stored in user_oauth_accounts.provider.
+ * Only GOOGLE is implemented; schema is multi-provider-ready.
+ */
+export enum OAuthProvider {
+  GOOGLE = 'google',
+}
+
+/**
+ * Body for POST /auth/google (GIS popup auth-code exchange).
+ */
+export interface GoogleAuthRequest {
+  code: string;
+  locale?: SupportedLocale;
+}
