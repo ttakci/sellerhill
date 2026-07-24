@@ -146,6 +146,15 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   BROWSER_STATE_DIR?: string;
+
+  // --- Google OAuth (GIS popup auth-code). Optional; without these POST /auth/google returns 503. ---
+  @IsString()
+  @IsOptional()
+  GOOGLE_CLIENT_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  GOOGLE_CLIENT_SECRET?: string;
 }
 
 /**

@@ -27,10 +27,12 @@ import type { Request as ExpressRequest, Response } from 'express';
 import { clearRefreshTokenCookie, REFRESH_COOKIE_NAME, setRefreshTokenCookie } from './auth-cookies';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { GoogleAuthService } from './google-auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 type CookieRequest = ExpressRequest & { cookies?: Record<string, string> };
@@ -38,7 +40,10 @@ type CookieRequest = ExpressRequest & { cookies?: Record<string, string> };
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleAuthService: GoogleAuthService
+  ) {}
 
   /** Issue tokens: refresh goes in HttpOnly cookie; body only has accessToken + user. */
   private attachSession(res: Response, auth: AuthResponse): Omit<AuthResponse, 'refreshToken'> {
@@ -107,6 +112,24 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ): Promise<Omit<AuthResponse, 'refreshToken'>> {
     const auth = await this.authService.login(body);
+    return this.attachSession(res, auth);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Sign in or register with Google',
+    description:
+      'Exchanges a GIS popup auth code for a session. Never merges into an existing password account.',
+  })
+  @ApiOkResponse({ description: 'Authenticated; access token in body, refresh in HttpOnly cookie' })
+  @ApiUnauthorizedResponse({ description: 'Invalid code, unverified email, or inactive/banned user' })
+  @ApiBadRequestResponse({ description: 'Invalid input' })
+  async google(
+    @Body() body: GoogleAuthDto,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<Omit<AuthResponse, 'refreshToken'>> {
+    const auth = await this.googleAuthService.authenticate(body.code, body.locale);
     return this.attachSession(res, auth);
   }
 
