@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../../common/database/database.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
+import { LlmModule } from '../llm/llm.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
 import { ContentGenerationService } from './content-generation.service';
@@ -26,6 +27,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     ConfigModule,
     EbayModule,
     ListingSettingsGroupModule,
+    LlmModule,
     StoreSettingsModule,
     BullModule.registerQueue(
       { name: 'listings' },
