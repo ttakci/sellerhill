@@ -1,4 +1,5 @@
 // apps/api/src/modules/llm/llm.service.ts
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   LlmUsagePurpose,
@@ -32,6 +33,7 @@ interface ResolvedRequest {
  * content-gen (non-streaming `chat`) and the future assistant (streaming
  * `chatStream`).
  */
+@Injectable()
 export class LlmService {
   constructor(
     private readonly config: ConfigService,
@@ -92,16 +94,20 @@ export class LlmService {
     const started = Date.now();
     let accumulated = '';
     let success = false;
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
     try {
       const res = await this.request(messages, opts, model, true);
       if (res.body === null || res.body === undefined) {
         throw new LlmResponseError('LLM stream returned no body', res.status);
       }
-      const reader = res.body.getReader();
+      reader = res.body.getReader();
       const decoder = new TextDecoder();
       let rest = '';
+      let terminalYielded = false;
 
-      while (true) {
+      // Read until [DONE] OR the upstream stream closes naturally. Either way
+      // we emit exactly one terminal `{ done: true }` chunk below.
+      while (!terminalYielded) {
         const { value, done } = await reader.read();
         if (done) {
           break;
@@ -112,9 +118,8 @@ export class LlmService {
         for (const event of parsed.events) {
           if (event.data === '[DONE]') {
             yield { delta: accumulated, model, done: true };
-            success = true;
-            this.safeLog(opts, model, undefined, undefined, started, true);
-            return;
+            terminalYielded = true;
+            break;
           }
           let parsedEvent: { choices?: Array<{ delta?: { content?: string } }> };
           try {
@@ -131,13 +136,21 @@ export class LlmService {
           }
         }
       }
-      // Stream ended without [DONE] — emit terminal chunk anyway.
-      yield { delta: accumulated, model, done: true };
+      // Upstream closed without [DONE] — emit terminal chunk anyway.
+      if (!terminalYielded) {
+        yield { delta: accumulated, model, done: true };
+      }
       success = true;
-      this.safeLog(opts, model, undefined, undefined, started, true);
-    } catch (error) {
-      this.safeLog(opts, model, undefined, undefined, started, success, error);
-      throw error;
+    } finally {
+      // ALWAYS release the reader and log usage, regardless of how the
+      // consumer exited the for-await (break on done, break early, return,
+      // throw). Without this, a consumer `break` triggers
+      // `generator.return()` at the suspended yield and statements after the
+      // yield never run — leaking the reader and dropping the usage log.
+      if (reader !== undefined) {
+        await reader.cancel().catch(() => undefined);
+      }
+      this.safeLog(opts, model, undefined, undefined, started, success);
     }
   }
 
@@ -199,12 +212,18 @@ export class LlmService {
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), spec.timeoutMs);
+    // Bridge the caller-supplied signal to the internal controller. Track the
+    // handler so we can remove it in the finally below — `{ once: true }`
+    // only fires once but the listener stays attached if the signal never
+    // aborts, which on long-lived caller signals is a leak.
+    let signalHandler: (() => void) | undefined;
     if (opts.signal !== undefined) {
       if (opts.signal.aborted) {
         clearTimeout(timer);
         controller.abort();
       } else {
-        opts.signal.addEventListener('abort', () => controller.abort(), { once: true });
+        signalHandler = () => controller.abort();
+        opts.signal.addEventListener('abort', signalHandler, { once: true });
       }
     }
 
@@ -254,6 +273,9 @@ export class LlmService {
       throw new LlmRateLimitError('LLM rate limited', last429RetryAfterMs);
     } finally {
       clearTimeout(timer);
+      if (signalHandler !== undefined && opts.signal !== undefined) {
+        opts.signal.removeEventListener('abort', signalHandler);
+      }
     }
   }
 
