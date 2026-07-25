@@ -36,4 +36,10 @@ describe('parseSseChunk', () => {
     const { events } = parseSseChunk('data: a\n\ndata: b\n\n');
     expect(events).toEqual([{ data: 'a' }, { data: 'b' }]);
   });
+
+  it('parses CRLF-framed events', () => {
+    const { events, rest } = parseSseChunk('data: first\r\n\r\ndata: [DONE]\r\n\r\n');
+    expect(events).toEqual([{ data: 'first' }, { data: '[DONE]' }]);
+    expect(rest).toBe('');
+  });
 });

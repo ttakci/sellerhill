@@ -258,6 +258,39 @@ describe('LlmService', () => {
     expect(lastDone).toBe(true);
   });
 
+  it('chatStream break on terminal chunk logs the completed stream as successful', async () => {
+    const sse =
+      'data: {"choices":[{"delta":{"content":"Done"}}]}\n\n' +
+      'data: [DONE]\n\n';
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(sse));
+        controller.close();
+      },
+    });
+    const fetchMock = jest.fn();
+    mockResponse(fetchMock, {
+      ok: true,
+      status: 200,
+      body: stream,
+      headers: new Headers(),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const usage = makeUsage();
+    const logMock = usageLogMock(usage);
+    const svc = new LlmService(makeConfig(), usage);
+
+    for await (const chunk of svc.chatStream([{ role: 'user', content: 'hi' }])) {
+      if (chunk.done) {
+        break;
+      }
+    }
+
+    expect(logMock).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+  });
+
   it('chatStream early break still cancels reader and logs usage (generator-lifetime contract)', async () => {
     // Reproduces the generator-lifetime bug: a consumer that breaks out of
     // the for-await (token-budget cap, user cancel, etc.) triggers

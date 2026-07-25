@@ -117,8 +117,13 @@ export class LlmService {
         rest = parsed.rest;
         for (const event of parsed.events) {
           if (event.data === '[DONE]') {
-            yield { delta: accumulated, model, done: true };
+            // Mark success before yielding: a consumer commonly breaks on the
+            // terminal chunk, which triggers generator.return() at the yield and
+            // jumps directly to finally. Setting this afterwards would log a
+            // successfully completed stream as failed.
+            success = true;
             terminalYielded = true;
+            yield { delta: accumulated, model, done: true };
             break;
           }
           let parsedEvent: { choices?: Array<{ delta?: { content?: string } }> };
@@ -136,11 +141,12 @@ export class LlmService {
           }
         }
       }
-      // Upstream closed without [DONE] — emit terminal chunk anyway.
+      // Upstream closed without [DONE] — emit terminal chunk anyway. Mark
+      // success before yielding for the same generator-return reason above.
       if (!terminalYielded) {
+        success = true;
         yield { delta: accumulated, model, done: true };
       }
-      success = true;
     } finally {
       // ALWAYS release the reader and log usage, regardless of how the
       // consumer exited the for-await (break on done, break early, return,

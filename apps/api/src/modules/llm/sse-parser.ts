@@ -10,6 +10,10 @@ export interface ParsedSseEvent {
  * Feed successive byte chunks; carry `rest` between reads.
  */
 export function parseSseChunk(buffer: string): { events: ParsedSseEvent[]; rest: string } {
+  // SSE permits CRLF framing. Normalize before delimiter/line parsing so
+  // OpenAI-compatible providers and proxies using `\r\n\r\n` do not leave the
+  // entire stream buffered forever as unconsumed `rest`.
+  buffer = buffer.replace(/\r\n/g, '\n');
   const events: ParsedSseEvent[] = [];
   let start = 0;
 
