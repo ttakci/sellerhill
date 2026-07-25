@@ -136,21 +136,27 @@ Throughput = batch_size × ticks/min; bounded by Keepa's token-generation rate (
 ### Listing creation path
 `ListingProcessorService` (the `listings` queue worker) uses a **single** `KeepaService.getProductDetailsWithMeta(asin)` per new product (full metadata + price + stock + token meta in one call). Re-listing a cached ASIN makes **no** Keepa call (0 tokens) — the product is already on the refresh schedule. New product rows get `next_refresh_at = NOW() + 12h` on insert (`findOrCreateProduct`); subsequent rescheduling uses the config interval.
 
-### Listing content policy (title / description)
+### Listing content policy + shared LLM infra (B)
 Configured per **listing settings group** (`content` JSONB on `listing_settings_groups`, migration `031`):
-- `stripBrandFromTitle` — deterministic remove of Amazon brand tokens from eBay title at **create**.
-- `aiTitleEnabled` / `aiDescriptionEnabled` — optional rewrite via **local free LLM (Ollama)** at **create only**.
+- `stripBrandFromTitle` — deterministic removal of Amazon brand tokens from the eBay title at **create**.
+- `aiTitleEnabled` / `aiDescriptionEnabled` — optional one-time rewrite through the shared LLM client at **create only**.
 
-**Scale (100k+ listings):** AI must **never** run on Keepa refresh / product-sync. `ListingStrategyService.prepareListingData(..., { applyContentAi: true })` is only used by the create worker. Refresh paths omit AI and only recompute price/qty.
+**Create-only hard rule (100k+ listings):** AI must **never** run on Keepa refresh, product-sync, or sale-driven stock-sync. Only `ListingProcessorService` calls `ListingStrategyService.prepareListingData(..., { applyContentAi: true })`; refresh paths omit the option and recompute price/quantity only. `create-only-ai.guard.spec.ts` locks this invariant. AI failures always fall back to deterministic title/description, so listing creation continues.
 
-**Local AI setup (optional):**
-1. Install [Ollama](https://ollama.com), pull a small model: `ollama pull llama3.2:1b` (or `3b` if you have RAM/GPU).
-2. `CONTENT_AI_ENABLED=true` in `apps/api/.env` (+ optional `CONTENT_AI_OLLAMA_URL`, `CONTENT_AI_OLLAMA_MODEL`, timeouts).
-3. Enable AI toggles on the listing settings group. If Ollama is down or times out, create falls back to deterministic title/description (job does not fail).
+**Shared transport:** `LlmModule` exports `LlmService`, an OpenAI-compatible Chat Completions client with `chat()` and accumulated-delta `chatStream()`. It supports typed errors, bounded `Retry-After` handling for HTTP 429, per-call timeouts/abort signals, and fail-soft append-only usage logging in `llm_usage_log` (migration `040`). There is no billing/aggregation UI yet.
 
-**Throughput:** ~ listing worker concurrency × model speed. For mass historical rewrites of existing listings, do not flip AI on and re-queue 100k creates — use strip-brand + templates for bulk, or a dedicated offline batch later.
+**Provider/config (env-only, no code branch):**
+- Prod/bulk default: OpenAI (`LLM_BASE_URL=https://api.openai.com/v1`, `LLM_CONTENT_MODEL=gpt-4o-mini`) for reliable EN/TR quality. Groq (`https://api.groq.com/openai/v1`, `llama-3.1-8b-instant`) is the faster/cheaper alternative.
+- Dev/trickle default: local Ollama (`LLM_BASE_URL=http://localhost:11434/v1`, `qwen3:1.7b`). `docker-compose.yml` includes the service + persistent `ollama_data` volume; pull once with `docker compose exec ollama ollama pull qwen3:1.7b` (and `qwen3:4b-instruct` for the future assistant).
+- `LLM_API_KEY` is omitted for Ollama and required by hosted providers. `LLM_CONTENT_ENABLED=false` is the safe default. `LISTINGS_WORKER_CONCURRENCY=2` defaults bulk AI to modest provider pressure (tune 2–4).
 
-Key files: `content-generation.service.ts`, `listing-strategy.service.ts`, group `content` in shared types + Listing Group drawer.
+**Capacity:** local Ollama is for development/trickle only. The no-GPU 16 GB test VPS already runs Postgres, Redis, Playwright, API, and web; a 4B model needs roughly 3–4 GB extra RAM. Prod/bulk should use hosted OpenAI/Groq instead of adding Ollama to the Coolify production compose.
+
+**Deferred to C:** assistant HTTP/SSE API, RAG/doc ingestion, conversation/support persistence, and a proactive multi-tenant token-bucket limiter. C reuses `LlmService.chatStream()` and `LLM_ASSISTANT_MODEL`.
+
+For mass historical rewrites of existing published listings, do not re-queue create jobs; use deterministic strip-brand/templates or a future dedicated eBay revise batch.
+
+Key files: `src/modules/llm/` (`llm.service.ts`, `llm-usage.service.ts`, `sse-parser.ts`), `content-generation.service.ts`, `listing-strategy.service.ts`, and the listing-group `content` config in shared types/UI.
 
 ### Key product / listing files
 - `src/modules/listings/keepa.service.ts` — Keepa API, `history=0`, token-meta capture, bulk `getProducts()` + `getProductDetailsWithMeta()`.
@@ -629,6 +635,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `037` | `amazon_accounts.auto_fulfill_enabled` (default `false`) + `auto_fulfill_cap_total NUMERIC(10,2)` (nullable) + `auto_fulfill_dry_run` (default `false`) (A2 per-account) |
 | `038` | `orders.auto_fulfill_status` enum (`pending|running|placed|blocked|failed|dry_run|skipped`) + `auto_fulfill_blocked_reason VARCHAR(200)` + `auto_fulfill_attempted_at TIMESTAMPTZ` + partial index `idx_orders_auto_fulfill_status WHERE status IN ('blocked','failed')` (A2) |
 | `039` | `users.password_hash` nullable (Google-only users) + `user_oauth_accounts` table (`provider`, `provider_user_id`, `provider_email`, unique `(provider, provider_user_id)`, multi-provider-ready) — Google OAuth |
+| `040` | Append-only `llm_usage_log` (`user_id`, purpose/model, prompt/completion tokens, latency, success/error) for future per-user LLM cost attribution; no billing UI yet — shared LLM infra (B) |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 

@@ -61,12 +61,26 @@ services:
     depends_on:
       - postgres
 
+  # Local OpenAI-compatible LLM (dev/trickle). Prod/bulk uses hosted OpenAI/Groq via LLM_* env.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: zonds_ollama
+    restart: unless-stopped
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - zonds_network
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
     driver: local
   pgadmin_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:
