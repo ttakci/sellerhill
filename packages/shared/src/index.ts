@@ -44,6 +44,9 @@ export * from './domain/dashboard/index';
 // Domain - Amazon
 export * from './domain/amazon/index';
 
+// Domain - LLM
+export * from './domain/llm/index';
+
 // API Error Types
 export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
 
