@@ -120,7 +120,7 @@ export class ListingProcessorService extends WorkerHost {
 
       // 3. Prepare listing data (Price, stock, etc. based on strategy group)
       const ebayAccountId = await this.ebayService.getActiveAccountId(userId);
-      // applyContentAi: create path only (local Ollama when group flags + CONTENT_AI_ENABLED)
+      // applyContentAi: create path only (shared LLM when group flags + LLM_CONTENT_ENABLED)
       const listingData = await this.listingStrategyService.prepareListingData(
         userId,
         productData,

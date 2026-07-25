@@ -27,7 +27,7 @@ export class ListingStrategyService {
    * Calculate final price and stock based on product data and settings group.
    *
    * @param options.applyContentAi — **create path only**. When true and group AI flags
-   * are on, may call local Ollama. Product-sync / Keepa refresh must pass false (default)
+   * are on, may call the shared LLM client. Product-sync / Keepa refresh must pass false (default)
    * so we never rewrite 100k titles on every price tick.
    */
   async prepareListingData(
