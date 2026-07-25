@@ -1,7 +1,7 @@
 # B — Shared LLM Infra + Content-AI Refactor (Design)
 
 **Date:** 2026-07-20
-**Status:** Approved (2026-07-21) — implementation plan: `docs/superpowers/plans/2026-07-20-llm-infra.md`
+**Status:** Implemented + reviewed on `development` (2026-07-26) — implementation plan: `docs/superpowers/plans/2026-07-20-llm-infra.md`; final review: Ready to merge; 99 API tests + lint/typecheck/build green
 **Scope:** Backend (`apps/api`) — new `LlmModule` + `LlmService`, migrate `ContentGenerationService` off Ollama-native `/api/generate` onto an OpenAI-compatible client, bundle Ollama into docker-compose. No frontend, no assistant (that is spec C). DB: append-only `llm_usage_log` only.
 
 ---
@@ -14,7 +14,7 @@ Third of four sequenced specs. A1 (net profit) + A1.1 (estimated profit) + A2 (a
 |---|---|---|
 | A1 / A1.1 | Net profit correctness / estimated profit | Done |
 | A2 | Automated Amazon fulfillment | Done (code; proxy + dry-run gating external) |
-| **B** | **Shared LLM infra + content-AI refactor** (this doc) | Design |
+| **B** | **Shared LLM infra + content-AI refactor** (this doc) | Done |
 | C | Assistant backend (RAG + ticket escalation) | Future — consumes B's `LlmService` |
 
 B decouples Zonds from Ollama's native `/api/generate` and from a single provider. The OpenAI-compatible Chat Completions client means the provider is swapped by env (`LLM_BASE_URL` + `LLM_API_KEY`) only — Ollama (local/CPU) today, a hosted OpenAI-compatible provider or vLLM (GPU) later, code unchanged. This is the explicit hosting constraint: **no GPU anywhere** (local PC CPU; Coolify test VPS = 4 vCPU / 16 GB RAM / no GPU, already loaded with Postgres + Redis + Playwright).
