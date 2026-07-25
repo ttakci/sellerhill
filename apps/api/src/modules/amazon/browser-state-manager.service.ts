@@ -92,6 +92,13 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
   // Used by `evictIdle` alongside the zero-page guard to decide which cached
   // contexts can be safely closed to bound resident Chromium memory.
   private readonly lastUsedAt = new Map<string, number>();
+  // Whether the LIVE context for an account was actually launched THROUGH the
+  // proxy (set at launch time, retained for the context's lifetime). Reflects
+  // launch reality, not a prediction: `resolveProxy` returns null on a DB error
+  // or missing-account and the context then launches DIRECT. Auto-fulfill
+  // checkout asserts this (via `isProxyActive`) so it can fail closed with
+  // `proxy_required` instead of clicking Place Order over the bare server IP.
+  private readonly proxyActiveFor = new Map<string, boolean>();
   private sweepTimer: NodeJS.Timeout | null = null;
 
   constructor(
@@ -216,6 +223,7 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
         return cached;
       }
       this.activeContexts.delete(amazonAccountId);
+      this.proxyActiveFor.delete(amazonAccountId);
     }
 
     const profileDir = this.getProfileDir(amazonAccountId);
@@ -232,6 +240,10 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
     await fs.promises.mkdir(profileDir, { recursive: true });
 
     const proxy = await this.resolveProxy(amazonAccountId);
+    // Record launch truth BEFORE the launch — if launch throws, the flag still
+    // reflects the resolved intent (and is cleaned up if the context never lands
+    // in activeContexts, since callers treat launch failure as no-context).
+    this.proxyActiveFor.set(amazonAccountId, proxy !== null);
     const fingerprint = this.getFingerprint(amazonAccountId);
 
     const playwrightExtra = await import('playwright-extra');
@@ -332,6 +344,19 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
     }
     this.activeContexts.delete(amazonAccountId);
     this.lastUsedAt.delete(amazonAccountId);
+    this.proxyActiveFor.delete(amazonAccountId);
+  }
+
+  /**
+   * Whether the LIVE context for `amazonAccountId` was launched through the
+   * proxy. Reflects actual launch truth (set in `getContext`), retained for the
+   * context's lifetime so cache-hit reuses report the original launch. Returns
+   * `false` when unknown (no live context / launched before tracking) — callers
+   * that require a proxy (auto-fulfill checkout) must treat `false` as
+   * "not proven proxied" and fail closed.
+   */
+  isProxyActive(amazonAccountId: string): boolean {
+    return this.proxyActiveFor.get(amazonAccountId) ?? false;
   }
 
   async isSessionValid(amazonAccountId: string): Promise<boolean> {
@@ -394,6 +419,7 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
       await this.releaseContext(id);
     }
     this.lastUsedAt.clear();
+    this.proxyActiveFor.clear();
   }
 
   private async resolveProxy(

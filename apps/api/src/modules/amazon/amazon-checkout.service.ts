@@ -292,6 +292,19 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // returned is authenticated and lives in the proxy-aware persistent
     // context for the account — all subsequent steps reuse it.
     const page = await this.ensureLoggedIn(amazonAccountId, userId);
+    // R2 — per-account proxy-launch truth (defense-in-depth on top of R1's
+    // env-level `isConfigured` check). `resolveProxy` can return null on a
+    // transient DB error or missing account, in which case the persistent
+    // context launched DIRECT over the bare server IP. Auto-fulfill MUST NOT
+    // place an order over the bare IP (account ban + money risk), so fail
+    // closed here BEFORE any product navigation. Existing scraping legitimately
+    // falls back to direct — only checkout is hard-blocked.
+    if (this.proxyService.isConfigured() && !this.browserState.isProxyActive(amazonAccountId)) {
+      throw new AutoFulfillBlockedError(
+        'proxy_required',
+        'per-account proxy did not apply to the browser context (resolution failed) — refusing to proceed over bare IP',
+      );
+    }
     try {
       await this.humanDelay();
 
@@ -375,8 +388,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       }
       await page.waitForLoadState('domcontentloaded', { timeout: 30_000 }).catch(() => undefined);
       const placed = await this.parseConfirmation(page); // throws 'no_confirmation'
+      // onPlaced sets `auto_fulfill_status='placed'` atomically in its Layer 1
+      // UPDATE (or the Layer 2 minimal fallback). Do NOT setStatus(PLACED) again
+      // here: in the catastrophic case where BOTH layers throw, onPlaced swallows
+      // and leaves the row at RUNNING on purpose (the operator "needs attention"
+      // signal + manual reconciliation). A redundant setStatus(PLACED) here would
+      // mark the order PLACED with NO amazon_order_id persisted, orphaning it and
+      // hiding the stuck-at-RUNNING signal. See onPlaced's I-3 JSDoc contract.
       await this.onPlaced(ebayOrderId, amazonAccountId, placed);
-      await this.setStatus(ebayOrderId, AutoFulfillStatus.PLACED);
       this.logger.log(
         `placed ${ebayOrderId}: amazon=${placed.amazonOrderId} total=${(
           placed.purchasePrice +
