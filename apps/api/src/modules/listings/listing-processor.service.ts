@@ -15,7 +15,15 @@ import { KeepaService } from './keepa.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
 
-@Processor('listings')
+function listingsWorkerConcurrency(): number {
+  const raw = Number(process.env.LISTINGS_WORKER_CONCURRENCY ?? 2);
+  if (!Number.isFinite(raw)) {
+    return 2;
+  }
+  return Math.min(16, Math.max(1, Math.floor(raw)));
+}
+
+@Processor('listings', { concurrency: listingsWorkerConcurrency() })
 export class ListingProcessorService extends WorkerHost {
   private readonly logger = new Logger(ListingProcessorService.name);
 
