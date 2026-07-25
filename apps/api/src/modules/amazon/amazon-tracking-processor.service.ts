@@ -20,7 +20,7 @@ interface AmazonOrderRow {
   user_id: string;
   ebay_account_id: string;
   ebay_order_id: string;
-  status: string;
+  status: OrderStatus;
   amazon_order_id: string;
   amazon_account_id: string;
   amazon_tracking_number: string;
@@ -113,10 +113,16 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         );
       }
 
-      // Handle status transitions
-      if (normalizedStatus === 'shipped' && previousStatus !== 'shipped') {
+      // Handle status transitions. Compare against the enum constants, not raw
+      // string literals: mapAmazonStatus returns OrderStatus.* values, and a
+      // literal like 'delivered' would NEVER match OrderStatus.COMPLETED
+      // (= 'completed') — silently dropping the delivered→completed transition.
+      if (normalizedStatus === OrderStatus.SHIPPED && previousStatus !== OrderStatus.SHIPPED) {
         await this.handleShipped(order);
-      } else if (normalizedStatus === 'delivered' && previousStatus !== 'delivered') {
+      } else if (
+        normalizedStatus === OrderStatus.COMPLETED &&
+        previousStatus !== OrderStatus.COMPLETED
+      ) {
         await this.handleDelivered(order);
       }
 
@@ -220,7 +226,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     this.logger.log(`Order ${order.id} marked as completed (delivered on Amazon)`);
   }
 
-  private mapAmazonStatus(status: string): string {
+  private mapAmazonStatus(status: string): OrderStatus {
     const lower = status.toLowerCase();
     if (lower === 'shipped' || lower.includes('on the way')) {return OrderStatus.SHIPPED;}
     if (lower === 'delivered' || lower.includes('arrived')) {return OrderStatus.COMPLETED;}
