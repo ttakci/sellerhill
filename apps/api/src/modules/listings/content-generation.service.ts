@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { ProductData } from '@repo/shared';
+import { LlmUsagePurpose, type LlmMessage, type ProductData } from '@repo/shared';
+
+import { LlmService } from '../llm/llm.service';
 
 export interface ContentRewriteInput {
   product: ProductData;
@@ -11,50 +13,31 @@ export interface ContentRewriteInput {
 }
 
 /**
- * Optional free local LLM rewrites for listing title/description at **create time only**.
+ * Optional LLM rewrites for listing title/description at **create time only**.
  *
  * Scale notes (100k+ listings):
- * - Never call on Keepa refresh / product-sync — only listing create path.
- * - One short Ollama request per new ASIN when group flag is on.
+ * - Never call on Keepa refresh / product-sync — only the listing-create path.
+ * - One short Chat Completions call per new ASIN when a group flag is on.
  * - Hard timeout → always fall back to baseTitle/baseDescription so the job queue never stalls.
- * - Throughput ≈ worker concurrency × tokens/s of the local model; for bulk historical rewrites
+ * - Throughput ≈ worker concurrency × provider tokens/s. For bulk historical rewrites
  *   run a separate offline batch (not online order path). Prefer strip-brand + templates for mass volume.
  *
- * Provider: Ollama HTTP API (default http://127.0.0.1:11434). No paid cloud key required.
+ * Provider: OpenAI-compatible Chat Completions via `LlmService` (Task 4 of the B-spec
+ * LLM infra). Provider URL/model/key are env-only on `LlmService` — this service only
+ * supplies prompts + cleanup. Master toggle: `LLM_CONTENT_ENABLED`.
  */
 @Injectable()
 export class ContentGenerationService {
   private readonly logger = new Logger(ContentGenerationService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly llm: LlmService
+  ) {}
 
   isEnabled(): boolean {
-    const v = (this.configService.get<string>('CONTENT_AI_ENABLED') || 'false').toLowerCase();
+    const v = (this.configService.get<string>('LLM_CONTENT_ENABLED') || 'false').toLowerCase();
     return v === 'true' || v === '1' || v === 'yes';
-  }
-
-  private baseUrl(): string {
-    return (
-      this.configService.get<string>('CONTENT_AI_OLLAMA_URL') ||
-      this.configService.get<string>('OLLAMA_BASE_URL') ||
-      'http://127.0.0.1:11434'
-    ).replace(/\/$/, '');
-  }
-
-  private model(): string {
-    return (
-      this.configService.get<string>('CONTENT_AI_OLLAMA_MODEL') ||
-      this.configService.get<string>('OLLAMA_MODEL') ||
-      'llama3.2:1b'
-    );
-  }
-
-  private titleTimeoutMs(): number {
-    return Math.max(1000, Number(this.configService.get('CONTENT_AI_TITLE_TIMEOUT_MS') || 8000));
-  }
-
-  private descriptionTimeoutMs(): number {
-    return Math.max(1000, Number(this.configService.get('CONTENT_AI_DESCRIPTION_TIMEOUT_MS') || 15000));
   }
 
   /**
@@ -66,23 +49,38 @@ export class ContentGenerationService {
     }
 
     const features = (input.product.features || []).slice(0, 6).join('; ');
-    const prompt = [
-      'You write eBay listing titles for dropshippers.',
-      'Rules: English only. Max 80 characters. No brand name if avoidable. No quotes. No HTML. One line only.',
-      'Do not invent false claims. Prefer searchable keywords from the product.',
-      `ASIN: ${input.product.asin || ''}`,
-      `Brand: ${input.product.brand || ''}`,
-      `Category: ${input.product.category || ''}`,
-      `Source title: ${input.baseTitle}`,
-      features ? `Features: ${features}` : '',
-      'Reply with only the title text.',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const messages: LlmMessage[] = [
+      {
+        role: 'system',
+        content: [
+          'You write eBay listing titles for dropshippers.',
+          'Rules: English only. Max 80 characters. No brand name if avoidable. No quotes. No HTML. One line only.',
+          'Do not invent false claims. Prefer searchable keywords from the product.',
+          'Reply with only the title text.',
+        ].join('\n'),
+      },
+      {
+        role: 'user',
+        content: [
+          `ASIN: ${input.product.asin || ''}`,
+          `Brand: ${input.product.brand || ''}`,
+          `Category: ${input.product.category || ''}`,
+          `Source title: ${input.baseTitle}`,
+          features ? `Features: ${features}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+    ];
 
     try {
-      const raw = await this.ollamaGenerate(prompt, this.titleTimeoutMs(), 0.3);
-      const cleaned = this.cleanTitle(raw);
+      const { text } = await this.llm.chat(messages, {
+        purpose: LlmUsagePurpose.CONTENT,
+        temperature: 0.3,
+        maxTokens: 256,
+        timeoutMs: 60_000,
+      });
+      const cleaned = this.cleanTitle(text);
       if (cleaned.length >= 8) {
         this.logger.debug(`AI title ok (${cleaned.length} chars) for ${input.product.asin}`);
         return cleaned;
@@ -106,21 +104,36 @@ export class ContentGenerationService {
 
     const features = (input.product.features || []).slice(0, 12).join('\n- ');
     const plainBase = this.stripHtml(input.baseDescription).slice(0, 1200);
-    const prompt = [
-      'You write short eBay listing descriptions for dropshippers.',
-      'Rules: English. 2-4 short paragraphs or bullet lines. No brand hype if avoidable. No HTML tags. No markdown fences.',
-      'Do not invent warranties, certifications, or medical claims. Stay factual from the source.',
-      `Source title: ${input.baseTitle}`,
-      plainBase ? `Source text: ${plainBase}` : '',
-      features ? `Features:\n- ${features}` : '',
-      'Reply with only the description body.',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const messages: LlmMessage[] = [
+      {
+        role: 'system',
+        content: [
+          'You write short eBay listing descriptions for dropshippers.',
+          'Rules: English. 2-4 short paragraphs or bullet lines. No brand hype if avoidable. No HTML tags. No markdown fences.',
+          'Do not invent warranties, certifications, or medical claims. Stay factual from the source.',
+          'Reply with only the description body.',
+        ].join('\n'),
+      },
+      {
+        role: 'user',
+        content: [
+          `Source title: ${input.baseTitle}`,
+          plainBase ? `Source text: ${plainBase}` : '',
+          features ? `Features:\n- ${features}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+    ];
 
     try {
-      const raw = await this.ollamaGenerate(prompt, this.descriptionTimeoutMs(), 0.4);
-      const cleaned = this.cleanDescription(raw);
+      const { text } = await this.llm.chat(messages, {
+        purpose: LlmUsagePurpose.CONTENT,
+        temperature: 0.4,
+        maxTokens: 512,
+        timeoutMs: 60_000,
+      });
+      const cleaned = this.cleanDescription(text);
       if (cleaned.length >= 40) {
         this.logger.debug(`AI description ok (${cleaned.length} chars) for ${input.product.asin}`);
         return cleaned;
@@ -183,43 +196,5 @@ export class ContentGenerationService {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
-  }
-
-  /**
-   * Ollama /api/generate with AbortSignal timeout.
-   * @see https://github.com/ollama/ollama/blob/main/docs/api.md
-   */
-  private async ollamaGenerate(prompt: string, timeoutMs: number, temperature: number): Promise<string> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetch(`${this.baseUrl()}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          model: this.model(),
-          prompt,
-          stream: false,
-          options: {
-            temperature,
-            num_predict: 256,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        throw new Error(`Ollama HTTP ${res.status}: ${body.slice(0, 200)}`);
-      }
-
-      const data = (await res.json()) as { response?: string };
-      if (!data.response || typeof data.response !== 'string') {
-        throw new Error('Ollama response missing response field');
-      }
-      return data.response;
-    } finally {
-      clearTimeout(timer);
-    }
   }
 }

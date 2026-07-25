@@ -59,7 +59,7 @@ export class ListingStrategyService {
       }
     } else if (applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
       this.logger.debug(
-        `Content AI flags on for group but CONTENT_AI_ENABLED is false — using deterministic title/description`
+        `Content AI flags on for group but LLM_CONTENT_ENABLED is false — using deterministic title/description`
       );
     }
 
