@@ -32,7 +32,7 @@ pnpm docker:logs      # Follow logs
 pnpm docker:clean     # Remove containers and volumes
 ```
 
-Packages must be built before apps can run (`pnpm dev` handles this automatically). `apps/api` has a **minimal Jest harness** for pure-logic helpers only: `pnpm --filter api test` (config at `apps/api/jest.config.js`, CJS + ts-jest, with a `@repo/shared → dist/cjs` moduleNameMapper and a `uuid` CJS shim for uuid@13 ESM). Covered: `profit-calculation.ts`, `order-matcher.ts`, `pick-best-match.ts`, `amazon-order-parser.service.ts`. DB/queue/NestJS layer is still manual-verified — integration tests are deferred (deliberate, not a gap). `apps/web` has no tests yet.
+Packages must be built before apps can run (`pnpm dev` handles this automatically). `apps/api` has a **minimal Jest harness** for pure-logic helpers only: `pnpm --filter api test` (config at `apps/api/jest.config.js`, CJS + ts-jest, with a `@repo/shared → dist/cjs` moduleNameMapper and a `uuid` CJS shim for uuid@13 ESM). Covered: `profit-calculation.ts`, `order-matcher.ts`, `pick-best-match.ts`, `amazon-order-parser.service.ts`, `google-link-decision.ts`. DB/queue/NestJS layer is still manual-verified — integration tests are deferred (deliberate, not a gap). `apps/web` has no tests yet.
 
 ## Architecture
 
@@ -596,6 +596,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 - Do **not** reintroduce `localStorage.setItem('accessToken'|'refreshToken')`.
 - **CORS**: API reads `CORS_ORIGINS` (comma-separated) or legacy `CORS_ORIGIN`. Production must list the real web origin(s).
 - **Cookie env**: optional `COOKIE_DOMAIN` (e.g. `.takci.cloud`), `COOKIE_SAMESITE=lax|none`.
+- **Google OAuth (GIS popup auth-code)**: optional. Env: `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` (api), `VITE_GOOGLE_CLIENT_ID` (web — same Client ID). FE `@react-oauth/google` popup yields a one-time `code` → `POST /auth/google` → backend `google-auth-library` exchanges it (`redirectUri: 'postmessage'`) + `verifyIdToken`, then issues a normal session. **Never auto-merges** a Google identity into an existing password account — same email with a password account → `409 emailExistsPassword`. Google skips only name entry + email verification; onboarding/eBay connect/routing are identical to password login (same `{accessToken,user}` + `zonds_rt` cookie via `attachSession`). Pure `google-link-decision.ts` (login/create/block) is unit-tested. Google-only users have `password_hash = NULL`; password login is blocked for them (`invalidCredentials`). Missing env → API boots, endpoint returns `503 googleNotConfigured`, FE hides the button. Schema: migration `039` (`users.password_hash` nullable + `user_oauth_accounts` multi-provider table, unique on `(provider, provider_user_id)`). Design spec: `docs/superpowers/specs/2026-07-21-google-oauth-design.md`.
 - Listings URL: `{VITE_API_BASE_URL}/listings?page=1&limit=…` — bare `/listings` without page still works (server defaults) but FE always sends page/limit.
 
 ### Domain UI vs design system
@@ -627,6 +628,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `036` | `store_settings.auto_fulfill_enabled` (master toggle, default `false`) + `tracking_conversion_provider VARCHAR(20)` default `'local'` (A2) |
 | `037` | `amazon_accounts.auto_fulfill_enabled` (default `false`) + `auto_fulfill_cap_total NUMERIC(10,2)` (nullable) + `auto_fulfill_dry_run` (default `false`) (A2 per-account) |
 | `038` | `orders.auto_fulfill_status` enum (`pending|running|placed|blocked|failed|dry_run|skipped`) + `auto_fulfill_blocked_reason VARCHAR(200)` + `auto_fulfill_attempted_at TIMESTAMPTZ` + partial index `idx_orders_auto_fulfill_status WHERE status IN ('blocked','failed')` (A2) |
+| `039` | `users.password_hash` nullable (Google-only users) + `user_oauth_accounts` table (`provider`, `provider_user_id`, `provider_email`, unique `(provider, provider_user_id)`, multi-provider-ready) — Google OAuth |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
