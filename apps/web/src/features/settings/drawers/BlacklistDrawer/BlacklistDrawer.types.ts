@@ -59,7 +59,6 @@ export interface BlacklistDrawerComponentProps {
   onOpenConfirm: () => void;
   onCloseConfirm: () => void;
   onConfirmBulkDelete: () => void;
-  confirmTitle: string;
   confirmDescription: string;
   confirmLabel: string;
   cancelLabel: string;

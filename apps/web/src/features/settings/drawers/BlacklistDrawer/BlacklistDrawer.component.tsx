@@ -55,7 +55,6 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   onOpenConfirm,
   onCloseConfirm,
   onConfirmBulkDelete,
-  confirmTitle,
   confirmDescription,
   confirmLabel,
   cancelLabel,
@@ -173,11 +172,16 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
         isOpen={isConfirmOpen}
         onClose={onCloseConfirm}
         onConfirm={onConfirmBulkDelete}
-        title={confirmTitle}
+        type="warning"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
         description={confirmDescription}
         confirmLabel={confirmLabel}
         cancelLabel={cancelLabel}
-        variant="danger"
       />
     </Drawer>
   );

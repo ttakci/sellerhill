@@ -19,9 +19,19 @@ export interface DialogAction {
 export interface DialogProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Drives default icon + tint (info | success | warning | error) */
+  /** Drives default icon + tint + default title (info | success | warning | error) */
   type?: MessageType;
-  title: string;
+  /**
+   * Optional title override (form dialogs).
+   * When omitted, Dialog shows the type label (Info / Warning / …) — pass localized
+   * type titles via `typeTitles` for i18n.
+   */
+  title?: string;
+  /**
+   * Localized short titles per message type. Used when `title` is omitted.
+   * Fallbacks are English: Info / Success / Warning / Error.
+   */
+  typeTitles?: Partial<Record<MessageType, string>>;
   description?: ReactNode;
   /** Extra content under description (e.g. confirm email field) */
   children?: ReactNode;

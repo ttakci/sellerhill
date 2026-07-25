@@ -63,9 +63,17 @@
     "passwordMismatch": "Passwords do not match",
     "invalidStatus": "Please select a valid status"
   },
+  "dialog": {
+    "title": {
+      "info": "Info",
+      "success": "Success",
+      "warning": "Warning",
+      "error": "Error"
+    }
+  },
   "message": {
     "error": {
-      "header": "An Error Occurred",
+      "header": "Error",
       "goHome": "Go to Home",
       "close": "Close",
       "copyRequestId": "Copy Request ID",
@@ -74,6 +82,12 @@
     "success": {
       "header": "Success",
       "ok": "OK"
+    },
+    "warning": {
+      "header": "Warning"
+    },
+    "info": {
+      "header": "Info"
     }
   },
   "errorBoundary": {

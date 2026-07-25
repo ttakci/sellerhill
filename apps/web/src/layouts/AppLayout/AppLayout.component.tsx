@@ -282,7 +282,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           onClose={onCloseLogoutConfirm}
           onConfirm={onLogoutConfirm}
           type="warning"
-          title={t('translation:menu.logoutConfirmTitle')}
+          typeTitles={{
+            info: t('translation:dialog.title.info'),
+            success: t('translation:dialog.title.success'),
+            warning: t('translation:dialog.title.warning'),
+            error: t('translation:dialog.title.error'),
+          }}
           description={t('translation:menu.logoutConfirmDescription')}
           confirmLabel={t('translation:menu.logoutConfirmButton')}
           cancelLabel={t('translation:common.cancel')}

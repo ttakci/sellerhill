@@ -230,7 +230,6 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       onOpenConfirm={handleOpenConfirm}
       onCloseConfirm={handleCloseConfirm}
       onConfirmBulkDelete={handleConfirmBulkDelete}
-      confirmTitle={t('translation:settingsHub.drawer.blacklist.list.confirmBulkDeleteTitle')}
       confirmDescription={t('translation:settingsHub.drawer.blacklist.list.confirmBulkDeleteDescription', {
         count: selectedItems.length,
       })}

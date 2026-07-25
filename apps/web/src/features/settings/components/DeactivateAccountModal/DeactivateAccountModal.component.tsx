@@ -24,8 +24,13 @@ export const DeactivateAccountModalComponent = ({
     <Dialog
       isOpen={isOpen}
       onClose={isLoading ? () => undefined : onClose}
-      type="error"
-      title={t('translation:settingsHub.modal.deactivate.title')}
+      type="warning"
+      typeTitles={{
+        info: t('translation:dialog.title.info'),
+        success: t('translation:dialog.title.success'),
+        warning: t('translation:dialog.title.warning'),
+        error: t('translation:dialog.title.error'),
+      }}
       description={t('translation:settingsHub.modal.deactivate.warning')}
       primaryAction={{
         label: t('translation:settingsHub.modal.deactivate.confirmLabel'),

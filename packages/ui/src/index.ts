@@ -79,7 +79,7 @@ export type { TextInputProps as ModernTextInputProps } from './molecules/TextInp
 export { ConfirmModal } from './molecules/ConfirmModal';
 export type { ConfirmModalProps } from './molecules/ConfirmModal';
 
-export { Dialog } from './molecules/Dialog';
+export { DEFAULT_DIALOG_TYPE_TITLES, Dialog } from './molecules/Dialog';
 export type { DialogAction, DialogProps } from './molecules/Dialog';
 
 export { Drawer } from './molecules/Drawer';
@@ -172,6 +172,7 @@ export { ThemeContext, ThemeProvider, UIContext, UIProvider } from './context';
 export type {
   LoadingState,
   MessageState,
+  MessageType,
   ShowLoadingOptions,
   ShowMessageOptions,
   ThemeContextValue,

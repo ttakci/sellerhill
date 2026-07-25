@@ -4,7 +4,13 @@ export interface MessageModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: MessageType;
-  title: string;
+  /**
+   * @deprecated Prefer type-based titles. When omitted, Dialog uses `typeTitles` / defaults.
+   * Kept for backward compatibility — if set, overrides the type title.
+   */
+  title?: string;
+  /** Localized short titles per type (Info / Warning / …). */
+  typeTitles?: Partial<Record<MessageType, string>>;
   description: string;
   primaryButton: {
     label: string;

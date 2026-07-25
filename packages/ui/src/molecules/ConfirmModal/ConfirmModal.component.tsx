@@ -7,17 +7,15 @@ import type { ConfirmModalProps } from './ConfirmModal.types';
 
 /**
  * Thin wrapper over Dialog for confirm / cancel flows.
- * Always brand-blue buttons (Dialog coerces danger → primary).
- * Stack: outline cancel on top, filled confirm below.
- *
- * Icon + disc color come from `type` (default `warning` — confirmations are cautionary).
- * Legacy `variant: 'danger'` maps to `warning`; `variant: 'primary'` maps to `info`.
+ * Title is type-based (Uyarı / Bilgi / …) unless an explicit `title` override is passed.
+ * Always brand-blue buttons. Stack: outline cancel on top, filled confirm below.
  */
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
+  typeTitles,
   description,
   confirmLabel,
   cancelLabel,
@@ -25,7 +23,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   type,
   isLoading = false,
 }) => {
-  // Resolve dialog type: explicit `type` wins; fall back to legacy `variant` mapping; default `warning`.
   const dialogType: MessageType =
     type ?? (variant === 'danger' ? 'warning' : variant === 'primary' ? 'info' : 'warning');
 
@@ -34,7 +31,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       isOpen={isOpen}
       onClose={isLoading ? () => undefined : onClose}
       type={dialogType}
-      title={title}
+      title={title?.trim() ? title : undefined}
+      typeTitles={typeTitles}
       description={description}
       primaryAction={{
         label: confirmLabel,

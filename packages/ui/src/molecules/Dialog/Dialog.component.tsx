@@ -15,6 +15,14 @@ const defaultIcons: Record<MessageType, IconName> = {
   info: 'info',
 };
 
+/** English fallbacks when no localized `typeTitles` / `title` are provided */
+export const DEFAULT_DIALOG_TYPE_TITLES: Record<MessageType, string> = {
+  info: 'Info',
+  success: 'Success',
+  warning: 'Warning',
+  error: 'Error',
+};
+
 /**
  * Dialog actions always use brand blue: filled primary + outline secondary.
  * Never red danger buttons — icon disc may still use semantic type color.
@@ -36,7 +44,8 @@ const resolveOutlineVariant = (variant?: ButtonVariant): ButtonVariant => {
 
 /**
  * Canonical app dialog — single visual system for alerts, confirms, and form prompts.
- * Layout: solid icon disc + title + description; secondary (outline) above primary (filled).
+ * Layout: solid icon disc + **type title** (Uyarı / Bilgi / …) + description;
+ * secondary (outline) above primary (filled).
  * All system popups (MessageModal / ConfirmModal / feature Dialogs) share this molecule.
  */
 export const Dialog: React.FC<DialogProps> = ({
@@ -44,6 +53,7 @@ export const Dialog: React.FC<DialogProps> = ({
   onClose,
   type = 'info',
   title,
+  typeTitles,
   description,
   children,
   icon,
@@ -54,6 +64,11 @@ export const Dialog: React.FC<DialogProps> = ({
   const iconName = icon ?? defaultIcons[type];
   const primaryVariant = resolveFilledVariant(primaryAction.variant);
   const secondaryVariant = resolveOutlineVariant(secondaryAction?.variant);
+  // Prefer explicit title (form dialogs); else localized type title; else English default
+  const displayTitle =
+    title?.trim() ||
+    typeTitles?.[type] ||
+    DEFAULT_DIALOG_TYPE_TITLES[type];
 
   return (
     <S.Shell isOpen={isOpen} onClose={onClose} title="" size="md" showCloseButton={showCloseButton} showDivider={false}>
@@ -63,7 +78,7 @@ export const Dialog: React.FC<DialogProps> = ({
         </S.IconCircle>
 
         <S.Title variant="h1" weight="semibold" color="brand.primary">
-          {title}
+          {displayTitle}
         </S.Title>
 
         {description ? (

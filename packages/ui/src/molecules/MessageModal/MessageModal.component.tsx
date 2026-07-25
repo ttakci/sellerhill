@@ -6,12 +6,14 @@ import type { MessageModalProps } from './MessageModal.types';
 
 /**
  * Thin wrapper over Dialog for global showMessage alerts.
+ * Title is driven by `type` (Uyarı / Bilgi / Hata / Başarılı); description carries the message.
  */
 export const MessageModal: React.FC<MessageModalProps> = ({
   isOpen,
   onClose,
   type,
   title,
+  typeTitles,
   description,
   primaryButton,
   secondaryButton,
@@ -21,7 +23,9 @@ export const MessageModal: React.FC<MessageModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       type={type}
-      title={title}
+      // Omit empty title so Dialog falls back to typeTitles / defaults
+      title={title?.trim() ? title : undefined}
+      typeTitles={typeTitles}
       description={description}
       primaryAction={{
         label: primaryButton.label,

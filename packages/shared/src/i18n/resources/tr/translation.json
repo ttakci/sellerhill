@@ -63,9 +63,17 @@
     "passwordMismatch": "Şifreler eşleşmiyor",
     "invalidStatus": "Lütfen geçerli bir durum seçin"
   },
+  "dialog": {
+    "title": {
+      "info": "Bilgi",
+      "success": "Başarılı",
+      "warning": "Uyarı",
+      "error": "Hata"
+    }
+  },
   "message": {
     "error": {
-      "header": "Bir Hata Oluştu",
+      "header": "Hata",
       "goHome": "Ana Sayfaya Dön",
       "close": "Kapat",
       "copyRequestId": "İstek ID'sini Kopyala",
@@ -74,6 +82,12 @@
     "success": {
       "header": "Başarılı",
       "ok": "Tamam"
+    },
+    "warning": {
+      "header": "Uyarı"
+    },
+    "info": {
+      "header": "Bilgi"
     }
   },
   "errorBoundary": {

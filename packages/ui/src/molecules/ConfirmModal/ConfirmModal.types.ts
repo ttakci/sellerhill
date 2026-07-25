@@ -6,7 +6,13 @@ export interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  title: string;
+  /**
+   * @deprecated Prefer type-based titles (omit this). Description already explains the action.
+   * If set, overrides the type title.
+   */
+  title?: string;
+  /** Localized short titles per type — used when `title` is omitted. */
+  typeTitles?: Partial<Record<MessageType, string>>;
   description: ReactNode;
   confirmLabel: string;
   cancelLabel: string;
@@ -16,7 +22,7 @@ export interface ConfirmModalProps {
    * @deprecated Use `type` instead. Kept for backward compat.
    */
   variant?: 'primary' | 'danger';
-  /** Dialog semantic type — controls icon + icon disc color. Defaults to `warning`. */
+  /** Dialog semantic type — controls icon + icon disc color + default title. Defaults to `warning`. */
   type?: MessageType;
   isLoading?: boolean;
 }
