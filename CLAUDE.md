@@ -152,7 +152,7 @@ Configured per **listing settings group** (`content` JSONB on `listing_settings_
 
 **Capacity:** local Ollama is for development/trickle only. The no-GPU 16 GB test VPS already runs Postgres, Redis, Playwright, API, and web; a 4B model needs roughly 3–4 GB extra RAM. Prod/bulk should use hosted OpenAI/Groq instead of adding Ollama to the Coolify production compose.
 
-**Deferred to C:** assistant HTTP/SSE API, RAG/doc ingestion, conversation/support persistence, and a proactive multi-tenant token-bucket limiter. C reuses `LlmService.chatStream()` and `LLM_ASSISTANT_MODEL`.
+**Implemented in C — Zon Assistant:** customer conversation/history APIs, generation + inbox SSE, signed replay cursors, RAG/help-corpus ingestion and atomic releases, persistent support handoff/presence, proactive multi-tenant limiting, read-only redacted admin observability, and the AssistantWidget/support/admin frontend surfaces now reuse `LlmService.chatStream()` and `LLM_ASSISTANT_MODEL`. Canonical design/plan: `docs/superpowers/specs/2026-07-26-zon-assistant-backend-design.md` and `docs/superpowers/plans/2026-07-26-zon-assistant-backend.md`; concise developer/operations handbook: `docs/assistant/`.
 
 For mass historical rewrites of existing published listings, do not re-queue create jobs; use deterministic strip-brand/templates or a future dedicated eBay revise batch.
 
