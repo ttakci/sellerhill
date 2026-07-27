@@ -203,6 +203,40 @@ Security contract (enforced in helpers + script):
 
 The CLI loads `apps/api/.env` (for `DATABASE_URL`) like `migrate.ts`; it does NOT bootstrap the NestJS app context. Operator identity (the server-shell `$USER`) is recorded as the audit `actor` when available, else `null`. The script files (`apps/api/src/scripts/**/*.ts`) follow `migrate.ts`/`knowledge.ts` precedent for console output + dotenv typing; no `eslint-disable` is used in the new files.
 
+## Billing & Packages
+
+The package and billing system is database-driven and Paddle-ready. Canonical details live in [docs/billing-and-packages.md](docs/billing-and-packages.md); keep this section aligned when billing behavior changes.
+
+### Customer packages
+
+Customers see only two capacity metrics — active listings and monthly automatic orders (AO). Internal Keepa, LLM, API, queue, and proxy usage must not be exposed as customer-facing tokens or credits. Initial seeded catalog values are deliberately configurable before launch:
+
+| Plan | Active listings | Monthly AO | Initial monthly price |
+|---|---:|---:|---:|
+| Starter | 1,500 | 150 | $39 |
+| Growth | 2,500 | 250 | $55 |
+| Scale | 4,500 | 450 | $75 |
+
+Plan prices, yearly prices, limits, active state, ordering, and Paddle price IDs are stored in billing catalog tables, not TypeScript constants or UI copy. Landing pricing reads the public catalog. Do not create a second plan model.
+
+### Billing implementation
+
+- Migrations `052_create_billing_foundation.sql` and `053_billing_quota_enforcement.sql` create the catalog, subscriptions, usage periods, listing/AO reservations, and webhook inbox.
+- Backend module: `apps/api/src/modules/billing/`; frontend feature: `apps/web/src/features/billing/`.
+- Paddle is abstracted behind a provider port as the planned Merchant of Record. Checkout/portal fail safely until Paddle credentials and price IDs exist.
+- `BILLING_ENFORCEMENT_ENABLED=false` is the transition default. It gives users full access without fabricating a subscription. Enable only after Paddle sandbox/live flows are verified.
+- Paddle webhooks use raw-body signature verification, idempotent inbox processing, stale-event protection, and subscription state updates. JWT must never be treated as the billing source of truth.
+
+### Quota semantics
+
+- Listing quota = active listings + open reservations. Draft and ended listings are excluded. Bulk create and publish use advisory-lock reservations. Queue success consumes; terminal failure releases. Downgrades never disable existing listings; they block new create/publish operations only.
+- AO quota = per-user UTC calendar month. Reservation is idempotent by eBay order ID, consumption occurs only after Amazon placement, and blocked/final-failed checkout releases the reservation. Existing placed orders and tracking are not stopped by quota exhaustion.
+- Quota exhaustion uses shared enums/reasons and must not be represented by hardcoded status strings.
+
+### Admin billing metrics
+
+`GET /v1/admin/billing/metrics` is a read-only, role-gated endpoint displayed in the admin Billing tab. It reports cost totals, account/access distributions, and listing/AO quota pressure. Unknown costs remain `null`; real zero costs remain `0`. It uses the existing `UserRole.ADMIN`, `RolesGuard`, and privileged-session guards — do not introduce a second RBAC system.
+
 ## Order Management
 
 ### Data Flow
