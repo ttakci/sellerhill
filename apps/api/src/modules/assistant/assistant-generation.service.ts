@@ -32,7 +32,7 @@ export class AssistantGenerationService {
     if (!content || content.length > MAX_MESSAGE_LENGTH) {throw new ConflictException();}
     await this.authorize(request.userId, request.conversationId);
     if (request.signal?.aborted) {throw request.signal.reason ?? new Error('aborted');}
-    const plan = await this.router.plan(content);
+    const plan = this.router.plan(content);
     const toolResults = await Promise.all(plan.tools.map((tool) => this.tools.execute(request.userId, tool)));
     const references = request.references ?? [];
     const prompt = this.context.build({ applicationContext: 'Zonds account assistant', recentMessages: [], currentMessage: content, references, toolResults });
