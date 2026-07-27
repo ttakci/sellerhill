@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   TrackingConversionProvider,
   type BlacklistKeyword,
+  type BuyerMessagingConfig,
   type SaveStoreSettingsRequest,
   type StoreSettingsResponse,
 } from '@repo/shared';
@@ -28,6 +29,9 @@ interface StoreSettingsEntity {
   // Carrier-mapping provider; persisted LOWERCASE — the tracking processor
   // compares the raw DB string case-sensitively (migration 036, default 'local').
   tracking_conversion_provider: string;
+  // Buyer auto-messaging config JSONB (migration 054). Nullable — NULL means
+  // the feature is off (no automated buyer messages). Parsed in mapToDto.
+  buyer_messaging: unknown;
   created_at: Date;
   updated_at: Date;
 }
@@ -77,6 +81,7 @@ export class StoreSettingsService {
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
         trackingConversionProvider: TrackingConversionProvider.LOCAL,
+        buyerMessaging: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -121,10 +126,13 @@ export class StoreSettingsService {
       // field don't blow away a prior value with NULL. Persisted LOWERCASE — the
       // tracking processor compares the raw DB string case-sensitively.
       trackingConversionProvider = TrackingConversionProvider.LOCAL,
+      buyerMessaging,
     } = dto;
 
     const blacklistJson = JSON.stringify(blacklist);
     const autoFulfillBool = autoFulfillEnabled ?? false;
+    // null-safe JSON for the JSONB cell: null means "feature off".
+    const buyerMessagingJson = buyerMessaging ? JSON.stringify(buyerMessaging) : null;
 
     let result: StoreSettingsEntity[];
 
@@ -132,8 +140,8 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider)
-            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
+            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -145,6 +153,7 @@ export class StoreSettingsService {
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
                 tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
+                buyer_messaging = EXCLUDED.buyer_messaging,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -159,14 +168,15 @@ export class StoreSettingsService {
           amazonTaxRate,
           autoFulfillBool,
           trackingConversionProvider,
+          buyerMessagingJson,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider)
-            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
+            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -178,6 +188,7 @@ export class StoreSettingsService {
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
                 tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
+                buyer_messaging = EXCLUDED.buyer_messaging,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -193,6 +204,7 @@ export class StoreSettingsService {
           amazonTaxRate,
           autoFulfillBool,
           trackingConversionProvider,
+          buyerMessagingJson,
         ]
       );
     }
@@ -229,8 +241,25 @@ export class StoreSettingsService {
         entity.tracking_conversion_provider === 'api'
           ? TrackingConversionProvider.API
           : TrackingConversionProvider.LOCAL,
+      buyerMessaging: this.parseBuyerMessaging(entity.buyer_messaging),
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };
+  }
+
+  /**
+   * Parse the buyer_messaging JSONB cell into a typed config object.
+   * Returns null when the cell is NULL, missing, or not a JSON object —
+   * null means the feature is OFF (no automated buyer messages).
+   */
+  private parseBuyerMessaging(raw: unknown): BuyerMessagingConfig | null {
+    if (!raw || typeof raw !== 'object') {
+      return null;
+    }
+    try {
+      return raw as BuyerMessagingConfig;
+    } catch {
+      return null;
+    }
   }
 }
