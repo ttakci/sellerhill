@@ -1,6 +1,5 @@
-import { PageContainer, tkn } from '@repo/ui';
 import styled from '@emotion/styled';
-import { Card } from '@repo/ui';
+import { Card, PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 

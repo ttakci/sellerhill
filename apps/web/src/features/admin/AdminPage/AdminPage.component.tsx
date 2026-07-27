@@ -1,3 +1,4 @@
+import { AdminWarningLevel } from '@repo/shared';
 import { Badge, Button, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +33,7 @@ export const AdminPageComponent = ({
           {operations?.warnings.map((warning, index) => (
             <S.Row key={`${warning.kind}-${warning.subject ?? index}`}>
               <Text variant="body-sm">{t(`admin.warnings.${warning.kind}`, { subject: warning.subject })}</Text>
-              <Badge variant={warning.level === 'critical' ? 'error' : 'warning'}>{warning.value}</Badge>
+              <Badge variant={warning.level === AdminWarningLevel.CRITICAL ? 'error' : 'warning'}>{warning.value}</Badge>
             </S.Row>
           ))}
           {operations?.queues.map((queue) => (
