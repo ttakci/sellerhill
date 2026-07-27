@@ -23,6 +23,12 @@ packages/*/dist/
 !packages/ui/src/eslint-plugin/*.js
 !.claude/hooks/*.js
 
+# Claude Code generated artifacts (keep tracked hooks/settings/skills)
+.claude/worktrees/
+.claude/plans/
+.claude/*.patch
+.claude/*.diff
+
 # Env files
 .env
 .env.local

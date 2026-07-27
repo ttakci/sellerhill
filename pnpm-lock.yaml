@@ -325,6 +325,9 @@ importers:
       recharts:
         specifier: ^3.8.1
         version: 3.8.1(@types/react-dom@18.3.5)(@types/react@18.3.27)(react-dom@18.3.1)(react-is@19.2.7)(react@18.3.1)(redux@4.2.1)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -9463,6 +9466,10 @@ packages:
 
   /reflect-metadata@0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
+
+  /reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
     dev: false
 
   /reflect.getprototypeof@1.0.10:
