@@ -1,6 +1,8 @@
 import type { SupportedLocale } from '../common/common.constants';
 import { UserStatus } from '../user/user.types';
 
+import { UserRole } from './auth.types';
+
 /**
  * Auth Domain DTOs
  * Used by backend for class-validator decorators
@@ -26,6 +28,8 @@ export class UserDto {
   email!: string;
   emailVerified!: boolean;
   status!: UserStatus;
+  role!: UserRole;
+  sessionVersion!: number;
   locale!: SupportedLocale;
   hasConnectedAccounts!: boolean;
   createdAt!: string;

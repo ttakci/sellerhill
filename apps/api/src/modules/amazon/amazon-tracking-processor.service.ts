@@ -1,9 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { OrderStatus, TrackingConversionProvider } from '@repo/shared';
+import { extractCorrelationId, generateCorrelationId, OrderStatus, TrackingConversionProvider } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { withCorrelation } from '../../common/observability/correlation.context';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -52,6 +53,18 @@ export class AmazonTrackingProcessorService extends WorkerHost {
   }
 
   async process(job: Job): Promise<void> {
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'amazon-tracking',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      () => this.processTracking(job)
+    );
+  }
+
+  private async processTracking(job: Job): Promise<void> {
     if (job.name !== 'track-amazon-order') {
       this.logger.warn(`Unknown job name: ${job.name}`);
       return;

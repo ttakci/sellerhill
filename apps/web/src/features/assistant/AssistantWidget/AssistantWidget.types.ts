@@ -1,26 +1,28 @@
-export type AssistantMessageRole = 'user' | 'assistant';
-
-export interface AssistantMessage {
-  id: string;
-  role: AssistantMessageRole;
-  text: string;
-}
+import type { AssistantConnectionStatus, AssistantConversationSummaryDto, AssistantMessageDto } from '@repo/shared';
 
 export interface AssistantWidgetProps {
-  /** When sidebar is collapsed, show compact open control only */
   sidebarCollapsed: boolean;
 }
 
 export interface AssistantWidgetComponentProps {
-  sidebarCollapsed: boolean;
-  isOpen: boolean;
+  activeConversationId: string | null;
+  connectionStatus: AssistantConnectionStatus;
+  conversations: AssistantConversationSummaryDto[];
+  draft: string;
+  isLoading: boolean;
   isMinimized: boolean;
-  inputValue: string;
-  messages: AssistantMessage[];
-  onOpen: () => void;
+  isOpen: boolean;
+  isSending: boolean;
+  messages: AssistantMessageDto[];
+  onBack: () => void;
   onClose: () => void;
-  onToggleMinimize: () => void;
-  onRefresh: () => void;
-  onInputChange: (value: string) => void;
+  onConversationSelect: (id: string) => void;
+  onDraftChange: (value: string) => void;
+  onNewConversation: () => void;
+  onOpen: () => void;
   onSend: () => void;
+  onStop: () => void;
+  onToggleMinimize: () => void;
+  sidebarCollapsed: boolean;
+  streamingContent: string;
 }

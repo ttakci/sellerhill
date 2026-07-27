@@ -3,6 +3,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 import { AMAZON_ORDER_SYNC_QUEUE } from './amazon-order-sync.queue';
 
 /**
@@ -36,7 +38,7 @@ export class AmazonOrderSyncSchedulerService implements OnModuleInit {
 
     await this.syncQueue.add(
       'tick',
-      {},
+      stampCurrentCorrelation({}),
       {
         repeat: { pattern: cron },
         jobId: 'amazon-order-sync-tick',

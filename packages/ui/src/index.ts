@@ -163,6 +163,18 @@ export type { IdBadgeProps, StoreType } from './molecules/IdBadge';
 export { LanguageSwitcher } from './molecules/LanguageSwitcher';
 export type { LanguageSwitcherProps, LocaleOption } from './molecules/LanguageSwitcher';
 
+export { MessageComposer } from './molecules/MessageComposer';
+export type {
+  MessageComposerCancelAction,
+  MessageComposerProps,
+  MessageComposerSendAction,
+  MessageComposerSize,
+  MessageComposerSubmitMode,
+} from './molecules/MessageComposer';
+
+export { SafeMarkdown } from './molecules/SafeMarkdown';
+export type { SafeMarkdownProps } from './molecules/SafeMarkdown';
+
 // Organisms
 export { DataTable } from './organisms/DataTable';
 export type { ColumnOption, DataTableProps } from './organisms/DataTable';

@@ -1,3 +1,4 @@
+import { UserRole } from '@repo/shared';
 import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -123,6 +124,34 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.NavItemContent>
             </S.NavItem>
 
+            {user?.role === UserRole.SUPPORT || user?.role === UserRole.ADMIN ? (
+              <S.NavItem
+                $active={pathWithoutLocale.startsWith('/support')}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/support')}
+                title={sidebarCollapsed ? t('translation:support.title') : undefined}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="help" size={20} />
+                  {!sidebarCollapsed && t('translation:support.title')}
+                </S.NavItemContent>
+              </S.NavItem>
+            ) : null}
+
+            {user?.role === UserRole.ADMIN ? (
+              <S.NavItem
+                $active={pathWithoutLocale.startsWith('/admin/assistant')}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/admin/assistant')}
+                title={sidebarCollapsed ? t('translation:adminAssistant.title') : undefined}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="gauge" size={20} />
+                  {!sidebarCollapsed && t('translation:adminAssistant.title')}
+                </S.NavItemContent>
+              </S.NavItem>
+            ) : null}
+
             <S.NavItem
               $active={
                 pathWithoutLocale.startsWith('/settings') ||
@@ -138,6 +167,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 {!sidebarCollapsed && t('translation:menu.settings')}
               </S.NavItemContent>
             </S.NavItem>
+
+            {user?.role === UserRole.ADMIN && (
+              <S.NavItem
+                $active={pathWithoutLocale === '/admin'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/admin')}
+                title={sidebarCollapsed ? t('translation:menu.admin') : undefined}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="gauge" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.admin')}
+                </S.NavItemContent>
+              </S.NavItem>
+            )}
           </S.NavSection>
 
           <S.SidebarFooter>

@@ -2,6 +2,8 @@ import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-win
 import * as winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
+import { getCorrelation } from '../observability/correlation.context';
+
 /**
  * Winston Logger Configuration
  * 
@@ -15,9 +17,18 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+export const correlationFormat = winston.format((info) => {
+  const context = getCorrelation();
+  if (context.correlationId) {info.correlationId = context.correlationId;}
+  if (context.queueName) {info.queueName = context.queueName;}
+  if (context.jobId) {info.jobId = context.jobId;}
+  return info;
+});
+
 // Console transport for development
 const consoleTransport = new winston.transports.Console({
   format: winston.format.combine(
+    correlationFormat(),
     winston.format.timestamp(),
     winston.format.ms(),
     nestWinstonModuleUtilities.format.nestLike('API', {
@@ -35,6 +46,7 @@ const errorFileTransport = new DailyRotateFile({
   maxFiles: '30d',
   maxSize: '20m',
   format: winston.format.combine(
+    correlationFormat(),
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.json(),
@@ -48,6 +60,7 @@ const combinedFileTransport = new DailyRotateFile({
   maxFiles: '14d',
   maxSize: '20m',
   format: winston.format.combine(
+    correlationFormat(),
     winston.format.timestamp(),
     winston.format.json(),
   ),

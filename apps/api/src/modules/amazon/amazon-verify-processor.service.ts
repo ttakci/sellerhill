@@ -1,6 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
+import { extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job } from 'bullmq';
+
+import { withCorrelation } from '../../common/observability/correlation.context';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -28,6 +31,18 @@ export class AmazonVerifyProcessorService extends WorkerHost {
   }
 
   async process(job: Job<VerifyAmazonAccountData>): Promise<void> {
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'amazon-verify',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      () => this.verifyAccount(job)
+    );
+  }
+
+  private async verifyAccount(job: Job<VerifyAmazonAccountData>): Promise<void> {
     const { userId, accountId } = job.data;
 
     // Account may have been deleted between enqueue and execution.

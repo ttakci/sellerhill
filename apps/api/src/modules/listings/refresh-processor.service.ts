@@ -1,10 +1,12 @@
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { KeepaUsageSource, ListingStatus, type KeepaProduct } from '@repo/shared';
+import { extractCorrelationId, generateCorrelationId, KeepaUsageSource, ListingStatus, type KeepaProduct } from '@repo/shared';
 import { Job, Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { withCorrelation } from '../../common/observability/correlation.context';
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
@@ -51,13 +53,23 @@ export class RefreshProcessorService extends WorkerHost {
   }
 
   async process(job: Job<SelectBatchJobData | RefreshBatchJobData>): Promise<void> {
-    if (job.name === 'select-refresh-batch') {
-      await this.selectRefreshBatch();
-    } else if (job.name === 'refresh-batch') {
-      await this.refreshBatch(job as Job<RefreshBatchJobData>);
-    } else {
-      this.logger.warn(`Unknown keepa-refresh job name: ${job.name}`);
-    }
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'keepa-refresh',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      async () => {
+        if (job.name === 'select-refresh-batch') {
+          await this.selectRefreshBatch();
+        } else if (job.name === 'refresh-batch') {
+          await this.refreshBatch(job as Job<RefreshBatchJobData>);
+        } else {
+          this.logger.warn(`Unknown keepa-refresh job name: ${job.name}`);
+        }
+      }
+    );
   }
 
   /**
@@ -85,7 +97,7 @@ export class RefreshProcessorService extends WorkerHost {
 
     await this.refreshQueue.add(
       'refresh-batch',
-      { productIds },
+      stampCurrentCorrelation({ productIds }),
       {
         // Unique per tick so overlapping scheduler runs don't duplicate; BullMQ
         // exponential backoff handles transport failures (whole batch retries).

@@ -1,3 +1,4 @@
+import enAdmin from './resources/en/admin.json';
 import enAmazon from './resources/en/amazon.json';
 import enAuth from './resources/en/auth.json';
 import enDashboard from './resources/en/dashboard.json';
@@ -8,6 +9,7 @@ import enOrders from './resources/en/orders.json';
 import enProfile from './resources/en/profile.json';
 import enStoreSettings from './resources/en/storeSettings.json';
 import enTranslation from './resources/en/translation.json';
+import trAdmin from './resources/tr/admin.json';
 import trAmazon from './resources/tr/amazon.json';
 import trAuth from './resources/tr/auth.json';
 import trDashboard from './resources/tr/dashboard.json';
@@ -21,6 +23,7 @@ import trTranslation from './resources/tr/translation.json';
 
 
 export {
+  enAdmin,
   enAmazon,
   enAuth,
   enDashboard,
@@ -31,6 +34,7 @@ export {
   enProfile,
   enStoreSettings,
   enTranslation,
+  trAdmin,
   trAmazon,
   trAuth,
   trDashboard,

@@ -2,6 +2,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 /**
  * Producer for the `stock-sync` queue. Order-sync enqueues a job per confirmed
  * sale so affected listings are recomputed + pushed to eBay without waiting for
@@ -28,7 +30,7 @@ export class StockSyncQueueService {
 
     await this.stockSyncQueue.add(
       'sync-product-stock',
-      { productId },
+      stampCurrentCorrelation({ productId }),
       {
         jobId,
         attempts: 3,

@@ -23,6 +23,8 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
+import { withCorrelation } from '../observability/correlation.context';
+
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
@@ -35,6 +37,6 @@ export class RequestIdMiddleware implements NestMiddleware {
     // Add to response headers for client tracking
     res.setHeader('X-Request-ID', requestId);
 
-    next();
+    withCorrelation({ correlationId: requestId, origin: 'http' }, next);
   }
 }

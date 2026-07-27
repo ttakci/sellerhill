@@ -7,6 +7,8 @@ import {
 } from '@repo/shared';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 import { ListingsService } from './listings.service';
 
 @Injectable()
@@ -34,7 +36,7 @@ export class ListingQueueService {
     // 2. Add each ASIN as a separate task to the queue for parallel processing
     const jobs = asins.map((asin) => ({
       name: 'create-listing',
-      data: {
+      data: stampCurrentCorrelation({
         jobId: job.id,
         userId,
         asin,
@@ -43,7 +45,7 @@ export class ListingQueueService {
         shippingPolicyId: request.shippingPolicyId,
         returnPolicyId: request.returnPolicyId,
         asDraft: Boolean(request.asDraft),
-      } as ListingQueueJobData,
+      } as ListingQueueJobData),
       opts: {
         attempts: 3,
         backoff: {

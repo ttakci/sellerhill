@@ -1,6 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
+  extractCorrelationId,
+  generateCorrelationId,
   KeepaUsageSource,
   ListingStatus,
   type ListingQueueJobData,
@@ -8,6 +10,7 @@ import {
 } from '@repo/shared';
 import { Job } from 'bullmq';
 
+import { withCorrelation } from '../../common/observability/correlation.context';
 import { EbayService } from '../ebay/ebay.service';
 
 import { KeepaUsageService } from './keepa-usage.service';
@@ -41,6 +44,18 @@ export class ListingProcessorService extends WorkerHost {
    * Process a listing job task from the queue
    */
   async process(job: Job<ListingQueueJobData>): Promise<void> {
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'listings',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      () => this.processListing(job)
+    );
+  }
+
+  private async processListing(job: Job<ListingQueueJobData>): Promise<void> {
     const {
       jobId,
       userId,

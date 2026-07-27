@@ -41,9 +41,18 @@ export interface AuthResponse {
 /**
  * JWT token payload
  */
+export enum UserRole {
+  CUSTOMER = 'customer',
+  SUPPORT = 'support',
+  ADMIN = 'admin',
+}
+
 export interface JwtPayload {
   sub: string; // userId
   email: string;
+  role: UserRole;
+  sessionId: string;
+  sessionVersion: number;
   iat?: number;
   exp?: number;
 }
@@ -85,7 +94,7 @@ export interface RefreshTokenRequest {
  * Used by NestJS controllers with @Request() decorator
  */
 export interface AuthenticatedRequest {
-  user: { sub: string; email: string };
+  user: JwtPayload;
 }
 
 /**

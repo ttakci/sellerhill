@@ -3,7 +3,8 @@ version: '3.8'
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:16-alpine
+    # Back up postgres_data with pg_dump before switching an existing volume to this image.
+    image: pgvector/pgvector:0.8.1-pg16
     container_name: zonds_postgres
     restart: unless-stopped
     environment:

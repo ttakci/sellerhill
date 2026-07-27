@@ -117,6 +117,7 @@
     "orders": "Siparişler",
     "stores": "Mağazalar",
     "settings": "Ayarlar",
+    "admin": "Yönetim Operasyonları",
     "configuration": "Yapılandırma",
     "storeSettings": "Mağaza Ayarları",
     "listingSettingsGroups": "Listeleme Ayar Grupları",
@@ -139,10 +140,45 @@
     "placeholder": "Mesajınızı yazın…",
     "placeholderReply": "Mesajınız alındı. Yapay zekâ yanıtları yakında aktif olacak.",
     "send": "Gönder",
+    "cancel": "Yanıtı durdur",
+    "newConversation": "Yeni sohbet",
+    "conversations": "Sohbetler",
+    "emptyTitle": "Bir sohbet başlatın",
+    "emptyDescription": "Zon'a ilanlarınız, siparişleriniz, ayarlarınız veya hesabınız hakkında sorun.",
+    "offline": "Çevrimdışısınız. Sohbet geçmişiniz kullanılabilir.",
+    "loading": "Sohbetler yükleniyor…",
+    "connected": "Bağlı",
+    "disconnected": "Yeniden bağlanıyor…",
+    "retry": "Yanıtı yeniden dene",
     "refresh": "Sohbeti yenile",
     "minimize": "Küçült",
     "expand": "Genişlet",
     "close": "Kapat"
+  },
+  "support": {
+    "title": "Destek görüşmeleri",
+    "subtitle": "Müşteri taleplerini inceleyin ve yanıtlayın.",
+    "loading": "Destek görüşmeleri yükleniyor…",
+    "emptyTitle": "Görüşme yok",
+    "emptyDescription": "Bu kuyrukta görüşme bulunmuyor.",
+    "filters": {
+      "waiting": "Bekleyen",
+      "assigned_to_me": "Bana atanan",
+      "open": "Açık",
+      "resolved": "Çözüldü",
+      "all": "Tümü"
+    }
+  },
+  "adminAssistant": {
+    "title": "Asistan operasyonları",
+    "subtitle": "Görüşme içeriğini açığa çıkarmadan platform sağlığını, kuyrukları, kullanımı ve bilgi işlemlerini izleyin.",
+    "loading": "Asistan operasyonları yükleniyor…",
+    "users": "Kullanıcılar",
+    "activeListings": "Aktif ilanlar",
+    "orders": "Son 30 gündeki siparişler",
+    "queues": "Kuyruk sağlığı",
+    "usage": "Kullanım",
+    "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI aracıyla değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."
   },
   "header": {
     "selectLanguage": "Dil Seçimi",

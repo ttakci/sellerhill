@@ -16,12 +16,18 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HealthCheck, HealthCheckService, MemoryHealthIndicator } from '@nestjs/terminus';
 
+import { RedisHealthIndicator } from '../common/redis/redis-health.indicator';
+
+import { PgvectorHealthIndicator } from './pgvector-health.indicator';
+
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
-    private readonly memory: MemoryHealthIndicator
+    private readonly memory: MemoryHealthIndicator,
+    private readonly redis: RedisHealthIndicator,
+    private readonly pgvector: PgvectorHealthIndicator
   ) {}
 
   @Get()
@@ -62,6 +68,10 @@ export class HealthController {
   @ApiOkResponse({ description: 'API is ready' })
   @ApiResponse({ status: 503, description: 'Service is not ready' })
   ready() {
-    return this.health.check([() => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024)]);
+    return this.health.check([
+      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
+      () => this.redis.isHealthy('redis'),
+      () => this.pgvector.isHealthy('pgvector'),
+    ]);
   }
 }

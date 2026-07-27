@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
+import { configureAuthRefresh } from '@/api/authRefreshBootstrap';
 import { baseApi } from '@/api/baseApi';
 import authReducer from '@/features/auth/store/authSlice';
 
@@ -13,3 +14,5 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+configureAuthRefresh(store.dispatch, () => store.getState());

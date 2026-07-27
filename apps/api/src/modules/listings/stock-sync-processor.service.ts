@@ -1,6 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
+import { extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job } from 'bullmq';
+
+import { withCorrelation } from '../../common/observability/correlation.context';
 
 import { ProductSyncService } from './product-sync.service';
 
@@ -27,14 +30,24 @@ export class StockSyncProcessorService extends WorkerHost {
   }
 
   async process(job: Job): Promise<void> {
-    const { productId } = job.data as StockSyncJobData;
-    this.logger.debug(`Processing stock-sync for product ${productId} (job ${job.id})`);
-    try {
-      await this.productSyncService.syncListingsForProduct(productId);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`stock-sync failed for product ${productId}: ${message}`);
-      throw error; // BullMQ will retry with backoff
-    }
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'stock-sync',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      async () => {
+        const { productId } = job.data as StockSyncJobData;
+        this.logger.debug(`Processing stock-sync for product ${productId} (job ${job.id})`);
+        try {
+          await this.productSyncService.syncListingsForProduct(productId);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(`stock-sync failed for product ${productId}: ${message}`);
+          throw error;
+        }
+      }
+    );
   }
 }

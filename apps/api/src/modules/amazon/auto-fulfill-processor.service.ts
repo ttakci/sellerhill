@@ -1,9 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { AutoFulfillStatus } from '@repo/shared';
+import { AutoFulfillStatus, extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { withCorrelation } from '../../common/observability/correlation.context';
 
 import { AmazonCheckoutService } from './amazon-checkout.service';
 import { AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.constants';
@@ -56,39 +57,40 @@ export class AutoFulfillProcessor extends WorkerHost {
   // All sibling processors in this repo use `process`; the brief's logic is
   // preserved verbatim, only the method name differs.
   async process(job: Job<AutoFulfillJobData>): Promise<void> {
-    const { ebayOrderId, amazonAccountId } = job.data;
-    this.logger.log(`processing fulfill ${ebayOrderId} (attempt ${job.attemptsMade + 1})`);
-    try {
-      await this.checkout.runForOrder(ebayOrderId, amazonAccountId);
-    } catch (err) {
-      // Transport/infra error — BullMQ retries (attempts: 3 from Task 5).
-      // On the final attempt, mark `failed` so the row is not stuck at
-      // `running` once retries exhaust. Blocked errors never reach here
-      // (the checkout runner catches them internally and returns cleanly).
-      const isLast = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
-      if (isLast) {
-        const failedErr = err as Error;
-        this.logger.error(
-          `fulfill failed (final) ${ebayOrderId}: ${failedErr.message}`,
-          failedErr.stack,
-        );
-        // Self-protect the final-attempt status write: if the DB itself caused
-        // the transport failure, this UPDATE would throw and mask the original
-        // error (and skip the `throw err` below). Swallow the status-write
-        // failure so the original error reaches BullMQ intact. A row stuck at
-        // `running` is the correct safe degradation here — operator investigates.
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: AUTO_FULFILL_QUEUE,
+        jobId: job.id,
+        origin: 'worker',
+      },
+      async () => {
+        const { ebayOrderId, amazonAccountId } = job.data;
+        this.logger.log(`processing fulfill ${ebayOrderId} (attempt ${job.attemptsMade + 1})`);
         try {
-          await this.db.query(
-            `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
-            [AutoFulfillStatus.FAILED, ebayOrderId],
-          );
-        } catch (markErr) {
-          this.logger.warn(
-            `failed to mark order ${ebayOrderId} as FAILED: ${(markErr as Error).message} — row stays at running`,
-          );
+          await this.checkout.runForOrder(ebayOrderId, amazonAccountId);
+        } catch (err) {
+          const isLast = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
+          if (isLast) {
+            const failedErr = err as Error;
+            this.logger.error(
+              `fulfill failed (final) ${ebayOrderId}: ${failedErr.message}`,
+              failedErr.stack,
+            );
+            try {
+              await this.db.query(
+                `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+                [AutoFulfillStatus.FAILED, ebayOrderId],
+              );
+            } catch (markErr) {
+              this.logger.warn(
+                `failed to mark order ${ebayOrderId} as FAILED: ${(markErr as Error).message} — row stays at running`,
+              );
+            }
+          }
+          throw err;
         }
       }
-      throw err; // let BullMQ apply backoff/retry (or give up on final attempt)
-    }
+    );
   }
 }

@@ -2,6 +2,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 /**
  * Internal queue name — BullMQ queue string (not a domain status). Kept here
  * so the queue service, processor, scheduler, and module registration all
@@ -30,7 +32,7 @@ export class AmazonOrderSyncQueueService {
   async enqueueAccount(accountId: string): Promise<void> {
     await this.queue.add(
       'sync-account',
-      { accountId },
+      stampCurrentCorrelation({ accountId }),
       {
         jobId: `acct-${accountId}`,
         removeOnComplete: 100,

@@ -1,9 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { EbayAccountStatus } from '@repo/shared';
+import { EbayAccountStatus, extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { withCorrelation } from '../../common/observability/correlation.context';
 
 import { OrderSyncService, type EbayAccountForSync } from './order-sync.service';
 
@@ -23,22 +24,31 @@ export class OrderSyncProcessorService extends WorkerHost {
   }
 
   async process(job: Job): Promise<void> {
-    this.logger.log(`Processing order sync job: ${job.name} (id: ${job.id})`);
-
-    try {
-      if (job.name === 'sync-all-orders') {
-        await this.syncAllUsers();
-      } else if (job.name === 'sync-user-orders') {
-        const { userId } = job.data as SyncUserOrdersData;
-        await this.syncSingleUser(userId);
-      } else {
-        this.logger.warn(`Unknown job name: ${job.name}`);
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: 'order-sync',
+        jobId: job.id,
+        origin: 'worker',
+      },
+      async () => {
+        this.logger.log(`Processing order sync job: ${job.name} (id: ${job.id})`);
+        try {
+          if (job.name === 'sync-all-orders') {
+            await this.syncAllUsers();
+          } else if (job.name === 'sync-user-orders') {
+            const { userId } = job.data as SyncUserOrdersData;
+            await this.syncSingleUser(userId);
+          } else {
+            this.logger.warn(`Unknown job name: ${job.name}`);
+          }
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(`Order sync job ${job.name} failed: ${message}`);
+          throw error;
+        }
       }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Order sync job ${job.name} failed: ${message}`);
-      throw error;
-    }
+    );
   }
 
   /**

@@ -137,19 +137,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh authentication tokens',
-    description: 'Uses HttpOnly refresh cookie (preferred) or body.refreshToken (legacy)',
+    description: 'Rotates the opaque persisted refresh session from the HttpOnly cookie',
   })
   @ApiOkResponse({ description: 'Tokens refreshed successfully' })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token' })
   async refresh(
     @Req() req: CookieRequest,
-    @Body() body: { refreshToken?: string },
     @Res({ passthrough: true }) res: Response
   ): Promise<Omit<AuthResponse, 'refreshToken'>> {
     // `req.cookies` is `any` from cookie-parser's type augment — narrow explicitly.
     const rawCookie: unknown = req.cookies?.[REFRESH_COOKIE_NAME];
     const cookieToken = typeof rawCookie === 'string' ? rawCookie : '';
-    const token = cookieToken || body?.refreshToken;
+    const token = cookieToken;
     if (!token) {
       throw new UnauthorizedException('auth.errors.invalidToken');
     }
@@ -161,10 +160,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Logout',
-    description: 'Clears the HttpOnly refresh cookie',
+    description: 'Revokes the persisted refresh session and clears its HttpOnly cookie',
   })
   @ApiOkResponse({ description: 'Logged out' })
-  logout(@Res({ passthrough: true }) res: Response): GenericSuccessResponse {
+  async logout(
+    @Req() req: CookieRequest,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<GenericSuccessResponse> {
+    const rawCookie: unknown = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (typeof rawCookie === 'string') {await this.authService.logout(rawCookie);}
     clearRefreshTokenCookie(res);
     return { success: true };
   }

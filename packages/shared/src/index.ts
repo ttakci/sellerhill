@@ -47,6 +47,20 @@ export * from './domain/amazon/index';
 // Domain - LLM
 export * from './domain/llm/index';
 
+// Domain - Admin (Observability)
+export * from './domain/admin/index';
+
+// Domain - Queue correlation
+export * from './domain/queue/index';
+
+// Domain - FinOps (Pricing & Cost Attribution)
+export * from './domain/finops/index';
+
+// Domain - Assistant, Support, Knowledge
+export * from './domain/assistant/index';
+export * from './domain/support/index';
+export * from './domain/knowledge/index';
+
 // API Error Types
 export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
 
@@ -83,3 +97,8 @@ export * from './schemas/orders/index';
 
 // Amazon Schemas
 export * from './schemas/amazon/index';
+
+// Assistant, Support, Knowledge Schemas
+export * from './schemas/assistant/index';
+export * from './schemas/support/index';
+export * from './schemas/knowledge/index';

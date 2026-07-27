@@ -11,8 +11,10 @@
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/scripts/migrate.ts",
     "migrate:prod": "node dist/scripts/migrate.js",
+    "user:set-role": "tsx src/scripts/user-set-role.ts",
     "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:integration": "jest --config jest.integration.config.js --runInBand"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
@@ -38,6 +40,7 @@
     "express": "^4.18.2",
     "google-auth-library": "^10.9.1",
     "helmet": "^7.1.0",
+    "ioredis": "^5.8.2",
     "nest-winston": "^1.9.4",
     "nodemailer": "^7.0.12",
     "otplib": "^13.4.0",
@@ -66,6 +69,7 @@
     "@types/pg": "^8.16.0",
     "@types/uuid": "^11.0.0",
     "jest": "^29.7.0",
+    "testcontainers": "^10.18.0",
     "ts-jest": "^29.1.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.7.0",

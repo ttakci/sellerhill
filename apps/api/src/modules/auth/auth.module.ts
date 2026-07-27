@@ -7,10 +7,14 @@ import { AUTH_CONSTANTS } from '@repo/shared';
 import { DatabaseModule } from '../../common/database/database.module';
 import { EmailModule } from '../email/email.module';
 
+import { AuthSessionRepository } from './auth-session.repository';
+import { AuthSessionService } from './auth-session.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google-auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { PrivilegedSessionGuard } from './privileged-session.guard';
+import { RolesGuard } from './roles.guard';
 
 @Module({
   imports: [
@@ -29,7 +33,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleAuthService, JwtStrategy],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, AuthSessionRepository, AuthSessionService, GoogleAuthService, JwtStrategy, RolesGuard, PrivilegedSessionGuard],
+  exports: [AuthService, AuthSessionService, RolesGuard, PrivilegedSessionGuard, JwtModule],
 })
 export class AuthModule {}

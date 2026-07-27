@@ -4,11 +4,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import type { JwtPayload } from '@repo/shared';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+import { AuthSessionService } from './auth-session.service';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService, private readonly sessions: AuthSessionService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -17,11 +19,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     this.logger.debug('JwtStrategy initialized with dynamic secret');
   }
 
-  validate(payload: JwtPayload): JwtPayload {
+  validate(payload: JwtPayload): Promise<JwtPayload> {
     this.logger.debug(`Validating JWT for user: ${payload.sub}`);
-    return {
-      sub: payload.sub,
-      email: payload.email,
-    };
+    return this.sessions.validateAccess(payload);
   }
 }

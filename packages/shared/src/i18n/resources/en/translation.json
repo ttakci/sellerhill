@@ -117,6 +117,7 @@
     "orders": "Orders",
     "stores": "Stores",
     "settings": "Settings",
+    "admin": "Admin Operations",
     "configuration": "Configuration",
     "storeSettings": "Store Settings",
     "listingSettingsGroups": "Listing Settings Groups",
@@ -139,10 +140,45 @@
     "placeholder": "Type your message…",
     "placeholderReply": "Thanks for your message. Full AI replies will be available soon.",
     "send": "Send",
+    "cancel": "Cancel response",
+    "newConversation": "New conversation",
+    "conversations": "Conversations",
+    "emptyTitle": "Start a conversation",
+    "emptyDescription": "Ask Zon about your listings, orders, settings, or account.",
+    "offline": "You are offline. Your conversation history is still available.",
+    "loading": "Loading conversations…",
+    "connected": "Connected",
+    "disconnected": "Reconnecting…",
+    "retry": "Retry response",
     "refresh": "Refresh chat",
     "minimize": "Minimize",
     "expand": "Expand",
     "close": "Close"
+  },
+  "support": {
+    "title": "Support conversations",
+    "subtitle": "Review and respond to customer requests.",
+    "loading": "Loading support conversations…",
+    "emptyTitle": "No conversations",
+    "emptyDescription": "There are no conversations in this queue.",
+    "filters": {
+      "waiting": "Waiting",
+      "assigned_to_me": "Assigned to me",
+      "open": "Open",
+      "resolved": "Resolved",
+      "all": "All"
+    }
+  },
+  "adminAssistant": {
+    "title": "Assistant operations",
+    "subtitle": "Monitor platform health, queues, usage, and knowledge operations without exposing conversation content.",
+    "loading": "Loading assistant operations…",
+    "users": "Users",
+    "activeListings": "Active listings",
+    "orders": "Orders in the last 30 days",
+    "queues": "Queue health",
+    "usage": "Usage",
+    "roleCliNotice": "User roles are changed only through the operator CLI. HTTP role escalation is disabled."
   },
   "header": {
     "selectLanguage": "Select Language",

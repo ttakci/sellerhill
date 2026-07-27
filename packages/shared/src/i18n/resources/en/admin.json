@@ -1,0 +1,26 @@
+{
+  "admin": {
+    "title": "Admin operations",
+    "subtitle": "Monitor platform costs, queues, provider usage and customer attribution.",
+    "tabs": { "queues": "Queues", "costs": "Costs", "users": "Users" },
+    "queue": { "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}" },
+    "cost": { "keepaBalance": "Keepa token balance", "users": "Total users" },
+    "users": { "unattributed": "Unattributed platform usage" },
+    "warnings": {
+      "queue_waiting": "{{subject}} queue waiting threshold exceeded",
+      "keepa_low_tokens": "Keepa token balance is low",
+      "llm_failure_rate": "LLM failure rate is elevated"
+    },
+    "metrics": {
+      "keepa_tokens": "Keepa tokens",
+      "llm_prompt_tokens": "LLM prompt tokens",
+      "llm_completion_tokens": "LLM completion tokens",
+      "llm_embedding_tokens": "LLM embedding tokens",
+      "amazon_browser_actions": "Amazon browser actions",
+      "ebay_api_calls": "eBay API calls",
+      "proxy_bytes": "Proxy bytes",
+      "proxy_requests": "Proxy requests",
+      "tracking_conversions": "Tracking conversions"
+    }
+  }
+}

@@ -49,6 +49,8 @@ class EnvironmentVariables {
   REDIS_HOST: string = 'localhost';
 
   @IsNumber()
+  @Min(1)
+  @Max(65535)
   @IsOptional()
   REDIS_PORT: number = 6379;
 
@@ -57,8 +59,14 @@ class EnvironmentVariables {
   REDIS_PASSWORD?: string;
 
   @IsNumber()
+  @Min(0)
+  @Max(15)
   @IsOptional()
   REDIS_DB: number = 0;
+
+  @IsString()
+  @IsOptional()
+  REDIS_KEY_PREFIX: string = 'zonds';
 
   @IsString()
   @IsOptional()

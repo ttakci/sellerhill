@@ -1,8 +1,11 @@
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
+import { extractCorrelationId, generateCorrelationId } from '@repo/shared';
 import { Job, Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { withCorrelation } from '../../common/observability/correlation.context';
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 
 import { AMAZON_ORDER_SYNC_QUEUE } from './amazon-order-sync.queue';
 import { AmazonOrderSyncService } from './amazon-order-sync.service';
@@ -41,15 +44,25 @@ export class AmazonOrderSyncProcessor extends WorkerHost {
   }
 
   async process(job: Job<SyncAccountJobData | TickJobData>): Promise<void> {
-    if (job.name === 'tick') {
-      await this.handleTick();
-    } else if (job.name === 'sync-account') {
-      const { accountId } = job.data as SyncAccountJobData;
-      this.logger.debug(`syncing Amazon orders for account ${accountId}`);
-      await this.syncService.runForAccount(accountId);
-    } else {
-      this.logger.warn(`Unknown ${AMAZON_ORDER_SYNC_QUEUE} job name: ${job.name}`);
-    }
+    return withCorrelation(
+      {
+        correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
+        queueName: AMAZON_ORDER_SYNC_QUEUE,
+        jobId: job.id,
+        origin: 'worker',
+      },
+      async () => {
+        if (job.name === 'tick') {
+          await this.handleTick();
+        } else if (job.name === 'sync-account') {
+          const { accountId } = job.data as SyncAccountJobData;
+          this.logger.debug(`syncing Amazon orders for account ${accountId}`);
+          await this.syncService.runForAccount(accountId);
+        } else {
+          this.logger.warn(`Unknown ${AMAZON_ORDER_SYNC_QUEUE} job name: ${job.name}`);
+        }
+      }
+    );
   }
 
   /**
@@ -71,7 +84,7 @@ export class AmazonOrderSyncProcessor extends WorkerHost {
       try {
         await this.syncQueue.add(
           'sync-account',
-          { accountId: account.id },
+          stampCurrentCorrelation({ accountId: account.id }),
           {
             jobId: `acct-${account.id}`,
             attempts: 3,

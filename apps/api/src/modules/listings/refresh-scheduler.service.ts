@@ -3,6 +3,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 /**
  * Registers the stale-driven refresh tick.
  *
@@ -30,7 +32,7 @@ export class RefreshSchedulerService implements OnModuleInit {
 
     await this.refreshQueue.add(
       'select-refresh-batch',
-      {},
+      stampCurrentCorrelation({}),
       {
         repeat: { pattern: cron },
         jobId: 'keepa-refresh-tick',

@@ -2,6 +2,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 interface VerifyAmazonAccountData {
   userId: string;
   accountId: string;
@@ -27,7 +29,7 @@ export class AmazonVerifyQueueService {
   async enqueue(userId: string, accountId: string): Promise<void> {
     await this.verifyQueue.add(
       'verify-amazon-account',
-      { userId, accountId },
+      stampCurrentCorrelation({ userId, accountId }),
       {
         jobId: `verify-${accountId}`,
         removeOnComplete: true,

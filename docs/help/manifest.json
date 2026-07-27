@@ -1,0 +1,258 @@
+{
+    "version":  1,
+    "items":  [
+                  {
+                      "locale":  "en",
+                      "checksum":  "609dad7fce57d22432c29caeec0cd84e24e6d9c1dc0f5428675c32daeab626ea",
+                      "version":  1,
+                      "slug":  "getting-started",
+                      "sourcePath":  "en/getting-started.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "cdf2d811a2c139549aaeb41074d5df3a07dec9701ef7ac2970ab2b5ac01af404",
+                      "version":  1,
+                      "slug":  "getting-started",
+                      "sourcePath":  "tr/getting-started.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "23ce19b59fde6c267cf144c7f4c18a5bbe68d64775e121a3b7ff1e6a80d7bc54",
+                      "version":  1,
+                      "slug":  "account-security",
+                      "sourcePath":  "en/account-security.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "84530d3f4ce13bcdefe66486a6b83def345c399898fd079ab7eadfe640bb1e6e",
+                      "version":  1,
+                      "slug":  "account-security",
+                      "sourcePath":  "tr/account-security.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "2f17ca5c1ac4ca67e05d6b4d3c2f79e03ad7184122bfa863864fe4767a54791a",
+                      "version":  1,
+                      "slug":  "connect-ebay",
+                      "sourcePath":  "en/connect-ebay.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "84076cce6211875a36805179655bb37e76ed9fc5e19180ccab7668b43b7f3748",
+                      "version":  1,
+                      "slug":  "connect-ebay",
+                      "sourcePath":  "tr/connect-ebay.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "daa3e014d09e5748b6904754ef5096a07dcc174fbf76a1f0cb0b34f2191059e0",
+                      "version":  1,
+                      "slug":  "connect-amazon",
+                      "sourcePath":  "en/connect-amazon.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "c0832c66dddee95494fac2b716b3331b9f585f7e96e353d2447f52487a2aee2d",
+                      "version":  1,
+                      "slug":  "connect-amazon",
+                      "sourcePath":  "tr/connect-amazon.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "f5a84b0eddbdf0f7736439415d02badcf05ab562ec6a7c66780fefdf74f89c56",
+                      "version":  1,
+                      "slug":  "listings-create",
+                      "sourcePath":  "en/listings-create.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "6266ff9258dd20f724c07160960e9051ff0339013d211e6a6f2b755cf017b7ce",
+                      "version":  1,
+                      "slug":  "listings-create",
+                      "sourcePath":  "tr/listings-create.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "fa79a1e46a6df1494245334de2f845264cb77f8580ed4bc57fb6ebb293f78079",
+                      "version":  1,
+                      "slug":  "listings-create-draft",
+                      "sourcePath":  "en/listings-create-draft.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "7cea6f4e914b51a943660756d7eb4961181d38afc86409da43fca9373611833c",
+                      "version":  1,
+                      "slug":  "listings-create-draft",
+                      "sourcePath":  "tr/listings-create-draft.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "d3adc5691a99886dec02bb17941ab2912f1a771fe867ee8e1c90cbda128b93f8",
+                      "version":  1,
+                      "slug":  "listings-manage",
+                      "sourcePath":  "en/listings-manage.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "426af96dc42201a1a7d490a93788ae91a24605dd5c83ec6f63c69dce6f5692aa",
+                      "version":  1,
+                      "slug":  "listings-manage",
+                      "sourcePath":  "tr/listings-manage.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "aaef18492288beaf1df089da823a67eec7ba23e22ab184a23ae59cf0cc7aa213",
+                      "version":  1,
+                      "slug":  "listing-groups",
+                      "sourcePath":  "en/listing-groups.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "27abb862861dc71a0ff1b4218a6e3f7d0c38fdb37e870014a8964b56edf89c7d",
+                      "version":  1,
+                      "slug":  "listing-groups",
+                      "sourcePath":  "tr/listing-groups.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "c60f02a13ceee0abf9319c84ca3c7b5e55a1a4aa279a6b8256b13491ebc7b185",
+                      "version":  1,
+                      "slug":  "repricing",
+                      "sourcePath":  "en/repricing.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "45c12a67ddb6aaca49179eb5c2d322b2f8a1db26fdae4e6e98e505f0ae4a0840",
+                      "version":  1,
+                      "slug":  "repricing",
+                      "sourcePath":  "tr/repricing.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "207936724e81df549b24f9bf7829c94c5ec34ef695328198e17b49946faa2b23",
+                      "version":  1,
+                      "slug":  "inventory",
+                      "sourcePath":  "en/inventory.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "67f51fd4f8465887a6f864e49190307d111997aca3e56ac2a25d53e05a975f87",
+                      "version":  1,
+                      "slug":  "inventory",
+                      "sourcePath":  "tr/inventory.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "7ac23e981636f14a9298721b115c39a3852f778c52e93af526e8421763f0f8b6",
+                      "version":  1,
+                      "slug":  "orders",
+                      "sourcePath":  "en/orders.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "a2aef1584024d02c90094fe59cbf4c5a70c356d9997cbb00e7b8cfecf9afe2b1",
+                      "version":  1,
+                      "slug":  "orders",
+                      "sourcePath":  "tr/orders.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "ecf2364617bc6ee1467551d790d9e9851905fa22bb6c5447610fdb4dc36928b0",
+                      "version":  1,
+                      "slug":  "amazon-costs",
+                      "sourcePath":  "en/amazon-costs.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "9b87de86087e43e376e32a36b23cab4d3a93b2d7118dc3e8df338b5e2e441e6f",
+                      "version":  1,
+                      "slug":  "amazon-costs",
+                      "sourcePath":  "tr/amazon-costs.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "4b86950b5eff188be37c37c1f8fdaa8f70abd53758525d131586f2876308de31",
+                      "version":  1,
+                      "slug":  "fulfillment",
+                      "sourcePath":  "en/fulfillment.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "964db406e843e01fc447e882b5e9e47303e4aa0ac614e7a41dac84ebe62e5831",
+                      "version":  1,
+                      "slug":  "fulfillment",
+                      "sourcePath":  "tr/fulfillment.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "398820e159d21b43e9b27680abc2d9cea36c678bdd99da4defe24cccf92293e3",
+                      "version":  1,
+                      "slug":  "tracking",
+                      "sourcePath":  "en/tracking.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "4a2b026b150158b066d8fba325a55fb4f70c380b161b8d5215701ae823445ee4",
+                      "version":  1,
+                      "slug":  "tracking",
+                      "sourcePath":  "tr/tracking.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "bb481cdfcfb9631e2f19cc1177fc5eed4d46931b2713d8203bbebf16e1a8b238",
+                      "version":  1,
+                      "slug":  "dashboard",
+                      "sourcePath":  "en/dashboard.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "44276f9d8bc657080bd44c814add65f746aa16284f59d4f99f8dabaed6b86ebb",
+                      "version":  1,
+                      "slug":  "dashboard",
+                      "sourcePath":  "tr/dashboard.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "dd5a36ad831ad7648564a396a998bcde9a0fbc57658418ed128c7a0d63901cb2",
+                      "version":  1,
+                      "slug":  "settings",
+                      "sourcePath":  "en/settings.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "43f97c9843eade061060e8293ee040078f1ea94940119a3e747360d93bce919c",
+                      "version":  1,
+                      "slug":  "settings",
+                      "sourcePath":  "tr/settings.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "6684fcc5092010ad56a897bdc601072c9d72ad8d1a4406a61e904f5f2c1093d5",
+                      "version":  1,
+                      "slug":  "troubleshooting",
+                      "sourcePath":  "en/troubleshooting.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "2e3dd9456974717e4a854e227cb7b51921f38374ef1c14e6c01e56f7990d35f8",
+                      "version":  1,
+                      "slug":  "troubleshooting",
+                      "sourcePath":  "tr/troubleshooting.md"
+                  },
+                  {
+                      "locale":  "en",
+                      "checksum":  "3d46857f81ef76a845f0e944c6ce3d9793945bd7cc2da9f974cb59f610b9c5cf",
+                      "version":  1,
+                      "slug":  "contact-support",
+                      "sourcePath":  "en/contact-support.md"
+                  },
+                  {
+                      "locale":  "tr",
+                      "checksum":  "af2e880a01b7a10684197d87d4bb9ed1179db8d458bebc43f35d877e1402cdb6",
+                      "version":  1,
+                      "slug":  "contact-support",
+                      "sourcePath":  "tr/contact-support.md"
+                  }
+              ],
+    "embeddingSpaceId":  "customer-help-v1"
+}

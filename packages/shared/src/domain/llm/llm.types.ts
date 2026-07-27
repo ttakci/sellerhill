@@ -1,49 +1,12 @@
-// packages/shared/src/domain/llm/llm.types.ts
-
-/** OpenAI-compatible chat message. */
-export interface LlmMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-export interface LlmChatOptions {
-  /** Override the per-purpose model for this call. */
-  model?: string;
-  /** Selects the default model when `model` is omitted. */
-  purpose?: 'content' | 'assistant';
-  temperature?: number;
-  maxTokens?: number;
-  timeoutMs?: number;
-  /** Caller-supplied abort signal (honored alongside internal timeout). */
-  signal?: AbortSignal;
-  /**
-   * Optional attribution for llm_usage_log. Content-gen may omit (no user
-   * context on the service today); assistant (C) should pass userId.
-   */
-  userId?: string;
-}
-
-/** Streaming chunk — `delta` is accumulated text so far (not raw incremental). */
-export interface LlmChatChunk {
-  delta: string;
-  model: string;
-  done: boolean;
-}
-
-export interface LlmChatResult {
-  text: string;
-  model: string;
-  /** Prompt tokens when the provider reports usage; else undefined. */
-  promptTokens?: number;
-  /** Completion tokens when the provider reports usage; else undefined. */
-  completionTokens?: number;
-}
-
-/**
- * Purpose of an LLM call for usage attribution (`llm_usage_log.purpose`).
- * Stored as VARCHAR; never as a raw string literal in write paths.
- */
-export enum LlmUsagePurpose {
-  CONTENT = 'content',
-  ASSISTANT = 'assistant',
-}
+/** OpenAI-compatible chat roles. */
+export enum LlmMessageRole { SYSTEM = 'system', USER = 'user', ASSISTANT = 'assistant' }
+export enum LlmUsagePurpose { CONTENT = 'content', ASSISTANT = 'assistant', ASSISTANT_EMBEDDING = 'assistant_embedding', ASSISTANT_SUMMARY = 'assistant_summary', ASSISTANT_CLASSIFIER = 'assistant_classifier', KNOWLEDGE_INGESTION = 'knowledge_ingestion' }
+export enum LlmUsageSource { PROVIDER = 'provider', ESTIMATED = 'estimated', MIXED = 'mixed' }
+export enum LlmFinishReason { STOP = 'stop', LENGTH = 'length', CONTENT_FILTER = 'content_filter', TOOL_CALLS = 'tool_calls', UNKNOWN = 'unknown' }
+export enum LlmStreamTerminalReason { PROVIDER_DONE = 'provider_done', FINISH_REASON = 'finish_reason', NATURAL_CLOSE = 'natural_close', CALLER_ABORT = 'caller_abort', TIMEOUT = 'timeout', ERROR = 'error' }
+export interface LlmMessage { role: `${LlmMessageRole}`; content: string }
+export interface LlmTokenUsage { promptTokens: number; completionTokens: number; totalTokens: number; source: LlmUsageSource }
+export interface LlmChatOptions { model?: string; purpose?: `${LlmUsagePurpose}`; temperature?: number; maxTokens?: number; timeoutMs?: number; signal?: AbortSignal; userId?: string; conversationId?: string; messageId?: string; generationAttemptId?: string }
+/** Streaming chunk; delta is accumulated text. */
+export interface LlmChatChunk { delta: string; model: string; done: boolean; terminalObserved?: boolean; terminalReason?: LlmStreamTerminalReason; finishReason?: LlmFinishReason; usage?: LlmTokenUsage }
+export interface LlmChatResult { text: string; model: string; promptTokens?: number; completionTokens?: number; totalTokens?: number; usage?: LlmTokenUsage; terminalObserved?: boolean; terminalReason?: LlmStreamTerminalReason; finishReason?: LlmFinishReason }

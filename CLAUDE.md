@@ -169,6 +169,38 @@ Key files: `src/modules/llm/` (`llm.service.ts`, `llm-usage.service.ts`, `sse-pa
 - FE listings: `apps/web/src/features/listings/` — `overview/`, `all/` (+ hooks), `detail/`, `api/listings.api.ts`, domain `ListingCard` under `apps/web/src/domain-ui/`.
 - DB: `products` refresh columns; `listings` overrides + `ebay_account_id`; `listing_settings_groups.content`. Migrations `025`–`031`.
 
+## Admin Observability & FinOps (read-only foundation)
+
+The additive admin foundation lives in `apps/api/src/modules/admin/` and uses the existing assistant/auth RBAC (`UserRole.CUSTOMER|SUPPORT|ADMIN`, `Roles`, `RolesGuard`, `PrivilegedSessionGuard`, migration `041`). It does not introduce a second role system. Every admin route is gated by `JwtAuthGuard` + `RolesGuard` + `PrivilegedSessionGuard` (per-request session revalidation) + `@Roles(UserRole.ADMIN)`; the controller is strictly read-only (no write/delete endpoints).
+
+- `GET /v1/admin/overview` — platform counts, current-period usage summaries, and BullMQ queue counts.
+- `GET /v1/admin/usage/summaries` — `(source, metric)` usage aggregation with optional period/source/metric filters.
+- `GET /v1/admin/queues/health` — waiting/active/completed/failed/delayed/prioritized counts for registered queues. Read-only; the admin module never enqueues.
+- Migration `049` adds append-only `usage_events` and effective-dated `shared_cost_entries`. Existing Keepa/LLM writers still target their source tables; projecting those rows into `usage_events` is a follow-up.
+- Costs use nullable micro-USD `BIGINT`; NULL means unknown and must never be represented as zero. Currency and estimated cost are pair-coupled.
+- Pure helpers in `apps/api/src/modules/admin/finops-helpers.ts` resolve effective pricing, calculate token cost, and allocate shared costs. Tests enforce exact allocation residue.
+- Admin operations frontend is available at `/:locale/admin/assistant` for ADMIN users and intentionally renders only redacted overview, queue, usage, and role-CLI guidance; no prompts, messages, credentials, or raw provider errors are exposed. Support console is available at `/:locale/support` for SUPPORT/ADMIN users. Proxy/tracking telemetry, provider invoice reconciliation, and alerting remain follow-ups.
+- Migration `050` adds partial unique indexes for safe replay of source projections. `UsageEventsService` is the single fail-soft writer; Keepa source rows project with deterministic per-user fair-share, and LLM source rows project prompt/completion/embedding tokens with effective-date pricing from `llm_model_pricing`. Source logs remain authoritative and projection failures never break provider operations.
+- `UsageBackfillService` can idempotently rebuild historical Keepa/LLM projections, but is deliberately not wired to startup or cron. Proxy/tracking enum seams exist without emitting synthetic bytes, requests, or costs.
+- Migration `051` adds append-only `queue_observations` for BullMQ completed/failed events. `QueueEventsCollectorService` watches the operational queues and persists only allowlisted correlation plus a SHA-256 hash of allowlisted identifiers—never raw job payloads. Writes are fail-soft/idempotent; retention defaults to 7 days (clamped 1–90) and runs on the dedicated `queue-observability-retention` queue.
+- Admin read APIs: `GET /v1/admin/queues/observations` (queue/event/correlation/date/page filters) and `GET /v1/admin/queues/observations/:id`. `QUEUE_OBSERVABILITY_ENABLED=false` disables collection; `QUEUE_OBSERVABILITY_RETENTION_DAYS` and `QUEUE_OBSERVABILITY_RETENTION_CRON` tune retention.
+- Shared queue correlation helpers (`stampJobData`, `extractCorrelationId`, `generateCorrelationId`) and an API AsyncLocalStorage context carry trace identity across HTTP and queue boundaries. `RequestIdMiddleware` enters ALS, Winston adds correlation/queue/job structured fields, and all operational producers/workers—including `order-sync`, `stock-sync`, `auto-fulfill`, Amazon sync/tracking/verify, listings, Keepa refresh, and knowledge ingestion—propagate the same ID through fan-out. Job IDs, retry/backoff, repeat schedules, dedup, and priority remain unchanged.
+- `KnowledgeModule` registers its ingestion queue/controller/processor/service and is imported by `AppModule`; the admin queue registry also includes `knowledge-ingestion`.
+
+### Role CLI (operator-only, no HTTP path)
+
+Role escalation/demotion is a **server-console operation only** — there is no HTTP endpoint to change a user's role. The `user-set-role` CLI (`apps/api/src/scripts/user-set-role.ts`, run via `pnpm user:set-role -- --email <email> --role <customer|support|admin>`) is the sole path. Pure parsing/audit logic is extracted into `user-set-role-helpers.ts` (unit-tested by `user-set-role-helpers.spec.ts`).
+
+Security contract (enforced in helpers + script):
+- **Strict `--email`/`--role` parsing** against the shared `UserRole` enum — no positional args, no env fallback, no HTTP. Unknown flags → `RoleCliArgError` → exit 2. `--role` must equal a `UserRole` enum value (e.g. `Admin` is rejected; only `admin` is accepted).
+- **Transactional user lock** — `SELECT id, email, role FROM users WHERE LOWER(email) = LOWER($1) FOR UPDATE` so a concurrent role change cannot race.
+- **Change only if needed** — `shouldChangeRole(current, next)` guards no-op writes; a re-run with the same role exits 0 without writing anything.
+- **Session invalidation** — on a real change, all active `auth_refresh_sessions` for the user are revoked explicitly. Migration `041`'s `users_security_change_revoke_sessions` trigger also bumps `users.session_version` + revokes sessions on the role UPDATE; the explicit revoke is defense-in-depth (survives a dropped trigger). The bumped `session_version` additionally invalidates all outstanding access tokens (validated via `AuthSessionService.validateAccess`).
+- **Durable redacted audit** — a row is inserted into `audit_logs` **in the same transaction** (commits atomically with the role change, or rolls back with it). `action='ROLE_CHANGE'`, `resource_type='user'`, `details` JSONB carries only `{ action, previousRole, newRole, targetUserId, actor|null, changedAt }` — never email/password/session secrets. The email is recoverable by joining `audit_logs.user_id` → `users`; it is not duplicated in `details`.
+- **Exit codes**: `0` changed (or already target role: no-op success), `2` bad args, `3` user not found, `1` DB/transaction failure.
+
+The CLI loads `apps/api/.env` (for `DATABASE_URL`) like `migrate.ts`; it does NOT bootstrap the NestJS app context. Operator identity (the server-shell `$USER`) is recorded as the audit `actor` when available, else `null`. The script files (`apps/api/src/scripts/**/*.ts`) follow `migrate.ts`/`knowledge.ts` precedent for console output + dotenv typing; no `eslint-disable` is used in the new files.
+
 ## Order Management
 
 ### Data Flow
@@ -636,6 +668,9 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `038` | `orders.auto_fulfill_status` enum (`pending|running|placed|blocked|failed|dry_run|skipped`) + `auto_fulfill_blocked_reason VARCHAR(200)` + `auto_fulfill_attempted_at TIMESTAMPTZ` + partial index `idx_orders_auto_fulfill_status WHERE status IN ('blocked','failed')` (A2) |
 | `039` | `users.password_hash` nullable (Google-only users) + `user_oauth_accounts` table (`provider`, `provider_user_id`, `provider_email`, unique `(provider, provider_user_id)`, multi-provider-ready) — Google OAuth |
 | `040` | Append-only `llm_usage_log` (`user_id`, purpose/model, prompt/completion tokens, latency, success/error) for future per-user LLM cost attribution; no billing UI yet — shared LLM infra (B) |
+| `049` | Admin Observability & FinOps foundation: append-only `usage_events` with nullable micro-USD estimated cost + effective-dated `shared_cost_entries`; user roles remain owned by migration `041`, LLM pricing by `048` |
+| `050` | Idempotent Keepa/LLM usage projections: partial unique indexes for user-attributed and platform-level `usage_events` source references |
+| `051` | Queue observability: append-only, payload-redacted `queue_observations` for idempotent BullMQ completed/failed event capture |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 

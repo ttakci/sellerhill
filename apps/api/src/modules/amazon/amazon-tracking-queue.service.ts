@@ -3,6 +3,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 
 @Injectable()
 export class AmazonTrackingQueueService implements OnModuleInit {
@@ -70,7 +71,7 @@ export class AmazonTrackingQueueService implements OnModuleInit {
       { every: interval },
       {
         name: 'track-amazon-order',
-        data: { orderId, amazonAccountId },
+        data: stampCurrentCorrelation({ orderId, amazonAccountId }),
         opts: {
           removeOnComplete: 100,
           removeOnFail: 50,
@@ -94,7 +95,7 @@ export class AmazonTrackingQueueService implements OnModuleInit {
   async triggerImmediateTracking(orderId: string, amazonAccountId: string) {
     await this.trackingQueue.add(
       'track-amazon-order',
-      { orderId, amazonAccountId },
+      stampCurrentCorrelation({ orderId, amazonAccountId }),
       {
         priority: 1,
         jobId: `track-immediate-${orderId}-${Date.now()}`,

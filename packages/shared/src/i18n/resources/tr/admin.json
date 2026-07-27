@@ -1,0 +1,26 @@
+{
+  "admin": {
+    "title": "Yönetim operasyonları",
+    "subtitle": "Platform maliyetlerini, kuyrukları, sağlayıcı kullanımını ve müşteri dağılımını izleyin.",
+    "tabs": { "queues": "Kuyruklar", "costs": "Maliyetler", "users": "Kullanıcılar" },
+    "queue": { "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}" },
+    "cost": { "keepaBalance": "Keepa token bakiyesi", "users": "Toplam kullanıcı" },
+    "users": { "unattributed": "Dağıtılmamış platform kullanımı" },
+    "warnings": {
+      "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
+      "keepa_low_tokens": "Keepa token bakiyesi düşük",
+      "llm_failure_rate": "LLM hata oranı yükseldi"
+    },
+    "metrics": {
+      "keepa_tokens": "Keepa tokenları",
+      "llm_prompt_tokens": "LLM girdi tokenları",
+      "llm_completion_tokens": "LLM çıktı tokenları",
+      "llm_embedding_tokens": "LLM embedding tokenları",
+      "amazon_browser_actions": "Amazon tarayıcı işlemleri",
+      "ebay_api_calls": "eBay API çağrıları",
+      "proxy_bytes": "Proxy baytları",
+      "proxy_requests": "Proxy istekleri",
+      "tracking_conversions": "Takip dönüşümleri"
+    }
+  }
+}

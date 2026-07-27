@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import {
   AUTO_FULFILL_JOB_ID_PREFIX,
   AUTO_FULFILL_QUEUE,
@@ -35,7 +36,7 @@ export class AutoFulfillQueueService {
     // jobId per order => dedup; one fulfillment attempt per order across BullMQ retries.
     await this.queue.add(
       'fulfill-order',
-      { ebayOrderId, amazonAccountId },
+      stampCurrentCorrelation({ ebayOrderId, amazonAccountId }),
       {
         jobId: `${AUTO_FULFILL_JOB_ID_PREFIX}${ebayOrderId}`,
         attempts: 3,

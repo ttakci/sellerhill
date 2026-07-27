@@ -2,6 +2,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+
 @Injectable()
 export class OrderSyncQueueService implements OnModuleInit {
   private readonly logger = new Logger(OrderSyncQueueService.name);
@@ -17,7 +19,7 @@ export class OrderSyncQueueService implements OnModuleInit {
 
     await this.orderSyncQueue.add(
       'sync-all-orders',
-      {},
+      stampCurrentCorrelation({}),
       {
         repeat: { pattern: '*/15 * * * *' },
         jobId: 'order-sync-cron',
@@ -34,7 +36,7 @@ export class OrderSyncQueueService implements OnModuleInit {
   async triggerUserSync(userId: string): Promise<string> {
     const job = await this.orderSyncQueue.add(
       'sync-user-orders',
-      { userId },
+      stampCurrentCorrelation({ userId }),
       {
         priority: 1,
         jobId: `order-sync-user-${userId}-${Date.now()}`,

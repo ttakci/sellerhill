@@ -5,21 +5,15 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { generateRequestId, type UserDto } from '@repo/shared';
+import { generateRequestId } from '@repo/shared';
 
-import { logout, setCredentials } from '@/features/auth/store/authSlice';
+import { refreshAuthSession } from './authRefreshCoordinator';
 
 /** Minimal auth slice shape used by baseQuery (avoids circular import with store). */
 interface AuthSliceState {
   auth: {
     accessToken: string | null;
   };
-}
-
-interface RefreshResponse {
-  user: UserDto;
-  accessToken: string;
-  refreshToken?: string;
 }
 
 const rawBaseQuery = fetchBaseQuery({
@@ -50,9 +44,6 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-/** Single-flight refresh so concurrent 401s don't stampede. */
-let refreshPromise: Promise<boolean> | null = null;
-
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
@@ -67,26 +58,8 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       return result;
     }
 
-    if (!refreshPromise) {
-      refreshPromise = (async () => {
-        const refreshResult = await rawBaseQuery(
-          { url: '/auth/refresh', method: 'POST', body: {} },
-          api,
-          extraOptions
-        );
-        if (refreshResult.data) {
-          api.dispatch(setCredentials(refreshResult.data as RefreshResponse));
-          return true;
-        }
-        api.dispatch(logout());
-        return false;
-      })().finally(() => {
-        refreshPromise = null;
-      });
-    }
-
-    const ok = await refreshPromise;
-    if (ok) {
+    const refreshed = await refreshAuthSession();
+    if (refreshed.success) {
       result = await rawBaseQuery(args, api, extraOptions);
     }
   }
@@ -109,6 +82,9 @@ export const baseApi = createApi({
     'EbayPolicies',
     'Amazon',
     'Orders',
+    'Assistant',
+    'Support',
+    'Admin',
   ],
   endpoints: () => ({}),
 });

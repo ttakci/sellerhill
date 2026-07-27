@@ -2,8 +2,8 @@ import { BadRequestException, ConflictException, HttpException, Injectable, Logg
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
-  AUTH_CONSTANTS,
   DEFAULT_LOCALE,
+  UserRole,
   UserStatus,
   type AuthResponse,
   type JwtPayload,
@@ -18,6 +18,8 @@ import * as bcrypt from 'bcrypt';
 import { DatabaseService } from '../../common/database/database.service';
 import { EmailService } from '../email/email.service';
 
+import { AuthSessionService } from './auth-session.service';
+
 /**
  * User entity from database
  */
@@ -29,6 +31,8 @@ interface UserEntity {
   password_hash: string | null;
   email_verified: boolean;
   status: UserStatus;
+  role: UserRole;
+  session_version: number;
   locale: string;
   email_verification_token?: string;
   email_verification_expiry?: Date;
@@ -44,7 +48,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly databaseService: DatabaseService,
     private readonly emailService: EmailService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly sessions: AuthSessionService
   ) {}
 
   /**
@@ -410,10 +415,16 @@ export class AuthService {
     }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await this.databaseService.query(
-      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
-      [newHash, userId]
-    );
+    await this.databaseService.transaction(async (client) => {
+      await client.query(
+        'UPDATE users SET password_hash = $1, session_version = session_version + 1, updated_at = NOW() WHERE id = $2',
+        [newHash, userId]
+      );
+      await client.query(
+        'UPDATE auth_refresh_sessions SET revoked_at = COALESCE(revoked_at, NOW()) WHERE user_id = $1 AND revoked_at IS NULL',
+        [userId]
+      );
+    });
 
     this.logger.log(`Password changed successfully for user: ${userId}`);
     return { success: true };
@@ -440,58 +451,26 @@ export class AuthService {
    * Refresh tokens using a valid refresh token
    */
   async refreshToken(token: string): Promise<AuthResponse> {
-    this.logger.log('Attempting to refresh tokens');
-
-    try {
-      // Verify refresh token
-      const payload = this.jwtService.verify<JwtPayload>(token);
-      this.logger.debug(`Refresh token verified for user: ${payload.sub}`);
-
-      // Find user
-      const users = await this.databaseService.query<UserEntity>('SELECT * FROM users WHERE id = $1', [payload.sub]);
-
-      if (users.length === 0) {
-        throw new UnauthorizedException('auth.errors.userNotFound');
-      }
-
-      const user = users[0];
-
-      // Check status
-      if (user.status !== UserStatus.ACTIVE) {
-        throw new UnauthorizedException('auth.errors.invalidStatus');
-      }
-
-      // Generate new tokens
-      const { accessToken, refreshToken: newRefreshToken } = await this.generateTokens(user.id, user.email);
-
-      return {
-        accessToken,
-        refreshToken: newRefreshToken,
-        user: this.mapToUserDto(user),
-      };
-    } catch (error) {
-      this.logger.error('Token refresh failed', error);
-      throw new UnauthorizedException('auth.errors.invalidToken');
-    }
+    this.logger.log('Attempting to rotate refresh session');
+    const { issued, authority } = await this.sessions.rotate(token);
+    const users = await this.databaseService.query<UserEntity>(
+      `SELECT u.*, EXISTS(SELECT 1 FROM ebay_accounts WHERE user_id = u.id) as has_connected_accounts
+       FROM users u WHERE u.id = $1`,
+      [authority.userId]
+    );
+    if (!users[0]) {throw new UnauthorizedException('auth.errors.invalidToken');}
+    return { ...issued, user: this.mapToUserDto(users[0]) };
   }
 
-  /**
-   * Generate JWT tokens
-   */
-  private generateTokens(userId: string, email: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload: JwtPayload = {
-      sub: userId,
-      email,
-    };
+  async logout(token: string): Promise<void> {
+    await this.sessions.revokeOpaque(token);
+  }
 
-    return Promise.all([
-      this.jwtService.signAsync(payload, {
-        expiresIn: AUTH_CONSTANTS.JWT_ACCESS_TOKEN_EXPIRES_IN,
-      }),
-      this.jwtService.signAsync(payload, {
-        expiresIn: AUTH_CONSTANTS.JWT_REFRESH_TOKEN_EXPIRES_IN,
-      }),
-    ]).then(([accessToken, refreshToken]) => ({ accessToken, refreshToken }));
+  private async generateTokens(userId: string, _email: string): Promise<{ accessToken: string; refreshToken: string }> {
+    const users = await this.databaseService.query<UserEntity>('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = users[0];
+    if (!user) {throw new UnauthorizedException('auth.errors.userNotFound');}
+    return this.sessions.issue({ id: user.id, email: user.email, role: user.role, sessionVersion: user.session_version });
   }
 
   /**
@@ -505,6 +484,8 @@ export class AuthService {
       email: user.email,
       emailVerified: user.email_verified,
       status: user.status,
+      role: user.role,
+      sessionVersion: user.session_version,
       locale: (user.locale as SupportedLocale) || DEFAULT_LOCALE,
       hasConnectedAccounts: user.has_connected_accounts ?? false,
       createdAt: user.created_at.toISOString(),

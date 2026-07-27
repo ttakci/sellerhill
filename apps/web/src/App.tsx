@@ -21,6 +21,7 @@ const RegisterPage = lazy(() => import('./features/auth/register'));
 const VerifyEmailPage = lazy(() => import('./features/auth/verify-email'));
 
 // App shell pages
+const AdminPage = lazy(() => import('./features/admin/AdminPage'));
 const DashboardPage = lazy(() => import('./features/dashboard/DashboardPage'));
 const OnboardingEbayPage = lazy(() => import('./features/ebay/onboarding'));
 const StoresPage = lazy(() => import('./features/ebay/stores'));
@@ -57,6 +58,8 @@ const OrdersAllPage = lazy(() =>
 const SettingsHubPage = lazy(() =>
   import('./features/settings/SettingsPage').then((m) => ({ default: m.SettingsHubPage }))
 );
+const SupportPage = lazy(() => import('./features/support/SupportPage'));
+const AdminAssistantPage = lazy(() => import('./features/admin-assistant/AdminAssistantPage'));
 
 export function App() {
   return (
@@ -128,6 +131,14 @@ export function App() {
               }
             />
 
+            <Route
+              path="admin"
+              element={
+                <Lazy>
+                  <AdminPage />
+                </Lazy>
+              }
+            />
             <Route
               path="settings"
               element={
@@ -221,6 +232,8 @@ export function App() {
                 </Lazy>
               }
             />
+            <Route path="support" element={<Lazy><SupportPage /></Lazy>} />
+            <Route path="admin/assistant" element={<Lazy><AdminAssistantPage /></Lazy>} />
             <Route path="profile" element={<Navigate to="../settings" replace />} />
             <Route index element={<Navigate to="register" replace />} />
           </Route>
