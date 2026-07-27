@@ -584,28 +584,31 @@
       "sectionTitle": "Basit, şeffaf fiyatlandırma",
       "sectionSubtitle": "Ücretsiz başla. Yalnızca büyümeye hazır olduğunda yükselt.",
       "billingNote": "Başlamak için kredi kartı gerekmez. İstediğin zaman iptal et.",
+      "perMonth": "/ay",
+      "perYear": "/yıl",
+      "mostPopular": "En popüler",
+      "unlimited": "Sınırsız",
+      "notIncluded": "Dahil değil",
+      "listingsLabel": "liste",
+      "ordersLabel": "sipariş",
+      "upToListings": "{{limit}} listeye kadar",
+      "unlimitedListings": "Sınırsız listeleme",
+      "catalogError": "Canlı fiyatlandırma yüklenemedi. Yalnızca plan özeti gösteriliyor.",
       "starter": {
         "name": "Başlangıç",
-        "price": "$0",
-        "period": "/ay",
-        "description": "Denemek için ihtiyacın olan her şey.",
+        "description": "Otomatik dropshipping'e yeni başlayan bireysel satıcılar için.",
         "features": [
-          "25 listeye kadar",
           "Amazon → eBay stok & fiyat senkronu",
           "Otomatik sipariş",
           "Takip güncellemeleri",
           "E-posta desteği"
         ],
-        "cta": "Ücretsiz başla"
+        "cta": "Ücretsiz dene"
       },
-      "pro": {
-        "badge": "En popüler",
-        "name": "Pro",
-        "price": "$49",
-        "period": "/ay",
-        "description": "Büyümeye hazır ciddi satıcılar için.",
+      "growth": {
+        "name": "Growth",
+        "description": "Daha fazla listing ve Amazon siparişine ihtiyaç duyan büyüyen satıcılar için.",
         "features": [
-          "500 listeye kadar",
           "Gerçek zamanlı senkron & uyarılar",
           "Otomatik + manuel sipariş",
           "Otomatik takip & kargo",
@@ -614,20 +617,64 @@
         ],
         "cta": "Ücretsiz dene"
       },
-      "enterprise": {
-        "name": "Kurumsal",
-        "price": "$149",
-        "period": "/ay",
-        "description": "Yüksek hacimli operasyonlar ve ajanslar için.",
+      "scale": {
+        "name": "Scale",
+        "description": "Birden fazla mağazayı ölçekte yöneten yüksek hacimli satıcılar için.",
         "features": [
-          "Sınırsız listeleme",
-          "Pro'daki her şey",
+          "Growth planındaki her şey",
           "API erişimi",
           "Özel hesap yöneticisi",
           "Özel otomasyonlar",
           "7/24 öncelikli destek"
         ],
         "cta": "Satışla iletişime geç"
+      },
+      "catalogFallback": {
+        "starter": {
+          "name": "Başlangıç",
+          "price": "$0",
+          "period": "/ay",
+          "description": "Denemek için ihtiyacın olan her şey.",
+          "features": [
+            "25 listeye kadar",
+            "Amazon → eBay stok & fiyat senkronu",
+            "Otomatik sipariş",
+            "Takip güncellemeleri",
+            "E-posta desteği"
+          ],
+          "cta": "Ücretsiz başla"
+        },
+        "pro": {
+          "badge": "En popüler",
+          "name": "Pro",
+          "price": "$49",
+          "period": "/ay",
+          "description": "Büyümeye hazır ciddi satıcılar için.",
+          "features": [
+            "500 listeye kadar",
+            "Gerçek zamanlı senkron & uyarılar",
+            "Otomatik + manuel sipariş",
+            "Otomatik takip & kargo",
+            "Ürün bazlı ayarlar",
+            "Öncelikli destek"
+          ],
+          "cta": "Ücretsiz dene"
+        },
+        "enterprise": {
+          "name": "Kurumsal",
+          "price": "$149",
+          "period": "/ay",
+          "description": "Yüksek hacimli operasyonlar ve ajanslar için.",
+          "features": [
+            "Sınırsız listeleme",
+            "Pro'daki her şey",
+            "API erişimi",
+            "Özel hesap yöneticisi",
+            "Özel otomasyonlar",
+            "7/24 öncelikli destek"
+          ],
+          "cta": "Satışla iletişime geç"
+        }
       }
     },
     "faq": {

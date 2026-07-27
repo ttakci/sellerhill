@@ -17,6 +17,7 @@ import {
   AdminWarningLevel,
   UsageEventSource,
   UsageMetric,
+  type AdminBillingMetricsDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
   type AdminWarningDto,
@@ -34,6 +35,12 @@ import type { Queue } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
+import {
+  buildAccessTierDistribution,
+  buildAccountStatusDistribution,
+  buildQuotaPressureSummary,
+  resolveCostTotal,
+} from './billing-metrics.helpers';
 
 interface CountRow {
   count: string;
@@ -276,6 +283,82 @@ export class AdminService {
     return this.getUsageSummaries(fromIso, toIso);
   }
 
+  /**
+   * Read-only billing metrics: account status distribution (proxy for
+   * subscription status), access-tier distribution (proxy for plan
+   * distribution), listing/AO quota usage-pressure summaries, and the total
+   * estimated cost for the period. Each section is independent — a failure in
+   * one does not abort the others; the failed section is surfaced as empty /
+   * null so the admin still sees the rest.
+   *
+   * No plan/subscription tables exist today (there is no `plans` table, no
+   * `subscriptions` table, and no per-user plan column). The metrics here are
+   * derived from the real tables that do exist: `users.status` and
+   * `users.role` for the distributions, `listings` and `amazon_accounts` for
+   * the quota usage counts, and `usage_events` for the cost total. Quota
+   * pressure bands use env-configurable soft thresholds (same pattern as
+   * `ADMIN_QUEUE_WAITING_THRESHOLD`) — they are NOT plan limits. Unknown
+   * financial data (no cost rows) is surfaced as null, never 0.
+   */
+  async getBillingMetrics(
+    fromIso: string | null,
+    toIso: string | null,
+  ): Promise<AdminBillingMetricsDto> {
+    const period = this.resolvePeriod(fromIso, toIso);
+    const listingWarn = this.configService.get<number>('ADMIN_LISTING_QUOTA_WARN_THRESHOLD') ?? 25;
+    const listingCritical = this.configService.get<number>('ADMIN_LISTING_QUOTA_CRITICAL_THRESHOLD') ?? 100;
+    const accountWarn = this.configService.get<number>('ADMIN_AMAZON_ACCOUNT_QUOTA_WARN_THRESHOLD') ?? 3;
+    const accountCritical = this.configService.get<number>('ADMIN_AMAZON_ACCOUNT_QUOTA_CRITICAL_THRESHOLD') ?? 10;
+
+    const [statusRows, tierRows, listingUsages, accountUsages, costRow] = await Promise.allSettled([
+      this.getAccountStatusDistribution(),
+      this.getAccessTierDistribution(),
+      this.getPerUserListingCounts(),
+      this.getPerUserAmazonAccountCounts(),
+      this.getTotalCost(period.from, period.to),
+    ]);
+
+    const accountStatusDistribution =
+      statusRows.status === 'fulfilled' ? statusRows.value : [];
+    if (statusRows.status === 'rejected') {
+      this.logger.warn(`getAccountStatusDistribution failed: ${this.errMsg(statusRows.reason)}`);
+    }
+    const accessTierDistribution =
+      tierRows.status === 'fulfilled' ? tierRows.value : [];
+    if (tierRows.status === 'rejected') {
+      this.logger.warn(`getAccessTierDistribution failed: ${this.errMsg(tierRows.reason)}`);
+    }
+    const listingUsagesArr =
+      listingUsages.status === 'fulfilled' ? listingUsages.value : [];
+    if (listingUsages.status === 'rejected') {
+      this.logger.warn(`getPerUserListingCounts failed: ${this.errMsg(listingUsages.reason)}`);
+    }
+    const accountUsagesArr =
+      accountUsages.status === 'fulfilled' ? accountUsages.value : [];
+    if (accountUsages.status === 'rejected') {
+      this.logger.warn(`getPerUserAmazonAccountCounts failed: ${this.errMsg(accountUsages.reason)}`);
+    }
+    const cost =
+      costRow.status === 'fulfilled' ? costRow.value : { totalCostMicros: null, currency: null };
+    if (costRow.status === 'rejected') {
+      this.logger.warn(`getTotalCost failed: ${this.errMsg(costRow.reason)}`);
+    }
+
+    return {
+      generatedAt: new Date().toISOString(),
+      accountStatusDistribution,
+      accessTierDistribution,
+      quotaPressure: [
+        buildQuotaPressureSummary('listings', listingUsagesArr, listingWarn, listingCritical),
+        buildQuotaPressureSummary('amazon_accounts', accountUsagesArr, accountWarn, accountCritical),
+      ],
+      totalEstimatedCostMicros: cost.totalCostMicros,
+      currency: cost.currency,
+      from: period.from,
+      to: period.to,
+    };
+  }
+
   async getOperationsSummary(queues: Array<{ name: string; queue: Queue }>): Promise<AdminOperationsSummaryDto> {
     const live = await this.getQueueHealth(queues);
     const observed = await this.databaseService.query<{
@@ -370,6 +453,60 @@ export class AdminService {
       activeListings: this.parseIntSafe(listingsRows[0]?.count),
       ordersLast30Days: this.parseIntSafe(ordersRows[0]?.count),
     };
+  }
+
+  /** Per-user count of active listings (proxy for listing quota usage). */
+  private async getPerUserListingCounts(): Promise<number[]> {
+    const rows = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::TEXT AS count FROM listings
+       WHERE status = 'active' GROUP BY user_id`,
+    );
+    return rows.map((row) => this.parseIntSafe(row.count));
+  }
+
+  /** Per-user count of amazon buyer accounts (proxy for AO quota usage). */
+  private async getPerUserAmazonAccountCounts(): Promise<number[]> {
+    const rows = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::TEXT AS count FROM amazon_accounts GROUP BY user_id`,
+    );
+    return rows.map((row) => this.parseIntSafe(row.count));
+  }
+
+  /** Distribution of users by `users.status` (proxy for subscription status). */
+  private async getAccountStatusDistribution() {
+    const rows = await this.databaseService.query<{ status: string | null; count: number }>(
+      `SELECT status, COUNT(*)::INT AS count FROM users GROUP BY status ORDER BY count DESC`,
+    );
+    return buildAccountStatusDistribution(rows);
+  }
+
+  /** Distribution of users by `users.role` (proxy for plan/access tier). */
+  private async getAccessTierDistribution() {
+    const rows = await this.databaseService.query<{ tier: string | null; count: number }>(
+      `SELECT role AS tier, COUNT(*)::INT AS count FROM users GROUP BY role ORDER BY count DESC`,
+    );
+    return buildAccessTierDistribution(rows);
+  }
+
+  /** Total estimated cost (micro-USD) across all usage_events in the period. */
+  private async getTotalCost(from: string, to: string) {
+    const rows = await this.databaseService.query<{
+      total_cost_micros: string | null;
+      currency: string | null;
+    }>(
+      `SELECT SUM(estimated_cost_micros)::TEXT AS total_cost_micros, MAX(currency) AS currency
+       FROM usage_events WHERE recorded_at >= $1 AND recorded_at < $2
+         AND estimated_cost_micros IS NOT NULL`,
+      [from, to],
+    );
+    const row = rows[0];
+    if (!row) {
+      return resolveCostTotal({ totalCostMicros: null, currency: null });
+    }
+    return resolveCostTotal({
+      totalCostMicros: row.total_cost_micros,
+      currency: row.currency,
+    });
   }
 
   private resolvePeriod(fromIso: string | null, toIso: string | null): { from: string; to: string } {

@@ -25,12 +25,14 @@ const PRODUCT_SETTINGS = ['margin', 'stock', 'template'] as const;
 const STAT_KEYS = ['sellers', 'orders', 'uptime', 'marketplaces'] as const;
 const TESTIMONIAL_KEYS = ['t1', 't2', 't3'] as const;
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
-const PLANS = ['starter', 'pro', 'enterprise'] as const;
+const FALLBACK_PLANS = ['starter', 'pro', 'enterprise'] as const;
 
 export const LandingPageComponent = ({
   currentLocale,
   scrolled,
   mobileMenuOpen,
+  pricingPlans,
+  pricingCatalogError,
   onLocaleChange,
   onNavigateLogin,
   onNavigateRegister,
@@ -390,34 +392,69 @@ export const LandingPageComponent = ({
           </S.SectionHead>
         </S.Reveal>
         <S.Reveal $visible={revealState['pricing'] ?? false} $delay={1}>
+          {pricingCatalogError ? (
+            <S.PlanDesc>{t('translation:landing.pricing.catalogError')}</S.PlanDesc>
+          ) : null}
           <S.PricingGrid>
-            {PLANS.map((plan) => {
-              const features = t(`translation:landing.pricing.${plan}.features`, { returnObjects: true }) as string[];
-              return (
-                <S.PricingCard key={plan} $highlight={plan === 'pro'}>
-                  {plan === 'pro' ? (
-                    <S.PlanBadge>{t('translation:landing.pricing.pro.badge')}</S.PlanBadge>
-                  ) : null}
-                  <S.PlanName>{t(`translation:landing.pricing.${plan}.name`)}</S.PlanName>
-                  <S.PlanPrice>
-                    <S.PlanAmount>{t(`translation:landing.pricing.${plan}.price`)}</S.PlanAmount>
-                    <S.PlanPeriod>{t(`translation:landing.pricing.${plan}.period`)}</S.PlanPeriod>
-                  </S.PlanPrice>
-                  <S.PlanDesc>{t(`translation:landing.pricing.${plan}.description`)}</S.PlanDesc>
-                  <S.PlanFeatures>
-                    {features.map((feat) => (
-                      <S.PlanFeature key={feat}>
-                        <Icon name="check-circle" size={16} color="semantic.success" />
-                        <span>{feat}</span>
-                      </S.PlanFeature>
-                    ))}
-                  </S.PlanFeatures>
-                  <S.PlanCta type="button" $highlight={plan === 'pro'} onClick={onNavigateRegister}>
-                    {t(`translation:landing.pricing.${plan}.cta`)}
-                  </S.PlanCta>
-                </S.PricingCard>
-              );
-            })}
+            {pricingPlans.length > 0
+              ? pricingPlans.map((plan) => {
+                  const features = t(`translation:landing.pricing.${plan.slug}.features`, { returnObjects: true }) as string[];
+                  return (
+                    <S.PricingCard key={plan.slug} $highlight={plan.isHighlighted}>
+                      {plan.isHighlighted ? (
+                        <S.PlanBadge>{t('translation:landing.pricing.mostPopular')}</S.PlanBadge>
+                      ) : null}
+                      <S.PlanName>{t(`translation:landing.pricing.${plan.slug}.name`)}</S.PlanName>
+                      <S.PlanPrice>
+                        <S.PlanAmount>{plan.priceDisplay}</S.PlanAmount>
+                        <S.PlanPeriod>{t(`translation:landing.pricing.${plan.periodKey}`)}</S.PlanPeriod>
+                      </S.PlanPrice>
+                      <S.PlanDesc>{t(`translation:landing.pricing.${plan.slug}.description`)}</S.PlanDesc>
+                      <S.PlanFeatures>
+                        <S.PlanFeature key={plan.listingsDisplay}>
+                          <Icon name="check-circle" size={16} color="semantic.success" />
+                          <span>{plan.listingsDisplay}</span>
+                        </S.PlanFeature>
+                        {features.map((feat) => (
+                          <S.PlanFeature key={feat}>
+                            <Icon name="check-circle" size={16} color="semantic.success" />
+                            <span>{feat}</span>
+                          </S.PlanFeature>
+                        ))}
+                      </S.PlanFeatures>
+                      <S.PlanCta type="button" $highlight={plan.isHighlighted} onClick={onNavigateRegister}>
+                        {t(`translation:landing.pricing.${plan.slug}.cta`)}
+                      </S.PlanCta>
+                    </S.PricingCard>
+                  );
+                })
+              : FALLBACK_PLANS.map((plan) => {
+                  const features = t(`translation:landing.pricing.catalogFallback.${plan}.features`, { returnObjects: true }) as string[];
+                  return (
+                    <S.PricingCard key={plan} $highlight={plan === 'pro'}>
+                      {plan === 'pro' ? (
+                        <S.PlanBadge>{t('translation:landing.pricing.catalogFallback.pro.badge')}</S.PlanBadge>
+                      ) : null}
+                      <S.PlanName>{t(`translation:landing.pricing.catalogFallback.${plan}.name`)}</S.PlanName>
+                      <S.PlanPrice>
+                        <S.PlanAmount>{t(`translation:landing.pricing.catalogFallback.${plan}.price`)}</S.PlanAmount>
+                        <S.PlanPeriod>{t(`translation:landing.pricing.catalogFallback.${plan}.period`)}</S.PlanPeriod>
+                      </S.PlanPrice>
+                      <S.PlanDesc>{t(`translation:landing.pricing.catalogFallback.${plan}.description`)}</S.PlanDesc>
+                      <S.PlanFeatures>
+                        {features.map((feat) => (
+                          <S.PlanFeature key={feat}>
+                            <Icon name="check-circle" size={16} color="semantic.success" />
+                            <span>{feat}</span>
+                          </S.PlanFeature>
+                        ))}
+                      </S.PlanFeatures>
+                      <S.PlanCta type="button" $highlight={plan === 'pro'} onClick={onNavigateRegister}>
+                        {t(`translation:landing.pricing.catalogFallback.${plan}.cta`)}
+                      </S.PlanCta>
+                    </S.PricingCard>
+                  );
+                })}
           </S.PricingGrid>
         </S.Reveal>
         <S.BillingNote>{t('translation:landing.pricing.billingNote')}</S.BillingNote>

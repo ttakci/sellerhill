@@ -57,6 +57,8 @@ export enum AutoFulfillBlockedReason {
   NO_CONFIRMATION = 'no_confirmation',
   /** Runtime proxy guard — auto-fulfill requires a configured residential proxy. */
   PROXY_REQUIRED = 'proxy_required',
+  /** AO monthly quota exhausted — placed+reserved this period >= limit. */
+  QUOTA_EXHAUSTED = 'quota_exhausted',
 }
 
 /**

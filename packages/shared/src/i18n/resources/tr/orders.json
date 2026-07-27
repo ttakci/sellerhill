@@ -88,7 +88,8 @@
         "payment": "Ödeme reddedildi",
         "cap": "Tavan aşıldı",
         "no_confirmation": "Onay alınamadı",
-        "proxy_required": "Proxy yapılandırılmamış"
+        "proxy_required": "Proxy yapılandırılmamış",
+        "quota_exhausted": "Aylık kota doldu"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "filter": {

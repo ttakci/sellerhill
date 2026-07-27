@@ -4,6 +4,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 
+// class-transformer `@Type` decorators (used by the billing plan input DTOs in
+// @repo/shared) require the Reflect metadata polyfill at module-load time.
+// The barrel export from @repo/shared pulls the billing schemas into the browser
+// bundle, so this polyfill must load before any @repo/shared import.
+import 'reflect-metadata';
+
 import { App } from './App';
 import { store } from './app/store';
 import { GlobalMessageModal } from './components/GlobalMessageModal';

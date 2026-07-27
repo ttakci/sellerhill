@@ -6,6 +6,7 @@ import { AutoFulfillStatus } from '@repo/shared';
 import type { Page } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
@@ -212,6 +213,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
     private readonly proxyService: ProxyService,
+    private readonly quotaEnforcement: QuotaEnforcementService,
   ) {}
 
   onModuleInit(): void {
@@ -395,7 +397,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // signal + manual reconciliation). A redundant setStatus(PLACED) here would
       // mark the order PLACED with NO amazon_order_id persisted, orphaning it and
       // hiding the stuck-at-RUNNING signal. See onPlaced's I-3 JSDoc contract.
-      await this.onPlaced(ebayOrderId, amazonAccountId, placed);
+      await this.onPlaced(ebayOrderId, amazonAccountId, userId, placed);
       this.logger.log(
         `placed ${ebayOrderId}: amazon=${placed.amazonOrderId} total=${(
           placed.purchasePrice +
@@ -928,6 +930,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   private async onPlaced(
     ebayOrderId: string,
     amazonAccountId: string,
+    userId: string,
     placed: PlacedResult,
   ): Promise<void> {
     let orderId: string | null = null;
@@ -1016,6 +1019,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         (err as Error).stack,
       );
     }
+
+    // Layer 5 (best-effort): AO monthly quota consume. The order was placed, so
+    // the reserved slot stays counted for the current billing period (the
+    // foundation's ledger model: 'reserved' counts; consume = no-op
+    // confirmation). Idempotent + fail-soft.
+    try {
+      this.quotaEnforcement.consumeAmazonOrder(userId, ebayOrderId);
+    } catch (err) {
+      this.logger.warn(
+        `onPlaced quota consume failed for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+    }
   }
 
   /**
@@ -1055,6 +1070,22 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     this.logger.warn(`fulfill blocked ${ebayOrderId}: ${reason} (${msg ?? ''})`);
     await this.setStatus(ebayOrderId, AutoFulfillStatus.BLOCKED, reason);
+    // AO monthly quota: release the reserved slot on a deliberate block so the
+    // period's quota is not consumed by an order that never placed. Best-effort
+    // + idempotent. userId resolved here (block call sites don't carry it).
+    try {
+      const rows = await this.db.query<{ user_id: string }>(
+        `SELECT user_id FROM orders WHERE ebay_order_id = $1`,
+        [ebayOrderId],
+      );
+      if (rows[0]?.user_id) {
+        await this.quotaEnforcement.releaseAmazonOrder(rows[0].user_id, ebayOrderId);
+      }
+    } catch (err) {
+      this.logger.warn(
+        `block quota release failed for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+    }
     // Notification (in-app needs-attention list reads blocked status directly)
     // — no email in scope.
   }

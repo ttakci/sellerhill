@@ -1,6 +1,7 @@
 import enAdmin from './resources/en/admin.json';
 import enAmazon from './resources/en/amazon.json';
 import enAuth from './resources/en/auth.json';
+import enBilling from './resources/en/billing.json';
 import enDashboard from './resources/en/dashboard.json';
 import enEbay from './resources/en/ebay.json';
 import enListings from './resources/en/listings.json';
@@ -12,6 +13,7 @@ import enTranslation from './resources/en/translation.json';
 import trAdmin from './resources/tr/admin.json';
 import trAmazon from './resources/tr/amazon.json';
 import trAuth from './resources/tr/auth.json';
+import trBilling from './resources/tr/billing.json';
 import trDashboard from './resources/tr/dashboard.json';
 import trEbay from './resources/tr/ebay.json';
 import trListings from './resources/tr/listings.json';
@@ -26,6 +28,7 @@ export {
   enAdmin,
   enAmazon,
   enAuth,
+  enBilling,
   enDashboard,
   enEbay,
   enListings,
@@ -37,6 +40,7 @@ export {
   trAdmin,
   trAmazon,
   trAuth,
+  trBilling,
   trDashboard,
   trEbay,
   trListings,

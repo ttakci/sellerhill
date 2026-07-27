@@ -88,7 +88,8 @@
         "payment": "Payment declined",
         "cap": "Over cost cap",
         "no_confirmation": "No confirmation",
-        "proxy_required": "No proxy configured"
+        "proxy_required": "No proxy configured",
+        "quota_exhausted": "Monthly quota reached"
       },
       "reasonLabel": "Reason: {{reason}}",
       "filter": {

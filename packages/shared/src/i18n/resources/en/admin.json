@@ -2,7 +2,7 @@
   "admin": {
     "title": "Admin operations",
     "subtitle": "Monitor platform costs, queues, provider usage and customer attribution.",
-    "tabs": { "queues": "Queues", "costs": "Costs", "users": "Users" },
+    "tabs": { "queues": "Queues", "costs": "Costs", "billing": "Billing", "users": "Users" },
     "queue": { "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}" },
     "cost": { "keepaBalance": "Keepa token balance", "users": "Total users" },
     "users": { "unattributed": "Unattributed platform usage" },
@@ -21,6 +21,35 @@
       "proxy_bytes": "Proxy bytes",
       "proxy_requests": "Proxy requests",
       "tracking_conversions": "Tracking conversions"
+    },
+    "billing": {
+      "costTotal": "Estimated cost (micro-USD)",
+      "accountStatus": {
+        "title": "Account status distribution",
+        "pending": "Pending",
+        "active": "Active",
+        "inactive": "Inactive",
+        "banned": "Banned"
+      },
+      "accessTier": {
+        "title": "Access tier distribution",
+        "customer": "Customer",
+        "support": "Support",
+        "admin": "Admin"
+      },
+      "quota": {
+        "title": "Quota usage pressure",
+        "listings": "Active listings per user",
+        "amazon_accounts": "Amazon accounts per user",
+        "summary": "Users with usage: {{usersWithUsage}} · Max: {{maxUsage}} · Warn: {{warn}} · Critical: {{critical}}"
+      },
+      "band": {
+        "none": "None",
+        "under_limit": "Under limit",
+        "near_limit": "Near limit",
+        "at_limit": "At limit",
+        "over_limit": "Over limit"
+      }
     }
   }
 }

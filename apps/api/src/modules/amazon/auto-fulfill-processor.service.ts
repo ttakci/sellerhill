@@ -5,6 +5,7 @@ import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
 import { AmazonCheckoutService } from './amazon-checkout.service';
 import { AUTO_FULFILL_QUEUE } from './auto-fulfill-queue.constants';
@@ -48,6 +49,7 @@ export class AutoFulfillProcessor extends WorkerHost {
   constructor(
     private readonly checkout: AmazonCheckoutService,
     private readonly db: DatabaseService,
+    private readonly quotaEnforcement: QuotaEnforcementService,
   ) {
     super();
   }
@@ -85,6 +87,22 @@ export class AutoFulfillProcessor extends WorkerHost {
             } catch (markErr) {
               this.logger.warn(
                 `failed to mark order ${ebayOrderId} as FAILED: ${(markErr as Error).message} — row stays at running`,
+              );
+            }
+            // AO quota: release the reserved slot on final transport failure —
+            // the order will not place, so it must not hold a monthly slot.
+            // Best-effort + idempotent; userId resolved via a lookup.
+            try {
+              const rows = await this.db.query<{ user_id: string }>(
+                `SELECT user_id FROM orders WHERE ebay_order_id = $1`,
+                [ebayOrderId],
+              );
+              if (rows[0]?.user_id) {
+                await this.quotaEnforcement.releaseAmazonOrder(rows[0].user_id, ebayOrderId);
+              }
+            } catch (releaseErr) {
+              this.logger.warn(
+                `final-fail quota release failed for ${ebayOrderId}: ${(releaseErr as Error).message}`,
               );
             }
           }

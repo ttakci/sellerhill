@@ -245,6 +245,12 @@ export interface ListingQueueJobData {
   returnPolicyId: string;
   /** Skip eBay publish; store listing as draft. */
   asDraft?: boolean;
+  /**
+   * The `listing_job_items.id` for this ASIN. Used by the worker to
+   * consume/release the billing-quota reservation keyed on this id.
+   * Always present when the job is created via the standard queue-service path.
+   */
+  listingJobItemId?: string;
 }
 
 /**

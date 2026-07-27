@@ -1,4 +1,4 @@
-import { AdminWarningLevel } from '@repo/shared';
+import { AdminWarningLevel, QuotaPressureBand } from '@repo/shared';
 import { Badge, Button, PageHeader, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,16 @@ import { useTranslation } from 'react-i18next';
 import * as S from './AdminPage.style';
 import type { AdminPageComponentProps, AdminTabId } from './AdminPage.types';
 
-const TABS: AdminTabId[] = ['queues', 'costs', 'users'];
+const TABS: AdminTabId[] = ['queues', 'costs', 'billing', 'users'];
+
+/** Badge variant for a quota pressure band. */
+const BAND_VARIANT: Record<QuotaPressureBand, 'neutral' | 'success' | 'warning' | 'error'> = {
+  [QuotaPressureBand.NONE]: 'neutral',
+  [QuotaPressureBand.UNDER_LIMIT]: 'success',
+  [QuotaPressureBand.NEAR_LIMIT]: 'warning',
+  [QuotaPressureBand.AT_LIMIT]: 'error',
+  [QuotaPressureBand.OVER_LIMIT]: 'error',
+};
 
 export const AdminPageComponent = ({
   activeTab,
@@ -14,6 +23,7 @@ export const AdminPageComponent = ({
   operations,
   providerCosts,
   userCosts,
+  billingMetrics,
   onTabChange,
 }: AdminPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['admin', 'translation']);
@@ -64,6 +74,78 @@ export const AdminPageComponent = ({
             </S.SummaryCard>
           ))}
         </S.Grid>
+      )}
+
+      {activeTab === 'billing' && (
+        <S.Rows>
+          <S.Section>
+            <Text variant="h4" weight="semibold">{t('admin.billing.costTotal')}</Text>
+            <S.Grid>
+              <S.SummaryCard>
+                <Text variant="body" weight="semibold">{t('admin.billing.costTotal')}</Text>
+                <Text variant="h3">{billingMetrics?.totalEstimatedCostMicros ?? '—'}</Text>
+                {billingMetrics?.currency && (
+                  <Text variant="caption" color="text.secondary">{billingMetrics.currency}</Text>
+                )}
+              </S.SummaryCard>
+            </S.Grid>
+          </S.Section>
+
+          <S.Section>
+            <Text variant="h5" weight="semibold">{t('admin.billing.accountStatus.title')}</Text>
+            <S.Grid>
+              {billingMetrics?.accountStatusDistribution.map((entry) => (
+                <S.SummaryCard key={entry.status}>
+                  <Text variant="body" weight="semibold">{t(`admin.billing.accountStatus.${entry.status}`, { defaultValue: entry.status })}</Text>
+                  <Text variant="h3">{entry.count}</Text>
+                </S.SummaryCard>
+              ))}
+            </S.Grid>
+          </S.Section>
+
+          <S.Section>
+            <Text variant="h5" weight="semibold">{t('admin.billing.accessTier.title')}</Text>
+            <S.Grid>
+              {billingMetrics?.accessTierDistribution.map((entry) => (
+                <S.SummaryCard key={entry.tier}>
+                  <Text variant="body" weight="semibold">{t(`admin.billing.accessTier.${entry.tier}`, { defaultValue: entry.tier })}</Text>
+                  <Text variant="h3">{entry.count}</Text>
+                </S.SummaryCard>
+              ))}
+            </S.Grid>
+          </S.Section>
+
+          <S.Section>
+            <Text variant="h5" weight="semibold">{t('admin.billing.quota.title')}</Text>
+            <S.Rows>
+              {billingMetrics?.quotaPressure.map((summary) => (
+                <S.Row key={summary.resource}>
+                  <Text variant="body" weight="semibold">{t(`admin.billing.quota.${summary.resource}`)}</Text>
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('admin.billing.quota.summary', {
+                      usersWithUsage: summary.usersWithUsage,
+                      maxUsage: summary.maxUsage ?? '—',
+                      warn: summary.warnThreshold,
+                      critical: summary.criticalThreshold,
+                    })}
+                  </Text>
+                </S.Row>
+              ))}
+            </S.Rows>
+            <S.Rows>
+              {billingMetrics?.quotaPressure.flatMap((summary) =>
+                summary.bands.map((band) => (
+                  <S.Row key={`${summary.resource}-${band.band}`}>
+                    <Text variant="body-sm">
+                      {t(`admin.billing.quota.${summary.resource}`)} · {t(`admin.billing.band.${band.band}`)}
+                    </Text>
+                    <Badge variant={BAND_VARIANT[band.band]}>{band.userCount}</Badge>
+                  </S.Row>
+                )),
+              )}
+            </S.Rows>
+          </S.Section>
+        </S.Rows>
       )}
 
       {activeTab === 'users' && (

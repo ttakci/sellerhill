@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { DatabaseModule } from '../../common/database/database.module';
 import { AdminModule } from '../admin/admin.module';
+import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { LlmModule } from '../llm/llm.module';
@@ -26,6 +27,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
   imports: [
     DatabaseModule,
     AdminModule,
+    BillingModule,
     ConfigModule,
     EbayModule,
     ListingSettingsGroupModule,

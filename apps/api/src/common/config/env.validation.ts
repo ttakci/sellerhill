@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsIn, IsNumber, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
+import { IsBoolean, IsEnum, IsIn, IsNumber, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -163,6 +163,60 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   GOOGLE_CLIENT_SECRET?: string;
+
+  // --- Billing (phase 2). All optional — BILLING_ENFORCEMENT_ENABLED defaults
+  // to false so the app runs in "full access" transition mode without a
+  // provider configured. Paddle webhook verification + checkout/portal require
+  // the PADDLE_* env to be set; without them the billing module fails safe
+  // (catalog + summary still work; checkout/portal return 409; webhooks 401). ---
+  /** Master enforcement toggle. When false (default), all users have full
+   *  access and the summary reports `transition: 'full_access'` with NO fake
+   *  subscription. Set to true only after a provider is wired and plans are
+   *  meant to gate features. */
+  @IsBoolean()
+  @IsOptional()
+  BILLING_ENFORCEMENT_ENABLED: boolean = false;
+
+  /** Paddle API key (server-to-server, for checkout/portal if needed). */
+  @IsString()
+  @IsOptional()
+  PADDLE_API_KEY?: string;
+
+  /** Paddle webhook secret — the HMAC key used to verify the
+   *  `Paddle-Signature` header. Required for `POST /billing/webhooks` to
+   *  accept deliveries; without it the endpoint 401s. */
+  @IsString()
+  @IsOptional()
+  PADDLE_WEBHOOK_SECRET?: string;
+
+  /** Paddle environment. `sandbox` for test, `production` for live. */
+  @IsIn(['sandbox', 'production'])
+  @IsOptional()
+  PADDLE_ENVIRONMENT: 'sandbox' | 'production' = 'sandbox';
+
+  /** Paddle checkout base URL. Defaults to the Paddle-hosted checkout. */
+  @IsString()
+  @IsOptional()
+  PADDLE_CHECKOUT_BASE_URL: string = 'https://checkout.paddle.com';
+
+  /** Paddle API base URL. Set per environment (sandbox vs production). */
+  @IsString()
+  @IsOptional()
+  PADDLE_API_BASE_URL: string = 'https://api.paddle.com';
+
+  /** Stale-webhook protection: drop events older than this many minutes after
+   *  they are logged to the inbox. Prevents a flood of ancient redeliveries
+   *  from mutating current subscription state. 0 = no staleness drop. */
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  BILLING_WEBHOOK_STALE_MINUTES: number = 1440; // 24h
+
+  /** Max attempts to process a single webhook event before marking it failed. */
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
+  BILLING_WEBHOOK_MAX_ATTEMPTS: number = 5;
 }
 
 /**

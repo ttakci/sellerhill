@@ -28,6 +28,7 @@ import {
   UsageEventSource,
   UsageMetric,
   UserRole,
+  type AdminBillingMetricsDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
   type ProviderCostSummaryDto,
@@ -143,6 +144,25 @@ export class AdminController {
   @ApiOperation({ summary: 'Provider cost summaries' })
   async getProviderCosts(@Query('from') from?: string, @Query('to') to?: string): Promise<ProviderCostSummaryDto[]> {
     return this.adminService.getProviderCostSummaries(from ?? null, to ?? null);
+  }
+
+  @Get('billing/metrics')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Billing metrics (read-only)',
+    description:
+      'Account status distribution (subscription-status proxy), access-tier distribution (plan proxy), listing/AO quota usage-pressure summaries, and the total estimated cost for the period. Read-only.',
+  })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Cost-period start (ISO 8601). Defaults to start of current month.' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Cost-period end (ISO 8601). Defaults to now.' })
+  @ApiOkResponse({ description: 'Billing metrics retrieved' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async getBillingMetrics(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ): Promise<AdminBillingMetricsDto> {
+    return this.adminService.getBillingMetrics(from ?? null, to ?? null);
   }
 
   @Get('operations/summary')

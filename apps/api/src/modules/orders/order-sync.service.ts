@@ -6,10 +6,11 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { AutoFulfillStatus, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
+import { AutoFulfillBlockedReason, AutoFulfillStatus, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { meetsCoarseCapGate, pickRoundRobinAccount } from '../amazon/auto-fulfill-helpers';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
@@ -43,6 +44,7 @@ export class OrderSyncService {
     private readonly stockSyncQueue: StockSyncQueueService,
     private readonly storeSettingsService: StoreSettingsService,
     private readonly autoFulfillQueue: AutoFulfillQueueService,
+    private readonly quotaEnforcement: QuotaEnforcementService,
   ) {}
 
   /**
@@ -518,6 +520,24 @@ export class OrderSyncService {
       await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
+    // 4. AO monthly quota gate (BILLING_ENFORCEMENT_ENABLED). Idempotent reserve
+    //    keyed by ebayOrderId — a re-enqueue from a later order-sync tick
+    //    collapses onto the existing reservation and proceeds. On quota
+    //    exhaustion, mark the order BLOCKED with the shared QUOTA_EXHAUSTED
+    //    reason (surfaces in the "needs attention" filter) and do NOT enqueue.
+    //    Existing tracking is unaffected — the order stays in its current
+    //    cost-capture tier; only auto_fulfill_status moves.
+    const quota = await this.quotaEnforcement.reserveAmazonOrder(
+      entity.userId,
+      entity.ebayOrderId,
+    );
+    if (!quota.allowed) {
+      await this.setAutoFulfillBlocked(
+        entity.ebayOrderId,
+        quota.blockedReason ?? AutoFulfillBlockedReason.QUOTA_EXHAUSTED,
+      );
+      return;
+    }
     // Stamp last_used_at so the next order rotates to the next account.
     await this.databaseService.query(
       `UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`,
@@ -530,6 +550,27 @@ export class OrderSyncService {
     await this.databaseService.query(
       `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
       [status, ebayOrderId],
+    );
+  }
+
+  /**
+   * Mark an order BLOCKED with an explicit fail-closed reason (shared enum —
+   * never a hardcoded string). Used by the AO quota gate to surface quota
+   * exhaustion in the "needs attention" filter. Mirrors the writer shape used
+   * by AmazonCheckoutService.block.
+   */
+  private async setAutoFulfillBlocked(
+    ebayOrderId: string,
+    reason: AutoFulfillBlockedReason,
+  ): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE orders
+         SET auto_fulfill_status = $1,
+             auto_fulfill_blocked_reason = $2,
+             auto_fulfill_attempted_at = CURRENT_TIMESTAMP,
+             updated_at = CURRENT_TIMESTAMP
+       WHERE ebay_order_id = $3`,
+      [AutoFulfillStatus.BLOCKED, reason, ebayOrderId],
     );
   }
 }

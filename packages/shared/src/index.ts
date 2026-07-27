@@ -56,6 +56,9 @@ export * from './domain/queue/index';
 // Domain - FinOps (Pricing & Cost Attribution)
 export * from './domain/finops/index';
 
+// Domain - Billing (Subscription Plans & Usage Limits)
+export * from './domain/billing/index';
+
 // Domain - Assistant, Support, Knowledge
 export * from './domain/assistant/index';
 export * from './domain/support/index';
@@ -97,6 +100,9 @@ export * from './schemas/orders/index';
 
 // Amazon Schemas
 export * from './schemas/amazon/index';
+
+// Billing Schemas
+export * from './schemas/billing/index';
 
 // Assistant, Support, Knowledge Schemas
 export * from './schemas/assistant/index';

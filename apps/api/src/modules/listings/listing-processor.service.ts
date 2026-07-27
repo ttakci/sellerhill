@@ -11,6 +11,7 @@ import {
 import { Job } from 'bullmq';
 
 import { withCorrelation } from '../../common/observability/correlation.context';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { KeepaUsageService } from './keepa-usage.service';
@@ -35,7 +36,8 @@ export class ListingProcessorService extends WorkerHost {
     private readonly keepaService: KeepaService,
     private readonly keepaUsageService: KeepaUsageService,
     private readonly ebayService: EbayService,
-    private readonly listingStrategyService: ListingStrategyService
+    private readonly listingStrategyService: ListingStrategyService,
+    private readonly quotaEnforcement: QuotaEnforcementService
   ) {
     super();
   }
@@ -65,6 +67,7 @@ export class ListingProcessorService extends WorkerHost {
       shippingPolicyId,
       returnPolicyId,
       asDraft = false,
+      listingJobItemId,
     } = job.data;
 
     this.logger.log(`Processing ASIN ${asin} for job ${jobId}${asDraft ? ' (draft)' : ''}`);
@@ -77,6 +80,12 @@ export class ListingProcessorService extends WorkerHost {
         status: ListingStatus.ERROR,
         errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active or draft listings.',
       });
+      // A duplicate never created a listing — release the reservation so the
+      // held slot is freed for the next create. (Non-draft path only; drafts
+      // never reserved.)
+      if (!asDraft && listingJobItemId) {
+        await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
+      }
       return;
     }
 
@@ -204,6 +213,12 @@ export class ListingProcessorService extends WorkerHost {
         ebayItemId,
       });
 
+      // 7. Consume the billing-quota reservation for this job-item (non-draft
+      //    creates only — drafts never reserved). Fail-soft + idempotent.
+      if (!asDraft && listingJobItemId) {
+        this.quotaEnforcement.consumeForCreate(userId, listingJobItemId);
+      }
+
       this.logger.log(
         asDraft
           ? `Successfully created draft listing ${listingId} for ASIN ${asin}`
@@ -247,6 +262,13 @@ export class ListingProcessorService extends WorkerHost {
         status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
         errorMessage: errorMessage,
       });
+
+      // Billing-quota release: only on PERMANENT failure (terminal ERROR). On
+      // intermediate RETRYING the reservation stays held so a BullMQ retry
+      // doesn't oversell the slot. Drafts never reserved.
+      if (!asDraft && listingJobItemId && isLastAttempt) {
+        await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
+      }
 
       if (!isLastAttempt) {
         throw error; // Rethrow to trigger BullMQ retry

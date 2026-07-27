@@ -278,3 +278,123 @@ export function fairSplitBalances(totalTokens: number, allocations: FairShareAll
   const sum = allocations.reduce((total, allocation) => total + allocation.tokens, 0);
   return Math.abs(sum - totalTokens) < 0.0001;
 }
+
+// ---------------------------------------------------------------------------
+// Billing metrics (read-only admin)
+// ---------------------------------------------------------------------------
+
+/**
+ * Pressure band for a quota usage summary.
+ *
+ * Bands are derived from soft, env-configurable thresholds (there is no plan
+ * table today). `nearLimit` and `atLimit` are mutually exclusive bands that
+ * sit just below / at the configured cap; `overLimit` exceeds it.
+ */
+export enum QuotaPressureBand {
+  /** 0 usage — no pressure. */
+  NONE = 'none',
+  /** Usage below the warn threshold. */
+  UNDER_LIMIT = 'under_limit',
+  /** Usage at or above the warn threshold but below the critical threshold. */
+  NEAR_LIMIT = 'near_limit',
+  /** Usage at or above the critical threshold. */
+  AT_LIMIT = 'at_limit',
+  /** Usage above the critical threshold (over the soft cap). */
+  OVER_LIMIT = 'over_limit',
+}
+
+/** Count of users in a single {@link QuotaPressureBand}. */
+export interface QuotaBandCountDto {
+  band: QuotaPressureBand;
+  /** Number of users whose usage fell into this band. */
+  userCount: number;
+}
+
+/** Quota usage-pressure summary for one resource kind (listings or amazon accounts). */
+export interface QuotaPressureSummaryDto {
+  /**
+   * Resource kind: `'listings'` (active listings per user) or
+   * `'amazon_accounts'` (amazon buyer accounts per user).
+   */
+  resource: 'listings' | 'amazon_accounts';
+  /** Total users with at least one unit of usage for this resource. */
+  usersWithUsage: number;
+  /** Per-band user counts. Bands with zero users are still emitted. */
+  bands: QuotaBandCountDto[];
+  /**
+   * Warn threshold used to derive bands (env-configurable soft cap). Always
+   * present — it is the configured value, never null.
+   */
+  warnThreshold: number;
+  /** Critical threshold used to derive bands. Always present. */
+  criticalThreshold: number;
+  /**
+   * Highest per-user usage observed for this resource. Null only when no user
+   * has any usage (empty table); never faked as 0 when unknown.
+   */
+  maxUsage: number | null;
+}
+
+/**
+ * Account status distribution entry — the closest existing proxy for
+ * subscription status counts (there is no subscriptions table). Sourced from
+ * `users.status`.
+ */
+export interface AccountStatusCountDto {
+  /** User status value (matches {@link UserStatus}). */
+  status: string;
+  /** Number of users in this status. */
+  count: number;
+}
+
+/**
+ * Access-tier distribution entry — the closest existing proxy for plan
+ * distribution (there is no plans/subscriptions table). Sourced from
+ * `users.role`.
+ */
+export interface AccessTierCountDto {
+  /** User role value (matches {@link UserRole}). */
+  tier: string;
+  /** Number of users in this tier. */
+  count: number;
+}
+
+/** Aggregate billing metrics payload returned by GET /admin/billing/metrics. */
+export interface AdminBillingMetricsDto {
+  /** ISO 8601 timestamp the metrics were generated at. */
+  generatedAt: string;
+  /**
+   * Account status distribution (proxy for subscription status). Sourced from
+   * `users.status`. Empty array only when the users table is empty.
+   */
+  accountStatusDistribution: AccountStatusCountDto[];
+  /**
+   * Access-tier distribution (proxy for plan distribution). Sourced from
+   * `users.role`. Empty array only when the users table is empty.
+   */
+  accessTierDistribution: AccessTierCountDto[];
+  /**
+   * Per-resource quota usage-pressure summaries. Always contains entries for
+   * both `listings` and `amazon_accounts`.
+   */
+  quotaPressure: QuotaPressureSummaryDto[];
+  /**
+   * Total estimated cost (micro-USD) across all usage_events in the period.
+   * Null when no cost rows exist (never faked as 0 when unknown).
+   */
+  totalEstimatedCostMicros: number | null;
+  /** Currency for totalEstimatedCostMicros; null when no cost rows exist. */
+  currency: string | null;
+  /** Period start (ISO 8601) used for the cost total. */
+  from: string;
+  /** Period end (ISO 8601) used for the cost total. */
+  to: string;
+}
+
+/** Query params for GET /admin/billing/metrics. */
+export interface AdminBillingMetricsQuery {
+  /** Cost-period start (ISO 8601). Defaults to start of current month. */
+  from?: string;
+  /** Cost-period end (ISO 8601). Defaults to now. */
+  to?: string;
+}

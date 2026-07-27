@@ -1,4 +1,5 @@
 import type {
+  AdminBillingMetricsDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
   ProviderCostSummaryDto,
@@ -25,6 +26,10 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => '/admin/finops/users',
       providesTags: ['Admin'],
     }),
+    getAdminBillingMetrics: builder.query<AdminBillingMetricsDto, void>({
+      query: () => '/admin/billing/metrics',
+      providesTags: ['Admin'],
+    }),
   }),
 });
 
@@ -33,4 +38,5 @@ export const {
   useGetAdminOperationsQuery,
   useGetAdminProviderCostsQuery,
   useGetAdminUserCostsQuery,
+  useGetAdminBillingMetricsQuery,
 } = adminApi;

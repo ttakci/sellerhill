@@ -1,0 +1,193 @@
+{
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscription plan, usage, and billing history.",
+    "plans": {
+      "title": "Plans",
+      "subtitle": "Choose the plan that fits your selling volume.",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "annualSavings": "Save 2 months with annual billing",
+      "perMonth": "/mo",
+      "perYear": "/yr",
+      "choosePlan": "Choose {{plan}}",
+      "currentPlan": "Current plan",
+      "switchPlan": "Switch to {{plan}}",
+      "contactSales": "Contact sales",
+      "freeTrial": "Free trial available",
+      "mostPopular": "Most popular",
+      "informationalOnly": "Billing enforcement is off — plans are informational only. All features are currently unrestricted.",
+      "free": {
+        "name": "Free"
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "For solo sellers getting started with automated dropshipping."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "For growing sellers who need more listings and Amazon orders."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "For high-volume sellers running multiple stores at scale."
+      }
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Active listings",
+        "unit": "listings",
+        "description": "Maximum active listings across all your stores."
+      },
+      "amazon_orders_per_month": {
+        "label": "Amazon orders",
+        "unit": "orders",
+        "description": "Maximum Amazon orders (auto-fulfill + manual link) per month."
+      },
+      "unlimited": "Unlimited",
+      "disabled": "Not included",
+      "of": "{{used}} of {{limit}}",
+      "used": "{{used}} used",
+      "remaining": "{{remaining}} remaining",
+      "exceeded": "Limit exceeded"
+    },
+    "subscription": {
+      "title": "Your subscription",
+      "plan": "Plan",
+      "interval": "Billing interval",
+      "intervalValue": {
+        "monthly": "Monthly billing",
+        "annual": "Annual billing"
+      },
+      "status": {
+        "label": "Status",
+        "trialing": "Trial",
+        "active": "Active",
+        "past_due": "Past due",
+        "canceled": "Canceled",
+        "ended": "Ended"
+      },
+      "currentPeriod": "Current period",
+      "nextRenewal": "Next renewal",
+      "canceledAt": "Canceled on",
+      "endedAt": "Ended on",
+      "manage": "Manage subscription",
+      "cancel": "Cancel subscription",
+      "resume": "Resume subscription",
+      "upgrade": "Upgrade plan",
+      "downgrade": "Downgrade plan"
+    },
+    "customer": {
+      "title": "Billing details",
+      "billingEmail": "Billing email",
+      "status": {
+        "label": "Account status",
+        "active": "Active",
+        "locked": "Locked",
+        "deleted": "Deleted"
+      }
+    },
+    "transition": {
+      "full_access": "Full access — billing enforcement is off. All features are unrestricted.",
+      "active": "Your subscription is active.",
+      "no_subscription": "No active subscription. Choose a plan to enable billing.",
+      "past_due": "Your subscription is past due. Update your payment method to restore access."
+    },
+    "provider": {
+      "unconfiguredTitle": "Billing not configured",
+      "unconfiguredBody": "Checkout and subscription management are unavailable because no billing provider is connected. Contact your operator."
+    },
+    "settingsHub": {
+      "title": "Billing & Plan",
+      "subtitle": "Manage your subscription, usage, and billing.",
+      "manage": {
+        "title": "Manage billing",
+        "subtitle": "View your plan, usage, and upgrade options."
+      }
+    },
+    "usage": {
+      "title": "Usage this period",
+      "subtitle": "Usage resets at the start of your next billing period.",
+      "period": "Period",
+      "noOpenPeriod": "No active usage period",
+      "status": {
+        "label": "Period status",
+        "open": "Open",
+        "closed": "Closed",
+        "finalized": "Finalized"
+      }
+    },
+    "webhooks": {
+      "title": "Webhook inbox",
+      "subtitle": "Recent billing provider events.",
+      "provider": "Provider",
+      "eventType": "Event type",
+      "status": {
+        "label": "Status",
+        "received": "Received",
+        "processing": "Processing",
+        "processed": "Processed",
+        "failed": "Failed"
+      },
+      "receivedAt": "Received",
+      "processedAt": "Processed",
+      "attempts": "Attempts",
+      "empty": "No webhook events yet"
+    },
+    "reservation": {
+      "title": "Reservations",
+      "subtitle": "Listing and Amazon-order slots reserved against your plan.",
+      "kind": {
+        "listing": "Listing",
+        "amazon_order": "Amazon order"
+      },
+      "status": {
+        "label": "Status",
+        "reserved": "Reserved",
+        "released": "Released",
+        "overage": "Overage"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "You have reached your plan limit. Upgrade to continue.",
+      "no_active_subscription": "No active subscription found.",
+      "no_open_period": "No open usage period for this limit.",
+      "already_reserved": "This resource is already reserved."
+    },
+    "actions": {
+      "subscribe": "Subscribe",
+      "save": "Save changes",
+      "cancel": "Cancel"
+    },
+    "admin": {
+      "plans": {
+        "title": "Plans",
+        "subtitle": "Manage subscription plans, prices, and limits.",
+        "add": "Add plan",
+        "edit": "Edit plan",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "slug": "Slug",
+        "name": "Name",
+        "description": "Description",
+        "isActive": "Active",
+        "displayOrder": "Display order",
+        "prices": "Prices",
+        "limits": "Limits",
+        "providerProductId": "Provider product id",
+        "providerPriceId": "Provider price id",
+        "effectiveFrom": "Effective from",
+        "effectiveTo": "Effective to",
+        "amountMicros": "Amount (micros)",
+        "limitKey": "Limit key",
+        "limitValue": "Limit value",
+        "unit": "Unit"
+      },
+      "webhooks": {
+        "title": "Webhook inbox",
+        "subtitle": "Inspect and replay billing provider webhook events.",
+        "replay": "Replay"
+      }
+    }
+  }
+}

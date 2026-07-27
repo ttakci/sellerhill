@@ -13,6 +13,11 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: winstonLogger,
+    // Capture the raw request body so webhook signature verification can run
+    // against the exact bytes the provider sent (Paddle signs the literal
+    // body). The raw body is stashed on `req.rawBody` as a Buffer for routes
+    // that opt in via `@Req()`. JSON parsing still happens for other routes.
+    rawBody: true,
   });
 
   // HttpOnly refresh-token cookies (auth)

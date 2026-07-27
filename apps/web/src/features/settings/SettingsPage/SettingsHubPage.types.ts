@@ -18,6 +18,7 @@ export type SettingsDrawerKey =
   | 'listingGroupCreate'
   | 'listingGroupEdit'
   | 'listingGroupList'
+  | 'billing'
   | null;
 
 export interface SettingsHubPageComponentProps {

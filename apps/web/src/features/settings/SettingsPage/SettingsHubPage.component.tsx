@@ -24,6 +24,8 @@ import {
 import * as S from './SettingsHubPage.style';
 import type { SettingsHubPageComponentProps } from './SettingsHubPage.types';
 
+import { BillingDrawer } from '@/features/billing';
+
 const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: () => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
@@ -62,6 +64,25 @@ const StoreManagementSection = ({ onOpenStoreSettings }: { onOpenStoreSettings: 
         label={t('translation:settingsHub.sections.storeManagement.storeSettings')}
         subtitle={t('translation:settingsHub.sections.storeManagement.storeSettingsSubtitle')}
         onClick={onOpenStoreSettings}
+      />
+    </SettingsCard>
+  );
+};
+
+const BillingSection = ({ onManage }: { onManage: () => void }): React.ReactElement => {
+  const { t } = useTranslation(['translation', 'billing']);
+  return (
+    <SettingsCard
+      variant="section"
+      header={{
+        icon: 'payments',
+        title: t('billing:billing.settingsHub.title'),
+      }}
+    >
+      <SettingsActionRow
+        label={t('billing:billing.settingsHub.manage.title')}
+        subtitle={t('billing:billing.settingsHub.manage.subtitle')}
+        onClick={onManage}
       />
     </SettingsCard>
   );
@@ -209,6 +230,8 @@ export const SettingsHubPageComponent = ({
         <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
       </S.TwoColGrid>
 
+      <BillingSection onManage={() => onOpenDrawer('billing')} />
+
       <AccountSecuritySection
         onAction={(key) => onOpenDrawer(key)}
         onPersonalInfo={() => onOpenDrawer('profile')}
@@ -247,6 +270,7 @@ export const SettingsHubPageComponent = ({
         selectedScope={storeScope}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
+      <BillingDrawer isOpen={activeDrawer === 'billing'} onClose={onCloseDrawer} />
 
       <ListingGroupDrawer
         isOpen={activeDrawer === 'listingGroupCreate' || activeDrawer === 'listingGroupEdit'}

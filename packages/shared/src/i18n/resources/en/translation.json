@@ -584,28 +584,31 @@
       "sectionTitle": "Simple, transparent pricing",
       "sectionSubtitle": "Start free. Upgrade only when you’re ready to scale.",
       "billingNote": "No credit card required to start. Cancel anytime.",
+      "perMonth": "/mo",
+      "perYear": "/yr",
+      "mostPopular": "Most popular",
+      "unlimited": "Unlimited",
+      "notIncluded": "Not included",
+      "listingsLabel": "listings",
+      "ordersLabel": "orders",
+      "upToListings": "Up to {{limit}} listings",
+      "unlimitedListings": "Unlimited listings",
+      "catalogError": "Couldn't load live pricing. Showing plan overview only.",
       "starter": {
         "name": "Starter",
-        "price": "$0",
-        "period": "/mo",
-        "description": "Everything you need to test the waters.",
+        "description": "For solo sellers getting started with automated dropshipping.",
         "features": [
-          "Up to 25 listings",
           "Amazon → eBay stock & price sync",
           "Automatic ordering",
           "Tracking updates",
           "Email support"
         ],
-        "cta": "Start free"
+        "cta": "Start free trial"
       },
-      "pro": {
-        "badge": "Most popular",
-        "name": "Pro",
-        "price": "$49",
-        "period": "/mo",
-        "description": "For serious sellers ready to scale.",
+      "growth": {
+        "name": "Growth",
+        "description": "For growing sellers who need more listings and Amazon orders.",
         "features": [
-          "Up to 500 listings",
           "Real-time sync & out-of-stock alerts",
           "Automatic + manual ordering",
           "Auto tracking & shipping",
@@ -614,20 +617,64 @@
         ],
         "cta": "Start free trial"
       },
-      "enterprise": {
-        "name": "Enterprise",
-        "price": "$149",
-        "period": "/mo",
-        "description": "For high-volume operations and agencies.",
+      "scale": {
+        "name": "Scale",
+        "description": "For high-volume sellers running multiple stores at scale.",
         "features": [
-          "Unlimited listings",
-          "Everything in Pro",
+          "Everything in Growth",
           "API access",
           "Dedicated account manager",
           "Custom automations",
           "24/7 priority support"
         ],
         "cta": "Contact sales"
+      },
+      "catalogFallback": {
+        "starter": {
+          "name": "Starter",
+          "price": "$0",
+          "period": "/mo",
+          "description": "Everything you need to test the waters.",
+          "features": [
+            "Up to 25 listings",
+            "Amazon → eBay stock & price sync",
+            "Automatic ordering",
+            "Tracking updates",
+            "Email support"
+          ],
+          "cta": "Start free"
+        },
+        "pro": {
+          "badge": "Most popular",
+          "name": "Pro",
+          "price": "$49",
+          "period": "/mo",
+          "description": "For serious sellers ready to scale.",
+          "features": [
+            "Up to 500 listings",
+            "Real-time sync & out-of-stock alerts",
+            "Automatic + manual ordering",
+            "Auto tracking & shipping",
+            "Per-product settings",
+            "Priority support"
+          ],
+          "cta": "Start free trial"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "price": "$149",
+          "period": "/mo",
+          "description": "For high-volume operations and agencies.",
+          "features": [
+            "Unlimited listings",
+            "Everything in Pro",
+            "API access",
+            "Dedicated account manager",
+            "Custom automations",
+            "24/7 priority support"
+          ],
+          "cta": "Contact sales"
+        }
       }
     },
     "faq": {

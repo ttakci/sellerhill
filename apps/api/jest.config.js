@@ -6,6 +6,11 @@ module.exports = {
   transform: { '^.+\\.ts$': 'ts-jest' },
   moduleFileExtensions: ['js', 'json', 'ts', 'cjs'],
   testEnvironment: 'node',
+  // `@repo/shared`'s CJS build pulls in class-validator/class-transformer
+  // decorators (orders/billing schemas) which call Reflect.getMetadata at
+  // module-eval time. The polyfill must load before any spec imports
+  // `@repo/shared`.
+  setupFiles: ['<rootDir>/test/setup.cjs'],
   // `@repo/shared` ships a CJS build at dist/cjs; without this mapper Jest's
   // resolver follows the workspace symlink into packages/shared/src/index.ts
   // (TypeScript source), which pulls ESM-only deps that the Node test runtime

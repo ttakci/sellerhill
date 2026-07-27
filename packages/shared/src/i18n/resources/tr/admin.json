@@ -2,7 +2,7 @@
   "admin": {
     "title": "Yönetim operasyonları",
     "subtitle": "Platform maliyetlerini, kuyrukları, sağlayıcı kullanımını ve müşteri dağılımını izleyin.",
-    "tabs": { "queues": "Kuyruklar", "costs": "Maliyetler", "users": "Kullanıcılar" },
+    "tabs": { "queues": "Kuyruklar", "costs": "Maliyetler", "billing": "Faturalandırma", "users": "Kullanıcılar" },
     "queue": { "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}" },
     "cost": { "keepaBalance": "Keepa token bakiyesi", "users": "Toplam kullanıcı" },
     "users": { "unattributed": "Dağıtılmamış platform kullanımı" },
@@ -21,6 +21,35 @@
       "proxy_bytes": "Proxy baytları",
       "proxy_requests": "Proxy istekleri",
       "tracking_conversions": "Takip dönüşümleri"
+    },
+    "billing": {
+      "costTotal": "Tahmini maliyet (mikro-USD)",
+      "accountStatus": {
+        "title": "Hesap durumu dağılımı",
+        "pending": "Beklemede",
+        "active": "Aktif",
+        "inactive": "Pasif",
+        "banned": "Yasaklı"
+      },
+      "accessTier": {
+        "title": "Erişim seviyesi dağılımı",
+        "customer": "Müşteri",
+        "support": "Destek",
+        "admin": "Yönetici"
+      },
+      "quota": {
+        "title": "Kota kullanım baskısı",
+        "listings": "Kullanıcı başına aktif ilanlar",
+        "amazon_accounts": "Kullanıcı başına Amazon hesapları",
+        "summary": "Kullanımı olan kullanıcılar: {{usersWithUsage}} · En yüksek: {{maxUsage}} · Uyarı: {{warn}} · Kritik: {{critical}}"
+      },
+      "band": {
+        "none": "Yok",
+        "under_limit": "Limit altında",
+        "near_limit": "Limite yakın",
+        "at_limit": "Limitte",
+        "over_limit": "Limit üstü"
+      }
     }
   }
 }

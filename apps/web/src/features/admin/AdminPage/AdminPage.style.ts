@@ -28,6 +28,13 @@ export const Rows = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
+export const Section = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  padding-block: ${tkn('spacing.sm')};
+`;
+
 export const Row = styled.div`
   display: flex;
   justify-content: space-between;

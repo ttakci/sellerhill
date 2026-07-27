@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
 import {
+  useGetAdminBillingMetricsQuery,
   useGetAdminOperationsQuery,
   useGetAdminOverviewQuery,
   useGetAdminProviderCostsQuery,
@@ -15,7 +16,7 @@ import type { AdminTabId } from './AdminPage.types';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useLocale } from '@/utils/useLocale';
 
-const VALID_TABS: AdminTabId[] = ['queues', 'costs', 'users'];
+const VALID_TABS: AdminTabId[] = ['queues', 'costs', 'billing', 'users'];
 
 export const AdminPageContainer = (): React.ReactElement => {
   const { buildPath } = useLocale();
@@ -26,6 +27,7 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: operations } = useGetAdminOperationsQuery(undefined, { skip });
   const { data: providerCosts = [] } = useGetAdminProviderCostsQuery(undefined, { skip });
   const { data: userCosts = [] } = useGetAdminUserCostsQuery(undefined, { skip });
+  const { data: billingMetrics } = useGetAdminBillingMetricsQuery(undefined, { skip });
   const tabParam = searchParams.get('tab') as AdminTabId | null;
   const activeTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'queues';
   const handleTabChange = useCallback((tab: AdminTabId) => setSearchParams({ tab }), [setSearchParams]);
@@ -39,6 +41,7 @@ export const AdminPageContainer = (): React.ReactElement => {
       operations={operations}
       providerCosts={providerCosts}
       userCosts={userCosts}
+      billingMetrics={billingMetrics}
       onTabChange={handleTabChange}
     />
   );

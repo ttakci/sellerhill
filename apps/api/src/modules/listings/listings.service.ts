@@ -14,6 +14,7 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { ListingStrategyService } from './listing-strategy.service';
@@ -113,7 +114,8 @@ export class ListingsService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly ebayService: EbayService,
-    private readonly strategyService: ListingStrategyService
+    private readonly strategyService: ListingStrategyService,
+    private readonly quotaEnforcement: QuotaEnforcementService
   ) {}
 
   /**
@@ -748,7 +750,10 @@ export class ListingsService {
   /**
    * Create a new listing job
    */
-  async createJob(userId: string, request: CreateListingsRequest): Promise<ListingJobDto> {
+  async createJob(
+    userId: string,
+    request: CreateListingsRequest
+  ): Promise<ListingJobDto & { items: Array<{ id: string; asin: string }> }> {
     const { asins } = request;
 
     // Filter out ASINs that are already actively listed
@@ -764,12 +769,6 @@ export class ListingsService {
       }
     }
 
-    if (toProcess.length === 0) {
-      // Return a special object or throw error if all are duplicates?
-      // For now, let's create a job with 0 asins or throw.
-      // Better to return a job with 0 so the UI handles it normally.
-    }
-
     // Create job record
     const jobResult = await this.databaseService.query<ListingJobEntity>(
       `
@@ -781,22 +780,22 @@ export class ListingsService {
     );
 
     const job = jobResult[0];
+    const items: Array<{ id: string; asin: string }> = [];
 
-    // Create job items for each ASIN
+    // Create job items for each ASIN (capture ids for quota reservation keys)
     for (const asin of toProcess) {
-      await this.databaseService.query(
+      const itemRows = await this.databaseService.query<{ id: string }>(
         `
         INSERT INTO listing_job_items (job_id, asin, status)
         VALUES ($1, $2, $3)
+        RETURNING id
       `,
         [job.id, asin, ListingStatus.DRAFT]
       );
+      items.push({ id: itemRows[0].id, asin });
     }
 
-    // TODO: Queue the job for processing
-    // await this.queueService.addListingJob(job.id, userId, request);
-
-    return this.mapJobToDto(job);
+    return { ...this.mapJobToDto(job), items };
   }
 
   /**
@@ -1117,57 +1116,74 @@ export class ListingsService {
       roi,
     };
 
-    const { listingId: ebayItemId, categoryName } = await this.ebayService.createListingWithRest(
-      userId,
-      product.id,
-      listingData,
-      {
-        paymentId: listing.paymentPolicyId,
-        shippingId: listing.shippingPolicyId,
-        returnId: listing.returnPolicyId,
-      },
-      listing.asin
-    );
+    // Billing-quota gate (BILLING_ENFORCEMENT_ENABLED): reserve an active-
+    // listings slot for this publish, race-safe (advisory-locked). Throws
+    // QuotaExhaustedError if the limit would be exceeded — the controller
+    // surfaces it as a structured 4xx and no eBay call is made.
+    await this.quotaEnforcement.reserveForPublish(userId, listingId);
 
-    await this.databaseService.query(
-      `
-      UPDATE listings SET
-        ebay_item_id = $1,
-        status = '${ListingStatus.ACTIVE}',
-        price = $2,
-        quantity = $3,
-        purchase_price = $4,
-        estimated_profit = $5,
-        profit_margin = $6,
-        roi = $7,
-        title = $8,
-        ebay_category_name = COALESCE(NULLIF($9, ''), ebay_category_name),
-        ebay_account_id = COALESCE(ebay_account_id, $10),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $11 AND user_id = $12
-    `,
-      [
-        ebayItemId,
-        finalPrice,
-        finalQty,
-        purchasePrice ?? 0,
-        estimatedProfit ?? 0,
-        profitMargin ?? 0,
-        roi ?? 0,
-        listingData.title,
-        categoryName || '',
-        ebayAccountId,
-        listingId,
+    try {
+      const { listingId: ebayItemId, categoryName } = await this.ebayService.createListingWithRest(
         userId,
-      ]
-    );
+        product.id,
+        listingData,
+        {
+          paymentId: listing.paymentPolicyId,
+          shippingId: listing.shippingPolicyId,
+          returnId: listing.returnPolicyId,
+        },
+        listing.asin
+      );
 
-    const updated = await this.getListing(userId, listingId);
-    if (!updated) {
-      throw new NotFoundException('Listing not found after publish');
+      await this.databaseService.query(
+        `
+        UPDATE listings SET
+          ebay_item_id = $1,
+          status = '${ListingStatus.ACTIVE}',
+          price = $2,
+          quantity = $3,
+          purchase_price = $4,
+          estimated_profit = $5,
+          profit_margin = $6,
+          roi = $7,
+          title = $8,
+          ebay_category_name = COALESCE(NULLIF($9, ''), ebay_category_name),
+          ebay_account_id = COALESCE(ebay_account_id, $10),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $11 AND user_id = $12
+      `,
+        [
+          ebayItemId,
+          finalPrice,
+          finalQty,
+          purchasePrice ?? 0,
+          estimatedProfit ?? 0,
+          profitMargin ?? 0,
+          roi ?? 0,
+          listingData.title,
+          categoryName || '',
+          ebayAccountId,
+          listingId,
+          userId,
+        ]
+      );
+
+      // Publish succeeded — consume the reservation (idempotent, fail-soft).
+      this.quotaEnforcement.consumeForPublish(userId, listingId);
+
+      const updated = await this.getListing(userId, listingId);
+      if (!updated) {
+        throw new NotFoundException('Listing not found after publish');
+      }
+      this.logger.log(`Published draft ${listingId} as eBay item ${ebayItemId}`);
+      return updated;
+    } catch (err) {
+      // Any failure between reserve and consume releases the held slot so the
+      // next publish attempt can re-reserve cleanly. QuotaExhaustedError from
+      // the reserve above is NOT re-caught here (it threw before this block).
+      await this.quotaEnforcement.releaseForPublish(userId, listingId);
+      throw err;
     }
-    this.logger.log(`Published draft ${listingId} as eBay item ${ebayItemId}`);
-    return updated;
   }
 
   /**

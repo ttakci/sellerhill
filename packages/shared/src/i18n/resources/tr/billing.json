@@ -1,0 +1,193 @@
+{
+  "billing": {
+    "title": "Faturalandırma",
+    "subtitle": "Abonelik planınızı, kullanımınızı ve fatura geçmişinizi yönetin.",
+    "plans": {
+      "title": "Planlar",
+      "subtitle": "Satış hacminize uygun planı seçin.",
+      "monthly": "Aylık",
+      "annual": "Yıllık",
+      "annualSavings": "Yıllık abonelikte 2 ay bedava",
+      "perMonth": "/ay",
+      "perYear": "/yıl",
+      "choosePlan": "{{plan}} planını seç",
+      "currentPlan": "Mevcut plan",
+      "switchPlan": "{{plan}} planına geç",
+      "contactSales": "Satış ekibiyle iletişime geç",
+      "freeTrial": "Ücretsiz deneme mevcut",
+      "mostPopular": "En popüler",
+      "informationalOnly": "Faturalandırma zorunluluğu kapalı — planlar yalnızca bilgilendirme amaçlıdır. Tüm özellikler şu anda kısıtlamasız.",
+      "free": {
+        "name": "Ücretsiz"
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Otomatik dropshipping'e yeni başlayan bireysel satıcılar için."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Daha fazla listing ve Amazon siparişine ihtiyaç duyan büyüyen satıcılar için."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Birden fazla mağazayı ölçekte yöneten yüksek hacimli satıcılar için."
+      }
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Aktif listeler",
+        "unit": "liste",
+        "description": "Tüm mağazalarınızdaki maksimum aktif liste sayısı."
+      },
+      "amazon_orders_per_month": {
+        "label": "Amazon siparişleri",
+        "unit": "sipariş",
+        "description": "Aylık maksimum Amazon siparişi (otomatik karşılama + manuel bağlama)."
+      },
+      "unlimited": "Sınırsız",
+      "disabled": "Dahil değil",
+      "of": "{{used}} / {{limit}}",
+      "used": "{{used}} kullanıldı",
+      "remaining": "{{remaining}} kaldı",
+      "exceeded": "Limit aşıldı"
+    },
+    "subscription": {
+      "title": "Aboneliğiniz",
+      "plan": "Plan",
+      "interval": "Faturalandırma aralığı",
+      "intervalValue": {
+        "monthly": "Aylık faturalandırma",
+        "annual": "Yıllık faturalandırma"
+      },
+      "status": {
+        "label": "Durum",
+        "trialing": "Deneme",
+        "active": "Aktif",
+        "past_due": "Vadesi geçmiş",
+        "canceled": "İptal edildi",
+        "ended": "Sona erdi"
+      },
+      "currentPeriod": "Mevcut dönem",
+      "nextRenewal": "Sonraki yenileme",
+      "canceledAt": "İptal tarihi",
+      "endedAt": "Bitiş tarihi",
+      "manage": "Aboneliği yönet",
+      "cancel": "Aboneliği iptal et",
+      "resume": "Aboneliği sürdür",
+      "upgrade": "Planı yükselt",
+      "downgrade": "Planı düşür"
+    },
+    "customer": {
+      "title": "Fatura bilgileri",
+      "billingEmail": "Fatura e-postası",
+      "status": {
+        "label": "Hesap durumu",
+        "active": "Aktif",
+        "locked": "Kilitli",
+        "deleted": "Silinmiş"
+      }
+    },
+    "transition": {
+      "full_access": "Tam erişim — faturalandırma zorunluluğu kapalı. Tüm özellikler kısıtlamasız.",
+      "active": "Aboneliğiniz aktif.",
+      "no_subscription": "Aktif abonelik yok. Faturalandırmayı etkinleştirmek için bir plan seçin.",
+      "past_due": "Aboneliğinizin vadesi geçmiş. Erişimi geri kazanmak için ödeme yönteminizi güncelleyin."
+    },
+    "provider": {
+      "unconfiguredTitle": "Faturalandırma yapılandırılmamış",
+      "unconfiguredBody": "Hiçbir faturalandırma sağlayıcısı bağlı olmadığı için ödeme ve abonelik yönetimi kullanılamıyor. Operatörünüzle iletişime geçin."
+    },
+    "settingsHub": {
+      "title": "Faturalandırma & Plan",
+      "subtitle": "Aboneliğinizi, kullanımınızı ve faturalandırmanızı yönetin.",
+      "manage": {
+        "title": "Faturalandırmayı yönet",
+        "subtitle": "Planınızı, kullanımınızı ve yükseltme seçeneklerini görüntüleyin."
+      }
+    },
+    "usage": {
+      "title": "Bu dönem kullanımı",
+      "subtitle": "Kullanım, sonraki faturalandırma döneminin başında sıfırlanır.",
+      "period": "Dönem",
+      "noOpenPeriod": "Aktif kullanım dönemi yok",
+      "status": {
+        "label": "Dönem durumu",
+        "open": "Açık",
+        "closed": "Kapalı",
+        "finalized": "Sonuçlandırıldı"
+      }
+    },
+    "webhooks": {
+      "title": "Webhook gelen kutusu",
+      "subtitle": "Son faturalandırma sağlayıcısı olayları.",
+      "provider": "Sağlayıcı",
+      "eventType": "Olay türü",
+      "status": {
+        "label": "Durum",
+        "received": "Alındı",
+        "processing": "İşleniyor",
+        "processed": "İşlendi",
+        "failed": "Başarısız"
+      },
+      "receivedAt": "Alınma",
+      "processedAt": "İşlenme",
+      "attempts": "Deneme",
+      "empty": "Henüz webhook olayı yok"
+    },
+    "reservation": {
+      "title": "Rezervasyonlar",
+      "subtitle": "Planınıza karşı ayrılmış liste ve Amazon sipariş yuvaları.",
+      "kind": {
+        "listing": "Liste",
+        "amazon_order": "Amazon siparişi"
+      },
+      "status": {
+        "label": "Durum",
+        "reserved": "Ayrıldı",
+        "released": "Bırakıldı",
+        "overage": "Fazla kullanım"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "Plan limitinize ulaştınız. Devam etmek için planınızı yükseltin.",
+      "no_active_subscription": "Aktif abonelik bulunamadı.",
+      "no_open_period": "Bu limit için açık kullanım dönemi yok.",
+      "already_reserved": "Bu kaynak zaten ayrılmış."
+    },
+    "actions": {
+      "subscribe": "Abone ol",
+      "save": "Değişiklikleri kaydet",
+      "cancel": "İptal"
+    },
+    "admin": {
+      "plans": {
+        "title": "Planlar",
+        "subtitle": "Abonelik planlarını, fiyatlarını ve limitlerini yönetin.",
+        "add": "Plan ekle",
+        "edit": "Planı düzenle",
+        "activate": "Etkinleştir",
+        "deactivate": "Devre dışı bırak",
+        "slug": "Kısa ad",
+        "name": "Ad",
+        "description": "Açıklama",
+        "isActive": "Aktif",
+        "displayOrder": "Görüntüleme sırası",
+        "prices": "Fiyatlar",
+        "limits": "Limitler",
+        "providerProductId": "Sağlayıcı ürün kimliği",
+        "providerPriceId": "Sağlayıcı fiyat kimliği",
+        "effectiveFrom": "Başlangıç tarihi",
+        "effectiveTo": "Bitiş tarihi",
+        "amountMicros": "Tutar (mikro)",
+        "limitKey": "Limit anahtarı",
+        "limitValue": "Limit değeri",
+        "unit": "Birim"
+      },
+      "webhooks": {
+        "title": "Webhook gelen kutusu",
+        "subtitle": "Faturalandırma sağlayıcısı webhook olaylarını inceleyin ve yeniden oynatın.",
+        "replay": "Yeniden oynat"
+      }
+    }
+  }
+}
