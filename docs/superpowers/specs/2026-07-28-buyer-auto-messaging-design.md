@@ -53,7 +53,7 @@ All configuration lives in `store_settings`; system templates are code constants
 
 ## 5. Data Model — Migration `054_buyer_messaging.sql`
 
-> FK column types follow the referenced tables' PKs (`users.id`, `ebay_accounts.id`). Confirm exact types against `init.sql` at implementation time; the migration runner validates on boot.
+> FK column types follow the referenced tables' PKs. Confirmed: `users.id` and `ebay_accounts.id` are both **UUID** (migrations `001`/`002`). `ebay_order_id` is `VARCHAR` (eBay order ids are strings). `buyer_message_templates.id` and `buyer_message_log.id` are as shown below.
 
 ```sql
 BEGIN;
@@ -78,7 +78,7 @@ ALTER TABLE store_settings
 -- (b) user-authored custom templates
 CREATE TABLE buyer_message_templates (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   event_type    buyer_message_event_type NOT NULL,
   name          VARCHAR(120) NOT NULL,
   body          TEXT NOT NULL,
@@ -93,8 +93,8 @@ CREATE INDEX idx_buyer_msg_templates_user_event
 -- (c) idempotency + audit log (append-only)
 CREATE TABLE buyer_message_log (
   id                  BIGSERIAL PRIMARY KEY,
-  user_id             BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  ebay_account_id     BIGINT NOT NULL,  -- references ebay_accounts(id)
+  user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  ebay_account_id     UUID NOT NULL REFERENCES ebay_accounts(id) ON DELETE CASCADE,
   ebay_order_id       VARCHAR(64) NOT NULL,
   event_type          buyer_message_event_type NOT NULL,
   template_kind       VARCHAR(16) NOT NULL,   -- 'system' | 'custom'
@@ -244,7 +244,7 @@ Every enqueue is wrapped in try/catch so messaging never breaks order/tracking f
 1. **`Textarea` atom** — confirm existence in `packages/ui`; add if missing (required for the template body editor).
 2. **`EbayService` token model** — confirm the exact method to obtain the per-account user token for a Sell-API-style REST call (Message API uses the same user token).
 3. **Exact eBay Message API `sendMessage` request shape** — fields/headers/scopes; validate against live docs at implementation. If `sendMessage` cannot send proactively for a given region/scopes, fall back to Trading `AddMemberMessageAAQToPartner` via the same `BuyerMessagingProvider` port.
-4. **`ebay_accounts.id` PK type** — confirm BIGINT for the FK in `buyer_message_log`.
+4. **`ebay_accounts.id` PK type** — **RESOLVED**: UUID (migration `002`); `users.id` is also UUID. FKs in `buyer_message_templates`/`buyer_message_log` are UUID.
 
 ## 15. Rollout
 
