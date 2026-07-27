@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
@@ -941,6 +941,22 @@ export class EbayService {
       return null;
     }
     return this.getAccessToken(account);
+  }
+
+  /**
+   * Get a valid access token for a SPECIFIC eBay account (by id).
+   * Used by BuyerMessagingProvider and other per-account callers.
+   * Refreshes if expiring within 5 minutes (delegates to getAccessToken).
+   */
+  async getAccountAccessToken(accountId: string): Promise<string> {
+    const accounts = await this.databaseService.query<EbayAccountEntity>(
+      `SELECT * FROM ebay_accounts WHERE id = $1`,
+      [accountId],
+    );
+    if (!accounts[0]) {
+      throw new NotFoundException(`eBay account ${accountId} not found`);
+    }
+    return this.getAccessToken(accounts[0]);
   }
 
   /**
