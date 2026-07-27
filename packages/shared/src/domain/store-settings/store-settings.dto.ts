@@ -1,4 +1,5 @@
 import { TrackingConversionProvider } from '../amazon';
+import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
 import { BlacklistKeyword, StoreSettings } from './store-settings.types';
 
@@ -28,6 +29,10 @@ export interface SaveStoreSettingsRequest {
     // Carrier-mapping provider; persisted LOWERCASE ('local' | 'api').
     // Optional on the request — service defaults to LOCAL. Response always carries it.
     trackingConversionProvider?: TrackingConversionProvider;
+
+    // Buyer auto-messaging config (per-user global store setting).
+    // Optional on the request — service defaults to disabled. Response always carries it.
+    buyerMessaging?: BuyerMessagingConfig | null;
 }
 
 /**

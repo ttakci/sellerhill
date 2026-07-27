@@ -1,4 +1,5 @@
 import type { TrackingConversionProvider } from '../amazon';
+import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
 /**
  * Blacklist Keyword Interface
@@ -42,6 +43,11 @@ export interface StoreSettings {
     // tracking number must be relayed to eBay. Persisted LOWERCASE ('local' | 'api')
     // — the tracking processor compares case-sensitively. Default 'local'.
     trackingConversionProvider: TrackingConversionProvider;
+
+    // Buyer auto-messaging config (per-user global store setting,
+    // `store_settings.buyer_messaging` JSONB). Nullable — null/undefined means
+    // the feature is off (no automated buyer messages). See BuyerMessagingConfig.
+    buyerMessaging?: BuyerMessagingConfig | null;
 
     createdAt: Date;
     updatedAt: Date;

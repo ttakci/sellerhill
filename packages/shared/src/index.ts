@@ -64,6 +64,9 @@ export * from './domain/assistant/index';
 export * from './domain/support/index';
 export * from './domain/knowledge/index';
 
+// Domain - Buyer Messaging (automated buyer messages on order lifecycle events)
+export * from './domain/buyer-messaging/buyer-messaging.types';
+
 // API Error Types
 export type { ApiErrorResponse, RtkQueryError } from './types/api-error.types';
 
@@ -108,3 +111,6 @@ export * from './schemas/billing/index';
 export * from './schemas/assistant/index';
 export * from './schemas/support/index';
 export * from './schemas/knowledge/index';
+
+// Buyer Messaging Schemas
+export * from './schemas/buyer-messaging/buyer-messaging.schema';

@@ -14,6 +14,7 @@
 
 export * from './amazon';
 export * from './auth';
+export * from './buyer-messaging/buyer-messaging.schema';
 export * from './common/form.utils';
 export * from './orders';
 export * from './store-settings';
