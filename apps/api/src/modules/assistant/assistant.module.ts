@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 
+import { LlmModule } from '../llm/llm.module';
+
 import { AssistantContextRouterService } from './assistant-context-router.service';
 import { AssistantContextService } from './assistant-context.service';
 import { AssistantConversationService } from './assistant-conversation.service';
@@ -16,6 +18,7 @@ import { AssistantOutboxRepository } from './repositories/assistant-outbox.repos
 import { AssistantToolService } from './tools/assistant-tool.service';
 
 @Module({
+  imports: [LlmModule],
   providers: [AssistantConversationRepository, AssistantOutboxRepository, AssistantConversationService,
     AssistantCursorService, AssistantEventService, AssistantOutboxScheduler, AssistantRetentionService,
     AssistantContextRouterService, AssistantContextService, AssistantOutputValidatorService, AssistantToolService,

@@ -84,7 +84,8 @@ export class AssistantOutboxRepository {
           AND dead_lettered_at IS NULL AND available_at<=NOW() AND (leased_until IS NULL OR leased_until<NOW())
           ORDER BY id FOR UPDATE SKIP LOCKED LIMIT $2)
          UPDATE assistant_event_outbox o SET lease_owner=$1,leased_until=NOW()+($3*INTERVAL '1 second'),attempt_count=attempt_count+1
-         FROM candidates c WHERE o.id=c.id RETURNING ${COLUMNS}`,
+         FROM candidates c WHERE o.id=c.id RETURNING o.id,o.event_id,o.event_type,o.recipient_kind,o.recipient_user_id,o.recipient_topic,
+          o.conversation_id,o.sequence,o.aggregate_id,o.aggregate_version,o.created_at`,
         [ownerId, Math.min(Math.max(limit, 1), 500), leaseSeconds],
       );
       return result.rows.map(mapRow);

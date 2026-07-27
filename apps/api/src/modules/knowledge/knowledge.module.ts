@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../common/database/database.module';
+import { AuthModule } from '../auth/auth.module';
 import { LlmModule } from '../llm/llm.module';
 
 import { EmbeddingService } from './embedding.service';
@@ -13,7 +14,7 @@ import { KnowledgeReleaseRepository } from './repositories/knowledge-release.rep
 import { HybridRetrievalService } from './retrieval.service';
 
 @Module({
-  imports: [DatabaseModule, LlmModule, BullModule.registerQueue({ name: KNOWLEDGE_INGESTION_QUEUE })],
+  imports: [DatabaseModule, AuthModule, LlmModule, BullModule.registerQueue({ name: KNOWLEDGE_INGESTION_QUEUE })],
   controllers: [KnowledgeAdminController],
   providers: [
     EmbeddingService,

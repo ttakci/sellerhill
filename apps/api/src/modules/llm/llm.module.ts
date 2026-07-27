@@ -11,6 +11,6 @@ import { ProviderLimiterService } from './provider-limiter.service';
 @Module({
   imports: [ConfigModule, DatabaseModule, AdminModule],
   providers: [LlmService, LlmUsageService, ProviderLimiterService],
-  exports: [LlmService, ProviderLimiterService],
+  exports: [LlmService, LlmUsageService, ProviderLimiterService],
 })
 export class LlmModule {}
