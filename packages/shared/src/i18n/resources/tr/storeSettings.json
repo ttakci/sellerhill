@@ -38,6 +38,34 @@
     "trackingConversionProvider": "Takip numarası dönüştürme",
     "trackingConversionProviderHint": "Gerçek kargo takip numaraları olduğu gibi iletilir. Amazon Logistics (TBA) numaraları değiştirilmeden geçer.",
     "trackingConversionProviderLocal": "Yerleşik (yerel)",
-    "trackingConversionApiComingSoon": "API tabanlı dönüştürme sağlayıcısı yol haritasındadır."
+    "trackingConversionApiComingSoon": "API tabanlı dönüştürme sağlayıcısı yol haritasındadır.",
+    "messaging": {
+      "title": "Alıcı mesajları",
+      "subtitle": "Önemli sipariş anlarında alıcıya otomatik mesaj gönderin. Opsiyonel, olay bazlı.",
+      "masterEnable": "Otomatik alıcı mesajlarını etkinleştir",
+      "shippedWarning": "Sipariş kargolandı olarak işaretlendiğinde eBay zaten takip bildirimi gönderir. Ek mesaj opsiyoneldir.",
+      "delayDays": "Gecikme (gün)",
+      "events": {
+        "order_received": "Sipariş alındı",
+        "shipped": "Kargolandı",
+        "delivered": "Teslim edildi",
+        "feedback_request": "Geri bildirim isteği"
+      },
+      "templateSource": "Şablon",
+      "systemTemplate": "Varsayılan",
+      "customTemplate": "Özel",
+      "manageTemplates": "Özel şablonları yönet",
+      "templates": {
+        "new": "Yeni şablon",
+        "name": "Ad",
+        "body": "Mesaj içeriği",
+        "placeholders": "Yer tutucu ekle",
+        "preview": "Önizleme",
+        "save": "Kaydet",
+        "delete": "Sil",
+        "deleteConfirm": "Bu şablon silinsin mi?",
+        "empty": "Henüz özel şablon yok."
+      }
+    }
   }
 }

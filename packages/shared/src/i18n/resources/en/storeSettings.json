@@ -38,6 +38,34 @@
     "trackingConversionProvider": "Tracking-number conversion",
     "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged.",
     "trackingConversionProviderLocal": "Built-in (local)",
-    "trackingConversionApiComingSoon": "An API-based conversion provider is on the roadmap."
+    "trackingConversionApiComingSoon": "An API-based conversion provider is on the roadmap.",
+    "messaging": {
+      "title": "Buyer messages",
+      "subtitle": "Automatically message buyers at key order moments. Optional and per event.",
+      "masterEnable": "Enable automated buyer messages",
+      "shippedWarning": "eBay already sends a tracking notification when an order is marked shipped. Sending another is optional.",
+      "delayDays": "Delay (days)",
+      "events": {
+        "order_received": "Order received",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "feedback_request": "Feedback request"
+      },
+      "templateSource": "Template",
+      "systemTemplate": "Default",
+      "customTemplate": "Custom",
+      "manageTemplates": "Manage custom templates",
+      "templates": {
+        "new": "New template",
+        "name": "Name",
+        "body": "Message body",
+        "placeholders": "Insert placeholder",
+        "preview": "Preview",
+        "save": "Save",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this template?",
+        "empty": "No custom templates yet."
+      }
+    }
   }
 }
