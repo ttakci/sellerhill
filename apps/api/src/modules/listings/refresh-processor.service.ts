@@ -1,7 +1,14 @@
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { extractCorrelationId, generateCorrelationId, KeepaUsageSource, ListingStatus, type KeepaProduct } from '@repo/shared';
+import {
+  extractCorrelationId,
+  generateCorrelationId,
+  KeepaStockStatus,
+  KeepaUsageSource,
+  ListingStatus,
+  type KeepaProduct,
+} from '@repo/shared';
 import { Job, Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -11,6 +18,7 @@ import { stampCurrentCorrelation } from '../../common/observability/queue-correl
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ProductSyncService } from './product-sync.service';
+import { dataFailureDelayMinutes } from './refresh-backoff';
 
 interface ProductRow {
   id: string;
@@ -35,7 +43,7 @@ interface RefreshBatchJobData {
 
 // Worker concurrency is applied at decoration time, so read it from the env
 // directly (ConfigService is not available in decorator metadata).
-const REFRESH_CONCURRENCY = Math.max(1, Number(process.env.KEEPA_REFRESH_WORKER_CONCURRENCY) || 1);
+const REFRESH_CONCURRENCY = Math.max(1, Math.floor(Number(process.env.KEEPA_REFRESH_WORKER_CONCURRENCY) || 1));
 
 @Processor('keepa-refresh', { concurrency: REFRESH_CONCURRENCY })
 export class RefreshProcessorService extends WorkerHost {
@@ -73,18 +81,42 @@ export class RefreshProcessorService extends WorkerHost {
   }
 
   /**
-   * Scheduler tick: select the most overdue products and enqueue a single
-   * refresh-batch job (one bulk Keepa call). Knows nothing about Keepa itself.
+   * Scheduler tick: atomically CLAIM the most overdue products and enqueue a
+   * refresh batch. The claim advances next_refresh_at by a short lease inside
+   * the same statement (FOR UPDATE SKIP LOCKED), so overlapping ticks or
+   * parallel workers can never select the same rows and double-spend tokens.
+   * If the batch permanently fails, the lease expires and the rows become due
+   * again — no row is ever lost.
+   *
+   * Scope: only products with ≥1 ACTIVE listing are refreshed. Products whose
+   * listings are all draft/ended have no eBay surface to update; drafts get a
+   * fresh fetch on the publish path instead. This applies to every product
+   * equally — there is no per-product sales-velocity tiering.
    */
   private async selectRefreshBatch(): Promise<void> {
     const batchSize = this.configService.get<number>('KEEPA_REFRESH_BATCH_SIZE') ?? 50;
+    const leaseMinutes = this.configService.get<number>('KEEPA_REFRESH_CLAIM_LEASE_MINUTES') ?? 15;
 
     const rows = await this.databaseService.query<{ id: string }>(
-      `SELECT id FROM products
-       WHERE next_refresh_at IS NULL OR next_refresh_at <= NOW()
-       ORDER BY next_refresh_at ASC NULLS LAST
-       LIMIT $1`,
-      [batchSize]
+      `WITH due AS (
+         SELECT p.id
+         FROM products p
+         WHERE (p.next_refresh_at IS NULL OR p.next_refresh_at <= NOW())
+           AND EXISTS (
+             SELECT 1 FROM listings l
+             WHERE l.product_id = p.id AND l.status = '${ListingStatus.ACTIVE}'
+           )
+         ORDER BY p.next_refresh_at ASC NULLS FIRST
+         LIMIT $1
+         FOR UPDATE SKIP LOCKED
+       )
+       UPDATE products
+       SET next_refresh_at = NOW() + make_interval(mins => $2::int),
+           last_refresh_attempt_at = NOW()
+       FROM due
+       WHERE products.id = due.id
+       RETURNING products.id`,
+      [batchSize, leaseMinutes]
     );
 
     if (rows.length === 0) {
@@ -93,14 +125,12 @@ export class RefreshProcessorService extends WorkerHost {
     }
 
     const productIds = rows.map((r) => r.id);
-    this.logger.log(`Selected ${productIds.length} products for refresh.`);
+    this.logger.log(`Claimed ${productIds.length} products for refresh (lease ${leaseMinutes}m).`);
 
     await this.refreshQueue.add(
       'refresh-batch',
       stampCurrentCorrelation({ productIds }),
       {
-        // Unique per tick so overlapping scheduler runs don't duplicate; BullMQ
-        // exponential backoff handles transport failures (whole batch retries).
         jobId: `refresh-batch-${Date.now()}`,
         attempts: 3,
         backoff: { type: 'exponential', delay: 5000 },
@@ -110,9 +140,12 @@ export class RefreshProcessorService extends WorkerHost {
   }
 
   /**
-   * Worker: one bulk Keepa call for the whole batch, then per-product compare,
-   * update, and fan-out. Per-product failures are isolated inside the batch;
-   * a transport failure (Keepa HTTP error) propagates so BullMQ retries the batch.
+   * Worker: one bulk Keepa call for the whole batch (chunked internally at
+   * Keepa's 100-ASIN limit), then per-product compare, update, and fan-out.
+   * Per-product failures are isolated inside the batch; a transport failure
+   * (Keepa HTTP error) propagates so BullMQ retries the batch. Rows stay
+   * claimed during retries; if all attempts fail the claim lease expires and
+   * the products become due again.
    */
   private async refreshBatch(job: Job<RefreshBatchJobData>): Promise<void> {
     const { productIds } = job.data;
@@ -135,62 +168,76 @@ export class RefreshProcessorService extends WorkerHost {
     const asins = products.map((p) => p.asin);
 
     // Transport failure here (429/5xx/network) → throws → BullMQ retries the
-    // whole batch. next_refresh_at is NOT advanced, so products stay due.
+    // whole batch idempotently (rows are still claimed by the lease).
     const { products: keepaProducts, meta } = await this.keepaService.getProducts(asins);
     await this.keepaUsageService.captureBalance(meta);
 
-    const tokenShare = meta.tokensConsumed / Math.max(keepaProducts.length, 1);
+    // Fair-split across REQUESTED ASINs (not returned products): a missing
+    // ASIN still consumed its share of the request, and its users must not be
+    // subsidized by the users of returned ASINs.
+    const tokenShare = meta.tokensConsumed / products.length;
     const userIdsByProduct = await this.loadUserIdsByProduct(productIds);
-    const returnedAsins = new Set(keepaProducts.map((p) => p.asin));
+    const keepaByAsin = new Map(keepaProducts.map((p) => [p.asin, p]));
 
-    for (const kp of keepaProducts) {
-      const row = products.find((p) => p.asin === kp.asin);
-      if (!row) {
+    for (const row of products) {
+      // Token was spent for every requested ASIN whether or not data came back.
+      await this.keepaUsageService.logUsage({
+        asin: row.asin,
+        tokens: tokenShare,
+        source: KeepaUsageSource.REFRESH,
+        userIds: userIdsByProduct.get(row.id) ?? [],
+      });
+
+      const kp = keepaByAsin.get(row.asin);
+      if (!kp) {
+        // Keepa returned no data for this ASIN → data failure (not transport):
+        // escalating backoff, then quarantine past the threshold.
+        await this.handleDataFailure(row);
         continue;
       }
+
       try {
-        await this.applyKeepaProduct(row, kp, tokenShare, userIdsByProduct.get(row.id) ?? []);
+        await this.applyKeepaProduct(row, kp);
       } catch (error: unknown) {
         this.logger.error(
           `Refresh failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
-
-    // ASINs Keepa returned no data for → treat as a data failure (not a transport
-    // failure): bump consecutive_failures, quarantine once past the threshold so
-    // a permanently-dead ASIN can't starve the refresh queue.
-    for (const row of products) {
-      if (!returnedAsins.has(row.asin)) {
-        await this.handleDataFailure(row);
-      }
-    }
   }
 
-  /** Compare + update one product from its Keepa snapshot, fan out if changed. */
-  private async applyKeepaProduct(
-    row: ProductRow,
-    kp: KeepaProduct,
-    tokenShare: number,
-    userIds: string[]
-  ): Promise<void> {
+  /**
+   * Compare + update one product from its Keepa snapshot, fan out if its
+   * commerce state (price/stock) changed.
+   *
+   * Unknown-preserve contract: a null price or UNKNOWN stock never overwrites
+   * the previous value — Keepa failing to observe the Buy Box is not evidence
+   * the product is free or out of stock.
+   */
+  private async applyKeepaProduct(row: ProductRow, kp: KeepaProduct): Promise<void> {
     const intervalMinutes = this.configService.get<number>('KEEPA_REFRESH_INTERVAL_MINUTES') ?? 720;
 
-    // Token was spent whether or not the data changed — attribute it now.
-    await this.keepaUsageService.logUsage({
-      asin: row.asin,
-      tokens: tokenShare,
-      source: KeepaUsageSource.REFRESH,
-      userIds,
-    });
+    // Resolve effective values: fall back to the previous row value when the
+    // new observation is missing.
+    const previousPrice = row.price?.current !== undefined ? Number(row.price.current) : null;
+    const effectivePrice = kp.price ?? previousPrice;
+    const effectiveStock = kp.stockStatus === KeepaStockStatus.UNKNOWN ? row.stock : kp.stock;
 
-    const changed = this.hasProductChanged(row, kp);
+    const commerceChanged =
+      (effectivePrice !== null && effectivePrice !== previousPrice) ||
+      (effectiveStock !== null && Number(row.stock ?? 0) !== Number(effectiveStock));
+    const metadataChanged =
+      (kp.title !== undefined && kp.title !== row.title) ||
+      (kp.brand !== undefined && kp.brand !== row.brand) ||
+      (kp.description !== undefined && kp.description !== (row.description ?? ''));
 
-    if (changed) {
+    if (commerceChanged || metadataChanged) {
       await this.databaseService.query(
         `UPDATE products
-         SET price = jsonb_set(COALESCE(price, '{}'::jsonb), '{current}', to_jsonb($1::numeric)),
-             stock = $2,
+         SET price = CASE WHEN $1::numeric IS NOT NULL
+                          THEN jsonb_set(COALESCE(price, '{}'::jsonb), '{current}', to_jsonb($1::numeric))
+                          ELSE price END,
+             stock = COALESCE($2, stock),
              title = $3,
              image_urls = $4,
              brand = $5,
@@ -205,11 +252,11 @@ export class RefreshProcessorService extends WorkerHost {
          WHERE id = $10`,
         [
           kp.price,
-          kp.stock,
+          effectiveStock,
           kp.title ?? row.title,
-          JSON.stringify(kp.imageUrls ?? []),
+          JSON.stringify(kp.imageUrls?.length ? kp.imageUrls : (row.image_urls ?? [])),
           kp.brand ?? row.brand,
-          JSON.stringify(kp.features ?? []),
+          JSON.stringify(kp.features ?? row.features ?? []),
           kp.description ?? row.description ?? '',
           JSON.stringify(kp.raw ?? {}),
           intervalMinutes,
@@ -217,10 +264,15 @@ export class RefreshProcessorService extends WorkerHost {
         ]
       );
 
-      // Fan out: recompute every active listing sharing this ASIN and push to
-      // eBay only where price/quantity actually changed.
-      await this.productSyncService.updateAllListingsForProduct(row.id, row.asin);
-      this.logger.debug(`Refreshed (changed) ASIN ${row.asin} → price=${kp.price}, stock=${kp.stock}`);
+      if (commerceChanged) {
+        // Fan out: recompute every active listing sharing this ASIN and push to
+        // eBay only where price/quantity actually changed.
+        await this.productSyncService.updateAllListingsForProduct(row.id, row.asin);
+      }
+      this.logger.debug(
+        `Refreshed ASIN ${row.asin} → price=${effectivePrice}, stock=${effectiveStock} (${kp.stockStatus})` +
+          `${commerceChanged ? ' [commerce]' : ''}${metadataChanged ? ' [metadata]' : ''}`
+      );
     } else {
       await this.databaseService.query(
         `UPDATE products
@@ -235,50 +287,33 @@ export class RefreshProcessorService extends WorkerHost {
     }
   }
 
-  /** A product changed if its buy-box price, stock, or title differs. */
-  private hasProductChanged(row: ProductRow, kp: KeepaProduct): boolean {
-    const currentPrice = row.price?.current;
-    if (currentPrice === undefined || Number(currentPrice) !== Number(kp.price)) {
-      return true;
-    }
-    if (Number(row.stock ?? 0) !== Number(kp.stock)) {
-      return true;
-    }
-    if (kp.title && row.title !== kp.title) {
-      return true;
-    }
-    return false;
-  }
-
   /**
-   * Per-product failure handling without forwarding next_refresh_at beyond a
-   * quarantine threshold — prevents poison products from starving the queue.
+   * Data-failure handling with escalating backoff before quarantine, so a bad
+   * ASIN cannot burn tokens on every scheduler tick: 5m → 15m → 60m → 240m,
+   * then quarantine at the failure threshold.
    */
   private async handleDataFailure(row: ProductRow): Promise<void> {
     const maxFailures = this.configService.get<number>('KEEPA_REFRESH_MAX_FAILURES') ?? 5;
     const quarantineMinutes = this.configService.get<number>('KEEPA_REFRESH_QUARANTINE_MINUTES') ?? 1440;
     const newCount = row.consecutive_failures + 1;
 
+    const delayMinutes = dataFailureDelayMinutes(newCount, maxFailures, quarantineMinutes);
+
+    await this.databaseService.query(
+      `UPDATE products
+       SET consecutive_failures = $1,
+           last_refresh_attempt_at = NOW(),
+           next_refresh_at = NOW() + make_interval(mins => $2::int)
+       WHERE id = $3`,
+      [newCount, delayMinutes, row.id]
+    );
+
     if (newCount >= maxFailures) {
-      await this.databaseService.query(
-        `UPDATE products
-         SET consecutive_failures = $1,
-             last_refresh_attempt_at = NOW(),
-             next_refresh_at = NOW() + make_interval(mins => $2::int)
-         WHERE id = $3`,
-        [newCount, quarantineMinutes, row.id]
-      );
-      this.logger.warn(`ASIN ${row.asin} quarantined for ${quotaMinutes(quarantineMinutes)} after ${newCount} failures`);
+      this.logger.warn(`ASIN ${row.asin} quarantined for ${formatMinutes(quarantineMinutes)} after ${newCount} failures`);
     } else {
-      // Leave next_refresh_at untouched so the product is retried on a near-future tick.
-      await this.databaseService.query(
-        `UPDATE products
-         SET consecutive_failures = $1,
-             last_refresh_attempt_at = NOW()
-         WHERE id = $2`,
-        [newCount, row.id]
+      this.logger.debug(
+        `ASIN ${row.asin} data failure (${newCount}/${maxFailures}); retry in ${formatMinutes(delayMinutes)}`
       );
-      this.logger.debug(`ASIN ${row.asin} data failure (${newCount}/${maxFailures}); will retry`);
     }
   }
 
@@ -304,7 +339,7 @@ export class RefreshProcessorService extends WorkerHost {
   }
 }
 
-function quotaMinutes(minutes: number): string {
+function formatMinutes(minutes: number): string {
   if (minutes >= 1440) {
     return `${Math.round(minutes / 1440)} day(s)`;
   }

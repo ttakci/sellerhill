@@ -23,7 +23,30 @@ export class RefreshSchedulerService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    const enabled = (this.configService.get<string>('KEEPA_REFRESH_ENABLED') ?? 'true') !== 'false';
+    if (!enabled) {
+      // Remove any previously-registered repeatable tick so a restart with the
+      // flag off genuinely stops background Keepa spend.
+      this.logger.warn('KEEPA_REFRESH_ENABLED=false — Keepa refresh scheduler disabled.');
+      await this.removeRepeatableTick();
+      return;
+    }
     await this.setupRepeatableTick();
+  }
+
+  private async removeRepeatableTick() {
+    try {
+      const schedulers = await this.refreshQueue.getJobSchedulers();
+      for (const scheduler of schedulers) {
+        if (scheduler.key) {
+          await this.refreshQueue.removeJobScheduler(scheduler.key);
+        }
+      }
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Failed to remove Keepa refresh tick: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   private async setupRepeatableTick() {

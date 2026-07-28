@@ -2,52 +2,57 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   IProductDataProvider,
+  KeepaStockStatus,
   type KeepaApiMeta,
   type KeepaBulkResult,
+  type KeepaProduct,
   type KeepaSingleResult,
   type ProductData,
 } from '@repo/shared';
 import axios from 'axios';
 
-/**
- * Raw Keepa API product response shape for type safety
- */
-interface KeepaProductRaw {
-  asin?: string;
-  title?: string;
-  description?: string;
-  brand?: string;
-  manufacturer?: string;
-  model?: string;
-  categoryTree?: Array<{ name: string }>;
-  imagesCSV?: string;
-  features?: string[];
-  stats?: {
-    buyBoxPrice?: number;
-    buyBoxShipping?: number;
-    buyBoxSellerId?: string;
-    buyBoxAvailabilityMessage?: string;
-    stockBuyBox?: number;
-    stockAmazon?: number;
-    availabilityAmazon?: number;
-    totalOfferCount?: number;
-    avg30?: number[];
-    avg90?: number[];
-    current?: number[];
-  };
-}
+import {
+  chunkAsins,
+  dedupeAsins,
+  extractCommerce,
+  extractImageUrls,
+  type KeepaRawProduct,
+} from './keepa-normalizer';
 
 /**
- * Top-level Keepa /product response. tokensConsumed/tokensLeft/refillIn are
- * returned on every response and captured for token-cost tracking.
+ * Top-level Keepa /product response. tokensConsumed/tokensLeft/refillIn/
+ * refillRate are returned on every response and captured for token-cost
+ * tracking and admission control.
  */
 interface KeepaResponse {
-  products?: KeepaProductRaw[];
+  products?: KeepaRawProduct[];
   tokensConsumed?: number;
   tokensLeft?: number;
   refillIn?: number; // ms until next token refill
+  refillRate?: number; // tokens generated per minute (plan tier)
+  error?: unknown;
 }
 
+/** Keepa's hard per-request ASIN limit. Larger inputs are chunked internally. */
+const KEEPA_MAX_ASINS_PER_REQUEST = 100;
+
+/**
+ * Keepa /product client.
+ *
+ * Query contract (identical for create + refresh — no per-product tiering):
+ *   history=0            smaller payload (no token effect)
+ *   stats=90             Statistics object incl. Buy Box fields (free)
+ *   offers=20            live marketplace offers — REQUIRED for real stock.
+ *                        Keepa charges 6 tokens per FOUND page of 10 offers
+ *                        (0 tokens when its offer cache is <1h old).
+ *   only-live-offers=1   drop historical offers from the payload (free)
+ *   stock=1              per-offer stockCSV (+2 tokens only when the stock
+ *                        observation is fresh)
+ *
+ * Token accounting MUST use the response-reported `tokensConsumed`: observed
+ * live costs for the same query range from 0 (cached) to 6+ (offer refresh).
+ * Estimating per-ASIN costs locally is wrong by design.
+ */
 @Injectable()
 export class KeepaService implements IProductDataProvider {
   private readonly logger = new Logger(KeepaService.name);
@@ -62,12 +67,9 @@ export class KeepaService implements IProductDataProvider {
   }
 
   /**
-   * Fetch full product details (Metadata + Price + Stock) + token metadata.
-   * Implements IProductDataProvider (product only); callers needing token
-   * attribution use getProductDetailsWithMeta.
-   *
-   * `history=0` skips Keepa's price-history arrays — we only need the current
-   * snapshot, so this halves token cost (~2 → ~1 token/ASIN).
+   * Fetch full product details (metadata + Buy Box price + stock).
+   * Implements IProductDataProvider; callers needing token attribution use
+   * getProductDetailsWithMeta.
    */
   async getProductDetails(asin: string): Promise<ProductData | null> {
     return (await this.getProductDetailsWithMeta(asin)).product;
@@ -77,220 +79,163 @@ export class KeepaService implements IProductDataProvider {
   async getProductDetailsWithMeta(asin: string): Promise<KeepaSingleResult> {
     this.logger.log(`Fetching full Keepa data for ASIN: ${asin}`);
 
-    try {
-      const response = await axios.get<KeepaResponse>(this.baseUrl, {
-        params: {
-          key: this.apiKey,
-          domain: 1,
-          asin: asin,
-          stock: 1,
-          stats: 90,
-          history: 0,
-        },
-        timeout: 30000,
-      });
-
-      const products = response.data?.products;
-      const meta = this.extractMeta(response.data, 1);
-      if (!products || products.length === 0) {
-        this.logger.warn(`No product data returned from Keepa for ASIN ${asin}`);
-        return { product: null, meta };
-      }
-
-      const product = products[0];
-      return { product: this.normalizeProduct(product, asin), meta };
-    } catch (error: unknown) {
-      this.logger.error(
-        `Failed to fetch Keepa product details for ${asin}: ${error instanceof Error ? error.message : String(error)}`
-      );
-      throw error;
+    const response = await this.request([asin], 30000);
+    const meta = this.extractMeta(response);
+    const raw = response.products?.[0];
+    if (!raw) {
+      this.logger.warn(`No product data returned from Keepa for ASIN ${asin}`);
+      return { product: null, meta };
     }
+    return { product: this.normalizeProductData(raw, asin), meta };
   }
 
   /**
-   * Bulk fetch (max 100 ASINs per Keepa request) returning token metadata.
-   * One HTTP call per batch preserves Keepa bulk efficiency at scale.
+   * Bulk fetch returning normalized products + aggregated token metadata.
+   * Any number of ASINs may be passed; requests are chunked to Keepa's
+   * 100-ASIN-per-request limit and `meta.tokensConsumed` is summed across
+   * chunks (balance fields reflect the last chunk — the freshest snapshot).
    */
   async getProducts(asins: string[]): Promise<KeepaBulkResult> {
-    const targetAsins = asins.slice(0, 100);
-    const emptyMeta = this.emptyMeta(targetAsins.length);
-
-    if (targetAsins.length === 0) {
-      return { products: [], meta: emptyMeta };
+    const uniqueAsins = dedupeAsins(asins);
+    if (uniqueAsins.length === 0) {
+      return { products: [], meta: { tokensConsumed: 0 } };
     }
 
-    this.logger.log(`Fetching Keepa data for ${targetAsins.length} ASINs in a single request`);
+    const chunks = chunkAsins(uniqueAsins, KEEPA_MAX_ASINS_PER_REQUEST);
+    this.logger.log(
+      `Fetching Keepa data for ${uniqueAsins.length} ASINs in ${chunks.length} request(s)`
+    );
+
+    const products: KeepaProduct[] = [];
+    let tokensConsumed = 0;
+    let lastMeta: KeepaApiMeta = { tokensConsumed: 0 };
+
+    for (const chunk of chunks) {
+      const response = await this.request(chunk, 120000);
+      lastMeta = this.extractMeta(response);
+      tokensConsumed += lastMeta.tokensConsumed;
+
+      for (const raw of response.products ?? []) {
+        if (!raw?.asin) {
+          continue;
+        }
+        products.push(this.normalizeKeepaProduct(raw));
+      }
+    }
+
+    return {
+      products,
+      meta: { ...lastMeta, tokensConsumed },
+    };
+  }
+
+  /** One Keepa /product HTTP call. Transport errors propagate to the caller. */
+  private async request(asins: string[], timeout: number): Promise<KeepaResponse> {
+    const params: Record<string, string | number> = {
+      key: this.apiKey,
+      domain: 1,
+      asin: asins.join(','),
+      history: 0,
+      stats: 90,
+      offers: 20,
+      'only-live-offers': 1,
+      stock: 1,
+    };
+
+    // Freshness/cost lever: `update=N` tells Keepa to serve its own cached
+    // offer data when it is younger than N hours (cheap/0 tokens — another
+    // Keepa customer already paid for the scrape) and only run a live offer
+    // refresh (6 tokens/found page) when older. Unset → Keepa's ~1h default.
+    // `update=-1` (never refresh) is deliberately NOT supported: niche ASINs
+    // nobody else queries would go permanently stale.
+    const updateHours = this.configService.get<number>('KEEPA_UPDATE_HOURS');
+    if (updateHours !== undefined && updateHours >= 0) {
+      params.update = updateHours;
+    }
 
     try {
-      const response = await axios.get<KeepaResponse>(this.baseUrl, {
-        params: {
-          key: this.apiKey,
-          domain: 1,
-          asin: targetAsins.join(','),
-          stock: 1,
-          stats: 90,
-          history: 0,
-        },
-        timeout: 60000,
-      });
-
-      const rawProducts: KeepaProductRaw[] = response.data?.products || [];
-      const meta = this.extractMeta(response.data, targetAsins.length);
-
-      const products = rawProducts
-        .filter((p) => p && p.asin)
-        .map((product) => {
-          const { price, stock, sellerId } = this.extractPriceAndStock(product);
-          return {
-            asin: product.asin!,
-            price,
-            stock,
-            sellerId,
-            lastSync: new Date(),
-            raw: product as unknown as Record<string, unknown>,
-            // also expose normalized metadata for the refresh worker
-            title: product.title,
-            description: product.description,
-            imageUrls: this.extractImages(product.imagesCSV),
-            brand: product.brand,
-            category: product.categoryTree ? product.categoryTree[product.categoryTree.length - 1]?.name : undefined,
-            features: product.features || [],
-          };
-        });
-
-      return { products, meta };
+      const response = await axios.get<KeepaResponse>(this.baseUrl, { params, timeout });
+      return response.data ?? {};
     } catch (error: unknown) {
       this.logger.error(
-        `Failed to fetch Keepa bulk data for ${targetAsins.length} ASINs: ${error instanceof Error ? error.message : String(error)}`
+        `Keepa request failed for ${asins.length} ASIN(s): ${error instanceof Error ? error.message : String(error)}`
       );
       throw error;
     }
   }
 
-  /**
-   * Build a normalized ProductData from a raw Keepa product object.
-   */
-  private normalizeProduct(product: KeepaProductRaw, asin: string): ProductData {
-    const imageUrls = this.extractImages(product.imagesCSV);
-    const { price, stock } = this.extractPriceAndStock(product);
-    const category = product.categoryTree ? product.categoryTree[product.categoryTree.length - 1]?.name : undefined;
+  /** Normalized KeepaProduct for the refresh worker (bulk path). */
+  private normalizeKeepaProduct(raw: KeepaRawProduct): KeepaProduct {
+    const commerce = extractCommerce(raw);
+    return {
+      asin: raw.asin!,
+      price: commerce.price,
+      stock: commerce.stock,
+      stockStatus: commerce.stockStatus,
+      sellerId: commerce.sellerId,
+      buyBoxIsAmazon: commerce.buyBoxIsAmazon,
+      lastSync: new Date(),
+      raw: raw as unknown as Record<string, unknown>,
+      title: raw.title,
+      description: raw.description,
+      imageUrls: extractImageUrls(raw),
+      brand: raw.brand,
+      category: raw.categoryTree ? raw.categoryTree[raw.categoryTree.length - 1]?.name : undefined,
+      features: raw.features || [],
+    };
+  }
+
+  /** Normalized ProductData for the create path (single-ASIN). */
+  private normalizeProductData(raw: KeepaRawProduct, asin: string): ProductData {
+    const commerce = extractCommerce(raw);
+    const category = raw.categoryTree ? raw.categoryTree[raw.categoryTree.length - 1]?.name : undefined;
 
     const specs: Record<string, string> = {};
-    if (product.brand) {
-      specs['Brand'] = product.brand;
+    if (raw.brand) {
+      specs['Brand'] = raw.brand;
     }
-    if (product.manufacturer) {
-      specs['Manufacturer'] = product.manufacturer;
+    if (raw.manufacturer) {
+      specs['Manufacturer'] = raw.manufacturer;
     }
-    if (product.model) {
-      specs['Model'] = product.model;
+    if (raw.model) {
+      specs['Model'] = raw.model;
     }
 
     return {
       asin,
-      title: product.title || 'Unknown Product',
-      description: product.description || '',
-      imageUrls,
-      brand: product.brand || 'Unknown',
+      title: raw.title || 'Unknown Product',
+      description: raw.description || '',
+      imageUrls: extractImageUrls(raw),
+      brand: raw.brand || 'Unknown',
       category,
-      manufacturer: product.manufacturer || product.brand || 'Unknown',
-      features: product.features || [],
+      manufacturer: raw.manufacturer || raw.brand || 'Unknown',
+      features: raw.features || [],
       specs,
       price: {
-        current: price,
+        current: commerce.price ?? 0,
         currency: 'USD',
-        avg30: product.stats?.avg30?.[0] ? product.stats.avg30[0] / 100 : undefined,
-        avg90: product.stats?.avg90?.[0] ? product.stats.avg90[0] / 100 : undefined,
+        avg30: raw.stats?.avg30?.[0] && raw.stats.avg30[0] > 0 ? raw.stats.avg30[0] / 100 : undefined,
+        avg90: raw.stats?.avg90?.[0] && raw.stats.avg90[0] > 0 ? raw.stats.avg90[0] / 100 : undefined,
       },
-      stock,
-      raw: product as unknown as Record<string, unknown>,
+      // ProductData.stock is non-null; UNKNOWN → 0 here is acceptable on the
+      // create path only because a brand-new product has no previous value to
+      // preserve and the listing worker blocks live publish at quantity 0.
+      stock: commerce.stockStatus === KeepaStockStatus.UNKNOWN ? 0 : (commerce.stock ?? 0),
+      raw: raw as unknown as Record<string, unknown>,
     };
   }
 
-  /** Extract token metadata from a Keepa response, falling back to ASIN count. */
-  private extractMeta(data: KeepaResponse | undefined, asinCount: number): KeepaApiMeta {
+  /**
+   * Token metadata straight from the response. `tokensConsumed` defaults to 0
+   * when absent — NEVER estimated from ASIN count (observed real costs for the
+   * same call range 0..6+ depending on Keepa's cache state).
+   */
+  private extractMeta(data: KeepaResponse | undefined): KeepaApiMeta {
     return {
-      tokensConsumed: data?.tokensConsumed ?? asinCount,
+      tokensConsumed: data?.tokensConsumed ?? 0,
       tokensLeft: data?.tokensLeft,
       refillIn: data?.refillIn,
+      refillRate: data?.refillRate,
     };
-  }
-
-  private emptyMeta(asinCount: number): KeepaApiMeta {
-    return { tokensConsumed: asinCount };
-  }
-
-  /**
-   * Helper to extract price and stock from Keepa product object
-   */
-  private extractPriceAndStock(product: KeepaProductRaw): { price: number; stock: number; sellerId?: string } {
-    let price = 0;
-    let stock = 0;
-    let sellerId: string | undefined;
-
-    const stats = product.stats;
-    if (!stats) {
-      return { price, stock, sellerId };
-    }
-
-    // 1. EXTRACT STOCK
-    if (typeof stats.stockBuyBox === 'number' && stats.stockBuyBox >= 0) {
-      stock = stats.stockBuyBox;
-    } else if (typeof stats.stockAmazon === 'number' && stats.stockAmazon >= 0) {
-      stock = stats.stockAmazon;
-    } else {
-      stock = this.extractStockFromStats(stats, product.asin || '');
-    }
-
-    // 2. EXTRACT PRICE
-    if (typeof stats.buyBoxPrice === 'number' && stats.buyBoxPrice > 0) {
-      const shipping = (stats.buyBoxShipping ?? 0) > 0 ? stats.buyBoxShipping! : 0;
-      price = (stats.buyBoxPrice + shipping) / 100;
-      sellerId = stats.buyBoxSellerId;
-    } else {
-      const newPrice = stats.current?.[1] ?? 0;
-      const bbPriceCurrent = stats.current?.[30] ?? 0;
-      const amzPrice = stats.current?.[0] ?? 0;
-
-      const rawPrice = newPrice > 0 ? newPrice : bbPriceCurrent > 0 ? bbPriceCurrent : amzPrice > 0 ? amzPrice : 0;
-      price = rawPrice / 100;
-      sellerId = stats.buyBoxSellerId || undefined;
-    }
-
-    return { price, stock, sellerId };
-  }
-
-  /**
-   * Helper to extract stock from product.stats
-   */
-  private extractStockFromStats(stats: KeepaProductRaw['stats'], _asin: string): number {
-    if (!stats) {
-      return 0;
-    }
-
-    if (stats.availabilityAmazon === 1) {
-      return 0;
-    }
-
-    const offerCount = stats.totalOfferCount || stats.current?.[17] || stats.current?.[11];
-    if (typeof offerCount === 'number' && offerCount > 0) {
-      return offerCount;
-    }
-
-    if (stats.availabilityAmazon === 0 || stats.buyBoxAvailabilityMessage === 'In Stock') {
-      return 1;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Helper to convert Keepa imagesCSV to full URLs
-   */
-  private extractImages(imagesCSV: string | undefined): string[] {
-    if (!imagesCSV) {
-      return [];
-    }
-    return imagesCSV.split(',').map((img) => `https://images-na.ssl-images-amazon.com/images/I/${img}`);
   }
 }

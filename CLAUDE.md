@@ -98,43 +98,47 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 
 ## Product Refresh Pipeline
 
-Amazon product data (metadata + buy-box price + stock) is sourced **exclusively from the Keepa API** — one provider, one token per ASIN (`history=0`, `stock=1`, `stats=90`). ScraperAPI was removed: its per-request credit model is 10–100× more expensive than Keepa's token pool under bulk-add/churn. Keepa returns title/images/brand/description/features/price/stock in a single token, so there is no second fetch.
+Amazon product data (metadata + Buy Box price + Buy Box stock) is sourced **exclusively from the Keepa API** — one provider, one query shape for every call (create + refresh alike): `history=0&stats=90&offers=20&only-live-offers=1&stock=1`. ScraperAPI was removed: its per-request credit model is 10–100× more expensive than Keepa's token pool under bulk-add/churn. **Full technical reference (verified cost model, response ground truth, invariants, probe procedure): [docs/keepa-integration.md](docs/keepa-integration.md) — read it before touching any Keepa code.**
 
-> **Strengths:** zero-waste token utilization, linear scalability to millions of products, per-user cost attribution, self-healing failure handling. Frequency is a config knob, not an architecture.
+**Token cost model (verified against live responses, 2026-07-28):** Keepa charges are conditional — `offers` costs **6 tokens per FOUND page of 10 live offers** when Keepa refreshes its offer cache, **0 tokens** when its cache is <1h fresh, and `stock=1` adds **+2 only when the stock observation is fresh**. Observed real costs for the same query ranged 0–6 tokens/ASIN. Therefore: (a) accounting always uses the response-reported `tokensConsumed`, **never** a locally-estimated per-ASIN count; (b) `history=0`/`stats`/`only-live-offers` are payload optimizations, **not** token savers. Real Buy Box stock requires `offers` — the old `stock=1`-without-`offers` call did not return usable per-seller stock.
 
 ### Shared product cache
-`products` is a global ASIN-keyed cache — one ASIN exists once regardless of how many users list it. One customer's data fetch serves every customer listing that ASIN. There is **no per-user Keepa cost isolation**; costs are attributed via fair-split (see Token tracking below).
+`products` is a shared ASIN-keyed cache — one ASIN exists once regardless of how many users list it. One customer's data fetch serves every customer listing that ASIN. There is **no per-user Keepa cost isolation**; costs are attributed via fair-split (see Token tracking below).
 
 ### Stale-driven scheduler + batch worker
 There is **no "refresh everything every N hours" cron**. Instead a `keepa-refresh` BullMQ queue with two roles:
-- **Scheduler** (`RefreshSchedulerService`, repeatable tick every minute by default): runs a single query — `SELECT id FROM products WHERE next_refresh_at <= NOW() ORDER BY next_refresh_at ASC LIMIT $batchSize` — and enqueues **one** `refresh-batch` job. The scheduler knows nothing about Keepa.
-- **Worker** (`RefreshProcessorService`): one bulk Keepa call per batch (Keepa's 100-ASIN bulk limit is chunked internally) → captures `tokensConsumed`/`tokensLeft` → per-product compare + update → fan-out for changed products. Per-product failures are isolated inside the batch (try/catch); a transport failure (Keepa 429/5xx/network) propagates so BullMQ retries the whole batch idempotently.
+- **Scheduler** (`RefreshSchedulerService` registers the tick; disabled entirely when `KEEPA_REFRESH_ENABLED=false`): every tick runs an **atomic claim** — `FOR UPDATE SKIP LOCKED` CTE that selects the most-overdue products **having ≥1 ACTIVE listing** and pushes their `next_refresh_at` forward by a short lease (`KEEPA_REFRESH_CLAIM_LEASE_MINUTES`, default 15) in the same statement — then enqueues **one** `refresh-batch` job. Overlapping ticks/parallel workers can never double-claim rows; a crashed batch's rows become due again when the lease expires. Products whose listings are all draft/ended are **not** refreshed (no eBay surface to update — this is a scope rule, NOT per-product sales-velocity tiering, which is explicitly not done).
+- **Worker** (`RefreshProcessorService`): one bulk Keepa call per batch (`KeepaService.getProducts` dedupes ASINs and chunks internally at Keepa's 100-ASIN/request limit, summing `tokensConsumed` across chunks) → captures balance → per-product compare + update + fan-out. Per-product failures are isolated inside the batch; a transport failure (429/5xx/network) propagates so BullMQ retries the whole batch idempotently (rows stay claimed during retries).
+
+### Stock semantics (three-state, unknown-preserve)
+`KeepaStockStatus` (`known|out_of_stock|unknown` in `packages/shared`): the normalizer (`keepa-normalizer.ts`, pure + fixture-tested) matches the **Buy Box offer by sellerId** in `liveOffersOrder` and reads the last `stockCSV` observation; falls back to `stats.stockBuyBox` / `stats.stockAmazon` (Amazon caps at 1000). `OUT_OF_STOCK` (stock 0) only when live-offer retrieval **succeeded** and no live offer + no price exists. Anything ambiguous → `UNKNOWN`: the worker **preserves the previous price/stock** — Keepa failing to observe is never evidence of $0/qty-0. Keepa price sentinels (`-1` no data, `-2` no Buy Box) are treated as null, never real prices. `totalOfferCount` is **never** used as a stock quantity. `images` array (modern) is preferred over legacy `imagesCSV` (live responses can null the CSV).
 
 ### Field change-detection
-The worker updates the `products` row only when buy-box price, stock, or title changed. The fan-out (`ProductSyncService.updateAllListingsForProduct`) recomputes each active listing's strategy and pushes to eBay **only when that listing's price or quantity actually changed** (buffer/rounding may absorb an Amazon change). eBay API volume stays proportional to real changes, not to refresh frequency.
+`commerceChanged` (price/stock) triggers the eBay fan-out (`ProductSyncService.updateAllListingsForProduct` — pushes only where a listing's own price/qty actually changed); `metadataChanged` (title/brand/description) persists to the products row **without** fan-out. eBay API volume stays proportional to real changes.
 
 ### Failure handling & poison-product quarantine
-- **Transport failure**: BullMQ exponential backoff retries the batch; `next_refresh_at` is **not** advanced, so products stay due.
-- **Data failure** (ASIN missing/broken in Keepa response): `consecutive_failures++`; below `KEEPA_REFRESH_MAX_FAILURES` the product is retried on a near-future tick (next_refresh_at untouched); at/above the threshold it is **quarantined** (`next_refresh_at = NOW() + KEEPA_REFRESH_QUARANTINE_MINUTES`) so a permanently-dead ASIN cannot starve the refresh queue.
+- **Transport failure**: BullMQ exponential backoff retries the batch; rows stay claimed (lease), then become due again if all attempts fail.
+- **Data failure** (ASIN missing from an otherwise-successful response): `consecutive_failures++` with **escalating backoff 5m → 15m → 60m → 240m** (`refresh-backoff.ts`, tested) so a dead ASIN can't burn tokens every tick; at/above `KEEPA_REFRESH_MAX_FAILURES` it is quarantined (`KEEPA_REFRESH_QUARANTINE_MINUTES`).
 
 ### Config-driven frequency (no rewrite to change cadence)
 All env (defaults shown), all optional:
-- `KEEPA_REFRESH_INTERVAL_MINUTES=720` (12h). Dial to 360 (6h) / 180 (3h) by env only.
-- `KEEPA_REFRESH_BATCH_SIZE=50` — products per tick (one bulk Keepa call).
-- `KEEPA_REFRESH_SCHEDULER_CRON=* * * * *` — tick cadence.
-- `KEEPA_REFRESH_WORKER_CONCURRENCY=1` — parallel refresh jobs.
-- `KEEPA_REFRESH_QUARANTINE_MINUTES=1440`, `KEEPA_REFRESH_MAX_FAILURES=5`.
+- `KEEPA_REFRESH_ENABLED=true` — master switch; `false` removes the repeatable tick (create-path calls unaffected).
+- `KEEPA_REFRESH_INTERVAL_MINUTES=720` (12h). Dial to 360/180 by env only.
+- `KEEPA_REFRESH_BATCH_SIZE=50` — products claimed per tick (chunked at 100/request internally, so >100 is safe).
+- `KEEPA_REFRESH_CLAIM_LEASE_MINUTES=15` — claim lease; must exceed worst-case batch runtime incl. BullMQ retries.
+- `KEEPA_REFRESH_SCHEDULER_CRON=* * * * *`, `KEEPA_REFRESH_WORKER_CONCURRENCY=1`, `KEEPA_REFRESH_QUARANTINE_MINUTES=1440`, `KEEPA_REFRESH_MAX_FAILURES=5`.
+- `KEEPA_UPDATE_HOURS` (unset by default) — Keepa-side cache tolerance: serve Keepa's own cached offer data younger than N hours for ~0 tokens instead of forcing a live scrape (6 tokens/found page). Popular ASINs are refreshed by other Keepa customers, so raising this materially cuts spend; keep well below the refresh interval. `update=-1` (never refresh) is deliberately unsupported — niche ASINs would go permanently stale.
 
-Throughput = batch_size × ticks/min; bounded by Keepa's token-generation rate (plan tier). Refresh interval ≈ `total_unique_asins / (token_rate × utilization)`.
+Budgeting: the offers+stock query costs ~6–14 tokens/ASIN on offer-cache refresh (0 when cached). Sustainable throughput ≈ `refill_rate_per_min / avg_tokens_per_asin`; e.g. 20 tpm ÷ 8 ≈ 2.5 ASIN/min ≈ 3.6k ASIN/day. `keepa_balance.refill_rate` (migration `055`) records the plan tier from each response.
 
 ### Token tracking (cost attribution)
-- `keepa_usage_log` — one row per ASIN per refresh: `asin, tokens (fair share = batch tokensConsumed / products_in_batch), source ('refresh'|'create'), user_ids (JSONB array of users actively listing the ASIN), requested_at`. Append-only.
-- `keepa_balance` — `tokensLeft`/`refillIn` snapshots from each Keepa response (time series).
+- `keepa_usage_log` — one row per **requested** ASIN per refresh (fair share = batch `tokensConsumed` / requested-ASIN count — missing ASINs still get their row, so their users are not subsidized by users of returned ASINs), `source ('refresh'|'create')`, `user_ids` (JSONB array of users actively listing the ASIN). Append-only.
+- `keepa_balance` — `tokens_left`/`refill_in_ms`/`refill_rate` snapshots captured from **every** Keepa response (refresh + create paths).
 - **Admin per-user monthly cost (fair-split):** `SELECT uid, SUM(tokens / jsonb_array_length(user_ids)) AS tokens FROM keepa_usage_log CROSS JOIN LATERAL jsonb_array_elements_text(user_ids) AS uid WHERE requested_at >= date_trunc('month', NOW()) GROUP BY uid ORDER BY tokens DESC;`
-- No UI yet (admin reads tables directly). Token-balance-driven worker throttling is intentionally deferred until real utilization data is collected.
+- No UI yet (admin reads tables directly). Token-balance-driven admission control is deferred until real utilization data accumulates.
 
 ### Listing creation path
-`ListingProcessorService` (the `listings` queue worker) uses a **single** `KeepaService.getProductDetailsWithMeta(asin)` per new product (full metadata + price + stock + token meta in one call). Re-listing a cached ASIN makes **no** Keepa call (0 tokens) — the product is already on the refresh schedule. New product rows get `next_refresh_at = NOW() + 12h` on insert (`findOrCreateProduct`); subsequent rescheduling uses the config interval.
+`ListingProcessorService` (the `listings` queue worker) resolves product data via `resolveProductData`: cache hit (valid title + ≥1 image) → **0 Keepa tokens**; cache miss → a **pg advisory lock keyed on the ASIN** serializes concurrent creates (recheck-after-lock), so N parallel jobs for one uncached ASIN make exactly **one** `getProductDetailsWithMeta` call. Usage + balance are logged from response meta **before** product validation — tokens charged for empty/invalid responses stay in accounting. New product rows get `next_refresh_at = NOW() + 12h` on insert (`findOrCreateProduct`). On the create path only, `UNKNOWN` stock normalizes to 0 (no previous value exists to preserve; live publish blocks at qty 0, drafts allowed).
 
 ### Listing content policy + shared LLM infra (B)
 Configured per **listing settings group** (`content` JSONB on `listing_settings_groups`, migration `031`):
@@ -159,9 +163,11 @@ For mass historical rewrites of existing published listings, do not re-queue cre
 Key files: `src/modules/llm/` (`llm.service.ts`, `llm-usage.service.ts`, `sse-parser.ts`), `content-generation.service.ts`, `listing-strategy.service.ts`, and the listing-group `content` config in shared types/UI.
 
 ### Key product / listing files
-- `src/modules/listings/keepa.service.ts` — Keepa API, `history=0`, token-meta capture, bulk `getProducts()` + `getProductDetailsWithMeta()`.
-- `src/modules/listings/refresh-scheduler.service.ts` — repeatable tick, selects overdue products.
-- `src/modules/listings/refresh-processor.service.ts` — batch worker (compare/update/fan-out/quarantine/token-log).
+- `src/modules/listings/keepa.service.ts` — Keepa `/product` client (offers+stock query, chunked bulk `getProducts()` + `getProductDetailsWithMeta()`, response-reported token meta only).
+- `src/modules/listings/keepa-normalizer.ts` (+ `.spec.ts`) — pure normalization: Buy Box offer matching, `stockCSV`, price sentinels, three-state stock, images array/CSV, `dedupeAsins`/`chunkAsins`.
+- `src/modules/listings/refresh-backoff.ts` (+ `.spec.ts`) — escalating data-failure delay schedule.
+- `src/modules/listings/refresh-scheduler.service.ts` — repeatable tick registration + `KEEPA_REFRESH_ENABLED` gate.
+- `src/modules/listings/refresh-processor.service.ts` — atomic claim (`FOR UPDATE SKIP LOCKED` + lease), batch worker (compare/update/fan-out/quarantine/token-log).
 - `src/modules/listings/keepa-usage.service.ts` — `keepa_usage_log` + `keepa_balance` persistence.
 - `src/modules/listings/product-sync.service.ts` — `updateAllListingsForProduct()` (overrides + change-detected fan-out) + `syncListingsForProduct()`.
 - `src/modules/listings/content-generation.service.ts` — optional Ollama title/description rewrite (create only).
@@ -344,7 +350,13 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
 - **No auto-stop**: Tracking continues until order reaches a terminal state (delivered, cancelled, completed). The processor removes the job when terminal status is detected.
 - **eBay sync**:
   - Amazon `shipped` → `POST /sell/fulfillment/v1/order/{id}/shipping_fulfillment` on eBay with tracking number
-  - Amazon `delivered` → Order status set to `completed`
+  - Amazon `delivered` → Order status set to `completed`; if the order was never observed `shipped` (fast delivery between ticks), the eBay fulfillment push runs first so eBay always gets the tracking
+- **Hardened semantics (2026-07-28, `amazon-tracking-processor.service.ts`)**:
+  - **Fresh eBay token**: the shipped push uses `EbayService.getAccountAccessToken(ebayAccountId)` (refresh-on-demand) — never the raw `ebay_accounts.access_token` column, which is expired by the time the 6–12h tick fires.
+  - **No silent drop**: a failed eBay fulfillment POST propagates out of `handleShipped` → the local status write is skipped → the next tick retries the push. Only permanently-unpushable conditions (account gone/inactive, no linked listing item) log-and-advance.
+  - **Fresh tracking on transition**: the freshly scraped tracking number/carrier are mirrored into the in-memory row before the shipped push (the row was read pre-scrape and is empty on the first shipped detection).
+  - **Status regression guard** (`shouldApplyStatus`): no-op writes, transitions out of terminal states, and SHIPPED → pre-ship downgrades are blocked (the Amazon parser's `'pending'` fallback on a layout miss must not rewind an order and cause a duplicate eBay fulfillment later).
+  - **Interval downshift**: on the shipped transition the per-order scheduler is re-upserted at the 12h interval (previously only a restart's `reconcileSchedulers()` applied it).
 - **On startup**: `reconcileSchedulers()` cleans up orphaned schedulers and creates missing ones for active orders
 
 ### Automated Amazon Fulfillment (A2)

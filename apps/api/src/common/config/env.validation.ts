@@ -110,6 +110,31 @@ class EnvironmentVariables {
   @Min(1)
   KEEPA_REFRESH_MAX_FAILURES: number = 5;
 
+  // Master switch for the stale-driven refresh scheduler. Disable to keep the
+  // API running (e.g. during token-budget testing) without any background
+  // Keepa spend; user-triggered create-path calls are unaffected.
+  @IsString()
+  @IsOptional()
+  KEEPA_REFRESH_ENABLED: string = 'true';
+
+  // Claim lease: how far next_refresh_at is pushed when a scheduler tick claims
+  // a batch. Must exceed the worst-case batch runtime (BullMQ retries incl.) so
+  // rows aren't re-claimed mid-flight, and stay short enough that a crashed
+  // batch re-becomes due quickly.
+  @IsNumber()
+  @IsOptional()
+  @Min(1)
+  KEEPA_REFRESH_CLAIM_LEASE_MINUTES: number = 15;
+
+  // Keepa `update` freshness threshold in hours: serve Keepa-side cached offer
+  // data younger than this (cheap/0 tokens) instead of forcing a live offer
+  // refresh (6 tokens/found page). Unset → Keepa's ~1h default. Trade staleness
+  // tolerance for tokens; keep well below KEEPA_REFRESH_INTERVAL_MINUTES.
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  KEEPA_UPDATE_HOURS?: number;
+
   @IsString()
   @IsOptional()
   EBAY_CLIENT_ID?: string;

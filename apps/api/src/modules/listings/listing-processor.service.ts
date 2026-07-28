@@ -10,6 +10,7 @@ import {
 } from '@repo/shared';
 import { Job } from 'bullmq';
 
+import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
@@ -37,7 +38,8 @@ export class ListingProcessorService extends WorkerHost {
     private readonly keepaUsageService: KeepaUsageService,
     private readonly ebayService: EbayService,
     private readonly listingStrategyService: ListingStrategyService,
-    private readonly quotaEnforcement: QuotaEnforcementService
+    private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly databaseService: DatabaseService
   ) {
     super();
   }
@@ -90,57 +92,10 @@ export class ListingProcessorService extends WorkerHost {
     }
 
     try {
-      // 1. Check if product already exists in DB
-      const existingProduct = await this.listingsService.getProductByAsin(asin);
-      let productData: ProductData | null = null;
-      let productId: string | null = null;
-
-      if (
-        existingProduct &&
-        existingProduct.data.title &&
-        existingProduct.data.title !== 'Unknown Product' &&
-        existingProduct.data.imageUrls?.length > 0
-      ) {
-        // Cached product: reuse as-is. No Keepa call (0 tokens) — the product is
-        // already on the stale-driven refresh schedule and will be freshened
-        // within its refresh interval. Re-listing must never block on Keepa.
-        this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
-        productId = existingProduct.id;
-        productData = existingProduct.data;
-      } else {
-        // New (or incomplete) product: one Keepa fetch yields metadata + price +
-        // stock in a single token. Keepa is the sole provider (ScraperAPI removed).
-        this.logger.log(
-          `${existingProduct ? 'Cached data is incomplete. ' : ''}Fetching product data for ASIN ${asin} from Keepa`
-        );
-        const { product: keepaProduct, meta } = await this.keepaService.getProductDetailsWithMeta(asin);
-
-        if (!keepaProduct) {
-          throw new Error(
-            `Keepa returned no product for ASIN ${asin}. The ASIN may be invalid or Amazon is blocking the request.`
-          );
-        }
-
-        if (!keepaProduct.title || keepaProduct.title === 'Unknown Product') {
-          throw new Error(`Keepa could not resolve a valid title for ASIN ${asin}.`);
-        }
-
-        keepaProduct.rawKeepaData = keepaProduct.raw;
-        productData = keepaProduct;
-
-        this.logger.log(`Keepa data received: price=${keepaProduct.price.current} USD, stock=${keepaProduct.stock ?? 0}`);
-
-        // Attribute this create-path token spend to the creating user.
-        await this.keepaUsageService.logUsage({
-          asin,
-          tokens: meta.tokensConsumed,
-          source: KeepaUsageSource.CREATE,
-          userIds: [userId],
-        });
-
-        // 2. Cache/Find product in database (sets next_refresh_at for new rows)
-        productId = await this.listingsService.findOrCreateProduct(asin, productData);
-      }
+      // 1. Resolve product data — cached, or one Keepa fetch guarded by a
+      //    per-ASIN advisory lock so concurrent creates of the same uncached
+      //    ASIN (bulk uploads, multi-tenant) make exactly ONE provider call.
+      const { productData, productId } = await this.resolveProductData(asin, userId);
 
       // 3. Prepare listing data (Price, stock, etc. based on strategy group)
       const ebayAccountId = await this.ebayService.getActiveAccountId(userId);
@@ -274,5 +229,85 @@ export class ListingProcessorService extends WorkerHost {
         throw error; // Rethrow to trigger BullMQ retry
       }
     }
+  }
+
+  /**
+   * Cached-or-fetch product resolution for the create path.
+   *
+   * - Cache hit (valid title + images): 0 Keepa tokens; the product is already
+   *   on the stale-driven refresh schedule. Re-listing never blocks on Keepa.
+   * - Cache miss: pg advisory lock keyed on the ASIN serializes concurrent
+   *   creates; after acquiring the lock the cache is re-checked, so N parallel
+   *   jobs for one uncached ASIN produce exactly one Keepa call.
+   * - Usage + balance are recorded from the response meta BEFORE product
+   *   validation — tokens Keepa charged for an empty/invalid response are real
+   *   spend and must not vanish from accounting.
+   */
+  private async resolveProductData(
+    asin: string,
+    userId: string
+  ): Promise<{ productData: ProductData; productId: string }> {
+    const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin));
+    if (cached) {
+      this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
+      return cached;
+    }
+
+    // Advisory lock scope: this transaction/connection only. hashtext() maps
+    // the ASIN into the bigint keyspace; collisions merely over-serialize.
+    return this.databaseService.transaction(async (client) => {
+      await client.query(`SELECT pg_advisory_xact_lock(hashtext('keepa-create'), hashtext($1))`, [asin]);
+
+      // Another worker may have fetched + cached while we waited on the lock.
+      const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin));
+      if (cachedAfterLock) {
+        this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
+        return cachedAfterLock;
+      }
+
+      this.logger.log(`Fetching product data for ASIN ${asin} from Keepa`);
+      const { product: keepaProduct, meta } = await this.keepaService.getProductDetailsWithMeta(asin);
+
+      // Record real token spend + balance snapshot regardless of data quality.
+      await this.keepaUsageService.logUsage({
+        asin,
+        tokens: meta.tokensConsumed,
+        source: KeepaUsageSource.CREATE,
+        userIds: [userId],
+      });
+      await this.keepaUsageService.captureBalance(meta);
+
+      if (!keepaProduct) {
+        throw new Error(
+          `Keepa returned no product for ASIN ${asin}. The ASIN may be invalid or Amazon is blocking the request.`
+        );
+      }
+      if (!keepaProduct.title || keepaProduct.title === 'Unknown Product') {
+        throw new Error(`Keepa could not resolve a valid title for ASIN ${asin}.`);
+      }
+
+      keepaProduct.rawKeepaData = keepaProduct.raw;
+      this.logger.log(
+        `Keepa data received: price=${keepaProduct.price.current} USD, stock=${keepaProduct.stock ?? 0}`
+      );
+
+      const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct);
+      return { productData: keepaProduct, productId };
+    });
+  }
+
+  /** A cached product row is reusable when it has a real title and ≥1 image. */
+  private asUsableCache(
+    existing: { id: string; data: ProductData } | null
+  ): { productData: ProductData; productId: string } | null {
+    if (
+      existing &&
+      existing.data.title &&
+      existing.data.title !== 'Unknown Product' &&
+      existing.data.imageUrls?.length > 0
+    ) {
+      return { productData: existing.data, productId: existing.id };
+    }
+    return null;
   }
 }

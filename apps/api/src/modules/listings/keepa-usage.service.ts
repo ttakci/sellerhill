@@ -61,8 +61,8 @@ export class KeepaUsageService {
     }
     try {
       await this.databaseService.query(
-        `INSERT INTO keepa_balance (tokens_left, refill_in_ms) VALUES ($1, $2)`,
-        [meta.tokensLeft, meta.refillIn ?? null]
+        `INSERT INTO keepa_balance (tokens_left, refill_in_ms, refill_rate) VALUES ($1, $2, $3)`,
+        [meta.tokensLeft, meta.refillIn ?? null, meta.refillRate ?? null]
       );
     } catch (error: unknown) {
       this.logger.error(
