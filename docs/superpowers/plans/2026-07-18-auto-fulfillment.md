@@ -1,5 +1,13 @@
 # Automated Amazon Fulfillment (A2) Implementation Plan
 
+> **⚠ Historical document — implemented, then partially superseded
+> (2026-07-28).** The per-user *residential* proxy stack this plan describes
+> was refactored to a fixed ISP proxy pool (`proxies` table, migration `057`,
+> one static proxy per user); tracking cadence is env-tunable with shipped
+> default 24h; and the checkout/tracking pipeline gained cart-hygiene steps,
+> a `cart` blocked reason, and Amazon-cancel handling. See CLAUDE.md for the
+> current state.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** After an eBay sale, automatically place the matching Amazon order via Playwright using the user's buyer account (round-robined across enabled accounts), ship to the eBay buyer's address, link real costs back to the order (A1 trust machinery), and let the existing Amazon→eBay status tracker close the loop — all behind fail-closed guardrails (master toggle, per-account enable, hard review-step cost cap, dry-run) and a per-user residential-proxy + per-account browser-profile anti-ban stack.

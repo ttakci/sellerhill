@@ -2,6 +2,20 @@
 
 **Date:** 2026-07-18
 **Status:** Draft, awaiting user review
+
+> **⚠ Partially superseded (2026-07-28).** The proxy model described in this
+> document (single rotating-residential provider via `PROXY_ENDPOINT`/
+> `PROXY_USER`/`PROXY_PASS_TEMPLATE` env with a sticky `{session}` token) was
+> replaced by a **fixed ISP proxy pool** in the `proxies` DB table (migration
+> `057`): one static proxy auto-assigned per user, passwords encrypted at
+> rest, env template retained only as a fallback while the pool is empty.
+> Tracking intervals are now env-tunable (`AMAZON_TRACKING_*_INTERVAL_HOURS`,
+> shipped default 24h not 12h). The tracking processor was also hardened
+> (fresh eBay token, no-silent-drop push, status regression guard,
+> Amazon-cancel ≠ eBay-cancel via `orders.amazon_cancelled_at`, cart-hygiene
+> checkout steps). Current source of truth: CLAUDE.md "Amazon Order Tracking",
+> "Automated Amazon Fulfillment (A2)" and "Amazon Scraping — Anti-Ban
+> Strategy" sections.
 **Scope:** Backend (`apps/api`) + shared types/enums + small frontend (settings drawer, Amazon-account edit, orders status surface). Builds on A1's cost-capture foundation and the existing Amazon scraping/tracking infrastructure.
 
 ---

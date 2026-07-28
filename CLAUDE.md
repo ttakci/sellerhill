@@ -433,7 +433,7 @@ Introduced by A2 so post-purchase shipped events map Amazon carrier strings to e
 
 ### Key Files
 - **Backend orders**: `src/modules/orders/` — OrdersService, OrderSyncService (owns `recomputeProfit` + `maybeEnqueueAutoFulfill`), EbayFulfillmentService, OrderSyncQueueService, OrderSyncProcessorService, **AutoFulfillQueueService** (A2 producer). Pure helpers: `profit-calculation.ts` (`computeNetProfit`, `deriveCostCaptureStatus`, `estimateProvisionalNetProfit`, `deriveProfitBasis`), `*.spec.ts` unit tests.
-- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService (owns `assertCanEnable` A2 guard), AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService (wires the tracking converter), AmazonRateLimiter, BrowserStateManager (persistent context + proxy), **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests), **AmazonCheckoutService + AutoFulfillProcessor + auto-fulfill-helpers.ts (.spec.ts)** (A2 checkout/processor/pure helpers), **proxy.service.ts** (Zonds sticky residential proxy), **tracking-converter.ts (.spec.ts)** (`LocalTrackingConverter` + `ApiTrackingConverter` stub + `resolveConverter`).
+- **Backend Amazon**: `src/modules/amazon/` — AmazonAccountsService (owns `assertCanEnable` A2 guard), AmazonScrapingService, AmazonOrderParserService, AmazonTrackingQueueService, AmazonTrackingProcessorService (wires the tracking converter), AmazonRateLimiter, BrowserStateManager (persistent context + proxy), **AmazonOrderSyncService + AmazonOrderSyncQueueService + AmazonOrderSyncSchedulerService + AmazonOrderSyncProcessor** (auto cost-capture), **order-matcher.ts / pick-best-match.ts** (pure match heuristic + tests), **AmazonCheckoutService + AutoFulfillProcessor + auto-fulfill-helpers.ts (.spec.ts)** (A2 checkout/processor/pure helpers), **proxy.service.ts** (fixed ISP proxy pool w/ per-user assignment; legacy env-template fallback), **tracking-converter.ts (.spec.ts)** (`LocalTrackingConverter` + `ApiTrackingConverter` stub + `resolveConverter`).
 - **Backend products**: `src/modules/products/` — ProductsService (price/image lookup, `decrementStock` for sale-driven stock sync)
 - **Product refresh pipeline** (Keepa sole provider): `keepa.service.ts`, `refresh-scheduler.service.ts`, `refresh-processor.service.ts`, `keepa-usage.service.ts`, `product-sync.service.ts` — see "Product Refresh Pipeline" section above.
 - **Sale-driven stock sync**: `src/modules/orders/stock-sync-queue.service.ts` (producer) + `src/modules/listings/stock-sync-processor.service.ts` (consumer) + `ProductSyncService.syncListingsForProduct()` + `ListingStrategyService.calculateQuantity()` (canonical quantity formula)
@@ -487,7 +487,7 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 | **Redis 7** | BullMQ job queues | `order-sync`, `stock-sync`, `amazon-*`, `auto-fulfill`, `keepa-refresh`, etc. |
 | **Node 20+ / pnpm 9+** | api + web + packages | monorepo workspace |
 | **Playwright Chromium** | Amazon scraping + A2 checkout | headless; needs OS libs (see below) |
-| **(A2) Residential proxy** | Amazon anti-ban | REQUIRED for A2 auto-fulfill; optional-but-recommended for scraping. `PROXY_*` env |
+| **(A2) Fixed ISP proxies** | Amazon anti-ban | REQUIRED for A2 auto-fulfill; optional-but-recommended for scraping. Rows in the `proxies` table (one per user, auto-assigned); legacy `PROXY_*` env fallback |
 
 **Playwright/Chromium OS deps** (Linux servers, not needed on local Docker which bundles them): `libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2`. Install once: `npx playwright install --with-deps chromium`.
 
@@ -495,14 +495,14 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 
 - **Machine:** your PC. **8 GB RAM minimum** (Chromium for scraping is the heaviest single process).
 - **Services:** `pnpm docker:up` runs PostgreSQL + Redis + pgAdmin in Docker — nothing else to install.
-- **A2 here:** runs, but **auto-fulfill is hard-blocked without a proxy** (`ProxyService.isConfigured()` false). That's fine for testing flow logic. To exercise a live checkout you need a real Amazon buyer account + residential proxy env set — then use **dry-run mode** on the account.
+- **A2 here:** runs, but **auto-fulfill is hard-blocked without a proxy** (`ProxyService.isConfigured()` false — empty `proxies` table and no env fallback). That's fine for testing flow logic. To exercise a live checkout you need a real Amazon buyer account + at least one row in the `proxies` table — then use **dry-run mode** on the account.
 - No GPU needed (A2 uses Playwright CPU; local LLM is a separate B-spec concern).
 
 ### Test (Coolify / VPS)
 
 - **Current Hostinger VPS:** 4 vCPU, 16 GB RAM, 200 GB disk, **no GPU** — runs api + web + postgres + redis + Playwright. This is adequate for test.
 - Run Postgres + Redis as containers (Coolify stack or `docker-compose`). api + web as Coolify services behind the Coolify reverse proxy.
-- **Set the residential proxy env** if you want scraping ban-resistance and to test A2 dry-run/live checkout.
+- **Seed the `proxies` table** (fixed ISP proxies) if you want scraping ban-resistance and to test A2 dry-run/live checkout.
 - Add real Amazon buyer accounts (encrypted at rest via `AMAZON_ENCRYPTION_KEY`).
 - 16 GB is comfortable for a handful of accounts; the I2 idle-eviction (`BROWSER_CONTEXT_IDLE_TTL_MS`) bounds resident Chromium so even ~10–20 accounts won't pile up.
 
@@ -513,7 +513,7 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 - **CPU:** 4+ vCPU (Playwright is CPU-bound; the per-account rate limiter caps concurrency, but headroom matters).
 - **RAM — the key dimension, driven by concurrent Amazon accounts:** ~150–300 MB per resident Chromium context + ~1–1.5 GB base (api + web + Postgres + Redis). I2 idle-eviction means resident contexts are bounded by **active** concurrency, not total account count. **Minimum 16 GB; 32 GB for multi-tenant scale.** Set OOM/alerting on memory.
 - **Disk:** 50 GB+ (Postgres, logs, `fulfillment-evidence/` screenshots — TTL-cleaned via `FULFILLMENT_EVIDENCE_TTL_DAYS`, traffic browser-state profiles under `.browser-state/profiles/`).
-- **Residential proxy:** **required** for A2 (sticky session per user). Budget per-GB; Amazon pages are heavy.
+- **Fixed ISP proxies:** **required** for A2 — one per user (auto-assigned from the `proxies` pool), static IP, unlimited bandwidth (~$3-4/proxy/30d). Size the pool to the active-user count; GB-billed residential was rejected on cost (~25-30 GB/user/month through Playwright).
 - **GPU:** not required (Playwright + local-LLM-via-Ollama are CPU; GPU only if a future hosted LLM/vLLM is chosen — B-spec decision).
 
 ### Secrets / env checklist (per environment)
@@ -528,7 +528,7 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 
 ### A2 operational checklist (before enabling real-money auto-fulfill in any environment)
 
-1. Residential proxy configured + reachable (`ProxyService.isConfigured()` true).
+1. Proxy capacity present (`ProxyService.isConfigured()` true — ≥1 ACTIVE row in `proxies`, or legacy env fallback) and reachable.
 2. ≥1 Amazon buyer account with `auto_fulfill_enabled=true` + `auto_fulfill_cap_total` set.
 3. **Run `auto_fulfill_dry_run=true` first** — confirms the full checkout flow reaches the Amazon review step and the cap behaves, **without charging**. Inspect `fulfillment-evidence/{ebayOrderId}/dry_run_review-*.png`.
 4. **Tune the Playwright selectors** in `AmazonCheckoutService` against live Amazon DOM during dry-run (selectors are best-effort and DOM-drift is the main fragility). Keep selectors in the `CHECKOUT_SELECTORS` constant.
@@ -546,7 +546,7 @@ Zonds runs the same code in every environment — only config (env vars) and cap
 2. **A real Amazon buyer account** connected in Zonds (email + password + 2FA secret), with `auto_fulfill_enabled=true` + `auto_fulfill_cap_total` set + `auto_fulfill_dry_run=true`.
 
 **How to guide the user when they want to "turn on auto-fulfill" / "test it" / "go live":**
-- **No proxy purchased yet → A2 cannot run.** Tell them the proxy is the first purchase (residential, sticky-session, per-GB). Do NOT suggest enabling `auto_fulfill_enabled` on any account — it will be rejected by `assertCanEnable` (proxy + cap required) and/or block every order at runtime. There is no code workaround; the proxy is a hard safety floor.
+- **No proxy purchased yet → A2 cannot run.** Tell them the proxy is the first purchase (fixed ISP Dedicated, US location, ~$3-4/proxy/30d, one per user — INSERT into the `proxies` table). Do NOT suggest enabling `auto_fulfill_enabled` on any account — it will be rejected by `assertCanEnable` (proxy + cap required) and/or block every order at runtime. There is no code workaround; the proxy is a hard safety floor.
 - **Proxy purchased + Amazon account added → run dry-run first.** Set `auto_fulfill_dry_run=true` on the account, ingest one new matched eBay order (or wait for the order-sync cron), then read `orders.auto_fulfill_status` (expect `dry_run`) and the screenshots under `fulfillment-evidence/{ebayOrderId}/`. If any step shows a wrong page / missing total / blocked reason other than `cap`, the `CHECKOUT_SELECTORS` for that step need a live-DOM patch — that is the "selector tuning" task. Repeat until `dry_run_review-*.png` shows the correct review page with a readable grand total and the cap behaves.
 - **Dry-run clean → one low-value live order.** Flip `auto_fulfill_dry_run=false`, set a tight `auto_fulfill_cap_total` (e.g. $10), and watch `auto_fulfill_status` flip to `placed` + a real `amazon_order_id` + `net_profit` (trusted, LINKED). Only then widen to normal caps / more accounts.
 - **Never skip dry-run.** The review-step hard cap is only as good as `readReviewGrandTotal`; if that selector misses on the live DOM, the cap check fails closed (`cap` block) — safe, but it means auto-fulfill is silently not working. Dry-run is how you prove the selectors resolve before money is at stake.
