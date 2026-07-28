@@ -3,6 +3,7 @@ import { Drawer, ModernSelect, ModernTextInput, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { BuyerMessagingSection } from './BuyerMessagingSection/BuyerMessagingSection.container';
 import { BodyStack, FieldGrid, FormCard, ToggleRow } from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
 
@@ -125,6 +126,10 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           <Text variant="caption" color="text.tertiary">
             {t('storeSettings:storeSettings.trackingConversionApiComingSoon')}
           </Text>
+        </FormCard>
+
+        <FormCard>
+          <BuyerMessagingSection selectedScope={selectedScope} />
         </FormCard>
       </BodyStack>
     </Drawer>
