@@ -487,8 +487,18 @@ export class OrderSyncService {
   private async maybeEnqueueAutoFulfill(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
   ): Promise<void> {
-    // 1. Master toggle (global per-user settings).
-    const settings = await this.storeSettingsService.getResolvedSettings(entity.userId, null);
+    // 1. Master toggle — store-specific override falls back to the user's
+    // global setting (Store specific > Global > Default, same resolution
+    // order as everywhere else `getResolvedSettings` is used). Passing the
+    // order's OWN ebayAccountId (not null) is required: a user can flip
+    // auto-fulfill off for one store while leaving it on globally/for other
+    // stores, and the previous `null` here silently ignored that override,
+    // always enforcing only the global row regardless of which store the
+    // order came from.
+    const settings = await this.storeSettingsService.getResolvedSettings(
+      entity.userId,
+      entity.ebayAccountId,
+    );
     if (!settings.autoFulfillEnabled) {
       await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;

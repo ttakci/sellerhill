@@ -367,7 +367,7 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
 
 - **Queue**: `auto-fulfill` (BullMQ, literal `AUTO_FULFILL_QUEUE = 'auto-fulfill'`, registered in `OrdersModule` via `BullModule.registerQueue`). Producer = `AutoFulfillQueueService` (orders module) invoked from `OrderSyncService.maybeEnqueueAutoFulfill` on the genuine-insert path. Processor = `AutoFulfillProcessor extends WorkerHost` (amazon module). `jobId = fulfill-${ebayOrderId}` dedup, `attempts: 3`, exponential backoff 60s. Concurrency: `AUTO_FULFILL_QUEUE_CONCURRENCY` (default 1) — sequential per the rate-limiter contract.
 - **Producer resolution** (`OrderSyncService.maybeEnqueueAutoFulfill`, pure helpers in `auto-fulfill-helpers.ts`):
-  1. `StoreSettingsService.getResolvedSettings(userId, null)` → if `!autoFulfillEnabled` → status `skipped`, no enqueue.
+  1. `StoreSettingsService.getResolvedSettings(userId, entity.ebayAccountId)` (store-specific override falls back to the user's global row — same Store > Global > Default resolution as the rest of `store_settings`; fixed 2026-07-28, previously always passed `null` and silently ignored any per-store `autoFulfillEnabled` override) → if `!autoFulfillEnabled` → status `skipped`, no enqueue.
   2. `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts WHERE user_id=$1 AND auto_fulfill_enabled=TRUE AND auto_fulfill_cap_total IS NOT NULL` → empty → `skipped`.
   3. `pickRoundRobinAccount` picks oldest-`last_used_at`-first (NULL treated as oldest); ties broken by id ASC.
   4. `meetsCoarseCapGate(saleTotal, cap)` pre-filter — `saleTotal > 0 && saleTotal <= cap`. Obvious over-cap orders never enqueue.
