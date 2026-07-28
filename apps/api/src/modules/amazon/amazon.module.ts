@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../common/database/database.module';
 import { BillingModule } from '../billing/billing.module';
+import { BuyerMessagingModule } from '../buyer-messaging/buyer-messaging.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { OrdersModule } from '../orders/orders.module';
 
@@ -28,6 +29,7 @@ import { ProxyService } from './proxy.service';
   imports: [
     DatabaseModule,
     BillingModule,
+    BuyerMessagingModule,
     EbayModule,
     OrdersModule,
     BullModule.registerQueue(

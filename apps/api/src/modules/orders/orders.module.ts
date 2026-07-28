@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../common/database/database.module';
 import { BillingModule } from '../billing/billing.module';
+import { BuyerMessagingModule } from '../buyer-messaging/buyer-messaging.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { ProductsModule } from '../products/products.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
@@ -20,6 +21,7 @@ import { StockSyncQueueService } from './stock-sync-queue.service';
   imports: [
     DatabaseModule,
     BillingModule,
+    BuyerMessagingModule,
     EbayModule,
     ProductsModule,
     StoreSettingsModule,

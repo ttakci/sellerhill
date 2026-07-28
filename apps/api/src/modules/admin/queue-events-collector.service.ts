@@ -48,6 +48,7 @@ export const OBSERVED_QUEUE_NAMES = [
   'amazon-verify',
   'listings',
   'keepa-refresh',
+  'buyer-message',
 ] as const;
 
 /** A BullMQ QueueEvents job event payload (minimal shape we consume). */

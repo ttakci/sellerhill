@@ -79,6 +79,7 @@ export const ADMIN_QUEUE_NAMES = [
   'amazon-verify',
   'listings',
   'keepa-refresh',
+  'buyer-message',
 ] as const;
 
 @Injectable()

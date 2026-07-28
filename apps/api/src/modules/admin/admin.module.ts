@@ -33,6 +33,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'amazon-verify' },
       { name: 'listings' },
       { name: 'keepa-refresh' },
+      { name: 'buyer-message' },
       { name: 'knowledge-ingestion' },
       { name: QUEUE_OBSERVABILITY_RETENTION_QUEUE },
     ),

@@ -15,6 +15,7 @@ import { AmazonModule } from './modules/amazon/amazon.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { BuyerMessagingModule } from './modules/buyer-messaging/buyer-messaging.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EbayModule } from './modules/ebay/ebay.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
@@ -71,6 +72,7 @@ import { SupportModule } from './modules/support/support.module';
     ListingsModule,
     ProfileModule,
     AmazonModule,
+    BuyerMessagingModule,
     OrdersModule,
     LlmModule,
     AssistantModule,

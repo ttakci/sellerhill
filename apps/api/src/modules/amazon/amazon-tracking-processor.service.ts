@@ -1,6 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
+  BuyerMessageEventType,
   EbayAccountStatus,
   extractCorrelationId,
   generateCorrelationId,
@@ -11,6 +12,7 @@ import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
+import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
@@ -53,7 +55,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     private readonly databaseService: DatabaseService,
     private readonly ebayService: EbayService,
     private readonly ebayFulfillmentService: EbayFulfillmentService,
-    private readonly trackingQueueService: AmazonTrackingQueueService
+    private readonly trackingQueueService: AmazonTrackingQueueService,
+    private readonly buyerMessages: BuyerMessageQueueService
   ) {
     super();
   }
@@ -170,6 +173,9 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         // Throws on eBay push failure → the status write below is skipped and
         // the next scheduler tick retries the push (still pre-SHIPPED).
         await this.handleShipped(order);
+        // Buyer auto-messaging "shipped" event (fail-soft; env + per-user
+        // store config re-checked at send time).
+        await this.enqueueBuyerMessage(order, BuyerMessageEventType.SHIPPED);
       } else if (applyStatus && normalizedStatus === OrderStatus.COMPLETED) {
         // Fast deliveries can jump straight past the shipped window between
         // two ticks — make sure eBay got its fulfillment before completing.
@@ -177,6 +183,12 @@ export class AmazonTrackingProcessorService extends WorkerHost {
           await this.handleShipped(order);
         }
         this.logger.log(`Order ${order.id} delivered on Amazon, marking completed`);
+        // Buyer auto-messaging "delivered" event + delayed "feedback_request".
+        await this.enqueueBuyerMessage(order, BuyerMessageEventType.DELIVERED);
+        const delayDays = Number(process.env.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS ?? 3);
+        await this.enqueueBuyerMessage(order, BuyerMessageEventType.FEEDBACK_REQUEST, {
+          delayMs: delayDays * 86_400_000,
+        });
       }
 
       if (applyStatus) {
@@ -303,6 +315,38 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Enqueue a buyer auto-message for an order lifecycle event. Gated by the
+   * BUYER_MESSAGING_ENABLED env master switch and fully fail-soft — messaging
+   * can never break the tracking pipeline (enqueue swallows its own errors;
+   * the .catch here is defense-in-depth).
+   */
+  private async enqueueBuyerMessage(
+    order: AmazonOrderRow,
+    event: BuyerMessageEventType,
+    opts?: { delayMs?: number },
+  ): Promise<void> {
+    if (process.env.BUYER_MESSAGING_ENABLED !== 'true') {
+      return;
+    }
+    await this.buyerMessages
+      .enqueue(
+        {
+          ebayOrderId: order.ebay_order_id,
+          userId: order.user_id,
+          ebayAccountId: order.ebay_account_id,
+          storeId: null,
+          event,
+        },
+        opts,
+      )
+      .catch((err: unknown) => {
+        this.logger.warn(
+          `Buyer-message ${event} enqueue skipped for order ${order.id}: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      });
   }
 
   private mapAmazonStatus(status: string): OrderStatus {

@@ -6,11 +6,12 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { AutoFulfillBlockedReason, AutoFulfillStatus, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
+import { AutoFulfillBlockedReason, AutoFulfillStatus, BuyerMessageEventType, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { meetsCoarseCapGate, pickRoundRobinAccount } from '../amazon/auto-fulfill-helpers';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
 import { ProductsService } from '../products/products.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
@@ -45,6 +46,7 @@ export class OrderSyncService {
     private readonly storeSettingsService: StoreSettingsService,
     private readonly autoFulfillQueue: AutoFulfillQueueService,
     private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly buyerMessages: BuyerMessageQueueService,
   ) {}
 
   /**
@@ -192,6 +194,26 @@ export class OrderSyncService {
               const msg = err instanceof Error ? err.message : String(err);
               this.logger.warn(`Auto-fulfill enqueue skipped for ${entity.ebayOrderId}: ${msg}`);
             }
+          }
+
+          // Buyer auto-messaging (best-effort; never fails order sync). The
+          // order_received "thank you" fires on EVERY genuine new order (env
+          // master switch + per-user store config are re-checked at send time,
+          // so a disabled feature is a cheap no-op enqueue).
+          if (inserted) {
+            await this.buyerMessages
+              .enqueue({
+                ebayOrderId: entity.ebayOrderId,
+                userId: entity.userId,
+                ebayAccountId: entity.ebayAccountId,
+                storeId: null,
+                event: BuyerMessageEventType.ORDER_RECEIVED,
+              })
+              .catch((err: unknown) => {
+                this.logger.warn(
+                  `Buyer-message order_received enqueue skipped for ${entity.ebayOrderId}: ${err instanceof Error ? err.message : String(err)}`,
+                );
+              });
           }
 
           totalSynced++;

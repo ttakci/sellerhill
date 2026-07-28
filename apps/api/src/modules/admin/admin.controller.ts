@@ -62,6 +62,7 @@ export class AdminController {
     @InjectQueue('amazon-verify') private readonly amazonVerifyQueue: Queue,
     @InjectQueue('listings') private readonly listingsQueue: Queue,
     @InjectQueue('keepa-refresh') private readonly keepaRefreshQueue: Queue,
+    @InjectQueue('buyer-message') private readonly buyerMessageQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -74,6 +75,7 @@ export class AdminController {
       { name: 'amazon-verify', queue: this.amazonVerifyQueue },
       { name: 'listings', queue: this.listingsQueue },
       { name: 'keepa-refresh', queue: this.keepaRefreshQueue },
+      { name: 'buyer-message', queue: this.buyerMessageQueue },
     ];
   }
 
