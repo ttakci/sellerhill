@@ -425,7 +425,7 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
   private async resolveProxy(
     amazonAccountId: string,
   ): Promise<{ server: string; username: string; password: string } | null> {
-    if (!this.proxyService.isConfigured()) {return null;}
+    if (!(await this.proxyService.isConfigured())) {return null;}
     try {
       const rows = await this.databaseService.query<{ user_id: string }>(
         'SELECT user_id FROM amazon_accounts WHERE id = $1',
@@ -437,7 +437,7 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
         );
         return null;
       }
-      return this.proxyService.resolve(rows[0].user_id, amazonAccountId);
+      return await this.proxyService.resolve(rows[0].user_id, amazonAccountId);
     } catch (err) {
       this.logger.warn(
         `Proxy resolution failed for account ${amazonAccountId}: ${(err as Error).message} — launching direct.`,

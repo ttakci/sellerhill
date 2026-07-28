@@ -96,3 +96,14 @@ export enum TrackingConversionProvider {
   LOCAL = 'local',
   API = 'api',
 }
+
+/**
+ * Lifecycle of a fixed ISP proxy row in the `proxies` pool (migration 057).
+ * DISABLED rows are never claimed and never used even if still assigned
+ * (burned IP / provider churn — operator flips the flag, user re-claims a
+ * free proxy on next resolve).
+ */
+export enum ProxyStatus {
+  ACTIVE = 'active',
+  DISABLED = 'disabled',
+}

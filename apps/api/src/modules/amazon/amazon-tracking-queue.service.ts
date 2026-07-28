@@ -5,9 +5,33 @@ import { Queue } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 
+/** Env int with fallback + inclusive clamp (typo'd env must not break cadence). */
+function clampIntEnv(raw: string | undefined, fallback: number, min: number, max: number): number {
+  if (raw === undefined || raw === '') {
+    return fallback;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, parsed));
+}
+
 @Injectable()
 export class AmazonTrackingQueueService implements OnModuleInit {
   private readonly logger = new Logger(AmazonTrackingQueueService.name);
+  /**
+   * Poll cadence, env-tunable (hours). Pre-ship default 6h: the only urgency
+   * is pushing the tracking number to eBay reasonably fast after Amazon
+   * ships. Shipped default 24h: delivered-detection has NO time-critical
+   * side effect (it only flips the local status to completed), and the
+   * shipping phase is the longest part of an order's life — polling it at
+   * 12h doubled scrape traffic for zero functional gain.
+   */
+  private readonly preShipIntervalMs =
+    clampIntEnv(process.env.AMAZON_TRACKING_PRESHIP_INTERVAL_HOURS, 6, 1, 72) * 60 * 60 * 1000;
+  private readonly shippedIntervalMs =
+    clampIntEnv(process.env.AMAZON_TRACKING_SHIPPED_INTERVAL_HOURS, 24, 1, 168) * 60 * 60 * 1000;
 
   constructor(
     @InjectQueue('amazon-tracking') private readonly trackingQueue: Queue,
@@ -58,13 +82,9 @@ export class AmazonTrackingQueueService implements OnModuleInit {
   async scheduleOrderTracking(orderId: string, amazonAccountId: string, orderStatus?: string) {
     const schedulerId = `track-amazon-${orderId}`;
 
-    // Adjust interval based on order status
-    let interval: number;
-    if (orderStatus === 'shipped') {
-      interval = 12 * 60 * 60 * 1000; // Every 12 hours for shipped orders (waiting for delivery)
-    } else {
-      interval = 6 * 60 * 60 * 1000; // Every 6 hours for pending/processing
-    }
+    // Adjust interval based on order status (env-tunable, see field docs).
+    const interval =
+      orderStatus === 'shipped' ? this.shippedIntervalMs : this.preShipIntervalMs;
 
     await this.trackingQueue.upsertJobScheduler(
       schedulerId,

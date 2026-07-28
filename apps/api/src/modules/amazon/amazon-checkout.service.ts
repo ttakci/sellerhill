@@ -273,15 +273,16 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       return;
     }
     // R1 — runtime proxy guard (defense-in-depth). `assertCanEnable` checks at
-    // enable time, but an operator can remove the proxy env afterwards. Auto-
-    // fulfill MUST NOT run over the bare server IP (ban + money risk); fail
-    // closed here before any browser action. Existing scraping still falls back
-    // to direct (no regression) — only checkout is hard-blocked.
-    if (!this.proxyService.isConfigured()) {
+    // enable time, but proxy capacity can disappear afterwards (pool rows
+    // disabled, env removed). Auto-fulfill MUST NOT run over the bare server
+    // IP (ban + money risk); fail closed here before any browser action.
+    // Existing scraping still falls back to direct (no regression) — only
+    // checkout is hard-blocked.
+    if (!(await this.proxyService.isConfigured())) {
       await this.block(
         ebayOrderId,
         'proxy_required',
-        'no residential proxy configured — auto-fulfill hard-blocked',
+        'no proxy configured (pool empty and no env fallback) — auto-fulfill hard-blocked',
       );
       return;
     }
@@ -324,10 +325,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // place an order over the bare IP (account ban + money risk), so fail
     // closed here BEFORE any product navigation. Existing scraping legitimately
     // falls back to direct — only checkout is hard-blocked.
-    if (this.proxyService.isConfigured() && !this.browserState.isProxyActive(amazonAccountId)) {
+    if ((await this.proxyService.isConfigured()) && !this.browserState.isProxyActive(amazonAccountId)) {
       throw new AutoFulfillBlockedError(
         'proxy_required',
-        'per-account proxy did not apply to the browser context (resolution failed) — refusing to proceed over bare IP',
+        'per-account proxy did not apply to the browser context (resolution failed or pool exhausted) — refusing to proceed over bare IP',
       );
     }
     try {

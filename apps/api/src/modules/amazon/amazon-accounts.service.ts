@@ -104,7 +104,7 @@ export class AmazonAccountsService {
     // BadRequestException to `showMessage` via the standard error interceptor;
     // i18n keys land in Task 10/11.
     if (data.autoFulfillEnabled) {
-      this.assertCanEnable(data.autoFulfillCapTotal ?? null);
+      await this.assertCanEnable(userId, data.autoFulfillCapTotal ?? null);
     }
 
     const encryptedPassword = this.encryption.encrypt(data.password);
@@ -162,7 +162,7 @@ export class AmazonAccountsService {
       || (data.autoFulfillEnabled === undefined && !!existing.auto_fulfill_enabled);
 
     if (enablingNow) {
-      this.assertCanEnable(effectiveCap);
+      await this.assertCanEnable(userId, effectiveCap);
     }
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
@@ -241,13 +241,19 @@ export class AmazonAccountsService {
   /**
    * Guardrail for enabling auto-fulfill on an Amazon account.
    * Throws `BadRequestException` (FE maps to `showMessage`) when:
-   *   - no proxy is configured (would route Amazon checkout over the user's
-   *     residential IP = ban risk); OR
+   *   - THIS user cannot get a proxy right now (pool exhausted/empty and no
+   *     env fallback — would route Amazon checkout over the bare server IP =
+   *     ban risk). `ensureAvailableFor` claims a pool proxy eagerly, so the
+   *     user gets immediate feedback at enable time instead of a runtime
+   *     proxy_required block on their first order; OR
    *   - the per-account spend cap is null (no ceiling = unbounded spend).
    * Money/ban safety — fail closed.
    */
-  private assertCanEnable(capTotal: number | null): void {
-    if (!this.proxyService.isConfigured()) {
+  private async assertCanEnable(userId: string, capTotal: number | null): Promise<void> {
+    // amazonAccountId only matters for the legacy perAccount env strategy;
+    // at enable time the account may not exist yet, so pass the userId (the
+    // pool model — the primary path — is per-user anyway).
+    if (!(await this.proxyService.ensureAvailableFor(userId, userId))) {
       // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillProxyRequired
       throw new BadRequestException('amazon.errors.autoFulfillProxyRequired');
     }
