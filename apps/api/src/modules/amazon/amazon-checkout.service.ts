@@ -82,6 +82,29 @@ const CHECKOUT_SELECTORS = {
     '#sw-gtc a',
   ],
 
+  // --- Cart page (/gp/cart/view.html) ---
+  // Active cart line items carry a `data-asin` attribute across Amazon's
+  // legacy and React cart layouts. Saved-for-later items live outside
+  // #sc-active-cart and must NOT be counted.
+  cartUrl: 'https://www.amazon.com/gp/cart/view.html',
+  cartItemRow: [
+    '#sc-active-cart [data-asin]',
+    'div[data-itemtype="active"] [data-asin]',
+    '.sc-list-item[data-asin]',
+  ],
+  cartDeleteButton: [
+    '#sc-active-cart input[value="Delete"]',
+    '#sc-active-cart [data-action="delete"] input',
+    '#sc-active-cart input[data-action="delete"]',
+    'input[name^="submit.delete"]',
+  ],
+  // Per-row quantity: legacy dropdown OR modern stepper value.
+  cartQuantityValue: [
+    'select[name^="quantity"]',
+    '[data-a-selector="value"]',
+    '.sc-quantity-stepper input',
+  ],
+
   // --- Checkout flow entrance ---
   proceedToCheckoutButton: [
     'input[name="proceedToRetailCheckout"]',
@@ -310,6 +333,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.humanDelay();
 
+      // Step 1b: cart hygiene — empty the cart BEFORE adding our item. A
+      // previous blocked attempt (address/payment/captcha) leaves its item in
+      // the cart, and the buyer account may hold personal items; Amazon checks
+      // out the ENTIRE cart, so any leftover would be co-purchased. Best-effort
+      // (verification below is the fail-closed gate).
+      await this.clearCart(page, ebayOrderId);
+
       // Step 2: product page + add to cart
       await page.goto(`https://www.amazon.com/dp/${asin}`, {
         waitUntil: 'domcontentloaded',
@@ -322,9 +352,16 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       }
       await this.setQuantityAndAddToCart(page, quantity);
 
-      // Step 3: proceed to checkout + address
+      // Step 3: cart verification (HARD, fail-closed) + proceed to checkout.
+      // Navigate to the cart page deterministically (interstitial layouts
+      // vary), then require the cart to contain EXACTLY our item before any
+      // payment surface is touched. Throws 'cart' on any mismatch.
       await this.humanDelay();
-      await this.clickFirstAvailable(page, CHECKOUT_SELECTORS.goToCartLink, 'go-to-cart');
+      await page.goto(CHECKOUT_SELECTORS.cartUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30_000,
+      });
+      await this.verifyCartContents(page, asin, quantity, ebayOrderId);
       await this.humanDelay();
       await this.clickFirstAvailable(
         page,
@@ -478,7 +515,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         if (opts >= qty) {
           await qtySelect.selectOption(String(qty)).catch(() => undefined);
         } else if (opts > 0) {
-          await qtySelect.selectOption({ index: opts }).catch(() => undefined);
+          // Fewer options than requested — pick the highest available (last
+          // option; selectOption index is 0-based, so `opts` itself would be
+          // out of range and silently leave quantity at 1).
+          await qtySelect.selectOption({ index: opts - 1 }).catch(() => undefined);
         }
       }
     }
@@ -488,6 +528,104 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     }
     await addBtn.click();
     await page.waitForLoadState('domcontentloaded', { timeout: 15_000 }).catch(() => undefined);
+  }
+
+  /**
+   * Cart hygiene, part 1: best-effort empty of the active cart before adding
+   * our item. Bounded delete-click loop; never throws — a miss here is caught
+   * by the fail-closed `verifyCartContents` gate, which is the real guard.
+   */
+  private async clearCart(page: Page, ebayOrderId: string): Promise<void> {
+    try {
+      await page.goto(CHECKOUT_SELECTORS.cartUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30_000,
+      });
+      for (let i = 0; i < 10; i++) {
+        const del = page.locator(CHECKOUT_SELECTORS.cartDeleteButton.join(', ')).first();
+        if (!(await del.isVisible({ timeout: 1500 }).catch(() => false))) {
+          break;
+        }
+        await del.click().catch(() => undefined);
+        await page.waitForLoadState('domcontentloaded', { timeout: 10_000 }).catch(() => undefined);
+        await this.humanDelay();
+      }
+    } catch (err) {
+      this.logger.warn(
+        `clearCart best-effort failed for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Cart hygiene, part 2 (HARD, fail-closed): the active cart must contain
+   * EXACTLY one line item, it must be our ASIN, and — when the per-row
+   * quantity is readable — the quantity must match the order. Anything else
+   * throws `'cart'`: Amazon checks out the whole cart, so a stale leftover
+   * from a blocked attempt or the buyer's personal items would be
+   * co-purchased with real money. An unreadable row count also blocks
+   * (selector drift is surfaced during dry-run tuning, before money moves).
+   */
+  private async verifyCartContents(
+    page: Page,
+    asin: string,
+    qty: number,
+    ebayOrderId: string,
+  ): Promise<void> {
+    const rows = page.locator(CHECKOUT_SELECTORS.cartItemRow.join(', '));
+    const rowCount = await rows.count().catch(() => -1);
+    if (rowCount !== 1) {
+      await this.snap(page, ebayOrderId, 'cart-mismatch');
+      throw new AutoFulfillBlockedError(
+        'cart',
+        `active cart has ${rowCount < 0 ? 'unreadable' : rowCount} line items (expected exactly 1)`,
+      );
+    }
+
+    const row = rows.first();
+    const rowAsin = (await row.getAttribute('data-asin').catch(() => null)) ?? '';
+    const asinMatches =
+      rowAsin.toUpperCase() === asin.toUpperCase() ||
+      (rowAsin === '' &&
+        (await row
+          .locator(`a[href*="${asin}"]`)
+          .first()
+          .isVisible({ timeout: 1000 })
+          .catch(() => false)));
+    if (!asinMatches) {
+      await this.snap(page, ebayOrderId, 'cart-mismatch');
+      throw new AutoFulfillBlockedError(
+        'cart',
+        `cart line item ASIN mismatch (found "${rowAsin || 'unknown'}", expected ${asin})`,
+      );
+    }
+
+    // Quantity: block on a READABLE mismatch; warn-and-continue when
+    // unreadable (row count + ASIN already verified, review-step cap bounds
+    // the worst case; blocking on every unreadable stepper would dead-stop
+    // all orders on a cosmetic layout change).
+    const qtyLoc = row.locator(CHECKOUT_SELECTORS.cartQuantityValue.join(', ')).first();
+    let cartQty: number | null = null;
+    if (await qtyLoc.isVisible({ timeout: 1000 }).catch(() => false)) {
+      const rawValue = await qtyLoc.inputValue().catch(() => null);
+      const rawText = rawValue ?? (await qtyLoc.textContent().catch(() => null));
+      const parsed = Number.parseInt((rawText ?? '').trim(), 10);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        cartQty = parsed;
+      }
+    }
+    if (cartQty !== null && cartQty !== qty) {
+      await this.snap(page, ebayOrderId, 'cart-mismatch');
+      throw new AutoFulfillBlockedError(
+        'cart',
+        `cart quantity ${cartQty} != order quantity ${qty}`,
+      );
+    }
+    if (cartQty === null) {
+      this.logger.warn(
+        `verifyCartContents: quantity unreadable for ${ebayOrderId} — proceeding on row/ASIN match only`,
+      );
+    }
   }
 
   /**

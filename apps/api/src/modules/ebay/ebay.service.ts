@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
@@ -6,7 +6,6 @@ import {
   EBAY_MARKETPLACE_CONFIG,
   EbayAccountStatus,
   type CreateEbayConnectUrlResponse,
-  type EbayAccountDto,
   type EbayAccountPublicDto,
   type EbayMarketplaceId,
   type GetEbayAccountsResponse,
@@ -15,8 +14,16 @@ import {
 import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EncryptionUtil } from '../../common/utils/encryption.util';
 
 import { EbayOAuthService } from './ebay-oauth.service';
+
+/**
+ * Prefix marking an encrypted-at-rest token value in `ebay_accounts`.
+ * Legacy rows hold plaintext (no prefix) and are decrypt-passthrough until the
+ * onModuleInit backfill re-encrypts them.
+ */
+const TOKEN_ENC_PREFIX = 'enc:';
 
 /** Helper to safely extract error message from unknown errors */
 function getErrorMessage(error: unknown): string {
@@ -118,14 +125,76 @@ interface EbayAccountEntity {
 }
 
 @Injectable()
-export class EbayService {
+export class EbayService implements OnModuleInit {
   private readonly logger = new Logger(EbayService.name);
+  /**
+   * At-rest encryption for eBay OAuth tokens (AES-256-GCM, same key as the
+   * Amazon buyer-account credentials — `AMAZON_ENCRYPTION_KEY`). A leaked DB
+   * dump must not yield working seller-API tokens.
+   */
+  private readonly tokenEncryption: EncryptionUtil;
 
   constructor(
     private readonly oauthService: EbayOAuthService,
     private readonly databaseService: DatabaseService,
     private readonly configService: ConfigService
-  ) {}
+  ) {
+    const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
+    if (!key) {
+      // Same hard requirement as AmazonAccountsService — the app already
+      // cannot boot without this key, so failing fast here adds no new burden.
+      throw new Error('AMAZON_ENCRYPTION_KEY environment variable is required');
+    }
+    this.tokenEncryption = new EncryptionUtil(key);
+  }
+
+  /**
+   * One-time lazy migration: re-encrypt any legacy plaintext tokens still in
+   * `ebay_accounts`. Best-effort — a failure logs and leaves the row as
+   * plaintext (still readable via the decrypt-passthrough), never blocks boot.
+   */
+  async onModuleInit(): Promise<void> {
+    try {
+      const rows = await this.databaseService.query<{
+        id: string;
+        access_token: string;
+        refresh_token: string;
+      }>(
+        `SELECT id, access_token, refresh_token FROM ebay_accounts
+         WHERE access_token NOT LIKE $1 OR refresh_token NOT LIKE $1`,
+        [`${TOKEN_ENC_PREFIX}%`]
+      );
+      for (const row of rows) {
+        await this.databaseService.query(
+          `UPDATE ebay_accounts SET access_token = $1, refresh_token = $2, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $3`,
+          [
+            this.encryptToken(this.decryptToken(row.access_token)),
+            this.encryptToken(this.decryptToken(row.refresh_token)),
+            row.id,
+          ]
+        );
+      }
+      if (rows.length > 0) {
+        this.logger.log(`Encrypted ${rows.length} legacy plaintext eBay token row(s) at rest`);
+      }
+    } catch (error: unknown) {
+      this.logger.warn(`eBay token encryption backfill failed (will retry next boot): ${getErrorMessage(error)}`);
+    }
+  }
+
+  /** Encrypt a token for storage. */
+  private encryptToken(plaintext: string): string {
+    return TOKEN_ENC_PREFIX + this.tokenEncryption.encrypt(plaintext);
+  }
+
+  /** Decrypt a stored token; legacy plaintext rows pass through unchanged. */
+  private decryptToken(stored: string): string {
+    if (!stored.startsWith(TOKEN_ENC_PREFIX)) {
+      return stored;
+    }
+    return this.tokenEncryption.decrypt(stored.slice(TOKEN_ENC_PREFIX.length));
+  }
 
   /**
    * Generate eBay connect URL
@@ -183,8 +252,8 @@ export class EbayService {
         sellerId,
         storeName,
         marketplaceId,
-        tokenResponse.access_token,
-        tokenResponse.refresh_token,
+        this.encryptToken(tokenResponse.access_token),
+        this.encryptToken(tokenResponse.refresh_token),
         expiresAt.toISOString(),
         EBAY_ACCOUNT_STATUS.ACTIVE,
       ]
@@ -964,8 +1033,8 @@ export class EbayService {
    */
   private async getActiveAccount(userId: string): Promise<EbayAccountEntity | null> {
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = '${EbayAccountStatus.ACTIVE}' LIMIT 1`,
-      [userId]
+      `SELECT * FROM ebay_accounts WHERE user_id = $1 AND status = $2 LIMIT 1`,
+      [userId, EbayAccountStatus.ACTIVE]
     );
     return accounts[0] || null;
   }
@@ -979,17 +1048,19 @@ export class EbayService {
     const expiresAt = new Date(account.access_token_expires_at);
 
     if (expiresAt.getTime() - now.getTime() > 5 * 60 * 1000) {
-      return account.access_token;
+      return this.decryptToken(account.access_token);
     }
 
     this.logger.log(`Access token for account ${account.id} expired. Refreshing...`);
-    const tokenResponse = await this.oauthService.refreshAccessToken(account.refresh_token);
+    const tokenResponse = await this.oauthService.refreshAccessToken(
+      this.decryptToken(account.refresh_token)
+    );
 
     const newExpiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
 
     await this.databaseService.query(
       `UPDATE ebay_accounts SET access_token = $1, access_token_expires_at = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
-      [tokenResponse.access_token, newExpiresAt.toISOString(), account.id]
+      [this.encryptToken(tokenResponse.access_token), newExpiresAt.toISOString(), account.id]
     );
 
     return tokenResponse.access_token;
@@ -1288,25 +1359,6 @@ export class EbayService {
       }
       throw error;
     }
-  }
-
-  /**
-   * Map entity to DTO (internal - includes tokens)
-   */
-  private mapToDto(entity: EbayAccountEntity): EbayAccountDto {
-    return {
-      id: entity.id,
-      userId: entity.user_id,
-      sellerId: entity.seller_id,
-      storeName: entity.store_name,
-      marketplaceId: entity.marketplace_id,
-      accessToken: entity.access_token,
-      refreshToken: entity.refresh_token,
-      accessTokenExpiresAt: entity.access_token_expires_at.toISOString(),
-      status: entity.status,
-      createdAt: entity.created_at.toISOString(),
-      updatedAt: entity.updated_at.toISOString(),
-    };
   }
 
   /**

@@ -89,9 +89,11 @@
         "cap": "Over cost cap",
         "no_confirmation": "No confirmation",
         "proxy_required": "No proxy configured",
-        "quota_exhausted": "Monthly quota reached"
+        "quota_exhausted": "Monthly quota reached",
+        "cart": "Cart mismatch"
       },
       "reasonLabel": "Reason: {{reason}}",
+      "amazonCancelledBadge": "Amazon cancelled",
       "filter": {
         "all": "All auto-fulfill",
         "needsAttention": "Needs attention"

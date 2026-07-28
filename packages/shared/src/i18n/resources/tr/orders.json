@@ -89,9 +89,11 @@
         "cap": "Tavan aşıldı",
         "no_confirmation": "Onay alınamadı",
         "proxy_required": "Proxy yapılandırılmamış",
-        "quota_exhausted": "Aylık kota doldu"
+        "quota_exhausted": "Aylık kota doldu",
+        "cart": "Sepet uyuşmazlığı"
       },
       "reasonLabel": "Sebep: {{reason}}",
+      "amazonCancelledBadge": "Amazon iptal etti",
       "filter": {
         "all": "Tümü",
         "needsAttention": "İlgilenilecek"

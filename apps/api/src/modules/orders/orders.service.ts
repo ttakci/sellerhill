@@ -52,6 +52,7 @@ interface OrderRow {
   cost_capture_status: string;
   auto_fulfill_status: string | null;
   auto_fulfill_blocked_reason: string | null;
+  amazon_cancelled_at: Date | null;
   shipping_address: {
     street?: string;
     city?: string;
@@ -141,10 +142,13 @@ export class OrdersService {
 
     if (filters?.autoFulfillNeedsAttention) {
       // Surface orders whose automated Amazon fulfillment hit a fail-closed
-      // obstacle so the operator can fall back to manual linking.
+      // obstacle — or whose AMAZON purchase was cancelled after placement
+      // (the eBay sale is still live and must be fulfilled another way).
       conditions.push(
-        `o.auto_fulfill_status IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}')`
+        `(o.auto_fulfill_status IN ($${paramIndex}, $${paramIndex + 1}) OR o.amazon_cancelled_at IS NOT NULL)`
       );
+      params.push(AutoFulfillStatus.BLOCKED, AutoFulfillStatus.FAILED);
+      paramIndex += 2;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -413,6 +417,9 @@ export class OrdersService {
         : undefined,
       autoFulfillBlockedReason: row.auto_fulfill_blocked_reason
         ? (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReason)
+        : null,
+      amazonCancelledAt: row.amazon_cancelled_at
+        ? row.amazon_cancelled_at.toISOString()
         : null,
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,

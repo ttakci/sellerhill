@@ -59,6 +59,12 @@ export enum AutoFulfillBlockedReason {
   PROXY_REQUIRED = 'proxy_required',
   /** AO monthly quota exhausted — placed+reserved this period >= limit. */
   QUOTA_EXHAUSTED = 'quota_exhausted',
+  /**
+   * Cart-hygiene guard — the Amazon cart did not contain exactly the expected
+   * item/quantity before checkout (stale leftovers from a blocked attempt or
+   * the buyer's own items would be co-purchased). Fail-closed before payment.
+   */
+  CART = 'cart',
 }
 
 /**
@@ -102,6 +108,13 @@ export interface OrderDto {
    * Null/undefined otherwise. Drives the "needs attention" filter + chip tooltip.
    */
   autoFulfillBlockedReason?: AutoFulfillBlockedReason | null;
+  /**
+   * Set when the linked AMAZON purchase was observed cancelled by the tracker.
+   * The local eBay order status is deliberately NOT changed — the eBay sale is
+   * still live and must be fulfilled another way. Included in the
+   * "needs attention" filter so the operator sees it.
+   */
+  amazonCancelledAt?: string | null;
 
   // Product
   product?: {

@@ -83,7 +83,7 @@ export function useOrdersColumns(
         key: 'autoFulfill',
         header: t('orders.autoFulfill.column'),
         render: (_value, order) => {
-          if (!order.autoFulfillStatus) {
+          if (!order.autoFulfillStatus && !order.amazonCancelledAt) {
             return (
               <Text variant="body-sm" color="text.secondary">
                 —
@@ -99,13 +99,20 @@ export function useOrdersColumns(
             : undefined;
           return (
             <S.AutoFulfillCell>
-              <Badge
-                variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
-                size="xs"
-                isPill
-              >
-                {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
-              </Badge>
+              {order.autoFulfillStatus && (
+                <Badge
+                  variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
+                  size="xs"
+                  isPill
+                >
+                  {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
+                </Badge>
+              )}
+              {order.amazonCancelledAt && (
+                <Badge variant="error" size="xs" isPill>
+                  {t('orders.autoFulfill.amazonCancelledBadge')}
+                </Badge>
+              )}
               {reasonLabel && (
                 <Text variant="caption" color="text.secondary">
                   {reasonLabel}

@@ -5,6 +5,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
+import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import {
   pickBestMatch,
   type CandidateEbayOrderRow,
@@ -46,6 +47,7 @@ export class AmazonOrderSyncService {
     private readonly databaseService: DatabaseService,
     private readonly scraping: AmazonScrapingService,
     private readonly orderSync: OrderSyncService,
+    private readonly trackingQueue: AmazonTrackingQueueService,
   ) {}
 
   /**
@@ -184,6 +186,19 @@ export class AmazonOrderSyncService {
         // Recompute net_profit + fees from the freshly-persisted costs. Sets
         // cost_capture_status authoritatively (matches what we just wrote).
         await this.orderSync.recomputeProfit(best.ebayOrderId);
+
+        // Kick off Amazon→eBay status tracking for the newly-linked order.
+        // Without this, tracking only started at the next API restart
+        // (reconcileSchedulers) — shipped/delivered sync would silently lag.
+        // Best-effort: a scheduling miss is repaired by the next restart's
+        // reconcile and must not fail the link.
+        try {
+          await this.trackingQueue.scheduleOrderTracking(best.orderId, accountId);
+        } catch (err) {
+          this.logger.warn(
+            `tracking kickoff failed for order ${best.orderId}: ${(err as Error).message}`,
+          );
+        }
         linked++;
       } catch (err) {
         // Per-Amazon-order failure isolation — never fail the run.

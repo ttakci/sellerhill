@@ -1,10 +1,17 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { extractCorrelationId, generateCorrelationId, OrderStatus, TrackingConversionProvider } from '@repo/shared';
+import {
+  EbayAccountStatus,
+  extractCorrelationId,
+  generateCorrelationId,
+  OrderStatus,
+  TrackingConversionProvider,
+} from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
+import { EbayService } from '../ebay/ebay.service';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -34,9 +41,7 @@ interface AmazonOrderRow {
 
 interface EbayAccountRow {
   id: string;
-  access_token: string;
-  marketplace_id: string;
-  status: string;
+  status: EbayAccountStatus;
 }
 
 @Processor('amazon-tracking', { concurrency: 2 })
@@ -46,6 +51,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
   constructor(
     private readonly scrapingService: AmazonScrapingService,
     private readonly databaseService: DatabaseService,
+    private readonly ebayService: EbayService,
     private readonly ebayFulfillmentService: EbayFulfillmentService,
     private readonly trackingQueueService: AmazonTrackingQueueService
   ) {
@@ -95,8 +101,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
 
       const order = orders[0];
 
-      // Skip if already delivered/completed/cancelled
-      if (['completed', 'cancelled', 'delivered'].includes(order.status)) {
+      // Skip if already in a terminal state
+      if ([OrderStatus.COMPLETED, OrderStatus.CANCELLED].includes(order.status)) {
         this.logger.log(`Order ${orderId} is ${order.status}, removing tracking`);
         await this.trackingQueueService.removeOrderTracking(orderId);
         return;
@@ -114,7 +120,11 @@ export class AmazonTrackingProcessorService extends WorkerHost {
 
       this.logger.log(`Order ${orderId}: Amazon status=${amazonStatus.status}, mapped=${normalizedStatus}, previous=${previousStatus}`);
 
-      // Update tracking info if we got new data
+      // Update tracking info if we got new data — and mirror it into the
+      // in-memory row so the shipped transition below pushes the FRESH
+      // tracking number to eBay (the row was read before this scrape; on the
+      // very first shipped detection the row's tracking columns are still
+      // empty, and pushing those would create a no-tracking fulfillment).
       if (amazonStatus.trackingNumber && amazonStatus.trackingNumber !== order.amazon_tracking_number) {
         await this.databaseService.query(
           `UPDATE orders SET
@@ -124,30 +134,69 @@ export class AmazonTrackingProcessorService extends WorkerHost {
            WHERE id = $3`,
           [amazonStatus.trackingNumber, amazonStatus.trackingCarrier || null, orderId]
         );
+        order.amazon_tracking_number = amazonStatus.trackingNumber;
+        order.amazon_tracking_carrier = amazonStatus.trackingCarrier || '';
       }
 
-      // Handle status transitions. Compare against the enum constants, not raw
-      // string literals: mapAmazonStatus returns OrderStatus.* values, and a
-      // literal like 'delivered' would NEVER match OrderStatus.COMPLETED
-      // (= 'completed') — silently dropping the delivered→completed transition.
-      if (normalizedStatus === OrderStatus.SHIPPED && previousStatus !== OrderStatus.SHIPPED) {
-        await this.handleShipped(order);
-      } else if (
-        normalizedStatus === OrderStatus.COMPLETED &&
-        previousStatus !== OrderStatus.COMPLETED
-      ) {
-        await this.handleDelivered(order);
-      }
-
-      // Update order status
-      await this.databaseService.query(
-        `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-        [normalizedStatus, orderId]
-      );
-
-      // Remove tracking if terminal state
-      if (['completed', 'delivered'].includes(normalizedStatus)) {
+      // Amazon-side cancellation is NOT an eBay-side cancellation: the eBay
+      // sale is still live and must be fulfilled another way. Never overwrite
+      // the local order status — stamp amazon_cancelled_at (surfaces in the
+      // "needs attention" filter), stop tracking, and leave the order as-is
+      // for the operator.
+      if (normalizedStatus === OrderStatus.CANCELLED) {
+        this.logger.warn(
+          `Order ${orderId}: AMAZON purchase ${order.amazon_order_id} observed cancelled — ` +
+            `flagging for attention (local eBay order status unchanged)`,
+        );
+        await this.databaseService.query(
+          `UPDATE orders SET
+             amazon_cancelled_at = COALESCE(amazon_cancelled_at, CURRENT_TIMESTAMP),
+             updated_at = CURRENT_TIMESTAMP
+           WHERE id = $1`,
+          [orderId]
+        );
         await this.trackingQueueService.removeOrderTracking(orderId);
+        return;
+      }
+
+      // Status transitions are guarded against regression: a parse miss on
+      // Amazon's side (parser falls back to 'pending' → WAITING_SHIPMENT)
+      // must never downgrade a SHIPPED order — that would re-trigger the
+      // shipped transition on a later tick and push a DUPLICATE fulfillment
+      // to eBay. Compare against enum constants, not raw string literals.
+      const applyStatus = this.shouldApplyStatus(previousStatus, normalizedStatus);
+
+      if (applyStatus && normalizedStatus === OrderStatus.SHIPPED) {
+        // Throws on eBay push failure → the status write below is skipped and
+        // the next scheduler tick retries the push (still pre-SHIPPED).
+        await this.handleShipped(order);
+      } else if (applyStatus && normalizedStatus === OrderStatus.COMPLETED) {
+        // Fast deliveries can jump straight past the shipped window between
+        // two ticks — make sure eBay got its fulfillment before completing.
+        if (previousStatus !== OrderStatus.SHIPPED) {
+          await this.handleShipped(order);
+        }
+        this.logger.log(`Order ${order.id} delivered on Amazon, marking completed`);
+      }
+
+      if (applyStatus) {
+        await this.databaseService.query(
+          `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+          [normalizedStatus, orderId]
+        );
+      }
+
+      // Remove tracking if terminal state (CANCELLED already returned above);
+      // slow the poll to 12h once shipped (waiting for delivery needs less
+      // frequent — and cheaper — scraping).
+      if (normalizedStatus === OrderStatus.COMPLETED) {
+        await this.trackingQueueService.removeOrderTracking(orderId);
+      } else if (applyStatus && normalizedStatus === OrderStatus.SHIPPED) {
+        await this.trackingQueueService.scheduleOrderTracking(
+          orderId,
+          amazonAccountId,
+          OrderStatus.SHIPPED
+        );
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
@@ -156,87 +205,104 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     }
   }
 
+  /**
+   * Push the shipped fulfillment (tracking number + carrier) to eBay.
+   *
+   * Failure semantics: permanently-unpushable conditions (account gone /
+   * inactive / no linked listing item) log and return, letting the caller
+   * advance the local status. A FAILED eBay API call (401/5xx/network)
+   * PROPAGATES instead — the caller then skips the status write, so the
+   * order is still pre-SHIPPED on the next scheduler tick and the push is
+   * retried. Swallowing here would mark the order shipped locally while eBay
+   * never received the tracking — an unrecoverable silent drop.
+   */
   private async handleShipped(order: AmazonOrderRow): Promise<void> {
     this.logger.log(`Order ${order.id} shipped on Amazon, syncing to eBay`);
 
-    try {
-      // Get eBay account for API call
-      const ebayAccounts = await this.databaseService.query<EbayAccountRow>(
-        `SELECT id, access_token, marketplace_id, status FROM ebay_accounts WHERE id = $1`,
-        [order.ebay_account_id]
-      );
-
-      if (ebayAccounts.length === 0) {
-        this.logger.error(`eBay account ${order.ebay_account_id} not found for order ${order.id}`);
-        return;
-      }
-
-      const ebayAccount = ebayAccounts[0];
-
-      if (ebayAccount.status !== 'active') {
-        this.logger.error(`eBay account ${ebayAccount.id} is not active`);
-        return;
-      }
-
-      // Get the eBay line item ID from the linked listing
-      const lineItemId = order.listing_ebay_item_id;
-      if (!lineItemId) {
-        this.logger.error(`No eBay item ID for order ${order.id}`);
-        return;
-      }
-
-      // Create shipping fulfillment on eBay.
-      // Tracking number/carrier go through the pluggable TrackingConverter:
-      //   - Real carriers (UPS/USPS/FedEx/DHL) are remapped to eBay's enum.
-      //   - TBA/TBM/TBC (Amazon Logistics) pass through UNCHANGED as
-      //     Amazon_Logistics — never fabricated into a fake USPS/UPS number
-      //     (eBay deprecated Bluecare/Aquiline validation; fabrication is fraud).
-      // The provider is resolved per-order from store_settings (default LOCAL).
-      const provider = await this.resolveProvider(order.user_id);
-      const converter = resolveConverter(provider);
-      const { trackingNumber, shippingCarrierCode } = converter.convert(
-        order.amazon_tracking_number || '',
-        order.amazon_tracking_carrier || '',
-      );
-
-      await this.ebayFulfillmentService.createShippingFulfillment(
-        ebayAccount.access_token,
-        order.ebay_order_id,
-        lineItemId,
-        order.quantity || 1,
-        {
-          // Preserve "no tracking number = no tracking body" semantic —
-          // EbayFulfillmentService only attaches tracking when BOTH fields
-          // are truthy, so empty strings collapse to undefined here.
-          trackingNumber: trackingNumber || undefined,
-          shippingCarrierCode: shippingCarrierCode || undefined,
-          shippedDate: new Date().toISOString(),
-        }
-      );
-
-      await this.databaseService.query(
-        `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-        [OrderStatus.SHIPPED, order.id]
-      );
-
-      this.logger.log(`eBay order ${order.ebay_order_id} marked as shipped`);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to sync shipped status to eBay for order ${order.id}: ${message}`);
-    }
-  }
-
-  private async handleDelivered(order: AmazonOrderRow): Promise<void> {
-    this.logger.log(`Order ${order.id} delivered on Amazon, syncing to eBay`);
-
-    // eBay doesn't have a direct "mark as delivered" API
-    // The order transitions to COMPLETED after the buyer confirms or after a timeout
-    await this.databaseService.query(
-      `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [OrderStatus.COMPLETED, order.id]
+    // Get eBay account for API call
+    const ebayAccounts = await this.databaseService.query<EbayAccountRow>(
+      `SELECT id, status FROM ebay_accounts WHERE id = $1`,
+      [order.ebay_account_id]
     );
 
-    this.logger.log(`Order ${order.id} marked as completed (delivered on Amazon)`);
+    if (ebayAccounts.length === 0) {
+      this.logger.error(`eBay account ${order.ebay_account_id} not found for order ${order.id}`);
+      return;
+    }
+
+    const ebayAccount = ebayAccounts[0];
+
+    if (ebayAccount.status !== EbayAccountStatus.ACTIVE) {
+      this.logger.error(`eBay account ${ebayAccount.id} is not active`);
+      return;
+    }
+
+    // Get the eBay line item ID from the linked listing
+    const lineItemId = order.listing_ebay_item_id;
+    if (!lineItemId) {
+      this.logger.error(`No eBay item ID for order ${order.id}`);
+      return;
+    }
+
+    // Fresh access token, refreshed on demand. eBay access tokens live ~2h;
+    // this job fires 6–12h after order sync, so the raw ebay_accounts column
+    // value is virtually always expired by the time we push.
+    const accessToken = await this.ebayService.getAccountAccessToken(order.ebay_account_id);
+
+    // Create shipping fulfillment on eBay.
+    // Tracking number/carrier go through the pluggable TrackingConverter:
+    //   - Real carriers (UPS/USPS/FedEx/DHL) are remapped to eBay's enum.
+    //   - TBA/TBM/TBC (Amazon Logistics) pass through UNCHANGED as
+    //     Amazon_Logistics — never fabricated into a fake USPS/UPS number
+    //     (eBay deprecated Bluecare/Aquiline validation; fabrication is fraud).
+    // The provider is resolved per-order from store_settings (default LOCAL).
+    const provider = await this.resolveProvider(order.user_id);
+    const converter = resolveConverter(provider);
+    const { trackingNumber, shippingCarrierCode } = converter.convert(
+      order.amazon_tracking_number || '',
+      order.amazon_tracking_carrier || '',
+    );
+
+    await this.ebayFulfillmentService.createShippingFulfillment(
+      accessToken,
+      order.ebay_order_id,
+      lineItemId,
+      order.quantity || 1,
+      {
+        // Preserve "no tracking number = no tracking body" semantic —
+        // EbayFulfillmentService only attaches tracking when BOTH fields
+        // are truthy, so empty strings collapse to undefined here.
+        trackingNumber: trackingNumber || undefined,
+        shippingCarrierCode: shippingCarrierCode || undefined,
+        shippedDate: new Date().toISOString(),
+      }
+    );
+
+    this.logger.log(`eBay order ${order.ebay_order_id} marked as shipped`);
+  }
+
+  /**
+   * Whether an Amazon-observed status may overwrite the local order status.
+   * Blocks no-op writes, any change out of a terminal state, and — most
+   * importantly — regression of a SHIPPED order to a pre-ship state (the
+   * parser's 'pending' fallback on a layout miss must not rewind the order
+   * and cause a duplicate shipped transition later).
+   */
+  private shouldApplyStatus(prev: OrderStatus, next: OrderStatus): boolean {
+    if (prev === next) {
+      return false;
+    }
+    if (prev === OrderStatus.COMPLETED || prev === OrderStatus.CANCELLED) {
+      return false;
+    }
+    if (
+      prev === OrderStatus.SHIPPED &&
+      next !== OrderStatus.COMPLETED &&
+      next !== OrderStatus.CANCELLED
+    ) {
+      return false;
+    }
+    return true;
   }
 
   private mapAmazonStatus(status: string): OrderStatus {

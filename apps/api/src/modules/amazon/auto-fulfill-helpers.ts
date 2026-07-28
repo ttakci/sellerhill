@@ -7,7 +7,8 @@ import { AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum, AutoFulfillSt
  * FE chip mapping all reference ONE source of truth — a future enum edit can
  * never silently desync the union. String values mirror the enum members
  * (`no_asin` | `captcha` | `otp` | `login` | `out_of_stock` | `address` |
- * `payment` | `cap` | `no_confirmation` | `proxy_required`).
+ * `payment` | `cap` | `no_confirmation` | `proxy_required` |
+ * `quota_exhausted` | `cart`).
  */
 export type AutoFulfillBlockedReason = `${AutoFulfillBlockedReasonEnum}`;
 

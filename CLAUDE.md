@@ -94,7 +94,7 @@ Packages must be built before apps can run (`pnpm dev` handles this automaticall
 - **Listing Setting Group**: Repricing strategy, stock buffer, fees, HTML templates, plus **content policy** (`content` JSONB: strip brand from title, optional AI title/description flags). Multiple listings share one group.
 - **Order**: An eBay sale. Linked to a Listing (`listing_id`) and eBay account (`ebay_account_id`). Product info via listing→product JOIN. Financials on both eBay and Amazon sides.
 - **Amazon Account**: Buyer Amazon account for order scraping. AES-256-GCM credentials. Multiple per user.
-- **eBay Account**: Connected store(s). Multi-store filtering on listings + orders by `ebayAccountId`.
+- **eBay Account**: Connected store(s). Multi-store filtering on listings + orders by `ebayAccountId`. OAuth tokens are **encrypted at rest** (AES-256-GCM via `AMAZON_ENCRYPTION_KEY`, `enc:` prefix in `ebay_accounts.access_token`/`refresh_token`; `EbayService.onModuleInit` lazily re-encrypts legacy plaintext rows). All API callers must obtain tokens via `EbayService.getActiveAccountAccessToken(userId)` / `getAccountAccessToken(accountId)` — never read the raw columns.
 
 ## Product Refresh Pipeline
 
@@ -357,6 +357,8 @@ Automatically links Amazon costs to pending/provisional eBay orders without manu
   - **Fresh tracking on transition**: the freshly scraped tracking number/carrier are mirrored into the in-memory row before the shipped push (the row was read pre-scrape and is empty on the first shipped detection).
   - **Status regression guard** (`shouldApplyStatus`): no-op writes, transitions out of terminal states, and SHIPPED → pre-ship downgrades are blocked (the Amazon parser's `'pending'` fallback on a layout miss must not rewind an order and cause a duplicate eBay fulfillment later).
   - **Interval downshift**: on the shipped transition the per-order scheduler is re-upserted at the 12h interval (previously only a restart's `reconcileSchedulers()` applied it).
+  - **Amazon-cancel ≠ eBay-cancel**: an Amazon-side cancellation (migration `056`) stamps `orders.amazon_cancelled_at` and stops tracking but NEVER overwrites the local eBay order status — the eBay sale is still live and must be fulfilled another way. Such orders surface in the "needs attention" filter (`auto_fulfill_status IN (blocked,failed) OR amazon_cancelled_at IS NOT NULL`) and as an "Amazon cancelled" badge in the orders list.
+  - **Tracking kickoff on auto-link**: `AmazonOrderSyncService` schedules per-order tracking immediately after a confident cost-capture match (previously tracking only started at the next API restart via `reconcileSchedulers`).
 - **On startup**: `reconcileSchedulers()` cleans up orphaned schedulers and creates missing ones for active orders
 
 ### Automated Amazon Fulfillment (A2)
@@ -374,7 +376,9 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
   1. **Idempotency re-check** — re-reads `orders.auto_fulfill_status`; `shouldSkipFulfillStart` (PLACED/BLOCKED/DRY_RUN/SKIPPED) → log + return. Prevents double-order on BullMQ retries.
   2. `loadInputs` (joins amazon_accounts + listings + products) — throws `no_asin` if no row, `cap` on non-finite cap.
   3. `ensureLoggedIn` via `AmazonScrapingService.ensureAuthenticatedPage` → maps captcha/OTP/login signals to `captcha`/`otp`/`login`.
+  3b. **Cart hygiene** — `clearCart` best-effort empties the active cart BEFORE adding our item (a blocked prior attempt or the buyer's personal items would otherwise be co-purchased — Amazon checks out the WHOLE cart).
   4. Add-to-cart with quantity — `out_of_stock` if ASIN unavailable or no visible add-to-cart button.
+  4b. **Cart verification (HARD, fail-closed)** — `verifyCartContents` navigates to the cart page and requires EXACTLY one active line item matching our ASIN (and, when readable, the order quantity) → otherwise throws `cart` + `cart-mismatch` evidence snap. An unreadable row count also blocks; selector drift surfaces during dry-run tuning, before money moves.
   5. `selectShipToAddress` (throws `address`), `selectDefaultPayment` (throws `payment` on decline signals).
   6. **Review-step HARD CAP** — reads grand total on the review page (the last step before "Place Order"); non-finite/≤0 → `cap`; `> capTotal` when `AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false'` (default ON) → `cap`. Aborts BEFORE the click, never over-spends.
   7. **Dry-run** (`amazon_accounts.auto_fulfill_dry_run`) → snap `dry_run_review` + set status `dry_run` + return. NO click.
@@ -384,7 +388,7 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
   - **Layer 2** (fallback if layer 1 throws): minimal UPDATE setting `amazon_order_id` + `placed` only.
   - **Layer 3** (best-effort try/catch): `OrderSyncService.recomputeProfit(ebayOrderId)` → trusted `net_profit` (A1 reuse — single writer invariant preserved).
   - **Layer 4** (best-effort try/catch): `AmazonTrackingQueueService.scheduleOrderTracking(orderId, amazonAccountId)` → existing tracker drives shipped→eBay shipped, delivered→completed.
-- **Fail-closed typed errors**: `AutoFulfillBlockedError` carries one of 9 reasons (`no_asin`, `captcha`, `otp`, `login`, `out_of_stock`, `address`, `payment`, `cap`, `no_confirmation`). `AmazonCheckoutService.runForOrder` catches its OWN blocked errors → sets `auto_fulfill_status='blocked'` + `auto_fulfill_blocked_reason` + returns (NO BullMQ retry — blocked is a permanent data/state condition, not transport). Any error that ESCAPES to `AutoFulfillProcessor.process` is transport/infra: on the final attempt it sets `auto_fulfill_status='failed'` then rethrows so BullMQ applies backoff. The idempotency re-check inside `runForOrder` is what keeps retries safe across the producer→processor boundary.
+- **Fail-closed typed errors**: `AutoFulfillBlockedError` carries one of the shared blocked reasons (`no_asin`, `captcha`, `otp`, `login`, `out_of_stock`, `address`, `payment`, `cap`, `no_confirmation`, `cart`). `AmazonCheckoutService.runForOrder` catches its OWN blocked errors → sets `auto_fulfill_status='blocked'` + `auto_fulfill_blocked_reason` + returns (NO BullMQ retry — blocked is a permanent data/state condition, not transport). Any error that ESCAPES to `AutoFulfillProcessor.process` is transport/infra: on the final attempt it sets `auto_fulfill_status='failed'` then rethrows so BullMQ applies backoff. The idempotency re-check inside `runForOrder` is what keeps retries safe across the producer→processor boundary.
 - **Evidence screenshots**: full-page PNGs at `fulfillment-evidence/{ebayOrderId}/{stage}-{timestamp}.png` via `snap(page, ebayOrderId, stage)` (path overridable via `FULFILLMENT_EVIDENCE_DIR`, default `$CWD/fulfillment-evidence`). Stages include each blocked-reason, `dry_run_review`, and the order confirmation. **No admin-role gating is enforced in code** — the directory is treated as admin-only via filesystem perms on the server.
 - **Guardrails (defense-in-depth)**: master toggle (store settings) + per-account enable/cap/dry-run (amazon_accounts) + **proxy-required-to-enable** (server-side `AmazonAccountsService.assertCanEnable` throws `amazon.errors.autoFulfillProxyRequired` if `!proxyService.isConfigured()` and `amazon.errors.autoFulfillCapRequired` if `capTotal == null` when the flag is on) + review-step hard cap + coarse pre-filter + dry-run + fail-closed typed errors + idempotency re-check.
 - **Config (all optional, defaults shown):**
@@ -396,7 +400,7 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
   - `PROXY_PROVIDER` — **`.env.example` placeholder only; no runtime branch** — the provider format is encoded entirely in `PROXY_USER`/`PROXY_PASS_TEMPLATE`.
   - `PROXY_ENDPOINT`, `PROXY_USER` (supports `{session}` placeholder), `PROXY_PASS_TEMPLATE` (supports `{session}`), `PROXY_STRATEGY` (`perUser` default | `perAccount` reserved) — see "Amazon Scraping — Anti-Ban Strategy" below.
 - **Settings UI**: master toggle + tracking-conversion provider Select in the live `StoreSettingsDrawer` (only `local` visible; `api` labeled "coming soon"). Per-account enable/cap-total/dry-run live **on the `AmazonAccountsPage` form** (NOT in `AmazonAccountDrawer`, which holds credentials only). Orders list surfaces `auto_fulfill_status` as a Badge column + reason tooltip (`autoFulfillStatusToBadgeVariant`) and a "needs attention" filter (blocked/failed → backend filter `o.auto_fulfill_status IN ('blocked','failed')`). Reason/column/filter labels all i18n'd under `orders.autoFulfill.*` and `amazon.autoFulfill.*` (EN + TR).
-- **Shared enums**: `AutoFulfillStatus` (`pending|running|placed|blocked|failed|dry_run|skipped`) + `AutoFulfillBlockedReason` (10 values incl. `proxy_required`) in `packages/shared/src/domain/orders/orders.types.ts`; `TrackingConversionProvider` (`local|api`) in `packages/shared/src/domain/amazon/amazon.types.ts`. The `auto-fulfill-helpers.ts` re-exports a template-literal type derived from the enum (single source of truth).
+- **Shared enums**: `AutoFulfillStatus` (`pending|running|placed|blocked|failed|dry_run|skipped`) + `AutoFulfillBlockedReason` (12 values incl. `proxy_required`, `quota_exhausted`, `cart`) in `packages/shared/src/domain/orders/orders.types.ts`; `TrackingConversionProvider` (`local|api`) in `packages/shared/src/domain/amazon/amazon.types.ts`. The `auto-fulfill-helpers.ts` re-exports a template-literal type derived from the enum (single source of truth).
 
 ### Tracking Converter (real-only, pluggable)
 
@@ -719,6 +723,7 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 | `049` | Admin Observability & FinOps foundation: append-only `usage_events` with nullable micro-USD estimated cost + effective-dated `shared_cost_entries`; user roles remain owned by migration `041`, LLM pricing by `048` |
 | `050` | Idempotent Keepa/LLM usage projections: partial unique indexes for user-attributed and platform-level `usage_events` source references |
 | `051` | Queue observability: append-only, payload-redacted `queue_observations` for idempotent BullMQ completed/failed event capture |
+| `056` | `orders.amazon_cancelled_at TIMESTAMPTZ` + partial index — Amazon-side purchase cancellation flag (local eBay order status is never overwritten; surfaces in the needs-attention filter) |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
