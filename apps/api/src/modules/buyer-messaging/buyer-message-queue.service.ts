@@ -13,7 +13,6 @@ export interface BuyerMessageJobData {
   ebayAccountId: string;
   storeId: string | null;
   event: BuyerMessageEventType;
-  feedbackDelayDays?: number;
 }
 
 @Injectable()

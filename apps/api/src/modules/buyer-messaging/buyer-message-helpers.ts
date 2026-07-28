@@ -50,3 +50,14 @@ export function buyerMessageJobId(ebayOrderId: string, event: BuyerMessageEventT
 export function templateVersionHash(body: string): string {
   return createHash('sha256').update(body).digest('hex').slice(0, 12);
 }
+
+/**
+ * Strip token-like substrings (Bearer tokens, `token=...`, `"token":"..."`)
+ * before persisting an error to logs. Mirrors the regex used by the eBay
+ * provider's internal redactor. Truncates to 400 chars.
+ */
+export function redactForLog(message: unknown): string {
+  return String(message)
+    .replace(/(Bearer\s+[\w.-]+|token["']?\s*[:=]\s*["']?[\w.-]+)/gi, '[redacted]')
+    .slice(0, 400);
+}

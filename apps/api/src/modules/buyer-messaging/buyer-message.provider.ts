@@ -3,6 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { EbayService } from '../ebay/ebay.service';
 
+import { redactForLog } from './buyer-message-helpers';
+
 export interface BuyerMessageSendInput {
   ebayAccountId: string;
   orderId: string;
@@ -78,8 +80,6 @@ export class EbayMessageApiProvider implements BuyerMessagingProvider {
 
   /** Strip anything token-like before logging. */
   private redact(text: string): string {
-    return text
-      .replace(/(Bearer\s+[\w.-]+|token["']?\s*[:=]\s*["']?[\w.-]+)/gi, '[redacted]')
-      .slice(0, 400);
+    return redactForLog(text);
   }
 }

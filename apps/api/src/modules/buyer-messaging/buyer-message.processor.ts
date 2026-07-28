@@ -5,8 +5,8 @@ import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 
-import { renderTemplate } from './buyer-message-helpers';
-import { BuyerMessageQueueService, type BuyerMessageJobData } from './buyer-message-queue.service';
+import { redactForLog, renderTemplate } from './buyer-message-helpers';
+import { type BuyerMessageJobData } from './buyer-message-queue.service';
 import { BuyerMessagingProvider } from './buyer-message.provider';
 import { BuyerMessageService } from './buyer-message.service';
 import { BUYER_MESSAGE_QUEUE, BUYER_MESSAGING_DEFAULTS, BUYER_MESSAGE_TOKEN } from './buyer-messaging.constants';
@@ -36,7 +36,6 @@ export class BuyerMessageProcessor extends WorkerHost {
     private readonly db: DatabaseService,
     private readonly messageService: BuyerMessageService,
     @Inject(BUYER_MESSAGE_TOKEN) private readonly provider: BuyerMessagingProvider,
-    private readonly queue: BuyerMessageQueueService,
   ) {
     super();
   }
@@ -68,9 +67,27 @@ export class BuyerMessageProcessor extends WorkerHost {
       return;
     }
 
-    // 3. feedback_request scheduling: producer-side delay handles when the job fires;
-    //    here we just send once it has fired.
-    const ctx = await this.loadOrderCtx(ebayOrderId, ebayAccountId);
+    // 3. load context + render + send. The entire span is wrapped so a DB error
+    //    from loadOrderCtx or a render bug becomes a redacted 'failed' row and
+    //    rethrows for BullMQ backoff. ctx === null (order row vanished) is a
+    //    legit "can't send", recorded as 'skipped' — not an error.
+    let ctx: OrderCtx | null;
+    try {
+      ctx = await this.loadOrderCtx(ebayOrderId, ebayAccountId);
+    } catch (err) {
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'failed',
+        templateKind: tpl.kind,
+        templateRef: tpl.ref,
+        versionHash: tpl.versionHash,
+        error: redactForLog((err as Error).message),
+      });
+      throw err;
+    }
     if (!ctx) {
       await this.recordLog({
         ebayOrderId,
@@ -83,10 +100,9 @@ export class BuyerMessageProcessor extends WorkerHost {
       });
       return;
     }
-    const body = renderTemplate(tpl.body, ctx);
 
-    // 4. send
     try {
+      const body = renderTemplate(tpl.body, ctx);
       const result = await this.provider.sendMessage({
         ebayAccountId,
         orderId: ctx.orderId,
@@ -106,9 +122,6 @@ export class BuyerMessageProcessor extends WorkerHost {
         providerMessageId: result.providerMessageId,
       });
     } catch (err) {
-      const redacted = String((err as Error).message)
-        .replace(/Bearer\s+[\w.-]+/gi, '[redacted]')
-        .slice(0, 400);
       await this.recordLog({
         ebayOrderId,
         userId,
@@ -118,13 +131,22 @@ export class BuyerMessageProcessor extends WorkerHost {
         templateKind: tpl.kind,
         templateRef: tpl.ref,
         versionHash: tpl.versionHash,
-        error: redacted,
+        error: redactForLog((err as Error).message),
       });
       throw err; // BullMQ backoff retries; final failure leaves 'failed'.
     }
   }
 
-  /** Load buyer/item/tracking context via orders→listings→products join. */
+  /**
+   * Load buyer/item/tracking context via orders -> listings -> products join.
+   * Schema (verified against migrations 012/022/024/010):
+   *   - orders.amazon_tracking_number, orders.amazon_tracking_carrier (migration 024)
+   *   - ebay_accounts.store_name (migration 022, nullable), ebay_accounts.seller_id (migration 002)
+   *   - listings.ebay_item_id (migration 010; nullable for drafts since 032) - the
+   *     persistent legacyItemId pointer; we use it directly instead of digging
+   *     through transient eBay line_items JSON, which is never persisted.
+   *   - orders has NO line_items column.
+   */
   private async loadOrderCtx(ebayOrderId: string, ebayAccountId: string): Promise<OrderCtx | null> {
     const rows = await this.db.query<{
       buyer_username: string;
@@ -132,19 +154,20 @@ export class BuyerMessageProcessor extends WorkerHost {
       order_id: string;
       tracking_number: string | null;
       carrier: string | null;
-      store_name: string;
+      store_name: string | null;
       legacy_item_id: string | null;
     }>(
-      `SELECT o.buyer_username, COALESCE(p.title, o.ebay_order_id) AS item_title,
-              o.ebay_order_id AS order_id, o.tracking_number, o.carrier,
-              ea.seller_id AS store_name, li.legacy_item_id
+      `SELECT o.buyer_username,
+              COALESCE(p.title, o.ebay_order_id) AS item_title,
+              o.ebay_order_id AS order_id,
+              o.amazon_tracking_number AS tracking_number,
+              o.amazon_tracking_carrier  AS carrier,
+              COALESCE(ea.store_name, ea.seller_id) AS store_name,
+              l.ebay_item_id AS legacy_item_id
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
          LEFT JOIN products p ON p.id = l.product_id
          LEFT JOIN ebay_accounts ea ON ea.id = o.ebay_account_id
-         LEFT JOIN LATERAL (
-           SELECT jsonb_array_elements(o.line_items)->>'legacyItemId' AS legacy_item_id LIMIT 1
-         ) li ON true
         WHERE o.ebay_order_id = $1 AND o.ebay_account_id = $2
         LIMIT 1`,
       [ebayOrderId, ebayAccountId],
@@ -153,11 +176,10 @@ export class BuyerMessageProcessor extends WorkerHost {
       return null;
     }
     const r = rows[0];
-    // Note: LocalTrackingConverter only exposes `convert(rawNumber, rawCarrier)`
-    // returning eBay-specific enum codes (e.g. 'Amazon_Logistics', 'UPS') — those
-    // aren't useful for a buyer-facing {{carrier}} placeholder, so we passthrough
-    // the raw carrier string as recorded on the order. {{carrier}} is a nice-to-have,
-    // not load-bearing.
+    // Carrier is passed through raw. LocalTrackingConverter.convert() returns
+    // eBay-specific enum codes ('Amazon_Logistics', 'UPS', ...) which aren't
+    // useful for a buyer-facing {{carrier}} placeholder. {{carrier}} is a
+    // nice-to-have; not load-bearing.
     return {
       buyerUsername: r.buyer_username || 'there',
       itemTitle: r.item_title,
