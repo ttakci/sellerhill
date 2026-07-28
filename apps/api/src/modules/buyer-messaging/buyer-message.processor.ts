@@ -43,6 +43,13 @@ export class BuyerMessageProcessor extends WorkerHost {
   async process(job: Job<BuyerMessageJobData>): Promise<void> {
     const { ebayOrderId, userId, ebayAccountId, storeId, event } = job.data;
 
+    // 0. Silent no-op for users who haven't opted in — avoids skipped-log spam
+    //    (and the idempotency query) for the common case. The per-user/per-event
+    //    store_settings config is the SOLE gate; there is no env master switch.
+    if (!(await this.messageService.isMessagingEnabled(userId, storeId))) {
+      return;
+    }
+
     // 1. idempotency guard — already sent?
     const already = await this.db.query<{ id: string }>(
       `SELECT id FROM buyer_message_log WHERE ebay_order_id=$1 AND event_type=$2 AND status='sent' LIMIT 1`,

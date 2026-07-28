@@ -23,6 +23,12 @@ export class BuyerMessageService {
     private readonly templates: BuyerMessageTemplateRepository,
   ) {}
 
+  /** Whether the user has opted into buyer messaging at all (master toggle). */
+  async isMessagingEnabled(userId: string, storeId: string | null): Promise<boolean> {
+    const settings = await this.settings.getResolvedSettings(userId, storeId);
+    return settings.buyerMessaging?.enabled === true;
+  }
+
   /** Resolve the effective template for an event, or null if disabled/unconfigured. */
   async resolveTemplate(
     userId: string,

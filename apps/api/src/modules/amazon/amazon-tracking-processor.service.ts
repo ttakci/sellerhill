@@ -318,19 +318,17 @@ export class AmazonTrackingProcessorService extends WorkerHost {
   }
 
   /**
-   * Enqueue a buyer auto-message for an order lifecycle event. Gated by the
-   * BUYER_MESSAGING_ENABLED env master switch and fully fail-soft — messaging
-   * can never break the tracking pipeline (enqueue swallows its own errors;
-   * the .catch here is defense-in-depth).
+   * Enqueue a buyer auto-message for an order lifecycle event. Fully fail-soft
+   * — messaging can never break the tracking pipeline (enqueue swallows its own
+   * errors; the .catch here is defense-in-depth). The per-user/per-event
+   * store_settings config is the sole gate (checked by the worker at fire
+   * time), so there is no env master switch to consult here.
    */
   private async enqueueBuyerMessage(
     order: AmazonOrderRow,
     event: BuyerMessageEventType,
     opts?: { delayMs?: number },
   ): Promise<void> {
-    if (process.env.BUYER_MESSAGING_ENABLED !== 'true') {
-      return;
-    }
     await this.buyerMessages
       .enqueue(
         {
