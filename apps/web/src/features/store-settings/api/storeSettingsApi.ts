@@ -1,4 +1,5 @@
 import {
+    BuyerMessagingConfig,
     SaveStoreSettingsRequest,
     StoreSettingsResponse
 } from '@repo/shared';
@@ -34,11 +35,29 @@ export const storeSettingsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['StoreSettings'],
     }),
+    getBuyerMessagingConfig: builder.query<BuyerMessagingConfig | null, { storeId?: string } | void>({
+      query: (args) => ({
+        url: '/store-settings/buyer-messaging',
+        params: args?.storeId ? { storeId: args.storeId } : undefined,
+      }),
+      providesTags: ['BuyerMessagingConfig'],
+    }),
+    updateBuyerMessagingConfig: builder.mutation<BuyerMessagingConfig, { config: BuyerMessagingConfig; storeId?: string }>({
+      query: ({ config, storeId }) => ({
+        url: '/store-settings/buyer-messaging',
+        method: 'PUT',
+        body: config,
+        params: storeId ? { storeId } : undefined,
+      }),
+      invalidatesTags: ['BuyerMessagingConfig'],
+    }),
   }),
 });
 
 export const {
     useGetStoreSettingsQuery,
     useGetAllStoreSettingsQuery,
-    useSaveStoreSettingsMutation
+    useSaveStoreSettingsMutation,
+    useGetBuyerMessagingConfigQuery,
+    useUpdateBuyerMessagingConfigMutation
 } = storeSettingsApi;

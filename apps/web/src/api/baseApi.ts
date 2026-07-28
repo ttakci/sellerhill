@@ -86,6 +86,8 @@ export const baseApi = createApi({
     'Support',
     'Admin',
     'Billing',
+    'BuyerMessagingConfig',
+    'BuyerMessageTemplates',
   ],
   endpoints: () => ({}),
 });
