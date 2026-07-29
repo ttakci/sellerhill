@@ -1,17 +1,30 @@
 # ============================================
-# Zonds - Production Docker Compose (TEST / SANDBOX)
-# For Coolify deployment
+# Zonds — PRODUCTION Docker Compose (Coolify)
+#
+# For the sandbox/test deployment use docker-compose.test.yml instead. The two
+# files build the same images from the same code; only configuration differs.
 #
 # Architecture: SAME-ORIGIN nginx proxy
 #   - web (nginx) serves the React SPA and proxies /api/* → api:3000
 #   - ONE public domain (set in Coolify UI). No CORS, no second domain.
 #
-# Stateful services (PostgreSQL, Redis) are NOT defined here.
-# They are managed by Coolify as separate Database resources, on the same
-# Docker network. Their connection strings are injected via env vars:
-#   DATABASE_URL  → copy internal connection string from the PostgreSQL resource
-#   REDIS_*       → host/port (and optional password) from the Redis resource
-# See docs/deployment-guide.md.
+# Stateful services (PostgreSQL, Redis) are NOT defined here. They are managed
+# by Coolify as separate Database resources on the same Docker network; their
+# connection strings are injected via env vars. See docs/deployment-guide.md.
+#
+# WHAT BELONGS HERE vs THE ADMIN PANEL
+#   This file carries only bootstrap + secrets: connection strings, crypto
+#   keys, provider API credentials and process identity. Operational tuning
+#   (Keepa refresh cadence and kill switch, AI content toggle, quota
+#   enforcement, admin warning thresholds, SMTP host/user/password, matching
+#   tolerances, evidence retention) is stored in the `platform_settings` table
+#   and edited at /admin → Settings, with no redeploy. Any value set here is
+#   still honoured as the fallback when no override row exists, so leaving
+#   these unset is the normal case.
+#
+#   The fixed ISP proxy pool is likewise DB-managed (`proxies` table, migration
+#   057/058) via /admin → Proxies. The legacy PROXY_* env template is only a
+#   fallback for environments with an empty pool.
 # ============================================
 
 services:
@@ -29,7 +42,7 @@ services:
       # Database — Coolify-managed PostgreSQL.
       # Copy the INTERNAL connection string from the PostgreSQL resource panel.
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in Coolify (internal conn string from PostgreSQL resource)}
-      DB_POOL_MAX: 20
+      DB_POOL_MAX: ${DB_POOL_MAX:-20}
 
       # Redis — Coolify-managed Redis (host/port from the Redis resource).
       REDIS_HOST: ${REDIS_HOST:?Set REDIS_HOST in Coolify (from Redis resource)}
@@ -38,66 +51,106 @@ services:
       REDIS_DB: 0
 
       # Frontend URL (OAuth redirects + email links) — same domain as web.
-      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://zonds.takci.cloud)}
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://app.zonds.com)}
 
       # CORS — allowed origins (comma-separated). Same-origin SPA requests carry
       # no Origin header so this rarely matters, but set it for correctness.
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
 
       # JWT
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in Coolify env vars}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in Coolify env vars}
-      JWT_EXPIRES_IN: 15m
-      JWT_REFRESH_EXPIRES_IN: 7d
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
 
       # Logging
-      LOG_LEVEL: info
+      LOG_LEVEL: ${LOG_LEVEL:-info}
 
-      # eBay OAuth (SANDBOX)
+      # eBay OAuth — PRODUCTION endpoints.
       EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:?Set EBAY_CLIENT_ID in Coolify env vars}
       EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:?Set EBAY_CLIENT_SECRET in Coolify env vars}
       EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:?Set EBAY_REDIRECT_URI in Coolify (https://<domain>/api/v1/ebay/callback)}
       EBAY_RUNAME: ${EBAY_RUNAME:?Set EBAY_RUNAME in Coolify env vars}
-      EBAY_ENVIRONMENT: sandbox
-      EBAY_AUTH_URL: https://auth.sandbox.ebay.com/oauth2/authorize
-      EBAY_TOKEN_URL: https://api.sandbox.ebay.com/identity/v1/oauth2/token
-      EBAY_REST_API_URL: https://api.sandbox.ebay.com
-      EBAY_XML_API_URL: https://api.sandbox.ebay.com/ws/api.dll
+      EBAY_ENVIRONMENT: production
+      EBAY_AUTH_URL: https://auth.ebay.com/oauth2/authorize
+      EBAY_TOKEN_URL: https://api.ebay.com/identity/v1/oauth2/token
+      EBAY_REST_API_URL: https://api.ebay.com
+      EBAY_XML_API_URL: https://api.ebay.com/ws/api.dll
 
-      # Keepa — sole product data provider (metadata + price + stock in one token).
+      # Keepa — sole product data provider (metadata + price + stock).
+      # Only the API key lives here. Refresh cadence, batch size, quarantine
+      # policy and the master kill switch are managed at /admin → Settings.
       KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
       KEEPA_API_URL: https://api.keepa.com/product
-      # Stale-driven refresh pipeline (all optional — defaults shown; override in
-      # Coolify to tune cadence/cost on the test env). Changing cadence is env-only.
-      KEEPA_REFRESH_INTERVAL_MINUTES: ${KEEPA_REFRESH_INTERVAL_MINUTES:-720}
-      KEEPA_REFRESH_BATCH_SIZE: ${KEEPA_REFRESH_BATCH_SIZE:-50}
-      KEEPA_REFRESH_SCHEDULER_CRON: "${KEEPA_REFRESH_SCHEDULER_CRON:-* * * * *}"
+      # Worker concurrency is read at worker registration, so it stays here.
       KEEPA_REFRESH_WORKER_CONCURRENCY: ${KEEPA_REFRESH_WORKER_CONCURRENCY:-1}
-      KEEPA_REFRESH_QUARANTINE_MINUTES: ${KEEPA_REFRESH_QUARANTINE_MINUTES:-1440}
-      KEEPA_REFRESH_MAX_FAILURES: ${KEEPA_REFRESH_MAX_FAILURES:-5}
 
-      # Amazon (32-byte hex key for AES-256-GCM credential encryption)
+      # Amazon (32-byte hex key for AES-256-GCM credential encryption).
+      # Also encrypts proxy passwords and secret platform settings — rotating
+      # it invalidates all three, so treat it as a permanent secret.
       AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:?Set AMAZON_ENCRYPTION_KEY in Coolify env vars}
 
-      # ZON internal scraper queue (packages/shared zon-scrapper) — NOT ScraperAPI.
-      ZON_SCRAPPER_CONCURRENCY: 1
-      ZON_SCRAPPER_TIMEOUT_MS: 60000
-      ZON_SCRAPPER_USE_PROXY: 'false'
+      # Worker concurrency — read at worker registration (restart to change).
+      LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-2}
+      AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
+      AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-2}
+
+      # Playwright browser-state + evidence locations (bind to the volumes below).
+      BROWSER_STATE_DIR: /app/.browser-state
+      FULFILLMENT_EVIDENCE_DIR: /app/fulfillment-evidence
+
+      # LLM transport (provider credentials only; the content toggle and model
+      # behavior are managed in the admin panel / listing groups).
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gpt-4o-mini}
+      LLM_ASSISTANT_MODEL: ${LLM_ASSISTANT_MODEL:-gpt-4o-mini}
+
+      # Google OAuth (optional — the API boots without it and the FE hides the button).
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+      # Paddle (Merchant of Record). Without both values billing stays in
+      # local/fail-safe mode; quota enforcement itself is an admin-panel toggle.
+      PADDLE_API_KEY: ${PADDLE_API_KEY:-}
+      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET:-}
+      PADDLE_ENVIRONMENT: ${PADDLE_ENVIRONMENT:-production}
 
       # Rate Limiting
-      RATE_LIMIT_TTL: 60
-      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
 
-      # Email (SMTP)
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 465
-      SMTP_SECURE: 'true'
-      SMTP_USER: ${SMTP_USER:?Set SMTP_USER in Coolify env vars}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:?Set SMTP_PASSWORD in Coolify env vars}
-      SMTP_FROM: ${SMTP_FROM:?Set SMTP_FROM in Coolify env vars}
+      # Email (SMTP) — bootstrap values only. Once an admin edits mail settings
+      # at /admin → Settings the DB override wins, and the password there is
+      # stored encrypted. Leave unset to configure entirely from the panel.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     volumes:
-      # Playwright/Amazon session cookies — persistent, app-specific state.
+      # Per-account Chromium profiles — losing these only forces a re-login.
       - browser_state:/app/.browser-state
+      # Auto-fulfill evidence screenshots. TTL-swept by the app; not backed up.
+      - fulfillment_evidence:/app/fulfillment-evidence
+    healthcheck:
+      # `/api/health/live` is the liveness probe (no DB dependency), so a brief
+      # database outage does not cause a restart loop.
+      test: ['CMD', 'node', '-e', "require('http').get('http://127.0.0.1:3000/api/health/live',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          # Each resident Chromium context costs ~150–300 MB on top of the Node
+          # heap. The idle-eviction sweep bounds how many stay alive; this cap
+          # is the backstop. Raise it with the active-account count.
+          memory: ${API_MEMORY_LIMIT:-6G}
     networks:
       - coolify
     # NOTE: no depends_on for postgres/redis — they live in separate Coolify
@@ -115,7 +168,8 @@ services:
         # so the SPA calls <same-domain>/api/v1/* with no CORS.
         VITE_API_BASE_URL: /api/v1
         VITE_NODE_ENV: production
-        VITE_ENABLE_AUTH: "true"
+        VITE_ENABLE_AUTH: 'true'
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     restart: unless-stopped
     depends_on:
       - api
@@ -124,6 +178,7 @@ services:
 
 volumes:
   browser_state:
+  fulfillment_evidence:
 
 # Attach both services to Coolify's shared network so they reach the managed
 # PostgreSQL and Redis resources (which live on the external `coolify` network)

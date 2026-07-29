@@ -1,0 +1,143 @@
+# ============================================
+# Zonds — TEST / SANDBOX Docker Compose (Coolify)
+#
+# Same images and same code as docker-compose.production.yml; only the
+# configuration differs. Use this for the VPS test deployment:
+#   - eBay SANDBOX endpoints (no real listings, no real money)
+#   - debug logging
+#   - lower worker concurrency (the test VPS shares CPU with Postgres + Redis)
+#
+# Stateful services (PostgreSQL, Redis) are Coolify-managed resources on the
+# same Docker network — not defined here. See docs/deployment-guide.md.
+#
+# Operational tuning is NOT in this file. Keepa refresh cadence and its kill
+# switch, AI content, quota enforcement, SMTP settings, matching tolerances and
+# admin thresholds are edited at /admin → Settings and stored in
+# `platform_settings`. The proxy pool is managed at /admin → Proxies. Env vars
+# here are only the fallback used when no override row exists.
+# ============================================
+
+services:
+  # ---- NestJS API ----
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    environment:
+      # `production` keeps the same runtime code paths as prod — the test env
+      # differs by configuration only, never by a code branch.
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in Coolify (internal conn string from PostgreSQL resource)}
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
+
+      REDIS_HOST: ${REDIS_HOST:?Set REDIS_HOST in Coolify (from Redis resource)}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: 0
+
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://zonds.takci.cloud)}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in Coolify env vars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in Coolify env vars}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+
+      # eBay OAuth — SANDBOX endpoints.
+      EBAY_CLIENT_ID: ${EBAY_CLIENT_ID:?Set EBAY_CLIENT_ID in Coolify env vars}
+      EBAY_CLIENT_SECRET: ${EBAY_CLIENT_SECRET:?Set EBAY_CLIENT_SECRET in Coolify env vars}
+      EBAY_REDIRECT_URI: ${EBAY_REDIRECT_URI:?Set EBAY_REDIRECT_URI in Coolify (https://<domain>/api/v1/ebay/callback)}
+      EBAY_RUNAME: ${EBAY_RUNAME:?Set EBAY_RUNAME in Coolify env vars}
+      EBAY_ENVIRONMENT: sandbox
+      EBAY_AUTH_URL: https://auth.sandbox.ebay.com/oauth2/authorize
+      EBAY_TOKEN_URL: https://api.sandbox.ebay.com/identity/v1/oauth2/token
+      EBAY_REST_API_URL: https://api.sandbox.ebay.com
+      EBAY_XML_API_URL: https://api.sandbox.ebay.com/ws/api.dll
+
+      # Keepa hits the LIVE API even from the test env (there is no sandbox),
+      # so it spends real tokens. Turn "Background refresh enabled" OFF at
+      # /admin → Settings when the test env is idle.
+      KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
+      KEEPA_API_URL: https://api.keepa.com/product
+      KEEPA_REFRESH_WORKER_CONCURRENCY: ${KEEPA_REFRESH_WORKER_CONCURRENCY:-1}
+
+      AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:?Set AMAZON_ENCRYPTION_KEY in Coolify env vars}
+
+      # Kept low: the test VPS runs Postgres, Redis, Playwright, API and web.
+      LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-1}
+      AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
+      AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-1}
+
+      BROWSER_STATE_DIR: /app/.browser-state
+      FULFILLMENT_EVIDENCE_DIR: /app/fulfillment-evidence
+
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gpt-4o-mini}
+      LLM_ASSISTANT_MODEL: ${LLM_ASSISTANT_MODEL:-gpt-4o-mini}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+      PADDLE_API_KEY: ${PADDLE_API_KEY:-}
+      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET:-}
+      PADDLE_ENVIRONMENT: ${PADDLE_ENVIRONMENT:-sandbox}
+
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+
+      # Leave unset and configure mail entirely from /admin → Settings.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    volumes:
+      - browser_state:/app/.browser-state
+      - fulfillment_evidence:/app/fulfillment-evidence
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://127.0.0.1:3000/api/health/live',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          # 16 GB test VPS shared with Postgres/Redis — leave headroom.
+          memory: ${API_MEMORY_LIMIT:-4G}
+    networks:
+      - coolify
+
+  # ---- React Web (nginx) ----
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_NODE_ENV: production
+        VITE_ENABLE_AUTH: 'true'
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - coolify
+
+volumes:
+  browser_state:
+  fulfillment_evidence:
+
+networks:
+  coolify:
+    external: true
