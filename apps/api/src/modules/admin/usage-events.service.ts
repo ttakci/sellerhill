@@ -156,7 +156,7 @@ export class UsageEventsService {
     return `
       INSERT INTO usage_events
         (source, metric, provider_ref_id, user_id, quantity, estimated_cost_micros, currency, recorded_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::timestamptz, NOW()))
     `;
   }
 

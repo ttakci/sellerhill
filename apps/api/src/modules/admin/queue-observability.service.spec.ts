@@ -158,11 +158,12 @@ describe('QueueObservabilityService.record', () => {
     expect(params[9]).toBe(when.toISOString()); // recorded_at is the last param
   });
 
-  it('passes null recordedAt when omitted (DB defaults to NOW())', async () => {
+  it('passes null recordedAt when omitted (SQL COALESCEs to NOW() — an explicit NULL would bypass the column DEFAULT)', async () => {
     const db = makeMockDb();
     const service = new QueueObservabilityService(db as never);
     await service.record(validParams({ recordedAt: undefined }));
-    const params = db.query.mock.calls[0][1];
+    const [sql, params] = db.query.mock.calls[0];
     expect(params[9]).toBeNull();
+    expect(sql).toContain('COALESCE($10::timestamptz, NOW())');
   });
 });

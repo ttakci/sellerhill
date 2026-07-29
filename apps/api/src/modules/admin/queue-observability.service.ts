@@ -110,7 +110,7 @@ export class QueueObservabilityService {
     return `
       INSERT INTO queue_observations
         (queue_name, job_id, event, correlation_id, job_name, attempts, duration_ms, error_message, payload_hash, recorded_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10::timestamptz, NOW()))
     `;
   }
 

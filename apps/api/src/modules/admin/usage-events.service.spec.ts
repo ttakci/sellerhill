@@ -111,6 +111,15 @@ describe('UsageEventsService.append', () => {
     const params = db.query.mock.calls[0][1];
     expect(params[7]).toBe(when.toISOString()); // recorded_at is the last param
   });
+
+  it('passes null recordedAt when omitted (SQL COALESCEs to NOW() — an explicit NULL would bypass the column DEFAULT)', async () => {
+    const db = makeMockDb();
+    const service = new UsageEventsService(db as never);
+    await service.append(validEvent({ recordedAt: undefined }));
+    const [sql, params] = db.query.mock.calls[0];
+    expect(params[7]).toBeNull();
+    expect(sql).toContain('COALESCE($8::timestamptz, NOW())');
+  });
 });
 
 describe('UsageEventsService.appendBatch', () => {
