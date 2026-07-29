@@ -101,6 +101,9 @@ export * from './schemas/listings/index';
 // Orders Schemas
 export * from './schemas/orders/index';
 
+// Admin Schemas
+export * from './schemas/admin/index';
+
 // Amazon Schemas
 export * from './schemas/amazon/index';
 

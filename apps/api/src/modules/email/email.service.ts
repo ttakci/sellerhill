@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PlatformSettingKey } from '@repo/shared';
 import type { Transporter } from 'nodemailer';
 import * as nodemailer from 'nodemailer';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 interface EmailTemplate {
   id: string;
@@ -15,76 +17,101 @@ interface EmailTemplate {
   variables: string[];
 }
 
+/** SMTP connection settings resolved from platform settings (DB -> env -> default). */
+interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  from: string;
+}
+
 /**
  * Email Service
- * Handles all email sending operations using Nodemailer + Gmail SMTP
- * Templates are stored in PostgreSQL database for easy management
+ *
+ * Sends transactional email via Nodemailer; templates live in PostgreSQL.
+ *
+ * SMTP credentials come from platform settings, so an operator can change the
+ * mail host/user/password from the admin panel without a redeploy. The
+ * transporter is rebuilt whenever the resolved config changes (detected via a
+ * fingerprint), which makes a settings edit take effect on the next send
+ * instead of the next restart.
  */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter!: Transporter;
+  private transporter: Transporter | null = null;
+  /** Fingerprint of the config the current transporter was built from. */
+  private transporterKey: string | null = null;
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly databaseService: DatabaseService
-  ) {
-    this.initializeTransporter();
+    private readonly databaseService: DatabaseService,
+    private readonly platformSettings: PlatformSettingsService
+  ) {}
+
+  /** Resolve SMTP settings; null when credentials are incomplete. */
+  private async resolveSmtpConfig(): Promise<SmtpConfig | null> {
+    const [host, port, secure, user, pass, from] = await Promise.all([
+      this.platformSettings.getString(PlatformSettingKey.SMTP_HOST),
+      this.platformSettings.getNumber(PlatformSettingKey.SMTP_PORT),
+      this.platformSettings.getBoolean(PlatformSettingKey.SMTP_SECURE),
+      this.platformSettings.getString(PlatformSettingKey.SMTP_USER),
+      this.platformSettings.getString(PlatformSettingKey.SMTP_PASSWORD),
+      this.platformSettings.getString(PlatformSettingKey.SMTP_FROM),
+    ]);
+    if (!host || !user || !pass) {
+      return null;
+    }
+    return { host, port, secure, user, pass, from: from || user };
   }
 
   /**
-   * Initialize Nodemailer transporter with Gmail SMTP
+   * Return a transporter for the current settings, rebuilding it when the
+   * resolved config differs from the one it was created with. Null means SMTP
+   * is not configured — callers surface that instead of silently dropping mail.
    */
-  private initializeTransporter(): void {
-    const smtpHost = this.configService.get<string>('SMTP_HOST', 'smtp.gmail.com');
-    const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
-    const smtpUser = this.configService.get<string>('SMTP_USER');
-    const smtpPass = this.configService.get<string>('SMTP_PASS');
-    const smtpPassword = this.configService.get<string>('SMTP_PASSWORD');
-    const smtpFrom = this.configService.get<string>('SMTP_FROM');
-    const smtpSecure = this.configService.get<boolean>('SMTP_SECURE');
-
-    this.logger.debug('Email configuration debug:', {
-      SMTP_HOST: smtpHost,
-      SMTP_PORT: smtpPort,
-      SMTP_USER: smtpUser,
-      SMTP_PASS_EXISTS: !!smtpPass,
-      SMTP_PASS_LENGTH: smtpPass?.length,
-      SMTP_PASSWORD_EXISTS: !!smtpPassword,
-      SMTP_PASSWORD_LENGTH: smtpPassword?.length,
-      SMTP_FROM: smtpFrom,
-      SMTP_SECURE: smtpSecure,
-    });
-
-    const finalPass = smtpPass || smtpPassword;
-
-    if (!smtpUser || !finalPass) {
-      this.logger.warn(
-        `SMTP credentials missing. USER: ${smtpUser ? 'OK' : 'MISSING'}, PASS/PASSWORD: ${finalPass ? 'OK' : 'MISSING'}`
-      );
-      return;
+  private async getTransporter(): Promise<{ transporter: Transporter; from: string } | null> {
+    const config = await this.resolveSmtpConfig();
+    if (!config) {
+      this.logger.warn('SMTP is not configured (host/user/password missing) — email not sent.');
+      return null;
     }
+    // The password participates in the fingerprint so a rotation rebuilds the
+    // transporter, but it is never logged.
+    const key = `${config.host}:${config.port}:${config.secure}:${config.user}:${config.pass.length}:${config.from}`;
+    if (!this.transporter || this.transporterKey !== key) {
+      this.transporter = nodemailer.createTransport({
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
+        auth: { user: config.user, pass: config.pass },
+      });
+      this.transporterKey = key;
+      this.logger.log(`Email transporter initialized: ${config.user}@${config.host}:${config.port}`);
+    }
+    return { transporter: this.transporter, from: config.from };
+  }
 
-    this.transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpSecure ?? false,
-      auth: {
-        user: smtpUser,
-        pass: finalPass,
-      },
-    });
-
-    // Verify connection on startup
-    this.transporter.verify((error) => {
-      if (error) {
-        this.logger.error('SMTP Connection Error', error);
-      } else {
-        this.logger.log(`SMTP Connection verified for: ${smtpUser}`);
+  /**
+   * Verify the current SMTP settings by opening a connection. Used by the
+   * admin panel's "test connection" action so an operator can confirm a
+   * credential change before relying on it.
+   */
+  async verifyConnection(): Promise<{ ok: boolean; error: string | null }> {
+    try {
+      const resolved = await this.getTransporter();
+      if (!resolved) {
+        return { ok: false, error: 'admin.errors.smtpNotConfigured' };
       }
-    });
-
-    this.logger.log(`Email transporter initialized: ${smtpUser}@${smtpHost}:${smtpPort}`);
+      await resolved.transporter.verify();
+      return { ok: true, error: null };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`SMTP verification failed: ${message}`);
+      return { ok: false, error: message };
+    }
   }
 
   /**
@@ -139,7 +166,8 @@ export class EmailService {
     variables: Record<string, string>,
     locale: string = 'en'
   ): Promise<void> {
-    if (!this.transporter) {
+    const resolved = await this.getTransporter();
+    if (!resolved) {
       throw new Error('Email transporter not configured');
     }
 
@@ -152,15 +180,9 @@ export class EmailService {
     const html = this.replaceVariables(template.html_content, variables);
     const text = template.text_content ? this.replaceVariables(template.text_content, variables) : undefined;
 
-    const smtpFrom = this.configService.get<string>('SMTP_FROM');
-    const smtpUser = this.configService.get<string>('SMTP_USER');
-    const from = smtpFrom || smtpUser || '';
-
-    this.logger.debug(`Email 'from' configuration - SMTP_FROM: ${smtpFrom}, SMTP_USER: ${smtpUser}, resulting from: ${from}`);
-
     try {
-      await this.transporter.sendMail({
-        from: `"Zonds" <${from}>`,
+      await resolved.transporter.sendMail({
+        from: `"Zonds" <${resolved.from}>`,
         to,
         subject,
         html,

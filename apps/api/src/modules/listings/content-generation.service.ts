@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { LlmUsagePurpose, type LlmMessage, type ProductData } from '@repo/shared';
+import { LlmUsagePurpose, PlatformSettingKey, type LlmMessage, type ProductData } from '@repo/shared';
 
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { LlmService } from '../llm/llm.service';
 
 export interface ContentRewriteInput {
@@ -24,27 +24,31 @@ export interface ContentRewriteInput {
  *
  * Provider: OpenAI-compatible Chat Completions via `LlmService` (Task 4 of the B-spec
  * LLM infra). Provider URL/model/key are env-only on `LlmService` — this service only
- * supplies prompts + cleanup. Master toggle: `LLM_CONTENT_ENABLED`.
+ * supplies prompts + cleanup. Master toggle: the `llm.contentEnabled` platform
+ * setting (admin panel), falling back to the `LLM_CONTENT_ENABLED` env var.
  */
 @Injectable()
 export class ContentGenerationService {
   private readonly logger = new Logger(ContentGenerationService.name);
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly platformSettings: PlatformSettingsService,
     private readonly llm: LlmService
   ) {}
 
-  isEnabled(): boolean {
-    const v = (this.configService.get<string>('LLM_CONTENT_ENABLED') || 'false').toLowerCase();
-    return v === 'true' || v === '1' || v === 'yes';
+  /**
+   * Master toggle, resolved at call time from platform settings so an
+   * operator can stop LLM spend from the admin panel without a restart.
+   */
+  async isEnabled(): Promise<boolean> {
+    return this.platformSettings.getBoolean(PlatformSettingKey.LLM_CONTENT_ENABLED);
   }
 
   /**
    * Rewrite eBay title (≤80 chars). Returns baseTitle on any failure / disabled.
    */
   async rewriteTitle(input: ContentRewriteInput): Promise<string> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return input.baseTitle;
     }
 
@@ -98,7 +102,7 @@ export class ContentGenerationService {
    * Rewrite listing description (plain text → light HTML paragraphs). Falls back to baseDescription.
    */
   async rewriteDescription(input: ContentRewriteInput): Promise<string> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return input.baseDescription;
     }
 

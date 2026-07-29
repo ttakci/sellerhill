@@ -33,6 +33,17 @@ export const formatCompactNumber = (
   }).format(value);
 
 /**
+ * Format a micro-currency amount (1/1,000,000 units — the platform's BIGINT
+ * cost convention) as a readable currency string. Callers must handle null
+ * (unknown cost) themselves — unknown is never rendered as 0.
+ */
+export const formatMicroCurrency = (
+  micros: number,
+  locale: string = 'en-US',
+  currency: string = 'USD',
+): string => formatCurrency(micros / 1_000_000, locale, currency, 2);
+
+/**
  * Format a date string into a localized date(time).
  */
 export const formatDate = (

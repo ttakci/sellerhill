@@ -31,13 +31,22 @@ describe('billing quota enforcement wiring invariants', () => {
       expect(src).toMatch(/enforcementEnabled/);
     });
 
-    it('every gate returns early when !isEnabled() (no-op bypass)', () => {
+    it('the bypass resolves from platform settings so it can be flipped without a restart', () => {
       const src = read('quota-enforcement.service.ts');
-      const gated = src.match(/if \(!this\.isEnabled\(\)\)\s*\{[^}]*return;?\s*\}/g) ?? [];
-      // reserveForBulkCreate / reserveForPublish / consumeForCreate / releaseForCreate
-      // / consumeForPublish / releaseForPublish / consumeAmazonOrder / releaseAmazonOrder.
+      expect(src).toMatch(/async isEnabled\(\): Promise<boolean>/);
+      expect(src).toMatch(/PlatformSettingKey\.BILLING_ENFORCEMENT_ENABLED/);
+    });
+
+    it('every gate returns early when disabled (no-op bypass)', () => {
+      const src = read('quota-enforcement.service.ts');
+      // `isEnabled()` is async (platform-settings backed), so every gate awaits it.
+      const gated = src.match(/if \(!\(await this\.isEnabled\(\)\)[^)]*\)\s*\{[^}]*return;?\s*\}/g) ?? [];
+      // reserveForBulkCreate / reserveForPublish / releaseForCreate /
+      // releaseForPublish / consumeAmazonOrder / releaseAmazonOrder.
+      // consumeForCreate + consumeForPublish are pure no-ops in the ledger model
+      // (the 'reserved' row stays counted either way), so they carry no gate.
       // reserveAmazonOrder returns an object — it has its own gate shape.
-      expect(gated.length).toBeGreaterThanOrEqual(6);
+      expect(gated.length).toBeGreaterThanOrEqual(5);
     });
   });
 

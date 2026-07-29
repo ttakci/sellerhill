@@ -9,6 +9,7 @@ import { DatabaseModule } from './common/database/database.module';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { getBullRedisOptions } from './common/redis/redis.config';
 import { RedisModule } from './common/redis/redis.module';
+import { SettingsModule } from './common/settings/settings.module';
 import { HealthModule } from './health/health.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AmazonModule } from './modules/amazon/amazon.module';
@@ -38,6 +39,8 @@ import { SupportModule } from './modules/support/support.module';
     // Database connection pool (Global)
     DatabaseModule,
     RedisModule,
+    // Runtime platform settings (Global) — DB override -> env -> code default
+    SettingsModule,
     // Queue processing configuration
     BullModule.forRootAsync({
       inject: [ConfigService],

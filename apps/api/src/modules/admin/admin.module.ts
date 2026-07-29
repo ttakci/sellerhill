@@ -4,13 +4,19 @@
 // usage_events, llm_usage_log, keepa_usage_log, shared_cost_entries, and the
 // BullMQ queues. Registers every queue name with BullModule so the controller
 // can @InjectQueue them for getJobCounts(); it never enqueues (read-only).
+// One deliberate write surface: proxy pool management (AdminProxiesService) —
+// the `proxies` table is operator-owned platform infrastructure with no
+// customer module, so registering/disabling proxies lives here.
 
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../common/database/database.module';
 import { AuthModule } from '../auth/auth.module';
+import { EmailModule } from '../email/email.module';
 
+import { AdminProxiesService } from './admin-proxies.service';
+import { AdminUsersService } from './admin-users.service';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { ProviderPricingService } from './provider-pricing.service';
@@ -24,6 +30,8 @@ import { UsageEventsService } from './usage-events.service';
   imports: [
     DatabaseModule,
     AuthModule,
+    // Only for the SMTP "test connection" action on the settings surface.
+    EmailModule,
     BullModule.registerQueue(
       { name: 'order-sync' },
       { name: 'stock-sync' },
@@ -41,6 +49,8 @@ import { UsageEventsService } from './usage-events.service';
   controllers: [AdminController],
   providers: [
     AdminService,
+    AdminProxiesService,
+    AdminUsersService,
     UsageEventsService,
     ProviderPricingService,
     UsageBackfillService,

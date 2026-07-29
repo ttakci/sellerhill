@@ -23,13 +23,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   AutoFulfillBlockedReason,
   BillingLimitKey,
+  PlatformSettingKey,
 } from '@repo/shared';
+
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { BillingRepositoryService } from './billing-repository.service';
 import {
   buildSourceKey,
   decideQuota,
-  isEnforcementEnabled,
   quotaExhaustedBlockedReason,
 } from './quota-helpers';
 
@@ -37,11 +39,18 @@ import {
 export class QuotaEnforcementService {
   private readonly logger = new Logger(QuotaEnforcementService.name);
 
-  constructor(private readonly repository: BillingRepositoryService) {}
+  constructor(
+    private readonly repository: BillingRepositoryService,
+    private readonly platformSettings: PlatformSettingsService,
+  ) {}
 
-  /** Whether gates are active (master bypass). Exposed for callers/tests. */
-  isEnabled(): boolean {
-    return isEnforcementEnabled();
+  /**
+   * Whether gates are active (master bypass). Resolved from platform settings
+   * so an operator can turn enforcement on/off from the admin panel without a
+   * restart; falls back to the BILLING_ENFORCEMENT_ENABLED env var.
+   */
+  async isEnabled(): Promise<boolean> {
+    return this.platformSettings.getBoolean(PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED);
   }
 
   /**
@@ -86,7 +95,7 @@ export class QuotaEnforcementService {
     userId: string,
     listingJobItemIds: string[],
   ): Promise<void> {
-    if (!this.isEnabled() || listingJobItemIds.length === 0) {
+    if (!(await this.isEnabled()) || listingJobItemIds.length === 0) {
       return;
     }
     const ctx = await this.resolveSubscriptionContext(
@@ -129,7 +138,7 @@ export class QuotaEnforcementService {
    * Throws QuotaExhaustedError on exhaustion.
    */
   async reserveForPublish(userId: string, listingId: string): Promise<void> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return;
     }
     const ctx = await this.resolveSubscriptionContext(
@@ -176,17 +185,11 @@ export class QuotaEnforcementService {
     // counts, and stays counted for the billing period. The listing row
     // itself is the entitlement. Kept as a seam for future per-event metering.
     // (Synchronous no-op — callers `await` it, which is harmless on void.)
-    if (!this.isEnabled()) {
-      return;
-    }
   }
 
   /** Consume the publish reservation on successful publish. Idempotent. */
   consumeForPublish(_userId: string, _listingId: string): void {
     // Same as consumeForCreate — the 'reserved' row stays counted.
-    if (!this.isEnabled()) {
-      return;
-    }
   }
 
   /**
@@ -195,7 +198,7 @@ export class QuotaEnforcementService {
    * retry doesn't oversell. Fail-soft + idempotent.
    */
   async releaseForCreate(userId: string, listingJobItemId: string): Promise<void> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return;
     }
     const ctx = await this.resolveSubscriptionContext(
@@ -217,7 +220,7 @@ export class QuotaEnforcementService {
 
   /** Release the publish reservation on permanent publish failure. Idempotent. */
   async releaseForPublish(userId: string, listingId: string): Promise<void> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return;
     }
     const ctx = await this.resolveSubscriptionContext(
@@ -256,7 +259,7 @@ export class QuotaEnforcementService {
     allowed: boolean;
     blockedReason?: AutoFulfillBlockedReason;
   }> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return { allowed: true };
     }
     const ctx = await this.resolveSubscriptionContext(
@@ -318,9 +321,6 @@ export class QuotaEnforcementService {
   consumeAmazonOrder(_userId: string, _ebayOrderId: string): void {
     // No DB write: the 'reserved' row stays counted. Kept as a seam.
     // (Synchronous no-op — callers `await` it, which is harmless on void.)
-    if (!this.isEnabled()) {
-      return;
-    }
   }
 
   /**
@@ -329,7 +329,7 @@ export class QuotaEnforcementService {
    * attempt.
    */
   async releaseAmazonOrder(userId: string, ebayOrderId: string): Promise<void> {
-    if (!this.isEnabled()) {
+    if (!(await this.isEnabled())) {
       return;
     }
     const ctx = await this.resolveSubscriptionContext(

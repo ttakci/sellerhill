@@ -46,7 +46,7 @@ export class ListingStrategyService {
     const applyAi = Boolean(options?.applyContentAi);
     const wantAiTitle = applyAi && Boolean(group.content?.aiTitleEnabled);
     const wantAiDescription = applyAi && Boolean(group.content?.aiDescriptionEnabled);
-    if ((wantAiTitle || wantAiDescription) && this.contentGeneration.isEnabled()) {
+    if ((wantAiTitle || wantAiDescription) && (await this.contentGeneration.isEnabled())) {
       const base = { product, baseTitle: title, baseDescription: description };
       if (wantAiTitle) {
         title = await this.contentGeneration.rewriteTitle(base);

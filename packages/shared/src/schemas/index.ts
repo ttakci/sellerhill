@@ -12,6 +12,7 @@
  * - schemas/store-settings/ - Store settings forms
  */
 
+export * from './admin';
 export * from './amazon';
 export * from './auth';
 export * from './buyer-messaging/buyer-messaging.schema';

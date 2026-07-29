@@ -2,10 +2,11 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { AutoFulfillStatus } from '@repo/shared';
+import { AutoFulfillStatus, PlatformSettingKey } from '@repo/shared';
 import type { Page } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
@@ -213,17 +214,8 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     1000,
     60_000,
   );
-  /** Hard cap can be disabled per-env (emergencies). Defaults ON. */
-  private readonly hardStop = process.env.AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false';
   private readonly evidenceDir =
     process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
-  /** Evidence PNG retention; per-order dirs older than this are swept. */
-  private readonly evidenceTtlDays = clampInt(
-    process.env.FULFILLMENT_EVIDENCE_TTL_DAYS,
-    7,
-    1,
-    365,
-  );
   /** How often the evidence-TTL sweep runs (ms). Default: hourly. */
   private readonly evidenceSweepIntervalMs = 60 * 60 * 1000;
   private evidenceSweepTimer: NodeJS.Timeout | null = null;
@@ -237,6 +229,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     private readonly trackingQueue: AmazonTrackingQueueService,
     private readonly proxyService: ProxyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly platformSettings: PlatformSettingsService,
   ) {}
 
   onModuleInit(): void {
@@ -386,7 +379,12 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
           `unparseable review grandTotal (${grandTotal}); refusing to proceed without cap check`,
         );
       }
-      if (this.hardStop && capTotal !== Number.POSITIVE_INFINITY && grandTotal > capTotal) {
+      // Read at checkout time so an operator can flip the hard cap off (or
+      // back on) from the admin panel without restarting the API mid-incident.
+      const hardStop = await this.platformSettings.getBoolean(
+        PlatformSettingKey.AUTO_FULFILL_REVIEW_CAP_HARD_STOP,
+      );
+      if (hardStop && capTotal !== Number.POSITIVE_INFINITY && grandTotal > capTotal) {
         await this.snap(page, ebayOrderId, 'cap');
         throw new AutoFulfillBlockedError(
           'cap',
@@ -956,7 +954,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // Dir doesn't exist yet (no blocked/dry-run orders) — nothing to sweep.
       return;
     }
-    const ttlMs = this.evidenceTtlDays * 24 * 60 * 60 * 1000;
+    const evidenceTtlDays = await this.platformSettings.getNumber(
+      PlatformSettingKey.FULFILLMENT_EVIDENCE_TTL_DAYS,
+    );
+    const ttlMs = evidenceTtlDays * 24 * 60 * 60 * 1000;
     const now = Date.now();
     for (const entry of root) {
       const dir = path.join(this.evidenceDir, entry);
@@ -969,7 +970,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         // are written into the dir, which updates mtime on most filesystems.
         if (now - stat.mtimeMs > ttlMs) {
           await fs.rm(dir, { recursive: true, force: true });
-          this.logger.log(`swept evidence dir ${entry} (older than ${this.evidenceTtlDays}d)`);
+          this.logger.log(`swept evidence dir ${entry} (older than ${evidenceTtlDays}d)`);
         }
       } catch (err) {
         this.logger.warn(

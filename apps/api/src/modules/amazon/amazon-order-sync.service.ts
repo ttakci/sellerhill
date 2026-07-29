@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OrderCostCaptureStatus } from '@repo/shared';
+import { OrderCostCaptureStatus, PlatformSettingKey } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -40,14 +41,13 @@ interface AmazonAccountSyncRow {
 @Injectable()
 export class AmazonOrderSyncService {
   private readonly logger = new Logger(AmazonOrderSyncService.name);
-  private readonly tolerancePct = Number(process.env.AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT) || 5;
-  private readonly windowDays = Number(process.env.AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS) || 7;
 
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly scraping: AmazonScrapingService,
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
+    private readonly platformSettings: PlatformSettingsService,
   ) {}
 
   /**
@@ -136,6 +136,12 @@ export class AmazonOrderSyncService {
     // in this run, so two Amazon rows can't both write to the same eBay order.
     // (The strict matcher could otherwise pick the same eBay row twice when
     // two Amazon orders have identical ASIN/qty/amount/date signatures.)
+    // Matcher strictness is operator-tunable at runtime (admin panel), so read
+    // it once per run rather than freezing it at construction.
+    const [tolerancePct, windowDays] = await Promise.all([
+      this.platformSettings.getNumber(PlatformSettingKey.AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT),
+      this.platformSettings.getNumber(PlatformSettingKey.AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS),
+    ]);
     const consumedEbayOrderIds = new Set<string>();
     let linked = 0;
     for (const ao of amazonOrders.rows) {
@@ -143,8 +149,8 @@ export class AmazonOrderSyncService {
         const best = pickBestMatch({
           amazon: ao,
           candidates,
-          tolerancePct: this.tolerancePct,
-          windowDays: this.windowDays,
+          tolerancePct,
+          windowDays,
         });
         if (!best) {continue;} // strict matcher — never force-link
         if (consumedEbayOrderIds.has(best.ebayOrderId)) {

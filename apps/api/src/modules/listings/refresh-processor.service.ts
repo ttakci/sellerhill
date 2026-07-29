@@ -1,12 +1,12 @@
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   extractCorrelationId,
   generateCorrelationId,
   KeepaStockStatus,
   KeepaUsageSource,
   ListingStatus,
+  PlatformSettingKey,
   type KeepaProduct,
 } from '@repo/shared';
 import { Job, Queue } from 'bullmq';
@@ -14,6 +14,7 @@ import { Job, Queue } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
@@ -51,7 +52,7 @@ export class RefreshProcessorService extends WorkerHost {
 
   constructor(
     @InjectQueue('keepa-refresh') private readonly refreshQueue: Queue,
-    private readonly configService: ConfigService,
+    private readonly platformSettings: PlatformSettingsService,
     private readonly databaseService: DatabaseService,
     private readonly keepaService: KeepaService,
     private readonly keepaUsageService: KeepaUsageService,
@@ -94,8 +95,17 @@ export class RefreshProcessorService extends WorkerHost {
    * equally — there is no per-product sales-velocity tiering.
    */
   private async selectRefreshBatch(): Promise<void> {
-    const batchSize = this.configService.get<number>('KEEPA_REFRESH_BATCH_SIZE') ?? 50;
-    const leaseMinutes = this.configService.get<number>('KEEPA_REFRESH_CLAIM_LEASE_MINUTES') ?? 15;
+    // Runtime kill switch. The repeatable tick is registered at boot, so the
+    // admin panel's "Keepa refresh enabled" toggle is enforced HERE — turning
+    // it off stops all background token spend immediately, without a restart.
+    if (!(await this.platformSettings.getBoolean(PlatformSettingKey.KEEPA_REFRESH_ENABLED))) {
+      this.logger.debug('Keepa refresh disabled by platform settings — skipping tick.');
+      return;
+    }
+    const batchSize = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_BATCH_SIZE);
+    const leaseMinutes = await this.platformSettings.getNumber(
+      PlatformSettingKey.KEEPA_REFRESH_CLAIM_LEASE_MINUTES,
+    );
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (
@@ -215,7 +225,9 @@ export class RefreshProcessorService extends WorkerHost {
    * the product is free or out of stock.
    */
   private async applyKeepaProduct(row: ProductRow, kp: KeepaProduct): Promise<void> {
-    const intervalMinutes = this.configService.get<number>('KEEPA_REFRESH_INTERVAL_MINUTES') ?? 720;
+    const intervalMinutes = await this.platformSettings.getNumber(
+      PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES,
+    );
 
     // Resolve effective values: fall back to the previous row value when the
     // new observation is missing.
@@ -293,8 +305,10 @@ export class RefreshProcessorService extends WorkerHost {
    * then quarantine at the failure threshold.
    */
   private async handleDataFailure(row: ProductRow): Promise<void> {
-    const maxFailures = this.configService.get<number>('KEEPA_REFRESH_MAX_FAILURES') ?? 5;
-    const quarantineMinutes = this.configService.get<number>('KEEPA_REFRESH_QUARANTINE_MINUTES') ?? 1440;
+    const maxFailures = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_MAX_FAILURES);
+    const quarantineMinutes = await this.platformSettings.getNumber(
+      PlatformSettingKey.KEEPA_REFRESH_QUARANTINE_MINUTES,
+    );
     const newCount = row.consecutive_failures + 1;
 
     const delayMinutes = dataFailureDelayMinutes(newCount, maxFailures, quarantineMinutes);

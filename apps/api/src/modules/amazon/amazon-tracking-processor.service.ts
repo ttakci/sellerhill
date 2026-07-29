@@ -6,12 +6,14 @@ import {
   extractCorrelationId,
   generateCorrelationId,
   OrderStatus,
+  PlatformSettingKey,
   TrackingConversionProvider,
 } from '@repo/shared';
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
@@ -56,7 +58,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     private readonly ebayService: EbayService,
     private readonly ebayFulfillmentService: EbayFulfillmentService,
     private readonly trackingQueueService: AmazonTrackingQueueService,
-    private readonly buyerMessages: BuyerMessageQueueService
+    private readonly buyerMessages: BuyerMessageQueueService,
+    private readonly platformSettings: PlatformSettingsService
   ) {
     super();
   }
@@ -185,7 +188,9 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         this.logger.log(`Order ${order.id} delivered on Amazon, marking completed`);
         // Buyer auto-messaging "delivered" event + delayed "feedback_request".
         await this.enqueueBuyerMessage(order, BuyerMessageEventType.DELIVERED);
-        const delayDays = Number(process.env.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS ?? 3);
+        const delayDays = await this.platformSettings.getNumber(
+          PlatformSettingKey.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS,
+        );
         await this.enqueueBuyerMessage(order, BuyerMessageEventType.FEEDBACK_REQUEST, {
           delayMs: delayDays * 86_400_000,
         });

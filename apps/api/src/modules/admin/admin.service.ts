@@ -11,10 +11,12 @@
 // aggregate — well below Number.MAX_SAFE_INTEGER).
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   AdminWarningKind,
   AdminWarningLevel,
+  PlatformSettingKey,
+  ProxyExpiryState,
+  ProxyStatus,
   UsageEventSource,
   UsageMetric,
   type AdminBillingMetricsDto,
@@ -33,7 +35,9 @@ import {
 import type { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
+import { AdminProxiesService } from './admin-proxies.service';
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
 import {
   buildAccessTierDistribution,
@@ -88,7 +92,8 @@ export class AdminService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly adminProxiesService: AdminProxiesService
   ) {}
 
   /**
@@ -306,10 +311,12 @@ export class AdminService {
     toIso: string | null,
   ): Promise<AdminBillingMetricsDto> {
     const period = this.resolvePeriod(fromIso, toIso);
-    const listingWarn = this.configService.get<number>('ADMIN_LISTING_QUOTA_WARN_THRESHOLD') ?? 25;
-    const listingCritical = this.configService.get<number>('ADMIN_LISTING_QUOTA_CRITICAL_THRESHOLD') ?? 100;
-    const accountWarn = this.configService.get<number>('ADMIN_AMAZON_ACCOUNT_QUOTA_WARN_THRESHOLD') ?? 3;
-    const accountCritical = this.configService.get<number>('ADMIN_AMAZON_ACCOUNT_QUOTA_CRITICAL_THRESHOLD') ?? 10;
+    const [listingWarn, listingCritical, accountWarn, accountCritical] = await Promise.all([
+      this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LISTING_QUOTA_WARN_THRESHOLD),
+      this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LISTING_QUOTA_CRITICAL_THRESHOLD),
+      this.platformSettings.getNumber(PlatformSettingKey.ADMIN_AMAZON_ACCOUNT_QUOTA_WARN_THRESHOLD),
+      this.platformSettings.getNumber(PlatformSettingKey.ADMIN_AMAZON_ACCOUNT_QUOTA_CRITICAL_THRESHOLD),
+    ]);
 
     const [statusRows, tierRows, listingUsages, accountUsages, costRow] = await Promise.allSettled([
       this.getAccountStatusDistribution(),
@@ -398,21 +405,68 @@ export class AdminService {
     const keepaTokensLeft = balanceRows[0]?.tokens_left ?? null;
     const llmFailureRatePct = calculateFailureRate(Number(llmRows[0]?.failed ?? 0), Number(llmRows[0]?.total ?? 0));
     const warnings: AdminWarningDto[] = [];
-    const queueThreshold = this.configService.get<number>('ADMIN_QUEUE_WAITING_THRESHOLD') ?? 100;
+    const queueThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_QUEUE_WAITING_THRESHOLD);
     for (const queue of queueSummaries) {
       const warning = thresholdWarning(AdminWarningKind.QUEUE_WAITING, queue.waiting, queueThreshold);
       if (warning) {warnings.push({ ...warning, subject: queue.name });}
     }
     if (keepaTokensLeft !== null) {
-      const threshold = this.configService.get<number>('ADMIN_KEEPA_LOW_TOKENS_THRESHOLD') ?? 100;
+      const threshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_KEEPA_LOW_TOKENS_THRESHOLD);
       if (keepaTokensLeft <= threshold) {
         warnings.push({ kind: AdminWarningKind.KEEPA_LOW_TOKENS, level: keepaTokensLeft <= threshold / 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: keepaTokensLeft, threshold });
       }
     }
-    const llmThreshold = this.configService.get<number>('ADMIN_LLM_FAILURE_RATE_THRESHOLD') ?? 10;
+    const llmThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LLM_FAILURE_RATE_THRESHOLD);
     const llmWarning = thresholdWarning(AdminWarningKind.LLM_FAILURE_RATE, llmFailureRatePct, llmThreshold);
     if (llmWarning) {warnings.push(llmWarning);}
+    warnings.push(...(await this.buildProxyPoolWarnings()));
     return { generatedAt: new Date().toISOString(), queues: queueSummaries, keepaTokensLeft, llmFailureRatePct, warnings };
+  }
+
+  /**
+   * Proxy pool warnings: per-proxy expiry (a lapsed fixed ISP proxy releases
+   * its static IP and breaks the assigned user's IP continuity) plus pool
+   * exhaustion (no free ACTIVE proxy left — the next new user's auto-fulfill
+   * fails closed with proxy_required). Fail-soft: a proxies-table error never
+   * breaks the operations summary.
+   */
+  private async buildProxyPoolWarnings(): Promise<AdminWarningDto[]> {
+    const warnings: AdminWarningDto[] = [];
+    try {
+      const pool = await this.adminProxiesService.list();
+      for (const proxy of pool.proxies) {
+        if (proxy.status !== ProxyStatus.ACTIVE) {continue;}
+        const subject = `${proxy.host}:${proxy.port}`;
+        if (proxy.expiryState === ProxyExpiryState.EXPIRED) {
+          warnings.push({
+            kind: AdminWarningKind.PROXY_EXPIRED,
+            level: AdminWarningLevel.CRITICAL,
+            value: Math.abs(proxy.daysUntilExpiry ?? 0),
+            threshold: 0,
+            subject,
+          });
+        } else if (proxy.expiryState === ProxyExpiryState.EXPIRING_SOON) {
+          warnings.push({
+            kind: AdminWarningKind.PROXY_EXPIRING,
+            level: AdminWarningLevel.WARNING,
+            value: proxy.daysUntilExpiry ?? 0,
+            threshold: pool.summary.expiryWarnDays,
+            subject,
+          });
+        }
+      }
+      if (pool.summary.activeProxies > 0 && pool.summary.freeActiveProxies === 0) {
+        warnings.push({
+          kind: AdminWarningKind.PROXY_POOL_EXHAUSTED,
+          level: AdminWarningLevel.WARNING,
+          value: 0,
+          threshold: 1,
+        });
+      }
+    } catch (error: unknown) {
+      this.logger.warn(`buildProxyPoolWarnings failed: ${this.errMsg(error)}`);
+    }
+    return warnings;
   }
 
   // --- internals -------------------------------------------------------------
