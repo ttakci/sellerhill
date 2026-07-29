@@ -8,3 +8,10 @@ export const BodyStack = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
 `;
+
+export const ToggleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+`;
