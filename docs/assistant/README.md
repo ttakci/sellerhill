@@ -34,7 +34,7 @@ Redis/BullMQ: limiter state, queues, replay fan-out, background processing
 | Shared schemas | `packages/shared/src/schemas/{assistant,support,knowledge}/` |
 | Customer widget | `apps/web/src/features/assistant/` |
 | Support console | `apps/web/src/features/support/` |
-| Admin operations | `apps/web/src/features/admin-assistant/` and `features/admin/` |
+| Admin operations | `apps/web/src/features/admin/` (single panel at `/admin`; the former `admin-assistant` page was folded in) |
 | Generic composer/Markdown | `packages/ui/src/molecules/{MessageComposer,SafeMarkdown}/` |
 | Help/RAG corpus | `docs/help/{en,tr}/` and `docs/help/manifest.json` |
 

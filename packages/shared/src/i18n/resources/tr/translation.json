@@ -169,17 +169,6 @@
       "all": "Tümü"
     }
   },
-  "adminAssistant": {
-    "title": "Asistan operasyonları",
-    "subtitle": "Görüşme içeriğini açığa çıkarmadan platform sağlığını, kuyrukları, kullanımı ve bilgi işlemlerini izleyin.",
-    "loading": "Asistan operasyonları yükleniyor…",
-    "users": "Kullanıcılar",
-    "activeListings": "Aktif ilanlar",
-    "orders": "Son 30 gündeki siparişler",
-    "queues": "Kuyruk sağlığı",
-    "usage": "Kullanım",
-    "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI aracıyla değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."
-  },
   "header": {
     "selectLanguage": "Dil Seçimi",
     "toggleTheme": "Temayı Değiştir",

@@ -59,7 +59,6 @@ const SettingsHubPage = lazy(() =>
   import('./features/settings/SettingsPage').then((m) => ({ default: m.SettingsHubPage }))
 );
 const SupportPage = lazy(() => import('./features/support/SupportPage'));
-const AdminAssistantPage = lazy(() => import('./features/admin-assistant/AdminAssistantPage'));
 
 export function App() {
   return (
@@ -233,7 +232,8 @@ export function App() {
               }
             />
             <Route path="support" element={<Lazy><SupportPage /></Lazy>} />
-            <Route path="admin/assistant" element={<Lazy><AdminAssistantPage /></Lazy>} />
+            {/* Folded into the /admin panel (Overview tab) — kept as a redirect for old links. */}
+            <Route path="admin/assistant" element={<Navigate to="../admin" replace />} />
             <Route path="profile" element={<Navigate to="../settings" replace />} />
             <Route index element={<Navigate to="register" replace />} />
           </Route>

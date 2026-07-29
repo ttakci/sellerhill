@@ -2,14 +2,80 @@
   "admin": {
     "title": "Admin operations",
     "subtitle": "Monitor platform costs, queues, provider usage and customer attribution.",
-    "tabs": { "queues": "Queues", "costs": "Costs", "billing": "Billing", "users": "Users" },
-    "queue": { "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}" },
-    "cost": { "keepaBalance": "Keepa token balance", "users": "Total users" },
-    "users": { "unattributed": "Unattributed platform usage" },
+    "tabs": {
+      "overview": "Overview",
+      "queues": "Queues",
+      "costs": "Costs",
+      "proxies": "Proxies",
+      "settings": "Settings",
+      "billing": "Billing",
+      "users": "Users"
+    },
+    "queue": {
+      "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}"
+    },
+    "cost": {
+      "keepaBalance": "Keepa token balance",
+      "users": "Total users",
+      "proxyPool": "Proxy pool / month",
+      "proxyPoolHint": "Sum of known monthly costs for active proxies",
+      "quantity": "Quantity: {{quantity}}"
+    },
+    "users": {
+      "unattributed": "Unattributed platform usage",
+      "total": "{{value}} users · costs are for the current month",
+      "stats": "Listings: {{listings}} · Orders 30d: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
+      "proxy": "Proxy: {{proxy}}",
+      "noProxy": "No proxy assigned"
+    },
     "warnings": {
       "queue_waiting": "{{subject}} queue waiting threshold exceeded",
       "keepa_low_tokens": "Keepa token balance is low",
-      "llm_failure_rate": "LLM failure rate is elevated"
+      "llm_failure_rate": "LLM failure rate is elevated",
+      "proxy_expiring": "Proxy {{subject}} expires soon (days left)",
+      "proxy_expired": "Proxy {{subject}} has expired (days overdue)",
+      "proxy_pool_exhausted": "Proxy pool exhausted — no free proxy for new users"
+    },
+    "proxies": {
+      "activePool": "Active proxies",
+      "freeCount": "{{value}} free to claim",
+      "assigned": "Assigned to users",
+      "monthlyCost": "Monthly cost",
+      "expiringSoon": "Expiring soon",
+      "expiredCount": "{{value}} expired",
+      "addTitle": "Add a purchased proxy",
+      "addSubtitle": "The password is encrypted at rest immediately and never shown again. Users claim proxies automatically — assignment is not manual.",
+      "host": "Host",
+      "port": "Port",
+      "username": "Username",
+      "password": "Password",
+      "labelField": "Label (provider / order ref)",
+      "expiresAt": "Expires at",
+      "monthlyCostUsd": "Monthly cost (USD)",
+      "addButton": "Add proxy",
+      "formInvalid": "Please fill host, port, username and password with valid values.",
+      "createSuccess": "Proxy added to the pool.",
+      "listTitle": "Pool",
+      "empty": "No proxies in the pool yet. Add your purchased fixed ISP proxies above — each user is automatically assigned one.",
+      "unassigned": "Unassigned",
+      "expiresOn": "Expires {{date}}",
+      "noExpiry": "No expiry date set",
+      "disable": "Disable",
+      "enable": "Enable",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "expiry": {
+        "ok": "{{value}}d left",
+        "expiring_soon": "{{value}}d left",
+        "expired": "Expired",
+        "no_expiry": "No expiry"
+      }
+    },
+    "errors": {
+      "proxyNotFound": "Proxy not found.",
+      "currencyRequiresCost": "A currency can only be set together with a cost."
     },
     "metrics": {
       "keepa_tokens": "Keepa tokens",
@@ -23,7 +89,7 @@
       "tracking_conversions": "Tracking conversions"
     },
     "billing": {
-      "costTotal": "Estimated cost (micro-USD)",
+      "costTotal": "Estimated cost",
       "accountStatus": {
         "title": "Account status distribution",
         "pending": "Pending",
@@ -49,6 +115,77 @@
         "near_limit": "Near limit",
         "at_limit": "At limit",
         "over_limit": "Over limit"
+      }
+    },
+    "overview": {
+      "users": "Total users",
+      "activeListings": "Active listings",
+      "orders": "Orders (30 days)",
+      "ebayStores": "Active eBay stores",
+      "amazonAccounts": "Amazon buyer accounts",
+      "keepaBalance": "Keepa tokens left",
+      "warningsTitle": "Warnings",
+      "noWarnings": "No active warnings.",
+      "roleCliNotice": "User roles are changed only through the operator CLI. HTTP role escalation is disabled."
+    },
+    "settings": {
+      "intro": "Runtime configuration. Each setting resolves as database override, then environment variable, then code default — reset a setting to fall back to the environment. Secrets and connection credentials stay in the environment and are not editable here.",
+      "valueLabel": "Value",
+      "reset": "Reset",
+      "requiresRestart": "Restart required",
+      "secretSet": "Configured",
+      "secretUnset": "Not configured",
+      "envHint": "Env: {{envVar}}",
+      "defaultHint": "Default: {{value}}",
+      "emailTest": "Test connection",
+      "emailTestOk": "SMTP connection succeeded",
+      "emailTestFailed": "SMTP connection failed",
+      "source": {
+        "database": "Overridden",
+        "env": "From environment",
+        "default": "Default"
+      },
+      "category": {
+        "keepa": "Keepa product refresh",
+        "amazon": "Amazon order sync & tracking",
+        "auto_fulfill": "Auto-fulfillment",
+        "email": "Email (SMTP)",
+        "admin": "Admin warning thresholds",
+        "billing": "Billing",
+        "llm": "AI content",
+        "buyer_messaging": "Buyer messaging"
+      },
+      "keys": {
+        "keepa.refresh.enabled": "Background refresh enabled",
+        "keepa.refresh.intervalMinutes": "Refresh interval (minutes)",
+        "keepa.refresh.batchSize": "Products per batch",
+        "keepa.refresh.claimLeaseMinutes": "Claim lease (minutes)",
+        "keepa.refresh.maxFailures": "Failures before quarantine",
+        "keepa.refresh.quarantineMinutes": "Quarantine duration (minutes)",
+        "keepa.refresh.schedulerCron": "Scheduler cron pattern",
+        "amazon.orderSync.matchTolerancePct": "Cost match amount tolerance (%)",
+        "amazon.orderSync.matchWindowDays": "Cost match date window (days)",
+        "amazon.tracking.preshipIntervalHours": "Pre-ship poll interval (hours)",
+        "amazon.tracking.shippedIntervalHours": "Shipped poll interval (hours)",
+        "autoFulfill.reviewCapHardStop": "Enforce review-step spend cap",
+        "autoFulfill.evidenceTtlDays": "Evidence screenshot retention (days)",
+        "email.smtpHost": "SMTP host",
+        "email.smtpPort": "SMTP port",
+        "email.smtpSecure": "Use TLS",
+        "email.smtpUser": "SMTP username",
+        "email.smtpPassword": "SMTP password",
+        "email.smtpFrom": "From address",
+        "admin.queueWaitingThreshold": "Queue waiting warning threshold",
+        "admin.keepaLowTokensThreshold": "Keepa low-balance threshold",
+        "admin.llmFailureRateThreshold": "AI failure rate threshold (%)",
+        "admin.listingQuotaWarnThreshold": "Listing quota warn threshold",
+        "admin.listingQuotaCriticalThreshold": "Listing quota critical threshold",
+        "admin.amazonAccountQuotaWarnThreshold": "Amazon account warn threshold",
+        "admin.amazonAccountQuotaCriticalThreshold": "Amazon account critical threshold",
+        "admin.proxyExpiryWarnDays": "Proxy expiry warning window (days)",
+        "llm.contentEnabled": "AI title/description rewrites",
+        "billing.enforcementEnabled": "Enforce plan quotas",
+        "buyerMessaging.feedbackDefaultDelayDays": "Feedback request delay (days)"
       }
     }
   }

@@ -42,3 +42,36 @@ export const Row = styled.div`
   padding-block: ${tkn('spacing.sm')};
   border-bottom: 1px solid ${tkn('colors.border.primary')};
 `;
+
+export const RowMain = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+export const RowSide = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+  justify-content: flex-end;
+`;
+
+export const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: ${tkn('spacing.md')};
+`;
+
+export const FormActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  justify-content: flex-end;
+`;
+
+/** Bounded width so a settings value field never stretches the whole row. */
+export const SettingInput = styled.div`
+  width: 12rem;
+`;

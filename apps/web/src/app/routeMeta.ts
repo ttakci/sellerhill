@@ -114,14 +114,8 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     breadcrumbs: [{ labelKey: 'translation:support.title', path: '/support' }],
   },
   {
-    path: '/admin/assistant',
-    match: 'prefix',
-    section: 'configuration',
-    breadcrumbs: [{ labelKey: 'translation:adminAssistant.title', path: '/admin/assistant' }],
-  },
-  {
     path: '/admin',
-    match: 'exact',
+    match: 'prefix',
     section: 'configuration',
     breadcrumbs: [{ labelKey: 'translation:menu.admin' }],
   },

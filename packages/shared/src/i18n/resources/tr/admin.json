@@ -2,14 +2,80 @@
   "admin": {
     "title": "Yönetim operasyonları",
     "subtitle": "Platform maliyetlerini, kuyrukları, sağlayıcı kullanımını ve müşteri dağılımını izleyin.",
-    "tabs": { "queues": "Kuyruklar", "costs": "Maliyetler", "billing": "Faturalandırma", "users": "Kullanıcılar" },
-    "queue": { "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}" },
-    "cost": { "keepaBalance": "Keepa token bakiyesi", "users": "Toplam kullanıcı" },
-    "users": { "unattributed": "Dağıtılmamış platform kullanımı" },
+    "tabs": {
+      "overview": "Genel bakış",
+      "queues": "Kuyruklar",
+      "costs": "Maliyetler",
+      "proxies": "Proxyler",
+      "settings": "Ayarlar",
+      "billing": "Faturalandırma",
+      "users": "Kullanıcılar"
+    },
+    "queue": {
+      "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}"
+    },
+    "cost": {
+      "keepaBalance": "Keepa token bakiyesi",
+      "users": "Toplam kullanıcı",
+      "proxyPool": "Proxy havuzu / ay",
+      "proxyPoolHint": "Aktif proxylerin bilinen aylık maliyet toplamı",
+      "quantity": "Miktar: {{quantity}}"
+    },
+    "users": {
+      "unattributed": "Dağıtılmamış platform kullanımı",
+      "total": "{{value}} kullanıcı · maliyetler bu aya aittir",
+      "stats": "İlanlar: {{listings}} · Sipariş 30g: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
+      "proxy": "Proxy: {{proxy}}",
+      "noProxy": "Proxy atanmadı"
+    },
     "warnings": {
       "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
       "keepa_low_tokens": "Keepa token bakiyesi düşük",
-      "llm_failure_rate": "LLM hata oranı yükseldi"
+      "llm_failure_rate": "LLM hata oranı yükseldi",
+      "proxy_expiring": "{{subject}} proxy'sinin süresi yakında doluyor (kalan gün)",
+      "proxy_expired": "{{subject}} proxy'sinin süresi doldu (gecikilen gün)",
+      "proxy_pool_exhausted": "Proxy havuzu tükendi — yeni kullanıcılar için boş proxy yok"
+    },
+    "proxies": {
+      "activePool": "Aktif proxyler",
+      "freeCount": "{{value}} boşta",
+      "assigned": "Kullanıcılara atanan",
+      "monthlyCost": "Aylık maliyet",
+      "expiringSoon": "Süresi yakında dolan",
+      "expiredCount": "{{value}} süresi dolmuş",
+      "addTitle": "Satın alınan proxy'yi ekle",
+      "addSubtitle": "Parola anında şifrelenerek saklanır ve bir daha gösterilmez. Kullanıcılar proxy'leri otomatik alır — atama manuel yapılmaz.",
+      "host": "Sunucu (host)",
+      "port": "Port",
+      "username": "Kullanıcı adı",
+      "password": "Parola",
+      "labelField": "Etiket (sağlayıcı / sipariş no)",
+      "expiresAt": "Bitiş tarihi",
+      "monthlyCostUsd": "Aylık maliyet (USD)",
+      "addButton": "Proxy ekle",
+      "formInvalid": "Lütfen host, port, kullanıcı adı ve parolayı geçerli değerlerle doldurun.",
+      "createSuccess": "Proxy havuza eklendi.",
+      "listTitle": "Havuz",
+      "empty": "Havuzda henüz proxy yok. Satın aldığınız sabit ISP proxy'leri yukarıdan ekleyin — her kullanıcıya otomatik olarak bir tane atanır.",
+      "unassigned": "Atanmamış",
+      "expiresOn": "Bitiş: {{date}}",
+      "noExpiry": "Bitiş tarihi girilmedi",
+      "disable": "Devre dışı bırak",
+      "enable": "Etkinleştir",
+      "status": {
+        "active": "Aktif",
+        "disabled": "Devre dışı"
+      },
+      "expiry": {
+        "ok": "{{value}} gün kaldı",
+        "expiring_soon": "{{value}} gün kaldı",
+        "expired": "Süresi doldu",
+        "no_expiry": "Bitiş yok"
+      }
+    },
+    "errors": {
+      "proxyNotFound": "Proxy bulunamadı.",
+      "currencyRequiresCost": "Para birimi yalnızca bir maliyetle birlikte ayarlanabilir."
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -23,7 +89,7 @@
       "tracking_conversions": "Takip dönüşümleri"
     },
     "billing": {
-      "costTotal": "Tahmini maliyet (mikro-USD)",
+      "costTotal": "Tahmini maliyet",
       "accountStatus": {
         "title": "Hesap durumu dağılımı",
         "pending": "Beklemede",
@@ -49,6 +115,77 @@
         "near_limit": "Limite yakın",
         "at_limit": "Limitte",
         "over_limit": "Limit üstü"
+      }
+    },
+    "overview": {
+      "users": "Toplam kullanıcı",
+      "activeListings": "Aktif ilanlar",
+      "orders": "Siparişler (30 gün)",
+      "ebayStores": "Aktif eBay mağazaları",
+      "amazonAccounts": "Amazon alıcı hesapları",
+      "keepaBalance": "Kalan Keepa token",
+      "warningsTitle": "Uyarılar",
+      "noWarnings": "Aktif uyarı yok.",
+      "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI'ı ile değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."
+    },
+    "settings": {
+      "intro": "Çalışma zamanı yapılandırması. Her ayar önce veritabanı geçersiz kılması, sonra ortam değişkeni, sonra kod varsayılanı olarak çözülür — sıfırlarsanız ortam değerine geri döner. Sırlar ve bağlantı kimlik bilgileri ortamda kalır, buradan düzenlenemez.",
+      "valueLabel": "Değer",
+      "reset": "Sıfırla",
+      "requiresRestart": "Yeniden başlatma gerekir",
+      "secretSet": "Tanımlı",
+      "secretUnset": "Tanımsız",
+      "envHint": "Ortam: {{envVar}}",
+      "defaultHint": "Varsayılan: {{value}}",
+      "emailTest": "Bağlantıyı test et",
+      "emailTestOk": "SMTP bağlantısı başarılı",
+      "emailTestFailed": "SMTP bağlantısı başarısız",
+      "source": {
+        "database": "Geçersiz kılındı",
+        "env": "Ortamdan",
+        "default": "Varsayılan"
+      },
+      "category": {
+        "keepa": "Keepa ürün yenileme",
+        "amazon": "Amazon sipariş eşleme & takip",
+        "auto_fulfill": "Otomatik satın alma",
+        "email": "E-posta (SMTP)",
+        "admin": "Yönetim uyarı eşikleri",
+        "billing": "Faturalandırma",
+        "llm": "Yapay zekâ içerik",
+        "buyer_messaging": "Alıcı mesajlaşma"
+      },
+      "keys": {
+        "keepa.refresh.enabled": "Arka plan yenileme açık",
+        "keepa.refresh.intervalMinutes": "Yenileme aralığı (dakika)",
+        "keepa.refresh.batchSize": "Parti başına ürün",
+        "keepa.refresh.claimLeaseMinutes": "Talep kirası (dakika)",
+        "keepa.refresh.maxFailures": "Karantina öncesi hata sayısı",
+        "keepa.refresh.quarantineMinutes": "Karantina süresi (dakika)",
+        "keepa.refresh.schedulerCron": "Zamanlayıcı cron deseni",
+        "amazon.orderSync.matchTolerancePct": "Maliyet eşleme tutar toleransı (%)",
+        "amazon.orderSync.matchWindowDays": "Maliyet eşleme tarih penceresi (gün)",
+        "amazon.tracking.preshipIntervalHours": "Kargo öncesi sorgu aralığı (saat)",
+        "amazon.tracking.shippedIntervalHours": "Kargolandı sorgu aralığı (saat)",
+        "autoFulfill.reviewCapHardStop": "Özet adımında harcama limitini zorla",
+        "autoFulfill.evidenceTtlDays": "Kanıt ekran görüntüsü saklama (gün)",
+        "email.smtpHost": "SMTP sunucusu",
+        "email.smtpPort": "SMTP portu",
+        "email.smtpSecure": "TLS kullan",
+        "email.smtpUser": "SMTP kullanıcı adı",
+        "email.smtpPassword": "SMTP parolası",
+        "email.smtpFrom": "Gönderen adresi",
+        "admin.queueWaitingThreshold": "Kuyruk bekleme uyarı eşiği",
+        "admin.keepaLowTokensThreshold": "Keepa düşük bakiye eşiği",
+        "admin.llmFailureRateThreshold": "Yapay zekâ hata oranı eşiği (%)",
+        "admin.listingQuotaWarnThreshold": "İlan kotası uyarı eşiği",
+        "admin.listingQuotaCriticalThreshold": "İlan kotası kritik eşiği",
+        "admin.amazonAccountQuotaWarnThreshold": "Amazon hesabı uyarı eşiği",
+        "admin.amazonAccountQuotaCriticalThreshold": "Amazon hesabı kritik eşiği",
+        "admin.proxyExpiryWarnDays": "Proxy bitiş uyarı penceresi (gün)",
+        "llm.contentEnabled": "Yapay zekâ başlık/açıklama yeniden yazımı",
+        "billing.enforcementEnabled": "Paket kotalarını zorla",
+        "buyerMessaging.feedbackDefaultDelayDays": "Değerlendirme isteği gecikmesi (gün)"
       }
     }
   }

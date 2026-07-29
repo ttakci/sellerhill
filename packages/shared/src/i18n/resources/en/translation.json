@@ -169,17 +169,6 @@
       "all": "All"
     }
   },
-  "adminAssistant": {
-    "title": "Assistant operations",
-    "subtitle": "Monitor platform health, queues, usage, and knowledge operations without exposing conversation content.",
-    "loading": "Loading assistant operations…",
-    "users": "Users",
-    "activeListings": "Active listings",
-    "orders": "Orders in the last 30 days",
-    "queues": "Queue health",
-    "usage": "Usage",
-    "roleCliNotice": "User roles are changed only through the operator CLI. HTTP role escalation is disabled."
-  },
   "header": {
     "selectLanguage": "Select Language",
     "toggleTheme": "Toggle Theme",

@@ -140,14 +140,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
             {user?.role === UserRole.ADMIN ? (
               <S.NavItem
-                $active={pathWithoutLocale.startsWith('/admin/assistant')}
+                $active={pathWithoutLocale.startsWith('/admin')}
                 $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate('/admin/assistant')}
-                title={sidebarCollapsed ? t('translation:adminAssistant.title') : undefined}
+                onClick={() => onLocaleNavigate('/admin')}
+                title={sidebarCollapsed ? t('translation:menu.admin') : undefined}
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="gauge" size={20} />
-                  {!sidebarCollapsed && t('translation:adminAssistant.title')}
+                  {!sidebarCollapsed && t('translation:menu.admin')}
                 </S.NavItemContent>
               </S.NavItem>
             ) : null}
