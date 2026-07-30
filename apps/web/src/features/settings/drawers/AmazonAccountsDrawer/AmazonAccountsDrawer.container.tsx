@@ -1,5 +1,5 @@
-import type { AmazonAccountPublicDto } from '@repo/shared';
-import { formatDate, getLocaleConfig } from '@repo/ui';
+import { AmazonAccountStatus, type AmazonAccountPublicDto } from '@repo/shared';
+import { formatDate, getLocaleConfig, useUI } from '@repo/ui';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,14 +9,19 @@ import type {
   AmazonAccountsDrawerProps,
 } from './AmazonAccountsDrawer.types';
 
+import { useVerifyAmazonAccountMutation } from '@/features/amazon/api/amazon.api';
+import { getErrorI18nKey } from '@/utils/errorHandler';
+
 export const AmazonAccountsDrawer: React.FC<AmazonAccountsDrawerProps> = ({
   isOpen,
   onClose,
   accounts,
   onEdit,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { locale } = getLocaleConfig(i18n.language);
+  const { showMessage } = useUI();
+  const [verifyAccount] = useVerifyAmazonAccountMutation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [wasOpen, setWasOpen] = useState(isOpen);
 
@@ -40,6 +45,24 @@ export const AmazonAccountsDrawer: React.FC<AmazonAccountsDrawerProps> = ({
     }
   };
 
+  // Verification runs on a BullMQ worker (Playwright login). The mutation only
+  // marks the account VERIFYING and enqueues; the hub already polls while any
+  // account is in that state, so the card resolves to active/invalid on its own.
+  const handleVerify = (id: string): void => {
+    void verifyAccount(id)
+      .unwrap()
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error, 'translation:common.error'),
+          },
+          t
+        );
+      });
+  };
+
   const cards: AmazonAccountCardView[] = accounts.map((a: AmazonAccountPublicDto) => ({
     id: a.id,
     displayName: a.label || a.email,
@@ -47,6 +70,7 @@ export const AmazonAccountsDrawer: React.FC<AmazonAccountsDrawerProps> = ({
     connectedSince: formatDate(a.createdAt, locale, { year: 'numeric' }),
     status: a.status,
     lastVerificationError: a.lastVerificationError ?? undefined,
+    isVerifying: a.status === AmazonAccountStatus.VERIFYING,
   }));
 
   return (
@@ -58,6 +82,7 @@ export const AmazonAccountsDrawer: React.FC<AmazonAccountsDrawerProps> = ({
       isContinueDisabled={selectedId === null}
       onSelect={handleSelect}
       onContinue={handleContinue}
+      onVerify={handleVerify}
     />
   );
 };

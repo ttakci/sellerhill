@@ -1,5 +1,5 @@
 import { AmazonAccountStatus } from '@repo/shared';
-import { Drawer, Icon, StatusBadge, Text } from '@repo/ui';
+import { Button, Drawer, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +14,7 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
   isContinueDisabled,
   onSelect,
   onContinue,
+  onVerify,
 }) => {
   const { t } = useTranslation();
 
@@ -83,6 +84,25 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
                     </S.AccountMetaLine>
                   )}
                 </S.AccountMetaList>
+
+                <S.AccountActions>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    isLoading={a.isVerifying}
+                    disabled={a.isVerifying}
+                    // The whole card is a selection control; without stopping
+                    // propagation, verifying would also toggle the selection.
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      onVerify(a.id);
+                    }}
+                  >
+                    <Text variant="body-sm">
+                      {t('translation:settingsHub.sections.amazon.manage.verify')}
+                    </Text>
+                  </Button>
+                </S.AccountActions>
               </S.AccountMain>
             </S.SelectableCard>
           ))}

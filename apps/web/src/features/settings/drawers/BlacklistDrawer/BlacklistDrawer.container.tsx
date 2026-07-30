@@ -155,8 +155,12 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       validateTitle: config?.validateTitle ?? true,
       validateDescription: config?.validateDescription ?? false,
       blacklist: blacklist.map((b) => ({ keyword: b.keyword, scope: b.scope })),
-      // Preserve existing tax rate through this drawer (UI for editing lands in a later task).
+      // Preserve settings owned by the parent drawer. The backend also treats
+      // omitted optional fields as "leave unchanged", but carrying them here
+      // makes this full-row save explicit and protects older API deployments.
       amazonTaxRate: config?.amazonTaxRate ?? 0,
+      autoFulfillEnabled: config?.autoFulfillEnabled ?? false,
+      trackingConversionProvider: config?.trackingConversionProvider,
     };
 
     /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
