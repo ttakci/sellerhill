@@ -1,5 +1,5 @@
 import { BuyerMessageEventType } from '@repo/shared';
-import { Button, IconButton, Icon, ModernSelect, ModernTextInput, Text, Textarea } from '@repo/ui';
+import { Button, Drawer, IconButton, Icon, ModernSelect, ModernTextInput, Text, Textarea } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,11 +23,25 @@ export const BuyerMessageTemplateManagerComponent: React.FC<BuyerMessageTemplate
   onDelete,
 }) => {
   const { t } = useTranslation(['storeSettings', 'translation']);
-  if (!isOpen) {
-    return <></>;
-  }
+
+  /*
+   * A real nested Drawer. This used to render its content inline inside the
+   * parent drawer's card, so opening "Manage templates" grew the same white
+   * panel in place — the messaging toggles stayed visible above a second,
+   * unrelated form, and the only way out was a tertiary "Close" button at the
+   * very bottom. `onBack` is the affordance the Drawer already has for exactly
+   * this nested flow (ListingGroupDrawer/AddListingsDrawer use it).
+   */
   return (
-    <S.BodyStack>
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      onBack={onClose}
+      size="lg"
+      title={t('storeSettings:storeSettings.messaging.templates.title')}
+      subtitle={t('storeSettings:storeSettings.messaging.templates.subtitle')}
+    >
+      <S.BodyStack>
       <S.ListColumn>
         <Text variant="body-sm" weight="semibold">{t('storeSettings:storeSettings.messaging.templates.name')}</Text>
         {templates.length === 0 && (
@@ -99,10 +113,8 @@ export const BuyerMessageTemplateManagerComponent: React.FC<BuyerMessageTemplate
           <Text>{t('storeSettings:storeSettings.messaging.templates.save')}</Text>
         </Button>
       </S.EditorColumn>
-      <Button variant="tertiary" size="small" onClick={onClose}>
-        <Text>{t('translation:common.close')}</Text>
-      </Button>
-    </S.BodyStack>
+      </S.BodyStack>
+    </Drawer>
   );
 };
 

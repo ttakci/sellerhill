@@ -10,6 +10,8 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
   const {
     data,
     renderGridCard,
+    gridMinItemWidth = '20rem',
+    gridMaxColumns,
     viewMode: controlledViewMode,
     defaultViewMode,
     onViewModeChange,
@@ -68,6 +70,8 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       columns={props.columns}
       data={data}
       renderGridCard={renderGridCard}
+      gridMinItemWidth={gridMinItemWidth}
+      gridMaxColumns={gridMaxColumns}
       viewMode={viewMode}
       onViewModeChange={handleViewModeChange}
       hideViewToggle={hideViewToggle}

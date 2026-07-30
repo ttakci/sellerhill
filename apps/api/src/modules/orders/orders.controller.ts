@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
+  OrderFulfillmentState,
   type OrderDto,
   type OrderFiltersDto,
   type OrderStatsDto,
@@ -32,9 +33,16 @@ export class OrdersController {
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
     @Query('autoFulfillNeedsAttention') autoFulfillNeedsAttention?: string,
+    @Query('fulfillmentState') fulfillmentState?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
   ): Promise<{ orders: OrderDto[]; total: number }> {
+    // Validate against the enum rather than passing the raw string through: the
+    // service maps this value to a fixed SQL clause, so an unknown value must be
+    // dropped, not forwarded.
+    const isKnownState = Object.values(OrderFulfillmentState).includes(
+      fulfillmentState as OrderFulfillmentState
+    );
     const filters: OrderFiltersDto = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -45,6 +53,9 @@ export class OrdersController {
       dateTo,
       autoFulfillNeedsAttention:
         autoFulfillNeedsAttention === 'true' ? true : undefined,
+      fulfillmentState: isKnownState
+        ? (fulfillmentState as OrderFulfillmentState)
+        : undefined,
       sortBy,
       sortOrder,
     };

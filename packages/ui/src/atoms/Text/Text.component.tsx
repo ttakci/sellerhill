@@ -10,6 +10,7 @@ export const Text = ({
   align,
   muted = false,
   truncate = false,
+  numeric = false,
   color,
   className,
   style,
@@ -20,6 +21,7 @@ export const Text = ({
     $align={align}
     $muted={muted}
     $truncate={truncate}
+    $numeric={numeric}
     $color={color}
     className={className}
     // eslint-disable-next-line design-system/no-inline-styles -- pass-through style prop for consumer overrides

@@ -1,21 +1,16 @@
 import styled from '@emotion/styled';
-import { PageContainerWithMobileBar, tkn } from '@repo/ui';
+import { Card, PageContainerWithMobileBar, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
 /** Call-to-action strip for draft → publish */
-export const DraftPublishBar = styled.div`
+export const DraftPublishBar = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   align-items: stretch;
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  box-sizing: border-box;
 
-  @media (min-width: 40rem) {
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -27,24 +22,23 @@ export const DraftPublishCopy = styled.div`
   flex: 1;
 `;
 
-/** Product hero: gallery + summary — stacks on phone, side-by-side tablet+ */
-export const Hero = styled.div`
+/**
+ * Product hero: gallery + summary — stacks on phone, side-by-side tablet+.
+ * Extends the Card atom; this was a hand-rolled copy of it (identical surface,
+ * radius, shadow and padding), which is how it drifted onto the 6px radius.
+ */
+export const Hero = styled(Card)`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
-  box-sizing: border-box;
 
-  @media (min-width: 48rem) {
-    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
     align-items: start;
   }
 
-  @media (min-width: 64rem) {
-    grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+  @media (min-width: ${tkn('breakpoints.lg')}) {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
   }
 `;
 
@@ -77,7 +71,7 @@ export const GalleryMain = styled.div`
     color: ${tkn('colors.text.tertiary')};
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     max-height: none;
   }
 `;
@@ -143,20 +137,21 @@ export const IdRow = styled.div`
   align-items: center;
 `;
 
-export const ChipRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const Chip = styled.div`
+/**
+ * Single headline KPI in the hero. Replaces the old stock/sold/last-sale chip
+ * row, whose three values were repeated verbatim by the Performance card.
+ */
+export const ProfitHighlight = styled.div<{ $positive: boolean }>`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.sm')};
-  min-width: 4.5rem;
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${({ $positive, theme }) =>
+    $positive ? theme.colors.semanticTint.success : theme.colors.semanticTint.error};
+  border: 0.0625rem solid
+    ${({ $positive, theme }) =>
+      $positive ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.error};
 `;
 
 export const QuickLinks = styled.div`
@@ -170,29 +165,28 @@ export const SectionGrid = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 `;
 
-export const Card = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
+export const SectionCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-sizing: border-box;
   width: 100%;
   min-width: 0;
 `;
 
-export const CardFull = styled(Card)`
-  @media (min-width: 48rem) {
+export const SectionCardFull = styled(SectionCard)`
+  @media (min-width: ${tkn('breakpoints.md')}) {
     grid-column: 1 / -1;
   }
+`;
+
+/** Wrapper for the shared EmptyState on the loading / not-found screens. */
+export const StateCard = styled(Card)`
+  width: 100%;
 `;
 
 export const CardHeader = styled.div`
@@ -263,7 +257,7 @@ export const AutomationFields = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.md')};
 
-  @media (min-width: 30rem) {
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     grid-template-columns: 1fr 1fr;
   }
 `;
@@ -313,26 +307,13 @@ export const FormStack = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
-export const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
-  text-align: center;
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-`;
-
 /** Single manage CTA on phones */
 export const MobileActionBar = styled.div`
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 40;
+  z-index: ${tkn('zIndex.sticky')};
   display: flex;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
@@ -342,7 +323,7 @@ export const MobileActionBar = styled.div`
   box-shadow: ${tkn('shadows.lg')};
   box-sizing: border-box;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     display: none;
   }
 `;

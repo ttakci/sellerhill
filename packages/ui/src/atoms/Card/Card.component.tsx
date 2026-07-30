@@ -1,7 +1,16 @@
 import React from 'react';
 
+import { Text } from '../Text';
+
 import * as S from './Card.style';
 import type { CardBodyProps, CardFooterProps, CardHeaderProps, CardProps, CardStatProps } from './Card.types';
+
+/** Trend tone -> semantic colour path consumed by `Text`'s `color` prop. */
+const TREND_COLOR: Record<NonNullable<CardStatProps['trend']>, string> = {
+  up: 'semantic.success',
+  down: 'semantic.error',
+  neutral: 'text.tertiary',
+};
 
 export const Card = ({
   children,
@@ -34,7 +43,7 @@ export const CardHeader = ({ children, icon, description, actions, className }: 
         {icon}
         <S.CardHeaderTextContent>
           {children}
-          {description && <S.CardHeaderDescription>{description}</S.CardHeaderDescription>}
+          {description}
         </S.CardHeaderTextContent>
       </S.CardHeaderContent>
       {actions && <S.CardHeaderActions>{actions}</S.CardHeaderActions>}
@@ -61,16 +70,28 @@ export const CardStat = ({
   ...rest
 }: CardStatProps): React.ReactElement => {
   return (
-    <S.CardStatContainer $trend={trend} className={className} {...rest}>
+    <S.CardStatContainer className={className} {...rest}>
       <div className="card-stat-header">
-        <span className="card-stat-label">{label}</span>
+        <Text variant="body-sm" weight="medium" color="text.secondary">
+          {label}
+        </Text>
         {icon && <div className="card-stat-icon">{icon}</div>}
       </div>
-      <div className="card-stat-value">{value}</div>
+      <Text variant="metric" weight="semibold">
+        {value}
+      </Text>
       {(trendValue || subtitle) && (
         <div className="card-stat-footer">
-          {trendValue && <span className="card-stat-trend">{trendValue}</span>}
-          {subtitle && <span className="card-stat-subtitle">{subtitle}</span>}
+          {trendValue && (
+            <Text variant="caption" weight="medium" color={TREND_COLOR[trend]}>
+              {trendValue}
+            </Text>
+          )}
+          {subtitle && (
+            <Text variant="caption" color="text.tertiary">
+              {subtitle}
+            </Text>
+          )}
         </div>
       )}
     </S.CardStatContainer>

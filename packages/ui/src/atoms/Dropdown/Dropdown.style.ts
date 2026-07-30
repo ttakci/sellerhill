@@ -21,15 +21,15 @@ export const Menu = styled.div<{
   position: absolute;
   ${({ $direction }) => ($direction === 'up' ? 'bottom: 120%;' : 'top: 120%;')}
   ${({ $align }) => ($align === 'left' ? 'left: 0;' : 'right: 0;')};
-  z-index: 1000;
+  z-index: ${tkn('zIndex.dropdown')};
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   flex-direction: column;
   ${({ $width }) => ($width ? `width: ${$width}; min-width: unset;` : 'min-width: 16.25rem;')}; /* 260px */
   background: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.md')};
   padding: ${tkn('spacing.sm')} 0;
-  box-shadow: ${tkn('shadows.xl')};
+  box-shadow: ${tkn('shadows.lg')};
   animation: ${({ $direction }) => ($direction === 'up' ? 'fadeInUp' : 'fadeIn')} 0.2s ease-out;
 
   @keyframes fadeIn {
@@ -73,12 +73,20 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
 
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
-  transition: all 0.2s;
+  transition: all ${tkn('transitions.fast')};
   color: ${({ $variant, theme }) => ($variant === 'danger' ? theme.colors.semantic.error : theme.colors.text.primary)};
 
   &:hover {
     background: ${tkn('colors.background.tertiary')};
     color: ${({ $variant, theme }) =>
       $variant === 'danger' ? theme.colors.semantic.error : theme.colors.brand.primary};
+  }
+
+  /* Menu items are real <button>s but had hover only — arrow-keying through an
+     open menu gave no visible position. Inset ring so it reads inside the menu. */
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: -0.125rem;
+    background: ${tkn('colors.background.tertiary')};
   }
 `;

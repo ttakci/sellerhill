@@ -1,7 +1,5 @@
 import type React from 'react';
 
-import { Icon } from '../Icon';
-
 import * as S from './Tabs.style';
 import type { TabsComponentProps } from './Tabs.types';
 
@@ -15,19 +13,12 @@ export const TabsComponent: React.FC<TabsComponentProps> = ({
 }) => {
   return (
     <S.Container className={className}>
-      <S.TabList $variant={variant}>
-        {items.map((item) => (
-          <S.TabButton
-            key={item.id}
-            $isActive={activeTab === item.id}
-            $variant={variant}
-            onClick={() => onTabClick(item.id)}
-          >
-            {item.icon && <Icon name={item.icon} size={18} />}
-            {item.label}
-          </S.TabButton>
-        ))}
-      </S.TabList>
+      <S.Rail
+        items={items.map(({ id, label, icon }) => ({ id, label, icon }))}
+        value={activeTab}
+        onChange={onTabClick}
+        variant={variant}
+      />
       <S.Content>{activeContent}</S.Content>
     </S.Container>
   );

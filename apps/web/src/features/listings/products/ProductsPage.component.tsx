@@ -1,4 +1,4 @@
-import { DataTable, Icon, IdBadge, PageHeader } from '@repo/ui';
+import { DataTable, EmptyState, Icon, IdBadge, PageHeader, SearchField } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,11 @@ import type { ProductsPageComponentProps } from './ProductsPage.types';
 
 export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
   products,
+  isLoading,
+  search,
+  onSearchChange,
+  onClearSearch,
+  formatCurrency,
   pagination,
   columns,
   onDownload,
@@ -36,9 +41,8 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
         </S.ASINContainer>
       </S.CardContent>
       <S.CardFooter>
-        <S.PriceText variant="body" weight="bold" color="semantic.success">
-          {product.price.currency === 'USD' ? '$' : product.price.currency}
-          {product.price.current.toFixed(2)}
+        <S.PriceText variant="body" weight="semibold" color="semantic.success" numeric>
+          {formatCurrency(product.price.current)}
         </S.PriceText>
       </S.CardFooter>
     </S.GridCard>
@@ -48,11 +52,52 @@ export const ProductsPageComponent: React.FC<ProductsPageComponentProps> = ({
     <S.Container>
       <PageHeader title={t('translation:menu.products')} subtitle={t('translation:products.subtitle')} />
 
+      {/* Products was the only list page with no filter row while its siblings
+          all had one — and the search is server-side now, so it is also the
+          only way to reach a product that is not on the current page. */}
+      <S.FilterBar>
+        <S.SearchWrapper>
+          <SearchField
+            value={search}
+            onChange={onSearchChange}
+            placeholder={t('listings.products.searchPlaceholder')}
+            size="medium"
+            fullWidth
+          />
+        </S.SearchWrapper>
+      </S.FilterBar>
+
       <DataTable
+        gridMinItemWidth="19rem"
         columns={columns}
         data={products}
         renderGridCard={renderGridCard}
-        emptyMessage={t('listings.overview.emptyTitle')}
+        emptyContent={
+          isLoading ? (
+            <EmptyState
+              icon="loader"
+              title={t('listings.empty.loadingTitle')}
+              description={t('listings.empty.loadingSubtitle')}
+              size="md"
+            />
+          ) : search.trim() ? (
+            <EmptyState
+              icon="search"
+              title={t('listings.empty.filtersTitle')}
+              description={t('listings.empty.filtersSubtitle')}
+              action={t('listings.empty.filtersAction')}
+              onAction={onClearSearch}
+              size="lg"
+            />
+          ) : (
+            <EmptyState
+              icon="inventory"
+              title={t('listings.overview.emptyTitle')}
+              description={t('listings.overview.emptySubtitle')}
+              size="lg"
+            />
+          )
+        }
         onDownload={onDownload}
         pagination={pagination}
       />

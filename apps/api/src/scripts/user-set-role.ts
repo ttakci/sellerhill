@@ -29,6 +29,8 @@
 //   3  — user not found
 //   1  — any other failure (DB, transaction, etc.)
 
+import 'reflect-metadata';
+
 import * as path from 'path';
 
 import { UserRole } from '@repo/shared';

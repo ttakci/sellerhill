@@ -33,11 +33,25 @@ export const ListingJobsPageContainer: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const { data: jobs = [], isLoading } = useGetListingJobsQuery(undefined, {
-    pollingInterval: 5000,
-    refetchOnMountOrArgChange: true,
-  });
+  /*
+   * Server-paginated. This endpoint is polled every 5s, so pulling the whole
+   * job table and filtering/slicing it here meant the payload grew for the life
+   * of the account and every poll re-downloaded all of it.
+   */
+  const { data, isLoading } = useGetListingJobsQuery(
+    {
+      page,
+      limit: rowsPerPage,
+      search: search.trim() || undefined,
+      status: statusFilter || undefined,
+    },
+    { pollingInterval: 5000, refetchOnMountOrArgChange: true }
+  );
 
+  /* Memoised: `?? []` would hand a fresh array to every consumer on each
+     render and defeat their memoisation. */
+  const jobs = useMemo(() => data?.items ?? [], [data]);
+  const totalCount = data?.total ?? 0;
   const isInitialLoading = isLoading && jobs.length === 0;
 
   const statusLabel = useCallback(
@@ -72,24 +86,6 @@ export const ListingJobsPageContainer: React.FC = () => {
     ],
     [t]
   );
-
-  const filteredJobs = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return jobs.filter((job) => {
-      if (statusFilter && String(job.status).toLowerCase() !== statusFilter.toLowerCase()) {
-        return false;
-      }
-      if (!q) {
-        return true;
-      }
-      return job.id.toLowerCase().includes(q);
-    });
-  }, [jobs, search, statusFilter]);
-
-  const paginatedJobs = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return filteredJobs.slice(start, start + rowsPerPage);
-  }, [filteredJobs, page, rowsPerPage]);
 
   const hasActiveFilters = Boolean(search.trim() || statusFilter);
 
@@ -195,7 +191,7 @@ export const ListingJobsPageContainer: React.FC = () => {
       t('listings.jobs.table.total'),
       t('listings.jobs.table.createdAt'),
     ];
-    const rows = filteredJobs.map((job) =>
+    const rows = jobs.map((job) =>
       [
         job.id,
         job.status,
@@ -218,13 +214,13 @@ export const ListingJobsPageContainer: React.FC = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [filteredJobs, t]);
+  }, [jobs, t]);
 
   return (
     <EbayAccountGuard>
       <ListingJobsPageComponent
-        jobs={paginatedJobs}
-        totalCount={jobs.length}
+        jobs={jobs}
+        totalCount={totalCount}
         isInitialLoading={isInitialLoading}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -243,7 +239,7 @@ export const ListingJobsPageContainer: React.FC = () => {
         formatJobDate={formatJobDate}
         statusLabel={statusLabel}
         pagination={{
-          count: filteredJobs.length,
+          count: totalCount,
           page,
           rowsPerPage,
           onPageChange: setPage,

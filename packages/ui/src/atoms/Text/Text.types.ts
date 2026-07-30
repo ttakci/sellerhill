@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 
-export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'body' | 'body-sm' | 'body-xs' | 'caption' | 'overline' | 'mono' | 'nav';
+export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'body' | 'body-sm' | 'body-xs' | 'caption' | 'overline' | 'mono' | 'metric' | 'metric-sm' | 'nav';
 
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
@@ -42,6 +42,13 @@ export interface TextProps {
    * Show in single line and truncate overflow with ...
    */
   truncate?: boolean;
+
+  /**
+   * Lining, fixed-width numerals. Required for any figure rendered in a column
+   * (money, counts, percentages) so digits stack instead of jittering.
+   * `metric` / `metric-sm` already enable this.
+   */
+  numeric?: boolean;
 
   /**
    * Text color (semantic path)

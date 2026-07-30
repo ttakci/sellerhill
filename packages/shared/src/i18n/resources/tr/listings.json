@@ -41,6 +41,7 @@
       },
       "card": {
         "progressLabel": "%{{percent}} tamamlandı",
+        "progressCount": "{{processed}} / {{total}} ASIN",
         "asinsTotal": "{{count}} ASIN",
         "openDetail": "Detayı gör"
       },
@@ -304,6 +305,7 @@
       "showMore": "Daha fazla",
       "showLess": "Daha az",
       "imageThumb": "Görsel {{index}}",
+      "loadingSubtitle": "İlan detayları getiriliyor…",
       "notFoundTitle": "İlan bulunamadı",
       "notFoundSubtitle": "Bu ilan silinmiş olabilir veya erişim yetkiniz yok.",
       "loadFailed": "İlan detayları yüklenemedi.",
@@ -330,6 +332,9 @@
     "carousel": {
       "previous": "Önceki",
       "next": "Sonraki"
+    },
+    "products": {
+      "searchPlaceholder": "Başlık, ASIN veya marka ile ara…"
     }
   }
 }

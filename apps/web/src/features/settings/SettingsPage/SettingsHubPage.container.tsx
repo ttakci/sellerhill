@@ -41,12 +41,11 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
   const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
 
-  const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery();
-  const { data: profile, isLoading: isProfileLoading, error: profileError } = useGetProfileQuery();
-  const { data: ebayData, isLoading: isEbayLoading, error: ebayError } = useGetEbayAccountsQuery();
+  const { data: user, error: userError } = useGetMeQuery();
+  const { data: profile, error: profileError } = useGetProfileQuery();
+  const { data: ebayData, error: ebayError } = useGetEbayAccountsQuery();
   const {
     data: amazonData,
-    isLoading: isAmazonLoading,
     error: amazonError,
     refetch: refetchAmazonAccounts,
   } = useGetAmazonAccountsQuery();
@@ -65,15 +64,18 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     }, 5000);
     return () => clearInterval(id);
   }, [amazonHasVerifying, refetchAmazonAccounts]);
-  const { data: listingGroupsData, isLoading: isGroupsLoading, error: groupsError } = useGetListingSettingsGroupsQuery();
+  const { data: listingGroupsData, error: groupsError } = useGetListingSettingsGroupsQuery();
   // Reuses the RTK-Query-cached predefined templates (same hook the edit form uses);
   // resolves each group's predefinedTemplateId to its display name. Not a new endpoint.
   const { data: predefinedTemplatesData } = useGetPredefinedTemplatesQuery();
-  const { data: storeConfigsData, isLoading: isStoreConfigsLoading, error: storeConfigsError } = useGetAllStoreSettingsQuery();
+  const { data: storeConfigsData, error: storeConfigsError } = useGetAllStoreSettingsQuery();
   // Lazy: only fires when the user clicks "Connect". Fetches the eBay OAuth consent URL.
   const [getConnectUrl, { isLoading: isConnectLoading, error: connectError }] = useLazyGetEbayConnectUrlQuery();
 
-  useLoading(isUserLoading || isProfileLoading || isEbayLoading || isAmazonLoading || isGroupsLoading || isStoreConfigsLoading || isConnectLoading);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isConnectLoading);
 
   useEffect(() => {
     const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError || connectError;

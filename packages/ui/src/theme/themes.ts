@@ -1,10 +1,13 @@
 import {
+  breakpointTokens,
   controlTokens,
+  radiusPxTokens,
   radiusTokens,
   shadowTokens,
   spacingTokens,
   transitionTokens,
   typographyTokens,
+  zIndexTokens,
 } from './designTokens';
 import type { AppTheme, ThemeColors } from './theme.types';
 
@@ -30,7 +33,9 @@ const lightColors: ThemeColors = {
     // Strong readable ink — not washed/silky
     primary: '#0f172a',
     secondary: '#475569',
-    tertiary: '#64748b',
+    // Darkened from #64748b: the old value fell to 4.28:1 on background.tertiary
+    // (#eef3ff), below AA. Now >=4.88:1 on every surface it is used over.
+    tertiary: '#5d6b7f',
     disabled: '#cbd5e1',
     inverse: '#FFFFFF',
   },
@@ -86,14 +91,29 @@ const lightColors: ThemeColors = {
     active: '#162b6e',
     accent: '#2563eb',
     divider: '#ffffff14',
-    logoGlow: 'rgba(37, 99, 235, 0.3)',
   },
 
   dashboard: {
-    periodToday: '#5b7fd6',
-    periodThisWeek: '#5b9bb8',
-    periodThisMonth: '#2a9d8f',
-    periodLastMonth: '#3d9b6e',
+    /*
+     * Period bands are conceptually ALWAYS-DARK (like the landing hero), so the
+     * gradients are identical in both themes — a band that flips lightness would
+     * need two sets of foreground tokens. Stops darkened from the original set:
+     * white ink measured 3.08–3.85:1 on the light stops (below AA even for large
+     * text on "This Week"). Now every stop is >=5.39:1 for `periodForeground`
+     * and >=4.73:1 for `periodForegroundMuted`.
+     */
+    periodTodayGradient: 'linear-gradient(135deg, #3f63c2 0%, #2d4aa0 100%)',
+    periodThisWeekGradient: 'linear-gradient(135deg, #33718e 0%, #245a73 100%)',
+    periodThisMonthGradient: 'linear-gradient(135deg, #16766c 0%, #0e5d55 100%)',
+    periodThisYearGradient: 'linear-gradient(135deg, #227249 0%, #175c39 100%)',
+    periodForeground: '#ffffff',
+    periodForegroundMuted: 'rgba(255, 255, 255, 0.9)',
+    seriesProfit: '#10b981',
+    seriesSales: '#2563eb',
+    seriesUnits: '#8b5cf6',
+    seriesRefunds: '#f59e0b',
+    heatPositive: '#10b981',
+    heatNegative: '#dc2626',
   },
 
   landing: {
@@ -137,7 +157,10 @@ const darkColors: ThemeColors = {
   text: {
     primary: '#e2e8f0',
     secondary: '#94a3b8',
-    tertiary: '#64748b',
+    // Lightened from #64748b: it measured 3.43:1 on surface.secondary and
+    // 3.90:1 on surface.primary — failing AA in dark while passing in light.
+    // Now >=4.61:1 on both, and still visibly dimmer than text.secondary.
+    tertiary: '#7c899d',
     disabled: '#4b5563',
     inverse: '#1e293b',
   },
@@ -145,7 +168,10 @@ const darkColors: ThemeColors = {
   border: {
     primary: '#ffffff12',
     secondary: '#ffffff0a',
-    focus: '#6366f1',
+    // Must equal brand.primary. It was left at the old indigo #6366f1 when the
+    // brand blue was retuned, so a focused Textarea/IconButton/ThemeToggle rang
+    // in a different colour than a focused TextInput/Select in dark mode only.
+    focus: '#4f6ef7',
   },
 
   semantic: {
@@ -185,10 +211,19 @@ const darkColors: ThemeColors = {
   },
 
   dashboard: {
-    periodToday: '#6b8fe8',
-    periodThisWeek: '#6aadc4',
-    periodThisMonth: '#34b3a4',
-    periodLastMonth: '#4cba88',
+    /* Identical to light — the bands are always-dark by design (see light block). */
+    periodTodayGradient: 'linear-gradient(135deg, #3f63c2 0%, #2d4aa0 100%)',
+    periodThisWeekGradient: 'linear-gradient(135deg, #33718e 0%, #245a73 100%)',
+    periodThisMonthGradient: 'linear-gradient(135deg, #16766c 0%, #0e5d55 100%)',
+    periodThisYearGradient: 'linear-gradient(135deg, #227249 0%, #175c39 100%)',
+    periodForeground: '#ffffff',
+    periodForegroundMuted: 'rgba(255, 255, 255, 0.9)',
+    seriesProfit: '#34d399',
+    seriesSales: '#60a5fa',
+    seriesUnits: '#a78bfa',
+    seriesRefunds: '#fbbf24',
+    heatPositive: '#34d399',
+    heatNegative: '#f87171',
   },
 
   sidebar: {
@@ -198,9 +233,8 @@ const darkColors: ThemeColors = {
     textMuted: 'rgba(148, 163, 184, 0.7)',
     hover: '#1c1f2e',
     active: '#1c1f2e',
-    accent: '#6366f1',
+    accent: '#4f6ef7', // tracks brand.primary — was stale indigo #6366f1
     divider: '#ffffff12',
-    logoGlow: 'rgba(99, 102, 241, 0.3)',
   },
 
   landing: {
@@ -232,10 +266,13 @@ export const lightTheme: AppTheme = {
   colors: lightColors,
   spacing: spacingTokens,
   radius: radiusTokens,
+  radiusPx: radiusPxTokens,
   shadows: shadowTokens,
   typography: typographyTokens,
   transitions: transitionTokens,
   controls: controlTokens,
+  zIndex: zIndexTokens,
+  breakpoints: breakpointTokens,
 };
 
 export const darkTheme: AppTheme = {
@@ -243,8 +280,11 @@ export const darkTheme: AppTheme = {
   colors: darkColors,
   spacing: spacingTokens,
   radius: radiusTokens,
+  radiusPx: radiusPxTokens,
   shadows: shadowTokens,
   typography: typographyTokens,
   transitions: transitionTokens,
   controls: controlTokens,
+  zIndex: zIndexTokens,
+  breakpoints: breakpointTokens,
 };

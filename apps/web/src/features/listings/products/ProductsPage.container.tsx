@@ -1,5 +1,5 @@
-import { Icon, IdBadge, Tooltip, useLoading } from '@repo/ui';
-import React, { useMemo, useState } from 'react';
+import { formatCurrency, getLocaleConfig, Icon, IdBadge, Tooltip, useLoading } from '@repo/ui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetUserProductsQuery } from '../api/listings.api';
@@ -10,17 +10,45 @@ import * as S from './ProductsPage.style';
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 
 export const ProductsPageContainer: React.FC = () => {
-  const { t } = useTranslation(['listings', 'translation']);
-  const { data: products = [], isLoading } = useGetUserProductsQuery();
+  const { t, i18n } = useTranslation(['listings', 'translation']);
+  const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
+  const fmtCurrency = useCallback(
+    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
+    [localeCfg]
+  );
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [search, setSearch] = useState('');
 
-  useLoading(isLoading);
+  /*
+   * Server-paginated. This used to fetch the user's entire distinct-product
+   * catalog on every page load and slice ten rows out of it in the browser.
+   */
+  const { data, isLoading } = useGetUserProductsQuery({
+    page,
+    limit: rowsPerPage,
+    search: search.trim() || undefined,
+  });
 
-  const paginatedProducts = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return products.slice(start, start + rowsPerPage);
-  }, [products, page, rowsPerPage]);
+  const products = data?.items ?? [];
+  const totalCount = data?.total ?? 0;
+
+  /* A search narrows the result set — staying on a later page would show an
+     empty page. */
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(1);
+  }, []);
+
+  const handleClearSearch = useCallback(() => {
+    setSearch('');
+    setPage(1);
+  }, []);
+
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(false);
 
   const columns = useMemo(
     () => [
@@ -89,9 +117,8 @@ export const ProductsPageContainer: React.FC = () => {
         header: t('listings.table.price'),
         align: 'right' as const,
         render: (price: any) => (
-          <S.PriceText variant="body" weight="bold" color="semantic.success">
-            {price.currency === 'USD' ? '$' : price.currency}
-            {price.current.toFixed(2)}
+          <S.PriceText variant="body-sm" weight="semibold" color="semantic.success" numeric>
+            {fmtCurrency(price.current)}
           </S.PriceText>
         ),
       },
@@ -106,7 +133,7 @@ export const ProductsPageContainer: React.FC = () => {
         ),
       },
     ],
-    [t]
+    [t, fmtCurrency]
   );
 
   const handleDownload = () => {
@@ -135,12 +162,16 @@ export const ProductsPageContainer: React.FC = () => {
   return (
     <EbayAccountGuard>
       <ProductsPageComponent
-      products={paginatedProducts}
+      products={products}
       isLoading={isLoading}
       onDownload={handleDownload}
+      search={search}
+      onSearchChange={handleSearchChange}
+      onClearSearch={handleClearSearch}
+      formatCurrency={fmtCurrency}
       columns={columns}
       pagination={{
-        count: products.length,
+        count: totalCount,
         page,
         rowsPerPage,
         onPageChange: setPage,

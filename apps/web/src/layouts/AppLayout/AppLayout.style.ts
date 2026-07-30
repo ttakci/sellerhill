@@ -28,7 +28,7 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
   transition: width ${tkn('transitions.normal')} cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: ${tkn('zIndex.sidebar')};
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
@@ -59,7 +59,7 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
     width: 100vw;
     height: 100vh;
     background: ${tkn('colors.surface.overlay')};
-    z-index: 999;
+    z-index: ${tkn('zIndex.scrim')};
     animation: fadeIn 0.15s ease-out;
   }
 
@@ -79,6 +79,12 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
  * 80px logo → 4rem chrome (matches page header).
  */
 const APP_CHROME_HEIGHT = '4rem';
+
+/**
+ * Content column cap. Header and page content MUST share it, otherwise the
+ * breadcrumb and the page title stop lining up at wide viewports.
+ */
+const CONTENT_MAX_WIDTH = '90rem'; /* 1440px */
 
 /**
  * Sellerboard brand strip: [ ☰ ] [ logo 80px ]
@@ -261,7 +267,7 @@ export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boole
 export const SubNavContainer = styled.div<{ $isOpen: boolean }>`
   max-height: ${({ $isOpen }) => ($isOpen ? '62.5rem' : '0')}; /* 1000px */
   overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height ${tkn('transitions.normal')};
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -407,21 +413,21 @@ export const MainContent = styled.div`
 
 export const HeaderContainer = styled.header`
   /* Same height as SidebarBrandRow so dividers align */
-  height: 4rem;
-  min-height: 4rem;
-  max-height: 4rem;
+  height: ${APP_CHROME_HEIGHT};
+  min-height: ${APP_CHROME_HEIGHT};
+  max-height: ${APP_CHROME_HEIGHT};
   background: ${tkn('colors.surface.primary')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   position: sticky;
   top: 0;
-  z-index: 99;
+  z-index: ${tkn('zIndex.sticky')};
   box-shadow: ${tkn('shadows.sm')};
   width: 100%;
   box-sizing: border-box;
 `;
 
 export const HeaderInner = styled.div`
-  max-width: 90rem; /* 1440px */
+  max-width: ${CONTENT_MAX_WIDTH};
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -631,7 +637,7 @@ export const LanguageSelectTrigger = styled.div`
   cursor: pointer;
   padding: ${tkn('spacing.2xs')} 0.375rem; /* 2px 6px — 6px no exact token */
   border-radius: ${tkn('radius.sm')};
-  transition: background 0.2s;
+  transition: background ${tkn('transitions.fast')};
 
   &:hover {
     background: ${tkn('colors.brand.secondary')};
@@ -810,7 +816,7 @@ export const ContentArea = styled.main`
  * Title starts at the same inset on every route.
  */
 export const ContentInner = styled.div`
-  max-width: 90rem; /* 1440px */
+  max-width: ${CONTENT_MAX_WIDTH};
   width: 100%;
   margin: 0 auto;
   padding: ${tkn('spacing.lg')};
@@ -841,7 +847,10 @@ export const LoadingOverlay = styled.div<{ $visible: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: ${tkn('spacing.xxxl')}; /* High z-index */
+  /* Was tkn('spacing.xxxl') -> the string "4rem", which is invalid for the
+     unitless z-index property, so the browser dropped the declaration entirely
+     and the blocking overlay could paint BEHIND the sidebar, a drawer or a modal. */
+  z-index: ${tkn('zIndex.loading')};
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   visibility: ${({ $visible }) => ($visible ? 'visible' : 'hidden')};
   transition: all ${tkn('transitions.normal')};

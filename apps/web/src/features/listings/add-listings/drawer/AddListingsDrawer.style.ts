@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { Text as UIText, tkn } from '@repo/ui';
+import { Text as UIText, Textarea, tkn } from '@repo/ui';
 
 /**
  * Add listings drawer — 2-step flow on soft canvas + white cards.
- * Step 2: ASIN card fills drawer body; native textarea fills remaining card area.
+ * Step 2: ASIN card fills drawer body; the shared Textarea atom (fill mode)
+ * occupies the remaining card area.
  */
 export const BodyStack = styled.div`
   display: flex;
@@ -133,50 +134,12 @@ export const AsinCounter = styled.div`
 `;
 
 /**
- * Native textarea (not @repo/ui Textarea wrapper) so we can reliably
- * fill the remaining card area with position:absolute inset:0.
+ * Fills the remaining card area. Was a forked native <textarea> that
+ * re-implemented the control border/focus treatment by hand; the shared atom
+ * now owns that and exposes `fill` for the absolute-inset behaviour.
  */
-export const AsinTextarea = styled.textarea<{ $hasError?: boolean }>`
-  position: absolute;
-  inset: 0;
-  width: 100%;
+export const AsinTextarea = styled(Textarea)`
   height: 100%;
-  box-sizing: border-box;
-  margin: 0;
-  resize: none;
-  overflow-y: auto;
-  padding: ${tkn('spacing.sm-md+')} 1.125rem;
-  background-color: ${tkn('colors.background.secondary')};
-  border: 0.0625rem solid
-    ${({ theme, $hasError }) =>
-      $hasError ? theme.colors.semantic.error : theme.colors.border.primary};
-  border-radius: ${tkn('radius.sm')};
-  color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  outline: none;
-  transition:
-    border-color ${tkn('transitions.normal')},
-    box-shadow ${tkn('transitions.normal')};
-
-  &::placeholder {
-    color: ${tkn('colors.text.tertiary')};
-  }
-
-  &:hover:not(:disabled) {
-    border-color: ${tkn('colors.border.focus')};
-  }
-
-  &:focus {
-    border-color: ${tkn('colors.border.focus')};
-    box-shadow: 0 0 0 0.25rem ${tkn('colors.brand.primary')}15;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-    background-color: ${tkn('colors.background.tertiary')};
-  }
 `;
 
 export const Label = styled(UIText)`

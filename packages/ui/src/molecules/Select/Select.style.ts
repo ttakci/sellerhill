@@ -161,7 +161,7 @@ export const DropdownContainer = styled.div<{ $placement?: 'bottom' | 'top' }>`
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
   box-shadow: ${tkn('shadows.lg')};
-  z-index: 1000;
+  z-index: ${tkn('zIndex.dropdown')};
   overflow: hidden;
   animation: ${({ $placement }) => ($placement === 'top' ? 'slideFadeUp' : 'slideFadeDown')} ${tkn('transitions.fast')};
 
@@ -232,7 +232,7 @@ export const OptionItem = styled.div<{ $isSelected: boolean; $isFocused: boolean
   background: ${({ $isSelected, $isFocused, theme }) =>
     $isSelected ? `${theme.colors.brand.primary}10` : $isFocused ? theme.colors.background.tertiary : 'transparent'};
   color: ${({ $isSelected, theme }) => ($isSelected ? theme.colors.brand.primary : theme.colors.text.primary)};
-  transition: background-color 0.1s ease;
+  transition: background-color ${tkn('transitions.fast')};
 
   &:hover {
     background: ${({ $isSelected, theme }) =>
@@ -273,7 +273,7 @@ export const Overlay = styled.div`
   position: fixed;
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
-  z-index: 2000;
+  z-index: ${tkn('zIndex.modal')};
   display: flex;
   align-items: flex-end;
   animation: fadeIn ${tkn('transitions.fast')};

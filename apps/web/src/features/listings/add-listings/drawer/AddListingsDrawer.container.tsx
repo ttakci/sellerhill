@@ -34,7 +34,10 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   ] = useCreateListingsMutation();
 
   const isLoading = isLoadingSettings || isLoadingPolicies;
-  useLoading(isLoading || isSubmitting);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isSubmitting);
 
   const form = useForm<CreateListingsFormData>({
     resolver: zodResolver(createListingsSchema(t)) as never,

@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Drawer,
+  EmptyState,
   Icon,
   IdBadge,
   ModernSelect,
@@ -86,14 +87,18 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   const { t } = useTranslation(['listings', 'translation']);
   const { control } = form;
 
+  /* Shared EmptyState for both states — they used to be a bespoke block whose
+     loading branch was a single line of grey text. */
   if (isLoading) {
     return (
       <S.Container>
-        <S.EmptyState>
-          <Text variant="body" color="text.secondary">
-            {t('translation:common.loading')}
-          </Text>
-        </S.EmptyState>
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="inventory"
+            title={t('translation:common.loading')}
+            description={t('listings.detail.loadingSubtitle')}
+          />
+        </S.StateCard>
       </S.Container>
     );
   }
@@ -101,18 +106,15 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   if (!listing) {
     return (
       <S.Container>
-        <S.EmptyState>
-          <Icon name="inventory" size={40} />
-          <Text variant="h4" weight="semibold">
-            {t('listings.detail.notFoundTitle')}
-          </Text>
-          <Text variant="body-sm" color="text.secondary">
-            {t('listings.detail.notFoundSubtitle')}
-          </Text>
-          <Button variant="secondary" onClick={onBack}>
-            <Text variant="body">{t('translation:common.back')}</Text>
-          </Button>
-        </S.EmptyState>
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="inventory"
+            title={t('listings.detail.notFoundTitle')}
+            description={t('listings.detail.notFoundSubtitle')}
+            action={t('translation:common.back')}
+            onAction={onBack}
+          />
+        </S.StateCard>
       </S.Container>
     );
   }
@@ -143,7 +145,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       />
 
       {canPublish ? (
-        <S.DraftPublishBar>
+        <S.DraftPublishBar variant="elevated" padding="md">
           <S.DraftPublishCopy>
             <Text variant="body-sm" color="text.secondary">
               {t('listings.detail.publishHint')}
@@ -155,7 +157,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.DraftPublishBar>
       ) : null}
 
-      <S.Hero>
+      <S.Hero variant="elevated" padding="lg">
         <S.GalleryBlock>
           <S.GalleryMain>
             {mainImage ? (
@@ -182,6 +184,8 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.GalleryBlock>
 
         <S.HeroInfo>
+          {/* The product title lives in PageHeader (h1). It used to be repeated
+              verbatim here, so the same string rendered twice, 24px apart. */}
           <S.TitleRow>
             <S.BadgeRow>
               <Badge variant={statusVariant(listing.status)} size="sm">
@@ -192,15 +196,12 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                   {listing.brand}
                 </Text>
               ) : null}
+              {listing.category ? (
+                <Text variant="body-sm" color="text.secondary">
+                  {listing.category}
+                </Text>
+              ) : null}
             </S.BadgeRow>
-            <Text variant="h3" weight="semibold" color="text.primary">
-              {listing.title || listing.asin}
-            </Text>
-            {listing.category ? (
-              <Text variant="body-sm" color="text.secondary">
-                {listing.category}
-              </Text>
-            ) : null}
           </S.TitleRow>
 
           <S.IdRow>
@@ -210,34 +211,24 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             ) : null}
           </S.IdRow>
 
-          <S.ChipRow>
-            <S.Chip>
-              <Text variant="caption" color="text.secondary">
-                {t('listings.table.stock')}
-              </Text>
-              <Text variant="body-sm" weight="semibold">
-                {listing.quantity}
-              </Text>
-            </S.Chip>
-            <S.Chip>
-              <Text variant="caption" color="text.secondary">
-                {t('listings.table.sold')}
-              </Text>
-              <Text variant="body-sm" weight="semibold">
-                {listing.soldCount ?? 0}
-              </Text>
-            </S.Chip>
-            {listing.lastSaleAt ? (
-              <S.Chip>
-                <Text variant="caption" color="text.secondary">
-                  {t('listings.table.lastSale')}
-                </Text>
-                <Text variant="body-sm" weight="semibold">
-                  {formatDate(listing.lastSaleAt)}
-                </Text>
-              </S.Chip>
-            ) : null}
-          </S.ChipRow>
+          {/* One headline KPI instead of a stock/sold/last-sale chip row — those
+              three facts are itemised in the Performance card below, so the hero
+              was repeating them. Profit is the number this page exists for. */}
+          <S.ProfitHighlight $positive={profit >= 0}>
+            <Text variant="caption" color="text.secondary" weight="medium">
+              {t('listings.table.estimatedProfit')}
+            </Text>
+            <Text
+              variant="metric"
+              weight="semibold"
+              color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
+            >
+              {formatCurrency(profit)}
+            </Text>
+            <Text variant="body-sm" color="text.secondary">
+              {t('listings.table.roi')}: {`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`}
+            </Text>
+          </S.ProfitHighlight>
 
           <S.QuickLinks>
             <Button variant="text" size="small" onClick={onOpenAmazon}>
@@ -255,7 +246,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       </S.Hero>
 
       <S.SectionGrid>
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="trending-up" size={20} color="brand.primary" />
@@ -275,33 +266,16 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
                 {formatCurrency(cost)}
               </Text>
             </Meta>
-            <Meta label={t('listings.table.estimatedProfit')}>
-              <Text
-                variant="body"
-                weight="semibold"
-                color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
-              >
-                {formatCurrency(profit)}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.roi')}>
-              <Text
-                variant="body"
-                weight="semibold"
-                color={roi >= 0 ? 'semantic.success' : 'semantic.error'}
-              >
-                {`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`}
-              </Text>
-            </Meta>
+            {/* Profit and ROI are the hero headline — not repeated here. */}
             <Meta label={t('listings.table.profitMargin')}>
               <Text variant="body" weight="semibold">
                 {`${margin.toFixed(1)}%`}
               </Text>
             </Meta>
           </S.MetaList>
-        </S.Card>
+        </S.SectionCard>
 
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="inventory" size={20} color="brand.primary" />
@@ -342,9 +316,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               </Text>
             </Meta>
           </S.MetaList>
-        </S.Card>
+        </S.SectionCard>
 
-        <S.CardFull>
+        <S.SectionCardFull variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="settings" size={20} color="brand.primary" />
@@ -453,9 +427,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               {t('listings.detail.saveOverrides')}
             </Text>
           </Button>
-        </S.CardFull>
+        </S.SectionCardFull>
 
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="settings" size={20} color="brand.primary" />
@@ -491,9 +465,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             label={t('listings.detail.editConfig')}
             onClick={onOpenEditDrawer}
           />
-        </S.Card>
+        </S.SectionCard>
 
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="info" size={20} color="brand.primary" />
@@ -515,9 +489,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               <Text variant="body">{formatDate(listing.updatedAt)}</Text>
             </Meta>
           </S.MetaList>
-        </S.Card>
+        </S.SectionCard>
 
-        <S.CardFull>
+        <S.SectionCardFull variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="list" size={20} color="brand.primary" />
@@ -584,7 +558,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               {t('listings.detail.specsEmpty')}
             </Text>
           )}
-        </S.CardFull>
+        </S.SectionCardFull>
       </S.SectionGrid>
 
       <S.MobileActionBar>

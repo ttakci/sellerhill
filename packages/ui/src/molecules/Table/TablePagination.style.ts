@@ -8,7 +8,7 @@ export const PaginationContainer = styled.div`
   box-sizing: border-box;
   width: 100%;
   font-size: ${tkn('typography.fontSize.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md+')};
   background: ${tkn('colors.surface.primary')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
 
@@ -69,7 +69,7 @@ export const NavButton = styled.button`
   align-items: center;
   justify-content: center;
   color: ${tkn('colors.text.secondary')};
-  transition: all 0.12s ease;
+  transition: all ${tkn('transitions.fast')};
 
   &:hover:not(:disabled) {
     background: ${tkn('colors.background.tertiary')};

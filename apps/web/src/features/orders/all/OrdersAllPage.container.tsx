@@ -29,9 +29,9 @@ export const OrdersAllPageContainer: React.FC = () => {
     statusOptions,
     ebayAccountId,
     handleEbayAccountChange,
-    needsAttention,
-    needsAttentionOptions,
-    handleNeedsAttentionChange,
+    fulfillmentState,
+    fulfillmentStateOptions,
+    handleFulfillmentStateChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,
@@ -143,9 +143,9 @@ export const OrdersAllPageContainer: React.FC = () => {
         ebayAccountId={ebayAccountId}
         onEbayAccountChange={handleEbayAccountChange}
         storeOptions={storeOptions}
-        needsAttention={needsAttention}
-        onNeedsAttentionChange={handleNeedsAttentionChange}
-        needsAttentionOptions={needsAttentionOptions}
+        fulfillmentState={fulfillmentState}
+        onFulfillmentStateChange={handleFulfillmentStateChange}
+        fulfillmentStateOptions={fulfillmentStateOptions}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={totalCount}

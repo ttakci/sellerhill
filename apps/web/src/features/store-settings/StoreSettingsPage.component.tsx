@@ -171,7 +171,7 @@ export const StoreSettingsPageComponent = ({
               render={({ field }) => <Toggle checked={field.value} onChange={field.onChange} />}
             />
             <S.SwitchLabelContent>
-              <Text weight="bold" color="text.primary">
+              <Text weight="semibold" color="text.primary">
                 {t('storeSettings:storeSettings.globalSettings')}
               </Text>
               <Text variant="caption" color="text.secondary">
@@ -271,7 +271,7 @@ export const StoreSettingsPageComponent = ({
               <Icon name="block" size={20} />
             </S.HeaderIconWrapper>
             <S.SectionTitleContent>
-              <S.SectionTitle variant="h3" weight="bold">
+              <S.SectionTitle variant="h3" weight="semibold">
                 {t('storeSettings:storeSettings.blacklistSectionTitle')}
               </S.SectionTitle>
               <Text variant="caption" color="text.secondary">

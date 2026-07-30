@@ -46,6 +46,12 @@ export const StyledRadio = styled.div<{ $checked?: boolean; $disabled?: boolean 
     border-color: ${tkn('colors.brand.primary')};
     background-color: ${tkn('colors.background.tertiary')};
   }
+
+  /* Hidden <input> carries focus; mirror it onto the visible dot. */
+  input:focus-visible + & {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const Label = styled.span`

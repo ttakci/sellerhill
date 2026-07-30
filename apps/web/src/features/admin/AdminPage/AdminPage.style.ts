@@ -3,11 +3,7 @@ import { Card, PageContainer, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
-export const Tabs = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-  flex-wrap: wrap;
-`;
+/* Tab rail now comes from the shared TabNav atom. */
 
 export const Grid = styled.div`
   display: grid;

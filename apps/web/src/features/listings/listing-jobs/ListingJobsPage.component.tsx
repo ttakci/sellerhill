@@ -3,8 +3,8 @@ import {
   Button,
   DataTable,
   EmptyState,
+  Icon,
   PageHeader,
-  ProgressBar,
   SearchField,
   Select,
   StatusBadge,
@@ -50,44 +50,55 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
     const remaining = Math.max(job.totalAsins - job.processedCount, 0);
 
     return (
+      /*
+       * Redesigned: the card was nine `caption` texts stacked with dot
+       * separators — a wall of 12px grey with no focal point, and a fake
+       * "open detail" link inside an already-clickable card. Progress is now
+       * the headline, status leads, and the technical id is demoted to meta.
+       */
       <S.JobCard key={job.id} variant="elevated" onClick={() => onJobClick(job.id)}>
         <S.JobCardHeader>
-          <S.JobCardTitleRow>
-            <S.MonoId variant="body-sm" weight="semibold" color="text.primary">
-              {shortId}
-            </S.MonoId>
-            <Text variant="caption" color="text.secondary" weight="medium">
-              {t('listings.jobs.card.asinsTotal', { count: job.totalAsins })}
-            </Text>
-          </S.JobCardTitleRow>
           <StatusBadge status={String(job.status).toLowerCase()} size="sm">
             {statusLabel(job.status)}
           </StatusBadge>
         </S.JobCardHeader>
 
         <S.JobCardBody>
-          <S.ProgressMeta>
-            <Text variant="caption" color="text.secondary" weight="medium">
-              {job.processedCount}/{job.totalAsins}
-            </Text>
-            <Text variant="caption" weight="semibold" color="brand.primary">
-              {percent}%
-            </Text>
-          </S.ProgressMeta>
-          <ProgressBar value={percent} size="sm" />
+          <S.ProgressRow>
+            <S.ProgressRing $percent={percent} role="img" aria-label={`${percent}%`}>
+              <S.ProgressRingValue variant="body-sm" weight="semibold" numeric>
+                {percent}%
+              </S.ProgressRingValue>
+            </S.ProgressRing>
+            <S.ProgressCounts>
+              <Text variant="body" weight="semibold" numeric>
+                {t('listings.jobs.card.progressCount', {
+                  processed: job.processedCount,
+                  total: job.totalAsins,
+                })}
+              </Text>
+              <Text variant="caption" color="text.tertiary">
+                {formatJobDate(job.createdAt)}
+              </Text>
+            </S.ProgressCounts>
+          </S.ProgressRow>
 
           <S.StatsInline>
             <S.StatInline>
-              <Text variant="caption" weight="semibold" color="semantic.success">
+              <Text variant="body-sm" weight="semibold" color="semantic.success" numeric>
                 {job.successCount}
               </Text>
               <Text variant="caption" color="text.tertiary">
                 {t('listings.jobs.stats.success')}
               </Text>
             </S.StatInline>
-            <S.DotSep aria-hidden>·</S.DotSep>
             <S.StatInline>
-              <Text variant="caption" weight="semibold" color="semantic.error">
+              <Text
+                variant="body-sm"
+                weight="semibold"
+                color={job.failedCount > 0 ? 'semantic.error' : 'text.tertiary'}
+                numeric
+              >
                 {job.failedCount}
               </Text>
               <Text variant="caption" color="text.tertiary">
@@ -95,28 +106,25 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
               </Text>
             </S.StatInline>
             {remaining > 0 ? (
-              <>
-                <S.DotSep aria-hidden>·</S.DotSep>
-                <S.StatInline>
-                  <Text variant="caption" weight="semibold" color="text.secondary">
-                    {remaining}
-                  </Text>
-                  <Text variant="caption" color="text.tertiary">
-                    {t('listings.jobs.stats.remaining')}
-                  </Text>
-                </S.StatInline>
-              </>
+              <S.StatInline>
+                <Text variant="body-sm" weight="semibold" color="text.secondary" numeric>
+                  {remaining}
+                </Text>
+                <Text variant="caption" color="text.tertiary">
+                  {t('listings.jobs.stats.remaining')}
+                </Text>
+              </S.StatInline>
             ) : null}
           </S.StatsInline>
         </S.JobCardBody>
 
         <S.JobCardFooter>
-          <Text variant="caption" color="text.secondary">
-            {formatJobDate(job.createdAt)}
-          </Text>
-          <Text variant="caption" weight="semibold" color="brand.primary">
-            {t('listings.jobs.card.openDetail')}
-          </Text>
+          <S.MonoId variant="caption" color="text.tertiary">
+            {shortId}
+          </S.MonoId>
+          <S.OpenAffordance aria-hidden>
+            <Icon name="arrow-right" size="sm" />
+          </S.OpenAffordance>
         </S.JobCardFooter>
       </S.JobCard>
     );
@@ -203,6 +211,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
       )}
 
       <DataTable
+        gridMinItemWidth="20rem"
         columns={columns}
         data={jobs}
         renderGridCard={renderGridCard}

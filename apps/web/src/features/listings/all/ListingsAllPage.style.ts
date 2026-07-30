@@ -12,15 +12,16 @@ export const FilterBarWrapper = styled.div`
 export const FilterBar = styled.div`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
-  padding: ${tkn('spacing.lg')};
+  border-radius: ${tkn('radius.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   box-shadow: ${tkn('shadows.sm')};
   overflow: visible;
+  box-sizing: border-box;
 
-  @media (max-width: 64rem) {
+  @media (max-width: ${tkn('breakpoints.md')}) {
     padding: ${tkn('spacing.md')};
   }
 `;

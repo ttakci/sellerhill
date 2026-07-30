@@ -246,6 +246,8 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
       )}
 
       <DataTable
+        gridMinItemWidth="24rem"
+        gridMaxColumns={2}
         columns={columns}
         data={listings}
         renderGridCard={renderGridCard}

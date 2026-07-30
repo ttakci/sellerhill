@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Text as UIText, tkn, type AppTheme } from '@repo/ui';
+import { Button, IconButton, Text as UIText, tkn } from '@repo/ui';
 
 // --- Custom paginated carousel (content-height, not stretch-to-sibling) ---
 
@@ -55,30 +55,35 @@ export const CarouselSlide = styled.div<{ $isActive?: boolean }>`
   }
 `;
 
-export const CarouselArrow = styled.button<{ $side: 'left' | 'right' }>`
+/*
+ * Was a raw styled.button re-implementing hover/focus/disabled by hand. Extends
+ * the IconButton atom so it inherits the shared focus ring; only positioning and
+ * the brand fill (which no IconButton variant expresses) stay local.
+ */
+export const CarouselArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
   position: absolute;
   top: 50%;
   ${({ $side }) => ($side === 'left' ? 'left: -1.125rem' : 'right: -1.125rem')};
   transform: translateY(-50%);
   width: 2rem;
   height: 2rem;
+  padding: 0;
   border-radius: ${tkn('radius.full')};
-  border: none;
   background: ${tkn('colors.brand.primary')};
+  border-color: transparent;
   color: ${tkn('colors.text.inverse')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   opacity: 0;
-  transition:
-    opacity ${tkn('transitions.fast')},
-    background ${tkn('transitions.fast')};
-  z-index: 10;
+  z-index: 1;
   box-shadow: ${tkn('shadows.md')};
+
+  & svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
 
   &:hover {
     background: ${tkn('colors.brand.primaryHover')};
+    color: ${tkn('colors.text.inverse')};
   }
 
   &:disabled {
@@ -97,24 +102,25 @@ export const CarouselPagination = styled.div`
   flex-shrink: 0;
 `;
 
-export const PaginationDot = styled.button<{ $active: boolean }>`
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  border: none;
+/*
+ * 1.5rem hit area with a small visual dot inside — the dot itself used to BE the
+ * button at 0.5rem, which is far below a usable/accessible target size.
+ */
+export const PaginationDot = styled(IconButton)<{ $active: boolean }>`
+  width: 1.5rem;
+  height: 1.5rem;
   padding: 0;
-  cursor: pointer;
-  background: ${({ $active, theme }) => {
-    const t = theme as AppTheme;
-    return $active ? t.colors.brand.primary : t.colors.border.primary;
-  }};
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  border-radius: ${tkn('radius.full')};
+  color: inherit;
+`;
 
-  &:hover {
-    transform: scale(1.25);
-  }
+export const PaginationDotMark = styled.span<{ $active: boolean }>`
+  width: ${({ $active }) => ($active ? '1.25rem' : '0.5rem')};
+  height: 0.5rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.brand.primary : theme.colors.border.primary};
+  transition: all ${tkn('transitions.fast')};
 `;
 
 export const CarouselTopBar = styled.div`
@@ -144,18 +150,7 @@ export const SliderEmpty = styled.div`
 
 export const SliderEmptyText = styled(UIText)``;
 
-export const ViewAllButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: ${tkn('colors.brand.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-  transition: color ${tkn('transitions.fast')};
-
-  &:hover {
-    color: ${tkn('colors.brand.primaryHover')};
-  }
+/* Extends the Button atom (use variant="text"); was a hand-styled link-button. */
+export const ViewAllButton = styled(Button)`
+  align-self: flex-end;
 `;

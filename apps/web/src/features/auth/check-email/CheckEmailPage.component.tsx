@@ -58,7 +58,7 @@ export const CheckEmailPageComponent = ({
             </S.IconContainer>
 
             <S.Header>
-              <Text variant="h3" weight="bold">
+              <Text variant="h2" weight="semibold">
                 {t('auth:auth.checkEmail.header')}
               </Text>
               <Text variant="body" color="text.secondary">

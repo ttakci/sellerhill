@@ -74,7 +74,7 @@ export const RegisterPageComponent = ({
         <S.FormPanel>
           <S.AuthCard>
             <S.Header>
-              <Text variant="h2" weight="bold">
+              <Text variant="h2" weight="semibold">
                 {t('auth:auth.register.title')}
               </Text>
               <Text variant="body" color="text.secondary">

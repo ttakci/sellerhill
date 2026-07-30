@@ -5,9 +5,9 @@ export const Container = PageContainer;
 
 export const FilterBar = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.sm')};
-  padding: ${tkn('spacing.lg')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
@@ -15,7 +15,7 @@ export const FilterBar = styled.div`
   overflow: visible;
   box-sizing: border-box;
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.md')}) {
     padding: ${tkn('spacing.md')};
   }
 `;
@@ -71,8 +71,6 @@ export const ResultCount = styled(UIText)`
   padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
 `;
 
 export const BuyerCell = styled.div`
@@ -109,7 +107,9 @@ export const ProductThumb = styled.div`
   width: 2.75rem;
   height: 2.75rem;
   border-radius: ${tkn('radius.sm')};
-  background: ${tkn('colors.background.tertiary')};
+  /* Transparent per the product-image rule — a grey plate behind a cut-out
+     product shot reads as a broken image. */
+  background: transparent;
   flex-shrink: 0;
   overflow: hidden;
   display: flex;

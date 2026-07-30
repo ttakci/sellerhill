@@ -6,6 +6,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
 
 import { ProxyService } from './proxy.service';
+import { normalizeTotpSecret } from './totp-secret';
 
 export interface AmazonAccountRow {
   id: string;
@@ -82,8 +83,11 @@ export class AmazonAccountsService {
     return {
       ...row,
       decryptedPassword: this.encryption.decrypt(row.encrypted_password),
+      // Secondary normalization on read: any secret stored BEFORE write-time
+      // normalization shipped (or via raw SQL) is recovered here so the user
+      // doesn't have to re-enter it. Normalize after decrypting.
       decryptedTwoFactorSecret: row.two_factor_secret
-        ? this.encryption.decrypt(row.two_factor_secret)
+        ? normalizeTotpSecret(this.encryption.decrypt(row.two_factor_secret))
         : null,
     };
   }
@@ -108,8 +112,12 @@ export class AmazonAccountsService {
     }
 
     const encryptedPassword = this.encryption.encrypt(data.password);
+    // Normalize the 2FA secret before encrypting: Amazon shows the secret in
+    // space-separated blocks ("abcd efgh …") and users paste it verbatim.
+    // otplib's base32 decoder throws on the space, so strip whitespace/separators
+    // and uppercase once at write time — the stored value is canonical.
     const encryptedTwoFactor = data.twoFactorSecret
-      ? this.encryption.encrypt(data.twoFactorSecret)
+      ? this.encryption.encrypt(normalizeTotpSecret(data.twoFactorSecret) ?? '')
       : null;
 
     // Defaults match migration 037 (FALSE / NULL / FALSE) when fields are omitted.
@@ -193,7 +201,11 @@ export class AmazonAccountsService {
 
     if (data.twoFactorSecret !== undefined) {
       updates.push(`two_factor_secret = $${paramIndex}`);
-      params.push(data.twoFactorSecret ? this.encryption.encrypt(data.twoFactorSecret) : null);
+      params.push(
+        data.twoFactorSecret
+          ? this.encryption.encrypt(normalizeTotpSecret(data.twoFactorSecret) ?? '')
+          : null
+      );
       paramIndex++;
       credentialsChanged = true;
     }
@@ -275,9 +287,19 @@ export class AmazonAccountsService {
   }
 
   async updateStatus(userId: string, id: string, status: AmazonAccountStatus): Promise<void> {
+    // Entering VERIFYING clears the previous failure reason so a stale error is
+    // never shown next to an in-flight re-verification. The branch is resolved
+    // in JS, not SQL: reusing $1 as both the assigned value and a comparison
+    // operand made Postgres fail with "inconsistent types deduced for parameter
+    // $1" (it infers the placeholder's type once, from all usages).
+    const clearError = status === AmazonAccountStatus.VERIFYING;
     await this.databaseService.query(
-      `UPDATE amazon_accounts SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3`,
-      [status, id, userId]
+      `UPDATE amazon_accounts
+          SET status = $1,
+              last_verification_error = CASE WHEN $4 THEN NULL ELSE last_verification_error END,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2 AND user_id = $3`,
+      [status, id, userId, clearError]
     );
   }
 

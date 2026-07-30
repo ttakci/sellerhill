@@ -15,6 +15,8 @@ export const DataTableComponent = <T,>({
   columns,
   data,
   renderGridCard,
+  gridMinItemWidth,
+  gridMaxColumns,
   viewMode,
   onViewModeChange,
   hideViewToggle,
@@ -102,7 +104,7 @@ export const DataTableComponent = <T,>({
           onRowClick={onRowClick}
         />
       ) : (
-        <S.GridContainer>
+        <S.GridContainer $minItemWidth={gridMinItemWidth} $maxColumns={gridMaxColumns}>
           {isEmpty ? (
             <S.GridEmptyState>{resolvedEmpty}</S.GridEmptyState>
           ) : (

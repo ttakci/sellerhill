@@ -1,22 +1,27 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
+import { controlTokens, spacingTokens, typographyTokens } from '../../theme/designTokens';
 import { tkn } from '../../theme/tkn';
 
 import { ActionSurfaceProps, ButtonSize } from './Button.types';
 
-/** Align medium/small with compact form-control heights (SearchField / Select). */
+/**
+ * Align with the shared control geometry so a Button always sits flush with the
+ * field beside (or above) it. `large` deliberately matches `mediumLabeled` —
+ * that is the auth-form pairing: labeled TextInput above, primary submit below.
+ */
 const getBaseHeight = (size: ButtonSize) => {
   switch (size) {
     case 'xsmall':
-      return '2rem'; /* 32px */
+      return '2rem'; /* 32px — inline/table actions */
     case 'small':
-      return '2.5rem'; /* 40px — matches control small compact */
+      return controlTokens.height.small; /* 40px — matches control small compact */
     case 'large':
-      return '3.25rem'; /* 52px — matches control medium labeled */
+      return controlTokens.height.mediumLabeled; /* 56px — matches labeled field */
     case 'medium':
     default:
-      return '2.75rem'; /* 44px — matches control medium compact */
+      return controlTokens.height.medium; /* 44px — matches control medium compact */
   }
 };
 
@@ -48,19 +53,33 @@ const getMinWidth = (size: ButtonSize): string => {
   }
 };
 
-const getFontSize = (size: ButtonSize): string => {
-  switch (size) {
-    case 'xsmall':
-      return '0.875rem'; /* 14px */
-    case 'small':
-      return '0.9375rem'; /* 15px */
-    case 'large':
-      return '1.0625rem'; /* 17px */
-    case 'medium':
+/**
+ * Button labels stay on the documented type scale. The previous 15px/17px steps
+ * existed nowhere else in the system — an invented 13th/14th scale step.
+ * 14px is the dense-SaaS default; only `large` (hero/auth CTAs) steps up.
+ */
+const getFontSize = (size: ButtonSize): string =>
+  size === 'large' ? typographyTokens.fontSize.md : typographyTokens.fontSize.sm;
+
+/**
+ * Colored elevation for filled variants. Neutral `shadowTokens` can't express a
+ * brand-tinted glow, so the formula lives here once instead of being retyped
+ * per variant per state (which is how primary and danger drifted apart).
+ */
+const glow = (color: string, level: 'rest' | 'hover' | 'press'): string => {
+  switch (level) {
+    case 'hover':
+      return `0 0.5rem 1.5rem 0 ${color}50`;
+    case 'press':
+      return `0 0.125rem 0.5rem 0 ${color}40`;
+    case 'rest':
     default:
-      return '1rem'; /* 16px — primary UI actions */
+      return `0 0.25rem 0.875rem 0 ${color}40`;
   }
 };
+
+/** Soft tinted lift for outline variants. */
+const outlineGlow = (color: string): string => `0 0.25rem 0.625rem 0 ${color}18`;
 
 export const ActionSurface = styled.button<ActionSurfaceProps>`
   all: unset;
@@ -89,7 +108,16 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
   font-size: ${({ $size }) => getFontSize($size)};
   letter-spacing: ${tkn('typography.letterSpacing.normal')};
 
-  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all ${tkn('transitions.fast')};
+
+  /* all:unset strips the native focus ring, so keyboard users had NO visible
+     focus on the most-used interactive atom in the app. Outline (not box-shadow)
+     so it survives the variant-specific shadows below, with an offset that keeps
+     it legible on both filled and outline variants. */
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 
   /* Force nested content (Text spans, Icon wrappers) to inherit the button's
      variant color, so Text's default text.primary doesn't override it.
@@ -106,17 +134,17 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
         return css`
           background-color: ${theme.colors.brand.primary};
           color: ${theme.colors.text.inverse};
-          box-shadow: 0 0.25rem 0.875rem 0 ${theme.colors.brand.primary}40;
+          box-shadow: ${glow(theme.colors.brand.primary, 'rest')};
 
           &:hover:not(:disabled) {
             background-color: ${theme.colors.brand.primaryHover};
             filter: ${theme.mode === 'dark' ? 'brightness(1.08)' : 'brightness(0.92)'};
-            box-shadow: 0 0.5rem 1.5rem 0 ${theme.colors.brand.primary}50;
+            box-shadow: ${glow(theme.colors.brand.primary, 'hover')};
           }
 
           &:active:not(:disabled) {
             filter: brightness(1);
-            box-shadow: 0 0.125rem 0.5rem 0 ${theme.colors.brand.primary}40;
+            box-shadow: ${glow(theme.colors.brand.primary, 'press')};
             background-color: ${theme.colors.brand.primary};
           }
         `;
@@ -133,7 +161,7 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
               : theme.colors.brand.secondary};
             border-color: ${theme.colors.brand.primaryHover};
             color: ${theme.colors.brand.primaryHover};
-            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
+            box-shadow: ${outlineGlow(theme.colors.brand.primary)};
           }
 
           &:active:not(:disabled) {
@@ -154,7 +182,7 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             background-color: ${theme.mode === 'dark'
               ? `${theme.colors.brand.primary}18`
               : `${theme.colors.brand.primary}15`};
-            box-shadow: 0 0.25rem 0.625rem 0 ${theme.colors.brand.primary}18;
+            box-shadow: ${outlineGlow(theme.colors.brand.primary)};
           }
 
           &:active:not(:disabled) {
@@ -168,7 +196,7 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
         return css`
           background-color: transparent;
           color: ${theme.colors.text.secondary};
-          padding: 0 0.75rem;
+          padding: 0 ${spacingTokens['sm-md']};
           height: auto;
           min-height: 2rem;
 
@@ -189,16 +217,16 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
           background-color: ${theme.colors.semantic.error};
           color: ${theme.colors.text.inverse};
           border: 0.0625rem solid ${theme.colors.semantic.error};
-          box-shadow: 0 0.25rem 0.875rem 0 ${theme.colors.semantic.error}40;
+          box-shadow: ${glow(theme.colors.semantic.error, 'rest')};
 
           &:hover:not(:disabled) {
             filter: ${theme.mode === 'dark' ? 'brightness(1.1)' : 'brightness(0.92)'};
-            box-shadow: 0 0.5rem 1.5rem 0 ${theme.colors.semantic.error}45;
+            box-shadow: ${glow(theme.colors.semantic.error, 'hover')};
           }
 
           &:active:not(:disabled) {
             filter: brightness(1);
-            box-shadow: 0 0.125rem 0.5rem 0 ${theme.colors.semantic.error}35;
+            box-shadow: ${glow(theme.colors.semantic.error, 'press')};
           }
         `;
     }

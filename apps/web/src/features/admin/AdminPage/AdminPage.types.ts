@@ -4,11 +4,13 @@ import type {
   AdminOverviewDto,
   AdminProxyDto,
   AdminProxyListDto,
+  AdminUserDto,
   AdminUsersListDto,
   PlatformSettingCategory,
   PlatformSettingDto,
   ProviderCostSummaryDto,
 } from '@repo/shared';
+import type { TableColumn } from '@repo/ui';
 
 export type AdminTabId = 'overview' | 'queues' | 'costs' | 'proxies' | 'settings' | 'billing' | 'users';
 
@@ -39,6 +41,9 @@ export interface AdminPageComponentProps {
   billingMetrics?: AdminBillingMetricsDto;
   proxyPool?: AdminProxyListDto;
   usersList?: AdminUsersListDto;
+  /** Real table columns — the tabs used to render hand-built flex rows. */
+  userColumns: TableColumn<AdminUserDto>[];
+  proxyColumns: TableColumn<AdminProxyDto>[];
   settingGroups: SettingGroup[];
   settingDrafts: Record<string, string>;
   isSavingSetting: boolean;
@@ -49,7 +54,6 @@ export interface AdminPageComponentProps {
   onTabChange: (tab: AdminTabId) => void;
   onProxyFieldChange: (field: keyof ProxyFormState, value: string) => void;
   onProxySubmit: () => void;
-  onProxyToggleStatus: (proxy: AdminProxyDto) => void;
   onSettingDraftChange: (key: string, value: string) => void;
   onSettingSave: (key: string) => void;
   onSettingToggle: (setting: PlatformSettingDto) => void;
@@ -57,6 +61,4 @@ export interface AdminPageComponentProps {
   onEmailTest: () => void;
   /** Renders a micro-USD amount; returns the em-dash placeholder for null (unknown). */
   formatCost: (micros: number | null, currency: string | null) => string;
-  /** Localized short date for ISO strings; em-dash for null. */
-  formatDateValue: (iso: string | null) => string;
 }

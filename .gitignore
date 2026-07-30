@@ -76,3 +76,13 @@ coverage/
 
 # Playwright MCP session artifacts (logs/page snapshots)
 .playwright-mcp/
+
+# Amazon buyer-account browser profiles (Chromium user_data_dir per account).
+# Session cookies + cache: machine-local, regenerated on next login, and never
+# safe to share — a committed profile would leak an authenticated session.
+.browser-state/
+
+# Auto-fulfill audit evidence (checkout screenshots + blocked.log). Contains
+# buyer addresses and order details, is TTL-swept by FULFILLMENT_EVIDENCE_TTL_DAYS,
+# and is treated as admin-only on the server (see CLAUDE.md "Backups & monitoring").
+fulfillment-evidence/

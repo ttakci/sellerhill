@@ -2,6 +2,7 @@ import type { OrderDto } from '@repo/shared';
 import {
   Button,
   DataTable,
+  EmptyState,
   PageHeader,
   SearchField,
   Select,
@@ -30,9 +31,9 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   ebayAccountId,
   onEbayAccountChange,
   storeOptions,
-  needsAttention,
-  onNeedsAttentionChange,
-  needsAttentionOptions,
+  fulfillmentState,
+  onFulfillmentStateChange,
+  fulfillmentStateOptions,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -99,10 +100,10 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
           </S.SelectWrapper>
           <S.SelectWrapper>
             <Select
-              value={needsAttention ? 'true' : 'false'}
-              onChange={onNeedsAttentionChange}
-              options={needsAttentionOptions}
-              placeholder={t('orders.autoFulfill.filter.all')}
+              value={fulfillmentState}
+              onChange={onFulfillmentStateChange}
+              options={fulfillmentStateOptions}
+              placeholder={t('orders.fulfillmentState.filter.all')}
               size="medium"
               fullWidth
             />
@@ -121,15 +122,38 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
       </S.FilterBar>
 
       <DataTable
+        gridMinItemWidth="26rem"
+        gridMaxColumns={2}
         columns={columns}
         data={orders}
         renderGridCard={renderGridCard}
         viewMode={tableView}
         onViewModeChange={onTableViewChange}
-        emptyMessage={
-          isInitialLoading
-            ? t('translation:common.loading')
-            : t('orders.all.emptyTitle')
+        emptyContent={
+          isInitialLoading ? (
+            <EmptyState
+              icon="loader"
+              title={t('orders.all.loadingTitle')}
+              description={t('orders.all.loadingSubtitle')}
+              size="md"
+            />
+          ) : hasActiveFilters ? (
+            <EmptyState
+              icon="search"
+              title={t('orders.all.filtersTitle')}
+              description={t('orders.all.filtersSubtitle')}
+              action={t('orders.filters.clearAll')}
+              onAction={onClearFilters}
+              size="lg"
+            />
+          ) : (
+            <EmptyState
+              icon="shopping-bag"
+              title={t('orders.all.emptyTitle')}
+              description={t('orders.all.emptySubtitle')}
+              size="lg"
+            />
+          )
         }
         onDownload={onDownload}
         pagination={pagination}

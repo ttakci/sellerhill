@@ -64,7 +64,9 @@
         "save": "Kaydet",
         "delete": "Sil",
         "deleteConfirm": "Bu şablon silinsin mi?",
-        "empty": "Henüz özel şablon yok."
+        "empty": "Henüz özel şablon yok.",
+        "title": "Mesaj şablonları",
+        "subtitle": "Kendi alıcı mesaj şablonlarınızı oluşturun ve düzenleyin."
       }
     }
   }

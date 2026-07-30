@@ -43,6 +43,12 @@ export const Switch = styled.div<{ $checked?: boolean; $disabled?: boolean }>`
   &:hover {
     opacity: 0.9;
   }
+
+  /* Hidden <input> carries focus; mirror it onto the visible switch. */
+  input:focus-visible + & {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const Label = styled.span`

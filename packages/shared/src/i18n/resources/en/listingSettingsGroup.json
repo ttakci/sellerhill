@@ -2,6 +2,7 @@
   "listingSettingsGroup": {
     "title": "Listing Settings Groups",
     "subtitle": "Manage and assign strategy templates to your product listings for automated optimization.",
+    "loadingDescription": "Fetching your listing groups.",
     "createNewGroup": "Create New Group",
     "editGroup": "Edit Listing Group",
     "backToList": "Back to Groups",

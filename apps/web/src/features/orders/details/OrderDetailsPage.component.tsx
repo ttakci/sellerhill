@@ -2,6 +2,7 @@ import { ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
+  EmptyState,
   Icon,
   IdBadge,
   PageHeader,
@@ -11,7 +12,10 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { autoFulfillStatusToBadgeVariant } from '../shared/auto-fulfill-status';
+import {
+  fulfillmentStateNoticeKey,
+  fulfillmentStateToBadgeVariant,
+} from '../shared/fulfillment-state';
 import { orderStatusToBadgeStatus } from '../shared/order-status';
 
 import * as S from './OrderDetailsPage.style';
@@ -49,14 +53,19 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
+  /* Loading and not-found both route through the shared EmptyState molecule.
+     They used to be a bespoke block — loading was one line of grey text, so the
+     two states looked like different pages. */
   if (isLoading) {
     return (
       <S.Container>
-        <S.EmptyState>
-          <Text variant="body" color="text.secondary">
-            {t('translation:common.loading')}
-          </Text>
-        </S.EmptyState>
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="inbox"
+            title={t('translation:common.loading')}
+            description={t('orders.detail.loadingSubtitle')}
+          />
+        </S.StateCard>
       </S.Container>
     );
   }
@@ -64,18 +73,15 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   if (!order) {
     return (
       <S.Container>
-        <S.EmptyState>
-          <Icon name="inbox" size={40} />
-          <Text variant="h4" weight="semibold">
-            {t('orders.detail.notFoundTitle')}
-          </Text>
-          <Text variant="body-sm" color="text.secondary">
-            {t('orders.detail.notFoundSubtitle')}
-          </Text>
-          <Button variant="secondary" onClick={onBack}>
-            <Text variant="body">{t('translation:common.back')}</Text>
-          </Button>
-        </S.EmptyState>
+        <S.StateCard variant="elevated" padding="lg">
+          <EmptyState
+            icon="inbox"
+            title={t('orders.detail.notFoundTitle')}
+            description={t('orders.detail.notFoundSubtitle')}
+            action={t('translation:common.back')}
+            onAction={onBack}
+          />
+        </S.StateCard>
       </S.Container>
     );
   }
@@ -90,22 +96,15 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         ),
       })
     : undefined;
+  const noticeKey = fulfillmentStateNoticeKey(order.fulfillmentState);
+  const fulfillmentNotice = noticeKey ? t(noticeKey) : undefined;
 
-  const desktopActions = (
-    <S.HeaderActions>
-      <Button variant="primary" size="small" onClick={onOpenLinkAmazon} isLoading={isUpdating}>
-        <Icon name="link" size={16} />
-        <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
-      </Button>
-      {canCopyAddress && (
-        <Button variant="secondary" size="small" onClick={onCopyAddress}>
-          <Icon name="copy" size={16} />
-          <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
-        </Button>
-      )}
-    </S.HeaderActions>
-  );
-
+  /*
+   * No header action cluster. "Link Amazon" and "Copy address" used to render
+   * BOTH here and inside their own cards — on desktop that meant two identical
+   * primary CTAs competing on one screen. Each action now lives once, in the
+   * card that owns it, plus the mobile action bar.
+   */
   return (
     <S.Container>
       <PageHeader
@@ -113,10 +112,9 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         subtitle={`${order.ebayOrderId} · ${formatDate(order.createdAt)}`}
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
-        actions={desktopActions}
       />
 
-      <S.Hero>
+      <S.Hero variant="elevated" padding="lg">
         <S.ProductImage>
           {order.product?.imageUrl ? (
             <img src={order.product.imageUrl} alt={productTitle} />
@@ -130,19 +128,26 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
               {statusLabel}
             </StatusBadge>
-            {order.autoFulfillStatus && (
+            {order.fulfillmentState && (
               <Badge
-                variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
+                variant={fulfillmentStateToBadgeVariant(order.fulfillmentState)}
                 size="xs"
                 isPill
               >
-                {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
+                {t(`orders.fulfillmentState.${order.fulfillmentState}`)}
               </Badge>
             )}
-            <Text variant="caption" color="text.secondary">
-              {formatDate(order.createdAt)}
-            </Text>
           </S.BadgeRow>
+          {/*
+            State-specific guidance instead of a bare reason code. "blocked ·
+            address" told the seller nothing about what to DO; each state now
+            explains the consequence and the next step.
+          */}
+          {fulfillmentNotice && (
+            <Text variant="caption" color="text.secondary">
+              {fulfillmentNotice}
+            </Text>
+          )}
           {autoFulfillReasonLabel && (
             <Text variant="caption" color="text.secondary">
               {autoFulfillReasonLabel}
@@ -160,9 +165,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             {order.product?.ebayItemId ? (
               <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" />
             ) : null}
-            <Text variant="body-sm" weight="semibold" color="brand.primary">
-              {order.ebayOrderId}
-            </Text>
           </S.IdRow>
 
           <S.ProfitHighlight $positive={profitPositive}>
@@ -177,7 +179,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               )}
             </S.ProfitLabelRow>
             <Text
-              variant="h3"
+              variant="metric"
               weight="semibold"
               color={profitPositive ? 'semantic.success' : 'semantic.error'}
             >
@@ -195,47 +197,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         </S.HeroInfo>
       </S.Hero>
 
-      <S.KpiStrip>
-        <S.KpiCard>
-          <Text variant="caption" color="text.secondary">
-            {t('orders.detail.orderTotal')}
-          </Text>
-          <Text variant="body" weight="semibold">
-            {formatCurrency(order.saleTotal)}
-          </Text>
-        </S.KpiCard>
-        <S.KpiCard>
-          <Text variant="caption" color="text.secondary">
-            {t('orders.detail.orderEarnings')}
-          </Text>
-          <Text variant="body" weight="semibold">
-            {formatCurrency(order.ebayEarnings)}
-          </Text>
-        </S.KpiCard>
-        <S.KpiCard>
-          <Text variant="caption" color="text.secondary">
-            {t('orders.detail.totalAmazonCost')}
-          </Text>
-          <Text variant="body" weight="semibold">
-            {formatCurrency(totalAmazonCost)}
-          </Text>
-        </S.KpiCard>
-        <S.KpiCard>
-          <Text variant="caption" color="text.secondary">
-            {t('orders.detail.roi')}
-          </Text>
-          <Text
-            variant="body"
-            weight="semibold"
-            color={profitPositive ? 'semantic.success' : 'semantic.error'}
-          >
-            {roiLabel}
-          </Text>
-        </S.KpiCard>
-      </S.KpiStrip>
-
-      {/* Net profit formula */}
-      <S.Card>
+      {/*
+        Net profit derivation. Deliberately reduced to earnings − total cost:
+        the three cost components (purchase / tax / shipping) are itemised once,
+        in the Amazon Costs card, and this row used to repeat them verbatim.
+      */}
+      <S.SectionCard variant="elevated" padding="lg">
         <S.CardHeader>
           <S.CardHeaderLeft>
             <Icon name="insights" size={20} color="brand.primary" />
@@ -244,37 +211,47 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </Text>
           </S.CardHeaderLeft>
         </S.CardHeader>
-        <Text variant="body-sm" color="text.secondary">
-          {t('orders.detail.analysisDesc')}
-        </Text>
         <S.FormulaRow>
-          <Text variant="body-sm">
-            {t('orders.detail.calcEarnings')} {formatCurrency(order.ebayEarnings)}
-          </Text>
-          <Text variant="body-sm" color="text.secondary">
+          <S.FormulaTerm>
+            <Text variant="caption" color="text.secondary">
+              {t('orders.detail.orderEarnings')}
+            </Text>
+            <Text variant="metric-sm" weight="semibold">
+              {formatCurrency(order.ebayEarnings)}
+            </Text>
+          </S.FormulaTerm>
+          <S.FormulaOperator variant="metric-sm" color="text.tertiary">
             −
-          </Text>
-          <Text variant="body-sm">
-            {t('orders.detail.calcPurchase')} {formatCurrency(order.purchasePrice)}
-          </Text>
-          <Text variant="body-sm" color="text.secondary">
-            −
-          </Text>
-          <Text variant="body-sm">
-            {t('orders.detail.calcTax')} {formatCurrency(order.amazonTax || 0)}
-          </Text>
-          <Text variant="body-sm" color="text.secondary">
-            −
-          </Text>
-          <Text variant="body-sm">
-            {t('orders.detail.calcShipping')} {formatCurrency(order.amazonShipping || 0)}
-          </Text>
+          </S.FormulaOperator>
+          <S.FormulaTerm>
+            <Text variant="caption" color="text.secondary">
+              {t('orders.detail.totalAmazonCost')}
+            </Text>
+            <Text variant="metric-sm" weight="semibold">
+              {formatCurrency(totalAmazonCost)}
+            </Text>
+          </S.FormulaTerm>
+          <S.FormulaOperator variant="metric-sm" color="text.tertiary">
+            =
+          </S.FormulaOperator>
+          <S.FormulaTerm>
+            <Text variant="caption" color="text.secondary">
+              {t('orders.detail.netProfitResult')}
+            </Text>
+            <Text
+              variant="metric-sm"
+              weight="semibold"
+              color={profitPositive ? 'semantic.success' : 'semantic.error'}
+            >
+              {formatCurrency(order.netProfit)}
+            </Text>
+          </S.FormulaTerm>
         </S.FormulaRow>
-      </S.Card>
+      </S.SectionCard>
 
       <S.SectionGrid>
         {/* Customer */}
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="user" size={20} color="brand.primary" />
@@ -325,10 +302,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               <Text variant="body-sm">{t('orders.detail.copyAddress')}</Text>
             </Button>
           )}
-        </S.Card>
+        </S.SectionCard>
 
         {/* eBay summary */}
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="tag" size={20} color="brand.primary" />
@@ -372,10 +349,10 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Text>
             </Meta>
           </S.MetaList>
-        </S.Card>
+        </S.SectionCard>
 
         {/* Amazon costs */}
-        <S.Card>
+        <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
               <Icon name="shopping-bag" size={20} color="brand.primary" />
@@ -409,7 +386,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               <Text variant="body-sm">{t('orders.detail.amazonOrder')}</Text>
             </Button>
           ) : null}
-        </S.Card>
+        </S.SectionCard>
       </S.SectionGrid>
 
       <S.MobileActionBar>

@@ -16,7 +16,10 @@ export const StoresPageContainer = (): React.ReactElement => {
   const [getConnectUrl, { isLoading: isConnecting }] = useLazyGetEbayConnectUrlQuery();
   const { data: accountsData, isLoading } = useGetEbayAccountsQuery();
 
-  useLoading(isLoading);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(false);
 
   const handleConnect = (): void => {
     void getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US })
@@ -40,6 +43,7 @@ export const StoresPageContainer = (): React.ReactElement => {
   return (
     <StoresPageComponent
       accounts={accountsData?.items || []}
+      isLoading={isLoading}
       isConnecting={isConnecting}
       onConnect={handleConnect}
     />

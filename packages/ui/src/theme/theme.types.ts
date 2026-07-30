@@ -86,15 +86,26 @@ export interface ThemeColors {
     active: string;
     accent: string;
     divider: string;
-    logoGlow: string;
   };
 
-  // Dashboard period card headers (Sellerboard-style solid bands)
+  // Dashboard period card headers (Sellerboard-style bands) + chart/P&L palette
   dashboard: {
-    periodToday: string;
-    periodThisWeek: string;
-    periodThisMonth: string;
-    periodLastMonth: string;
+    /** Gradient band backgrounds for the period card headers (always-dark, theme-identical) */
+    periodTodayGradient: string;
+    periodThisWeekGradient: string;
+    periodThisMonthGradient: string;
+    periodThisYearGradient: string;
+    /** Text on the (always dark) period bands — fixed in both themes */
+    periodForeground: string;
+    periodForegroundMuted: string;
+    /** Chart series colors (net profit bars + sales/units/refunds lines) */
+    seriesProfit: string;
+    seriesSales: string;
+    seriesUnits: string;
+    seriesRefunds: string;
+    /** P&L heat-map cell tints (applied through an opacity overlay) */
+    heatPositive: string;
+    heatNegative: string;
   };
 
   // Landing page specific tokens
@@ -127,8 +138,14 @@ export interface AppTheme {
   colors: ThemeColors;
   spacing: typeof tokens.spacingTokens;
   radius: typeof tokens.radiusTokens;
+  /** Pixel radii for SVG/canvas consumers (charts) — mirrors `radius`. */
+  radiusPx: typeof tokens.radiusPxTokens;
   shadows: typeof tokens.shadowTokens;
   typography: typeof tokens.typographyTokens;
   transitions: typeof tokens.transitionTokens;
   controls: typeof tokens.controlTokens;
+  /** Overlay stacking order — never hardcode a z-index. */
+  zIndex: typeof tokens.zIndexTokens;
+  /** Responsive tiers — never hardcode a breakpoint literal. */
+  breakpoints: typeof tokens.breakpointTokens;
 }

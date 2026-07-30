@@ -412,8 +412,10 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
   4. Add-to-cart with quantity — `out_of_stock` if ASIN unavailable or no visible add-to-cart button.
   4b. **Cart verification (HARD, fail-closed)** — `verifyCartContents` navigates to the cart page and requires EXACTLY one active line item matching our ASIN (and, when readable, the order quantity) → otherwise throws `cart` + `cart-mismatch` evidence snap. An unreadable row count also blocks; selector drift surfaces during dry-run tuning, before money moves.
   5. `selectShipToAddress` (throws `address`), `selectDefaultPayment` (throws `payment` on decline signals).
-  6. **Review-step HARD CAP** — reads grand total on the review page (the last step before "Place Order"); non-finite/≤0 → `cap`; `> capTotal` when `AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false'` (default ON) → `cap`. Aborts BEFORE the click, never over-spends.
-  7. **Dry-run** (`amazon_accounts.auto_fulfill_dry_run`) → snap `dry_run_review` + set status `dry_run` + return. NO click.
+  **Ship-to must be the eBay BUYER, never the buyer account's default.** `loadInputs` refuses the order (`address`) when `orders.shipping_address` lacks street/city/zip — it previously defaulted to `{}`, and the flow then "used whatever Amazon pre-selected", i.e. the account holder's own address: a paid order delivered to the wrong person with the eBay sale still unfulfilled. Saved-address selection uses the pure, unit-tested `addressBlockMatchesBuyer` (`address-match.ts`), which requires street **and** zip (plus the unit line when the buyer has one) — a zip-only rule silently picked the wrong entry when one household held two addresses under the same zip (observed live: `30 N GOULD ST 24233` vs `STE567`). Name is corroborating only, since eBay and Amazon render recipients differently. No match → `addBuyerAddress` enters the buyer's address; if that is unavailable the order fails closed.
+  6. **Review-step HARD CAP** — reads grand total on the review page (the last step before "Place Order"). The **Place Order control must be visible** before the total is accepted (`review_unreadable` otherwise): Amazon's address step also renders an "Order total" sidebar, so without this gate the cap was checked against an earlier step's figure and dry-run reported success without ever proving the final pre-purchase page. The total is read from labelled selectors first, then a structure-independent `/order total|grand total\s*:?\s*\$N/` text fallback anchored to the LABEL (never "first price on the page", which could be a subtotal). Non-finite/≤0 → `review_unreadable` (distinct from `cap`, so a selector break is never misreported as the spend guard working); `> capTotal` when `AUTO_FULFILL_REVIEW_CAP_HARD_STOP !== 'false'` (default ON) → `cap`. Aborts BEFORE the click, never over-spends.
+  7. **Dry-run** (`amazon_accounts.auto_fulfill_dry_run`) → snap `dry_run_review`, then `simulatePlacement` + return. NO click.
+  **Dry-run simulates the post-purchase bookkeeping** so an operator can verify what a real placement does to an order — which costs land, that it becomes cost-captured, what net profit is computed — without money leaving. It writes a `SIM-`-prefixed `amazon_order_id` (`SIMULATED_AMAZON_ORDER_PREFIX`), splits the REAL review-page total into `purchase_price`/`amazon_tax`/`amazon_shipping`, sets `cost_capture_status='linked'`, and calls the real `recomputeProfit` so `net_profit` is produced exactly as production would. Three safety properties are load-bearing: `auto_fulfill_status` stays **DRY_RUN** (never `placed`, so `shouldSkipFulfillStart` and the PURCHASED state are untouched); the `SIM-` prefix makes `deriveFulfillmentState` report SIMULATED; and **tracking is NOT scheduled** — the id is fake, so a tracker would scrape a non-existent Amazon order and mark the row failed. Fail-soft throughout: a diagnostic aid must never break the run it inspects.
   8. Else click "Place Order" (click errors swallowed at warn-log to prevent double-order races), `parseConfirmation` (throws `no_confirmation` on missing confirmation DOM), `onPlaced`, set status `placed`.
 - **Money safety — `onPlaced` (fail-soft layered)**: after a confirmed placement, NO path rethrows into the processor's failure branch.
   - **Layer 1** (single atomic UPDATE): `auto_fulfill_status='placed'` + `cost_capture_status='linked'` + real `purchase_price`/`amazon_tax`/`amazon_shipping` + `amazon_order_id` + `amazon_linked_at=NOW` in one statement.
@@ -435,9 +437,13 @@ When `store_settings.auto_fulfill_enabled` is on, a brand-new matched eBay order
   1. **Store gate** — `autoFulfillEnabled` toggle in the live `StoreSettingsDrawer`, set globally or per eBay store (Store > Global > Default, same as `amazonTaxRate`). The drawer also carries the tracking-conversion provider Select (only `local` visible; `api` labeled "coming soon").
   2. **Buyer-account gate** — `autoFulfillEnabled` toggle + `autoFulfillCapTotal` in the live `AmazonAccountDrawer`, per Amazon buyer account. A user with two buyer accounts must opt each one in separately. Enabling is refused by `assertCanEnable` without a proxy or a cap; the drawer surfaces the backend's own error key (`autoFulfillProxyRequired` / `autoFulfillCapRequired`) rather than a generic failure so the user knows which guard rejected them.
 
-  **`auto_fulfill_dry_run` is deliberately NOT in any customer UI.** It exists to validate the Playwright `CHECKOUT_SELECTORS` against live Amazon DOM — a platform engineering concern with no customer meaning. Operators set it directly on `amazon_accounts` for the one-time selector-tuning pass. (The former `features/amazon/accounts/AmazonAccountsPage` carried all three fields but was orphaned — no route, no importer — when settings moved to the hub+drawer model; it was deleted and its customer-facing fields moved into `AmazonAccountDrawer`. Account delete + credential verify existed only there too and are currently unreachable in the UI — a known gap.)
-- Orders list surfaces `auto_fulfill_status` as a Badge column + reason tooltip (`autoFulfillStatusToBadgeVariant`) and a "needs attention" filter (blocked/failed → backend filter `o.auto_fulfill_status IN ('blocked','failed')`). Reason/column/filter labels all i18n'd under `orders.autoFulfill.*` and `amazon.autoFulfill.*` (EN + TR).
-- **Shared enums**: `AutoFulfillStatus` (`pending|running|placed|blocked|failed|dry_run|skipped`) + `AutoFulfillBlockedReason` (12 values incl. `proxy_required`, `quota_exhausted`, `cart`) in `packages/shared/src/domain/orders/orders.types.ts`; `TrackingConversionProvider` (`local|api`) in `packages/shared/src/domain/amazon/amazon.types.ts`. The `auto-fulfill-helpers.ts` re-exports a template-literal type derived from the enum (single source of truth).
+  **`auto_fulfill_dry_run` is deliberately NOT in any customer UI.** It exists to validate the Playwright `CHECKOUT_SELECTORS` against live Amazon DOM — a platform engineering concern with no customer meaning. Operators set it directly on `amazon_accounts` for the one-time selector-tuning pass. (The former `features/amazon/accounts/AmazonAccountsPage` carried all three fields but was orphaned — no route, no importer — when settings moved to the hub+drawer model; it was deleted and its customer-facing fields moved into `AmazonAccountDrawer`. **Credential verify is now reachable** as a per-card "Verify login" action in `AmazonAccountsDrawer` — re-saving the password purely to trigger a retry was not a usable recovery path, since verification can fail for reasons unrelated to the stored credentials (stale session, proxy hiccup, Amazon challenge). Account delete is still unreachable in the UI — a known gap.)
+
+**Amazon authentication must be positively PROVEN, never inferred (`amazon-auth-state.ts`).** `probeAmazonAuth` + the pure, unit-tested `decideAmazonAuth` are the single source of truth, used by `performLogin` (post-login gate), `BrowserStateManager.isSessionValid` (session reuse) and `AmazonCheckoutService.ensureLoggedIn` (pre-checkout gate). Precedence: an auth route (`/ap/signin`, `/ax/claim/*`) or a visible credential/OTP control is a HARD negative; auth-gated account content or a populated non-signed-out nav greeting is a positive; `signedOutNav` alone is a WEAK negative that must NOT veto a positive, because Amazon serves its header from a CDN cache that can render "Hello, sign in" on a fully authenticated page. Two bugs made this necessary: (a) `!url.includes('/signin')` treated Unified Auth's `/ax/claim/*` pages as valid sessions, and a submit that merely produced no error was marked ACTIVE — so `AmazonAccountStatus.ACTIVE` was a false positive; (b) `ensureLoggedIn` only probed for captcha/OTP, so a signed-out page silently no-opped every checkout step (each helper treats a missing control as "layout variant, skip") and the run failed only at the review-total read — misreported as `cap`. Hence `review_unreadable` is now a distinct blocked reason from `cap`, and "Proceed to checkout" is a mandatory step (`clickFirstAvailable` returns a boolean; a miss there throws `cart`).
+- **`OrderFulfillmentState` is the seller-facing vocabulary** (`packages/shared/src/domain/orders/fulfillment-state.ts`, derived at read time by the pure `deriveFulfillmentState`, unit-tested): `purchased | amazon_cancelled | action_required | in_progress | not_automated | manual | simulated`. It exists because the raw columns could not answer "did Amazon buy this, and must I act?" without knowing the schema — `orders.status` is eBay-only, `auto_fulfill_status` has seven values (several internal), `amazon_cancelled_at` is a separate flag that overrides `placed`, and `cost_capture_status` is a third axis. Precedence is load-bearing: an Amazon cancellation outranks `placed` (money moved, item not coming, eBay sale still owed), and a `SIM-` order id reports SIMULATED so a dry run can never look purchased. The list column, detail page and filter all read this one value; `GET /orders?fulfillmentState=` filters it **in SQL** so paging/totals stay correct. FE mapping (badge variant, icon, per-state guidance key) lives in `features/orders/shared/fulfillment-state.ts`.
+- Orders list shows ONE unified fulfillment column (badge + blocked reason + Amazon order id). The old pairing of a raw `auto_fulfill_status` badge with a separate cancellation badge required schema knowledge to read, and an untouched order rendered a bare em dash. The status filter offers only the statuses the sync actually writes (`pending | waiting_shipment | processing | shipped | completed`) — `mapOrderStatus` never writes `cancelled`, so offering it guaranteed an empty result that read as a broken filter. The former two-value "needs attention" dropdown is replaced by the fulfillment-state filter (`autoFulfillNeedsAttention` is still accepted for API compatibility). Labels i18n'd under `orders.fulfillmentState.*` (EN + TR).
+- **A missing Amazon product page is `no_asin`, not `out_of_stock`.** `isProductPageMissing` checks HTTP 404/410 and Amazon's own "couldn't find that page" screen before the availability check. Reporting a delisted ASIN as out-of-stock told the seller to wait for stock that will never return; the two need different actions (fix/end the listing vs. wait).
+- **Shared enums**: `AutoFulfillStatus` (`pending|running|placed|blocked|failed|dry_run|skipped`) + `AutoFulfillBlockedReason` (13 values incl. `proxy_required`, `quota_exhausted`, `cart`, `review_unreadable`) in `packages/shared/src/domain/orders/orders.types.ts`; `TrackingConversionProvider` (`local|api`) in `packages/shared/src/domain/amazon/amazon.types.ts`. The `auto-fulfill-helpers.ts` re-exports a template-literal type derived from the enum (single source of truth).
 
 ### Tracking Converter (real-only, pluggable)
 
@@ -628,7 +634,7 @@ The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced ton
 - **Font**: **Source Sans 3** for headings + body/UI (institutional / insurance-grade readability; TR-friendly). Loaded via Google Fonts in `apps/web/index.html`; tokens in `packages/ui/src/theme/designTokens.ts`. Mono = JetBrains Mono.
 - **Text ink**: strong slate primary (`#0f172a`), secondary (`#475569`). Brand blue `#2563eb`.
 - **Weights**: headings / card titles **semibold**; row labels **semibold** for clarity.
-- **Radii**: progressive scale — sm 6px (badges/checkboxes/table cells), md 8px (buttons/inputs/selects), lg 12px (cards/dialogs), xl 16px (modals), 2xl 20px (hero). Tokens in `packages/ui/src/theme/designTokens.ts` (`radiusTokens`); `controlTokens.radius` matches `radiusTokens.md`.
+- **Radii**: progressive scale — sm 6px (badges/checkboxes/table cells), md 8px (buttons/inputs/selects), lg 12px (cards/dialogs), xl 16px (modals), 2xl 20px (hero). Tokens in `packages/ui/src/theme/designTokens.ts` (`radiusTokens`); `controlTokens.radius` matches `radiusTokens.md`. **`radiusPxTokens`** (`theme.radiusPx`, adds `xs: 4`) is the pixel mirror for SVG/canvas consumers such as recharts, which cannot take rem — use it instead of hardcoding a chart radius, and keep both scales in sync.
 - **Sidebar nav**: Inventory + Configuration. Route breadcrumbs from `apps/web/src/app/routeMeta.ts`.
 - **Settings hub**: full-width 2-col grid; **header icons restored** on section cards; account rows keep row icons.
 
@@ -644,10 +650,17 @@ Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`
 | `h3` | 18px / semibold | Drawer titles, major section |
 | `h4` | 16px / semibold | Card titles (`SettingsCard`, `QuickActionCard`) |
 | `h5` | 14px / semibold | Small section labels |
-| `body` | 14px / regular | Primary UI text, table cells, control text, row labels |
-| `body-sm` | 12px / regular | Secondary denser text, drawer subtitles |
+| `body` | 16px / regular | Primary UI text, control text, row labels |
+| `body-sm` | 14px / regular | Table cells, secondary denser text, drawer subtitles |
+| `body-xs` | 10px / regular | Micro meta |
 | `caption` / `overline` | 12px / 10px | Meta, helper, chips |
 | `mono` | 12px | Codes / IDs only |
+| `metric` | 20px / semibold / tabular-nums | KPI figures (period cards, detail-page headline). Headings are for titles — do **not** repurpose `h1`/`h2` for numbers |
+| `metric-sm` | 18px / semibold / tabular-nums | Secondary KPI figures (net profit under a headline metric) |
+
+**`numeric` prop** — any figure rendered in a column (money, counts, percentages) must set `<Text numeric>` so digits are tabular and stack down the column. `metric` / `metric-sm` already enable it. A money cell in `body`/`body-sm` without `numeric` visibly jitters row to row.
+
+**KPI card pattern** — label is `caption` + `text.secondary`, figure is `metric`. Never give the label the same weight as its own number (`body` + semibold labels above an `h3` figure was the old Admin pattern and read as two competing headings).
 
 **Title → subtitle gap**: `PageHeader` uses `spacing.xs` between title and subtitle. Title is always `Text variant="h1" weight="semibold"`; subtitle is `body-sm` secondary. **Do not** invent ad-hoc page titles.
 
@@ -658,18 +671,51 @@ Redesign spec: `docs/superpowers/specs/2026-07-03-figma-site-refactor-design.md`
 - Never double-pad (ContentInner + page Container) — that misaligns titles across screens.
 
 ### Form controls (must stay aligned)
-Shared geometry: `packages/ui/src/styles/formControl.ts` + `controlTokens` on theme.
+**`controlTokens.height` in `designTokens.ts` is the single source of truth.**
+`packages/ui/src/styles/formControl.ts` derives from it — it must never re-declare
+a height literal. (It used to, and had drifted 4px away from the tokens *and* from
+this table, so a labeled TextInput never matched the Button beside it.)
 
 | Size | Compact (no floating label) | Labeled (floating label) |
 |---|---|---|
-| small | 2.5rem | 3rem |
-| medium | 2.75rem | 3.25rem |
-| large | 3rem | 3.75rem |
+| small | 2.5rem | 3.25rem |
+| medium | 2.75rem | 3.5rem |
+| large | 3rem | 4rem |
 
-- **TextInput**, **Select**, **SearchField** share the same heights, `surface.primary` fill, `border.primary`, and **brand.primary** focus ring (`controlFocusShadow`). Never black/neutral focus borders.
+- **TextInput**, **Select**, **SearchField**, **Textarea** share the same heights, `surface.primary` fill, `border.primary`, and **brand.primary** focus ring via `controlFocusShadow`. Never black/neutral focus borders, and never a bespoke ring formula.
+- **`colors.border.focus` must always equal `colors.brand.primary`.** They are separate tokens for historical reasons; when they diverged, a focused Textarea/IconButton rang a different colour than a focused TextInput in dark mode only.
 - **Floating labels are mandatory** for form fields (drawers, settings, auth). Do **not** place an external `<Text>` label above a TextInput/Select — use the `label` prop.
 - Toolbar/filter rows may use compact controls with `placeholder` only (no label) so Search + Select share one height.
-- Button `medium` = 2.75rem (matches compact medium); form primary actions in drawers use `medium` not `large`.
+- Button `medium` = 2.75rem (matches compact medium); Button `large` = 3.5rem (matches **medium labeled**, i.e. the auth-form pairing of labeled input above primary submit). Form primary actions in drawers use `medium` not `large`.
+- Every interactive atom carries a `:focus-visible` ring in `brand.primary`. Checkbox / Radio / Toggle hide their real `<input>`, so they mirror focus onto the visible box with `input:focus-visible + &` — a plain sibling selector, **never** an Emotion component selector (those need the babel plugin and crash at runtime).
+
+### Card grids (list surfaces)
+`DataTable`'s grid derives its column count from **`gridMinItemWidth`** (the
+narrowest track a card can survive in) via `auto-fill`, optionally capped by
+**`gridMaxColumns`**. It used to be `repeat(3, 1fr)` above 75rem, which handed a
+wide horizontal card ~380px — not enough for its own contents, so the card
+visibly crushed. Current settings: Orders `26rem`/max 2 · Listings `24rem`/max 2 ·
+Jobs `20rem` · Products `19rem`. A card that lays out horizontally (thumbnail
+beside content) must declare a wide minimum; a compact tile can go narrow.
+
+Inside a card, a fixed `repeat(N, 1fr)` stat strip is the usual failure mode —
+use `repeat(auto-fit, minmax(…, 1fr))` so cells reflow instead of truncating.
+
+### Density, radius and elevation (one scale, no per-page drift)
+- **Card tier radius is `lg` (12px)** — `Card`, `SettingsCard`, `QuickActionCard`, `Table` container, `FilterBar`. Controls are `md` (8px), badges/checkboxes are `sm` (6px), modals `xl`.
+- **Card content inset is 20px (`spacing.md+`)** whether you use `<Card padding="lg">` or `<CardBody>` — the two APIs resolve to the same value on purpose.
+- **Table rhythm**: `Th` 12px vertical, `Td` 8px vertical, `Tr` min-height 2.5rem → ~38px rows. Header stays taller than data so chrome reads lighter.
+- **`TableColumn.align` is honoured** by `Th`/`Td`/`ThContent`. Money and count columns are `align: 'right'` + `<Text numeric>`; text columns stay left. (The prop existed but was dead for a long time — every right/center column silently rendered left.)
+- **Never hand-roll a Card.** Detail pages had five separate styled-components duplicating the atom's surface/radius/shadow/padding. Extend it — `styled(Card)` with layout-only CSS — so a change to the card language reaches every page.
+
+### Overlay and breakpoint tokens
+- **`theme.zIndex`** (`zIndexTokens`): `sticky 100 · scrim 990 · sidebar 1000 · dropdown 1100 · assistant 1200 · overlay 9000 · drawer 9100 · modal 9200 · toast 9400 · loading 9600 · tooltip 9800`. Never hardcode a z-index — the global loading overlay once resolved to the string `"4rem"` (from `tkn('spacing.xxxl')`), which is invalid for the unitless property, so the browser dropped it and the overlay rendered *behind* drawers and modals.
+- **`theme.breakpoints`** (`breakpointTokens`): `sm 30rem · md 48rem · lg 64rem · xl 80rem`, plus `*Below` max-width complements. The app previously carried ~11 hand-typed breakpoint literals.
+- **Drawer size scale**: `sm 22rem · md 32rem (default) · lg 44rem`. It is monotonic — `lg` used to resolve *narrower* than `md`, so the three densest drawers opted into "more room" and got less.
+
+### Accessibility floors held by the token layer
+- `text.tertiary` must clear WCAG AA (4.5:1) on `surface.primary`, `surface.secondary` **and** `background.tertiary` in **both** themes. It is used 60+ times; the previous value failed in dark on both surfaces and in light on `background.tertiary`.
+- Dashboard period-band gradients are **theme-identical** (the bands are always-dark by design, like the landing hero) and dark enough that `periodForeground` clears 5.3:1 and `periodForegroundMuted` clears 4.7:1 on every stop.
 
 ### Container logic extraction
 God containers are forbidden. Extract feature hooks under `features/<feature>/hooks/`:
@@ -687,6 +733,18 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 ### Domain vs design system
 - Keep domain composites (`ListingCard`, `ConnectEbayPrompt`) generic where possible; prefer app-level wrappers if they grow domain-specific. Do not add more product/domain molecules to `@repo/ui` without review.
 
+### Every list endpoint is server-paginated (mandatory)
+`GET /listings`, `GET /listings/jobs` and `GET /listings/products` all return
+`{ items, total, page, limit }`. Jobs and products used to return unbounded
+arrays that the browser filtered and sliced — and the jobs page polls every 5s,
+so each poll re-downloaded the account's entire job history to render ten rows.
+
+- `ListingJobsQueryDto` — `page`, `limit` (default 20, clamped 100), `search` (job-id prefix), `status`.
+- `UserProductsQueryDto` — `page`, `limit`, `search` (title / ASIN / brand).
+- Product counts use `COUNT(DISTINCT p.id)` to match the `SELECT DISTINCT` page query — a product with several listings must count once.
+- Every filter control resets `page` to 1; otherwise a narrowed result set leaves the user on an empty page.
+- **Never add a list endpoint that returns a bare array.** If a UI shows a table or grid over it, it needs `page`/`limit` on day one.
+
 ### Listings list (server-side — mandatory)
 - `GET /listings` returns `PaginatedListingsDto` `{ items, total, page, limit, categories }` — **never** the full catalog for table UIs.
 - Query: `ListingsQueryDto` — `page`, `limit`, `search`, `status`, `category`, `ebayAccountId` (store filter), `sortBy`/`sortOrder`, numeric range mins/maxes. Deprecated `stockPreset` still accepted for API compat; **FE does not send it** — use advanced `quantityMin`/`quantityMax` only (avoid dual stock filters).
@@ -699,14 +757,21 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 - Overview/Dashboard: small pages (`limit: 12` / `50`). Client-side filter/sort/slice of the full catalog is **forbidden**.
 
 ### Dashboard panel (Sellerboard-style)
-- **Tabs** (`?tab=cards|chart|history`): Cards · Chart · History.
-- **Period cards** (Tab 1): `today` | `thisWeek` | `thisMonth` | `thisYear` — solid header bands (`colors.dashboard.period*`). Click filters carousels below.
-- **Carousels**: standard `ListingCarousel` + `OrderCarousel` side-by-side; listings via `soldFrom`/`soldTo`, orders via `dateFrom`/`dateTo`.
+
+**Toolbar**: underline tabs (icon + label) on the left, store filter pinned right **on the same row** — `flex-wrap: nowrap` with a scrollable tab rail, never wrapping onto a second line. The store `Dropdown` must be wrapped in an auto-width flex parent (`S.ToolbarRight`): the atom's own container is `display: block; width: 100%`, so as a bare flex child it claims the whole row and pushes itself below the tabs. The tab rail is deliberately underline-styled, not a pill group, so page navigation reads differently from the in-card `SegmentedControl`.
+
+**URL state** (all in the query string, shareable): `?tab=cards|chart|pnl`, `?period=today|thisWeek|thisMonth|thisYear`, `?store=<ebayAccountId>`, `?granularity=day|week|month`. Owned by `hooks/useDashboardUrlState.ts`; defaults are omitted from the URL. Every value is a **shared enum** (`DashboardTab`, `DashboardPeriodKey`, `DashboardChartGranularity`, `DashboardChartSeries`, `DashboardPnlGroup`, `DashboardValueFormat` in `packages/shared/src/domain/dashboard/`) — no string literals.
+
+- **Cards tab**: 4 period cards (gradient band + headline sales, net profit w/ margin, trend chips, orders/units · refunds · gross profit · ROI grid, expandable "More details" with payout/COGS/tax/shipping/fees/AOV/refund-rate) over two carousel sections (`ListingCarousel` + `OrderCarousel` in `Card`s, "view all" moved into the card header). Selecting a card refilters both carousels (listings via `soldFrom`/`soldTo`, orders via `dateFrom`/`dateTo`). Skeleton cards render during the first load — **never** `useLoading` for the initial fetch.
+- **Chart tab**: ComposedChart — net-profit **bars** (gradient fill) against sales/units/refunds **lines**, dual axis (currency left, count right), custom themed tooltip, **click-toggleable legend chips**, and a `SegmentedControl` for granularity (30 days / 12 weeks / 12 months). Right rail is a grouped P&L summary (Revenue · Costs · Profit · Ratios) with emphasized gross/net totals.
+- **P&L tab**: metrics × 12-month matrix, grouped sections, sticky metric column + header, current-period column highlighted, **heat-map toggle** (per-row relative intensity via an opacity overlay — never a hardcoded rgba) and **client-side CSV export** (the matrix is already in memory; no API round-trip).
 - **View all** → `/listings/all?soldFrom&soldTo&from=dashboard` or `/orders/all?dateFrom&dateTo&from=dashboard`; back returns to `/dashboard`.
-- **Chart tab**: monthly ComposedChart (units bar + sales/profit lines) + summary sidebar.
-- **History tab**: P&L matrix (metrics × months) from `dashboard.history.months`.
-- API: `GET /dashboard?ebayAccountId=` — metrics + chart + history. No day/week/month segmented control; no active-listings chip.
-- **Tiered profit** (per period): headline `netProfit` is **confirmed-only** (`cost_capture_status = 'linked'`, trusted Amazon costs). `profitProvisional` (product-only costs) and `revenueUncosted` (pending/failed/untracked — revenue only, no profit) are surfaced separately so users never confuse an unknown cost with a real zero. See "Net Profit Formula" for the enum semantics.
+- API: `GET /v1/dashboard?chartGranularity=&ebayAccountId=` → `{ metrics, chart: { granularity, points, summary }, history: { months } }`. The old `days`/`revenueTrend`/`recentOrders` payload was removed — nothing consumed it and the granularity switch replaces it.
+- **Bucket keys are anchored on Postgres' `CURRENT_DATE`** (`getAnchorDate()`) and emitted as `to_char(...,'YYYY-MM-DD')` text, never a `date` column: node-pg parses `date` into a *local-midnight* Date, so an API process in UTC+3 talking to a UTC database used to generate keys that never matched and rendered an empty chart/P&L. Do not reintroduce `toISOString()` on a pg `date`.
+- **Cost/ratio aggregates**: `periodSelect()` also sums `purchase_price`, `transaction_fee`, `ad_fee`, `amazon_shipping`, `amazon_tax`; `roi = profitConfirmed / costOfGoods` and `refundRate = refunds / (orders + refunds)`. Costs are display-only (already inside `ebay_earnings`) and render with a `−` prefix.
+- **Tiered profit** (per period): headline `netProfit` is **confirmed-only** (`cost_capture_status = 'linked'`, trusted Amazon costs). `profitProvisional` (product-only costs) and `revenueUncosted` (pending/failed/untracked — revenue only, no profit) surface as separate chips with tooltips, so users never confuse an unknown cost with a real zero. See "Net Profit Formula" for the enum semantics.
+- **Theme tokens**: `colors.dashboard.period*Gradient` (band backgrounds), `periodForeground`/`periodForegroundMuted` (fixed light ink on the always-dark bands — **never** `text.inverse`, which flips per theme), `series{Profit,Sales,Units,Refunds}`, `heat{Positive,Negative}`.
+- **Files**: `apps/web/src/features/dashboard/` — `DashboardPage/` (shell), `components/{PeriodCard,CardsPanel,ChartPanel,PnlPanel}/`, `hooks/{useDashboardUrlState,useDashboardFormatters}.ts`, `utils/{metricRows,chartSeries,pnlExport,periodRanges,emptyMetrics}.ts`, `dashboard.types.ts`. `utils/metricRows.ts` is the single source of truth for row order/labels/formats shared by the chart summary and the P&L matrix.
 
 ### Listings UX chrome (mobile-first SaaS)
 - Prefer **no** dense PageHeader action button clusters (Create / Export / End) on list/detail. Use overview QuickActions, SettingsCard rows, drawers, DataTable toolbar download, or a single mobile **Manage** sheet.
@@ -756,6 +821,29 @@ God containers are forbidden. Extract feature hooks under `features/<feature>/ho
 ### Settings surface
 - Canonical UI: `/settings` hub + drawers only.
 - Legacy full pages (`/settings/store`, `/amazon-accounts`, `/listing-groups`) redirect to the hub.
+
+### One canonical flow per task (no duplicate surfaces)
+Same rule as "one admin panel, no duplicates" and the settings-hub redirects:
+- **Add listings** is the `AddListingsDrawer` only. `/listings/add` redirects to `/listings?drawer=add`; the standalone `AddListingsPage` was deleted. It was a second implementation over the same Zod schema with its own Card radius and raw `<h2>`/`<span>` typography, and would have silently drifted from the drawer.
+- Before adding a page that duplicates an existing flow, add a tab, a drawer, or a query param instead.
+
+### Tabs — one rail, one meaning
+- **`TabNav`** (`packages/ui/src/atoms/TabNav/`) is the only tab rail: controlled (`items` / `value` / `onChange`), navigation-only, scrolls instead of wrapping. `Tabs` composes it when you also want it to own the panel content.
+- Page-level section navigation (Dashboard, Admin, Support) = `TabNav` `underline`. Compact in-card switches (chart granularity, billing interval) = `SegmentedControl`. Grid↔table = `ViewToggle`.
+- **Never use `Button variant="primary|secondary"` as a tab or filter group.** Admin and Support did, which made "where you already are" the loudest element on the page and left no weight for real CTAs. For the same reason, per-row Save buttons in a settings list are `secondary` — a tab full of primaries means nothing is primary.
+
+### No hand-rolled primitives (the recurring failure mode)
+Every one of these existed as a private copy before being folded back into the
+design system. Reach for the atom first; if it can't express what you need, add
+a variant to the atom rather than forking it.
+- **Cards** → `styled(Card)`. Five bespoke copies existed across two detail pages, the add-listings flow and the error screen.
+- **Textareas** → `Textarea`, which now carries `fill` (absolute-inset, fills a positioned card) and `mono` (code/HTML). Two features had forked a native `<textarea>` purely for those two behaviours and both lost the shared focus ring.
+- **Buttons** → `Button` / `IconButton`. Carousel arrows, pagination dots and "view all" links were raw `styled.button`s re-implementing hover/focus/disabled. A pagination dot needs a ≥1.5rem hit area with a small visual mark inside — never make the 0.5rem dot itself the button.
+- **Empty / loading / error screens** → `EmptyState`. Loading and empty on the same surface must use the **same** component, otherwise the two states look like different screens. The `ErrorBoundary` fallback uses it too (it was an emoji glyph over margin-spaced text).
+- **Nested flows** → a real nested `Drawer` with `onBack`, not inline content swapped into the parent's card.
+
+### Page-level loading is not the global overlay
+`useLoading(...)` takes **mutation flags only**. Nine containers had folded their initial `useQuery` `isLoading` into it, so the blocking full-screen overlay covered the app on first paint of Settings, Stores, Products, Profile, Store Settings, Listing Groups and the add/edit drawers. Initial fetch renders the page's own `EmptyState` (loading title + description), never the overlay. Loading and empty must use the *same* component so the two states don't look like different screens.
 
 ### Listings CSV export
 - `GET /listings/export` — same filters as list (incl. store/status/ranges), server-built CSV, max 5000 rows.

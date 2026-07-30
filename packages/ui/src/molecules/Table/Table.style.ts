@@ -6,7 +6,8 @@ export const TableContainer = styled.div`
   width: 100%;
   overflow: visible;
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
+  /* Panel-level surface — same tier as Card, was on the badge radius. */
+  border-radius: ${tkn('radius.lg')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   box-shadow: ${tkn('shadows.sm')};
 `;
@@ -72,7 +73,9 @@ export const Tbody = styled.tbody``;
 export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?: number }>`
   background: ${tkn('colors.surface.primary')};
   transition: background-color ${tkn('transitions.fast')};
-  height: 3.25rem;
+  /* Floor, not a fixed height — a taller cell (2-line product title) still grows.
+     Lowered 3.25rem -> 2.5rem so the tightened cell padding actually takes effect. */
+  height: 2.5rem;
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:nth-of-type(even) {
@@ -109,19 +112,22 @@ export const Th = styled.th<{
   /** Checkbox/select column — hard-cap width so table-layout:auto cannot stretch it */
   $selection?: boolean;
 }>`
-  padding: ${tkn('spacing.sm-md+')} ${tkn('spacing.md')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
   color: ${tkn('colors.text.secondary')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-size: ${tkn('typography.fontSize.xs')};
   text-transform: uppercase;
   letter-spacing: ${tkn('typography.letterSpacing.widest')};
-  text-align: left;
+  /* The align prop was declared but never consumed — every column that asked for
+     right/center alignment silently rendered left, so money columns never
+     lined up. Header and cell must resolve it identically. */
+  text-align: ${({ $align }) => $align ?? 'left'};
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: ${tkn('colors.background.primary')};
-  transition: color 0.12s ease;
+  transition: color ${tkn('transitions.fast')};
   position: relative;
   border-right: 0.0625rem solid ${tkn('colors.border.primary')};
 
@@ -157,7 +163,7 @@ export const Th = styled.th<{
     min-width: 3.25rem;
     max-width: 3.25rem;
     box-sizing: border-box;
-    padding: ${tkn('spacing.sm-md+')({ theme })} ${tkn('spacing.xs')({ theme })} !important;
+    padding: ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.xs')({ theme })} !important;
     text-align: center;
   `}
 
@@ -165,7 +171,7 @@ export const Th = styled.th<{
     ${({ $selection, theme }) =>
       !$selection &&
       `
-      padding-left: ${tkn('spacing.lg')({ theme })};
+      padding-left: ${tkn('spacing.md+')({ theme })};
     `}
     ${({ $sticky }) =>
       $sticky &&
@@ -175,7 +181,7 @@ export const Th = styled.th<{
     `}
   }
   &:last-of-type {
-    padding-right: ${tkn('spacing.lg')};
+    padding-right: ${tkn('spacing.md+')};
     border-right: none;
   }
 `;
@@ -201,10 +207,18 @@ export const CheckboxCell = styled.div`
   }
 `;
 
+const FLEX_JUSTIFY = {
+  left: 'flex-start',
+  center: 'center',
+  right: 'flex-end',
+} as const;
+
 export const ThContent = styled.div<{ $align?: 'left' | 'center' | 'right' }>`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  /* Must track the Th text-align, otherwise a right-aligned header label sits
+     left of its own sort icon. */
+  justify-content: ${({ $align }) => FLEX_JUSTIFY[$align ?? 'left']};
   gap: ${tkn('spacing.2xs')};
 `;
 
@@ -217,7 +231,7 @@ export const SortIconWrapper = styled.div<{ $sortable?: boolean }>`
   padding: ${tkn('spacing.xs')};
   margin: -${tkn('spacing.xs')};
   border-radius: ${tkn('radius.md')};
-  transition: background-color 0.12s ease;
+  transition: background-color ${tkn('transitions.fast')};
 
   &:hover {
     background: ${tkn('colors.background.secondary')};
@@ -234,7 +248,7 @@ export const SortIcon = styled.div<{ $active: boolean; $rotated: boolean }>`
   justify-content: center;
   transform: ${(props) => (props.$rotated ? 'rotate(180deg)' : 'rotate(0deg)')};
   opacity: ${(props) => (props.$active ? 1 : 0.3)};
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform ${tkn('transitions.fast')}, opacity ${tkn('transitions.fast')};
 `;
 
 export const Td = styled.td<{
@@ -246,13 +260,15 @@ export const Td = styled.td<{
   /** Checkbox/select column — hard-cap width so table-layout:auto cannot stretch it */
   $selection?: boolean;
 }>`
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md')};
+  /* Row inset tightened sm-md (12px) -> sm (8px): ~46px rows became ~38px,
+     the dense-SaaS rhythm. Header keeps 12px so chrome stays taller than data. */
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
   vertical-align: middle;
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.primary')};
-  text-align: left;
+  text-align: ${({ $align }) => $align ?? 'left'};
   background: inherit;
-  transition: background-color 0.12s ease;
+  transition: background-color ${tkn('transitions.fast')};
   overflow: visible;
   border-right: 0.0625rem solid ${tkn('colors.border.primary')};
 
@@ -303,11 +319,11 @@ export const Td = styled.td<{
     ${({ $selection, theme }) =>
       !$selection &&
       `
-      padding-left: ${tkn('spacing.lg')({ theme })};
+      padding-left: ${tkn('spacing.md+')({ theme })};
     `}
   }
   &:last-of-type {
-    padding-right: ${tkn('spacing.lg')};
+    padding-right: ${tkn('spacing.md+')};
     border-right: none;
   }
 `;
@@ -317,11 +333,11 @@ export const EmptyRow = styled.tr``;
 export const EmptyCell = styled(Td)`
   text-align: center;
   color: ${tkn('colors.text.tertiary')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.xxl')} ${tkn('spacing.md+')};
 `;
 
 export const Toolbar = styled.div`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md+')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
   display: flex;
   flex-wrap: wrap;
@@ -347,7 +363,7 @@ export const ToolbarButton = styled.button`
   background: transparent;
   border: 0.0625rem solid transparent;
   border-radius: ${tkn('radius.md')};
-  transition: all 0.12s ease;
+  transition: all ${tkn('transitions.fast')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,7 +376,7 @@ export const ToolbarButton = styled.button`
 `;
 
 export const StyledFooter = styled.div`
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md+')};
   background: ${tkn('colors.surface.primary')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;

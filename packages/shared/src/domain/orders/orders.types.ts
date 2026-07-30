@@ -1,3 +1,35 @@
+/**
+ * What the seller actually needs to know about an order, in ONE value.
+ *
+ * The raw columns could not answer "did Amazon buy this, and do I need to do
+ * something?" without the reader knowing the schema:
+ *  - `orders.status` is the eBay-side state and says nothing about Amazon.
+ *  - `auto_fulfill_status` has seven values, several of which are internal
+ *    (`running`, `pending`) or operator-only (`dry_run`).
+ *  - `amazon_cancelled_at` is a separate flag that overrides a `placed` order.
+ *  - `cost_capture_status` is a THIRD axis, about cost confidence.
+ * The list showed these side by side, so "which orders need me?" was unanswerable.
+ *
+ * Derived at read time (no column) by `deriveFulfillmentState`, and the single
+ * vocabulary the list column, the detail page and the filter all speak.
+ */
+export enum OrderFulfillmentState {
+  /** Bought on Amazon; nothing for the seller to do. */
+  PURCHASED = 'purchased',
+  /** Amazon cancelled after purchase — the eBay sale is still owed to the buyer. */
+  AMAZON_CANCELLED = 'amazon_cancelled',
+  /** Automation stopped on purpose (missing address, cap, captcha …). Seller must act. */
+  ACTION_REQUIRED = 'action_required',
+  /** Automation is mid-flight or queued. */
+  IN_PROGRESS = 'in_progress',
+  /** Automation is off for this order (store/account gate, or no eligible account). */
+  NOT_AUTOMATED = 'not_automated',
+  /** Operator dry-run only — never a real purchase. */
+  SIMULATED = 'simulated',
+  /** Fulfilled outside automation (manual Amazon link, or shipped already). */
+  MANUAL = 'manual',
+}
+
 export enum OrderStatus {
   COMPLETED = 'completed',
   SHIPPED = 'shipped',
@@ -65,6 +97,12 @@ export enum AutoFulfillBlockedReason {
    * the buyer's own items would be co-purchased). Fail-closed before payment.
    */
   CART = 'cart',
+  /**
+   * The review-step grand total could not be read from the page. Distinct from
+   * CAP (a total that was read and exceeded the limit) so a selector break is
+   * never misreported as the spend guard doing its job.
+   */
+  REVIEW_UNREADABLE = 'review_unreadable',
 }
 
 /**
@@ -115,6 +153,16 @@ export interface OrderDto {
    * "needs attention" filter so the operator sees it.
    */
   amazonCancelledAt?: string | null;
+  /**
+   * Seller-facing fulfillment state, derived server-side from
+   * `status` + `autoFulfillStatus` + `amazonOrderId` + `amazonCancelledAt`.
+   * The one value the list column, detail page and filter all read, so the UI
+   * never has to re-implement the precedence rules (an Amazon cancellation
+   * outranking a placed order, a simulated order never counting as purchased).
+   */
+  fulfillmentState?: OrderFulfillmentState;
+  /** True when `amazonOrderId` is a dry-run placeholder, not a real purchase. */
+  isSimulated?: boolean;
 
   // Product
   product?: {
@@ -135,6 +183,12 @@ export interface OrderDto {
 
   // Financial - Amazon side
   purchasePrice: number;
+  /**
+   * The Amazon order this was bought on. Surfaced so a seller can reconcile the
+   * eBay sale against their Amazon account without opening the detail page.
+   * A `SIM-` prefix means a dry-run placeholder, not a real purchase.
+   */
+  amazonOrderId?: string | null;
   amazonOrderUrl?: string;
   amazonTrackingUrl?: string;
   amazonTax?: number;
@@ -146,12 +200,18 @@ export interface OrderDto {
   adFee: number;
 
   // Shipping
+  // Buyer ship-to address. `fullName`/`street2`/`phone` are optional because
+  // eBay does not always supply them, but auto-fulfill needs them to match a
+  // saved Amazon address (or fill the add-address form) for the RIGHT recipient.
   shippingAddress?: {
+    fullName?: string;
     street: string;
+    street2?: string;
     city: string;
     state: string;
     zipCode: string;
     country: string;
+    phone?: string;
   };
 
   // Detailed breakdown (from eBay order API)
@@ -204,6 +264,12 @@ export interface OrderFiltersDto {
    * the operator can fall back to manual linking.
    */
   autoFulfillNeedsAttention?: boolean;
+  /**
+   * Filter by the derived seller-facing fulfillment state. Preferred over
+   * `autoFulfillNeedsAttention`, which could only express one boolean question
+   * and left "which orders were actually bought on Amazon?" unanswerable.
+   */
+  fulfillmentState?: OrderFulfillmentState;
   page?: number;
   limit?: number;
   sortBy?: string;

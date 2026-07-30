@@ -2,6 +2,7 @@
   "listingSettingsGroup": {
     "title": "Listeleme Ayarları Grupları",
     "subtitle": "Otomatik optimizasyon için ürün listelerinize strateji şablonları yönetin ve atayın.",
+    "loadingDescription": "İlan gruplarınız getiriliyor.",
     "createNewGroup": "Yeni Grup Oluştur",
     "editGroup": "Listeleme Grubunu Düzenle",
     "backToList": "Gruplara Dön",

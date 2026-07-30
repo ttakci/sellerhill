@@ -45,7 +45,10 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
 
   const isSaving = isCreating || isUpdating;
   const isLoading = isGroupLoading || isTemplatesLoading;
-  useLoading(isLoading || isSaving);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isSaving);
 
   // Form Initialization
   const form = useForm<ListingSettingsGroupFormData>({

@@ -26,8 +26,10 @@ export const IconButtonContainer = styled.button<{ $variant: IconButtonVariant }
     color: ${tkn('colors.text.primary')};
   }
 
+  /* brand.primary, not border.focus — every other interactive atom rings on the
+     brand colour, and the two tokens had drifted apart in dark mode. */
   &:focus-visible {
-    outline: 0.125rem solid ${tkn('colors.border.focus')};
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
     outline-offset: 0.125rem;
   }
 

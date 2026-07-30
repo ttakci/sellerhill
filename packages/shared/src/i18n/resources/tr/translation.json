@@ -159,6 +159,7 @@
     "title": "Destek görüşmeleri",
     "subtitle": "Müşteri taleplerini inceleyin ve yanıtlayın.",
     "loading": "Destek görüşmeleri yükleniyor…",
+    "loadingDescription": "Güncel kuyruk getiriliyor.",
     "emptyTitle": "Görüşme yok",
     "emptyDescription": "Bu kuyrukta görüşme bulunmuyor.",
     "filters": {
@@ -241,7 +242,8 @@
         "connectedSince": "Bağlanma Tarihi",
         "manage": {
           "title": "Bağlı Hesaplar",
-          "subtitle": "Bağlı Amazon hesaplarınızı görüntüleyin ve yönetin"
+          "subtitle": "Bağlı Amazon hesaplarınızı görüntüleyin ve yönetin",
+          "verify": "Girişi doğrula"
         }
       },
       "storeConfig": {

@@ -17,7 +17,7 @@ export const TooltipPortal = styled.div<{
   $left: number;
 }>`
   position: fixed;
-  z-index: 9999;
+  z-index: ${tkn('zIndex.tooltip')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   border-radius: ${tkn('radius.md')};
   font-size: ${tkn('typography.fontSize.sm')};
@@ -27,7 +27,7 @@ export const TooltipPortal = styled.div<{
   pointer-events: none;
   max-width: 20rem;
   word-break: break-word;
-  transition: opacity 0.15s ease;
+  transition: opacity ${tkn('transitions.fast')};
 
   /* Arrow */
   &::after {
@@ -101,10 +101,14 @@ export const TooltipPortal = styled.div<{
       left: `transparent transparent transparent ${bg}`,
       right: `transparent ${bg} transparent transparent`,
     };
+    /* Both variants carry the same elevation. The dark variant previously had
+       NO box-shadow while the light one did, so a tooltip's depth changed with
+       an unrelated prop. `md` matches the transient-overlay tier (Popover). */
     if ($variant === 'dark') {
       return `
         background: ${bg};
         color: ${t.colors.text.inverse};
+        box-shadow: ${t.shadows.md};
         &::after { border-color: ${arrowMap[$position]}; }
       `;
     }
@@ -112,7 +116,7 @@ export const TooltipPortal = styled.div<{
       background: ${bg};
       color: ${t.colors.text.primary};
       border: 0.0625rem solid ${t.colors.border.primary};
-      box-shadow: ${t.shadows.sm};
+      box-shadow: ${t.shadows.md};
       &::after { border-color: ${arrowMap[$position]}; }
     `;
   }}

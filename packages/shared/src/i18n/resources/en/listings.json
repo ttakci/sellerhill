@@ -41,6 +41,7 @@
       },
       "card": {
         "progressLabel": "{{percent}}% complete",
+        "progressCount": "{{processed}} / {{total}} ASINs",
         "asinsTotal": "{{count}} ASINs",
         "openDetail": "View details"
       },
@@ -304,6 +305,7 @@
       "showMore": "Show more",
       "showLess": "Show less",
       "imageThumb": "Image {{index}}",
+      "loadingSubtitle": "Fetching listing details…",
       "notFoundTitle": "Listing not found",
       "notFoundSubtitle": "This listing may have been deleted or you do not have access.",
       "loadFailed": "Failed to load listing details.",
@@ -326,6 +328,9 @@
       "publish": "Publish to eBay",
       "publishHint": "This draft is not live on eBay yet. Publish when pricing and stock look right.",
       "draftBanner": "Draft — not published to eBay"
+    },
+    "products": {
+      "searchPlaceholder": "Search by title, ASIN or brand…"
     }
   }
 }

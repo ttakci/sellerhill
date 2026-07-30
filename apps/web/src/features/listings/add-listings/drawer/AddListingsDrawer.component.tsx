@@ -173,9 +173,10 @@ export const AddListingsDrawerComponent = ({
                   <S.AsinInputWrapper>
                     <S.AsinTextarea
                       {...field}
+                      fill
                       placeholder={t('listings.asinEntry.placeholder')}
                       disabled={isLoading || isSubmitting}
-                      $hasError={!!fieldState.error}
+                      error={fieldState.error?.message}
                       onChange={(e) => {
                         field.onChange(e);
                         onAsinChange(e.target.value);

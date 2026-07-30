@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, Card, CardBody, IconButton as IconButtonAtom, Text, tkn } from '@repo/ui';
+import { Button, Card, CardBody, IconButton as IconButtonAtom, Text, Textarea, tkn } from '@repo/ui';
 
 export const StepperWrapper = styled.div`
   margin-bottom: 0;
@@ -190,24 +190,10 @@ export const TemplateBody = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
-export const CustomTemplateTextarea = styled.textarea`
-  width: 100%;
+/* Shared Textarea atom in mono mode. This was a forked native <textarea> with
+   its own border/focus rules — so it never picked up the shared focus ring. */
+export const CustomTemplateTextarea = styled(Textarea)`
   min-height: 12rem;
-  padding: ${tkn('spacing.md')};
-  background-color: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.md')};
-  color: ${tkn('colors.text.primary')};
-  font-family: ${tkn('typography.fontFamily.mono')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: ${tkn('typography.lineHeight.relaxed')};
-  resize: vertical;
-  outline: none;
-  box-sizing: border-box;
-
-  &:focus {
-    border-color: ${tkn('colors.brand.primary')};
-  }
 `;
 
 export const PreviewContainer = styled.div`
@@ -234,7 +220,7 @@ export const PreviewViewport = styled.div`
   }
   &::-webkit-scrollbar-thumb {
     background: ${tkn('colors.text.disabled')};
-    border-radius: 0.625rem;
+    border-radius: ${tkn('radius.md')};
   }
 `;
 
@@ -242,7 +228,7 @@ export const PreviewContent = styled.div`
   width: 100%;
   background: ${tkn('colors.surface.primary')};
   min-height: 100%;
-  transition: width 0.3s ease;
+  transition: width ${tkn('transitions.normal')};
 `;
 
 export const PreviewHTMLContent = styled.div`

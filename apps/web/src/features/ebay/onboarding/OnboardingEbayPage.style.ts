@@ -8,16 +8,22 @@
 import styled from '@emotion/styled';
 import { PageContainer, Text, tkn } from '@repo/ui';
 
-/** Narrow onboarding column — still uses standard page gap / no outer pad */
-export const Container = styled(PageContainer)`
-  max-width: 37.5rem; /* 600px */
-  margin: 0 auto;
-`;
+/**
+ * Page root stays a plain PageContainer. It used to add its own
+ * `max-width: 37.5rem; margin: 0 auto`, which re-centred the page title around
+ * the column midpoint — every other page starts flush at the ContentInner
+ * inset, so this was the one screen whose header didn't line up.
+ * The narrow reading column now lives on the inner content wrapper instead.
+ */
+export const Container = PageContainer;
+
 export const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.lg')};
+  width: 100%;
+  max-width: 37.5rem; /* 600px */
 `;
 
 export const IconWrapper = styled.div`

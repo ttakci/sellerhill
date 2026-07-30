@@ -71,7 +71,7 @@ export const LoginPageComponent = ({
         <S.FormPanel>
           <S.AuthCard>
             <S.Header>
-              <Text variant="h2" weight="bold">
+              <Text variant="h2" weight="semibold">
                 {t('auth:auth.login.title')}
               </Text>
               <Text variant="body" color="text.secondary">

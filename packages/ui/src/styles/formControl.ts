@@ -3,36 +3,29 @@
  * TextInput, Select, SearchField (and Button medium) must stay aligned.
  */
 
-export type ControlSize = 'small' | 'medium' | 'large';
+import { controlTokens } from '../theme/designTokens';
+
+import type { ControlSize } from './formControl.types';
+
+export type { ControlSize } from './formControl.types';
+
+/**
+ * Heights are derived from `controlTokens.height` — the single source of truth.
+ * They used to be duplicated here as literals and had silently drifted 4px away
+ * from the tokens (and from the documented table), so a labeled TextInput never
+ * matched the Button beside it.
+ */
 
 /** Height for controls without a floating label (search, compact toolbars). */
-export const compactControlHeight = (size: ControlSize = 'medium'): string => {
-  switch (size) {
-    case 'small':
-      return '2.5rem';
-    case 'large':
-      return '3rem';
-    case 'medium':
-    default:
-      return '2.75rem';
-  }
-};
+export const compactControlHeight = (size: ControlSize = 'medium'): string =>
+  controlTokens.height[size];
 
 /**
  * Height for controls with a floating label.
  * Sized so floated label and value never collide (body is 16px).
  */
-export const labeledControlHeight = (size: ControlSize = 'medium'): string => {
-  switch (size) {
-    case 'small':
-      return '3.25rem'; // 52px
-    case 'large':
-      return '4rem'; // 64px
-    case 'medium':
-    default:
-      return '3.5rem'; // 56px — room for label + 16px value
-  }
-};
+export const labeledControlHeight = (size: ControlSize = 'medium'): string =>
+  controlTokens.height[`${size}Labeled` as const];
 
 export const controlHeight = (size: ControlSize = 'medium', hasLabel = false): string =>
   hasLabel ? labeledControlHeight(size) : compactControlHeight(size);

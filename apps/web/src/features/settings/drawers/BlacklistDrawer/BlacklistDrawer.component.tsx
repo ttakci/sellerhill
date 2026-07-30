@@ -110,7 +110,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
               {keywordsHint}
             </Text>
             <Button variant="secondary" onClick={onAdd}>
-              <Text weight="bold">{addLabel}</Text>
+              <Text weight="semibold">{addLabel}</Text>
             </Button>
             {errorMessage && (
               <Text variant="caption" color="semantic.error">
@@ -139,7 +139,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
                 {hasSelection && (
                   <ToolbarRight>
                     <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
-                      <Text weight="bold">{bulkDeleteLabel}</Text>
+                      <Text weight="semibold">{bulkDeleteLabel}</Text>
                     </Button>
                   </ToolbarRight>
                 )}

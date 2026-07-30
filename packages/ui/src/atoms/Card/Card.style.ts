@@ -10,7 +10,9 @@ export const CardContainer = styled.div<{
   $hoverable?: boolean;
 }>`
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
+  /* radius.lg (12px) is the documented card tier. This was radius.sm (6px), which
+     put every card on the badge/table-cell radius and made surfaces read flat. */
+  border-radius: ${tkn('radius.lg')};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -51,17 +53,20 @@ export const CardContainer = styled.div<{
     }
   }}
 
-  /* Padding styles */
+  /* Padding styles.
+     The lg step resolves to the SAME inset as CardBody (md+ / 20px) so a card
+     padded via the prop and a card padded via CardBody are visually identical —
+     they used to differ by 4px depending on which API the caller reached for. */
   ${(props) => {
     switch (props.$padding) {
       case 'none':
         return 'padding: 0;';
       case 'sm':
-        return `padding: ${tkn('spacing.sm')(props)};`;
+        return `padding: ${tkn('spacing.sm-md')(props)};`;
       case 'md':
         return `padding: ${tkn('spacing.md')(props)};`;
       case 'lg':
-        return `padding: ${tkn('spacing.lg')(props)};`;
+        return `padding: ${tkn('spacing.md+')(props)};`;
       default:
         return '';
     }
@@ -80,21 +85,20 @@ export const CardContainer = styled.div<{
   `}
 `;
 
+/*
+ * Header used to restyle `h3, span` descendants by tag selector, forcing bold
+ * 16px onto anything passed in — which silently overrode <Text variant>, and
+ * contradicted the "card titles are semibold" rule. Titles now come in as
+ * <Text> from the component, so this wrapper is layout-only.
+ */
 export const CardHeaderContainer = styled.div`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
   background: transparent;
-
-  h3,
-  span {
-    font-weight: ${tkn('typography.fontWeight.bold')};
-    color: ${tkn('colors.text.primary')};
-    font-size: ${tkn('typography.fontSize.md')};
-  }
 `;
 
 export const CardHeaderContent = styled.div`
@@ -115,27 +119,23 @@ export const CardHeaderTextContent = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
-export const CardHeaderDescription = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.secondary')};
-  line-height: ${tkn('typography.lineHeight.normal')};
-`;
-
 export const CardHeaderActions = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
 `;
 
+/* Body/footer inset tightened lg (24px) -> md+ (20px): the shared SaaS density
+   step. Header/footer stay 12px vertical so chrome reads lighter than content. */
 export const CardBodyContainer = styled.div`
-  padding: ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md+')};
   flex: 1;
   display: flex;
   flex-direction: column;
 `;
 
 export const CardFooterContainer = styled.div`
-  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
   display: flex;
   align-items: center;
@@ -143,10 +143,13 @@ export const CardFooterContainer = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-/* Stat Card styles */
-export const CardStatContainer = styled.div<{
-  $trend?: 'up' | 'down' | 'neutral';
-}>`
+/*
+ * Stat card — layout only. Typography and trend colour used to be driven by
+ * `.card-stat-*` class rules with raw font-size/weight (bypassing <Text> and
+ * rendering the value at 24px/bold instead of the `metric` tier). The component
+ * now composes <Text variant="metric"> etc., so nothing here styles text.
+ */
+export const CardStatContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -169,40 +172,10 @@ export const CardStatContainer = styled.div<{
     color: ${tkn('colors.brand.primary')};
   }
 
-  .card-stat-value {
-    font-size: ${tkn('typography.fontSize.xxl')};
-    font-weight: ${tkn('typography.fontWeight.bold')};
-    color: ${tkn('colors.text.primary')};
-    line-height: ${tkn('typography.lineHeight.tight')};
-  }
-
-  .card-stat-label {
-    font-size: ${tkn('typography.fontSize.xs')};
-    color: ${tkn('colors.text.secondary')};
-    font-weight: ${tkn('typography.fontWeight.medium')};
-  }
-
   .card-stat-footer {
     display: flex;
     align-items: center;
     gap: ${tkn('spacing.xs')};
-    margin-top: 0.125rem;
-  }
-
-  .card-stat-trend {
-    font-size: ${tkn('typography.fontSize.xs')};
-    font-weight: ${tkn('typography.fontWeight.medium')};
-    color: ${(props) => {
-      switch (props.$trend) {
-        case 'up': return tkn('colors.semantic.success')(props);
-        case 'down': return tkn('colors.semantic.error')(props);
-        default: return tkn('colors.text.tertiary')(props);
-      }
-    }};
-  }
-
-  .card-stat-subtitle {
-    font-size: ${(props) => props.theme.typography.fontSize['2xs']};
-    color: ${tkn('colors.text.tertiary')};
+    margin-top: ${tkn('spacing.2xs')};
   }
 `;

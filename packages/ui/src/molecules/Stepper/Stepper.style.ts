@@ -75,7 +75,7 @@ export const StepCircle = styled.div<{ $status: 'completed' | 'current' | 'upcom
   /* Solid surface fill so the connector line behind is masked by the dot. */
   background: ${tkn('colors.surface.primary')};
   z-index: 1;
-  transition: all 0.2s ease;
+  transition: all ${tkn('transitions.fast')};
 
   /* Active step: medium circle with number */
   ${(props) =>

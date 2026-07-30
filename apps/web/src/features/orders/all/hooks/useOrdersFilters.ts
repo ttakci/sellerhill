@@ -1,4 +1,8 @@
-import { OrderStatus, type OrderFiltersDto } from '@repo/shared';
+import {
+  OrderFulfillmentState,
+  OrderStatus,
+  type OrderFiltersDto,
+} from '@repo/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -21,7 +25,7 @@ export function useOrdersFilters() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
-  const [needsAttention, setNeedsAttention] = useState(false);
+  const [fulfillmentState, setFulfillmentState] = useState('');
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
@@ -36,27 +40,52 @@ export function useOrdersFilters() {
     return () => window.clearTimeout(handle);
   }, [searchInput]);
 
+  /**
+   * eBay-side statuses the sync can actually produce. `mapOrderStatus` only ever
+   * writes these four, and `completed` is set later by the Amazon tracker;
+   * `cancelled` is never written at all. Offering the full enum meant two of the
+   * six options could only ever return an empty list, which read as a broken
+   * filter.
+   */
   const statusOptions = useMemo(
     () => [
       { value: '', label: t('orders.filters.allStatuses') },
-      ...Object.values(OrderStatus).map((s) => ({
-        value: s,
-        label: t(`orders.status.${s}`),
-      })),
+      ...[
+        OrderStatus.PENDING,
+        OrderStatus.WAITING_SHIPMENT,
+        OrderStatus.PROCESSING,
+        OrderStatus.SHIPPED,
+        OrderStatus.COMPLETED,
+      ].map((s) => ({ value: s, label: t(`orders.status.${s}`) })),
     ],
     [t]
   );
 
-  const needsAttentionOptions = useMemo(
+  /**
+   * Amazon-fulfillment filter. Replaces the old two-value dropdown ("All" /
+   * "Needs attention"), which could not answer the question sellers actually
+   * have — which orders were bought on Amazon, which are still queued, which are
+   * stuck — and whose "Needs attention" option looked broken whenever nothing
+   * was blocked.
+   */
+  const fulfillmentStateOptions = useMemo(
     () => [
-      { value: 'false', label: t('orders.autoFulfill.filter.all') },
-      { value: 'true', label: t('orders.autoFulfill.filter.needsAttention') },
+      { value: '', label: t('orders.fulfillmentState.filter.all') },
+      ...[
+        OrderFulfillmentState.ACTION_REQUIRED,
+        OrderFulfillmentState.AMAZON_CANCELLED,
+        OrderFulfillmentState.PURCHASED,
+        OrderFulfillmentState.IN_PROGRESS,
+        OrderFulfillmentState.NOT_AUTOMATED,
+        OrderFulfillmentState.MANUAL,
+        OrderFulfillmentState.SIMULATED,
+      ].map((s) => ({ value: s, label: t(`orders.fulfillmentState.${s}`) })),
     ],
     [t]
   );
 
   const hasActiveFilters = Boolean(
-    search || status || ebayAccountId || dateFrom || dateTo || needsAttention,
+    search || status || ebayAccountId || dateFrom || dateTo || fulfillmentState,
   );
 
   const serverQuery: OrderFiltersDto = useMemo(
@@ -68,11 +97,11 @@ export function useOrdersFilters() {
       ebayAccountId: ebayAccountId || undefined,
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
-      autoFulfillNeedsAttention: needsAttention || undefined,
+      fulfillmentState: (fulfillmentState as OrderFulfillmentState) || undefined,
       sortBy: 'order_date',
       sortOrder: 'desc',
     }),
-    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, needsAttention]
+    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, fulfillmentState]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,8 +129,8 @@ export function useOrdersFilters() {
     [searchParams, setSearchParams]
   );
 
-  const handleNeedsAttentionChange = useCallback((value: string | number) => {
-    setNeedsAttention(String(value) === 'true');
+  const handleFulfillmentStateChange = useCallback((value: string | number) => {
+    setFulfillmentState(String(value));
     setPage(1);
   }, []);
 
@@ -110,7 +139,7 @@ export function useOrdersFilters() {
     setSearch('');
     setStatus('');
     setEbayAccountId('');
-    setNeedsAttention(false);
+    setFulfillmentState('');
     setPage(1);
     const next = new URLSearchParams();
     if (dateFrom) {
@@ -142,9 +171,9 @@ export function useOrdersFilters() {
     statusOptions,
     ebayAccountId,
     handleEbayAccountChange,
-    needsAttention,
-    needsAttentionOptions,
-    handleNeedsAttentionChange,
+    fulfillmentState,
+    fulfillmentStateOptions,
+    handleFulfillmentStateChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,

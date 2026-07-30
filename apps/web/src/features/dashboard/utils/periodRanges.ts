@@ -3,15 +3,9 @@
  * Must align with backend SQL (Monday-start weeks via ISO / date_trunc week).
  */
 
-import type { DashboardPeriodKey } from '@repo/shared';
+import { DashboardPeriodKey } from '@repo/shared';
 
-export interface PeriodRange {
-  /** Inclusive start YYYY-MM-DD */
-  from: string;
-  /** Inclusive end YYYY-MM-DD */
-  to: string;
-  dateRangeLabel: string;
-}
+import type { PeriodDateInfo } from '../dashboard.types';
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
@@ -27,54 +21,48 @@ const startOfWeekMonday = (d: Date): Date => {
   return copy;
 };
 
-export function getPeriodRange(key: DashboardPeriodKey, locale: string): PeriodRange {
+export function getPeriodRange(key: DashboardPeriodKey, locale: string): PeriodDateInfo {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const fmt = (d: Date, opts?: Intl.DateTimeFormatOptions) =>
-    d.toLocaleDateString(locale, opts ?? { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const fmtShort = (d: Date) =>
-    d.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
+  const fmt = (d: Date) =>
+    d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const fmtShort = (d: Date) => d.toLocaleDateString(locale, { day: '2-digit', month: 'short' });
 
-  if (key === 'today') {
-    return {
-      from: toIsoDate(today),
-      to: toIsoDate(today),
-      dateRangeLabel: fmt(today),
-    };
+  if (key === DashboardPeriodKey.TODAY) {
+    return { from: toIsoDate(today), to: toIsoDate(today), dateRange: fmt(today) };
   }
 
-  if (key === 'thisWeek') {
+  if (key === DashboardPeriodKey.THIS_WEEK) {
     const weekStart = startOfWeekMonday(today);
     return {
       from: toIsoDate(weekStart),
       to: toIsoDate(today),
-      dateRangeLabel: `${fmtShort(weekStart)} – ${fmtShort(today)}`,
+      dateRange: `${fmtShort(weekStart)} – ${fmtShort(today)}`,
     };
   }
 
-  if (key === 'thisMonth') {
+  if (key === DashboardPeriodKey.THIS_MONTH) {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     return {
       from: toIsoDate(monthStart),
       to: toIsoDate(today),
-      dateRangeLabel: `${fmtShort(monthStart)} – ${fmtShort(today)}`,
+      dateRange: `${fmtShort(monthStart)} – ${fmtShort(today)}`,
     };
   }
 
-  // thisYear (YTD)
   const yearStart = new Date(today.getFullYear(), 0, 1);
   return {
     from: toIsoDate(yearStart),
     to: toIsoDate(today),
-    dateRangeLabel: `${fmtShort(yearStart)} – ${fmtShort(today)}`,
+    dateRange: `${fmtShort(yearStart)} – ${fmtShort(today)}`,
   };
 }
 
-export function getAllPeriodRanges(locale: string): Record<DashboardPeriodKey, PeriodRange> {
+export function getAllPeriodRanges(locale: string): Record<DashboardPeriodKey, PeriodDateInfo> {
   return {
-    today: getPeriodRange('today', locale),
-    thisWeek: getPeriodRange('thisWeek', locale),
-    thisMonth: getPeriodRange('thisMonth', locale),
-    thisYear: getPeriodRange('thisYear', locale),
+    [DashboardPeriodKey.TODAY]: getPeriodRange(DashboardPeriodKey.TODAY, locale),
+    [DashboardPeriodKey.THIS_WEEK]: getPeriodRange(DashboardPeriodKey.THIS_WEEK, locale),
+    [DashboardPeriodKey.THIS_MONTH]: getPeriodRange(DashboardPeriodKey.THIS_MONTH, locale),
+    [DashboardPeriodKey.THIS_YEAR]: getPeriodRange(DashboardPeriodKey.THIS_YEAR, locale),
   };
 }

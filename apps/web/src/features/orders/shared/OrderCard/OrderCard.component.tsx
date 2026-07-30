@@ -23,7 +23,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         {imageUrl ? (
           <img src={imageUrl} alt={productTitle} />
         ) : (
-          <Icon name="image" size={40} />
+          <Icon name="image" size={28} />
         )}
       </S.Image>
 
@@ -33,7 +33,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             <S.Title variant="body" weight="semibold" color="text.primary">
               {productTitle}
             </S.Title>
-            <StatusBadge status={orderStatusToBadgeStatus(status)}>{statusLabel}</StatusBadge>
+            <StatusBadge status={orderStatusToBadgeStatus(status)} size="sm">{statusLabel}</StatusBadge>
           </S.TitleRow>
 
           {meta.length > 0 && (
@@ -47,7 +47,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" />
                     ) : (
-                      <S.MetaValueText variant="caption" weight="bold" color="text.primary">
+                      <S.MetaValueText variant="caption" weight="semibold" color="text.primary">
                         {item.value}
                       </S.MetaValueText>
                     )}
@@ -64,7 +64,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               <S.StatLabel variant="caption" color="text.tertiary">
                 {stat.label}
               </S.StatLabel>
-              <S.StatValue variant="body-sm" weight="bold" $tone={stat.tone ?? 'default'}>
+              <S.StatValue variant="body-sm" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
                 {stat.value}
               </S.StatValue>
               {stat.badge && (

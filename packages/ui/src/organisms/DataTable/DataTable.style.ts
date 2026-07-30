@@ -34,21 +34,38 @@ export const BulkSelectWrapper = styled.div`
   min-width: 10rem;
 `;
 
-export const GridContainer = styled.div`
+/**
+ * Card grid. Column count is derived from a minimum track width instead of
+ * hardcoded breakpoints: fixed `repeat(3, 1fr)` at 75rem gave a wide horizontal
+ * card (image + content side by side) roughly 380px of track, which is not
+ * enough for its own contents — the card visibly crushed. `auto-fill` +
+ * `minmax` lets each surface declare the narrowest track its card can survive,
+ * and the column count then follows the viewport on its own.
+ */
+export const GridContainer = styled.div<{ $minItemWidth: string; $maxColumns?: number }>`
   display: grid;
-  /* minmax(0, 1fr) prevents grid items from overflowing / stacking into each other */
-  grid-template-columns: minmax(0, 1fr);
+  /*
+   * Track floor = the larger of the caller's minimum and an equal share of the
+   * row split maxColumns ways. Raising the floor is what caps the column count
+   * (CSS has no direct cap on auto-fill), and it still collapses to fewer
+   * columns on narrow viewports because the caller's minimum wins there.
+   */
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(
+      min(
+        100%,
+        ${({ $minItemWidth, $maxColumns, theme }) =>
+          $maxColumns && $maxColumns > 1
+            ? `max(${$minItemWidth}, calc((100% - ${$maxColumns - 1} * ${theme.spacing.md}) / ${$maxColumns}))`
+            : $minItemWidth}
+      ),
+      1fr
+    )
+  );
   gap: ${tkn('spacing.md')};
   align-items: stretch;
   width: 100%;
-
-  @media (min-width: 40rem) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (min-width: 75rem) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 
   & > * {
     min-width: 0;

@@ -13,7 +13,7 @@ export const TriggerWrapper = styled.div`
 
 export const PopoverContent = styled.div<{ $position: string }>`
   position: absolute;
-  z-index: 1000;
+  z-index: ${tkn('zIndex.dropdown')};
   background: ${tkn('colors.surface.primary')};
   border: 1px solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};

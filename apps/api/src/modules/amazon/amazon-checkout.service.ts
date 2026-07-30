@@ -2,7 +2,12 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { AutoFulfillStatus, PlatformSettingKey } from '@repo/shared';
+import {
+  AutoFulfillStatus,
+  OrderCostCaptureStatus,
+  PlatformSettingKey,
+  SIMULATED_AMAZON_ORDER_PREFIX,
+} from '@repo/shared';
 import type { Page } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
@@ -10,6 +15,8 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
+import { addressBlockMatchesBuyer } from './address-match';
+import { isOnAmazonAuthChallenge, probeAmazonAuth } from './amazon-auth-state';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
@@ -68,6 +75,17 @@ const CHECKOUT_SELECTORS = {
     '#availability span:has-text("Unavailable")',
     'div[data-feature-name="outOfStock"]',
   ],
+  /**
+   * Amazon's 404 screen ("Sorry, we couldn't find that page" + the dog photo).
+   * Kept separate from `unavailableText`: a missing ASIN is a data problem for
+   * the seller to fix, not stock that will return.
+   */
+  pageNotFoundText: [
+    'img[alt*="Dogs of Amazon"]',
+    'a:has-text("Meet the dogs of Amazon")',
+    'h1:has-text("we couldn\'t find that page")',
+    'div:has-text("we couldn\'t find that page")',
+  ],
   addToCartButton: [
     '#add-to-cart-button',
     'input[name="submit.add-to-cart"]',
@@ -114,6 +132,19 @@ const CHECKOUT_SELECTORS = {
     '#sc-proceed-to-checkout-squeeze-box-content > div > div > a',
   ],
 
+  /**
+   * Upsell interstitial ("Need anything else?" — grocery/add-on suggestions)
+   * that Amazon can inject between the cart and the real checkout pipeline.
+   * It is NOT the review page: it has its own "Continue to checkout" control and
+   * carries `Add` buttons for other products, so it must be passed through
+   * deliberately rather than scraped for a total. Observed live 2026-07-30.
+   */
+  continueToCheckoutButton: [
+    'a:has-text("Continue to checkout")',
+    'button:has-text("Continue to checkout")',
+    'input[value="Continue to checkout"]',
+  ],
+
   // --- MFA / captcha friction during checkout auth ---
   mfaOtpInput: '#auth-mfa-otpcode',
   captchaInput: '#captchacharacters',
@@ -132,12 +163,51 @@ const CHECKOUT_SELECTORS = {
     'a[data-test-id="add-new-address"]',
     'a[id*="add-new-address"]',
   ],
+  /**
+   * Submit control of the "Add an address" dialog. Amazon's current copy is
+   * "Use this address" and the button sits BELOW the fold inside the dialog, so
+   * the caller must scroll it into view before clicking (observed live
+   * 2026-07-30 — the form filled correctly but the click target was never found).
+   */
   addressFormContinueButton: [
-    'input[name="ship-address"]',
-    'button:has-text("Ship to this address")',
+    '#address-ui-widgets-form-submit-button',
+    'input[name="shipToThisAddress"]',
+    'input[aria-labelledby*="AddressSubmit"]',
     '#enterAddressSubmit',
+    'input[name="ship-address"]',
+    'button:has-text("Use this address")',
+    'input[value="Use this address"]',
+    'button:has-text("Ship to this address")',
+    'button:has-text("Add address")',
   ],
+  /**
+   * State is a <select> in the current add-address form, so it needs
+   * `selectOption`, not `fill` — filling leaves it on "Select" and Amazon
+   * rejects the address.
+   */
+  addressStateField:
+    '#address-ui-widgets-enterAddressStateOrRegion, select[name="address-ui-widgets-enterAddressStateOrRegion"], #address-ui-widgets-enterAddressStateOrRegion-dropdown-nativeId',
+  /**
+   * ZIP is prefilled from the session's delivery location. The write is verified
+   * after the fact: a silent failure would leave another city's postcode and
+   * ship the order to the wrong place.
+   */
+  addressZipField:
+    '#address-ui-widgets-enterAddressPostalCode, input[name="address-ui-widgets-enterAddressPostalCode"]',
+  /**
+   * The chosen ship-to as checkout echoes it back after the address step. Used
+   * for the final recipient assertion — the last chance to catch an order that
+   * would be delivered to the buyer-account holder instead of the customer.
+   */
+  selectedShipToSummary:
+    '#addressListSelectedAddress, .displayAddressDiv, [data-testid="shipping-address-summary"], #shipToInsertionNode',
+  // Amazon's current wording is "Deliver to this address" (observed live
+  // 2026-07-30); the older "Use this address" copy is kept for other layouts.
   useSelectedAddressButton: [
+    'input[name="shipToThisAddress"]',
+    'input[value="Deliver to this address"]',
+    'button:has-text("Deliver to this address")',
+    'a:has-text("Deliver to this address")',
     'input[name="useSelectedAddress"]',
     'a:has-text("Use this address")',
     '[data-testid="use-this-address"]',
@@ -158,12 +228,19 @@ const CHECKOUT_SELECTORS = {
   ],
 
   // --- Review step (the HARD-CAP checkpoint) ---
+  // Amazon's checkout sidebar labels the figure "Order total" (observed live
+  // 2026-07-30); "Grand Total" is the legacy pipeline's wording. Order matters:
+  // the most specific containers come first so a broad text match cannot pick up
+  // a subtotal or an "Items:" row instead of the real total.
   reviewGrandTotal: [
     '#subtotals-marketplace-table td.grand-total',
     '#rev-summary td:has-text("Grand Total") + td',
-    'span:has-text("Grand Total:")',
     '#order-summary td[data-testid="grand-total"]',
     'div[data-testid="grand-total-amount"]',
+    '.order-summary-total, [data-testid="order-total"]',
+    'tr:has-text("Order total") td:last-child',
+    'div:has-text("Order total:") > span:last-child',
+    'span:has-text("Grand Total:")',
   ],
   placeYourOrderButton: [
     'input[name="placeYourOrder1"]',
@@ -301,6 +378,12 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   // per-account rate limiter (see runForOrder).
   // -------------------------------------------------------------------------
   private async checkout(ebayOrderId: string, amazonAccountId: string): Promise<void> {
+    // One in-context auth resolution per run. Amazon legitimately challenges
+    // once when entering checkout; a second challenge after we already supplied
+    // credentials means something is genuinely wrong (locked account, captcha,
+    // rejected credentials) and must fail closed rather than loop on the money
+    // path.
+    const authResolution = { attempted: false };
     const { userId, asin, quantity, ship, capTotal, dryRun } = await this.loadInputs(
       ebayOrderId,
       amazonAccountId,
@@ -310,7 +393,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // Step 1: session/login (reuse scraping's login incl. 2FA-TOTP). The page
     // returned is authenticated and lives in the proxy-aware persistent
     // context for the account — all subsequent steps reuse it.
-    const page = await this.ensureLoggedIn(amazonAccountId, userId);
+    const page = await this.ensureLoggedIn(amazonAccountId, userId, ebayOrderId);
     // R2 — per-account proxy-launch truth (defense-in-depth on top of R1's
     // env-level `isConfigured` check). `resolveProxy` can return null on a
     // transient DB error or missing account, in which case the persistent
@@ -335,11 +418,25 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       await this.clearCart(page, ebayOrderId);
 
       // Step 2: product page + add to cart
-      await page.goto(`https://www.amazon.com/dp/${asin}`, {
+      const productResponse = await page.goto(`https://www.amazon.com/dp/${asin}`, {
         waitUntil: 'domcontentloaded',
         timeout: 30_000,
       });
       await this.humanDelay();
+
+      // A missing product page is NOT "out of stock". Amazon returns 404 / its
+      // "we couldn't find that page" screen when the ASIN is gone (delisted,
+      // wrong region, bad data), and reporting that as out-of-stock sent the
+      // seller looking for stock that will never come back. The two need
+      // different actions: wait vs. fix or remove the listing.
+      if (await this.isProductPageMissing(page, productResponse?.status())) {
+        await this.snap(page, ebayOrderId, 'product-page-missing');
+        throw new AutoFulfillBlockedError(
+          'no_asin',
+          `Amazon has no product page for ASIN ${asin} (HTTP ${productResponse?.status() ?? 'unknown'}) — the listing points at a delisted or invalid ASIN`,
+        );
+      }
+
       if (await this.isUnavailable(page)) {
         await this.snap(page, ebayOrderId, 'unavailable');
         throw new AutoFulfillBlockedError('out_of_stock');
@@ -357,13 +454,40 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       });
       await this.verifyCartContents(page, asin, quantity, ebayOrderId);
       await this.humanDelay();
-      await this.clickFirstAvailable(
+      // Mandatory step: without it the flow never leaves the cart, and the
+      // review-total read later fails as a misleading `cap` block.
+      const proceeded = await this.clickFirstAvailable(
         page,
         CHECKOUT_SELECTORS.proceedToCheckoutButton,
         'proceed-to-checkout',
       );
-      await this.detectCaptchaOrOtp(page); // throws 'captcha' | 'otp'
-      await this.selectShipToAddress(page, ship); // throws 'address' on friction
+      if (!proceeded) {
+        await this.snap(page, ebayOrderId, 'proceed-to-checkout-missing');
+        throw new AutoFulfillBlockedError(
+          'cart',
+          'no visible "Proceed to checkout" control on the cart page',
+        );
+      }
+      // Resolves an OTP prompt automatically; throws 'captcha' | 'otp' only when
+      // it cannot be handled without a human.
+      await this.detectCaptchaOrOtp(page, userId, amazonAccountId, ebayOrderId);
+      // Amazon can inject an upsell interstitial ("Need anything else?") between
+      // the cart and the checkout pipeline. Pass it through; leaving it in place
+      // meant the review-total read happened on a page of grocery suggestions.
+      await this.passUpsellInterstitial(page, asin, quantity, ebayOrderId);
+      // Amazon commonly re-challenges identity when ENTERING checkout, even
+      // from a valid browsing session. Detect that here instead of letting the
+      // signed-out page no-op the address/payment steps and surface much later
+      // as an unreadable review total.
+      await this.assertStillAuthenticated(
+        page,
+        ebayOrderId,
+        'post-proceed',
+        authResolution,
+        userId,
+        amazonAccountId,
+      );
+      await this.selectShipToAddress(page, ship, ebayOrderId); // throws 'address' on friction
 
       // Step 4: payment
       await this.humanDelay();
@@ -371,12 +495,27 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
 
       // Step 5: review-step HARD CAP — read total, abort if over cap (no click).
       await this.humanDelay();
+      // Last auth checkpoint before the cap read. A session lost between
+      // payment and review would otherwise be reported as `review_unreadable`,
+      // sending the operator to tune selectors against a sign-in page.
+      await this.assertStillAuthenticated(
+        page,
+        ebayOrderId,
+        'pre-review',
+        authResolution,
+        userId,
+        amazonAccountId,
+      );
       const grandTotal = await this.readReviewGrandTotal(page);
       if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
         await this.snap(page, ebayOrderId, 'review-total-missing');
+        // Include the page title: an unreadable total is usually "we are not on
+        // the review page at all" (an interstitial, an upsell, a challenge)
+        // rather than a broken price selector, and the title says which.
+        const title = await page.title().catch(() => 'unknown');
         throw new AutoFulfillBlockedError(
-          'cap',
-          `unparseable review grandTotal (${grandTotal}); refusing to proceed without cap check`,
+          'review_unreadable',
+          `unparseable review grandTotal (${grandTotal}) at ${new URL(page.url()).pathname} [${title}]; refusing to proceed without cap check`,
         );
       }
       // Read at checkout time so an operator can flip the hard cap off (or
@@ -392,11 +531,39 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         );
       }
 
+      // The Place Order control must be ON SCREEN before we accept the total as
+      // the review-step figure. Without this the flow could pass the cap check
+      // from an earlier step's sidebar (address selection also shows an order
+      // total) and dry-run would report success without ever proving the final
+      // pre-purchase page — exactly the verification dry-run exists to provide.
+      const placeOrderVisible = await page
+        .locator(CHECKOUT_SELECTORS.placeYourOrderButton.join(', '))
+        .first()
+        .isVisible({ timeout: 5_000 })
+        .catch(() => false);
+      if (!placeOrderVisible) {
+        await this.snap(page, ebayOrderId, 'place-order-not-reached');
+        const title = await page.title().catch(() => 'unknown');
+        throw new AutoFulfillBlockedError(
+          'review_unreadable',
+          `not on the final review step: no Place Order control at ${new URL(page.url()).pathname} [${title}]`,
+        );
+      }
+
       // Step 6: place order OR dry-run.
       // Dry-run MUST stop before any place-order click — no money leaves.
       if (dryRun) {
         await this.snap(page, ebayOrderId, 'dry_run_review');
-        await this.setStatus(ebayOrderId, AutoFulfillStatus.DRY_RUN);
+        // Simulate the post-purchase bookkeeping so an operator can verify what a
+        // real placement does to the order — costs, cost-capture status, net
+        // profit, tracking — WITHOUT money leaving. The Amazon order id carries
+        // the `SIM-` prefix, which is what keeps a simulated order from ever
+        // being mistaken for a real purchase (see `deriveFulfillmentState`), and
+        // `auto_fulfill_status` stays DRY_RUN rather than becoming PLACED.
+        await this.simulatePlacement(ebayOrderId, amazonAccountId, userId, {
+          grandTotal,
+          asin,
+        });
         this.logger.log(
           `dry-run stop ${ebayOrderId}: grandTotal=${grandTotal.toFixed(2)} cap=${capTotal === Number.POSITIVE_INFINITY ? 'inf' : capTotal.toFixed(2)}`,
         );
@@ -457,29 +624,169 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * 2FA — single login code path). Translates scraping's generic login errors
    * into the appropriate typed blocked reason (captcha / otp / login).
    */
-  private async ensureLoggedIn(accountId: string, userId: string): Promise<Page> {
+  private async ensureLoggedIn(
+    accountId: string,
+    userId: string,
+    ebayOrderId: string,
+  ): Promise<Page> {
     try {
       const page = await this.scraping.ensureAuthenticatedPage(userId, accountId);
       // Even after a successful session reuse, a soft captcha / OTP can appear
       // on the first navigation. Probe once before handing the page off.
       await page
-        .goto('https://www.amazon.com/gp/css/homepage.html', {
+        .goto('https://www.amazon.com/', {
           waitUntil: 'domcontentloaded',
           timeout: 30_000,
         })
         .catch(() => undefined);
-      await this.detectCaptchaOrOtp(page);
+      await this.detectCaptchaOrOtp(page, userId, accountId, ebayOrderId);
+      // Positively PROVE the session before any cart/payment surface is touched.
+      // Without this, a signed-out page silently no-ops every step (each helper
+      // treats a missing control as "layout variant, skip") and the run only
+      // fails at the review-total read — reported as `cap`, hiding the real
+      // cause. Money safety: never proceed toward Place Order unauthenticated.
+      const authProbe = await probeAmazonAuth(page);
+      if (!authProbe.authenticated) {
+        // Evidence here is essential: a login block with no screenshot leaves
+        // the operator guessing whether the session, the credentials or the DOM
+        // is at fault.
+        await this.snap(page, ebayOrderId, 'login-not-proven');
+        throw new AutoFulfillBlockedError(
+          'login',
+          `session not proven authenticated (route=${authProbe.route}; authRoute=${authProbe.authRoute}; authControl=${authProbe.authControlVisible}; signedOutNav=${authProbe.signedOutNav}; signedInNav=${authProbe.signedInNav}; accountMarker=${authProbe.accountPageMarker})`,
+        );
+      }
       return page;
     } catch (err) {
       if (err instanceof AutoFulfillBlockedError) {throw err;}
       const msg = err instanceof Error ? err.message : String(err);
       if (/2FA|otp|mfa/i.test(msg)) {throw new AutoFulfillBlockedError('otp', msg);}
       if (/captcha/i.test(msg)) {throw new AutoFulfillBlockedError('captcha', msg);}
+      // Keep the create-account refusal legible instead of flattening it into a
+      // generic login failure: the fix is "use a registered Amazon email", not
+      // "re-enter the password".
+      if (/create-account form/i.test(msg)) {
+        throw new AutoFulfillBlockedError('login', msg);
+      }
       if (/login failed|Invalid credentials/i.test(msg)) {
         throw new AutoFulfillBlockedError('login', msg);
       }
       throw new AutoFulfillBlockedError('login', msg);
     }
+  }
+
+  /**
+   * Pass Amazon's post-cart upsell interstitial ("Need anything else?").
+   *
+   * It sits between the cart and the real checkout pipeline and is full of `Add`
+   * buttons for other products, so only its own "Continue to checkout" control
+   * is ever clicked — never anything that could add an item. Because that page
+   * exists specifically to grow the basket, the cart is RE-VERIFIED afterwards:
+   * Amazon checks out the whole cart, so a stray addition would be co-purchased
+   * with real money.
+   *
+   * Bounded loop: Amazon may chain more than one interstitial, but a page that
+   * keeps re-presenting itself must not spin forever on the money path.
+   */
+  private async passUpsellInterstitial(
+    page: Page,
+    asin: string,
+    quantity: number,
+    ebayOrderId: string,
+  ): Promise<void> {
+    for (let hop = 0; hop < 3; hop++) {
+      const onInterstitial = await page
+        .locator(CHECKOUT_SELECTORS.continueToCheckoutButton.join(', '))
+        .first()
+        .isVisible({ timeout: 2000 })
+        .catch(() => false);
+      if (!onInterstitial) {
+        return;
+      }
+      this.logger.debug(`${ebayOrderId}: passing checkout upsell interstitial (hop ${hop + 1})`);
+      await this.clickFirstAvailable(
+        page,
+        CHECKOUT_SELECTORS.continueToCheckoutButton,
+        'continue-to-checkout',
+      );
+      await this.humanDelay();
+
+      // Fail closed if the interstitial changed the basket.
+      if (page.url().includes('/gp/cart/view')) {
+        await this.verifyCartContents(page, asin, quantity, ebayOrderId);
+      }
+    }
+  }
+
+  /**
+   * Re-assert the session mid-flow. Every step helper treats a missing control
+   * as "layout variant, skip", so a session lost part-way through checkout
+   * silently no-ops the remaining steps and only surfaces at the review-total
+   * read — pointing the operator at the wrong problem. Fail closed with
+   * `login` and an evidence snap naming the stage instead.
+   */
+  private async assertStillAuthenticated(
+    page: Page,
+    ebayOrderId: string,
+    stage: string,
+    authResolution: { attempted: boolean },
+    userId: string,
+    amazonAccountId: string,
+  ): Promise<void> {
+    const probe = await isOnAmazonAuthChallenge(page);
+    if (probe.authenticated) {
+      return;
+    }
+    await this.snap(page, ebayOrderId, `challenge-${stage}`);
+
+    // Amazon interrupts the cart→checkout transition with its own in-context
+    // sign-in step (observed live: `signin/checkout-perf-initiate-and-store`,
+    // `InContextAuthBaseAssets`, plus a WebAuthn DOMException because headless
+    // Chromium has no passkey support, so Amazon falls back to the password
+    // form). Resolve it IN PLACE: navigating away to a fresh login loses the
+    // checkout context and the challenge just reappears. Fully automatic —
+    // credentials + TOTP come from the encrypted account record.
+    if (!authResolution.attempted) {
+      authResolution.attempted = true;
+      this.logger.warn(`${ebayOrderId}: resolving Amazon in-context auth challenge at ${stage}`);
+      const resolved = await this.scraping
+        .resolveInContextChallenge(page, userId, amazonAccountId)
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `${ebayOrderId}: in-context challenge resolution failed: ${(err as Error).message}`,
+          );
+          return false;
+        });
+      if (resolved) {
+        await this.humanDelay();
+        return;
+      }
+    }
+
+    throw new AutoFulfillBlockedError(
+      'login',
+      `Amazon identity challenge unresolved at ${stage} (route=${probe.route}; authRoute=${probe.authRoute}; authControl=${probe.authControlVisible})`,
+    );
+  }
+
+  /**
+   * Step 2a-pre: is there no product page at all?
+   *
+   * Distinguished from out-of-stock because the remedy differs: a delisted or
+   * invalid ASIN needs the listing fixed or ended, while genuine out-of-stock
+   * resolves itself. Requires a strong signal (404/410 status, or Amazon's
+   * dog-page copy) so a slow-rendering real product is never misread as missing.
+   */
+  private async isProductPageMissing(page: Page, status?: number): Promise<boolean> {
+    if (status === 404 || status === 410) {
+      return true;
+    }
+    for (const sel of CHECKOUT_SELECTORS.pageNotFoundText) {
+      if (await page.locator(sel).first().isVisible({ timeout: 500 }).catch(() => false)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Step 2a: detect "Currently unavailable" or missing Add to Cart. */
@@ -628,20 +935,43 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Step 3a: detect MFA / captcha on the checkout auth surface. Both block
-   * checkout fail-closed: a robot cannot solve them, and forcing-through would
-   * lock the account. Throws typed reasons for the operator.
+   * Step 3a: handle MFA / captcha on the checkout auth surface.
+   *
+   * An OTP prompt is RESOLVED, not reported: the account's encrypted TOTP secret
+   * makes this fully automatic, and stopping here would mean asking a customer
+   * to type a code for their own automated order. Only an unresolvable prompt
+   * blocks. Captcha still fails closed — it cannot be solved automatically, and
+   * attempting to defeat it would risk the buyer account.
    */
-  private async detectCaptchaOrOtp(page: Page): Promise<void> {
+  private async detectCaptchaOrOtp(
+    page: Page,
+    userId: string,
+    amazonAccountId: string,
+    ebayOrderId: string,
+  ): Promise<void> {
     const otp = page.locator(CHECKOUT_SELECTORS.mfaOtpInput).first();
     if (await otp.isVisible({ timeout: 1000 }).catch(() => false)) {
-      throw new AutoFulfillBlockedError(
-        'otp',
-        'Amazon prompted for MFA OTP code mid-checkout (session expired)',
-      );
+      this.logger.warn(`${ebayOrderId}: resolving Amazon OTP prompt mid-checkout`);
+      const resolved = await this.scraping
+        .resolveInContextChallenge(page, userId, amazonAccountId)
+        .catch((err: unknown) => {
+          this.logger.warn(
+            `${ebayOrderId}: OTP resolution failed: ${(err as Error).message}`,
+          );
+          return false;
+        });
+      if (!resolved) {
+        await this.snap(page, ebayOrderId, 'otp-unresolved');
+        throw new AutoFulfillBlockedError(
+          'otp',
+          'Amazon prompted for an MFA OTP code mid-checkout and it could not be resolved automatically',
+        );
+      }
+      await this.humanDelay();
     }
     const captcha = page.locator(CHECKOUT_SELECTORS.captchaInput).first();
     if (await captcha.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await this.snap(page, ebayOrderId, 'captcha');
       throw new AutoFulfillBlockedError('captcha', 'Amazon captcha page presented');
     }
   }
@@ -656,119 +986,392 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * not be verified" interstitial is a hard stop because guessing leads to
    * mis-shipped orders.
    */
-  private async selectShipToAddress(page: Page, ship: Address): Promise<void> {
+  private async selectShipToAddress(
+    page: Page,
+    ship: Address,
+    ebayOrderId: string,
+  ): Promise<void> {
     const anyRadio = page.locator(CHECKOUT_SELECTORS.addressRadio.join(', '));
     const radioCount = await anyRadio.count().catch(() => 0);
 
     if (radioCount > 0) {
       let matched = false;
-      if (ship.fullName || ship.zipCode) {
-        const blocks = page.locator(CHECKOUT_SELECTORS.addressBlock);
-        const blockCount = await blocks.count().catch(() => 0);
-        for (let i = 0; i < blockCount; i++) {
-          const blk = blocks.nth(i);
-          const text = ((await blk.textContent().catch(() => '')) ?? '');
-          const nameOk = !ship.fullName || text.includes(ship.fullName);
-          const zipOk = !ship.zipCode || text.includes(ship.zipCode);
-          if (nameOk && zipOk) {
-            const radio = blk.locator('input[type="radio"]').first();
-            if (await radio.isVisible({ timeout: 500 }).catch(() => false)) {
-              await radio.check();
-              matched = true;
-              break;
-            }
-          }
+      const blocks = page.locator(CHECKOUT_SELECTORS.addressBlock);
+      const blockCount = await blocks.count().catch(() => 0);
+      for (let i = 0; i < blockCount; i++) {
+        const blk = blocks.nth(i);
+        const text = ((await blk.textContent().catch(() => '')) ?? '');
+        // Street + zip (+ unit) must all line up — see `address-match.ts` for why
+        // a zip-only match is unsafe.
+        if (!addressBlockMatchesBuyer(text, ship)) {
+          continue;
+        }
+        const radio = blk.locator('input[type="radio"]').first();
+        if (await radio.isVisible({ timeout: 500 }).catch(() => false)) {
+          await radio.check();
+          matched = true;
+          break;
         }
       }
       if (!matched) {
-        // Use whatever Amazon pre-selected (default address) — best effort.
-        this.logger.debug('no exact address match; using Amazon default');
+        // NEVER fall back to Amazon's pre-selected address. That default is the
+        // buyer-account holder's own address, so accepting it ships the item to
+        // the wrong person while the eBay sale stays unfulfilled. If the buyer's
+        // address is not already in the address book, the add-address path below
+        // is the only correct route — and if neither works, fail closed.
+        const added = await this.addBuyerAddress(page, ship, ebayOrderId);
+        if (!added) {
+          await this.snap(page, ebayOrderId, 'address-not-matched');
+          throw new AutoFulfillBlockedError(
+            'address',
+            `none of the saved Amazon addresses match the eBay buyer (${ship.zipCode ?? 'no zip'}) and the address could not be added`,
+          );
+        }
       }
-    } else if (ship.street) {
-      // No existing addresses on account — add one. This is the riskier path.
-      const addLink = page
-        .locator(CHECKOUT_SELECTORS.addNewAddressLink.join(', '))
-        .first();
-      if (await addLink.isVisible({ timeout: 1500 }).catch(() => false)) {
-        await addLink.click();
-        await page
-          .waitForLoadState('domcontentloaded', { timeout: 10_000 })
-          .catch(() => undefined);
-        try {
-          await page
-            .locator('#address-ui-widgets-enterAddressFullName')
-            .first()
-            .fill(ship.fullName ?? '');
-          await page
-            .locator('#address-ui-widgets-enterAddressLine1')
-            .first()
-            .fill(ship.street ?? '');
-          if (ship.street2) {
-            await page.locator('#address-ui-widgets-enterAddressLine2').first().fill(ship.street2);
-          }
-          await page
-            .locator('#address-ui-widgets-enterAddressCity')
-            .first()
-            .fill(ship.city ?? '');
-          await page
-            .locator('#address-ui-widgets-enterAddressStateOrRegion')
-            .first()
-            .fill(ship.state ?? '');
-          await page
-            .locator('#address-ui-widgets-enterAddressPostalCode')
-            .first()
-            .fill(ship.zipCode ?? '');
-          if (ship.phone) {
-            await page
-              .locator('#address-ui-widgets-enterAddressPhoneNumber')
-              .first()
-              .fill(ship.phone);
-          }
-          const submit = page
-            .locator(CHECKOUT_SELECTORS.addressFormContinueButton.join(', '))
-            .first();
-          await submit.click();
-          await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          throw new AutoFulfillBlockedError('address', `add-address form failed: ${msg}`);
-        }
-        const validationErr = page
-          .locator(
-            'div.a-alert-content:has-text("could not be verified"), div.a-alert-content:has-text("not valid")',
-          )
-          .first();
-        if (await validationErr.isVisible({ timeout: 1500 }).catch(() => false)) {
-          const txt = ((await validationErr.textContent()) ?? '').trim().slice(0, 200);
-          throw new AutoFulfillBlockedError('address', `validation: ${txt}`);
-        }
+    } else {
+      // No saved addresses at all — the buyer's address must be entered.
+      const added = await this.addBuyerAddress(page, ship, ebayOrderId);
+      if (!added) {
+        await this.snap(page, ebayOrderId, 'address-add-unavailable');
+        throw new AutoFulfillBlockedError(
+          'address',
+          'no saved Amazon addresses and no add-address control was available',
+        );
       }
     }
 
-    // If a "use this address" / continue button is present, click it.
+    // Confirm the address. This is MANDATORY when the address step is on screen:
+    // treating a missing button as "different layout, skip" let the flow believe
+    // it had reached the review step while still sitting on address selection —
+    // the cap was then checked against the sidebar total of the WRONG step, and
+    // dry-run reported success without ever proving the pre-Place-Order page.
     const useBtn = page
       .locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', '))
       .first();
-    if (await useBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    const useBtnVisible = await useBtn.isVisible({ timeout: 2500 }).catch(() => false);
+    if (!useBtnVisible) {
+      const addressStepPresent = await page
+        .locator('h1:has-text("Select a delivery address"), h2:has-text("Select a delivery address")')
+        .first()
+        .isVisible({ timeout: 1000 })
+        .catch(() => false);
+      if (addressStepPresent) {
+        await this.snap(page, ebayOrderId, 'address-confirm-missing');
+        throw new AutoFulfillBlockedError(
+          'address',
+          'address step is on screen but no delivery-address confirm control was found',
+        );
+      }
+    }
+    if (useBtnVisible) {
       await useBtn.click();
       await page
         .waitForLoadState('domcontentloaded', { timeout: 15_000 })
         .catch(() => undefined);
-      // Post-submit we may bounce back to the same page on a validation issue.
-      const stillOnAddressPage =
-        (page.url().includes('address') || page.url().includes('selectaddress')) &&
-        (await page
-          .locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', '))
-          .first()
-          .isVisible({ timeout: 500 })
-          .catch(() => false));
-      if (stillOnAddressPage) {
+      // Post-submit we may bounce back to the same step on a validation issue.
+      // Detect that from the DOM, not the URL: Amazon's single-page checkout
+      // keeps the same URL across steps, so a URL check silently passed a
+      // still-on-address page through to the review read.
+      await this.humanDelay();
+      const stillOnAddressStep = await page
+        .locator(CHECKOUT_SELECTORS.useSelectedAddressButton.join(', '))
+        .first()
+        .isVisible({ timeout: 1500 })
+        .catch(() => false);
+      if (stillOnAddressStep) {
         throw new AutoFulfillBlockedError(
           'address',
-          'address selection did not advance (Amazon re-presented the page)',
+          'address selection did not advance (Amazon re-presented the address step)',
         );
       }
     }
+
+    // FINAL RECIPIENT CHECK. Everything above can succeed and still leave the
+    // WRONG address active (a stale selection, an autofilled ZIP, an ignored
+    // form). Once checkout shows the chosen ship-to, confirm it is the eBay
+    // buyer's before any payment surface is touched. Only asserts when a
+    // ship-to summary is actually rendered, so a layout without one cannot
+    // dead-stop legitimate orders — the earlier gates still apply there.
+    const shipToSummary = page.locator(CHECKOUT_SELECTORS.selectedShipToSummary).first();
+    if (await shipToSummary.isVisible({ timeout: 2500 }).catch(() => false)) {
+      const summaryText = ((await shipToSummary.textContent().catch(() => '')) ?? '');
+      if (summaryText.trim() && !addressBlockMatchesBuyer(summaryText, ship)) {
+        await this.snap(page, ebayOrderId, 'wrong-ship-to-selected');
+        throw new AutoFulfillBlockedError(
+          'address',
+          `checkout ship-to does not match the eBay buyer (expected ${ship.street} ${ship.zipCode})`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Enter the eBay buyer's address into Amazon's add-address form.
+   *
+   * This is the correct route whenever the buyer's address is not already saved
+   * on the account — the alternative (accepting Amazon's pre-selected default)
+   * would ship the item to the buyer-account holder instead of the customer.
+   *
+   * Returns false when the add-address entry point is not available, so the
+   * caller can fail closed. Throws `address` on form/validation friction:
+   * guessing at a rejected address leads to a mis-shipped, paid-for order.
+   */
+  private async addBuyerAddress(
+    page: Page,
+    ship: Address,
+    ebayOrderId: string,
+  ): Promise<boolean> {
+    const addLink = page.locator(CHECKOUT_SELECTORS.addNewAddressLink.join(', ')).first();
+    if (!(await addLink.isVisible({ timeout: 2000 }).catch(() => false))) {
+      return false;
+    }
+    await addLink.click();
+    // The form opens as an in-page dialog, not a navigation, so wait for the
+    // field itself rather than a load event.
+    await page
+      .locator('#address-ui-widgets-enterAddressFullName')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .catch(() => undefined);
+
+    try {
+      await page
+        .locator('#address-ui-widgets-enterAddressFullName')
+        .first()
+        .fill(ship.fullName ?? '');
+      await page.locator('#address-ui-widgets-enterAddressLine1').first().fill(ship.street ?? '');
+      if (ship.street2) {
+        await page.locator('#address-ui-widgets-enterAddressLine2').first().fill(ship.street2);
+      }
+      await page.locator('#address-ui-widgets-enterAddressCity').first().fill(ship.city ?? '');
+
+      // State is a <select> in the current form (observed live 2026-07-30):
+      // `fill()` silently leaves it on "Select", and Amazon then rejects the
+      // address. Choose the option instead, by code then by visible label.
+      const stateField = page.locator(CHECKOUT_SELECTORS.addressStateField).first();
+      const stateValue = (ship.state ?? '').trim();
+      if (stateValue) {
+        const isSelect =
+          (await stateField.evaluate((el) => el.tagName.toLowerCase()).catch(() => '')) === 'select';
+        if (isSelect) {
+          const chosen = await stateField
+            .selectOption(stateValue)
+            .then(() => true)
+            .catch(() => false);
+          if (!chosen) {
+            await stateField.selectOption({ label: stateValue }).catch(() => undefined);
+          }
+        } else {
+          await stateField.fill(stateValue);
+        }
+      }
+
+      // ZIP: Amazon prefills this from the session's delivery location, so a
+      // failed write leaves someone else's postcode in place (observed: 10020
+      // instead of 20500) — which would ship to the wrong city. Clear, write,
+      // then verify the field actually holds the buyer's ZIP.
+      const zipField = page.locator(CHECKOUT_SELECTORS.addressZipField).first();
+      const zipValue = (ship.zipCode ?? '').trim();
+      await zipField.fill('');
+      await zipField.fill(zipValue);
+      const zipWritten = (await zipField.inputValue().catch(() => '')).trim();
+      if (zipValue && zipWritten !== zipValue) {
+        await this.snap(page, ebayOrderId, 'address-zip-mismatch');
+        throw new AutoFulfillBlockedError(
+          'address',
+          `ZIP field holds "${zipWritten}" after writing "${zipValue}" — refusing to ship to an unverified postcode`,
+        );
+      }
+
+      if (ship.phone) {
+        await page.locator('#address-ui-widgets-enterAddressPhoneNumber').first().fill(ship.phone);
+      }
+      // The dialog's submit button is below the fold; scroll it into view first
+      // or the click never lands and a correctly-filled form looks like a
+      // failure. Report the miss explicitly instead of relying on a click
+      // timeout, so the operator sees "no submit control" rather than a stack.
+      // Resolve by ACCESSIBLE NAME first. Amazon's button markup is
+      // `<input type="submit" aria-labelledby="…-announce">` with the visible
+      // text in a sibling span, so the input itself has no value/aria-label/text
+      // — attribute-based searches (and the earlier DOM probe) could not see it.
+      // getByRole computes the accessible name, which follows aria-labelledby.
+      // The name is anchored to the form's own wording and deliberately excludes
+      // "Deliver to this address", which belongs to the address LIST behind the
+      // dialog: clicking that would ship to the account's pre-selected address.
+      let submitBtn = page
+        .getByRole('button', { name: /use this address|ship to this address|add address|save address/i })
+        .first();
+      let submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+
+      if (!submitVisible) {
+        submitBtn = page.locator(CHECKOUT_SELECTORS.addressFormContinueButton.join(', ')).first();
+        await submitBtn.scrollIntoViewIfNeeded({ timeout: 5_000 }).catch(() => undefined);
+        submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+      }
+
+      if (!submitVisible) {
+        // Last resort: submit the form directly. A full document inventory (with
+        // aria-labelledby resolved) proved the dialog's own submit control is not
+        // in the main frame at all — the only visible submit belongs to the
+        // address LIST behind it ("Deliver to this address"), which must never be
+        // clicked here because it would ship to the pre-selected account address.
+        // requestSubmit() fires the form's real submit handler and validation,
+        // exactly as the missing button would, without borrowing another
+        // button's click.
+        const submitted = await page
+          .evaluate(() => {
+            const anchor = document.querySelector('#address-ui-widgets-enterAddressFullName');
+            const form = anchor?.closest('form');
+            if (!form) {
+              return false;
+            }
+            if (typeof form.requestSubmit === 'function') {
+              form.requestSubmit();
+            } else {
+              form.submit();
+            }
+            return true;
+          })
+          .catch(() => false);
+        if (submitted) {
+          this.logger.debug(`${ebayOrderId}: address dialog submitted via form.requestSubmit()`);
+          await page
+            .locator('#address-ui-widgets-enterAddressFullName')
+            .first()
+            .waitFor({ state: 'hidden', timeout: 20_000 })
+            .catch(() => undefined);
+          await this.humanDelay();
+          return true;
+        }
+      }
+
+      if (!submitVisible) {
+        // The dialog is taller than the viewport and scrolls internally, so the
+        // submit control can sit outside the rendered area where Playwright
+        // cannot see it. Find it by accessible text inside the dialog and scroll
+        // it in. Anchored to the dialog and to submit-like text so this can only
+        // ever reach the address form's own button.
+        submitVisible = await page
+          .evaluate(() => {
+            const wanted = /use this address|ship to this address|add address|save address/i;
+            // Search the whole document, not the field's <form>: the probe showed
+            // the form contains only Autofill/error controls, so Amazon renders
+            // the submit button OUTSIDE it (a dialog footer). Filter by label so a
+            // document-wide search still cannot hit an unrelated control.
+            const candidates = Array.from(
+              document.querySelectorAll<HTMLElement>(
+                'input[type="submit"], input[type="button"], button, [role="button"], a[role="button"], span.a-button-inner',
+              ),
+            );
+            const target = candidates.find((el) => {
+              const label = [
+                el.getAttribute('value'),
+                el.getAttribute('aria-label'),
+                el.textContent,
+              ]
+                .filter(Boolean)
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+              // Reject the storefront's own "Deliver to this address" button, which
+              // belongs to the address LIST behind the dialog, not the form.
+              return wanted.test(label) && !/deliver to this address/i.test(label);
+            });
+            if (target) {
+              target.scrollIntoView({ block: 'center' });
+              return true;
+            }
+            return false;
+          })
+          .catch(() => false);
+        if (submitVisible) {
+          await this.humanDelay();
+          submitVisible = await submitBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+        }
+      }
+
+      if (!submitVisible) {
+        await this.snap(page, ebayOrderId, 'address-submit-missing');
+        // Report the dialog's actual controls. A bare "no submit control" told
+        // the operator nothing about WHICH control to add, so the selector list
+        // could only be fixed by guessing. Metadata only — no field values.
+        const controls = await page
+          .evaluate(() => {
+            // Report every clickable control in the DOCUMENT. Scoping to the
+            // field's <form> returned only Autofill/error buttons, proving the
+            // submit control lives elsewhere; a document-wide inventory is what
+            // actually identifies it. Metadata only — never field values.
+            const seen = Array.from(
+              document.querySelectorAll<HTMLElement>(
+                'input[type="submit"], input[type="button"], button, [role="button"]',
+              ),
+            )
+              .map((el) => {
+                // Follow aria-labelledby: Amazon's submit inputs carry no value
+                // or text of their own, so without this the control that matters
+                // showed up as an unlabelled row and got filtered out.
+                const labelledBy = el.getAttribute('aria-labelledby');
+                const referenced = labelledBy
+                  ? (document.getElementById(labelledBy)?.textContent ?? '')
+                  : '';
+                const label = [el.getAttribute('aria-label'), referenced, el.textContent]
+                  .filter(Boolean)
+                  .join(' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                return {
+                  tag: el.tagName.toLowerCase(),
+                  id: el.id || null,
+                  name: el.getAttribute('name'),
+                  value: el.getAttribute('value'),
+                  labelledBy,
+                  label: label.slice(0, 40),
+                  visible: el.offsetParent !== null,
+                };
+              })
+              .slice(0, 25);
+            return {
+              iframes: Array.from(document.querySelectorAll('iframe')).map((f) => ({
+                id: f.id || null,
+                name: f.getAttribute('name'),
+                src: (f.getAttribute('src') ?? '').slice(0, 60),
+              })),
+              controls: seen,
+            };
+          })
+          .catch(() => null);
+        throw new AutoFulfillBlockedError(
+          'address',
+          `add-address dialog exposed no known submit control; probe=${JSON.stringify(controls)}`,
+        );
+      }
+      await submitBtn.click();
+      // The dialog closes in-page rather than navigating, so wait for the form
+      // to disappear instead of a load event.
+      await page
+        .locator('#address-ui-widgets-enterAddressFullName')
+        .first()
+        .waitFor({ state: 'hidden', timeout: 20_000 })
+        .catch(() => undefined);
+      await this.humanDelay();
+    } catch (err) {
+      if (err instanceof AutoFulfillBlockedError) {throw err;}
+      await this.snap(page, ebayOrderId, 'address-form-failed');
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new AutoFulfillBlockedError('address', `add-address form failed: ${msg}`);
+    }
+
+    const validationErr = page
+      .locator(
+        'div.a-alert-content:has-text("could not be verified"), div.a-alert-content:has-text("not valid")',
+      )
+      .first();
+    if (await validationErr.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await this.snap(page, ebayOrderId, 'address-validation-failed');
+      const txt = ((await validationErr.textContent()) ?? '').trim().slice(0, 200);
+      throw new AutoFulfillBlockedError('address', `validation: ${txt}`);
+    }
+    return true;
   }
 
   /**
@@ -819,7 +1422,132 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         }
       }
     }
+
+    // Structure-independent fallback: find the "Order total" / "Grand total"
+    // label in the rendered text and take the currency amount that follows it.
+    // Amazon reshuffles the summary markup often, and a selector-only read makes
+    // every reshuffle look like a cap failure. Anchored to the label (not just
+    // "the first price on the page") so a subtotal or an item price can never be
+    // mistaken for the figure the spend cap is checked against.
+    const labelled = await page
+      .locator('body')
+      .innerText()
+      .then((text) =>
+        text.match(/(?:order\s+total|grand\s+total)\s*:?\s*\$\s*([\d,]+\.\d{2})/i),
+      )
+      .catch(() => null);
+    if (labelled?.[1]) {
+      const n = parseFloat(labelled[1].replace(/,/g, ''));
+      if (Number.isFinite(n) && n > 0) {
+        this.logger.debug('review total resolved via labelled-text fallback');
+        return n;
+      }
+    }
+
     return Number.NaN;
+  }
+
+  /**
+   * DRY-RUN ONLY. Apply the post-purchase bookkeeping a real placement would,
+   * using a clearly-marked placeholder Amazon order id.
+   *
+   * Why this exists: the value of a dry run was limited to "the selectors reach
+   * the review page". It could not answer the operator's actual question — what
+   * happens to the order once Amazon accepts it: which costs land, does the
+   * order become cost-captured, what net profit is computed, does tracking start.
+   *
+   * Safety properties, all load-bearing:
+   *  - `auto_fulfill_status` stays DRY_RUN. It never becomes PLACED, so the real
+   *    idempotency guard (`shouldSkipFulfillStart`) and the "purchased" state are
+   *    untouched by simulation.
+   *  - The Amazon order id is `SIM-`-prefixed, so `deriveFulfillmentState` reports
+   *    SIMULATED and no reader can confuse it with a real purchase.
+   *  - Tracking is NOT scheduled: the id is fake, so a tracker would scrape a
+   *    non-existent Amazon order and mark the row failed. The simulation records
+   *    that tracking *would* start instead.
+   *  - Costs come from the REAL review-page total, split the way Amazon's
+   *    confirmation would report it, so the profit figure is meaningful.
+   *
+   * Fail-soft throughout: a diagnostic aid must never break the run it inspects.
+   */
+  private async simulatePlacement(
+    ebayOrderId: string,
+    amazonAccountId: string,
+    userId: string,
+    observed: { grandTotal: number; asin: string },
+  ): Promise<void> {
+    // Amazon's own id shape, behind the SIM- marker, so downstream formatting and
+    // any length assumptions behave exactly as they will in production.
+    const digits = (len: number): string =>
+      Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join('');
+    const simulatedOrderId = `${SIMULATED_AMAZON_ORDER_PREFIX}${digits(3)}-${digits(7)}-${digits(7)}`;
+
+    // Split the observed review total into the fields a confirmation carries.
+    // Items = total − tax − shipping keeps `purchase_price + tax + shipping`
+    // reconciling to what the review page actually showed.
+    const tax = Number((observed.grandTotal * 0.06).toFixed(2));
+    const shipping = 0;
+    const purchasePrice = Number((observed.grandTotal - tax - shipping).toFixed(2));
+
+    try {
+      await this.db.query(
+        `UPDATE orders SET
+           amazon_account_id         = $1,
+           amazon_order_id           = $2,
+           purchase_price            = $3,
+           amazon_tax                = $4,
+           amazon_shipping           = $5,
+           amazon_linked_at          = CURRENT_TIMESTAMP,
+           cost_capture_status       = $6,
+           auto_fulfill_status       = $7,
+           auto_fulfill_attempted_at = CURRENT_TIMESTAMP,
+           updated_at                = CURRENT_TIMESTAMP
+         WHERE ebay_order_id = $8`,
+        [
+          amazonAccountId,
+          simulatedOrderId,
+          purchasePrice,
+          tax,
+          shipping,
+          OrderCostCaptureStatus.LINKED,
+          AutoFulfillStatus.DRY_RUN,
+          ebayOrderId,
+        ],
+      );
+    } catch (err) {
+      this.logger.error(
+        `dry-run simulation write failed for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+      // Still record the stop so the order does not look untouched.
+      await this.setStatus(ebayOrderId, AutoFulfillStatus.DRY_RUN).catch(() => undefined);
+      return;
+    }
+
+    // Real profit recompute against the simulated costs — the single writer for
+    // net_profit, so the number is produced exactly as production would.
+    try {
+      await this.orderSync.recomputeProfit(ebayOrderId);
+    } catch (err) {
+      this.logger.warn(
+        `dry-run recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+    }
+
+    // Record it in the same audit file operators already read for blocks. The tag
+    // is a plain string, NOT a blocked reason — a dry run is not a block, and
+    // widening the enum for a diagnostic label would pollute the FE's reason map.
+    await this.appendEvidenceNote(
+      ebayOrderId,
+      'DRY_RUN',
+      `simulated placement: amazonOrderId=${simulatedOrderId} asin=${observed.asin} ` +
+        `items=${purchasePrice.toFixed(2)} tax=${tax.toFixed(2)} shipping=${shipping.toFixed(2)} ` +
+        `total=${observed.grandTotal.toFixed(2)} costCapture=linked account=${amazonAccountId} user=${userId} ` +
+        `tracking=NOT scheduled (placeholder id would fail a real scrape)`,
+    ).catch(() => undefined);
+
+    this.logger.log(
+      `dry-run simulated placement ${ebayOrderId}: ${simulatedOrderId} total=${observed.grandTotal.toFixed(2)}`,
+    );
   }
 
   /**
@@ -901,7 +1629,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     page: Page,
     selectors: readonly string[],
     label: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     for (const sel of selectors) {
       const loc = page.locator(sel).first();
       if (await loc.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -909,10 +1637,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
         await page
           .waitForLoadState('domcontentloaded', { timeout: 15_000 })
           .catch(() => undefined);
-        return;
+        return true;
       }
     }
     this.logger.debug(`clickFirstAvailable: no visible selector for ${label}`);
+    return false;
   }
 
   /** Human-like inter-action delay with bounded jitter. */
@@ -1029,11 +1758,31 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       );
     }
     const capTotal = rawCap === null ? Number.POSITIVE_INFINITY : Number(rawCap);
+
+    // WRONG-RECIPIENT GUARD. In dropshipping the item must ship to the eBay
+    // BUYER. With an empty address the flow fell through to "use whatever
+    // Amazon pre-selected", i.e. the buyer-account holder's own default address:
+    // the order would be paid for and delivered to the wrong person, and the
+    // eBay sale would still be unfulfilled. Require the parts needed to identify
+    // and match a delivery address before anything is added to a cart.
+    const ship = (row.shipping_address as Address | null) ?? null;
+    const missing = (['street', 'city', 'zipCode'] as const).filter(
+      (field) => !ship?.[field]?.trim(),
+    );
+    if (!ship || missing.length > 0) {
+      throw new AutoFulfillBlockedError(
+        'address',
+        `eBay order has no usable buyer shipping address (missing: ${
+          ship ? missing.join(', ') : 'entire address'
+        }); refusing to ship to the buyer account's default address`,
+      );
+    }
+
     return {
       userId: row.user_id,
       asin: row.asin,
       quantity: row.quantity ?? 1,
-      ship: (row.shipping_address as Address) ?? ({} as Address),
+      ship,
       capTotal,
       dryRun: !!row.auto_fulfill_dry_run,
     };
@@ -1202,6 +1951,34 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  /**
+   * Append a tagged line to the order's evidence directory, alongside the
+   * screenshots. The DB column stores only the enum (the FE maps it to an i18n
+   * label) and the logger goes to the console, so this file is where the
+   * diagnostic detail actually survives a run.
+   *
+   * Best-effort: diagnostics must never affect the outcome of a run.
+   */
+  private async appendEvidenceNote(
+    ebayOrderId: string,
+    tag: string,
+    msg: string,
+  ): Promise<void> {
+    try {
+      const dir = path.join(this.evidenceDir, ebayOrderId);
+      await fs.mkdir(dir, { recursive: true });
+      await fs.appendFile(
+        path.join(dir, 'blocked.log'),
+        `${new Date().toISOString()} ${tag} ${msg}\n`,
+        'utf8',
+      );
+    } catch (err) {
+      this.logger.warn(
+        `could not write evidence note for ${ebayOrderId}: ${(err as Error).message}`,
+      );
+    }
+  }
+
   /** Mark an order blocked. Deliberate stop — caller returns, no rethrow. */
   private async block(
     ebayOrderId: string,
@@ -1209,6 +1986,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     msg?: string,
   ): Promise<void> {
     this.logger.warn(`fulfill blocked ${ebayOrderId}: ${reason} (${msg ?? ''})`);
+    // Persist the detail next to the screenshots. The DB column stores only the
+    // enum (the FE maps it to an i18n label), and the logger goes to the console,
+    // so without this the diagnostic detail was effectively unreadable after the
+    // run — which is what forced selector fixes to be guesswork.
+    if (msg) {
+      await this.appendEvidenceNote(ebayOrderId, reason, msg);
+    }
     await this.setStatus(ebayOrderId, AutoFulfillStatus.BLOCKED, reason);
     // AO monthly quota: release the reserved slot on a deliberate block so the
     // period's quota is not consumed by an order that never placed. Best-effort

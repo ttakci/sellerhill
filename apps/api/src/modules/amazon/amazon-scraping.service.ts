@@ -1,8 +1,12 @@
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
 import { Injectable, Logger } from '@nestjs/common';
 import { AmazonAccountStatus, type AmazonScrapedOrderData } from '@repo/shared';
 import type { Locator, Page } from 'playwright';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
+import { probeAmazonAuth } from './amazon-auth-state';
 import { AmazonOrderParserService } from './amazon-order-parser.service';
 import { AmazonRateLimiter } from './amazon-rate-limiter.service';
 import { BrowserStateManager } from './browser-state-manager.service';
@@ -44,6 +48,44 @@ export interface ScrapedAccountOrders {
   rows: AmazonListOrderRow[];
   suspect: boolean;
 }
+
+// Amazon now returns HTTP 404 for the bare `/ap/signin` path. The OpenID
+// parameters are required to initialize the unified-auth flow (observed live
+// 2026-07-30). Keep this centralized: verification, scraping and checkout all
+// delegate to performLogin, so there must be only one login entry URL.
+const AMAZON_SIGN_IN_URL =
+  'https://www.amazon.com/ap/signin?openid.return_to=https%3A%2F%2Fwww.amazon.com%2F&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0';
+
+const AMAZON_LOGIN_SELECTORS = {
+  // Legacy Amazon used #ap_email. Unified Auth (2026) uses #ap_email_login.
+  emailInput: '#ap_email_login, #ap_email, input[name="email"]',
+  continueButton: '#continue, input[type="submit"]:visible, button[type="submit"]:visible',
+  // Unified Auth can insert `/ax/claim/intent` after email submission. The
+  // observed page exposes exactly one visible submit and no credential fields;
+  // clicking it confirms the requested sign-in intent and advances to password.
+  claimIntentContinue: 'input[type="submit"]:visible, button[type="submit"]:visible',
+  passwordInput:
+    '#ap_password_login, #ap_password, input[name="password"]:visible, input[type="password"]:visible',
+  signInButton: '#signInSubmit, input[type="submit"]:visible, button[type="submit"]:visible',
+  mfaInput: '#auth-mfa-otpcode, input[name="otpCode"]',
+  mfaSubmit: '#auth-signin-button, input[type="submit"]:visible, button[type="submit"]:visible',
+  /**
+   * "Keep me signed in". Off by default; checking it extends session life, which
+   * cuts repeat logins — and every extra login is another chance for Amazon to
+   * raise a challenge that stops an order.
+   */
+  keepSignedInCheckbox: '#auth-rememberMe-checkbox, input[name="rememberMe"]',
+  /** OTP "don't ask on this device again" — same session-longevity rationale. */
+  mfaRememberDevice: '#auth-mfa-remember-device, input[name="rememberDevice"]',
+  /**
+   * Registration form. Amazon shows this when it does not recognize the email —
+   * it must NEVER be filled in. Creating an unintended Amazon account under the
+   * customer's email is a destructive side effect, and the fields overlap with
+   * the sign-in form enough that a blind fill lands here (observed live:
+   * "Create account" with `#ap_customer_name` + a re-enter-password field).
+   */
+  registrationForm: '#ap_customer_name, input[name="customerName"], #ap_password_check',
+} as const;
 
 // ---------------------------------------------------------------------------
 // FRAGILE: Amazon "Your Orders" list-page DOM selectors.
@@ -94,6 +136,31 @@ export class AmazonScrapingService {
     private readonly browserStateManager: BrowserStateManager,
     private readonly rateLimiter: AmazonRateLimiter
   ) {}
+
+  /**
+   * Capture a login-failure screenshot before the page is closed.
+   *
+   * Every failure path in `performLogin` closes the page and throws a text
+   * message, which left login blocks with no visual evidence at all — the one
+   * class of failure where the DOM is the whole story (which Amazon screen came
+   * up, and why). Written next to the checkout evidence so an operator finds
+   * both in one place. Best-effort: never let diagnostics break the flow.
+   */
+  private async snapLoginFailure(
+    page: Page,
+    amazonAccountId: string,
+    stage: string
+  ): Promise<void> {
+    try {
+      const root =
+        process.env.FULFILLMENT_EVIDENCE_DIR || path.join(process.cwd(), 'fulfillment-evidence');
+      const dir = path.join(root, 'login', amazonAccountId);
+      await fs.mkdir(dir, { recursive: true });
+      await page.screenshot({ path: path.join(dir, `${stage}-${Date.now()}.png`), fullPage: true });
+    } catch (err) {
+      this.logger.warn(`login evidence snap failed (${stage}): ${(err as Error).message}`);
+    }
+  }
 
   async scrapeOrder(
     userId: string,
@@ -602,47 +669,395 @@ export class AmazonScrapingService {
     const context = await this.browserStateManager.getContext(amazonAccountId);
     const page = await context.newPage();
 
-    await page.goto('https://www.amazon.com/ap/signin', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const response = await page.goto(AMAZON_SIGN_IN_URL, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
 
-    const emailInput = page.locator('#ap_email');
-    await emailInput.waitFor({ state: 'visible', timeout: 10000 });
-    await emailInput.fill(email);
-    await page.locator('#continue').click();
-    await page.waitForTimeout(2000);
-
-    const passwordInput = page.locator('#ap_password');
-    await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
-    await passwordInput.fill(password);
-    await page.locator('#signInSubmit').click();
-    await page.waitForTimeout(3000);
-
-    // Handle 2FA
-    const authMfa = page.locator('#auth-mfa-otpcode');
-    if (await authMfa.isVisible({ timeout: 3000 }).catch(() => false)) {
-      if (!twoFactorSecret) {
-        await page.close();
-        throw new Error('Amazon requires 2FA but no secret key is configured for this account');
+    const emailInput = page.locator(AMAZON_LOGIN_SELECTORS.emailInput).first();
+    const emailVisible = await emailInput
+      .isVisible({ timeout: 10000 })
+      .catch(() => false);
+    if (!emailVisible) {
+      // No email field can mean the OPPOSITE of a failure: Amazon skips the
+      // sign-in form when the session is already authenticated. Probe before
+      // reporting an error, otherwise a healthy session is thrown away and the
+      // caller blocks the order on `login` (observed live: the storefront
+      // rendered "Hello, <name>" with the item already in the cart).
+      const alreadyAuthed = await probeAmazonAuth(page);
+      if (alreadyAuthed.authenticated) {
+        this.logger.debug(
+          `Amazon skipped the sign-in form for ${amazonAccountId}: session already authenticated`
+        );
+        await this.browserStateManager.saveState(amazonAccountId);
+        return page;
       }
 
-      const { generateSync } = await import('otplib');
-      const totpCode = generateSync({ secret: twoFactorSecret });
-      await authMfa.fill(totpCode);
-      await page.locator('#auth-signin-button').click();
-      await page.waitForTimeout(3000);
+      // Amazon also skips the email step when it REMEMBERS the identity and
+      // asks only for the password ("Sign in" showing the saved name/email).
+      // That is a normal returning-customer screen, not a broken selector, so
+      // continue from the password step instead of failing the order.
+      const passwordOnly = await page
+        .locator(AMAZON_LOGIN_SELECTORS.passwordInput)
+        .first()
+        .isVisible({ timeout: 2000 })
+        .catch(() => false);
+      if (!passwordOnly) {
+        const status = response?.status() ?? 'unknown';
+        const title = await page.title().catch(() => 'unknown');
+        const url = page.url();
+        await this.snapLoginFailure(page, amazonAccountId, 'no-email-field');
+        await page.close();
+        throw new Error(
+          `Amazon login page did not expose an email field (HTTP ${status}, URL ${url}, title ${title})`
+        );
+      }
+      this.logger.debug(
+        `Amazon remembered the identity for ${amazonAccountId}: entering at the password step`
+      );
+      await this.submitPasswordAndChallenges(page, password, twoFactorSecret, amazonAccountId);
+    } else {
+      await this.submitCredentialsOnPage(page, email, password, twoFactorSecret, amazonAccountId);
     }
 
-    // Check for login errors
-    const loginError = page.locator('#auth-error-message-box .a-alert-content');
-    if (await loginError.isVisible({ timeout: 2000 }).catch(() => false)) {
-      const errorText = await loginError.textContent();
+    // A submit completing without an error is NOT proof of authentication.
+    // Land on the storefront and require a positive signed-in signal; Unified
+    // Auth can remain under /ax/claim/* and the old code falsely marked such
+    // sessions ACTIVE, causing checkout to run on a signed-out page.
+    await page.goto('https://www.amazon.com/', {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+    await page.waitForTimeout(2000);
+    const authProbe = await probeAmazonAuth(page);
+    if (!authProbe.authenticated) {
+      await this.snapLoginFailure(page, amazonAccountId, 'auth-not-proven');
       await page.close();
       await this.browserStateManager.clearState(amazonAccountId);
-      throw new Error(`Amazon login failed: ${errorText?.trim() || 'Invalid credentials'}`);
+      throw new Error(
+        `Amazon authentication could not be proven (route=${authProbe.route}; authRoute=${authProbe.authRoute}; authControl=${authProbe.authControlVisible}; signedOutNav=${authProbe.signedOutNav}; signedInNav=${authProbe.signedInNav}; accountMarker=${authProbe.accountPageMarker})`
+      );
     }
 
-    // Save state after successful login
+    // Save only a positively-proven authenticated session.
     await this.browserStateManager.saveState(amazonAccountId);
 
     return page;
+  }
+
+  /**
+   * Drive Amazon's credential flow on the page as it currently stands: email →
+   * optional intent confirmation → password → challenge resolution (TOTP).
+   *
+   * Extracted from `performLogin` because Amazon runs the SAME flow as an
+   * "in-context authentication" step when entering checkout from a browsing
+   * session (observed live: `signin/checkout-perf-initiate-and-store.html`,
+   * `InContextAuthBaseAssets`). Re-driving it in place is what lets checkout
+   * recover without abandoning the cart — and without a customer ever typing a
+   * password or an OTP, which the product promise requires.
+   *
+   * Assumes an email field is already visible. Does NOT prove authentication or
+   * persist state; the caller decides how to verify (account-page probe for a
+   * fresh login, challenge-absence for a mid-checkout recovery).
+   */
+  private async submitCredentialsOnPage(
+    page: Page,
+    email: string,
+    password: string,
+    twoFactorSecret: string | null,
+    amazonAccountId: string,
+    closePageOnAbort = true
+  ): Promise<void> {
+    const emailInput = page.locator(AMAZON_LOGIN_SELECTORS.emailInput).first();
+    await emailInput.fill(email);
+    await page.locator(AMAZON_LOGIN_SELECTORS.continueButton).first().click();
+    await page.waitForTimeout(2000);
+    await this.assertNotRegistrationForm(page, amazonAccountId, closePageOnAbort);
+
+    // Amazon Unified Auth (2026) may insert an intent-confirmation page between
+    // the email and password steps. It has no credentials and exactly one
+    // visible submit control. Advance only on the known route and only when the
+    // control count is exactly one — fail closed if Amazon changes the page.
+    if (new URL(page.url()).pathname === '/ax/claim/intent') {
+      const intentSubmit = page.locator(AMAZON_LOGIN_SELECTORS.claimIntentContinue);
+      const intentSubmitCount = await intentSubmit.count().catch(() => 0);
+      if (intentSubmitCount !== 1) {
+        await page.close();
+        throw new Error(
+          `Amazon claim-intent page exposed ${intentSubmitCount} submit controls; expected exactly one`
+        );
+      }
+      await intentSubmit.first().click();
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => undefined);
+      await page.waitForTimeout(2000);
+      await this.assertNotRegistrationForm(page, amazonAccountId, closePageOnAbort);
+    }
+
+    const passwordInput = page.locator(AMAZON_LOGIN_SELECTORS.passwordInput).first();
+    const passwordVisible = await passwordInput
+      .isVisible({ timeout: 10000 })
+      .catch(() => false);
+    if (!passwordVisible) {
+      const title = await page.title().catch(() => 'unknown');
+      // Query strings can contain long opaque challenge IDs and made the useful
+      // DOM diagnostics fall past the UI's truncation boundary. Keep only the
+      // origin + path; no credential or claim value is needed to identify flow.
+      const url = new URL(page.url());
+      const route = `${url.origin}${url.pathname}`;
+      // Diagnose only coarse DOM signals and control metadata — never body text
+      // or input values, because unified-auth can echo the customer's email.
+      const [captcha, accountError, passkey, otp, controls] = await Promise.all([
+        page.locator('#captchacharacters, img[src*="captcha"]').first().isVisible().catch(() => false),
+        page.locator('#auth-error-message-box, .a-alert-error').first().isVisible().catch(() => false),
+        page.locator('[data-testid*="passkey"], button:has-text("passkey")').first().isVisible().catch(() => false),
+        page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first().isVisible().catch(() => false),
+        page.locator('input:visible, button:visible').evaluateAll((elements) =>
+          elements.slice(0, 12).map((element) => ({
+            tag: element.tagName.toLowerCase(),
+            id: element.id || null,
+            name: element.getAttribute('name'),
+            type: element.getAttribute('type'),
+            testId: element.getAttribute('data-testid'),
+          }))
+        ).catch(() => []),
+      ]);
+      await this.snapLoginFailure(page, amazonAccountId, 'password-step-unavailable');
+      if (closePageOnAbort) {
+        await page.close();
+      }
+      throw new Error(
+        `Amazon password step unavailable: route=${route}; title=${title}; captcha=${captcha}; accountError=${accountError}; passkey=${passkey}; otp=${otp}; controls=${JSON.stringify(controls)}`
+      );
+    }
+    await this.submitPasswordAndChallenges(
+      page,
+      password,
+      twoFactorSecret,
+      amazonAccountId,
+      closePageOnAbort
+    );
+  }
+
+  /**
+   * Submit the password and resolve any post-password challenge.
+   *
+   * Separate from the email step because Amazon serves a password-only "Sign in"
+   * screen for a remembered identity — there is no email field to fill, and
+   * treating that as a failure blocked orders on a perfectly normal returning-
+   * customer screen.
+   *
+   * TOTP is fully automatic from the encrypted account secret; the worker never
+   * has an interactive branch, so an unsupported challenge fails closed.
+   */
+  private async submitPasswordAndChallenges(
+    page: Page,
+    password: string,
+    twoFactorSecret: string | null,
+    amazonAccountId: string,
+    closePageOnAbort = true
+  ): Promise<void> {
+    const passwordInput = page.locator(AMAZON_LOGIN_SELECTORS.passwordInput).first();
+    await passwordInput.fill(password);
+
+    // "Keep me signed in" — Amazon leaves this OFF by default, which is why the
+    // session kept lapsing and every run paid for a fresh login (and drew more
+    // challenges). Checking it materially extends session life. Best-effort: the
+    // checkbox is absent on some layouts.
+    const keepSignedIn = page.locator(AMAZON_LOGIN_SELECTORS.keepSignedInCheckbox).first();
+    if (await keepSignedIn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await keepSignedIn.check().catch(() => undefined);
+    }
+
+    await page.locator(AMAZON_LOGIN_SELECTORS.signInButton).first().click();
+    await page.waitForTimeout(3000);
+
+    for (let step = 0; step < 4; step++) {
+      const authMfa = page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first();
+      if (await authMfa.isVisible({ timeout: 2000 }).catch(() => false)) {
+        if (!twoFactorSecret) {
+          await page.close();
+          throw new Error('Amazon requires 2FA but no secret key is configured for this account');
+        }
+
+        const { generateSync } = await import('otplib');
+        const totpCode = generateSync({ secret: twoFactorSecret });
+        await authMfa.fill(totpCode);
+        // Ask Amazon to trust this device so subsequent runs are not challenged
+        // again — each OTP round trip is another opportunity for the flow to be
+        // interrupted mid-checkout. Best-effort.
+        const rememberDevice = page.locator(AMAZON_LOGIN_SELECTORS.mfaRememberDevice).first();
+        if (await rememberDevice.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await rememberDevice.check().catch(() => undefined);
+        }
+        await page.locator(AMAZON_LOGIN_SELECTORS.mfaSubmit).first().click();
+        await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => undefined);
+        await page.waitForTimeout(2500);
+        continue;
+      }
+
+      const captchaVisible = await page
+        .locator('#captchacharacters, img[src*="captcha"]')
+        .first()
+        .isVisible()
+        .catch(() => false);
+      if (captchaVisible) {
+        await this.snapLoginFailure(page, amazonAccountId, 'captcha');
+        if (closePageOnAbort) {
+          await page.close();
+        }
+        throw new Error('Amazon captcha challenge blocked automated login');
+      }
+
+      const loginError = page.locator('#auth-error-message-box .a-alert-content, .a-alert-error .a-alert-content').first();
+      if (await loginError.isVisible({ timeout: 1000 }).catch(() => false)) {
+        // Do not persist Amazon's raw message: Unified Auth may echo account
+        // identifiers. A stable typed message is enough for the account status.
+        await this.snapLoginFailure(page, amazonAccountId, 'credentials-rejected');
+        if (closePageOnAbort) {
+          await page.close();
+        }
+        await this.browserStateManager.clearState(amazonAccountId);
+        throw new Error('Amazon login failed: credentials or challenge rejected');
+      }
+
+      break;
+    }
+  }
+
+  /**
+   * Abort if Amazon presented its "Create account" form.
+   *
+   * DESTRUCTIVE-ACTION GUARD. Amazon shows registration when it does not
+   * recognize the email, and its fields overlap the sign-in form enough that a
+   * blind password fill lands in the signup flow — observed live, one submit
+   * away from creating an unintended Amazon account under the customer's
+   * address. Never fill it; fail closed so the operator fixes the credentials.
+   *
+   * Closes the page so no caller can keep interacting with the signup form.
+   */
+  private async assertNotRegistrationForm(
+    page: Page,
+    amazonAccountId: string,
+    closePage = true
+  ): Promise<void> {
+    const onRegistration = await page
+      .locator(AMAZON_LOGIN_SELECTORS.registrationForm)
+      .first()
+      .isVisible({ timeout: 1500 })
+      .catch(() => false);
+    if (!onRegistration) {
+      return;
+    }
+    await this.snapLoginFailure(page, amazonAccountId, 'create-account-form');
+    // The mid-checkout caller owns its page (it snaps evidence and blocks the
+    // order), so it opts out of closing.
+    if (closePage) {
+      await page.close().catch(() => undefined);
+    }
+    throw new Error(
+      'Amazon presented the create-account form: this email is not a recognized Amazon customer. ' +
+        'Refusing to continue — an automated signup would create an unintended Amazon account. ' +
+        'Verify the buyer account email is registered at amazon.com.'
+    );
+  }
+
+  /**
+   * Resolve an Amazon in-context authentication challenge WITHOUT leaving the
+   * page. Used mid-checkout: Amazon interrupts the cart→checkout transition with
+   * its own sign-in step, so abandoning the page (full re-login) loses the
+   * checkout context and the challenge simply reappears.
+   *
+   * Returns true when the challenge was resolved and no auth control remains.
+   * Never throws for "no challenge present" — the caller checks first.
+   */
+  async resolveInContextChallenge(
+    page: Page,
+    userId: string,
+    amazonAccountId: string
+  ): Promise<boolean> {
+    const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+
+    // The in-context form sometimes starts at the password step (Amazon already
+    // knows the identity), so an email field is not guaranteed.
+    const emailVisible = await page
+      .locator(AMAZON_LOGIN_SELECTORS.emailInput)
+      .first()
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+
+    // Same destructive-action guard as the fresh-login path, checked BEFORE any
+    // fill: if Amazon is offering registration here, filling the form would
+    // create an unintended account. Returning false makes the caller fail closed
+    // (it does not close the page — the checkout page must stay owned by the
+    // checkout flow, which snaps evidence and blocks the order).
+    const onRegistration = await page
+      .locator(AMAZON_LOGIN_SELECTORS.registrationForm)
+      .first()
+      .isVisible({ timeout: 1500 })
+      .catch(() => false);
+    if (onRegistration) {
+      this.logger.error(
+        `Amazon offered the create-account form during checkout for account ${amazonAccountId}; refusing to fill it`
+      );
+      return false;
+    }
+
+    if (emailVisible) {
+      await this.submitCredentialsOnPage(
+        page,
+        account.email,
+        account.decryptedPassword,
+        account.decryptedTwoFactorSecret,
+        amazonAccountId,
+        false
+      );
+    } else if (
+      await page
+        .locator(AMAZON_LOGIN_SELECTORS.passwordInput)
+        .first()
+        .isVisible({ timeout: 2000 })
+        .catch(() => false)
+    ) {
+      await this.submitPasswordAndChallenges(
+        page,
+        account.decryptedPassword,
+        account.decryptedTwoFactorSecret,
+        amazonAccountId,
+        false
+      );
+    } else {
+      // OTP-only screen: Amazon accepts the existing session but wants a second
+      // factor (typical when it re-verifies identity at checkout). Answer it from
+      // the stored secret — no customer interaction, per the product contract.
+      const authMfa = page.locator(AMAZON_LOGIN_SELECTORS.mfaInput).first();
+      if (!(await authMfa.isVisible({ timeout: 2000 }).catch(() => false))) {
+        return false;
+      }
+      if (!account.decryptedTwoFactorSecret) {
+        throw new Error('Amazon requires 2FA but no secret key is configured for this account');
+      }
+      const { generateSync } = await import('otplib');
+      await authMfa.fill(generateSync({ secret: account.decryptedTwoFactorSecret }));
+      const rememberDevice = page.locator(AMAZON_LOGIN_SELECTORS.mfaRememberDevice).first();
+      if (await rememberDevice.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await rememberDevice.check().catch(() => undefined);
+      }
+      await page.locator(AMAZON_LOGIN_SELECTORS.mfaSubmit).first().click();
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => undefined);
+      await page.waitForTimeout(2500);
+    }
+
+    // Persist the refreshed session for subsequent runs.
+    await this.browserStateManager.saveState(amazonAccountId);
+
+    // Success = no credential/OTP control left on the page.
+    const stillChallenged = await page
+      .locator(AMAZON_LOGIN_SELECTORS.emailInput)
+      .or(page.locator(AMAZON_LOGIN_SELECTORS.passwordInput))
+      .or(page.locator(AMAZON_LOGIN_SELECTORS.mfaInput))
+      .first()
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    return !stillChallenged;
   }
 }

@@ -10,7 +10,7 @@ export const Wrapper = styled.button`
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: ${tkn('spacing.lg')};
+  gap: ${tkn('spacing.md')};
   width: 100%;
   height: 100%;
   max-width: 100%;
@@ -19,9 +19,9 @@ export const Wrapper = styled.button`
   cursor: pointer;
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md')};
   box-sizing: border-box;
   transition:
     border-color ${tkn('transitions.fast')},
@@ -31,6 +31,7 @@ export const Wrapper = styled.button`
 
   &:hover {
     box-shadow: ${tkn('shadows.md')};
+    border-color: ${tkn('colors.brand.primary')};
   }
 
   &:focus-visible {
@@ -46,14 +47,14 @@ export const Image = styled.div`
   overflow: hidden;
   flex-shrink: 0;
   background: transparent;
-  border-radius: ${tkn('radius.sm')};
-  width: 7.5rem;
-  height: 7.5rem;
+  border-radius: ${tkn('radius.md')};
+  width: 5rem;
+  height: 5rem;
   align-self: flex-start;
 
-  @media (min-width: 30rem) {
-    width: 10.5rem;
-    height: 10.5rem;
+  @media (min-width: ${tkn('breakpoints.sm')}) {
+    width: 6.5rem;
+    height: 6.5rem;
   }
 
   img {
@@ -114,7 +115,7 @@ export const MetaRow = styled.div`
   align-items: baseline;
   min-width: 0;
 
-  @media (min-width: 30rem) {
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     grid-template-columns: 5rem minmax(0, 1fr);
   }
 `;
@@ -135,7 +136,7 @@ export const MetaValue = styled.div`
   }
 
   a > span:first-of-type {
-    font-weight: ${tkn('typography.fontWeight.bold')};
+    font-weight: ${tkn('typography.fontWeight.semibold')};
     color: ${tkn('colors.text.primary')};
     overflow: hidden;
     text-overflow: ellipsis;
@@ -152,27 +153,26 @@ export const MetaValueText = styled(Text)`
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
+  /* Was a rigid repeat(3, 1fr) with vertical dividers, which is exactly what
+     crushed at a narrow track: three currency values in ~55px each. Cells now
+     reflow to two rows before they truncate. */
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   background: ${tkn('colors.background.tertiary')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
-  border-radius: ${tkn('radius.sm')};
-  padding: ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   margin-top: auto;
   flex-shrink: 0;
 `;
 
 export const StatCell = styled.div`
-  text-align: center;
+  /* Left-aligned: centred values in a reflowing grid never line up with each
+     other, and money reads better against a common left edge. */
+  text-align: left;
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
   min-width: 0;
-
-  &:not(:last-child) {
-    border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
-  }
 `;
 
 export const StatLabel = styled(Text)`

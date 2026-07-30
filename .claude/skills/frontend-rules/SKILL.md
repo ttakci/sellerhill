@@ -36,7 +36,9 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 - All visible text uses `<Text variant="...">` from `@repo/ui`. Never `styled.h1`, `styled.p`, etc.
 - Variants (hierarchy — keep sizes distinct):
   - `h1` 24px page title · `h2` 20px · `h3` 18px drawer · `h4` 16px card · `h5` 14px
-  - `body` 14px primary UI · `body-sm` 12px secondary · `body-xs` 10px · `caption` 12px · `overline` 10px uppercase
+  - `body` 16px primary UI · `body-sm` 14px table cells/secondary · `body-xs` 10px · `caption` 12px · `overline` 10px uppercase
+  - `metric` 20px / `metric-sm` 18px — KPI figures (tabular-nums). Never repurpose `h1`/`h2` for a number.
+- Any figure in a column (money, counts, %) sets `<Text numeric>` so digits stack instead of jittering.
 - Page titles: use `PageHeader` (not ad-hoc title stacks). Title→subtitle gap is built into `PageHeader` / Drawer — do not invent per-page gaps.
 - Prefer `weight="semibold"` on headings; avoid bold everywhere.
 
@@ -45,12 +47,24 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 - Text inputs → `TextInput` with **floating `label` prop**. Never `<input>`, never external label above the field.
 - Selects → `Select` with floating `label` (forms) or `placeholder` only (compact toolbars). Never `<select>`.
 - Checkboxes → `Checkbox`. Toggles → `Toggle`.
-- Shared geometry: `packages/ui/src/styles/formControl.ts`. TextInput / Select / SearchField must share heights and **brand.primary** focus rings (never black borders on focus/open).
-- Heights: compact medium `2.75rem`, labeled medium `3.25rem`. See `controlTokens` on theme.
+- Shared geometry: `controlTokens.height` on the theme is the single source of truth; `packages/ui/src/styles/formControl.ts` derives from it and must never re-declare a literal. TextInput / Select / SearchField / Textarea share heights and the **brand.primary** focus ring via `controlFocusShadow` (never black borders, never a bespoke ring).
+- Heights: compact `2.5 / 2.75 / 3rem`, labeled `3.25 / 3.5 / 4rem`. Button `medium` = compact medium; Button `large` = labeled medium (auth submit under a labeled field).
+- `colors.border.focus` must always equal `colors.brand.primary`.
+- Every interactive atom needs a `:focus-visible` ring. Checkbox/Radio/Toggle mirror it from the hidden input via `input:focus-visible + &` — a plain sibling selector, never an Emotion component selector.
 - Toolbar rows (filters): all compact same size so Search + Select + Button align.
 
 ### Layout
-- Cards → `Card` variants: `default | bordered | elevated | flat | interactive | stat | section`.
+- Cards → `Card` variants: `default | bordered | elevated | flat | interactive | stat | section`. **Never hand-roll a card** — extend with `styled(Card)` + layout-only CSS.
+- Radius tiers: cards/tables/filter bars `lg` (12px) · controls `md` (8px) · badges `sm` (6px) · modals `xl`.
+- Card content inset is 20px whether via `padding="lg"` or `<CardBody>`.
+- Tabs → `TabNav` (underline) for page sections; `SegmentedControl` for in-card switches. Never `Button variant="primary|secondary"` as a tab or filter group.
+- z-index → `theme.zIndex.*`; breakpoints → `theme.breakpoints.*`. Never a literal.
+- Money/count table columns: `align: 'right'` + `<Text numeric>`.
+- Card grids: set `gridMinItemWidth` (narrowest track the card survives in) and `gridMaxColumns` on `DataTable`. Inside a card, stat strips use `repeat(auto-fit, minmax(...))`, never a fixed `repeat(N, 1fr)`.
+- Textareas → `Textarea` (`fill` = absolute-inset, `mono` = code/HTML). Never fork a native `<textarea>`.
+- Loading and empty on the same surface must both be `EmptyState` — different components make them look like different screens.
+- Nested flows → a real nested `Drawer` with `onBack`, never inline content swapped into the parent card.
+- Never hand-roll a Card, Button, Textarea or empty state. Add a variant to the atom instead of forking it.
 - Settings sections → `SettingsCard` + `SettingsActionRow` (row label = `body`, subtitle = `caption`/`body-sm`).
 - Tables → `Table` / `DataTable`. Never `styled.table`.
 - Page header → `PageHeader` molecule.
@@ -58,7 +72,8 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 - Dropdowns → `Dropdown` atom.
 
 ### Loading
-- `useLoading` only for blocking mutations. Initial page data → empty/skeleton state, not global overlay.
+- `useLoading` takes **mutation flags only**. Never fold a query's initial `isLoading` into it — that blocks the whole app on first paint.
+- Initial page data → the page's own `EmptyState` (loading title + description). Loading and empty must use the same component so the two states don't look like different screens.
 
 ### Logic extraction
 - Feature hooks under `features/<feature>/hooks/` when container would exceed ~150–200 lines.

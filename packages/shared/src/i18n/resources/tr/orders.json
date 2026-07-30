@@ -23,7 +23,12 @@
     "all": {
       "title": "Tüm siparişler",
       "subtitle": "{{count}} sonuç",
-      "emptyTitle": "Filtrelere uyan sipariş yok"
+      "loadingTitle": "Siparişler yükleniyor",
+      "loadingSubtitle": "En güncel eBay siparişleriniz getiriliyor.",
+      "filtersTitle": "Filtrelere uyan sipariş yok",
+      "filtersSubtitle": "Tarih aralığını, durumu veya mağazayı genişletmeyi deneyin.",
+      "emptyTitle": "Henüz sipariş yok",
+      "emptySubtitle": "eBay senkronizasyonu çalıştığında siparişler burada otomatik görünür."
     },
     "filters": {
       "allStatuses": "Tüm durumlar",
@@ -67,6 +72,28 @@
       "pending": "Bekliyor",
       "waiting_shipment": "Kargo Bekliyor"
     },
+    "fulfillmentState": {
+      "column": "Amazon karşılama",
+      "purchased": "Amazon'dan alındı",
+      "amazon_cancelled": "Amazon iptal etti",
+      "action_required": "Aksiyon gerekli",
+      "in_progress": "Amazon'dan alınıyor",
+      "not_automated": "Otomatik değil",
+      "manual": "Elle alındı",
+      "simulated": "Test çalışması — sipariş verilmedi",
+      "filter": {
+        "all": "Tüm karşılama durumları"
+      },
+      "detail": {
+        "title": "Amazon karşılama",
+        "amazonOrderId": "Amazon siparişi",
+        "simulatedNotice": "Bu bir test çalışmasıdır. Amazon'da sipariş verilmedi ve para çekilmedi — aşağıdaki maliyet ve kâr simüle edilmiştir.",
+        "actionRequiredNotice": "Otomasyon satın almadan önce durdu. Sebebi inceleyip bu siparişi elle karşılayın.",
+        "cancelledNotice": "Amazon siparişi iptal edildi. eBay satışı hâlâ alıcıya borçlu — başka bir yolla karşılayın.",
+        "notAutomatedNotice": "Bu sipariş için otomatik sipariş kapalı.",
+        "attemptedAt": "Son deneme"
+      }
+    },
     "autoFulfill": {
       "column": "Otomatik Sipariş",
       "status": {
@@ -79,7 +106,7 @@
         "skipped": "Atlandı"
       },
       "reason": {
-        "no_asin": "ASIN bulunamadı",
+        "no_asin": "Ürün Amazon'da bulunamadı",
         "captcha": "Captcha gerekti",
         "otp": "MFA/OTP doğrulaması",
         "login": "Giriş başarısız",
@@ -90,7 +117,8 @@
         "no_confirmation": "Onay alınamadı",
         "proxy_required": "Proxy yapılandırılmamış",
         "quota_exhausted": "Aylık kota doldu",
-        "cart": "Sepet uyuşmazlığı"
+        "cart": "Sepet uyuşmazlığı",
+        "review_unreadable": "Sipariş toplamı okunamadı"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
@@ -104,6 +132,7 @@
     },
     "detail": {
       "title": "Sipariş Detayı",
+      "loadingSubtitle": "Sipariş detayları getiriliyor…",
       "notFoundTitle": "Sipariş bulunamadı",
       "notFoundSubtitle": "Bu sipariş silinmiş olabilir veya erişim yetkiniz yok.",
       "orderPlaced": "Sipariş Tarihi",

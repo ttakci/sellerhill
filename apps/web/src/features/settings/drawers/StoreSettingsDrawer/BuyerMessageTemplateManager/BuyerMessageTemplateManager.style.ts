@@ -2,9 +2,15 @@ import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
 export const BodyStack = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${tkn('spacing.lg')};
+
+  /* List beside editor once the lg drawer gives us the width. */
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    align-items: start;
+  }
 `;
 
 export const ListColumn = styled.div`
@@ -19,7 +25,7 @@ export const TemplateItem = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm')};
-  border: 1px solid ${tkn('colors.border.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};
   cursor: pointer;
 `;

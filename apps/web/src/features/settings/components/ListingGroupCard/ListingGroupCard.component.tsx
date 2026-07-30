@@ -44,7 +44,7 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
     >
       <S.CardBody>
         <S.TitleRow>
-          <S.CardName variant="h5" weight="bold" className="card-title" truncate>
+          <S.CardName variant="h5" weight="semibold" className="card-title" truncate>
             {group.name}
           </S.CardName>
           <S.ActiveBadge variant={isPredefined ? 'info' : 'neutral'} size="md">

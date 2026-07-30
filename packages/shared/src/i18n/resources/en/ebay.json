@@ -18,6 +18,7 @@
     },
     "accounts": {
       "title": "Connected eBay Accounts",
+      "loadingDescription": "Fetching your connected stores.",
       "noAccounts": "No eBay accounts connected yet",
       "statusActive": "Active",
       "statusRevoked": "Revoked",

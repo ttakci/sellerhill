@@ -91,7 +91,7 @@ export const ToastListContainer = styled.div`
   position: fixed;
   top: ${tkn('spacing.md')};
   right: ${tkn('spacing.md')};
-  z-index: 2000;
+  z-index: ${tkn('zIndex.toast')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};

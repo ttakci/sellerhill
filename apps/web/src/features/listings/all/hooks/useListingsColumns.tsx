@@ -9,7 +9,7 @@ import * as S from '../ListingsAllPage.style';
  * Column definitions for ListingsAll table view.
  * Extracted so the page container stays orchestration-only.
  */
-export function useListingsColumns() {
+export function useListingsColumns(formatCurrency: (value: number) => string) {
   const { t } = useTranslation(['listings', 'translation']);
 
   const columnOptions = useMemo(
@@ -86,11 +86,12 @@ export function useListingsColumns() {
         key: 'prices',
         sortable: true,
         header: t('listings.table.price'),
-        width: '5.25rem',
+        width: '6rem',
+        align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
             <S.MetricValue variant="body-sm" weight="semibold">
-              ${listing.price.toFixed(2)}
+              {formatCurrency(listing.price)}
             </S.MetricValue>
           </S.CompactMetric>
         ),
@@ -121,10 +122,11 @@ export function useListingsColumns() {
         key: 'purchasePrice',
         sortable: true,
         header: t('listings.table.purchasePrice'),
-        width: '5.25rem',
+        width: '6rem',
+        align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
-            <S.MetricValue variant="body-sm">${listing.purchasePrice?.toFixed(2) || '0.00'}</S.MetricValue>
+            <S.MetricValue variant="body-sm">{formatCurrency(listing.purchasePrice ?? 0)}</S.MetricValue>
           </S.CompactMetric>
         ),
       },
@@ -132,13 +134,15 @@ export function useListingsColumns() {
         key: 'profit',
         sortable: true,
         header: t('listings.table.estimatedProfit'),
-        width: '5.5rem',
+        width: '6.25rem',
+        align: 'right',
         render: (_value, listing) => {
           const profit = listing.estimatedProfit || 0;
           return (
             <S.CompactMetric>
               <S.MetricValue variant="body-sm" weight="semibold" $positive={profit > 0} $negative={profit < 0}>
-                {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
+                {profit >= 0 ? '+' : ''}
+                {formatCurrency(profit)}
               </S.MetricValue>
             </S.CompactMetric>
           );
@@ -149,6 +153,7 @@ export function useListingsColumns() {
         sortable: true,
         header: t('listings.table.roi'),
         width: '4.5rem',
+        align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
             <S.MetricValue
@@ -167,6 +172,7 @@ export function useListingsColumns() {
         sortable: true,
         header: t('listings.table.profitMargin'),
         width: '4.5rem',
+        align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
             <S.MetricValue variant="body-sm">{listing.profitMargin?.toFixed(1) || '0'}%</S.MetricValue>
@@ -177,7 +183,7 @@ export function useListingsColumns() {
         key: 'sold',
         sortable: true,
         header: t('listings.table.sold'),
-        align: 'center',
+        align: 'right',
         width: '4.25rem',
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
@@ -189,7 +195,7 @@ export function useListingsColumns() {
         key: 'watch',
         sortable: true,
         header: t('listings.table.watch'),
-        align: 'center',
+        align: 'right',
         width: '3.5rem',
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
@@ -201,7 +207,7 @@ export function useListingsColumns() {
         key: 'views',
         sortable: true,
         header: t('listings.table.views'),
-        align: 'center',
+        align: 'right',
         width: '3.5rem',
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
@@ -214,7 +220,7 @@ export function useListingsColumns() {
         sortable: true,
         header: t('listings.table.stock'),
         width: '3.75rem',
-        align: 'center',
+        align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.quantity === 0}>{listing.quantity}</S.StockValue>
         ),
@@ -224,13 +230,13 @@ export function useListingsColumns() {
         sortable: true,
         header: t('listings.table.amazonStock'),
         width: '4.25rem',
-        align: 'center',
+        align: 'right',
         render: (_value, listing) => (
           <S.StockValue $outOfStock={listing.sourceStock === 0}>{listing.sourceStock ?? '—'}</S.StockValue>
         ),
       },
     ],
-    [t]
+    [t, formatCurrency]
   );
 
   return { columnOptions, allColumns };

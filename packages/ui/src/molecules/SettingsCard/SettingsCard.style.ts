@@ -7,7 +7,7 @@ import { SettingsCardVariant } from './SettingsCard.types';
 export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
   overflow: hidden;
   display: flex;

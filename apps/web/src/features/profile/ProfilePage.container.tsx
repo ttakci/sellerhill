@@ -40,7 +40,10 @@ export const ProfilePageContainer = (): React.ReactElement => {
     },
   });
 
-  useLoading(isProfileLoading || isUpdating);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isUpdating);
 
   // Sync profile data to form when loaded
   useEffect(() => {

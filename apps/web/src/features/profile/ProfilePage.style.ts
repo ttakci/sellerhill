@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Badge, Button, PageContainer, TextInput, tkn } from '@repo/ui';
+import { Badge, PageContainer, TextInput, tkn } from '@repo/ui';
 
 export const Container = PageContainer;
 
@@ -91,15 +91,15 @@ export const SectionTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')}; /* 1px */
 `;
 
 export const SectionContent = styled.div`
-  padding: ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.md+')};
   display: grid;
   grid-template-columns: 1fr;
-  gap: ${tkn('spacing.xl')} ${tkn('spacing.xxl')};
+  gap: ${tkn('spacing.md+')} ${tkn('spacing.xl')};
 
   @media (min-width: 48rem) {
     /* 768px */
@@ -113,8 +113,6 @@ export const FooterActions = styled.div`
   gap: ${tkn('spacing.md')};
   padding-top: ${tkn('spacing.md')};
 `;
-
-export const DeleteButton = styled(Button)``;
 
 /* Input overrides for clean look */
 export const CleanInput = styled(TextInput)`
@@ -247,7 +245,4 @@ export const ErrorMessage = styled.div`
   margin-top: ${tkn('spacing.xs')};
 `;
 
-export const SectionCard = styled.div`
-  margin-top: ${tkn('spacing.xl')};
-  overflow: hidden;
-`;
+/* SectionCard removed — it wrapped a real Card in a second card shell. */

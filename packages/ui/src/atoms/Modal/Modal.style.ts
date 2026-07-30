@@ -9,7 +9,7 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   display: ${({ $isOpen }) => ($isOpen ? 'flex' : 'none')};
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: ${tkn('zIndex.modal')};
   padding: ${tkn('spacing.md')};
   animation: fadeIn 0.2s ease-out;
 
@@ -98,7 +98,7 @@ export const CloseButton = styled.button`
   border: none;
   cursor: pointer;
   color: ${tkn('colors.text.tertiary')};
-  transition: color 0.2s;
+  transition: color ${tkn('transitions.fast')};
   display: flex;
   align-items: center;
   justify-content: center;

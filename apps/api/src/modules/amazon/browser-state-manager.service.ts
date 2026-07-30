@@ -7,6 +7,7 @@ import type { BrowserContext } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
 
+import { probeAmazonAuth } from './amazon-auth-state';
 import { ProxyService } from './proxy.service';
 
 const VIEWPORTS = [
@@ -371,13 +372,15 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
       const context = await this.getContext(amazonAccountId);
       const page = await context.newPage();
       try {
-        await page.goto('https://www.amazon.com/gp/css/homepage.html', {
+        // The storefront is the reliable place to read session state: Amazon
+        // may serve an authenticated request for /gp/css/homepage.html as the
+        // normal storefront, and its nav still carries the signed-in greeting.
+        await page.goto('https://www.amazon.com/', {
           waitUntil: 'domcontentloaded',
           timeout: 15000,
         });
-        const url = page.url();
-        const isValid = !url.includes('/signin') && !url.includes('/ap/signin');
-        return isValid;
+        const authProbe = await probeAmazonAuth(page);
+        return authProbe.authenticated;
       } finally {
         await page.close();
       }

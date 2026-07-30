@@ -1,4 +1,4 @@
-import { Icon } from '@repo/ui';
+import { EmptyState, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,15 +28,13 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
   if (orders.length === 0) {
     return (
       <S.CarouselWrapper>
-        <S.SliderEmpty>
-          <Icon name="inbox" size={40} />
-          <S.SliderEmptyText variant="body" weight="semibold" color="text.primary">
-            {emptyTitle ?? t('orders.overview.emptyTitle')}
-          </S.SliderEmptyText>
-          <S.SliderEmptyText variant="body-sm" color="text.secondary">
-            {emptySubtitle ?? t('orders.overview.emptySubtitle')}
-          </S.SliderEmptyText>
-        </S.SliderEmpty>
+        {/* Shared EmptyState — this was a bespoke icon+title+subtitle block. */}
+        <EmptyState
+          icon="inbox"
+          title={emptyTitle ?? t('orders.overview.emptyTitle')}
+          description={emptySubtitle ?? t('orders.overview.emptySubtitle')}
+          size="md"
+        />
       </S.CarouselWrapper>
     );
   }
@@ -45,8 +43,8 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
     <S.CarouselWrapper>
       {showViewAll && (
         <S.CarouselTopBar>
-          <S.ViewAllButton type="button" onClick={onViewAll}>
-            {viewAllLabel}
+          <S.ViewAllButton variant="text" size="small" onClick={onViewAll}>
+            <Text variant="body-sm" weight="semibold">{viewAllLabel}</Text>
           </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
@@ -91,10 +89,14 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
           {orders.map((_, index) => (
             <S.PaginationDot
               key={index}
-              type="button"
+              variant="ghost"
               $active={index === currentSlide}
               onClick={() => onGoTo(index)}
-            />
+              aria-label={String(index + 1)}
+              aria-current={index === currentSlide}
+            >
+              <S.PaginationDotMark $active={index === currentSlide} />
+            </S.PaginationDot>
           ))}
         </S.CarouselPagination>
       )}

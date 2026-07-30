@@ -122,16 +122,21 @@ export class StoreSettingsService {
       blacklist,
       amazonTaxRate,
       autoFulfillEnabled,
-      // Default to LOCAL when omitted so existing callers that don't send the
-      // field don't blow away a prior value with NULL. Persisted LOWERCASE — the
-      // tracking processor compares the raw DB string case-sensitively.
-      trackingConversionProvider = TrackingConversionProvider.LOCAL,
+      trackingConversionProvider,
       buyerMessaging,
     } = dto;
 
     const blacklistJson = JSON.stringify(blacklist);
-    const autoFulfillBool = autoFulfillEnabled ?? false;
-    // null-safe JSON for the JSONB cell: null means "feature off".
+    // Optional means "leave unchanged" on UPDATE, not "turn off". Multiple
+    // focused drawers save through this endpoint (e.g. Blacklist omits A2), so
+    // defaulting an omitted field to false silently undid a toggle saved moments
+    // earlier. INSERT still resolves null to the schema default (false).
+    const autoFulfillBool = autoFulfillEnabled ?? null;
+    const trackingProviderValue = trackingConversionProvider ?? null;
+    // Preserve the distinction between omitted (leave unchanged on UPDATE) and
+    // explicit null (turn buyer messaging off). `undefined` is represented by a
+    // separate boolean parameter because node-postgres serializes both as NULL.
+    const buyerMessagingProvided = buyerMessaging !== undefined;
     const buyerMessagingJson = buyerMessaging ? JSON.stringify(buyerMessaging) : null;
 
     let result: StoreSettingsEntity[];
@@ -141,7 +146,7 @@ export class StoreSettingsService {
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
             INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, COALESCE($9, FALSE), COALESCE($10, 'local'), $11)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -151,9 +156,12 @@ export class StoreSettingsService {
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
-                auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
-                tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
-                buyer_messaging = EXCLUDED.buyer_messaging,
+                auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
+                tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
+                buyer_messaging = CASE
+                  WHEN $12 THEN EXCLUDED.buyer_messaging
+                  ELSE store_settings.buyer_messaging
+                END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -167,8 +175,9 @@ export class StoreSettingsService {
           blacklistJson,
           amazonTaxRate,
           autoFulfillBool,
-          trackingConversionProvider,
+          trackingProviderValue,
           buyerMessagingJson,
+          buyerMessagingProvided,
         ]
       );
     } else {
@@ -176,7 +185,7 @@ export class StoreSettingsService {
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
             INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, FALSE), COALESCE($11, 'local'), $12)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = EXCLUDED.country,
@@ -186,9 +195,12 @@ export class StoreSettingsService {
                 validate_description = EXCLUDED.validate_description,
                 blacklist = EXCLUDED.blacklist,
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
-                auto_fulfill_enabled = EXCLUDED.auto_fulfill_enabled,
-                tracking_conversion_provider = EXCLUDED.tracking_conversion_provider,
-                buyer_messaging = EXCLUDED.buyer_messaging,
+                auto_fulfill_enabled = COALESCE($10, store_settings.auto_fulfill_enabled),
+                tracking_conversion_provider = COALESCE($11, store_settings.tracking_conversion_provider),
+                buyer_messaging = CASE
+                  WHEN $13 THEN EXCLUDED.buyer_messaging
+                  ELSE store_settings.buyer_messaging
+                END,
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -203,8 +215,9 @@ export class StoreSettingsService {
           blacklistJson,
           amazonTaxRate,
           autoFulfillBool,
-          trackingConversionProvider,
+          trackingProviderValue,
           buyerMessagingJson,
+          buyerMessagingProvided,
         ]
       );
     }

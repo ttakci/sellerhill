@@ -4,10 +4,13 @@ import type {
   ListingDto,
   ListingJobDto,
   ListingJobItemDto,
+  ListingJobsQueryDto,
   ListingsQueryDto,
+  PaginatedListingJobsDto,
   PaginatedListingsDto,
-  ProductData,
+  PaginatedProductsDto,
   UpdateListingRequest,
+  UserProductsQueryDto,
 } from '@repo/shared';
 
 import { baseApi } from '../../../api/baseApi';
@@ -99,15 +102,15 @@ export const listingsApi = baseApi.injectEndpoints({
     /**
      * Get all listing jobs for user
      */
-    getListingJobs: builder.query<ListingJobDto[], number | void>({
-      query: (timestamp) => (timestamp ? `/listings/jobs?_t=${timestamp}` : '/listings/jobs'),
+    getListingJobs: builder.query<PaginatedListingJobsDto, ListingJobsQueryDto | void>({
+      query: (params) => ({ url: '/listings/jobs', params: params ?? undefined }),
       providesTags: ['Listings'],
     }),
     /**
-     * Get all products for user
+     * Get products behind the user's listings (server-paginated)
      */
-    getUserProducts: builder.query<ProductData[], void>({
-      query: () => '/listings/products',
+    getUserProducts: builder.query<PaginatedProductsDto, UserProductsQueryDto | void>({
+      query: (params) => ({ url: '/listings/products', params: params ?? undefined }),
       providesTags: ['Listings'],
     }),
 

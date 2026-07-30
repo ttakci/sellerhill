@@ -278,6 +278,7 @@ export const ListingGroupDrawerComponent = ({
             control={control}
             render={({ field }) => (
               <S.CustomTemplateTextarea
+                mono
                 value={field.value ?? ''}
                 onChange={field.onChange}
                 placeholder={t('listingSettingsGroup.templatePlaceholder')}
@@ -292,7 +293,7 @@ export const ListingGroupDrawerComponent = ({
             <Icon name="eye" size={20} />
           </S.StepIconWrapper>
           <S.StepTitleContent>
-            <S.StepTitle variant="h3" weight="bold">
+            <S.StepTitle variant="h3" weight="semibold">
               {t('listingSettingsGroup.livePreview')}
             </S.StepTitle>
           </S.StepTitleContent>

@@ -28,6 +28,16 @@ export interface DataTableProps<T> {
   /** Render function for each grid card item */
   renderGridCard: (item: T, index: number) => ReactNode;
 
+  /**
+   * Narrowest track a grid card can survive in. Column count is derived from it
+   * (auto-fill), so a wide horizontal card never gets squeezed into a third of
+   * the row. Default suits a compact vertical card.
+   */
+  gridMinItemWidth?: string;
+
+  /** Hard cap on grid columns. Omit to let the viewport decide. */
+  gridMaxColumns?: number;
+
   // --- View mode ---
   /** Controlled view mode */
   viewMode?: ViewMode;
@@ -90,6 +100,8 @@ export interface DataTableComponentProps<T> {
   columns: TableColumn<T>[];
   data: T[];
   renderGridCard: (item: T, index: number) => ReactNode;
+  gridMinItemWidth: string;
+  gridMaxColumns?: number;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   hideViewToggle: boolean;

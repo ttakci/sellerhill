@@ -18,7 +18,9 @@ import {
   ListingJobDto,
   ListingJobItemDto,
   type ListingsQueryDto,
+  type PaginatedListingJobsDto,
   type PaginatedListingsDto,
+  type PaginatedProductsDto,
   ProductData,
   type UpdateListingRequest,
   isListingsStockPreset,
@@ -28,6 +30,13 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { ListingQueueService } from './listing-queue.service';
 import { ListingsService } from './listings.service';
+
+/** Query params arrive as strings; blank/garbage becomes undefined so the
+ *  service applies its own default rather than NaN. */
+const toPositiveInt = (value?: string): number | undefined =>
+  value !== undefined && value !== '' && Number.isFinite(Number(value)) && Number(value) > 0
+    ? Math.trunc(Number(value))
+    : undefined;
 
 @ApiTags('listings')
 @ApiBearerAuth('JWT')
@@ -210,21 +219,41 @@ export class ListingsController {
   /**
    * Get all listing jobs for user
    */
-  @ApiOperation({ summary: 'Get all listing jobs for current user' })
+  @ApiOperation({ summary: 'Get listing jobs for current user (paginated)' })
   @Get('jobs')
-  async getJobs(@Request() req: { user: { sub: string } }): Promise<ListingJobDto[]> {
+  async getJobs(
+    @Request() req: { user: { sub: string } },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string
+  ): Promise<PaginatedListingJobsDto> {
     const userId = req.user.sub;
-    return this.listingsService.getJobs(userId);
+    return this.listingsService.getJobs(userId, {
+      page: toPositiveInt(page),
+      limit: toPositiveInt(limit),
+      search,
+      status,
+    });
   }
 
   /**
-   * Get all products for user (from their listings)
+   * Get products behind the user's listings (paginated)
    */
-  @ApiOperation({ summary: 'Get all unique products from user listings' })
+  @ApiOperation({ summary: 'Get unique products from user listings (paginated)' })
   @Get('products')
-  async getProducts(@Request() req: { user: { sub: string } }): Promise<ProductData[]> {
+  async getProducts(
+    @Request() req: { user: { sub: string } },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string
+  ): Promise<PaginatedProductsDto> {
     const userId = req.user.sub;
-    return this.listingsService.getUserProducts(userId);
+    return this.listingsService.getUserProducts(userId, {
+      page: toPositiveInt(page),
+      limit: toPositiveInt(limit),
+      search,
+    });
   }
 
   /**

@@ -10,6 +10,7 @@ interface StyledTextProps {
   $muted?: boolean;
   $truncate?: boolean;
   $color?: string;
+  $numeric?: boolean;
 }
 
 const variantStyles = {
@@ -26,7 +27,7 @@ const variantStyles = {
     font-size: ${theme.typography.fontSize.xxl};
     line-height: ${theme.typography.lineHeight.tight};
     font-weight: ${theme.typography.fontWeight.semibold};
-    letter-spacing: ${theme.typography.letterSpacing.tight};
+    letter-spacing: ${theme.typography.letterSpacing.tighter};
   `,
   h2: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
@@ -45,16 +46,16 @@ const variantStyles = {
   h4: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.md};
-    line-height: ${theme.typography.lineHeight.normal};
+    line-height: ${theme.typography.lineHeight.snug};
     font-weight: ${theme.typography.fontWeight.semibold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   h5: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize.sm};
-    line-height: ${theme.typography.lineHeight.normal};
+    line-height: ${theme.typography.lineHeight.snug};
     font-weight: ${theme.typography.fontWeight.semibold};
-    letter-spacing: ${theme.typography.letterSpacing.normal};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
   `,
   /* ── Body scale (must stay distinct — never collapse body === body-sm) ── */
   body: (theme: Theme) => `
@@ -97,6 +98,23 @@ const variantStyles = {
     font-family: ${theme.typography.fontFamily.mono};
     font-size: ${theme.typography.fontSize.xs};
     line-height: ${theme.typography.lineHeight.normal};
+  `,
+  /* ── KPI figures: lining, tabular numerals so columns of money align ── */
+  metric: (theme: Theme) => `
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: ${theme.typography.fontSize.xl};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
+    font-variant-numeric: tabular-nums;
+  `,
+  'metric-sm': (theme: Theme) => `
+    font-family: ${theme.typography.fontFamily.heading};
+    font-size: ${theme.typography.fontSize.lg};
+    line-height: ${theme.typography.lineHeight.tight};
+    font-weight: ${theme.typography.fontWeight.semibold};
+    letter-spacing: ${theme.typography.letterSpacing.tight};
+    font-variant-numeric: tabular-nums;
   `,
   nav: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
@@ -155,6 +173,13 @@ const TextElement = styled.span<StyledTextProps>`
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    `}
+
+  /* Tabular figures — money/count columns must not jitter between rows */
+  ${(p) =>
+    p.$numeric &&
+    css`
+      font-variant-numeric: tabular-nums;
     `}
 `;
 

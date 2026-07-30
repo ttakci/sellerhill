@@ -29,7 +29,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
         {title || showCloseButton ? (
           <S.Header $showDivider={showDivider}>
             {title && (
-              <Text variant="h3" weight="bold">
+              <Text variant="h3" weight="semibold">
                 {title}
               </Text>
             )}

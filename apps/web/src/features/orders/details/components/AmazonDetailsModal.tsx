@@ -83,7 +83,7 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({
             }
             fullWidth
           />
-          {errors.amazonOrderUrl ? <S.ErrorText>{errors.amazonOrderUrl}</S.ErrorText> : null}
+          {errors.amazonOrderUrl ? <S.ErrorText variant="caption" color="semantic.error">{errors.amazonOrderUrl}</S.ErrorText> : null}
         </S.FormGroup>
         <S.FormGroup>
           <ModernTextInput
@@ -96,7 +96,7 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({
             }
             fullWidth
           />
-          {errors.amazonTrackingUrl ? <S.ErrorText>{errors.amazonTrackingUrl}</S.ErrorText> : null}
+          {errors.amazonTrackingUrl ? <S.ErrorText variant="caption" color="semantic.error">{errors.amazonTrackingUrl}</S.ErrorText> : null}
         </S.FormGroup>
         <S.FormRow>
           <S.FormGroup>
@@ -111,7 +111,7 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({
               }
               fullWidth
             />
-            {errors.amazonTax ? <S.ErrorText>{errors.amazonTax}</S.ErrorText> : null}
+            {errors.amazonTax ? <S.ErrorText variant="caption" color="semantic.error">{errors.amazonTax}</S.ErrorText> : null}
           </S.FormGroup>
           <S.FormGroup>
             <ModernTextInput
@@ -125,7 +125,7 @@ export const AmazonDetailsModal: React.FC<AmazonDetailsModalProps> = ({
               }
               fullWidth
             />
-            {errors.amazonShipping ? <S.ErrorText>{errors.amazonShipping}</S.ErrorText> : null}
+            {errors.amazonShipping ? <S.ErrorText variant="caption" color="semantic.error">{errors.amazonShipping}</S.ErrorText> : null}
           </S.FormGroup>
         </S.FormRow>
       </S.ModalBody>

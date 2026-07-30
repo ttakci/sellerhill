@@ -90,7 +90,7 @@ export const VerifyEmailPageComponent = ({
             <S.StatusIconWrapper $type={content.type}>{content.icon}</S.StatusIconWrapper>
 
             <S.Header>
-              <Text variant="h3" weight="bold">
+              <Text variant="h2" weight="semibold">
                 {content.title}
               </Text>
               <Text variant="body" color="text.secondary">

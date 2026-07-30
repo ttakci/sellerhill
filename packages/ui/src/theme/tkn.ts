@@ -50,11 +50,18 @@ type ThemePath =
   | 'colors.sidebar.active'
   | 'colors.sidebar.accent'
   | 'colors.sidebar.divider'
-  | 'colors.sidebar.logoGlow'
-  | 'colors.dashboard.periodToday'
-  | 'colors.dashboard.periodThisWeek'
-  | 'colors.dashboard.periodThisMonth'
-  | 'colors.dashboard.periodLastMonth'
+  | 'colors.dashboard.periodTodayGradient'
+  | 'colors.dashboard.periodThisWeekGradient'
+  | 'colors.dashboard.periodThisMonthGradient'
+  | 'colors.dashboard.periodThisYearGradient'
+  | 'colors.dashboard.periodForeground'
+  | 'colors.dashboard.periodForegroundMuted'
+  | 'colors.dashboard.seriesProfit'
+  | 'colors.dashboard.seriesSales'
+  | 'colors.dashboard.seriesUnits'
+  | 'colors.dashboard.seriesRefunds'
+  | 'colors.dashboard.heatPositive'
+  | 'colors.dashboard.heatNegative'
   | 'colors.landing.heroGradient'
   | 'colors.landing.heroBg'
   | 'colors.landing.heroGlow'
@@ -116,6 +123,7 @@ type ThemePath =
   | 'typography.fontWeight.semibold'
   | 'typography.fontWeight.bold'
   | 'typography.lineHeight.tight'
+  | 'typography.lineHeight.snug'
   | 'typography.lineHeight.normal'
   | 'typography.lineHeight.relaxed'
   | 'typography.letterSpacing.tighter'
@@ -140,7 +148,27 @@ type ThemePath =
   | 'controls.paddingX'
   | 'controls.iconWidth'
   | 'controls.fontSize'
-  | 'controls.radius';
+  | 'controls.radius'
+  | 'zIndex.base'
+  | 'zIndex.sticky'
+  | 'zIndex.scrim'
+  | 'zIndex.sidebar'
+  | 'zIndex.dropdown'
+  | 'zIndex.assistant'
+  | 'zIndex.overlay'
+  | 'zIndex.drawer'
+  | 'zIndex.modal'
+  | 'zIndex.toast'
+  | 'zIndex.loading'
+  | 'zIndex.tooltip'
+  | 'breakpoints.sm'
+  | 'breakpoints.md'
+  | 'breakpoints.lg'
+  | 'breakpoints.xl'
+  | 'breakpoints.smBelow'
+  | 'breakpoints.mdBelow'
+  | 'breakpoints.lgBelow'
+  | 'breakpoints.xlBelow';
 
 /**
  * tkn Fonksiyonu:
@@ -156,12 +184,14 @@ export const tkn = (path: ThemePath) => (p: { theme: Theme }) => {
 
   // Path'i parçalara ayır (örn: 'colors.text.primary' -> ['colors', 'text', 'primary'])
   // ve objenin içinde derinlere inerek değeri bul.
+  // `zIndex.*` resolves to a number; every other path resolves to a string.
+  // Emotion interpolates both, so the union is the honest return type.
   const value = path
     .split('.')
     .reduce<unknown>(
       (obj, key) => (obj !== null && typeof obj === 'object' ? (obj as Record<string, unknown>)[key] : undefined),
       t as unknown
-    ) as string | undefined;
+    ) as string | number | undefined;
 
   if (value === undefined) {
     console.warn(`[tkn] Path "${path}" not found in theme.`);

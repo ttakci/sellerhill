@@ -1,60 +1,62 @@
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Card, Text, tkn } from '@repo/ui';
 
+/**
+ * Centred failure screen. It used to be an emoji glyph over a stack of
+ * margin-spaced wrappers — the only screen in the app that did not use the
+ * shared EmptyState/Card language, so a crash looked like a different product.
+ */
 export const Container = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: ${tkn('spacing.xl')};
-  background-color: ${tkn('colors.background.primary')};
+  padding: ${tkn('spacing.lg')};
+  background: ${tkn('colors.background.primary')};
+  box-sizing: border-box;
 `;
 
-export const ErrorIcon = styled.div`
-  font-size: ${tkn('typography.fontSize.5xl')};
-  margin-bottom: ${tkn('spacing.lg')};
-`;
-
-export const TitleWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.md')};
-`;
-
-export const MessageWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.xl')};
-  max-width: 31.25rem; /* 500px */
-`;
-
-export const Details = styled.details`
-  margin-top: ${tkn('spacing.lg')};
-  padding: ${tkn('spacing.md')};
-  background-color: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.md')};
-  max-width: 37.5rem; /* 600px */
+export const Panel = styled(Card)`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
   width: 100%;
+  max-width: 34rem;
+`;
+
+/** Dev-only stack trace. Never rendered in production builds. */
+export const Details = styled.details`
+  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+  padding-top: ${tkn('spacing.md')};
 `;
 
 export const Summary = styled.summary`
   cursor: pointer;
-  font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.secondary')};
-  margin-bottom: ${tkn('spacing.sm')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  transition: color ${tkn('transitions.fast')};
 
   &:hover {
     color: ${tkn('colors.text.primary')};
   }
+
+  &:focus-visible {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+    border-radius: ${tkn('radius.sm')};
+  }
 `;
 
-export const ErrorStack = styled.pre`
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.semantic.error')};
-  overflow-x: auto;
+export const ErrorStack = styled(Text)`
+  display: block;
+  margin-top: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm-md')};
+  background: ${tkn('colors.semanticTint.error')};
+  border: 0.0625rem solid ${tkn('colors.semanticTintBorder.error')};
+  border-radius: ${tkn('radius.md')};
+  max-height: 18rem;
+  overflow: auto;
   white-space: pre-wrap;
-  word-wrap: break-word;
-`;
-
-export const ButtonGroup = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.lg')};
+  word-break: break-word;
 `;

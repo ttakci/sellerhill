@@ -1,7 +1,62 @@
 /**
  * Dashboard Domain Types
  * Sellerboard-style period-based metrics (today / this week / this month / this year)
+ * + chart (day|week|month buckets) + P&L matrix.
  */
+
+/** Dashboard tab ids (URL `?tab=`). */
+export enum DashboardTab {
+  CARDS = 'cards',
+  CHART = 'chart',
+  PNL = 'pnl',
+}
+
+/** Period card keys (URL `?period=`). */
+export enum DashboardPeriodKey {
+  TODAY = 'today',
+  THIS_WEEK = 'thisWeek',
+  THIS_MONTH = 'thisMonth',
+  THIS_YEAR = 'thisYear',
+}
+
+/** Chart bucket size (URL `?granularity=`, API `chartGranularity`). */
+export enum DashboardChartGranularity {
+  /** Last 30 days, one point per day. */
+  DAY = 'day',
+  /** Last 12 ISO weeks, one point per week. */
+  WEEK = 'week',
+  /** Last 12 months, one point per month. */
+  MONTH = 'month',
+}
+
+/** Toggleable chart series (legend chips). */
+export enum DashboardChartSeries {
+  NET_PROFIT = 'netProfit',
+  SALES = 'sales',
+  UNITS = 'units',
+  REFUNDS = 'refunds',
+}
+
+/** P&L matrix / summary panel row groups. */
+export enum DashboardPnlGroup {
+  REVENUE = 'revenue',
+  COSTS = 'costs',
+  PROFIT = 'profit',
+  RATIOS = 'ratios',
+}
+
+/** How a P&L / summary row value is rendered. */
+export enum DashboardValueFormat {
+  CURRENCY = 'currency',
+  NUMBER = 'number',
+  PERCENT = 'percent',
+}
+
+/**
+ * `DashboardHistoryMonth.key` of the month-to-date column.
+ * Shared so the API writer and the FE label reader can never drift apart.
+ */
+export const DASHBOARD_CURRENT_PERIOD_KEY = 'current';
 
 /** Metrics for a single time period (Sellerboard-style KPI card) */
 export interface PeriodMetricsDto {
@@ -40,31 +95,34 @@ export interface PeriodMetricsDto {
   ordersCaptureFailed: number;
   /** # of non-cancelled orders with cost_capture_status = 'untracked'. */
   ordersUntracked: number;
+  /** SUM(purchase_price) on non-cancelled — Amazon product cost. */
+  costOfGoods: number;
+  /** SUM(transaction_fee) on non-cancelled (display only, already inside ebay_earnings). */
+  transactionFees: number;
+  /** SUM(ad_fee) on non-cancelled (display only, already inside ebay_earnings). */
+  adFees: number;
+  /** SUM(amazon_shipping) on non-cancelled. */
+  amazonShipping: number;
+  /** SUM(amazon_tax) on non-cancelled. */
+  amazonTax: number;
+  /** profitConfirmed / costOfGoods * 100 (0 when no product cost is known). */
+  roi: number;
+  /** refunds / (orders + refunds) * 100. */
+  refundRate: number;
 }
 
-export type DashboardPeriodKey = 'today' | 'thisWeek' | 'thisMonth' | 'thisYear';
+export type DashboardMetricsDto = Record<DashboardPeriodKey, PeriodMetricsDto>;
 
-export interface DashboardMetricsDto {
-  today: PeriodMetricsDto;
-  thisWeek: PeriodMetricsDto;
-  thisMonth: PeriodMetricsDto;
-  thisYear: PeriodMetricsDto;
-}
-
-export interface RevenueTrendPoint {
-  date: string;
-  revenue: number;
-  profit: number;
-  orders: number;
-}
-
-/** Monthly (or MTD) point for the chart tab */
+/** One bucket on the chart tab (day, week or month depending on granularity) */
 export interface DashboardChartPoint {
-  /** ISO date of period start, e.g. "2026-07-01" */
+  /** ISO date of bucket start, e.g. "2026-07-01" */
   period: string;
   sales: number;
   units: number;
+  orders: number;
+  /** Confirmed (linked) net profit only — same trust rule as the period cards. */
   netProfit: number;
+  grossProfit: number;
   refunds: number;
 }
 
@@ -80,6 +138,7 @@ export interface DashboardHistoryMonth {
   refunds: number;
   adFee: number;
   amazonShipping: number;
+  amazonTax: number;
   purchasePrice: number;
   transactionFee: number;
   ebayEarnings: number;
@@ -91,17 +150,19 @@ export interface DashboardHistoryMonth {
   profitProvisional: number;
   estimatedPayout: number;
   margin: number;
+  /** profitConfirmed / purchasePrice * 100 (0 when no product cost is known). */
+  roi: number;
 }
 
 export interface DashboardDataDto {
   metrics: DashboardMetricsDto;
-  revenueTrend: RevenueTrendPoint[];
   chart: {
+    /** Echoes the requested bucket size so the FE can label the axis. */
+    granularity: DashboardChartGranularity;
     points: DashboardChartPoint[];
     summary: PeriodMetricsDto;
   };
   history: {
     months: DashboardHistoryMonth[];
   };
-  recentOrders: import('../orders/orders.types').OrderDto[];
 }

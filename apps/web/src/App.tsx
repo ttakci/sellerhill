@@ -25,9 +25,6 @@ const AdminPage = lazy(() => import('./features/admin/AdminPage'));
 const DashboardPage = lazy(() => import('./features/dashboard/DashboardPage'));
 const OnboardingEbayPage = lazy(() => import('./features/ebay/onboarding'));
 const StoresPage = lazy(() => import('./features/ebay/stores'));
-const AddListingsPage = lazy(() =>
-  import('./features/listings').then((m) => ({ default: m.AddListingsPage }))
-);
 const ListingJobDetailsPage = lazy(() =>
   import('./features/listings').then((m) => ({ default: m.ListingJobDetailsPage }))
 );
@@ -191,13 +188,16 @@ export function App() {
                 </Lazy>
               }
             />
+            {/*
+              One canonical create flow. `/listings/add` used to render a second,
+              independently-built full page over the same Zod schema as the
+              drawer — different radius, different typography compliance, and two
+              code paths to keep in sync. It now redirects into the drawer, the
+              same way the legacy settings pages redirect to the settings hub.
+            */}
             <Route
               path="listings/add"
-              element={
-                <Lazy>
-                  <AddListingsPage />
-                </Lazy>
-              }
+              element={<Navigate to={{ pathname: '..', search: '?drawer=add' }} relative="path" replace />}
             />
             <Route
               path="listings/:listingId"

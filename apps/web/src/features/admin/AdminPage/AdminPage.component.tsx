@@ -3,12 +3,9 @@ import {
   PlatformSettingCategory,
   PlatformSettingSource,
   PlatformSettingType,
-  ProxyExpiryState,
-  ProxyStatus,
   QuotaPressureBand,
-  UserStatus,
 } from '@repo/shared';
-import { Badge, Button, ModernTextInput, PageHeader, Text, Toggle } from '@repo/ui';
+import { Badge, Button, EmptyState, ModernTextInput, PageHeader, TabNav, Table, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -26,14 +23,6 @@ const BAND_VARIANT: Record<QuotaPressureBand, 'neutral' | 'success' | 'warning' 
   [QuotaPressureBand.OVER_LIMIT]: 'error',
 };
 
-/** Badge variant for a proxy's server-derived expiry state. */
-const EXPIRY_VARIANT: Record<ProxyExpiryState, 'neutral' | 'success' | 'warning' | 'error'> = {
-  [ProxyExpiryState.NO_EXPIRY]: 'neutral',
-  [ProxyExpiryState.OK]: 'success',
-  [ProxyExpiryState.EXPIRING_SOON]: 'warning',
-  [ProxyExpiryState.EXPIRED]: 'error',
-};
-
 /** A database override is the only source worth calling out visually. */
 const SOURCE_VARIANT: Record<PlatformSettingSource, 'neutral' | 'success' | 'warning' | 'error'> = {
   [PlatformSettingSource.DATABASE]: 'success',
@@ -49,6 +38,8 @@ export const AdminPageComponent = ({
   billingMetrics,
   proxyPool,
   usersList,
+  userColumns,
+  proxyColumns,
   settingGroups,
   settingDrafts,
   isSavingSetting,
@@ -59,58 +50,58 @@ export const AdminPageComponent = ({
   onTabChange,
   onProxyFieldChange,
   onProxySubmit,
-  onProxyToggleStatus,
   onSettingDraftChange,
   onSettingSave,
   onSettingToggle,
   onSettingReset,
   onEmailTest,
   formatCost,
-  formatDateValue,
 }: AdminPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['admin', 'translation']);
   return (
     <S.Container>
       <PageHeader title={t('admin.title')} subtitle={t('admin.subtitle')} />
-      <S.Tabs role="tablist">
-        {TABS.map((tab) => (
-          <Button key={tab} variant={activeTab === tab ? 'primary' : 'secondary'} onClick={() => onTabChange(tab)}>
-            <Text variant="body-sm" weight="semibold">{t(`admin.tabs.${tab}`)}</Text>
-          </Button>
-        ))}
-      </S.Tabs>
+      {/* Section navigation, not a call to action. These were `Button`s whose
+          active one was `variant="primary"`, so the loudest thing on the page
+          was always "where you already are". */}
+      <TabNav
+        items={TABS.map((tab) => ({ id: tab, label: t(`admin.tabs.${tab}`) }))}
+        value={activeTab}
+        onChange={(id) => onTabChange(id as AdminTabId)}
+        ariaLabel={t('admin.title')}
+      />
 
       {activeTab === 'overview' && (
         <S.Rows>
           <S.Grid>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.users')}</Text>
-              <Text variant="h3">{overview?.totalUsers ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.users')}</Text>
+              <Text variant="metric" weight="semibold">{overview?.totalUsers ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.activeListings')}</Text>
-              <Text variant="h3">{overview?.activeListings ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.activeListings')}</Text>
+              <Text variant="metric" weight="semibold">{overview?.activeListings ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.orders')}</Text>
-              <Text variant="h3">{overview?.ordersLast30Days ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.orders')}</Text>
+              <Text variant="metric" weight="semibold">{overview?.ordersLast30Days ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.ebayStores')}</Text>
-              <Text variant="h3">{overview?.activeEbayStores ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.ebayStores')}</Text>
+              <Text variant="metric" weight="semibold">{overview?.activeEbayStores ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.amazonAccounts')}</Text>
-              <Text variant="h3">{overview?.activeAmazonAccounts ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.amazonAccounts')}</Text>
+              <Text variant="metric" weight="semibold">{overview?.activeAmazonAccounts ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.overview.keepaBalance')}</Text>
-              <Text variant="h3">{operations?.keepaTokensLeft ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.overview.keepaBalance')}</Text>
+              <Text variant="metric" weight="semibold">{operations?.keepaTokensLeft ?? '—'}</Text>
             </S.SummaryCard>
           </S.Grid>
 
           <S.Section>
-            <Text variant="h5" weight="semibold">{t('admin.overview.warningsTitle')}</Text>
+            <Text variant="h4" weight="semibold">{t('admin.overview.warningsTitle')}</Text>
             {operations && operations.warnings.length === 0 && (
               <Text variant="body-sm" color="text.secondary">{t('admin.overview.noWarnings')}</Text>
             )}
@@ -126,18 +117,13 @@ export const AdminPageComponent = ({
             </S.Rows>
           </S.Section>
 
-          <Text variant="caption" color="text.secondary">{t('admin.overview.roleCliNotice')}</Text>
         </S.Rows>
       )}
 
+      {/* Warnings live on Overview only — this tab used to repeat the exact
+          same list above the queue rows. */}
       {activeTab === 'queues' && (
         <S.Rows>
-          {operations?.warnings.map((warning, index) => (
-            <S.Row key={`${warning.kind}-${warning.subject ?? index}`}>
-              <Text variant="body-sm">{t(`admin.warnings.${warning.kind}`, { subject: warning.subject })}</Text>
-              <Badge variant={warning.level === AdminWarningLevel.CRITICAL ? 'error' : 'warning'}>{warning.value}</Badge>
-            </S.Row>
-          ))}
           {operations?.queues.map((queue) => (
             <S.Row key={queue.name}>
               <Text variant="body" weight="semibold">{queue.name}</Text>
@@ -152,16 +138,8 @@ export const AdminPageComponent = ({
       {activeTab === 'costs' && (
         <S.Grid>
           <S.SummaryCard>
-            <Text variant="h4" weight="semibold">{t('admin.cost.keepaBalance')}</Text>
-            <Text variant="h3">{operations?.keepaTokensLeft ?? '—'}</Text>
-          </S.SummaryCard>
-          <S.SummaryCard>
-            <Text variant="h4" weight="semibold">{t('admin.cost.users')}</Text>
-            <Text variant="h3">{overview?.totalUsers ?? '—'}</Text>
-          </S.SummaryCard>
-          <S.SummaryCard>
-            <Text variant="h4" weight="semibold">{t('admin.cost.proxyPool')}</Text>
-            <Text variant="h3">
+            <Text variant="caption" color="text.secondary">{t('admin.cost.proxyPool')}</Text>
+            <Text variant="metric" weight="semibold">
               {proxyPool
                 ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency)
                 : '—'}
@@ -171,7 +149,7 @@ export const AdminPageComponent = ({
           {providerCosts.map((cost) => (
             <S.SummaryCard key={`${cost.source}-${cost.metric}`}>
               <Text variant="body" weight="semibold">{t(`admin.metrics.${cost.metric}`)}</Text>
-              <Text variant="h4">{formatCost(cost.totalCostMicros, cost.currency)}</Text>
+              <Text variant="metric-sm" weight="semibold">{formatCost(cost.totalCostMicros, cost.currency)}</Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.cost.quantity', { quantity: cost.totalQuantity })}
               </Text>
@@ -184,27 +162,27 @@ export const AdminPageComponent = ({
         <S.Rows>
           <S.Grid>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.proxies.activePool')}</Text>
-              <Text variant="h3">{proxyPool?.summary.activeProxies ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.proxies.activePool')}</Text>
+              <Text variant="metric" weight="semibold">{proxyPool?.summary.activeProxies ?? '—'}</Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.proxies.freeCount', { value: proxyPool?.summary.freeActiveProxies ?? 0 })}
               </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.proxies.assigned')}</Text>
-              <Text variant="h3">{proxyPool?.summary.assignedProxies ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.proxies.assigned')}</Text>
+              <Text variant="metric" weight="semibold">{proxyPool?.summary.assignedProxies ?? '—'}</Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.proxies.monthlyCost')}</Text>
-              <Text variant="h3">
+              <Text variant="caption" color="text.secondary">{t('admin.proxies.monthlyCost')}</Text>
+              <Text variant="metric" weight="semibold">
                 {proxyPool
                   ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency)
                   : '—'}
               </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="body" weight="semibold">{t('admin.proxies.expiringSoon')}</Text>
-              <Text variant="h3">{proxyPool?.summary.expiringSoon ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">{t('admin.proxies.expiringSoon')}</Text>
+              <Text variant="metric" weight="semibold">{proxyPool?.summary.expiringSoon ?? '—'}</Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.proxies.expiredCount', { value: proxyPool?.summary.expired ?? 0 })}
               </Text>
@@ -212,7 +190,7 @@ export const AdminPageComponent = ({
           </S.Grid>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.proxies.addTitle')}</Text>
+            <Text variant="caption" color="text.secondary">{t('admin.proxies.addTitle')}</Text>
             <Text variant="body-sm" color="text.secondary">{t('admin.proxies.addSubtitle')}</Text>
             <S.FormGrid>
               <ModernTextInput
@@ -271,47 +249,20 @@ export const AdminPageComponent = ({
 
           <S.Section>
             <Text variant="h4" weight="semibold">{t('admin.proxies.listTitle')}</Text>
-            {proxyPool && proxyPool.proxies.length === 0 && (
-              <Text variant="body-sm" color="text.secondary">{t('admin.proxies.empty')}</Text>
-            )}
-            <S.Rows>
-              {proxyPool?.proxies.map((proxy) => (
-                <S.Row key={proxy.id}>
-                  <S.RowMain>
-                    <Text variant="body" weight="semibold">{`${proxy.host}:${proxy.port}`}</Text>
-                    <Text variant="body-sm" color="text.secondary">
-                      {proxy.label ?? '—'}
-                      {' · '}
-                      {proxy.assignedUserEmail ?? t('admin.proxies.unassigned')}
-                    </Text>
-                    <Text variant="caption" color="text.secondary">
-                      {proxy.expiresAt
-                        ? t('admin.proxies.expiresOn', { date: formatDateValue(proxy.expiresAt) })
-                        : t('admin.proxies.noExpiry')}
-                      {' · '}
-                      {formatCost(proxy.monthlyCostMicros, proxy.currency)}
-                    </Text>
-                  </S.RowMain>
-                  <S.RowSide>
-                    <Badge variant={proxy.status === ProxyStatus.ACTIVE ? 'success' : 'neutral'}>
-                      {t(`admin.proxies.status.${proxy.status}`)}
-                    </Badge>
-                    {proxy.expiryState !== ProxyExpiryState.NO_EXPIRY && (
-                      <Badge variant={EXPIRY_VARIANT[proxy.expiryState]}>
-                        {t(`admin.proxies.expiry.${proxy.expiryState}`, { value: proxy.daysUntilExpiry ?? 0 })}
-                      </Badge>
-                    )}
-                    <Button variant="secondary" size="small" onClick={() => onProxyToggleStatus(proxy)} disabled={isSavingProxy}>
-                      <Text variant="body-sm" weight="semibold">
-                        {proxy.status === ProxyStatus.ACTIVE
-                          ? t('admin.proxies.disable')
-                          : t('admin.proxies.enable')}
-                      </Text>
-                    </Button>
-                  </S.RowSide>
-                </S.Row>
-              ))}
-            </S.Rows>
+            {/* Was a hand-built flex row per proxy that ran label, assignee,
+                expiry and cost together into two sentences. */}
+            <Table
+              columns={proxyColumns}
+              data={proxyPool?.proxies ?? []}
+              emptyContent={
+                <EmptyState
+                  icon="shield-check"
+                  title={t('admin.proxies.empty')}
+                  description={t('admin.proxies.emptyDescription')}
+                  size="md"
+                />
+              }
+            />
           </S.Section>
         </S.Rows>
       )}
@@ -419,11 +370,11 @@ export const AdminPageComponent = ({
       {activeTab === 'billing' && (
         <S.Rows>
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.billing.costTotal')}</Text>
+            <Text variant="caption" color="text.secondary">{t('admin.billing.costTotal')}</Text>
             <S.Grid>
               <S.SummaryCard>
-                <Text variant="body" weight="semibold">{t('admin.billing.costTotal')}</Text>
-                <Text variant="h3">
+                <Text variant="caption" color="text.secondary">{t('admin.billing.costTotal')}</Text>
+                <Text variant="metric" weight="semibold">
                   {formatCost(billingMetrics?.totalEstimatedCostMicros ?? null, billingMetrics?.currency ?? null)}
                 </Text>
               </S.SummaryCard>
@@ -431,31 +382,31 @@ export const AdminPageComponent = ({
           </S.Section>
 
           <S.Section>
-            <Text variant="h5" weight="semibold">{t('admin.billing.accountStatus.title')}</Text>
+            <Text variant="h4" weight="semibold">{t('admin.billing.accountStatus.title')}</Text>
             <S.Grid>
               {billingMetrics?.accountStatusDistribution.map((entry) => (
                 <S.SummaryCard key={entry.status}>
                   <Text variant="body" weight="semibold">{t(`admin.billing.accountStatus.${entry.status}`, { defaultValue: entry.status })}</Text>
-                  <Text variant="h3">{entry.count}</Text>
+                  <Text variant="metric" weight="semibold">{entry.count}</Text>
                 </S.SummaryCard>
               ))}
             </S.Grid>
           </S.Section>
 
           <S.Section>
-            <Text variant="h5" weight="semibold">{t('admin.billing.accessTier.title')}</Text>
+            <Text variant="h4" weight="semibold">{t('admin.billing.accessTier.title')}</Text>
             <S.Grid>
               {billingMetrics?.accessTierDistribution.map((entry) => (
                 <S.SummaryCard key={entry.tier}>
                   <Text variant="body" weight="semibold">{t(`admin.billing.accessTier.${entry.tier}`, { defaultValue: entry.tier })}</Text>
-                  <Text variant="h3">{entry.count}</Text>
+                  <Text variant="metric" weight="semibold">{entry.count}</Text>
                 </S.SummaryCard>
               ))}
             </S.Grid>
           </S.Section>
 
           <S.Section>
-            <Text variant="h5" weight="semibold">{t('admin.billing.quota.title')}</Text>
+            <Text variant="h4" weight="semibold">{t('admin.billing.quota.title')}</Text>
             <S.Rows>
               {billingMetrics?.quotaPressure.map((summary) => (
                 <S.Row key={summary.resource}>
@@ -489,40 +440,21 @@ export const AdminPageComponent = ({
 
       {activeTab === 'users' && (
         <S.Rows>
-          {usersList && (
-            <Text variant="body-sm" color="text.secondary">
-              {t('admin.users.total', { value: usersList.users.length })}
-            </Text>
-          )}
-          {usersList?.users.map((row) => (
-            <S.Row key={row.id}>
-              <S.RowMain>
-                <Text variant="body" weight="semibold">{row.email}</Text>
-                <Text variant="body-sm" color="text.secondary">
-                  {t('admin.users.stats', {
-                    listings: row.activeListings,
-                    orders: row.ordersLast30Days,
-                    keepa: row.keepaTokens,
-                    llm: row.llmTokens,
-                  })}
-                </Text>
-                <Text variant="caption" color="text.secondary">
-                  {row.proxyHost
-                    ? t('admin.users.proxy', { proxy: row.proxyHost })
-                    : t('admin.users.noProxy')}
-                </Text>
-              </S.RowMain>
-              <S.RowSide>
-                <Badge variant="neutral">{t(`admin.billing.accessTier.${row.role}`, { defaultValue: row.role })}</Badge>
-                <Badge variant={row.status === UserStatus.ACTIVE ? 'success' : 'warning'}>
-                  {t(`admin.billing.accountStatus.${row.status}`, { defaultValue: row.status })}
-                </Badge>
-                <Text variant="body" weight="semibold">
-                  {formatCost(row.estimatedCostMicros, row.currency)}
-                </Text>
-              </S.RowSide>
-            </S.Row>
-          ))}
+          {/* Listings / orders / Keepa / LLM used to be interpolated into a
+              single sentence per row, so none of them could be scanned down
+              a column or sorted. Each is its own numeric column now. */}
+          <Table
+            columns={userColumns}
+            data={usersList?.users ?? []}
+            emptyContent={
+              <EmptyState
+                icon="user"
+                title={t('admin.users.empty')}
+                description={t('admin.users.emptyDescription')}
+                size="md"
+              />
+            }
+          />
           <Text variant="caption" color="text.secondary">{t('admin.overview.roleCliNotice')}</Text>
         </S.Rows>
       )}

@@ -9,7 +9,11 @@ import {
   AutoFulfillStatus,
   EbayAccountStatus,
   OrderCostCaptureStatus,
+  OrderFulfillmentState,
   OrderStatus,
+  SIMULATED_AMAZON_ORDER_PREFIX,
+  deriveFulfillmentState,
+  isSimulatedAmazonOrderId,
   type OrderDto,
   type OrderFiltersDto,
   type OrderStatsDto,
@@ -42,6 +46,7 @@ interface OrderRow {
   sale_total: string;
   ebay_earnings: string;
   purchase_price: string;
+  amazon_order_id: string | null;
   amazon_order_url: string;
   amazon_tracking_url: string;
   amazon_tax: string;
@@ -149,6 +154,24 @@ export class OrdersService {
       );
       params.push(AutoFulfillStatus.BLOCKED, AutoFulfillStatus.FAILED);
       paramIndex += 2;
+    }
+
+    if (filters?.fulfillmentState) {
+      // Filter on the derived seller-facing state. Kept as SQL (not a post-fetch
+      // filter) so paging and totals stay correct — filtering after the page
+      // query would return short pages and a wrong count.
+      const simulated = `o.amazon_order_id LIKE '${SIMULATED_AMAZON_ORDER_PREFIX}%'`;
+      const cancelled = `o.amazon_cancelled_at IS NOT NULL`;
+      const clauses: Record<OrderFulfillmentState, string> = {
+        [OrderFulfillmentState.AMAZON_CANCELLED]: cancelled,
+        [OrderFulfillmentState.SIMULATED]: `NOT ${cancelled} AND ${simulated}`,
+        [OrderFulfillmentState.PURCHASED]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status = '${AutoFulfillStatus.PLACED}'`,
+        [OrderFulfillmentState.ACTION_REQUIRED]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}')`,
+        [OrderFulfillmentState.IN_PROGRESS]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IN ('${AutoFulfillStatus.PENDING}', '${AutoFulfillStatus.RUNNING}')`,
+        [OrderFulfillmentState.MANUAL]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IS DISTINCT FROM '${AutoFulfillStatus.PLACED}' AND (o.amazon_order_id IS NOT NULL OR o.status IN ('${OrderStatus.SHIPPED}', '${OrderStatus.COMPLETED}'))`,
+        [OrderFulfillmentState.NOT_AUTOMATED]: `NOT ${cancelled} AND NOT ${simulated} AND o.amazon_order_id IS NULL AND o.status NOT IN ('${OrderStatus.SHIPPED}', '${OrderStatus.COMPLETED}') AND (o.auto_fulfill_status IS NULL OR o.auto_fulfill_status = '${AutoFulfillStatus.SKIPPED}')`,
+      };
+      conditions.push(`(${clauses[filters.fulfillmentState]})`);
     }
 
     const whereClause = conditions.join(' AND ');
@@ -421,6 +444,18 @@ export class OrdersService {
       amazonCancelledAt: row.amazon_cancelled_at
         ? row.amazon_cancelled_at.toISOString()
         : null,
+      // Derive the seller-facing state once, here, so the list, the detail page
+      // and the filter cannot drift apart on the precedence rules.
+      isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
+      fulfillmentState: deriveFulfillmentState({
+        status: row.status as OrderStatus,
+        autoFulfillStatus: row.auto_fulfill_status
+          ? (row.auto_fulfill_status as AutoFulfillStatus)
+          : null,
+        amazonOrderId: row.amazon_order_id,
+        amazonCancelledAt: row.amazon_cancelled_at,
+        isSimulated: isSimulatedAmazonOrderId(row.amazon_order_id),
+      }),
       orderFulfillmentStatus: row.order_fulfillment_status || undefined,
       paymentStatus: row.payment_status || undefined,
       product: hasListing
@@ -438,6 +473,7 @@ export class OrdersService {
       saleTotal: parseFloat(row.sale_total) || 0,
       ebayEarnings: parseFloat(row.ebay_earnings) || 0,
       purchasePrice: parseFloat(row.purchase_price) || 0,
+      amazonOrderId: row.amazon_order_id || null,
       amazonOrderUrl: row.amazon_order_url || undefined,
       amazonTrackingUrl: row.amazon_tracking_url || undefined,
       amazonTax: row.amazon_tax ? parseFloat(row.amazon_tax) : undefined,

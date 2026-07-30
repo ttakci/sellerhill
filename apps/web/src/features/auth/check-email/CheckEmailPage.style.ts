@@ -27,7 +27,7 @@ export const LayoutWrapper = styled.div`
   height: 100%;
   flex-wrap: wrap;
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px */
     flex-wrap: nowrap;
   }
@@ -37,7 +37,7 @@ export const BrandingPanel = styled.div`
   flex: 1 1 100%;
   width: 100%;
   height: 100%;
-  padding: ${tkn('spacing.xxxl')};
+  padding: ${tkn('spacing.xl')};
   display: none;
   flex-direction: column;
   align-items: center;
@@ -46,7 +46,7 @@ export const BrandingPanel = styled.div`
   position: relative;
   overflow: hidden;
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px */
     display: flex;
     flex: 0 0 50%;
@@ -114,11 +114,11 @@ export const FormPanel = styled.div`
   overflow-y: auto;
   z-index: 1;
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px */
     flex: 0 0 50%;
     width: 50%;
-    padding: ${tkn('spacing.xxxl')};
+    padding: ${tkn('spacing.xl')};
   }
 `;
 
@@ -142,7 +142,7 @@ export const IconContainer = styled.div`
   align-items: center;
   justify-content: center;
   border-radius: ${tkn('radius.full')};
-  margin-bottom: ${tkn('spacing.xl')};
+  margin-bottom: ${tkn('spacing.md')};
 
   @media (max-width: 40rem) {
     width: 4rem;
@@ -152,7 +152,7 @@ export const IconContainer = styled.div`
 `;
 
 export const Header = styled.div`
-  margin-bottom: ${tkn('spacing.xxl')};
+  margin-bottom: ${tkn('spacing.lg')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
@@ -172,7 +172,7 @@ export const ResendRow = styled.div`
   align-items: center;
   justify-content: center;
   gap: ${tkn('spacing.xs')};
-  margin-top: ${tkn('spacing.xl')};
+  margin-top: ${tkn('spacing.lg')};
 `;
 
 export const ResendButton = styled(Button)`

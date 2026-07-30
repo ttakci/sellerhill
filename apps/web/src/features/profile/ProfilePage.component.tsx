@@ -66,7 +66,7 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
               </S.AvatarWrapper>
 
               <S.ProfileHeaderContent>
-                <Text variant="h3" weight="bold">
+                <Text variant="h3" weight="semibold">
                   {userName}
                 </Text>
                 <S.ProfileBadges>
@@ -82,10 +82,9 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
         </Card>
 
         {/* Section 2: Personal Information */}
-        <S.SectionCard>
-          <Card variant="default" padding="none">
+        <Card variant="default" padding="none">
             <S.SectionTitleWrapper>
-              <Text variant="body" weight="bold">
+              <Text variant="h4" weight="semibold">
                 {t('profile.personalInfo')}
               </Text>
             </S.SectionTitleWrapper>
@@ -96,14 +95,12 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
               {renderField(t('profile.phone'), profile.phoneNumber, 'phoneNumber')}
               {renderField(t('profile.bio'), profile.bio, 'bio', true)}
             </S.SectionContent>
-          </Card>
-        </S.SectionCard>
+        </Card>
 
         {/* Section 3: Address */}
-        <S.SectionCard>
-          <Card variant="default" padding="none">
+        <Card variant="default" padding="none">
             <S.SectionTitleWrapper>
-            <Text variant="body" weight="bold">
+            <Text variant="h4" weight="semibold">
               {t('profile.address')}
             </Text>
           </S.SectionTitleWrapper>
@@ -113,14 +110,12 @@ export const ProfilePageComponent: React.FC<ProfilePageComponentProps> = ({
             {renderField(t('profile.postalCode'), profile.postalCode, 'postalCode')}
           </S.SectionContent>
         </Card>
-        </S.SectionCard>
 
         {/* Footer Actions */}
         <S.FooterActions>
-          <S.DeleteButton variant="danger" type="button">{t('profile.deactivateAccount')}</S.DeleteButton>
           {isEditing && (
             <Button variant="primary" size="medium" type="submit" isLoading={isLoading}>
-              <Text>{t('profile.saveChanges')}</Text>
+              <Text variant="body" weight="semibold">{t('profile.saveChanges')}</Text>
             </Button>
           )}
         </S.FooterActions>

@@ -1,110 +1,256 @@
 /**
  * Dashboard Service
- * Sellerboard-style metrics: today, this week, this month, last month
- * + chart (monthly) + history (P&L matrix)
+ * Sellerboard-style metrics: today / this week / this month / this year
+ * + chart (day|week|month buckets) + P&L matrix (12 months).
+ *
+ * Bucket keys are produced with `to_char(...)` (plain text) rather than a `date`
+ * column: node-pg parses a `date` into a LOCAL-midnight Date, so building the key
+ * with `toISOString()` silently shifted a day on any non-UTC server (e.g. UTC+3),
+ * making every bucket miss and the chart render empty.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
+  DASHBOARD_CURRENT_PERIOD_KEY,
+  DashboardChartGranularity,
   OrderCostCaptureStatus,
   OrderStatus,
   type DashboardChartPoint,
   type DashboardDataDto,
   type DashboardHistoryMonth,
   type DashboardMetricsDto,
-  type OrderDto,
   type PeriodMetricsDto,
-  type RevenueTrendPoint,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
-import { deriveProfitBasis } from '../orders/profit-calculation';
+
+/**
+ * Raw aggregate shape produced by `periodSelect()`.
+ * `numeric`/`bigint` columns arrive as strings from node-pg; `to_jsonb` variants
+ * arrive as JSON numbers — both are normalized through `num()`.
+ */
+interface PeriodAggregateRow {
+  sales: string | number;
+  orders: string | number;
+  units: string | number;
+  refunds: string | number;
+  gross_profit: string | number;
+  payout: string | number;
+  profit_confirmed: string | number;
+  profit_provisional: string | number;
+  revenue_uncosted: string | number;
+  orders_pending_capture: string | number;
+  orders_capture_failed: string | number;
+  orders_untracked: string | number;
+  cost_of_goods: string | number;
+  transaction_fees: string | number;
+  ad_fees: string | number;
+  amazon_shipping: string | number;
+  amazon_tax: string | number;
+}
+
+interface MetricsQueryRow {
+  today: PeriodAggregateRow;
+  yesterday: PeriodAggregateRow;
+  this_week: PeriodAggregateRow;
+  last_week_span: PeriodAggregateRow;
+  this_month: PeriodAggregateRow;
+  same_period_last_month: PeriodAggregateRow;
+  this_year: PeriodAggregateRow;
+  same_period_last_year: PeriodAggregateRow;
+}
+
+/** One grouped bucket (chart point or P&L month) — aggregates plus its bucket key. */
+interface BucketQueryRow extends PeriodAggregateRow {
+  period: string;
+}
+
+/** SQL fragments per chart granularity — enum-validated, never user text. */
+const GRANULARITY_SQL: Record<
+  DashboardChartGranularity,
+  { trunc: string; since: string; buckets: number }
+> = {
+  [DashboardChartGranularity.DAY]: {
+    trunc: "date_trunc('day', order_date)",
+    since: "CURRENT_DATE - INTERVAL '29 days'",
+    buckets: 30,
+  },
+  [DashboardChartGranularity.WEEK]: {
+    trunc: "date_trunc('week', order_date)",
+    since: "date_trunc('week', CURRENT_DATE) - INTERVAL '11 weeks'",
+    buckets: 12,
+  },
+  [DashboardChartGranularity.MONTH]: {
+    trunc: "date_trunc('month', order_date)",
+    since: "date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'",
+    buckets: 12,
+  },
+};
+
+const HISTORY_MONTHS = 12;
 
 @Injectable()
 export class DashboardService {
-  private readonly logger = new Logger(DashboardService.name);
-
   constructor(private readonly databaseService: DatabaseService) {}
 
   async getDashboard(
     userId: string,
-    days?: number,
+    granularity: DashboardChartGranularity,
     ebayAccountId?: string,
   ): Promise<DashboardDataDto> {
-    const safeDays = Math.max(7, Math.min(90, days || 14));
-    const [metrics, revenueTrend, chart, history, recentOrders] = await Promise.all([
+    // Buckets are zero-filled in JS but keyed by Postgres' calendar, so the anchor
+    // must come from the DB: an API process in UTC+3 talking to a UTC database
+    // would otherwise generate keys that never match and render an empty chart.
+    const anchor = await this.getAnchorDate();
+
+    const [metrics, chart, history] = await Promise.all([
       this.getMetrics(userId, ebayAccountId),
-      this.getRevenueTrend(userId, safeDays, ebayAccountId),
-      this.getChart(userId, ebayAccountId),
-      this.getHistory(userId, ebayAccountId),
-      this.getRecentOrders(userId, ebayAccountId),
+      this.getChart(userId, granularity, anchor, ebayAccountId),
+      this.getHistory(userId, anchor, ebayAccountId),
     ]);
 
-    return { metrics, revenueTrend, chart, history, recentOrders };
+    return { metrics, chart, history };
+  }
+
+  /** Postgres' `CURRENT_DATE` as a local Date — the calendar all buckets align to. */
+  private async getAnchorDate(): Promise<Date> {
+    const rows = await this.databaseService.query<{ today: string }>(
+      `SELECT to_char(CURRENT_DATE, 'YYYY-MM-DD') AS today`,
+    );
+    const raw = rows[0]?.today;
+    if (!raw) {
+      return new Date();
+    }
+    const [year, month, day] = raw.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  /* ─── shared helpers ─── */
+
+  private num(value: unknown): number {
+    const n = typeof value === 'number' ? value : parseFloat(String(value ?? '0'));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  private round(value: number, decimals = 2): number {
+    const f = 10 ** decimals;
+    return Math.round(value * f) / f;
   }
 
   private calcChange(current: number, previous: number): number | null {
     if (previous === 0) {
       return null;
     }
-    return Math.round(((current - previous) / previous) * 1000) / 10;
+    return this.round(((current - previous) / previous) * 100, 1);
   }
 
-  private buildPeriod(p: {
-    sales: number;
-    orders: number;
-    units: number;
-    refunds: number;
-    grossProfit: number;
-    payout: number;
-    profitConfirmed: number;
-    profitProvisional: number;
-    revenueUncosted: number;
-    ordersPendingCapture: number;
-    ordersCaptureFailed: number;
-    ordersUntracked: number;
-    prevSales: number;
-    prevProfitConfirmed: number;
-  }): PeriodMetricsDto {
-    const profit = p.profitConfirmed;
+  /** Local (server-timezone) YYYY-MM-DD — must match `to_char` output from Postgres. */
+  private toIsoDate(d: Date): string {
+    const pad = (n: number): string => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  /** Monday of the week containing `d` (matches Postgres ISO `date_trunc('week')`). */
+  private startOfIsoWeek(d: Date): Date {
+    const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = copy.getDay(); // 0 Sun … 6 Sat
+    copy.setDate(copy.getDate() + (day === 0 ? -6 : 1 - day));
+    return copy;
+  }
+
+  /** Oldest → newest bucket keys for the requested granularity, anchored on the DB date. */
+  private bucketKeys(granularity: DashboardChartGranularity, anchor: Date): string[] {
+    const { buckets } = GRANULARITY_SQL[granularity];
+    const keys: string[] = [];
+
+    for (let i = buckets - 1; i >= 0; i--) {
+      if (granularity === DashboardChartGranularity.DAY) {
+        const d = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() - i);
+        keys.push(this.toIsoDate(d));
+        continue;
+      }
+      if (granularity === DashboardChartGranularity.WEEK) {
+        const monday = this.startOfIsoWeek(anchor);
+        monday.setDate(monday.getDate() - i * 7);
+        keys.push(this.toIsoDate(monday));
+        continue;
+      }
+      keys.push(this.toIsoDate(new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)));
+    }
+
+    return keys;
+  }
+
+  private emptyAggregate(): PeriodAggregateRow {
     return {
-      sales: p.sales,
-      orders: p.orders,
-      units: p.units,
-      refunds: p.refunds,
-      grossProfit: p.grossProfit,
-      netProfit: profit,
-      estimatedPayout: p.payout,
-      margin: p.sales > 0 ? Math.round((profit / p.sales) * 1000) / 10 : 0,
-      avgOrderValue: p.orders > 0 ? Math.round((p.sales / p.orders) * 100) / 100 : 0,
-      trend: this.calcChange(p.sales, p.prevSales),
-      profitTrend: this.calcChange(profit, p.prevProfitConfirmed),
-      profitConfirmed: p.profitConfirmed,
-      profitProvisional: p.profitProvisional,
-      revenueUncosted: p.revenueUncosted,
-      ordersPendingCapture: p.ordersPendingCapture,
-      ordersCaptureFailed: p.ordersCaptureFailed,
-      ordersUntracked: p.ordersUntracked,
-    };
-  }
-
-  private emptyPeriod(): PeriodMetricsDto {
-    return this.buildPeriod({
       sales: 0,
       orders: 0,
       units: 0,
       refunds: 0,
-      grossProfit: 0,
+      gross_profit: 0,
       payout: 0,
-      profitConfirmed: 0,
-      profitProvisional: 0,
-      revenueUncosted: 0,
-      ordersPendingCapture: 0,
-      ordersCaptureFailed: 0,
-      ordersUntracked: 0,
-      prevSales: 0,
-      prevProfitConfirmed: 0,
-    });
+      profit_confirmed: 0,
+      profit_provisional: 0,
+      revenue_uncosted: 0,
+      orders_pending_capture: 0,
+      orders_capture_failed: 0,
+      orders_untracked: 0,
+      cost_of_goods: 0,
+      transaction_fees: 0,
+      ad_fees: 0,
+      amazon_shipping: 0,
+      amazon_tax: 0,
+    };
+  }
+
+  private sumAggregates(rows: PeriodAggregateRow[]): PeriodAggregateRow {
+    const acc = this.emptyAggregate();
+    const keys = Object.keys(acc) as (keyof PeriodAggregateRow)[];
+    for (const row of rows) {
+      for (const key of keys) {
+        acc[key] = this.num(acc[key]) + this.num(row[key]);
+      }
+    }
+    return acc;
+  }
+
+  /**
+   * Headline `netProfit` = confirmed (linked) profit only — an unknown Amazon cost
+   * is never presented as a real zero. Provisional/uncosted tiers ride alongside.
+   */
+  private buildPeriod(row: PeriodAggregateRow, previous?: PeriodAggregateRow): PeriodMetricsDto {
+    const sales = this.num(row.sales);
+    const orders = this.num(row.orders);
+    const refunds = this.num(row.refunds);
+    const profit = this.num(row.profit_confirmed);
+    const costOfGoods = this.num(row.cost_of_goods);
+
+    return {
+      sales: this.round(sales),
+      orders,
+      units: this.num(row.units),
+      refunds,
+      grossProfit: this.round(this.num(row.gross_profit)),
+      netProfit: this.round(profit),
+      estimatedPayout: this.round(this.num(row.payout)),
+      margin: sales > 0 ? this.round((profit / sales) * 100, 1) : 0,
+      avgOrderValue: orders > 0 ? this.round(sales / orders) : 0,
+      trend: previous ? this.calcChange(sales, this.num(previous.sales)) : null,
+      profitTrend: previous ? this.calcChange(profit, this.num(previous.profit_confirmed)) : null,
+      profitConfirmed: this.round(profit),
+      profitProvisional: this.round(this.num(row.profit_provisional)),
+      revenueUncosted: this.round(this.num(row.revenue_uncosted)),
+      ordersPendingCapture: this.num(row.orders_pending_capture),
+      ordersCaptureFailed: this.num(row.orders_capture_failed),
+      ordersUntracked: this.num(row.orders_untracked),
+      costOfGoods: this.round(costOfGoods),
+      transactionFees: this.round(this.num(row.transaction_fees)),
+      adFees: this.round(this.num(row.ad_fees)),
+      amazonShipping: this.round(this.num(row.amazon_shipping)),
+      amazonTax: this.round(this.num(row.amazon_tax)),
+      roi: costOfGoods > 0 ? this.round((profit / costOfGoods) * 100, 1) : 0,
+      refundRate: orders + refunds > 0 ? this.round((refunds / (orders + refunds)) * 100, 1) : 0,
+    };
   }
 
   /**
@@ -113,7 +259,6 @@ export class DashboardService {
    *   - confirmed   = linked (trusted Amazon costs scraped)
    *   - provisional = product-only costs (purchase price known, tax/shipping pending)
    *   - uncosted    = pending/failed/untracked (revenue only, no reliable cost basis)
-   * Headline `netProfit` (mapped from profit_confirmed) shows trusted-only profit.
    */
   private periodSelect(): string {
     const c = OrderStatus.CANCELLED;
@@ -122,70 +267,42 @@ export class DashboardService {
     const pending = OrderCostCaptureStatus.PENDING;
     const failed = OrderCostCaptureStatus.FAILED;
     const untracked = OrderCostCaptureStatus.UNTRACKED;
+    const live = `WHERE status <> '${c}'`;
     return `
-      COALESCE(SUM(sale_total) FILTER (WHERE status <> '${c}'), 0) AS sales,
-      COUNT(*) FILTER (WHERE status <> '${c}') AS orders,
-      COALESCE(SUM(quantity) FILTER (WHERE status <> '${c}'), 0) AS units,
+      COALESCE(SUM(sale_total) FILTER (${live}), 0) AS sales,
+      COUNT(*) FILTER (${live}) AS orders,
+      COALESCE(SUM(quantity) FILTER (${live}), 0) AS units,
       COUNT(*) FILTER (WHERE status = '${c}') AS refunds,
       COALESCE(SUM(COALESCE(ebay_earnings, 0) - COALESCE(purchase_price, 0))
-        FILTER (WHERE status <> '${c}'), 0) AS gross_profit,
-      COALESCE(SUM(COALESCE(ebay_earnings, 0)) FILTER (WHERE status <> '${c}'), 0) AS payout,
-      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${linked}'), 0) AS profit_confirmed,
-      COALESCE(SUM(net_profit) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${provisional}'), 0) AS profit_provisional,
-      COALESCE(SUM(sale_total) FILTER (WHERE status <> '${c}' AND cost_capture_status IN ('${pending}','${failed}','${untracked}')), 0) AS revenue_uncosted,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${pending}') AS orders_pending_capture,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${failed}') AS orders_capture_failed,
-      COUNT(*) FILTER (WHERE status <> '${c}' AND cost_capture_status = '${untracked}') AS orders_untracked
+        FILTER (${live}), 0) AS gross_profit,
+      COALESCE(SUM(COALESCE(ebay_earnings, 0)) FILTER (${live}), 0) AS payout,
+      COALESCE(SUM(net_profit) FILTER (${live} AND cost_capture_status = '${linked}'), 0) AS profit_confirmed,
+      COALESCE(SUM(net_profit) FILTER (${live} AND cost_capture_status = '${provisional}'), 0) AS profit_provisional,
+      COALESCE(SUM(sale_total) FILTER (${live} AND cost_capture_status IN ('${pending}','${failed}','${untracked}')), 0) AS revenue_uncosted,
+      COUNT(*) FILTER (${live} AND cost_capture_status = '${pending}') AS orders_pending_capture,
+      COUNT(*) FILTER (${live} AND cost_capture_status = '${failed}') AS orders_capture_failed,
+      COUNT(*) FILTER (${live} AND cost_capture_status = '${untracked}') AS orders_untracked,
+      COALESCE(SUM(COALESCE(purchase_price, 0)) FILTER (${live}), 0) AS cost_of_goods,
+      COALESCE(SUM(COALESCE(transaction_fee, 0)) FILTER (${live}), 0) AS transaction_fees,
+      COALESCE(SUM(COALESCE(ad_fee, 0)) FILTER (${live}), 0) AS ad_fees,
+      COALESCE(SUM(COALESCE(amazon_shipping, 0)) FILTER (${live}), 0) AS amazon_shipping,
+      COALESCE(SUM(COALESCE(amazon_tax, 0)) FILTER (${live}), 0) AS amazon_tax
     `;
   }
 
-  private storeClause(ebayAccountId: string | undefined, paramIndex: number): { sql: string; next: number } {
-    if (!ebayAccountId) {
-      return { sql: '', next: paramIndex };
-    }
-    return { sql: ` AND ebay_account_id = $${paramIndex}`, next: paramIndex + 1 };
+  private storeClause(ebayAccountId: string | undefined, paramIndex: number): string {
+    return ebayAccountId ? ` AND ebay_account_id = $${paramIndex}` : '';
   }
 
+  /* ─── period cards ─── */
+
   private async getMetrics(userId: string, ebayAccountId?: string): Promise<DashboardMetricsDto> {
-    const store = this.storeClause(ebayAccountId, 2);
-    const params: string[] = [userId];
-    if (ebayAccountId) {
-      params.push(ebayAccountId);
-    }
-    const s = store.sql;
+    const s = this.storeClause(ebayAccountId, 2);
+    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
     const sel = this.periodSelect();
 
     // Postgres date_trunc('week') is Monday-start (ISO).
-    const result = await this.databaseService.query<{
-      // today
-      t_sales: string; t_orders: string; t_units: string;
-      t_refunds: string; t_gross: string; t_payout: string;
-      t_profit_confirmed: string; t_profit_provisional: string; t_revenue_uncosted: string;
-      t_orders_pending_capture: string; t_orders_capture_failed: string; t_orders_untracked: string;
-      // yesterday (trend — confirmed profit only)
-      y_sales: string; y_profit_confirmed: string;
-      // this week
-      w_sales: string; w_orders: string; w_units: string;
-      w_refunds: string; w_gross: string; w_payout: string;
-      w_profit_confirmed: string; w_profit_provisional: string; w_revenue_uncosted: string;
-      w_orders_pending_capture: string; w_orders_capture_failed: string; w_orders_untracked: string;
-      // last week same span (trend for this week)
-      lw_sales: string; lw_profit_confirmed: string;
-      // this month
-      m_sales: string; m_orders: string; m_units: string;
-      m_refunds: string; m_gross: string; m_payout: string;
-      m_profit_confirmed: string; m_profit_provisional: string; m_revenue_uncosted: string;
-      m_orders_pending_capture: string; m_orders_capture_failed: string; m_orders_untracked: string;
-      // same period last month (trend)
-      sm_sales: string; sm_profit_confirmed: string;
-      // this year
-      ytd_sales: string; ytd_orders: string; ytd_units: string;
-      ytd_refunds: string; ytd_gross: string; ytd_payout: string;
-      ytd_profit_confirmed: string; ytd_profit_provisional: string; ytd_revenue_uncosted: string;
-      ytd_orders_pending_capture: string; ytd_orders_capture_failed: string; ytd_orders_untracked: string;
-      // same YTD span last year (trend)
-      ly_sales: string; ly_profit_confirmed: string;
-    }>(
+    const result = await this.databaseService.query<MetricsQueryRow>(
       `WITH bounds AS (
         SELECT
           CURRENT_DATE AS today,
@@ -252,38 +369,14 @@ export class DashboardService {
           AND order_date < b.last_year_start + (b.days_into_year + 1) * INTERVAL '1 day'
       )
       SELECT
-        t.sales as t_sales, t.orders as t_orders, t.units as t_units,
-        t.refunds as t_refunds, t.gross_profit as t_gross, t.payout as t_payout,
-        t.profit_confirmed as t_profit_confirmed, t.profit_provisional as t_profit_provisional,
-        t.revenue_uncosted as t_revenue_uncosted,
-        t.orders_pending_capture as t_orders_pending_capture,
-        t.orders_capture_failed as t_orders_capture_failed,
-        t.orders_untracked as t_orders_untracked,
-        y.sales as y_sales, y.profit_confirmed as y_profit_confirmed,
-        w.sales as w_sales, w.orders as w_orders, w.units as w_units,
-        w.refunds as w_refunds, w.gross_profit as w_gross, w.payout as w_payout,
-        w.profit_confirmed as w_profit_confirmed, w.profit_provisional as w_profit_provisional,
-        w.revenue_uncosted as w_revenue_uncosted,
-        w.orders_pending_capture as w_orders_pending_capture,
-        w.orders_capture_failed as w_orders_capture_failed,
-        w.orders_untracked as w_orders_untracked,
-        lw.sales as lw_sales, lw.profit_confirmed as lw_profit_confirmed,
-        m.sales as m_sales, m.orders as m_orders, m.units as m_units,
-        m.refunds as m_refunds, m.gross_profit as m_gross, m.payout as m_payout,
-        m.profit_confirmed as m_profit_confirmed, m.profit_provisional as m_profit_provisional,
-        m.revenue_uncosted as m_revenue_uncosted,
-        m.orders_pending_capture as m_orders_pending_capture,
-        m.orders_capture_failed as m_orders_capture_failed,
-        m.orders_untracked as m_orders_untracked,
-        sm.sales as sm_sales, sm.profit_confirmed as sm_profit_confirmed,
-        ytd.sales as ytd_sales, ytd.orders as ytd_orders, ytd.units as ytd_units,
-        ytd.refunds as ytd_refunds, ytd.gross_profit as ytd_gross, ytd.payout as ytd_payout,
-        ytd.profit_confirmed as ytd_profit_confirmed, ytd.profit_provisional as ytd_profit_provisional,
-        ytd.revenue_uncosted as ytd_revenue_uncosted,
-        ytd.orders_pending_capture as ytd_orders_pending_capture,
-        ytd.orders_capture_failed as ytd_orders_capture_failed,
-        ytd.orders_untracked as ytd_orders_untracked,
-        ly.sales as ly_sales, ly.profit_confirmed as ly_profit_confirmed
+        to_jsonb(t) AS today,
+        to_jsonb(y) AS yesterday,
+        to_jsonb(w) AS this_week,
+        to_jsonb(lw) AS last_week_span,
+        to_jsonb(m) AS this_month,
+        to_jsonb(sm) AS same_period_last_month,
+        to_jsonb(ytd) AS this_year,
+        to_jsonb(ly) AS same_period_last_year
       FROM today t, yesterday y, this_week w, last_week_span lw,
            this_month m, same_period_last_month sm, this_year ytd, same_period_last_year ly`,
       params,
@@ -291,504 +384,138 @@ export class DashboardService {
 
     const r = result[0];
     if (!r) {
-      return {
-        today: this.emptyPeriod(),
-        thisWeek: this.emptyPeriod(),
-        thisMonth: this.emptyPeriod(),
-        thisYear: this.emptyPeriod(),
-      };
+      const empty = this.buildPeriod(this.emptyAggregate());
+      return { today: empty, thisWeek: empty, thisMonth: empty, thisYear: empty };
     }
 
-    const num = (v: string | undefined) => parseFloat(v || '0') || 0;
-    const int = (v: string | undefined) => parseInt(v || '0', 10) || 0;
-
     return {
-      today: this.buildPeriod({
-        sales: num(r.t_sales), orders: int(r.t_orders), units: int(r.t_units),
-        refunds: int(r.t_refunds), grossProfit: num(r.t_gross), payout: num(r.t_payout),
-        profitConfirmed: num(r.t_profit_confirmed),
-        profitProvisional: num(r.t_profit_provisional),
-        revenueUncosted: num(r.t_revenue_uncosted),
-        ordersPendingCapture: int(r.t_orders_pending_capture),
-        ordersCaptureFailed: int(r.t_orders_capture_failed),
-        ordersUntracked: int(r.t_orders_untracked),
-        prevSales: num(r.y_sales), prevProfitConfirmed: num(r.y_profit_confirmed),
-      }),
-      thisWeek: this.buildPeriod({
-        sales: num(r.w_sales), orders: int(r.w_orders), units: int(r.w_units),
-        refunds: int(r.w_refunds), grossProfit: num(r.w_gross), payout: num(r.w_payout),
-        profitConfirmed: num(r.w_profit_confirmed),
-        profitProvisional: num(r.w_profit_provisional),
-        revenueUncosted: num(r.w_revenue_uncosted),
-        ordersPendingCapture: int(r.w_orders_pending_capture),
-        ordersCaptureFailed: int(r.w_orders_capture_failed),
-        ordersUntracked: int(r.w_orders_untracked),
-        prevSales: num(r.lw_sales), prevProfitConfirmed: num(r.lw_profit_confirmed),
-      }),
-      thisMonth: this.buildPeriod({
-        sales: num(r.m_sales), orders: int(r.m_orders), units: int(r.m_units),
-        refunds: int(r.m_refunds), grossProfit: num(r.m_gross), payout: num(r.m_payout),
-        profitConfirmed: num(r.m_profit_confirmed),
-        profitProvisional: num(r.m_profit_provisional),
-        revenueUncosted: num(r.m_revenue_uncosted),
-        ordersPendingCapture: int(r.m_orders_pending_capture),
-        ordersCaptureFailed: int(r.m_orders_capture_failed),
-        ordersUntracked: int(r.m_orders_untracked),
-        prevSales: num(r.sm_sales), prevProfitConfirmed: num(r.sm_profit_confirmed),
-      }),
-      thisYear: this.buildPeriod({
-        sales: num(r.ytd_sales), orders: int(r.ytd_orders), units: int(r.ytd_units),
-        refunds: int(r.ytd_refunds), grossProfit: num(r.ytd_gross), payout: num(r.ytd_payout),
-        profitConfirmed: num(r.ytd_profit_confirmed),
-        profitProvisional: num(r.ytd_profit_provisional),
-        revenueUncosted: num(r.ytd_revenue_uncosted),
-        ordersPendingCapture: int(r.ytd_orders_pending_capture),
-        ordersCaptureFailed: int(r.ytd_orders_capture_failed),
-        ordersUntracked: int(r.ytd_orders_untracked),
-        prevSales: num(r.ly_sales), prevProfitConfirmed: num(r.ly_profit_confirmed),
-      }),
+      today: this.buildPeriod(r.today, r.yesterday),
+      thisWeek: this.buildPeriod(r.this_week, r.last_week_span),
+      thisMonth: this.buildPeriod(r.this_month, r.same_period_last_month),
+      thisYear: this.buildPeriod(r.this_year, r.same_period_last_year),
     };
   }
 
-  private async getRevenueTrend(
-    userId: string,
-    days: number,
-    ebayAccountId?: string,
-  ): Promise<RevenueTrendPoint[]> {
-    const offset = days - 1;
-    const store = this.storeClause(ebayAccountId, 3);
-    const params: (string | number)[] = [userId, offset];
-    if (ebayAccountId) {
-      params.push(ebayAccountId);
-    }
-
-    const cancelled = OrderStatus.CANCELLED;
-    const linked = OrderCostCaptureStatus.LINKED;
-    const results = await this.databaseService.query<{
-      date: Date;
-      revenue: string;
-      profit: string;
-      orders: string;
-    }>(
-      `SELECT
-        DATE(order_date) as date,
-        COALESCE(SUM(sale_total) FILTER (WHERE status <> '${cancelled}'), 0) as revenue,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${linked}'), 0) as profit,
-        COUNT(*) FILTER (WHERE status <> '${cancelled}') as orders
-       FROM orders
-       WHERE user_id = $1 AND order_date >= CURRENT_DATE - INTERVAL '1 day' * $2 ${store.sql}
-       GROUP BY DATE(order_date)
-       ORDER BY date ASC`,
-      params,
-    );
-
-    const trendMap = new Map<string, RevenueTrendPoint>();
-    for (const row of results) {
-      const dateStr = row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date);
-      trendMap.set(dateStr, {
-        date: dateStr,
-        revenue: parseFloat(row.revenue || '0'),
-        profit: parseFloat(row.profit || '0'),
-        orders: parseInt(row.orders || '0', 10),
-      });
-    }
-
-    const trend: RevenueTrendPoint[] = [];
-    const now = new Date();
-    for (let i = offset; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      trend.push(trendMap.get(dateStr) || { date: dateStr, revenue: 0, profit: 0, orders: 0 });
-    }
-    return trend;
-  }
+  /* ─── chart tab ─── */
 
   private async getChart(
     userId: string,
+    granularity: DashboardChartGranularity,
+    anchor: Date,
     ebayAccountId?: string,
-  ): Promise<{ points: DashboardChartPoint[]; summary: PeriodMetricsDto }> {
-    const store = this.storeClause(ebayAccountId, 2);
-    const params: string[] = [userId];
-    if (ebayAccountId) {
-      params.push(ebayAccountId);
-    }
-    const sel = this.periodSelect();
+  ): Promise<{
+    granularity: DashboardChartGranularity;
+    points: DashboardChartPoint[];
+    summary: PeriodMetricsDto;
+  }> {
+    const s = this.storeClause(ebayAccountId, 2);
+    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
+    const { trunc, since } = GRANULARITY_SQL[granularity];
 
-    const results = await this.databaseService.query<{
-      period: Date;
-      sales: string;
-      units: string;
-      profit_confirmed: string;
-      profit_provisional: string;
-      revenue_uncosted: string;
-      refunds: string;
-      orders: string;
-      gross_profit: string;
-      payout: string;
-      orders_pending_capture: string;
-      orders_capture_failed: string;
-      orders_untracked: string;
-    }>(
+    const rows = await this.databaseService.query<BucketQueryRow>(
       `SELECT
-        date_trunc('month', order_date)::date as period,
-        ${sel}
+         to_char(${trunc}, 'YYYY-MM-DD') AS period,
+         ${this.periodSelect()}
        FROM orders
        WHERE user_id = $1
-         AND order_date >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
-         ${store.sql}
-       GROUP BY date_trunc('month', order_date)
-       ORDER BY period ASC`,
+         AND order_date >= ${since}
+         ${s}
+       GROUP BY 1
+       ORDER BY 1 ASC`,
       params,
     );
 
-    type MonthRollup = DashboardChartPoint & {
-      orders: number;
-      grossProfit: number;
-      payout: number;
-      profitConfirmed: number;
-      profitProvisional: number;
-      revenueUncosted: number;
-      ordersPendingCapture: number;
-      ordersCaptureFailed: number;
-      ordersUntracked: number;
-    };
-    const byMonth = new Map<string, MonthRollup>();
-    for (const row of results) {
-      const periodStr =
-        row.period instanceof Date
-          ? row.period.toISOString().split('T')[0]
-          : String(row.period).slice(0, 10);
-      byMonth.set(periodStr, {
-        period: periodStr,
-        sales: parseFloat(row.sales || '0'),
-        units: parseInt(row.units || '0', 10),
-        netProfit: parseFloat(row.profit_confirmed || '0'),
-        refunds: parseInt(row.refunds || '0', 10),
-        orders: parseInt(row.orders || '0', 10),
-        grossProfit: parseFloat(row.gross_profit || '0'),
-        payout: parseFloat(row.payout || '0'),
-        profitConfirmed: parseFloat(row.profit_confirmed || '0'),
-        profitProvisional: parseFloat(row.profit_provisional || '0'),
-        revenueUncosted: parseFloat(row.revenue_uncosted || '0'),
-        ordersPendingCapture: parseInt(row.orders_pending_capture || '0', 10),
-        ordersCaptureFailed: parseInt(row.orders_capture_failed || '0', 10),
-        ordersUntracked: parseInt(row.orders_untracked || '0', 10),
-      });
+    const byBucket = new Map<string, PeriodAggregateRow>();
+    for (const row of rows) {
+      byBucket.set(row.period, row);
     }
 
-    // Fill last 12 months including current
     const points: DashboardChartPoint[] = [];
-    let sumSales = 0;
-    let sumOrders = 0;
-    let sumUnits = 0;
-    let sumRefunds = 0;
-    let sumGross = 0;
-    let sumPayout = 0;
-    let sumProfitConfirmed = 0;
-    let sumProfitProvisional = 0;
-    let sumRevenueUncosted = 0;
-    let sumOrdersPendingCapture = 0;
-    let sumOrdersCaptureFailed = 0;
-    let sumOrdersUntracked = 0;
+    const filled: PeriodAggregateRow[] = [];
 
-    const now = new Date();
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-      const key = d.toISOString().split('T')[0];
-      const point = byMonth.get(key) || {
-        period: key,
-        sales: 0,
-        units: 0,
-        netProfit: 0,
-        refunds: 0,
-        orders: 0,
-        grossProfit: 0,
-        payout: 0,
-        profitConfirmed: 0,
-        profitProvisional: 0,
-        revenueUncosted: 0,
-        ordersPendingCapture: 0,
-        ordersCaptureFailed: 0,
-        ordersUntracked: 0,
-      };
+    for (const key of this.bucketKeys(granularity, anchor)) {
+      const agg = byBucket.get(key) ?? this.emptyAggregate();
+      filled.push(agg);
       points.push({
-        period: point.period,
-        sales: point.sales,
-        units: point.units,
-        netProfit: point.netProfit,
-        refunds: point.refunds,
+        period: key,
+        sales: this.round(this.num(agg.sales)),
+        units: this.num(agg.units),
+        orders: this.num(agg.orders),
+        netProfit: this.round(this.num(agg.profit_confirmed)),
+        grossProfit: this.round(this.num(agg.gross_profit)),
+        refunds: this.num(agg.refunds),
       });
-      sumSales += point.sales;
-      sumOrders += point.orders;
-      sumUnits += point.units;
-      sumRefunds += point.refunds;
-      sumGross += point.grossProfit;
-      sumPayout += point.payout;
-      sumProfitConfirmed += point.profitConfirmed;
-      sumProfitProvisional += point.profitProvisional;
-      sumRevenueUncosted += point.revenueUncosted;
-      sumOrdersPendingCapture += point.ordersPendingCapture;
-      sumOrdersCaptureFailed += point.ordersCaptureFailed;
-      sumOrdersUntracked += point.ordersUntracked;
     }
 
     return {
+      granularity,
       points,
-      summary: this.buildPeriod({
-        sales: sumSales,
-        orders: sumOrders,
-        units: sumUnits,
-        refunds: sumRefunds,
-        grossProfit: sumGross,
-        payout: sumPayout,
-        profitConfirmed: sumProfitConfirmed,
-        profitProvisional: sumProfitProvisional,
-        revenueUncosted: sumRevenueUncosted,
-        ordersPendingCapture: sumOrdersPendingCapture,
-        ordersCaptureFailed: sumOrdersCaptureFailed,
-        ordersUntracked: sumOrdersUntracked,
-        prevSales: 0,
-        prevProfitConfirmed: 0,
-      }),
+      summary: this.buildPeriod(this.sumAggregates(filled)),
     };
   }
 
+  /* ─── P&L tab ─── */
+
   private async getHistory(
     userId: string,
+    anchor: Date,
     ebayAccountId?: string,
   ): Promise<{ months: DashboardHistoryMonth[] }> {
-    const store = this.storeClause(ebayAccountId, 2);
-    const params: string[] = [userId];
-    if (ebayAccountId) {
-      params.push(ebayAccountId);
-    }
-    const cancelled = OrderStatus.CANCELLED;
-    const linked = OrderCostCaptureStatus.LINKED;
-    const provisional = OrderCostCaptureStatus.PROVISIONAL;
+    const s = this.storeClause(ebayAccountId, 2);
+    const params: string[] = ebayAccountId ? [userId, ebayAccountId] : [userId];
 
-    const results = await this.databaseService.query<{
-      period: Date;
-      sales: string;
-      units: string;
-      orders: string;
-      refunds: string;
-      ad_fee: string;
-      amazon_shipping: string;
-      purchase_price: string;
-      transaction_fee: string;
-      ebay_earnings: string;
-      gross_profit: string;
-      profit: string;
-      profit_confirmed: string;
-      profit_provisional: string;
-      payout: string;
-    }>(
+    const rows = await this.databaseService.query<BucketQueryRow>(
       `SELECT
-        date_trunc('month', order_date)::date as period,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN sale_total ELSE 0 END), 0) as sales,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN quantity ELSE 0 END), 0) as units,
-        COUNT(*) FILTER (WHERE status <> '${cancelled}') as orders,
-        COUNT(*) FILTER (WHERE status = '${cancelled}') as refunds,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(ad_fee, 0) ELSE 0 END), 0) as ad_fee,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(amazon_shipping, 0) ELSE 0 END), 0) as amazon_shipping,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(purchase_price, 0) ELSE 0 END), 0) as purchase_price,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(transaction_fee, 0) ELSE 0 END), 0) as transaction_fee,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(ebay_earnings, 0) ELSE 0 END), 0) as ebay_earnings,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}'
-          THEN COALESCE(ebay_earnings, 0) - COALESCE(purchase_price, 0) ELSE 0 END), 0) as gross_profit,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN net_profit ELSE 0 END), 0) as profit,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${linked}'), 0) as profit_confirmed,
-        COALESCE(SUM(net_profit) FILTER (WHERE status <> '${cancelled}' AND cost_capture_status = '${provisional}'), 0) as profit_provisional,
-        COALESCE(SUM(CASE WHEN status <> '${cancelled}' THEN COALESCE(ebay_earnings, 0) ELSE 0 END), 0) as payout
+         to_char(date_trunc('month', order_date), 'YYYY-MM-DD') AS period,
+         ${this.periodSelect()}
        FROM orders
        WHERE user_id = $1
-         AND order_date >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
-         ${store.sql}
-       GROUP BY date_trunc('month', order_date)
-       ORDER BY period DESC`,
+         AND order_date >= date_trunc('month', CURRENT_DATE) - INTERVAL '${HISTORY_MONTHS - 1} months'
+         ${s}
+       GROUP BY 1
+       ORDER BY 1 DESC`,
       params,
     );
 
-    const byMonth = new Map<string, DashboardHistoryMonth>();
-    for (const row of results) {
-      const periodDate = row.period instanceof Date ? row.period : new Date(String(row.period));
-      const y = periodDate.getUTCFullYear();
-      const m = periodDate.getUTCMonth();
-      const key = `${y}-${String(m + 1).padStart(2, '0')}`;
-      const dateFrom = `${key}-01`;
-      const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-      const dateTo = `${key}-${String(lastDay).padStart(2, '0')}`;
-      const sales = parseFloat(row.sales || '0');
-      const profit = parseFloat(row.profit || '0');
-      const profitConfirmed = parseFloat(row.profit_confirmed || '0');
-      byMonth.set(key, {
-        key,
+    const byMonth = new Map<string, PeriodAggregateRow>();
+    for (const row of rows) {
+      byMonth.set(row.period, row);
+    }
+
+    // Newest first (current month first), missing months filled with zeros.
+    const months: DashboardHistoryMonth[] = [];
+
+    for (let i = 0; i < HISTORY_MONTHS; i++) {
+      const start = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
+      const dateFrom = this.toIsoDate(start);
+      const dateTo = this.toIsoDate(new Date(start.getFullYear(), start.getMonth() + 1, 0));
+      const agg = byMonth.get(dateFrom) ?? this.emptyAggregate();
+      const period = this.buildPeriod(agg);
+
+      months.push({
+        key: i === 0 ? DASHBOARD_CURRENT_PERIOD_KEY : dateFrom.slice(0, 7),
         dateFrom,
         dateTo,
-        sales,
-        units: parseInt(row.units || '0', 10),
-        orders: parseInt(row.orders || '0', 10),
-        refunds: parseInt(row.refunds || '0', 10),
-        adFee: parseFloat(row.ad_fee || '0'),
-        amazonShipping: parseFloat(row.amazon_shipping || '0'),
-        purchasePrice: parseFloat(row.purchase_price || '0'),
-        transactionFee: parseFloat(row.transaction_fee || '0'),
-        ebayEarnings: parseFloat(row.ebay_earnings || '0'),
-        grossProfit: parseFloat(row.gross_profit || '0'),
-        netProfit: profit,
-        profitConfirmed,
-        profitProvisional: parseFloat(row.profit_provisional || '0'),
-        estimatedPayout: parseFloat(row.payout || '0'),
-        margin: sales > 0 ? Math.round((profitConfirmed / sales) * 1000) / 10 : 0,
+        sales: period.sales,
+        units: period.units,
+        orders: period.orders,
+        refunds: period.refunds,
+        adFee: period.adFees,
+        amazonShipping: period.amazonShipping,
+        amazonTax: period.amazonTax,
+        purchasePrice: period.costOfGoods,
+        transactionFee: period.transactionFees,
+        ebayEarnings: period.estimatedPayout,
+        grossProfit: period.grossProfit,
+        netProfit: period.netProfit,
+        profitConfirmed: period.profitConfirmed,
+        profitProvisional: period.profitProvisional,
+        estimatedPayout: period.estimatedPayout,
+        margin: period.margin,
+        roi: period.roi,
       });
     }
 
-    // Newest first (current month first), fill missing months
-    const months: DashboardHistoryMonth[] = [];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-      const y = d.getUTCFullYear();
-      const m = d.getUTCMonth();
-      const key = `${y}-${String(m + 1).padStart(2, '0')}`;
-      const existing = byMonth.get(key);
-      if (existing) {
-        // Mark current month key as "current" for FE label
-        if (i === 0) {
-          months.push({ ...existing, key: 'current' });
-        } else {
-          months.push(existing);
-        }
-      } else {
-        const dateFrom = `${key}-01`;
-        const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-        const dateTo = `${key}-${String(lastDay).padStart(2, '0')}`;
-        months.push({
-          key: i === 0 ? 'current' : key,
-          dateFrom,
-          dateTo,
-          sales: 0,
-          units: 0,
-          orders: 0,
-          refunds: 0,
-          adFee: 0,
-          amazonShipping: 0,
-          purchasePrice: 0,
-          transactionFee: 0,
-          ebayEarnings: 0,
-          grossProfit: 0,
-          netProfit: 0,
-          profitConfirmed: 0,
-          profitProvisional: 0,
-          estimatedPayout: 0,
-          margin: 0,
-        });
-      }
-    }
-
     return { months };
-  }
-
-  private async getRecentOrders(userId: string, ebayAccountId?: string): Promise<OrderDto[]> {
-    interface RecentOrderRow {
-      id: string;
-      ebay_order_id: string;
-      sale_total: string | null;
-      sale_price: string | null;
-      sale_shipping: string | null;
-      sale_tax: string | null;
-      ebay_earnings: string | null;
-      purchase_price: string | null;
-      transaction_fee: string | null;
-      ad_fee: string | null;
-      net_profit: string | null;
-      cost_capture_status: string | null;
-      status: string;
-      order_date: Date | null;
-      updated_at: Date;
-      quantity: number;
-      listing_id: string | null;
-      listing_title: string | null;
-      listing_asin: string | null;
-      product_image_urls: string[] | string | null;
-    }
-    const params: string[] = [userId];
-    let storeSql = '';
-    if (ebayAccountId) {
-      storeSql = ' AND o.ebay_account_id = $2';
-      params.push(ebayAccountId);
-    }
-
-    const results = await this.databaseService.query<RecentOrderRow>(
-      `SELECT
-        o.id, o.ebay_order_id,
-        o.sale_total, o.sale_price, o.sale_shipping, o.sale_tax,
-        o.ebay_earnings, o.purchase_price, o.transaction_fee, o.ad_fee,
-        o.net_profit, o.cost_capture_status,
-        o.status, o.order_date, o.updated_at, o.quantity,
-        o.listing_id,
-        l.title as listing_title,
-        l.asin as listing_asin,
-        p.image_urls as product_image_urls
-       FROM orders o
-       LEFT JOIN listings l ON o.listing_id = l.id
-       LEFT JOIN products p ON l.product_id = p.id
-       WHERE o.user_id = $1 ${storeSql}
-       ORDER BY o.order_date DESC NULLS LAST
-       LIMIT 3`,
-      params,
-    );
-
-    const num = (v: string | null | undefined) => parseFloat(v || '0') || 0;
-
-    return results.map((row) => {
-      const imageUrl = row.product_image_urls
-        ? (() => {
-            const urls = Array.isArray(row.product_image_urls)
-              ? row.product_image_urls
-              : (() => {
-                  try {
-                    const parsed: unknown = JSON.parse(String(row.product_image_urls));
-                    return Array.isArray(parsed)
-                      ? parsed.filter((v: unknown): v is string => typeof v === 'string')
-                      : [];
-                  } catch {
-                    return [];
-                  }
-                })();
-            return urls[0] || undefined;
-          })()
-        : undefined;
-
-      return {
-        id: row.id,
-        ebayOrderId: row.ebay_order_id,
-        createdAt: (row.order_date || row.updated_at).toISOString(),
-        isTracked: !!row.listing_id,
-        status: row.status as OrderStatus,
-        costCaptureStatus: (row.cost_capture_status as OrderCostCaptureStatus) ?? undefined,
-        profitBasis: deriveProfitBasis(
-          row.cost_capture_status as OrderCostCaptureStatus,
-        ),
-        salePrice: num(row.sale_price),
-        saleShipping: num(row.sale_shipping),
-        saleTax: num(row.sale_tax),
-        saleTotal: num(row.sale_total),
-        ebayEarnings: num(row.ebay_earnings),
-        purchasePrice: num(row.purchase_price),
-        netProfit: num(row.net_profit),
-        transactionFee: num(row.transaction_fee),
-        adFee: num(row.ad_fee),
-        product: row.listing_id
-          ? {
-              title: row.listing_title || 'Unknown Product',
-              asin: row.listing_asin ?? undefined,
-              quantity: row.quantity,
-              imageUrl,
-            }
-          : undefined,
-      };
-    });
   }
 }

@@ -59,8 +59,10 @@ interface EbayFulfillmentOrder {
   shippingDetail?: {
     shipToAddress?: {
       fullName?: string;
+      primaryPhone?: { phoneNumber?: string };
       contactAddress?: {
         addressLine1?: string;
+        addressLine2?: string;
         city?: string;
         stateOrProvince?: string;
         postalCode?: string;
@@ -224,13 +226,20 @@ export class EbayFulfillmentService {
       netProfit: null,
       costCaptureStatus: OrderCostCaptureStatus.PENDING,
       purchasePrice: purchasePrice || 0,
+      // Persist the recipient name and second address line too: auto-fulfill
+      // matches saved Amazon addresses (and fills the add-address form) from
+      // this object, so dropping them meant the buyer's unit/suite and name
+      // never reached Amazon — risking a mis-shipped order.
       shippingAddress: address
         ? {
+            fullName: shipTo?.fullName || buyer?.buyerRegistrationAddress?.fullName || '',
             street: address.addressLine1 || '',
+            street2: address.addressLine2 || '',
             city: address.city || '',
             state: address.stateOrProvince || '',
             zipCode: address.postalCode || '',
             country: address.countryCode || '',
+            phone: shipTo?.primaryPhone?.phoneNumber || buyer?.buyerRegistrationAddress?.phone || '',
           }
         : null,
       orderDate: ebayOrder.creationDate ? new Date(ebayOrder.creationDate) : null,

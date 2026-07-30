@@ -2,12 +2,13 @@
  * Dashboard API - RTK Query Endpoints
  */
 
-import type { DashboardDataDto } from '@repo/shared';
+import type { DashboardChartGranularity, DashboardDataDto } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
 export interface GetDashboardArgs {
-  days?: number;
+  /** Chart bucket size — day (30d) | week (12w) | month (12m). */
+  chartGranularity?: DashboardChartGranularity;
   ebayAccountId?: string;
 }
 
@@ -16,8 +17,8 @@ export const dashboardApi = baseApi.injectEndpoints({
     getDashboard: builder.query<DashboardDataDto, GetDashboardArgs | void>({
       query: (args) => {
         const params: Record<string, string> = {};
-        if (args?.days) {
-          params.days = String(args.days);
+        if (args?.chartGranularity) {
+          params.chartGranularity = args.chartGranularity;
         }
         if (args?.ebayAccountId) {
           params.ebayAccountId = args.ebayAccountId;

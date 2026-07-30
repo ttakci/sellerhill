@@ -22,7 +22,10 @@ export const ListingSettingsGroupPageContainer = () => {
   const [isGroupDrawerOpen, setIsGroupDrawerOpen] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
-  useLoading(isGroupsLoading || isDeleting);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isDeleting);
 
   // Handle delete success
   React.useEffect(() => {
@@ -55,7 +58,11 @@ export const ListingSettingsGroupPageContainer = () => {
   const handleDeleteGroup = (id: string) => {
     showMessage(
       {
-        type: 'error',
+        /* `warning`, not `error`: this is a yes/no question the user has not
+           caused a failure with. `error` rendered the red ✕ icon, which is the
+           icon for something that already went wrong. Matches ConfirmModal's
+           own default for a destructive confirm. */
+        type: 'warning',
         headerKey: 'listingSettingsGroup:listingSettingsGroup.confirmDelete',
         descriptionKey: 'listingSettingsGroup:listingSettingsGroup.confirmDeleteMessage',
         primaryButton: {
@@ -78,6 +85,7 @@ export const ListingSettingsGroupPageContainer = () => {
     <EbayAccountGuard>
       <ListingSettingsGroupPageComponent
         groups={groups}
+      isLoading={isGroupsLoading}
         onCreateGroup={handleCreateGroup}
         onEditGroup={handleEditGroup}
         onDeleteGroup={handleDeleteGroup}

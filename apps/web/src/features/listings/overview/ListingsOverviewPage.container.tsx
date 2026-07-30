@@ -1,5 +1,6 @@
 import { ListingStatus } from '@repo/shared';
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { AddListingsDrawer } from '../add-listings/drawer';
 import { useGetListingsQuery } from '../api/listings.api';
@@ -9,9 +10,15 @@ import { ListingsOverviewPageComponent } from './ListingsOverviewPage.component'
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useLocale } from '@/utils/useLocale';
 
+/** `?drawer=add` opens the create flow — the legacy `/listings/add` page redirects here. */
+const ADD_DRAWER_PARAM = 'add';
+
 export const ListingsOverviewPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(
+    () => searchParams.get('drawer') === ADD_DRAWER_PARAM
+  );
 
   // Carousel + "view all" only show real (active) listings — never drafts
   const { data } = useGetListingsQuery(
@@ -41,6 +48,11 @@ export const ListingsOverviewPageContainer: React.FC = () => {
 
   const handleAddDrawerClose = () => {
     setIsAddDrawerOpen(false);
+    if (searchParams.get('drawer') === ADD_DRAWER_PARAM) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('drawer');
+      setSearchParams(next, { replace: true });
+    }
   };
 
   const handleAddSuccess = (result?: { asDraft: boolean }) => {

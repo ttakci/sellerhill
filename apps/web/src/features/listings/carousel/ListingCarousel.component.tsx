@@ -1,4 +1,4 @@
-import { Icon } from '@repo/ui';
+import { EmptyState, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -27,15 +27,13 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
 
   if (listings.length === 0) {
     return (
-      <S.SliderEmpty>
-        <Icon name="inventory" size={40} />
-        <S.SliderEmptyText variant="body" weight="semibold" color="text.primary">
-          {emptyTitle ?? t('listings.overview.emptyTitle')}
-        </S.SliderEmptyText>
-        <S.SliderEmptyText variant="body-sm" color="text.secondary">
-          {emptySubtitle ?? t('listings.overview.emptySubtitle')}
-        </S.SliderEmptyText>
-      </S.SliderEmpty>
+      /* Shared EmptyState — this was a bespoke icon+title+subtitle block. */
+      <EmptyState
+        icon="inventory"
+        title={emptyTitle ?? t('listings.overview.emptyTitle')}
+        description={emptySubtitle ?? t('listings.overview.emptySubtitle')}
+        size="md"
+      />
     );
   }
 
@@ -43,7 +41,9 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
     <S.CarouselWrapper>
       {showViewAll && (
         <S.CarouselTopBar>
-          <S.ViewAllButton onClick={onViewAll}>{viewAllLabel}</S.ViewAllButton>
+          <S.ViewAllButton variant="text" size="small" onClick={onViewAll}>
+            <Text variant="body-sm" weight="semibold">{viewAllLabel}</Text>
+          </S.ViewAllButton>
         </S.CarouselTopBar>
       )}
       <S.CarouselViewport>
@@ -62,19 +62,28 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
         })}
       </S.CarouselViewport>
       {currentSlide > 0 && (
-        <S.CarouselArrow $side="left" className="carousel-arrow" onClick={onPrev} aria-label={t('listings.carousel.previous')}>
+        <S.CarouselArrow $side="left" variant="elevated" className="carousel-arrow" onClick={onPrev} aria-label={t('listings.carousel.previous')}>
           <Icon name="chevron-left" size={20} />
         </S.CarouselArrow>
       )}
       {currentSlide < listings.length - 1 && (
-        <S.CarouselArrow $side="right" className="carousel-arrow" onClick={onNext} aria-label={t('listings.carousel.next')}>
+        <S.CarouselArrow $side="right" variant="elevated" className="carousel-arrow" onClick={onNext} aria-label={t('listings.carousel.next')}>
           <Icon name="chevron-right" size={20} />
         </S.CarouselArrow>
       )}
       {listings.length > 1 && (
         <S.CarouselPagination>
           {listings.map((_, index) => (
-            <S.PaginationDot key={index} $active={index === currentSlide} onClick={() => onGoTo(index)} />
+            <S.PaginationDot
+              key={index}
+              variant="ghost"
+              $active={index === currentSlide}
+              onClick={() => onGoTo(index)}
+              aria-label={String(index + 1)}
+              aria-current={index === currentSlide}
+            >
+              <S.PaginationDotMark $active={index === currentSlide} />
+            </S.PaginationDot>
           ))}
         </S.CarouselPagination>
       )}

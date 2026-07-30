@@ -7,7 +7,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { DashboardDataDto } from '@repo/shared';
+import { DashboardChartGranularity, type DashboardDataDto } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -26,10 +26,10 @@ export class DashboardController {
     description: 'Period metrics, chart, history, and recent orders',
   })
   @ApiQuery({
-    name: 'days',
+    name: 'chartGranularity',
     required: false,
-    type: Number,
-    description: 'Number of days for daily revenue trend (default: 14)',
+    enum: DashboardChartGranularity,
+    description: 'Chart bucket size: day (30d), week (12w) or month (12m, default)',
   })
   @ApiQuery({
     name: 'ebayAccountId',
@@ -41,10 +41,15 @@ export class DashboardController {
   @ApiUnauthorizedResponse({ description: 'User not authenticated' })
   async getDashboard(
     @Request() req: { user: { sub: string } },
-    @Query('days') days?: number,
+    @Query('chartGranularity') chartGranularity?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
   ): Promise<DashboardDataDto> {
     const userId = req.user.sub;
-    return this.dashboardService.getDashboard(userId, days, ebayAccountId);
+    const granularity = Object.values(DashboardChartGranularity).includes(
+      chartGranularity as DashboardChartGranularity,
+    )
+      ? (chartGranularity as DashboardChartGranularity)
+      : DashboardChartGranularity.MONTH;
+    return this.dashboardService.getDashboard(userId, granularity, ebayAccountId);
   }
 }

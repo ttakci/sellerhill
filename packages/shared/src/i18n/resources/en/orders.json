@@ -23,7 +23,12 @@
     "all": {
       "title": "All orders",
       "subtitle": "{{count}} results",
-      "emptyTitle": "No orders match your filters"
+      "loadingTitle": "Loading orders",
+      "loadingSubtitle": "Fetching your latest eBay orders.",
+      "filtersTitle": "No orders match your filters",
+      "filtersSubtitle": "Try widening the date range, status or store.",
+      "emptyTitle": "No orders yet",
+      "emptySubtitle": "Orders appear here automatically once eBay sync runs."
     },
     "filters": {
       "allStatuses": "All statuses",
@@ -67,6 +72,28 @@
       "pending": "Pending",
       "waiting_shipment": "Waiting Shipment"
     },
+    "fulfillmentState": {
+      "column": "Amazon fulfillment",
+      "purchased": "Bought on Amazon",
+      "amazon_cancelled": "Amazon cancelled",
+      "action_required": "Action required",
+      "in_progress": "Buying on Amazon",
+      "not_automated": "Not automated",
+      "manual": "Bought manually",
+      "simulated": "Test run — no purchase",
+      "filter": {
+        "all": "All fulfillment states"
+      },
+      "detail": {
+        "title": "Amazon fulfillment",
+        "amazonOrderId": "Amazon order",
+        "simulatedNotice": "This is a test run. No Amazon order was placed and no money was charged — the costs and profit below are simulated.",
+        "actionRequiredNotice": "Automation stopped before buying. Review the reason and fulfill this order manually.",
+        "cancelledNotice": "The Amazon purchase was cancelled. The eBay sale is still owed to the buyer — fulfill it another way.",
+        "notAutomatedNotice": "Automatic ordering is off for this order.",
+        "attemptedAt": "Last attempt"
+      }
+    },
     "autoFulfill": {
       "column": "Auto-Fulfill",
       "status": {
@@ -79,7 +106,7 @@
         "skipped": "Skipped"
       },
       "reason": {
-        "no_asin": "ASIN unavailable",
+        "no_asin": "Product not found on Amazon",
         "captcha": "Captcha required",
         "otp": "MFA/OTP challenge",
         "login": "Login failed",
@@ -90,7 +117,8 @@
         "no_confirmation": "No confirmation",
         "proxy_required": "No proxy configured",
         "quota_exhausted": "Monthly quota reached",
-        "cart": "Cart mismatch"
+        "cart": "Cart mismatch",
+        "review_unreadable": "Order total unreadable"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",
@@ -104,6 +132,7 @@
     },
     "detail": {
       "title": "Order Details",
+      "loadingSubtitle": "Fetching order details…",
       "notFoundTitle": "Order not found",
       "notFoundSubtitle": "This order may have been removed or you do not have access.",
       "orderPlaced": "Order placed",

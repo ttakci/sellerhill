@@ -18,6 +18,7 @@
     },
     "accounts": {
       "title": "Bağlı eBay Hesapları",
+      "loadingDescription": "Bağlı mağazalarınız getiriliyor.",
       "noAccounts": "Henüz bağlı eBay hesabı yok",
       "statusActive": "Aktif",
       "statusRevoked": "İptal Edildi",

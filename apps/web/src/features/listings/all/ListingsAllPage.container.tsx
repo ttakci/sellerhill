@@ -1,5 +1,5 @@
 import { ListingStatus } from '@repo/shared';
-import { useLoading, useUI, type ViewMode } from '@repo/ui';
+import { formatCurrency, getLocaleConfig, useLoading, useUI, type ViewMode } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -20,9 +20,18 @@ import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useLocale } from '@/utils/useLocale';
 
 export const ListingsAllPage: React.FC = () => {
-  const { t } = useTranslation(['listings', 'translation']);
+  const { t, i18n } = useTranslation(['listings', 'translation']);
   const { showMessage } = useUI();
   const { localeNavigate } = useLocale();
+
+  /* Same locale-aware money formatter Orders uses. The table used to print a
+     bare "$" + toFixed(2), so a TR user saw the wrong currency on this page
+     and the right one on the next. */
+  const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
+  const fmtCurrency = useCallback(
+    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
+    [localeCfg]
+  );
 
   const [tableView, setTableView] = useState<ViewMode>('grid');
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
@@ -112,7 +121,7 @@ export const ListingsAllPage: React.FC = () => {
   // Global overlay only for mutations — list fetch is inline
   useLoading(isEnding || isDeleting || isExporting || isPublishing);
 
-  const { columnOptions, allColumns } = useListingsColumns();
+  const { columnOptions, allColumns } = useListingsColumns(fmtCurrency);
 
   const filteredColumns = useMemo(
     () => allColumns.filter((col) => visibleColumnKeys.includes(col.key || '')),

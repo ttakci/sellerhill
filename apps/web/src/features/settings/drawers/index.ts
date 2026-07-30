@@ -1,11 +1,11 @@
 export { AmazonAccountDrawer } from './AmazonAccountDrawer';
-export type { AmazonAccountDrawerProps } from './AmazonAccountDrawer.types';
+export type { AmazonAccountDrawerProps } from './AmazonAccountDrawer';
 export { AmazonAccountsDrawer } from './AmazonAccountsDrawer';
 export type { AmazonAccountsDrawerProps } from './AmazonAccountsDrawer';
 export { BlacklistDrawer } from './BlacklistDrawer';
 export type { BlacklistDrawerProps } from './BlacklistDrawer';
 export { ChangePasswordDrawer } from './ChangePasswordDrawer';
-export type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
+export type { ChangePasswordDrawerProps } from './ChangePasswordDrawer';
 export { EbayAccountDrawer } from './EbayAccountDrawer/EbayAccountDrawer.container';
 export type { EbayAccountDrawerProps } from './EbayAccountDrawer/EbayAccountDrawer.types';
 export { ListingGroupDrawer } from './ListingGroupDrawer';
@@ -13,6 +13,6 @@ export type { ListingGroupDrawerProps, ListingGroupDrawerStep } from './ListingG
 export { ListingGroupsDrawer } from './ListingGroupsDrawer';
 export type { ListingGroupsDrawerProps } from './ListingGroupsDrawer';
 export { ProfileDrawer } from './ProfileDrawer';
-export type { ProfileDrawerProps } from './ProfileDrawer.types';
+export type { ProfileDrawerProps } from './ProfileDrawer';
 export { StoreSettingsDrawer } from './StoreSettingsDrawer';
 export type { StoreSettingsDrawerProps } from './StoreSettingsDrawer';

@@ -1,5 +1,5 @@
 import { SupportQueueFilter } from '@repo/shared';
-import { Button, EmptyState, Icon, PageHeader, Text } from '@repo/ui';
+import { EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,10 +13,26 @@ export const SupportPageComponent = ({ filter, isLoading, items, onFilterChange,
   return (
     <S.Container>
       <PageHeader title={t('translation:support.title')} subtitle={t('translation:support.subtitle')} />
-      <S.FilterRow>
-        {FILTERS.map((option) => <Button key={option} variant={option === filter ? 'primary' : 'secondary'} size="small" onClick={() => onFilterChange(option)}><Text variant="body-sm">{t(`translation:support.filters.${option}`)}</Text></Button>)}
-      </S.FilterRow>
-      {isLoading ? <Text variant="body-sm" color="text.secondary">{t('translation:support.loading')}</Text> : null}
+      {/* Queue sections, not actions — these were Buttons whose active one was
+          `variant="primary"`, competing with the real CTAs on the page. */}
+      <TabNav
+        items={FILTERS.map((option) => ({
+          id: option,
+          label: t(`translation:support.filters.${option}`),
+        }))}
+        value={filter}
+        onChange={(id) => onFilterChange(id as SupportQueueFilter)}
+        ariaLabel={t('translation:support.title')}
+      />
+      {/* Loading used to be one line of grey text while empty was a full
+          EmptyState card, so the two states looked like different screens. */}
+      {isLoading ? (
+        <EmptyState
+          icon="inbox"
+          title={t('translation:support.loading')}
+          description={t('translation:support.loadingDescription')}
+        />
+      ) : null}
       {!isLoading && items.length === 0 ? <EmptyState icon="inbox" title={t('translation:support.emptyTitle')} description={t('translation:support.emptyDescription')} /> : null}
       <S.List>
         {items.map((item) => (

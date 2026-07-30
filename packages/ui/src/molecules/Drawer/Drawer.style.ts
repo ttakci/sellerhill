@@ -7,8 +7,8 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   inset: 0;
   background: ${tkn('colors.surface.overlay')};
   display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
-  z-index: 9998;
-  animation: fadeIn 0.2s ease-out;
+  z-index: ${tkn('zIndex.overlay')};
+  animation: fadeIn ${tkn('transitions.normal')};
 
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -22,27 +22,32 @@ export const Panel = styled.aside<{ $size: string; $isOpen: boolean }>`
   right: 0;
   bottom: 0;
   width: 100%;
+  /*
+   * lg used to resolve to 35rem — NARROWER than the 36rem md default — so
+   * the three densest drawers (group wizard, bulk ASIN entry, plan comparison)
+   * all opted into "more room" and got less. The scale is now monotonic.
+   */
   max-width: ${({ $size }) => {
     switch ($size) {
       case 'sm':
-        return '20rem'; /* 320px */
+        return '22rem'; /* 352px — confirmations, short forms */
       case 'lg':
-        return '35rem'; /* 560px */
+        return '44rem'; /* 704px — wizards, two-column content */
       case 'md':
       default:
-        return '36rem'; /* 576px */
+        return '32rem'; /* 512px — single-column forms (default) */
     }
   }};
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('shadows.xl')};
   display: flex;
   flex-direction: column;
-  z-index: 9999;
+  z-index: ${tkn('zIndex.drawer')};
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform ${tkn('transitions.normal')};
   ${({ $isOpen }) => $isOpen && `transform: translateX(0);`}
 
-  @media (max-width: 48rem) { /* 768px */
+  @media (max-width: ${tkn('breakpoints.md')}) {
     max-width: 100%;
   }
 `;
@@ -97,7 +102,7 @@ export const CloseButton = styled.button`
   border: none;
   cursor: pointer;
   color: ${tkn('colors.text.tertiary')};
-  transition: color 0.2s;
+  transition: color ${tkn('transitions.fast')};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,7 +122,7 @@ export const BackButton = styled.button`
   border: none;
   cursor: pointer;
   color: ${tkn('colors.text.tertiary')};
-  transition: color 0.2s;
+  transition: color ${tkn('transitions.fast')};
   display: flex;
   align-items: center;
   justify-content: center;

@@ -26,7 +26,20 @@
       "total": "{{value}} kullanıcı · maliyetler bu aya aittir",
       "stats": "İlanlar: {{listings}} · Sipariş 30g: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
       "proxy": "Proxy: {{proxy}}",
-      "noProxy": "Proxy atanmadı"
+      "noProxy": "Proxy atanmadı",
+      "columns": {
+        "user": "Kullanıcı",
+        "role": "Erişim seviyesi",
+        "status": "Durum",
+        "listings": "İlan",
+        "orders": "30g sipariş",
+        "keepa": "Keepa",
+        "llm": "LLM",
+        "proxy": "Proxy",
+        "cost": "Maliyet"
+      },
+      "empty": "Kullanıcı yok",
+      "emptyDescription": "Bu döneme uyan hesap bulunmuyor."
     },
     "warnings": {
       "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
@@ -71,7 +84,17 @@
         "expiring_soon": "{{value}} gün kaldı",
         "expired": "Süresi doldu",
         "no_expiry": "Bitiş yok"
-      }
+      },
+      "columns": {
+        "endpoint": "Uç nokta",
+        "label": "Etiket",
+        "assignee": "Atanan",
+        "status": "Durum",
+        "expiry": "Bitiş",
+        "cost": "Aylık",
+        "actions": "İşlemler"
+      },
+      "emptyDescription": "Havuzu başlatmak için yukarıdan sabit ISP proxy ekleyin."
     },
     "errors": {
       "proxyNotFound": "Proxy bulunamadı.",

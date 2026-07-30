@@ -12,8 +12,10 @@ import {
   useGetAdminProxiesQuery,
   useGetAdminUsersQuery,
 } from '../api/admin.api';
+import { useAdminProxyColumns } from '../hooks/useAdminProxyColumns';
 import { useAdminProxyForm } from '../hooks/useAdminProxyForm';
 import { useAdminSettings } from '../hooks/useAdminSettings';
+import { useAdminUserColumns } from '../hooks/useAdminUserColumns';
 
 import { AdminPageComponent } from './AdminPage.component';
 import type { AdminTabId, SettingGroup } from './AdminPage.types';
@@ -84,9 +86,19 @@ export const AdminPageContainer = (): React.ReactElement => {
     [locale]
   );
 
+  /* Must sit above the role guard — hooks cannot be called after an early return. */
+  const userColumns = useAdminUserColumns(formatCost);
+  const proxyColumns = useAdminProxyColumns(
+    formatCost,
+    formatDateValue,
+    proxy.onProxyToggleStatus,
+    proxy.isSavingProxy
+  );
+
   if (!isLoading && user?.role !== UserRole.ADMIN) {
     return <Navigate to={buildPath('/dashboard')} replace />;
   }
+
   return (
     <AdminPageComponent
       activeTab={activeTab}
@@ -96,6 +108,8 @@ export const AdminPageContainer = (): React.ReactElement => {
       billingMetrics={billingMetrics}
       proxyPool={proxyPool}
       usersList={usersList}
+      userColumns={userColumns}
+      proxyColumns={proxyColumns}
       settingGroups={settingGroups}
       settingDrafts={settings.settingDrafts}
       isSavingSetting={settings.isSavingSetting}
@@ -106,14 +120,12 @@ export const AdminPageContainer = (): React.ReactElement => {
       onTabChange={handleTabChange}
       onProxyFieldChange={proxy.onProxyFieldChange}
       onProxySubmit={proxy.onProxySubmit}
-      onProxyToggleStatus={proxy.onProxyToggleStatus}
       onSettingDraftChange={settings.onSettingDraftChange}
       onSettingSave={settings.onSettingSave}
       onSettingToggle={settings.onSettingToggle}
       onSettingReset={settings.onSettingReset}
       onEmailTest={settings.onEmailTest}
       formatCost={formatCost}
-      formatDateValue={formatDateValue}
     />
   );
 };

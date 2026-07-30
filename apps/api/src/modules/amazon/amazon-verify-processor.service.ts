@@ -63,7 +63,11 @@ export class AmazonVerifyProcessorService extends WorkerHost {
 
     // BullMQ will retry per `attempts`; only mark invalid on the final attempt
     // so a transient captcha/transport blip doesn't prematurely flip the status.
-    const isFinalAttempt = job.attemptsMade >= (job.opts.attempts ?? 1);
+    // BullMQ increments attemptsMade only after an attempt has failed. While the
+    // second (final) attempt is executing, attemptsMade is therefore 1, not 2.
+    // Include the current attempt or the account stays VERIFYING forever after
+    // the last failure because BullMQ has no third run in which to mark INVALID.
+    const isFinalAttempt = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
     if (isFinalAttempt) {
       await this.accountsService.markInvalid(
         userId,

@@ -1,31 +1,21 @@
 import styled from '@emotion/styled';
-import { PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
+import { Card, PageContainerWithMobileBar, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
-export const HeaderActions = styled.div`
-  display: none;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-
-  @media (min-width: 48rem) {
-    display: flex;
-  }
-`;
-
-export const Hero = styled.div`
+/*
+ * Hero and the section cards used to be hand-rolled copies of the Card atom
+ * (same surface/radius/shadow/padding, retyped) — plus a third copy for the KPI
+ * strip. They now extend the atom, so a change to the card language reaches
+ * this page too.
+ */
+export const Hero = styled(Card)`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
-  box-sizing: border-box;
 
-  @media (min-width: 48rem) {
-    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
     align-items: start;
   }
 `;
@@ -33,9 +23,10 @@ export const Hero = styled.div`
 export const ProductImage = styled.div`
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-height: 16rem;
-  border-radius: ${tkn('radius.sm')};
-  background: ${tkn('colors.background.tertiary')};
+  max-height: 14rem;
+  /* Transparent, per the product-image rule — a grey plate behind a cut-out
+     product shot reads as a broken image. */
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +38,7 @@ export const ProductImage = styled.div`
     object-fit: contain;
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     max-height: none;
   }
 `;
@@ -78,9 +69,15 @@ export const ProfitHighlight = styled.div<{ $positive: boolean }>`
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
   padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.md')};
+  /* semanticTint carries the themed tint; the old code appended a raw "12" hex
+     alpha onto a resolved token, which silently breaks if a token ever becomes
+     rgb()/rgba() and produced a different opacity than the same effect elsewhere. */
   background: ${({ $positive, theme }) =>
-    $positive ? `${theme.colors.semantic.success}12` : `${theme.colors.semantic.error}12`};
+    $positive ? theme.colors.semanticTint.success : theme.colors.semanticTint.error};
+  border: 0.0625rem solid
+    ${({ $positive, theme }) =>
+      $positive ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.error};
 `;
 
 export const ProfitLabelRow = styled.div`
@@ -94,61 +91,43 @@ export const EstimateNote = styled(Text)`
   line-height: ${tkn('typography.lineHeight.normal')};
 `;
 
-export const KpiStrip = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: ${tkn('spacing.sm')};
-
-  @media (min-width: 48rem) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: ${tkn('spacing.md')};
-  }
-`;
-
-export const KpiCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.md')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  min-width: 0;
-  box-sizing: border-box;
-`;
-
 export const SectionGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 `;
 
-export const Card = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: none;
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
+export const SectionCard = styled(Card)`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  box-sizing: border-box;
   width: 100%;
   min-width: 0;
 `;
 
-export const CardFull = styled(Card)`
-  @media (min-width: 48rem) {
-    grid-column: 1 / -1;
-  }
+/** Wrapper for the shared EmptyState on the loading / not-found screens. */
+export const StateCard = styled(Card)`
+  width: 100%;
+`;
+
+export const FormulaTerm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  min-width: 0;
+`;
+
+export const FormulaOperator = styled(Text)`
+  align-self: flex-end;
+  padding-bottom: ${tkn('spacing.2xs')};
 `;
 
 export const CardHeader = styled.div`
@@ -189,7 +168,7 @@ export const MetaRow = styled.div`
     padding-top: 0;
   }
 
-  @media (max-width: 22rem) {
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
     grid-template-columns: 1fr;
     gap: ${tkn('spacing.2xs')};
   }
@@ -201,24 +180,16 @@ export const AddressBlock = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
+/*
+ * The derivation is now `earnings − total Amazon cost = net profit`. It used to
+ * re-list purchase price, tax and shipping individually — the third appearance
+ * of those same three numbers on one page (they live in the Amazon Costs card).
+ */
 export const FormulaRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
-`;
-
-export const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.md')};
-  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
-  text-align: center;
-  background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const MobileActionBar = styled.div`
@@ -226,7 +197,7 @@ export const MobileActionBar = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 40;
+  z-index: ${tkn('zIndex.sticky')};
   display: flex;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
@@ -236,7 +207,7 @@ export const MobileActionBar = styled.div`
   box-shadow: ${tkn('shadows.lg')};
   box-sizing: border-box;
 
-  @media (min-width: 48rem) {
+  @media (min-width: ${tkn('breakpoints.md')}) {
     display: none;
   }
 `;
@@ -266,27 +237,13 @@ export const FormRow = styled.div`
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.md')};
 
-  @media (min-width: 30rem) {
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     grid-template-columns: 1fr 1fr;
   }
 `;
 
-export const FormLabel = styled.div`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.text.primary')};
-`;
-
-export const ErrorText = styled.div`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.semantic.error')};
-`;
-
-export const InfoText = styled.div`
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.secondary')};
-  line-height: ${tkn('typography.lineHeight.normal')};
+/* `FormLabel` and `InfoText` were unreachable dead styles and are gone.
+   ErrorText now extends Text instead of hand-setting font-family/size. */
+export const ErrorText = styled(Text)`
+  display: block;
 `;

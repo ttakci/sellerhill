@@ -56,6 +56,14 @@ export const StyledCheckbox = styled.div<{ $checked?: boolean; $disabled?: boole
     background-color: ${({ $checked, theme }) =>
       $checked ? theme.colors.brand.primary : theme.colors.background.tertiary};
   }
+
+  /* The real <input> is visually hidden, so without this a keyboard user gets no
+     focus feedback at all. Plain sibling selector — an Emotion component selector
+     would need the babel plugin and crashes at runtime without it. */
+  input:focus-visible + & {
+    outline: 0.125rem solid ${tkn('colors.brand.primary')};
+    outline-offset: 0.125rem;
+  }
 `;
 
 export const Label = styled.span`

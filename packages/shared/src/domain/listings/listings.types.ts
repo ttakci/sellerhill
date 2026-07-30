@@ -2,6 +2,8 @@
  * Listings Domain Types
  */
 
+import type { ProductData } from '../products/product-data.types';
+
 /**
  * eBay Business Policy Type
  */
@@ -230,6 +232,51 @@ export interface PaginatedListingsDto {
   limit: number;
   /** Distinct categories for filter dropdown (current user). */
   categories: string[];
+}
+
+/**
+ * Query for `GET /listings/jobs`.
+ *
+ * Jobs used to be returned as an unbounded array and filtered/sliced in the
+ * browser, so an account with a long import history downloaded (and re-polled
+ * every 5s) its entire job table to show ten rows.
+ */
+export interface ListingJobsQueryDto {
+  page?: number;
+  /** Page size (default 20, clamped to 100). */
+  limit?: number;
+  /** Matches the job id prefix. */
+  search?: string;
+  status?: ListingJobStatus | string;
+}
+
+/** Paginated listing-jobs response. */
+export interface PaginatedListingJobsDto {
+  items: ListingJobDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/**
+ * Query for `GET /listings/products`.
+ * Same rationale as `ListingJobsQueryDto` — the products endpoint returned the
+ * user's whole distinct-product catalog on every page load.
+ */
+export interface UserProductsQueryDto {
+  page?: number;
+  /** Page size (default 20, clamped to 100). */
+  limit?: number;
+  /** Matches product title, ASIN or brand. */
+  search?: string;
+}
+
+/** Paginated user-products response. */
+export interface PaginatedProductsDto {
+  items: ProductData[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 /**

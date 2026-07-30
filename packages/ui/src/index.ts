@@ -59,6 +59,8 @@ export type { DropdownItem, DropdownProps } from './atoms/Dropdown';
 
 export { Tabs } from './atoms/Tabs';
 export type { TabItem, TabsProps } from './atoms/Tabs';
+export { TabNav } from './atoms/TabNav';
+export type { TabNavItem, TabNavProps } from './atoms/TabNav';
 
 export { ProgressBar } from './atoms/ProgressBar';
 export type { ProgressBarProps } from './atoms/ProgressBar';

@@ -26,7 +26,20 @@
       "total": "{{value}} users · costs are for the current month",
       "stats": "Listings: {{listings}} · Orders 30d: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
       "proxy": "Proxy: {{proxy}}",
-      "noProxy": "No proxy assigned"
+      "noProxy": "No proxy assigned",
+      "columns": {
+        "user": "User",
+        "role": "Access tier",
+        "status": "Status",
+        "listings": "Listings",
+        "orders": "Orders 30d",
+        "keepa": "Keepa",
+        "llm": "LLM",
+        "proxy": "Proxy",
+        "cost": "Cost"
+      },
+      "empty": "No users",
+      "emptyDescription": "No accounts match the current period."
     },
     "warnings": {
       "queue_waiting": "{{subject}} queue waiting threshold exceeded",
@@ -71,7 +84,17 @@
         "expiring_soon": "{{value}}d left",
         "expired": "Expired",
         "no_expiry": "No expiry"
-      }
+      },
+      "columns": {
+        "endpoint": "Endpoint",
+        "label": "Label",
+        "assignee": "Assigned to",
+        "status": "Status",
+        "expiry": "Expires",
+        "cost": "Monthly",
+        "actions": "Actions"
+      },
+      "emptyDescription": "Register a fixed ISP proxy above to start the pool."
     },
     "errors": {
       "proxyNotFound": "Proxy not found.",

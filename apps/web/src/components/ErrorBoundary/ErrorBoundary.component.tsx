@@ -1,4 +1,4 @@
-import { Button, Text } from '@repo/ui';
+import { EmptyState } from '@repo/ui';
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { WithTranslation, withTranslation } from 'react-i18next';
 
@@ -64,39 +64,31 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
     if (this.state.hasError) {
       return (
         <S.Container>
-          <S.ErrorIcon>⚠️</S.ErrorIcon>
-          <S.TitleWrapper>
-            <Text variant="h2" weight="semibold" color="text.primary" align="center">
-              {t('errorBoundary.title')}
-            </Text>
-          </S.TitleWrapper>
-          <S.MessageWrapper>
-            <Text variant="body" color="text.secondary" align="center">
-              {t('errorBoundary.message')}
-            </Text>
-          </S.MessageWrapper>
+          <S.Panel variant="elevated" padding="lg">
+            {/* Same EmptyState molecule every other failure/empty screen uses —
+                this was an emoji glyph over hand-margined text. */}
+            <EmptyState
+              icon="alert-triangle"
+              title={t('errorBoundary.title')}
+              description={t('errorBoundary.message')}
+              action={t('errorBoundary.reload')}
+              onAction={this.handleReload}
+              secondaryAction={t('errorBoundary.goHome')}
+              onSecondaryAction={this.handleGoHome}
+              size="lg"
+            />
 
-          <S.ButtonGroup>
-            <Button variant="primary" onClick={this.handleReload}>
-              <Text>{t('errorBoundary.reload')}</Text>
-            </Button>
-            <Button variant="secondary" onClick={this.handleGoHome}>
-              <Text>{t('errorBoundary.goHome')}</Text>
-            </Button>
-          </S.ButtonGroup>
-
-          {import.meta.env.MODE === 'development' && this.state.error && (
-            <S.Details>
-              <S.Summary>{t('errorBoundary.details')}</S.Summary>
-              <S.ErrorStack>
-                <strong>Error:</strong> {this.state.error.toString()}
-                {'\n\n'}
-                <strong>Stack:</strong>
-                {'\n'}
-                {this.state.errorInfo?.componentStack}
-              </S.ErrorStack>
-            </S.Details>
-          )}
+            {import.meta.env.MODE === 'development' && this.state.error && (
+              <S.Details>
+                <S.Summary>{t('errorBoundary.details')}</S.Summary>
+                <S.ErrorStack variant="mono" color="semantic.error">
+                  {this.state.error.toString()}
+                  {'\n\n'}
+                  {this.state.errorInfo?.componentStack}
+                </S.ErrorStack>
+              </S.Details>
+            )}
+          </S.Panel>
         </S.Container>
       );
     }

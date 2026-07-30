@@ -3,7 +3,7 @@ import { Badge, Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { autoFulfillStatusToBadgeVariant } from '../../shared/auto-fulfill-status';
+import { fulfillmentStateToBadgeVariant } from '../../shared/fulfillment-state';
 import { orderStatusToBadgeStatus } from '../../shared/order-status';
 import * as S from '../OrdersAllPage.style';
 
@@ -18,6 +18,7 @@ export function useOrdersColumns(
       {
         key: 'ebayOrderId',
         header: t('orders.table.orderNumber'),
+        width: '10rem',
         sortable: true,
         render: (_value, order) => (
           <Text variant="body" weight="semibold" color="brand.primary">
@@ -28,6 +29,7 @@ export function useOrdersColumns(
       {
         key: 'product',
         header: t('orders.table.product'),
+        width: '18rem',
         render: (_value, order) => (
           <S.ProductCell>
             <S.ProductThumb>
@@ -46,6 +48,7 @@ export function useOrdersColumns(
       {
         key: 'createdAt',
         header: t('orders.table.date'),
+        width: '8rem',
         sortable: true,
         render: (_value, order) => (
           <Text variant="body-sm" color="text.secondary">
@@ -56,6 +59,7 @@ export function useOrdersColumns(
       {
         key: 'buyer',
         header: t('orders.table.buyer'),
+        width: '12rem',
         render: (_value, order) => (
           <S.BuyerCell>
             <Text variant="body" weight="medium">
@@ -72,50 +76,50 @@ export function useOrdersColumns(
       {
         key: 'status',
         header: t('orders.table.status'),
+        width: '8rem',
         sortable: true,
         render: (_value, order) => (
-          <StatusBadge status={orderStatusToBadgeStatus(order.status)}>
+          <StatusBadge status={orderStatusToBadgeStatus(order.status)} size="sm">
             {t(`orders.status.${order.status}`)}
           </StatusBadge>
         ),
       },
       {
-        key: 'autoFulfill',
-        header: t('orders.autoFulfill.column'),
+        // ONE column answering "did Amazon buy this, and do I need to act?".
+        // Previously this showed the raw `auto_fulfill_status` (seven values,
+        // several internal) beside a separate cancellation badge, so the reader
+        // had to know the schema to interpret it — and an untouched order rendered
+        // a bare em dash that said nothing.
+        key: 'fulfillmentState',
+        header: t('orders.fulfillmentState.column'),
+        width: '13rem',
         render: (_value, order) => {
-          if (!order.autoFulfillStatus && !order.amazonCancelledAt) {
+          const state = order.fulfillmentState;
+          if (!state) {
             return (
               <Text variant="body-sm" color="text.secondary">
                 —
               </Text>
             );
           }
+          // The blocked reason is the actionable part of ACTION_REQUIRED — it
+          // tells the seller WHAT to fix, so it is shown inline, not on hover.
           const reasonLabel = order.autoFulfillBlockedReason
-            ? t('orders.autoFulfill.reasonLabel', {
-                reason: t(
-                  `orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`,
-                ),
-              })
+            ? t(`orders.autoFulfill.reason.${order.autoFulfillBlockedReason}`)
             : undefined;
           return (
             <S.AutoFulfillCell>
-              {order.autoFulfillStatus && (
-                <Badge
-                  variant={autoFulfillStatusToBadgeVariant(order.autoFulfillStatus)}
-                  size="xs"
-                  isPill
-                >
-                  {t(`orders.autoFulfill.status.${order.autoFulfillStatus}`)}
-                </Badge>
-              )}
-              {order.amazonCancelledAt && (
-                <Badge variant="error" size="xs" isPill>
-                  {t('orders.autoFulfill.amazonCancelledBadge')}
-                </Badge>
-              )}
+              <Badge variant={fulfillmentStateToBadgeVariant(state)} size="xs" isPill>
+                {t(`orders.fulfillmentState.${state}`)}
+              </Badge>
               {reasonLabel && (
                 <Text variant="caption" color="text.secondary">
                   {reasonLabel}
+                </Text>
+              )}
+              {order.amazonOrderId && (
+                <Text variant="caption" color="text.tertiary" numeric>
+                  {order.amazonOrderId}
                 </Text>
               )}
             </S.AutoFulfillCell>
@@ -125,9 +129,11 @@ export function useOrdersColumns(
       {
         key: 'salePrice',
         header: t('orders.table.salePrice'),
+        width: '7.5rem',
+        align: 'right',
         sortable: true,
         render: (_value, order) => (
-          <Text variant="body" weight="semibold">
+          <Text variant="body" weight="semibold" numeric>
             {formatCurrency(order.salePrice)}
           </Text>
         ),
@@ -135,9 +141,11 @@ export function useOrdersColumns(
       {
         key: 'purchasePrice',
         header: t('orders.table.purchasePrice'),
+        width: '7.5rem',
+        align: 'right',
         sortable: true,
         render: (_value, order) => (
-          <Text variant="body-sm" color="text.secondary">
+          <Text variant="body-sm" color="text.secondary" numeric>
             {formatCurrency(order.purchasePrice)}
           </Text>
         ),
@@ -145,6 +153,8 @@ export function useOrdersColumns(
       {
         key: 'netProfit',
         header: t('orders.table.netProfit'),
+        width: '8.5rem',
+        align: 'right',
         sortable: true,
         render: (_value, order) => (
           <S.ProfitCell>
@@ -152,6 +162,7 @@ export function useOrdersColumns(
               variant="body"
               weight="semibold"
               color={order.netProfit >= 0 ? 'semantic.success' : 'semantic.error'}
+              numeric
             >
               {order.netProfit >= 0 ? '+' : ''}
               {formatCurrency(order.netProfit)}

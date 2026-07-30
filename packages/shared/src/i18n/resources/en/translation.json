@@ -159,6 +159,7 @@
     "title": "Support conversations",
     "subtitle": "Review and respond to customer requests.",
     "loading": "Loading support conversations…",
+    "loadingDescription": "Fetching the current queue.",
     "emptyTitle": "No conversations",
     "emptyDescription": "There are no conversations in this queue.",
     "filters": {
@@ -241,7 +242,8 @@
         "connectedSince": "Connected Since",
         "manage": {
           "title": "Connected Accounts",
-          "subtitle": "View and manage your linked Amazon accounts"
+          "subtitle": "View and manage your linked Amazon accounts",
+          "verify": "Verify login"
         }
       },
       "storeConfig": {

@@ -38,8 +38,10 @@ export const StoreSettingsPageContainer = (): React.ReactElement => {
   const [saveSettings, { isLoading: isSaving, isSuccess: saveSuccess, error: saveError }] =
     useSaveStoreSettingsMutation();
 
-  // Use RTK Query loading state with useLoading hook
-  useLoading(settingsLoading || isSaving);
+  /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
+     to be folded in here, so the global overlay covered the whole app on
+     first paint of this page instead of the page showing its own state. */
+  useLoading(isSaving);
 
   // Form Setup
   const form = useForm<StoreSettingsFormData>({

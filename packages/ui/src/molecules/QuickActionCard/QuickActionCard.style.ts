@@ -8,9 +8,9 @@ import type { QuickActionCardVariant } from './QuickActionCard.types';
 export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-  border-radius: ${tkn('radius.sm')};
+  border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.xl')};
+  padding: ${tkn('spacing.lg')};
   display: flex;
   align-items: center;
   justify-content: space-between;

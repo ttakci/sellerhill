@@ -7,9 +7,13 @@ import {
   type ListingDto,
   type ListingJobDto,
   type ListingJobItemDto,
+  type ListingJobsQueryDto,
   type ListingsQueryDto,
+  type PaginatedListingJobsDto,
   type PaginatedListingsDto,
+  type PaginatedProductsDto,
   type ProductData,
+  type UserProductsQueryDto,
   type UpdateListingRequest,
 } from '@repo/shared';
 
@@ -552,19 +556,52 @@ export class ListingsService {
   /**
    * Get all unique products for a user from their listings
    */
-  async getUserProducts(userId: string): Promise<ProductData[]> {
+  /**
+   * Distinct products behind a user's listings, paginated.
+   *
+   * Was an unbounded `SELECT DISTINCT` that returned the whole catalog on every
+   * page load while the browser sliced ten rows out of it.
+   */
+  async getUserProducts(userId: string, query: UserProductsQueryDto = {}): Promise<PaginatedProductsDto> {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const offset = (page - 1) * limit;
+
+    const params: (string | number | null)[] = [userId];
+    const conditions = ['l.user_id = $1'];
+    const search = query.search?.trim();
+    if (search) {
+      params.push(`%${search}%`);
+      conditions.push(
+        `(p.title ILIKE $${params.length} OR p.asin ILIKE $${params.length} OR p.brand ILIKE $${params.length})`
+      );
+    }
+
+    const fromJoin = `
+      FROM products p
+      INNER JOIN listings l ON p.id = l.product_id
+      WHERE ${conditions.join(' AND ')}
+    `;
+
+    // COUNT(DISTINCT p.id) — a product with several listings must count once,
+    // matching the DISTINCT in the page query.
+    const countResult = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(DISTINCT p.id)::text AS count ${fromJoin}`,
+      params
+    );
+    const total = parseInt(countResult[0]?.count || '0', 10);
+
     const results = await this.databaseService.query<ProductQueryRow>(
       `
       SELECT DISTINCT p.*
-      FROM products p
-      INNER JOIN listings l ON p.id = l.product_id
-      WHERE l.user_id = $1
-      ORDER BY p.created_at DESC
-    `,
-      [userId]
+      ${fromJoin}
+      ORDER BY p.created_at DESC, p.id ASC
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `,
+      [...params, limit, offset]
     );
 
-    return results.map((row) => ({
+    const items: ProductData[] = results.map((row) => ({
       asin: row.asin,
       title: row.title,
       description: row.description ?? '',
@@ -580,6 +617,8 @@ export class ListingsService {
       features: Array.isArray(row.features) ? row.features : (JSON.parse(row.features || '[]') as string[]),
       updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
     }));
+
+    return { items, total, page, limit };
   }
 
   /**
@@ -820,17 +859,54 @@ export class ListingsService {
   /**
    * Get all listing jobs for a user
    */
-  async getJobs(userId: string): Promise<ListingJobDto[]> {
+  /**
+   * Import jobs for a user, paginated + filtered server-side.
+   *
+   * This endpoint is polled every 5s by the jobs page, so returning the whole
+   * job table (and filtering it in the browser) meant the payload grew without
+   * bound for the life of the account.
+   */
+  async getJobs(userId: string, query: ListingJobsQueryDto = {}): Promise<PaginatedListingJobsDto> {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const offset = (page - 1) * limit;
+
+    const params: (string | number | null)[] = [userId];
+    const conditions = ['user_id = $1'];
+
+    const status = typeof query.status === 'string' ? query.status.trim() : query.status;
+    if (status) {
+      params.push(String(status).toLowerCase());
+      conditions.push(`LOWER(status) = $${params.length}`);
+    }
+
+    // The UI searches by the short id shown on the card, which is a prefix of
+    // the uuid — so match against the text form rather than casting the input.
+    const search = query.search?.trim();
+    if (search) {
+      params.push(`%${search.toLowerCase()}%`);
+      conditions.push(`LOWER(id::text) LIKE $${params.length}`);
+    }
+
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
+
+    const countResult = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM listing_jobs ${whereClause}`,
+      params
+    );
+    const total = parseInt(countResult[0]?.count || '0', 10);
+
     const results = await this.databaseService.query<ListingJobEntity>(
       `
       SELECT * FROM listing_jobs
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-    `,
-      [userId]
+      ${whereClause}
+      ORDER BY created_at DESC, id ASC
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `,
+      [...params, limit, offset]
     );
 
-    return results.map((row) => this.mapJobToDto(row));
+    return { items: results.map((row) => this.mapJobToDto(row)), total, page, limit };
   }
 
   /**

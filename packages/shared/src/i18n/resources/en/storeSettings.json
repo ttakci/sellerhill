@@ -64,7 +64,9 @@
         "save": "Save",
         "delete": "Delete",
         "deleteConfirm": "Delete this template?",
-        "empty": "No custom templates yet."
+        "empty": "No custom templates yet.",
+        "title": "Message templates",
+        "subtitle": "Create and edit your own buyer message templates."
       }
     }
   }

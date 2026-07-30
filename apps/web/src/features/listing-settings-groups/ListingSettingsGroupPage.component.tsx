@@ -7,6 +7,7 @@ import { ListingSettingsGroupPageProps } from './ListingSettingsGroupPage.types'
 
 export const ListingSettingsGroupPageComponent = ({
   groups,
+  isLoading,
   onCreateGroup,
   onEditGroup,
   onDeleteGroup,
@@ -21,19 +22,27 @@ export const ListingSettingsGroupPageComponent = ({
         actions={
           groups.length > 0 ? (
             <Button variant="primary" size="medium" onClick={onCreateGroup}>
-              <Text>{t('listingSettingsGroup.createNewGroup')}</Text>
+              <Text variant="body" weight="semibold">{t('listingSettingsGroup.createNewGroup')}</Text>
             </Button>
           ) : undefined
         }
       />
 
-      {groups.length > 0 ? (
+      {isLoading ? (
+        <S.EmptyStateWrapper>
+          <S.EmptyState
+            icon="layers"
+            title={t('translation:common.loading')}
+            description={t('listingSettingsGroup.loadingDescription')}
+          />
+        </S.EmptyStateWrapper>
+      ) : groups.length > 0 ? (
         <S.CardGrid>
           {groups.map((group: ListingSettingsGroupResponse) => (
             <S.InteractiveCard key={group.id} variant="interactive" onClick={() => onEditGroup(group.id)}>
               <S.CardBodyContent>
                 <S.CardTitleGroup>
-                  <S.CardTitleText variant="h4" weight="bold" className="card-title">
+                  <S.CardTitleText variant="h4" weight="semibold" className="card-title">
                     {group.name}
                   </S.CardTitleText>
                   {group.description && (
@@ -82,7 +91,7 @@ export const ListingSettingsGroupPageComponent = ({
             description={t('listingSettingsGroup.emptyState.description')}
           />
           <Button variant="primary" size="medium" onClick={onCreateGroup}>
-            <Text>{t('listingSettingsGroup.createNewGroup')}</Text>
+            <Text variant="body" weight="semibold">{t('listingSettingsGroup.createNewGroup')}</Text>
           </Button>
         </S.EmptyStateWrapper>
       )}

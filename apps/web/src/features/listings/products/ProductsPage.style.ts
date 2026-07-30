@@ -3,53 +3,32 @@ import { Card as RepoCard, Badge as UIBadge, PageContainer, Text as UIText, tkn 
 
 export const Container = PageContainer;
 
-export const Card = styled.div`
+/* Same geometry as the Listings / Orders / Jobs filter bars. */
+export const FilterBar = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.xl')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.md+')};
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
   box-shadow: ${tkn('shadows.sm')};
-  overflow: hidden;
-`;
+  overflow: visible;
+  box-sizing: border-box;
 
-export const TableWrapper = styled.div`
-  overflow-x: auto;
-`;
-
-export const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-`;
-
-export const THead = styled.thead`
-  background: ${tkn('colors.background.tertiary')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-`;
-
-export const TH = styled.th`
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  font-size: ${tkn('typography.fontSize.2xs')}; /* 0.6875rem (11px) → 2xs (10px) closest */
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.tertiary')};
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
-`;
-
-export const TBody = styled.tbody`
-  & > tr {
-    border-bottom: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
-    transition: background ${tkn('transitions.fast')};
-
-    &:hover {
-      background: ${tkn('colors.background.tertiary')};
-    }
+  @media (max-width: ${tkn('breakpoints.md')}) {
+    padding: ${tkn('spacing.md')};
   }
 `;
 
-export const TD = styled.td`
-  padding: ${tkn('spacing.md+')} ${tkn('spacing.lg')}; /* 20px */
-  vertical-align: middle;
-  color: ${tkn('colors.text.primary')};
+export const SearchWrapper = styled.div`
+  min-width: 0;
+  width: 20rem;
+  max-width: 100%;
+
+  @media (max-width: ${tkn('breakpoints.md')}) {
+    width: 100%;
+  }
 `;
 
 export const ProductCell = styled.div`
@@ -63,12 +42,13 @@ export const ProductImageWrapper = styled.div`
   width: 4rem; /* 64px */
   height: 4rem; /* 64px */
   border-radius: ${tkn('radius.md')};
-  border: 0.0625rem solid ${tkn('colors.border.secondary')};
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${tkn('colors.background.tertiary')};
+  /* Transparent per the product-image rule — a grey plate plus a border ring
+     behind a cut-out product shot reads as a broken image. */
+  background: transparent;
   flex-shrink: 0;
   padding: ${tkn('spacing.xs+')}; /* 6px */
 
