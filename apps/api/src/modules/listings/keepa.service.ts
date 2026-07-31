@@ -16,6 +16,7 @@ import {
   dedupeAsins,
   extractCommerce,
   extractImageUrls,
+  extractProductAttributes,
   type KeepaRawProduct,
 } from './keepa-normalizer';
 
@@ -167,7 +168,10 @@ export class KeepaService implements IProductDataProvider {
   /** Normalized KeepaProduct for the refresh worker (bulk path). */
   private normalizeKeepaProduct(raw: KeepaRawProduct): KeepaProduct {
     const commerce = extractCommerce(raw);
+    const { specs, identifiers } = extractProductAttributes(raw);
     return {
+      specs,
+      identifiers,
       asin: raw.asin!,
       price: commerce.price,
       stock: commerce.stock,
@@ -190,18 +194,12 @@ export class KeepaService implements IProductDataProvider {
     const commerce = extractCommerce(raw);
     const category = raw.categoryTree ? raw.categoryTree[raw.categoryTree.length - 1]?.name : undefined;
 
-    const specs: Record<string, string> = {};
-    if (raw.brand) {
-      specs['Brand'] = raw.brand;
-    }
-    if (raw.manufacturer) {
-      specs['Manufacturer'] = raw.manufacturer;
-    }
-    if (raw.model) {
-      specs['Model'] = raw.model;
-    }
+    // Full attribute sweep (color/size/MPN/UPC/weight/variation dimensions/…),
+    // not just brand+manufacturer+model: these become the eBay item specifics.
+    const { specs, identifiers } = extractProductAttributes(raw);
 
     return {
+      identifiers,
       asin,
       title: raw.title || 'Unknown Product',
       description: raw.description || '',

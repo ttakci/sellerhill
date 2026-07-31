@@ -94,6 +94,10 @@ export enum PlatformSettingKey {
 
   // --- Feature toggles ---
   LLM_CONTENT_ENABLED = 'llm.contentEnabled',
+  /** Let a model pick a required item specific from eBay's allowed values (local provider). */
+  EBAY_ASPECTS_LLM_ENABLED = 'ebay.aspects.llmEnabled',
+  /** Hard per-listing ceiling on those calls. */
+  EBAY_ASPECTS_LLM_MAX_PER_LISTING = 'ebay.aspects.llmMaxPerListing',
   BILLING_ENFORCEMENT_ENABLED = 'billing.enforcementEnabled',
   BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS = 'buyerMessaging.feedbackDefaultDelayDays',
 }

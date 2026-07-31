@@ -46,9 +46,13 @@ interface PredefinedTemplateEntity {
   created_at: Date;
 }
 
+/** Predefined-template HTML cache TTL (templates are seeded, not user-edited). */
+const TEMPLATE_CACHE_TTL_MS = 5 * 60 * 1000;
+
 @Injectable()
 export class ListingSettingsGroupService implements OnModuleInit {
   private readonly logger = new Logger(ListingSettingsGroupService.name);
+  private readonly templateHtmlCache = new Map<string, { html: string; expiresAt: number }>();
 
   constructor(private readonly databaseService: DatabaseService) {}
 
@@ -60,25 +64,6 @@ export class ListingSettingsGroupService implements OnModuleInit {
    * Seed predefined templates if they don't exist
    */
   private async seedPredefinedTemplates() {
-    const existingTemplates = await this.databaseService.query<PredefinedTemplateEntity>(`
-      SELECT COUNT(*) as count FROM predefined_templates
-    `);
-
-    if (existingTemplates[0] && (existingTemplates[0] as unknown as { count: number }).count > 0) {
-      // Check if we need to refresh (e.g. if specific v2 template name exists)
-      const v2Check = await this.databaseService.query(`
-        SELECT id FROM predefined_templates WHERE name = 'Elite Trust'
-      `);
-      
-      if (v2Check.length > 0) {
-        this.logger.log('Predefined templates already exist and are up to date.');
-        return;
-      }
-
-      this.logger.log('Refreshing predefined templates to v2...');
-      await this.databaseService.query(`DELETE FROM predefined_templates`);
-    }
-
     this.logger.log('Seeding predefined templates...');
 
     const templates = [
@@ -87,7 +72,6 @@ export class ListingSettingsGroupService implements OnModuleInit {
         description: 'Clean typography and professional two-column layout for high-end products',
         htmlContent: `
 <div class="zonds-listing">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Outfit:300,400,600,700">
   <div class="zonds-content">
     <h1 class="zonds-title">{{title}}</h1>
     <div class="zonds-grid">
@@ -122,7 +106,8 @@ export class ListingSettingsGroupService implements OnModuleInit {
   </div>
 </div>
 <style>
-.zonds-listing { font-family: 'Outfit', sans-serif; color: #1e293b; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 20px; }
+.zonds-listing { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 20px; }
+.zonds-listing img { max-width: 100%; height: auto; }
 .zonds-title { font-size: 32px; font-weight: 700; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 32px; }
 .zonds-grid { display: flex; gap: 40px; margin-bottom: 40px; }
 .zonds-image-col { flex: 1; max-width: 450px; }
@@ -231,13 +216,66 @@ export class ListingSettingsGroupService implements OnModuleInit {
       }
     ];
 
+    // Upsert BY NAME, never delete-and-reinsert: template ids are referenced by
+    // every listing settings group (`templates.predefinedTemplateId`), so a
+    // re-seed that mints new ids silently orphans user configuration and the
+    // create path falls back to the default template.
     for (const template of templates) {
-      await this.databaseService.query(`
-        INSERT INTO predefined_templates (name, description, html_content, sample_data)
-        VALUES ($1, $2, $3, $4)
-      `, [template.name, template.description, template.htmlContent, JSON.stringify(template.sampleData)]);
+      const existing = await this.databaseService.query<{ id: string }>(
+        `SELECT id FROM predefined_templates WHERE name = $1 ORDER BY created_at ASC, id ASC`,
+        [template.name]
+      );
+
+      if (existing.length === 0) {
+        await this.databaseService.query(
+          `INSERT INTO predefined_templates (name, description, html_content, sample_data)
+           VALUES ($1, $2, $3, $4)`,
+          [template.name, template.description, template.htmlContent, JSON.stringify(template.sampleData)]
+        );
+        continue;
+      }
+
+      const [keep, ...duplicates] = existing;
+
+      await this.databaseService.query(
+        `UPDATE predefined_templates
+         SET description = $2, html_content = $3, sample_data = $4
+         WHERE id = $1`,
+        [keep.id, template.description, template.htmlContent, JSON.stringify(template.sampleData)]
+      );
+
+      // Self-heal the rows an earlier delete-and-reinsert seed left behind:
+      // duplicates show up twice in the template picker, and groups end up
+      // split across copies. Repoint those groups BEFORE deleting, otherwise
+      // their `predefinedTemplateId` dangles and the create path silently falls
+      // back to the default template.
+      if (duplicates.length > 0) {
+        const duplicateIds = duplicates.map((row) => row.id);
+        // DatabaseService.query takes scalar params only — expand placeholders
+        // the same way the other multi-id queries in the codebase do.
+        const repointPlaceholders = duplicateIds.map((_, i) => `$${i + 2}`).join(',');
+        const deletePlaceholders = duplicateIds.map((_, i) => `$${i + 1}`).join(',');
+
+        await this.databaseService.query(
+          `UPDATE listing_settings_groups
+           SET templates = jsonb_set(templates, '{predefinedTemplateId}', to_jsonb($1::text)),
+               updated_at = CURRENT_TIMESTAMP
+           WHERE templates->>'predefinedTemplateId' IN (${repointPlaceholders})`,
+          [keep.id, ...duplicateIds]
+        );
+
+        await this.databaseService.query(
+          `DELETE FROM predefined_templates WHERE id IN (${deletePlaceholders})`,
+          duplicateIds
+        );
+
+        this.logger.warn(
+          `Removed ${duplicateIds.length} duplicate '${template.name}' template row(s); groups repointed to ${keep.id}`
+        );
+      }
     }
 
+    this.templateHtmlCache.clear();
     this.logger.log('Predefined templates seeded successfully.');
   }
 
@@ -385,6 +423,32 @@ export class ListingSettingsGroupService implements OnModuleInit {
     );
 
     return { success: true };
+  }
+
+  /**
+   * Resolve a predefined template's HTML for the listing create path.
+   *
+   * Cached in-process (short TTL): the listings worker renders one description
+   * per ASIN and templates change rarely, so a bulk add of 500 ASINs must not
+   * become 500 identical SELECTs. Returns null when the id no longer exists —
+   * the caller falls back to the default template rather than publishing an
+   * empty description.
+   */
+  async getPredefinedTemplateHtml(id: string): Promise<string | null> {
+    const cached = this.templateHtmlCache.get(id);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.html;
+    }
+
+    const results = await this.databaseService.query<{ html_content: string }>(
+      `SELECT html_content FROM predefined_templates WHERE id = $1`,
+      [id]
+    );
+    const html = results[0]?.html_content ?? null;
+    if (html !== null) {
+      this.templateHtmlCache.set(id, { html, expiresAt: Date.now() + TEMPLATE_CACHE_TTL_MS });
+    }
+    return html;
   }
 
   /**

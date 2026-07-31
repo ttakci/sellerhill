@@ -48,7 +48,7 @@ const textareaPaddingAndSize = (size: ControlSize, theme: Theme): string => {
   const vertical = size === 'small' ? t('spacing.xs') : size === 'large' ? t('spacing.sm-md+') : t('spacing.sm');
   const horizontal = size === 'small' ? t('spacing.sm') : t('spacing.md');
   const minHeight = size === 'small' ? '2.5rem' : size === 'large' ? '4.5rem' : '3.5rem';
-  const fontSize = size === 'small' ? t('typography.fontSize.sm') : t('typography.fontSize.md');
+  const fontSize = size === 'small' ? t('typography.fontSize.sm') : t('typography.fontSize.base');
   return `
     min-height: ${minHeight};
     padding: ${vertical} ${horizontal};

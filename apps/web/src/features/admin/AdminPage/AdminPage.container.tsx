@@ -12,6 +12,7 @@ import {
   useGetAdminProxiesQuery,
   useGetAdminUsersQuery,
 } from '../api/admin.api';
+import { useAdminListingQuality } from '../hooks/useAdminListingQuality';
 import { useAdminProxyColumns } from '../hooks/useAdminProxyColumns';
 import { useAdminProxyForm } from '../hooks/useAdminProxyForm';
 import { useAdminSettings } from '../hooks/useAdminSettings';
@@ -28,6 +29,7 @@ const VALID_TABS: AdminTabId[] = [
   'queues',
   'costs',
   'proxies',
+  'listingQuality',
   'settings',
   'billing',
   'users',
@@ -58,6 +60,7 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: billingMetrics } = useGetAdminBillingMetricsQuery(undefined, { skip });
   const { data: proxyPool } = useGetAdminProxiesQuery(undefined, { skip });
   const { data: usersList } = useGetAdminUsersQuery(undefined, { skip });
+  const listingQuality = useAdminListingQuality(skip);
 
   const proxy = useAdminProxyForm();
   const settings = useAdminSettings(skip);
@@ -102,6 +105,7 @@ export const AdminPageContainer = (): React.ReactElement => {
   return (
     <AdminPageComponent
       activeTab={activeTab}
+      listingQuality={listingQuality}
       overview={overview}
       operations={operations}
       providerCosts={providerCosts}

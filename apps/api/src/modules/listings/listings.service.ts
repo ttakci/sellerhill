@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
+  ListingFailureCode,
   ListingJobStatus,
   ListingStatus,
   OrderStatus,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
+  type ListingFailureDetails,
   type ListingJobItemDto,
   type ListingJobsQueryDto,
   type ListingsQueryDto,
@@ -13,6 +15,7 @@ import {
   type PaginatedListingsDto,
   type PaginatedProductsDto,
   type ProductData,
+  type ProductIdentifiers,
   type UserProductsQueryDto,
   type UpdateListingRequest,
 } from '@repo/shared';
@@ -21,6 +24,8 @@ import { DatabaseService } from '../../common/database/database.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
+import { summarizeAspectResolution } from './aspect-audit';
+import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
@@ -81,10 +86,33 @@ interface ProductQueryRow {
   brand: string | null;
   category: string | null;
   features: string[] | string | null;
+  specs: Record<string, string> | string | null;
+  identifiers: ProductIdentifiers | string | null;
+  raw_keepa_data?: string | Record<string, unknown> | null;
+  manufacturer: string | null;
   stock: number;
   raw_provider_data: string | Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date | string;
+}
+
+/**
+ * Read a JSONB column that node-pg may hand back either parsed (jsonb) or as a
+ * string (older rows written as text). Malformed JSON falls back to the default
+ * rather than failing the listing create.
+ */
+function parseJsonColumn<T>(value: unknown, fallback: T): T {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return value as T;
 }
 
 /** Price data stored in JSONB price column */
@@ -146,6 +174,11 @@ export class ListingsService {
     watchCount?: number;
     viewCount?: number;
     ebayCategoryName?: string;
+    ebayCategoryId?: string;
+    /** Which layer resolved each item specific (see AspectResolution). */
+    aspectResolution?: Record<string, unknown> | null;
+    /** Count of specifics filled by the terminal fallback — drives the review badge. */
+    aspectAutofilledCount?: number;
     ebayAccountId?: string;
     status?: ListingStatus;
   }): Promise<string> {
@@ -158,9 +191,9 @@ export class ListingsService {
         ebay_item_id, title, price, quantity, status,
         purchase_price, estimated_profit, profit_margin, roi,
         sold_count, watch_count, view_count, ebay_category_name,
-        ebay_account_id
+        ebay_account_id, ebay_category_id, aspect_resolution, aspect_autofilled_count
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23::jsonb, $24)
       RETURNING id
     `,
       [
@@ -185,6 +218,9 @@ export class ListingsService {
         data.viewCount || 0,
         data.ebayCategoryName || '',
         data.ebayAccountId || null,
+        data.ebayCategoryId || null,
+        data.aspectResolution ? JSON.stringify(data.aspectResolution) : null,
+        data.aspectAutofilledCount ?? 0,
       ]
     );
 
@@ -744,12 +780,44 @@ export class ListingsService {
   }
 
   /**
+   * Item specifics for a cached product row.
+   *
+   * Rows cached before attribute extraction existed carry an empty `specs`
+   * map. Re-deriving them from the stored raw Keepa payload costs no tokens and
+   * means an existing catalog produces full item specifics on the next listing
+   * create, instead of waiting for a refresh cycle to touch the row.
+   */
+  private resolveCachedAttributes(row: ProductQueryRow): {
+    specs: Record<string, string>;
+    identifiers: ProductIdentifiers;
+  } {
+    const specs = parseJsonColumn<Record<string, string>>(row.specs, {});
+    const identifiers = parseJsonColumn<ProductIdentifiers>(row.identifiers, {});
+
+    if (Object.keys(specs).length > 0 || !row.raw_keepa_data) {
+      return { specs, identifiers };
+    }
+
+    const raw = parseJsonColumn<KeepaRawProduct | null>(row.raw_keepa_data, null);
+    if (!raw) {
+      return { specs, identifiers };
+    }
+
+    const derived = extractProductAttributes(raw);
+    return {
+      specs: derived.specs,
+      identifiers: Object.keys(identifiers).length > 0 ? identifiers : derived.identifiers,
+    };
+  }
+
+  /**
    * Get cached product info by ASIN
    */
   async getProductByAsin(asin: string): Promise<{ id: string; data: ProductData } | null> {
     const results = await this.databaseService.query<ProductQueryRow>(
       `
-      SELECT id, asin, title, description, price, image_urls, brand, category, stock, raw_provider_data
+      SELECT id, asin, title, description, price, currency, image_urls, brand, manufacturer,
+             category, features, specs, identifiers, stock, raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1
     `,
       [asin]
@@ -773,8 +841,11 @@ export class ListingsService {
       imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(String(row.image_urls) || '[]') as string[]),
       brand: row.brand ?? '',
       category: row.category ?? undefined,
-      manufacturer: row.brand ?? undefined, // Fallback
+      manufacturer: row.manufacturer ?? row.brand ?? undefined,
       features: row.features ? (Array.isArray(row.features) ? row.features : (JSON.parse(String(row.features)) as string[])) : [],
+      // Item specifics + catalog identifiers must survive a cache hit; without
+      // them a re-listed ASIN published with almost no eBay item specifics.
+      ...this.resolveCachedAttributes(row),
       stock: row.stock || 0,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
@@ -811,11 +882,24 @@ export class ListingsService {
     // Create job record
     const jobResult = await this.databaseService.query<ListingJobEntity>(
       `
-      INSERT INTO listing_jobs (user_id, total_asins, status)
-      VALUES ($1, $2, $3)
+      INSERT INTO listing_jobs (
+        user_id, total_asins, status,
+        listing_settings_group_id, payment_policy_id, shipping_policy_id, return_policy_id
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `,
-      [userId, toProcess.length, toProcess.length === 0 ? ListingJobStatus.COMPLETED : ListingJobStatus.PENDING]
+      [
+        userId,
+        toProcess.length,
+        toProcess.length === 0 ? ListingJobStatus.COMPLETED : ListingJobStatus.PENDING,
+        // Kept so a single failed ASIN can be re-queued later; the BullMQ
+        // payload that used to hold these is gone once the job completes.
+        request.listingSettingsGroupId,
+        request.paymentPolicyId,
+        request.shippingPolicyId,
+        request.returnPolicyId,
+      ]
     );
 
     const job = jobResult[0];
@@ -942,9 +1026,10 @@ export class ListingsService {
       `
       INSERT INTO products (
         asin, title, price, currency, image_urls, description,
-        brand, category, features, stock, raw_provider_data, raw_keepa_data, next_refresh_at
+        brand, manufacturer, category, features, specs, identifiers,
+        stock, raw_provider_data, raw_keepa_data, next_refresh_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW() + INTERVAL '12 hours')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW() + INTERVAL '12 hours')
       ON CONFLICT (asin) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,
@@ -952,8 +1037,14 @@ export class ListingsService {
         image_urls = EXCLUDED.image_urls,
         description = EXCLUDED.description,
         brand = EXCLUDED.brand,
+        manufacturer = COALESCE(EXCLUDED.manufacturer, products.manufacturer),
         category = EXCLUDED.category,
         features = EXCLUDED.features,
+        -- Attribute maps only ever grow richer: a later fetch that resolved
+        -- fewer specs must not erase specifics an earlier one captured.
+        specs = CASE WHEN EXCLUDED.specs = '{}'::jsonb THEN products.specs ELSE EXCLUDED.specs END,
+        identifiers = CASE WHEN EXCLUDED.identifiers = '{}'::jsonb
+                           THEN products.identifiers ELSE EXCLUDED.identifiers END,
         stock = EXCLUDED.stock,
         raw_provider_data = EXCLUDED.raw_provider_data,
         raw_keepa_data = COALESCE(EXCLUDED.raw_keepa_data, products.raw_keepa_data),
@@ -969,8 +1060,11 @@ export class ListingsService {
         JSON.stringify(productData.imageUrls),
         productData.description,
         productData.brand || null,
+        productData.manufacturer || null,
         productData.category || productData.manufacturer || null,
         JSON.stringify(productData.features || []),
+        JSON.stringify(productData.specs || {}),
+        JSON.stringify(productData.identifiers || {}),
         productData.stock || 0,
         JSON.stringify(productData.raw || productData),
         productData.rawKeepaData ? JSON.stringify(productData.rawKeepaData) : null,
@@ -992,6 +1086,8 @@ export class ListingsService {
       status: ListingStatus;
       ebayItemId?: string;
       errorMessage?: string;
+      failureCode?: ListingFailureCode;
+      failureDetails?: ListingFailureDetails;
     }
   ): Promise<void> {
     await this.databaseService.query(
@@ -1002,6 +1098,8 @@ export class ListingsService {
           status = $3,
           ebay_item_id = $4,
           error_message = $5,
+          failure_code = $8,
+          failure_details = $9::jsonb,
           updated_at = CURRENT_TIMESTAMP
       WHERE job_id = $6 AND asin = $7
     `,
@@ -1013,9 +1111,90 @@ export class ListingsService {
         data.errorMessage || null,
         jobId,
         asin,
+        data.failureCode || null,
+        data.failureDetails ? JSON.stringify(data.failureDetails) : null,
       ]
     );
 
+    await this.updateJobCounts(jobId);
+  }
+
+  /**
+   * Resolve everything needed to re-queue one failed ASIN.
+   *
+   * Ownership, item state and job settings are all verified here so the
+   * controller stays a thin route: a retry is only offered for an item that
+   * belongs to the caller and actually failed.
+   */
+  async getJobItemForRetry(
+    userId: string,
+    jobId: string,
+    itemId: string
+  ): Promise<{
+    jobId: string;
+    listingJobItemId: string;
+    asin: string;
+    listingSettingsGroupId: string;
+    paymentPolicyId: string;
+    shippingPolicyId: string;
+    returnPolicyId: string;
+  }> {
+    const rows = await this.databaseService.query<{
+      id: string;
+      asin: string;
+      status: ListingStatus;
+      listing_settings_group_id: string | null;
+      payment_policy_id: string | null;
+      shipping_policy_id: string | null;
+      return_policy_id: string | null;
+    }>(
+      `SELECT i.id, i.asin, i.status,
+              j.listing_settings_group_id, j.payment_policy_id, j.shipping_policy_id, j.return_policy_id
+       FROM listing_job_items i
+       JOIN listing_jobs j ON j.id = i.job_id
+       WHERE i.id = $1 AND i.job_id = $2 AND j.user_id = $3`,
+      [itemId, jobId, userId]
+    );
+
+    const row = rows[0];
+    if (!row) {
+      throw new NotFoundException('Listing job item not found');
+    }
+    if (row.status !== ListingStatus.ERROR) {
+      throw new BadRequestException('Only failed items can be retried');
+    }
+    if (
+      !row.listing_settings_group_id ||
+      !row.payment_policy_id ||
+      !row.shipping_policy_id ||
+      !row.return_policy_id
+    ) {
+      // Jobs created before the settings were stored on the row.
+      throw new BadRequestException(
+        'This job predates single-item retry. Re-run the ASIN from Add listings instead.'
+      );
+    }
+
+    return {
+      jobId,
+      listingJobItemId: row.id,
+      asin: row.asin,
+      listingSettingsGroupId: row.listing_settings_group_id,
+      paymentPolicyId: row.payment_policy_id,
+      shippingPolicyId: row.shipping_policy_id,
+      returnPolicyId: row.return_policy_id,
+    };
+  }
+
+  /** Reset a failed item so the re-queued job starts from a clean state. */
+  async resetJobItemForRetry(jobId: string, itemId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE listing_job_items
+       SET status = $1, error_message = NULL, failure_code = NULL, failure_details = NULL,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2 AND job_id = $3`,
+      [ListingStatus.RETRYING, itemId, jobId]
+    );
     await this.updateJobCounts(jobId);
   }
 
@@ -1099,6 +1278,10 @@ export class ListingsService {
       status: entity.status as ListingStatus,
       ebayItemId: entity.ebay_item_id || undefined,
       errorMessage: entity.error_message || undefined,
+      failureCode: (entity.failure_code as ListingFailureCode) || undefined,
+      failureDetails: entity.failure_details
+        ? parseJsonColumn<ListingFailureDetails>(entity.failure_details, {})
+        : undefined,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };
@@ -1199,7 +1382,12 @@ export class ListingsService {
     await this.quotaEnforcement.reserveForPublish(userId, listingId);
 
     try {
-      const { listingId: ebayItemId, categoryName } = await this.ebayService.createListingWithRest(
+      const {
+        listingId: ebayItemId,
+        categoryName,
+        categoryId: ebayCategoryId,
+        aspectResolution,
+      } = await this.ebayService.createListingWithRest(
         userId,
         product.id,
         listingData,
@@ -1210,6 +1398,15 @@ export class ListingsService {
         },
         listing.asin
       );
+
+      // A published row with an empty eBay item id is unrepairable: it does not
+      // exist on eBay, order sync keys on this column, and the ASIN then counts
+      // as already listed. Leave the listing a DRAFT instead.
+      if (!ebayItemId) {
+        throw new BadRequestException('eBay did not return a listing id; the listing stays a draft.');
+      }
+
+      const aspectAudit = summarizeAspectResolution(aspectResolution);
 
       await this.databaseService.query(
         `
@@ -1225,6 +1422,9 @@ export class ListingsService {
           title = $8,
           ebay_category_name = COALESCE(NULLIF($9, ''), ebay_category_name),
           ebay_account_id = COALESCE(ebay_account_id, $10),
+          ebay_category_id = $13,
+          aspect_resolution = $14::jsonb,
+          aspect_autofilled_count = $15,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $11 AND user_id = $12
       `,
@@ -1241,6 +1441,9 @@ export class ListingsService {
           ebayAccountId,
           listingId,
           userId,
+          ebayCategoryId,
+          JSON.stringify(aspectAudit.summary),
+          aspectAudit.autofilledCount,
         ]
       );
 

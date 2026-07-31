@@ -1,4 +1,6 @@
-import { KeepaStockStatus } from '@repo/shared';
+import { EBAY_ASPECT_VALUE_MAX_LENGTH, KeepaStockStatus, type ProductIdentifiers } from '@repo/shared';
+
+import { isValidGtin, normalizeGtin } from '../../common/utils/gtin';
 
 /**
  * Pure normalization helpers for raw Keepa /product responses.
@@ -48,13 +50,100 @@ export interface KeepaRawImage {
   m?: string;
 }
 
+export interface KeepaRawVariationAttribute {
+  dimension?: string;
+  value?: string;
+}
+
+export interface KeepaRawVariation {
+  asin?: string;
+  attributes?: KeepaRawVariationAttribute[];
+}
+
+/** Keepa's `unitCount` object (NOT a plain number). */
+export interface KeepaRawUnitCount {
+  unitValue?: number;
+  unitType?: string;
+  eachUnitCount?: number;
+}
+
+export interface KeepaRawHazardousMaterial {
+  aspect?: string;
+  value?: string;
+}
+
+/**
+ * Field names mirror the official Keepa product schema
+ * (keepacom/api_backend Product.java). Fields that do NOT exist there must not
+ * be added: an earlier version read `flavor`, `department`, `genre`, `platform`
+ * and `variationAttributes`, none of which Keepa ever sends, while ignoring
+ * ~15 attributes it does — which is why published listings carried a handful of
+ * item specifics where competitors carry thirty.
+ */
 export interface KeepaRawProduct {
   asin?: string;
   title?: string;
   description?: string;
+  shortDescription?: string;
+  itemHighlights?: string;
   brand?: string;
   manufacturer?: string;
   model?: string;
+  /** Manufacturer part number. */
+  partNumber?: string;
+  type?: string;
+  color?: string;
+  size?: string;
+  pattern?: string;
+  style?: string;
+  scent?: string;
+  itemForm?: string;
+  itemTypeKeyword?: string;
+  targetAudienceKeyword?: string;
+  audienceRating?: string;
+  /** Keepa: `materials` is the array; the singular `material` is deprecated. */
+  materials?: string[];
+  includedComponents?: string;
+  recommendedUsesForProduct?: string;
+  specificUsesForProduct?: string[];
+  specialFeatures?: string[];
+  ingredients?: string;
+  activeIngredients?: string;
+  specialIngredients?: string;
+  safetyWarning?: string;
+  productBenefit?: string;
+  batteriesRequired?: boolean | null;
+  batteriesIncluded?: boolean | null;
+  edition?: string;
+  format?: string;
+  binding?: string;
+  productGroup?: string;
+  /** Keepa numeric attributes use -1 (or 0) for "unknown". */
+  numberOfItems?: number;
+  packageQuantity?: number;
+  numberOfPages?: number;
+  publicationDate?: number;
+  releaseDate?: number;
+  /** Millimetres. */
+  itemLength?: number;
+  itemWidth?: number;
+  itemHeight?: number;
+  packageLength?: number;
+  packageWidth?: number;
+  packageHeight?: number;
+  /** Grams. */
+  itemWeight?: number;
+  packageWeight?: number;
+  unitCount?: KeepaRawUnitCount;
+  eanList?: string[];
+  upcList?: string[];
+  gtinList?: string[];
+  variations?: KeepaRawVariation[];
+  hazardousMaterials?: KeepaRawHazardousMaterial[];
+  /** [["English", "type", "audio"], ...] */
+  languages?: string[][];
+  /** [["Name", "role"], ...] */
+  contributors?: string[][];
   categoryTree?: Array<{ name: string }>;
   imagesCSV?: string | null;
   images?: KeepaRawImage[];
@@ -188,6 +277,236 @@ export function extractImageUrls(product: KeepaRawProduct): string[] {
     return product.imagesCSV.split(',').map((img) => `https://images-na.ssl-images-amazon.com/images/I/${img}`);
   }
   return [];
+}
+
+/**
+ * Product attributes usable as eBay item specifics.
+ *
+ * `specs` is a display/aspect-ready `Name: Value` map; `identifiers` carries
+ * the catalog identifiers eBay matches on. Before this existed the create path
+ * mapped only Brand/Manufacturer/Model, which is why published listings showed
+ * three item specifics and a literal "Unknown".
+ */
+export interface NormalizedProductAttributes {
+  specs: Record<string, string>;
+  identifiers: ProductIdentifiers;
+}
+
+/** Keepa uses -1 for "attribute unknown" on numeric fields. */
+function usableNumber(value: number | undefined): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function cleanText(value: string | undefined | null): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.replace(/\s+/g, ' ').trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  // Amazon/Keepa fill unknown text attributes with these placeholders.
+  if (/^(unknown|n\/?a|null|none|-)$/i.test(trimmed)) {
+    return null;
+  }
+  return trimmed.slice(0, EBAY_ASPECT_VALUE_MAX_LENGTH);
+}
+
+/**
+ * A manufacturer part number that is not actually a barcode.
+ *
+ * Amazon fills `partNumber` with the product's UPC for a large share of grocery
+ * and consumables ASINs. eBay rejects the publish outright for those —
+ * "MPN has an invalid value of 021500000529 ... or you can leave the MPN field
+ * blank" — because an MPN must not be a GTIN. Returning null means the listing
+ * simply carries no MPN, which eBay explicitly allows.
+ */
+export function asPartNumber(
+  value: string | undefined | null,
+  brand?: string | null
+): string | null {
+  const clean = cleanText(value ?? null);
+  if (!clean || isValidGtin(clean)) {
+    return null;
+  }
+  // eBay also rejects an MPN that merely repeats the brand
+  // ("MPN has an invalid value of \"BolaButty\""). Amazon fills partNumber with
+  // the brand name for a lot of private-label listings.
+  const brandText = cleanText(brand ?? null);
+  if (brandText && clean.toLowerCase() === brandText.toLowerCase()) {
+    return null;
+  }
+  return clean;
+}
+
+/** Grams → a US-marketplace-readable weight string. */
+export function formatWeightFromGrams(grams: number): string {
+  const ounces = grams / 28.349523125;
+  if (ounces < 16) {
+    return `${Math.round(ounces * 10) / 10} oz`;
+  }
+  return `${Math.round((ounces / 16) * 100) / 100} lbs`;
+}
+
+/** Millimetres → inches, one decimal. */
+export function formatLengthFromMillimeters(mm: number): string {
+  return `${Math.round((mm / 25.4) * 10) / 10} in`;
+}
+
+/**
+ * Build item-specific-ready attributes from a raw Keepa product.
+ *
+ * Pure and total: any field Keepa omits (or fills with a sentinel) is simply
+ * absent from the result — a missing attribute must never become a fabricated
+ * "Unknown", which is buyer-visible noise on the live listing.
+ */
+export function extractProductAttributes(product: KeepaRawProduct): NormalizedProductAttributes {
+  const specs: Record<string, string> = {};
+
+  const put = (name: string, value: string | null | undefined): void => {
+    const clean = cleanText(value ?? null);
+    if (clean && !specs[name]) {
+      specs[name] = clean;
+    }
+  };
+  const putNumber = (name: string, value: number | undefined): void => {
+    const usable = usableNumber(value);
+    if (usable !== null) {
+      put(name, String(usable));
+    }
+  };
+  const putList = (name: string, values: string[] | undefined): void => {
+    const joined = (values ?? [])
+      .map((value) => cleanText(value))
+      .filter((value): value is string => Boolean(value))
+      .join(', ');
+    put(name, joined);
+  };
+  const putBoolean = (name: string, value: boolean | null | undefined): void => {
+    if (typeof value === 'boolean') {
+      put(name, value ? 'Yes' : 'No');
+    }
+  };
+
+  // --- identity ---
+  put('Brand', product.brand);
+  put('Manufacturer', product.manufacturer ?? product.brand);
+  const brandForMpn = product.brand ?? product.manufacturer;
+  put('Model', asPartNumber(product.model, brandForMpn));
+  put('MPN', asPartNumber(product.partNumber, brandForMpn) ?? asPartNumber(product.model, brandForMpn));
+
+  // --- descriptive attributes (the bulk of a rich item-specifics table) ---
+  put('Color', product.color);
+  put('Size', product.size);
+  put('Pattern', product.pattern);
+  put('Style', product.style);
+  put('Scent', product.scent);
+  put('Item Form', product.itemForm);
+  put('Type', product.itemTypeKeyword ?? product.type ?? product.productGroup);
+  put('Department', product.targetAudienceKeyword);
+  put('Age Range', product.audienceRating);
+  putList('Material', product.materials);
+  put('Included Components', product.includedComponents);
+  put('Recommended Uses', product.recommendedUsesForProduct);
+  putList('Specific Uses', product.specificUsesForProduct);
+  putList('Features', product.specialFeatures);
+  put('Ingredients', product.ingredients);
+  put('Active Ingredients', product.activeIngredients);
+  put('Special Ingredients', product.specialIngredients);
+  put('Product Benefit', product.productBenefit);
+  put('Safety Warning', product.safetyWarning);
+  put('Highlights', product.itemHighlights);
+  putBoolean('Batteries Required', product.batteriesRequired);
+  putBoolean('Batteries Included', product.batteriesIncluded);
+
+  // --- media / publishing ---
+  put('Edition', product.edition);
+  put('Format', product.format ?? product.binding);
+  putNumber('Number of Pages', product.numberOfPages);
+  const language = product.languages?.find((entry) => Array.isArray(entry) && cleanText(entry[0]));
+  if (language) {
+    put('Language', language[0]);
+  }
+  const contributor = product.contributors?.find((entry) => Array.isArray(entry) && cleanText(entry[0]));
+  if (contributor) {
+    put('Author', contributor[0]);
+  }
+
+  // --- variation dimensions Amazon defines for THIS asin ---
+  const variation = product.variations?.find((entry) => entry.asin && entry.asin === product.asin);
+  for (const attribute of variation?.attributes ?? []) {
+    const dimension = cleanText(attribute.dimension);
+    const value = cleanText(attribute.value);
+    if (dimension && value) {
+      put(dimension, value);
+    }
+  }
+
+  // --- hazard flags carry their own aspect names ---
+  for (const hazard of product.hazardousMaterials ?? []) {
+    const aspect = cleanText(hazard.aspect);
+    const value = cleanText(hazard.value);
+    if (aspect && value) {
+      put(aspect, value);
+    }
+  }
+
+  // --- counts ---
+  putNumber('Number of Items', product.numberOfItems);
+  putNumber('Package Quantity', product.packageQuantity);
+  const unitValue = usableNumber(product.unitCount?.unitValue);
+  if (unitValue !== null) {
+    const unitType = cleanText(product.unitCount?.unitType);
+    put('Unit Quantity', unitType ? `${unitValue} ${unitType}` : String(unitValue));
+  }
+  put('Unit Type', product.unitCount?.unitType);
+
+  // --- measurements (Keepa is metric; US buyers read imperial) ---
+  const itemWeight = usableNumber(product.itemWeight) ?? usableNumber(product.packageWeight);
+  if (itemWeight !== null) {
+    put('Item Weight', formatWeightFromGrams(itemWeight));
+  }
+  const length = usableNumber(product.itemLength) ?? usableNumber(product.packageLength);
+  const width = usableNumber(product.itemWidth) ?? usableNumber(product.packageWidth);
+  const height = usableNumber(product.itemHeight) ?? usableNumber(product.packageHeight);
+  if (length !== null) {
+    put('Item Length', formatLengthFromMillimeters(length));
+  }
+  if (width !== null) {
+    put('Item Width', formatLengthFromMillimeters(width));
+  }
+  if (height !== null) {
+    put('Item Height', formatLengthFromMillimeters(height));
+  }
+
+  // --- identifiers ---
+  // Only check-digit-valid GTINs are kept: eBay rejects the whole publish on a
+  // malformed product.upc/ean, and Amazon data carries plenty of junk codes.
+  const upc = (product.upcList ?? []).map(normalizeGtin).find((value): value is string => Boolean(value));
+  const ean = (product.eanList ?? []).map(normalizeGtin).find((value): value is string => Boolean(value));
+  const gtin = (product.gtinList ?? []).map(normalizeGtin).find((value): value is string => Boolean(value));
+
+  const identifiers: ProductIdentifiers = {};
+  if (upc) {
+    identifiers.upc = upc;
+  }
+  if (ean) {
+    identifiers.ean = ean;
+  }
+  if (gtin && gtin !== upc && gtin !== ean) {
+    identifiers.gtin = gtin;
+  }
+  // A barcode is never a part number - see asPartNumber.
+  const mpn = asPartNumber(product.partNumber, brandForMpn) ?? asPartNumber(product.model, brandForMpn);
+  if (mpn) {
+    identifiers.mpn = mpn;
+  }
+  const model = asPartNumber(product.model, brandForMpn);
+  if (model) {
+    identifiers.model = model;
+  }
+
+  return { specs, identifiers };
 }
 
 /** Deduplicate ASINs preserving order (Keepa charges per requested product). */

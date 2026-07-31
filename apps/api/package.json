@@ -12,6 +12,7 @@
     "migrate": "tsx src/scripts/migrate.ts",
     "migrate:prod": "node dist/scripts/migrate.js",
     "user:set-role": "tsx src/scripts/user-set-role.ts",
+    "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:integration": "jest --config jest.integration.config.js --runInBand"

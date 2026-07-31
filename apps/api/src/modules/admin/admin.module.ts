@@ -15,6 +15,8 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { EmailModule } from '../email/email.module';
 
+
+import { AdminListingQualityService } from './admin-listing-quality.service';
 import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminController } from './admin.controller';
@@ -50,6 +52,7 @@ import { UsageEventsService } from './usage-events.service';
   providers: [
     AdminService,
     AdminProxiesService,
+    AdminListingQualityService,
     AdminUsersService,
     UsageEventsService,
     ProviderPricingService,

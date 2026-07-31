@@ -17,6 +17,14 @@ import { LlmAbortError, LlmError, LlmRateLimitError, LlmResponseError, LlmTimeou
 import { ProviderLimiterService } from './provider-limiter.service';
 import { parseSseChunk } from './sse-parser';
 
+/** Purposes that run on the (optionally paid) assistant provider. */
+const ASSISTANT_PURPOSES = new Set<LlmUsagePurpose>([
+  LlmUsagePurpose.ASSISTANT,
+  LlmUsagePurpose.ASSISTANT_EMBEDDING,
+  LlmUsagePurpose.ASSISTANT_SUMMARY,
+  LlmUsagePurpose.ASSISTANT_CLASSIFIER,
+]);
+
 const DEFAULT_TEMPERATURE=0.4, DEFAULT_MAX_TOKENS=512, DEFAULT_TIMEOUT_MS=30_000, MAX_ATTEMPTS=3, DEFAULT_RETRY_AFTER_MS=1000;
 interface ResolvedRequest { url:string; headers:Record<string,string>; body:string; model:string; timeoutMs:number }
 interface StreamEvent { choices?:Array<{delta?:{content?:string};finish_reason?:string|null}>; model?:string; usage?:{prompt_tokens?:number;completion_tokens?:number;total_tokens?:number} }
@@ -92,8 +100,9 @@ export class LlmService {
   }
 
   private buildRequest(messages:LlmMessage[],opts:LlmChatOptions,model:string,stream:boolean):ResolvedRequest{
-    const base=(this.config.get<string>('LLM_BASE_URL')??'').trim(),headers:Record<string,string>={'Content-Type':'application/json'},key=(this.config.get<string>('LLM_API_KEY')??'').trim(); if(key){headers.Authorization=`Bearer ${key}`;}
-    return{url:`${base.replace(/\/$/,'')}/chat/completions`,headers,body:JSON.stringify({model,messages,temperature:opts.temperature??DEFAULT_TEMPERATURE,max_tokens:opts.maxTokens??DEFAULT_MAX_TOKENS,stream,...(stream?{stream_options:{include_usage:true}}:{})}),model,timeoutMs:opts.timeoutMs??this.readTimeout()};
+    const provider=this.resolveProvider(opts),headers:Record<string,string>={'Content-Type':'application/json'}; if(provider.apiKey){headers.Authorization=`Bearer ${provider.apiKey}`;}
+    const base=provider.baseUrl;
+    return{url:`${base}/chat/completions`,headers,body:JSON.stringify({model,messages,temperature:opts.temperature??DEFAULT_TEMPERATURE,max_tokens:opts.maxTokens??DEFAULT_MAX_TOKENS,stream,...(stream?{stream_options:{include_usage:true}}:{})}),model,timeoutMs:opts.timeoutMs??this.readTimeout()};
   }
   private async request(messages:LlmMessage[],opts:LlmChatOptions,model:string,stream:boolean):Promise<Response>{
     const spec=this.buildRequest(messages,opts,model,stream),deadline=Date.now()+spec.timeoutMs,controller=new AbortController(); let timedOut=false,callerAborted=opts.signal?.aborted??false;
@@ -104,7 +113,29 @@ export class LlmService {
   }
   private async log(opts:LlmChatOptions,model:string,reservationTokens:number,started:number,success:boolean,tokens?:LlmTokenUsage,error?:unknown):Promise<string|undefined>{return this.usage.log({userId:opts.userId,purpose:this.purpose(opts),model,provider:this.config.get<string>('LLM_PROVIDER','default'),conversationId:opts.conversationId,messageId:opts.messageId,generationAttemptId:opts.generationAttemptId,promptTokens:tokens?.promptTokens,completionTokens:tokens?.completionTokens,reservationTokens,latencyMs:Date.now()-started,success,error:error instanceof Error?`${error.name}: ${error.message}`:error===undefined?undefined:String(error)});}
   private tokenUsage(value:StreamEvent['usage']):LlmTokenUsage|undefined{if(!value){return undefined;}const prompt=value.prompt_tokens??0,completion=value.completion_tokens??0;return{promptTokens:prompt,completionTokens:completion,totalTokens:value.total_tokens??prompt+completion,source:LlmUsageSource.PROVIDER};}
-  private resolveModel(opts:LlmChatOptions):string{return opts.model?.trim()||((opts.purpose===LlmUsagePurpose.ASSISTANT?this.config.get<string>('LLM_ASSISTANT_MODEL'):this.config.get<string>('LLM_CONTENT_MODEL'))??'').trim();}
+  private resolveModel(opts:LlmChatOptions):string{return opts.model?.trim()||this.resolveProvider(opts).model;}
+
+  /**
+   * Provider config for a call, chosen by purpose group.
+   *
+   * Assistant purposes read `LLM_ASSISTANT_*`; everything else (listing title /
+   * description rewrites, item-specific selection, knowledge ingestion) reads
+   * the base `LLM_*`. Each assistant value falls back to the base one when it is
+   * unset, so a single-provider deployment behaves exactly as before.
+   *
+   * The split exists because the two workloads have opposite economics: listing
+   * generation runs across thousands of products and must be free (local
+   * Ollama), while the customer chatbot is low-volume and can justify a paid
+   * hosted model — without dragging bulk listing traffic onto a metered API.
+   */
+  private resolveProvider(opts:LlmChatOptions):{baseUrl:string;apiKey:string;model:string}{
+    const read=(name:string):string=>(this.config.get<string>(name)??'').trim();
+    const isAssistant=ASSISTANT_PURPOSES.has(this.purpose(opts));
+    const baseUrl=(isAssistant?read('LLM_ASSISTANT_BASE_URL'):'')||read('LLM_BASE_URL');
+    const apiKey=(isAssistant?read('LLM_ASSISTANT_API_KEY'):'')||read('LLM_API_KEY');
+    const model=(isAssistant?read('LLM_ASSISTANT_MODEL'):'')||read('LLM_CONTENT_MODEL');
+    return{baseUrl:baseUrl.replace(/\/$/,''),apiKey,model};
+  }
   private purpose(opts:LlmChatOptions):LlmUsagePurpose{
     const purpose = opts.purpose ?? LlmUsagePurpose.CONTENT;
     return purpose as LlmUsagePurpose;

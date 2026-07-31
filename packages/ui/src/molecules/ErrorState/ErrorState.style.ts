@@ -38,7 +38,7 @@ export const Title = styled.div`
 
 export const Description = styled.div`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-weight: ${tkn('typography.fontWeight.normal')};
   color: ${tkn('colors.text.secondary')};
   line-height: ${tkn('typography.lineHeight.relaxed')};

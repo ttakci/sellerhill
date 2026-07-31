@@ -28,6 +28,11 @@
 //   GET    /admin/proxies             — proxy pool listing + summary
 //   POST   /admin/proxies             — register a purchased proxy
 //   PATCH  /admin/proxies/:id         — status/label/expiry/cost patch
+//   GET    /admin/listing-quality/summary   — how item specifics got filled
+//   GET    /admin/listing-quality/defaults  — curated + learned aspect values
+//   PUT    /admin/listing-quality/defaults  — curate one aspect value (3rd write surface)
+//   DELETE /admin/listing-quality/defaults/:id — drop a curated value / retire a learned one
+//   GET    /admin/listing-quality/categories   — learned + pinned category mappings
 //   GET    /admin/users               — per-user monitoring snapshot
 //   GET    /admin/settings            — runtime settings + provenance
 //   PUT    /admin/settings/:key       — set an operator override
@@ -63,10 +68,15 @@ import {
   QueueEventType,
   UpdatePlatformSettingDto,
   UpdateProxyDto,
+  UpsertAspectDefaultDto,
   UsageEventSource,
   UsageMetric,
   UserRole,
+  type AdminAspectDefaultDto,
+  type AdminAspectDefaultsListDto,
   type AdminBillingMetricsDto,
+  type AdminCategoryMappingDto,
+  type AdminListingQualitySummaryDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
   type AdminProxyDto,
@@ -89,6 +99,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { EmailService } from '../email/email.service';
 
+import { AdminListingQualityService } from './admin-listing-quality.service';
 import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminService } from './admin.service';
@@ -101,6 +112,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly adminProxiesService: AdminProxiesService,
+    private readonly adminListingQualityService: AdminListingQualityService,
     private readonly adminUsersService: AdminUsersService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly emailService: EmailService,
@@ -302,6 +314,91 @@ export class AdminController {
   @ApiForbiddenResponse({ description: 'User is not an admin' })
   async updateProxy(@Param('id') id: string, @Body() dto: UpdateProxyDto): Promise<AdminProxyDto> {
     return this.adminProxiesService.update(id, dto);
+  }
+
+  @Get('listing-quality/summary')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Item-specifics quality summary',
+    description:
+      'How eBay item specifics were actually filled on recent listings: average count per listing, which resolution layer supplied them, and the categories where the broad fallback fires most (the curation worklist).',
+  })
+  @ApiOkResponse({ description: 'Summary returned' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async getListingQualitySummary(@Query('days') days?: string): Promise<AdminListingQualitySummaryDto> {
+    return this.adminListingQualityService.getSummary(Number(days) || 30);
+  }
+
+  @Get('listing-quality/defaults')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Curated + learned item-specific values',
+    description:
+      'Values used to fill category-required item specifics. Learned rows are written after a successful publish; curated rows are operator-set and outrank them.',
+  })
+  @ApiOkResponse({ description: 'Defaults returned' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async getAspectDefaults(
+    @Query('marketplaceId') marketplaceId?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ): Promise<AdminAspectDefaultsListDto> {
+    return this.adminListingQualityService.listAspectDefaults({
+      marketplaceId,
+      categoryId,
+      search,
+      page: Number(page) || undefined,
+      limit: Number(limit) || undefined,
+    });
+  }
+
+  @Put('listing-quality/defaults')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Curate an item-specific value for a category',
+    description:
+      'Third deliberate write surface: category-level defaults are shared across all customers, so they are operator-owned. A value the category does not accept is rejected here rather than failing every publish later.',
+  })
+  @ApiOkResponse({ description: 'Default stored' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async upsertAspectDefault(
+    @Request() req: { user: { sub: string } },
+    @Body() dto: UpsertAspectDefaultDto
+  ): Promise<AdminAspectDefaultDto> {
+    return this.adminListingQualityService.upsertAspectDefault(dto, req.user.sub);
+  }
+
+  @Delete('listing-quality/defaults/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Remove a curated value (or retire a learned one)',
+    description:
+      'Curated rows are deleted; learned rows are marked stale instead, because their publish history is evidence about the category.',
+  })
+  @ApiOkResponse({ description: 'Default removed' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async removeAspectDefault(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.adminListingQualityService.removeAspectDefault(id);
+    return { success: true };
+  }
+
+  @Get('listing-quality/categories')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Learned and pinned eBay category mappings',
+    description: 'What the resolver decided for an ASIN / Amazon category / search query, and how often it was used.',
+  })
+  @ApiOkResponse({ description: 'Mappings returned' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'User is not an admin' })
+  async getCategoryMappings(@Query('limit') limit?: string): Promise<AdminCategoryMappingDto[]> {
+    return this.adminListingQualityService.listCategoryMappings(Number(limit) || undefined);
   }
 
   @Get('users')

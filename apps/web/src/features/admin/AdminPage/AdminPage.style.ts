@@ -71,3 +71,10 @@ export const FormActions = styled.div`
 export const SettingInput = styled.div`
   width: 12rem;
 `;
+
+/** Right-hand cluster of a settings-style row (badge + count + action). */
+export const RowActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+`;

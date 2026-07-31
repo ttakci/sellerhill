@@ -13,7 +13,7 @@ interface RootProps {
 export const Root = styled.div<RootProps>`
   color: ${tkn('colors.text.primary')};
   font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   line-height: ${tkn('typography.lineHeight.normal')};
 
   & > *:first-child {

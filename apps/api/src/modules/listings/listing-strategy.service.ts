@@ -1,17 +1,33 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
+  DEFAULT_LISTING_TEMPLATE_HTML,
+  EBAY_DESCRIPTION_MAX_LENGTH,
+  EBAY_TITLE_MAX_LENGTH,
   TemplateType,
+  buildListingTemplateContext,
+  renderListingTemplate,
   type FeeConfig,
   type ListingSettingsGroup,
   type ProductData,
   type StoreSettingsResponse,
 } from '@repo/shared';
 
-import { sanitizeHtml, sanitizeStringArray } from '../../common/utils/sanitize';
+import {
+  extractVisibleText,
+  sanitizeHtml,
+  sanitizeListingHtml,
+  sanitizeStringArray,
+  truncateHtml,
+} from '../../common/utils/sanitize';
 import { ListingSettingsGroupService } from '../listing-settings-groups/listing-settings-group.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { ContentGenerationService } from './content-generation.service';
+import {
+  normalizeTitleWhitespace,
+  stripBrandFromTitle,
+  truncateTitleAtWordBoundary,
+} from './listing-title';
 
 @Injectable()
 export class ListingStrategyService {
@@ -41,21 +57,31 @@ export class ListingStrategyService {
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 
     let title = this.buildListingTitle(product, group);
-    let description = this.processDescriptionTemplate(product, group);
+    let description = await this.processDescriptionTemplate(product, group);
 
     const applyAi = Boolean(options?.applyContentAi);
     const wantAiTitle = applyAi && Boolean(group.content?.aiTitleEnabled);
     const wantAiDescription = applyAi && Boolean(group.content?.aiDescriptionEnabled);
     if ((wantAiTitle || wantAiDescription) && (await this.contentGeneration.isEnabled())) {
-      const base = { product, baseTitle: title, baseDescription: description };
+      const base = {
+        product,
+        baseTitle: title,
+        baseDescription: description,
+        stripBrand: Boolean(group.content?.stripBrandFromTitle),
+      };
       if (wantAiTitle) {
-        title = await this.contentGeneration.rewriteTitle(base);
+        // Model output is untrusted for length/whitespace as much as for content.
+        title = truncateTitleAtWordBoundary(
+          normalizeTitleWhitespace(await this.contentGeneration.rewriteTitle(base)),
+          EBAY_TITLE_MAX_LENGTH
+        );
       }
       if (wantAiDescription) {
-        description = await this.contentGeneration.rewriteDescription({
+        const aiDescription = await this.contentGeneration.rewriteDescription({
           ...base,
           baseTitle: title,
         });
+        description = truncateHtml(sanitizeListingHtml(aiDescription), EBAY_DESCRIPTION_MAX_LENGTH);
       }
     } else if (applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
       this.logger.debug(
@@ -96,6 +122,9 @@ export class ListingStrategyService {
       brand: product.brand,
       features: product.features || [],
       specs: product.specs || {},
+      identifiers: product.identifiers || {},
+      asin: product.asin,
+      category: product.category,
       // Location data from Store Settings
       country: storeSettings.country || 'US',
       postalCode: storeSettings.zipCode,
@@ -110,29 +139,15 @@ export class ListingStrategyService {
     product: ProductData,
     group: ListingSettingsGroup
   ): string {
-    let title = (product.title || '').trim();
-    if (group.content?.stripBrandFromTitle && product.brand) {
-      title = this.stripBrandFromTitle(title, product.brand);
-    }
-    // eBay title max 80 chars
-    if (title.length > 80) {
-      title = title.slice(0, 80).trim();
-    }
-    return title || product.asin || 'Product';
-  }
+    let title = normalizeTitleWhitespace(product.title || '');
 
-  /** Case-insensitive brand strip (whole token / leading brand + separators). */
-  private stripBrandFromTitle(title: string, brand: string): string {
-    const b = brand.trim();
-    if (!b) {
-      return title;
+    if (group.content?.stripBrandFromTitle && product.brand) {
+      title = stripBrandFromTitle(title, product.brand);
     }
-    const escaped = b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Leading "Brand - " / "Brand:" / "Brand "
-    let next = title.replace(new RegExp(`^${escaped}\\s*[-–:|]?\\s*`, 'i'), '');
-    // Remaining whole-word brand occurrences
-    next = next.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), ' ');
-    return next.replace(/\s{2,}/g, ' ').replace(/^[-–:|,\s]+|[-–:|,\s]+$/g, '').trim() || title;
+
+    title = truncateTitleAtWordBoundary(title, EBAY_TITLE_MAX_LENGTH);
+
+    return title || product.asin || 'Product';
   }
 
   /**
@@ -168,49 +183,93 @@ export class ListingStrategyService {
       validateBlacklist(title, 'title');
     }
 
-    // 2. Description Validation
+    // 2. Description Validation — the blacklist runs against buyer-VISIBLE text.
+    // The rendered description embeds Amazon-hosted image URLs
+    // (images-na.ssl-images-amazon.com), so scanning raw markup made the
+    // obvious "amazon" keyword reject every listing over an `<img src>` no
+    // buyer ever reads.
     if (validateDescription) {
       if (!description || description.trim().length === 0) {
         throw new BadRequestException('Listing description cannot be empty');
       }
-      validateBlacklist(description, 'description');
+      validateBlacklist(extractVisibleText(description), 'description');
     }
   }
 
   /**
-   * Process description using template from settings group.
-   * When Keepa description is empty, fall back to features as an HTML list.
+   * Resolve the HTML template a settings group publishes with.
+   *
+   * PREDEFINED groups used to fall through to a bare `{{description}}` because
+   * the branch was never implemented — the seeded designs users pick in the UI
+   * simply never reached eBay. A missing/removed template id degrades to the
+   * shared default rather than publishing an empty description.
    */
-  private processDescriptionTemplate(product: ProductData, group: ListingSettingsGroup): string {
-    let template = '{{description}}'; // Default
+  private async resolveTemplateHtml(group: ListingSettingsGroup): Promise<string> {
+    const templates = group.templates;
 
-    // Use custom template if available
-    if (group.templates?.type === TemplateType.CUSTOM && group.templates.customTemplateHtml) {
-      template = group.templates.customTemplateHtml;
+    if (templates?.type === TemplateType.CUSTOM) {
+      const custom = templates.customTemplateHtml?.trim();
+      return custom && custom.length > 0 ? custom : DEFAULT_LISTING_TEMPLATE_HTML;
     }
-    // TODO: Handle predefined templates if needed
+
+    if (templates?.predefinedTemplateId) {
+      const html = await this.settingsGroupService.getPredefinedTemplateHtml(templates.predefinedTemplateId);
+      if (html && html.trim().length > 0) {
+        return html;
+      }
+      this.logger.warn(
+        `Predefined template ${templates.predefinedTemplateId} not found for group ${group.id} — using default template`
+      );
+    }
+
+    return DEFAULT_LISTING_TEMPLATE_HTML;
+  }
+
+  /**
+   * Render the listing description from the group's template.
+   *
+   * Uses the SHARED renderer (`@repo/shared`) — the same one the settings-drawer
+   * preview uses — so what a user previews is what a buyer sees. The old
+   * backend-only replacer understood four placeholders and published the rest
+   * (`{{{product_description}}}`, `{{#feature_bullets}}…`) as literal text on
+   * live listings.
+   */
+  private async processDescriptionTemplate(
+    product: ProductData,
+    group: ListingSettingsGroup
+  ): Promise<string> {
+    const template = await this.resolveTemplateHtml(group);
 
     const features = sanitizeStringArray(product.features || []);
-    const rawDescription = (product.description || '').trim();
-    const descriptionBody =
-      rawDescription ||
-      (features.length > 0
-        ? `<ul><li>${features.join('</li><li>')}</li></ul>`
-        : '');
+    const description = sanitizeHtml((product.description || '').trim());
 
-    // Replace variables with sanitized content
-    const finalDescription = template
-      .replace(/{{title}}/g, sanitizeHtml(product.title))
-      .replace(/{{description}}/g, rawDescription ? sanitizeHtml(rawDescription) : descriptionBody)
-      .replace(/{{brand}}/g, sanitizeHtml(product.brand || ''))
-      .replace(/{{features}}/g, features.join('</li><li>'));
+    const context = buildListingTemplateContext({
+      title: product.title,
+      // Amazon descriptions are often empty; the feature bullets are then the
+      // only real copy we have and must not be dropped silently.
+      description: description || (features.length > 0 ? `<ul><li>${features.join('</li><li>')}</li></ul>` : ''),
+      brand: product.brand,
+      manufacturer: product.manufacturer,
+      asin: product.asin,
+      category: product.category,
+      features,
+      specs: product.specs,
+      imageUrls: product.imageUrls,
+      price: product.price?.current,
+      currency: product.price?.currency,
+    });
 
-    // If template only had empty description and no features placeholders, still return features fallback
-    if (!finalDescription.trim() && features.length > 0) {
-      return `<ul><li>${features.join('</li><li>')}</li></ul>`;
+    const rendered = renderListingTemplate(template, context);
+    const safe = truncateHtml(sanitizeListingHtml(rendered), EBAY_DESCRIPTION_MAX_LENGTH);
+
+    if (safe.trim().length > 0) {
+      return safe;
     }
 
-    return finalDescription;
+    // Last resort: never publish an empty description box.
+    return features.length > 0
+      ? `<ul><li>${features.join('</li><li>')}</li></ul>`
+      : sanitizeListingHtml(description);
   }
 
   /**

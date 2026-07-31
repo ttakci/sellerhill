@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  font-family: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 1rem;
-  line-height: 1.55;
-  letter-spacing: 0.005em;
+  font-family: 'Lexend', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.47;
+  letter-spacing: 0;
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

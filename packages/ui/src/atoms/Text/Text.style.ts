@@ -18,7 +18,7 @@ const variantStyles = {
   display: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.heading};
     font-size: ${theme.typography.fontSize['3xl']};
-    line-height: ${theme.typography.lineHeight.tight};
+    line-height: ${theme.typography.lineHeight.display};
     font-weight: ${theme.typography.fontWeight.bold};
     letter-spacing: ${theme.typography.letterSpacing.tighter};
   `,
@@ -60,7 +60,7 @@ const variantStyles = {
   /* ── Body scale (must stay distinct — never collapse body === body-sm) ── */
   body: (theme: Theme) => `
     font-family: ${theme.typography.fontFamily.body};
-    font-size: ${theme.typography.fontSize.md};
+    font-size: ${theme.typography.fontSize.base};
     line-height: ${theme.typography.lineHeight.normal};
     font-weight: ${theme.typography.fontWeight.normal};
     letter-spacing: ${theme.typography.letterSpacing.normal};

@@ -109,41 +109,55 @@ export const shadowTokens = {
 } as const;
 
 /**
- * Single UI typeface — Source Sans 3 (corporate / insurance-grade readability).
- * Chosen over Inter for a calmer institutional feel (TR-friendly, open counters).
+ * Two UI typefaces — Inter for headings, Lexend for body/UI.
+ *
+ * Lexend is drawn for reading fluency (wide apertures, tall x-height), which is
+ * what a dense financial dashboard full of tables and forms needs; Inter keeps
+ * headings tighter and more neutral so titles do not compete with the data.
+ * Both are SIL OFL 1.1 and cover latin-ext (ı/İ/ş/ğ/ç/ö/ü), so TR is safe.
  * Mono stays JetBrains Mono for codes / IDs only.
+ *
+ * This is the ONE sanctioned two-typeface pairing — do not add a third stack.
+ *
+ * The size / weight / line-height steps below mirror a proven production scale
+ * (see the `web` variants: 40/32/24/20/16 headings over a 15px body). Its two
+ * signatures versus a generic scale: body is **15px, not 16**, and heading
+ * leading is tight (1.1–1.3) because Lexend's x-height already carries the row.
  */
 export const typographyTokens = {
   fontFamily: {
-    heading: "'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    body: "'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    sans: "'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    heading: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    body: "'Lexend', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    sans: "'Lexend', 'Segoe UI', system-ui, -apple-system, sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   fontSize: {
-    '2xs': '0.625rem', // 10px - Micro labels, tiny badges
-    xs: '0.75rem', // 12px - Captions, meta, helper
-    sm: '0.875rem', // 14px - Dense UI / table cells
-    md: '1rem', // 16px - Primary body (comfortable reading)
-    lg: '1.125rem', // 18px - Section titles (h3)
-    xl: '1.25rem', // 20px - Sub-section (h2)
-    xxl: '1.5rem', // 24px - Page titles (h1)
-    xxxl: '1.875rem', // 30px - Hero headings
-    '3xl': '2.25rem', // 36px - Large hero headings
-    '4xl': '3rem', // 48px - Display headings
+    '2xs': '0.625rem', // 10px - Micro labels, tiny badges (no scale equivalent)
+    xs: '0.75rem', // 12px - caption / captionLight
+    sm: '0.875rem', // 14px - bodyMD: table cells, dense UI, h5
+    base: '0.9375rem', // 15px - body: THE primary reading size
+    md: '1rem', // 16px - headingSM / callout
+    lg: '1.125rem', // 18px - Section titles (h3), metric-sm
+    xl: '1.25rem', // 20px - headingMD: sub-section (h2), metric
+    xxl: '1.5rem', // 24px - headingLG: page titles (h1)
+    xxxl: '2rem', // 32px - headingXL
+    '3xl': '2.5rem', // 40px - headingXXL: display
+    '4xl': '3rem', // 48px - Landing display headings
     '5xl': '3.75rem', // 60px - Hero display
     '6xl': '4.5rem', // 72px - Massive hero
   },
   fontWeight: {
+    light: 300,
     normal: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
   },
   lineHeight: {
-    tight: 1.25, // single-line headings and metrics
-    snug: 1.4, // headings/titles that may wrap to a second line
-    normal: 1.55, // body copy
+    display: 1.1, // 40/44 - display only; large type needs the least leading
+    tight: 1.2, // 20/24 - single-line headings and metrics
+    snug: 1.3, // 16/20, 12/16 - headings/titles that may wrap to a second line
+    normal: 1.47, // 15/22 - body copy
     relaxed: 1.65, // long-form / mono blocks
   },
   letterSpacing: {

@@ -4,6 +4,7 @@ import {
   extractCorrelationId,
   generateCorrelationId,
   KeepaUsageSource,
+  ListingFailureCode,
   ListingStatus,
   type ListingQueueJobData,
   type ProductData,
@@ -15,8 +16,10 @@ import { withCorrelation } from '../../common/observability/correlation.context'
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
+import { summarizeAspectResolution } from './aspect-audit';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
+import { classifyListingFailure } from './listing-failure';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
 
@@ -81,6 +84,8 @@ export class ListingProcessorService extends WorkerHost {
       await this.listingsService.updateJobItemResult(jobId, asin, {
         status: ListingStatus.ERROR,
         errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active or draft listings.',
+        failureCode: ListingFailureCode.DUPLICATE_LISTING,
+        failureDetails: { retryable: false },
       });
       // A duplicate never created a listing — release the reservation so the
       // held slot is freed for the next create. (Non-draft path only; drafts
@@ -120,6 +125,8 @@ export class ListingProcessorService extends WorkerHost {
 
       let ebayItemId: string | undefined;
       let categoryName = productData.category ?? '';
+      let ebayCategoryId: string | undefined;
+      let aspectAudit: { summary: Record<string, unknown>; autofilledCount: number } | undefined;
 
       if (!asDraft) {
         // 4. Create eBay listing (REST API)
@@ -136,6 +143,16 @@ export class ListingProcessorService extends WorkerHost {
         );
         ebayItemId = created.listingId;
         categoryName = created.categoryName;
+        ebayCategoryId = created.categoryId;
+        aspectAudit = summarizeAspectResolution(created.aspectResolution);
+
+        // Defence in depth against a phantom listing: an ACTIVE row whose
+        // `ebay_item_id` is empty does not exist on eBay, can never be matched
+        // to an order (order sync keys on this column), and blocks re-listing
+        // the ASIN as a duplicate.
+        if (!ebayItemId) {
+          throw new Error(`eBay did not return a listing id for ASIN ${asin}; refusing to record the listing.`);
+        }
       }
 
       // 5. Create listing record (ACTIVE with eBay id, or DRAFT without)
@@ -156,6 +173,9 @@ export class ListingProcessorService extends WorkerHost {
         roi: listingData.roi,
         quantity: listingData.quantity,
         ebayCategoryName: categoryName,
+        ebayCategoryId,
+        aspectResolution: aspectAudit?.summary ?? null,
+        aspectAutofilledCount: aspectAudit?.autofilledCount ?? 0,
         ebayAccountId: ebayAccountId || undefined,
         status: asDraft ? ListingStatus.DRAFT : ListingStatus.ACTIVE,
       });
@@ -182,40 +202,20 @@ export class ListingProcessorService extends WorkerHost {
     } catch (error: unknown) {
       const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
 
-      // Extract detailed error message if available from eBay REST API
-      let errorMessage = error instanceof Error ? error.message : String(error);
-      const axiosErr =
-        error instanceof Error && 'response' in error
-          ? (error as {
-              response?: {
-                data?: {
-                  errors?: Array<{ message?: string; parameters?: Array<{ name?: string; value?: string }> }>;
-                  error_description?: string;
-                };
-              };
-            })
-          : null;
-      if (axiosErr?.response?.data?.errors && Array.isArray(axiosErr.response.data.errors)) {
-        errorMessage = axiosErr.response.data.errors
-          .map((e: { message?: string; parameters?: Array<{ name?: string; value?: string }> }) => {
-            const params = e.parameters
-              ? ` (${e.parameters.map((p: { name?: string; value?: string }) => `${p.name}: ${p.value}`).join(', ')})`
-              : '';
-            return `${e.message}${params}`;
-          })
-          .join(' | ');
-      } else if (axiosErr?.response?.data?.error_description) {
-        errorMessage = axiosErr.response.data.error_description;
-      }
+      // One classifier owns every failure shape (ours, eBay's, transport), so
+      // the UI can show an actionable reason instead of a raw eBay string.
+      const failure = classifyListingFailure(error);
 
       this.logger.error(
-        `Error processing ASIN ${asin} in job ${jobId}: ${errorMessage} (Attempt ${job.attemptsMade + 1})`
+        `Error processing ASIN ${asin} in job ${jobId}: [${failure.code}] ${failure.message} ` +
+          `(Attempt ${job.attemptsMade + 1})`
       );
 
-      // Update job item status in database
       await this.listingsService.updateJobItemResult(jobId, asin, {
         status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
-        errorMessage: errorMessage,
+        errorMessage: failure.message,
+        failureCode: failure.code,
+        failureDetails: failure.details,
       });
 
       // Billing-quota release: only on PERMANENT failure (terminal ERROR). On

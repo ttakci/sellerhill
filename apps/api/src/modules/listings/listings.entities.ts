@@ -25,6 +25,8 @@ export interface ListingJobItemEntity {
   status: string;
   ebay_item_id: string | null;
   error_message: string | null;
+  failure_code: string | null;
+  failure_details: Record<string, unknown> | string | null;
   created_at: Date;
   updated_at: Date;
 }

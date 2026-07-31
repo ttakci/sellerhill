@@ -137,3 +137,18 @@ export const EmptyWrap = styled.div`
 export const MonoId = styled(UIText)`
   font-family: ${tkn('typography.fontFamily.mono')};
 `;
+
+/** Reason + optional technical disclosure inside one table cell. */
+export const FailureCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;
+
+/** Raw provider text is diagnostic, so it is collapsed by default. */
+export const TechnicalDetails = styled.details`
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+`;

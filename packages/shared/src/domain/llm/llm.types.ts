@@ -1,6 +1,12 @@
 /** OpenAI-compatible chat roles. */
 export enum LlmMessageRole { SYSTEM = 'system', USER = 'user', ASSISTANT = 'assistant' }
-export enum LlmUsagePurpose { CONTENT = 'content', ASSISTANT = 'assistant', ASSISTANT_EMBEDDING = 'assistant_embedding', ASSISTANT_SUMMARY = 'assistant_summary', ASSISTANT_CLASSIFIER = 'assistant_classifier', KNOWLEDGE_INGESTION = 'knowledge_ingestion' }
+/**
+ * What an LLM call was for. Also selects the PROVIDER GROUP: assistant
+ * purposes can run on a different (paid) provider than the listing ones,
+ * because listing traffic is thousands of calls a day and belongs on a local
+ * model, while the customer-facing chatbot is low-volume and quality-critical.
+ */
+export enum LlmUsagePurpose { CONTENT = 'content', ASPECT = 'aspect', ASSISTANT = 'assistant', ASSISTANT_EMBEDDING = 'assistant_embedding', ASSISTANT_SUMMARY = 'assistant_summary', ASSISTANT_CLASSIFIER = 'assistant_classifier', KNOWLEDGE_INGESTION = 'knowledge_ingestion' }
 export enum LlmUsageSource { PROVIDER = 'provider', ESTIMATED = 'estimated', MIXED = 'mixed' }
 export enum LlmFinishReason { STOP = 'stop', LENGTH = 'length', CONTENT_FILTER = 'content_filter', TOOL_CALLS = 'tool_calls', UNKNOWN = 'unknown' }
 export enum LlmStreamTerminalReason { PROVIDER_DONE = 'provider_done', FINISH_REASON = 'finish_reason', NATURAL_CLOSE = 'natural_close', CALLER_ABORT = 'caller_abort', TIMEOUT = 'timeout', ERROR = 'error' }

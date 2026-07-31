@@ -9,7 +9,8 @@
       "proxies": "Proxyler",
       "settings": "Ayarlar",
       "billing": "Faturalandırma",
-      "users": "Kullanıcılar"
+      "users": "Kullanıcılar",
+      "listingQuality": "Liste kalitesi"
     },
     "queue": {
       "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}"
@@ -209,6 +210,29 @@
         "llm.contentEnabled": "Yapay zekâ başlık/açıklama yeniden yazımı",
         "billing.enforcementEnabled": "Paket kotalarını zorla",
         "buyerMessaging.feedbackDefaultDelayDays": "Değerlendirme isteği gecikmesi (gün)"
+      }
+    },
+    "listingQuality": {
+      "averageSpecifics": "Liste başına ort. ürün özelliği",
+      "listingsAnalyzed": "{{value}} liste incelendi",
+      "autofilled": "Otomatik doldurulmuş özellikli listeler",
+      "autofilledHint": "Zorunlu bir özellik için ürün verisi yoktu; geniş ama doğru bir değer kullanıldı.",
+      "coverage": "Özellikler nasıl dolduruldu",
+      "defaults": "Kategori varsayılanları",
+      "defaultsHint": "Küratörlü değerler otomatik olanları geçer ve o kategorideki tüm müşteri listelerine uygulanır.",
+      "searchPlaceholder": "Özellik veya değer ara",
+      "remove": "Kaldır",
+      "source": {
+        "curated": "Küratörlü",
+        "learned": "Öğrenilmiş"
+      },
+      "layer": {
+        "product_data": "Ürün verisi",
+        "curated": "Küratörlü",
+        "learned": "Öğrenilmiş",
+        "prior": "Çıkarım",
+        "llm": "Yapay zekâ",
+        "terminal_fallback": "Yedek değer"
       }
     }
   }

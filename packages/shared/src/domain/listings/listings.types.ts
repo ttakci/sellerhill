@@ -2,7 +2,9 @@
  * Listings Domain Types
  */
 
-import type { ProductData } from '../products/product-data.types';
+import type { ProductData, ProductIdentifiers } from '../products/product-data.types';
+
+import type { ListingFailureCode, ListingFailureDetails } from './listing-failure.types';
 
 /**
  * eBay Business Policy Type
@@ -136,6 +138,9 @@ export interface ListingJobItemDto {
   errorMessage?: string;
   createdAt: string;
   updatedAt: string;
+  /** Structured reason this item failed; drives the localized UI message. */
+  failureCode?: ListingFailureCode;
+  failureDetails?: ListingFailureDetails;
 }
 
 /**
@@ -309,6 +314,11 @@ export interface ListingCreationData {
   description: string;
   brand: string;
   specs?: Record<string, string>;
+  /** UPC/EAN/MPN/model — sent to eBay for catalog matching + identifier aspects. */
+  identifiers?: ProductIdentifiers;
+  asin?: string;
+  /** Amazon category name, used as a category-resolution hint. */
+  category?: string;
   features?: string[];
   quantity: number;
   imageUrls: string[];

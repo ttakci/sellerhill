@@ -5,7 +5,14 @@ import {
   updateListingSchema,
   type UpdateListingFormData,
 } from '@repo/shared';
-import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import {
+  formatCurrency,
+  formatDate,
+  getLocaleConfig,
+  useLoading,
+  useMarketplaceContext,
+  useUI,
+} from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -60,6 +67,9 @@ export const ListingDetailPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
+  // Same injected builders the IdBadge uses, so header actions and row badges
+  // can never disagree about which eBay environment a listing lives in.
+  const { buildEbayItemUrl, buildAmazonProductUrl } = useMarketplaceContext();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -449,14 +459,15 @@ export const ListingDetailPageContainer: React.FC = () => {
     if (!listing?.asin) {
       return;
     }
-    window.open(`https://www.amazon.com/dp/${listing.asin}`, '_blank', 'noopener,noreferrer');
+    window.open(buildAmazonProductUrl(listing.asin), '_blank', 'noopener,noreferrer');
   };
 
   const handleOpenEbay = () => {
     if (!listing?.ebayListingId) {
       return;
     }
-    window.open(`https://www.ebay.com/itm/${listing.ebayListingId}`, '_blank', 'noopener,noreferrer');
+    // Sandbox item ids do not resolve on ebay.com — build per environment.
+    window.open(buildEbayItemUrl(listing.ebayListingId), '_blank', 'noopener,noreferrer');
   };
 
   /** Mobile manage sheet: edit / publish / end / delete without header button clutter */

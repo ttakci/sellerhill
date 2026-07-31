@@ -12,6 +12,16 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
 import { ListingsService } from './listings.service';
 
+export interface ListingRetryInput {
+  jobId: string;
+  listingJobItemId: string;
+  asin: string;
+  listingSettingsGroupId: string;
+  paymentPolicyId: string;
+  shippingPolicyId: string;
+  returnPolicyId: string;
+}
+
 @Injectable()
 export class ListingQueueService {
   private readonly logger = new Logger(ListingQueueService.name);
@@ -86,5 +96,38 @@ export class ListingQueueService {
     const { items: _items, ...dto } = job;
     void _items;
     return dto;
+  }
+
+  /**
+   * Re-queue ONE failed ASIN from an existing job.
+   *
+   * A failed create used to be a dead end: nothing was written to `listings`,
+   * so the seller could neither fix nor retry the ASIN without re-running the
+   * whole import. The queue job is identical to the original one — only the
+   * single item is re-enqueued.
+   */
+  async retryJobItem(userId: string, item: ListingRetryInput): Promise<void> {
+    await this.listingQueue.add(
+      'create-listing',
+      stampCurrentCorrelation({
+        jobId: item.jobId,
+        userId,
+        asin: item.asin,
+        listingSettingsGroupId: item.listingSettingsGroupId,
+        paymentPolicyId: item.paymentPolicyId,
+        shippingPolicyId: item.shippingPolicyId,
+        returnPolicyId: item.returnPolicyId,
+        asDraft: false,
+        listingJobItemId: item.listingJobItemId,
+      } as ListingQueueJobData),
+      {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      }
+    );
+
+    this.logger.log(`Re-queued ASIN ${item.asin} for job ${item.jobId}`);
   }
 }

@@ -7,21 +7,18 @@
     "editGroup": "Listeleme Grubunu Düzenle",
     "backToList": "Gruplara Dön",
     "connectorSubtitle": "AMAZON'DAN EBAY'E BAĞLAYICI",
-
     "groupDetails": "Grup Detayları",
     "groupName": "Grup Adı",
     "groupNamePlaceholder": "örn., Premium Elektronik",
     "description": "Açıklama",
     "descriptionPlaceholder": "Grup iç notlarını girin...",
-
     "contentSection": "İlan içeriği",
     "stripBrandFromTitle": "Başlıkta markayı kaldır",
     "stripBrandFromTitleHint": "İlan oluştururken Amazon marka adını eBay başlığından çıkarır (dropshipping için).",
-    "aiTitleEnabled": "YZ başlık (yerel Ollama)",
-    "aiTitleEnabledHint": "Yalnızca yeni ilan oluştururken: CONTENT_AI_ENABLED=true ise yerel Ollama ile başlığı yeniden yazar. Zaman aşımında normal başlık. Stok/fiyat yenilemede kullanılmaz (büyük kataloglar için).",
-    "aiDescriptionEnabled": "YZ açıklama (yerel Ollama)",
-    "aiDescriptionEnabledHint": "Yalnızca yeni ilan oluştururken: Ollama ile açıklamayı yeniden yazar. Yoksa şablon/özellikler. Yüzbinlerce mevcut ilanı toplu yeniden yazmak için kullanmayın.",
-
+    "aiTitleEnabled": "YZ destekli başlık",
+    "aiTitleEnabledHint": "Yalnızca yeni ilanlarda. Admin → Ayarlar bölümünde \"llm.contentEnabled\" açık olmalıdır. Hata veya zaman aşımında normal başlığa döner; ilan oluşturma asla durmaz.",
+    "aiDescriptionEnabled": "YZ destekli açıklama",
+    "aiDescriptionEnabledHint": "Yalnızca yeni ilanlarda. Admin → Ayarlar bölümünde \"llm.contentEnabled\" açık olmalıdır. Hata durumunda şablonunuza/özelliklere döner. Mevcut ilanlar hiçbir zaman yeniden işlenmez.",
     "repricingStrategy": "Yeniden Fiyatlandırma",
     "addPriceRange": "Fiyat Aralığı Ekle",
     "removePriceRange": "Fiyat Aralığını Kaldır",
@@ -30,10 +27,8 @@
     "profitMargin": "Kâr Marjı (%)",
     "fixedProfit": "Sabit Kâr ($)",
     "priceRangeLabel": "Fiyat Aralığı {{index}}",
-
     "stock": "Stok",
     "defaultQuantity": "Varsayılan Miktar",
-
     "fees": "Ücretler",
     "ebayFee": "eBay Ücreti",
     "ebayFeePercent": "eBay Ücreti (%)",
@@ -41,7 +36,6 @@
     "fixedFeeAmount": "Sabit Ücret ($)",
     "tax": "Vergi",
     "taxPercent": "Vergi (%)",
-
     "templates": "Şablon",
     "customTemplate": "Özel",
     "predefinedTemplate": "Öntanımlı",
@@ -50,14 +44,12 @@
     "htmlEditor": "HTML Editörü",
     "templatePlaceholder": "Özel HTML şablonunuzu girin...",
     "templateVariablesHelp": "{{product_title}}, {{product_price}}, {{product_image}}, {{product_description}} gibi değişkenler kullanın",
-
     "preview": "Önizleme",
     "livePreview": "Canlı Önizleme",
     "darkModePreview": "Karanlık Mod Önizlemesi",
     "desktopView": "Masaüstü Görünümü",
     "mobileView": "Mobil Görünüm",
     "renderingPreview": "Önizleme oluşturuluyor...",
-
     "saveChanges": "Değişiklikleri Kaydet",
     "saving": "Kaydediliyor...",
     "cancel": "İptal",
@@ -67,15 +59,12 @@
     "confirmDeleteMessage": "Bu işlem geri alınamaz. Bu grubu kullanan ürünlerin yeniden atanması gerekecek.",
     "deleteSuccess": "Grup başarıyla silindi",
     "deleteFailed": "Grup silinemedi",
-
     "productsCount_one": "{{count}} ürün",
     "productsCount_other": "{{count}} ürün",
     "noProducts": "Ürün yok",
-
     "statusActive": "Aktif",
     "statusDraft": "Taslak",
     "statusInactive": "Pasif",
-
     "card": {
       "generalTitle": "Genel Ayarlar",
       "deductionsTitle": "Kesintiler",
@@ -85,13 +74,11 @@
       "tax": "Vergi",
       "customTemplate": "Özelleştirilmiş Şablon"
     },
-
     "emptyState": {
       "title": "Henüz Listeleme Grubu Yok",
       "description": "Listelerinizi organize etmeye başlamak için ilk grubunuzu oluşturun",
       "action": "Yeni Grup Oluştur"
     },
-
     "predefinedTemplates": {
       "modernMinimalist": "Modern Minimalist",
       "modernMinimalistDesc": "Ürün detaylarına odaklanan temiz ve profesyonel tasarım",
@@ -100,7 +87,6 @@
       "ecommerceClassic": "E-ticaret Klasik",
       "ecommerceClassicDesc": "Net bölümler ve harekete geçirici mesajlarla geleneksel düzen"
     },
-
     "validation": {
       "nameRequired": "Grup adı gereklidir",
       "nameMinLength": "Grup adı en az 3 karakter olmalıdır",
@@ -126,7 +112,6 @@
       "overlappingPriceRanges": "Fiyat aralıkları örtüşemez",
       "minStockBuffer": "Stok tamponu 0 veya daha büyük olmalıdır"
     },
-
     "errors": {
       "loadFailed": "Listeleme grupları yüklenemedi",
       "saveFailed": "Değişiklikler kaydedilemedi",
@@ -139,14 +124,12 @@
       "networkError": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
       "unknownError": "Beklenmeyen bir hata oluştu"
     },
-
     "success": {
       "created": "Listeleme grubu başarıyla oluşturuldu",
       "updated": "Listeleme grubu başarıyla güncellendi",
       "deleted": "Listeleme grubu başarıyla silindi",
       "saved": "Değişiklikler başarıyla kaydedildi"
     },
-
     "tooltips": {
       "editGroup": "Grubu düzenle",
       "deleteGroup": "Grubu sil",
@@ -158,7 +141,6 @@
       "copyTemplate": "Şablon HTML'ini kopyala",
       "resetTemplate": "Varsayılan şablona sıfırla"
     },
-
     "help": {
       "repricingStrategy": "Farklı kâr marjlarıyla birden fazla fiyat aralığı tanımlayın. Ürünler maliyet aralıklarına göre fiyatlandırılacaktır.",
       "profitMargin": "Ürün maliyetinden hesaplanan yüzde bazlı kâr.",

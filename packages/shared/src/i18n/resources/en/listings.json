@@ -63,7 +63,30 @@
         "error": "Error",
         "empty": "No items found for this job.",
         "emptyTitle": "No items yet",
-        "emptySubtitle": "Items appear as the job starts processing ASINs."
+        "emptySubtitle": "Items appear as the job starts processing ASINs.",
+        "reason": "Reason",
+        "technicalDetails": "Technical details",
+        "retry": "Retry",
+        "retryQueued": "Retry queued",
+        "retryFailed": "Could not queue the retry"
+      },
+      "failure": {
+        "duplicate_listing": "Already listed — this ASIN is in your active or draft listings.",
+        "zero_stock": "Out of stock on Amazon after your stock buffer, so the quantity would be 0.",
+        "quota_exhausted": "Plan limit reached. Upgrade or free up listing slots to continue.",
+        "product_data_unavailable": "Amazon product data could not be retrieved for this ASIN.",
+        "category_unresolved": "eBay could not match this product to a listing category.",
+        "category_aspects_unavailable": "eBay item-specific data was temporarily unavailable.",
+        "aspect_missing": "eBay requires the item specific {{aspects}} and no value could be derived.",
+        "aspect_rejected": "eBay rejected the value we sent for {{aspects}}.",
+        "invalid_identifier": "eBay rejected the product identifier ({{aspects}}).",
+        "image_invalid": "eBay rejected the product images.",
+        "ebay_policy_missing": "Your eBay business policy is missing or not valid for this marketplace.",
+        "ebay_auth": "Your eBay account connection needs to be renewed.",
+        "ebay_rate_limited": "eBay rate-limited the request. Retrying later usually works.",
+        "ebay_unavailable": "eBay was unavailable while publishing. Retrying usually works.",
+        "ebay_restricted_item": "eBay restricts this item or category for your account.",
+        "unknown": "The listing could not be created."
       }
     },
     "filters": {

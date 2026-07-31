@@ -9,7 +9,8 @@
       "proxies": "Proxies",
       "settings": "Settings",
       "billing": "Billing",
-      "users": "Users"
+      "users": "Users",
+      "listingQuality": "Listing quality"
     },
     "queue": {
       "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}"
@@ -209,6 +210,29 @@
         "llm.contentEnabled": "AI title/description rewrites",
         "billing.enforcementEnabled": "Enforce plan quotas",
         "buyerMessaging.feedbackDefaultDelayDays": "Feedback request delay (days)"
+      }
+    },
+    "listingQuality": {
+      "averageSpecifics": "Avg. item specifics per listing",
+      "listingsAnalyzed": "{{value}} listings analyzed",
+      "autofilled": "Listings with auto-filled specifics",
+      "autofilledHint": "A required specific had no product value, so a broad-but-true one was used.",
+      "coverage": "How specifics were resolved",
+      "defaults": "Category defaults",
+      "defaultsHint": "Curated values beat the automatic ones and apply to every customer listing in that category.",
+      "searchPlaceholder": "Search aspect or value",
+      "remove": "Remove",
+      "source": {
+        "curated": "Curated",
+        "learned": "Learned"
+      },
+      "layer": {
+        "product_data": "Product data",
+        "curated": "Curated",
+        "learned": "Learned",
+        "prior": "Inferred",
+        "llm": "AI",
+        "terminal_fallback": "Fallback"
       }
     }
   }

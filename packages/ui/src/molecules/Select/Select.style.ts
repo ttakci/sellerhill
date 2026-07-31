@@ -54,7 +54,7 @@ export const FieldWrapper = styled.div<{
 
 export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boolean; $size?: string }>`
   flex: 1;
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-family: ${tkn('typography.fontFamily.body')};
   color: ${tkn('colors.text.primary')};
   /* Push value down so it clears the floated label with comfortable gap */
@@ -317,7 +317,7 @@ export const BottomSheetHeader = styled.div`
 `;
 
 export const BottomSheetTitle = styled.div`
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;
@@ -360,7 +360,7 @@ export const MobileOption = styled.div<{ $isSelected: boolean }>`
   border: none;
   background: transparent;
   color: ${({ theme, $isSelected }) => ($isSelected ? theme.colors.brand.primary : theme.colors.text.primary)};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   cursor: pointer;
 
   &:active {

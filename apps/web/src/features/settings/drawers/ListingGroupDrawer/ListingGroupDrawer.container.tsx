@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TemplateType,
   listingSettingsGroupSchema,
+  renderListingTemplate,
   type ListingSettingsGroupFormData,
   type PredefinedTemplateResponse,
 } from '@repo/shared';
@@ -223,31 +224,13 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     templates,
   ]);
 
-  const renderedPreview = useMemo(() => {
-    const { htmlContent, sampleData } = activeTemplate;
-
-    let processedHtml = htmlContent || '';
-    if (!sampleData) {
-      return processedHtml;
-    }
-
-    Object.entries(sampleData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        const blockRegex = new RegExp(`{{#${key}}}(.*?){{/${key}}}`, 'gs');
-        processedHtml = processedHtml.replace(blockRegex, (_, inner) => {
-          return value.map((item) => inner.replace(/{{.}}/g, String(item))).join('\n');
-        });
-
-        const listHtml = value.map((item) => `<li>${item}</li>`).join('\n');
-        processedHtml = processedHtml.replace(new RegExp(`{{${key}}}`, 'g'), `<ul>${listHtml}</ul>`);
-      } else {
-        const regex = new RegExp(`{{{?${key}}}?}`, 'g');
-        processedHtml = processedHtml.replace(regex, String(value));
-      }
-    });
-
-    return processedHtml;
-  }, [activeTemplate]);
+  // Preview and the published listing MUST go through the same renderer — a
+  // second, drifting implementation here is what let the backend publish raw
+  // `{{{product_description}}}` while this panel looked perfect.
+  const renderedPreview = useMemo(
+    () => renderListingTemplate(activeTemplate.htmlContent || '', activeTemplate.sampleData ?? {}),
+    [activeTemplate]
+  );
 
   const handleOpenPreview = () => {
     const win = window.open('', '_blank');

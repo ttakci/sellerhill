@@ -149,7 +149,7 @@ export const Input = styled.input<{
   padding-right: ${({ $hasIconRight }) => ($hasIconRight ? CONTROL_ICON_WIDTH : CONTROL_PADDING_X)};
 
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-family: ${tkn('typography.fontFamily.body')};
   font-weight: ${tkn('typography.fontWeight.normal')};
   outline: none;

@@ -196,6 +196,9 @@ export type {
 export { ToastContext, ToastProvider, useToastContext } from './context';
 export type { ToastContextValue } from './context';
 
+export { MarketplaceContext, MarketplaceProvider, useMarketplaceContext } from './context';
+export type { MarketplaceContextValue, MarketplaceProviderProps } from './context';
+
 // Hook exports
 export { useIsMobile, useLoading, useMediaQuery, useTheme, useToast, useUI } from './hooks';
 

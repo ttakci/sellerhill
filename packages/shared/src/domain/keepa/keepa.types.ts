@@ -1,4 +1,4 @@
-import type { ProductData } from '../products/product-data.types';
+import type { ProductData, ProductIdentifiers } from '../products/product-data.types';
 
 /**
  * Confidence of a Keepa stock observation. `UNKNOWN` must never be written as a
@@ -34,6 +34,10 @@ export interface KeepaProduct {
   brand?: string;
   category?: string;
   features?: string[];
+  /** Item-specific-ready attributes (Color/Size/MPN/weight/…). */
+  specs?: Record<string, string>;
+  /** UPC/EAN/MPN/model for eBay catalog matching. */
+  identifiers?: ProductIdentifiers;
 }
 
 /**

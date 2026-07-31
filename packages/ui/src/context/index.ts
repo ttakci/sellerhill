@@ -14,3 +14,6 @@ export type { ThemeContextValue } from './ThemeContext.types';
 
 export { ToastContext, ToastProvider, useToastContext } from './ToastContext';
 export type { ToastContextValue } from './ToastContext';
+
+export { MarketplaceContext, MarketplaceProvider, useMarketplaceContext } from './MarketplaceContext';
+export type { MarketplaceContextValue, MarketplaceProviderProps } from './MarketplaceContext.types';

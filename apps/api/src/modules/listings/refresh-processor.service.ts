@@ -31,6 +31,7 @@ interface ProductRow {
   brand: string | null;
   features: string[] | null;
   description: string | null;
+  specs: Record<string, string> | null;
   consecutive_failures: number;
 }
 
@@ -165,7 +166,7 @@ export class RefreshProcessorService extends WorkerHost {
 
     const placeholders = productIds.map((_, i) => `$${i + 1}`).join(',');
     const products = await this.databaseService.query<ProductRow>(
-      `SELECT id, asin, price, stock, title, image_urls, brand, features, description, consecutive_failures
+      `SELECT id, asin, price, stock, title, image_urls, brand, features, description, specs, consecutive_failures
        FROM products
        WHERE id IN (${placeholders})`,
       productIds
@@ -241,7 +242,11 @@ export class RefreshProcessorService extends WorkerHost {
     const metadataChanged =
       (kp.title !== undefined && kp.title !== row.title) ||
       (kp.brand !== undefined && kp.brand !== row.brand) ||
-      (kp.description !== undefined && kp.description !== (row.description ?? ''));
+      (kp.description !== undefined && kp.description !== (row.description ?? '')) ||
+      // Backfill: rows cached before item specifics were extracted have an empty
+      // `specs` map. Without this they would keep publishing bare listings until
+      // their price happened to move.
+      (Object.keys(kp.specs ?? {}).length > 0 && Object.keys(row.specs ?? {}).length === 0);
 
     if (commerceChanged || metadataChanged) {
       await this.databaseService.query(
@@ -255,6 +260,10 @@ export class RefreshProcessorService extends WorkerHost {
              brand = $5,
              features = $6,
              description = $7,
+             -- Attribute maps only grow richer: a refresh that resolved nothing
+             -- must not wipe item specifics captured on an earlier fetch.
+             specs = CASE WHEN $11::jsonb = '{}'::jsonb THEN specs ELSE $11::jsonb END,
+             identifiers = CASE WHEN $12::jsonb = '{}'::jsonb THEN identifiers ELSE $12::jsonb END,
              raw_keepa_data = $8,
              last_refresh_attempt_at = NOW(),
              last_successful_refresh_at = NOW(),
@@ -273,6 +282,8 @@ export class RefreshProcessorService extends WorkerHost {
           JSON.stringify(kp.raw ?? {}),
           intervalMinutes,
           row.id,
+          JSON.stringify(kp.specs ?? {}),
+          JSON.stringify(kp.identifiers ?? {}),
         ]
       );
 

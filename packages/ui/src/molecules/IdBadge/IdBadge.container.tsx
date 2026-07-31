@@ -1,19 +1,9 @@
 import { useState } from 'react';
 
-import { IdBadgeComponent } from './IdBadge.component';
-import type { IdBadgeProps, StoreType } from './IdBadge.types';
+import { useMarketplaceContext } from '../../context';
 
-/** Generate the appropriate URL based on store type and ID */
-const getStoreUrl = (storeType: StoreType, id: string): string => {
-  switch (storeType) {
-    case 'amazon':
-      return `https://www.amazon.com/dp/${id}`;
-    case 'ebay':
-      return `https://www.ebay.com/itm/${id}`;
-    default:
-      return '#';
-  }
-};
+import { IdBadgeComponent } from './IdBadge.component';
+import type { IdBadgeProps } from './IdBadge.types';
 
 export const IdBadge = ({
   id,
@@ -22,7 +12,11 @@ export const IdBadge = ({
   className,
   onClick,
 }: IdBadgeProps) => {
-  const url = getStoreUrl(storeType, id);
+  // URL building is injected by the app: eBay item links are environment-scoped
+  // (a sandbox item id does not resolve on ebay.com), and the design system
+  // must not know about deployment environments.
+  const { buildEbayItemUrl, buildAmazonProductUrl } = useMarketplaceContext();
+  const url = storeType === 'ebay' ? buildEbayItemUrl(id) : buildAmazonProductUrl(id);
   const [isHovered, setIsHovered] = useState(false);
 
   return (

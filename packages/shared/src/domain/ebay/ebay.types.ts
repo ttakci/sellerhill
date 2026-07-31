@@ -50,6 +50,18 @@ export interface GetEbayAccountsResponse {
 }
 
 /**
+ * Which eBay environment the deployment talks to.
+ *
+ * Sandbox listings do NOT exist on ebay.com — a production item URL for a
+ * sandbox item id resolves to "listing not found", so every buyer-facing eBay
+ * link has to be built against the environment the listing was published in.
+ */
+export enum EbayEnvironment {
+  PRODUCTION = 'production',
+  SANDBOX = 'sandbox',
+}
+
+/**
  * eBay OAuth callback query parameters
  */
 export interface EbayOAuthCallbackQuery {

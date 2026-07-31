@@ -30,7 +30,7 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 ### Tokens
 - All colors, spacing, shadows, radii, typography → `tkn('path')` from `@repo/ui`. Never hardcoded hex/rgb, never raw `16px`/`1rem`.
 - Inline `style={{ }}` is forbidden.
-- Typeface: **Source Sans 3** for UI (`heading` / `body` / `sans`). `mono` = JetBrains Mono. Institutional / insurance-grade readability; no dual typeface stacks.
+- Typeface: **Inter** for `heading`, **Lexend** for `body` / `sans`, JetBrains Mono for `mono`. That pairing is fixed — never introduce a third family or hardcode a family name outside `designTokens.ts`. Body reads at **15px** (`fontSize.base`); `fontSize.md` (16px) is a heading step.
 
 ### Text
 - All visible text uses `<Text variant="...">` from `@repo/ui`. Never `styled.h1`, `styled.p`, etc.

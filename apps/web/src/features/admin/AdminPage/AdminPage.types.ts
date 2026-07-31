@@ -1,5 +1,7 @@
 import type {
+  AdminAspectDefaultDto,
   AdminBillingMetricsDto,
+  AdminListingQualitySummaryDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
   AdminProxyDto,
@@ -12,7 +14,15 @@ import type {
 } from '@repo/shared';
 import type { TableColumn } from '@repo/ui';
 
-export type AdminTabId = 'overview' | 'queues' | 'costs' | 'proxies' | 'settings' | 'billing' | 'users';
+export type AdminTabId =
+  | 'overview'
+  | 'queues'
+  | 'costs'
+  | 'proxies'
+  | 'listingQuality'
+  | 'settings'
+  | 'billing'
+  | 'users';
 
 /** Controlled add-proxy form state (strings — converted at submit). */
 export interface ProxyFormState {
@@ -33,8 +43,19 @@ export interface SettingGroup {
   settings: PlatformSettingDto[];
 }
 
+/** Listing-quality tab data + actions. */
+export interface AdminListingQualityView {
+  summary?: AdminListingQualitySummaryDto;
+  defaults: AdminAspectDefaultDto[];
+  search: string;
+  onSearchChange: (value: string) => void;
+  onRemoveDefault: (id: string) => void;
+  isRemoving: boolean;
+}
+
 export interface AdminPageComponentProps {
   activeTab: AdminTabId;
+  listingQuality: AdminListingQualityView;
   overview?: AdminOverviewDto;
   operations?: AdminOperationsSummaryDto;
   providerCosts: ProviderCostSummaryDto[];

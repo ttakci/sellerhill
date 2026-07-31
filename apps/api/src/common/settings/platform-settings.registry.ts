@@ -289,6 +289,25 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'false',
   }),
   def({
+    // Off by default: it needs a local model pulled (`ollama pull qwen3:1.7b`).
+    // Turning it on costs nothing on the local provider, and a failure falls
+    // back to the deterministic layers.
+    key: PlatformSettingKey.EBAY_ASPECTS_LLM_ENABLED,
+    category: PlatformSettingCategory.LLM,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_ASPECTS_LLM_ENABLED',
+    defaultValue: 'false',
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_ASPECTS_LLM_MAX_PER_LISTING,
+    category: PlatformSettingCategory.LLM,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_ASPECTS_LLM_MAX_PER_LISTING',
+    defaultValue: '3',
+    min: 0,
+    max: 20,
+  }),
+  def({
     key: PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
     category: PlatformSettingCategory.BILLING,
     type: PlatformSettingType.BOOLEAN,

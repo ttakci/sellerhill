@@ -52,7 +52,7 @@ export const SearchInput = styled.input`
   height: 100%;
   padding: 0;
   color: ${tkn('colors.text.primary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-family: ${tkn('typography.fontFamily.body')};
   font-weight: ${tkn('typography.fontWeight.normal')};
   outline: none;

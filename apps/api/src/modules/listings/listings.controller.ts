@@ -284,6 +284,26 @@ export class ListingsController {
   }
 
   /**
+   * Re-queue one failed ASIN.
+   *
+   * Without this a failed create was a dead end: no `listings` row is written
+   * on failure, so the seller could only re-run the entire import.
+   */
+  @ApiOperation({ summary: 'Retry a single failed listing job item' })
+  @Post('jobs/:jobId/items/:itemId/retry')
+  async retryJobItem(
+    @Request() req: { user: { sub: string } },
+    @Param('jobId') jobId: string,
+    @Param('itemId') itemId: string
+  ): Promise<{ success: boolean }> {
+    const userId = req.user.sub;
+    const item = await this.listingsService.getJobItemForRetry(userId, jobId, itemId);
+    await this.listingsService.resetJobItemForRetry(jobId, itemId);
+    await this.listingQueueService.retryJobItem(userId, item);
+    return { success: true };
+  }
+
+  /**
    * Get cached product info
    */
   @ApiOperation({ summary: 'Get cached product data by ASIN' })

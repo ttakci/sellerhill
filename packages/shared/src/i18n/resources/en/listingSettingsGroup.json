@@ -7,22 +7,18 @@
     "editGroup": "Edit Listing Group",
     "backToList": "Back to Groups",
     "connectorSubtitle": "AMAZON TO EBAY CONNECTOR",
-
     "groupDetails": "Group Details",
     "groupName": "Group Name",
     "groupNamePlaceholder": "e.g., Premium Electronics",
     "description": "Description",
     "descriptionPlaceholder": "Enter group internal notes...",
-
     "contentSection": "Listing content",
     "stripBrandFromTitle": "Remove brand from title",
     "stripBrandFromTitleHint": "Strip the Amazon brand name from eBay titles when creating listings (dropshipping-friendly).",
-    "aiTitleEnabled": "AI-assisted title (local Ollama)",
-    "aiTitleEnabledHint": "On new listing create only: rewrite title via local Ollama if CONTENT_AI_ENABLED=true. Timeout falls back to normal title. Not used on stock/price refresh (scales for large catalogs).",
-    "aiDescriptionEnabled": "AI-assisted description (local Ollama)",
-    "aiDescriptionEnabledHint": "On new listing create only: rewrite description via local Ollama. Falls back to template/features. Do not use for bulk reprocessing hundreds of thousands of existing listings.",
-
-
+    "aiTitleEnabled": "AI-assisted title",
+    "aiTitleEnabledHint": "New listings only. Requires \"llm.contentEnabled\" to be on at Admin → Settings. A failure or timeout falls back to the normal title, so listing creation never blocks.",
+    "aiDescriptionEnabled": "AI-assisted description",
+    "aiDescriptionEnabledHint": "New listings only. Requires \"llm.contentEnabled\" to be on at Admin → Settings. Falls back to your template/features on failure. Existing listings are never reprocessed.",
     "repricingStrategy": "Repricing Strategy",
     "addPriceRange": "Add Price Range",
     "removePriceRange": "Remove Price Range",
@@ -31,10 +27,8 @@
     "profitMargin": "Profit Margin (%)",
     "fixedProfit": "Fixed Profit ($)",
     "priceRangeLabel": "Price Range {{index}}",
-
     "stock": "Stock",
     "defaultQuantity": "Default Quantity",
-
     "fees": "Fees",
     "ebayFee": "eBay Fee",
     "ebayFeePercent": "eBay Fee (%)",
@@ -42,7 +36,6 @@
     "fixedFeeAmount": "Fixed Fee ($)",
     "tax": "Tax",
     "taxPercent": "Tax (%)",
-
     "templates": "Template",
     "customTemplate": "Custom",
     "predefinedTemplate": "Predefined",
@@ -51,14 +44,12 @@
     "htmlEditor": "HTML Editor",
     "templatePlaceholder": "Enter your custom HTML template...",
     "templateVariablesHelp": "Use variables like {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}",
-
     "preview": "Preview",
     "livePreview": "Live Preview",
     "darkModePreview": "Dark Mode Preview",
     "desktopView": "Desktop View",
     "mobileView": "Mobile View",
     "renderingPreview": "Rendering preview...",
-
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "cancel": "Cancel",
@@ -68,15 +59,12 @@
     "confirmDeleteMessage": "This action cannot be undone. Products using this group will need to be reassigned.",
     "deleteSuccess": "Group deleted successfully",
     "deleteFailed": "Failed to delete group",
-
     "productsCount_one": "{{count}} product",
     "productsCount_other": "{{count}} products",
     "noProducts": "No products",
-
     "statusActive": "Active",
     "statusDraft": "Draft",
     "statusInactive": "Inactive",
-
     "card": {
       "generalTitle": "General",
       "deductionsTitle": "Deductions",
@@ -86,13 +74,11 @@
       "tax": "Tax",
       "customTemplate": "Customized Template"
     },
-
     "emptyState": {
       "title": "No Listing Groups Yet",
       "description": "Create your first group to start organizing your listings",
       "action": "Create New Group"
     },
-
     "predefinedTemplates": {
       "modernMinimalist": "Modern Minimalist",
       "modernMinimalistDesc": "Clean and professional design with focus on product details",
@@ -101,7 +87,6 @@
       "ecommerceClassic": "E-commerce Classic",
       "ecommerceClassicDesc": "Traditional layout with clear sections and call-to-action"
     },
-
     "validation": {
       "nameRequired": "Group name is required",
       "nameMinLength": "Group name must be at least 3 characters",
@@ -127,7 +112,6 @@
       "overlappingPriceRanges": "Price ranges cannot overlap",
       "minStockBuffer": "Stock buffer must be 0 or greater"
     },
-
     "errors": {
       "loadFailed": "Failed to load listing groups",
       "saveFailed": "Failed to save changes",
@@ -140,14 +124,12 @@
       "networkError": "Network error. Please check your connection.",
       "unknownError": "An unexpected error occurred"
     },
-
     "success": {
       "created": "Listing group created successfully",
       "updated": "Listing group updated successfully",
       "deleted": "Listing group deleted successfully",
       "saved": "Changes saved successfully"
     },
-
     "tooltips": {
       "editGroup": "Edit group",
       "deleteGroup": "Delete group",
@@ -159,7 +141,6 @@
       "copyTemplate": "Copy template HTML",
       "resetTemplate": "Reset to default template"
     },
-
     "help": {
       "repricingStrategy": "Define multiple price ranges with different profit margins. Products will be priced according to their cost range.",
       "profitMargin": "Percentage-based profit calculated from the product cost.",

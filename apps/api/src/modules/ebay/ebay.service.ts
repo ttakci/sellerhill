@@ -2,8 +2,13 @@ import { ConflictException, Injectable, Logger, NotFoundException, OnModuleInit 
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
+  EBAY_DESCRIPTION_MAX_LENGTH,
+  EBAY_INVENTORY_DESCRIPTION_MAX_LENGTH,
   EBAY_MARKETPLACE,
   EBAY_MARKETPLACE_CONFIG,
+  EBAY_MAX_IMAGES,
+  EBAY_NOT_APPLICABLE,
+  EBAY_TITLE_MAX_LENGTH,
   EbayAccountStatus,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
@@ -15,8 +20,19 @@ import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
+import { isValidGtin, normalizeGtin } from '../../common/utils/gtin';
+import { truncateHtml } from '../../common/utils/sanitize';
 
+import { type AspectResolution, type CategoryAspect } from './aspect-builder';
+import { AspectResolverService } from './aspect-resolver.service';
 import { EbayOAuthService } from './ebay-oauth.service';
+import { EbayTaxonomyService } from './ebay-taxonomy.service';
+import {
+  CategoryAspectsUnavailableError,
+  CategoryResolutionError,
+  ListingPublishExhaustedError,
+} from './ebay.errors';
+import { resolveEbayCondition } from './listing-condition';
 
 /**
  * Prefix marking an encrypted-at-rest token value in `ebay_accounts`.
@@ -24,6 +40,31 @@ import { EbayOAuthService } from './ebay-oauth.service';
  * onModuleInit backfill re-encrypts them.
  */
 const TOKEN_ENC_PREFIX = 'enc:';
+
+/** eBay's category taxonomy changes on a release cadence, not per request. */
+const CATEGORY_ASPECT_CACHE_TTL_MS = 60 * 60 * 1000;
+
+/** What a successful publish produced, including the item-specifics audit trail. */
+export interface EbayListingCreationResult {
+  listingId: string;
+  categoryName: string;
+  categoryId: string;
+  aspectResolution: AspectResolution;
+}
+
+/** Compact "which layer filled what" line — the diagnostic that replaces guessing. */
+function summarizeAspectLayers(resolution: AspectResolution): string {
+  const counts = new Map<string, number>();
+  for (const decision of resolution.decisions) {
+    if (decision.value) {
+      counts.set(decision.layer, (counts.get(decision.layer) ?? 0) + 1);
+    }
+  }
+  return (
+    [...counts.entries()].map(([layer, count]) => `${layer}=${count}`).join(' ') ||
+    'none'
+  );
+}
 
 /** Helper to safely extract error message from unknown errors */
 function getErrorMessage(error: unknown): string {
@@ -133,11 +174,20 @@ export class EbayService implements OnModuleInit {
    * dump must not yield working seller-API tokens.
    */
   private readonly tokenEncryption: EncryptionUtil;
+  /** Category → aspect metadata cache (see getItemAspectsForCategory). */
+  private readonly categoryAspectCache = new Map<string, { aspects: CategoryAspect[]; expiresAt: number }>();
+  /** Title → resolved category cache; identical titles are common in bulk adds. */
+  private readonly categorySuggestionCache = new Map<
+    string,
+    { categoryId: string; categoryName: string; expiresAt: number }
+  >();
 
   constructor(
     private readonly oauthService: EbayOAuthService,
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly taxonomyService: EbayTaxonomyService,
+    private readonly aspectResolver: AspectResolverService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -299,7 +349,7 @@ export class EbayService implements OnModuleInit {
     listingData: ListingCreationData,
     policies: { paymentId: string; shippingId: string; returnId: string },
     asin: string
-  ): Promise<{ listingId: string; categoryName: string }> {
+  ): Promise<EbayListingCreationResult> {
     this.logger.log(`Creating eBay listing (REST) for user ${userId}, product ${productId}`);
 
     // 1. Get user's active eBay account
@@ -319,33 +369,68 @@ export class EbayService implements OnModuleInit {
     const isSandbox = this.configService.get('EBAY_ENVIRONMENT') === 'sandbox';
     const sku = isSandbox ? `${asin}-NEW-${Date.now().toString().slice(-6)}` : `${asin}-NEW`;
 
-    // 5. Create or Replace Inventory Item (PUT)
-    await this.createOrReplaceInventoryItem(accessToken, sku, listingData, config);
-
-    // 6. Ensure Inventory Location Exists
+    // 5. Ensure Inventory Location Exists
     const merchantLocationKey = 'default';
     await this.ensureInventoryLocation(accessToken, merchantLocationKey, listingData, config);
 
-    // 7. Get Suggested Category (Dynamic)
-    const { categoryId, categoryName } = await this.getSuggestedCategory(accessToken, listingData.title, config.siteId);
-    this.logger.log(`Suggested category for "${listingData.title}": ${categoryName} (${categoryId})`);
+    // 6. Resolve the category FIRST — item specifics are category-scoped, so
+    //    the inventory item cannot be built correctly before it is known. (The
+    //    old flow PUT the item once with a Brand-only aspect map before the
+    //    category was resolved, which is how listings reached eBay with a
+    //    near-empty specifics table.)
+    const { categoryId, categoryName } = await this.taxonomyService.resolveCategory({
+      accessToken,
+      marketplaceId,
+      categoryTreeId: config.siteId,
+      asin,
+      brand: listingData.brand,
+      title: listingData.title,
+      amazonCategory: listingData.category,
+    });
+    this.logger.log(`Category for "${listingData.title}": ${categoryName} (${categoryId})`);
 
-    // 8. Fetch Required Aspects for this Category
-    const requiredAspects = await this.getItemAspectsForCategory(accessToken, categoryId, config.siteId);
-    this.logger.log(`Required aspects for category ${categoryId}: ${requiredAspects.join(', ') || 'None'}`);
+    // 7. Fetch full aspect metadata (names + required + allowed values) for it.
+    const categoryAspects = await this.taxonomyService.getCategoryAspects({
+      accessToken,
+      marketplaceId,
+      categoryTreeId: config.siteId,
+      categoryId,
+    });
+    this.logger.log(
+      `Category ${categoryId}: ${categoryAspects.length} aspects, ` +
+        `${categoryAspects.filter((a) => a.required).length} required`
+    );
+    const forcedAspectNames: string[] = [];
+    let resolution = await this.aspectResolver.resolve({
+      marketplaceId,
+      categoryId,
+      categoryAspects,
+      forcedAspectNames,
+      product: {
+        title: listingData.title,
+        brand: listingData.brand,
+        specs: listingData.specs,
+        features: listingData.features,
+        identifiers: listingData.identifiers,
+      },
+    });
 
-    // Self-Healing Loop:
-    // If Publish fails due to "Missing Aspect", we catch it, add the missing aspect to 'requiredAspects', and retry.
-    // This allows us to auto-fill "Unknown" ONLY when eBay explicitly complains, getting around API data gaps.
+    // Self-healing loop: when a publish fails on a missing item specific, the
+    // aspect name is added to `forcedAspectNames` and the item is rebuilt. The
+    // second failure for the same aspect throws — the category constrains it to
+    // values we cannot derive, and retrying cannot change that.
     let listingId = '';
     let attempts = 0;
-    const maxAttempts = 5; // Increased slightly for safety
+    // With the terminal fallback in place a required aspect is never empty, so
+    // a third publish attempt cannot succeed where the second failed - it only
+    // multiplies eBay call volume for a listing that is already broken.
+    const maxAttempts = 3;
 
     while (attempts < maxAttempts) {
       let currentOfferId: string | undefined;
       try {
-        // 9. Create or Replace Inventory Item (PUT) with dynamic aspects
-        await this.createOrReplaceInventoryItem(accessToken, sku, listingData, config, requiredAspects);
+        // 8. Create or Replace Inventory Item (PUT) with category-aware aspects
+        await this.createOrReplaceInventoryItem(accessToken, sku, listingData, config, resolution);
 
         // 10. Create Offer (POST)
         currentOfferId = await this.createOffer(
@@ -363,7 +448,10 @@ export class EbayService implements OnModuleInit {
         listingId = await this.publishOffer(accessToken, currentOfferId);
 
         this.logger.log(`Successfully created eBay listing (REST): ${listingId}`);
-        return { listingId, categoryName };
+        // Teach the platform what worked in this category so the next listing
+        // resolves the same aspects without re-deriving them.
+        this.aspectResolver.recordPublishSuccess(marketplaceId, categoryId, resolution);
+        return { listingId, categoryName, categoryId, aspectResolution: resolution };
       } catch (error: unknown) {
         attempts++;
 
@@ -391,13 +479,48 @@ export class EbayService implements OnModuleInit {
           }
 
           if (missingKey) {
+            // Already forced once and eBay still rejects it: the category
+            // constrains this aspect to values we cannot derive. Retrying is
+            // guaranteed to fail, so surface an actionable error on the job item
+            // instead of burning four more publish attempts.
+            if (forcedAspectNames.includes(missingKey)) {
+              throw new Error(
+                `eBay requires the item specific "${missingKey}" for category ${categoryId} ` +
+                  `and no value could be derived from the Amazon product data. ` +
+                  `Set it manually on the listing, or choose a different category.`
+              );
+            }
+
             this.logger.warn(
               `Publish failed due to missing aspect '${missingKey}'. Auto-filling and retrying... (Attempt ${attempts})`
             );
-            if (!requiredAspects.includes(missingKey)) {
-              requiredAspects.push(missingKey);
-            }
+            forcedAspectNames.push(missingKey);
+            resolution = await this.aspectResolver.resolve({
+              marketplaceId,
+              categoryId,
+              categoryAspects,
+              forcedAspectNames,
+              product: {
+                title: listingData.title,
+                brand: listingData.brand,
+                specs: listingData.specs,
+                features: listingData.features,
+                identifiers: listingData.identifiers,
+              },
+            });
             continue; // Retry loop
+          }
+        }
+
+        // eBay rejected a VALUE we sent (as opposed to reporting one missing).
+        // Demote it so the next listing in this category stops repeating it.
+        const invalidAspectError = errors.find(
+          (e: { message?: string }) => e.message?.includes('has an invalid value') ?? false
+        );
+        if (invalidAspectError) {
+          const match = invalidAspectError.message?.match(/^(.*?) has an invalid value of "(.*?)"/);
+          if (match) {
+            this.aspectResolver.recordAspectRejection(marketplaceId, categoryId, match[1], match[2]);
           }
         }
 
@@ -420,7 +543,11 @@ export class EbayService implements OnModuleInit {
       }
     }
 
-    return { listingId, categoryName };
+    // Every attempt ended in `continue` and eBay never returned a listing id.
+    // Returning that as success wrote an ACTIVE listing row with an empty
+    // `ebay_item_id` - a listing that does not exist on eBay, can never be
+    // matched to an order, and blocks re-listing the ASIN.
+    throw new ListingPublishExhaustedError(categoryId, forcedAspectNames, attempts);
   }
 
   /**
@@ -431,67 +558,41 @@ export class EbayService implements OnModuleInit {
     sku: string,
     data: ListingCreationData,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US'],
-    requiredAspects: string[] = []
+    resolution: AspectResolution
   ): Promise<void> {
     const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/inventory_item/${sku}`;
 
-    // Build aspects dynamically
-    const aspects: Record<string, string[]> = {
-      Brand: [(data.brand || 'Unbranded').substring(0, 65)],
-    };
+    // Item specifics were resolved once for this attempt by AspectResolverService:
+    // the category's declared aspects (value-constrained, every required one
+    // filled) plus the product's remaining attributes as custom specifics.
+    const aspects = resolution.aspects;
 
-    // Priority 1: Use structured specs if available (from ScraperAPI)
-    if (data.specs && typeof data.specs === 'object') {
-      Object.entries(data.specs).forEach(([key, value]) => {
-        if (typeof value === 'string' && value.length < 65 && !aspects[key]) {
-          aspects[key] = [value];
-        }
-      });
-    }
+    this.logger.log(
+      `Item specifics for ${sku}: ${Object.keys(aspects).length} total ` +
+        `(${summarizeAspectLayers(resolution)})`
+    );
 
-    // Priority 2: Extract "Key: Value" pairs from features (bullet points)
-    if (data.features && Array.isArray(data.features)) {
-      data.features.forEach((feature: string) => {
-        // Regex to find "Key: Value" or "Key - Value" patterns
-        const match = feature.match(/(?:^|\.\s+)([A-Za-z0-9\-/.]{2,30})[:]\s*(.+?)(?=\.|$)/);
-        if (match) {
-          const key = match[1].trim();
-          const value = match[2].trim();
+    const condition = resolveEbayCondition(data.title);
 
-          if (key.length > 2 && value.length < 65 && !aspects[key]) {
-            aspects[key] = [value];
-          }
-        }
-      });
-    }
-
-    // Fill MISSING required aspects with "Unknown" or safe defaults
-    // This solves the validation error generically using the requiredAspects list
-    requiredAspects.forEach((req) => {
-      if (!aspects[req]) {
-        // Check if we have a close match (case insensitive) from our generic extraction
-        const existingKey = Object.keys(aspects).find((k) => k.toLowerCase() === req.toLowerCase());
-        if (existingKey) {
-          aspects[req] = aspects[existingKey];
-        } else {
-          this.logger.log(`Auto-filling missing required aspect '${req}' for SKU ${sku}`);
-          aspects[req] = ['Unknown'];
-        }
-      }
-    });
-
-    // Determine condition based on title
-    let condition = 'NEW';
-    const lowerTitle = data.title.toLowerCase();
-    if (lowerTitle.includes('renewed') || lowerTitle.includes('refurbished')) {
-      // In eBay REST API, for many categories, refurbished items use specific strings
-      // For Sandbox and generic purposes, we'll try a common one or keep as NEW but log it
-      this.logger.log(`Detected Renewed/Refurbished item: ${sku}. Adjusting condition logic.`);
-      // Note: eBay REST Inventory API uses condition values like:
-      // NEW, LIKE_NEW, VERY_GOOD, GOOD, ACCEPTABLE
-      // For "Renewed" on Amazon, 'LIKE_NEW' or 'VERY_GOOD' is often more accurate for eBay
-      condition = 'LIKE_NEW';
-    }
+    // Catalog identifiers: this is what lets eBay match the listing to its own
+    // catalog product, which auto-enriches item specifics and search metadata.
+    // GTINs are check-digit validated — a malformed one fails the whole publish.
+    const upc = normalizeGtin(data.identifiers?.upc);
+    const ean = normalizeGtin(data.identifiers?.ean);
+    // A GTIN is not a part number: eBay fails the publish with "MPN has an
+    // invalid value" when a barcode lands here (Amazon puts the UPC in
+    // `partNumber` for most grocery ASINs). Omitting MPN is explicitly allowed.
+    const rawMpn = data.identifiers?.mpn?.trim();
+    const brandText = data.brand?.trim().toLowerCase();
+    const usableMpn =
+      rawMpn && !isValidGtin(rawMpn) && (!brandText || rawMpn.toLowerCase() !== brandText)
+        ? rawMpn
+        : undefined;
+    // eBay validates Brand and MPN as a PAIR (`<BrandMPN>`): sending a brand with
+    // no MPN fails with "Input data for tag <BrandMPN> is invalid or missing".
+    // Its documented answer for "this product has no part number" is the literal
+    // non-value, which is also what the item-specific fallback uses.
+    const mpn = usableMpn ?? (data.brand?.trim() ? EBAY_NOT_APPLICABLE : undefined);
 
     const payload = {
       availability: {
@@ -501,13 +602,20 @@ export class EbayService implements OnModuleInit {
       },
       condition: condition,
       product: {
-        // eBay title limit is 80 characters. Truncate to ensure success.
-        title: data.title ? data.title.substring(0, 80) : 'New Product',
-        description: data.description ? data.description.substring(0, 4000) : '',
+        title: data.title ? data.title.substring(0, EBAY_TITLE_MAX_LENGTH) : 'New Product',
+        // Inventory-item description is catalog metadata capped at 4,000 chars —
+        // the buyer-visible copy is the offer's listingDescription (500,000).
+        // Truncated at a tag boundary so a cut never leaves broken markup.
+        description: data.description
+          ? truncateHtml(data.description, EBAY_INVENTORY_DESCRIPTION_MAX_LENGTH)
+          : '',
         aspects: aspects,
+        ...(data.brand ? { brand: data.brand.substring(0, 65) } : {}),
+        ...(mpn ? { mpn: mpn.substring(0, 65) } : {}),
+        ...(upc ? { upc: [upc] } : {}),
+        ...(ean ? { ean: [ean] } : {}),
         // Filter out null/empty URLs and ensure valid format
         // eBay requires at least one image, use placeholder if none available
-        // eBay allows maximum 12 images
         imageUrls: (() => {
           const validUrls = (data.imageUrls || []).filter(
             (url: string) => url && typeof url === 'string' && url.startsWith('http')
@@ -516,8 +624,7 @@ export class EbayService implements OnModuleInit {
             this.logger.warn(`No valid images for SKU ${sku}, using placeholder`);
             return ['https://via.placeholder.com/600x600?text=No+Image+Available'];
           }
-          // eBay maximum is 12 images
-          return validUrls.slice(0, 12);
+          return validUrls.slice(0, EBAY_MAX_IMAGES);
         })(),
       },
     };
@@ -526,13 +633,17 @@ export class EbayService implements OnModuleInit {
     this.logger.debug(`Payload for ${sku}: ${JSON.stringify(payload)}`);
 
     try {
-      await axios.put(url, payload, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB', // Simplified language logic
-        },
-      });
+      // 429/5xx backoff on the create path too: one transient eBay 500 during a
+      // bulk add used to burn a whole BullMQ attempt for that ASIN.
+      await this.withRateLimitRetry(() =>
+        axios.put(url, payload, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
+          },
+        })
+      );
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
       this.logger.error(
@@ -565,7 +676,8 @@ export class EbayService implements OnModuleInit {
       format: 'FIXED_PRICE',
       availableQuantity: data.quantity || 1,
       categoryId: categoryId,
-      listingDescription: data.description ? data.description.substring(0, 4000) : '',
+      // Buyer-visible description: full template HTML (eBay allows 500,000).
+      listingDescription: data.description ? truncateHtml(data.description, EBAY_DESCRIPTION_MAX_LENGTH) : '',
       listingPolicies: {
         fulfillmentPolicyId: policies.shippingId,
         paymentPolicyId: policies.paymentId,
@@ -584,13 +696,15 @@ export class EbayService implements OnModuleInit {
     this.logger.debug(`Creating offer for ${sku}. URL: ${url}, Payload: ${JSON.stringify(payload)}`);
 
     try {
-      const response = await axios.post<EbayOfferResponse>(url, payload, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
-        },
-      });
+      const response = await this.withRateLimitRetry(() =>
+        axios.post<EbayOfferResponse>(url, payload, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'Content-Language': config.countryCode === 'US' ? 'en-US' : 'en-GB',
+          },
+        })
+      );
       return response.data.offerId;
     } catch (e: unknown) {
       const axiosErr = isAxiosErrorWithData(e) ? e : null;
@@ -667,15 +781,17 @@ export class EbayService implements OnModuleInit {
     this.logger.debug(`Publishing offer ${offerId}. URL: ${url}`);
 
     try {
-      const response = await axios.post<EbayPublishResponse>(
-        url,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      const response = await this.withRateLimitRetry(() =>
+        axios.post<EbayPublishResponse>(
+          url,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        )
       );
 
       return response.data.listingId;
@@ -755,9 +871,22 @@ export class EbayService implements OnModuleInit {
    */
   private async getSuggestedCategory(
     accessToken: string,
-    query: string,
+    data: Pick<ListingCreationData, 'title' | 'brand' | 'category'>,
     treeId: string
   ): Promise<{ categoryId: string; categoryName: string }> {
+    // Brand + the Amazon category are strong signals eBay's matcher uses; the
+    // title alone lands generic items in "Other" far more often.
+    const query = [data.brand, data.title, data.category]
+      .filter((part): part is string => Boolean(part && part.trim()))
+      .join(' ')
+      .slice(0, 350);
+
+    const cacheKey = `${treeId}:${query}`;
+    const cached = this.categorySuggestionCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return { categoryId: cached.categoryId, categoryName: cached.categoryName };
+    }
+
     try {
       const url = `${this.configService.get(
         'EBAY_REST_API_URL'
@@ -775,27 +904,53 @@ export class EbayService implements OnModuleInit {
           category: { categoryId: string; categoryName?: string };
         }>;
       }
-      const data = response.data as CategorySuggestionResponse | undefined;
-      if (data?.categorySuggestions?.length && data.categorySuggestions.length > 0) {
-        const leaf = data.categorySuggestions[0].category;
-        return {
+      const suggestions = (response.data as CategorySuggestionResponse | undefined)?.categorySuggestions;
+      if (suggestions && suggestions.length > 0) {
+        const leaf = suggestions[0].category;
+        const resolved = {
           categoryId: leaf.categoryId,
           categoryName: leaf.categoryName || 'Unknown Category',
         };
+        this.categorySuggestionCache.set(cacheKey, {
+          ...resolved,
+          expiresAt: Date.now() + CATEGORY_ASPECT_CACHE_TTL_MS,
+        });
+        return resolved;
       }
 
-      this.logger.warn(`No category suggestions found for "${query}". Using default (Other).`);
-      return { categoryId: '1', categoryName: 'Other' }; // Fallback
+      // Category 1 is eBay's ROOT, not a listable leaf. Returning it (the old
+      // behaviour) guaranteed a later publish failure whose message never
+      // mentioned the category, so the real cause stayed invisible.
+      throw new CategoryResolutionError(query);
     } catch (e) {
+      if (e instanceof CategoryResolutionError) {
+        throw e;
+      }
       this.logger.error('Failed to get suggested category', e);
-      return { categoryId: '1', categoryName: 'Other' }; // Fallback
+      throw new CategoryResolutionError(query);
     }
   }
 
   /**
-   * Get Required Item Aspects for a Category (Taxonomy API)
+   * Full item-aspect metadata for a category (Taxonomy API).
+   *
+   * We used to keep only the NAMES of REQUIRED aspects and fill each with
+   * "Unknown". The value constraints are the important part: a SELECTION_ONLY
+   * aspect rejects free text, and the recommended aspects are exactly the item
+   * specifics buyers filter on. Cached per category — the taxonomy is static
+   * for days and a bulk add would otherwise call it once per ASIN.
    */
-  private async getItemAspectsForCategory(accessToken: string, categoryId: string, treeId: string): Promise<string[]> {
+  private async getItemAspectsForCategory(
+    accessToken: string,
+    categoryId: string,
+    treeId: string
+  ): Promise<CategoryAspect[]> {
+    const cacheKey = `${treeId}:${categoryId}`;
+    const cached = this.categoryAspectCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.aspects;
+    }
+
     try {
       const url = `${this.configService.get(
         'EBAY_REST_API_URL'
@@ -807,26 +962,56 @@ export class EbayService implements OnModuleInit {
         },
       });
 
-      // Filter for aspects that are mandatory (usage: 'REQUIRED')
+      interface AspectValue {
+        localizedValue?: string;
+      }
       interface AspectData {
-        aspectConstraint?: { aspectMode?: string; aspectUsage?: string };
         localizedAspectName: string;
+        aspectConstraint?: {
+          aspectRequired?: boolean;
+          aspectUsage?: string;
+          aspectMode?: string;
+          itemToAspectCardinality?: string;
+          aspectMaxLength?: number;
+          aspectDataType?: string;
+        };
+        aspectValues?: AspectValue[];
       }
       interface AspectsResponse {
         aspects?: AspectData[];
       }
-      const aspectsData = response.data as AspectsResponse | undefined;
-      const requiredAspects =
-        aspectsData?.aspects
-          ?.filter(
-            (a) => a.aspectConstraint?.aspectMode === 'REQUIRED' || a.aspectConstraint?.aspectUsage === 'REQUIRED'
-          )
-          .map((a) => a.localizedAspectName) || [];
 
-      return requiredAspects;
+      const aspectsData = response.data as AspectsResponse | undefined;
+      const aspects: CategoryAspect[] = (aspectsData?.aspects ?? []).map((aspect) => ({
+        name: aspect.localizedAspectName,
+        required:
+          aspect.aspectConstraint?.aspectRequired === true ||
+          aspect.aspectConstraint?.aspectUsage === 'REQUIRED' ||
+          aspect.aspectConstraint?.aspectMode === 'REQUIRED',
+        selectionOnly: aspect.aspectConstraint?.aspectMode === 'SELECTION_ONLY',
+        multiValue: aspect.aspectConstraint?.itemToAspectCardinality === 'MULTI',
+        maxLength: aspect.aspectConstraint?.aspectMaxLength,
+        values: (aspect.aspectValues ?? [])
+          .map((value) => value.localizedValue)
+          .filter((value): value is string => Boolean(value)),
+      }));
+
+      this.categoryAspectCache.set(cacheKey, {
+        aspects,
+        expiresAt: Date.now() + CATEGORY_ASPECT_CACHE_TTL_MS,
+      });
+      return aspects;
     } catch (e) {
+      // An empty aspect list is not a benign default: it publishes a Brand-only
+      // listing that then fails on every required item specific in turn. Serve a
+      // stale cached copy when one exists; otherwise fail loudly.
       this.logger.warn(`Failed to fetch aspects for category ${categoryId}`, e);
-      return [];
+      const stale = this.categoryAspectCache.get(cacheKey);
+      if (stale) {
+        this.logger.warn(`Serving stale aspect metadata for category ${categoryId}`);
+        return stale.aspects;
+      }
+      throw new CategoryAspectsUnavailableError(categoryId);
     }
   }
 

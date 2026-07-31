@@ -15,10 +15,16 @@ COPY . .
 ARG VITE_API_BASE_URL=/api/v1
 ARG VITE_NODE_ENV=production
 ARG VITE_ENABLE_AUTH=true
+# Must match the api service's EBAY_ENVIRONMENT: buyer-facing item links are
+# built from it, and a sandbox item id is a dead link on ebay.com.
+ARG VITE_EBAY_ENVIRONMENT=production
+ARG VITE_GOOGLE_CLIENT_ID=
 
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_NODE_ENV=$VITE_NODE_ENV
 ENV VITE_ENABLE_AUTH=$VITE_ENABLE_AUTH
+ENV VITE_EBAY_ENVIRONMENT=$VITE_EBAY_ENVIRONMENT
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 # Install dependencies and build in order (single layer for verbose error output)
 RUN set -ex && \

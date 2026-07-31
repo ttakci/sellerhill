@@ -96,7 +96,7 @@ export const Description = styled.div`
   width: 100%;
   line-height: ${tkn('typography.lineHeight.relaxed')};
   color: ${tkn('colors.text.secondary')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.base')};
   font-family: ${tkn('typography.fontFamily.body')};
   text-align: center;
 `;

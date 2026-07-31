@@ -1,18 +1,39 @@
 import {
   AdminWarningLevel,
+  AspectDefaultSourceDto,
   PlatformSettingCategory,
   PlatformSettingSource,
   PlatformSettingType,
   QuotaPressureBand,
 } from '@repo/shared';
-import { Badge, Button, EmptyState, ModernTextInput, PageHeader, TabNav, Table, Text, Toggle } from '@repo/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ModernTextInput,
+  PageHeader,
+  SearchField,
+  TabNav,
+  Table,
+  Text,
+  Toggle,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './AdminPage.style';
 import type { AdminPageComponentProps, AdminTabId } from './AdminPage.types';
 
-const TABS: AdminTabId[] = ['overview', 'queues', 'costs', 'proxies', 'settings', 'billing', 'users'];
+const TABS: AdminTabId[] = [
+  'overview',
+  'queues',
+  'costs',
+  'proxies',
+  'listingQuality',
+  'settings',
+  'billing',
+  'users',
+];
 
 /** Badge variant for a quota pressure band. */
 const BAND_VARIANT: Record<QuotaPressureBand, 'neutral' | 'success' | 'warning' | 'error'> = {
@@ -32,6 +53,7 @@ const SOURCE_VARIANT: Record<PlatformSettingSource, 'neutral' | 'success' | 'war
 
 export const AdminPageComponent = ({
   activeTab,
+  listingQuality,
   overview,
   operations,
   providerCosts,
@@ -433,6 +455,94 @@ export const AdminPageComponent = ({
                   </S.Row>
                 )),
               )}
+            </S.Rows>
+          </S.Section>
+        </S.Rows>
+      )}
+
+      {activeTab === 'listingQuality' && (
+        <S.Rows>
+          <S.Grid>
+            <S.SummaryCard>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.listingQuality.averageSpecifics')}
+              </Text>
+              <Text variant="metric" weight="semibold" numeric>
+                {listingQuality.summary?.averageSpecifics ?? '—'}
+              </Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.listingQuality.listingsAnalyzed', {
+                  value: listingQuality.summary?.listingsAnalyzed ?? 0,
+                })}
+              </Text>
+            </S.SummaryCard>
+            <S.SummaryCard>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.listingQuality.autofilled')}
+              </Text>
+              <Text variant="metric" weight="semibold" numeric>
+                {listingQuality.summary?.listingsWithAutofill ?? '—'}
+              </Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.listingQuality.autofilledHint')}
+              </Text>
+            </S.SummaryCard>
+          </S.Grid>
+
+          <S.Section>
+            <Text variant="h4" weight="semibold">
+              {t('admin.listingQuality.coverage')}
+            </Text>
+            <S.Rows>
+              {(listingQuality.summary?.coverage ?? []).slice(0, 12).map((row) => (
+                <S.Row key={`${row.categoryId}-${row.layer}`}>
+                  <Text variant="body-sm">
+                    {row.categoryId || '—'} · {t(`admin.listingQuality.layer.${row.layer}`, { defaultValue: row.layer })}
+                  </Text>
+                  <Text variant="body-sm" numeric>
+                    {row.aspectCount}
+                  </Text>
+                </S.Row>
+              ))}
+            </S.Rows>
+          </S.Section>
+
+          <S.Section>
+            <Text variant="h4" weight="semibold">
+              {t('admin.listingQuality.defaults')}
+            </Text>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.listingQuality.defaultsHint')}
+            </Text>
+            <SearchField
+              value={listingQuality.search}
+              onChange={(event) => listingQuality.onSearchChange(event.target.value)}
+              placeholder={t('admin.listingQuality.searchPlaceholder')}
+            />
+            <S.Rows>
+              {listingQuality.defaults.map((row) => (
+                <S.Row key={row.id}>
+                  <Text variant="body-sm">
+                    {row.categoryId} · {row.aspectName} = {row.value}
+                  </Text>
+                  <S.RowActions>
+                    <Badge variant={row.source === AspectDefaultSourceDto.CURATED ? 'info' : 'neutral'}>
+                      {t(`admin.listingQuality.source.${row.source}`)}
+                    </Badge>
+                    <Text variant="caption" color="text.secondary" numeric>
+                      {row.successCount}
+                    </Text>
+                    <Button
+                      size="small"
+                      variant="secondary"
+                      isLoading={listingQuality.isRemoving}
+                      onClick={() => listingQuality.onRemoveDefault(row.id)}
+                    >
+                      <Text variant="body-sm">{t('admin.listingQuality.remove')}</Text>
+                    </Button>
+                  </S.RowActions>
+                </S.Row>
+              ))}
             </S.Rows>
           </S.Section>
         </S.Rows>

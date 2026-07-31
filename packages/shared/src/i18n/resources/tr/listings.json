@@ -63,7 +63,30 @@
         "error": "Hata",
         "empty": "Bu işe ait ürün kaydı bulunamadı.",
         "emptyTitle": "Henüz kalem yok",
-        "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir."
+        "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir.",
+        "reason": "Sebep",
+        "technicalDetails": "Teknik detay",
+        "retry": "Tekrar dene",
+        "retryQueued": "Yeniden denemeye alındı",
+        "retryFailed": "Yeniden deneme kuyruğa alınamadı"
+      },
+      "failure": {
+        "duplicate_listing": "Zaten listelenmiş — bu ASIN aktif veya taslak listelerinizde var.",
+        "zero_stock": "Stok tamponunuz sonrası Amazon stoğu yetersiz, miktar 0 olurdu.",
+        "quota_exhausted": "Paket limitine ulaşıldı. Devam etmek için yükseltin veya yer açın.",
+        "product_data_unavailable": "Bu ASIN için Amazon ürün verisi alınamadı.",
+        "category_unresolved": "eBay bu ürün için bir listeleme kategorisi bulamadı.",
+        "category_aspects_unavailable": "eBay ürün özellik bilgisi geçici olarak alınamadı.",
+        "aspect_missing": "eBay {{aspects}} özelliğini zorunlu tutuyor ve bir değer türetilemedi.",
+        "aspect_rejected": "eBay {{aspects}} için gönderdiğimiz değeri reddetti.",
+        "invalid_identifier": "eBay ürün tanımlayıcısını reddetti ({{aspects}}).",
+        "image_invalid": "eBay ürün görsellerini reddetti.",
+        "ebay_policy_missing": "eBay iş politikanız eksik veya bu pazaryeri için geçerli değil.",
+        "ebay_auth": "eBay hesap bağlantınızın yenilenmesi gerekiyor.",
+        "ebay_rate_limited": "eBay istek sınırına takıldı. Daha sonra denemek genelde çalışır.",
+        "ebay_unavailable": "Yayınlama sırasında eBay yanıt vermedi. Tekrar denemek genelde çalışır.",
+        "ebay_restricted_item": "eBay bu ürünü veya kategoriyi hesabınız için kısıtlıyor.",
+        "unknown": "Liste oluşturulamadı."
       }
     },
     "filters": {
