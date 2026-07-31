@@ -103,10 +103,12 @@ services:
 
       # LLM transport (provider credentials only; the content toggle and model
       # behavior are managed in the admin panel / listing groups).
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gpt-4o-mini}
-      LLM_ASSISTANT_MODEL: ${LLM_ASSISTANT_MODEL:-gpt-4o-mini}
+      LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gemini-3.1-flash-lite}
+      # Empty on purpose: LlmService falls back to LLM_CONTENT_MODEL. A hardcoded
+      # default here would send another provider's model id to LLM_BASE_URL and 404.
+      LLM_ASSISTANT_MODEL: ${LLM_ASSISTANT_MODEL:-}
       # Chatbot can run on a different (paid) provider than listing traffic;
       # unset means it shares the listing provider above.
       LLM_ASSISTANT_BASE_URL: ${LLM_ASSISTANT_BASE_URL:-}

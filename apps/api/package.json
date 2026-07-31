@@ -12,6 +12,8 @@
     "migrate": "tsx src/scripts/migrate.ts",
     "migrate:prod": "node dist/scripts/migrate.js",
     "user:set-role": "tsx src/scripts/user-set-role.ts",
+    "llm:check": "tsx src/scripts/llm-check.ts",
+    "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
