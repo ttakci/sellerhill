@@ -155,6 +155,9 @@
     "expand": "Genişlet",
     "close": "Kapat"
   },
+  "operator": {
+    "console": "Operatör Konsolu"
+  },
   "support": {
     "title": "Destek görüşmeleri",
     "subtitle": "Müşteri taleplerini inceleyin ve yanıtlayın.",

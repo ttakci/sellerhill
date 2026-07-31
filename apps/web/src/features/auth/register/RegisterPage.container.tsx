@@ -10,7 +10,7 @@
  */
 
 import { useGoogleLogin as useGoogleOAuth } from '@react-oauth/google';
-import type { RegisterFormData, SupportedLocale } from '@repo/shared';
+import type { RegisterFormData, SupportedLocale, UserRole } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,7 @@ import { setCredentials } from '../store/authSlice';
 
 import { RegisterPageComponent } from './RegisterPage.component';
 
+import { resolveHomePath } from '@/app/operatorRouting';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
@@ -44,15 +45,12 @@ function showErrorModal(
   );
 }
 
+/** Staff land in the operator console, sellers in their own app. */
 function navigateAfterAuth(
-  user: { hasConnectedAccounts: boolean },
+  user: { hasConnectedAccounts: boolean; role?: UserRole },
   localeNavigate: (path: string) => void
 ): void {
-  if (user.hasConnectedAccounts) {
-    localeNavigate('/dashboard');
-  } else {
-    localeNavigate('/onboarding/ebay');
-  }
+  localeNavigate(resolveHomePath(user.role, user.hasConnectedAccounts));
 }
 
 /** Password-only branch (no GoogleOAuthProvider mounted). */

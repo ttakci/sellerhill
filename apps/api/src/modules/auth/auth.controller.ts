@@ -34,11 +34,14 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { GoogleAuthService } from './google-auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { OperatorSurface } from './operator-surface.decorator';
 
 type CookieRequest = ExpressRequest & { cookies?: Record<string, string> };
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
+/* Session lifecycle belongs to every account, seller or staff. */
+@OperatorSurface()
 export class AuthController {
   constructor(
     private readonly authService: AuthService,

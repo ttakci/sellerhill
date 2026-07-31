@@ -1,4 +1,4 @@
-import { type SupportedLocale } from '@repo/shared';
+import { isOperatorRole, type SupportedLocale } from '@repo/shared';
 import { useTheme, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
+import { resolveHomePath } from '@/app/operatorRouting';
 import { resolveBreadcrumbs, resolveNavSection } from '@/app/routeMeta';
 import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
@@ -20,7 +21,7 @@ export const AppLayout: React.FC = () => {
   const [apiLogout] = useLogoutMutation();
 
   const { buildPath } = useLocale();
-  const { data: user } = useGetMeQuery();
+  const { data: user, isLoading: isUserLoading } = useGetMeQuery();
   const { t, i18n } = useTranslation(['translation', 'listings', 'orders']);
   const { loadingState } = useUI();
   const { themeMode, toggleTheme } = useTheme();
@@ -95,6 +96,14 @@ export const AppLayout: React.FC = () => {
 
   if (!isAuthenticated) {
     return <Navigate to={buildPath('/login')} state={{ from: location }} replace />;
+  }
+  /*
+   * Staff accounts belong to the operator console. Bouncing them here means a
+   * stale bookmark or an old link cannot render the seller shell around empty
+   * data — every seller endpoint answers 403 for these roles.
+   */
+  if (!isUserLoading && isOperatorRole(user?.role)) {
+    return <Navigate to={buildPath(resolveHomePath(user?.role, false))} replace />;
   }
 
   return (

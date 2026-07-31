@@ -98,18 +98,11 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
       { labelKey: 'orders:orders.detail.title' },
     ],
   },
-  {
-    path: '/support',
-    match: 'prefix',
-    section: 'inventory',
-    breadcrumbs: [{ labelKey: 'translation:support.title', path: '/support' }],
-  },
-  {
-    path: '/admin',
-    match: 'prefix',
-    section: 'configuration',
-    breadcrumbs: [{ labelKey: 'translation:menu.admin' }],
-  },
+  /*
+   * `/admin` and `/support` are deliberately absent: they belong to the
+   * operator console, which has its own shell and its own route table
+   * (`operatorRouting.ts`). This list describes the seller app only.
+   */
   {
     path: '/settings',
     match: 'exact',

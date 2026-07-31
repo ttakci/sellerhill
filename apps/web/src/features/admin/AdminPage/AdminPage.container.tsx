@@ -21,6 +21,7 @@ import { useAdminUserColumns } from '../hooks/useAdminUserColumns';
 import { AdminPageComponent } from './AdminPage.component';
 import type { AdminTabId, SettingGroup } from './AdminPage.types';
 
+import { resolveHomePath } from '@/app/operatorRouting';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useLocale } from '@/utils/useLocale';
 
@@ -98,8 +99,9 @@ export const AdminPageContainer = (): React.ReactElement => {
     proxy.isSavingProxy
   );
 
+  /* A SUPPORT operator lands on the support console, a seller on its own app. */
   if (!isLoading && user?.role !== UserRole.ADMIN) {
-    return <Navigate to={buildPath('/dashboard')} replace />;
+    return <Navigate to={buildPath(resolveHomePath(user?.role, true))} replace />;
   }
 
   return (

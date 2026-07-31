@@ -155,6 +155,9 @@
     "expand": "Expand",
     "close": "Close"
   },
+  "operator": {
+    "console": "Operator Console"
+  },
   "support": {
     "title": "Support conversations",
     "subtitle": "Review and respond to customer requests.",

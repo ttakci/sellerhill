@@ -5,6 +5,7 @@ import type { Queue } from 'bullmq';
 
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OperatorSurface } from '../auth/operator-surface.decorator';
 import { PrivilegedSessionGuard } from '../auth/privileged-session.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,6 +17,7 @@ class KnowledgeRootDto { root!: string; }
 
 @Controller('admin/knowledge')
 @UseGuards(JwtAuthGuard, RolesGuard, PrivilegedSessionGuard)
+@OperatorSurface()
 @Roles(UserRole.ADMIN)
 export class KnowledgeAdminController {
  constructor(private readonly ingestion:KnowledgeIngestionService,@InjectQueue(KNOWLEDGE_INGESTION_QUEUE) private readonly queue:Queue){}

@@ -94,6 +94,7 @@ import type { Queue } from 'bullmq';
 
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OperatorSurface } from '../auth/operator-surface.decorator';
 import { PrivilegedSessionGuard } from '../auth/privileged-session.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -107,6 +108,7 @@ import { AdminService } from './admin.service';
 @ApiTags('admin')
 @Controller({ path: 'admin', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard, PrivilegedSessionGuard)
+@OperatorSurface()
 @ApiBearerAuth()
 export class AdminController {
   constructor(

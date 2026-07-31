@@ -10,6 +10,11 @@ import { SupportPresenceService } from './support-presence.service';
 
 const DEFAULT_CAPACITY = 5;
 
+/** Roles that may act on a conversation (claim/reply/transfer/resolve). */
+const SUPPORT_AGENT_ROLES: readonly UserRole[] = [UserRole.SUPPORT];
+/** Roles that may read the queue. ADMIN oversees it without working it. */
+const SUPPORT_CONSOLE_READ_ROLES: readonly UserRole[] = [UserRole.SUPPORT, UserRole.ADMIN];
+
 interface SupportVisibleConversationRow {
   id: string;
   status: AssistantConversationStatus;
@@ -43,18 +48,26 @@ export class SupportService {
   constructor(private readonly database: DatabaseService, private readonly support: SupportConversationRepository,
     private readonly conversations: AssistantConversationRepository, private readonly presence: SupportPresenceService) {}
 
-  private async authority(client: PoolClient, actor: JwtPayload): Promise<void> {
+  /**
+   * Acting authority. SUPPORT is the only role that can WORK a conversation —
+   * claim, reply, transfer, resolve — because the queue, capacity and transfer
+   * targets are all modelled on support agents (`support_profiles`).
+   * ADMIN gets read-only oversight (`SUPPORT_CONSOLE_READ_ROLES`): the console
+   * is an operator surface, so an admin can look at the queue without becoming
+   * an agent in it.
+   */
+  private async authority(client: PoolClient, actor: JwtPayload, allowed: readonly UserRole[] = SUPPORT_AGENT_ROLES): Promise<void> {
     const result = await client.query<{ role: UserRole; session_version: number; status: UserStatus }>(
       'SELECT role,session_version,status FROM users WHERE id=$1 FOR SHARE', [actor.sub]);
     const row = result.rows[0];
-    if (!row || row.role !== UserRole.SUPPORT || row.session_version !== actor.sessionVersion || row.status !== UserStatus.ACTIVE) {
+    if (!row || !allowed.includes(row.role) || row.session_version !== actor.sessionVersion || row.status !== UserStatus.ACTIVE) {
       throw new ForbiddenException('auth.errors.forbidden');
     }
   }
 
   async list(actor: JwtPayload, filter: SupportQueueFilter, search: string | undefined, limit: number) {
     return this.database.transaction(async (client) => {
-      await this.authority(client, actor);
+      await this.authority(client, actor, SUPPORT_CONSOLE_READ_ROLES);
       const params: unknown[] = [actor.sub, AssistantConversationStatus.DELETED, Math.min(limit, 100)];
       const clauses = ['c.status<>$2'];
       if (filter === SupportQueueFilter.WAITING) { params.push(AssistantConversationMode.WAITING_FOR_SUPPORT); clauses.push(`c.mode=$${params.length}`); }
@@ -75,7 +88,7 @@ export class SupportService {
     const messages = await client.query<SupportMessageRow>('SELECT id,sequence,author_type,author_user_id,message_type,status,content,created_at,completed_at FROM assistant_messages WHERE conversation_id=$1 AND deleted_at IS NULL ORDER BY sequence', [id]);
     await this.audit(client, actor.sub, id, SupportAuditAction.CONVERSATION_OPENED);
     return { conversation: row, messages: messages.rows };
-  }); }
+  }, SUPPORT_CONSOLE_READ_ROLES); }
 
   async claim(actor: JwtPayload, id: string) { return this.database.transaction(async (client) => {
     await this.authority(client, actor); await this.assertCapacity(client, actor.sub);
@@ -150,8 +163,8 @@ export class SupportService {
     await this.authority(client, actor); const result = await client.query<{ assigned_support_user_id: string | null; last_sequence: string }>('SELECT assigned_support_user_id,last_sequence FROM assistant_conversations WHERE id=$1 FOR UPDATE', [id]);
     if (!result.rows[0]) {throw new NotFoundException();} if (result.rows[0].assigned_support_user_id !== actor.sub) {throw new ForbiddenException('support.errors.readOnlyHistory');} return fn(client, result.rows[0]);
   }); }
-  private async withVisible<T>(actor: JwtPayload, id: string, lock: boolean, fn: (client: PoolClient, row: SupportVisibleConversationRow) => Promise<T>): Promise<T> { return this.database.transaction(async (client) => {
-    await this.authority(client, actor); const result = await client.query<SupportVisibleConversationRow>(`SELECT c.id,c.status,c.mode,c.assigned_support_user_id,c.last_sequence FROM assistant_conversations c LEFT JOIN assistant_conversation_participants p ON p.conversation_id=c.id AND p.user_id=$2 WHERE c.id=$1 AND (c.mode=$3 OR c.assigned_support_user_id=$2 OR p.id IS NOT NULL)${lock ? ' FOR UPDATE OF c' : ''}`, [id, actor.sub, AssistantConversationMode.WAITING_FOR_SUPPORT]);
+  private async withVisible<T>(actor: JwtPayload, id: string, lock: boolean, fn: (client: PoolClient, row: SupportVisibleConversationRow) => Promise<T>, allowed: readonly UserRole[] = SUPPORT_AGENT_ROLES): Promise<T> { return this.database.transaction(async (client) => {
+    await this.authority(client, actor, allowed); const result = await client.query<SupportVisibleConversationRow>(`SELECT c.id,c.status,c.mode,c.assigned_support_user_id,c.last_sequence FROM assistant_conversations c LEFT JOIN assistant_conversation_participants p ON p.conversation_id=c.id AND p.user_id=$2 WHERE c.id=$1 AND (c.mode=$3 OR c.assigned_support_user_id=$2 OR p.id IS NOT NULL)${lock ? ' FOR UPDATE OF c' : ''}`, [id, actor.sub, AssistantConversationMode.WAITING_FOR_SUPPORT]);
     if (!result.rows[0]) {throw new NotFoundException();} return fn(client, result.rows[0]);
   }); }
   private async assertCapacity(client: PoolClient, userId: string) { const result = await client.query<{ capacity: number; active: number }>('SELECT COALESCE(sp.capacity,$2)::int capacity,(SELECT COUNT(*)::int FROM support_assignments WHERE support_user_id=$1 AND status=$3) active FROM users u LEFT JOIN support_profiles sp ON sp.user_id=u.id WHERE u.id=$1 FOR UPDATE OF u', [userId, DEFAULT_CAPACITY, SupportAssignmentStatus.ACTIVE]); if (!result.rows[0] || result.rows[0].active >= result.rows[0].capacity) {throw new ConflictException('support.errors.capacity');} }

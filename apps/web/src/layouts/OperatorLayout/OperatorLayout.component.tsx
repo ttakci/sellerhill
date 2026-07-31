@@ -3,49 +3,48 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 
-import * as S from './AppLayout.style';
-import type { AppLayoutProps } from './AppLayout.types';
+import * as S from './OperatorLayout.style';
+import type { OperatorLayoutProps } from './OperatorLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Footer } from '@/components/Footer';
-import { AssistantWidget } from '@/features/assistant/AssistantWidget';
 
 /**
- * App shell: collapsible sidebar (desktop) + overlay drawer (mobile).
+ * Operator shell: the staff-side counterpart of `AppLayout`.
+ *
+ * It intentionally carries none of the seller navigation, no store switcher
+ * and no assistant widget — an operator account has no listings, orders or
+ * eBay stores to reach, and the API refuses those surfaces for it anyway.
  */
-export const AppLayout: React.FC<AppLayoutProps> = ({
+export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
   user,
+  userName,
+  navItems,
+  breadcrumbItems,
   sidebarCollapsed,
   mobileSidebarOpen,
   isLogoutConfirmOpen,
-  pathWithoutLocale,
-  userName,
   loadingIsLoading,
   themeMode,
-  breadcrumbItems,
+  i18nLanguage,
   onToggleSidebar,
   onNavigate,
-  onLogoutConfirm,
+  onLocaleNavigate,
   onChangeLanguage,
   onToggleTheme,
   onCloseMobileSidebar,
   onOpenLogoutConfirm,
   onCloseLogoutConfirm,
-  onLocaleNavigate,
-  i18nLanguage,
+  onLogoutConfirm,
 }) => {
-  const { t } = useTranslation(['translation', 'listings', 'orders']);
+  const { t } = useTranslation(['translation', 'admin']);
 
   return (
     <ErrorBoundary>
       <S.LayoutWrapper>
-        {/* Mobile Sidebar Overlay */}
         <S.SidebarOverlay $isOpen={mobileSidebarOpen} onClick={onCloseMobileSidebar} />
 
-        {/* Sidebar */}
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
           <MeshBackground animate={false} />
-          {/* Sellerboard strip: [menu] [logo] one row — divider = border-bottom */}
           <S.SidebarBrandRow $isCollapsed={sidebarCollapsed}>
             <S.SidebarCollapseButton
               type="button"
@@ -60,93 +59,39 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             </S.SidebarCollapseButton>
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/dashboard')}
-              title={t('translation:menu.dashboard')}
+              onClick={() => onLocaleNavigate(navItems[0]?.path ?? '/')}
+              title={t('translation:operator.console')}
             >
               <Logo layout="nav" height={80} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 
           <S.NavSection $isCollapsed={sidebarCollapsed}>
-            <S.NavItem
-              $active={pathWithoutLocale === '/dashboard'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/dashboard')}
-              title={sidebarCollapsed ? t('translation:menu.dashboard') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="dashboard" size={20} />
-                {!sidebarCollapsed && t('translation:menu.dashboard')}
-              </S.NavItemContent>
-            </S.NavItem>
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:operator.console')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
 
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
-              onClick={() => onLocaleNavigate('/orders')}
-              title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inbox" size={20} />
-                {!sidebarCollapsed && t('translation:menu.orders')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $active={
-                pathWithoutLocale === '/listings' ||
-                pathWithoutLocale === '/listings/all' ||
-                (pathWithoutLocale.startsWith('/listings/') &&
-                  !pathWithoutLocale.startsWith('/listings/jobs') &&
-                  pathWithoutLocale !== '/listings/products' &&
-                  pathWithoutLocale !== '/listings/add')
-              }
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/listings')}
-              title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="storefront" size={20} />
-                {!sidebarCollapsed && t('translation:menu.ebayListings')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            <S.NavItem
-              $active={pathWithoutLocale === '/listings/jobs'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/listings/jobs')}
-              title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="bolt" size={20} />
-                {!sidebarCollapsed && t('translation:menu.listingJobs')}
-              </S.NavItemContent>
-            </S.NavItem>
-
-            {/*
-              No admin or support entry here on purpose. Staff work lives in
-              the operator console (`OperatorLayout`), which a seller account
-              cannot open — the two products no longer share a menu.
-            */}
-            <S.NavItem
-              $active={
-                pathWithoutLocale.startsWith('/settings') ||
-                pathWithoutLocale === '/profile' ||
-                pathWithoutLocale === '/stores'
-              }
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/settings')}
-              title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="settings" size={20} />
-                {!sidebarCollapsed && t('translation:menu.settings')}
-              </S.NavItemContent>
-            </S.NavItem>
+            {navItems.map((item) => (
+              <S.NavItem
+                key={item.path}
+                $active={item.isActive}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate(item.path)}
+                title={sidebarCollapsed ? t(item.labelKey) : undefined}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name={item.icon} size={20} />
+                  {!sidebarCollapsed && t(item.labelKey)}
+                </S.NavItemContent>
+              </S.NavItem>
+            ))}
           </S.NavSection>
 
           <S.SidebarFooter>
-            <AssistantWidget sidebarCollapsed={sidebarCollapsed} />
             <S.LogoutButton
               $isCollapsed={sidebarCollapsed}
               onClick={onOpenLogoutConfirm}
@@ -163,12 +108,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </S.SidebarFooter>
         </S.SidebarContainer>
 
-        {/* Main Content Area */}
         <S.MainContent>
           <S.HeaderContainer>
             <S.HeaderInner>
               <S.HeaderLeft>
-                {/* Mobile only — opens the off-canvas sidebar */}
                 <S.MobileMenuButton
                   type="button"
                   onClick={onToggleSidebar}
@@ -207,14 +150,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     </S.LanguageSelectTrigger>
                   }
                   items={[
-                    {
-                      label: t('translation:languages.en'),
-                      onClick: () => onChangeLanguage('en'),
-                    },
-                    {
-                      label: t('translation:languages.tr'),
-                      onClick: () => onChangeLanguage('tr'),
-                    },
+                    { label: t('translation:languages.en'), onClick: () => onChangeLanguage('en') },
+                    { label: t('translation:languages.tr'), onClick: () => onChangeLanguage('tr') },
                   ]}
                 />
 
@@ -236,8 +173,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   trigger={
                     <S.HeaderProfileArea title={user?.email || ''}>
                       <S.HeaderProfileBadge>
-                        {user?.firstName?.charAt(0) || 'D'}
-                        {user?.lastName?.charAt(0) || 'U'}
+                        {user?.firstName?.charAt(0) || 'O'}
+                        {user?.lastName?.charAt(0) || 'P'}
                       </S.HeaderProfileBadge>
                       <S.HeaderProfileInfo>
                         <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
@@ -247,16 +184,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     </S.HeaderProfileArea>
                   }
                   items={[
-                    {
-                      label: t('translation:menu.dashboard'),
-                      icon: 'dashboard',
-                      onClick: () => onLocaleNavigate('/dashboard'),
-                    },
-                    {
-                      label: t('translation:menu.settings'),
-                      icon: 'settings',
-                      onClick: () => onLocaleNavigate('/settings'),
-                    },
                     {
                       label: t('translation:menu.logout'),
                       icon: 'log-out',
@@ -274,10 +201,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               <Outlet />
             </S.ContentInner>
           </S.ContentArea>
-          <Footer />
         </S.MainContent>
 
-        {/* Global UI Overlays */}
         <S.LoadingOverlay $visible={loadingIsLoading}>
           <Icon name="loader" size={48} />
         </S.LoadingOverlay>
@@ -302,4 +227,4 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   );
 };
 
-AppLayout.displayName = 'AppLayout';
+OperatorLayout.displayName = 'OperatorLayout';

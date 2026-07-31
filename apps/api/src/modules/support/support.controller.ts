@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@
 import { SupportQueueFilter, UserRole, type AuthenticatedRequest } from '@repo/shared';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OperatorSurface } from '../auth/operator-surface.decorator';
 import { PrivilegedSessionGuard } from '../auth/privileged-session.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -9,9 +10,16 @@ import { RolesGuard } from '../auth/roles.guard';
 import { SupportHeartbeatDto, SupportMessageDto, SupportPresencePreferenceDto, SupportQueueQueryDto, SupportReadDto, SupportTransferDto } from './support.dto';
 import { SupportService } from './support.service';
 
+/**
+ * Support console — an operator surface, never reachable by a seller account.
+ * ADMIN passes the role gate for oversight; `SupportService` still restricts
+ * every acting route (claim/reply/transfer/resolve/presence) to SUPPORT, so an
+ * admin reads the queue without becoming an agent in it.
+ */
 @Controller('support')
 @UseGuards(JwtAuthGuard, PrivilegedSessionGuard, RolesGuard)
-@Roles(UserRole.SUPPORT)
+@OperatorSurface()
+@Roles(UserRole.SUPPORT, UserRole.ADMIN)
 export class SupportController {
   constructor(private readonly support: SupportService) {}
   @Get('conversations') list(@Request() req: AuthenticatedRequest, @Query() query: SupportQueueQueryDto) { return this.support.list(req.user, query.filter ?? SupportQueueFilter.WAITING, query.search, query.limit); }

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import LandingPage from './features/landing';
 import { AppLayout } from './layouts/AppLayout';
+import { OperatorLayout } from './layouts/OperatorLayout';
 import { LocaleRedirect } from './utils/LocaleRedirect';
 
 /** Lightweight route fallback — avoids global overlay for navigation. */
@@ -128,14 +129,6 @@ export function App() {
             />
 
             <Route
-              path="admin"
-              element={
-                <Lazy>
-                  <AdminPage />
-                </Lazy>
-              }
-            />
-            <Route
               path="settings"
               element={
                 <Lazy>
@@ -231,11 +224,35 @@ export function App() {
                 </Lazy>
               }
             />
-            <Route path="support" element={<Lazy><SupportPage /></Lazy>} />
-            {/* Folded into the /admin panel (Overview tab) — kept as a redirect for old links. */}
-            <Route path="admin/assistant" element={<Navigate to="../admin" replace />} />
             <Route path="profile" element={<Navigate to="../settings" replace />} />
             <Route index element={<Navigate to="register" replace />} />
+          </Route>
+
+          {/*
+            Operator console — a separate shell, not a section of the seller
+            app. Staff accounts (ADMIN / SUPPORT) live here and nowhere else;
+            the API refuses seller surfaces for them, and `OperatorLayout`
+            bounces a customer that reaches these URLs.
+          */}
+          <Route element={<OperatorLayout />}>
+            <Route
+              path="admin"
+              element={
+                <Lazy>
+                  <AdminPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="support"
+              element={
+                <Lazy>
+                  <SupportPage />
+                </Lazy>
+              }
+            />
+            {/* Folded into the /admin panel (Overview tab) — kept as a redirect for old links. */}
+            <Route path="admin/assistant" element={<Navigate to="../admin" replace />} />
           </Route>
         </Route>
 
