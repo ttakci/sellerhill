@@ -12,6 +12,13 @@ import { ListingFailureCode, type ListingFailureDetails } from '@repo/shared';
  * message, never an exception.
  */
 
+/**
+ * eBay error ids that mean "our side failed", not "your request was wrong".
+ * 25001 is the Sell APIs' generic system error; its `message` varies and often
+ * names an internal eBay service, so it must be matched by id, not by text.
+ */
+const EBAY_SYSTEM_ERROR_IDS = new Set<number>([25001]);
+
 export interface ClassifiedListingFailure {
   code: ListingFailureCode;
   /** Operator-facing English message; the UI shows a localized one by code. */
@@ -179,6 +186,17 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
   }
   if (entries.some((entry) => /token|expired|invalid access/i.test(entry.message ?? ''))) {
     return { code: ListingFailureCode.EBAY_AUTH, message, details: { ebayErrorIds, retryable: false } };
+  }
+  /*
+   * eBay's own internal failure ("A system error has occurred", sometimes
+   * naming one of their services). Our request was fine — their side broke, and
+   * the same payload usually succeeds on a retry. Checked last so a specific
+   * cause above still wins when eBay returns 25001 alongside a real error.
+   * Without this it landed in UNKNOWN and the UI said "unknown reason" for the
+   * single most common transient failure on sandbox.
+   */
+  if (ebayErrorIds.some((id) => EBAY_SYSTEM_ERROR_IDS.has(id))) {
+    return { code: ListingFailureCode.EBAY_UNAVAILABLE, message, details: { ebayErrorIds, retryable: true } };
   }
 
   return { code: ListingFailureCode.UNKNOWN, message, details: { ebayErrorIds, retryable: true } };

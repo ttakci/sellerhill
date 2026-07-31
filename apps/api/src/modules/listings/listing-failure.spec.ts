@@ -62,6 +62,29 @@ describe('classifyListingFailure', () => {
     );
   });
 
+  it('reads eBay 25001 as an eBay-side outage, not an unknown failure', () => {
+    // Observed live 2026-07-31: three job items failed with only errorId 25001
+    // and a message naming an internal eBay service. The request was fine.
+    const failure = classifyListingFailure(
+      ebayError([{ errorId: 25001, message: 'A system error has occurred. Core Inventory Service internal error' }])
+    );
+
+    expect(failure.code).toBe(ListingFailureCode.EBAY_UNAVAILABLE);
+    expect(failure.details.retryable).toBe(true);
+    expect(failure.details.ebayErrorIds).toEqual([25001]);
+  });
+
+  it('lets a specific cause win when eBay also reports its system error', () => {
+    const failure = classifyListingFailure(
+      ebayError([
+        { errorId: 25001, message: 'A system error has occurred.' },
+        { errorId: 25002, message: 'The item specific Department is missing.', parameters: [{ name: '2', value: 'Department' }] },
+      ])
+    );
+
+    expect(failure.code).toBe(ListingFailureCode.ASPECT_MISSING);
+  });
+
   it('maps our typed create-path errors', () => {
     expect(classifyListingFailure(new CategoryResolutionError('Badia Seasoning')).code).toBe(
       ListingFailureCode.CATEGORY_UNRESOLVED
