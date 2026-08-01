@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 
 import {
+  CONTROL_BORDER_COLOR_PATH,
   CONTROL_ICON_WIDTH,
   CONTROL_PADDING_X,
-  controlFocusShadow,
   controlHeight,
   type ControlSize,
 } from '../../styles/formControl';
@@ -43,23 +43,15 @@ export const FieldWrapper = styled.div<FieldContainerProps>`
     if ($isFocused) {
       return theme.colors.brand.primary;
     }
-    return theme.colors.border.primary;
+    return tkn(CONTROL_BORDER_COLOR_PATH)({ theme });
   }};
-  transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
-  box-shadow: ${({ $isFocused, theme }) =>
-    $isFocused ? controlFocusShadow(theme.colors.brand.primary) : 'none'};
+  transition: border-color ${tkn('transitions.fast')};
+  box-shadow: none;
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'text')};
-
-  &:hover {
-    border-color: ${({ $isFocused, $hasError, $isDisabled, theme }) =>
-      !$isDisabled && !$isFocused && !$hasError ? theme.colors.text.tertiary : undefined};
-  }
 
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${({ theme }) => controlFocusShadow(theme.colors.brand.primary)};
+    box-shadow: none;
   }
 `;
 
@@ -183,15 +175,6 @@ export const SuffixText = styled.span`
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   font-family: ${tkn('typography.fontFamily.body')};
-`;
-
-export const ErrorText = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.semantic.error')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  margin-top: ${tkn('spacing.2xs')};
-  margin-left: ${tkn('spacing.2xs')};
 `;
 
 export const ToggleButton = styled.button`

@@ -1,4 +1,4 @@
-import { Icon, type LocaleOption, LanguageSwitcher, Logo, ThemeToggle } from '@repo/ui';
+import { Icon, type IconName, type LocaleOption, LanguageSwitcher, Logo, ThemeToggle } from '@repo/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,7 @@ const LOCALE_OPTIONS: LocaleOption[] = [
 ];
 
 type FeatureKey = 'asinListing' | 'stockPriceSync' | 'autoOrder' | 'manualOrder' | 'tracking';
-const FEATURES: { key: FeatureKey; icon: string }[] = [
+const FEATURES: { key: FeatureKey; icon: IconName }[] = [
   { key: 'asinListing', icon: 'plus' },
   { key: 'stockPriceSync', icon: 'sync' },
   { key: 'autoOrder', icon: 'shopping-cart' },
@@ -217,14 +217,12 @@ export const LandingPageComponent = ({
         <S.PlatformLabel>{t('translation:landing.logos.title')}</S.PlatformLabel>
         <S.PlatformFlow>
           <S.PlatformChip>
-            <Icon name="brand-amazon" size={26} />
             <span>Amazon</span>
           </S.PlatformChip>
           <S.PlatformArrow>
             <Icon name="arrow-right" size={18} />
           </S.PlatformArrow>
           <S.PlatformChip>
-            <Icon name="brand-ebay" size={26} />
             <span>eBay</span>
           </S.PlatformChip>
         </S.PlatformFlow>
@@ -253,7 +251,7 @@ export const LandingPageComponent = ({
             <S.FeatureCard $highlight>
               <S.FeatureHeadRow>
                 <S.FeatureIconWrap $highlight>
-                  <Icon name="rule" size={22} color="landing.heroText" />
+                  <Icon name="sliders-horizontal" size={22} color="landing.heroText" />
                 </S.FeatureIconWrap>
                 <S.FeatureBadge>{t('translation:landing.features.perProduct.badge')}</S.FeatureBadge>
               </S.FeatureHeadRow>

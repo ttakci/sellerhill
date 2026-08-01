@@ -45,6 +45,8 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   categoryOptions,
   onStatusChange,
   statusOptions,
+  onTrackingStateChange,
+  trackingOptions,
   onEbayAccountChange,
   storeOptions,
   numericFilters,
@@ -113,7 +115,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
     if (isDraftMode) {
       return (
         <EmptyState
-          icon="layers"
+          icon="inventory"
           title={t('listings.empty.draftTitle')}
           description={t('listings.empty.draftSubtitle')}
           size="lg"
@@ -177,6 +179,16 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                   />
                 </S.SelectWrapper>
               )}
+              <S.SelectWrapper>
+                <Select
+                  value={filters.trackingState}
+                  onChange={onTrackingStateChange}
+                  options={trackingOptions}
+                  placeholder={t('listings.filters.allTrackingStates')}
+                  size="medium"
+                  fullWidth
+                />
+              </S.SelectWrapper>
               <S.SelectWrapper>
                 <Select
                   value={filters.ebayAccountId}

@@ -32,6 +32,7 @@ export interface ThemeColors {
   border: {
     primary: string;
     secondary: string;
+    control: string;
     focus: string;
   };
 

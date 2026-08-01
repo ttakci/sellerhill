@@ -14,6 +14,7 @@ export interface ListingsOverviewPageProps {
   onAddListing: () => void;
   onViewAll: () => void;
   onViewJobs: () => void;
+  onImportExisting: () => void;
   onViewDrafts: () => void;
   onListingClick: (listingId: string) => void;
 }

@@ -66,12 +66,6 @@ export const AccountMetaLine = styled.div`
   min-width: 0;
 `;
 
-export const AccountActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: ${tkn('spacing.sm')};
-`;
-
 export const EmptyState = styled.div`
   display: flex;
   flex-direction: column;

@@ -56,7 +56,7 @@ export const ListingSettingsGroupPageComponent = ({
               <S.CardFooter>
                 <S.Stats>
                   <S.StatItem>
-                    <Icon name="grid-view" size={18} color="text.tertiary" />
+                    <Icon name="inventory" size={18} color="text.tertiary" />
                     <Text variant="caption" color="text.tertiary">{t('listingSettingsGroup.productsCount', { count: 0 })}</Text>
                   </S.StatItem>
                 </S.Stats>

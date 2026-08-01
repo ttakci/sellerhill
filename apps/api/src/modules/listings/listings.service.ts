@@ -1,8 +1,11 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   ListingFailureCode,
+  ListingJobKind,
   ListingJobStatus,
   ListingStatus,
+  ListingTrackingState,
+  EbayListingApiModel,
   OrderStatus,
   type CreateListingsRequest,
   type ListingDto,
@@ -254,6 +257,8 @@ export class ListingsService {
       features: this.parseFeatures(row.features),
       specs: this.buildSpecs(row),
       status: row.status as ListingStatus,
+      trackingState: ListingTrackingState.TRACKED,
+      importedFromEbay: Boolean((row as ListingQueryRow & { imported_from_ebay?: boolean }).imported_from_ebay),
       ebayAccountId: row.ebay_account_id ?? undefined,
       lastSaleAt: row.last_sale_at ? row.last_sale_at.toISOString() : null,
       createdAt: row.created_at.toISOString(),
@@ -358,6 +363,9 @@ export class ListingsService {
   ): Promise<PaginatedListingsDto> {
     const page = Math.max(1, Number(query.page) || 1);
     const maxLimit = options?.maxLimit ?? 100;
+    if (query.trackingState === ListingTrackingState.UNTRACKED) {
+      return this.getUntrackedListings(userId, query, page, Math.min(maxLimit, Math.max(1, Number(query.limit) || 20)));
+    }
     const limit = Math.min(maxLimit, Math.max(1, Number(query.limit) || 20));
     const offset = (page - 1) * limit;
     const sortExpr = this.resolveListingsSort(query.sortBy);
@@ -501,6 +509,44 @@ export class ListingsService {
       page,
       limit,
       categories: categoryRows.map((r) => r.category),
+    };
+  }
+
+  private async getUntrackedListings(
+    userId: string,
+    query: ListingsQueryDto,
+    page: number,
+    limit: number
+  ): Promise<PaginatedListingsDto> {
+    const conditions = [`d.user_id=$1`, `d.tracking_state=$2`, `d.ended_at IS NULL`];
+    const params: Array<string | number> = [userId, ListingTrackingState.UNTRACKED];
+    if (query.search?.trim()) {
+      params.push(`%${query.search.trim()}%`);
+      conditions.push(`(d.title ILIKE $${params.length} OR d.ebay_item_id ILIKE $${params.length} OR d.sku ILIKE $${params.length})`);
+    }
+    if (query.ebayAccountId?.trim()) {
+      params.push(query.ebayAccountId.trim());
+      conditions.push(`d.ebay_account_id=$${params.length}`);
+    }
+    const where = conditions.join(' AND ');
+    const count = await this.databaseService.query<{ count: string }>(`SELECT COUNT(*)::text count FROM ebay_listing_discoveries d WHERE ${where}`, params);
+    const rows = await this.databaseService.query<{
+      id: string; user_id: string; ebay_account_id: string; ebay_item_id: string; title: string;
+      price: string; quantity: number; quantity_sold: number; image_url: string | null;
+      api_model: EbayListingApiModel; discovered_at: Date; last_seen_at: Date;
+    }>(`SELECT d.* FROM ebay_listing_discoveries d WHERE ${where} ORDER BY d.last_seen_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, (page - 1) * limit]);
+    return {
+      items: rows.map((row) => ({
+        id: row.id, userId: row.user_id, asin: '', productId: '', title: row.title,
+        price: Number(row.price), quantity: row.quantity, imageUrls: row.image_url ? [row.image_url] : [],
+        ebayListingId: row.ebay_item_id, listingSettingsGroupId: '', paymentPolicyId: '',
+        shippingPolicyId: '', returnPolicyId: '', status: ListingStatus.ACTIVE,
+        trackingState: ListingTrackingState.UNTRACKED, ebayApiModel: row.api_model,
+        soldCount: row.quantity_sold, ebayAccountId: row.ebay_account_id,
+        createdAt: row.discovered_at.toISOString(), updatedAt: row.last_seen_at.toISOString(),
+      })),
+      total: Number(count[0]?.count ?? 0), page, limit, categories: [],
     };
   }
 
@@ -884,9 +930,10 @@ export class ListingsService {
       `
       INSERT INTO listing_jobs (
         user_id, total_asins, status,
-        listing_settings_group_id, payment_policy_id, shipping_policy_id, return_policy_id
+        listing_settings_group_id, payment_policy_id, shipping_policy_id, return_policy_id,
+        ebay_account_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `,
       [
@@ -899,6 +946,7 @@ export class ListingsService {
         request.paymentPolicyId,
         request.shippingPolicyId,
         request.returnPolicyId,
+        request.ebayAccountId,
       ]
     );
 
@@ -1260,6 +1308,7 @@ export class ListingsService {
       successCount: entity.success_count,
       failedCount: entity.failed_count,
       status: entity.status as ListingJobStatus,
+      kind: (entity.kind ?? ListingJobKind.CREATE) as ListingJobKind,
       createdAt: entity.created_at.toISOString(),
       updatedAt: entity.updated_at.toISOString(),
     };
@@ -1396,7 +1445,8 @@ export class ListingsService {
           shippingId: listing.shippingPolicyId,
           returnId: listing.returnPolicyId,
         },
-        listing.asin
+        listing.asin,
+        listing.ebayAccountId
       );
 
       // A published row with an empty eBay item id is unrepairable: it does not

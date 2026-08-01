@@ -60,10 +60,12 @@ export const ListingsAllPage: React.FC = () => {
     handleSearchChange,
     handleCategoryChange,
     handleStatusChange,
+    handleTrackingStateChange,
     handleEbayAccountChange,
     handleClearFilters,
     hasActiveFilters,
     statusOptions,
+    trackingOptions,
     numericFilters,
     fromDashboard,
   } = useListingsFilters();
@@ -422,6 +424,8 @@ export const ListingsAllPage: React.FC = () => {
         categoryOptions={categoryOptions}
         onStatusChange={handleStatusChange}
         statusOptions={statusOptions}
+        onTrackingStateChange={handleTrackingStateChange}
+        trackingOptions={trackingOptions}
         onEbayAccountChange={handleEbayAccountChange}
         storeOptions={storeOptions}
         numericFilters={numericFilters}

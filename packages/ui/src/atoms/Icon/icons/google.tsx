@@ -1,7 +1,7 @@
 /**
  * Google "G" mark, single-path monochrome (inherits theme color via currentColor).
- * Multicolour fills are blocked by the design-system no-hardcoded-colors rule in
- * packages/ui, so this matches the amazon/ebay brand-icon pattern (currentColor).
+ *
+ * It stays monochrome because the current UI uses it as a compact control icon.
  */
 import React from 'react';
 

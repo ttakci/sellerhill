@@ -232,12 +232,10 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
           <S.QuickLinks>
             <Button variant="text" size="small" onClick={onOpenAmazon}>
-              <Icon name="amazon" size={16} />
               <Text variant="body-sm">{t('listings.detail.openAmazon')}</Text>
             </Button>
             {canOpenEbay ? (
               <Button variant="text" size="small" onClick={onOpenEbay}>
-                <Icon name="ebay" size={16} />
                 <Text variant="body-sm">{t('listings.detail.openEbay')}</Text>
               </Button>
             ) : null}
@@ -249,7 +247,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="trending-up" size={20} color="brand.primary" />
+              <Icon name="circle-dollar-sign" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('listings.detail.economics')}
               </Text>
@@ -278,7 +276,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="inventory" size={20} color="brand.primary" />
+              <Icon name="chart-line" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('listings.detail.performance')}
               </Text>
@@ -321,7 +319,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.SectionCardFull variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="settings" size={20} color="brand.primary" />
+              <Icon name="bolt" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('listings.detail.automationTitle')}
               </Text>
@@ -494,7 +492,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         <S.SectionCardFull variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="list" size={20} color="brand.primary" />
+              <Icon name="file-text" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('listings.detail.productContent')}
               </Text>

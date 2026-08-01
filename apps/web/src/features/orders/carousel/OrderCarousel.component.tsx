@@ -30,7 +30,7 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
       <S.CarouselWrapper>
         {/* Shared EmptyState — this was a bespoke icon+title+subtitle block. */}
         <EmptyState
-          icon="inbox"
+          icon="shopping-bag"
           title={emptyTitle ?? t('orders.overview.emptyTitle')}
           description={emptySubtitle ?? t('orders.overview.emptySubtitle')}
           size="md"

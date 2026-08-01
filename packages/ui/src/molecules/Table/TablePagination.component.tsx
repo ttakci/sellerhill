@@ -68,10 +68,10 @@ export const TablePagination = ({
 
         <S.Navigation>
           <S.NavButton onClick={() => handlePageChange(page - 1)} disabled={page <= 1} type="button">
-            <Icon name="chevron_left" size={20} />
+            <Icon name="chevron-left" size={20} />
           </S.NavButton>
           <S.NavButton onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages} type="button">
-            <Icon name="chevron_right" size={20} />
+            <Icon name="chevron-right" size={20} />
           </S.NavButton>
         </S.Navigation>
       </S.NavigationWrapper>

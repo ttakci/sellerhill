@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 
 import {
+  CONTROL_BORDER_COLOR_PATH,
   CONTROL_ICON_WIDTH,
   CONTROL_PADDING_X,
-  controlFocusShadow,
   controlHeight,
   type ControlSize,
 } from '../../styles/formControl';
@@ -34,22 +34,19 @@ export const FieldWrapper = styled.div<{
     $isDisabled ? theme.colors.background.tertiary : theme.colors.surface.primary};
   border: 0.0625rem solid
     ${({ $isFocused, $hasError, theme }) =>
-      $hasError ? theme.colors.semantic.error : $isFocused ? theme.colors.brand.primary : theme.colors.border.primary};
+      $hasError && !$isFocused
+        ? theme.colors.semantic.error
+        : $isFocused
+          ? theme.colors.brand.primary
+          : tkn(CONTROL_BORDER_COLOR_PATH)({ theme })};
   border-radius: ${tkn('radius.md')};
   padding: 0 ${CONTROL_PADDING_X};
-  transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
+  transition: border-color ${tkn('transitions.fast')};
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'pointer')};
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   opacity: ${({ $isDisabled }) => ($isDisabled ? 0.5 : 1)};
-  box-shadow: ${({ $isFocused, theme }) => ($isFocused ? controlFocusShadow(theme.colors.brand.primary) : 'none')};
+  box-shadow: none;
   box-sizing: border-box;
-
-  &:hover {
-    border-color: ${({ $isFocused, $hasError, $isDisabled, theme }) =>
-      !$isDisabled && !$isFocused && !$hasError ? theme.colors.text.tertiary : undefined};
-  }
 `;
 
 export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boolean; $size?: string }>`
@@ -246,15 +243,6 @@ export const OptionContent = styled.div`
   gap: ${tkn('spacing.sm')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.medium')};
-`;
-
-export const ErrorText = styled.span`
-  color: ${tkn('colors.semantic.error')};
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  font-family: ${tkn('typography.fontFamily.body')};
-  margin-top: ${tkn('spacing.2xs')};
-  margin-left: ${tkn('spacing.2xs')};
 `;
 
 export const NoResultsMessage = styled.div`

@@ -1,332 +1,410 @@
 /**
- * Icon mapping: our semantic names → Lucide React icons
+ * Icon mapping: our semantic names → Lucide React icons.
  *
- * All icons use lucide-react (tree-shakeable, 1500+ icons).
- * Only brand-specific icons (logo, zorro) remain custom SVGs.
- * Country flags use Globe as fallback.
+ * Conventions (deliberate — each one fixes a real defect):
+ *  1. **kebab-case only.** The Material-era `snake_case` twins (`open_in_new`,
+ *     `keyboard_arrow_down`, …) were fossils from a previous icon set. 35 of
+ *     them existed; 32 were never referenced. One name per concept now.
+ *  2. **One glyph per meaning.** An alias is only justified when the names are
+ *     true synonyms in our domain (`delete`/`trash`, `sync`/`refresh`).
+ *     Aliasing *distinct* concepts onto one glyph is what made the UI read as
+ *     "the same five icons everywhere" — `zap` used to draw Sparkles and
+ *     `history` used to draw the refresh arrows.
+ *  3. **Reach for a new import before reusing a near-miss.** Lucide ships
+ *     ~1900 glyphs and we use a fraction of them; adding one here is cheap and
+ *     is the intended way to grow the vocabulary.
+ *  4. **`satisfies`, not `: Record<string, …>`.** The annotation widened
+ *     `IconName` to `string`, so every icon name was unchecked and a typo only
+ *     surfaced as a runtime `console.warn`. `satisfies` keeps the literal keys
+ *     so `IconName` is a real union.
+ *
+ * Only the Google and Zorro brand marks are custom SVGs.
  */
 import {
   type LucideIcon,
+  Activity,
   AlertCircle,
   AlertTriangle,
   Archive,
+  ArrowDownRight,
   ArrowLeft,
   ArrowRight,
+  ArrowUpDown,
+  ArrowUpRight,
   BadgeCheck,
+  BadgePercent,
   Ban,
+  Banknote,
   BarChart3,
+  Barcode,
   Bell,
+  BellRing,
   Bolt,
+  Bot,
   Box,
+  Boxes,
+  Building2,
   Calendar,
   CalendarDays,
   Camera,
+  ChartLine,
   Check,
   CheckCircle,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  CircleDollarSign,
+  CircleHelp,
+  CircleX,
+  ClipboardCheck,
+  ClipboardList,
   Clock,
   Code,
+  Coins,
   Copy,
   CreditCard,
+  Database,
   Download,
   ExternalLink,
   Eye,
   EyeOff,
   FileText,
   Filter,
-  Flag,
   Gauge,
   Globe,
+  Headset,
+  History,
   Home,
   Image,
   Inbox,
   Info,
   Key,
+  KeyRound,
   Layers,
   LayoutDashboard,
   LayoutGrid,
+  LayoutList,
+  LifeBuoy,
   Link2,
   List,
   ListChecks,
   ListFilter,
   Loader2,
   Lock,
+  LockKeyhole,
   LogOut,
   Mail,
   MapPin,
+  Megaphone,
   Menu,
+  MessageCircle,
   Minus,
   Monitor,
   Moon,
   MoreHorizontal,
   MoreVertical,
   Package,
+  PackageCheck,
+  PackageOpen,
+  PackageX,
   PanelLeft,
   PanelLeftClose,
   PanelLeftOpen,
   Pencil,
   Percent,
   Phone,
+  PiggyBank,
   Play,
+  Plug,
   Plus,
   Printer,
+  QrCode,
   Receipt,
+  ReceiptText,
   RefreshCw,
   Repeat,
   Rocket,
   RotateCcw,
   Save,
+  ScanBarcode,
   Search,
   Send,
+  Server,
   Settings,
   Settings2,
+  Shield,
+  ShieldAlert,
   ShieldCheck,
   ShoppingBag,
   ShoppingCart,
   SlidersHorizontal,
   Smartphone,
   Sparkles,
+  SquarePen,
   Star,
   Store,
   Sun,
+  Table,
   Tablet,
   Tag,
   Trash2,
   TrendingDown,
   TrendingUp,
   Truck,
+  Undo2,
   UnfoldVertical,
   Upload,
   User,
+  UserCog,
+  Users,
   Wallet,
+  WalletCards,
+  Warehouse,
+  Webhook,
   X,
+  Zap,
 } from 'lucide-react';
 import React from 'react';
 
-import { AmazonIcon } from './amazon';
-import { EbayIcon } from './ebay';
 import { GoogleIcon } from './google';
+import { TriangleInfoIcon } from './triangle-info';
 import { ZorroIcon } from './zorro';
 
-const lucide = (IconComp: LucideIcon) => {
+type IconGlyph = React.FC<React.SVGProps<SVGSVGElement>>;
+
+const lucide = (IconComp: LucideIcon): IconGlyph => {
   const Wrapped = (props: React.SVGProps<SVGSVGElement>) => {
-    const { stroke, strokeWidth } = props;
+    const { stroke, strokeWidth, fill } = props;
     return React.createElement(IconComp, {
       size: 24,
       color: stroke as string,
       strokeWidth: Number(strokeWidth) || 2,
+      // Lucide glyphs are stroke-drawn; `none` keeps them outlined unless a
+      // caller explicitly asks for the solid variant via <Icon filled>.
+      fill: (fill as string) ?? 'none',
     });
   };
   Wrapped.displayName = `LucideIcon(${IconComp.displayName || IconComp.name || 'Unknown'})`;
   return Wrapped;
 };
 
-export const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  // Navigation
+export const iconMap = {
+  // ── Navigation & shell ───────────────────────────────
   dashboard: lucide(LayoutDashboard),
   home: lucide(Home),
-  store: lucide(Store),
   storefront: lucide(Store),
-  'shopping-cart': lucide(ShoppingCart),
-  shopping_cart: lucide(ShoppingCart),
   inbox: lucide(Inbox),
   settings: lucide(Settings),
   'settings-suggest': lucide(Settings2),
-  settings_suggest: lucide(Settings2),
-  'edit-note': lucide(Pencil),
-  edit_note: lucide(Pencil),
+  menu: lucide(Menu),
+  'panel-left': lucide(PanelLeft),
+  'panel-left-close': lucide(PanelLeftClose),
+  'panel-left-open': lucide(PanelLeftOpen),
+  'log-out': lucide(LogOut),
 
-  // Finance & E-commerce
+  // ── Chevrons & arrows ────────────────────────────────
+  'chevron-down': lucide(ChevronDown),
+  'chevron-up': lucide(ChevronUp),
+  'chevron-left': lucide(ChevronLeft),
+  'chevron-right': lucide(ChevronRight),
+  'arrow-left': lucide(ArrowLeft),
+  'arrow-right': lucide(ArrowRight),
+  'arrow-up-right': lucide(ArrowUpRight),
+  'arrow-down-right': lucide(ArrowDownRight),
+  'arrow-up-down': lucide(ArrowUpDown),
+  'unfold-more': lucide(UnfoldVertical),
+
+  // ── Catalog & inventory ──────────────────────────────
+  /** One product / stock on hand */
+  inventory: lucide(Package),
+  /** Many units / bulk listings — deliberately distinct from `inventory` */
+  'inventory-2': lucide(Boxes),
+  box: lucide(Box),
+  archive: lucide(Archive),
+  /** Amazon source / fulfillment centre */
+  warehouse: lucide(Warehouse),
+  /** Draft listing — prepared but not published */
+  'package-open': lucide(PackageOpen),
+  /** Fulfilled / successfully placed */
+  'package-check': lucide(PackageCheck),
+  /** Out of stock / delisted ASIN */
+  'package-x': lucide(PackageX),
+  /** ASIN / UPC / EAN identifiers */
+  barcode: lucide(Barcode),
+  'scan-barcode': lucide(ScanBarcode),
+  'qr-code': lucide(QrCode),
+  tag: lucide(Tag),
+
+  // ── Orders & shipping ────────────────────────────────
+  'shopping-cart': lucide(ShoppingCart),
+  'shopping-bag': lucide(ShoppingBag),
+  receipt: lucide(Receipt),
+  'receipt-text': lucide(ReceiptText),
+  truck: lucide(Truck),
+  'local-shipping': lucide(Truck),
+  /** Refund / return */
+  'undo-2': lucide(Undo2),
+  'assignment-return': lucide(RotateCcw),
+
+  // ── Money & billing ──────────────────────────────────
   payments: lucide(CreditCard),
   'account-balance-wallet': lucide(Wallet),
-  account_balance_wallet: lucide(Wallet),
-  receipt: lucide(Receipt),
-  tag: lucide(Tag),
+  'wallet-cards': lucide(WalletCards),
+  /** Payout / seller earnings */
+  banknote: lucide(Banknote),
+  /** Cost of goods */
+  coins: lucide(Coins),
+  /** Retained margin */
+  'piggy-bank': lucide(PiggyBank),
+  'circle-dollar-sign': lucide(CircleDollarSign),
+  'badge-percent': lucide(BadgePercent),
   percent: lucide(Percent),
-  'trending-up': lucide(TrendingUp),
-  trending_up: lucide(TrendingUp),
-  'trending-down': lucide(TrendingDown),
-  trending_down: lucide(TrendingDown),
-  bolt: lucide(Bolt),
-  'local-shipping': lucide(Truck),
-  local_shipping: lucide(Truck),
-  'assignment-return': lucide(RotateCcw),
-  assignment_return: lucide(RotateCcw),
-  'shopping-bag': lucide(ShoppingBag),
-  shopping_bag: lucide(ShoppingBag),
-  'bar-chart': lucide(BarChart3),
-  insights: lucide(BarChart3),
 
-  // Actions
+  // ── Analytics ────────────────────────────────────────
+  'bar-chart': lucide(BarChart3),
+  /** Trend over time — was an exact duplicate of `bar-chart` */
+  insights: lucide(ChartLine),
+  'chart-line': lucide(ChartLine),
+  activity: lucide(Activity),
+  'trending-up': lucide(TrendingUp),
+  'trending-down': lucide(TrendingDown),
+  gauge: lucide(Gauge),
+
+  // ── Automation & platform ops ────────────────────────
+  bolt: lucide(Bolt),
+  /** Was drawing Sparkles — now the actual lightning bolt */
+  zap: lucide(Zap),
+  sparkles: lucide(Sparkles),
+  /** AI assistant / automated agent */
+  bot: lucide(Bot),
+  repeat: lucide(Repeat),
+  sync: lucide(RefreshCw),
+  refresh: lucide(RefreshCw),
+  /** Past events — was drawing the refresh arrows */
+  history: lucide(History),
+  server: lucide(Server),
+  database: lucide(Database),
+  /** Integration / connected account */
+  plug: lucide(Plug),
+  webhook: lucide(Webhook),
+  'clipboard-list': lucide(ClipboardList),
+  'clipboard-check': lucide(ClipboardCheck),
+
+  // ── Actions ──────────────────────────────────────────
   plus: lucide(Plus),
-  add: lucide(Plus),
+  minus: lucide(Minus),
   x: lucide(X),
   edit: lucide(Pencil),
+  /** Edit rich content — a distinct pen from plain `edit` */
+  'edit-note': lucide(SquarePen),
   delete: lucide(Trash2),
   trash: lucide(Trash2),
   copy: lucide(Copy),
   save: lucide(Save),
   download: lucide(Download),
   'file-download': lucide(Download),
-  file_download: lucide(Download),
   upload: lucide(Upload),
-  'open-in-new': lucide(ExternalLink),
-  open_in_new: lucide(ExternalLink),
   'external-link': lucide(ExternalLink),
+  'open-in-new': lucide(ExternalLink),
   link: lucide(Link2),
   search: lucide(Search),
   filter: lucide(Filter),
   'filter-list': lucide(ListFilter),
-  filter_list: lucide(ListFilter),
+  'sliders-horizontal': lucide(SlidersHorizontal),
   eye: lucide(Eye),
   'eye-off': lucide(EyeOff),
   'play-arrow': lucide(Play),
-  play_arrow: lucide(Play),
-  'play-circle': lucide(Play),
   block: lucide(Ban),
   print: lucide(Printer),
-  sync: lucide(RefreshCw),
-  refresh: lucide(RefreshCw),
-  history: lucide(RefreshCw),
   code: lucide(Code),
   send: lucide(Send),
-  minus: lucide(Minus),
 
-  // Chevron & Navigation
-  'chevron-down': lucide(ChevronDown),
-  chevron_down: lucide(ChevronDown),
-  'chevron-up': lucide(ChevronUp),
-  chevron_up: lucide(ChevronUp),
-  'chevron-left': lucide(ChevronLeft),
-  chevron_left: lucide(ChevronLeft),
-  'chevron-right': lucide(ChevronRight),
-  chevron_right: lucide(ChevronRight),
-  'expand-more': lucide(ChevronDown),
-  expand_more: lucide(ChevronDown),
-  'unfold-more': lucide(UnfoldVertical),
-  unfold_more: lucide(UnfoldVertical),
-  keyboard_arrow_down: lucide(ChevronDown),
-  menu: lucide(Menu),
-  /** Sidebar rail collapse / expand (desktop shells) */
-  'panel-left': lucide(PanelLeft),
-  panel_left: lucide(PanelLeft),
-  'panel-left-close': lucide(PanelLeftClose),
-  panel_left_close: lucide(PanelLeftClose),
-  'panel-left-open': lucide(PanelLeftOpen),
-  panel_left_open: lucide(PanelLeftOpen),
-
-  // Status & Feedback
+  // ── Status & feedback ────────────────────────────────
   check: lucide(Check),
-  check_circle: lucide(CheckCircle),
   'check-circle': lucide(CheckCircle),
   'check-list': lucide(ListChecks),
   'alert-circle': lucide(AlertCircle),
   'alert-triangle': lucide(AlertTriangle),
-  key: lucide(Key),
-  error: lucide(AlertCircle),
-  error_outline: lucide(AlertCircle),
-  'error-outline': lucide(AlertCircle),
+  'triangle-info': TriangleInfoIcon,
+  /**
+   * Error state for Toast / MessageModal. This name was referenced by Toast but
+   * had never been registered, so every error toast rendered an empty icon and
+   * a console warning — invisible while `IconName` was `string`.
+   */
+  'x-circle': lucide(CircleX),
   info: lucide(Info),
-  help: lucide(Info),
+  /** A genuine question mark — was drawing the Info circle */
+  help: lucide(CircleHelp),
   loader: lucide(Loader2),
   bell: lucide(Bell),
-  notifications: lucide(Bell),
+  'bell-ring': lucide(BellRing),
   validation: lucide(BadgeCheck),
 
-  // Communication
-  mail: lucide(Mail),
-  phone: lucide(Phone),
-  'map-pin': lucide(MapPin),
-  globe: lucide(Globe),
+  // ── Security & accounts ──────────────────────────────
+  lock: lucide(Lock),
+  'lock-keyhole': lucide(LockKeyhole),
+  key: lucide(Key),
+  'key-round': lucide(KeyRound),
+  shield: lucide(Shield),
+  'shield-check': lucide(ShieldCheck),
+  'shield-alert': lucide(ShieldAlert),
+  user: lucide(User),
+  /** Operator / role management */
+  'user-cog': lucide(UserCog),
+  users: lucide(Users),
+  'building-2': lucide(Building2),
 
-  // Theme
+  // ── Support & messaging ──────────────────────────────
+  mail: lucide(Mail),
+  'message-circle': lucide(MessageCircle),
+  /** Support agent */
+  headset: lucide(Headset),
+  'life-buoy': lucide(LifeBuoy),
+  /** Buyer broadcast / announcements */
+  megaphone: lucide(Megaphone),
+  phone: lucide(Phone),
+  globe: lucide(Globe),
+  'map-pin': lucide(MapPin),
+
+  // ── Theme ────────────────────────────────────────────
   sun: lucide(Sun),
   moon: lucide(Moon),
-  dark_mode: lucide(Moon),
-  'light-mode': lucide(Sun),
 
-  // Content & Media
+  // ── Content & media ──────────────────────────────────
   image: lucide(Image),
   camera: lucide(Camera),
-  'inventory-2': lucide(Package),
-  inventory_2: lucide(Package),
-  inventory: lucide(Package),
-  archive: lucide(Archive),
-  box: lucide(Box),
   calendar: lucide(Calendar),
   'calendar-today': lucide(CalendarDays),
-  calendar_today: lucide(CalendarDays),
-  table: lucide(FileText),
+  clock: lucide(Clock),
+  layers: lucide(Layers),
+  star: lucide(Star),
+  /** A real table grid — was drawing a document */
+  table: lucide(Table),
+  'file-text': lucide(FileText),
 
-  // View toggles
+  // ── View toggles ─────────────────────────────────────
   'grid-view': lucide(LayoutGrid),
-  grid_view: lucide(LayoutGrid),
-  grid: lucide(LayoutGrid),
-  'format-list-bulleted': lucide(List),
-  format_list_bulleted: lucide(List),
   list: lucide(List),
   'view-list': lucide(List),
-  view_list: lucide(List),
-  'list-alt': lucide(List),
-  list_alt: lucide(List),
+  'list-alt': lucide(LayoutList),
+  'format-list-bulleted': lucide(List),
 
-  // Devices
+  // ── Devices ──────────────────────────────────────────
   monitor: lucide(Monitor),
   tablet: lucide(Tablet),
   smartphone: lucide(Smartphone),
 
-  // Lock
-  lock: lucide(Lock),
-
-  // User / Profile
-  user: lucide(User),
-  person: lucide(User),
-  profile: lucide(User),
-
-  // Other
+  // ── Overflow ─────────────────────────────────────────
   'more-horiz': lucide(MoreHorizontal),
-  more_horiz: lucide(MoreHorizontal),
   'more-vert': lucide(MoreVertical),
-  more_vert: lucide(MoreVertical),
-  rule: lucide(SlidersHorizontal),
-  'sliders-horizontal': lucide(SlidersHorizontal),
-  sliders: lucide(SlidersHorizontal),
 
-  // Landing / marketing
-  'arrow-right': lucide(ArrowRight),
-  arrow_right: lucide(ArrowRight),
-  star: lucide(Star),
-  'star-filled': lucide(Star),
-  zap: lucide(Sparkles),
-  sparkles: lucide(Sparkles),
-  'shield-check': lucide(ShieldCheck),
-  clock: lucide(Clock),
-  layers: lucide(Layers),
-  repeat: lucide(Repeat),
-  gauge: lucide(Gauge),
-
-  // Brand (custom)
-  logo: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  zorro: ZorroIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  amazon: AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  ebay: EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  google: GoogleIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  'brand-amazon': AmazonIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  'brand-ebay': EbayIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-  'brand-google': GoogleIcon as React.FC<React.SVGProps<SVGSVGElement>>,
-
-  // Flags (use Globe + text fallback)
-  'flag-us': lucide(Flag),
-  'flag-tr': lucide(Flag),
-
-  // Misc
+  // ── Misc ─────────────────────────────────────────────
   rocket: lucide(Rocket),
-  'rocket-launch': lucide(Rocket),
-  'log-out': lucide(LogOut),
-  'arrow-left': lucide(ArrowLeft),
-} as const;
 
-export type IconName = keyof typeof iconMap;
+  // ── Brand (custom SVGs) ──────────────────────────────
+  logo: ZorroIcon as IconGlyph,
+  zorro: ZorroIcon as IconGlyph,
+  google: GoogleIcon as IconGlyph,
+  'brand-google': GoogleIcon as IconGlyph,
+} satisfies Record<string, IconGlyph>;

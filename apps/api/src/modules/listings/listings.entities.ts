@@ -9,6 +9,7 @@ export interface ListingJobEntity {
   success_count: number;
   failed_count: number;
   status: string;
+  kind: string;
   created_at: Date;
   updated_at: Date;
 }

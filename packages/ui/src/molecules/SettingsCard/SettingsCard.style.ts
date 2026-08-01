@@ -58,7 +58,9 @@ export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
   }
 `;
 
-export const IconWrapper = styled.div<{ $type?: 'location' | 'validation' | 'blacklist' }>`
+export const IconWrapper = styled.div<{
+  $type?: 'location' | 'validation' | 'blacklist';
+}>`
   width: 2.75rem;
   height: 2.75rem;
   border-radius: ${tkn('radius.md')};

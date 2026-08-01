@@ -146,7 +146,7 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                       aria-label={t('translation:header.selectLanguage')}
                     >
                       <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
-                      <Icon name="chevron_down" size={12} />
+                      <Icon name="chevron-down" size={12} />
                     </S.LanguageSelectTrigger>
                   }
                   items={[

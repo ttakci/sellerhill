@@ -10,7 +10,7 @@ import type { DialogProps } from './Dialog.types';
 
 const defaultIcons: Record<MessageType, IconName> = {
   success: 'check-circle',
-  error: 'error',
+  error: 'x-circle',
   warning: 'alert-triangle',
   info: 'info',
 };

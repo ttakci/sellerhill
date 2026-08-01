@@ -112,7 +112,7 @@ export const ListingCard = ({
           <S.ExtraFields>
             {(soldCount ?? 0) > 0 && (
               <S.ExtraItem>
-                <Icon name="shopping-cart" size={12} />
+                <Icon name="shopping-bag" size={12} />
                 <Text variant="caption" color="text.secondary">
                   {soldCount}
                 </Text>

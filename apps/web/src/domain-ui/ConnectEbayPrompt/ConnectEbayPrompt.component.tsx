@@ -1,4 +1,4 @@
-import { Button, Card, Icon, Text } from '@repo/ui';
+import { Button, Card, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ export const ConnectEbayPrompt = ({
     <Card variant="bordered" padding="lg" className={className}>
       <S.Inner>
         <S.IconWrapper>
-          <Icon name="storefront" size={40} />
+          <Text variant="h4" weight="semibold">eBay</Text>
         </S.IconWrapper>
 
         <Text variant="h3" weight="semibold">

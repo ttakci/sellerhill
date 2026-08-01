@@ -93,6 +93,7 @@
       "searchPlaceholder": "Search by title or ASIN...",
       "allCategories": "All Categories",
       "allStatuses": "All Statuses",
+      "allTrackingStates": "All tracking states",
       "allStores": "All Stores",
       "advancedFilters": "Advanced Filters",
       "clearAll": "Clear All",
@@ -169,6 +170,10 @@
       "editListing": "Edit Listing",
       "deleteListing": "Delete Listing",
       "ebayStore": "eBay Store"
+    },
+    "tracking": {
+      "tracked": "Tracked by Zonds",
+      "untracked": "Not tracked"
     },
     "status": {
       "active": "Active",
@@ -251,6 +256,21 @@
       "step1": "Settings & Policies",
       "step2": "Product Entry"
     },
+    "existingImport": {
+      "title": "Import existing eBay listings",
+      "actionTitle": "Import existing eBay listings",
+      "actionSubtitle": "Match active store listings to Amazon ASINs with an Excel workbook.",
+      "storeTitle": "Source store",
+      "store": "eBay store",
+      "fileTitle": "Upload listing matches",
+      "fileHint": "Provide an exact Amazon ASIN and eBay Item ID for every listing. Eligible legacy listings are migrated without being recreated.",
+      "downloadTemplate": "Download example Excel",
+      "chooseFile": "Choose Excel file",
+      "xlsxOnly": "XLSX only · Item IDs must remain exact text",
+      "start": "Start import",
+      "syncFailed": "The eBay store could not be synchronized.",
+      "importFailed": "The workbook could not be queued for import."
+    },
     "notifications": {
       "endSuccessTitle": "Listings Ended",
       "endSuccess": "Successfully ended {{count}} listings on eBay.",
@@ -282,6 +302,7 @@
       "paymentPolicyRequired": "Payment policy is required",
       "shippingPolicyRequired": "Shipping policy is required",
       "returnPolicyRequired": "Return policy is required",
+      "ebayAccountRequired": "eBay store is required",
       "listingSettingsGroupRequired": "Listing strategy group is required",
       "titleRequired": "Title is required",
       "titleMax": "Title must be 80 characters or less"

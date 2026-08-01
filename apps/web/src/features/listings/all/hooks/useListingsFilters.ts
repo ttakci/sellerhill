@@ -1,4 +1,4 @@
-import { ListingStatus, type ListingsQueryDto } from '@repo/shared';
+import { ListingStatus, ListingTrackingState, type ListingsQueryDto } from '@repo/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ export const DEFAULT_LISTINGS_FILTERS: ListingsFilterState = {
   search: '',
   category: '',
   status: ListingStatus.ACTIVE,
+  trackingState: '',
   ebayAccountId: '',
   price: { min: '', max: '' },
   purchasePrice: { min: '', max: '' },
@@ -96,7 +97,8 @@ export function useListingsFilters() {
       // Default active listings; sold-period (dashboard) defaults to all non-draft
       status:
         searchParams.get('status') ??
-        (hasSoldPeriod ? '' : ListingStatus.ACTIVE),
+        (searchParams.get('tracking') === 'untracked' || hasSoldPeriod ? '' : ListingStatus.ACTIVE),
+      trackingState: searchParams.get('tracking') ?? '',
       ebayAccountId: searchParams.get('store') ?? '',
       price: readRange(searchParams, 'price'),
       purchasePrice: readRange(searchParams, 'purchasePrice'),
@@ -215,6 +217,17 @@ export function useListingsFilters() {
     [patchParams]
   );
 
+  const handleTrackingStateChange = useCallback(
+    (value: string | number) => {
+      patchParams((next) => {
+        const v = String(value);
+        if (v) {next.set('tracking', v);} else {next.delete('tracking');}
+        if (v === 'untracked') {next.delete('status');}
+      }, true);
+    },
+    [patchParams]
+  );
+
   const handleEbayAccountChange = useCallback(
     (value: string | number) => {
       patchParams((next) => {
@@ -273,7 +286,7 @@ export function useListingsFilters() {
       String(filters.status) !== String(ListingStatus.ACTIVE) &&
       !isDraftView &&
       !hasSoldPeriod;
-    if (filters.search || filters.category || nonDefaultStatus || filters.ebayAccountId) {
+    if (filters.search || filters.category || nonDefaultStatus || filters.trackingState || filters.ebayAccountId) {
       return true;
     }
     return RANGE_KEYS.some((k) => filters[k].min !== '' || filters[k].max !== '');
@@ -287,6 +300,9 @@ export function useListingsFilters() {
       search: filters.search || undefined,
       category: filters.category || undefined,
       status: filters.status || undefined,
+      trackingState: Object.values(ListingTrackingState).find(
+        (state) => String(state) === filters.trackingState
+      ),
       ebayAccountId: filters.ebayAccountId || undefined,
       // Default sort: last sale when filtering by sold period, else newest
       sortBy: sortColumn || (hasSoldPeriod ? 'lastSale' : 'createdAt'),
@@ -326,6 +342,15 @@ export function useListingsFilters() {
       { value: '', label: t('listings.filters.allStatuses') },
       { value: ListingStatus.ACTIVE, label: t('listings.status.active') },
       { value: ListingStatus.INACTIVE, label: t('listings.status.inactive') },
+    ],
+    [t]
+  );
+
+  const trackingOptions = useMemo(
+    () => [
+      { value: '', label: t('listings.filters.allTrackingStates') },
+      { value: 'tracked', label: t('listings.tracking.tracked') },
+      { value: 'untracked', label: t('listings.tracking.untracked') },
     ],
     [t]
   );
@@ -380,10 +405,12 @@ export function useListingsFilters() {
     handleSearchChange,
     handleCategoryChange,
     handleStatusChange,
+    handleTrackingStateChange,
     handleEbayAccountChange,
     handleClearFilters,
     hasActiveFilters,
     statusOptions,
+    trackingOptions,
     numericFilters,
     fromDashboard,
     hasSoldPeriod,

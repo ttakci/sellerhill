@@ -1,4 +1,4 @@
-import { Button, Card, EmptyState, Icon, PageHeader, StatusBadge, Text } from '@repo/ui';
+import { Button, Card, EmptyState, PageHeader, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -33,7 +33,7 @@ export const StoresPageComponent = ({
             <Card key={account.id} variant="bordered" padding="lg">
               <S.StoreCardHeader>
                 <S.StoreIconWrapper>
-                  <Icon name="storefront" size={24} color="semantic.success" />
+                  <Text variant="body-sm" weight="semibold">eBay</Text>
                 </S.StoreIconWrapper>
                 <StatusBadge status={account.status} size="sm" />
               </S.StoreCardHeader>
@@ -51,7 +51,7 @@ export const StoresPageComponent = ({
         <Card variant="bordered" padding="lg">
           <S.EmptyStateInner>
             <S.EmptyIconWrapper>
-              <Icon name="storefront" size={40} color="brand.primary" />
+              <Text variant="h4" weight="semibold">eBay</Text>
             </S.EmptyIconWrapper>
             <Text variant="h3" weight="semibold">{t('ebay.accounts.noAccounts')}</Text>
             <S.EmptyDesc variant="body" color="text.secondary">

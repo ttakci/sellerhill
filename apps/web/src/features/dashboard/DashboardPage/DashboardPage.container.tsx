@@ -128,7 +128,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
     () => [
       { id: DashboardTab.CARDS, label: t('dashboard.tabs.cards'), icon: 'grid-view' },
       { id: DashboardTab.CHART, label: t('dashboard.tabs.chart'), icon: 'bar-chart' },
-      { id: DashboardTab.PNL, label: t('dashboard.tabs.pnl'), icon: 'list-alt' },
+      { id: DashboardTab.PNL, label: t('dashboard.tabs.pnl'), icon: 'table' },
     ],
     [t],
   );

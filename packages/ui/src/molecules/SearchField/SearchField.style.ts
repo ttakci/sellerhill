@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import { compactControlHeight, controlFocusShadow, type ControlSize } from '../../styles/formControl';
+import { compactControlHeight, type ControlSize } from '../../styles/formControl';
 import { tkn } from '../../theme/tkn';
 
 import type { SearchFieldVariant } from './SearchField.types';
@@ -21,19 +21,14 @@ export const SearchContainer = styled.div<SearchContainerProps>`
   box-sizing: border-box;
   background-color: ${({ $variant, theme }) =>
     $variant === 'gray' ? theme.colors.background.tertiary : theme.colors.surface.primary};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.control')};
   border-radius: ${tkn('radius.md')};
-  transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
-
-  &:hover {
-    border-color: ${tkn('colors.text.tertiary')};
-  }
+  transition: border-color ${tkn('transitions.fast')};
+  box-shadow: none;
 
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${({ theme }) => controlFocusShadow(theme.colors.brand.primary)};
+    box-shadow: none;
   }
 `;
 

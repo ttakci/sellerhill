@@ -20,6 +20,7 @@ type ThemePath =
   | 'colors.text.inverse'
   | 'colors.border.primary'
   | 'colors.border.secondary'
+  | 'colors.border.control'
   | 'colors.border.focus'
   | 'colors.semantic.success'
   | 'colors.semantic.error'

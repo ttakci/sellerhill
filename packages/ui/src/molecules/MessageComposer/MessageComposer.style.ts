@@ -1,7 +1,7 @@
 import { Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { controlFocusShadow, type ControlSize } from '../../styles/formControl';
+import type { ControlSize } from '../../styles/formControl';
 import { tkn } from '../../theme/tkn';
 
 import type { MessageComposerSize } from './MessageComposer.types';
@@ -25,21 +25,15 @@ export const ComposerShell = styled.div<ComposerShellProps>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   background-color: ${({ theme, $isDisabled }) =>
     $isDisabled ? theme.colors.background.tertiary : theme.colors.surface.primary};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.control')};
   border-radius: ${tkn('radius.md')};
-  transition:
-    border-color ${tkn('transitions.fast')},
-    box-shadow ${tkn('transitions.fast')};
+  transition: border-color ${tkn('transitions.fast')};
+  box-shadow: none;
   cursor: ${({ $isDisabled }) => ($isDisabled ? 'not-allowed' : 'text')};
-
-  &:hover {
-    border-color: ${({ $isDisabled, theme }) =>
-      !$isDisabled ? theme.colors.text.tertiary : undefined};
-  }
 
   &:focus-within {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${({ theme }) => controlFocusShadow(theme.colors.brand.primary)};
+    box-shadow: none;
   }
 `;
 

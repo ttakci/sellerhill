@@ -1,5 +1,5 @@
 import { AmazonAccountStatus } from '@repo/shared';
-import { Button, Drawer, Icon, StatusBadge, Text } from '@repo/ui';
+import { Drawer, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,6 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
   isContinueDisabled,
   onSelect,
   onContinue,
-  onVerify,
 }) => {
   const { t } = useTranslation();
 
@@ -54,7 +53,6 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
               <S.AccountMain>
                 <S.AccountHead>
                   <S.AccountIdentity>
-                    <Icon name="amazon" size={20} color="brand.primary" />
                     <S.AccountIdText>
                       <Text variant="body" weight="semibold">{a.displayName}</Text>
                     </S.AccountIdText>
@@ -84,25 +82,6 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
                     </S.AccountMetaLine>
                   )}
                 </S.AccountMetaList>
-
-                <S.AccountActions>
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    isLoading={a.isVerifying}
-                    disabled={a.isVerifying}
-                    // The whole card is a selection control; without stopping
-                    // propagation, verifying would also toggle the selection.
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                      e.stopPropagation();
-                      onVerify(a.id);
-                    }}
-                  >
-                    <Text variant="body-sm">
-                      {t('translation:settingsHub.sections.amazon.manage.verify')}
-                    </Text>
-                  </Button>
-                </S.AccountActions>
               </S.AccountMain>
             </S.SelectableCard>
           ))}
@@ -110,7 +89,7 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
       ) : (
         <S.EmptyState>
           <S.EmptyIconCircle>
-            <Icon name="amazon" size={28} />
+            <Text variant="body" weight="semibold">Amazon</Text>
           </S.EmptyIconCircle>
           <Text variant="body" color="text.secondary">
             {t('translation:settingsHub.sections.amazon.noAccounts')}

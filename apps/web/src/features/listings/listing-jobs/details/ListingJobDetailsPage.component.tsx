@@ -47,7 +47,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
         />
         <S.EmptyWrap>
           <EmptyState
-            icon="layers"
+            icon="clipboard-list"
             title={t('listings.jobs.details.notFoundTitle')}
             description={t('listings.jobs.details.notFoundSubtitle')}
             action={t('translation:common.back')}

@@ -441,6 +441,7 @@ netProfit = ebayEarnings - purchasePrice - (purchasePrice × amazonTaxRate/100) 
 - **Cache tracking**: `ebay_accounts.last_ebay_sync_at` — sync fetches only orders since last sync
 - **Listing matching**: Uses `lineItem.legacyItemId` → `listings.ebay_item_id` to establish `listing_id`
 - **Idempotency**: `upsertOrder()` uses Postgres `RETURNING id, (xmax = 0) AS inserted` to detect brand-new orders vs re-synced updates — one-time side effects (stock decrement) only fire on genuine inserts
+- **Tracking-at-ingest invariant**: every eBay-account order is ingested and visible, but `listing_id` is assigned only when the Item ID matches a Zonds listing that is ACTIVE at first ingest. Sale-driven stock sync and auto-fulfill require that initial match. `ON CONFLICT` deliberately never backfills `listing_id`, so importing the listing later cannot retroactively auto-purchase an older untracked order. `order-tracking-invariant.guard.spec.ts` locks all three gates.
 - **Re-sync cost recompute**: when an existing order's `ebay_earnings` changes on re-sync (delta > $0.001), `OrderSyncService.recomputeProfit(ebayOrderId)` is re-invoked so `net_profit` + fees reflect the corrected earnings. `cost_capture_status` is preserved/advanced, never reset to `pending`.
 
 ### Sale-Driven Stock Sync (between Keepa refresh cycles)
@@ -790,8 +791,8 @@ this table, so a labeled TextInput never matched the Button beside it.)
 | medium | 2.75rem | 3.5rem |
 | large | 3rem | 4rem |
 
-- **TextInput**, **Select**, **SearchField**, **Textarea** share the same heights, `surface.primary` fill, `border.primary`, and **brand.primary** focus ring via `controlFocusShadow`. Never black/neutral focus borders, and never a bespoke ring formula.
-- **`colors.border.focus` must always equal `colors.brand.primary`.** They are separate tokens for historical reasons; when they diverged, a focused Textarea/IconButton rang a different colour than a focused TextInput in dark mode only.
+- **TextInput**, **Select**, **SearchField**, **Textarea** share the same heights, surface treatment and `border.control` idle border. Hover does not alter the border. Focus/open uses a clean **brand.primary** border with no halo or box-shadow; field validation uses the shared `ValidationMessage` (outlined triangle-info glyph + semantic error text).
+- **`colors.border.focus` must always equal `colors.brand.primary`.** They are separate tokens for historical reasons; when they diverged, focused controls used different colours in dark mode.
 - **Floating labels are mandatory** for form fields (drawers, settings, auth). Do **not** place an external `<Text>` label above a TextInput/Select — use the `label` prop.
 - Toolbar/filter rows may use compact controls with `placeholder` only (no label) so Search + Select share one height.
 - Button `medium` = 2.75rem (matches compact medium); Button `large` = 3.5rem (matches **medium labeled**, i.e. the auth-form pairing of labeled input above primary submit). Form primary actions in drawers use `medium` not `large`.
@@ -904,6 +905,7 @@ so each poll re-downloaded the account's entire job history to render ten rows.
 - Detail payload joins product `features` + builds `specs` (Brand + parsed `Key: Value` features); description from product.
 
 ### Multi-store (`ebay_account_id`)
+- **Create/import store selection is mandatory:** both Add Listings and Existing eBay Import drawers require an explicit eBay store on step 1. `ebayAccountId` travels through request → persisted listing job → BullMQ item → processor → `createListingWithRest`; these flows must never publish through an arbitrary `LIMIT 1` active account.
 - Migration `030`: `listings.ebay_account_id` (backfill from user's eBay account). Create path sets it via `EbayService.getActiveAccountId`.
 - Filter: listings `?ebayAccountId=`; orders already had `orders.ebay_account_id` + same query param.
 - FE store Select options from `useGetEbayAccountsQuery`.
@@ -991,6 +993,7 @@ a variant to the atom rather than forking it.
 | `062` | `ebay_category_aspects` (taxonomy cache, stale-servable) + `ebay_category_map` (category resolution + operator pins, CHECK refuses root category `1`) + `ebay_aspect_defaults` (curated + learned item-specific values) + `listings.ebay_category_id`/`aspect_resolution`/`aspect_autofilled_count` |
 | `063` | `listing_job_items.failure_code` + `failure_details` — structured failure reasons so the UI stops rendering raw eBay strings |
 | `064` | `listing_jobs.listing_settings_group_id` + policy ids — required to re-queue ONE failed ASIN (the BullMQ payload holding them is gone once the job completes) |
+| `065` | Existing eBay listing onboarding: read-only store discovery (`ebay_listing_discoveries`), tracked/untracked filter, exact ASIN↔Item ID XLSX import, and legacy Trading→Inventory API migration without recreating eligible listings |
 | `061` | `products.manufacturer` — split out of `060` because `060` was already applied when the column was added. **An applied migration never re-runs: amending one is a silent no-op, so a new column always ships as a new file.** |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.

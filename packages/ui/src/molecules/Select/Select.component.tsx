@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 
 import { Icon } from '../../atoms/Icon';
+import { ValidationMessage } from '../ValidationMessage';
 
 import * as S from './Select.style';
 import type { SelectStandaloneComponentProps } from './Select.types';
@@ -159,13 +160,13 @@ export const ModernSelectStandalone = ({
         )}
 
         <S.DecorationWrapper $side="right" $size={size}>
-          <Icon name={isOpen ? 'chevron_up' : 'chevron_down'} size={size === 'small' ? 16 : 20} />
+          <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={size === 'small' ? 16 : 20} />
         </S.DecorationWrapper>
 
         {renderDropdown()}
       </S.FieldWrapper>
 
-      {error && <S.ErrorText>{error.message}</S.ErrorText>}
+      {error?.message && <ValidationMessage>{error.message}</ValidationMessage>}
     </S.Container>
   );
 };

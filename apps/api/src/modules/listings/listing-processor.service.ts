@@ -1,11 +1,13 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { forwardRef, Inject, Logger } from '@nestjs/common';
 import {
   extractCorrelationId,
   generateCorrelationId,
   KeepaUsageSource,
   ListingFailureCode,
+  ListingJobKind,
   ListingStatus,
+  type ExistingListingImportQueueData,
   type ListingQueueJobData,
   type ProductData,
 } from '@repo/shared';
@@ -20,6 +22,7 @@ import { summarizeAspectResolution } from './aspect-audit';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
+import { ListingImportService } from './listing-import.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
 
@@ -42,7 +45,9 @@ export class ListingProcessorService extends WorkerHost {
     private readonly ebayService: EbayService,
     private readonly listingStrategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly databaseService: DatabaseService
+    private readonly databaseService: DatabaseService,
+    @Inject(forwardRef(() => ListingImportService))
+    private readonly listingImportService: ListingImportService
   ) {
     super();
   }
@@ -50,7 +55,7 @@ export class ListingProcessorService extends WorkerHost {
   /**
    * Process a listing job task from the queue
    */
-  async process(job: Job<ListingQueueJobData>): Promise<void> {
+  async process(job: Job<ListingQueueJobData | ExistingListingImportQueueData>): Promise<void> {
     return withCorrelation(
       {
         correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
@@ -58,7 +63,26 @@ export class ListingProcessorService extends WorkerHost {
         jobId: job.id,
         origin: 'worker',
       },
-      () => this.processListing(job)
+      async () => {
+        if (job.data.kind === ListingJobKind.EXISTING_IMPORT) {
+          const data = job.data ;
+          try {
+            await this.listingImportService.processImport(data);
+          } catch (error) {
+            const terminal = job.attemptsMade + 1 >= (job.opts.attempts || 1);
+            await this.listingImportService.markFailure(
+              data,
+              error instanceof Error ? error.message : String(error),
+              terminal
+            );
+            if (!terminal) {
+              throw error;
+            }
+          }
+          return;
+        }
+        await this.processListing(job as Job<ListingQueueJobData>);
+      }
     );
   }
 
@@ -67,6 +91,7 @@ export class ListingProcessorService extends WorkerHost {
       jobId,
       userId,
       asin,
+      ebayAccountId,
       listingSettingsGroupId,
       paymentPolicyId,
       shippingPolicyId,
@@ -103,7 +128,7 @@ export class ListingProcessorService extends WorkerHost {
       const { productData, productId } = await this.resolveProductData(asin, userId);
 
       // 3. Prepare listing data (Price, stock, etc. based on strategy group)
-      const ebayAccountId = await this.ebayService.getActiveAccountId(userId);
+      await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
       // applyContentAi: create path only (shared LLM when group flags + LLM_CONTENT_ENABLED)
       const listingData = await this.listingStrategyService.prepareListingData(
         userId,
@@ -139,7 +164,8 @@ export class ListingProcessorService extends WorkerHost {
             shippingId: shippingPolicyId,
             returnId: returnPolicyId,
           },
-          asin
+          asin,
+          ebayAccountId
         );
         ebayItemId = created.listingId;
         categoryName = created.categoryName;
@@ -243,7 +269,7 @@ export class ListingProcessorService extends WorkerHost {
    *   validation — tokens Keepa charged for an empty/invalid response are real
    *   spend and must not vanish from accounting.
    */
-  private async resolveProductData(
+  async resolveProductData(
     asin: string,
     userId: string
   ): Promise<{ productData: ProductData; productId: string }> {
@@ -294,6 +320,20 @@ export class ListingProcessorService extends WorkerHost {
       const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct);
       return { productData: keepaProduct, productId };
     });
+  }
+
+  async prepareImportedListingData(
+    userId: string,
+    productData: ProductData,
+    listingSettingsGroupId: string,
+    ebayAccountId: string
+  ) {
+    return this.listingStrategyService.prepareListingData(
+      userId,
+      productData,
+      listingSettingsGroupId,
+      ebayAccountId
+    );
   }
 
   /** A cached product row is reusable when it has a real title and ≥1 image. */

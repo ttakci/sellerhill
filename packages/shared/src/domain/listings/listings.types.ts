@@ -26,9 +26,25 @@ export enum ListingStatus {
   RETRYING = 'retrying',
 }
 
+export enum ListingTrackingState {
+  TRACKED = 'tracked',
+  UNTRACKED = 'untracked',
+}
+
+export enum EbayListingApiModel {
+  LEGACY = 'legacy',
+  INVENTORY = 'inventory',
+  UNKNOWN = 'unknown',
+}
+
 /**
  * Listing Job Status
  */
+export enum ListingJobKind {
+  CREATE = 'create',
+  EXISTING_IMPORT = 'existing_import',
+}
+
 export enum ListingJobStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
@@ -57,6 +73,9 @@ export interface ListingDto {
   shippingPolicyId: string;
   returnPolicyId: string;
   status: ListingStatus;
+  trackingState: ListingTrackingState;
+  ebayApiModel?: EbayListingApiModel;
+  importedFromEbay?: boolean;
   purchasePrice?: number;
   estimatedProfit?: number;
   profitMargin?: number;
@@ -120,6 +139,7 @@ export interface ListingJobDto {
   successCount: number;
   failedCount: number;
   status: ListingJobStatus;
+  kind: ListingJobKind;
   createdAt: string;
   updatedAt: string;
 }
@@ -148,6 +168,7 @@ export interface ListingJobItemDto {
  */
 export interface CreateListingsRequest {
   asins: string[];
+  ebayAccountId: string;
   listingSettingsGroupId: string;
   paymentPolicyId: string;
   shippingPolicyId: string;
@@ -188,6 +209,7 @@ export interface ListingsQueryDto {
   limit?: number;
   search?: string;
   status?: ListingStatus | string;
+  trackingState?: ListingTrackingState;
   /**
    * @deprecated Prefer quantityMin/quantityMax — kept for API compat; FE no longer sends this.
    * in_stock = quantity > 0, oos = quantity = 0
@@ -239,6 +261,24 @@ export interface PaginatedListingsDto {
   categories: string[];
 }
 
+export interface EbayListingSyncResult {
+  discovered: number;
+  untracked: number;
+  ended: number;
+}
+
+export interface ListingImportDefaults {
+  listingSettingsGroupId: string;
+  paymentPolicyId: string;
+  shippingPolicyId: string;
+  returnPolicyId: string;
+}
+
+export interface ListingImportResult {
+  jobId: string;
+  total: number;
+}
+
 /**
  * Query for `GET /listings/jobs`.
  *
@@ -287,10 +327,26 @@ export interface PaginatedProductsDto {
 /**
  * Listing Queue Job Data
  */
+export interface ExistingListingImportQueueData {
+  kind: ListingJobKind.EXISTING_IMPORT;
+  jobId: string;
+  listingJobItemId: string;
+  userId: string;
+  asin: string;
+  ebayItemId: string;
+  ebayAccountId: string;
+  listingSettingsGroupId: string;
+  paymentPolicyId: string;
+  shippingPolicyId: string;
+  returnPolicyId: string;
+}
+
 export interface ListingQueueJobData {
+  kind?: ListingJobKind.CREATE;
   jobId: string;
   userId: string;
   asin: string;
+  ebayAccountId: string;
   listingSettingsGroupId: string;
   paymentPolicyId: string;
   shippingPolicyId: string;

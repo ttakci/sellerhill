@@ -13,6 +13,7 @@ import { StoreSettingsModule } from '../store-settings/store-settings.module';
 import { ContentGenerationService } from './content-generation.service';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
+import { ListingImportService } from './listing-import.service';
 import { ListingProcessorService } from './listing-processor.service';
 import { ListingQueueService } from './listing-queue.service';
 import { ListingStrategyService } from './listing-strategy.service';
@@ -42,6 +43,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
   controllers: [ListingsController],
   providers: [
     ListingsService,
+    ListingImportService,
     KeepaService,
     KeepaUsageService,
     ProductSyncService,

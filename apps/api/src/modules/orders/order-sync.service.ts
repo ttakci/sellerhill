@@ -6,7 +6,15 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { AutoFulfillBlockedReason, AutoFulfillStatus, BuyerMessageEventType, EbayAccountStatus, OrderCostCaptureStatus, type EbayMarketplaceId } from '@repo/shared';
+import {
+  AutoFulfillBlockedReason,
+  AutoFulfillStatus,
+  BuyerMessageEventType,
+  EbayAccountStatus,
+  ListingStatus,
+  OrderCostCaptureStatus,
+  type EbayMarketplaceId,
+} from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { meetsCoarseCapGate, pickRoundRobinAccount } from '../amazon/auto-fulfill-helpers';
@@ -121,9 +129,9 @@ export class OrderSyncService {
           if (lineItem?.legacyItemId) {
             const match = await this.databaseService.query<{ id: string; product_id: string }>(
               `SELECT id, product_id FROM listings
-               WHERE ebay_item_id = $1 AND user_id = $2
+               WHERE ebay_item_id = $1 AND user_id = $2 AND status = $3
                LIMIT 1`,
-              [lineItem.legacyItemId, userId]
+              [lineItem.legacyItemId, userId, ListingStatus.ACTIVE]
             );
 
             if (match.length > 0) {

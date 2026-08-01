@@ -6,6 +6,8 @@ import type {
   ListingJobItemDto,
   ListingJobsQueryDto,
   ListingsQueryDto,
+  EbayListingSyncResult,
+  ListingImportResult,
   PaginatedListingJobsDto,
   PaginatedListingsDto,
   PaginatedProductsDto,
@@ -29,6 +31,7 @@ export function listingsQueryToParams(query: ListingsQueryDto = {}): Record<stri
   set('limit', query.limit);
   set('search', query.search);
   set('status', query.status);
+  set('trackingState', query.trackingState);
   set('stockPreset', query.stockPreset);
   set('ebayAccountId', query.ebayAccountId);
   set('category', query.category);
@@ -112,6 +115,18 @@ export const listingsApi = baseApi.injectEndpoints({
     getUserProducts: builder.query<PaginatedProductsDto, UserProductsQueryDto | void>({
       query: (params) => ({ url: '/listings/products', params: params ?? undefined }),
       providesTags: ['Listings'],
+    }),
+
+    syncEbayListings: builder.mutation<EbayListingSyncResult, string>({
+      query: (ebayAccountId) => ({ url: '/listings/sync-ebay', method: 'POST', body: { ebayAccountId } }),
+      invalidatesTags: ['Listings'],
+    }),
+    downloadListingImportTemplate: builder.mutation<Blob, void>({
+      query: () => ({ url: '/listings/import/template', method: 'GET', responseHandler: (response) => response.blob() }),
+    }),
+    importExistingListings: builder.mutation<ListingImportResult, FormData>({
+      query: (body) => ({ url: '/listings/import', method: 'POST', body }),
+      invalidatesTags: ['Listings'],
     }),
 
     /**
@@ -249,6 +264,9 @@ export const {
   useGetListingJobsQuery,
   useGetUserProductsQuery,
   useCreateListingsMutation,
+  useSyncEbayListingsMutation,
+  useDownloadListingImportTemplateMutation,
+  useImportExistingListingsMutation,
   useGetJobStatusQuery,
   useGetJobItemsQuery,
   useRetryJobItemMutation,

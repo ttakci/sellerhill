@@ -4,6 +4,9 @@ import {
   Get,
   Header,
   NotFoundException,
+  Res,
+  UploadedFile,
+  UseInterceptors,
   Param,
   Patch,
   Post,
@@ -11,9 +14,11 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateListingsRequest,
+  ListingTrackingState,
   ListingDto,
   ListingJobDto,
   ListingJobItemDto,
@@ -25,9 +30,11 @@ import {
   type UpdateListingRequest,
   isListingsStockPreset,
 } from '@repo/shared';
+import type { Response } from 'express';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+import { ListingImportService } from './listing-import.service';
 import { ListingQueueService } from './listing-queue.service';
 import { ListingsService } from './listings.service';
 
@@ -45,7 +52,8 @@ const toPositiveInt = (value?: string): number | undefined =>
 export class ListingsController {
   constructor(
     private readonly listingsService: ListingsService,
-    private readonly listingQueueService: ListingQueueService
+    private readonly listingQueueService: ListingQueueService,
+    private readonly listingImportService: ListingImportService
   ) {}
 
   /**
@@ -60,6 +68,7 @@ export class ListingsController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('trackingState') trackingState?: string,
     @Query('stockPreset') stockPreset?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
     @Query('category') category?: string,
@@ -96,6 +105,10 @@ export class ListingsController {
       limit: num(limit),
       search,
       status,
+      trackingState:
+        trackingState === ListingTrackingState.TRACKED || trackingState === ListingTrackingState.UNTRACKED
+          ? trackingState
+          : undefined,
       stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
       ebayAccountId,
       category,
@@ -141,6 +154,7 @@ export class ListingsController {
     @Request() req: { user: { sub: string } },
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('trackingState') trackingState?: string,
     @Query('stockPreset') stockPreset?: string,
     @Query('ebayAccountId') ebayAccountId?: string,
     @Query('category') category?: string,
@@ -173,6 +187,10 @@ export class ListingsController {
     const query: ListingsQueryDto = {
       search,
       status,
+      trackingState:
+        trackingState === ListingTrackingState.TRACKED || trackingState === ListingTrackingState.UNTRACKED
+          ? trackingState
+          : undefined,
       stockPreset: isListingsStockPreset(stockPreset) ? stockPreset : undefined,
       ebayAccountId,
       category,
@@ -201,6 +219,42 @@ export class ListingsController {
     };
 
     return this.listingsService.exportListingsCsv(req.user.sub, query);
+  }
+
+  @Get('import/template')
+  async downloadImportTemplate(@Res() response: Response): Promise<void> {
+    const workbook = await this.listingImportService.buildTemplate();
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.setHeader('Content-Disposition', 'attachment; filename="zonds-listing-import.xlsx"');
+    response.send(workbook);
+  }
+
+  @Post('sync-ebay')
+  async syncEbayListings(
+    @Request() req: { user: { sub: string } },
+    @Body() body: { ebayAccountId: string }
+  ) {
+    return this.listingImportService.syncStore(req.user.sub, body.ebayAccountId);
+  }
+
+  @Post('import')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  async importExistingListings(
+    @Request() req: { user: { sub: string } },
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: {
+      ebayAccountId: string;
+      listingSettingsGroupId: string;
+      paymentPolicyId: string;
+      shippingPolicyId: string;
+      returnPolicyId: string;
+    }
+  ) {
+    if (!file) {
+      throw new NotFoundException('Import workbook is required');
+    }
+    return this.listingImportService.importWorkbook(req.user.sub, body.ebayAccountId, file.buffer, body);
   }
 
   /**

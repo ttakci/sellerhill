@@ -20,6 +20,7 @@ export const AddListingsDrawerComponent = ({
   isSubmitting,
   isLoading,
   form,
+  ebayAccounts,
   listingSettingsGroups,
   businessPolicies,
   asinCount,
@@ -60,6 +61,22 @@ export const AddListingsDrawerComponent = ({
       <S.BodyStack>
         <S.StepPanel $active={currentStep === 0}>
           <S.Card>
+            <S.SectionBlock>
+              <S.SectionTitle variant="h5" weight="semibold" color="text.primary">
+                {t('listings.existingImport.storeTitle')}
+              </S.SectionTitle>
+              <ModernSelect<CreateListingsFormData>
+                name="ebayAccountId"
+                control={control}
+                label={t('listings.existingImport.store')}
+                isDisabled={isLoading || isSubmitting}
+                options={ebayAccounts.map((account) => ({ label: account.name, value: account.id }))}
+                fullWidth
+                searchPlaceholder={t('translation:common.search')}
+                noResultsMessage={t('translation:common.noResults')}
+              />
+            </S.SectionBlock>
+
             <S.SectionBlock>
               <S.SectionTitle variant="h5" weight="semibold" color="text.primary">
                 {t('listings.listingSettings.title')}

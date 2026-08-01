@@ -61,7 +61,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       <S.Container>
         <S.StateCard variant="elevated" padding="lg">
           <EmptyState
-            icon="inbox"
+            icon="shopping-bag"
             title={t('translation:common.loading')}
             description={t('orders.detail.loadingSubtitle')}
           />
@@ -75,7 +75,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       <S.Container>
         <S.StateCard variant="elevated" padding="lg">
           <EmptyState
-            icon="inbox"
+            icon="shopping-bag"
             title={t('orders.detail.notFoundTitle')}
             description={t('orders.detail.notFoundSubtitle')}
             action={t('translation:common.back')}
@@ -205,7 +205,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
       <S.SectionCard variant="elevated" padding="lg">
         <S.CardHeader>
           <S.CardHeaderLeft>
-            <Icon name="insights" size={20} color="brand.primary" />
+            <Icon name="chart-line" size={20} color="brand.primary" />
             <Text variant="h4" weight="semibold">
               {t('orders.detail.netProfitAnalysis')}
             </Text>
@@ -308,7 +308,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="tag" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('orders.detail.ebaySummary')}
               </Text>
@@ -355,7 +354,6 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         <S.SectionCard variant="elevated" padding="lg">
           <S.CardHeader>
             <S.CardHeaderLeft>
-              <Icon name="shopping-bag" size={20} color="brand.primary" />
               <Text variant="h4" weight="semibold">
                 {t('orders.detail.amazonCosts')}
               </Text>

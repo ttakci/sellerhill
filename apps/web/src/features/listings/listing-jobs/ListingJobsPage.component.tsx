@@ -155,7 +155,7 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
     }
     return (
       <EmptyState
-        icon="layers"
+        icon="clipboard-list"
         title={t('listings.jobs.emptyTitle')}
         description={t('listings.jobs.emptySubtitle')}
         size="lg"

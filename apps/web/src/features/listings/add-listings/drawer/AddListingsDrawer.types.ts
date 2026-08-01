@@ -17,6 +17,7 @@ export interface AddListingsDrawerComponentProps {
   isSubmitting: boolean;
   isLoading: boolean;
   form: UseFormReturn<CreateListingsFormData>;
+  ebayAccounts: Array<{ id: string; name: string }>;
   listingSettingsGroups: Array<{ id: string; name: string }>;
   businessPolicies: {
     payment: Array<{ id: string; name: string }>;

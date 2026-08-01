@@ -278,7 +278,7 @@ export const AdminPageComponent = ({
               data={proxyPool?.proxies ?? []}
               emptyContent={
                 <EmptyState
-                  icon="shield-check"
+                  icon="server"
                   title={t('admin.proxies.empty')}
                   description={t('admin.proxies.emptyDescription')}
                   size="md"

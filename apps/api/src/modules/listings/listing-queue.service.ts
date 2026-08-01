@@ -69,6 +69,7 @@ export class ListingQueueService {
         jobId: job.id,
         userId,
         asin: item.asin,
+        ebayAccountId: request.ebayAccountId,
         listingSettingsGroupId: request.listingSettingsGroupId,
         paymentPolicyId: request.paymentPolicyId,
         shippingPolicyId: request.shippingPolicyId,

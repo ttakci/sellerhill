@@ -43,6 +43,7 @@ const lightColors: ThemeColors = {
   border: {
     primary: '#00000014',
     secondary: '#0000000a',
+    control: '#cbd5e1',
     focus: '#2563eb',
   },
 
@@ -168,6 +169,7 @@ const darkColors: ThemeColors = {
   border: {
     primary: '#ffffff12',
     secondary: '#ffffff0a',
+    control: '#475569',
     // Must equal brand.primary. It was left at the old indigo #6366f1 when the
     // brand blue was retuned, so a focused Textarea/IconButton/ThemeToggle rang
     // in a different colour than a focused TextInput/Select in dark mode only.

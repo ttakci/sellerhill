@@ -32,7 +32,7 @@ const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'box',
+        icon: 'storefront',
         title: t('translation:settingsHub.sections.amazon.title'),
       }}
     >
@@ -56,7 +56,7 @@ const StoreManagementSection = ({ onOpenStoreSettings }: { onOpenStoreSettings: 
     <SettingsCard
       variant="section"
       header={{
-        icon: 'settings',
+        icon: 'sliders-horizontal',
         title: t('translation:settingsHub.sections.storeManagement.title'),
       }}
     >
@@ -230,13 +230,14 @@ export const SettingsHubPageComponent = ({
         <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
       </S.TwoColGrid>
 
-      <BillingSection onManage={() => onOpenDrawer('billing')} />
-
-      <AccountSecuritySection
-        onAction={(key) => onOpenDrawer(key)}
-        onPersonalInfo={() => onOpenDrawer('profile')}
-        onDeactivate={onOpenDeactivateModal}
-      />
+      <S.TwoColGrid>
+        <BillingSection onManage={() => onOpenDrawer('billing')} />
+        <AccountSecuritySection
+          onAction={(key) => onOpenDrawer(key)}
+          onPersonalInfo={() => onOpenDrawer('profile')}
+          onDeactivate={onOpenDeactivateModal}
+        />
+      </S.TwoColGrid>
 
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountDrawer isOpen={activeDrawer === 'ebay'} onClose={onCloseDrawer} accounts={ebayAccounts} />

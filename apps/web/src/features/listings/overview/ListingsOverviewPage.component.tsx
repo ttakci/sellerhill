@@ -14,6 +14,7 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
   onAddListing,
   onViewAll,
   onViewJobs,
+  onImportExisting,
   onViewDrafts,
   onListingClick,
 }) => {
@@ -62,6 +63,11 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
                 label={t('listings.otherActions.draftsTitle')}
                 subtitle={draftsSubtitle}
                 onClick={onViewDrafts}
+              />
+              <SettingsActionRow
+                label={t('listings.existingImport.actionTitle')}
+                subtitle={t('listings.existingImport.actionSubtitle')}
+                onClick={onImportExisting}
               />
               <SettingsActionRow
                 label={t('listings.otherActions.jobsTitle')}

@@ -36,9 +36,6 @@ export const CONTROL_PADDING_X = '1rem';
 /** Icon / decoration column width. */
 export const CONTROL_ICON_WIDTH = '2.75rem';
 
-/**
- * Brand focus ring formula (border + soft ring).
- * Always use brand.primary — never black / neutral on focus or open.
- */
-export const controlFocusShadow = (brandPrimary: string): string =>
-  `0 0 0 0.1875rem ${brandPrimary}20`;
+/** Shared idle border for interactive form controls. */
+export const CONTROL_BORDER_COLOR_PATH = 'colors.border.control' as const;
+

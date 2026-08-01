@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle } from 'react';
 
 import { Icon } from '../../atoms/Icon';
+import { ValidationMessage } from '../ValidationMessage';
 
 import * as S from './TextInput.style';
 import type { TextInputInnerComponentProps } from './TextInput.types';
@@ -36,6 +37,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
   } = props;
 
   const hasValue = field.value !== undefined && field.value !== null && field.value !== '';
+  const errorId = error ? `${id ?? field.name}-error` : undefined;
 
   // Expose the input element for refs
   useImperativeHandle(ref, () => inputRef.current!);
@@ -66,6 +68,8 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
           autoFocus={autoFocus}
           maxLength={maxLength}
           autoComplete={autoComplete}
+          aria-invalid={!!error}
+          aria-describedby={errorId}
           onFocus={onFocus}
           onBlur={onBlurField}
           onKeyDown={onKeyDown}
@@ -117,7 +121,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
         )}
       </S.FieldWrapper>
 
-      {error && <S.ErrorText>{error.message}</S.ErrorText>}
+      {error?.message && <ValidationMessage id={errorId}>{error.message}</ValidationMessage>}
     </S.Container>
   );
 });

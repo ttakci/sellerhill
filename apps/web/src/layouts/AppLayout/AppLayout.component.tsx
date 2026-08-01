@@ -87,7 +87,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inbox" size={20} />
+                <Icon name="shopping-bag" size={20} />
                 {!sidebarCollapsed && t('translation:menu.orders')}
               </S.NavItemContent>
             </S.NavItem>
@@ -106,7 +106,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="storefront" size={20} />
+                <Icon name="inventory" size={20} />
                 {!sidebarCollapsed && t('translation:menu.ebayListings')}
               </S.NavItemContent>
             </S.NavItem>
@@ -118,7 +118,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
             >
               <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="bolt" size={20} />
+                <Icon name="clipboard-list" size={20} />
                 {!sidebarCollapsed && t('translation:menu.listingJobs')}
               </S.NavItemContent>
             </S.NavItem>
@@ -203,7 +203,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       aria-label={t('translation:header.selectLanguage')}
                     >
                       <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
-                      <Icon name="chevron_down" size={12} />
+                      <Icon name="chevron-down" size={12} />
                     </S.LanguageSelectTrigger>
                   }
                   items={[

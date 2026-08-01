@@ -15,6 +15,7 @@ import {
   type EbayMarketplaceId,
   type GetEbayAccountsResponse,
   type ListingCreationData,
+  EbayListingApiModel,
 } from '@repo/shared';
 import axios from 'axios';
 
@@ -348,12 +349,15 @@ export class EbayService implements OnModuleInit {
     productId: string,
     listingData: ListingCreationData,
     policies: { paymentId: string; shippingId: string; returnId: string },
-    asin: string
+    asin: string,
+    ebayAccountId?: string
   ): Promise<EbayListingCreationResult> {
     this.logger.log(`Creating eBay listing (REST) for user ${userId}, product ${productId}`);
 
-    // 1. Get user's active eBay account
-    const account = await this.getActiveAccount(userId);
+    // 1. Resolve the explicitly selected store (legacy callers fall back to active account).
+    const account = ebayAccountId
+      ? await this.getOwnedAccount(userId, ebayAccountId)
+      : await this.getActiveAccount(userId);
     if (!account) {
       throw new Error('No active eBay account found for user');
     }
@@ -1213,6 +1217,21 @@ export class EbayService implements OnModuleInit {
     return this.getAccessToken(accounts[0]);
   }
 
+  async assertAccountOwnership(userId: string, accountId: string): Promise<void> {
+    await this.getOwnedAccount(userId, accountId);
+  }
+
+  private async getOwnedAccount(userId: string, accountId: string): Promise<EbayAccountEntity> {
+    const accounts = await this.databaseService.query<EbayAccountEntity>(
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND user_id = $2 AND status = $3`,
+      [accountId, userId, EbayAccountStatus.ACTIVE]
+    );
+    if (!accounts[0]) {
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
+    }
+    return accounts[0];
+  }
+
   /**
    * Get active eBay account for user
    */
@@ -1251,192 +1270,103 @@ export class EbayService implements OnModuleInit {
     return tokenResponse.access_token;
   }
 
-  /**
-   * Build eBay AddItem XML request
-   */
-  private buildAddItemXml(
-    data: Record<string, unknown>,
-    policies: { paymentId: string; shippingId: string; returnId: string }
-  ): string {
-    const title = data.title as string | undefined;
-    const description = data.description as string | undefined;
-    const price = data.price as number | undefined;
-    const quantity = data.quantity as number | undefined;
-    const imageUrls = data.imageUrls as string[] | undefined;
-    const currency = data.currency as string | undefined;
-
-    // Basic XML structure for AddItem
-    // Note: In a real app, we'd use a robust XML builder and handle all fields
-    return `<?xml version="1.0" encoding="utf-8"?>
-<AddItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-  <ErrorLanguage>en_US</ErrorLanguage>
-  <WarningLevel>High</WarningLevel>
-  <Item>
-    <Title>${this.escapeXml(title || 'Product')}</Title>
-    <Description><![CDATA[${description || ''}]]></Description>
-    <PrimaryCategory>
-      <CategoryID>1</CategoryID> <!-- TODO: Category Mapping -->
-      </PrimaryCategory>
-      <StartPrice>${price || 0}</StartPrice>
-      <CategoryMappingAllowed>true</CategoryMappingAllowed>
-      <ConditionID>1000</ConditionID> <!-- New -->
-      <Currency>${currency}</Currency>
-      <Country>${String(data.country || 'US')}</Country>
-      <Location>${String(data.country || 'US')}</Location>
-    <DispatchTimeMax>3</DispatchTimeMax>
-    <ListingDuration>GTC</ListingDuration>
-    <ListingType>FixedPriceItem</ListingType>
-    <PaymentMethods>PayPal</PaymentMethods>
-    <!-- Payment handled via payment policy -->
-    <PictureDetails>
-      ${(imageUrls || []).map((url: string) => `<PictureURL>${url}</PictureURL>`).join('\n      ')}
-    </PictureDetails>
-    <Quantity>${quantity || 1}</Quantity>
-    <ReturnPolicy>
-      <ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption>
-      <ReturnsWithinOption>Days_30</ReturnsWithinOption>
-      <RefundOption>MoneyBack</RefundOption>
-      <Description>Returns accepted within 30 days.</Description>
-      <ShippingCostPaidByOption>Buyer</ShippingCostPaidByOption>
-    </ReturnPolicy>
-    <SellerProfiles>
-      <SellerPaymentProfile>
-        <PaymentProfileID>${policies.paymentId}</PaymentProfileID>
-      </SellerPaymentProfile>
-      <SellerShippingProfile>
-        <ShippingProfileID>${policies.shippingId}</ShippingProfileID>
-      </SellerShippingProfile>
-      <SellerReturnProfile>
-        <ReturnProfileID>${policies.returnId}</ReturnProfileID>
-      </SellerReturnProfile>
-    </SellerProfiles>
-    <ShippingDetails>
-      <ShippingServiceOptions>
-        <ShippingServicePriority>1</ShippingServicePriority>
-        <ShippingService>USPSFirstClass</ShippingService>
-        <ShippingServiceCost>0.00</ShippingServiceCost>
-      </ShippingServiceOptions>
-    </ShippingDetails>
-    <Site>US</Site>
-  </Item>
-</AddItemRequest>`;
-  }
-
-  /**
-   * Execute AddItem call to eBay XML API
-   */
-  private async executeAddItem(accessToken: string, xml: string, marketplaceId: string): Promise<string> {
-    const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
-
-    // Map marketplace to SiteID
-    const siteIdMap: Record<string, string> = {
-      EBAY_US: '0',
-      EBAY_UK: '3',
-      EBAY_DE: '77',
-      EBAY_FR: '71',
-      EBAY_IT: '101',
-      EBAY_ES: '186',
-    };
-    const siteId = siteIdMap[marketplaceId] || '0';
-
-    try {
-      const response = await axios.post(baseUrl, xml, {
-        headers: {
-          'Content-Type': 'text/xml',
-          'X-EBAY-API-SITEID': siteId,
-          'X-EBAY-API-COMPATIBILITY-LEVEL': '967',
-          'X-EBAY-API-CALL-NAME': 'AddItem',
-          'X-EBAY-API-IAF-TOKEN': accessToken,
-        },
-      });
-
-      // Simple parsing logic for mock/initial version
-      // In production, use fast-xml-parser
-      const responseBody = response.data as string;
-      if (responseBody.includes('<Ack>Success</Ack>') || responseBody.includes('<Ack>Warning</Ack>')) {
-        const match = responseBody.match(/<ItemID>(\d+)<\/ItemID>/);
-        return match ? match[1] : `EBAY-MOCK-${Date.now()}`;
-      } else {
-        const errorMatch = responseBody.match(/<LongMessage>(.*?)<\/LongMessage>/);
-        throw new Error(errorMatch ? errorMatch[1] : 'Unknown eBay API error');
-      }
-    } catch (error: unknown) {
-      const axiosErr = isAxiosErrorWithData(error) ? error : null;
-      this.logger.error('eBay API request failed', axiosErr?.response?.data || getErrorMessage(error));
-      throw error;
-    }
-  }
-
-  private escapeXml(unsafe: string): string {
-    return unsafe.replace(/[<>&"']/g, (c) => {
-      switch (c) {
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '&':
-          return '&amp;';
-        case '"':
-          return '&quot;';
-        case "'":
-          return '&apos;';
-        default:
-          return c;
-      }
-    });
-  }
-
-  /**
-   * Get business policies from eBay for the user's connected account
-   */
-  async getBusinessPolicies(userId: string) {
-    this.logger.log(`Fetching business policies for user ${userId}`);
-
-    // 1. Get user's active eBay account
-    const account = await this.getActiveAccount(userId);
+  async discoverActiveListings(accountId: string): Promise<Array<{
+    ebayItemId: string;
+    sku?: string;
+    title: string;
+    price: number;
+    quantity: number;
+    quantitySold: number;
+    imageUrl?: string;
+    marketplaceId: string;
+    apiModel: EbayListingApiModel;
+  }>> {
+    const accounts = await this.databaseService.query<EbayAccountEntity>(
+      `SELECT * FROM ebay_accounts WHERE id = $1`,
+      [accountId]
+    );
+    const account = accounts[0];
     if (!account) {
-      this.logger.warn(`No active eBay account for user ${userId} to fetch policies`);
-      return [];
+      throw new NotFoundException(`eBay account ${accountId} not found`);
     }
+    const accessToken = await this.getAccessToken(account);
+    const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
+    const siteIdMap: Record<string, string> = { EBAY_US: '0', EBAY_UK: '3', EBAY_DE: '77', EBAY_FR: '71', EBAY_IT: '101', EBAY_ES: '186' };
+    const discovered: Array<{ ebayItemId: string; sku?: string; title: string; price: number; quantity: number; quantitySold: number; imageUrl?: string; marketplaceId: string; apiModel: EbayListingApiModel }> = [];
+    let page = 1;
+    let totalPages = 1;
 
-    // 2. Get fresh access token
+    do {
+      const xml = `<?xml version="1.0" encoding="utf-8"?>
+<GetMyeBaySellingRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <ErrorLanguage>en_US</ErrorLanguage><WarningLevel>High</WarningLevel>
+  <ActiveList><Include>true</Include><Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>${page}</PageNumber></Pagination></ActiveList>
+  <DetailLevel>ReturnAll</DetailLevel>
+</GetMyeBaySellingRequest>`;
+      const response = await this.withRateLimitRetry(() => axios.post<string>(baseUrl, xml, { headers: {
+        'Content-Type': 'text/xml', 'X-EBAY-API-SITEID': siteIdMap[account.marketplace_id] || '0',
+        'X-EBAY-API-COMPATIBILITY-LEVEL': '967', 'X-EBAY-API-CALL-NAME': 'GetMyeBaySelling',
+        'X-EBAY-API-IAF-TOKEN': accessToken,
+      }}));
+      const body = response.data;
+      const pages = body.match(/<TotalNumberOfPages>(\d+)<\/TotalNumberOfPages>/)?.[1];
+      totalPages = pages ? Number(pages) : 1;
+      const itemBlocks = body.match(/<Item>[^]*?<\/Item>/g) ?? [];
+      const value = (block: string, tag: string): string | undefined =>
+        block.match(new RegExp(`<${tag}>([^]*?)<\\/${tag}>`))?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+      for (const block of itemBlocks) {
+        const ebayItemId = value(block, 'ItemID');
+        if (!ebayItemId) {continue;}
+        const quantity = Number(value(block, 'Quantity') ?? 0);
+        const quantitySold = Number(value(block, 'QuantitySold') ?? 0);
+        discovered.push({
+          ebayItemId,
+          sku: value(block, 'SKU'),
+          title: value(block, 'Title') ?? ebayItemId,
+          price: Number(value(block, 'CurrentPrice') ?? value(block, 'StartPrice') ?? 0),
+          quantity: Math.max(0, quantity - quantitySold),
+          quantitySold,
+          imageUrl: value(block, 'GalleryURL'),
+          marketplaceId: account.marketplace_id,
+          apiModel: block.includes('<InventoryTrackingMethod>SKU</InventoryTrackingMethod>')
+            ? EbayListingApiModel.INVENTORY : EbayListingApiModel.LEGACY,
+        });
+      }
+      page++;
+    } while (page <= totalPages);
+    return discovered;
+  }
+
+  async migrateLegacyListing(accountId: string, ebayItemId: string): Promise<void> {
+    const accessToken = await this.getAccountAccessToken(accountId);
+    const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/bulk_migrate_listing`;
+    const response = await this.withRateLimitRetry(() => axios.post(url, { requests: [{ listingId: ebayItemId }] }, {
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    }));
+    const result = (response.data as { responses?: Array<{ statusCode?: number; errors?: Array<{ message?: string }> }> }).responses?.[0];
+    if (!result || (result.statusCode !== undefined && result.statusCode >= 400)) {
+      throw new Error(result?.errors?.map((error) => error.message).filter(Boolean).join('; ') || 'eBay listing migration failed');
+    }
+  }
+
+  async getBusinessPolicies(userId: string) {
+    const account = await this.getActiveAccount(userId);
+    if (!account) {return [];}
     const accessToken = await this.getAccessToken(account);
     const marketplaceId = account.marketplace_id;
-
     try {
-      // 3. Fetch all 3 types of policies
       const [fulfillment, payment, returns] = await Promise.all([
         this.fetchPoliciesFromEbay(accessToken, 'fulfillment_policy', marketplaceId),
         this.fetchPoliciesFromEbay(accessToken, 'payment_policy', marketplaceId),
         this.fetchPoliciesFromEbay(accessToken, 'return_policy', marketplaceId),
       ]);
-
-      const allPolicies = [
-        ...fulfillment.map((p: Record<string, unknown>) => ({
-          id: String(p.fulfillmentPolicyId ?? ''),
-          name: String(p.name ?? ''),
-          type: 'shipping' as const,
-          description: String(p.description ?? ''),
-        })),
-        ...payment.map((p: Record<string, unknown>) => ({
-          id: String(p.paymentPolicyId ?? ''),
-          name: String(p.name ?? ''),
-          type: 'payment' as const,
-          description: String(p.description ?? ''),
-        })),
-        ...returns.map((p: Record<string, unknown>) => ({
-          id: String(p.returnPolicyId ?? ''),
-          name: String(p.name ?? ''),
-          type: 'return' as const,
-          description: String(p.description ?? ''),
-        })),
+      return [
+        ...fulfillment.map((policy) => ({ id: String(policy.fulfillmentPolicyId ?? ''), name: String(policy.name ?? ''), type: 'shipping' as const, description: String(policy.description ?? '') })),
+        ...payment.map((policy) => ({ id: String(policy.paymentPolicyId ?? ''), name: String(policy.name ?? ''), type: 'payment' as const, description: String(policy.description ?? '') })),
+        ...returns.map((policy) => ({ id: String(policy.returnPolicyId ?? ''), name: String(policy.name ?? ''), type: 'return' as const, description: String(policy.description ?? '') })),
       ];
-
-      this.logger.log(`Fetched ${allPolicies.length} business policies from eBay for ${userId}`);
-      return allPolicies;
-    } catch (error: unknown) {
+    } catch (error) {
       this.logger.error(`Failed to fetch business policies from eBay: ${getErrorMessage(error)}`);
-      // Fallback to empty if eBay API fails (e.g. business policies not enabled on account)
       return [];
     }
   }
@@ -1467,7 +1397,7 @@ export class EbayService implements OnModuleInit {
 <EndItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
   <ErrorLanguage>en_US</ErrorLanguage>
   <WarningLevel>High</WarningLevel>
-  <ItemID>${this.escapeXml(ebayItemId)}</ItemID>
+  <ItemID>${ebayItemId.replace(/[^0-9]/g, '')}</ItemID>
   <EndingReason>NotAvailable</EndingReason>
 </EndItemRequest>`;
 

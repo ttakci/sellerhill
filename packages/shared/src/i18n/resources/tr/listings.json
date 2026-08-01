@@ -93,6 +93,7 @@
       "searchPlaceholder": "Başlık veya ASIN ile ara...",
       "allCategories": "Tüm Kategoriler",
       "allStatuses": "Tüm Durumlar",
+      "allTrackingStates": "Tüm takip durumları",
       "allStores": "Tüm Mağazalar",
       "advancedFilters": "Gelişmiş Filtreler",
       "clearAll": "Tümünü Temizle",
@@ -169,6 +170,10 @@
       "editListing": "İlanı Düzenle",
       "deleteListing": "İlanı Sil",
       "ebayStore": "eBay Mağazası"
+    },
+    "tracking": {
+      "tracked": "Zonds tarafından takip ediliyor",
+      "untracked": "Takip edilmiyor"
     },
     "status": {
       "active": "Aktif",
@@ -251,6 +256,21 @@
       "step1": "Ayarlar & Politikalar",
       "step2": "Ürün Girişi"
     },
+    "existingImport": {
+      "title": "Mevcut eBay listelerini içe aktar",
+      "actionTitle": "Mevcut eBay listelerini içe aktar",
+      "actionSubtitle": "Mağazadaki aktif listeleri Excel ile Amazon ASIN’leriyle eşleştirin.",
+      "storeTitle": "Kaynak mağaza",
+      "store": "eBay mağazası",
+      "fileTitle": "Liste eşleşmelerini yükle",
+      "fileHint": "Her liste için tam Amazon ASIN’i ve eBay Item ID sağlayın. Uygun eski API listeleri yeniden oluşturulmadan taşınır.",
+      "downloadTemplate": "Örnek Excel indir",
+      "chooseFile": "Excel dosyası seç",
+      "xlsxOnly": "Yalnızca XLSX · Item ID’ler tam metin olarak korunmalıdır",
+      "start": "İçe aktarmayı başlat",
+      "syncFailed": "eBay mağazası senkronize edilemedi.",
+      "importFailed": "Excel dosyası içe aktarma kuyruğuna alınamadı."
+    },
     "notifications": {
       "endSuccessTitle": "İlanlar Bitirildi",
       "endSuccess": "{{count}} ilan eBay'de başarıyla bitirildi.",
@@ -282,6 +302,7 @@
       "paymentPolicyRequired": "Ödeme politikası zorunludur",
       "shippingPolicyRequired": "Kargo politikası zorunludur",
       "returnPolicyRequired": "İade politikası zorunludur",
+      "ebayAccountRequired": "eBay mağazası zorunludur",
       "listingSettingsGroupRequired": "Liste strateji grubu zorunludur",
       "titleRequired": "Başlık zorunludur",
       "titleMax": "Başlık en fazla 80 karakter olabilir"

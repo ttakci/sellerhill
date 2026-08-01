@@ -4,7 +4,7 @@ import { tkn } from '../theme/tkn';
 
 /**
  * Shared Form Layout Styles
- * used by RadioGroup, CheckboxGroup and other non-floating-label inputs.
+ * used by non-floating-label inputs.
  */
 
 export const Container = styled.div`

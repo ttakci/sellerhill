@@ -16,6 +16,7 @@ import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from '../../ap
 import { AddListingsDrawerComponent } from './AddListingsDrawer.component';
 import type { AddListingsDrawerProps, AddListingsDrawerStep } from './AddListingsDrawer.types';
 
+import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 
 export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess }) => {
@@ -25,6 +26,11 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   const [currentStep, setCurrentStep] = useState<AddListingsDrawerStep>(0);
   const lastSubmittedAsDraft = useRef(false);
 
+  const { data: ebayAccountsData, isLoading: isLoadingAccounts } = useGetEbayAccountsQuery();
+  const ebayAccounts = useMemo(
+    () => (ebayAccountsData?.items ?? []).map((account) => ({ id: account.id, name: account.storeName || account.sellerId || account.id })),
+    [ebayAccountsData?.items]
+  );
   const { data: listingSettingsGroups = [], isLoading: isLoadingSettings } = useGetListingSettingsGroupsQuery();
   const { data: policiesMap = [], isLoading: isLoadingPolicies } = useGetBusinessPoliciesQuery();
 
@@ -33,7 +39,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     { isLoading: isSubmitting, isSuccess, error: submitError, data: submitData, reset: resetMutation },
   ] = useCreateListingsMutation();
 
-  const isLoading = isLoadingSettings || isLoadingPolicies;
+  const isLoading = isLoadingAccounts || isLoadingSettings || isLoadingPolicies;
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
      to be folded in here, so the global overlay covered the whole app on
      first paint of this page instead of the page showing its own state. */
@@ -45,6 +51,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     reValidateMode: 'onSubmit',
     defaultValues: {
       asins: '',
+      ebayAccountId: '',
       listingSettingsGroupId: '',
       paymentPolicyId: '',
       shippingPolicyId: '',
@@ -145,7 +152,8 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
   const canProceed = useMemo(() => {
     if (currentStep === 0) {
       return Boolean(
-        watchedValues.listingSettingsGroupId &&
+        watchedValues.ebayAccountId &&
+          watchedValues.listingSettingsGroupId &&
           watchedValues.paymentPolicyId &&
           watchedValues.shippingPolicyId &&
           watchedValues.returnPolicyId
@@ -173,6 +181,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       lastSubmittedAsDraft.current = Boolean(data.asDraft);
       const cleanData: CreateListingsRequest = {
         asins: parseAsins(data.asins),
+        ebayAccountId: data.ebayAccountId,
         listingSettingsGroupId: data.listingSettingsGroupId,
         paymentPolicyId: data.paymentPolicyId,
         shippingPolicyId: data.shippingPolicyId,
@@ -191,6 +200,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       isSubmitting={isSubmitting}
       isLoading={isLoading}
       form={form}
+      ebayAccounts={ebayAccounts}
       listingSettingsGroups={listingSettingsGroups}
       businessPolicies={businessPolicies}
       asinCount={asinCount}

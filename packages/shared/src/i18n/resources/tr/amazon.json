@@ -76,14 +76,11 @@
     },
     "autoFulfill": {
       "autoFulfillEnabled": "Bu hesabı otomatik karşılama için kullan",
-      "autoFulfillEnabledHint": "Açık olduğunda, bu hesap eBay satışlarını Amazon'da otomatik satın almak için seçilebilir. Operatör tarafından yapılandırılmış proxy ve harcama limiti gerektirir.",
       "autoFulfillCapTotal": "Maksimum sipariş tutarı (otomatik karşılama limiti)",
       "autoFulfillCapTotalHint": "Hesap başına harcama tavanı (USD). Bu tutarın üzerindeki siparişler bu hesabı atlar. Otomatik karşılamanın etkinleştirilmesi için gereklidir.",
       "autoFulfillCapTotalPlaceholder": "ör. 250",
       "autoFulfillDryRun": "Deneme modu (sipariş oluşturmadan akışı çalıştır)",
-      "autoFulfillDryRunHint": "Sipariş Verme adımı hariç tam ödeme akışını çalıştırır; inceleme toplamı yakalanır ve gösterilir.",
-      "sectionTitle": "Otomatik karşılama (A2)",
-      "sectionSubtitle": "eBay satışlarının Amazon'da otomatik karşılanması için hesap bazlı ayarlar."
+      "autoFulfillDryRunHint": "Sipariş Verme adımı hariç tam ödeme akışını çalıştırır; inceleme toplamı yakalanır ve gösterilir."
     },
     "errors": {
       "autoFulfillProxyRequired": "Otomatik karşılama, operatör tarafından yapılandırılmış bir proxy gerektirir.",

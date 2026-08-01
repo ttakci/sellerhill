@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { AddListingsDrawer } from '../add-listings/drawer';
 import { useGetListingsQuery } from '../api/listings.api';
+import { ExistingListingsImportDrawer } from '../import-existing';
 
 import { ListingsOverviewPageComponent } from './ListingsOverviewPage.component';
 
@@ -19,6 +20,7 @@ export const ListingsOverviewPageContainer: React.FC = () => {
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(
     () => searchParams.get('drawer') === ADD_DRAWER_PARAM
   );
+  const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
 
   // Carousel + "view all" only show real (active) listings — never drafts
   const { data } = useGetListingsQuery(
@@ -72,10 +74,16 @@ export const ListingsOverviewPageContainer: React.FC = () => {
         onAddListing={handleAddListing}
         onViewAll={() => localeNavigate('/listings/all')}
         onViewJobs={() => localeNavigate('/listings/jobs')}
+        onImportExisting={() => setIsImportDrawerOpen(true)}
         onViewDrafts={() => localeNavigate(`/listings/all?status=${ListingStatus.DRAFT}`)}
         onListingClick={(id) => localeNavigate(`/listings/${id}`)}
       />
       <AddListingsDrawer isOpen={isAddDrawerOpen} onClose={handleAddDrawerClose} onSuccess={handleAddSuccess} />
+      <ExistingListingsImportDrawer
+        isOpen={isImportDrawerOpen}
+        onClose={() => setIsImportDrawerOpen(false)}
+        onSuccess={(jobId) => localeNavigate(`/listings/jobs/${jobId}`)}
+      />
     </EbayAccountGuard>
   );
 };

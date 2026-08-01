@@ -36,6 +36,8 @@ export interface ListingsAllPageProps {
   categoryOptions: { value: string | number; label: string }[];
   onStatusChange: (value: string | number) => void;
   statusOptions: { value: string | number; label: string }[];
+  onTrackingStateChange: (value: string | number) => void;
+  trackingOptions: { value: string | number; label: string }[];
   onEbayAccountChange: (value: string | number) => void;
   storeOptions: { value: string | number; label: string }[];
   numericFilters: {

@@ -13,12 +13,27 @@ const sizeMap = {
   lg: 24,
 };
 
+/** Resolves a theme dot-path (e.g. 'brand.primary') to its color, else returns the input. */
+const resolveThemeColor = (theme: AppTheme, value: string): string => {
+  if (value.includes('.')) {
+    const [cat, sub] = value.split('.') as [keyof typeof theme.colors, string];
+    const category = theme.colors[cat];
+    if (category && typeof category === 'object' && sub in category) {
+      return (category as Record<string, string>)[sub];
+    }
+  } else if (value === 'inverse' && theme.colors?.text?.inverse) {
+    return theme.colors.text.inverse;
+  }
+  return value;
+};
+
 export const Icon = ({
   name,
   size = 'md',
   color = 'currentColor',
   stroke,
   strokeWidth = 2,
+  filled,
   className,
   style,
   ...props
@@ -32,17 +47,10 @@ export const Icon = ({
     return <></>;
   }
 
-  // Resolve theme color if dot notation is used (e.g., 'brand.primary')
-  let resolvedColor = color;
-  if (color && color.includes('.')) {
-    const [cat, sub] = color.split('.') as [keyof typeof theme.colors, string];
-    const category = theme.colors[cat];
-    if (category && typeof category === 'object' && sub in category) {
-      resolvedColor = (category as Record<string, string>)[sub];
-    }
-  } else if (color === 'inverse' && theme.colors?.text?.inverse) {
-    resolvedColor = theme.colors.text.inverse;
-  }
+  const resolvedColor = resolveThemeColor(theme, color);
+  const strokeColor = stroke || resolvedColor;
+  const fill =
+    typeof filled === 'string' ? resolveThemeColor(theme, filled) : filled ? strokeColor : undefined;
 
   return (
     <S.IconWrapper
@@ -53,7 +61,7 @@ export const Icon = ({
       style={style}
       {...props}
     >
-      <IconComponent stroke={stroke || resolvedColor} strokeWidth={strokeWidth} />
+      <IconComponent fill={fill} stroke={strokeColor} strokeWidth={strokeWidth} />
     </S.IconWrapper>
   );
 };

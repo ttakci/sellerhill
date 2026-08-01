@@ -1,4 +1,4 @@
-import { Badge, Drawer, ModernTextInput, Text, Toggle } from '@repo/ui';
+import { Badge, Drawer, InfoMessage, ModernTextInput, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -58,9 +58,9 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
             onChange={onFieldChange('password')}
           />
           {isEdit && (
-            <Text variant="caption" color="text.tertiary">
+            <InfoMessage>
               {t('translation:settingsHub.drawer.amazonEdit.passwordHint')}
-            </Text>
+            </InfoMessage>
           )}
           <ModernTextInput
             name="twoFactorSecret"
@@ -69,7 +69,7 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
             onChange={onFieldChange('twoFactorSecret')}
           />
           {isEdit && (
-            <Text variant="caption" color="text.tertiary">
+            <InfoMessage>
               <Badge variant={hasTwoFactor ? 'success' : 'neutral'} size="sm">
                 {t(
                   hasTwoFactor
@@ -78,24 +78,8 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
                 )}
               </Badge>{' '}
               {t('translation:settingsHub.drawer.amazonEdit.twoFactorHint')}
-            </Text>
+            </InfoMessage>
           )}
-        </S.FormCard>
-
-        <S.FormCard>
-          <Text variant="h5" weight="semibold">
-            {t('amazon:amazon.autoFulfill.sectionTitle')}
-          </Text>
-          <Text variant="caption" color="text.secondary">
-            {t('amazon:amazon.autoFulfill.sectionSubtitle')}
-          </Text>
-          <S.ToggleRow>
-            <Text variant="body-sm">{t('amazon:amazon.autoFulfill.autoFulfillEnabled')}</Text>
-            <Toggle checked={fields.autoFulfillEnabled} onChange={onAutoFulfillEnabledChange} />
-          </S.ToggleRow>
-          <Text variant="caption" color="text.tertiary">
-            {t('amazon:amazon.autoFulfill.autoFulfillEnabledHint')}
-          </Text>
           <ModernTextInput
             name="autoFulfillCapTotal"
             type="number"
@@ -104,9 +88,11 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
             value={fields.autoFulfillCapTotal}
             onChange={onFieldChange('autoFulfillCapTotal')}
           />
-          <Text variant="caption" color="text.tertiary">
-            {t('amazon:amazon.autoFulfill.autoFulfillCapTotalHint')}
-          </Text>
+          <InfoMessage>{t('amazon:amazon.autoFulfill.autoFulfillCapTotalHint')}</InfoMessage>
+          <S.ToggleRow>
+            <Text variant="body-sm">{t('amazon:amazon.autoFulfill.autoFulfillEnabled')}</Text>
+            <Toggle checked={fields.autoFulfillEnabled} onChange={onAutoFulfillEnabledChange} />
+          </S.ToggleRow>
         </S.FormCard>
       </S.BodyStack>
     </Drawer>

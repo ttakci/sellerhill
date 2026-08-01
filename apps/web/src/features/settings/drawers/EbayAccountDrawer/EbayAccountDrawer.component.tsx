@@ -56,7 +56,7 @@ export const EbayAccountDrawerComponent: React.FC<EbayAccountDrawerComponentProp
       ) : (
         <S.EmptyState>
           <S.EmptyIconCircle>
-            <Icon name="storefront" size={28} />
+            <Text variant="body" weight="semibold">eBay</Text>
           </S.EmptyIconCircle>
           <Text variant="body" color="text.secondary">
             {t('translation:settingsHub.sections.ebay.manageStores.empty')}

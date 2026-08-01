@@ -23,7 +23,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, onNavigate, class
             </S.Item>
             {!isLast && (
               <S.Separator>
-                <Icon name="chevron_right" size={14} />
+                <Icon name="chevron-right" size={14} />
               </S.Separator>
             )}
           </React.Fragment>

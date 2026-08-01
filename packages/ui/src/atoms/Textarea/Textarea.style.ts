@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-import { controlFocusShadow, CONTROL_PADDING_X } from '../../styles/formControl';
+import { CONTROL_BORDER_COLOR_PATH, CONTROL_PADDING_X } from '../../styles/formControl';
 import { tkn } from '../../theme/tkn';
 
 export const StyledTextarea = styled.textarea<{
@@ -14,15 +14,15 @@ export const StyledTextarea = styled.textarea<{
   padding: ${tkn('spacing.sm-md')} ${CONTROL_PADDING_X};
   background-color: ${tkn('colors.background.secondary')};
   border: 0.0625rem solid
-    ${({ theme, $hasError }) => ($hasError ? theme.colors.semantic.error : theme.colors.border.primary)}; /* 1px */
+    ${({ theme, $hasError }) =>
+      $hasError ? theme.colors.semantic.error : tkn(CONTROL_BORDER_COLOR_PATH)({ theme })};
   border-radius: ${tkn('radius.md')};
   color: ${tkn('colors.text.primary')};
   font-size: ${tkn('typography.fontSize.sm')};
   font-family: ${tkn('typography.fontFamily.sans')};
   outline: none;
-  transition:
-    border-color ${tkn('transitions.normal')},
-    box-shadow ${tkn('transitions.normal')};
+  transition: border-color ${tkn('transitions.normal')};
+  box-shadow: none;
   min-height: 8.75rem; /* 140px */
   resize: vertical;
 
@@ -30,23 +30,16 @@ export const StyledTextarea = styled.textarea<{
     color: ${tkn('colors.text.tertiary')};
   }
 
-  &:hover:not(:disabled) {
-    border-color: ${tkn('colors.brand.primary')};
-  }
-
-  /* Was a bespoke 4px/8%-alpha ring off border.focus, while TextInput, Select and
-     SearchField all use the shared 3px/12.5% formula off brand.primary — so a
-     focused Textarea rang differently from every other field beside it. */
   &:focus {
     border-color: ${tkn('colors.brand.primary')};
-    box-shadow: ${({ theme }) => controlFocusShadow(theme.colors.brand.primary)};
+    box-shadow: none;
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.7;
     background-color: ${tkn('colors.background.tertiary')};
-    border-color: ${tkn('colors.border.primary')};
+    border-color: ${tkn('colors.border.control')};
   }
 
   ${({ $mono, theme }) =>
@@ -68,12 +61,6 @@ export const StyledTextarea = styled.textarea<{
     resize: none;
     overflow-y: auto;
   `}
-`;
-
-export const HelperText = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.semantic.error')};
-  margin-top: ${tkn('spacing.xs')};
 `;
 
 export const Container = styled.div<{ $fill?: boolean }>`

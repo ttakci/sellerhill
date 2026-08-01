@@ -34,7 +34,7 @@ const OPERATOR_ROUTES: readonly OperatorRoute[] = [
     /* ADMIN oversees the queue read-only; SUPPORT works it. */
     path: OPERATOR_SUPPORT_PATH,
     labelKey: 'translation:support.title',
-    icon: 'help',
+    icon: 'headset',
     roles: [UserRole.ADMIN, UserRole.SUPPORT],
   },
 ];
