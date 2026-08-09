@@ -45,6 +45,14 @@ export enum ListingFailureCode {
    */
   PROVIDER_BUDGET_EXHAUSTED = 'provider_budget_exhausted',
   /**
+   * The seller's own Store Settings blacklist matched the title or description.
+   *
+   * Entirely self-inflicted and entirely fixable, so it must never be reported
+   * as "unknown": the seller can edit the keyword or the listing template. The
+   * matched keyword travels in `blacklistedKeyword`.
+   */
+  BLACKLISTED_KEYWORD = 'blacklisted_keyword',
+  /**
    * The seller stopped the job before this ASIN was reached.
    *
    * Not a defect in the product or in our pipeline — it never ran.
@@ -60,6 +68,18 @@ export interface ListingFailureDetails {
   categoryId?: string;
   categoryName?: string;
   ebayErrorIds?: number[];
+  /** The Store Settings keyword that rejected the listing. */
+  blacklistedKeyword?: string;
+  /**
+   * Trace id for this attempt, shown to the seller as a reference.
+   *
+   * It is the same correlation id already threaded through HTTP → queue →
+   * worker logs and `queue_observations`, so a support case quoting it can be
+   * traced end-to-end instead of being reconstructed from a timestamp and an
+   * ASIN. Safe to expose: an opaque `req_<uuid>` that identifies a request, not
+   * a user or a resource.
+   */
+  correlationId?: string;
   /** False when retrying the same input cannot succeed. */
   retryable?: boolean;
 }

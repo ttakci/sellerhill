@@ -37,6 +37,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   jobStatusLabel,
   itemStatusLabel,
   itemFailureLabel,
+  itemFailureReference,
   pagination,
   paginatedItems,
 }) => {
@@ -79,7 +80,16 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           {itemStatusLabel(item.status)}
         </StatusBadge>
       </S.ItemCardHeader>
-      {itemFailureLabel(item) ? <S.ErrorBox>{itemFailureLabel(item)}</S.ErrorBox> : null}
+      {itemFailureLabel(item) ? (
+        <S.FailureCell>
+          <S.ErrorBox>{itemFailureLabel(item)}</S.ErrorBox>
+          {itemFailureReference(item) ? (
+            <Text variant="caption" color="text.tertiary">
+              {t('listings.jobs.items.reference')}: {itemFailureReference(item)}
+            </Text>
+          ) : null}
+        </S.FailureCell>
+      ) : null}
     </S.ItemCard>
   );
 

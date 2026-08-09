@@ -30,6 +30,8 @@ export interface ListingJobDetailsPageComponentProps {
    * fail. The provider's raw error text never reaches this surface.
    */
   itemFailureLabel: (item: ListingJobItemDto) => string | null;
+  /** Correlation id for the failed attempt, quoted when opening a support case. */
+  itemFailureReference: (item: ListingJobItemDto) => string | null;
   pagination: {
     count: number;
     page: number;

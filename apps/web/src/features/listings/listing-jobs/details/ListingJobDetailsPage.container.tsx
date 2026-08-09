@@ -24,6 +24,7 @@ import {
 } from '../../api/listings.api';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
+import * as S from './ListingJobDetailsPage.style';
 
 import { useLocale } from '@/utils/useLocale';
 
@@ -77,12 +78,24 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     [t]
   );
 
+  /**
+   * Job-item statuses read differently from listing statuses.
+   *
+   * A job item starts at the `draft` default and only leaves it once the worker
+   * reaches that ASIN, so labelling it "Draft" told sellers they had draft
+   * listings that did not exist. Here `draft` means "queued". Falls back to the
+   * listing vocabulary for anything the job namespace does not override.
+   */
   const itemStatusLabel = useCallback(
     (status: ListingStatus | string) => {
       const key = String(status).toLowerCase();
-      const path = `listings.status.${key}`;
-      const translated = t(path);
-      return translated === path ? key : translated;
+      for (const path of [`listings.jobs.items.itemStatus.${key}`, `listings.status.${key}`]) {
+        const translated = t(path);
+        if (translated !== path) {
+          return translated;
+        }
+      }
+      return key;
     },
     [t]
   );
@@ -99,10 +112,23 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       const path = `listings.jobs.failure.${item.failureCode}`;
       const translated = t(path, {
         aspects: (item.failureDetails?.aspectNames ?? []).join(', '),
+        keyword: item.failureDetails?.blacklistedKeyword ?? '',
       });
       return translated === path ? null : translated;
     },
     [t]
+  );
+
+  /**
+   * Support reference for a failed item.
+   *
+   * The correlation id already threads through the API, the queue and the logs,
+   * so a seller quoting it lets support find the exact attempt instead of
+   * guessing from a timestamp and an ASIN.
+   */
+  const failureReference = useCallback(
+    (item: ListingJobItemDto): string | null => item.failureDetails?.correlationId ?? null,
+    []
   );
 
   const formatJobDate = useCallback(
@@ -153,12 +179,23 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
           // raw text (eBay error ids, SKUs, internal field names) is operator
           // diagnostics and is not sent to this surface at all.
           const reason = failureLabel(item);
-          return reason ? (
-            <Text variant="body-sm">{reason}</Text>
-          ) : (
-            <Text variant="body-sm" color="text.tertiary">
-              —
-            </Text>
+          const reference = failureReference(item);
+          if (!reason) {
+            return (
+              <Text variant="body-sm" color="text.tertiary">
+                —
+              </Text>
+            );
+          }
+          return (
+            <S.FailureCell>
+              <Text variant="body-sm">{reason}</Text>
+              {reference ? (
+                <Text variant="caption" color="text.tertiary">
+                  {t('listings.jobs.items.reference')}: {reference}
+                </Text>
+              ) : null}
+            </S.FailureCell>
           );
         },
       },
@@ -168,7 +205,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       // the aspect self-heal). Offering the button would spend a common
       // resource on the attempt least likely to succeed.
     ],
-    [t, itemStatusLabel, failureLabel]
+    [t, itemStatusLabel, failureLabel, failureReference]
   );
 
   const paginatedItems = useMemo(() => {
@@ -221,6 +258,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       jobStatusLabel={jobStatusLabel}
       itemStatusLabel={itemStatusLabel}
       itemFailureLabel={failureLabel}
+      itemFailureReference={failureReference}
       pagination={{
         count: items.length,
         page,

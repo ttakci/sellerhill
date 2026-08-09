@@ -67,7 +67,14 @@
         "empty": "No items found for this job.",
         "emptyTitle": "No items yet",
         "emptySubtitle": "Items appear as the job starts processing ASINs.",
-        "reason": "Reason"
+        "reason": "Reason",
+        "reference": "Reference",
+        "itemStatus": {
+          "draft": "Queued",
+          "retrying": "In progress",
+          "active": "Done",
+          "error": "Failed"
+        }
       },
       "failure": {
         "duplicate_listing": "Already listed — this ASIN is in your active or draft listings.",
@@ -86,6 +93,7 @@
         "ebay_unavailable": "eBay was unavailable while publishing. Retrying usually works.",
         "ebay_restricted_item": "eBay restricts this item or category for your account.",
         "provider_budget_exhausted": "Today's eBay API allowance is used up. This listing is queued and will continue automatically.",
+        "blacklisted_keyword": "Your Store Settings blacklist blocked this listing (keyword: \"{{keyword}}\"). Remove the keyword or adjust your listing template.",
         "cancelled": "Cancelled before this ASIN was processed.",
         "unknown": "The listing could not be created."
       }

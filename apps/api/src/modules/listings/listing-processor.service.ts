@@ -10,6 +10,7 @@ import {
   type ExistingListingImportQueueData,
   type ListingBatchQueueJobData,
   type ListingCreationData,
+  type ListingFailureDetails,
   type ListingQueueJobData,
   type ProductData,
 } from '@repo/shared';
@@ -18,9 +19,9 @@ import { DelayedError, Job } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { deferralDelayMs } from '../../common/ebay-budget/ebay-call-budget.helpers';
-import { withCorrelation } from '../../common/observability/correlation.context';
+import { getCorrelation, withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
-import { EbayBulkService, type BulkListingDraft } from '../ebay/ebay-bulk.service';
+import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
@@ -212,11 +213,30 @@ export class ListingProcessorService extends WorkerHost {
       return;
     }
 
-    const outcomes = await this.ebayBulkService.createListings(accountId, merchantLocationKey, drafts);
+    // A throw here (transport failure, an unusable account, a spent quota) must
+    // not leave prepared items with no status. They would sit at the job-item
+    // default forever and the job would never reach a terminal state — which is
+    // exactly what happened before this guard existed: two ASINs stuck showing
+    // the initial status while the job stayed "processing" for good.
+    let outcomes: BulkListingOutcome[];
+    try {
+      outcomes = await this.ebayBulkService.createListings(accountId, merchantLocationKey, drafts);
+    } catch (error: unknown) {
+      if (error instanceof EbayBudgetExhaustedError) {
+        await this.deferUntilBudgetResets(job, token, error);
+        return;
+      }
+      await this.failPreparedItems(job, jobId, userId, drafts, error);
+      return;
+    }
 
+    const answered = new Set(outcomes.map((outcome) => outcome.key));
     for (const outcome of outcomes) {
       const prepared = context.get(outcome.key);
       if (!prepared) {
+        this.logger.error(
+          `Bulk create answered for item ${outcome.key}, which this batch did not send (job ${jobId})`
+        );
         continue;
       }
 
@@ -268,8 +288,74 @@ export class ListingProcessorService extends WorkerHost {
       this.quotaEnforcement.consumeForCreate(userId, outcome.key);
     }
 
+    // Every prepared item has to end terminal. An item eBay never answered for
+    // is a failure, never a silent skip — the same rule `correlateBulkResponses`
+    // applies to a missing response entry.
+    const unanswered = drafts.filter((draft) => !answered.has(draft.key));
+    if (unanswered.length > 0) {
+      await this.failPreparedItems(
+        job,
+        jobId,
+        userId,
+        unanswered,
+        new Error('eBay returned no result for this item in the bulk response.')
+      );
+    }
+
     const created = outcomes.filter((outcome) => outcome.ok).length;
     this.logger.log(`Batch for job ${jobId}: ${created}/${drafts.length} listing(s) published`);
+  }
+
+  /**
+   * Close out prepared items when the write phase itself failed.
+   *
+   * Mirrors the per-ASIN contract: RETRYING while BullMQ attempts remain (the
+   * reservation stays held so a retry cannot oversell the slot), terminal ERROR
+   * on the last one with the reservation released. Rethrows on a non-final
+   * attempt so BullMQ actually performs the retry.
+   */
+  private async failPreparedItems(
+    job: Job,
+    jobId: string,
+    userId: string,
+    drafts: BulkListingDraft[],
+    error: unknown
+  ): Promise<void> {
+    const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
+    const failure = classifyListingFailure(error);
+
+    for (const draft of drafts) {
+      await this.listingsService.updateJobItemResult(jobId, draft.asin, {
+        status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
+        errorMessage: failure.message,
+        failureCode: failure.code,
+        failureDetails: this.withTrace(failure.details),
+      });
+      if (isLastAttempt) {
+        await this.quotaEnforcement.releaseForCreate(userId, draft.key);
+      }
+    }
+
+    this.logger.error(
+      `Bulk write failed for ${drafts.length} item(s) in job ${jobId}: ` +
+        `[${failure.code}] ${failure.message}${isLastAttempt ? '' : ' — will retry'}`
+    );
+
+    if (!isLastAttempt) {
+      throw error;
+    }
+  }
+
+  /**
+   * Stamp the request trace onto a failure.
+   *
+   * Surfaced to the seller as a reference code: it is the same correlation id
+   * already threaded through HTTP, the queue and the logs, so a support case
+   * quoting it can be traced end-to-end instead of reconstructed from a
+   * timestamp and an ASIN.
+   */
+  private withTrace(details: ListingFailureDetails | undefined): ListingFailureDetails {
+    return { ...(details ?? {}), correlationId: getCorrelation().correlationId };
   }
 
   /**
@@ -357,7 +443,7 @@ export class ListingProcessorService extends WorkerHost {
       status: ListingStatus.ERROR,
       errorMessage: failure.message,
       failureCode: failure.code,
-      failureDetails: failure.details,
+      failureDetails: this.withTrace(failure.details),
     });
     await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
   }
@@ -576,7 +662,7 @@ export class ListingProcessorService extends WorkerHost {
         status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
         errorMessage: failure.message,
         failureCode: failure.code,
-        failureDetails: failure.details,
+        failureDetails: this.withTrace(failure.details),
       });
 
       // Billing-quota release: only on PERMANENT failure (terminal ERROR). On

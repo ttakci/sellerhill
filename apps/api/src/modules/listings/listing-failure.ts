@@ -134,6 +134,18 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   if (name === 'QuotaExhaustedError') {
     return { code: ListingFailureCode.QUOTA_EXHAUSTED, message: raw, details: { retryable: false } };
   }
+  // The seller's own Store Settings blacklist rejected the copy. Reported as
+  // UNKNOWN ("The listing could not be created.") until now, which hid a cause
+  // the seller could have fixed in one click — the keyword is right there in
+  // the message thrown by ListingStrategyService.validateListing.
+  const blacklisted = raw.match(/(Title|Description) contains blacklisted keyword:\s*(.+)$/i);
+  if (blacklisted) {
+    return {
+      code: ListingFailureCode.BLACKLISTED_KEYWORD,
+      message: raw,
+      details: { retryable: false, blacklistedKeyword: blacklisted[2].trim() },
+    };
+  }
   if (raw.startsWith('DUPLICATE_LISTING')) {
     return { code: ListingFailureCode.DUPLICATE_LISTING, message: raw, details: { retryable: false } };
   }

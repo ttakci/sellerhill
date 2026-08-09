@@ -137,7 +137,13 @@ export const EmptyWrap = styled.div`
 export const MonoId = styled(UIText)`
   font-family: ${tkn('typography.fontFamily.mono')};
 `;
-// `FailureCell` and `TechnicalDetails` were removed with the raw-error
-// disclosure: the provider's own wording is operator diagnostics and now lives
-// only in the admin listing-failures panel, so the seller view renders a single
-// localized reason with nothing to expand.
+// `TechnicalDetails` was removed with the raw-error disclosure: the provider's
+// own wording is operator diagnostics and now lives only in the admin
+// listing-failures panel.
+
+/** Localized reason stacked over the support reference for a failed item. */
+export const FailureCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+`;

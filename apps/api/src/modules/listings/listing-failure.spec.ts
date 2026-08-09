@@ -94,6 +94,14 @@ describe('classifyListingFailure', () => {
     );
   });
 
+  it('maps a seller-configured blacklist rejection with its keyword', () => {
+    const failure = classifyListingFailure(new Error('Description contains blacklisted keyword: 3M'));
+
+    expect(failure.code).toBe(ListingFailureCode.BLACKLISTED_KEYWORD);
+    expect(failure.details.blacklistedKeyword).toBe('3M');
+    expect(failure.details.retryable).toBe(false);
+  });
+
   it('maps the worker\'s own guard messages', () => {
     expect(classifyListingFailure(new Error('DUPLICATE_LISTING: already listed')).code).toBe(
       ListingFailureCode.DUPLICATE_LISTING
