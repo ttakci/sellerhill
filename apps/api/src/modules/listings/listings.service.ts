@@ -1229,18 +1229,93 @@ export class ListingsService {
       this.logger.log(`Job ${jobId} finished with status: ${jobStatus} (${success} success, ${failed} failed)`);
     }
 
+    // CANCELLED is terminal and set deliberately by the seller, so counts keep
+    // updating (an in-flight batch may still land) but the status must not be
+    // recomputed back to PROCESSING/COMPLETED/FAILED underneath them.
     await this.databaseService.query(
       `
       UPDATE listing_jobs
       SET processed_count = $1,
           success_count = $2,
           failed_count = $3,
-          status = $4,
+          status = CASE WHEN status = $6 THEN status ELSE $4 END,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $5
     `,
-      [processed, success, failed, jobStatus, jobId]
+      [processed, success, failed, jobStatus, jobId, ListingJobStatus.CANCELLED]
     );
+  }
+
+  /**
+   * Has the seller stopped this job?
+   *
+   * Checked by the worker before each batch. This — not queue surgery — is what
+   * actually stops the work: BullMQ jobs are enqueued without stable ids, so
+   * finding and removing them would mean scanning the whole shared queue on
+   * every cancel. Letting the already-queued jobs drain as one-DB-read no-ops
+   * is bounded and cannot miss a job.
+   */
+  async isJobCancelled(jobId: string): Promise<boolean> {
+    const rows = await this.databaseService.query<{ status: ListingJobStatus }>(
+      `SELECT status FROM listing_jobs WHERE id = $1`,
+      [jobId]
+    );
+    return rows[0]?.status === ListingJobStatus.CANCELLED;
+  }
+
+  /**
+   * Stop a running job: nothing already published is touched, everything not
+   * yet processed is closed out.
+   *
+   * Returns the job-item ids that were still holding a billing reservation, so
+   * the caller can release them — a slot reserved for an ASIN we will never
+   * list must not stay counted against the seller's plan.
+   */
+  async cancelJob(userId: string, jobId: string): Promise<{ cancelledItemIds: string[] }> {
+    const jobs = await this.databaseService.query<{ status: ListingJobStatus }>(
+      `SELECT status FROM listing_jobs WHERE id = $1 AND user_id = $2`,
+      [jobId, userId]
+    );
+    const job = jobs[0];
+    if (!job) {
+      throw new NotFoundException('Listing job not found');
+    }
+    if (
+      job.status === ListingJobStatus.COMPLETED ||
+      job.status === ListingJobStatus.FAILED ||
+      job.status === ListingJobStatus.CANCELLED
+    ) {
+      throw new BadRequestException('This job has already finished.');
+    }
+
+    // Close out only items that have not reached a terminal state. An ASIN that
+    // already published keeps its ACTIVE row and its listing — "what went out,
+    // went out".
+    const cancelled = await this.databaseService.query<{ id: string }>(
+      `UPDATE listing_job_items
+       SET status = $1,
+           failure_code = $2,
+           failure_details = '{"retryable": false}'::jsonb,
+           error_message = 'Cancelled by the seller before this ASIN was processed.',
+           updated_at = CURRENT_TIMESTAMP
+       WHERE job_id = $3 AND status NOT IN ($4, $1)
+       RETURNING id`,
+      [
+        ListingStatus.ERROR,
+        ListingFailureCode.CANCELLED,
+        jobId,
+        ListingStatus.ACTIVE,
+      ]
+    );
+
+    await this.databaseService.query(
+      `UPDATE listing_jobs SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [ListingJobStatus.CANCELLED, jobId]
+    );
+    await this.updateJobCounts(jobId);
+
+    this.logger.log(`Job ${jobId} cancelled by user ${userId}; ${cancelled.length} pending item(s) stopped`);
+    return { cancelledItemIds: cancelled.map((row) => row.id) };
   }
 
   /**

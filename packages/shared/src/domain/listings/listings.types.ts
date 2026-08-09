@@ -50,6 +50,13 @@ export enum ListingJobStatus {
   PROCESSING = 'processing',
   COMPLETED = 'completed',
   FAILED = 'failed',
+  /**
+   * Stopped by the seller. Terminal, and NOT a failure.
+   *
+   * Whatever had already been published stays published — cancelling stops the
+   * remaining ASINs, it does not undo the ones that already cost eBay quota.
+   */
+  CANCELLED = 'cancelled',
 }
 
 /**

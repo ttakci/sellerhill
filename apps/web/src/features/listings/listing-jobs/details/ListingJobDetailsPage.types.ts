@@ -6,12 +6,21 @@ export interface ListingJobDetailsPageComponentProps {
   job: ListingJobDto | undefined;
   items: ListingJobItemDto[];
   isLoading: boolean;
-  isRefreshing: boolean;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   columns: TableColumn<ListingJobItemDto>[];
   onBack: () => void;
-  onRefresh: () => void;
+  /**
+   * Cancel is offered only while the job can still be stopped. There is no
+   * refresh action — the page polls every 3s, so a manual refresh only ever
+   * duplicated what was already happening.
+   */
+  canCancel: boolean;
+  isCancelling: boolean;
+  isCancelConfirmOpen: boolean;
+  onCancelRequest: () => void;
+  onCancelDismiss: () => void;
+  onCancelConfirm: () => void;
   formatPercent: (job: ListingJobDto) => number;
   formatJobDate: (iso: string) => string;
   jobStatusLabel: (status: ListingJobStatus | string) => string;

@@ -124,6 +124,15 @@ export class ListingProcessorService extends WorkerHost {
       items,
     } = job.data;
 
+    // Checked before every batch, so a cancel stops the queue within one batch
+    // rather than at the end of the job. An in-flight batch is allowed to
+    // finish — its eBay calls are already spent, and abandoning them would
+    // leave listings on eBay with no row on our side.
+    if (await this.listingsService.isJobCancelled(jobId)) {
+      this.logger.log(`Job ${jobId} was cancelled; skipping a batch of ${items.length} ASIN(s)`);
+      return;
+    }
+
     this.logger.log(
       `Processing batch of ${items.length} ASIN(s) for job ${jobId}${asDraft ? ' (drafts)' : ''}`
     );
@@ -394,6 +403,11 @@ export class ListingProcessorService extends WorkerHost {
       asDraft = false,
       listingJobItemId,
     } = job.data;
+
+    if (await this.listingsService.isJobCancelled(jobId)) {
+      this.logger.log(`Job ${jobId} was cancelled; skipping ASIN ${asin}`);
+      return;
+    }
 
     this.logger.log(`Processing ASIN ${asin} for job ${jobId}${asDraft ? ' (draft)' : ''}`);
 

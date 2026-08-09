@@ -20,7 +20,8 @@
         "pending": "Bekliyor",
         "processing": "İşleniyor",
         "completed": "Tamamlandı",
-        "failed": "Hata"
+        "failed": "Hata",
+        "cancelled": "İptal edildi"
       },
       "table": {
         "id": "İş ID",
@@ -54,7 +55,9 @@
         "notFoundTitle": "İş bulunamadı",
         "notFoundSubtitle": "Bu iş silinmiş olabilir veya erişim yetkiniz yok.",
         "jobId": "İş ID",
-        "refresh": "Yenile"
+        "cancel": "İşi iptal et",
+        "cancelConfirm": "Bu iş durdurulsun mu? Zaten listelenmiş ASIN'ler listede kalır — yalnızca henüz işlenmemiş olanlar iptal edilir.",
+        "cancelConfirmAction": "İşi durdur"
       },
       "items": {
         "asin": "ASIN",
@@ -83,6 +86,7 @@
         "ebay_unavailable": "Yayınlama sırasında eBay yanıt vermedi. Tekrar denemek genelde çalışır.",
         "ebay_restricted_item": "eBay bu ürünü veya kategoriyi hesabınız için kısıtlıyor.",
         "provider_budget_exhausted": "Bugünkü eBay API kotası doldu. Bu ürün sıraya alındı ve otomatik olarak devam edecek.",
+        "cancelled": "Bu ASIN işlenmeden önce iptal edildi.",
         "unknown": "Liste oluşturulamadı."
       }
     },

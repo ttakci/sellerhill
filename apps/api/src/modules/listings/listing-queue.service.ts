@@ -128,6 +128,26 @@ export class ListingQueueService {
     return dto;
   }
 
+  /**
+   * Hand back the plan slots reserved for ASINs a cancelled job will never list.
+   *
+   * Fail-soft and per item: `releaseForCreate` is idempotent, and a reservation
+   * that fails to release only makes the seller's own quota look fuller than it
+   * is — never a reason to fail the cancel the user asked for.
+   */
+  async releaseCancelledReservations(userId: string, listingJobItemIds: string[]): Promise<void> {
+    for (const itemId of listingJobItemIds) {
+      try {
+        await this.quotaEnforcement.releaseForCreate(userId, itemId);
+      } catch (error: unknown) {
+        this.logger.warn(
+          `Could not release the quota reservation for cancelled item ${itemId}: ` +
+            `${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
   // Seller-triggered per-item retry was REMOVED (2026-08-09).
   //
   // eBay quota is metered per application and shared by every seller, so a

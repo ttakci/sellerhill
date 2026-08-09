@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import {
+  useCancelListingJobMutation,
   useGetJobItemsQuery,
   useGetJobStatusQuery,
 } from '../../api/listings.api';
@@ -42,7 +43,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const {
     data: job,
     isLoading: isJobLoading,
-    isFetching: isJobFetching,
     refetch: refetchJob,
   } = useGetJobStatusQuery(jobId || '', {
     pollingInterval: 3000,
@@ -52,7 +52,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const {
     data: items = [],
     isLoading: isItemsLoading,
-    isFetching: isItemsFetching,
     refetch: refetchItems,
   } = useGetJobItemsQuery(jobId || '', {
     pollingInterval: 3000,
@@ -60,7 +59,13 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   });
 
   const isLoading = (isJobLoading || isItemsLoading) && !job && items.length === 0;
-  const isRefreshing = isJobFetching || isItemsFetching;
+
+  const [cancelJob, { isLoading: isCancelling }] = useCancelListingJobMutation();
+  const [isCancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+
+  /** Only a job that is still working can be stopped. */
+  const canCancel =
+    job?.status === ListingJobStatus.PENDING || job?.status === ListingJobStatus.PROCESSING;
 
   const jobStatusLabel = useCallback(
     (status: ListingJobStatus | string) => {
@@ -175,10 +180,20 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     localeNavigate('/listings/jobs');
   }, [localeNavigate]);
 
-  const handleRefresh = useCallback(() => {
-    void refetchJob();
-    void refetchItems();
-  }, [refetchJob, refetchItems]);
+  const handleCancelConfirm = useCallback(async () => {
+    if (!jobId) {
+      return;
+    }
+    try {
+      await cancelJob(jobId).unwrap();
+    } finally {
+      // Close regardless: on success the poll already shows the new state, and
+      // on failure leaving the dialog open would hide the reason behind it.
+      setCancelConfirmOpen(false);
+      void refetchJob();
+      void refetchItems();
+    }
+  }, [jobId, cancelJob, refetchJob, refetchItems]);
 
   if (!jobId) {
     return null;
@@ -191,12 +206,16 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       items={items}
       paginatedItems={paginatedItems}
       isLoading={isLoading}
-      isRefreshing={isRefreshing}
       viewMode={viewMode}
       onViewModeChange={setViewMode}
       columns={columns}
       onBack={handleBack}
-      onRefresh={handleRefresh}
+      canCancel={canCancel}
+      isCancelling={isCancelling}
+      isCancelConfirmOpen={isCancelConfirmOpen}
+      onCancelRequest={() => setCancelConfirmOpen(true)}
+      onCancelDismiss={() => setCancelConfirmOpen(false)}
+      onCancelConfirm={() => void handleCancelConfirm()}
       formatPercent={jobPercent}
       formatJobDate={formatJobDate}
       jobStatusLabel={jobStatusLabel}

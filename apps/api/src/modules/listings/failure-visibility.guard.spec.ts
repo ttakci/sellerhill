@@ -97,6 +97,39 @@ describe('listing retry discipline', () => {
     expect(source).not.toMatch(/EBAY_BULK_ENABLED/);
   });
 
+  it('cancelling a job never touches an ASIN that already published', () => {
+    // "What went out, went out": cancelling stops the queue, it does not roll
+    // back listings that already cost eBay quota. ACTIVE items are excluded
+    // from the close-out, and the seller's plan slots for the stopped ASINs are
+    // handed back so they are not counted against a listing that never existed.
+    const source = read(LISTINGS_DIR, 'listings.service.ts');
+    const start = source.indexOf('async cancelJob(');
+    expect(start).toBeGreaterThan(-1);
+    const body = source.slice(start, source.indexOf('\n  /**', start));
+
+    expect(body).toMatch(/status NOT IN \(\$4, \$1\)/);
+    expect(body).toMatch(/ListingStatus\.ACTIVE/);
+    expect(body).toMatch(/ListingJobStatus\.CANCELLED/);
+    expect(body).toMatch(/cancelledItemIds/);
+  });
+
+  it('keeps a cancelled job cancelled when a late batch reports in', () => {
+    // An in-flight batch is allowed to finish, so updateJobCounts still runs
+    // after the cancel. It must not recompute the status back to PROCESSING.
+    const source = read(LISTINGS_DIR, 'listings.service.ts');
+    const start = source.indexOf('private async updateJobCounts(');
+    const body = source.slice(start, source.indexOf('\n  /**', start));
+    expect(body).toMatch(/CASE WHEN status = \$6 THEN status ELSE \$4 END/);
+  });
+
+  it('stops queued work by checking the flag, not by scanning the queue', () => {
+    // BullMQ jobs are enqueued without stable ids, so finding them would mean
+    // scanning the whole shared queue on every cancel. Both workers re-read the
+    // job status instead, which is bounded and cannot miss a job.
+    const source = read(LISTINGS_DIR, 'listing-processor.service.ts');
+    expect(source.match(/isJobCancelled\(jobId\)/g) ?? []).toHaveLength(2);
+  });
+
   it('never spends an eBay call on a draft', () => {
     // A draft defers the quota to publish; it must not pay it twice. The batch
     // path returns before category resolution and the bulk writes.

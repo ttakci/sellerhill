@@ -342,6 +342,25 @@ export class ListingsController {
   // terminally failed item has already exhausted every retry that could work.
 
   /**
+   * Stop a running job.
+   *
+   * Already-published ASINs stay published — cancelling stops the queue, it
+   * does not roll back listings that already cost eBay quota. Everything not
+   * yet processed is closed out and its billing reservation released.
+   */
+  @ApiOperation({ summary: 'Cancel a running listing job' })
+  @Post('jobs/:jobId/cancel')
+  async cancelJob(
+    @Request() req: { user: { sub: string } },
+    @Param('jobId') jobId: string
+  ): Promise<{ success: boolean; cancelledCount: number }> {
+    const userId = req.user.sub;
+    const { cancelledItemIds } = await this.listingsService.cancelJob(userId, jobId);
+    await this.listingQueueService.releaseCancelledReservations(userId, cancelledItemIds);
+    return { success: true, cancelledCount: cancelledItemIds.length };
+  }
+
+  /**
    * Get cached product info
    */
   @ApiOperation({ summary: 'Get cached product data by ASIN' })

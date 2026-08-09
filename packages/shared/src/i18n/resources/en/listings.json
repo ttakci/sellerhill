@@ -20,7 +20,8 @@
         "pending": "Pending",
         "processing": "Processing",
         "completed": "Completed",
-        "failed": "Failed"
+        "failed": "Failed",
+        "cancelled": "Cancelled"
       },
       "table": {
         "id": "Job ID",
@@ -54,7 +55,9 @@
         "notFoundTitle": "Job not found",
         "notFoundSubtitle": "This job may have been removed or you do not have access.",
         "jobId": "Job ID",
-        "refresh": "Refresh"
+        "cancel": "Cancel job",
+        "cancelConfirm": "Stop this job? ASINs already listed stay listed — only the ones not yet processed are cancelled.",
+        "cancelConfirmAction": "Stop job"
       },
       "items": {
         "asin": "ASIN",
@@ -83,6 +86,7 @@
         "ebay_unavailable": "eBay was unavailable while publishing. Retrying usually works.",
         "ebay_restricted_item": "eBay restricts this item or category for your account.",
         "provider_budget_exhausted": "Today's eBay API allowance is used up. This listing is queued and will continue automatically.",
+        "cancelled": "Cancelled before this ASIN was processed.",
         "unknown": "The listing could not be created."
       }
     },

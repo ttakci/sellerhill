@@ -44,6 +44,12 @@ export enum ListingFailureCode {
    * The item is deferred, never marked permanently failed.
    */
   PROVIDER_BUDGET_EXHAUSTED = 'provider_budget_exhausted',
+  /**
+   * The seller stopped the job before this ASIN was reached.
+   *
+   * Not a defect in the product or in our pipeline — it never ran.
+   */
+  CANCELLED = 'cancelled',
   /** Anything not yet classified — carries the raw message. */
   UNKNOWN = 'unknown',
 }

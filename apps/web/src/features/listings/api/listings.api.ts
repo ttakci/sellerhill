@@ -162,6 +162,19 @@ export const listingsApi = baseApi.injectEndpoints({
     // that could succeed.
 
     /**
+     * Stop a running job. Already-published ASINs stay published — this stops
+     * the queue, it does not roll back listings that already cost eBay quota.
+     */
+    cancelListingJob: builder.mutation<{ success: boolean; cancelledCount: number }, string>({
+      query: (jobId) => ({ url: `/listings/jobs/${jobId}/cancel`, method: 'POST' }),
+      invalidatesTags: (_result, _error, jobId) => [
+        { type: 'Listings', id: `${jobId}-items` },
+        { type: 'Listings', id: jobId },
+        'Listings',
+      ],
+    }),
+
+    /**
      * Get eBay business policies
      */
     getBusinessPolicies: builder.query<EbayBusinessPolicyDto[], void>({
@@ -257,6 +270,7 @@ export const {
   useDownloadListingImportTemplateMutation,
   useImportExistingListingsMutation,
   useGetJobStatusQuery,
+  useCancelListingJobMutation,
   useGetJobItemsQuery,
   useGetBusinessPoliciesQuery,
   useEndListingsMutation,

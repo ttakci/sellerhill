@@ -1,6 +1,7 @@
 import type { ListingJobItemDto } from '@repo/shared';
 import {
   Button,
+  ConfirmModal,
   DataTable,
   EmptyState,
   Icon,
@@ -21,12 +22,16 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   job,
   items,
   isLoading,
-  isRefreshing,
   viewMode,
   onViewModeChange,
   columns,
   onBack,
-  onRefresh,
+  canCancel,
+  isCancelling,
+  isCancelConfirmOpen,
+  onCancelRequest,
+  onCancelDismiss,
+  onCancelConfirm,
   formatPercent,
   formatJobDate,
   jobStatusLabel,
@@ -124,16 +129,18 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
             ) : null}
           </S.SummaryTitleBlock>
           <S.SummaryActions>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={onRefresh}
-              isLoading={isRefreshing}
-              disabled={isLoading || isRefreshing}
-            >
-              <Icon name="refresh" size={16} />
-              <Text variant="body-sm">{t('listings.jobs.details.refresh')}</Text>
-            </Button>
+            {canCancel ? (
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={onCancelRequest}
+                isLoading={isCancelling}
+                disabled={isCancelling}
+              >
+                <Icon name="x-circle" size={16} />
+                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+              </Button>
+            ) : null}
           </S.SummaryActions>
         </S.SummaryTop>
 
@@ -206,6 +213,23 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           pagination={pagination}
         />
       </S.ItemsSection>
+
+      <ConfirmModal
+        isOpen={isCancelConfirmOpen}
+        onClose={onCancelDismiss}
+        onConfirm={onCancelConfirm}
+        type="warning"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('listings.jobs.details.cancelConfirm')}
+        confirmLabel={t('listings.jobs.details.cancelConfirmAction')}
+        cancelLabel={t('translation:common.cancel')}
+        isLoading={isCancelling}
+      />
     </S.Container>
   );
 };
