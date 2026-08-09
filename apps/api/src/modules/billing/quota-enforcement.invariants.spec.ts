@@ -61,15 +61,21 @@ describe('billing quota enforcement wiring invariants', () => {
       const src = read('../listings/listing-processor.service.ts');
       expect(src).toMatch(/consumeForCreate/);
       expect(src).toMatch(/releaseForCreate/);
-      // Release only on the last attempt (terminal ERROR), not intermediate RETRYING.
-      expect(src).toMatch(/listingJobItemId && isLastAttempt\)/);
+      // Release only when the item is terminal (ERROR), not on an intermediate
+      // RETRYING — the slot stays held so a retry cannot oversell it.
+      expect(src).toMatch(/if \(isTerminal\) \{\s*await this\.quotaEnforcement\.releaseForCreate/);
     });
 
-    it('drafts are excluded from quota — consume/release gated on !asDraft', () => {
+    it('drafts are excluded from quota — they return before the write phase', () => {
+      // Structural rather than conditional: a draft is persisted and `continue`s
+      // before it can be pushed onto the batch, so it never reaches the bulk
+      // write, `consumeForCreate`, or `failPreparedItems`. A draft reserves its
+      // slot at publish instead (see the publish gate below).
       const src = read('../listings/listing-processor.service.ts');
-      // consume call (synchronous no-op in the foundation ledger model)
-      expect(src).toMatch(/if \(!asDraft && listingJobItemId\)\s*\{\s*this\.quotaEnforcement\.consumeForCreate/);
-      expect(src).toMatch(/if \(!asDraft && listingJobItemId && isLastAttempt\)/);
+      expect(src).toMatch(/if \(asDraft\) \{[\s\S]*?await this\.persistDraft\([\s\S]*?continue;/);
+      const writePhase = src.slice(src.indexOf('if (drafts.length === 0)'));
+      expect(writePhase).toMatch(/consumeForCreate/);
+      expect(src.slice(0, src.indexOf('if (drafts.length === 0)'))).not.toMatch(/consumeForCreate/);
     });
   });
 
@@ -81,9 +87,21 @@ describe('billing quota enforcement wiring invariants', () => {
       expect(src).toMatch(/releaseForPublish/);
     });
 
-    it('publishListings delegates to publishListing (single gate, per-item)', () => {
+    it('the publish gate is per listing even though the write is batched', () => {
+      // Publishing many drafts is one bulk eBay call, but the plan slot is not
+      // a batch concept: each draft reserves its own before the write and every
+      // failure branch hands that one back, so a partial batch cannot leave a
+      // slot held for a listing that does not exist.
       const src = read('../listings/listings.service.ts');
-      expect(src).toMatch(/for \(const id of listingIds\)\s*\{[\s\S]*await this\.publishListing/);
+      expect(src).toMatch(/for \(const listingId of listingIds\)\s*\{[\s\S]*?prepareDraftForPublish/);
+      const prepare = src.slice(src.indexOf('private async prepareDraftForPublish('));
+      expect(prepare.slice(0, prepare.indexOf('\n  /**'))).toMatch(
+        /await this\.quotaEnforcement\.reserveForPublish\(userId, listingId\)/
+      );
+      // Every terminal branch of the write phase releases; success consumes.
+      const write = src.slice(src.indexOf('private async writePreparedPublishes('));
+      expect((write.match(/releaseForPublish/g) ?? []).length).toBeGreaterThanOrEqual(4);
+      expect(src).toMatch(/consumeForPublish\(userId, item\.listingId\)/);
     });
   });
 

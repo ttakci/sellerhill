@@ -353,26 +353,6 @@ export interface ExistingListingImportQueueData {
   returnPolicyId: string;
 }
 
-export interface ListingQueueJobData {
-  kind?: ListingJobKind.CREATE;
-  jobId: string;
-  userId: string;
-  asin: string;
-  ebayAccountId: string;
-  listingSettingsGroupId: string;
-  paymentPolicyId: string;
-  shippingPolicyId: string;
-  returnPolicyId: string;
-  /** Skip eBay publish; store listing as draft. */
-  asDraft?: boolean;
-  /**
-   * The `listing_job_items.id` for this ASIN. Used by the worker to
-   * consume/release the billing-quota reservation keyed on this id.
-   * Always present when the job is created via the standard queue-service path.
-   */
-  listingJobItemId?: string;
-}
-
 /**
  * Listing Creation Data - used by eBay service for creating listings
  * Replaces `any` types in eBay service methods

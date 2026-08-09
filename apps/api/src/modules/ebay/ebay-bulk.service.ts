@@ -26,6 +26,7 @@ import {
 } from './ebay-bulk.helpers';
 import { withEbayRateLimitRetry } from './ebay-http-retry';
 import { buildInventoryItemPayload, buildOfferPayload } from './ebay-listing-payload';
+import { ListingPublishExhaustedError } from './ebay.errors';
 import { EbayService } from './ebay.service';
 
 /** One listing's desired commerce state, as the fan-out computed it. */
@@ -75,6 +76,15 @@ export interface BulkListingOutcome {
   /** Final aspect resolution, including anything the self-heal loop forced. */
   resolution: AspectResolution;
   error?: string;
+  /**
+   * `name` of the typed error behind this failure, when there is one.
+   *
+   * The failure classifier keys on `Error.name`, but a per-entry bulk failure
+   * is a JSON object rather than a thrown error, so the type would be lost on
+   * the way to `classifyListingFailure` and every exhausted item would report
+   * the generic "could not be created". The caller reattaches it.
+   */
+  errorName?: string;
 }
 
 /**
@@ -232,13 +242,18 @@ export class EbayBulkService {
   async createListings(
     accountId: string,
     merchantLocationKey: string,
-    drafts: BulkListingDraft[]
+    drafts: BulkListingDraft[],
+    priority: EbayCallPriority = EbayCallPriority.BACKGROUND
   ): Promise<BulkListingOutcome[]> {
     if (drafts.length === 0) {
       return [];
     }
 
-    const context = await this.ebayService.getAccountApiContext(accountId);
+    // A seller waiting on a publish gets the full daily ceiling; queue-driven
+    // bulk adds acquire against the reserved-off limit. That reserve exists
+    // precisely so a night of background work cannot leave a seller unable to
+    // publish, which only holds if the interactive path says so.
+    const context = { ...(await this.ebayService.getAccountApiContext(accountId)), priority };
     const outcomes: BulkListingOutcome[] = [];
 
     for (const batch of chunkForBulk(drafts)) {
@@ -257,13 +272,15 @@ export class EbayBulkService {
           if (state.attempts < MAX_CREATE_ATTEMPTS) {
             return true;
           }
-          outcomes.push(
-            this.failure(
-              state,
-              `eBay still rejected the item specifics after ${state.attempts} attempts ` +
-                `(contested: ${state.forcedAspectNames.join(', ') || 'unknown'}).`
-            )
+          // Same condition the single-item path raised as a typed error, and the
+          // failure classifier still keys on that type — so it is built here
+          // rather than hand-written, and its name travels on the outcome.
+          const exhausted = new ListingPublishExhaustedError(
+            state.draft.categoryId,
+            state.forcedAspectNames,
+            state.attempts
           );
+          outcomes.push(this.failure(state, exhausted.message, exhausted.name));
           return false;
         });
       }
@@ -274,7 +291,12 @@ export class EbayBulkService {
 
   /** One pass of inventory item -> offer -> publish over the given items. */
   private async runCreateStages(
-    context: { accessToken: string; marketplaceId: EbayMarketplaceId; contentLanguage: string },
+    context: {
+      accessToken: string;
+      marketplaceId: EbayMarketplaceId;
+      contentLanguage: string;
+      priority: EbayCallPriority;
+    },
     merchantLocationKey: string,
     states: DraftState[]
   ): Promise<{ settled: BulkListingOutcome[]; retry: DraftState[] }> {
@@ -283,12 +305,19 @@ export class EbayBulkService {
     const config = EBAY_MARKETPLACE_CONFIG[context.marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
 
     // --- Stage A: inventory items -------------------------------------------
+    // The single-item `PUT /inventory_item/{sku}` path only needs the
+    // Content-Language header, but the bulk endpoint validates a `locale`
+    // field on every request entry and rejects the whole batch with "Valid
+    // SKU and locale information are required for all the InventoryItems in
+    // the request" when it's missing. eBay's LocaleEnum uses underscores
+    // (`en_US`), unlike the header's hyphenated form (`en-US`).
+    const locale = context.contentLanguage.replace('-', '_');
     const itemRequests = states.map((state) => {
       const { payload, usedPlaceholderImage } = buildInventoryItemPayload(state.draft.data, state.draft.resolution);
       if (usedPlaceholderImage) {
         this.logger.warn(`No valid images for SKU ${state.draft.sku}, using placeholder`);
       }
-      return { sku: state.draft.sku, ...payload };
+      return { sku: state.draft.sku, locale, ...payload };
     });
 
     const itemResponses = await this.postBulk(context, 'bulk_create_or_replace_inventory_item', {
@@ -422,7 +451,7 @@ export class EbayBulkService {
     return { settled, retry };
   }
 
-  private failure(state: DraftState, error: string): BulkListingOutcome {
+  private failure(state: DraftState, error: string, errorName?: string): BulkListingOutcome {
     return {
       key: state.draft.key,
       ok: false,
@@ -430,12 +459,13 @@ export class EbayBulkService {
       categoryName: state.draft.categoryName,
       resolution: state.draft.resolution,
       error,
+      ...(errorName ? { errorName } : {}),
     };
   }
 
   /** POST a bulk Inventory-API body and return its `responses[]`. */
   private async postBulk(
-    context: { accessToken: string; contentLanguage: string },
+    context: { accessToken: string; contentLanguage: string; priority: EbayCallPriority },
     path: string,
     body: Record<string, unknown>
   ): Promise<EbayBulkResponseEntry[]> {
@@ -449,7 +479,7 @@ export class EbayBulkService {
             'Content-Language': context.contentLanguage,
           },
         }),
-      { logger: this.logger, acquireBudget: this.chargeInventory(EbayCallPriority.BACKGROUND) }
+      { logger: this.logger, acquireBudget: this.chargeInventory(context.priority) }
     );
     return response.data?.responses ?? [];
   }
@@ -463,7 +493,12 @@ export class EbayBulkService {
    * left an offer behind — so it does not affect the batch's call economics.
    */
   private async refreshOffer(
-    context: { accessToken: string; contentLanguage: string; marketplaceId: EbayMarketplaceId },
+    context: {
+      accessToken: string;
+      contentLanguage: string;
+      marketplaceId: EbayMarketplaceId;
+      priority: EbayCallPriority;
+    },
     offerId: string,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US'],
     merchantLocationKey: string,
@@ -489,7 +524,7 @@ export class EbayBulkService {
               'Content-Language': context.contentLanguage,
             },
           }),
-        { logger: this.logger, acquireBudget: this.chargeInventory(EbayCallPriority.BACKGROUND) }
+        { logger: this.logger, acquireBudget: this.chargeInventory(context.priority) }
       );
     } catch (error: unknown) {
       // Publishing a possibly-stale offer still beats failing the listing; the
@@ -502,7 +537,10 @@ export class EbayBulkService {
   }
 
   /** Remove an offer eBay orphaned on a system error, so a replay can recreate it. */
-  private async deleteOffer(context: { accessToken: string }, offerId: string | undefined): Promise<void> {
+  private async deleteOffer(
+    context: { accessToken: string; priority: EbayCallPriority },
+    offerId: string | undefined
+  ): Promise<void> {
     if (!offerId) {
       return;
     }
@@ -512,7 +550,7 @@ export class EbayBulkService {
           axios.delete(`${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer/${offerId}`, {
             headers: { Authorization: `Bearer ${context.accessToken}` },
           }),
-        { logger: this.logger, acquireBudget: this.chargeInventory(EbayCallPriority.BACKGROUND) }
+        { logger: this.logger, acquireBudget: this.chargeInventory(context.priority) }
       );
     } catch (error: unknown) {
       this.logger.warn(

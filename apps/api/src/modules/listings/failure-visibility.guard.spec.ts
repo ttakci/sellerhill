@@ -84,17 +84,29 @@ describe('listing retry discipline', () => {
     // worker used to ignore that and rethrow anyway, re-paying Keepa, the LLM
     // rewrite and the whole publish sequence for a guaranteed second refusal.
     const source = read(LISTINGS_DIR, 'listing-processor.service.ts');
-    expect(source).toMatch(/failure\.details\?\.retryable !== false/);
-    expect(source).toMatch(/!canRetry \|\| job\.attemptsMade/);
+    expect(source).toMatch(/const canRetry = failure\.details\?\.retryable !== false/);
+    expect(source).toMatch(/const isTerminal = !canRetry \|\| job\.attemptsMade/);
+    // …and a terminal failure is the only thing that releases the plan slot.
+    expect(source).toMatch(/if \(isTerminal\) \{\s*await this\.quotaEnforcement\.releaseForCreate/);
   });
 
   it('batches every create, drafts included, with no fallback switch', () => {
     // A per-item path would cost 25x the quota for byte-identical output, so
-    // there is nothing to toggle. Drafts share the pipeline too — they cost no
-    // eBay calls either way, and one pipeline means one set of rules.
+    // there is nothing to toggle and nothing to fall back to. Drafts share the
+    // pipeline too — they cost no eBay calls either way, and one pipeline means
+    // one set of rules.
     const source = read(LISTINGS_DIR, 'listing-queue.service.ts');
-    expect(source).toMatch(/const useBulk = Boolean\(request\.ebayAccountId\)/);
+    expect(source).toMatch(/chunkForBulk\(job\.items\)/);
     expect(source).not.toMatch(/EBAY_BULK_ENABLED/);
+    expect(source).not.toMatch(/useBulk/);
+    // The store is required, not degraded-to-per-ASIN when absent: a bulk call
+    // carries exactly one seller token.
+    expect(source).toMatch(/if \(!request\.ebayAccountId\)/);
+    // The per-ASIN worker and its job name are gone.
+    expect(source).not.toMatch(/'create-listing'/);
+    expect(read(LISTINGS_DIR, 'listing-processor.service.ts')).not.toMatch(
+      /private async processListing\(/
+    );
   });
 
   it('cancelling a job never touches an ASIN that already published', () => {
@@ -127,7 +139,10 @@ describe('listing retry discipline', () => {
     // scanning the whole shared queue on every cancel. Both workers re-read the
     // job status instead, which is bounded and cannot miss a job.
     const source = read(LISTINGS_DIR, 'listing-processor.service.ts');
-    expect(source.match(/isJobCancelled\(jobId\)/g) ?? []).toHaveLength(2);
+    // One check, because there is one create worker: it re-reads the flag before
+    // each batch, so a cancel lands within one batch rather than at job end.
+    expect(source.match(/isJobCancelled\(jobId\)/g) ?? []).toHaveLength(1);
+    expect(source).not.toMatch(/listingQueue\.(getJobs|remove)\(/);
   });
 
   it('never spends an eBay call on a draft', () => {

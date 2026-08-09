@@ -245,6 +245,10 @@ export class ProductSyncService {
       listingId: listing.id,
       userId: listing.user_id,
       ebayAccountId: accountId,
+      // Rows created before migration 067 have no stored SKU. Production minted
+      // `${asin}-NEW`, so the guess is right there and is the only way to
+      // address those rows — but it is only a guess, and `persistApplied` will
+      // not write it back unless eBay confirms it by resolving an offer.
       sku: listing.sku ?? `${asin}-NEW`,
       offerId: listing.ebay_offer_id,
       ebayItemId: listing.ebay_item_id,
@@ -273,7 +277,11 @@ export class ProductSyncService {
            estimated_profit = v.estimated_profit,
            profit_margin = v.profit_margin,
            roi = v.roi,
-           sku = COALESCE(l.sku, v.sku),
+           -- Only adopt the guessed SKU once eBay has confirmed it by resolving
+           -- an offer from it. Writing it unconditionally poisoned the column
+           -- on sandbox rows, whose real SKU is timestamped and can never match
+           -- the guessed one -- and a wrong SKU here is permanent.
+           sku = CASE WHEN v.offer_id IS NOT NULL THEN COALESCE(l.sku, v.sku) ELSE l.sku END,
            ebay_offer_id = COALESCE(v.offer_id, l.ebay_offer_id),
            updated_at = CURRENT_TIMESTAMP
        FROM (

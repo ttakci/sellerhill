@@ -43,18 +43,36 @@ describe('eBay create-path invariants', () => {
   });
 
   it('never returns a publish result without a listing id', () => {
-    expect(ebayService).toMatch(/throw new ListingPublishExhaustedError\(/);
-    // The old code ended createListingWithRest with a bare `return { listingId, categoryName }`
-    // after the retry loop, where listingId was still ''.
-    const loopEnd = ebayService.indexOf('throw new ListingPublishExhaustedError(');
-    const afterLoop = ebayService.slice(loopEnd);
-    expect(afterLoop.slice(0, afterLoop.indexOf('\n  }\n'))).not.toMatch(/return \{ listingId/);
+    // The original single-item loop ended with a bare `return { listingId }`
+    // where listingId was still '', and the caller wrote an ACTIVE row for a
+    // listing that does not exist on eBay. The batched path inherits the rule:
+    // running out of attempts is a typed failure, never an empty success.
+    const bulk = read(EBAY_DIR, 'ebay-bulk.service.ts');
+    expect(bulk).toMatch(/new ListingPublishExhaustedError\(/);
+    expect(bulk).not.toMatch(/listingId:\s*''/);
   });
 
   it('wraps create-path eBay calls in the rate-limit retry', () => {
-    for (const fn of ['createOrReplaceInventoryItem', 'createOffer', 'publishOffer']) {
-      expect(methodBody(ebayService, `private async ${fn}(`)).toMatch(/this\.withRateLimitRetry\(/);
+    // Every write the create path makes goes through the shared retry helper,
+    // which is also where the call budget is charged — one transient 500 used
+    // to burn a whole BullMQ attempt for that ASIN.
+    const bulk = read(EBAY_DIR, 'ebay-bulk.service.ts');
+    for (const fn of ['private async postBulk(', 'private async refreshOffer(']) {
+      expect(methodBody(bulk, fn)).toMatch(/withEbayRateLimitRetry\(/);
     }
+  });
+
+  it('keeps exactly one create implementation', () => {
+    // `createListingWithRest` was a second one: it rebuilt the same eBay bodies,
+    // ran its own aspect self-heal loop, spent three calls per listing where a
+    // batch spends three per 25, and charged the call budget nothing — so draft
+    // publishing was invisible to the quota governor. Publishing a draft now
+    // goes through EbayBulkService like every other create.
+    expect(ebayService).not.toMatch(/createListingWithRest/);
+    expect(ebayService).not.toMatch(/private async (createOffer|publishOffer)\(/);
+    expect(read(LISTINGS_DIR, 'listings.service.ts')).toMatch(
+      /this\.ebayBulkService\.createListings\(/
+    );
   });
 
   it('never sends a brand without an MPN (eBay validates the pair)', () => {
@@ -64,16 +82,23 @@ describe('eBay create-path invariants', () => {
     expect(read(EBAY_DIR, 'ebay-listing-payload.ts')).toMatch(/EBAY_NOT_APPLICABLE/);
   });
 
-  it('builds both write paths from the same payload module', () => {
-    // A bulk-published listing must be byte-for-byte what the single path would
-    // have published. Two payload builders would drift, and every rule encoded
-    // there (GTIN check digits, BrandMPN, tag-safe truncation, the image floor)
-    // is one that has already broken live listings once.
-    for (const file of ['ebay.service.ts', 'ebay-bulk.service.ts']) {
-      const source = read(EBAY_DIR, file);
-      expect(source).toMatch(/buildInventoryItemPayload\(/);
-      expect(source).toMatch(/buildOfferPayload\(/);
-    }
+  it('builds every eBay body from the shared payload module', () => {
+    // Every rule encoded there (GTIN check digits, BrandMPN, tag-safe
+    // truncation, the image floor) has already broken live listings once, so
+    // the bodies are never hand-rolled at a call site.
+    const bulk = read(EBAY_DIR, 'ebay-bulk.service.ts');
+    expect(bulk).toMatch(/buildInventoryItemPayload\(/);
+    expect(bulk).toMatch(/buildOfferPayload\(/);
+  });
+
+  it('sends a locale on every bulk inventory item', () => {
+    // The single-item PUT only needed the Content-Language header, but the bulk
+    // endpoint validates a per-entry `locale` and rejects the WHOLE batch
+    // without it ("Valid SKU and locale information are required for all the
+    // InventoryItems in the request") — so every bulk-created listing failed.
+    const bulk = read(EBAY_DIR, 'ebay-bulk.service.ts');
+    expect(bulk).toMatch(/const locale = context\.contentLanguage\.replace\('-', '_'\)/);
+    expect(bulk).toMatch(/sku: state\.draft\.sku, locale/);
   });
 
   it('never records a bulk-created listing eBay did not confirm', () => {
@@ -93,9 +118,32 @@ describe('eBay create-path invariants', () => {
     expect(bulk).toMatch(/!state\.forcedAspectNames\.includes\(missing\)/);
   });
 
+  it('records the SKU and offer id at create, on both write sites', () => {
+    // Migration 067 exists to stop paying an offer lookup on every price push,
+    // and the SKU is NOT recoverable afterwards — sandbox mints a timestamped
+    // one. Both columns were nevertheless left out of the INSERT, so every new
+    // listing came back NULL and the fan-out fell back to guessing the SKU.
+    const listings = read(LISTINGS_DIR, 'listings.service.ts');
+    expect(listings).toMatch(/sku, ebay_offer_id\n\s*\)/);
+    expect(listings).toMatch(/sku = \$16,\s*\n\s*ebay_offer_id = \$17/);
+    expect(read(LISTINGS_DIR, 'listing-processor.service.ts')).toMatch(
+      /sku: prepared\.sku,\s*\n\s*ebayOfferId: outcome\.offerId/
+    );
+
+    // …and a SKU we only guessed is never written back unless eBay confirmed it
+    // by resolving an offer from it. A wrong SKU in this column is permanent.
+    expect(read(LISTINGS_DIR, 'product-sync.service.ts')).toMatch(
+      /sku = CASE WHEN v\.offer_id IS NOT NULL THEN COALESCE\(l\.sku, v\.sku\) ELSE l\.sku END/
+    );
+  });
+
   it('guards both listing write sites against an empty eBay item id', () => {
-    expect(read(LISTINGS_DIR, 'listing-processor.service.ts')).toMatch(/if \(!ebayItemId\)/);
-    expect(read(LISTINGS_DIR, 'listings.service.ts')).toMatch(/if \(!ebayItemId\)/);
+    // An ACTIVE row with no eBay item id does not exist on eBay, can never be
+    // matched to an order (order sync keys on that column), and blocks
+    // re-listing the ASIN. Both the queue worker and the publish path refuse it.
+    for (const file of ['listing-processor.service.ts', 'listings.service.ts']) {
+      expect(read(LISTINGS_DIR, file)).toMatch(/if \(!\w+\.ok \|\| !\w+\.listingId\)/);
+    }
   });
 });
 

@@ -1,10 +1,9 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
     type CreateListingsRequest,
     type ListingBatchQueueJobData,
     type ListingJobDto,
-    type ListingQueueJobData,
 } from '@repo/shared';
 import { Queue } from 'bullmq';
 
@@ -40,6 +39,16 @@ export class ListingQueueService {
   ): Promise<ListingJobDto> {
     const { asins } = request;
 
+    // Every create goes out as a batch, and a batch carries exactly one seller
+    // token — so the store is required, not optional. It always was in the
+    // type and in the UI; the old code just degraded silently to a per-ASIN
+    // path when a raw API caller left it out (the controller binds a plain
+    // interface, so nothing validates the body). Now it is refused up front
+    // instead of enqueuing work that cannot resolve an account.
+    if (!request.ebayAccountId) {
+      throw new BadRequestException('An eBay store must be selected to create listings');
+    }
+
     // 1. Create job record in database (returns the created job items)
     const job = await this.listingsService.createJob(userId, request);
     this.logger.log(`Created listing job ${job.id} for user ${userId} with ${asins.length} ASINs`);
@@ -66,13 +75,10 @@ export class ListingQueueService {
     //    duplicate check, Keepa resolution, pricing and content rules identical
     //    between "save for later" and "publish now".
     //
-    //    There is no opt-out. A per-item fallback would cost 25x the quota for
-    //    identical output — the payload builders are shared, so the two paths
-    //    produce the same listing — which makes it a switch whose only possible
-    //    effect is to make things worse. The per-ASIN path survives solely for
-    //    a request that names no store, which the UI cannot produce.
-    const useBulk = Boolean(request.ebayAccountId);
-
+    //    There is no opt-out and no per-item path to fall back to. A per-item
+    //    fallback would cost 25x the quota for identical output — the payload
+    //    builders are shared, so both paths produced the same listing — which
+    //    made it a switch whose only possible effect was to make things worse.
     const opts = {
       attempts: 3,
       backoff: { type: 'exponential', delay: 5000 },
@@ -80,45 +86,27 @@ export class ListingQueueService {
       removeOnFail: false,
     };
 
-    const jobs = useBulk
-      ? chunkForBulk(job.items).map((chunk) => ({
-          name: LISTING_BATCH_JOB,
-          data: stampCurrentCorrelation({
-            jobId: job.id,
-            userId,
-            // Non-null by construction: `useBulk` requires it.
-            ebayAccountId: request.ebayAccountId,
-            listingSettingsGroupId: request.listingSettingsGroupId,
-            paymentPolicyId: request.paymentPolicyId,
-            shippingPolicyId: request.shippingPolicyId,
-            returnPolicyId: request.returnPolicyId,
-            asDraft,
-            items: chunk.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
-          } as ListingBatchQueueJobData),
-          opts,
-        }))
-      : job.items.map((item) => ({
-          name: 'create-listing',
-          data: stampCurrentCorrelation({
-            jobId: job.id,
-            userId,
-            asin: item.asin,
-            ebayAccountId: request.ebayAccountId,
-            listingSettingsGroupId: request.listingSettingsGroupId,
-            paymentPolicyId: request.paymentPolicyId,
-            shippingPolicyId: request.shippingPolicyId,
-            returnPolicyId: request.returnPolicyId,
-            asDraft,
-            listingJobItemId: item.id,
-          } as ListingQueueJobData),
-          opts,
-        }));
+    const jobs = chunkForBulk(job.items).map((chunk) => ({
+      name: LISTING_BATCH_JOB,
+      data: stampCurrentCorrelation({
+        jobId: job.id,
+        userId,
+        ebayAccountId: request.ebayAccountId,
+        listingSettingsGroupId: request.listingSettingsGroupId,
+        paymentPolicyId: request.paymentPolicyId,
+        shippingPolicyId: request.shippingPolicyId,
+        returnPolicyId: request.returnPolicyId,
+        asDraft,
+        items: chunk.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
+      } as ListingBatchQueueJobData),
+      opts,
+    }));
 
     if (jobs.length > 0) {
       await this.listingQueue.addBulk(jobs);
       this.logger.log(
         `Added ${jobs.length} task(s) to listings queue for job ${job.id} ` +
-          `(${useBulk ? `bulk, ${job.items.length} ASINs` : 'per-ASIN'})`
+          `(bulk, ${job.items.length} ASINs)`
       );
     }
 

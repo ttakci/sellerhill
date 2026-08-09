@@ -5,6 +5,7 @@ import {
   ListingJobStatus,
   ListingStatus,
   ListingTrackingState,
+  EbayCallPriority,
   EbayListingApiModel,
   OrderStatus,
   PlatformSettingKey,
@@ -27,6 +28,11 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import {
+  EbayBulkService,
+  type BulkListingDraft,
+  type BulkListingOutcome,
+} from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
@@ -145,6 +151,33 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/**
+ * A draft that passed every local check and holds a quota slot, waiting on the
+ * batched write. Carries the resolved store because a bulk call takes exactly
+ * one seller token, so drafts have to be grouped by account before anything
+ * goes out.
+ */
+interface PreparedPublish {
+  listingId: string;
+  accountId: string;
+  merchantLocationKey: string;
+  ebayAccountId: string | null;
+  data: BulkListingDraft['data'];
+  draft: BulkListingDraft;
+}
+
+/**
+ * Per-listing result of a publish run.
+ *
+ * `error` keeps the original throw rather than a message so the single-listing
+ * endpoint can rethrow it and preserve its HTTP status.
+ */
+interface PublishOutcome {
+  listingId: string;
+  ok: boolean;
+  error?: unknown;
+}
+
 @Injectable()
 export class ListingsService {
   private readonly logger = new Logger(ListingsService.name);
@@ -152,6 +185,7 @@ export class ListingsService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly ebayService: EbayService,
+    private readonly ebayBulkService: EbayBulkService,
     private readonly strategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly platformSettings: PlatformSettingsService
@@ -170,6 +204,17 @@ export class ListingsService {
     returnPolicyId: string;
     /** Null for draft listings not yet published to eBay. */
     ebayItemId?: string | null;
+    /**
+     * The SKU eBay knows this listing by, and the offer behind it.
+     *
+     * Both are what `bulk_update_price_quantity` addresses rows by (migration
+     * 067). Recording them at create is the whole point of that migration: the
+     * SKU is NOT derivable after the fact — sandbox mints a timestamped one —
+     * and without the offer id every price push re-pays a lookup call.
+     * Null on drafts, which have neither until they publish.
+     */
+    sku?: string | null;
+    ebayOfferId?: string | null;
     title: string;
     price: number;
     quantity: number;
@@ -198,9 +243,10 @@ export class ListingsService {
         ebay_item_id, title, price, quantity, status,
         purchase_price, estimated_profit, profit_margin, roi,
         sold_count, watch_count, view_count, ebay_category_name,
-        ebay_account_id, ebay_category_id, aspect_resolution, aspect_autofilled_count
+        ebay_account_id, ebay_category_id, aspect_resolution, aspect_autofilled_count,
+        sku, ebay_offer_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23::jsonb, $24)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23::jsonb, $24, $25, $26)
       RETURNING id
     `,
       [
@@ -228,6 +274,8 @@ export class ListingsService {
         data.ebayCategoryId || null,
         data.aspectResolution ? JSON.stringify(data.aspectResolution) : null,
         data.aspectAutofilledCount ?? 0,
+        data.sku ?? null,
+        data.ebayOfferId ?? null,
       ]
     );
 
@@ -1376,6 +1424,85 @@ export class ListingsService {
    * Publish a draft listing to eBay (create live offer + mark ACTIVE).
    */
   async publishListing(userId: string, listingId: string): Promise<ListingDto> {
+    const [outcome] = await this.publishDrafts(userId, [listingId]);
+
+    if (!outcome || !outcome.ok) {
+      // Rethrown as-is so NotFound/BadRequest keep the status codes this
+      // endpoint has always returned; the batched caller records them per item.
+      const error = outcome?.error;
+      throw error instanceof Error ? error : new BadRequestException(String(error ?? 'Publish failed'));
+    }
+
+    const updated = await this.getListing(userId, listingId);
+    if (!updated) {
+      throw new NotFoundException('Listing not found after publish');
+    }
+    return updated;
+  }
+
+  /**
+   * Bulk publish draft listings. Continues on individual failures.
+   */
+  async publishListings(userId: string, listingIds: string[]): Promise<number> {
+    const outcomes = await this.publishDrafts(userId, listingIds);
+    return outcomes.filter((outcome) => outcome.ok).length;
+  }
+
+  /**
+   * Publish drafts through the same batched create the listing queue uses.
+   *
+   * There is ONE create implementation. The per-listing path this replaced was
+   * a second one: it rebuilt the same eBay bodies, ran its own aspect self-heal
+   * loop, and spent three calls per draft — 100 drafts cost 300 calls where a
+   * batch costs 12 — while charging the call budget nothing at all, so draft
+   * publishing was invisible to the quota governor. Two implementations of the
+   * rules that have each broken live listings once (GTIN check digits, the
+   * BrandMPN pair, tag-safe truncation) is precisely the drift
+   * `listing-invariants.guard.spec.ts` exists to prevent.
+   *
+   * Preparation stays per listing: a draft carries seller edits (its title, and
+   * price/quantity locks) that a shared write path must not flatten.
+   */
+  private async publishDrafts(userId: string, listingIds: string[]): Promise<PublishOutcome[]> {
+    const outcomes: PublishOutcome[] = [];
+    // A bulk call carries exactly one seller token, so drafts are grouped by
+    // the store they publish through before anything is written.
+    const byAccount = new Map<string, PreparedPublish[]>();
+    const locationKeys = new Map<string, string>();
+
+    for (const listingId of listingIds) {
+      try {
+        const prepared = await this.prepareDraftForPublish(userId, listingId);
+        byAccount.set(prepared.accountId, [...(byAccount.get(prepared.accountId) ?? []), prepared]);
+        locationKeys.set(prepared.accountId, prepared.merchantLocationKey);
+      } catch (error: unknown) {
+        this.logger.error(`Failed to publish listing ${listingId}: ${getErrorMessage(error)}`);
+        outcomes.push({ listingId, ok: false, error });
+      }
+    }
+
+    for (const [accountId, prepared] of byAccount) {
+      outcomes.push(
+        ...(await this.writePreparedPublishes(
+          userId,
+          accountId,
+          locationKeys.get(accountId) ?? 'default',
+          prepared
+        ))
+      );
+    }
+
+    return outcomes;
+  }
+
+  /**
+   * Everything a draft needs settled before eBay is written to.
+   *
+   * Makes no write call. The quota slot is reserved here because the reserve
+   * must precede the publish it guards, and is handed straight back if the
+   * (read-only) category and aspect resolution then fails.
+   */
+  private async prepareDraftForPublish(userId: string, listingId: string): Promise<PreparedPublish> {
     const listing = await this.getListing(userId, listingId);
     if (!listing) {
       throw new NotFoundException('Listing not found');
@@ -1467,35 +1594,139 @@ export class ListingsService {
     await this.quotaEnforcement.reserveForPublish(userId, listingId);
 
     try {
-      const {
-        listingId: ebayItemId,
-        categoryName,
-        categoryId: ebayCategoryId,
-        aspectResolution,
-      } = await this.ebayService.createListingWithRest(
+      const draft = await this.ebayService.prepareListingDraft(
         userId,
-        product.id,
         listingData,
-        {
-          paymentId: listing.paymentPolicyId,
-          shippingId: listing.shippingPolicyId,
-          returnId: listing.returnPolicyId,
-        },
         listing.asin,
-        listing.ebayAccountId
+        ebayAccountId ?? undefined
       );
 
-      // A published row with an empty eBay item id is unrepairable: it does not
-      // exist on eBay, order sync keys on this column, and the ASIN then counts
-      // as already listed. Leave the listing a DRAFT instead.
-      if (!ebayItemId) {
-        throw new BadRequestException('eBay did not return a listing id; the listing stays a draft.');
+      return {
+        listingId,
+        accountId: draft.accountId,
+        merchantLocationKey: draft.merchantLocationKey,
+        ebayAccountId,
+        data: listingData,
+        draft: {
+          key: listingId,
+          asin: listing.asin,
+          sku: draft.sku,
+          data: listingData,
+          policies: {
+            paymentId: listing.paymentPolicyId,
+            shippingId: listing.shippingPolicyId,
+            returnId: listing.returnPolicyId,
+          },
+          categoryId: draft.categoryId,
+          categoryName: draft.categoryName,
+          categoryAspects: draft.categoryAspects,
+          resolution: draft.resolution,
+        },
+      };
+    } catch (error: unknown) {
+      // Nothing was written, so the held slot goes back rather than blocking
+      // the next attempt at a listing that does not exist yet.
+      await this.quotaEnforcement.releaseForPublish(userId, listingId);
+      throw error;
+    }
+  }
+
+  /**
+   * Write one store's prepared drafts to eBay and record what landed.
+   *
+   * Every prepared draft has to end terminal: a slot released on failure, or
+   * consumed against a real eBay item id. An item eBay never answered for is a
+   * failure, never a silent skip — the same rule the batch worker applies.
+   */
+  private async writePreparedPublishes(
+    userId: string,
+    accountId: string,
+    merchantLocationKey: string,
+    prepared: PreparedPublish[]
+  ): Promise<PublishOutcome[]> {
+    const outcomes: PublishOutcome[] = [];
+    const byKey = new Map(prepared.map((item) => [item.listingId, item]));
+
+    let results: BulkListingOutcome[];
+    try {
+      results = await this.ebayBulkService.createListings(
+        accountId,
+        merchantLocationKey,
+        prepared.map((item) => item.draft),
+        // A seller is waiting on this one, so it draws against the full daily
+        // ceiling rather than the background reserve.
+        EbayCallPriority.INTERACTIVE
+      );
+    } catch (error: unknown) {
+      // Transport failure: nothing in this group landed.
+      for (const item of prepared) {
+        await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
+        this.logger.error(`Failed to publish listing ${item.listingId}: ${getErrorMessage(error)}`);
+        outcomes.push({ listingId: item.listingId, ok: false, error });
+      }
+      return outcomes;
+    }
+
+    const answered = new Set<string>();
+    for (const result of results) {
+      const item = byKey.get(result.key);
+      if (!item) {
+        this.logger.error(`Bulk create answered for ${result.key}, which this publish did not send`);
+        continue;
+      }
+      answered.add(result.key);
+
+      if (!result.ok || !result.listingId) {
+        // A published row with an empty eBay item id is unrepairable: it does
+        // not exist on eBay, order sync keys on that column, and the ASIN then
+        // counts as already listed. Leave the listing a DRAFT instead.
+        await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
+        const error = new Error(result.error ?? 'eBay did not return a listing id for this item.');
+        if (result.errorName) {
+          // Restores the typed failure the classifier keys on.
+          error.name = result.errorName;
+        }
+        this.logger.error(`Failed to publish listing ${item.listingId}: ${error.message}`);
+        outcomes.push({ listingId: item.listingId, ok: false, error });
+        continue;
       }
 
-      const aspectAudit = summarizeAspectResolution(aspectResolution);
+      try {
+        await this.markDraftPublished(userId, item, result);
+        outcomes.push({ listingId: item.listingId, ok: true });
+      } catch (error: unknown) {
+        await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
+        this.logger.error(
+          `Listing ${item.listingId} published to eBay as ${result.listingId} but could not be ` +
+            `recorded locally: ${getErrorMessage(error)}`
+        );
+        outcomes.push({ listingId: item.listingId, ok: false, error });
+      }
+    }
 
-      await this.databaseService.query(
-        `
+    for (const item of prepared) {
+      if (answered.has(item.listingId)) {
+        continue;
+      }
+      await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
+      const error = new Error('eBay returned no result for this item in the bulk response.');
+      this.logger.error(`Failed to publish listing ${item.listingId}: ${error.message}`);
+      outcomes.push({ listingId: item.listingId, ok: false, error });
+    }
+
+    return outcomes;
+  }
+
+  /** Flip a draft row to ACTIVE against the eBay item id that now exists. */
+  private async markDraftPublished(
+    userId: string,
+    item: PreparedPublish,
+    result: BulkListingOutcome
+  ): Promise<void> {
+    const aspectAudit = summarizeAspectResolution(result.resolution);
+
+    await this.databaseService.query(
+      `
         UPDATE listings SET
           ebay_item_id = $1,
           status = '${ListingStatus.ACTIVE}',
@@ -1511,60 +1742,38 @@ export class ListingsService {
           ebay_category_id = $13,
           aspect_resolution = $14::jsonb,
           aspect_autofilled_count = $15,
+          -- A draft had neither until now. The SKU is not derivable after the
+          -- fact (sandbox timestamps it) and the offer id would otherwise cost
+          -- a lookup call on every later price push — migration 067's point.
+          sku = $16,
+          ebay_offer_id = $17,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $11 AND user_id = $12
       `,
-        [
-          ebayItemId,
-          finalPrice,
-          finalQty,
-          purchasePrice ?? 0,
-          estimatedProfit ?? 0,
-          profitMargin ?? 0,
-          roi ?? 0,
-          listingData.title,
-          categoryName || '',
-          ebayAccountId,
-          listingId,
-          userId,
-          ebayCategoryId,
-          JSON.stringify(aspectAudit.summary),
-          aspectAudit.autofilledCount,
-        ]
-      );
+      [
+        result.listingId,
+        item.data.price,
+        item.data.quantity,
+        item.data.purchasePrice ?? 0,
+        item.data.estimatedProfit ?? 0,
+        item.data.profitMargin ?? 0,
+        item.data.roi ?? 0,
+        item.data.title,
+        result.categoryName || '',
+        item.ebayAccountId,
+        item.listingId,
+        userId,
+        result.categoryId,
+        JSON.stringify(aspectAudit.summary),
+        aspectAudit.autofilledCount,
+        item.draft.sku,
+        result.offerId ?? null,
+      ]
+    );
 
-      // Publish succeeded — consume the reservation (idempotent, fail-soft).
-      this.quotaEnforcement.consumeForPublish(userId, listingId);
-
-      const updated = await this.getListing(userId, listingId);
-      if (!updated) {
-        throw new NotFoundException('Listing not found after publish');
-      }
-      this.logger.log(`Published draft ${listingId} as eBay item ${ebayItemId}`);
-      return updated;
-    } catch (err) {
-      // Any failure between reserve and consume releases the held slot so the
-      // next publish attempt can re-reserve cleanly. QuotaExhaustedError from
-      // the reserve above is NOT re-caught here (it threw before this block).
-      await this.quotaEnforcement.releaseForPublish(userId, listingId);
-      throw err;
-    }
-  }
-
-  /**
-   * Bulk publish draft listings. Continues on individual failures.
-   */
-  async publishListings(userId: string, listingIds: string[]): Promise<number> {
-    let successCount = 0;
-    for (const id of listingIds) {
-      try {
-        await this.publishListing(userId, id);
-        successCount++;
-      } catch (error: unknown) {
-        this.logger.error(`Failed to publish listing ${id}: ${getErrorMessage(error)}`);
-      }
-    }
-    return successCount;
+    // Publish succeeded — consume the reservation (idempotent, fail-soft).
+    this.quotaEnforcement.consumeForPublish(userId, item.listingId);
+    this.logger.log(`Published draft ${item.listingId} as eBay item ${result.listingId}`);
   }
 
   /**

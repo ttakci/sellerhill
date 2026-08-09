@@ -11,7 +11,6 @@ import {
   type ListingBatchQueueJobData,
   type ListingCreationData,
   type ListingFailureDetails,
-  type ListingQueueJobData,
   type ProductData,
 } from '@repo/shared';
 import { DelayedError, Job } from 'bullmq';
@@ -64,7 +63,7 @@ export class ListingProcessorService extends WorkerHost {
    * Process a listing job task from the queue
    */
   async process(
-    job: Job<ListingQueueJobData | ExistingListingImportQueueData>,
+    job: Job<ListingBatchQueueJobData | ExistingListingImportQueueData>,
     token?: string
   ): Promise<void> {
     return withCorrelation(
@@ -75,8 +74,10 @@ export class ListingProcessorService extends WorkerHost {
         origin: 'worker',
       },
       async () => {
-        if (job.data.kind === ListingJobKind.EXISTING_IMPORT) {
-          const data = job.data ;
+        // A batch job carries no `kind` — it is discriminated by its BullMQ job
+        // name — so the import job is identified by the presence of the field.
+        if ('kind' in job.data && job.data.kind === ListingJobKind.EXISTING_IMPORT) {
+          const data = job.data;
           try {
             await this.listingImportService.processImport(data);
           } catch (error) {
@@ -93,10 +94,17 @@ export class ListingProcessorService extends WorkerHost {
           return;
         }
         if (job.name === LISTING_BATCH_JOB) {
-          await this.processListingBatch(job as unknown as Job<ListingBatchQueueJobData>, token);
+          await this.processListingBatch(job as Job<ListingBatchQueueJobData>, token);
           return;
         }
-        await this.processListing(job as Job<ListingQueueJobData>, token);
+        // Creates are batch-only. The per-ASIN job this queue also used to
+        // carry is gone, so the only way to land here is a job enqueued by an
+        // older build. Failing loudly beats silently dropping it: a dropped
+        // job leaves its items at their default status, and `updateJobCounts`
+        // then never finishes the job.
+        throw new Error(
+          `Unsupported listings job "${job.name}" (id ${job.id}). Creates are batch-only.`
+        );
       }
     );
   }
@@ -141,7 +149,10 @@ export class ListingProcessorService extends WorkerHost {
 
     const policies = { paymentId: paymentPolicyId, shippingId: shippingPolicyId, returnId: returnPolicyId };
     const drafts: BulkListingDraft[] = [];
-    const context = new Map<string, { asin: string; productId: string; data: ListingCreationData }>();
+    const context = new Map<
+      string,
+      { asin: string; productId: string; sku: string; data: ListingCreationData }
+    >();
     let merchantLocationKey = 'default';
     let accountId = ebayAccountId;
 
@@ -197,7 +208,12 @@ export class ListingProcessorService extends WorkerHost {
           categoryAspects: prepared.categoryAspects,
           resolution: prepared.resolution,
         });
-        context.set(item.listingJobItemId, { asin: item.asin, productId, data: listingData });
+        context.set(item.listingJobItemId, {
+          asin: item.asin,
+          productId,
+          sku: prepared.sku,
+          data: listingData,
+        });
       } catch (error: unknown) {
         // A spent quota is a platform condition, not a defect in this ASIN:
         // park the whole batch rather than failing items that were never tried.
@@ -264,6 +280,11 @@ export class ListingProcessorService extends WorkerHost {
         shippingPolicyId,
         returnPolicyId,
         ebayItemId: outcome.listingId,
+        // Recorded now because neither is recoverable later for free: the SKU
+        // is not derivable (sandbox timestamps it) and the offer id would
+        // otherwise cost a lookup call on every price push.
+        sku: prepared.sku,
+        ebayOfferId: outcome.offerId ?? null,
         title: prepared.data.title,
         price: prepared.data.price,
         purchasePrice: prepared.data.purchasePrice,
@@ -321,27 +342,32 @@ export class ListingProcessorService extends WorkerHost {
     drafts: BulkListingDraft[],
     error: unknown
   ): Promise<void> {
-    const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
     const failure = classifyListingFailure(error);
+    // The classifier already marks input rejections `retryable: false`. Retrying
+    // one re-pays Keepa, the LLM rewrite and the whole publish sequence to get
+    // the same refusal — ~27 eBay calls spent on an answer we already have — so
+    // an unretryable failure is terminal on its first attempt.
+    const canRetry = failure.details?.retryable !== false;
+    const isTerminal = !canRetry || job.attemptsMade + 1 >= (job.opts.attempts || 1);
 
     for (const draft of drafts) {
       await this.listingsService.updateJobItemResult(jobId, draft.asin, {
-        status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
+        status: isTerminal ? ListingStatus.ERROR : ListingStatus.RETRYING,
         errorMessage: failure.message,
         failureCode: failure.code,
         failureDetails: this.withTrace(failure.details),
       });
-      if (isLastAttempt) {
+      if (isTerminal) {
         await this.quotaEnforcement.releaseForCreate(userId, draft.key);
       }
     }
 
     this.logger.error(
       `Bulk write failed for ${drafts.length} item(s) in job ${jobId}: ` +
-        `[${failure.code}] ${failure.message}${isLastAttempt ? '' : ' — will retry'}`
+        `[${failure.code}] ${failure.message}${isTerminal ? '' : ' — will retry'}`
     );
 
-    if (!isLastAttempt) {
+    if (!isTerminal) {
       throw error;
     }
   }
@@ -474,208 +500,6 @@ export class ListingProcessorService extends WorkerHost {
 
     await job.moveToDelayed(Date.now() + delay, token);
     throw new DelayedError();
-  }
-
-  private async processListing(job: Job<ListingQueueJobData>, token?: string): Promise<void> {
-    const {
-      jobId,
-      userId,
-      asin,
-      ebayAccountId,
-      listingSettingsGroupId,
-      paymentPolicyId,
-      shippingPolicyId,
-      returnPolicyId,
-      asDraft = false,
-      listingJobItemId,
-    } = job.data;
-
-    if (await this.listingsService.isJobCancelled(jobId)) {
-      this.logger.log(`Job ${jobId} was cancelled; skipping ASIN ${asin}`);
-      return;
-    }
-
-    this.logger.log(`Processing ASIN ${asin} for job ${jobId}${asDraft ? ' (draft)' : ''}`);
-
-    // 0. Check if ASIN is already active or draft for this user
-    const isAlreadyListed = await this.listingsService.isAsinListed(userId, asin);
-    if (isAlreadyListed) {
-      this.logger.warn(`ASIN ${asin} is already listed/draft for user ${userId}. Skipping.`);
-      await this.listingsService.updateJobItemResult(jobId, asin, {
-        status: ListingStatus.ERROR,
-        errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active or draft listings.',
-        failureCode: ListingFailureCode.DUPLICATE_LISTING,
-        failureDetails: { retryable: false },
-      });
-      // A duplicate never created a listing — release the reservation so the
-      // held slot is freed for the next create. (Non-draft path only; drafts
-      // never reserved.)
-      if (!asDraft && listingJobItemId) {
-        await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
-      }
-      return;
-    }
-
-    try {
-      // 1. Resolve product data — cached, or one Keepa fetch guarded by a
-      //    per-ASIN advisory lock so concurrent creates of the same uncached
-      //    ASIN (bulk uploads, multi-tenant) make exactly ONE provider call.
-      const { productData, productId } = await this.resolveProductData(asin, userId);
-
-      // 3. Prepare listing data (Price, stock, etc. based on strategy group)
-      await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
-      // applyContentAi: create path only (shared LLM when group flags + LLM_CONTENT_ENABLED)
-      const listingData = await this.listingStrategyService.prepareListingData(
-        userId,
-        productData,
-        listingSettingsGroupId,
-        ebayAccountId,
-        { applyContentAi: true }
-      );
-
-      // Drafts: allow zero stock so users can prepare OOS ASINs and publish later.
-      // Live publish: block zero stock so we never push qty 0 to eBay on create.
-      if (!asDraft && listingData.quantity === 0) {
-        throw new Error(
-          `Cannot list ASIN ${asin}: Stock is 0. ` +
-            `Amazon stock (${productData.stock}) is less than user preferred quantity. ` +
-            `Please adjust your listing settings group stock preferences, wait for Amazon to restock, or save as draft.`
-        );
-      }
-
-      let ebayItemId: string | undefined;
-      let categoryName = productData.category ?? '';
-      let ebayCategoryId: string | undefined;
-      let aspectAudit: { summary: Record<string, unknown>; autofilledCount: number } | undefined;
-
-      if (!asDraft) {
-        // 4. Create eBay listing (REST API)
-        const created = await this.ebayService.createListingWithRest(
-          userId,
-          productId,
-          listingData,
-          {
-            paymentId: paymentPolicyId,
-            shippingId: shippingPolicyId,
-            returnId: returnPolicyId,
-          },
-          asin,
-          ebayAccountId
-        );
-        ebayItemId = created.listingId;
-        categoryName = created.categoryName;
-        ebayCategoryId = created.categoryId;
-        aspectAudit = summarizeAspectResolution(created.aspectResolution);
-
-        // Defence in depth against a phantom listing: an ACTIVE row whose
-        // `ebay_item_id` is empty does not exist on eBay, can never be matched
-        // to an order (order sync keys on this column), and blocks re-listing
-        // the ASIN as a duplicate.
-        if (!ebayItemId) {
-          throw new Error(`eBay did not return a listing id for ASIN ${asin}; refusing to record the listing.`);
-        }
-      }
-
-      // 5. Create listing record (ACTIVE with eBay id, or DRAFT without)
-      const listingId = await this.listingsService.createListing({
-        userId,
-        asin,
-        productId,
-        listingSettingsGroupId,
-        paymentPolicyId,
-        shippingPolicyId,
-        returnPolicyId,
-        ebayItemId: ebayItemId ?? null,
-        title: listingData.title,
-        price: listingData.price,
-        purchasePrice: listingData.purchasePrice,
-        estimatedProfit: listingData.estimatedProfit,
-        profitMargin: listingData.profitMargin,
-        roi: listingData.roi,
-        quantity: listingData.quantity,
-        ebayCategoryName: categoryName,
-        ebayCategoryId,
-        aspectResolution: aspectAudit?.summary ?? null,
-        aspectAutofilledCount: aspectAudit?.autofilledCount ?? 0,
-        ebayAccountId: ebayAccountId || undefined,
-        status: asDraft ? ListingStatus.DRAFT : ListingStatus.ACTIVE,
-      });
-
-      // 6. Update job item success (job-item ACTIVE = processed successfully)
-      await this.listingsService.updateJobItemResult(jobId, asin, {
-        productId,
-        listingId,
-        status: ListingStatus.ACTIVE,
-        ebayItemId,
-      });
-
-      // 7. Consume the billing-quota reservation for this job-item (non-draft
-      //    creates only — drafts never reserved). Fail-soft + idempotent.
-      if (!asDraft && listingJobItemId) {
-        this.quotaEnforcement.consumeForCreate(userId, listingJobItemId);
-      }
-
-      this.logger.log(
-        asDraft
-          ? `Successfully created draft listing ${listingId} for ASIN ${asin}`
-          : `Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`
-      );
-    } catch (error: unknown) {
-      // Budget exhaustion is not a failure of this listing — the platform's
-      // shared daily eBay quota is spent. Park the job until it resets, keep
-      // the billing reservation held (the work is still coming), and leave the
-      // item in RETRYING so the UI reports "waiting", not "failed".
-      if (error instanceof EbayBudgetExhaustedError) {
-        await this.listingsService.updateJobItemResult(jobId, asin, {
-          status: ListingStatus.RETRYING,
-          errorMessage: error.message,
-          failureCode: ListingFailureCode.PROVIDER_BUDGET_EXHAUSTED,
-          failureDetails: { retryable: true },
-        });
-        await this.deferUntilBudgetResets(job, token, error);
-        return;
-      }
-
-      // One classifier owns every failure shape (ours, eBay's, transport), so
-      // the UI can show an actionable reason instead of a raw eBay string.
-      const failure = classifyListingFailure(error);
-
-      // Honour the classifier's own verdict instead of retrying blindly.
-      //
-      // By the time we are here, transient causes have already been retried
-      // four times at the HTTP layer (429/5xx, `Retry-After`-aware) and the
-      // aspect self-heal has already re-derived the item specifics. What is
-      // left is usually a rejection of the INPUT — wrong category, invalid
-      // identifier, missing business policy — where the same request produces
-      // the same answer. Re-running the job then re-pays Keepa, the LLM content
-      // rewrite and the whole publish sequence for a guaranteed second refusal;
-      // a permanently broken ASIN could burn ~27 eBay calls before giving up.
-      const canRetry = failure.details?.retryable !== false;
-      const isLastAttempt = !canRetry || job.attemptsMade + 1 >= (job.opts.attempts || 1);
-
-      this.logger.error(
-        `Error processing ASIN ${asin} in job ${jobId}: [${failure.code}] ${failure.message} ` +
-          `(Attempt ${job.attemptsMade + 1}${canRetry ? '' : ', not retryable'})`
-      );
-
-      await this.listingsService.updateJobItemResult(jobId, asin, {
-        status: isLastAttempt ? ListingStatus.ERROR : ListingStatus.RETRYING,
-        errorMessage: failure.message,
-        failureCode: failure.code,
-        failureDetails: this.withTrace(failure.details),
-      });
-
-      // Billing-quota release: only on PERMANENT failure (terminal ERROR). On
-      // intermediate RETRYING the reservation stays held so a BullMQ retry
-      // doesn't oversell the slot. Drafts never reserved.
-      if (!asDraft && listingJobItemId && isLastAttempt) {
-        await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
-      }
-
-      if (!isLastAttempt) {
-        throw error; // Rethrow to trigger BullMQ retry
-      }
-    }
   }
 
   /**
