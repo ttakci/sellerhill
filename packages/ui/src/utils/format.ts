@@ -1,7 +1,40 @@
 /**
  * Format utilities for currency, numbers, and dates.
  * Platform-agnostic — works with any locale.
+ *
+ * Every formatter below goes through a process-wide instance cache. Constructing
+ * an `Intl.NumberFormat` / `Intl.DateTimeFormat` is one to two orders of
+ * magnitude more expensive than calling `.format()` on an existing one, and
+ * these helpers are called per table cell, per card and per chart tick. The
+ * worst case is exactly a language switch: `languageChanged` re-renders every
+ * consumer at once, so an uncached build reconstructs every formatter in the app
+ * in a single frame.
+ *
+ * The key set is bounded by (locale × options), so the cache cannot grow
+ * unbounded — the app ships two locales and a handful of option shapes.
  */
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+const dateFormatCache = new Map<string, Intl.DateTimeFormat>();
+
+const getNumberFormat = (locale: string, options: Intl.NumberFormatOptions): Intl.NumberFormat => {
+  const key = `${locale}|${JSON.stringify(options)}`;
+  let formatter = numberFormatCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, options);
+    numberFormatCache.set(key, formatter);
+  }
+  return formatter;
+};
+
+const getDateFormat = (locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
+  const key = `${locale}|${JSON.stringify(options)}`;
+  let formatter = dateFormatCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options);
+    dateFormatCache.set(key, formatter);
+  }
+  return formatter;
+};
 
 /**
  * Format a number as currency.
@@ -12,7 +45,7 @@ export const formatCurrency = (
   currency: string = 'USD',
   minimumFractionDigits: number = 0,
 ): string =>
-  new Intl.NumberFormat(locale, {
+  getNumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits,
@@ -26,7 +59,7 @@ export const formatCompactNumber = (
   locale: string = 'en-US',
   maximumFractionDigits: number = 1,
 ): string =>
-  new Intl.NumberFormat(locale, {
+  getNumberFormat(locale, {
     notation: 'compact',
     compactDisplay: 'short',
     maximumFractionDigits,
@@ -51,21 +84,28 @@ export const formatDate = (
   locale: string = 'en-US',
   options?: Intl.DateTimeFormatOptions,
 ): string =>
-  new Intl.DateTimeFormat(locale, {
+  getDateFormat(locale, {
     day: 'numeric',
     month: 'short',
     ...options,
   }).format(new Date(dateString));
 
 /**
+ * The two resolved configs, returned by identity. Several containers call
+ * `getLocaleConfig(i18n.language)` outside a `useMemo` and feed the result into
+ * one — a fresh object per render invalidated those memos on every render, so
+ * column definitions and derived rows were rebuilt continuously.
+ */
+const LOCALE_CONFIGS = {
+  en: { locale: 'en-US', currency: 'USD' },
+  tr: { locale: 'tr-TR', currency: 'TRY' },
+} as const;
+
+/**
  * Get locale and currency based on language code.
  * Accepts bare codes (`tr`, `en`) or BCP-47 tags (`tr-TR`, `en-US`).
  */
-export const getLocaleConfig = (language: string) => {
+export const getLocaleConfig = (language: string): { locale: string; currency: string } => {
   const code = (language || 'en').toLowerCase().split('-')[0];
-  const isTR = code === 'tr';
-  return {
-    locale: isTR ? 'tr-TR' : 'en-US',
-    currency: isTR ? 'TRY' : 'USD',
-  };
+  return code === 'tr' ? LOCALE_CONFIGS.tr : LOCALE_CONFIGS.en;
 };

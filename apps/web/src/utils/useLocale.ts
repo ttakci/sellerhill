@@ -50,13 +50,27 @@ export const useLocale = (): UseLocaleReturn => {
       return;
     }
 
+    if (newLocale === locale) {
+      return;
+    }
+
     storeLocalePreference(newLocale as SupportedLocale);
+    /*
+     * Resources are bundled at init, so `changeLanguage` resolves and emits
+     * `languageChanged` synchronously. Firing it in the same click handler as
+     * the navigation lets React batch both into ONE commit — awaiting it first
+     * would split the switch into two full-tree renders.
+     */
     void i18n.changeLanguage(newLocale);
 
-    // Navigate to same page with new locale
-    const currentPath = window.location.pathname;
-    const newPath = changeLocaleInPath(currentPath, newLocale as SupportedLocale);
-    void navigate(newPath, { replace: true });
+    /*
+     * Same page, new locale — query string and hash carry the page's own state
+     * (dashboard tab/period, list filters, drawer flags). Dropping them turned
+     * a language switch into a silent page reset plus a refetch.
+     */
+    const { pathname, search, hash } = window.location;
+    const newPath = changeLocaleInPath(pathname, newLocale as SupportedLocale);
+    void navigate(`${newPath}${search}${hash}`, { replace: true });
   };
 
   const buildPath = (path: string): string => {
