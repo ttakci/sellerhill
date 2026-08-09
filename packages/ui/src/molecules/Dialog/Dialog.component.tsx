@@ -8,9 +8,14 @@ import type { MessageType } from '../../context';
 import * as S from './Dialog.style';
 import type { DialogProps } from './Dialog.types';
 
+/**
+ * Error uses the same triangle-and-exclamation glyph as `ValidationMessage`, so
+ * a failure looks the same whether it surfaces under a field or in a dialog. A
+ * crossed circle reads as "closed / cancelled", not "something went wrong".
+ */
 const iconsByType: Record<MessageType, IconName> = {
   success: 'check-circle',
-  error: 'x-circle',
+  error: 'triangle-info',
   warning: 'alert-triangle',
   info: 'info',
 };

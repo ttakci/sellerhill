@@ -328,9 +328,11 @@ export const iconMap = {
   'alert-triangle': lucide(AlertTriangle),
   'triangle-info': TriangleInfoIcon,
   /**
-   * Error state for Toast / MessageModal. This name was referenced by Toast but
-   * had never been registered, so every error toast rendered an empty icon and
-   * a console warning — invisible while `IconName` was `string`.
+   * A crossed circle: "closed / removed / cancelled".
+   *
+   * No longer the error glyph for Toast / Dialog — those use `triangle-info`,
+   * the same triangle-and-exclamation `ValidationMessage` shows under a field,
+   * so a failure looks the same wherever it surfaces.
    */
   'x-circle': lucide(CircleX),
   info: lucide(Info),

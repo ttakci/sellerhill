@@ -5,9 +5,10 @@ import { Icon, type IconName } from '../../atoms/Icon';
 import * as S from './Toast.style';
 import type { ToastComponentProps } from './Toast.types';
 
+/** Same glyph per type as Dialog — an error must not change shape by surface. */
 const toastIcons: Record<string, IconName> = {
   success: 'check-circle',
-  error: 'x-circle',
+  error: 'triangle-info',
   warning: 'alert-triangle',
   info: 'info',
 };
