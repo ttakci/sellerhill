@@ -6,13 +6,12 @@ import { getCorrelation } from '../observability/correlation.context';
 
 /**
  * Winston Logger Configuration
- * 
+ *
  * Features:
- * - Console logging with colors (development)
- * - File logging with daily rotation (production)
- * - Different log levels per environment
- * - Structured JSON logs for production
- * - Human-readable logs for development
+ * - Console logging with colors (human-readable, all environments)
+ * - JSON file logging with daily rotation (all environments — Promtail tails
+ *   apps/api/logs/*.log for the Loki/Grafana log-tracing stack)
+ * - Level from LOG_LEVEL env var, falling back to debug (dev) / info (prod)
  */
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -67,9 +66,9 @@ const combinedFileTransport = new DailyRotateFile({
 });
 
 // Create Winston instance
+// File transports run in every environment (not just production) so local
+// dev also produces JSON logs under apps/api/logs/ for Promtail/Loki to tail.
 export const winstonLogger = WinstonModule.createLogger({
-  level: isDevelopment ? 'debug' : 'info',
-  transports: isDevelopment
-    ? [consoleTransport]
-    : [consoleTransport, errorFileTransport, combinedFileTransport],
+  level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
+  transports: [consoleTransport, errorFileTransport, combinedFileTransport],
 });

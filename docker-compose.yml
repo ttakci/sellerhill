@@ -66,12 +66,70 @@ services:
   # hosted OpenAI-compatible provider configured in LLM_BASE_URL, so what you
   # test locally is what runs in production. See apps/api/.env.example.
 
+  # Log tracing stack (Loki + Promtail + Grafana). apps/api runs on the host
+  # via `pnpm dev:api`, not in a container, so Promtail tails its JSON log
+  # files (apps/api/logs/*.log — see logger.config.ts) via a host bind mount
+  # rather than scraping container stdout. See CLAUDE.md "Observability — Log
+  # tracing (Loki/Promtail/Grafana)".
+  loki:
+    image: grafana/loki:3.7.6
+    container_name: zonds_loki
+    restart: unless-stopped
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - zonds_network
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    container_name: zonds_promtail
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ./apps/api/logs:/var/log/zonds-api:ro
+      - promtail_positions:/tmp/positions
+    command: -config.expand-env=true -config.file=/etc/promtail/config.yml
+    networks:
+      - zonds_network
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:13.1.3
+    container_name: zonds_grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+    ports:
+      - '3001:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - zonds_network
+    depends_on:
+      - loki
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
     driver: local
   pgadmin_data:
+    driver: local
+  loki_data:
+    driver: local
+  grafana_data:
+    driver: local
+  promtail_positions:
     driver: local
 
 networks:

@@ -1,0 +1,46 @@
+# Promtail — tails apps/api's JSON log files and ships them to Loki.
+# Reused as-is across local/test/production: the `environment` label comes
+# from the ENVIRONMENT env var (set per docker-compose file), expanded via the
+# container's `-config.expand-env=true` flag.
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: zonds-api
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: zonds-api
+          environment: ${ENVIRONMENT}
+          __path__: /var/log/zonds-api/*.log
+    pipeline_stages:
+      # apps/api's Winston transports write one JSON object per line
+      # (correlationId/queueName/jobId stamped by correlationFormat — see
+      # apps/api/src/common/config/logger.config.ts). Extract fields so they
+      # are queryable in LogQL (e.g. `| json | correlationId="<id>"`) without
+      # promoting high-cardinality fields to indexed Loki labels.
+      - json:
+          expressions:
+            level: level
+            timestamp: timestamp
+            message: message
+            context: context
+            correlationId: correlationId
+            queueName: queueName
+            jobId: jobId
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      # Only `level` is promoted to an indexed label — bounded cardinality
+      # (debug/info/warn/error). correlationId/queueName/jobId stay as
+      # extracted fields, filterable but not indexed.
+      - labels:
+          level:

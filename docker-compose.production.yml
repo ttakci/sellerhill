@@ -137,6 +137,8 @@ services:
       - browser_state:/app/.browser-state
       # Auto-fulfill evidence screenshots. TTL-swept by the app; not backed up.
       - fulfillment_evidence:/app/fulfillment-evidence
+      # JSON logs (logger.config.ts) — tailed by the promtail service below.
+      - api_logs:/app/apps/api/logs
     healthcheck:
       # `/api/health/live` is the liveness probe (no DB dependency), so a brief
       # database outage does not cause a restart loop.
@@ -183,9 +185,58 @@ services:
     networks:
       - coolify
 
+  # ---- Log tracing (Loki + Promtail + Grafana) ----
+  # Promtail tails the api service's JSON log files via the shared api_logs
+  # volume. Grafana intentionally publishes no ports — reach it via an SSH
+  # tunnel to this VPS, or add a Coolify domain + auth for it deliberately.
+  # See CLAUDE.md "Observability — Log tracing (Loki/Promtail/Grafana)".
+  loki:
+    image: grafana/loki:3.7.6
+    restart: unless-stopped
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - coolify
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+    volumes:
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - api_logs:/var/log/zonds-api:ro
+      - promtail_positions:/tmp/positions
+    command: -config.expand-env=true -config.file=/etc/promtail/config.yml
+    networks:
+      - coolify
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:13.1.3
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in Coolify env vars}
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - coolify
+    depends_on:
+      - loki
+
 volumes:
   browser_state:
   fulfillment_evidence:
+  api_logs:
+  loki_data:
+  grafana_data:
+  promtail_positions:
 
 # Attach both services to Coolify's shared network so they reach the managed
 # PostgreSQL and Redis resources (which live on the external `coolify` network)
