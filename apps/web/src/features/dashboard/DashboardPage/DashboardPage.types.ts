@@ -23,7 +23,6 @@ export interface DashboardPageComponentProps {
   onTabChange: (tab: DashboardTab) => void;
   /** Store filter — hidden when the user has no connected eBay store. */
   storeSelectorLabel: string;
-  storeSelectorTitle: string;
   storeItems: DropdownItem[];
   showStoreSelector: boolean;
   cardsProps: CardsPanelProps;

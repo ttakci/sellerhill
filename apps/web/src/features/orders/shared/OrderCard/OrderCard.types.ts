@@ -12,8 +12,6 @@ export interface OrderCardStat {
   label: string;
   value: string;
   tone?: OrderCardStatTone;
-  /** Optional small badge rendered under the stat value (e.g. "Estimated"). */
-  badge?: OrderCardStatBadge;
 }
 
 export interface OrderCardMetaItem {
@@ -33,6 +31,7 @@ export interface OrderCardProps {
   ebayOrderId: string;
   status: OrderStatus;
   statusLabel: string;
+  statsBadge?: OrderCardStatBadge;
   /** Labeled rows under title (order #, buyer, qty, ASIN, …) */
   meta: OrderCardMetaItem[];
   /** Bottom strip: sale / cost / profit (or similar) */

@@ -14,10 +14,55 @@ import { useTranslation } from 'react-i18next';
 import { useCreateListingsMutation, useGetBusinessPoliciesQuery } from '../../api/listings.api';
 
 import { AddListingsDrawerComponent } from './AddListingsDrawer.component';
-import type { AddListingsDrawerProps, AddListingsDrawerStep } from './AddListingsDrawer.types';
+import type {
+  AddListingsDrawerPreferences,
+  AddListingsDrawerProps,
+  AddListingsDrawerStep,
+} from './AddListingsDrawer.types';
 
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+
+const PREFERENCES_STORAGE_KEY = 'zonds:add-listings-preferences:v1';
+
+const EMPTY_PREFERENCES: AddListingsDrawerPreferences = {
+  ebayAccountId: '',
+  listingSettingsGroupId: '',
+  paymentPolicyId: '',
+  shippingPolicyId: '',
+  returnPolicyId: '',
+  asDraft: false,
+};
+
+const readPreferences = (): AddListingsDrawerPreferences => {
+  try {
+    const stored = window.localStorage.getItem(PREFERENCES_STORAGE_KEY);
+    if (!stored) {
+      return EMPTY_PREFERENCES;
+    }
+
+    const parsed = JSON.parse(stored) as Partial<AddListingsDrawerPreferences>;
+    return {
+      ebayAccountId: typeof parsed.ebayAccountId === 'string' ? parsed.ebayAccountId : '',
+      listingSettingsGroupId:
+        typeof parsed.listingSettingsGroupId === 'string' ? parsed.listingSettingsGroupId : '',
+      paymentPolicyId: typeof parsed.paymentPolicyId === 'string' ? parsed.paymentPolicyId : '',
+      shippingPolicyId: typeof parsed.shippingPolicyId === 'string' ? parsed.shippingPolicyId : '',
+      returnPolicyId: typeof parsed.returnPolicyId === 'string' ? parsed.returnPolicyId : '',
+      asDraft: parsed.asDraft === true,
+    };
+  } catch {
+    return EMPTY_PREFERENCES;
+  }
+};
+
+const writePreferences = (preferences: AddListingsDrawerPreferences) => {
+  try {
+    window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+  } catch {
+    // Storage can be unavailable in privacy mode; the drawer must remain usable.
+  }
+};
 
 export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -69,13 +114,10 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     if (isOpen) {
       setCurrentStep(0);
       clearErrors();
+      const preferences = readPreferences();
       reset({
         asins: '',
-        listingSettingsGroupId: '',
-        paymentPolicyId: '',
-        shippingPolicyId: '',
-        returnPolicyId: '',
-        asDraft: false,
+        ...preferences,
       });
     }
   }
@@ -149,6 +191,53 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
 
   // Soft gate per step — no red field errors until final submit
   const watchedValues = useWatch({ control });
+
+  React.useEffect(() => {
+    if (!isOpen || isLoading) {
+      return;
+    }
+
+    const hasId = (items: Array<{ id: string }>, id: string | undefined) =>
+      Boolean(id && items.some((item) => item.id === id));
+    const preferences: AddListingsDrawerPreferences = {
+      ebayAccountId: hasId(ebayAccounts, watchedValues.ebayAccountId) ? watchedValues.ebayAccountId ?? '' : '',
+      listingSettingsGroupId: hasId(listingSettingsGroups, watchedValues.listingSettingsGroupId)
+        ? watchedValues.listingSettingsGroupId ?? ''
+        : '',
+      paymentPolicyId: hasId(businessPolicies.payment, watchedValues.paymentPolicyId)
+        ? watchedValues.paymentPolicyId ?? ''
+        : '',
+      shippingPolicyId: hasId(businessPolicies.shipping, watchedValues.shippingPolicyId)
+        ? watchedValues.shippingPolicyId ?? ''
+        : '',
+      returnPolicyId: hasId(businessPolicies.return, watchedValues.returnPolicyId)
+        ? watchedValues.returnPolicyId ?? ''
+        : '',
+      asDraft: Boolean(watchedValues.asDraft),
+    };
+
+    for (const key of [
+      'ebayAccountId',
+      'listingSettingsGroupId',
+      'paymentPolicyId',
+      'shippingPolicyId',
+      'returnPolicyId',
+    ] as const) {
+      if (watchedValues[key] !== preferences[key]) {
+        form.setValue(key, preferences[key]);
+      }
+    }
+    writePreferences(preferences);
+  }, [
+    isOpen,
+    isLoading,
+    ebayAccounts,
+    listingSettingsGroups,
+    businessPolicies,
+    watchedValues,
+    form,
+  ]);
+
   const canProceed = useMemo(() => {
     if (currentStep === 0) {
       return Boolean(

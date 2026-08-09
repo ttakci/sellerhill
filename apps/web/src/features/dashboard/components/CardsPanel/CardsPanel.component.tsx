@@ -3,7 +3,7 @@
  * Period KPI cards + the period-filtered listings/orders sections.
  */
 
-import { Card, CardHeader, Icon, Text } from '@repo/ui';
+import { CardHeader, Icon, Text } from '@repo/ui';
 import React from 'react';
 
 import { PeriodCard } from '../PeriodCard';
@@ -30,12 +30,10 @@ export const CardsPanelComponent = ({
   onOrderOpen,
   onOrdersViewAll,
   listingsTitle,
-  listingsCountLabel,
   listingsViewAllLabel,
   listingsEmptyTitle,
   listingsEmptySubtitle,
   ordersTitle,
-  ordersCountLabel,
   ordersViewAllLabel,
   ordersEmptyTitle,
   ordersEmptySubtitle,
@@ -60,27 +58,12 @@ export const CardsPanelComponent = ({
     </S.Grid>
 
     <S.SectionsRow>
-      <Card variant="bordered">
+      <S.CarouselCard variant="bordered">
         <CardHeader
           icon={
             <S.SectionIcon>
-              <Icon name="inventory-2" size={16} />
+              <Icon name="inventory" size={16} />
             </S.SectionIcon>
-          }
-          description={
-            <Text variant="caption" color="text.tertiary">
-              {listingsCountLabel}
-            </Text>
-          }
-          actions={
-            listings.length > 0 ? (
-              <S.SectionAction type="button" onClick={onListingsViewAll}>
-                <Text variant="caption" weight="semibold" color="inherit">
-                  {listingsViewAllLabel}
-                </Text>
-                <Icon name="arrow-right" size={14} />
-              </S.SectionAction>
-            ) : undefined
           }
         >
           <Text variant="h4" weight="semibold">
@@ -92,35 +75,20 @@ export const CardsPanelComponent = ({
             listings={listings}
             onViewAll={onListingsViewAll}
             viewAllLabel={listingsViewAllLabel}
-            showViewAll={false}
+            showViewAll
             onListingClick={onListingOpen}
             emptyTitle={listingsEmptyTitle}
             emptySubtitle={listingsEmptySubtitle}
           />
         </S.SectionBody>
-      </Card>
+      </S.CarouselCard>
 
-      <Card variant="bordered">
+      <S.CarouselCard variant="bordered">
         <CardHeader
           icon={
             <S.SectionIcon>
               <Icon name="shopping-bag" size={16} />
             </S.SectionIcon>
-          }
-          description={
-            <Text variant="caption" color="text.tertiary">
-              {ordersCountLabel}
-            </Text>
-          }
-          actions={
-            orders.length > 0 ? (
-              <S.SectionAction type="button" onClick={onOrdersViewAll}>
-                <Text variant="caption" weight="semibold" color="inherit">
-                  {ordersViewAllLabel}
-                </Text>
-                <Icon name="arrow-right" size={14} />
-              </S.SectionAction>
-            ) : undefined
           }
         >
           <Text variant="h4" weight="semibold">
@@ -132,7 +100,7 @@ export const CardsPanelComponent = ({
             orders={orders}
             onViewAll={onOrdersViewAll}
             viewAllLabel={ordersViewAllLabel}
-            showViewAll={false}
+            showViewAll
             onOrderClick={onOrderOpen}
             formatCurrency={formatters.currency}
             formatDate={formatters.date}
@@ -140,7 +108,7 @@ export const CardsPanelComponent = ({
             emptySubtitle={ordersEmptySubtitle}
           />
         </S.SectionBody>
-      </Card>
+      </S.CarouselCard>
     </S.SectionsRow>
   </S.Root>
 );

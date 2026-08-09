@@ -30,7 +30,7 @@ import { useLocale } from '@/utils/useLocale';
 const CAROUSEL_LIMIT = 12;
 
 export const DashboardPageContainer = (): React.ReactElement => {
-  const { t, i18n } = useTranslation(['dashboard', 'translation']);
+  const { t, i18n } = useTranslation(['dashboard', 'listings', 'orders', 'translation']);
   const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
   const { theme } = useTheme();
@@ -81,9 +81,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
   });
 
   const listings = listingsPage?.items ?? [];
-  const listingsTotal = listingsPage?.total ?? 0;
   const orders = ordersPage?.orders ?? [];
-  const ordersTotal = ordersPage?.total ?? 0;
 
   /* ─── navigation ─── */
 
@@ -251,7 +249,6 @@ export const DashboardPageContainer = (): React.ReactElement => {
         activeTab={tab}
         onTabChange={setTab}
         storeSelectorLabel={selectedStoreLabel}
-        storeSelectorTitle={t('dashboard.selectStore')}
         storeItems={storeItems}
         showStoreSelector={ebayAccounts.length > 0}
         cardsProps={{
@@ -268,13 +265,11 @@ export const DashboardPageContainer = (): React.ReactElement => {
           onOrderOpen: handleOrderOpen,
           onOrdersViewAll: handleOrdersViewAll,
           listingsTitle: t('dashboard.listingsSection'),
-          listingsCountLabel: t('dashboard.listingsCount', { count: listingsTotal }),
-          listingsViewAllLabel: t('dashboard.viewAllListings'),
+          listingsViewAllLabel: t('listings:listings.actions.viewAll'),
           listingsEmptyTitle: t('dashboard.listingsEmptyTitle'),
           listingsEmptySubtitle: t('dashboard.listingsEmptySubtitle'),
           ordersTitle: t('dashboard.ordersSection'),
-          ordersCountLabel: t('dashboard.ordersCount', { count: ordersTotal }),
-          ordersViewAllLabel: t('dashboard.viewAllOrders'),
+          ordersViewAllLabel: t('orders:orders.overview.viewAll'),
           ordersEmptyTitle: t('dashboard.ordersEmptyTitle'),
           ordersEmptySubtitle: t('dashboard.ordersEmptySubtitle'),
         }}

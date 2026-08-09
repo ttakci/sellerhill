@@ -30,12 +30,10 @@ export interface CardsPanelProps {
   onOrderOpen: (orderId: string) => void;
   onOrdersViewAll: () => void;
   listingsTitle: string;
-  listingsCountLabel: string;
   listingsViewAllLabel: string;
   listingsEmptyTitle: string;
   listingsEmptySubtitle: string;
   ordersTitle: string;
-  ordersCountLabel: string;
   ordersViewAllLabel: string;
   ordersEmptyTitle: string;
   ordersEmptySubtitle: string;

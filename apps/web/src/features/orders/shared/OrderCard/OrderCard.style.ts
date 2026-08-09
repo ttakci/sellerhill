@@ -152,6 +152,7 @@ export const MetaValueText = styled(Text)`
 `;
 
 export const StatsGrid = styled.div`
+  position: relative;
   display: grid;
   /* Was a rigid repeat(3, 1fr) with vertical dividers, which is exactly what
      crushed at a narrow track: three currency values in ~55px each. Cells now
@@ -163,6 +164,13 @@ export const StatsGrid = styled.div`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   margin-top: auto;
   flex-shrink: 0;
+`;
+
+export const StatsBadge = styled.div`
+  position: absolute;
+  top: ${tkn('spacing.xs')};
+  right: ${tkn('spacing.xs')};
+  z-index: 1;
 `;
 
 export const StatCell = styled.div`

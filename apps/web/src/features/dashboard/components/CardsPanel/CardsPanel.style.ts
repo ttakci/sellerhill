@@ -4,7 +4,7 @@
 
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Card, tkn } from '@repo/ui';
 
 export const Root = styled.div`
   display: flex;
@@ -57,26 +57,13 @@ export const SectionsRow = styled.div`
   }
 `;
 
+export const CarouselCard = styled(Card)`
+  overflow: visible;
+`;
+
 export const SectionBody = styled.div`
   padding: ${tkn('spacing.md')};
   min-width: 0;
-`;
-
-export const SectionAction = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
-  background: transparent;
-  border: none;
-  border-radius: ${tkn('radius.md')};
-  cursor: pointer;
-  font: inherit;
-  color: ${tkn('colors.brand.primary')};
-
-  &:hover {
-    background: ${tkn('colors.brand.secondary')};
-  }
 `;
 
 export const SectionIcon = styled.span`

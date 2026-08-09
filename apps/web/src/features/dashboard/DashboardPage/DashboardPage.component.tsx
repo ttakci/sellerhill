@@ -21,7 +21,6 @@ export const DashboardPageComponent = ({
   activeTab,
   onTabChange,
   storeSelectorLabel,
-  storeSelectorTitle,
   storeItems,
   showStoreSelector,
   cardsProps,
@@ -47,7 +46,7 @@ export const DashboardPageComponent = ({
             width="14rem"
             items={storeItems}
             trigger={
-              <S.StoreTrigger title={storeSelectorTitle}>
+              <S.StoreTrigger>
                 <Icon name="storefront" size={16} />
                 <S.StoreLabel>
                   <Text variant="body-sm" weight="medium" truncate>

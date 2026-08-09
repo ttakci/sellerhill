@@ -4,10 +4,9 @@ import { Button, IconButton, Text as UIText, tkn } from '@repo/ui';
 /** Same carousel chrome as listings overview — shared UX language. */
 export const CarouselWrapper = styled.div`
   position: relative;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-width: 0;
 
   &:hover .carousel-arrow {
     opacity: 1;
@@ -16,33 +15,42 @@ export const CarouselWrapper = styled.div`
 
 export const CarouselViewport = styled.div`
   position: relative;
-  flex: 1;
   overflow: hidden;
-  /* Room for horizontal product card (image ~10.5rem + padding) */
-  min-height: 16rem;
+  min-width: 0;
 `;
 
+/**
+ * Active slide stays in document flow so the viewport follows the visible card.
+ * Inactive slides remain absolute for enter/exit animation only.
+ */
 export const CarouselSlide = styled.div`
-  position: absolute;
-  inset: 0;
   width: 100%;
   display: flex;
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
-  opacity: 0;
-  transform: translateX(100%);
-  pointer-events: none;
 
-  &.active {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
+  &:not(.active) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
   }
 
   &.prev {
+    position: absolute;
+    inset: 0;
     opacity: 0;
     transform: translateX(-100%);
+    pointer-events: none;
+  }
+
+  &.active {
+    position: relative;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
   }
 `;
 

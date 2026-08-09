@@ -69,6 +69,10 @@ export const toOrderCardProps = (
       const translated = t(key);
       return translated === key ? order.status : translated;
     })(),
+    statsBadge:
+      order.profitBasis === ProfitBasis.ESTIMATED
+        ? { label: t('orders.estimateBadge'), variant: 'warning' }
+        : undefined,
     meta,
     stats: [
       {
@@ -83,10 +87,6 @@ export const toOrderCardProps = (
         label: t('orders.table.netProfit'),
         value: `${order.netProfit >= 0 ? '+' : ''}${formatCurrency(order.netProfit)}`,
         tone: profitTone,
-        badge:
-          order.profitBasis === ProfitBasis.ESTIMATED
-            ? { label: t('orders.estimateBadge'), variant: 'warning' }
-            : undefined,
       },
     ],
   };

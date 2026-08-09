@@ -3,6 +3,15 @@ import type { UseFormReturn } from 'react-hook-form';
 
 export type AddListingsDrawerStep = 0 | 1;
 
+export interface AddListingsDrawerPreferences {
+  ebayAccountId: string;
+  listingSettingsGroupId: string;
+  paymentPolicyId: string;
+  shippingPolicyId: string;
+  returnPolicyId: string;
+  asDraft: boolean;
+}
+
 export interface AddListingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;

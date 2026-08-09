@@ -12,6 +12,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   ebayOrderId,
   status,
   statusLabel,
+  statsBadge,
   meta,
   stats,
   onClick,
@@ -33,7 +34,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             <S.Title variant="body" weight="semibold" color="text.primary">
               {productTitle}
             </S.Title>
-            <StatusBadge status={orderStatusToBadgeStatus(status)} size="sm">{statusLabel}</StatusBadge>
+            <StatusBadge status={orderStatusToBadgeStatus(status)} size="sm">
+              {statusLabel}
+            </StatusBadge>
           </S.TitleRow>
 
           {meta.length > 0 && (
@@ -59,6 +62,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </S.HeaderBlock>
 
         <S.StatsGrid>
+          {statsBadge && (
+            <S.StatsBadge>
+              <Badge variant={statsBadge.variant ?? 'warning'} size="xs">
+                {statsBadge.label}
+              </Badge>
+            </S.StatsBadge>
+          )}
           {stats.map((stat) => (
             <S.StatCell key={stat.label}>
               <S.StatLabel variant="caption" color="text.tertiary">
@@ -67,11 +77,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               <S.StatValue variant="body-sm" weight="semibold" numeric $tone={stat.tone ?? 'default'}>
                 {stat.value}
               </S.StatValue>
-              {stat.badge && (
-                <Badge variant={stat.badge.variant ?? 'warning'} size="xs">
-                  {stat.badge.label}
-                </Badge>
-              )}
             </S.StatCell>
           ))}
         </S.StatsGrid>
