@@ -13,12 +13,23 @@ export const LauncherCard = styled.div`
   box-sizing: border-box;
 `;
 
-export const LauncherButton = styled(Button)`
+export const LauncherButtonAnchor = styled.div`
   position: relative;
 `;
 
+export const LauncherButton = styled(Button)``;
+
 export const CollapsedLauncher = styled(IconButton)`
   position: relative;
+`;
+
+/**
+ * `Tooltip`'s wrapper div becomes the actual flex item inside the sidebar
+ * footer (column flex, default `align-items: stretch`) once the launcher is
+ * wrapped in it — this anchor carries the centering the launcher itself used
+ * to own directly, so wrapping it in a tooltip doesn't left-align it.
+ */
+export const CollapsedLauncherAnchor = styled.div`
   align-self: center;
 `;
 

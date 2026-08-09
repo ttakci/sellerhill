@@ -3,6 +3,12 @@ import styled from '@emotion/styled';
 import { Text, tkn } from '@repo/ui';
 
 /**
+ * Expanded sidebar rail. Single source of truth — the docked width, the mobile
+ * off-canvas width and its hidden offset must always be the same number.
+ */
+const SIDEBAR_WIDTH = '12rem'; /* 192px */
+
+/**
  * LayoutWrapper - Root container
  */
 export const LayoutWrapper = styled.div`
@@ -18,10 +24,10 @@ export const LayoutWrapper = styled.div`
 
 /**
  * SidebarContainer — dense Sellerboard-style rail
- * Expanded ~13rem · collapsed icon rail ~3.75rem
+ * Expanded ~12rem · collapsed icon rail ~3.75rem
  */
 export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileOpen: boolean }>`
-  width: ${(props) => (props.$isCollapsed ? '3.75rem' : '13rem')};
+  width: ${(props) => (props.$isCollapsed ? '3.75rem' : SIDEBAR_WIDTH)};
   background: ${tkn('colors.sidebar.background')};
   color: ${tkn('colors.sidebar.text')};
   border-right: 0.0625rem solid ${tkn('colors.sidebar.divider')};
@@ -37,9 +43,9 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
     /* 1023px */
     position: fixed;
     top: 0;
-    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : '-13rem')};
+    left: ${({ $isMobileOpen }) => ($isMobileOpen ? '0' : `-${SIDEBAR_WIDTH}`)};
     height: 100vh;
-    width: 13rem;
+    width: ${SIDEBAR_WIDTH};
     box-shadow: ${tkn('shadows.xl')};
   }
 `;
@@ -81,14 +87,25 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
 const APP_CHROME_HEIGHT = '4rem';
 
 /**
+ * Logo box inside the brand strip. It must stay comfortably under
+ * APP_CHROME_HEIGHT — the mark used to be 5rem tall inside a 4rem row, so the
+ * box overflowed the strip and only looked contained because `max-width: 100%`
+ * happened to bind first. Height is the binding constraint now, so the mark is
+ * a predictable size instead of a side effect of the rail width.
+ */
+const SIDEBAR_LOGO_HEIGHT = '2.25rem'; /* 36px — matches the hamburger beside it */
+
+/**
  * Content column cap. Header and page content MUST share it, otherwise the
  * breadcrumb and the page title stop lining up at wide viewports.
  */
 const CONTENT_MAX_WIDTH = '90rem'; /* 1440px */
 
 /**
- * Sellerboard brand strip: [ ☰ ] [ logo 80px ]
- * Fixed height matches HeaderContainer / HeaderInner.
+ * Sellerboard brand strip: [ ☰ ] [ logo ]
+ * Fixed height matches HeaderContainer / HeaderInner. Both children are the
+ * same height now, so the row centres them instead of top-aligning around an
+ * oversized mark.
  */
 export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   position: relative;
@@ -96,21 +113,20 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  /* Top-align: logo + menu sit high; tight gap = closer to button */
-  align-items: flex-start;
+  align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   flex-shrink: 0;
   height: ${APP_CHROME_HEIGHT};
   min-height: ${APP_CHROME_HEIGHT};
   max-height: ${APP_CHROME_HEIGHT};
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.sm')} 0 ${tkn('spacing.sm')};
+  padding: 0 ${tkn('spacing.sm')};
   box-sizing: border-box;
   border-bottom: 0.0625rem solid ${tkn('colors.sidebar.divider')};
-  overflow: visible;
+  overflow: hidden;
 
   @media (max-width: 63.9375rem) {
-    padding: ${tkn('spacing.2xs')} ${tkn('spacing.md')} 0 ${tkn('spacing.md')};
+    padding: 0 ${tkn('spacing.md')};
     justify-content: flex-start;
   }
 `;
@@ -119,7 +135,7 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollap
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   cursor: pointer;
   line-height: 0;
@@ -140,17 +156,15 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollap
     max-width: 100%;
   }
 
-  /* Logo 80px */
   & img {
     display: block;
-    height: 5rem !important; /* 80px */
+    height: ${SIDEBAR_LOGO_HEIGHT} !important;
     width: auto !important;
     max-width: 100% !important;
-    max-height: 5rem !important;
+    max-height: ${SIDEBAR_LOGO_HEIGHT} !important;
     margin: 0 !important;
-    margin-left: -${tkn('spacing.2xs')} !important; /* nudge toward button */
     object-fit: contain !important;
-    object-position: left top;
+    object-position: left center;
     background: transparent !important;
   }
 `;
@@ -158,12 +172,12 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollap
 export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
   padding: ${({ $isCollapsed, theme }) =>
     $isCollapsed
-      ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.xs')({ theme })}`
-      : `${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`};
+      ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.xs')({ theme })} ${tkn('spacing.sm')({ theme })}`
+      : `${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })} ${tkn('spacing.sm')({ theme })}`};
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -201,14 +215,16 @@ export const NavItemWrapper = styled.div`
 
 export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $isSubItem?: boolean }>`
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
   padding: ${({ $isCollapsed, $isSubItem, theme }) =>
     $isCollapsed
-      ? `${tkn('spacing.xs')({ theme })} 0`
+      ? `${tkn('spacing.sm')({ theme })} 0`
       : $isSubItem
-        ? `${tkn('spacing.xs')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.xs')({ theme })} ${tkn('spacing.md+')({ theme })}`
-        : `${tkn('spacing.xs')({ theme })} ${tkn('spacing.md')({ theme })}`};
+        ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.sm')({ theme })} ${tkn('spacing.md+')({ theme })}`
+        : `${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`};
   /* Selected item is a full-width filled pill (brand-blue), not a left accent bar */
   border-radius: ${tkn('radius.md')};
   color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.sidebar.text)};
@@ -278,19 +294,18 @@ export const SidebarFooter = styled.div`
 `;
 
 /**
- * Hamburger LEFT of logo — top-aligned with mark, small gap via row gap.
+ * Hamburger LEFT of logo — same box height as the mark, centred by the row.
  */
 export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
   display: none;
   position: static;
   flex: 0 0 auto;
-  align-self: flex-start;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
   padding: 0;
-  margin: ${tkn('spacing.sm')} 0 0 0;
+  margin: 0;
   border-radius: ${tkn('radius.sm')};
   cursor: pointer;
   background: transparent;

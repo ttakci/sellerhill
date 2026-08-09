@@ -20,8 +20,8 @@ export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
 export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
   padding: ${({ $variant, theme }) =>
     $variant === 'section'
-      ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.lg')({ theme })}`
-      : tkn('spacing.md')({ theme })};
+      ? `${tkn('spacing.sm-md+')({ theme })} ${tkn('spacing.lg')({ theme })}`
+      : tkn('spacing.sm-md+')({ theme })};
   border-bottom: none;
   display: flex;
   justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
@@ -34,8 +34,8 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
     padding: ${({ $variant, theme }) =>
       $variant === 'section'
-        ? `${tkn('spacing.md+')({ theme })} ${tkn('spacing.lg')({ theme })}`
-        : `${tkn('spacing.md+')({ theme })} ${tkn('spacing.md')({ theme })}`};
+        ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.lg')({ theme })}`
+        : `${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })}`};
   }
 `;
 
@@ -61,8 +61,8 @@ export const HeaderLeft = styled.div<{ $variant: SettingsCardVariant }>`
 export const IconWrapper = styled.div<{
   $type?: 'location' | 'validation' | 'blacklist';
 }>`
-  width: 2.75rem;
-  height: 2.75rem;
+  width: ${tkn('controls.height.small')};
+  height: ${tkn('controls.height.small')};
   border-radius: ${tkn('radius.md')};
   display: flex;
   align-items: center;

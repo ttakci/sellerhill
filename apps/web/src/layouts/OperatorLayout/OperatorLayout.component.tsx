@@ -1,4 +1,4 @@
-import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
+import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -7,6 +7,7 @@ import * as S from './OperatorLayout.style';
 import type { OperatorLayoutProps } from './OperatorLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { NavTooltip } from '@/layouts/shell/NavTooltip';
 
 /**
  * Operator shell: the staff-side counterpart of `AppLayout`.
@@ -46,23 +47,27 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
         <S.SidebarContainer $isCollapsed={sidebarCollapsed} $isMobileOpen={mobileSidebarOpen}>
           <MeshBackground animate={false} />
           <S.SidebarBrandRow $isCollapsed={sidebarCollapsed}>
-            <S.SidebarCollapseButton
-              type="button"
-              $isCollapsed={sidebarCollapsed}
-              onClick={onToggleSidebar}
-              title={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
-              aria-label={
-                sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
-              }
+            <Tooltip
+              content={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
+              position="right"
             >
-              <Icon name="menu" size={20} />
-            </S.SidebarCollapseButton>
+              <S.SidebarCollapseButton
+                type="button"
+                $isCollapsed={sidebarCollapsed}
+                onClick={onToggleSidebar}
+                aria-label={
+                  sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
+                }
+              >
+                <Icon name="menu" size={20} />
+              </S.SidebarCollapseButton>
+            </Tooltip>
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate(navItems[0]?.path ?? '/')}
               title={t('translation:operator.console')}
             >
-              <Logo layout="nav" height={80} />
+              <Logo layout="nav" height={36} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 
@@ -76,35 +81,37 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
             )}
 
             {navItems.map((item) => (
-              <S.NavItem
-                key={item.path}
-                $active={item.isActive}
-                $isCollapsed={sidebarCollapsed}
-                onClick={() => onLocaleNavigate(item.path)}
-                title={sidebarCollapsed ? t(item.labelKey) : undefined}
-              >
-                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                  <Icon name={item.icon} size={20} />
-                  {!sidebarCollapsed && t(item.labelKey)}
-                </S.NavItemContent>
-              </S.NavItem>
+              <NavTooltip key={item.path} label={t(item.labelKey)} collapsed={sidebarCollapsed}>
+                <S.NavItem
+                  $active={item.isActive}
+                  $isCollapsed={sidebarCollapsed}
+                  onClick={() => onLocaleNavigate(item.path)}
+                  aria-label={t(item.labelKey)}
+                >
+                  <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                    <Icon name={item.icon} size={20} />
+                    {!sidebarCollapsed && t(item.labelKey)}
+                  </S.NavItemContent>
+                </S.NavItem>
+              </NavTooltip>
             ))}
           </S.NavSection>
 
           <S.SidebarFooter>
-            <S.LogoutButton
-              $isCollapsed={sidebarCollapsed}
-              onClick={onOpenLogoutConfirm}
-              title={sidebarCollapsed ? t('translation:menu.logout') : undefined}
-              aria-label={t('translation:menu.logout')}
-            >
-              <Icon name="log-out" size={20} />
-              {!sidebarCollapsed && (
-                <Text variant="body" weight="medium" color="sidebar.text">
-                  {t('translation:menu.logout')}
-                </Text>
-              )}
-            </S.LogoutButton>
+            <NavTooltip label={t('translation:menu.logout')} collapsed={sidebarCollapsed}>
+              <S.LogoutButton
+                $isCollapsed={sidebarCollapsed}
+                onClick={onOpenLogoutConfirm}
+                aria-label={t('translation:menu.logout')}
+              >
+                <Icon name="log-out" size={20} />
+                {!sidebarCollapsed && (
+                  <Text variant="body" weight="medium" color="sidebar.text">
+                    {t('translation:menu.logout')}
+                  </Text>
+                )}
+              </S.LogoutButton>
+            </NavTooltip>
           </S.SidebarFooter>
         </S.SidebarContainer>
 
@@ -126,14 +133,15 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <S.ActionIcon
-                  type="button"
-                  onClick={onToggleTheme}
-                  title={t('translation:header.toggleTheme')}
-                  aria-label={t('translation:header.toggleTheme')}
-                >
-                  <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
-                </S.ActionIcon>
+                <Tooltip content={t('translation:header.toggleTheme')} position="bottom">
+                  <S.ActionIcon
+                    type="button"
+                    onClick={onToggleTheme}
+                    aria-label={t('translation:header.toggleTheme')}
+                  >
+                    <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
+                  </S.ActionIcon>
+                </Tooltip>
 
                 <S.VerticalDivider />
 
@@ -141,13 +149,12 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                   align="right"
                   width="6.25rem"
                   trigger={
-                    <S.LanguageSelectTrigger
-                      title={t('translation:header.selectLanguage')}
-                      aria-label={t('translation:header.selectLanguage')}
-                    >
-                      <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
-                      <Icon name="chevron-down" size={12} />
-                    </S.LanguageSelectTrigger>
+                    <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
+                      <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
+                        <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
+                        <Icon name="chevron-down" size={12} />
+                      </S.LanguageSelectTrigger>
+                    </Tooltip>
                   }
                   items={[
                     { label: t('translation:languages.en'), onClick: () => onChangeLanguage('en') },
@@ -171,17 +178,19 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                     </S.ProfileDropdownHeader>
                   }
                   trigger={
-                    <S.HeaderProfileArea title={user?.email || ''}>
-                      <S.HeaderProfileBadge>
-                        {user?.firstName?.charAt(0) || 'O'}
-                        {user?.lastName?.charAt(0) || 'P'}
-                      </S.HeaderProfileBadge>
-                      <S.HeaderProfileInfo>
-                        <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
-                          {userName}
-                        </Text>
-                      </S.HeaderProfileInfo>
-                    </S.HeaderProfileArea>
+                    <Tooltip content={user?.email || ''} position="bottom">
+                      <S.HeaderProfileArea aria-label={user?.email || ''}>
+                        <S.HeaderProfileBadge>
+                          {user?.firstName?.charAt(0) || 'O'}
+                          {user?.lastName?.charAt(0) || 'P'}
+                        </S.HeaderProfileBadge>
+                        <S.HeaderProfileInfo>
+                          <Text variant="body-sm" weight="semibold" color="text.primary" truncate>
+                            {userName}
+                          </Text>
+                        </S.HeaderProfileInfo>
+                      </S.HeaderProfileArea>
+                    </Tooltip>
                   }
                   items={[
                     {

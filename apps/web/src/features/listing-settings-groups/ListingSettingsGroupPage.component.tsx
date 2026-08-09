@@ -1,5 +1,5 @@
 import type { ListingSettingsGroupResponse } from '@repo/shared';
-import { Button, Icon, PageHeader, Text } from '@repo/ui';
+import { Button, Icon, PageHeader, Text, Tooltip } from '@repo/ui';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingSettingsGroupPage.style';
@@ -62,22 +62,26 @@ export const ListingSettingsGroupPageComponent = ({
                 </S.Stats>
 
                 <S.CardActions onClick={(e) => e.stopPropagation()}>
-                  <S.IconButton
-                    variant="ghost"
-                    $type="edit"
-                    onClick={() => onEditGroup(group.id)}
-                    title={t('listingSettingsGroup.tooltips.editGroup')}
-                  >
-                    <Icon name="edit-note" size={20} />
-                  </S.IconButton>
-                  <S.IconButton
-                    variant="ghost"
-                    $type="delete"
-                    onClick={() => onDeleteGroup(group.id)}
-                    title={t('listingSettingsGroup.tooltips.deleteGroup')}
-                  >
-                    <Icon name="delete" size={20} />
-                  </S.IconButton>
+                  <Tooltip content={t('listingSettingsGroup.tooltips.editGroup')} position="top">
+                    <S.IconButton
+                      variant="ghost"
+                      $type="edit"
+                      onClick={() => onEditGroup(group.id)}
+                      aria-label={t('listingSettingsGroup.tooltips.editGroup')}
+                    >
+                      <Icon name="edit-note" size={20} />
+                    </S.IconButton>
+                  </Tooltip>
+                  <Tooltip content={t('listingSettingsGroup.tooltips.deleteGroup')} position="top">
+                    <S.IconButton
+                      variant="ghost"
+                      $type="delete"
+                      onClick={() => onDeleteGroup(group.id)}
+                      aria-label={t('listingSettingsGroup.tooltips.deleteGroup')}
+                    >
+                      <Icon name="delete" size={20} />
+                    </S.IconButton>
+                  </Tooltip>
                 </S.CardActions>
               </S.CardFooter>
             </S.InteractiveCard>

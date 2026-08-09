@@ -1,4 +1,4 @@
-import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
+import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -9,6 +9,7 @@ import type { AppLayoutProps } from './AppLayout.types';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
 import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
+import { NavTooltip } from '@/layouts/shell/NavTooltip';
 
 /**
  * App shell: collapsible sidebar (desktop) + overlay drawer (mobile).
@@ -47,119 +48,134 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <MeshBackground animate={false} />
           {/* Sellerboard strip: [menu] [logo] one row — divider = border-bottom */}
           <S.SidebarBrandRow $isCollapsed={sidebarCollapsed}>
-            <S.SidebarCollapseButton
-              type="button"
-              $isCollapsed={sidebarCollapsed}
-              onClick={onToggleSidebar}
-              title={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
-              aria-label={
-                sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
-              }
+            <Tooltip
+              content={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
+              position="right"
             >
-              <Icon name="menu" size={20} />
-            </S.SidebarCollapseButton>
+              <S.SidebarCollapseButton
+                type="button"
+                $isCollapsed={sidebarCollapsed}
+                onClick={onToggleSidebar}
+                aria-label={
+                  sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
+                }
+              >
+                <Icon name="menu" size={20} />
+              </S.SidebarCollapseButton>
+            </Tooltip>
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/dashboard')}
               title={t('translation:menu.dashboard')}
             >
-              <Logo layout="nav" height={80} />
+              <Logo layout="nav" height={36} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 
           <S.NavSection $isCollapsed={sidebarCollapsed}>
-            <S.NavItem
-              $active={pathWithoutLocale === '/dashboard'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/dashboard')}
-              title={sidebarCollapsed ? t('translation:menu.dashboard') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="dashboard" size={20} />
-                {!sidebarCollapsed && t('translation:menu.dashboard')}
-              </S.NavItemContent>
-            </S.NavItem>
+            <NavTooltip label={t('translation:menu.dashboard')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/dashboard'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/dashboard')}
+                aria-label={t('translation:menu.dashboard')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="dashboard" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.dashboard')}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
 
-            <S.NavItem
-              $isCollapsed={sidebarCollapsed}
-              $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
-              onClick={() => onLocaleNavigate('/orders')}
-              title={sidebarCollapsed ? t('translation:menu.orders') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="shopping-bag" size={20} />
-                {!sidebarCollapsed && t('translation:menu.orders')}
-              </S.NavItemContent>
-            </S.NavItem>
+            <NavTooltip label={t('translation:menu.orders')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $isCollapsed={sidebarCollapsed}
+                $active={pathWithoutLocale === '/orders' || pathWithoutLocale.startsWith('/orders/')}
+                onClick={() => onLocaleNavigate('/orders')}
+                aria-label={t('translation:menu.orders')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="shopping-bag" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.orders')}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
 
-            <S.NavItem
-              $active={
-                pathWithoutLocale === '/listings' ||
-                pathWithoutLocale === '/listings/all' ||
-                (pathWithoutLocale.startsWith('/listings/') &&
-                  !pathWithoutLocale.startsWith('/listings/jobs') &&
-                  pathWithoutLocale !== '/listings/products' &&
-                  pathWithoutLocale !== '/listings/add')
-              }
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/listings')}
-              title={sidebarCollapsed ? t('translation:menu.ebayListings') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="inventory" size={20} />
-                {!sidebarCollapsed && t('translation:menu.ebayListings')}
-              </S.NavItemContent>
-            </S.NavItem>
+            <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={
+                  pathWithoutLocale === '/listings' ||
+                  pathWithoutLocale === '/listings/all' ||
+                  (pathWithoutLocale.startsWith('/listings/') &&
+                    !pathWithoutLocale.startsWith('/listings/jobs') &&
+                    pathWithoutLocale !== '/listings/products' &&
+                    pathWithoutLocale !== '/listings/add')
+                }
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/listings')}
+                aria-label={t('translation:menu.ebayListings')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="inventory" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.ebayListings')}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
 
-            <S.NavItem
-              $active={pathWithoutLocale === '/listings/jobs'}
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/listings/jobs')}
-              title={sidebarCollapsed ? t('translation:menu.listingJobs') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="clipboard-list" size={20} />
-                {!sidebarCollapsed && t('translation:menu.listingJobs')}
-              </S.NavItemContent>
-            </S.NavItem>
+            <NavTooltip label={t('translation:menu.listingJobs')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/listings/jobs'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/listings/jobs')}
+                aria-label={t('translation:menu.listingJobs')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="clipboard-list" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.listingJobs')}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
 
             {/*
               No admin or support entry here on purpose. Staff work lives in
               the operator console (`OperatorLayout`), which a seller account
               cannot open — the two products no longer share a menu.
             */}
-            <S.NavItem
-              $active={
-                pathWithoutLocale.startsWith('/settings') ||
-                pathWithoutLocale === '/profile' ||
-                pathWithoutLocale === '/stores'
-              }
-              $isCollapsed={sidebarCollapsed}
-              onClick={() => onLocaleNavigate('/settings')}
-              title={sidebarCollapsed ? t('translation:menu.settings') : undefined}
-            >
-              <S.NavItemContent $isCollapsed={sidebarCollapsed}>
-                <Icon name="settings" size={20} />
-                {!sidebarCollapsed && t('translation:menu.settings')}
-              </S.NavItemContent>
-            </S.NavItem>
+            <NavTooltip label={t('translation:menu.settings')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={
+                  pathWithoutLocale.startsWith('/settings') ||
+                  pathWithoutLocale === '/profile' ||
+                  pathWithoutLocale === '/stores'
+                }
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/settings')}
+                aria-label={t('translation:menu.settings')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="settings" size={20} />
+                  {!sidebarCollapsed && t('translation:menu.settings')}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
           </S.NavSection>
 
           <S.SidebarFooter>
             <TawkToWidget sidebarCollapsed={sidebarCollapsed} onLaunch={onCloseMobileSidebar} />
-            <S.LogoutButton
-              $isCollapsed={sidebarCollapsed}
-              onClick={onOpenLogoutConfirm}
-              title={sidebarCollapsed ? t('translation:menu.logout') : undefined}
-              aria-label={t('translation:menu.logout')}
-            >
-              <Icon name="log-out" size={20} />
-              {!sidebarCollapsed && (
-                <Text variant="body" weight="medium" color="sidebar.text">
-                  {t('translation:menu.logout')}
-                </Text>
-              )}
-            </S.LogoutButton>
+            <NavTooltip label={t('translation:menu.logout')} collapsed={sidebarCollapsed}>
+              <S.LogoutButton
+                $isCollapsed={sidebarCollapsed}
+                onClick={onOpenLogoutConfirm}
+                aria-label={t('translation:menu.logout')}
+              >
+                <Icon name="log-out" size={20} />
+                {!sidebarCollapsed && (
+                  <Text variant="body" weight="medium" color="sidebar.text">
+                    {t('translation:menu.logout')}
+                  </Text>
+                )}
+              </S.LogoutButton>
+            </NavTooltip>
           </S.SidebarFooter>
         </S.SidebarContainer>
 
@@ -183,14 +199,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <S.ActionIcon
-                  type="button"
-                  onClick={onToggleTheme}
-                  title={t('translation:header.toggleTheme')}
-                  aria-label={t('translation:header.toggleTheme')}
-                >
-                  <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
-                </S.ActionIcon>
+                <Tooltip content={t('translation:header.toggleTheme')} position="bottom">
+                  <S.ActionIcon
+                    type="button"
+                    onClick={onToggleTheme}
+                    aria-label={t('translation:header.toggleTheme')}
+                  >
+                    <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
+                  </S.ActionIcon>
+                </Tooltip>
 
                 <S.VerticalDivider />
 
@@ -198,13 +215,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   align="right"
                   width="6.25rem"
                   trigger={
-                    <S.LanguageSelectTrigger
-                      title={t('translation:header.selectLanguage')}
-                      aria-label={t('translation:header.selectLanguage')}
-                    >
-                      <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
-                      <Icon name="chevron-down" size={12} />
-                    </S.LanguageSelectTrigger>
+                    <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
+                      <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
+                        <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
+                        <Icon name="chevron-down" size={12} />
+                      </S.LanguageSelectTrigger>
+                    </Tooltip>
                   }
                   items={[
                     {
@@ -234,7 +250,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                     </S.ProfileDropdownHeader>
                   }
                   trigger={
-                    <S.HeaderProfileArea title={user?.email || ''}>
+                    <S.HeaderProfileArea aria-label={user?.email || ''}>
                       <S.HeaderProfileBadge>
                         {user?.firstName?.charAt(0) || 'D'}
                         {user?.lastName?.charAt(0) || 'U'}
