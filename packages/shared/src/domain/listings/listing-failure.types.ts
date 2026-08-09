@@ -36,6 +36,14 @@ export enum ListingFailureCode {
   EBAY_UNAVAILABLE = 'ebay_unavailable',
   /** The item or category is restricted for this seller. */
   EBAY_RESTRICTED_ITEM = 'ebay_restricted_item',
+  /**
+   * The platform's shared daily eBay API quota ran out.
+   *
+   * Not the seller's fault and not a defect in their listing: eBay meters calls
+   * per application, so this is a queue that will drain at the next UTC reset.
+   * The item is deferred, never marked permanently failed.
+   */
+  PROVIDER_BUDGET_EXHAUSTED = 'provider_budget_exhausted',
   /** Anything not yet classified — carries the raw message. */
   UNKNOWN = 'unknown',
 }
@@ -50,13 +58,28 @@ export interface ListingFailureDetails {
   retryable?: boolean;
 }
 
-/** Failure codes where a plain retry is worth offering. */
+/**
+ * Failure codes where re-running the SAME input can still succeed.
+ *
+ * There is no seller-facing retry action (removed 2026-08-09 — eBay's quota is
+ * metered per application and shared by every seller, so re-attempting the case
+ * least likely to succeed spends a common resource). This list now drives the
+ * WORKER's decision: `ListingProcessorService` only lets BullMQ retry a job
+ * whose failure is in this set, because everything else is a rejection of the
+ * input itself and would re-pay Keepa, the LLM rewrite and the publish sequence
+ * for a guaranteed second refusal.
+ *
+ * Transient provider faults are absent on purpose: 429/5xx are already retried
+ * four times inside `withEbayRateLimitRetry` before a failure is classified at
+ * all, so by this point they are no longer transient.
+ */
 export const RETRYABLE_LISTING_FAILURE_CODES: ReadonlyArray<ListingFailureCode> = [
   ListingFailureCode.EBAY_RATE_LIMITED,
   ListingFailureCode.EBAY_UNAVAILABLE,
   ListingFailureCode.CATEGORY_ASPECTS_UNAVAILABLE,
   ListingFailureCode.PRODUCT_DATA_UNAVAILABLE,
   ListingFailureCode.ZERO_STOCK,
+  ListingFailureCode.PROVIDER_BUDGET_EXHAUSTED,
   ListingFailureCode.UNKNOWN,
 ];
 

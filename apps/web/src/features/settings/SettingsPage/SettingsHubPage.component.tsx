@@ -4,7 +4,8 @@
  * Section cards keep header icons; account rows keep row icons.
  */
 
-import { PageHeader, SettingsActionRow, SettingsCard } from '@repo/ui';
+import type { ProfileDto } from '@repo/shared';
+import { PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +13,8 @@ import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
   AmazonAccountsDrawer,
-  BlacklistDrawer,
+  BuyerMessageTemplateDrawer,
+  BuyerMessageTemplatesDrawer,
   ChangePasswordDrawer,
   EbayAccountDrawer,
   ListingGroupDrawer,
@@ -26,13 +28,59 @@ import type { SettingsHubPageComponentProps } from './SettingsHubPage.types';
 
 import { BillingDrawer } from '@/features/billing';
 
+const PersonalInfoSection = ({
+  profile,
+  onEdit,
+}: {
+  profile: ProfileDto | null;
+  onEdit: () => void;
+}): React.ReactElement => {
+  const { t } = useTranslation(['translation']);
+  const editAriaLabel = t('translation:settingsHub.sections.profile.edit');
+  const nameValue =
+    [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || t('translation:common.notProvided');
+  const phoneValue = profile?.phoneNumber?.trim() || t('translation:common.notProvided');
+  const emailValue = profile?.email || t('translation:common.notProvided');
+  return (
+    <SettingsCard
+      variant="section"
+      header={{
+        icon: 'user-cog',
+        title: t('translation:settingsHub.sections.profile.tabs.personalInfo'),
+      }}
+    >
+      <SettingsInfoRow
+        icon="user"
+        label={t('translation:settingsHub.sections.profile.nameLabel')}
+        value={nameValue}
+        onEdit={onEdit}
+        editAriaLabel={editAriaLabel}
+      />
+      <SettingsInfoRow
+        icon="phone"
+        label={t('translation:settingsHub.sections.profile.phoneLabel')}
+        value={phoneValue}
+        onEdit={onEdit}
+        editAriaLabel={editAriaLabel}
+      />
+      <SettingsInfoRow
+        icon="mail"
+        label={t('translation:settingsHub.sections.profile.emailLabel')}
+        value={emailValue}
+        onEdit={onEdit}
+        editAriaLabel={editAriaLabel}
+      />
+    </SettingsCard>
+  );
+};
+
 const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: () => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'storefront',
+        icon: 'shopping-bag',
         title: t('translation:settingsHub.sections.amazon.title'),
       }}
     >
@@ -50,7 +98,15 @@ const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: (
   );
 };
 
-const StoreManagementSection = ({ onOpenStoreSettings }: { onOpenStoreSettings: () => void }): React.ReactElement => {
+const StoreManagementSection = ({
+  onOpenStoreSettings,
+  onManageMessageTemplates,
+  onCreateMessageTemplate,
+}: {
+  onOpenStoreSettings: () => void;
+  onManageMessageTemplates: () => void;
+  onCreateMessageTemplate: () => void;
+}): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
@@ -60,6 +116,16 @@ const StoreManagementSection = ({ onOpenStoreSettings }: { onOpenStoreSettings: 
         title: t('translation:settingsHub.sections.storeManagement.title'),
       }}
     >
+      <SettingsActionRow
+        label={t('translation:settingsHub.sections.storeManagement.manageMessageTemplates')}
+        subtitle={t('translation:settingsHub.sections.storeManagement.manageMessageTemplatesSubtitle')}
+        onClick={onManageMessageTemplates}
+      />
+      <SettingsActionRow
+        label={t('translation:settingsHub.sections.storeManagement.createMessageTemplate')}
+        subtitle={t('translation:settingsHub.sections.storeManagement.createMessageTemplateSubtitle')}
+        onClick={onCreateMessageTemplate}
+      />
       <SettingsActionRow
         label={t('translation:settingsHub.sections.storeManagement.storeSettings')}
         subtitle={t('translation:settingsHub.sections.storeManagement.storeSettingsSubtitle')}
@@ -75,7 +141,7 @@ const BillingSection = ({ onManage }: { onManage: () => void }): React.ReactElem
     <SettingsCard
       variant="section"
       header={{
-        icon: 'payments',
+        icon: 'receipt-text',
         title: t('billing:billing.settingsHub.title'),
       }}
     >
@@ -120,11 +186,9 @@ const ListingGroupsSection = ({
 
 const AccountSecuritySection = ({
   onAction,
-  onPersonalInfo,
   onDeactivate,
 }: {
   onAction: (key: 'password') => void;
-  onPersonalInfo: () => void;
   onDeactivate: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
@@ -136,12 +200,6 @@ const AccountSecuritySection = ({
         title: t('translation:settingsHub.sections.account.title'),
       }}
     >
-      <SettingsActionRow
-        icon="user"
-        label={t('translation:settingsHub.sections.profile.tabs.personalInfo')}
-        subtitle={t('translation:settingsHub.sections.profile.tabs.personalInfoSubtitle')}
-        onClick={onPersonalInfo}
-      />
       <SettingsActionRow
         icon="lock"
         label={t('translation:settingsHub.sections.account.changePassword')}
@@ -207,8 +265,12 @@ export const SettingsHubPageComponent = ({
   onBackToAmazonList,
   storeScope,
   onSelectStoreScope,
-  onManageBlacklist,
-  onBackToStoreSettings,
+  buyerMessageTemplates,
+  editingTemplateId,
+  onManageBuyerMessageTemplates,
+  onCreateBuyerMessageTemplate,
+  onEditBuyerMessageTemplate,
+  onBackToBuyerMessageTemplateList,
 }: SettingsHubPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
 
@@ -221,23 +283,25 @@ export const SettingsHubPageComponent = ({
       />
 
       <S.TwoColGrid>
+        <PersonalInfoSection profile={profile ?? null} onEdit={() => onOpenDrawer('profile')} />
         <EbaySection onConnect={onConnectEbay} onView={() => onOpenDrawer('ebay')} />
+      </S.TwoColGrid>
+
+      <S.TwoColGrid>
         <AmazonAccountsSection onView={() => onOpenDrawer('amazonList')} onAdd={() => onOpenDrawer('amazonAdd')} />
-      </S.TwoColGrid>
-
-      <S.TwoColGrid>
-        <StoreManagementSection onOpenStoreSettings={() => onOpenDrawer('storeSettings')} />
-        <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
-      </S.TwoColGrid>
-
-      <S.TwoColGrid>
-        <BillingSection onManage={() => onOpenDrawer('billing')} />
-        <AccountSecuritySection
-          onAction={(key) => onOpenDrawer(key)}
-          onPersonalInfo={() => onOpenDrawer('profile')}
-          onDeactivate={onOpenDeactivateModal}
+        <StoreManagementSection
+          onOpenStoreSettings={() => onOpenDrawer('storeSettings')}
+          onManageMessageTemplates={onManageBuyerMessageTemplates}
+          onCreateMessageTemplate={onCreateBuyerMessageTemplate}
         />
       </S.TwoColGrid>
+
+      <S.TwoColGrid>
+        <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
+        <BillingSection onManage={() => onOpenDrawer('billing')} />
+      </S.TwoColGrid>
+
+      <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
 
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountDrawer isOpen={activeDrawer === 'ebay'} onClose={onCloseDrawer} accounts={ebayAccounts} />
@@ -260,15 +324,6 @@ export const SettingsHubPageComponent = ({
         storeConfigs={storeConfigs}
         selectedScope={storeScope}
         onSelectScope={onSelectStoreScope}
-        onManageBlacklist={onManageBlacklist}
-      />
-      <BlacklistDrawer
-        isOpen={activeDrawer === 'storeBlacklist'}
-        onClose={onCloseDrawer}
-        onBack={onBackToStoreSettings}
-        availableStores={availableStores}
-        storeConfigs={storeConfigs}
-        selectedScope={storeScope}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
       <BillingDrawer isOpen={activeDrawer === 'billing'} onClose={onCloseDrawer} />
@@ -284,6 +339,19 @@ export const SettingsHubPageComponent = ({
         groups={listingGroups}
         predefinedTemplateNames={predefinedTemplateNames}
         onEdit={onEditListingGroup}
+      />
+
+      <BuyerMessageTemplateDrawer
+        isOpen={activeDrawer === 'buyerMessageTemplateCreate' || activeDrawer === 'buyerMessageTemplateEdit'}
+        onClose={onCloseDrawer}
+        onBack={activeDrawer === 'buyerMessageTemplateEdit' ? onBackToBuyerMessageTemplateList : undefined}
+        editingTemplateId={activeDrawer === 'buyerMessageTemplateEdit' ? editingTemplateId : null}
+      />
+      <BuyerMessageTemplatesDrawer
+        isOpen={activeDrawer === 'buyerMessageTemplateList'}
+        onClose={onCloseDrawer}
+        templates={buyerMessageTemplates}
+        onEdit={onEditBuyerMessageTemplate}
       />
 
       <DeactivateAccountModal isOpen={isDeactivateModalOpen} onClose={onCloseDeactivateModal} />

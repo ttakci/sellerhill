@@ -59,6 +59,16 @@ export const buyerMessagingApi = baseApi.injectEndpoints({
         { type: 'BuyerMessageTemplates', id: 'LIST' },
       ],
     }),
+    resetBuyerMessageTemplate: builder.mutation<BuyerMessageTemplate, string>({
+      query: (id) => ({
+        url: `/buyer-messaging/templates/${id}/reset`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'BuyerMessageTemplates', id },
+        { type: 'BuyerMessageTemplates', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -67,4 +77,5 @@ export const {
   useCreateBuyerMessageTemplateMutation,
   useUpdateBuyerMessageTemplateMutation,
   useDeleteBuyerMessageTemplateMutation,
+  useResetBuyerMessageTemplateMutation,
 } = buyerMessagingApi;

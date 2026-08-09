@@ -1,6 +1,8 @@
 import type {
   AdminAspectDefaultDto,
   AdminBillingMetricsDto,
+  AdminListingFailureDto,
+  AdminListingFailuresDto,
   AdminListingQualitySummaryDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
@@ -11,6 +13,7 @@ import type {
   PlatformSettingCategory,
   PlatformSettingDto,
   ProviderCostSummaryDto,
+  EbayCallBudgetStatusDto,
 } from '@repo/shared';
 import type { TableColumn } from '@repo/ui';
 
@@ -22,7 +25,9 @@ export type AdminTabId =
   | 'listingQuality'
   | 'settings'
   | 'billing'
-  | 'users';
+  | 'users'
+  | 'ebayLimits'
+  | 'listingFailures';
 
 /** Controlled add-proxy form state (strings — converted at submit). */
 export interface ProxyFormState {
@@ -62,9 +67,15 @@ export interface AdminPageComponentProps {
   billingMetrics?: AdminBillingMetricsDto;
   proxyPool?: AdminProxyListDto;
   usersList?: AdminUsersListDto;
+  /** Per-resource daily eBay quota usage. The pool is shared by every seller. */
+  ebayBudget: EbayCallBudgetStatusDto[];
+  /** Failed listing attempts WITH the raw provider text — operators only. */
+  listingFailures?: AdminListingFailuresDto;
   /** Real table columns — the tabs used to render hand-built flex rows. */
   userColumns: TableColumn<AdminUserDto>[];
   proxyColumns: TableColumn<AdminProxyDto>[];
+  budgetColumns: TableColumn<EbayCallBudgetStatusDto>[];
+  failureColumns: TableColumn<AdminListingFailureDto>[];
   settingGroups: SettingGroup[];
   settingDrafts: Record<string, string>;
   isSavingSetting: boolean;

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 
 import type { ButtonVariant } from '../../atoms/Button';
-import type { IconName } from '../../atoms/Icon';
 import type { MessageType } from '../../context';
 
 export interface DialogAction {
@@ -35,8 +34,6 @@ export interface DialogProps {
   description?: ReactNode;
   /** Extra content under description (e.g. confirm email field) */
   children?: ReactNode;
-  /** Override default type icon */
-  icon?: IconName;
   primaryAction: DialogAction;
   /** Rendered below primary — full width stack */
   secondaryAction?: DialogAction;

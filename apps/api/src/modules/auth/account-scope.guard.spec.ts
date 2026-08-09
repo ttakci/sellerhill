@@ -34,13 +34,7 @@ jest.mock('@nestjs/passport', () => ({
 const MODULES_DIR = join(__dirname, '..');
 
 /** Controllers staff accounts may reach. Everything else is seller-only. */
-const OPERATOR_SURFACES = [
-  'admin/admin.controller.ts',
-  'knowledge/knowledge-admin.controller.ts',
-  'support/support.controller.ts',
-  'auth/auth.controller.ts',
-  'profile/profile.controller.ts',
-];
+const OPERATOR_SURFACES = ['admin/admin.controller.ts', 'auth/auth.controller.ts', 'profile/profile.controller.ts'];
 
 /** A sample of seller surfaces — none of them may open up to staff. */
 const CUSTOMER_SURFACES = [
@@ -51,7 +45,6 @@ const CUSTOMER_SURFACES = [
   'amazon/amazon.controller.ts',
   'ebay/ebay.controller.ts',
   'store-settings/store-settings.controller.ts',
-  'assistant/assistant.controller.ts',
   'buyer-messaging/buyer-message.controller.ts',
   'listing-settings-groups/listing-settings-group.controller.ts',
 ];

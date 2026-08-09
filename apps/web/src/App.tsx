@@ -56,7 +56,6 @@ const OrdersAllPage = lazy(() =>
 const SettingsHubPage = lazy(() =>
   import('./features/settings/SettingsPage').then((m) => ({ default: m.SettingsHubPage }))
 );
-const SupportPage = lazy(() => import('./features/support/SupportPage'));
 
 export function App() {
   return (
@@ -230,9 +229,14 @@ export function App() {
 
           {/*
             Operator console — a separate shell, not a section of the seller
-            app. Staff accounts (ADMIN / SUPPORT) live here and nowhere else;
-            the API refuses seller surfaces for them, and `OperatorLayout`
-            bounces a customer that reaches these URLs.
+            app. Staff accounts (ADMIN) live here and nowhere else; the API
+            refuses seller surfaces for them, and `OperatorLayout` bounces a
+            customer that reaches these URLs.
+
+            The `/support` console (SUPPORT role queue/claim/reply/presence)
+            was removed 2026-08 when customer support moved to tawk.to, which
+            has its own agent dashboard outside Zonds — see CLAUDE.md
+            "Customer support widget — tawk.to".
           */}
           <Route element={<OperatorLayout />}>
             <Route
@@ -240,14 +244,6 @@ export function App() {
               element={
                 <Lazy>
                   <AdminPage />
-                </Lazy>
-              }
-            />
-            <Route
-              path="support"
-              element={
-                <Lazy>
-                  <SupportPage />
                 </Lazy>
               }
             />

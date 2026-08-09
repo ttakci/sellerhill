@@ -16,6 +16,7 @@ import { AuthModule } from '../auth/auth.module';
 import { EmailModule } from '../email/email.module';
 
 
+import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
 import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
@@ -44,7 +45,6 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'listings' },
       { name: 'keepa-refresh' },
       { name: 'buyer-message' },
-      { name: 'knowledge-ingestion' },
       { name: QUEUE_OBSERVABILITY_RETENTION_QUEUE },
     ),
   ],
@@ -53,6 +53,7 @@ import { UsageEventsService } from './usage-events.service';
     AdminService,
     AdminProxiesService,
     AdminListingQualityService,
+    AdminListingFailuresService,
     AdminUsersService,
     UsageEventsService,
     ProviderPricingService,

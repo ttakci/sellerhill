@@ -1,16 +1,13 @@
 import {
   ListingJobStatus,
   ListingStatus,
-  isRetryableListingFailure,
   type ListingJobDto,
   type ListingJobItemDto,
 } from '@repo/shared';
 import {
-  Button,
   IdBadge,
   StatusBadge,
   Text,
-  useUI,
   formatDate,
   getLocaleConfig,
   type TableColumn,
@@ -23,11 +20,9 @@ import { useParams } from 'react-router-dom';
 import {
   useGetJobItemsQuery,
   useGetJobStatusQuery,
-  useRetryJobItemMutation,
 } from '../../api/listings.api';
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
-import * as S from './ListingJobDetailsPage.style';
 
 import { useLocale } from '@/utils/useLocale';
 
@@ -63,9 +58,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     pollingInterval: 3000,
     skip: !jobId,
   });
-
-  const [retryJobItem, { isLoading: isRetrying }] = useRetryJobItemMutation();
-  const { showMessage, closeMessage } = useUI();
 
   const isLoading = (isJobLoading || isItemsLoading) && !job && items.length === 0;
   const isRefreshing = isJobFetching || isItemsFetching;
@@ -106,37 +98,6 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       return translated === path ? null : translated;
     },
     [t]
-  );
-
-  const handleRetryItem = useCallback(
-    async (item: ListingJobItemDto) => {
-      if (!jobId) {
-        return;
-      }
-      try {
-        await retryJobItem({ jobId, itemId: item.id }).unwrap();
-        showMessage(
-          {
-            type: 'success',
-            headerKey: 'translation:message.success.header',
-            descriptionKey: 'listings:listings.jobs.items.retryQueued',
-            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-          },
-          t
-        );
-      } catch {
-        showMessage(
-          {
-            type: 'error',
-            headerKey: 'translation:message.error.header',
-            descriptionKey: 'listings:listings.jobs.items.retryFailed',
-            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-          },
-          t
-        );
-      }
-    },
-    [jobId, retryJobItem, showMessage, closeMessage, t]
   );
 
   const formatJobDate = useCallback(
@@ -180,46 +141,29 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
           ),
       },
       {
-        key: 'errorMessage',
+        key: 'failureCode',
         header: t('listings.jobs.items.reason'),
         render: (_value, item) => {
+          // Sellers see the localized, actionable reason only. The provider's
+          // raw text (eBay error ids, SKUs, internal field names) is operator
+          // diagnostics and is not sent to this surface at all.
           const reason = failureLabel(item);
-          if (!reason && !item.errorMessage) {
-            return (
-              <Text variant="body-sm" color="text.tertiary">
-                —
-              </Text>
-            );
-          }
-          return (
-            <S.FailureCell>
-              <Text variant="body-sm">{reason ?? item.errorMessage}</Text>
-              {item.errorMessage && reason ? (
-                <S.TechnicalDetails>
-                  <summary>
-                    <Text variant="caption" color="text.secondary">
-                      {t('listings.jobs.items.technicalDetails')}
-                    </Text>
-                  </summary>
-                  <S.ErrorBox>{item.errorMessage}</S.ErrorBox>
-                </S.TechnicalDetails>
-              ) : null}
-            </S.FailureCell>
+          return reason ? (
+            <Text variant="body-sm">{reason}</Text>
+          ) : (
+            <Text variant="body-sm" color="text.tertiary">
+              —
+            </Text>
           );
         },
       },
-      {
-        key: 'retry',
-        header: '',
-        render: (_value, item) =>
-          item.status === ListingStatus.ERROR && isRetryableListingFailure(item.failureCode) ? (
-            <Button size="small" variant="secondary" isLoading={isRetrying} onClick={() => void handleRetryItem(item)}>
-              <Text variant="body-sm">{t('listings.jobs.items.retry')}</Text>
-            </Button>
-          ) : null,
-      },
+      // No per-item retry action. eBay's quota is metered per application and
+      // shared by every seller, and a terminally failed item has already
+      // exhausted the retries that could work (429/5xx at the HTTP layer, and
+      // the aspect self-heal). Offering the button would spend a common
+      // resource on the attempt least likely to succeed.
     ],
-    [t, itemStatusLabel, failureLabel, handleRetryItem, isRetrying]
+    [t, itemStatusLabel, failureLabel]
   );
 
   const paginatedItems = useMemo(() => {
@@ -257,6 +201,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       formatJobDate={formatJobDate}
       jobStatusLabel={jobStatusLabel}
       itemStatusLabel={itemStatusLabel}
+      itemFailureLabel={failureLabel}
       pagination={{
         count: items.length,
         page,

@@ -14,9 +14,19 @@ export const TooltipComponent = ({
   contentRef,
   onMouseEnter,
   onMouseLeave,
+  onClick,
+  onFocus,
+  onBlur,
 }: TooltipComponentProps) => {
   return (
-    <S.TooltipWrapper ref={wrapperRef} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <S.TooltipWrapper
+      ref={wrapperRef}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+      onFocus={onFocus}
+      onBlur={onBlur}
+    >
       {children}
       {visible &&
         createPortal(

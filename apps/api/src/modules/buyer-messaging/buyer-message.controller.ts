@@ -85,10 +85,11 @@ export class BuyerMessageTemplateController {
   constructor(private readonly templates: BuyerMessageTemplateRepository) {}
 
   @Get()
-  listTemplates(
+  async listTemplates(
     @Request() req: UserRequest,
     @Query() query: ListBuyerMessageTemplatesQueryDto,
   ): Promise<BuyerMessageTemplate[]> {
+    await this.templates.ensureSeeded(req.user.sub);
     return this.templates.list(req.user.sub, query.eventType);
   }
 
@@ -126,5 +127,17 @@ export class BuyerMessageTemplateController {
     if (!deleted) {
       throw new NotFoundException();
     }
+  }
+
+  @Post(':id/reset')
+  async resetTemplate(
+    @Request() req: UserRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BuyerMessageTemplate> {
+    const reset = await this.templates.resetToDefault(req.user.sub, id);
+    if (!reset) {
+      throw new NotFoundException();
+    }
+    return reset;
   }
 }

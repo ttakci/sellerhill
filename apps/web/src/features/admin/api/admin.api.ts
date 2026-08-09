@@ -3,6 +3,8 @@ import type {
   AdminAspectDefaultsListDto,
   AdminBillingMetricsDto,
   AdminCategoryMappingDto,
+  AdminListingFailuresDto,
+  AdminListingFailuresQuery,
   AdminListingQualitySummaryDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
@@ -13,6 +15,7 @@ import type {
   PlatformSettingsListDto,
   ProviderCostSummaryDto,
   UpdateProxyRequest,
+  EbayCallBudgetStatusDto,
   UpsertAspectDefaultRequest,
   UserCostSummaryDto,
 } from '@repo/shared';
@@ -55,6 +58,17 @@ export const adminApi = baseApi.injectEndpoints({
     }),
     getAdminUsers: builder.query<AdminUsersListDto, void>({
       query: () => '/admin/users',
+      providesTags: ['Admin'],
+    }),
+    // eBay meters calls per APPLICATION, so this is one pool shared by every
+    // seller — the panel is how an operator watches it drain.
+    getAdminEbayBudget: builder.query<EbayCallBudgetStatusDto[], void>({
+      query: () => '/admin/ebay/budget',
+      providesTags: ['Admin'],
+    }),
+    // The only surface that carries a provider's raw error text.
+    getAdminListingFailures: builder.query<AdminListingFailuresDto, AdminListingFailuresQuery | void>({
+      query: (params) => ({ url: '/admin/listing-failures', params: params ?? undefined }),
       providesTags: ['Admin'],
     }),
     getAdminSettings: builder.query<PlatformSettingsListDto, void>({
@@ -117,6 +131,8 @@ export const {
   useCreateAdminProxyMutation,
   useUpdateAdminProxyMutation,
   useGetAdminUsersQuery,
+  useGetAdminEbayBudgetQuery,
+  useGetAdminListingFailuresQuery,
   useGetAdminSettingsQuery,
   useUpdateAdminSettingMutation,
   useResetAdminSettingMutation,

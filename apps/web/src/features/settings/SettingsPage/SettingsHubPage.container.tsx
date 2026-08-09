@@ -17,6 +17,7 @@ import type { SettingsDrawerKey } from './SettingsHubPage.types';
 
 import { useGetAmazonAccountsQuery } from '@/features/amazon/api/amazon.api';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
+import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '@/features/ebay/api/ebayApi';
 import {
   useGetListingSettingsGroupsQuery,
@@ -38,6 +39,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingAmazonId, setEditingAmazonId] = useState<string | null>(null);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
   const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
 
@@ -69,6 +71,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   // resolves each group's predefinedTemplateId to its display name. Not a new endpoint.
   const { data: predefinedTemplatesData } = useGetPredefinedTemplatesQuery();
   const { data: storeConfigsData, error: storeConfigsError } = useGetAllStoreSettingsQuery();
+  const { data: buyerMessageTemplatesData, error: buyerMessageTemplatesError } = useGetBuyerMessageTemplatesQuery();
   // Lazy: only fires when the user clicks "Connect". Fetches the eBay OAuth consent URL.
   const [getConnectUrl, { isLoading: isConnectLoading, error: connectError }] = useLazyGetEbayConnectUrlQuery();
 
@@ -78,7 +81,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   useLoading(isConnectLoading);
 
   useEffect(() => {
-    const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError || connectError;
+    const error = userError || profileError || ebayError || amazonError || groupsError || storeConfigsError || connectError || buyerMessageTemplatesError;
     if (!error) {return;}
     if ('status' in error && error.status === 401) {return;}
     showMessage(
@@ -90,7 +93,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       },
       t,
     );
-  }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, connectError, showMessage, closeMessage, t]);
+  }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, connectError, buyerMessageTemplatesError, showMessage, closeMessage, t]);
 
   const handleOpenDrawer = (drawer: SettingsDrawerKey): void => {
     const next = new URLSearchParams(searchParams);
@@ -137,6 +140,28 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const handleBackToAmazonList = (): void => {
     setEditingAmazonId(null);
     handleOpenDrawer('amazonList');
+  };
+
+  // Buyer message templates — open the list drawer (cards inside); create/edit
+  // open their own drawer flow. The single activeDrawer param closes this list
+  // automatically when edit/create opens.
+  const handleManageBuyerMessageTemplates = (): void => {
+    handleOpenDrawer('buyerMessageTemplateList');
+  };
+
+  const handleCreateBuyerMessageTemplate = (): void => {
+    setEditingTemplateId(null);
+    handleOpenDrawer('buyerMessageTemplateCreate');
+  };
+
+  const handleEditBuyerMessageTemplate = (id: string): void => {
+    setEditingTemplateId(id);
+    handleOpenDrawer('buyerMessageTemplateEdit');
+  };
+
+  const handleBackToBuyerMessageTemplateList = (): void => {
+    setEditingTemplateId(null);
+    handleOpenDrawer('buyerMessageTemplateList');
   };
 
   // Store settings flow: hub (location/validation) → nested blacklist management.
@@ -215,6 +240,12 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       onSelectStoreScope={setStoreScope}
       onManageBlacklist={handleManageBlacklist}
       onBackToStoreSettings={handleBackToStoreSettings}
+      buyerMessageTemplates={buyerMessageTemplatesData ?? []}
+      editingTemplateId={editingTemplateId}
+      onManageBuyerMessageTemplates={handleManageBuyerMessageTemplates}
+      onCreateBuyerMessageTemplate={handleCreateBuyerMessageTemplate}
+      onEditBuyerMessageTemplate={handleEditBuyerMessageTemplate}
+      onBackToBuyerMessageTemplateList={handleBackToBuyerMessageTemplateList}
     />
   );
 };

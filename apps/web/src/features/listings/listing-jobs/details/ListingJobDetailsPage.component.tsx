@@ -31,6 +31,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   formatJobDate,
   jobStatusLabel,
   itemStatusLabel,
+  itemFailureLabel,
   pagination,
   paginatedItems,
 }) => {
@@ -73,7 +74,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           {itemStatusLabel(item.status)}
         </StatusBadge>
       </S.ItemCardHeader>
-      {item.errorMessage ? <S.ErrorBox>{item.errorMessage}</S.ErrorBox> : null}
+      {itemFailureLabel(item) ? <S.ErrorBox>{itemFailureLabel(item)}</S.ErrorBox> : null}
     </S.ItemCard>
   );
 

@@ -1,20 +1,32 @@
-import type { StoreSettingsResponse, TrackingConversionProvider } from '@repo/shared';
+import type {
+  BuyerMessageEventType,
+  BuyerMessagingConfig,
+  BuyerMessageTemplate,
+  StoreSettingsDrawerStep,
+  StoreSettingsResponse,
+} from '@repo/shared';
+
+export type BlacklistScope = 'title' | 'description' | 'both';
+export type BlacklistItem = { keyword: string; scope: BlacklistScope };
 
 export interface StoreSettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   availableStores: Array<{ id: string; name: string }>;
   storeConfigs: StoreSettingsResponse[];
-  /** Hoisted scope — shared with the nested blacklist drawer so both stay in sync. */
   selectedScope: string;
   onSelectScope: (value: string) => void;
-  /** Open the nested blacklist management drawer for the selected scope. */
-  onManageBlacklist: () => void;
 }
 
 export interface StoreSettingsDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
+  step: StoreSettingsDrawerStep;
+  steps: Array<{ label: string }>;
+  onBack: () => void;
+  onContinue: () => void;
+  isSaving: boolean;
+  isContinueDisabled: boolean;
   scopeOptions: Array<{ value: string; label: string }>;
   selectedScope: string;
   onSelectScope: (value: string) => void;
@@ -25,7 +37,12 @@ export interface StoreSettingsDrawerComponentProps {
   validateDescription: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
-  trackingConversionProvider: TrackingConversionProvider;
+  buyerMessagingConfig: BuyerMessagingConfig;
+  buyerMessageTemplates: BuyerMessageTemplate[];
+  onToggleBuyerMessagingMaster: (enabled: boolean) => void;
+  onToggleBuyerMessagingEvent: (event: BuyerMessageEventType, enabled: boolean) => void;
+  onPickBuyerMessageTemplate: (event: BuyerMessageEventType, templateId: string) => void;
+  onChangeBuyerMessageDelayDays: (event: BuyerMessageEventType, delayDays: number) => void;
   onCountryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -33,8 +50,12 @@ export interface StoreSettingsDrawerComponentProps {
   onToggleValidateDescription: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
-  onTrackingConversionProviderChange: (value: TrackingConversionProvider) => void;
-  onContinue: () => void;
-  isSaving: boolean;
-  isContinueDisabled: boolean;
+  keywords: string;
+  onKeywordsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  blacklistScope: BlacklistScope;
+  onBlacklistScopeChange: (value: BlacklistScope) => void;
+  onAddKeyword: () => void;
+  blacklistError: string | null;
+  blacklist: BlacklistItem[];
+  onRemoveKeyword: (item: BlacklistItem) => void;
 }

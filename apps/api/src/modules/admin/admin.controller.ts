@@ -24,6 +24,8 @@
 //   GET    /admin/finops/users        — per-user cost summaries
 //   GET    /admin/finops/providers    — per-provider cost summaries
 //   GET    /admin/billing/metrics     — quota pressure + cost totals
+//   GET    /admin/ebay/budget         — daily eBay API quota usage per resource
+//   GET    /admin/listing-failures    — failed listing attempts WITH raw provider text
 //   GET    /admin/operations/summary  — queue summaries + warnings
 //   GET    /admin/proxies             — proxy pool listing + summary
 //   POST   /admin/proxies             — register a purchased proxy
@@ -76,9 +78,12 @@ import {
   type AdminAspectDefaultsListDto,
   type AdminBillingMetricsDto,
   type AdminCategoryMappingDto,
+  type AdminListingFailuresDto,
   type AdminListingQualitySummaryDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
+  type EbayCallBudgetStatusDto,
+  type ListingFailureCode,
   type AdminProxyDto,
   type AdminProxyListDto,
   type AdminUsersListDto,
@@ -92,6 +97,7 @@ import {
 } from '@repo/shared';
 import type { Queue } from 'bullmq';
 
+import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OperatorSurface } from '../auth/operator-surface.decorator';
@@ -100,6 +106,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { EmailService } from '../email/email.service';
 
+import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
 import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
@@ -116,6 +123,8 @@ export class AdminController {
     private readonly adminProxiesService: AdminProxiesService,
     private readonly adminListingQualityService: AdminListingQualityService,
     private readonly adminUsersService: AdminUsersService,
+    private readonly listingFailures: AdminListingFailuresService,
+    private readonly ebayCallBudget: EbayCallBudgetService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly emailService: EmailService,
     @InjectQueue('order-sync') private readonly orderSyncQueue: Queue,
@@ -210,6 +219,44 @@ export class AdminController {
   @ApiOperation({ summary: 'Provider cost summaries' })
   async getProviderCosts(@Query('from') from?: string, @Query('to') to?: string): Promise<ProviderCostSummaryDto[]> {
     return this.adminService.getProviderCostSummaries(from ?? null, to ?? null);
+  }
+
+  @Get('ebay/budget')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'eBay API call budget (read-only)',
+    description:
+      'Daily quota, consumption and reset time per eBay API resource. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
+  })
+  @ApiOkResponse({ description: 'Budget status retrieved' })
+  async getEbayCallBudget(): Promise<EbayCallBudgetStatusDto[]> {
+    return this.ebayCallBudget.status();
+  }
+
+  @Get('listing-failures')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Failed listing attempts (read-only, operator diagnostics)',
+    description:
+      "The only surface carrying the provider's raw error text. Sellers see the localized failure code instead, because eBay's own wording is not actionable for them.",
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'failureCode', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'ASIN or seller email prefix' })
+  @ApiOkResponse({ description: 'Listing failures retrieved' })
+  async getListingFailures(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('failureCode') failureCode?: ListingFailureCode,
+    @Query('search') search?: string
+  ): Promise<AdminListingFailuresDto> {
+    return this.listingFailures.list({
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      failureCode,
+      search,
+    });
   }
 
   @Get('billing/metrics')

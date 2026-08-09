@@ -157,20 +157,9 @@ export const listingsApi = baseApi.injectEndpoints({
       providesTags: (result, error, jobId) => [{ type: 'Listings', id: `${jobId}-items` }],
     }),
 
-    /**
-     * Re-queue a single failed ASIN (a failed create writes no listing row, so
-     * this is the only way to retry one item without re-running the import).
-     */
-    retryJobItem: builder.mutation<{ success: boolean }, { jobId: string; itemId: string }>({
-      query: ({ jobId, itemId }) => ({
-        url: `/listings/jobs/${jobId}/items/${itemId}/retry`,
-        method: 'POST',
-      }),
-      invalidatesTags: (_result, _error, { jobId }) => [
-        { type: 'Listings', id: `${jobId}-items` },
-        { type: 'Listings', id: jobId },
-      ],
-    }),
+    // `retryJobItem` was removed (2026-08-09): eBay quota is shared across all
+    // sellers, and a terminally failed item has already exhausted every retry
+    // that could succeed.
 
     /**
      * Get eBay business policies
@@ -269,7 +258,6 @@ export const {
   useImportExistingListingsMutation,
   useGetJobStatusQuery,
   useGetJobItemsQuery,
-  useRetryJobItemMutation,
   useGetBusinessPoliciesQuery,
   useEndListingsMutation,
   useDeleteListingsMutation,

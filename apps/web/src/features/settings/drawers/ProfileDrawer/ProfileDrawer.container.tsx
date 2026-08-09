@@ -17,6 +17,20 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, p
   const [lastName, setLastName] = useState(profile?.lastName ?? '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phoneNumber ?? '');
 
+  // The drawer stays mounted the whole time (visibility is just `isOpen`), so the
+  // useState initializers above only ever ran once — often before the profile
+  // query resolved, leaving the form permanently empty. Resync from the latest
+  // profile every time the drawer opens (React-recommended render-time state reset).
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setFirstName(profile?.firstName ?? '');
+      setLastName(profile?.lastName ?? '');
+      setPhoneNumber(profile?.phoneNumber ?? '');
+    }
+  }
+
   const handleSave = useCallback((): void => {
     const payload: UpdateProfileRequest = { firstName, lastName, phoneNumber };
     void updateProfile(payload)

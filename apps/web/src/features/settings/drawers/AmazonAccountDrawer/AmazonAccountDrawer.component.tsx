@@ -1,4 +1,4 @@
-import { Badge, Drawer, InfoMessage, ModernTextInput, Text, Toggle } from '@repo/ui';
+import { Drawer, InfoMessage, ModernTextInput, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,9 +9,7 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
   isOpen,
   onClose,
   onBack,
-  isEdit,
   prefix,
-  hasTwoFactor,
   fields,
   isSaving,
   onFieldChange,
@@ -39,47 +37,34 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
         <S.FormCard>
           <ModernTextInput
             name="label"
-            label={t(`${prefix}.label`)}
+            label={t('translation:settingsHub.drawer.amazonAdd.label')}
             value={fields.label}
             onChange={onFieldChange('label')}
           />
           <ModernTextInput
             name="email"
-            label={t(`${prefix}.email`)}
+            label={t('translation:settingsHub.drawer.amazonAdd.email')}
             value={fields.email}
             type="email"
             onChange={onFieldChange('email')}
           />
           <ModernTextInput
             name="password"
-            label={t(`${prefix}.password`)}
+            label={t('translation:settingsHub.drawer.amazonAdd.password')}
             value={fields.password}
             type="password"
             onChange={onFieldChange('password')}
           />
-          {isEdit && (
-            <InfoMessage>
-              {t('translation:settingsHub.drawer.amazonEdit.passwordHint')}
-            </InfoMessage>
-          )}
           <ModernTextInput
             name="twoFactorSecret"
-            label={t(`${prefix}.twoFactorSecret`)}
+            label={t('translation:settingsHub.drawer.amazonAdd.twoFactorSecret')}
             value={fields.twoFactorSecret}
             onChange={onFieldChange('twoFactorSecret')}
           />
-          {isEdit && (
-            <InfoMessage>
-              <Badge variant={hasTwoFactor ? 'success' : 'neutral'} size="sm">
-                {t(
-                  hasTwoFactor
-                    ? 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeSet'
-                    : 'translation:settingsHub.drawer.amazonEdit.twoFactorBadgeNotSet'
-                )}
-              </Badge>{' '}
-              {t('translation:settingsHub.drawer.amazonEdit.twoFactorHint')}
-            </InfoMessage>
-          )}
+          <S.ToggleRow>
+            <Text variant="body-sm">{t('amazon:amazon.autoFulfill.autoFulfillEnabled')}</Text>
+            <Toggle checked={fields.autoFulfillEnabled} onChange={onAutoFulfillEnabledChange} />
+          </S.ToggleRow>
           <ModernTextInput
             name="autoFulfillCapTotal"
             type="number"
@@ -87,12 +72,9 @@ export const AmazonAccountDrawerComponent: React.FC<AmazonAccountDrawerComponent
             placeholder={t('amazon:amazon.autoFulfill.autoFulfillCapTotalPlaceholder')}
             value={fields.autoFulfillCapTotal}
             onChange={onFieldChange('autoFulfillCapTotal')}
+            isDisabled={!fields.autoFulfillEnabled}
           />
           <InfoMessage>{t('amazon:amazon.autoFulfill.autoFulfillCapTotalHint')}</InfoMessage>
-          <S.ToggleRow>
-            <Text variant="body-sm">{t('amazon:amazon.autoFulfill.autoFulfillEnabled')}</Text>
-            <Toggle checked={fields.autoFulfillEnabled} onChange={onAutoFulfillEnabledChange} />
-          </S.ToggleRow>
         </S.FormCard>
       </S.BodyStack>
     </Drawer>

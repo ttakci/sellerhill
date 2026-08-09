@@ -8,7 +8,7 @@ import type { MessageType } from '../../context';
 import * as S from './Dialog.style';
 import type { DialogProps } from './Dialog.types';
 
-const defaultIcons: Record<MessageType, IconName> = {
+const iconsByType: Record<MessageType, IconName> = {
   success: 'check-circle',
   error: 'x-circle',
   warning: 'alert-triangle',
@@ -56,12 +56,10 @@ export const Dialog: React.FC<DialogProps> = ({
   typeTitles,
   description,
   children,
-  icon,
   primaryAction,
   secondaryAction,
   showCloseButton = false,
 }) => {
-  const iconName = icon ?? defaultIcons[type];
   const primaryVariant = resolveFilledVariant(primaryAction.variant);
   const secondaryVariant = resolveOutlineVariant(secondaryAction?.variant);
   // Prefer explicit title (form dialogs); else localized type title; else English default
@@ -74,7 +72,7 @@ export const Dialog: React.FC<DialogProps> = ({
     <S.Shell isOpen={isOpen} onClose={onClose} title="" size="md" showCloseButton={showCloseButton} showDivider={false}>
       <S.Content>
         <S.IconCircle $type={type}>
-          <Icon name={iconName} size={24} color="text.inverse" />
+          <Icon name={iconsByType[type]} size={24} color="text.inverse" />
         </S.IconCircle>
 
         <S.Title variant="h1" weight="semibold" color="brand.primary">

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { lockDocumentScroll } from '../../utils/documentScrollLock';
+
 import { DrawerComponent } from './Drawer.component';
 import type { DrawerProps } from './Drawer.types';
 
@@ -17,14 +19,11 @@ export const Drawer: React.FC<DrawerProps> = ({
   className,
 }) => {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+    if (!isOpen) {
+      return;
     }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+
+    return lockDocumentScroll();
   }, [isOpen]);
 
   useEffect(() => {

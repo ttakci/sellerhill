@@ -16,6 +16,11 @@ export interface ListingJobDetailsPageComponentProps {
   formatJobDate: (iso: string) => string;
   jobStatusLabel: (status: ListingJobStatus | string) => string;
   itemStatusLabel: (status: ListingStatus | string) => string;
+  /**
+   * Localized, seller-actionable failure reason. Null when the item did not
+   * fail. The provider's raw error text never reaches this surface.
+   */
+  itemFailureLabel: (item: ListingJobItemDto) => string | null;
   pagination: {
     count: number;
     page: number;

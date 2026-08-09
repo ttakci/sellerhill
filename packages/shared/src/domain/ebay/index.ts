@@ -2,6 +2,7 @@
  * eBay Domain - Barrel Export
  */
 
+export * from './ebay-call-budget.types';
 export * from './ebay.constants';
 export * from './ebay.dto';
 export * from './ebay.types';

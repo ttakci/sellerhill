@@ -1,5 +1,6 @@
 import type {
   AmazonAccountPublicDto,
+  BuyerMessageTemplate,
   EbayAccountPublicDto,
   ListingSettingsGroupResponse,
   ProfileDto,
@@ -18,6 +19,9 @@ export type SettingsDrawerKey =
   | 'listingGroupCreate'
   | 'listingGroupEdit'
   | 'listingGroupList'
+  | 'buyerMessageTemplateCreate'
+  | 'buyerMessageTemplateEdit'
+  | 'buyerMessageTemplateList'
   | 'billing'
   | null;
 
@@ -47,6 +51,13 @@ export interface SettingsHubPageComponentProps {
   editingGroupId?: string | null;
   // Editing amazon account (for amazon drawer edit mode)
   editingAmazonAccount?: AmazonAccountPublicDto | null;
+  // Buyer message templates (Store Configuration → manage/create/edit)
+  buyerMessageTemplates: BuyerMessageTemplate[];
+  editingTemplateId?: string | null;
+  onManageBuyerMessageTemplates: () => void;
+  onCreateBuyerMessageTemplate: () => void;
+  onEditBuyerMessageTemplate: (id: string) => void;
+  onBackToBuyerMessageTemplateList: () => void;
   // Return from the amazon add/edit drawer to the accounts list drawer.
   onBackToAmazonList?: () => void;
   // Store settings flow: shared scope + nested blacklist navigation.

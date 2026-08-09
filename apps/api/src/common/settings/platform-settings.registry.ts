@@ -35,6 +35,72 @@ export interface PlatformSettingDefinition {
 const def = (d: PlatformSettingDefinition): PlatformSettingDefinition => d;
 
 export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
+  // --- eBay API call budget ---
+  // eBay meters calls PER APPLICATION, so all users share one daily quota and
+  // exhausting it locks out every seller at once. Defaults mirror eBay's
+  // published ceilings (developer.ebay.com/develop/apis/api-call-limits); raise
+  // them here after an Application Growth Check is approved, without a deploy.
+  def({
+    key: PlatformSettingKey.EBAY_BUDGET_ENABLED,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'EBAY_BUDGET_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    // Share of each quota fenced off for seller-triggered actions, so a night
+    // of background refreshing cannot leave a user unable to publish.
+    key: PlatformSettingKey.EBAY_BUDGET_RESERVE_PERCENT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_RESERVE_PERCENT',
+    defaultValue: '5',
+    min: 0,
+    max: 50,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BUDGET_INVENTORY_DAILY_LIMIT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_INVENTORY_DAILY_LIMIT',
+    defaultValue: '2000000',
+    min: 1,
+  }),
+  def({
+    // The scarcest resource we depend on, and the one that caps how many NEW
+    // ASINs the platform can onboard per day.
+    key: PlatformSettingKey.EBAY_BUDGET_TAXONOMY_DAILY_LIMIT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_TAXONOMY_DAILY_LIMIT',
+    defaultValue: '5000',
+    min: 1,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BUDGET_ACCOUNT_DAILY_LIMIT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_ACCOUNT_DAILY_LIMIT',
+    defaultValue: '25000',
+    min: 1,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT',
+    defaultValue: '100000',
+    min: 1,
+  }),
+  def({
+    key: PlatformSettingKey.EBAY_BUDGET_TRADING_DAILY_LIMIT,
+    category: PlatformSettingCategory.EBAY,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'EBAY_BUDGET_TRADING_DAILY_LIMIT',
+    defaultValue: '5000',
+    min: 1,
+  }),
+
   // --- Keepa refresh: the dominant recurring provider cost ---
   def({
     key: PlatformSettingKey.KEEPA_REFRESH_ENABLED,

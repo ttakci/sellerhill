@@ -132,9 +132,11 @@
   },
   "chatbot": {
     "sidebarTitle": "Sorularınız mı var?",
-    "sidebarSubtitle": "AI destekli asistanımızla size yardımcı olalım.",
-    "ctaLabel": "Zon",
-    "openAria": "Asistan sohbetini aç",
+    "sidebarSubtitle": "Destek ekibimizle sohbet edin.",
+    "ctaLabel": "Bize ulaşın",
+    "openAria": "Destek sohbetini aç",
+    "unreadAria": "{{count}} okunmamış destek mesajı",
+    "unreadOverflow": "99+",
     "panelTitle": "Zon",
     "welcomeMessage": "Merhaba, size nasıl yardımcı olabilirim?",
     "placeholder": "Mesajınızı yazın…",
@@ -157,21 +159,6 @@
   },
   "operator": {
     "console": "Operatör Konsolu"
-  },
-  "support": {
-    "title": "Destek görüşmeleri",
-    "subtitle": "Müşteri taleplerini inceleyin ve yanıtlayın.",
-    "loading": "Destek görüşmeleri yükleniyor…",
-    "loadingDescription": "Güncel kuyruk getiriliyor.",
-    "emptyTitle": "Görüşme yok",
-    "emptyDescription": "Bu kuyrukta görüşme bulunmuyor.",
-    "filters": {
-      "waiting": "Bekleyen",
-      "assigned_to_me": "Bana atanan",
-      "open": "Açık",
-      "resolved": "Çözüldü",
-      "all": "Tümü"
-    }
   },
   "header": {
     "selectLanguage": "Dil Seçimi",
@@ -200,6 +187,9 @@
         "title": "Profil",
         "subtitle": "Kişisel bilgileriniz ve avatarınız",
         "edit": "Kişisel Bilgileri Düzenle",
+        "nameLabel": "Ad Soyad",
+        "phoneLabel": "Telefon Numarası",
+        "emailLabel": "E-posta Adresi",
         "tabs": {
           "personalInfo": "Kişisel Bilgiler",
           "personalInfoSubtitle": "Adınız, iletişim bilgileriniz ve avatarınız",
@@ -271,7 +261,11 @@
         "title": "Mağaza Yapılandırması",
         "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
         "storeSettings": "Mağaza Ayarları",
-        "storeSettingsSubtitle": "Konum, doğrulama ve bölgesel tercihler"
+        "storeSettingsSubtitle": "Konum, doğrulama ve bölgesel tercihler",
+        "manageMessageTemplates": "Mesaj Şablonlarını Yönet",
+        "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin ve düzenleyin",
+        "createMessageTemplate": "Mesaj Şablonu Oluştur",
+        "createMessageTemplateSubtitle": "Bir sipariş olayı için yeni mesaj tanımlayın"
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
@@ -349,6 +343,11 @@
         "country": "Ülke",
         "region": "Bölge",
         "zipCode": "Posta Kodu",
+        "steps": {
+          "general": "Genel",
+          "messaging": "Alıcı mesajları",
+          "blacklist": "Kara liste"
+        },
         "blacklistSection": {
           "label": "Kara Liste",
           "keywordCount": "{{count}} anahtar",

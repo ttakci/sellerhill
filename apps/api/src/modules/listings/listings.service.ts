@@ -7,6 +7,7 @@ import {
   ListingTrackingState,
   EbayListingApiModel,
   OrderStatus,
+  PlatformSettingKey,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
@@ -24,6 +25,7 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
@@ -88,6 +90,7 @@ interface ProductQueryRow {
   image_urls: string[] | string;
   brand: string | null;
   category: string | null;
+  category_path: string | null;
   features: string[] | string | null;
   specs: Record<string, string> | string | null;
   identifiers: ProductIdentifiers | string | null;
@@ -150,7 +153,8 @@ export class ListingsService {
     private readonly databaseService: DatabaseService,
     private readonly ebayService: EbayService,
     private readonly strategyService: ListingStrategyService,
-    private readonly quotaEnforcement: QuotaEnforcementService
+    private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
 
   /**
@@ -863,7 +867,8 @@ export class ListingsService {
     const results = await this.databaseService.query<ProductQueryRow>(
       `
       SELECT id, asin, title, description, price, currency, image_urls, brand, manufacturer,
-             category, features, specs, identifiers, stock, raw_provider_data, raw_keepa_data
+             category, category_path, features, specs, identifiers, stock,
+             raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1
     `,
       [asin]
@@ -887,6 +892,7 @@ export class ListingsService {
       imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(String(row.image_urls) || '[]') as string[]),
       brand: row.brand ?? '',
       category: row.category ?? undefined,
+      categoryPath: row.category_path ?? undefined,
       manufacturer: row.manufacturer ?? row.brand ?? undefined,
       features: row.features ? (Array.isArray(row.features) ? row.features : (JSON.parse(String(row.features)) as string[])) : [],
       // Item specifics + catalog identifiers must survive a cache hit; without
@@ -1070,14 +1076,23 @@ export class ListingsService {
   }
 
   async findOrCreateProduct(asin: string, productData: ProductData): Promise<string> {
+    // The refresh cadence is operator-tunable at runtime (admin → Settings), and
+    // RefreshProcessorService already honours it. This path used to hardcode
+    // 12 hours, so lowering the interval in the panel silently applied to the
+    // existing catalog but not to anything created afterwards.
+    const intervalMinutes = await this.platformSettings.getNumber(
+      PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES
+    );
+
     const result = await this.databaseService.query<{ id: string }>(
       `
       INSERT INTO products (
         asin, title, price, currency, image_urls, description,
         brand, manufacturer, category, features, specs, identifiers,
-        stock, raw_provider_data, raw_keepa_data, next_refresh_at
+        stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW() + INTERVAL '12 hours')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+              NOW() + make_interval(mins => $17::int))
       ON CONFLICT (asin) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,
@@ -1096,6 +1111,10 @@ export class ListingsService {
         stock = EXCLUDED.stock,
         raw_provider_data = EXCLUDED.raw_provider_data,
         raw_keepa_data = COALESCE(EXCLUDED.raw_keepa_data, products.raw_keepa_data),
+        -- Keep the last known path when a fetch resolved none, same grow-only
+        -- rule as specs/identifiers: an absent category tree is not evidence
+        -- the product left its niche.
+        category_path = COALESCE(EXCLUDED.category_path, products.category_path),
         last_sync_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id
@@ -1116,6 +1135,8 @@ export class ListingsService {
         productData.stock || 0,
         JSON.stringify(productData.raw || productData),
         productData.rawKeepaData ? JSON.stringify(productData.rawKeepaData) : null,
+        productData.categoryPath || null,
+        intervalMinutes,
       ]
     );
 
@@ -1167,84 +1188,10 @@ export class ListingsService {
     await this.updateJobCounts(jobId);
   }
 
-  /**
-   * Resolve everything needed to re-queue one failed ASIN.
-   *
-   * Ownership, item state and job settings are all verified here so the
-   * controller stays a thin route: a retry is only offered for an item that
-   * belongs to the caller and actually failed.
-   */
-  async getJobItemForRetry(
-    userId: string,
-    jobId: string,
-    itemId: string
-  ): Promise<{
-    jobId: string;
-    listingJobItemId: string;
-    asin: string;
-    listingSettingsGroupId: string;
-    paymentPolicyId: string;
-    shippingPolicyId: string;
-    returnPolicyId: string;
-  }> {
-    const rows = await this.databaseService.query<{
-      id: string;
-      asin: string;
-      status: ListingStatus;
-      listing_settings_group_id: string | null;
-      payment_policy_id: string | null;
-      shipping_policy_id: string | null;
-      return_policy_id: string | null;
-    }>(
-      `SELECT i.id, i.asin, i.status,
-              j.listing_settings_group_id, j.payment_policy_id, j.shipping_policy_id, j.return_policy_id
-       FROM listing_job_items i
-       JOIN listing_jobs j ON j.id = i.job_id
-       WHERE i.id = $1 AND i.job_id = $2 AND j.user_id = $3`,
-      [itemId, jobId, userId]
-    );
-
-    const row = rows[0];
-    if (!row) {
-      throw new NotFoundException('Listing job item not found');
-    }
-    if (row.status !== ListingStatus.ERROR) {
-      throw new BadRequestException('Only failed items can be retried');
-    }
-    if (
-      !row.listing_settings_group_id ||
-      !row.payment_policy_id ||
-      !row.shipping_policy_id ||
-      !row.return_policy_id
-    ) {
-      // Jobs created before the settings were stored on the row.
-      throw new BadRequestException(
-        'This job predates single-item retry. Re-run the ASIN from Add listings instead.'
-      );
-    }
-
-    return {
-      jobId,
-      listingJobItemId: row.id,
-      asin: row.asin,
-      listingSettingsGroupId: row.listing_settings_group_id,
-      paymentPolicyId: row.payment_policy_id,
-      shippingPolicyId: row.shipping_policy_id,
-      returnPolicyId: row.return_policy_id,
-    };
-  }
-
-  /** Reset a failed item so the re-queued job starts from a clean state. */
-  async resetJobItemForRetry(jobId: string, itemId: string): Promise<void> {
-    await this.databaseService.query(
-      `UPDATE listing_job_items
-       SET status = $1, error_message = NULL, failure_code = NULL, failure_details = NULL,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $2 AND job_id = $3`,
-      [ListingStatus.RETRYING, itemId, jobId]
-    );
-    await this.updateJobCounts(jobId);
-  }
+  // getJobItemForRetry / resetJobItemForRetry were REMOVED (2026-08-09) with
+  // the seller-facing per-item retry. eBay quota is metered per application, so
+  // re-attempting an item whose input eBay already rejected spends a shared
+  // resource on the case with the lowest chance of succeeding.
 
   /**
    * Update job counts and status
@@ -1317,6 +1264,19 @@ export class ListingsService {
   /**
    * Map job item entity to DTO
    */
+  /**
+   * Customer-facing job item.
+   *
+   * The raw provider text in `error_message` is deliberately NOT mapped: it is
+   * eBay's or Keepa's own wording (SKUs, error ids, internal field names) and
+   * means nothing to a seller, who needs to know what to DO. The UI renders the
+   * localized message for `failureCode` instead, and the raw text stays in the
+   * database for the operator panel (`GET /v1/admin/listing-failures`).
+   *
+   * A row with no `failureCode` — written before the taxonomy existed — falls
+   * back to the generic "could not be created" copy rather than leaking the
+   * provider string.
+   */
   private mapJobItemToDto(entity: ListingJobItemEntity): ListingJobItemDto {
     return {
       id: entity.id,
@@ -1326,8 +1286,9 @@ export class ListingsService {
       listingId: entity.listing_id || undefined,
       status: entity.status as ListingStatus,
       ebayItemId: entity.ebay_item_id || undefined,
-      errorMessage: entity.error_message || undefined,
-      failureCode: (entity.failure_code as ListingFailureCode) || undefined,
+      failureCode:
+        (entity.failure_code as ListingFailureCode) ||
+        (entity.error_message ? ListingFailureCode.UNKNOWN : undefined),
       failureDetails: entity.failure_details
         ? parseJsonColumn<ListingFailureDetails>(entity.failure_details, {})
         : undefined,

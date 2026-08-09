@@ -11,6 +11,7 @@ export const SelectableCard = styled(Card, {
   shouldForwardProp: (prop) => prop !== '$selected',
 })<{ $selected?: boolean }>`
   cursor: pointer;
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   transition: all ${tkn('transitions.normal')};
 
   ${({ $selected, theme }) =>

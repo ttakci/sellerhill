@@ -32,9 +32,10 @@
     "noKeywords": "No keywords found",
     "copyright": "© {{year}} Zonds Platform. All rights reserved.",
     "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
-    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost when an order's profit is still provisional (Amazon order not yet placed). Set to your buyer account's state rate (e.g. 7). 0 = no tax estimated.",
+    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost while an order's profit is still provisional and the Amazon order has not yet been placed.",
     "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
     "autoFulfillEnabledHint": "When on, Zonds buys the item on Amazon with your linked buyer account. Disable to order manually.",
+    "autoFulfillEnabledInfo": "Enable this only after connecting and configuring an Amazon buyer account. Automatic ordering also requires that account's auto-fulfillment setting and spending cap to be enabled.",
     "trackingConversionProvider": "Tracking-number conversion",
     "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged.",
     "trackingConversionProviderLocal": "Built-in (local)",
@@ -45,28 +46,49 @@
       "masterEnable": "Enable automated buyer messages",
       "shippedWarning": "eBay already sends a tracking notification when an order is marked shipped. Sending another is optional.",
       "delayDays": "Delay (days)",
+      "delayDaysOption_one": "{{count}} day",
+      "delayDaysOption_other": "{{count}} days",
       "events": {
         "order_received": "Order received",
         "shipped": "Shipped",
         "delivered": "Delivered",
         "feedback_request": "Feedback request"
       },
+      "eventDescriptions": {
+        "order_received": "Sends the selected message when a new matched eBay order is first received.",
+        "shipped": "Sends the selected message after Amazon tracking marks the order as shipped. eBay also sends its own tracking notification.",
+        "delivered": "Sends the selected message when Amazon tracking confirms delivery.",
+        "feedback_request": "Sends the selected feedback request a chosen number of days after delivery."
+      },
       "templateSource": "Template",
       "systemTemplate": "Default",
       "customTemplate": "Custom",
-      "manageTemplates": "Manage custom templates",
       "templates": {
-        "new": "New template",
+        "list": {
+          "title": "Message Templates",
+          "subtitle": "View, edit, or create your automated buyer message templates",
+          "allEvents": "All events",
+          "empty": "No templates for this event yet",
+          "emptyDescription": "Create a template to use your own wording for buyer messaging events."
+        },
+        "create": {
+          "title": "New Message Template",
+          "subtitle": "Write a custom message for an order event"
+        },
+        "edit": {
+          "title": "Edit Message Template",
+          "subtitle": "Update this message template"
+        },
         "name": "Name",
+        "event": "Event",
         "body": "Message body",
         "placeholders": "Insert placeholder",
         "preview": "Preview",
         "save": "Save",
         "delete": "Delete",
-        "deleteConfirm": "Delete this template?",
-        "empty": "No custom templates yet.",
-        "title": "Message templates",
-        "subtitle": "Create and edit your own buyer message templates."
+        "reset": "Reset to default",
+        "resetConfirm": "Restore the original default message? Your edits to the text will be lost.",
+        "deleteConfirmDescription": "This will permanently delete \"{{name}}\". If a messaging event is currently using it, that event will stop sending until you pick another template."
       }
     }
   }

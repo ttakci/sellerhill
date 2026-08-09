@@ -263,6 +263,24 @@ export function extractCommerce(product: KeepaRawProduct): NormalizedCommerce {
 }
 
 /**
+ * The product's full Amazon category path, e.g.
+ * `Home & Kitchen > Kitchen & Dining > Coffee, Tea & Espresso > Espresso Machines`.
+ *
+ * We already store the LEAF name (`products.category`), which is fine as a
+ * search hint but far too weak to key a shared category mapping on: leaves like
+ * "Accessories" or "Parts" recur across unrelated departments, so caching
+ * "Accessories → eBay category X" would mis-file a whole niche. The full path
+ * is specific enough to be reused safely.
+ */
+export function extractCategoryPath(product: KeepaRawProduct): string | undefined {
+  const names = (product.categoryTree ?? [])
+    .map((node) => node?.name?.trim())
+    .filter((name): name is string => Boolean(name));
+
+  return names.length > 0 ? names.join(' > ') : undefined;
+}
+
+/**
  * Image URLs from either the modern `images` array (preferred, large size) or
  * the legacy `imagesCSV` string — live responses can carry either.
  */

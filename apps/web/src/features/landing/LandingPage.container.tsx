@@ -15,6 +15,7 @@ import { LandingPageComponent } from './LandingPage.component';
 import type { LandingPricingPlan } from './LandingPage.types';
 
 import { useGetBillingCatalogQuery } from '@/features/billing/api/billing.api';
+import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
 import { storeLocalePreference } from '@/utils/locale';
 
 /** Format a micros price into a display string for the landing. $0 → "Free". */
@@ -136,18 +137,21 @@ export const LandingPageContainer = (): React.ReactElement => {
   }, []);
 
   return (
-    <LandingPageComponent
-      currentLocale={currentLocale}
-      scrolled={scrolled}
-      mobileMenuOpen={mobileMenuOpen}
-      pricingPlans={pricingPlans}
-      pricingCatalogError={isCatalogError}
-      onLocaleChange={handleLocaleChange}
-      onNavigateLogin={handleNavigateLogin}
-      onNavigateRegister={handleNavigateRegister}
-      onToggleMobileMenu={handleToggleMobileMenu}
-      onCloseMobileMenu={handleCloseMobileMenu}
-    />
+    <>
+      <LandingPageComponent
+        currentLocale={currentLocale}
+        scrolled={scrolled}
+        mobileMenuOpen={mobileMenuOpen}
+        pricingPlans={pricingPlans}
+        pricingCatalogError={isCatalogError}
+        onLocaleChange={handleLocaleChange}
+        onNavigateLogin={handleNavigateLogin}
+        onNavigateRegister={handleNavigateRegister}
+        onToggleMobileMenu={handleToggleMobileMenu}
+        onCloseMobileMenu={handleCloseMobileMenu}
+      />
+      <TawkToWidget />
+    </>
   );
 };
 

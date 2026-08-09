@@ -203,38 +203,29 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   display: flex;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
-  padding: ${({ $isCollapsed, $isSubItem }) =>
-    $isCollapsed ? '0.5rem 0' : $isSubItem ? '0.5rem 0.75rem 0.5rem 1.25rem' : '0.5rem 1rem'};
-  border-radius: ${tkn('radius.sm')};
-  color: ${tkn('colors.sidebar.text')};
-  background: ${({ $active }) => ($active ? tkn('colors.sidebar.active') : 'transparent')};
+  padding: ${({ $isCollapsed, $isSubItem, theme }) =>
+    $isCollapsed
+      ? `${tkn('spacing.xs')({ theme })} 0`
+      : $isSubItem
+        ? `${tkn('spacing.xs')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.xs')({ theme })} ${tkn('spacing.md+')({ theme })}`
+        : `${tkn('spacing.xs')({ theme })} ${tkn('spacing.md')({ theme })}`};
+  /* Selected item is a full-width filled pill (brand-blue), not a left accent bar */
+  border-radius: ${tkn('radius.md')};
+  color: ${({ $active, theme }) => ($active ? theme.colors.text.inverse : theme.colors.sidebar.text)};
+  background: ${(props) => (props.$active ? tkn('colors.sidebar.accent')(props) : 'transparent')};
   cursor: pointer;
-  transition: background ${tkn('transitions.fast')};
+  transition:
+    background ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
   position: relative;
   font-weight: ${({ $active, theme }) =>
     $active ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.medium};
-  font-size: ${tkn('typography.fontSize.md')};
-  min-height: 2.5rem;
+  font-size: ${tkn('typography.fontSize.sm')};
+  min-height: 2rem;
 
   &:hover {
-    background: ${tkn('colors.sidebar.hover')};
+    background: ${(props) => (props.$active ? tkn('colors.sidebar.accent')(props) : tkn('colors.sidebar.hover')(props))};
   }
-
-  ${({ $active, theme }) =>
-    $active &&
-    `
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0.1875rem;
-      height: 1.25rem;
-      background: ${theme.colors.sidebar.accent};
-      border-radius: 0 ${tkn('radius.sm')({ theme })} ${tkn('radius.sm')({ theme })} 0;
-    }
-  `}
 `;
 
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
@@ -247,12 +238,12 @@ export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
-  font-size: ${tkn('typography.fontSize.md')};
+  font-size: ${tkn('typography.fontSize.sm')};
 
   & svg {
     color: inherit;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
     flex-shrink: 0;
   }
 `;
@@ -819,16 +810,16 @@ export const ContentInner = styled.div`
   max-width: ${CONTENT_MAX_WIDTH};
   width: 100%;
   margin: 0 auto;
-  padding: ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')} ${tkn('spacing.lg')};
   box-sizing: border-box;
   flex: 1;
 
   @media (min-width: 48rem) {
-    padding: ${tkn('spacing.xl')};
+    padding: ${tkn('spacing.md')} ${tkn('spacing.xl')} ${tkn('spacing.xl')};
   }
 
   @media (min-width: 64rem) {
-    padding: ${tkn('spacing.xl')} ${tkn('spacing.xxl')};
+    padding: ${tkn('spacing.md')} ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
   }
 `;
 const spin = keyframes`

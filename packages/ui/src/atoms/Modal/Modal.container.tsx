@@ -1,4 +1,7 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+import { lockDocumentScroll } from '../../utils/documentScrollLock';
 
 import { ModalComponent } from './Modal.component';
 import type { ModalProps } from './Modal.types';
@@ -15,17 +18,18 @@ export const Modal: React.FC<ModalProps> = ({
   showDivider = true,
 }) => {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+    if (!isOpen) {
+      return;
     }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+
+    return lockDocumentScroll();
   }, [isOpen]);
 
-  return (
+  if (!isOpen || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <ModalComponent
       isOpen={isOpen}
       onClose={onClose}
@@ -37,7 +41,8 @@ export const Modal: React.FC<ModalProps> = ({
       showDivider={showDivider}
     >
       {children}
-    </ModalComponent>
+    </ModalComponent>,
+    document.body,
   );
 };
 

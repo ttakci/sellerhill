@@ -2,6 +2,19 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool, PoolClient } from 'pg';
 
+/** A scalar a query can be parameterized with. */
+export type QueryScalar = string | number | boolean | null | undefined;
+
+/**
+ * A bind parameter.
+ *
+ * Arrays are included because `pg` serializes a JS array into a Postgres array
+ * literal, which is what lets a batch write update N rows in ONE round trip
+ * (`UPDATE … FROM (SELECT * FROM unnest($1::uuid[], $2::numeric[]) …)`) instead
+ * of issuing N statements. Without this the fan-out has to loop.
+ */
+export type QueryParam = QueryScalar | QueryScalar[];
+
 /**
  * Database Service
  * Manages PostgreSQL connection pool and provides query methods
@@ -83,7 +96,7 @@ export class DatabaseService implements OnModuleInit {
   /**
    * Execute a query
    */
-  async query<T>(text: string, params?: (string | number | boolean | null | undefined)[]): Promise<T[]> {
+  async query<T>(text: string, params?: QueryParam[]): Promise<T[]> {
     const start = Date.now();
     try {
       const result = await this.pool.query(text, params);

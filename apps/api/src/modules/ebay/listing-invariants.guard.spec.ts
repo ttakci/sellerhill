@@ -59,9 +59,38 @@ describe('eBay create-path invariants', () => {
 
   it('never sends a brand without an MPN (eBay validates the pair)', () => {
     // "Input data for tag <BrandMPN> is invalid or missing" — dropping a bad MPN
-    // must not leave the brand unpaired.
-    const body = methodBody(ebayService, 'private async createOrReplaceInventoryItem(');
-    expect(body).toMatch(/EBAY_NOT_APPLICABLE/);
+    // must not leave the brand unpaired. The rule lives in the shared payload
+    // builder so the single and batched write paths cannot disagree about it.
+    expect(read(EBAY_DIR, 'ebay-listing-payload.ts')).toMatch(/EBAY_NOT_APPLICABLE/);
+  });
+
+  it('builds both write paths from the same payload module', () => {
+    // A bulk-published listing must be byte-for-byte what the single path would
+    // have published. Two payload builders would drift, and every rule encoded
+    // there (GTIN check digits, BrandMPN, tag-safe truncation, the image floor)
+    // is one that has already broken live listings once.
+    for (const file of ['ebay.service.ts', 'ebay-bulk.service.ts']) {
+      const source = read(EBAY_DIR, file);
+      expect(source).toMatch(/buildInventoryItemPayload\(/);
+      expect(source).toMatch(/buildOfferPayload\(/);
+    }
+  });
+
+  it('never records a bulk-created listing eBay did not confirm', () => {
+    // The batched path has the same failure mode the single path shipped: a
+    // missing response entry must never be read as success.
+    const helpers = read(EBAY_DIR, 'ebay-bulk.helpers.ts');
+    expect(helpers).toMatch(/export function isBulkEntrySuccess/);
+    // A null entry (eBay answered for fewer items than we sent) is a failure.
+    expect(helpers).toMatch(/if \(!entry\) \{\s*return false;/);
+  });
+
+  it('bounds the batched aspect self-heal so a batch cannot loop forever', () => {
+    const bulk = read(EBAY_DIR, 'ebay-bulk.service.ts');
+    expect(bulk).toMatch(/MAX_CREATE_ATTEMPTS/);
+    expect(bulk).toMatch(/state\.attempts \+= 1/);
+    // An aspect is forced at most once; the second refusal is terminal.
+    expect(bulk).toMatch(/!state\.forcedAspectNames\.includes\(missing\)/);
   });
 
   it('guards both listing write sites against an empty eBay item id', () => {

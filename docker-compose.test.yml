@@ -82,13 +82,6 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gemini-3.1-flash-lite}
-      # Empty on purpose: LlmService falls back to LLM_CONTENT_MODEL. A hardcoded
-      # default here would send another provider's model id to LLM_BASE_URL and 404.
-      LLM_ASSISTANT_MODEL: ${LLM_ASSISTANT_MODEL:-}
-      # Chatbot can run on a different (paid) provider than listing traffic;
-      # unset means it shares the listing provider above.
-      LLM_ASSISTANT_BASE_URL: ${LLM_ASSISTANT_BASE_URL:-}
-      LLM_ASSISTANT_API_KEY: ${LLM_ASSISTANT_API_KEY:-}
       EBAY_ASPECTS_LLM_ENABLED: ${EBAY_ASPECTS_LLM_ENABLED:-false}
       EBAY_ASPECTS_LLM_MAX_PER_LISTING: ${EBAY_ASPECTS_LLM_MAX_PER_LISTING:-3}
 
@@ -139,6 +132,10 @@ services:
         # sandbox.ebay.com, since sandbox item ids do not exist on ebay.com.
         VITE_EBAY_ENVIRONMENT: sandbox
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        # tawk.to live-chat widget (optional). See CLAUDE.md "Customer support
+        # widget — tawk.to".
+        VITE_TAWKTO_PROPERTY_ID: ${VITE_TAWKTO_PROPERTY_ID:-6a77cbcad1e0df1d455e2131}
+        VITE_TAWKTO_WIDGET_ID: ${VITE_TAWKTO_WIDGET_ID:-1jvhv843q}
     restart: unless-stopped
     depends_on:
       - api

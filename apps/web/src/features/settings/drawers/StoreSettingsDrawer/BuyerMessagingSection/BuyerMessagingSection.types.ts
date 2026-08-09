@@ -12,17 +12,10 @@ export const BUYER_MESSAGE_EVENTS: BuyerMessageEventType[] = [
 ];
 
 export interface BuyerMessagingSectionProps {
-  config: BuyerMessagingConfig | null;
+  config: BuyerMessagingConfig;
   templates: BuyerMessageTemplate[];
-  saving: boolean;
   onToggleMaster: (enabled: boolean) => void;
   onToggleEvent: (event: BuyerMessageEventType, enabled: boolean) => void;
-  onPickTemplate: (event: BuyerMessageEventType, kind: 'system' | 'custom', templateId: string) => void;
+  onPickTemplate: (event: BuyerMessageEventType, templateId: string) => void;
   onChangeDelayDays: (event: BuyerMessageEventType, delayDays: number) => void;
-  onSave: () => void;
-  onManageTemplates: () => void;
-}
-
-export interface BuyerMessagingSectionContainerProps {
-  selectedScope: string;
 }

@@ -8,7 +8,7 @@ import type { AppLayoutProps } from './AppLayout.types';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
-import { AssistantWidget } from '@/features/assistant/AssistantWidget';
+import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
 
 /**
  * App shell: collapsible sidebar (desktop) + overlay drawer (mobile).
@@ -146,7 +146,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </S.NavSection>
 
           <S.SidebarFooter>
-            <AssistantWidget sidebarCollapsed={sidebarCollapsed} />
+            <TawkToWidget sidebarCollapsed={sidebarCollapsed} onLaunch={onCloseMobileSidebar} />
             <S.LogoutButton
               $isCollapsed={sidebarCollapsed}
               onClick={onOpenLogoutConfirm}

@@ -64,11 +64,7 @@
         "empty": "No items found for this job.",
         "emptyTitle": "No items yet",
         "emptySubtitle": "Items appear as the job starts processing ASINs.",
-        "reason": "Reason",
-        "technicalDetails": "Technical details",
-        "retry": "Retry",
-        "retryQueued": "Retry queued",
-        "retryFailed": "Could not queue the retry"
+        "reason": "Reason"
       },
       "failure": {
         "duplicate_listing": "Already listed — this ASIN is in your active or draft listings.",
@@ -86,6 +82,7 @@
         "ebay_rate_limited": "eBay rate-limited the request. Retrying later usually works.",
         "ebay_unavailable": "eBay was unavailable while publishing. Retrying usually works.",
         "ebay_restricted_item": "eBay restricts this item or category for your account.",
+        "provider_budget_exhausted": "Today's eBay API allowance is used up. This listing is queued and will continue automatically.",
         "unknown": "The listing could not be created."
       }
     },

@@ -33,6 +33,8 @@ const TABS: AdminTabId[] = [
   'settings',
   'billing',
   'users',
+  'ebayLimits',
+  'listingFailures',
 ];
 
 /** Badge variant for a quota pressure band. */
@@ -60,7 +62,11 @@ export const AdminPageComponent = ({
   billingMetrics,
   proxyPool,
   usersList,
+  ebayBudget,
+  listingFailures,
   userColumns,
+  budgetColumns,
+  failureColumns,
   proxyColumns,
   settingGroups,
   settingDrafts,
@@ -566,6 +572,49 @@ export const AdminPageComponent = ({
             }
           />
           <Text variant="caption" color="text.secondary">{t('admin.overview.roleCliNotice')}</Text>
+        </S.Rows>
+      )}
+
+      {activeTab === 'ebayLimits' && (
+        <S.Rows>
+          {/* eBay meters calls per APPLICATION, so this pool is shared by every
+              seller: running a resource dry stops that operation platform-wide,
+              not for one customer. Background work is additionally capped below
+              the ceiling so a seller's own action always has budget left. */}
+          <Text variant="caption" color="text.secondary">{t('admin.ebayLimits.description')}</Text>
+          <Table
+            columns={budgetColumns}
+            data={ebayBudget}
+            emptyContent={
+              <EmptyState
+                icon="gauge"
+                title={t('admin.ebayLimits.empty')}
+                description={t('admin.ebayLimits.emptyDescription')}
+                size="md"
+              />
+            }
+          />
+        </S.Rows>
+      )}
+
+      {activeTab === 'listingFailures' && (
+        <S.Rows>
+          {/* The provider's raw wording lives here and nowhere else: sellers get
+              the localized reason, because eBay's own text names internal
+              fields and reads as a defect in their product. */}
+          <Text variant="caption" color="text.secondary">{t('admin.listingFailures.description')}</Text>
+          <Table
+            columns={failureColumns}
+            data={listingFailures?.items ?? []}
+            emptyContent={
+              <EmptyState
+                icon="check-circle"
+                title={t('admin.listingFailures.empty')}
+                description={t('admin.listingFailures.emptyDescription')}
+                size="md"
+              />
+            }
+          />
         </S.Rows>
       )}
     </S.Container>

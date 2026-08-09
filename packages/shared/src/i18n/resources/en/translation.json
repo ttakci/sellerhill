@@ -132,9 +132,11 @@
   },
   "chatbot": {
     "sidebarTitle": "Have questions?",
-    "sidebarSubtitle": "Get help from our AI-powered assistant.",
-    "ctaLabel": "Zon",
-    "openAria": "Open assistant chat",
+    "sidebarSubtitle": "Chat with our support team.",
+    "ctaLabel": "Contact us",
+    "openAria": "Open support chat",
+    "unreadAria": "{{count}} unread support messages",
+    "unreadOverflow": "99+",
     "panelTitle": "Zon",
     "welcomeMessage": "Hello, how can I help you?",
     "placeholder": "Type your message…",
@@ -157,21 +159,6 @@
   },
   "operator": {
     "console": "Operator Console"
-  },
-  "support": {
-    "title": "Support conversations",
-    "subtitle": "Review and respond to customer requests.",
-    "loading": "Loading support conversations…",
-    "loadingDescription": "Fetching the current queue.",
-    "emptyTitle": "No conversations",
-    "emptyDescription": "There are no conversations in this queue.",
-    "filters": {
-      "waiting": "Waiting",
-      "assigned_to_me": "Assigned to me",
-      "open": "Open",
-      "resolved": "Resolved",
-      "all": "All"
-    }
   },
   "header": {
     "selectLanguage": "Select Language",
@@ -200,6 +187,9 @@
         "title": "Profile",
         "subtitle": "Your personal information and avatar",
         "edit": "Edit Personal Information",
+        "nameLabel": "Full Name",
+        "phoneLabel": "Phone Number",
+        "emailLabel": "Email Address",
         "tabs": {
           "personalInfo": "Personal Information",
           "personalInfoSubtitle": "Your name, contact, and avatar",
@@ -271,7 +261,11 @@
         "title": "Store Configuration",
         "subtitle": "Store settings and listing keyword blacklist",
         "storeSettings": "Store Settings",
-        "storeSettingsSubtitle": "Location, validation, and regional preferences"
+        "storeSettingsSubtitle": "Location, validation, and regional preferences",
+        "manageMessageTemplates": "Manage Message Templates",
+        "manageMessageTemplatesSubtitle": "View and edit your automated buyer message templates",
+        "createMessageTemplate": "Create Message Template",
+        "createMessageTemplateSubtitle": "Define a new message for an order event"
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
@@ -349,6 +343,11 @@
         "country": "Country",
         "region": "Region",
         "zipCode": "Zip Code",
+        "steps": {
+          "general": "General",
+          "messaging": "Buyer messaging",
+          "blacklist": "Blacklist"
+        },
         "blacklistSection": {
           "label": "Blacklist",
           "keywordCount": "{{count}} keyword(s)",

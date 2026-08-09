@@ -29,6 +29,7 @@ export interface DrawerProps {
   children: React.ReactNode;
   primaryAction?: DrawerPrimaryAction;
   footer?: React.ReactNode;
+  /** @deprecated Drawers use one application-wide width. Kept for source compatibility; the value no longer changes the shell. */
   size?: DrawerSize;
   className?: string;
 }
@@ -43,6 +44,7 @@ export interface DrawerComponentProps {
   children: React.ReactNode;
   primaryAction?: DrawerPrimaryAction;
   footer?: React.ReactNode;
+  /** @deprecated Drawers use one application-wide width. Kept for source compatibility; the value no longer changes the shell. */
   size?: DrawerSize;
   className?: string;
 }

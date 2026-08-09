@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import {
     type CreateListingsRequest,
+    type ListingBatchQueueJobData,
     type ListingJobDto,
     type ListingQueueJobData,
 } from '@repo/shared';
@@ -9,18 +10,10 @@ import { Queue } from 'bullmq';
 
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { chunkForBulk } from '../ebay/ebay-bulk.helpers';
 
+import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
-
-export interface ListingRetryInput {
-  jobId: string;
-  listingJobItemId: string;
-  asin: string;
-  listingSettingsGroupId: string;
-  paymentPolicyId: string;
-  shippingPolicyId: string;
-  returnPolicyId: string;
-}
 
 @Injectable()
 export class ListingQueueService {
@@ -59,38 +52,74 @@ export class ListingQueueService {
       await this.quotaEnforcement.reserveForBulkCreate(userId, job.items.map((i) => i.id));
     }
 
-    // 3. Add each ASIN as a separate task to the queue for parallel processing.
-    //    job.items is already deduped/filtered by createJob; align each task
-    //    with its job-item id (used by the worker to consume/release the quota
-    //    reservation).
-    const jobs = job.items.map((item) => ({
-      name: 'create-listing',
-      data: stampCurrentCorrelation({
-        jobId: job.id,
-        userId,
-        asin: item.asin,
-        ebayAccountId: request.ebayAccountId,
-        listingSettingsGroupId: request.listingSettingsGroupId,
-        paymentPolicyId: request.paymentPolicyId,
-        shippingPolicyId: request.shippingPolicyId,
-        returnPolicyId: request.returnPolicyId,
-        asDraft,
-        listingJobItemId: item.id,
-      } as ListingQueueJobData),
-      opts: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-        removeOnComplete: true,
-        removeOnFail: false,
-      },
-    }));
+    // 3. Enqueue the work. job.items is already deduped/filtered by createJob;
+    //    every task carries its job-item id so the worker can consume or
+    //    release the quota reservation.
+    //
+    //    Live creates go out in chunks of 25 (eBay's bulk maximum) so a
+    //    2,000-ASIN upload costs ~240 eBay calls instead of ~6,000. Chunking is
+    //    purely size-based on a set we already know in full — a 3-ASIN job
+    //    ships immediately as a batch of 3, it never waits to fill a chunk.
+    //
+    //    Drafts go through the same batch and stop before the eBay writes. They
+    //    cost no quota either way; sharing the pipeline is what keeps the
+    //    duplicate check, Keepa resolution, pricing and content rules identical
+    //    between "save for later" and "publish now".
+    //
+    //    There is no opt-out. A per-item fallback would cost 25x the quota for
+    //    identical output — the payload builders are shared, so the two paths
+    //    produce the same listing — which makes it a switch whose only possible
+    //    effect is to make things worse. The per-ASIN path survives solely for
+    //    a request that names no store, which the UI cannot produce.
+    const useBulk = Boolean(request.ebayAccountId);
+
+    const opts = {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    };
+
+    const jobs = useBulk
+      ? chunkForBulk(job.items).map((chunk) => ({
+          name: LISTING_BATCH_JOB,
+          data: stampCurrentCorrelation({
+            jobId: job.id,
+            userId,
+            // Non-null by construction: `useBulk` requires it.
+            ebayAccountId: request.ebayAccountId,
+            listingSettingsGroupId: request.listingSettingsGroupId,
+            paymentPolicyId: request.paymentPolicyId,
+            shippingPolicyId: request.shippingPolicyId,
+            returnPolicyId: request.returnPolicyId,
+            asDraft,
+            items: chunk.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
+          } as ListingBatchQueueJobData),
+          opts,
+        }))
+      : job.items.map((item) => ({
+          name: 'create-listing',
+          data: stampCurrentCorrelation({
+            jobId: job.id,
+            userId,
+            asin: item.asin,
+            ebayAccountId: request.ebayAccountId,
+            listingSettingsGroupId: request.listingSettingsGroupId,
+            paymentPolicyId: request.paymentPolicyId,
+            shippingPolicyId: request.shippingPolicyId,
+            returnPolicyId: request.returnPolicyId,
+            asDraft,
+            listingJobItemId: item.id,
+          } as ListingQueueJobData),
+          opts,
+        }));
 
     if (jobs.length > 0) {
       await this.listingQueue.addBulk(jobs);
-      this.logger.log(`Added ${jobs.length} tasks to listings queue for job ${job.id}`);
+      this.logger.log(
+        `Added ${jobs.length} task(s) to listings queue for job ${job.id} ` +
+          `(${useBulk ? `bulk, ${job.items.length} ASINs` : 'per-ASIN'})`
+      );
     }
 
     // Strip the internal items field before returning the DTO.
@@ -99,36 +128,16 @@ export class ListingQueueService {
     return dto;
   }
 
-  /**
-   * Re-queue ONE failed ASIN from an existing job.
-   *
-   * A failed create used to be a dead end: nothing was written to `listings`,
-   * so the seller could neither fix nor retry the ASIN without re-running the
-   * whole import. The queue job is identical to the original one — only the
-   * single item is re-enqueued.
-   */
-  async retryJobItem(userId: string, item: ListingRetryInput): Promise<void> {
-    await this.listingQueue.add(
-      'create-listing',
-      stampCurrentCorrelation({
-        jobId: item.jobId,
-        userId,
-        asin: item.asin,
-        listingSettingsGroupId: item.listingSettingsGroupId,
-        paymentPolicyId: item.paymentPolicyId,
-        shippingPolicyId: item.shippingPolicyId,
-        returnPolicyId: item.returnPolicyId,
-        asDraft: false,
-        listingJobItemId: item.listingJobItemId,
-      } as ListingQueueJobData),
-      {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 5000 },
-        removeOnComplete: true,
-        removeOnFail: false,
-      }
-    );
-
-    this.logger.log(`Re-queued ASIN ${item.asin} for job ${item.jobId}`);
-  }
+  // Seller-triggered per-item retry was REMOVED (2026-08-09).
+  //
+  // eBay quota is metered per application and shared by every seller, so a
+  // retry button spends a common resource on the attempt least likely to
+  // succeed: by the time an item is terminally failed, transient causes have
+  // already been retried four times at the HTTP layer (429/5xx) and the aspect
+  // self-heal has already re-derived the item specifics. What remains are
+  // rejections of the input itself — a wrong category, an invalid identifier, a
+  // missing business policy — where the same request produces the same answer.
+  //
+  // The endpoint, its controller route and the FE action were removed with it;
+  // a failed ASIN is simply reported as failed.
 }

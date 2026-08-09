@@ -23,7 +23,7 @@ export const EbayAccountDrawerComponent: React.FC<EbayAccountDrawerComponentProp
       {stores.length > 0 ? (
         <S.StoreList>
           {stores.map((s) => (
-            <Card key={s.id} variant="elevated" padding="none">
+            <Card key={s.id} variant="bordered" padding="none">
               <S.StoreMain>
                 <S.StoreHead>
                   <S.StoreIdText>

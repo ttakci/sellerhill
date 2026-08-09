@@ -23,6 +23,7 @@ import { ListingSettingsGroupService } from '../listing-settings-groups/listing-
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { ContentGenerationService } from './content-generation.service';
+import type { StrategyCommerce } from './listing-pricing.helpers';
 import {
   normalizeTitleWhitespace,
   stripBrandFromTitle,
@@ -125,11 +126,51 @@ export class ListingStrategyService {
       identifiers: product.identifiers || {},
       asin: product.asin,
       category: product.category,
+      categoryPath: product.categoryPath,
       // Location data from Store Settings
       country: storeSettings.country || 'US',
       postalCode: storeSettings.zipCode,
       location: storeSettings.state, // Using state as location, or could be city+state
     };
+  }
+
+  /**
+   * Price + quantity only — the refresh fan-out's path.
+   *
+   * `prepareListingData` also builds the title, renders the full HTML
+   * description template (which can hit the DB for a predefined template),
+   * sanitizes it and runs blacklist validation. The fan-out discarded every
+   * bit of that and kept six numbers, so at 1M listings on a 12h cycle it was
+   * paying two DB round-trips plus a template render per listing per cycle for
+   * output nobody read.
+   *
+   * A caller resolving many listings that share a settings group passes `group`
+   * so the lookup happens once per batch instead of once per listing.
+   */
+  async computePricing(
+    userId: string,
+    product: ProductData,
+    settingsGroupId: string,
+    group?: ListingSettingsGroup
+  ): Promise<StrategyCommerce> {
+    const resolved =
+      group ?? (await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId));
+
+    const priceMetrics = this.calculatePrice(product.price.current, resolved);
+
+    return {
+      price: priceMetrics.finalPrice,
+      quantity: this.calculateQuantity(product.stock ?? 0, resolved),
+      purchasePrice: priceMetrics.purchasePrice,
+      estimatedProfit: priceMetrics.estimatedProfit,
+      profitMargin: priceMetrics.profitMargin,
+      roi: priceMetrics.roi,
+    };
+  }
+
+  /** Settings-group lookup exposed so a batch can resolve each group once. */
+  async getSettingsGroup(userId: string, settingsGroupId: string): Promise<ListingSettingsGroup> {
+    return this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
   }
 
   /**

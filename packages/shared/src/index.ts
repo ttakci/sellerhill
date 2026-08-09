@@ -72,11 +72,6 @@ export * from './domain/finops/index';
 // Domain - Billing (Subscription Plans & Usage Limits)
 export * from './domain/billing/index';
 
-// Domain - Assistant, Support, Knowledge
-export * from './domain/assistant/index';
-export * from './domain/support/index';
-export * from './domain/knowledge/index';
-
 // Domain - Buyer Messaging (automated buyer messages on order lifecycle events)
 export * from './domain/buyer-messaging/buyer-messaging.types';
 
@@ -122,11 +117,6 @@ export * from './schemas/amazon/index';
 
 // Billing Schemas
 export * from './schemas/billing/index';
-
-// Assistant, Support, Knowledge Schemas
-export * from './schemas/assistant/index';
-export * from './schemas/support/index';
-export * from './schemas/knowledge/index';
 
 // Buyer Messaging Schemas
 export * from './schemas/buyer-messaging/buyer-messaging.schema';

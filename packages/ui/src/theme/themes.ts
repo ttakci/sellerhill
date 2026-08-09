@@ -30,8 +30,12 @@ const lightColors: ThemeColors = {
   },
 
   text: {
-    // Strong readable ink — not washed/silky
-    primary: '#0f172a',
+    // Softened 2026-08 (live user feedback: the near-black slate read too
+    // harsh/cold). Was '#0f172a' (slate-900, blue-tinted near-black) — moved
+    // to a neutral, slightly lighter charcoal so body/heading ink reads as a
+    // soft black rather than a navy-tinted one. Still >=15:1 on every light
+    // surface, well past AA.
+    primary: '#27272a',
     secondary: '#475569',
     // Darkened from #64748b: the old value fell to 4.28:1 on background.tertiary
     // (#eef3ff), below AA. Now >=4.88:1 on every surface it is used over.
@@ -72,6 +76,7 @@ const lightColors: ThemeColors = {
     error: '#fef2f2',
     warning: '#fffbeb',
     info: '#eff6ff',
+    infoStrong: '#dbeafe',
     neutral: '#f3f4f6',
   },
 
@@ -201,6 +206,7 @@ const darkColors: ThemeColors = {
     error: 'rgba(248, 113, 113, 0.1)',
     warning: 'rgba(251, 191, 36, 0.1)',
     info: 'rgba(96, 165, 250, 0.1)',
+    infoStrong: 'rgba(96, 165, 250, 0.18)',
     neutral: 'rgba(107, 114, 128, 0.1)',
   },
 

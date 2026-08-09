@@ -117,6 +117,11 @@ export function classifyListingFailure(error: unknown): ClassifiedListingFailure
 function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailure | null {
   const name = error instanceof Error ? error.name : '';
 
+  // Checked before every other classification: the work is valid and untried,
+  // so it must never be attributed to the listing, the category or the seller.
+  if (name === 'EbayBudgetExhaustedError') {
+    return { code: ListingFailureCode.PROVIDER_BUDGET_EXHAUSTED, message: raw, details: { retryable: true } };
+  }
   if (name === 'CategoryResolutionError') {
     return { code: ListingFailureCode.CATEGORY_UNRESOLVED, message: raw, details: { retryable: false } };
   }

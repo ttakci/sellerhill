@@ -80,3 +80,12 @@ export class ListingPublishExhaustedError extends EbayListingError {
     );
   }
 }
+
+/**
+ * Re-exported for callers already importing eBay failures from this module.
+ *
+ * The class itself lives in `common/ebay-budget` so the budget ledger stays
+ * independent of the eBay feature module — that independence is what lets the
+ * admin panel read it without closing the Ebay -> Llm -> Admin import cycle.
+ */
+export { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';

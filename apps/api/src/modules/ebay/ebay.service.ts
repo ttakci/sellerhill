@@ -2,13 +2,8 @@ import { ConflictException, Injectable, Logger, NotFoundException, OnModuleInit 
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
-  EBAY_DESCRIPTION_MAX_LENGTH,
-  EBAY_INVENTORY_DESCRIPTION_MAX_LENGTH,
   EBAY_MARKETPLACE,
   EBAY_MARKETPLACE_CONFIG,
-  EBAY_MAX_IMAGES,
-  EBAY_NOT_APPLICABLE,
-  EBAY_TITLE_MAX_LENGTH,
   EbayAccountStatus,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
@@ -21,11 +16,10 @@ import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
-import { isValidGtin, normalizeGtin } from '../../common/utils/gtin';
-import { truncateHtml } from '../../common/utils/sanitize';
 
 import { type AspectResolution, type CategoryAspect } from './aspect-builder';
 import { AspectResolverService } from './aspect-resolver.service';
+import { buildInventoryItemPayload, buildOfferPayload, type OfferPayload } from './ebay-listing-payload';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import {
@@ -33,7 +27,6 @@ import {
   CategoryResolutionError,
   ListingPublishExhaustedError,
 } from './ebay.errors';
-import { resolveEbayCondition } from './listing-condition';
 
 /**
  * Prefix marking an encrypted-at-rest token value in `ebay_accounts`.
@@ -341,6 +334,100 @@ export class EbayService implements OnModuleInit {
    * Create a listing on eBay (AddItem API)
    */
   /**
+   * Everything a listing needs resolved BEFORE eBay is written to.
+   *
+   * This is the first half of `createListingWithRest`, extracted so the batched
+   * create path can prepare 25 listings and then write them with three calls
+   * instead of 75. It makes no write calls itself — only the location check and
+   * the (heavily cached) category + aspect resolution — so it is safe to run
+   * per item while the writes are shared.
+   */
+  async prepareListingDraft(
+    userId: string,
+    listingData: ListingCreationData,
+    asin: string,
+    ebayAccountId?: string
+  ): Promise<{
+    accountId: string;
+    sku: string;
+    merchantLocationKey: string;
+    categoryId: string;
+    categoryName: string;
+    categoryAspects: CategoryAspect[];
+    resolution: AspectResolution;
+  }> {
+    const account = ebayAccountId
+      ? await this.getOwnedAccount(userId, ebayAccountId)
+      : await this.getActiveAccount(userId);
+    if (!account) {
+      throw new Error('No active eBay account found for user');
+    }
+
+    const accessToken = await this.getAccessToken(account);
+    const marketplaceId = account.marketplace_id;
+    const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
+
+    const merchantLocationKey = 'default';
+    await this.ensureInventoryLocation(accessToken, merchantLocationKey, listingData, config);
+
+    const { categoryId, categoryName } = await this.taxonomyService.resolveCategory({
+      accessToken,
+      marketplaceId,
+      categoryTreeId: config.siteId,
+      asin,
+      brand: listingData.brand,
+      title: listingData.title,
+      amazonCategory: listingData.category,
+      amazonCategoryPath: listingData.categoryPath,
+    });
+
+    const categoryAspects = await this.taxonomyService.getCategoryAspects({
+      accessToken,
+      marketplaceId,
+      categoryTreeId: config.siteId,
+      categoryId,
+    });
+
+    const resolution = await this.aspectResolver.resolve({
+      marketplaceId,
+      categoryId,
+      categoryAspects,
+      forcedAspectNames: [],
+      product: {
+        title: listingData.title,
+        brand: listingData.brand,
+        specs: listingData.specs,
+        features: listingData.features,
+        identifiers: listingData.identifiers,
+      },
+    });
+
+    return {
+      accountId: account.id,
+      sku: this.buildSku(asin),
+      merchantLocationKey,
+      categoryId,
+      categoryName,
+      categoryAspects,
+      resolution,
+    };
+  }
+
+  /**
+   * The listing's eBay SKU.
+   *
+   * Sandbox appends a timestamp because a sandbox account accumulates test
+   * inventory and SKU collisions block the publish. That makes the sandbox SKU
+   * NON-derivable after the fact, which is why `listings.sku` is persisted
+   * (migration 067) rather than recomputed at every call site.
+   */
+  private buildSku(asin: string): string {
+    return this.configService.get('EBAY_ENVIRONMENT') === 'sandbox'
+      ? `${asin}-NEW-${Date.now().toString().slice(-6)}`
+      : `${asin}-NEW`;
+  }
+
+  /**
    * Create a listing on eBay using REST Inventory API
    * This is the modern replacement for XML-based trading API
    */
@@ -369,9 +456,8 @@ export class EbayService implements OnModuleInit {
     const marketplaceId = account.marketplace_id as EbayMarketplaceId;
     const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
 
-    // 4. Generate SKU (e.g. ASIN-NEW-timestamp for sandbox to avoid conflicts)
-    const isSandbox = this.configService.get('EBAY_ENVIRONMENT') === 'sandbox';
-    const sku = isSandbox ? `${asin}-NEW-${Date.now().toString().slice(-6)}` : `${asin}-NEW`;
+    // 4. Generate SKU (sandbox gets a timestamp suffix to avoid collisions)
+    const sku = this.buildSku(asin);
 
     // 5. Ensure Inventory Location Exists
     const merchantLocationKey = 'default';
@@ -390,6 +476,7 @@ export class EbayService implements OnModuleInit {
       brand: listingData.brand,
       title: listingData.title,
       amazonCategory: listingData.category,
+      amazonCategoryPath: listingData.categoryPath,
     });
     this.logger.log(`Category for "${listingData.title}": ${categoryName} (${categoryId})`);
 
@@ -569,69 +656,17 @@ export class EbayService implements OnModuleInit {
     // Item specifics were resolved once for this attempt by AspectResolverService:
     // the category's declared aspects (value-constrained, every required one
     // filled) plus the product's remaining attributes as custom specifics.
-    const aspects = resolution.aspects;
-
     this.logger.log(
-      `Item specifics for ${sku}: ${Object.keys(aspects).length} total ` +
+      `Item specifics for ${sku}: ${Object.keys(resolution.aspects).length} total ` +
         `(${summarizeAspectLayers(resolution)})`
     );
 
-    const condition = resolveEbayCondition(data.title);
-
-    // Catalog identifiers: this is what lets eBay match the listing to its own
-    // catalog product, which auto-enriches item specifics and search metadata.
-    // GTINs are check-digit validated — a malformed one fails the whole publish.
-    const upc = normalizeGtin(data.identifiers?.upc);
-    const ean = normalizeGtin(data.identifiers?.ean);
-    // A GTIN is not a part number: eBay fails the publish with "MPN has an
-    // invalid value" when a barcode lands here (Amazon puts the UPC in
-    // `partNumber` for most grocery ASINs). Omitting MPN is explicitly allowed.
-    const rawMpn = data.identifiers?.mpn?.trim();
-    const brandText = data.brand?.trim().toLowerCase();
-    const usableMpn =
-      rawMpn && !isValidGtin(rawMpn) && (!brandText || rawMpn.toLowerCase() !== brandText)
-        ? rawMpn
-        : undefined;
-    // eBay validates Brand and MPN as a PAIR (`<BrandMPN>`): sending a brand with
-    // no MPN fails with "Input data for tag <BrandMPN> is invalid or missing".
-    // Its documented answer for "this product has no part number" is the literal
-    // non-value, which is also what the item-specific fallback uses.
-    const mpn = usableMpn ?? (data.brand?.trim() ? EBAY_NOT_APPLICABLE : undefined);
-
-    const payload = {
-      availability: {
-        shipToLocationAvailability: {
-          quantity: data.quantity || 1,
-        },
-      },
-      condition: condition,
-      product: {
-        title: data.title ? data.title.substring(0, EBAY_TITLE_MAX_LENGTH) : 'New Product',
-        // Inventory-item description is catalog metadata capped at 4,000 chars —
-        // the buyer-visible copy is the offer's listingDescription (500,000).
-        // Truncated at a tag boundary so a cut never leaves broken markup.
-        description: data.description
-          ? truncateHtml(data.description, EBAY_INVENTORY_DESCRIPTION_MAX_LENGTH)
-          : '',
-        aspects: aspects,
-        ...(data.brand ? { brand: data.brand.substring(0, 65) } : {}),
-        ...(mpn ? { mpn: mpn.substring(0, 65) } : {}),
-        ...(upc ? { upc: [upc] } : {}),
-        ...(ean ? { ean: [ean] } : {}),
-        // Filter out null/empty URLs and ensure valid format
-        // eBay requires at least one image, use placeholder if none available
-        imageUrls: (() => {
-          const validUrls = (data.imageUrls || []).filter(
-            (url: string) => url && typeof url === 'string' && url.startsWith('http')
-          );
-          if (validUrls.length === 0) {
-            this.logger.warn(`No valid images for SKU ${sku}, using placeholder`);
-            return ['https://via.placeholder.com/600x600?text=No+Image+Available'];
-          }
-          return validUrls.slice(0, EBAY_MAX_IMAGES);
-        })(),
-      },
-    };
+    // Shared with the batched path so a bulk-published listing is byte-for-byte
+    // what this path would have published.
+    const { payload, usedPlaceholderImage } = buildInventoryItemPayload(data, resolution);
+    if (usedPlaceholderImage) {
+      this.logger.warn(`No valid images for SKU ${sku}, using placeholder`);
+    }
 
     this.logger.debug(`Creating inventory item ${sku}. URL: ${url}`);
     this.logger.debug(`Payload for ${sku}: ${JSON.stringify(payload)}`);
@@ -674,28 +709,15 @@ export class EbayService implements OnModuleInit {
   ): Promise<string> {
     const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/offer`;
 
-    const payload = {
-      sku: sku,
-      marketplaceId: marketplaceId,
-      format: 'FIXED_PRICE',
-      availableQuantity: data.quantity || 1,
-      categoryId: categoryId,
-      // Buyer-visible description: full template HTML (eBay allows 500,000).
-      listingDescription: data.description ? truncateHtml(data.description, EBAY_DESCRIPTION_MAX_LENGTH) : '',
-      listingPolicies: {
-        fulfillmentPolicyId: policies.shippingId,
-        paymentPolicyId: policies.paymentId,
-        returnPolicyId: policies.returnId,
-      },
-      merchantLocationKey: merchantLocationKey,
-      pricingSummary: {
-        price: {
-          currency: config.currency,
-          value: data.price.toString(),
-        },
-      },
-      quantityLimitPerBuyer: 5,
-    };
+    const payload = buildOfferPayload({
+      sku,
+      data,
+      policies,
+      config,
+      marketplaceId,
+      categoryId,
+      merchantLocationKey,
+    });
 
     this.logger.debug(`Creating offer for ${sku}. URL: ${url}, Payload: ${JSON.stringify(payload)}`);
 
@@ -741,7 +763,7 @@ export class EbayService implements OnModuleInit {
   private async updateOffer(
     accessToken: string,
     offerId: string,
-    payload: Record<string, unknown>,
+    payload: OfferPayload,
     config: (typeof EBAY_MARKETPLACE_CONFIG)['EBAY_US']
   ): Promise<void> {
     try {
@@ -1219,6 +1241,64 @@ export class EbayService implements OnModuleInit {
 
   async assertAccountOwnership(userId: string, accountId: string): Promise<void> {
     await this.getOwnedAccount(userId, accountId);
+  }
+
+  /**
+   * Everything one eBay API call needs to be addressed to a specific store.
+   *
+   * A bulk call carries exactly ONE seller token and writes into ONE
+   * marketplace, so batching has to group by account before it can group by
+   * anything else. Resolving token + marketplace + currency together also
+   * avoids the second `ebay_accounts` read that calling `getAccountAccessToken`
+   * and then re-reading the row would cost on every batch.
+   */
+  async getAccountApiContext(accountId: string): Promise<{
+    accessToken: string;
+    marketplaceId: EbayMarketplaceId;
+    currency: string;
+    contentLanguage: string;
+  }> {
+    const accounts = await this.databaseService.query<EbayAccountEntity>(
+      `SELECT * FROM ebay_accounts WHERE id = $1 AND status = $2`,
+      [accountId, EbayAccountStatus.ACTIVE]
+    );
+    const account = accounts[0];
+    if (!account) {
+      throw new NotFoundException(`Active eBay account ${accountId} not found`);
+    }
+
+    const marketplaceId = account.marketplace_id;
+    const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
+
+    return {
+      accessToken: await this.getAccessToken(account),
+      marketplaceId,
+      currency: config.currency,
+      contentLanguage: config.countryCode === 'US' ? 'en-US' : 'en-GB',
+    };
+  }
+
+  /**
+   * The account a listing must be pushed through.
+   *
+   * `listings.ebay_account_id` is nullable on rows created before migration 030
+   * backfilled it, so this falls back to the user's active account — but unlike
+   * the old `getActiveAccount(userId)` path it is deterministic (oldest account
+   * first) instead of an unordered `LIMIT 1`, which could hand back a different
+   * store on each call and reprice a listing through the wrong token.
+   */
+  async resolveListingAccountId(userId: string, listingAccountId: string | null): Promise<string | null> {
+    if (listingAccountId) {
+      return listingAccountId;
+    }
+    const accounts = await this.databaseService.query<{ id: string }>(
+      `SELECT id FROM ebay_accounts
+       WHERE user_id = $1 AND status = $2
+       ORDER BY created_at ASC, id ASC
+       LIMIT 1`,
+      [userId, EbayAccountStatus.ACTIVE]
+    );
+    return accounts[0]?.id ?? null;
   }
 
   private async getOwnedAccount(userId: string, accountId: string): Promise<EbayAccountEntity> {

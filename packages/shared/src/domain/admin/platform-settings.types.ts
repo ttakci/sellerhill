@@ -25,6 +25,7 @@ export enum PlatformSettingType {
 /** Grouping used to lay out the admin settings UI. */
 export enum PlatformSettingCategory {
   KEEPA = 'keepa',
+  EBAY = 'ebay',
   AMAZON = 'amazon',
   AUTO_FULFILL = 'auto_fulfill',
   EMAIL = 'email',
@@ -63,6 +64,15 @@ export enum PlatformSettingKey {
   KEEPA_REFRESH_MAX_FAILURES = 'keepa.refresh.maxFailures',
   KEEPA_REFRESH_QUARANTINE_MINUTES = 'keepa.refresh.quarantineMinutes',
   KEEPA_REFRESH_SCHEDULER_CRON = 'keepa.refresh.schedulerCron',
+
+  // --- eBay API call budget (quotas are per APPLICATION, shared by all users) ---
+  EBAY_BUDGET_ENABLED = 'ebay.budget.enabled',
+  EBAY_BUDGET_RESERVE_PERCENT = 'ebay.budget.reservePercent',
+  EBAY_BUDGET_INVENTORY_DAILY_LIMIT = 'ebay.budget.inventoryDailyLimit',
+  EBAY_BUDGET_TAXONOMY_DAILY_LIMIT = 'ebay.budget.taxonomyDailyLimit',
+  EBAY_BUDGET_ACCOUNT_DAILY_LIMIT = 'ebay.budget.accountDailyLimit',
+  EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT = 'ebay.budget.fulfillmentDailyLimit',
+  EBAY_BUDGET_TRADING_DAILY_LIMIT = 'ebay.budget.tradingDailyLimit',
 
   // --- Amazon order sync / tracking ---
   AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT = 'amazon.orderSync.matchTolerancePct',

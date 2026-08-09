@@ -9,6 +9,7 @@ import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AspectLlmService } from './aspect-llm.service';
 import { AspectResolverService } from './aspect-resolver.service';
+import { EbayBulkService } from './ebay-bulk.service';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
@@ -22,6 +23,7 @@ import { EbayService } from './ebay.service';
   controllers: [EbayController],
   providers: [
     EbayService,
+    EbayBulkService,
     EbayOAuthService,
     EbayTaxonomyService,
     AspectResolverService,
@@ -29,6 +31,12 @@ import { EbayService } from './ebay.service';
     EmailVerifiedGuard,
     EbayFulfillmentService,
   ],
-  exports: [EbayService, EbayFulfillmentService, EbayTaxonomyService, AspectResolverService],
+  exports: [
+    EbayService,
+    EbayBulkService,
+    EbayFulfillmentService,
+    EbayTaxonomyService,
+    AspectResolverService,
+  ],
 })
 export class EbayModule {}

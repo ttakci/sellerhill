@@ -15,7 +15,7 @@ import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
 
 /**
- * Guarded shell for the staff console (`/admin`, `/support`).
+ * Guarded shell for the staff console (`/admin`).
  *
  * A seller account that reaches an operator URL is sent back to its own app;
  * the API would refuse the data anyway, but bouncing at the shell keeps the

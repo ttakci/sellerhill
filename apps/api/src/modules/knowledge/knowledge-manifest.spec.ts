@@ -1,2 +1,0 @@
-import { chunkKnowledge } from './knowledge-manifest';
-describe('knowledge chunker golden',()=>{it('keeps heading paths and stable hashes',()=>{const a=chunkKnowledge('# Root\n\n## Child\nalpha beta');const b=chunkKnowledge('# Root\n\n## Child\nalpha beta');expect(a).toEqual(b);expect(a[0].headingPath).toBe('Root > Child');expect(a[0].contentHash).toHaveLength(64);});it('bounds tokens',()=>{expect(chunkKnowledge('# A\n'+Array(20).fill('word').join(' '),5).every(c=>c.tokenCount<=5)).toBe(true);});});

@@ -34,7 +34,18 @@ export interface ProductData {
   description: string;
   imageUrls: string[];
   brand: string;
+  /** Leaf Amazon category name, e.g. `Espresso Machines`. A search hint. */
   category?: string;
+  /**
+   * Full Amazon category path, e.g.
+   * `Home & Kitchen > Kitchen & Dining > Coffee, Tea & Espresso > Espresso Machines`.
+   *
+   * Used as the key for the shared eBay-category mapping: the leaf alone is too
+   * ambiguous to cache against (many departments have an "Accessories" leaf),
+   * while the whole path identifies a niche precisely enough that one eBay
+   * category answer can serve every ASIN under it.
+   */
+  categoryPath?: string;
   manufacturer?: string;
   weight?: number;
   dimensions?: string;

@@ -5,8 +5,7 @@
  * Zonds has two products behind one login:
  *   - the seller app (dashboard / listings / orders / settings), used by
  *     CUSTOMER accounts to run their eBay business;
- *   - the operator console (/admin, /support), used by staff to run Zonds
- *     itself.
+ *   - the operator console (/admin), used by staff to run Zonds itself.
  *
  * They used to share one shell and one guard set, so an ADMIN account was a
  * seller account with extra menu items. That is the thing this module removes:
@@ -17,9 +16,15 @@
  *
  * Role → surface:
  *   CUSTOMER — seller app only.
- *   SUPPORT  — support console only (answers customer questions; not staff of
- *              the platform's configuration).
- *   ADMIN    — admin panel + support console.
+ *   ADMIN    — admin panel.
+ *   SUPPORT  — kept as a role for backward compatibility, but has NO console
+ *              today. The in-app support queue/handoff console was removed
+ *              (2026-08) when customer support moved to tawk.to, which has
+ *              its own agent dashboard outside Zonds. A SUPPORT-role account
+ *              is still blocked from the seller app (still "staff"), but has
+ *              no operator surface to land on either — see CLAUDE.md
+ *              "Customer support widget — tawk.to". Existing SUPPORT
+ *              accounts should be demoted via `pnpm user:set-role`.
  */
 
 import { UserRole } from './auth.types';

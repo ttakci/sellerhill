@@ -64,11 +64,7 @@
         "empty": "Bu işe ait ürün kaydı bulunamadı.",
         "emptyTitle": "Henüz kalem yok",
         "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir.",
-        "reason": "Sebep",
-        "technicalDetails": "Teknik detay",
-        "retry": "Tekrar dene",
-        "retryQueued": "Yeniden denemeye alındı",
-        "retryFailed": "Yeniden deneme kuyruğa alınamadı"
+        "reason": "Sebep"
       },
       "failure": {
         "duplicate_listing": "Zaten listelenmiş — bu ASIN aktif veya taslak listelerinizde var.",
@@ -86,6 +82,7 @@
         "ebay_rate_limited": "eBay istek sınırına takıldı. Daha sonra denemek genelde çalışır.",
         "ebay_unavailable": "Yayınlama sırasında eBay yanıt vermedi. Tekrar denemek genelde çalışır.",
         "ebay_restricted_item": "eBay bu ürünü veya kategoriyi hesabınız için kısıtlıyor.",
+        "provider_budget_exhausted": "Bugünkü eBay API kotası doldu. Bu ürün sıraya alındı ve otomatik olarak devam edecek.",
         "unknown": "Liste oluşturulamadı."
       }
     },

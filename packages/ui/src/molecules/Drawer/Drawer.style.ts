@@ -16,28 +16,19 @@ export const Overlay = styled.div<{ $isOpen: boolean }>`
   }
 `;
 
-export const Panel = styled.aside<{ $size: string; $isOpen: boolean }>`
+export const Panel = styled.aside<{ $isOpen: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   width: 100%;
   /*
-   * lg used to resolve to 35rem — NARROWER than the 36rem md default — so
-   * the three densest drawers (group wizard, bulk ASIN entry, plan comparison)
-   * all opted into "more room" and got less. The scale is now monotonic.
+   * One application-wide drawer shell. Content density must adapt inside this
+   * width rather than changing the surrounding panel between flows; otherwise
+   * headers, body canvas and footer actions appear to belong to different
+   * products as users move from one drawer to another.
    */
-  max-width: ${({ $size }) => {
-    switch ($size) {
-      case 'sm':
-        return '22rem'; /* 352px — confirmations, short forms */
-      case 'lg':
-        return '44rem'; /* 704px — wizards, two-column content */
-      case 'md':
-      default:
-        return '32rem'; /* 512px — single-column forms (default) */
-    }
-  }};
+  max-width: 32rem; /* 512px — canonical drawer width */
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('shadows.xl')};
   display: flex;

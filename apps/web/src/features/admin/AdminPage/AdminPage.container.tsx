@@ -11,7 +11,10 @@ import {
   useGetAdminProviderCostsQuery,
   useGetAdminProxiesQuery,
   useGetAdminUsersQuery,
+  useGetAdminEbayBudgetQuery,
+  useGetAdminListingFailuresQuery,
 } from '../api/admin.api';
+import { useAdminEbayColumns } from '../hooks/useAdminEbayColumns';
 import { useAdminListingQuality } from '../hooks/useAdminListingQuality';
 import { useAdminProxyColumns } from '../hooks/useAdminProxyColumns';
 import { useAdminProxyForm } from '../hooks/useAdminProxyForm';
@@ -34,6 +37,8 @@ const VALID_TABS: AdminTabId[] = [
   'settings',
   'billing',
   'users',
+  'ebayLimits',
+  'listingFailures',
 ];
 
 /** Category render order — cost levers first, cosmetics last. */
@@ -61,6 +66,8 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: billingMetrics } = useGetAdminBillingMetricsQuery(undefined, { skip });
   const { data: proxyPool } = useGetAdminProxiesQuery(undefined, { skip });
   const { data: usersList } = useGetAdminUsersQuery(undefined, { skip });
+  const { data: ebayBudget } = useGetAdminEbayBudgetQuery(undefined, { skip });
+  const { data: listingFailures } = useGetAdminListingFailuresQuery(undefined, { skip });
   const listingQuality = useAdminListingQuality(skip);
 
   const proxy = useAdminProxyForm();
@@ -92,6 +99,7 @@ export const AdminPageContainer = (): React.ReactElement => {
 
   /* Must sit above the role guard — hooks cannot be called after an early return. */
   const userColumns = useAdminUserColumns(formatCost);
+  const { budgetColumns, failureColumns } = useAdminEbayColumns();
   const proxyColumns = useAdminProxyColumns(
     formatCost,
     formatDateValue,
@@ -114,7 +122,11 @@ export const AdminPageContainer = (): React.ReactElement => {
       billingMetrics={billingMetrics}
       proxyPool={proxyPool}
       usersList={usersList}
+      ebayBudget={ebayBudget ?? []}
+      listingFailures={listingFailures}
       userColumns={userColumns}
+      budgetColumns={budgetColumns}
+      failureColumns={failureColumns}
       proxyColumns={proxyColumns}
       settingGroups={settingGroups}
       settingDrafts={settings.settingDrafts}

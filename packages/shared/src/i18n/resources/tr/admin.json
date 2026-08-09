@@ -10,7 +10,9 @@
       "settings": "Ayarlar",
       "billing": "Faturalandırma",
       "users": "Kullanıcılar",
-      "listingQuality": "Liste kalitesi"
+      "listingQuality": "Liste kalitesi",
+      "ebayLimits": "eBay Limitleri",
+      "listingFailures": "Listeleme Hataları"
     },
     "queue": {
       "summary": "Bekleyen: {{waiting}} · Aktif: {{active}} · Hatalı: {{failed}}"
@@ -234,6 +236,29 @@
         "llm": "Yapay zekâ",
         "terminal_fallback": "Yedek değer"
       }
+    },
+    "ebayLimits": {
+      "description": "eBay, API çağrılarını satıcı başına değil uygulama başına sayar — tüm müşteriler bu tek günlük havuzdan yer. Arka plan işleri düşürülmüş tavanda durur, böylece satıcının kendi işlemine her zaman kota kalır.",
+      "resource": "Kaynak",
+      "used": "Kullanılan",
+      "limit": "Günlük limit",
+      "remaining": "Kalan",
+      "backgroundLimit": "Arka plan tavanı",
+      "resetAt": "Sıfırlanma",
+      "empty": "Henüz kullanım kaydı yok",
+      "emptyDescription": "Sayaçlar, platform bugünkü ilk eBay çağrısını yaptığında görünür."
+    },
+    "listingFailures": {
+      "description": "Operatör teşhis ekranı. Kullanıcılar yalnızca eşlenmiş nedeni görür; sağlayıcının ham mesajı eBay hata kodlarını ve iç alan adlarını içerdiği için yalnızca burada gösterilir.",
+      "asin": "ASIN",
+      "seller": "Satıcı",
+      "code": "Kod",
+      "sellerSees": "Kullanıcının gördüğü",
+      "technical": "Sağlayıcı mesajı",
+      "attemptedAt": "Deneme",
+      "uncoded": "sınıflandırılmamış",
+      "empty": "Başarısız listeleme yok",
+      "emptyDescription": "Başarısız oluşturma denemeleri ham sağlayıcı hatasıyla burada listelenir."
     }
   }
 }

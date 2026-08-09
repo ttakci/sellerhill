@@ -155,10 +155,15 @@ export interface ListingJobItemDto {
   listingId?: string;
   status: ListingStatus;
   ebayItemId?: string;
-  errorMessage?: string;
   createdAt: string;
   updatedAt: string;
-  /** Structured reason this item failed; drives the localized UI message. */
+  /**
+   * Structured reason this item failed; the ONLY failure signal a seller sees.
+   *
+   * The raw provider text is intentionally absent from this DTO — it is eBay's
+   * internal wording and is exposed to operators only, via the admin listing
+   * failures panel.
+   */
   failureCode?: ListingFailureCode;
   failureDetails?: ListingFailureDetails;
 }
@@ -365,6 +370,38 @@ export interface ListingQueueJobData {
  * Listing Creation Data - used by eBay service for creating listings
  * Replaces `any` types in eBay service methods
  */
+/**
+ * A chunk of ASINs created together through eBay's bulk Inventory endpoints.
+ *
+ * Every ASIN in a listing job shares one eBay store (store selection is
+ * mandatory on step 1), so the producer can chunk the known set up front — 25
+ * is eBay's per-call maximum. There is deliberately NO accumulation window:
+ * a job of 3 ASINs ships one call with 3 entries immediately rather than
+ * waiting for a 25th that may never come.
+ *
+ * Discriminated by the BullMQ job name (`create-listing-batch`), not by
+ * `ListingJobKind`, which maps to a DB column describing the job's origin.
+ */
+export interface ListingBatchQueueJobData {
+  jobId: string;
+  userId: string;
+  ebayAccountId: string;
+  listingSettingsGroupId: string;
+  paymentPolicyId: string;
+  shippingPolicyId: string;
+  returnPolicyId: string;
+  /**
+   * Drafts run through the same batch, they just stop before the eBay writes.
+   *
+   * A draft costs ZERO eBay calls — the quota is paid once, later, at publish —
+   * so batching them buys no quota. It exists so there is one create pipeline
+   * instead of two: same duplicate check, same Keepa resolution, same pricing
+   * and content rules, with the write stage skipped.
+   */
+  asDraft: boolean;
+  items: Array<{ asin: string; listingJobItemId: string }>;
+}
+
 export interface ListingCreationData {
   title: string;
   description: string;
@@ -373,8 +410,10 @@ export interface ListingCreationData {
   /** UPC/EAN/MPN/model — sent to eBay for catalog matching + identifier aspects. */
   identifiers?: ProductIdentifiers;
   asin?: string;
-  /** Amazon category name, used as a category-resolution hint. */
+  /** Amazon leaf category name, used as a category-resolution hint. */
   category?: string;
+  /** Full Amazon category path — the key the eBay category mapping is cached under. */
+  categoryPath?: string;
   features?: string[];
   quantity: number;
   imageUrls: string[];

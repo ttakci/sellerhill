@@ -337,25 +337,9 @@ export class ListingsController {
     return this.listingsService.getJobItems(userId, jobId);
   }
 
-  /**
-   * Re-queue one failed ASIN.
-   *
-   * Without this a failed create was a dead end: no `listings` row is written
-   * on failure, so the seller could only re-run the entire import.
-   */
-  @ApiOperation({ summary: 'Retry a single failed listing job item' })
-  @Post('jobs/:jobId/items/:itemId/retry')
-  async retryJobItem(
-    @Request() req: { user: { sub: string } },
-    @Param('jobId') jobId: string,
-    @Param('itemId') itemId: string
-  ): Promise<{ success: boolean }> {
-    const userId = req.user.sub;
-    const item = await this.listingsService.getJobItemForRetry(userId, jobId, itemId);
-    await this.listingsService.resetJobItemForRetry(jobId, itemId);
-    await this.listingQueueService.retryJobItem(userId, item);
-    return { success: true };
-  }
+  // POST jobs/:jobId/items/:itemId/retry was REMOVED (2026-08-09).
+  // See ListingQueueService for why: eBay quota is shared platform-wide and a
+  // terminally failed item has already exhausted every retry that could work.
 
   /**
    * Get cached product info

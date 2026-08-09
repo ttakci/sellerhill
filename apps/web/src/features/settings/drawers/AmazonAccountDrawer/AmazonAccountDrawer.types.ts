@@ -26,10 +26,8 @@ export interface AmazonAccountDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void;
-  isEdit: boolean;
-  /** i18n key prefix — add vs edit copy. */
+  /** i18n key prefix for the drawer title and subtitle. */
   prefix: string;
-  hasTwoFactor: boolean;
   fields: AmazonAccountDrawerFields;
   isSaving: boolean;
   onFieldChange: (

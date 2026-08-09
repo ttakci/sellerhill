@@ -14,4 +14,5 @@ export const ToggleRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
+  margin-block: ${tkn('spacing.xs')};
 `;

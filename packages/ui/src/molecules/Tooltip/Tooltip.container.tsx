@@ -57,13 +57,47 @@ export const Tooltip = ({
     setVisible(false);
   }, []);
 
+  const toggle = useCallback(() => {
+    clearTimeout(timerRef.current);
+    updatePosition();
+    setVisible((current) => !current);
+  }, [updatePosition]);
+
+  const showImmediately = useCallback(() => {
+    clearTimeout(timerRef.current);
+    updatePosition();
+    setVisible(true);
+  }, [updatePosition]);
+
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      hide();
+    }
+  }, [hide]);
+
   useEffect(() => {
     if (!visible) {return;}
     const frame = requestAnimationFrame(() => {
       updatePosition();
     });
-    return () => cancelAnimationFrame(frame);
-  }, [visible, updatePosition]);
+    const handleDocumentClick = (event: MouseEvent): void => {
+      if (!wrapperRef.current?.contains(event.target as Node)) {
+        hide();
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        hide();
+      }
+    };
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener('click', handleDocumentClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [visible, updatePosition, hide]);
 
   return (
     <TooltipComponent
@@ -76,6 +110,9 @@ export const Tooltip = ({
       contentRef={contentRef}
       onMouseEnter={show}
       onMouseLeave={hide}
+      onClick={toggle}
+      onFocus={showImmediately}
+      onBlur={handleBlur}
     >
       {children}
     </TooltipComponent>

@@ -17,7 +17,6 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
   children,
   primaryAction,
   footer,
-  size = 'md',
   className,
 }) => {
   if (!isOpen) {return null;}
@@ -28,7 +27,6 @@ export const DrawerComponent: React.FC<DrawerComponentProps> = ({
     <>
       <S.Overlay $isOpen={isOpen} onClick={onClose} />
       <S.Panel
-        $size={size}
         $isOpen={isOpen}
         className={className}
         role="dialog"

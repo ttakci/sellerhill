@@ -1,6 +1,12 @@
 import type { TrackingConversionProvider } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
+export enum StoreSettingsDrawerStep {
+    GENERAL = 0,
+    BUYER_MESSAGING = 1,
+    BLACKLIST = 2,
+}
+
 /**
  * Blacklist Keyword Interface
  */

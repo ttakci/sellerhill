@@ -14,6 +14,7 @@ import axios from 'axios';
 import {
   chunkAsins,
   dedupeAsins,
+  extractCategoryPath,
   extractCommerce,
   extractImageUrls,
   extractProductAttributes,
@@ -206,6 +207,7 @@ export class KeepaService implements IProductDataProvider {
       imageUrls: extractImageUrls(raw),
       brand: raw.brand || 'Unknown',
       category,
+      categoryPath: extractCategoryPath(raw),
       manufacturer: raw.manufacturer || raw.brand || 'Unknown',
       features: raw.features || [],
       specs,

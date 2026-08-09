@@ -8,7 +8,7 @@ export const Container = styled.div`
   gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.md')};
   border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.semanticTint.info')};
+  background: ${tkn('colors.semanticTint.infoStrong')};
   color: ${tkn('colors.text.primary')};
 `;
 
@@ -20,8 +20,8 @@ export const IconWell = styled.span`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: ${tkn('colors.surface.primary')};
-  color: ${tkn('colors.semantic.info')};
+  background: ${tkn('colors.semantic.info')};
+  color: ${tkn('colors.text.inverse')};
 `;
 
 export const Content = styled.div`

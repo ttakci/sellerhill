@@ -1,20 +1,59 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ListingStatus } from '@repo/shared';
+import { ListingStatus, type ListingSettingsGroup, type ProductData } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayBulkService, type BulkPriceQuantityItem } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 
+import {
+  applyListingOverrides,
+  hasCommerceDelta,
+  type ListingOverrideRow,
+} from './listing-pricing.helpers';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsService } from './listings.service';
 
+/** A listing whose price or quantity moved and now has to reach eBay. */
+export interface PendingListingUpdate {
+  listingId: string;
+  userId: string;
+  /** The store this listing lives on — the grouping key for a bulk call. */
+  ebayAccountId: string;
+  sku: string;
+  offerId: string | null;
+  ebayItemId: string;
+  price: number;
+  quantity: number;
+  purchasePrice: number;
+  estimatedProfit: number;
+  profitMargin: number;
+  roi: number;
+}
+
+interface ListingRow extends ListingOverrideRow {
+  id: string;
+  user_id: string;
+  listing_settings_group_id: string;
+  ebay_item_id: string;
+  ebay_account_id: string | null;
+  sku: string | null;
+  ebay_offer_id: string | null;
+}
+
 /**
- * Fan-out helper for product data changes.
+ * Fan-out for product data changes.
  *
- * The stale-driven refresh pipeline (`RefreshProcessorService`) and the
- * sale-driven stock sync both delegate here: given a product whose Amazon
- * data changed, recompute every active listing sharing it (each per its own
- * settings group) and push to eBay — but only when a listing's price or
- * quantity actually changed (eBay rate-limit hygiene).
+ * The stale-driven Keepa refresh and the sale-driven stock sync both delegate
+ * here: given a product whose Amazon data moved, recompute every active listing
+ * sharing it (each per its own settings group) and push the ones that actually
+ * changed.
+ *
+ * Split in two on purpose. `computePendingUpdates` touches no eBay API, so a
+ * caller holding many products (the 50-product refresh batch) can accumulate
+ * across all of them and hand the whole set to `flushUpdates`, which groups by
+ * store and sends 25 listings per call. Pushing per product — the old shape —
+ * meant two products belonging to the same seller never shared a call, and each
+ * listing cost four.
  */
 @Injectable()
 export class ProductSyncService {
@@ -24,13 +63,14 @@ export class ProductSyncService {
     private readonly databaseService: DatabaseService,
     private readonly strategyService: ListingStrategyService,
     private readonly ebayService: EbayService,
+    private readonly ebayBulkService: EbayBulkService,
     private readonly listingsService: ListingsService
   ) {}
 
   /**
    * Public entry point used by the sale-driven stock-sync queue.
    * Resolves the ASIN for a product, then recomputes + pushes every active
-   * listing that shares it (each per its own settings group).
+   * listing that shares it.
    */
   async syncListingsForProduct(productId: string): Promise<void> {
     const rows = await this.databaseService.query<{ asin: string }>(`SELECT asin FROM products WHERE id = $1`, [
@@ -43,162 +83,238 @@ export class ProductSyncService {
     await this.updateAllListingsForProduct(productId, rows[0].asin);
   }
 
-  /**
-   * Recalculate and push updates to eBay for all listings linked to a product.
-   * Groups listings by user for batch processing. Skips the eBay push (and the
-   * listing row update) when neither price nor quantity changed — this keeps
-   * eBay API call volume proportional to real changes, not to refresh frequency.
-   */
+  /** Compute + push for a single product. Callers with many products should batch instead. */
   async updateAllListingsForProduct(productId: string, asin: string): Promise<void> {
-    interface ListingRow {
-      id: string;
-      user_id: string;
-      listing_settings_group_id: string;
-      ebay_item_id: string;
-      price: string | null;
-      quantity: number | null;
-      disable_ordering: boolean;
-      disable_repricing: boolean;
-      lock_price: boolean;
-      lock_quantity: boolean;
-      price_override: string | null;
-      quantity_override: number | null;
-      margin_percent_override: string | null;
-      margin_fixed_override: string | null;
-    }
+    await this.flushUpdates(await this.computePendingUpdates(productId, asin));
+  }
+
+  /**
+   * Work out what each active listing for this product should now cost and
+   * stock. Makes no eBay calls; returns only the listings that actually moved.
+   */
+  async computePendingUpdates(productId: string, asin: string): Promise<PendingListingUpdate[]> {
     const listings = await this.databaseService.query<ListingRow>(
-      `SELECT id, user_id, listing_settings_group_id, ebay_item_id, price, quantity,
+      `SELECT id, user_id, listing_settings_group_id, ebay_item_id, ebay_account_id,
+              sku, ebay_offer_id, price, quantity,
               COALESCE(disable_ordering, false) as disable_ordering,
               COALESCE(disable_repricing, false) as disable_repricing,
               COALESCE(lock_price, false) as lock_price,
               COALESCE(lock_quantity, false) as lock_quantity,
               price_override, quantity_override, margin_percent_override, margin_fixed_override
        FROM listings
-       WHERE product_id = $1 AND status = '${ListingStatus.ACTIVE}'`,
-      [productId]
+       WHERE product_id = $1 AND status = $2`,
+      [productId, ListingStatus.ACTIVE]
     );
 
     if (listings.length === 0) {
-      return;
+      return [];
     }
 
     const productInfo = await this.listingsService.getProductByAsin(asin);
     if (!productInfo) {
+      return [];
+    }
+
+    // One settings-group read per (user, group) instead of one per listing:
+    // an ASIN listed by the same seller in several groups, or by many sellers,
+    // used to re-fetch the same rows for every listing.
+    const groupCache = new Map<string, ListingSettingsGroup>();
+    const accountCache = new Map<string, string | null>();
+    const pending: PendingListingUpdate[] = [];
+
+    for (const listing of listings) {
+      try {
+        const update = await this.buildPendingUpdate(listing, asin, productInfo.data, groupCache, accountCache);
+        if (update) {
+          pending.push(update);
+        }
+      } catch (error: unknown) {
+        this.logger.error(
+          `Failed to recompute listing ${listing.id}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+
+    return pending;
+  }
+
+  /**
+   * Send pending updates to eBay, grouped by store, 25 per call, then persist
+   * what eBay accepted.
+   *
+   * A listing row is only written after eBay confirms its entry — a failed push
+   * leaves the old price in place so the next refresh retries it, which is the
+   * same contract the per-listing path had.
+   */
+  async flushUpdates(updates: PendingListingUpdate[]): Promise<void> {
+    if (updates.length === 0) {
       return;
     }
 
-    // Group by user for parallel processing
-    const byUser = new Map<string, typeof listings>();
-    for (const listing of listings) {
-      const group = byUser.get(listing.user_id) || [];
-      group.push(listing);
-      byUser.set(listing.user_id, group);
+    const byAccount = new Map<string, PendingListingUpdate[]>();
+    for (const update of updates) {
+      const group = byAccount.get(update.ebayAccountId) ?? [];
+      group.push(update);
+      byAccount.set(update.ebayAccountId, group);
     }
 
-    // Process each user's listings in parallel
-    const userPromises = Array.from(byUser.entries()).map(async ([userId, userListings]) => {
-      for (const listing of userListings) {
-        try {
-          const strategyResult = await this.strategyService.prepareListingData(
-            userId,
-            productInfo.data,
-            listing.listing_settings_group_id
+    const byListingId = new Map(updates.map((update) => [update.listingId, update]));
+
+    await Promise.allSettled(
+      Array.from(byAccount.entries()).map(async ([accountId, accountUpdates]) => {
+        const items: BulkPriceQuantityItem[] = accountUpdates.map((update) => ({
+          listingId: update.listingId,
+          sku: update.sku,
+          offerId: update.offerId,
+          price: update.price,
+          quantity: update.quantity,
+        }));
+
+        const results = await this.ebayBulkService.updatePriceQuantity(accountId, items);
+
+        const applied = results
+          .filter((result) => result.ok)
+          .map((result) => ({ result, update: byListingId.get(result.listingId) }))
+          .filter((pair): pair is { result: (typeof results)[number]; update: PendingListingUpdate } =>
+            Boolean(pair.update)
           );
 
-          // Apply per-listing overrides (easync-style locks / disable flags)
-          let finalPrice = strategyResult.price;
-          let finalQty = strategyResult.quantity;
-          let purchasePrice = strategyResult.purchasePrice;
-          let estimatedProfit = strategyResult.estimatedProfit;
-          let profitMargin = strategyResult.profitMargin;
-          let roi = strategyResult.roi;
+        await this.persistApplied(applied);
+        await this.persistResolvedOfferIds(results.filter((result) => !result.ok && result.offerId));
 
-          if (listing.disable_ordering) {
-            finalQty = 0;
-          } else if (listing.lock_quantity) {
-            finalQty =
-              listing.quantity_override !== null && listing.quantity_override !== undefined
-                ? Number(listing.quantity_override)
-                : Number(listing.quantity ?? 0);
-          }
-
-          if (listing.disable_repricing || listing.lock_price) {
-            if (listing.price_override !== null && listing.price_override !== undefined) {
-              finalPrice = parseFloat(String(listing.price_override));
-            } else if (listing.price !== null && listing.price !== undefined) {
-              finalPrice = parseFloat(String(listing.price));
-            }
-            // Recompute profit metrics vs Amazon cost when price is locked/overridden
-            purchasePrice = strategyResult.purchasePrice;
-            estimatedProfit = finalPrice - purchasePrice;
-            profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
-            roi = purchasePrice > 0 ? (estimatedProfit / purchasePrice) * 100 : 0;
-          } else if (
-            listing.margin_percent_override !== null ||
-            listing.margin_fixed_override !== null
-          ) {
-            // Optional margin overrides on top of Amazon cost
-            const amazon = strategyResult.purchasePrice;
-            const pct = listing.margin_percent_override
-              ? parseFloat(String(listing.margin_percent_override))
-              : 0;
-            const fixed = listing.margin_fixed_override
-              ? parseFloat(String(listing.margin_fixed_override))
-              : 0;
-            finalPrice = amazon * (1 + pct / 100) + fixed;
-            estimatedProfit = finalPrice - amazon;
-            profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
-            roi = amazon > 0 ? (estimatedProfit / amazon) * 100 : 0;
-          }
-
-          const priceChanged = String(listing.price) !== String(finalPrice);
-          const quantityChanged = Number(listing.quantity) !== Number(finalQty);
-
-          // No price/quantity delta → nothing to push to eBay, nothing to persist.
-          if (!priceChanged && !quantityChanged) {
-            this.logger.debug(
-              `Listing ${listing.ebay_item_id} unchanged (price=${finalPrice}, qty=${finalQty}); skipping eBay push`
-            );
-            continue;
-          }
-
-          const sku = `${asin}-NEW`;
-          await this.ebayService.updatePriceAndStock(
-            userId,
-            sku,
-            finalPrice,
-            finalQty,
-            listing.ebay_item_id
-          );
-
-          await this.databaseService.query(
-            `UPDATE listings
-             SET price = $1, quantity = $2, purchase_price = $3,
-                 estimated_profit = $4, profit_margin = $5, roi = $6,
-                 updated_at = CURRENT_TIMESTAMP
-             WHERE id = $7`,
-            [
-              finalPrice,
-              finalQty,
-              purchasePrice,
-              estimatedProfit,
-              profitMargin,
-              roi,
-              listing.id,
-            ]
-          );
-
-          this.logger.debug(
-            `Repriced listing ${listing.ebay_item_id} (Price: ${finalPrice}, Stock: ${finalQty})`
-          );
-        } catch (error: unknown) {
-          this.logger.error(
-            `Failed to reprice listing ${listing.id}: ${error instanceof Error ? error.message : String(error)}`
-          );
+        const failures = results.filter((result) => !result.ok);
+        for (const failure of failures) {
+          this.logger.warn(`eBay rejected the update for listing ${failure.listingId}: ${failure.error}`);
         }
-      }
-    });
 
-    await Promise.allSettled(userPromises);
+        this.logger.log(
+          `Pushed ${results.length - failures.length}/${results.length} listing updates ` +
+            `to eBay account ${accountId} in ${Math.ceil(items.length / 25)} bulk call(s)`
+        );
+      })
+    );
+  }
+
+  // --------------------------------------------------------------- internals
+
+  private async buildPendingUpdate(
+    listing: ListingRow,
+    asin: string,
+    product: ProductData,
+    groupCache: Map<string, ListingSettingsGroup>,
+    accountCache: Map<string, string | null>
+  ): Promise<PendingListingUpdate | null> {
+    const groupKey = `${listing.user_id}:${listing.listing_settings_group_id}`;
+    let group = groupCache.get(groupKey);
+    if (!group) {
+      group = await this.strategyService.getSettingsGroup(listing.user_id, listing.listing_settings_group_id);
+      groupCache.set(groupKey, group);
+    }
+
+    const strategy = await this.strategyService.computePricing(
+      listing.user_id,
+      product,
+      listing.listing_settings_group_id,
+      group
+    );
+    const resolved = applyListingOverrides(strategy, listing);
+
+    if (!hasCommerceDelta(listing, resolved)) {
+      this.logger.debug(
+        `Listing ${listing.ebay_item_id} unchanged (price=${resolved.price}, qty=${resolved.quantity}); skipping`
+      );
+      return null;
+    }
+
+    // A bulk call is authenticated with ONE seller token, so the account is no
+    // longer optional context. The old path asked `getActiveAccount(userId)`,
+    // an unordered `LIMIT 1`, which could push a listing through a different
+    // store than the one it was published on.
+    const accountKey = `${listing.user_id}:${listing.ebay_account_id ?? ''}`;
+    let accountId = accountCache.get(accountKey);
+    if (accountId === undefined) {
+      accountId = await this.ebayService.resolveListingAccountId(listing.user_id, listing.ebay_account_id);
+      accountCache.set(accountKey, accountId);
+    }
+    if (!accountId) {
+      this.logger.warn(`Listing ${listing.id} has no active eBay account to push through; skipping`);
+      return null;
+    }
+
+    return {
+      listingId: listing.id,
+      userId: listing.user_id,
+      ebayAccountId: accountId,
+      sku: listing.sku ?? `${asin}-NEW`,
+      offerId: listing.ebay_offer_id,
+      ebayItemId: listing.ebay_item_id,
+      price: resolved.price,
+      quantity: resolved.quantity,
+      purchasePrice: resolved.purchasePrice,
+      estimatedProfit: resolved.estimatedProfit,
+      profitMargin: resolved.profitMargin,
+      roi: resolved.roi,
+    };
+  }
+
+  /** One round trip for the whole batch instead of one UPDATE per listing. */
+  private async persistApplied(
+    applied: Array<{ result: { offerId: string | null }; update: PendingListingUpdate }>
+  ): Promise<void> {
+    if (applied.length === 0) {
+      return;
+    }
+
+    await this.databaseService.query(
+      `UPDATE listings AS l
+       SET price = v.price,
+           quantity = v.quantity,
+           purchase_price = v.purchase_price,
+           estimated_profit = v.estimated_profit,
+           profit_margin = v.profit_margin,
+           roi = v.roi,
+           sku = COALESCE(l.sku, v.sku),
+           ebay_offer_id = COALESCE(v.offer_id, l.ebay_offer_id),
+           updated_at = CURRENT_TIMESTAMP
+       FROM (
+         SELECT * FROM unnest(
+           $1::uuid[], $2::numeric[], $3::int[], $4::numeric[],
+           $5::numeric[], $6::numeric[], $7::numeric[], $8::text[], $9::text[]
+         ) AS t(id, price, quantity, purchase_price, estimated_profit, profit_margin, roi, sku, offer_id)
+       ) AS v
+       WHERE l.id = v.id`,
+      [
+        applied.map((entry) => entry.update.listingId),
+        applied.map((entry) => entry.update.price),
+        applied.map((entry) => entry.update.quantity),
+        applied.map((entry) => entry.update.purchasePrice),
+        applied.map((entry) => entry.update.estimatedProfit),
+        applied.map((entry) => entry.update.profitMargin),
+        applied.map((entry) => entry.update.roi),
+        applied.map((entry) => entry.update.sku),
+        applied.map((entry) => entry.result.offerId),
+      ]
+    );
+  }
+
+  /**
+   * Keep an offer id we had to look up even when the push itself failed —
+   * the id is still correct, and storing it stops the next attempt paying for
+   * the same lookup.
+   */
+  private async persistResolvedOfferIds(
+    results: Array<{ listingId: string; offerId: string | null }>
+  ): Promise<void> {
+    if (results.length === 0) {
+      return;
+    }
+
+    await this.databaseService.query(
+      `UPDATE listings AS l
+       SET ebay_offer_id = v.offer_id
+       FROM (SELECT * FROM unnest($1::uuid[], $2::text[]) AS t(id, offer_id)) AS v
+       WHERE l.id = v.id AND l.ebay_offer_id IS NULL`,
+      [results.map((result) => result.listingId), results.map((result) => result.offerId)]
+    );
   }
 }

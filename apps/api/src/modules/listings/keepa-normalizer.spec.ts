@@ -4,6 +4,7 @@ import {
   AMAZON_SELLER_ID,
   chunkAsins,
   dedupeAsins,
+  extractCategoryPath,
   extractCommerce,
   extractImageUrls,
   latestStockFromCsv,
@@ -221,6 +222,45 @@ describe('extractImageUrls', () => {
   });
   it('returns [] when neither is present (live responses can null imagesCSV)', () => {
     expect(extractImageUrls({ imagesCSV: null })).toEqual([]);
+  });
+});
+
+describe('extractCategoryPath', () => {
+  it('joins the whole tree root-to-leaf', () => {
+    expect(
+      extractCategoryPath({
+        categoryTree: [
+          { name: 'Home & Kitchen' },
+          { name: 'Kitchen & Dining' },
+          { name: 'Coffee, Tea & Espresso' },
+          { name: 'Espresso Machines' },
+        ],
+      } as KeepaRawProduct)
+    ).toBe('Home & Kitchen > Kitchen & Dining > Coffee, Tea & Espresso > Espresso Machines');
+  });
+
+  it('distinguishes identically-named leaves under different departments', () => {
+    // The reason the mapping is keyed on the path and not the leaf: caching
+    // "Accessories -> some eBay category" would mis-file an entire niche.
+    const electronics = extractCategoryPath({
+      categoryTree: [{ name: 'Electronics' }, { name: 'Accessories' }],
+    } as KeepaRawProduct);
+    const automotive = extractCategoryPath({
+      categoryTree: [{ name: 'Automotive' }, { name: 'Accessories' }],
+    } as KeepaRawProduct);
+
+    expect(electronics).not.toBe(automotive);
+  });
+
+  it('drops blank nodes rather than emitting empty segments', () => {
+    expect(
+      extractCategoryPath({ categoryTree: [{ name: 'Toys' }, { name: '  ' }, { name: 'Puzzles' }] } as KeepaRawProduct)
+    ).toBe('Toys > Puzzles');
+  });
+
+  it('returns undefined when Keepa sent no tree', () => {
+    expect(extractCategoryPath({} as KeepaRawProduct)).toBeUndefined();
+    expect(extractCategoryPath({ categoryTree: [] } as unknown as KeepaRawProduct)).toBeUndefined();
   });
 });
 

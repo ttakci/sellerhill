@@ -99,9 +99,9 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     ],
   },
   /*
-   * `/admin` and `/support` are deliberately absent: they belong to the
-   * operator console, which has its own shell and its own route table
-   * (`operatorRouting.ts`). This list describes the seller app only.
+   * `/admin` is deliberately absent: it belongs to the operator console,
+   * which has its own shell and its own route table (`operatorRouting.ts`).
+   * This list describes the seller app only.
    */
   {
     path: '/settings',

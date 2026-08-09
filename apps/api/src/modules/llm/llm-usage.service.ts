@@ -12,13 +12,9 @@ export interface LlmUsageLogParams {
   purpose: LlmUsagePurpose;
   model: string;
   provider?: string;
-  conversationId?: string;
-  messageId?: string;
-  generationAttemptId?: string;
   promptTokens?: number;
   completionTokens?: number;
   embeddingTokens?: number;
-  reservationTokens?: number;
   latencyMs?: number;
   success: boolean;
   error?: string;
@@ -37,9 +33,9 @@ export class LlmUsageService {
     try {
       const rows = await this.databaseService.query<{ id: string }>(
         `INSERT INTO llm_usage_log
-         (user_id,tenant_id,purpose,model,provider,conversation_id,message_id,generation_attempt_id,prompt_tokens,completion_tokens,embedding_tokens,reservation_tokens,usage_source,latency_ms,success,error)
-         VALUES($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
-        [params.userId??null,params.purpose,params.model,params.provider??null,params.conversationId??null,params.messageId??null,params.generationAttemptId??null,params.promptTokens??null,params.completionTokens??null,params.embeddingTokens??null,params.reservationTokens??null,
+         (user_id,tenant_id,purpose,model,provider,prompt_tokens,completion_tokens,embedding_tokens,usage_source,latency_ms,success,error)
+         VALUES($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+        [params.userId??null,params.purpose,params.model,params.provider??null,params.promptTokens??null,params.completionTokens??null,params.embeddingTokens??null,
           params.promptTokens===undefined&&params.completionTokens===undefined?LlmUsageSource.ESTIMATED:LlmUsageSource.PROVIDER,
           params.latencyMs??null,params.success,params.error?.slice(0,200)??null]
       );

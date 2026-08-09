@@ -13,6 +13,16 @@ export enum BuyerMessageStatus {
   SKIPPED = 'skipped',
 }
 
+/**
+ * @deprecated The SYSTEM/CUSTOM split is legacy. Every event now points at a
+ * real `BuyerMessageTemplate` row — the four starter defaults are seeded as
+ * ordinary user-owned rows (`isDefault: true`) instead of a separate
+ * code-constant template space. `SYSTEM` is kept only so already-persisted
+ * `store_settings.buyer_messaging` configs (written before this change) keep
+ * resolving; `BuyerMessageService.resolveTemplate` reads their body from
+ * `buyer_message_system_defaults` (DB) rather than a hardcoded map. New saves
+ * from the settings UI always write `CUSTOM`.
+ */
 export enum BuyerMessageTemplateKind {
   SYSTEM = 'system',
   CUSTOM = 'custom',
@@ -20,7 +30,7 @@ export enum BuyerMessageTemplateKind {
 
 export interface BuyerMessageTemplateRef {
   kind: BuyerMessageTemplateKind;
-  /** System template id (e.g. 'order_received.en.default') OR custom template UUID. */
+  /** BuyerMessageTemplate UUID (or, for legacy SYSTEM refs, the event type). */
   id: string;
 }
 
@@ -36,7 +46,7 @@ export interface BuyerMessagingConfig {
   events: Partial<Record<BuyerMessageEventType, BuyerMessageEventConfig>>;
 }
 
-/** Custom template row DTO. */
+/** Buyer message template row DTO. */
 export interface BuyerMessageTemplate {
   id: string;
   userId: string;
@@ -44,6 +54,8 @@ export interface BuyerMessageTemplate {
   name: string;
   body: string;
   locale: string;
+  /** Seeded from `buyer_message_system_defaults` as this user's starter template for the event. Drives the "Default" badge and "Reset to default" action — not a protection flag, still editable/deletable like any template. */
+  isDefault: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,33 +82,10 @@ export const BUYER_MESSAGE_PLACEHOLDERS = [
   '{{estimated_delivery}}',
 ] as const;
 
-/**
- * Predefined system templates (EN buyer-facing). Versioned in code — copy
- * changes need no migration. The `shipped` body is deliberately distinct from
- * eBay's automatic tracking notification (warm tone, does not repeat tracking).
- */
-export const SYSTEM_BUYER_MESSAGE_TEMPLATES: Record<
-  BuyerMessageEventType,
-  { id: string; body: string }
-> = {
-  [BuyerMessageEventType.ORDER_RECEIVED]: {
-    id: 'order_received.en.default',
-    body:
-      'Hi {{buyer_username}}, thank you for your order of "{{item_title}}"! We’re getting it ready and will let you know once it ships.',
-  },
-  [BuyerMessageEventType.SHIPPED]: {
-    id: 'shipped.en.default',
-    body:
-      'Hi {{buyer_username}}, great news — "{{item_title}}" is on its way! \u{1F4E6} It’ll arrive with you soon.',
-  },
-  [BuyerMessageEventType.DELIVERED]: {
-    id: 'delivered.en.default',
-    body:
-      'Hi {{buyer_username}}, your "{{item_title}}" has been delivered. We hope you love it! If you’re happy, a quick feedback would mean a lot.',
-  },
-  [BuyerMessageEventType.FEEDBACK_REQUEST]: {
-    id: 'feedback_request.en.default',
-    body:
-      'Hi {{buyer_username}}, just checking in — if you’re enjoying "{{item_title}}", a moment of feedback really helps our small business. Thank you!',
-  },
-};
+// The four starter default bodies (EN, buyer-facing) used to live here as
+// SYSTEM_BUYER_MESSAGE_TEMPLATES. They are now DB-stored in
+// `buyer_message_system_defaults` (apps/api/migrations/066) and seeded as
+// ordinary per-user BuyerMessageTemplate rows (isDefault: true) — see
+// BuyerMessageTemplateRepository.ensureSeeded — so a copy-only change no
+// longer needs a code deploy, and users can see/edit/reset them like any
+// other template.

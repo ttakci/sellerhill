@@ -8,14 +8,19 @@ import {
   ListingJobKind,
   ListingStatus,
   type ExistingListingImportQueueData,
+  type ListingBatchQueueJobData,
+  type ListingCreationData,
   type ListingQueueJobData,
   type ProductData,
 } from '@repo/shared';
-import { Job } from 'bullmq';
+import { DelayedError, Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
+import { deferralDelayMs } from '../../common/ebay-budget/ebay-call-budget.helpers';
 import { withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { EbayBulkService, type BulkListingDraft } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
@@ -24,6 +29,7 @@ import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
 import { ListingImportService } from './listing-import.service';
 import { ListingStrategyService } from './listing-strategy.service';
+import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
 
 function listingsWorkerConcurrency(): number {
@@ -43,6 +49,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly keepaService: KeepaService,
     private readonly keepaUsageService: KeepaUsageService,
     private readonly ebayService: EbayService,
+    private readonly ebayBulkService: EbayBulkService,
     private readonly listingStrategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
@@ -55,7 +62,10 @@ export class ListingProcessorService extends WorkerHost {
   /**
    * Process a listing job task from the queue
    */
-  async process(job: Job<ListingQueueJobData | ExistingListingImportQueueData>): Promise<void> {
+  async process(
+    job: Job<ListingQueueJobData | ExistingListingImportQueueData>,
+    token?: string
+  ): Promise<void> {
     return withCorrelation(
       {
         correlationId: extractCorrelationId(job) ?? generateCorrelationId(),
@@ -81,12 +91,297 @@ export class ListingProcessorService extends WorkerHost {
           }
           return;
         }
-        await this.processListing(job as Job<ListingQueueJobData>);
+        if (job.name === LISTING_BATCH_JOB) {
+          await this.processListingBatch(job as unknown as Job<ListingBatchQueueJobData>, token);
+          return;
+        }
+        await this.processListing(job as Job<ListingQueueJobData>, token);
       }
     );
   }
 
-  private async processListing(job: Job<ListingQueueJobData>): Promise<void> {
+  /**
+   * Create up to 25 listings on one store with three eBay calls.
+   *
+   * Per-ASIN work that costs us nothing at eBay — the duplicate check, Keepa
+   * resolution, pricing, AI content, category and aspect resolution — still
+   * runs per item. Only the WRITES are shared, which is where the quota goes.
+   *
+   * Per-item results are still written to `listing_job_items` individually, so
+   * the job UI keeps the same granularity it had when every ASIN was its own
+   * BullMQ job.
+   */
+  private async processListingBatch(job: Job<ListingBatchQueueJobData>, token?: string): Promise<void> {
+    const {
+      jobId,
+      userId,
+      ebayAccountId,
+      listingSettingsGroupId,
+      paymentPolicyId,
+      shippingPolicyId,
+      returnPolicyId,
+      asDraft,
+      items,
+    } = job.data;
+
+    this.logger.log(
+      `Processing batch of ${items.length} ASIN(s) for job ${jobId}${asDraft ? ' (drafts)' : ''}`
+    );
+    await this.ebayService.assertAccountOwnership(userId, ebayAccountId);
+
+    const policies = { paymentId: paymentPolicyId, shippingId: shippingPolicyId, returnId: returnPolicyId };
+    const drafts: BulkListingDraft[] = [];
+    const context = new Map<string, { asin: string; productId: string; data: ListingCreationData }>();
+    let merchantLocationKey = 'default';
+    let accountId = ebayAccountId;
+
+    for (const item of items) {
+      try {
+        if (await this.listingsService.isAsinListed(userId, item.asin)) {
+          await this.recordDuplicate(jobId, userId, item.asin, item.listingJobItemId);
+          continue;
+        }
+
+        const { productData, productId } = await this.resolveProductData(item.asin, userId);
+        const listingData = await this.listingStrategyService.prepareListingData(
+          userId,
+          productData,
+          listingSettingsGroupId,
+          ebayAccountId,
+          { applyContentAi: true }
+        );
+
+        // Drafts may hold a zero-stock ASIN so the seller can prepare it and
+        // publish once Amazon restocks; a live publish must never push qty 0.
+        if (!asDraft && listingData.quantity === 0) {
+          throw new Error(
+            `Cannot list ASIN ${item.asin}: Stock is 0. ` +
+              `Amazon stock (${productData.stock}) is less than user preferred quantity.`
+          );
+        }
+
+        if (asDraft) {
+          // Stop before every eBay call. Category and item specifics are
+          // resolved at publish, so an abandoned draft costs no quota at all.
+          await this.persistDraft(job.data, item, productId, listingData);
+          continue;
+        }
+
+        const prepared = await this.ebayService.prepareListingDraft(
+          userId,
+          listingData,
+          item.asin,
+          ebayAccountId
+        );
+        merchantLocationKey = prepared.merchantLocationKey;
+        accountId = prepared.accountId;
+
+        drafts.push({
+          key: item.listingJobItemId,
+          asin: item.asin,
+          sku: prepared.sku,
+          data: listingData,
+          policies,
+          categoryId: prepared.categoryId,
+          categoryName: prepared.categoryName,
+          categoryAspects: prepared.categoryAspects,
+          resolution: prepared.resolution,
+        });
+        context.set(item.listingJobItemId, { asin: item.asin, productId, data: listingData });
+      } catch (error: unknown) {
+        // A spent quota is a platform condition, not a defect in this ASIN:
+        // park the whole batch rather than failing items that were never tried.
+        if (error instanceof EbayBudgetExhaustedError) {
+          await this.deferUntilBudgetResets(job, token, error);
+          return;
+        }
+        await this.recordItemFailure(jobId, userId, item.asin, item.listingJobItemId, error);
+      }
+    }
+
+    if (drafts.length === 0) {
+      return;
+    }
+
+    const outcomes = await this.ebayBulkService.createListings(accountId, merchantLocationKey, drafts);
+
+    for (const outcome of outcomes) {
+      const prepared = context.get(outcome.key);
+      if (!prepared) {
+        continue;
+      }
+
+      if (!outcome.ok || !outcome.listingId) {
+        // Defence in depth against a phantom listing: an ACTIVE row with no
+        // eBay item id does not exist on eBay, can never be matched to an
+        // order, and blocks re-listing the ASIN.
+        await this.recordItemFailure(
+          jobId,
+          userId,
+          prepared.asin,
+          outcome.key,
+          new Error(outcome.error ?? 'eBay did not return a listing id for this item.')
+        );
+        continue;
+      }
+
+      const audit = summarizeAspectResolution(outcome.resolution);
+      const listingId = await this.listingsService.createListing({
+        userId,
+        asin: prepared.asin,
+        productId: prepared.productId,
+        listingSettingsGroupId,
+        paymentPolicyId,
+        shippingPolicyId,
+        returnPolicyId,
+        ebayItemId: outcome.listingId,
+        title: prepared.data.title,
+        price: prepared.data.price,
+        purchasePrice: prepared.data.purchasePrice,
+        estimatedProfit: prepared.data.estimatedProfit,
+        profitMargin: prepared.data.profitMargin,
+        roi: prepared.data.roi,
+        quantity: prepared.data.quantity,
+        ebayCategoryName: outcome.categoryName,
+        ebayCategoryId: outcome.categoryId,
+        aspectResolution: audit.summary,
+        aspectAutofilledCount: audit.autofilledCount,
+        ebayAccountId,
+        status: ListingStatus.ACTIVE,
+      });
+
+      await this.listingsService.updateJobItemResult(jobId, prepared.asin, {
+        productId: prepared.productId,
+        listingId,
+        status: ListingStatus.ACTIVE,
+        ebayItemId: outcome.listingId,
+      });
+      this.quotaEnforcement.consumeForCreate(userId, outcome.key);
+    }
+
+    const created = outcomes.filter((outcome) => outcome.ok).length;
+    this.logger.log(`Batch for job ${jobId}: ${created}/${drafts.length} listing(s) published`);
+  }
+
+  /**
+   * Write a DRAFT listing row — the batch path's terminal step for a draft job.
+   *
+   * No eBay id, no category, no item specifics: all of that is resolved by
+   * `publishListing` later, which is what makes a draft free. The quota is paid
+   * once, at publish, exactly as it would have been on a direct create — a
+   * draft never doubles the cost, it defers it.
+   */
+  private async persistDraft(
+    data: ListingBatchQueueJobData,
+    item: { asin: string; listingJobItemId: string },
+    productId: string,
+    listingData: ListingCreationData
+  ): Promise<void> {
+    const listingId = await this.listingsService.createListing({
+      userId: data.userId,
+      asin: item.asin,
+      productId,
+      listingSettingsGroupId: data.listingSettingsGroupId,
+      paymentPolicyId: data.paymentPolicyId,
+      shippingPolicyId: data.shippingPolicyId,
+      returnPolicyId: data.returnPolicyId,
+      ebayItemId: null,
+      title: listingData.title,
+      price: listingData.price,
+      purchasePrice: listingData.purchasePrice,
+      estimatedProfit: listingData.estimatedProfit,
+      profitMargin: listingData.profitMargin,
+      roi: listingData.roi,
+      quantity: listingData.quantity,
+      ebayCategoryName: listingData.category ?? '',
+      aspectAutofilledCount: 0,
+      ebayAccountId: data.ebayAccountId,
+      status: ListingStatus.DRAFT,
+    });
+
+    await this.listingsService.updateJobItemResult(data.jobId, item.asin, {
+      productId,
+      listingId,
+      status: ListingStatus.ACTIVE,
+    });
+    this.logger.log(`Created draft listing ${listingId} for ASIN ${item.asin}`);
+  }
+
+  /** An ASIN the user already has listed or drafted — never a retryable failure. */
+  private async recordDuplicate(
+    jobId: string,
+    userId: string,
+    asin: string,
+    listingJobItemId: string
+  ): Promise<void> {
+    this.logger.warn(`ASIN ${asin} is already listed/draft for user ${userId}. Skipping.`);
+    await this.listingsService.updateJobItemResult(jobId, asin, {
+      status: ListingStatus.ERROR,
+      errorMessage: 'DUPLICATE_LISTING: This ASIN is already in your active or draft listings.',
+      failureCode: ListingFailureCode.DUPLICATE_LISTING,
+      failureDetails: { retryable: false },
+    });
+    await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
+  }
+
+  /**
+   * Terminal failure for one item in a batch.
+   *
+   * Always terminal, by design: the other 24 items in this batch succeeded, so
+   * re-running the job would re-attempt work that already landed. Transient
+   * causes were exhausted before we got here — 429/5xx were retried four times
+   * at the HTTP layer and the aspect self-heal already re-derived the item
+   * specifics — so what remains is a rejection of this ASIN's own input, which
+   * a further attempt cannot change.
+   */
+  private async recordItemFailure(
+    jobId: string,
+    userId: string,
+    asin: string,
+    listingJobItemId: string,
+    error: unknown
+  ): Promise<void> {
+    const failure = classifyListingFailure(error);
+    this.logger.error(`Batch item ${asin} failed in job ${jobId}: [${failure.code}] ${failure.message}`);
+
+    await this.listingsService.updateJobItemResult(jobId, asin, {
+      status: ListingStatus.ERROR,
+      errorMessage: failure.message,
+      failureCode: failure.code,
+      failureDetails: failure.details,
+    });
+    await this.quotaEnforcement.releaseForCreate(userId, listingJobItemId);
+  }
+
+  /**
+   * Park a job until the platform's shared eBay quota resets.
+   *
+   * `moveToDelayed` is used rather than rethrowing so BullMQ does NOT count
+   * this as a failed attempt: the listing is untried, and burning its three
+   * retries against a quota that only refills at UTC midnight would turn a
+   * temporary platform-wide condition into a permanent per-listing failure.
+   */
+  private async deferUntilBudgetResets(
+    job: Job,
+    token: string | undefined,
+    error: EbayBudgetExhaustedError
+  ): Promise<void> {
+    const delay = deferralDelayMs(error.resetAt, new Date());
+    this.logger.warn(
+      `Deferring job ${job.id} for ${Math.round(delay / 60_000)} min — ${error.message}`
+    );
+
+    if (!token) {
+      // No worker token means the job cannot be re-parked; rethrowing at least
+      // gets it a BullMQ retry rather than silently dropping the listing.
+      throw error;
+    }
+
+    await job.moveToDelayed(Date.now() + delay, token);
+    throw new DelayedError();
+  }
+
+  private async processListing(job: Job<ListingQueueJobData>, token?: string): Promise<void> {
     const {
       jobId,
       userId,
@@ -226,15 +521,41 @@ export class ListingProcessorService extends WorkerHost {
           : `Successfully created eBay listing ${ebayItemId} for ASIN ${asin}`
       );
     } catch (error: unknown) {
-      const isLastAttempt = job.attemptsMade + 1 >= (job.opts.attempts || 1);
+      // Budget exhaustion is not a failure of this listing — the platform's
+      // shared daily eBay quota is spent. Park the job until it resets, keep
+      // the billing reservation held (the work is still coming), and leave the
+      // item in RETRYING so the UI reports "waiting", not "failed".
+      if (error instanceof EbayBudgetExhaustedError) {
+        await this.listingsService.updateJobItemResult(jobId, asin, {
+          status: ListingStatus.RETRYING,
+          errorMessage: error.message,
+          failureCode: ListingFailureCode.PROVIDER_BUDGET_EXHAUSTED,
+          failureDetails: { retryable: true },
+        });
+        await this.deferUntilBudgetResets(job, token, error);
+        return;
+      }
 
       // One classifier owns every failure shape (ours, eBay's, transport), so
       // the UI can show an actionable reason instead of a raw eBay string.
       const failure = classifyListingFailure(error);
 
+      // Honour the classifier's own verdict instead of retrying blindly.
+      //
+      // By the time we are here, transient causes have already been retried
+      // four times at the HTTP layer (429/5xx, `Retry-After`-aware) and the
+      // aspect self-heal has already re-derived the item specifics. What is
+      // left is usually a rejection of the INPUT — wrong category, invalid
+      // identifier, missing business policy — where the same request produces
+      // the same answer. Re-running the job then re-pays Keepa, the LLM content
+      // rewrite and the whole publish sequence for a guaranteed second refusal;
+      // a permanently broken ASIN could burn ~27 eBay calls before giving up.
+      const canRetry = failure.details?.retryable !== false;
+      const isLastAttempt = !canRetry || job.attemptsMade + 1 >= (job.opts.attempts || 1);
+
       this.logger.error(
         `Error processing ASIN ${asin} in job ${jobId}: [${failure.code}] ${failure.message} ` +
-          `(Attempt ${job.attemptsMade + 1})`
+          `(Attempt ${job.attemptsMade + 1}${canRetry ? '' : ', not retryable'})`
       );
 
       await this.listingsService.updateJobItemResult(jobId, asin, {

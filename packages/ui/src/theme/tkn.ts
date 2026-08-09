@@ -37,6 +37,7 @@ type ThemePath =
   | 'colors.semanticTint.error'
   | 'colors.semanticTint.warning'
   | 'colors.semanticTint.info'
+  | 'colors.semanticTint.infoStrong'
   | 'colors.semanticTint.neutral'
   | 'colors.semanticTintBorder.success'
   | 'colors.semanticTintBorder.error'

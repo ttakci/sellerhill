@@ -65,6 +65,7 @@ export interface ThemeColors {
     error: string;
     warning: string;
     info: string;
+    infoStrong: string;
     neutral: string;
   };
 

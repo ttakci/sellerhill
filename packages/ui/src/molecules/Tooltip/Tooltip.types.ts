@@ -22,4 +22,7 @@ export interface TooltipComponentProps {
   contentRef: React.RefObject<HTMLDivElement>;
   onMouseEnter: (e: React.MouseEvent) => void;
   onMouseLeave: () => void;
+  onClick: () => void;
+  onFocus: () => void;
+  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
 }

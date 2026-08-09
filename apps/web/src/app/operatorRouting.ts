@@ -14,7 +14,6 @@ import type { TFunction } from 'i18next';
 
 /** Path without locale prefix. */
 export const OPERATOR_ADMIN_PATH = '/admin';
-export const OPERATOR_SUPPORT_PATH = '/support';
 
 export interface OperatorRoute {
   path: string;
@@ -23,19 +22,19 @@ export interface OperatorRoute {
   roles: readonly UserRole[];
 }
 
+/*
+ * Only one operator route today. The `/support` console (SUPPORT role) was
+ * removed 2026-08 when customer support moved to tawk.to — see CLAUDE.md
+ * "Customer support widget — tawk.to". SUPPORT accounts are still kept out
+ * of the seller app (`isOperatorRole`), but have no console to land on; see
+ * `resolveHomePath` below.
+ */
 const OPERATOR_ROUTES: readonly OperatorRoute[] = [
   {
     path: OPERATOR_ADMIN_PATH,
     labelKey: 'translation:menu.admin',
     icon: 'gauge',
     roles: [UserRole.ADMIN],
-  },
-  {
-    /* ADMIN oversees the queue read-only; SUPPORT works it. */
-    path: OPERATOR_SUPPORT_PATH,
-    labelKey: 'translation:support.title',
-    icon: 'headset',
-    roles: [UserRole.ADMIN, UserRole.SUPPORT],
   },
 ];
 
@@ -51,7 +50,12 @@ export function resolveOperatorRoutes(role: UserRole | undefined): readonly Oper
  */
 export function resolveHomePath(role: UserRole | undefined, hasConnectedAccounts: boolean): string {
   if (isOperatorRole(role)) {
-    return resolveOperatorRoutes(role)[0]?.path ?? OPERATOR_SUPPORT_PATH;
+    /* SUPPORT has no operator route since the /support console was removed
+       (see file header). Falling back into the seller app or looping back
+       into /admin would both be wrong (the API refuses seller surfaces for
+       staff, and /admin itself redirects non-ADMIN back through this
+       function) — /login is the only non-looping, non-privileged landing. */
+    return resolveOperatorRoutes(role)[0]?.path ?? '/login';
   }
   return hasConnectedAccounts ? '/dashboard' : '/onboarding/ebay';
 }

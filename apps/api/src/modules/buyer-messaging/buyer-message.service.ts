@@ -1,8 +1,6 @@
 // apps/api/src/modules/buyer-messaging/buyer-message.service.ts
 import { Injectable } from '@nestjs/common';
-import {
-  BuyerMessageEventType, BuyerMessageTemplateKind, SYSTEM_BUYER_MESSAGE_TEMPLATES,
-} from '@repo/shared';
+import { BuyerMessageEventType, BuyerMessageTemplateKind } from '@repo/shared';
 
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
@@ -42,8 +40,10 @@ export class BuyerMessageService {
     }
 
     if (ev.template.kind === BuyerMessageTemplateKind.SYSTEM) {
-      const sys = SYSTEM_BUYER_MESSAGE_TEMPLATES[event];
-      const body = sys?.body ?? '';
+      // Legacy ref, from a config saved before defaults became real template
+      // rows (see BuyerMessageTemplateKind doc comment). Resolve by event
+      // type against the DB-stored default, not the removed code constant.
+      const body = (await this.templates.getSystemDefaultBody(event)) ?? '';
       return { body, kind: BuyerMessageTemplateKind.SYSTEM, ref: ev.template.id, versionHash: templateVersionHash(body) };
     }
     // custom

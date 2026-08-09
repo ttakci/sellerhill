@@ -10,7 +10,9 @@
       "settings": "Settings",
       "billing": "Billing",
       "users": "Users",
-      "listingQuality": "Listing quality"
+      "listingQuality": "Listing quality",
+      "ebayLimits": "eBay Limits",
+      "listingFailures": "Listing Failures"
     },
     "queue": {
       "summary": "Waiting: {{waiting}} · Active: {{active}} · Failed: {{failed}}"
@@ -234,6 +236,29 @@
         "llm": "AI",
         "terminal_fallback": "Fallback"
       }
+    },
+    "ebayLimits": {
+      "description": "eBay meters API calls per application, not per seller - every customer draws from this one daily pool. Background jobs stop at the reduced ceiling so seller-triggered actions always have budget left.",
+      "resource": "Resource",
+      "used": "Used",
+      "limit": "Daily limit",
+      "remaining": "Remaining",
+      "backgroundLimit": "Background ceiling",
+      "resetAt": "Resets",
+      "empty": "No usage recorded yet",
+      "emptyDescription": "Counters appear once the platform makes its first eBay call today."
+    },
+    "listingFailures": {
+      "description": "Operator diagnostics. Sellers only ever see the localized reason; the raw provider message is shown here because it names eBay error ids and internal fields.",
+      "asin": "ASIN",
+      "seller": "Seller",
+      "code": "Code",
+      "sellerSees": "Seller sees",
+      "technical": "Provider message",
+      "attemptedAt": "Attempted",
+      "uncoded": "unclassified",
+      "empty": "No failed listings",
+      "emptyDescription": "Failed create attempts appear here with the raw provider error."
     }
   }
 }

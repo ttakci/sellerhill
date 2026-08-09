@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EbayApiResource } from '@repo/shared';
 import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
 import type { CategoryAspect } from './aspect-builder';
 import {
@@ -40,7 +42,15 @@ export interface ResolveCategoryInput {
   asin?: string;
   brand?: string | null;
   title: string;
+  /** Leaf Amazon category — a hint appended to eBay's own search query. */
   amazonCategory?: string | null;
+  /**
+   * Full Amazon category path, used as the shared cache key.
+   *
+   * Falls back to the leaf when a product predates the path being captured,
+   * which is weaker but still better than paying Taxonomy per ASIN.
+   */
+  amazonCategoryPath?: string | null;
 }
 
 export interface ResolvedCategory {
@@ -70,7 +80,8 @@ export class EbayTaxonomyService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly budget: EbayCallBudgetService
   ) {}
 
   /**
@@ -84,7 +95,7 @@ export class EbayTaxonomyService {
   async resolveCategory(input: ResolveCategoryInput): Promise<ResolvedCategory> {
     const query = buildCategoryQuery(input);
     const queryKey = categoryQueryHash(query);
-    const amazonCategory = normalizeAmazonCategory(input.amazonCategory);
+    const amazonCategory = normalizeAmazonCategory(input.amazonCategoryPath ?? input.amazonCategory);
     const memoKey = `${input.marketplaceId}:${input.categoryTreeId}:${queryKey}`;
 
     const memo = this.categoryMemo.get(memoKey);
@@ -208,6 +219,18 @@ export class EbayTaxonomyService {
     if (input.asin) {
       entries.push({ scope: CategoryMapScope.ASIN, scopeKey: input.asin });
     }
+    // The scope that actually saves Taxonomy budget. The query key is a hash of
+    // brand+title and is therefore unique per product, so it only ever helps a
+    // re-list of the SAME item; the Amazon category path generalizes across a
+    // whole niche, which is what turns "one Taxonomy call per new ASIN" (a hard
+    // 5,000/day ceiling on platform-wide onboarding) into one per niche.
+    //
+    // It is deliberately the least specific scope: `pickCategoryFromRows` ranks
+    // ASIN above it, and an operator's locked pin above everything, so a bad
+    // generalization is always correctable and never overwrites a curated row.
+    if (args.amazonCategory) {
+      entries.push({ scope: CategoryMapScope.AMAZON_CATEGORY, scopeKey: args.amazonCategory });
+    }
 
     for (const entry of entries) {
       // `is_locked` guards operator pins: a cached taxonomy answer must never
@@ -252,7 +275,9 @@ export class EbayTaxonomyService {
           axios.get<SuggestionResponse>(url, {
             headers: { Authorization: `Bearer ${input.accessToken}`, 'Accept-Language': 'en-US' },
           }),
-        { logger: this.logger }
+        // Taxonomy is our scarcest quota (5,000/day for the whole application
+        // vs 2,000,000 for Inventory) and this is the call that consumes it.
+        { logger: this.logger, acquireBudget: () => this.budget.acquire(EbayApiResource.TAXONOMY) }
       );
       data = response.data;
     } catch (error: unknown) {
@@ -351,7 +376,7 @@ export class EbayTaxonomyService {
         axios.get<AspectsResponse>(url, {
           headers: { Authorization: `Bearer ${input.accessToken}`, 'Accept-Language': 'en-US' },
         }),
-      { logger: this.logger }
+      { logger: this.logger, acquireBudget: () => this.budget.acquire(EbayApiResource.TAXONOMY) }
     );
 
     const aspects: CategoryAspect[] = (response.data?.aspects ?? []).map((aspect) => ({

@@ -18,7 +18,7 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
-import { ProductSyncService } from './product-sync.service';
+import { ProductSyncService, type PendingListingUpdate } from './product-sync.service';
 import { dataFailureDelayMinutes } from './refresh-backoff';
 
 interface ProductRow {
@@ -189,6 +189,7 @@ export class RefreshProcessorService extends WorkerHost {
     const tokenShare = meta.tokensConsumed / products.length;
     const userIdsByProduct = await this.loadUserIdsByProduct(productIds);
     const keepaByAsin = new Map(keepaProducts.map((p) => [p.asin, p]));
+    const pendingUpdates: PendingListingUpdate[] = [];
 
     for (const row of products) {
       // Token was spent for every requested ASIN whether or not data came back.
@@ -208,13 +209,18 @@ export class RefreshProcessorService extends WorkerHost {
       }
 
       try {
-        await this.applyKeepaProduct(row, kp);
+        pendingUpdates.push(...(await this.applyKeepaProduct(row, kp)));
       } catch (error: unknown) {
         this.logger.error(
           `Refresh failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
+
+    // One flush for the WHOLE batch, not one per product. Two products sold by
+    // the same seller now share a bulk call; previously they never could, and
+    // each listing cost four eBay calls of its own.
+    await this.productSyncService.flushUpdates(pendingUpdates);
   }
 
   /**
@@ -224,8 +230,11 @@ export class RefreshProcessorService extends WorkerHost {
    * Unknown-preserve contract: a null price or UNKNOWN stock never overwrites
    * the previous value — Keepa failing to observe the Buy Box is not evidence
    * the product is free or out of stock.
+   *
+   * Returns the listing updates this product implies rather than pushing them,
+   * so the caller can batch every product's updates into shared bulk calls.
    */
-  private async applyKeepaProduct(row: ProductRow, kp: KeepaProduct): Promise<void> {
+  private async applyKeepaProduct(row: ProductRow, kp: KeepaProduct): Promise<PendingListingUpdate[]> {
     const intervalMinutes = await this.platformSettings.getNumber(
       PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES,
     );
@@ -287,15 +296,18 @@ export class RefreshProcessorService extends WorkerHost {
         ]
       );
 
-      if (commerceChanged) {
-        // Fan out: recompute every active listing sharing this ASIN and push to
-        // eBay only where price/quantity actually changed.
-        await this.productSyncService.updateAllListingsForProduct(row.id, row.asin);
-      }
       this.logger.debug(
         `Refreshed ASIN ${row.asin} → price=${effectivePrice}, stock=${effectiveStock} (${kp.stockStatus})` +
           `${commerceChanged ? ' [commerce]' : ''}${metadataChanged ? ' [metadata]' : ''}`
       );
+
+      if (commerceChanged) {
+        // Fan out: recompute every active listing sharing this ASIN. The push
+        // itself is deferred to the batch flush so listings from different
+        // products can share one eBay call.
+        return this.productSyncService.computePendingUpdates(row.id, row.asin);
+      }
+      return [];
     } else {
       await this.databaseService.query(
         `UPDATE products
@@ -308,6 +320,8 @@ export class RefreshProcessorService extends WorkerHost {
       );
       this.logger.debug(`Refreshed (unchanged) ASIN ${row.asin}`);
     }
+
+    return [];
   }
 
   /**

@@ -49,21 +49,28 @@ export const colorTokens = {
   },
 } as const;
 
+/**
+ * Softened 2026-08 alongside the typography pass (same live user feedback:
+ * the app felt dense/heavy). Steps at or above `sm` (8px) each dropped ~1-2px;
+ * `2xs`/`2xs+`/`xs`/`xs+` (2-6px) are untouched — they're already the finest
+ * gaps in the system (icon-to-label, chip insets) and further shrinking there
+ * risks sub-pixel/visual-alignment issues for no perceptible gain.
+ */
 export const spacingTokens = {
   '2xs': '0.125rem', // 2px
   '2xs+': '0.1875rem', // 3px
   xs: '0.25rem', // 4px
   'xs+': '0.375rem', // 6px
-  sm: '0.5rem', // 8px
-  'sm+': '0.625rem', // 10px
-  'sm-md': '0.75rem', // 12px
-  'sm-md+': '0.875rem', // 14px
-  md: '1rem', // 16px
-  'md+': '1.25rem', // 20px
-  lg: '1.5rem', // 24px
-  xl: '2rem', // 32px
-  xxl: '3rem', // 48px
-  xxxl: '4rem', // 64px
+  sm: '0.4375rem', // 7px
+  'sm+': '0.5625rem', // 9px
+  'sm-md': '0.6875rem', // 11px
+  'sm-md+': '0.8125rem', // 13px
+  md: '0.9375rem', // 15px
+  'md+': '1.125rem', // 18px
+  lg: '1.375rem', // 22px
+  xl: '1.875rem', // 30px
+  xxl: '2.75rem', // 44px
+  xxxl: '3.75rem', // 60px
 } as const;
 
 /**
@@ -120,9 +127,11 @@ export const shadowTokens = {
  * This is the ONE sanctioned two-typeface pairing — do not add a third stack.
  *
  * The size / weight / line-height steps below mirror a proven production scale
- * (see the `web` variants: 40/32/24/20/16 headings over a 15px body). Its two
- * signatures versus a generic scale: body is **15px, not 16**, and heading
- * leading is tight (1.1–1.3) because Lexend's x-height already carries the row.
+ * (headings 23/19/17/15/13 over a 14px body — one step down from the original
+ * 24/20/18/16/14-over-15 scale, tuned 2026-08 after user feedback that the app
+ * read too large/bold). Its two signatures versus a generic scale: body is
+ * **14px, not 16**, and heading leading is tight (1.1–1.3) because Lexend's
+ * x-height already carries the row.
  */
 export const typographyTokens = {
   fontFamily: {
@@ -133,25 +142,32 @@ export const typographyTokens = {
   },
   fontSize: {
     '2xs': '0.625rem', // 10px - Micro labels, tiny badges (no scale equivalent)
-    xs: '0.75rem', // 12px - caption / captionLight
-    sm: '0.875rem', // 14px - bodyMD: table cells, dense UI, h5
-    base: '0.9375rem', // 15px - body: THE primary reading size
-    md: '1rem', // 16px - headingSM / callout
-    lg: '1.125rem', // 18px - Section titles (h3), metric-sm
-    xl: '1.25rem', // 20px - headingMD: sub-section (h2), metric
-    xxl: '1.5rem', // 24px - headingLG: page titles (h1)
+    xs: '0.6875rem', // 11px - caption / captionLight
+    sm: '0.8125rem', // 13px - bodyMD: table cells, dense UI, h5
+    base: '0.875rem', // 14px - body: THE primary reading size
+    md: '0.9375rem', // 15px - headingSM / callout
+    lg: '1.0625rem', // 17px - Section titles (h3), metric-sm
+    xl: '1.1875rem', // 19px - headingMD: sub-section (h2), metric
+    xxl: '1.4375rem', // 23px - headingLG: page titles (h1)
     xxxl: '2rem', // 32px - headingXL
     '3xl': '2.5rem', // 40px - headingXXL: display
     '4xl': '3rem', // 48px - Landing display headings
     '5xl': '3.75rem', // 60px - Hero display
     '6xl': '4.5rem', // 72px - Massive hero
   },
+  /**
+   * Softened 2026-08 after live user feedback ("too bold"): `semibold` and
+   * `bold` each dropped one loaded static weight (600→500, 700→600). `normal`
+   * and `medium` are untouched — body/reading text was never the complaint,
+   * only headings, labels and emphasis. Only 400/500/600/700 are loaded
+   * (`apps/web/index.html`), so values must stay on that set.
+   */
   fontWeight: {
     light: 300,
     normal: 400,
     medium: 500,
-    semibold: 600,
-    bold: 700,
+    semibold: 500,
+    bold: 600,
   },
   lineHeight: {
     display: 1.1, // 40/44 - display only; large type needs the least leading
@@ -195,9 +211,9 @@ export const controlTokens = {
     mediumLabeled: '3.5rem', // 56px default forms — Button `large` matches this
     largeLabeled: '4rem', // 64px
   },
-  paddingX: '1rem', // 16px
+  paddingX: '0.9375rem', // 15px — matches spacing.md
   iconWidth: '2.75rem', // 44px
-  fontSize: typographyTokens.fontSize.sm, // 14px — always match body/sm
+  fontSize: typographyTokens.fontSize.sm, // 13px — always match body/sm
   radius: radiusTokens.md, // 8px — mirrors the control radius tier
 } as const;
 

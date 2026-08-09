@@ -20,7 +20,6 @@ function makeConfig(map: Record<string, string | undefined> = {}): ConfigService
     LLM_BASE_URL: 'http://llm.test/v1',
     LLM_API_KEY: '',
     LLM_CONTENT_MODEL: 'content-model',
-    LLM_ASSISTANT_MODEL: 'assistant-model',
     LLM_TIMEOUT_MS: '5000',
   };
   const merged = { ...defaults, ...map };
@@ -127,15 +126,15 @@ describe('LlmService', () => {
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer sk-test');
   });
 
-  it('purpose assistant selects assistant model', async () => {
+  it('purpose aspect still uses the single content model', async () => {
     const fetchMock = jest.fn();
     mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const svc = new LlmService(makeConfig(), makeUsage());
-    await svc.chat([{ role: 'user', content: 'hi' }], { purpose: 'assistant' });
+    await svc.chat([{ role: 'user', content: 'hi' }], { purpose: 'aspect' });
     const body = JSON.parse(getCallInit(fetchMock).body as string) as Record<string, unknown>;
-    expect(body.model).toBe('assistant-model');
+    expect(body.model).toBe('content-model');
   });
 
   it('explicit opts.model wins over purpose', async () => {
@@ -145,7 +144,7 @@ describe('LlmService', () => {
 
     const svc = new LlmService(makeConfig(), makeUsage());
     await svc.chat([{ role: 'user', content: 'hi' }], {
-      purpose: 'assistant',
+      purpose: 'aspect',
       model: 'override',
     });
     const body = JSON.parse(getCallInit(fetchMock).body as string) as Record<string, unknown>;
