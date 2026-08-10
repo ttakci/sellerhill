@@ -96,6 +96,14 @@ services:
       LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-2}
       AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
       AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-2}
+      # Platform-wide ceiling on concurrent Playwright actions, and therefore
+      # the throughput ceiling: capacity is this × 86,400 browser-seconds/day.
+      # A RESOURCE guard, not the anti-ban control (that is per-account and
+      # hardcoded). Past ~400 buyer accounts this becomes the binding
+      # constraint — but lower AMAZON_ORDER_SYNC_CRON (admin panel) FIRST,
+      # since order-list scraping costs accounts × ticks/day regardless of
+      # sales. Budget ~150–300 MB RSS per unit and raise API_MEMORY_LIMIT with it.
+      AMAZON_GLOBAL_CONCURRENCY: ${AMAZON_GLOBAL_CONCURRENCY:-5}
 
       # Playwright browser-state + evidence locations (bind to the volumes below).
       BROWSER_STATE_DIR: /app/.browser-state

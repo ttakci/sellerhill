@@ -75,6 +75,11 @@ services:
       LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-1}
       AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
       AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-1}
+      # Platform-wide ceiling on concurrent Playwright actions (resource guard,
+      # not the anti-ban control — that is per-account and hardcoded). Left at
+      # the code default here; test carries few accounts. See the production
+      # compose file for the capacity math.
+      AMAZON_GLOBAL_CONCURRENCY: ${AMAZON_GLOBAL_CONCURRENCY:-5}
 
       BROWSER_STATE_DIR: /app/.browser-state
       FULFILLMENT_EVIDENCE_DIR: /app/fulfillment-evidence
