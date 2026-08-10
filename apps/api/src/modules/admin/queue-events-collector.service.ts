@@ -49,6 +49,8 @@ export const OBSERVED_QUEUE_NAMES = [
   'listings',
   'keepa-refresh',
   'buyer-message',
+  'billing-trial-expiry',
+  'data-retention',
 ] as const;
 
 /** A BullMQ QueueEvents job event payload (minimal shape we consume). */

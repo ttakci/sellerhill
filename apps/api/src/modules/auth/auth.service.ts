@@ -16,6 +16,7 @@ import {
 import * as bcrypt from 'bcrypt';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { BillingService } from '../billing/billing.service';
 import { EmailService } from '../email/email.service';
 
 import { AuthSessionService } from './auth-session.service';
@@ -49,7 +50,8 @@ export class AuthService {
     private readonly databaseService: DatabaseService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-    private readonly sessions: AuthSessionService
+    private readonly sessions: AuthSessionService,
+    private readonly billingService: BillingService,
   ) {}
 
   /**
@@ -104,6 +106,11 @@ export class AuthService {
     const user = users[0];
     this.logger.log(`User created in database: ${user.id}`);
 
+    // Billing is downstream of account creation: a DB/settings outage here must
+    // never turn a successful registration into a failed one. The repository's
+    // trial_started_at guard keeps a retry from extending the one-time trial.
+    await this.startSignupTrial(user.id, user.email);
+
     // Send verification email in user's locale
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
     const verificationUrl = `${frontendUrl}/${userLocale}/verify-email?token=${verificationToken}&email=${encodeURIComponent(request.email)}`;
@@ -125,6 +132,20 @@ export class AuthService {
       message,
       email: user.email,
     };
+  }
+
+  /**
+   * Start the one-time trial without allowing billing availability to become an
+   * account-registration dependency. Shared by password and Google create paths.
+   */
+  async startSignupTrial(userId: string, email: string): Promise<void> {
+    try {
+      await this.billingService.startTrialForUser(userId, email);
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Could not start signup trial for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   /**

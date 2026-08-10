@@ -12,16 +12,19 @@ export const Container = styled.div`
   color: ${tkn('colors.text.primary')};
 `;
 
+/**
+ * White circular well behind the outlined triangle glyph — the same shape
+ * Dialog/Toast/ValidationMessage use, so a note reads the same wherever it surfaces.
+ */
 export const IconWell = styled.span`
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: ${tkn('radius.full')};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: ${tkn('colors.semantic.info')};
-  color: ${tkn('colors.text.inverse')};
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: ${tkn('colors.surface.primary')};
 `;
 
 export const Content = styled.div`

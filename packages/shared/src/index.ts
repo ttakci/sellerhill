@@ -13,6 +13,7 @@ export { generateRequestId, getRequestIdFromHeaders, isValidRequestId } from './
 export {
   DEFAULT_LISTING_TEMPLATE_HTML,
   LISTING_TEMPLATE_PLACEHOLDERS,
+  LISTING_TEMPLATE_PRESENCE_FLAGS,
   buildListingTemplateContext,
   renderListingTemplate,
   stripUnresolvedPlaceholders,

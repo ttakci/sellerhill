@@ -75,7 +75,7 @@ export const CardsPanelComponent = ({
             listings={listings}
             onViewAll={onListingsViewAll}
             viewAllLabel={listingsViewAllLabel}
-            showViewAll
+            showViewAll={listings.length > 3}
             onListingClick={onListingOpen}
             emptyTitle={listingsEmptyTitle}
             emptySubtitle={listingsEmptySubtitle}
@@ -100,7 +100,7 @@ export const CardsPanelComponent = ({
             orders={orders}
             onViewAll={onOrdersViewAll}
             viewAllLabel={ordersViewAllLabel}
-            showViewAll
+            showViewAll={orders.length > 3}
             onOrderClick={onOrderOpen}
             formatCurrency={formatters.currency}
             formatDate={formatters.date}

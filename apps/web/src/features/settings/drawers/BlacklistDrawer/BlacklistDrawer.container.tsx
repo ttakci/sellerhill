@@ -1,3 +1,4 @@
+import { BlacklistType } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,17 +6,16 @@ import { useTranslation } from 'react-i18next';
 import { GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { BlacklistDrawerComponent } from './BlacklistDrawer.component';
-import type { BlacklistDrawerProps, BlacklistItem, BlacklistScope } from './BlacklistDrawer.types';
+import type { BlacklistDrawerProps, BlacklistItem } from './BlacklistDrawer.types';
 
 import { useSaveStoreSettingsMutation } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
-/** Normalize a persisted blacklist entry into the local draft shape. */
-const toItems = (entries: Array<{ keyword: string; scope: BlacklistScope }> | undefined): BlacklistItem[] =>
-  (entries ?? []).map((b) => ({ keyword: b.keyword, scope: b.scope }));
+const ALL_BLACKLIST_TYPES = Object.values(BlacklistType);
 
-const sameItem = (a: BlacklistItem, b: BlacklistItem): boolean =>
-  a.keyword === b.keyword && a.scope === b.scope;
+/** Normalize a persisted blacklist entry into the local draft shape. */
+const toItems = (entries: Array<{ keyword: string; types: BlacklistType[] }> | undefined): BlacklistItem[] =>
+  (entries ?? []).map((b) => ({ keyword: b.keyword, types: [...b.types] }));
 
 export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   isOpen,
@@ -27,7 +27,6 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   const { t } = useTranslation(['translation']);
   const { showMessage, closeMessage } = useUI();
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const [saveSettings, { isLoading: isSaving }] = useSaveStoreSettingsMutation();
   useLoading(isSaving);
 
@@ -37,10 +36,10 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   // Draft state — add/remove mutate this; Save commits it.
   const [blacklist, setBlacklist] = useState<BlacklistItem[]>(originalBlacklist);
   const [keywords, setKeywords] = useState('');
-  const [scopeValue, setScopeValue] = useState<BlacklistScope>('both');
+  const [selectedTypes, setSelectedTypes] = useState<BlacklistType[]>(ALL_BLACKLIST_TYPES);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
-  const [selectedItems, setSelectedItems] = useState<BlacklistItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   // Reset draft + form when the drawer opens or the inherited scope changes.
@@ -53,7 +52,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     if (isOpen) {
       setBlacklist(originalBlacklist);
       setKeywords('');
-      setScopeValue('both');
+      setSelectedTypes(ALL_BLACKLIST_TYPES);
       setErrorMessage(null);
       setSearchValue('');
       setSelectedItems([]);
@@ -70,7 +69,12 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   }, [blacklist, searchValue]);
 
   const isAllSelected =
-    items.length > 0 && items.every((item) => selectedItems.some((s) => sameItem(s, item)));
+    items.length > 0 && items.every((item) => selectedItems.includes(item.keyword));
+
+  const handleToggleType = useCallback((type: BlacklistType): void => {
+    setSelectedTypes((current) =>
+      current.includes(type) ? current.filter((item) => item !== type) : [...current, type]);
+  }, []);
 
   const handleAdd = useCallback(() => {
     const keywordList = keywords
@@ -82,54 +86,56 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       setErrorMessage(t('translation:settingsHub.drawer.blacklist.add.empty'));
       return;
     }
+    if (selectedTypes.length === 0) {
+      setErrorMessage(t('translation:settingsHub.drawer.blacklist.add.typeRequired'));
+      return;
+    }
 
-    const additions: BlacklistItem[] = [];
-    for (const kw of keywordList) {
-      const exists =
-        blacklist.some((b) => b.keyword.toLowerCase() === kw.toLowerCase() && b.scope === scopeValue) ||
-        additions.some((b) => b.keyword.toLowerCase() === kw.toLowerCase() && b.scope === scopeValue);
-      if (!exists) {
-        additions.push({ keyword: kw, scope: scopeValue });
+    const next = blacklist.map((item) => ({ ...item, types: [...item.types] }));
+    for (const keyword of keywordList) {
+      const existing = next.find((item) => item.keyword.toLowerCase() === keyword.toLowerCase());
+      if (existing) {
+        existing.types = Array.from(new Set([...existing.types, ...selectedTypes]));
+      } else {
+        next.push({ keyword, types: [...selectedTypes] });
       }
     }
 
-    if (additions.length === 0) {
+    const changed = next.length !== blacklist.length
+      || next.some((item) => {
+        const old = blacklist.find((b) => b.keyword.toLowerCase() === item.keyword.toLowerCase());
+        return !old || old.types.length !== item.types.length || !old.types.every((type) => item.types.includes(type));
+      });
+    if (!changed) {
       setErrorMessage(t('translation:settingsHub.drawer.blacklist.add.duplicate'));
       return;
     }
 
     setErrorMessage(null);
-    setBlacklist((prev) => [...prev, ...additions]);
+    setBlacklist(next);
     setKeywords('');
-  }, [keywords, blacklist, scopeValue, t]);
+  }, [keywords, blacklist, selectedTypes, t]);
 
-  const handleRemove = useCallback((keyword: string, scope: BlacklistScope): void => {
-    setBlacklist((prev) => prev.filter((b) => !(b.keyword === keyword && b.scope === scope)));
+  const handleRemove = useCallback((keyword: string): void => {
+    setBlacklist((prev) => prev.filter((b) => b.keyword !== keyword));
+    setSelectedItems((prev) => prev.filter((k) => k !== keyword));
   }, []);
 
-  const handleToggleSelect = useCallback((item: BlacklistItem) => {
-    setSelectedItems((prev) => {
-      if (prev.some((s) => sameItem(s, item))) {
-        return prev.filter((s) => !sameItem(s, item));
-      }
-      return [...prev, item];
-    });
+  const handleToggleSelect = useCallback((keyword: string) => {
+    setSelectedItems((prev) =>
+      (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]));
   }, []);
 
   const handleToggleSelectAll = useCallback(() => {
-    if (isAllSelected) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(items.map((item) => ({ keyword: item.keyword, scope: item.scope })));
-    }
+    setSelectedItems(isAllSelected ? [] : items.map((item) => item.keyword));
   }, [isAllSelected, items]);
 
   const handleOpenConfirm = useCallback(() => setIsConfirmOpen(true), []);
   const handleCloseConfirm = useCallback(() => setIsConfirmOpen(false), []);
 
   const handleConfirmBulkDelete = useCallback(() => {
-    const removeSet = new Set(selectedItems.map((i) => `${i.keyword}-${i.scope}`));
-    setBlacklist((prev) => prev.filter((b) => !removeSet.has(`${b.keyword}-${b.scope}`)));
+    const removeSet = new Set(selectedItems);
+    setBlacklist((prev) => prev.filter((b) => !removeSet.has(b.keyword)));
     setSelectedItems([]);
     setIsConfirmOpen(false);
   }, [selectedItems]);
@@ -139,32 +145,23 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     if (blacklist.length !== originalBlacklist.length) {
       return true;
     }
-    return blacklist.some((b) => !originalBlacklist.some((o) => sameItem(o, b)));
+    return blacklist.some((b) => {
+      const old = originalBlacklist.find((o) => o.keyword === b.keyword);
+      return !old || old.types.length !== b.types.length || !old.types.every((type) => b.types.includes(type));
+    });
   }, [blacklist, originalBlacklist]);
 
   const isSaveDisabled = isSaving || !hasChanges;
 
   const handleSave = (): void => {
     const isGlobal = selectedScope === GLOBAL_SCOPE;
-    const payload = {
+
+    void saveSettings({
       isGlobal,
       storeId: isGlobal ? undefined : selectedScope,
-      country: config?.country ?? '',
-      state: config?.state ?? '',
-      zipCode: config?.zipCode ?? '',
-      validateTitle: config?.validateTitle ?? true,
-      validateDescription: config?.validateDescription ?? false,
-      blacklist: blacklist.map((b) => ({ keyword: b.keyword, scope: b.scope })),
-      // Preserve settings owned by the parent drawer. The backend also treats
-      // omitted optional fields as "leave unchanged", but carrying them here
-      // makes this full-row save explicit and protects older API deployments.
       amazonTaxRate: config?.amazonTaxRate ?? 0,
-      autoFulfillEnabled: config?.autoFulfillEnabled ?? false,
-      trackingConversionProvider: config?.trackingConversionProvider,
-    };
-
-    /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-    void saveSettings(payload)
+      blacklist: blacklist.map((b) => ({ keyword: b.keyword, types: b.types })),
+    })
       .unwrap()
       .then(() => {
         showMessage(
@@ -188,7 +185,6 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
           t,
         );
       });
-    /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   };
 
   return (
@@ -198,8 +194,12 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       onBack={onBack}
       keywords={keywords}
       onKeywordsChange={(e) => setKeywords(e.target.value)}
-      selectedScopeValue={scopeValue}
-      onSelectScopeValue={setScopeValue}
+      selectedTypes={selectedTypes}
+      typeOptions={ALL_BLACKLIST_TYPES.map((value) => ({
+        value,
+        label: t(`translation:settingsHub.drawer.blacklist.add.type.${value}`),
+      }))}
+      onToggleType={handleToggleType}
       onAdd={handleAdd}
       errorMessage={errorMessage}
       items={items}
@@ -218,10 +218,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       keywordsLabel={t('translation:settingsHub.drawer.blacklist.add.keywordsLabel')}
       keywordsPlaceholder={t('translation:settingsHub.drawer.blacklist.add.keywordsPlaceholder')}
       keywordsHint={t('translation:settingsHub.drawer.blacklist.add.keywordsHint')}
-      scopeLabel={t('translation:settingsHub.drawer.blacklist.add.scope')}
-      scopeBothLabel={t('translation:settingsHub.drawer.blacklist.add.scopeBoth')}
-      scopeTitleLabel={t('translation:settingsHub.drawer.blacklist.add.scopeTitle')}
-      scopeDescriptionLabel={t('translation:settingsHub.drawer.blacklist.add.scopeDescription')}
+      typeLabel={t('translation:settingsHub.drawer.blacklist.add.typeLabel')}
       addLabel={t('translation:settingsHub.drawer.blacklist.add.add')}
       emptyMessage={t('translation:settingsHub.drawer.blacklist.list.empty')}
       searchPlaceholder={t('translation:common.search')}

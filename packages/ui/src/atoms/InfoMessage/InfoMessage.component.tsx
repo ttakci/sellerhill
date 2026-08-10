@@ -9,7 +9,7 @@ import type { InfoMessageProps } from './InfoMessage.types';
 export const InfoMessage = ({ children, className }: InfoMessageProps): React.ReactElement => (
   <S.Container className={className} role="note">
     <S.IconWell>
-      <Icon name="info" size={18} color="text.inverse" />
+      <Icon name="triangle-info" size={18} color="semantic.info" />
     </S.IconWell>
     <S.Content>
       <Text variant="caption" color="text.primary">

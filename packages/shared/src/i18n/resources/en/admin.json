@@ -179,7 +179,8 @@
         "admin": "Admin warning thresholds",
         "billing": "Billing",
         "llm": "AI content",
-        "buyer_messaging": "Buyer messaging"
+        "buyer_messaging": "Buyer messaging",
+        "retention": "Data retention & disk"
       },
       "keys": {
         "keepa.refresh.enabled": "Background refresh enabled",
@@ -189,6 +190,7 @@
         "keepa.refresh.maxFailures": "Failures before quarantine",
         "keepa.refresh.quarantineMinutes": "Quarantine duration (minutes)",
         "keepa.refresh.schedulerCron": "Scheduler cron pattern",
+        "amazon.orderSync.cron": "Cost-capture scrape schedule (cron)",
         "amazon.orderSync.matchTolerancePct": "Cost match amount tolerance (%)",
         "amazon.orderSync.matchWindowDays": "Cost match date window (days)",
         "amazon.tracking.preshipIntervalHours": "Pre-ship poll interval (hours)",
@@ -211,7 +213,16 @@
         "admin.proxyExpiryWarnDays": "Proxy expiry warning window (days)",
         "llm.contentEnabled": "AI title/description rewrites",
         "billing.enforcementEnabled": "Enforce plan quotas",
-        "buyerMessaging.feedbackDefaultDelayDays": "Feedback request delay (days)"
+        "buyerMessaging.feedbackDefaultDelayDays": "Feedback request delay (days)",
+        "amazon.browserProfileGc.enabled": "Browser profile cleanup enabled",
+        "amazon.browserProfileGc.dormantDays": "Delete unused profile after (days)",
+        "amazon.browserProfileGc.purgeOrphans": "Remove profiles of deleted accounts",
+        "retention.queueObservationsDays": "Queue events history (days)",
+        "retention.keepaUsageLogDays": "Keepa usage log (days)",
+        "retention.llmUsageLogDays": "AI usage log (days)",
+        "retention.usageEventsDays": "Cost events history (days)",
+        "retention.buyerMessageLogDays": "Buyer message log (days)",
+        "retention.auditLogsDays": "Audit log (days)"
       }
     },
     "listingQuality": {

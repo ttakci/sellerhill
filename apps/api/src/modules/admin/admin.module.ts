@@ -22,9 +22,9 @@ import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
+import { DATA_RETENTION_QUEUE, DataRetentionService } from './data-retention.service';
 import { ProviderPricingService } from './provider-pricing.service';
 import { QueueEventsCollectorService } from './queue-events-collector.service';
-import { QUEUE_OBSERVABILITY_RETENTION_QUEUE, QueueObservabilityRetentionService } from './queue-observability-retention.service';
 import { QueueObservabilityService } from './queue-observability.service';
 import { UsageBackfillService } from './usage-backfill.service';
 import { UsageEventsService } from './usage-events.service';
@@ -45,7 +45,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'listings' },
       { name: 'keepa-refresh' },
       { name: 'buyer-message' },
-      { name: QUEUE_OBSERVABILITY_RETENTION_QUEUE },
+      { name: DATA_RETENTION_QUEUE },
     ),
   ],
   controllers: [AdminController],
@@ -60,7 +60,7 @@ import { UsageEventsService } from './usage-events.service';
     UsageBackfillService,
     QueueObservabilityService,
     QueueEventsCollectorService,
-    QueueObservabilityRetentionService,
+    DataRetentionService,
   ],
   exports: [
     AdminService,

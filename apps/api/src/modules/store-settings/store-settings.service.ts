@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   TrackingConversionProvider,
+  createDefaultBlacklist,
   type BlacklistKeyword,
   type BuyerMessagingConfig,
   type SaveStoreSettingsRequest,
@@ -8,6 +9,8 @@ import {
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
+
+import { inheritMissingStoreLocation } from './store-settings.helpers';
 
 /**
  * Store Settings Entity
@@ -20,8 +23,7 @@ interface StoreSettingsEntity {
   country: string;
   state: string;
   zip_code: string;
-  validate_title: boolean;
-  validate_description: boolean;
+  check_blacklist: boolean;
   blacklist: string; // JSON string in DB
   amazon_tax_rate: string | number; // NUMERIC(5,2) — coerced via Number() in mapper
   // A2 auto-fulfillment master toggle (migration 036).
@@ -75,9 +77,8 @@ export class StoreSettingsService {
         country: '',
         state: '',
         zipCode: '',
-        validateTitle: true,
-        validateDescription: false,
-        blacklist: [],
+        checkBlacklist: true,
+        blacklist: createDefaultBlacklist(),
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
         trackingConversionProvider: TrackingConversionProvider.LOCAL,
@@ -94,17 +95,21 @@ export class StoreSettingsService {
    * Get resolved settings (Store specific > Global > Default)
    */
   async getResolvedSettings(userId: string, storeId: string | null): Promise<StoreSettingsResponse> {
-    // 1. Try Store Specific (if storeId provided)
-    if (storeId) {
-      const storeSettings = await this.getSettings(userId, storeId);
-      if (storeSettings.id) {
-        // Found valid settings
-        return storeSettings;
-      }
+    const globalSettings = await this.getSettings(userId);
+
+    if (!storeId) {
+      return globalSettings;
     }
 
-    // 2. Fallback to Global
-    return this.getSettings(userId);
+    const storeSettings = await this.getSettings(userId, storeId);
+    if (!storeSettings.id) {
+      return globalSettings;
+    }
+
+    // Focused drawers can create a store row before its location is configured.
+    // Inherit ONLY the empty location fields — the store still owns every other
+    // override (A2, tax, blacklist, validation and buyer messaging).
+    return inheritMissingStoreLocation(storeSettings, globalSettings);
   }
 
   /**
@@ -117,8 +122,7 @@ export class StoreSettingsService {
       country,
       state,
       zipCode,
-      validateTitle,
-      validateDescription,
+      checkBlacklist,
       blacklist,
       amazonTaxRate,
       autoFulfillEnabled,
@@ -126,11 +130,19 @@ export class StoreSettingsService {
       buyerMessaging,
     } = dto;
 
-    const blacklistJson = JSON.stringify(blacklist);
+    // A focused drawer omits fields it does not own. Empty location strings are
+    // also omission: `getSettings` synthesizes '' when a row does not exist and
+    // older callers echo that DTO back. INSERT still satisfies the NOT NULL
+    // schema through COALESCE defaults below.
+    const countryValue = country?.trim() ? country.trim() : null;
+    const stateValue = state?.trim() ? state.trim() : null;
+    const zipCodeValue = zipCode?.trim() ? zipCode.trim() : null;
+    const blacklistJson = blacklist ? JSON.stringify(blacklist) : null;
     // Optional means "leave unchanged" on UPDATE, not "turn off". Multiple
-    // focused drawers save through this endpoint (e.g. Blacklist omits A2), so
-    // defaulting an omitted field to false silently undid a toggle saved moments
-    // earlier. INSERT still resolves null to the schema default (false).
+    // focused drawers save through this endpoint (e.g. Blacklist omits general
+    // settings), so defaulting an omitted field silently undid a toggle saved
+    // moments earlier. INSERT still resolves null to the schema default.
+    const checkBlacklistBool = checkBlacklist ?? null;
     const autoFulfillBool = autoFulfillEnabled ?? null;
     const trackingProviderValue = trackingConversionProvider ?? null;
     // Preserve the distinction between omitted (leave unchanged on UPDATE) and
@@ -145,21 +157,20 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, TRUE, $2, $3, $4, $5, $6, $7, $8, COALESCE($9, FALSE), COALESCE($10, 'local'), $11)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), $10)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
-                country = EXCLUDED.country,
-                state = EXCLUDED.state,
-                zip_code = EXCLUDED.zip_code,
-                validate_title = EXCLUDED.validate_title,
-                validate_description = EXCLUDED.validate_description,
-                blacklist = EXCLUDED.blacklist,
+                country = COALESCE($2, store_settings.country),
+                state = COALESCE($3, store_settings.state),
+                zip_code = COALESCE($4, store_settings.zip_code),
+                check_blacklist = COALESCE($5, store_settings.check_blacklist),
+                blacklist = COALESCE($6::jsonb, store_settings.blacklist),
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
-                auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
-                tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
+                auto_fulfill_enabled = COALESCE($8, store_settings.auto_fulfill_enabled),
+                tracking_conversion_provider = COALESCE($9, store_settings.tracking_conversion_provider),
                 buyer_messaging = CASE
-                  WHEN $12 THEN EXCLUDED.buyer_messaging
+                  WHEN $11 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
                 END,
                 updated_at = CURRENT_TIMESTAMP
@@ -167,11 +178,10 @@ export class StoreSettingsService {
         `,
         [
           userId,
-          country,
-          state,
-          zipCode,
-          validateTitle,
-          validateDescription,
+          countryValue,
+          stateValue,
+          zipCodeValue,
+          checkBlacklistBool,
           blacklistJson,
           amazonTaxRate,
           autoFulfillBool,
@@ -184,21 +194,20 @@ export class StoreSettingsService {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, validate_title, validate_description, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, $2, FALSE, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, FALSE), COALESCE($11, 'local'), $12)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
+            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), $11)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
-                country = EXCLUDED.country,
-                state = EXCLUDED.state,
-                zip_code = EXCLUDED.zip_code,
-                validate_title = EXCLUDED.validate_title,
-                validate_description = EXCLUDED.validate_description,
-                blacklist = EXCLUDED.blacklist,
+                country = COALESCE($3, store_settings.country),
+                state = COALESCE($4, store_settings.state),
+                zip_code = COALESCE($5, store_settings.zip_code),
+                check_blacklist = COALESCE($6, store_settings.check_blacklist),
+                blacklist = COALESCE($7::jsonb, store_settings.blacklist),
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
-                auto_fulfill_enabled = COALESCE($10, store_settings.auto_fulfill_enabled),
-                tracking_conversion_provider = COALESCE($11, store_settings.tracking_conversion_provider),
+                auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
+                tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
                 buyer_messaging = CASE
-                  WHEN $13 THEN EXCLUDED.buyer_messaging
+                  WHEN $12 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
                 END,
                 updated_at = CURRENT_TIMESTAMP
@@ -207,11 +216,10 @@ export class StoreSettingsService {
         [
           userId,
           storeId,
-          country,
-          state,
-          zipCode,
-          validateTitle,
-          validateDescription,
+          countryValue,
+          stateValue,
+          zipCodeValue,
+          checkBlacklistBool,
           blacklistJson,
           amazonTaxRate,
           autoFulfillBool,
@@ -241,8 +249,7 @@ export class StoreSettingsService {
       country: entity.country,
       state: entity.state,
       zipCode: entity.zip_code,
-      validateTitle: entity.validate_title,
-      validateDescription: entity.validate_description,
+      checkBlacklist: entity.check_blacklist,
       blacklist: parsedBlacklist,
       amazonTaxRate: Number(entity.amazon_tax_rate) || 0,
       autoFulfillEnabled: !!entity.auto_fulfill_enabled,

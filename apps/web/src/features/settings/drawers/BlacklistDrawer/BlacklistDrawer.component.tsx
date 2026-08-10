@@ -1,4 +1,4 @@
-import { Button, Checkbox, ConfirmModal, Drawer, ModernSelect, SearchField, Text, Textarea } from '@repo/ui';
+import { Button, Checkbox, ConfirmModal, Drawer, SearchField, Text, Textarea } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,8 +10,9 @@ import {
   ToolbarLeft,
   ToolbarRight,
   ToolbarRow,
+  TypeOptionsRow,
 } from './BlacklistDrawer.style';
-import type { BlacklistDrawerComponentProps, BlacklistScope } from './BlacklistDrawer.types';
+import type { BlacklistDrawerComponentProps } from './BlacklistDrawer.types';
 
 import { BlacklistCard } from '@/features/store-settings/components/BlacklistCard';
 
@@ -21,8 +22,9 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   onBack,
   keywords,
   onKeywordsChange,
-  selectedScopeValue,
-  onSelectScopeValue,
+  selectedTypes,
+  typeOptions,
+  onToggleType,
   onAdd,
   errorMessage,
   items,
@@ -41,10 +43,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   keywordsLabel,
   keywordsPlaceholder,
   keywordsHint,
-  scopeLabel,
-  scopeBothLabel,
-  scopeTitleLabel,
-  scopeDescriptionLabel,
+  typeLabel,
   addLabel,
   emptyMessage,
   searchPlaceholder,
@@ -63,8 +62,6 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
 
   const hasItems = items.length > 0;
   const hasSelection = selectedItems.length > 0;
-  const isItemSelected = (keyword: string, scope: BlacklistScope) =>
-    selectedItems.some((item) => item.keyword === keyword && item.scope === scope);
 
   return (
     <Drawer
@@ -85,19 +82,19 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
       <BodyStack>
         <FormCard>
           <AddStack>
-            <ModernSelect
-              label={scopeLabel}
-              options={[
-                { value: 'both', label: scopeBothLabel },
-                { value: 'title', label: scopeTitleLabel },
-                { value: 'description', label: scopeDescriptionLabel },
-              ]}
-              value={selectedScopeValue}
-              onChange={(v) => onSelectScopeValue(v as BlacklistScope)}
-              fullWidth
-              searchPlaceholder={t('translation:common.search')}
-              noResultsMessage={t('translation:common.noResults')}
-            />
+            <Text variant="body-sm" weight="semibold">
+              {typeLabel}
+            </Text>
+            <TypeOptionsRow>
+              {typeOptions.map((option) => (
+                <Checkbox
+                  key={option.value}
+                  checked={selectedTypes.includes(option.value)}
+                  onChange={() => onToggleType(option.value)}
+                  label={option.label}
+                />
+              ))}
+            </TypeOptionsRow>
             <Textarea
               value={keywords}
               onChange={onKeywordsChange}
@@ -155,13 +152,13 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
           <CardGrid>
             {items.map((item) => (
               <BlacklistCard
-                key={`${item.keyword}-${item.scope}`}
+                key={item.keyword}
                 keyword={item.keyword}
-                scope={item.scope}
-                onRemove={() => onRemove(item.keyword, item.scope)}
+                types={item.types}
+                onRemove={() => onRemove(item.keyword)}
                 selectable
-                selected={isItemSelected(item.keyword, item.scope)}
-                onSelect={() => onToggleSelect(item)}
+                selected={selectedItems.includes(item.keyword)}
+                onSelect={() => onToggleSelect(item.keyword)}
               />
             ))}
           </CardGrid>

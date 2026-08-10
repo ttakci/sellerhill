@@ -41,7 +41,7 @@ export const Row = styled.button<{ $danger?: boolean }>`
 export const Info = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm-md')};
+  gap: ${tkn('spacing.md')};
   flex: 1;
   min-width: 0;
 `;
@@ -51,11 +51,6 @@ export const RowIcon = styled.span<{ $danger?: boolean }>`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  border-radius: ${tkn('radius.sm')};
-  background: ${({ $danger, theme }) =>
-    $danger ? `${theme.colors.semantic.error}15` : theme.colors.brand.secondary};
   color: ${({ $danger, theme }) =>
     $danger ? theme.colors.semantic.error : theme.colors.brand.primary};
 `;

@@ -22,6 +22,7 @@ import { AmazonVerifyProcessorService } from './amazon-verify-processor.service'
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
 import { AutoFulfillProcessor } from './auto-fulfill-processor.service';
+import { BrowserProfileGcService } from './browser-profile-gc.service';
 import { BrowserStateManager } from './browser-state-manager.service';
 import { ProxyService } from './proxy.service';
 
@@ -46,6 +47,11 @@ import { ProxyService } from './proxy.service';
     ProxyService,
     BrowserStateManager,
     AmazonRateLimiter,
+    // Bounds profile DISK the way BrowserStateManager.evictIdle bounds memory:
+    // prunes each account's disposable Chromium caches (login preserved) and
+    // removes profiles for accounts that no longer exist. Without it a
+    // user_data_dir grows without limit — 50–250 GB at 500 accounts.
+    BrowserProfileGcService,
     AmazonAccountsService,
     AmazonScrapingService,
     AmazonOrderParserService,

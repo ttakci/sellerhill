@@ -20,6 +20,10 @@
       "free": {
         "name": "Ücretsiz"
       },
+      "trial": {
+        "name": "Ücretsiz deneme",
+        "description": "Zonds'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
+      },
       "starter": {
         "name": "Starter",
         "description": "Otomatik dropshipping'e yeni başlayan bireysel satıcılar için."
@@ -66,6 +70,14 @@
         "past_due": "Vadesi geçmiş",
         "canceled": "İptal edildi",
         "ended": "Sona erdi"
+      },
+      "trial": {
+        "title": "Ücretsiz denemedesiniz",
+        "daysLeft": "{{count}} gün kaldı",
+        "lastDay": "Denemeniz bugün sona eriyor",
+        "endsOn": "Deneme {{date}} tarihinde bitiyor",
+        "expired": "Ücretsiz denemeniz sona erdi.",
+        "chooseAPlan": "Deneme bittiğinde devam etmek için bir plan seçin."
       },
       "currentPeriod": "Mevcut dönem",
       "nextRenewal": "Sonraki yenileme",

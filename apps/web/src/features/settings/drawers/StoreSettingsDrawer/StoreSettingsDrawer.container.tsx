@@ -1,19 +1,25 @@
-import { BuyerMessageEventConfig, BuyerMessageEventType, BuyerMessagingConfig, BuyerMessageTemplate, BuyerMessageTemplateKind, BuyerMessageTemplateRef, StoreSettingsDrawerStep, TrackingConversionProvider } from '@repo/shared';
+import {
+  BuyerMessageEventConfig,
+  BuyerMessageEventType,
+  BuyerMessagingConfig,
+  BuyerMessageTemplate,
+  BuyerMessageTemplateKind,
+  BuyerMessageTemplateRef,
+  StoreSettingsDrawerStep,
+  TrackingConversionProvider,
+} from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { StoreSettingsDrawerComponent } from './StoreSettingsDrawer.component';
-import type { BlacklistItem, BlacklistScope, StoreSettingsDrawerProps } from './StoreSettingsDrawer.types';
+import type { StoreSettingsDrawerProps } from './StoreSettingsDrawer.types';
 
 import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
 import { useGetBuyerMessagingConfigQuery, useSaveStoreSettingsMutation, useUpdateBuyerMessagingConfigMutation } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
-
-const toBlacklist = (entries: Array<{ keyword: string; scope: BlacklistScope }> | undefined): BlacklistItem[] =>
-  (entries ?? []).map(({ keyword, scope }) => ({ keyword, scope }));
 
 const buildDefaultBuyerMessagingConfig = (templates: BuyerMessageTemplate[]): BuyerMessagingConfig => {
   const templateFor = (event: BuyerMessageEventType): BuyerMessageTemplateRef => {
@@ -62,16 +68,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [country, setCountry] = useState(config?.country ?? '');
   const [stateField, setStateField] = useState(config?.state ?? '');
   const [zipCode, setZipCode] = useState(config?.zipCode ?? '');
-  const [validateTitle, setValidateTitle] = useState(config?.validateTitle ?? true);
-  const [validateDescription, setValidateDescription] = useState(config?.validateDescription ?? false);
+  const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
   const [buyerMessagingConfig, setBuyerMessagingConfig] = useState<BuyerMessagingConfig>(() =>
     remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
-  const [blacklist, setBlacklist] = useState<BlacklistItem[]>(toBlacklist(config?.blacklist));
-  const [keywords, setKeywords] = useState('');
-  const [blacklistScope, setBlacklistScope] = useState<BlacklistScope>('both');
-  const [blacklistError, setBlacklistError] = useState<string | null>(null);
 
   const [prevOpen, setPrevOpen] = useState(isOpen);
   const [prevScope, setPrevScope] = useState(selectedScope);
@@ -96,38 +97,14 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCountry(next?.country ?? '');
       setStateField(next?.state ?? '');
       setZipCode(next?.zipCode ?? '');
-      setValidateTitle(next?.validateTitle ?? true);
-      setValidateDescription(next?.validateDescription ?? false);
+      setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
       setBuyerMessagingConfig(remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
-      setBlacklist(toBlacklist(next?.blacklist));
-      setKeywords('');
-      setBlacklistError(null);
     } else if (isOpen && step === StoreSettingsDrawerStep.GENERAL) {
       setBuyerMessagingConfig(remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
     }
   }
-
-  const handleAddKeyword = useCallback(() => {
-    const additions = keywords.split(/[\n,]/).map((value) => value.trim()).filter(Boolean);
-    if (!additions.length) {
-      setBlacklistError(t('translation:settingsHub.drawer.blacklist.add.empty'));
-      return;
-    }
-    const unique = additions.filter(
-      (keyword) => !blacklist.some(
-        (item) => item.scope === blacklistScope && item.keyword.toLowerCase() === keyword.toLowerCase(),
-      ),
-    );
-    if (!unique.length) {
-      setBlacklistError(t('translation:settingsHub.drawer.blacklist.add.duplicate'));
-      return;
-    }
-    setBlacklist((current) => [...current, ...unique.map((keyword) => ({ keyword, scope: blacklistScope }))]);
-    setKeywords('');
-    setBlacklistError(null);
-  }, [blacklist, blacklistScope, keywords, t]);
 
   const save = (): void => {
     const isGlobal = selectedScope === GLOBAL_SCOPE;
@@ -138,9 +115,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         country: country.trim(),
         state: stateField.trim(),
         zipCode: zipCode.trim(),
-        validateTitle,
-        validateDescription,
-        blacklist,
+        checkBlacklist,
         amazonTaxRate,
         autoFulfillEnabled,
         trackingConversionProvider: config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL,
@@ -191,8 +166,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       country={country}
       state={stateField}
       zipCode={zipCode}
-      validateTitle={validateTitle}
-      validateDescription={validateDescription}
+      checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
       buyerMessagingConfig={buyerMessagingConfig}
@@ -204,18 +178,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onCountryChange={(e) => setCountry(e.target.value)}
       onStateChange={(e) => setStateField(e.target.value)}
       onZipCodeChange={(e) => setZipCode(e.target.value)}
-      onToggleValidateTitle={setValidateTitle}
-      onToggleValidateDescription={setValidateDescription}
+      onToggleCheckBlacklist={setCheckBlacklist}
       onAmazonTaxRateChange={(e) => setAmazonTaxRate(Number(e.target.value) || 0)}
       onAutoFulfillEnabledChange={setAutoFulfillEnabled}
-      keywords={keywords}
-      onKeywordsChange={(e) => setKeywords(e.target.value)}
-      blacklistScope={blacklistScope}
-      onBlacklistScopeChange={setBlacklistScope}
-      onAddKeyword={handleAddKeyword}
-      blacklistError={blacklistError}
-      blacklist={blacklist}
-      onRemoveKeyword={(item) => setBlacklist((current) => current.filter((candidate) => candidate.keyword !== item.keyword || candidate.scope !== item.scope))}
     />
   );
 };

@@ -20,8 +20,8 @@ export const CardContainer = styled.div<{ $variant: SettingsCardVariant }>`
 export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
   padding: ${({ $variant, theme }) =>
     $variant === 'section'
-      ? `${tkn('spacing.sm-md+')({ theme })} ${tkn('spacing.lg')({ theme })}`
-      : tkn('spacing.sm-md+')({ theme })};
+      ? `${tkn('spacing.lg')({ theme })} ${tkn('spacing.lg')({ theme })} ${tkn('spacing.sm-md+')({ theme })}`
+      : `${tkn('spacing.lg')({ theme })} ${tkn('spacing.sm-md+')({ theme })} ${tkn('spacing.sm-md+')({ theme })}`};
   border-bottom: none;
   display: flex;
   justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
@@ -34,8 +34,8 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
     align-items: ${({ $variant }) => ($variant === 'panel' ? 'stretch' : 'center')};
     padding: ${({ $variant, theme }) =>
       $variant === 'section'
-        ? `${tkn('spacing.md')({ theme })} ${tkn('spacing.lg')({ theme })}`
-        : `${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })}`};
+        ? `${tkn('spacing.lg')({ theme })} ${tkn('spacing.lg')({ theme })} ${tkn('spacing.md')({ theme })}`
+        : `${tkn('spacing.lg')({ theme })} ${tkn('spacing.md')({ theme })} ${tkn('spacing.md')({ theme })}`};
   }
 `;
 
@@ -114,10 +114,10 @@ export const TitleContent = styled.div`
   min-width: 0;
 `;
 
-/** Section title — clear and readable (18px / semibold) */
+/** Section title — card-title size per the h4 scale (15px / semibold) */
 export const Title = styled.div`
   font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.lg')};
+  font-size: ${tkn('typography.fontSize.md')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
   margin: 0;

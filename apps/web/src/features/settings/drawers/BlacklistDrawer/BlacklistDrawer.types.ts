@@ -1,8 +1,11 @@
-import type { StoreSettingsResponse } from '@repo/shared';
+import type { BlacklistType, StoreSettingsResponse } from '@repo/shared';
 
-export type BlacklistScope = 'title' | 'description' | 'both';
+export type BlacklistItem = { keyword: string; types: BlacklistType[] };
 
-export type BlacklistItem = { keyword: string; scope: BlacklistScope };
+export interface BlacklistTypeOption {
+  value: BlacklistType;
+  label: string;
+}
 
 export interface BlacklistDrawerProps {
   isOpen: boolean;
@@ -21,17 +24,18 @@ export interface BlacklistDrawerComponentProps {
   // inline add form
   keywords: string;
   onKeywordsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  selectedScopeValue: BlacklistScope;
-  onSelectScopeValue: (value: BlacklistScope) => void;
+  selectedTypes: BlacklistType[];
+  typeOptions: BlacklistTypeOption[];
+  onToggleType: (value: BlacklistType) => void;
   onAdd: () => void;
   errorMessage: string | null;
   // list (filtered by search)
   items: BlacklistItem[];
-  onRemove: (keyword: string, scope: BlacklistScope) => void;
+  onRemove: (keyword: string) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  selectedItems: BlacklistItem[];
-  onToggleSelect: (item: BlacklistItem) => void;
+  selectedItems: string[];
+  onToggleSelect: (keyword: string) => void;
   onToggleSelectAll: () => void;
   isAllSelected: boolean;
   // save
@@ -44,10 +48,7 @@ export interface BlacklistDrawerComponentProps {
   keywordsLabel: string;
   keywordsPlaceholder: string;
   keywordsHint: string;
-  scopeLabel: string;
-  scopeBothLabel: string;
-  scopeTitleLabel: string;
-  scopeDescriptionLabel: string;
+  typeLabel: string;
   addLabel: string;
   emptyMessage: string;
   searchPlaceholder: string;

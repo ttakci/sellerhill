@@ -1,4 +1,4 @@
-import { TemplateType, type ListingSettingsGroupFormData, type PredefinedTemplateResponse } from '@repo/shared';
+import { TemplateType, type ListingSettingsGroupFormData } from '@repo/shared';
 import { Drawer, Icon, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { Controller } from 'react-hook-form';
@@ -25,7 +25,7 @@ export const ListingGroupDrawerComponent = ({
   fields,
   remove,
   onAddRange,
-  predefinedTemplates,
+  predefinedTemplateOptions,
   renderedPreview,
   onOpenPreview,
   onNext,
@@ -251,10 +251,7 @@ export const ListingGroupDrawerComponent = ({
               label={t('listingSettingsGroup.activeTemplate')}
               value={watchedValues.templates?.type === TemplateType.CUSTOM ? '__custom__' : field.value}
               options={[
-                ...predefinedTemplates.map((tmp: PredefinedTemplateResponse) => ({
-                  value: tmp.id,
-                  label: tmp.name,
-                })),
+                ...predefinedTemplateOptions,
                 { value: '__custom__', label: t('listingSettingsGroup.custom') },
               ]}
               fullWidth

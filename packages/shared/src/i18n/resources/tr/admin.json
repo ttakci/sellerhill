@@ -179,7 +179,8 @@
         "admin": "Yönetim uyarı eşikleri",
         "billing": "Faturalandırma",
         "llm": "Yapay zekâ içerik",
-        "buyer_messaging": "Alıcı mesajlaşma"
+        "buyer_messaging": "Alıcı mesajlaşma",
+        "retention": "Veri saklama & disk"
       },
       "keys": {
         "keepa.refresh.enabled": "Arka plan yenileme açık",
@@ -189,6 +190,7 @@
         "keepa.refresh.maxFailures": "Karantina öncesi hata sayısı",
         "keepa.refresh.quarantineMinutes": "Karantina süresi (dakika)",
         "keepa.refresh.schedulerCron": "Zamanlayıcı cron deseni",
+        "amazon.orderSync.cron": "Maliyet yakalama tarama zamanlaması (cron)",
         "amazon.orderSync.matchTolerancePct": "Maliyet eşleme tutar toleransı (%)",
         "amazon.orderSync.matchWindowDays": "Maliyet eşleme tarih penceresi (gün)",
         "amazon.tracking.preshipIntervalHours": "Kargo öncesi sorgu aralığı (saat)",
@@ -211,7 +213,16 @@
         "admin.proxyExpiryWarnDays": "Proxy bitiş uyarı penceresi (gün)",
         "llm.contentEnabled": "Yapay zekâ başlık/açıklama yeniden yazımı",
         "billing.enforcementEnabled": "Paket kotalarını zorla",
-        "buyerMessaging.feedbackDefaultDelayDays": "Değerlendirme isteği gecikmesi (gün)"
+        "buyerMessaging.feedbackDefaultDelayDays": "Değerlendirme isteği gecikmesi (gün)",
+        "amazon.browserProfileGc.enabled": "Tarayıcı profili temizliği açık",
+        "amazon.browserProfileGc.dormantDays": "Kullanılmayan profili şu süre sonra sil (gün)",
+        "amazon.browserProfileGc.purgeOrphans": "Silinmiş hesapların profillerini kaldır",
+        "retention.queueObservationsDays": "Kuyruk olay geçmişi (gün)",
+        "retention.keepaUsageLogDays": "Keepa kullanım kaydı (gün)",
+        "retention.llmUsageLogDays": "Yapay zekâ kullanım kaydı (gün)",
+        "retention.usageEventsDays": "Maliyet olay geçmişi (gün)",
+        "retention.buyerMessageLogDays": "Alıcı mesaj kaydı (gün)",
+        "retention.auditLogsDays": "Denetim kaydı (gün)"
       }
     },
     "listingQuality": {

@@ -1,44 +1,10 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
-export const StoreList = styled.div`
+export const AccountList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-`;
-
-export const StoreMain = styled.div`
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.md+')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const StoreHead = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: ${tkn('spacing.md')};
-`;
-
-export const StoreIdText = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
-export const StoreMetaList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const StoreMetaLine = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
 `;
 
 export const EmptyState = styled.div`
@@ -56,7 +22,7 @@ export const EmptyState = styled.div`
 `;
 
 export const EmptyIconCircle = styled.div`
-  width: 3.75rem; /* 60px */
+  width: 3.75rem;
   height: 3.75rem;
   border-radius: 50%;
   background-color: ${tkn('colors.background.tertiary')};

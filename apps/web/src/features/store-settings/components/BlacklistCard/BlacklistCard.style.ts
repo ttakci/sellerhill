@@ -44,6 +44,8 @@ export const ScopeSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.xs')};
   flex: 0 0 45%;
   min-width: 0;
 `;

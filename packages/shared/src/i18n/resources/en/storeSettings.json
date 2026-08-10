@@ -13,23 +13,10 @@
     "country": "Country",
     "state": "State/Location",
     "zipCode": "Zip Code",
-    "validationSectionTitle": "Validation Settings",
-    "validationSectionSubtitle": "Configure rules for product validation",
-    "validateTitle": "Validate Title",
-    "validateTitleDesc": "Scan product titles for prohibited words",
-    "validateDescription": "Validate Description",
-    "validateDescriptionDesc": "Scan body text & bullet points",
-    "blacklistSectionTitle": "Blacklist Management",
-    "blacklistSubtitle": "Manage prohibited keywords for product listings",
-    "addKeyword": "Add keyword...",
-    "blacklistKeyword": "Keyword",
-    "keyword": "Keyword",
-    "scope": "Validation Scope",
-    "scope_both": "Title and Description",
-    "scope_title": "Title only",
-    "scope_description": "Description only",
-    "noBlacklist": "No blacklisted keywords yet",
-    "noKeywords": "No keywords found",
+    "blacklistType_title": "Title",
+    "blacklistType_description": "Description",
+    "blacklistType_feature_specification": "Features & specifications",
+    "blacklistType_brand_manufacturer": "Brand & manufacturer",
     "copyright": "© {{year}} Zonds Platform. All rights reserved.",
     "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
     "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost while an order's profit is still provisional and the Amazon order has not yet been placed.",
@@ -64,6 +51,17 @@
       "systemTemplate": "Default",
       "customTemplate": "Custom",
       "templates": {
+        "hub": {
+          "title": "Message Templates",
+          "subtitle": "Your automated buyer message templates",
+          "addNew": {
+            "title": "New Message Template",
+            "subtitle": "Write a custom message for an order event"
+          },
+          "viewAll": {
+            "title": "All"
+          }
+        },
         "list": {
           "title": "Message Templates",
           "subtitle": "View, edit, or create your automated buyer message templates",

@@ -80,12 +80,38 @@
       "action": "Yeni Grup Oluştur"
     },
     "predefinedTemplates": {
-      "modernMinimalist": "Modern Minimalist",
-      "modernMinimalistDesc": "Ürün detaylarına odaklanan temiz ve profesyonel tasarım",
-      "premiumElectronics": "Premium Elektronik",
-      "premiumElectronicsDesc": "Teknik özelliklerle elektronik için üst düzey tasarım",
-      "ecommerceClassic": "E-ticaret Klasik",
-      "ecommerceClassicDesc": "Net bölümler ve harekete geçirici mesajlarla geleneksel düzen"
+      "modern-professional": {
+        "name": "Modern Profesyonel",
+        "description": "Üst segment ürünler için sade tipografi ve profesyonel iki kolonlu düzen"
+      },
+      "elite-trust": {
+        "name": "Güven Odaklı",
+        "description": "Hazırlık, teslimat ve garanti bloklarıyla alıcı güvenini öne çıkaran düzen"
+      },
+      "spec-sheet": {
+        "name": "Teknik Föy",
+        "description": "Tam teknik özellik tablosu içeren düzen - elektronik, alet ve yedek parça için ideal"
+      },
+      "gallery-grid": {
+        "name": "Galeri Izgarası",
+        "description": "Büyük bir ana görselin altında tüm fotoğraf setini gösteren görsel ağırlıklı düzen"
+      },
+      "minimal-mono": {
+        "name": "Minimal Mono",
+        "description": "Hiç görsel içermeyen, yalnızca metin tabanlı en hafif ve en yalın seçenek"
+      },
+      "boutique-card": {
+        "name": "Butik Kart",
+        "description": "Ev, kozmetik ve moda ilanları için sıcak serif kart düzeni"
+      },
+      "compact-mobile": {
+        "name": "Kompakt Mobil",
+        "description": "eBay mobil uygulaması için tek kolonlu düzen, özellikler en üstte"
+      },
+      "brand-story": {
+        "name": "Marka Hikayesi",
+        "description": "Markayı öne çıkaran editoryal düzen - özel markalı ve markalı ürünler için"
+      }
     },
     "validation": {
       "nameRequired": "Grup adı gereklidir",

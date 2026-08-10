@@ -1,12 +1,17 @@
 import type { TFunction } from 'i18next';
 import { z } from 'zod';
 
+import { BlacklistType } from '../../domain/store-settings/store-settings.types';
+
 /**
  * Blacklist keyword schema
  */
 export const blacklistKeywordSchema = (t: TFunction) => z.object({
-  keyword: z.string().min(1, t('validation.required')),
-  scope: z.enum(['title', 'description', 'both']),
+  keyword: z.string().trim().min(1, t('validation.required')),
+  types: z.array(z.nativeEnum(BlacklistType)).min(1, t('validation.required')).refine(
+    (types) => new Set(types).size === types.length,
+    t('validation.required'),
+  ),
 });
 
 /**
@@ -20,8 +25,7 @@ export const storeSettingsSchema = (t: TFunction) => z.object({
   state: z.string().min(1, t('validation.stateRequired')),
   zipCode: z.string().min(1, t('validation.zipCodeRequired')),
 
-  validateTitle: z.boolean(),
-  validateDescription: z.boolean(),
+  checkBlacklist: z.boolean(),
 
   blacklist: z.array(blacklistKeywordSchema(t)),
 

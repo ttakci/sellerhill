@@ -1,38 +1,30 @@
-import type { BuyerMessageEventType, BuyerMessageTemplate } from '@repo/shared';
-
-export type BuyerMessageEventFilter = BuyerMessageEventType | 'all';
+import type { BuyerMessageTemplate } from '@repo/shared';
 
 export interface BuyerMessageTemplatesDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   templates: BuyerMessageTemplate[];
+  /** Card click -> straight to the edit form (no select-then-continue step). */
   onEdit: (id: string) => void;
+  /** "New template" card -> opens the create form. */
+  onCreate: () => void;
+  /** "View all" carousel card (shown once templates exceed the carousel cap). */
+  onViewAll: () => void;
 }
 
 export interface BuyerMessageTemplatesDrawerComponentProps {
   isOpen: boolean;
   onClose: () => void;
   templates: BuyerMessageTemplate[];
-  eventFilter: BuyerMessageEventFilter;
-  eventFilterOptions: Array<{ value: BuyerMessageEventFilter; label: string }>;
-  onEventFilterChange: (value: BuyerMessageEventFilter) => void;
+  onEdit: (id: string) => void;
+  onCreate: () => void;
+  onViewAll: () => void;
   defaultBadgeLabel: string;
-  /** Currently selected template id, or null when nothing is selected. */
-  selectedId: string | null;
-  /** True until a card is selected — disables the footer "Continue" action. */
-  isContinueDisabled: boolean;
-  /** Selects (or toggles off) a card by id. */
-  onSelect: (id: string) => void;
-  /** Opens the edit flow for the currently selected template. */
-  onContinue: () => void;
-  /** Opens the delete confirmation for a template. */
+  customBadgeLabel: string;
+  eventLabel: (eventType: BuyerMessageTemplate['eventType']) => string;
   onDeleteRequest: (id: string) => void;
-  isDeleting: boolean;
-  titleLabel: string;
-  subtitleLabel: string;
-  emptyTitle: string;
-  emptyDescription: string;
   deleteLabel: string;
+  isDeleting: boolean;
   isConfirmOpen: boolean;
   confirmDescription: string;
   confirmLabel: string;

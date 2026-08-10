@@ -13,23 +13,10 @@
     "country": "Ülke",
     "state": "Eyalet/Konum",
     "zipCode": "Posta Kodu",
-    "validationSectionTitle": "Doğrulama Ayarları",
-    "validationSectionSubtitle": "Ürün doğrulama kurallarını yapılandırın",
-    "validateTitle": "Başlığı Doğrula",
-    "validateTitleDesc": "Yasaklı kelimeler için ürün başlıklarını tara",
-    "validateDescription": "Açıklamayı Doğrula",
-    "validateDescriptionDesc": "Gövde metni ve madde işaretlerini tara",
-    "blacklistSectionTitle": "Kara Liste Yönetimi",
-    "blacklistSubtitle": "Ürün listeleri için yasaklı anahtar kelimeleri yönetin",
-    "addKeyword": "Anahtar kelime ekle...",
-    "blacklistKeyword": "Anahtar Kelime",
-    "keyword": "Anahtar Kelime",
-    "scope": "Doğrulama Kapsamı",
-    "scope_both": "Başlık ve Açıklama",
-    "scope_title": "Yalnızca Başlık",
-    "scope_description": "Yalnızca Açıklama",
-    "noBlacklist": "Henüz kara listeye alınmış anahtar kelime yok",
-    "noKeywords": "Anahtar kelime bulunamadı",
+    "blacklistType_title": "Başlık",
+    "blacklistType_description": "Açıklama",
+    "blacklistType_feature_specification": "Özellikler ve spesifikasyonlar",
+    "blacklistType_brand_manufacturer": "Marka ve üretici",
     "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır.",
     "amazonTaxRate": "Amazon Satış Alış Vergi Oranı (%)",
     "amazonTaxRateDesc": "Bir siparişin kârı hala geçiciyken (Amazon siparişi henüz verilmediğinde) alış maliyetine uygulanan tahmini Amazon satış vergisi oranı.",
@@ -64,6 +51,17 @@
       "systemTemplate": "Varsayılan",
       "customTemplate": "Özel",
       "templates": {
+        "hub": {
+          "title": "Mesaj Şablonları",
+          "subtitle": "Otomatik alıcı mesaj şablonlarınız",
+          "addNew": {
+            "title": "Yeni Mesaj Şablonu",
+            "subtitle": "Bir sipariş olayı için yeni bir mesaj yazın"
+          },
+          "viewAll": {
+            "title": "Tümü"
+          }
+        },
         "list": {
           "title": "Mesaj Şablonları",
           "subtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin veya oluşturun",

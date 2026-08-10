@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AUTH_CONSTANTS } from '@repo/shared';
 
 import { DatabaseModule } from '../../common/database/database.module';
+import { BillingModule } from '../billing/billing.module';
 import { EmailModule } from '../email/email.module';
 
 import { AuthSessionRepository } from './auth-session.repository';
@@ -19,6 +20,7 @@ import { RolesGuard } from './roles.guard';
 @Module({
   imports: [
     DatabaseModule,
+    BillingModule,
     EmailModule,
     PassportModule,
     JwtModule.registerAsync({

@@ -33,6 +33,8 @@ export enum PlatformSettingCategory {
   BILLING = 'billing',
   LLM = 'llm',
   BUYER_MESSAGING = 'buyer_messaging',
+  /** Append-only table retention windows + Chromium profile disk GC. */
+  RETENTION = 'retention',
 }
 
 /** Where the effective value came from — shown in the UI so overrides are obvious. */
@@ -75,10 +77,38 @@ export enum PlatformSettingKey {
   EBAY_BUDGET_TRADING_DAILY_LIMIT = 'ebay.budget.tradingDailyLimit',
 
   // --- Amazon order sync / tracking ---
+  /**
+   * How often each Amazon buyer account's order list is scraped for cost
+   * capture. This is the single largest consumer of browser time on the
+   * platform: it costs one scrape per ACCOUNT per tick regardless of whether
+   * anything sold, so at N accounts the cost scales with N × ticks/day and
+   * with nothing else. Dial this before buying a bigger machine.
+   */
+  AMAZON_ORDER_SYNC_CRON = 'amazon.orderSync.cron',
   AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT = 'amazon.orderSync.matchTolerancePct',
   AMAZON_ORDER_SYNC_MATCH_WINDOW_DAYS = 'amazon.orderSync.matchWindowDays',
   AMAZON_TRACKING_PRESHIP_INTERVAL_HOURS = 'amazon.tracking.preshipIntervalHours',
   AMAZON_TRACKING_SHIPPED_INTERVAL_HOURS = 'amazon.tracking.shippedIntervalHours',
+
+  // --- Chromium profile disk GC (see amazon/browser-profile-gc.ts) ---
+  /** Master switch for the per-account profile sweeper. */
+  BROWSER_PROFILE_GC_ENABLED = 'amazon.browserProfileGc.enabled',
+  /**
+   * Delete a whole profile after this many days unused. Long by design: a full
+   * removal forces an Amazon re-login, which can hit a captcha/OTP challenge.
+   * 0 disables dormant eviction (cache pruning and orphan purging still run).
+   */
+  BROWSER_PROFILE_GC_DORMANT_DAYS = 'amazon.browserProfileGc.dormantDays',
+  /** Remove profiles whose Amazon account no longer exists. Never costs a re-login. */
+  BROWSER_PROFILE_GC_PURGE_ORPHANS = 'amazon.browserProfileGc.purgeOrphans',
+
+  // --- Database retention (append-only tables; see admin/data-retention.manifest.ts) ---
+  RETENTION_QUEUE_OBSERVATIONS_DAYS = 'retention.queueObservationsDays',
+  RETENTION_KEEPA_USAGE_LOG_DAYS = 'retention.keepaUsageLogDays',
+  RETENTION_LLM_USAGE_LOG_DAYS = 'retention.llmUsageLogDays',
+  RETENTION_USAGE_EVENTS_DAYS = 'retention.usageEventsDays',
+  RETENTION_BUYER_MESSAGE_LOG_DAYS = 'retention.buyerMessageLogDays',
+  RETENTION_AUDIT_LOGS_DAYS = 'retention.auditLogsDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',
@@ -109,6 +139,7 @@ export enum PlatformSettingKey {
   /** Hard per-listing ceiling on those calls. */
   EBAY_ASPECTS_LLM_MAX_PER_LISTING = 'ebay.aspects.llmMaxPerListing',
   BILLING_ENFORCEMENT_ENABLED = 'billing.enforcementEnabled',
+  BILLING_TRIAL_DAYS = 'billing.trialDays',
   BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS = 'buyerMessaging.feedbackDefaultDelayDays',
 }
 

@@ -36,7 +36,7 @@ export const OrdersOverviewPageComponent: React.FC<OrdersOverviewPageProps> = ({
               orders={orders}
               onViewAll={onViewAll}
               viewAllLabel={t('orders.overview.viewAll')}
-              showViewAll
+              showViewAll={totalCount > 3}
               onOrderClick={onOrderClick}
               formatCurrency={formatCurrency}
               formatDate={formatDate}

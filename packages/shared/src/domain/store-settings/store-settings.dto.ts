@@ -5,19 +5,29 @@ import { BlacklistKeyword, StoreSettings } from './store-settings.types';
 
 /**
  * Request DTO for creating/updating Store Settings
+ *
+ * Several FOCUSED drawers write disjoint halves of one row: `StoreSettingsDrawer`
+ * owns location/validation/tax/A2, `BlacklistDrawer` owns the blacklist. So an
+ * OMITTED optional field means "leave unchanged" on UPDATE (and falls back to
+ * the column default on INSERT) — never "erase". An empty string is treated the
+ * same as omitted for the location fields, because `getSettings` synthesizes
+ * `''` defaults when a row does not exist yet and callers echo those back.
  */
 export interface SaveStoreSettingsRequest {
     isGlobal: boolean;
     storeId?: string;
 
-    country: string;
-    state: string;
-    zipCode: string;
+    // Owned by StoreSettingsDrawer. Omitted by the blacklist drawer.
+    country?: string;
+    state?: string;
+    zipCode?: string;
 
-    validateTitle: boolean;
-    validateDescription: boolean;
+    // Owned by StoreSettingsDrawer. Optional — omitted means "leave unchanged"
+    // (see class doc above), same pattern as autoFulfillEnabled.
+    checkBlacklist?: boolean;
 
-    blacklist: Omit<BlacklistKeyword, 'id'>[];
+    // Owned by BlacklistDrawer. Omitted by the store-settings drawer.
+    blacklist?: Omit<BlacklistKeyword, 'id'>[];
 
     // Percent 0–100 used to estimate provisional order profit when real tax unknown.
     amazonTaxRate: number;

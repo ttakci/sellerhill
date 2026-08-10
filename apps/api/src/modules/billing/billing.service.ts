@@ -12,7 +12,9 @@
 // with NO fake subscription — the absence of a row is the truthful state.
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BillingInterval } from '@repo/shared';
+import { BillingInterval, PlatformSettingKey } from '@repo/shared';
+
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import {
   deriveSummaryTransition,
@@ -28,6 +30,7 @@ import {
   type BillingPortalDto,
   type BillingSummaryDto,
 } from './billing.types';
+import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
 export class BillingService {
@@ -36,6 +39,7 @@ export class BillingService {
   constructor(
     private readonly repository: BillingRepositoryService,
     private readonly provider: BillingProviderPort,
+    private readonly platformSettings: PlatformSettingsService,
   ) {}
 
   /**
@@ -70,7 +74,10 @@ export class BillingService {
    */
   async getSummary(userId: string): Promise<BillingSummaryDto> {
     const config = this.getConfig();
-    const subscription = await this.repository.findCurrentSubscription(userId);
+    const storedSubscription = await this.repository.findCurrentSubscription(userId);
+    // Primary expiry is the scheduled writer; normalization is the fail-closed
+    // read guard when that daily job is delayed or Redis is unavailable.
+    const subscription = normalizeExpiredTrial(storedSubscription, new Date());
     const plan = subscription ? await this.repository.loadPlanWithPricing(subscription.planId) : null;
     const usagePeriods = subscription ? await this.repository.findOpenUsagePeriods(subscription.id) : [];
 
@@ -87,6 +94,25 @@ export class BillingService {
       provider: config.provider,
       transition,
     };
+  }
+
+  /**
+   * Start the one-time cardless trial for a newly-created user. Idempotency is
+   * enforced by billing_customers.trial_started_at inside a transaction, not by
+   * this process, so concurrent registration retries can never extend it.
+   */
+  async startTrialForUser(userId: string, billingEmail: string | null): Promise<void> {
+    const trialDays = await this.platformSettings.getNumber(PlatformSettingKey.BILLING_TRIAL_DAYS);
+    const startedAt = new Date();
+    const subscription = await this.repository.startTrialOnce(
+      userId,
+      billingEmail,
+      startedAt,
+      trialEndFrom(startedAt, trialDays),
+    );
+    if (subscription) {
+      this.logger.log(`Started ${trialDays}-day trial for user ${userId}`);
+    }
   }
 
   /**

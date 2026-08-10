@@ -167,6 +167,21 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
 
   // --- Amazon order sync + tracking ---
   def({
+    // THE platform's biggest scaling lever. This tick costs one Playwright
+    // scrape per ACCOUNT per fire regardless of sales, so its cost is
+    // `accounts × ticks/day` and nothing else. At 500 accounts the old */30
+    // default demanded roughly twice the browser-time the rate limiter can
+    // supply; every 3 hours fits with room to spare. Raising the frequency
+    // only speeds up how soon ALREADY-PLACED orders get their Amazon costs
+    // written — no seller-facing action waits on it.
+    key: PlatformSettingKey.AMAZON_ORDER_SYNC_CRON,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.CRON,
+    envVar: 'AMAZON_ORDER_SYNC_CRON',
+    defaultValue: '0 */3 * * *',
+    requiresRestart: true,
+  }),
+  def({
     key: PlatformSettingKey.AMAZON_ORDER_SYNC_MATCH_TOLERANCE_PCT,
     category: PlatformSettingCategory.AMAZON,
     type: PlatformSettingType.NUMBER,
@@ -381,6 +396,15 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'false',
   }),
   def({
+    key: PlatformSettingKey.BILLING_TRIAL_DAYS,
+    category: PlatformSettingCategory.BILLING,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BILLING_TRIAL_DAYS',
+    defaultValue: '7',
+    min: 1,
+    max: 90,
+  }),
+  def({
     key: PlatformSettingKey.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS,
     category: PlatformSettingCategory.BUYER_MESSAGING,
     type: PlatformSettingType.NUMBER,
@@ -388,6 +412,106 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: '3',
     min: 0,
     max: 60,
+  }),
+
+  // --- Chromium profile disk GC ---
+  // `BrowserStateManager` bounds resident MEMORY; this bounds DISK. Without it
+  // a per-account user_data_dir grows without limit and a deleted account
+  // leaks its profile forever (50–250 GB at 500 accounts).
+  def({
+    key: PlatformSettingKey.BROWSER_PROFILE_GC_ENABLED,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'BROWSER_PROFILE_GC_ENABLED',
+    defaultValue: 'true',
+  }),
+  def({
+    // A full profile removal forces an Amazon re-login, which can land a
+    // captcha/OTP and take a buyer account out of service — so the window is
+    // months, not days. By 90 days Amazon has usually expired the session
+    // server-side anyway, making the eviction effectively free.
+    key: PlatformSettingKey.BROWSER_PROFILE_GC_DORMANT_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BROWSER_PROFILE_GC_DORMANT_DAYS',
+    defaultValue: '90',
+    min: 0,
+    max: 3650,
+  }),
+  def({
+    key: PlatformSettingKey.BROWSER_PROFILE_GC_PURGE_ORPHANS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'BROWSER_PROFILE_GC_PURGE_ORPHANS',
+    defaultValue: 'true',
+  }),
+
+  // --- Append-only table retention ---
+  // Every one of these tables grows forever by design. `keepa_usage_log` is
+  // the fastest: one row per REQUESTED ASIN per refresh, ~26M rows/year at a
+  // full refresh schedule. Defaults keep enough history for the admin FinOps
+  // period views without letting the DB become the disk constraint.
+  def({
+    key: PlatformSettingKey.RETENTION_QUEUE_OBSERVATIONS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'QUEUE_OBSERVABILITY_RETENTION_DAYS',
+    defaultValue: '7',
+    min: 1,
+    max: 90,
+  }),
+  def({
+    key: PlatformSettingKey.RETENTION_KEEPA_USAGE_LOG_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_KEEPA_USAGE_LOG_DAYS',
+    defaultValue: '90',
+    min: 7,
+    max: 3650,
+  }),
+  def({
+    key: PlatformSettingKey.RETENTION_LLM_USAGE_LOG_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_LLM_USAGE_LOG_DAYS',
+    defaultValue: '90',
+    min: 7,
+    max: 3650,
+  }),
+  def({
+    // The FinOps projection the admin Costs tab reads. Kept longer than its
+    // source logs so month-over-month comparisons survive a source purge.
+    key: PlatformSettingKey.RETENTION_USAGE_EVENTS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_USAGE_EVENTS_DAYS',
+    defaultValue: '400',
+    min: 30,
+    max: 3650,
+  }),
+  def({
+    // ALSO the buyer-messaging idempotency guard: the partial unique index on
+    // (ebay_order_id, event_type) WHERE status='sent' is what stops a buyer
+    // being messaged twice. Purging a row re-arms that event for its order, so
+    // the floor must comfortably exceed any order's lifecycle.
+    key: PlatformSettingKey.RETENTION_BUYER_MESSAGE_LOG_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_BUYER_MESSAGE_LOG_DAYS',
+    defaultValue: '400',
+    min: 180,
+    max: 3650,
+  }),
+  def({
+    // Compliance evidence (role changes, platform-setting edits). Long floor —
+    // this is the table you need when answering "who changed what, when".
+    key: PlatformSettingKey.RETENTION_AUDIT_LOGS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_AUDIT_LOGS_DAYS',
+    defaultValue: '730',
+    min: 365,
+    max: 3650,
   }),
 ];
 

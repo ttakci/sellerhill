@@ -7,7 +7,7 @@ import { BlacklistCardProps } from './BlacklistCard.types';
 
 export const BlacklistCard: React.FC<BlacklistCardProps> = ({
   keyword,
-  scope,
+  types,
   onRemove,
   selectable = false,
   selected = false,
@@ -36,7 +36,11 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
             </Text>
           </S.KeywordSection>
           <S.ScopeSection>
-            <S.ScopeTag $status={scope}>{t(`storeSettings:storeSettings.scope_${scope}`)}</S.ScopeTag>
+            {types.map((type) => (
+              <S.ScopeTag key={type} $status={type}>
+                {t(`storeSettings:storeSettings.blacklistType_${type}`)}
+              </S.ScopeTag>
+            ))}
           </S.ScopeSection>
           <S.ActionButton variant="ghost" onClick={onRemove} aria-label={t('translation:common.delete')}>
             <Icon name="trash" size={16} />

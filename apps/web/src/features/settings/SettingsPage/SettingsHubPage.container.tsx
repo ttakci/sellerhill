@@ -128,40 +128,22 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     handleOpenDrawer('listingGroupEdit');
   };
 
-  // Amazon accounts — open the list drawer (cards inside); clicking a card opens
-  // the edit flow, the "Add" action opens the create flow. Back from edit/create
-  // returns to the list. The single activeDrawer param closes the list when the
-  // edit/create drawer opens, and vice-versa.
+  // Amazon accounts — the carousel drawer's cards and the "view all" list
+  // drawer's cards both click straight to edit. Back from the create/edit
+  // form always returns to the carousel drawer (inlined via onOpenDrawer in
+  // the component — see SettingsHubPage.component.tsx).
   const handleEditAmazon = (id: string): void => {
     setEditingAmazonId(id);
     handleOpenDrawer('amazonEdit');
   };
 
-  const handleBackToAmazonList = (): void => {
-    setEditingAmazonId(null);
-    handleOpenDrawer('amazonList');
-  };
-
-  // Buyer message templates — open the list drawer (cards inside); create/edit
-  // open their own drawer flow. The single activeDrawer param closes this list
-  // automatically when edit/create opens.
-  const handleManageBuyerMessageTemplates = (): void => {
-    handleOpenDrawer('buyerMessageTemplateList');
-  };
-
-  const handleCreateBuyerMessageTemplate = (): void => {
-    setEditingTemplateId(null);
-    handleOpenDrawer('buyerMessageTemplateCreate');
-  };
-
+  // Buyer message templates — the carousel drawer's cards and the "view all"
+  // list drawer's cards both click straight to edit. Back from the
+  // create/edit form and "view all" both return to the carousel drawer
+  // (inlined via onOpenDrawer in the component — see SettingsHubPage.component.tsx).
   const handleEditBuyerMessageTemplate = (id: string): void => {
     setEditingTemplateId(id);
     handleOpenDrawer('buyerMessageTemplateEdit');
-  };
-
-  const handleBackToBuyerMessageTemplateList = (): void => {
-    setEditingTemplateId(null);
-    handleOpenDrawer('buyerMessageTemplateList');
   };
 
   // Store settings flow: hub (location/validation) → nested blacklist management.
@@ -235,17 +217,13 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       predefinedTemplateNames={predefinedTemplateNames}
       editingGroupId={editingGroupId}
       editingAmazonAccount={editingAmazonAccount}
-      onBackToAmazonList={handleBackToAmazonList}
       storeScope={storeScope}
       onSelectStoreScope={setStoreScope}
       onManageBlacklist={handleManageBlacklist}
       onBackToStoreSettings={handleBackToStoreSettings}
       buyerMessageTemplates={buyerMessageTemplatesData ?? []}
       editingTemplateId={editingTemplateId}
-      onManageBuyerMessageTemplates={handleManageBuyerMessageTemplates}
-      onCreateBuyerMessageTemplate={handleCreateBuyerMessageTemplate}
       onEditBuyerMessageTemplate={handleEditBuyerMessageTemplate}
-      onBackToBuyerMessageTemplateList={handleBackToBuyerMessageTemplateList}
     />
   );
 };

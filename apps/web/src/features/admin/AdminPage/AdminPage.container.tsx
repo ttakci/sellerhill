@@ -51,6 +51,7 @@ const CATEGORY_ORDER: PlatformSettingCategory[] = [
   PlatformSettingCategory.BUYER_MESSAGING,
   PlatformSettingCategory.EMAIL,
   PlatformSettingCategory.ADMIN,
+  PlatformSettingCategory.RETENTION,
 ];
 
 export const AdminPageContainer = (): React.ReactElement => {

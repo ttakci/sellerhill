@@ -8,6 +8,7 @@
     "save": "Save",
     "delete": "Delete",
     "back": "Back",
+    "previous": "Previous",
     "next": "Next",
     "continue": "Continue",
     "saveSuccess": "Changes saved successfully",
@@ -196,48 +197,27 @@
           "connectedStores": "Connected Stores"
         }
       },
-      "ebay": {
-        "title": "eBay Account",
-        "subtitle": "Connected eBay seller account and token status",
-        "manage": "Manage",
-        "status": "Status",
-        "sellerId": "Seller ID",
-        "marketplace": "Marketplace",
-        "currencyLabel": "Currency",
-        "connectedSince": "Connected Since",
-        "tokenExpires": "Token Expires",
-        "lastSync": "Last Sync",
-        "connected": "Connected",
-        "notConnected": "Not Connected",
-        "connect": "Connect eBay Account",
-        "connectNew": {
-          "title": "Connect a New Store",
-          "subtitle": "Authorize a new eBay seller account via eBay's secure login",
-          "action": "Connect Store"
+      "accounts": {
+        "title": "Connected Accounts",
+        "ebay": {
+          "title": "eBay Account",
+          "subtitle": "Manage your connected eBay stores"
         },
+        "amazon": {
+          "title": "Amazon Account",
+          "subtitle": "Manage your buyer accounts for order scraping"
+        }
+      },
+      "ebay": {
+        "sellerId": "Seller ID",
+        "connectedSince": "Connected Since",
         "manageStores": {
-          "title": "Connected Stores",
-          "subtitle": "View and manage your linked eBay stores",
-          "action": "View Stores",
-          "count": "{{count}} store(s) connected",
-          "none": "No stores connected yet",
           "empty": "No eBay stores connected yet"
         }
       },
       "amazon": {
-        "title": "Amazon Accounts",
-        "subtitle": "Buyer accounts used for order scraping",
-        "add": "Add Account",
-        "addSubtitle": "Connect a new buyer account for order scraping",
-        "accountCount": "{{count}} account(s)",
         "noAccounts": "No Amazon accounts connected",
-        "emailLabel": "Email",
-        "connectedSince": "Connected Since",
-        "manage": {
-          "title": "Connected Accounts",
-          "subtitle": "View and manage your linked Amazon accounts",
-          "verify": "Verify login"
-        }
+        "connectedSince": "Connected Since"
       },
       "storeConfig": {
         "title": "Store Configuration",
@@ -262,10 +242,10 @@
         "subtitle": "Store settings and listing keyword blacklist",
         "storeSettings": "Store Settings",
         "storeSettingsSubtitle": "Location, validation, and regional preferences",
-        "manageMessageTemplates": "Manage Message Templates",
-        "manageMessageTemplatesSubtitle": "View and edit your automated buyer message templates",
-        "createMessageTemplate": "Create Message Template",
-        "createMessageTemplateSubtitle": "Define a new message for an order event"
+        "manageMessageTemplates": "Message Templates",
+        "manageMessageTemplatesSubtitle": "View, edit, and create your automated buyer message templates",
+        "manageBlacklist": "Manage Blacklist",
+        "manageBlacklistSubtitle": "Keywords to block from listing titles, descriptions, and specifics"
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
@@ -300,6 +280,36 @@
         "phone": "Phone",
         "bio": "Bio",
         "address": "Address"
+      },
+      "ebayAccounts": {
+        "title": "eBay Accounts",
+        "subtitle": "Your connected eBay stores",
+        "addNew": {
+          "title": "New eBay Account",
+          "subtitle": "Authorize a new store via eBay's secure login"
+        },
+        "viewAll": {
+          "title": "All"
+        }
+      },
+      "ebayAccountsAll": {
+        "title": "Connected Stores",
+        "subtitle": "All of your connected eBay stores"
+      },
+      "amazonAccounts": {
+        "title": "Amazon Accounts",
+        "subtitle": "Your buyer accounts for order scraping",
+        "addNew": {
+          "title": "New Amazon Account",
+          "subtitle": "Connect a new buyer account for order scraping"
+        },
+        "viewAll": {
+          "title": "All"
+        }
+      },
+      "amazonAccountsAll": {
+        "title": "Connected Accounts",
+        "subtitle": "All of your connected Amazon accounts"
       },
       "amazonAdd": {
         "title": "Add Amazon Account",
@@ -337,9 +347,8 @@
         "subtitle": "Location and listing validation for the selected scope",
         "global": "Global (all stores)",
         "appliesTo": "Applies to",
-        "validation": "Listing validation",
-        "validateTitle": "Validate product titles",
-        "validateDescription": "Validate product descriptions",
+        "checkBlacklist": "Check blacklist keywords",
+        "checkBlacklistDesc": "Scan listing titles, descriptions, specifics, and brand against your blacklist before publishing. Each keyword's own field selection controls where it's checked.",
         "country": "Country",
         "region": "Region",
         "zipCode": "Zip Code",
@@ -347,44 +356,37 @@
           "general": "General",
           "messaging": "Buyer messaging",
           "blacklist": "Blacklist"
-        },
-        "blacklistSection": {
-          "label": "Blacklist",
-          "keywordCount": "{{count}} keyword(s)",
-          "empty": "No keywords"
         }
       },
       "blacklist": {
         "manage": {
           "title": "Manage Blacklist",
-          "subtitle": "Forbidden keywords for the selected scope"
+          "subtitle": "Keywords blocked from listing titles, descriptions, and specifics for the selected scope"
         },
         "add": {
-          "title": "Add Blacklist Keywords",
-          "subtitle": "Forbidden keywords for the selected scope",
           "keyword": "Keyword",
           "keywordsLabel": "Keywords",
           "keywordsPlaceholder": "Enter keywords...",
           "keywordsHint": "Enter keywords one per line or separate with commas",
-          "scope": "Scope",
-          "scopeBoth": "Title & Description",
-          "scopeTitle": "Title only",
-          "scopeDescription": "Description only",
+          "typeLabel": "Check in",
+          "type": {
+            "title": "Title",
+            "description": "Description",
+            "feature_specification": "Features & specifications",
+            "brand_manufacturer": "Brand & manufacturer"
+          },
           "add": "Add Keywords",
-          "duplicate": "All keywords already exist for the selected scope",
-          "empty": "Please enter at least one keyword"
+          "duplicate": "All keywords already include the selected fields",
+          "empty": "Please enter at least one keyword",
+          "typeRequired": "Select at least one field"
         },
         "list": {
-          "title": "Blacklist Keywords",
-          "subtitle": "Forbidden keywords for the selected scope",
           "empty": "No blacklist keywords for the selected scope",
           "removeLabel": "Remove keyword",
-          "searchPlaceholder": "Search keywords...",
           "selectAll": "Select all",
           "selectedCount": "{{count}} selected",
-          "bulkDelete": "Delete Selected",
-          "confirmBulkDeleteTitle": "Delete Selected Keywords?",
-          "confirmBulkDeleteDescription": "Are you sure you want to delete {{count}} selected keyword(s)? This action cannot be undone."
+          "bulkDelete": "Delete selected",
+          "confirmBulkDeleteDescription": "Delete {{count}} blacklist keyword(s)? This cannot be undone."
         }
       },
       "listingGroup": {

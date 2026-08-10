@@ -12,11 +12,15 @@ import { useTranslation } from 'react-i18next';
 import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
+  AmazonAccountsAllDrawer,
   AmazonAccountsDrawer,
+  BlacklistDrawer,
   BuyerMessageTemplateDrawer,
+  BuyerMessageTemplatesAllDrawer,
   BuyerMessageTemplatesDrawer,
   ChangePasswordDrawer,
-  EbayAccountDrawer,
+  EbayAccountsAllDrawer,
+  EbayAccountsDrawer,
   ListingGroupDrawer,
   ListingGroupsDrawer,
   ProfileDrawer,
@@ -45,7 +49,6 @@ const PersonalInfoSection = ({
     <SettingsCard
       variant="section"
       header={{
-        icon: 'user-cog',
         title: t('translation:settingsHub.sections.profile.tabs.personalInfo'),
       }}
     >
@@ -74,25 +77,32 @@ const PersonalInfoSection = ({
   );
 };
 
-const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: () => void }): React.ReactElement => {
+const AccountsSection = ({
+  onOpenEbay,
+  onOpenAmazon,
+}: {
+  onOpenEbay: () => void;
+  onOpenAmazon: () => void;
+}): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'shopping-bag',
-        title: t('translation:settingsHub.sections.amazon.title'),
+        title: t('translation:settingsHub.sections.accounts.title'),
       }}
     >
       <SettingsActionRow
-        label={t('translation:settingsHub.sections.amazon.manage.title')}
-        subtitle={t('translation:settingsHub.sections.amazon.manage.subtitle')}
-        onClick={onView}
+        icon="storefront"
+        label={t('translation:settingsHub.sections.accounts.ebay.title')}
+        subtitle={t('translation:settingsHub.sections.accounts.ebay.subtitle')}
+        onClick={onOpenEbay}
       />
       <SettingsActionRow
-        label={t('translation:settingsHub.sections.amazon.add')}
-        subtitle={t('translation:settingsHub.sections.amazon.addSubtitle')}
-        onClick={onAdd}
+        icon="shopping-bag"
+        label={t('translation:settingsHub.sections.accounts.amazon.title')}
+        subtitle={t('translation:settingsHub.sections.accounts.amazon.subtitle')}
+        onClick={onOpenAmazon}
       />
     </SettingsCard>
   );
@@ -100,33 +110,35 @@ const AmazonAccountsSection = ({ onView, onAdd }: { onView: () => void; onAdd: (
 
 const StoreManagementSection = ({
   onOpenStoreSettings,
-  onManageMessageTemplates,
-  onCreateMessageTemplate,
+  onOpenMessageTemplates,
+  onManageBlacklist,
 }: {
   onOpenStoreSettings: () => void;
-  onManageMessageTemplates: () => void;
-  onCreateMessageTemplate: () => void;
+  onOpenMessageTemplates: () => void;
+  onManageBlacklist: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'sliders-horizontal',
         title: t('translation:settingsHub.sections.storeManagement.title'),
       }}
     >
       <SettingsActionRow
+        icon="message-circle"
         label={t('translation:settingsHub.sections.storeManagement.manageMessageTemplates')}
         subtitle={t('translation:settingsHub.sections.storeManagement.manageMessageTemplatesSubtitle')}
-        onClick={onManageMessageTemplates}
+        onClick={onOpenMessageTemplates}
       />
       <SettingsActionRow
-        label={t('translation:settingsHub.sections.storeManagement.createMessageTemplate')}
-        subtitle={t('translation:settingsHub.sections.storeManagement.createMessageTemplateSubtitle')}
-        onClick={onCreateMessageTemplate}
+        icon="block"
+        label={t('translation:settingsHub.sections.storeManagement.manageBlacklist')}
+        subtitle={t('translation:settingsHub.sections.storeManagement.manageBlacklistSubtitle')}
+        onClick={onManageBlacklist}
       />
       <SettingsActionRow
+        icon="sliders-horizontal"
         label={t('translation:settingsHub.sections.storeManagement.storeSettings')}
         subtitle={t('translation:settingsHub.sections.storeManagement.storeSettingsSubtitle')}
         onClick={onOpenStoreSettings}
@@ -217,30 +229,6 @@ const AccountSecuritySection = ({
   );
 };
 
-const EbaySection = ({ onConnect, onView }: { onConnect: () => void; onView: () => void }): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
-  return (
-    <SettingsCard
-      variant="section"
-      header={{
-        icon: 'storefront',
-        title: t('translation:settingsHub.sections.ebay.title'),
-      }}
-    >
-      <SettingsActionRow
-        label={t('translation:settingsHub.sections.ebay.manageStores.title')}
-        subtitle={t('translation:settingsHub.sections.ebay.manageStores.subtitle')}
-        onClick={onView}
-      />
-      <SettingsActionRow
-        label={t('translation:settingsHub.sections.ebay.connectNew.title')}
-        subtitle={t('translation:settingsHub.sections.ebay.connectNew.subtitle')}
-        onClick={onConnect}
-      />
-    </SettingsCard>
-  );
-};
-
 export const SettingsHubPageComponent = ({
   profile,
   ebayAccounts,
@@ -262,15 +250,13 @@ export const SettingsHubPageComponent = ({
   predefinedTemplateNames,
   editingGroupId,
   editingAmazonAccount,
-  onBackToAmazonList,
   storeScope,
   onSelectStoreScope,
+  onManageBlacklist,
+  onBackToStoreSettings,
   buyerMessageTemplates,
   editingTemplateId,
-  onManageBuyerMessageTemplates,
-  onCreateBuyerMessageTemplate,
   onEditBuyerMessageTemplate,
-  onBackToBuyerMessageTemplateList,
 }: SettingsHubPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
 
@@ -284,36 +270,59 @@ export const SettingsHubPageComponent = ({
 
       <S.TwoColGrid>
         <PersonalInfoSection profile={profile ?? null} onEdit={() => onOpenDrawer('profile')} />
-        <EbaySection onConnect={onConnectEbay} onView={() => onOpenDrawer('ebay')} />
-      </S.TwoColGrid>
-
-      <S.TwoColGrid>
-        <AmazonAccountsSection onView={() => onOpenDrawer('amazonList')} onAdd={() => onOpenDrawer('amazonAdd')} />
-        <StoreManagementSection
-          onOpenStoreSettings={() => onOpenDrawer('storeSettings')}
-          onManageMessageTemplates={onManageBuyerMessageTemplates}
-          onCreateMessageTemplate={onCreateBuyerMessageTemplate}
+        <AccountsSection
+          onOpenEbay={() => onOpenDrawer('ebayAccounts')}
+          onOpenAmazon={() => onOpenDrawer('amazonAccounts')}
         />
       </S.TwoColGrid>
 
       <S.TwoColGrid>
+        <StoreManagementSection
+          onOpenStoreSettings={() => onOpenDrawer('storeSettings')}
+          onOpenMessageTemplates={() => onOpenDrawer('buyerMessageTemplates')}
+          onManageBlacklist={onManageBlacklist}
+        />
         <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
+      </S.TwoColGrid>
+
+      <S.TwoColGrid>
         <BillingSection onManage={() => onOpenDrawer('billing')} />
       </S.TwoColGrid>
 
       <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
 
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
-      <EbayAccountDrawer isOpen={activeDrawer === 'ebay'} onClose={onCloseDrawer} accounts={ebayAccounts} />
+      <EbayAccountsDrawer
+        isOpen={activeDrawer === 'ebayAccounts'}
+        onClose={onCloseDrawer}
+        accounts={ebayAccounts}
+        onConnectNew={onConnectEbay}
+        onViewAll={() => onOpenDrawer('ebayAccountsAll')}
+      />
+      <EbayAccountsAllDrawer
+        isOpen={activeDrawer === 'ebayAccountsAll'}
+        onClose={onCloseDrawer}
+        onBack={() => onOpenDrawer('ebayAccounts')}
+        accounts={ebayAccounts}
+      />
       <AmazonAccountDrawer
         isOpen={activeDrawer === 'amazonAdd' || activeDrawer === 'amazonEdit'}
         onClose={onCloseDrawer}
         editingAccount={activeDrawer === 'amazonEdit' ? editingAmazonAccount : null}
-        onBack={onBackToAmazonList}
+        onBack={() => onOpenDrawer('amazonAccounts')}
       />
       <AmazonAccountsDrawer
-        isOpen={activeDrawer === 'amazonList'}
+        isOpen={activeDrawer === 'amazonAccounts'}
         onClose={onCloseDrawer}
+        accounts={amazonAccounts}
+        onAddNew={() => onOpenDrawer('amazonAdd')}
+        onViewAll={() => onOpenDrawer('amazonAccountsAll')}
+        onEdit={onEditAmazon}
+      />
+      <AmazonAccountsAllDrawer
+        isOpen={activeDrawer === 'amazonAccountsAll'}
+        onClose={onCloseDrawer}
+        onBack={() => onOpenDrawer('amazonAccounts')}
         accounts={amazonAccounts}
         onEdit={onEditAmazon}
       />
@@ -324,6 +333,14 @@ export const SettingsHubPageComponent = ({
         storeConfigs={storeConfigs}
         selectedScope={storeScope}
         onSelectScope={onSelectStoreScope}
+      />
+      <BlacklistDrawer
+        isOpen={activeDrawer === 'storeBlacklist'}
+        onClose={onCloseDrawer}
+        onBack={onBackToStoreSettings}
+        availableStores={availableStores}
+        storeConfigs={storeConfigs}
+        selectedScope={storeScope}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
       <BillingDrawer isOpen={activeDrawer === 'billing'} onClose={onCloseDrawer} />
@@ -344,12 +361,21 @@ export const SettingsHubPageComponent = ({
       <BuyerMessageTemplateDrawer
         isOpen={activeDrawer === 'buyerMessageTemplateCreate' || activeDrawer === 'buyerMessageTemplateEdit'}
         onClose={onCloseDrawer}
-        onBack={activeDrawer === 'buyerMessageTemplateEdit' ? onBackToBuyerMessageTemplateList : undefined}
+        onBack={() => onOpenDrawer('buyerMessageTemplates')}
         editingTemplateId={activeDrawer === 'buyerMessageTemplateEdit' ? editingTemplateId : null}
       />
       <BuyerMessageTemplatesDrawer
-        isOpen={activeDrawer === 'buyerMessageTemplateList'}
+        isOpen={activeDrawer === 'buyerMessageTemplates'}
         onClose={onCloseDrawer}
+        templates={buyerMessageTemplates}
+        onEdit={onEditBuyerMessageTemplate}
+        onCreate={() => onOpenDrawer('buyerMessageTemplateCreate')}
+        onViewAll={() => onOpenDrawer('buyerMessageTemplatesAll')}
+      />
+      <BuyerMessageTemplatesAllDrawer
+        isOpen={activeDrawer === 'buyerMessageTemplatesAll'}
+        onClose={onCloseDrawer}
+        onBack={() => onOpenDrawer('buyerMessageTemplates')}
         templates={buyerMessageTemplates}
         onEdit={onEditBuyerMessageTemplate}
       />

@@ -80,12 +80,38 @@
       "action": "Create New Group"
     },
     "predefinedTemplates": {
-      "modernMinimalist": "Modern Minimalist",
-      "modernMinimalistDesc": "Clean and professional design with focus on product details",
-      "premiumElectronics": "Premium Electronics",
-      "premiumElectronicsDesc": "High-end design for electronics with technical specifications",
-      "ecommerceClassic": "E-commerce Classic",
-      "ecommerceClassicDesc": "Traditional layout with clear sections and call-to-action"
+      "modern-professional": {
+        "name": "Modern Professional",
+        "description": "Clean typography and a professional two-column layout for high-end products"
+      },
+      "elite-trust": {
+        "name": "Elite Trust",
+        "description": "Buyer-confidence layout with clear handling, delivery and guarantee blocks"
+      },
+      "spec-sheet": {
+        "name": "Spec Sheet",
+        "description": "Technical layout with a full specification table - best for electronics, tools and parts"
+      },
+      "gallery-grid": {
+        "name": "Gallery Grid",
+        "description": "Photo-led layout that shows the complete image set beneath a large hero shot"
+      },
+      "minimal-mono": {
+        "name": "Minimal Mono",
+        "description": "Text-only editorial layout with no images at all - the lightest, most neutral option"
+      },
+      "boutique-card": {
+        "name": "Boutique Card",
+        "description": "Warm serif card layout for home, beauty and fashion listings"
+      },
+      "compact-mobile": {
+        "name": "Compact Mobile",
+        "description": "Single-column layout tuned for the eBay mobile app, with features shown first"
+      },
+      "brand-story": {
+        "name": "Brand Story",
+        "description": "Editorial layout that leads with the brand - suits private-label and branded goods"
+      }
     },
     "validation": {
       "nameRequired": "Group name is required",

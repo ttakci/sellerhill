@@ -6,9 +6,6 @@ import type {
   StoreSettingsResponse,
 } from '@repo/shared';
 
-export type BlacklistScope = 'title' | 'description' | 'both';
-export type BlacklistItem = { keyword: string; scope: BlacklistScope };
-
 export interface StoreSettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,8 +30,7 @@ export interface StoreSettingsDrawerComponentProps {
   country: string;
   state: string;
   zipCode: string;
-  validateTitle: boolean;
-  validateDescription: boolean;
+  checkBlacklist: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
   buyerMessagingConfig: BuyerMessagingConfig;
@@ -46,16 +42,7 @@ export interface StoreSettingsDrawerComponentProps {
   onCountryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onToggleValidateTitle: (checked: boolean) => void;
-  onToggleValidateDescription: (checked: boolean) => void;
+  onToggleCheckBlacklist: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
-  keywords: string;
-  onKeywordsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  blacklistScope: BlacklistScope;
-  onBlacklistScopeChange: (value: BlacklistScope) => void;
-  onAddKeyword: () => void;
-  blacklistError: string | null;
-  blacklist: BlacklistItem[];
-  onRemoveKeyword: (item: BlacklistItem) => void;
 }

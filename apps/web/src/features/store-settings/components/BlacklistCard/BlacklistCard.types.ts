@@ -1,6 +1,8 @@
+import type { BlacklistType } from '@repo/shared';
+
 export interface BlacklistCardProps {
   keyword: string;
-  scope: 'both' | 'title' | 'description';
+  types: BlacklistType[];
   onRemove: () => void;
   selectable?: boolean;
   selected?: boolean;

@@ -86,6 +86,7 @@ export class GoogleAuthService {
     // create
     const userId = await this.createGoogleUser(decision.profile);
     this.logger.log(`Google user created ${userId}`);
+    await this.authService.startSignupTrial(userId, decision.profile.email);
     return this.authService.issueSession(userId);
   }
 

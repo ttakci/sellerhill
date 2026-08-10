@@ -1,25 +1,15 @@
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
-export { FormCard } from '../shared/drawerSurfaces.style';
-
+/**
+ * Horizontal inset — without it, the carousel's arrows (which protrude past
+ * the card's own edges by design) land almost flush against the drawer's
+ * edge. Insetting here keeps the carousel, the single-item card, and the
+ * "add new" card all the same width and aligned with each other.
+ */
 export const BodyStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.lg')};
-`;
-
-export const FilterRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
-export const FilterSelectWrapper = styled.div`
-  min-width: 12rem;
-`;
-
-export const CardGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xl')};
+  padding: 0 ${tkn('spacing.md')};
 `;

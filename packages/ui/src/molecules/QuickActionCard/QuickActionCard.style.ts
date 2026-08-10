@@ -10,7 +10,7 @@ export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.xl')};
   display: flex;
   align-items: center;
   justify-content: space-between;

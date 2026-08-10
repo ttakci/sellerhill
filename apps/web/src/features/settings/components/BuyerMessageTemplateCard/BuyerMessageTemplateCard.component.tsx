@@ -10,13 +10,15 @@ import type { BuyerMessageTemplateCardProps } from './BuyerMessageTemplateCard.t
  * custom template (just flagged `isDefault` for the badge + "Reset to
  * default" action in the edit drawer). Clicking selects the card for editing;
  * the delete action is a stopPropagation'd icon button so it never triggers
- * selection. The full body renders (no truncation) so the card is readable
- * without opening the editor.
+ * selection. Every card is a fixed height with the body clamped to a few
+ * lines, so cards stay uniform (and the carousel never reflows) regardless
+ * of how long a given template's body is.
  */
 export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> = ({
   template,
   eventLabel,
   defaultBadgeLabel,
+  customBadgeLabel,
   onClick,
   onDelete,
   deleteLabel,
@@ -52,11 +54,6 @@ export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> =
             {template.name}
           </S.CardName>
           <S.BadgeRow>
-            {template.isDefault && (
-              <S.DefaultBadge variant="info" size="md">
-                {defaultBadgeLabel}
-              </S.DefaultBadge>
-            )}
             <S.EventBadge variant="neutral" size="md">
               {eventLabel}
             </S.EventBadge>
@@ -68,6 +65,20 @@ export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> =
         <S.BodyPreview variant="body-sm" color="text.secondary">
           {template.body}
         </S.BodyPreview>
+        <S.BottomRow>
+          {template.isDefault ? (
+            <S.DefaultBadge variant="info" size="md">
+              {defaultBadgeLabel}
+            </S.DefaultBadge>
+          ) : (
+            <S.CustomBadge variant="secondary" size="md">
+              {customBadgeLabel}
+            </S.CustomBadge>
+          )}
+          <S.ArrowSlot>
+            <Icon name="arrow-right" size={16} color="brand.primary" />
+          </S.ArrowSlot>
+        </S.BottomRow>
       </S.CardBody>
     </S.InteractiveCard>
   );

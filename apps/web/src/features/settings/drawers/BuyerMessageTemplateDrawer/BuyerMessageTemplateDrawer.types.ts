@@ -20,7 +20,7 @@ export const PLACEHOLDER_TOKENS = [
 export interface BuyerMessageTemplateDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Returns from step 2 (edit) to step 1 (template list). Create mode is single-step and does not show a back action. */
+  /** Returns to the templates carousel hub — both create and edit are opened from inside it. */
   onBack?: () => void;
   /** null/undefined = create mode; string = edit existing template */
   editingTemplateId?: string | null;

@@ -8,6 +8,7 @@
     "save": "Kaydet",
     "delete": "Sil",
     "back": "Geri",
+    "previous": "Önceki",
     "next": "İleri",
     "continue": "Devam Et",
     "saveSuccess": "Değişiklikler başarıyla kaydedildi",
@@ -196,48 +197,27 @@
           "connectedStores": "Bağlı Mağazalar"
         }
       },
-      "ebay": {
-        "title": "eBay Hesabı",
-        "subtitle": "Bağlı eBay satıcı hesabı ve token durumu",
-        "manage": "Yönet",
-        "status": "Durum",
-        "sellerId": "Satıcı ID",
-        "marketplace": "Pazaryeri",
-        "currencyLabel": "Para Birimi",
-        "connectedSince": "Bağlanma Tarihi",
-        "tokenExpires": "Token Bitiş Tarihi",
-        "lastSync": "Son Senkronizasyon",
-        "connected": "Bağlı",
-        "notConnected": "Bağlı Değil",
-        "connect": "eBay Hesabını Bağla",
-        "connectNew": {
-          "title": "Yeni Mağaza Bağla",
-          "subtitle": "eBay güvenli girişi ile yeni bir satıcı hesabı yetkilendir",
-          "action": "Mağaza Bağla"
+      "accounts": {
+        "title": "Bağlı Hesaplar",
+        "ebay": {
+          "title": "eBay Hesabı",
+          "subtitle": "Bağlı eBay mağazalarınızı yönetin"
         },
+        "amazon": {
+          "title": "Amazon Hesabı",
+          "subtitle": "Sipariş taraması için alıcı hesaplarınızı yönetin"
+        }
+      },
+      "ebay": {
+        "sellerId": "Satıcı ID",
+        "connectedSince": "Bağlanma Tarihi",
         "manageStores": {
-          "title": "Bağlı Mağazalar",
-          "subtitle": "Bağlı eBay mağazalarınızı görüntüleyin ve yönetin",
-          "action": "Mağazaları Görüntüle",
-          "count": "{{count}} mağaza bağlı",
-          "none": "Henüz mağaza bağlı değil",
           "empty": "Henüz bağlı eBay mağaza yok"
         }
       },
       "amazon": {
-        "title": "Amazon Hesapları",
-        "subtitle": "Sipariş taraması için kullanılan alıcı hesapları",
-        "add": "Hesap Ekle",
-        "addSubtitle": "Sipariş taraması için yeni bir alıcı hesabı bağla",
-        "accountCount": "{{count}} hesap",
         "noAccounts": "Bağlı Amazon hesabı yok",
-        "emailLabel": "E-posta",
-        "connectedSince": "Bağlanma Tarihi",
-        "manage": {
-          "title": "Bağlı Hesaplar",
-          "subtitle": "Bağlı Amazon hesaplarınızı görüntüleyin ve yönetin",
-          "verify": "Girişi doğrula"
-        }
+        "connectedSince": "Bağlanma Tarihi"
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırması",
@@ -262,10 +242,10 @@
         "subtitle": "Mağaza ayarları ve listing kelime blacklist'i",
         "storeSettings": "Mağaza Ayarları",
         "storeSettingsSubtitle": "Konum, doğrulama ve bölgesel tercihler",
-        "manageMessageTemplates": "Mesaj Şablonlarını Yönet",
-        "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin ve düzenleyin",
-        "createMessageTemplate": "Mesaj Şablonu Oluştur",
-        "createMessageTemplateSubtitle": "Bir sipariş olayı için yeni mesaj tanımlayın"
+        "manageMessageTemplates": "Mesaj Şablonları",
+        "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin ve oluşturun",
+        "manageBlacklist": "Kara Listeyi Yönet",
+        "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler"
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
@@ -300,6 +280,36 @@
         "phone": "Telefon",
         "bio": "Biyografi",
         "address": "Adres"
+      },
+      "ebayAccounts": {
+        "title": "eBay Hesapları",
+        "subtitle": "Bağlı eBay mağazalarınız",
+        "addNew": {
+          "title": "Yeni eBay Hesabı",
+          "subtitle": "eBay'in güvenli girişiyle yeni bir mağaza bağlayın"
+        },
+        "viewAll": {
+          "title": "Tümü"
+        }
+      },
+      "ebayAccountsAll": {
+        "title": "Bağlı Mağazalar",
+        "subtitle": "Bağlı eBay mağazalarınızın tamamı"
+      },
+      "amazonAccounts": {
+        "title": "Amazon Hesapları",
+        "subtitle": "Sipariş taraması için alıcı hesaplarınız",
+        "addNew": {
+          "title": "Yeni Amazon Hesabı",
+          "subtitle": "Sipariş taraması için yeni bir alıcı hesabı bağlayın"
+        },
+        "viewAll": {
+          "title": "Tümü"
+        }
+      },
+      "amazonAccountsAll": {
+        "title": "Bağlı Hesaplar",
+        "subtitle": "Bağlı Amazon hesaplarınızın tamamı"
       },
       "amazonAdd": {
         "title": "Amazon Hesabı Ekle",
@@ -337,9 +347,8 @@
         "subtitle": "Seçili kapsam için konum ve listing doğrulaması",
         "global": "Global (tüm mağazalar)",
         "appliesTo": "Uygulandığı yer",
-        "validation": "Listing doğrulaması",
-        "validateTitle": "Ürün başlıklarını doğrula",
-        "validateDescription": "Ürün açıklamalarını doğrula",
+        "checkBlacklist": "Kara liste kelimelerini kontrol et",
+        "checkBlacklistDesc": "Yayınlamadan önce listing başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
         "country": "Ülke",
         "region": "Bölge",
         "zipCode": "Posta Kodu",
@@ -347,44 +356,37 @@
           "general": "Genel",
           "messaging": "Alıcı mesajları",
           "blacklist": "Kara liste"
-        },
-        "blacklistSection": {
-          "label": "Kara Liste",
-          "keywordCount": "{{count}} anahtar",
-          "empty": "Anahtar yok"
         }
       },
       "blacklist": {
         "manage": {
           "title": "Kara Listeyi Yönet",
-          "subtitle": "Seçili kapsam için yasaklı kelimeler"
+          "subtitle": "Seçili kapsam için listing başlığı, açıklaması ve özelliklerinde engellenen kelimeler"
         },
         "add": {
-          "title": "Blacklist Kelimeleri Ekle",
-          "subtitle": "Seçili kapsam için yasaklı kelimeler",
           "keyword": "Kelime",
           "keywordsLabel": "Kelimeler",
           "keywordsPlaceholder": "Kelimeleri girin...",
           "keywordsHint": "Kelimeleri alt alta veya virgülle ayırarak girebilirsiniz",
-          "scope": "Kapsam",
-          "scopeBoth": "Başlık & Açıklama",
-          "scopeTitle": "Yalnızca başlık",
-          "scopeDescription": "Yalnızca açıklama",
+          "typeLabel": "Kontrol edilecek alanlar",
+          "type": {
+            "title": "Başlık",
+            "description": "Açıklama",
+            "feature_specification": "Özellikler ve spesifikasyonlar",
+            "brand_manufacturer": "Marka ve üretici"
+          },
           "add": "Kelimeleri Ekle",
-          "duplicate": "Tüm kelimeler seçili kapsam için zaten mevcut",
-          "empty": "Lütfen en az bir kelime girin"
+          "duplicate": "Tüm kelimeler seçili alanları zaten içeriyor",
+          "empty": "Lütfen en az bir kelime girin",
+          "typeRequired": "En az bir alan seçin"
         },
         "list": {
-          "title": "Blacklist Kelimeleri",
-          "subtitle": "Seçili kapsam için yasaklı kelimeler",
           "empty": "Seçili kapsam için blacklist kelimesi yok",
           "removeLabel": "Kelimeyi kaldır",
-          "searchPlaceholder": "Kelime ara...",
           "selectAll": "Tümünü seç",
-          "selectedCount": "{{count}} seçili",
-          "bulkDelete": "Seçilenleri Sil",
-          "confirmBulkDeleteTitle": "Seçili Kelimeler Silinsin mi?",
-          "confirmBulkDeleteDescription": "{{count}} seçili kelimeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+          "selectedCount": "{{count}} seçildi",
+          "bulkDelete": "Seçilenleri sil",
+          "confirmBulkDeleteDescription": "{{count}} kara liste kelimesi silinsin mi? Bu işlem geri alınamaz."
         }
       },
       "listingGroup": {

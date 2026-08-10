@@ -27,11 +27,6 @@ export const RowIcon = styled.span`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  border-radius: ${tkn('radius.sm')};
-  background: ${tkn('colors.brand.secondary')};
-  color: ${tkn('colors.brand.primary')};
 `;
 
 export const Right = styled.div`

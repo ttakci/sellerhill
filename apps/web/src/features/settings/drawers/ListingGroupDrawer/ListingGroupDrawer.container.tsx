@@ -20,6 +20,7 @@ import {
   useGetPredefinedTemplatesQuery,
   useUpdateListingSettingsGroupMutation,
 } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { predefinedTemplateName } from '@/features/settings/utils/predefinedTemplateLabel';
 
 export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, onClose, editingGroupId }) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
@@ -46,6 +47,10 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
 
   const isSaving = isCreating || isUpdating;
   const isLoading = isGroupLoading || isTemplatesLoading;
+  const predefinedTemplateOptions = useMemo(
+    () => templates.map((template) => ({ value: template.id, label: predefinedTemplateName(t, template) })),
+    [t, templates]
+  );
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
      to be folded in here, so the global overlay covered the whole app on
      first paint of this page instead of the page showing its own state. */
@@ -367,7 +372,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       append={append}
       remove={remove}
       onAddRange={handleAddRange}
-      predefinedTemplates={templates}
+      predefinedTemplateOptions={predefinedTemplateOptions}
       renderedPreview={renderedPreview}
       activeTemplate={activeTemplate}
       onOpenPreview={handleOpenPreview}

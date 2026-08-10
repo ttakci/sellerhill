@@ -360,6 +360,38 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
     return this.proxyActiveFor.get(amazonAccountId) ?? false;
   }
 
+  /**
+   * Whether this process currently holds a cached context for the account.
+   *
+   * Read by `BrowserProfileGcService` as its highest-precedence guard: removing
+   * files under a running Chromium corrupts the profile. It is authoritative
+   * because only ONE API process may run (two would race the user_data_dir
+   * `SingletonLock` — see the invariant on `getContext`), so "not in this map"
+   * means "no browser anywhere owns this dir".
+   */
+  hasLiveContext(amazonAccountId: string): boolean {
+    return this.activeContexts.has(amazonAccountId);
+  }
+
+  /** Root directory holding every per-account profile. */
+  getProfilesRoot(): string {
+    return this.profilesDir;
+  }
+
+  /** Absolute `user_data_dir` for one account. */
+  getProfileDirFor(amazonAccountId: string): string {
+    return this.getProfileDir(amazonAccountId);
+  }
+
+  /**
+   * In-memory last-touch time (epoch ms), or `undefined` when this process has
+   * never opened the account. The GC falls back to the profile dir's mtime in
+   * that case, so a restart does not make every profile look dormant.
+   */
+  getLastUsedAt(amazonAccountId: string): number | undefined {
+    return this.lastUsedAt.get(amazonAccountId);
+  }
+
   async isSessionValid(amazonAccountId: string): Promise<boolean> {
     // With persistent contexts the cookie state lives in the user_data_dir, not
     // a JSON storageState file. A profile dir that exists is a candidate for a

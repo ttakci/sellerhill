@@ -20,6 +20,10 @@
  *                              renders once for a truthy scalar, drops when empty
  *   {{^key}}…{{/key}}  inverted section: renders only when key is empty/falsy
  *
+ * Plus three scalar presence flags — `has_features`, `has_details`,
+ * `has_images` — for conditionally wrapping a LIST block. See
+ * `LISTING_TEMPLATE_PRESENCE_FLAGS`.
+ *
  * Anything left over after rendering (unknown keys, unbalanced sections) is
  * stripped by `stripUnresolvedPlaceholders` so template syntax can never reach
  * a buyer-visible listing.
@@ -127,6 +131,29 @@ function isEmptyValue(value: ListingTemplateValue): boolean {
 }
 
 /**
+ * Presence flags for the three list placeholders.
+ *
+ * A section cannot be nested inside another section of the SAME key (the
+ * closing tag is matched by backreference), so `{{#product_details}}` cannot
+ * both wrap a heading and repeat its own rows. Without a separate scalar key
+ * there is no way to hide a list's heading/table when the list is empty, and
+ * templates render an empty styled box — the exact class of defect that makes a
+ * live listing look broken. These are scalars, so they render their body ONCE.
+ *
+ * Deliberately not in `LISTING_TEMPLATE_PLACEHOLDERS`: they are control flags,
+ * not content, and inserting `{{has_features}}` into a template would print a
+ * bare "1". Use them only as `{{#has_features}}…{{/has_features}}`.
+ *
+ * Empty is `''` (never `'0'`) — `isEmptyValue('0')` is false, so a "0" flag
+ * would render the very block it is meant to suppress.
+ */
+export const LISTING_TEMPLATE_PRESENCE_FLAGS = ['has_features', 'has_details', 'has_images'] as const;
+
+/** Truthy value for a presence flag. Any non-blank string works; this is the canonical one. */
+const PRESENCE_FLAG_SET = '1';
+const PRESENCE_FLAG_UNSET = '';
+
+/**
  * Build the canonical placeholder context from product-shaped data.
  * `product_details` is a "Key: Value" list built from specs — the shape the
  * seeded templates iterate over.
@@ -153,6 +180,9 @@ export function buildListingTemplateContext(input: ListingTemplateInput): Listin
     price: typeof input.price === 'number' ? input.price.toFixed(2) : '',
     currency: input.currency ?? '',
     quantity: typeof input.quantity === 'number' ? String(input.quantity) : '',
+    has_features: features.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
+    has_details: productDetails.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
+    has_images: images.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
   };
 }
 

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
+  BlacklistType,
   DEFAULT_LISTING_TEMPLATE_HTML,
   EBAY_DESCRIPTION_MAX_LENGTH,
   EBAY_TITLE_MAX_LENGTH,
@@ -91,7 +92,7 @@ export class ListingStrategyService {
     }
 
     // Validate listing against store settings (Blacklist, etc.) — after AI so blacklist still applies
-    this.validateListing(title, description, storeSettings);
+    this.validateListing(title, description, product, storeSettings);
 
     const priceMetrics = this.calculatePrice(product.price.current, group);
 
@@ -194,47 +195,54 @@ export class ListingStrategyService {
   /**
    * Validate listing data against store settings (Blacklist, Length, etc.)
    */
-  private validateListing(title: string, description: string, settings: StoreSettingsResponse): void {
-    const { validateTitle, validateDescription, blacklist } = settings;
+  private validateListing(
+    title: string,
+    description: string,
+    product: ProductData,
+    settings: StoreSettingsResponse
+  ): void {
+    const { checkBlacklist, blacklist } = settings;
 
-    // 3. Blacklist Validation Logic (merged into scope checks)
-    const validateBlacklist = (text: string, scope: 'title' | 'description') => {
-      if (!blacklist || blacklist.length === 0) {
-        return;
-      }
+    const validateBlacklist = (values: string[], type: BlacklistType): void => {
+      for (const item of blacklist ?? []) {
+        const keyword = item.keyword.trim();
+        if (!keyword || !item.types.includes(type)) {
+          continue;
+        }
 
-      for (const item of blacklist) {
-        const keyword = item.keyword.toLowerCase();
-        // Check if item applies to this scope
-        if (item.scope === scope || item.scope === 'both') {
-          if (text.toLowerCase().includes(keyword)) {
-            throw new BadRequestException(
-              `${scope.charAt(0).toUpperCase() + scope.slice(1)} contains blacklisted keyword: ${item.keyword}`
-            );
-          }
+        const normalizedKeyword = keyword.toLowerCase();
+        if (values.some((value) => value.toLowerCase().includes(normalizedKeyword))) {
+          throw new BadRequestException(
+            `${type} contains blacklisted keyword: ${item.keyword}`
+          );
         }
       }
     };
 
-    // 1. Title Validation
-    if (validateTitle) {
-      if (!title || title.trim().length === 0) {
-        throw new BadRequestException('Listing title cannot be empty');
-      }
-      validateBlacklist(title, 'title');
+    if (!title || title.trim().length === 0) {
+      throw new BadRequestException('Listing title cannot be empty');
     }
 
-    // 2. Description Validation — the blacklist runs against buyer-VISIBLE text.
-    // The rendered description embeds Amazon-hosted image URLs
-    // (images-na.ssl-images-amazon.com), so scanning raw markup made the
-    // obvious "amazon" keyword reject every listing over an `<img src>` no
-    // buyer ever reads.
-    if (validateDescription) {
-      if (!description || description.trim().length === 0) {
-        throw new BadRequestException('Listing description cannot be empty');
-      }
-      validateBlacklist(extractVisibleText(description), 'description');
+    // Each keyword carries its own `types` (title/description/features/brand),
+    // so `checkBlacklist` is the only remaining switch — on/off, not per-field.
+    // Description deliberately scans buyer-visible text only, so Amazon-hosted
+    // image URLs remain valid.
+    if (!checkBlacklist) {
+      return;
     }
+    validateBlacklist([title], BlacklistType.TITLE);
+    validateBlacklist([extractVisibleText(description)], BlacklistType.DESCRIPTION);
+    validateBlacklist(
+      [
+        ...(product.features ?? []),
+        ...Object.entries(product.specs ?? {}).flatMap(([name, value]) => [name, value]),
+      ],
+      BlacklistType.FEATURE_SPECIFICATION
+    );
+    validateBlacklist(
+      [product.brand ?? '', product.manufacturer ?? ''],
+      BlacklistType.BRAND_MANUFACTURER
+    );
   }
 
   /**

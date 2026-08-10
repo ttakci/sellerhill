@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TrackingConversionProvider, type SaveStoreSettingsRequest, type BlacklistKeyword } from '@repo/shared';
+import {
+  BlacklistType,
+  TrackingConversionProvider,
+  type SaveStoreSettingsRequest,
+  type BlacklistKeyword,
+} from '@repo/shared';
 import { Type } from 'class-transformer';
 import {
   IsString,
@@ -7,6 +12,7 @@ import {
   IsOptional,
   IsBoolean,
   IsArray,
+  ArrayNotEmpty,
   ValidateNested,
   IsIn,
   IsNumber,
@@ -21,14 +27,15 @@ class BlacklistKeywordDto implements Omit<BlacklistKeyword, 'id'> {
   keyword!: string;
 
   @ApiProperty({
-    description: 'Scope where the keyword applies',
-    example: 'both',
-    enum: ['title', 'description', 'both'],
+    description: 'Payload fields where the keyword applies',
+    example: [BlacklistType.TITLE, BlacklistType.DESCRIPTION],
+    enum: BlacklistType,
+    isArray: true,
   })
-  @IsString()
-  @IsNotEmpty()
-  @IsIn(['title', 'description', 'both'])
-  scope!: 'title' | 'description' | 'both';
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsIn(Object.values(BlacklistType), { each: true })
+  types!: BlacklistType[];
 }
 
 export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
@@ -41,20 +48,20 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsString()
   storeId?: string;
 
-  @ApiProperty({ description: 'Country code', example: 'US' })
+  @ApiPropertyOptional({ description: 'Country code. Omitted by focused drawers.', example: 'US' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  country!: string;
+  country?: string;
 
-  @ApiProperty({ description: 'State', example: 'CA' })
+  @ApiPropertyOptional({ description: 'State. Omitted by focused drawers.', example: 'CA' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  state!: string;
+  state?: string;
 
-  @ApiProperty({ description: 'ZIP code', example: '90210' })
+  @ApiPropertyOptional({ description: 'ZIP code. Omitted by focused drawers.', example: '90210' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  zipCode!: string;
+  zipCode?: string;
 
   @ApiProperty({
     description: 'Default Amazon tax rate (percent 0–100) used to estimate provisional order profit',
@@ -86,17 +93,18 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsOptional()
   trackingConversionProvider?: TrackingConversionProvider;
 
-  @ApiProperty({ description: 'Whether to validate titles', example: true })
+  @ApiPropertyOptional({
+    description: 'Master switch for blacklist scanning at listing create. Omitted means "leave unchanged".',
+    default: true,
+  })
   @IsBoolean()
-  validateTitle!: boolean;
+  @IsOptional()
+  checkBlacklist?: boolean;
 
-  @ApiProperty({ description: 'Whether to validate descriptions', example: true })
-  @IsBoolean()
-  validateDescription!: boolean;
-
-  @ApiProperty({ description: 'Blacklisted keywords', type: [BlacklistKeywordDto] })
+  @ApiPropertyOptional({ description: 'Blacklisted keywords. Omitted by the store-settings drawer.', type: [BlacklistKeywordDto] })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BlacklistKeywordDto)
-  blacklist!: Omit<BlacklistKeyword, 'id'>[];
+  blacklist?: Omit<BlacklistKeyword, 'id'>[];
 }

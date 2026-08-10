@@ -78,6 +78,7 @@ interface CustomerEntity {
   provider: string;
   status: string;
   billing_email: string | null;
+  trial_started_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -92,6 +93,7 @@ interface SubscriptionEntity {
   current_period_end: Date;
   canceled_at: Date | null;
   ended_at: Date | null;
+  trial_ends_at: Date | null;
   provider_subscription_id: string | null;
   metadata: Record<string, unknown>;
   created_at: Date;
@@ -405,6 +407,85 @@ export class BillingRepositoryService {
    * exist. Used by checkout to ensure a customer record exists before
    * redirecting to Paddle. Idempotent on user_id.
    */
+  async startTrialOnce(
+    userId: string,
+    billingEmail: string | null,
+    startedAt: Date,
+    trialEndsAt: Date,
+  ): Promise<BillingSubscriptionDto | null> {
+    return this.databaseService.transaction(async (client) => {
+      const customerResult = await client.query<CustomerEntity>(
+        `INSERT INTO billing_customers (user_id, provider, billing_email)
+         VALUES ($1, 'local', $2)
+         ON CONFLICT (user_id) DO UPDATE SET
+           billing_email = COALESCE(billing_customers.billing_email, EXCLUDED.billing_email),
+           updated_at = NOW()
+         RETURNING *`,
+        [userId, billingEmail],
+      );
+      const customer = customerResult.rows[0];
+      if (!customer || customer.trial_started_at) {
+        return null;
+      }
+
+      // This conditional update is the one-time entitlement guard. Concurrent
+      // registration retries can both read NULL above, but only one can claim it.
+      const claimed = await client.query<{ id: string }>(
+        `UPDATE billing_customers
+         SET trial_started_at = $2, updated_at = NOW()
+         WHERE id = $1 AND trial_started_at IS NULL
+         RETURNING id`,
+        [customer.id, startedAt.toISOString()],
+      );
+      if (claimed.rowCount !== 1) {
+        return null;
+      }
+
+      const planResult = await client.query<{ id: string }>(
+        `SELECT id FROM billing_plans WHERE slug = 'trial' LIMIT 1`,
+      );
+      const trialPlanId = planResult.rows[0]?.id;
+      if (!trialPlanId) {
+        throw new Error('billing.errors.trialPlanMissing');
+      }
+
+      const subscriptionResult = await client.query<SubscriptionEntity>(
+        `INSERT INTO billing_subscriptions
+           (customer_id, plan_id, status, interval, current_period_start,
+            current_period_end, trial_ends_at, metadata)
+         VALUES ($1, $2, 'trialing', 'monthly', $3, $4, $4, '{}'::jsonb)
+         RETURNING *`,
+        [customer.id, trialPlanId, startedAt.toISOString(), trialEndsAt.toISOString()],
+      );
+      const subscription = subscriptionResult.rows[0];
+      if (!subscription) {
+        throw new Error('billing.errors.trialCreateFailed');
+      }
+      return this.mapSubscription(subscription);
+    });
+  }
+
+  async expireElapsedTrials(): Promise<number> {
+    return this.databaseService.transaction(async (client) => {
+      const expired = await client.query<{ id: string }>(
+        `UPDATE billing_subscriptions
+         SET status = 'ended', ended_at = COALESCE(ended_at, trial_ends_at), updated_at = NOW()
+         WHERE status = 'trialing' AND trial_ends_at <= NOW()
+         RETURNING id`,
+      );
+      const subscriptionIds = expired.rows.map((row) => row.id);
+      if (subscriptionIds.length > 0) {
+        await client.query(
+          `UPDATE billing_usage_periods
+           SET status = 'closed', closed_at = COALESCE(closed_at, NOW()), updated_at = NOW()
+           WHERE subscription_id = ANY($1::uuid[]) AND status = 'open'`,
+          [subscriptionIds],
+        );
+      }
+      return subscriptionIds.length;
+    });
+  }
+
   async ensureLocalCustomer(userId: string, billingEmail: string | null): Promise<BillingCustomerDto> {
     const existing = await this.findCustomerByUserId(userId);
     if (existing) {return existing;}
@@ -634,6 +715,7 @@ export class BillingRepositoryService {
       currentPeriodEnd: row.current_period_end.toISOString(),
       canceledAt: row.canceled_at ? row.canceled_at.toISOString() : null,
       endedAt: row.ended_at ? row.ended_at.toISOString() : null,
+      trialEndsAt: row.trial_ends_at ? row.trial_ends_at.toISOString() : null,
       providerSubscriptionId: row.provider_subscription_id,
       metadata: row.metadata,
       createdAt: row.created_at.toISOString(),

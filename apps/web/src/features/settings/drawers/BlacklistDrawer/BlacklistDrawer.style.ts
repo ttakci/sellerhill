@@ -9,10 +9,16 @@ export const BodyStack = styled.div`
   gap: ${tkn('spacing.lg')};
 `;
 
-/** Inline add form: scope-value select + textarea + hint + error (use inside FormCard). */
+/** Inline add form: type checkboxes + textarea + hint + error (use inside FormCard). */
 export const AddStack = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const TypeOptionsRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
   gap: ${tkn('spacing.md')};
 `;
 

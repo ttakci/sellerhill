@@ -94,13 +94,25 @@ export interface ListingSettingsGroup {
 
 /**
  * Predefined Template
+ *
+ * Seeded catalog rows, owned by the database (migrations `070`/`071`) rather
+ * than by application code. `slug` is the stable natural key: `id` is a random
+ * UUID referenced from `listing_settings_groups.templates->>'predefinedTemplateId'`
+ * with no foreign key, so a catalog update must address rows by slug and leave
+ * the id untouched or every group's template choice silently detaches.
  */
 export interface PredefinedTemplate {
   id: string;
+  slug: string;
   name: string;
   description: string;
   htmlContent: string;
-  sampleData: Record<string, string>;
+  /**
+   * Preview-only render context. Array values are real — `feature_bullets`,
+   * `product_details` and `images` are lists, and the template renderer treats
+   * them differently from scalars.
+   */
+  sampleData: Record<string, string | string[]>;
   previewImage?: string;
   createdAt: Date;
 }

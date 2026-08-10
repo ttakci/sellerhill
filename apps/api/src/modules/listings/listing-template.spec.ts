@@ -67,6 +67,39 @@ describe('renderListingTemplate', () => {
     expect(html).toBe('<p></p><p></p>');
   });
 
+  it('renders condition and quantity empty, because the publish path never passes them', () => {
+    // processDescriptionTemplate builds its context without these two, so a
+    // template using them publishes a blank. Predefined templates are forbidden
+    // from referencing them (predefined-templates.guard.spec.ts); this locks the
+    // reason why.
+    expect(renderListingTemplate('[{{condition}}][{{quantity}}]', context)).toBe('[][]');
+  });
+
+  it('exposes presence flags so a list block can be hidden when the list is empty', () => {
+    // A section cannot nest inside a section of the SAME key, so
+    // `{{#product_details}}` cannot both wrap a heading and repeat its rows.
+    // Without these flags a spec-less product renders a styled heading over a void.
+    const template =
+      '{{#has_details}}<h2>Details</h2><ul>{{#product_details}}<li>{{.}}</li>{{/product_details}}</ul>{{/has_details}}';
+
+    const withData = renderListingTemplate(template, context);
+    expect(withData).toContain('<h2>Details</h2>');
+    expect(withData).toContain('<li>Flavor: Assorted</li>');
+    // Rendered ONCE, not once per spec — the flag is a scalar, not the array.
+    expect(withData.match(/<h2>Details<\/h2>/g)).toHaveLength(1);
+
+    expect(renderListingTemplate(template, buildListingTemplateContext({ title: 'X' }))).toBe('');
+  });
+
+  it('sets every presence flag from its own list', () => {
+    const empty = buildListingTemplateContext({ title: 'X' });
+    expect(renderListingTemplate('{{#has_features}}F{{/has_features}}', context)).toBe('F');
+    expect(renderListingTemplate('{{#has_images}}I{{/has_images}}', context)).toBe('I');
+    expect(renderListingTemplate('{{#has_features}}F{{/has_features}}', empty)).toBe('');
+    expect(renderListingTemplate('{{#has_details}}D{{/has_details}}', empty)).toBe('');
+    expect(renderListingTemplate('{{#has_images}}I{{/has_images}}', empty)).toBe('');
+  });
+
   it('handles sections nested inside other sections', () => {
     const html = renderListingTemplate(
       '{{#main_image}}<div>{{#feature_bullets}}<li>{{.}}</li>{{/feature_bullets}}</div>{{/main_image}}',

@@ -1,4 +1,4 @@
-import type { ListingSettingsGroupFormData, PredefinedTemplateResponse } from '@repo/shared';
+import type { ListingSettingsGroupFormData } from '@repo/shared';
 import type { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 
 export type ListingGroupDrawerStep = 0 | 1 | 2 | 3;
@@ -23,7 +23,7 @@ export interface ListingGroupDrawerComponentProps {
   append: UseFieldArrayAppend<ListingSettingsGroupFormData, 'repricingStrategy'>;
   remove: UseFieldArrayRemove;
   onAddRange: () => void;
-  predefinedTemplates: PredefinedTemplateResponse[];
+  predefinedTemplateOptions: Array<{ value: string; label: string }>;
   renderedPreview: string;
   activeTemplate: { htmlContent: string; sampleData: Record<string, string | string[]> };
   onOpenPreview: () => void;

@@ -9,19 +9,22 @@ import type {
 
 export type SettingsDrawerKey =
   | 'profile'
-  | 'ebay'
+  | 'ebayAccounts'
+  | 'ebayAccountsAll'
+  | 'amazonAccounts'
+  | 'amazonAccountsAll'
   | 'amazonAdd'
   | 'amazonEdit'
-  | 'amazonList'
   | 'storeSettings'
   | 'storeBlacklist'
   | 'password'
   | 'listingGroupCreate'
   | 'listingGroupEdit'
   | 'listingGroupList'
+  | 'buyerMessageTemplates'
+  | 'buyerMessageTemplatesAll'
   | 'buyerMessageTemplateCreate'
   | 'buyerMessageTemplateEdit'
-  | 'buyerMessageTemplateList'
   | 'billing'
   | null;
 
@@ -51,15 +54,10 @@ export interface SettingsHubPageComponentProps {
   editingGroupId?: string | null;
   // Editing amazon account (for amazon drawer edit mode)
   editingAmazonAccount?: AmazonAccountPublicDto | null;
-  // Buyer message templates (Store Configuration → manage/create/edit)
+  // Buyer message templates (Store Configuration → templates hub → carousel/all/create/edit)
   buyerMessageTemplates: BuyerMessageTemplate[];
   editingTemplateId?: string | null;
-  onManageBuyerMessageTemplates: () => void;
-  onCreateBuyerMessageTemplate: () => void;
   onEditBuyerMessageTemplate: (id: string) => void;
-  onBackToBuyerMessageTemplateList: () => void;
-  // Return from the amazon add/edit drawer to the accounts list drawer.
-  onBackToAmazonList?: () => void;
   // Store settings flow: shared scope + nested blacklist navigation.
   storeScope: string;
   onSelectStoreScope: (value: string) => void;

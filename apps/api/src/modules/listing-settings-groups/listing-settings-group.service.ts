@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
     DEFAULT_LISTING_CONTENT_CONFIG,
     type CreateListingSettingsGroupRequest,
@@ -35,249 +35,44 @@ interface ListingSettingsGroupEntity {
 
 /**
  * Predefined Template Entity
+ *
+ * Seeded by migrations `070`/`071`, not by this service. `slug` is the stable
+ * natural key catalog migrations upsert on; `id` is referenced from
+ * `listing_settings_groups.templates` JSONB with no foreign key and must never
+ * be rewritten.
  */
 interface PredefinedTemplateEntity {
   id: string;
+  slug: string;
   name: string;
   description: string;
   html_content: string;
   sample_data: string; // JSON string in DB
   preview_image: string | null;
+  sort_order: number;
+  is_active: boolean;
   created_at: Date;
 }
 
-/** Predefined-template HTML cache TTL (templates are seeded, not user-edited). */
+/**
+ * Predefined-template HTML cache TTL.
+ *
+ * Templates are catalog DATA owned by the database (migrations 070/071), not by
+ * this service. The boot-time seed that used to upsert a hardcoded TS array on
+ * every start is gone, and the unique index on `slug` structurally replaces the
+ * duplicate self-heal it carried.
+ *
+ * Do NOT reintroduce a cache clear() here: the only ways html_content changes
+ * now are a migration (which implies a new process with an empty cache) or a
+ * manual DB edit (covered by this TTL).
+ */
 const TEMPLATE_CACHE_TTL_MS = 5 * 60 * 1000;
 
 @Injectable()
-export class ListingSettingsGroupService implements OnModuleInit {
-  private readonly logger = new Logger(ListingSettingsGroupService.name);
+export class ListingSettingsGroupService {
   private readonly templateHtmlCache = new Map<string, { html: string; expiresAt: number }>();
 
   constructor(private readonly databaseService: DatabaseService) {}
-
-  async onModuleInit() {
-    await this.seedPredefinedTemplates();
-  }
-
-  /**
-   * Seed predefined templates if they don't exist
-   */
-  private async seedPredefinedTemplates() {
-    this.logger.log('Seeding predefined templates...');
-
-    const templates = [
-      {
-        name: 'Modern Professional',
-        description: 'Clean typography and professional two-column layout for high-end products',
-        htmlContent: `
-<div class="zonds-listing">
-  <div class="zonds-content">
-    <h1 class="zonds-title">{{title}}</h1>
-    <div class="zonds-grid">
-      <div class="zonds-image-col">
-        <div class="zonds-image-box">
-          <img src="{{main_image}}" alt="{{title}}">
-        </div>
-      </div>
-      <div class="zonds-details-col">
-        <div class="zonds-section">
-          <h2 class="zonds-section-title">Product Details</h2>
-          <ul class="zonds-list">
-            {{#product_details}}
-            <li>{{.}}</li>
-            {{/product_details}}
-          </ul>
-        </div>
-        <div class="zonds-section">
-          <h2 class="zonds-section-title">Key Features</h2>
-          <ul class="zonds-list">
-            {{#feature_bullets}}
-            <li>{{.}}</li>
-            {{/feature_bullets}}
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="zonds-description">
-      <h2 class="zonds-section-title">Full Description</h2>
-      <p>{{{product_description}}}</p>
-    </div>
-  </div>
-</div>
-<style>
-.zonds-listing { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 20px; }
-.zonds-listing img { max-width: 100%; height: auto; }
-.zonds-title { font-size: 32px; font-weight: 700; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 32px; }
-.zonds-grid { display: flex; gap: 40px; margin-bottom: 40px; }
-.zonds-image-col { flex: 1; max-width: 450px; }
-.zonds-details-col { flex: 1.2; }
-.zonds-image-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
-.zonds-image-box img { max-width: 100%; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-.zonds-section-title { font-size: 18px; font-weight: 600; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-left: 4px solid #3b82f6; padding-left: 12px; }
-.zonds-list { list-style: none; padding: 0; }
-.zonds-list li { margin-bottom: 8px; position: relative; padding-left: 20px; }
-.zonds-list li::before { content: "•"; color: #3b82f6; position: absolute; left: 0; font-weight: bold; }
-.zonds-description { background: #f1f5f9; padding: 32px; border-radius: 12px; margin-top: 40px; }
-@media (max-width: 768px) { .zonds-grid { flex-direction: column; } .zonds-image-col { max-width: 100%; } }
-</style>
-        `,
-        sampleData: {
-          title: 'Premium Wireless Noise Cancelling Headphones - Silver Edition',
-          main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
-          product_description: 'Experience world-class noise cancellation and premium sound quality with these high-end wireless headphones. Perfect for travel, work, or pure listening pleasure.',
-          feature_bullets: ['Industry-leading noise cancellation', 'Up to 30-hour battery life', 'Touch sensor controls', 'Quick attention mode'],
-          product_details: ['Brand: Zonds Audio', 'Connectivity: Bluetooth 5.0', 'Noise Cancelling: Yes', 'Color: Silver']
-        }
-      },
-      {
-        name: 'Elite Trust',
-        description: 'Focus on shipping, returns, and buyer confidence with clear policy blocks',
-        htmlContent: `
-<div class="elite-wrapper">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700">
-  <div class="elite-header">
-    <h1>{{title}}</h1>
-  </div>
-  <div class="elite-main">
-    <div class="elite-image-center">
-      <img src="{{main_image}}" alt="{{title}}">
-    </div>
-    <div class="elite-container">
-      <div class="elite-section">
-        <h3><span class="elite-icon">📋</span> Product Overview</h3>
-        <p>{{{product_description}}}</p>
-        <ul class="elite-features">
-          {{#feature_bullets}}
-          <li>{{.}}</li>
-          {{/feature_bullets}}
-        </ul>
-      </div>
-      <div class="elite-policies">
-        <div class="elite-policy-item">
-          <h4><span class="elite-icon">🚚</span> Fast Handling</h4>
-          <p>We process all orders within <strong>24-48 hours</strong> of payment confirmation.</p>
-        </div>
-        <div class="elite-policy-item">
-          <h4><span class="elite-icon">📦</span> Secure Delivery</h4>
-          <p>Orders are shipped with premium tracking. Continental US shipping only.</p>
-        </div>
-        <div class="elite-policy-item">
-          <h4><span class="elite-icon">🛡️</span> 30-Day Guarantee</h4>
-          <p>Not satisfied? Return within 30 days for a full refund. Peace of mind guaranteed.</p>
-        </div>
-        <div class="elite-policy-item">
-          <h4><span class="elite-icon">⭐</span> Reliable Feedback</h4>
-          <p>Our reputation is based on trust. Contact us first if you have any issues with your order.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<style>
-.elite-wrapper { font-family: 'Inter', sans-serif; background: #fff; max-width: 900px; margin: 0 auto; color: #2d3748; }
-.elite-header { background: #1a202c; color: #fff; padding: 40px 20px; text-align: center; }
-.elite-header h1 { font-size: 24px; margin: 0; max-width: 800px; margin: 0 auto; line-height: 1.4; }
-.elite-main { padding: 40px 20px; }
-.elite-image-center { text-align: center; margin-bottom: 40px; }
-.elite-image-center img { max-width: 500px; border: 1px solid #edf2f7; border-radius: 8px; }
-.elite-container { display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
-.elite-section h3 { font-size: 18px; margin-top: 0; padding-bottom: 12px; border-bottom: 1px solid #edf2f7; }
-.elite-features { padding-left: 20px; margin-top: 20px; }
-.elite-features li { margin-bottom: 10px; }
-.elite-policies { background: #f7fafc; padding: 24px; border-radius: 8px; }
-.elite-policy-item { margin-bottom: 24px; }
-.elite-policy-item:last-child { margin-bottom: 0; }
-.elite-policy-item h4 { margin: 0 0 8px 0; display: flex; align-items: center; font-size: 14px; text-transform: uppercase; color: #4a5568; }
-.elite-policy-item p { font-size: 13px; margin: 0; color: #718096; }
-.elite-icon { margin-right: 8px; font-size: 18px; }
-@media (max-width: 768px) { .elite-container { grid-template-columns: 1fr; } }
-</style>
-        `,
-        sampleData: {
-          title: 'EliteBook X360 1040 G8 Laptop - 14" Touchscreen, Core i7, 16GB RAM, 512GB SSD',
-          main_image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=1000',
-          product_description: 'Experience professional performance with the EliteBook X360. This versatile 2-in-1 laptop features a stunning 14-inch touchscreen and powerful internals for maximum productivity.',
-          feature_bullets: [
-            '11th Gen Intel Core i7 processor for blazing fast speeds',
-            '16GB High-Speed RAM for seamless multitasking',
-            '512GB NVMe SSD storage for instant boot times',
-            '14-inch Full HD x360 Touchscreen display',
-            'Backlit Keyboard and Fingerprint reader for security'
-          ],
-          product_details: [
-            'Brand: HP',
-            'Model: EliteBook X360 1040 G8',
-            'Processor: Intel Core i7-1185G7',
-            'Operating System: Windows 11 Pro',
-            'Color: Silver'
-          ]
-        }
-      }
-    ];
-
-    // Upsert BY NAME, never delete-and-reinsert: template ids are referenced by
-    // every listing settings group (`templates.predefinedTemplateId`), so a
-    // re-seed that mints new ids silently orphans user configuration and the
-    // create path falls back to the default template.
-    for (const template of templates) {
-      const existing = await this.databaseService.query<{ id: string }>(
-        `SELECT id FROM predefined_templates WHERE name = $1 ORDER BY created_at ASC, id ASC`,
-        [template.name]
-      );
-
-      if (existing.length === 0) {
-        await this.databaseService.query(
-          `INSERT INTO predefined_templates (name, description, html_content, sample_data)
-           VALUES ($1, $2, $3, $4)`,
-          [template.name, template.description, template.htmlContent, JSON.stringify(template.sampleData)]
-        );
-        continue;
-      }
-
-      const [keep, ...duplicates] = existing;
-
-      await this.databaseService.query(
-        `UPDATE predefined_templates
-         SET description = $2, html_content = $3, sample_data = $4
-         WHERE id = $1`,
-        [keep.id, template.description, template.htmlContent, JSON.stringify(template.sampleData)]
-      );
-
-      // Self-heal the rows an earlier delete-and-reinsert seed left behind:
-      // duplicates show up twice in the template picker, and groups end up
-      // split across copies. Repoint those groups BEFORE deleting, otherwise
-      // their `predefinedTemplateId` dangles and the create path silently falls
-      // back to the default template.
-      if (duplicates.length > 0) {
-        const duplicateIds = duplicates.map((row) => row.id);
-        // DatabaseService.query takes scalar params only — expand placeholders
-        // the same way the other multi-id queries in the codebase do.
-        const repointPlaceholders = duplicateIds.map((_, i) => `$${i + 2}`).join(',');
-        const deletePlaceholders = duplicateIds.map((_, i) => `$${i + 1}`).join(',');
-
-        await this.databaseService.query(
-          `UPDATE listing_settings_groups
-           SET templates = jsonb_set(templates, '{predefinedTemplateId}', to_jsonb($1::text)),
-               updated_at = CURRENT_TIMESTAMP
-           WHERE templates->>'predefinedTemplateId' IN (${repointPlaceholders})`,
-          [keep.id, ...duplicateIds]
-        );
-
-        await this.databaseService.query(
-          `DELETE FROM predefined_templates WHERE id IN (${deletePlaceholders})`,
-          duplicateIds
-        );
-
-        this.logger.warn(
-          `Removed ${duplicateIds.length} duplicate '${template.name}' template row(s); groups repointed to ${keep.id}`
-        );
-      }
-    }
-
-    this.templateHtmlCache.clear();
-    this.logger.log('Predefined templates seeded successfully.');
-  }
 
   /**
    * Get all listing settings groups for a user
@@ -433,6 +228,10 @@ export class ListingSettingsGroupService implements OnModuleInit {
    * become 500 identical SELECTs. Returns null when the id no longer exists —
    * the caller falls back to the default template rather than publishing an
    * empty description.
+   *
+   * Deliberately does NOT filter on `is_active`. Retiring a template hides it
+   * from the picker; it must keep resolving here, or every listing already
+   * configured with it would silently downgrade to DEFAULT_LISTING_TEMPLATE_HTML.
    */
   async getPredefinedTemplateHtml(id: string): Promise<string | null> {
     const cached = this.templateHtmlCache.get(id);
@@ -452,19 +251,30 @@ export class ListingSettingsGroupService implements OnModuleInit {
   }
 
   /**
-   * Get all predefined templates
+   * Get the selectable predefined templates (settings-drawer picker).
+   *
+   * Ordered by `sort_order`, not `created_at`: catalog rows adopted by migration
+   * `070` keep their original timestamps while every row a catalog migration
+   * inserts shares one NOW(), so created_at ordering would make the picker's
+   * order an artifact of seed history.
    */
   async getPredefinedTemplates(): Promise<PredefinedTemplateResponse[]> {
     const results = await this.databaseService.query<PredefinedTemplateEntity>(
-      `SELECT * FROM predefined_templates ORDER BY created_at ASC`
+      `SELECT id, slug, name, description, html_content, sample_data, preview_image, created_at
+       FROM predefined_templates
+       WHERE is_active = TRUE
+       ORDER BY sort_order ASC, name ASC`
     );
 
     return results.map(entity => ({
       id: entity.id,
+      slug: entity.slug,
       name: entity.name,
       description: entity.description,
       htmlContent: entity.html_content,
-      sampleData: typeof entity.sample_data === 'string' ? (JSON.parse(entity.sample_data) as Record<string, string>) : (entity.sample_data as unknown as Record<string, string>),
+      sampleData: typeof entity.sample_data === 'string'
+        ? (JSON.parse(entity.sample_data) as Record<string, string | string[]>)
+        : (entity.sample_data as unknown as Record<string, string | string[]>),
       previewImage: entity.preview_image || undefined,
       createdAt: entity.created_at
     }));

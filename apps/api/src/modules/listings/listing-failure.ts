@@ -138,7 +138,9 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   // UNKNOWN ("The listing could not be created.") until now, which hid a cause
   // the seller could have fixed in one click — the keyword is right there in
   // the message thrown by ListingStrategyService.validateListing.
-  const blacklisted = raw.match(/(Title|Description) contains blacklisted keyword:\s*(.+)$/i);
+  const blacklisted = raw.match(
+    /(title|description|feature_specification|brand_manufacturer) contains blacklisted keyword:\s*(.+)$/i
+  );
   if (blacklisted) {
     return {
       code: ListingFailureCode.BLACKLISTED_KEYWORD,

@@ -1,6 +1,11 @@
 import type { TrackingConversionProvider } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
+/**
+ * Steps of the store-settings drawer wizard. The BLACKLIST step here only
+ * hosts the `checkBlacklist` master switch — keyword management itself is a
+ * separate drawer (`BlacklistDrawer`).
+ */
 export enum StoreSettingsDrawerStep {
     GENERAL = 0,
     BUYER_MESSAGING = 1,
@@ -10,10 +15,37 @@ export enum StoreSettingsDrawerStep {
 /**
  * Blacklist Keyword Interface
  */
+export enum BlacklistType {
+    TITLE = 'title',
+    DESCRIPTION = 'description',
+    FEATURE_SPECIFICATION = 'feature_specification',
+    BRAND_MANUFACTURER = 'brand_manufacturer',
+}
+
+export const DEFAULT_BLACKLIST_KEYWORDS: ReadonlyArray<Readonly<Omit<BlacklistKeyword, 'id'>>> = [
+    {
+        keyword: 'Amazon',
+        types: [
+            BlacklistType.TITLE,
+            BlacklistType.DESCRIPTION,
+            BlacklistType.FEATURE_SPECIFICATION,
+            BlacklistType.BRAND_MANUFACTURER,
+        ],
+    },
+];
+
+export function createDefaultBlacklist(): BlacklistKeyword[] {
+    return DEFAULT_BLACKLIST_KEYWORDS.map((item, index) => ({
+        id: `default-${index}`,
+        keyword: item.keyword,
+        types: [...item.types],
+    }));
+}
+
 export interface BlacklistKeyword {
     id: string;
     keyword: string;
-    scope: 'title' | 'description' | 'both';
+    types: BlacklistType[];
 }
 
 /**
@@ -29,9 +61,11 @@ export interface StoreSettings {
     state: string;
     zipCode: string;
 
-    // Validation Settings
-    validateTitle: boolean;
-    validateDescription: boolean;
+    // Master toggle for blacklist scanning at listing create. Each keyword's
+    // own `types` already scopes WHERE it is checked (title/description/
+    // features/brand), so this is the only validation switch left — on/off,
+    // not per-field.
+    checkBlacklist: boolean;
 
     // Blacklist
     blacklist: BlacklistKeyword[];

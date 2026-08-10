@@ -11,7 +11,10 @@
 //   'BILLING_CONFIG'    → resolved BillingConfig snapshot (read at boot)
 // The repository/service/processor are concrete classes.
 
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { resolveBillingConfig } from './billing-helpers';
 import { LocalBillingProvider, PaddleBillingProvider, type BillingProviderPort } from './billing-provider';
@@ -21,15 +24,18 @@ import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 import { BillingProvider } from './billing.types';
 import { QuotaEnforcementService } from './quota-enforcement.service';
+import { BILLING_TRIAL_EXPIRY_QUEUE, TrialExpiryProcessor } from './trial-expiry.processor';
 
 export const BILLING_PROVIDER_TOKEN = 'BILLING_PROVIDER';
 export const BILLING_CONFIG_TOKEN = 'BILLING_CONFIG';
 
 @Module({
+  imports: [BullModule.registerQueue({ name: BILLING_TRIAL_EXPIRY_QUEUE })],
   controllers: [BillingController],
   providers: [
     BillingRepositoryService,
     QuotaEnforcementService,
+    TrialExpiryProcessor,
     {
       // Provider is selected at module-init time based on env. The token is a
       // string; the concrete impl is Paddle or Local. BillingService injects
@@ -54,9 +60,12 @@ export const BILLING_CONFIG_TOKEN = 'BILLING_CONFIG';
     },
     {
       provide: BillingService,
-      inject: [BillingRepositoryService, BILLING_PROVIDER_TOKEN],
-      useFactory: (repo: BillingRepositoryService, provider: BillingProviderPort) =>
-        new BillingService(repo, provider),
+      inject: [BillingRepositoryService, BILLING_PROVIDER_TOKEN, PlatformSettingsService],
+      useFactory: (
+        repo: BillingRepositoryService,
+        provider: BillingProviderPort,
+        platformSettings: PlatformSettingsService,
+      ) => new BillingService(repo, provider, platformSettings),
     },
   ],
   exports: [BillingService, BillingRepositoryService, QuotaEnforcementService],

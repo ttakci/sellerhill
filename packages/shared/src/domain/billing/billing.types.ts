@@ -223,9 +223,20 @@ export interface BillingSubscriptionDto {
   canceledAt: string | null;
   /** When the subscription ended (terminal). */
   endedAt: string | null;
+  /**
+   * Exclusive end of the free trial, or null when this subscription is not (and
+   * never was) a trial. A real column rather than a `metadata` key because the
+   * trial-expiry job scans it from an index.
+   *
+   * Note the FE distinguishes "trialing" from "paid" via {@link status}, NOT via
+   * `BillingSummaryDto.transition` — `deriveSummaryTransition` deliberately maps
+   * trialing → `active` because that is the correct ACCESS level, and quota
+   * enforcement depends on that mapping.
+   */
+  trialEndsAt: string | null;
   /** Optional provider-side subscription id (Stripe sub_...). */
   providerSubscriptionId: string | null;
-  /** Free-form metadata (trial end, promo code, etc.). */
+  /** Free-form metadata (promo code, etc.). */
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;

@@ -20,6 +20,10 @@
       "free": {
         "name": "Free"
       },
+      "trial": {
+        "name": "Free trial",
+        "description": "A time-limited trial of Zonds. Not purchasable — it starts automatically when you sign up."
+      },
       "starter": {
         "name": "Starter",
         "description": "For solo sellers getting started with automated dropshipping."
@@ -66,6 +70,14 @@
         "past_due": "Past due",
         "canceled": "Canceled",
         "ended": "Ended"
+      },
+      "trial": {
+        "title": "You are on the free trial",
+        "daysLeft": "{{count}} day(s) left",
+        "lastDay": "Your trial ends today",
+        "endsOn": "Trial ends on {{date}}",
+        "expired": "Your free trial has ended.",
+        "chooseAPlan": "Choose a plan to keep going once the trial ends."
       },
       "currentPeriod": "Current period",
       "nextRenewal": "Next renewal",
