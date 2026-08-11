@@ -1,5 +1,6 @@
 import { Badge, Checkbox, Icon, IdBadge, Text } from '@repo/ui';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingCard.style';
 import type { ListingCardMetaItem, ListingCardProps } from './ListingCard.types';
@@ -36,7 +37,6 @@ export const ListingCard = ({
   stats,
   status,
   soldCount,
-  watchCount,
   orientation,
   onClick,
   className,
@@ -46,8 +46,9 @@ export const ListingCard = ({
   selectionAriaLabel,
   ...rest
 }: ListingCardProps): React.ReactElement => {
+  const { t } = useTranslation(['translation']);
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
-  const hasExtras = (soldCount ?? 0) > 0 || (watchCount ?? 0) > 0;
+  const hasExtras = (soldCount ?? 0) > 0;
   const statusVariant = status?.tone === 'active' ? 'success' : 'neutral';
 
   return (
@@ -118,14 +119,6 @@ export const ListingCard = ({
                 </Text>
               </S.ExtraItem>
             )}
-            {(watchCount ?? 0) > 0 && (
-              <S.ExtraItem>
-                <Icon name="eye" size={12} />
-                <Text variant="caption" color="text.secondary">
-                  {watchCount}
-                </Text>
-              </S.ExtraItem>
-            )}
           </S.ExtraFields>
         )}
 
@@ -142,13 +135,21 @@ export const ListingCard = ({
           ))}
         </S.StatsGrid>
 
-        {status && (
-          <S.Footer>
+        <S.Footer>
+          {status ? (
             <Badge variant={statusVariant} size="sm">
               {status.label}
             </Badge>
-          </S.Footer>
-        )}
+          ) : (
+            <span />
+          )}
+          <S.DetailAction>
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <Icon name="arrow-right" size={14} color="brand.primary" />
+          </S.DetailAction>
+        </S.Footer>
       </S.Content>
     </S.Wrapper>
   );

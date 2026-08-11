@@ -414,6 +414,63 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 60,
   }),
 
+  // --- Tracking-number conversion (Aquiline) ---
+  // Turns the Amazon tracking number into an AQUAA…YQ number carried under the
+  // AQUILINE carrier, so the buyer never sees the supplier. Off until an API
+  // key exists: with no key every order falls back to the honest pass-through,
+  // which is exactly the behaviour before this feature.
+  def({
+    key: PlatformSettingKey.AQUILINE_BASE_URL,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.STRING,
+    envVar: 'AQUILINE_BASE_URL',
+    defaultValue: 'https://api.aquiline-tracking.com/v3',
+  }),
+  def({
+    key: PlatformSettingKey.AQUILINE_API_KEY,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.STRING,
+    envVar: 'AQUILINE_API_KEY',
+    defaultValue: null,
+    isSecret: true,
+  }),
+  def({
+    // Aquiline meters "seller profiles" per plan tier (10/25/50/100/250), so a
+    // profile is a scarce plan-bound resource, not something to mint per user.
+    // This is the account-level default; a store may override it.
+    key: PlatformSettingKey.AQUILINE_PARTNER_ID,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.STRING,
+    envVar: 'AQUILINE_PARTNER_ID',
+    defaultValue: null,
+  }),
+  def({
+    key: PlatformSettingKey.AQUILINE_TIMEOUT_MS,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'AQUILINE_TIMEOUT_MS',
+    defaultValue: '15000',
+    min: 1000,
+    max: 60000,
+  }),
+  def({
+    key: PlatformSettingKey.AQUILINE_WEBHOOK_SECRET,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.STRING,
+    envVar: 'AQUILINE_WEBHOOK_SECRET',
+    defaultValue: null,
+    isSecret: true,
+  }),
+  def({
+    key: PlatformSettingKey.AQUILINE_WEBHOOK_MAX_AGE_MINUTES,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'AQUILINE_WEBHOOK_MAX_AGE_MINUTES',
+    defaultValue: '1440',
+    min: 5,
+    max: 20160,
+  }),
+
   // --- Chromium profile disk GC ---
   // `BrowserStateManager` bounds resident MEMORY; this bounds DISK. Without it
   // a per-account user_data_dir grows without limit and a deleted account
@@ -511,6 +568,18 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'RETENTION_AUDIT_LOGS_DAYS',
     defaultValue: '730',
     min: 365,
+    max: 3650,
+  }),
+  def({
+    // The listing detail page's "Revisions" drawer. Not correctness-load-bearing
+    // like buyer_message_log — losing an old row only loses history, nothing
+    // re-arms — so the floor is short like the other diagnostic/history tables.
+    key: PlatformSettingKey.RETENTION_LISTING_REVISIONS_DAYS,
+    category: PlatformSettingCategory.RETENTION,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'RETENTION_LISTING_REVISIONS_DAYS',
+    defaultValue: '180',
+    min: 30,
     max: 3650,
   }),
 ];

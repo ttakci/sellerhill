@@ -217,7 +217,11 @@
       },
       "amazon": {
         "noAccounts": "No Amazon accounts connected",
-        "connectedSince": "Connected Since"
+        "connectedSince": "Connected Since",
+        "twoFactorOn": "2FA enabled",
+        "twoFactorOff": "No 2FA",
+        "autoFulfillOn": "Auto-fulfill on · cap {{cap}}",
+        "autoFulfillOff": "Auto-fulfill off"
       },
       "storeConfig": {
         "title": "Store Configuration",
@@ -251,7 +255,7 @@
         "title": "Listing Settings Groups",
         "subtitle": "Repricing strategies, stock logic, profit margins",
         "manage": "Manage Groups",
-        "manageSubtitle": "View and edit existing pricing and stock groups",
+        "manageSubtitle": "View, edit, and create your pricing and stock groups",
         "viewAll": "View All",
         "create": "Create New Group",
         "createSubtitle": "Define a new repricing strategy and profit margin",
@@ -393,6 +397,10 @@
         "list": {
           "title": "Listing Settings Groups",
           "subtitle": "View, edit, or create your repricing groups"
+        },
+        "all": {
+          "title": "All Groups",
+          "subtitle": "Select a group to edit its pricing and stock rules"
         }
       },
       "password": {

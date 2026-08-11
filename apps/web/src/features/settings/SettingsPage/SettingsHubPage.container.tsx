@@ -111,9 +111,9 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     setSearchParams(next, { replace: true });
   };
 
-  // Listing groups — open the list drawer (cards inside); create/edit open
-  // their own drawer flows. The single activeDrawer param closes this list
-  // automatically when edit/create opens.
+  // Listing groups — one hub row opens the carousel drawer; "view all",
+  // create and edit are exits from there. The single activeDrawer param closes
+  // the hub automatically when one of them opens.
   const handleViewAllListingGroups = (): void => {
     handleOpenDrawer('listingGroupList');
   };

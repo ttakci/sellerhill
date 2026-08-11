@@ -95,7 +95,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
   }, [order, showMessage, closeMessage, t]);
 
   const handleBack = () => {
-    localeNavigate('/orders/all');
+    localeNavigate('/orders');
   };
 
   const handleLinked = () => {

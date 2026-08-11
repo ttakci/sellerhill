@@ -81,15 +81,21 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   autoFulfillEnabled?: boolean;
 
   @ApiPropertyOptional({
-    description: "Carrier-mapping provider used when relaying tracking to eBay. Persisted LOWERCASE ('local' | 'api').",
+    description:
+      "How the Amazon tracking number is relayed to eBay. Persisted LOWERCASE. " +
+      "'local' passes it through as Amazon_Logistics; 'aquiline' converts it to an " +
+      "AQUAA…YQ number under the AQUILINE carrier so the buyer never sees the supplier.",
     default: 'local',
-    enum: ['local'],
+    enum: ['local', 'aquiline'],
   })
-  // Intentionally restricted to LOCAL until the API converter is wired.
-  // ApiTrackingConverter.convert() currently throws, so allowing 'api' to
-  // persist via any path (direct API, FE bug) would silently break per-account
-  // tracking. Remove this guard when a real API provider ships.
-  @IsIn([TrackingConversionProvider.LOCAL])
+  // 'aquiline' is accepted now that a real converter ships
+  // (TrackingConversionService). It is still safe to store with no API key
+  // configured: the service degrades to the local pass-through and logs, so a
+  // half-configured account behaves exactly as it did before.
+  //
+  // The legacy 'api' spelling stays REJECTED on write. It resolves correctly on
+  // read for safety, but writing it would spread a second name for one choice.
+  @IsIn([TrackingConversionProvider.LOCAL, TrackingConversionProvider.AQUILINE])
   @IsOptional()
   trackingConversionProvider?: TrackingConversionProvider;
 

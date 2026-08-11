@@ -38,6 +38,7 @@ export enum DataRetentionTable {
   USAGE_EVENTS = 'usage_events',
   BUYER_MESSAGE_LOG = 'buyer_message_log',
   AUDIT_LOGS = 'audit_logs',
+  LISTING_REVISIONS = 'listing_revisions',
 }
 
 export interface DataRetentionRule {
@@ -104,6 +105,14 @@ export const DATA_RETENTION_RULES: readonly DataRetentionRule[] = [
     minDays: 365,
     rationale:
       'Compliance evidence for role changes and platform-setting edits — the record you need to answer "who changed what, when". Long floor on purpose.',
+  },
+  {
+    table: DataRetentionTable.LISTING_REVISIONS,
+    timestampColumn: 'recorded_at',
+    settingKey: PlatformSettingKey.RETENTION_LISTING_REVISIONS_DAYS,
+    minDays: 30,
+    rationale:
+      'Price/quantity change history behind the listing detail page\'s Revisions drawer. Purely historical — nothing re-derives state from an old row the way buyer_message_log does, so the floor is short.',
   },
 ] as const;
 

@@ -31,7 +31,6 @@ export interface StockConfig {
 export interface FeeConfig {
   ebayFeePercent: number;
   fixedFeeAmount: number;
-  taxPercent: number;
 }
 
 /**

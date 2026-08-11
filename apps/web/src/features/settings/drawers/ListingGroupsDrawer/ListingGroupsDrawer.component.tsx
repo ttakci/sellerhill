@@ -1,33 +1,35 @@
 import { TemplateType } from '@repo/shared';
-import { Drawer, EmptyState } from '@repo/ui';
+import { Drawer, EmptyState, QuickActionCard } from '@repo/ui';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
-import { BodyStack, CardGrid, FormCard } from './ListingGroupsDrawer.style';
+import { BodyStack, FormCard } from './ListingGroupsDrawer.style';
 import type { ListingGroupsDrawerComponentProps } from './ListingGroupsDrawer.types';
 
+import { AccountCarousel } from '@/features/settings/components/AccountCarousel';
 import { ListingGroupCard } from '@/features/settings/components/ListingGroupCard';
 
 /**
- * Presentation for the "Listing Settings Groups" list drawer.
- * Shows the group cards in a single-column grid; clicking a card opens the
- * edit flow. The create CTA lives on the settings hub section row, not here.
+ * Presentation for the "Listing Settings Groups" hub drawer — the single
+ * settings-hub row for groups. Same shape as the buyer-message templates hub:
+ * a carousel of the first few groups (with "view all" beyond that) over an
+ * "add new" card, so viewing, editing and creating live behind one row.
  */
 export const ListingGroupsDrawerComponent: React.FC<ListingGroupsDrawerComponentProps> = ({
   isOpen,
   onClose,
   groups,
   predefinedTemplateNames,
-  selectedId,
-  isContinueDisabled,
-  onSelect,
-  onContinue,
+  onEdit,
+  onCreate,
+  onViewAll,
   titleLabel,
   subtitleLabel,
+  viewAllLabel,
+  createTitle,
+  createSubtitle,
   emptyTitle,
   emptyDescription,
 }) => {
-  const { t } = useTranslation();
   const resolveTemplateName = (g: ListingGroupsDrawerComponentProps['groups'][number]): string | undefined => {
     if (g.templates.type !== TemplateType.PREDEFINED || !g.templates.predefinedTemplateId) {
       return undefined;
@@ -36,36 +38,24 @@ export const ListingGroupsDrawerComponent: React.FC<ListingGroupsDrawerComponent
   };
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      onClose={onClose}
-      title={titleLabel}
-      subtitle={subtitleLabel}
-      size="md"
-      primaryAction={{
-        label: t('translation:common.continue'),
-        onClick: onContinue,
-        disabled: isContinueDisabled,
-      }}
-    >
+    <Drawer isOpen={isOpen} onClose={onClose} title={titleLabel} subtitle={subtitleLabel} size="lg">
       <BodyStack>
         {groups.length > 0 ? (
-          <CardGrid>
-            {groups.map((g) => (
-              <ListingGroupCard
-                key={g.id}
-                group={g}
-                onClick={onSelect}
-                templateName={resolveTemplateName(g)}
-                selected={g.id === selectedId}
-              />
-            ))}
-          </CardGrid>
+          <AccountCarousel
+            items={groups}
+            keyExtractor={(g) => g.id}
+            renderCard={(g) => (
+              <ListingGroupCard group={g} onClick={onEdit} templateName={resolveTemplateName(g)} />
+            )}
+            onViewAll={onViewAll}
+            viewAllLabel={viewAllLabel}
+          />
         ) : (
           <FormCard>
             <EmptyState icon="layers" title={emptyTitle} description={emptyDescription} />
           </FormCard>
         )}
+        <QuickActionCard variant="brand" title={createTitle} subtitle={createSubtitle} onClick={onCreate} />
       </BodyStack>
     </Drawer>
   );

@@ -19,6 +19,14 @@ import { ListingFailureCode, type ListingFailureDetails } from '@repo/shared';
  */
 const EBAY_SYSTEM_ERROR_IDS = new Set<number>([25001]);
 
+/**
+ * eBay's Inventory API duplicate-item rejection: the seller already has an
+ * identical item live, so publishing a second one is refused. Checked by id,
+ * not text, for the same reason as {@link EBAY_SYSTEM_ERROR_IDS} — the message
+ * names the specific conflicting item and is never stable to match on.
+ */
+const EBAY_DUPLICATE_ITEM_ERROR_IDS = new Set<number>([25002]);
+
 export interface ClassifiedListingFailure {
   code: ListingFailureCode;
   /** Operator-facing English message; the UI shows a localized one by code. */
@@ -35,9 +43,30 @@ export interface EbayApiErrorEntry {
 interface AxiosLikeError {
   response?: {
     status?: number;
-    data?: { errors?: EbayApiErrorEntry[]; error_description?: string };
+    data?: {
+      errors?: EbayApiErrorEntry[];
+      error_description?: string;
+      /**
+       * Shape of a whole-batch failure from an Inventory API bulk endpoint
+       * (`bulk_create_or_replace_inventory_item` etc.): eBay nests errors
+       * per request entry here instead of on a top-level `errors` array.
+       */
+      responses?: Array<{ errors?: EbayApiErrorEntry[] }>;
+    };
   };
   message?: string;
+}
+
+/** Errors from either eBay error shape: top-level, or nested per bulk response entry. */
+function extractEbayErrorEntries(axiosError: AxiosLikeError | null): EbayApiErrorEntry[] {
+  const data = axiosError?.response?.data;
+  if (!data) {
+    return [];
+  }
+  if (data.errors && data.errors.length > 0) {
+    return data.errors;
+  }
+  return data.responses?.flatMap((entry) => entry.errors ?? []) ?? [];
 }
 
 function asAxiosLike(error: unknown): AxiosLikeError | null {
@@ -87,7 +116,7 @@ export function classifyListingFailure(error: unknown): ClassifiedListingFailure
 
   // 2. eBay's structured errors.
   const axiosError = asAxiosLike(error);
-  const entries = axiosError?.response?.data?.errors ?? [];
+  const entries = extractEbayErrorEntries(axiosError);
   if (entries.length > 0) {
     return classifyEbayErrors(entries);
   }
@@ -188,6 +217,13 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
       message,
       details: { aspectNames: [rejected.aspectName], ebayErrorIds, retryable: false },
     };
+  }
+
+  // Checked before the generic text-matched buckets below: eBay names the
+  // specific conflicting item in `message`, so a seller sees a plan-actionable
+  // reason instead of the generic UNKNOWN this fell into before.
+  if (ebayErrorIds.some((id) => EBAY_DUPLICATE_ITEM_ERROR_IDS.has(id))) {
+    return { code: ListingFailureCode.EBAY_DUPLICATE_ITEM, message, details: { ebayErrorIds, retryable: false } };
   }
 
   if (entries.some((entry) => /policy/i.test(entry.message ?? ''))) {

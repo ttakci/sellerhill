@@ -54,7 +54,7 @@ export class OrderSyncService {
     private readonly storeSettingsService: StoreSettingsService,
     private readonly autoFulfillQueue: AutoFulfillQueueService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly buyerMessages: BuyerMessageQueueService,
+    private readonly buyerMessages: BuyerMessageQueueService
   ) {}
 
   /**
@@ -192,6 +192,22 @@ export class OrderSyncService {
             }
           }
 
+          // Real-time sold count: same "genuine new matched order" gate as
+          // sale-driven stock sync above. Isolated in its own try/catch so a
+          // failure here can never block stock sync or auto-fulfill, and vice
+          // versa — each is best-effort independently.
+          if (inserted && listingId && entity.quantity > 0) {
+            try {
+              await this.databaseService.query(`UPDATE listings SET sold_count = sold_count + $1 WHERE id = $2`, [
+                entity.quantity,
+                listingId,
+              ]);
+            } catch (error: unknown) {
+              const msg = error instanceof Error ? error.message : String(error);
+              this.logger.warn(`Sold count increment for order ${entity.ebayOrderId} skipped: ${msg}`);
+            }
+          }
+
           // Auto-fulfill (best-effort; never fails order sync). Fires only on a
           // genuine new matched order — same gate as sale-driven stock sync. See
           // `maybeEnqueueAutoFulfill` for the toggle/cap/round-robin resolution.
@@ -219,7 +235,9 @@ export class OrderSyncService {
               })
               .catch((err: unknown) => {
                 this.logger.warn(
-                  `Buyer-message order_received enqueue skipped for ${entity.ebayOrderId}: ${err instanceof Error ? err.message : String(err)}`,
+                  `Buyer-message order_received enqueue skipped for ${entity.ebayOrderId}: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
                 );
               });
           }
@@ -269,10 +287,9 @@ export class OrderSyncService {
     // recomputeProfit call in the sync loop above.
     const existing = await this.databaseService.query<{ ebay_earnings: string | number | null }>(
       `SELECT ebay_earnings FROM orders WHERE ebay_order_id = $1`,
-      [entity.ebayOrderId],
+      [entity.ebayOrderId]
     );
-    const prevEbayEarnings =
-      existing.length > 0 ? Number(existing[0].ebay_earnings) : null;
+    const prevEbayEarnings = existing.length > 0 ? Number(existing[0].ebay_earnings) : null;
 
     const result = await this.databaseService.query<{ id: string; inserted: boolean }>(
       `INSERT INTO orders (
@@ -281,7 +298,7 @@ export class OrderSyncService {
         status, order_fulfillment_status, payment_status,
         listing_id,
         quantity,
-        sale_price, sale_shipping, sale_tax, sale_total, ebay_earnings,
+        sale_price, sale_shipping, sale_tax, sale_total, ebay_earnings, currency,
         purchase_price, transaction_fee, ad_fee, net_profit,
         shipping_address,
         order_date, last_ebay_event_at,
@@ -289,10 +306,10 @@ export class OrderSyncService {
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
-        $13, $14, $15, $16, $17,
-        $18, $19, $20, $21,
-        $22, $23, $24,
-        $25
+        $13, $14, $15, $16, $17, $18,
+        $19, $20, $21, $22,
+        $23, $24, $25,
+        $26
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -303,6 +320,7 @@ export class OrderSyncService {
         sale_tax = EXCLUDED.sale_tax,
         sale_total = EXCLUDED.sale_total,
         ebay_earnings = EXCLUDED.ebay_earnings,
+        currency = EXCLUDED.currency,
         quantity = EXCLUDED.quantity,
         shipping_address = EXCLUDED.shipping_address,
         last_ebay_event_at = EXCLUDED.last_ebay_event_at,
@@ -327,6 +345,7 @@ export class OrderSyncService {
         entity.saleTax,
         entity.saleTotal,
         entity.ebayEarnings,
+        entity.currency,
         entity.purchasePrice,
         entity.transactionFee,
         entity.adFee,
@@ -345,10 +364,7 @@ export class OrderSyncService {
     // brand-new inserts (prevEbayEarnings === null) — the sync loop already
     // recomputes those unconditionally.
     const incomingEarnings = Number(entity.ebayEarnings) || 0;
-    if (
-      prevEbayEarnings !== null &&
-      Math.abs(prevEbayEarnings - incomingEarnings) > 0.001
-    ) {
+    if (prevEbayEarnings !== null && Math.abs(prevEbayEarnings - incomingEarnings) > 0.001) {
       await this.recomputeProfit(entity.ebayOrderId);
     }
 
@@ -365,10 +381,7 @@ export class OrderSyncService {
    *   owns preserving prior costs; this method only reads what's already on the row.
    * Best-effort: logs and swallows errors so sync never fails.
    */
-  async recomputeProfit(
-    ebayOrderId: string,
-    opts: { scrapeFailed?: boolean } = {},
-  ): Promise<void> {
+  async recomputeProfit(ebayOrderId: string, opts: { scrapeFailed?: boolean } = {}): Promise<void> {
     try {
       // Pull the order + product ASIN + settings-group fees in one go.
       const rows = await this.databaseService.query<{
@@ -382,7 +395,7 @@ export class OrderSyncService {
         amazon_linked_at: Date | null;
         listing_id: string | null;
         asin: string | null;
-        fees: { ebayFeePercent?: number; fixedFeeAmount?: number; taxPercent?: number } | null;
+        fees: { ebayFeePercent?: number; fixedFeeAmount?: number } | null;
       }>(
         `SELECT o.id, o.user_id, o.sale_total, o.ebay_earnings, o.purchase_price,
                 o.amazon_tax, o.amazon_shipping, o.amazon_linked_at,
@@ -393,7 +406,7 @@ export class OrderSyncService {
          LEFT JOIN products p ON p.id = l.product_id
          LEFT JOIN listing_settings_groups lsg ON lsg.id = l.listing_settings_group_id
          WHERE o.ebay_order_id = $1`,
-        [ebayOrderId],
+        [ebayOrderId]
       );
       if (rows.length === 0) {
         return;
@@ -445,7 +458,9 @@ export class OrderSyncService {
             amazonTaxRatePct = Number(settings.amazonTaxRate) || 0;
           } catch (settingsErr) {
             this.logger.warn(
-              `store settings resolve failed for order ${ebayOrderId} (user ${o.user_id}): ${(settingsErr as Error).message}`,
+              `store settings resolve failed for order ${ebayOrderId} (user ${o.user_id}): ${
+                (settingsErr as Error).message
+              }`
             );
           }
           finalNetProfit = estimateProvisionalNetProfit({
@@ -486,7 +501,7 @@ export class OrderSyncService {
           resolvedPurchase,
           status,
           o.id,
-        ],
+        ]
       );
     } catch (err) {
       this.logger.error(`recomputeProfit failed for ${ebayOrderId}: ${(err as Error).message}`, (err as Error).stack);
@@ -515,7 +530,7 @@ export class OrderSyncService {
    * processor (Task 8) to pick up. Only the skip paths write `skipped` here.
    */
   private async maybeEnqueueAutoFulfill(
-    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
+    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
   ): Promise<void> {
     // 1. Master toggle — store-specific override falls back to the user's
     // global setting (Store specific > Global > Default, same resolution
@@ -525,10 +540,7 @@ export class OrderSyncService {
     // stores, and the previous `null` here silently ignored that override,
     // always enforcing only the global row regardless of which store the
     // order came from.
-    const settings = await this.storeSettingsService.getResolvedSettings(
-      entity.userId,
-      entity.ebayAccountId,
-    );
+    const settings = await this.storeSettingsService.getResolvedSettings(entity.userId, entity.ebayAccountId);
     if (!settings.autoFulfillEnabled) {
       await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
@@ -541,15 +553,13 @@ export class OrderSyncService {
     }>(
       `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts
         WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
-      [entity.userId],
+      [entity.userId]
     );
     if (enabled.length === 0) {
       await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
-    const pick = pickRoundRobinAccount(
-      enabled.map((a) => ({ id: a.id, lastUsedAt: a.last_used_at })),
-    );
+    const pick = pickRoundRobinAccount(enabled.map((a) => ({ id: a.id, lastUsedAt: a.last_used_at })));
     if (!pick) {
       await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
@@ -567,29 +577,25 @@ export class OrderSyncService {
     //    reason (surfaces in the "needs attention" filter) and do NOT enqueue.
     //    Existing tracking is unaffected — the order stays in its current
     //    cost-capture tier; only auto_fulfill_status moves.
-    const quota = await this.quotaEnforcement.reserveAmazonOrder(
-      entity.userId,
-      entity.ebayOrderId,
-    );
+    const quota = await this.quotaEnforcement.reserveAmazonOrder(entity.userId, entity.ebayOrderId);
     if (!quota.allowed) {
       await this.setAutoFulfillBlocked(
         entity.ebayOrderId,
-        quota.blockedReason ?? AutoFulfillBlockedReason.QUOTA_EXHAUSTED,
+        quota.blockedReason ?? AutoFulfillBlockedReason.QUOTA_EXHAUSTED
       );
       return;
     }
     // Stamp last_used_at so the next order rotates to the next account.
-    await this.databaseService.query(
-      `UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`,
-      [pick.id],
-    );
+    await this.databaseService.query(`UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`, [
+      pick.id,
+    ]);
     await this.autoFulfillQueue.enqueue(entity.ebayOrderId, pick.id);
   }
 
   private async setAutoFulfillStatus(ebayOrderId: string, status: AutoFulfillStatus): Promise<void> {
     await this.databaseService.query(
       `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
-      [status, ebayOrderId],
+      [status, ebayOrderId]
     );
   }
 
@@ -599,10 +605,7 @@ export class OrderSyncService {
    * exhaustion in the "needs attention" filter. Mirrors the writer shape used
    * by AmazonCheckoutService.block.
    */
-  private async setAutoFulfillBlocked(
-    ebayOrderId: string,
-    reason: AutoFulfillBlockedReason,
-  ): Promise<void> {
+  private async setAutoFulfillBlocked(ebayOrderId: string, reason: AutoFulfillBlockedReason): Promise<void> {
     await this.databaseService.query(
       `UPDATE orders
          SET auto_fulfill_status = $1,
@@ -610,7 +613,7 @@ export class OrderSyncService {
              auto_fulfill_attempted_at = CURRENT_TIMESTAMP,
              updated_at = CURRENT_TIMESTAMP
        WHERE ebay_order_id = $3`,
-      [AutoFulfillStatus.BLOCKED, reason, ebayOrderId],
+      [AutoFulfillStatus.BLOCKED, reason, ebayOrderId]
     );
   }
 }

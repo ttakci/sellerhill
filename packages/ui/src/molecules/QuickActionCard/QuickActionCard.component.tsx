@@ -21,7 +21,7 @@ export const QuickActionCard = ({
   return (
     <S.Container $variant={variant} className={className} onClick={onClick} role="button" tabIndex={0}>
       <S.Content>
-        <Text variant="h4" weight="semibold" color={isBrand ? 'brand.primary' : 'text.primary'}>
+        <Text variant="h3" weight={isBrand ? 'bold' : 'semibold'} color={isBrand ? 'brand.primary' : 'text.primary'}>
           {title}
         </Text>
         {subtitle && (

@@ -21,10 +21,14 @@ import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AmazonVerifyProcessorService } from './amazon-verify-processor.service';
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
+import { AquilineClient } from './aquiline.client';
 import { AutoFulfillProcessor } from './auto-fulfill-processor.service';
 import { BrowserProfileGcService } from './browser-profile-gc.service';
 import { BrowserStateManager } from './browser-state-manager.service';
 import { ProxyService } from './proxy.service';
+import { TrackingConversionService } from './tracking-conversion.service';
+import { TrackingWebhookController } from './tracking-webhook.controller';
+import { TrackingWebhookService } from './tracking-webhook.service';
 
 @Module({
   imports: [
@@ -39,7 +43,7 @@ import { ProxyService } from './proxy.service';
       { name: AMAZON_ORDER_SYNC_QUEUE },
     ),
   ],
-  controllers: [AmazonController],
+  controllers: [AmazonController, TrackingWebhookController],
   providers: [
     // Per-account persistent + proxy-aware browser context manager.
     // Resolves sticky residential proxy per Zonds user (or per account) and
@@ -57,6 +61,12 @@ import { ProxyService } from './proxy.service';
     AmazonOrderParserService,
     AmazonTrackingQueueService,
     AmazonTrackingProcessorService,
+    // Tracking-number conversion (Aquiline). The converter decides what the
+    // eBay BUYER sees; the webhook receiver is what lets delivery detection
+    // stop costing Playwright time once a conversion exists.
+    AquilineClient,
+    TrackingConversionService,
+    TrackingWebhookService,
     AmazonVerifyQueueService,
     AmazonVerifyProcessorService,
     // Auto cost-capture (Task 7) — scrapes each Amazon account's order list,

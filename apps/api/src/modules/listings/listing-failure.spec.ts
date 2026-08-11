@@ -129,6 +129,36 @@ describe('classifyListingFailure', () => {
     );
   });
 
+  it('extracts errors nested under a bulk envelope\'s responses[] (whole-batch failure shape)', () => {
+    // Observed live 2026-08-10: bulk_publish_offer rejected the whole batch
+    // with HTTP 400; eBay's error is nested per response entry, not on a
+    // top-level `errors` array, so the extractor must look in both places.
+    const failure = classifyListingFailure({
+      message: 'Request failed with status code 400',
+      response: {
+        status: 400,
+        data: {
+          responses: [
+            {
+              statusCode: 400,
+              offerId: '11432468010',
+              errors: [
+                {
+                  errorId: 25002,
+                  message: 'It looks like this listing is for an item you already have on eBay: Widget (110590178528).',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    expect(failure.code).toBe(ListingFailureCode.EBAY_DUPLICATE_ITEM);
+    expect(failure.details.retryable).toBe(false);
+    expect(failure.details.ebayErrorIds).toEqual([25002]);
+  });
+
   it('classifies policy and image rejections', () => {
     expect(classifyListingFailure(ebayError([{ message: 'The fulfillment policy is not valid.' }])).code).toBe(
       ListingFailureCode.EBAY_POLICY_MISSING

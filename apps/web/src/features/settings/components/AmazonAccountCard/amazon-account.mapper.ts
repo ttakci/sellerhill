@@ -10,4 +10,7 @@ export const toAmazonAccountCardView = (account: AmazonAccountPublicDto, locale:
   connectedSince: formatDate(account.createdAt, locale, { year: 'numeric' }),
   status: account.status,
   lastVerificationError: account.lastVerificationError ?? undefined,
+  hasTwoFactor: account.hasTwoFactor ?? false,
+  autoFulfillEnabled: account.autoFulfillEnabled,
+  autoFulfillCapTotal: account.autoFulfillCapTotal,
 });

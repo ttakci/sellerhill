@@ -91,9 +91,24 @@ export type AmazonOrderStatus =
   | 'cancelled'
   | 'returned';
 
-/** Tracking-number conversion provider. Only LOCAL is active; API is reserved (no-op stub). */
+/**
+ * Tracking-number conversion provider — how an Amazon tracking number is turned
+ * into the number the eBay buyer sees.
+ *
+ * LOCAL passes the Amazon number through unchanged under `Amazon_Logistics`,
+ * which is honest but tells the buyer who the supplier is. AQUILINE converts it
+ * to an `AQUAA…YQ` number carried under the `AQUILINE` carrier, which eBay's
+ * Add-Tracking form accepts (verified against a live eBay seller UI, 2026-08-11).
+ *
+ * `API` is the legacy spelling of the same "use the external provider" choice
+ * and resolves to the Aquiline adapter. It was never writable — the
+ * store-settings DTO rejected it — so no stored row can carry it; it is kept
+ * only so an old value could never crash resolution.
+ */
 export enum TrackingConversionProvider {
   LOCAL = 'local',
+  AQUILINE = 'aquiline',
+  /** @deprecated Legacy alias for {@link TrackingConversionProvider.AQUILINE}. */
   API = 'api',
 }
 

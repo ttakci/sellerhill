@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ListingGroupsDrawerComponent } from './ListingGroupsDrawer.component';
 import type { ListingGroupsDrawerProps } from './ListingGroupsDrawer.types';
 
 /**
- * "Listing Settings Groups" list drawer. Renders every group as a card;
- * clicking a card selects it, and the footer "Continue" action opens the edit
- * drawer flow (onEdit) for the selected group. Creating a new group is
- * triggered from the settings hub section row, not from this list. The hub
- * owns which drawer is active, so opening edit automatically closes this list.
+ * "Listing Settings Groups" hub drawer, opened from the single settings-hub
+ * row. Cards click straight to the edit flow, "view all" opens the full list,
+ * and the footer card starts a new group — the same three exits the buyer
+ * message templates hub offers. The hub owns which drawer is active, so
+ * opening edit/create/all automatically closes this one.
  */
 export const ListingGroupsDrawer: React.FC<ListingGroupsDrawerProps> = ({
   isOpen,
@@ -17,30 +17,10 @@ export const ListingGroupsDrawer: React.FC<ListingGroupsDrawerProps> = ({
   groups,
   predefinedTemplateNames,
   onEdit,
+  onCreate,
+  onViewAll,
 }) => {
   const { t } = useTranslation(['translation', 'listingSettingsGroup']);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [wasOpen, setWasOpen] = useState(isOpen);
-
-  // Reset the selection when the drawer transitions to closed — without an
-  // effect (avoids cascading setState-in-effect). Render-time guard per the
-  // React "adjusting state when a prop changes" pattern.
-  if (isOpen !== wasOpen) {
-    setWasOpen(isOpen);
-    if (!isOpen) {
-      setSelectedId(null);
-    }
-  }
-
-  const handleSelect = (id: string): void => {
-    setSelectedId((prev) => (prev === id ? null : id));
-  };
-
-  const handleContinue = (): void => {
-    if (selectedId) {
-      onEdit(selectedId);
-    }
-  };
 
   return (
     <ListingGroupsDrawerComponent
@@ -48,12 +28,14 @@ export const ListingGroupsDrawer: React.FC<ListingGroupsDrawerProps> = ({
       onClose={onClose}
       groups={groups}
       predefinedTemplateNames={predefinedTemplateNames}
-      selectedId={selectedId}
-      isContinueDisabled={selectedId === null}
-      onSelect={handleSelect}
-      onContinue={handleContinue}
+      onEdit={onEdit}
+      onCreate={onCreate}
+      onViewAll={onViewAll}
       titleLabel={t('translation:settingsHub.drawer.listingGroup.list.title')}
       subtitleLabel={t('translation:settingsHub.drawer.listingGroup.list.subtitle')}
+      viewAllLabel={t('translation:settingsHub.sections.listingGroups.viewAll')}
+      createTitle={t('translation:settingsHub.sections.listingGroups.create')}
+      createSubtitle={t('translation:settingsHub.sections.listingGroups.createSubtitle')}
       emptyTitle={t('listingSettingsGroup:emptyState.title')}
       emptyDescription={t('listingSettingsGroup:emptyState.description')}
     />

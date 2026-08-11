@@ -43,28 +43,34 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   onOrderClick,
   onBack,
   onDownload,
-  onRefresh,
-  isRefreshing,
 }) => {
   const { t } = useTranslation(['orders', 'translation']);
 
   const renderGridCard = (order: OrderDto) => {
     const card = toOrderCardProps(order, t, formatCurrency, formatDate);
-    return <OrderCard key={order.id} {...card} onClick={() => onOrderClick(order.id)} />;
+    return (
+      <OrderCard
+        key={order.id}
+        {...card}
+        onClick={() => onOrderClick(order.id)}
+        hoverEffect={false}
+      />
+    );
   };
 
   return (
     <S.Container>
+      {/*
+        No manual "sync from eBay" action: the 15-minute cron already keeps this
+        list current, and eBay meters the Fulfillment API per APPLICATION across
+        every seller — a user-triggered pull spends a shared quota for almost no
+        new information.
+      */}
       <PageHeader
         title={t('orders.all.title')}
         subtitle={t('orders.all.subtitle', { count: resultCount })}
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
-        actions={
-          <Button variant="secondary" size="medium" onClick={onRefresh} isLoading={isRefreshing}>
-            <Text variant="body">{t('orders.actions.refresh')}</Text>
-          </Button>
-        }
       />
 
       <S.FilterBar>

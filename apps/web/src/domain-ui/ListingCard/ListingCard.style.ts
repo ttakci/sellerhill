@@ -221,3 +221,12 @@ export const Footer = styled.div`
   gap: ${tkn('spacing.sm')};
   flex-shrink: 0;
 `;
+
+/** "Detay" label + arrow — the same trailing affordance the Settings carousels' cards use. */
+export const DetailAction = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  margin-left: auto;
+  flex-shrink: 0;
+`;

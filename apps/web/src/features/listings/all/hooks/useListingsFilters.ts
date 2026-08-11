@@ -17,8 +17,6 @@ export const DEFAULT_LISTINGS_FILTERS: ListingsFilterState = {
   roi: { min: '', max: '' },
   profitMargin: { min: '', max: '' },
   soldCount: { min: '', max: '' },
-  watchCount: { min: '', max: '' },
-  viewCount: { min: '', max: '' },
   quantity: { min: '', max: '' },
   sourceStock: { min: '', max: '' },
 };
@@ -30,8 +28,6 @@ const RANGE_KEYS = [
   'roi',
   'profitMargin',
   'soldCount',
-  'watchCount',
-  'viewCount',
   'quantity',
   'sourceStock',
 ] as const;
@@ -46,8 +42,6 @@ const RANGE_QUERY_KEYS: Record<RangeKey, { min: keyof ListingsQueryDto; max: key
   roi: { min: 'roiMin', max: 'roiMax' },
   profitMargin: { min: 'profitMarginMin', max: 'profitMarginMax' },
   soldCount: { min: 'soldCountMin', max: 'soldCountMax' },
-  watchCount: { min: 'watchCountMin', max: 'watchCountMax' },
-  viewCount: { min: 'viewCountMin', max: 'viewCountMax' },
   quantity: { min: 'quantityMin', max: 'quantityMax' },
   sourceStock: { min: 'sourceStockMin', max: 'sourceStockMax' },
 };
@@ -106,8 +100,6 @@ export function useListingsFilters() {
       roi: readRange(searchParams, 'roi'),
       profitMargin: readRange(searchParams, 'profitMargin'),
       soldCount: readRange(searchParams, 'soldCount'),
-      watchCount: readRange(searchParams, 'watchCount'),
-      viewCount: readRange(searchParams, 'viewCount'),
       quantity: readRange(searchParams, 'quantity'),
       sourceStock: readRange(searchParams, 'sourceStock'),
     }),
@@ -221,8 +213,14 @@ export function useListingsFilters() {
     (value: string | number) => {
       patchParams((next) => {
         const v = String(value);
-        if (v) {next.set('tracking', v);} else {next.delete('tracking');}
-        if (v === 'untracked') {next.delete('status');}
+        if (v) {
+          next.set('tracking', v);
+        } else {
+          next.delete('tracking');
+        }
+        if (v === 'untracked') {
+          next.delete('status');
+        }
       }, true);
     },
     [patchParams]
@@ -300,9 +298,7 @@ export function useListingsFilters() {
       search: filters.search || undefined,
       category: filters.category || undefined,
       status: filters.status || undefined,
-      trackingState: Object.values(ListingTrackingState).find(
-        (state) => String(state) === filters.trackingState
-      ),
+      trackingState: Object.values(ListingTrackingState).find((state) => String(state) === filters.trackingState),
       ebayAccountId: filters.ebayAccountId || undefined,
       // Default sort: last sale when filtering by sold period, else newest
       sortBy: sortColumn || (hasSoldPeriod ? 'lastSale' : 'createdAt'),
@@ -311,7 +307,11 @@ export function useListingsFilters() {
       soldTo: soldTo || undefined,
     };
 
-    const assignRange = (minKey: keyof ListingsQueryDto, maxKey: keyof ListingsQueryDto, range: { min: string; max: string }) => {
+    const assignRange = (
+      minKey: keyof ListingsQueryDto,
+      maxKey: keyof ListingsQueryDto,
+      range: { min: string; max: string }
+    ) => {
       const min = parseNum(range.min);
       const max = parseNum(range.max);
       if (min !== undefined) {
@@ -328,8 +328,6 @@ export function useListingsFilters() {
     assignRange('roiMin', 'roiMax', filters.roi);
     assignRange('profitMarginMin', 'profitMarginMax', filters.profitMargin);
     assignRange('soldCountMin', 'soldCountMax', filters.soldCount);
-    assignRange('watchCountMin', 'watchCountMax', filters.watchCount);
-    assignRange('viewCountMin', 'viewCountMax', filters.viewCount);
     assignRange('quantityMin', 'quantityMax', filters.quantity);
     assignRange('sourceStockMin', 'sourceStockMax', filters.sourceStock);
 
@@ -365,8 +363,6 @@ export function useListingsFilters() {
           { key: 'roi' as const, label: t('listings.filters.fields.roi') },
           { key: 'profitMargin' as const, label: t('listings.filters.fields.profitMargin') },
           { key: 'soldCount' as const, label: t('listings.filters.fields.soldCount') },
-          { key: 'watchCount' as const, label: t('listings.filters.fields.watchCount') },
-          { key: 'viewCount' as const, label: t('listings.filters.fields.viewCount') },
           { key: 'quantity' as const, label: t('listings.filters.fields.quantity') },
           { key: 'sourceStock' as const, label: t('listings.filters.fields.sourceStock') },
         ] as const

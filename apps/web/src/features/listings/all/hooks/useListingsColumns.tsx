@@ -1,9 +1,11 @@
 import type { ListingDto } from '@repo/shared';
-import { Icon, IdBadge, Tooltip, type TableColumn } from '@repo/ui';
+import { type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from '../ListingsAllPage.style';
+
+import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 
 /**
  * Column definitions for ListingsAll table view.
@@ -25,8 +27,6 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
       { key: 'purchasePrice', label: t('listings.table.purchasePrice') },
       { key: 'roi', label: t('listings.table.roi') },
       { key: 'profitMargin', label: t('listings.table.profitMargin') },
-      { key: 'watch', label: t('listings.table.watch') },
-      { key: 'views', label: t('listings.table.views') },
       { key: 'sourceStock', label: t('listings.table.amazonStock') },
     ],
     [t]
@@ -40,36 +40,18 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         header: t('listings.table.product'),
         width: '20.5rem',
         render: (_value, listing) => {
-          const displayName =
-            listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
-          return (
-            <S.ProductCell>
-              <S.ProductImageWrapper>
-                {listing.imageUrls?.[0] ? (
-                  <S.ProductImage src={listing.imageUrls[0]} alt={listing.title} />
-                ) : (
-                  <Icon name="image" size={28} />
-                )}
-              </S.ProductImageWrapper>
-              <S.ProductMainInfo>
-                <Tooltip content={displayName} position="top" variant="dark">
-                  <S.ProductTitle>{displayName}</S.ProductTitle>
-                </Tooltip>
-                <S.ProductMeta>
-                  <S.ProductMetaRow>
-                    <S.ProductMetaLabel>{t('listings.table.asin')}</S.ProductMetaLabel>
-                    <IdBadge id={listing.asin} storeType="amazon" size="sm" />
-                  </S.ProductMetaRow>
-                  {listing.ebayListingId ? (
-                    <S.ProductMetaRow>
-                      <S.ProductMetaLabel>{t('listings.table.ebayId')}</S.ProductMetaLabel>
-                      <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
-                    </S.ProductMetaRow>
-                  ) : null}
-                </S.ProductMeta>
-              </S.ProductMainInfo>
-            </S.ProductCell>
-          );
+          const displayName = listing.title === t('translation:common.unknownProduct') ? listing.asin : listing.title;
+          const meta: ProductTableCellMetaRow[] = [
+            { label: t('listings.table.asin'), id: listing.asin, storeType: 'amazon' },
+          ];
+          if (listing.ebayListingId) {
+            meta.push({
+              label: t('listings.table.ebayId'),
+              id: listing.ebayListingId,
+              storeType: 'ebay',
+            });
+          }
+          return <ProductTableCell title={displayName} imageUrl={listing.imageUrls?.[0]} meta={meta} />;
         },
       },
       {
@@ -102,9 +84,7 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         header: t('listings.table.added'),
         width: '5.75rem',
         render: (_value, listing) => (
-          <S.CompactText>
-            {listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—'}
-          </S.CompactText>
+          <S.CompactText>{listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : '—'}</S.CompactText>
         ),
       },
       {
@@ -113,9 +93,7 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         header: t('listings.table.lastSale'),
         width: '5.75rem',
         render: (_value, listing) => (
-          <S.CompactText>
-            {listing.lastSaleAt ? new Date(listing.lastSaleAt).toLocaleDateString() : '—'}
-          </S.CompactText>
+          <S.CompactText>{listing.lastSaleAt ? new Date(listing.lastSaleAt).toLocaleDateString() : '—'}</S.CompactText>
         ),
       },
       {
@@ -188,30 +166,6 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         render: (_value, listing) => (
           <S.StatMain variant="body-sm" weight="semibold">
             {listing.soldCount || 0}
-          </S.StatMain>
-        ),
-      },
-      {
-        key: 'watch',
-        sortable: true,
-        header: t('listings.table.watch'),
-        align: 'right',
-        width: '3.5rem',
-        render: (_value, listing) => (
-          <S.StatMain variant="body-sm" weight="semibold">
-            {listing.watchCount || 0}
-          </S.StatMain>
-        ),
-      },
-      {
-        key: 'views',
-        sortable: true,
-        header: t('listings.table.views'),
-        align: 'right',
-        width: '3.5rem',
-        render: (_value, listing) => (
-          <S.StatMain variant="body-sm" weight="semibold">
-            {listing.viewCount || 0}
           </S.StatMain>
         ),
       },

@@ -73,6 +73,18 @@ export const GridContainer = styled.div<{ $minItemWidth: string; $maxColumns?: n
   }
 `;
 
+/**
+ * The pagination is a sibling of the table card / card grid, so it needs real
+ * separation. It used to butt straight against the last row of cards (container
+ * gap was 0), which read as the bar being part of the grid.
+ */
+export const PaginationSlot = styled.div`
+  margin-top: ${tkn('spacing.lg')};
+`;
+
+/* Card tier (border + radius.lg + sm elevation), matching TableContainer — this
+   was on the badge radius with no border, so empty grid and empty table looked
+   like two different surfaces. */
 export const GridEmptyState = styled.div`
   grid-column: 1 / -1;
   display: flex;
@@ -83,7 +95,8 @@ export const GridEmptyState = styled.div`
   padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
   color: ${tkn('colors.text.tertiary')};
   background: ${tkn('colors.surface.primary')};
-  border-radius: ${tkn('radius.sm')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
   box-sizing: border-box;
 `;

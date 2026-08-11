@@ -67,7 +67,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       description: '',
       repricingStrategy: [{ id: crypto.randomUUID(), minPrice: 0, maxPrice: 100, profitMarginPercent: 15 }],
       stock: { defaultQuantity: 1, stockBuffer: 0 },
-      fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3, taxPercent: 0 },
+      fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3 },
       templates: { type: TemplateType.PREDEFINED, predefinedTemplateId: undefined },
       content: {
         stripBrandFromTitle: false,
@@ -102,7 +102,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
         description: '',
         repricingStrategy: [{ id: crypto.randomUUID(), minPrice: 0, maxPrice: 100, profitMarginPercent: 15 }],
         stock: { defaultQuantity: 1, stockBuffer: 0 },
-        fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3, taxPercent: 0 },
+        fees: { ebayFeePercent: 13.25, fixedFeeAmount: 0.3 },
         templates: { type: TemplateType.PREDEFINED, predefinedTemplateId: templates[0]?.id },
         content: {
           stripBrandFromTitle: false,
@@ -179,12 +179,13 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     const lastStrategy = strategies?.length ? strategies[strategies.length - 1] : null;
     const lastMax = lastStrategy ? Number(lastStrategy.maxPrice) : 0;
 
-    // Start exactly where the previous range ends so the price buckets tile
-    // continuously (no gap, no overlap). The schema allows contiguity
-    // (minPrice === prev.maxPrice), so this is always valid — no +epsilon hack.
+    // Start one cent above where the previous range ends — no gap (currency
+    // granularity is $0.01, so nothing falls between them) and no ambiguous
+    // shared boundary (the schema now rejects minPrice === prev.maxPrice;
+    // see listingSettingsGroup.schema.ts for why).
     append({
       id: crypto.randomUUID(),
-      minPrice: lastMax,
+      minPrice: Math.round((lastMax + 0.01) * 100) / 100,
       maxPrice: 9999,
       profitMarginPercent: 15,
     });
@@ -269,17 +270,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       case 1: {
         const fee = Number(v.fees?.ebayFeePercent);
         const fixed = Number(v.fees?.fixedFeeAmount);
-        const tax = Number(v.fees?.taxPercent);
-        return (
-          Number.isFinite(fee) &&
-          fee >= 0 &&
-          fee <= 100 &&
-          Number.isFinite(fixed) &&
-          fixed >= 0 &&
-          Number.isFinite(tax) &&
-          tax >= 0 &&
-          tax <= 100
-        );
+        return Number.isFinite(fee) && fee >= 0 && fee <= 100 && Number.isFinite(fixed) && fixed >= 0;
       }
       case 2: {
         const ranges = v.repricingStrategy ?? [];

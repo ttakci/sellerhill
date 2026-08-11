@@ -1,5 +1,8 @@
-import { Icon } from '@repo/ui';
+import { Icon, Text } from '@repo/ui';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { CARD_ACTION_ICON_SIZE } from '../cardMetrics';
 
 import * as S from './BuyerMessageTemplateCard.style';
 import type { BuyerMessageTemplateCardProps } from './BuyerMessageTemplateCard.types';
@@ -24,6 +27,8 @@ export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> =
   deleteLabel,
   selected,
 }) => {
+  const { t } = useTranslation(['translation']);
+
   const handleActivate = (): void => onClick(template.id);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -75,9 +80,14 @@ export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> =
               {customBadgeLabel}
             </S.CustomBadge>
           )}
-          <S.ArrowSlot>
-            <Icon name="arrow-right" size={16} color="brand.primary" />
-          </S.ArrowSlot>
+          <S.DetailAction>
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <S.ArrowSlot>
+              <Icon name="arrow-right" size={CARD_ACTION_ICON_SIZE} color="brand.primary" />
+            </S.ArrowSlot>
+          </S.DetailAction>
         </S.BottomRow>
       </S.CardBody>
     </S.InteractiveCard>

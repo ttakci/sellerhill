@@ -5,12 +5,21 @@ import { tkn } from '../../theme/tkn';
 
 import type { QuickActionCardVariant } from './QuickActionCard.types';
 
+/**
+ * `min-height` is what makes this card the same size everywhere it appears.
+ * Its height would otherwise be driven by whether the subtitle wraps, so the
+ * "add new" card was visibly taller in one drawer than the next for no reason
+ * a user can see. The floor fits a two-line subtitle; a one-line card pads out
+ * to match instead of shrinking.
+ */
 export const Container = styled.div<{ $variant: QuickActionCardVariant }>`
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')}; /* 1px */
   border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
   padding: ${tkn('spacing.xl')};
+  min-height: 7.5rem; /* 120px — two-line subtitle */
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;

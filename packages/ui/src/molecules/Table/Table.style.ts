@@ -79,17 +79,34 @@ export const Tr = styled.tr<{ $clickable?: boolean; $selected?: boolean; $index?
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:nth-of-type(even) {
-    background: ${tkn('colors.background.tertiary')};
+    background: ${tkn('colors.table.rowZebra')};
   }
 
   &:hover {
-    background: ${tkn('colors.background.secondary')};
+    background: ${tkn('colors.table.rowHover')};
   }
 
+  /*
+   * Selection outranks zebra and hover by specificity (doubled &), not by an
+   * important flag — which is what the previous rule needed, and which also made
+   * a selected+hovered row impossible to express. Selection is carried by BOTH a
+   * chromatic fill and a left accent bar: the fill alone had to compete with the
+   * zebra stripe, and hue alone is not a signal every reader can see.
+   */
   ${({ $selected, theme }) =>
     $selected &&
     `
-    background: ${tkn('colors.semanticTint.info')({ theme })} !important;
+    && {
+      background: ${tkn('colors.table.rowSelected')({ theme })};
+    }
+
+    &&:hover {
+      background: ${tkn('colors.table.rowSelectedHover')({ theme })};
+    }
+
+    & > td:first-of-type {
+      box-shadow: inset 0.1875rem 0 0 ${tkn('colors.table.rowSelectedAccent')({ theme })};
+    }
   `}
 
   &:last-child {
@@ -280,12 +297,23 @@ export const Td = styled.td<{
     z-index: 20;
     background: ${tkn('colors.surface.primary')({ theme })};
 
+    /* A sticky cell paints its own background (it scrolls over its neighbours),
+       so it has to mirror every row state or the frozen column stops matching
+       the row it belongs to. */
+    tr:nth-of-type(even) & {
+      background: ${tkn('colors.table.rowZebra')({ theme })};
+    }
+
     tr:hover & {
-      background: ${tkn('colors.background.secondary')({ theme })};
+      background: ${tkn('colors.table.rowHover')({ theme })};
     }
 
     tr[data-selected="true"] & {
-      background: ${tkn('colors.semanticTint.info')({ theme })};
+      background: ${tkn('colors.table.rowSelected')({ theme })};
+    }
+
+    tr[data-selected="true"]:hover & {
+      background: ${tkn('colors.table.rowSelectedHover')({ theme })};
     }
   `}
 

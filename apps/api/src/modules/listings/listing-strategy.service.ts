@@ -6,8 +6,9 @@ import {
   EBAY_TITLE_MAX_LENGTH,
   TemplateType,
   buildListingTemplateContext,
+  calculateListingPrice,
   renderListingTemplate,
-  type FeeConfig,
+  type ListingPriceMetrics,
   type ListingSettingsGroup,
   type ProductData,
   type StoreSettingsResponse,
@@ -94,7 +95,11 @@ export class ListingStrategyService {
     // Validate listing against store settings (Blacklist, etc.) — after AI so blacklist still applies
     this.validateListing(title, description, product, storeSettings);
 
-    const priceMetrics = this.calculatePrice(product.price.current, group);
+    const priceMetrics = this.calculatePrice(
+      product.price.current,
+      group,
+      Number(storeSettings.amazonTaxRate) || 0
+    );
 
     // Stock Logic: Subtract buffer from Amazon stock, cap at user's max listing quantity.
     // See calculateQuantity() for the canonical formula (shared by all stock-compute paths).
@@ -147,17 +152,24 @@ export class ListingStrategyService {
    *
    * A caller resolving many listings that share a settings group passes `group`
    * so the lookup happens once per batch instead of once per listing.
+   *
+   * `amazonTaxRatePct` is the caller's job to resolve (and cache across a
+   * batch) — this method never reads store settings itself, for the same
+   * reason it accepts `group`: a fan-out over many listings must not pay a
+   * DB round trip per listing for a value that is the same for every listing
+   * on the same store.
    */
   async computePricing(
     userId: string,
     product: ProductData,
     settingsGroupId: string,
-    group?: ListingSettingsGroup
+    group?: ListingSettingsGroup,
+    amazonTaxRatePct = 0
   ): Promise<StrategyCommerce> {
     const resolved =
       group ?? (await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId));
 
-    const priceMetrics = this.calculatePrice(product.price.current, resolved);
+    const priceMetrics = this.calculatePrice(product.price.current, resolved, amazonTaxRatePct);
 
     return {
       price: priceMetrics.finalPrice,
@@ -338,92 +350,32 @@ export class ListingStrategyService {
   }
 
   /**
-   * Calculate final eBay price based on Amazon price and repricing strategy
+   * Calculate final eBay price + profit metrics for an Amazon price.
+   *
+   * Thin wrapper around the shared `calculateListingPrice` — the same pure
+   * function the Listing Settings Group drawer's client-side "test your
+   * settings" calculator calls, so the two can never drift apart. This
+   * wrapper's only job is the diagnostic log when no price range covers the
+   * Amazon price (the shared function stays free of a logger dependency).
+   *
+   * @param amazonTaxRatePct Store Settings' global "Amazon Satış Alış Vergi
+   * Oranı" (`store_settings.amazon_tax_rate`) — an estimate of the sales tax
+   * paid AT PURCHASE time on Amazon, before this listing has ever sold. It was
+   * previously used only in `estimateProvisionalNetProfit` (a post-sale
+   * estimate for orders still awaiting a real Amazon link) and played no part
+   * in setting the eBay price itself — so a seller who configured it only saw
+   * it reflected after a sale, never in what they were charging. It is a real
+   * acquisition cost, so it now raises the price/cost basis too. The caller
+   * resolves and caches it (see `computePricing`) — this method never reads
+   * store settings itself.
    */
-  private calculatePrice(
-    amazonPrice: number,
-    group: ListingSettingsGroup
-  ): {
-    finalPrice: number;
-    purchasePrice: number;
-    estimatedProfit: number;
-    profitMargin: number;
-    roi: number;
-  } {
-    const { repricingStrategy, fees } = group;
-
-    // 1. Find the applicable price range
-    const range = repricingStrategy.find((r) => amazonPrice >= r.minPrice && amazonPrice <= r.maxPrice);
-
-    let netTarget = amazonPrice;
-
-    if (!range) {
+  private calculatePrice(amazonPrice: number, group: ListingSettingsGroup, amazonTaxRatePct: number): ListingPriceMetrics {
+    const hasRange = group.repricingStrategy.some((r) => amazonPrice >= r.minPrice && amazonPrice <= r.maxPrice);
+    if (!hasRange) {
       this.logger.warn(
         `No price range found for price ${amazonPrice} in group ${group.id}. Using fallback calculation.`
       );
-      // Fallback: use a default 20% margin
-      const defaultMargin = 0.2;
-      netTarget = amazonPrice * (1 + defaultMargin);
-    } else {
-      // 2. Apply profit margin
-      if (range.profitMarginPercent) {
-        netTarget *= 1 + range.profitMarginPercent / 100;
-      }
-      if (range.fixedProfitAmount) {
-        netTarget += range.fixedProfitAmount;
-      }
     }
-
-    // 3. Apply eBay fees
-    let finalPrice = this.applyFees(netTarget, fees);
-
-    // 3.5. Enforce minimum price (eBay requirement: typically $0.99 for USD)
-    const minPrice = 0.99;
-    if (finalPrice < minPrice) {
-      this.logger.log(`Calculated price ${finalPrice} is below minimum. Adjusting to ${minPrice}.`);
-      finalPrice = minPrice;
-    }
-
-    // 4. Calculate metrics
-    const estimatedProfit = netTarget - amazonPrice;
-    const profitMargin = finalPrice > 0 ? (estimatedProfit / finalPrice) * 100 : 0;
-    const roi = amazonPrice > 0 ? (estimatedProfit / amazonPrice) * 100 : 0;
-
-    return {
-      finalPrice,
-      purchasePrice: amazonPrice,
-      estimatedProfit: Math.round(estimatedProfit * 100) / 100,
-      profitMargin: Math.round(profitMargin * 100) / 100,
-      roi: Math.round(roi * 100) / 100,
-    };
-  }
-
-  /**
-   * Add eBay fees and taxes to the target price using a reverse calculation
-   * to ensure the desired profit margin is maintained after all deductions.
-   */
-  private applyFees(netTarget: number, fees: FeeConfig): number {
-    const ebayFeePercent = Number(fees?.ebayFeePercent) || 0;
-    const fixedFeeAmount = Number(fees?.fixedFeeAmount) || 0;
-    const taxPercent = Number(fees?.taxPercent) || 0;
-
-    // Formula: SalePrice = (NetTarget + FixedFee) / (1 - (EbayFee% + Tax%) / 100)
-    // This ensures that when eBay takes its percentage and the fixed fee,
-    // we are left with exactly the netTarget.
-
-    const totalPercentageDeduction = (ebayFeePercent + taxPercent) / 100;
-
-    // Guard against division by zero if fees are 100% or more
-    if (totalPercentageDeduction >= 1) {
-      this.logger.error(
-        `Total percentage deduction (${totalPercentageDeduction * 100}%) is 100% or more. Invalid fee config.`
-      );
-      return netTarget * 1.5; // Fallback
-    }
-
-    const finalPrice = (netTarget + fixedFeeAmount) / (1 - totalPercentageDeduction);
-
-    // Round to 2 decimal places
-    return Math.round(finalPrice * 100) / 100;
+    return calculateListingPrice(amazonPrice, group.repricingStrategy, group.fees, amazonTaxRatePct);
   }
 }

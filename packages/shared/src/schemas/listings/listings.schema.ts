@@ -44,14 +44,16 @@ export const createListingsSchema = (t: TranslationFunction) =>
 
 export type CreateListingsFormData = z.infer<ReturnType<typeof createListingsSchema>>;
 
-/** Zod schema for listing detail settings form (title + strategy + policies). */
+/**
+ * Zod schema for listing detail settings form (title + strategy group only).
+ * eBay policies are read-only on this page — reassigning a listing's payment/
+ * shipping/return policy is not pushed to eBay's offer yet, so no form field
+ * edits them (see listing detail eBay Policies card).
+ */
 export const updateListingSchema = (t: TranslationFunction) =>
   z.object({
     title: z.string().min(1, t('listings.validation.titleRequired')).max(80, t('listings.validation.titleMax')),
     listingSettingsGroupId: z.string().min(1, t('listings.validation.listingSettingsGroupRequired')),
-    paymentPolicyId: z.string().min(1, t('listings.validation.paymentPolicyRequired')),
-    shippingPolicyId: z.string().min(1, t('listings.validation.shippingPolicyRequired')),
-    returnPolicyId: z.string().min(1, t('listings.validation.returnPolicyRequired')),
   });
 
 export type UpdateListingFormData = z.infer<ReturnType<typeof updateListingSchema>>;

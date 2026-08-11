@@ -16,10 +16,20 @@ export const TablePagination = ({
   className,
   labelRowsPerPage,
   labelInfo,
+  variant = 'footer',
 }: TablePaginationProps): React.ReactElement => {
   const start = Math.min((page - 1) * rowsPerPage + 1, count);
   const end = Math.min(page * rowsPerPage, count);
   const rowsPerPageLabel = labelRowsPerPage;
+
+  /*
+   * The caller's current page size always appears in the list. A page defaulting
+   * to a size outside `rowsPerPageOptions` (orders uses 20) otherwise matched no
+   * option and the Select rendered blank.
+   */
+  const resolvedOptions = rowsPerPageOptions.includes(rowsPerPage)
+    ? rowsPerPageOptions
+    : [...rowsPerPageOptions, rowsPerPage].sort((a, b) => a - b);
 
   const handlePageChange = (newPage: number) => {
     onPageChange(newPage);
@@ -29,7 +39,7 @@ export const TablePagination = ({
     onRowsPerPageChange(Number(value));
   };
 
-  const totalPages = Math.ceil(count / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(count / rowsPerPage));
 
   const renderLabelInfo = () => {
     if (!labelInfo) {return null;}
@@ -41,16 +51,16 @@ export const TablePagination = ({
   };
 
   return (
-    <S.PaginationContainer className={className}>
+    <S.PaginationContainer className={className} $variant={variant}>
       <S.RowsPerPage>
         <S.PaginationLabel>{rowsPerPageLabel}</S.PaginationLabel>
         <S.SelectWrapper>
           <Select
             size="small"
             value={rowsPerPage.toString()}
-            options={rowsPerPageOptions.map((opt) => ({ value: opt.toString(), label: opt.toString() }))}
+            options={resolvedOptions.map((opt) => ({ value: opt.toString(), label: opt.toString() }))}
             onChange={(val: string | number) => handleRowsPerPageChange(val)}
-            fullWidth={false}
+            fullWidth
           />
         </S.SelectWrapper>
       </S.RowsPerPage>
@@ -67,10 +77,23 @@ export const TablePagination = ({
         </S.PageInfo>
 
         <S.Navigation>
-          <S.NavButton onClick={() => handlePageChange(page - 1)} disabled={page <= 1} type="button">
+          <S.NavButton
+            variant="ghost"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page <= 1}
+            type="button"
+          >
             <Icon name="chevron-left" size={20} />
           </S.NavButton>
-          <S.NavButton onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages} type="button">
+          <S.PageCounter>
+            {page} / {totalPages}
+          </S.PageCounter>
+          <S.NavButton
+            variant="ghost"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+            type="button"
+          >
             <Icon name="chevron-right" size={20} />
           </S.NavButton>
         </S.Navigation>

@@ -221,6 +221,12 @@ export class EbayFulfillmentService {
       saleTax: parseFloat(pricing?.tax?.value || '0'),
       saleTotal: parseFloat(pricing?.total?.value || '0'),
       ebayEarnings: parseFloat(totalDueSeller?.value || '0'),
+      // eBay stamps a currency on every money field; only US accounts can be
+      // connected today (see migration 074), so this is always 'USD' in
+      // practice, but capturing the real value now means a future
+      // multi-marketplace account's orders are correct from day one instead
+      // of needing a backfill.
+      currency: pricing?.total?.currency || totalDueSeller?.currency || 'USD',
       transactionFee: 0,
       adFee: 0,
       netProfit: null,

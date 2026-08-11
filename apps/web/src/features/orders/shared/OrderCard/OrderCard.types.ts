@@ -38,4 +38,6 @@ export interface OrderCardProps {
   stats: OrderCardStat[];
   onClick?: () => void;
   className?: string;
+  /** Border/shadow lift on hover — on for the carousel preview, off for the list grid. Defaults to true. */
+  hoverEffect?: boolean;
 }

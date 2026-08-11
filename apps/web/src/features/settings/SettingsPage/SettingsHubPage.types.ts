@@ -21,6 +21,7 @@ export type SettingsDrawerKey =
   | 'listingGroupCreate'
   | 'listingGroupEdit'
   | 'listingGroupList'
+  | 'listingGroupsAll'
   | 'buyerMessageTemplates'
   | 'buyerMessageTemplatesAll'
   | 'buyerMessageTemplateCreate'

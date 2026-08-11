@@ -1,5 +1,6 @@
-import { Badge, Icon, IdBadge, StatusBadge } from '@repo/ui';
+import { Badge, Icon, IdBadge, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { orderStatusToBadgeStatus } from '../order-status';
 
@@ -17,9 +18,18 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   stats,
   onClick,
   className,
+  hoverEffect = true,
 }) => {
+  const { t } = useTranslation(['translation']);
+
   return (
-    <S.Wrapper type="button" onClick={onClick} className={className} aria-label={ebayOrderId}>
+    <S.Wrapper
+      type="button"
+      onClick={onClick}
+      className={className}
+      aria-label={ebayOrderId}
+      $hoverEffect={hoverEffect}
+    >
       <S.Image>
         {imageUrl ? (
           <img src={imageUrl} alt={productTitle} />
@@ -80,6 +90,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </S.StatCell>
           ))}
         </S.StatsGrid>
+
+        <S.Footer>
+          <S.DetailAction>
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <Icon name="arrow-right" size={14} color="brand.primary" />
+          </S.DetailAction>
+        </S.Footer>
       </S.Content>
     </S.Wrapper>
   );

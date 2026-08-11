@@ -39,7 +39,7 @@
     "notSet": "Ayarlanmadı",
     "notProvided": "Belirtilmedi",
     "noCategory": "Kategori Yok",
-    "details": "Detaylar",
+    "details": "Detay",
     "noBrand": "Marka Bilgisi Yok",
     "amazonLink": "AMAZON",
     "languageCode": "tr-TR",
@@ -110,8 +110,8 @@
   },
   "menu": {
     "dashboard": "Panel",
-    "listings": "Listelemeler",
-    "ebayListings": "Ebay Listeleri",
+    "listings": "Listeler",
+    "ebayListings": "eBay Listeleri",
     "listingJobs": "İş Takibi",
     "products": "Ürünler",
     "inventory": "Envanter",
@@ -147,7 +147,7 @@
     "newConversation": "Yeni sohbet",
     "conversations": "Sohbetler",
     "emptyTitle": "Bir sohbet başlatın",
-    "emptyDescription": "Zon'a ilanlarınız, siparişleriniz, ayarlarınız veya hesabınız hakkında sorun.",
+    "emptyDescription": "Zon'a listeleriniz, siparişleriniz, ayarlarınız veya hesabınız hakkında sorun.",
     "offline": "Çevrimdışısınız. Sohbet geçmişiniz kullanılabilir.",
     "loading": "Sohbetler yükleniyor…",
     "connected": "Bağlı",
@@ -217,7 +217,11 @@
       },
       "amazon": {
         "noAccounts": "Bağlı Amazon hesabı yok",
-        "connectedSince": "Bağlanma Tarihi"
+        "connectedSince": "Bağlanma Tarihi",
+        "twoFactorOn": "2FA aktif",
+        "twoFactorOff": "2FA yok",
+        "autoFulfillOn": "Otomatik sipariş açık · limit {{cap}}",
+        "autoFulfillOff": "Otomatik sipariş kapalı"
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırması",
@@ -251,7 +255,7 @@
         "title": "Liste Ayar Grupları",
         "subtitle": "Yeniden fiyatlandırma stratejileri, stok mantığı, kâr marjları",
         "manage": "Grupları Yönet",
-        "manageSubtitle": "Mevcut fiyatlandırma ve stok gruplarını görüntüle ve düzenle",
+        "manageSubtitle": "Fiyatlandırma ve stok gruplarınızı görüntüleyin, düzenleyin ve oluşturun",
         "viewAll": "Tümü",
         "create": "Yeni Grup Oluştur",
         "createSubtitle": "Yeni bir yeniden fiyatlandırma stratejisi ve kâr marjı tanımla",
@@ -393,6 +397,10 @@
         "list": {
           "title": "Liste Ayar Grupları",
           "subtitle": "Yeniden fiyatlandırma gruplarınızı görüntüleyin, düzenleyin veya oluşturun"
+        },
+        "all": {
+          "title": "Tüm Gruplar",
+          "subtitle": "Fiyatlandırma ve stok kurallarını düzenlemek için bir grup seçin"
         }
       },
       "password": {

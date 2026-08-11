@@ -1,11 +1,13 @@
 import { ProfitBasis, type OrderDto } from '@repo/shared';
-import { Badge, Icon, StatusBadge, Text, type TableColumn } from '@repo/ui';
+import { Badge, StatusBadge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fulfillmentStateToBadgeVariant } from '../../shared/fulfillment-state';
 import { orderStatusToBadgeStatus } from '../../shared/order-status';
 import * as S from '../OrdersAllPage.style';
+
+import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 
 export function useOrdersColumns(
   formatCurrency: (value: number) => string,
@@ -27,23 +29,35 @@ export function useOrdersColumns(
         ),
       },
       {
+        // Same cell as the listings table — one implementation in domain-ui, so
+        // the two product columns cannot drift apart again.
         key: 'product',
         header: t('orders.table.product'),
-        width: '18rem',
-        render: (_value, order) => (
-          <S.ProductCell>
-            <S.ProductThumb>
-              {order.product?.imageUrl ? (
-                <img src={order.product.imageUrl} alt="" />
-              ) : (
-                <Icon name="image" size={18} />
-              )}
-            </S.ProductThumb>
-            <Text variant="body-sm" weight="medium">
-              {order.product?.title || '—'}
-            </Text>
-          </S.ProductCell>
-        ),
+        width: '20.5rem',
+        render: (_value, order) => {
+          const meta: ProductTableCellMetaRow[] = [];
+          if (order.product?.asin) {
+            meta.push({
+              label: t('orders.table.asin'),
+              id: order.product.asin,
+              storeType: 'amazon',
+            });
+          }
+          if (order.product?.ebayItemId) {
+            meta.push({
+              label: t('orders.table.ebayId'),
+              id: order.product.ebayItemId,
+              storeType: 'ebay',
+            });
+          }
+          return (
+            <ProductTableCell
+              title={order.product?.title || t('translation:common.unknownProduct')}
+              imageUrl={order.product?.imageUrl}
+              meta={meta}
+            />
+          );
+        },
       },
       {
         key: 'createdAt',

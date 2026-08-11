@@ -33,8 +33,7 @@ export interface OrdersAllPageProps {
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
   onOrderClick: (orderId: string) => void;
-  onBack: () => void;
+  /** Only set when the user arrived from the dashboard — `/orders` is itself the root of this section. */
+  onBack?: () => void;
   onDownload: () => void;
-  onRefresh: () => void;
-  isRefreshing: boolean;
 }

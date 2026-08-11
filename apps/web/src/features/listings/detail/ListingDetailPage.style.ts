@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, PageContainerWithMobileBar, tkn } from '@repo/ui';
+import { Card, PageContainerWithMobileBar, SettingsCard, Text, tkn } from '@repo/ui';
 
 export const Container = PageContainerWithMobileBar;
 
@@ -28,6 +28,7 @@ export const DraftPublishCopy = styled.div`
  * radius, shadow and padding), which is how it drifted onto the 6px radius.
  */
 export const Hero = styled(Card)`
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
@@ -40,6 +41,13 @@ export const Hero = styled(Card)`
   @media (min-width: ${tkn('breakpoints.lg')}) {
     grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
   }
+`;
+
+/** Status badge pinned to the hero card's top-right corner. */
+export const StatusBadgeSlot = styled.div`
+  position: absolute;
+  top: ${tkn('spacing.md')};
+  right: ${tkn('spacing.md')};
 `;
 
 export const GalleryBlock = styled.div`
@@ -90,8 +98,7 @@ export const ThumbButton = styled.button<{ $active: boolean }>`
   height: 3.25rem;
   padding: 0;
   border-radius: ${tkn('radius.sm')};
-  border: 0.125rem solid
-    ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
+  border: 0.125rem solid ${({ $active, theme }) => ($active ? theme.colors.brand.primary : 'transparent')};
   background: transparent;
   cursor: pointer;
   overflow: hidden;
@@ -123,6 +130,13 @@ export const TitleRow = styled.div`
   min-width: 0;
 `;
 
+/** Product title + its edit pencil, side by side. */
+export const TitleHeadingRow = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.sm')};
+`;
+
 export const BadgeRow = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -130,34 +144,102 @@ export const BadgeRow = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-export const IdRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-  align-items: center;
+/**
+ * The product title, which heads the hero rather than the page (see PageHeader).
+ * Clamped: Amazon titles run to 200 characters and an unclamped one pushed the
+ * whole hero column down past the gallery.
+ */
+export const ProductTitle = styled(Text)`
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
 `;
 
 /**
- * Single headline KPI in the hero. Replaces the old stock/sold/last-sale chip
- * row, whose three values were repeated verbatim by the Performance card.
+ * Record facts as labelled rows, stacked — the listing card's meta pattern.
+ * Holds the marketplace ids plus the internal id and timestamps that used to
+ * be a separate "system" card at the foot of the page.
+ *
+ * The label column is a fixed track rather than `auto` so every row's value
+ * starts on the same x — with `auto` the widest label ("Güncellenme") would
+ * set the column and the ids would sit at a different indent than the page's
+ * other label/value pairs.
  */
-export const ProfitHighlight = styled.div<{ $positive: boolean }>`
+export const IdList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+`;
+
+export const IdItem = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  gap: ${tkn('spacing.sm')};
+  align-items: center;
+  min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
+`;
+
+/** The internal listing UUID — long, unwrappable, and never read in full. */
+export const IdValue = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+`;
+
+/** "Updated" value + its "Detay" action, sharing the row. */
+export const UpdatedValueRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+`;
+
+/**
+ * The money story as ONE strip — profit, ROI, sale price, cost, margin — sharing
+ * a single surface and separated by hairlines.
+ *
+ * Deliberately not one box per number: five filled boxes in a row read as five
+ * competing objects, which is exactly the checkerboard this replaced. One
+ * surface with rules says "these belong together and are read across", and the
+ * only colour left in it is the profit value itself, so the eye lands there
+ * first instead of on five equal grey rectangles.
+ */
+export const KpiStrip = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.background.tertiary')};
+`;
+
+export const KpiItem = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  background: ${({ $positive, theme }) =>
-    $positive ? theme.colors.semanticTint.success : theme.colors.semanticTint.error};
-  border: 0.0625rem solid
-    ${({ $positive, theme }) =>
-      $positive ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.error};
+  flex: 1 1 7rem;
+  min-width: 7rem;
+  padding: 0 ${tkn('spacing.sm')};
+  border-left: 0.0625rem solid ${tkn('colors.border.secondary')};
+
+  &:first-of-type {
+    border-left: none;
+  }
 `;
 
-export const QuickLinks = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
+export const KpiLabel = styled(Text)`
+  text-transform: uppercase;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+  white-space: nowrap;
 `;
 
 export const SectionGrid = styled.div`
@@ -170,18 +252,39 @@ export const SectionGrid = styled.div`
   }
 `;
 
-export const SectionCard = styled(Card)`
+/**
+ * Stacks eBay Politikaları + Otomasyon inside ONE grid column so the shorter
+ * policies card doesn't stretch to Performance's height — same fix as
+ * SettingsHubPage.style.ts's ColumnStack, for the identical cause (grid row
+ * stretch + SettingsCard's own `height: 100%`). `&&` is deliberate: both
+ * this rule and SettingsCard's height:100% sit at single-class specificity,
+ * so a plain `& > *` would win or lose on Emotion injection order.
+ */
+export const SectionColumnStack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  width: 100%;
+  gap: ${tkn('spacing.lg')};
   min-width: 0;
+
+  && > * {
+    height: auto;
+    flex: 0 0 auto;
+  }
 `;
 
-export const SectionCardFull = styled(SectionCard)`
+/** Full-width variant of the shared SettingsCard — layout only, spans both grid columns from `md` up. */
+export const FullWidthSettingsCard = styled(SettingsCard)`
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-column: 1 / -1;
   }
+`;
+
+/** Vertical rhythm for a SettingsCard body with multiple top-level children. */
+export const SectionContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
 `;
 
 /** Wrapper for the shared EmptyState on the loading / not-found screens. */
@@ -189,19 +292,69 @@ export const StateCard = styled(Card)`
   width: 100%;
 `;
 
-export const CardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.md')};
-  flex-wrap: wrap;
+/**
+ * Facts as plain label-over-value pairs in columns — no fill, no border, the
+ * card itself is the container.
+ *
+ * The card already establishes the surface; giving each fact its own filled box
+ * inside it stacks a second container on a first and turns six numbers into six
+ * objects to scan. Whitespace and a column rhythm group them just as clearly and
+ * far more quietly. Two columns is the widest this goes: these labels ("Amazon
+ * stok", "Son satış") are long enough that a 3rd column truncates them on a
+ * laptop, and the card sits in a half-width grid track to begin with.
+ */
+export const DefGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+
+  @media (min-width: ${tkn('breakpoints.sm')}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 `;
 
-export const CardHeaderLeft = styled.div`
+export const DefItem = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
   min-width: 0;
+`;
+
+export const DefLabel = styled(Text)`
+  text-transform: uppercase;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+/**
+ * Item specifics — a spec sheet, not cards. Two columns of `label · value` rows
+ * separated by hairlines, which is the densest form that stays scannable when a
+ * product carries 20+ of them (see the reference eBay/Amazon detail screens).
+ */
+export const SpecList = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: ${tkn('spacing.xl')};
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+export const SpecRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr);
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  align-items: baseline;
+  padding: ${tkn('spacing.sm')} 0;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  min-width: 0;
+  word-break: break-word;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
 `;
 
 export const MetaList = styled.div`
@@ -211,45 +364,90 @@ export const MetaList = styled.div`
 `;
 
 export const MetaRow = styled.div`
-  display: grid;
-  grid-template-columns: minmax(6rem, 40%) minmax(0, 1fr);
-  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  display: flex;
   align-items: center;
-  padding: ${tkn('spacing.sm')} 0;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')} 0;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:last-child {
     border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  &:first-of-type {
-    padding-top: 0;
-  }
-
-  @media (max-width: 22rem) {
-    grid-template-columns: 1fr;
-    gap: ${tkn('spacing.2xs')};
   }
 `;
 
+export const MetaValue = styled.div`
+  min-width: 0;
+  max-width: 60%;
+  text-align: right;
+  overflow-wrap: anywhere;
+`;
+
+/** Row icon + label, left side of a Meta row — matches SettingsInfoRow's icon/label pairing. */
+export const MetaLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+/** Description / features / specs, spaced generously apart — no icons, no
+ *  card-header chrome, just clearly separated sections. */
+export const ProductContentStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xl')};
+`;
+
+/** One Product Content section: its heading + its own body. */
+export const ProductContentBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/** Spacing for the InfoMessage under the Automation card's summary rows —
+ *  changes aren't pushed instantly, so this stays visible rather than
+ *  hidden behind a hover tooltip. */
+export const AutomationSyncNoteSlot = styled.div`
+  margin-top: ${tkn('spacing.sm')};
+`;
+
+/** Stacks the boxed automation blocks with even spacing — matches the Store
+ *  Settings buyer-messaging event list. */
+export const AutomationBlockList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+/** Each toggle area is its own bordered box — matches the Store Settings
+ *  buyer-messaging event rows, so every box shares the same padding/edges
+ *  and lines up top to bottom. */
 export const AutomationBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
-  padding-bottom: ${tkn('spacing.md')};
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
-
-  &:last-of-type {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
+  padding: ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.sm')};
+  box-shadow: ${tkn('shadows.sm')};
 `;
 
 export const AutomationHeader = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
+`;
+
+/** Label on the left, Toggle switch on the right — matches the Store
+ *  Settings buyer-messaging event rows. */
+export const ToggleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
 `;
 
 export const AutomationFields = styled.div`
@@ -260,6 +458,13 @@ export const AutomationFields = styled.div`
   @media (min-width: ${tkn('breakpoints.sm')}) {
     grid-template-columns: 1fr 1fr;
   }
+`;
+
+/** Always stacked — unlike AutomationFields, the two margin inputs never sit side by side. */
+export const MarginFields = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
 `;
 
 export const FeatureList = styled.ul`

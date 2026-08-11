@@ -15,3 +15,6 @@ export type {
 
 export { ConnectEbayPrompt } from './ConnectEbayPrompt';
 export type { ConnectEbayPromptProps } from './ConnectEbayPrompt';
+
+export { ProductTableCell } from './ProductTableCell';
+export type { ProductTableCellMetaRow, ProductTableCellProps } from './ProductTableCell';

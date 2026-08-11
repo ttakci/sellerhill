@@ -89,13 +89,25 @@ export const CarouselSlide = styled.div`
   }
 `;
 
+/**
+ * The card's border bisects the arrow: the offset is exactly half of ARROW_SIZE,
+ * so half the circle sits outside the card and half inside. Both halves are
+ * load-bearing — the outer half keeps the arrow off the card's content, and the
+ * inner half lands entirely within every consuming card's horizontal padding
+ * (ListingGroupCard lg / template card xl / account cards md+, all > 1rem), so
+ * it can never cover text. Keep that invariant when adding a card to a
+ * carousel: horizontal padding must be at least half of ARROW_SIZE.
+ */
+const ARROW_SIZE = '2rem';
+const ARROW_OVERHANG = '1rem';
+
 export const CarouselArrow = styled(IconButton)<{ $side: 'left' | 'right' }>`
   position: absolute;
   top: 50%;
-  ${({ $side }) => ($side === 'left' ? 'left: -1.125rem' : 'right: -1.125rem')};
+  ${({ $side }) => ($side === 'left' ? `left: -${ARROW_OVERHANG}` : `right: -${ARROW_OVERHANG}`)};
   transform: translateY(-50%);
-  width: 2rem;
-  height: 2rem;
+  width: ${ARROW_SIZE};
+  height: ${ARROW_SIZE};
   padding: 0;
   border-radius: ${tkn('radius.full')};
   background: ${tkn('colors.brand.primary')};

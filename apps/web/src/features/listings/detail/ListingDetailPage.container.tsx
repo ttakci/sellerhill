@@ -1,18 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ListingStatus,
-  PolicyType,
-  updateListingSchema,
-  type UpdateListingFormData,
-} from '@repo/shared';
-import {
-  formatCurrency,
-  formatDate,
-  getLocaleConfig,
-  useLoading,
-  useMarketplaceContext,
-  useUI,
-} from '@repo/ui';
+import { ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData } from '@repo/shared';
+import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +11,7 @@ import {
   useEndListingsMutation,
   useGetBusinessPoliciesQuery,
   useGetListingByIdQuery,
+  useGetListingRevisionsQuery,
   usePublishListingMutation,
   useUpdateListingMutation,
 } from '../api/listings.api';
@@ -67,20 +56,27 @@ export const ListingDetailPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
-  // Same injected builders the IdBadge uses, so header actions and row badges
-  // can never disagree about which eBay environment a listing lives in.
-  const { buildEbayItemUrl, buildAmazonProductUrl } = useMarketplaceContext();
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
-  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [isTitleDrawerOpen, setIsTitleDrawerOpen] = useState(false);
+  const [isAutomationDrawerOpen, setIsAutomationDrawerOpen] = useState(false);
+  const [isRevisionsDrawerOpen, setIsRevisionsDrawerOpen] = useState(false);
   const [overrides, setOverrides] = useState<ListingOverridesUiState>(emptyOverrides);
   const [isSavingOverrides, setIsSavingOverrides] = useState(false);
 
-  const { data: listing, isLoading, isError } = useGetListingByIdQuery(listingId ?? '', {
+  const {
+    data: listing,
+    isLoading,
+    isError,
+  } = useGetListingByIdQuery(listingId ?? '', {
     skip: !listingId,
     refetchOnMountOrArgChange: true,
   });
+  const { data: revisionsPreview } = useGetListingRevisionsQuery(
+    { listingId: listingId ?? '', query: { page: 1, limit: 1 } },
+    { skip: !listingId }
+  );
 
   const { data: listingSettingsGroups = [] } = useGetListingSettingsGroupsQuery();
   const { data: policiesMap = [] } = useGetBusinessPoliciesQuery();
@@ -98,25 +94,29 @@ export const ListingDetailPageContainer: React.FC = () => {
     defaultValues: {
       title: '',
       listingSettingsGroupId: '',
-      paymentPolicyId: '',
-      shippingPolicyId: '',
-      returnPolicyId: '',
     },
   });
 
-  const { reset, handleSubmit: rhfSubmit } = form;
+  const { reset, getValues, handleSubmit: rhfSubmit } = form;
 
-  useEffect(() => {
+  /** Discards any unsaved title/group edits — used on drawer open (fresh from
+   *  server) and on drawer close-without-save (so an edit in one drawer can
+   *  never leak into the other's save, since both share this form). */
+  const resetFormFromListing = useCallback(() => {
     if (!listing) {
       return;
     }
     reset({
       title: listing.title ?? '',
       listingSettingsGroupId: listing.listingSettingsGroupId ?? '',
-      paymentPolicyId: listing.paymentPolicyId ?? '',
-      shippingPolicyId: listing.shippingPolicyId ?? '',
-      returnPolicyId: listing.returnPolicyId ?? '',
     });
+  }, [listing, reset]);
+
+  useEffect(() => {
+    if (!listing) {
+      return;
+    }
+    resetFormFromListing();
     // Hydrate local automation UI from server listing payload
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync local draft from remote listing
     setOverrides({
@@ -124,9 +124,7 @@ export const ListingDetailPageContainer: React.FC = () => {
       fixedPrice: Boolean(listing.lockPrice || listing.disableRepricing),
       fixedQuantity: Boolean(listing.lockQuantity),
       priceOverride:
-        listing.priceOverride !== null && listing.priceOverride !== undefined
-          ? String(listing.priceOverride)
-          : '',
+        listing.priceOverride !== null && listing.priceOverride !== undefined ? String(listing.priceOverride) : '',
       quantityOverride:
         listing.quantityOverride !== null && listing.quantityOverride !== undefined
           ? String(listing.quantityOverride)
@@ -142,7 +140,7 @@ export const ListingDetailPageContainer: React.FC = () => {
     });
     setSelectedImageIndex(0);
     setDescriptionExpanded(false);
-  }, [listing, reset]);
+  }, [listing, resetFormFromListing]);
 
   useEffect(() => {
     if (!isError) {
@@ -161,13 +159,27 @@ export const ListingDetailPageContainer: React.FC = () => {
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
-    [localeCfg]
+    (value: number) => formatCurrency(value, localeCfg.locale, listing?.currency ?? 'USD'),
+    [listing?.currency, localeCfg.locale]
   );
 
   const fmtDate = useCallback(
     (dateString: string) =>
       formatDate(dateString, localeCfg.locale, { month: 'short', day: 'numeric', year: 'numeric' }),
+    [localeCfg]
+  );
+
+  /** Same date, plus the clock time — for record timestamps, where "when today"
+   *  is the whole point and a bare date reads as stale. */
+  const fmtDateTime = useCallback(
+    (dateString: string) =>
+      formatDate(dateString, localeCfg.locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     [localeCfg]
   );
 
@@ -184,8 +196,7 @@ export const ListingDetailPageContainer: React.FC = () => {
 
   const strategyGroupLabel = useMemo(
     () =>
-      listing?.listingSettingsGroupName ||
-      resolveLabel(listingSettingsGroups, listing?.listingSettingsGroupId, dash),
+      listing?.listingSettingsGroupName || resolveLabel(listingSettingsGroups, listing?.listingSettingsGroupId, dash),
     [listing, listingSettingsGroups, dash]
   );
 
@@ -202,6 +213,21 @@ export const ListingDetailPageContainer: React.FC = () => {
     [businessPolicies.return, listing?.returnPolicyId, dash]
   );
 
+  /** Compact "what's active" line for the Automation card's summary row. */
+  const automationSummary = useMemo(() => {
+    const active: string[] = [];
+    if (overrides.pauseSales) {
+      active.push(t('listings.detail.pauseSales'));
+    }
+    if (overrides.fixedPrice) {
+      active.push(t('listings.detail.fixedPrice'));
+    }
+    if (overrides.fixedQuantity) {
+      active.push(t('listings.detail.fixedQuantity'));
+    }
+    return active.length > 0 ? active.join(', ') : t('listings.detail.automationNone');
+  }, [overrides, t]);
+
   const statusLabel = useMemo(() => {
     if (!listing) {
       return '';
@@ -215,21 +241,32 @@ export const ListingDetailPageContainer: React.FC = () => {
     localeNavigate('/listings/all');
   };
 
-  const handleOpenEditDrawer = () => {
-    if (listing) {
-      reset({
-        title: listing.title ?? '',
-        listingSettingsGroupId: listing.listingSettingsGroupId ?? '',
-        paymentPolicyId: listing.paymentPolicyId ?? '',
-        shippingPolicyId: listing.shippingPolicyId ?? '',
-        returnPolicyId: listing.returnPolicyId ?? '',
-      });
-    }
-    setIsEditDrawerOpen(true);
+  const handleOpenTitleDrawer = () => {
+    resetFormFromListing();
+    setIsTitleDrawerOpen(true);
   };
 
-  const handleCloseEditDrawer = () => {
-    setIsEditDrawerOpen(false);
+  const handleCloseTitleDrawer = () => {
+    resetFormFromListing();
+    setIsTitleDrawerOpen(false);
+  };
+
+  const handleOpenAutomationDrawer = () => {
+    resetFormFromListing();
+    setIsAutomationDrawerOpen(true);
+  };
+
+  const handleCloseAutomationDrawer = () => {
+    resetFormFromListing();
+    setIsAutomationDrawerOpen(false);
+  };
+
+  const handleOpenRevisions = () => {
+    setIsRevisionsDrawerOpen(true);
+  };
+
+  const handleCloseRevisions = () => {
+    setIsRevisionsDrawerOpen(false);
   };
 
   const handleSave = () => {
@@ -238,8 +275,8 @@ export const ListingDetailPageContainer: React.FC = () => {
     }
     void rhfSubmit(async (data) => {
       try {
-        await updateListing({ id: listingId, data }).unwrap();
-        setIsEditDrawerOpen(false);
+        await updateListing({ id: listingId, data: { title: data.title } }).unwrap();
+        setIsTitleDrawerOpen(false);
         showMessage(
           {
             type: 'success',
@@ -267,28 +304,25 @@ export const ListingDetailPageContainer: React.FC = () => {
       return;
     }
     setIsSavingOverrides(true);
+    const groupId = getValues('listingSettingsGroupId');
     // Map simplified UI → DB columns (fixed price drives lockPrice + disableRepricing)
     void updateListing({
       id: listingId,
       data: {
+        listingSettingsGroupId: groupId || undefined,
         disableOrdering: overrides.pauseSales,
         disableRepricing: overrides.fixedPrice,
         lockPrice: overrides.fixedPrice,
         lockQuantity: overrides.fixedQuantity,
         priceOverride: overrides.fixedPrice ? parseOptionalNumber(overrides.priceOverride) : null,
-        quantityOverride: overrides.fixedQuantity
-          ? parseOptionalNumber(overrides.quantityOverride)
-          : null,
-        marginPercentOverride: overrides.fixedPrice
-          ? null
-          : parseOptionalNumber(overrides.marginPercentOverride),
-        marginFixedOverride: overrides.fixedPrice
-          ? null
-          : parseOptionalNumber(overrides.marginFixedOverride),
+        quantityOverride: overrides.fixedQuantity ? parseOptionalNumber(overrides.quantityOverride) : null,
+        marginPercentOverride: overrides.fixedPrice ? null : parseOptionalNumber(overrides.marginPercentOverride),
+        marginFixedOverride: overrides.fixedPrice ? null : parseOptionalNumber(overrides.marginFixedOverride),
       },
     })
       .unwrap()
       .then(() => {
+        setIsAutomationDrawerOpen(false);
         showMessage(
           {
             type: 'success',
@@ -455,21 +489,6 @@ export const ListingDetailPageContainer: React.FC = () => {
     );
   };
 
-  const handleOpenAmazon = () => {
-    if (!listing?.asin) {
-      return;
-    }
-    window.open(buildAmazonProductUrl(listing.asin), '_blank', 'noopener,noreferrer');
-  };
-
-  const handleOpenEbay = () => {
-    if (!listing?.ebayListingId) {
-      return;
-    }
-    // Sandbox item ids do not resolve on ebay.com — build per environment.
-    window.open(buildEbayItemUrl(listing.ebayListingId), '_blank', 'noopener,noreferrer');
-  };
-
   /** Mobile manage sheet: edit / publish / end / delete without header button clutter */
   const handleManage = () => {
     if (listing?.status === ListingStatus.DRAFT) {
@@ -502,29 +521,30 @@ export const ListingDetailPageContainer: React.FC = () => {
       {
         type: 'info',
         headerKey: 'listings:listings.detail.manage',
-        descriptionKey: 'listings:listings.detail.editDrawerSubtitle',
+        descriptionKey: 'listings:listings.detail.automationDrawerSubtitle',
         primaryButton: {
           labelKey: 'listings:listings.detail.editConfig',
           onClick: () => {
             closeMessage();
-            handleOpenEditDrawer();
+            handleOpenAutomationDrawer();
           },
         },
-        secondaryButton: listing?.status === ListingStatus.ACTIVE
-          ? {
-              labelKey: 'listings:listings.detail.endShort',
-              onClick: () => {
-                closeMessage();
-                handleEnd();
+        secondaryButton:
+          listing?.status === ListingStatus.ACTIVE
+            ? {
+                labelKey: 'listings:listings.detail.endShort',
+                onClick: () => {
+                  closeMessage();
+                  handleEnd();
+                },
+              }
+            : {
+                labelKey: 'listings:listings.detail.deleteShort',
+                onClick: () => {
+                  closeMessage();
+                  handleDelete();
+                },
               },
-            }
-          : {
-              labelKey: 'listings:listings.detail.deleteShort',
-              onClick: () => {
-                closeMessage();
-                handleDelete();
-              },
-            },
       },
       t
     );
@@ -539,7 +559,6 @@ export const ListingDetailPageContainer: React.FC = () => {
       isActionLoading={isEnding || isDeleting || isPublishing}
       form={form}
       listingSettingsGroups={listingSettingsGroups}
-      businessPolicies={businessPolicies}
       strategyGroupLabel={strategyGroupLabel}
       paymentPolicyLabel={paymentPolicyLabel}
       shippingPolicyLabel={shippingPolicyLabel}
@@ -548,26 +567,32 @@ export const ListingDetailPageContainer: React.FC = () => {
       onSelectImage={setSelectedImageIndex}
       descriptionExpanded={descriptionExpanded}
       onToggleDescription={() => setDescriptionExpanded((v) => !v)}
-      isEditDrawerOpen={isEditDrawerOpen}
-      onOpenEditDrawer={handleOpenEditDrawer}
-      onCloseEditDrawer={handleCloseEditDrawer}
+      isTitleDrawerOpen={isTitleDrawerOpen}
+      onOpenTitleDrawer={handleOpenTitleDrawer}
+      onCloseTitleDrawer={handleCloseTitleDrawer}
+      isAutomationDrawerOpen={isAutomationDrawerOpen}
+      onOpenAutomationDrawer={handleOpenAutomationDrawer}
+      onCloseAutomationDrawer={handleCloseAutomationDrawer}
       overrides={overrides}
       onOverrideChange={(patch) => setOverrides((prev) => ({ ...prev, ...patch }))}
       onSaveOverrides={handleSaveOverrides}
+      automationSummary={automationSummary}
       formatCurrency={fmtCurrency}
       formatDate={fmtDate}
+      formatDateTime={fmtDateTime}
       onBack={handleBack}
       onSave={handleSave}
       onEnd={handleEnd}
       onDelete={handleDelete}
       onPublish={handlePublish}
-      onOpenAmazon={handleOpenAmazon}
-      onOpenEbay={handleOpenEbay}
       onManage={handleManage}
+      isRevisionsDrawerOpen={isRevisionsDrawerOpen}
+      hasRevisions={(revisionsPreview?.total ?? 0) > 0}
+      onOpenRevisions={handleOpenRevisions}
+      onCloseRevisions={handleCloseRevisions}
       canEnd={listing?.status === ListingStatus.ACTIVE}
       canDelete={Boolean(listing)}
       canPublish={listing?.status === ListingStatus.DRAFT}
-      canOpenEbay={Boolean(listing?.ebayListingId)}
       statusLabel={statusLabel}
       statusTone={listing?.status ?? ListingStatus.INACTIVE}
     />

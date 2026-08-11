@@ -52,10 +52,6 @@ export const feeConfigSchema = (t: TFunction) =>
       .min(0, t('listingSettingsGroup.validation.minFeePercent'))
       .max(100, t('listingSettingsGroup.validation.maxFeePercent')),
     fixedFeeAmount: z.coerce.number().min(0, t('listingSettingsGroup.validation.minFixedFee')),
-    taxPercent: z.coerce
-      .number()
-      .min(0, t('listingSettingsGroup.validation.minTaxPercent'))
-      .max(100, t('listingSettingsGroup.validation.maxTaxPercent')),
   });
 
 /**
@@ -103,11 +99,15 @@ export const listingSettingsGroupSchema = (t: TFunction) =>
       .min(1, t('listingSettingsGroup.validation.minOnePriceRange'))
       .superRefine((items, ctx) => {
         for (let i = 1; i < items.length; i++) {
-          // Forbid overlap but ALLOW contiguity: a range may start exactly where
-          // the previous one ends (minPrice === prev.maxPrice) so the price
-          // buckets tile continuously with no gaps. Only a true overlap
-          // (minPrice < prev.maxPrice) is invalid.
-          if (items[i].minPrice < items[i - 1].maxPrice) {
+          // A range must start STRICTLY above where the previous one ends.
+          // Equal boundaries used to be allowed ("tile continuously"), but the
+          // actual price match (`amazonPrice >= min && amazonPrice <= max`) is
+          // inclusive on both ends, so an Amazon price landing exactly on the
+          // shared boundary matched BOTH ranges — which one governed was
+          // whichever came first in the array, an implementation detail no
+          // user ever chose. At $0.01 currency granularity there is no real
+          // price this excludes, so tightening it costs nothing.
+          if (items[i].minPrice <= items[i - 1].maxPrice) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: t('listingSettingsGroup.validation.overlappingPriceRanges'),

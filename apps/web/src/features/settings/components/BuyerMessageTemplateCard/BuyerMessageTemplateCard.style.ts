@@ -1,9 +1,12 @@
 import styled from '@emotion/styled';
 import { Badge, Card, IconButton, Text, tkn } from '@repo/ui';
 
+import { CARD_ACTION_ARROW_INSET, CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
+
 /**
- * Fixed height — every card is the same size regardless of body length, so
- * the carousel never reflows between slides. `width: 100%` is load-bearing:
+ * Shared carousel height — every card is the same size regardless of body
+ * length, so the carousel never reflows between slides and this card matches
+ * the other carousels' cards. `width: 100%` is load-bearing:
  * inside the carousel's row-flex slide, a flex item without an explicit
  * width shrinks to its content instead of filling the slide, so the card
  * renders narrower (and misaligned) than the single-item path, where the
@@ -21,7 +24,7 @@ export const InteractiveCard = styled(Card, {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 13rem;
+  min-height: ${CAROUSEL_CARD_MIN_HEIGHT};
 
   &:focus-visible {
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
@@ -100,8 +103,18 @@ export const BottomRow = styled.div`
   flex-shrink: 0;
 `;
 
+/** "Detay" label + arrow. The arrow keeps its own fixed-width slot so its tip
+ *  lines up with the "add new" card's arrow below it — see `cardMetrics`. */
+export const DetailAction = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  margin-left: auto;
+`;
+
 export const ArrowSlot = styled.span`
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
+  margin-right: ${tkn(CARD_ACTION_ARROW_INSET)};
+  flex-shrink: 0;
 `;

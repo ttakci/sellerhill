@@ -1,7 +1,9 @@
 import { AmazonAccountStatus } from '@repo/shared';
-import { Icon, StatusBadge, Text } from '@repo/ui';
+import { formatCurrency, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { CARD_ACTION_ICON_SIZE } from '../cardMetrics';
 
 import * as S from './AmazonAccountCard.style';
 import type { AmazonAccountCardProps } from './AmazonAccountCard.types';
@@ -42,6 +44,26 @@ export const AmazonAccountCard: React.FC<AmazonAccountCardProps> = ({ account, o
               {account.email}
             </Text>
           </S.AccountMetaLine>
+          <S.AccountMetaLine>
+            <Icon name={account.hasTwoFactor ? 'shield-check' : 'shield'} size={14} color="text.tertiary" />
+            <Text variant="caption" color="text.secondary">
+              {t(
+                account.hasTwoFactor
+                  ? 'translation:settingsHub.sections.amazon.twoFactorOn'
+                  : 'translation:settingsHub.sections.amazon.twoFactorOff',
+              )}
+            </Text>
+          </S.AccountMetaLine>
+          <S.AccountMetaLine>
+            <Icon name="zap" size={14} color="text.tertiary" />
+            <Text variant="caption" color="text.secondary">
+              {account.autoFulfillEnabled && account.autoFulfillCapTotal !== null
+                ? t('translation:settingsHub.sections.amazon.autoFulfillOn', {
+                    cap: formatCurrency(account.autoFulfillCapTotal),
+                  })
+                : t('translation:settingsHub.sections.amazon.autoFulfillOff')}
+            </Text>
+          </S.AccountMetaLine>
           <S.BottomRow>
             <S.AccountMetaLine>
               <Icon name="calendar" size={14} color="text.tertiary" />
@@ -49,7 +71,16 @@ export const AmazonAccountCard: React.FC<AmazonAccountCardProps> = ({ account, o
                 {t('translation:settingsHub.sections.amazon.connectedSince')}: {account.connectedSince}
               </Text>
             </S.AccountMetaLine>
-            {onClick && <Icon name="arrow-right" size={16} color="brand.primary" />}
+            {onClick && (
+              <S.DetailAction>
+                <Text variant="body-sm" weight="semibold" color="brand.primary">
+                  {t('translation:common.details')}
+                </Text>
+                <S.ArrowSlot>
+                  <Icon name="arrow-right" size={CARD_ACTION_ICON_SIZE} color="brand.primary" />
+                </S.ArrowSlot>
+              </S.DetailAction>
+            )}
           </S.BottomRow>
           {account.status === AmazonAccountStatus.INVALID && account.lastVerificationError && (
             <S.AccountMetaLine>

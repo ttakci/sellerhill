@@ -2,7 +2,7 @@
   "listingSettingsGroup": {
     "title": "Listeleme Ayarları Grupları",
     "subtitle": "Otomatik optimizasyon için ürün listelerinize strateji şablonları yönetin ve atayın.",
-    "loadingDescription": "İlan gruplarınız getiriliyor.",
+    "loadingDescription": "Liste gruplarınız getiriliyor.",
     "createNewGroup": "Yeni Grup Oluştur",
     "editGroup": "Listeleme Grubunu Düzenle",
     "backToList": "Gruplara Dön",
@@ -12,13 +12,9 @@
     "groupNamePlaceholder": "örn., Premium Elektronik",
     "description": "Açıklama",
     "descriptionPlaceholder": "Grup iç notlarını girin...",
-    "contentSection": "İlan içeriği",
     "stripBrandFromTitle": "Başlıkta markayı kaldır",
-    "stripBrandFromTitleHint": "İlan oluştururken Amazon marka adını eBay başlığından çıkarır (dropshipping için).",
     "aiTitleEnabled": "YZ destekli başlık",
-    "aiTitleEnabledHint": "Yalnızca yeni ilanlarda. Admin → Ayarlar bölümünde \"llm.contentEnabled\" açık olmalıdır. Hata veya zaman aşımında normal başlığa döner; ilan oluşturma asla durmaz.",
-    "aiDescriptionEnabled": "YZ destekli açıklama",
-    "aiDescriptionEnabledHint": "Yalnızca yeni ilanlarda. Admin → Ayarlar bölümünde \"llm.contentEnabled\" açık olmalıdır. Hata durumunda şablonunuza/özelliklere döner. Mevcut ilanlar hiçbir zaman yeniden işlenmez.",
+    "aiTitleEnabledInfo": "eBay başlığınızı yapay zeka ile yeniden yazarak arama dostu karakter sınırını daha fazla kullanır, ürün sayfasından alınan ek anahtar kelimelerle doldurur. Yalnızca yeni listelerde geçerlidir — bir hata olursa normal başlığınız kullanılır, liste oluşturma hiçbir zaman etkilenmez.",
     "repricingStrategy": "Yeniden Fiyatlandırma",
     "addPriceRange": "Fiyat Aralığı Ekle",
     "removePriceRange": "Fiyat Aralığını Kaldır",
@@ -71,7 +67,7 @@
       "stock": "Stok",
       "buffer": "Buffer",
       "fee": "Komisyon",
-      "tax": "Vergi",
+      "fixedFee": "Sabit ücret",
       "customTemplate": "Özelleştirilmiş Şablon"
     },
     "emptyState": {
@@ -102,7 +98,7 @@
       },
       "boutique-card": {
         "name": "Butik Kart",
-        "description": "Ev, kozmetik ve moda ilanları için sıcak serif kart düzeni"
+        "description": "Ev, kozmetik ve moda listeleri için sıcak serif kart düzeni"
       },
       "compact-mobile": {
         "name": "Kompakt Mobil",
@@ -128,8 +124,6 @@
       "maxFeePercent": "Ücret yüzdesi %100'ü geçemez",
       "minFeePercent": "Ücret yüzdesi 0 veya daha büyük olmalıdır",
       "minFixedFee": "Sabit ücret 0 veya daha büyük olmalıdır",
-      "maxTaxPercent": "Vergi yüzdesi %100'ü geçemez",
-      "minTaxPercent": "Vergi yüzdesi 0 veya daha büyük olmalıdır",
       "templateRequired": "Şablon içeriği gereklidir",
       "templateMinLength": "Şablon en az 10 karakter olmalıdır",
       "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",
@@ -181,14 +175,33 @@
     "editorTitle": "Listeleme Grubu Editörü",
     "editorDescription": "Listeleme ayarlarınızı, fiyatlandırma stratejilerinizi ve şablonlarınızı yapılandırın.",
     "generalSettings": "Genel Ayarlar",
-    "pricingStrategy": "Yeniden Fiyatlandırma",
+    "pricingStrategy": "Fiyatlandırma",
     "addRange": "Aralık Ekle",
+    "calculator": {
+      "title": "Fiyat hesaplayıcı",
+      "subtitle": "Bu ayarları test edin — kaydedilmez, sadece önizlemedir.",
+      "amazonPrice": "Amazon alış fiyatı",
+      "calculate": "Hesapla",
+      "resultLabel": "eBay liste fiyatı",
+      "breakdown": {
+        "amazonPrice": "Amazon alış fiyatı",
+        "tax": "Amazon alış vergisi ({{pct}})",
+        "trueCost": "Gerçek maliyet (fiyat + vergi)",
+        "margin": "Kâr marjı ({{pct}})",
+        "fallbackMargin": "Hiçbir aralık eşleşmedi, varsayılan marj ({{pct}})",
+        "fixedProfit": "Sabit kâr",
+        "netTarget": "eBay ücretleri öncesi hedef",
+        "ebayFee": "eBay ücreti ({{pct}})",
+        "fixedFee": "Sabit ücret",
+        "floorApplied": "eBay'in $0.99 minimumunun altında, şuna yükseltildi"
+      }
+    },
     "feesAndTaxes": "Ücretler ve Vergiler",
-    "taxRate": "Vergi Oranı (%)",
+    "amazonTaxRateNote": "Fiyat hesaplanırken Amazon'dan alışverişte ödediğiniz tahmini vergi de otomatik olarak dikkate alınır. Bu oranı Mağaza Ayarları → Amazon Satış Alış Vergi Oranı bölümünden ayarlayabilirsiniz.",
     "stockControl": "Stok Kontrolü",
-    "defaultStockQuantity": "Varsayılan Miktar",
+    "ebayStockQuantity": "eBay Stok",
     "stockBuffer": "Stok Tamponu",
-    "stockBufferDescription": "Tampon olarak tutulacak minimum Amazon stoku. Amazon stoğu (miktar + tampon) seviyesine düşerse veya altına inerse liste stok dışı olur",
+    "stockBufferDescription": "eBay'de listelenecek miktar, Amazon stoğundan bu tampon düşülerek hesaplanır (asla 0'ın altına inmez) ve yukarıdaki eBay Stok değeriyle sınırlanır — yani Amazon'daki gerçek stok azalırsa eBay'deki miktar da onunla birlikte azalır.",
     "htmlTemplate": "HTML Şablonu",
     "custom": "Özel",
     "predefined": "Öntanımlı",

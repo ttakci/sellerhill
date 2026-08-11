@@ -8,6 +8,14 @@
 export enum ListingFailureCode {
   /** The ASIN is already listed or drafted for this user. */
   DUPLICATE_LISTING = 'duplicate_listing',
+  /**
+   * eBay itself reports the seller already has an identical item live
+   * (errorId 25002), for a listing our own DB has no record of — e.g. a stray
+   * listing from earlier manual/sandbox testing. Distinct from
+   * `DUPLICATE_LISTING`, which is our own local pre-check against this user's
+   * tracked listings; this one is eBay's answer, not ours.
+   */
+  EBAY_DUPLICATE_ITEM = 'ebay_duplicate_item',
   /** Amazon stock is below the group's buffer, so quantity resolved to 0. */
   ZERO_STOCK = 'zero_stock',
   /** Plan limit reached (listing or monthly automatic orders). */

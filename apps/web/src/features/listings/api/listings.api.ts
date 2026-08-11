@@ -5,10 +5,12 @@ import type {
   ListingJobDto,
   ListingJobItemDto,
   ListingJobsQueryDto,
+  ListingRevisionsQueryDto,
   ListingsQueryDto,
   EbayListingSyncResult,
   ListingImportResult,
   PaginatedListingJobsDto,
+  PaginatedListingRevisionsDto,
   PaginatedListingsDto,
   PaginatedProductsDto,
   UpdateListingRequest,
@@ -49,10 +51,6 @@ export function listingsQueryToParams(query: ListingsQueryDto = {}): Record<stri
   set('profitMarginMax', query.profitMarginMax);
   set('soldCountMin', query.soldCountMin);
   set('soldCountMax', query.soldCountMax);
-  set('watchCountMin', query.watchCountMin);
-  set('watchCountMax', query.watchCountMax);
-  set('viewCountMin', query.viewCountMin);
-  set('viewCountMax', query.viewCountMax);
   set('quantityMin', query.quantityMin);
   set('quantityMax', query.quantityMax);
   set('sourceStockMin', query.sourceStockMin);
@@ -84,10 +82,7 @@ export const listingsApi = baseApi.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.items.map(({ id }) => ({ type: 'Listings' as const, id })),
-              { type: 'Listings', id: 'LIST' },
-            ]
+          ? [...result.items.map(({ id }) => ({ type: 'Listings' as const, id })), { type: 'Listings', id: 'LIST' }]
           : [{ type: 'Listings', id: 'LIST' }],
     }),
 
@@ -116,13 +111,28 @@ export const listingsApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/listings/products', params: params ?? undefined }),
       providesTags: ['Listings'],
     }),
+    /**
+     * Price/quantity change history for one listing — the detail page's
+     * "Revisions" drawer.
+     */
+    getListingRevisions: builder.query<
+      PaginatedListingRevisionsDto,
+      { listingId: string; query?: ListingRevisionsQueryDto }
+    >({
+      query: ({ listingId, query }) => ({ url: `/listings/${listingId}/revisions`, params: query ?? undefined }),
+      providesTags: (result, error, { listingId }) => [{ type: 'Listings', id: `${listingId}-revisions` }],
+    }),
 
     syncEbayListings: builder.mutation<EbayListingSyncResult, string>({
       query: (ebayAccountId) => ({ url: '/listings/sync-ebay', method: 'POST', body: { ebayAccountId } }),
       invalidatesTags: ['Listings'],
     }),
     downloadListingImportTemplate: builder.mutation<Blob, void>({
-      query: () => ({ url: '/listings/import/template', method: 'GET', responseHandler: (response) => response.blob() }),
+      query: () => ({
+        url: '/listings/import/template',
+        method: 'GET',
+        responseHandler: (response) => response.blob(),
+      }),
     }),
     importExistingListings: builder.mutation<ListingImportResult, FormData>({
       query: (body) => ({ url: '/listings/import', method: 'POST', body }),
@@ -265,6 +275,7 @@ export const {
   useExportListingsCsvMutation,
   useGetListingJobsQuery,
   useGetUserProductsQuery,
+  useGetListingRevisionsQuery,
   useCreateListingsMutation,
   useSyncEbayListingsMutation,
   useDownloadListingImportTemplateMutation,

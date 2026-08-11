@@ -5,16 +5,9 @@
       "subtitle": "{{count}} sipariş"
     },
     "overview": {
-      "title": "Siparişler",
-      "subtitle": "{{count}} sipariş",
       "viewAll": "Tümü",
       "emptyTitle": "Henüz sipariş yok",
-      "emptySubtitle": "eBay satışları senkronize edilince burada görünür.",
-      "syncTitle": "eBay'den siparişleri senkronize et",
-      "syncSubtitle": "En son satış, alıcı ve finansalları çekin.",
-      "actionsTitle": "Diğer işlemler",
-      "viewAllTitle": "Tüm siparişler",
-      "viewAllSubtitle": "{{count}} siparişi filtrele ve dışa aktar"
+      "emptySubtitle": "eBay satışları senkronize edilince burada görünür."
     },
     "carousel": {
       "previous": "Önceki",
@@ -49,8 +42,7 @@
     "actions": {
       "search": "Sipariş, alıcı veya ürün ara...",
       "last30Days": "Son 30 Gün",
-      "export": "Dışa Aktar",
-      "refresh": "Yenile"
+      "export": "Dışa Aktar"
     },
     "table": {
       "orderNumber": "Sipariş No",

@@ -5,20 +5,26 @@ import {
   Drawer,
   EmptyState,
   Icon,
+  IconButton,
+  IconName,
   IdBadge,
+  InfoMessage,
   ModernSelect,
-  ModernTextInput,
   PageHeader,
-  SettingsActionRow,
+  SettingsCard,
+  SettingsInfoRow,
   Text,
+  Textarea,
   TextInput,
   Toggle,
 } from '@repo/ui';
 import React from 'react';
+import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingDetailPage.style';
 import type { ListingDetailPageProps } from './ListingDetailPage.types';
+import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
 
 const statusVariant = (status: ListingStatus): 'success' | 'neutral' | 'error' | 'warning' => {
   switch (status) {
@@ -36,18 +42,43 @@ const statusVariant = (status: ListingStatus): 'success' | 'neutral' | 'error' |
 };
 
 const Meta = ({
+  icon,
   label,
   children,
 }: {
+  icon: IconName;
   label: string;
   children: React.ReactNode;
 }): React.ReactElement => (
   <S.MetaRow>
-    <Text variant="caption" color="text.secondary" weight="medium">
-      {label}
-    </Text>
-    <div>{children}</div>
+    <S.MetaLabel>
+      <Icon name={icon} size={16} color="brand.primary" />
+      <Text variant="body-sm" color="text.secondary">
+        {label}
+      </Text>
+    </S.MetaLabel>
+    <S.MetaValue>{children}</S.MetaValue>
   </S.MetaRow>
+);
+
+/** One headline number in the hero strip. Only profit passes a `tone`. */
+const Kpi = ({
+  label,
+  value,
+  color = 'text.primary',
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}): React.ReactElement => (
+  <S.KpiItem>
+    <S.KpiLabel variant="caption" color="text.tertiary">
+      {label}
+    </S.KpiLabel>
+    <Text variant="metric-sm" weight="semibold" numeric color={color}>
+      {value}
+    </Text>
+  </S.KpiItem>
 );
 
 export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
@@ -57,7 +88,6 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   isSavingOverrides,
   form,
   listingSettingsGroups,
-  businessPolicies,
   strategyGroupLabel,
   paymentPolicyLabel,
   shippingPolicyLabel,
@@ -66,22 +96,28 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   onSelectImage,
   descriptionExpanded,
   onToggleDescription,
-  isEditDrawerOpen,
-  onOpenEditDrawer,
-  onCloseEditDrawer,
+  isTitleDrawerOpen,
+  onOpenTitleDrawer,
+  onCloseTitleDrawer,
+  isAutomationDrawerOpen,
+  onOpenAutomationDrawer,
+  onCloseAutomationDrawer,
   overrides,
   onOverrideChange,
   onSaveOverrides,
+  automationSummary,
   formatCurrency,
   formatDate,
+  formatDateTime,
   onBack,
   onSave,
   onPublish,
-  onOpenAmazon,
-  onOpenEbay,
   onManage,
+  isRevisionsDrawerOpen,
+  hasRevisions,
+  onOpenRevisions,
+  onCloseRevisions,
   canPublish,
-  canOpenEbay,
   statusLabel,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -133,12 +169,15 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
   return (
     <S.Container>
+      {/* The page is titled by what it IS, not by its subject. The product title
+          used to be the h1 — so every listing produced a different page name,
+          the breadcrumb ("Liste Detayı") disagreed with the heading under it,
+          and a 200-character Amazon title became a three-line page header. It
+          now heads the hero card, where it belongs to the product. */}
       <PageHeader
-        title={listing.title || listing.asin}
+        title={t('listings.detail.breadcrumb')}
         subtitle={
-          listing.status === ListingStatus.DRAFT
-            ? t('listings.detail.draftBanner')
-            : t('listings.detail.subtitle')
+          listing.status === ListingStatus.DRAFT ? t('listings.detail.draftBanner') : t('listings.detail.subtitle')
         }
         onBack={onBack}
         backAriaLabel={t('translation:common.back')}
@@ -158,13 +197,15 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       ) : null}
 
       <S.Hero variant="elevated" padding="lg">
+        <S.StatusBadgeSlot>
+          <Badge variant={statusVariant(listing.status)} size="sm">
+            {statusLabel}
+          </Badge>
+        </S.StatusBadgeSlot>
+
         <S.GalleryBlock>
           <S.GalleryMain>
-            {mainImage ? (
-              <img src={mainImage} alt={listing.title} />
-            ) : (
-              <Icon name="image" size={48} />
-            )}
+            {mainImage ? <img src={mainImage} alt={listing.title} /> : <Icon name="image" size={48} />}
           </S.GalleryMain>
           {images.length > 1 && (
             <S.ThumbRow>
@@ -184,13 +225,20 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.GalleryBlock>
 
         <S.HeroInfo>
-          {/* The product title lives in PageHeader (h1). It used to be repeated
-              verbatim here, so the same string rendered twice, 24px apart. */}
           <S.TitleRow>
+            <S.TitleHeadingRow>
+              <S.ProductTitle variant="h3" weight="semibold">
+                {listing.title || listing.asin}
+              </S.ProductTitle>
+              <IconButton
+                variant="ghost"
+                onClick={onOpenTitleDrawer}
+                aria-label={t('listings.detail.titleDrawerTitle')}
+              >
+                <Icon name="edit" size={16} color="brand.primary" />
+              </IconButton>
+            </S.TitleHeadingRow>
             <S.BadgeRow>
-              <Badge variant={statusVariant(listing.status)} size="sm">
-                {statusLabel}
-              </Badge>
               {listing.brand ? (
                 <Text variant="body-sm" color="text.secondary" weight="medium">
                   {listing.brand}
@@ -204,359 +252,208 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             </S.BadgeRow>
           </S.TitleRow>
 
-          <S.IdRow>
-            <IdBadge id={listing.asin} storeType="amazon" size="sm" />
+          {/* Labelled and stacked, like the listing card's meta rows. A bare row
+              of two badges did not say WHICH marketplace each id belonged to,
+              which is why the page also carried "open on Amazon / eBay" text
+              buttons underneath — those were a second copy of these same two
+              links (IdBadge is itself an external anchor) and are now gone.
+
+              The internal id and the created/updated timestamps join them here
+              rather than in a card of their own at the foot of the page: they
+              are the same kind of fact (what this record IS, not how it is
+              performing), and a whole full-width card for three read-only
+              strings was more chrome than they are worth. */}
+          <S.IdList>
+            <S.IdItem>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {t('listings.table.asin')}
+              </Text>
+              <IdBadge id={listing.asin} storeType="amazon" size="sm" />
+            </S.IdItem>
             {listing.ebayListingId ? (
-              <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
+              <S.IdItem>
+                <Text variant="caption" color="text.secondary" weight="medium">
+                  {t('listings.table.ebayId')}
+                </Text>
+                <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
+              </S.IdItem>
             ) : null}
-          </S.IdRow>
+            <S.IdItem>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {t('listings.detail.listingId')}
+              </Text>
+              <S.IdValue variant="body-sm">{listing.id}</S.IdValue>
+            </S.IdItem>
+            <S.IdItem>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {t('listings.detail.createdAt')}
+              </Text>
+              <Text variant="body-sm" numeric>
+                {formatDateTime(listing.createdAt)}
+              </Text>
+            </S.IdItem>
+            <S.IdItem>
+              <Text variant="caption" color="text.secondary" weight="medium">
+                {t('listings.detail.updatedAt')}
+              </Text>
+              <S.UpdatedValueRow>
+                <Text variant="body-sm" numeric>
+                  {formatDateTime(listing.updatedAt)}
+                </Text>
+                {hasRevisions ? (
+                  <Button variant="text" size="small" onClick={onOpenRevisions}>
+                    <Text variant="body-sm" weight="medium" color="brand.primary">
+                      {t('listings.detail.revisions.action')}
+                    </Text>
+                  </Button>
+                ) : null}
+              </S.UpdatedValueRow>
+            </S.IdItem>
+          </S.IdList>
 
-          {/* One headline KPI instead of a stock/sold/last-sale chip row — those
-              three facts are itemised in the Performance card below, so the hero
-              was repeating them. Profit is the number this page exists for. */}
-          <S.ProfitHighlight $positive={profit >= 0}>
-            <Text variant="caption" color="text.secondary" weight="medium">
-              {t('listings.table.estimatedProfit')}
-            </Text>
-            <Text
-              variant="metric"
-              weight="semibold"
+          {/* The whole money story in one strip. It absorbed the old standalone
+              "price & profit" card, whose three values were a second, quieter
+              copy of these — one of them (margin) literally the same number. */}
+          <S.KpiStrip>
+            <Kpi
+              label={t('listings.table.estimatedProfit')}
+              value={formatCurrency(profit)}
               color={profit >= 0 ? 'semantic.success' : 'semantic.error'}
-            >
-              {formatCurrency(profit)}
-            </Text>
-            <Text variant="body-sm" color="text.secondary">
-              {t('listings.table.roi')}: {`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`}
-            </Text>
-          </S.ProfitHighlight>
-
-          <S.QuickLinks>
-            <Button variant="text" size="small" onClick={onOpenAmazon}>
-              <Text variant="body-sm">{t('listings.detail.openAmazon')}</Text>
-            </Button>
-            {canOpenEbay ? (
-              <Button variant="text" size="small" onClick={onOpenEbay}>
-                <Text variant="body-sm">{t('listings.detail.openEbay')}</Text>
-              </Button>
-            ) : null}
-          </S.QuickLinks>
+            />
+            <Kpi label={t('listings.table.roi')} value={`${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`} />
+            <Kpi label={t('listings.table.price')} value={formatCurrency(listing.price)} />
+            <Kpi label={t('listings.table.purchasePrice')} value={formatCurrency(cost)} />
+            <Kpi label={t('listings.table.profitMargin')} value={`${margin.toFixed(1)}%`} />
+          </S.KpiStrip>
         </S.HeroInfo>
       </S.Hero>
 
       <S.SectionGrid>
-        <S.SectionCard variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="circle-dollar-sign" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.economics')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
+        <SettingsCard variant="section" header={{ title: t('listings.detail.performance') }}>
           <S.MetaList>
-            <Meta label={t('listings.table.price')}>
-              <Text variant="body" weight="semibold">
-                {formatCurrency(listing.price)}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.purchasePrice')}>
-              <Text variant="body" weight="semibold">
-                {formatCurrency(cost)}
-              </Text>
-            </Meta>
-            {/* Profit and ROI are the hero headline — not repeated here. */}
-            <Meta label={t('listings.table.profitMargin')}>
-              <Text variant="body" weight="semibold">
-                {`${margin.toFixed(1)}%`}
-              </Text>
-            </Meta>
-          </S.MetaList>
-        </S.SectionCard>
-
-        <S.SectionCard variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="chart-line" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.performance')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
-          <S.MetaList>
-            <Meta label={t('listings.table.stock')}>
-              <Text variant="body" weight="semibold">
+            <Meta icon="box" label={t('listings.table.stock')}>
+              <Text variant="body" weight="semibold" numeric>
                 {listing.quantity}
               </Text>
             </Meta>
-            <Meta label={t('listings.table.amazonStock')}>
-              <Text variant="body" weight="semibold">
+            <Meta icon="shopping-bag" label={t('listings.table.amazonStock')}>
+              <Text variant="body" weight="semibold" numeric>
                 {listing.sourceStock ?? '—'}
               </Text>
             </Meta>
-            <Meta label={t('listings.table.sold')}>
-              <Text variant="body" weight="semibold">
+            <Meta icon="shopping-cart" label={t('listings.table.sold')}>
+              <Text variant="body" weight="semibold" numeric>
                 {listing.soldCount ?? 0}
               </Text>
             </Meta>
-            <Meta label={t('listings.table.watch')}>
-              <Text variant="body" weight="semibold">
-                {listing.watchCount ?? 0}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.views')}>
-              <Text variant="body" weight="semibold">
-                {listing.viewCount ?? 0}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.table.lastSale')}>
+            <Meta icon="clock" label={t('listings.table.lastSale')}>
               <Text variant="body" weight="semibold">
                 {listing.lastSaleAt ? formatDate(listing.lastSaleAt) : '—'}
               </Text>
             </Meta>
           </S.MetaList>
-        </S.SectionCard>
+        </SettingsCard>
 
-        <S.SectionCardFull variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="bolt" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.automationTitle')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
+        {/* eBay Politikaları + Otomasyon share this column — stacked so the
+            shorter policies card doesn't stretch to Performance's height. */}
+        <S.SectionColumnStack>
+          {/* Read-only — reassigning a policy here is not pushed to eBay's
+              offer yet, so this card only shows what's currently attached. */}
+          <SettingsCard variant="section" header={{ title: t('listings.detail.ebayPolicies') }}>
+            <SettingsInfoRow
+              icon="payments"
+              label={t('listings.businessPolicies.paymentPolicy')}
+              value={paymentPolicyLabel}
+            />
+            <SettingsInfoRow
+              icon="truck"
+              label={t('listings.businessPolicies.shippingPolicy')}
+              value={shippingPolicyLabel}
+            />
+            <SettingsInfoRow
+              icon="undo-2"
+              label={t('listings.businessPolicies.returnPolicy')}
+              value={returnPolicyLabel}
+            />
+          </SettingsCard>
 
-          <S.AutomationBlock>
-            <S.AutomationHeader>
-              <Toggle
-                checked={overrides.pauseSales}
-                onChange={(checked) => onOverrideChange({ pauseSales: checked })}
-                label={t('listings.detail.pauseSales')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listings.detail.pauseSalesHint')}
-              </Text>
-            </S.AutomationHeader>
-          </S.AutomationBlock>
+          {/* Strategy group + automation overrides feed the same price/quantity
+              computation, so they're edited together in one drawer. */}
+          <SettingsCard variant="section" header={{ title: t('listings.detail.automationTitle') }}>
+            <SettingsInfoRow
+              icon="layers"
+              label={t('listings.listingSettings.strategyGroup')}
+              value={strategyGroupLabel}
+              onEdit={onOpenAutomationDrawer}
+            />
+            <SettingsInfoRow
+              icon="activity"
+              label={t('listings.detail.automationStatus')}
+              value={automationSummary}
+              onEdit={onOpenAutomationDrawer}
+            />
+            <S.AutomationSyncNoteSlot>
+              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+            </S.AutomationSyncNoteSlot>
+          </SettingsCard>
+        </S.SectionColumnStack>
 
-          <S.AutomationBlock>
-            <S.AutomationHeader>
-              <Toggle
-                checked={overrides.fixedPrice}
-                onChange={(checked) => onOverrideChange({ fixedPrice: checked })}
-                label={t('listings.detail.fixedPrice')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listings.detail.fixedPriceHint')}
-              </Text>
-            </S.AutomationHeader>
-            {overrides.fixedPrice ? (
-              <S.AutomationFields>
-                <TextInput
-                  name="priceOverride"
-                  label={t('listings.detail.priceOverride')}
-                  value={overrides.priceOverride}
-                  onChange={(e) => onOverrideChange({ priceOverride: e.target.value })}
-                  type="number"
-                  fullWidth
-                />
-              </S.AutomationFields>
-            ) : null}
-          </S.AutomationBlock>
-
-          <S.AutomationBlock>
-            <S.AutomationHeader>
-              <Toggle
-                checked={overrides.fixedQuantity}
-                onChange={(checked) => onOverrideChange({ fixedQuantity: checked })}
-                label={t('listings.detail.fixedQuantity')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listings.detail.fixedQuantityHint')}
-              </Text>
-            </S.AutomationHeader>
-            {overrides.fixedQuantity ? (
-              <S.AutomationFields>
-                <TextInput
-                  name="quantityOverride"
-                  label={t('listings.detail.quantityOverride')}
-                  value={overrides.quantityOverride}
-                  onChange={(e) => onOverrideChange({ quantityOverride: e.target.value })}
-                  type="number"
-                  fullWidth
-                />
-              </S.AutomationFields>
-            ) : null}
-          </S.AutomationBlock>
-
-          {!overrides.fixedPrice ? (
-            <S.AutomationBlock>
-              <S.AutomationHeader>
+        <S.FullWidthSettingsCard variant="section" header={{ title: t('listings.detail.productContent') }}>
+          <S.ProductContentStack>
+            {hasDescription && (
+              <S.ProductContentBlock>
                 <Text variant="body-sm" weight="semibold">
-                  {t('listings.detail.customMargin')}
+                  {t('listings.detail.description')}
                 </Text>
-                <Text variant="caption" color="text.secondary">
-                  {t('listings.detail.customMarginHint')}
+                <S.DescriptionBody>
+                  <S.DescriptionText $expanded={descriptionExpanded || !descriptionLong}>
+                    {listing.description}
+                  </S.DescriptionText>
+                  {descriptionLong ? (
+                    <Button variant="text" size="small" onClick={onToggleDescription}>
+                      <Text variant="body-sm" weight="semibold" color="brand.primary">
+                        {descriptionExpanded ? t('listings.detail.showLess') : t('listings.detail.showMore')}
+                      </Text>
+                    </Button>
+                  ) : null}
+                </S.DescriptionBody>
+              </S.ProductContentBlock>
+            )}
+
+            {features.length > 0 && (
+              <S.ProductContentBlock>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listings.detail.features')}
                 </Text>
-              </S.AutomationHeader>
-              <S.AutomationFields>
-                <TextInput
-                  name="marginPercentOverride"
-                  label={t('listings.detail.marginPercentOverride')}
-                  value={overrides.marginPercentOverride}
-                  onChange={(e) => onOverrideChange({ marginPercentOverride: e.target.value })}
-                  type="number"
-                  fullWidth
-                />
-                <TextInput
-                  name="marginFixedOverride"
-                  label={t('listings.detail.marginFixedOverride')}
-                  value={overrides.marginFixedOverride}
-                  onChange={(e) => onOverrideChange({ marginFixedOverride: e.target.value })}
-                  type="number"
-                  fullWidth
-                />
-              </S.AutomationFields>
-            </S.AutomationBlock>
-          ) : null}
+                <S.FeatureList>
+                  {features.map((f) => (
+                    <S.FeatureItem key={f}>{f}</S.FeatureItem>
+                  ))}
+                </S.FeatureList>
+              </S.ProductContentBlock>
+            )}
 
-          <Button variant="primary" onClick={onSaveOverrides} isLoading={isSavingOverrides}>
-            <Text variant="body" weight="semibold">
-              {t('listings.detail.saveOverrides')}
-            </Text>
-          </Button>
-        </S.SectionCardFull>
-
-        <S.SectionCard variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="settings" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.settings')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
-          <S.MetaList>
-            <Meta label={t('listings.listingSettings.strategyGroup')}>
-              <Text variant="body" weight="semibold">
-                {strategyGroupLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.businessPolicies.paymentPolicy')}>
-              <Text variant="body" weight="semibold">
-                {paymentPolicyLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.businessPolicies.shippingPolicy')}>
-              <Text variant="body" weight="semibold">
-                {shippingPolicyLabel}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.businessPolicies.returnPolicy')}>
-              <Text variant="body" weight="semibold">
-                {returnPolicyLabel}
-              </Text>
-            </Meta>
-          </S.MetaList>
-          <SettingsActionRow
-            icon="edit"
-            label={t('listings.detail.editConfig')}
-            onClick={onOpenEditDrawer}
-          />
-        </S.SectionCard>
-
-        <S.SectionCard variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="info" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.system')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
-          <S.MetaList>
-            <Meta label={t('listings.detail.listingId')}>
-              <Text variant="body-sm" weight="semibold">
-                {listing.id}
-              </Text>
-            </Meta>
-            <Meta label={t('listings.detail.createdAt')}>
-              <Text variant="body">{formatDate(listing.createdAt)}</Text>
-            </Meta>
-            <Meta label={t('listings.detail.updatedAt')}>
-              <Text variant="body">{formatDate(listing.updatedAt)}</Text>
-            </Meta>
-          </S.MetaList>
-        </S.SectionCard>
-
-        <S.SectionCardFull variant="elevated" padding="lg">
-          <S.CardHeader>
-            <S.CardHeaderLeft>
-              <Icon name="file-text" size={20} color="brand.primary" />
-              <Text variant="h4" weight="semibold">
-                {t('listings.detail.productContent')}
-              </Text>
-            </S.CardHeaderLeft>
-          </S.CardHeader>
-
-          <Text variant="body-sm" weight="semibold">
-            {t('listings.detail.description')}
-          </Text>
-          {hasDescription ? (
-            <S.DescriptionBody>
-              <S.DescriptionText $expanded={descriptionExpanded || !descriptionLong}>
-                {listing.description}
-              </S.DescriptionText>
-              {descriptionLong ? (
-                <Button variant="text" size="small" onClick={onToggleDescription}>
-                  <Text variant="body-sm" weight="semibold" color="brand.primary">
-                    {descriptionExpanded
-                      ? t('listings.detail.showLess')
-                      : t('listings.detail.showMore')}
-                  </Text>
-                </Button>
-              ) : null}
-            </S.DescriptionBody>
-          ) : (
-            <Text variant="body-sm" color="text.secondary">
-              {t('listings.detail.descriptionEmpty')}
-            </Text>
-          )}
-
-          <Text variant="body-sm" weight="semibold">
-            {t('listings.detail.features')}
-          </Text>
-          {features.length > 0 ? (
-            <S.FeatureList>
-              {features.map((f) => (
-                <S.FeatureItem key={f}>{f}</S.FeatureItem>
-              ))}
-            </S.FeatureList>
-          ) : (
-            <Text variant="body-sm" color="text.secondary">
-              {t('listings.detail.featuresEmpty')}
-            </Text>
-          )}
-
-          <Text variant="body-sm" weight="semibold">
-            {t('listings.detail.specs')}
-          </Text>
-          {specEntries.length > 0 ? (
-            <S.MetaList>
-              {specEntries.map(([key, value]) => (
-                <Meta key={key} label={key}>
-                  <Text variant="body" weight="semibold">
-                    {value}
-                  </Text>
-                </Meta>
-              ))}
-            </S.MetaList>
-          ) : (
-            <Text variant="body-sm" color="text.secondary">
-              {t('listings.detail.specsEmpty')}
-            </Text>
-          )}
-        </S.SectionCardFull>
+            {specEntries.length > 0 && (
+              <S.ProductContentBlock>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listings.detail.specs')}
+                </Text>
+                <S.SpecList>
+                  {specEntries.map(([key, value]) => (
+                    <S.SpecRow key={key}>
+                      <Text variant="caption" color="text.secondary" weight="medium">
+                        {key}
+                      </Text>
+                      <Text variant="body-sm" weight="semibold">
+                        {value}
+                      </Text>
+                    </S.SpecRow>
+                  ))}
+                </S.SpecList>
+              </S.ProductContentBlock>
+            )}
+          </S.ProductContentStack>
+        </S.FullWidthSettingsCard>
       </S.SectionGrid>
 
       <S.MobileActionBar>
@@ -568,10 +465,10 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       </S.MobileActionBar>
 
       <Drawer
-        isOpen={isEditDrawerOpen}
-        onClose={onCloseEditDrawer}
-        title={t('listings.detail.editDrawerTitle')}
-        subtitle={t('listings.detail.editDrawerSubtitle')}
+        isOpen={isTitleDrawerOpen}
+        onClose={onCloseTitleDrawer}
+        title={t('listings.detail.titleDrawerTitle')}
+        subtitle={t('listings.detail.titleDrawerSubtitle')}
         size="md"
         primaryAction={{
           label: t('translation:common.save'),
@@ -580,12 +477,30 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         }}
       >
         <S.FormStack>
-          <ModernTextInput<UpdateListingFormData>
+          <Text variant="body-sm" weight="semibold">
+            {t('listings.detail.titleField')}
+          </Text>
+          <Controller<UpdateListingFormData>
             name="title"
             control={control}
-            label={t('listings.detail.titleField')}
-            fullWidth
+            render={({ field }) => <Textarea {...field} rows={3} fullWidth />}
           />
+        </S.FormStack>
+      </Drawer>
+
+      <Drawer
+        isOpen={isAutomationDrawerOpen}
+        onClose={onCloseAutomationDrawer}
+        title={t('listings.detail.automationDrawerTitle')}
+        subtitle={t('listings.detail.automationDrawerSubtitle')}
+        size="md"
+        primaryAction={{
+          label: t('listings.detail.saveOverrides'),
+          onClick: onSaveOverrides,
+          isLoading: isSavingOverrides,
+        }}
+      >
+        <S.SectionContent>
           <ModernSelect<UpdateListingFormData>
             name="listingSettingsGroupId"
             control={control}
@@ -595,35 +510,117 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             searchPlaceholder={t('translation:common.search')}
             noResultsMessage={t('translation:common.noResults')}
           />
-          <ModernSelect<UpdateListingFormData>
-            name="paymentPolicyId"
-            control={control}
-            label={t('listings.businessPolicies.paymentPolicy')}
-            options={businessPolicies.payment.map((p) => ({ label: p.name, value: p.id }))}
-            fullWidth
-            searchPlaceholder={t('translation:common.search')}
-            noResultsMessage={t('translation:common.noResults')}
-          />
-          <ModernSelect<UpdateListingFormData>
-            name="shippingPolicyId"
-            control={control}
-            label={t('listings.businessPolicies.shippingPolicy')}
-            options={businessPolicies.shipping.map((p) => ({ label: p.name, value: p.id }))}
-            fullWidth
-            searchPlaceholder={t('translation:common.search')}
-            noResultsMessage={t('translation:common.noResults')}
-          />
-          <ModernSelect<UpdateListingFormData>
-            name="returnPolicyId"
-            control={control}
-            label={t('listings.businessPolicies.returnPolicy')}
-            options={businessPolicies.return.map((p) => ({ label: p.name, value: p.id }))}
-            fullWidth
-            searchPlaceholder={t('translation:common.search')}
-            noResultsMessage={t('translation:common.noResults')}
-          />
-        </S.FormStack>
+
+          <S.AutomationBlockList>
+            <S.AutomationBlock>
+              <S.ToggleRow>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listings.detail.pauseSales')}
+                </Text>
+                <Toggle
+                  checked={overrides.pauseSales}
+                  onChange={(checked) => onOverrideChange({ pauseSales: checked })}
+                />
+              </S.ToggleRow>
+              <Text variant="caption" color="text.secondary">
+                {t('listings.detail.pauseSalesHint')}
+              </Text>
+            </S.AutomationBlock>
+
+            <S.AutomationBlock>
+              <S.ToggleRow>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listings.detail.fixedPrice')}
+                </Text>
+                <Toggle
+                  checked={overrides.fixedPrice}
+                  onChange={(checked) => onOverrideChange({ fixedPrice: checked })}
+                />
+              </S.ToggleRow>
+              <Text variant="caption" color="text.secondary">
+                {t('listings.detail.fixedPriceHint')}
+              </Text>
+              {overrides.fixedPrice ? (
+                <S.AutomationFields>
+                  <TextInput
+                    name="priceOverride"
+                    label={t('listings.detail.priceOverride')}
+                    value={overrides.priceOverride}
+                    onChange={(e) => onOverrideChange({ priceOverride: e.target.value })}
+                    type="number"
+                    fullWidth
+                  />
+                </S.AutomationFields>
+              ) : null}
+            </S.AutomationBlock>
+
+            <S.AutomationBlock>
+              <S.ToggleRow>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listings.detail.fixedQuantity')}
+                </Text>
+                <Toggle
+                  checked={overrides.fixedQuantity}
+                  onChange={(checked) => onOverrideChange({ fixedQuantity: checked })}
+                />
+              </S.ToggleRow>
+              <Text variant="caption" color="text.secondary">
+                {t('listings.detail.fixedQuantityHint')}
+              </Text>
+              {overrides.fixedQuantity ? (
+                <S.AutomationFields>
+                  <TextInput
+                    name="quantityOverride"
+                    label={t('listings.detail.quantityOverride')}
+                    value={overrides.quantityOverride}
+                    onChange={(e) => onOverrideChange({ quantityOverride: e.target.value })}
+                    type="number"
+                    fullWidth
+                  />
+                </S.AutomationFields>
+              ) : null}
+            </S.AutomationBlock>
+
+            {!overrides.fixedPrice ? (
+              <S.AutomationBlock>
+                <S.AutomationHeader>
+                  <Text variant="body-sm" weight="semibold">
+                    {t('listings.detail.customMargin')}
+                  </Text>
+                  <Text variant="caption" color="text.secondary">
+                    {t('listings.detail.customMarginHint')}
+                  </Text>
+                </S.AutomationHeader>
+                <S.MarginFields>
+                  <TextInput
+                    name="marginPercentOverride"
+                    label={t('listings.detail.marginPercentOverride')}
+                    value={overrides.marginPercentOverride}
+                    onChange={(e) => onOverrideChange({ marginPercentOverride: e.target.value })}
+                    type="number"
+                    fullWidth
+                  />
+                  <TextInput
+                    name="marginFixedOverride"
+                    label={t('listings.detail.marginFixedOverride')}
+                    value={overrides.marginFixedOverride}
+                    onChange={(e) => onOverrideChange({ marginFixedOverride: e.target.value })}
+                    type="number"
+                    fullWidth
+                  />
+                </S.MarginFields>
+              </S.AutomationBlock>
+            ) : null}
+          </S.AutomationBlockList>
+        </S.SectionContent>
       </Drawer>
+
+      <ListingRevisionsDrawer
+        isOpen={isRevisionsDrawerOpen}
+        onClose={onCloseRevisions}
+        listingId={listing.id}
+        currency={listing.currency}
+      />
     </S.Container>
   );
 };

@@ -470,18 +470,33 @@ export class EbayBulkService {
     body: Record<string, unknown>
   ): Promise<EbayBulkResponseEntry[]> {
     const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/${path}`;
-    const response = await withEbayRateLimitRetry(
-      () =>
-        axios.post<EbayBulkEnvelope>(url, body, {
-          headers: {
-            Authorization: `Bearer ${context.accessToken}`,
-            'Content-Type': 'application/json',
-            'Content-Language': context.contentLanguage,
-          },
-        }),
-      { logger: this.logger, acquireBudget: this.chargeInventory(context.priority) }
-    );
-    return response.data?.responses ?? [];
+    try {
+      const response = await withEbayRateLimitRetry(
+        () =>
+          axios.post<EbayBulkEnvelope>(url, body, {
+            headers: {
+              Authorization: `Bearer ${context.accessToken}`,
+              'Content-Type': 'application/json',
+              'Content-Language': context.contentLanguage,
+            },
+          }),
+        { logger: this.logger, acquireBudget: this.chargeInventory(context.priority) }
+      );
+      return response.data?.responses ?? [];
+    } catch (error: unknown) {
+      // A whole-batch failure here (network error, or a 400 whose body isn't
+      // eBay's per-item `errors[]` shape — e.g. a top-level request rejection)
+      // propagates uncaught up to failPreparedItems, whose classifier only
+      // extracts recognized shapes and discards the rest. Without this, the
+      // seller-facing reference id pointed at a support case with no way to
+      // learn eBay's actual reason — the raw body was never written anywhere.
+      if (axios.isAxiosError(error) && error.response) {
+        this.logger.error(
+          `${path} failed with status ${error.response.status}: ${JSON.stringify(error.response.data)}`
+        );
+      }
+      throw error;
+    }
   }
 
   /**

@@ -81,15 +81,6 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     breadcrumbs: [{ labelKey: 'translation:menu.orders', path: '/orders' }],
   },
   {
-    path: '/orders/all',
-    match: 'exact',
-    section: 'inventory',
-    breadcrumbs: [
-      { labelKey: 'translation:menu.orders', path: '/orders' },
-      { labelKey: 'orders:orders.all.title' },
-    ],
-  },
-  {
     path: '/orders/',
     match: 'prefix',
     section: 'inventory',

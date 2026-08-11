@@ -5,16 +5,9 @@
       "subtitle": "{{count}} orders"
     },
     "overview": {
-      "title": "Orders",
-      "subtitle": "{{count}} orders",
       "viewAll": "View All",
       "emptyTitle": "No orders yet",
-      "emptySubtitle": "Synced eBay sales will show up here.",
-      "syncTitle": "Sync orders from eBay",
-      "syncSubtitle": "Pull the latest sales, buyers, and financials.",
-      "actionsTitle": "Other actions",
-      "viewAllTitle": "All orders",
-      "viewAllSubtitle": "Browse, filter, and export {{count}} orders"
+      "emptySubtitle": "Synced eBay sales will show up here."
     },
     "carousel": {
       "previous": "Previous",
@@ -49,8 +42,7 @@
     "actions": {
       "search": "Search orders, buyers or items...",
       "last30Days": "Last 30 Days",
-      "export": "Export",
-      "refresh": "Refresh"
+      "export": "Export"
     },
     "table": {
       "orderNumber": "Order #",

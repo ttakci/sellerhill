@@ -31,55 +31,10 @@ export const SearchWrapper = styled.div`
   }
 `;
 
-export const ProductCell = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  min-width: 0;
-`;
-
-export const ProductImageWrapper = styled.div`
-  width: 4rem; /* 64px */
-  height: 4rem; /* 64px */
-  border-radius: ${tkn('radius.md')};
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Transparent per the product-image rule — a grey plate plus a border ring
-     behind a cut-out product shot reads as a broken image. */
-  background: transparent;
-  flex-shrink: 0;
-  padding: ${tkn('spacing.xs+')}; /* 6px */
-
-  svg,
-  .material-symbols-outlined {
-    font-size: ${tkn('typography.fontSize.xxl')};
-    color: ${tkn('colors.text.tertiary')};
-  }
-`;
-
 export const ProductImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
-`;
-
-export const ProductMainInfo = styled.div`
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-export const ProductTitle = styled.div`
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.text.primary')};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: default;
 `;
 
 export const ProductBrand = styled.div`

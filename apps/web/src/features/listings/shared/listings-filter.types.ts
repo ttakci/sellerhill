@@ -17,8 +17,6 @@ export interface ListingsFilterState {
   roi: NumericRange;
   profitMargin: NumericRange;
   soldCount: NumericRange;
-  watchCount: NumericRange;
-  viewCount: NumericRange;
   quantity: NumericRange;
   sourceStock: NumericRange;
 }

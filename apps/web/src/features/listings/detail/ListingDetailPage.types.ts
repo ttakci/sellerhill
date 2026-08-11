@@ -28,12 +28,8 @@ export interface ListingDetailPageProps {
   isActionLoading: boolean;
   form: UseFormReturn<UpdateListingFormData>;
   listingSettingsGroups: ListingDetailSelectOption[];
-  businessPolicies: {
-    payment: ListingDetailSelectOption[];
-    shipping: ListingDetailSelectOption[];
-    return: ListingDetailSelectOption[];
-  };
   strategyGroupLabel: string;
+  /** Read-only — eBay policy reassignment from this page is not pushed to eBay yet. */
   paymentPolicyLabel: string;
   shippingPolicyLabel: string;
   returnPolicyLabel: string;
@@ -41,26 +37,34 @@ export interface ListingDetailPageProps {
   onSelectImage: (index: number) => void;
   descriptionExpanded: boolean;
   onToggleDescription: () => void;
-  isEditDrawerOpen: boolean;
-  onOpenEditDrawer: () => void;
-  onCloseEditDrawer: () => void;
+  isTitleDrawerOpen: boolean;
+  onOpenTitleDrawer: () => void;
+  onCloseTitleDrawer: () => void;
+  isAutomationDrawerOpen: boolean;
+  onOpenAutomationDrawer: () => void;
+  onCloseAutomationDrawer: () => void;
   overrides: ListingOverridesUiState;
   onOverrideChange: (patch: Partial<ListingOverridesUiState>) => void;
   onSaveOverrides: () => void;
+  /** Comma-joined labels of active automation toggles, or a "none" placeholder. */
+  automationSummary: string;
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
+  /** Date + clock time — used for record timestamps (created / updated). */
+  formatDateTime: (value: string) => string;
   onBack: () => void;
   onSave: () => void;
   onEnd: () => void;
   onDelete: () => void;
   onPublish: () => void;
-  onOpenAmazon: () => void;
-  onOpenEbay: () => void;
   onManage: () => void;
+  isRevisionsDrawerOpen: boolean;
+  hasRevisions: boolean;
+  onOpenRevisions: () => void;
+  onCloseRevisions: () => void;
   canEnd: boolean;
   canDelete: boolean;
   canPublish: boolean;
-  canOpenEbay: boolean;
   statusLabel: string;
   statusTone: ListingStatus;
 }

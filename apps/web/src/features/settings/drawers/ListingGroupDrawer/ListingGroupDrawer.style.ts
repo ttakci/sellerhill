@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, Card, CardBody, IconButton as IconButtonAtom, Text, Textarea, tkn } from '@repo/ui';
+import { Button, Card, CardBody, IconButton as IconButtonAtom, Textarea, tkn } from '@repo/ui';
 
 export const StepperWrapper = styled.div`
   margin-bottom: 0;
@@ -31,63 +31,29 @@ export const BodyStack = styled.div`
   gap: ${tkn('spacing.lg')};
 `;
 
-export const StepHeader = styled.div`
+/** Label left, switch right — matches the Buyer Messaging section's toggle rows. */
+export const ContentToggleRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
-  padding: ${tkn('spacing.xs')} ${tkn('spacing.md')};
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+`;
+
+/**
+ * Plain title + action row, matching every other card header in this drawer
+ * (no icon badge) — the icon-box `StepHeader` this replaced was a leftover
+ * from an older per-step icon language only this one card still carried,
+ * which combined with `PreviewContainer`'s own border+grey background right
+ * underneath it (see below) made the header read as a separate box floating
+ * on top of the preview rather than part of the same card.
+ */
+export const PreviewCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
-`;
-
-export const StepIconWrapper = styled.div<{ $type?: 'general' | 'deductions' | 'repricing' | 'template' }>`
-  width: 2rem;
-  height: 2rem;
-  border-radius: ${tkn('radius.sm')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  ${({ $type, theme }) => {
-    switch ($type) {
-      case 'general':
-        return `
-          background: ${theme.colors.brand.secondary};
-          color: ${theme.colors.brand.primary};
-        `;
-      case 'deductions':
-        return `
-          background: ${theme.colors.semantic.error}15;
-          color: ${theme.colors.semantic.error};
-        `;
-      case 'repricing':
-        return `
-          background: ${theme.colors.semantic.success}15;
-          color: ${theme.colors.semantic.success};
-        `;
-      case 'template':
-        return `
-          background: ${theme.colors.semantic.warning}15;
-          color: ${theme.colors.semantic.warning};
-        `;
-      default:
-        return `
-          background: ${theme.colors.background.tertiary};
-          color: ${theme.colors.text.primary};
-        `;
-    }
-  }}
-`;
-
-export const StepTitleContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  flex: 1;
-`;
-
-export const StepTitle = styled(Text)`
-  margin: 0;
 `;
 
 /* ── Repricing Card-based Layout ── */
@@ -115,7 +81,7 @@ export const RepricingCardHeader = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.lg')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
   background: ${tkn('colors.surface.primary')};
 `;
@@ -135,18 +101,21 @@ export const RepricingFieldGrid = styled.div`
   }
 `;
 
-export const RemoveButton = styled(Button)`
-  width: 1.75rem;
-  height: 1.75rem;
-  min-width: unset;
-  min-height: unset;
-  padding: 0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/** Plain trash icon, red only on hover — matches BuyerMessageTemplateCard/BlacklistCard's delete action. */
+export const RemoveButton = styled(IconButtonAtom)`
+  width: 2rem;
+  height: 2rem;
   margin-left: auto;
   flex-shrink: 0;
+
+  &:hover {
+    background: ${tkn('colors.semantic.error')}15;
+    color: ${tkn('colors.semantic.error')};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 `;
 
 export const AddRangeRow = styled.div`
@@ -196,15 +165,14 @@ export const CustomTemplateTextarea = styled(Textarea)`
   min-height: 12rem;
 `;
 
-export const PreviewContainer = styled.div`
-  background: ${tkn('colors.background.tertiary')};
-  border-radius: ${tkn('radius.md')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
-
+/**
+ * Sits directly under `PreviewCardHeader` inside `PreviewCard`, with no
+ * wrapper of its own — a nested box here (as there used to be, with its own
+ * border and a grey `background.tertiary`) sat flush against the header's
+ * white background and bottom border, reading as a second, disconnected card
+ * rather than the body of this one. The `PreviewCard` atom already clips
+ * corners (`overflow: hidden`), so this only needs its own scroll.
+ */
 export const PreviewViewport = styled.div`
   max-height: 30rem;
   overflow-y: auto;
@@ -234,13 +202,6 @@ export const PreviewContent = styled.div`
 export const PreviewHTMLContent = styled.div`
   width: 100%;
   height: 100%;
-`;
-
-export const DeviceControls = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.xs')};
-  align-items: center;
-  margin-right: ${tkn('spacing.xs')};
 `;
 
 export const PreviewIconButton = styled(IconButtonAtom)<{ $active?: boolean }>`

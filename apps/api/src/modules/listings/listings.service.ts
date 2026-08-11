@@ -7,6 +7,8 @@ import {
   ListingTrackingState,
   EbayCallPriority,
   EbayListingApiModel,
+  EBAY_MARKETPLACE_CONFIG,
+  EbayMarketplaceId,
   OrderStatus,
   PlatformSettingKey,
   type CreateListingsRequest,
@@ -15,8 +17,11 @@ import {
   type ListingFailureDetails,
   type ListingJobItemDto,
   type ListingJobsQueryDto,
+  type ListingRevisionDto,
+  type ListingRevisionsQueryDto,
   type ListingsQueryDto,
   type PaginatedListingJobsDto,
+  type PaginatedListingRevisionsDto,
   type PaginatedListingsDto,
   type PaginatedProductsDto,
   type ProductData,
@@ -28,11 +33,7 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
-import {
-  EbayBulkService,
-  type BulkListingDraft,
-  type BulkListingOutcome,
-} from '../ebay/ebay-bulk.service';
+import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
@@ -53,8 +54,6 @@ interface ListingQueryRow {
   profit_margin: string | null;
   roi: string | null;
   sold_count: string | number;
-  watch_count: string | number;
-  view_count: string | number;
   quantity: number;
   source_stock: number | null;
   image_urls: string[] | null;
@@ -65,6 +64,9 @@ interface ListingQueryRow {
   brand: string | null;
   manufacturer?: string | null;
   features?: string[] | string | null;
+  specs?: Record<string, string> | string | null;
+  identifiers?: ProductIdentifiers | string | null;
+  raw_keepa_data?: string | Record<string, unknown> | null;
   status: string;
   created_at: Date;
   updated_at: Date;
@@ -74,6 +76,7 @@ interface ListingQueryRow {
   product_description?: string | null;
   group_name?: string | null;
   ebay_account_id?: string | null;
+  ebay_marketplace_id?: EbayMarketplaceId | null;
   last_sale_at?: Date | null;
   disable_ordering?: boolean;
   disable_repricing?: boolean;
@@ -223,8 +226,6 @@ export class ListingsService {
     profitMargin?: number;
     roi?: number;
     soldCount?: number;
-    watchCount?: number;
-    viewCount?: number;
     ebayCategoryName?: string;
     ebayCategoryId?: string;
     /** Which layer resolved each item specific (see AspectResolution). */
@@ -242,11 +243,11 @@ export class ListingsService {
         payment_policy_id, shipping_policy_id, return_policy_id,
         ebay_item_id, title, price, quantity, status,
         purchase_price, estimated_profit, profit_margin, roi,
-        sold_count, watch_count, view_count, ebay_category_name,
+        sold_count, ebay_category_name,
         ebay_account_id, ebay_category_id, aspect_resolution, aspect_autofilled_count,
         sku, ebay_offer_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23::jsonb, $24, $25, $26)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21::jsonb, $22, $23, $24)
       RETURNING id
     `,
       [
@@ -267,8 +268,6 @@ export class ListingsService {
         data.profitMargin || 0,
         data.roi || 0,
         data.soldCount || 0,
-        data.watchCount || 0,
-        data.viewCount || 0,
         data.ebayCategoryName || '',
         data.ebayAccountId || null,
         data.ebayCategoryId || null,
@@ -291,13 +290,14 @@ export class ListingsService {
       title: row.title,
       description: row.product_description ?? undefined,
       price: parseFloat(row.price),
+      currency:
+        (row.ebay_marketplace_id && EBAY_MARKETPLACE_CONFIG[row.ebay_marketplace_id]?.currency) ||
+        EBAY_MARKETPLACE_CONFIG[EbayMarketplaceId.EBAY_US].currency,
       purchasePrice: row.purchase_price ? parseFloat(row.purchase_price) : 0,
       estimatedProfit: row.estimated_profit ? parseFloat(row.estimated_profit) : 0,
       profitMargin: row.profit_margin ? parseFloat(row.profit_margin) : 0,
       roi: row.roi ? parseFloat(row.roi) : 0,
       soldCount: parseInt(String(row.sold_count), 10) || 0,
-      watchCount: parseInt(String(row.watch_count), 10) || 0,
-      viewCount: parseInt(String(row.view_count), 10) || 0,
       quantity: row.quantity,
       sourceStock: row.source_stock ?? undefined,
       imageUrls: row.image_urls || [],
@@ -323,9 +323,7 @@ export class ListingsService {
       lockPrice: Boolean(row.lock_price),
       lockQuantity: Boolean(row.lock_quantity),
       priceOverride:
-        row.price_override !== undefined && row.price_override !== null
-          ? parseFloat(String(row.price_override))
-          : null,
+        row.price_override !== undefined && row.price_override !== null ? parseFloat(String(row.price_override)) : null,
       quantityOverride: row.quantity_override ?? null,
       marginPercentOverride:
         row.margin_percent_override !== undefined && row.margin_percent_override !== null
@@ -353,12 +351,26 @@ export class ListingsService {
     }
   }
 
+  /**
+   * Item specifics for the listing detail page. The real ~30-attribute map
+   * lives in `products.specs` (migration 060, same store the eBay item-specific
+   * builder reads) — this used to be ignored entirely in favor of Brand plus a
+   * regex over feature bullets, so a product with 20+ real specs showed only
+   * "Brand" here. `resolveCachedAttributes` re-derives from `raw_keepa_data`
+   * when a cached row predates attribute extraction, at zero Keepa cost.
+   */
   private buildSpecs(row: ListingQueryRow): Record<string, string> {
+    const { specs: cachedSpecs } = this.resolveCachedAttributes(row);
+    if (Object.keys(cachedSpecs).length > 0) {
+      const hasBrand = Object.keys(cachedSpecs).some((key) => key.toLowerCase() === 'brand');
+      return row.brand && !hasBrand ? { Brand: row.brand, ...cachedSpecs } : cachedSpecs;
+    }
+
+    // Fallback for rows with neither cached specs nor a raw Keepa payload to derive from.
     const specs: Record<string, string> = {};
     if (row.brand) {
       specs.Brand = row.brand;
     }
-    // Parse "Key: Value" style features into specs
     for (const feature of this.parseFeatures(row.features)) {
       const match = feature.match(/^([^:]{2,40}):\s*(.+)$/);
       if (match) {
@@ -388,10 +400,6 @@ export class ListingsService {
       profitMargin: 'l.profit_margin',
       sold: 'l.sold_count',
       soldCount: 'l.sold_count',
-      watch: 'l.watch_count',
-      watchCount: 'l.watch_count',
-      views: 'l.view_count',
-      viewCount: 'l.view_count',
       quantity: 'l.quantity',
       sourceStock: 'p.stock',
       category: 'COALESCE(l.ebay_category_name, p.category)',
@@ -476,9 +484,7 @@ export class ListingsService {
     }
 
     if (query.category?.trim()) {
-      conditions.push(
-        `(COALESCE(l.ebay_category_name, p.category) = $${paramIndex})`
-      );
+      conditions.push(`(COALESCE(l.ebay_category_name, p.category) = $${paramIndex})`);
       params.push(query.category.trim());
       paramIndex++;
     }
@@ -489,8 +495,6 @@ export class ListingsService {
     pushRange('l.roi', query.roiMin, query.roiMax);
     pushRange('l.profit_margin', query.profitMarginMin, query.profitMarginMax);
     pushRange('l.sold_count', query.soldCountMin, query.soldCountMax);
-    pushRange('l.watch_count', query.watchCountMin, query.watchCountMax);
-    pushRange('l.view_count', query.viewCountMin, query.viewCountMax);
     pushRange('l.quantity', query.quantityMin, query.quantityMax);
     pushRange('p.stock', query.sourceStockMin, query.sourceStockMax);
 
@@ -518,6 +522,7 @@ export class ListingsService {
     const fromJoin = `
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
+      LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
       WHERE ${whereClause}
     `;
 
@@ -534,6 +539,7 @@ export class ListingsService {
              p.category as product_category,
              p.stock as source_stock,
              p.brand,
+             ea.marketplace_id AS ebay_marketplace_id,
              (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
       ${fromJoin}
       ORDER BY ${sortExpr} ${sortOrder}, l.id ASC
@@ -574,31 +580,72 @@ export class ListingsService {
     const params: Array<string | number> = [userId, ListingTrackingState.UNTRACKED];
     if (query.search?.trim()) {
       params.push(`%${query.search.trim()}%`);
-      conditions.push(`(d.title ILIKE $${params.length} OR d.ebay_item_id ILIKE $${params.length} OR d.sku ILIKE $${params.length})`);
+      conditions.push(
+        `(d.title ILIKE $${params.length} OR d.ebay_item_id ILIKE $${params.length} OR d.sku ILIKE $${params.length})`
+      );
     }
     if (query.ebayAccountId?.trim()) {
       params.push(query.ebayAccountId.trim());
       conditions.push(`d.ebay_account_id=$${params.length}`);
     }
     const where = conditions.join(' AND ');
-    const count = await this.databaseService.query<{ count: string }>(`SELECT COUNT(*)::text count FROM ebay_listing_discoveries d WHERE ${where}`, params);
+    const count = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text count FROM ebay_listing_discoveries d WHERE ${where}`,
+      params
+    );
     const rows = await this.databaseService.query<{
-      id: string; user_id: string; ebay_account_id: string; ebay_item_id: string; title: string;
-      price: string; quantity: number; quantity_sold: number; image_url: string | null;
-      api_model: EbayListingApiModel; discovered_at: Date; last_seen_at: Date;
-    }>(`SELECT d.* FROM ebay_listing_discoveries d WHERE ${where} ORDER BY d.last_seen_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, (page - 1) * limit]);
+      id: string;
+      user_id: string;
+      ebay_account_id: string;
+      ebay_item_id: string;
+      title: string;
+      price: string;
+      quantity: number;
+      quantity_sold: number;
+      image_url: string | null;
+      api_model: EbayListingApiModel;
+      discovered_at: Date;
+      last_seen_at: Date;
+      ebay_marketplace_id: EbayMarketplaceId | null;
+    }>(
+      `SELECT d.*, ea.marketplace_id AS ebay_marketplace_id
+        FROM ebay_listing_discoveries d
+        LEFT JOIN ebay_accounts ea ON ea.id = d.ebay_account_id
+        WHERE ${where}
+        ORDER BY d.last_seen_at DESC
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, (page - 1) * limit]
+    );
     return {
       items: rows.map((row) => ({
-        id: row.id, userId: row.user_id, asin: '', productId: '', title: row.title,
-        price: Number(row.price), quantity: row.quantity, imageUrls: row.image_url ? [row.image_url] : [],
-        ebayListingId: row.ebay_item_id, listingSettingsGroupId: '', paymentPolicyId: '',
-        shippingPolicyId: '', returnPolicyId: '', status: ListingStatus.ACTIVE,
-        trackingState: ListingTrackingState.UNTRACKED, ebayApiModel: row.api_model,
-        soldCount: row.quantity_sold, ebayAccountId: row.ebay_account_id,
-        createdAt: row.discovered_at.toISOString(), updatedAt: row.last_seen_at.toISOString(),
+        id: row.id,
+        userId: row.user_id,
+        asin: '',
+        productId: '',
+        title: row.title,
+        price: Number(row.price),
+        currency:
+          (row.ebay_marketplace_id && EBAY_MARKETPLACE_CONFIG[row.ebay_marketplace_id]?.currency) ||
+          EBAY_MARKETPLACE_CONFIG[EbayMarketplaceId.EBAY_US].currency,
+        quantity: row.quantity,
+        imageUrls: row.image_url ? [row.image_url] : [],
+        ebayListingId: row.ebay_item_id,
+        listingSettingsGroupId: '',
+        paymentPolicyId: '',
+        shippingPolicyId: '',
+        returnPolicyId: '',
+        status: ListingStatus.ACTIVE,
+        trackingState: ListingTrackingState.UNTRACKED,
+        ebayApiModel: row.api_model,
+        soldCount: row.quantity_sold,
+        ebayAccountId: row.ebay_account_id,
+        createdAt: row.discovered_at.toISOString(),
+        updatedAt: row.last_seen_at.toISOString(),
       })),
-      total: Number(count[0]?.count ?? 0), page, limit, categories: [],
+      total: Number(count[0]?.count ?? 0),
+      page,
+      limit,
+      categories: [],
     };
   }
 
@@ -607,11 +654,7 @@ export class ListingsService {
    * Cap at 5_000 rows to protect the API; clients should narrow filters for large catalogs.
    */
   async exportListingsCsv(userId: string, query: ListingsQueryDto = {}): Promise<string> {
-    const result = await this.getListings(
-      userId,
-      { ...query, page: 1, limit: 5000 },
-      { maxLimit: 5000 }
-    );
+    const result = await this.getListings(userId, { ...query, page: 1, limit: 5000 }, { maxLimit: 5000 });
 
     const headers = [
       'id',
@@ -626,8 +669,6 @@ export class ListingsService {
       'roi',
       'profitMargin',
       'soldCount',
-      'watchCount',
-      'viewCount',
       'quantity',
       'sourceStock',
       'status',
@@ -655,8 +696,6 @@ export class ListingsService {
           item.roi ?? '',
           item.profitMargin ?? '',
           item.soldCount ?? '',
-          item.watchCount ?? '',
-          item.viewCount ?? '',
           item.quantity,
           item.sourceStock ?? '',
           item.status,
@@ -740,8 +779,10 @@ export class ListingsService {
       title: row.title,
       description: row.description ?? '',
       price: {
-        current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
-        avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
+        current:
+          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
+        avg30:
+          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
       imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(row.image_urls || '[]') as string[]),
@@ -768,12 +809,17 @@ export class ListingsService {
         p.stock AS source_stock,
         p.brand,
         p.features,
+        p.specs,
+        p.identifiers,
+        p.raw_keepa_data,
         p.description AS product_description,
         g.name AS group_name,
+        ea.marketplace_id AS ebay_marketplace_id,
         (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
       FROM listings l
       LEFT JOIN products p ON l.product_id = p.id
       LEFT JOIN listing_settings_groups g ON l.listing_settings_group_id = g.id
+      LEFT JOIN ebay_accounts ea ON ea.id = l.ebay_account_id
       WHERE l.id = $1 AND l.user_id = $2
     `,
       [id, userId]
@@ -784,6 +830,60 @@ export class ListingsService {
     }
 
     return this.mapListingRow(results[0]);
+  }
+
+  /**
+   * Price/quantity change history for one listing (the detail page's
+   * "Revisions" drawer). The JOIN to `listings` is the ownership check —
+   * there is no separate existence lookup to drift out of sync with it, and a
+   * listing that is not the caller's (or does not exist) returns an empty
+   * page rather than a 404, matching how the rest of this file scopes reads.
+   */
+  async getListingRevisions(
+    userId: string,
+    listingId: string,
+    query: ListingRevisionsQueryDto = {}
+  ): Promise<PaginatedListingRevisionsDto> {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const offset = (page - 1) * limit;
+
+    const countResult = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count
+       FROM listing_revisions r
+       JOIN listings l ON l.id = r.listing_id
+       WHERE r.listing_id = $1 AND l.user_id = $2`,
+      [listingId, userId]
+    );
+    const total = parseInt(countResult[0]?.count || '0', 10);
+
+    const results = await this.databaseService.query<{
+      id: string;
+      previous_price: string;
+      new_price: string;
+      previous_quantity: number;
+      new_quantity: number;
+      recorded_at: Date;
+    }>(
+      `SELECT r.id, r.previous_price, r.new_price, r.previous_quantity, r.new_quantity, r.recorded_at
+       FROM listing_revisions r
+       JOIN listings l ON l.id = r.listing_id
+       WHERE r.listing_id = $1 AND l.user_id = $2
+       ORDER BY r.recorded_at DESC, r.id DESC
+       LIMIT $3 OFFSET $4`,
+      [listingId, userId, limit, offset]
+    );
+
+    const items: ListingRevisionDto[] = results.map((row) => ({
+      id: row.id,
+      previousPrice: Number(row.previous_price),
+      newPrice: Number(row.new_price),
+      previousQuantity: row.previous_quantity,
+      newQuantity: row.new_quantity,
+      recordedAt: row.recorded_at.toISOString(),
+    }));
+
+    return { items, total, page, limit };
   }
 
   /**
@@ -884,8 +984,17 @@ export class ListingsService {
    * map. Re-deriving them from the stored raw Keepa payload costs no tokens and
    * means an existing catalog produces full item specifics on the next listing
    * create, instead of waiting for a refresh cycle to touch the row.
+   *
+   * Structural (`Pick`) rather than `ProductQueryRow` so both the products
+   * list query and the listing detail query (`ListingQueryRow`, which joins
+   * in the same three product columns) can share this without one being
+   * cast to the other's much larger, unrelated shape.
    */
-  private resolveCachedAttributes(row: ProductQueryRow): {
+  private resolveCachedAttributes(row: {
+    specs?: Record<string, string> | string | null;
+    identifiers?: ProductIdentifiers | string | null;
+    raw_keepa_data?: string | Record<string, unknown> | null;
+  }): {
     specs: Record<string, string>;
     identifiers: ProductIdentifiers;
   } {
@@ -933,23 +1042,31 @@ export class ListingsService {
       title: row.title,
       description: row.description ?? '',
       price: {
-        current: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
-        avg30: typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
+        current:
+          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).current : row.price.current,
+        avg30:
+          typeof row.price === 'string' ? (JSON.parse(row.price) as ProductPriceData).avg30 || 0 : row.price.avg30 || 0,
         currency: row.currency || 'USD',
       },
-      imageUrls: Array.isArray(row.image_urls) ? row.image_urls : (JSON.parse(String(row.image_urls) || '[]') as string[]),
+      imageUrls: Array.isArray(row.image_urls)
+        ? row.image_urls
+        : (JSON.parse(String(row.image_urls) || '[]') as string[]),
       brand: row.brand ?? '',
       category: row.category ?? undefined,
       categoryPath: row.category_path ?? undefined,
       manufacturer: row.manufacturer ?? row.brand ?? undefined,
-      features: row.features ? (Array.isArray(row.features) ? row.features : (JSON.parse(String(row.features)) as string[])) : [],
+      features: row.features
+        ? Array.isArray(row.features)
+          ? row.features
+          : (JSON.parse(String(row.features)) as string[])
+        : [],
       // Item specifics + catalog identifiers must survive a cache hit; without
       // them a re-listed ASIN published with almost no eBay item specifics.
       ...this.resolveCachedAttributes(row),
       stock: row.stock || 0,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
-          ? JSON.parse(row.raw_provider_data) as Record<string, unknown>
+          ? (JSON.parse(row.raw_provider_data) as Record<string, unknown>)
           : row.raw_provider_data
         : undefined,
     };
@@ -1128,9 +1245,7 @@ export class ListingsService {
     // RefreshProcessorService already honours it. This path used to hardcode
     // 12 hours, so lowering the interval in the panel silently applied to the
     // existing catalog but not to anything created afterwards.
-    const intervalMinutes = await this.platformSettings.getNumber(
-      PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES
-    );
+    const intervalMinutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
 
     const result = await this.databaseService.query<{ id: string }>(
       `
@@ -1348,12 +1463,7 @@ export class ListingsService {
            updated_at = CURRENT_TIMESTAMP
        WHERE job_id = $3 AND status NOT IN ($4, $1)
        RETURNING id`,
-      [
-        ListingStatus.ERROR,
-        ListingFailureCode.CANCELLED,
-        jobId,
-        ListingStatus.ACTIVE,
-      ]
+      [ListingStatus.ERROR, ListingFailureCode.CANCELLED, jobId, ListingStatus.ACTIVE]
     );
 
     await this.databaseService.query(
@@ -1410,8 +1520,7 @@ export class ListingsService {
       status: entity.status as ListingStatus,
       ebayItemId: entity.ebay_item_id || undefined,
       failureCode:
-        (entity.failure_code as ListingFailureCode) ||
-        (entity.error_message ? ListingFailureCode.UNKNOWN : undefined),
+        (entity.failure_code as ListingFailureCode) || (entity.error_message ? ListingFailureCode.UNKNOWN : undefined),
       failureDetails: entity.failure_details
         ? parseJsonColumn<ListingFailureDetails>(entity.failure_details, {})
         : undefined,
@@ -1483,12 +1592,7 @@ export class ListingsService {
 
     for (const [accountId, prepared] of byAccount) {
       outcomes.push(
-        ...(await this.writePreparedPublishes(
-          userId,
-          accountId,
-          locationKeys.get(accountId) ?? 'default',
-          prepared
-        ))
+        ...(await this.writePreparedPublishes(userId, accountId, locationKeys.get(accountId) ?? 'default', prepared))
       );
     }
 
@@ -1529,8 +1633,7 @@ export class ListingsService {
       throw new BadRequestException('Product data missing for this draft — cannot publish');
     }
 
-    const ebayAccountId =
-      listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
+    const ebayAccountId = listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
 
     // Recompute price/qty from strategy (no AI on publish — draft already has prepared title)
     const prepared = await this.strategyService.prepareListingData(
@@ -1571,9 +1674,7 @@ export class ListingsService {
     }
 
     if (finalQty === 0) {
-      throw new BadRequestException(
-        'Cannot publish: quantity is 0. Adjust stock settings or wait for Amazon restock.'
-      );
+      throw new BadRequestException('Cannot publish: quantity is 0. Adjust stock settings or wait for Amazon restock.');
     }
 
     const listingData = {
@@ -1718,11 +1819,7 @@ export class ListingsService {
   }
 
   /** Flip a draft row to ACTIVE against the eBay item id that now exists. */
-  private async markDraftPublished(
-    userId: string,
-    item: PreparedPublish,
-    result: BulkListingOutcome
-  ): Promise<void> {
+  private async markDraftPublished(userId: string, item: PreparedPublish, result: BulkListingOutcome): Promise<void> {
     const aspectAudit = summarizeAspectResolution(result.resolution);
 
     await this.databaseService.query(
@@ -1795,7 +1892,9 @@ export class ListingsService {
           [listingId, userId]
         );
 
-        if (results.length === 0) {continue;}
+        if (results.length === 0) {
+          continue;
+        }
 
         const ebayItemId = results[0].ebay_item_id;
 
@@ -1842,7 +1941,9 @@ export class ListingsService {
             [listingId, userId]
           );
 
-          if (results.rows.length === 0) {return;}
+          if (results.rows.length === 0) {
+            return;
+          }
 
           const { ebay_item_id: ebayItemId, status, product_id: productId } = results.rows[0];
 
@@ -1852,7 +1953,9 @@ export class ListingsService {
               await this.ebayService.withdrawOffer(userId, ebayItemId);
             } catch (ebayError: unknown) {
               this.logger.error(
-                `Failed to end listing ${listingId} on eBay, but proceeding with DB deletion: ${getErrorMessage(ebayError)}`
+                `Failed to end listing ${listingId} on eBay, but proceeding with DB deletion: ${getErrorMessage(
+                  ebayError
+                )}`
               );
             }
           }

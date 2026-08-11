@@ -80,6 +80,17 @@ const lightColors: ThemeColors = {
     neutral: '#f3f4f6',
   },
 
+  /* Zebra is neutral (was the blue-tinted `#eef3ff`, which competed with the
+     blue selection); hover is a real step down from BOTH stripes (was `#FFFFFF`,
+     identical to the odd row); selection is unmistakably chromatic. */
+  table: {
+    rowZebra: '#f8fafc',
+    rowHover: '#eef2f7',
+    rowSelected: '#dbeafe',
+    rowSelectedHover: '#c7dcfd',
+    rowSelectedAccent: '#2563eb',
+  },
+
   semanticTintBorder: {
     success: '#a7f3d0',
     error: '#fecaca',
@@ -208,6 +219,16 @@ const darkColors: ThemeColors = {
     info: 'rgba(96, 165, 250, 0.1)',
     infoStrong: 'rgba(96, 165, 250, 0.18)',
     neutral: 'rgba(107, 114, 128, 0.1)',
+  },
+
+  /* Dark mirrors light: hover lifts UP from the row (it used to be `#0c1018`,
+     darker than the odd row, so hover read as the row receding). */
+  table: {
+    rowZebra: '#15181f',
+    rowHover: '#1e2331',
+    rowSelected: 'rgba(96, 165, 250, 0.2)',
+    rowSelectedHover: 'rgba(96, 165, 250, 0.28)',
+    rowSelectedAccent: '#4f6ef7',
   },
 
   semanticTintBorder: {

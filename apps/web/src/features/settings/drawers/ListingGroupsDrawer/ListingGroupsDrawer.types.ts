@@ -7,6 +7,10 @@ export interface ListingGroupsDrawerProps {
   /** predefinedTemplateId → display name (for the template badge on each card). */
   predefinedTemplateNames: Record<string, string>;
   onEdit: (id: string) => void;
+  /** Opens the create-group flow. */
+  onCreate: () => void;
+  /** Opens the full "all groups" list drawer. */
+  onViewAll: () => void;
 }
 
 export interface ListingGroupsDrawerComponentProps {
@@ -14,16 +18,15 @@ export interface ListingGroupsDrawerComponentProps {
   onClose: () => void;
   groups: ListingSettingsGroupResponse[];
   predefinedTemplateNames: Record<string, string>;
-  /** Currently selected group id, or null when nothing is selected. */
-  selectedId: string | null;
-  /** True until a card is selected — disables the footer "Continue" action. */
-  isContinueDisabled: boolean;
-  /** Selects (or toggles off) a card by id. */
-  onSelect: (id: string) => void;
-  /** Opens the edit flow for the currently selected group. */
-  onContinue: () => void;
+  /** Opens the edit flow for a group by id. */
+  onEdit: (id: string) => void;
+  onCreate: () => void;
+  onViewAll: () => void;
   titleLabel: string;
   subtitleLabel: string;
+  viewAllLabel: string;
+  createTitle: string;
+  createSubtitle: string;
   emptyTitle: string;
   emptyDescription: string;
 }

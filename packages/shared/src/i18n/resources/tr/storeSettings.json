@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Marka ve üretici",
     "copyright": "© {{year}} Zonds Platformu. Tüm hakları saklıdır.",
     "amazonTaxRate": "Amazon Satış Alış Vergi Oranı (%)",
-    "amazonTaxRateDesc": "Bir siparişin kârı hala geçiciyken (Amazon siparişi henüz verilmediğinde) alış maliyetine uygulanan tahmini Amazon satış vergisi oranı.",
+    "amazonTaxRateDesc": "Alış maliyetine uygulanan tahmini Amazon satış vergisi oranı. İki şekilde kullanılır: bu maliyeti karşılamak için eBay liste fiyatınızı yükseltir, ve bir siparişin kârı hâlâ geçiciyken (Amazon siparişi henüz verilmediğinde) o siparişin kârını tahmin eder.",
     "autoFulfillEnabled": "eBay satışlarından sonra Amazon siparişlerini otomatik oluştur",
     "autoFulfillEnabledHint": "Açık olduğunda Zonds, bağlı alıcı hesabınızla ürünü Amazon'da satın alır. Manuel sipariş için kapatın.",
     "autoFulfillEnabledInfo": "Bu ayarı yalnızca bir Amazon alıcı hesabını bağlayıp yapılandırdıktan sonra açın. Otomatik sipariş için ilgili hesabın otomatik sipariş ayarı ve harcama limiti de etkin olmalıdır.",

@@ -69,6 +69,24 @@ export interface ThemeColors {
     neutral: string;
   };
 
+  /*
+   * Data-table row states. These are their own tokens because the three states
+   * must stay separable from each other: zebra striping, hover, and selection
+   * were previously borrowed from `background.*` / `semanticTint.info`, which put
+   * the selected row within ~3/255 of the even-row stripe and made hover in light
+   * theme pure white — i.e. identical to the odd row.
+   */
+  table: {
+    /** Even-row stripe. Neutral on purpose: selection is the chromatic state. */
+    rowZebra: string;
+    rowHover: string;
+    rowSelected: string;
+    /** Selected AND hovered — a selected row must still answer the pointer. */
+    rowSelectedHover: string;
+    /** Left accent bar on a selected row; carries the state without relying on hue. */
+    rowSelectedAccent: string;
+  };
+
   // Semantic border tints
   semanticTintBorder: {
     success: string;

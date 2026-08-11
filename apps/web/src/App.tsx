@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactElement, type ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import LandingPage from './features/landing';
 import { AppLayout } from './layouts/AppLayout';
@@ -13,6 +13,15 @@ function RouteFallback(): ReactElement {
 
 function Lazy({ children }: { children: ReactNode }): ReactElement {
   return <Suspense fallback={<RouteFallback />}>{children}</Suspense>;
+}
+
+/**
+ * Legacy child path that folded into its parent. Keeps the query string, so a
+ * bookmarked `/orders/all?dateFrom=…` still lands on the filtered list.
+ */
+function RedirectToParent(): ReactElement {
+  const { search } = useLocation();
+  return <Navigate to={{ pathname: '..', search }} relative="path" replace />;
 }
 
 // Public auth (small) — still lazy to keep initial landing bundle lean
@@ -46,9 +55,6 @@ const ListingDetailPage = lazy(() =>
 );
 const OrderDetailsPage = lazy(() =>
   import('./features/orders').then((m) => ({ default: m.OrderDetailsPage }))
-);
-const OrdersOverviewPage = lazy(() =>
-  import('./features/orders').then((m) => ({ default: m.OrdersOverviewPage }))
 );
 const OrdersAllPage = lazy(() =>
   import('./features/orders').then((m) => ({ default: m.OrdersAllPage }))
@@ -203,18 +209,12 @@ export function App() {
               path="orders"
               element={
                 <Lazy>
-                  <OrdersOverviewPage />
-                </Lazy>
-              }
-            />
-            <Route
-              path="orders/all"
-              element={
-                <Lazy>
                   <OrdersAllPage />
                 </Lazy>
               }
             />
+            {/* Folded into `/orders`: the overview carried no action of its own. */}
+            <Route path="orders/all" element={<RedirectToParent />} />
             <Route
               path="orders/:id"
               element={

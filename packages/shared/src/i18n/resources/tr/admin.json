@@ -27,14 +27,14 @@
     "users": {
       "unattributed": "Dağıtılmamış platform kullanımı",
       "total": "{{value}} kullanıcı · maliyetler bu aya aittir",
-      "stats": "İlanlar: {{listings}} · Sipariş 30g: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
+      "stats": "Listeler: {{listings}} · Sipariş 30g: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
       "proxy": "Proxy: {{proxy}}",
       "noProxy": "Proxy atanmadı",
       "columns": {
         "user": "Kullanıcı",
         "role": "Erişim seviyesi",
         "status": "Durum",
-        "listings": "İlan",
+        "listings": "Liste",
         "orders": "30g sipariş",
         "keepa": "Keepa",
         "llm": "LLM",
@@ -131,7 +131,7 @@
       },
       "quota": {
         "title": "Kota kullanım baskısı",
-        "listings": "Kullanıcı başına aktif ilanlar",
+        "listings": "Kullanıcı başına aktif listeler",
         "amazon_accounts": "Kullanıcı başına Amazon hesapları",
         "summary": "Kullanımı olan kullanıcılar: {{usersWithUsage}} · En yüksek: {{maxUsage}} · Uyarı: {{warn}} · Kritik: {{critical}}"
       },
@@ -145,7 +145,7 @@
     },
     "overview": {
       "users": "Toplam kullanıcı",
-      "activeListings": "Aktif ilanlar",
+      "activeListings": "Aktif listeler",
       "orders": "Siparişler (30 gün)",
       "ebayStores": "Aktif eBay mağazaları",
       "amazonAccounts": "Amazon alıcı hesapları",
@@ -206,8 +206,8 @@
         "admin.queueWaitingThreshold": "Kuyruk bekleme uyarı eşiği",
         "admin.keepaLowTokensThreshold": "Keepa düşük bakiye eşiği",
         "admin.llmFailureRateThreshold": "Yapay zekâ hata oranı eşiği (%)",
-        "admin.listingQuotaWarnThreshold": "İlan kotası uyarı eşiği",
-        "admin.listingQuotaCriticalThreshold": "İlan kotası kritik eşiği",
+        "admin.listingQuotaWarnThreshold": "Liste kotası uyarı eşiği",
+        "admin.listingQuotaCriticalThreshold": "Liste kotası kritik eşiği",
         "admin.amazonAccountQuotaWarnThreshold": "Amazon hesabı uyarı eşiği",
         "admin.amazonAccountQuotaCriticalThreshold": "Amazon hesabı kritik eşiği",
         "admin.proxyExpiryWarnDays": "Proxy bitiş uyarı penceresi (gün)",
@@ -222,7 +222,8 @@
         "retention.llmUsageLogDays": "Yapay zekâ kullanım kaydı (gün)",
         "retention.usageEventsDays": "Maliyet olay geçmişi (gün)",
         "retention.buyerMessageLogDays": "Alıcı mesaj kaydı (gün)",
-        "retention.auditLogsDays": "Denetim kaydı (gün)"
+        "retention.auditLogsDays": "Denetim kaydı (gün)",
+        "retention.listingRevisionsDays": "Liste revizyonları (gün)"
       }
     },
     "listingQuality": {

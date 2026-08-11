@@ -96,29 +96,3 @@ export const AutoFulfillCell = styled.div`
   min-width: 0;
 `;
 
-export const ProductCell = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
-export const ProductThumb = styled.div`
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: ${tkn('radius.sm')};
-  /* Transparent per the product-image rule — a grey plate behind a cut-out
-     product shot reads as a broken image. */
-  background: transparent;
-  flex-shrink: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-`;

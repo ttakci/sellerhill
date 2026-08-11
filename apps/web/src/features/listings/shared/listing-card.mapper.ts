@@ -51,7 +51,6 @@ export const toListingCardProps = (
     imageUrl: listing.imageUrls?.[0],
     meta,
     soldCount: listing.soldCount,
-    watchCount: listing.watchCount,
     status: statusLabel
       ? {
           label: statusLabel,

@@ -71,11 +71,6 @@ class FeeConfigDto implements FeeConfig {
   @IsNumber()
   @Min(0)
   fixedFeeAmount!: number;
-
-  @ApiProperty({ description: 'Tax percentage', example: 10.0 })
-  @IsNumber()
-  @Min(0)
-  taxPercent!: number;
 }
 
 class TemplateConfigDto implements TemplateConfig {

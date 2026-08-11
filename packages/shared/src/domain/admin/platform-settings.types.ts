@@ -90,6 +90,20 @@ export enum PlatformSettingKey {
   AMAZON_TRACKING_PRESHIP_INTERVAL_HOURS = 'amazon.tracking.preshipIntervalHours',
   AMAZON_TRACKING_SHIPPED_INTERVAL_HOURS = 'amazon.tracking.shippedIntervalHours',
 
+  // --- Tracking-number conversion provider (Aquiline) ---
+  /** Base URL of the conversion API. Overridable so a provider swap is config. */
+  AQUILINE_BASE_URL = 'tracking.aquiline.baseUrl',
+  /** Write-only secret. Without it every order degrades to the pass-through. */
+  AQUILINE_API_KEY = 'tracking.aquiline.apiKey',
+  /** Default seller profile (X-Partner-Id) when a store has none assigned. */
+  AQUILINE_PARTNER_ID = 'tracking.aquiline.partnerId',
+  AQUILINE_TIMEOUT_MS = 'tracking.aquiline.timeoutMs',
+  /** HMAC secret for inbound webhooks. Empty = receiver refuses everything. */
+  AQUILINE_WEBHOOK_SECRET = 'tracking.aquiline.webhookSecret',
+  /** Reject delivery events older than this, so a replayed backlog cannot
+   *  fire a burst of days-late "delivered" messages at buyers. */
+  AQUILINE_WEBHOOK_MAX_AGE_MINUTES = 'tracking.aquiline.webhookMaxAgeMinutes',
+
   // --- Chromium profile disk GC (see amazon/browser-profile-gc.ts) ---
   /** Master switch for the per-account profile sweeper. */
   BROWSER_PROFILE_GC_ENABLED = 'amazon.browserProfileGc.enabled',
@@ -109,6 +123,7 @@ export enum PlatformSettingKey {
   RETENTION_USAGE_EVENTS_DAYS = 'retention.usageEventsDays',
   RETENTION_BUYER_MESSAGE_LOG_DAYS = 'retention.buyerMessageLogDays',
   RETENTION_AUDIT_LOGS_DAYS = 'retention.auditLogsDays',
+  RETENTION_LISTING_REVISIONS_DAYS = 'retention.listingRevisionsDays',
 
   // --- Auto-fulfillment ---
   AUTO_FULFILL_REVIEW_CAP_HARD_STOP = 'autoFulfill.reviewCapHardStop',

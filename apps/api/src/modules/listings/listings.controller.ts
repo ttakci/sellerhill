@@ -24,6 +24,7 @@ import {
   ListingJobItemDto,
   type ListingsQueryDto,
   type PaginatedListingJobsDto,
+  type PaginatedListingRevisionsDto,
   type PaginatedListingsDto,
   type PaginatedProductsDto,
   ProductData,
@@ -86,10 +87,6 @@ export class ListingsController {
     @Query('profitMarginMax') profitMarginMax?: string,
     @Query('soldCountMin') soldCountMin?: string,
     @Query('soldCountMax') soldCountMax?: string,
-    @Query('watchCountMin') watchCountMin?: string,
-    @Query('watchCountMax') watchCountMax?: string,
-    @Query('viewCountMin') viewCountMin?: string,
-    @Query('viewCountMax') viewCountMax?: string,
     @Query('quantityMin') quantityMin?: string,
     @Query('quantityMax') quantityMax?: string,
     @Query('sourceStockMin') sourceStockMin?: string,
@@ -126,10 +123,6 @@ export class ListingsController {
       profitMarginMax: num(profitMarginMax),
       soldCountMin: num(soldCountMin),
       soldCountMax: num(soldCountMax),
-      watchCountMin: num(watchCountMin),
-      watchCountMax: num(watchCountMax),
-      viewCountMin: num(viewCountMin),
-      viewCountMax: num(viewCountMax),
       quantityMin: num(quantityMin),
       quantityMax: num(quantityMax),
       sourceStockMin: num(sourceStockMin),
@@ -172,10 +165,6 @@ export class ListingsController {
     @Query('profitMarginMax') profitMarginMax?: string,
     @Query('soldCountMin') soldCountMin?: string,
     @Query('soldCountMax') soldCountMax?: string,
-    @Query('watchCountMin') watchCountMin?: string,
-    @Query('watchCountMax') watchCountMax?: string,
-    @Query('viewCountMin') viewCountMin?: string,
-    @Query('viewCountMax') viewCountMax?: string,
     @Query('quantityMin') quantityMin?: string,
     @Query('quantityMax') quantityMax?: string,
     @Query('sourceStockMin') sourceStockMin?: string,
@@ -208,10 +197,6 @@ export class ListingsController {
       profitMarginMax: num(profitMarginMax),
       soldCountMin: num(soldCountMin),
       soldCountMax: num(soldCountMax),
-      watchCountMin: num(watchCountMin),
-      watchCountMax: num(watchCountMax),
-      viewCountMin: num(viewCountMin),
-      viewCountMax: num(viewCountMax),
       quantityMin: num(quantityMin),
       quantityMax: num(quantityMax),
       sourceStockMin: num(sourceStockMin),
@@ -230,10 +215,7 @@ export class ListingsController {
   }
 
   @Post('sync-ebay')
-  async syncEbayListings(
-    @Request() req: { user: { sub: string } },
-    @Body() body: { ebayAccountId: string }
-  ) {
+  async syncEbayListings(@Request() req: { user: { sub: string } }, @Body() body: { ebayAccountId: string }) {
     return this.listingImportService.syncStore(req.user.sub, body.ebayAccountId);
   }
 
@@ -243,7 +225,8 @@ export class ListingsController {
   async importExistingListings(
     @Request() req: { user: { sub: string } },
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: {
+    @Body()
+    body: {
       ebayAccountId: string;
       listingSettingsGroupId: string;
       paymentPolicyId: string;
@@ -385,6 +368,20 @@ export class ListingsController {
     return listing;
   }
 
+  @ApiOperation({ summary: 'Get price/quantity change history for a listing (paginated)' })
+  @Get(':id/revisions')
+  async getListingRevisions(
+    @Request() req: { user: { sub: string } },
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ): Promise<PaginatedListingRevisionsDto> {
+    return this.listingsService.getListingRevisions(req.user.sub, id, {
+      page: toPositiveInt(page),
+      limit: toPositiveInt(limit),
+    });
+  }
+
   @ApiOperation({ summary: 'Update listing customizations (title, strategy group, policies)' })
   @ApiResponse({ status: 200, description: 'Updated listing' })
   @Patch(':id')
@@ -443,10 +440,7 @@ export class ListingsController {
    */
   @ApiOperation({ summary: 'Publish a draft listing to eBay' })
   @Post(':id/publish')
-  async publishListing(
-    @Request() req: { user: { sub: string } },
-    @Param('id') id: string
-  ): Promise<ListingDto> {
+  async publishListing(@Request() req: { user: { sub: string } }, @Param('id') id: string): Promise<ListingDto> {
     return this.listingsService.publishListing(req.user.sub, id);
   }
 }

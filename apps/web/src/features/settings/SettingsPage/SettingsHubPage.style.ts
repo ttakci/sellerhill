@@ -23,3 +23,23 @@ export const TwoColGrid = styled.div`
     grid-template-columns: 1fr;
   }
 `;
+
+/**
+ * Stacks two short cards inside ONE grid column, so a one-row card doesn't get
+ * stretched to the height of a three-row card beside it. `&&` is deliberate:
+ * `TwoColGrid > *` and `SettingsCard`'s own container both set `height: 100%`
+ * at single-class specificity, so a plain `& > *` would win or lose on Emotion
+ * injection order. Doubling the class makes the reset unconditional — without
+ * it each stacked card claims the full column height and they overflow.
+ */
+export const ColumnStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.lg')};
+  min-width: 0;
+
+  && > * {
+    height: auto;
+    flex: 0 0 auto;
+  }
+`;

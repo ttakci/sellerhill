@@ -93,9 +93,9 @@ export const ListingsAllPage: React.FC = () => {
   });
 
   // Support both paginated shape and accidental legacy array responses
-  const listings = useMemo(() => (Array.isArray(data) ? data : (data?.items ?? [])), [data]);
-  const total = Array.isArray(data) ? data.length : (data?.total ?? 0);
-  const categories = useMemo(() => (Array.isArray(data) ? [] : (data?.categories ?? [])), [data]);
+  const listings = useMemo(() => (Array.isArray(data) ? data : data?.items ?? []), [data]);
+  const total = Array.isArray(data) ? data.length : data?.total ?? 0;
+  const categories = useMemo(() => (Array.isArray(data) ? [] : data?.categories ?? []), [data]);
 
   useEffect(() => {
     if (!isListingsError || !listingsError) {
@@ -145,7 +145,9 @@ export const ListingsAllPage: React.FC = () => {
 
   // Clear selection when the page of results changes. Implemented as render-time
   // state adjustment (React-recommended) rather than setState-in-effect.
-  const selectionResetKey = `${page}|${rowsPerPage}|${serverQuery.search ?? ''}|${serverQuery.status ?? ''}|${serverQuery.category ?? ''}|${serverQuery.ebayAccountId ?? ''}`;
+  const selectionResetKey = `${page}|${rowsPerPage}|${serverQuery.search ?? ''}|${serverQuery.status ?? ''}|${
+    serverQuery.category ?? ''
+  }|${serverQuery.ebayAccountId ?? ''}`;
   const [lastSelectionResetKey, setLastSelectionResetKey] = useState(selectionResetKey);
   if (lastSelectionResetKey !== selectionResetKey) {
     setLastSelectionResetKey(selectionResetKey);
@@ -354,10 +356,6 @@ export const ListingsAllPage: React.FC = () => {
         profitMarginMax: serverQuery.profitMarginMax,
         soldCountMin: serverQuery.soldCountMin,
         soldCountMax: serverQuery.soldCountMax,
-        watchCountMin: serverQuery.watchCountMin,
-        watchCountMax: serverQuery.watchCountMax,
-        viewCountMin: serverQuery.viewCountMin,
-        viewCountMax: serverQuery.viewCountMax,
         quantityMin: serverQuery.quantityMin,
         quantityMax: serverQuery.quantityMax,
         sourceStockMin: serverQuery.sourceStockMin,

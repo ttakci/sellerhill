@@ -1,8 +1,11 @@
 import styled from '@emotion/styled';
 import { Card, tkn } from '@repo/ui';
 
+import { CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
+
 /**
- * `width: 100%` is load-bearing: inside the carousel's row-flex slide, a flex
+ * The shared carousel height keeps this card the same size as the template and
+ * listing-group cards in their own drawers. `width: 100%` is load-bearing: inside the carousel's row-flex slide, a flex
  * item without an explicit width shrinks to its content instead of filling
  * the slide, so the card renders narrower (and misaligned) than the single-
  * item path, where the column-flex `BodyStack` stretches it to full width
@@ -11,13 +14,17 @@ import { Card, tkn } from '@repo/ui';
 export const CardRoot = styled(Card)`
   width: 100%;
   max-width: 100%;
+  min-height: ${CAROUSEL_CARD_MIN_HEIGHT};
+  display: flex;
+  flex-direction: column;
 `;
 
 export const StoreMain = styled.div`
-  padding: ${tkn('spacing.lg')} ${tkn('spacing.md+')};
+  padding: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
+  flex: 1;
 `;
 
 export const StoreHead = styled.div`

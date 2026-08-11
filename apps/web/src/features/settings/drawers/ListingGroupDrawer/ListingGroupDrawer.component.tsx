@@ -1,11 +1,12 @@
 import { TemplateType, type ListingSettingsGroupFormData } from '@repo/shared';
-import { Drawer, Icon, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
+import { Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingGroupDrawer.style';
 import type { ListingGroupDrawerComponentProps, ListingGroupDrawerStep } from './ListingGroupDrawer.types';
+import { PriceCalculatorSection } from './PriceCalculatorSection';
 
 const blockNonNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
   if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
@@ -68,61 +69,10 @@ export const ListingGroupDrawerComponent = ({
           label={t('listingSettingsGroup.description')}
           fullWidth
         />
-        <Text variant="body-sm" weight="semibold">
-          {t('listingSettingsGroup.contentSection')}
-        </Text>
-        <Controller
-          name="content.stripBrandFromTitle"
-          control={control}
-          render={({ field }) => (
-            <>
-              <Toggle
-                checked={Boolean(field.value)}
-                onChange={field.onChange}
-                label={t('listingSettingsGroup.stripBrandFromTitle')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.stripBrandFromTitleHint')}
-              </Text>
-            </>
-          )}
-        />
-        <Controller
-          name="content.aiTitleEnabled"
-          control={control}
-          render={({ field }) => (
-            <>
-              <Toggle
-                checked={Boolean(field.value)}
-                onChange={field.onChange}
-                label={t('listingSettingsGroup.aiTitleEnabled')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.aiTitleEnabledHint')}
-              </Text>
-            </>
-          )}
-        />
-        <Controller
-          name="content.aiDescriptionEnabled"
-          control={control}
-          render={({ field }) => (
-            <>
-              <Toggle
-                checked={Boolean(field.value)}
-                onChange={field.onChange}
-                label={t('listingSettingsGroup.aiDescriptionEnabled')}
-              />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.aiDescriptionEnabledHint')}
-              </Text>
-            </>
-          )}
-        />
         <ModernTextInput<ListingSettingsGroupFormData>
           name="stock.defaultQuantity"
           control={control}
-          label={t('listingSettingsGroup.defaultStockQuantity')}
+          label={t('listingSettingsGroup.ebayStockQuantity')}
           type="number"
           fullWidth
           onKeyDown={blockNonNumeric}
@@ -134,6 +84,34 @@ export const ListingGroupDrawerComponent = ({
           type="number"
           fullWidth
           onKeyDown={blockNonNumeric}
+        />
+        <InfoMessage>{t('listingSettingsGroup.stockBufferDescription')}</InfoMessage>
+        <Controller
+          name="content.stripBrandFromTitle"
+          control={control}
+          render={({ field }) => (
+            <S.ContentToggleRow>
+              <Text variant="body-sm" weight="semibold">
+                {t('listingSettingsGroup.stripBrandFromTitle')}
+              </Text>
+              <Toggle checked={Boolean(field.value)} onChange={field.onChange} />
+            </S.ContentToggleRow>
+          )}
+        />
+        <Controller
+          name="content.aiTitleEnabled"
+          control={control}
+          render={({ field }) => (
+            <>
+              <S.ContentToggleRow>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listingSettingsGroup.aiTitleEnabled')}
+                </Text>
+                <Toggle checked={Boolean(field.value)} onChange={field.onChange} />
+              </S.ContentToggleRow>
+              <InfoMessage>{t('listingSettingsGroup.aiTitleEnabledInfo')}</InfoMessage>
+            </>
+          )}
         />
       </S.FormCard>
     </S.BodyStack>
@@ -160,15 +138,7 @@ export const ListingGroupDrawerComponent = ({
           fullWidth
           onKeyDown={blockNonNumeric}
         />
-        <ModernTextInput<ListingSettingsGroupFormData>
-          name="fees.taxPercent"
-          control={control}
-          label={t('listingSettingsGroup.taxRate')}
-          type="number"
-          suffixText="%"
-          fullWidth
-          onKeyDown={blockNonNumeric}
-        />
+        <InfoMessage>{t('listingSettingsGroup.amazonTaxRateNote')}</InfoMessage>
       </S.FormCard>
     </S.BodyStack>
   );
@@ -183,8 +153,13 @@ export const ListingGroupDrawerComponent = ({
                 {t('listingSettingsGroup.priceRangeLabel', { index: index + 1 })}
               </Text>
               {fields.length > 1 && (
-                <S.RemoveButton variant="danger" type="button" onClick={() => remove(index)}>
-                  <Icon name="x" size={14} />
+                <S.RemoveButton
+                  variant="ghost"
+                  type="button"
+                  onClick={() => remove(index)}
+                  aria-label={t('translation:common.delete')}
+                >
+                  <Icon name="trash" size={16} />
                 </S.RemoveButton>
               )}
             </S.RepricingCardHeader>
@@ -196,6 +171,7 @@ export const ListingGroupDrawerComponent = ({
                   label={t('listingSettingsGroup.minPrice')}
                   type="number"
                   suffixText="$"
+                  size="small"
                   fullWidth
                   onKeyDown={blockNonNumeric}
                 />
@@ -205,6 +181,7 @@ export const ListingGroupDrawerComponent = ({
                   label={t('listingSettingsGroup.maxPrice')}
                   type="number"
                   suffixText="$"
+                  size="small"
                   fullWidth
                   onKeyDown={blockNonNumeric}
                 />
@@ -214,6 +191,7 @@ export const ListingGroupDrawerComponent = ({
                   label={t('listingSettingsGroup.profitMargin')}
                   type="number"
                   suffixText="%"
+                  size="small"
                   fullWidth
                   onKeyDown={blockNonNumeric}
                 />
@@ -223,6 +201,7 @@ export const ListingGroupDrawerComponent = ({
                   label={t('listingSettingsGroup.fixedProfit')}
                   type="number"
                   suffixText="$"
+                  size="small"
                   fullWidth
                   onKeyDown={blockNonNumeric}
                 />
@@ -237,6 +216,7 @@ export const ListingGroupDrawerComponent = ({
           <Text>{t('listingSettingsGroup.addRange')}</Text>
         </S.AddRangeButton>
       </S.AddRangeRow>
+      <PriceCalculatorSection control={control} />
     </S.BodyStack>
   );
 
@@ -285,34 +265,25 @@ export const ListingGroupDrawerComponent = ({
         )}
       </S.FormCard>
       <S.PreviewCard variant="elevated">
-        <S.StepHeader>
-          <S.StepIconWrapper $type="template">
-            <Icon name="eye" size={20} />
-          </S.StepIconWrapper>
-          <S.StepTitleContent>
-            <S.StepTitle variant="h3" weight="semibold">
-              {t('listingSettingsGroup.livePreview')}
-            </S.StepTitle>
-          </S.StepTitleContent>
-          <S.DeviceControls>
-            <S.PreviewIconButton
-              type="button"
-              variant="ghost"
-              onClick={onOpenPreview}
-              aria-label={t('listingSettingsGroup.livePreview')}
-            >
-              <Icon name="external-link" size={16} />
-            </S.PreviewIconButton>
-          </S.DeviceControls>
-        </S.StepHeader>
+        <S.PreviewCardHeader>
+          <Text variant="h4" weight="semibold">
+            {t('listingSettingsGroup.livePreview')}
+          </Text>
+          <S.PreviewIconButton
+            type="button"
+            variant="ghost"
+            onClick={onOpenPreview}
+            aria-label={t('listingSettingsGroup.livePreview')}
+          >
+            <Icon name="external-link" size={16} />
+          </S.PreviewIconButton>
+        </S.PreviewCardHeader>
         <S.PreviewCardBody>
-          <S.PreviewContainer>
-            <S.PreviewViewport>
-              <S.PreviewContent>
-                <S.PreviewHTMLContent dangerouslySetInnerHTML={{ __html: renderedPreview }} />
-              </S.PreviewContent>
-            </S.PreviewViewport>
-          </S.PreviewContainer>
+          <S.PreviewViewport>
+            <S.PreviewContent>
+              <S.PreviewHTMLContent dangerouslySetInnerHTML={{ __html: renderedPreview }} />
+            </S.PreviewContent>
+          </S.PreviewViewport>
         </S.PreviewCardBody>
       </S.PreviewCard>
     </S.BodyStack>

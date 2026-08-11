@@ -7,7 +7,6 @@ import {
   generateCorrelationId,
   OrderStatus,
   PlatformSettingKey,
-  TrackingConversionProvider,
 } from '@repo/shared';
 import { Job } from 'bullmq';
 
@@ -20,7 +19,7 @@ import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
-import { resolveConverter } from './tracking-converter';
+import { TrackingConversionService } from './tracking-conversion.service';
 
 interface TrackAmazonOrderData {
   orderId: string;
@@ -59,7 +58,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     private readonly ebayFulfillmentService: EbayFulfillmentService,
     private readonly trackingQueueService: AmazonTrackingQueueService,
     private readonly buyerMessages: BuyerMessageQueueService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly trackingConversion: TrackingConversionService
   ) {
     super();
   }
@@ -203,17 +203,35 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         );
       }
 
-      // Remove tracking if terminal state (CANCELLED already returned above);
-      // slow the poll to 12h once shipped (waiting for delivery needs less
-      // frequent — and cheaper — scraping).
+      // Remove tracking if terminal state (CANCELLED already returned above).
+      //
+      // Once SHIPPED there are two ways delivery can be detected, and only one
+      // of them costs browser time:
+      //
+      //   * A converted tracking number exists → the provider PUSHES
+      //     `shipment.delivered` to `TrackingWebhookController`, so polling
+      //     Amazon for the rest of the delivery week buys nothing. Stop the
+      //     scheduler entirely. This is the whole point of the integration:
+      //     post-shipment polling was ~5 of every ~13 scrapes an order costs.
+      //
+      //   * No conversion (local provider, or the conversion failed) → keep
+      //     scraping, downshifted to the shipped interval. A webhook that will
+      //     never arrive must not leave an order stuck in SHIPPED forever.
       if (normalizedStatus === OrderStatus.COMPLETED) {
         await this.trackingQueueService.removeOrderTracking(orderId);
       } else if (applyStatus && normalizedStatus === OrderStatus.SHIPPED) {
-        await this.trackingQueueService.scheduleOrderTracking(
-          orderId,
-          amazonAccountId,
-          OrderStatus.SHIPPED
-        );
+        if (await this.hasWebhookDeliveryCoverage(orderId)) {
+          this.logger.log(
+            `Order ${orderId}: delivery will arrive by provider webhook — stopping Amazon polling`,
+          );
+          await this.trackingQueueService.removeOrderTracking(orderId);
+        } else {
+          await this.trackingQueueService.scheduleOrderTracking(
+            orderId,
+            amazonAccountId,
+            OrderStatus.SHIPPED
+          );
+        }
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
@@ -266,19 +284,23 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     // value is virtually always expired by the time we push.
     const accessToken = await this.ebayService.getAccountAccessToken(order.ebay_account_id);
 
-    // Create shipping fulfillment on eBay.
-    // Tracking number/carrier go through the pluggable TrackingConverter:
-    //   - Real carriers (UPS/USPS/FedEx/DHL) are remapped to eBay's enum.
-    //   - TBA/TBM/TBC (Amazon Logistics) pass through UNCHANGED as
-    //     Amazon_Logistics — never fabricated into a fake USPS/UPS number
-    //     (eBay deprecated Bluecare/Aquiline validation; fabrication is fraud).
-    // The provider is resolved per-order from store_settings (default LOCAL).
-    const provider = await this.resolveProvider(order.user_id);
-    const converter = resolveConverter(provider);
-    const { trackingNumber, shippingCarrierCode } = converter.convert(
-      order.amazon_tracking_number || '',
-      order.amazon_tracking_carrier || '',
-    );
+    // Resolve the number the BUYER sees. `TrackingConversionService` owns this
+    // because an external conversion is billed, needs the buyer address, and
+    // must be persisted before it reaches eBay — this method rethrows on a
+    // failed push so the next tick retries, and an unstored conversion would
+    // be re-bought and hand eBay a different number each time.
+    //
+    //   LOCAL     → Amazon number passes through as Amazon_Logistics.
+    //   AQUILINE  → AQUAA…YQ number under the AQUILINE carrier, which eBay's
+    //               Add-Tracking form accepts (verified 2026-08-11).
+    //
+    // Any provider failure degrades to the pass-through rather than blocking
+    // the fulfilment: late-but-honest tracking beats no tracking at all.
+    const { trackingNumber, shippingCarrierCode } = await this.trackingConversion.resolveForOrder({
+      orderId: order.id,
+      rawNumber: order.amazon_tracking_number || '',
+      rawCarrier: order.amazon_tracking_carrier || '',
+    });
 
     await this.ebayFulfillmentService.createShippingFulfillment(
       accessToken,
@@ -362,38 +384,48 @@ export class AmazonTrackingProcessorService extends WorkerHost {
   }
 
   /**
-   * Resolve the user's tracking-conversion provider from store_settings.
+   * Whether this order's delivery will be pushed to us by the tracking
+   * provider, making further Amazon scraping redundant.
    *
-   * Fail-closed: returns LOCAL on any miss/error/unknown value — settings
-   * resolution must never break the tracking pipeline. Direct query (instead
-   * of injecting StoreSettingsService) because (a) StoreSettingsResponse does
-   * not yet expose `trackingConversionProvider` (added in Task 5), so the
-   * typed-API path would require a cast; and (b) handleShipped already runs
-   * direct queries against orders/ebay_accounts — this stays consistent and
-   * avoids growing the AmazonModule import graph for a single column read.
-   * Migration `036` provides the column (default 'local').
+   * Keyed on the STORED converted number rather than on the configured
+   * provider: the configuration says what we intended, the column says what
+   * actually happened. A conversion that failed (quota, outage, incomplete
+   * buyer address) leaves the column NULL, and those orders must keep polling
+   * — otherwise a webhook that will never arrive would strand them in SHIPPED.
+   *
+   * Fail-closed: any error answers "no coverage", i.e. keep polling. The cost
+   * of being wrong that way is some browser time; the cost of the opposite is
+   * an order that never completes.
    */
-  private async resolveProvider(userId: string): Promise<TrackingConversionProvider> {
+  private async hasWebhookDeliveryCoverage(orderId: string): Promise<boolean> {
     try {
-      const rows = await this.databaseService.query<{ tracking_conversion_provider: string }>(
-        `SELECT tracking_conversion_provider
-           FROM store_settings
-          WHERE user_id = $1 AND is_global = TRUE
-          LIMIT 1`,
-        [userId],
+      // BOTH conditions are required, and the second one is the one that is
+      // easy to forget. A converted number only means the provider COULD push
+      // to us; a configured webhook secret means a receiver actually exists
+      // that can accept the push (`TrackingWebhookController` returns 401 for
+      // every request when the secret is unset).
+      //
+      // Checking only the number is a stuck-order bug: enable conversion,
+      // forget the webhook, and every order sits in SHIPPED forever because
+      // nothing is left to notice delivery.
+      const secret = await this.platformSettings.getString(
+        PlatformSettingKey.AQUILINE_WEBHOOK_SECRET,
       );
-      const raw = rows[0]?.tracking_conversion_provider;
-      // Compare to the string literal `'api'` (not the enum) to avoid
-      // `no-unsafe-enum-comparison` between the DB-side string and the enum.
-      if (raw === 'api') {
-        return TrackingConversionProvider.API;
+      if (!secret) {
+        return false;
       }
+
+      const rows = await this.databaseService.query<{ converted_tracking_number: string | null }>(
+        `SELECT converted_tracking_number FROM orders WHERE id = $1`,
+        [orderId],
+      );
+      return Boolean(rows[0]?.converted_tracking_number);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
-        `Failed to resolve tracking provider for user ${userId}: ${message}; defaulting to LOCAL`,
+        `Order ${orderId}: could not check webhook coverage (${message}) — keeping Amazon polling on`,
       );
+      return false;
     }
-    return TrackingConversionProvider.LOCAL;
   }
 }

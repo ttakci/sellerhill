@@ -70,6 +70,8 @@ export interface ListingDto {
   title: string;
   description?: string;
   price: number;
+  /** Selling currency resolved from the listing's eBay store marketplace. */
+  currency: string;
   quantity: number;
   imageUrls: string[];
   ebayListingId?: string;
@@ -88,8 +90,6 @@ export interface ListingDto {
   profitMargin?: number;
   roi?: number;
   soldCount?: number;
-  watchCount?: number;
-  viewCount?: number;
   category?: string;
   brand?: string;
   manufacturer?: string;
@@ -245,10 +245,6 @@ export interface ListingsQueryDto {
   profitMarginMax?: number;
   soldCountMin?: number;
   soldCountMax?: number;
-  watchCountMin?: number;
-  watchCountMax?: number;
-  viewCountMin?: number;
-  viewCountMax?: number;
   quantityMin?: number;
   quantityMax?: number;
   sourceStockMin?: number;
@@ -310,6 +306,34 @@ export interface ListingJobsQueryDto {
 /** Paginated listing-jobs response. */
 export interface PaginatedListingJobsDto {
   items: ListingJobDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/**
+ * One price/quantity change, written only when the value actually moved (see
+ * `ProductSyncService.recordRevisions`) — never a per-refresh-tick no-op row.
+ */
+export interface ListingRevisionDto {
+  id: string;
+  previousPrice: number;
+  newPrice: number;
+  previousQuantity: number;
+  newQuantity: number;
+  recordedAt: string;
+}
+
+/** Query for `GET /listings/:id/revisions`. */
+export interface ListingRevisionsQueryDto {
+  page?: number;
+  /** Page size (default 20, clamped to 100). */
+  limit?: number;
+}
+
+/** Paginated listing-revisions response. */
+export interface PaginatedListingRevisionsDto {
+  items: ListingRevisionDto[];
   total: number;
   page: number;
   limit: number;

@@ -1,8 +1,8 @@
-import { formatCurrency, formatDate, getLocaleConfig, useLoading, type ViewMode } from '@repo/ui';
+import { formatCurrency, formatDate, getLocaleConfig, type ViewMode } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useGetOrdersQuery, useTriggerOrderSyncMutation } from '../api/orders.api';
+import { useGetOrdersQuery } from '../api/orders.api';
 
 import { useOrdersColumns } from './hooks/useOrdersColumns';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
@@ -54,10 +54,6 @@ export const OrdersAllPageContainer: React.FC = () => {
   const { data, isLoading } = useGetOrdersQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
   });
-  const [triggerSync, { isLoading: isSyncing }] = useTriggerOrderSyncMutation();
-
-  useLoading(isSyncing);
-
   const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const totalCount = data?.total ?? 0;
 
@@ -153,12 +149,8 @@ export const OrdersAllPageContainer: React.FC = () => {
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}
-        onBack={() => localeNavigate(fromDashboard ? '/dashboard' : '/orders')}
+        onBack={fromDashboard ? () => localeNavigate('/dashboard') : undefined}
         onDownload={handleDownload}
-        onRefresh={() => {
-          void triggerSync();
-        }}
-        isRefreshing={isSyncing}
       />
     </EbayAccountGuard>
   );

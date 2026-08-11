@@ -3,6 +3,8 @@ import { Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CARD_ACTION_ICON_SIZE } from '../cardMetrics';
+
 import * as S from './ListingGroupCard.style';
 import type { ListingGroupCardProps } from './ListingGroupCard.types';
 
@@ -89,11 +91,22 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
             <S.StatItem>
               <Icon name="receipt" size={16} color="text.tertiary" />
               <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.card.tax')}: {group.fees.taxPercent}%
+                {t('listingSettingsGroup.card.fixedFee')}: ${group.fees.fixedFeeAmount}
               </Text>
             </S.StatItem>
           </S.StatColumn>
         </S.StatColumns>
+
+        <S.BottomRow>
+          <S.DetailAction>
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <S.ArrowSlot>
+              <Icon name="arrow-right" size={CARD_ACTION_ICON_SIZE} color="brand.primary" />
+            </S.ArrowSlot>
+          </S.DetailAction>
+        </S.BottomRow>
       </S.CardBody>
     </S.InteractiveCard>
   );

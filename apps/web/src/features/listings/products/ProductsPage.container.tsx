@@ -1,4 +1,4 @@
-import { formatCurrency, getLocaleConfig, Icon, IdBadge, Tooltip, useLoading } from '@repo/ui';
+import { formatCurrency, getLocaleConfig, IdBadge, useLoading } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +8,7 @@ import { ProductsPageComponent } from './ProductsPage.component';
 import * as S from './ProductsPage.style';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
+import { ProductTableCell } from '@/domain-ui';
 
 export const ProductsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
@@ -55,31 +56,19 @@ export const ProductsPageContainer: React.FC = () => {
       {
         key: 'product',
         header: t('listings.table.product'),
-        render: (_: any, product: any) => {
-          const displayName = product.title || t('translation:common.unknownProduct');
-          const truncated = displayName.length > 40 ? displayName.slice(0, 40) + '...' : displayName;
-          return (
-            <S.ProductCell>
-              <S.ProductImageWrapper>
-                {product.imageUrls?.[0] ? (
-                  <S.ProductImage src={product.imageUrls[0]} alt={product.title} />
-                ) : (
-                  <Icon name="image" />
-                )}
-              </S.ProductImageWrapper>
-              <S.ProductMainInfo>
-                {displayName.length > 40 ? (
-                  <Tooltip content={displayName} position="top" variant="dark">
-                    <S.ProductTitle>{truncated}</S.ProductTitle>
-                  </Tooltip>
-                ) : (
-                  <S.ProductTitle>{truncated}</S.ProductTitle>
-                )}
-                <S.ProductBrand>{product.brand || t('translation:common.notProvided')}</S.ProductBrand>
-              </S.ProductMainInfo>
-            </S.ProductCell>
-          );
-        },
+        // Same cell as the listings and orders tables. It used to slice the title
+        // at 40 chars in JS and only tooltip past that — so it printed "…" even
+        // when the column had room, and cut mid-word. The shared cell clamps in
+        // CSS and always carries the full title on the tooltip.
+        render: (_: any, product: any) => (
+          <ProductTableCell
+            title={product.title || t('translation:common.unknownProduct')}
+            imageUrl={product.imageUrls?.[0]}
+            subtitle={
+              <S.ProductBrand>{product.brand || t('translation:common.notProvided')}</S.ProductBrand>
+            }
+          />
+        ),
       },
       {
         key: 'asin',

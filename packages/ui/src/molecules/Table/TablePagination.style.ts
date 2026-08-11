@@ -1,18 +1,32 @@
 import styled from '@emotion/styled';
 
+import { IconButton } from '../../atoms/IconButton';
 import { tkn } from '../../theme/tkn';
 
-export const PaginationContainer = styled.div`
+import type { TablePaginationVariant } from './TablePagination.types';
+
+export const PaginationContainer = styled.div<{ $variant: TablePaginationVariant }>`
   display: flex;
   flex-direction: column;
+  gap: ${tkn('spacing.sm')};
   box-sizing: border-box;
   width: 100%;
   font-size: ${tkn('typography.fontSize.sm')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md+')};
+  padding: ${tkn('spacing.sm-md')} ${tkn('spacing.md+')};
   background: ${tkn('colors.surface.primary')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
 
-  @media (min-width: 40rem) {
+  ${({ $variant, theme }) =>
+    $variant === 'detached'
+      ? `
+        border: 0.0625rem solid ${theme.colors.border.primary};
+        border-radius: ${theme.radius.lg};
+        box-shadow: ${theme.shadows.sm};
+      `
+      : `
+        border-top: 0.0625rem solid ${theme.colors.border.secondary};
+      `}
+
+  @media (min-width: ${tkn('breakpoints.sm')}) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -30,6 +44,7 @@ export const PaginationLabel = styled.span`
   font-size: ${tkn('typography.fontSize.sm')};
   color: ${tkn('colors.text.tertiary')};
   font-weight: ${tkn('typography.fontWeight.medium')};
+  white-space: nowrap;
 
   span {
     font-weight: ${tkn('typography.fontWeight.semibold')};
@@ -37,8 +52,13 @@ export const PaginationLabel = styled.span`
   }
 `;
 
+/*
+ * Wide enough for the widest option ("100") plus the chevron. It was 4.5rem with
+ * an auto-width Select inside, so the control neither filled its slot nor had
+ * room for a three-digit value.
+ */
 export const SelectWrapper = styled.div`
-  width: 4.5rem;
+  width: 5.5rem;
   position: relative;
 `;
 
@@ -59,23 +79,23 @@ export const Navigation = styled.div`
   gap: ${tkn('spacing.2xs')};
 `;
 
-export const NavButton = styled.button`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  cursor: pointer;
-  padding: ${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.md')};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${tkn('colors.text.secondary')};
-  transition: all ${tkn('transitions.fast')};
+/** Page N of M — chevrons alone never said how much further the list goes. */
+export const PageCounter = styled.span`
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.text.primary')};
+  font-variant-numeric: tabular-nums;
+  padding: 0 ${tkn('spacing.xs')};
+  white-space: nowrap;
+`;
 
-  &:hover:not(:disabled) {
-    background: ${tkn('colors.background.tertiary')};
-    border-color: ${tkn('colors.text.tertiary')};
-    color: ${tkn('colors.text.primary')};
-  }
+/*
+ * Extends the IconButton atom — this was a raw styled.button re-implementing
+ * hover/disabled by hand and carrying no :focus-visible ring at all.
+ */
+export const NavButton = styled(IconButton)`
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.md')};
 
   &:disabled {
     opacity: 0.35;

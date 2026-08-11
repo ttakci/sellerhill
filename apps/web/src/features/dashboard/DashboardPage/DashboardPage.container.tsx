@@ -116,7 +116,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
   );
 
   const handleOrdersViewAll = useCallback(
-    () => localeNavigate(`/orders/all?${buildRangeParams('dateFrom', 'dateTo')}`),
+    () => localeNavigate(`/orders?${buildRangeParams('dateFrom', 'dateTo')}`),
     [localeNavigate, buildRangeParams],
   );
 

@@ -1,16 +1,16 @@
-import { type Theme } from '@emotion/react';
+import { css, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Text, tkn } from '@repo/ui';
 
 import type { OrderCardStatTone } from './OrderCard.types';
 
 /** Horizontal product card — mirrors ListingCard elevated language */
-export const Wrapper = styled.button`
+export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
   position: relative;
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.lg')};
   width: 100%;
   height: 100%;
   max-width: 100%;
@@ -21,7 +21,7 @@ export const Wrapper = styled.button`
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.lg')};
   box-shadow: ${tkn('shadows.sm')};
-  padding: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.lg')};
   box-sizing: border-box;
   transition:
     border-color ${tkn('transitions.fast')},
@@ -29,10 +29,14 @@ export const Wrapper = styled.button`
   font: inherit;
   color: inherit;
 
-  &:hover {
-    box-shadow: ${tkn('shadows.md')};
-    border-color: ${tkn('colors.brand.primary')};
-  }
+  ${({ $hoverEffect, theme }: { theme: Theme; $hoverEffect: boolean }) =>
+    $hoverEffect &&
+    css`
+      &:hover {
+        box-shadow: ${theme.shadows.md};
+        border-color: ${theme.colors.brand.primary};
+      }
+    `}
 
   &:focus-visible {
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
@@ -48,14 +52,9 @@ export const Image = styled.div`
   flex-shrink: 0;
   background: transparent;
   border-radius: ${tkn('radius.md')};
-  width: 5rem;
-  height: 5rem;
+  width: 10.5rem;
+  height: 10.5rem;
   align-self: flex-start;
-
-  @media (min-width: ${tkn('breakpoints.sm')}) {
-    width: 6.5rem;
-    height: 6.5rem;
-  }
 
   img {
     width: 100%;
@@ -80,7 +79,6 @@ export const Content = styled.div`
 export const HeaderBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 
@@ -90,6 +88,7 @@ export const TitleRow = styled.div`
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
+  margin-bottom: ${tkn('spacing.md')};
 `;
 
 export const Title = styled(Text)`
@@ -161,8 +160,8 @@ export const StatsGrid = styled.div`
   gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
   background: ${tkn('colors.background.tertiary')};
   border-radius: ${tkn('radius.md')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
-  margin-top: auto;
+  padding: ${tkn('spacing.sm-md')};
+  margin-top: ${tkn('spacing.sm')};
   flex-shrink: 0;
 `;
 
@@ -200,4 +199,18 @@ export const StatValue = styled(Text)<{ $tone: OrderCardStatTone }>`
     return theme.colors.text.primary;
   }};
   line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+export const Footer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  flex-shrink: 0;
+`;
+
+/** "Detay" label + arrow — the same trailing affordance the Settings carousels' cards use. */
+export const DetailAction = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
 `;

@@ -22,6 +22,7 @@ import {
   EbayAccountsAllDrawer,
   EbayAccountsDrawer,
   ListingGroupDrawer,
+  ListingGroupsAllDrawer,
   ListingGroupsDrawer,
   ProfileDrawer,
   StoreSettingsDrawer,
@@ -153,11 +154,11 @@ const BillingSection = ({ onManage }: { onManage: () => void }): React.ReactElem
     <SettingsCard
       variant="section"
       header={{
-        icon: 'receipt-text',
         title: t('billing:billing.settingsHub.title'),
       }}
     >
       <SettingsActionRow
+        icon="receipt-text"
         label={t('billing:billing.settingsHub.manage.title')}
         subtitle={t('billing:billing.settingsHub.manage.subtitle')}
         onClick={onManage}
@@ -166,31 +167,20 @@ const BillingSection = ({ onManage }: { onManage: () => void }): React.ReactElem
   );
 };
 
-const ListingGroupsSection = ({
-  onManage,
-  onCreate,
-}: {
-  onManage: () => void;
-  onCreate: () => void;
-}): React.ReactElement => {
+const ListingGroupsSection = ({ onManage }: { onManage: () => void }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
     <SettingsCard
       variant="section"
       header={{
-        icon: 'layers',
         title: t('translation:settingsHub.sections.listingGroups.title'),
       }}
     >
       <SettingsActionRow
+        icon="layers"
         label={t('translation:settingsHub.sections.listingGroups.manage')}
         subtitle={t('translation:settingsHub.sections.listingGroups.manageSubtitle')}
         onClick={onManage}
-      />
-      <SettingsActionRow
-        label={t('translation:settingsHub.sections.listingGroups.create')}
-        subtitle={t('translation:settingsHub.sections.listingGroups.createSubtitle')}
-        onClick={onCreate}
       />
     </SettingsCard>
   );
@@ -208,7 +198,6 @@ const AccountSecuritySection = ({
     <SettingsCard
       variant="section"
       header={{
-        icon: 'shield-check',
         title: t('translation:settingsHub.sections.account.title'),
       }}
     >
@@ -282,11 +271,10 @@ export const SettingsHubPageComponent = ({
           onOpenMessageTemplates={() => onOpenDrawer('buyerMessageTemplates')}
           onManageBlacklist={onManageBlacklist}
         />
-        <ListingGroupsSection onManage={onViewAllListingGroups} onCreate={onCreateListingGroup} />
-      </S.TwoColGrid>
-
-      <S.TwoColGrid>
-        <BillingSection onManage={() => onOpenDrawer('billing')} />
+        <S.ColumnStack>
+          <ListingGroupsSection onManage={onViewAllListingGroups} />
+          <BillingSection onManage={() => onOpenDrawer('billing')} />
+        </S.ColumnStack>
       </S.TwoColGrid>
 
       <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
@@ -353,6 +341,16 @@ export const SettingsHubPageComponent = ({
       <ListingGroupsDrawer
         isOpen={activeDrawer === 'listingGroupList'}
         onClose={onCloseDrawer}
+        groups={listingGroups}
+        predefinedTemplateNames={predefinedTemplateNames}
+        onEdit={onEditListingGroup}
+        onCreate={onCreateListingGroup}
+        onViewAll={() => onOpenDrawer('listingGroupsAll')}
+      />
+      <ListingGroupsAllDrawer
+        isOpen={activeDrawer === 'listingGroupsAll'}
+        onClose={onCloseDrawer}
+        onBack={() => onOpenDrawer('listingGroupList')}
         groups={listingGroups}
         predefinedTemplateNames={predefinedTemplateNames}
         onEdit={onEditListingGroup}

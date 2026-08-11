@@ -97,7 +97,10 @@ export { ThemeToggle } from './molecules/ThemeToggle';
 export { Table } from './molecules/Table';
 export type { BulkAction, TableColumn, TableProps } from './molecules/Table';
 export { TablePagination } from './molecules/Table/TablePagination.component';
-export type { TablePaginationProps } from './molecules/Table/TablePagination.types';
+export type {
+  TablePaginationProps,
+  TablePaginationVariant,
+} from './molecules/Table/TablePagination.types';
 
 export { SettingsCard } from './molecules/SettingsCard';
 export type { SettingsCardHeaderProps, SettingsCardProps, SettingsCardVariant } from './molecules/SettingsCard';

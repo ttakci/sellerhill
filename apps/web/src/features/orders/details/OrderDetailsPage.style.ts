@@ -105,14 +105,6 @@ export const SectionGrid = styled.div`
   }
 `;
 
-export const SectionCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  width: 100%;
-  min-width: 0;
-`;
-
 /** Wrapper for the shared EmptyState on the loading / not-found screens. */
 export const StateCard = styled(Card)`
   width: 100%;
@@ -130,21 +122,17 @@ export const FormulaOperator = styled(Text)`
   padding-bottom: ${tkn('spacing.2xs')};
 `;
 
-export const CardHeader = styled.div`
+/** Vertical rhythm for a SettingsCard body with multiple top-level children
+ *  (a sub-heading + its row list, a row list + its action button). */
+export const SectionContent = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: ${tkn('spacing.md')};
-  flex-wrap: wrap;
 `;
 
-export const CardHeaderLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
+/** Row list — matches the listing detail page's Meta rows exactly (same
+ *  border, padding, icon+label pairing) so the two detail pages read as one
+ *  design language. */
 export const MetaList = styled.div`
   display: flex;
   flex-direction: column;
@@ -152,26 +140,54 @@ export const MetaList = styled.div`
 `;
 
 export const MetaRow = styled.div`
-  display: grid;
-  grid-template-columns: minmax(6rem, 45%) minmax(0, 1fr);
-  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  align-items: start;
-  padding: ${tkn('spacing.sm')} 0;
-  border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')} 0;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
   &:last-child {
     border-bottom: none;
-    padding-bottom: 0;
   }
+`;
 
-  &:first-of-type {
-    padding-top: 0;
-  }
+/** Icon + label, left side of a Meta row. */
+export const MetaLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
 
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    grid-template-columns: 1fr;
-    gap: ${tkn('spacing.2xs')};
+export const MetaValue = styled.div`
+  min-width: 0;
+  max-width: 60%;
+  text-align: right;
+  overflow-wrap: anywhere;
+`;
+
+/**
+ * Same row chrome as MetaRow, but the value stacks BELOW the label instead
+ * of beside it — for content that reads better left-aligned across several
+ * lines (a shipping address, an email + phone pair) than squeezed right.
+ */
+export const MetaBlockRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  padding: ${tkn('spacing.md')} 0;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  &:last-child {
+    border-bottom: none;
   }
+`;
+
+export const MetaBlockValue = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
 `;
 
 export const AddressBlock = styled.div`

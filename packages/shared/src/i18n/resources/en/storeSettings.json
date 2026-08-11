@@ -19,7 +19,7 @@
     "blacklistType_brand_manufacturer": "Brand & manufacturer",
     "copyright": "© {{year}} Zonds Platform. All rights reserved.",
     "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
-    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost while an order's profit is still provisional and the Amazon order has not yet been placed.",
+    "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost. Used two ways: it raises your eBay listing price so this cost is covered, and — while an order's profit is still provisional and the Amazon order has not yet been placed — it estimates that order's profit.",
     "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
     "autoFulfillEnabledHint": "When on, Zonds buys the item on Amazon with your linked buyer account. Disable to order manually.",
     "autoFulfillEnabledInfo": "Enable this only after connecting and configuring an Amazon buyer account. Automatic ordering also requires that account's auto-fulfillment setting and spending cap to be enabled.",

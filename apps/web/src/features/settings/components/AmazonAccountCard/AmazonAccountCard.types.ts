@@ -13,6 +13,12 @@ export interface AmazonAccountCardView {
   status: AmazonAccountStatus;
   /** Reason the last verification failed — shown under an invalid card. */
   lastVerificationError?: string;
+  /** Whether a 2FA secret is stored for this account. */
+  hasTwoFactor: boolean;
+  /** A2 auto-fulfillment eligibility — see `AmazonAccountPublicDto`. */
+  autoFulfillEnabled: boolean;
+  /** Per-account spend ceiling (USD); only meaningful when `autoFulfillEnabled`. */
+  autoFulfillCapTotal: number | null;
 }
 
 export interface AmazonAccountCardProps {

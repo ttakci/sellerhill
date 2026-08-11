@@ -114,15 +114,23 @@ export const DataTableComponent = <T,>({
       )}
 
       {pagination && !isEmpty && (
-        <TablePagination
-          count={pagination.count}
-          page={pagination.page}
-          rowsPerPage={pagination.rowsPerPage}
-          onPageChange={pagination.onPageChange}
-          onRowsPerPageChange={pagination.onRowsPerPageChange}
-          labelRowsPerPage={pagination.labelRowsPerPage}
-          labelInfo={pagination.labelInfo}
-        />
+        <S.PaginationSlot>
+          {/*
+            Detached: here the pagination is a sibling of the table card / card
+            grid, not a footer inside the table's surface, so it carries its own
+            border and radius instead of a bare divider.
+          */}
+          <TablePagination
+            variant="detached"
+            count={pagination.count}
+            page={pagination.page}
+            rowsPerPage={pagination.rowsPerPage}
+            onPageChange={pagination.onPageChange}
+            onRowsPerPageChange={pagination.onRowsPerPageChange}
+            labelRowsPerPage={pagination.labelRowsPerPage}
+            labelInfo={pagination.labelInfo}
+          />
+        </S.PaginationSlot>
       )}
     </S.DataTableContainer>
   );

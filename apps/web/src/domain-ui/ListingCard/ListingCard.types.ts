@@ -45,7 +45,6 @@ export interface ListingCardProps {
   /** Optional status pill — omit when the list only shows one status (e.g. active). */
   status?: ListingCardStatus;
   soldCount?: number;
-  watchCount?: number;
   orientation: ListingCardOrientation;
   onClick?: () => void;
   className?: string;

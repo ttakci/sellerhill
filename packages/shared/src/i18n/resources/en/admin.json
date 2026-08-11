@@ -222,7 +222,8 @@
         "retention.llmUsageLogDays": "AI usage log (days)",
         "retention.usageEventsDays": "Cost events history (days)",
         "retention.buyerMessageLogDays": "Buyer message log (days)",
-        "retention.auditLogsDays": "Audit log (days)"
+        "retention.auditLogsDays": "Audit log (days)",
+        "retention.listingRevisionsDays": "Listing revisions (days)"
       }
     },
     "listingQuality": {

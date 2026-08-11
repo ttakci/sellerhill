@@ -4,6 +4,7 @@ import { ListingStatus, type ListingSettingsGroup, type ProductData } from '@rep
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBulkService, type BulkPriceQuantityItem } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
+import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import {
   applyListingOverrides,
@@ -28,6 +29,10 @@ export interface PendingListingUpdate {
   estimatedProfit: number;
   profitMargin: number;
   roi: number;
+  /** What eBay/the row held before this update — carried through only so
+   *  `recordRevisions` can log a from→to pair without a second read. */
+  previousPrice: number;
+  previousQuantity: number;
 }
 
 interface ListingRow extends ListingOverrideRow {
@@ -64,7 +69,8 @@ export class ProductSyncService {
     private readonly strategyService: ListingStrategyService,
     private readonly ebayService: EbayService,
     private readonly ebayBulkService: EbayBulkService,
-    private readonly listingsService: ListingsService
+    private readonly listingsService: ListingsService,
+    private readonly storeSettingsService: StoreSettingsService
   ) {}
 
   /**
@@ -120,11 +126,23 @@ export class ProductSyncService {
     // used to re-fetch the same rows for every listing.
     const groupCache = new Map<string, ListingSettingsGroup>();
     const accountCache = new Map<string, string | null>();
+    // One Amazon-tax-rate read per (user, store) instead of per listing — the
+    // same reasoning as groupCache: a shared ASIN listed by many sellers, or
+    // by one seller across several stores, must not re-resolve store settings
+    // for every listing it touches.
+    const taxRateCache = new Map<string, number>();
     const pending: PendingListingUpdate[] = [];
 
     for (const listing of listings) {
       try {
-        const update = await this.buildPendingUpdate(listing, asin, productInfo.data, groupCache, accountCache);
+        const update = await this.buildPendingUpdate(
+          listing,
+          asin,
+          productInfo.data,
+          groupCache,
+          accountCache,
+          taxRateCache
+        );
         if (update) {
           pending.push(update);
         }
@@ -181,6 +199,14 @@ export class ProductSyncService {
 
         await this.persistApplied(applied);
         await this.persistResolvedOfferIds(results.filter((result) => !result.ok && result.offerId));
+        // Best-effort — a history row is never worth failing a push eBay already
+        // accepted over. Every entry here already passed `hasCommerceDelta`, so
+        // this never logs a no-op tick.
+        await this.recordRevisions(applied.map((entry) => entry.update)).catch((err: unknown) => {
+          this.logger.warn(
+            `Failed to record listing revisions: ${err instanceof Error ? err.message : String(err)}`
+          );
+        });
 
         const failures = results.filter((result) => !result.ok);
         for (const failure of failures) {
@@ -202,7 +228,8 @@ export class ProductSyncService {
     asin: string,
     product: ProductData,
     groupCache: Map<string, ListingSettingsGroup>,
-    accountCache: Map<string, string | null>
+    accountCache: Map<string, string | null>,
+    taxRateCache: Map<string, number>
   ): Promise<PendingListingUpdate | null> {
     const groupKey = `${listing.user_id}:${listing.listing_settings_group_id}`;
     let group = groupCache.get(groupKey);
@@ -211,11 +238,33 @@ export class ProductSyncService {
       groupCache.set(groupKey, group);
     }
 
+    const taxRateKey = `${listing.user_id}:${listing.ebay_account_id ?? ''}`;
+    let amazonTaxRatePct = taxRateCache.get(taxRateKey);
+    if (amazonTaxRatePct === undefined) {
+      // Best-effort — a settings hiccup must degrade to "no tax factored in"
+      // for this one listing, never abort its price recompute (same rule as
+      // OrderSyncService.recomputeProfit's provisional-profit resolve).
+      try {
+        const settings = await this.storeSettingsService.getResolvedSettings(
+          listing.user_id,
+          listing.ebay_account_id
+        );
+        amazonTaxRatePct = Number(settings.amazonTaxRate) || 0;
+      } catch (err) {
+        this.logger.warn(
+          `Store settings resolve failed for tax rate (user ${listing.user_id}): ${err instanceof Error ? err.message : String(err)}`
+        );
+        amazonTaxRatePct = 0;
+      }
+      taxRateCache.set(taxRateKey, amazonTaxRatePct);
+    }
+
     const strategy = await this.strategyService.computePricing(
       listing.user_id,
       product,
       listing.listing_settings_group_id,
-      group
+      group,
+      amazonTaxRatePct
     );
     const resolved = applyListingOverrides(strategy, listing);
 
@@ -258,6 +307,8 @@ export class ProductSyncService {
       estimatedProfit: resolved.estimatedProfit,
       profitMargin: resolved.profitMargin,
       roi: resolved.roi,
+      previousPrice: Number(listing.price) || 0,
+      previousQuantity: Number(listing.quantity) || 0,
     };
   }
 
@@ -323,6 +374,35 @@ export class ProductSyncService {
        FROM (SELECT * FROM unnest($1::uuid[], $2::text[]) AS t(id, offer_id)) AS v
        WHERE l.id = v.id AND l.ebay_offer_id IS NULL`,
       [results.map((result) => result.listingId), results.map((result) => result.offerId)]
+    );
+  }
+
+  /**
+   * One row per listing whose price or quantity eBay just confirmed — the
+   * history behind the detail page's "Revisions" drawer. Same one-round-trip
+   * shape as `persistApplied`; `updates` is already filtered to listings eBay
+   * accepted (see the `applied` array in `flushUpdates`), so nothing here
+   * re-checks `hasCommerceDelta`.
+   */
+  private async recordRevisions(updates: PendingListingUpdate[]): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    await this.databaseService.query(
+      `INSERT INTO listing_revisions (
+         listing_id, previous_price, new_price, previous_quantity, new_quantity
+       )
+       SELECT * FROM unnest(
+         $1::uuid[], $2::numeric[], $3::numeric[], $4::int[], $5::int[]
+       ) AS t(listing_id, previous_price, new_price, previous_quantity, new_quantity)`,
+      [
+        updates.map((update) => update.listingId),
+        updates.map((update) => update.previousPrice),
+        updates.map((update) => update.price),
+        updates.map((update) => update.previousQuantity),
+        updates.map((update) => update.quantity),
+      ]
     );
   }
 }
