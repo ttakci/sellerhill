@@ -3,7 +3,7 @@ set -e
 
 echo ""
 echo "====================================="
-echo "  Zonds API - Starting"
+echo "  SellerHill API - Starting"
 echo "====================================="
 echo ""
 

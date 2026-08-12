@@ -12,9 +12,16 @@
       "emptySubtitle": "When you create listings, jobs appear here so you can follow progress and errors.",
       "emptyLoading": "Loading jobs…",
       "filters": {
-        "searchPlaceholder": "Search by job ID…",
+        "searchPlaceholder": "Search by ASIN…",
         "allStatuses": "All statuses",
-        "resultCount": "{{count}} jobs"
+        "resultCount": "{{count}} jobs",
+        "datePreset": {
+          "all": "All time",
+          "today": "Today",
+          "last7Days": "Last 7 days",
+          "last30Days": "Last 30 days",
+          "thisMonth": "This month"
+        }
       },
       "status": {
         "pending": "Pending",
@@ -55,7 +62,7 @@
         "notFoundTitle": "Job not found",
         "notFoundSubtitle": "This job may have been removed or you do not have access.",
         "jobId": "Job ID",
-        "cancel": "Cancel job",
+        "cancel": "Cancel",
         "cancelConfirm": "Stop this job? ASINs already listed stay listed — only the ones not yet processed are cancelled.",
         "cancelConfirmAction": "Stop job"
       },
@@ -67,6 +74,8 @@
         "empty": "No items found for this job.",
         "emptyTitle": "No items yet",
         "emptySubtitle": "Items appear as the job starts processing ASINs.",
+        "searchPlaceholder": "Search by ASIN or error message…",
+        "resultCount": "{{count}} items",
         "reason": "Reason",
         "reference": "Reference",
         "itemStatus": {
@@ -177,7 +186,7 @@
       "ebayStore": "eBay Store"
     },
     "tracking": {
-      "tracked": "Tracked by Zonds",
+      "tracked": "Tracked by SellerHill",
       "untracked": "Not tracked"
     },
     "status": {

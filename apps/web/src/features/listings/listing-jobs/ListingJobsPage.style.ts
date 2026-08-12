@@ -101,73 +101,39 @@ export const JobCard = styled(Card)`
   }
 `;
 
+/* Short job id top-left, status badge top-right — opposite corners of the
+   same row instead of a separate labeled meta row further down the card. */
 export const JobCardHeader = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
-/* Replaces the old text that looked like a link but sat inside an already
-   clickable card, so it was never independently focusable or actionable. */
-export const OpenAffordance = styled.span`
-  display: inline-flex;
-  align-items: center;
-  color: ${tkn('colors.text.tertiary')};
-  transition: color ${tkn('transitions.fast')};
-`;
-
-export const JobCardTitleRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-  flex-wrap: wrap;
-`;
-
 export const JobCardBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
 /*
- * Progress ring. Replaces the full-width bar: a horizontal line pinned the card
- * into a "header / line / stats / footer" stack with four equal-weight rows and
- * no focal point. The ring puts the one number that matters in the centre and
- * frees the row beside it for the count, so the card reads in one glance.
- *
- * Pure conic-gradient — no SVG, no extra dependency, and both colours are tokens.
+ * Replaces the old full-width bar: a horizontal line pinned the card into a
+ * "header / line / stats / footer" stack with four equal-weight rows and no
+ * focal point. The shared JobProgressRing puts the one number that matters
+ * in the centre and frees the row beside it for the count, so the card reads
+ * in one glance. Ring + counts on the left, the created date on the right.
  */
-export const ProgressRing = styled.div<{ $percent: number }>`
-  position: relative;
-  width: 3.5rem;
-  height: 3.5rem;
-  flex-shrink: 0;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: ${({ $percent, theme }) =>
-    `conic-gradient(${theme.colors.brand.primary} ${$percent}%, ${theme.colors.background.tertiary} 0)`};
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0.3125rem;
-    border-radius: 50%;
-    background: ${tkn('colors.surface.primary')};
-  }
-`;
-
-export const ProgressRingValue = styled(UIText)`
-  position: relative;
-  line-height: 1;
-`;
-
-/** Ring + the counts that sit beside it. */
 export const ProgressRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  min-width: 0;
+`;
+
+export const ProgressMain = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.md')};
@@ -181,32 +147,72 @@ export const ProgressCounts = styled.div`
   min-width: 0;
 `;
 
-/*
- * Success / failed / remaining. Was an inline run separated by a middot with
- * every value at caption size, so a figure never stood out from its own label.
- */
-export const StatsInline = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: ${tkn('spacing.xs')} ${tkn('spacing.md')};
-  margin-top: ${tkn('spacing.2xs')};
+/* Success / failed / remaining — label above value, matching ListingCard's
+   StatsGrid so every card family reads a stat the same way. auto-fit (not a
+   fixed repeat(3)) so 2 cells split the row evenly instead of leaving a dead
+   third column when "remaining" is hidden (job fully processed). */
+export const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: 0;
+  background: ${tkn('colors.background.tertiary')};
+  border: 0.0625rem solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.sm')};
+  /* Roomier interior so it reads as a real box, not a thin strip. */
+  padding: ${tkn('spacing.sm-md')};
+  /* Only above — it is the last element in JobCardBody now, so the space
+     after it is owned by Footer below, kept tight there instead. */
+  margin-top: ${tkn('spacing.xs')};
+  flex-shrink: 0;
 `;
 
-export const StatInline = styled.div`
-  display: inline-flex;
-  align-items: baseline;
+export const StatCell = styled.div`
+  text-align: center;
+  display: flex;
+  flex-direction: column;
   gap: ${tkn('spacing.2xs')};
+  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
   min-width: 0;
+
+  &:not(:last-child) {
+    border-right: 0.0625rem solid ${tkn('colors.border.secondary')};
+  }
 `;
 
-export const JobCardFooter = styled.div`
+export const StatLabel = styled(UIText)`
+  text-transform: uppercase;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+export const StatValue = styled(UIText)<{ $tone?: 'default' | 'positive' | 'negative' }>`
+  color: ${({ $tone, theme }) => {
+    if ($tone === 'positive') {
+      return theme.colors.semantic.success;
+    }
+    if ($tone === 'negative') {
+      return theme.colors.semantic.error;
+    }
+    return theme.colors.text.primary;
+  }};
+  line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+export const Footer = styled.div`
+  margin-top: auto;
+  /* JobCard's own flex gap already separates this from the stats box above —
+     no extra padding on top of it, so the gap after the box stays tight. */
   display: flex;
+  justify-content: flex-end;
   align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  padding-top: ${tkn('spacing.sm')};
-  border-top: 0.0625rem solid ${tkn('colors.border.secondary')};
+  flex-shrink: 0;
+`;
+
+/** "Detay" label + arrow — the same trailing affordance ListingCard/OrderCard use. */
+export const DetailAction = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
 `;
 
 /** Compact progress cell for table */

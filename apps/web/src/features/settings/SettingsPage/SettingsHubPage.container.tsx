@@ -15,6 +15,7 @@ import { GLOBAL_SCOPE } from '../drawers/storeScope';
 import { SettingsHubPageComponent } from './SettingsHubPage.component';
 import type { SettingsDrawerKey } from './SettingsHubPage.types';
 
+import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetAmazonAccountsQuery } from '@/features/amazon/api/amazon.api';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
@@ -195,35 +196,37 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   );
 
   return (
-    <SettingsHubPageComponent
-      profile={profile ?? null}
-      ebayAccounts={ebayData?.items ?? []}
-      amazonAccounts={amazonData ?? []}
-      listingGroups={listingGroupsData ?? []}
-      activeDrawer={activeDrawer}
-      onOpenDrawer={handleOpenDrawer}
-      onCloseDrawer={handleCloseDrawer}
-      onEditListingGroup={handleEditListingGroup}
-      onEditAmazon={handleEditAmazon}
-      onViewAllListingGroups={handleViewAllListingGroups}
-      onCreateListingGroup={handleCreateListingGroup}
-      onConnectEbay={handleConnectEbay}
-      isImpersonatingAdmin={isImpersonatingAdmin}
-      isDeactivateModalOpen={isDeactivateModalOpen}
-      onOpenDeactivateModal={handleOpenDeactivateModal}
-      onCloseDeactivateModal={handleCloseDeactivateModal}
-      storeConfigs={storeConfigs}
-      availableStores={availableStores}
-      predefinedTemplateNames={predefinedTemplateNames}
-      editingGroupId={editingGroupId}
-      editingAmazonAccount={editingAmazonAccount}
-      storeScope={storeScope}
-      onSelectStoreScope={setStoreScope}
-      onManageBlacklist={handleManageBlacklist}
-      onBackToStoreSettings={handleBackToStoreSettings}
-      buyerMessageTemplates={buyerMessageTemplatesData ?? []}
-      editingTemplateId={editingTemplateId}
-      onEditBuyerMessageTemplate={handleEditBuyerMessageTemplate}
-    />
+    <EbayAccountGuard>
+      <SettingsHubPageComponent
+        profile={profile ?? null}
+        ebayAccounts={ebayData?.items ?? []}
+        amazonAccounts={amazonData ?? []}
+        listingGroups={listingGroupsData ?? []}
+        activeDrawer={activeDrawer}
+        onOpenDrawer={handleOpenDrawer}
+        onCloseDrawer={handleCloseDrawer}
+        onEditListingGroup={handleEditListingGroup}
+        onEditAmazon={handleEditAmazon}
+        onViewAllListingGroups={handleViewAllListingGroups}
+        onCreateListingGroup={handleCreateListingGroup}
+        onConnectEbay={handleConnectEbay}
+        isImpersonatingAdmin={isImpersonatingAdmin}
+        isDeactivateModalOpen={isDeactivateModalOpen}
+        onOpenDeactivateModal={handleOpenDeactivateModal}
+        onCloseDeactivateModal={handleCloseDeactivateModal}
+        storeConfigs={storeConfigs}
+        availableStores={availableStores}
+        predefinedTemplateNames={predefinedTemplateNames}
+        editingGroupId={editingGroupId}
+        editingAmazonAccount={editingAmazonAccount}
+        storeScope={storeScope}
+        onSelectStoreScope={setStoreScope}
+        onManageBlacklist={handleManageBlacklist}
+        onBackToStoreSettings={handleBackToStoreSettings}
+        buyerMessageTemplates={buyerMessageTemplatesData ?? []}
+        editingTemplateId={editingTemplateId}
+        onEditBuyerMessageTemplate={handleEditBuyerMessageTemplate}
+      />
+    </EbayAccountGuard>
   );
 };

@@ -9,7 +9,7 @@ import { OPERATOR_SURFACE_KEY } from './operator-surface.decorator';
 /**
  * Authentication + account-scope separation.
  *
- * Authentication is Passport's; the second half is the rule that a Zonds
+ * Authentication is Passport's; the second half is the rule that a SellerHill
  * account is either a seller account or a staff account, never both. Staff
  * (ADMIN / SUPPORT) are refused on every authenticated route that is not
  * explicitly marked `@OperatorSurface()`, so the seller app is unreachable

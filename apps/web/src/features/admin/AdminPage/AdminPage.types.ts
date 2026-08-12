@@ -77,13 +77,15 @@ export interface AdminPageComponentProps {
   budgetColumns: TableColumn<EbayCallBudgetStatusDto>[];
   failureColumns: TableColumn<AdminListingFailureDto>[];
   settingGroups: SettingGroup[];
+  /** Categories currently collapsed in the Settings tab accordion. Absent = expanded. */
+  collapsedSettingCategories: Set<PlatformSettingCategory>;
+  onToggleSettingCategory: (category: PlatformSettingCategory) => void;
   settingDrafts: Record<string, string>;
   isSavingSetting: boolean;
   emailTestResult: { ok: boolean; error: string | null } | null;
   isTestingEmail: boolean;
   proxyForm: ProxyFormState;
   isSavingProxy: boolean;
-  onTabChange: (tab: AdminTabId) => void;
   onProxyFieldChange: (field: keyof ProxyFormState, value: string) => void;
   onProxySubmit: () => void;
   onSettingDraftChange: (key: string, value: string) => void;

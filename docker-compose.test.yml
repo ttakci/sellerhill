@@ -1,5 +1,5 @@
 # ============================================
-# Zonds — TEST / SANDBOX Docker Compose (Coolify)
+# SellerHill — TEST / SANDBOX Docker Compose (Coolify)
 #
 # Same images and same code as docker-compose.production.yml; only the
 # configuration differs. Use this for the VPS test deployment:
@@ -39,7 +39,7 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_DB: 0
 
-      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://zonds.takci.cloud)}
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://sellerhill.takci.cloud)}
       CORS_ORIGINS: ${CORS_ORIGINS:-}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
@@ -170,7 +170,7 @@ services:
       ENVIRONMENT: test
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
-      - api_logs:/var/log/zonds-api:ro
+      - api_logs:/var/log/sellerhill-api:ro
       - promtail_positions:/tmp/positions
     command: -config.expand-env=true -config.file=/etc/promtail/config.yml
     networks:

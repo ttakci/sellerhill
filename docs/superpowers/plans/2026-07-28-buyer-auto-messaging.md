@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Let Zonds users (eBay dropshipping sellers) opt into automated, template-driven buyer messages on four order lifecycle events, configured per-store in Store Settings.
+**Goal:** Let SellerHill users (eBay dropshipping sellers) opt into automated, template-driven buyer messages on four order lifecycle events, configured per-store in Store Settings.
 
 **Architecture:** Order lifecycle seams enqueue a `buyer-message` BullMQ job; a worker resolves the per-event config + template (system constant or user custom), renders placeholders, and sends via eBay's REST Message API behind a `BuyerMessagingProvider` port. Config lives in `store_settings.buyer_messaging` JSONB (global + per-store, row-level resolve); custom templates in a `buyer_message_templates` table; an append-only `buyer_message_log` provides idempotency + audit. System templates are code constants in `packages/shared`.
 

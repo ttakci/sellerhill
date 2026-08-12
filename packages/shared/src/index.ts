@@ -57,6 +57,9 @@ export * from './domain/orders/index';
 // Domain - Dashboard
 export * from './domain/dashboard/index';
 
+// Domain - Action Center
+export * from './domain/action-center/index';
+
 // Domain - Amazon
 export * from './domain/amazon/index';
 

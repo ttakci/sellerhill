@@ -5,7 +5,7 @@
  */
 
 import type { ProfileDto } from '@repo/shared';
-import { PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
+import { InfoMessage, PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -30,8 +30,6 @@ import {
 
 import * as S from './SettingsHubPage.style';
 import type { SettingsHubPageComponentProps } from './SettingsHubPage.types';
-
-import { BillingDrawer } from '@/features/billing';
 
 const PersonalInfoSection = ({
   profile,
@@ -144,25 +142,9 @@ const StoreManagementSection = ({
         subtitle={t('translation:settingsHub.sections.storeManagement.storeSettingsSubtitle')}
         onClick={onOpenStoreSettings}
       />
-    </SettingsCard>
-  );
-};
-
-const BillingSection = ({ onManage }: { onManage: () => void }): React.ReactElement => {
-  const { t } = useTranslation(['translation', 'billing']);
-  return (
-    <SettingsCard
-      variant="section"
-      header={{
-        title: t('billing:billing.settingsHub.title'),
-      }}
-    >
-      <SettingsActionRow
-        icon="receipt-text"
-        label={t('billing:billing.settingsHub.manage.title')}
-        subtitle={t('billing:billing.settingsHub.manage.subtitle')}
-        onClick={onManage}
-      />
+      <S.SectionInfoMessage>
+        <InfoMessage>{t('translation:settingsHub.sections.storeManagement.infoMessage')}</InfoMessage>
+      </S.SectionInfoMessage>
     </SettingsCard>
   );
 };
@@ -273,11 +255,9 @@ export const SettingsHubPageComponent = ({
         />
         <S.ColumnStack>
           <ListingGroupsSection onManage={onViewAllListingGroups} />
-          <BillingSection onManage={() => onOpenDrawer('billing')} />
+          <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
         </S.ColumnStack>
       </S.TwoColGrid>
-
-      <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
 
       <ProfileDrawer isOpen={activeDrawer === 'profile'} onClose={onCloseDrawer} profile={profile ?? undefined} />
       <EbayAccountsDrawer
@@ -331,7 +311,6 @@ export const SettingsHubPageComponent = ({
         selectedScope={storeScope}
       />
       <ChangePasswordDrawer isOpen={activeDrawer === 'password'} onClose={onCloseDrawer} />
-      <BillingDrawer isOpen={activeDrawer === 'billing'} onClose={onCloseDrawer} />
 
       <ListingGroupDrawer
         isOpen={activeDrawer === 'listingGroupCreate' || activeDrawer === 'listingGroupEdit'}

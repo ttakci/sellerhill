@@ -118,6 +118,8 @@ export enum ProfitBasis {
 export interface OrderDto {
   id: string;
   ebayOrderId: string;
+  /** The connected eBay store this order belongs to. Drives per-order currency resolution (multi-store sellers). */
+  ebayAccountId?: string;
   createdAt: string;
   isTracked: boolean;
 

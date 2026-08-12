@@ -182,7 +182,7 @@ export class EmailService {
 
     try {
       await resolved.transporter.sendMail({
-        from: `"Zonds" <${resolved.from}>`,
+        from: `"SellerHill" <${resolved.from}>`,
         to,
         subject,
         html,

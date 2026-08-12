@@ -4,18 +4,37 @@ import {
   ConfirmModal,
   DataTable,
   EmptyState,
-  Icon,
+  Icon, type IconName,
   IdBadge,
   PageHeader,
-  ProgressBar,
+  SearchField,
+  SettingsCard,
   StatusBadge,
   Text,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { JobProgressRing } from '../shared/JobProgressRing';
+
 import * as S from './ListingJobDetailsPage.style';
 import type { ListingJobDetailsPageComponentProps } from './ListingJobDetailsPage.types';
+
+const jobMetaRow = (
+  icon: IconName,
+  label: string,
+  value: React.ReactNode
+): React.ReactElement => (
+  <S.MetaRow>
+    <S.MetaLabel>
+      <Icon name={icon} size={16} color="brand.primary" />
+      <Text variant="body-sm" color="text.secondary">
+        {label}
+      </Text>
+    </S.MetaLabel>
+    <S.MetaValue>{value}</S.MetaValue>
+  </S.MetaRow>
+);
 
 export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageComponentProps> = ({
   jobId,
@@ -40,6 +59,10 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   itemFailureReference,
   pagination,
   paginatedItems,
+  itemSearch,
+  onItemSearchChange,
+  onClearItemSearch,
+  filteredItemCount,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -69,46 +92,81 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   const percent = job ? formatPercent(job) : 0;
   const shortId = jobId.slice(0, 8);
 
-  const renderItemCard = (item: ListingJobItemDto) => (
-    <S.ItemCard key={item.id} variant="elevated">
-      <S.ItemCardHeader>
-        <S.ItemIds>
-          <IdBadge id={item.asin} storeType="amazon" size="sm" />
-          {item.ebayItemId ? <IdBadge id={item.ebayItemId} storeType="ebay" size="sm" /> : null}
-        </S.ItemIds>
-        <StatusBadge status={String(item.status).toLowerCase()} size="sm">
-          {itemStatusLabel(item.status)}
-        </StatusBadge>
-      </S.ItemCardHeader>
-      {itemFailureLabel(item) ? (
-        <S.FailureCell>
-          <S.ErrorBox>{itemFailureLabel(item)}</S.ErrorBox>
-          {itemFailureReference(item) ? (
-            <Text variant="caption" color="text.tertiary">
-              {t('listings.jobs.items.reference')}: {itemFailureReference(item)}
-            </Text>
-          ) : null}
-        </S.FailureCell>
-      ) : null}
-    </S.ItemCard>
-  );
+  const renderItemCard = (item: ListingJobItemDto) => {
+    const reason = itemFailureLabel(item);
+    const reference = itemFailureReference(item);
 
-  const itemsEmpty = (
-    <EmptyState
-      icon={isLoading ? 'loader' : 'inventory'}
-      title={
-        isLoading
-          ? t('translation:common.loading')
-          : t('listings.jobs.items.emptyTitle')
-      }
-      description={
-        isLoading
-          ? t('listings.jobs.details.subtitle')
-          : t('listings.jobs.items.emptySubtitle')
-      }
-      size="md"
-    />
-  );
+    return (
+      <SettingsCard key={item.id} variant="section">
+        <S.ItemCardHeader>
+          <StatusBadge status={String(item.status).toLowerCase()} size="sm">
+            {itemStatusLabel(item.status)}
+          </StatusBadge>
+        </S.ItemCardHeader>
+
+        <S.MetaList>
+          {jobMetaRow('barcode', t('listings.jobs.items.asin'), (
+            <IdBadge id={item.asin} storeType="amazon" size="sm" />
+          ))}
+          {item.ebayItemId
+            ? jobMetaRow('tag', t('listings.jobs.items.ebayId'), (
+                <IdBadge id={item.ebayItemId} storeType="ebay" size="sm" />
+              ))
+            : null}
+          {reason
+            ? jobMetaRow('alert-triangle', t('listings.jobs.items.reason'), (
+                <Text variant="body-sm" color="semantic.error">
+                  {reason}
+                </Text>
+              ))
+            : null}
+          {reference
+            ? jobMetaRow('file-text', t('listings.jobs.items.reference'), (
+                <Text variant="caption" color="text.tertiary">
+                  {reference}
+                </Text>
+              ))
+            : null}
+        </S.MetaList>
+      </SettingsCard>
+    );
+  };
+
+  const hasActiveItemSearch = Boolean(itemSearch.trim());
+  const isItemFilterEmpty = !isLoading && items.length > 0 && filteredItemCount === 0;
+
+  const itemsEmpty = (() => {
+    if (isLoading) {
+      return (
+        <EmptyState
+          icon="loader"
+          title={t('translation:common.loading')}
+          description={t('listings.jobs.details.subtitle')}
+          size="md"
+        />
+      );
+    }
+    if (isItemFilterEmpty) {
+      return (
+        <EmptyState
+          icon="search"
+          title={t('listings.empty.filtersTitle')}
+          description={t('listings.empty.filtersSubtitle')}
+          action={t('listings.empty.filtersAction')}
+          onAction={onClearItemSearch}
+          size="md"
+        />
+      );
+    }
+    return (
+      <EmptyState
+        icon="inventory"
+        title={t('listings.jobs.items.emptyTitle')}
+        description={t('listings.jobs.items.emptySubtitle')}
+        size="md"
+      />
+    );
+  })();
 
   return (
     <S.Container>
@@ -121,82 +179,76 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
 
       <S.SummaryCard variant="elevated">
         <S.SummaryTop>
-          <S.SummaryTitleBlock>
-            <S.SummaryTitleRow>
-              <S.MonoId variant="body" weight="semibold" color="text.primary">
-                {shortId}…
-              </S.MonoId>
-              {job ? (
-                <StatusBadge status={String(job.status).toLowerCase()} size="sm">
-                  {jobStatusLabel(job.status)}
-                </StatusBadge>
-              ) : null}
-            </S.SummaryTitleRow>
-            {job ? (
-              <Text variant="caption" color="text.secondary">
-                {formatJobDate(job.createdAt)}
-              </Text>
-            ) : null}
-          </S.SummaryTitleBlock>
-          <S.SummaryActions>
-            {canCancel ? (
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={onCancelRequest}
-                isLoading={isCancelling}
-                disabled={isCancelling}
-              >
-                <Icon name="x-circle" size={16} />
-                <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
-              </Button>
-            ) : null}
-          </S.SummaryActions>
+          <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
+            {shortId}
+          </S.MonoId>
+          {job ? (
+            <StatusBadge status={String(job.status).toLowerCase()} size="sm">
+              {jobStatusLabel(job.status)}
+            </StatusBadge>
+          ) : null}
         </S.SummaryTop>
 
         {job ? (
           <>
-            <S.ProgressBlock>
-              <S.ProgressMeta>
-                <Text variant="caption" color="text.secondary" weight="medium">
-                  {job.processedCount}/{job.totalAsins}
+            <S.ProgressRow>
+              <S.ProgressMain>
+                <JobProgressRing percent={percent} />
+                <Text variant="body" weight="semibold" numeric>
+                  {job.processedCount}/{job.totalAsins} ASIN
                 </Text>
-                <Text variant="caption" weight="semibold" color="brand.primary">
-                  {percent}%
-                </Text>
-              </S.ProgressMeta>
-              <ProgressBar value={percent} size="sm" />
-            </S.ProgressBlock>
+              </S.ProgressMain>
+              <Text variant="caption" color="text.tertiary">
+                {formatJobDate(job.createdAt)}
+              </Text>
+            </S.ProgressRow>
 
-            <S.MetricsInline>
-              <S.MetricInline>
-                <Text variant="caption" weight="semibold" color="text.primary">
-                  {job.totalAsins}
-                </Text>
-                <Text variant="caption" color="text.tertiary">
+            <S.StatsGrid>
+              <S.StatCell>
+                <S.StatLabel variant="caption" color="text.tertiary">
                   {t('listings.jobs.table.total')}
-                </Text>
-              </S.MetricInline>
-              <S.DotSep aria-hidden>·</S.DotSep>
-              <S.MetricInline>
-                <Text variant="caption" weight="semibold" color="semantic.success">
-                  {job.successCount}
-                </Text>
-                <Text variant="caption" color="text.tertiary">
+                </S.StatLabel>
+                <S.StatValue variant="body-sm" weight="bold" numeric>
+                  {job.totalAsins}
+                </S.StatValue>
+              </S.StatCell>
+              <S.StatCell>
+                <S.StatLabel variant="caption" color="text.tertiary">
                   {t('listings.jobs.stats.success')}
-                </Text>
-              </S.MetricInline>
-              <S.DotSep aria-hidden>·</S.DotSep>
-              <S.MetricInline>
-                <Text variant="caption" weight="semibold" color="semantic.error">
-                  {job.failedCount}
-                </Text>
-                <Text variant="caption" color="text.tertiary">
+                </S.StatLabel>
+                <S.StatValue variant="body-sm" weight="bold" $tone="positive" numeric>
+                  {job.successCount}
+                </S.StatValue>
+              </S.StatCell>
+              <S.StatCell>
+                <S.StatLabel variant="caption" color="text.tertiary">
                   {t('listings.jobs.stats.failed')}
-                </Text>
-              </S.MetricInline>
-            </S.MetricsInline>
+                </S.StatLabel>
+                <S.StatValue
+                  variant="body-sm"
+                  weight="bold"
+                  $tone={job.failedCount > 0 ? 'negative' : 'default'}
+                  numeric
+                >
+                  {job.failedCount}
+                </S.StatValue>
+              </S.StatCell>
+            </S.StatsGrid>
           </>
+        ) : null}
+
+        {canCancel ? (
+          <S.SummaryFooter>
+            <Button
+              variant="danger-tint"
+              size="small"
+              onClick={onCancelRequest}
+              isLoading={isCancelling}
+              disabled={isCancelling}
+            >
+              <Text variant="body-sm">{t('listings.jobs.details.cancel')}</Text>
+            </Button>
+          </S.SummaryFooter>
         ) : null}
       </S.SummaryCard>
 
@@ -210,6 +262,23 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           </Text>
         </S.SectionHeader>
 
+        {items.length > 0 || hasActiveItemSearch ? (
+          <S.FilterBar>
+            <S.SearchWrapper>
+              <SearchField
+                value={itemSearch}
+                onChange={onItemSearchChange}
+                placeholder={t('listings.jobs.items.searchPlaceholder')}
+                size="medium"
+                fullWidth
+              />
+            </S.SearchWrapper>
+            <S.FilterResultCount variant="caption" weight="medium" color="text.secondary">
+              {t('listings.jobs.items.resultCount', { count: filteredItemCount })}
+            </S.FilterResultCount>
+          </S.FilterBar>
+        ) : null}
+
         <DataTable
           columns={columns}
           data={paginatedItems}
@@ -217,7 +286,7 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
           viewMode={viewMode}
           onViewModeChange={onViewModeChange}
           defaultViewMode="grid"
-          hideViewToggle={items.length === 0 && !isLoading}
+          hideViewToggle={filteredItemCount === 0 && !isLoading}
           emptyContent={itemsEmpty}
           emptyMessage={t('listings.jobs.items.empty')}
           pagination={pagination}

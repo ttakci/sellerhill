@@ -9,7 +9,7 @@ export interface AppRedisOptions extends RedisOptions {
 
 export function getRedisOptions(config: ConfigService): AppRedisOptions {
   const url = config.get<string>('REDIS_URL');
-  const keyPrefix = config.get<string>('REDIS_KEY_PREFIX', 'zonds');
+  const keyPrefix = config.get<string>('REDIS_KEY_PREFIX', 'sellerhill');
   const common: AppRedisOptions = {
     host: config.get<string>('REDIS_HOST', 'localhost'),
     port: config.get<number>('REDIS_PORT', 6379),

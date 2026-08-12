@@ -7,11 +7,11 @@
 
 ## 1. Context & Goal
 
-Zonds users are dropshipping eBay sellers. Competitors optionally auto-message buyers at lifecycle moments — "thank you for your order" on purchase, "your item shipped" with tracking, "delivered / hope you enjoy it" on delivery. This spec adds that capability to Zonds.
+SellerHill users are dropshipping eBay sellers. Competitors optionally auto-message buyers at lifecycle moments — "thank you for your order" on purchase, "your item shipped" with tracking, "delivered / hope you enjoy it" on delivery. This spec adds that capability to SellerHill.
 
-**Goal:** Let a Zonds user (eBay seller) opt into automated, template-driven buyer messages on four order lifecycle events, configured in **Store Settings** (global + per-eBay-store, matching the existing `store_settings` pattern). Per event: independent enable/disable + choose a predefined system template **or** a custom template they author.
+**Goal:** Let a SellerHill user (eBay seller) opt into automated, template-driven buyer messages on four order lifecycle events, configured in **Store Settings** (global + per-eBay-store, matching the existing `store_settings` pattern). Per event: independent enable/disable + choose a predefined system template **or** a custom template they author.
 
-**Why it matters:** Reduces seller manual work, improves buyer experience/satisfaction, and brings Zonds to feature-parity with competitors on a standard post-sale touchpoint.
+**Why it matters:** Reduces seller manual work, improves buyer experience/satisfaction, and brings SellerHill to feature-parity with competitors on a standard post-sale touchpoint.
 
 ## 2. Non-Goals (explicitly out of scope)
 
@@ -27,7 +27,7 @@ Zonds users are dropshipping eBay sellers. Competitors optionally auto-message b
 - `sendMessage` **can start a conversation** ("start a conversation with another user, or send a message in an existing conversation"). The sole constraint is that the recipient must have an **order relationship** with the sender (an `orderId`/`lineItemId` context). We always have one. ([Sell Communications guide](https://developer.ebay.com/develop/guides-v2/communications/sell-communications-guide))
 - **Legacy Trading API** (`AddMemberMessageAAQToPartner`) is the proven fallback for the same use case (post-sale buyer follow-up, 90-day window) but is being decommissioned field-by-field through 2025–2026 and requires XML. ([API Deprecation Status](https://developer.ebay.com/develop/get-started/api-deprecation-status))
 - **Product caveat — eBay auto-notifies on shipped:** when an order is marked shipped via the Fulfillment API (`createShippingFulfillment`), eBay already sends the buyer a tracking notification. A redundant "shipped" message risks spam/seller-defect perception. **Mitigation:** the `shipped` system template is deliberately distinct in tone/content (warm "on its way" rather than repeating the tracking number), and the FE shows an informational hint. The event remains opt-in per the user's explicit request.
-- **Auth:** uses the per-eBay-account user access token Zonds already holds (same token model as the existing Sell API calls).
+- **Auth:** uses the per-eBay-account user access token SellerHill already holds (same token model as the existing Sell API calls).
 
 **Decision:** implement against the **REST Message API** behind a `BuyerMessagingProvider` port. v1 ships a single `EbayMessageApiProvider`; the port lets a Trading fallback be added later without touching call sites.
 

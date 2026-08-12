@@ -4,6 +4,7 @@ import { EbayAccountStatus, extractCorrelationId, generateCorrelationId } from '
 import { Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { withCorrelation } from '../../common/observability/correlation.context';
 
 import { OrderSyncService, type EbayAccountForSync } from './order-sync.service';
@@ -63,14 +64,23 @@ export class OrderSyncProcessorService extends WorkerHost {
     this.logger.log(`Found ${accounts.length} users with active eBay accounts`);
 
     for (const { user_id } of accounts) {
-      await this.syncSingleUser(user_id);
+      const { budgetExhausted } = await this.syncSingleUser(user_id);
+      if (budgetExhausted) {
+        // Shared per-application quota — every remaining account would fail
+        // the same acquire this tick. Stop now instead of logging N identical
+        // exhaustion warnings; the next cron tick picks up where this left off.
+        this.logger.warn(
+          'eBay Fulfillment call budget exhausted — stopping this order-sync tick early; remaining accounts resume next tick.'
+        );
+        break;
+      }
     }
   }
 
   /**
    * Sync orders for a single user
    */
-  private async syncSingleUser(userId: string): Promise<number> {
+  private async syncSingleUser(userId: string): Promise<{ total: number; budgetExhausted: boolean }> {
     const accounts = await this.databaseService.query<EbayAccountForSync>(
       `SELECT id, user_id, marketplace_id, access_token, refresh_token,
               access_token_expires_at, created_at, status, last_ebay_sync_at
@@ -80,7 +90,7 @@ export class OrderSyncProcessorService extends WorkerHost {
 
     if (accounts.length === 0) {
       this.logger.debug(`No active accounts for user ${userId}`);
-      return 0;
+      return { total: 0, budgetExhausted: false };
     }
 
     let total = 0;
@@ -89,12 +99,16 @@ export class OrderSyncProcessorService extends WorkerHost {
         const count = await this.orderSyncService.syncOrdersForAccount(account);
         total += count;
       } catch (error: unknown) {
+        if (error instanceof EbayBudgetExhaustedError) {
+          this.logger.warn(`Order sync deferred for account ${account.id} — ${error.message}`);
+          return { total, budgetExhausted: true };
+        }
         const msg = error instanceof Error ? error.message : String(error);
         this.logger.error(`Order sync failed for account ${account.id}: ${msg}`);
       }
     }
 
     this.logger.log(`Synced ${total} orders for user ${userId}`);
-    return total;
+    return { total, budgetExhausted: false };
   }
 }

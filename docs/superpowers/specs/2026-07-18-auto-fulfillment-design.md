@@ -32,13 +32,13 @@ Second of four sequenced specs. A1 (net-profit correctness) and A1.1 (estimated 
 | B | Shared LLM infra (`LlmClient`) + content-AI refactor | Future |
 | C | Assistant backend (RAG chatbot + ticket escalation) | Future |
 
-A2 turns Zonds from "report your manual Amazon orders" into "Zonds places the Amazon order for you." It carries **real-money spend and a real Amazon-ban risk** that A1/A1.1 did not, so guardrails and anti-detection are first-class concerns, not afterthoughts.
+A2 turns SellerHill from "report your manual Amazon orders" into "SellerHill places the Amazon order for you." It carries **real-money spend and a real Amazon-ban risk** that A1/A1.1 did not, so guardrails and anti-detection are first-class concerns, not afterthoughts.
 
 ---
 
 ## Problem statement
 
-Today, after an eBay sale, a Zonds user must **manually** buy the item on Amazon with a buyer account, then either link the Amazon order by ID or wait for the auto cost-capture matcher (`amazon-order-sync`) to find it. This is the manual labor dropshipping is supposed to eliminate, and it is the gating feature for the product.
+Today, after an eBay sale, a SellerHill user must **manually** buy the item on Amazon with a buyer account, then either link the Amazon order by ID or wait for the auto cost-capture matcher (`amazon-order-sync`) to find it. This is the manual labor dropshipping is supposed to eliminate, and it is the gating feature for the product.
 
 What A2 adds:
 
@@ -72,12 +72,12 @@ Explicitly **out of scope / deferred:**
 
 ### 1. Anti-ban stack (decided first — it gates everything)
 
-The decisive design choice is the **isolation unit = the Amazon buyer account, not the Zonds user** at the *browser-identity* layer, while the **IP is shared per Zonds user** (cost/UX decision). This combination mimics "one household, several devices," which is the strongest realistic profile at this cost point.
+The decisive design choice is the **isolation unit = the Amazon buyer account, not the SellerHill user** at the *browser-identity* layer, while the **IP is shared per SellerHill user** (cost/UX decision). This combination mimics "one household, several devices," which is the strongest realistic profile at this cost point.
 
 **Detection reality (research, 2026-07-18):** Amazon's primary linkage signals are IP address, payment method, shipping/billing address, browser fingerprint, and behavioral velocity. Multiple high-volume buyer accounts with rotating ship-to addresses on a single IP is a strong dropshipper cluster signal. Per-user IP therefore *links a user's accounts at the IP layer* — an accepted, calculated tradeoff — which we counter by maximally separating the **non-IP** signals per account and by keeping account usage sequential and conservative.
 
-**1a. Proxy — Zonds-provided, residential, sticky, per user.**
-Users do not configure proxies. Zonds provides a residential-proxy provider (env-driven). A **sticky session token = `userId`** so each user always exits from the same residential IP for all their accounts and all Amazon traffic (scrape + checkout). A new `ProxyService` resolves the proxy for a given `(userId, amazonAccountId)`:
+**1a. Proxy — SellerHill-provided, residential, sticky, per user.**
+Users do not configure proxies. SellerHill provides a residential-proxy provider (env-driven). A **sticky session token = `userId`** so each user always exits from the same residential IP for all their accounts and all Amazon traffic (scrape + checkout). A new `ProxyService` resolves the proxy for a given `(userId, amazonAccountId)`:
 
 ```ts
 interface ProxyService {
@@ -130,7 +130,7 @@ ALTER TABLE store_settings
 
 No single "designated account" column — the fulfillment pool is **all of the user's `amazon_accounts` rows with `auto_fulfill_enabled = true`**, and orders are assigned **round-robin** across them (§3). `tracking_conversion_provider` only accepts `'local'` for now (`'api'` is reserved — the `ApiTrackingConverter` is a no-op stub).
 
-**Migration `037_alter_amazon_accounts_add_auto_fulfill.sql`** — per-account guardrails (no proxy column — Zonds provides the proxy):
+**Migration `037_alter_amazon_accounts_add_auto_fulfill.sql`** — per-account guardrails (no proxy column — SellerHill provides the proxy):
 
 ```sql
 ALTER TABLE amazon_accounts
@@ -139,7 +139,7 @@ ALTER TABLE amazon_accounts
   ADD COLUMN IF NOT EXISTS auto_fulfill_dry_run BOOLEAN NOT NULL DEFAULT FALSE;
 ```
 
-**Hard guardrail (enforced in service layer, not DB):** `auto_fulfill_enabled` may not be `true` unless a Zonds-provided proxy is configured (env present) **and** `auto_fulfill_cap_total IS NOT NULL`. The settings upsert/account-update path rejects an invalid enable and returns a structured error the FE surfaces via `MessageModal`.
+**Hard guardrail (enforced in service layer, not DB):** `auto_fulfill_enabled` may not be `true` unless a SellerHill-provided proxy is configured (env present) **and** `auto_fulfill_cap_total IS NOT NULL`. The settings upsert/account-update path rejects an invalid enable and returns a structured error the FE surfaces via `MessageModal`.
 
 **Migration `038_alter_orders_add_auto_fulfill_status.sql`** — order lifecycle:
 
@@ -255,7 +255,7 @@ Wired in at the single call site: `AmazonTrackingProcessorService.handleShipped`
 | Dry-run | `auto_fulfill_dry_run` runs the full flow, stops before payment |
 | Fail-closed on any obstacle | typed `AutoFulfillBlocked` → `blocked` state, no retry, no charge |
 | Human-in-the-loop | none live; falls back to existing manual `linkAmazonOrder` |
-| Proxy mandatory | `auto_fulfill_enabled` rejected if proxy env absent (Zonds-provided proxy gates the feature) |
+| Proxy mandatory | `auto_fulfill_enabled` rejected if proxy env absent (SellerHill-provided proxy gates the feature) |
 | Ban-risk mitigation | per-user sticky residential proxy + per-account persistent profile + deterministic fingerprint + sequential per-user concurrency + human-like checkout behavior |
 | Idempotency | status re-check on job start; dedup `jobId` |
 
@@ -271,7 +271,7 @@ Wired in at the single call site: `AmazonTrackingProcessorService.handleShipped`
 - `AUTO_FULFILL_QUEUE_CONCURRENCY=1` — worker concurrency per process.
 - `AUTO_FULFILL_CHECKOUT_MIN_TIME_MS=4500` — tighter inter-step spacing than scrape.
 - `AUTO_FULFILL_REVIEW_CAP_HARD_STOP=true` — global kill-switch on the review-step cap (if `false`, the feature refuses to run — never silently bypasses the cap).
-- `PROXY_PROVIDER=`, `PROXY_ENDPOINT=`, `PROXY_USER=`, `PROXY_PASS_TEMPLATE=` — Zonds-level residential proxy. Sticky session token (`userId` by default) is interpolated into the template by `ProxyService`.
+- `PROXY_PROVIDER=`, `PROXY_ENDPOINT=`, `PROXY_USER=`, `PROXY_PASS_TEMPLATE=` — SellerHill-level residential proxy. Sticky session token (`userId` by default) is interpolated into the template by `ProxyService`.
 - `PROXY_STRATEGY=perUser` — selects `ProxyAssignmentStrategy` (`perUser` now; `perAccount` reserved).
 
 No new external services beyond the proxy provider (chosen at implementation).

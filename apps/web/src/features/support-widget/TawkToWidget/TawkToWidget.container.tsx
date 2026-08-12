@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState, type FC } from 'react';
 import { TawkToWidgetComponent } from './TawkToWidget.component';
 import type { TawkToWidgetProps } from './TawkToWidget.types';
 
+import { isDemoMode } from '@/features/demo/demoMode';
+
 const TAWK_SCRIPT_ID = 'tawkto-embed-script';
 const propertyId = (import.meta.env.VITE_TAWKTO_PROPERTY_ID as string | undefined)?.trim() ?? '';
 const widgetId = (import.meta.env.VITE_TAWKTO_WIDGET_ID as string | undefined)?.trim() ?? '';
@@ -10,7 +12,7 @@ const widgetId = (import.meta.env.VITE_TAWKTO_WIDGET_ID as string | undefined)?.
 /**
  * Loads tawk.to once. On the public landing page it leaves tawk.to's floating
  * launcher visible; in the seller sidebar it hides that launcher and renders
- * the Zonds-designed trigger instead.
+ * the SellerHill-designed trigger instead.
  */
 export const TawkToWidget: FC<TawkToWidgetProps> = ({ sidebarCollapsed, onLaunch }) => {
   const isSidebarLauncher = sidebarCollapsed !== undefined;
@@ -30,7 +32,14 @@ export const TawkToWidget: FC<TawkToWidgetProps> = ({ sidebarCollapsed, onLaunch
   }, [isSidebarLauncher]);
 
   useEffect(() => {
-    if (!propertyId || !widgetId) {
+    /*
+     * The demo must not reach ANY third party. tawk.to is the only external
+     * script the shell loads, and a demo visitor is not a customer with a
+     * support case — injecting the embed would put them in a real agent queue
+     * and hand tawk.to their IP and page history for a session that is
+     * entirely sample data.
+     */
+    if (!propertyId || !widgetId || isDemoMode()) {
       return;
     }
 
@@ -90,6 +99,11 @@ export const TawkToWidget: FC<TawkToWidgetProps> = ({ sidebarCollapsed, onLaunch
     window.Tawk_API?.maximize?.();
     setUnreadCount(0);
   }, [onLaunch]);
+
+  // No embed was loaded in demo mode, so the launcher would be a dead button.
+  if (isDemoMode()) {
+    return null;
+  }
 
   return (
     <TawkToWidgetComponent

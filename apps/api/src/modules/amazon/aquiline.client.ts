@@ -319,7 +319,7 @@ export function buildConversionBody(input: CreateConversionInput): Record<string
  * would defeat the entire mechanism and bill us twice.
  */
 export function conversionIdempotencyKey(input: CreateConversionInput): string {
-  return `zonds-${input.externalOrderId}-${input.sourceTrackingNumber}`;
+  return `sellerhill-${input.externalOrderId}-${input.sourceTrackingNumber}`;
 }
 
 /**

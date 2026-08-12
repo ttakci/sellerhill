@@ -24,7 +24,7 @@ export const Container = styled.div`
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background: ${tkn('colors.landing.heroBg')};
+  background: ${tkn('colors.landing.auroraBg')};
   z-index: 0;
   pointer-events: none;
 `;

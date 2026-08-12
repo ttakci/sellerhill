@@ -74,7 +74,7 @@ interface LegacyStorageState {
  * `playwright-extra`'s chromium + stealth plugin.
  *
  * Proxy-aware: when `ProxyService` is configured (env), each context launches
- * with the injected residential proxy (sticky session per Zonds user by
+ * with the injected residential proxy (sticky session per SellerHill user by
  * default). When proxy env is absent, the `proxy` option is omitted entirely —
  * network behavior is identical to a direct connection (no scraping regression).
  *

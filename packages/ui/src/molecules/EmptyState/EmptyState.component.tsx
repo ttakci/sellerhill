@@ -13,6 +13,7 @@ export const EmptyState = ({
   description,
   action,
   onAction,
+  isActionLoading = false,
   secondaryAction,
   onSecondaryAction,
   size = 'md',
@@ -24,7 +25,7 @@ export const EmptyState = ({
 
   return (
     <S.EmptyStateWrapper $size={size} className={className}>
-      <S.IconCircle $size={size}>
+      <S.IconCircle $size={size} $spin={icon === 'loader'}>
         <Icon name={icon} color="brand.primary" />
       </S.IconCircle>
       <S.Title $size={size}>
@@ -40,7 +41,7 @@ export const EmptyState = ({
       {(hasPrimary || hasSecondary) && (
         <S.Actions>
           {hasPrimary && (
-            <Button variant="primary" size="medium" onClick={onAction}>
+            <Button variant="primary" size="medium" onClick={onAction} isLoading={isActionLoading}>
               <Text variant="body">{action}</Text>
             </Button>
           )}

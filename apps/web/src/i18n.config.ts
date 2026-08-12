@@ -13,6 +13,7 @@
  */
 
 import {
+  enActionCenter,
   enAdmin,
   enAmazon,
   enAuth,
@@ -25,6 +26,7 @@ import {
   enProfile,
   enStoreSettings,
   enTranslation,
+  trActionCenter,
   trAdmin,
   trAmazon,
   trAuth,
@@ -50,6 +52,7 @@ void i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: enTranslation,
+      actionCenter: enActionCenter,
       admin: enAdmin,
       amazon: enAmazon,
       billing: enBilling,
@@ -64,6 +67,7 @@ void i18n.use(initReactI18next).init({
     },
     tr: {
       translation: trCommon,
+      actionCenter: trActionCenter,
       admin: trAdmin,
       amazon: trAmazon,
       billing: trBilling,

@@ -1,8 +1,8 @@
 
 import os
 
-source_path = r'd:\dev\projects\zonds\zonds\packages\ui\dist\assets\logo.svg'
-dest_path = r'd:\dev\projects\zonds\zonds\packages\ui\src\assets\logo.svg'
+source_path = r'd:\dev\projects\sellerhill\sellerhill\packages\ui\dist\assets\logo.svg'
+dest_path = r'd:\dev\projects\sellerhill\sellerhill\packages\ui\src\assets\logo.svg'
 
 with open(source_path, 'r', encoding='utf-8') as f_src:
     lines = f_src.readlines()

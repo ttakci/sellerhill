@@ -57,6 +57,7 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
               <OrderCard
                 {...card}
                 onClick={onOrderClick ? () => onOrderClick(order.id) : undefined}
+                hoverEffect={false}
               />
             </S.CarouselSlide>
           );

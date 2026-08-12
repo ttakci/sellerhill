@@ -1,5 +1,5 @@
 import { ListingStatus } from '@repo/shared';
-import { formatCurrency, getLocaleConfig, useLoading, useUI, type ViewMode } from '@repo/ui';
+import { getLocaleConfig, useLoading, useUI, type ViewMode } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,14 +24,11 @@ export const ListingsAllPage: React.FC = () => {
   const { showMessage } = useUI();
   const { localeNavigate } = useLocale();
 
-  /* Same locale-aware money formatter Orders uses. The table used to print a
-     bare "$" + toFixed(2), so a TR user saw the wrong currency on this page
-     and the right one on the next. */
+  /* Table used to print a bare "$" + toFixed(2) with no locale awareness at
+     all. Currency itself comes from each listing's own `currency` (resolved
+     server-side from its eBay store's marketplace) — see useListingsColumns —
+     never from the UI language, which controls only separators/ordering. */
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
-  const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
-    [localeCfg]
-  );
 
   const [tableView, setTableView] = useState<ViewMode>('grid');
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
@@ -86,6 +83,7 @@ export const ListingsAllPage: React.FC = () => {
   const {
     data,
     isLoading: isListingsLoading,
+    isFetching: isListingsFetching,
     isError: isListingsError,
     error: listingsError,
   } = useGetListingsQuery(serverQuery, {
@@ -123,7 +121,7 @@ export const ListingsAllPage: React.FC = () => {
   // Global overlay only for mutations — list fetch is inline
   useLoading(isEnding || isDeleting || isExporting || isPublishing);
 
-  const { columnOptions, allColumns } = useListingsColumns(fmtCurrency);
+  const { columnOptions, allColumns } = useListingsColumns(localeCfg.locale);
 
   const filteredColumns = useMemo(
     () => allColumns.filter((col) => visibleColumnKeys.includes(col.key || '')),
@@ -366,7 +364,7 @@ export const ListingsAllPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `zonds_listings_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `sellerhill_listings_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -399,7 +397,7 @@ export const ListingsAllPage: React.FC = () => {
         tableView={tableView}
         onTableViewChange={setTableView}
         onBack={handleBack}
-        isInitialLoading={isListingsLoading}
+        isInitialLoading={isListingsLoading || isListingsFetching}
         onListingClick={(id) => localeNavigate(`/listings/${id}`)}
         pagination={{
           count: total,

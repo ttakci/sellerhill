@@ -1,6 +1,6 @@
 import { PlatformSettingCategory, UserRole } from '@repo/shared';
 import { formatDate, formatMicroCurrency, getLocaleConfig } from '@repo/ui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
@@ -57,7 +57,13 @@ const CATEGORY_ORDER: PlatformSettingCategory[] = [
 export const AdminPageContainer = (): React.ReactElement => {
   const { buildPath } = useLocale();
   const { i18n } = useTranslation(['admin', 'translation']);
-  const [searchParams, setSearchParams] = useSearchParams();
+  /* The tab comes from the URL only — navigation between admin sections now
+     happens through real sidebar links (OperatorLayout), not an in-page
+     switcher, so this page never needs to write the query string itself. */
+  const [searchParams] = useSearchParams();
+  const [collapsedSettingCategories, setCollapsedSettingCategories] = useState<Set<PlatformSettingCategory>>(
+    () => new Set()
+  );
 
   const { data: user, isLoading } = useGetMeQuery();
   const skip = isLoading || user?.role !== UserRole.ADMIN;
@@ -76,7 +82,18 @@ export const AdminPageContainer = (): React.ReactElement => {
 
   const tabParam = searchParams.get('tab') as AdminTabId | null;
   const activeTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'overview';
-  const handleTabChange = useCallback((tab: AdminTabId) => setSearchParams({ tab }), [setSearchParams]);
+
+  const handleToggleSettingCategory = useCallback((category: PlatformSettingCategory) => {
+    setCollapsedSettingCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  }, []);
 
   const settingGroups = useMemo<SettingGroup[]>(
     () =>
@@ -130,13 +147,14 @@ export const AdminPageContainer = (): React.ReactElement => {
       failureColumns={failureColumns}
       proxyColumns={proxyColumns}
       settingGroups={settingGroups}
+      collapsedSettingCategories={collapsedSettingCategories}
+      onToggleSettingCategory={handleToggleSettingCategory}
       settingDrafts={settings.settingDrafts}
       isSavingSetting={settings.isSavingSetting}
       emailTestResult={settings.emailTestResult}
       isTestingEmail={settings.isTestingEmail}
       proxyForm={proxy.proxyForm}
       isSavingProxy={proxy.isSavingProxy}
-      onTabChange={handleTabChange}
       onProxyFieldChange={proxy.onProxyFieldChange}
       onProxySubmit={proxy.onProxySubmit}
       onSettingDraftChange={settings.onSettingDraftChange}

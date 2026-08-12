@@ -28,7 +28,7 @@ export interface LoginRequest {
 
 /**
  * Authentication response with tokens.
- * Refresh token is delivered via HttpOnly cookie (`zonds_rt`) and is **not**
+ * Refresh token is delivered via HttpOnly cookie (`sellerhill_rt`) and is **not**
  * returned in the JSON body in the cookie-auth path (optional for legacy only).
  */
 export interface AuthResponse {
@@ -85,7 +85,7 @@ export interface ResendVerificationRequest {
  * Refresh token request body (optional — cookie is preferred).
  */
 export interface RefreshTokenRequest {
-  /** @deprecated Prefer HttpOnly cookie `zonds_rt` */
+  /** @deprecated Prefer HttpOnly cookie `sellerhill_rt` */
   refreshToken?: string;
 }
 

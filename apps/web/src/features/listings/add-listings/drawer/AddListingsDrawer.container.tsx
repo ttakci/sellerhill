@@ -23,7 +23,7 @@ import type {
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 
-const PREFERENCES_STORAGE_KEY = 'zonds:add-listings-preferences:v1';
+const PREFERENCES_STORAGE_KEY = 'sellerhill:add-listings-preferences:v1';
 
 const EMPTY_PREFERENCES: AddListingsDrawerPreferences = {
   ebayAccountId: '',

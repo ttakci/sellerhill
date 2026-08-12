@@ -1,6 +1,6 @@
 # Keepa Integration — Technical Reference
 
-> Canonical reference for how Zonds consumes the Keepa API. The short operational
+> Canonical reference for how SellerHill consumes the Keepa API. The short operational
 > summary lives in `CLAUDE.md` ("Product Refresh Pipeline"); this document holds
 > the full contract, the verified ground truth behind it, and the reasoning, so
 > future sessions/models do not re-derive (or re-break) these decisions.
@@ -11,7 +11,7 @@
 
 Keepa is the **sole** Amazon product-data provider (ScraperAPI removed — its
 per-request credit model was 10–100× more expensive under bulk-add/churn).
-Zonds needs, per ASIN: metadata (title/images/brand/description/features/category),
+SellerHill needs, per ASIN: metadata (title/images/brand/description/features/category),
 the **Buy Box price**, and the **Buy Box seller's stock quantity** — the two
 values that drive eBay repricing and quantity sync.
 
@@ -109,7 +109,7 @@ live publish blocks at quantity 0 (drafts allowed).
 
 ## 4. Two caches — who decides what
 
-**(a) Zonds' shared product cache (`products` table).** ASIN-keyed, shared by
+**(a) SellerHill' shared product cache (`products` table).** ASIN-keyed, shared by
 all users. Decision (in `ListingProcessorService.resolveProductData`): row
 exists + real title + ≥1 image → cache hit, **0 tokens**. Freshness is
 guaranteed by the refresh pipeline, not by the create path. Concurrent creates

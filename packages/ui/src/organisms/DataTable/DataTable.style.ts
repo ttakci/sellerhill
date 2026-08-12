@@ -101,6 +101,53 @@ export const GridEmptyState = styled.div`
   box-sizing: border-box;
 `;
 
+/* Table-mode skeleton — same card tier as TableContainer so the loading and
+   loaded states read as the same surface, not two different screens. */
+export const SkeletonTableCard = styled.div`
+  width: 100%;
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.lg')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  box-shadow: ${tkn('shadows.sm')};
+  overflow: hidden;
+`;
+
+export const SkeletonRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  min-height: 2.5rem;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+`;
+
+/* Grid-mode skeleton card — generic thumbnail + text-line shape. Sits inside
+   the same GridContainer as real cards, so it inherits the exact column
+   count/track width the real grid would use for this page. */
+export const SkeletonGridCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.md')};
+  padding: ${tkn('spacing.md')};
+  background: ${tkn('colors.surface.primary')};
+  border-radius: ${tkn('radius.lg')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  box-shadow: ${tkn('shadows.sm')};
+  min-height: 6rem;
+`;
+
+export const SkeletonGridCardBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  flex: 1;
+  min-width: 0;
+`;
+
 export const ColumnManagerContent = styled.div`
   padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   display: flex;

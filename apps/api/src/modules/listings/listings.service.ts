@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   ListingFailureCode,
+  LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingJobKind,
   ListingJobStatus,
   ListingStatus,
@@ -497,6 +498,15 @@ export class ListingsService {
     pushRange('l.sold_count', query.soldCountMin, query.soldCountMax);
     pushRange('l.quantity', query.quantityMin, query.quantityMax);
     pushRange('p.stock', query.sourceStockMin, query.sourceStockMax);
+
+    // Deep-link filter for the Action Center's LISTING_SOURCE_UNAVAILABLE item —
+    // same threshold the count query uses, so "N listings need you" and this
+    // list can never disagree about which ones qualify.
+    if (query.sourceUnavailable) {
+      conditions.push(`p.consecutive_failures >= $${paramIndex}`);
+      params.push(LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD);
+      paramIndex++;
+    }
 
     // Listings with ≥1 non-cancelled order in [soldFrom, soldTo] (soldTo inclusive as date)
     if (query.soldFrom?.trim() || query.soldTo?.trim()) {
@@ -1183,12 +1193,37 @@ export class ListingsService {
       conditions.push(`LOWER(status) = $${params.length}`);
     }
 
-    // The UI searches by the short id shown on the card, which is a prefix of
-    // the uuid — so match against the text form rather than casting the input.
+    // A job has no seller-meaningful id of its own — the ASIN it worked on is
+    // what a seller actually recalls and searches by.
     const search = query.search?.trim();
     if (search) {
       params.push(`%${search.toLowerCase()}%`);
-      conditions.push(`LOWER(id::text) LIKE $${params.length}`);
+      conditions.push(`EXISTS (
+        SELECT 1 FROM listing_job_items lji
+        WHERE lji.job_id = listing_jobs.id AND LOWER(lji.asin) LIKE $${params.length}
+      )`);
+    }
+
+    // "When" is a discoverable date-range preset dropdown on the frontend,
+    // resolved to plain YYYY-MM-DD bounds — never free-text date matching.
+    const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+    const dateFrom = query.dateFrom?.trim();
+    if (dateFrom && isIsoDate(dateFrom)) {
+      params.push(dateFrom);
+      conditions.push(`created_at >= $${params.length}::date`);
+    }
+    const dateTo = query.dateTo?.trim();
+    if (dateTo && isIsoDate(dateTo)) {
+      params.push(dateTo);
+      conditions.push(`created_at < ($${params.length}::date + INTERVAL '1 day')`);
+    }
+
+    // Deep-link filter for the Action Center's LISTING_JOB_FAILURES item.
+    // Distinct from `status=failed`: a job is only FAILED when every item
+    // failed, so a job with partial failures (the common bulk-create case)
+    // would be invisible to a status filter but must still show up here.
+    if (query.hasFailures) {
+      conditions.push('failed_count > 0');
     }
 
     const whereClause = `WHERE ${conditions.join(' AND ')}`;

@@ -208,7 +208,7 @@ Under `settingsHub.drawer` (after `language` block, before closing brace), add a
     "modal": {
       "deactivate": {
         "title": "Deactivate account",
-        "warning": "This will revoke your access to Zonds. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
+        "warning": "This will revoke your access to SellerHill. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
         "typeEmail": "To confirm, type your email address below:",
         "emailPlaceholder": "{{email}}",
         "confirmLabel": "Deactivate account",
@@ -249,7 +249,7 @@ settingsHub.drawer.password additions:
 
 settingsHub.modal.deactivate:
   "title": "Hesabı devre dışı bırak",
-  "warning": "Zonds erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
+  "warning": "SellerHill erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
   "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
   "emailPlaceholder": "{{email}}",
   "confirmLabel": "Hesabı devre dışı bırak",

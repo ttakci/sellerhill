@@ -21,13 +21,13 @@ export class OrderSyncQueueService implements OnModuleInit {
       'sync-all-orders',
       stampCurrentCorrelation({}),
       {
-        repeat: { pattern: '*/15 * * * *' },
+        repeat: { pattern: '*/20 * * * *' },
         jobId: 'order-sync-cron',
         removeOnComplete: true,
       }
     );
 
-    this.logger.log('Order sync repeatable job configured (every 15 min).');
+    this.logger.log('Order sync repeatable job configured (every 20 min).');
   }
 
   /**

@@ -1,6 +1,9 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'text' | 'danger';
+/** `danger-tint` is the light-fill destructive action — same semantic tint
+ *  Badge's error variant uses, for a "cancel/stop" action that shouldn't
+ *  read as loud as a full delete (`danger`, solid fill). */
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'text' | 'danger' | 'danger-tint';
 
 export type ButtonSize = 'xsmall' | 'small' | 'medium' | 'large';
 

@@ -3,7 +3,7 @@
  * Period KPI cards + the period-filtered listings/orders sections.
  */
 
-import { CardHeader, Icon, Text } from '@repo/ui';
+import { Button, Skeleton, Text } from '@repo/ui';
 import React from 'react';
 
 import { PeriodCard } from '../PeriodCard';
@@ -41,7 +41,7 @@ export const CardsPanelComponent = ({
   <S.Root>
     <S.Grid>
       {isLoading && periods.length === 0
-        ? SKELETON_KEYS.map((key) => <S.SkeletonCard key={key} />)
+        ? SKELETON_KEYS.map((key) => <Skeleton key={key} height="19rem" radius="lg" />)
         : periods.map((entry) => (
             <PeriodCard
               key={entry.key}
@@ -58,57 +58,51 @@ export const CardsPanelComponent = ({
     </S.Grid>
 
     <S.SectionsRow>
-      <S.CarouselCard variant="bordered">
-        <CardHeader
-          icon={
-            <S.SectionIcon>
-              <Icon name="inventory" size={16} />
-            </S.SectionIcon>
-          }
-        >
+      <S.CarouselSection>
+        <S.SectionHeading>
           <Text variant="h4" weight="semibold">
             {listingsTitle}
           </Text>
-        </CardHeader>
-        <S.SectionBody>
-          <ListingCarousel
-            listings={listings}
-            onViewAll={onListingsViewAll}
-            viewAllLabel={listingsViewAllLabel}
-            showViewAll={listings.length > 3}
-            onListingClick={onListingOpen}
-            emptyTitle={listingsEmptyTitle}
-            emptySubtitle={listingsEmptySubtitle}
-          />
-        </S.SectionBody>
-      </S.CarouselCard>
+          <Button variant="text" size="small" onClick={onListingsViewAll}>
+            <Text variant="body-sm" weight="semibold">
+              {listingsViewAllLabel}
+            </Text>
+          </Button>
+        </S.SectionHeading>
+        <ListingCarousel
+          listings={listings}
+          onViewAll={onListingsViewAll}
+          viewAllLabel={listingsViewAllLabel}
+          showViewAll={false}
+          onListingClick={onListingOpen}
+          emptyTitle={listingsEmptyTitle}
+          emptySubtitle={listingsEmptySubtitle}
+        />
+      </S.CarouselSection>
 
-      <S.CarouselCard variant="bordered">
-        <CardHeader
-          icon={
-            <S.SectionIcon>
-              <Icon name="shopping-bag" size={16} />
-            </S.SectionIcon>
-          }
-        >
+      <S.CarouselSection>
+        <S.SectionHeading>
           <Text variant="h4" weight="semibold">
             {ordersTitle}
           </Text>
-        </CardHeader>
-        <S.SectionBody>
-          <OrderCarousel
-            orders={orders}
-            onViewAll={onOrdersViewAll}
-            viewAllLabel={ordersViewAllLabel}
-            showViewAll={orders.length > 3}
-            onOrderClick={onOrderOpen}
-            formatCurrency={formatters.currency}
-            formatDate={formatters.date}
-            emptyTitle={ordersEmptyTitle}
-            emptySubtitle={ordersEmptySubtitle}
-          />
-        </S.SectionBody>
-      </S.CarouselCard>
+          <Button variant="text" size="small" onClick={onOrdersViewAll}>
+            <Text variant="body-sm" weight="semibold">
+              {ordersViewAllLabel}
+            </Text>
+          </Button>
+        </S.SectionHeading>
+        <OrderCarousel
+          orders={orders}
+          onViewAll={onOrdersViewAll}
+          viewAllLabel={ordersViewAllLabel}
+          showViewAll={false}
+          onOrderClick={onOrderOpen}
+          formatCurrency={formatters.currency}
+          formatDate={formatters.date}
+          emptyTitle={ordersEmptyTitle}
+          emptySubtitle={ordersEmptySubtitle}
+        />
+      </S.CarouselSection>
     </S.SectionsRow>
   </S.Root>
 );

@@ -209,7 +209,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
             'Quick attention mode',
           ],
           product_details: [
-            'Brand: Zonds Audio',
+            'Brand: SellerHill Audio',
             'Connectivity: Bluetooth 5.0',
             'Noise Cancelling: Yes',
             'Color: Silver',

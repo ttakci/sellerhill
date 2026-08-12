@@ -1,4 +1,4 @@
-const TEST_DATABASE_MARKER = '_zonds_test';
+const TEST_DATABASE_MARKER = '_sellerhill_test';
 
 export function assertSafeIntegrationDatabase(databaseName: string): void {
   if (!databaseName.toLowerCase().includes(TEST_DATABASE_MARKER)) {

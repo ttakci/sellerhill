@@ -13,6 +13,8 @@ export interface EmptyStateProps {
   action?: string;
   /** Click handler for the primary action */
   onAction?: () => void;
+  /** Shows a spinner on the primary action button and disables it (e.g. while an async action is in flight) */
+  isActionLoading?: boolean;
   /** Label for optional secondary action (e.g. clear filters) */
   secondaryAction?: string;
   /** Click handler for the secondary action */

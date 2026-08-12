@@ -90,16 +90,6 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
   };
 
   const emptyState = (() => {
-    if (isInitialLoading) {
-      return (
-        <EmptyState
-          icon="loader"
-          title={t('listings.empty.loadingTitle')}
-          description={t('listings.empty.loadingSubtitle')}
-          size="md"
-        />
-      );
-    }
     if (hasActiveFilters) {
       return (
         <EmptyState
@@ -270,11 +260,7 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
         selectedRows={selectedRows}
         onSelectionChange={(rows) => onSelectionChange(rows.map((r) => r.id))}
         emptyContent={emptyState}
-        emptyMessage={
-          isInitialLoading
-            ? t('translation:common.loading')
-            : t('listings.overview.emptyTitle')
-        }
+        loading={isInitialLoading}
         bulkActions={bulkActions}
         bulkActionsPlaceholder={t('listings.actions.bulkActions')}
         columnOptions={isEmpty ? undefined : columnOptions}

@@ -9,6 +9,10 @@ import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
 import { resolveBreadcrumbs, resolveNavSection } from '@/app/routeMeta';
+import {
+  ACTION_CENTER_POLL_INTERVAL_MS,
+  useGetActionCenterQuery,
+} from '@/features/action-center';
 import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { stripLocaleFromPath } from '@/utils/locale';
@@ -94,6 +98,20 @@ export const AppLayout: React.FC = () => {
     [pathWithoutLocale, t]
   );
 
+  /*
+   * The nav badge is the whole point of the Action Center: it is what makes a
+   * blocked purchase discoverable without already suspecting it. Polling lives
+   * here rather than on the page so the count keeps updating while the seller
+   * is anywhere in the app.
+   *
+   * `skip` while unauthenticated — the shell renders a redirect below in that
+   * case, and firing an authenticated request first would be a guaranteed 401.
+   */
+  const { data: actionCenter } = useGetActionCenterQuery(undefined, {
+    skip: !isAuthenticated || isOperatorRole(user?.role),
+    pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
+  });
+
   if (!isAuthenticated) {
     return <Navigate to={buildPath('/login')} state={{ from: location }} replace />;
   }
@@ -129,6 +147,8 @@ export const AppLayout: React.FC = () => {
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}
       onLocaleNavigate={localeNavigate}
       onToggleSection={handleToggleSection}
+      pendingActionCount={actionCenter?.totalCount ?? 0}
+      hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
       i18nLanguage={(i18n.language || 'en').split('-')[0]}
     />
   );

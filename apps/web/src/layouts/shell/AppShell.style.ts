@@ -6,7 +6,7 @@ import { Text, tkn } from '@repo/ui';
  * Expanded sidebar rail. Single source of truth — the docked width, the mobile
  * off-canvas width and its hidden offset must always be the same number.
  */
-const SIDEBAR_WIDTH = '12rem'; /* 192px */
+const SIDEBAR_WIDTH = '16rem'; /* 256px */
 
 /**
  * LayoutWrapper - Root container
@@ -218,12 +218,15 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   width: 100%;
   box-sizing: border-box;
   align-items: center;
-  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'space-between')};
+  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
+  gap: ${({ $isCollapsed, theme }) => ($isCollapsed ? '0' : tkn('spacing.sm')({ theme }))};
   padding: ${({ $isCollapsed, $isSubItem, theme }) =>
     $isCollapsed
       ? `${tkn('spacing.sm')({ theme })} 0`
       : $isSubItem
-        ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.sm')({ theme })} ${tkn('spacing.md+')({ theme })}`
+        ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.sm')({ theme })} ${tkn(
+            'spacing.md+'
+          )({ theme })}`
         : `${tkn('spacing.sm')({ theme })} ${tkn('spacing.md')({ theme })}`};
   /* Selected item is a full-width filled pill (brand-blue), not a left accent bar */
   border-radius: ${tkn('radius.md')};
@@ -240,8 +243,55 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
   min-height: 2rem;
 
   &:hover {
-    background: ${(props) => (props.$active ? tkn('colors.sidebar.accent')(props) : tkn('colors.sidebar.hover')(props))};
+    background: ${(props) =>
+      props.$active ? tkn('colors.sidebar.accent')(props) : tkn('colors.sidebar.hover')(props)};
   }
+`;
+
+/**
+ * Count chip on a nav item (pending actions).
+ *
+ * Deliberately NOT the `Badge` atom: badges are tuned for light page surfaces,
+ * and the sidebar is a dark, always-dark panel in both themes — a `warning`
+ * badge there renders as a pale block that fights the nav pill. This chip is
+ * drawn from the semantic palette against the sidebar's own ink instead.
+ *
+ * `$urgent` is the only colour decision: red when something critical is
+ * waiting, neutral-bright otherwise. The count itself is the information, so
+ * the chip must never be the loudest thing in the nav when nothing is on fire.
+ */
+export const NavBadge = styled.span<{ $urgent: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 ${tkn('spacing.2xs+')};
+  border-radius: ${tkn('radius.full')};
+  flex-shrink: 0;
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.xs')};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: ${tkn('colors.text.inverse')};
+  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : theme.colors.semantic.warning)};
+`;
+
+/**
+ * Collapsed-rail form of the same signal. There is no room for a number on a
+ * 3.5rem rail, so the count degrades to a presence dot pinned to the icon —
+ * the item still reads as "needs you", and expanding the sidebar (or the
+ * tooltip) gives the number.
+ */
+export const NavBadgeDot = styled.span<{ $urgent: boolean }>`
+  position: absolute;
+  top: 0.375rem;
+  right: 0.75rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: ${tkn('radius.full')};
+  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : theme.colors.semantic.warning)};
 `;
 
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
@@ -249,9 +299,7 @@ export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
   gap: ${tkn('spacing.sm-md')};
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
   font-size: ${tkn('typography.fontSize.sm')};
@@ -262,6 +310,23 @@ export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
     height: 1.125rem;
     flex-shrink: 0;
   }
+`;
+
+/**
+ * The label text itself, not `NavItemContent`. `text-overflow: ellipsis`
+ * doesn't reliably truncate a raw text node sitting beside an icon inside a
+ * flex row — the browser has no single inline box to clip, so the word just
+ * got hard-clipped by `overflow: hidden` with no "…", and on a narrow rail
+ * the badge sibling ended up crowding right against the cut-off letters. This
+ * span is the one flexing, overflow-hidden box the ellipsis actually applies
+ * to, so the label always truncates cleanly and leaves the badge its gap.
+ */
+export const NavItemLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 export const ChevronWrapper = styled.div<{ $isOpen: boolean; $isCollapsed: boolean }>`
   display: ${({ $isCollapsed }) => ($isCollapsed ? 'none' : 'flex')};

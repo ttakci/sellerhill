@@ -182,7 +182,7 @@ In `docker/postgres/init.sql`, inside the `CREATE TABLE IF NOT EXISTS amazon_acc
 Run: `pnpm docker:up` (if not already up), then apply the migration. The repo applies migrations via the API's migration runner on boot — restart the API (`pnpm dev:api`) and confirm the column exists:
 
 ```bash
-docker compose exec postgres psql -U postgres -d zonds -c "\d amazon_accounts"
+docker compose exec postgres psql -U postgres -d sellerhill -c "\d amazon_accounts"
 ```
 
 Expected: `last_verification_error | text` appears in the column list.

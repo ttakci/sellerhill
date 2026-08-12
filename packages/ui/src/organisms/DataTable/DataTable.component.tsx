@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Icon } from '../../atoms/Icon';
 import { IconButton } from '../../atoms/IconButton';
+import { Skeleton } from '../../atoms/Skeleton';
 import { Select } from '../../molecules/Select';
 import { Table } from '../../molecules/Table';
 import { TablePagination } from '../../molecules/Table/TablePagination.component';
@@ -41,6 +42,8 @@ export const DataTableComponent = <T,>({
   pagination,
   emptyMessage,
   emptyContent,
+  loading,
+  skeletonCount,
   onRowClick,
   className,
 }: DataTableComponentProps<T>): React.ReactElement => {
@@ -49,6 +52,11 @@ export const DataTableComponent = <T,>({
   const hasToolbar = hasBulkActions || !hideViewToggle || onDownload || actions || showColumnManager || toolbarLeft;
   const isEmpty = data.length === 0;
   const resolvedEmpty = emptyContent ?? emptyMessage ?? 'No data';
+  // Skeleton only when there is genuinely nothing to show yet — a background
+  // refetch that still has previous rows/cards keeps showing them, never a flash.
+  const showSkeleton = loading && isEmpty;
+  const skeletonRows = Array.from({ length: skeletonCount });
+  const skeletonColumnCount = Math.max(1, Math.min(columns.length, 6));
 
   return (
     <S.DataTableContainer className={className}>
@@ -90,22 +98,47 @@ export const DataTableComponent = <T,>({
       )}
 
       {viewMode === 'table' ? (
-        <Table
-          columns={columns}
-          data={data}
-          selectable={selectable}
-          selectedRows={selectedRows}
-          onSelectionChange={onSelectionChange}
-          emptyMessage={typeof resolvedEmpty === 'string' ? resolvedEmpty : undefined}
-          emptyContent={typeof resolvedEmpty !== 'string' ? resolvedEmpty : undefined}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={onSort}
-          onRowClick={onRowClick}
-        />
+        showSkeleton ? (
+          <S.SkeletonTableCard>
+            {skeletonRows.map((_, rowIndex) => (
+              <S.SkeletonRow key={rowIndex}>
+                <Skeleton width="2.25rem" height="2.25rem" radius="md" />
+                <Skeleton width="30%" height="0.875rem" />
+                {Array.from({ length: skeletonColumnCount - 1 }).map((__, cellIndex) => (
+                  <Skeleton key={cellIndex} width="4rem" height="0.875rem" />
+                ))}
+              </S.SkeletonRow>
+            ))}
+          </S.SkeletonTableCard>
+        ) : (
+          <Table
+            columns={columns}
+            data={data}
+            selectable={selectable}
+            selectedRows={selectedRows}
+            onSelectionChange={onSelectionChange}
+            emptyMessage={typeof resolvedEmpty === 'string' ? resolvedEmpty : undefined}
+            emptyContent={typeof resolvedEmpty !== 'string' ? resolvedEmpty : undefined}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRowClick={onRowClick}
+          />
+        )
       ) : (
         <S.GridContainer $minItemWidth={gridMinItemWidth} $maxColumns={gridMaxColumns}>
-          {isEmpty ? (
+          {showSkeleton ? (
+            skeletonRows.map((_, cardIndex) => (
+              <S.SkeletonGridCard key={cardIndex}>
+                <Skeleton width="4.5rem" height="4.5rem" radius="md" />
+                <S.SkeletonGridCardBody>
+                  <Skeleton width="70%" height="0.875rem" />
+                  <Skeleton width="45%" height="0.75rem" />
+                  <Skeleton width="30%" height="0.75rem" />
+                </S.SkeletonGridCardBody>
+              </S.SkeletonGridCard>
+            ))
+          ) : isEmpty ? (
             <S.GridEmptyState>{resolvedEmpty}</S.GridEmptyState>
           ) : (
             data.map((item, index) => renderGridCard(item, index))

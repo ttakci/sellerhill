@@ -31,7 +31,7 @@ netProfit = ebayEarnings − purchasePrice − amazonTax − amazonShipping
 
 (`ebay_earnings` = eBay `totalDueSeller`, already net of eBay commission. `transactionFee`/`adFee` are display-only estimates and correctly excluded — they do not enter `net_profit`.)
 
-The **coverage** is broken. Net profit is only trustworthy for the narrow slice of orders that are (1) matched to a Zonds listing **and** (2) manually linked to a scraped Amazon order. Everywhere else it silently misleads:
+The **coverage** is broken. Net profit is only trustworthy for the narrow slice of orders that are (1) matched to a SellerHill listing **and** (2) manually linked to a scraped Amazon order. Everywhere else it silently misleads:
 
 | Case | Current behavior | Effect |
 |---|---|---|

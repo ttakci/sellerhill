@@ -13,6 +13,13 @@ import { useLocale } from '@/utils/useLocale';
 
 /** `?drawer=add` opens the create flow — the legacy `/listings/add` page redirects here. */
 const ADD_DRAWER_PARAM = 'add';
+/**
+ * `?drawer=import` opens the existing-listing import flow. It is the fix for
+ * untracked orders (a sale on an eBay item we hold no listing for), so the
+ * Action Center links straight at it — the drawer had no URL param at all and
+ * that link silently opened the plain overview page.
+ */
+const IMPORT_DRAWER_PARAM = 'import';
 
 export const ListingsOverviewPageContainer: React.FC = () => {
   const { localeNavigate } = useLocale();
@@ -20,7 +27,9 @@ export const ListingsOverviewPageContainer: React.FC = () => {
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(
     () => searchParams.get('drawer') === ADD_DRAWER_PARAM
   );
-  const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(false);
+  const [isImportDrawerOpen, setIsImportDrawerOpen] = useState(
+    () => searchParams.get('drawer') === IMPORT_DRAWER_PARAM
+  );
 
   // Carousel + "view all" only show real (active) listings — never drafts
   const { data } = useGetListingsQuery(
@@ -48,13 +57,26 @@ export const ListingsOverviewPageContainer: React.FC = () => {
     setIsAddDrawerOpen(true);
   };
 
-  const handleAddDrawerClose = () => {
-    setIsAddDrawerOpen(false);
-    if (searchParams.get('drawer') === ADD_DRAWER_PARAM) {
+  /**
+   * Drop the `drawer` param on close so a back/refresh does not immediately
+   * reopen a drawer the seller just dismissed.
+   */
+  const clearDrawerParam = (value: string) => {
+    if (searchParams.get('drawer') === value) {
       const next = new URLSearchParams(searchParams);
       next.delete('drawer');
       setSearchParams(next, { replace: true });
     }
+  };
+
+  const handleAddDrawerClose = () => {
+    setIsAddDrawerOpen(false);
+    clearDrawerParam(ADD_DRAWER_PARAM);
+  };
+
+  const handleImportDrawerClose = () => {
+    setIsImportDrawerOpen(false);
+    clearDrawerParam(IMPORT_DRAWER_PARAM);
   };
 
   const handleAddSuccess = (result?: { asDraft: boolean }) => {
@@ -81,7 +103,7 @@ export const ListingsOverviewPageContainer: React.FC = () => {
       <AddListingsDrawer isOpen={isAddDrawerOpen} onClose={handleAddDrawerClose} onSuccess={handleAddSuccess} />
       <ExistingListingsImportDrawer
         isOpen={isImportDrawerOpen}
-        onClose={() => setIsImportDrawerOpen(false)}
+        onClose={handleImportDrawerClose}
         onSuccess={(jobId) => localeNavigate(`/listings/jobs/${jobId}`)}
       />
     </EbayAccountGuard>

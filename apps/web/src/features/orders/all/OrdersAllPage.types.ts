@@ -26,6 +26,10 @@ export interface OrdersAllPageProps {
   fulfillmentState: string;
   onFulfillmentStateChange: (value: string | number) => void;
   fulfillmentStateOptions: { value: string | number; label: string }[];
+  dateFrom: string;
+  dateTo: string;
+  onDateFromChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDateToChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;

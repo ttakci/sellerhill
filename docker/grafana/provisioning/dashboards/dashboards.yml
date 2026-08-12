@@ -2,7 +2,7 @@
 apiVersion: 1
 
 providers:
-  - name: Zonds
+  - name: SellerHill
     orgId: 1
     folder: ''
     type: file

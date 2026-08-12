@@ -33,9 +33,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onOpenLogoutConfirm,
   onCloseLogoutConfirm,
   onLocaleNavigate,
+  pendingActionCount,
+  hasCriticalActions,
   i18nLanguage,
 }) => {
-  const { t } = useTranslation(['translation', 'listings', 'orders']);
+  const { t } = useTranslation(['translation', 'actionCenter', 'listings', 'orders']);
 
   return (
     <ErrorBoundary>
@@ -82,8 +84,43 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="dashboard" size={20} />
-                  {!sidebarCollapsed && t('translation:menu.dashboard')}
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.dashboard')}</S.NavItemLabel>}
                 </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            {/*
+              Pending Actions sits directly under Dashboard on purpose: the
+              dashboard says what happened, this says what is waiting. The badge
+              is what makes a blocked purchase or a revoked store token
+              discoverable without already suspecting it — every other surface
+              requires the seller to open the right list with the right filter
+              in mind. It renders nothing at all when the count is zero.
+            */}
+            <NavTooltip
+              label={
+                pendingActionCount > 0
+                  ? `${t('actionCenter:actionCenter.menu')} (${pendingActionCount})`
+                  : t('actionCenter:actionCenter.menu')
+              }
+              collapsed={sidebarCollapsed}
+            >
+              <S.NavItem
+                $active={pathWithoutLocale === '/actions'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/actions')}
+                aria-label={t('actionCenter:actionCenter.menu')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="bell-ring" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('actionCenter:actionCenter.menu')}</S.NavItemLabel>}
+                </S.NavItemContent>
+                {pendingActionCount > 0 &&
+                  (sidebarCollapsed ? (
+                    <S.NavBadgeDot $urgent={hasCriticalActions} />
+                  ) : (
+                    <S.NavBadge $urgent={hasCriticalActions}>{pendingActionCount}</S.NavBadge>
+                  ))}
               </S.NavItem>
             </NavTooltip>
 
@@ -96,7 +133,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="shopping-bag" size={20} />
-                  {!sidebarCollapsed && t('translation:menu.orders')}
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.orders')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>
@@ -117,7 +154,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="inventory" size={20} />
-                  {!sidebarCollapsed && t('translation:menu.ebayListings')}
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.ebayListings')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>
@@ -131,7 +168,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="clipboard-list" size={20} />
-                  {!sidebarCollapsed && t('translation:menu.listingJobs')}
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.listingJobs')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <NavTooltip label={t('translation:menu.billing')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={pathWithoutLocale === '/billing'}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate('/billing')}
+                aria-label={t('translation:menu.billing')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="wallet-cards" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.billing')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>
@@ -154,7 +205,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               >
                 <S.NavItemContent $isCollapsed={sidebarCollapsed}>
                   <Icon name="settings" size={20} />
-                  {!sidebarCollapsed && t('translation:menu.settings')}
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.settings')}</S.NavItemLabel>}
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>

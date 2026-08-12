@@ -1,5 +1,5 @@
 # ============================================
-# Zonds — PRODUCTION Docker Compose (Coolify)
+# SellerHill — PRODUCTION Docker Compose (Coolify)
 #
 # For the sandbox/test deployment use docker-compose.test.yml instead. The two
 # files build the same images from the same code; only configuration differs.
@@ -51,7 +51,7 @@ services:
       REDIS_DB: 0
 
       # Frontend URL (OAuth redirects + email links) — same domain as web.
-      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://app.zonds.com)}
+      FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://app.sellerhill.com)}
 
       # CORS — allowed origins (comma-separated). Same-origin SPA requests carry
       # no Origin header so this rarely matters, but set it for correctness.
@@ -215,7 +215,7 @@ services:
       ENVIRONMENT: production
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
-      - api_logs:/var/log/zonds-api:ro
+      - api_logs:/var/log/sellerhill-api:ro
       - promtail_positions:/tmp/positions
     command: -config.expand-env=true -config.file=/etc/promtail/config.yml
     networks:

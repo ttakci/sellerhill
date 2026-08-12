@@ -32,6 +32,22 @@ export const TwoColGrid = styled.div`
  * injection order. Doubling the class makes the reset unconditional — without
  * it each stacked card claims the full column height and they overflow.
  */
+/**
+ * Fills the leftover space in a card stretched by its taller \`TwoColGrid\`
+ * sibling and centers the InfoMessage inside it, instead of the note
+ * hugging the last row with dead space still hanging below.
+ */
+export const SectionInfoMessage = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  margin-top: ${tkn('spacing.sm')};
+
+  & > * {
+    width: 100%;
+  }
+`;
+
 export const ColumnStack = styled.div`
   display: flex;
   flex-direction: column;

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingJobsPage.style';
 import type { ListingJobsPageComponentProps } from './ListingJobsPage.types';
+import { JobProgressRing } from './shared/JobProgressRing';
 
 export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> = ({
   jobs,
@@ -27,6 +28,9 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
   statusFilter,
   onStatusFilterChange,
   statusOptions,
+  datePreset,
+  onDatePresetChange,
+  datePresetOptions,
   hasActiveFilters,
   onClearFilters,
   columns,
@@ -51,13 +55,16 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
 
     return (
       /*
-       * Redesigned: the card was nine `caption` texts stacked with dot
-       * separators — a wall of 12px grey with no focal point, and a fake
-       * "open detail" link inside an already-clickable card. Progress is now
-       * the headline, status leads, and the technical id is demoted to meta.
+       * Job id top-left / status badge top-right (opposite corners of the
+       * header row instead of a labeled meta row), created date pushed to
+       * the far right of the progress row, label-above-value stats box, and
+       * a "Detay ->" footer instead of a bare icon.
        */
       <S.JobCard key={job.id} variant="elevated" onClick={() => onJobClick(job.id)}>
         <S.JobCardHeader>
+          <S.MonoId variant="body-sm" weight="semibold" color="text.secondary">
+            {shortId}
+          </S.MonoId>
           <StatusBadge status={String(job.status).toLowerCase()} size="sm">
             {statusLabel(job.status)}
           </StatusBadge>
@@ -65,67 +72,65 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
 
         <S.JobCardBody>
           <S.ProgressRow>
-            <S.ProgressRing $percent={percent} role="img" aria-label={`${percent}%`}>
-              <S.ProgressRingValue variant="body-sm" weight="semibold" numeric>
-                {percent}%
-              </S.ProgressRingValue>
-            </S.ProgressRing>
-            <S.ProgressCounts>
-              <Text variant="body" weight="semibold" numeric>
-                {t('listings.jobs.card.progressCount', {
-                  processed: job.processedCount,
-                  total: job.totalAsins,
-                })}
-              </Text>
-              <Text variant="caption" color="text.tertiary">
-                {formatJobDate(job.createdAt)}
-              </Text>
-            </S.ProgressCounts>
+            <S.ProgressMain>
+              <JobProgressRing percent={percent} />
+              <S.ProgressCounts>
+                <Text variant="body" weight="semibold" numeric>
+                  {t('listings.jobs.card.progressCount', {
+                    processed: job.processedCount,
+                    total: job.totalAsins,
+                  })}
+                </Text>
+              </S.ProgressCounts>
+            </S.ProgressMain>
+            <Text variant="caption" color="text.tertiary">
+              {formatJobDate(job.createdAt)}
+            </Text>
           </S.ProgressRow>
 
-          <S.StatsInline>
-            <S.StatInline>
-              <Text variant="body-sm" weight="semibold" color="semantic.success" numeric>
-                {job.successCount}
-              </Text>
-              <Text variant="caption" color="text.tertiary">
+          <S.StatsGrid>
+            <S.StatCell>
+              <S.StatLabel variant="caption" color="text.tertiary">
                 {t('listings.jobs.stats.success')}
-              </Text>
-            </S.StatInline>
-            <S.StatInline>
-              <Text
+              </S.StatLabel>
+              <S.StatValue variant="body-sm" weight="bold" $tone="positive" numeric>
+                {job.successCount}
+              </S.StatValue>
+            </S.StatCell>
+            <S.StatCell>
+              <S.StatLabel variant="caption" color="text.tertiary">
+                {t('listings.jobs.stats.failed')}
+              </S.StatLabel>
+              <S.StatValue
                 variant="body-sm"
-                weight="semibold"
-                color={job.failedCount > 0 ? 'semantic.error' : 'text.tertiary'}
+                weight="bold"
+                $tone={job.failedCount > 0 ? 'negative' : 'default'}
                 numeric
               >
                 {job.failedCount}
-              </Text>
-              <Text variant="caption" color="text.tertiary">
-                {t('listings.jobs.stats.failed')}
-              </Text>
-            </S.StatInline>
+              </S.StatValue>
+            </S.StatCell>
             {remaining > 0 ? (
-              <S.StatInline>
-                <Text variant="body-sm" weight="semibold" color="text.secondary" numeric>
-                  {remaining}
-                </Text>
-                <Text variant="caption" color="text.tertiary">
+              <S.StatCell>
+                <S.StatLabel variant="caption" color="text.tertiary">
                   {t('listings.jobs.stats.remaining')}
-                </Text>
-              </S.StatInline>
+                </S.StatLabel>
+                <S.StatValue variant="body-sm" weight="bold" numeric>
+                  {remaining}
+                </S.StatValue>
+              </S.StatCell>
             ) : null}
-          </S.StatsInline>
+          </S.StatsGrid>
         </S.JobCardBody>
 
-        <S.JobCardFooter>
-          <S.MonoId variant="caption" color="text.tertiary">
-            {shortId}
-          </S.MonoId>
-          <S.OpenAffordance aria-hidden>
-            <Icon name="arrow-right" size="sm" />
-          </S.OpenAffordance>
-        </S.JobCardFooter>
+        <S.Footer>
+          <S.DetailAction>
+            <Text variant="body-sm" weight="semibold" color="brand.primary">
+              {t('translation:common.details')}
+            </Text>
+            <Icon name="arrow-right" size={14} color="brand.primary" />
+          </S.DetailAction>
+        </S.Footer>
       </S.JobCard>
     );
   };
@@ -191,6 +196,15 @@ export const ListingJobsPageComponent: React.FC<ListingJobsPageComponentProps> =
                   onChange={onStatusFilterChange}
                   options={statusOptions}
                   placeholder={t('listings.jobs.filters.allStatuses')}
+                  size="medium"
+                  fullWidth
+                />
+              </S.SelectWrapper>
+              <S.SelectWrapper>
+                <Select
+                  value={datePreset}
+                  onChange={onDatePresetChange}
+                  options={datePresetOptions}
                   size="medium"
                   fullWidth
                 />

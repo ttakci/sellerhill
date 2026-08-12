@@ -1,5 +1,5 @@
 # ============================================
-# Zonds API - Production Docker Image
+# SellerHill API - Production Docker Image
 # Includes: NestJS + Playwright (Chromium)
 # ============================================
 FROM node:20-bookworm

@@ -1,4 +1,4 @@
-import { ListingJobStatus, type ListingJobDto } from '@repo/shared';
+import { ListingJobDatePreset, ListingJobStatus, type ListingJobDto } from '@repo/shared';
 import {
   ProgressBar,
   StatusBadge,
@@ -10,11 +10,13 @@ import {
 } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import { useGetListingJobsQuery } from '../api/listings.api';
 
 import { ListingJobsPageComponent } from './ListingJobsPage.component';
 import * as S from './ListingJobsPage.style';
+import { resolveJobDateRange } from './utils/jobDateRange';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useLocale } from '@/utils/useLocale';
@@ -26,12 +28,29 @@ export const ListingJobsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const { localeNavigate } = useLocale();
   const { locale } = getLocaleConfig(i18n.language);
+  /**
+   * Read once, on mount — this page's filters are local state, not
+   * URL-synced. The Action Center's `LISTING_JOB_FAILURES` item deep-links
+   * here with `?hasFailures=true&datePreset=last7Days`; without seeding
+   * initial state from those params, the link landed on every job ever run,
+   * not the ones the item counted.
+   */
+  const [searchParams] = useSearchParams();
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') ?? '');
+  const [datePreset, setDatePreset] = useState<ListingJobDatePreset>(() => {
+    const raw = searchParams.get('datePreset');
+    return Object.values(ListingJobDatePreset).find((preset) => preset === raw) ?? ListingJobDatePreset.ALL;
+  });
+  const [hasFailures, setHasFailures] = useState(() => searchParams.get('hasFailures') === 'true');
+
+  // A discoverable dropdown, not a typed date guess — resolved to explicit
+  // YYYY-MM-DD bounds once per render, not re-derived inside the query call.
+  const dateRange = useMemo(() => resolveJobDateRange(datePreset), [datePreset]);
 
   /*
    * Server-paginated. This endpoint is polled every 5s, so pulling the whole
@@ -44,6 +63,9 @@ export const ListingJobsPageContainer: React.FC = () => {
       limit: rowsPerPage,
       search: search.trim() || undefined,
       status: statusFilter || undefined,
+      dateFrom: dateRange.dateFrom,
+      dateTo: dateRange.dateTo,
+      hasFailures: hasFailures || undefined,
     },
     { pollingInterval: 5000, refetchOnMountOrArgChange: true }
   );
@@ -87,7 +109,20 @@ export const ListingJobsPageContainer: React.FC = () => {
     [t]
   );
 
-  const hasActiveFilters = Boolean(search.trim() || statusFilter);
+  const datePresetOptions = useMemo(
+    () => [
+      { value: ListingJobDatePreset.ALL, label: t('listings.jobs.filters.datePreset.all') },
+      { value: ListingJobDatePreset.TODAY, label: t('listings.jobs.filters.datePreset.today') },
+      { value: ListingJobDatePreset.LAST_7_DAYS, label: t('listings.jobs.filters.datePreset.last7Days') },
+      { value: ListingJobDatePreset.LAST_30_DAYS, label: t('listings.jobs.filters.datePreset.last30Days') },
+      { value: ListingJobDatePreset.THIS_MONTH, label: t('listings.jobs.filters.datePreset.thisMonth') },
+    ],
+    [t]
+  );
+
+  const hasActiveFilters = Boolean(
+    search.trim() || statusFilter || datePreset !== ListingJobDatePreset.ALL || hasFailures
+  );
 
   const columns: TableColumn<ListingJobDto>[] = useMemo(
     () => [
@@ -164,9 +199,16 @@ export const ListingJobsPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
+  const handleDatePresetChange = useCallback((value: string | number) => {
+    setDatePreset(value as ListingJobDatePreset);
+    setPage(1);
+  }, []);
+
   const handleClearFilters = useCallback(() => {
     setSearch('');
     setStatusFilter('');
+    setDatePreset(ListingJobDatePreset.ALL);
+    setHasFailures(false);
     setPage(1);
   }, []);
 
@@ -209,7 +251,7 @@ export const ListingJobsPageContainer: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `zonds_jobs_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sellerhill_jobs_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -229,6 +271,9 @@ export const ListingJobsPageContainer: React.FC = () => {
         statusFilter={statusFilter}
         onStatusFilterChange={handleStatusFilterChange}
         statusOptions={statusOptions}
+        datePreset={datePreset}
+        onDatePresetChange={handleDatePresetChange}
+        datePresetOptions={datePresetOptions}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         columns={columns}

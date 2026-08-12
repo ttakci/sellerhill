@@ -40,6 +40,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [itemSearch, setItemSearch] = useState('');
 
   const {
     data: job,
@@ -208,10 +209,36 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     [t, itemStatusLabel, failureLabel, failureReference]
   );
 
+  /** ASIN or the localized failure message — the two things a seller actually
+      recognizes an item by. */
+  const filteredItems = useMemo(() => {
+    const q = itemSearch.trim().toLowerCase();
+    if (!q) {
+      return items;
+    }
+    return items.filter((item) => {
+      if (item.asin.toLowerCase().includes(q)) {
+        return true;
+      }
+      const reason = failureLabel(item);
+      return reason ? reason.toLowerCase().includes(q) : false;
+    });
+  }, [items, itemSearch, failureLabel]);
+
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
-    return items.slice(start, start + rowsPerPage);
-  }, [items, page, rowsPerPage]);
+    return filteredItems.slice(start, start + rowsPerPage);
+  }, [filteredItems, page, rowsPerPage]);
+
+  const handleItemSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setItemSearch(e.target.value);
+    setPage(1);
+  }, []);
+
+  const handleClearItemSearch = useCallback(() => {
+    setItemSearch('');
+    setPage(1);
+  }, []);
 
   const handleBack = useCallback(() => {
     localeNavigate('/listings/jobs');
@@ -259,8 +286,12 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       itemStatusLabel={itemStatusLabel}
       itemFailureLabel={failureLabel}
       itemFailureReference={failureReference}
+      itemSearch={itemSearch}
+      onItemSearchChange={handleItemSearchChange}
+      onClearItemSearch={handleClearItemSearch}
+      filteredItemCount={filteredItems.length}
       pagination={{
-        count: items.length,
+        count: filteredItems.length,
         page,
         rowsPerPage,
         onPageChange: setPage,

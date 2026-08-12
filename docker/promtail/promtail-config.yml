@@ -13,14 +13,14 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: zonds-api
+  - job_name: sellerhill-api
     static_configs:
       - targets:
           - localhost
         labels:
-          job: zonds-api
+          job: sellerhill-api
           environment: ${ENVIRONMENT}
-          __path__: /var/log/zonds-api/*.log
+          __path__: /var/log/sellerhill-api/*.log
     pipeline_stages:
       # apps/api's Winston transports write one JSON object per line
       # (correlationId/queueName/jobId stamped by correlationFormat — see

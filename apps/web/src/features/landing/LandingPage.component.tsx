@@ -1,31 +1,41 @@
-import { Icon, type IconName, type LocaleOption, LanguageSwitcher, Logo, ThemeToggle } from '@repo/ui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Dropdown, Icon, type IconName, Logo, ThemeToggle } from '@repo/ui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './LandingPage.style';
 import type { LandingPageProps } from './LandingPage.types';
 
-const LOCALE_OPTIONS: LocaleOption[] = [
-  { code: 'en', displayName: 'English' },
-  { code: 'tr', displayName: 'Türkçe' },
-];
-
-type FeatureKey = 'asinListing' | 'stockPriceSync' | 'autoOrder' | 'manualOrder' | 'tracking';
-const FEATURES: { key: FeatureKey; icon: IconName }[] = [
-  { key: 'asinListing', icon: 'plus' },
-  { key: 'stockPriceSync', icon: 'sync' },
+const FEATURES: { key: string; icon: IconName }[] = [
+  { key: 'asinListing', icon: 'rocket' },
+  { key: 'priceStock', icon: 'sync' },
   { key: 'autoOrder', icon: 'shopping-cart' },
-  { key: 'manualOrder', icon: 'edit' },
   { key: 'tracking', icon: 'local-shipping' },
+  { key: 'buyerMessages', icon: 'message-circle' },
+  { key: 'multiStore', icon: 'storefront' },
 ];
 
+const PROFIT_POINTS: { key: string; icon: IconName }[] = [
+  { key: 'confirmed', icon: 'shield-check' },
+  { key: 'estimated', icon: 'triangle-info' },
+  { key: 'honest', icon: 'eye' },
+  { key: 'pnl', icon: 'chart-line' },
+];
+
+const PILLARS = ['p1', 'p2', 'p3'] as const;
 const STEPS = ['step1', 'step2', 'step3'] as const;
 const PRODUCTS = ['productA', 'productB', 'productC'] as const;
 const PRODUCT_SETTINGS = ['margin', 'stock', 'template'] as const;
-const STAT_KEYS = ['sellers', 'orders', 'uptime', 'marketplaces'] as const;
-const TESTIMONIAL_KEYS = ['t1', 't2', 't3'] as const;
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
-const FALLBACK_PLANS = ['starter', 'pro', 'enterprise'] as const;
+const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
+const FALLBACK_PLANS = ['starter', 'growth', 'scale'] as const;
+
+/**
+ * Hero chart shape. Fixed, not random: the preview must render identically on
+ * every visit, and the tallest bar is the profit series so the eye lands on the
+ * thing the page is actually about.
+ */
+const CHART_BARS = [38, 52, 44, 61, 49, 72, 58, 83, 66, 91];
+const CHART_ACCENT_INDEX = 7;
 
 export const LandingPageComponent = ({
   currentLocale,
@@ -36,19 +46,19 @@ export const LandingPageComponent = ({
   onLocaleChange,
   onNavigateLogin,
   onNavigateRegister,
+  onOpenDemo,
   onToggleMobileMenu,
   onCloseMobileMenu,
 }: LandingPageProps): React.ReactElement => {
   const { t } = useTranslation('translation');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [revealState, setRevealState] = useState<Record<string, boolean>>({});
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const toggleFaq = useCallback((index: number) => {
     setOpenFaq((prev) => (prev === index ? null : index));
   }, []);
 
-  // Scroll-reveal animation — purely visual, lives in the presentation layer.
+  // Scroll-reveal — purely visual, so it lives in the presentation layer.
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -62,9 +72,8 @@ export const LandingPageComponent = ({
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -8% 0px' }
     );
-    observerRef.current = observer;
     document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
@@ -79,18 +88,26 @@ export const LandingPageComponent = ({
 
   const navLinks = [
     { id: 'features', label: t('translation:landing.navbar.features') },
+    { id: 'profit', label: t('translation:landing.navbar.profit') },
     { id: 'how-it-works', label: t('translation:landing.navbar.howItWorks') },
     { id: 'pricing', label: t('translation:landing.navbar.pricing') },
     { id: 'faq', label: t('translation:landing.navbar.faq') },
   ];
+
+  const seen = (id: string): boolean => revealState[id] ?? false;
 
   return (
     <S.Page>
       {/* ── Navbar ─────────────────────────────────────── */}
       <S.Navbar $scrolled={scrolled}>
         <S.NavInner>
-          <S.NavBrand type="button" onClick={() => scrollTo('top')}>
-            <Logo size={44} />
+          {/*
+            The horizontal wordmark, as in the app shell. The default layout is
+            the tall mark-plus-tagline built for the 280px auth panels; at
+            navbar height it collapses into an illegible smudge.
+          */}
+          <S.NavBrand type="button" onClick={() => scrollTo('top')} aria-label="SellerHill">
+            <Logo layout="nav" height={32} />
           </S.NavBrand>
           <S.NavLinks>
             {navLinks.map((link) => (
@@ -98,14 +115,25 @@ export const LandingPageComponent = ({
                 {link.label}
               </S.NavLink>
             ))}
+            <S.NavLink type="button" onClick={onOpenDemo}>
+              {t('translation:landing.navbar.demo')}
+            </S.NavLink>
           </S.NavLinks>
           <S.NavActions>
             <S.UtilityGroup>
-              <LanguageSwitcher
-                currentLocale={currentLocale}
-                locales={LOCALE_OPTIONS}
-                onLocaleChange={(code) => onLocaleChange(code as 'en' | 'tr')}
-                variant="compact"
+              <Dropdown
+                align="right"
+                width="6.25rem"
+                trigger={
+                  <S.LanguageTrigger>
+                    <S.LanguageText>{currentLocale.slice(0, 2)}</S.LanguageText>
+                    <Icon name="chevron-down" size={12} />
+                  </S.LanguageTrigger>
+                }
+                items={[
+                  { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
+                  { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
+                ]}
               />
               <ThemeToggle />
             </S.UtilityGroup>
@@ -114,10 +142,10 @@ export const LandingPageComponent = ({
             </S.LoginButton>
             <S.NavCta type="button" onClick={onNavigateRegister}>
               {t('translation:landing.navbar.getStarted')}
-              <Icon name="arrow-right" size={16} />
+              <Icon name="arrow-right" size={15} />
             </S.NavCta>
             <S.Hamburger $open={mobileMenuOpen} type="button" onClick={onToggleMobileMenu} aria-label="Menu">
-              <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={22} />
+              <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={20} />
             </S.Hamburger>
           </S.NavActions>
         </S.NavInner>
@@ -127,9 +155,9 @@ export const LandingPageComponent = ({
       <S.MobileMenuOverlay $open={mobileMenuOpen} onClick={onCloseMobileMenu} />
       <S.MobileMenu $open={mobileMenuOpen}>
         <S.MobileMenuHead>
-          <Logo size={36} />
+          <Logo layout="nav" height={28} />
           <S.MobileClose type="button" onClick={onCloseMobileMenu} aria-label="Close">
-            <Icon name="x" size={22} />
+            <Icon name="x" size={20} />
           </S.MobileClose>
         </S.MobileMenuHead>
         <S.MobileLinks>
@@ -138,6 +166,9 @@ export const LandingPageComponent = ({
               {link.label}
             </S.MobileLink>
           ))}
+          <S.MobileLink type="button" onClick={onOpenDemo}>
+            {t('translation:landing.navbar.demo')}
+          </S.MobileLink>
         </S.MobileLinks>
         <S.MobileCtas>
           <S.LoginButton $block type="button" onClick={onNavigateLogin}>
@@ -152,6 +183,7 @@ export const LandingPageComponent = ({
       {/* ── Hero ───────────────────────────────────────── */}
       <S.Hero id="top">
         <S.HeroGlow />
+        <S.HeroFade />
         <S.HeroInner>
           <S.HeroContent>
             <S.Eyebrow>
@@ -161,11 +193,11 @@ export const LandingPageComponent = ({
             <S.HeroTitle>{t('translation:landing.hero.headline')}</S.HeroTitle>
             <S.HeroSubtitle>{t('translation:landing.hero.subheading')}</S.HeroSubtitle>
             <S.HeroCtas>
-              <S.PrimaryButton type="button" onClick={onNavigateRegister}>
+              <S.PrimaryButton $lg type="button" onClick={onNavigateRegister}>
                 {t('translation:landing.hero.ctaPrimary')}
-                <Icon name="arrow-right" size={18} />
+                <Icon name="arrow-right" size={17} />
               </S.PrimaryButton>
-              <S.GhostButton type="button" onClick={() => scrollTo('how-it-works')}>
+              <S.GhostButton $lg type="button" onClick={onOpenDemo}>
                 <Icon name="play-arrow" size={16} />
                 {t('translation:landing.hero.ctaSecondary')}
               </S.GhostButton>
@@ -173,132 +205,231 @@ export const LandingPageComponent = ({
             <S.HeroNote>{t('translation:landing.hero.note')}</S.HeroNote>
           </S.HeroContent>
 
+          {/*
+            A legible rendering of the real dashboard rather than grey
+            placeholder blocks. The third order row shows an em dash on
+            purpose: an unknown cost is never printed as a number, and that
+            behaviour is the argument the rest of the page makes.
+          */}
           <S.HeroPreview>
-            <S.DashboardMock>
-              <S.MockBar>
-                <S.MockDot $c="error" />
-                <S.MockDot $c="warning" />
-                <S.MockDot $c="success" />
-                <S.MockUrl>app.zonds.io/dashboard</S.MockUrl>
-              </S.MockBar>
-              <S.MockBody>
-                <S.MockSidebar>
-                  <S.MockSideItem $active />
-                  <S.MockSideItem />
-                  <S.MockSideItem />
-                  <S.MockSideItem $active />
-                  <S.MockSideItem />
-                </S.MockSidebar>
-                <S.MockMain>
-                  <S.MockKpis>
-                    <S.MockKpi />
-                    <S.MockKpi />
-                    <S.MockKpi />
-                  </S.MockKpis>
-                  <S.MockChart>
-                    {[34, 52, 40, 68, 48, 80, 60, 92, 72].map((h, i) => (
-                      <S.MockBar2 key={i} $h={`${h}%`} />
+            <S.PreviewFrame>
+              <S.PreviewBar>
+                <S.PreviewDot $c="error" />
+                <S.PreviewDot $c="warning" />
+                <S.PreviewDot $c="success" />
+                <S.PreviewUrl>app.sellerhill.com/dashboard</S.PreviewUrl>
+              </S.PreviewBar>
+              <S.PreviewBody>
+                <S.PreviewRail>
+                  <S.PreviewRailItem $active />
+                  <S.PreviewRailItem />
+                  <S.PreviewRailItem />
+                  <S.PreviewRailItem />
+                  <S.PreviewRailItem />
+                </S.PreviewRail>
+                <S.PreviewMain>
+                  <S.PreviewPeriod>{t('translation:landing.heroPreview.periodLabel')}</S.PreviewPeriod>
+                  <S.PreviewKpis>
+                    <S.PreviewKpi $accent>
+                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.netProfit')}</S.PreviewKpiLabel>
+                      <S.PreviewKpiValue>$3,186.40</S.PreviewKpiValue>
+                      <S.PreviewKpiFoot $tone="success">
+                        <Icon name="shield-check" size={12} />
+                        {t('translation:landing.heroPreview.confirmed')}
+                      </S.PreviewKpiFoot>
+                    </S.PreviewKpi>
+                    <S.PreviewKpi>
+                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.sales')}</S.PreviewKpiLabel>
+                      <S.PreviewKpiValue>$18,420.50</S.PreviewKpiValue>
+                      <S.PreviewKpiFoot $tone="success">
+                        <Icon name="trending-up" size={12} />
+                        +12.4%
+                      </S.PreviewKpiFoot>
+                    </S.PreviewKpi>
+                    <S.PreviewKpi>
+                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.orders')}</S.PreviewKpiLabel>
+                      <S.PreviewKpiValue>214</S.PreviewKpiValue>
+                      <S.PreviewKpiFoot>
+                        {t('translation:landing.heroPreview.margin')} 17.3%
+                      </S.PreviewKpiFoot>
+                    </S.PreviewKpi>
+                  </S.PreviewKpis>
+
+                  <S.PreviewChart aria-hidden="true">
+                    {CHART_BARS.map((h, i) => (
+                      <S.PreviewChartBar key={i} $h={`${h}%`} $accent={i === CHART_ACCENT_INDEX} />
                     ))}
-                  </S.MockChart>
-                  <S.MockTable>
-                    <S.MockRow />
-                    <S.MockRow />
-                    <S.MockRow />
-                  </S.MockTable>
-                </S.MockMain>
-              </S.MockBody>
-            </S.DashboardMock>
+                  </S.PreviewChart>
+
+                  <S.PreviewTable>
+                    <S.PreviewTableHead>
+                      <span>{t('translation:landing.heroPreview.recentTitle')}</span>
+                      <span />
+                      <span>{t('translation:landing.heroPreview.profitColumn')}</span>
+                    </S.PreviewTableHead>
+                    <S.PreviewRow>
+                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.a')}</S.PreviewRowTitle>
+                      <S.PreviewBadge $tone="success">
+                        {t('translation:landing.heroPreview.states.purchased')}
+                      </S.PreviewBadge>
+                      <S.PreviewRowValue>$14.20</S.PreviewRowValue>
+                    </S.PreviewRow>
+                    <S.PreviewRow>
+                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.b')}</S.PreviewRowTitle>
+                      <S.PreviewBadge $tone="info">
+                        {t('translation:landing.heroPreview.states.shipped')}
+                      </S.PreviewBadge>
+                      <S.PreviewRowValue>$8.75</S.PreviewRowValue>
+                    </S.PreviewRow>
+                    <S.PreviewRow>
+                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.c')}</S.PreviewRowTitle>
+                      <S.PreviewBadge $tone="warning">
+                        {t('translation:landing.heroPreview.states.actionRequired')}
+                      </S.PreviewBadge>
+                      <S.PreviewRowValue
+                        $muted
+                        title={t('translation:landing.heroPreview.pending')}
+                      >
+                        —
+                      </S.PreviewRowValue>
+                    </S.PreviewRow>
+                  </S.PreviewTable>
+                </S.PreviewMain>
+              </S.PreviewBody>
+            </S.PreviewFrame>
           </S.HeroPreview>
         </S.HeroInner>
       </S.Hero>
 
-      {/* ── Platform strip ─────────────────────────────── */}
-      <S.Platforms>
-        <S.PlatformLabel>{t('translation:landing.logos.title')}</S.PlatformLabel>
-        <S.PlatformFlow>
-          <S.PlatformChip>
-            <span>Amazon</span>
-          </S.PlatformChip>
-          <S.PlatformArrow>
-            <Icon name="arrow-right" size={18} />
-          </S.PlatformArrow>
-          <S.PlatformChip>
-            <span>eBay</span>
-          </S.PlatformChip>
-        </S.PlatformFlow>
-      </S.Platforms>
+      {/* ── Flow strip + pillars ───────────────────────── */}
+      <S.FlowStrip>
+        <S.FlowLabel>{t('translation:landing.flow.title')}</S.FlowLabel>
+        <S.FlowRow>
+          <S.FlowChip>
+            <Icon name="package-open" size={16} />
+            {t('translation:landing.flow.source')}
+          </S.FlowChip>
+          <S.FlowArrow>
+            <Icon name="arrow-right" size={17} />
+          </S.FlowArrow>
+          <S.FlowChip $accent>
+            <Icon name="bolt" size={16} />
+            {t('translation:landing.flow.engine')}
+          </S.FlowChip>
+          <S.FlowArrow>
+            <Icon name="arrow-right" size={17} />
+          </S.FlowArrow>
+          <S.FlowChip>
+            <Icon name="storefront" size={16} />
+            {t('translation:landing.flow.destination')}
+          </S.FlowChip>
+        </S.FlowRow>
+      </S.FlowStrip>
+
+      <S.Pillars data-reveal="pillars">
+        {PILLARS.map((key, i) => (
+          <S.Reveal key={key} $visible={seen('pillars')} $delay={i}>
+            <S.Pillar>
+              <S.PillarTitle>{t(`translation:landing.pillars.${key}.title`)}</S.PillarTitle>
+              <S.PillarText>{t(`translation:landing.pillars.${key}.description`)}</S.PillarText>
+            </S.Pillar>
+          </S.Reveal>
+        ))}
+      </S.Pillars>
 
       {/* ── Features ───────────────────────────────────── */}
-      <S.Section id="features" data-reveal="features">
-        <S.Reveal $visible={revealState['features'] ?? false}>
+      <S.Section $alt id="features" data-reveal="features">
+        <S.Reveal $visible={seen('features')}>
           <S.SectionHead>
             <S.Eyebrow>{t('translation:landing.features.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.features.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.features.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
         </S.Reveal>
-        <S.Reveal $visible={revealState['features'] ?? false} $delay={1}>
+        <S.Reveal $visible={seen('features')} $delay={1}>
           <S.FeaturesGrid>
             {FEATURES.map((f) => (
               <S.FeatureCard key={f.key}>
                 <S.FeatureIconWrap>
-                  <Icon name={f.icon} size={22} color="brand.primary" />
+                  <Icon name={f.icon} size={20} color="brand.primary" />
                 </S.FeatureIconWrap>
                 <S.FeatureTitle>{t(`translation:landing.features.${f.key}.title`)}</S.FeatureTitle>
                 <S.FeatureDesc>{t(`translation:landing.features.${f.key}.description`)}</S.FeatureDesc>
               </S.FeatureCard>
             ))}
-            <S.FeatureCard $highlight>
-              <S.FeatureHeadRow>
-                <S.FeatureIconWrap $highlight>
-                  <Icon name="sliders-horizontal" size={22} color="landing.heroText" />
-                </S.FeatureIconWrap>
-                <S.FeatureBadge>{t('translation:landing.features.perProduct.badge')}</S.FeatureBadge>
-              </S.FeatureHeadRow>
-              <S.FeatureTitleLarge>{t('translation:landing.features.perProduct.title')}</S.FeatureTitleLarge>
-              <S.FeatureDesc>{t('translation:landing.features.perProduct.description')}</S.FeatureDesc>
-            </S.FeatureCard>
           </S.FeaturesGrid>
         </S.Reveal>
       </S.Section>
 
-      {/* ── How it works ───────────────────────────────── */}
-      <S.Section $alt id="how-it-works" data-reveal="how-it-works">
-        <S.Reveal $visible={revealState['how-it-works'] ?? false}>
-          <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.howItWorks.sectionEyebrow')}</S.Eyebrow>
-            <S.SectionTitle>{t('translation:landing.howItWorks.sectionTitle')}</S.SectionTitle>
-            <S.SectionSubtitle>{t('translation:landing.howItWorks.sectionSubtitle')}</S.SectionSubtitle>
-          </S.SectionHead>
-        </S.Reveal>
-        <S.Reveal $visible={revealState['how-it-works'] ?? false} $delay={1}>
-          <S.Steps>
-            {STEPS.map((step, i) => (
-              <S.StepCard key={step}>
-                <S.StepNumber>{i + 1}</S.StepNumber>
-                <S.StepTitle>{t(`translation:landing.howItWorks.${step}.title`)}</S.StepTitle>
-                <S.StepDesc>{t(`translation:landing.howItWorks.${step}.description`)}</S.StepDesc>
-                {i < STEPS.length - 1 && (
-                  <S.StepConnector>
-                    <Icon name="arrow-right" size={18} />
-                  </S.StepConnector>
-                )}
-              </S.StepCard>
-            ))}
-          </S.Steps>
+      {/* ── Profit — the differentiator ────────────────── */}
+      <S.Section id="profit" data-reveal="profit">
+        <S.Reveal $visible={seen('profit')}>
+          <S.SplitLayout>
+            <S.SplitCopy>
+              <S.SplitEyebrow>{t('translation:landing.profit.sectionEyebrow')}</S.SplitEyebrow>
+              <S.SplitTitle>{t('translation:landing.profit.sectionTitle')}</S.SplitTitle>
+              <S.SplitSubtitle>{t('translation:landing.profit.sectionSubtitle')}</S.SplitSubtitle>
+              <S.ProfitList>
+                {PROFIT_POINTS.map((point) => (
+                  <S.ProfitItem key={point.key}>
+                    <S.ProfitItemIcon>
+                      <Icon name={point.icon} size={15} />
+                    </S.ProfitItemIcon>
+                    <div>
+                      <S.ProfitItemTitle>
+                        {t(`translation:landing.profit.${point.key}.title`)}
+                      </S.ProfitItemTitle>
+                      <S.ProfitItemText>
+                        {t(`translation:landing.profit.${point.key}.description`)}
+                      </S.ProfitItemText>
+                    </div>
+                  </S.ProfitItem>
+                ))}
+              </S.ProfitList>
+            </S.SplitCopy>
+
+            <S.ProfitPanel>
+              <S.ProfitPanelTitle>{t('translation:landing.profit.panel.title')}</S.ProfitPanelTitle>
+              <S.ProfitTier $tone="confirmed">
+                <S.ProfitTierLabel>
+                  <S.ProfitTierName>
+                    {t('translation:landing.profit.panel.confirmedLabel')}
+                  </S.ProfitTierName>
+                </S.ProfitTierLabel>
+                <S.ProfitTierValue>$3,186.40</S.ProfitTierValue>
+              </S.ProfitTier>
+              <S.ProfitTier $tone="estimated">
+                <S.ProfitTierLabel>
+                  <S.ProfitTierName>
+                    {t('translation:landing.profit.panel.estimatedLabel')}
+                  </S.ProfitTierName>
+                </S.ProfitTierLabel>
+                <S.ProfitTierValue>$742.10</S.ProfitTierValue>
+              </S.ProfitTier>
+              <S.ProfitTier $tone="unknown">
+                <S.ProfitTierLabel>
+                  <S.ProfitTierName>
+                    {t('translation:landing.profit.panel.unknownLabel')}
+                  </S.ProfitTierName>
+                </S.ProfitTierLabel>
+                <S.ProfitTierValue $muted>—</S.ProfitTierValue>
+              </S.ProfitTier>
+              <S.ProfitFootnote>{t('translation:landing.profit.panel.footnote')}</S.ProfitFootnote>
+            </S.ProfitPanel>
+          </S.SplitLayout>
         </S.Reveal>
       </S.Section>
 
-      {/* ── Per-product deep dive ──────────────────────── */}
-      <S.Section data-reveal="per-product">
-        <S.Reveal $visible={revealState['per-product'] ?? false}>
+      {/* ── Per-product control ────────────────────────── */}
+      <S.Section $alt data-reveal="per-product">
+        <S.Reveal $visible={seen('per-product')}>
           <S.SectionHead>
             <S.Eyebrow>{t('translation:landing.perProduct.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.perProduct.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.perProduct.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
         </S.Reveal>
-        <S.Reveal $visible={revealState['per-product'] ?? false} $delay={1}>
+        <S.Reveal $visible={seen('per-product')} $delay={1}>
           <S.ProductGrid>
             {PRODUCTS.map((product) => (
               <S.ProductCard key={product}>
@@ -306,8 +437,12 @@ export const LandingPageComponent = ({
                 <S.ProductSettings>
                   {PRODUCT_SETTINGS.map((setting) => (
                     <S.SettingRow key={setting}>
-                      <S.SettingLabel>{t(`translation:landing.perProduct.labels.${setting}`)}</S.SettingLabel>
-                      <S.SettingValue>{t(`translation:landing.perProduct.${product}.${setting}`)}</S.SettingValue>
+                      <S.SettingLabel>
+                        {t(`translation:landing.perProduct.labels.${setting}`)}
+                      </S.SettingLabel>
+                      <S.SettingValue>
+                        {t(`translation:landing.perProduct.${product}.${setting}`)}
+                      </S.SettingValue>
                     </S.SettingRow>
                   ))}
                 </S.ProductSettings>
@@ -317,86 +452,75 @@ export const LandingPageComponent = ({
         </S.Reveal>
       </S.Section>
 
-      {/* ── CTA banner (1) ──────────────────────────────── */}
-      <S.Section $narrow data-reveal="cta1">
-        <S.Reveal $visible={revealState['cta1'] ?? false}>
-          <S.CtaBanner>
-            <S.CtaGlow />
-            <S.CtaTitle>{t('translation:landing.ctaBanner.variant1.headline')}</S.CtaTitle>
-            <S.CtaSub>{t('translation:landing.ctaBanner.variant1.subheading')}</S.CtaSub>
-            <S.PrimaryButton $lg type="button" onClick={onNavigateRegister}>
-              {t('translation:landing.ctaBanner.variant1.button')}
-              <Icon name="arrow-right" size={18} />
-            </S.PrimaryButton>
-          </S.CtaBanner>
+      {/* ── How it works ───────────────────────────────── */}
+      <S.Section id="how-it-works" data-reveal="how-it-works">
+        <S.Reveal $visible={seen('how-it-works')}>
+          <S.SectionHead>
+            <S.Eyebrow>{t('translation:landing.howItWorks.sectionEyebrow')}</S.Eyebrow>
+            <S.SectionTitle>{t('translation:landing.howItWorks.sectionTitle')}</S.SectionTitle>
+            <S.SectionSubtitle>{t('translation:landing.howItWorks.sectionSubtitle')}</S.SectionSubtitle>
+          </S.SectionHead>
+        </S.Reveal>
+        <S.Reveal $visible={seen('how-it-works')} $delay={1}>
+          <S.Steps>
+            {STEPS.map((step, i) => (
+              <S.StepCard key={step}>
+                <S.StepNumber>{i + 1}</S.StepNumber>
+                <S.StepTitle>{t(`translation:landing.howItWorks.${step}.title`)}</S.StepTitle>
+                <S.StepDesc>{t(`translation:landing.howItWorks.${step}.description`)}</S.StepDesc>
+              </S.StepCard>
+            ))}
+          </S.Steps>
         </S.Reveal>
       </S.Section>
 
-      {/* ── Stats band ─────────────────────────────────── */}
-      <S.StatsBand data-reveal="stats">
-        {STAT_KEYS.map((key) => (
-          <S.Reveal key={key} $visible={revealState['stats'] ?? false}>
-            <S.StatItem>
-              <S.StatValue>{t(`translation:landing.stats.${key}.value`)}</S.StatValue>
-              <S.StatLabel>{t(`translation:landing.stats.${key}.label`)}</S.StatLabel>
-            </S.StatItem>
-          </S.Reveal>
-        ))}
-      </S.StatsBand>
-
-      {/* ── Testimonials ───────────────────────────────── */}
-      <S.Section data-reveal="testimonials">
-        <S.Reveal $visible={revealState['testimonials'] ?? false}>
-          <S.SectionHead>
-            <S.SectionTitle>{t('translation:landing.testimonials.sectionTitle')}</S.SectionTitle>
-            <S.SectionSubtitle>{t('translation:landing.testimonials.sectionSubtitle')}</S.SectionSubtitle>
-          </S.SectionHead>
-        </S.Reveal>
-        <S.Reveal $visible={revealState['testimonials'] ?? false} $delay={1}>
-          <S.Testimonials>
-            {TESTIMONIAL_KEYS.map((key) => {
-              const rating = parseInt(t(`translation:landing.testimonials.${key}.rating`), 10) || 5;
-              return (
-                <S.TestimonialCard key={key}>
-                  <S.Stars>
-                    {Array.from({ length: rating }, (_, i) => (
-                      <Icon key={i} name="star" size={16} color="semantic.warning" />
-                    ))}
-                  </S.Stars>
-                  <S.TestimonialText>{t(`translation:landing.testimonials.${key}.text`)}</S.TestimonialText>
-                  <S.TestimonialAuthor>
-                    <S.TestimonialAvatar>
-                      {t(`translation:landing.testimonials.${key}.name`).charAt(0)}
-                    </S.TestimonialAvatar>
-                    <S.TestimonialMeta>
-                      <S.TestimonialName>{t(`translation:landing.testimonials.${key}.name`)}</S.TestimonialName>
-                      <S.TestimonialRole>{t(`translation:landing.testimonials.${key}.role`)}</S.TestimonialRole>
-                    </S.TestimonialMeta>
-                  </S.TestimonialAuthor>
-                </S.TestimonialCard>
-              );
-            })}
-          </S.Testimonials>
+      {/* ── Demo band ──────────────────────────────────── */}
+      <S.Section data-reveal="demo">
+        <S.Reveal $visible={seen('demo')}>
+          <S.DemoBand>
+            <S.DemoCopy>
+              <S.SplitEyebrow>{t('translation:landing.demo.sectionEyebrow')}</S.SplitEyebrow>
+              <S.SplitTitle>{t('translation:landing.demo.sectionTitle')}</S.SplitTitle>
+              <S.SplitSubtitle>{t('translation:landing.demo.sectionSubtitle')}</S.SplitSubtitle>
+              <S.DemoBullets>
+                {DEMO_BULLETS.map((b) => (
+                  <S.DemoBullet key={b}>
+                    <Icon name="check-circle" size={16} color="semantic.success" />
+                    <span>{t(`translation:landing.demo.bullets.${b}`)}</span>
+                  </S.DemoBullet>
+                ))}
+              </S.DemoBullets>
+            </S.DemoCopy>
+            <S.DemoActions>
+              <S.PrimaryButton $lg type="button" onClick={onOpenDemo}>
+                <Icon name="play-arrow" size={17} />
+                {t('translation:landing.demo.button')}
+              </S.PrimaryButton>
+              <S.DemoNote>{t('translation:landing.demo.note')}</S.DemoNote>
+            </S.DemoActions>
+          </S.DemoBand>
         </S.Reveal>
       </S.Section>
 
       {/* ── Pricing ────────────────────────────────────── */}
       <S.Section $alt id="pricing" data-reveal="pricing">
-        <S.Reveal $visible={revealState['pricing'] ?? false}>
+        <S.Reveal $visible={seen('pricing')}>
           <S.SectionHead>
             <S.Eyebrow>{t('translation:landing.pricing.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.pricing.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.pricing.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
         </S.Reveal>
-        <S.Reveal $visible={revealState['pricing'] ?? false} $delay={1}>
-          {pricingCatalogError ? (
-            <S.PlanDesc>{t('translation:landing.pricing.catalogError')}</S.PlanDesc>
-          ) : null}
+        {pricingCatalogError ? (
+          <S.CatalogError>{t('translation:landing.pricing.catalogError')}</S.CatalogError>
+        ) : null}
+        <S.Reveal $visible={seen('pricing')} $delay={1}>
           <S.PricingGrid>
             {pricingPlans.length > 0
               ? pricingPlans.map((plan) => {
-                  const features = t(`translation:landing.pricing.${plan.slug}.features`, { returnObjects: true }) as string[];
+                  const features = t(`translation:landing.pricing.${plan.slug}.features`, {
+                    returnObjects: true,
+                  }) as string[];
                   return (
                     <S.PricingCard key={plan.slug} $highlight={plan.isHighlighted}>
                       {plan.isHighlighted ? (
@@ -409,16 +533,18 @@ export const LandingPageComponent = ({
                       </S.PlanPrice>
                       <S.PlanDesc>{t(`translation:landing.pricing.${plan.slug}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
-                        <S.PlanFeature key={plan.listingsDisplay}>
-                          <Icon name="check-circle" size={16} color="semantic.success" />
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.listingsDisplay}</span>
                         </S.PlanFeature>
-                        {features.map((feat) => (
-                          <S.PlanFeature key={feat}>
-                            <Icon name="check-circle" size={16} color="semantic.success" />
-                            <span>{feat}</span>
-                          </S.PlanFeature>
-                        ))}
+                        {Array.isArray(features)
+                          ? features.map((feat) => (
+                              <S.PlanFeature key={feat}>
+                                <Icon name="check-circle" size={15} color="semantic.success" />
+                                <span>{feat}</span>
+                              </S.PlanFeature>
+                            ))
+                          : null}
                       </S.PlanFeatures>
                       <S.PlanCta type="button" $highlight={plan.isHighlighted} onClick={onNavigateRegister}>
                         {t(`translation:landing.pricing.${plan.slug}.cta`)}
@@ -427,27 +553,42 @@ export const LandingPageComponent = ({
                   );
                 })
               : FALLBACK_PLANS.map((plan) => {
-                  const features = t(`translation:landing.pricing.catalogFallback.${plan}.features`, { returnObjects: true }) as string[];
+                  const features = t(`translation:landing.pricing.catalogFallback.${plan}.features`, {
+                    returnObjects: true,
+                  }) as string[];
+                  const highlight = plan === 'growth';
                   return (
-                    <S.PricingCard key={plan} $highlight={plan === 'pro'}>
-                      {plan === 'pro' ? (
-                        <S.PlanBadge>{t('translation:landing.pricing.catalogFallback.pro.badge')}</S.PlanBadge>
+                    <S.PricingCard key={plan} $highlight={highlight}>
+                      {highlight ? (
+                        <S.PlanBadge>
+                          {t('translation:landing.pricing.catalogFallback.growth.badge')}
+                        </S.PlanBadge>
                       ) : null}
-                      <S.PlanName>{t(`translation:landing.pricing.catalogFallback.${plan}.name`)}</S.PlanName>
+                      <S.PlanName>
+                        {t(`translation:landing.pricing.catalogFallback.${plan}.name`)}
+                      </S.PlanName>
                       <S.PlanPrice>
-                        <S.PlanAmount>{t(`translation:landing.pricing.catalogFallback.${plan}.price`)}</S.PlanAmount>
-                        <S.PlanPeriod>{t(`translation:landing.pricing.catalogFallback.${plan}.period`)}</S.PlanPeriod>
+                        <S.PlanAmount>
+                          {t(`translation:landing.pricing.catalogFallback.${plan}.price`)}
+                        </S.PlanAmount>
+                        <S.PlanPeriod>
+                          {t(`translation:landing.pricing.catalogFallback.${plan}.period`)}
+                        </S.PlanPeriod>
                       </S.PlanPrice>
-                      <S.PlanDesc>{t(`translation:landing.pricing.catalogFallback.${plan}.description`)}</S.PlanDesc>
+                      <S.PlanDesc>
+                        {t(`translation:landing.pricing.catalogFallback.${plan}.description`)}
+                      </S.PlanDesc>
                       <S.PlanFeatures>
-                        {features.map((feat) => (
-                          <S.PlanFeature key={feat}>
-                            <Icon name="check-circle" size={16} color="semantic.success" />
-                            <span>{feat}</span>
-                          </S.PlanFeature>
-                        ))}
+                        {Array.isArray(features)
+                          ? features.map((feat) => (
+                              <S.PlanFeature key={feat}>
+                                <Icon name="check-circle" size={15} color="semantic.success" />
+                                <span>{feat}</span>
+                              </S.PlanFeature>
+                            ))
+                          : null}
                       </S.PlanFeatures>
-                      <S.PlanCta type="button" $highlight={plan === 'pro'} onClick={onNavigateRegister}>
+                      <S.PlanCta type="button" $highlight={highlight} onClick={onNavigateRegister}>
                         {t(`translation:landing.pricing.catalogFallback.${plan}.cta`)}
                       </S.PlanCta>
                     </S.PricingCard>
@@ -459,25 +600,32 @@ export const LandingPageComponent = ({
       </S.Section>
 
       {/* ── FAQ ────────────────────────────────────────── */}
-      <S.Section id="faq" data-reveal="faq">
-        <S.Reveal $visible={revealState['faq'] ?? false}>
+      <S.Section $narrow id="faq" data-reveal="faq">
+        <S.Reveal $visible={seen('faq')}>
           <S.SectionHead>
             <S.SectionTitle>{t('translation:landing.faq.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.faq.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
         </S.Reveal>
-        <S.Reveal $visible={revealState['faq'] ?? false} $delay={1}>
+        <S.Reveal $visible={seen('faq')} $delay={1}>
           <S.FaqList>
             {FAQ_KEYS.map((key, index) => {
               const isOpen = openFaq === index;
               return (
                 <S.FaqItem key={key} $open={isOpen}>
-                  <S.FaqQuestion type="button" $open={isOpen} onClick={() => toggleFaq(index)}>
+                  <S.FaqQuestion
+                    type="button"
+                    $open={isOpen}
+                    aria-expanded={isOpen}
+                    onClick={() => toggleFaq(index)}
+                  >
                     <span>{t(`translation:landing.faq.${key}.question`)}</span>
-                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} />
+                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={17} />
                   </S.FaqQuestion>
                   <S.FaqAnswer $open={isOpen}>
-                    <S.FaqAnswerText>{t(`translation:landing.faq.${key}.answer`)}</S.FaqAnswerText>
+                    <S.FaqAnswerText>
+                      <p>{t(`translation:landing.faq.${key}.answer`)}</p>
+                    </S.FaqAnswerText>
                   </S.FaqAnswer>
                 </S.FaqItem>
               );
@@ -486,17 +634,16 @@ export const LandingPageComponent = ({
         </S.Reveal>
       </S.Section>
 
-      {/* ── Final CTA banner ───────────────────────────── */}
-      <S.Section $narrow data-reveal="cta2">
-        <S.Reveal $visible={revealState['cta2'] ?? false}>
-          <S.CtaBanner $dark>
-            <S.CtaGlow $strong />
+      {/* ── Final CTA ──────────────────────────────────── */}
+      <S.Section $narrow data-reveal="cta">
+        <S.Reveal $visible={seen('cta')}>
+          <S.CtaBanner>
             <S.CtaTitle>{t('translation:landing.ctaBanner.variant2.headline')}</S.CtaTitle>
             <S.CtaSub>{t('translation:landing.ctaBanner.variant2.subheading')}</S.CtaSub>
-            <S.PrimaryButton $lg type="button" onClick={onNavigateRegister}>
+            <S.CtaButton type="button" onClick={onNavigateRegister}>
               {t('translation:landing.ctaBanner.variant2.button')}
-              <Icon name="arrow-right" size={18} />
-            </S.PrimaryButton>
+              <Icon name="arrow-right" size={17} />
+            </S.CtaButton>
           </S.CtaBanner>
         </S.Reveal>
       </S.Section>
@@ -505,14 +652,22 @@ export const LandingPageComponent = ({
       <S.Footer>
         <S.FooterInner>
           <S.FooterBrand>
-            <Logo size={36} />
+            <Logo layout="nav" height={30} />
             <S.FooterDescription>{t('translation:landing.footer.description')}</S.FooterDescription>
             <S.UtilityGroup>
-              <LanguageSwitcher
-                currentLocale={currentLocale}
-                locales={LOCALE_OPTIONS}
-                onLocaleChange={(code) => onLocaleChange(code as 'en' | 'tr')}
-                variant="compact"
+              <Dropdown
+                align="right"
+                width="6.25rem"
+                trigger={
+                  <S.LanguageTrigger>
+                    <S.LanguageText>{currentLocale.slice(0, 2)}</S.LanguageText>
+                    <Icon name="chevron-down" size={12} />
+                  </S.LanguageTrigger>
+                }
+                items={[
+                  { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
+                  { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
+                ]}
               />
               <ThemeToggle />
             </S.UtilityGroup>
@@ -523,22 +678,23 @@ export const LandingPageComponent = ({
               <S.FooterLink type="button" onClick={() => scrollTo('features')}>
                 {t('translation:landing.footer.links.features')}
               </S.FooterLink>
+              <S.FooterLink type="button" onClick={() => scrollTo('profit')}>
+                {t('translation:landing.footer.links.profit')}
+              </S.FooterLink>
               <S.FooterLink type="button" onClick={() => scrollTo('pricing')}>
                 {t('translation:landing.footer.links.pricing')}
               </S.FooterLink>
-              <S.FooterLink type="button" onClick={() => scrollTo('how-it-works')}>
-                {t('translation:landing.footer.links.howItWorks')}
-              </S.FooterLink>
-              <S.FooterLink type="button" onClick={() => scrollTo('faq')}>
-                {t('translation:landing.footer.links.faq')}
+              <S.FooterLink type="button" onClick={onOpenDemo}>
+                {t('translation:landing.footer.links.demo')}
               </S.FooterLink>
             </S.FooterColumn>
             <S.FooterColumn>
               <S.FooterColTitle>{t('translation:landing.footer.company')}</S.FooterColTitle>
               <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.about')}</S.FooterLink>
               <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.blog')}</S.FooterLink>
-              <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.careers')}</S.FooterLink>
-              <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.contact')}</S.FooterLink>
+              <S.FooterLink type="button">
+                {t('translation:landing.footer.companyLinks.contact')}
+              </S.FooterLink>
             </S.FooterColumn>
             <S.FooterColumn>
               <S.FooterColTitle>{t('translation:landing.footer.legal')}</S.FooterColTitle>
@@ -550,7 +706,9 @@ export const LandingPageComponent = ({
         </S.FooterInner>
         <S.FooterDivider />
         <S.FooterBottom>
-          <S.Copyright>{t('translation:landing.footer.copyright', { year: new Date().getFullYear() })}</S.Copyright>
+          <S.Copyright>
+            {t('translation:landing.footer.copyright', { year: new Date().getFullYear() })}
+          </S.Copyright>
         </S.FooterBottom>
       </S.Footer>
     </S.Page>

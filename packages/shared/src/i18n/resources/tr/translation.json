@@ -1,6 +1,6 @@
 {
   "common": {
-    "brandName": "Zonds",
+    "brandName": "SellerHill",
     "loading": "Yükleniyor...",
     "retry": "Yeniden Dene",
     "ok": "Tamam",
@@ -112,11 +112,12 @@
     "dashboard": "Panel",
     "listings": "Listeler",
     "ebayListings": "eBay Listeleri",
-    "listingJobs": "İş Takibi",
+    "listingJobs": "İçe Aktarma İşleri",
     "products": "Ürünler",
     "inventory": "Envanter",
     "orders": "Siparişler",
     "stores": "Mağazalar",
+    "billing": "Faturalandırma",
     "settings": "Ayarlar",
     "admin": "Yönetim Operasyonları",
     "configuration": "Yapılandırma",
@@ -249,7 +250,8 @@
         "manageMessageTemplates": "Mesaj Şablonları",
         "manageMessageTemplatesSubtitle": "Otomatik alıcı mesaj şablonlarınızı görüntüleyin, düzenleyin ve oluşturun",
         "manageBlacklist": "Kara Listeyi Yönet",
-        "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler"
+        "manageBlacklistSubtitle": "Listing başlığı, açıklaması ve özelliklerinde engellenecek kelimeler",
+        "infoMessage": "Mesaj şablonları ve kara liste tanımları, Mağaza Ayarları'nda seçtiğiniz kapsama (genel veya mağazaya özel) göre kullanılır."
       },
       "listingGroups": {
         "title": "Liste Ayar Grupları",
@@ -419,7 +421,7 @@
     "modal": {
       "deactivate": {
         "title": "Hesabı devre dışı bırak",
-        "warning": "Zonds erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
+        "warning": "SellerHill erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
         "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
         "emailPlaceholder": "{{email}}",
         "confirmLabel": "Hesabı devre dışı bırak",
@@ -430,7 +432,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2026 Zonds E-ticaret Çözümleri. Tüm hakları saklıdır.",
+    "copyright": "© 2026 SellerHill E-ticaret Çözümleri. Tüm hakları saklıdır.",
     "privacyPolicy": "Gizlilik Politikası",
     "termsOfService": "Hizmet Şartları",
     "contactSupport": "Destek ile İletişim"
@@ -439,73 +441,130 @@
     "navbar": {
       "features": "Özellikler",
       "howItWorks": "Nasıl çalışır",
+      "profit": "Kâr",
       "pricing": "Fiyatlandırma",
       "faq": "SSS",
       "login": "Giriş yap",
-      "getStarted": "Başla"
+      "getStarted": "Ücretsiz başla",
+      "demo": "Canlı demo"
     },
     "hero": {
-      "badge": "2.500+ dropshipper tarafından tercih ediliyor",
-      "headline": "Amazon ürünlerini eBay'de sat — tam otomatik",
-      "subheading": "Listelemeden teslimata kadar her şeyi Zonds yönetir: yeniden fiyatlandırma, stok senkronizasyonu, otomatik sipariş ve takip. Kuralları ürün bazında sen belirlersin — işletmeyi biz yürütürüz.",
+      "badge": "Amazon'dan eBay'e, uçtan uca",
+      "headline": "Mağazanız kendi çalışsın. Ne kazandığınızı tam olarak bilin.",
+      "subheading": "SellerHill ürünlerinizi listeler, fiyat ve stoğu senkron tutar, gelen siparişi tedarikçinizden satın alır ve kargo takibini eBay'e işler. Ardından her satışın arkasındaki gerçek kârı gösterir — tahminle değil, ölçerek.",
       "ctaPrimary": "Ücretsiz başla",
-      "ctaSecondary": "Nasıl çalışır?",
-      "note": "Kredi kartı gerekmez • Ücretsiz plan daima geçerli"
+      "ctaSecondary": "Canlı demoyu aç",
+      "note": "Başlamak için kart gerekmez. Demo için üyelik de gerekmez."
     },
-    "logos": {
-      "title": "Amazon → eBay dropshipping akışı için tasarlandı"
-    },
-    "features": {
-      "sectionEyebrow": "Her şey otomatik",
-      "sectionTitle": "Tüm operasyonun, sensiz çalışır",
-      "sectionSubtitle": "Amazon'dan eBay'e bir işin hareketli her parçası — otomatik, izlenir ve gece gündüz senkron tutulur.",
-      "asinListing": {
-        "title": "ASIN bazlı listeleme",
-        "description": "Bir Amazon ASIN'i yapıştır, dakikalar içinde eBay'de yayına al. Başlık, görsel ve özellikler otomatik çekilir — manuel veri girişi yok."
+    "heroPreview": {
+      "windowLabel": "Panel",
+      "periodLabel": "Bu ay",
+      "netProfit": "Net kâr",
+      "sales": "Satış",
+      "orders": "Sipariş",
+      "margin": "Marj",
+      "confirmed": "Onaylanmış",
+      "estimated": "Tahmini",
+      "pending": "Maliyeti henüz bilinmiyor",
+      "recentTitle": "Son siparişler",
+      "profitColumn": "Kâr",
+      "states": {
+        "purchased": "Satın alındı",
+        "shipped": "Kargoda",
+        "actionRequired": "Sizi bekliyor"
       },
-      "stockPriceSync": {
-        "title": "Gerçek zamanlı stok & fiyat senkronu",
-        "description": "Amazon fiyatı veya stoğu değiştiği an eBay listelerin anında güncellenir. Asla tükenmiş ürün satma, asla düşük fiyatla kalma."
-      },
-      "autoOrder": {
-        "title": "Otomatik sipariş karşılama",
-        "description": "eBay'den bir sipariş geldiğinde, Amazon'da otomatik olarak verilir — sen uyurken bile 7/24 el değmeden."
-      },
-      "manualOrder": {
-        "title": "Manuel sipariş kontrolü",
-        "description": "Belirli bir siparişte tam kontrol mü istiyorsun? İstediğin an devreye girip manuel halledebilirsin. Otomasyon senin kurallarınla."
-      },
-      "tracking": {
-        "title": "Otomatik takip & kargo",
-        "description": "Takip numaraları göründüğü an çekilir ve eBay'e aktılır. Kargolandı → Teslim edildi, parmağını kaldırmadan."
-      },
-      "perProduct": {
-        "badge": "Farkımız",
-        "title": "Ürün bazlı ayarlar",
-        "description": "Çoğu araç tüm kataloğa tek bir kural uygular. Biz değil. Kar marjı, stok limiti ve listeleme şablonunu sattığın her ASIN için tek tek belirle."
+      "products": {
+        "a": "Kablosuz Kulaklık Pro",
+        "b": "USB-C Hızlı Şarj 65W",
+        "c": "Ergonomik Laptop Standı"
       }
     },
-    "howItWorks": {
-      "sectionEyebrow": "Nasıl çalışır",
-      "sectionTitle": "Üç basit adımda yayında",
-      "sectionSubtitle": "Bir kez bağla, bir kez yapılandır, sonra çalışsın.",
-      "step1": {
-        "title": "Hesaplarını bağla",
-        "description": "Amazon alıcı hesabını ve eBay satıcı hesabını saniyeler içinde güvenle bağla."
+    "flow": {
+      "title": "Tek bir iş için kuruldu, düzgün yapmak için",
+      "source": "Tedarikçiniz",
+      "engine": "SellerHill",
+      "destination": "eBay mağazanız"
+    },
+    "pillars": {
+      "p1": {
+        "title": "Beş araç değil, tek akış",
+        "description": "Listeleme, fiyatlama, stok, satın alma ve takip tek bir hat olarak çalışır — birbirine bağlanacak ya da elle karşılaştırılacak bir şey kalmaz."
       },
-      "step2": {
-        "title": "ASIN yapıştır & kuralları belirle",
-        "description": "Ürünleri ASIN ile ekle ve ürün bazlı kuralları tanımla: marj, stok limiti, listeleme şablonu."
+      "p2": {
+        "title": "Üzerine karar verilebilir kâr",
+        "description": "Onaylanmış maliyetlerle tahminler ayrı ayrı raporlanır. Bilinmeyen bir maliyet sessizce sıfıra yuvarlanmaz."
       },
-      "step3": {
-        "title": "Arkana yaslan & büyü",
-        "description": "Listeler yayına girer, siparişler otomatik akar, takip kendiliğinden güncellenir. Sen büyümeye odaklan."
+      "p3": {
+        "title": "Ürün bazında kural",
+        "description": "Marj, stok tavanı ve şablon ürün ürün ayarlanır — tüm kataloğa gerilmiş tek bir kural değil."
+      }
+    },
+    "features": {
+      "sectionEyebrow": "Hepsi otomatik",
+      "sectionTitle": "Günlük iş, sizin yerinize",
+      "sectionSubtitle": "Bir satıcının gününü dolduran işler — listelemek, fiyat kollamak, satın almak, kargo peşinde koşmak — kendi başına, günün her saati çalışır.",
+      "asinListing": {
+        "title": "Dakikalar içinde listeleyin",
+        "description": "Ürünü ekleyin; temiz ve aramaya uygun bir başlık, düzgün görseller ve alıcıların filtrelediği ürün özellikleri hazır şekilde eBay'de yayına girsin."
+      },
+      "priceStock": {
+        "title": "Fiyat ve stok hep güncel",
+        "description": "Kaynaktaki fiyat ya da stok oynadığında eBay ilanınız aynı turda onu takip eder. Tedarik edemeyeceğinizi satmazsınız, marjı da masada bırakmazsınız."
+      },
+      "autoOrder": {
+        "title": "Siparişler sizin yerinize alınır",
+        "description": "eBay'deki satış, otomatik olarak tedarikçi siparişine dönüşür ve alıcınıza gönderilir. Hesap başına harcama tavanını siz koyarsınız; asla fazlasını ödeyemez."
+      },
+      "tracking": {
+        "title": "Kendini işleyen kargo takibi",
+        "description": "Takip numarası oluşur oluşmaz alınıp eBay'e işlenir; sipariş zamanında kargolandı görünür ve alıcınız tedarik zincirinizi değil, düzgün bir teslimat görür."
+      },
+      "buyerMessages": {
+        "title": "Zamanında alıcı mesajları",
+        "description": "Teşekkür, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi şablonlarınızla, doğru anda, siz hatırlamak zorunda kalmadan gider."
+      },
+      "multiStore": {
+        "title": "Birkaç mağaza, tek masa",
+        "description": "Birden fazla eBay mağazasını ve birden fazla alıcı hesabını yan yana yürütün; her biri kendi başına filtrelenir ve raporlanır."
+      }
+    },
+    "profit": {
+      "sectionEyebrow": "Tahmin değil, kâr",
+      "sectionTitle": "Çoğu araç ciroyu gösterir. SellerHill geriye ne kaldığını gösterir.",
+      "sectionSubtitle": "Her satış kendi gerçek maliyetiyle eşleştirilir — ödediğiniz tutar, vergi, kargo ve eBay'in kestiği. Bir maliyet henüz bilinmiyorsa rakam bunu saklamaz, söyler.",
+      "confirmed": {
+        "title": "Onaylanmış kâr",
+        "description": "Maliyeti eksiksiz toplanmış satışlar. Plan yapabileceğiniz rakam budur."
+      },
+      "estimated": {
+        "title": "Tahmini kâr",
+        "description": "Maliyeti yalnızca kısmen bilinen satışlar. Ayrı gösterilir, açıkça etiketlenir ve manşet rakamınıza asla karıştırılmaz."
+      },
+      "honest": {
+        "title": "Uydurulan hiçbir şey yok",
+        "description": "Eksik maliyet tire olarak kalır. Böylece sıfır gördüğünüzde bu gerçek bir sıfırdır — sıfır kılığına sokulmuş bir bilinmezlik değil."
+      },
+      "pnl": {
+        "title": "Ay ay kâr-zarar",
+        "description": "On iki aylık ciro, maliyet, marj ve ROI tek ekranda; tek tıkla dışa aktarılabilir."
+      },
+      "panel": {
+        "title": "Bu ay",
+        "confirmedLabel": "Onaylanmış kâr",
+        "estimatedLabel": "Tahmini kâr",
+        "unknownLabel": "Ciro, maliyeti bilinmiyor",
+        "footnote": "Manşet rakamınıza yalnızca onaylanmış kâr sayılır."
       }
     },
     "perProduct": {
-      "sectionEyebrow": "İnce ayar kontrolü",
-      "sectionTitle": "Kuralların. Ürün bazında. Hesap bazında değil.",
-      "sectionSubtitle": "Diğer araçlar tüm kataloğuna tek strateji dayatır. Zonds sattığın her ASIN üzerinde bireysel kontrol verir.",
+      "sectionEyebrow": "İnce ayar",
+      "sectionTitle": "Sizin kurallarınız. Hesap başına değil, ürün başına.",
+      "sectionSubtitle": "Tek bir genel ayar, uymadığı her üründe sessizce para kaybettirir. Marjı, stok tavanını ve şablonu kendi kuralını hak eden ürünlerde ayrı belirleyin.",
+      "labels": {
+        "margin": "Kâr marjı",
+        "stock": "Stok tavanı",
+        "template": "İlan şablonu"
+      },
       "productA": {
         "name": "Kablosuz Kulaklık Pro",
         "margin": "%12",
@@ -513,203 +572,186 @@
         "template": "Elektronik — Standart"
       },
       "productB": {
-        "name": "USB-C Hızlı Şarj",
+        "name": "USB-C Hızlı Şarj 65W",
         "margin": "%22",
         "stock": "1",
         "template": "Hızlı Kargo"
       },
       "productC": {
-        "name": "Telefon Kılıfı Paketi",
+        "name": "Ergonomik Laptop Standı",
         "margin": "%18",
         "stock": "5",
-        "template": "Paket Fırsatı"
-      },
-      "labels": {
-        "margin": "Kar marjı",
-        "stock": "Stok limiti",
-        "template": "Listeleme şablonu"
+        "template": "Ev Ofis"
       }
     },
-    "stats": {
-      "sellers": {
-        "value": "2.500+",
-        "label": "Aktif satıcı"
+    "howItWorks": {
+      "sectionEyebrow": "Nasıl çalışır",
+      "sectionTitle": "Üç adım, sonrası kendiliğinden",
+      "sectionSubtitle": "Bir kez bağlayın, bir kez kuralınızı koyun; günlük iş sizden çıksın.",
+      "step1": {
+        "title": "Hesaplarınızı bağlayın",
+        "description": "eBay mağazanızı ve tedarik ettiğiniz alıcı hesabını bağlayın. Birkaç dakika sürer, kurulacak hiçbir şey yok."
       },
-      "orders": {
-        "value": "50B+",
-        "label": "İşlenen sipariş"
+      "step2": {
+        "title": "Ürünleri ekleyin, kuralı koyun",
+        "description": "Satmak istediğiniz ürünleri getirin; marjınızı, stok tavanınızı ve şablonunuzu seçin — toplu ya da ürün ürün."
       },
-      "uptime": {
-        "value": "%99.9",
-        "label": "Çalışma süresi"
-      },
-      "marketplaces": {
-        "value": "6",
-        "label": "Amazon pazarı"
+      "step3": {
+        "title": "Bırakın çalışsın",
+        "description": "İlanlar yayına girer, fiyatlar takip edilir, siparişler satın alınır, takip eBay'e döner ve kâr rakamlarınız kendini günceller."
       }
     },
-    "ctaBanner": {
-      "variant1": {
-        "headline": "Mağazanı otopilota almaya hazır mısın?",
-        "subheading": "Bugün ücretsiz başla. Hesaplarını bağla, ilk ürününü dakikalar içinde listele.",
-        "button": "Ücretsiz başla"
-      },
-      "variant2": {
-        "headline": "Bunu manuel yapmayı bırak.",
-        "subheading": "Amazon → eBay işini Zonds ile otomatikleştiren binlerce satıcıya katıl.",
-        "button": "Ücretsiz başla"
-      }
-    },
-    "testimonials": {
-      "sectionTitle": "Dünyaca seviliyor",
-      "sectionSubtitle": "Gerçek satıcılar, gerçek sonuçlar. Otopilotta çalıştırmanın ne demek olduğunu onlar anlatıyor.",
-      "t1": {
-        "rating": "5",
-        "text": "Zonds üç araç ve bir asistanın yerini aldı. Listelerim senkronize kalıyor, siparişler kendiliğinden veriliyor — kelimenin tam anlamıyla satışlara uyanıyorum.",
-        "name": "Marcus J.",
-        "role": "eBay İnce Satıcı"
-      },
-      "t2": {
-        "rating": "5",
-        "text": "Ürün bazlı ayarlar oyunun kurallarını değiştirdi. Tek düz kural yerine her ASIN için ayrı marj ve stok limiti kullanabiliyorum artık.",
-        "name": "Sarah K.",
-        "role": "Tam zamanlı dropshipper"
-      },
-      "t3": {
-        "rating": "5",
-        "text": "Sadece takip senkronu her gün saatlerimi kurtarıyor. Amazon güncellendiği an sipariş eBay’de otomatik kargolanır. Çalışma süresi de kaya gibi sağlam.",
-        "name": "David R.",
-        "role": "Çoklu mağaza operatörü"
+    "demo": {
+      "sectionEyebrow": "Önce görün",
+      "sectionTitle": "Üye olmadan önce içeride dolaşın.",
+      "sectionSubtitle": "Örnek veriyle doldurulmuş uygulamanın tamamı. Her ekran, her rakam; doldurulacak bir form ve iptal edilecek bir şey yok.",
+      "button": "Canlı demoyu aç",
+      "note": "Üyelik yok, kart yok, kurulum yok.",
+      "bullets": {
+        "b1": "Onaylanmış ve tahmini kârın yan yana durduğu gerçek panel",
+        "b2": "İlanlar, siparişler ve ay ay kâr-zarar tablosu",
+        "b3": "İstediğiniz an çıkın — hiçbir şey kaydedilmez"
       }
     },
     "pricing": {
       "sectionEyebrow": "Fiyatlandırma",
-      "sectionTitle": "Basit, şeffaf fiyatlandırma",
-      "sectionSubtitle": "Ücretsiz başla. Yalnızca büyümeye hazır olduğunda yükselt.",
-      "billingNote": "Başlamak için kredi kartı gerekmez. İstediğin zaman iptal et.",
+      "sectionTitle": "Dolambaçsız fiyatlandırma",
+      "sectionSubtitle": "Gerçekten kullandığınız şeye göre: kaç ilanı aktif tuttuğunuza ve ayda kaç siparişin sizin yerinize satın alındığına göre.",
+      "billingNote": "İstediğiniz an iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "perYear": "/yıl",
-      "mostPopular": "En popüler",
+      "mostPopular": "En çok tercih edilen",
       "unlimited": "Sınırsız",
-      "notIncluded": "Dahil değil",
-      "listingsLabel": "liste",
+      "notIncluded": "Dâhil değil",
+      "listingsLabel": "ilan",
       "ordersLabel": "sipariş",
-      "upToListings": "{{limit}} listeye kadar",
-      "unlimitedListings": "Sınırsız listeleme",
-      "catalogError": "Canlı fiyatlandırma yüklenemedi. Yalnızca plan özeti gösteriliyor.",
+      "upToListings": "{{limit}} aktif ilana kadar",
+      "unlimitedListings": "Sınırsız aktif ilan",
+      "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda plan özeti gösteriliyor.",
       "starter": {
-        "name": "Başlangıç",
-        "description": "Otomatik dropshipping'e yeni başlayan bireysel satıcılar için.",
+        "name": "Starter",
+        "description": "İlk kataloğunu otomatiğe bağlayan tek kişilik satıcı için.",
         "features": [
-          "Amazon → eBay stok & fiyat senkronu",
-          "Otomatik sipariş",
-          "Takip güncellemeleri",
+          "Fiyat ve stok senkronizasyonu",
+          "Otomatik sipariş satın alma",
+          "eBay'e kargo takibi işleme",
+          "Onaylanmış ve tahmini kâr raporlaması",
           "E-posta desteği"
         ],
-        "cta": "Ücretsiz dene"
+        "cta": "Ücretsiz başla"
       },
       "growth": {
         "name": "Growth",
-        "description": "Daha fazla listing ve Amazon siparişine ihtiyaç duyan büyüyen satıcılar için.",
+        "description": "İlanları takip edebildiğinden hızlı ekleyen satıcı için.",
         "features": [
-          "Gerçek zamanlı senkron & uyarılar",
-          "Otomatik + manuel sipariş",
-          "Otomatik takip & kargo",
-          "Ürün bazlı ayarlar",
+          "Starter'daki her şey",
+          "Ürün bazında marj, stok tavanı ve şablon",
+          "Otomatik alıcı mesajları",
+          "Ay ay kâr-zarar ve CSV dışa aktarma",
           "Öncelikli destek"
         ],
-        "cta": "Ücretsiz dene"
+        "cta": "Ücretsiz başla"
       },
       "scale": {
         "name": "Scale",
-        "description": "Birden fazla mağazayı ölçekte yöneten yüksek hacimli satıcılar için.",
+        "description": "Aynı anda birkaç mağaza ve alıcı hesabı yürüten operasyon için.",
         "features": [
-          "Growth planındaki her şey",
-          "API erişimi",
-          "Özel hesap yöneticisi",
-          "Özel otomasyonlar",
-          "7/24 öncelikli destek"
+          "Growth'taki her şey",
+          "Çoklu eBay mağazası ve alıcı hesabı",
+          "Mağaza bazında kural ve raporlama",
+          "En yüksek ilan ve sipariş hakkı",
+          "Öncelikli destek"
         ],
-        "cta": "Satışla iletişime geç"
+        "cta": "Ücretsiz başla"
       },
       "catalogFallback": {
         "starter": {
-          "name": "Başlangıç",
-          "price": "$0",
+          "name": "Starter",
+          "price": "$39",
           "period": "/ay",
-          "description": "Denemek için ihtiyacın olan her şey.",
+          "description": "İlk kataloğunu otomatiğe bağlayan tek kişilik satıcı için.",
           "features": [
-            "25 listeye kadar",
-            "Amazon → eBay stok & fiyat senkronu",
-            "Otomatik sipariş",
-            "Takip güncellemeleri",
+            "1.500 aktif ilan",
+            "Ayda 150 otomatik sipariş",
+            "Fiyat ve stok senkronizasyonu",
+            "eBay'e kargo takibi işleme",
             "E-posta desteği"
           ],
           "cta": "Ücretsiz başla"
         },
-        "pro": {
-          "badge": "En popüler",
-          "name": "Pro",
-          "price": "$49",
+        "growth": {
+          "badge": "En çok tercih edilen",
+          "name": "Growth",
+          "price": "$55",
           "period": "/ay",
-          "description": "Büyümeye hazır ciddi satıcılar için.",
+          "description": "İlanları takip edebildiğinden hızlı ekleyen satıcı için.",
           "features": [
-            "500 listeye kadar",
-            "Gerçek zamanlı senkron & uyarılar",
-            "Otomatik + manuel sipariş",
-            "Otomatik takip & kargo",
-            "Ürün bazlı ayarlar",
+            "2.500 aktif ilan",
+            "Ayda 250 otomatik sipariş",
+            "Ürün bazında marj, stok tavanı ve şablon",
+            "Otomatik alıcı mesajları",
             "Öncelikli destek"
           ],
-          "cta": "Ücretsiz dene"
+          "cta": "Ücretsiz başla"
         },
-        "enterprise": {
-          "name": "Kurumsal",
-          "price": "$149",
+        "scale": {
+          "name": "Scale",
+          "price": "$75",
           "period": "/ay",
-          "description": "Yüksek hacimli operasyonlar ve ajanslar için.",
+          "description": "Aynı anda birkaç mağaza ve alıcı hesabı yürüten operasyon için.",
           "features": [
-            "Sınırsız listeleme",
-            "Pro'daki her şey",
-            "API erişimi",
-            "Özel hesap yöneticisi",
-            "Özel otomasyonlar",
-            "7/24 öncelikli destek"
+            "4.500 aktif ilan",
+            "Ayda 450 otomatik sipariş",
+            "Çoklu eBay mağazası ve alıcı hesabı",
+            "Mağaza bazında kural ve raporlama",
+            "Öncelikli destek"
           ],
-          "cta": "Satışla iletişime geç"
+          "cta": "Ücretsiz başla"
         }
       }
     },
     "faq": {
       "sectionTitle": "Sık sorulan sorular",
-      "sectionSubtitle": "Başlamadan önce bilmen gereken her şey.",
+      "sectionSubtitle": "Başlamadan önce bilmeye değer olanlar.",
       "q1": {
-        "question": "Otomatik sipariş nasıl çalışır?",
-        "answer": "eBay'den bir alıcı sipariş verdiğinde, Zonds bağlı alıcı hesabını kullanarak alıcının kargo adresiyle Amazon'da ilgili siparişi otomatik verir. Manuel tıklama gerekmez."
+        "question": "Otomatik sipariş nasıl çalışıyor?",
+        "answer": "Bir alıcı eBay'de sipariş verdiğinde SellerHill, bağlı tedarikçi hesabınızda eşleşen siparişi oluşturur ve alıcının adresine gönderir. Hesap başına bir harcama tavanı belirlersiniz; bu tavanın üstündeki sipariş geçip gitmez, onayınız için durur."
       },
       "q2": {
-        "question": "Siparişleri yine de manuel halledebilir miyim?",
-        "answer": "Kesinlikle. Otomatik sipariş sipariş bazında isteğe bağlıdır — tam kontrol istediğin her an devreye girip herhangi bir siparişi manuel işleyebilirsin."
+        "question": "Bir siparişi kendim yönetebilir miyim?",
+        "answer": "Evet. Otomasyon bir ayardır, bağlayıcı değil — tamamen kapatılabilir, belirli bir mağaza için kapatılabilir ya da kendiniz vermek istediğiniz herhangi bir siparişte devreye girebilirsiniz."
       },
       "q3": {
-        "question": "Takip numaraları nasıl işlenir?",
-        "answer": "Zonds her Amazon siparişini izler ve bir takip numarası belirdiği an onu eBay'e aktararak siparişi otomatik kargolandı olarak işaretler."
+        "question": "Bir şey ters gittiğinde ne oluyor?",
+        "answer": "Tahmin yürütmek yerine durur ve nedenini sade bir dille söyler. Sizi bekleyen her şey — tamamlanamayan bir satın alma, bağlantısı kopmuş bir mağaza, stoğu tükenmiş bir ilan — aramaya çıkmanız gereken bir şey olmaktan çıkıp tek bir sayfada toplanır."
       },
       "q4": {
-        "question": "Ürün başına farklı marj belirleyebilir miyim?",
-        "answer": "Evet. Çoğu aracın aksine Zonds kar marjı, stok limiti ve listeleme şablonunu her ASIN için tek tek belirlemene izin verir — tüm hesabın için tek bir kural değil."
+        "question": "Onaylanmış ve tahmini kârı neden ayırıyorsunuz?",
+        "answer": "Çünkü güvenemediğiniz bir kâr rakamı, hiç olmamasından kötüdür. Bir satışın gerçek maliyeti bilinene kadar o satış tahmin olarak raporlanır ve manşet rakamınızın dışında tutulur. Maliyet hiç çözülemiyorsa tire görürsünüz — böylece panelinizdeki sıfır her zaman gerçek bir sıfırdır."
       },
       "q5": {
-        "question": "Hangi Amazon pazarları destekleniyor?",
-        "answer": "ABD, İngiltere, Almanya, Fransa, İtalya ve İspanya — tek panelden altı Amazon pazarında satış yap."
+        "question": "Bir şey kurmam gerekiyor mu?",
+        "answer": "Hayır. SellerHill tarayıcıda çalışır ve hesaplarınıza doğrudan bağlanır. Eklenti yok, masaüstü uygulaması yok, kendi bilgisayarınızda açık tutmanız gereken hiçbir şey yok."
       },
       "q6": {
-        "question": "Ücretsiz plan var mı?",
-        "answer": "Evet. Başlangıç planı 25 listeye kadar daima ücretsizdir; böylece kredi kartı olmadan tüm otomasyon akışını deneyebilirsin."
+        "question": "Ödeme yapmadan deneyebilir miyim?",
+        "answer": "Evet, iki şekilde. Canlı demo uygulamanın tamamını örnek veriyle açar ve hiçbir üyelik istemez. Ya da hesap açıp ücretsiz başlayın — başlamak için kart gerekmiyor."
+      }
+    },
+    "ctaBanner": {
+      "variant1": {
+        "headline": "Karar vermeden önce çalışırken görün.",
+        "subheading": "Demoyu açın ve gerçeğinin içinde dolaşın — panel, ilanlar, siparişler ve arkalarındaki kâr rakamları.",
+        "button": "Canlı demoyu aç"
+      },
+      "variant2": {
+        "headline": "Bunu elle yapmayı bırakın.",
+        "subheading": "Listelemeyi, fiyatlamayı, satın almayı ve takibi otomatiğe alın — ve gerçekten plan yapabileceğiniz bir kâr rakamı edinin.",
+        "button": "Ücretsiz başla"
       }
     },
     "footer": {
-      "description": "Zonds, Amazon → eBay dropshipping işini uçtan uca otomatikleştirir — listeleme, yeniden fiyatlandırma, sipariş ve takip, tam otopilotta.",
+      "description": "SellerHill, Amazon'dan eBay'e satış yapan bir mağazanın günlük işini — listeleme, fiyatlama, satın alma ve takip — otomatikleştirir ve her satışın arkasındaki gerçek kârı raporlar.",
       "product": "Ürün",
       "company": "Şirket",
       "legal": "Yasal",
@@ -717,6 +759,8 @@
         "features": "Özellikler",
         "pricing": "Fiyatlandırma",
         "howItWorks": "Nasıl çalışır",
+        "profit": "Kâr raporlaması",
+        "demo": "Canlı demo",
         "faq": "SSS"
       },
       "companyLinks": {
@@ -727,10 +771,22 @@
       },
       "legalLinks": {
         "privacy": "Gizlilik Politikası",
-        "terms": "Kullanım Şartları",
+        "terms": "Kullanım Koşulları",
         "cookies": "Çerezler"
       },
-      "copyright": "© {{year}} Zonds. Tüm hakları saklıdır."
+      "copyright": "© {{year}} SellerHill. Tüm hakları saklıdır."
+    }
+  },
+  "demo": {
+    "banner": {
+      "label": "Demo",
+      "description": "Örnek veri — hiçbir şey kaydedilmez.",
+      "exit": "Demodan çık",
+      "signUp": "Ücretsiz hesap aç"
+    },
+    "readonly": {
+      "title": "Salt okunur demo",
+      "message": "Örnek veriyle doldurulmuş bir demoyu geziyorsunuz, bu yüzden değişiklikler kaydedilemez. Kendi mağazanızda çalıştırmak için ücretsiz bir hesap açın."
     }
   }
 }

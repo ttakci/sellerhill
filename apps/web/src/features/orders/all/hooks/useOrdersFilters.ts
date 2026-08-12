@@ -18,6 +18,13 @@ export function useOrdersFilters() {
   const dateTo = searchParams.get('dateTo') ?? '';
   const fromDashboard = searchParams.get('from') === 'dashboard';
   const storeFromUrl = searchParams.get('store') ?? '';
+  /**
+   * Deep-link target for the Action Center: every one of its order rows links
+   * here with the state it counted (`?fulfillmentState=action_required`). This
+   * was local-only state, so those links landed on an unfiltered list showing
+   * every order — the seller was told "3 need you" and handed all 400.
+   */
+  const fulfillmentStateFromUrl = searchParams.get('fulfillmentState') ?? '';
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
@@ -25,12 +32,19 @@ export function useOrdersFilters() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
-  const [fulfillmentState, setFulfillmentState] = useState('');
+  const [fulfillmentState, setFulfillmentState] = useState(fulfillmentStateFromUrl);
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
     setEbayAccountId(storeFromUrl);
   }, [storeFromUrl]);
+
+  // Same for the fulfillment state, so navigating between two Action Center
+  // rows re-filters instead of keeping the first one's selection.
+  useEffect(() => {
+    setFulfillmentState(fulfillmentStateFromUrl);
+    setPage(1);
+  }, [fulfillmentStateFromUrl]);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -134,6 +148,10 @@ export function useOrdersFilters() {
     setPage(1);
   }, []);
 
+  // No date-range setters here on purpose: `dateFrom`/`dateTo` are read-only
+  // inbound state, arriving from the dashboard's "view all" deep link. The list
+  // has no date inputs of its own, and `handleClearFilters` already drops them.
+
   const handleClearFilters = useCallback(() => {
     setSearchInput('');
     setSearch('');
@@ -142,17 +160,11 @@ export function useOrdersFilters() {
     setFulfillmentState('');
     setPage(1);
     const next = new URLSearchParams();
-    if (dateFrom) {
-      next.set('dateFrom', dateFrom);
-    }
-    if (dateTo) {
-      next.set('dateTo', dateTo);
-    }
     if (fromDashboard) {
       next.set('from', 'dashboard');
     }
     setSearchParams(next, { replace: true });
-  }, [dateFrom, dateTo, fromDashboard, setSearchParams]);
+  }, [fromDashboard, setSearchParams]);
 
   const handleRowsPerPageChange = useCallback((rows: number) => {
     setRowsPerPage(rows);

@@ -26,7 +26,6 @@ export type SettingsDrawerKey =
   | 'buyerMessageTemplatesAll'
   | 'buyerMessageTemplateCreate'
   | 'buyerMessageTemplateEdit'
-  | 'billing'
   | null;
 
 export interface SettingsHubPageComponentProps {

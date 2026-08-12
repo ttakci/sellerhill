@@ -1,9 +1,11 @@
-import { Button, Card, EmptyState, PageHeader, StatusBadge, Text } from '@repo/ui';
+import { Card, EmptyState, PageHeader, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './StoresPage.style';
 import type { StoresPageComponentProps } from './StoresPage.types';
+
+import { ConnectEbayPrompt } from '@/domain-ui';
 
 export const StoresPageComponent = ({
   accounts,
@@ -48,20 +50,7 @@ export const StoresPageComponent = ({
           ))}
         </S.StoresGrid>
       ) : (
-        <Card variant="bordered" padding="lg">
-          <S.EmptyStateInner>
-            <S.EmptyIconWrapper>
-              <Text variant="h4" weight="semibold">eBay</Text>
-            </S.EmptyIconWrapper>
-            <Text variant="h3" weight="semibold">{t('ebay.accounts.noAccounts')}</Text>
-            <S.EmptyDesc variant="body" color="text.secondary">
-              {t('ebay.onboarding.description')}
-            </S.EmptyDesc>
-            <Button variant="primary" onClick={onConnect} isLoading={isConnecting}>
-              <Text variant="body" weight="semibold">{t('ebay.connect.connectButton')}</Text>
-            </Button>
-          </S.EmptyStateInner>
-        </Card>
+        <ConnectEbayPrompt onConnect={onConnect} isLoading={isConnecting} />
       )}
     </S.Container>
   );

@@ -3,7 +3,7 @@
 // Public receiver for tracking-provider (Aquiline) delivery events.
 //
 // Deliberately carries NO `@UseGuards(JwtAuthGuard)` — same as the Paddle
-// billing webhook. The provider has no Zonds session; the HMAC signature is
+// billing webhook. The provider has no SellerHill session; the HMAC signature is
 // the authentication, and it is verified against the RAW request bytes before
 // the body is parsed.
 

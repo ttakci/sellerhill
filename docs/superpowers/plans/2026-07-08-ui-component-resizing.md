@@ -185,7 +185,7 @@ Expected: PASS (0 lint warnings, 0 typecheck errors). If lint fails on unused im
 - [ ] **Step 8: Commit**
 
 ```bash
-cd D:/dev/projects/zonds/zonds
+cd D:/dev/projects/sellerhill/sellerhill
 git add packages/ui/src/atoms/Button/Button.types.ts packages/ui/src/atoms/Button/Button.component.tsx packages/ui/src/atoms/Button/Button.style.ts
 git commit -m "$(cat <<'EOF'
 refactor(ui): Button — remove icon props, new sizing, brightness hover
@@ -863,7 +863,7 @@ EOF
 - [ ] **Step 1: Run full validation**
 
 ```bash
-cd D:/dev/projects/zonds/zonds
+cd D:/dev/projects/sellerhill/sellerhill
 pnpm validate
 ```
 Expected: lint 0 warnings, typecheck 0 errors.

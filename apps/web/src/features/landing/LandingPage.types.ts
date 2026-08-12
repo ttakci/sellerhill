@@ -29,6 +29,12 @@ export interface LandingPageProps {
   onLocaleChange: (locale: SupportedLocale) => void;
   onNavigateLogin: () => void;
   onNavigateRegister: () => void;
+  /**
+   * Enters the sign-up-free demo. Deliberately a full document navigation, not
+   * a router push — demo mode is resolved once at boot, so entering (and
+   * leaving) it always starts from a clean store and RTK Query cache.
+   */
+  onOpenDemo: () => void;
   onToggleMobileMenu: () => void;
   onCloseMobileMenu: () => void;
 }

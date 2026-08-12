@@ -21,7 +21,7 @@ import {
 import * as S from './ChartPanel.style';
 import type { ChartPanelComponentProps } from './ChartPanel.types';
 
-const PROFIT_GRADIENT_ID = 'zonds-dashboard-profit-fill';
+const PROFIT_GRADIENT_ID = 'sellerhill-dashboard-profit-fill';
 
 /**
  * Chart geometry recharts needs as raw SVG numbers (px). Colors, fonts and

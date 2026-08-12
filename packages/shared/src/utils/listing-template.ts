@@ -86,10 +86,10 @@ const PLACEHOLDER_ALIASES: Record<string, ListingTemplatePlaceholder> = {
 };
 
 /** Default template used when a group has no usable template configured. */
-export const DEFAULT_LISTING_TEMPLATE_HTML = `<div class="zonds-listing">
+export const DEFAULT_LISTING_TEMPLATE_HTML = `<div class="sellerhill-listing">
   <h1>{{title}}</h1>
   {{#main_image}}<p><img src="{{.}}" alt="{{title}}" style="max-width:100%;height:auto;" /></p>{{/main_image}}
-  {{#product_description}}<div class="zonds-description">{{{product_description}}}</div>{{/product_description}}
+  {{#product_description}}<div class="sellerhill-description">{{{product_description}}}</div>{{/product_description}}
   {{#feature_bullets}}<ul><li>{{.}}</li></ul>{{/feature_bullets}}
   {{#product_details}}<ul><li>{{.}}</li></ul>{{/product_details}}
 </div>`;

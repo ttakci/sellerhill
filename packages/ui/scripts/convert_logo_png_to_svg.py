@@ -10,8 +10,8 @@ except ImportError:
     print("PIL not found. Please run 'pip install Pillow'")
     sys.exit(1)
 
-INPUT_PATH = r'd:\dev\projects\zonds\zonds\packages\ui\src\assets\logo.png'
-OUTPUT_PATH = r'd:\dev\projects\zonds\zonds\packages\ui\src\assets\logo.svg'
+INPUT_PATH = r'd:\dev\projects\sellerhill\sellerhill\packages\ui\src\assets\logo.png'
+OUTPUT_PATH = r'd:\dev\projects\sellerhill\sellerhill\packages\ui\src\assets\logo.svg'
 
 def main():
     if not os.path.exists(INPUT_PATH):

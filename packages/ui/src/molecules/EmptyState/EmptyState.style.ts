@@ -1,8 +1,14 @@
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
 import type { EmptyStateSize } from './EmptyState.types';
+
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
 
 export const EmptyStateWrapper = styled.div<{ $size: EmptyStateSize }>`
   display: flex;
@@ -18,7 +24,7 @@ export const EmptyStateWrapper = styled.div<{ $size: EmptyStateSize }>`
     $size === 'sm' ? tkn('spacing.sm') : $size === 'lg' ? tkn('spacing.lg') : tkn('spacing.md')};
 `;
 
-export const IconCircle = styled.div<{ $size: EmptyStateSize }>`
+export const IconCircle = styled.div<{ $size: EmptyStateSize; $spin?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,6 +39,7 @@ export const IconCircle = styled.div<{ $size: EmptyStateSize }>`
   svg {
     width: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.25rem' : '2rem')};
     height: ${({ $size }) => ($size === 'sm' ? '1.5rem' : $size === 'lg' ? '2.25rem' : '2rem')};
+    animation: ${({ $spin }) => ($spin ? spin : 'none')} 1s linear infinite;
   }
 `;
 

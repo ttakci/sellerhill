@@ -1,6 +1,11 @@
 /**
  * Locale-aware formatters for every dashboard surface (cards, chart, P&L).
  * Resolved once in the page container and passed down as props.
+ *
+ * `currency` is a separate parameter from `languageCode` on purpose — it
+ * must come from the seller's connected eBay store marketplace
+ * (`resolveStoreCurrency`), never from the UI language. See
+ * `getLocaleConfig`'s doc comment.
  */
 
 import { DashboardChartGranularity } from '@repo/shared';
@@ -9,8 +14,8 @@ import { useMemo } from 'react';
 
 import type { DashboardFormatters } from '../dashboard.types';
 
-export function useDashboardFormatters(languageCode: string): DashboardFormatters {
-  const { locale, currency } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
+export function useDashboardFormatters(languageCode: string, currency: string): DashboardFormatters {
+  const { locale } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
 
   return useMemo<DashboardFormatters>(() => {
     const parseIsoDate = (isoDate: string): Date | null => {

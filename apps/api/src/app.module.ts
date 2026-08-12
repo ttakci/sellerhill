@@ -12,6 +12,7 @@ import { getBullRedisOptions } from './common/redis/redis.config';
 import { RedisModule } from './common/redis/redis.module';
 import { SettingsModule } from './common/settings/settings.module';
 import { HealthModule } from './health/health.module';
+import { ActionCenterModule } from './modules/action-center/action-center.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AmazonModule } from './modules/amazon/amazon.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -72,6 +73,7 @@ import { StoreSettingsModule } from './modules/store-settings/store-settings.mod
     AuthModule,
     EbayModule,
     DashboardModule,
+    ActionCenterModule,
     StoreSettingsModule,
     ListingSettingsGroupModule,
     ListingsModule,

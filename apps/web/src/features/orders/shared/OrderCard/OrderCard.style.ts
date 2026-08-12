@@ -205,6 +205,7 @@ export const Footer = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: auto;
+  padding-top: ${tkn('spacing.md')};
   flex-shrink: 0;
 `;
 

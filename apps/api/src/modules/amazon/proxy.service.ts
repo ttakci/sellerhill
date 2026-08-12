@@ -27,7 +27,7 @@ interface ProxyRow {
 const PASS_ENC_PREFIX = 'enc:';
 
 /**
- * Zonds-provided proxy layer. Users never configure this.
+ * SellerHill-provided proxy layer. Users never configure this.
  *
  * PRIMARY model (migration 057): a pool of FIXED ISP proxies (static IP,
  * unlimited bandwidth) in the `proxies` table. Each user is lazily assigned

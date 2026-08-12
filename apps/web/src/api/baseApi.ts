@@ -9,6 +9,9 @@ import { generateRequestId } from '@repo/shared';
 
 import { refreshAuthSession } from './authRefreshCoordinator';
 
+import { demoBaseQuery } from '@/features/demo/demoBaseQuery';
+import { isDemoMode } from '@/features/demo/demoMode';
+
 /** Minimal auth slice shape used by baseQuery (avoids circular import with store). */
 interface AuthSliceState {
   auth: {
@@ -49,6 +52,16 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   api,
   extraOptions
 ) => {
+  /*
+   * Demo mode short-circuits every request before the network. It is resolved
+   * once at boot from sessionStorage and cannot change mid-document, so this
+   * branch is stable for the lifetime of the store — no cache can end up
+   * holding a mix of real and sample responses.
+   */
+  if (isDemoMode()) {
+    return demoBaseQuery(args, api, extraOptions);
+  }
+
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
@@ -74,6 +87,7 @@ export const baseApi = createApi({
     'Auth',
     'Ebay',
     'Dashboard',
+    'ActionCenter',
     'StoreSettings',
     'ListingSettingsGroups',
     'PredefinedTemplates',

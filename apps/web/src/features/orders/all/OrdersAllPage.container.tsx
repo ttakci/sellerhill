@@ -10,6 +10,7 @@ import { OrdersAllPageComponent } from './OrdersAllPage.component';
 
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
 export const OrdersAllPageContainer: React.FC = () => {
@@ -51,7 +52,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     [ebayAccountsData?.items, t]
   );
 
-  const { data, isLoading } = useGetOrdersQuery(serverQuery, {
+  const { data, isLoading, isFetching } = useGetOrdersQuery(serverQuery, {
     refetchOnMountOrArgChange: true,
   });
   const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
@@ -59,9 +60,16 @@ export const OrdersAllPageContainer: React.FC = () => {
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
+  /* Money renders in the connected eBay store's marketplace currency, never
+     the UI language — a filtered store narrows to its own currency, "all
+     stores" falls back to the first connected store. */
+  const currency = useMemo(
+    () => resolveStoreCurrency(ebayAccountsData?.items ?? [], ebayAccountId),
+    [ebayAccountsData, ebayAccountId]
+  );
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
-    [localeCfg]
+    (value: number) => formatCurrency(value, localeCfg.locale, currency),
+    [localeCfg, currency]
   );
 
   const fmtDate = useCallback(
@@ -108,7 +116,7 @@ export const OrdersAllPageContainer: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `zonds_orders_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sellerhill_orders_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -145,7 +153,7 @@ export const OrdersAllPageContainer: React.FC = () => {
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={totalCount}
-        isInitialLoading={isLoading}
+        isInitialLoading={isLoading || isFetching}
         formatCurrency={fmtCurrency}
         formatDate={fmtDate}
         onOrderClick={(id) => localeNavigate(`/orders/${id}`)}

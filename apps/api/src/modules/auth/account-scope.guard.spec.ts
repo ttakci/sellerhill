@@ -1,5 +1,5 @@
 /**
- * Account-scope separation: a Zonds account is either a seller account or a
+ * Account-scope separation: a SellerHill account is either a seller account or a
  * staff account, never both.
  *
  * Two things are locked here:

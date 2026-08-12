@@ -1,5 +1,5 @@
 # ============================================
-# Zonds Web - Production Docker Image
+# SellerHill Web - Production Docker Image
 # Multi-stage: Node.js build → nginx serve
 # ============================================
 

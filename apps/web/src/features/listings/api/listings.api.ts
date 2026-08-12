@@ -57,6 +57,9 @@ export function listingsQueryToParams(query: ListingsQueryDto = {}): Record<stri
   set('sourceStockMax', query.sourceStockMax);
   set('soldFrom', query.soldFrom);
   set('soldTo', query.soldTo);
+  if (query.sourceUnavailable) {
+    params.sourceUnavailable = 'true';
+  }
 
   return params;
 }

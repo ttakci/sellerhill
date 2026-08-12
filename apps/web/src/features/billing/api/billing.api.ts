@@ -5,7 +5,7 @@
 //
 // Endpoints (mirror apps/api/src/modules/billing/billing.controller.ts):
 //   GET  /billing/catalog   — public, no auth. Used by the landing pricing grid
-//                              + the authenticated plan-compare drawer.
+//                              + the authenticated /billing page.
 //   GET  /billing/summary   — authenticated. Current subscription + plan +
 //                              open usage periods + transition state.
 //   POST /billing/checkout  — authenticated; body SubscribeDto { planId, interval }.

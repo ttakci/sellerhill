@@ -46,7 +46,7 @@ import { TrackingWebhookService } from './tracking-webhook.service';
   controllers: [AmazonController, TrackingWebhookController],
   providers: [
     // Per-account persistent + proxy-aware browser context manager.
-    // Resolves sticky residential proxy per Zonds user (or per account) and
+    // Resolves sticky residential proxy per SellerHill user (or per account) and
     // launches contexts that share a per-account user-data-dir.
     ProxyService,
     BrowserStateManager,

@@ -66,7 +66,7 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  REDIS_KEY_PREFIX: string = 'zonds';
+  REDIS_KEY_PREFIX: string = 'sellerhill';
 
   @IsString()
   @IsOptional()

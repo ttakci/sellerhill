@@ -37,9 +37,7 @@ export const TabButton = styled.button<{ $isActive: boolean; $variant: 'underlin
   font-size: ${tkn('typography.fontSize.sm')};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   padding: ${({ $variant, theme }) =>
-    $variant === 'pill'
-      ? `${theme.spacing['xs+']} ${theme.spacing['sm-md+']}`
-      : `${theme.spacing['sm+']} 0`};
+    $variant === 'pill' ? `${theme.spacing['xs+']} ${theme.spacing['sm-md+']}` : `${theme.spacing['sm+']} 0`};
   transition: all ${tkn('transitions.fast')};
   position: relative;
 

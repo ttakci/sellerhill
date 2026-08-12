@@ -214,7 +214,7 @@ export const StatValue = styled(Text)<{ $tone: StatTone }>`
 
 export const Footer = styled.div`
   margin-top: auto;
-  padding-top: ${tkn('spacing.sm')};
+  padding-top: ${tkn('spacing.md')};
   display: flex;
   justify-content: space-between;
   align-items: center;

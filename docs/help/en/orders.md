@@ -11,7 +11,7 @@ visibility: customer
 
 ## Overview
 
-This guide explains the supported Zonds workflow. Follow each step and verify the result before continuing.
+This guide explains the supported SellerHill workflow. Follow each step and verify the result before continuing.
 
 ## Steps
 
@@ -21,4 +21,4 @@ This guide explains the supported Zonds workflow. Follow each step and verify th
 
 ## Safety
 
-Zonds never bypasses account, proxy, payment, or dry-run safeguards. Stop and contact support if unavailable.
+SellerHill never bypasses account, proxy, payment, or dry-run safeguards. Stop and contact support if unavailable.

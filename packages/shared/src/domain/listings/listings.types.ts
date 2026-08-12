@@ -255,7 +255,23 @@ export interface ListingsQueryDto {
    */
   soldFrom?: string;
   soldTo?: string;
+  /**
+   * Active listings whose source product is quarantined
+   * (`products.consecutive_failures >= LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD`).
+   * Deep-link-only filter for the Action Center's `LISTING_SOURCE_UNAVAILABLE`
+   * item — not exposed as its own UI control, same as `soldFrom`/`soldTo`.
+   */
+  sourceUnavailable?: boolean;
 }
+
+/**
+ * Consecutive Keepa refresh failures before a listing's source product counts
+ * as "unavailable at the source" (usually delisted). Mirrors the refresh
+ * pipeline's quarantine default (`KEEPA_REFRESH_MAX_FAILURES`). Shared so the
+ * Action Center's count and the `sourceUnavailable` listings filter it links
+ * to can never disagree about which listings qualify.
+ */
+export const LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD = 5;
 
 /**
  * Paginated listings response.
@@ -298,9 +314,33 @@ export interface ListingJobsQueryDto {
   page?: number;
   /** Page size (default 20, clamped to 100). */
   limit?: number;
-  /** Matches the job id prefix. */
+  /** Matches an ASIN among the job's items — a job has no other seller-meaningful id of its own. */
   search?: string;
   status?: ListingJobStatus | string;
+  /** Inclusive `YYYY-MM-DD` lower bound on the job's created date, from the date-range preset filter. */
+  dateFrom?: string;
+  /** Inclusive `YYYY-MM-DD` upper bound on the job's created date. */
+  dateTo?: string;
+  /**
+   * Jobs with `failed_count > 0`. Distinct from `status=failed` — a job is
+   * only marked FAILED when EVERY item failed, so a batch with 24 successes
+   * and 1 failure stays COMPLETED and would be invisible to a status filter.
+   * Deep-link target for the Action Center's `LISTING_JOB_FAILURES` item.
+   */
+  hasFailures?: boolean;
+}
+
+/**
+ * Date-range presets for the jobs list filter (`?datePreset=`). A free-text
+ * search box is not how anyone discovers "type a date to filter" — this is a
+ * discoverable dropdown instead, resolved to `dateFrom`/`dateTo` client-side.
+ */
+export enum ListingJobDatePreset {
+  ALL = 'all',
+  TODAY = 'today',
+  LAST_7_DAYS = 'last7Days',
+  LAST_30_DAYS = 'last30Days',
+  THIS_MONTH = 'thisMonth',
 }
 
 /** Paginated listing-jobs response. */

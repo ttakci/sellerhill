@@ -136,14 +136,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
         viewMode={tableView}
         onViewModeChange={onTableViewChange}
         emptyContent={
-          isInitialLoading ? (
-            <EmptyState
-              icon="loader"
-              title={t('orders.all.loadingTitle')}
-              description={t('orders.all.loadingSubtitle')}
-              size="md"
-            />
-          ) : hasActiveFilters ? (
+          hasActiveFilters ? (
             <EmptyState
               icon="search"
               title={t('orders.all.filtersTitle')}
@@ -161,6 +154,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
             />
           )
         }
+        loading={isInitialLoading}
         onDownload={onDownload}
         pagination={pagination}
         onRowClick={(row) => onOrderClick(row.id)}

@@ -15,6 +15,7 @@ import { LandingPageComponent } from './LandingPage.component';
 import type { LandingPricingPlan } from './LandingPage.types';
 
 import { useGetBillingCatalogQuery } from '@/features/billing/api/billing.api';
+import { enterDemoMode } from '@/features/demo';
 import { TawkToWidget } from '@/features/support-widget/TawkToWidget';
 import { storeLocalePreference } from '@/utils/locale';
 
@@ -128,6 +129,16 @@ export const LandingPageContainer = (): React.ReactElement => {
     void navigate(`/${currentLocale}/register`);
   }, [navigate, currentLocale]);
 
+  /*
+   * A full document navigation, not a router push: demo mode is resolved once
+   * at boot, so entering it has to start a new document for the store and the
+   * RTK Query cache to come up in demo state together.
+   */
+  const handleOpenDemo = useCallback(() => {
+    setMobileMenuOpen(false);
+    enterDemoMode(`/${currentLocale}/dashboard`);
+  }, [currentLocale]);
+
   const handleToggleMobileMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
   }, []);
@@ -147,6 +158,7 @@ export const LandingPageContainer = (): React.ReactElement => {
         onLocaleChange={handleLocaleChange}
         onNavigateLogin={handleNavigateLogin}
         onNavigateRegister={handleNavigateRegister}
+        onOpenDemo={handleOpenDemo}
         onToggleMobileMenu={handleToggleMobileMenu}
         onCloseMobileMenu={handleCloseMobileMenu}
       />

@@ -91,6 +91,16 @@ export interface DataTableProps<T> {
   emptyMessage?: string;
   /** Rich empty state (icon, actions). Takes precedence over emptyMessage when data is empty. */
   emptyContent?: ReactNode;
+  /**
+   * Renders shimmering skeleton rows/cards (matching the current view mode's
+   * real layout — table rows or the grid's own column count) instead of data
+   * or the empty state. Takes priority over both. Use for an initial fetch
+   * (or a refetch that would otherwise flash the empty state) — never for
+   * blocking mutations, which use the global loading overlay instead.
+   */
+  loading?: boolean;
+  /** Skeleton row/card count while `loading` is true. Default 6. */
+  skeletonCount?: number;
   onRowClick?: (row: T, index: number) => void;
   className?: string;
 }
@@ -126,6 +136,8 @@ export interface DataTableComponentProps<T> {
   pagination?: DataTablePagination;
   emptyMessage?: string;
   emptyContent?: ReactNode;
+  loading: boolean;
+  skeletonCount: number;
   onRowClick?: (row: T, index: number) => void;
   className?: string;
 }

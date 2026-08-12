@@ -1,4 +1,4 @@
-# Zonds
+# SellerHill
 
 **eBay–Amazon dropshipping yönetim platformu.** Listing yönetimi, otomatik fiyatlandırma, sipariş senkronizasyonu ve Amazon sipariş takibi.
 
@@ -22,8 +22,8 @@ React 18 + NestJS 10 monorepo. pnpm workspace, PostgreSQL 16, Redis 7.
 ### 1. Repoyu Klonla
 
 ```bash
-git clone <repo-url> zonds
-cd zonds
+git clone <repo-url> sellerhill
+cd sellerhill
 ```
 
 ### 2. Bağımlılıkları Yükle
@@ -47,7 +47,7 @@ Bu komut şu servisleri ayağa kaldırır:
 | pgAdmin 4 | `5050` | Veritabanı yönetim UI |
 
 > pgAdmin'e `http://localhost:5050` adresinden erişebilirsiniz.
-> Giriş: `admin@zonds.com` / `admin123`
+> Giriş: `admin@sellerhill.com` / `admin123`
 
 ### 4. Ortam Değişkenlerini Ayarla
 
@@ -80,7 +80,7 @@ cp apps/api/.env.example apps/api/.env
 | `SMTP_PASSWORD` | SMTP şifresi | ⬜ |
 
 > **Not:** Yeni kurulumlarda `DATABASE_NAME`, `DATABASE_USER` ve `DATABASE_PASSWORD` değerlerini `docker-compose.yml` ile eşleştirin:
-> - DB: `zonds_db`, User: `zonds_user`, Password: `zonds_password_change_in_production`
+> - DB: `sellerhill_db`, User: `sellerhill_user`, Password: `sellerhill_password_change_in_production`
 
 **Web (.env):**
 
@@ -167,7 +167,7 @@ pnpm migrate          # Migration'ları çalıştır
 ## Proje Yapısı
 
 ```
-zonds/
+sellerhill/
 ├── apps/
 │   ├── api/                  # NestJS backend
 │   └── web/                  # React + Vite frontend

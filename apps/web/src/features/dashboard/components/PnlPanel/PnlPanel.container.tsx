@@ -90,7 +90,7 @@ export const PnlPanel = ({
       })),
     });
     const stamp = months[0]?.dateTo ?? months[0]?.dateFrom ?? '';
-    downloadCsv(`zonds-pnl-${stamp}.csv`, csv);
+    downloadCsv(`sellerhill-pnl-${stamp}.csv`, csv);
   }, [columns, months, t]);
 
   const isEmpty = !isLoading && months.length === 0;

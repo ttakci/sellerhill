@@ -12,9 +12,16 @@
       "emptySubtitle": "Liste oluşturduğunuzda işler burada görünür; ilerleme ve hataları takip edebilirsiniz.",
       "emptyLoading": "İşler yükleniyor…",
       "filters": {
-        "searchPlaceholder": "İş ID ile ara…",
+        "searchPlaceholder": "ASIN ile ara…",
         "allStatuses": "Tüm durumlar",
-        "resultCount": "{{count}} iş"
+        "resultCount": "{{count}} iş",
+        "datePreset": {
+          "all": "Tüm zamanlar",
+          "today": "Bugün",
+          "last7Days": "Son 7 gün",
+          "last30Days": "Son 30 gün",
+          "thisMonth": "Bu ay"
+        }
       },
       "status": {
         "pending": "Bekliyor",
@@ -55,7 +62,7 @@
         "notFoundTitle": "İş bulunamadı",
         "notFoundSubtitle": "Bu iş silinmiş olabilir veya erişim yetkiniz yok.",
         "jobId": "İş ID",
-        "cancel": "İşi iptal et",
+        "cancel": "İptal",
         "cancelConfirm": "Bu iş durdurulsun mu? Zaten listelenmiş ASIN'ler listede kalır — yalnızca henüz işlenmemiş olanlar iptal edilir.",
         "cancelConfirmAction": "İşi durdur"
       },
@@ -67,6 +74,8 @@
         "empty": "Bu işe ait ürün kaydı bulunamadı.",
         "emptyTitle": "Henüz kalem yok",
         "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir.",
+        "searchPlaceholder": "ASIN veya hata mesajına göre ara…",
+        "resultCount": "{{count}} kalem",
         "reason": "Sebep",
         "reference": "Referans",
         "itemStatus": {
@@ -177,7 +186,7 @@
       "ebayStore": "eBay Mağazası"
     },
     "tracking": {
-      "tracked": "Zonds tarafından takip ediliyor",
+      "tracked": "SellerHill tarafından takip ediliyor",
       "untracked": "Takip edilmiyor"
     },
     "status": {

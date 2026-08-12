@@ -8,18 +8,17 @@
       "Bash(node -e \"const tr = require\\('./packages/shared/src/i18n/resources/tr/dashboard.json'\\); console.log\\('todayOrders:', tr.dashboard.todayOrders\\); console.log\\('totalRevenue:', tr.dashboard.totalRevenue\\); console.log\\('totalProfit:', tr.dashboard.totalProfit\\);\")",
       "Bash(pnpm dev:web)",
       "Bash(xargs rm:*)",
-      "Bash(ls d:/dev/projects/zonds/zonds/.eslint* d:/dev/projects/zonds/zonds/eslint*)",
+      "Bash(ls d:/dev/projects/sellerhill/sellerhill/.eslint* d:/dev/projects/sellerhill/sellerhill/eslint*)",
       "Bash(node -e \"const p = require.resolve\\('./eslint-plugin-design-system.js'\\); console.log\\(p\\)\")",
       "Bash(pnpm --filter @repo/ui build)",
       "Bash(pnpm --filter @repo/ui exec tsc --noEmit \"src/molecules/MessageModal/**/*.tsx\" \"src/molecules/MessageModal/**/*.ts\")",
       "Bash(pnpm --filter @repo/web dev)",
       "Bash(pnpm --filter \"apps/*\" exec ls)",
       "Bash(pnpm --filter web dev)",
-      "Read(//c/Users/2B/AppData/Local/Temp/claude/d--dev/projects-zonds-zonds/6c744d38-bd56-4e8d-9dab-ffbf6a3b1e4b/tasks/**)",
       "Bash(pnpm --filter @repo/ui lint)",
       "Bash(pnpm --filter=@repo/web build)",
       "Bash(curl -s http://localhost:5173)",
-      "Bash(grep -v '^\\\\s*$' \"d:/dev/projects/zonds/zonds/packages/ui/src/assets/logo.svg\")",
+      "Bash(grep -v '^\\\\s*$' \"d:/dev/projects/sellerhill/sellerhill/packages/ui/src/assets/logo.svg\")",
       "Bash(pnpm --filter @repo/web build)",
       "Bash(pnpm --filter @repo/shared build)",
       "Bash(pnpm --filter web build)",
@@ -85,9 +84,7 @@
       "Bash(git stash *)",
       "Bash(git commit -m 'feat\\(shared\\): add AmazonAccountStatus.VERIFYING, editable email on update, public hasTwoFactor/lastVerificationError *)"
     ],
-    "additionalDirectories": [
-      "d:\\dev\\projects\\zonds\\zonds\\packages\\ui\\src\\molecules\\RichTooltip"
-    ]
+    "additionalDirectories": []
   },
   "hooks": {
     "PreToolUse": [

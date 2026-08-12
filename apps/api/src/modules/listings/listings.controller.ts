@@ -92,7 +92,8 @@ export class ListingsController {
     @Query('sourceStockMin') sourceStockMin?: string,
     @Query('sourceStockMax') sourceStockMax?: string,
     @Query('soldFrom') soldFrom?: string,
-    @Query('soldTo') soldTo?: string
+    @Query('soldTo') soldTo?: string,
+    @Query('sourceUnavailable') sourceUnavailable?: string
   ): Promise<PaginatedListingsDto> {
     const num = (v?: string): number | undefined =>
       v !== undefined && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : undefined;
@@ -129,6 +130,7 @@ export class ListingsController {
       sourceStockMax: num(sourceStockMax),
       soldFrom,
       soldTo,
+      sourceUnavailable: sourceUnavailable === 'true',
     };
 
     return this.listingsService.getListings(req.user.sub, query);
@@ -210,7 +212,7 @@ export class ListingsController {
   async downloadImportTemplate(@Res() response: Response): Promise<void> {
     const workbook = await this.listingImportService.buildTemplate();
     response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    response.setHeader('Content-Disposition', 'attachment; filename="zonds-listing-import.xlsx"');
+    response.setHeader('Content-Disposition', 'attachment; filename="sellerhill-listing-import.xlsx"');
     response.send(workbook);
   }
 
@@ -263,7 +265,10 @@ export class ListingsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('search') search?: string,
-    @Query('status') status?: string
+    @Query('status') status?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('hasFailures') hasFailures?: string
   ): Promise<PaginatedListingJobsDto> {
     const userId = req.user.sub;
     return this.listingsService.getJobs(userId, {
@@ -271,6 +276,9 @@ export class ListingsController {
       limit: toPositiveInt(limit),
       search,
       status,
+      dateFrom,
+      dateTo,
+      hasFailures: hasFailures === 'true',
     });
   }
 

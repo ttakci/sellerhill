@@ -26,7 +26,7 @@ import { isValidGtin, normalizeGtin } from '../../common/utils/gtin';
 
 export const AMAZON_SELLER_ID = 'ATVPDKIKX0DER';
 
-/** Keepa csv/current indices actually consumed by Zonds. */
+/** Keepa csv/current indices actually consumed by SellerHill. */
 export enum KeepaCsvIndex {
   AMAZON = 0,
   NEW = 1,

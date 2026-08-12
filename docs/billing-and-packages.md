@@ -2,7 +2,7 @@
 
 ## Product model
 
-Zonds uses simple capacity-based packages. Customers do not see Keepa tokens, LLM tokens, API calls, or internal queue units. The visible limits are:
+SellerHill uses simple capacity-based packages. Customers do not see Keepa tokens, LLM tokens, API calls, or internal queue units. The visible limits are:
 
 - Active listings
 - Monthly automatic orders (AO)
@@ -35,7 +35,7 @@ The module is under `apps/api/src/modules/billing/`.
 - `PaddleWebhookProcessor` verifies signatures, stores an idempotent inbox event, rejects stale/out-of-order state, and applies subscription updates transactionally.
 - `BILLING_ENFORCEMENT_ENABLED=false` is the migration/transition default. It reports `full_access` without creating a fake subscription.
 
-Required runtime settings are documented in `apps/api/.env.example` and validated in `env.validation.ts`. Paddle uses Merchant of Record responsibilities for customer-facing indirect taxes; Zonds still owns LLC income/accounting obligations.
+Required runtime settings are documented in `apps/api/.env.example` and validated in `env.validation.ts`. Paddle uses Merchant of Record responsibilities for customer-facing indirect taxes; SellerHill still owns LLC income/accounting obligations.
 
 ## Quota semantics
 
@@ -49,7 +49,7 @@ AO quota is per user and per UTC calendar month. A reservation is idempotent by 
 
 ## Customer UI
 
-The billing feature is under `apps/web/src/features/billing/`. Settings shows the current subscription/transition state, listing usage, monthly AO usage, and a simple monthly/yearly comparison. Upgrade/manage actions are unavailable until Paddle is configured. Landing pricing reads the public billing catalog rather than owning a second price/limit definition.
+The billing feature is under `apps/web/src/features/billing/`, rendered as its own routed page at `/:locale/billing` (sidebar entry near Settings) rather than a Settings drawer — `/:locale/settings/billing` and `/:locale/settings?drawer=billing` redirect there for old links. The page shows the current subscription/transition state, listing usage, monthly AO usage, and a simple monthly/yearly comparison. Upgrade/manage actions are unavailable until Paddle is configured. Landing pricing reads the public billing catalog rather than owning a second price/limit definition.
 
 All visible text is localized in English and Turkish. Do not add token-based pricing copy.
 

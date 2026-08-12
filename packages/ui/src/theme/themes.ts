@@ -135,24 +135,46 @@ const lightColors: ThemeColors = {
 
   landing: {
     heroGradient: 'linear-gradient(135deg, #4263EB 0%, #6366F1 50%, #818CF8 100%)',
-    heroBg: '#070B1A',
-    heroGlow: 'rgba(66, 99, 235, 0.45)',
-    heroGlowAlt: 'rgba(129, 140, 248, 0.32)',
-    heroGrid: 'rgba(148, 163, 184, 0.08)',
-    heroText: '#F8FAFC',
-    heroTextMuted: 'rgba(226, 232, 240, 0.72)',
-    heroBorder: 'rgba(148, 163, 184, 0.16)',
-    statsBg: '#0B1226',
+    /*
+     * The hero used to be unconditionally dark in BOTH themes. It is now a
+     * light, airy surface in the light theme — the landing follows the app's
+     * theme like every other page, and `heroText` is real ink here. Anything
+     * that sits on a brand-coloured fill must use `onAccent` instead.
+     */
+    /*
+     * A hair off pure white. Cards are `surface.primary` (#FFFFFF), so they
+     * lift off the page instead of dissolving into it — the cheapest and most
+     * reliable way to make a light layout read as layered rather than flat.
+     */
+    heroBg: '#FBFCFE',
+    auroraBg: '#070B1A',
+    heroGlow: 'rgba(37, 99, 235, 0.17)',
+    heroGlowAlt: 'rgba(124, 58, 237, 0.13)',
+    heroGrid: 'rgba(15, 23, 42, 0.045)',
+    heroText: '#27272a',
+    heroTextMuted: '#475569',
+    heroBorder: 'rgba(15, 23, 42, 0.07)',
+    onAccent: '#FFFFFF',
+    shadowSoft: '0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 28px -10px rgba(37, 99, 235, 0.13)',
+    shadowStrong: '0 2px 6px rgba(15, 23, 42, 0.05), 0 28px 56px -18px rgba(37, 99, 235, 0.22)',
+    /* Marketing accents — feature cards cycle these so the grid doesn't read as one blue wall. */
+    accentBlue: '#3B82F6',
+    accentViolet: '#8B5CF6',
+    accentEmerald: '#10B981',
+    accentAmber: '#F59E0B',
+    accentRose: '#F43F5E',
+    statsBg: '#F5F8FD',
     accentPurple: '#818CF8',
     accentCyan: '#22D3EE',
     gradientText: 'linear-gradient(135deg, #60A5FA 0%, #818CF8 50%, #A78BFA 100%)',
     cardGlow: 'rgba(66, 99, 235, 0.08)',
-    cardBorder: 'rgba(15, 23, 42, 0.08)',
-    cardBorderHover: 'rgba(66, 99, 235, 0.35)',
-    chipBg: 'rgba(66, 99, 235, 0.10)',
-    chipBorder: 'rgba(66, 99, 235, 0.25)',
-    sectionAlt: '#F8FAFC',
-    sectionDeep: '#F1F5F9',
+    cardBorder: 'rgba(15, 23, 42, 0.06)',
+    cardBorderHover: 'rgba(37, 99, 235, 0.32)',
+    chipBg: 'rgba(37, 99, 235, 0.07)',
+    chipBorder: 'rgba(37, 99, 235, 0.16)',
+    /* Blue-tinted rather than neutral slate — reads warmer next to the brand. */
+    sectionAlt: '#F5F8FD',
+    sectionDeep: '#EFF4FB',
     ring: 'rgba(66, 99, 235, 0.40)',
   },
 };
@@ -269,23 +291,35 @@ const darkColors: ThemeColors = {
   landing: {
     heroGradient: 'linear-gradient(135deg, #3B82F6 0%, #6366F1 50%, #818CF8 100%)',
     heroBg: '#050816',
-    heroGlow: 'rgba(59, 130, 246, 0.40)',
-    heroGlowAlt: 'rgba(129, 140, 248, 0.28)',
+    auroraBg: '#050816',
+    heroGlow: 'rgba(59, 130, 246, 0.34)',
+    heroGlowAlt: 'rgba(139, 92, 246, 0.26)',
     heroGrid: 'rgba(148, 163, 184, 0.07)',
     heroText: '#F8FAFC',
     heroTextMuted: 'rgba(226, 232, 240, 0.70)',
     heroBorder: 'rgba(148, 163, 184, 0.14)',
+    onAccent: '#FFFFFF',
+    /* Dark elevation is real shadow, not a brand tint — a coloured glow on a
+       near-black surface reads as haze rather than depth. */
+    shadowSoft: '0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -10px rgba(0, 0, 0, 0.6)',
+    shadowStrong: '0 2px 6px rgba(0, 0, 0, 0.45), 0 28px 56px -18px rgba(0, 0, 0, 0.7)',
+    /* Same marketing accents as light — slightly lifted for contrast on near-black. */
+    accentBlue: '#60A5FA',
+    accentViolet: '#A78BFA',
+    accentEmerald: '#34D399',
+    accentAmber: '#FBBF24',
+    accentRose: '#FB7185',
     statsBg: '#020617',
     accentPurple: '#A78BFA',
     accentCyan: '#22D3EE',
     gradientText: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #22D3EE 100%)',
     cardGlow: 'rgba(96, 165, 250, 0.06)',
-    cardBorder: 'rgba(148, 163, 184, 0.14)',
+    cardBorder: 'rgba(148, 163, 184, 0.13)',
     cardBorderHover: 'rgba(99, 102, 241, 0.45)',
     chipBg: 'rgba(99, 102, 241, 0.14)',
-    chipBorder: 'rgba(129, 140, 248, 0.30)',
-    sectionAlt: '#0B1226',
-    sectionDeep: '#070B1A',
+    chipBorder: 'rgba(129, 140, 248, 0.28)',
+    sectionAlt: '#0A1020',
+    sectionDeep: '#070B18',
     ring: 'rgba(99, 102, 241, 0.45)',
   },
 };

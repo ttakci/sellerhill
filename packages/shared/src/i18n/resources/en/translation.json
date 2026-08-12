@@ -1,6 +1,6 @@
 {
   "common": {
-    "brandName": "Zonds",
+    "brandName": "SellerHill",
     "loading": "Loading...",
     "retry": "Retry",
     "ok": "OK",
@@ -112,11 +112,12 @@
     "dashboard": "Dashboard",
     "listings": "Listings",
     "ebayListings": "eBay Listings",
-    "listingJobs": "Listing Jobs",
+    "listingJobs": "Import Jobs",
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
     "stores": "Stores",
+    "billing": "Billing",
     "settings": "Settings",
     "admin": "Admin Operations",
     "configuration": "Configuration",
@@ -249,7 +250,8 @@
         "manageMessageTemplates": "Message Templates",
         "manageMessageTemplatesSubtitle": "View, edit, and create your automated buyer message templates",
         "manageBlacklist": "Manage Blacklist",
-        "manageBlacklistSubtitle": "Keywords to block from listing titles, descriptions, and specifics"
+        "manageBlacklistSubtitle": "Keywords to block from listing titles, descriptions, and specifics",
+        "infoMessage": "Message templates and blacklist rules are applied based on the scope (global or per-store) you choose in Store Settings."
       },
       "listingGroups": {
         "title": "Listing Settings Groups",
@@ -419,7 +421,7 @@
     "modal": {
       "deactivate": {
         "title": "Deactivate account",
-        "warning": "This will revoke your access to Zonds. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
+        "warning": "This will revoke your access to SellerHill. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
         "typeEmail": "To confirm, type your email address below:",
         "emailPlaceholder": "{{email}}",
         "confirmLabel": "Deactivate account",
@@ -430,7 +432,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2026 Zonds E-commerce Solutions. All rights reserved.",
+    "copyright": "© 2026 SellerHill E-commerce Solutions. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contactSupport": "Contact Support"
@@ -439,73 +441,130 @@
     "navbar": {
       "features": "Features",
       "howItWorks": "How it works",
+      "profit": "Profit",
       "pricing": "Pricing",
       "faq": "FAQ",
       "login": "Log in",
-      "getStarted": "Get started"
+      "getStarted": "Start free",
+      "demo": "Live demo"
     },
     "hero": {
-      "badge": "Trusted by 2,500+ dropshippers",
-      "headline": "Sell Amazon products on eBay — on full autopilot",
-      "subheading": "From listing to delivery, Zonds handles it all: repricing, stock sync, automatic ordering and tracking. You set the rules per product — we run the operation.",
+      "badge": "Amazon to eBay, end to end",
+      "headline": "Run your store on autopilot. Know exactly what you earned.",
+      "subheading": "SellerHill lists your products, keeps price and stock in sync, buys each order from your supplier and pushes tracking back to eBay. Then it shows the real profit behind every sale — measured, not guessed.",
       "ctaPrimary": "Start free",
-      "ctaSecondary": "See how it works",
-      "note": "No credit card required • Free plan forever"
+      "ctaSecondary": "Open live demo",
+      "note": "No credit card to start. The demo needs no sign-up."
     },
-    "logos": {
-      "title": "Built for the Amazon → eBay dropshipping flow"
+    "heroPreview": {
+      "windowLabel": "Dashboard",
+      "periodLabel": "This month",
+      "netProfit": "Net profit",
+      "sales": "Sales",
+      "orders": "Orders",
+      "margin": "Margin",
+      "confirmed": "Confirmed",
+      "estimated": "Estimated",
+      "pending": "Cost not yet known",
+      "recentTitle": "Recent orders",
+      "profitColumn": "Profit",
+      "states": {
+        "purchased": "Purchased",
+        "shipped": "Shipped",
+        "actionRequired": "Needs you"
+      },
+      "products": {
+        "a": "Wireless Earbuds Pro",
+        "b": "USB-C Fast Charger 65W",
+        "c": "Ergonomic Laptop Stand"
+      }
+    },
+    "flow": {
+      "title": "Built for one job, done properly",
+      "source": "Your supplier",
+      "engine": "SellerHill",
+      "destination": "Your eBay store"
+    },
+    "pillars": {
+      "p1": {
+        "title": "One flow, not five tools",
+        "description": "Listing, repricing, stock, ordering and tracking run as a single pipeline — nothing to stitch together or reconcile by hand."
+      },
+      "p2": {
+        "title": "Profit you can act on",
+        "description": "Confirmed costs and estimates are reported separately. An unknown cost is never quietly rounded down to zero."
+      },
+      "p3": {
+        "title": "Rules per product",
+        "description": "Margin, stock cap and listing template are set item by item — not one blanket rule stretched across your whole catalogue."
+      }
     },
     "features": {
       "sectionEyebrow": "Everything automated",
-      "sectionTitle": "Your entire operation, running without you",
-      "sectionSubtitle": "Every moving part of an Amazon-to-eBay business — automated, monitored and kept in sync around the clock.",
+      "sectionTitle": "The daily work, handled for you",
+      "sectionSubtitle": "The jobs that fill a seller's day — listing, watching prices, buying, chasing tracking — run on their own, around the clock.",
       "asinListing": {
-        "title": "ASIN-based listing",
-        "description": "Paste an Amazon ASIN and go live on eBay in minutes. Titles, images and specs pulled automatically — no manual data entry."
+        "title": "List in minutes",
+        "description": "Add a product and it goes live on eBay with a clean, search-ready title, proper images and the item details buyers filter by already filled in."
       },
-      "stockPriceSync": {
-        "title": "Real-time stock & price sync",
-        "description": "The moment Amazon price or stock changes, your eBay listings update instantly. Never sell out-of-stock, never underprice."
+      "priceStock": {
+        "title": "Price and stock stay current",
+        "description": "When your source price or stock moves, your eBay offer follows in the same cycle. No overselling what you can't get, no leaving margin behind."
       },
       "autoOrder": {
-        "title": "Automatic order fulfillment",
-        "description": "When an eBay order lands, it is placed on Amazon automatically — hands-free, 24/7, even while you sleep."
-      },
-      "manualOrder": {
-        "title": "Manual order override",
-        "description": "Want full control on a specific order? Step in and handle it manually at any time. Automation on your terms."
+        "title": "Orders bought for you",
+        "description": "An eBay sale becomes a supplier purchase automatically, shipped to your buyer. You set a spending ceiling per account, so it can never overpay."
       },
       "tracking": {
-        "title": "Automatic tracking & shipping",
-        "description": "Tracking numbers are scraped and pushed to eBay the moment they appear. Shipped → delivered, without lifting a finger."
+        "title": "Tracking that files itself",
+        "description": "Tracking is picked up as soon as it exists and pushed to eBay, so your order is marked shipped on time — and your buyer sees a clean delivery, not your supply chain."
       },
-      "perProduct": {
-        "badge": "Our edge",
-        "title": "Per-product settings",
-        "description": "Most tools force one rule across your whole catalog. We don’t. Set profit margin, stock cap and listing template individually for every single ASIN."
+      "buyerMessages": {
+        "title": "Buyer messages on schedule",
+        "description": "Thank-you, shipped, delivered and feedback requests go out on your own templates, at the right moment, without you remembering to send them."
+      },
+      "multiStore": {
+        "title": "Several stores, one desk",
+        "description": "Run more than one eBay store and more than one buyer account side by side, each filtered and reported on its own."
       }
     },
-    "howItWorks": {
-      "sectionEyebrow": "How it works",
-      "sectionTitle": "Live in three simple steps",
-      "sectionSubtitle": "Connect once, configure once, then let it run.",
-      "step1": {
-        "title": "Connect your accounts",
-        "description": "Securely link your Amazon buyer account and eBay seller account in seconds."
+    "profit": {
+      "sectionEyebrow": "Profit, not guesswork",
+      "sectionTitle": "Most tools show revenue. SellerHill shows what is left.",
+      "sectionSubtitle": "Every sale is matched to its real cost — what you paid, the tax, the shipping and eBay's cut. When a cost isn't known yet, the number says so instead of pretending.",
+      "confirmed": {
+        "title": "Confirmed profit",
+        "description": "Sales whose costs are fully captured. This is the figure you can plan against."
       },
-      "step2": {
-        "title": "Paste ASINs & set rules",
-        "description": "Add products by ASIN and define per-product rules: margin, stock cap, listing template."
+      "estimated": {
+        "title": "Estimated profit",
+        "description": "Costs only partly known. Shown apart, clearly labelled, and never blended into your headline number."
       },
-      "step3": {
-        "title": "Sit back & scale",
-        "description": "Listings go live, orders flow in automatically, tracking updates itself. You focus on growth."
+      "honest": {
+        "title": "Nothing invented",
+        "description": "A missing cost stays a dash. So when you do see a zero, it is a real zero — not an absence dressed up as one."
+      },
+      "pnl": {
+        "title": "Month-by-month P&L",
+        "description": "Revenue, costs, margin and ROI across twelve months, on one screen and exportable in a click."
+      },
+      "panel": {
+        "title": "This month",
+        "confirmedLabel": "Confirmed profit",
+        "estimatedLabel": "Estimated profit",
+        "unknownLabel": "Revenue, cost unknown",
+        "footnote": "Only confirmed profit counts toward your headline figure."
       }
     },
     "perProduct": {
       "sectionEyebrow": "Granular control",
-      "sectionTitle": "Your rules. Per product. Not per account.",
-      "sectionSubtitle": "Other tools apply one strategy to your entire catalog. Zonds gives you individual control over every ASIN you sell.",
+      "sectionTitle": "Your rules. Per product, not per account.",
+      "sectionSubtitle": "One blanket setting quietly costs you money on every product it doesn't suit. Set the margin, the stock cap and the template on the items that need their own.",
+      "labels": {
+        "margin": "Profit margin",
+        "stock": "Stock cap",
+        "template": "Listing template"
+      },
       "productA": {
         "name": "Wireless Earbuds Pro",
         "margin": "12%",
@@ -513,80 +572,52 @@
         "template": "Electronics — Standard"
       },
       "productB": {
-        "name": "USB-C Fast Charger",
+        "name": "USB-C Fast Charger 65W",
         "margin": "22%",
         "stock": "1",
         "template": "Fast Shipping"
       },
       "productC": {
-        "name": "Phone Case Bundle",
+        "name": "Ergonomic Laptop Stand",
         "margin": "18%",
         "stock": "5",
-        "template": "Bundle Deal"
-      },
-      "labels": {
-        "margin": "Profit margin",
-        "stock": "Stock cap",
-        "template": "Listing template"
+        "template": "Home Office"
       }
     },
-    "stats": {
-      "sellers": {
-        "value": "2,500+",
-        "label": "Active sellers"
+    "howItWorks": {
+      "sectionEyebrow": "How it works",
+      "sectionTitle": "Three steps, then it runs itself",
+      "sectionSubtitle": "Connect once, set your rules once, and the daily work stops being yours.",
+      "step1": {
+        "title": "Connect your accounts",
+        "description": "Link your eBay store and the buyer account you source from. It takes a couple of minutes and nothing is installed."
       },
-      "orders": {
-        "value": "50K+",
-        "label": "Orders processed"
+      "step2": {
+        "title": "Add products and set rules",
+        "description": "Bring in the items you want to sell, then choose your margin, stock cap and template — globally, or one product at a time."
       },
-      "uptime": {
-        "value": "99.9%",
-        "label": "Uptime"
-      },
-      "marketplaces": {
-        "value": "6",
-        "label": "Amazon marketplaces"
+      "step3": {
+        "title": "Let it run",
+        "description": "Listings publish, prices track, orders get bought, tracking flows back to eBay, and your profit figures keep themselves up to date."
       }
     },
-    "ctaBanner": {
-      "variant1": {
-        "headline": "Ready to put your store on autopilot?",
-        "subheading": "Start free today. Connect your accounts and list your first product in minutes.",
-        "button": "Start free"
-      },
-      "variant2": {
-        "headline": "Stop doing this manually.",
-        "subheading": "Join thousands of sellers who automated their Amazon → eBay business with Zonds.",
-        "button": "Get started free"
-      }
-    },
-    "testimonials": {
-      "sectionTitle": "Loved by dropshippers worldwide",
-      "sectionSubtitle": "Real sellers, real results. Here’s what they say about running on autopilot.",
-      "t1": {
-        "rating": "5",
-        "text": "Zonds replaced three tools and a virtual assistant. My listings stay in sync and orders place themselves — I literally wake up to sales.",
-        "name": "Marcus J.",
-        "role": "eBay Top Seller"
-      },
-      "t2": {
-        "rating": "5",
-        "text": "The per-product settings are a game changer. I finally run different margins and stock caps per ASIN instead of one flat rule.",
-        "name": "Sarah K.",
-        "role": "Full-time dropshipper"
-      },
-      "t3": {
-        "rating": "5",
-        "text": "Tracking sync alone saves me hours every day. Orders ship on eBay automatically once Amazon updates. Rock solid uptime too.",
-        "name": "David R.",
-        "role": "Multi-store operator"
+    "demo": {
+      "sectionEyebrow": "See it first",
+      "sectionTitle": "Look around before you sign up.",
+      "sectionSubtitle": "The full application, loaded with sample data. Every screen, every number, nothing to fill in and nothing to cancel.",
+      "button": "Open the live demo",
+      "note": "No sign-up, no card, nothing installed.",
+      "bullets": {
+        "b1": "The real dashboard, with confirmed and estimated profit side by side",
+        "b2": "Listings, orders and the month-by-month P&L",
+        "b3": "Leave whenever you like — nothing is saved"
       }
     },
     "pricing": {
       "sectionEyebrow": "Pricing",
-      "sectionTitle": "Simple, transparent pricing",
-      "sectionSubtitle": "Start free. Upgrade only when you’re ready to scale.",
-      "billingNote": "No credit card required to start. Cancel anytime.",
+      "sectionTitle": "Straightforward pricing",
+      "sectionSubtitle": "Priced on what you actually use: how many listings you keep active, and how many orders are bought for you each month.",
+      "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "perYear": "/yr",
       "mostPopular": "Most popular",
@@ -594,122 +625,133 @@
       "notIncluded": "Not included",
       "listingsLabel": "listings",
       "ordersLabel": "orders",
-      "upToListings": "Up to {{limit}} listings",
-      "unlimitedListings": "Unlimited listings",
-      "catalogError": "Couldn't load live pricing. Showing plan overview only.",
+      "upToListings": "Up to {{limit}} active listings",
+      "unlimitedListings": "Unlimited active listings",
+      "catalogError": "Live pricing couldn't be loaded right now. Plan overview shown below.",
       "starter": {
         "name": "Starter",
-        "description": "For solo sellers getting started with automated dropshipping.",
+        "description": "For a solo seller putting their first catalogue on autopilot.",
         "features": [
-          "Amazon → eBay stock & price sync",
-          "Automatic ordering",
-          "Tracking updates",
+          "Price and stock kept in sync",
+          "Orders bought automatically",
+          "Tracking pushed to eBay",
+          "Confirmed and estimated profit reporting",
           "Email support"
         ],
-        "cta": "Start free trial"
+        "cta": "Start free"
       },
       "growth": {
         "name": "Growth",
-        "description": "For growing sellers who need more listings and Amazon orders.",
+        "description": "For a seller adding listings faster than they can watch them.",
         "features": [
-          "Real-time sync & out-of-stock alerts",
-          "Automatic + manual ordering",
-          "Auto tracking & shipping",
-          "Per-product settings",
+          "Everything in Starter",
+          "Per-product margin, stock cap and template",
+          "Automated buyer messaging",
+          "Month-by-month P&L and CSV export",
           "Priority support"
         ],
-        "cta": "Start free trial"
+        "cta": "Start free"
       },
       "scale": {
         "name": "Scale",
-        "description": "For high-volume sellers running multiple stores at scale.",
+        "description": "For an operation running several stores and buyer accounts at once.",
         "features": [
           "Everything in Growth",
-          "API access",
-          "Dedicated account manager",
-          "Custom automations",
-          "24/7 priority support"
+          "Multiple eBay stores and buyer accounts",
+          "Per-store rules and reporting",
+          "Highest listing and order allowances",
+          "Priority support"
         ],
-        "cta": "Contact sales"
+        "cta": "Start free"
       },
       "catalogFallback": {
         "starter": {
           "name": "Starter",
-          "price": "$0",
+          "price": "$39",
           "period": "/mo",
-          "description": "Everything you need to test the waters.",
+          "description": "For a solo seller putting their first catalogue on autopilot.",
           "features": [
-            "Up to 25 listings",
-            "Amazon → eBay stock & price sync",
-            "Automatic ordering",
-            "Tracking updates",
+            "1,500 active listings",
+            "150 automatic orders / month",
+            "Price and stock kept in sync",
+            "Tracking pushed to eBay",
             "Email support"
           ],
           "cta": "Start free"
         },
-        "pro": {
+        "growth": {
           "badge": "Most popular",
-          "name": "Pro",
-          "price": "$49",
+          "name": "Growth",
+          "price": "$55",
           "period": "/mo",
-          "description": "For serious sellers ready to scale.",
+          "description": "For a seller adding listings faster than they can watch them.",
           "features": [
-            "Up to 500 listings",
-            "Real-time sync & out-of-stock alerts",
-            "Automatic + manual ordering",
-            "Auto tracking & shipping",
-            "Per-product settings",
+            "2,500 active listings",
+            "250 automatic orders / month",
+            "Per-product margin, stock cap and template",
+            "Automated buyer messaging",
             "Priority support"
           ],
-          "cta": "Start free trial"
+          "cta": "Start free"
         },
-        "enterprise": {
-          "name": "Enterprise",
-          "price": "$149",
+        "scale": {
+          "name": "Scale",
+          "price": "$75",
           "period": "/mo",
-          "description": "For high-volume operations and agencies.",
+          "description": "For an operation running several stores and buyer accounts at once.",
           "features": [
-            "Unlimited listings",
-            "Everything in Pro",
-            "API access",
-            "Dedicated account manager",
-            "Custom automations",
-            "24/7 priority support"
+            "4,500 active listings",
+            "450 automatic orders / month",
+            "Multiple eBay stores and buyer accounts",
+            "Per-store rules and reporting",
+            "Priority support"
           ],
-          "cta": "Contact sales"
+          "cta": "Start free"
         }
       }
     },
     "faq": {
       "sectionTitle": "Frequently asked questions",
-      "sectionSubtitle": "Everything you need to know before getting started.",
+      "sectionSubtitle": "The things worth knowing before you start.",
       "q1": {
         "question": "How does automatic ordering work?",
-        "answer": "When an eBay buyer places an order, Zonds automatically places the corresponding order on Amazon using your connected buyer account, with the buyer’s shipping address. No manual clicking required."
+        "answer": "When a buyer orders on eBay, SellerHill places the matching order on your connected supplier account and ships it to the buyer's address. You set a spending ceiling per account, and any order above it stops for your approval rather than going through."
       },
       "q2": {
-        "question": "Can I still handle orders manually?",
-        "answer": "Absolutely. Automatic ordering is optional per order — you can step in and process any order manually whenever you want full control."
+        "question": "Can I still handle an order myself?",
+        "answer": "Yes. Automation is a setting, not a lock-in — it can be off entirely, off for a particular store, or stepped over on any individual order you want to place yourself."
       },
       "q3": {
-        "question": "How are tracking numbers handled?",
-        "answer": "Zonds monitors each Amazon order and, the moment a tracking number appears, pushes it to eBay and marks the order as shipped automatically."
+        "question": "What happens when something goes wrong?",
+        "answer": "It stops rather than guessing, and tells you why in plain language. Anything waiting on you — a purchase that couldn't complete, a disconnected store, a listing that fell out of stock — is collected on one page instead of being something you have to go looking for."
       },
       "q4": {
-        "question": "Can I set a different margin per product?",
-        "answer": "Yes. Unlike most tools, Zonds lets you define profit margin, stock cap and listing template individually for every ASIN — not one rule for your whole account."
+        "question": "Why do you separate confirmed and estimated profit?",
+        "answer": "Because a profit figure you can't trust is worse than none. Until the real cost of a sale is known, that sale is reported as an estimate and kept out of your headline number. When a cost can't be resolved at all, you see a dash — so a zero on your dashboard always means a genuine zero."
       },
       "q5": {
-        "question": "Which Amazon marketplaces are supported?",
-        "answer": "US, UK, Germany, France, Italy and Spain — sell across six Amazon marketplaces from a single dashboard."
+        "question": "Do I need to install anything?",
+        "answer": "No. SellerHill runs in the browser and connects to your accounts directly. There is no extension, no desktop app and nothing to keep running on your own machine."
       },
       "q6": {
-        "question": "Is there a free plan?",
-        "answer": "Yes. The Starter plan is free forever with up to 25 listings, so you can try the full automation flow without a credit card."
+        "question": "Can I try it before paying?",
+        "answer": "Yes, two ways. The live demo opens the full application with sample data and needs no sign-up at all. Or create an account and start free — no card is required to begin."
+      }
+    },
+    "ctaBanner": {
+      "variant1": {
+        "headline": "See it working before you commit.",
+        "subheading": "Open the demo and click through the real thing — the dashboard, the listings, the orders and the profit figures behind them.",
+        "button": "Open the live demo"
+      },
+      "variant2": {
+        "headline": "Stop doing this by hand.",
+        "subheading": "Put the listing, the pricing, the buying and the tracking on autopilot — and get a profit number you can actually plan against.",
+        "button": "Start free"
       }
     },
     "footer": {
-      "description": "Zonds automates your Amazon → eBay dropshipping business end to end — listing, repricing, ordering and tracking, on full autopilot.",
+      "description": "SellerHill automates the daily work of an Amazon-to-eBay store — listing, repricing, ordering and tracking — and reports the real profit behind every sale.",
       "product": "Product",
       "company": "Company",
       "legal": "Legal",
@@ -717,6 +759,8 @@
         "features": "Features",
         "pricing": "Pricing",
         "howItWorks": "How it works",
+        "profit": "Profit reporting",
+        "demo": "Live demo",
         "faq": "FAQ"
       },
       "companyLinks": {
@@ -730,7 +774,19 @@
         "terms": "Terms of Service",
         "cookies": "Cookies"
       },
-      "copyright": "© {{year}} Zonds. All rights reserved."
+      "copyright": "© {{year}} SellerHill. All rights reserved."
+    }
+  },
+  "demo": {
+    "banner": {
+      "label": "Demo",
+      "description": "Sample data — nothing is saved.",
+      "exit": "Exit demo",
+      "signUp": "Create free account"
+    },
+    "readonly": {
+      "title": "Read-only demo",
+      "message": "You are exploring a demo filled with sample data, so changes cannot be saved. Create a free account to run this on your own store."
     }
   }
 }

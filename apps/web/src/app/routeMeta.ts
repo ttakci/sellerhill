@@ -30,6 +30,12 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
     breadcrumbs: [],
   },
   {
+    path: '/actions',
+    match: 'exact',
+    section: 'inventory',
+    breadcrumbs: [{ labelKey: 'actionCenter:actionCenter.menu', path: '/actions' }],
+  },
+  {
     path: '/listings',
     match: 'exact',
     section: 'inventory',
@@ -94,6 +100,12 @@ export const APP_ROUTE_META: AppRouteMeta[] = [
    * which has its own shell and its own route table (`operatorRouting.ts`).
    * This list describes the seller app only.
    */
+  {
+    path: '/billing',
+    match: 'exact',
+    section: 'configuration',
+    breadcrumbs: [{ labelKey: 'translation:menu.billing', path: '/billing' }],
+  },
   {
     path: '/settings',
     match: 'exact',

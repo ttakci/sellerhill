@@ -25,6 +25,7 @@ import { useGetListingsQuery } from '@/features/listings/api/listings.api';
 import { useGetOrdersQuery } from '@/features/orders/api/orders.api';
 import { useGetStoreSettingsQuery } from '@/features/store-settings/api/storeSettingsApi';
 import { getErrorI18nKey } from '@/utils/errorHandler';
+import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
 const CAROUSEL_LIMIT = 12;
@@ -40,17 +41,25 @@ export const DashboardPageContainer = (): React.ReactElement => {
   const storeFilter = storeId !== ALL_STORES ? storeId : undefined;
 
   const languageCode = (i18n.language || 'en').split('-')[0];
-  const formatters = useDashboardFormatters(languageCode);
   const { locale } = useMemo(() => getLocaleConfig(languageCode), [languageCode]);
+
+  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
+  const ebayAccounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData]);
+
+  /* Money renders in the connected eBay store's marketplace currency, never
+     the UI language — a filtered store narrows to its own currency, "all
+     stores" falls back to the first connected store. */
+  const currency = useMemo(
+    () => resolveStoreCurrency(ebayAccounts, storeFilter),
+    [ebayAccounts, storeFilter]
+  );
+  const formatters = useDashboardFormatters(languageCode, currency);
 
   const {
     data: dashboardData,
     isLoading: isDashboardLoading,
     error: dashboardError,
   } = useGetDashboardQuery({ chartGranularity: granularity, ebayAccountId: storeFilter });
-
-  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
-  const ebayAccounts = useMemo(() => ebayAccountsData?.items ?? [], [ebayAccountsData]);
 
   const { data: storeSettings } = useGetStoreSettingsQuery({ storeId: storeFilter });
   const amazonTaxRate = storeSettings?.amazonTaxRate ?? 0;

@@ -1,6 +1,6 @@
 # 🚀 Coolify ile Test Ortamı Deployment Rehberi
 
-> Bu rehber, Hostinger VPS üzerinde **Coolify** kullanarak Zonds projesini test/sandbox ortamına almak için hazırlanmıştır.
+> Bu rehber, Hostinger VPS üzerinde **Coolify** kullanarak SellerHill projesini test/sandbox ortamına almak için hazırlanmıştır.
 >
 > **Mimari özeti:** Tek domain (same-origin). `web` (nginx) React SPA'yı serve eder ve `/api/*` isteklerini API'ye proxy'ler. **PostgreSQL ve Redis compose içinde değil** — Coolify'nin ayrı Database resource'ları olarak yönetilir (otomatik backup, port derdi yok, app'ten bağımsız lifecycle).
 
@@ -120,17 +120,17 @@ git push origin development
 
 1. Coolify dashboard → **"+ Add New"** → **"Resources"** → **"PostgreSQL"**
 2. Ayarlar:
-   - **Name:** `zonds-postgres`
-   - **Postgres User:** `zonds_user`
+   - **Name:** `sellerhill-postgres`
+   - **Postgres User:** `sellerhill_user`
    - **Postgres Password:** güçlü bir şifre (kaydedin!)
-   - **Postgres DB:** `zonds_db`
+   - **Postgres DB:** `sellerhill_db`
 3. **Deploy** → container başlar, healthcheck geçer
 
 ### 3.2 Redis
 
 1. **"+ Add New"** → **"Resources"** → **"Redis"**
 2. Ayarlar:
-   - **Name:** `zonds-redis`
+   - **Name:** `sellerhill-redis`
    - Password belirleyin (veya boş bırakın — test için opsiyonel)
 3. **Deploy**
 
@@ -145,8 +145,8 @@ Almanız gerekenler:
 
 | Değişken | Nereden | Örnek |
 |----------|---------|-------|
-| `DATABASE_URL` | PostgreSQL resource → internal connection string | `postgresql://zonds_user:****@zonds-postgres:5432/zonds_db` |
-| `REDIS_HOST` | Redis resource → internal hostname | `zonds-redis` |
+| `DATABASE_URL` | PostgreSQL resource → internal connection string | `postgresql://sellerhill_user:****@sellerhill-postgres:5432/sellerhill_db` |
+| `REDIS_HOST` | Redis resource → internal hostname | `sellerhill-redis` |
 | `REDIS_PORT` | Redis resource → port | `6379` |
 | `REDIS_PASSWORD` | Redis resource → password (belirlediyseniz) | `****` |
 
@@ -158,7 +158,7 @@ Almanız gerekenler:
 
 ### 4.1 Project + Resource
 
-1. **"+ Add New"** → **"Project"** → ad: `zonds`
+1. **"+ Add New"** → **"Project"** → ad: `sellerhill`
 2. Proje altında **"+ Add New Resource"** → **"Docker Compose"**
 
 ### 4.2 Git Repository Bağlama
@@ -172,7 +172,7 @@ Almanız gerekenler:
 
 Coolify compose app'inizde iki servis görünür: `api` ve `web`.
 
-- **`web` servisini seçin** → **"Configuration"** → **"Domains"** → `zonds.takci.cloud` (kendi domaininiz)
+- **`web` servisini seçin** → **"Configuration"** → **"Domains"** → `sellerhill.takci.cloud` (kendi domaininiz)
 - **`api` servisine domain VERMEYİN** — internal kalacak, nginx üzerinden `/api` ile ulaşılır
 
 ---
@@ -185,15 +185,15 @@ Coolify UI'da compose servisini seçin → **"Environment Variables"** sekmesi.
 
 ```env
 # Database (Adım 3.3'ten kopyalayın)
-DATABASE_URL=postgresql://zonds_user:SIFRE@zonds-postgres:5432/zonds_db
-REDIS_HOST=zonds-redis
+DATABASE_URL=postgresql://sellerhill_user:SIFRE@sellerhill-postgres:5432/sellerhill_db
+REDIS_HOST=sellerhill-redis
 REDIS_PORT=6379
 REDIS_PASSWORD=
 
 # Frontend (same domain)
-FRONTEND_URL=https://zonds.takci.cloud
+FRONTEND_URL=https://sellerhill.takci.cloud
 # CORS allowlist (comma-separated). Same-origin'da zorunlu değil ama best practice.
-CORS_ORIGINS=https://zonds.takci.cloud
+CORS_ORIGINS=https://sellerhill.takci.cloud
 
 # JWT (en az 32 karakter, rastgele)
 JWT_SECRET=
@@ -211,7 +211,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 eBay sandbox Developer Portal'da **OAuth Redirect URL** olarak same-origin callback'i kaydedin:
 
 ```
-https://zonds.takci.cloud/api/v1/ebay/callback
+https://sellerhill.takci.cloud/api/v1/ebay/callback
 ```
 
 Sonra env var'lar:
@@ -219,7 +219,7 @@ Sonra env var'lar:
 ```env
 EBAY_CLIENT_ID=
 EBAY_CLIENT_SECRET=
-EBAY_REDIRECT_URI=https://zonds.takci.cloud/api/v1/ebay/callback
+EBAY_REDIRECT_URI=https://sellerhill.takci.cloud/api/v1/ebay/callback
 EBAY_RUNAME=
 ```
 
@@ -256,12 +256,12 @@ SMTP_FROM=
 Domain sağlayıcınızın panelinde A kaydı ekleyin:
 
 ```
-A    zonds.takci.cloud    →    SIZIN_VPS_IP
+A    sellerhill.takci.cloud    →    SIZIN_VPS_IP
 ```
 
 ### Coolify'da SSL
 
-1. `web` servisi → **"Configuration"** → **"Domains"** → `zonds.takci.cloud`
+1. `web` servisi → **"Configuration"** → **"Domains"** → `sellerhill.takci.cloud`
 2. **"HTTPS"** → **"Let's Encrypt"** aktif edin
 3. Coolify otomatik SSL sertifikası alır (1-2 dakika)
 
@@ -288,7 +288,7 @@ A    zonds.takci.cloud    →    SIZIN_VPS_IP
 
 ```bash
 # API health check (domain üzerinden, same-origin)
-curl https://zonds.takci.cloud/api/v1/health
+curl https://sellerhill.takci.cloud/api/v1/health
 # Beklenen: {"status":"ok"}  (veya uygulamanızın health endpoint'i)
 ```
 
@@ -302,19 +302,19 @@ curl https://zonds.takci.cloud/api/v1/health
 
 **Seçenek A — Port expose (test için en basit):**
 
-1. Coolify → PostgreSQL resource (`zonds-postgres`) → **"Configuration"**
+1. Coolify → PostgreSQL resource (`sellerhill-postgres`) → **"Configuration"**
 2. **"Publicly accessible"** / port mapping'i açın → Coolify bir host port'u map'ler (örn. `VPS_IP:32145`)
 3. DBeaver → New Connection:
    - Host: `SIZIN_VPS_IP`
    - Port: Coolify'nin verdiği port (örn. `32145`)
-   - Database: `zonds_db`, User: `zonds_user`, Password: (Adım 3.1)
+   - Database: `sellerhill_db`, User: `sellerhill_user`, Password: (Adım 3.1)
 
 > ⚠️ Bu DB'yi internete açar. **Sadece test** için, güçlü şifreyle. Prod'da kapalı tutun.
 
 **Seçenek B — CLI (port açmadan, VPS'te):**
 
 ```bash
-docker exec -it <postgres_container_id> psql -U zonds_user -d zonds_db
+docker exec -it <postgres_container_id> psql -U sellerhill_user -d sellerhill_db
 ```
 
 ### 8.2 Redis → Redis GUI / CLI
@@ -372,7 +372,7 @@ Coolify → Servis → **"Configuration"** → **"Watch Paths"** → `*` ekleyin
 
 | Sorun | Çözüm |
 |-------|-------|
-| **Migration: DB connection refused** | DB resource çalışıyor mu? `DATABASE_URL` **internal** mi (hostname `zonds-postgres`, yoksa public IP değil)? App ile DB aynı Coolify server'ında mı? |
+| **Migration: DB connection refused** | DB resource çalışıyor mu? `DATABASE_URL` **internal** mi (hostname `sellerhill-postgres`, yoksa public IP değil)? App ile DB aynı Coolify server'ında mı? |
 | **502 Bad Gateway** | `api` container'ı çalışıyor mu? `docker ps`. nginx `/api` → `api:3000` proxy'si için her ikisi de up olmalı |
 | **Build OOM** | VPS en az 4GB RAM + swap ekleyin (aşağıya bakın) |
 | **SSL alınamıyor** | DNS A kaydının VPS IP'ye yöneldiğinden emin olun, 5-10 dk bekleyin |
@@ -401,7 +401,7 @@ cd /data/coolify/compose/<project-id>
 docker compose logs -f api
 
 # DB'ye gir
-docker exec -it <postgres_container_id> psql -U zonds_user -d zonds_db
+docker exec -it <postgres_container_id> psql -U sellerhill_user -d sellerhill_db
 
 # Redis'e gir
 docker exec -it <redis_container_id> redis-cli
@@ -424,8 +424,8 @@ docker system prune -f
 - [ ] VPS: en az 4GB RAM, 2 vCPU, 40GB SSD, Ubuntu 22.04/24.04
 - [ ] Coolify kuruldu, admin hesap oluşturuldu
 - [ ] Repo'da deployment dosyaları push'landı (`docker-compose.production.yml` DB servissiz)
-- [ ] Coolify'da **PostgreSQL resource** oluşturuldu + çalışıyor (`zonds-postgres`)
-- [ ] Coolify'da **Redis resource** oluşturuldu + çalışıyor (`zonds-redis`)
+- [ ] Coolify'da **PostgreSQL resource** oluşturuldu + çalışıyor (`sellerhill-postgres`)
+- [ ] Coolify'da **Redis resource** oluşturuldu + çalışıyor (`sellerhill-redis`)
 - [ ] `DATABASE_URL`, `REDIS_HOST/PORT` internal connection bilgileri alındı
 - [ ] Coolify'da app (Docker Compose) oluşturuldu, repo bağlandı
 - [ ] Domain SADECE `web` servisine atandı (`api`'ye verilmedi)

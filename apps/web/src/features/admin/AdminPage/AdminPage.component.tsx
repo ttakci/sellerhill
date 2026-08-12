@@ -10,32 +10,20 @@ import {
   Badge,
   Button,
   EmptyState,
+  Icon,
   ModernTextInput,
   PageHeader,
   SearchField,
-  TabNav,
   Table,
   Text,
   Toggle,
+  Tooltip,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './AdminPage.style';
-import type { AdminPageComponentProps, AdminTabId } from './AdminPage.types';
-
-const TABS: AdminTabId[] = [
-  'overview',
-  'queues',
-  'costs',
-  'proxies',
-  'listingQuality',
-  'settings',
-  'billing',
-  'users',
-  'ebayLimits',
-  'listingFailures',
-];
+import type { AdminPageComponentProps } from './AdminPage.types';
 
 /** Badge variant for a quota pressure band. */
 const BAND_VARIANT: Record<QuotaPressureBand, 'neutral' | 'success' | 'warning' | 'error'> = {
@@ -69,13 +57,14 @@ export const AdminPageComponent = ({
   failureColumns,
   proxyColumns,
   settingGroups,
+  collapsedSettingCategories,
+  onToggleSettingCategory,
   settingDrafts,
   isSavingSetting,
   emailTestResult,
   isTestingEmail,
   proxyForm,
   isSavingProxy,
-  onTabChange,
   onProxyFieldChange,
   onProxySubmit,
   onSettingDraftChange,
@@ -89,49 +78,70 @@ export const AdminPageComponent = ({
   return (
     <S.Container>
       <PageHeader title={t('admin.title')} subtitle={t('admin.subtitle')} />
-      {/* Section navigation, not a call to action. These were `Button`s whose
-          active one was `variant="primary"`, so the loudest thing on the page
-          was always "where you already are". */}
-      <TabNav
-        items={TABS.map((tab) => ({ id: tab, label: t(`admin.tabs.${tab}`) }))}
-        value={activeTab}
-        onChange={(id) => onTabChange(id as AdminTabId)}
-        ariaLabel={t('admin.title')}
-      />
-
+      {/* Section navigation lives in the operator sidebar (OperatorLayout) —
+          each section is its own `/admin?tab=...` link there. This page only
+          renders the content for whichever tab the URL currently selects. */}
       {activeTab === 'overview' && (
         <S.Rows>
           <S.Grid>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.users')}</Text>
-              <Text variant="metric" weight="semibold">{overview?.totalUsers ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.users')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {overview?.totalUsers ?? '—'}
+              </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.activeListings')}</Text>
-              <Text variant="metric" weight="semibold">{overview?.activeListings ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.activeListings')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {overview?.activeListings ?? '—'}
+              </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.orders')}</Text>
-              <Text variant="metric" weight="semibold">{overview?.ordersLast30Days ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.orders')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {overview?.ordersLast30Days ?? '—'}
+              </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.ebayStores')}</Text>
-              <Text variant="metric" weight="semibold">{overview?.activeEbayStores ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.ebayStores')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {overview?.activeEbayStores ?? '—'}
+              </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.amazonAccounts')}</Text>
-              <Text variant="metric" weight="semibold">{overview?.activeAmazonAccounts ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.amazonAccounts')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {overview?.activeAmazonAccounts ?? '—'}
+              </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.overview.keepaBalance')}</Text>
-              <Text variant="metric" weight="semibold">{operations?.keepaTokensLeft ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.overview.keepaBalance')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {operations?.keepaTokensLeft ?? '—'}
+              </Text>
             </S.SummaryCard>
           </S.Grid>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.overview.warningsTitle')}</Text>
+            <Text variant="h4" weight="semibold">
+              {t('admin.overview.warningsTitle')}
+            </Text>
             {operations && operations.warnings.length === 0 && (
-              <Text variant="body-sm" color="text.secondary">{t('admin.overview.noWarnings')}</Text>
+              <Text variant="body-sm" color="text.secondary">
+                {t('admin.overview.noWarnings')}
+              </Text>
             )}
             <S.Rows>
               {operations?.warnings.map((warning, index) => (
@@ -144,7 +154,6 @@ export const AdminPageComponent = ({
               ))}
             </S.Rows>
           </S.Section>
-
         </S.Rows>
       )}
 
@@ -154,9 +163,15 @@ export const AdminPageComponent = ({
         <S.Rows>
           {operations?.queues.map((queue) => (
             <S.Row key={queue.name}>
-              <Text variant="body" weight="semibold">{queue.name}</Text>
+              <Text variant="body" weight="semibold">
+                {queue.name}
+              </Text>
               <Text variant="body-sm" color="text.secondary">
-                {t('admin.queue.summary', { waiting: queue.waiting, active: queue.active, failed: queue.failedObserved })}
+                {t('admin.queue.summary', {
+                  waiting: queue.waiting,
+                  active: queue.active,
+                  failed: queue.failedObserved,
+                })}
               </Text>
             </S.Row>
           ))}
@@ -166,18 +181,24 @@ export const AdminPageComponent = ({
       {activeTab === 'costs' && (
         <S.Grid>
           <S.SummaryCard>
-            <Text variant="caption" color="text.secondary">{t('admin.cost.proxyPool')}</Text>
-            <Text variant="metric" weight="semibold">
-              {proxyPool
-                ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency)
-                : '—'}
+            <Text variant="caption" color="text.secondary">
+              {t('admin.cost.proxyPool')}
             </Text>
-            <Text variant="caption" color="text.secondary">{t('admin.cost.proxyPoolHint')}</Text>
+            <Text variant="metric" weight="semibold">
+              {proxyPool ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency) : '—'}
+            </Text>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.cost.proxyPoolHint')}
+            </Text>
           </S.SummaryCard>
           {providerCosts.map((cost) => (
             <S.SummaryCard key={`${cost.source}-${cost.metric}`}>
-              <Text variant="body" weight="semibold">{t(`admin.metrics.${cost.metric}`)}</Text>
-              <Text variant="metric-sm" weight="semibold">{formatCost(cost.totalCostMicros, cost.currency)}</Text>
+              <Text variant="body" weight="semibold">
+                {t(`admin.metrics.${cost.metric}`)}
+              </Text>
+              <Text variant="metric-sm" weight="semibold">
+                {formatCost(cost.totalCostMicros, cost.currency)}
+              </Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.cost.quantity', { quantity: cost.totalQuantity })}
               </Text>
@@ -190,27 +211,39 @@ export const AdminPageComponent = ({
         <S.Rows>
           <S.Grid>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.proxies.activePool')}</Text>
-              <Text variant="metric" weight="semibold">{proxyPool?.summary.activeProxies ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.proxies.activePool')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {proxyPool?.summary.activeProxies ?? '—'}
+              </Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.proxies.freeCount', { value: proxyPool?.summary.freeActiveProxies ?? 0 })}
               </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.proxies.assigned')}</Text>
-              <Text variant="metric" weight="semibold">{proxyPool?.summary.assignedProxies ?? '—'}</Text>
-            </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.proxies.monthlyCost')}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.proxies.assigned')}
+              </Text>
               <Text variant="metric" weight="semibold">
-                {proxyPool
-                  ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency)
-                  : '—'}
+                {proxyPool?.summary.assignedProxies ?? '—'}
               </Text>
             </S.SummaryCard>
             <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">{t('admin.proxies.expiringSoon')}</Text>
-              <Text variant="metric" weight="semibold">{proxyPool?.summary.expiringSoon ?? '—'}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.proxies.monthlyCost')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {proxyPool ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency) : '—'}
+              </Text>
+            </S.SummaryCard>
+            <S.SummaryCard>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.proxies.expiringSoon')}
+              </Text>
+              <Text variant="metric" weight="semibold">
+                {proxyPool?.summary.expiringSoon ?? '—'}
+              </Text>
               <Text variant="caption" color="text.secondary">
                 {t('admin.proxies.expiredCount', { value: proxyPool?.summary.expired ?? 0 })}
               </Text>
@@ -218,8 +251,12 @@ export const AdminPageComponent = ({
           </S.Grid>
 
           <S.Section>
-            <Text variant="caption" color="text.secondary">{t('admin.proxies.addTitle')}</Text>
-            <Text variant="body-sm" color="text.secondary">{t('admin.proxies.addSubtitle')}</Text>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.proxies.addTitle')}
+            </Text>
+            <Text variant="body-sm" color="text.secondary">
+              {t('admin.proxies.addSubtitle')}
+            </Text>
             <S.FormGrid>
               <ModernTextInput
                 name="proxyHost"
@@ -270,13 +307,17 @@ export const AdminPageComponent = ({
             </S.FormGrid>
             <S.FormActions>
               <Button variant="primary" onClick={onProxySubmit} isLoading={isSavingProxy} disabled={isSavingProxy}>
-                <Text variant="body-sm" weight="semibold">{t('admin.proxies.addButton')}</Text>
+                <Text variant="body-sm" weight="semibold">
+                  {t('admin.proxies.addButton')}
+                </Text>
               </Button>
             </S.FormActions>
           </S.Section>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.proxies.listTitle')}</Text>
+            <Text variant="h4" weight="semibold">
+              {t('admin.proxies.listTitle')}
+            </Text>
             {/* Was a hand-built flex row per proxy that ran label, assignee,
                 expiry and cost together into two sentences. */}
             <Table
@@ -297,111 +338,168 @@ export const AdminPageComponent = ({
 
       {activeTab === 'settings' && (
         <S.Rows>
-          <Text variant="body-sm" color="text.secondary">{t('admin.settings.intro')}</Text>
-          {settingGroups.map((group) => (
-            <S.Section key={group.category}>
-              <Text variant="h4" weight="semibold">{t(`admin.settings.category.${group.category}`)}</Text>
-              {group.category === PlatformSettingCategory.EMAIL && (
-                <S.FormActions>
-                  {emailTestResult && (
-                    <Badge variant={emailTestResult.ok ? 'success' : 'error'}>
-                      {emailTestResult.ok ? t('admin.settings.emailTestOk') : t('admin.settings.emailTestFailed')}
-                    </Badge>
-                  )}
-                  <Button variant="secondary" size="small" onClick={onEmailTest} isLoading={isTestingEmail} disabled={isTestingEmail}>
-                    <Text variant="body-sm" weight="semibold">{t('admin.settings.emailTest')}</Text>
-                  </Button>
-                </S.FormActions>
-              )}
-              <S.Rows>
-                {group.settings.map((setting) => (
-                  <S.Row key={setting.key}>
-                    <S.RowMain>
-                      <Text variant="body" weight="semibold">
-                        {t(`admin.settings.keys.${setting.key}`, { defaultValue: setting.key })}
-                      </Text>
-                      <Text variant="caption" color="text.secondary">
-                        {t('admin.settings.envHint', { envVar: setting.envVar })}
-                        {setting.defaultValue !== null
-                          ? ` · ${t('admin.settings.defaultHint', { value: setting.defaultValue })}`
-                          : ''}
-                      </Text>
-                      <S.RowSide>
-                        <Badge variant={SOURCE_VARIANT[setting.source]}>
-                          {t(`admin.settings.source.${setting.source}`)}
-                        </Badge>
-                        {setting.requiresRestart && (
-                          <Badge variant="warning">{t('admin.settings.requiresRestart')}</Badge>
-                        )}
-                        {setting.isSecret && (
-                          <Badge variant={setting.hasValue ? 'success' : 'neutral'}>
-                            {setting.hasValue
-                              ? t('admin.settings.secretSet')
-                              : t('admin.settings.secretUnset')}
+          <Text variant="body-sm" color="text.secondary">
+            {t('admin.settings.intro')}
+          </Text>
+          {settingGroups.map((group) => {
+            const isOpen = !collapsedSettingCategories.has(group.category);
+            return (
+              <S.SettingsCategoryCard key={group.category}>
+                <S.SettingsCategoryHeader
+                  type="button"
+                  $isOpen={isOpen}
+                  onClick={() => onToggleSettingCategory(group.category)}
+                  aria-expanded={isOpen}
+                >
+                  <S.SettingsCategoryHeaderTitle>
+                    <Text variant="h4" weight="semibold">
+                      {t(`admin.settings.category.${group.category}`)}
+                    </Text>
+                    <Text variant="caption" color="text.tertiary" numeric>
+                      {group.settings.length}
+                    </Text>
+                  </S.SettingsCategoryHeaderTitle>
+                  <Icon name="chevron-down" size={18} />
+                </S.SettingsCategoryHeader>
+                {isOpen && (
+                  <>
+                    {group.category === PlatformSettingCategory.EMAIL && (
+                      <S.FormActions>
+                        {emailTestResult && (
+                          <Badge variant={emailTestResult.ok ? 'success' : 'error'}>
+                            {emailTestResult.ok ? t('admin.settings.emailTestOk') : t('admin.settings.emailTestFailed')}
                           </Badge>
                         )}
-                      </S.RowSide>
-                    </S.RowMain>
-                    <S.RowSide>
-                      {setting.type === PlatformSettingType.BOOLEAN ? (
-                        <Toggle
-                          checked={setting.value === 'true'}
-                          onChange={() => onSettingToggle(setting)}
-                          disabled={isSavingSetting}
-                        />
-                      ) : (
-                        <>
-                          <S.SettingInput>
-                            <ModernTextInput
-                              name={setting.key}
-                              type={
-                                setting.isSecret
-                                  ? 'password'
-                                  : setting.type === PlatformSettingType.NUMBER
-                                    ? 'number'
-                                    : 'text'
-                              }
-                              label={t('admin.settings.valueLabel')}
-                              value={settingDrafts[setting.key] ?? (setting.isSecret ? '' : setting.value ?? '')}
-                              onChange={(e) => onSettingDraftChange(setting.key, e.target.value)}
-                            />
-                          </S.SettingInput>
-                          <Button
-                            variant="primary"
-                            size="small"
-                            onClick={() => onSettingSave(setting.key)}
-                            disabled={isSavingSetting || settingDrafts[setting.key] === undefined}
-                          >
-                            <Text variant="body-sm" weight="semibold">{t('translation:common.save')}</Text>
-                          </Button>
-                        </>
-                      )}
-                      {setting.source === PlatformSettingSource.DATABASE && (
                         <Button
                           variant="secondary"
                           size="small"
-                          onClick={() => onSettingReset(setting.key)}
-                          disabled={isSavingSetting}
+                          onClick={onEmailTest}
+                          isLoading={isTestingEmail}
+                          disabled={isTestingEmail}
                         >
-                          <Text variant="body-sm" weight="semibold">{t('admin.settings.reset')}</Text>
+                          <Text variant="body-sm" weight="semibold">
+                            {t('admin.settings.emailTest')}
+                          </Text>
                         </Button>
-                      )}
-                    </S.RowSide>
-                  </S.Row>
-                ))}
-              </S.Rows>
-            </S.Section>
-          ))}
+                      </S.FormActions>
+                    )}
+                    <S.Rows>
+                      {group.settings.map((setting) => (
+                        <S.Row key={setting.key}>
+                          <S.RowMain>
+                            <S.LabelRow>
+                              <Text variant="body" weight="semibold">
+                                {t(`admin.settings.keys.${setting.key}`, { defaultValue: setting.key })}
+                              </Text>
+                              <Tooltip
+                                content={t(`admin.settings.descriptions.${setting.key}`, {
+                                  defaultValue: t('admin.settings.noDescription'),
+                                })}
+                                position="right"
+                                variant="dark"
+                              >
+                                <S.InfoButton
+                                  type="button"
+                                  variant="ghost"
+                                  aria-label={t(`admin.settings.descriptions.${setting.key}`, {
+                                    defaultValue: t('admin.settings.noDescription'),
+                                  })}
+                                >
+                                  <Icon name="info" size={14} color="text.tertiary" />
+                                </S.InfoButton>
+                              </Tooltip>
+                            </S.LabelRow>
+                            <Text variant="caption" color="text.secondary">
+                              {t('admin.settings.envHint', { envVar: setting.envVar })}
+                              {setting.defaultValue !== null
+                                ? ` · ${t('admin.settings.defaultHint', { value: setting.defaultValue })}`
+                                : ''}
+                            </Text>
+                            <S.RowSide>
+                              <Badge variant={SOURCE_VARIANT[setting.source]}>
+                                {t(`admin.settings.source.${setting.source}`)}
+                              </Badge>
+                              {setting.requiresRestart && (
+                                <Badge variant="warning">{t('admin.settings.requiresRestart')}</Badge>
+                              )}
+                              {setting.isSecret && (
+                                <Badge variant={setting.hasValue ? 'success' : 'neutral'}>
+                                  {setting.hasValue ? t('admin.settings.secretSet') : t('admin.settings.secretUnset')}
+                                </Badge>
+                              )}
+                            </S.RowSide>
+                          </S.RowMain>
+                          <S.RowSide>
+                            {setting.type === PlatformSettingType.BOOLEAN ? (
+                              <Toggle
+                                checked={setting.value === 'true'}
+                                onChange={() => onSettingToggle(setting)}
+                                disabled={isSavingSetting}
+                              />
+                            ) : (
+                              <>
+                                <S.SettingInput>
+                                  <ModernTextInput
+                                    name={setting.key}
+                                    type={
+                                      setting.isSecret
+                                        ? 'password'
+                                        : setting.type === PlatformSettingType.NUMBER
+                                          ? 'number'
+                                          : 'text'
+                                    }
+                                    label={t('admin.settings.valueLabel')}
+                                    value={settingDrafts[setting.key] ?? (setting.isSecret ? '' : setting.value ?? '')}
+                                    onChange={(e) => onSettingDraftChange(setting.key, e.target.value)}
+                                  />
+                                </S.SettingInput>
+                                <Button
+                                  variant="primary"
+                                  size="small"
+                                  onClick={() => onSettingSave(setting.key)}
+                                  disabled={isSavingSetting || settingDrafts[setting.key] === undefined}
+                                >
+                                  <Text variant="body-sm" weight="semibold">
+                                    {t('translation:common.save')}
+                                  </Text>
+                                </Button>
+                              </>
+                            )}
+                            {setting.source === PlatformSettingSource.DATABASE && (
+                              <Button
+                                variant="secondary"
+                                size="small"
+                                onClick={() => onSettingReset(setting.key)}
+                                disabled={isSavingSetting}
+                              >
+                                <Text variant="body-sm" weight="semibold">
+                                  {t('admin.settings.reset')}
+                                </Text>
+                              </Button>
+                            )}
+                          </S.RowSide>
+                        </S.Row>
+                      ))}
+                    </S.Rows>
+                  </>
+                )}
+              </S.SettingsCategoryCard>
+            );
+          })}
         </S.Rows>
       )}
 
       {activeTab === 'billing' && (
         <S.Rows>
           <S.Section>
-            <Text variant="caption" color="text.secondary">{t('admin.billing.costTotal')}</Text>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.billing.costTotal')}
+            </Text>
             <S.Grid>
               <S.SummaryCard>
-                <Text variant="caption" color="text.secondary">{t('admin.billing.costTotal')}</Text>
+                <Text variant="caption" color="text.secondary">
+                  {t('admin.billing.costTotal')}
+                </Text>
                 <Text variant="metric" weight="semibold">
                   {formatCost(billingMetrics?.totalEstimatedCostMicros ?? null, billingMetrics?.currency ?? null)}
                 </Text>
@@ -410,35 +508,51 @@ export const AdminPageComponent = ({
           </S.Section>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.billing.accountStatus.title')}</Text>
+            <Text variant="h4" weight="semibold">
+              {t('admin.billing.accountStatus.title')}
+            </Text>
             <S.Grid>
               {billingMetrics?.accountStatusDistribution.map((entry) => (
                 <S.SummaryCard key={entry.status}>
-                  <Text variant="body" weight="semibold">{t(`admin.billing.accountStatus.${entry.status}`, { defaultValue: entry.status })}</Text>
-                  <Text variant="metric" weight="semibold">{entry.count}</Text>
+                  <Text variant="body" weight="semibold">
+                    {t(`admin.billing.accountStatus.${entry.status}`, { defaultValue: entry.status })}
+                  </Text>
+                  <Text variant="metric" weight="semibold">
+                    {entry.count}
+                  </Text>
                 </S.SummaryCard>
               ))}
             </S.Grid>
           </S.Section>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.billing.accessTier.title')}</Text>
+            <Text variant="h4" weight="semibold">
+              {t('admin.billing.accessTier.title')}
+            </Text>
             <S.Grid>
               {billingMetrics?.accessTierDistribution.map((entry) => (
                 <S.SummaryCard key={entry.tier}>
-                  <Text variant="body" weight="semibold">{t(`admin.billing.accessTier.${entry.tier}`, { defaultValue: entry.tier })}</Text>
-                  <Text variant="metric" weight="semibold">{entry.count}</Text>
+                  <Text variant="body" weight="semibold">
+                    {t(`admin.billing.accessTier.${entry.tier}`, { defaultValue: entry.tier })}
+                  </Text>
+                  <Text variant="metric" weight="semibold">
+                    {entry.count}
+                  </Text>
                 </S.SummaryCard>
               ))}
             </S.Grid>
           </S.Section>
 
           <S.Section>
-            <Text variant="h4" weight="semibold">{t('admin.billing.quota.title')}</Text>
+            <Text variant="h4" weight="semibold">
+              {t('admin.billing.quota.title')}
+            </Text>
             <S.Rows>
               {billingMetrics?.quotaPressure.map((summary) => (
                 <S.Row key={summary.resource}>
-                  <Text variant="body" weight="semibold">{t(`admin.billing.quota.${summary.resource}`)}</Text>
+                  <Text variant="body" weight="semibold">
+                    {t(`admin.billing.quota.${summary.resource}`)}
+                  </Text>
                   <Text variant="body-sm" color="text.secondary">
                     {t('admin.billing.quota.summary', {
                       usersWithUsage: summary.usersWithUsage,
@@ -459,7 +573,7 @@ export const AdminPageComponent = ({
                     </Text>
                     <Badge variant={BAND_VARIANT[band.band]}>{band.userCount}</Badge>
                   </S.Row>
-                )),
+                ))
               )}
             </S.Rows>
           </S.Section>
@@ -503,7 +617,8 @@ export const AdminPageComponent = ({
               {(listingQuality.summary?.coverage ?? []).slice(0, 12).map((row) => (
                 <S.Row key={`${row.categoryId}-${row.layer}`}>
                   <Text variant="body-sm">
-                    {row.categoryId || '—'} · {t(`admin.listingQuality.layer.${row.layer}`, { defaultValue: row.layer })}
+                    {row.categoryId || '—'} ·{' '}
+                    {t(`admin.listingQuality.layer.${row.layer}`, { defaultValue: row.layer })}
                   </Text>
                   <Text variant="body-sm" numeric>
                     {row.aspectCount}
@@ -571,7 +686,9 @@ export const AdminPageComponent = ({
               />
             }
           />
-          <Text variant="caption" color="text.secondary">{t('admin.overview.roleCliNotice')}</Text>
+          <Text variant="caption" color="text.secondary">
+            {t('admin.overview.roleCliNotice')}
+          </Text>
         </S.Rows>
       )}
 
@@ -581,7 +698,9 @@ export const AdminPageComponent = ({
               seller: running a resource dry stops that operation platform-wide,
               not for one customer. Background work is additionally capped below
               the ceiling so a seller's own action always has budget left. */}
-          <Text variant="caption" color="text.secondary">{t('admin.ebayLimits.description')}</Text>
+          <Text variant="caption" color="text.secondary">
+            {t('admin.ebayLimits.description')}
+          </Text>
           <Table
             columns={budgetColumns}
             data={ebayBudget}
@@ -602,7 +721,9 @@ export const AdminPageComponent = ({
           {/* The provider's raw wording lives here and nowhere else: sellers get
               the localized reason, because eBay's own text names internal
               fields and reads as a defect in their product. */}
-          <Text variant="caption" color="text.secondary">{t('admin.listingFailures.description')}</Text>
+          <Text variant="caption" color="text.secondary">
+            {t('admin.listingFailures.description')}
+          </Text>
           <Table
             columns={failureColumns}
             data={listingFailures?.items ?? []}

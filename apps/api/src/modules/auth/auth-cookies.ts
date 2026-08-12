@@ -1,7 +1,7 @@
 import type { CookieOptions, Response } from 'express';
 
 /** Cookie name for the long-lived refresh JWT (HttpOnly — never readable by JS). */
-export const REFRESH_COOKIE_NAME = 'zonds_rt';
+export const REFRESH_COOKIE_NAME = 'sellerhill_rt';
 
 /** 7 days in seconds — keep in sync with AUTH_CONSTANTS.JWT_REFRESH_TOKEN_EXPIRES_IN */
 const REFRESH_MAX_AGE_SEC = 7 * 24 * 60 * 60;
@@ -31,7 +31,7 @@ function cookieOptions(): CookieOptions {
     maxAge: REFRESH_MAX_AGE_SEC * 1000,
   };
 
-  // e.g. COOKIE_DOMAIN=.takci.cloud so app.takci.cloud + zonds.takci.cloud share the cookie
+  // e.g. COOKIE_DOMAIN=.takci.cloud so app.takci.cloud + sellerhill.takci.cloud share the cookie
   if (process.env.COOKIE_DOMAIN?.trim()) {
     options.domain = process.env.COOKIE_DOMAIN.trim();
   }

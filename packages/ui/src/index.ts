@@ -44,6 +44,9 @@ export type {
 export { Badge } from './atoms/Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from './atoms/Badge';
 
+export { Skeleton } from './atoms/Skeleton';
+export type { SkeletonProps, SkeletonRadius } from './atoms/Skeleton';
+
 export { Breadcrumb } from './atoms/Breadcrumb';
 export type { BreadcrumbItem, BreadcrumbProps } from './atoms/Breadcrumb';
 

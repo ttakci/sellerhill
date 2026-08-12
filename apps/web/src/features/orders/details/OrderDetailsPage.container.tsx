@@ -8,6 +8,8 @@ import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../ap
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
+import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
 export const OrderDetailsPageContainer: React.FC = () => {
@@ -21,15 +23,23 @@ export const OrderDetailsPageContainer: React.FC = () => {
     skip: !id,
   });
 
+  const { data: ebayAccountsData } = useGetEbayAccountsQuery();
+
   const [, { isLoading: isUpdating }] = useUpdateOrderAmazonDetailsMutation();
 
   useLoading(isUpdating);
 
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
 
+  /* Money renders in the connected eBay store's marketplace currency this
+     order belongs to, never the UI language. */
+  const currency = useMemo(
+    () => resolveStoreCurrency(ebayAccountsData?.items ?? [], order?.ebayAccountId),
+    [ebayAccountsData, order?.ebayAccountId]
+  );
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
-    [localeCfg]
+    (value: number) => formatCurrency(value, localeCfg.locale, currency),
+    [localeCfg, currency]
   );
 
   const fmtDate = useCallback(

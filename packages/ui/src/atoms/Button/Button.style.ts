@@ -229,6 +229,23 @@ export const ActionSurface = styled.button<ActionSurfaceProps>`
             box-shadow: ${glow(theme.colors.semantic.error, 'press')};
           }
         `;
+      case 'danger-tint':
+        /* Light fill, error-toned label — the same tint/border pair Badge's
+           error variant uses, so a "cancel" action reads as related-but-lighter
+           than the solid `danger` (delete-class) fill. */
+        return css`
+          background-color: ${theme.colors.semanticTint.error};
+          color: ${theme.colors.semantic.error};
+          border: 0.0625rem solid ${theme.colors.semanticTintBorder.error};
+
+          &:hover:not(:disabled) {
+            background-color: ${theme.colors.semanticTintBorder.error};
+          }
+
+          &:active:not(:disabled) {
+            filter: brightness(0.97);
+          }
+        `;
     }
   }}
 

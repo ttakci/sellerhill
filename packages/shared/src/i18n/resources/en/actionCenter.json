@@ -1,0 +1,163 @@
+{
+  "actionCenter": {
+    "title": "Pending Actions",
+    "subtitle": "Everything waiting on you, most urgent first.",
+    "menu": "Pending Actions",
+    "refresh": "Refresh",
+    "updatedAt": "Updated {{time}}",
+    "empty": {
+      "title": "Nothing needs you right now",
+      "description": "No blocked purchases, broken connections or plan limits. New items appear here the moment something needs a decision."
+    },
+    "emptyFiltered": {
+      "title": "Nothing at this level",
+      "description": "There are no items with this urgency. Switch back to All to see the rest."
+    },
+    "loading": {
+      "title": "Checking what needs you",
+      "description": "Reviewing your orders, connections, listings and plan."
+    },
+    "severity": {
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Suggestion"
+    },
+    "filter": {
+      "all": "All",
+      "critical": "Critical",
+      "warning": "Warning",
+      "info": "Suggestions"
+    },
+    "summary": {
+      "critical": "{{count}} critical",
+      "warning": "{{count}} warning",
+      "info": "{{count}} suggestion",
+      "total_one": "{{count}} item needs you",
+      "total_other": "{{count}} items need you"
+    },
+    "breakdownLabel": "Reasons",
+    "moreReasons": "+{{count}} more",
+    "groups": {
+      "orders": {
+        "title": "Orders",
+        "subtitle": "Sales with a buyer waiting on the other end."
+      },
+      "connections": {
+        "title": "Connections",
+        "subtitle": "Store and buyer accounts the automation runs on."
+      },
+      "listings": {
+        "title": "Listings",
+        "subtitle": "Offers that are live but not earning."
+      },
+      "plan": {
+        "title": "Plan & capacity",
+        "subtitle": "Limits that will start refusing work."
+      },
+      "setup": {
+        "title": "Setup",
+        "subtitle": "Steps that unlock automation you are not using yet."
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "Amazon cancelled a purchase you already paid for",
+        "description_one": "{{count}} order was cancelled on the Amazon side. The eBay sale is still live and still owed to the buyer — re-order it or refund before eBay counts it as a defect.",
+        "description_other": "{{count}} orders were cancelled on the Amazon side. Those eBay sales are still live and still owed to the buyers — re-order them or refund before eBay counts them as defects.",
+        "action": "Review orders"
+      },
+      "order_fulfillment_blocked": {
+        "title": "Automatic purchase stopped before paying",
+        "description_one": "{{count}} order was stopped by a safety check, so no money moved. Fix the reason below and it can go through.",
+        "description_other": "{{count}} orders were stopped by a safety check, so no money moved. Fix the reasons below and they can go through.",
+        "action": "Review orders"
+      },
+      "order_awaiting_purchase": {
+        "title": "Sold, but nobody has bought it on Amazon",
+        "description_one": "{{count}} order older than {{hours}} hours has no Amazon purchase and no automation running on it. It will not ship unless you buy it yourself.",
+        "description_other": "{{count}} orders older than {{hours}} hours have no Amazon purchase and no automation running on them. They will not ship unless you buy them yourself.",
+        "action": "Review orders"
+      },
+      "order_untracked": {
+        "title": "Sales from listings you do not track",
+        "description_one": "{{count}} order in the last {{days}} days came from an eBay item that is not linked to a SellerHill listing, so its cost and profit can never be calculated. Import the listing to track future sales.",
+        "description_other": "{{count}} orders in the last {{days}} days came from eBay items that are not linked to SellerHill listings, so their cost and profit can never be calculated. Import those listings to track future sales.",
+        "action": "Import listings"
+      },
+      "ebay_account_disconnected": {
+        "title": "An eBay store lost its connection",
+        "description_one": "{{count}} store is no longer authorized. Order sync, repricing and publishing are stopped for it until you reconnect.",
+        "description_other": "{{count}} stores are no longer authorized. Order sync, repricing and publishing are stopped for them until you reconnect.",
+        "action": "Manage stores"
+      },
+      "amazon_account_needs_attention": {
+        "title": "An Amazon buyer account cannot sign in",
+        "description_one": "{{count}} buyer account is failing sign-in, so nothing can be purchased through it.",
+        "description_other": "{{count}} buyer accounts are failing sign-in, so nothing can be purchased through them.",
+        "action": "Manage accounts"
+      },
+      "listing_job_failures": {
+        "title": "Listings that could not be created",
+        "description_one": "{{count}} listing failed in the last {{days}} days. The reason tells you whether it is fixable on your side.",
+        "description_other": "{{count}} listings failed in the last {{days}} days. The reasons tell you which are fixable on your side.",
+        "action": "View jobs"
+      },
+      "listing_source_unavailable": {
+        "title": "Live listings whose Amazon product is gone",
+        "description_one": "{{count}} active listing points at an Amazon product that keeps failing to load — usually delisted. It is still buyable on eBay and you would not be able to fulfil that sale.",
+        "description_other": "{{count}} active listings point at Amazon products that keep failing to load — usually delisted. They are still buyable on eBay and you would not be able to fulfil those sales.",
+        "action": "Review listings"
+      },
+      "listing_out_of_stock": {
+        "title": "Live listings at zero quantity",
+        "description_one": "{{count}} active listing is showing on eBay with nothing to sell. It earns nothing until the source restocks.",
+        "description_other": "{{count}} active listings are showing on eBay with nothing to sell. They earn nothing until the source restocks.",
+        "action": "Review listings"
+      },
+      "listing_drafts_pending": {
+        "title": "Drafts that were never published",
+        "description_one": "{{count}} draft is prepared and costs you nothing — but it also sells nothing until it goes live.",
+        "description_other": "{{count}} drafts are prepared and cost you nothing — but they also sell nothing until they go live.",
+        "action": "View drafts"
+      },
+      "plan_listing_quota": {
+        "title": "Active listing limit almost reached",
+        "description": "You are using {{used}} of {{limit}} listing slots. New listings are refused once the limit is hit; existing ones keep running.",
+        "action": "View plan"
+      },
+      "plan_ao_quota": {
+        "title": "Monthly automatic order limit almost reached",
+        "description": "You have used {{used}} of {{limit}} automatic orders this month. Once it is reached, new orders must be purchased by hand until the month resets.",
+        "action": "View plan"
+      },
+      "plan_past_due": {
+        "title": "Your last payment failed",
+        "description": "Update your payment method to keep automation running.",
+        "action": "Fix payment"
+      },
+      "plan_trial_ending": {
+        "title": "Your trial is ending",
+        "description_one": "{{count}} day left. Choose a plan to keep your listings and automatic orders running.",
+        "description_other": "{{count}} days left. Choose a plan to keep your listings and automatic orders running.",
+        "action": "Choose a plan"
+      },
+      "setup_no_amazon_account": {
+        "title": "No Amazon buyer account yet",
+        "description": "You are selling, but there is no Amazon account to buy from — every order has to be purchased by hand. Adding one enables automatic fulfilment.",
+        "action": "Add account"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "Automatic purchasing is off",
+        "description": "Your Amazon accounts are connected but none is cleared to buy. Turn it on with a spend cap and new orders are purchased for you.",
+        "action": "Enable it"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "Needs re-authentication",
+        "invalid": "Invalid credentials",
+        "locked": "Locked by Amazon"
+      }
+    }
+  }
+}

@@ -26,7 +26,7 @@ export const FilterBarRow = styled.div`
   gap: ${tkn('spacing.md')};
   flex-wrap: wrap;
 
-  @media (max-width: 48rem) {
+  @media (max-width: ${tkn('breakpoints.md')}) {
     flex-direction: column;
     align-items: stretch;
     gap: ${tkn('spacing.sm')};

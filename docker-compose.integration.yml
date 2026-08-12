@@ -2,9 +2,9 @@ services:
   postgres-integration:
     image: pgvector/pgvector:0.8.1-pg16
     environment:
-      POSTGRES_DB: zonds_integration_test
-      POSTGRES_USER: zonds_test
-      POSTGRES_PASSWORD: zonds_test
+      POSTGRES_DB: sellerhill_integration_test
+      POSTGRES_USER: sellerhill_test
+      POSTGRES_PASSWORD: sellerhill_test
     ports:
       - '${INTEGRATION_POSTGRES_PORT:-55432}:5432'
     tmpfs:
@@ -16,7 +16,7 @@ services:
       test:
         [
           'CMD-SHELL',
-          'pg_isready -U zonds_test -d zonds_integration_test && psql -U zonds_test -d zonds_integration_test -tAc "SELECT 1 FROM pg_extension WHERE extname=''vector''" | grep -q 1',
+          'pg_isready -U sellerhill_test -d sellerhill_integration_test && psql -U sellerhill_test -d sellerhill_integration_test -tAc "SELECT 1 FROM pg_extension WHERE extname=''vector''" | grep -q 1',
         ]
       interval: 2s
       timeout: 5s

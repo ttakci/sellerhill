@@ -1,4 +1,4 @@
-import { Button, Card, Text } from '@repo/ui';
+import { EmptyState } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,32 +7,32 @@ import type { ConnectEbayPromptProps } from './ConnectEbayPrompt.types';
 
 export const ConnectEbayPrompt = ({
   onConnect,
-  onSkip: _onSkip,
+  onSkip,
   isLoading,
+  footnote,
   className,
 }: ConnectEbayPromptProps): React.ReactElement => {
   const { t } = useTranslation(['ebay', 'translation']);
 
   return (
-    <Card variant="bordered" padding="lg" className={className}>
-      <S.Inner>
-        <S.IconWrapper>
-          <Text variant="h4" weight="semibold">eBay</Text>
-        </S.IconWrapper>
-
-        <Text variant="h3" weight="semibold">
-          {t('ebay:ebay.accounts.noAccounts')}
-        </Text>
-
-        <S.Description variant="body" color="text.secondary">
-          {t('ebay:ebay.onboarding.description')}
-        </S.Description>
-
-        <Button onClick={onConnect} variant="primary" isLoading={isLoading}>
-          <Text>{t('ebay:ebay.connect.connectButton')}</Text>
-        </Button>
-      </S.Inner>
-    </Card>
+    <S.StyledCard variant="bordered" padding="lg" className={className}>
+      <EmptyState
+        icon="link"
+        size="lg"
+        title={t('ebay:ebay.accounts.noAccounts')}
+        description={t('ebay:ebay.onboarding.description')}
+        action={t('ebay:ebay.connect.connectButton')}
+        onAction={onConnect}
+        isActionLoading={isLoading}
+        secondaryAction={onSkip ? t('ebay:ebay.onboarding.skipButton') : undefined}
+        onSecondaryAction={onSkip}
+      />
+      {footnote && (
+        <S.Footnote variant="caption" color="text.tertiary">
+          {footnote}
+        </S.Footnote>
+      )}
+    </S.StyledCard>
   );
 };
 

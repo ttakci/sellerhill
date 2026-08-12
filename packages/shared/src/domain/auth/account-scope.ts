@@ -2,10 +2,10 @@
  * Account scope — an account is EITHER a customer account or an operator
  * (staff) account, never both.
  *
- * Zonds has two products behind one login:
+ * SellerHill has two products behind one login:
  *   - the seller app (dashboard / listings / orders / settings), used by
  *     CUSTOMER accounts to run their eBay business;
- *   - the operator console (/admin), used by staff to run Zonds itself.
+ *   - the operator console (/admin), used by staff to run SellerHill itself.
  *
  * They used to share one shell and one guard set, so an ADMIN account was a
  * seller account with extra menu items. That is the thing this module removes:
@@ -20,7 +20,7 @@
  *   SUPPORT  — kept as a role for backward compatibility, but has NO console
  *              today. The in-app support queue/handoff console was removed
  *              (2026-08) when customer support moved to tawk.to, which has
- *              its own agent dashboard outside Zonds. A SUPPORT-role account
+ *              its own agent dashboard outside SellerHill. A SUPPORT-role account
  *              is still blocked from the seller app (still "staff"), but has
  *              no operator surface to land on either — see CLAUDE.md
  *              "Customer support widget — tawk.to". Existing SUPPORT

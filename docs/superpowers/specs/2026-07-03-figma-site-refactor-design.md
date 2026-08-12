@@ -139,7 +139,7 @@ Current nav order: Dashboard → [Inventory: eBay Listings, Listing Jobs, Produc
 New nav order (matches figma):
 
 ```
-[Logo: ZonDS / Dropship Automation subtitle]
+[Logo: SellerHill / Dropship Automation subtitle]
 
 INVENTORY
   Dashboard
@@ -164,7 +164,7 @@ Changes:
 
 ### 2.2 Logo treatment
 
-Figma shows: small square logo + stacked text "ZonDS" / "Dropship Automation".
+Figma shows: small square logo + stacked text "SellerHill" / "Dropship Automation".
 
 Update `<Logo>` atom (or create a `SidebarLogo` variant) to support this stacked text layout. The current `<Logo size={220} />` is horizontal; figma wants vertical lockup.
 

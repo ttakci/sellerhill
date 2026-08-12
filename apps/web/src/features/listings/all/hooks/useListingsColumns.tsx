@@ -1,6 +1,6 @@
 import type { ListingDto } from '@repo/shared';
-import { type TableColumn } from '@repo/ui';
-import { useMemo } from 'react';
+import { formatCurrency as formatCurrencyValue, type TableColumn } from '@repo/ui';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from '../ListingsAllPage.style';
@@ -10,9 +10,18 @@ import { ProductTableCell, type ProductTableCellMetaRow } from '@/domain-ui';
 /**
  * Column definitions for ListingsAll table view.
  * Extracted so the page container stays orchestration-only.
+ *
+ * Money is formatted per row from the listing's own `currency` (resolved
+ * server-side from its eBay store's marketplace — see CLAUDE.md's listing
+ * detail notes) — never a single page-wide currency, and never the UI
+ * language. `locale` only controls separators/ordering.
  */
-export function useListingsColumns(formatCurrency: (value: number) => string) {
+export function useListingsColumns(locale: string) {
   const { t } = useTranslation(['listings', 'translation']);
+  const formatCurrency = useCallback(
+    (value: number, listing: ListingDto) => formatCurrencyValue(value, locale, listing.currency || 'USD'),
+    [locale]
+  );
 
   const columnOptions = useMemo(
     () => [
@@ -73,7 +82,7 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         render: (_value, listing) => (
           <S.CompactMetric>
             <S.MetricValue variant="body-sm" weight="semibold">
-              {formatCurrency(listing.price)}
+              {formatCurrency(listing.price, listing)}
             </S.MetricValue>
           </S.CompactMetric>
         ),
@@ -104,7 +113,7 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
         align: 'right',
         render: (_value, listing) => (
           <S.CompactMetric>
-            <S.MetricValue variant="body-sm">{formatCurrency(listing.purchasePrice ?? 0)}</S.MetricValue>
+            <S.MetricValue variant="body-sm">{formatCurrency(listing.purchasePrice ?? 0, listing)}</S.MetricValue>
           </S.CompactMetric>
         ),
       },
@@ -120,7 +129,7 @@ export function useListingsColumns(formatCurrency: (value: number) => string) {
             <S.CompactMetric>
               <S.MetricValue variant="body-sm" weight="semibold" $positive={profit > 0} $negative={profit < 0}>
                 {profit >= 0 ? '+' : ''}
-                {formatCurrency(profit)}
+                {formatCurrency(profit, listing)}
               </S.MetricValue>
             </S.CompactMetric>
           );

@@ -76,7 +76,7 @@ export class TrackingWebhookService {
     const order = await this.findOrder(trackingNumber);
     if (!order) {
       // Not necessarily an error: the provider may push for a number issued
-      // outside Zonds, or before our row was written. Recorded so support can
+      // outside SellerHill, or before our row was written. Recorded so support can
       // see it rather than it vanishing.
       this.logger.warn(`Tracking webhook for unknown number ${trackingNumber} — no matching order`);
       await this.record(payload, TrackingWebhookOutcome.UNMATCHED, null);

@@ -675,7 +675,7 @@ git commit -m "refactor(web): replace hardcoded colors in AppLayout.style with t
 - Modify: `packages/ui/src/atoms/Logo/Logo.types.ts` (if exists)
 
 **Interfaces:**
-- Produces: `<Logo variant="stacked" />` renders logo mark + stacked "ZonDS" / "Dropship Automation" text lockup
+- Produces: `<Logo variant="stacked" />` renders logo mark + stacked "SellerHill" / "Dropship Automation" text lockup
 - Produces: `<Logo />` (default) preserves current horizontal behavior (no breaking change)
 - Consumes: `Text` atom, `tkn()`
 
@@ -709,7 +709,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 220, variant = 'default', onC
         {mark}
         <S.StackedText>
           <Text variant="headingMd" weight="bold" color="sidebar.foreground">
-            ZonDS
+            SellerHill
           </Text>
           <Text variant="caption" color="sidebar.textMuted">
             Dropship Automation
@@ -758,7 +758,7 @@ Expected: PASS
 - [ ] **Step 5: Visual diff**
 
 Run dev server. Verify sidebar shows:
-- Expanded: small logo mark + stacked "ZonDS" / "Dropship Automation" text
+- Expanded: small logo mark + stacked "SellerHill" / "Dropship Automation" text
 - Collapsed: just the logo mark, centered
 
 - [ ] **Step 6: Commit**

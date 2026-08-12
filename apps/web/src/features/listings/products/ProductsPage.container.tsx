@@ -10,11 +10,16 @@ import * as S from './ProductsPage.style';
 import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { ProductTableCell } from '@/domain-ui';
 
+/* Amazon has no sandbox and no non-US site (see CLAUDE.md "Marketplace links
+   are environment-scoped") — every product price here is sourced from
+   amazon.com in USD, regardless of the seller's eBay store or UI language. */
+const PRODUCT_SOURCE_CURRENCY = 'USD';
+
 export const ProductsPageContainer: React.FC = () => {
   const { t, i18n } = useTranslation(['listings', 'translation']);
   const localeCfg = useMemo(() => getLocaleConfig(i18n.language), [i18n.language]);
   const fmtCurrency = useCallback(
-    (value: number) => formatCurrency(value, localeCfg.locale, localeCfg.currency),
+    (value: number) => formatCurrency(value, localeCfg.locale, PRODUCT_SOURCE_CURRENCY),
     [localeCfg]
   );
   const [page, setPage] = useState(1);
@@ -25,7 +30,7 @@ export const ProductsPageContainer: React.FC = () => {
    * Server-paginated. This used to fetch the user's entire distinct-product
    * catalog on every page load and slice ten rows out of it in the browser.
    */
-  const { data, isLoading } = useGetUserProductsQuery({
+  const { data, isLoading, isFetching } = useGetUserProductsQuery({
     page,
     limit: rowsPerPage,
     search: search.trim() || undefined,
@@ -142,7 +147,7 @@ export const ProductsPageContainer: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `zonds_products_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `sellerhill_products_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -152,7 +157,7 @@ export const ProductsPageContainer: React.FC = () => {
     <EbayAccountGuard>
       <ProductsPageComponent
       products={products}
-      isLoading={isLoading}
+      isLoading={isLoading || isFetching}
       onDownload={handleDownload}
       search={search}
       onSearchChange={handleSearchChange}

@@ -9,9 +9,8 @@ import {
   AutoFulfillStatus,
   EbayAccountStatus,
   OrderCostCaptureStatus,
-  OrderFulfillmentState,
   OrderStatus,
-  SIMULATED_AMAZON_ORDER_PREFIX,
+  buildFulfillmentStateSql,
   deriveFulfillmentState,
   isSimulatedAmazonOrderId,
   type OrderDto,
@@ -157,21 +156,22 @@ export class OrdersService {
     }
 
     if (filters?.fulfillmentState) {
-      // Filter on the derived seller-facing state. Kept as SQL (not a post-fetch
-      // filter) so paging and totals stay correct — filtering after the page
-      // query would return short pages and a wrong count.
-      const simulated = `o.amazon_order_id LIKE '${SIMULATED_AMAZON_ORDER_PREFIX}%'`;
-      const cancelled = `o.amazon_cancelled_at IS NOT NULL`;
-      const clauses: Record<OrderFulfillmentState, string> = {
-        [OrderFulfillmentState.AMAZON_CANCELLED]: cancelled,
-        [OrderFulfillmentState.SIMULATED]: `NOT ${cancelled} AND ${simulated}`,
-        [OrderFulfillmentState.PURCHASED]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status = '${AutoFulfillStatus.PLACED}'`,
-        [OrderFulfillmentState.ACTION_REQUIRED]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IN ('${AutoFulfillStatus.BLOCKED}', '${AutoFulfillStatus.FAILED}')`,
-        [OrderFulfillmentState.IN_PROGRESS]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IN ('${AutoFulfillStatus.PENDING}', '${AutoFulfillStatus.RUNNING}')`,
-        [OrderFulfillmentState.MANUAL]: `NOT ${cancelled} AND NOT ${simulated} AND o.auto_fulfill_status IS DISTINCT FROM '${AutoFulfillStatus.PLACED}' AND (o.amazon_order_id IS NOT NULL OR o.status IN ('${OrderStatus.SHIPPED}', '${OrderStatus.COMPLETED}'))`,
-        [OrderFulfillmentState.NOT_AUTOMATED]: `NOT ${cancelled} AND NOT ${simulated} AND o.amazon_order_id IS NULL AND o.status NOT IN ('${OrderStatus.SHIPPED}', '${OrderStatus.COMPLETED}') AND (o.auto_fulfill_status IS NULL OR o.auto_fulfill_status = '${AutoFulfillStatus.SKIPPED}')`,
-      };
-      conditions.push(`(${clauses[filters.fulfillmentState]})`);
+      /*
+       * Filter on the derived seller-facing state. Kept as SQL (not a post-fetch
+       * filter) so paging and totals stay correct — filtering after the page
+       * query would return short pages and a wrong count.
+       *
+       * The state is computed by the shared `buildFulfillmentStateSql`, which is
+       * the SQL twin of `deriveFulfillmentState`. This replaced seven
+       * hand-written per-state predicates that each re-encoded the precedence
+       * chain and had already drifted from it — a BLOCKED order with a linked
+       * Amazon id matched the MANUAL filter *and* the ACTION_REQUIRED filter,
+       * while the row rendered as ACTION_REQUIRED. One ordered chain cannot
+       * disagree with itself.
+       */
+      conditions.push(`${buildFulfillmentStateSql('o')} = $${paramIndex}`);
+      params.push(filters.fulfillmentState);
+      paramIndex++;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -422,6 +422,7 @@ export class OrdersService {
     return {
       id: row.id,
       ebayOrderId: row.ebay_order_id,
+      ebayAccountId: row.ebay_account_id || undefined,
       createdAt: (row.order_date || row.updated_at).toISOString(),
       isTracked: !!row.listing_id,
       buyerName: row.buyer_name || undefined,

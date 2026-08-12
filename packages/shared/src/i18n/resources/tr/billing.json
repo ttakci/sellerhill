@@ -2,6 +2,9 @@
   "billing": {
     "title": "Faturalandırma",
     "subtitle": "Abonelik planınızı, kullanımınızı ve fatura geçmişinizi yönetin.",
+    "loadingSubtitle": "Faturalandırma bilgileriniz yükleniyor…",
+    "unavailableTitle": "Faturalandırma şu anda kullanılamıyor",
+    "unavailableSubtitle": "Faturalandırma bilgileriniz yüklenemedi. Lütfen tekrar deneyin.",
     "plans": {
       "title": "Planlar",
       "subtitle": "Satış hacminize uygun planı seçin.",
@@ -22,7 +25,7 @@
       },
       "trial": {
         "name": "Ücretsiz deneme",
-        "description": "Zonds'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
+        "description": "SellerHill'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
       },
       "starter": {
         "name": "Starter",
@@ -108,14 +111,6 @@
     "provider": {
       "unconfiguredTitle": "Faturalandırma yapılandırılmamış",
       "unconfiguredBody": "Hiçbir faturalandırma sağlayıcısı bağlı olmadığı için ödeme ve abonelik yönetimi kullanılamıyor. Operatörünüzle iletişime geçin."
-    },
-    "settingsHub": {
-      "title": "Faturalandırma & Plan",
-      "subtitle": "Aboneliğinizi, kullanımınızı ve faturalandırmanızı yönetin.",
-      "manage": {
-        "title": "Faturalandırmayı yönet",
-        "subtitle": "Planınızı, kullanımınızı ve yükseltme seçeneklerini görüntüleyin."
-      }
     },
     "usage": {
       "title": "Bu dönem kullanımı",

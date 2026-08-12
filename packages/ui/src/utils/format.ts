@@ -97,15 +97,24 @@ export const formatDate = (
  * column definitions and derived rows were rebuilt continuously.
  */
 const LOCALE_CONFIGS = {
-  en: { locale: 'en-US', currency: 'USD' },
-  tr: { locale: 'tr-TR', currency: 'TRY' },
+  en: { locale: 'en-US' },
+  tr: { locale: 'tr-TR' },
 } as const;
 
 /**
- * Get locale and currency based on language code.
- * Accepts bare codes (`tr`, `en`) or BCP-47 tags (`tr-TR`, `en-US`).
+ * Get the number/date locale for a UI language code. Accepts bare codes
+ * (`tr`, `en`) or BCP-47 tags (`tr-TR`, `en-US`).
+ *
+ * Deliberately does NOT resolve a currency: the UI language controls only
+ * separators/ordering, never which currency money renders in. Currency is
+ * domain data — the seller's connected eBay store marketplace
+ * (`EBAY_MARKETPLACE_CONFIG`), a listing/order's own `currency` field, or a
+ * billing plan's `currency` — and must be threaded through explicitly by the
+ * caller. An earlier version returned `{ locale, currency }` keyed off the
+ * language, which made every Turkish-language session render eBay-USD sale
+ * amounts as TRY even though the seller's store was still eBay US.
  */
-export const getLocaleConfig = (language: string): { locale: string; currency: string } => {
+export const getLocaleConfig = (language: string): { locale: string } => {
   const code = (language || 'en').toLowerCase().split('-')[0];
   return code === 'tr' ? LOCALE_CONFIGS.tr : LOCALE_CONFIGS.en;
 };

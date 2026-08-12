@@ -14,7 +14,11 @@ const EBAY_DIR = path.join(__dirname);
 const LISTINGS_DIR = path.join(__dirname, '..', 'listings');
 
 function read(dir: string, file: string): string {
-  return fs.readFileSync(path.join(dir, file), 'utf8');
+  // Normalized to LF: these assertions pin multi-line shapes with `\n`, and the
+  // repo is checked out with CRLF on Windows. Without this every such regex
+  // fails on a developer machine while passing in CI — a false alarm that
+  // teaches the team to ignore this guard, which is exactly what it must not be.
+  return fs.readFileSync(path.join(dir, file), 'utf8').replace(/\r\n/g, '\n');
 }
 
 /** Body of one class method, bounded by the next method declaration. */

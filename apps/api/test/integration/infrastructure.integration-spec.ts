@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 import { getRedisOptions } from '../../src/common/redis/redis.config';
 import { RedisService } from '../../src/common/redis/redis.service';
 
-const databaseUrl = process.env.INTEGRATION_DATABASE_URL ?? 'postgresql://zonds_test:zonds_test@localhost:55432/zonds_integration_test';
+const databaseUrl = process.env.INTEGRATION_DATABASE_URL ?? 'postgresql://sellerhill_test:sellerhill_test@localhost:55432/sellerhill_integration_test';
 const redisPort = Number(process.env.INTEGRATION_REDIS_PORT ?? 56379);
 
 if (!new URL(databaseUrl).pathname.includes('integration_test')) {

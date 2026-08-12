@@ -17,7 +17,7 @@ Third of four sequenced specs. A1 (net profit) + A1.1 (estimated profit) + A2 (a
 | **B** | **Shared LLM infra + content-AI refactor** (this doc) | Done |
 | C | Assistant backend (RAG + ticket escalation) | Future — consumes B's `LlmService` |
 
-B decouples Zonds from Ollama's native `/api/generate` and from a single provider. The OpenAI-compatible Chat Completions client means the provider is swapped by env (`LLM_BASE_URL` + `LLM_API_KEY`) only — Ollama (local/CPU) today, a hosted OpenAI-compatible provider or vLLM (GPU) later, code unchanged. This is the explicit hosting constraint: **no GPU anywhere** (local PC CPU; Coolify test VPS = 4 vCPU / 16 GB RAM / no GPU, already loaded with Postgres + Redis + Playwright).
+B decouples SellerHill from Ollama's native `/api/generate` and from a single provider. The OpenAI-compatible Chat Completions client means the provider is swapped by env (`LLM_BASE_URL` + `LLM_API_KEY`) only — Ollama (local/CPU) today, a hosted OpenAI-compatible provider or vLLM (GPU) later, code unchanged. This is the explicit hosting constraint: **no GPU anywhere** (local PC CPU; Coolify test VPS = 4 vCPU / 16 GB RAM / no GPU, already loaded with Postgres + Redis + Playwright).
 
 ---
 
@@ -119,7 +119,7 @@ The LlmClient is provider-agnostic by env, so the provider is a deployment decis
 
 | Workload | Provider | Model | Why |
 |---|---|---|---|
-| **Prod / bulk (default)** | **OpenAI** (paid, OpenAI-compatible) | **gpt-4o-mini** (or its current cheapest successor) | Best TR instruction-following at the cheap tier (Zonds is EN+TR; description cleanup in Turkish is where small models stumble). Rock-solid reliability + predictable rate-limit tiering — matters under the 10×2000 burst. Cheap: ~$0.15/M input, ~$0.60/M output ⇒ a 2000-listing batch (4000 calls, ~400 tok avg) ≈ **~$0.40**, i.e. ~$0.0002/listing. Fast: ~1–2s/call. The task (keyword-preserving title ≤80 chars + description cleanup) is light — this model is purpose-built for high-volume light work. |
+| **Prod / bulk (default)** | **OpenAI** (paid, OpenAI-compatible) | **gpt-4o-mini** (or its current cheapest successor) | Best TR instruction-following at the cheap tier (SellerHill is EN+TR; description cleanup in Turkish is where small models stumble). Rock-solid reliability + predictable rate-limit tiering — matters under the 10×2000 burst. Cheap: ~$0.15/M input, ~$0.60/M output ⇒ a 2000-listing batch (4000 calls, ~400 tok avg) ≈ **~$0.40**, i.e. ~$0.0002/listing. Fast: ~1–2s/call. The task (keyword-preserving title ≤80 chars + description cleanup) is light — this model is purpose-built for high-volume light work. |
 | **Prod / bulk (alt — max speed/cost)** | **Groq** (paid, OpenAI-compatible) | `llama-3.1-8b-instant` | Fastest inference (LPU, sub-second/call) and cheapest (~5–10× cheaper than gpt-4o-mini). One-line env swap. Trade-off: weaker Turkish quality than gpt-4o-mini + Groq has historically queued/capacity-throttled under burst load — risky for exactly the 10×2000 case. Use when raw speed/cost beats TR-quality/reliability for the user's listings. |
 | **Dev / trickle** | **Local Ollama** (free, in docker-compose) | `qwen3:1.7b` | Free, private, no rate limit, no egress. Fine for a few listings/day. NOT for bulk (CPU ~7h for 4000 calls + RAM pressure). |
 
@@ -270,14 +270,14 @@ Add to `docker-compose.yml` (dev) and `docker-compose.production.yml` (test/prod
 ```yaml
 ollama:
   image: ollama/ollama:latest
-  container_name: zonds_ollama
+  container_name: sellerhill_ollama
   restart: unless-stopped
   ports:
     - '11434:11434'
   volumes:
     - ollama_data:/root/.ollama
   networks:
-    - zonds_network
+    - sellerhill_network
 ```
 
 Add `ollama_data` to the `volumes:` block. `pnpm docker:up` starts Ollama alongside Postgres/Redis/pgAdmin.

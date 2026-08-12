@@ -5,8 +5,17 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EBAY_MARKETPLACE_CONFIG, type EbayMarketplaceId, OrderCostCaptureStatus, OrderStatus } from '@repo/shared';
+import {
+  EBAY_MARKETPLACE_CONFIG,
+  EbayApiResource,
+  EbayCallPriority,
+  type EbayMarketplaceId,
+  OrderCostCaptureStatus,
+  OrderStatus,
+} from '@repo/shared';
 import axios from 'axios';
+
+import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
 /**
  * Raw eBay order from Fulfillment API
@@ -82,10 +91,20 @@ interface FetchOrdersResult {
 export class EbayFulfillmentService {
   private readonly logger = new Logger(EbayFulfillmentService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly ebayCallBudget: EbayCallBudgetService
+  ) {}
 
   /**
    * Fetch orders from eBay Fulfillment API
+   *
+   * Acquires against the shared `FULFILLMENT` budget first — this is the
+   * highest-volume Fulfillment caller (one call per connected eBay account
+   * every sync tick) and used to run completely unmetered, so the admin
+   * "eBay Limits" tab read 0/limit for this resource while it was in fact the
+   * one closest to its daily ceiling. `EbayBudgetExhaustedError` propagates to
+   * the caller, which defers rather than treats it as a per-account failure.
    */
   async fetchOrders(
     accessToken: string,
@@ -97,6 +116,8 @@ export class EbayFulfillmentService {
       cursor?: string;
     } = {}
   ): Promise<FetchOrdersResult> {
+    await this.ebayCallBudget.acquire(EbayApiResource.FULFILLMENT, EbayCallPriority.BACKGROUND);
+
     const _config = EBAY_MARKETPLACE_CONFIG[marketplaceId] || EBAY_MARKETPLACE_CONFIG.EBAY_US;
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
 

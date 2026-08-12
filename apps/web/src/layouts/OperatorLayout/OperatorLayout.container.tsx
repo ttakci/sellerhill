@@ -3,7 +3,7 @@ import { useTheme, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 
 import { OperatorLayout as OperatorLayoutComponent } from './OperatorLayout.component';
 import type { OperatorNavItem } from './OperatorLayout.types';
@@ -24,6 +24,7 @@ import { useLocale } from '@/utils/useLocale';
 export const OperatorLayout: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const [apiLogout] = useLogoutMutation();
 
@@ -72,20 +73,26 @@ export const OperatorLayout: React.FC = () => {
 
   const handleChangeLanguage = useCallback((lang: SupportedLocale) => changeLocale(lang), [changeLocale]);
 
+  /* Every admin section shares the same pathname, so the active entry is the
+     one whose `?tab=` also matches — a plain pathname compare would highlight
+     all ten at once. */
+  const activeTab = searchParams.get('tab');
   const navItems = useMemo<OperatorNavItem[]>(
     () =>
       resolveOperatorRoutes(user?.role).map((route) => ({
-        path: route.path,
+        path: route.href,
         labelKey: route.labelKey,
         icon: route.icon,
-        isActive: pathWithoutLocale === route.path || pathWithoutLocale.startsWith(`${route.path}/`),
+        isActive:
+          (pathWithoutLocale === route.path || pathWithoutLocale.startsWith(`${route.path}/`)) &&
+          (route.tab ?? 'overview') === (activeTab ?? 'overview'),
       })),
-    [user?.role, pathWithoutLocale]
+    [user?.role, pathWithoutLocale, activeTab]
   );
 
   const breadcrumbItems = useMemo(
-    () => resolveOperatorBreadcrumbs(pathWithoutLocale, user?.role, t),
-    [pathWithoutLocale, user?.role, t]
+    () => resolveOperatorBreadcrumbs(pathWithoutLocale, activeTab, user?.role, t),
+    [pathWithoutLocale, activeTab, user?.role, t]
   );
 
   const userName = user ? `${user.firstName} ${user.lastName}` : t('translation:common.notSet');

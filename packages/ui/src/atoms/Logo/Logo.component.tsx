@@ -2,7 +2,7 @@ import React from 'react';
 
 /** Full mark with tagline — auth / landing */
 import logoFull from '../../assets/logo-mark.svg';
-/** ZonDS only (no slogan) — app sidebar / navbar */
+/** SellerHill only (no slogan) — app sidebar / navbar */
 import logoNav from '../../assets/logo-nav.svg';
 
 import * as S from './Logo.style';
@@ -15,7 +15,7 @@ export interface LogoProps {
   className?: string;
   /**
    * - `default` / `full` — original mark + slogan (login, register, landing)
-   * - `nav` — ZonDS only, no slogan (sidebar)
+   * - `nav` — SellerHill only, no slogan (sidebar)
    * - `wordmark` / `stacked` — aliases of `nav` (compat)
    */
   layout?: 'default' | 'full' | 'nav' | 'wordmark' | 'stacked';
@@ -37,7 +37,7 @@ export const Logo: React.FC<LogoProps> = ({
       <S.LogoImage
         src={useNav ? logoNav : logoFull}
         $height={resolvedHeight}
-        alt="Zonds Logo"
+        alt="SellerHill Logo"
         className={className}
       />
     </S.DefaultWrapper>

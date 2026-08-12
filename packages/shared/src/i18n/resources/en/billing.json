@@ -2,6 +2,9 @@
   "billing": {
     "title": "Billing",
     "subtitle": "Manage your subscription plan, usage, and billing history.",
+    "loadingSubtitle": "Loading your billing details…",
+    "unavailableTitle": "Billing is unavailable",
+    "unavailableSubtitle": "We couldn't load your billing details. Please try again.",
     "plans": {
       "title": "Plans",
       "subtitle": "Choose the plan that fits your selling volume.",
@@ -22,7 +25,7 @@
       },
       "trial": {
         "name": "Free trial",
-        "description": "A time-limited trial of Zonds. Not purchasable — it starts automatically when you sign up."
+        "description": "A time-limited trial of SellerHill. Not purchasable — it starts automatically when you sign up."
       },
       "starter": {
         "name": "Starter",
@@ -108,14 +111,6 @@
     "provider": {
       "unconfiguredTitle": "Billing not configured",
       "unconfiguredBody": "Checkout and subscription management are unavailable because no billing provider is connected. Contact your operator."
-    },
-    "settingsHub": {
-      "title": "Billing & Plan",
-      "subtitle": "Manage your subscription, usage, and billing.",
-      "manage": {
-        "title": "Manage billing",
-        "subtitle": "View your plan, usage, and upgrade options."
-      }
     },
     "usage": {
       "title": "Usage this period",

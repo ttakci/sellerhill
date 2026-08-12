@@ -19,6 +19,8 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
     selectedRows = [],
     bulkActions,
     bulkActionsPlaceholder,
+    loading = false,
+    skeletonCount = 6,
   } = props;
 
   const isMobile = useIsMobile();
@@ -96,6 +98,8 @@ export const DataTable = <T,>(props: DataTableProps<T>): React.ReactElement => {
       pagination={props.pagination}
       emptyMessage={props.emptyMessage}
       emptyContent={props.emptyContent}
+      loading={loading}
+      skeletonCount={skeletonCount}
       onRowClick={props.onRowClick}
       className={props.className}
     />

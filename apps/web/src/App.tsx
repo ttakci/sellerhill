@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactElement, type ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 
+import { DemoBanner } from './features/demo';
 import LandingPage from './features/landing';
 import { AppLayout } from './layouts/AppLayout';
 import { OperatorLayout } from './layouts/OperatorLayout';
@@ -24,6 +25,21 @@ function RedirectToParent(): ReactElement {
   return <Navigate to={{ pathname: '..', search }} relative="path" replace />;
 }
 
+/**
+ * Billing moved out of the Settings drawer stack onto its own route
+ * (`/:locale/billing`). `?drawer=billing` used to open it as a drawer over
+ * `/settings` — this still needs to resolve for old bookmarks/links, so the
+ * settings route checks for it and redirects to the canonical page instead of
+ * rendering (silently) nothing.
+ */
+function SettingsRoute({ children }: { children: ReactNode }): ReactElement {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get('drawer') === 'billing') {
+    return <Navigate to="../billing" relative="path" replace />;
+  }
+  return <>{children}</>;
+}
+
 // Public auth (small) — still lazy to keep initial landing bundle lean
 const CheckEmailPage = lazy(() => import('./features/auth/check-email'));
 const LoginPage = lazy(() => import('./features/auth/login'));
@@ -31,7 +47,11 @@ const RegisterPage = lazy(() => import('./features/auth/register'));
 const VerifyEmailPage = lazy(() => import('./features/auth/verify-email'));
 
 // App shell pages
+const ActionCenterPage = lazy(() =>
+  import('./features/action-center').then((m) => ({ default: m.ActionCenterPageContainer }))
+);
 const AdminPage = lazy(() => import('./features/admin/AdminPage'));
+const BillingPage = lazy(() => import('./features/billing').then((m) => ({ default: m.BillingPage })));
 const DashboardPage = lazy(() => import('./features/dashboard/DashboardPage'));
 const OnboardingEbayPage = lazy(() => import('./features/ebay/onboarding'));
 const StoresPage = lazy(() => import('./features/ebay/stores'));
@@ -66,6 +86,8 @@ const SettingsHubPage = lazy(() =>
 export function App() {
   return (
     <BrowserRouter>
+      {/* Renders nothing unless this document was opened as a demo. */}
+      <DemoBanner />
       <Routes>
         {/* Landing page (no locale prefix) — eager for first paint */}
         <Route path="/" element={<LandingPage />} />
@@ -117,6 +139,14 @@ export function App() {
               }
             />
             <Route
+              path="actions"
+              element={
+                <Lazy>
+                  <ActionCenterPage />
+                </Lazy>
+              }
+            />
+            <Route
               path="stores"
               element={
                 <Lazy>
@@ -136,15 +166,27 @@ export function App() {
             <Route
               path="settings"
               element={
-                <Lazy>
-                  <SettingsHubPage />
-                </Lazy>
+                <SettingsRoute>
+                  <Lazy>
+                    <SettingsHubPage />
+                  </Lazy>
+                </SettingsRoute>
               }
             />
             {/* Legacy full-page settings routes → hub (drawers cover all edit flows) */}
             <Route path="settings/store" element={<Navigate to=".." relative="path" replace />} />
             <Route path="settings/amazon-accounts" element={<Navigate to=".." relative="path" replace />} />
             <Route path="settings/listing-groups" element={<Navigate to=".." relative="path" replace />} />
+            {/* Billing moved out of Settings onto its own route — see SettingsRoute above. */}
+            <Route path="settings/billing" element={<Navigate to="../billing" relative="path" replace />} />
+            <Route
+              path="billing"
+              element={
+                <Lazy>
+                  <BillingPage />
+                </Lazy>
+              }
+            />
 
             <Route
               path="listings"
@@ -235,7 +277,7 @@ export function App() {
 
             The `/support` console (SUPPORT role queue/claim/reply/presence)
             was removed 2026-08 when customer support moved to tawk.to, which
-            has its own agent dashboard outside Zonds — see CLAUDE.md
+            has its own agent dashboard outside SellerHill — see CLAUDE.md
             "Customer support widget — tawk.to".
           */}
           <Route element={<OperatorLayout />}>
@@ -258,6 +300,7 @@ export function App() {
         <Route path="/verify-email" element={<LocaleRedirect to="verify-email" preserveQuery />} />
         <Route path="/auth/check-email" element={<LocaleRedirect to="auth/check-email" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
+        <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" />} />
 

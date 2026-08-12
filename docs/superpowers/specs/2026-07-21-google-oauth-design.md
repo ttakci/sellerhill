@@ -142,7 +142,7 @@ All CREATE+oauth insert runs in a single `DatabaseService.transaction`.
   accessToken: string;
   user: UserDto;
 }
-// + Set-Cookie: zonds_rt=... (HttpOnly, path=/api) via existing attachSession
+// + Set-Cookie: sellerhill_rt=... (HttpOnly, path=/api) via existing attachSession
 ```
 
 **Errors (i18n keys, HttpException):**

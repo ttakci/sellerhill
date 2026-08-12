@@ -4,7 +4,7 @@
 
 **Goal:** Let users register and log in with Google via a GIS popup auth-code flow, skipping only name entry + email verification while keeping session shape and onboarding identical to password login.
 
-**Architecture:** FE `@react-oauth/google` popup returns a one-time auth code → `POST /api/v1/auth/google` → backend `google-auth-library` exchanges code (`redirectUri: 'postmessage'`) + verifies ID token → pure `decideGoogleLink` helper decides login/create/block → existing JWT + HttpOnly `zonds_rt` cookie session. Never auto-merge with password accounts. Multi-provider-ready `user_oauth_accounts` table; only Google implemented.
+**Architecture:** FE `@react-oauth/google` popup returns a one-time auth code → `POST /api/v1/auth/google` → backend `google-auth-library` exchanges code (`redirectUri: 'postmessage'`) + verifies ID token → pure `decideGoogleLink` helper decides login/create/block → existing JWT + HttpOnly `sellerhill_rt` cookie session. Never auto-merge with password accounts. Multi-provider-ready `user_oauth_accounts` table; only Google implemented.
 
 **Tech Stack:** NestJS 10, `google-auth-library`, Passport JWT (existing), React 18 + RTK Query, `@react-oauth/google`, Emotion + `@repo/ui` Button/Icon, PostgreSQL migration `039`, Jest pure-helper tests.
 
@@ -17,7 +17,7 @@
 - No hardcoded colors/spacing — theme tokens via `tkn()` only.
 - Design-system only: our `Button` + `Icon name="brand-google"` — never Google's rendered button, never inline SVG in feature code.
 - Container/component split strict: no `useState`/`useEffect`/RTK/GIS hooks in `.component.tsx`; no `styled` outside `.style.ts`; types only in `.types.ts`.
-- Session parity: Google success response = login success response (`{ accessToken, user }` + `zonds_rt` cookie via `attachSession`).
+- Session parity: Google success response = login success response (`{ accessToken, user }` + `sellerhill_rt` cookie via `attachSession`).
 - Never auto-merge password ↔ Google accounts by email.
 - Google skips only name form + email verification; does **not** skip onboarding/eBay connect.
 - When Google env is missing: API boots; endpoint returns 503; FE hides the button.

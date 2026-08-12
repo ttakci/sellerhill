@@ -42,4 +42,10 @@ export interface ListingJobDetailsPageComponentProps {
     labelInfo?: string;
   };
   paginatedItems: ListingJobItemDto[];
+  /** Client-side search over ASIN + the localized failure message. */
+  itemSearch: string;
+  onItemSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClearItemSearch: () => void;
+  /** Count after the search filter, before pagination slicing. */
+  filteredItemCount: number;
 }

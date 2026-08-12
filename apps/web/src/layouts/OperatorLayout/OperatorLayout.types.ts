@@ -2,7 +2,7 @@ import type { SupportedLocale, UserDto } from '@repo/shared';
 import type { BreadcrumbItem, IconName } from '@repo/ui';
 
 export interface OperatorNavItem {
-  /** Path without locale prefix, e.g. `/admin` */
+  /** Href without locale prefix, e.g. `/admin` or `/admin?tab=queues` */
   path: string;
   labelKey: string;
   icon: IconName;

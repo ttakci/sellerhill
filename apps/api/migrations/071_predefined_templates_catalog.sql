@@ -66,41 +66,41 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   'modern-professional',
   'Modern Professional',
   $desc_modern_professional$Clean typography and a professional two-column layout for high-end products$desc_modern_professional$,
-  $html_modern_professional$<div class="zonds-listing">
-  <div class="zonds-content">
-    <h1 class="zonds-title">{{title}}</h1>
-    <div class="zonds-grid">
-      {{#main_image}}<div class="zonds-image-col"><div class="zonds-image-box"><img src="{{.}}" alt="{{title}}"></div></div>{{/main_image}}
-      <div class="zonds-details-col">
-        {{#has_details}}<div class="zonds-section"><h2 class="zonds-section-title">Product Details</h2><ul class="zonds-list">{{#product_details}}<li>{{.}}</li>{{/product_details}}</ul></div>{{/has_details}}
-        {{#has_features}}<div class="zonds-section"><h2 class="zonds-section-title">Key Features</h2><ul class="zonds-list">{{#feature_bullets}}<li>{{.}}</li>{{/feature_bullets}}</ul></div>{{/has_features}}
+  $html_modern_professional$<div class="sellerhill-listing">
+  <div class="sellerhill-content">
+    <h1 class="sellerhill-title">{{title}}</h1>
+    <div class="sellerhill-grid">
+      {{#main_image}}<div class="sellerhill-image-col"><div class="sellerhill-image-box"><img src="{{.}}" alt="{{title}}"></div></div>{{/main_image}}
+      <div class="sellerhill-details-col">
+        {{#has_details}}<div class="sellerhill-section"><h2 class="sellerhill-section-title">Product Details</h2><ul class="sellerhill-list">{{#product_details}}<li>{{.}}</li>{{/product_details}}</ul></div>{{/has_details}}
+        {{#has_features}}<div class="sellerhill-section"><h2 class="sellerhill-section-title">Key Features</h2><ul class="sellerhill-list">{{#feature_bullets}}<li>{{.}}</li>{{/feature_bullets}}</ul></div>{{/has_features}}
       </div>
     </div>
-    {{#product_description}}<div class="zonds-description"><h2 class="zonds-section-title">Full Description</h2><div class="zonds-prose">{{{product_description}}}</div></div>{{/product_description}}
+    {{#product_description}}<div class="sellerhill-description"><h2 class="sellerhill-section-title">Full Description</h2><div class="sellerhill-prose">{{{product_description}}}</div></div>{{/product_description}}
   </div>
 </div>
 <style>
-.zonds-listing { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #1e293b; line-height: 1.6; font-size: 15px; max-width: 1000px; margin: 0 auto; padding: 20px; }
-.zonds-listing img { max-width: 100%; height: auto; }
-.zonds-title { font-size: 28px; font-weight: 700; line-height: 1.3; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin: 0 0 32px 0; }
-.zonds-grid { display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
-.zonds-image-col { flex: 1 1 300px; max-width: 450px; }
-.zonds-details-col { flex: 1.2 1 320px; }
-.zonds-image-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
-.zonds-image-box img { max-width: 100%; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-.zonds-section { margin-bottom: 28px; }
-.zonds-section-title { font-size: 17px; font-weight: 600; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 16px 0; border-left: 4px solid #3b82f6; padding-left: 12px; }
-.zonds-list { list-style: none; padding: 0; margin: 0; }
-.zonds-list li { margin-bottom: 8px; position: relative; padding-left: 20px; }
-.zonds-list li::before { content: "\2022"; color: #3b82f6; position: absolute; left: 0; font-weight: bold; }
-.zonds-description { background: #f1f5f9; padding: 32px; border-radius: 12px; margin-top: 40px; }
-.zonds-prose { margin: 0; }
-.zonds-prose img { border-radius: 8px; }
+.sellerhill-listing { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #1e293b; line-height: 1.6; font-size: 15px; max-width: 1000px; margin: 0 auto; padding: 20px; }
+.sellerhill-listing img { max-width: 100%; height: auto; }
+.sellerhill-title { font-size: 28px; font-weight: 700; line-height: 1.3; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin: 0 0 32px 0; }
+.sellerhill-grid { display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
+.sellerhill-image-col { flex: 1 1 300px; max-width: 450px; }
+.sellerhill-details-col { flex: 1.2 1 320px; }
+.sellerhill-image-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
+.sellerhill-image-box img { max-width: 100%; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+.sellerhill-section { margin-bottom: 28px; }
+.sellerhill-section-title { font-size: 17px; font-weight: 600; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 16px 0; border-left: 4px solid #3b82f6; padding-left: 12px; }
+.sellerhill-list { list-style: none; padding: 0; margin: 0; }
+.sellerhill-list li { margin-bottom: 8px; position: relative; padding-left: 20px; }
+.sellerhill-list li::before { content: "\2022"; color: #3b82f6; position: absolute; left: 0; font-weight: bold; }
+.sellerhill-description { background: #f1f5f9; padding: 32px; border-radius: 12px; margin-top: 40px; }
+.sellerhill-prose { margin: 0; }
+.sellerhill-prose img { border-radius: 8px; }
 @media (max-width: 768px) {
-  .zonds-listing { padding: 16px; }
-  .zonds-grid { gap: 24px; }
-  .zonds-image-col { max-width: 100%; }
-  .zonds-description { padding: 20px; }
+  .sellerhill-listing { padding: 16px; }
+  .sellerhill-grid { gap: 24px; }
+  .sellerhill-image-col { max-width: 100%; }
+  .sellerhill-description { padding: 20px; }
 }
 </style>$html_modern_professional$,
   $json_modern_professional${
@@ -115,7 +115,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Quick attention mode"
       ],
       "product_details": [
-          "Brand: Zonds Audio",
+          "Brand: SellerHill Audio",
           "Connectivity: Bluetooth 5.0",
           "Noise Cancelling: Yes",
           "Color: Silver"

@@ -38,4 +38,4 @@ ALTER TABLE listing_job_items
     ADD COLUMN IF NOT EXISTS source_ebay_item_id VARCHAR(50);
 
 COMMENT ON TABLE ebay_listing_discoveries IS
-    'Read-only mirror of active eBay listings not yet managed by Zonds; import promotes a row into listings.';
+    'Read-only mirror of active eBay listings not yet managed by SellerHill; import promotes a row into listings.';

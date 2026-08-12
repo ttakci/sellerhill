@@ -24,8 +24,7 @@ export const StyledCheckbox = styled.div<{ $checked?: boolean; $disabled?: boole
   flex-shrink: 0;
   width: 1.125rem; /* 18px including border */
   height: 1.125rem;
-  border: 0.0625rem solid
-    ${({ theme, $checked }) => ($checked ? theme.colors.brand.primary : theme.colors.border.primary)};
+  border: 0.09375rem solid ${tkn('colors.brand.primary')};
   border-radius: ${tkn('radius.sm')};
   display: flex;
   align-items: center;

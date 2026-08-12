@@ -570,7 +570,7 @@ export interface ProxyConfig {
 }
 
 /**
- * Zonds-provided residential proxy. Users never configure this.
+ * SellerHill-provided residential proxy. Users never configure this.
  * Sticky session token = userId (perUser, default) or amazonAccountId (perAccount, reserved),
  * so each user (or account) always exits from the same residential IP across all Amazon traffic.
  * Returns null when proxy env is absent — callers fall back to a direct connection
@@ -649,7 +649,7 @@ AUTO_FULFILL_CHECKOUT_MIN_TIME_MS=4500
 AUTO_FULFILL_REVIEW_CAP_HARD_STOP=true
 FULFILLMENT_EVIDENCE_DIR=
 FULFILLMENT_EVIDENCE_TTL_DAYS=7
-# Zonds-provided residential proxy (sticky session per user by default)
+# SellerHill-provided residential proxy (sticky session per user by default)
 PROXY_PROVIDER=              # smartproxy | brightdata | iproyal
 PROXY_ENDPOINT=              # gate.smartproxy.com:7000
 PROXY_USER=                  # base username; may contain {session}
@@ -1273,7 +1273,7 @@ git commit -m "feat(a2): persist auto-fulfill settings + proxy/cap guardrail on 
 Add to both `translation.json` files under `storeSettings.storeSettings`:
 ```json
 "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
-"autoFulfillEnabledHint": "When on, Zonds buys the item on Amazon with your linked buyer account. Disable to order manually.",
+"autoFulfillEnabledHint": "When on, SellerHill buys the item on Amazon with your linked buyer account. Disable to order manually.",
 "trackingConversionProvider": "Tracking-number conversion",
 "trackingConversionProviderHint": "Real carrier numbers are forwarded as-is. Amazon Logistics (TBA) passes through unchanged."
 ```
