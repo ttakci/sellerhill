@@ -11,9 +11,9 @@ import {
 /**
  * Listing-quality tab state.
  *
- * Split out of the container for the same reason the proxy and settings hooks
- * were: the admin page owns eight tabs, and folding each one's queries and
- * handlers into a single container is how god containers start.
+ * Split out of the container for the same reason the settings hook was: the
+ * admin page owns several tabs, and folding each one's queries and handlers
+ * into a single container is how god containers start.
  */
 export function useAdminListingQuality(skip: boolean): AdminListingQualityView {
   const [search, setSearch] = useState('');

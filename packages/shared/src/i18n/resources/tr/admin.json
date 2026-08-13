@@ -6,7 +6,6 @@
       "overview": "Genel bakış",
       "queues": "Kuyruklar",
       "costs": "Maliyetler",
-      "proxies": "Proxyler",
       "settings": "Ayarlar",
       "billing": "Faturalandırma",
       "users": "Kullanıcılar",
@@ -20,16 +19,12 @@
     "cost": {
       "keepaBalance": "Keepa token bakiyesi",
       "users": "Toplam kullanıcı",
-      "proxyPool": "Proxy havuzu / ay",
-      "proxyPoolHint": "Aktif proxylerin bilinen aylık maliyet toplamı",
       "quantity": "Miktar: {{quantity}}"
     },
     "users": {
       "unattributed": "Dağıtılmamış platform kullanımı",
       "total": "{{value}} kullanıcı · maliyetler bu aya aittir",
       "stats": "Listeler: {{listings}} · Sipariş 30g: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
-      "proxy": "Proxy: {{proxy}}",
-      "noProxy": "Proxy atanmadı",
       "columns": {
         "user": "Kullanıcı",
         "role": "Erişim seviyesi",
@@ -38,7 +33,6 @@
         "orders": "30g sipariş",
         "keepa": "Keepa",
         "llm": "LLM",
-        "proxy": "Proxy",
         "cost": "Maliyet"
       },
       "empty": "Kullanıcı yok",
@@ -47,61 +41,7 @@
     "warnings": {
       "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
       "keepa_low_tokens": "Keepa token bakiyesi düşük",
-      "llm_failure_rate": "LLM hata oranı yükseldi",
-      "proxy_expiring": "{{subject}} proxy'sinin süresi yakında doluyor (kalan gün)",
-      "proxy_expired": "{{subject}} proxy'sinin süresi doldu (gecikilen gün)",
-      "proxy_pool_exhausted": "Proxy havuzu tükendi — yeni kullanıcılar için boş proxy yok"
-    },
-    "proxies": {
-      "activePool": "Aktif proxyler",
-      "freeCount": "{{value}} boşta",
-      "assigned": "Kullanıcılara atanan",
-      "monthlyCost": "Aylık maliyet",
-      "expiringSoon": "Süresi yakında dolan",
-      "expiredCount": "{{value}} süresi dolmuş",
-      "addTitle": "Satın alınan proxy'yi ekle",
-      "addSubtitle": "Parola anında şifrelenerek saklanır ve bir daha gösterilmez. Kullanıcılar proxy'leri otomatik alır — atama manuel yapılmaz.",
-      "host": "Sunucu (host)",
-      "port": "Port",
-      "username": "Kullanıcı adı",
-      "password": "Parola",
-      "labelField": "Etiket (sağlayıcı / sipariş no)",
-      "expiresAt": "Bitiş tarihi",
-      "monthlyCostUsd": "Aylık maliyet (USD)",
-      "addButton": "Proxy ekle",
-      "formInvalid": "Lütfen host, port, kullanıcı adı ve parolayı geçerli değerlerle doldurun.",
-      "createSuccess": "Proxy havuza eklendi.",
-      "listTitle": "Havuz",
-      "empty": "Havuzda henüz proxy yok. Satın aldığınız sabit ISP proxy'leri yukarıdan ekleyin — her kullanıcıya otomatik olarak bir tane atanır.",
-      "unassigned": "Atanmamış",
-      "expiresOn": "Bitiş: {{date}}",
-      "noExpiry": "Bitiş tarihi girilmedi",
-      "disable": "Devre dışı bırak",
-      "enable": "Etkinleştir",
-      "status": {
-        "active": "Aktif",
-        "disabled": "Devre dışı"
-      },
-      "expiry": {
-        "ok": "{{value}} gün kaldı",
-        "expiring_soon": "{{value}} gün kaldı",
-        "expired": "Süresi doldu",
-        "no_expiry": "Bitiş yok"
-      },
-      "columns": {
-        "endpoint": "Uç nokta",
-        "label": "Etiket",
-        "assignee": "Atanan",
-        "status": "Durum",
-        "expiry": "Bitiş",
-        "cost": "Aylık",
-        "actions": "İşlemler"
-      },
-      "emptyDescription": "Havuzu başlatmak için yukarıdan sabit ISP proxy ekleyin."
-    },
-    "errors": {
-      "proxyNotFound": "Proxy bulunamadı.",
-      "currencyRequiresCost": "Para birimi yalnızca bir maliyetle birlikte ayarlanabilir."
+      "llm_failure_rate": "LLM hata oranı yükseldi"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -211,7 +151,6 @@
         "admin.listingQuotaCriticalThreshold": "Liste kotası kritik eşiği",
         "admin.amazonAccountQuotaWarnThreshold": "Amazon hesabı uyarı eşiği",
         "admin.amazonAccountQuotaCriticalThreshold": "Amazon hesabı kritik eşiği",
-        "admin.proxyExpiryWarnDays": "Proxy bitiş uyarı penceresi (gün)",
         "llm.contentEnabled": "Yapay zekâ başlık/açıklama yeniden yazımı",
         "billing.enforcementEnabled": "Paket kotalarını zorla",
         "buyerMessaging.feedbackDefaultDelayDays": "Değerlendirme isteği gecikmesi (gün)",
@@ -256,7 +195,6 @@
         "admin.listingQuotaCriticalThreshold": "Bir kullanıcının kritik seviyede kota rozeti almasını tetikleyen aktif liste sayısı.",
         "admin.amazonAccountQuotaWarnThreshold": "Bir kullanıcının uyarı seviyesinde kota rozeti almasını tetikleyen Amazon alıcı hesabı sayısı.",
         "admin.amazonAccountQuotaCriticalThreshold": "Bir kullanıcının kritik seviyede kota rozeti almasını tetikleyen Amazon alıcı hesabı sayısı.",
-        "admin.proxyExpiryWarnDays": "Bir proxy'nin bitiş tarihinden kaç gün önce 'yakında dolacak' olarak gösterilmeye başlayacağı.",
         "llm.contentEnabled": "Oluşturma anında yapay zekâ ile üretilen liste başlığı/açıklaması için ana anahtar. Varsayılan olarak kapalıdır; bir hata her zaman deterministik başlığa geri döner.",
         "billing.enforcementEnabled": "Açıkken liste ve otomatik sipariş kotaları kullanıcının paketine göre gerçekten uygulanır. Kapalıyken her kullanıcı gerçek bir abonelik olmadan tam erişime sahip olur.",
         "buyerMessaging.feedbackDefaultDelayDays": "Bir mağaza kendi gecikmesini ayarlamadığında, teslimattan kaç gün sonra değerlendirme isteği mesajının gönderileceği varsayılan süre.",

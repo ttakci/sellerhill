@@ -98,16 +98,6 @@ export function useAdminUserColumns(
         ),
       },
       {
-        key: 'proxyHost',
-        header: t('admin.users.columns.proxy'),
-        width: '11rem',
-        render: (_value, row) => (
-          <Text variant="body-sm" color="text.secondary" truncate>
-            {row.proxyHost ?? t('admin.users.noProxy')}
-          </Text>
-        ),
-      },
-      {
         key: 'estimatedCostMicros',
         header: t('admin.users.columns.cost'),
         width: '8rem',

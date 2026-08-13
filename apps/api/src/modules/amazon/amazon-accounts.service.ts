@@ -1,11 +1,16 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AmazonAccountStatus, type AmazonAccountPublicDto } from '@repo/shared';
+import {
+  AmazonAccountStatus,
+  AmazonMarketplace,
+  ProxyConnectionType,
+  SUPPORTED_AMAZON_MARKETPLACES,
+  type AmazonAccountPublicDto,
+} from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
 
-import { ProxyService } from './proxy.service';
 import { normalizeTotpSecret } from './totp-secret';
 
 export interface AmazonAccountRow {
@@ -15,6 +20,9 @@ export interface AmazonAccountRow {
   email: string;
   encrypted_password: string;
   two_factor_secret: string;
+  // Storefront this buyer account operates on (migration 081). Immutable
+  // after creation.
+  marketplace: string;
   status: string;
   last_verification_error: string | null;
   last_verified_at: Date;
@@ -25,6 +33,13 @@ export interface AmazonAccountRow {
   auto_fulfill_enabled: boolean;
   auto_fulfill_cap_total: string | number | null;
   auto_fulfill_dry_run: boolean;
+  // Self-service proxy (migration 080). User-supplied; replaces the platform pool.
+  proxy_enabled: boolean;
+  proxy_connection_type: string | null;
+  proxy_host: string | null;
+  proxy_port: number | null;
+  proxy_username: string | null;
+  proxy_password: string | null;
 }
 
 export interface DecryptedAmazonAccount extends AmazonAccountRow {
@@ -39,6 +54,17 @@ export interface AmazonAccountAutoFulfillData {
   autoFulfillDryRun?: boolean;
 }
 
+/** Self-service proxy write payload (migration 080). `undefined` = leave unchanged. */
+export interface AmazonAccountProxyData {
+  proxyEnabled?: boolean;
+  proxyConnectionType?: ProxyConnectionType | null;
+  proxyHost?: string | null;
+  proxyPort?: number | null;
+  proxyUsername?: string | null;
+  /** Write-only. `undefined` = keep stored value; `null`/`''` clears it. */
+  proxyPassword?: string | null;
+}
+
 @Injectable()
 export class AmazonAccountsService {
   private readonly logger = new Logger(AmazonAccountsService.name);
@@ -46,8 +72,7 @@ export class AmazonAccountsService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly configService: ConfigService,
-    private readonly proxyService: ProxyService
+    private readonly configService: ConfigService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -99,16 +124,29 @@ export class AmazonAccountsService {
       email: string;
       password: string;
       twoFactorSecret?: string;
-    } & AmazonAccountAutoFulfillData
+      marketplace?: AmazonMarketplace;
+    } & AmazonAccountAutoFulfillData &
+      AmazonAccountProxyData
   ) {
-    // Guardrail: enabling auto-fulfill requires a configured proxy AND a non-null
-    // per-account spend cap. Money/ban safety — fail closed at the API boundary
-    // so the auto-fulfill processor never picks an account that would route over
-    // the user's residential IP or spend without a ceiling. The FE maps this
-    // BadRequestException to `showMessage` via the standard error interceptor;
-    // i18n keys land in Task 10/11.
+    // Guardrail: enabling auto-fulfill requires a non-null per-account spend
+    // cap. Money safety — fail closed at the API boundary so the auto-fulfill
+    // processor never picks an account with unbounded spend. A proxy is no
+    // longer required to enable: it is now the user's own, optional choice
+    // (migration 080) — see `validateProxyFields` below.
     if (data.autoFulfillEnabled) {
-      await this.assertCanEnable(userId, data.autoFulfillCapTotal ?? null);
+      this.assertCanEnable(data.autoFulfillCapTotal ?? null);
+    }
+    this.validateProxyFields(data);
+
+    // Storefront this buyer account operates on (migration 081). Immutable
+    // after creation — UpdateAmazonAccountDto has no matching field. Only
+    // AmazonMarketplace.AMAZON_US is supported today (see amazon.constants.ts);
+    // resolved (not `data.marketplace` directly) so an omitted field always
+    // gets the real default rather than `undefined` in the INSERT.
+    const marketplace = data.marketplace ?? AmazonMarketplace.AMAZON_US;
+    if (!SUPPORTED_AMAZON_MARKETPLACES.includes(marketplace)) {
+      // FE maps via getErrorI18nKey → amazon:amazon.errors.unsupportedMarketplace
+      throw new BadRequestException('amazon.errors.unsupportedMarketplace');
     }
 
     const encryptedPassword = this.encryption.encrypt(data.password);
@@ -125,11 +163,20 @@ export class AmazonAccountsService {
     const autoFulfillCapTotal = data.autoFulfillCapTotal ?? null;
     const autoFulfillDryRun = data.autoFulfillDryRun ?? false;
 
+    // Proxy defaults match migration 080 (FALSE / NULL everywhere).
+    const proxyEnabled = data.proxyEnabled ?? false;
+    const proxyConnectionType = data.proxyConnectionType ?? null;
+    const proxyHost = data.proxyHost ?? null;
+    const proxyPort = data.proxyPort ?? null;
+    const proxyUsername = data.proxyUsername ?? null;
+    const encryptedProxyPassword = data.proxyPassword ? this.encryption.encrypt(data.proxyPassword) : null;
+
     const rows = await this.databaseService.query<AmazonAccountRow>(
       `INSERT INTO amazon_accounts
-         (user_id, label, email, encrypted_password, two_factor_secret, status,
-          auto_fulfill_enabled, auto_fulfill_cap_total, auto_fulfill_dry_run)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         (user_id, label, email, encrypted_password, two_factor_secret, marketplace, status,
+          auto_fulfill_enabled, auto_fulfill_cap_total, auto_fulfill_dry_run,
+          proxy_enabled, proxy_connection_type, proxy_host, proxy_port, proxy_username, proxy_password)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING *`,
       [
         userId,
@@ -137,10 +184,17 @@ export class AmazonAccountsService {
         data.email,
         encryptedPassword,
         encryptedTwoFactor,
+        marketplace,
         AmazonAccountStatus.VERIFYING,
         autoFulfillEnabled,
         autoFulfillCapTotal,
         autoFulfillDryRun,
+        proxyEnabled,
+        proxyConnectionType,
+        proxyHost,
+        proxyPort,
+        proxyUsername,
+        encryptedProxyPassword,
       ]
     );
 
@@ -155,7 +209,8 @@ export class AmazonAccountsService {
       email?: string;
       password?: string;
       twoFactorSecret?: string;
-    } & AmazonAccountAutoFulfillData
+    } & AmazonAccountAutoFulfillData &
+      AmazonAccountProxyData
   ): Promise<{ account: AmazonAccountPublicDto; credentialsChanged: boolean }> {
     const existing = await this.findOne(userId, id);
 
@@ -170,8 +225,9 @@ export class AmazonAccountsService {
       || (data.autoFulfillEnabled === undefined && !!existing.auto_fulfill_enabled);
 
     if (enablingNow) {
-      await this.assertCanEnable(userId, effectiveCap);
+      this.assertCanEnable(effectiveCap);
     }
+    this.validateProxyFields(data);
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const params: (string | number | boolean | null)[] = [];
@@ -228,6 +284,39 @@ export class AmazonAccountsService {
       paramIndex++;
     }
 
+    if (data.proxyEnabled !== undefined) {
+      updates.push(`proxy_enabled = $${paramIndex}`);
+      params.push(data.proxyEnabled);
+      paramIndex++;
+    }
+    if (data.proxyConnectionType !== undefined) {
+      updates.push(`proxy_connection_type = $${paramIndex}`);
+      params.push(data.proxyConnectionType);
+      paramIndex++;
+    }
+    if (data.proxyHost !== undefined) {
+      updates.push(`proxy_host = $${paramIndex}`);
+      params.push(data.proxyHost);
+      paramIndex++;
+    }
+    if (data.proxyPort !== undefined) {
+      updates.push(`proxy_port = $${paramIndex}`);
+      params.push(data.proxyPort);
+      paramIndex++;
+    }
+    if (data.proxyUsername !== undefined) {
+      updates.push(`proxy_username = $${paramIndex}`);
+      params.push(data.proxyUsername);
+      paramIndex++;
+    }
+    // Write-only: `undefined` keeps the stored password, `null`/`''` clears it,
+    // any other string re-encrypts. Never round-tripped back to the client.
+    if (data.proxyPassword !== undefined) {
+      updates.push(`proxy_password = $${paramIndex}`);
+      params.push(data.proxyPassword ? this.encryption.encrypt(data.proxyPassword) : null);
+      paramIndex++;
+    }
+
     if (credentialsChanged) {
       // Re-verify against Amazon; clear any stale failure reason while in-flight.
       updates.push(`status = $${paramIndex}`);
@@ -251,27 +340,30 @@ export class AmazonAccountsService {
   }
 
   /**
-   * Guardrail for enabling auto-fulfill on an Amazon account.
-   * Throws `BadRequestException` (FE maps to `showMessage`) when:
-   *   - THIS user cannot get a proxy right now (pool exhausted/empty and no
-   *     env fallback — would route Amazon checkout over the bare server IP =
-   *     ban risk). `ensureAvailableFor` claims a pool proxy eagerly, so the
-   *     user gets immediate feedback at enable time instead of a runtime
-   *     proxy_required block on their first order; OR
-   *   - the per-account spend cap is null (no ceiling = unbounded spend).
-   * Money/ban safety — fail closed.
+   * Guardrail for enabling auto-fulfill on an Amazon account: the per-account
+   * spend cap must be non-null (no ceiling = unbounded spend). Money safety —
+   * fail closed. A proxy is deliberately NOT required here — see the class
+   * doc on `AmazonAccountProxyData`: proxying is now the user's own optional
+   * choice (migration 080), and `AmazonCheckoutService` runs bare-IP when the
+   * account has none configured.
    */
-  private async assertCanEnable(userId: string, capTotal: number | null): Promise<void> {
-    // amazonAccountId only matters for the legacy perAccount env strategy;
-    // at enable time the account may not exist yet, so pass the userId (the
-    // pool model — the primary path — is per-user anyway).
-    if (!(await this.proxyService.ensureAvailableFor(userId, userId))) {
-      // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillProxyRequired
-      throw new BadRequestException('amazon.errors.autoFulfillProxyRequired');
-    }
+  private assertCanEnable(capTotal: number | null): void {
     if (capTotal === null) {
       // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillCapRequired
       throw new BadRequestException('amazon.errors.autoFulfillCapRequired');
+    }
+  }
+
+  /**
+   * A user who turns proxying ON is asking us to route through it — an
+   * incomplete config (enabled but missing host/port) would silently launch
+   * bare-IP instead, defeating the point of opting in. Validated here rather
+   * than only at the DB layer so the drawer gets one consistent error key.
+   */
+  private validateProxyFields(data: AmazonAccountProxyData): void {
+    if (data.proxyEnabled !== true) {return;}
+    if (!data.proxyHost?.trim() || !data.proxyPort) {
+      throw new BadRequestException('amazon.errors.proxyHostPortRequired');
     }
   }
 
@@ -339,6 +431,7 @@ export class AmazonAccountsService {
       userId: row.user_id,
       label: row.label || undefined,
       email: row.email,
+      marketplace: row.marketplace as AmazonMarketplace,
       status: row.status as AmazonAccountStatus,
       hasTwoFactor: !!row.two_factor_secret,
       lastVerificationError: row.last_verification_error ?? undefined,
@@ -349,6 +442,12 @@ export class AmazonAccountsService {
       autoFulfillEnabled: !!row.auto_fulfill_enabled,
       autoFulfillCapTotal: capNum !== null && Number.isFinite(capNum) ? capNum : null,
       autoFulfillDryRun: !!row.auto_fulfill_dry_run,
+      proxyEnabled: !!row.proxy_enabled,
+      proxyConnectionType: (row.proxy_connection_type as ProxyConnectionType | null) ?? null,
+      proxyHost: row.proxy_host ?? null,
+      proxyPort: row.proxy_port ?? null,
+      proxyUsername: row.proxy_username ?? null,
+      hasProxyPassword: !!row.proxy_password,
     };
   }
 }

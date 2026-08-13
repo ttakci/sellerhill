@@ -3,12 +3,13 @@ import * as path from 'path';
 
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ProxyConnectionType } from '@repo/shared';
 import type { BrowserContext } from 'playwright';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EncryptionUtil } from '../../common/utils/encryption.util';
 
 import { probeAmazonAuth } from './amazon-auth-state';
-import { ProxyService } from './proxy.service';
 
 const VIEWPORTS = [
   { width: 1920, height: 1080 },
@@ -73,10 +74,12 @@ interface LegacyStorageState {
  * timezone from `hashCode(accountId)`). Contexts are launched via
  * `playwright-extra`'s chromium + stealth plugin.
  *
- * Proxy-aware: when `ProxyService` is configured (env), each context launches
- * with the injected residential proxy (sticky session per SellerHill user by
- * default). When proxy env is absent, the `proxy` option is omitted entirely —
- * network behavior is identical to a direct connection (no scraping regression).
+ * Proxy-aware: each Amazon account may carry its OWN user-supplied proxy
+ * (migration 080 — `amazon_accounts.proxy_*`, self-service, replaces the
+ * former platform-paid pool). When the account has one configured and
+ * enabled, the context launches through it; otherwise the `proxy` option is
+ * omitted entirely and the context launches bare-IP — that is the expected,
+ * unremarkable default, not a degraded fallback.
  *
  * Public method signatures are preserved so existing callers
  * (AmazonScrapingService etc.) do not break.
@@ -101,12 +104,18 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
   // `proxy_required` instead of clicking Place Order over the bare server IP.
   private readonly proxyActiveFor = new Map<string, boolean>();
   private sweepTimer: NodeJS.Timeout | null = null;
+  private readonly encryption: EncryptionUtil;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly databaseService: DatabaseService,
-    private readonly proxyService: ProxyService,
   ) {
+    const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
+    if (!key) {
+      throw new Error('AMAZON_ENCRYPTION_KEY environment variable is required');
+    }
+    this.encryption = new EncryptionUtil(key);
+
     this.stateDir = this.configService.get<string>('BROWSER_STATE_DIR')
       || path.resolve(process.cwd(), '.browser-state');
     this.profilesDir = path.join(this.stateDir, 'profiles');
@@ -457,22 +466,44 @@ export class BrowserStateManager implements OnModuleInit, OnModuleDestroy {
     this.proxyActiveFor.clear();
   }
 
+  /**
+   * Resolve the account's OWN proxy (migration 080 — self-service, per
+   * `amazon_accounts` row). Returns null (bare-IP launch) when the account has
+   * none configured/enabled, when it doesn't exist, or on any DB error — a
+   * proxy is the user's opt-in choice, never a platform-provided fallback.
+   */
   private async resolveProxy(
     amazonAccountId: string,
   ): Promise<{ server: string; username: string; password: string } | null> {
-    if (!(await this.proxyService.isConfigured())) {return null;}
     try {
-      const rows = await this.databaseService.query<{ user_id: string }>(
-        'SELECT user_id FROM amazon_accounts WHERE id = $1',
+      const rows = await this.databaseService.query<{
+        proxy_enabled: boolean;
+        proxy_connection_type: string | null;
+        proxy_host: string | null;
+        proxy_port: number | null;
+        proxy_username: string | null;
+        proxy_password: string | null;
+      }>(
+        `SELECT proxy_enabled, proxy_connection_type, proxy_host, proxy_port, proxy_username, proxy_password
+           FROM amazon_accounts WHERE id = $1`,
         [amazonAccountId],
       );
-      if (rows.length === 0) {
+      const row = rows[0];
+      if (!row) {
         this.logger.warn(
           `Amazon account ${amazonAccountId} not found — launching direct (no proxy).`,
         );
         return null;
       }
-      return await this.proxyService.resolve(rows[0].user_id, amazonAccountId);
+      if (!row.proxy_enabled || !row.proxy_host || !row.proxy_port) {
+        return null;
+      }
+      const connectionType = (row.proxy_connection_type as ProxyConnectionType) || ProxyConnectionType.HTTP;
+      return {
+        server: `${connectionType}://${row.proxy_host}:${row.proxy_port}`,
+        username: row.proxy_username ?? '',
+        password: row.proxy_password ? this.encryption.decrypt(row.proxy_password) : '',
+      };
     } catch (err) {
       this.logger.warn(
         `Proxy resolution failed for account ${amazonAccountId}: ${(err as Error).message} — launching direct.`,

@@ -4,12 +4,13 @@
  * Purpose: Handle eBay onboarding logic — US marketplace only.
  */
 
-import { EBAY_MARKETPLACE } from '@repo/shared';
+import { SUPPORTED_EBAY_MARKETPLACES, type EbayMarketplaceId } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useLazyGetEbayConnectUrlQuery } from '../api/ebayApi';
+import { getEbayMarketplaceOptions } from '../utils/ebayMarketplaceOptions';
 
 import { OnboardingEbayPageComponent } from './OnboardingEbayPage.component';
 
@@ -19,7 +20,10 @@ import { useLocale } from '@/utils/useLocale';
 export const OnboardingEbayPageContainer = (): React.ReactElement => {
   const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['ebay', 'translation']);
+  const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(
+    SUPPORTED_EBAY_MARKETPLACES[0]
+  );
 
   const [getConnectUrl, { isLoading, isSuccess, data, error }] = useLazyGetEbayConnectUrlQuery();
 
@@ -43,14 +47,23 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   }, [error, showMessage, closeMessage, i18n]);
 
   const handleConnect = (): void => {
-    void getConnectUrl({ marketplaceId: EBAY_MARKETPLACE.US });
+    void getConnectUrl({ marketplaceId: selectedMarketplace });
   };
 
   const handleSkip = (): void => {
     localeNavigate('/dashboard');
   };
 
-  return <OnboardingEbayPageComponent onConnect={handleConnect} isLoading={isLoading} onSkip={handleSkip} />;
+  return (
+    <OnboardingEbayPageComponent
+      onConnect={handleConnect}
+      isLoading={isLoading}
+      onSkip={handleSkip}
+      marketplaceOptions={getEbayMarketplaceOptions(t)}
+      selectedMarketplace={selectedMarketplace}
+      onMarketplaceChange={setSelectedMarketplace}
+    />
+  );
 };
 
 export default OnboardingEbayPageContainer;

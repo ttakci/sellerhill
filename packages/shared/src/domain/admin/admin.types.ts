@@ -1,6 +1,5 @@
 // packages/shared/src/domain/admin/admin.types.ts
 
-import type { ProxyStatus } from '../amazon/amazon.types';
 import type { UserRole } from '../auth/auth.types';
 import type { UserStatus } from '../user/user.types';
 
@@ -212,12 +211,6 @@ export enum AdminWarningKind {
   QUEUE_WAITING = 'queue_waiting',
   KEEPA_LOW_TOKENS = 'keepa_low_tokens',
   LLM_FAILURE_RATE = 'llm_failure_rate',
-  /** An ACTIVE proxy expires within the configured warn window (value = days left). */
-  PROXY_EXPIRING = 'proxy_expiring',
-  /** An ACTIVE proxy is past its expiry date (value = days overdue). */
-  PROXY_EXPIRED = 'proxy_expired',
-  /** The pool has ACTIVE rows but no free (unassigned) one left (value = free count, 0). */
-  PROXY_POOL_EXHAUSTED = 'proxy_pool_exhausted',
 }
 
 export enum AdminWarningLevel {
@@ -409,114 +402,10 @@ export interface AdminBillingMetricsQuery {
   to?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Proxy pool management (operator-facing admin surface)
-// ---------------------------------------------------------------------------
-
-/**
- * Expiry classification for a proxy row, derived server-side so every client
- * renders the same state. Fixed ISP proxies renew ~monthly; a lapsed proxy's
- * static IP is released by the provider, breaking the assigned user's
- * "one household" IP continuity — expiry must therefore be visible and alerted
- * on, never discovered at checkout time.
- */
-export enum ProxyExpiryState {
-  /** No expiry date recorded (operator has not set one). */
-  NO_EXPIRY = 'no_expiry',
-  /** Expiry known and outside the warn window. */
-  OK = 'ok',
-  /** Expiry within the warn window (ADMIN_PROXY_EXPIRY_WARN_DAYS). */
-  EXPIRING_SOON = 'expiring_soon',
-  /** Expiry date is in the past. */
-  EXPIRED = 'expired',
-}
-
-/**
- * Admin view of a proxy pool row. The password is NEVER exposed — not even
- * masked; it exists only encrypted at rest and inside Playwright launch args.
- */
-export interface AdminProxyDto {
-  id: string;
-  host: string;
-  port: number;
-  username: string;
-  status: ProxyStatus;
-  /** Operator label (e.g. provider + order ref). */
-  label: string | null;
-  /** User currently assigned to this proxy (UNIQUE per user), if any. */
-  assignedUserId: string | null;
-  /** Email of the assigned user (joined for display; null when unassigned). */
-  assignedUserEmail: string | null;
-  /** ISO 8601 timestamp of the assignment claim; null when unassigned. */
-  assignedAt: string | null;
-  /** ISO 8601 subscription expiry; null when the operator has not set one. */
-  expiresAt: string | null;
-  /** Server-derived expiry classification (single source of truth for badges/alerts). */
-  expiryState: ProxyExpiryState;
-  /** Whole days until expiry (negative when overdue); null when no expiry set. */
-  daysUntilExpiry: number | null;
-  /** Monthly renewal cost in micro-USD; null = unknown (never faked as 0). */
-  monthlyCostMicros: number | null;
-  /** Currency for monthlyCostMicros; pair-coupled (both set or both null). */
-  currency: string | null;
-  createdAt: string;
-}
-
-/** Aggregate health of the proxy pool. */
-export interface AdminProxyPoolSummaryDto {
-  totalProxies: number;
-  activeProxies: number;
-  disabledProxies: number;
-  /** ACTIVE rows currently claimed by a user. */
-  assignedProxies: number;
-  /** ACTIVE rows still claimable — 0 while users remain unserved means new users block. */
-  freeActiveProxies: number;
-  /** ACTIVE rows in EXPIRING_SOON state. */
-  expiringSoon: number;
-  /** ACTIVE rows already past expiry. */
-  expired: number;
-  /**
-   * Sum of known monthly costs (micro-USD) across ACTIVE rows; null when no
-   * ACTIVE row has a recorded cost. Rows with unknown cost are excluded, so
-   * this is a lower bound whenever some costs are unrecorded.
-   */
-  totalMonthlyCostMicros: number | null;
-  /** Currency for totalMonthlyCostMicros; null when it is null. */
-  currency: string | null;
-  /** Warn window (days) used to derive EXPIRING_SOON, for display. */
-  expiryWarnDays: number;
-}
-
-/** Payload of GET /admin/proxies. */
-export interface AdminProxyListDto {
-  generatedAt: string;
-  summary: AdminProxyPoolSummaryDto;
-  proxies: AdminProxyDto[];
-}
-
-/** Request body for POST /admin/proxies (operator adds a purchased proxy). */
-export interface CreateProxyRequest {
-  host: string;
-  port: number;
-  username: string;
-  /** Plaintext over TLS; encrypted (AES-256-GCM, `enc:` prefix) before persist. */
-  password: string;
-  label?: string;
-  /** ISO 8601 subscription expiry. */
-  expiresAt?: string;
-  /** Monthly renewal cost in micro-USD; pair with currency. */
-  monthlyCostMicros?: number;
-  currency?: string;
-}
-
-/** Request body for PATCH /admin/proxies/:id. Only provided fields change. */
-export interface UpdateProxyRequest {
-  status?: ProxyStatus;
-  label?: string | null;
-  expiresAt?: string | null;
-  monthlyCostMicros?: number | null;
-  currency?: string | null;
-}
+// Proxy pool management types (ProxyExpiryState, AdminProxyDto,
+// AdminProxyPoolSummaryDto, AdminProxyListDto, CreateProxyRequest,
+// UpdateProxyRequest) were removed 2026-08-13 along with the admin proxy pool
+// surface — see CLAUDE.md "Amazon Scraping — Anti-Ban Strategy".
 
 // ---------------------------------------------------------------------------
 // User monitoring (read-only admin)
@@ -537,8 +426,6 @@ export interface AdminUserDto {
   activeEbayStores: number;
   /** Orders ingested in the last 30 days. */
   ordersLast30Days: number;
-  /** Assigned pool proxy as host:port; null when the user has no proxy. */
-  proxyHost: string | null;
   /** Keepa tokens attributed to the user in the period (fair-split projection). */
   keepaTokens: number;
   /** LLM tokens (prompt+completion+embedding) attributed in the period. */

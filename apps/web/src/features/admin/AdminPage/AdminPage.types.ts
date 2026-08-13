@@ -6,8 +6,6 @@ import type {
   AdminListingQualitySummaryDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
-  AdminProxyDto,
-  AdminProxyListDto,
   AdminUserDto,
   AdminUsersListDto,
   PlatformSettingCategory,
@@ -21,26 +19,12 @@ export type AdminTabId =
   | 'overview'
   | 'queues'
   | 'costs'
-  | 'proxies'
   | 'listingQuality'
   | 'settings'
   | 'billing'
   | 'users'
   | 'ebayLimits'
   | 'listingFailures';
-
-/** Controlled add-proxy form state (strings — converted at submit). */
-export interface ProxyFormState {
-  host: string;
-  port: string;
-  username: string;
-  password: string;
-  label: string;
-  /** YYYY-MM-DD (native date input value). */
-  expiresAt: string;
-  /** Monthly cost in USD; converted to micro-USD at submit. */
-  monthlyCostUsd: string;
-}
 
 /** Settings grouped for rendering, one block per registry category. */
 export interface SettingGroup {
@@ -65,7 +49,6 @@ export interface AdminPageComponentProps {
   operations?: AdminOperationsSummaryDto;
   providerCosts: ProviderCostSummaryDto[];
   billingMetrics?: AdminBillingMetricsDto;
-  proxyPool?: AdminProxyListDto;
   usersList?: AdminUsersListDto;
   /** Per-resource daily eBay quota usage. The pool is shared by every seller. */
   ebayBudget: EbayCallBudgetStatusDto[];
@@ -73,7 +56,6 @@ export interface AdminPageComponentProps {
   listingFailures?: AdminListingFailuresDto;
   /** Real table columns — the tabs used to render hand-built flex rows. */
   userColumns: TableColumn<AdminUserDto>[];
-  proxyColumns: TableColumn<AdminProxyDto>[];
   budgetColumns: TableColumn<EbayCallBudgetStatusDto>[];
   failureColumns: TableColumn<AdminListingFailureDto>[];
   settingGroups: SettingGroup[];
@@ -84,10 +66,6 @@ export interface AdminPageComponentProps {
   isSavingSetting: boolean;
   emailTestResult: { ok: boolean; error: string | null } | null;
   isTestingEmail: boolean;
-  proxyForm: ProxyFormState;
-  isSavingProxy: boolean;
-  onProxyFieldChange: (field: keyof ProxyFormState, value: string) => void;
-  onProxySubmit: () => void;
   onSettingDraftChange: (key: string, value: string) => void;
   onSettingSave: (key: string) => void;
   onSettingToggle: (setting: PlatformSettingDto) => void;

@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EBAY_ACCOUNT_STATUS,
   EBAY_MARKETPLACE,
   EBAY_MARKETPLACE_CONFIG,
   EbayAccountStatus,
+  SUPPORTED_EBAY_MARKETPLACES,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
   type EbayMarketplaceId,
@@ -212,11 +213,28 @@ export class EbayService implements OnModuleInit {
    */
   createConnectUrl(userId: string, marketplaceId?: EbayMarketplaceId): CreateEbayConnectUrlResponse {
     const marketplace = marketplaceId || EBAY_MARKETPLACE.US;
+    // Server-side gate mirroring the frontend picker's allowlist: only
+    // marketplaces actually offered today (see SUPPORTED_EBAY_MARKETPLACES)
+    // can be connected, even if a stale client or manual API call requests
+    // one of the marketplaces EBAY_MARKETPLACE_CONFIG already has data for.
+    if (!SUPPORTED_EBAY_MARKETPLACES.includes(marketplace)) {
+      throw new BadRequestException(`Unsupported eBay marketplace: ${marketplace}`);
+    }
     this.logger.log(`Creating eBay connect URL for user ${userId}, marketplace: ${marketplace}`);
 
     const { url, state } = this.oauthService.generateConsentUrl(marketplace, userId);
 
     return { url, state };
+  }
+
+  /**
+   * eBay's Trading (XML) API Site ID for a marketplace, read from the single
+   * shared config (EBAY_MARKETPLACE_CONFIG) rather than a duplicated inline
+   * map — this used to be redeclared independently at two call sites.
+   */
+  private resolveSiteId(marketplaceId: string): string {
+    const config = EBAY_MARKETPLACE_CONFIG[marketplaceId as EbayMarketplaceId];
+    return config?.siteId ?? EBAY_MARKETPLACE_CONFIG[EBAY_MARKETPLACE.US].siteId;
   }
 
   /**
@@ -901,7 +919,6 @@ export class EbayService implements OnModuleInit {
     }
     const accessToken = await this.getAccessToken(account);
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
-    const siteIdMap: Record<string, string> = { EBAY_US: '0', EBAY_UK: '3', EBAY_DE: '77', EBAY_FR: '71', EBAY_IT: '101', EBAY_ES: '186' };
     const discovered: Array<{ ebayItemId: string; sku?: string; title: string; price: number; quantity: number; quantitySold: number; imageUrl?: string; marketplaceId: string; apiModel: EbayListingApiModel }> = [];
     let page = 1;
     let totalPages = 1;
@@ -914,7 +931,7 @@ export class EbayService implements OnModuleInit {
   <DetailLevel>ReturnAll</DetailLevel>
 </GetMyeBaySellingRequest>`;
       const response = await this.withRateLimitRetry(() => axios.post<string>(baseUrl, xml, { headers: {
-        'Content-Type': 'text/xml', 'X-EBAY-API-SITEID': siteIdMap[account.marketplace_id] || '0',
+        'Content-Type': 'text/xml', 'X-EBAY-API-SITEID': this.resolveSiteId(account.marketplace_id),
         'X-EBAY-API-COMPATIBILITY-LEVEL': '967', 'X-EBAY-API-CALL-NAME': 'GetMyeBaySelling',
         'X-EBAY-API-IAF-TOKEN': accessToken,
       }}));
@@ -1012,15 +1029,7 @@ export class EbayService implements OnModuleInit {
 </EndItemRequest>`;
 
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
-    const siteIdMap: Record<string, string> = {
-      EBAY_US: '0',
-      EBAY_UK: '3',
-      EBAY_DE: '77',
-      EBAY_FR: '71',
-      EBAY_IT: '101',
-      EBAY_ES: '186',
-    };
-    const siteId = siteIdMap[account.marketplace_id] || '0';
+    const siteId = this.resolveSiteId(account.marketplace_id);
 
     try {
       const response = await axios.post(baseUrl, xml, {

@@ -39,7 +39,6 @@ const OPERATOR_ROUTES: readonly OperatorRoute[] = [
   adminSection(undefined, 'dashboard', 'admin:admin.tabs.overview'),
   adminSection('queues', 'list', 'admin:admin.tabs.queues'),
   adminSection('costs', 'coins', 'admin:admin.tabs.costs'),
-  adminSection('proxies', 'server', 'admin:admin.tabs.proxies'),
   adminSection('listingQuality', 'star', 'admin:admin.tabs.listingQuality'),
   adminSection('settings', 'settings', 'admin:admin.tabs.settings'),
   adminSection('billing', 'payments', 'admin:admin.tabs.billing'),

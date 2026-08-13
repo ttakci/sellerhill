@@ -15,8 +15,6 @@ import {
   AdminWarningKind,
   AdminWarningLevel,
   PlatformSettingKey,
-  ProxyExpiryState,
-  ProxyStatus,
   UsageEventSource,
   UsageMetric,
   type AdminBillingMetricsDto,
@@ -37,7 +35,6 @@ import type { Queue } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
-import { AdminProxiesService } from './admin-proxies.service';
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
 import {
   buildAccessTierDistribution,
@@ -94,8 +91,7 @@ export class AdminService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly platformSettings: PlatformSettingsService,
-    private readonly adminProxiesService: AdminProxiesService
+    private readonly platformSettings: PlatformSettingsService
   ) {}
 
   /**
@@ -421,54 +417,7 @@ export class AdminService {
     const llmThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LLM_FAILURE_RATE_THRESHOLD);
     const llmWarning = thresholdWarning(AdminWarningKind.LLM_FAILURE_RATE, llmFailureRatePct, llmThreshold);
     if (llmWarning) {warnings.push(llmWarning);}
-    warnings.push(...(await this.buildProxyPoolWarnings()));
     return { generatedAt: new Date().toISOString(), queues: queueSummaries, keepaTokensLeft, llmFailureRatePct, warnings };
-  }
-
-  /**
-   * Proxy pool warnings: per-proxy expiry (a lapsed fixed ISP proxy releases
-   * its static IP and breaks the assigned user's IP continuity) plus pool
-   * exhaustion (no free ACTIVE proxy left — the next new user's auto-fulfill
-   * fails closed with proxy_required). Fail-soft: a proxies-table error never
-   * breaks the operations summary.
-   */
-  private async buildProxyPoolWarnings(): Promise<AdminWarningDto[]> {
-    const warnings: AdminWarningDto[] = [];
-    try {
-      const pool = await this.adminProxiesService.list();
-      for (const proxy of pool.proxies) {
-        if (proxy.status !== ProxyStatus.ACTIVE) {continue;}
-        const subject = `${proxy.host}:${proxy.port}`;
-        if (proxy.expiryState === ProxyExpiryState.EXPIRED) {
-          warnings.push({
-            kind: AdminWarningKind.PROXY_EXPIRED,
-            level: AdminWarningLevel.CRITICAL,
-            value: Math.abs(proxy.daysUntilExpiry ?? 0),
-            threshold: 0,
-            subject,
-          });
-        } else if (proxy.expiryState === ProxyExpiryState.EXPIRING_SOON) {
-          warnings.push({
-            kind: AdminWarningKind.PROXY_EXPIRING,
-            level: AdminWarningLevel.WARNING,
-            value: proxy.daysUntilExpiry ?? 0,
-            threshold: pool.summary.expiryWarnDays,
-            subject,
-          });
-        }
-      }
-      if (pool.summary.activeProxies > 0 && pool.summary.freeActiveProxies === 0) {
-        warnings.push({
-          kind: AdminWarningKind.PROXY_POOL_EXHAUSTED,
-          level: AdminWarningLevel.WARNING,
-          value: 0,
-          threshold: 1,
-        });
-      }
-    } catch (error: unknown) {
-      this.logger.warn(`buildProxyPoolWarnings failed: ${this.errMsg(error)}`);
-    }
-    return warnings;
   }
 
   // --- internals -------------------------------------------------------------

@@ -6,7 +6,6 @@ export type AdminSectionId =
   | 'overview'
   | 'queues'
   | 'costs'
-  | 'proxies'
   | 'listingQuality'
   | 'settings'
   | 'billing'

@@ -20,6 +20,9 @@ export const OnboardingEbayPageComponent = ({
   onConnect,
   onSkip,
   isLoading,
+  marketplaceOptions,
+  selectedMarketplace,
+  onMarketplaceChange,
 }: OnboardingEbayPageProps): React.ReactElement => {
   const { t } = useTranslation(['ebay', 'translation']);
 
@@ -31,6 +34,9 @@ export const OnboardingEbayPageComponent = ({
         onSkip={onSkip}
         isLoading={isLoading}
         footnote={t('ebay:ebay.onboarding.usOnlyNote')}
+        marketplaceOptions={marketplaceOptions}
+        selectedMarketplace={selectedMarketplace}
+        onMarketplaceChange={onMarketplaceChange}
       />
     </S.Container>
   );

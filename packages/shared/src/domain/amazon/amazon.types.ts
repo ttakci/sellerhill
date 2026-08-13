@@ -17,22 +17,42 @@ export interface CreateAmazonAccountRequest {
   email: string;
   password: string;
   twoFactorSecret?: string;
-  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
-  // configured and a non-null cap (enforced in AmazonAccountsService).
+  // A2 auto-fulfillment per-account overrides. Enabling requires a non-null cap
+  // (enforced in AmazonAccountsService). A proxy is no longer required — see
+  // `proxyEnabled` below.
   autoFulfillEnabled?: boolean;
   autoFulfillCapTotal?: number | null;
   autoFulfillDryRun?: boolean;
+  // Self-service proxy (replaces the platform-paid pool, migration 080). The
+  // user supplies their own; when omitted/disabled, browser automation for
+  // this account runs bare-IP — never a platform-funded fallback.
+  proxyEnabled?: boolean;
+  proxyConnectionType?: ProxyConnectionType | null;
+  proxyHost?: string | null;
+  proxyPort?: number | null;
+  proxyUsername?: string | null;
+  /** Write-only; omit on update to keep the stored password unchanged. */
+  proxyPassword?: string | null;
 }
 
 export interface UpdateAmazonAccountRequest {
   label?: string;
   password?: string;
   twoFactorSecret?: string;
-  // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
-  // configured and a non-null cap (enforced in AmazonAccountsService).
+  // A2 auto-fulfillment per-account overrides. Enabling requires a non-null cap
+  // (enforced in AmazonAccountsService). A proxy is no longer required — see
+  // `proxyEnabled` below.
   autoFulfillEnabled?: boolean;
   autoFulfillCapTotal?: number | null;
   autoFulfillDryRun?: boolean;
+  // Self-service proxy (replaces the platform-paid pool, migration 080).
+  proxyEnabled?: boolean;
+  proxyConnectionType?: ProxyConnectionType | null;
+  proxyHost?: string | null;
+  proxyPort?: number | null;
+  proxyUsername?: string | null;
+  /** Write-only; omit to keep the stored password unchanged. */
+  proxyPassword?: string | null;
 }
 
 export interface AmazonOrderLinkRequest {
@@ -113,12 +133,13 @@ export enum TrackingConversionProvider {
 }
 
 /**
- * Lifecycle of a fixed ISP proxy row in the `proxies` pool (migration 057).
- * DISABLED rows are never claimed and never used even if still assigned
- * (burned IP / provider churn — operator flips the flag, user re-claims a
- * free proxy on next resolve).
+ * Proxy transport for a user-supplied, per-Amazon-account proxy (migration
+ * 080). Replaces the platform-paid `proxies` pool (that table and
+ * `ProxyStatus` are retired, not deleted — see CLAUDE.md "Amazon Scraping —
+ * Anti-Ban Strategy").
  */
-export enum ProxyStatus {
-  ACTIVE = 'active',
-  DISABLED = 'disabled',
+export enum ProxyConnectionType {
+  HTTP = 'http',
+  HTTPS = 'https',
+  SOCKS5 = 'socks5',
 }

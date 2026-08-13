@@ -49,6 +49,7 @@ export class AmazonController {
       email: dto.email,
       password: dto.password,
       twoFactorSecret: dto.twoFactorSecret,
+      marketplace: dto.marketplace,
       autoFulfillEnabled: dto.autoFulfillEnabled,
       autoFulfillCapTotal: dto.autoFulfillCapTotal,
       autoFulfillDryRun: dto.autoFulfillDryRun,

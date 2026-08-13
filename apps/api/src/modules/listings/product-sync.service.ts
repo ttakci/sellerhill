@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ListingStatus, type ListingSettingsGroup, type ProductData } from '@repo/shared';
+import { AmazonMarketplace, ListingStatus, type ListingSettingsGroup, type ProductData } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EbayBulkService, type BulkPriceQuantityItem } from '../ebay/ebay-bulk.service';
@@ -79,26 +79,35 @@ export class ProductSyncService {
    * listing that shares it.
    */
   async syncListingsForProduct(productId: string): Promise<void> {
-    const rows = await this.databaseService.query<{ asin: string }>(`SELECT asin FROM products WHERE id = $1`, [
-      productId,
-    ]);
+    const rows = await this.databaseService.query<{ asin: string; marketplace: string }>(
+      `SELECT asin, marketplace FROM products WHERE id = $1`,
+      [productId]
+    );
     if (rows.length === 0) {
       this.logger.debug(`syncListingsForProduct: product ${productId} not found`);
       return;
     }
-    await this.updateAllListingsForProduct(productId, rows[0].asin);
+    await this.updateAllListingsForProduct(productId, rows[0].asin, rows[0].marketplace as AmazonMarketplace);
   }
 
   /** Compute + push for a single product. Callers with many products should batch instead. */
-  async updateAllListingsForProduct(productId: string, asin: string): Promise<void> {
-    await this.flushUpdates(await this.computePendingUpdates(productId, asin));
+  async updateAllListingsForProduct(
+    productId: string,
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<void> {
+    await this.flushUpdates(await this.computePendingUpdates(productId, asin, marketplace));
   }
 
   /**
    * Work out what each active listing for this product should now cost and
    * stock. Makes no eBay calls; returns only the listings that actually moved.
    */
-  async computePendingUpdates(productId: string, asin: string): Promise<PendingListingUpdate[]> {
+  async computePendingUpdates(
+    productId: string,
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<PendingListingUpdate[]> {
     const listings = await this.databaseService.query<ListingRow>(
       `SELECT id, user_id, listing_settings_group_id, ebay_item_id, ebay_account_id,
               sku, ebay_offer_id, price, quantity,
@@ -116,7 +125,7 @@ export class ProductSyncService {
       return [];
     }
 
-    const productInfo = await this.listingsService.getProductByAsin(asin);
+    const productInfo = await this.listingsService.getProductByAsin(asin, marketplace);
     if (!productInfo) {
       return [];
     }

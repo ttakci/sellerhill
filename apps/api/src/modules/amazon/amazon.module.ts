@@ -25,7 +25,6 @@ import { AquilineClient } from './aquiline.client';
 import { AutoFulfillProcessor } from './auto-fulfill-processor.service';
 import { BrowserProfileGcService } from './browser-profile-gc.service';
 import { BrowserStateManager } from './browser-state-manager.service';
-import { ProxyService } from './proxy.service';
 import { TrackingConversionService } from './tracking-conversion.service';
 import { TrackingWebhookController } from './tracking-webhook.controller';
 import { TrackingWebhookService } from './tracking-webhook.service';
@@ -45,10 +44,9 @@ import { TrackingWebhookService } from './tracking-webhook.service';
   ],
   controllers: [AmazonController, TrackingWebhookController],
   providers: [
-    // Per-account persistent + proxy-aware browser context manager.
-    // Resolves sticky residential proxy per SellerHill user (or per account) and
-    // launches contexts that share a per-account user-data-dir.
-    ProxyService,
+    // Per-account persistent + proxy-aware browser context manager. Each
+    // amazon_accounts row may carry its own self-service proxy (migration
+    // 080); the context launches through it when enabled, bare-IP otherwise.
     BrowserStateManager,
     AmazonRateLimiter,
     // Bounds profile DISK the way BrowserStateManager.evictIdle bounds memory:
@@ -92,7 +90,6 @@ import { TrackingWebhookService } from './tracking-webhook.service';
     AmazonTrackingQueueService,
     AmazonVerifyQueueService,
     AmazonOrderSyncQueueService,
-    ProxyService,
   ],
 })
 export class AmazonModule {}

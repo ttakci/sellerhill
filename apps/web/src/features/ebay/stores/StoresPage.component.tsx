@@ -6,12 +6,16 @@ import * as S from './StoresPage.style';
 import type { StoresPageComponentProps } from './StoresPage.types';
 
 import { ConnectEbayPrompt } from '@/domain-ui';
+import { getEbayMarketplaceLabel } from '@/features/ebay/utils/ebayMarketplaceOptions';
 
 export const StoresPageComponent = ({
   accounts,
   isLoading,
   isConnecting,
   onConnect,
+  marketplaceOptions,
+  selectedMarketplace,
+  onMarketplaceChange,
 }: StoresPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['ebay', 'translation']);
 
@@ -44,13 +48,21 @@ export const StoresPageComponent = ({
                 <Text variant="body-sm" color="text.secondary">{account.sellerId}</Text>
               </S.StoreCardBody>
               <S.StoreMeta>
-                <Text variant="caption" color="text.tertiary">{account.marketplaceId}</Text>
+                <Text variant="caption" color="text.tertiary">
+                  {getEbayMarketplaceLabel(t, account.marketplaceId)}
+                </Text>
               </S.StoreMeta>
             </Card>
           ))}
         </S.StoresGrid>
       ) : (
-        <ConnectEbayPrompt onConnect={onConnect} isLoading={isConnecting} />
+        <ConnectEbayPrompt
+          onConnect={onConnect}
+          isLoading={isConnecting}
+          marketplaceOptions={marketplaceOptions}
+          selectedMarketplace={selectedMarketplace}
+          onMarketplaceChange={onMarketplaceChange}
+        />
       )}
     </S.Container>
   );

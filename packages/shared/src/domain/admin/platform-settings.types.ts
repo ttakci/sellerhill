@@ -145,7 +145,6 @@ export enum PlatformSettingKey {
   ADMIN_LISTING_QUOTA_CRITICAL_THRESHOLD = 'admin.listingQuotaCriticalThreshold',
   ADMIN_AMAZON_ACCOUNT_QUOTA_WARN_THRESHOLD = 'admin.amazonAccountQuotaWarnThreshold',
   ADMIN_AMAZON_ACCOUNT_QUOTA_CRITICAL_THRESHOLD = 'admin.amazonAccountQuotaCriticalThreshold',
-  ADMIN_PROXY_EXPIRY_WARN_DAYS = 'admin.proxyExpiryWarnDays',
 
   // --- Feature toggles ---
   LLM_CONTENT_ENABLED = 'llm.contentEnabled',

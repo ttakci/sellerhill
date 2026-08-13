@@ -2,7 +2,12 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { Injectable, Logger } from '@nestjs/common';
-import { AmazonAccountStatus, type AmazonScrapedOrderData } from '@repo/shared';
+import {
+  AmazonAccountStatus,
+  AmazonMarketplace,
+  buildAmazonSiteUrl,
+  type AmazonScrapedOrderData,
+} from '@repo/shared';
 import type { Locator, Page } from 'playwright';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
@@ -193,13 +198,13 @@ export class AmazonScrapingService {
         page = await context.newPage();
         this.logger.debug(`Reusing existing session for account ${amazonAccountId}`);
       } else {
-        page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret);
+        page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
       }
 
       try {
         onProgress?.({ stage: 'navigating', message: 'Navigating to order page...' });
 
-        const orderUrl = `https://www.amazon.com/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+        const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
         await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForTimeout(2000);
 
@@ -209,7 +214,7 @@ export class AmazonScrapingService {
           // Session expired mid-request, re-login
           await page.close();
           await this.browserStateManager.clearState(amazonAccountId);
-          page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret);
+          page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
           await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
           await page.waitForTimeout(2000);
         }
@@ -272,11 +277,11 @@ export class AmazonScrapingService {
       const context = await this.browserStateManager.getContext(amazonAccountId);
       page = await context.newPage();
     } else {
-      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret);
+      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
     }
 
     try {
-      const orderUrl = `https://www.amazon.com/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+      const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
       await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
@@ -305,7 +310,8 @@ export class AmazonScrapingService {
           amazonAccountId,
           account.email,
           account.decryptedPassword,
-          account.decryptedTwoFactorSecret
+          account.decryptedTwoFactorSecret,
+          account.marketplace as AmazonMarketplace
         );
         await page.close();
         return { success: true };
@@ -346,6 +352,7 @@ export class AmazonScrapingService {
       account.email,
       account.decryptedPassword,
       account.decryptedTwoFactorSecret,
+      account.marketplace as AmazonMarketplace,
     );
   }
 
@@ -392,6 +399,7 @@ export class AmazonScrapingService {
         account.email,
         account.decryptedPassword,
         account.decryptedTwoFactorSecret,
+        account.marketplace as AmazonMarketplace,
       );
     }
 
@@ -401,7 +409,7 @@ export class AmazonScrapingService {
       // rows. The page itself only paginates so far back — if the user hasn't
       // synced in >1 year, we miss older orders (acceptable: cost-capture is
       // best-effort, controller-mediated for any gap).
-      const ordersUrl = 'https://www.amazon.com/your-orders/orders?timeFilter=year-' +
+      const ordersUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/your-orders/orders?timeFilter=year-` +
         new Date().getFullYear();
       await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
       await page.waitForTimeout(1500);
@@ -416,6 +424,7 @@ export class AmazonScrapingService {
           account.email,
           account.decryptedPassword,
           account.decryptedTwoFactorSecret,
+          account.marketplace as AmazonMarketplace,
         );
         await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
         await page.waitForTimeout(1500);
@@ -664,7 +673,8 @@ export class AmazonScrapingService {
     amazonAccountId: string,
     email: string,
     password: string,
-    twoFactorSecret: string | null
+    twoFactorSecret: string | null,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
   ): Promise<import('playwright').Page> {
     const context = await this.browserStateManager.getContext(amazonAccountId);
     const page = await context.newPage();
@@ -724,7 +734,7 @@ export class AmazonScrapingService {
     // Land on the storefront and require a positive signed-in signal; Unified
     // Auth can remain under /ax/claim/* and the old code falsely marked such
     // sessions ACTIVE, causing checkout to run on a signed-out page.
-    await page.goto('https://www.amazon.com/', {
+    await page.goto(buildAmazonSiteUrl(marketplace), {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });

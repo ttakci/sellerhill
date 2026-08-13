@@ -1,3 +1,6 @@
+import { AMAZON_MARKETPLACE_CONFIG } from '../amazon/amazon.constants';
+import { AmazonMarketplace } from '../amazon/amazon.enums';
+
 import { EbayEnvironment } from './ebay.types';
 
 /**
@@ -14,8 +17,6 @@ export const EBAY_SITE_URL: Record<EbayEnvironment, string> = {
   [EbayEnvironment.SANDBOX]: 'https://sandbox.ebay.com',
 };
 
-export const AMAZON_SITE_URL = 'https://www.amazon.com';
-
 /** Item page for an eBay listing id, in the given environment. */
 export function buildEbayItemUrl(
   itemId: string,
@@ -24,9 +25,22 @@ export function buildEbayItemUrl(
   return `${EBAY_SITE_URL[environment] ?? EBAY_SITE_URL[EbayEnvironment.PRODUCTION]}/itm/${itemId}`;
 }
 
-/** Amazon product page for an ASIN (Amazon has no sandbox counterpart). */
-export function buildAmazonProductUrl(asin: string): string {
-  return `${AMAZON_SITE_URL}/dp/${asin}`;
+/**
+ * Amazon storefront base URL for a marketplace (Amazon has no sandbox
+ * counterpart — one storefront per marketplace, always live).
+ */
+export function buildAmazonSiteUrl(
+  marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+): string {
+  return `https://www.${AMAZON_MARKETPLACE_CONFIG[marketplace].domain}`;
+}
+
+/** Amazon product page for an ASIN in the given marketplace. */
+export function buildAmazonProductUrl(
+  asin: string,
+  marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+): string {
+  return `${buildAmazonSiteUrl(marketplace)}/dp/${asin}`;
 }
 
 /** Parse an env/config string into the enum, defaulting to production. */

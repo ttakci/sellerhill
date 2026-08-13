@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AMAZON_MARKETPLACE_CONFIG,
+  AmazonMarketplace,
   IProductDataProvider,
   KeepaStockStatus,
   type KeepaApiMeta,
@@ -73,22 +75,28 @@ export class KeepaService implements IProductDataProvider {
    * Implements IProductDataProvider; callers needing token attribution use
    * getProductDetailsWithMeta.
    */
-  async getProductDetails(asin: string): Promise<ProductData | null> {
-    return (await this.getProductDetailsWithMeta(asin)).product;
+  async getProductDetails(
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<ProductData | null> {
+    return (await this.getProductDetailsWithMeta(asin, marketplace)).product;
   }
 
   /** Single-ASIN fetch returning token metadata alongside product data. */
-  async getProductDetailsWithMeta(asin: string): Promise<KeepaSingleResult> {
+  async getProductDetailsWithMeta(
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<KeepaSingleResult> {
     this.logger.log(`Fetching full Keepa data for ASIN: ${asin}`);
 
-    const response = await this.request([asin], 30000);
+    const response = await this.request([asin], 30000, marketplace);
     const meta = this.extractMeta(response);
     const raw = response.products?.[0];
     if (!raw) {
       this.logger.warn(`No product data returned from Keepa for ASIN ${asin}`);
       return { product: null, meta };
     }
-    return { product: this.normalizeProductData(raw, asin), meta };
+    return { product: this.normalizeProductData(raw, asin, marketplace), meta };
   }
 
   /**
@@ -97,7 +105,10 @@ export class KeepaService implements IProductDataProvider {
    * 100-ASIN-per-request limit and `meta.tokensConsumed` is summed across
    * chunks (balance fields reflect the last chunk — the freshest snapshot).
    */
-  async getProducts(asins: string[]): Promise<KeepaBulkResult> {
+  async getProducts(
+    asins: string[],
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<KeepaBulkResult> {
     const uniqueAsins = dedupeAsins(asins);
     if (uniqueAsins.length === 0) {
       return { products: [], meta: { tokensConsumed: 0 } };
@@ -113,7 +124,7 @@ export class KeepaService implements IProductDataProvider {
     let lastMeta: KeepaApiMeta = { tokensConsumed: 0 };
 
     for (const chunk of chunks) {
-      const response = await this.request(chunk, 120000);
+      const response = await this.request(chunk, 120000, marketplace);
       lastMeta = this.extractMeta(response);
       tokensConsumed += lastMeta.tokensConsumed;
 
@@ -132,10 +143,14 @@ export class KeepaService implements IProductDataProvider {
   }
 
   /** One Keepa /product HTTP call. Transport errors propagate to the caller. */
-  private async request(asins: string[], timeout: number): Promise<KeepaResponse> {
+  private async request(
+    asins: string[],
+    timeout: number,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<KeepaResponse> {
     const params: Record<string, string | number> = {
       key: this.apiKey,
-      domain: 1,
+      domain: AMAZON_MARKETPLACE_CONFIG[marketplace].keepaDomainId,
       asin: asins.join(','),
       history: 0,
       stats: 90,
@@ -191,7 +206,11 @@ export class KeepaService implements IProductDataProvider {
   }
 
   /** Normalized ProductData for the create path (single-ASIN). */
-  private normalizeProductData(raw: KeepaRawProduct, asin: string): ProductData {
+  private normalizeProductData(
+    raw: KeepaRawProduct,
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): ProductData {
     const commerce = extractCommerce(raw);
     const category = raw.categoryTree ? raw.categoryTree[raw.categoryTree.length - 1]?.name : undefined;
 
@@ -213,7 +232,7 @@ export class KeepaService implements IProductDataProvider {
       specs,
       price: {
         current: commerce.price ?? 0,
-        currency: 'USD',
+        currency: AMAZON_MARKETPLACE_CONFIG[marketplace].currency,
         avg30: raw.stats?.avg30?.[0] && raw.stats.avg30[0] > 0 ? raw.stats.avg30[0] / 100 : undefined,
         avg90: raw.stats?.avg90?.[0] && raw.stats.avg90[0] > 0 ? raw.stats.avg90[0] / 100 : undefined,
       },

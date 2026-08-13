@@ -48,14 +48,12 @@ export const AdminPageComponent = ({
   operations,
   providerCosts,
   billingMetrics,
-  proxyPool,
   usersList,
   ebayBudget,
   listingFailures,
   userColumns,
   budgetColumns,
   failureColumns,
-  proxyColumns,
   settingGroups,
   collapsedSettingCategories,
   onToggleSettingCategory,
@@ -63,10 +61,6 @@ export const AdminPageComponent = ({
   isSavingSetting,
   emailTestResult,
   isTestingEmail,
-  proxyForm,
-  isSavingProxy,
-  onProxyFieldChange,
-  onProxySubmit,
   onSettingDraftChange,
   onSettingSave,
   onSettingToggle,
@@ -180,17 +174,6 @@ export const AdminPageComponent = ({
 
       {activeTab === 'costs' && (
         <S.Grid>
-          <S.SummaryCard>
-            <Text variant="caption" color="text.secondary">
-              {t('admin.cost.proxyPool')}
-            </Text>
-            <Text variant="metric" weight="semibold">
-              {proxyPool ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency) : '—'}
-            </Text>
-            <Text variant="caption" color="text.secondary">
-              {t('admin.cost.proxyPoolHint')}
-            </Text>
-          </S.SummaryCard>
           {providerCosts.map((cost) => (
             <S.SummaryCard key={`${cost.source}-${cost.metric}`}>
               <Text variant="body" weight="semibold">
@@ -205,135 +188,6 @@ export const AdminPageComponent = ({
             </S.SummaryCard>
           ))}
         </S.Grid>
-      )}
-
-      {activeTab === 'proxies' && (
-        <S.Rows>
-          <S.Grid>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.activePool')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {proxyPool?.summary.activeProxies ?? '—'}
-              </Text>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.freeCount', { value: proxyPool?.summary.freeActiveProxies ?? 0 })}
-              </Text>
-            </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.assigned')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {proxyPool?.summary.assignedProxies ?? '—'}
-              </Text>
-            </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.monthlyCost')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {proxyPool ? formatCost(proxyPool.summary.totalMonthlyCostMicros, proxyPool.summary.currency) : '—'}
-              </Text>
-            </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.expiringSoon')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {proxyPool?.summary.expiringSoon ?? '—'}
-              </Text>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.proxies.expiredCount', { value: proxyPool?.summary.expired ?? 0 })}
-              </Text>
-            </S.SummaryCard>
-          </S.Grid>
-
-          <S.Section>
-            <Text variant="caption" color="text.secondary">
-              {t('admin.proxies.addTitle')}
-            </Text>
-            <Text variant="body-sm" color="text.secondary">
-              {t('admin.proxies.addSubtitle')}
-            </Text>
-            <S.FormGrid>
-              <ModernTextInput
-                name="proxyHost"
-                label={t('admin.proxies.host')}
-                value={proxyForm.host}
-                onChange={(e) => onProxyFieldChange('host', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyPort"
-                type="number"
-                label={t('admin.proxies.port')}
-                value={proxyForm.port}
-                onChange={(e) => onProxyFieldChange('port', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyUsername"
-                label={t('admin.proxies.username')}
-                value={proxyForm.username}
-                onChange={(e) => onProxyFieldChange('username', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyPassword"
-                type="password"
-                label={t('admin.proxies.password')}
-                value={proxyForm.password}
-                onChange={(e) => onProxyFieldChange('password', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyLabel"
-                label={t('admin.proxies.labelField')}
-                value={proxyForm.label}
-                onChange={(e) => onProxyFieldChange('label', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyExpiresAt"
-                type="date"
-                label={t('admin.proxies.expiresAt')}
-                value={proxyForm.expiresAt}
-                onChange={(e) => onProxyFieldChange('expiresAt', e.target.value)}
-              />
-              <ModernTextInput
-                name="proxyMonthlyCost"
-                type="number"
-                label={t('admin.proxies.monthlyCostUsd')}
-                value={proxyForm.monthlyCostUsd}
-                onChange={(e) => onProxyFieldChange('monthlyCostUsd', e.target.value)}
-              />
-            </S.FormGrid>
-            <S.FormActions>
-              <Button variant="primary" onClick={onProxySubmit} isLoading={isSavingProxy} disabled={isSavingProxy}>
-                <Text variant="body-sm" weight="semibold">
-                  {t('admin.proxies.addButton')}
-                </Text>
-              </Button>
-            </S.FormActions>
-          </S.Section>
-
-          <S.Section>
-            <Text variant="h4" weight="semibold">
-              {t('admin.proxies.listTitle')}
-            </Text>
-            {/* Was a hand-built flex row per proxy that ran label, assignee,
-                expiry and cost together into two sentences. */}
-            <Table
-              columns={proxyColumns}
-              data={proxyPool?.proxies ?? []}
-              emptyContent={
-                <EmptyState
-                  icon="server"
-                  title={t('admin.proxies.empty')}
-                  description={t('admin.proxies.emptyDescription')}
-                  size="md"
-                />
-              }
-            />
-          </S.Section>
-        </S.Rows>
       )}
 
       {activeTab === 'settings' && (

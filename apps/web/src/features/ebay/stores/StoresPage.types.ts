@@ -1,4 +1,6 @@
-import type { EbayAccountPublicDto } from '@repo/shared';
+import type { EbayAccountPublicDto, EbayMarketplaceId } from '@repo/shared';
+
+import type { EbayMarketplaceOption } from '@/domain-ui/ConnectEbayPrompt/ConnectEbayPrompt.types';
 
 export interface StoresPageComponentProps {
   accounts: EbayAccountPublicDto[];
@@ -6,4 +8,7 @@ export interface StoresPageComponentProps {
   isLoading: boolean;
   isConnecting: boolean;
   onConnect: () => void;
+  marketplaceOptions: EbayMarketplaceOption[];
+  selectedMarketplace: EbayMarketplaceId;
+  onMarketplaceChange: (value: EbayMarketplaceId) => void;
 }

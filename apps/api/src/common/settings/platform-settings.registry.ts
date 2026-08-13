@@ -351,16 +351,6 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     min: 1,
     max: 1000,
   }),
-  def({
-    key: PlatformSettingKey.ADMIN_PROXY_EXPIRY_WARN_DAYS,
-    category: PlatformSettingCategory.ADMIN,
-    type: PlatformSettingType.NUMBER,
-    envVar: 'ADMIN_PROXY_EXPIRY_WARN_DAYS',
-    defaultValue: '7',
-    min: 1,
-    max: 90,
-  }),
-
   // --- Feature toggles ---
   def({
     key: PlatformSettingKey.LLM_CONTENT_ENABLED,

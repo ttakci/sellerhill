@@ -1,9 +1,10 @@
-import { EbayMarketplaceId } from '@repo/shared';
+import { SUPPORTED_EBAY_MARKETPLACES, type EbayMarketplaceId } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '../api/ebayApi';
+import { getEbayMarketplaceOptions } from '../utils/ebayMarketplaceOptions';
 
 import { StoresPageComponent } from './StoresPage.component';
 
@@ -11,7 +12,10 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 
 export const StoresPageContainer = (): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['ebay', 'translation']);
+  const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(
+    SUPPORTED_EBAY_MARKETPLACES[0]
+  );
 
   const [getConnectUrl, { isLoading: isConnecting }] = useLazyGetEbayConnectUrlQuery();
   const { data: accountsData, isLoading } = useGetEbayAccountsQuery();
@@ -22,7 +26,7 @@ export const StoresPageContainer = (): React.ReactElement => {
   useLoading(false);
 
   const handleConnect = (): void => {
-    void getConnectUrl({ marketplaceId: EbayMarketplaceId.EBAY_US })
+    void getConnectUrl({ marketplaceId: selectedMarketplace })
       .unwrap()
       .then((result) => {
         window.location.href = result.url;
@@ -46,6 +50,9 @@ export const StoresPageContainer = (): React.ReactElement => {
       isLoading={isLoading}
       isConnecting={isConnecting}
       onConnect={handleConnect}
+      marketplaceOptions={getEbayMarketplaceOptions(t)}
+      selectedMarketplace={selectedMarketplace}
+      onMarketplaceChange={setSelectedMarketplace}
     />
   );
 };

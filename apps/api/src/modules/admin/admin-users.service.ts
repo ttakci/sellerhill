@@ -2,9 +2,9 @@
 //
 // Read-only per-user monitoring for the admin Users tab: one row per user
 // joining operational footprint (active listings, connected accounts, recent
-// orders, assigned proxy) with period usage/cost attribution from the
-// usage_events projection (Keepa fair-split + LLM tokens). Costs stay
-// micro-USD and nullable — no cost rows means null, never a fabricated 0.
+// orders) with period usage/cost attribution from the usage_events projection
+// (Keepa fair-split + LLM tokens). Costs stay micro-USD and nullable — no cost
+// rows means null, never a fabricated 0.
 
 import { Injectable } from '@nestjs/common';
 import type { AdminUserDto, AdminUsersListDto, UserRole, UserStatus } from '@repo/shared';
@@ -21,8 +21,6 @@ interface AdminUserRowDb {
   amazon_accounts: string;
   active_ebay_stores: string;
   orders_30d: string;
-  proxy_host: string | null;
-  proxy_port: number | null;
   keepa_tokens: string | null;
   llm_tokens: string | null;
   cost_micros: string | null;
@@ -41,7 +39,6 @@ export class AdminUsersService {
               COALESCE(a.cnt, 0)::TEXT AS amazon_accounts,
               COALESCE(e.cnt, 0)::TEXT AS active_ebay_stores,
               COALESCE(o.cnt, 0)::TEXT AS orders_30d,
-              p.host AS proxy_host, p.port AS proxy_port,
               ue.keepa_tokens::TEXT AS keepa_tokens,
               ue.llm_tokens::TEXT AS llm_tokens,
               ue.cost_micros::TEXT AS cost_micros,
@@ -56,7 +53,6 @@ export class AdminUsersService {
          LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM orders
                      WHERE order_date >= NOW() - INTERVAL '30 days' GROUP BY user_id) o
                 ON o.user_id = u.id
-         LEFT JOIN proxies p ON p.assigned_user_id = u.id AND p.status = 'active'
          LEFT JOIN (
            SELECT user_id,
                   COALESCE(SUM(quantity) FILTER (WHERE source = 'keepa'), 0) AS keepa_tokens,
@@ -89,7 +85,6 @@ export class AdminUsersService {
       amazonAccounts: this.parseIntSafe(row.amazon_accounts),
       activeEbayStores: this.parseIntSafe(row.active_ebay_stores),
       ordersLast30Days: this.parseIntSafe(row.orders_30d),
-      proxyHost: row.proxy_host ? `${row.proxy_host}:${row.proxy_port}` : null,
       keepaTokens: row.keepa_tokens === null ? 0 : Number.parseFloat(row.keepa_tokens) || 0,
       llmTokens: row.llm_tokens === null ? 0 : Number.parseFloat(row.llm_tokens) || 0,
       estimatedCostMicros: row.cost_micros === null ? null : Number.parseInt(row.cost_micros, 10),

@@ -4,9 +4,12 @@
 // usage_events, llm_usage_log, keepa_usage_log, shared_cost_entries, and the
 // BullMQ queues. Registers every queue name with BullModule so the controller
 // can @InjectQueue them for getJobCounts(); it never enqueues (read-only).
-// One deliberate write surface: proxy pool management (AdminProxiesService) —
-// the `proxies` table is operator-owned platform infrastructure with no
-// customer module, so registering/disabling proxies lives here.
+//
+// The proxy pool write surface (AdminProxiesService) that used to live here
+// was retired 2026-08-13 — Amazon browser-automation proxying is now
+// self-service per `amazon_accounts` row (migration 080), not a platform-paid
+// pool an operator provisions. See CLAUDE.md "Amazon Scraping — Anti-Ban
+// Strategy".
 
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
@@ -18,7 +21,6 @@ import { EmailModule } from '../email/email.module';
 
 import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
-import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
@@ -51,7 +53,6 @@ import { UsageEventsService } from './usage-events.service';
   controllers: [AdminController],
   providers: [
     AdminService,
-    AdminProxiesService,
     AdminListingQualityService,
     AdminListingFailuresService,
     AdminUsersService,

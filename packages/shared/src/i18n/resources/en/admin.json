@@ -6,7 +6,6 @@
       "overview": "Overview",
       "queues": "Queues",
       "costs": "Costs",
-      "proxies": "Proxies",
       "settings": "Settings",
       "billing": "Billing",
       "users": "Users",
@@ -20,16 +19,12 @@
     "cost": {
       "keepaBalance": "Keepa token balance",
       "users": "Total users",
-      "proxyPool": "Proxy pool / month",
-      "proxyPoolHint": "Sum of known monthly costs for active proxies",
       "quantity": "Quantity: {{quantity}}"
     },
     "users": {
       "unattributed": "Unattributed platform usage",
       "total": "{{value}} users · costs are for the current month",
       "stats": "Listings: {{listings}} · Orders 30d: {{orders}} · Keepa: {{keepa}} · LLM: {{llm}}",
-      "proxy": "Proxy: {{proxy}}",
-      "noProxy": "No proxy assigned",
       "columns": {
         "user": "User",
         "role": "Access tier",
@@ -38,7 +33,6 @@
         "orders": "Orders 30d",
         "keepa": "Keepa",
         "llm": "LLM",
-        "proxy": "Proxy",
         "cost": "Cost"
       },
       "empty": "No users",
@@ -47,61 +41,7 @@
     "warnings": {
       "queue_waiting": "{{subject}} queue waiting threshold exceeded",
       "keepa_low_tokens": "Keepa token balance is low",
-      "llm_failure_rate": "LLM failure rate is elevated",
-      "proxy_expiring": "Proxy {{subject}} expires soon (days left)",
-      "proxy_expired": "Proxy {{subject}} has expired (days overdue)",
-      "proxy_pool_exhausted": "Proxy pool exhausted — no free proxy for new users"
-    },
-    "proxies": {
-      "activePool": "Active proxies",
-      "freeCount": "{{value}} free to claim",
-      "assigned": "Assigned to users",
-      "monthlyCost": "Monthly cost",
-      "expiringSoon": "Expiring soon",
-      "expiredCount": "{{value}} expired",
-      "addTitle": "Add a purchased proxy",
-      "addSubtitle": "The password is encrypted at rest immediately and never shown again. Users claim proxies automatically — assignment is not manual.",
-      "host": "Host",
-      "port": "Port",
-      "username": "Username",
-      "password": "Password",
-      "labelField": "Label (provider / order ref)",
-      "expiresAt": "Expires at",
-      "monthlyCostUsd": "Monthly cost (USD)",
-      "addButton": "Add proxy",
-      "formInvalid": "Please fill host, port, username and password with valid values.",
-      "createSuccess": "Proxy added to the pool.",
-      "listTitle": "Pool",
-      "empty": "No proxies in the pool yet. Add your purchased fixed ISP proxies above — each user is automatically assigned one.",
-      "unassigned": "Unassigned",
-      "expiresOn": "Expires {{date}}",
-      "noExpiry": "No expiry date set",
-      "disable": "Disable",
-      "enable": "Enable",
-      "status": {
-        "active": "Active",
-        "disabled": "Disabled"
-      },
-      "expiry": {
-        "ok": "{{value}}d left",
-        "expiring_soon": "{{value}}d left",
-        "expired": "Expired",
-        "no_expiry": "No expiry"
-      },
-      "columns": {
-        "endpoint": "Endpoint",
-        "label": "Label",
-        "assignee": "Assigned to",
-        "status": "Status",
-        "expiry": "Expires",
-        "cost": "Monthly",
-        "actions": "Actions"
-      },
-      "emptyDescription": "Register a fixed ISP proxy above to start the pool."
-    },
-    "errors": {
-      "proxyNotFound": "Proxy not found.",
-      "currencyRequiresCost": "A currency can only be set together with a cost."
+      "llm_failure_rate": "LLM failure rate is elevated"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokens",
@@ -211,7 +151,6 @@
         "admin.listingQuotaCriticalThreshold": "Listing quota critical threshold",
         "admin.amazonAccountQuotaWarnThreshold": "Amazon account warn threshold",
         "admin.amazonAccountQuotaCriticalThreshold": "Amazon account critical threshold",
-        "admin.proxyExpiryWarnDays": "Proxy expiry warning window (days)",
         "llm.contentEnabled": "AI title/description rewrites",
         "billing.enforcementEnabled": "Enforce plan quotas",
         "buyerMessaging.feedbackDefaultDelayDays": "Feedback request delay (days)",
@@ -256,7 +195,6 @@
         "admin.listingQuotaCriticalThreshold": "Number of active listings for a user that triggers a critical-level quota badge.",
         "admin.amazonAccountQuotaWarnThreshold": "Number of Amazon buyer accounts for a user that triggers a warning-level quota badge.",
         "admin.amazonAccountQuotaCriticalThreshold": "Number of Amazon buyer accounts for a user that triggers a critical-level quota badge.",
-        "admin.proxyExpiryWarnDays": "Days before a proxy's expiry date that it starts showing as expiring soon.",
         "llm.contentEnabled": "Master switch for AI-generated listing titles and descriptions at create time. Off by default; a failure always falls back to the deterministic title.",
         "billing.enforcementEnabled": "When on, listing and automatic-order quotas are actually enforced against a user's plan. Off gives every user full access without a real subscription.",
         "buyerMessaging.feedbackDefaultDelayDays": "Default number of days after delivery before the feedback-request message is sent, when a store hasn't set its own delay.",

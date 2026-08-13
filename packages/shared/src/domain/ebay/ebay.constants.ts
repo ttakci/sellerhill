@@ -75,6 +75,16 @@ export const EBAY_MARKETPLACE_CONFIG: Record<EbayMarketplaceId, EbayMarketplaceC
 };
 
 /**
+ * Marketplaces actually offered in any selector and accepted by
+ * EbayService.createConnectUrl — separate from EBAY_MARKETPLACE_CONFIG
+ * (which already carries verified data for all 6) so enabling UK/DE/... in
+ * production is one array entry, not a new code path.
+ */
+export const SUPPORTED_EBAY_MARKETPLACES: readonly EbayMarketplaceId[] = [
+  EbayMarketplaceId.EBAY_US,
+] as const;
+
+/**
  * eBay OAuth constants
  */
 export const EBAY_OAUTH_CONSTANTS = {

@@ -14,10 +14,10 @@ export const EbayAccountsAllDrawer: React.FC<EbayAccountsAllDrawerProps> = ({
   onBack,
   accounts,
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['ebay', 'translation']);
   const { locale } = getLocaleConfig(i18n.language);
 
-  const stores = accounts.map((a: EbayAccountPublicDto) => toEbayStoreCardView(a, locale));
+  const stores = accounts.map((a: EbayAccountPublicDto) => toEbayStoreCardView(a, locale, t));
 
   return (
     <EbayAccountsAllDrawerComponent

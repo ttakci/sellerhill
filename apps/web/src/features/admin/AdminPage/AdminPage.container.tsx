@@ -1,5 +1,5 @@
 import { PlatformSettingCategory, UserRole } from '@repo/shared';
-import { formatDate, formatMicroCurrency, getLocaleConfig } from '@repo/ui';
+import { formatMicroCurrency, getLocaleConfig } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -9,15 +9,12 @@ import {
   useGetAdminOperationsQuery,
   useGetAdminOverviewQuery,
   useGetAdminProviderCostsQuery,
-  useGetAdminProxiesQuery,
   useGetAdminUsersQuery,
   useGetAdminEbayBudgetQuery,
   useGetAdminListingFailuresQuery,
 } from '../api/admin.api';
 import { useAdminEbayColumns } from '../hooks/useAdminEbayColumns';
 import { useAdminListingQuality } from '../hooks/useAdminListingQuality';
-import { useAdminProxyColumns } from '../hooks/useAdminProxyColumns';
-import { useAdminProxyForm } from '../hooks/useAdminProxyForm';
 import { useAdminSettings } from '../hooks/useAdminSettings';
 import { useAdminUserColumns } from '../hooks/useAdminUserColumns';
 
@@ -32,7 +29,6 @@ const VALID_TABS: AdminTabId[] = [
   'overview',
   'queues',
   'costs',
-  'proxies',
   'listingQuality',
   'settings',
   'billing',
@@ -71,13 +67,11 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: operations } = useGetAdminOperationsQuery(undefined, { skip });
   const { data: providerCosts = [] } = useGetAdminProviderCostsQuery(undefined, { skip });
   const { data: billingMetrics } = useGetAdminBillingMetricsQuery(undefined, { skip });
-  const { data: proxyPool } = useGetAdminProxiesQuery(undefined, { skip });
   const { data: usersList } = useGetAdminUsersQuery(undefined, { skip });
   const { data: ebayBudget } = useGetAdminEbayBudgetQuery(undefined, { skip });
   const { data: listingFailures } = useGetAdminListingFailuresQuery(undefined, { skip });
   const listingQuality = useAdminListingQuality(skip);
 
-  const proxy = useAdminProxyForm();
   const settings = useAdminSettings(skip);
 
   const tabParam = searchParams.get('tab') as AdminTabId | null;
@@ -110,20 +104,9 @@ export const AdminPageContainer = (): React.ReactElement => {
       micros === null ? '—' : formatMicroCurrency(micros, locale, currency ?? 'USD'),
     [locale]
   );
-  const formatDateValue = useCallback(
-    (iso: string | null): string => (iso ? formatDate(iso, locale, { year: 'numeric' }) : '—'),
-    [locale]
-  );
-
   /* Must sit above the role guard — hooks cannot be called after an early return. */
   const userColumns = useAdminUserColumns(formatCost);
   const { budgetColumns, failureColumns } = useAdminEbayColumns();
-  const proxyColumns = useAdminProxyColumns(
-    formatCost,
-    formatDateValue,
-    proxy.onProxyToggleStatus,
-    proxy.isSavingProxy
-  );
 
   /* A SUPPORT operator lands on the support console, a seller on its own app. */
   if (!isLoading && user?.role !== UserRole.ADMIN) {
@@ -138,14 +121,12 @@ export const AdminPageContainer = (): React.ReactElement => {
       operations={operations}
       providerCosts={providerCosts}
       billingMetrics={billingMetrics}
-      proxyPool={proxyPool}
       usersList={usersList}
       ebayBudget={ebayBudget ?? []}
       listingFailures={listingFailures}
       userColumns={userColumns}
       budgetColumns={budgetColumns}
       failureColumns={failureColumns}
-      proxyColumns={proxyColumns}
       settingGroups={settingGroups}
       collapsedSettingCategories={collapsedSettingCategories}
       onToggleSettingCategory={handleToggleSettingCategory}
@@ -153,10 +134,6 @@ export const AdminPageContainer = (): React.ReactElement => {
       isSavingSetting={settings.isSavingSetting}
       emailTestResult={settings.emailTestResult}
       isTestingEmail={settings.isTestingEmail}
-      proxyForm={proxy.proxyForm}
-      isSavingProxy={proxy.isSavingProxy}
-      onProxyFieldChange={proxy.onProxyFieldChange}
-      onProxySubmit={proxy.onProxySubmit}
       onSettingDraftChange={settings.onSettingDraftChange}
       onSettingSave={settings.onSettingSave}
       onSettingToggle={settings.onSettingToggle}

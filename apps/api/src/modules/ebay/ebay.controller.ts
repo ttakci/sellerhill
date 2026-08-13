@@ -84,7 +84,7 @@ export class EbayController {
       const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
       this.logger.log(`eBay account connected successfully for user: ${userId}`);
 
-      return { url: `${frontendUrl}/stores?ebay_connected=success` };
+      return { url: `${frontendUrl}/dashboard?ebay_connected=success` };
     } catch (err: unknown) {
       this.logger.error('Failed to handle eBay callback', err);
       const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');

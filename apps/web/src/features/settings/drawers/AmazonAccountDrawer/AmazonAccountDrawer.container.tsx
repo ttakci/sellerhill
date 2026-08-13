@@ -1,7 +1,4 @@
-import type {
-  CreateAmazonAccountFormData,
-  UpdateAmazonAccountFormData,
-} from '@repo/shared';
+import { AmazonMarketplace, ProxyConnectionType, SUPPORTED_AMAZON_MARKETPLACES, type CreateAmazonAccountFormData, type UpdateAmazonAccountFormData } from '@repo/shared';
 import { useUI } from '@repo/ui';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,11 +23,22 @@ const EMPTY_FIELDS: AmazonAccountDrawerFields = {
   email: '',
   password: '',
   twoFactorSecret: '',
+  // Only one marketplace exists today (SUPPORTED_AMAZON_MARKETPLACES) — set,
+  // never chosen away from, and locked once the account is created.
+  marketplace: SUPPORTED_AMAZON_MARKETPLACES[0],
   // Second gate of auto-fulfillment: the Store Settings toggle arms it for a
   // store (or globally), and each buyer account must opt in here as well. Both
   // must be on before an order is ever purchased on this account.
   autoFulfillEnabled: false,
   autoFulfillCapTotal: '',
+  // Self-service proxy (migration 080): off by default, so a brand-new
+  // account runs bare-IP unless the user explicitly opts in.
+  proxyEnabled: false,
+  proxyConnectionType: ProxyConnectionType.HTTP,
+  proxyHost: '',
+  proxyPort: '',
+  proxyUsername: '',
+  proxyPassword: '',
 };
 
 export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
@@ -65,12 +73,23 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
         email: editingAccount.email,
         password: '',
         twoFactorSecret: '',
+        marketplace: editingAccount.marketplace,
         autoFulfillEnabled: editingAccount.autoFulfillEnabled ?? false,
         autoFulfillCapTotal:
           editingAccount.autoFulfillCapTotal === null ||
           editingAccount.autoFulfillCapTotal === undefined
             ? ''
             : String(editingAccount.autoFulfillCapTotal),
+        proxyEnabled: editingAccount.proxyEnabled ?? false,
+        proxyConnectionType: editingAccount.proxyConnectionType ?? ProxyConnectionType.HTTP,
+        proxyHost: editingAccount.proxyHost ?? '',
+        proxyPort: editingAccount.proxyPort === null || editingAccount.proxyPort === undefined
+          ? ''
+          : String(editingAccount.proxyPort),
+        proxyUsername: editingAccount.proxyUsername ?? '',
+        // Write-only — never round-tripped back from the server. Left blank,
+        // it means "keep the stored password" on save.
+        proxyPassword: '',
       });
     } else if (isOpen) {
       setFields(EMPTY_FIELDS);
@@ -78,7 +97,7 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
   }
 
   const handleFieldChange = useCallback(
-    (field: keyof Omit<AmazonAccountDrawerFields, 'autoFulfillEnabled'>) =>
+    (field: keyof Omit<AmazonAccountDrawerFields, 'autoFulfillEnabled' | 'proxyEnabled' | 'proxyConnectionType'>) =>
       (event: React.ChangeEvent<HTMLInputElement>): void => {
         const { value } = event.target;
         setFields((prev) => ({ ...prev, [field]: value }));
@@ -88,6 +107,18 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
 
   const handleAutoFulfillEnabledChange = useCallback((checked: boolean): void => {
     setFields((prev) => ({ ...prev, autoFulfillEnabled: checked }));
+  }, []);
+
+  const handleProxyEnabledChange = useCallback((checked: boolean): void => {
+    setFields((prev) => ({ ...prev, proxyEnabled: checked }));
+  }, []);
+
+  const handleProxyConnectionTypeChange = useCallback((value: ProxyConnectionType): void => {
+    setFields((prev) => ({ ...prev, proxyConnectionType: value }));
+  }, []);
+
+  const handleMarketplaceChange = useCallback((value: AmazonMarketplace): void => {
+    setFields((prev) => ({ ...prev, marketplace: value }));
   }, []);
 
   /**
@@ -115,6 +146,7 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
     // autoFulfillEnabled is on, rather than defaulting to an unbounded spend.
     const capTotal =
       fields.autoFulfillCapTotal.trim() === '' ? null : Number(fields.autoFulfillCapTotal);
+    const proxyPort = fields.proxyPort.trim() === '' ? null : Number(fields.proxyPort);
 
     if (isEdit && editingAccount) {
       const data: UpdateAmazonAccountFormData = {
@@ -124,6 +156,14 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
         twoFactorSecret: fields.twoFactorSecret || undefined,
         autoFulfillEnabled: fields.autoFulfillEnabled,
         autoFulfillCapTotal: capTotal,
+        proxyEnabled: fields.proxyEnabled,
+        proxyConnectionType: fields.proxyConnectionType,
+        proxyHost: fields.proxyHost || null,
+        proxyPort,
+        proxyUsername: fields.proxyUsername || null,
+        // Blank means "keep the stored password" — never overwritten with an
+        // empty value just because the field wasn't touched this time.
+        proxyPassword: fields.proxyPassword || undefined,
       };
       void updateAccount({ id: editingAccount.id, data })
         .unwrap()
@@ -139,8 +179,15 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
       password: fields.password,
       label: fields.label || undefined,
       twoFactorSecret: fields.twoFactorSecret || undefined,
+      marketplace: fields.marketplace,
       autoFulfillEnabled: fields.autoFulfillEnabled,
       autoFulfillCapTotal: capTotal,
+      proxyEnabled: fields.proxyEnabled,
+      proxyConnectionType: fields.proxyConnectionType,
+      proxyHost: fields.proxyHost || null,
+      proxyPort,
+      proxyUsername: fields.proxyUsername || null,
+      proxyPassword: fields.proxyPassword || undefined,
     };
     void createAccount(payload)
       .unwrap()
@@ -156,10 +203,14 @@ export const AmazonAccountDrawer: React.FC<AmazonAccountDrawerProps> = ({
       onClose={onClose}
       onBack={onBack}
       prefix={prefix}
+      isEdit={isEdit}
       fields={fields}
       isSaving={isSaving}
       onFieldChange={handleFieldChange}
       onAutoFulfillEnabledChange={handleAutoFulfillEnabledChange}
+      onProxyEnabledChange={handleProxyEnabledChange}
+      onProxyConnectionTypeChange={handleProxyConnectionTypeChange}
+      onMarketplaceChange={handleMarketplaceChange}
       onSave={handleSave}
     />
   );

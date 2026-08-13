@@ -45,6 +45,7 @@
       "description": "To start syncing your items, you first need to connect your eBay store.",
       "connectButton": "eBay Account",
       "skipButton": "Skip for Now",
+      "deactivateAccountButton": "Deactivate Account",
       "usOnlyNote": "Currently only US marketplace is supported. More regions coming soon.",
       "brandingDescription": "Link your eBay store to SellerHill to manage all your sales processes from a single hub."
     }

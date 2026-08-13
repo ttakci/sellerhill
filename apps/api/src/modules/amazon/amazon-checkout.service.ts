@@ -3,7 +3,10 @@ import * as path from 'path';
 
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {
+  AmazonMarketplace,
   AutoFulfillStatus,
+  buildAmazonProductUrl,
+  buildAmazonSiteUrl,
   OrderCostCaptureStatus,
   PlatformSettingKey,
   SIMULATED_AMAZON_ORDER_PREFIX,
@@ -22,7 +25,6 @@ import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AutoFulfillBlockedReason, shouldSkipFulfillStart } from './auto-fulfill-helpers';
 import { BrowserStateManager } from './browser-state-manager.service';
-import { ProxyService } from './proxy.service';
 
 /**
  * Fail-closed obstacle. Thrown by every step helper in this service to signal
@@ -105,7 +107,8 @@ const CHECKOUT_SELECTORS = {
   // Active cart line items carry a `data-asin` attribute across Amazon's
   // legacy and React cart layouts. Saved-for-later items live outside
   // #sc-active-cart and must NOT be counted.
-  cartUrl: 'https://www.amazon.com/gp/cart/view.html',
+  cartUrl: (marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US): string =>
+    `${buildAmazonSiteUrl(marketplace)}/gp/cart/view.html`,
   cartItemRow: [
     '#sc-active-cart [data-asin]',
     'div[data-itemtype="active"] [data-asin]',
@@ -304,7 +307,6 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     private readonly browserState: BrowserStateManager,
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
-    private readonly proxyService: ProxyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly platformSettings: PlatformSettingsService,
   ) {}
@@ -342,20 +344,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
       return;
     }
-    // R1 — runtime proxy guard (defense-in-depth). `assertCanEnable` checks at
-    // enable time, but proxy capacity can disappear afterwards (pool rows
-    // disabled, env removed). Auto-fulfill MUST NOT run over the bare server
-    // IP (ban + money risk); fail closed here before any browser action.
-    // Existing scraping still falls back to direct (no regression) — only
-    // checkout is hard-blocked.
-    if (!(await this.proxyService.isConfigured())) {
-      await this.block(
-        ebayOrderId,
-        'proxy_required',
-        'no proxy configured (pool empty and no env fallback) — auto-fulfill hard-blocked',
-      );
-      return;
-    }
+    // A platform-level proxy gate used to sit here (pool empty/exhausted).
+    // Proxying is now the user's own optional per-account choice (migration
+    // 080) — see the R2 check in `checkout()`, which only fails closed when
+    // THIS account opted in and the browser context failed to honor it.
     await this.setStatus(ebayOrderId, AutoFulfillStatus.RUNNING);
 
     try {
@@ -384,7 +376,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // rejected credentials) and must fail closed rather than loop on the money
     // path.
     const authResolution = { attempted: false };
-    const { userId, asin, quantity, ship, capTotal, dryRun } = await this.loadInputs(
+    const { userId, asin, quantity, ship, capTotal, dryRun, proxyEnabled, marketplace } = await this.loadInputs(
       ebayOrderId,
       amazonAccountId,
     );
@@ -393,18 +385,18 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     // Step 1: session/login (reuse scraping's login incl. 2FA-TOTP). The page
     // returned is authenticated and lives in the proxy-aware persistent
     // context for the account — all subsequent steps reuse it.
-    const page = await this.ensureLoggedIn(amazonAccountId, userId, ebayOrderId);
-    // R2 — per-account proxy-launch truth (defense-in-depth on top of R1's
-    // env-level `isConfigured` check). `resolveProxy` can return null on a
-    // transient DB error or missing account, in which case the persistent
-    // context launched DIRECT over the bare server IP. Auto-fulfill MUST NOT
-    // place an order over the bare IP (account ban + money risk), so fail
-    // closed here BEFORE any product navigation. Existing scraping legitimately
-    // falls back to direct — only checkout is hard-blocked.
-    if ((await this.proxyService.isConfigured()) && !this.browserState.isProxyActive(amazonAccountId)) {
+    const page = await this.ensureLoggedIn(amazonAccountId, userId, ebayOrderId, marketplace);
+    // R2 — per-account proxy-launch truth. Proxying is the user's own opt-in
+    // choice on the account (migration 080): when they did NOT enable one,
+    // bare-IP is the expected, unremarkable launch and this check is skipped.
+    // When they DID enable one, `resolveProxy` returning null (DB error,
+    // missing account) would otherwise silently launch DIRECT against the
+    // user's explicit preference — fail closed instead, before any product
+    // navigation.
+    if (proxyEnabled && !this.browserState.isProxyActive(amazonAccountId)) {
       throw new AutoFulfillBlockedError(
         'proxy_required',
-        'per-account proxy did not apply to the browser context (resolution failed or pool exhausted) — refusing to proceed over bare IP',
+        'this account has its own proxy enabled, but it did not apply to the browser context (resolution failed) — refusing to proceed over bare IP',
       );
     }
     try {
@@ -415,10 +407,10 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // the cart, and the buyer account may hold personal items; Amazon checks
       // out the ENTIRE cart, so any leftover would be co-purchased. Best-effort
       // (verification below is the fail-closed gate).
-      await this.clearCart(page, ebayOrderId);
+      await this.clearCart(page, ebayOrderId, marketplace);
 
       // Step 2: product page + add to cart
-      const productResponse = await page.goto(`https://www.amazon.com/dp/${asin}`, {
+      const productResponse = await page.goto(buildAmazonProductUrl(asin, marketplace), {
         waitUntil: 'domcontentloaded',
         timeout: 30_000,
       });
@@ -448,7 +440,7 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       // vary), then require the cart to contain EXACTLY our item before any
       // payment surface is touched. Throws 'cart' on any mismatch.
       await this.humanDelay();
-      await page.goto(CHECKOUT_SELECTORS.cartUrl, {
+      await page.goto(CHECKOUT_SELECTORS.cartUrl(marketplace), {
         waitUntil: 'domcontentloaded',
         timeout: 30_000,
       });
@@ -628,13 +620,14 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     accountId: string,
     userId: string,
     ebayOrderId: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
   ): Promise<Page> {
     try {
       const page = await this.scraping.ensureAuthenticatedPage(userId, accountId);
       // Even after a successful session reuse, a soft captcha / OTP can appear
       // on the first navigation. Probe once before handing the page off.
       await page
-        .goto('https://www.amazon.com/', {
+        .goto(buildAmazonSiteUrl(marketplace), {
           waitUntil: 'domcontentloaded',
           timeout: 30_000,
         })
@@ -841,9 +834,13 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    * our item. Bounded delete-click loop; never throws — a miss here is caught
    * by the fail-closed `verifyCartContents` gate, which is the real guard.
    */
-  private async clearCart(page: Page, ebayOrderId: string): Promise<void> {
+  private async clearCart(
+    page: Page,
+    ebayOrderId: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+  ): Promise<void> {
     try {
-      await page.goto(CHECKOUT_SELECTORS.cartUrl, {
+      await page.goto(CHECKOUT_SELECTORS.cartUrl(marketplace), {
         waitUntil: 'domcontentloaded',
         timeout: 30_000,
       });
@@ -1725,6 +1722,8 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
     ship: Address;
     capTotal: number;
     dryRun: boolean;
+    proxyEnabled: boolean;
+    marketplace: AmazonMarketplace;
   }> {
     const [row] = await this.db.query<{
       user_id: string;
@@ -1733,9 +1732,11 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       shipping_address: unknown;
       auto_fulfill_cap_total: string | number | null;
       auto_fulfill_dry_run: boolean;
+      proxy_enabled: boolean;
+      marketplace: string;
     }>(
       `SELECT o.user_id, p.asin, o.quantity, o.shipping_address,
-              a.auto_fulfill_cap_total, a.auto_fulfill_dry_run
+              a.auto_fulfill_cap_total, a.auto_fulfill_dry_run, a.proxy_enabled, a.marketplace
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id
          LEFT JOIN products p ON p.id = l.product_id
@@ -1785,6 +1786,8 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
       ship,
       capTotal,
       dryRun: !!row.auto_fulfill_dry_run,
+      proxyEnabled: !!row.proxy_enabled,
+      marketplace: (row.marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US,
     };
   }
 

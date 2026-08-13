@@ -1,12 +1,14 @@
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
+  AmazonMarketplace,
   extractCorrelationId,
   generateCorrelationId,
   KeepaStockStatus,
   KeepaUsageSource,
   ListingStatus,
   PlatformSettingKey,
+  type KeepaApiMeta,
   type KeepaProduct,
 } from '@repo/shared';
 import { Job, Queue } from 'bullmq';
@@ -24,6 +26,10 @@ import { dataFailureDelayMinutes } from './refresh-backoff';
 interface ProductRow {
   id: string;
   asin: string;
+  // Storefront this product was sourced from (migration 082). Grouped on
+  // below so one batch can span marketplaces without mixing Keepa domains
+  // into a single request.
+  marketplace: string;
   price: { current?: number; currency?: string } | null;
   stock: number | null;
   title: string | null;
@@ -166,7 +172,7 @@ export class RefreshProcessorService extends WorkerHost {
 
     const placeholders = productIds.map((_, i) => `$${i + 1}`).join(',');
     const products = await this.databaseService.query<ProductRow>(
-      `SELECT id, asin, price, stock, title, image_urls, brand, features, description, specs, consecutive_failures
+      `SELECT id, asin, marketplace, price, stock, title, image_urls, brand, features, description, specs, consecutive_failures
        FROM products
        WHERE id IN (${placeholders})`,
       productIds
@@ -176,19 +182,45 @@ export class RefreshProcessorService extends WorkerHost {
       return;
     }
 
-    const asins = products.map((p) => p.asin);
+    // Keepa's `domain` param is one value per request, so a batch spanning
+    // multiple Amazon marketplaces must issue one call per marketplace group
+    // rather than mixing ASINs from different storefronts into one request.
+    // At a single marketplace (today) this produces exactly one group and is
+    // behavior-identical to the old single-call path.
+    const byMarketplace = new Map<AmazonMarketplace, ProductRow[]>();
+    for (const row of products) {
+      const marketplace = row.marketplace as AmazonMarketplace;
+      const group = byMarketplace.get(marketplace);
+      if (group) {
+        group.push(row);
+      } else {
+        byMarketplace.set(marketplace, [row]);
+      }
+    }
 
-    // Transport failure here (429/5xx/network) → throws → BullMQ retries the
-    // whole batch idempotently (rows are still claimed by the lease).
-    const { products: keepaProducts, meta } = await this.keepaService.getProducts(asins);
-    await this.keepaUsageService.captureBalance(meta);
+    const keepaByAsin = new Map<string, KeepaProduct>();
+    let tokensConsumed = 0;
+    let lastMeta: KeepaApiMeta = { tokensConsumed: 0 };
+    for (const [marketplace, group] of byMarketplace) {
+      // Transport failure here (429/5xx/network) → throws → BullMQ retries the
+      // whole batch idempotently (rows are still claimed by the lease).
+      const { products: keepaProducts, meta } = await this.keepaService.getProducts(
+        group.map((p) => p.asin),
+        marketplace
+      );
+      lastMeta = meta;
+      tokensConsumed += meta.tokensConsumed;
+      for (const kp of keepaProducts) {
+        keepaByAsin.set(kp.asin, kp);
+      }
+    }
+    await this.keepaUsageService.captureBalance(lastMeta);
 
     // Fair-split across REQUESTED ASINs (not returned products): a missing
     // ASIN still consumed its share of the request, and its users must not be
     // subsidized by the users of returned ASINs.
-    const tokenShare = meta.tokensConsumed / products.length;
+    const tokenShare = tokensConsumed / products.length;
     const userIdsByProduct = await this.loadUserIdsByProduct(productIds);
-    const keepaByAsin = new Map(keepaProducts.map((p) => [p.asin, p]));
     const pendingUpdates: PendingListingUpdate[] = [];
 
     for (const row of products) {
@@ -305,7 +337,11 @@ export class RefreshProcessorService extends WorkerHost {
         // Fan out: recompute every active listing sharing this ASIN. The push
         // itself is deferred to the batch flush so listings from different
         // products can share one eBay call.
-        return this.productSyncService.computePendingUpdates(row.id, row.asin);
+        return this.productSyncService.computePendingUpdates(
+          row.id,
+          row.asin,
+          row.marketplace as AmazonMarketplace
+        );
       }
       return [];
     } else {

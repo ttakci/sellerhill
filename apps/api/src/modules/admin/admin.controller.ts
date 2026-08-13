@@ -4,17 +4,17 @@
 // (authenticate) + RolesGuard (authorize) + PrivilegedSessionGuard
 // (per-request session revalidation) + @Roles(UserRole.ADMIN).
 //
-// The controller is read-only for observability data, with TWO deliberate
-// write surfaces — both platform infrastructure that has no owning customer
-// module, so an operator action is the only way they ever change:
-//   1. Proxy pool (POST/PATCH /admin/proxies*) — register purchased fixed ISP
-//      proxies, disable burned ones. Assignment is NOT writable (ProxyService
-//      owns the atomic claim).
-//   2. Runtime settings (PUT/DELETE /admin/settings/:key) — operator overrides
-//      for tunables that would otherwise require an env change + redeploy.
-//      Secrets and connection bootstrap are excluded from the registry.
+// The controller is read-only for observability data, with ONE deliberate
+// write surface: runtime settings (PUT/DELETE /admin/settings/:key) —
+// operator overrides for tunables that would otherwise require an env change
+// + redeploy. Secrets and connection bootstrap are excluded from the registry.
 // All other admin mutations still go through the owning module's endpoint
 // with its own guard chain.
+//
+// The proxy pool write surface (POST/PATCH /admin/proxies*) that used to live
+// here was retired 2026-08-13: Amazon browser-automation proxying moved from
+// a platform-paid shared pool to a self-service, per-`amazon_accounts` field
+// (migration 080) — see CLAUDE.md "Amazon Scraping — Anti-Ban Strategy".
 //
 // Endpoints (all v1, /admin/*):
 //   GET    /admin/overview            — counts + usage + queue health (one call)
@@ -27,9 +27,6 @@
 //   GET    /admin/ebay/budget         — daily eBay API quota usage per resource
 //   GET    /admin/listing-failures    — failed listing attempts WITH raw provider text
 //   GET    /admin/operations/summary  — queue summaries + warnings
-//   GET    /admin/proxies             — proxy pool listing + summary
-//   POST   /admin/proxies             — register a purchased proxy
-//   PATCH  /admin/proxies/:id         — status/label/expiry/cost patch
 //   GET    /admin/listing-quality/summary   — how item specifics got filled
 //   GET    /admin/listing-quality/defaults  — curated + learned aspect values
 //   PUT    /admin/listing-quality/defaults  — curate one aspect value (3rd write surface)
@@ -48,7 +45,6 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Put,
   Query,
@@ -65,11 +61,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
-  CreateProxyDto,
   PlatformSettingKey,
   QueueEventType,
   UpdatePlatformSettingDto,
-  UpdateProxyDto,
   UpsertAspectDefaultDto,
   UsageEventSource,
   UsageMetric,
@@ -84,8 +78,6 @@ import {
   type AdminOverviewDto,
   type EbayCallBudgetStatusDto,
   type ListingFailureCode,
-  type AdminProxyDto,
-  type AdminProxyListDto,
   type AdminUsersListDto,
   type PlatformSettingsListDto,
   type ProviderCostSummaryDto,
@@ -108,7 +100,6 @@ import { EmailService } from '../email/email.service';
 
 import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
-import { AdminProxiesService } from './admin-proxies.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminService } from './admin.service';
 
@@ -120,7 +111,6 @@ import { AdminService } from './admin.service';
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly adminProxiesService: AdminProxiesService,
     private readonly adminListingQualityService: AdminListingQualityService,
     private readonly adminUsersService: AdminUsersService,
     private readonly listingFailures: AdminListingFailuresService,
@@ -321,48 +311,6 @@ export class AdminController {
   @ApiOperation({ summary: 'Single queue terminal event observation' })
   async getQueueObservation(@Param('id') id: string): Promise<QueueObservationDto | null> {
     return this.adminService.getQueueObservation(id);
-  }
-
-  @Get('proxies')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({
-    summary: 'Proxy pool listing + summary',
-    description:
-      'Every proxy pool row (credentials excluded) with server-derived expiry state, plus aggregate pool health and monthly cost. Read-only.',
-  })
-  @ApiOkResponse({ description: 'Proxy pool retrieved' })
-  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
-  @ApiForbiddenResponse({ description: 'User is not an admin' })
-  async getProxies(): Promise<AdminProxyListDto> {
-    return this.adminProxiesService.list();
-  }
-
-  @Post('proxies')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({
-    summary: 'Register a purchased proxy',
-    description:
-      'Adds a fixed ISP proxy to the pool. The password is encrypted at rest immediately and never returned. Users claim proxies lazily via ProxyService — assignment is not settable here.',
-  })
-  @ApiOkResponse({ description: 'Proxy created' })
-  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
-  @ApiForbiddenResponse({ description: 'User is not an admin' })
-  async createProxy(@Body() dto: CreateProxyDto): Promise<AdminProxyDto> {
-    return this.adminProxiesService.create(dto);
-  }
-
-  @Patch('proxies/:id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({
-    summary: 'Update proxy operational fields',
-    description:
-      'Patches status (disable a burned proxy), label, expiry date, and monthly cost. Credentials and assignment are deliberately not patchable.',
-  })
-  @ApiOkResponse({ description: 'Proxy updated' })
-  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
-  @ApiForbiddenResponse({ description: 'User is not an admin' })
-  async updateProxy(@Param('id') id: string, @Body() dto: UpdateProxyDto): Promise<AdminProxyDto> {
-    return this.adminProxiesService.update(id, dto);
   }
 
   @Get('listing-quality/summary')

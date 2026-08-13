@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
+  AmazonMarketplace,
   ListingFailureCode,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingJobKind,
@@ -1030,15 +1031,18 @@ export class ListingsService {
   /**
    * Get cached product info by ASIN
    */
-  async getProductByAsin(asin: string): Promise<{ id: string; data: ProductData } | null> {
+  async getProductByAsin(
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<{ id: string; data: ProductData } | null> {
     const results = await this.databaseService.query<ProductQueryRow>(
       `
       SELECT id, asin, title, description, price, currency, image_urls, brand, manufacturer,
              category, category_path, features, specs, identifiers, stock,
              raw_provider_data, raw_keepa_data
-      FROM products WHERE asin = $1
+      FROM products WHERE asin = $1 AND marketplace = $2
     `,
-      [asin]
+      [asin, marketplace]
     );
 
     if (results.length === 0) {
@@ -1275,7 +1279,11 @@ export class ListingsService {
     return items.map((item) => this.mapJobItemToDto(item));
   }
 
-  async findOrCreateProduct(asin: string, productData: ProductData): Promise<string> {
+  async findOrCreateProduct(
+    asin: string,
+    productData: ProductData,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<string> {
     // The refresh cadence is operator-tunable at runtime (admin → Settings), and
     // RefreshProcessorService already honours it. This path used to hardcode
     // 12 hours, so lowering the interval in the panel silently applied to the
@@ -1285,13 +1293,13 @@ export class ListingsService {
     const result = await this.databaseService.query<{ id: string }>(
       `
       INSERT INTO products (
-        asin, title, price, currency, image_urls, description,
+        asin, marketplace, title, price, currency, image_urls, description,
         brand, manufacturer, category, features, specs, identifiers,
         stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-              NOW() + make_interval(mins => $17::int))
-      ON CONFLICT (asin) DO UPDATE SET
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+              NOW() + make_interval(mins => $18::int))
+      ON CONFLICT (asin, marketplace) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,
         currency = EXCLUDED.currency,
@@ -1319,6 +1327,7 @@ export class ListingsService {
     `,
       [
         asin,
+        marketplace,
         productData.title,
         JSON.stringify(productData.price),
         productData.price.currency || 'USD',

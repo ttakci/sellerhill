@@ -1,15 +1,4 @@
-import type { AdminProxyDto, PlatformSettingDto } from '@repo/shared';
-
-import type { ProxyFormState } from '../AdminPage/AdminPage.types';
-
-/** Return shape of `useAdminProxyForm`. */
-export interface UseAdminProxyForm {
-  proxyForm: ProxyFormState;
-  isSavingProxy: boolean;
-  onProxyFieldChange: (field: keyof ProxyFormState, value: string) => void;
-  onProxySubmit: () => void;
-  onProxyToggleStatus: (proxy: AdminProxyDto) => void;
-}
+import type { PlatformSettingDto } from '@repo/shared';
 
 /** Return shape of `useAdminSettings`. */
 export interface UseAdminSettings {

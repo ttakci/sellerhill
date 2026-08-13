@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AmazonMarketplace } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 
@@ -34,10 +35,13 @@ export class ProductsService {
     return this.extractPriceAndImage(results[0]);
   }
 
-  async getProductPriceAndImageByAsin(asin: string): Promise<ProductPriceAndImage | null> {
+  async getProductPriceAndImageByAsin(
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<ProductPriceAndImage | null> {
     const results = await this.databaseService.query<ProductPriceRow>(
-      `SELECT price, image_urls FROM products WHERE asin = $1`,
-      [asin]
+      `SELECT price, image_urls FROM products WHERE asin = $1 AND marketplace = $2`,
+      [asin, marketplace]
     );
 
     if (results.length === 0) {
@@ -47,8 +51,11 @@ export class ProductsService {
     return this.extractPriceAndImage(results[0]);
   }
 
-  async getProductPriceByAsin(asin: string): Promise<number | null> {
-    const result = await this.getProductPriceAndImageByAsin(asin);
+  async getProductPriceByAsin(
+    asin: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+  ): Promise<number | null> {
+    const result = await this.getProductPriceAndImageByAsin(asin, marketplace);
     return result?.purchasePrice ?? null;
   }
 

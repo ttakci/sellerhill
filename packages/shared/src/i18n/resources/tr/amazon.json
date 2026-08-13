@@ -82,9 +82,26 @@
       "autoFulfillDryRun": "Deneme modu (sipariş oluşturmadan akışı çalıştır)",
       "autoFulfillDryRunHint": "Sipariş Verme adımı hariç tam ödeme akışını çalıştırır; inceleme toplamı yakalanır ve gösterilir."
     },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "enabled": "Proxy'yi etkinleştir",
+      "enabledHint": "Hesabınızı korumak için bir proxy sunucusu kullanın",
+      "connectionType": "Bağlantı Türü",
+      "host": "Sunucu adresi girin",
+      "port": "Port girin",
+      "username": "Kullanıcı adı",
+      "password": "Parola",
+      "hint": "İsteğe bağlıdır. Bu hesabın otomasyon trafiğini kendi proxy'niz üzerinden yönlendirmek isterseniz ekleyin — IP tabanlı engellemelere karşı ekstra koruma sağlar. Boş bırakırsanız hesap doğrudan bağlanır; normal ve varsayılan kullanım budur."
+    },
+    "marketplace": {
+      "label": "Pazar Yeri",
+      "AMAZON_US": "Amerika Birleşik Devletleri (amazon.com)",
+      "readOnlyHint": "Hesap oluşturulduktan sonra pazar yeri değiştirilemez."
+    },
     "errors": {
-      "autoFulfillProxyRequired": "Otomatik karşılama, operatör tarafından yapılandırılmış bir proxy gerektirir.",
-      "autoFulfillCapRequired": "Bu hesapta otomatik karşılamayı etkinleştirmek için bir maksimum sipariş tutarı belirleyin."
+      "autoFulfillCapRequired": "Bu hesapta otomatik karşılamayı etkinleştirmek için bir maksimum sipariş tutarı belirleyin.",
+      "proxyHostPortRequired": "Bu hesap için proxy kullanmak üzere bir sunucu adresi ve port girin.",
+      "unsupportedMarketplace": "Bu Amazon pazar yeri henüz kullanılamıyor."
     }
   }
 }

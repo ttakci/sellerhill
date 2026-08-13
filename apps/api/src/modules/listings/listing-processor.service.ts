@@ -1,6 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { forwardRef, Inject, Logger } from '@nestjs/common';
 import {
+  AmazonMarketplace,
   extractCorrelationId,
   generateCorrelationId,
   KeepaUsageSource,
@@ -516,28 +517,33 @@ export class ListingProcessorService extends WorkerHost {
    */
   async resolveProductData(
     asin: string,
-    userId: string
+    userId: string,
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
   ): Promise<{ productData: ProductData; productId: string }> {
-    const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin));
+    const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
       return cached;
     }
 
     // Advisory lock scope: this transaction/connection only. hashtext() maps
-    // the ASIN into the bigint keyspace; collisions merely over-serialize.
+    // the asin:marketplace pair into the bigint keyspace; collisions merely
+    // over-serialize. Marketplace is folded into the key so a future second
+    // Amazon marketplace can never collide on the lock with this one.
     return this.databaseService.transaction(async (client) => {
-      await client.query(`SELECT pg_advisory_xact_lock(hashtext('keepa-create'), hashtext($1))`, [asin]);
+      await client.query(`SELECT pg_advisory_xact_lock(hashtext('keepa-create'), hashtext($1))`, [
+        `${asin}:${marketplace}`,
+      ]);
 
       // Another worker may have fetched + cached while we waited on the lock.
-      const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin));
+      const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
         return cachedAfterLock;
       }
 
       this.logger.log(`Fetching product data for ASIN ${asin} from Keepa`);
-      const { product: keepaProduct, meta } = await this.keepaService.getProductDetailsWithMeta(asin);
+      const { product: keepaProduct, meta } = await this.keepaService.getProductDetailsWithMeta(asin, marketplace);
 
       // Record real token spend + balance snapshot regardless of data quality.
       await this.keepaUsageService.logUsage({
@@ -562,7 +568,7 @@ export class ListingProcessorService extends WorkerHost {
         `Keepa data received: price=${keepaProduct.price.current} USD, stock=${keepaProduct.stock ?? 0}`
       );
 
-      const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct);
+      const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct, marketplace);
       return { productData: keepaProduct, productId };
     });
   }

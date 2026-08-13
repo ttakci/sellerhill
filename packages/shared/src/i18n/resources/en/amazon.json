@@ -82,9 +82,26 @@
       "autoFulfillDryRun": "Dry-run (run the flow without placing the order)",
       "autoFulfillDryRunHint": "Runs the full checkout flow up to (not including) Place Order so the review total can be captured and surfaced for review."
     },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "enabled": "Enable proxy",
+      "enabledHint": "Use a proxy server to protect your account",
+      "connectionType": "Connection Type",
+      "host": "Enter host",
+      "port": "Enter port",
+      "username": "Username",
+      "password": "Password",
+      "hint": "Optional. Add your own proxy to route this account's automation through it — helpful if you want extra protection against IP-based blocks. Leave it off and the account connects directly; that's the normal default."
+    },
+    "marketplace": {
+      "label": "Marketplace",
+      "AMAZON_US": "United States (amazon.com)",
+      "readOnlyHint": "Marketplace can't be changed after the account is created."
+    },
     "errors": {
-      "autoFulfillProxyRequired": "Auto-fulfillment requires a proxy to be configured by the operator.",
-      "autoFulfillCapRequired": "Set a max order total to enable auto-fulfillment on this account."
+      "autoFulfillCapRequired": "Set a max order total to enable auto-fulfillment on this account.",
+      "proxyHostPortRequired": "Enter a host and port to use a proxy for this account.",
+      "unsupportedMarketplace": "This Amazon marketplace isn't available yet."
     }
   }
 }

@@ -8,13 +8,9 @@ import type {
   AdminListingQualitySummaryDto,
   AdminOperationsSummaryDto,
   AdminOverviewDto,
-  AdminProxyDto,
-  AdminProxyListDto,
   AdminUsersListDto,
-  CreateProxyRequest,
   PlatformSettingsListDto,
   ProviderCostSummaryDto,
-  UpdateProxyRequest,
   EbayCallBudgetStatusDto,
   UpsertAspectDefaultRequest,
   UserCostSummaryDto,
@@ -43,18 +39,6 @@ export const adminApi = baseApi.injectEndpoints({
     getAdminBillingMetrics: builder.query<AdminBillingMetricsDto, void>({
       query: () => '/admin/billing/metrics',
       providesTags: ['Admin'],
-    }),
-    getAdminProxies: builder.query<AdminProxyListDto, void>({
-      query: () => '/admin/proxies',
-      providesTags: ['Admin'],
-    }),
-    createAdminProxy: builder.mutation<AdminProxyDto, CreateProxyRequest>({
-      query: (body) => ({ url: '/admin/proxies', method: 'POST', body }),
-      invalidatesTags: ['Admin'],
-    }),
-    updateAdminProxy: builder.mutation<AdminProxyDto, { id: string } & UpdateProxyRequest>({
-      query: ({ id, ...body }) => ({ url: `/admin/proxies/${id}`, method: 'PATCH', body }),
-      invalidatesTags: ['Admin'],
     }),
     getAdminUsers: builder.query<AdminUsersListDto, void>({
       query: () => '/admin/users',
@@ -127,9 +111,6 @@ export const {
   useGetAdminProviderCostsQuery,
   useGetAdminUserCostsQuery,
   useGetAdminBillingMetricsQuery,
-  useGetAdminProxiesQuery,
-  useCreateAdminProxyMutation,
-  useUpdateAdminProxyMutation,
   useGetAdminUsersQuery,
   useGetAdminEbayBudgetQuery,
   useGetAdminListingFailuresQuery,

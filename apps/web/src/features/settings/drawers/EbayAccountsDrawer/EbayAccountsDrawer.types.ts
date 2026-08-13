@@ -1,5 +1,6 @@
-import type { EbayAccountPublicDto } from '@repo/shared';
+import type { EbayAccountPublicDto, EbayMarketplaceId } from '@repo/shared';
 
+import type { EbayMarketplaceOption } from '@/domain-ui/ConnectEbayPrompt/ConnectEbayPrompt.types';
 import type { EbayStoreCardView } from '@/features/settings/components/EbayAccountCard';
 
 export interface EbayAccountsDrawerProps {
@@ -10,6 +11,9 @@ export interface EbayAccountsDrawerProps {
   onConnectNew: () => void;
   /** Opens the full accounts list drawer. */
   onViewAll: () => void;
+  marketplaceOptions: EbayMarketplaceOption[];
+  selectedMarketplace: EbayMarketplaceId;
+  onMarketplaceChange: (value: EbayMarketplaceId) => void;
 }
 
 export interface EbayAccountsDrawerComponentProps {
@@ -18,4 +22,7 @@ export interface EbayAccountsDrawerComponentProps {
   stores: EbayStoreCardView[];
   onConnectNew: () => void;
   onViewAll: () => void;
+  marketplaceOptions: EbayMarketplaceOption[];
+  selectedMarketplace: EbayMarketplaceId;
+  onMarketplaceChange: (value: EbayMarketplaceId) => void;
 }
