@@ -50,27 +50,22 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <MeshBackground animate={false} />
           {/* Sellerboard strip: [menu] [logo] one row — divider = border-bottom */}
           <S.SidebarBrandRow $isCollapsed={sidebarCollapsed}>
-            <Tooltip
-              content={sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')}
-              position="right"
+            <S.SidebarCollapseButton
+              type="button"
+              $isCollapsed={sidebarCollapsed}
+              onClick={onToggleSidebar}
+              aria-label={
+                sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
+              }
             >
-              <S.SidebarCollapseButton
-                type="button"
-                $isCollapsed={sidebarCollapsed}
-                onClick={onToggleSidebar}
-                aria-label={
-                  sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
-                }
-              >
-                <Icon name="menu" size={20} />
-              </S.SidebarCollapseButton>
-            </Tooltip>
+              {sidebarCollapsed ? <Logo layout="icon" height={24} /> : <Icon name="menu" size={20} />}
+            </S.SidebarCollapseButton>
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}
               onClick={() => onLocaleNavigate('/dashboard')}
               title={t('translation:menu.dashboard')}
             >
-              <Logo layout="nav" height={36} />
+              <Logo layout="wordmark" height={30} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 
@@ -264,11 +259,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
                 <Dropdown
                   align="right"
-                  width="6.25rem"
+                  width="8rem"
                   trigger={
                     <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
                       <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
-                        <S.LanguageText>{i18nLanguage.toUpperCase()}</S.LanguageText>
+                        <S.LanguageText>{t(`translation:languages.${i18nLanguage}`)}</S.LanguageText>
                         <Icon name="chevron-down" size={12} />
                       </S.LanguageSelectTrigger>
                     </Tooltip>

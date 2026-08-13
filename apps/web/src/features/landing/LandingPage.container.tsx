@@ -1,3 +1,4 @@
+import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
 import {
   BILLING_DISABLED,
   BILLING_MICROS_PER_UNIT,
@@ -6,7 +7,7 @@ import {
   BillingLimitKey,
   type SupportedLocale,
 } from '@repo/shared';
-import { formatCurrency } from '@repo/ui';
+import { formatCurrency, lightTheme } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -96,14 +97,37 @@ export const LandingPageContainer = (): React.ReactElement => {
     const highlightedSlug = pickHighlightedSlug(slugs);
     return catalog.plans.map((plan) => {
       const monthlyPrice = plan.prices[BillingInterval.MONTHLY];
-      const priceDisplay = monthlyPrice
+      const annualPrice = plan.prices[BillingInterval.ANNUAL];
+      const priceDisplayMonthly = monthlyPrice
         ? formatLandingPrice(monthlyPrice.amountMicros, monthlyPrice.currency, freeLabel)
         : freeLabel;
+
+      let priceDisplayAnnual: string | null = null;
+      let priceDisplayAnnualPerMonth: string | null = null;
+      let annualSavingsMonths: number | null = null;
+      if (annualPrice) {
+        priceDisplayAnnual = formatLandingPrice(annualPrice.amountMicros, annualPrice.currency, freeLabel);
+        priceDisplayAnnualPerMonth = formatLandingPrice(
+          Math.round(annualPrice.amountMicros / 12),
+          annualPrice.currency,
+          freeLabel
+        );
+        if (monthlyPrice && monthlyPrice.amountMicros > 0) {
+          const yearOfMonthly = monthlyPrice.amountMicros * 12;
+          annualSavingsMonths = Math.max(
+            0,
+            Math.round(((yearOfMonthly - annualPrice.amountMicros) / monthlyPrice.amountMicros) * 10) / 10
+          );
+        }
+      }
+
       const listingsLimit = plan.limits[BillingLimitKey.LISTINGS_PER_MONTH]?.limitValue ?? 0;
       return {
         slug: plan.slug,
-        priceDisplay,
-        periodKey: 'perMonth' as const,
+        priceDisplayMonthly,
+        priceDisplayAnnual,
+        priceDisplayAnnualPerMonth,
+        annualSavingsMonths,
         listingsDisplay: formatListingsLine(listingsLimit, t),
         isHighlighted: plan.slug === highlightedSlug,
       };
@@ -148,7 +172,12 @@ export const LandingPageContainer = (): React.ReactElement => {
   }, []);
 
   return (
-    <>
+    // The landing page is always light — no dark mode, no toggle. Nesting a
+    // light-pinned EmotionThemeProvider here overrides the app-wide theme
+    // context (which otherwise follows the visitor's OS/localStorage
+    // preference) for every styled-component and Icon under it, without
+    // touching the authenticated app's own light/dark support.
+    <EmotionThemeProvider theme={lightTheme}>
       <LandingPageComponent
         currentLocale={currentLocale}
         scrolled={scrolled}
@@ -163,7 +192,7 @@ export const LandingPageContainer = (): React.ReactElement => {
         onCloseMobileMenu={handleCloseMobileMenu}
       />
       <TawkToWidget />
-    </>
+    </EmotionThemeProvider>
   );
 };
 

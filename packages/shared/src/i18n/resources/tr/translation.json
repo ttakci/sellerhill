@@ -423,7 +423,7 @@
         "title": "Hesabı devre dışı bırak",
         "warning": "SellerHill erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
         "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
-        "emailPlaceholder": "{{email}}",
+        "emailFieldLabel": "E-posta adresi",
         "confirmLabel": "Hesabı devre dışı bırak",
         "cancelLabel": "Vazgeç",
         "successHeader": "Hesap devre dışı bırakıldı",
@@ -446,38 +446,16 @@
       "faq": "SSS",
       "login": "Giriş yap",
       "getStarted": "Ücretsiz başla",
-      "demo": "Canlı demo"
+      "demo": "Demo"
     },
     "hero": {
-      "badge": "Amazon'dan eBay'e, uçtan uca",
       "headline": "Mağazanız kendi çalışsın. Ne kazandığınızı tam olarak bilin.",
       "subheading": "SellerHill ürünlerinizi listeler, fiyat ve stoğu senkron tutar, gelen siparişi tedarikçinizden satın alır ve kargo takibini eBay'e işler. Ardından her satışın arkasındaki gerçek kârı gösterir — tahminle değil, ölçerek.",
       "ctaPrimary": "Ücretsiz başla",
-      "ctaSecondary": "Canlı demoyu aç",
-      "note": "Başlamak için kart gerekmez. Demo için üyelik de gerekmez."
-    },
-    "heroPreview": {
-      "windowLabel": "Panel",
-      "periodLabel": "Bu ay",
-      "netProfit": "Net kâr",
-      "sales": "Satış",
-      "orders": "Sipariş",
-      "margin": "Marj",
-      "confirmed": "Onaylanmış",
-      "estimated": "Tahmini",
-      "pending": "Maliyeti henüz bilinmiyor",
-      "recentTitle": "Son siparişler",
-      "profitColumn": "Kâr",
-      "states": {
-        "purchased": "Satın alındı",
-        "shipped": "Kargoda",
-        "actionRequired": "Sizi bekliyor"
-      },
-      "products": {
-        "a": "Kablosuz Kulaklık Pro",
-        "b": "USB-C Hızlı Şarj 65W",
-        "c": "Ergonomik Laptop Standı"
-      }
+      "ctaSecondary": "Demo hesap",
+      "trialTitle": "1 hafta ücretsiz deneme",
+      "trialNoCard": "Kredi kartı gerekmez.",
+      "trialCancelAnytime": "İstediğiniz zaman iptal edebilirsiniz."
     },
     "flow": {
       "title": "Tek bir iş için kuruldu, düzgün yapmak için",
@@ -505,27 +483,33 @@
       "sectionSubtitle": "Bir satıcının gününü dolduran işler — listelemek, fiyat kollamak, satın almak, kargo peşinde koşmak — kendi başına, günün her saati çalışır.",
       "asinListing": {
         "title": "Dakikalar içinde listeleyin",
-        "description": "Ürünü ekleyin; temiz ve aramaya uygun bir başlık, düzgün görseller ve alıcıların filtrelediği ürün özellikleri hazır şekilde eBay'de yayına girsin."
+        "description": "Ürünü ekleyin; temiz ve aramaya uygun bir başlık, düzgün görseller ve alıcıların filtrelediği ürün özellikleri hazır şekilde eBay'de yayına girsin.",
+        "detail": "Aramaya uygun başlık, galeri görselleri ve alıcıların filtrelediği ürün özellikleri kaynak üründen otomatik doldurulur — iki kez yazmanız, yarım yayınlamanız gerekmez."
       },
       "priceStock": {
         "title": "Fiyat ve stok hep güncel",
-        "description": "Kaynaktaki fiyat ya da stok oynadığında eBay ilanınız aynı turda onu takip eder. Tedarik edemeyeceğinizi satmazsınız, marjı da masada bırakmazsınız."
+        "description": "Kaynaktaki fiyat ya da stok oynadığında eBay ilanınız aynı turda onu takip eder. Tedarik edemeyeceğinizi satmazsınız, marjı da masada bırakmazsınız.",
+        "detail": "Her yenilemede kaynak fiyat ve stoğunuz eBay'deki canlı değerle karşılaştırılır, yalnızca gerçekten bir şey değiştiğinde güncelleme gönderilir — ilanınız sabit bir takvimle değil, gerçek değişikliklerle güncel kalır."
       },
       "autoOrder": {
         "title": "Siparişler sizin yerinize alınır",
-        "description": "eBay'deki satış, otomatik olarak tedarikçi siparişine dönüşür ve alıcınıza gönderilir. Hesap başına harcama tavanını siz koyarsınız; asla fazlasını ödeyemez."
+        "description": "eBay'deki satış, otomatik olarak tedarikçi siparişine dönüşür ve alıcınıza gönderilir. Hesap başına harcama tavanını siz koyarsınız; asla fazlasını ödeyemez.",
+        "detail": "Eşleşen satış, sırası gelen alıcı hesabından satın alınır ve doğrudan eBay alıcınıza gönderilir; belirlediğiniz harcama tavanının altında kalır — tavanı aşma riski olan sipariş geçip gitmez, onayınız için durur."
       },
       "tracking": {
         "title": "Kendini işleyen kargo takibi",
-        "description": "Takip numarası oluşur oluşmaz alınıp eBay'e işlenir; sipariş zamanında kargolandı görünür ve alıcınız tedarik zincirinizi değil, düzgün bir teslimat görür."
+        "description": "Takip numarası oluşur oluşmaz alınıp eBay'e işlenir; sipariş zamanında kargolandı görünür ve alıcınız tedarik zincirinizi değil, düzgün bir teslimat görür.",
+        "detail": "Takip numarası oluşur oluşmaz alınır ve eBay'e kargo güncellemesi olarak işlenir; siz kontrol etmeden sipariş kargolandı görünür."
       },
       "buyerMessages": {
         "title": "Zamanında alıcı mesajları",
-        "description": "Teşekkür, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi şablonlarınızla, doğru anda, siz hatırlamak zorunda kalmadan gider."
+        "description": "Teşekkür, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi şablonlarınızla, doğru anda, siz hatırlamak zorunda kalmadan gider.",
+        "detail": "Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi metninizle, her biri gerçekten doğru olduğu anda kendiliğinden gider — ne zaman olmuş olabileceğine dair bir tahmin değil."
       },
       "multiStore": {
         "title": "Birkaç mağaza, tek masa",
-        "description": "Birden fazla eBay mağazasını ve birden fazla alıcı hesabını yan yana yürütün; her biri kendi başına filtrelenir ve raporlanır."
+        "description": "Birden fazla eBay mağazasını ve birden fazla alıcı hesabını yan yana yürütün; her biri kendi başına filtrelenir ve raporlanır.",
+        "detail": "Her mağaza ve alıcı hesabı kendi marj kuralını, kendi raporunu ve kendi otomasyon ayarını korur; üç mağaza yürütmek onları tek bir ortalamaya indirmek anlamına gelmez."
       }
     },
     "profit": {
@@ -554,6 +538,17 @@
         "estimatedLabel": "Tahmini kâr",
         "unknownLabel": "Ciro, maliyeti bilinmiyor",
         "footnote": "Manşet rakamınıza yalnızca onaylanmış kâr sayılır."
+      },
+      "tabs": {
+        "overview": "Genel bakış",
+        "pnl": "Kâr-zarar",
+        "perOrder": "Sipariş bazında",
+        "pnlRows": {
+          "sales": "Satış",
+          "fees": "Ücretler",
+          "cost": "Ürün maliyeti",
+          "netProfit": "Net kâr"
+        }
       }
     },
     "perProduct": {
@@ -620,6 +615,12 @@
       "billingNote": "İstediğiniz an iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "perYear": "/yıl",
+      "interval": {
+        "monthly": "Aylık",
+        "annual": "Yıllık",
+        "annualSavings": "{{months}} ay ücretsiz",
+        "billedAnnually": "Yıllık {{price}} olarak faturalandırılır"
+      },
       "mostPopular": "En çok tercih edilen",
       "unlimited": "Sınırsız",
       "notIncluded": "Dâhil değil",

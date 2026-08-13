@@ -423,7 +423,7 @@
         "title": "Deactivate account",
         "warning": "This will revoke your access to SellerHill. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
         "typeEmail": "To confirm, type your email address below:",
-        "emailPlaceholder": "{{email}}",
+        "emailFieldLabel": "Email address",
         "confirmLabel": "Deactivate account",
         "cancelLabel": "Cancel",
         "successHeader": "Account deactivated",
@@ -446,38 +446,16 @@
       "faq": "FAQ",
       "login": "Log in",
       "getStarted": "Start free",
-      "demo": "Live demo"
+      "demo": "Demo"
     },
     "hero": {
-      "badge": "Amazon to eBay, end to end",
       "headline": "Run your store on autopilot. Know exactly what you earned.",
       "subheading": "SellerHill lists your products, keeps price and stock in sync, buys each order from your supplier and pushes tracking back to eBay. Then it shows the real profit behind every sale — measured, not guessed.",
       "ctaPrimary": "Start free",
-      "ctaSecondary": "Open live demo",
-      "note": "No credit card to start. The demo needs no sign-up."
-    },
-    "heroPreview": {
-      "windowLabel": "Dashboard",
-      "periodLabel": "This month",
-      "netProfit": "Net profit",
-      "sales": "Sales",
-      "orders": "Orders",
-      "margin": "Margin",
-      "confirmed": "Confirmed",
-      "estimated": "Estimated",
-      "pending": "Cost not yet known",
-      "recentTitle": "Recent orders",
-      "profitColumn": "Profit",
-      "states": {
-        "purchased": "Purchased",
-        "shipped": "Shipped",
-        "actionRequired": "Needs you"
-      },
-      "products": {
-        "a": "Wireless Earbuds Pro",
-        "b": "USB-C Fast Charger 65W",
-        "c": "Ergonomic Laptop Stand"
-      }
+      "ctaSecondary": "Demo account",
+      "trialTitle": "1 week free trial",
+      "trialNoCard": "No credit card required.",
+      "trialCancelAnytime": "Cancel anytime."
     },
     "flow": {
       "title": "Built for one job, done properly",
@@ -505,27 +483,33 @@
       "sectionSubtitle": "The jobs that fill a seller's day — listing, watching prices, buying, chasing tracking — run on their own, around the clock.",
       "asinListing": {
         "title": "List in minutes",
-        "description": "Add a product and it goes live on eBay with a clean, search-ready title, proper images and the item details buyers filter by already filled in."
+        "description": "Add a product and it goes live on eBay with a clean, search-ready title, proper images and the item details buyers filter by already filled in.",
+        "detail": "Search-ready title, gallery images and the item specifics buyers filter by are filled in from your source product — nothing to type twice, nothing published half-finished."
       },
       "priceStock": {
         "title": "Price and stock stay current",
-        "description": "When your source price or stock moves, your eBay offer follows in the same cycle. No overselling what you can't get, no leaving margin behind."
+        "description": "When your source price or stock moves, your eBay offer follows in the same cycle. No overselling what you can't get, no leaving margin behind.",
+        "detail": "Every refresh compares your source price and stock to what is live on eBay and only pushes a change when something actually moved, so your listing stays accurate without being touched on a fixed schedule."
       },
       "autoOrder": {
         "title": "Orders bought for you",
-        "description": "An eBay sale becomes a supplier purchase automatically, shipped to your buyer. You set a spending ceiling per account, so it can never overpay."
+        "description": "An eBay sale becomes a supplier purchase automatically, shipped to your buyer. You set a spending ceiling per account, so it can never overpay.",
+        "detail": "A matched sale places the purchase on a rotating buyer account and ships straight to your eBay buyer, staying under the spending cap you set — anything at risk of going over it stops for your review instead of going through."
       },
       "tracking": {
         "title": "Tracking that files itself",
-        "description": "Tracking is picked up as soon as it exists and pushed to eBay, so your order is marked shipped on time — and your buyer sees a clean delivery, not your supply chain."
+        "description": "Tracking is picked up as soon as it exists and pushed to eBay, so your order is marked shipped on time — and your buyer sees a clean delivery, not your supply chain.",
+        "detail": "As soon as a tracking number exists it is picked up and pushed to eBay as the shipment update, so a sale reads as shipped without you checking in on it."
       },
       "buyerMessages": {
         "title": "Buyer messages on schedule",
-        "description": "Thank-you, shipped, delivered and feedback requests go out on your own templates, at the right moment, without you remembering to send them."
+        "description": "Thank-you, shipped, delivered and feedback requests go out on your own templates, at the right moment, without you remembering to send them.",
+        "detail": "Order-received, shipped, delivered and feedback-request messages send themselves on your own wording, at the moment each one is actually true — not a guess at when it probably happened."
       },
       "multiStore": {
         "title": "Several stores, one desk",
-        "description": "Run more than one eBay store and more than one buyer account side by side, each filtered and reported on its own."
+        "description": "Run more than one eBay store and more than one buyer account side by side, each filtered and reported on its own.",
+        "detail": "Each store and buyer account keeps its own margin rules, its own reporting and its own automation settings, so running three storefronts never means averaging them into one."
       }
     },
     "profit": {
@@ -554,6 +538,17 @@
         "estimatedLabel": "Estimated profit",
         "unknownLabel": "Revenue, cost unknown",
         "footnote": "Only confirmed profit counts toward your headline figure."
+      },
+      "tabs": {
+        "overview": "Overview",
+        "pnl": "P&L",
+        "perOrder": "Per order",
+        "pnlRows": {
+          "sales": "Sales",
+          "fees": "Fees & referral",
+          "cost": "Cost of goods",
+          "netProfit": "Net profit"
+        }
       }
     },
     "perProduct": {
@@ -620,6 +615,12 @@
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "perYear": "/yr",
+      "interval": {
+        "monthly": "Monthly",
+        "annual": "Annual",
+        "annualSavings": "{{months}} months free",
+        "billedAnnually": "Billed {{price}}/yr"
+      },
       "mostPopular": "Most popular",
       "unlimited": "Unlimited",
       "notIncluded": "Not included",

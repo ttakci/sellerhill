@@ -6,7 +6,7 @@ import { Text, tkn } from '@repo/ui';
  * Expanded sidebar rail. Single source of truth — the docked width, the mobile
  * off-canvas width and its hidden offset must always be the same number.
  */
-const SIDEBAR_WIDTH = '16rem'; /* 256px */
+const SIDEBAR_WIDTH = '16rem'; /* 256px — "Bekleyen Aksiyonlar" + its count badge is the longest nav row; anything narrower clips it */
 
 /**
  * LayoutWrapper - Root container
@@ -115,7 +115,7 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   flex-wrap: nowrap;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm+')};
   flex-shrink: 0;
   height: ${APP_CHROME_HEIGHT};
   min-height: ${APP_CHROME_HEIGHT};
@@ -132,7 +132,7 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
 `;
 
 export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollapsed?: boolean }>`
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -177,6 +177,7 @@ export const NavSection = styled.nav<{ $isCollapsed: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'stretch')};
   gap: ${tkn('spacing.xs')};
   overflow-y: auto;
   overflow-x: hidden;
@@ -215,14 +216,16 @@ export const NavItemWrapper = styled.div`
 
 export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $isSubItem?: boolean }>`
   display: flex;
-  width: 100%;
+  width: ${({ $isCollapsed }) => ($isCollapsed ? SIDEBAR_LOGO_HEIGHT : '100%')};
+  height: ${({ $isCollapsed }) => ($isCollapsed ? SIDEBAR_LOGO_HEIGHT : 'auto')};
+  align-self: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'stretch')};
   box-sizing: border-box;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
   gap: ${({ $isCollapsed, theme }) => ($isCollapsed ? '0' : tkn('spacing.sm')({ theme }))};
   padding: ${({ $isCollapsed, $isSubItem, theme }) =>
     $isCollapsed
-      ? `${tkn('spacing.sm')({ theme })} 0`
+      ? '0'
       : $isSubItem
         ? `${tkn('spacing.sm')({ theme })} ${tkn('spacing.sm-md')({ theme })} ${tkn('spacing.sm')({ theme })} ${tkn(
             'spacing.md+'
@@ -286,8 +289,8 @@ export const NavBadge = styled.span<{ $urgent: boolean }>`
  */
 export const NavBadgeDot = styled.span<{ $urgent: boolean }>`
   position: absolute;
-  top: 0.375rem;
-  right: 0.75rem;
+  top: 0.3125rem;
+  right: 0.3125rem;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: ${tkn('radius.full')};
@@ -367,8 +370,8 @@ export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: ${SIDEBAR_LOGO_HEIGHT};
+  height: ${SIDEBAR_LOGO_HEIGHT};
   padding: 0;
   margin: 0;
   border-radius: ${tkn('radius.sm')};
@@ -722,11 +725,11 @@ export const LanguageSelectTrigger = styled.div`
 `;
 
 export const LanguageText = styled.span`
+  white-space: nowrap;
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.bold')};
   color: ${tkn('colors.text.secondary')};
   transition: color ${tkn('transitions.fast')};
-  text-transform: uppercase;
 `;
 
 export const NotificationBadge = styled.span`

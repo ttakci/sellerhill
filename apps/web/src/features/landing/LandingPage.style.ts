@@ -21,6 +21,36 @@ const NARROW_MAX = '900px';
 const SECTION_Y = '7.5rem';
 const SECTION_Y_SM = '4.5rem';
 
+/*
+ * Sellerboard's own fonts, loaded as extra families in `index.html` alongside
+ * the app's Inter/Lexend (see the Google Fonts `<link>` there) — landing is
+ * the one surface that deliberately does NOT use the app's type system.
+ * Montserrat Bold is sellerboard's headline face (h1 56px, h2 48px, h3 40px);
+ * Poppins is everything else (body, nav, buttons, card titles, the pricing
+ * figure). Sizes below are copied from sellerboard.com/tr's live computed
+ * styles, not our app's own (smaller) type scale — do not "fix" them to
+ * match `typographyTokens`, that would undo the point of this file.
+ */
+const FONT_HEADING =
+  "'Montserrat', Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const FONT_BODY =
+  "'Poppins', Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
+/** Sellerboard-matched type scale (px, as rem @ 16px root). */
+const TYPE = {
+  h1: '3.5rem' /* 56px */,
+  h2: '3rem' /* 48px */,
+  h3: '2.5rem' /* 40px */,
+  cardLg: '1.5rem' /* 24px */,
+  cardMd: '1.25rem' /* 20px */,
+  cardSm: '1.125rem' /* 18px */,
+  price: '2rem' /* 32px */,
+  lead: '1.25rem' /* 20px */,
+  body: '1rem' /* 16px */,
+  small: '0.875rem' /* 14px */,
+  micro: '0.8125rem' /* 13px */,
+};
+
 export const Reveal = styled.div<{ $visible: boolean; $delay?: number }>`
   opacity: ${(p) => (p.$visible ? 1 : 0)};
   transform: translateY(${(p) => (p.$visible ? '0' : '18px')})
@@ -49,7 +79,7 @@ export const Page = styled.div`
   min-height: 100vh;
   background: ${tkn('colors.landing.heroBg')};
   color: ${tkn('colors.landing.heroText')};
-  font-family: ${tkn('typography.fontFamily.body')};
+  font-family: ${FONT_BODY};
   overflow-x: hidden;
 `;
 
@@ -57,15 +87,23 @@ export const Page = styled.div`
  * Navbar
  * ========================================================================= */
 
+/**
+ * Sellerboard keeps its navbar dark at all times — over the blue hero AND
+ * over the white sections once scrolled. Ours mirrors that: transparent
+ * (blends into the dark hero) until scrolled, then an opaque dark-navy fill
+ * so light nav text stays legible over whatever white section sits behind
+ * it. \`colors.sidebar.background\` is reused deliberately — same deep blue
+ * (light theme) / near-black (dark theme) as the app's own sidebar.
+ */
 export const Navbar = styled.header<{ $scrolled: boolean }>`
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 50;
   background: ${(p) =>
-    p.$scrolled ? `color-mix(in srgb, ${tkn('colors.landing.heroBg')(p)} 78%, transparent)` : 'transparent'};
+    p.$scrolled ? `color-mix(in srgb, ${tkn('colors.sidebar.background')(p)} 92%, transparent)` : 'transparent'};
   backdrop-filter: ${(p) => (p.$scrolled ? 'saturate(160%) blur(16px)' : 'none')};
   -webkit-backdrop-filter: ${(p) => (p.$scrolled ? 'saturate(160%) blur(16px)' : 'none')};
-  border-bottom: 1px solid ${(p) => (p.$scrolled ? tkn('colors.landing.heroBorder')(p) : 'transparent')};
+  border-bottom: 1px solid ${(p) => (p.$scrolled ? tkn('colors.sidebar.divider')(p) : 'transparent')};
   transition:
     background 240ms ease,
     backdrop-filter 240ms ease,
@@ -79,81 +117,134 @@ export const NavInner = styled.nav`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${tkn('spacing.lg')};
+  gap: ${tkn('spacing.md')};
 
   @media (max-width: 1080px) {
     padding: 0.75rem ${tkn('spacing.md')};
   }
 `;
 
+/**
+ * Navbar-only (never reused on a light surface) — same unconditional
+ * sidebar-text treatment as NavLink/Hamburger, so the wordmark's "seller"
+ * run (currentColor) doesn't inherit the page's theme-following heroText
+ * and go dark-on-dark. \`flex-shrink: 0\` keeps the brand mark at full size
+ * even when the row is tight — it must never be the thing that compresses.
+ */
 export const NavBrand = styled.button`
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
+  color: ${tkn('colors.sidebar.text')};
 `;
 
+/**
+ * Scrolls horizontally instead of wrapping when the row is tight — same
+ * principle as \`TabNav\`. Flexbox's default \`flex-shrink: 1\` on the nav
+ * buttons let the browser compress them below their text's natural width
+ * (with \`white-space\` left at its default \`normal\`), which wrapped
+ * "Nasıl çalışır" and "Giriş yap" onto two lines instead of just tightening
+ * the row. \`min-width: 0\` is required for a flex child to be allowed to
+ * shrink/scroll at all — without it this ignores overflow and pushes the
+ * pinned \`NavActions\` off the row instead.
+ */
 export const NavLinks = styled.div`
   display: flex;
   align-items: center;
   gap: 0.125rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: 960px) {
     display: none;
   }
 `;
 
+/**
+ * Navbar-only (never reused on a light surface) — safe to pin to the
+ * always-light sidebar text tokens. Full \`sidebar.text\` (not the muted
+ * variant), matching sellerboard.com/tr's own nav item color — same weight
+ * as before, just brighter; hover only adds the background tint now that
+ * there's no dimmer resting state to brighten out of.
+ */
 export const NavLink = styled.button`
+  flex-shrink: 0;
+  white-space: nowrap;
   background: none;
   border: none;
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.landing.heroTextMuted')};
+  color: ${tkn('colors.sidebar.text')};
   padding: 0.5rem 0.75rem;
   border-radius: ${tkn('radius.md')};
-  transition:
-    color 140ms ease,
-    background 140ms ease;
+  transition: background 140ms ease;
 
   &:hover {
-    color: ${tkn('colors.landing.heroText')};
-    background: ${tkn('colors.landing.chipBg')};
+    background: ${tkn('colors.sidebar.hover')};
   }
 `;
 
+/** Dropdown trigger with the exact NavLink look — used for the Features mega-menu-lite. Same full \`sidebar.text\` color as NavLink, see its comment. */
+export const NavDropdownTrigger = styled.div`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  gap: 0.3125rem;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: ${tkn('typography.fontWeight.medium')};
+  color: ${tkn('colors.sidebar.text')};
+  padding: 0.5rem 0.75rem;
+  border-radius: ${tkn('radius.md')};
+  transition: background 140ms ease;
+
+  &:hover {
+    background: ${tkn('colors.sidebar.hover')};
+  }
+`;
+
+/** \`flex-shrink: 0\` pins language/login/register/hamburger at full size — this cluster must never be what compresses under a tight row (see NavLinks). */
 export const NavActions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const UtilityGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
+  flex-shrink: 0;
+  gap: ${tkn('spacing.md')};
 `;
 
 /**
  * Locale trigger. Deliberately identical to the one in the app header
  * (`AppShell.style.ts` → `LanguageSelectTrigger`): a visitor who signs up
  * should meet the same control, not a second dialect of the same idea.
+ *
+ * Reused on two surfaces with opposite backgrounds — the always-dark navbar
+ * and the theme-following (light) footer — so its colour is a \`$onDark\`
+ * variant rather than a hardcoded choice.
  */
-export const LanguageTrigger = styled.div`
+export const LanguageTrigger = styled.div<{ $onDark?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.2xs')};
   cursor: pointer;
   padding: ${tkn('spacing.2xs')} 0.375rem;
   border-radius: ${tkn('radius.sm')};
-  color: ${tkn('colors.landing.heroTextMuted')};
+  color: ${(p) => (p.$onDark ? tkn('colors.sidebar.textMuted')(p) : tkn('colors.landing.heroTextMuted')(p))};
   transition: background 140ms ease;
 
   &:hover {
-    background: ${tkn('colors.landing.chipBg')};
+    background: ${(p) => (p.$onDark ? tkn('colors.sidebar.hover')(p) : tkn('colors.landing.chipBg')(p))};
 
     & > span,
     & svg {
@@ -162,36 +253,47 @@ export const LanguageTrigger = styled.div`
   }
 `;
 
-export const LanguageText = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.landing.heroTextMuted')};
-  text-transform: uppercase;
+export const LanguageText = styled.span<{ $onDark?: boolean }>`
+  white-space: nowrap;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
   transition: color 140ms ease;
 `;
 
-export const LoginButton = styled.button<{ $block?: boolean }>`
+/**
+ * Navbar (\`$onDark\`) is a borderless icon+text link, matching sellerboard's
+ * plain "Giriş yap" — a box around it competed with NavCta's filled button
+ * for attention. The mobile-menu-panel (\`$block\`) usage stays a bordered
+ * button: there it is one of two stacked CTAs, not a lightweight nav item.
+ */
+export const LoginButton = styled.button<{ $block?: boolean; $onDark?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  gap: ${tkn('spacing.2xs')};
   background: none;
-  border: 1px solid ${tkn('colors.landing.heroBorder')};
+  border: ${(p) => (p.$block ? `1px solid ${tkn('colors.landing.heroBorder')(p)}` : 'none')};
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.landing.heroText')};
-  padding: 0.5rem 1rem;
+  color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
+  padding: 0.5rem ${(p) => (p.$block ? '1rem' : '0.5rem')};
   border-radius: ${tkn('radius.md')};
   transition:
-    border-color 140ms ease,
+    color 140ms ease,
     background 140ms ease;
   ${(p) => (p.$block ? 'width: 100%;' : '')}
 
   &:hover {
-    border-color: ${tkn('colors.landing.cardBorderHover')};
-    background: ${tkn('colors.landing.chipBg')};
+    background: ${(p) => (p.$onDark ? tkn('colors.sidebar.hover')(p) : tkn('colors.landing.chipBg')(p))};
   }
 
   @media (max-width: 960px) {
-    display: ${(p) => (p.$block ? 'block' : 'none')};
+    display: ${(p) => (p.$block ? 'inline-flex' : 'none')};
   }
 `;
 
@@ -199,12 +301,14 @@ export const NavCta = styled.button<{ $block?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   gap: 0.375rem;
   background: ${tkn('colors.brand.primary')};
   border: none;
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.onAccent')};
   padding: 0.5rem 1.125rem;
@@ -238,9 +342,9 @@ export const Hamburger = styled.button<{ $open: boolean }>`
   width: 2.5rem;
   height: 2.5rem;
   background: none;
-  border: 1px solid ${tkn('colors.landing.heroBorder')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
   border-radius: ${tkn('radius.md')};
-  color: ${tkn('colors.landing.heroText')};
+  color: ${tkn('colors.sidebar.text')};
   cursor: pointer;
 
   @media (max-width: 960px) {
@@ -309,8 +413,8 @@ export const MobileLink = styled.button`
   border: none;
   cursor: pointer;
   text-align: left;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.landing.heroText')};
   padding: 0.75rem;
@@ -332,12 +436,22 @@ export const MobileCtas = styled.div`
  * Hero
  * ========================================================================= */
 
+/**
+ * Sellerboard-format hero: a full-bleed dark-navy band (the "üst taraf mavi"
+ * — top part blue), fading into the page's own light background at the
+ * bottom ("alt beyaz" — bottom white). \`colors.sidebar.background\` is
+ * reused rather than a new landing token — same deep blue in the light
+ * theme / near-black in the dark theme as the app's own sidebar, so the
+ * hero and the real product screenshot floating inside it read as one
+ * consistent brand colour instead of two unrelated blues.
+ */
 export const Hero = styled.section`
   position: relative;
-  padding: 8.5rem ${tkn('spacing.xl')} ${SECTION_Y};
+  background: ${tkn('colors.sidebar.background')};
+  padding: 9.5rem ${tkn('spacing.xl')} ${SECTION_Y};
   overflow: hidden;
 
-  @media (max-width: 900px) {
+  @media (max-width: 980px) {
     padding: 7.5rem ${tkn('spacing.md')} ${SECTION_Y_SM};
   }
 `;
@@ -365,32 +479,29 @@ export const HeroGlow = styled.div`
   opacity: 0.95;
 `;
 
-/** A soft floor under the hero so it melts into the page instead of stopping. */
-export const HeroFade = styled.div`
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 14rem;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent, ${tkn('colors.landing.heroBg')});
-`;
-
+/** Left content / right screenshot split — sellerboard's asymmetric hero, not a centered block. */
 export const HeroInner = styled.div`
   position: relative;
   max-width: ${CONTENT_MAX};
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   align-items: center;
-  text-align: center;
-  gap: ${tkn('spacing.xl')};
+  gap: ${tkn('spacing.xxl')};
+  text-align: left;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xl')};
+  }
 `;
 
 export const HeroContent = styled.div`
-  max-width: 52rem;
+  max-width: 34rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: ${tkn('spacing.lg')};
+  align-items: flex-start;
+  gap: ${tkn('spacing.md')};
 `;
 
 export const Eyebrow = styled.div`
@@ -403,58 +514,64 @@ export const Eyebrow = styled.div`
   background: ${tkn('colors.landing.chipBg')};
   border: 1px solid ${tkn('colors.landing.chipBorder')};
   box-shadow: ${tkn('colors.landing.shadowSoft')};
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   letter-spacing: 0.03em;
   color: ${tkn('colors.brand.primary')};
 `;
 
-export const EyebrowDot = styled.span`
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 50%;
-  background: ${tkn('colors.semantic.success')};
-`;
-
+/** Matches sellerboard's h1 exactly: Montserrat 700, 56px, 1.14 line-height. */
 export const HeroTitle = styled.h1`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(2.15rem, 4.6vw, 3.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.032em;
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  color: ${tkn('colors.landing.heroText')};
+  font-family: ${FONT_HEADING};
+  font-size: clamp(2.5rem, 4.2vw, ${TYPE.h1});
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
 `;
 
+/** Matches sellerboard's lead paragraph: Poppins 400, 20px, 1.6 line-height. */
 export const HeroSubtitle = styled.p`
   margin: 0;
-  max-width: 40rem;
-  font-size: clamp(${tkn('typography.fontSize.base')}, 1.5vw, ${tkn('typography.fontSize.lg')});
-  line-height: 1.65;
-  color: ${tkn('colors.landing.heroTextMuted')};
+  max-width: 30rem;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.lead};
+  line-height: 1.6;
+  color: ${tkn('colors.sidebar.textMuted')};
   text-wrap: pretty;
 `;
 
 export const HeroCtas = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: ${tkn('spacing.sm')};
 `;
 
-export const PrimaryButton = styled.button<{ $lg?: boolean }>`
+/**
+ * \`$accent\` swaps to an amber-fill/navy-text pill — used for the Hero's
+ * primary CTA. Matches sellerboard's own orange primary button, and reuses
+ * the exact amber \`HillAccent\` is set in ("hill" in the SellerHill
+ * wordmark) so the CTA and the logo read as the same brand color. A
+ * blue-on-blue button would otherwise barely separate from the dark-navy
+ * hero. Every other usage sits on a light surface, where the default
+ * blue-fill/white-text reads normally.
+ */
+export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: ${tkn('colors.brand.primary')};
+  background: ${(p) => (p.$accent ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primary')(p))};
   border: none;
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${(p) => (p.$lg ? tkn('typography.fontSize.base')(p) : tkn('typography.fontSize.sm')(p))};
+  font-family: ${FONT_BODY};
+  font-size: ${(p) => (p.$lg ? TYPE.cardSm : TYPE.body)};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.landing.onAccent')};
+  color: ${(p) => (p.$accent ? tkn('colors.sidebar.background')(p) : tkn('colors.landing.onAccent')(p))};
   padding: ${(p) => (p.$lg ? '0.95rem 1.85rem' : '0.75rem 1.5rem')};
   border-radius: ${tkn('radius.md')};
   box-shadow: ${tkn('colors.landing.shadowSoft')};
@@ -464,7 +581,8 @@ export const PrimaryButton = styled.button<{ $lg?: boolean }>`
     box-shadow 160ms ease;
 
   &:hover {
-    background: ${tkn('colors.brand.primaryHover')};
+    background: ${(p) =>
+      p.$accent ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primaryHover')(p)};
     transform: translateY(-2px);
     box-shadow: ${tkn('colors.landing.shadowStrong')};
   }
@@ -482,8 +600,8 @@ export const GhostButton = styled.button<{ $lg?: boolean }>`
   background: color-mix(in srgb, ${tkn('colors.surface.primary')} 88%, transparent);
   border: 1px solid ${tkn('colors.landing.heroBorder')};
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${(p) => (p.$lg ? tkn('typography.fontSize.base')(p) : tkn('typography.fontSize.sm')(p))};
+  font-family: ${FONT_BODY};
+  font-size: ${(p) => (p.$lg ? TYPE.cardSm : TYPE.body)};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
   padding: ${(p) => (p.$lg ? '0.95rem 1.85rem' : '0.75rem 1.5rem')};
@@ -508,25 +626,77 @@ export const GhostButton = styled.button<{ $lg?: boolean }>`
   }
 `;
 
-export const HeroNote = styled.p`
+/** Mirrors sellerboard's trial note under the primary CTA: a bold title line + muted detail lines below it. */
+export const HeroNote = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: ${tkn('spacing.xs')};
+`;
+
+export const HeroNoteTitle = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.tertiary')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  color: ${tkn('colors.sidebar.text')};
+`;
+
+export const HeroNoteLine = styled.p`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  color: ${tkn('colors.sidebar.textMuted')};
 `;
 
 /* =========================================================================
- * Hero product preview
- *
- * A faithful, legible rendering of the real dashboard — labels and figures,
- * not grey placeholder boxes. The last row deliberately shows an em dash for
- * an unknown profit, because that behaviour is the page's whole argument.
+ * Hero product preview — a real screenshot (from the sign-up-free demo
+ * account), not a hand-drawn mockup, floating on the dark hero exactly like
+ * sellerboard's own dashboard screenshot. \`PreviewFrame\`/\`PreviewBar\`/
+ * \`PreviewDot\`/\`PreviewUrl\`/\`PreviewImage\` below are shared with the
+ * Features and Profit sections further down the page — every screenshot on
+ * the site reads as one consistent browser-chrome "window".
  * ========================================================================= */
 
 export const HeroPreview = styled.div`
   position: relative;
   width: 100%;
-  max-width: 62rem;
-  perspective: 1600px;
+  max-width: 40rem;
+  margin-top: -2.75rem;
+
+  @media (max-width: 980px) {
+    max-width: 30rem;
+    margin: 0 auto;
+  }
+`;
+
+/**
+ * The floating stat-card overlay — sellerboard's "Month to date" card
+ * overlapping the top-right corner of its dashboard screenshot. Ours is a
+ * real crop of one KPI card from the same demo screenshot (never a second,
+ * fabricated set of numbers), clipped to a rounded rect so the crop's own
+ * square corners disappear under this wrapper's radius.
+ */
+export const HeroFloatCard = styled.div`
+  position: absolute;
+  top: -1.75rem;
+  right: -1.25rem;
+  width: 12.5rem;
+  border-radius: ${tkn('radius.lg')};
+  overflow: hidden;
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  z-index: 2;
+
+  @media (max-width: 980px) {
+    display: none;
+  }
+`;
+
+export const HeroFloatImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
 `;
 
 export const PreviewFrame = styled.div`
@@ -536,6 +706,18 @@ export const PreviewFrame = styled.div`
   box-shadow: ${tkn('colors.landing.shadowStrong')};
   overflow: hidden;
   text-align: left;
+`;
+
+/**
+ * A real product screenshot (from the sign-up-free demo account) inside the
+ * same browser-chrome frame as the hand-drawn hero preview — reused by the
+ * profit and features sections so every screenshot on the page reads as one
+ * consistent "window", not a mixed bag of raw images.
+ */
+export const PreviewImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
 `;
 
 export const PreviewBar = styled.div`
@@ -562,184 +744,6 @@ export const PreviewUrl = styled.span`
   font-family: ${tkn('typography.fontFamily.mono')};
 `;
 
-export const PreviewBody = styled.div`
-  display: grid;
-  grid-template-columns: 3.25rem 1fr;
-
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const PreviewRail = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: ${tkn('spacing.md')} 0;
-  align-items: center;
-  background: ${tkn('colors.sidebar.background')};
-
-  @media (max-width: 720px) {
-    display: none;
-  }
-`;
-
-export const PreviewRailItem = styled.span<{ $active?: boolean }>`
-  width: 1.5rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  background: ${(p) =>
-    p.$active ? tkn('colors.brand.primary')(p) : tkn('colors.sidebar.textMuted')(p)};
-  opacity: ${(p) => (p.$active ? 1 : 0.35)};
-`;
-
-export const PreviewMain = styled.div`
-  padding: ${tkn('spacing.lg')};
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.md')};
-  min-width: 0;
-`;
-
-export const PreviewPeriod = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: ${tkn('colors.text.tertiary')};
-`;
-
-export const PreviewKpis = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const PreviewKpi = styled.div<{ $accent?: boolean }>`
-  padding: 0.875rem;
-  border-radius: ${tkn('radius.lg')};
-  border: 1px solid ${(p) => (p.$accent ? tkn('colors.landing.chipBorder')(p) : tkn('colors.border.secondary')(p))};
-  background: ${(p) => (p.$accent ? tkn('colors.landing.chipBg')(p) : tkn('colors.surface.secondary')(p))};
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-`;
-
-export const PreviewKpiLabel = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.secondary')};
-`;
-
-export const PreviewKpiValue = styled.span`
-  font-size: ${tkn('typography.fontSize.xl')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-variant-numeric: tabular-nums;
-  color: ${tkn('colors.text.primary')};
-  letter-spacing: -0.015em;
-`;
-
-export const PreviewKpiFoot = styled.span<{ $tone?: 'success' | 'muted' }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${(p) =>
-    p.$tone === 'success' ? tkn('colors.semantic.success')(p) : tkn('colors.text.tertiary')(p)};
-`;
-
-export const PreviewChart = styled.div`
-  display: flex;
-  align-items: flex-end;
-  gap: 0.375rem;
-  height: 5.5rem;
-  padding: ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.lg')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  background: ${tkn('colors.surface.secondary')};
-`;
-
-export const PreviewChartBar = styled.span<{ $h: string; $accent?: boolean }>`
-  flex: 1;
-  height: ${(p) => p.$h};
-  min-width: 0.25rem;
-  border-radius: 3px 3px 0 0;
-  background: ${(p) =>
-    p.$accent
-      ? tkn('colors.dashboard.seriesProfit')(p)
-      : tkn('colors.brand.primary')(p)};
-  opacity: ${(p) => (p.$accent ? 0.9 : 0.28)};
-`;
-
-export const PreviewTable = styled.div`
-  display: flex;
-  flex-direction: column;
-  border-radius: ${tkn('radius.lg')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  overflow: hidden;
-`;
-
-export const PreviewTableHead = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 4.5rem;
-  gap: ${tkn('spacing.sm')};
-  padding: 0.5rem 0.75rem;
-  background: ${tkn('colors.surface.secondary')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: ${tkn('colors.text.tertiary')};
-
-  & > :last-child {
-    text-align: right;
-  }
-`;
-
-export const PreviewRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 4.5rem;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-  padding: 0.625rem 0.75rem;
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
-
-  &:last-of-type {
-    border-bottom: none;
-  }
-`;
-
-export const PreviewRowTitle = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
-  color: ${tkn('colors.text.primary')};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-export const PreviewBadge = styled.span<{ $tone: 'success' | 'info' | 'warning' }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 999px;
-  white-space: nowrap;
-  font-size: ${tkn('typography.fontSize.2xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${(p) => tkn(`colors.semantic.${p.$tone}` as 'colors.semantic.success')(p)};
-  background: ${(p) => tkn(`colors.semanticTint.${p.$tone}` as 'colors.semanticTint.success')(p)};
-`;
-
-export const PreviewRowValue = styled.span<{ $muted?: boolean }>`
-  text-align: right;
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  font-variant-numeric: tabular-nums;
-  color: ${(p) => (p.$muted ? tkn('colors.text.tertiary')(p) : tkn('colors.text.primary')(p))};
-`;
-
 /* =========================================================================
  * Flow strip + pillars
  * ========================================================================= */
@@ -760,7 +764,8 @@ export const FlowStrip = styled.div`
 
 export const FlowLabel = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   text-transform: uppercase;
   letter-spacing: 0.09em;
@@ -785,7 +790,8 @@ export const FlowChip = styled.div<{ $accent?: boolean }>`
     ${(p) => (p.$accent ? tkn('colors.landing.chipBorder')(p) : tkn('colors.landing.heroBorder')(p))};
   background: ${(p) => (p.$accent ? tkn('colors.landing.chipBg')(p) : tkn('colors.surface.primary')(p))};
   color: ${(p) => (p.$accent ? tkn('colors.brand.primary')(p) : tkn('colors.landing.heroText')(p))};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   box-shadow: ${tkn('colors.landing.shadowSoft')};
 `;
@@ -818,16 +824,17 @@ export const Pillar = styled.div`
 
 export const PillarTitle = styled.h3`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardMd};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
 
 export const PillarText = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.62;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.75;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
@@ -860,14 +867,15 @@ export const SectionHead = styled.div`
   margin-bottom: ${tkn('spacing.xxl')};
 `;
 
+/** Matches sellerboard's h2 exactly: Montserrat 700, 48px, 1.17 line-height. */
 export const SectionTitle = styled.h2`
   margin: 0;
   max-width: 40rem;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(1.55rem, 2.7vw, 2.15rem);
-  line-height: 1.16;
-  letter-spacing: -0.022em;
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-family: ${FONT_HEADING};
+  font-size: clamp(2rem, 3.6vw, ${TYPE.h2});
+  line-height: 1.17;
+  letter-spacing: -0.015em;
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
 `;
@@ -875,7 +883,8 @@ export const SectionTitle = styled.h2`
 export const SectionSubtitle = styled.p`
   margin: 0;
   max-width: 40rem;
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.lead};
   line-height: 1.65;
   color: ${tkn('colors.landing.heroTextMuted')};
   text-wrap: pretty;
@@ -885,57 +894,124 @@ export const SectionSubtitle = styled.p`
  * Features
  * ========================================================================= */
 
-export const FeaturesGrid = styled.div`
+/**
+ * Sellerboard-style tabbed deep-dive: a vertical list of features on the
+ * left, a detail panel (copy + a real screenshot from the demo account) on
+ * the right — replaces the old static 6-card grid, which could only show a
+ * one-line description per feature.
+ */
+export const FeatureTabsLayout = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
-  gap: ${tkn('spacing.lg')};
-`;
+  grid-template-columns: minmax(0, 17.5rem) minmax(0, 1fr);
+  gap: ${tkn('spacing.xl')};
+  align-items: start;
 
-export const FeatureCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  padding: ${tkn('spacing.lg')};
-  border-radius: ${tkn('radius.lg')};
-  border: 1px solid ${tkn('colors.landing.cardBorder')};
-  background: ${tkn('colors.surface.primary')};
-  box-shadow: ${tkn('colors.landing.shadowSoft')};
-  transition:
-    border-color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-
-  &:hover {
-    border-color: ${tkn('colors.landing.cardBorderHover')};
-    transform: translateY(-2px);
-    box-shadow: ${tkn('colors.landing.shadowSoft')};
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-export const FeatureIconWrap = styled.div`
+export const FeatureTabList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  @media (max-width: 900px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+`;
+
+export const FeatureTabButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  width: 100%;
+  text-align: left;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.lg')};
+  border: 1px solid ${(p) => (p.$active ? tkn('colors.brand.primary')(p) : 'transparent')};
+  background: ${(p) => (p.$active ? tkn('colors.landing.chipBg')(p) : 'transparent')};
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
+
+  &:hover {
+    background: ${tkn('colors.landing.chipBg')};
+  }
+
+  @media (max-width: 900px) {
+    width: auto;
+  }
+`;
+
+export const FeatureTabIconWrap = styled.span<{ $active: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
   border-radius: ${tkn('radius.md')};
-  background: ${tkn('colors.landing.chipBg')};
-  border: 1px solid ${tkn('colors.landing.chipBorder')};
-  margin-bottom: 0.25rem;
+  background: ${(p) => (p.$active ? tkn('colors.brand.primary')(p) : tkn('colors.surface.primary')(p))};
+  border: 1px solid
+    ${(p) => (p.$active ? tkn('colors.brand.primary')(p) : tkn('colors.landing.chipBorder')(p))};
+  color: ${(p) => (p.$active ? tkn('colors.landing.onAccent')(p) : tkn('colors.brand.primary')(p))};
 `;
 
-export const FeatureTitle = styled.h3`
+export const FeatureTabLabel = styled.span<{ $active: boolean }>`
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  font-weight: ${(p) =>
+    p.$active ? tkn('typography.fontWeight.semibold')(p) : tkn('typography.fontWeight.medium')(p)};
+  color: ${(p) => (p.$active ? tkn('colors.landing.heroText')(p) : tkn('colors.landing.heroTextMuted')(p))};
+`;
+
+export const FeatureDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.lg')};
+`;
+
+export const FeatureDetailHead = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const FeatureDetailIconWrap = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
+`;
+
+export const FeatureDetailBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+`;
+
+export const FeatureDetailTitle = styled.h3`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.md')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardLg};
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   color: ${tkn('colors.landing.heroText')};
 `;
 
-export const FeatureDesc = styled.p`
+export const FeatureDetailText = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.65;
+  max-width: 38rem;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.75;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
@@ -962,21 +1038,23 @@ export const SplitCopy = styled.div`
   text-align: left;
 `;
 
+/** Matches sellerboard's sub-hero h3 (e.g. "Doğru kâr panosuyla tanışın"): Montserrat 700, 40px. */
 export const SplitTitle = styled.h2`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(1.5rem, 2.5vw, 2.05rem);
-  line-height: 1.18;
-  letter-spacing: -0.022em;
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-family: ${FONT_HEADING};
+  font-size: clamp(1.75rem, 3vw, ${TYPE.h3});
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
 `;
 
 export const SplitSubtitle = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.base')};
-  line-height: 1.65;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.lead};
+  line-height: 1.6;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
@@ -987,7 +1065,8 @@ export const SplitEyebrow = styled.span`
   border-radius: 999px;
   background: ${tkn('colors.landing.chipBg')};
   border: 1px solid ${tkn('colors.landing.chipBorder')};
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.brand.primary')};
 `;
@@ -1019,17 +1098,23 @@ export const ProfitItemIcon = styled.span`
 
 export const ProfitItemTitle = styled.h3`
   margin: 0 0 0.125rem;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardSm};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
 
 export const ProfitItemText = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.62;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.75;
   color: ${tkn('colors.landing.heroTextMuted')};
+`;
+
+/** Houses the Overview / P&L / Per order pill tabs above the profit visual. */
+export const ProfitTabsWrap = styled.div`
+  margin-bottom: ${tkn('spacing.md')};
 `;
 
 /** The visual proof: three tiers, one of them deliberately unresolved. */
@@ -1045,7 +1130,8 @@ export const ProfitPanel = styled.div`
 `;
 
 export const ProfitPanelTitle = styled.span`
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1077,14 +1163,17 @@ export const ProfitTierLabel = styled.div`
 `;
 
 export const ProfitTierName = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.text.primary')};
 `;
 
+/** A figure, like sellerboard's price display — Poppins bold, not the Montserrat headline face. */
 export const ProfitTierValue = styled.span<{ $muted?: boolean }>`
-  font-size: ${tkn('typography.fontSize.xl')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardLg};
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.015em;
   white-space: nowrap;
@@ -1093,7 +1182,8 @@ export const ProfitTierValue = styled.span<{ $muted?: boolean }>`
 
 export const ProfitFootnote = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   line-height: 1.55;
   color: ${tkn('colors.text.tertiary')};
 `;
@@ -1120,7 +1210,8 @@ export const ProductName = styled.div`
   padding: ${tkn('spacing.md')};
   border-bottom: 1px solid ${tkn('colors.border.secondary')};
   background: ${tkn('colors.surface.secondary')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardSm};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
@@ -1143,12 +1234,14 @@ export const SettingRow = styled.div`
 `;
 
 export const SettingLabel = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   color: ${tkn('colors.text.secondary')};
 `;
 
 export const SettingValue = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   font-variant-numeric: tabular-nums;
   color: ${tkn('colors.text.primary')};
@@ -1186,24 +1279,25 @@ export const StepNumber = styled.span`
   border-radius: 50%;
   background: ${tkn('colors.brand.primary')};
   color: ${tkn('colors.landing.onAccent')};
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.sm')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   margin-bottom: 0.25rem;
 `;
 
 export const StepTitle = styled.h3`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardMd};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
 
 export const StepDesc = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.65;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.75;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
@@ -1251,8 +1345,9 @@ export const DemoBullet = styled.li`
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.55;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.6;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
@@ -1270,13 +1365,43 @@ export const DemoActions = styled.div`
 
 export const DemoNote = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   color: ${tkn('colors.text.tertiary')};
 `;
 
 /* =========================================================================
  * Pricing
  * ========================================================================= */
+
+export const PricingToggleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${tkn('spacing.sm')};
+  margin-bottom: ${tkn('spacing.xl')};
+`;
+
+export const PricingSavingsBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: ${tkn('colors.semanticTint.success')};
+  color: ${tkn('colors.semantic.success')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  white-space: nowrap;
+`;
+
+export const PlanPeriodNote = styled.span`
+  display: block;
+  margin-top: 0.125rem;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  color: ${tkn('colors.text.tertiary')};
+`;
 
 export const PricingGrid = styled.div`
   display: grid;
@@ -1307,15 +1432,16 @@ export const PlanBadge = styled.span`
   border-radius: 999px;
   background: ${tkn('colors.brand.primary')};
   color: ${tkn('colors.landing.onAccent')};
-  font-size: ${tkn('typography.fontSize.2xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   letter-spacing: 0.02em;
 `;
 
 export const PlanName = styled.h3`
   margin: 0;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.md')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardMd};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
@@ -1326,23 +1452,26 @@ export const PlanPrice = styled.div`
   gap: 0.25rem;
 `;
 
+/** Matches sellerboard's price figure ("15$"): Poppins bold, 32px — not the Montserrat headline face. */
 export const PlanAmount = styled.span`
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: 2.15rem;
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.price};
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: ${tkn('colors.landing.heroText')};
 `;
 
 export const PlanPeriod = styled.span`
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   color: ${tkn('colors.text.tertiary')};
 `;
 
 export const PlanDesc = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
   line-height: 1.6;
   color: ${tkn('colors.landing.heroTextMuted')};
   min-height: 2.75rem;
@@ -1362,16 +1491,17 @@ export const PlanFeature = styled.li`
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: ${tkn('typography.fontSize.sm')};
-  line-height: 1.5;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  line-height: 1.55;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
 export const PlanCta = styled.button<{ $highlight?: boolean }>`
   width: 100%;
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   padding: 0.75rem 1.25rem;
   border-radius: ${tkn('radius.md')};
@@ -1395,14 +1525,16 @@ export const PlanCta = styled.button<{ $highlight?: boolean }>`
 export const BillingNote = styled.p`
   margin: ${tkn('spacing.lg')} auto 0;
   text-align: center;
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   color: ${tkn('colors.text.tertiary')};
 `;
 
 export const CatalogError = styled.p`
   margin: 0 auto ${tkn('spacing.lg')};
   text-align: center;
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
   color: ${tkn('colors.text.tertiary')};
 `;
 
@@ -1436,8 +1568,8 @@ export const FaqQuestion = styled.button<{ $open: boolean }>`
   border: none;
   cursor: pointer;
   text-align: left;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardSm};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${(p) => (p.$open ? tkn('colors.brand.primary')(p) : tkn('colors.landing.heroText')(p))};
 
@@ -1458,8 +1590,9 @@ export const FaqAnswerText = styled.div`
   & > p {
     margin: 0;
     padding: 0 ${tkn('spacing.lg')} ${tkn('spacing.md')};
-    font-size: ${tkn('typography.fontSize.sm')};
-    line-height: 1.68;
+    font-family: ${FONT_BODY};
+    font-size: ${TYPE.body};
+    line-height: 1.75;
     color: ${tkn('colors.landing.heroTextMuted')};
   }
 `;
@@ -1489,11 +1622,11 @@ export const CtaBanner = styled.div`
 export const CtaTitle = styled.h2`
   margin: 0;
   max-width: 34rem;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-family: ${FONT_HEADING};
+  font-size: clamp(1.75rem, 3vw, ${TYPE.h3});
   line-height: 1.18;
-  letter-spacing: -0.022em;
-  font-weight: ${tkn('typography.fontWeight.bold')};
+  letter-spacing: -0.015em;
+  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   color: ${tkn('colors.landing.onAccent')};
   text-wrap: balance;
 `;
@@ -1501,7 +1634,8 @@ export const CtaTitle = styled.h2`
 export const CtaSub = styled.p`
   margin: 0;
   max-width: 36rem;
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.lead};
   line-height: 1.6;
   color: ${tkn('colors.landing.onAccent')};
   opacity: 0.88;
@@ -1517,8 +1651,8 @@ export const CtaButton = styled.button`
   background: ${tkn('colors.landing.onAccent')};
   border: none;
   cursor: pointer;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.base')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.cardSm};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.brand.primary')};
   padding: 0.9rem 1.85rem;
@@ -1571,7 +1705,8 @@ export const FooterBrand = styled.div`
 export const FooterDescription = styled.p`
   margin: 0;
   max-width: 22rem;
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   line-height: 1.65;
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
@@ -1591,8 +1726,8 @@ export const FooterColumn = styled.div`
 
 export const FooterColTitle = styled.h4`
   margin: 0 0 0.25rem;
-  font-family: ${tkn('typography.fontFamily.heading')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.heroText')};
 `;
@@ -1603,8 +1738,8 @@ export const FooterLink = styled.button`
   padding: 0;
   cursor: pointer;
   text-align: left;
-  font-family: ${tkn('typography.fontFamily.body')};
-  font-size: ${tkn('typography.fontSize.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
   color: ${tkn('colors.landing.heroTextMuted')};
   transition: color 140ms ease;
 
@@ -1630,6 +1765,7 @@ export const FooterBottom = styled.div`
 
 export const Copyright = styled.p`
   margin: 0;
-  font-size: ${tkn('typography.fontSize.xs')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
   color: ${tkn('colors.text.tertiary')};
 `;

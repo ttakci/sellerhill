@@ -1,18 +1,36 @@
-import { Dropdown, Icon, type IconName, Logo, ThemeToggle } from '@repo/ui';
+import { Dropdown, Icon, type IconName, Logo, SegmentedControl, TabNav } from '@repo/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './LandingPage.style';
-import type { LandingPageProps } from './LandingPage.types';
+import type { LandingBillingInterval, LandingPageProps } from './LandingPage.types';
 
-const FEATURES: { key: string; icon: IconName }[] = [
-  { key: 'asinListing', icon: 'rocket' },
-  { key: 'priceStock', icon: 'sync' },
-  { key: 'autoOrder', icon: 'shopping-cart' },
-  { key: 'tracking', icon: 'local-shipping' },
-  { key: 'buyerMessages', icon: 'message-circle' },
-  { key: 'multiStore', icon: 'storefront' },
+/**
+ * Screenshots are real captures from the sign-up-free demo account (never
+ * mockups) — see `apps/web/public/landing-screens/`. Reused across the
+ * features tabs and the profit tabs so the whole page draws from one small,
+ * honest set of images instead of a screenshot per claim.
+ */
+const SCREEN = {
+  dashboardCards: '/landing-screens/dashboard-cards.jpg',
+  dashboardPnl: '/landing-screens/dashboard-pnl.jpg',
+  orders: '/landing-screens/orders.jpg',
+  listings: '/landing-screens/listings.jpg',
+  heroDashboard: '/landing-screens/hero-dashboard.jpg',
+  heroKpiCard: '/landing-screens/hero-kpi-card.jpg',
+} as const;
+
+const FEATURES: { key: string; icon: IconName; image: string }[] = [
+  { key: 'asinListing', icon: 'rocket', image: SCREEN.listings },
+  { key: 'priceStock', icon: 'sync', image: SCREEN.listings },
+  { key: 'autoOrder', icon: 'shopping-cart', image: SCREEN.orders },
+  { key: 'tracking', icon: 'local-shipping', image: SCREEN.orders },
+  { key: 'buyerMessages', icon: 'message-circle', image: SCREEN.orders },
+  { key: 'multiStore', icon: 'storefront', image: SCREEN.dashboardCards },
 ];
+
+const PROFIT_TAB_IDS = ['overview', 'pnl', 'perOrder'] as const;
+type ProfitTabId = (typeof PROFIT_TAB_IDS)[number];
 
 const PROFIT_POINTS: { key: string; icon: IconName }[] = [
   { key: 'confirmed', icon: 'shield-check' },
@@ -28,14 +46,6 @@ const PRODUCT_SETTINGS = ['margin', 'stock', 'template'] as const;
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
 const FALLBACK_PLANS = ['starter', 'growth', 'scale'] as const;
-
-/**
- * Hero chart shape. Fixed, not random: the preview must render identically on
- * every visit, and the tallest bar is the profit series so the eye lands on the
- * thing the page is actually about.
- */
-const CHART_BARS = [38, 52, 44, 61, 49, 72, 58, 83, 66, 91];
-const CHART_ACCENT_INDEX = 7;
 
 export const LandingPageComponent = ({
   currentLocale,
@@ -53,6 +63,9 @@ export const LandingPageComponent = ({
   const { t } = useTranslation('translation');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [revealState, setRevealState] = useState<Record<string, boolean>>({});
+  const [activeFeatureKey, setActiveFeatureKey] = useState<string>(FEATURES[0].key);
+  const [activeProfitTab, setActiveProfitTab] = useState<ProfitTabId>('overview');
+  const [billingInterval, setBillingInterval] = useState<LandingBillingInterval>('monthly');
 
   const toggleFaq = useCallback((index: number) => {
     setOpenFaq((prev) => (prev === index ? null : index));
@@ -87,7 +100,6 @@ export const LandingPageComponent = ({
   );
 
   const navLinks = [
-    { id: 'features', label: t('translation:landing.navbar.features') },
     { id: 'profit', label: t('translation:landing.navbar.profit') },
     { id: 'how-it-works', label: t('translation:landing.navbar.howItWorks') },
     { id: 'pricing', label: t('translation:landing.navbar.pricing') },
@@ -95,6 +107,20 @@ export const LandingPageComponent = ({
   ];
 
   const seen = (id: string): boolean => revealState[id] ?? false;
+  const activeFeature = FEATURES.find((f) => f.key === activeFeatureKey) ?? FEATURES[0];
+
+  const openFeature = useCallback(
+    (key: string) => {
+      setActiveFeatureKey(key);
+      scrollTo('features');
+    },
+    [scrollTo]
+  );
+
+  /** tawk.to's own bubble is already live on the landing (see TawkToWidget); this just opens it. */
+  const openSupportChat = useCallback(() => {
+    window.Tawk_API?.maximize?.();
+  }, []);
 
   return (
     <S.Page>
@@ -107,9 +133,24 @@ export const LandingPageComponent = ({
             navbar height it collapses into an illegible smudge.
           */}
           <S.NavBrand type="button" onClick={() => scrollTo('top')} aria-label="SellerHill">
-            <Logo layout="nav" height={32} />
+            <Logo layout="wordmark" height={38} />
           </S.NavBrand>
           <S.NavLinks>
+            <Dropdown
+              align="left"
+              width="15rem"
+              trigger={
+                <S.NavDropdownTrigger>
+                  {t('translation:landing.navbar.features')}
+                  <Icon name="chevron-down" size={12} />
+                </S.NavDropdownTrigger>
+              }
+              items={FEATURES.map((f) => ({
+                label: t(`translation:landing.features.${f.key}.title`),
+                icon: f.icon,
+                onClick: () => openFeature(f.key),
+              }))}
+            />
             {navLinks.map((link) => (
               <S.NavLink key={link.id} type="button" onClick={() => scrollTo(link.id)}>
                 {link.label}
@@ -120,29 +161,26 @@ export const LandingPageComponent = ({
             </S.NavLink>
           </S.NavLinks>
           <S.NavActions>
-            <S.UtilityGroup>
-              <Dropdown
-                align="right"
-                width="6.25rem"
-                trigger={
-                  <S.LanguageTrigger>
-                    <S.LanguageText>{currentLocale.slice(0, 2)}</S.LanguageText>
-                    <Icon name="chevron-down" size={12} />
-                  </S.LanguageTrigger>
-                }
-                items={[
-                  { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
-                  { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
-                ]}
-              />
-              <ThemeToggle />
-            </S.UtilityGroup>
-            <S.LoginButton type="button" onClick={onNavigateLogin}>
+            <Dropdown
+              align="right"
+              width="8rem"
+              trigger={
+                <S.LanguageTrigger $onDark>
+                  <S.LanguageText $onDark>{t(`translation:languages.${currentLocale}`)}</S.LanguageText>
+                  <Icon name="chevron-down" size={12} />
+                </S.LanguageTrigger>
+              }
+              items={[
+                { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
+                { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
+              ]}
+            />
+            <S.LoginButton $onDark type="button" onClick={onNavigateLogin}>
+              <Icon name="user" size={15} />
               {t('translation:landing.navbar.login')}
             </S.LoginButton>
             <S.NavCta type="button" onClick={onNavigateRegister}>
               {t('translation:landing.navbar.getStarted')}
-              <Icon name="arrow-right" size={15} />
             </S.NavCta>
             <S.Hamburger $open={mobileMenuOpen} type="button" onClick={onToggleMobileMenu} aria-label="Menu">
               <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={20} />
@@ -155,12 +193,15 @@ export const LandingPageComponent = ({
       <S.MobileMenuOverlay $open={mobileMenuOpen} onClick={onCloseMobileMenu} />
       <S.MobileMenu $open={mobileMenuOpen}>
         <S.MobileMenuHead>
-          <Logo layout="nav" height={28} />
+          <Logo layout="wordmark" height={32} />
           <S.MobileClose type="button" onClick={onCloseMobileMenu} aria-label="Close">
             <Icon name="x" size={20} />
           </S.MobileClose>
         </S.MobileMenuHead>
         <S.MobileLinks>
+          <S.MobileLink type="button" onClick={() => scrollTo('features')}>
+            {t('translation:landing.navbar.features')}
+          </S.MobileLink>
           {navLinks.map((link) => (
             <S.MobileLink key={link.id} type="button" onClick={() => scrollTo(link.id)}>
               {link.label}
@@ -183,17 +224,13 @@ export const LandingPageComponent = ({
       {/* ── Hero ───────────────────────────────────────── */}
       <S.Hero id="top">
         <S.HeroGlow />
-        <S.HeroFade />
         <S.HeroInner>
           <S.HeroContent>
-            <S.Eyebrow>
-              <S.EyebrowDot />
-              {t('translation:landing.hero.badge')}
-            </S.Eyebrow>
             <S.HeroTitle>{t('translation:landing.hero.headline')}</S.HeroTitle>
             <S.HeroSubtitle>{t('translation:landing.hero.subheading')}</S.HeroSubtitle>
+
             <S.HeroCtas>
-              <S.PrimaryButton $lg type="button" onClick={onNavigateRegister}>
+              <S.PrimaryButton $lg $accent type="button" onClick={onNavigateRegister}>
                 {t('translation:landing.hero.ctaPrimary')}
                 <Icon name="arrow-right" size={17} />
               </S.PrimaryButton>
@@ -202,14 +239,18 @@ export const LandingPageComponent = ({
                 {t('translation:landing.hero.ctaSecondary')}
               </S.GhostButton>
             </S.HeroCtas>
-            <S.HeroNote>{t('translation:landing.hero.note')}</S.HeroNote>
+            <S.HeroNote>
+              <S.HeroNoteTitle>{t('translation:landing.hero.trialTitle')}</S.HeroNoteTitle>
+              <S.HeroNoteLine>{t('translation:landing.hero.trialNoCard')}</S.HeroNoteLine>
+              <S.HeroNoteLine>{t('translation:landing.hero.trialCancelAnytime')}</S.HeroNoteLine>
+            </S.HeroNote>
           </S.HeroContent>
 
           {/*
-            A legible rendering of the real dashboard rather than grey
-            placeholder blocks. The third order row shows an em dash on
-            purpose: an unknown cost is never printed as a number, and that
-            behaviour is the argument the rest of the page makes.
+            A real screenshot from the sign-up-free demo account (never a
+            mockup), with a real cropped KPI card floating over its corner —
+            sellerboard's own "Month to date" card treatment, built from the
+            same screenshot rather than a second, invented set of numbers.
           */}
           <S.HeroPreview>
             <S.PreviewFrame>
@@ -219,84 +260,11 @@ export const LandingPageComponent = ({
                 <S.PreviewDot $c="success" />
                 <S.PreviewUrl>app.sellerhill.com/dashboard</S.PreviewUrl>
               </S.PreviewBar>
-              <S.PreviewBody>
-                <S.PreviewRail>
-                  <S.PreviewRailItem $active />
-                  <S.PreviewRailItem />
-                  <S.PreviewRailItem />
-                  <S.PreviewRailItem />
-                  <S.PreviewRailItem />
-                </S.PreviewRail>
-                <S.PreviewMain>
-                  <S.PreviewPeriod>{t('translation:landing.heroPreview.periodLabel')}</S.PreviewPeriod>
-                  <S.PreviewKpis>
-                    <S.PreviewKpi $accent>
-                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.netProfit')}</S.PreviewKpiLabel>
-                      <S.PreviewKpiValue>$3,186.40</S.PreviewKpiValue>
-                      <S.PreviewKpiFoot $tone="success">
-                        <Icon name="shield-check" size={12} />
-                        {t('translation:landing.heroPreview.confirmed')}
-                      </S.PreviewKpiFoot>
-                    </S.PreviewKpi>
-                    <S.PreviewKpi>
-                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.sales')}</S.PreviewKpiLabel>
-                      <S.PreviewKpiValue>$18,420.50</S.PreviewKpiValue>
-                      <S.PreviewKpiFoot $tone="success">
-                        <Icon name="trending-up" size={12} />
-                        +12.4%
-                      </S.PreviewKpiFoot>
-                    </S.PreviewKpi>
-                    <S.PreviewKpi>
-                      <S.PreviewKpiLabel>{t('translation:landing.heroPreview.orders')}</S.PreviewKpiLabel>
-                      <S.PreviewKpiValue>214</S.PreviewKpiValue>
-                      <S.PreviewKpiFoot>
-                        {t('translation:landing.heroPreview.margin')} 17.3%
-                      </S.PreviewKpiFoot>
-                    </S.PreviewKpi>
-                  </S.PreviewKpis>
-
-                  <S.PreviewChart aria-hidden="true">
-                    {CHART_BARS.map((h, i) => (
-                      <S.PreviewChartBar key={i} $h={`${h}%`} $accent={i === CHART_ACCENT_INDEX} />
-                    ))}
-                  </S.PreviewChart>
-
-                  <S.PreviewTable>
-                    <S.PreviewTableHead>
-                      <span>{t('translation:landing.heroPreview.recentTitle')}</span>
-                      <span />
-                      <span>{t('translation:landing.heroPreview.profitColumn')}</span>
-                    </S.PreviewTableHead>
-                    <S.PreviewRow>
-                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.a')}</S.PreviewRowTitle>
-                      <S.PreviewBadge $tone="success">
-                        {t('translation:landing.heroPreview.states.purchased')}
-                      </S.PreviewBadge>
-                      <S.PreviewRowValue>$14.20</S.PreviewRowValue>
-                    </S.PreviewRow>
-                    <S.PreviewRow>
-                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.b')}</S.PreviewRowTitle>
-                      <S.PreviewBadge $tone="info">
-                        {t('translation:landing.heroPreview.states.shipped')}
-                      </S.PreviewBadge>
-                      <S.PreviewRowValue>$8.75</S.PreviewRowValue>
-                    </S.PreviewRow>
-                    <S.PreviewRow>
-                      <S.PreviewRowTitle>{t('translation:landing.heroPreview.products.c')}</S.PreviewRowTitle>
-                      <S.PreviewBadge $tone="warning">
-                        {t('translation:landing.heroPreview.states.actionRequired')}
-                      </S.PreviewBadge>
-                      <S.PreviewRowValue
-                        $muted
-                        title={t('translation:landing.heroPreview.pending')}
-                      >
-                        —
-                      </S.PreviewRowValue>
-                    </S.PreviewRow>
-                  </S.PreviewTable>
-                </S.PreviewMain>
-              </S.PreviewBody>
+              <S.PreviewImage src={SCREEN.heroDashboard} alt="SellerHill dashboard" loading="lazy" />
             </S.PreviewFrame>
+            <S.HeroFloatCard>
+              <S.HeroFloatImage src={SCREEN.heroKpiCard} alt="" loading="lazy" />
+            </S.HeroFloatCard>
           </S.HeroPreview>
         </S.HeroInner>
       </S.Hero>
@@ -347,17 +315,58 @@ export const LandingPageComponent = ({
           </S.SectionHead>
         </S.Reveal>
         <S.Reveal $visible={seen('features')} $delay={1}>
-          <S.FeaturesGrid>
-            {FEATURES.map((f) => (
-              <S.FeatureCard key={f.key}>
-                <S.FeatureIconWrap>
-                  <Icon name={f.icon} size={20} color="brand.primary" />
-                </S.FeatureIconWrap>
-                <S.FeatureTitle>{t(`translation:landing.features.${f.key}.title`)}</S.FeatureTitle>
-                <S.FeatureDesc>{t(`translation:landing.features.${f.key}.description`)}</S.FeatureDesc>
-              </S.FeatureCard>
-            ))}
-          </S.FeaturesGrid>
+          <S.FeatureTabsLayout>
+            <S.FeatureTabList>
+              {FEATURES.map((f) => {
+                const active = f.key === activeFeatureKey;
+                return (
+                  <S.FeatureTabButton
+                    key={f.key}
+                    type="button"
+                    $active={active}
+                    onClick={() => setActiveFeatureKey(f.key)}
+                  >
+                    <S.FeatureTabIconWrap $active={active}>
+                      <Icon name={f.icon} size={17} />
+                    </S.FeatureTabIconWrap>
+                    <S.FeatureTabLabel $active={active}>
+                      {t(`translation:landing.features.${f.key}.title`)}
+                    </S.FeatureTabLabel>
+                  </S.FeatureTabButton>
+                );
+              })}
+            </S.FeatureTabList>
+
+            <S.FeatureDetail>
+              <S.FeatureDetailHead>
+                <S.FeatureDetailIconWrap>
+                  <Icon name={activeFeature.icon} size={24} color="brand.primary" />
+                </S.FeatureDetailIconWrap>
+                <S.FeatureDetailBody>
+                  <S.FeatureDetailTitle>
+                    {t(`translation:landing.features.${activeFeature.key}.title`)}
+                  </S.FeatureDetailTitle>
+                  <S.FeatureDetailText>
+                    {t(`translation:landing.features.${activeFeature.key}.detail`)}
+                  </S.FeatureDetailText>
+                </S.FeatureDetailBody>
+              </S.FeatureDetailHead>
+
+              <S.PreviewFrame>
+                <S.PreviewBar>
+                  <S.PreviewDot $c="error" />
+                  <S.PreviewDot $c="warning" />
+                  <S.PreviewDot $c="success" />
+                  <S.PreviewUrl>app.sellerhill.com</S.PreviewUrl>
+                </S.PreviewBar>
+                <S.PreviewImage
+                  src={activeFeature.image}
+                  alt={t(`translation:landing.features.${activeFeature.key}.title`)}
+                  loading="lazy"
+                />
+              </S.PreviewFrame>
+            </S.FeatureDetail>
+          </S.FeatureTabsLayout>
         </S.Reveal>
       </S.Section>
 
@@ -388,34 +397,67 @@ export const LandingPageComponent = ({
               </S.ProfitList>
             </S.SplitCopy>
 
-            <S.ProfitPanel>
-              <S.ProfitPanelTitle>{t('translation:landing.profit.panel.title')}</S.ProfitPanelTitle>
-              <S.ProfitTier $tone="confirmed">
-                <S.ProfitTierLabel>
-                  <S.ProfitTierName>
-                    {t('translation:landing.profit.panel.confirmedLabel')}
-                  </S.ProfitTierName>
-                </S.ProfitTierLabel>
-                <S.ProfitTierValue>$3,186.40</S.ProfitTierValue>
-              </S.ProfitTier>
-              <S.ProfitTier $tone="estimated">
-                <S.ProfitTierLabel>
-                  <S.ProfitTierName>
-                    {t('translation:landing.profit.panel.estimatedLabel')}
-                  </S.ProfitTierName>
-                </S.ProfitTierLabel>
-                <S.ProfitTierValue>$742.10</S.ProfitTierValue>
-              </S.ProfitTier>
-              <S.ProfitTier $tone="unknown">
-                <S.ProfitTierLabel>
-                  <S.ProfitTierName>
-                    {t('translation:landing.profit.panel.unknownLabel')}
-                  </S.ProfitTierName>
-                </S.ProfitTierLabel>
-                <S.ProfitTierValue $muted>—</S.ProfitTierValue>
-              </S.ProfitTier>
-              <S.ProfitFootnote>{t('translation:landing.profit.panel.footnote')}</S.ProfitFootnote>
-            </S.ProfitPanel>
+            <div>
+              <S.ProfitTabsWrap>
+                <TabNav
+                  variant="pill"
+                  ariaLabel={t('translation:landing.profit.panel.title')}
+                  value={activeProfitTab}
+                  onChange={(id) => setActiveProfitTab(id as ProfitTabId)}
+                  items={PROFIT_TAB_IDS.map((id) => ({
+                    id,
+                    label: t(`translation:landing.profit.tabs.${id}`),
+                  }))}
+                />
+              </S.ProfitTabsWrap>
+
+              {activeProfitTab === 'overview' ? (
+                <S.ProfitPanel>
+                  <S.ProfitPanelTitle>{t('translation:landing.profit.panel.title')}</S.ProfitPanelTitle>
+                  <S.ProfitTier $tone="confirmed">
+                    <S.ProfitTierLabel>
+                      <S.ProfitTierName>
+                        {t('translation:landing.profit.panel.confirmedLabel')}
+                      </S.ProfitTierName>
+                    </S.ProfitTierLabel>
+                    <S.ProfitTierValue>$3,186.40</S.ProfitTierValue>
+                  </S.ProfitTier>
+                  <S.ProfitTier $tone="estimated">
+                    <S.ProfitTierLabel>
+                      <S.ProfitTierName>
+                        {t('translation:landing.profit.panel.estimatedLabel')}
+                      </S.ProfitTierName>
+                    </S.ProfitTierLabel>
+                    <S.ProfitTierValue>$742.10</S.ProfitTierValue>
+                  </S.ProfitTier>
+                  <S.ProfitTier $tone="unknown">
+                    <S.ProfitTierLabel>
+                      <S.ProfitTierName>
+                        {t('translation:landing.profit.panel.unknownLabel')}
+                      </S.ProfitTierName>
+                    </S.ProfitTierLabel>
+                    <S.ProfitTierValue $muted>—</S.ProfitTierValue>
+                  </S.ProfitTier>
+                  <S.ProfitFootnote>{t('translation:landing.profit.panel.footnote')}</S.ProfitFootnote>
+                </S.ProfitPanel>
+              ) : (
+                <S.PreviewFrame>
+                  <S.PreviewBar>
+                    <S.PreviewDot $c="error" />
+                    <S.PreviewDot $c="warning" />
+                    <S.PreviewDot $c="success" />
+                    <S.PreviewUrl>
+                      app.sellerhill.com/{activeProfitTab === 'pnl' ? 'dashboard' : 'orders'}
+                    </S.PreviewUrl>
+                  </S.PreviewBar>
+                  <S.PreviewImage
+                    src={activeProfitTab === 'pnl' ? SCREEN.dashboardPnl : SCREEN.orders}
+                    alt={t(`translation:landing.profit.tabs.${activeProfitTab}`)}
+                    loading="lazy"
+                  />
+                </S.PreviewFrame>
+              )}
+            </div>
           </S.SplitLayout>
         </S.Reveal>
       </S.Section>
@@ -514,6 +556,26 @@ export const LandingPageComponent = ({
         {pricingCatalogError ? (
           <S.CatalogError>{t('translation:landing.pricing.catalogError')}</S.CatalogError>
         ) : null}
+        {pricingPlans.length > 0 ? (
+          <S.PricingToggleRow>
+            <SegmentedControl
+              size="md"
+              value={billingInterval}
+              onChange={(value) => setBillingInterval(value as LandingBillingInterval)}
+              options={[
+                { value: 'monthly', label: t('translation:landing.pricing.interval.monthly') },
+                { value: 'annual', label: t('translation:landing.pricing.interval.annual') },
+              ]}
+            />
+            {billingInterval === 'annual' && pricingPlans[0]?.annualSavingsMonths ? (
+              <S.PricingSavingsBadge>
+                {t('translation:landing.pricing.interval.annualSavings', {
+                  months: pricingPlans[0].annualSavingsMonths,
+                })}
+              </S.PricingSavingsBadge>
+            ) : null}
+          </S.PricingToggleRow>
+        ) : null}
         <S.Reveal $visible={seen('pricing')} $delay={1}>
           <S.PricingGrid>
             {pricingPlans.length > 0
@@ -521,6 +583,8 @@ export const LandingPageComponent = ({
                   const features = t(`translation:landing.pricing.${plan.slug}.features`, {
                     returnObjects: true,
                   }) as string[];
+                  const showAnnual = billingInterval === 'annual' && plan.priceDisplayAnnualPerMonth;
+                  const amount = showAnnual ? plan.priceDisplayAnnualPerMonth : plan.priceDisplayMonthly;
                   return (
                     <S.PricingCard key={plan.slug} $highlight={plan.isHighlighted}>
                       {plan.isHighlighted ? (
@@ -528,9 +592,16 @@ export const LandingPageComponent = ({
                       ) : null}
                       <S.PlanName>{t(`translation:landing.pricing.${plan.slug}.name`)}</S.PlanName>
                       <S.PlanPrice>
-                        <S.PlanAmount>{plan.priceDisplay}</S.PlanAmount>
-                        <S.PlanPeriod>{t(`translation:landing.pricing.${plan.periodKey}`)}</S.PlanPeriod>
+                        <S.PlanAmount>{amount}</S.PlanAmount>
+                        <S.PlanPeriod>{t('translation:landing.pricing.perMonth')}</S.PlanPeriod>
                       </S.PlanPrice>
+                      {showAnnual && plan.priceDisplayAnnual ? (
+                        <S.PlanPeriodNote>
+                          {t('translation:landing.pricing.interval.billedAnnually', {
+                            price: plan.priceDisplayAnnual,
+                          })}
+                        </S.PlanPeriodNote>
+                      ) : null}
                       <S.PlanDesc>{t(`translation:landing.pricing.${plan.slug}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
                         <S.PlanFeature>
@@ -652,25 +723,22 @@ export const LandingPageComponent = ({
       <S.Footer>
         <S.FooterInner>
           <S.FooterBrand>
-            <Logo layout="nav" height={30} />
+            <Logo layout="wordmark" height={34} />
             <S.FooterDescription>{t('translation:landing.footer.description')}</S.FooterDescription>
-            <S.UtilityGroup>
-              <Dropdown
-                align="right"
-                width="6.25rem"
-                trigger={
-                  <S.LanguageTrigger>
-                    <S.LanguageText>{currentLocale.slice(0, 2)}</S.LanguageText>
-                    <Icon name="chevron-down" size={12} />
-                  </S.LanguageTrigger>
-                }
-                items={[
-                  { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
-                  { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
-                ]}
-              />
-              <ThemeToggle />
-            </S.UtilityGroup>
+            <Dropdown
+              align="right"
+              width="8rem"
+              trigger={
+                <S.LanguageTrigger>
+                  <S.LanguageText>{t(`translation:languages.${currentLocale}`)}</S.LanguageText>
+                  <Icon name="chevron-down" size={12} />
+                </S.LanguageTrigger>
+              }
+              items={[
+                { label: t('translation:languages.en'), onClick: () => onLocaleChange('en') },
+                { label: t('translation:languages.tr'), onClick: () => onLocaleChange('tr') },
+              ]}
+            />
           </S.FooterBrand>
           <S.FooterColumns>
             <S.FooterColumn>
@@ -690,9 +758,7 @@ export const LandingPageComponent = ({
             </S.FooterColumn>
             <S.FooterColumn>
               <S.FooterColTitle>{t('translation:landing.footer.company')}</S.FooterColTitle>
-              <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.about')}</S.FooterLink>
-              <S.FooterLink type="button">{t('translation:landing.footer.companyLinks.blog')}</S.FooterLink>
-              <S.FooterLink type="button">
+              <S.FooterLink type="button" onClick={openSupportChat}>
                 {t('translation:landing.footer.companyLinks.contact')}
               </S.FooterLink>
             </S.FooterColumn>
