@@ -195,7 +195,8 @@ export interface BillingPlanWithPricingDto extends BillingPlanDto {
  */
 export interface BillingCustomerDto {
   id: string;
-  userId: string;
+  /** Null once the owning user has been hard-deleted — the billing record survives for audit (ON DELETE SET NULL). */
+  userId: string | null;
   /** Provider-side customer id (Stripe cus_...). Null for local-only phase-1. */
   providerCustomerId: string | null;
   /** Provider key ('stripe' | 'local' | ...). 'local' for phase-1. */

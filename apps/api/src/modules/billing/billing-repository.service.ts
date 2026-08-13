@@ -73,7 +73,7 @@ interface LimitEntity {
 
 interface CustomerEntity {
   id: string;
-  user_id: string;
+  user_id: string | null;
   provider_customer_id: string | null;
   provider: string;
   status: string;

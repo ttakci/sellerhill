@@ -1,0 +1,22 @@
+-- Migration 077: Fix billing_customers.user_id NOT NULL / ON DELETE SET NULL contradiction.
+--
+-- Migration 052 declared:
+--   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE SET NULL
+-- with the stated intent "billing records must survive user deletion for
+-- audit. ON DELETE SET NULL keeps the audit trail." That intent cannot be
+-- satisfied while the column is also NOT NULL: any `DELETE FROM users` for a
+-- user with a billing_customers row (every registered user gets one via the
+-- signup trial, regardless of eBay connection) makes Postgres attempt
+-- `UPDATE billing_customers SET user_id = NULL WHERE user_id = <deleted-id>`
+-- as part of enforcing ON DELETE SET NULL, which immediately violates NOT
+-- NULL and rolls back the whole DELETE. In practice this made hard-deleting
+-- any user row impossible.
+--
+-- Fix: drop NOT NULL so ON DELETE SET NULL can actually apply. UNIQUE is
+-- preserved and remains safe — Postgres never treats two NULLs as equal, so
+-- multiple orphaned (user-deleted) billing_customers rows can coexist.
+-- New rows are always inserted with a real user_id (startTrialOnce /
+-- ensureLocalCustomer), so this only affects rows whose owning user has since
+-- been hard-deleted.
+
+ALTER TABLE billing_customers ALTER COLUMN user_id DROP NOT NULL;
