@@ -13,8 +13,9 @@
 # Operational tuning is NOT in this file. Keepa refresh cadence and its kill
 # switch, AI content, quota enforcement, SMTP settings, matching tolerances and
 # admin thresholds are edited at /admin → Settings and stored in
-# `platform_settings`. The proxy pool is managed at /admin → Proxies. Env vars
-# here are only the fallback used when no override row exists.
+# `platform_settings`. Env vars here are only the fallback used when no
+# override row exists. Amazon browser-automation proxying is self-service
+# (per Amazon buyer account, set from the app) — nothing to configure here.
 # ============================================
 
 services:

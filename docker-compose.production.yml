@@ -22,9 +22,9 @@
 #   still honoured as the fallback when no override row exists, so leaving
 #   these unset is the normal case.
 #
-#   The fixed ISP proxy pool is likewise DB-managed (`proxies` table, migration
-#   057/058) via /admin → Proxies. The legacy PROXY_* env template is only a
-#   fallback for environments with an empty pool.
+#   Amazon browser-automation proxying is self-service: a user optionally sets
+#   host/port/credentials per Amazon buyer account from the app (migration
+#   080). There is nothing to configure here or at /admin for it anymore.
 # ============================================
 
 services:

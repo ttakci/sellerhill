@@ -1,8 +1,16 @@
-# 🚀 Coolify ile Test Ortamı Deployment Rehberi
+# 🚀 Coolify ile Test/UAT Ortamı Deployment Rehberi
 
-> Bu rehber, Hostinger VPS üzerinde **Coolify** kullanarak SellerHill projesini test/sandbox ortamına almak için hazırlanmıştır.
+> Bu rehber, Hostinger VPS üzerindeki **self-hosted Coolify** ile SellerHill'in **UAT/test** ortamını (yeniden) kurmak için hazırlanmıştır. Aynı adımlar **birebir aynı arayüzle** Coolify Cloud'da da geçerli — self-hosted/Cloud farkı sadece panelin nerede çalıştığı, DB resource/env var/domain iş akışı değişmiyor. Cloud'u ne zaman/nasıl kullanacağınla ilgili notlar → [`docs/coolify-cloud-migration.md`](./coolify-cloud-migration.md) (örn. production'ı ayrı, bağımsız bir server üzerinde Cloud'a taşımak — **bu VPS gibi başka projelerin de barındığı paylaşımlı bir server'ı Cloud'a bağlamak önerilmez**, bkz. o dokümandaki proxy çakışması notu).
 >
-> **Mimari özeti:** Tek domain (same-origin). `web` (nginx) React SPA'yı serve eder ve `/api/*` isteklerini API'ye proxy'ler. **PostgreSQL ve Redis compose içinde değil** — Coolify'nin ayrı Database resource'ları olarak yönetilir (otomatik backup, port derdi yok, app'ten bağımsız lifecycle).
+> **Branch / compose eşleşmesi — karıştırma:**
+>
+> | | UAT / Test | Production |
+> |---|---|---|
+> | **Branch** | `UAT` | `main` |
+> | **Compose dosyası** | `docker-compose.test.yml` | `docker-compose.production.yml` |
+> | **eBay ortamı** | sandbox (compose içinde sabit `EBAY_ENVIRONMENT: sandbox`) | production |
+>
+> **Mimari özeti:** Tek domain (same-origin). `web` (nginx) React SPA'yı serve eder ve `/api/*` isteklerini API'ye proxy'ler. **PostgreSQL ve Redis compose içinde değil** — Coolify'nin ayrı Database resource'ları olarak yönetilir (otomatik backup, port derdi yok, app'ten bağımsız lifecycle). **Grafana/Loki/Promtail (log takibi) ise compose'un İÇİNDE** — ayrı resource açmana gerek yok, aşağıda ayrıca anlatılıyor.
 
 ---
 
@@ -15,6 +23,9 @@ Internet → Coolify Traefik (otomatik SSL) → nginx (web:80)
                                                               ├── PostgreSQL  ← Coolify DB resource
                                                               ├── Redis       ← Coolify DB resource
                                                               └── Playwright Chromium (imajda gömülü)
+
+Log takibi (compose İÇİNDE, ayrı Coolify resource DEĞİL):
+  api → api_logs volume → Promtail → Loki → Grafana (domain'i yok, SSH tunnel ile açılır)
 ```
 
 ### nginx neden var?
@@ -39,6 +50,20 @@ Same-origin olunca **CORS tamamen ortadan kalkar**: tarayıcı same-origin istek
 | **Lifecycle** | Hepsinin birbirine bağımlı | ✅ Ayrı |
 
 Solo dev için en kritik kazanım **otomatik backup**. DB çöküp veri kaybı olduğunda elle backup alan olmaz.
+
+### Grafana / Loki / Promtail neden ayrı bir Coolify resource'u değil?
+
+Postgres/Redis'in aksine, log takip yığını (**Loki + Promtail + Grafana**) `docker-compose.test.yml` / `docker-compose.production.yml` dosyalarının **içinde tanımlı** — ayrı bir Coolify Database/resource açmana gerek YOK, app'i deploy ettiğinde otomatik gelirler.
+
+Sebep: bunlar Postgres/Redis gibi "kalıcı veri + otomatik backup" isteyen servisler değil — kendi (stateless sayılabilecek, kısa retention'lı) volume'larını compose içinde tanımlıyorlar (`loki_data`, `grafana_data`, `promtail_positions`) ve log verisi zaten 7 gün retention ile kendini temizliyor (bkz. `CLAUDE.md` → "Observability — log tracing").
+
+| Servis | Nerede tanımlı | Domain gerekir mi? |
+|---|---|---|
+| Loki | compose (internal, `coolify` network) | Hayır |
+| Promtail | compose (internal) | Hayır — `api_logs` volume'unu tail eder |
+| Grafana | compose (internal) | **Hayır (default)** — SSH tunnel ile erişilir (bkz. Adım 6.3). İstersen ayrı domain de verebilirsin |
+
+Zorunlu tek şey: app'i oluştururken `GRAFANA_ADMIN_PASSWORD` env var'ını girmek (Adım 5.4) — yoksa `grafana` container'ı başlamaz.
 
 ### Servisler ve portlar
 
@@ -76,6 +101,8 @@ Solo dev için en kritik kazanım **otomatik backup**. DB çöküp veri kaybı o
 
 ## Adım 1: Coolify Kurulumu (VPS'te)
 
+> ⏭️ **VPS'te zaten çalışan bir Coolify varsa bu adımı atla** — tek Coolify instance'ı aynı VPS'te birden fazla projeyi/app'i barındırabilir. Yeni bir test/UAT app'i eklemek için doğrudan Adım 4'e geç.
+
 ```bash
 ssh root@SIZIN_VPS_IP
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
@@ -91,23 +118,26 @@ Kurulum 5-10 dakika sürer. Sonra:
 
 ---
 
-## Adım 2: Deployment Dosyalarını Push'layın
+## Adım 2: Deployment Dosyaları (repo'da zaten mevcut)
 
-Aşağıdaki dosyalar repo'da olmalıdır:
+> Bu adım **tek seferlik/geçmiş** bir kurulum işiydi — aşağıdaki dosyalar repo'da zaten var, tekrar oluşturmana gerek yok. Sadece varlıklarını biliyor ol:
 
 | Dosya | Açıklama |
 |-------|----------|
 | `.dockerignore` | Docker build'ten hariç tutulacaklar |
 | `Dockerfile.api` | NestJS API + Playwright Chromium |
 | `Dockerfile.web` | Vite build → nginx statik serve |
-| `docker-compose.production.yml` | **Sadece `api` + `web`** (DB servisleri YOK) |
+| `docker-compose.test.yml` | Test/UAT: `api` + `web` + Loki/Promtail/Grafana (DB servisleri YOK) |
+| `docker-compose.production.yml` | Production: aynısı, production env değerleriyle |
 | `nginx.conf` | SPA serve + `/api` proxy + SPA routing |
 | `docker/api-entrypoint.sh` | DB migration → API başlat |
 
+Yapman gereken tek şey, deploy etmeden önce **`UAT` branch'inin güncel olduğundan** emin olmak:
+
 ```bash
-git add .
-git commit -m "chore: managed DBs (Coolify resources) + same-origin compose"
-git push origin development
+git checkout UAT
+git merge development
+git push origin UAT
 ```
 
 ---
@@ -115,6 +145,8 @@ git push origin development
 ## Adım 3: Coolify'da Veritabanı Resource'larını Oluşturun
 
 > ⚠️ **Sıra önemli:** DB resource'larını app'ten ÖNCE oluşturup başlatın. App ilk deploy'da migration çalıştıracak, DB hazır olmalı.
+>
+> **Zaten `sellerhill-postgres` / `sellerhill-redis` adında eski kaynaklar varsa** ("nasıl kurduğumu unuttum" durumu) → aşağıya, "🔁 Var Olan Test/UAT App'ini Sıfırdan Kurma" bölümüne bak: ya sil-ve-yeniden-kur, ya da burada farklı bir isim (örn. `sellerhill-uat-postgres`) kullanıp eskisinin yanına yeni kur.
 
 ### 3.1 PostgreSQL
 
@@ -163,10 +195,12 @@ Almanız gerekenler:
 
 ### 4.2 Git Repository Bağlama
 
-- **Repository URL:** Git repo URL'niz
-- **Branch:** `development` (veya `main`)
-- **Compose File:** `docker-compose.production.yml`
+- **Repository URL:** `https://github.com/ttakci/sellerhill.git`
+- **Branch:** **`UAT`** (test/UAT için) — production kuruyorsan `main`
+- **Compose File:** **`docker-compose.test.yml`** (test/UAT için) — production kuruyorsan `docker-compose.production.yml`
 - Private repo ise **Deploy Key** / **Access Token** ekleyin
+
+> `UAT` branch'i `development`'tan merge edilerek güncel tutuluyor — en son kod için önce `git checkout UAT && git merge development && git push origin UAT` (proje kökünden, VPS'te değil).
 
 ### 4.3 Servislere Domain Atama (sadece `web`)
 
@@ -245,6 +279,15 @@ SMTP_PASSWORD=
 SMTP_FROM=
 ```
 
+### 5.4 Log takibi (Grafana) — zorunlu, yoksa container başlamaz
+
+```env
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=güçlü-bir-şifre
+```
+
+`docker-compose.test.yml`/`docker-compose.production.yml` içinde `GRAFANA_ADMIN_PASSWORD` `:?` ile zorunlu işaretli — girilmezse compose ayağa kalkarken hata verir. `GRAFANA_ADMIN_USER` girilmezse `admin` default'u kullanılır. Loki ve Promtail için ekstra env var gerekmiyor.
+
 > Not: Same-origin (tek domain) olduğu için tarayıcı `/api` isteklerinde `Origin` header göndermez → CORS devreye girmez. Yine de `CORS_ORIGINS`'i web domaininize set etmek best practice — API artık bu env var'ı okuyor (virgülle ayrılmış liste), hardcode kaldırıldı.
 
 ---
@@ -261,9 +304,22 @@ A    sellerhill.takci.cloud    →    SIZIN_VPS_IP
 
 ### Coolify'da SSL
 
-1. `web` servisi → **"Configuration"** → **"Domains"** → `sellerhill.takci.cloud`
+1. `web` servisi → **"Configuration"** → **"Domains"** → `sellerhill.takci.cloud` (ya da hangi domain/subdomain'i kullanıyorsan)
 2. **"HTTPS"** → **"Let's Encrypt"** aktif edin
 3. Coolify otomatik SSL sertifikası alır (1-2 dakika)
+
+### 6.3 (Opsiyonel) Grafana'ya erişim
+
+Default'ta Grafana'nın domaini yok — hiç kurulum yapmadan SSH tunnel ile açılır:
+
+```bash
+ssh -L 3001:localhost:3001 root@SIZIN_VPS_IP
+# sonra kendi tarayıcında: http://localhost:3001  (kullanıcı/şifre = Adım 5.4)
+```
+
+> Grafana container'ın iç portu `3000`'dir; yukarıdaki `3001` sadece örnek yerel port — istersen değiştir (`ssh -L 3001:localhost:3000 ...` gibi container'ın gerçek iç portunu hedeflemen gerekebilir, Coolify'nin ürettiği port mapping'e bak).
+>
+> Sürekli tarayıcıdan erişmek istersen `grafana` servisine de bir Coolify domain atayabilirsin (örn. `grafana.sellerhill.takci.cloud`) — ama bu paneli internete açar; mutlaka güçlü `GRAFANA_ADMIN_PASSWORD` kullan (`GF_AUTH_ANONYMOUS_ENABLED` zaten compose'da `false`).
 
 ---
 
@@ -354,10 +410,37 @@ HGETALL bull:order-sync:meta
 
 ---
 
+## 🔁 Var Olan Test/UAT App'ini Sıfırdan Kurma
+
+"Nasıl kurduğumu unuttum, baştan yapacağım" durumundaysan — DB'nin yeni olması zaten sorun değilse — iki yol var:
+
+### Seçenek A — Eskisini sil, temiz kur
+
+1. Coolify → eski test app'inin bulunduğu proje → **"Delete"** (app + varsa domain kaydı silinir)
+2. Eski `sellerhill-postgres` / `sellerhill-redis` DB resource'larını da sil (Coolify → **Resources**)
+3. Bu dokümanın **Adım 3**'ünden itibaren sıfırdan başla (aynı isimleri tekrar kullanabilirsin)
+
+> ⚠️ Geri alınamaz — eski test DB'sinde bir şey varsa kalıcı silinir. Test/UAT ortamı için genelde sorun değil (zaten "db falan yeni olmalı" diyorsun).
+
+### Seçenek B — Eskisini silmeden, yanına yeni kur
+
+Eskisi hâlâ çalışır durumda kalır, yeni kurulum doğrulanınca eskisini kaldırırsın:
+
+1. Adım 4.1'de **farklı bir proje adı** (örn. `sellerhill-uat-v2`)
+2. Adım 3'te **farklı DB resource isimleri** (örn. `sellerhill-uat-postgres-v2`, `sellerhill-uat-redis-v2`)
+3. Adım 4.3 / 6.1'de **farklı bir domain** (örn. `uat2.sellerhill.takci.cloud` — DNS'e yeni A kaydı eklemen gerekir)
+4. Yeni kurulum çalıştığını doğrulayınca eskisini Seçenek A'daki gibi sil
+
+> İkisi aynı VPS'te, aynı Coolify instance'ında sorunsuz yan yana durur — proxy (Traefik) domain bazlı routing yaptığı için farklı domain/subdomain'ler çakışmaz.
+
+---
+
 ## 🔄 Güncelleme (Yeni Deploy)
 
 ```bash
-git push origin development   # kod değişti
+git checkout UAT
+git merge development   # en son kodu UAT'a al
+git push origin UAT
 ```
 
 Coolify UI → **"Redeploy"**. DB resource'ları **dokunulmaz** — sadece app rebuild olur, veri kaybı yok.
@@ -379,6 +462,8 @@ Coolify → Servis → **"Configuration"** → **"Watch Paths"** → `*` ekleyin
 | **Playwright hatası** | `playwright install --with-deps` loglarını kontrol edin (Dockerfile.api) |
 | **İlk deploy yavaş** | Normal. Playwright Chromium ~400MB. Sonraki deploy'larda Docker cache |
 | **DBeaver bağlanamıyor** | PostgreSQL resource'ta "Publicly accessible" açık mı? Port doğru mu? Şifre doğru mu? |
+| **`grafana` container'ı başlamıyor / restart loop** | `GRAFANA_ADMIN_PASSWORD` env var'ı girilmiş mi kontrol et (Adım 5.4) — compose'da zorunlu (`:?`) olarak işaretli. |
+| **Grafana'da veri/dashboard görünmüyor** | Loki/Promtail container'ları çalışıyor mu (`docker ps`)? Promtail `api_logs` volume'unu tail ediyor — API loglama gerçekten yapıyor mu (`docker compose logs -f api`)? |
 
 ### Swap Ekleme (RAM yetmiyorsa)
 
@@ -422,14 +507,16 @@ docker system prune -f
 ## 📌 Adım Adım Checklist
 
 - [ ] VPS: en az 4GB RAM, 2 vCPU, 40GB SSD, Ubuntu 22.04/24.04
-- [ ] Coolify kuruldu, admin hesap oluşturuldu
-- [ ] Repo'da deployment dosyaları push'landı (`docker-compose.production.yml` DB servissiz)
-- [ ] Coolify'da **PostgreSQL resource** oluşturuldu + çalışıyor (`sellerhill-postgres`)
-- [ ] Coolify'da **Redis resource** oluşturuldu + çalışıyor (`sellerhill-redis`)
+- [ ] Coolify kuruldu (ya da zaten kuruluysa Adım 1 atlandı), admin hesap var
+- [ ] Eski test/UAT app'i varsa: Seçenek A (sil-yeniden kur) ya da B (yanına yeni kur) netleştirildi
+- [ ] Repo'da deployment dosyaları push'landı, **`UAT` branch** güncel (`git merge development` sonrası push edildi)
+- [ ] Coolify'da **PostgreSQL resource** oluşturuldu + çalışıyor
+- [ ] Coolify'da **Redis resource** oluşturuldu + çalışıyor
 - [ ] `DATABASE_URL`, `REDIS_HOST/PORT` internal connection bilgileri alındı
-- [ ] Coolify'da app (Docker Compose) oluşturuldu, repo bağlandı
+- [ ] Coolify'da app (Docker Compose) oluşturuldu, repo bağlandı — branch **`UAT`**, compose **`docker-compose.test.yml`**
 - [ ] Domain SADECE `web` servisine atandı (`api`'ye verilmedi)
 - [ ] Env var'lar ayarlandı: `DATABASE_URL`, `REDIS_*`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `FRONTEND_URL`, `CORS_ORIGINS`
+- [ ] **`GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` girildi** (yoksa `grafana` container'ı başlamaz)
 - [ ] eBay sandbox redirect URI = `https://<domain>/api/v1/ebay/callback`
 - [ ] DNS A kaydı eklendi (domain → VPS IP)
 - [ ] Let's Encrypt SSL aktif
@@ -438,3 +525,4 @@ docker system prune -f
 - [ ] Uygulama tarayıcıda açılıyor
 - [ ] (Opsiyonel) DBeaver ile DB'ye bağlandı
 - [ ] (Opsiyonel) Redis GUI / CLI ile kuyruklar görüldü
+- [ ] (Opsiyonel) Grafana'ya SSH tunnel ile bağlanıldı, log akışı görüldü
