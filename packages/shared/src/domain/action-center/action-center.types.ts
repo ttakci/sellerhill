@@ -126,8 +126,19 @@ export enum ActionCenterItemKey {
   /** Trial ends within the notice window. */
   PLAN_TRIAL_ENDING = 'plan_trial_ending',
 
+  /**
+   * No eBay store connected yet. The one prerequisite for everything else —
+   * shown alone, before any of the items below, because none of them are
+   * reachable (their destinations live behind the same `EbayAccountGuard`)
+   * until this is satisfied.
+   */
+  SETUP_NO_EBAY_STORE = 'setup_no_ebay_store',
   /** No Amazon buyer account exists, so nothing can ever be auto-purchased. */
   SETUP_NO_AMAZON_ACCOUNT = 'setup_no_amazon_account',
+  /** No global store-settings row exists yet (shipping origin, blacklist, tax rate). */
+  SETUP_NO_STORE_SETTINGS = 'setup_no_store_settings',
+  /** No listing settings group exists yet — required before a listing can be created. */
+  SETUP_NO_LISTING_SETTINGS_GROUP = 'setup_no_listing_settings_group',
   /** Buyer accounts exist but none is cleared for auto-fulfillment. */
   SETUP_AUTO_FULFILL_OFF = 'setup_auto_fulfill_off',
 }

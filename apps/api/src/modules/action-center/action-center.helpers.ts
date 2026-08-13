@@ -12,6 +12,8 @@
 import {
   ACTION_CENTER_GROUP_ORDER,
   ACTION_CENTER_SEVERITY_RANK,
+  ActionCenterGroup,
+  ActionCenterItemKey,
   ActionCenterSeverity,
   type ActionCenterBreakdownEntryDto,
   type ActionCenterGroupDto,
@@ -153,4 +155,69 @@ export function buildActionCenterSummary(
 /** An empty snapshot — used when a user has nothing waiting, and on cold start. */
 export function emptyActionCenterSummary(generatedAt: Date): ActionCenterSummaryDto {
   return buildActionCenterSummary([], generatedAt);
+}
+
+/** Raw counts `setupItems` reads from the DB — one row, five columns. */
+export interface SetupCounts {
+  ebayCount: number;
+  amazonCount: number;
+  /** Amazon accounts that are ACTIVE, auto-fulfill-enabled and carry a positive cap. */
+  automatedCount: number;
+  /** Global (`is_global = TRUE`) store_settings rows. */
+  storeSettingsCount: number;
+  listingGroupCount: number;
+}
+
+function setupItem(key: ActionCenterItemKey, actionPath: string): ActionCenterItemDto {
+  return {
+    key,
+    group: ActionCenterGroup.SETUP,
+    severity: ActionCenterSeverity.INFO,
+    count: 1,
+    actionPath,
+  };
+}
+
+/**
+ * Staged foundational-setup checklist for a seller who has not finished
+ * onboarding — connect eBay, add an Amazon buyer account, configure store
+ * settings, create a listing settings group, then (once an Amazon account
+ * exists) turn on auto-fulfillment.
+ *
+ * Staging, not a flat list of gaps:
+ *  - **No eBay account → show ONLY that.** Every other item's destination is
+ *    `/settings?drawer=...`, and the Settings hub is wrapped in the same
+ *    `EbayAccountGuard` that gates this very page — showing them earlier
+ *    would link to a page that immediately bounces back to "connect eBay."
+ *  - **Once eBay exists, the remaining foundational gaps show together** —
+ *    Amazon account, store settings, listing group have no dependency order
+ *    between them, so there is no reason to drip-feed them one at a time.
+ *  - **Auto-fulfillment readiness is evaluated only once an Amazon account
+ *    exists** — reporting "turn on auto-fulfill" before there is anything to
+ *    turn on is not actionable, and would double up with
+ *    `SETUP_NO_AMAZON_ACCOUNT` describing the same underlying gap.
+ */
+export function buildSetupItems(counts: SetupCounts): ActionCenterItemDto[] {
+  if (counts.ebayCount === 0) {
+    return [setupItem(ActionCenterItemKey.SETUP_NO_EBAY_STORE, '/onboarding/ebay')];
+  }
+
+  const items: ActionCenterItemDto[] = [];
+
+  if (counts.amazonCount === 0) {
+    items.push(setupItem(ActionCenterItemKey.SETUP_NO_AMAZON_ACCOUNT, '/settings?drawer=amazonAccounts'));
+  }
+  if (counts.storeSettingsCount === 0) {
+    items.push(setupItem(ActionCenterItemKey.SETUP_NO_STORE_SETTINGS, '/settings?drawer=storeSettings'));
+  }
+  if (counts.listingGroupCount === 0) {
+    items.push(
+      setupItem(ActionCenterItemKey.SETUP_NO_LISTING_SETTINGS_GROUP, '/settings?drawer=listingGroupCreate'),
+    );
+  }
+  if (counts.amazonCount > 0 && counts.automatedCount === 0) {
+    items.push(setupItem(ActionCenterItemKey.SETUP_AUTO_FULFILL_OFF, '/settings?drawer=amazonAccounts'));
+  }
+
+  return items;
 }

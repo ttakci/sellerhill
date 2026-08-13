@@ -8,9 +8,11 @@ import {
 import {
   buildActionCenterSummary,
   buildBreakdown,
+  buildSetupItems,
   daysUntil,
   highestSeverity,
   resolveQuotaSeverity,
+  type SetupCounts,
 } from './action-center.helpers';
 
 const NOW = new Date('2026-08-12T10:00:00.000Z');
@@ -226,6 +228,71 @@ describe('buildActionCenterSummary', () => {
       infoCount: 0,
       groups: [],
       generatedAt: NOW.toISOString(),
+    });
+  });
+});
+
+function setupCounts(overrides: Partial<SetupCounts> = {}): SetupCounts {
+  return {
+    ebayCount: 1,
+    amazonCount: 1,
+    automatedCount: 1,
+    storeSettingsCount: 1,
+    listingGroupCount: 1,
+    ...overrides,
+  };
+}
+
+describe('buildSetupItems', () => {
+  it('shows only the eBay item when no eBay account exists, regardless of everything else', () => {
+    const items = buildSetupItems(
+      setupCounts({ ebayCount: 0, amazonCount: 0, automatedCount: 0, storeSettingsCount: 0, listingGroupCount: 0 }),
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0].key).toBe(ActionCenterItemKey.SETUP_NO_EBAY_STORE);
+  });
+
+  it('reports every unmet foundational gap together once eBay is connected', () => {
+    const items = buildSetupItems(
+      setupCounts({ amazonCount: 0, automatedCount: 0, storeSettingsCount: 0, listingGroupCount: 0 }),
+    );
+
+    expect(items.map((i) => i.key)).toEqual([
+      ActionCenterItemKey.SETUP_NO_AMAZON_ACCOUNT,
+      ActionCenterItemKey.SETUP_NO_STORE_SETTINGS,
+      ActionCenterItemKey.SETUP_NO_LISTING_SETTINGS_GROUP,
+    ]);
+  });
+
+  it('does not report auto-fulfill readiness before an Amazon account exists', () => {
+    const items = buildSetupItems(setupCounts({ amazonCount: 0, automatedCount: 0 }));
+
+    expect(items.map((i) => i.key)).not.toContain(ActionCenterItemKey.SETUP_AUTO_FULFILL_OFF);
+  });
+
+  it('reports auto-fulfill readiness once an Amazon account exists but none is cleared to buy', () => {
+    const items = buildSetupItems(setupCounts({ automatedCount: 0, storeSettingsCount: 0 }));
+
+    expect(items.map((i) => i.key)).toEqual([
+      ActionCenterItemKey.SETUP_NO_STORE_SETTINGS,
+      ActionCenterItemKey.SETUP_AUTO_FULFILL_OFF,
+    ]);
+    // The two Amazon-related items never co-occur for the same gap.
+    expect(items.map((i) => i.key)).not.toContain(ActionCenterItemKey.SETUP_NO_AMAZON_ACCOUNT);
+  });
+
+  it('returns nothing once every foundational condition is satisfied', () => {
+    expect(buildSetupItems(setupCounts())).toEqual([]);
+  });
+
+  it('every item carries count 1 and an INFO severity in the setup group', () => {
+    const items = buildSetupItems(setupCounts({ ebayCount: 0 }));
+
+    expect(items[0]).toMatchObject({
+      group: ActionCenterGroup.SETUP,
+      severity: ActionCenterSeverity.INFO,
+      count: 1,
     });
   });
 });

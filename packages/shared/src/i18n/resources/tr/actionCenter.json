@@ -56,7 +56,7 @@
       },
       "setup": {
         "title": "Kurulum",
-        "subtitle": "Henüz kullanmadığınız otomasyonu açan adımlar."
+        "subtitle": "SellerHill'in sizin için çalışmasını sağlayan temel adımlar."
       }
     },
     "items": {
@@ -141,10 +141,25 @@
         "description_other": "{{count}} gün kaldı. İlanlarınızın ve otomatik siparişlerinizin çalışmaya devam etmesi için bir plan seçin.",
         "action": "Plan seç"
       },
+      "setup_no_ebay_store": {
+        "title": "eBay mağazanızı bağlayın",
+        "description": "Bağlı bir eBay mağazası olmadan SellerHill'de hiçbir şey çalışmaz — ilanlar, siparişler ve otomasyonun hepsi buna bağlı. Önce yapılması gereken tek şey bu.",
+        "action": "eBay'i bağla"
+      },
       "setup_no_amazon_account": {
         "title": "Henüz Amazon alıcı hesabı yok",
         "description": "Satış yapıyorsunuz ama satın alacak bir Amazon hesabı yok — her siparişi elle almanız gerekiyor. Bir hesap eklediğinizde otomatik karşılama açılır.",
         "action": "Hesap ekle"
+      },
+      "setup_no_store_settings": {
+        "title": "Mağaza ayarları henüz yapılmadı",
+        "description": "Kargo gönderim yeriniz ve kara liste anahtar kelimeleriniz hâlâ ayarlanmadı. Bunlar maliyet hesaplamada ve engellenen içerikle ilan yayınlanmasını önlemede kullanılır.",
+        "action": "Ayarları yapılandır"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "Henüz listing grup yok",
+        "description": "Bir listing ayar grubu fiyatlama, stok ve fiyat güncelleme kurallarını tanımlar — her ilanın bir gruba ihtiyacı vardır, bu yüzden gruplandırmadan ilk ilanınızı oluşturamazsınız.",
+        "action": "Grup oluştur"
       },
       "setup_auto_fulfill_off": {
         "title": "Otomatik satın alma kapalı",

@@ -63,6 +63,7 @@ import {
   TRIAL_ENDING_NOTICE_DAYS,
   buildActionCenterSummary,
   buildBreakdown,
+  buildSetupItems,
   daysUntil,
   resolveQuotaSeverity,
 } from './action-center.helpers';
@@ -527,60 +528,43 @@ export class ActionCenterService {
   // ----------------------------------------------------------------- setup
 
   /**
-   * Onboarding gaps that silently cap what the platform can do for this seller.
-   *
-   * Scoped to sellers who have actually started (at least one listing): a brand
-   * new account is walked through connection by the eBay gate and the
-   * onboarding page, and stacking setup nags on top of that is noise. Both
-   * items disappear permanently once satisfied.
+   * Foundational onboarding checklist — the first thing a brand-new registrant
+   * sees, before there is a single listing or order to report on. Staging rules
+   * live in the pure `buildSetupItems` (see its doc comment): no eBay account
+   * shows only the eBay item, since every other destination here sits behind
+   * the same `EbayAccountGuard` that gates the Settings hub; once eBay exists,
+   * the remaining foundational gaps (Amazon account, store settings, listing
+   * group) are reported together; auto-fulfillment readiness is only evaluated
+   * once an Amazon account exists to evaluate it on.
    */
   private async setupItems(userId: string): Promise<ActionCenterItemDto[]> {
     const row = await this.db.query<{
-      listing_count: string;
+      ebay_count: string;
       amazon_count: string;
       automated_count: string;
+      store_settings_count: string;
+      listing_group_count: string;
     }>(
       `SELECT
-         (SELECT COUNT(*) FROM listings WHERE user_id = $1) AS listing_count,
+         (SELECT COUNT(*) FROM ebay_accounts WHERE user_id = $1) AS ebay_count,
          (SELECT COUNT(*) FROM amazon_accounts WHERE user_id = $1) AS amazon_count,
          (SELECT COUNT(*) FROM amazon_accounts
            WHERE user_id = $1
+             AND status = $2
              AND auto_fulfill_enabled = TRUE
-             AND auto_fulfill_cap_total IS NOT NULL) AS automated_count`,
-      [userId],
+             AND auto_fulfill_cap_total IS NOT NULL
+             AND auto_fulfill_cap_total > 0) AS automated_count,
+         (SELECT COUNT(*) FROM store_settings WHERE user_id = $1 AND is_global = TRUE) AS store_settings_count,
+         (SELECT COUNT(*) FROM listing_settings_groups WHERE user_id = $1) AS listing_group_count`,
+      [userId, AmazonAccountStatus.ACTIVE],
     );
 
-    const listings = toCount(row[0]?.listing_count);
-    if (listings === 0) {
-      return [];
-    }
-
-    const amazonAccounts = toCount(row[0]?.amazon_count);
-    const automatedAccounts = toCount(row[0]?.automated_count);
-
-    if (amazonAccounts === 0) {
-      return [
-        {
-          key: ActionCenterItemKey.SETUP_NO_AMAZON_ACCOUNT,
-          group: ActionCenterGroup.SETUP,
-          severity: ActionCenterSeverity.INFO,
-          count: 1,
-          actionPath: '/settings?drawer=amazonAccounts',
-        },
-      ];
-    }
-
-    // Accounts exist but none is cleared to buy. Only the second half of the
-    // gate is reported — the first (no account at all) already returned above,
-    // and showing both would describe the same gap twice.
-    return [
-      {
-        key: ActionCenterItemKey.SETUP_AUTO_FULFILL_OFF,
-        group: ActionCenterGroup.SETUP,
-        severity: ActionCenterSeverity.INFO,
-        count: automatedAccounts === 0 ? 1 : 0,
-        actionPath: '/settings?drawer=amazonAccounts',
-      },
-    ];
+    return buildSetupItems({
+      ebayCount: toCount(row[0]?.ebay_count),
+      amazonCount: toCount(row[0]?.amazon_count),
+      automatedCount: toCount(row[0]?.automated_count),
+      storeSettingsCount: toCount(row[0]?.store_settings_count),
+      listingGroupCount: toCount(row[0]?.listing_group_count),
+    });
   }
 }

@@ -56,7 +56,7 @@
       },
       "setup": {
         "title": "Setup",
-        "subtitle": "Steps that unlock automation you are not using yet."
+        "subtitle": "Foundational steps to get SellerHill working for you."
       }
     },
     "items": {
@@ -141,10 +141,25 @@
         "description_other": "{{count}} days left. Choose a plan to keep your listings and automatic orders running.",
         "action": "Choose a plan"
       },
+      "setup_no_ebay_store": {
+        "title": "Connect your eBay store",
+        "description": "Nothing else in SellerHill can run without an eBay store connected — listings, orders and automation all depend on it. This is the one thing to do first.",
+        "action": "Connect eBay"
+      },
       "setup_no_amazon_account": {
         "title": "No Amazon buyer account yet",
         "description": "You are selling, but there is no Amazon account to buy from — every order has to be purchased by hand. Adding one enables automatic fulfilment.",
         "action": "Add account"
+      },
+      "setup_no_store_settings": {
+        "title": "Store settings not configured yet",
+        "description": "Your shipping origin and blacklist keywords are still unset. These are used to compute costs and to keep listings from publishing with blocked content.",
+        "action": "Configure settings"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "No listing settings group yet",
+        "description": "A listing settings group defines pricing, stock and repricing rules — every listing needs one, so you cannot create your first listing without it.",
+        "action": "Create a group"
       },
       "setup_auto_fulfill_off": {
         "title": "Automatic purchasing is off",
