@@ -2,10 +2,13 @@ import type {
   AmazonAccountPublicDto,
   BuyerMessageTemplate,
   EbayAccountPublicDto,
+  EbayMarketplaceId,
   ListingSettingsGroupResponse,
   ProfileDto,
   StoreSettingsResponse,
 } from '@repo/shared';
+
+import type { EbayMarketplaceOption } from '@/domain-ui/ConnectEbayPrompt/ConnectEbayPrompt.types';
 
 export type SettingsDrawerKey =
   | 'profile'
@@ -41,6 +44,9 @@ export interface SettingsHubPageComponentProps {
   onViewAllListingGroups: () => void;
   onCreateListingGroup: () => void;
   onConnectEbay: () => void;
+  ebayMarketplaceOptions: EbayMarketplaceOption[];
+  selectedEbayMarketplace: EbayMarketplaceId;
+  onEbayMarketplaceChange: (value: EbayMarketplaceId) => void;
   isImpersonatingAdmin: boolean;
   isDeactivateModalOpen: boolean;
   onOpenDeactivateModal: () => void;

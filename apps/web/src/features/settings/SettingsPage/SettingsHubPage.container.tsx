@@ -4,7 +4,7 @@
  * account/security, notifications, plan, and danger zone into single page.
  */
 
-import { AmazonAccountStatus, EBAY_MARKETPLACE } from '@repo/shared';
+import { AmazonAccountStatus, SUPPORTED_EBAY_MARKETPLACES, type EbayMarketplaceId } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ import { useGetAmazonAccountsQuery } from '@/features/amazon/api/amazon.api';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '@/features/ebay/api/ebayApi';
+import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
 import {
   useGetListingSettingsGroupsQuery,
   useGetPredefinedTemplatesQuery,
@@ -32,12 +33,15 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 const DRAWER_PARAM = 'drawer';
 
 export const SettingsHubPageContainer = (): React.ReactElement => {
-  const { t } = useTranslation(['translation']);
+  const { t } = useTranslation(['translation', 'ebay']);
   const { showMessage, closeMessage } = useUI();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [selectedEbayMarketplace, setSelectedEbayMarketplace] = useState<EbayMarketplaceId>(
+    SUPPORTED_EBAY_MARKETPLACES[0]
+  );
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingAmazonId, setEditingAmazonId] = useState<string | null>(null);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
@@ -162,7 +166,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   // OnboardingEbayPage: fetch eBay OAuth consent URL, redirect the browser there.
   const handleConnectEbay = (): void => {
     handleCloseDrawer();
-    void getConnectUrl({ marketplaceId: EBAY_MARKETPLACE.US })
+    void getConnectUrl({ marketplaceId: selectedEbayMarketplace })
       .unwrap()
       .then((result) => {
         window.location.href = result.url;
@@ -210,6 +214,9 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
         onViewAllListingGroups={handleViewAllListingGroups}
         onCreateListingGroup={handleCreateListingGroup}
         onConnectEbay={handleConnectEbay}
+        ebayMarketplaceOptions={getEbayMarketplaceOptions(t)}
+        selectedEbayMarketplace={selectedEbayMarketplace}
+        onEbayMarketplaceChange={setSelectedEbayMarketplace}
         isImpersonatingAdmin={isImpersonatingAdmin}
         isDeactivateModalOpen={isDeactivateModalOpen}
         onOpenDeactivateModal={handleOpenDeactivateModal}

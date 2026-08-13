@@ -213,6 +213,9 @@ export const SettingsHubPageComponent = ({
   onViewAllListingGroups,
   onCreateListingGroup,
   onConnectEbay,
+  ebayMarketplaceOptions,
+  selectedEbayMarketplace,
+  onEbayMarketplaceChange,
   isDeactivateModalOpen,
   onOpenDeactivateModal,
   onCloseDeactivateModal,
@@ -266,6 +269,9 @@ export const SettingsHubPageComponent = ({
         accounts={ebayAccounts}
         onConnectNew={onConnectEbay}
         onViewAll={() => onOpenDrawer('ebayAccountsAll')}
+        marketplaceOptions={ebayMarketplaceOptions}
+        selectedMarketplace={selectedEbayMarketplace}
+        onMarketplaceChange={onEbayMarketplaceChange}
       />
       <EbayAccountsAllDrawer
         isOpen={activeDrawer === 'ebayAccountsAll'}

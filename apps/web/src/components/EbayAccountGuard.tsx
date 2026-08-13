@@ -1,35 +1,34 @@
-import { EBAY_MARKETPLACE, type CreateEbayConnectUrlResponse, type GetEbayAccountsResponse } from '@repo/shared';
+import { SUPPORTED_EBAY_MARKETPLACES, type EbayMarketplaceId } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '../features/ebay/api/ebayApi';
 import { getErrorI18nKey } from '../utils/errorHandler';
-import { useLocale } from '../utils/useLocale';
+
+import type {
+  EbayAccountGuardProps,
+  EbayAccountsQueryResult,
+  EbayConnectUrlQueryTuple,
+} from './EbayAccountGuard.types';
 
 import { ConnectEbayPrompt } from '@/domain-ui';
-
-interface EbayAccountGuardProps {
-  children: React.ReactNode;
-}
+import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
+import { DeactivateAccountModal } from '@/features/settings/components/DeactivateAccountModal';
 
 export const EbayAccountGuard = ({ children }: EbayAccountGuardProps): React.ReactElement => {
-  const { localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['ebay', 'translation']);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(
+    SUPPORTED_EBAY_MARKETPLACES[0],
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const accountsResult = useGetEbayAccountsQuery() as {
-    data?: GetEbayAccountsResponse;
-    isLoading: boolean;
-    error?: unknown;
-  };
+  const accountsResult = useGetEbayAccountsQuery() as EbayAccountsQueryResult;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const connectResult = useLazyGetEbayConnectUrlQuery() as unknown as [
-    (arg: { marketplaceId: string }) => unknown,
-    { isLoading: boolean; isSuccess: boolean; data?: CreateEbayConnectUrlResponse; error?: unknown },
-  ];
+  const connectResult = useLazyGetEbayConnectUrlQuery() as unknown as EbayConnectUrlQueryTuple;
 
   const [getConnectUrl, { isLoading: isConnectLoading, isSuccess, data }] = connectResult;
   const { data: accountsData, isLoading: isAccountsLoading, error: accountsError } = accountsResult;
@@ -67,15 +66,22 @@ export const EbayAccountGuard = ({ children }: EbayAccountGuardProps): React.Rea
 
   if (!hasAccounts) {
     return (
-      <ConnectEbayPrompt
-        onConnect={() => {
-          void getConnectUrl({ marketplaceId: EBAY_MARKETPLACE.US });
-        }}
-        onSkip={() => {
-          localeNavigate('/dashboard');
-        }}
-        isLoading={isConnectLoading}
-      />
+      <>
+        <ConnectEbayPrompt
+          onConnect={() => {
+            void getConnectUrl({ marketplaceId: selectedMarketplace });
+          }}
+          onDeactivateAccount={() => setIsDeactivateModalOpen(true)}
+          isLoading={isConnectLoading}
+          marketplaceOptions={getEbayMarketplaceOptions(t)}
+          selectedMarketplace={selectedMarketplace}
+          onMarketplaceChange={setSelectedMarketplace}
+        />
+        <DeactivateAccountModal
+          isOpen={isDeactivateModalOpen}
+          onClose={() => setIsDeactivateModalOpen(false)}
+        />
+      </>
     );
   }
 

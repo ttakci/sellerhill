@@ -11,6 +11,10 @@ export const StyledCard = styled(Card)`
   margin: 0 auto;
 `;
 
+export const MarketplaceSelectWrapper = styled.div`
+  margin-bottom: ${tkn('spacing.lg')};
+`;
+
 export const Footnote = styled(Text)`
   text-align: center;
   max-width: 20rem;
