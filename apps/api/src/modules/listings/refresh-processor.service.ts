@@ -223,15 +223,18 @@ export class RefreshProcessorService extends WorkerHost {
     const userIdsByProduct = await this.loadUserIdsByProduct(productIds);
     const pendingUpdates: PendingListingUpdate[] = [];
 
-    for (const row of products) {
-      // Token was spent for every requested ASIN whether or not data came back.
-      await this.keepaUsageService.logUsage({
+    // Token was spent for every requested ASIN whether or not data came back.
+    // One bulk write for the whole batch instead of one round trip per ASIN.
+    await this.keepaUsageService.logUsageBatch(
+      products.map((row) => ({
         asin: row.asin,
         tokens: tokenShare,
         source: KeepaUsageSource.REFRESH,
         userIds: userIdsByProduct.get(row.id) ?? [],
-      });
+      }))
+    );
 
+    for (const row of products) {
       const kp = keepaByAsin.get(row.asin);
       if (!kp) {
         // Keepa returned no data for this ASIN → data failure (not transport):

@@ -174,6 +174,14 @@ export const AdminPageComponent = ({
 
       {activeTab === 'costs' && (
         <S.Grid>
+          <S.SummaryCard>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.cost.keepaBalance')}
+            </Text>
+            <Text variant="metric" weight="semibold" numeric>
+              {operations?.keepaTokensLeft ?? '—'}
+            </Text>
+          </S.SummaryCard>
           {providerCosts.map((cost) => (
             <S.SummaryCard key={`${cost.source}-${cost.metric}`}>
               <Text variant="body" weight="semibold">
