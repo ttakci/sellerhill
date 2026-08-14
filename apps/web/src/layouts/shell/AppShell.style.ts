@@ -39,7 +39,7 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
   position: relative;
   overflow: hidden;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     /* 1023px */
     position: fixed;
     top: 0;
@@ -56,7 +56,7 @@ export const SidebarContainer = styled.aside<{ $isCollapsed: boolean; $isMobileO
 export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   display: none;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     /* 1023px */
     display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
     position: fixed;
@@ -125,7 +125,7 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   border-bottom: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   overflow: hidden;
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     padding: 0 ${tkn('spacing.md')};
     justify-content: flex-start;
   }
@@ -142,7 +142,7 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollap
   background: transparent;
   ${({ $isCollapsed }) => $isCollapsed && `display: none;`}
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     display: flex;
   }
 
@@ -384,11 +384,11 @@ export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
     background ${tkn('transitions.fast')},
     color ${tkn('transitions.fast')};
 
-  @media (min-width: 64rem) {
+  @media (min-width: ${tkn('breakpoints.lg')}) {
     display: inline-flex;
   }
 
-  @media (max-width: 63.9375rem) {
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
     display: none;
   }
 

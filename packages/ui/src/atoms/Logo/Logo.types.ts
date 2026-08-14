@@ -5,14 +5,12 @@ export interface LogoProps {
   size?: number;
   className?: string;
   /**
-   * - `default` / `full` — icon over wordmark, stacked (auth branding panel)
-   * - `nav` — icon + wordmark, side by side, no slogan (landing navbar)
-   * - `stacked` — alias of `nav` (compat)
-   * - `icon` — badge only, no wordmark, square aspect (collapsed sidebar rail)
-   * - `wordmark` — two-tone text only, no badge ("Seller" + accent "Hill"),
-   *   sellerboard-style expanded sidebar rail — pairs with `icon` on the
-   *   collapse button
+   * Text-only wordmark in every case — there is no icon/badge graphic mark.
+   * - `default` / `full` — sized for the auth branding panel; "seller" is
+   *   hardcoded white for the always-dark aurora background.
+   * - `wordmark` — "seller" uses `currentColor`, inheriting the ambient ink
+   *   of whatever surface it renders on (sidebar, landing navbar/footer).
    */
-  layout?: 'default' | 'full' | 'nav' | 'wordmark' | 'stacked' | 'icon';
+  layout?: 'default' | 'full' | 'wordmark';
   onClick?: () => void;
 }

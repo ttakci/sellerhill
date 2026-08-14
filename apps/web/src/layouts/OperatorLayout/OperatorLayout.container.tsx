@@ -1,5 +1,5 @@
 import { isOperatorRole, type SupportedLocale } from '@repo/shared';
-import { useUI } from '@repo/ui';
+import { SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -50,7 +50,7 @@ export const OperatorLayout: React.FC = () => {
   );
 
   const handleToggleSidebar = useCallback(() => {
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT_PX) {
       setMobileSidebarOpen((prev) => !prev);
     } else {
       setSidebarCollapsed((prev) => !prev);

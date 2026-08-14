@@ -160,8 +160,8 @@ export const BrandingLogoWrapper = styled.div`
   max-width: 22rem; /* ~352px — full mark fits without edge clip */
   overflow: visible;
 
-  /* Force contain so fixed Logo height cannot overflow/crop the mark */
-  & img {
+  /* Force contain so fixed Logo height cannot overflow the wordmark's own width */
+  & svg {
     width: 100% !important;
     height: auto !important;
     max-width: 100% !important;

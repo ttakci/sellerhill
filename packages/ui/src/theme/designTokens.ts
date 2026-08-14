@@ -253,6 +253,14 @@ export const breakpointTokens = {
   xlBelow: '79.9375rem',
 } as const;
 
+/**
+ * Plain px mirror of `breakpointTokens.lg` for JS-side (non-CSS) width checks
+ * that can't consume a `tkn()` CSS value, e.g. a sidebar mobile/desktop mode
+ * toggle driven by `window.innerWidth`. Keep in sync with `breakpointTokens.lg`
+ * (64rem = 1024px at the default root font size).
+ */
+export const SIDEBAR_MOBILE_BREAKPOINT_PX = 1024;
+
 export const transitionTokens = {
   fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
   normal: '300ms cubic-bezier(0.4, 0, 0.2, 1)',

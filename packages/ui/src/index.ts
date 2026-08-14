@@ -2,6 +2,7 @@
 export type { AppTheme, ThemeColors, ThemeMode } from './theme/theme.types';
 export { darkTheme, lightTheme } from './theme/themes';
 export { tkn } from './theme/tkn';
+export { SIDEBAR_MOBILE_BREAKPOINT_PX } from './theme/designTokens';
 
 // Atom exports
 export { Button } from './atoms/Button';

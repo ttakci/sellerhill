@@ -53,7 +53,7 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
                 sidebarCollapsed ? t('translation:header.expandSidebar') : t('translation:header.collapseSidebar')
               }
             >
-              {sidebarCollapsed ? <Logo layout="icon" height={24} /> : <Icon name="menu" size={20} />}
+              <Icon name={sidebarCollapsed ? 'panel-left-open' : 'panel-left-close'} size={20} />
             </S.SidebarCollapseButton>
             <S.LogoArea
               $isCollapsed={sidebarCollapsed}

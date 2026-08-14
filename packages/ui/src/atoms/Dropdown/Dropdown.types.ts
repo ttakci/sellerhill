@@ -28,7 +28,9 @@ export interface DropdownComponentProps {
   width?: string;
   className?: string;
   isOpen: boolean;
+  isMobile: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
   onTriggerClick: () => void;
   onItemClick: (item: DropdownItem) => void;
+  onClose: () => void;
 }

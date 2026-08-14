@@ -1,3 +1,11 @@
+html,
+body {
+  /* Safety net for pages/overlays outside the authenticated shell (which
+     guards itself via LayoutWrapper's own overflow:hidden) — one too-wide
+     element anywhere must not cause page-level horizontal scroll on mobile. */
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: 'Lexend', 'Segoe UI', system-ui, -apple-system, sans-serif;
