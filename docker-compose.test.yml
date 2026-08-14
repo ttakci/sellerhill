@@ -155,22 +155,22 @@ services:
   # tunnel to this VPS, or add a Coolify domain + auth for it deliberately.
   # See CLAUDE.md "Observability — Log tracing (Loki/Promtail/Grafana)".
   loki:
-    image: grafana/loki:3.7.6
+    build:
+      context: ./docker/loki
     restart: unless-stopped
     volumes:
-      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - coolify
 
   promtail:
-    image: grafana/promtail:3.6.11
+    build:
+      context: ./docker/promtail
     restart: unless-stopped
     environment:
       ENVIRONMENT: test
     volumes:
-      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - api_logs:/var/log/sellerhill-api:ro
       - promtail_positions:/tmp/positions
     command: -config.expand-env=true -config.file=/etc/promtail/config.yml
@@ -180,7 +180,8 @@ services:
       - loki
 
   grafana:
-    image: grafana/grafana:13.1.3
+    build:
+      context: ./docker/grafana
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
@@ -188,7 +189,6 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: 'false'
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
       - coolify
     depends_on:
