@@ -87,22 +87,28 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
 
   useLayoutEffect(() => {
     if (isOpen && !isMobile && containerRef.current) {
+      const ESTIMATED_MENU_HEIGHT = 260;
+
       const updatePosition = () => {
         if (!containerRef.current) {return;}
 
         const rect = containerRef.current.getBoundingClientRect();
         const margin = 4;
 
-        const absoluteBottom = rect.bottom + window.scrollY;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const shouldFlip = spaceBelow < ESTIMATED_MENU_HEIGHT && spaceAbove > spaceBelow;
 
-        setPlacement('bottom');
+        setPlacement(shouldFlip ? 'top' : 'bottom');
 
         setDropdownStyle({
           position: 'absolute',
-          top: absoluteBottom + margin,
+          top: shouldFlip
+            ? rect.top + window.scrollY - margin
+            : rect.bottom + window.scrollY + margin,
           left: rect.left + window.scrollX,
           width: rect.width,
-          transform: 'none',
+          transform: shouldFlip ? 'translateY(-100%)' : 'none',
           zIndex: 9999,
         });
       };

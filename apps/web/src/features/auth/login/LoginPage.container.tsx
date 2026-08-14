@@ -11,13 +11,14 @@
 import { useGoogleLogin as useGoogleOAuth } from '@react-oauth/google';
 import type { LoginFormData, SupportedLocale, UserRole } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { useGoogleLoginMutation, useLoginMutation } from '../api/authApi';
 import { setCredentials } from '../store/authSlice';
 
+import { useLoginErrorModal } from './hooks/useLoginErrorModal';
 import { LoginPageComponent } from './LoginPage.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
@@ -68,8 +69,7 @@ function navigateAfterAuth(
 const LoginPageContainerPasswordOnly = (): React.ReactElement => {
   const dispatch = useDispatch();
   const { localeNavigate } = useLocale();
-  const { showMessage, closeMessage } = useUI();
-  const { i18n } = useTranslation();
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const [login, { isLoading, isSuccess, error, data }] = useLoginMutation();
 
@@ -82,14 +82,10 @@ const LoginPageContainerPasswordOnly = (): React.ReactElement => {
     }
   }, [isSuccess, data, dispatch, localeNavigate]);
 
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-    showErrorModal(error, showMessage, closeMessage, i18n);
-  }, [error, showMessage, closeMessage, i18n]);
+  useLoginErrorModal(error, submittedEmail);
 
   const handleSubmit = (formData: LoginFormData): void => {
+    setSubmittedEmail(formData.email);
     void login({ email: formData.email, password: formData.password });
   };
 
@@ -115,6 +111,7 @@ const LoginPageContainerWithGoogle = (): React.ReactElement => {
   const { locale, localeNavigate } = useLocale();
   const { showMessage, closeMessage } = useUI();
   const { i18n } = useTranslation();
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const [login, { isLoading, isSuccess, error, data }] = useLoginMutation();
   const [
@@ -138,12 +135,7 @@ const LoginPageContainerWithGoogle = (): React.ReactElement => {
     }
   }, [isGoogleSuccess, googleData, dispatch, localeNavigate]);
 
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-    showErrorModal(error, showMessage, closeMessage, i18n);
-  }, [error, showMessage, closeMessage, i18n]);
+  useLoginErrorModal(error, submittedEmail);
 
   useEffect(() => {
     if (!googleError) {
@@ -177,6 +169,7 @@ const LoginPageContainerWithGoogle = (): React.ReactElement => {
   });
 
   const handleSubmit = (formData: LoginFormData): void => {
+    setSubmittedEmail(formData.email);
     void login({ email: formData.email, password: formData.password });
   };
 

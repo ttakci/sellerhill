@@ -91,6 +91,18 @@ export const Footer = styled.div<{ $showDivider?: boolean }>`
   display: flex;
   justify-content: flex-end;
   gap: ${tkn('spacing.sm-md')};
+
+  /* Two full-Turkish-label buttons in a flex-end row can squeeze on a narrow
+     modal. Stack to full-width, keeping the same visual order as desktop
+     (primary action stays last/bottom). */
+  @media (max-width: ${tkn('breakpoints.md')}) {
+    flex-direction: column;
+    align-items: stretch;
+
+    & > * {
+      width: 100%;
+    }
+  }
 `;
 
 export const CloseButton = styled.button`

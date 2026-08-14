@@ -80,7 +80,7 @@ export const BrandingLogoWrapper = styled.div`
   max-width: 22rem;
   overflow: visible;
 
-  & img {
+  & svg {
     width: 100% !important;
     height: auto !important;
     max-width: 100% !important;

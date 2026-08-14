@@ -71,6 +71,17 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 - Drawers → `Drawer` (title `h3` semibold, subtitle `body-sm`).
 - Dropdowns → `Dropdown` atom.
 
+### Mobile responsiveness (mandatory — every new UI must work down to 360px)
+- Never a hardcoded `@media` literal or raw `window.innerWidth` check — use `tkn('breakpoints.*')` (`sm/md/lg/xl` + `*Below`); for a rare JS-side threshold, use an exported constant (e.g. `SIDEBAR_MOBILE_BREAKPOINT_PX` from `@repo/ui`), never a second inline magic number.
+- Multi-column layouts/grids collapse to one column at `breakpoints.md`/`mdBelow`.
+- Card grids use `DataTable`'s `GridContainer` `minmax(min(100%,...),1fr)` pattern, never a fixed `repeat(N, 1fr)`.
+- Wide/tabular content that can't reflow gets its own local `overflow-x: auto` container — never left to overflow the page.
+- A horizontal image+content card stacks to `flex-direction: column` below `breakpoints.sm`/`smBelow` once fixed-width children can't coexist with reflowing content at that width.
+- `Drawer` is full-width below `breakpoints.md`; a multi-button `Modal` footer stacks to full-width buttons below `breakpoints.md`, same visual order as desktop.
+- Popover-style menus (`Dropdown`, `Select`) render as a bottom sheet below 640px width — reuse `Select`'s `isMobile`/`createPortal`/`Overlay`+`BottomSheet` pattern for any new one, never a floating popover shrunk to fit.
+- Fixed bottom action bars reserve `env(safe-area-inset-bottom)` in their bottom padding.
+- Verify at a 375px-wide viewport (devtools device emulation) before calling a UI change done.
+
 ### Loading
 - `useLoading` takes **mutation flags only**. Never fold a query's initial `isLoading` into it — that blocks the whole app on first paint.
 - Initial page data → the page's own `EmptyState` (loading title + description). Loading and empty must use the same component so the two states don't look like different screens.

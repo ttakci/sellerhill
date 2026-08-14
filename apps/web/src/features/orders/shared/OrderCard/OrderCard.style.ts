@@ -42,6 +42,12 @@ export const Wrapper = styled.button<{ $hoverEffect: boolean }>`
     outline: 0.125rem solid ${tkn('colors.brand.primary')};
     outline-offset: 0.125rem;
   }
+
+  /* Fixed-width image + row layout crushes content into ~130-150px on a
+     360-375px viewport. Stack instead so both get the card's full width. */
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    flex-direction: column;
+  }
 `;
 
 export const Image = styled.div`
@@ -64,6 +70,13 @@ export const Image = styled.div`
 
   svg {
     color: ${tkn('colors.text.disabled')};
+  }
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 100%;
+    height: auto;
+    max-height: 12rem;
+    align-self: stretch;
   }
 `;
 
