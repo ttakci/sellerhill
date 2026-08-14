@@ -1,5 +1,5 @@
 import { isOperatorRole, type SupportedLocale } from '@repo/shared';
-import { useTheme, useUI } from '@repo/ui';
+import { useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,7 +28,6 @@ export const AppLayout: React.FC = () => {
   const { data: user, isLoading: isUserLoading } = useGetMeQuery();
   const { t, i18n } = useTranslation(['translation', 'listings', 'orders']);
   const { loadingState } = useUI();
-  const { themeMode, toggleTheme } = useTheme();
   const { localeNavigate, changeLocale } = useLocale();
 
   // Strip locale prefix for path comparisons
@@ -134,14 +133,12 @@ export const AppLayout: React.FC = () => {
       pathWithoutLocale={pathWithoutLocale}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}
-      themeMode={themeMode}
       breadcrumbItems={breadcrumbItems}
       openSections={openSections}
       onToggleSidebar={handleToggleSidebar}
       onNavigate={handleNavigate}
       onLogoutConfirm={handleLogout}
       onChangeLanguage={handleChangeLanguage}
-      onToggleTheme={toggleTheme}
       onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
       onOpenLogoutConfirm={() => setIsLogoutConfirmOpen(true)}
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}

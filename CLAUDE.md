@@ -887,7 +887,7 @@ SellerHill runs the same code in every environment — only config (env vars) an
 - JWT/auth secrets (access + refresh-cookie signing).
 - `KEEPA_API_KEY` (product refresh pipeline).
 - eBay app credentials (per connected store).
-- `CORS_ORIGINS` / `COOKIE_DOMAIN` / `COOKIE_SAMESITE` (prod web origin).
+- `CORS_ORIGINS` / `COOKIE_DOMAIN` / `COOKIE_SAMESITE` (prod web origin). **In both Coolify compose files, `CORS_ORIGINS` defaults to `FRONTEND_URL` when left unset in Coolify's env panel (2026-08-14)** — it used to default to an empty string, which `main.ts` then silently resolved to `http://localhost:5173`, rejecting every real browser origin with "Origin '...' is not allowed by CORS" (hit live in test registration). Since `FRONTEND_URL` is already a required Coolify var and is exactly the web origin in the common single-domain case, this closes the misconfiguration instead of requiring a second var to remember. Set `CORS_ORIGINS` explicitly only when more than one origin must be allowed.
 - A2 tunables (all optional, defaults safe): `AUTO_FULFILL_*`, `BROWSER_CONTEXT_*`, `FULFILLMENT_EVIDENCE_*`, Keepa refresh tunables.
 
 **Env vs admin panel.** The list above is the complete set of things that MUST be env: connection bootstrap, crypto keys, provider credentials, process identity. Operational tuning (Keepa refresh cadence + kill switch, AI content toggle, quota enforcement, SMTP host/user/password, order-matching tolerances, evidence retention, admin warning thresholds) is edited at `/admin` → Settings and stored in `platform_settings`; env values there are only the fallback when no override row exists. Prefer the panel — it needs no redeploy and is audit-logged.
@@ -948,6 +948,8 @@ A free, self-hosted log-tracing stack, present in **every** environment (local `
 - **Alert on:** API OOM / restart, BullMQ dead-letter growth, spike in `auto_fulfill_status='blocked'`.
 
 ## Figma Redesign — Per-Theme Tokens
+
+**Dark mode is disabled app-wide for phase 1 (2026-08-14).** `packages/ui/src/context/ThemeContext.tsx`'s `ThemeProvider` now hardcodes `themeMode` to `'light'` — no `localStorage` read, no `prefers-color-scheme` detection, `toggleTheme`/`setThemeMode` are no-ops. The header theme-toggle button (`AppLayout`, `OperatorLayout`) and the unused `ThemeToggle` molecule were removed outright. Reason: dark mode had never been tested end-to-end, and the system-preference detection was silently dropping visitors with an OS dark preference into an unverified theme on their very first screen (most visibly on the landing→app transition, since the landing page forces its own light theme via a nested provider — see "Landing page" above — while the app's own provider used to pick up the OS preference independently). `darkTheme` and every per-theme token below are untouched and still correct; re-enable by restoring `getInitialTheme()`'s localStorage/system-preference logic and re-adding a toggle control once dark mode is actually verified — do not re-derive this from scratch.
 
 The figma Make redesign (https://sweet-yang-69529706.figma.site/) introduced tonal shifts:
 - **Primary is per-theme**: light uses `#2563eb` (blue-600), dark uses `#6366f1` (indigo-500). Do NOT expect them to match.

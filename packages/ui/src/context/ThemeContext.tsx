@@ -1,8 +1,8 @@
 import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
-import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useMemo, useState } from 'react';
 
 import type { ThemeMode } from '../theme/theme.types';
-import { darkTheme, lightTheme } from '../theme/themes';
+import { lightTheme } from '../theme/themes';
 
 import type { ThemeContextValue } from './ThemeContext.types';
 
@@ -12,82 +12,36 @@ import type { ThemeContextValue } from './ThemeContext.types';
  */
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'app-theme-mode';
-
 /**
- * Get initial theme from localStorage or system preference
+ * Phase 1: light mode only. Dark mode tokens (`darkTheme`) still exist but
+ * have never been tested end-to-end, so switching is disabled here rather
+ * than deleted — no localStorage read, no system-preference detection, no
+ * toggle. Restore both once dark mode is actually verified.
  */
-const getInitialTheme = (): ThemeMode => {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
-
-  // Check localStorage
-  const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-  if (stored === 'light' || stored === 'dark') {
-    return stored;
-  }
-
-  // Check system preference
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-
-  return 'light';
-};
-
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(getInitialTheme);
-
-  const theme = themeMode === 'light' ? lightTheme : darkTheme;
-
-  // Persist to localStorage
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    localStorage.setItem(THEME_STORAGE_KEY, themeMode);
-
-    // Update document class for global styles
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(themeMode);
-  }, [themeMode]);
-
-  // Listen to system preference changes
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const handleChange = (e: MediaQueryListEvent): void => {
-      const newMode = e.matches ? 'dark' : 'light';
-      setThemeMode(newMode);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  const [themeMode] = useState<ThemeMode>('light');
 
   const toggleTheme = useCallback(() => {
-    setThemeMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+    // No-op: dark mode is disabled for phase 1.
+  }, []);
+
+  const setThemeMode = useCallback(() => {
+    // No-op: dark mode is disabled for phase 1.
   }, []);
 
   const value = useMemo(
     () => ({
-      theme,
+      theme: lightTheme,
       themeMode,
       toggleTheme,
       setThemeMode,
     }),
-    [theme, themeMode, toggleTheme]
+    [themeMode, toggleTheme, setThemeMode]
   );
 
   return (
     <ThemeContext.Provider value={value}>
-      <EmotionThemeProvider theme={theme}>{children}</EmotionThemeProvider>
+      <EmotionThemeProvider theme={lightTheme}>{children}</EmotionThemeProvider>
     </ThemeContext.Provider>
   );
 };

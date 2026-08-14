@@ -1,5 +1,5 @@
 import { isOperatorRole, type SupportedLocale } from '@repo/shared';
-import { useTheme, useUI } from '@repo/ui';
+import { useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,7 +32,6 @@ export const OperatorLayout: React.FC = () => {
   const { data: user, isLoading } = useGetMeQuery();
   const { t, i18n } = useTranslation(['translation', 'admin']);
   const { loadingState } = useUI();
-  const { themeMode, toggleTheme } = useTheme();
 
   const pathWithoutLocale: string = stripLocaleFromPath(location.pathname);
 
@@ -118,13 +117,11 @@ export const OperatorLayout: React.FC = () => {
       mobileSidebarOpen={mobileSidebarOpen}
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       loadingIsLoading={loadingState.isLoading}
-      themeMode={themeMode}
       i18nLanguage={(i18n.language || 'en').split('-')[0]}
       onToggleSidebar={handleToggleSidebar}
       onNavigate={handleNavigate}
       onLocaleNavigate={handleNavigate}
       onChangeLanguage={handleChangeLanguage}
-      onToggleTheme={toggleTheme}
       onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
       onOpenLogoutConfirm={() => setIsLogoutConfirmOpen(true)}
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}

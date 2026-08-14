@@ -10,13 +10,11 @@ export interface AppLayoutProps {
   pathWithoutLocale: string;
   userName: string;
   loadingIsLoading: boolean;
-  themeMode: 'light' | 'dark';
   breadcrumbItems: BreadcrumbItem[];
   onToggleSidebar: () => void;
   onNavigate: (path: string) => void;
   onLogoutConfirm: () => void;
   onChangeLanguage: (lang: SupportedLocale) => void;
-  onToggleTheme: () => void;
   onCloseMobileSidebar: () => void;
   onOpenLogoutConfirm: () => void;
   onCloseLogoutConfirm: () => void;

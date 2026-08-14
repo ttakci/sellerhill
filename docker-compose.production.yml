@@ -54,8 +54,12 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://app.sellerhill.com)}
 
       # CORS — allowed origins (comma-separated). Same-origin SPA requests carry
-      # no Origin header so this rarely matters, but set it for correctness.
-      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      # no Origin header so this rarely matters, but cross-origin calls (and
+      # any separately-hosted client) need it. Defaults to FRONTEND_URL so a
+      # deploy that only sets FRONTEND_URL still allows its own web origin
+      # instead of silently falling back to main.ts's localhost:5173 default.
+      # Override explicitly if more than one origin must be allowed.
+      CORS_ORIGINS: ${CORS_ORIGINS:-${FRONTEND_URL}}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
 
