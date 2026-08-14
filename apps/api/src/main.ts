@@ -61,9 +61,21 @@ async function bootstrap() {
     })
   );
 
-  // CORS: prefer CORS_ORIGINS (comma-separated); fall back to legacy CORS_ORIGIN.
+  // CORS: prefer CORS_ORIGINS (comma-separated); fall back to legacy CORS_ORIGIN,
+  // then FRONTEND_URL (the single-domain deploys' own web origin), then localhost
+  // for local dev. FRONTEND_URL is the safety net for Coolify deploys where the
+  // panel's CORS_ORIGINS row was left blank — an explicitly-empty env var still
+  // reaches process.env as '', so this must be resolved in code, not only via the
+  // compose file's own `${CORS_ORIGINS:-${FRONTEND_URL}}` default (Coolify can
+  // inject its panel variables directly into the container, bypassing compose
+  // interpolation entirely).
   // Same-origin requests (no Origin header) are always allowed (nginx same-host proxy).
-  const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173')
+  const allowedOrigins = (
+    process.env.CORS_ORIGINS ||
+    process.env.CORS_ORIGIN ||
+    process.env.FRONTEND_URL ||
+    'http://localhost:5173'
+  )
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
