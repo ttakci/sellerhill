@@ -22,13 +22,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   pathWithoutLocale,
   userName,
   loadingIsLoading,
-  themeMode,
   breadcrumbItems,
   onToggleSidebar,
   onNavigate,
   onLogoutConfirm,
   onChangeLanguage,
-  onToggleTheme,
   onCloseMobileSidebar,
   onOpenLogoutConfirm,
   onCloseLogoutConfirm,
@@ -245,18 +243,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <Tooltip content={t('translation:header.toggleTheme')} position="bottom">
-                  <S.ActionIcon
-                    type="button"
-                    onClick={onToggleTheme}
-                    aria-label={t('translation:header.toggleTheme')}
-                  >
-                    <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
-                  </S.ActionIcon>
-                </Tooltip>
-
-                <S.VerticalDivider />
-
                 <Dropdown
                   align="right"
                   width="8rem"

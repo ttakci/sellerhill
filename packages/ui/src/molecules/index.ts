@@ -8,4 +8,3 @@ export * from './SearchField';
 export * from './StatusBadge';
 export * from './ViewToggle';
 export * from './Table';
-export * from './ThemeToggle';

@@ -41,7 +41,12 @@ services:
       REDIS_DB: 0
 
       FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in Coolify (e.g. https://sellerhill.takci.cloud)}
-      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      # Defaults to FRONTEND_URL so a deploy that only sets FRONTEND_URL still
+      # allows its own web origin — CORS_ORIGINS silently falling back to
+      # main.ts's http://localhost:5173 default (when left unset) is what
+      # blocked registration in test with "Origin '...' is not allowed by
+      # CORS". Override explicitly if more than one origin must be allowed.
+      CORS_ORIGINS: ${CORS_ORIGINS:-${FRONTEND_URL}}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
 

@@ -25,13 +25,11 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
   mobileSidebarOpen,
   isLogoutConfirmOpen,
   loadingIsLoading,
-  themeMode,
   i18nLanguage,
   onToggleSidebar,
   onNavigate,
   onLocaleNavigate,
   onChangeLanguage,
-  onToggleTheme,
   onCloseMobileSidebar,
   onOpenLogoutConfirm,
   onCloseLogoutConfirm,
@@ -128,18 +126,6 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
               </S.BreadcrumbArea>
 
               <S.HeaderRight>
-                <Tooltip content={t('translation:header.toggleTheme')} position="bottom">
-                  <S.ActionIcon
-                    type="button"
-                    onClick={onToggleTheme}
-                    aria-label={t('translation:header.toggleTheme')}
-                  >
-                    <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={20} />
-                  </S.ActionIcon>
-                </Tooltip>
-
-                <S.VerticalDivider />
-
                 <Dropdown
                   align="right"
                   width="8rem"

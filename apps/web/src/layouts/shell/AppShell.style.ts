@@ -669,33 +669,6 @@ export const HeaderRight = styled.div`
   }
 `;
 
-export const ActionIcon = styled.button`
-  width: 2.5rem; /* 40px */
-  height: 2.5rem; /* 40px */
-  flex-shrink: 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: ${tkn('radius.md')};
-  cursor: pointer;
-  color: ${tkn('colors.text.secondary')};
-  transition: all ${tkn('transitions.fast')};
-
-  &:hover {
-    background: ${tkn('colors.brand.secondary')};
-    color: ${tkn('colors.brand.primary')};
-    transform: translateY(-0.0625rem);
-  }
-
-  & svg {
-    width: 1.25rem; /* 20px */
-    height: 1.25rem; /* 20px */
-  }
-`;
-
 export const VerticalDivider = styled.div`
   width: 0.0625rem; /* 1px */
   height: 1rem; /* 16px */

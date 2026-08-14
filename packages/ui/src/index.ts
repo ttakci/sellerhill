@@ -95,8 +95,6 @@ export type { DrawerProps, DrawerSize } from './molecules/Drawer';
 export { MessageModal } from './molecules/MessageModal/index';
 export type { MessageModalProps } from './molecules/MessageModal/index';
 
-export { ThemeToggle } from './molecules/ThemeToggle';
-
 export { Table } from './molecules/Table';
 export type { BulkAction, TableColumn, TableProps } from './molecules/Table';
 export { TablePagination } from './molecules/Table/TablePagination.component';
