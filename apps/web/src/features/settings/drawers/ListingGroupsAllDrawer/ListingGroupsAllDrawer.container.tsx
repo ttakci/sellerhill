@@ -54,8 +54,8 @@ export const ListingGroupsAllDrawer: React.FC<ListingGroupsAllDrawerProps> = ({
       onContinue={handleContinue}
       titleLabel={t('translation:settingsHub.drawer.listingGroup.all.title')}
       subtitleLabel={t('translation:settingsHub.drawer.listingGroup.all.subtitle')}
-      emptyTitle={t('listingSettingsGroup:emptyState.title')}
-      emptyDescription={t('listingSettingsGroup:emptyState.description')}
+      emptyTitle={t('listingSettingsGroup:listingSettingsGroup.emptyState.title')}
+      emptyDescription={t('listingSettingsGroup:listingSettingsGroup.emptyState.description')}
     />
   );
 };

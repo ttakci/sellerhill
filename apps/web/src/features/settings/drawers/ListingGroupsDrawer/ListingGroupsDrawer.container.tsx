@@ -36,8 +36,8 @@ export const ListingGroupsDrawer: React.FC<ListingGroupsDrawerProps> = ({
       viewAllLabel={t('translation:settingsHub.sections.listingGroups.viewAll')}
       createTitle={t('translation:settingsHub.sections.listingGroups.create')}
       createSubtitle={t('translation:settingsHub.sections.listingGroups.createSubtitle')}
-      emptyTitle={t('listingSettingsGroup:emptyState.title')}
-      emptyDescription={t('listingSettingsGroup:emptyState.description')}
+      emptyTitle={t('listingSettingsGroup:listingSettingsGroup.emptyState.title')}
+      emptyDescription={t('listingSettingsGroup:listingSettingsGroup.emptyState.description')}
     />
   );
 };
