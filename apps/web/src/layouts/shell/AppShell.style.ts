@@ -120,7 +120,11 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   height: ${APP_CHROME_HEIGHT};
   min-height: ${APP_CHROME_HEIGHT};
   max-height: ${APP_CHROME_HEIGHT};
-  padding: 0 ${tkn('spacing.sm')};
+  /* Expanded: matches NavSection's own left padding, so the collapse
+     button's icon (padded again by the same amount below) lines up in the
+     same vertical column as the nav item icons beneath it. */
+  padding: ${({ $isCollapsed, theme }) =>
+    $isCollapsed ? `0 ${tkn('spacing.sm')({ theme })}` : `0 ${tkn('spacing.md')({ theme })}`};
   box-sizing: border-box;
   border-bottom: 0.0625rem solid ${tkn('colors.sidebar.divider')};
   overflow: hidden;
@@ -369,10 +373,13 @@ export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
   position: static;
   flex: 0 0 auto;
   align-items: center;
-  justify-content: center;
-  width: ${SIDEBAR_LOGO_HEIGHT};
+  /* Expanded: left-aligned + left/right padding (like a nav item), so the
+     icon sits in the same column as the menu icons below instead of being
+     centred in a fixed square. Collapsed: unchanged centred square. */
+  justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
+  width: ${({ $isCollapsed }) => ($isCollapsed ? SIDEBAR_LOGO_HEIGHT : 'auto')};
   height: ${SIDEBAR_LOGO_HEIGHT};
-  padding: 0;
+  padding: ${({ $isCollapsed, theme }) => ($isCollapsed ? '0' : `0 ${tkn('spacing.md')({ theme })}`)};
   margin: 0;
   border-radius: ${tkn('radius.sm')};
   cursor: pointer;
