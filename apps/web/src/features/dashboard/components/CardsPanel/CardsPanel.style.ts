@@ -44,6 +44,14 @@ export const CarouselSection = styled.section`
   min-width: 0;
 `;
 
+export const EmptyCard = styled.div`
+  background: ${tkn('colors.surface.primary')};
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
+  border-radius: ${tkn('radius.lg')};
+  box-shadow: ${tkn('shadows.sm')};
+  box-sizing: border-box;
+`;
+
 export const SectionHeading = styled.div`
   display: flex;
   align-items: center;
