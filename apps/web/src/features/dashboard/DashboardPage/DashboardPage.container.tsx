@@ -90,7 +90,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
   });
 
   const listings = listingsPage?.items ?? [];
+  const listingsTotal = listingsPage?.total ?? 0;
   const orders = ordersPage?.orders ?? [];
+  const ordersTotal = ordersPage?.total ?? 0;
 
   /* ─── navigation ─── */
 
@@ -268,7 +270,9 @@ export const DashboardPageContainer = (): React.ReactElement => {
           cardLabels,
           isLoading: isDashboardLoading,
           listings,
+          listingsTotal,
           orders,
+          ordersTotal,
           onListingOpen: handleListingOpen,
           onListingsViewAll: handleListingsViewAll,
           onOrderOpen: handleOrderOpen,

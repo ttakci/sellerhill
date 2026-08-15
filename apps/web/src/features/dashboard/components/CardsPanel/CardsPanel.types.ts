@@ -24,7 +24,9 @@ export interface CardsPanelProps {
   cardLabels: PeriodCardLabels;
   isLoading: boolean;
   listings: ListingDto[];
+  listingsTotal: number;
   orders: OrderDto[];
+  ordersTotal: number;
   onListingOpen: (listingId: string) => void;
   onListingsViewAll: () => void;
   onOrderOpen: (orderId: string) => void;

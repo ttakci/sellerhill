@@ -24,7 +24,9 @@ export const CardsPanelComponent = ({
   cardLabels,
   isLoading,
   listings,
+  listingsTotal,
   orders,
+  ordersTotal,
   onListingOpen,
   onListingsViewAll,
   onOrderOpen,
@@ -63,21 +65,37 @@ export const CardsPanelComponent = ({
           <Text variant="h4" weight="semibold">
             {listingsTitle}
           </Text>
-          <Button variant="text" size="small" onClick={onListingsViewAll}>
-            <Text variant="body-sm" weight="semibold">
-              {listingsViewAllLabel}
-            </Text>
-          </Button>
+          {listingsTotal > 3 && (
+            <Button variant="text" size="small" onClick={onListingsViewAll}>
+              <Text variant="body-sm" weight="semibold">
+                {listingsViewAllLabel}
+              </Text>
+            </Button>
+          )}
         </S.SectionHeading>
-        <ListingCarousel
-          listings={listings}
-          onViewAll={onListingsViewAll}
-          viewAllLabel={listingsViewAllLabel}
-          showViewAll={false}
-          onListingClick={onListingOpen}
-          emptyTitle={listingsEmptyTitle}
-          emptySubtitle={listingsEmptySubtitle}
-        />
+        {listings.length === 0 ? (
+          <S.EmptyCard>
+            <ListingCarousel
+              listings={listings}
+              onViewAll={onListingsViewAll}
+              viewAllLabel={listingsViewAllLabel}
+              showViewAll={false}
+              onListingClick={onListingOpen}
+              emptyTitle={listingsEmptyTitle}
+              emptySubtitle={listingsEmptySubtitle}
+            />
+          </S.EmptyCard>
+        ) : (
+          <ListingCarousel
+            listings={listings}
+            onViewAll={onListingsViewAll}
+            viewAllLabel={listingsViewAllLabel}
+            showViewAll={false}
+            onListingClick={onListingOpen}
+            emptyTitle={listingsEmptyTitle}
+            emptySubtitle={listingsEmptySubtitle}
+          />
+        )}
       </S.CarouselSection>
 
       <S.CarouselSection>
@@ -85,23 +103,41 @@ export const CardsPanelComponent = ({
           <Text variant="h4" weight="semibold">
             {ordersTitle}
           </Text>
-          <Button variant="text" size="small" onClick={onOrdersViewAll}>
-            <Text variant="body-sm" weight="semibold">
-              {ordersViewAllLabel}
-            </Text>
-          </Button>
+          {ordersTotal > 3 && (
+            <Button variant="text" size="small" onClick={onOrdersViewAll}>
+              <Text variant="body-sm" weight="semibold">
+                {ordersViewAllLabel}
+              </Text>
+            </Button>
+          )}
         </S.SectionHeading>
-        <OrderCarousel
-          orders={orders}
-          onViewAll={onOrdersViewAll}
-          viewAllLabel={ordersViewAllLabel}
-          showViewAll={false}
-          onOrderClick={onOrderOpen}
-          formatCurrency={formatters.currency}
-          formatDate={formatters.date}
-          emptyTitle={ordersEmptyTitle}
-          emptySubtitle={ordersEmptySubtitle}
-        />
+        {orders.length === 0 ? (
+          <S.EmptyCard>
+            <OrderCarousel
+              orders={orders}
+              onViewAll={onOrdersViewAll}
+              viewAllLabel={ordersViewAllLabel}
+              showViewAll={false}
+              onOrderClick={onOrderOpen}
+              formatCurrency={formatters.currency}
+              formatDate={formatters.date}
+              emptyTitle={ordersEmptyTitle}
+              emptySubtitle={ordersEmptySubtitle}
+            />
+          </S.EmptyCard>
+        ) : (
+          <OrderCarousel
+            orders={orders}
+            onViewAll={onOrdersViewAll}
+            viewAllLabel={ordersViewAllLabel}
+            showViewAll={false}
+            onOrderClick={onOrderOpen}
+            formatCurrency={formatters.currency}
+            formatDate={formatters.date}
+            emptyTitle={ordersEmptyTitle}
+            emptySubtitle={ordersEmptySubtitle}
+          />
+        )}
       </S.CarouselSection>
     </S.SectionsRow>
   </S.Root>
