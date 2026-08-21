@@ -4,6 +4,7 @@ import {
   AmazonMarketplace,
   extractCorrelationId,
   generateCorrelationId,
+  isValidAsinShape,
   KeepaUsageSource,
   ListingFailureCode,
   ListingJobKind,
@@ -32,6 +33,20 @@ import { ListingImportService } from './listing-import.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
+
+/**
+ * The identifier could not be resolved to a real product — never a leading-'B'
+ * format assumption (removed; that was wrong — see `isValidAsinShape`), just
+ * "nothing eBay-listable exists for this input." Terminal: `classifyListingFailure`
+ * maps this to `ListingFailureCode.ASIN_NOT_FOUND`, which is NOT in
+ * `RETRYABLE_LISTING_FAILURE_CODES`, so re-running the same input is never attempted.
+ */
+export class AsinNotFoundError extends Error {
+  constructor(public readonly asin: string) {
+    super(`No product could be resolved for ASIN ${asin}.`);
+    this.name = 'AsinNotFoundError';
+  }
+}
 
 function listingsWorkerConcurrency(): number {
   const raw = Number(process.env.LISTINGS_WORKER_CONCURRENCY ?? 2);
@@ -307,7 +322,11 @@ export class ListingProcessorService extends WorkerHost {
         status: ListingStatus.ACTIVE,
         ebayItemId: outcome.listingId,
       });
-      this.quotaEnforcement.consumeForCreate(userId, outcome.key);
+      // Awaited now that consuming is a real write: it releases the in-flight
+      // reservation so the ACTIVE listing row we just inserted becomes the
+      // thing holding the slot. Fire-and-forget would let the next item in the
+      // batch count this listing twice.
+      await this.quotaEnforcement.consumeForCreate(userId, outcome.key);
     }
 
     // Every prepared item has to end terminal. An item eBay never answered for
@@ -520,6 +539,14 @@ export class ListingProcessorService extends WorkerHost {
     userId: string,
     marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
   ): Promise<{ productData: ProductData; productId: string }> {
+    // A malformed identifier (wrong length/characters — never a leading-'B'
+    // requirement) can never resolve to a real ASIN. Reject it here, before any
+    // DB/Keepa round trip, rather than as a whole-batch rejection at intake: one
+    // bad line must not block the other items in the same submission.
+    if (!isValidAsinShape(asin)) {
+      throw new AsinNotFoundError(asin);
+    }
+
     const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
@@ -555,12 +582,14 @@ export class ListingProcessorService extends WorkerHost {
       await this.keepaUsageService.captureBalance(meta);
 
       if (!keepaProduct) {
-        throw new Error(
-          `Keepa returned no product for ASIN ${asin}. The ASIN may be invalid or Amazon is blocking the request.`
+        this.logger.warn(
+          `Keepa returned no product for ASIN ${asin}. The ASIN may not exist or Amazon is blocking the request.`
         );
+        throw new AsinNotFoundError(asin);
       }
       if (!keepaProduct.title || keepaProduct.title === 'Unknown Product') {
-        throw new Error(`Keepa could not resolve a valid title for ASIN ${asin}.`);
+        this.logger.warn(`Keepa could not resolve a valid title for ASIN ${asin}.`);
+        throw new AsinNotFoundError(asin);
       }
 
       keepaProduct.rawKeepaData = keepaProduct.raw;

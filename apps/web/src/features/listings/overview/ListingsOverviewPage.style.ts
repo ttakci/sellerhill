@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { PageContainer, tkn } from '@repo/ui';
+import { Card, PageContainer, tkn } from '@repo/ui';
 
 /**
  * Listings overview — same visual system as Settings hub:
@@ -35,6 +35,18 @@ export const SliderContent = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
+`;
+
+/**
+ * Wraps the carousel's own empty state (a bare `EmptyState`, no surface of its
+ * own) in the same white card the sibling "Yeni Liste Ekle"/"Diğer İşlemler"
+ * panels use — otherwise the page background shows through behind it.
+ * Mirrors the dashboard `CardsPanel`'s `EmptyCard`.
+ */
+export const EmptyCard = styled(Card)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const AddColumn = styled.div`

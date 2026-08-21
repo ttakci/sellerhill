@@ -609,106 +609,58 @@
     },
     "pricing": {
       "sectionEyebrow": "Fiyatlandırma",
-      "sectionTitle": "Dolambaçsız fiyatlandırma",
-      "sectionSubtitle": "Gerçekten kullandığınız şeye göre: kaç ilanı aktif tuttuğunuza ve ayda kaç siparişin sizin yerinize satın alındığına göre.",
-      "billingNote": "İstediğiniz an iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
+      "sectionTitle": "Açık ve net fiyatlandırma",
+      "sectionSubtitle": "Gerçekten kullandığınız kadar ödeyin: kaç ilanı aktif tuttuğunuz ve ayda sizin için kaç sipariş satın alındığı.",
+      "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dahil değildir.",
       "perMonth": "/ay",
-      "perYear": "/yıl",
-      "interval": {
-        "monthly": "Aylık",
-        "annual": "Yıllık",
-        "annualSavings": "{{months}} ay ücretsiz",
-        "billedAnnually": "Yıllık {{price}} olarak faturalandırılır"
-      },
-      "mostPopular": "En çok tercih edilen",
+      "mostPopular": "En popüler",
+      "planCta": "Ücretsiz başla",
+      "showAllPlans": "Tüm {{count}} paketi gör",
+      "showFewerPlans": "Daha az paket göster",
       "unlimited": "Sınırsız",
-      "notIncluded": "Dâhil değil",
+      "notIncluded": "Dahil değil",
       "listingsLabel": "ilan",
       "ordersLabel": "sipariş",
       "upToListings": "{{limit}} aktif ilana kadar",
       "unlimitedListings": "Sınırsız aktif ilan",
-      "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda plan özeti gösteriliyor.",
-      "starter": {
-        "name": "Starter",
-        "description": "İlk kataloğunu otomatiğe bağlayan tek kişilik satıcı için.",
-        "features": [
-          "Fiyat ve stok senkronizasyonu",
-          "Otomatik sipariş satın alma",
-          "eBay'e kargo takibi işleme",
-          "Onaylanmış ve tahmini kâr raporlaması",
-          "E-posta desteği"
-        ],
-        "cta": "Ücretsiz başla"
-      },
-      "growth": {
-        "name": "Growth",
-        "description": "İlanları takip edebildiğinden hızlı ekleyen satıcı için.",
-        "features": [
-          "Starter'daki her şey",
-          "Ürün bazında marj, stok tavanı ve şablon",
-          "Otomatik alıcı mesajları",
-          "Ay ay kâr-zarar ve CSV dışa aktarma",
-          "Öncelikli destek"
-        ],
-        "cta": "Ücretsiz başla"
-      },
-      "scale": {
-        "name": "Scale",
-        "description": "Aynı anda birkaç mağaza ve alıcı hesabı yürüten operasyon için.",
-        "features": [
-          "Growth'taki her şey",
-          "Çoklu eBay mağazası ve alıcı hesabı",
-          "Mağaza bazında kural ve raporlama",
-          "En yüksek ilan ve sipariş hakkı",
-          "Öncelikli destek"
-        ],
-        "cta": "Ücretsiz başla"
+      "upToOrders": "Ayda {{limit}} otomatik siparişe kadar",
+      "unlimitedOrders": "Sınırsız otomatik sipariş",
+      "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
+      "included": {
+        "sync": "Fiyat ve stok otomatik senkronize",
+        "autoOrder": "Siparişler otomatik satın alınır",
+        "tracking": "Kargo takibi eBay'e iletilir",
+        "profit": "Doğrulanmış ve tahmini kâr raporlaması",
+        "support": "E-posta desteği"
       },
       "catalogFallback": {
+        "nano": {
+          "price": "$24.99",
+          "listings": "500 aktif ilana kadar",
+          "orders": "Ayda 100 otomatik siparişe kadar",
+          "conversions": "Ayda 50 kargo takip dönüşümü"
+        },
         "starter": {
-          "name": "Starter",
-          "price": "$39",
-          "period": "/ay",
-          "description": "İlk kataloğunu otomatiğe bağlayan tek kişilik satıcı için.",
-          "features": [
-            "1.500 aktif ilan",
-            "Ayda 150 otomatik sipariş",
-            "Fiyat ve stok senkronizasyonu",
-            "eBay'e kargo takibi işleme",
-            "E-posta desteği"
-          ],
-          "cta": "Ücretsiz başla"
+          "price": "$44.99",
+          "listings": "2.000 aktif ilana kadar",
+          "orders": "Ayda 300 otomatik siparişe kadar",
+          "conversions": "Ayda 150 kargo takip dönüşümü"
         },
         "growth": {
-          "badge": "En çok tercih edilen",
-          "name": "Growth",
-          "price": "$55",
-          "period": "/ay",
-          "description": "İlanları takip edebildiğinden hızlı ekleyen satıcı için.",
-          "features": [
-            "2.500 aktif ilan",
-            "Ayda 250 otomatik sipariş",
-            "Ürün bazında marj, stok tavanı ve şablon",
-            "Otomatik alıcı mesajları",
-            "Öncelikli destek"
-          ],
-          "cta": "Ücretsiz başla"
+          "price": "$104.99",
+          "listings": "5.000 aktif ilana kadar",
+          "orders": "Ayda 600 otomatik siparişe kadar",
+          "conversions": "Ayda 300 kargo takip dönüşümü"
         },
-        "scale": {
-          "name": "Scale",
-          "price": "$75",
-          "period": "/ay",
-          "description": "Aynı anda birkaç mağaza ve alıcı hesabı yürüten operasyon için.",
-          "features": [
-            "4.500 aktif ilan",
-            "Ayda 450 otomatik sipariş",
-            "Çoklu eBay mağazası ve alıcı hesabı",
-            "Mağaza bazında kural ve raporlama",
-            "Öncelikli destek"
-          ],
-          "cta": "Ücretsiz başla"
+        "pro": {
+          "price": "$179.99",
+          "listings": "10.000 aktif ilana kadar",
+          "orders": "Ayda 1.000 otomatik siparişe kadar",
+          "conversions": "Ayda 500 kargo takip dönüşümü"
         }
-      }
+      },
+      "upToConversions": "Ayda {{limit}} kargo takip dönüşümü",
+      "unlimitedConversions": "Sınırsız kargo takip dönüşümü"
     },
     "faq": {
       "sectionTitle": "Sık sorulan sorular",

@@ -1,4 +1,4 @@
-import type { BillingPlanWithPricingDto, BillingUsagePeriodDto } from '@repo/shared';
+import type { BillingPlanWithPricingDto } from '@repo/shared';
 
 export interface BillingUsageFormatArgs {
   limit: number;
@@ -11,6 +11,3 @@ export interface BillingUsagePlanArgs {
   plan: BillingPlanWithPricingDto;
 }
 
-export interface BillingUsagePeriodArgs {
-  periods: BillingUsagePeriodDto[];
-}

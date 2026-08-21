@@ -139,6 +139,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     if (createSuccess || updateSuccess) {
       resetCreate();
       resetUpdate();
+      onClose();
       showMessage(
         {
           type: 'success',
@@ -148,10 +149,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
             : 'listingSettingsGroup:listingSettingsGroup.success.updated',
           primaryButton: {
             labelKey: 'translation:common.ok',
-            onClick: () => {
-              closeMessage();
-              onClose();
-            },
+            onClick: closeMessage,
           },
         },
         t

@@ -1,4 +1,4 @@
-import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text, Tooltip } from '@repo/ui';
+import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -247,12 +247,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                   align="right"
                   width="8rem"
                   trigger={
-                    <Tooltip content={t('translation:header.selectLanguage')} position="bottom">
-                      <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
-                        <S.LanguageText>{t(`translation:languages.${i18nLanguage}`)}</S.LanguageText>
-                        <Icon name="chevron-down" size={12} />
-                      </S.LanguageSelectTrigger>
-                    </Tooltip>
+                    <S.LanguageSelectTrigger aria-label={t('translation:header.selectLanguage')}>
+                      <S.LanguageText>{t(`translation:languages.${i18nLanguage}`)}</S.LanguageText>
+                      <Icon name="chevron-down" size={12} />
+                    </S.LanguageSelectTrigger>
                   }
                   items={[
                     {

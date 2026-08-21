@@ -1,18 +1,35 @@
 // apps/api/src/modules/billing/billing.service.ts
 //
 // Orchestrator for catalog/summary/checkout/portal. Pure reads go through the
-// repository; checkout/portal go through the provider abstraction. Config is
-// resolved once per request via resolveBillingConfig() so an env change
-// (operator flips BILLING_ENFORCEMENT_ENABLED) takes effect without a restart.
+// repository; checkout/portal go through the provider abstraction. Provider
+// config (Stripe keys) is resolved once per request via resolveBillingConfig()
+// — those stay env-only per the platform-settings contract (provider
+// credentials are never DB-overridable).
 //
-// Fail-safe contract: when no provider is configured (Paddle env absent), the
-// service still serves catalog + summary; checkout + portal throw
+// `enforcementEnabled` is the one field of that config that IS a registered
+// platform setting (PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED) and MUST
+// resolve DB override -> env -> default via PlatformSettingsService, not the
+// raw env var — resolveBillingConfig() reads process.env directly and has no
+// DB access, so it can never see an admin-panel toggle. Resolved separately
+// here (resolveEnforcementEnabled()) rather than folded into getConfig(),
+// which callers that only need the Stripe fields (webhook, checkout, portal)
+// still call synchronously.
+//
+// Fail-safe contract: when Stripe is not configured (STRIPE_SECRET_KEY
+// absent), the service still serves catalog + summary; checkout + portal throw
 // 'billing.errors.providerNotConfigured' so the controller can map to 409.
 // When enforcement is off (default), summary reports transition='full_access'
 // with NO fake subscription — the absence of a row is the truthful state.
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BillingInterval, PlatformSettingKey } from '@repo/shared';
+import {
+  BillingInterval,
+  BillingLimitKey,
+  PlatformSettingKey,
+  type BillingQuotaAddonDto,
+  type BillingQuotaUsageDto,
+  type BillingSubscriptionDto,
+} from '@repo/shared';
 
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
@@ -43,12 +60,22 @@ export class BillingService {
   ) {}
 
   /**
-   * Resolve the current billing config. Reads env on each call so an operator
-   * flipping a flag takes effect without a restart (env-validation still ran
-   * at boot). Exposed for the controller + tests.
+   * Resolve the current billing PROVIDER config (Stripe keys) from env.
+   * Does NOT resolve enforcementEnabled correctly for display purposes — that
+   * field is a DB-overridable platform setting; use resolveEnforcementEnabled()
+   * instead wherever the effective value is shown to a user. Exposed for the
+   * controller + tests, which only need the Stripe fields.
    */
   getConfig(): BillingConfig {
     return resolveBillingConfig();
+  }
+
+  /**
+   * Resolved enforcementEnabled: DB override -> env var -> default, via
+   * PlatformSettingsService (same registry entry the admin panel edits).
+   */
+  private async resolveEnforcementEnabled(): Promise<boolean> {
+    return this.platformSettings.getBoolean(PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED);
   }
 
   /**
@@ -58,11 +85,14 @@ export class BillingService {
    */
   async getCatalog(): Promise<BillingCatalogDto> {
     const config = this.getConfig();
-    const plans = await this.repository.loadCatalog();
+    const [plans, enforcementEnabled] = await Promise.all([
+      this.repository.loadCatalog(),
+      this.resolveEnforcementEnabled(),
+    ]);
     return {
       plans,
       currency: 'USD',
-      enforcementEnabled: config.enforcementEnabled,
+      enforcementEnabled,
       provider: config.provider,
     };
   }
@@ -74,26 +104,245 @@ export class BillingService {
    */
   async getSummary(userId: string): Promise<BillingSummaryDto> {
     const config = this.getConfig();
-    const storedSubscription = await this.repository.findCurrentSubscription(userId);
+    const [storedSubscription, enforcementEnabled] = await Promise.all([
+      this.repository.findCurrentSubscription(userId),
+      this.resolveEnforcementEnabled(),
+    ]);
     // Primary expiry is the scheduled writer; normalization is the fail-closed
     // read guard when that daily job is delayed or Redis is unavailable.
     const subscription = normalizeExpiredTrial(storedSubscription, new Date());
     const plan = subscription ? await this.repository.loadPlanWithPricing(subscription.planId) : null;
     const usagePeriods = subscription ? await this.repository.findOpenUsagePeriods(subscription.id) : [];
+    const quotas = await this.getQuotaUsage(userId, subscription);
+    const quotaAddons = await this.resolveQuotaAddonOffer(quotas, enforcementEnabled);
 
-    const transition = deriveSummaryTransition(
-      config.enforcementEnabled,
-      subscription?.status ?? null,
-    );
+    const transition = deriveSummaryTransition(enforcementEnabled, subscription?.status ?? null);
 
     return {
       subscription,
       plan,
       usagePeriods,
-      enforcementEnabled: config.enforcementEnabled,
+      quotas,
+      quotaAddons,
+      // True when the seller already has a Stripe subscription, i.e. picking a
+      // plan must REPRICE it rather than open a checkout — the FE labels the
+      // button accordingly instead of the two paths looking identical.
+      hasProviderSubscription: Boolean(subscription?.providerSubscriptionId),
+      enforcementEnabled,
       provider: config.provider,
       transition,
     };
+  }
+
+  /**
+   * Top-up packs to offer, or nothing.
+   *
+   * Offered ONLY for a meter the seller has actually reached. A credit is
+   * scoped to the current calendar month (migration 087), so showing packs to
+   * somebody with allowance left would be selling them something they cannot
+   * use — and the offer appearing is itself the clearest signal that they are
+   * constrained.
+   *
+   * With enforcement off nothing is metered, so nothing is sold.
+   */
+  private async resolveQuotaAddonOffer(
+    quotas: BillingQuotaUsageDto[],
+    enforcementEnabled: boolean,
+  ): Promise<BillingQuotaAddonDto[]> {
+    if (!enforcementEnabled) {
+      return [];
+    }
+    const exhausted = quotas.filter(
+      (q) => q.limitValue !== null && q.limitValue > 0 && q.used >= q.limitValue,
+    );
+    if (exhausted.length === 0) {
+      return [];
+    }
+    try {
+      const packs = await Promise.all(
+        exhausted.map((q) => this.repository.listQuotaAddons(q.limitKey)),
+      );
+      return packs.flat();
+    } catch (err) {
+      // An unavailable offer is a missed sale; a failed summary is a broken
+      // billing page. Degrade.
+      this.logger.warn(`Quota add-on offer failed: ${(err as Error).message}`);
+      return [];
+    }
+  }
+
+
+
+  /**
+   * Live usage against each metered dimension.
+   *
+   * Deliberately NOT read from `billing_usage_periods.used_qty`: that column
+   * exists but nothing has ever incremented it, so every consumer of it —
+   * including the Action Center's quota warnings — reported zero usage for
+   * every seller and could never fire. Each number here is derived from the
+   * same source the gate refuses on, so the warning and the refusal cannot
+   * disagree:
+   *
+   *   listings    — ACTIVE listing rows (a level; ending one frees a slot)
+   *   AO          — this month's reservations
+   *   conversions — this month's actually-performed conversions
+   *
+   * Fail-soft: a dimension that cannot be resolved is omitted rather than
+   * reported as zero, because "0 of 100 used" is a claim, not an absence.
+   */
+  async getQuotaUsage(
+    userId: string,
+    subscription?: BillingSubscriptionDto | null,
+  ): Promise<BillingQuotaUsageDto[]> {
+    const sub =
+      subscription === undefined
+        ? await this.repository.findCurrentSubscription(userId)
+        : subscription;
+    if (!sub) {
+      return [];
+    }
+
+    const dimensions: Array<{
+      limitKey: BillingLimitKey;
+      resolve: () => Promise<number>;
+    }> = [
+      {
+        limitKey: BillingLimitKey.LISTINGS_PER_MONTH,
+        resolve: async () => {
+          const [active, inFlight] = await Promise.all([
+            this.repository.countActiveListings(userId),
+            this.repository.countReservedSlots(sub.id, BillingLimitKey.LISTINGS_PER_MONTH, null),
+          ]);
+          return active + inFlight;
+        },
+      },
+      {
+        limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+        resolve: async () => {
+          const { limitValue: limit } = await this.repository.resolveEffectiveLimit(
+            userId,
+            sub.id,
+            BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+          );
+          const periodId = await this.repository.ensureOpenUsagePeriod(
+            sub.id,
+            BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+            limit ?? -1,
+          );
+          return this.repository.countReservedSlots(
+            sub.id,
+            BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+            periodId,
+          );
+        },
+      },
+      {
+        limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+        resolve: () => this.repository.countMonthlyConversions(userId),
+      },
+    ];
+
+    const results = await Promise.all(
+      dimensions.map(async ({ limitKey, resolve }) => {
+        try {
+          const [used, effective] = await Promise.all([
+            resolve(),
+            this.repository.resolveEffectiveLimit(userId, sub.id, limitKey),
+          ]);
+          // The effective ceiling, not the plan's own number: a seller who just
+          // topped up must not still be shown at 100%.
+          return {
+            limitKey,
+            used,
+            limitValue: effective.limitValue,
+            creditValue: effective.creditValue,
+          };
+        } catch (err) {
+          this.logger.warn(
+            `Quota usage for ${limitKey} failed (user ${userId}): ${(err as Error).message}`,
+          );
+          return null;
+        }
+      }),
+    );
+    return results.filter((row): row is BillingQuotaUsageDto => row !== null);
+  }
+
+  /**
+   * Switch an existing subscription to another plan.
+   *
+   * Exists because "choose a plan" means two different things depending on
+   * where the seller is, and conflating them bills people twice: Stripe does
+   * not refuse a second subscription for a customer who already has one. A
+   * seller with a live Stripe subscription therefore never reaches checkout —
+   * their choice repricies what they already have, with proration.
+   *
+   * A trial user has a subscription in OUR tables but none in Stripe, so they
+   * correctly go through checkout: there is nothing to reprice.
+   */
+  async changePlan(userId: string, planId: string, interval: BillingInterval): Promise<void> {
+    if (!this.provider.isConfigured()) {
+      throw new Error('billing.errors.providerNotConfigured');
+    }
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription?.providerSubscriptionId) {
+      throw new Error('billing.errors.noSubscription');
+    }
+    const plan = await this.repository.loadPlanWithPricing(planId);
+    if (!plan) {
+      throw new Error('billing.errors.planNotFound');
+    }
+    const price = plan.prices[interval];
+    if (!price) {
+      throw new Error('billing.errors.priceNotFound');
+    }
+    if (!price.providerPriceId) {
+      this.logger.error(`Plan ${planId} has no provider_price_id for ${interval}`);
+      throw new Error('billing.errors.planNotMirrored');
+    }
+    await this.provider.changeSubscriptionPlan({
+      providerSubscriptionId: subscription.providerSubscriptionId,
+      providerPriceId: price.providerPriceId,
+      planId,
+    });
+    this.logger.log(`User ${userId} switched to plan ${plan.slug}`);
+  }
+
+  /**
+   * Open a one-time checkout for a quota top-up.
+   *
+   * Refuses an inactive pack and one that has not been mirrored to Stripe yet,
+   * for the same reason `createCheckout` refuses an unmirrored plan: sending a
+   * seller to Stripe with a price id that does not exist is an operator
+   * mistake, and it should surface here rather than as a broken Stripe page.
+   */
+  async createAddonCheckout(
+    userId: string,
+    email: string,
+    addonSlug: string,
+  ): Promise<BillingCheckoutDto> {
+    if (!this.provider.isConfigured()) {
+      throw new Error('billing.errors.providerNotConfigured');
+    }
+    const addon = await this.repository.findQuotaAddonBySlug(addonSlug);
+    if (!addon) {
+      throw new Error('billing.errors.addonNotFound');
+    }
+    if (!addon.isPurchasable) {
+      this.logger.error(
+        `Top-up ${addonSlug} has no provider_price_id — run stripe:sync-catalog`,
+      );
+      throw new Error('billing.errors.planNotMirrored');
+    }
+    const priceId = await this.repository.resolveAddonProviderPriceId(addon.id);
+    const customer = await this.repository.findCustomerByUserId(userId);
+    return this.provider.createAddonCheckout({
+      userId,
+      email,
+      addonSlug: addon.slug,
+      providerPriceId: priceId ?? '',
+      providerCustomerId: customer?.providerCustomerId ?? null,
+    });
   }
 
   /**
@@ -116,10 +365,43 @@ export class BillingService {
   }
 
   /**
-   * Create a checkout session. Requires a configured provider (Paddle). The
-   * caller must ensure the plan exists and has a provider_price_id for the
-   * requested interval — the provider throws 'billing.errors.planNotMirrored'
-   * otherwise.
+   * Gate on connecting an eBay store: one free trial per store, ever.
+   *
+   * Called from the eBay OAuth callback BEFORE the account row is written.
+   * Throws 'billing.errors.ebayTrialAlreadyUsed' when the store has already had
+   * a free trial under some other account and the connecting user has not paid
+   * for anything.
+   *
+   * Why the store and not the email: every data screen sits behind
+   * EbayAccountGuard, so a trial without a connected store is worthless. The
+   * scarce resource being farmed is therefore the eBay store, and
+   * `ebay_accounts`' UNIQUE (seller_id, marketplace_id) already stops two live
+   * accounts holding one store. The hole this closes is the sequential one —
+   * delete the account (ON DELETE CASCADE drops the ebay_accounts row) and
+   * reconnect the same store under a fresh registration for another trial.
+   * `ebay_trial_ledger` is deliberately not FK'd to that row so it survives.
+   *
+   * A paying customer is never blocked: the rule refuses a second free ride,
+   * not a returning customer.
+   */
+  async assertEbayStoreMayConnect(userId: string, sellerId: string, marketplaceId: string): Promise<void> {
+    const claimed = await this.repository.claimEbayTrial(sellerId, marketplaceId, userId);
+    if (claimed) {
+      return; // first time this store is seen — its trial is now spent
+    }
+    if (await this.repository.hasPaidSubscription(userId)) {
+      return;
+    }
+    this.logger.warn(
+      `Refusing eBay connect for user ${userId}: store ${sellerId}/${marketplaceId} has already used its free trial`,
+    );
+    throw new Error('billing.errors.ebayTrialAlreadyUsed');
+  }
+
+  /**
+   * Create a checkout session. Requires Stripe to be configured. The caller
+   * must ensure the plan exists and has a provider_price_id for the requested
+   * interval — the provider throws 'billing.errors.planNotMirrored' otherwise.
    */
   async createCheckout(
     userId: string,
@@ -132,9 +414,10 @@ export class BillingService {
       throw new Error('billing.errors.providerNotConfigured');
     }
 
-    // Ensure a local customer row exists so webhook processing can link the
-    // incoming subscription to this user. (Paddle sends customer_id in the
-    // webhook; our repository.findCustomerByProviderId resolves it.)
+    // Ensure a local customer row exists first: the provider links the Stripe
+    // customer id onto this row (linkProviderCustomer) before opening
+    // checkout, which is what lets webhook processing resolve the subscription
+    // back to this user.
     await this.repository.ensureLocalCustomer(userId, customerEmail);
 
     const plan = await this.repository.loadPlanWithPricing(planId);

@@ -35,6 +35,18 @@ export const BILLING_MICROS_PER_UNIT = 1_000_000;
 export const BILLING_UNLIMITED = -1;
 
 /**
+ * Slug of the cardless free-trial plan.
+ *
+ * A real catalog row like any other, which is why several places have to
+ * recognise it: it is excluded from "has a paid subscription", it is the plan
+ * `startTrialOnce` attaches, and the billing UI phrases its dates differently
+ * (a trial does not renew). It was written as a bare `'trial'` literal at each
+ * of those, so a rename would have silently changed behaviour at some of them
+ * and not others.
+ */
+export const TRIAL_PLAN_SLUG = 'trial';
+
+/**
  * Sentinel limit value meaning "feature disabled". Stored as 0.
  */
 export const BILLING_DISABLED = 0;
@@ -114,10 +126,28 @@ export enum BillingWebhookStatus {
  * string in feature code.
  */
 export enum BillingLimitKey {
-  /** Maximum active listings per billing period. */
+  /**
+   * Maximum ACTIVE listings — a level, not a monthly flow. Ending a listing
+   * frees its slot immediately; the count is not reset by the calendar.
+   */
   LISTINGS_PER_MONTH = 'listings_per_month',
-  /** Maximum Amazon orders (auto-fulfill + manual link) per billing period. */
+  /**
+   * Maximum Amazon orders (auto-fulfill + manual link) per calendar month.
+   * A generous anti-abuse ceiling rather than the priced dimension — the real
+   * per-unit cost sits on TRACKING_CONVERSIONS_PER_MONTH below.
+   */
   AMAZON_ORDERS_PER_MONTH = 'amazon_orders_per_month',
+  /**
+   * Maximum tracking-number conversions (Aquiline) per calendar month. THIS is
+   * the metered dimension the plans are priced on: conversion is what costs
+   * real money per unit, and a seller who converts only Amazon Logistics
+   * numbers can place far more orders than they convert.
+   *
+   * Unlike the two above, exhausting this does NOT block work — it degrades to
+   * local pass-through, so the seller's business keeps running and only the
+   * supplier concealment stops.
+   */
+  TRACKING_CONVERSIONS_PER_MONTH = 'tracking_conversions_per_month',
 }
 
 /**

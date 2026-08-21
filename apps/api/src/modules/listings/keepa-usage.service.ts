@@ -19,9 +19,14 @@ export interface LogUsageParams {
  * Persists Keepa token spend (per-ASIN, fair-split across users) and balance
  * snapshots. Storage-only — admin reads these tables directly via SQL (no UI yet).
  */
+/** How long a refill-rate read is reused. The plan tier changes rarely; this
+ *  only exists so a per-minute scheduler tick does not re-query every time. */
+const REFILL_RATE_TTL_MS = 60_000;
+
 @Injectable()
 export class KeepaUsageService {
   private readonly logger = new Logger(KeepaUsageService.name);
+  private refillRateCache: { value: number | null; expiresAt: number } | null = null;
 
   constructor(
     private readonly databaseService: DatabaseService,
@@ -107,6 +112,42 @@ export class KeepaUsageService {
       this.logger.warn(
         `Keepa usage batch projection failed for ${failed}/${results.length} events (batch of ${entries.length} ASINs); source log retained`
       );
+    }
+  }
+
+  /**
+   * Latest observed Keepa refill rate (tokens/minute) — i.e. which plan tier
+   * we are actually on, as reported by Keepa itself rather than configured by
+   * hand. Returns null when no response has carried it yet (fresh install), so
+   * callers can fall back rather than guess.
+   *
+   * Reads are cheap and this runs once per scheduler tick, but the value only
+   * changes when the plan changes, so it is cached briefly.
+   */
+  async getLatestRefillRate(): Promise<number | null> {
+    const now = Date.now();
+    if (this.refillRateCache && now < this.refillRateCache.expiresAt) {
+      return this.refillRateCache.value;
+    }
+    try {
+      const rows = await this.databaseService.query<{ refill_rate: number | string | null }>(
+        `SELECT refill_rate FROM keepa_balance
+         WHERE refill_rate IS NOT NULL
+         ORDER BY captured_at DESC
+         LIMIT 1`
+      );
+      const raw = rows[0]?.refill_rate;
+      const value = raw === undefined || raw === null ? null : Number(raw);
+      const resolved = value !== null && Number.isFinite(value) && value > 0 ? value : null;
+      this.refillRateCache = { value: resolved, expiresAt: now + REFILL_RATE_TTL_MS };
+      return resolved;
+    } catch (error: unknown) {
+      // Never let a diagnostics read break the refresh cycle — the caller
+      // falls back to the operator-set batch size.
+      this.logger.warn(
+        `Failed to read Keepa refill rate: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
     }
   }
 

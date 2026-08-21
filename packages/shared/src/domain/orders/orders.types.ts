@@ -92,6 +92,14 @@ export enum AutoFulfillBlockedReason {
   /** AO monthly quota exhausted — placed+reserved this period >= limit. */
   QUOTA_EXHAUSTED = 'quota_exhausted',
   /**
+   * The account's subscription is past due, cancelled, or its trial has ended.
+   * Deliberately NOT folded into QUOTA_EXHAUSTED: the two need different
+   * actions from the seller ("pay the invoice" vs "upgrade the plan"), and
+   * reporting one as the other sends them to the wrong screen — the same
+   * reason CAP and REVIEW_UNREADABLE are separate below.
+   */
+  SUBSCRIPTION_SUSPENDED = 'subscription_suspended',
+  /**
    * Cart-hygiene guard — the Amazon cart did not contain exactly the expected
    * item/quantity before checkout (stale leftovers from a blocked attempt or
    * the buyer's own items would be co-purchased). Fail-closed before payment.
@@ -193,6 +201,15 @@ export interface OrderDto {
   amazonOrderId?: string | null;
   amazonOrderUrl?: string;
   amazonTrackingUrl?: string;
+  /**
+   * Amazon's own tracking number, and the converted number the eBay buyer
+   * actually sees. Both are needed to answer "can this order's tracking still
+   * be converted?" — there must be a source number, and it must not already
+   * have been converted (a conversion is paid for and must never be bought
+   * twice for one shipment).
+   */
+  amazonTrackingNumber?: string | null;
+  convertedTrackingNumber?: string | null;
   amazonTax?: number;
   amazonShipping?: number;
 

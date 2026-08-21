@@ -42,7 +42,8 @@
     "actions": {
       "search": "Sipariş, alıcı veya ürün ara...",
       "last30Days": "Son 30 Gün",
-      "export": "Dışa Aktar"
+      "export": "Dışa Aktar",
+      "convertTracking": "Takibi dönüştür"
     },
     "table": {
       "orderNumber": "Sipariş No",
@@ -110,7 +111,8 @@
         "proxy_required": "Proxy yapılandırılmamış",
         "quota_exhausted": "Aylık kota doldu",
         "cart": "Sepet uyuşmazlığı",
-        "review_unreadable": "Sipariş toplamı okunamadı"
+        "review_unreadable": "Sipariş toplamı okunamadı",
+        "subscription_suspended": "Abonelik askıya alındı"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
@@ -195,6 +197,13 @@
     "estimateNote": "Tahmini kâr — Amazon siparişi oluşturulduğunda kesinleşir. Son bilinen Amazon fiyatına dayanır; Amazon kargo ücreti dahil değildir.",
     "footer": {
       "copyright": "© 2026 SellerHill E-ticaret Çözümleri. Tüm hakları saklıdır."
+    },
+    "errors": {
+      "notFound": "Sipariş bulunamadı.",
+      "noTrackingYet": "Bu siparişin henüz Amazon takip numarası yok — kargoya verilmemiş.",
+      "conversionUnavailable": "Kargo takibi şu anda dönüştürülemedi. Paket limitinizi ve dönüşüm ayarlarınızı kontrol edip tekrar deneyin.",
+      "conversionDone": "Kargo takibi dönüştürüldü.",
+      "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin."
     }
   }
 }

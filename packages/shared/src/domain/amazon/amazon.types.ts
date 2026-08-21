@@ -133,6 +133,28 @@ export enum TrackingConversionProvider {
 }
 
 /**
+ * WHICH carriers the conversion provider is applied to. Orthogonal to
+ * {@link TrackingConversionProvider}, which only decides whether conversion
+ * happens at all.
+ *
+ * This is a genuine trade-off the seller has to make, which is why it is an
+ * explicit setting and never an implicit rule in the service:
+ *
+ * - `AMAZON_LOGISTICS_ONLY` (default) converts only `TB*` numbers. Those are
+ *   unmistakably Amazon, so this hides the loudest tell while leaving
+ *   UPS/USPS/FedEx numbers native — and a native carrier scan is stronger
+ *   evidence than a third-party one in an eBay Item-Not-Received case. It also
+ *   spends far less of the conversion quota.
+ * - `ALL` converts every carrier. Maximum concealment: an Amazon-shipped
+ *   UPS/USPS number can often be looked up to reveal an Amazon origin, and this
+ *   closes that too. Costs more quota and gives up the native-scan evidence.
+ */
+export enum TrackingConversionScope {
+  ALL = 'all',
+  AMAZON_LOGISTICS_ONLY = 'amazon_logistics_only',
+}
+
+/**
  * Proxy transport for a user-supplied, per-Amazon-account proxy (migration
  * 080). Replaces the platform-paid `proxies` pool (that table and
  * `ProxyStatus` are retired, not deleted — see CLAUDE.md "Amazon Scraping —

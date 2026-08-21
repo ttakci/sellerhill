@@ -15,6 +15,7 @@
     "llm:check": "tsx src/scripts/llm-check.ts",
     "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
+    "stripe:sync-catalog": "tsx src/scripts/stripe-sync-catalog.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:integration": "jest --config jest.integration.config.js --runInBand"
@@ -57,6 +58,7 @@
     "react-hot-toast": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "stripe": "^22.4.0",
     "uuid": "^13.0.0",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"

@@ -1,6 +1,7 @@
 import {
   BlacklistType,
   TrackingConversionProvider,
+  TrackingConversionScope,
   type StoreSettingsResponse,
 } from '@repo/shared';
 
@@ -21,6 +22,8 @@ function settings(
     amazonTaxRate: 0,
     autoFulfillEnabled: false,
     trackingConversionProvider: TrackingConversionProvider.LOCAL,
+    trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+    trackingConvertManualOrders: true,
     buyerMessaging: null,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),

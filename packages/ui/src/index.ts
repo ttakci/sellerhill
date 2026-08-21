@@ -64,6 +64,8 @@ export type { TabNavItem, TabNavProps } from './atoms/TabNav';
 
 export { ProgressBar } from './atoms/ProgressBar';
 export type { ProgressBarProps } from './atoms/ProgressBar';
+export { ProgressRing } from './atoms/ProgressRing';
+export type { ProgressRingProps } from './atoms/ProgressRing';
 
 // Molecule exports
 export { Select } from './molecules/Select';

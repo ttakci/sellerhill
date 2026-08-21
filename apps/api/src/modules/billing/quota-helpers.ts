@@ -154,6 +154,22 @@ export function isEnforcementEnabled(env: NodeJS.ProcessEnv = process.env): bool
 }
 
 /**
+ * One lock discriminator per metered dimension.
+ *
+ * A `Record` rather than a ternary: the original was
+ * `kind === LISTINGS ? 1 : 2`, which silently gave every non-listing dimension
+ * the SAME lock. With only two keys that was merely opaque; once tracking
+ * conversions were added it would have made conversions and automatic orders
+ * serialise against each other for no reason. An exhaustive record cannot
+ * quietly absorb a third key.
+ */
+const LOCK_DISCRIMINATOR: Record<BillingLimitKey, number> = {
+  [BillingLimitKey.LISTINGS_PER_MONTH]: 1,
+  [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: 2,
+  [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: 3,
+};
+
+/**
  * A stable 64-bit advisory-lock key derived from (subscription_id, kind). Two
  * distinct (subscription, kind) pairs never collide; the same pair always maps
  * to the same lock so concurrent bursts for one subscription serialise.
@@ -165,7 +181,7 @@ export function advisoryLockKey(
   subscriptionId: string,
   kind: BillingLimitKey,
 ): { key1: number; key2: number } {
-  const kindDisc = kind === BillingLimitKey.LISTINGS_PER_MONTH ? 1 : 2;
+  const kindDisc = LOCK_DISCRIMINATOR[kind] ?? 0;
   // FNV-1a hash of subscription_id into a 32-bit int. Stable across processes.
   let hash = 0x811c9dc5;
   for (let i = 0; i < subscriptionId.length; i++) {
@@ -173,4 +189,25 @@ export function advisoryLockKey(
     hash = Math.imul(hash, 0x01000193);
   }
   return { key1: kindDisc, key2: hash >>> 0 };
+}
+
+/**
+ * Inclusive start / exclusive end of the UTC calendar month containing `now`.
+ *
+ * UTC, not the server's local time: the monthly meters must roll at the same
+ * instant for every seller regardless of where the API process runs, and a
+ * process restarted in a different timezone must not move the boundary and
+ * hand somebody a second month's allowance.
+ */
+export function utcMonthBounds(now: Date = new Date()): {
+  periodStart: Date;
+  periodEnd: Date;
+} {
+  const periodStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+  );
+  const periodEnd = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0),
+  );
+  return { periodStart, periodEnd };
 }

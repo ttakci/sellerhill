@@ -121,8 +121,22 @@ export enum ActionCenterItemKey {
   PLAN_LISTING_QUOTA = 'plan_listing_quota',
   /** Monthly automatic-order slots at or near the plan limit. */
   PLAN_AO_QUOTA = 'plan_ao_quota',
+  /**
+   * Monthly tracking-conversion slots at or near the plan limit. Unlike the two
+   * quotas above, exhausting this does not block work — conversion falls back
+   * to passing the raw Amazon number through, so the seller keeps selling and
+   * only the supplier concealment stops. That is exactly why it needs its own
+   * item: nothing else fails, so nothing else would tell them.
+   */
+  PLAN_CONVERSION_QUOTA = 'plan_conversion_quota',
   /** Payment failed — access is about to stop. */
   PLAN_PAST_DUE = 'plan_past_due',
+  /**
+   * The subscription is cancelled or the trial has ended, so automation is
+   * suspended. Separate from PLAN_PAST_DUE: that one is a card that failed and
+   * may still recover on its own, this one needs the seller to choose a plan.
+   */
+  PLAN_SUSPENDED = 'plan_suspended',
   /** Trial ends within the notice window. */
   PLAN_TRIAL_ENDING = 'plan_trial_ending',
 

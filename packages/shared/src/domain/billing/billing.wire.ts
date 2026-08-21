@@ -15,20 +15,32 @@
 
 import {
   BillingInterval,
+  type BillingLimitKey,
   type BillingPlanWithPricingDto,
   type BillingSubscriptionDto,
   type BillingUsagePeriodDto,
 } from './billing.types';
 
 /**
- * The billing provider the backend talks to. Stored as
- * `billing_customers.provider` / `billing_webhook_inbox.provider`. Phase 2
- * ships the Paddle provider; the `local` provider is the config-unavailable
- * fail-safe (no real checkout, used when Paddle env is absent).
+ * The billing provider a record belongs to. Stored as
+ * `billing_customers.provider` / `billing_webhook_inbox.provider`.
+ *
+ * Stripe is the ONLY payment provider — there is no provider-selection
+ * concept and no second implementation to switch between. (Stripe's own test
+ * mode covers local dev and the test environment, so a stand-in "local
+ * provider" would never be exercised; a Paddle implementation existed here
+ * until 2026-08-16 and was removed — recoverable from git if ever needed.)
+ *
+ * `local` is NOT a provider implementation. It is the state of a customer row
+ * that has never reached checkout: every user starts as `local` (see
+ * `ensureLocalCustomer` / `startTrialOnce`) and flips to `stripe` the first
+ * time a checkout session is created for them. It is also what the catalog /
+ * summary DTOs report when no `STRIPE_SECRET_KEY` is configured, so the FE can
+ * hide the checkout button instead of surfacing a 409 after the click.
  */
 export enum BillingProvider {
   LOCAL = 'local',
-  PADDLE = 'paddle',
+  STRIPE = 'stripe',
 }
 
 /**
@@ -74,6 +86,53 @@ export type BillingSummaryTransition = 'full_access' | 'active' | 'no_subscripti
  * label. When enforcement is on and the user has no subscription, `transition`
  * is `'no_subscription'`.
  */
+/**
+ * Usage against one metered dimension, computed live.
+ *
+ * `limitValue` follows the foundation's sentinels: `null` = the plan declares
+ * no limit for this dimension, `-1` = explicitly unlimited, `0` = disabled (and
+ * also what a suspended account reports).
+ */
+export interface BillingQuotaUsageDto {
+  limitKey: BillingLimitKey;
+  used: number;
+  /**
+   * The effective ceiling: the plan's limit PLUS any credits bought for the
+   * current month. This is the number the gate enforces, so it is the number
+   * the seller must be shown — reporting the plan limit alone would tell
+   * somebody who just topped up that they are still at 100%.
+   */
+  limitValue: number | null;
+  /** Of `limitValue`, how much came from purchased credits. 0 when none. */
+  creditValue: number;
+}
+
+/**
+ * A buyable pack of extra monthly quota.
+ *
+ * Only the tracking-conversion meter is sold this way. Listings are a level
+ * (wanting more is a plan upgrade), and the automatic-order ceiling is an
+ * anti-abuse guard on the Playwright pool — selling past it would be selling
+ * the one resource money cannot buy more of.
+ */
+export interface BillingQuotaAddonDto {
+  id: string;
+  /** Stable machine key, e.g. 'conversions-100'. */
+  slug: string;
+  /** The meter this raises. */
+  limitKey: BillingLimitKey;
+  /** Allowance granted by one purchase. */
+  quantity: number;
+  amountMicros: number;
+  currency: string;
+  /**
+   * False when the pack has not been mirrored to Stripe yet
+   * (`pnpm --filter api stripe:sync-catalog`). The FE shows it disabled rather
+   * than letting the seller click into a 409.
+   */
+  isPurchasable: boolean;
+}
+
 export interface BillingSummaryDto {
   /** The user's subscription, if any. Null when no subscription row exists. */
   subscription: BillingSubscriptionDto | null;
@@ -82,6 +141,32 @@ export interface BillingSummaryDto {
   /** Current usage periods for the subscription (open periods only). Empty
    *  array when there is no subscription. */
   usagePeriods: BillingUsagePeriodDto[];
+  /**
+   * Top-up packs on offer, or an empty array when none apply.
+   *
+   * Deliberately empty unless the seller has actually reached a meter's limit:
+   * a credit is scoped to the current calendar month, so offering one to
+   * somebody with allowance left would sell them something they cannot use.
+   * The offer appearing IS the signal that they are constrained.
+   */
+  quotaAddons: BillingQuotaAddonDto[];
+  /**
+   * Live usage against each metered dimension.
+   *
+   * Separate from `usagePeriods` because that table's `used_qty` column is a
+   * ledger field nothing ever increments — reading quota pressure from it
+   * reported every seller at zero. These numbers are computed at read time from
+   * what actually exists (ACTIVE listings, this month's reservations, this
+   * month's conversions), so they cannot drift from what the gate refuses.
+   */
+  quotas: BillingQuotaUsageDto[];
+  /**
+   * True when a Stripe subscription exists, so choosing a plan must change it
+   * in place rather than open a new checkout. Without this the FE cannot tell
+   * the two apart, and the wrong one creates a SECOND subscription — Stripe
+   * allows that, and the customer is then billed for both.
+   */
+  hasProviderSubscription: boolean;
   /** Whether billing enforcement is on. Mirrors the catalog flag. */
   enforcementEnabled: boolean;
   /** The provider backing checkout, or 'local' when unconfigured. */

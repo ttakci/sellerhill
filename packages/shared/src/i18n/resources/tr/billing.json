@@ -27,18 +27,60 @@
         "name": "Ücretsiz deneme",
         "description": "SellerHill'un süreli deneme sürümü. Satın alınamaz — kayıt olduğunuzda otomatik başlar."
       },
+      "lite": {
+        "name": "Lite",
+        "description": "Küçük bir katalogla yeni başlayan satıcılar için."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "Sınırlı bir ürün grubuyla denemek isteyenler için."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "Derli toplu bir katalog yöneten bireysel satıcılar için."
+      },
       "starter": {
         "name": "Starter",
-        "description": "Otomatik dropshipping'e yeni başlayan bireysel satıcılar için."
+        "description": "Kataloğu büyüyen ve düzenli sipariş alan satıcılar için."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "Birkaç bin ilanı aşan, oturmuş satıcılar için."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Birden fazla nişte geniş katalog yöneten satıcılar için."
       },
       "growth": {
         "name": "Growth",
-        "description": "Daha fazla listing ve Amazon siparişine ihtiyaç duyan büyüyen satıcılar için."
+        "description": "Beş bin ilanlık katalogla yüksek hacimli satış yapanlar için."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "Sürekli fiyat güncellenen büyük katalogları yöneten profesyoneller için."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "On bin ilan işleten profesyonel operasyonlar için."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "On beş bin ilanlık katalogla çalışan büyük operasyonlar için."
+      },
+      "business": {
+        "name": "Business",
+        "description": "Yirmi bin ilanda çok mağazalı işletmeler için."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "En büyük kataloglar için, öncelikli destekle."
       },
       "scale": {
         "name": "Scale",
-        "description": "Birden fazla mağazayı ölçekte yöneten yüksek hacimli satıcılar için."
-      }
+        "description": "Kaldırılmış paket. Mevcut abonelikler çalışmaya devam eder; yeni kayıtlar yukarıdaki paketlerden seçer."
+      },
+      "switchTo": "{{plan}} paketine geç",
+      "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak."
     },
     "limits": {
       "listings_per_month": {
@@ -47,16 +89,21 @@
         "description": "Tüm mağazalarınızdaki maksimum aktif liste sayısı."
       },
       "amazon_orders_per_month": {
-        "label": "Amazon siparişleri",
+        "label": "Otomatik siparişler",
         "unit": "sipariş",
-        "description": "Aylık maksimum Amazon siparişi (otomatik karşılama + manuel bağlama)."
+        "description": "Ayda sizin adınıza verilen (otomatik ya da elle bağlanan) Amazon siparişi üst sınırı."
       },
       "unlimited": "Sınırsız",
       "disabled": "Dahil değil",
       "of": "{{used}} / {{limit}}",
       "used": "{{used}} kullanıldı",
       "remaining": "{{remaining}} kaldı",
-      "exceeded": "Limit aşıldı"
+      "exceeded": "Limit aşıldı",
+      "tracking_conversions_per_month": {
+        "label": "Kargo takip dönüşümü",
+        "unit": "dönüşüm",
+        "description": "Ayda kaç gönderinin takip numarasının dönüştürüleceği — alıcı tedarikçinizi görmesin diye."
+      }
     },
     "subscription": {
       "title": "Aboneliğiniz",
@@ -90,7 +137,13 @@
       "cancel": "Aboneliği iptal et",
       "resume": "Aboneliği sürdür",
       "upgrade": "Planı yükselt",
-      "downgrade": "Planı düşür"
+      "downgrade": "Planı düşür",
+      "trialEnds": "Deneme bitişi",
+      "trialEnded": "Deneme sona erdi",
+      "accessEnds": "Erişim bitişi",
+      "portal": "Ödeme yöntemi ve faturalar",
+      "portalHint": "Kartınızı güncellemek, fatura indirmek veya iptal etmek için Stripe açılır.",
+      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin."
     },
     "customer": {
       "title": "Fatura bilgileri",
@@ -159,7 +212,21 @@
       "quota_exceeded": "Plan limitinize ulaştınız. Devam etmek için planınızı yükseltin.",
       "no_active_subscription": "Aktif abonelik bulunamadı.",
       "no_open_period": "Bu limit için açık kullanım dönemi yok.",
-      "already_reserved": "Bu kaynak zaten ayrılmış."
+      "already_reserved": "Bu kaynak zaten ayrılmış.",
+      "providerNotConfigured": "Bu ortamda ödeme henüz etkin değil. Lütfen daha sonra tekrar deneyin.",
+      "planNotMirrored": "Bu paket henüz satın alınamıyor. Başka bir paket seçin veya destek ile iletişime geçin.",
+      "checkoutFailed": "Ödeme başlatılamadı. Lütfen biraz sonra tekrar deneyin — sorun sürerse destek ile iletişime geçin.",
+      "portalFailed": "Fatura portalı açılamadı. Lütfen biraz sonra tekrar deneyin.",
+      "noCustomer": "Henüz bir fatura hesabınız yok. Önce bir paket seçin.",
+      "planNotFound": "Paket bulunamadı.",
+      "priceNotFound": "Bu paket için aktif bir fiyat bulunamadı.",
+      "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz denemesini zaten kullanmış. Devam etmek için bir paket seçin.",
+      "quotaExhausted": "Plan limitinize ulaştınız. Devam etmek için planınızı yükseltin.",
+      "addonNotFound": "Ek paket bulunamadı.",
+      "noSubscription": "Değiştirilecek aktif bir aboneliğiniz yok.",
+      "planChangeFailed": "Paket şu anda değiştirilemedi. Tekrar deneyin ya da \"Aboneliği yönet\" üzerinden ilerleyin.",
+      "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
+      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin."
     },
     "actions": {
       "subscribe": "Abone ol",
@@ -195,6 +262,12 @@
         "subtitle": "Faturalandırma sağlayıcısı webhook olaylarını inceleyin ve yeniden oynatın.",
         "replay": "Yeniden oynat"
       }
+    },
+    "addons": {
+      "title": "Bu ay daha fazlası mı gerekli?",
+      "subtitle": "Aylık kargo takip dönüşüm hakkınızı kullandınız. Ay yenilenene kadar tedarikçinizi gizlemeye devam etmek için ek paket alabilirsiniz.",
+      "buy": "Satın al",
+      "note": "Ek paket yalnızca içinde bulunduğunuz takvim ayı için geçerlidir; bu yüzden önceden değil, limite ulaştığınızda sunulur. Paket hakkınız ayın 1’inde yenilenir."
     }
   }
 }

@@ -8,6 +8,7 @@ import {
   extractRejectedAspect,
   formatEbayErrors,
 } from './listing-failure';
+import { AsinNotFoundError } from './listing-processor.service';
 
 const ebayError = (errors: Array<Record<string, unknown>>, status = 400): unknown => ({
   message: 'Request failed',
@@ -92,6 +93,15 @@ describe('classifyListingFailure', () => {
     expect(classifyListingFailure(new ListingPublishExhaustedError('260988', ['Department'], 3)).code).toBe(
       ListingFailureCode.EBAY_UNAVAILABLE
     );
+  });
+
+  it('maps a definitive ASIN miss to ASIN_NOT_FOUND, terminal — never the retryable PRODUCT_DATA_UNAVAILABLE bucket', () => {
+    // A malformed identifier (wrong shape) and a well-formed one Keepa has no
+    // data for both throw the same typed error — see resolveProductData.
+    const failure = classifyListingFailure(new AsinNotFoundError('NOTAREALASIN'));
+
+    expect(failure.code).toBe(ListingFailureCode.ASIN_NOT_FOUND);
+    expect(failure.details.retryable).toBe(false);
   });
 
   it('maps a seller-configured blacklist rejection with its keyword', () => {

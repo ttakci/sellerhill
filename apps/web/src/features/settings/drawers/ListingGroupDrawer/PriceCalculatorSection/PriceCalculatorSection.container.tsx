@@ -112,8 +112,47 @@ export const PriceCalculatorSection: React.FC<PriceCalculatorSectionProps> = ({ 
     if (!Number.isFinite(amazonPrice) || amazonPrice <= 0 || !fees) {
       return;
     }
+
+    // React Hook Form receives strings from native number inputs until the Zod
+    // resolver runs on submit. The calculator reads live values, so normalize
+    // that snapshot here before passing it to the shared numeric formula.
+    const normalizedFees = {
+      ebayFeePercent: Number(fees.ebayFeePercent),
+      fixedFeeAmount: Number(fees.fixedFeeAmount),
+    };
+    const normalizedStrategy = (repricingStrategy ?? []).map((range) => ({
+      ...range,
+      minPrice: Number(range.minPrice),
+      maxPrice: Number(range.maxPrice),
+      profitMarginPercent:
+        range.profitMarginPercent === undefined ||
+        range.profitMarginPercent === null ||
+        String(range.profitMarginPercent) === ''
+          ? undefined
+          : Number(range.profitMarginPercent),
+      fixedProfitAmount:
+        range.fixedProfitAmount === undefined ||
+        range.fixedProfitAmount === null ||
+        String(range.fixedProfitAmount) === ''
+          ? undefined
+          : Number(range.fixedProfitAmount),
+    }));
+    const hasInvalidValue =
+      !Number.isFinite(normalizedFees.ebayFeePercent) ||
+      !Number.isFinite(normalizedFees.fixedFeeAmount) ||
+      normalizedStrategy.some(
+        (range) =>
+          !Number.isFinite(range.minPrice) ||
+          !Number.isFinite(range.maxPrice) ||
+          (range.profitMarginPercent !== undefined && !Number.isFinite(range.profitMarginPercent)) ||
+          (range.fixedProfitAmount !== undefined && !Number.isFinite(range.fixedProfitAmount))
+      );
+    if (hasInvalidValue) {
+      return;
+    }
+
     const amazonTaxRatePct = Number(globalSettings?.amazonTaxRate) || 0;
-    const result = calculateListingPrice(amazonPrice, repricingStrategy ?? [], fees, amazonTaxRatePct);
+    const result = calculateListingPrice(amazonPrice, normalizedStrategy, normalizedFees, amazonTaxRatePct);
     setBreakdown(buildBreakdownRows(result.breakdown, t));
   };
 

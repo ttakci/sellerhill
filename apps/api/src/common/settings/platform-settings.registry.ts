@@ -128,6 +128,27 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 1000,
   }),
   def({
+    // When on (default), the batch size is derived from the Keepa plan's own
+    // refill rate so upgrading the plan raises throughput automatically — the
+    // batch size and the plan must stay matched, and doing it by hand is a
+    // step that gets forgotten (and then degrades silently). Turn off to pin
+    // the fixed KEEPA_REFRESH_BATCH_SIZE above.
+    key: PlatformSettingKey.KEEPA_REFRESH_BATCH_AUTO,
+    category: PlatformSettingCategory.KEEPA,
+    type: PlatformSettingType.BOOLEAN,
+    envVar: 'KEEPA_REFRESH_BATCH_AUTO',
+    defaultValue: 'true',
+  }),
+  def({
+    key: PlatformSettingKey.KEEPA_REFRESH_RESERVE_PERCENT,
+    category: PlatformSettingCategory.KEEPA,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'KEEPA_REFRESH_RESERVE_PERCENT',
+    defaultValue: '20',
+    min: 0,
+    max: 90,
+  }),
+  def({
     key: PlatformSettingKey.KEEPA_REFRESH_CLAIM_LEASE_MINUTES,
     category: PlatformSettingCategory.KEEPA,
     type: PlatformSettingType.NUMBER,

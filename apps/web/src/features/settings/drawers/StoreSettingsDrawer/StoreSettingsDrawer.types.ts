@@ -3,6 +3,7 @@ import type {
   BuyerMessagingConfig,
   BuyerMessageTemplate,
   StoreSettingsDrawerStep,
+  TrackingConversionScope,
   StoreSettingsResponse,
 } from '@repo/shared';
 
@@ -33,6 +34,8 @@ export interface StoreSettingsDrawerComponentProps {
   checkBlacklist: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
+  trackingConversionScope: TrackingConversionScope;
+  trackingConvertManualOrders: boolean;
   buyerMessagingConfig: BuyerMessagingConfig;
   buyerMessageTemplates: BuyerMessageTemplate[];
   onToggleBuyerMessagingMaster: (enabled: boolean) => void;
@@ -45,4 +48,6 @@ export interface StoreSettingsDrawerComponentProps {
   onToggleCheckBlacklist: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
+  onTrackingConversionScopeChange: (scope: TrackingConversionScope) => void;
+  onTrackingConvertManualOrdersChange: (checked: boolean) => void;
 }

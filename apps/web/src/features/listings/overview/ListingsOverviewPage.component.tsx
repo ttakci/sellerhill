@@ -35,13 +35,25 @@ export const ListingsOverviewPageComponent: React.FC<ListingsOverviewPageProps> 
       <S.TwoColumnLayout>
         <S.SliderColumn>
           <S.SliderContent>
-            <ListingCarousel
-              listings={listings}
-              onViewAll={onViewAll}
-              viewAllLabel={t('listings.actions.viewAll')}
-              showViewAll={totalCount > 3}
-              onListingClick={onListingClick}
-            />
+            {totalCount === 0 ? (
+              <S.EmptyCard>
+                <ListingCarousel
+                  listings={listings}
+                  onViewAll={onViewAll}
+                  viewAllLabel={t('listings.actions.viewAll')}
+                  showViewAll={false}
+                  onListingClick={onListingClick}
+                />
+              </S.EmptyCard>
+            ) : (
+              <ListingCarousel
+                listings={listings}
+                onViewAll={onViewAll}
+                viewAllLabel={t('listings.actions.viewAll')}
+                showViewAll={totalCount > 3}
+                onListingClick={onListingClick}
+              />
+            )}
           </S.SliderContent>
         </S.SliderColumn>
 

@@ -613,102 +613,54 @@
       "sectionSubtitle": "Priced on what you actually use: how many listings you keep active, and how many orders are bought for you each month.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
-      "perYear": "/yr",
-      "interval": {
-        "monthly": "Monthly",
-        "annual": "Annual",
-        "annualSavings": "{{months}} months free",
-        "billedAnnually": "Billed {{price}}/yr"
-      },
       "mostPopular": "Most popular",
+      "planCta": "Start free",
+      "showAllPlans": "See all {{count}} plans",
+      "showFewerPlans": "Show fewer plans",
       "unlimited": "Unlimited",
       "notIncluded": "Not included",
       "listingsLabel": "listings",
       "ordersLabel": "orders",
       "upToListings": "Up to {{limit}} active listings",
       "unlimitedListings": "Unlimited active listings",
+      "upToOrders": "Up to {{limit}} automatic orders / month",
+      "unlimitedOrders": "Unlimited automatic orders",
       "catalogError": "Live pricing couldn't be loaded right now. Plan overview shown below.",
-      "starter": {
-        "name": "Starter",
-        "description": "For a solo seller putting their first catalogue on autopilot.",
-        "features": [
-          "Price and stock kept in sync",
-          "Orders bought automatically",
-          "Tracking pushed to eBay",
-          "Confirmed and estimated profit reporting",
-          "Email support"
-        ],
-        "cta": "Start free"
-      },
-      "growth": {
-        "name": "Growth",
-        "description": "For a seller adding listings faster than they can watch them.",
-        "features": [
-          "Everything in Starter",
-          "Per-product margin, stock cap and template",
-          "Automated buyer messaging",
-          "Month-by-month P&L and CSV export",
-          "Priority support"
-        ],
-        "cta": "Start free"
-      },
-      "scale": {
-        "name": "Scale",
-        "description": "For an operation running several stores and buyer accounts at once.",
-        "features": [
-          "Everything in Growth",
-          "Multiple eBay stores and buyer accounts",
-          "Per-store rules and reporting",
-          "Highest listing and order allowances",
-          "Priority support"
-        ],
-        "cta": "Start free"
+      "included": {
+        "sync": "Price and stock kept in sync",
+        "autoOrder": "Orders bought automatically",
+        "tracking": "Tracking pushed to eBay",
+        "profit": "Confirmed and estimated profit reporting",
+        "support": "Email support"
       },
       "catalogFallback": {
+        "nano": {
+          "price": "$24.99",
+          "listings": "Up to 500 active listings",
+          "orders": "Up to 100 automatic orders / month",
+          "conversions": "50 tracking conversions / month"
+        },
         "starter": {
-          "name": "Starter",
-          "price": "$39",
-          "period": "/mo",
-          "description": "For a solo seller putting their first catalogue on autopilot.",
-          "features": [
-            "1,500 active listings",
-            "150 automatic orders / month",
-            "Price and stock kept in sync",
-            "Tracking pushed to eBay",
-            "Email support"
-          ],
-          "cta": "Start free"
+          "price": "$44.99",
+          "listings": "Up to 2,000 active listings",
+          "orders": "Up to 300 automatic orders / month",
+          "conversions": "150 tracking conversions / month"
         },
         "growth": {
-          "badge": "Most popular",
-          "name": "Growth",
-          "price": "$55",
-          "period": "/mo",
-          "description": "For a seller adding listings faster than they can watch them.",
-          "features": [
-            "2,500 active listings",
-            "250 automatic orders / month",
-            "Per-product margin, stock cap and template",
-            "Automated buyer messaging",
-            "Priority support"
-          ],
-          "cta": "Start free"
+          "price": "$104.99",
+          "listings": "Up to 5,000 active listings",
+          "orders": "Up to 600 automatic orders / month",
+          "conversions": "300 tracking conversions / month"
         },
-        "scale": {
-          "name": "Scale",
-          "price": "$75",
-          "period": "/mo",
-          "description": "For an operation running several stores and buyer accounts at once.",
-          "features": [
-            "4,500 active listings",
-            "450 automatic orders / month",
-            "Multiple eBay stores and buyer accounts",
-            "Per-store rules and reporting",
-            "Priority support"
-          ],
-          "cta": "Start free"
+        "pro": {
+          "price": "$179.99",
+          "listings": "Up to 10,000 active listings",
+          "orders": "Up to 1,000 automatic orders / month",
+          "conversions": "500 tracking conversions / month"
         }
-      }
+      },
+      "upToConversions": "{{limit}} tracking conversions / month",
+      "unlimitedConversions": "Unlimited tracking conversions"
     },
     "faq": {
       "sectionTitle": "Frequently asked questions",

@@ -1,9 +1,25 @@
 import type { ListingDto, ListingStatus, UpdateListingFormData } from '@repo/shared';
+import type { IconName } from '@repo/ui';
 import type { UseFormReturn } from 'react-hook-form';
 
 export interface ListingDetailSelectOption {
   id: string;
   name: string;
+}
+
+/** A rule's current state: genuinely on/off, or "na" when the configuration
+ *  makes it moot (custom margin while fixed price is on) — distinct from
+ *  "off" so the row explains itself instead of just looking unset. */
+export type AutomationRuleState = 'on' | 'off' | 'na';
+
+/** One row of the Otomasyon Durumu card — a rule + its current state +
+ *  (when on or n/a) the value/reason backing that state. */
+export interface AutomationStatusItem {
+  key: string;
+  icon: IconName;
+  label: string;
+  state: AutomationRuleState;
+  detail?: string;
 }
 
 /** Simplified automation UI → maps to DB override columns on save. */
@@ -29,6 +45,10 @@ export interface ListingDetailPageProps {
   form: UseFormReturn<UpdateListingFormData>;
   listingSettingsGroups: ListingDetailSelectOption[];
   strategyGroupLabel: string;
+  /** Listeleme Ayar Grubu card facts — pre-formatted, "—" when unavailable. */
+  groupDefaultQuantityLabel: string;
+  groupStockBufferLabel: string;
+  groupMarginSummaryLabel: string;
   /** Read-only — eBay policy reassignment from this page is not pushed to eBay yet. */
   paymentPolicyLabel: string;
   shippingPolicyLabel: string;
@@ -46,8 +66,8 @@ export interface ListingDetailPageProps {
   overrides: ListingOverridesUiState;
   onOverrideChange: (patch: Partial<ListingOverridesUiState>) => void;
   onSaveOverrides: () => void;
-  /** Comma-joined labels of active automation toggles, or a "none" placeholder. */
-  automationSummary: string;
+  /** Per-rule breakdown backing the Otomasyon Durumu card — always 4 rows. */
+  automationStatusItems: AutomationStatusItem[];
   formatCurrency: (value: number) => string;
   formatDate: (value: string) => string;
   /** Date + clock time — used for record timestamps (created / updated). */

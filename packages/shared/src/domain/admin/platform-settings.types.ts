@@ -62,6 +62,12 @@ export enum PlatformSettingKey {
   KEEPA_REFRESH_ENABLED = 'keepa.refresh.enabled',
   KEEPA_REFRESH_INTERVAL_MINUTES = 'keepa.refresh.intervalMinutes',
   KEEPA_REFRESH_BATCH_SIZE = 'keepa.refresh.batchSize',
+  /** Derive the batch size from the Keepa plan's own refill rate instead of
+   *  using the fixed batchSize above. See refresh-batch-size.ts. */
+  KEEPA_REFRESH_BATCH_AUTO = 'keepa.refresh.batchAuto',
+  /** Percent of the Keepa refill rate held back for the create path, so a
+   *  seller adding listings is never starved by background refresh. */
+  KEEPA_REFRESH_RESERVE_PERCENT = 'keepa.refresh.reservePercent',
   KEEPA_REFRESH_CLAIM_LEASE_MINUTES = 'keepa.refresh.claimLeaseMinutes',
   KEEPA_REFRESH_MAX_FAILURES = 'keepa.refresh.maxFailures',
   KEEPA_REFRESH_QUARANTINE_MINUTES = 'keepa.refresh.quarantineMinutes',

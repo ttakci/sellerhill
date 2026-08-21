@@ -23,6 +23,9 @@ ARG VITE_GOOGLE_CLIENT_ID=
 # CLAUDE.md "Customer support widget — tawk.to" for where to get these.
 ARG VITE_TAWKTO_PROPERTY_ID=
 ARG VITE_TAWKTO_WIDGET_ID=
+# Stripe publishable key — unconsumed by any FE code today (redirect-based
+# Checkout), provisioned ahead of a future Stripe.js/Elements surface.
+ARG VITE_STRIPE_PUBLISHABLE_KEY=
 
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_NODE_ENV=$VITE_NODE_ENV
@@ -31,6 +34,7 @@ ENV VITE_EBAY_ENVIRONMENT=$VITE_EBAY_ENVIRONMENT
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ENV VITE_TAWKTO_PROPERTY_ID=$VITE_TAWKTO_PROPERTY_ID
 ENV VITE_TAWKTO_WIDGET_ID=$VITE_TAWKTO_WIDGET_ID
+ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 
 # Install dependencies and build in order (single layer for verbose error output)
 RUN set -ex && \

@@ -126,9 +126,9 @@
         "action": "Planı görüntüle"
       },
       "plan_ao_quota": {
-        "title": "Aylık otomatik sipariş limiti dolmak üzere",
-        "description": "Bu ay {{limit}} otomatik siparişin {{used}} tanesini kullandınız. Limit dolduğunda ay yenilenene kadar yeni siparişleri elle satın almanız gerekir.",
-        "action": "Planı görüntüle"
+        "title": "Aylık otomatik sipariş limitiniz dolmak üzere",
+        "description": "Bu ay {{limit}} otomatik sipariş hakkınızın {{used}} tanesini kullandınız. Limit dolduğunda ay yenilenene kadar yeni siparişleri elle vermeniz gerekir.",
+        "action": "Paketi görüntüle"
       },
       "plan_past_due": {
         "title": "Son ödemeniz alınamadı",
@@ -165,6 +165,16 @@
         "title": "Otomatik satın alma kapalı",
         "description": "Amazon hesaplarınız bağlı ama hiçbiri satın almaya yetkili değil. Bir harcama tavanıyla açtığınızda yeni siparişler sizin yerinize satın alınır.",
         "action": "Aç"
+      },
+      "plan_conversion_quota": {
+        "title": "Aylık kargo takip dönüşüm limitiniz dolmak üzere",
+        "description": "Bu ay {{limit}} dönüşüm hakkınızın {{used}} tanesini kullandınız. Limit dolduğunda siparişler yine gönderilir ve eBay yine takip numarası alır — ancak bu Amazon’un kendi numarası olur, yani alıcılar tedarikçinizi görebilir.",
+        "action": "Paketi görüntüle"
+      },
+      "plan_suspended": {
+        "title": "Otomasyon askıya alındı",
+        "description": "Aboneliğiniz aktif olmadığı için yeni ilan açma, fiyat ve stok güncellemesi, otomatik satın alma ve kargo takip dönüşümü durdu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
+        "action": "Paket seç"
       }
     },
     "reasons": {

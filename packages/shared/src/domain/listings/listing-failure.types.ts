@@ -20,6 +20,12 @@ export enum ListingFailureCode {
   ZERO_STOCK = 'zero_stock',
   /** Plan limit reached (listing or monthly automatic orders). */
   QUOTA_EXHAUSTED = 'quota_exhausted',
+  /**
+   * The identifier does not resolve to a real product — either it never had a
+   * valid ASIN shape (10 alphanumeric characters) or the provider has no data
+   * for it. Terminal: retrying the same input cannot succeed.
+   */
+  ASIN_NOT_FOUND = 'asin_not_found',
   /** Keepa returned nothing usable for the ASIN. */
   PRODUCT_DATA_UNAVAILABLE = 'product_data_unavailable',
   /** eBay's taxonomy could not name a listable leaf category. */

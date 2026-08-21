@@ -53,7 +53,7 @@ export const SettingsCard: React.FC<SettingsCardProps> = ({
               </>
             )}
           </S.HeaderLeft>
-          {variant === 'panel' && headerRight && <S.HeaderRight $variant={variant}>{headerRight}</S.HeaderRight>}
+          {headerRight && <S.HeaderRight $variant={variant}>{headerRight}</S.HeaderRight>}
         </S.CardHeader>
       )}
       {showHeader && variant === 'section' && children && <S.HeaderDivider $variant={variant} />}

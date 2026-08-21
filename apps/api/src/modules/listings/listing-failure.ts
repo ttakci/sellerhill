@@ -160,8 +160,20 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   if (name === 'ListingPublishExhaustedError') {
     return { code: ListingFailureCode.EBAY_UNAVAILABLE, message: raw, details: { retryable: true } };
   }
-  if (name === 'QuotaExhaustedError') {
+  if (name === 'QuotaExhaustedError' || name === 'SubscriptionSuspendedError') {
+    // Both land on QUOTA_EXHAUSTED for a job item, because from the item's
+    // point of view the outcome is identical: it will not be created and a
+    // retry cannot change that. The distinction between "pay your invoice" and
+    // "upgrade your plan" is made where the seller can act on it — the HTTP
+    // refusal at create time — not on a failed row after the fact.
     return { code: ListingFailureCode.QUOTA_EXHAUSTED, message: raw, details: { retryable: false } };
+  }
+  // A definitive miss — either the identifier never had a valid ASIN shape, or
+  // the provider has no data for it. Never the same thing as a transient
+  // provider fault (network/429/5xx), which propagates as a raw axios error and
+  // is classified by transport status further down, not here.
+  if (name === 'AsinNotFoundError') {
+    return { code: ListingFailureCode.ASIN_NOT_FOUND, message: raw, details: { retryable: false } };
   }
   // The seller's own Store Settings blacklist rejected the copy. Reported as
   // UNKNOWN ("The listing could not be created.") until now, which hid a cause

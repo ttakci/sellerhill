@@ -13,6 +13,20 @@ export interface ConversionRequest {
   rawCarrier: string;
   /** Our order id — the provider's external reference and idempotency seed. */
   orderId: string;
+  /**
+   * Set only by the seller-initiated "convert this order's tracking" action.
+   *
+   * It bypasses the two rules that exist to infer intent — the per-store
+   * "convert manually linked orders too" switch and the carrier scope — because
+   * clicking the button on one order IS the intent those rules were guessing
+   * at. Offering an action that then silently declines because of a default
+   * would be worse than not offering it.
+   *
+   * It bypasses nothing else: an already-converted order is still returned
+   * as-is rather than paid for twice, a suspended account is still refused, and
+   * the monthly quota is still spent and still enforced.
+   */
+  forceManual?: boolean;
 }
 
 /**
@@ -38,6 +52,30 @@ const EBAY_CARRIER_MAP: Record<string, string> = {
   dhl: 'DHL_Express',
   'dhl express': 'DHL_Express',
 };
+
+/**
+ * Whether a tracking number came from Amazon Logistics.
+ *
+ * Extracted from `LocalTrackingConverter.convertSync`, which already had to
+ * make exactly this call to pick the eBay carrier code. The scope setting
+ * (`TrackingConversionScope.AMAZON_LOGISTICS_ONLY`) needs the same answer, and
+ * the two must not be able to disagree — a second hand-written `TB` regex is
+ * how "convert only Amazon Logistics" quietly starts converting a carrier the
+ * carrier mapper calls UPS, or skipping one it calls Amazon.
+ *
+ * The TB-prefix test is deliberately broad (TBA/TBM/TBC/TBN/…): treating an
+ * unknown TB* number as Amazon Logistics is always the safe direction, since
+ * the cost of a false positive is one converted shipment while a false negative
+ * leaves the supplier exposed.
+ */
+export function isAmazonLogisticsTracking(
+  trackingNumber: string | null | undefined,
+  carrier: string | null | undefined,
+): boolean {
+  const num = (trackingNumber || '').trim();
+  const car = (carrier || '').trim();
+  return /^TB[A-Z]/i.test(num) || /amazon/i.test(car);
+}
 
 /**
  * Pass-through converter — the honest default and the fallback for every
@@ -67,7 +105,7 @@ export class LocalTrackingConverter implements TrackingConverter {
     const num = (request.rawNumber || '').trim();
     const car = (request.rawCarrier || '').trim();
 
-    if (/^TB[A-Z]/i.test(num) || /amazon/i.test(car)) {
+    if (isAmazonLogisticsTracking(num, car)) {
       return { trackingNumber: num, shippingCarrierCode: 'Amazon_Logistics', shipmentId: null };
     }
     const mapped = EBAY_CARRIER_MAP[car.toLowerCase()];

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   TrackingConversionProvider,
+  TrackingConversionScope,
   createDefaultBlacklist,
   type BlacklistKeyword,
   type BuyerMessagingConfig,
@@ -31,6 +32,11 @@ interface StoreSettingsEntity {
   // Carrier-mapping provider; persisted LOWERCASE — the tracking processor
   // compares the raw DB string case-sensitively (migration 036, default 'local').
   tracking_conversion_provider: string;
+  // Which carriers the provider above is applied to (migration 086).
+  // 'all' | 'amazon_logistics_only'.
+  tracking_conversion_scope: string;
+  // Convert tracking for orders the seller linked by hand too (migration 086).
+  tracking_convert_manual_orders: boolean;
   // Buyer auto-messaging config JSONB (migration 054). Nullable — NULL means
   // the feature is off (no automated buyer messages). Parsed in mapToDto.
   buyer_messaging: unknown;
@@ -82,6 +88,8 @@ export class StoreSettingsService {
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
         trackingConversionProvider: TrackingConversionProvider.LOCAL,
+        trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+        trackingConvertManualOrders: true,
         buyerMessaging: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -127,6 +135,8 @@ export class StoreSettingsService {
       amazonTaxRate,
       autoFulfillEnabled,
       trackingConversionProvider,
+      trackingConversionScope,
+      trackingConvertManualOrders,
       buyerMessaging,
     } = dto;
 
@@ -145,6 +155,11 @@ export class StoreSettingsService {
     const checkBlacklistBool = checkBlacklist ?? null;
     const autoFulfillBool = autoFulfillEnabled ?? null;
     const trackingProviderValue = trackingConversionProvider ?? null;
+    // Same omitted-means-unchanged rule as every optional field above: the
+    // blacklist drawer saves through this endpoint too and must not reset a
+    // conversion setting the seller changed in the other drawer.
+    const trackingScopeValue = trackingConversionScope ?? null;
+    const trackingManualValue = trackingConvertManualOrders ?? null;
     // Preserve the distinction between omitted (leave unchanged on UPDATE) and
     // explicit null (turn buyer messaging off). `undefined` is represented by a
     // separate boolean parameter because node-postgres serializes both as NULL.
@@ -157,8 +172,8 @@ export class StoreSettingsService {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), $10)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -169,6 +184,8 @@ export class StoreSettingsService {
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 auto_fulfill_enabled = COALESCE($8, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($9, store_settings.tracking_conversion_provider),
+                tracking_conversion_scope = COALESCE($12, store_settings.tracking_conversion_scope),
+                tracking_convert_manual_orders = COALESCE($13, store_settings.tracking_convert_manual_orders),
                 buyer_messaging = CASE
                   WHEN $11 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
@@ -188,14 +205,16 @@ export class StoreSettingsService {
           trackingProviderValue,
           buyerMessagingJson,
           buyerMessagingProvided,
+          trackingScopeValue,
+          trackingManualValue,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, buyer_messaging)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), $11)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging)
+            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -206,6 +225,8 @@ export class StoreSettingsService {
                 amazon_tax_rate = EXCLUDED.amazon_tax_rate,
                 auto_fulfill_enabled = COALESCE($9, store_settings.auto_fulfill_enabled),
                 tracking_conversion_provider = COALESCE($10, store_settings.tracking_conversion_provider),
+                tracking_conversion_scope = COALESCE($13, store_settings.tracking_conversion_scope),
+                tracking_convert_manual_orders = COALESCE($14, store_settings.tracking_convert_manual_orders),
                 buyer_messaging = CASE
                   WHEN $12 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
@@ -226,6 +247,8 @@ export class StoreSettingsService {
           trackingProviderValue,
           buyerMessagingJson,
           buyerMessagingProvided,
+          trackingScopeValue,
+          trackingManualValue,
         ]
       );
     }
@@ -257,10 +280,21 @@ export class StoreSettingsService {
       // Compare to the string literal `'api'` (not the enum) to avoid
       // `no-unsafe-enum-comparison` between the DB-side string and the enum,
       // mirroring the tracking processor's case-sensitive check.
+      // Accept BOTH external spellings. The DTO only ever writes 'api', but
+      // matching solely on it meant a row holding the canonical 'aquiline'
+      // would silently read back as LOCAL — i.e. conversion quietly off for a
+      // seller who had turned it on.
       trackingConversionProvider:
-        entity.tracking_conversion_provider === 'api'
+        entity.tracking_conversion_provider === 'api' ||
+        entity.tracking_conversion_provider === 'aquiline'
           ? TrackingConversionProvider.API
           : TrackingConversionProvider.LOCAL,
+      trackingConversionScope:
+        entity.tracking_conversion_scope === 'all'
+          ? TrackingConversionScope.ALL
+          : TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+      // Default TRUE for rows written before migration 086 added the column.
+      trackingConvertManualOrders: entity.tracking_convert_manual_orders !== false,
       buyerMessaging: this.parseBuyerMessaging(entity.buyer_messaging),
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,

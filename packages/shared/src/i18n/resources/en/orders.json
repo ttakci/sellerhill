@@ -42,7 +42,8 @@
     "actions": {
       "search": "Search orders, buyers or items...",
       "last30Days": "Last 30 Days",
-      "export": "Export"
+      "export": "Export",
+      "convertTracking": "Convert tracking"
     },
     "table": {
       "orderNumber": "Order #",
@@ -110,7 +111,8 @@
         "proxy_required": "No proxy configured",
         "quota_exhausted": "Monthly quota reached",
         "cart": "Cart mismatch",
-        "review_unreadable": "Order total unreadable"
+        "review_unreadable": "Order total unreadable",
+        "subscription_suspended": "Subscription suspended"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",
@@ -195,6 +197,13 @@
     "estimateNote": "Estimated profit — finalizes when the Amazon order is placed. Based on the last known Amazon price; Amazon shipping not included.",
     "footer": {
       "copyright": "© 2026 SellerHill E-commerce Solutions. All rights reserved."
+    },
+    "errors": {
+      "notFound": "Order not found.",
+      "noTrackingYet": "This order has no Amazon tracking number yet — it has not shipped.",
+      "conversionUnavailable": "Tracking could not be converted right now. Check your plan limit and conversion settings, then try again.",
+      "conversionDone": "Tracking converted.",
+      "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first."
     }
   }
 }

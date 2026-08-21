@@ -2,6 +2,7 @@ import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
   AmazonMarketplace,
+  ENTITLED_SUBSCRIPTION_STATUSES,
   extractCorrelationId,
   generateCorrelationId,
   KeepaStockStatus,
@@ -22,6 +23,7 @@ import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ProductSyncService, type PendingListingUpdate } from './product-sync.service';
 import { dataFailureDelayMinutes } from './refresh-backoff';
+import { resolveRefreshBatchSize } from './refresh-batch-size';
 
 interface ProductRow {
   id: string;
@@ -109,10 +111,35 @@ export class RefreshProcessorService extends WorkerHost {
       this.logger.debug('Keepa refresh disabled by platform settings — skipping tick.');
       return;
     }
-    const batchSize = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_BATCH_SIZE);
+    const batchSize = await this.resolveBatchSize();
     const leaseMinutes = await this.platformSettings.getNumber(
       PlatformSettingKey.KEEPA_REFRESH_CLAIM_LEASE_MINUTES,
     );
+
+    // Entitlement filter — the cost stop.
+    //
+    // This query had no billing awareness at all, so an account that stopped
+    // paying kept every one of its products on the refresh schedule and kept
+    // burning Keepa tokens indefinitely. Keepa is the platform's largest
+    // recurring cost (~$0.011 per active product per month), so a lapsed
+    // 5,000-listing account was ~$55/month of pure loss with nothing to stop it.
+    //
+    // `products` is a SHARED, ASIN-keyed cache, so the rule is deliberately
+    // "at least one ACTIVE listing belongs to an entitled owner" rather than
+    // "every owner is entitled": a non-payer's listing goes stale, while a
+    // paying seller listing the same ASIN is unaffected.
+    //
+    // Built as a conditional fragment rather than a permanent join so that with
+    // enforcement off the statement is byte-identical to the original.
+    const enforcementOn = await this.platformSettings.getBoolean(
+      PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
+    );
+    const entitledStatuses = ENTITLED_SUBSCRIPTION_STATUSES.map((v) => `'${v}'`).join(', ');
+    const entitlementJoin = enforcementOn
+      ? `JOIN billing_customers bc ON bc.user_id = l.user_id
+              JOIN billing_subscriptions bs ON bs.customer_id = bc.id
+                AND bs.status IN (${entitledStatuses})`
+      : '';
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (
@@ -121,6 +148,7 @@ export class RefreshProcessorService extends WorkerHost {
          WHERE (p.next_refresh_at IS NULL OR p.next_refresh_at <= NOW())
            AND EXISTS (
              SELECT 1 FROM listings l
+             ${entitlementJoin}
              WHERE l.product_id = p.id AND l.status = '${ListingStatus.ACTIVE}'
            )
          ORDER BY p.next_refresh_at ASC NULLS FIRST
@@ -154,6 +182,43 @@ export class RefreshProcessorService extends WorkerHost {
         removeOnComplete: true,
       }
     );
+  }
+
+  /**
+   * How many products this tick may claim. By default this is derived from the
+   * Keepa plan's own refill rate (`keepa_balance.refill_rate`) rather than a
+   * fixed number, because the batch size IS the per-minute refresh throughput
+   * and must track the plan: too high burns the retry budget on Keepa 429s,
+   * too low lets the refresh interval stretch silently. Upgrading the Keepa
+   * plan therefore raises throughput on its own, with no second setting to
+   * remember. Operators can still pin a value by turning the auto flag off.
+   *
+   * The policy itself is the pure `resolveRefreshBatchSize` (unit-tested);
+   * this method only gathers the inputs.
+   */
+  private async resolveBatchSize(): Promise<number> {
+    const [manualBatchSize, autoEnabled, reservePercent, refillRate] = await Promise.all([
+      this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_BATCH_SIZE),
+      this.platformSettings.getBoolean(PlatformSettingKey.KEEPA_REFRESH_BATCH_AUTO),
+      this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_RESERVE_PERCENT),
+      this.keepaUsageService.getLatestRefillRate(),
+    ]);
+
+    const resolved = resolveRefreshBatchSize({
+      refillRate,
+      reservePercent,
+      manualBatchSize,
+      autoEnabled,
+      min: 1,
+      max: 1000,
+    });
+
+    if (resolved.source === 'auto') {
+      this.logger.debug(
+        `Batch size ${resolved.batchSize} derived from Keepa refill rate ${refillRate} tpm (reserve ${reservePercent}%).`
+      );
+    }
+    return resolved.batchSize;
   }
 
   /**

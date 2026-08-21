@@ -10,18 +10,21 @@
 //                              open usage periods + transition state.
 //   POST /billing/checkout  — authenticated; body SubscribeDto { planId, interval }.
 //                              Returns 409 billing.errors.providerNotConfigured
-//                              when Paddle env is absent — the FE surfaces that
-//                              via MessageModal instead of a silent no-op.
+//                              when no billing provider is configured — the FE
+//                              surfaces that via MessageModal instead of a
+//                              silent no-op.
 //   GET  /billing/portal    — authenticated. Returns 409
-//                              billing.errors.providerNotConfigured when Paddle
-//                              env is absent; 409 billing.errors.noCustomer when
-//                              the user has no provider customer yet.
+//                              billing.errors.providerNotConfigured when no
+//                              provider is configured; 409 billing.errors.noCustomer
+//                              when the user has no provider customer yet.
 //
 // The catalog + summary reads ALWAYS render (the backend serves them even when
 // no provider is configured — they are informational in that case). The
-// checkout + portal mutations are the ones that can 409; the FE gates the
-// buttons on `provider === 'paddle'` AND surfaces the 409 via MessageModal so
-// the user is never left guessing why a click did nothing.
+// checkout + portal mutations are the ones that can 409; the FE gates on
+// `enforcementEnabled`/the 409 response, never on the literal `provider`
+// string (Stripe vs. Paddle vs. local is an ops decision, not a FE branch) —
+// and surfaces the 409 via MessageModal so the user is never left guessing
+// why a click did nothing.
 
 import {
   BillingInterval,
@@ -78,6 +81,39 @@ export const billingApi = baseApi.injectEndpoints({
     }),
 
     /**
+     * Buy a one-time quota top-up. Same redirect shape as `initiateCheckout`,
+     * but the Stripe session is `mode: 'payment'` — there is no subscription
+     * involved, and the allowance is granted by the
+     * `checkout.session.completed` webhook.
+     */
+    initiateAddonCheckout: builder.mutation<BillingCheckoutDto, { addonSlug: string }>({
+      query: (body) => ({
+        url: '/billing/checkout/addon',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Billing', id: 'SUMMARY' }],
+    }),
+
+    /**
+     * Move an EXISTING subscription to another plan, prorated by Stripe.
+     *
+     * Not a checkout: a customer who already has a subscription must never be
+     * sent through checkout again, because Stripe would create a second one and
+     * bill for both. Returns no URL — nothing to redirect to, the change is
+     * immediate and the resulting `customer.subscription.updated` webhook
+     * refreshes our copy.
+     */
+    changePlan: builder.mutation<{ ok: true }, CheckoutRequestBody>({
+      query: (body) => ({
+        url: '/billing/change-plan',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Billing', id: 'SUMMARY' }],
+    }),
+
+    /**
      * Open the Paddle customer portal to manage the subscription (change plan,
      * update card, cancel). Can 409 with `billing.errors.providerNotConfigured`
      * / `noCustomer` — the container surfaces those via MessageModal.
@@ -94,5 +130,7 @@ export const {
   useGetBillingCatalogQuery,
   useGetBillingSummaryQuery,
   useInitiateCheckoutMutation,
+  useInitiateAddonCheckoutMutation,
+  useChangePlanMutation,
   useLazyOpenBillingPortalQuery,
 } = billingApi;

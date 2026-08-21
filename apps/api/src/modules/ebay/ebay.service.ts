@@ -17,6 +17,7 @@ import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
+import { BillingService } from '../billing/billing.service';
 
 import { type AspectResolution, type CategoryAspect } from './aspect-builder';
 import { AspectResolverService } from './aspect-resolver.service';
@@ -149,7 +150,8 @@ export class EbayService implements OnModuleInit {
     private readonly databaseService: DatabaseService,
     private readonly configService: ConfigService,
     private readonly taxonomyService: EbayTaxonomyService,
-    private readonly aspectResolver: AspectResolverService
+    private readonly aspectResolver: AspectResolverService,
+    private readonly billingService: BillingService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -262,6 +264,24 @@ export class EbayService implements OnModuleInit {
 
     if (existingAccounts.length > 0) {
       throw new ConflictException('ebay.errors.accountAlreadyConnected');
+    }
+
+    // One free trial per eBay store, ever. Checked BEFORE the row is written so
+    // a refused connect leaves nothing behind. See
+    // BillingService.assertEbayStoreMayConnect for why the store, not the
+    // email, is the thing being rationed.
+    try {
+      await this.billingService.assertEbayStoreMayConnect(userId, sellerId, marketplaceId);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message === 'billing.errors.ebayTrialAlreadyUsed') {
+        throw new ConflictException(message);
+      }
+      // A billing-side outage must not block a legitimate connect. The ledger
+      // is a fraud control, not a correctness invariant — failing open here
+      // costs at most one extra trial, while failing closed would lock out
+      // paying customers whenever billing is degraded.
+      this.logger.warn(`eBay trial ledger check failed (allowing connect): ${message}`);
     }
 
     // Calculate token expiry

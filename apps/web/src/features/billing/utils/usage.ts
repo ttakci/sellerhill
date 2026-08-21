@@ -7,7 +7,6 @@ import {
 import type {
   BillingUsageFormatArgs,
   BillingUsagePlanArgs,
-  BillingUsagePeriodArgs,
 } from './usage.types';
 
 export function formatBillingLimit(args: BillingUsageFormatArgs): string {
@@ -43,9 +42,4 @@ export function usageBarVariant(used: number, limit: number) {
 
 export function planLimitValue(args: BillingUsagePlanArgs, key: BillingLimitKey): number {
   return args.plan.limits[key]?.limitValue ?? 0;
-}
-
-export function usedQtyForPeriod(args: BillingUsagePeriodArgs, key: BillingLimitKey): number {
-  const period = args.periods.find((candidate) => String(candidate.limitKey) === String(key));
-  return period?.usedQty ?? 0;
 }

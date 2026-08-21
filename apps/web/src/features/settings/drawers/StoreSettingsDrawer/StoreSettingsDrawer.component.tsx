@@ -1,4 +1,4 @@
-import { StoreSettingsDrawerStep } from '@repo/shared';
+import { StoreSettingsDrawerStep, TrackingConversionScope } from '@repo/shared';
 import { Drawer, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -75,6 +75,35 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               isDisabled={!props.autoFulfillEnabled}
             />
             <InfoMessage>{t('storeSettings:storeSettings.amazonTaxRateDesc')}</InfoMessage>
+            <ModernSelect
+              name="trackingConversionScope"
+              label={t('storeSettings:storeSettings.trackingConversionScope')}
+              value={props.trackingConversionScope}
+              options={[
+                {
+                  value: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+                  label: t('storeSettings:storeSettings.trackingConversionScopeAmazonOnly'),
+                },
+                {
+                  value: TrackingConversionScope.ALL,
+                  label: t('storeSettings:storeSettings.trackingConversionScopeAll'),
+                },
+              ]}
+              onChange={(value) => props.onTrackingConversionScopeChange(value as TrackingConversionScope)}
+            />
+            <InfoMessage>{t('storeSettings:storeSettings.trackingConversionScopeHint')}</InfoMessage>
+            <ToggleRow>
+              <Text variant="body-sm">
+                {t('storeSettings:storeSettings.trackingConvertManualOrders')}
+              </Text>
+              <Toggle
+                checked={props.trackingConvertManualOrders}
+                onChange={props.onTrackingConvertManualOrdersChange}
+              />
+            </ToggleRow>
+            <InfoMessage>
+              {t('storeSettings:storeSettings.trackingConvertManualOrdersHint')}
+            </InfoMessage>
           </FormCard>
         )}
         {isMessaging && (

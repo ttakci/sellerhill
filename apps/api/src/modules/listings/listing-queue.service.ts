@@ -58,7 +58,31 @@ export class ListingQueueService {
     //    reserveForBulkCreate takes a transaction-scoped advisory lock.
     const asDraft = Boolean(request.asDraft);
     if (!asDraft && job.items.length > 0) {
-      await this.quotaEnforcement.reserveForBulkCreate(userId, job.items.map((i) => i.id));
+      try {
+        await this.quotaEnforcement.reserveForBulkCreate(userId, job.items.map((i) => i.id));
+      } catch (error) {
+        /*
+         * Roll the job back. The reservation needs the job-item ids as its
+         * source keys, so the rows have to exist before the gate can run —
+         * which meant a refused create still left a job in the import list,
+         * stuck at "0 / N, waiting" forever: nothing was queued to advance it
+         * and nothing was queued to fail it either. The seller saw an
+         * "Internal server error" dialog AND a phantom job.
+         *
+         * Cleanup is best-effort and never masks the refusal: the seller must
+         * be told why they were refused even if the tidy-up itself fails.
+         */
+        await this.listingsService
+          .deleteUnstartedJob(userId, job.id)
+          .catch((cleanupError: unknown) =>
+            this.logger.error(
+              `Could not roll back refused job ${job.id}: ${
+                cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+              }`,
+            ),
+          );
+        throw error;
+      }
     }
 
     // 3. Enqueue the work. job.items is already deduped/filtered by createJob;

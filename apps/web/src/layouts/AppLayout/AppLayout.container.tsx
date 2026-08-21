@@ -1,4 +1,9 @@
-import { isOperatorRole, type SupportedLocale } from '@repo/shared';
+import {
+  EntitlementState,
+  isOperatorRole,
+  resolveEntitlementState,
+  type SupportedLocale,
+} from '@repo/shared';
 import { SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +20,18 @@ import {
 } from '@/features/action-center';
 import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
+import { useGetBillingSummaryQuery } from '@/features/billing/api/billing.api';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
+
+/**
+ * The only paths a suspended account may open.
+ *
+ * `/billing` is where the problem is fixed; `/settings` is read-mostly and
+ * spends nothing, and a seller deciding which plan to buy may reasonably want
+ * to look at what they have configured first.
+ */
+const SUSPENDED_ALLOWED_PATHS = ['/billing', '/settings'];
 
 export const AppLayout: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -111,6 +126,26 @@ export const AppLayout: React.FC = () => {
     pollingInterval: ACTION_CENTER_POLL_INTERVAL_MS,
   });
 
+  /*
+   * Entitlement gate for the whole seller shell.
+   *
+   * A suspended account (payment failed, cancelled, or an expired trial) can
+   * reach every screen but do almost nothing on them: creating a listing is
+   * refused, price and stock updates have stopped, and orders are not being
+   * purchased. Letting them wander produced the worst version of that — the
+   * seller met a red error dialog on the one action they tried, with nothing
+   * pointing at billing as the cause.
+   *
+   * Billing is the only screen that can resolve it, so that is where they go.
+   */
+  const { data: billingSummary } = useGetBillingSummaryQuery(undefined, {
+    skip: !isAuthenticated || isOperatorRole(user?.role),
+  });
+  const isSuspended =
+    Boolean(billingSummary?.enforcementEnabled) &&
+    resolveEntitlementState(billingSummary?.subscription?.status ?? null) ===
+      EntitlementState.SUSPENDED;
+
   if (!isAuthenticated) {
     return <Navigate to={buildPath('/login')} state={{ from: location }} replace />;
   }
@@ -121,6 +156,16 @@ export const AppLayout: React.FC = () => {
    */
   if (!isUserLoading && isOperatorRole(user?.role)) {
     return <Navigate to={buildPath(resolveHomePath(user?.role, false))} replace />;
+  }
+  /*
+   * Redirect only from OTHER pages — billing itself must stay reachable, or the
+   * seller is bounced away from the one screen that can fix the problem.
+   */
+  if (
+    isSuspended &&
+    !SUSPENDED_ALLOWED_PATHS.some((allowed) => pathWithoutLocale.startsWith(allowed))
+  ) {
+    return <Navigate to={buildPath('/billing')} replace />;
   }
 
   return (

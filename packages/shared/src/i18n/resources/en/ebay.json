@@ -37,6 +37,7 @@
       "authorizationFailed": "eBay authorization failed",
       "tokenExchangeFailed": "Failed to exchange authorization code for tokens",
       "accountAlreadyConnected": "This eBay account is already connected",
+      "ebayTrialAlreadyUsed": "This eBay store has already used its free trial. Choose a plan to connect it.",
       "noAuthorizationCode": "No authorization code received from eBay"
     },
     "onboarding": {

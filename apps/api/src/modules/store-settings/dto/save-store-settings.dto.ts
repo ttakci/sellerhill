@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BlacklistType,
   TrackingConversionProvider,
+  TrackingConversionScope,
   type SaveStoreSettingsRequest,
   type BlacklistKeyword,
 } from '@repo/shared';
@@ -98,6 +99,33 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsIn([TrackingConversionProvider.LOCAL, TrackingConversionProvider.AQUILINE])
   @IsOptional()
   trackingConversionProvider?: TrackingConversionProvider;
+
+  @ApiPropertyOptional({
+    description:
+      'Which carriers the conversion provider is applied to. ' +
+      "'amazon_logistics_only' (default) converts only TB* numbers — the ones that " +
+      'unmistakably say Amazon — leaving UPS/USPS/FedEx native, which spends less ' +
+      'conversion quota and keeps the stronger delivery evidence in an eBay ' +
+      "Item-Not-Received case. 'all' converts every carrier for maximum concealment.",
+    default: 'amazon_logistics_only',
+    enum: ['all', 'amazon_logistics_only'],
+  })
+  @IsIn([TrackingConversionScope.ALL, TrackingConversionScope.AMAZON_LOGISTICS_ONLY])
+  @IsOptional()
+  trackingConversionScope?: TrackingConversionScope;
+
+  @ApiPropertyOptional({
+    description:
+      'Convert tracking for orders the seller linked by hand, not just auto-fulfilled ' +
+      'ones. Default true: a seller who places every order manually would otherwise ' +
+      'have to remember a per-order button, and forgetting it exposes the supplier. ' +
+      'Bulk historical linking is exempt regardless, so importing a backlog cannot ' +
+      'burn a month of quota at once.',
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  trackingConvertManualOrders?: boolean;
 
   @ApiPropertyOptional({
     description: 'Master switch for blacklist scanning at listing create. Omitted means "leave unchanged".',
