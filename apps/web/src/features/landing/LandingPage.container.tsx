@@ -43,10 +43,46 @@ function formatListingsLine(
   return t('translation:landing.pricing.upToListings', { limit: new Intl.NumberFormat('en-US').format(limit) });
 }
 
-/** Pick the highlighted "popular" plan (heuristic: lowest displayOrder non-free plan). */
-function pickHighlightedSlug(slugs: string[]): string | null {
-  return slugs.find((s) => s !== 'free') ?? null;
+/** Format the monthly tracking-conversion limit line. */
+function formatConversionsLine(
+  limit: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  if (limit === BILLING_UNLIMITED) {
+    return t('translation:landing.pricing.unlimitedConversions');
+  }
+  if (limit === BILLING_DISABLED || limit <= 0) {
+    return t('translation:landing.pricing.notIncluded');
+  }
+  return t('translation:landing.pricing.upToConversions', {
+    limit: new Intl.NumberFormat('en-US').format(limit),
+  });
 }
+
+/** Format the monthly automatic-order ceiling line. */
+function formatAmazonOrdersLine(
+  limit: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  if (limit === BILLING_UNLIMITED) {
+    return t('translation:landing.pricing.unlimitedOrders');
+  }
+  if (limit === BILLING_DISABLED || limit <= 0) {
+    return t('translation:landing.pricing.notIncluded');
+  }
+  return t('translation:landing.pricing.upToOrders', { limit: new Intl.NumberFormat('en-US').format(limit) });
+}
+
+/**
+ * The plans shown before the visitor expands the grid — one per tier band, so
+ * the section reads as a comparison rather than the full twelve-row price list.
+ * A slug that is not in the catalog simply contributes nothing, so a future
+ * catalog edit degrades to "fewer featured cards", never to a broken grid.
+ */
+const FEATURED_PLAN_SLUGS = new Set(['nano', 'starter', 'growth', 'pro']);
+
+/** The plan carrying the "most popular" badge. */
+const HIGHLIGHTED_PLAN_SLUG = 'growth';
 
 export const LandingPageContainer = (): React.ReactElement => {
   const { i18n, t } = useTranslation();
@@ -92,44 +128,26 @@ export const LandingPageContainer = (): React.ReactElement => {
     if (!catalog || catalog.plans.length === 0) {
       return [];
     }
-    const freeLabel = t('translation:billing.billing.plans.free.name');
-    const slugs = catalog.plans.map((p) => p.slug);
-    const highlightedSlug = pickHighlightedSlug(slugs);
+    // `billing` is its own namespace, not a key inside `translation` — the old
+    // `translation:billing.billing.…` form resolved to nothing and rendered the
+    // raw key as the price label for any zero-priced plan.
+    const freeLabel = t('billing:billing.plans.free.name');
     return catalog.plans.map((plan) => {
       const monthlyPrice = plan.prices[BillingInterval.MONTHLY];
-      const annualPrice = plan.prices[BillingInterval.ANNUAL];
-      const priceDisplayMonthly = monthlyPrice
-        ? formatLandingPrice(monthlyPrice.amountMicros, monthlyPrice.currency, freeLabel)
-        : freeLabel;
-
-      let priceDisplayAnnual: string | null = null;
-      let priceDisplayAnnualPerMonth: string | null = null;
-      let annualSavingsMonths: number | null = null;
-      if (annualPrice) {
-        priceDisplayAnnual = formatLandingPrice(annualPrice.amountMicros, annualPrice.currency, freeLabel);
-        priceDisplayAnnualPerMonth = formatLandingPrice(
-          Math.round(annualPrice.amountMicros / 12),
-          annualPrice.currency,
-          freeLabel
-        );
-        if (monthlyPrice && monthlyPrice.amountMicros > 0) {
-          const yearOfMonthly = monthlyPrice.amountMicros * 12;
-          annualSavingsMonths = Math.max(
-            0,
-            Math.round(((yearOfMonthly - annualPrice.amountMicros) / monthlyPrice.amountMicros) * 10) / 10
-          );
-        }
-      }
-
       const listingsLimit = plan.limits[BillingLimitKey.LISTINGS_PER_MONTH]?.limitValue ?? 0;
+      const ordersLimit = plan.limits[BillingLimitKey.AMAZON_ORDERS_PER_MONTH]?.limitValue ?? 0;
+      const conversionsLimit =
+        plan.limits[BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]?.limitValue ?? 0;
       return {
         slug: plan.slug,
-        priceDisplayMonthly,
-        priceDisplayAnnual,
-        priceDisplayAnnualPerMonth,
-        annualSavingsMonths,
+        priceDisplayMonthly: monthlyPrice
+          ? formatLandingPrice(monthlyPrice.amountMicros, monthlyPrice.currency, freeLabel)
+          : freeLabel,
         listingsDisplay: formatListingsLine(listingsLimit, t),
-        isHighlighted: plan.slug === highlightedSlug,
+        trackingConversionsDisplay: formatConversionsLine(conversionsLimit, t),
+        amazonOrdersDisplay: formatAmazonOrdersLine(ordersLimit, t),
+        isHighlighted: plan.slug === HIGHLIGHTED_PLAN_SLUG,
+        isFeatured: FEATURED_PLAN_SLUGS.has(plan.slug),
       };
     });
   }, [catalog, t]);

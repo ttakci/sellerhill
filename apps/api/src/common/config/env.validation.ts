@@ -189,45 +189,33 @@ class EnvironmentVariables {
   @IsOptional()
   GOOGLE_CLIENT_SECRET?: string;
 
-  // --- Billing (phase 2). All optional — BILLING_ENFORCEMENT_ENABLED defaults
-  // to false so the app runs in "full access" transition mode without a
-  // provider configured. Paddle webhook verification + checkout/portal require
-  // the PADDLE_* env to be set; without them the billing module fails safe
-  // (catalog + summary still work; checkout/portal return 409; webhooks 401). ---
+  // --- Billing (Stripe). All optional — BILLING_ENFORCEMENT_ENABLED defaults
+  // to false so the app runs in "full access" transition mode without Stripe
+  // configured. Checkout/portal need STRIPE_SECRET_KEY and webhooks need
+  // STRIPE_WEBHOOK_SECRET; without them the billing module fails safe
+  // (catalog + summary still work; checkout/portal return 409; webhooks 401).
+  // Stripe's own test mode is what local dev and the test environment use —
+  // there is no separate sandbox/environment switch to configure. ---
   /** Master enforcement toggle. When false (default), all users have full
    *  access and the summary reports `transition: 'full_access'` with NO fake
-   *  subscription. Set to true only after a provider is wired and plans are
+   *  subscription. Set to true only after Stripe is wired and plans are
    *  meant to gate features. */
   @IsBoolean()
   @IsOptional()
   BILLING_ENFORCEMENT_ENABLED: boolean = false;
 
-  /** Paddle API key (server-to-server, for checkout/portal if needed). */
+  /** Stripe secret key (`sk_test_...` / `sk_live_...`, or a restricted
+   *  `rk_...`). Required for checkout + portal; without it they return 409. */
   @IsString()
   @IsOptional()
-  PADDLE_API_KEY?: string;
+  STRIPE_SECRET_KEY?: string;
 
-  /** Paddle webhook secret — the HMAC key used to verify the
-   *  `Paddle-Signature` header. Required for `POST /billing/webhooks` to
-   *  accept deliveries; without it the endpoint 401s. */
+  /** Stripe webhook signing secret (`whsec_...`) used to verify the
+   *  `Stripe-Signature` header. Required for `POST /billing/webhooks/stripe`
+   *  to accept deliveries; without it the endpoint 401s. */
   @IsString()
   @IsOptional()
-  PADDLE_WEBHOOK_SECRET?: string;
-
-  /** Paddle environment. `sandbox` for test, `production` for live. */
-  @IsIn(['sandbox', 'production'])
-  @IsOptional()
-  PADDLE_ENVIRONMENT: 'sandbox' | 'production' = 'sandbox';
-
-  /** Paddle checkout base URL. Defaults to the Paddle-hosted checkout. */
-  @IsString()
-  @IsOptional()
-  PADDLE_CHECKOUT_BASE_URL: string = 'https://checkout.paddle.com';
-
-  /** Paddle API base URL. Set per environment (sandbox vs production). */
-  @IsString()
-  @IsOptional()
-  PADDLE_API_BASE_URL: string = 'https://api.paddle.com';
+  STRIPE_WEBHOOK_SECRET?: string;
 
   /** Stale-webhook protection: drop events older than this many minutes after
    *  they are logged to the inbox. Prevents a flood of ancient redeliveries

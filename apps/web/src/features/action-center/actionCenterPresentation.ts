@@ -7,7 +7,7 @@
  * cannot disagree about what "critical" or "drafts pending" is.
  */
 
-import { ActionCenterItemKey, ActionCenterSeverity } from '@repo/shared';
+import { ActionCenterGroup, ActionCenterItemKey, ActionCenterSeverity } from '@repo/shared';
 import type { BadgeVariant, IconName } from '@repo/ui';
 
 /**
@@ -34,34 +34,27 @@ export const severityToBadgeVariant = (severity: ActionCenterSeverity): BadgeVar
 };
 
 /**
- * Leading icon per severity.
- *
- * Colour alone is not enough — it fails for colour-blind users and in a dense
- * stack of rows the eye reads shape faster than hue.
+ * Group header icon. Reuses the exact glyph the sidebar nav already draws for
+ * that domain (`AppLayout.component.tsx`) so a group card and its own nav
+ * item can never disagree about what represents it — e.g. Orders is
+ * `shopping-bag` in both places. Connections has no matching nav item (eBay/
+ * Amazon account health isn't its own page), so it uses `plug`, the icon set's
+ * own "integration / connected account" glyph. Setup uses `clipboard-list`
+ * (not a rocket/launch glyph) — its items are a checklist of onboarding
+ * steps, not a "go live" moment. Deliberately NOT `check-list`: `SettingsCard`
+ * special-cases that exact icon name to render its always-green "validation"
+ * tint (see `SettingsCard.component.tsx`), which painted this group's icon
+ * green while every sibling group stayed brand-blue.
  */
-export const severityToIcon = (severity: ActionCenterSeverity): IconName => {
-  const map: Record<ActionCenterSeverity, IconName> = {
-    [ActionCenterSeverity.CRITICAL]: 'alert-circle',
-    [ActionCenterSeverity.WARNING]: 'alert-triangle',
-    [ActionCenterSeverity.INFO]: 'info',
-  };
-  return map[severity] ?? 'info';
+const GROUP_ICON: Record<ActionCenterGroup, IconName> = {
+  [ActionCenterGroup.ORDERS]: 'shopping-bag',
+  [ActionCenterGroup.CONNECTIONS]: 'plug',
+  [ActionCenterGroup.LISTINGS]: 'inventory',
+  [ActionCenterGroup.PLAN]: 'wallet-cards',
+  [ActionCenterGroup.SETUP]: 'clipboard-list',
 };
 
-/**
- * Tone key for the severity mark's styled props. Separate from the badge
- * variant because the mark is tinted from the semantic palette directly.
- */
-export const severityToTone = (
-  severity: ActionCenterSeverity,
-): 'critical' | 'warning' | 'info' => {
-  const map: Record<ActionCenterSeverity, 'critical' | 'warning' | 'info'> = {
-    [ActionCenterSeverity.CRITICAL]: 'critical',
-    [ActionCenterSeverity.WARNING]: 'warning',
-    [ActionCenterSeverity.INFO]: 'info',
-  };
-  return map[severity] ?? 'info';
-};
+export const groupToIcon = (group: ActionCenterGroup): IconName => GROUP_ICON[group];
 
 /**
  * Where an item's breakdown codes are localized.

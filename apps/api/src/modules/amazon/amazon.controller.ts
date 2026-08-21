@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   AmazonAccountStatus,
   type AmazonAccountPublicDto,
@@ -9,12 +22,14 @@ import {
 
 import { DatabaseService } from '../../common/database/database.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
 import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
+import { TrackingConversionService } from './tracking-conversion.service';
 
 interface AuthenticatedRequest extends Request {
   user: { sub: string };
@@ -31,7 +46,9 @@ export class AmazonController {
     private readonly trackingQueueService: AmazonTrackingQueueService,
     private readonly verifyQueueService: AmazonVerifyQueueService,
     private readonly databaseService: DatabaseService,
-    private readonly orderSyncService: OrderSyncService
+    private readonly orderSyncService: OrderSyncService,
+    private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly trackingConversion: TrackingConversionService
   ) {}
 
   @Get('accounts')
@@ -100,6 +117,33 @@ export class AmazonController {
     return { success: true, message: 'Verification started' };
   }
 
+  /**
+   * Convert this order's tracking number on demand.
+   *
+   * Lives on the amazon controller rather than orders because the conversion
+   * service is an amazon-module concern and the order already carries the
+   * Amazon tracking number this acts on.
+   */
+  @Post('orders/:orderId/convert-tracking')
+  async convertTracking(
+    @Req() req: AuthenticatedRequest,
+    @Param('orderId') orderId: string,
+  ): Promise<{ converted: boolean; trackingNumber: string | null; reasonKey: string | null }> {
+    const userId = req.user.sub;
+
+    // Ownership first — the conversion service takes an order id and does not
+    // itself check who is asking.
+    const owned = await this.databaseService.query<{ id: string }>(
+      `SELECT id FROM orders WHERE id = $1 AND user_id = $2`,
+      [orderId, userId],
+    );
+    if (owned.length === 0) {
+      throw new NotFoundException('orders.errors.notFound');
+    }
+
+    return this.trackingConversion.convertOnDemand(orderId);
+  }
+
   @Post('orders/:orderId/link-amazon')
   async linkAmazonOrder(
     @Req() req: AuthenticatedRequest,
@@ -123,6 +167,26 @@ export class AmazonController {
       return { success: false, message: 'Order not found' };
     }
 
+    // AO quota — checked BEFORE the scrape, which is the expensive half.
+    //
+    // This gate was missing entirely, and `BillingLimitKey.AMAZON_ORDERS_PER_MONTH`'s
+    // own docstring already said the quota covers "auto-fulfill + manual link".
+    // Without it a seller at their limit could place the order on Amazon by
+    // hand and link it here: identical cost to us (browser time, tracking
+    // pipeline, a paid conversion) for zero quota consumed, which made the
+    // automatic-order limit trivially avoidable.
+    //
+    // The reservation is idempotent on the eBay order id, so re-linking the
+    // same order — a retry, or fixing a typo'd Amazon order id — never spends
+    // a second slot.
+    const quota = await this.quotaEnforcement.reserveAmazonOrder(
+      userId,
+      orders[0].ebay_order_id,
+    );
+    if (!quota.allowed) {
+      throw new ConflictException('billing.errors.quotaExhausted');
+    }
+
     try {
       // Scrape the Amazon order
       const scrapedData = await this.scrapingService.scrapeOrder(
@@ -141,6 +205,10 @@ export class AmazonController {
         await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id, {
           scrapeFailed: true,
         });
+        // Nothing was linked, so the slot must go back. A reservation held for
+        // an order that never linked is a slot the seller can never recover —
+        // the same leak the auto-fulfill path releases for on BLOCKED/FAILED.
+        await this.quotaEnforcement.releaseAmazonOrder(userId, orders[0].ebay_order_id);
         return {
           success: false,
           linked: false,
@@ -199,6 +267,8 @@ export class AmazonController {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to link Amazon order: ${message}`);
+      // Same reason as above: the link did not happen, so the slot is not owed.
+      await this.quotaEnforcement.releaseAmazonOrder(userId, orders[0].ebay_order_id);
       return { success: false, message };
     }
   }

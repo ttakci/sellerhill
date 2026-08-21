@@ -48,6 +48,8 @@ interface OrderRow {
   amazon_order_id: string | null;
   amazon_order_url: string;
   amazon_tracking_url: string;
+  amazon_tracking_number: string | null;
+  converted_tracking_number: string | null;
   amazon_tax: string;
   amazon_shipping: string;
   transaction_fee: string;
@@ -477,6 +479,8 @@ export class OrdersService {
       amazonOrderId: row.amazon_order_id || null,
       amazonOrderUrl: row.amazon_order_url || undefined,
       amazonTrackingUrl: row.amazon_tracking_url || undefined,
+      amazonTrackingNumber: row.amazon_tracking_number || null,
+      convertedTrackingNumber: row.converted_tracking_number || null,
       amazonTax: row.amazon_tax ? parseFloat(row.amazon_tax) : undefined,
       amazonShipping: row.amazon_shipping ? parseFloat(row.amazon_shipping) : undefined,
       netProfit: parseFloat(row.net_profit) || 0,

@@ -104,6 +104,7 @@ export const BuyerMessageTemplateDrawer: React.FC<BuyerMessageTemplateDrawerProp
       return;
     }
     const onSuccess = (): void => {
+      onClose();
       showMessage(
         {
           type: 'success',
@@ -111,10 +112,7 @@ export const BuyerMessageTemplateDrawer: React.FC<BuyerMessageTemplateDrawerProp
           descriptionKey: 'translation:message.success.saved',
           primaryButton: {
             labelKey: 'translation:common.ok',
-            onClick: () => {
-              closeMessage();
-              onClose();
-            },
+            onClick: closeMessage,
           },
         },
         t,

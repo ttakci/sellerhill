@@ -24,7 +24,7 @@ export const CardHeader = styled.div<{ $variant: SettingsCardVariant }>`
       : `${tkn('spacing.lg')({ theme })} ${tkn('spacing.sm-md+')({ theme })} ${tkn('spacing.sm-md+')({ theme })}`};
   border-bottom: none;
   display: flex;
-  justify-content: ${({ $variant }) => ($variant === 'panel' ? 'space-between' : 'flex-start')};
+  justify-content: space-between;
   align-items: center;
   gap: ${tkn('spacing.md')};
   background: ${tkn('colors.surface.primary')};

@@ -51,6 +51,17 @@ const TYPE = {
   micro: '0.8125rem' /* 13px */,
 };
 
+/**
+ * One tick above `TYPE.small` (14px → 15px), for the navbar row only. Live
+ * feedback (2026-08-20) was that the nav read smaller than sellerboard.com/tr
+ * despite matching its measured 14px — sellerboard's nav sits inside a taller,
+ * more padded bar, which reads as bigger even at the same font size. Bumping
+ * the navbar's own type by one step (rather than touching the measured `TYPE`
+ * scale above, which several sections besides the navbar still rely on)
+ * closes that gap without re-deriving sellerboard's numbers.
+ */
+const NAV_FONT_SIZE = '0.9375rem' /* 15px */;
+
 export const Reveal = styled.div<{ $visible: boolean; $delay?: number }>`
   opacity: ${(p) => (p.$visible ? 1 : 0)};
   transform: translateY(${(p) => (p.$visible ? '0' : '18px')})
@@ -113,14 +124,14 @@ export const Navbar = styled.header<{ $scrolled: boolean }>`
 export const NavInner = styled.nav`
   max-width: ${CONTENT_MAX};
   margin: 0 auto;
-  padding: 0.875rem ${tkn('spacing.xl')};
+  padding: 1.375rem ${tkn('spacing.xl')};
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.md')};
 
   @media (max-width: 1080px) {
-    padding: 0.75rem ${tkn('spacing.md')};
+    padding: 1.125rem ${tkn('spacing.md')};
   }
 `;
 
@@ -184,7 +195,7 @@ export const NavLink = styled.button`
   border: none;
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
+  font-size: ${NAV_FONT_SIZE};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.sidebar.text')};
   padding: 0.5rem 0.75rem;
@@ -204,7 +215,7 @@ export const NavDropdownTrigger = styled.div`
   white-space: nowrap;
   gap: 0.3125rem;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
+  font-size: ${NAV_FONT_SIZE};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.sidebar.text')};
   padding: 0.5rem 0.75rem;
@@ -256,7 +267,7 @@ export const LanguageTrigger = styled.div<{ $onDark?: boolean }>`
 export const LanguageText = styled.span<{ $onDark?: boolean }>`
   white-space: nowrap;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
+  font-size: ${NAV_FONT_SIZE};
   font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
   color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
   transition: color 140ms ease;
@@ -273,12 +284,12 @@ export const LoginButton = styled.button<{ $block?: boolean; $onDark?: boolean }
   align-items: center;
   flex-shrink: 0;
   white-space: nowrap;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.xs')};
   background: none;
   border: ${(p) => (p.$block ? `1px solid ${tkn('colors.landing.heroBorder')(p)}` : 'none')};
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
+  font-size: ${NAV_FONT_SIZE};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
   padding: 0.5rem ${(p) => (p.$block ? '1rem' : '0.5rem')};
@@ -308,7 +319,7 @@ export const NavCta = styled.button<{ $block?: boolean }>`
   border: none;
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
+  font-size: ${NAV_FONT_SIZE};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${tkn('colors.landing.onAccent')};
   padding: 0.5rem 1.125rem;
@@ -1374,40 +1385,51 @@ export const DemoNote = styled.p`
  * Pricing
  * ========================================================================= */
 
-export const PricingToggleRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.sm')};
-  margin-bottom: ${tkn('spacing.xl')};
-`;
-
-export const PricingSavingsBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.625rem;
-  border-radius: 999px;
-  background: ${tkn('colors.semanticTint.success')};
-  color: ${tkn('colors.semantic.success')};
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  white-space: nowrap;
-`;
-
-export const PlanPeriodNote = styled.span`
-  display: block;
-  margin-top: 0.125rem;
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  color: ${tkn('colors.text.tertiary')};
-`;
-
 export const PricingGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
   gap: ${tkn('spacing.lg')};
   align-items: stretch;
+`;
+
+/** Row holding the "show all plans" expander under the pricing grid. */
+export const PricingExpandRow = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: ${tkn('spacing.lg')};
+`;
+
+/**
+ * Expander that reveals the rest of the catalog in place. The full plan list
+ * lives behind auth at /billing, so a visitor has to be able to see every tier
+ * without leaving this page.
+ */
+export const PricingExpandButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  padding: 0.625rem 1.25rem;
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: 999px;
+  background: ${tkn('colors.surface.primary')};
+  color: ${tkn('colors.brand.primary')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.body};
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:hover {
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    box-shadow: ${tkn('colors.landing.shadowSoft')};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${tkn('colors.brand.primary')};
+    outline-offset: 2px;
+  }
 `;
 
 export const PricingCard = styled.div<{ $highlight?: boolean }>`

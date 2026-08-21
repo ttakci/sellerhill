@@ -165,6 +165,16 @@
         "title": "Automatic purchasing is off",
         "description": "Your Amazon accounts are connected but none is cleared to buy. Turn it on with a spend cap and new orders are purchased for you.",
         "action": "Enable it"
+      },
+      "plan_conversion_quota": {
+        "title": "Monthly tracking conversion limit almost reached",
+        "description": "You have used {{used}} of {{limit}} tracking conversions this month. Once it is reached, orders still ship and eBay still gets a tracking number — but it will be the original Amazon one, so buyers can see your supplier.",
+        "action": "View plan"
+      },
+      "plan_suspended": {
+        "title": "Automation is suspended",
+        "description": "Your subscription is no longer active, so new listings, price and stock updates, automatic purchasing and tracking conversion have stopped. Choose a plan to resume — everything restarts on its own.",
+        "action": "Choose a plan"
       }
     },
     "reasons": {

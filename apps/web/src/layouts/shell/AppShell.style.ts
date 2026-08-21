@@ -264,8 +264,9 @@ export const NavItem = styled.div<{ $active?: boolean; $isCollapsed: boolean; $i
  * drawn from the semantic palette against the sidebar's own ink instead.
  *
  * `$urgent` is the only colour decision: red when something critical is
- * waiting, neutral-bright otherwise. The count itself is the information, so
- * the chip must never be the loudest thing in the nav when nothing is on fire.
+ * waiting, brand blue for informational actions. The count itself is the
+ * information, so the chip must never be the loudest thing in the nav when
+ * nothing is on fire.
  */
 export const NavBadge = styled.span<{ $urgent: boolean }>`
   display: inline-flex;
@@ -278,11 +279,11 @@ export const NavBadge = styled.span<{ $urgent: boolean }>`
   flex-shrink: 0;
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.xs')};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: ${tkn('typography.fontWeight.bold')};
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  color: ${tkn('colors.text.inverse')};
-  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : theme.colors.semantic.warning)};
+  color: ${({ theme, $urgent }) => ($urgent ? theme.colors.text.inverse : theme.colors.brand.primary)};
+  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : '#FFFFFF')};
 `;
 
 /**
@@ -298,7 +299,8 @@ export const NavBadgeDot = styled.span<{ $urgent: boolean }>`
   width: 0.5rem;
   height: 0.5rem;
   border-radius: ${tkn('radius.full')};
-  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : theme.colors.semantic.warning)};
+  background: ${({ theme, $urgent }) => ($urgent ? theme.colors.semantic.error : '#FFFFFF')};
+  border: 0.0625rem solid ${({ theme, $urgent }) => ($urgent ? 'transparent' : theme.colors.brand.primary)};
 `;
 
 export const NavItemContent = styled.div<{ $isCollapsed: boolean }>`
@@ -505,6 +507,19 @@ export const HeaderContainer = styled.header`
   box-shadow: ${tkn('shadows.sm')};
   width: 100%;
   box-sizing: border-box;
+
+  /*
+   * Below this breakpoint BreadcrumbArea wraps onto its own second line
+   * (flex-basis: 100%), and the sidebar is an off-canvas overlay rather
+   * than an inline rail, so the "match SidebarBrandRow's height" constraint
+   * above doesn't apply here. Without this override the fixed single-line
+   * height clipped the wrapped breadcrumb flush against the border below it.
+   */
+  @media (max-width: ${tkn('breakpoints.mdBelow')}) {
+    height: auto;
+    min-height: ${APP_CHROME_HEIGHT};
+    max-height: none;
+  }
 `;
 
 export const HeaderInner = styled.div`
@@ -518,8 +533,12 @@ export const HeaderInner = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tkn('spacing.sm')};
-  /* Vertical: none — height comes from HeaderContainer; H-pad matches ContentInner */
-  padding: 0 ${tkn('spacing.lg')};
+  /*
+   * Vertical padding here (not just horizontal) on mobile, where the row
+   * wraps onto two lines and needs breathing room above/below — desktop
+   * stays 0 since HeaderContainer's fixed height + centering handles it.
+   */
+  padding: ${tkn('spacing.sm+')} ${tkn('spacing.lg')};
   box-sizing: border-box;
 
   @media (min-width: 48rem) {

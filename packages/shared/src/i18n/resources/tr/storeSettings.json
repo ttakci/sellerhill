@@ -88,6 +88,12 @@
         "resetConfirm": "Orijinal varsayılan mesaj geri yüklensin mi? Metinde yaptığınız değişiklikler kaybolacak.",
         "deleteConfirmDescription": "\"{{name}}\" kalıcı olarak silinecek. Bu şablon aktif bir mesajlaşma olayında kullanılıyorsa, siz başka bir şablon seçene kadar o olay için mesaj gönderilmeyecek."
       }
-    }
+    },
+    "trackingConversionScope": "Hangi kargolar dönüştürülsün",
+    "trackingConversionScopeAll": "Tüm kargo firmaları",
+    "trackingConversionScopeAmazonOnly": "Sadece Amazon Logistics (TBA)",
+    "trackingConversionScopeHint": "Amazon Logistics (TBA) numaraları doğrudan \"Amazon\" der; sadece onları dönüştürmek tedarikçinizin en açık işaretini gizler ve aylık dönüşüm hakkınızdan çok daha az harcar. Tüm kargoları dönüştürmek daha fazlasını gizler — Amazon’dan çıkan bir UPS ya da USPS numarası çoğu zaman sorgulanabilir — ama daha pahalıdır ve alıcı \"ürün gelmedi\" derse eBay gerçek kargo firmasının kaydını daha güçlü kanıt sayar.",
+    "trackingConvertManualOrders": "Elle bağladığım siparişleri de dönüştür",
+    "trackingConvertManualOrdersHint": "Varsayılan olarak açık. Elle bağlanan siparişleri tek tek sipariş sayfasından dönüştürmeyi tercih ederseniz kapatın."
   }
 }

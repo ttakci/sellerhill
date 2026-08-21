@@ -60,6 +60,24 @@ export const amazonApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Orders', 'Amazon'],
     }),
+    /**
+     * Convert this order's tracking number on demand.
+     *
+     * `reasonKey` is an i18n key, not a sentence — the backend has no locale.
+     * `converted: false` with a reasonKey is a normal, expected outcome (no
+     * tracking number yet, quota exhausted, provider unavailable), not an
+     * error, so the caller shows the reason rather than a failure dialog.
+     */
+    convertOrderTracking: builder.mutation<
+      { converted: boolean; trackingNumber: string | null; reasonKey: string | null },
+      { orderId: string }
+    >({
+      query: ({ orderId }) => ({
+        url: `/amazon/orders/${orderId}/convert-tracking`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Orders'],
+    }),
   }),
 });
 
@@ -70,4 +88,5 @@ export const {
   useDeleteAmazonAccountMutation,
   useVerifyAmazonAccountMutation,
   useLinkAmazonOrderMutation,
+  useConvertOrderTrackingMutation,
 } = amazonApi;

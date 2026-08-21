@@ -6,6 +6,7 @@ import {
 
 import {
   AquilineTrackingConverter,
+  isAmazonLogisticsTracking,
   isExternalProvider,
   LocalTrackingConverter,
   resolveConverter,
@@ -137,6 +138,54 @@ describe('AQUILINE_TRACKING_NUMBER_PATTERN', () => {
       'AQ12345',
     ]) {
       expect(AQUILINE_TRACKING_NUMBER_PATTERN.test(bad)).toBe(false);
+    }
+  });
+});
+
+describe('isAmazonLogisticsTracking', () => {
+  // This predicate now decides TWO things: which eBay carrier code a
+  // pass-through gets, and whether the AMAZON_LOGISTICS_ONLY conversion scope
+  // pays for a shipment. They must never disagree, which is why there is one
+  // function and not a second regex in the conversion service.
+  it.each(['TBA123456789', 'TBM000111222', 'TBC999', 'tba123456789'])(
+    'recognises the TB* family: %s',
+    (num) => {
+      expect(isAmazonLogisticsTracking(num, '')).toBe(true);
+    },
+  );
+
+  it('recognises an Amazon carrier label regardless of number shape', () => {
+    expect(isAmazonLogisticsTracking('9400111899223', 'Amazon Logistics')).toBe(true);
+    expect(isAmazonLogisticsTracking('X1', 'AMZL')).toBe(false);
+  });
+
+  it('does not claim real carriers', () => {
+    expect(isAmazonLogisticsTracking('1Z999AA10123456784', 'UPS')).toBe(false);
+    expect(isAmazonLogisticsTracking('9400111899223', 'USPS')).toBe(false);
+    expect(isAmazonLogisticsTracking('771234567890', 'FedEx')).toBe(false);
+  });
+
+  it('handles empty / missing input without claiming Amazon', () => {
+    expect(isAmazonLogisticsTracking('', '')).toBe(false);
+    expect(isAmazonLogisticsTracking(null, null)).toBe(false);
+    expect(isAmazonLogisticsTracking(undefined, undefined)).toBe(false);
+  });
+
+  it('agrees with the carrier code the local converter picks', () => {
+    // The invariant that matters: anything the mapper labels Amazon_Logistics
+    // must also be in scope for AMAZON_LOGISTICS_ONLY, and vice versa.
+    const converter = new LocalTrackingConverter();
+    const cases: Array<[string, string]> = [
+      ['TBA123456789', ''],
+      ['1Z999AA10123456784', 'UPS'],
+      ['9400111899223', 'USPS'],
+      ['ANY', 'Amazon Logistics'],
+    ];
+    for (const [num, car] of cases) {
+      const result = converter.convertSync({ rawNumber: num, rawCarrier: car, orderId: 'o1' });
+      expect(result.shippingCarrierCode === 'Amazon_Logistics').toBe(
+        isAmazonLogisticsTracking(num, car),
+      );
     }
   });
 });

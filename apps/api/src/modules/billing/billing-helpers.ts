@@ -4,8 +4,6 @@
 // the minimal Jest harness (mirrors profit-calculation.ts / order-matcher.ts).
 // Exported for the provider/service/processor layers.
 
-import { createHmac, timingSafeEqual } from 'node:crypto';
-
 import {
   BillingInterval,
   BillingLimitKey,
@@ -18,11 +16,7 @@ import {
   type BillingUsagePeriodDto,
 } from '@repo/shared';
 
-import {
-  BillingProvider,
-  type BillingSummaryDto,
-  type ParsedPaddleEvent,
-} from './billing.types';
+import { BillingProvider, type BillingSummaryDto } from './billing.types';
 
 // ---------------------------------------------------------------------------
 // Config resolution (pure — reads env, returns typed config)
@@ -30,52 +24,53 @@ import {
 
 export interface BillingConfig {
   enforcementEnabled: boolean;
+  /** `stripe` when a secret key is configured, else `local` — see
+   *  {@link BillingProvider}. This is a derived status for the wire DTOs, NOT
+   *  a choice between implementations: Stripe is the only payment provider. */
   provider: BillingProvider;
-  paddleApiKey: string | null;
-  paddleWebhookSecret: string | null;
-  paddleEnvironment: 'sandbox' | 'production';
-  paddleCheckoutBaseUrl: string;
-  paddleApiBaseUrl: string;
+  /** The app's own frontend base URL — used to build Stripe Checkout's
+   *  success_url/cancel_url and the Billing Portal's return_url. Same env var
+   *  (with the same default) already used by ebay.controller.ts's OAuth
+   *  redirects and auth.service.ts. */
+  frontendUrl: string;
+  stripeSecretKey: string | null;
+  stripeWebhookSecret: string | null;
   webhookStaleMinutes: number;
   webhookMaxAttempts: number;
 }
 
 /**
  * Resolve billing config from env. Pure — called once at module init and on
- * each request that needs fresh values. The provider is `paddle` only when
- * both an API key and webhook secret are present; otherwise `local` (the
- * fail-safe). This is the single seam that decides whether checkout/portal
- * can run.
+ * each request that needs fresh values. This is the single seam that decides
+ * whether checkout/portal can run.
+ *
+ * There is no provider selection: Stripe is the only payment provider, and
+ * its own test mode covers local dev and the test environment (that is why no
+ * stand-in "local provider" exists — it would never be exercised). `provider`
+ * is purely a derived status for the catalog/summary DTOs: `stripe` once a
+ * secret key is present, `local` while it is not, so the FE can hide the
+ * checkout button rather than surface a 409 after the click.
  */
 export function resolveBillingConfig(env: NodeJS.ProcessEnv = process.env): BillingConfig {
-  const enforcementEnabled = parseBoolean(env.BILLING_ENFORCEMENT_ENABLED, false);
-  const paddleApiKey = env.PADDLE_API_KEY ? String(env.PADDLE_API_KEY) : null;
-  const paddleWebhookSecret = env.PADDLE_WEBHOOK_SECRET ? String(env.PADDLE_WEBHOOK_SECRET) : null;
-  // A provider is "configured" when we can both verify webhooks AND call the
-  // API. Requiring both avoids a half-configured state where checkout works
-  // but webhooks silently 401, or vice versa.
-  const provider: BillingProvider =
-    paddleApiKey && paddleWebhookSecret ? BillingProvider.PADDLE : BillingProvider.LOCAL;
+  const stripeSecretKey = env.STRIPE_SECRET_KEY ? String(env.STRIPE_SECRET_KEY) : null;
   return {
-    enforcementEnabled,
-    provider,
-    paddleApiKey,
-    paddleWebhookSecret,
-    paddleEnvironment: (env.PADDLE_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox',
-    paddleCheckoutBaseUrl: env.PADDLE_CHECKOUT_BASE_URL || 'https://checkout.paddle.com',
-    paddleApiBaseUrl: env.PADDLE_API_BASE_URL || 'https://api.paddle.com',
+    enforcementEnabled: parseBoolean(env.BILLING_ENFORCEMENT_ENABLED, false),
+    provider: stripeSecretKey ? BillingProvider.STRIPE : BillingProvider.LOCAL,
+    frontendUrl: env.FRONTEND_URL || 'http://localhost:5173',
+    stripeSecretKey,
+    stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET ? String(env.STRIPE_WEBHOOK_SECRET) : null,
     webhookStaleMinutes: parseNumber(env.BILLING_WEBHOOK_STALE_MINUTES, 1440),
     webhookMaxAttempts: parseNumber(env.BILLING_WEBHOOK_MAX_ATTEMPTS, 5),
   };
 }
 
 /**
- * True when a real billing provider is configured (Paddle env present). The
- * `local` provider is the fail-safe — checkout/portal/webhook-processing
- * gate on this.
+ * True when Stripe is configured and checkout/portal can actually run.
+ * Callers (BillingService) gate on this so an unconfigured deployment returns
+ * a clean 409 instead of a provider error.
  */
 export function isProviderConfigured(config: BillingConfig): boolean {
-  return config.provider !== BillingProvider.LOCAL;
+  return Boolean(config.stripeSecretKey);
 }
 
 function parseBoolean(raw: string | undefined, def: boolean): boolean {
@@ -260,94 +255,6 @@ export function isStaleEvent(occurredAt: string | null, staleMinutes: number, no
   if (Number.isNaN(occurred)) {return false;}
   const ageMs = now.getTime() - occurred;
   return ageMs > staleMinutes * 60_000;
-}
-
-// ---------------------------------------------------------------------------
-// Paddle webhook signature verification (pure, uses node:crypto)
-// ---------------------------------------------------------------------------
-
-/**
- * Paddle signs webhooks with an HMAC-SHA256 tag transmitted in the
- * `Paddle-Signature` header as `ts=<unix-seconds>;h1=<hex-hmac>`. The tag is
- * computed over `<ts>:<raw-body>`. This helper verifies the tag in constant
- * time and rejects tags older than the tolerance window (replay protection).
- *
- * Returns true iff the signature is valid AND the timestamp is within
- * `toleranceSeconds` of `now`. Returns false on any mismatch, missing header,
- * or malformed header — callers MUST treat false as a 401.
- *
- * Spec: https://developer.paddle.com/webhooks/overview/verify-a-webhook
- */
-export function verifyPaddleSignature(
-  signatureHeader: string | undefined,
-  rawBody: string,
-  secret: string,
-  toleranceSeconds = 300,
-  now: Date = new Date(),
-): boolean {
-  if (!signatureHeader || !secret) {return false;}
-  const parts = parseSignatureHeader(signatureHeader);
-  if (!parts) {return false;}
-  const { ts, h1 } = parts;
-
-  // Replay protection: reject timestamps outside the tolerance window.
-  const tsSeconds = Number(ts);
-  if (!Number.isFinite(tsSeconds)) {return false;}
-  const nowSeconds = Math.floor(now.getTime() / 1000);
-  if (Math.abs(nowSeconds - tsSeconds) > toleranceSeconds) {return false;}
-
-  const expected = createHmac('sha256', secret).update(`${ts}:${rawBody}`).digest('hex');
-  return constantTimeEqual(expected, h1);
-}
-
-interface ParsedSignature {
-  ts: string;
-  h1: string;
-}
-
-export function parseSignatureHeader(header: string): ParsedSignature | null {
-  // Format: ts=<unix>;h1=<hex>
-  let ts: string | null = null;
-  let h1: string | null = null;
-  for (const part of header.split(';')) {
-    const trimmed = part.trim();
-    if (trimmed.startsWith('ts=')) {ts = trimmed.slice(3);}
-    else if (trimmed.startsWith('h1=')) {h1 = trimmed.slice(3);}
-  }
-  if (ts === null || h1 === null) {return null;}
-  return { ts, h1 };
-}
-
-function constantTimeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {return false;}
-  try {
-    return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
-  } catch {
-    return false;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Paddle event parsing (pure)
-// ---------------------------------------------------------------------------
-
-/**
- * Extract the idempotency/event id, type, and occurred-at from a Paddle
- * webhook payload. Paddle's shape:
- *   { event_id: 'evt_...', event_type: 'subscription.created', occurred_at: '...', data: {...} }
- * All fields are optional in the raw payload; we coerce to null when missing.
- */
-export function parsePaddleEvent(payload: unknown): ParsedPaddleEvent {
-  const obj = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
-  const eventId = typeof obj.event_id === 'string' ? obj.event_id : null;
-  const eventType = typeof obj.event_type === 'string' ? obj.event_type : 'unknown';
-  const occurredAt = typeof obj.occurred_at === 'string' ? obj.occurred_at : null;
-  return {
-    eventId,
-    eventType,
-    occurredAt,
-    payload: obj ,
-  };
 }
 
 // ---------------------------------------------------------------------------

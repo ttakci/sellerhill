@@ -1,9 +1,9 @@
-import { Dropdown, Icon, type IconName, Logo, SegmentedControl, TabNav } from '@repo/ui';
+import { Dropdown, Icon, type IconName, Logo, TabNav } from '@repo/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './LandingPage.style';
-import type { LandingBillingInterval, LandingPageProps } from './LandingPage.types';
+import type { LandingPageProps } from './LandingPage.types';
 
 /**
  * Screenshots are real captures from the sign-up-free demo account (never
@@ -45,7 +45,16 @@ const PRODUCTS = ['productA', 'productB', 'productC'] as const;
 const PRODUCT_SETTINGS = ['margin', 'stock', 'template'] as const;
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
-const FALLBACK_PLANS = ['starter', 'growth', 'scale'] as const;
+const FALLBACK_PLANS = ['nano', 'starter', 'growth', 'pro'] as const;
+
+/**
+ * Capabilities every plan includes. The catalog meters exactly two things —
+ * active listings and monthly automatic orders — and gates no feature behind a
+ * tier, so one shared list is the honest rendering. A per-plan "everything in
+ * X, plus…" ladder would be inventing feature tiers that the product does not
+ * enforce, and would need twelve copies to drift out of sync.
+ */
+const INCLUDED_FEATURE_KEYS = ['sync', 'autoOrder', 'tracking', 'profit', 'support'] as const;
 
 export const LandingPageComponent = ({
   currentLocale,
@@ -60,16 +69,26 @@ export const LandingPageComponent = ({
   onToggleMobileMenu,
   onCloseMobileMenu,
 }: LandingPageProps): React.ReactElement => {
-  const { t } = useTranslation('translation');
+  const { t } = useTranslation(['translation', 'billing']);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [revealState, setRevealState] = useState<Record<string, boolean>>({});
   const [activeFeatureKey, setActiveFeatureKey] = useState<string>(FEATURES[0].key);
   const [activeProfitTab, setActiveProfitTab] = useState<ProfitTabId>('overview');
-  const [billingInterval, setBillingInterval] = useState<LandingBillingInterval>('monthly');
+  const [showAllPlans, setShowAllPlans] = useState(false);
 
   const toggleFaq = useCallback((index: number) => {
     setOpenFaq((prev) => (prev === index ? null : index));
   }, []);
+
+  const includedFeatures = INCLUDED_FEATURE_KEYS.map((key) =>
+    t(`translation:landing.pricing.included.${key}`)
+  );
+  const featuredPlans = pricingPlans.filter((plan) => plan.isFeatured);
+  // Fall back to the whole catalog if no slug matched — a catalog rename must
+  // not empty the pricing section.
+  const collapsedPlans = featuredPlans.length > 0 ? featuredPlans : pricingPlans;
+  const visiblePlans = showAllPlans ? pricingPlans : collapsedPlans;
+  const hasHiddenPlans = collapsedPlans.length < pricingPlans.length;
 
   // Scroll-reveal — purely visual, so it lives in the presentation layer.
   useEffect(() => {
@@ -176,7 +195,7 @@ export const LandingPageComponent = ({
               ]}
             />
             <S.LoginButton $onDark type="button" onClick={onNavigateLogin}>
-              <Icon name="user" size={15} />
+              <Icon name="user" size={18} />
               {t('translation:landing.navbar.login')}
             </S.LoginButton>
             <S.NavCta type="button" onClick={onNavigateRegister}>
@@ -556,117 +575,106 @@ export const LandingPageComponent = ({
         {pricingCatalogError ? (
           <S.CatalogError>{t('translation:landing.pricing.catalogError')}</S.CatalogError>
         ) : null}
-        {pricingPlans.length > 0 ? (
-          <S.PricingToggleRow>
-            <SegmentedControl
-              size="md"
-              value={billingInterval}
-              onChange={(value) => setBillingInterval(value as LandingBillingInterval)}
-              options={[
-                { value: 'monthly', label: t('translation:landing.pricing.interval.monthly') },
-                { value: 'annual', label: t('translation:landing.pricing.interval.annual') },
-              ]}
-            />
-            {billingInterval === 'annual' && pricingPlans[0]?.annualSavingsMonths ? (
-              <S.PricingSavingsBadge>
-                {t('translation:landing.pricing.interval.annualSavings', {
-                  months: pricingPlans[0].annualSavingsMonths,
-                })}
-              </S.PricingSavingsBadge>
-            ) : null}
-          </S.PricingToggleRow>
-        ) : null}
         <S.Reveal $visible={seen('pricing')} $delay={1}>
           <S.PricingGrid>
             {pricingPlans.length > 0
-              ? pricingPlans.map((plan) => {
-                  const features = t(`translation:landing.pricing.${plan.slug}.features`, {
-                    returnObjects: true,
-                  }) as string[];
-                  const showAnnual = billingInterval === 'annual' && plan.priceDisplayAnnualPerMonth;
-                  const amount = showAnnual ? plan.priceDisplayAnnualPerMonth : plan.priceDisplayMonthly;
+              ? visiblePlans.map((plan) => {
                   return (
                     <S.PricingCard key={plan.slug} $highlight={plan.isHighlighted}>
                       {plan.isHighlighted ? (
                         <S.PlanBadge>{t('translation:landing.pricing.mostPopular')}</S.PlanBadge>
                       ) : null}
-                      <S.PlanName>{t(`translation:landing.pricing.${plan.slug}.name`)}</S.PlanName>
+                      <S.PlanName>{t(`billing:billing.plans.${plan.slug}.name`)}</S.PlanName>
                       <S.PlanPrice>
-                        <S.PlanAmount>{amount}</S.PlanAmount>
+                        <S.PlanAmount>{plan.priceDisplayMonthly}</S.PlanAmount>
                         <S.PlanPeriod>{t('translation:landing.pricing.perMonth')}</S.PlanPeriod>
                       </S.PlanPrice>
-                      {showAnnual && plan.priceDisplayAnnual ? (
-                        <S.PlanPeriodNote>
-                          {t('translation:landing.pricing.interval.billedAnnually', {
-                            price: plan.priceDisplayAnnual,
-                          })}
-                        </S.PlanPeriodNote>
-                      ) : null}
-                      <S.PlanDesc>{t(`translation:landing.pricing.${plan.slug}.description`)}</S.PlanDesc>
+                      <S.PlanDesc>{t(`billing:billing.plans.${plan.slug}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
                         <S.PlanFeature>
                           <Icon name="check-circle" size={15} color="semantic.success" />
                           <span>{plan.listingsDisplay}</span>
                         </S.PlanFeature>
-                        {Array.isArray(features)
-                          ? features.map((feat) => (
-                              <S.PlanFeature key={feat}>
-                                <Icon name="check-circle" size={15} color="semantic.success" />
-                                <span>{feat}</span>
-                              </S.PlanFeature>
-                            ))
-                          : null}
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{plan.trackingConversionsDisplay}</span>
+                        </S.PlanFeature>
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>{plan.amazonOrdersDisplay}</span>
+                        </S.PlanFeature>
+                        {includedFeatures.map((feat) => (
+                          <S.PlanFeature key={feat}>
+                            <Icon name="check-circle" size={15} color="semantic.success" />
+                            <span>{feat}</span>
+                          </S.PlanFeature>
+                        ))}
                       </S.PlanFeatures>
                       <S.PlanCta type="button" $highlight={plan.isHighlighted} onClick={onNavigateRegister}>
-                        {t(`translation:landing.pricing.${plan.slug}.cta`)}
+                        {t('translation:landing.pricing.planCta')}
                       </S.PlanCta>
                     </S.PricingCard>
                   );
                 })
               : FALLBACK_PLANS.map((plan) => {
-                  const features = t(`translation:landing.pricing.catalogFallback.${plan}.features`, {
-                    returnObjects: true,
-                  }) as string[];
                   const highlight = plan === 'growth';
                   return (
                     <S.PricingCard key={plan} $highlight={highlight}>
                       {highlight ? (
-                        <S.PlanBadge>
-                          {t('translation:landing.pricing.catalogFallback.growth.badge')}
-                        </S.PlanBadge>
+                        <S.PlanBadge>{t('translation:landing.pricing.mostPopular')}</S.PlanBadge>
                       ) : null}
-                      <S.PlanName>
-                        {t(`translation:landing.pricing.catalogFallback.${plan}.name`)}
-                      </S.PlanName>
+                      <S.PlanName>{t(`billing:billing.plans.${plan}.name`)}</S.PlanName>
                       <S.PlanPrice>
                         <S.PlanAmount>
                           {t(`translation:landing.pricing.catalogFallback.${plan}.price`)}
                         </S.PlanAmount>
-                        <S.PlanPeriod>
-                          {t(`translation:landing.pricing.catalogFallback.${plan}.period`)}
-                        </S.PlanPeriod>
+                        <S.PlanPeriod>{t('translation:landing.pricing.perMonth')}</S.PlanPeriod>
                       </S.PlanPrice>
-                      <S.PlanDesc>
-                        {t(`translation:landing.pricing.catalogFallback.${plan}.description`)}
-                      </S.PlanDesc>
+                      <S.PlanDesc>{t(`billing:billing.plans.${plan}.description`)}</S.PlanDesc>
                       <S.PlanFeatures>
-                        {Array.isArray(features)
-                          ? features.map((feat) => (
-                              <S.PlanFeature key={feat}>
-                                <Icon name="check-circle" size={15} color="semantic.success" />
-                                <span>{feat}</span>
-                              </S.PlanFeature>
-                            ))
-                          : null}
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.listings`)}
+                          </span>
+                        </S.PlanFeature>
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.conversions`)}
+                          </span>
+                        </S.PlanFeature>
+                        <S.PlanFeature>
+                          <Icon name="check-circle" size={15} color="semantic.success" />
+                          <span>
+                            {t(`translation:landing.pricing.catalogFallback.${plan}.orders`)}
+                          </span>
+                        </S.PlanFeature>
+                        {includedFeatures.map((feat) => (
+                          <S.PlanFeature key={feat}>
+                            <Icon name="check-circle" size={15} color="semantic.success" />
+                            <span>{feat}</span>
+                          </S.PlanFeature>
+                        ))}
                       </S.PlanFeatures>
                       <S.PlanCta type="button" $highlight={highlight} onClick={onNavigateRegister}>
-                        {t(`translation:landing.pricing.catalogFallback.${plan}.cta`)}
+                        {t('translation:landing.pricing.planCta')}
                       </S.PlanCta>
                     </S.PricingCard>
                   );
                 })}
           </S.PricingGrid>
         </S.Reveal>
+        {hasHiddenPlans ? (
+          <S.PricingExpandRow>
+            <S.PricingExpandButton type="button" onClick={() => setShowAllPlans((prev) => !prev)}>
+              {showAllPlans
+                ? t('translation:landing.pricing.showFewerPlans')
+                : t('translation:landing.pricing.showAllPlans', { count: pricingPlans.length })}
+              <Icon name={showAllPlans ? 'chevron-up' : 'chevron-down'} size={16} />
+            </S.PricingExpandButton>
+          </S.PricingExpandRow>
+        ) : null}
         <S.BillingNote>{t('translation:landing.pricing.billingNote')}</S.BillingNote>
       </S.Section>
 

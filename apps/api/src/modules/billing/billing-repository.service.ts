@@ -12,6 +12,10 @@ import {
   BillingSubscriptionStatus,
   BillingUsagePeriodStatus,
   BillingWebhookStatus,
+  ListingStatus,
+  TrackingConversionProvider,
+  TRIAL_PLAN_SLUG,
+  type BillingQuotaAddonDto,
   type BillingCustomerDto,
   type BillingPlanDto,
   type BillingPlanLimitDto,
@@ -32,8 +36,8 @@ import {
   mapPriceRow,
   type BillingConfig,
 } from './billing-helpers';
-import type { ParsedPaddleEvent } from './billing.types';
-import { advisoryLockKey } from './quota-helpers';
+import type { ParsedStripeEvent } from './billing.types';
+import { advisoryLockKey, utcMonthBounds } from './quota-helpers';
 
 
 interface PlanEntity {
@@ -110,6 +114,20 @@ interface UsagePeriodEntity {
   limit_value_snapshot: string;
   status: string;
   closed_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface QuotaAddonEntity {
+  id: string;
+  slug: string;
+  limit_key: string;
+  quantity: string;
+  amount_micros: string;
+  currency: string;
+  is_active: boolean;
+  display_order: number;
+  provider_price_id: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -245,6 +263,295 @@ export class BillingRepositoryService {
     return rows.map((p) => this.mapUsagePeriod(p));
   }
 
+  /**
+   * Open the current calendar month's usage period for a (subscription, limit)
+   * if it is not open already, and close any period whose end has passed.
+   *
+   * THIS IS THE FIX FOR A DEAD TABLE. Nothing in the codebase had ever
+   * INSERTed into `billing_usage_periods` — there was a SELECT and a
+   * close-on-trial-expiry UPDATE and nothing else — so the table was always
+   * empty. Two consequences followed silently, both invisible while
+   * BILLING_ENFORCEMENT_ENABLED was off:
+   *
+   *   1. Monthly counts never reset. The AO count filtered on nothing, so
+   *      reservations accumulated for the life of the subscription: a seller on
+   *      100 orders/month was blocked permanently after their first 100 orders
+   *      ever, not after 100 in a month.
+   *   2. The Action Center's quota items iterate over the open periods, so they
+   *      could never fire — the seller got no warning before the wall.
+   *
+   * Lazy on read rather than a cron: the repo's own idiom (see
+   * `ensureSeeded` for buyer-message templates, `resolveProductData`'s
+   * advisory lock), and a scheduled job is one more thing that can silently
+   * stop running. Concurrency is handled by the table's own
+   * `(subscription_id, limit_key, period_start)` unique constraint.
+   *
+   * Returns the open period's id, or null if it could not be resolved (which
+   * callers treat as "no period" and degrade rather than fail).
+   */
+  async ensureOpenUsagePeriod(
+    subscriptionId: string,
+    kind: BillingLimitKey,
+    limitValue: number,
+    now: Date = new Date(),
+  ): Promise<string | null> {
+    const { periodStart, periodEnd } = utcMonthBounds(now);
+    try {
+      // Close anything that has run out, so a stale period cannot be picked up
+      // as "the current one" below.
+      await this.databaseService.query(
+        `UPDATE billing_usage_periods
+            SET status = 'closed', closed_at = COALESCE(closed_at, NOW()), updated_at = NOW()
+          WHERE subscription_id = $1 AND limit_key = $2
+            AND status = 'open' AND period_end <= $3`,
+        [subscriptionId, kind, periodStart.toISOString()],
+      );
+
+      const rows = await this.databaseService.query<{ id: string }>(
+        `INSERT INTO billing_usage_periods
+           (subscription_id, limit_key, period_start, period_end, limit_value_snapshot, status)
+         VALUES ($1, $2, $3, $4, $5, 'open')
+         ON CONFLICT (subscription_id, limit_key, period_start) DO UPDATE
+           SET updated_at = NOW()
+         RETURNING id`,
+        [
+          subscriptionId,
+          kind,
+          periodStart.toISOString(),
+          periodEnd.toISOString(),
+          limitValue,
+        ],
+      );
+      return rows[0]?.id ?? null;
+    } catch (err) {
+      // A usage period is bookkeeping, not a gate. Failing to open one must not
+      // block a listing or an order.
+      this.logger.warn(
+        `ensureOpenUsagePeriod failed (subscription=${subscriptionId}, key=${kind}): ${(err as Error).message}`,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Count the user's ACTIVE listings.
+   *
+   * The listing quota is a LEVEL, not a monthly flow: CLAUDE.md has always said
+   * "active listings + open reservations", and `countReservedSlots`' own
+   * docstring claimed it counted active listings — but the query only ever
+   * counted reservation rows, and nothing released a reservation when a listing
+   * was ended. So the number could only grow, and "delete one to add one" was
+   * impossible. Counting the listings themselves is what makes ending a listing
+   * free its slot, with no release call to forget.
+   */
+  async countActiveListings(userId: string, client?: PoolClient): Promise<number> {
+    const rows = await this.run<{ cnt: string }>(
+      `SELECT COUNT(*)::text AS cnt FROM listings
+        WHERE user_id = $1 AND status = $2`,
+      [userId, ListingStatus.ACTIVE],
+      client,
+    );
+    return Number(rows[0]?.cnt ?? 0);
+  }
+
+  /**
+   * Count tracking conversions actually performed this calendar month.
+   *
+   * Read straight from `orders` rather than from a reservation ledger, and that
+   * is deliberate. A conversion is a single synchronous act with a durable
+   * record (`tracking_converted_at`), so there is no in-flight window a
+   * reservation would protect — and a ledger is one more thing that can drift
+   * from what really happened. Here the count IS the conversions that occurred:
+   * a failed conversion writes nothing and therefore costs no quota, which is
+   * also the correct billing answer since we only pay the provider on success.
+   */
+  async countMonthlyConversions(
+    userId: string,
+    now: Date = new Date(),
+    client?: PoolClient,
+  ): Promise<number> {
+    const { periodStart } = utcMonthBounds(now);
+    const rows = await this.run<{ cnt: string }>(
+      // Both spellings: `normalizeProvider` collapses the legacy 'api' alias
+      // onto AQUILINE before persisting, but matching only the canonical value
+      // would undercount if any legacy row ever carried the alias — and
+      // undercounting hands out free conversions we have already paid for.
+      `SELECT COUNT(*)::text AS cnt FROM orders
+        WHERE user_id = $1
+          AND tracking_provider IN ($2, $3)
+          AND tracking_converted_at >= $4`,
+      [
+        userId,
+        TrackingConversionProvider.AQUILINE,
+        TrackingConversionProvider.API,
+        periodStart.toISOString(),
+      ],
+      client,
+    );
+    return Number(rows[0]?.cnt ?? 0);
+  }
+
+  // -------------------------------------------------------------------------
+  // Quota top-ups (migration 087)
+  // -------------------------------------------------------------------------
+
+  /** Active top-up packs for a meter, cheapest first. */
+  async listQuotaAddons(limitKey?: BillingLimitKey): Promise<BillingQuotaAddonDto[]> {
+    const rows = await this.databaseService.query<QuotaAddonEntity>(
+      `SELECT * FROM billing_quota_addons
+        WHERE is_active = TRUE
+          AND ($1::text IS NULL OR limit_key = $1)
+        ORDER BY display_order ASC, amount_micros ASC`,
+      [limitKey ?? null],
+    );
+    return rows.map((row) => this.mapQuotaAddon(row));
+  }
+
+  /** One pack by slug, active or not — a purchase in flight must still resolve. */
+  async findQuotaAddonBySlug(slug: string): Promise<BillingQuotaAddonDto | null> {
+    const rows = await this.databaseService.query<QuotaAddonEntity>(
+      `SELECT * FROM billing_quota_addons WHERE slug = $1`,
+      [slug],
+    );
+    return rows.length > 0 ? this.mapQuotaAddon(rows[0]) : null;
+  }
+
+  /**
+   * Extra allowance the user bought for the CURRENT calendar month.
+   *
+   * Summed rather than decremented: a credit raises the ceiling, and usage is
+   * still counted the one way it always was. That is what keeps the number the
+   * seller sees and the number the gate enforces from ever disagreeing — a
+   * separate consumption ledger would be a second accounting of the same
+   * quantity, and those drift.
+   */
+  async sumQuotaCredits(
+    userId: string,
+    limitKey: BillingLimitKey,
+    now: Date = new Date(),
+  ): Promise<number> {
+    const { periodStart } = utcMonthBounds(now);
+    const rows = await this.databaseService.query<{ total: string | null }>(
+      `SELECT COALESCE(SUM(quantity), 0)::text AS total
+         FROM billing_quota_credits
+        WHERE user_id = $1 AND limit_key = $2 AND period_start = $3`,
+      [userId, limitKey, periodStart.toISOString()],
+    );
+    return Number(rows[0]?.total ?? 0);
+  }
+
+  /**
+   * Grant a purchased top-up. Idempotent on `provider_event_id`.
+   *
+   * Returns true only when a row was actually inserted, so a redelivered Stripe
+   * webhook is visible in the log as a no-op rather than looking like a second
+   * sale. The UNIQUE constraint is what enforces this — the webhook inbox also
+   * dedupes, but free allowance is not something to protect with one layer.
+   */
+  async grantQuotaCredit(params: {
+    userId: string;
+    limitKey: BillingLimitKey;
+    quantity: number;
+    addonId: string | null;
+    providerEventId: string;
+    amountMicros: number | null;
+    currency: string | null;
+    now?: Date;
+  }): Promise<boolean> {
+    const { periodStart } = utcMonthBounds(params.now ?? new Date());
+    const rows = await this.databaseService.query<{ id: string }>(
+      `INSERT INTO billing_quota_credits
+         (user_id, limit_key, quantity, period_start, addon_id,
+          provider_event_id, amount_micros, currency)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (provider_event_id) DO NOTHING
+       RETURNING id`,
+      [
+        params.userId,
+        params.limitKey,
+        params.quantity,
+        periodStart.toISOString(),
+        params.addonId,
+        params.providerEventId,
+        params.amountMicros,
+        params.currency,
+      ],
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * The ceiling that is actually enforced: the plan's limit PLUS credits bought
+   * for the current calendar month.
+   *
+   * Lives here, not in a service, because BOTH the quota gate and the billing
+   * summary need it. If the gate resolved the plan limit while the summary
+   * added credits, a seller who topped up would see headroom and still be
+   * refused — the worst possible outcome for something they just paid for.
+   *
+   * The `null` (plan declares no limit) and `-1` (unlimited) sentinels are
+   * returned untouched: adding a credit to "unlimited" is meaningless, and
+   * adding one to "no limit declared" would invent a ceiling out of nothing.
+   */
+  async resolveEffectiveLimit(
+    userId: string,
+    subscriptionId: string,
+    limitKey: BillingLimitKey,
+    now: Date = new Date(),
+  ): Promise<{ limitValue: number | null; creditValue: number }> {
+    const planLimit = await this.resolveLimitValue(subscriptionId, limitKey);
+    if (planLimit === null || planLimit === -1) {
+      return { limitValue: planLimit, creditValue: 0 };
+    }
+    try {
+      const creditValue = await this.sumQuotaCredits(userId, limitKey, now);
+      return { limitValue: planLimit + creditValue, creditValue };
+    } catch (err) {
+      // Fail to the PLAN limit, never to unlimited. A credit lookup that fails
+      // costs the seller headroom they paid for — annoying, and visible. The
+      // other direction would hand out unmetered allowance silently.
+      this.logger.warn(
+        `Credit lookup failed for user ${userId} / ${limitKey}: ${(err as Error).message}`,
+      );
+      return { limitValue: planLimit, creditValue: 0 };
+    }
+  }
+
+  /** The Stripe price id for a pack. Kept off the DTO — it is an internal
+   *  identifier the browser has no use for. */
+  async resolveAddonProviderPriceId(addonId: string): Promise<string | null> {
+    const rows = await this.databaseService.query<{ provider_price_id: string | null }>(
+      `SELECT provider_price_id FROM billing_quota_addons WHERE id = $1`,
+      [addonId],
+    );
+    return rows[0]?.provider_price_id ?? null;
+  }
+
+  /** Write back a Stripe price id after `stripe:sync-catalog` mirrors a pack. */
+  async setQuotaAddonProviderPriceId(addonId: string, providerPriceId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_quota_addons
+          SET provider_price_id = $2, updated_at = NOW()
+        WHERE id = $1`,
+      [addonId, providerPriceId],
+    );
+  }
+
+  private mapQuotaAddon(row: QuotaAddonEntity): BillingQuotaAddonDto {
+    return {
+      id: row.id,
+      slug: row.slug,
+      limitKey: row.limit_key as BillingLimitKey,
+      quantity: Number(row.quantity),
+      amountMicros: Number(row.amount_micros),
+      currency: row.currency,
+      // Not purchasable until it exists in Stripe. Surfaced as a flag rather
+      // than hidden, so an operator who forgot the sync script sees the pack
+      // greyed out instead of wondering where it went.
+      isPurchasable: Boolean(row.provider_price_id),
+    };
+  }
+
   // -------------------------------------------------------------------------
   // Webhook inbox (append-only log + idempotent processing state)
   // -------------------------------------------------------------------------
@@ -257,7 +564,7 @@ export class BillingRepositoryService {
    */
   async insertWebhook(
     provider: string,
-    event: ParsedPaddleEvent,
+    event: ParsedStripeEvent,
   ): Promise<{ row: BillingWebhookDto; inserted: boolean }> {
     const existing = event.eventId
       ? await this.databaseService.query<WebhookEntity>(
@@ -334,7 +641,7 @@ export class BillingRepositoryService {
   // -------------------------------------------------------------------------
 
   /**
-   * Upsert a subscription from a Paddle event. Idempotent on
+   * Upsert a subscription from a Stripe event. Idempotent on
    * provider_subscription_id — a repeated subscription.activated event
    * updates the row in place rather than inserting a duplicate. The caller
    * passes the resolved customer_id (from billing_customers.provider_customer_id).
@@ -389,7 +696,7 @@ export class BillingRepositoryService {
 
   /**
    * Find a customer by provider customer id (for webhook processing — the
-   * Paddle event carries the provider customer id, not our user_id).
+   * Stripe event carries the provider customer id, not our user_id).
    */
   async findCustomerByProviderId(
     provider: string,
@@ -405,7 +712,7 @@ export class BillingRepositoryService {
   /**
    * Create a local customer row for a user (provider='local') if one does not
    * exist. Used by checkout to ensure a customer record exists before
-   * redirecting to Paddle. Idempotent on user_id.
+   * redirecting to Stripe. Idempotent on user_id.
    */
   async startTrialOnce(
     userId: string,
@@ -442,7 +749,8 @@ export class BillingRepositoryService {
       }
 
       const planResult = await client.query<{ id: string }>(
-        `SELECT id FROM billing_plans WHERE slug = 'trial' LIMIT 1`,
+        `SELECT id FROM billing_plans WHERE slug = $1 LIMIT 1`,
+        [TRIAL_PLAN_SLUG],
       );
       const trialPlanId = planResult.rows[0]?.id;
       if (!trialPlanId) {
@@ -499,6 +807,77 @@ export class BillingRepositoryService {
     return this.mapCustomer(rows[0]);
   }
 
+  /**
+   * Link a local billing_customers row to its real provider-side customer id.
+   * Without this, `provider` stays 'local' forever (ensureLocalCustomer never
+   * updates it) and findCustomerByProviderId() can never resolve a webhook's
+   * customer id back to a user — every subscription event would be silently
+   * ignored as `no_customer`. Called from the webhook applier the first time
+   * an event carries both our userId and the provider's customer id (Stripe:
+   * `checkout.session.completed`'s `client_reference_id` + `customer`).
+   * One row per user (unique on user_id), so this is a plain UPDATE — no
+   * upsert/conflict handling needed. Idempotent: re-running with the same
+   * values is a no-op write.
+   */
+  async linkProviderCustomer(userId: string, provider: string, providerCustomerId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_customers
+       SET provider = $2, provider_customer_id = $3, updated_at = NOW()
+       WHERE user_id = $1`,
+      [userId, provider, providerCustomerId],
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // eBay trial ledger (migration 084) — one free trial per eBay store, ever
+  // -------------------------------------------------------------------------
+
+  /**
+   * Record that this eBay store has consumed its one free trial, and report
+   * whether the claim was new.
+   *
+   * The INSERT ... ON CONFLICT DO NOTHING is the enforcement: the table's
+   * primary key is (seller_id, marketplace_id), so a second attempt for the
+   * same store returns rowCount 0 no matter how many user accounts have been
+   * created in between. That is the whole point of the ledger — it outlives
+   * the `ebay_accounts` row, which is ON DELETE CASCADE from users and would
+   * otherwise release the store for a fresh trial when an account is deleted.
+   *
+   * Returns true when this call consumed the store's trial (first time), false
+   * when it had already been consumed.
+   */
+  async claimEbayTrial(sellerId: string, marketplaceId: string, userId: string): Promise<boolean> {
+    const rows = await this.databaseService.query<{ seller_id: string }>(
+      `INSERT INTO ebay_trial_ledger (seller_id, marketplace_id, first_user_id)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (seller_id, marketplace_id) DO NOTHING
+       RETURNING seller_id`,
+      [sellerId, marketplaceId, userId],
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * Whether the user holds an entitlement that is NOT the free trial — i.e. a
+   * real subscription that has been paid for. Used to decide whether a store
+   * whose trial is already spent may still be connected: a paying customer is
+   * always allowed, only a second free ride is refused.
+   */
+  async hasPaidSubscription(userId: string): Promise<boolean> {
+    const rows = await this.databaseService.query<{ id: string }>(
+      `SELECT s.id
+       FROM billing_subscriptions s
+       JOIN billing_customers c ON c.id = s.customer_id
+       JOIN billing_plans p ON p.id = s.plan_id
+       WHERE c.user_id = $1
+         AND p.slug <> $2
+         AND s.status IN ('active', 'trialing', 'past_due')
+       LIMIT 1`,
+      [userId, TRIAL_PLAN_SLUG],
+    );
+    return rows.length > 0;
+  }
+
   // -------------------------------------------------------------------------
   // Quota enforcement — reservation count / reserve / release
   // -------------------------------------------------------------------------
@@ -526,16 +905,42 @@ export class BillingRepositoryService {
   async countReservedSlots(
     subscriptionId: string,
     kind: BillingLimitKey,
+    usagePeriodId: string | null,
     client?: PoolClient,
   ): Promise<number> {
-    const table =
-      kind === BillingLimitKey.LISTINGS_PER_MONTH
-        ? 'billing_listing_reservations'
-        : 'billing_ao_reservations';
+    if (kind === BillingLimitKey.LISTINGS_PER_MONTH) {
+      // Listings are a LEVEL: only the in-flight reservations are counted here
+      // (a bulk create can be minutes long and must not oversell), while the
+      // durable half of the number is the ACTIVE listing rows themselves —
+      // added by the caller via countActiveListings. No period filter: the
+      // calendar does not reset how many listings you have.
+      const q = await this.run<{ cnt: string }>(
+        `SELECT COUNT(*)::text AS cnt FROM billing_listing_reservations
+          WHERE subscription_id = $1 AND status = 'reserved'`,
+        [subscriptionId],
+        client,
+      );
+      return Number(q[0]?.cnt ?? 0);
+    }
+
+    // Automatic orders are a monthly FLOW, so the count MUST be scoped to the
+    // current period. It never was: `usage_period_id` was written on every
+    // reservation and then filtered on by nothing, so rows accumulated for the
+    // life of the subscription and the monthly allowance never reset.
+    //
+    // A null period means one could not be opened (see ensureOpenUsagePeriod's
+    // fail-soft path). Counting every row would then wrongly block the seller,
+    // so the unscoped count is deliberately NOT the fallback — an unknown
+    // period yields 0 used, i.e. the gate opens. Bookkeeping trouble must not
+    // read as quota exhaustion.
+    if (!usagePeriodId) {
+      return 0;
+    }
     const q = await this.run<{ cnt: string }>(
-      `SELECT COUNT(*)::text AS cnt FROM ${table}
-        WHERE subscription_id = $1 AND status = 'reserved'`,
-      [subscriptionId],
+      `SELECT COUNT(*)::text AS cnt FROM billing_ao_reservations
+        WHERE subscription_id = $1 AND status = 'reserved'
+          AND usage_period_id = $2`,
+      [subscriptionId, usagePeriodId],
       client,
     );
     return Number(q[0]?.cnt ?? 0);

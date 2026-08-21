@@ -125,11 +125,12 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
 
-      # Paddle (Merchant of Record). Without both values billing stays in
-      # local/fail-safe mode; quota enforcement itself is an admin-panel toggle.
-      PADDLE_API_KEY: ${PADDLE_API_KEY:-}
-      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET:-}
-      PADDLE_ENVIRONMENT: ${PADDLE_ENVIRONMENT:-production}
+      # Stripe (Billing/Invoicing/Tax) — LIVE keys here (sk_live_/whsec_ from
+      # the live-mode Dashboard). Without them billing fails safe: catalog and
+      # summary still work, checkout/portal 409. Quota enforcement itself is a
+      # separate admin-panel toggle.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
 
       # Rate Limiting
       RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
@@ -191,6 +192,9 @@ services:
         # widget — tawk.to".
         VITE_TAWKTO_PROPERTY_ID: ${VITE_TAWKTO_PROPERTY_ID:-6a77cbcad1e0df1d455e2131}
         VITE_TAWKTO_WIDGET_ID: ${VITE_TAWKTO_WIDGET_ID:-1jvhv843q}
+        # Stripe publishable key — unconsumed by any FE code today, provisioned
+        # ahead of a future Stripe.js/Elements surface.
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
     restart: unless-stopped
     depends_on:
       - api

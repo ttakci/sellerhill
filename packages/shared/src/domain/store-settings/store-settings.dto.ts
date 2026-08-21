@@ -1,4 +1,4 @@
-import { TrackingConversionProvider } from '../amazon';
+import { TrackingConversionProvider, TrackingConversionScope } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
 import { BlacklistKeyword, StoreSettings } from './store-settings.types';
@@ -39,6 +39,14 @@ export interface SaveStoreSettingsRequest {
     // Carrier-mapping provider; persisted LOWERCASE ('local' | 'api').
     // Optional on the request — service defaults to LOCAL. Response always carries it.
     trackingConversionProvider?: TrackingConversionProvider;
+
+    // Which carriers the provider above applies to.
+    // Optional on the request — service defaults to AMAZON_LOGISTICS_ONLY.
+    trackingConversionScope?: TrackingConversionScope;
+
+    // Whether manually linked orders are converted automatically too.
+    // Optional on the request — service defaults to true.
+    trackingConvertManualOrders?: boolean;
 
     // Buyer auto-messaging config (per-user global store setting).
     // Optional on the request — service defaults to disabled. Response always carries it.

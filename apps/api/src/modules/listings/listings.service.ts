@@ -11,6 +11,7 @@ import {
   EbayListingApiModel,
   EBAY_MARKETPLACE_CONFIG,
   EbayMarketplaceId,
+  isValidAsinShape,
   OrderStatus,
   PlatformSettingKey,
   type CreateListingsRequest,
@@ -1097,8 +1098,23 @@ export class ListingsService {
   ): Promise<ListingJobDto & { items: Array<{ id: string; asin: string }> }> {
     const { asins } = request;
 
+    // Defense-in-depth: the frontend already filters malformed identifiers
+    // before calling this endpoint (see AddListingsDrawer.container.tsx), but
+    // this endpoint has no request-body validation pipe of its own. A value
+    // that doesn't fit the ASIN shape can never resolve via the product
+    // provider AND cannot fit `listing_job_items.asin VARCHAR(10)` — inserting
+    // it would throw and abort the whole job-creation loop, taking every other
+    // (valid) ASIN in the same submission down with it. Drop it here instead.
+    const shapedAsins = asins.filter((asin) => {
+      if (isValidAsinShape(asin)) {
+        return true;
+      }
+      this.logger.warn(`Dropping malformed ASIN "${asin}" from job creation — does not fit the ASIN shape.`);
+      return false;
+    });
+
     // Filter out ASINs that are already actively listed
-    const uniqueAsins = [...new Set(asins)];
+    const uniqueAsins = [...new Set(shapedAsins)];
     const toProcess: string[] = [];
 
     for (const asin of uniqueAsins) {
@@ -1152,6 +1168,33 @@ export class ListingsService {
     }
 
     return { ...this.mapJobToDto(job), items };
+  }
+
+  /**
+   * Delete a job that was never started.
+   *
+   * Only ever called when the create was refused BEFORE any work was enqueued
+   * — a quota or entitlement refusal. It is a rollback, not a user-facing
+   * delete: without it a refused attempt left a job sitting in the import list
+   * at "0 / 1, waiting" forever, because nothing was ever queued to move it and
+   * nothing was ever going to fail it either.
+   *
+   * `listing_job_items` goes with it via ON DELETE CASCADE. Deliberately
+   * narrow: it refuses to touch a job that already has a terminal or in-flight
+   * item, so it can never be repurposed into something that discards real work.
+   */
+  async deleteUnstartedJob(userId: string, jobId: string): Promise<void> {
+    await this.databaseService.query(
+      `DELETE FROM listing_jobs j
+        WHERE j.id = $1
+          AND j.user_id = $2
+          AND j.status = $3
+          AND NOT EXISTS (
+            SELECT 1 FROM listing_job_items i
+             WHERE i.job_id = j.id AND i.status <> $4
+          )`,
+      [jobId, userId, ListingJobStatus.PENDING, ListingStatus.DRAFT],
+    );
   }
 
   /**
@@ -1912,8 +1955,9 @@ export class ListingsService {
       ]
     );
 
-    // Publish succeeded — consume the reservation (idempotent, fail-soft).
-    this.quotaEnforcement.consumeForPublish(userId, item.listingId);
+    // Publish succeeded — hand the slot from the reservation to the now-ACTIVE
+    // listing row (idempotent, fail-soft). Awaited: it is a real write.
+    await this.quotaEnforcement.consumeForPublish(userId, item.listingId);
     this.logger.log(`Published draft ${item.listingId} as eBay item ${result.listingId}`);
   }
 

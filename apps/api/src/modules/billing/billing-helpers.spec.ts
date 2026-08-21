@@ -3,8 +3,6 @@
 // Pure-logic tests for the billing helpers. No DB, no NestJS — mirrors the
 // profit-calculation.spec.ts / order-matcher.spec.ts style.
 
-import { createHmac } from 'node:crypto';
-
 import {
   BillingInterval,
   BillingLimitKey,
@@ -17,10 +15,7 @@ import {
   expandPlan,
   isProviderConfigured,
   isStaleEvent,
-  parsePaddleEvent,
-  parseSignatureHeader,
   resolveBillingConfig,
-  verifyPaddleSignature,
 } from './billing-helpers';
 import { BillingProvider } from './billing.types';
 
@@ -30,20 +25,31 @@ import { BillingProvider } from './billing.types';
 // ---------------------------------------------------------------------------
 
 describe('resolveBillingConfig', () => {
-  it('defaults to local provider + enforcement off when no Paddle env', () => {
+  it('reports provider=local + enforcement off when Stripe is not configured', () => {
     const config = resolveBillingConfig({});
     expect(config.provider).toBe(BillingProvider.LOCAL);
+    expect(config.stripeSecretKey).toBeNull();
     expect(config.enforcementEnabled).toBe(false);
     expect(config.webhookStaleMinutes).toBe(1440);
     expect(config.webhookMaxAttempts).toBe(5);
   });
 
-  it('selects paddle provider only when BOTH api key and webhook secret are set', () => {
-    expect(resolveBillingConfig({ PADDLE_API_KEY: 'k' }).provider).toBe(BillingProvider.LOCAL);
-    expect(resolveBillingConfig({ PADDLE_WEBHOOK_SECRET: 's' }).provider).toBe(BillingProvider.LOCAL);
-    expect(
-      resolveBillingConfig({ PADDLE_API_KEY: 'k', PADDLE_WEBHOOK_SECRET: 's' }).provider,
-    ).toBe(BillingProvider.PADDLE);
+  it('reports provider=stripe as soon as the secret key is present', () => {
+    const config = resolveBillingConfig({ STRIPE_SECRET_KEY: 'sk_test_x' });
+    expect(config.provider).toBe(BillingProvider.STRIPE);
+    expect(config.stripeSecretKey).toBe('sk_test_x');
+  });
+
+  it('carries the webhook secret through independently of the secret key', () => {
+    expect(resolveBillingConfig({ STRIPE_WEBHOOK_SECRET: 'whsec_x' }).stripeWebhookSecret).toBe('whsec_x');
+    expect(resolveBillingConfig({}).stripeWebhookSecret).toBeNull();
+  });
+
+  it('defaults frontendUrl to localhost:5173, overridable via FRONTEND_URL', () => {
+    expect(resolveBillingConfig({}).frontendUrl).toBe('http://localhost:5173');
+    expect(resolveBillingConfig({ FRONTEND_URL: 'https://app.example.com' }).frontendUrl).toBe(
+      'https://app.example.com',
+    );
   });
 
   it('parses enforcement flag as boolean (case-insensitive)', () => {
@@ -61,9 +67,9 @@ describe('resolveBillingConfig', () => {
 });
 
 describe('isProviderConfigured', () => {
-  it('returns true for paddle, false for local', () => {
-    expect(isProviderConfigured({ provider: BillingProvider.PADDLE } as never)).toBe(true);
-    expect(isProviderConfigured({ provider: BillingProvider.LOCAL } as never)).toBe(false);
+  it('gates on the Stripe secret key being present', () => {
+    expect(isProviderConfigured({ stripeSecretKey: 'sk_test_x' } as never)).toBe(true);
+    expect(isProviderConfigured({ stripeSecretKey: null } as never)).toBe(false);
   });
 });
 
@@ -126,116 +132,6 @@ describe('isStaleEvent', () => {
 
   it('returns false on unparseable occurredAt', () => {
     expect(isStaleEvent('not-a-date', 1440, now)).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// parseSignatureHeader / verifyPaddleSignature
-// ---------------------------------------------------------------------------
-
-describe('parseSignatureHeader', () => {
-  it('parses ts and h1', () => {
-    expect(parseSignatureHeader('ts=1700000000;h1=abc123')).toEqual({ ts: '1700000000', h1: 'abc123' });
-  });
-
-  it('handles whitespace between segments', () => {
-    expect(parseSignatureHeader('ts=1700000000; h1=abc123')).toEqual({ ts: '1700000000', h1: 'abc123' });
-  });
-
-  it('returns null when ts or h1 is missing', () => {
-    expect(parseSignatureHeader('ts=1700000000')).toBeNull();
-    expect(parseSignatureHeader('h1=abc123')).toBeNull();
-    expect(parseSignatureHeader('')).toBeNull();
-  });
-});
-
-describe('verifyPaddleSignature', () => {
-  const secret = 'whsec_test_secret';
-  const now = new Date('2026-07-27T12:00:00Z');
-  const ts = Math.floor(now.getTime() / 1000).toString();
-
-  function sign(body: string, tsToUse: string = ts): string {
-    const h1 = createHmac('sha256', secret).update(`${tsToUse}:${body}`).digest('hex');
-    return `ts=${tsToUse};h1=${h1}`;
-  }
-
-  it('accepts a valid signature for the exact body', () => {
-    const body = '{"event_id":"evt_1"}';
-    expect(verifyPaddleSignature(sign(body), body, secret, 300, now)).toBe(true);
-  });
-
-  it('rejects when the body was tampered with', () => {
-    const body = '{"event_id":"evt_1"}';
-    expect(verifyPaddleSignature(sign(body), '{"event_id":"evt_2"}', secret, 300, now)).toBe(false);
-  });
-
-  it('rejects when the secret is wrong', () => {
-    const body = '{"event_id":"evt_1"}';
-    expect(verifyPaddleSignature(sign(body), body, 'wrong-secret', 300, now)).toBe(false);
-  });
-
-  it('rejects when the header is missing', () => {
-    expect(verifyPaddleSignature(undefined, 'body', secret, 300, now)).toBe(false);
-  });
-
-  it('rejects when the secret is empty', () => {
-    expect(verifyPaddleSignature(sign('body'), 'body', '', 300, now)).toBe(false);
-  });
-
-  it('rejects when the timestamp is outside the tolerance window (replay protection)', () => {
-    // 10 minutes ago, tolerance 5 minutes
-    const oldTs = Math.floor(now.getTime() / 1000) - 600;
-    const body = 'body';
-    expect(verifyPaddleSignature(sign(body, oldTs.toString()), body, secret, 300, now)).toBe(false);
-  });
-
-  it('accepts a timestamp within the tolerance window', () => {
-    // 2 minutes ago, tolerance 5 minutes
-    const nearTs = Math.floor(now.getTime() / 1000) - 120;
-    const body = 'body';
-    expect(verifyPaddleSignature(sign(body, nearTs.toString()), body, secret, 300, now)).toBe(true);
-  });
-
-  it('rejects a malformed header', () => {
-    expect(verifyPaddleSignature('garbage', 'body', secret, 300, now)).toBe(false);
-  });
-
-  it('uses constant-time comparison (does not throw on length mismatch)', () => {
-    // h1 of wrong length should return false, not throw
-    expect(verifyPaddleSignature('ts=1700000000;h1=short', 'body', secret, 300, now)).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// parsePaddleEvent
-// ---------------------------------------------------------------------------
-
-describe('parsePaddleEvent', () => {
-  it('extracts event_id, event_type, occurred_at from a Paddle payload', () => {
-    const payload = {
-      event_id: 'evt_abc',
-      event_type: 'subscription.activated',
-      occurred_at: '2026-07-27T10:00:00Z',
-      data: { id: 'sub_1' },
-    };
-    const event = parsePaddleEvent(payload);
-    expect(event.eventId).toBe('evt_abc');
-    expect(event.eventType).toBe('subscription.activated');
-    expect(event.occurredAt).toBe('2026-07-27T10:00:00Z');
-    expect(event.payload).toBe(payload);
-  });
-
-  it('coerces missing fields to null / "unknown"', () => {
-    const event = parsePaddleEvent({ foo: 'bar' });
-    expect(event.eventId).toBeNull();
-    expect(event.eventType).toBe('unknown');
-    expect(event.occurredAt).toBeNull();
-  });
-
-  it('handles non-object input safely', () => {
-    const event = parsePaddleEvent('not-an-object');
-    expect(event.eventId).toBeNull();
-    expect(event.eventType).toBe('unknown');
   });
 });
 

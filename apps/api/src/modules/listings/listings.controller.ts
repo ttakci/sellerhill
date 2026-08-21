@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ConflictException,
   Get,
   Header,
   NotFoundException,
@@ -45,6 +46,33 @@ const toPositiveInt = (value?: string): number | undefined =>
   value !== undefined && value !== '' && Number.isFinite(Number(value)) && Number(value) > 0
     ? Math.trunc(Number(value))
     : undefined;
+
+/**
+ * Billing refusals thrown by the quota gate, mapped to HTTP.
+ *
+ * The gate throws plain `Error`s carrying a `name`, deliberately: the queue
+ * worker classifies failures by that name (`classifyListingFailure`), and a
+ * Nest HTTP exception there would be meaningless. But nothing translated them
+ * at the HTTP boundary either, so a seller whose trial had expired got a
+ * 500 "Internal server error" dialog — the actual reason ("Active-listings
+ * quota exhausted: 50 in use (limit 0)") existed only in `error-*.log`, and
+ * even that text was nonsense for a suspended account rather than a full one.
+ *
+ * Same audience split as `ListingFailureCode`: the seller gets a localized
+ * reason, the raw text stays in the log.
+ */
+const LISTING_REFUSAL_KEYS: Record<string, string> = {
+  SubscriptionSuspendedError: 'billing.errors.subscriptionSuspended',
+  QuotaExhaustedError: 'billing.errors.listingQuotaExhausted',
+};
+
+function rethrowListingRefusal(error: unknown): never {
+  const key = error instanceof Error ? LISTING_REFUSAL_KEYS[error.name] : undefined;
+  if (key) {
+    throw new ConflictException(key);
+  }
+  throw error;
+}
 
 @ApiTags('listings')
 @ApiBearerAuth('JWT')
@@ -252,7 +280,11 @@ export class ListingsController {
     @Body() body: CreateListingsRequest
   ): Promise<ListingJobDto> {
     const userId = req.user.sub;
-    return this.listingQueueService.addListingJob(userId, body);
+    try {
+      return await this.listingQueueService.addListingJob(userId, body);
+    } catch (error) {
+      rethrowListingRefusal(error);
+    }
   }
 
   /**

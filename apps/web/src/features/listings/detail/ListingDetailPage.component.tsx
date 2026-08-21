@@ -18,12 +18,13 @@ import {
   TextInput,
   Toggle,
 } from '@repo/ui';
+import type { TFunction } from 'i18next';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingDetailPage.style';
-import type { ListingDetailPageProps } from './ListingDetailPage.types';
+import type { AutomationRuleState, ListingDetailPageProps } from './ListingDetailPage.types';
 import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
 
 const statusVariant = (status: ListingStatus): 'success' | 'neutral' | 'error' | 'warning' => {
@@ -43,16 +44,18 @@ const statusVariant = (status: ListingStatus): 'success' | 'neutral' | 'error' |
 
 const Meta = ({
   icon,
+  iconColor = 'brand.primary',
   label,
   children,
 }: {
   icon: IconName;
+  iconColor?: string;
   label: string;
   children: React.ReactNode;
 }): React.ReactElement => (
   <S.MetaRow>
     <S.MetaLabel>
-      <Icon name={icon} size={16} color="brand.primary" />
+      <Icon name={icon} size={16} color={iconColor} />
       <Text variant="body-sm" color="text.secondary">
         {label}
       </Text>
@@ -60,6 +63,33 @@ const Meta = ({
     <S.MetaValue>{children}</S.MetaValue>
   </S.MetaRow>
 );
+
+/** Otomasyon Durumu row color — green once a rule is actually applying,
+ *  muted once it's off or moot ("na"), so the eye finds the active rules
+ *  first without needing a filled badge to carry that signal. */
+const automationStateColor = (state: AutomationRuleState): string => {
+  switch (state) {
+    case 'on':
+      return 'semantic.success';
+    case 'na':
+      return 'text.tertiary';
+    case 'off':
+    default:
+      return 'text.secondary';
+  }
+};
+
+const automationStateLabel = (state: AutomationRuleState, t: TFunction): string => {
+  switch (state) {
+    case 'on':
+      return t('listings.detail.automationBadgeActive');
+    case 'na':
+      return t('listings.detail.customMarginNaLabel');
+    case 'off':
+    default:
+      return t('listings.detail.automationBadgeOff');
+  }
+};
 
 /** One headline number in the hero strip. Only profit passes a `tone`. */
 const Kpi = ({
@@ -89,6 +119,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   form,
   listingSettingsGroups,
   strategyGroupLabel,
+  groupDefaultQuantityLabel,
+  groupStockBufferLabel,
+  groupMarginSummaryLabel,
   paymentPolicyLabel,
   shippingPolicyLabel,
   returnPolicyLabel,
@@ -105,7 +138,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   overrides,
   onOverrideChange,
   onSaveOverrides,
-  automationSummary,
+  automationStatusItems,
   formatCurrency,
   formatDate,
   formatDateTime,
@@ -354,49 +387,102 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
           </S.MetaList>
         </SettingsCard>
 
-        {/* eBay Politikaları + Otomasyon share this column — stacked so the
-            shorter policies card doesn't stretch to Performance's height. */}
-        <S.SectionColumnStack>
-          {/* Read-only — reassigning a policy here is not pushed to eBay's
-              offer yet, so this card only shows what's currently attached. */}
-          <SettingsCard variant="section" header={{ title: t('listings.detail.ebayPolicies') }}>
-            <SettingsInfoRow
-              icon="payments"
-              label={t('listings.businessPolicies.paymentPolicy')}
-              value={paymentPolicyLabel}
-            />
-            <SettingsInfoRow
-              icon="truck"
-              label={t('listings.businessPolicies.shippingPolicy')}
-              value={shippingPolicyLabel}
-            />
-            <SettingsInfoRow
-              icon="undo-2"
-              label={t('listings.businessPolicies.returnPolicy')}
-              value={returnPolicyLabel}
-            />
-          </SettingsCard>
+        {/* Read-only — reassigning a policy here is not pushed to eBay's
+            offer yet, so this card only shows what's currently attached. */}
+        <SettingsCard variant="section" header={{ title: t('listings.detail.ebayPolicies') }}>
+          <SettingsInfoRow
+            icon="payments"
+            label={t('listings.businessPolicies.paymentPolicy')}
+            value={paymentPolicyLabel}
+          />
+          <SettingsInfoRow
+            icon="truck"
+            label={t('listings.businessPolicies.shippingPolicy')}
+            value={shippingPolicyLabel}
+          />
+          <SettingsInfoRow
+            icon="undo-2"
+            label={t('listings.businessPolicies.returnPolicy')}
+            value={returnPolicyLabel}
+          />
+        </SettingsCard>
 
-          {/* Strategy group + automation overrides feed the same price/quantity
-              computation, so they're edited together in one drawer. */}
-          <SettingsCard variant="section" header={{ title: t('listings.detail.automationTitle') }}>
-            <SettingsInfoRow
-              icon="layers"
-              label={t('listings.listingSettings.strategyGroup')}
-              value={strategyGroupLabel}
-              onEdit={onOpenAutomationDrawer}
-            />
-            <SettingsInfoRow
-              icon="activity"
-              label={t('listings.detail.automationStatus')}
-              value={automationSummary}
-              onEdit={onOpenAutomationDrawer}
-            />
-            <S.AutomationSyncNoteSlot>
-              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
-            </S.AutomationSyncNoteSlot>
-          </SettingsCard>
-        </S.SectionColumnStack>
+        {/* Same compact fact-grid pattern as Performance — the group's own
+            settings, not just its name. Edit lives in the header now that the
+            body is plain facts, same drawer as the Otomasyon Durumu card. */}
+        <SettingsCard
+          variant="section"
+          header={{ title: t('listings.detail.strategyGroupCardTitle') }}
+          headerRight={
+            <IconButton
+              variant="ghost"
+              onClick={onOpenAutomationDrawer}
+              aria-label={t('listings.detail.automationDrawerTitle')}
+            >
+              <Icon name="edit" size={16} color="brand.primary" />
+            </IconButton>
+          }
+        >
+          <S.MetaList>
+            <Meta icon="layers" label={t('listings.detail.groupNameLabel')}>
+              <Text variant="body" weight="semibold">
+                {strategyGroupLabel}
+              </Text>
+            </Meta>
+            <Meta icon="box" label={t('listings.detail.groupDefaultQuantityLabel')}>
+              <Text variant="body" weight="semibold" numeric>
+                {groupDefaultQuantityLabel}
+              </Text>
+            </Meta>
+            <Meta icon="sliders-horizontal" label={t('listings.detail.groupStockBufferLabel')}>
+              <Text variant="body" weight="semibold" numeric>
+                {groupStockBufferLabel}
+              </Text>
+            </Meta>
+            <Meta icon="badge-percent" label={t('listings.detail.groupMarginLabel')}>
+              <Text variant="body" weight="semibold">
+                {groupMarginSummaryLabel}
+              </Text>
+            </Meta>
+          </S.MetaList>
+        </SettingsCard>
+
+        {/* Strategy group + automation overrides feed the same price/quantity
+            computation, so they're edited together in one drawer — same
+            headerRight edit action as the group card above. Each row is a
+            plain fact (state + the value it applies), not a filled box. */}
+        <SettingsCard
+          variant="section"
+          header={{ title: t('listings.detail.automationStatus') }}
+          headerRight={
+            <IconButton
+              variant="ghost"
+              onClick={onOpenAutomationDrawer}
+              aria-label={t('listings.detail.automationDrawerTitle')}
+            >
+              <Icon name="edit" size={16} color="brand.primary" />
+            </IconButton>
+          }
+        >
+          <S.MetaList>
+            {automationStatusItems.map((item) => (
+              <Meta key={item.key} icon={item.icon} iconColor={automationStateColor(item.state)} label={item.label}>
+                <Text variant="body" weight="semibold" color={automationStateColor(item.state)}>
+                  {automationStateLabel(item.state, t)}
+                </Text>
+                {item.detail ? (
+                  <Text variant="caption" color="text.secondary">
+                    {item.detail}
+                  </Text>
+                ) : null}
+              </Meta>
+            ))}
+          </S.MetaList>
+
+          <S.AutomationSyncNoteSlot>
+            <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+          </S.AutomationSyncNoteSlot>
+        </SettingsCard>
 
         <S.FullWidthSettingsCard variant="section" header={{ title: t('listings.detail.productContent') }}>
           <S.ProductContentStack>

@@ -46,6 +46,8 @@ import {
   AmazonAccountStatus,
   BillingLimitKey,
   BillingSubscriptionStatus,
+  EntitlementState,
+  resolveEntitlementState,
   EbayAccountStatus,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingStatus,
@@ -116,6 +118,7 @@ interface BreakdownRow {
 const QUOTA_ITEM_BY_LIMIT_KEY: Readonly<Record<string, ActionCenterItemKey>> = {
   [BillingLimitKey.LISTINGS_PER_MONTH]: ActionCenterItemKey.PLAN_LISTING_QUOTA,
   [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: ActionCenterItemKey.PLAN_AO_QUOTA,
+  [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: ActionCenterItemKey.PLAN_CONVERSION_QUOTA,
 };
 
 @Injectable()
@@ -473,14 +476,22 @@ export class ActionCenterService {
     const items: ActionCenterItemDto[] = [];
     const now = new Date();
 
-    for (const period of summary.usagePeriods) {
-      const severity = resolveQuotaSeverity(period.usedQty, period.limitValueSnapshot);
+    // Read from `summary.quotas`, NOT `summary.usagePeriods`. The period rows
+    // carry a `used_qty` column that nothing has ever incremented, so this loop
+    // used to compare 0 against the limit for every seller and could not fire —
+    // the wall arrived with no warning before it. `quotas` is computed from
+    // what actually exists, by the same code the gate refuses on.
+    for (const quota of summary.quotas) {
+      if (quota.limitValue === null) {
+        continue;
+      }
+      const severity = resolveQuotaSeverity(quota.used, quota.limitValue);
       if (!severity) {
         continue;
       }
       // A limit key we have no item for is skipped rather than guessed at, so a
       // future plan dimension cannot surface as a mislabelled quota warning.
-      const key = QUOTA_ITEM_BY_LIMIT_KEY[period.limitKey];
+      const key = QUOTA_ITEM_BY_LIMIT_KEY[quota.limitKey];
       if (!key) {
         continue;
       }
@@ -492,7 +503,7 @@ export class ActionCenterService {
         // the seller reads are in `context`; counting used slots here would
         // make the sidebar badge read in the thousands.
         count: 1,
-        context: { used: period.usedQty, limit: period.limitValueSnapshot },
+        context: { used: quota.used, limit: quota.limitValue },
         actionPath: '/billing',
       });
     }
@@ -501,6 +512,22 @@ export class ActionCenterService {
     if (subscription?.status === BillingSubscriptionStatus.PAST_DUE) {
       items.push({
         key: ActionCenterItemKey.PLAN_PAST_DUE,
+        group: ActionCenterGroup.PLAN,
+        severity: ActionCenterSeverity.CRITICAL,
+        count: 1,
+        actionPath: '/billing',
+      });
+    } else if (
+      // `else if` because PAST_DUE is already suspended under the immediate-stop
+      // policy — reporting both would tell the seller the same thing twice with
+      // two different calls to action. This branch is the cases a payment
+      // cannot fix by itself: a cancelled subscription or an expired trial,
+      // where the seller has to choose a plan.
+      subscription &&
+      resolveEntitlementState(subscription.status) === EntitlementState.SUSPENDED
+    ) {
+      items.push({
+        key: ActionCenterItemKey.PLAN_SUSPENDED,
         group: ActionCenterGroup.PLAN,
         severity: ActionCenterSeverity.CRITICAL,
         count: 1,

@@ -16,6 +16,8 @@ import {
   BILLING_MICROS_PER_UNIT,
   BillingInterval,
   BillingLimitKey,
+  BillingSubscriptionStatus,
+  TRIAL_PLAN_SLUG,
   BillingProvider,
 } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
@@ -25,13 +27,15 @@ import { useTranslation } from 'react-i18next';
 import {
   useGetBillingCatalogQuery,
   useGetBillingSummaryQuery,
+  useChangePlanMutation,
+  useInitiateAddonCheckoutMutation,
   useInitiateCheckoutMutation,
   useLazyOpenBillingPortalQuery,
 } from '../api/billing.api';
-import { formatBillingLimit, planLimitValue, usageBarValue, usageBarVariant, usedQtyForPeriod } from '../utils/usage';
+import { formatBillingLimit, planLimitValue, usageBarValue, usageBarVariant } from '../utils/usage';
 
 import { BillingPageComponent } from './BillingPage.component';
-import type { BillingPlanCard, BillingUsageRow } from './BillingPage.types';
+import type { BillingAddonCard, BillingPlanCard, BillingUsageRow } from './BillingPage.types';
 
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
@@ -66,7 +70,10 @@ export const BillingPage: React.FC = () => {
 
   useLoading(isCheckoutLoading || isPortalFetching);
 
-  const [compareInterval, setCompareInterval] = useState<BillingInterval>(BillingInterval.MONTHLY);
+  // Monthly is the only interval the catalog carries (migration 083 retired the
+  // annual prices), so this is a constant rather than state. Prices and the
+  // checkout call are still keyed by interval, hence the value still exists.
+  const compareInterval = BillingInterval.MONTHLY;
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
 
   const isInitialLoading = isCatalogLoading || isSummaryLoading;
@@ -115,28 +122,96 @@ export const BillingPage: React.FC = () => {
   const currentIntervalKey = subscription
     ? `billing:billing.subscription.intervalValue.${subscription.interval}`
     : null;
+  const hasProviderSubscription = summary?.hasProviderSubscription ?? false;
+  const [isPlansOpen, setIsPlansOpen] = useState(false);
   const currentPeriodEndDisplay = subscription?.currentPeriodEnd
     ? formatDate(subscription.currentPeriodEnd, localeCfg.locale, { day: 'numeric', month: 'short', year: 'numeric' })
     : null;
+
+  const [initiateAddonCheckout] = useInitiateAddonCheckoutMutation();
+  const [changePlan] = useChangePlanMutation();
+  const [addonSlugInFlight, setAddonSlugInFlight] = useState<string | null>(null);
+
+  /*
+   * The single muted line under the plan name.
+   *
+   * Assembled here rather than in the component because WHAT belongs on it
+   * depends on the kind of plan, and the old version got that wrong in two
+   * visible ways for a free trial: it printed the billing interval (a trial is
+   * not billed) and labelled the end date "next renewal" (a trial does not
+   * renew — and this one had already ended, so it read as a future renewal for
+   * something that was over).
+   *
+   * A paid plan keeps both parts; a trial gets only its end date, phrased for
+   * whether it is still running or already finished.
+   */
+  const planMetaLine = useMemo(() => {
+    if (!subscription) {
+      return null;
+    }
+    const isTrial = currentPlanSlug === TRIAL_PLAN_SLUG;
+    const parts: string[] = [];
+
+    if (!isTrial && currentIntervalKey) {
+      parts.push(t(currentIntervalKey));
+    }
+    if (currentPeriodEndDisplay) {
+      const labelKey = isTrial
+        ? subscriptionStatus === BillingSubscriptionStatus.TRIALING
+          ? 'billing:billing.subscription.trialEnds'
+          : 'billing:billing.subscription.trialEnded'
+        : subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
+            subscriptionStatus === BillingSubscriptionStatus.TRIALING
+          ? 'billing:billing.subscription.nextRenewal'
+          : 'billing:billing.subscription.accessEnds';
+      parts.push(`${t(labelKey)}: ${currentPeriodEndDisplay}`);
+    }
+    return parts.length > 0 ? parts.join(' · ') : null;
+  }, [subscription, currentPlanSlug, currentIntervalKey, currentPeriodEndDisplay, subscriptionStatus, t]);
 
   const usageRows: BillingUsageRow[] = useMemo(() => {
     if (!summary || !subscription || !summary.plan) {
       return [];
     }
     const plan = summary.plan;
-    const periods = summary.usagePeriods;
     const unlimitedLabel = t('billing:billing.limits.unlimited');
     const disabledLabel = t('billing:billing.limits.disabled');
+    // `summary.quotas` is computed server-side from what actually exists.
+    // `usagePeriods[].usedQty` — what this used to read — is a ledger column
+    // nothing increments, so every bar sat at zero regardless of real usage.
+    /*
+     * BOTH figures come from `summary.quotas`, not half from the plan.
+     *
+     * `quotas[].limitValue` is the EFFECTIVE ceiling — plan allowance plus any
+     * top-up bought this month — and it is the number the gate enforces.
+     * Reading the limit from the plan instead showed a seller who had just
+     * topped up their old ceiling, and showed nothing at all for a dimension
+     * the catalog row happened not to carry.
+     */
+    const quotaByKey = new Map(summary.quotas.map((q) => [q.limitKey, q]));
 
     const rows: BillingUsageRow[] = [];
-    for (const key of [BillingLimitKey.LISTINGS_PER_MONTH, BillingLimitKey.AMAZON_ORDERS_PER_MONTH]) {
-      const limit = planLimitValue({ plan }, key);
-      const used = usedQtyForPeriod({ periods }, key);
+    for (const key of [
+      BillingLimitKey.LISTINGS_PER_MONTH,
+      BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+      BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+    ]) {
+      const quota = quotaByKey.get(key);
+      const limit = quota?.limitValue ?? planLimitValue({ plan }, key);
+      const used = quota?.used ?? 0;
       const labelKey = `billing:billing.limits.${key}.label`;
       const limitDisplay = formatBillingLimit({ limit, unlimitedLabel, disabledLabel, locale: localeCfg.locale });
       const usedDisplay = new Intl.NumberFormat(localeCfg.locale).format(used);
       const ofDisplay = t('billing:billing.limits.of', { used: usedDisplay, limit: limitDisplay });
+      /*
+       * Percentage for inside the ring. `ofDisplay` ("50 / 50") stays as the
+       * text beside it — rendering the used figure on its own AND inside
+       * "used of limit" is what produced "50 50 / 50".
+       */
+      const ringLabel =
+        limit > 0 ? `${Math.min(999, Math.round((used / limit) * 100))}%` : '—';
       rows.push({
+        ringLabel,
         labelKey,
         usedDisplay,
         ofDisplay,
@@ -170,6 +245,12 @@ export const BillingPage: React.FC = () => {
           disabledLabel,
           locale: localeCfg.locale,
         }),
+        trackingConversionsLimitDisplay: formatBillingLimit({
+          limit: planLimitValue({ plan }, BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH),
+          unlimitedLabel,
+          disabledLabel,
+          locale: localeCfg.locale,
+        }),
         amazonOrdersLimitDisplay: formatBillingLimit({
           limit: planLimitValue({ plan }, BillingLimitKey.AMAZON_ORDERS_PER_MONTH),
           unlimitedLabel,
@@ -197,6 +278,57 @@ export const BillingPage: React.FC = () => {
     [showMessage, closeMessage, t],
   );
 
+  /**
+   * Top-up packs, already formatted. The server only returns any when a meter
+   * is actually exhausted — a credit is scoped to the current month, so
+   * offering one to somebody with headroom left would sell them something they
+   * cannot use.
+   */
+  const addons: BillingAddonCard[] = useMemo(() => {
+    if (!summary || summary.quotaAddons.length === 0) {
+      return [];
+    }
+    return summary.quotaAddons.map((addon) => ({
+      slug: addon.slug,
+      quantityDisplay: t(`billing:billing.limits.${addon.limitKey}.unit`, {
+        count: addon.quantity,
+        defaultValue: String(addon.quantity),
+      }).replace(/^/, `${new Intl.NumberFormat(localeCfg.locale).format(addon.quantity)} `),
+      priceDisplay: formatPriceMicros(
+        addon.amountMicros,
+        addon.currency,
+        localeCfg.locale,
+        ''
+      ),
+      isPurchasable: addon.isPurchasable,
+    }));
+  }, [summary, t, localeCfg.locale]);
+
+  const handleBuyAddon = useCallback(
+    (addonSlug: string) => {
+      setAddonSlugInFlight(addonSlug);
+      initiateAddonCheckout({ addonSlug })
+        .unwrap()
+        .then((result) => {
+          if (result.checkoutUrl) {
+            window.location.assign(result.checkoutUrl);
+            return;
+          }
+          // Demo mode answers with an empty URL rather than a live payment
+          // page; nothing to navigate to, so just stop the spinner.
+          setAddonSlugInFlight(null);
+        })
+        .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+          setAddonSlugInFlight(null);
+          surfaceBillingError(error);
+        });
+    },
+    [initiateAddonCheckout, surfaceBillingError]
+  );
+
+  const handleOpenPlans = useCallback(() => setIsPlansOpen(true), []);
+  const handleClosePlans = useCallback(() => setIsPlansOpen(false), []);
+
   const handleCheckout = useCallback(
     (planId: string) => {
       if (providerUnconfigured) {
@@ -212,6 +344,38 @@ export const BillingPage: React.FC = () => {
         return;
       }
       setCheckoutPlanId(planId);
+
+      /*
+       * Two genuinely different operations behind one click, and picking the
+       * wrong one costs the customer money.
+       *
+       * With a live Stripe subscription the plan is repriced in place and
+       * Stripe prorates. Opening checkout instead would create a SECOND
+       * subscription — Stripe permits that without complaint, and both would
+       * bill. With only a local trial (or nothing) there is nothing to reprice,
+       * so checkout is correct.
+       */
+      if (hasProviderSubscription) {
+        void changePlan({ planId, interval: compareInterval })
+          .unwrap()
+          .then(() => {
+            showMessage(
+              {
+                type: 'success',
+                headerKey: 'translation:message.success.header',
+                descriptionKey: 'billing:billing.plans.switchDone',
+                primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+              },
+              t,
+            );
+          })
+          .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+            surfaceBillingError(error);
+          })
+          .finally(() => setCheckoutPlanId(null));
+        return;
+      }
+
       void initiateCheckout({ planId, interval: compareInterval })
         .unwrap()
         .then((result) => {
@@ -224,7 +388,17 @@ export const BillingPage: React.FC = () => {
         })
         .finally(() => setCheckoutPlanId(null));
     },
-    [providerUnconfigured, compareInterval, initiateCheckout, showMessage, closeMessage, t, surfaceBillingError],
+    [
+      providerUnconfigured,
+      compareInterval,
+      hasProviderSubscription,
+      changePlan,
+      initiateCheckout,
+      showMessage,
+      closeMessage,
+      t,
+      surfaceBillingError,
+    ],
   );
 
   const handleManage = useCallback(() => {
@@ -262,15 +436,20 @@ export const BillingPage: React.FC = () => {
       providerUnconfigured={providerUnconfigured}
       subscriptionStatus={subscriptionStatus}
       currentPlanSlug={currentPlanSlug}
-      currentIntervalKey={currentIntervalKey}
-      currentPeriodEndDisplay={currentPeriodEndDisplay}
       usageRows={usageRows}
       plans={plans}
       compareInterval={compareInterval}
       checkoutPlanId={checkoutPlanId}
       isPortalLoading={isPortalFetching}
-      onSelectCompareInterval={setCompareInterval}
       onCheckout={handleCheckout}
+      hasProviderSubscription={hasProviderSubscription}
+      planMetaLine={planMetaLine}
+      isPlansOpen={isPlansOpen}
+      onOpenPlans={handleOpenPlans}
+      onClosePlans={handleClosePlans}
+      addons={addons}
+      addonSlugInFlight={addonSlugInFlight}
+      onBuyAddon={handleBuyAddon}
       onManage={handleManage}
     />
   );

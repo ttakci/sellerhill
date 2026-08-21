@@ -30,6 +30,7 @@ import {
   ProfitBasis,
   TemplateType,
   TrackingConversionProvider,
+  TrackingConversionScope,
   UserRole,
   UserStatus,
   type ActionCenterSummaryDto,
@@ -824,6 +825,8 @@ function storeSettings(
     amazonTaxRate: 6,
     autoFulfillEnabled: true,
     trackingConversionProvider: TrackingConversionProvider.LOCAL,
+    trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+    trackingConvertManualOrders: true,
     buyerMessaging: BUYER_MESSAGING,
     createdAt: new Date(isoDaysAgo(ACCOUNT_AGE_DAYS - 1)),
     updatedAt: new Date(isoDaysAgo(6)),
@@ -1110,14 +1113,19 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
 
 const MICROS = 1_000_000;
 
+/**
+ * One demo catalog plan. The automatic-order ceiling is DERIVED as 2x the
+ * conversion quota rather than passed in, for the same reason migration 085
+ * derives it in SQL: two numbers that must stay in a fixed ratio should not be
+ * two places to get it wrong.
+ */
 function plan(
   slug: string,
   name: string,
   description: string,
   monthly: number,
-  annual: number,
   listings: number,
-  orders: number,
+  conversions: number,
   order: number
 ): BillingPlanWithPricingDto {
   const id = `demo-plan-${slug}`;
@@ -1139,42 +1147,62 @@ function plan(
         effectiveFrom: stamp, effectiveTo: null, providerPriceId: null,
         createdAt: stamp, updatedAt: stamp,
       },
-      [BillingInterval.ANNUAL]: {
-        id: `${id}-a`, planId: id, interval: BillingInterval.ANNUAL,
-        amountMicros: annual * MICROS, currency: 'USD',
-        effectiveFrom: stamp, effectiveTo: null, providerPriceId: null,
-        createdAt: stamp, updatedAt: stamp,
-      },
     },
     limits: {
       [BillingLimitKey.LISTINGS_PER_MONTH]: {
         id: `${id}-l1`, planId: id, limitKey: BillingLimitKey.LISTINGS_PER_MONTH,
         limitValue: listings, unit: 'listings', createdAt: stamp, updatedAt: stamp,
       },
+      [BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH]: {
+        id: `${id}-l3`, planId: id, limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+        limitValue: conversions, unit: 'conversions', createdAt: stamp, updatedAt: stamp,
+      },
       [BillingLimitKey.AMAZON_ORDERS_PER_MONTH]: {
         id: `${id}-l2`, planId: id, limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
-        limitValue: orders, unit: 'orders', createdAt: stamp, updatedAt: stamp,
+        limitValue: conversions * 2, unit: 'orders', createdAt: stamp, updatedAt: stamp,
       },
     },
   };
 }
 
+/*
+ * Mirrors the real catalog (migrations 083 + 085): twelve monthly tiers, no
+ * annual interval, and the automatic-order ceiling derived as 2x the
+ * conversion quota. The demo showed the retired three-plan catalog at its old
+ * prices, so a visitor was quoted figures the product no longer sells.
+ *
+ * Names and descriptions come from the `billing` i18n namespace at render time,
+ * exactly as the live catalog's do, so the strings here are only fallbacks.
+ */
 export const DEMO_BILLING_PLANS: BillingPlanWithPricingDto[] = [
-  plan('starter', 'Starter', 'For a solo seller putting their first catalogue on autopilot.', 39, 390, 1500, 150, 1),
-  plan('growth', 'Growth', 'For a seller adding listings faster than they can watch them.', 55, 550, 2500, 250, 2),
-  plan('scale', 'Scale', 'For an operation running several stores and buyer accounts at once.', 75, 750, 4500, 450, 3),
+  plan('lite', 'Lite', 'For sellers just getting started with a small catalog.', 19.99, 200, 25, 1),
+  plan('nano', 'Nano', 'For testing the waters with a focused product set.', 24.99, 500, 50, 2),
+  plan('micro', 'Micro', 'For solo sellers running a compact catalog.', 29.99, 1000, 100, 3),
+  plan('starter', 'Starter', 'For sellers with a growing catalog and steady order flow.', 44.99, 2000, 150, 4),
+  plan('basic', 'Basic', 'For established sellers scaling past a few thousand listings.', 59.99, 3000, 200, 5),
+  plan('plus', 'Plus', 'For sellers running a broad catalog across multiple niches.', 84.99, 4000, 250, 6),
+  plan('growth', 'Growth', 'For high-volume sellers with a five-thousand-listing catalog.', 104.99, 5000, 300, 7),
+  plan('advanced', 'Advanced', 'For power sellers managing a large, actively repriced catalog.', 159.99, 7500, 350, 8),
+  plan('pro', 'Pro', 'For professional operations running ten thousand listings.', 179.99, 10000, 500, 9),
+  plan('elite', 'Elite', 'For large operations with a fifteen-thousand-listing catalog.', 319.99, 15000, 600, 10),
+  plan('business', 'Business', 'For multi-store businesses at twenty thousand listings.', 429.99, 20000, 700, 11),
+  plan('enterprise', 'Enterprise', 'For the largest catalogs, with priority support.', 529.99, 25000, 800, 12),
 ];
 
 export const DEMO_BILLING_CATALOG: BillingCatalogDto = {
   plans: DEMO_BILLING_PLANS,
   currency: 'USD',
   enforcementEnabled: true,
-  provider: BillingProvider.PADDLE,
+  provider: BillingProvider.STRIPE,
 };
 
 /** The demo account is a paying Growth customer, mid-period. */
 export function buildDemoBillingSummary(): BillingSummaryDto {
-  const growth = DEMO_BILLING_PLANS[1];
+  // By slug, not by index. The index silently pointed at a different plan the
+  // moment the catalog grew a cheaper tier at the front — the demo then showed
+  // "Nano" above Growth's quotas.
+  const growth =
+    DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
@@ -1225,8 +1253,38 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
         updatedAt: isoDaysAgo(0, 3),
       },
     ],
+    // The demo account is on a paid plan, so choosing another plan switches it
+    // in place rather than starting a second subscription.
+    hasProviderSubscription: true,
+    // No top-up offer: the demo account is comfortably inside every limit, and
+    // packs are only offered to a seller who has actually hit one.
+    quotaAddons: [],
+    // What the billing screen actually renders. Kept consistent with the
+    // period rows above so the demo never shows two different numbers for the
+    // same quota — the conversion count is deliberately well below the order
+    // count, which is what a seller converting only TBA numbers looks like.
+    quotas: [
+      {
+        limitKey: BillingLimitKey.LISTINGS_PER_MONTH,
+        used: 1840,
+        creditValue: 0,
+        limitValue: 5000,
+      },
+      {
+        limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
+        used: 168,
+        creditValue: 0,
+        limitValue: 300,
+      },
+      {
+        limitKey: BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+        used: 291,
+        creditValue: 0,
+        limitValue: 600,
+      },
+    ],
     enforcementEnabled: true,
-    provider: BillingProvider.PADDLE,
+    provider: BillingProvider.STRIPE,
     transition: 'active',
   };
 }

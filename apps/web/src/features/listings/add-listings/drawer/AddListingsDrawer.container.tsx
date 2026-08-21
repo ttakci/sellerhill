@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   PolicyType,
   createListingsSchema,
+  isValidAsinShape,
   parseAsins,
   type CreateListingsFormData,
   type CreateListingsRequest,
@@ -44,8 +45,7 @@ const readPreferences = (): AddListingsDrawerPreferences => {
     const parsed = JSON.parse(stored) as Partial<AddListingsDrawerPreferences>;
     return {
       ebayAccountId: typeof parsed.ebayAccountId === 'string' ? parsed.ebayAccountId : '',
-      listingSettingsGroupId:
-        typeof parsed.listingSettingsGroupId === 'string' ? parsed.listingSettingsGroupId : '',
+      listingSettingsGroupId: typeof parsed.listingSettingsGroupId === 'string' ? parsed.listingSettingsGroupId : '',
       paymentPolicyId: typeof parsed.paymentPolicyId === 'string' ? parsed.paymentPolicyId : '',
       shippingPolicyId: typeof parsed.shippingPolicyId === 'string' ? parsed.shippingPolicyId : '',
       returnPolicyId: typeof parsed.returnPolicyId === 'string' ? parsed.returnPolicyId : '',
@@ -73,7 +73,11 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
 
   const { data: ebayAccountsData, isLoading: isLoadingAccounts } = useGetEbayAccountsQuery();
   const ebayAccounts = useMemo(
-    () => (ebayAccountsData?.items ?? []).map((account) => ({ id: account.id, name: account.storeName || account.sellerId || account.id })),
+    () =>
+      (ebayAccountsData?.items ?? []).map((account) => ({
+        id: account.id,
+        name: account.storeName || account.sellerId || account.id,
+      })),
     [ebayAccountsData?.items]
   );
   const { data: listingSettingsGroups = [], isLoading: isLoadingSettings } = useGetListingSettingsGroupsQuery();
@@ -126,19 +130,17 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     if (isSuccess && submitData) {
       const wasDraft = lastSubmittedAsDraft.current;
       resetMutation();
+      onClose();
       showMessage(
         {
           type: 'info',
           headerKey: 'translation:message.success.header',
-          descriptionKey: wasDraft
-            ? 'listings:listings.success.queuedDraft'
-            : 'listings:listings.success.queued',
+          descriptionKey: wasDraft ? 'listings:listings.success.queuedDraft' : 'listings:listings.success.queued',
           descriptionParams: { count: submitData.totalAsins },
           primaryButton: {
             labelKey: 'translation:message.success.ok',
             onClick: () => {
               closeMessage();
-              onClose();
               onSuccess({ asDraft: wasDraft });
             },
           },
@@ -228,15 +230,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
       }
     }
     writePreferences(preferences);
-  }, [
-    isOpen,
-    isLoading,
-    ebayAccounts,
-    listingSettingsGroups,
-    businessPolicies,
-    watchedValues,
-    form,
-  ]);
+  }, [isOpen, isLoading, ebayAccounts, listingSettingsGroups, businessPolicies, watchedValues, form]);
 
   const canProceed = useMemo(() => {
     if (currentStep === 0) {
@@ -265,19 +259,54 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     }
   };
 
+  const submitAsins = (data: CreateListingsFormData, validAsins: string[]) => {
+    lastSubmittedAsDraft.current = Boolean(data.asDraft);
+    const cleanData: CreateListingsRequest = {
+      asins: validAsins,
+      ebayAccountId: data.ebayAccountId,
+      listingSettingsGroupId: data.listingSettingsGroupId,
+      paymentPolicyId: data.paymentPolicyId,
+      shippingPolicyId: data.shippingPolicyId,
+      returnPolicyId: data.returnPolicyId,
+      asDraft: Boolean(data.asDraft),
+    };
+    void createListings(cleanData);
+  };
+
   const handleSubmit = () => {
     void rhfSubmit((data: CreateListingsFormData) => {
-      lastSubmittedAsDraft.current = Boolean(data.asDraft);
-      const cleanData: CreateListingsRequest = {
-        asins: parseAsins(data.asins),
-        ebayAccountId: data.ebayAccountId,
-        listingSettingsGroupId: data.listingSettingsGroupId,
-        paymentPolicyId: data.paymentPolicyId,
-        shippingPolicyId: data.shippingPolicyId,
-        returnPolicyId: data.returnPolicyId,
-        asDraft: Boolean(data.asDraft),
-      };
-      void createListings(cleanData);
+      const parsed = parseAsins(data.asins);
+      const validAsins = parsed.filter((asin) => isValidAsinShape(asin));
+      const skippedCount = parsed.length - validAsins.length;
+
+      // Malformed entries never block the rest of the batch — they're filtered
+      // out here (the schema only blocks submission when NOTHING is usable) and
+      // the seller is warned before the well-formed ones are searched.
+      if (skippedCount > 0) {
+        showMessage(
+          {
+            type: 'warning',
+            headerKey: 'translation:message.warning.header',
+            descriptionKey: 'listings:listings.errors.invalidAsins',
+            descriptionParams: { count: skippedCount },
+            primaryButton: {
+              labelKey: 'translation:common.continue',
+              onClick: () => {
+                closeMessage();
+                submitAsins(data, validAsins);
+              },
+            },
+            secondaryButton: {
+              labelKey: 'translation:common.cancel',
+              onClick: closeMessage,
+            },
+          },
+          t
+        );
+        return;
+      }
+
+      submitAsins(data, validAsins);
     })();
   };
 

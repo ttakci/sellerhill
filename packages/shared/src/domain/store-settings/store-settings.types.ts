@@ -1,4 +1,4 @@
-import type { TrackingConversionProvider } from '../amazon';
+import type { TrackingConversionProvider, TrackingConversionScope } from '../amazon';
 import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.types';
 
 /**
@@ -83,6 +83,21 @@ export interface StoreSettings {
     // tracking number must be relayed to eBay. Persisted LOWERCASE ('local' | 'api')
     // — the tracking processor compares case-sensitively. Default 'local'.
     trackingConversionProvider: TrackingConversionProvider;
+
+    // WHICH carriers the provider above is applied to. Default
+    // 'amazon_logistics_only' — convert the TB* numbers that unmistakably say
+    // "Amazon" and leave real carriers native, which spends less conversion
+    // quota and keeps the stronger delivery evidence in an eBay INR case.
+    // See TrackingConversionScope for the full trade-off.
+    trackingConversionScope: TrackingConversionScope;
+
+    // Whether an order the seller linked by hand is also converted
+    // automatically. Default true: a seller who places every order manually
+    // would otherwise have to remember a button on each one, and forgetting it
+    // exposes the supplier — the exact thing conversion exists to prevent.
+    // Bulk historical linking is exempt regardless of this flag, so linking a
+    // backlog cannot burn a month of quota at once.
+    trackingConvertManualOrders: boolean;
 
     // Buyer auto-messaging config (per-user global store setting,
     // `store_settings.buyer_messaging` JSONB). Nullable — null/undefined means

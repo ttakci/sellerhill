@@ -7,6 +7,7 @@ import {
   BuyerMessageTemplateRef,
   StoreSettingsDrawerStep,
   TrackingConversionProvider,
+  TrackingConversionScope,
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
@@ -71,6 +72,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
+  const [trackingConversionScope, setTrackingConversionScope] = useState<TrackingConversionScope>(
+    config?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
+  );
+  const [trackingConvertManualOrders, setTrackingConvertManualOrders] = useState(
+    config?.trackingConvertManualOrders ?? true
+  );
   const [buyerMessagingConfig, setBuyerMessagingConfig] = useState<BuyerMessagingConfig>(() =>
     remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
 
@@ -100,6 +107,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
+      setTrackingConversionScope(
+        next?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
+      );
+      setTrackingConvertManualOrders(next?.trackingConvertManualOrders ?? true);
       setBuyerMessagingConfig(remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
     } else if (isOpen && step === StoreSettingsDrawerStep.GENERAL) {
       setBuyerMessagingConfig(remoteBuyerMessaging ?? buildDefaultBuyerMessagingConfig(buyerMessageTemplates));
@@ -119,6 +130,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         amazonTaxRate,
         autoFulfillEnabled,
         trackingConversionProvider: config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL,
+        trackingConversionScope,
+        trackingConvertManualOrders,
       }).unwrap(),
       updateBuyerMessaging({ config: buyerMessagingConfig, storeId }).unwrap(),
     ])
@@ -169,6 +182,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
+      trackingConversionScope={trackingConversionScope}
+      onTrackingConversionScopeChange={setTrackingConversionScope}
+      trackingConvertManualOrders={trackingConvertManualOrders}
+      onTrackingConvertManualOrdersChange={setTrackingConvertManualOrders}
       buyerMessagingConfig={buyerMessagingConfig}
       buyerMessageTemplates={buyerMessageTemplates}
       onToggleBuyerMessagingMaster={(enabled) => setBuyerMessagingConfig((current) => ({ ...current, enabled }))}

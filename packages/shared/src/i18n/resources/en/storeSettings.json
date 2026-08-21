@@ -88,6 +88,12 @@
         "resetConfirm": "Restore the original default message? Your edits to the text will be lost.",
         "deleteConfirmDescription": "This will permanently delete \"{{name}}\". If a messaging event is currently using it, that event will stop sending until you pick another template."
       }
-    }
+    },
+    "trackingConversionScope": "Convert which carriers",
+    "trackingConversionScopeAll": "All carriers",
+    "trackingConversionScopeAmazonOnly": "Amazon Logistics only (TBA)",
+    "trackingConversionScopeHint": "Amazon Logistics (TBA) numbers say \"Amazon\" outright, so converting only those hides the clearest sign of your supplier and uses far less of your monthly conversion allowance. Converting every carrier hides more — an Amazon-shipped UPS or USPS number can often be looked up — but costs more, and eBay treats a native carrier scan as stronger proof of delivery if a buyer claims their item never arrived.",
+    "trackingConvertManualOrders": "Also convert orders I link by hand",
+    "trackingConvertManualOrdersHint": "On by default. Turn it off if you would rather convert manually linked orders one at a time from the order page."
   }
 }

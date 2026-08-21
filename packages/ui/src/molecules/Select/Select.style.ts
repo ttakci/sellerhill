@@ -51,6 +51,15 @@ export const FieldWrapper = styled.div<{
 
 export const ValueDisplay = styled.div<{ $hasIconLeft: boolean; $hasLabel: boolean; $size?: string }>`
   flex: 1;
+  /*
+   * A flex item's default min-width is auto (its content's intrinsic
+   * width), which overrides text-overflow: ellipsis below — the label just
+   * keeps growing past its allotted space instead of truncating, pushing
+   * into (or under) the chevron icon next to it. Without this, a long
+   * selected value collides with the icon in both the closed trigger and the
+   * open (chevron-flipped) state, since both render the same element.
+   */
+  min-width: 0;
   font-size: ${tkn('typography.fontSize.base')};
   font-family: ${tkn('typography.fontFamily.body')};
   color: ${tkn('colors.text.primary')};
@@ -343,7 +352,15 @@ export const MobileOption = styled.div<{ $isSelected: boolean }>`
   align-items: center;
   justify-content: space-between;
   min-height: 3.25rem;
-  padding: 0 ${tkn('spacing.sm')};
+  /*
+   * Matches Dropdown.style.ts's MobileMenuItem exactly (spacing.sm-md) — the
+   * two mirror the same bottom-sheet pattern, and their combined inset with
+   * OptionsList's own spacing.xs padding (4px + 11px = 15px) lines up with
+   * BottomSheetHeader's flat spacing.md (15px), so the title and the option
+   * text share one left edge instead of the options sitting closer to the
+   * sheet's edge than the title above them.
+   */
+  padding: 0 ${tkn('spacing.sm-md')};
   width: 100%;
   border: none;
   background: transparent;

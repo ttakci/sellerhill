@@ -9,11 +9,11 @@ import { BillingInterval, BillingSubscriptionStatus } from '@repo/shared';
 import {
   Badge,
   Button,
+  Drawer,
   EmptyState,
   InfoMessage,
   PageHeader,
-  ProgressBar,
-  SegmentedControl,
+  ProgressRing,
   SettingsCard,
   Text,
 } from '@repo/ui';
@@ -48,18 +48,29 @@ function UsageCellView({ row }: BillingUsageCellViewProps): React.ReactElement {
   const { t } = useTranslation(['billing']);
   return (
     <S.UsageCell>
-      <Text variant="body-sm" weight="semibold">
-        {t(row.labelKey)}
-      </Text>
-      <S.UsageValueRow>
-        <Text variant="h4" weight="semibold">
-          {row.usedDisplay}
+      {/*
+        The ring carries the proportion and the percentage; the text beside it
+        carries the actual figures. Previously the used value was rendered
+        BOTH on its own and again inside "used of limit", so a full quota read
+        "50 50 / 50".
+      */}
+      <ProgressRing
+        value={row.barValue}
+        variant={row.barVariant}
+        size="sm"
+        centerLabel={row.ringLabel}
+        label={row.barAriaLabel}
+      />
+      <S.UsageTextStack>
+        <Text variant="body-sm" weight="semibold">
+          {t(row.labelKey)}
         </Text>
-        <Text variant="body-sm" color="text.secondary">
-          {row.ofDisplay}
-        </Text>
-      </S.UsageValueRow>
-      <ProgressBar value={row.barValue} variant={row.barVariant} size="sm" label={row.barAriaLabel} />
+        <S.UsageValueRow>
+          <Text variant="body" weight="semibold" numeric>
+            {row.ofDisplay}
+          </Text>
+        </S.UsageValueRow>
+      </S.UsageTextStack>
     </S.UsageCell>
   );
 }
@@ -68,6 +79,7 @@ function UsageCellView({ row }: BillingUsageCellViewProps): React.ReactElement {
 function PlanCardView({
   plan,
   compareInterval,
+  hasProviderSubscription,
   providerUnconfigured,
   checkoutPlanId,
   onCheckout,
@@ -77,34 +89,46 @@ function PlanCardView({
     compareInterval === BillingInterval.MONTHLY ? 'billing:billing.plans.perMonth' : 'billing:billing.plans.perYear';
   const nameKey = `billing:billing.plans.${plan.slug}.name`;
   const descriptionKey = `billing:billing.plans.${plan.slug}.description`;
+  // The label has to match what the click DOES. With a live Stripe
+  // subscription the choice reprices it; without one it starts a new one.
+  // Calling both "choose plan" hid that difference, and the difference is the
+  // whole reason a second subscription — and a second bill — was possible.
   const ctaLabel = plan.isCurrent
     ? t('billing:billing.plans.currentPlan')
-    : t('billing:billing.plans.choosePlan', { plan: t(nameKey) });
+    : hasProviderSubscription
+      ? t('billing:billing.plans.switchTo', { plan: t(nameKey) })
+      : t('billing:billing.plans.choosePlan', { plan: t(nameKey) });
   const isCheckingOutThis = checkoutPlanId === plan.planId;
   const isCheckingOutOther = checkoutPlanId !== null && !isCheckingOutThis;
 
   return (
-    <S.PlanCard variant="bordered" padding="lg">
-      <S.PlanCardHeader>
-        <Text variant="h4" weight="semibold">
-          {t(nameKey)}
-        </Text>
-        <Text variant="body-sm" color="text.secondary">
-          {t(descriptionKey)}
-        </Text>
-      </S.PlanCardHeader>
-      <S.PlanPriceRow>
-        <Text variant="h3" weight="semibold">
-          {plan.priceDisplay}
-        </Text>
-        <Text variant="body-sm" color="text.secondary">
-          {t(periodKey)}
-        </Text>
-      </S.PlanPriceRow>
+    <SettingsCard
+      variant="section"
+      header={{ title: t(nameKey), subtitle: t(descriptionKey) }}
+      headerRight={
+        // The price is the number a seller compares across 12 cards, so it
+        // gets a colored badge instead of plain text — the same chip
+        // treatment as the subscription status above, just for the figure
+        // that matters most on THIS card.
+        <Badge variant="primary" size="md" isPill>
+          {plan.priceDisplay} {t(periodKey)}
+        </Badge>
+      }
+    >
       <S.PlanFeatureList>
         <S.PlanFeatureItem>
           <Text variant="body-sm">
             {t('billing:billing.limits.listings_per_month.label')}: {plan.listingsLimitDisplay}
+          </Text>
+        </S.PlanFeatureItem>
+        {/* Conversions sit second because they are the METERED, priced
+            dimension — the automatic-order figure below is a ceiling, not what
+            the tier is sold on. The card listed only listings and orders, so
+            the thing the price is actually based on was invisible. */}
+        <S.PlanFeatureItem>
+          <Text variant="body-sm">
+            {t('billing:billing.limits.tracking_conversions_per_month.label')}:{' '}
+            {plan.trackingConversionsLimitDisplay}
           </Text>
         </S.PlanFeatureItem>
         <S.PlanFeatureItem>
@@ -125,7 +149,7 @@ function PlanCardView({
           <Text variant="body-sm">{ctaLabel}</Text>
         </Button>
       </S.PlanCardFooter>
-    </S.PlanCard>
+    </SettingsCard>
   );
 }
 
@@ -138,16 +162,21 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   providerUnconfigured,
   subscriptionStatus,
   currentPlanSlug,
-  currentIntervalKey,
-  currentPeriodEndDisplay,
   usageRows,
   plans,
   compareInterval,
   checkoutPlanId,
   isPortalLoading,
-  onSelectCompareInterval,
   onCheckout,
   onManage,
+  hasProviderSubscription,
+  planMetaLine,
+  isPlansOpen,
+  onOpenPlans,
+  onClosePlans,
+  addons,
+  addonSlugInFlight,
+  onBuyAddon,
 }) => {
   const { t } = useTranslation(['translation', 'billing']);
 
@@ -183,112 +212,208 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
     );
   }
 
-  const transitionKey = transition ? `billing:billing.transition.${transition}` : null;
+  /*
+   * The notice box is always shown — it is where "manage billing" lives now,
+   * not just where problems are announced.
+   *
+   * 'active' and 'full_access' carry a neutral hint instead of an alert: a
+   * healthy account still needs a place to reach the plans drawer, and
+   * rendering nothing there would leave that action with no home. Every other
+   * transition carries its real, actionable copy ("your payment failed", …).
+   */
+  const noticeKey =
+    transition && transition !== 'active' && transition !== 'full_access'
+      ? `billing:billing.transition.${transition}`
+      : 'billing:billing.subscription.manageHint';
   const planNameKey = currentPlanSlug ? `billing:billing.plans.${currentPlanSlug}.name` : null;
 
   return (
     <S.Container>
       <PageHeader title={t('billing:billing.title')} subtitle={t('billing:billing.subtitle')} />
 
-      <SettingsCard variant="section" header={{ title: t('billing:billing.subscription.title') }}>
-        {transitionKey ? (
-          <Text variant="body-sm" weight="semibold">
-            {t(transitionKey)}
-          </Text>
-        ) : null}
-        <S.PlanHeaderRow>
-          <S.PlanNameStack>
-            {planNameKey ? (
-              <Text variant="h3" weight="semibold">
-                {t(planNameKey)}
-              </Text>
-            ) : (
-              <Text variant="h3" weight="semibold">
-                {t('billing:billing.transition.no_subscription')}
-              </Text>
-            )}
-            {currentIntervalKey ? (
-              <Text variant="body-sm" color="text.secondary">
-                {t(currentIntervalKey)}
-              </Text>
-            ) : null}
-            {currentPeriodEndDisplay ? (
-              <Text variant="body-sm" color="text.secondary">
-                {t('billing:billing.subscription.nextRenewal')}: {currentPeriodEndDisplay}
-              </Text>
-            ) : null}
-          </S.PlanNameStack>
-          {subscriptionStatus ? (
+      {/*
+        ONE card for "what am I on and how much is left", not two.
+        Splitting the plan identity from its usage put the answer to a single
+        question across two cards, and the identity half was a vertical stack of
+        four short strings with no hierarchy. Trial and paid look identical here
+        on purpose — a trial IS the current plan, and showing it anywhere else
+        would make a trialling seller look like they had none.
+      */}
+      <S.SubscriptionCard
+        variant="section"
+        header={{ title: t('billing:billing.subscription.title') }}
+        headerRight={
+          // Top-right of the CARD, in the header row next to the title — not
+          // beside the plan name, which put it in the middle of a text stack
+          // instead of the corner a status badge conventionally occupies (see
+          // the listing-detail hero card's own StatusBadgeSlot).
+          subscriptionStatus ? (
             <Badge variant={statusBadgeVariant(subscriptionStatus)} size="sm" isPill>
               {t(`billing:billing.subscription.status.${subscriptionStatus}`)}
             </Badge>
-          ) : null}
+          ) : undefined
+        }
+      >
+        <S.PlanHeaderRow>
+          <S.PlanNameStack>
+            <Text variant="h3" weight="semibold">
+              {planNameKey ? t(planNameKey) : t('billing:billing.transition.no_subscription')}
+            </Text>
+            {planMetaLine ? (
+              <S.PlanMetaRow>
+                {/*
+                  One muted line, assembled in the container because what
+                  belongs on it depends on the kind of plan. A trial has no
+                  billing interval and does not renew — it used to read
+                  "Monthly billing · Next renewal" for an expired free trial,
+                  which was wrong on both counts.
+                */}
+                <Text variant="body-sm" color="text.secondary">
+                  {planMetaLine}
+                </Text>
+              </S.PlanMetaRow>
+            ) : null}
+          </S.PlanNameStack>
         </S.PlanHeaderRow>
-        <S.ManageButtonRow>
-          <Button
-            variant="secondary"
-            size="medium"
-            disabled={providerUnconfigured || !subscriptionStatus}
-            isLoading={isPortalLoading}
-            onClick={onManage}
+
+        {usageRows.length > 0 ? (
+          <S.UsageSection>
+            <S.PlanDivider />
+            <Text variant="body-sm" weight="semibold">
+              {t('billing:billing.usage.title')}
+            </Text>
+            {/* Three across on desktop, reflowing down on a narrow screen —
+                the three meters are the same kind of thing and read as one
+                row rather than a list of unrelated facts. */}
+            <S.UsageGrid>
+              {usageRows.map((row) => (
+                <UsageCellView key={row.labelKey} row={row} />
+              ))}
+            </S.UsageGrid>
+          </S.UsageSection>
+        ) : null}
+
+        <S.NoticeRow>
+          {/*
+            ONE box, always shown, full width — it carries both the message
+            AND the action now, rather than a separate button row plus a notice
+            that only sometimes appeared. Its width matches the usage grid
+            above it (S.NoticeRow stretches its child to 100%), so the row
+            reads as the close of the same card, not a narrower, disconnected
+            element. For a healthy subscription the copy is a neutral "manage
+            your billing here" hint — the action still needs a home even when
+            nothing is wrong.
+          */}
+          <InfoMessage
+            action={t('billing:billing.subscription.manage')}
+            onAction={onOpenPlans}
           >
-            <Text variant="body-sm">{t('billing:billing.subscription.manage')}</Text>
-          </Button>
-        </S.ManageButtonRow>
-      </SettingsCard>
+            {t(noticeKey)}
+          </InfoMessage>
+        </S.NoticeRow>
+      </S.SubscriptionCard>
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
 
-      {usageRows.length > 0 ? (
+      {addons.length > 0 ? (
         <SettingsCard
           variant="section"
-          header={{ title: t('billing:billing.usage.title'), subtitle: t('billing:billing.usage.subtitle') }}
+          header={{
+            title: t('billing:billing.addons.title'),
+            subtitle: t('billing:billing.addons.subtitle'),
+          }}
         >
-          <S.UsageGrid>
-            {usageRows.map((row) => (
-              <UsageCellView key={row.labelKey} row={row} />
+          <S.AddonGrid>
+            {addons.map((addon) => (
+              <S.AddonCard key={addon.slug} variant="bordered" padding="lg">
+                <S.AddonHeader>
+                  <Text variant="h4" weight="semibold">
+                    {addon.quantityDisplay}
+                  </Text>
+                  <Text variant="body" weight="semibold" numeric>
+                    {addon.priceDisplay}
+                  </Text>
+                </S.AddonHeader>
+                <S.AddonFooter>
+                  <Button
+                    variant="secondary"
+                    size="medium"
+                    fullWidth
+                    disabled={!addon.isPurchasable || providerUnconfigured}
+                    isLoading={addonSlugInFlight === addon.slug}
+                    onClick={() => onBuyAddon(addon.slug)}
+                  >
+                    <Text variant="body-sm">{t('billing:billing.addons.buy')}</Text>
+                  </Button>
+                </S.AddonFooter>
+              </S.AddonCard>
             ))}
-          </S.UsageGrid>
+          </S.AddonGrid>
+          <Text variant="caption" color="text.secondary">
+            {t('billing:billing.addons.note')}
+          </Text>
         </SettingsCard>
       ) : null}
 
-      {plans.length > 0 ? (
-        <SettingsCard
-          variant="section"
-          header={{ title: t('billing:billing.plans.title'), subtitle: t('billing:billing.plans.subtitle') }}
-          headerRight={
-            <S.CompareControlSlot>
-              <SegmentedControl
-                size="sm"
-                value={compareInterval}
-                onChange={(value) => onSelectCompareInterval(value as BillingInterval)}
-                options={[
-                  { label: t('billing:billing.plans.monthly'), value: BillingInterval.MONTHLY },
-                  { label: t('billing:billing.plans.annual'), value: BillingInterval.ANNUAL },
-                ]}
-              />
-            </S.CompareControlSlot>
-          }
-        >
-          <S.PricingGrid>
-            {plans.map((plan) => (
-              <PlanCardView
-                key={plan.planId}
-                plan={plan}
-                compareInterval={compareInterval}
-                providerUnconfigured={providerUnconfigured}
-                checkoutPlanId={checkoutPlanId}
-                onCheckout={onCheckout}
-              />
-            ))}
-          </S.PricingGrid>
+      {/*
+        Plans live in a drawer, not on the page.
+        Twelve tiers below the fold turned the billing screen into a price list
+        whose main content — what you are on and what is left — was the small
+        part at the top. The drawer opens from the one control on the plan card,
+        so "manage my subscription" is a single place rather than a disabled
+        button next to a wall of cards.
+      */}
+      <Drawer
+        isOpen={isPlansOpen}
+        onClose={onClosePlans}
+        title={t('billing:billing.plans.title')}
+        subtitle={t('billing:billing.plans.subtitle')}
+      >
+        <S.DrawerSection>
+          {hasProviderSubscription ? (
+            <>
+              {/*
+                Only offered with a real Stripe subscription: the portal has
+                nothing to show a trial user, whose trial exists only in our
+                own tables.
+              */}
+              <Button
+                variant="secondary"
+                size="medium"
+                fullWidth
+                disabled={providerUnconfigured}
+                isLoading={isPortalLoading}
+                onClick={onManage}
+              >
+                <Text variant="body-sm">{t('billing:billing.subscription.portal')}</Text>
+              </Button>
+              <Text variant="caption" color="text.secondary">
+                {t('billing:billing.subscription.portalHint')}
+              </Text>
+            </>
+          ) : null}
+
           {!enforcementEnabled ? (
             <Text variant="caption" color="text.secondary">
               {t('billing:billing.plans.informationalOnly')}
             </Text>
           ) : null}
-        </SettingsCard>
-      ) : null}
+
+          <S.DrawerPlanList>
+            {plans.map((plan) => (
+              <PlanCardView
+                key={plan.planId}
+                plan={plan}
+                compareInterval={compareInterval}
+                hasProviderSubscription={hasProviderSubscription}
+                providerUnconfigured={providerUnconfigured}
+                checkoutPlanId={checkoutPlanId}
+                onCheckout={onCheckout}
+              />
+            ))}
+          </S.DrawerPlanList>
+        </S.DrawerSection>
+      </Drawer>
     </S.Container>
   );
 };

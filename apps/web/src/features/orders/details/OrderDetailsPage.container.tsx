@@ -7,8 +7,10 @@ import { useGetOrderByIdQuery, useUpdateOrderAmazonDetailsMutation } from '../ap
 
 import { OrderDetailsPageComponent } from './OrderDetailsPage.component';
 
+import { useConvertOrderTrackingMutation } from '@/features/amazon/api/amazon.api';
 import { LinkAmazonModal } from '@/features/amazon/components/LinkAmazonModal';
 import { useGetEbayAccountsQuery } from '@/features/ebay/api/ebayApi';
+import { getErrorI18nKey } from '@/utils/errorHandler';
 import { resolveStoreCurrency } from '@/utils/resolveStoreCurrency';
 import { useLocale } from '@/utils/useLocale';
 
@@ -26,6 +28,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
   const { data: ebayAccountsData } = useGetEbayAccountsQuery();
 
   const [, { isLoading: isUpdating }] = useUpdateOrderAmazonDetailsMutation();
+  const [convertTracking, { isLoading: isConvertingTracking }] = useConvertOrderTrackingMutation();
 
   useLoading(isUpdating);
 
@@ -104,6 +107,59 @@ export const OrderDetailsPageContainer: React.FC = () => {
     });
   }, [order, showMessage, closeMessage, t]);
 
+  /*
+   * Offer the action only when it can actually do something:
+   *   - the order is linked to one of our listings, without which a converted
+   *     number could never be pushed to eBay (the fulfillment needs the
+   *     listing's eBay item id as its line item);
+   *   - Amazon has given us a number to convert;
+   *   - and it has not already been converted, since a conversion is paid for
+   *     and buying a second one for the same shipment is pure loss.
+   * The server refuses all three independently — this only keeps a button that
+   * would decline out of the seller's way.
+   */
+  const canConvertTracking = Boolean(
+    order?.isTracked && order.amazonTrackingNumber && !order.convertedTrackingNumber
+  );
+
+  const handleConvertTracking = useCallback(() => {
+    if (!id) {
+      return;
+    }
+    convertTracking({ orderId: id })
+      .unwrap()
+      .then((result) => {
+        // `converted: false` is a normal outcome, not a failure — the quota may
+        // be spent, or the provider unavailable. The backend names the reason
+        // as an i18n key so the seller reads WHY instead of "an error occurred".
+        showMessage(
+          {
+            type: result.converted ? 'success' : 'info',
+            headerKey: result.converted
+              ? 'translation:message.success.header'
+              : 'translation:message.info.header',
+            descriptionKey: result.converted
+              ? 'orders:orders.errors.conversionDone'
+              : `orders:${result.reasonKey ?? 'orders.errors.conversionUnavailable'}`,
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t
+        );
+        void refetch();
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t
+        );
+      });
+  }, [id, convertTracking, showMessage, closeMessage, t, refetch]);
+
   const handleBack = () => {
     localeNavigate('/orders');
   };
@@ -132,6 +188,9 @@ export const OrderDetailsPageContainer: React.FC = () => {
             : undefined
         }
         canCopyAddress={canCopyAddress}
+        canConvertTracking={canConvertTracking}
+        isConvertingTracking={isConvertingTracking}
+        onConvertTracking={handleConvertTracking}
       />
       {id && (
         <LinkAmazonModal

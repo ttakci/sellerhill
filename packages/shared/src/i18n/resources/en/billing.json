@@ -27,18 +27,60 @@
         "name": "Free trial",
         "description": "A time-limited trial of SellerHill. Not purchasable — it starts automatically when you sign up."
       },
+      "lite": {
+        "name": "Lite",
+        "description": "For sellers just getting started with a small catalog."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "For testing the waters with a focused product set."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "For solo sellers running a compact catalog."
+      },
       "starter": {
         "name": "Starter",
-        "description": "For solo sellers getting started with automated dropshipping."
+        "description": "For sellers with a growing catalog and steady order flow."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "For established sellers scaling past a few thousand listings."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "For sellers running a broad catalog across multiple niches."
       },
       "growth": {
         "name": "Growth",
-        "description": "For growing sellers who need more listings and Amazon orders."
+        "description": "For high-volume sellers with a five-thousand-listing catalog."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "For power sellers managing a large, actively repriced catalog."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For professional operations running ten thousand listings."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "For large operations with a fifteen-thousand-listing catalog."
+      },
+      "business": {
+        "name": "Business",
+        "description": "For multi-store businesses at twenty thousand listings."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For the largest catalogs, with priority support."
       },
       "scale": {
         "name": "Scale",
-        "description": "For high-volume sellers running multiple stores at scale."
-      }
+        "description": "A retired plan. Existing subscriptions keep working; new sign-ups choose from the plans above."
+      },
+      "switchTo": "Switch to {{plan}}",
+      "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice."
     },
     "limits": {
       "listings_per_month": {
@@ -47,16 +89,21 @@
         "description": "Maximum active listings across all your stores."
       },
       "amazon_orders_per_month": {
-        "label": "Amazon orders",
+        "label": "Automatic orders",
         "unit": "orders",
-        "description": "Maximum Amazon orders (auto-fulfill + manual link) per month."
+        "description": "Maximum Amazon orders placed for you (automatically or linked by hand) per month."
       },
       "unlimited": "Unlimited",
       "disabled": "Not included",
       "of": "{{used}} of {{limit}}",
       "used": "{{used}} used",
       "remaining": "{{remaining}} remaining",
-      "exceeded": "Limit exceeded"
+      "exceeded": "Limit exceeded",
+      "tracking_conversions_per_month": {
+        "label": "Tracking conversions",
+        "unit": "conversions",
+        "description": "How many shipments per month get a converted tracking number, so the buyer never sees your supplier."
+      }
     },
     "subscription": {
       "title": "Your subscription",
@@ -90,7 +137,13 @@
       "cancel": "Cancel subscription",
       "resume": "Resume subscription",
       "upgrade": "Upgrade plan",
-      "downgrade": "Downgrade plan"
+      "downgrade": "Downgrade plan",
+      "trialEnds": "Trial ends",
+      "trialEnded": "Trial ended",
+      "accessEnds": "Access ends",
+      "portal": "Payment method and invoices",
+      "portalHint": "Opens Stripe to update your card, download invoices, or cancel.",
+      "manageHint": "Manage your payment method, plan and invoices here."
     },
     "customer": {
       "title": "Billing details",
@@ -159,7 +212,21 @@
       "quota_exceeded": "You have reached your plan limit. Upgrade to continue.",
       "no_active_subscription": "No active subscription found.",
       "no_open_period": "No open usage period for this limit.",
-      "already_reserved": "This resource is already reserved."
+      "already_reserved": "This resource is already reserved.",
+      "providerNotConfigured": "Payments are not enabled on this environment yet. Please try again later.",
+      "planNotMirrored": "This plan is not available for purchase yet. Please choose another plan or contact support.",
+      "checkoutFailed": "Checkout could not be started. Please try again in a moment — if it keeps failing, contact support.",
+      "portalFailed": "The billing portal could not be opened. Please try again in a moment.",
+      "noCustomer": "No billing account yet. Choose a plan first to set one up.",
+      "planNotFound": "That plan could not be found.",
+      "priceNotFound": "No active price was found for that plan.",
+      "ebayTrialAlreadyUsed": "This eBay store has already used its free trial. Choose a plan to keep going.",
+      "quotaExhausted": "You have reached your plan limit. Upgrade to continue.",
+      "addonNotFound": "That top-up package could not be found.",
+      "noSubscription": "You do not have an active subscription to change.",
+      "planChangeFailed": "The plan could not be changed right now. Please try again, or use \"Manage billing\".",
+      "subscriptionSuspended": "Your subscription is not active, so new listings are paused. Choose a plan to resume — everything restarts on its own.",
+      "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan."
     },
     "actions": {
       "subscribe": "Subscribe",
@@ -195,6 +262,12 @@
         "subtitle": "Inspect and replay billing provider webhook events.",
         "replay": "Replay"
       }
+    },
+    "addons": {
+      "title": "Need more this month?",
+      "subtitle": "You have used your monthly tracking conversions. Top up to keep hiding your supplier until the month resets.",
+      "buy": "Buy",
+      "note": "A top-up applies to the current calendar month only, which is why it is offered when you reach the limit rather than in advance. Your plan allowance resets on the 1st."
     }
   }
 }

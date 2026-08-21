@@ -22,17 +22,18 @@ import {
 } from '@repo/shared';
 
 /**
- * Parsed Paddle webhook event. The signature-verification layer produces this
- * from the raw body; the idempotent processor consumes it. Only the fields the
- * processor needs are typed — the full payload is stored verbatim in the
- * webhook inbox. Backend-internal: the frontend never parses raw webhooks.
+ * Parsed Stripe webhook event. The controller's signature-verification step
+ * (`stripe.webhooks.constructEvent`) produces this from the raw body; the
+ * idempotent processor consumes it. Only the fields the processor needs are
+ * typed — the full payload is stored verbatim in the webhook inbox.
+ * Backend-internal: the frontend never parses raw webhooks.
  */
-export interface ParsedPaddleEvent {
-  /** Paddle event id (`evt_...`). Used for idempotency dedup. */
+export interface ParsedStripeEvent {
+  /** Stripe event id (`evt_...`). Used for idempotency dedup. */
   eventId: string | null;
-  /** Paddle event type (e.g. `subscription.created`, `subscription.canceled`). */
+  /** Stripe event type (e.g. `customer.subscription.updated`). */
   eventType: string;
-  /** Occurred-at timestamp from the Paddle payload (ISO 8601). Used for
+  /** Occurred-at timestamp (ISO 8601), from the event's `created`. Used for
    *  stale-event protection: events older than the configured TTL are dropped
    *  after being logged to the inbox. */
   occurredAt: string | null;
