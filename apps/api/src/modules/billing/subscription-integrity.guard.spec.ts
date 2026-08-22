@@ -148,4 +148,39 @@ describe('plan changes are billed by direction', () => {
     const body = service.slice(service.indexOf('async changePlan('));
     expect(body).toMatch(/cancelScheduledChange\(/);
   });
+
+  it('a downgrade preview costs 0 today and never reaches the provider', () => {
+    // The confirmation dialog must not tell a downgrading seller they are
+    // about to be charged for a change that moves no money until period end
+    // — so the 0-due return has to be an early return, strictly before the
+    // Stripe-calling branch, not just present somewhere in the method.
+    const body = service.slice(
+      service.indexOf('async previewPlanChange('),
+      service.indexOf('async createAddonCheckout('),
+    );
+    const downgradeIdx = body.indexOf('PlanChangeDirection.DOWNGRADE');
+    const zeroDueIdx = body.indexOf('amountDueMicros: 0');
+    const providerCallIdx = body.indexOf('this.provider.previewPlanChange(');
+    expect(downgradeIdx).toBeGreaterThan(-1);
+    expect(zeroDueIdx).toBeGreaterThan(downgradeIdx);
+    expect(providerCallIdx).toBeGreaterThan(zeroDueIdx);
+  });
+
+  it('the preview resolves direction the same way changePlan does', () => {
+    // A divergent argument order would let the preview disagree with what
+    // the change actually applies — showing the seller one number and
+    // charging another.
+    const directionCallPattern =
+      /resolvePlanChangeDirection\(\s*currentPlan\?\.prices\[interval\]\?\.amountMicros \?\? 0,\s*price\.amountMicros,?\s*\)/;
+    const changeBody = service.slice(
+      service.indexOf('async changePlan('),
+      service.indexOf('async previewPlanChange('),
+    );
+    const previewBody = service.slice(
+      service.indexOf('async previewPlanChange('),
+      service.indexOf('async createAddonCheckout('),
+    );
+    expect(changeBody).toMatch(directionCallPattern);
+    expect(previewBody).toMatch(directionCallPattern);
+  });
 });

@@ -28,6 +28,7 @@ import {
   PlanChangeDirection,
   PlatformSettingKey,
   resolvePlanChangeDirection,
+  type BillingPlanChangePreviewDto,
   type BillingQuotaAddonDto,
   type BillingQuotaUsageDto,
   type BillingSubscriptionDto,
@@ -381,6 +382,61 @@ export class BillingService {
       );
     }
     this.logger.log(`User ${userId} switched to plan ${plan.slug}`);
+  }
+
+  /**
+   * What will this plan change cost? Answered before anything is applied.
+   *
+   * A downgrade returns 0 due now: it takes effect at period end and moves no
+   * money today. Returning the preview's proration figure there would tell the
+   * seller they are about to be charged for a change that costs nothing now.
+   */
+  async previewPlanChange(
+    userId: string,
+    planId: string,
+    interval: BillingInterval,
+  ): Promise<BillingPlanChangePreviewDto> {
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription?.providerSubscriptionId) {
+      throw new Error('billing.errors.noSubscription');
+    }
+    const plan = await this.repository.loadPlanWithPricing(planId);
+    const price = plan?.prices[interval];
+    if (!plan || !price?.providerPriceId) {
+      throw new Error('billing.errors.planNotMirrored');
+    }
+    // Same resolution as changePlan (current plan, priced at the SAME
+    // interval as the target) — the preview must agree with what the change
+    // actually does, or the seller is shown one number and charged another.
+    const currentPlan = await this.repository.loadPlanWithPricing(subscription.planId);
+    const direction = resolvePlanChangeDirection(
+      currentPlan?.prices[interval]?.amountMicros ?? 0,
+      price.amountMicros,
+    );
+
+    if (direction === PlanChangeDirection.DOWNGRADE) {
+      return {
+        direction,
+        amountDueMicros: 0,
+        currency: price.currency,
+        effectiveAt: subscription.currentPeriodEnd,
+        nextInvoiceAmountMicros: price.amountMicros,
+        nextInvoiceAt: subscription.currentPeriodEnd,
+      };
+    }
+
+    const preview = await this.provider.previewPlanChange(
+      subscription.providerSubscriptionId,
+      price.providerPriceId,
+    );
+    return {
+      direction,
+      amountDueMicros: preview.amountDueMicros,
+      currency: preview.currency,
+      effectiveAt: new Date().toISOString(),
+      nextInvoiceAmountMicros: price.amountMicros,
+      nextInvoiceAt: subscription.currentPeriodEnd,
+    };
   }
 
   /**

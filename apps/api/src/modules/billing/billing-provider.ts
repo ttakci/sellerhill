@@ -107,6 +107,19 @@ export interface BillingProviderPort {
    * unconditionally before every upgrade.
    */
   cancelScheduledChange(providerSubscriptionId: string): Promise<void>;
+  /**
+   * What would `changeSubscriptionPlan` actually charge, without applying it.
+   *
+   * Uses the same `always_invoice` proration Stripe would use for a real
+   * upgrade, via `invoices.createPreview` — so the figure includes tax and
+   * discounts exactly as Stripe would bill them, not an estimate computed
+   * here. UPGRADE path only; the service never calls this for a downgrade
+   * (which bills nothing today — see {@link PlanChangeDirection}).
+   */
+  previewPlanChange(
+    providerSubscriptionId: string,
+    providerPriceId: string,
+  ): Promise<{ amountDueMicros: number; currency: string }>;
 }
 
 /** Everything a plan change needs, upgrade or downgrade. */
@@ -452,6 +465,31 @@ export class StripeBillingProvider implements BillingProviderPort {
       this.logger.error(`Stripe schedule release failed: ${describeError(error)}`);
       throw new Error('billing.errors.planChangeFailed');
     }
+  }
+
+  async previewPlanChange(
+    providerSubscriptionId: string,
+    providerPriceId: string,
+  ): Promise<{ amountDueMicros: number; currency: string }> {
+    const stripe = this.getClient();
+    const current = await stripe.subscriptions.retrieve(providerSubscriptionId);
+    const itemId = current.items.data[0]?.id;
+    if (!itemId) {
+      throw new Error('billing.errors.planChangeFailed');
+    }
+    const preview = await stripe.invoices.createPreview({
+      customer: typeof current.customer === 'string' ? current.customer : current.customer.id,
+      subscription: providerSubscriptionId,
+      subscription_details: {
+        items: [{ id: itemId, price: providerPriceId }],
+        proration_behavior: 'always_invoice',
+      },
+    });
+    // Stripe amounts are minor units (cents); our DTOs are micro-units.
+    return {
+      amountDueMicros: preview.amount_due * 10_000,
+      currency: preview.currency.toUpperCase(),
+    };
   }
 
   async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {

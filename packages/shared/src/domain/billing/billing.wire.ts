@@ -20,6 +20,7 @@ import {
   type BillingSubscriptionDto,
   type BillingUsagePeriodDto,
 } from './billing.types';
+import { type PlanChangeDirection } from './plan-change';
 
 /**
  * The billing provider a record belongs to. Stored as
@@ -208,4 +209,23 @@ export interface BillingPortalDto {
   provider: BillingProvider;
   /** Provider-side portal URL to redirect the browser to (Paddle). */
   portalUrl: string | null;
+}
+
+/**
+ * What a plan change will actually cost, from Stripe's own arithmetic.
+ *
+ * Not an estimate we computed: it comes from `invoices.createPreview`, so it
+ * carries tax, discounts and proration exactly as they will be billed.
+ */
+export interface BillingPlanChangePreviewDto {
+  direction: PlanChangeDirection;
+  /** Charged immediately for an upgrade; 0 for a downgrade (nothing moves now). */
+  amountDueMicros: number;
+  currency: string;
+  /** ISO date the change takes effect — now for an upgrade, period end for a
+   *  downgrade. */
+  effectiveAt: string;
+  /** The recurring amount from the next full period onward. */
+  nextInvoiceAmountMicros: number | null;
+  nextInvoiceAt: string | null;
 }

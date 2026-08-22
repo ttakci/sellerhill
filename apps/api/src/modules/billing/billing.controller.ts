@@ -31,7 +31,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SubscribeDto } from '@repo/shared';
+import { SubscribeDto, type BillingPlanChangePreviewDto } from '@repo/shared';
 import type { Request } from 'express';
 import Stripe from 'stripe';
 
@@ -147,6 +147,21 @@ export class BillingController {
     try {
       await this.billingService.changePlan(req.user.sub, dto.planId, dto.interval);
       return { ok: true };
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
+  @Post('plan-change/preview')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'What a plan change will cost, before applying it' })
+  async previewPlanChange(
+    @Req() req: { user: { sub: string } },
+    @Body() dto: SubscribeDto,
+  ): Promise<BillingPlanChangePreviewDto> {
+    try {
+      return await this.billingService.previewPlanChange(req.user.sub, dto.planId, dto.interval);
     } catch (error) {
       rethrowBillingError(error);
     }
