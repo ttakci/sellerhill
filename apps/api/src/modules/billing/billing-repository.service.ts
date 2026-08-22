@@ -192,6 +192,22 @@ export class BillingRepositoryService {
   }
 
   /**
+   * Resolve a Stripe price id (a pending downgrade schedule's next phase,
+   * from getBillingDetails) back to our plan slug. Only the slug — this is a
+   * display lookup for /billing/details, not a full plan load.
+   */
+  async findPlanByProviderPriceId(providerPriceId: string): Promise<{ slug: string } | null> {
+    const rows = await this.databaseService.query<{ slug: string }>(
+      `SELECT p.slug FROM billing_plans p
+         JOIN billing_plan_prices pr ON pr.plan_id = p.id
+        WHERE pr.provider_price_id = $1
+        LIMIT 1`,
+      [providerPriceId],
+    );
+    return rows[0] ?? null;
+  }
+
+  /**
    * Load the full catalog (active plans + their prices + limits) and expand
    * each plan with its effective pricing. Single call site for the catalog
    * endpoint.

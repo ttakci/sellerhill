@@ -120,6 +120,24 @@ export interface BillingProviderPort {
     providerSubscriptionId: string,
     providerPriceId: string,
   ): Promise<{ amountDueMicros: number; currency: string }>;
+  /**
+   * Live billing detail for the /billing/details endpoint: the DEFAULT
+   * payment method, the next invoice's amount/currency/date, and any pending
+   * downgrade schedule. All Stripe-side — nothing here is stored locally.
+   */
+  getBillingDetails(providerCustomerId: string): Promise<ProviderBillingDetails>;
+}
+
+/** Raw Stripe-shaped result of {@link BillingProviderPort.getBillingDetails}.
+ *  `BillingService.getDetails` resolves `scheduledPriceId` to a local plan
+ *  slug and computes `expiringSoon` before handing the FE its DTO. */
+export interface ProviderBillingDetails {
+  paymentMethod: { brand: string; last4: string; expMonth: number; expYear: number } | null;
+  nextChargeAmountMicros: number | null;
+  nextChargeCurrency: string | null;
+  nextChargeAt: string | null;
+  scheduledPriceId: string | null;
+  scheduledAt: string | null;
 }
 
 /** Everything a plan change needs, upgrade or downgrade. */
@@ -159,6 +177,16 @@ function randomLetterSuffix(length = 8): string {
   }
   return out;
 }
+
+/** Returned for a deleted Stripe customer — every field genuinely unknown. */
+const EMPTY_PROVIDER_BILLING_DETAILS: ProviderBillingDetails = {
+  paymentMethod: null,
+  nextChargeAmountMicros: null,
+  nextChargeCurrency: null,
+  nextChargeAt: null,
+  scheduledPriceId: null,
+  scheduledAt: null,
+};
 
 /**
  * Stripe Billing provider. Creates Stripe Checkout Sessions (mode:
@@ -490,6 +518,80 @@ export class StripeBillingProvider implements BillingProviderPort {
       amountDueMicros: preview.amount_due * 10_000,
       currency: preview.currency.toUpperCase(),
     };
+  }
+
+  async getBillingDetails(providerCustomerId: string): Promise<ProviderBillingDetails> {
+    const stripe = this.getClient();
+    try {
+      const customer = await stripe.customers.retrieve(providerCustomerId, {
+        expand: ['invoice_settings.default_payment_method'],
+      });
+      if (customer.deleted) {
+        return EMPTY_PROVIDER_BILLING_DETAILS;
+      }
+
+      // The DEFAULT method, not the first attached one. Several cards can be
+      // attached (each Checkout run adds one); showing the wrong one puts a
+      // false number on the screen whose whole purpose is being right.
+      const pm = customer.invoice_settings?.default_payment_method;
+      const card = pm && typeof pm !== 'string' ? pm.card : null;
+
+      let nextChargeAmountMicros: number | null = null;
+      let nextChargeCurrency: string | null = null;
+      let nextChargeAt: string | null = null;
+      try {
+        const upcoming = await stripe.invoices.createPreview({ customer: providerCustomerId });
+        nextChargeAmountMicros = upcoming.amount_due * 10_000;
+        nextChargeCurrency = upcoming.currency.toUpperCase();
+        nextChargeAt = upcoming.next_payment_attempt
+          ? new Date(upcoming.next_payment_attempt * 1000).toISOString()
+          : null;
+      } catch {
+        // No upcoming invoice (no subscription yet) is a normal state, not a
+        // failure. Leaving these null makes the FE render an em dash.
+      }
+
+      const subs = await stripe.subscriptions.list({ customer: providerCustomerId, limit: 1 });
+      const scheduleId =
+        typeof subs.data[0]?.schedule === 'string'
+          ? subs.data[0].schedule
+          : (subs.data[0]?.schedule?.id ?? null);
+      let scheduledPriceId: string | null = null;
+      let scheduledAt: string | null = null;
+      if (scheduleId) {
+        const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
+        const pending = schedule.phases[1];
+        const priceRef = pending?.items[0]?.price;
+        scheduledPriceId = typeof priceRef === 'string' ? priceRef : (priceRef?.id ?? null);
+        scheduledAt = pending?.start_date
+          ? new Date(pending.start_date * 1000).toISOString()
+          : null;
+      }
+
+      return {
+        paymentMethod: card
+          ? {
+              brand: card.brand,
+              last4: card.last4,
+              expMonth: card.exp_month,
+              expYear: card.exp_year,
+            }
+          : null,
+        nextChargeAmountMicros,
+        nextChargeCurrency,
+        nextChargeAt,
+        scheduledPriceId,
+        scheduledAt,
+      };
+    } catch (error) {
+      // BillingService.getDetails fails this whole request soft to an
+      // all-null shape, so the seller-facing outcome is silence, not an error
+      // screen — this log is the only trace of why.
+      this.logger.warn(
+        `Stripe billing details failed for customer ${providerCustomerId}: ${describeError(error)}`,
+      );
+      throw error;
+    }
   }
 
   async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {

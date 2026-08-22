@@ -28,6 +28,7 @@ import {
   PlanChangeDirection,
   PlatformSettingKey,
   resolvePlanChangeDirection,
+  type BillingDetailsDto,
   type BillingPlanChangePreviewDto,
   type BillingQuotaAddonDto,
   type BillingQuotaUsageDto,
@@ -50,6 +51,7 @@ import {
   type BillingPortalDto,
   type BillingSummaryDto,
 } from './billing.types';
+import { isCardExpiringSoon } from './payment-method-helpers';
 import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
@@ -627,5 +629,54 @@ export class BillingService {
       throw new Error('billing.errors.noCustomer');
     }
     return this.provider.createPortal(userId, customer.providerCustomerId);
+  }
+
+  /**
+   * Live billing detail for the billing page only.
+   *
+   * Fails soft to an all-null shape: a Stripe hiccup must leave the plan card
+   * and the quota rings on screen, not blank the page a suspended seller was
+   * just redirected to.
+   */
+  async getDetails(userId: string): Promise<BillingDetailsDto> {
+    const empty: BillingDetailsDto = {
+      paymentMethod: null,
+      nextChargeAmountMicros: null,
+      nextChargeCurrency: null,
+      nextChargeAt: null,
+      scheduledChange: null,
+    };
+    const customer = await this.repository.findCustomerByUserId(userId);
+    if (!customer?.providerCustomerId || !this.provider.isConfigured()) {
+      return empty;
+    }
+    try {
+      const raw = await this.provider.getBillingDetails(customer.providerCustomerId);
+      const scheduledPlan = raw.scheduledPriceId
+        ? await this.repository.findPlanByProviderPriceId(raw.scheduledPriceId)
+        : null;
+      return {
+        paymentMethod: raw.paymentMethod
+          ? {
+              ...raw.paymentMethod,
+              expiringSoon: isCardExpiringSoon(
+                raw.paymentMethod.expMonth,
+                raw.paymentMethod.expYear,
+                new Date(),
+              ),
+            }
+          : null,
+        nextChargeAmountMicros: raw.nextChargeAmountMicros,
+        nextChargeCurrency: raw.nextChargeCurrency,
+        nextChargeAt: raw.nextChargeAt,
+        scheduledChange:
+          scheduledPlan && raw.scheduledAt
+            ? { planSlug: scheduledPlan.slug, effectiveAt: raw.scheduledAt }
+            : null,
+      };
+    } catch (err) {
+      this.logger.warn(`Billing details unavailable for ${userId}: ${(err as Error).message}`);
+      return empty;
+    }
   }
 }

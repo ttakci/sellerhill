@@ -32,7 +32,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SubscribeDto, type BillingPlanChangePreviewDto } from '@repo/shared';
+import { SubscribeDto, type BillingDetailsDto, type BillingPlanChangePreviewDto } from '@repo/shared';
 import type { Request } from 'express';
 import Stripe from 'stripe';
 
@@ -115,6 +115,17 @@ export class BillingController {
   @ApiOperation({ summary: 'Authenticated billing summary' })
   async getSummary(@Req() req: { user: { sub: string } }): Promise<BillingSummaryDto> {
     return this.billingService.getSummary(req.user.sub);
+  }
+
+  // Live-from-Stripe (card, next charge, pending change) — deliberately
+  // separate from /summary, which AppLayout calls on every page load. See
+  // BillingDetailsDto's own doc comment for why provider latency must not
+  // land on that path.
+  @Get('details')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Live card, next charge and pending plan change' })
+  async getDetails(@Req() req: { user: { sub: string } }): Promise<BillingDetailsDto> {
+    return this.billingService.getDetails(req.user.sub);
   }
 
   @Post('checkout')

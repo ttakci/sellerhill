@@ -229,3 +229,37 @@ export interface BillingPlanChangePreviewDto {
   nextInvoiceAmountMicros: number | null;
   nextInvoiceAt: string | null;
 }
+
+/** The card Stripe actually charges — the customer's DEFAULT payment method,
+ *  never an arbitrary one from the attached list. */
+export interface BillingPaymentMethodDto {
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  /** True within CARD_EXPIRY_WARNING_DAYS of expiry, or already expired. */
+  expiringSoon: boolean;
+}
+
+/** A downgrade waiting for the current period to end. */
+export interface BillingScheduledChangeDto {
+  planSlug: string;
+  effectiveAt: string;
+}
+
+/**
+ * Live-from-Stripe billing detail. Deliberately NOT part of
+ * BillingSummaryDto: AppLayout calls the summary on every page load, and
+ * provider latency does not belong on that path.
+ *
+ * Every field is nullable because each is independently unavailable — a
+ * trialing seller has no card and no upcoming invoice, and that is normal, not
+ * an error.
+ */
+export interface BillingDetailsDto {
+  paymentMethod: BillingPaymentMethodDto | null;
+  nextChargeAmountMicros: number | null;
+  nextChargeCurrency: string | null;
+  nextChargeAt: string | null;
+  scheduledChange: BillingScheduledChangeDto | null;
+}
