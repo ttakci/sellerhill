@@ -20,6 +20,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { InvoiceHistoryCard } from '../components/InvoiceHistoryCard';
 import { PaymentMethodCard } from '../components/PaymentMethodCard';
 
 import * as S from './BillingPage.style';
@@ -373,6 +374,8 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           isChangeLoading={isPortalLoading}
         />
       ) : null}
+
+      <InvoiceHistoryCard />
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
 

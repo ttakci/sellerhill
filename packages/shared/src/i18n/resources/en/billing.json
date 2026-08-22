@@ -157,6 +157,32 @@
       "expiringSoon": "This card expires soon. Update it to avoid a failed renewal.",
       "change": "Change"
     },
+    "invoices": {
+      "title": "Invoice history",
+      "subtitle": "Everything you have paid, straight from Stripe.",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "status": "Status",
+      "pdf": "PDF",
+      "download": "Download",
+      "payNow": "Pay now",
+      "empty": "No invoices yet.",
+      "emptyDescription": "Your invoices will appear here once you have a paid subscription.",
+      "loading": "Loading invoices…",
+      "loadingDescription": "Fetching your invoice history from Stripe.",
+      "error": "Invoices could not be loaded.",
+      "errorDescription": "Something went wrong while loading your invoice history.",
+      "retry": "Try again",
+      "showMore": "Show more",
+      "statusLabel": {
+        "paid": "Paid",
+        "open": "Open",
+        "void": "Void",
+        "uncollectible": "Uncollectible",
+        "draft": "Draft"
+      }
+    },
     "customer": {
       "title": "Billing details",
       "billingEmail": "Billing email",

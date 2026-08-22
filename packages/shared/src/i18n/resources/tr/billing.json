@@ -157,6 +157,32 @@
       "expiringSoon": "Bu kartın süresi yakında doluyor. Yenilemenin başarısız olmaması için güncelleyin.",
       "change": "Değiştir"
     },
+    "invoices": {
+      "title": "Fatura geçmişi",
+      "subtitle": "Ödediğiniz her şey, doğrudan Stripe'tan.",
+      "date": "Tarih",
+      "description": "Açıklama",
+      "amount": "Tutar",
+      "status": "Durum",
+      "pdf": "PDF",
+      "download": "İndir",
+      "payNow": "Şimdi öde",
+      "empty": "Henüz faturanız yok.",
+      "emptyDescription": "Ücretli bir aboneliğiniz olduğunda faturalarınız burada görünecek.",
+      "loading": "Faturalar yükleniyor…",
+      "loadingDescription": "Fatura geçmişiniz Stripe'tan alınıyor.",
+      "error": "Faturalar yüklenemedi.",
+      "errorDescription": "Fatura geçmişiniz yüklenirken bir sorun oluştu.",
+      "retry": "Tekrar dene",
+      "showMore": "Daha fazla göster",
+      "statusLabel": {
+        "paid": "Ödendi",
+        "open": "Açık",
+        "void": "İptal",
+        "uncollectible": "Tahsil edilemedi",
+        "draft": "Taslak"
+      }
+    },
     "customer": {
       "title": "Fatura bilgileri",
       "billingEmail": "Fatura e-postası",
