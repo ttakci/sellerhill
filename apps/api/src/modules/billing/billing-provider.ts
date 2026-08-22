@@ -13,12 +13,13 @@
 // as unreachable dead code, and is recoverable from git.
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BillingInterval, PlanChangeDirection } from '@repo/shared';
+import { BillingInterval, PlanChangeDirection, type BillingInvoiceDto } from '@repo/shared';
 import Stripe from 'stripe';
 
 import type { BillingConfig } from './billing-helpers';
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type BillingCheckoutDto, type BillingPortalDto } from './billing.types';
+import { mapStripeInvoice, type StripeInvoiceLike } from './stripe-invoice-mapper';
 
 /**
  * Provider-facing checkout request. The controller builds this from the
@@ -126,6 +127,15 @@ export interface BillingProviderPort {
    * downgrade schedule. All Stripe-side — nothing here is stored locally.
    */
   getBillingDetails(providerCustomerId: string): Promise<ProviderBillingDetails>;
+  /**
+   * Paginated invoice history for the billing page. Read live from Stripe —
+   * nothing is mirrored locally, so this always reflects Stripe's own record.
+   */
+  listInvoices(
+    providerCustomerId: string,
+    limit: number,
+    startingAfter?: string,
+  ): Promise<{ items: BillingInvoiceDto[]; hasMore: boolean; nextCursor: string | null }>;
 }
 
 /** Raw Stripe-shaped result of {@link BillingProviderPort.getBillingDetails}.
@@ -592,6 +602,28 @@ export class StripeBillingProvider implements BillingProviderPort {
       );
       throw error;
     }
+  }
+
+  async listInvoices(
+    providerCustomerId: string,
+    limit: number,
+    startingAfter?: string,
+  ): Promise<{ items: BillingInvoiceDto[]; hasMore: boolean; nextCursor: string | null }> {
+    const stripe = this.getClient();
+    const page = await stripe.invoices.list({
+      customer: providerCustomerId,
+      limit,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+    const items = page.data.map((inv) => mapStripeInvoice(inv as unknown as StripeInvoiceLike));
+    return {
+      items,
+      hasMore: page.has_more,
+      // Stripe's starting_after cursor is a position in the LIST's own return
+      // order, not a timestamp — so "the last id we returned" is exactly the
+      // cursor that resumes correctly on the next page, no matter the sort.
+      nextCursor: page.has_more ? (items[items.length - 1]?.id ?? null) : null,
+    };
   }
 
   async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {

@@ -28,11 +28,17 @@ import {
   HttpStatus,
   Logger,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SubscribeDto, type BillingDetailsDto, type BillingPlanChangePreviewDto } from '@repo/shared';
+import {
+  SubscribeDto,
+  type BillingDetailsDto,
+  type BillingInvoiceListDto,
+  type BillingPlanChangePreviewDto,
+} from '@repo/shared';
 import type { Request } from 'express';
 import Stripe from 'stripe';
 
@@ -126,6 +132,25 @@ export class BillingController {
   @ApiOperation({ summary: 'Live card, next charge and pending plan change' })
   async getDetails(@Req() req: { user: { sub: string } }): Promise<BillingDetailsDto> {
     return this.billingService.getDetails(req.user.sub);
+  }
+
+  @Get('invoices')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Paginated invoice history, read live from Stripe' })
+  async listInvoices(
+    @Req() req: { user: { sub: string } },
+    @Query('limit') limit?: string,
+    @Query('startingAfter') startingAfter?: string,
+  ): Promise<BillingInvoiceListDto> {
+    try {
+      return await this.billingService.listInvoices(
+        req.user.sub,
+        limit ? Number(limit) : undefined,
+        startingAfter,
+      );
+    } catch (error) {
+      rethrowBillingError(error);
+    }
   }
 
   @Post('checkout')

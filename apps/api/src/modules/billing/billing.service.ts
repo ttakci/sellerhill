@@ -29,6 +29,7 @@ import {
   PlatformSettingKey,
   resolvePlanChangeDirection,
   type BillingDetailsDto,
+  type BillingInvoiceListDto,
   type BillingPlanChangePreviewDto,
   type BillingQuotaAddonDto,
   type BillingQuotaUsageDto,
@@ -678,5 +679,29 @@ export class BillingService {
       this.logger.warn(`Billing details unavailable for ${userId}: ${(err as Error).message}`);
       return empty;
     }
+  }
+
+  /**
+   * Paginated invoice history. Throws rather than failing soft (unlike
+   * getDetails above) because the FE renders its own retry state for this
+   * card specifically, so a Stripe hiccup should surface there, not as a
+   * silently empty list.
+   */
+  async listInvoices(
+    userId: string,
+    limit = 10,
+    startingAfter?: string,
+  ): Promise<BillingInvoiceListDto> {
+    const customer = await this.repository.findCustomerByUserId(userId);
+    if (!customer?.providerCustomerId || !this.provider.isConfigured()) {
+      // No Stripe customer yet (e.g. a trialing seller) is a normal state,
+      // not an error — an empty page is the correct answer.
+      return { items: [], hasMore: false, nextCursor: null };
+    }
+    return this.provider.listInvoices(
+      customer.providerCustomerId,
+      Math.min(Math.max(limit, 1), 50),
+      startingAfter,
+    );
   }
 }

@@ -263,3 +263,28 @@ export interface BillingDetailsDto {
   nextChargeAt: string | null;
   scheduledChange: BillingScheduledChangeDto | null;
 }
+
+/** One invoice as the seller sees it. Amounts are micro-units of `currency`. */
+export interface BillingInvoiceDto {
+  id: string;
+  /** ISO timestamp the invoice was created. */
+  issuedAt: string;
+  /** Line-item description ("Growth plan", "100 conversions pack"), or null —
+   *  never a fabricated label. */
+  description: string | null;
+  amountMicros: number;
+  /** The currency ACTUALLY charged. Adaptive Pricing means this is often not USD. */
+  currency: string;
+  status: string;
+  /** Stripe-hosted payment page. Present on an unpaid invoice — the one-click
+   *  way a suspended seller clears their debt. */
+  hostedUrl: string | null;
+  pdfUrl: string | null;
+}
+
+export interface BillingInvoiceListDto {
+  items: BillingInvoiceDto[];
+  hasMore: boolean;
+  /** Cursor for the next page — pass back as `startingAfter`. */
+  nextCursor: string | null;
+}
