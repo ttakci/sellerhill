@@ -81,4 +81,14 @@ export interface BillingPageComponentProps {
   addonSlugInFlight: string | null;
   onBuyAddon: (addonSlug: string) => void;
   onManage: () => void;
+  /** "Next payment: {date} · {amount}", already localized — null when there is
+   *  no upcoming Stripe invoice (a trialing seller, or no subscription yet).
+   *  The existing trial-end meta line covers that case, so this renders
+   *  nothing rather than an em dash beside a label. */
+  nextChargeLine: string | null;
+  /** "Switches to {plan} on {date}" for a downgrade scheduled at period end,
+   *  already localized — null when nothing is scheduled. */
+  scheduledChangeLine: string | null;
+  onCancelScheduledChange: () => void;
+  isCancellingChange: boolean;
 }

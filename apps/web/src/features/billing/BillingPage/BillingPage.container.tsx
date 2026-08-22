@@ -20,13 +20,15 @@ import {
   TRIAL_PLAN_SLUG,
   BillingProvider,
 } from '@repo/shared';
-import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
+import { formatCurrency, formatDate, formatMicroCurrency, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   useGetBillingCatalogQuery,
+  useGetBillingDetailsQuery,
   useGetBillingSummaryQuery,
+  useCancelScheduledChangeMutation,
   useChangePlanMutation,
   useInitiateAddonCheckoutMutation,
   useInitiateCheckoutMutation,
@@ -64,6 +66,10 @@ export const BillingPage: React.FC = () => {
     isLoading: isSummaryLoading,
     refetch: refetchSummary,
   } = useGetBillingSummaryQuery();
+
+  const { data: details } = useGetBillingDetailsQuery();
+  const [cancelScheduledChange, { isLoading: isCancellingChange }] =
+    useCancelScheduledChangeMutation();
 
   const [initiateCheckout, { isLoading: isCheckoutLoading }] = useInitiateCheckoutMutation();
   const [triggerPortal, { isFetching: isPortalFetching }] = useLazyOpenBillingPortalQuery();
@@ -168,6 +174,32 @@ export const BillingPage: React.FC = () => {
     }
     return parts.length > 0 ? parts.join(' · ') : null;
   }, [subscription, currentPlanSlug, currentIntervalKey, currentPeriodEndDisplay, subscriptionStatus, t]);
+
+  // A trialing seller has no upcoming invoice; the existing trial-end meta line
+  // stands in for this, so render nothing rather than an em dash beside a label.
+  const nextChargeLine = useMemo(() => {
+    if (typeof details?.nextChargeAmountMicros !== 'number' || !details.nextChargeAt) {
+      return null;
+    }
+    return t('billing:billing.subscription.nextCharge', {
+      date: formatDate(details.nextChargeAt, localeCfg.locale),
+      amount: formatMicroCurrency(
+        details.nextChargeAmountMicros,
+        localeCfg.locale,
+        details.nextChargeCurrency ?? 'USD',
+      ),
+    });
+  }, [details, t, localeCfg.locale]);
+
+  const scheduledChangeLine = useMemo(() => {
+    if (!details?.scheduledChange) {
+      return null;
+    }
+    return t('billing:billing.subscription.scheduledChange', {
+      plan: t(`billing:billing.plans.${details.scheduledChange.planSlug}.name`),
+      date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale),
+    });
+  }, [details, t, localeCfg.locale]);
 
   const usageRows: BillingUsageRow[] = useMemo(() => {
     if (!summary || !subscription || !summary.plan) {
@@ -336,6 +368,23 @@ export const BillingPage: React.FC = () => {
     [initiateAddonCheckout, surfaceBillingError]
   );
 
+  const handleCancelScheduledChange = useCallback(() => {
+    void cancelScheduledChange()
+      .unwrap()
+      .then(() => {
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: 'billing:billing.subscription.scheduledChangeCancelled',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t,
+        );
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => surfaceBillingError(error));
+  }, [cancelScheduledChange, showMessage, closeMessage, t, surfaceBillingError]);
+
   const handleOpenPlans = useCallback(() => setIsPlansOpen(true), []);
   const handleClosePlans = useCallback(() => setIsPlansOpen(false), []);
 
@@ -461,6 +510,10 @@ export const BillingPage: React.FC = () => {
       addonSlugInFlight={addonSlugInFlight}
       onBuyAddon={handleBuyAddon}
       onManage={handleManage}
+      nextChargeLine={nextChargeLine}
+      scheduledChangeLine={scheduledChangeLine}
+      onCancelScheduledChange={handleCancelScheduledChange}
+      isCancellingChange={isCancellingChange}
     />
   );
 };

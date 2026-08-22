@@ -274,3 +274,17 @@ export const DrawerSection = styled.div`
   gap: ${tkn('spacing.sm')};
   width: 100%;
 `;
+
+/** Pending-downgrade row: the copy on the left, Cancel on the right. */
+export const ScheduledChangeRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.semanticTint.infoStrong')};
+`;

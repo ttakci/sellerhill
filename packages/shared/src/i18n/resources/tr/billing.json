@@ -144,7 +144,11 @@
       "accessEnds": "Erişim bitişi",
       "portal": "Ödeme yöntemi ve faturalar",
       "portalHint": "Kartınızı güncellemek, fatura indirmek veya iptal etmek için Stripe açılır.",
-      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin."
+      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin.",
+      "nextCharge": "Bir sonraki ödeme: {{date}} · {{amount}}",
+      "scheduledChange": "{{date}} tarihinde {{plan}} paketine geçecek",
+      "cancelScheduledChange": "Vazgeç",
+      "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi."
     },
     "customer": {
       "title": "Fatura bilgileri",

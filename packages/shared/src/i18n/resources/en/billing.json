@@ -144,7 +144,11 @@
       "accessEnds": "Access ends",
       "portal": "Payment method and invoices",
       "portalHint": "Opens Stripe to update your card, download invoices, or cancel.",
-      "manageHint": "Manage your payment method, plan and invoices here."
+      "manageHint": "Manage your payment method, plan and invoices here.",
+      "nextCharge": "Next payment: {{date}} · {{amount}}",
+      "scheduledChange": "Switches to {{plan}} on {{date}}",
+      "cancelScheduledChange": "Cancel",
+      "scheduledChangeCancelled": "Your plan change has been cancelled."
     },
     "customer": {
       "title": "Billing details",

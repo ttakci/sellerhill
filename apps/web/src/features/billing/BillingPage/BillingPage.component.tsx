@@ -177,6 +177,10 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   addons,
   addonSlugInFlight,
   onBuyAddon,
+  nextChargeLine,
+  scheduledChangeLine,
+  onCancelScheduledChange,
+  isCancellingChange,
 }) => {
   const { t } = useTranslation(['translation', 'billing']);
 
@@ -293,8 +297,29 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
                 </Text>
               </S.PlanMetaRow>
             ) : null}
+            {nextChargeLine ? (
+              <Text variant="body-sm" color="text.secondary" numeric>
+                {nextChargeLine}
+              </Text>
+            ) : null}
           </S.PlanNameStack>
         </S.PlanHeaderRow>
+
+        {scheduledChangeLine ? (
+          <S.ScheduledChangeRow>
+            <Text variant="body-sm">{scheduledChangeLine}</Text>
+            <Button
+              variant="secondary"
+              size="small"
+              isLoading={isCancellingChange}
+              onClick={onCancelScheduledChange}
+            >
+              <Text variant="body-sm">
+                {t('billing:billing.subscription.cancelScheduledChange')}
+              </Text>
+            </Button>
+          </S.ScheduledChangeRow>
+        ) : null}
 
         {usageRows.length > 0 ? (
           <S.UsageSection>
