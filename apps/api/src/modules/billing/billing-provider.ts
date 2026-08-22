@@ -57,6 +57,18 @@ export interface BillingProviderPort {
    * customer ended up with three concurrent subscriptions on 2026-08-22.
    */
   hasActiveProviderSubscription(providerCustomerId: string): Promise<boolean>;
+  /**
+   * Resolve (creating if necessary) this user's provider customer id, and
+   * persist the link. `createCheckout`/`createAddonCheckout` each call this
+   * for their own request; `BillingService.createCheckout` ALSO calls it
+   * directly, up front, under its own per-user advisory lock
+   * (`BillingRepositoryService.withUserBillingLock`) — closing the race where
+   * two concurrent first-time checkouts each see no linked customer and each
+   * mint a SEPARATE Stripe customer for the same user. By the time
+   * `createCheckout` below reaches its own call, the customer is already
+   * resolved and linked, so that call is a fast, no-Stripe-call re-read.
+   */
+  ensureCustomer(userId: string, customerEmail: string): Promise<string>;
   /** Create a customer portal session. Throws when not configured or when the
    *  user has no Stripe customer id. */
   createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto>;
@@ -169,7 +181,7 @@ export class StripeBillingProvider implements BillingProviderPort {
     // customer and be dropped — the user would have paid and received no
     // subscription row until some later, unrelated event fired. Linking here
     // means the link always exists before any webhook can reference it.
-    const customerId = await this.ensureStripeCustomer(stripe, req);
+    const customerId = await this.ensureCustomer(req.userId, req.customerEmail);
 
     let session: Stripe.Checkout.Session;
     try {
@@ -224,12 +236,18 @@ export class StripeBillingProvider implements BillingProviderPort {
   /** Statuses that mean "this customer is already subscribed". `incomplete`
    *  and `incomplete_expired` are excluded: those never became a subscription
    *  the customer is being billed for, and blocking on them would trap a
-   *  seller whose first card attempt failed. */
+   *  seller whose first card attempt failed. `paused` IS included: this
+   *  codebase's own stripe-event-applier.ts (mapStatus) already documents it
+   *  as a real Stripe status (a trial that ended with no payment method) —
+   *  the subscription is still a live Stripe object tied to the customer and
+   *  can resume billing later, so treating it as "no subscription" would
+   *  reopen exactly the hole this guard exists to close. */
   private static readonly LIVE_SUBSCRIPTION_STATUSES = new Set([
     'active',
     'trialing',
     'past_due',
     'unpaid',
+    'paused',
   ]);
 
   async hasActiveProviderSubscription(providerCustomerId: string): Promise<boolean> {
@@ -265,16 +283,7 @@ export class StripeBillingProvider implements BillingProviderPort {
    */
   async createAddonCheckout(req: AddonCheckoutRequest): Promise<BillingCheckoutDto> {
     const stripe = this.getClient();
-    const customerId =
-      req.providerCustomerId ??
-      (await this.ensureStripeCustomer(stripe, {
-        userId: req.userId,
-        customerEmail: req.email,
-        planId: '',
-        providerProductId: null,
-        providerPriceId: null,
-        interval: BillingInterval.MONTHLY,
-      }));
+    const customerId = req.providerCustomerId ?? (await this.ensureCustomer(req.userId, req.email));
 
     let session: Stripe.Checkout.Session;
     try {
@@ -368,9 +377,26 @@ export class StripeBillingProvider implements BillingProviderPort {
    * checkout. Reusing the stored id keeps a retried or repeated checkout from
    * minting a second Stripe customer for the same user (which would split
    * their invoice history and break the portal).
+   *
+   * Public (part of BillingProviderPort) rather than a private helper of
+   * createCheckout: BillingService.createCheckout calls it directly, up
+   * front, under BillingRepositoryService.withUserBillingLock — a per-user
+   * Postgres advisory lock — so that two concurrent requests for a brand-new
+   * user (no linked customer yet) cannot each independently reach the
+   * `stripe.customers.create` call below and each mint a separate Stripe
+   * customer. Without that lock, billing_customers.user_id being UNIQUE means
+   * whichever linkProviderCustomer call below lands second silently
+   * overwrites the first's link, orphaning the first (now-unreferenced)
+   * Stripe customer — and any subscription created under it — from all local
+   * tracking. This method itself stays lock-agnostic (it just does the read,
+   * and the create+link if needed): the lock lives in the repository and is
+   * acquired by the caller, so a call from createCheckout/createAddonCheckout
+   * below (already inside, or after, the service's lock has resolved things)
+   * is a correct, ordinary re-read.
    */
-  private async ensureStripeCustomer(stripe: Stripe, req: CheckoutRequest): Promise<string> {
-    const existing = await this.repository.findCustomerByUserId(req.userId);
+  async ensureCustomer(userId: string, customerEmail: string): Promise<string> {
+    const stripe = this.getClient();
+    const existing = await this.repository.findCustomerByUserId(userId);
     if (existing?.provider === BillingProvider.STRIPE && existing.providerCustomerId) {
       return existing.providerCustomerId;
     }
@@ -378,15 +404,15 @@ export class StripeBillingProvider implements BillingProviderPort {
     let customer: Stripe.Customer;
     try {
       customer = await stripe.customers.create({
-        email: req.customerEmail || undefined,
-        metadata: { user_id: req.userId },
+        email: customerEmail || undefined,
+        metadata: { user_id: userId },
       });
     } catch (error) {
-      this.logger.error(`Stripe customer create failed for user ${req.userId}: ${describeError(error)}`);
+      this.logger.error(`Stripe customer create failed for user ${userId}: ${describeError(error)}`);
       throw new Error('billing.errors.checkoutFailed');
     }
 
-    await this.repository.linkProviderCustomer(req.userId, BillingProvider.STRIPE, customer.id);
+    await this.repository.linkProviderCustomer(userId, BillingProvider.STRIPE, customer.id);
     return customer.id;
   }
 }

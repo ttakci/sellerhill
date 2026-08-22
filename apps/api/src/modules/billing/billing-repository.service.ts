@@ -37,7 +37,7 @@ import {
   type BillingConfig,
 } from './billing-helpers';
 import type { ParsedStripeEvent } from './billing.types';
-import { advisoryLockKey, utcMonthBounds } from './quota-helpers';
+import { advisoryLockKey, billingCustomerLockKey, utcMonthBounds } from './quota-helpers';
 
 
 interface PlanEntity {
@@ -884,6 +884,37 @@ export class BillingRepositoryService {
        WHERE user_id = $1`,
       [userId, provider, providerCustomerId],
     );
+  }
+
+  /**
+   * Run `fn` while holding a Postgres advisory lock scoped to this user, for
+   * the duration of `fn` (released when the wrapping transaction ends,
+   * whether it commits or the callback throws — `pg_advisory_xact_lock`
+   * cannot be left held by a crashed process).
+   *
+   * Used by BillingService.createCheckout to serialize Stripe-customer
+   * resolution: two concurrent checkouts for a brand-new user (no linked
+   * provider customer yet) must not each read "no customer" and each mint a
+   * separate Stripe customer — billing_customers.user_id is UNIQUE, so
+   * whichever linkProviderCustomer call lands second silently overwrites the
+   * first's link, orphaning the first (now-unreferenced) Stripe customer, and
+   * any subscription created under it, from all local tracking. This is the
+   * same class of bug subscription-integrity.guard.spec.ts exists to prevent.
+   *
+   * Same shape as reserveSlotsBulk (DatabaseService.transaction +
+   * pg_advisory_xact_lock), a different key space (billingCustomerLockKey,
+   * not advisoryLockKey — see that function's doc for why). `fn` is free to
+   * use the repository's normal pooled queries, including an external call
+   * (Stripe): the lock only needs to be HELD while `fn` runs so a second
+   * caller blocked on the same key waits for it, not to run `fn`'s work on
+   * the same connection that holds the lock.
+   */
+  async withUserBillingLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+    return this.databaseService.transaction(async (client) => {
+      const { key1, key2 } = billingCustomerLockKey(userId);
+      await client.query('SELECT pg_advisory_xact_lock($1, $2)', [key1, key2]);
+      return fn();
+    });
   }
 
   // -------------------------------------------------------------------------

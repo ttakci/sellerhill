@@ -76,3 +76,47 @@ describe('A3 — checkout asks Stripe, not just our database', () => {
     expect(controller).toMatch(/'billing\.errors\.alreadySubscribed':\s*HttpStatus\.CONFLICT/);
   });
 });
+
+describe('A4 — code review round 1 fixes (paused status; customer-creation race)', () => {
+  const provider = read('modules', 'billing', 'billing-provider.ts');
+  const service = read('modules', 'billing', 'billing.service.ts');
+  const repository = read('modules', 'billing', 'billing-repository.service.ts');
+
+  it('a paused Stripe subscription counts as already-subscribed', () => {
+    // stripe-event-applier.ts's own mapStatus documents `paused` as a real
+    // Stripe status (a trial that ended with no payment method) — the
+    // subscription is still a live Stripe object tied to the customer and
+    // can resume billing, so it must not read as "no subscription." Scoped
+    // to the LIVE_SUBSCRIPTION_STATUSES set literal specifically, not the
+    // whole file, so this cannot pass because "paused" merely appears
+    // somewhere else (e.g. in a comment).
+    const setStart = provider.indexOf('LIVE_SUBSCRIPTION_STATUSES = new Set([');
+    const setLiteral = provider.slice(setStart, provider.indexOf(']', setStart));
+    expect(setLiteral).toMatch(/'paused'/);
+  });
+
+  it('the repository exposes a per-user Postgres advisory lock for customer resolution', () => {
+    expect(repository).toMatch(/async withUserBillingLock/);
+    expect(repository).toMatch(/pg_advisory_xact_lock/);
+  });
+
+  it('the provider exposes a customer-resolution method the service can call under that lock', () => {
+    expect(provider).toMatch(/async ensureCustomer\(/);
+  });
+
+  it('createCheckout resolves the customer under the lock and re-reads inside it, before asking Stripe about duplicates', () => {
+    // A lock acquired around code that does not recheck after acquiring
+    // protects nothing — so this asserts ORDER, not just presence: the
+    // re-read (ensureLocalCustomer) and the create-if-needed
+    // (provider.ensureCustomer) must both sit BETWEEN the lock call and the
+    // duplicate-subscription check that depends on their result.
+    const body = service.slice(service.indexOf('async createCheckout('));
+    const lockIdx = body.indexOf('withUserBillingLock(');
+    const guardIdx = body.indexOf('hasActiveProviderSubscription(');
+    expect(lockIdx).toBeGreaterThan(-1);
+    expect(guardIdx).toBeGreaterThan(lockIdx);
+    const lockedSection = body.slice(lockIdx, guardIdx);
+    expect(lockedSection).toMatch(/ensureLocalCustomer\(/);
+    expect(lockedSection).toMatch(/ensureCustomer\(/);
+  });
+});

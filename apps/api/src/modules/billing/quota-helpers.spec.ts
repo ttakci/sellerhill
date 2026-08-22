@@ -7,6 +7,7 @@ import { AutoFulfillBlockedReason, BillingLimitKey } from '@repo/shared';
 
 import {
   advisoryLockKey,
+  billingCustomerLockKey,
   buildSourceKey,
   decideQuota,
   isEnforcementEnabled,
@@ -218,5 +219,32 @@ describe('advisoryLockKey', () => {
   it('key1 is 1 for listings, 2 for AO', () => {
     expect(advisoryLockKey('x', BillingLimitKey.LISTINGS_PER_MONTH).key1).toBe(1);
     expect(advisoryLockKey('x', BillingLimitKey.AMAZON_ORDERS_PER_MONTH).key1).toBe(2);
+  });
+});
+
+describe('billingCustomerLockKey', () => {
+  it('is deterministic for the same user id', () => {
+    const a = billingCustomerLockKey('user-123');
+    const b = billingCustomerLockKey('user-123');
+    expect(a).toEqual(b);
+  });
+
+  it('differs by user id (key2)', () => {
+    const a = billingCustomerLockKey('user-123');
+    const b = billingCustomerLockKey('user-456');
+    expect(a.key2).not.toBe(b.key2);
+  });
+
+  it('never collides with a quota-reservation lock, whatever key2 hashes to', () => {
+    // pg_advisory_xact_lock keys on the (key1, key2) PAIR, so this only needs
+    // key1 to differ from every value LOCK_DISCRIMINATOR can produce (1-3,
+    // plus the unreachable 0 fallback) — it does not matter whether key2
+    // happens to collide with a quota lock's key2 for some other id.
+    const customerLock = billingCustomerLockKey('any-user');
+    const listingsLock = advisoryLockKey('any-user', BillingLimitKey.LISTINGS_PER_MONTH);
+    const aoLock = advisoryLockKey('any-user', BillingLimitKey.AMAZON_ORDERS_PER_MONTH);
+    expect(customerLock.key1).not.toBe(listingsLock.key1);
+    expect(customerLock.key1).not.toBe(aoLock.key1);
+    expect(customerLock.key1).not.toBe(0);
   });
 });

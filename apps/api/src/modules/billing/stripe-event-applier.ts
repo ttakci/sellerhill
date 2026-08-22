@@ -14,9 +14,11 @@
 // Deliberately NOT handled:
 //   - `checkout.session.completed` — nothing left to do. The Stripe customer is
 //     created and linked when the checkout session is created (see
-//     StripeBillingProvider.ensureStripeCustomer), so the local customer row is
-//     already resolvable by the time any webhook arrives. Depending on this
-//     event instead would make correctness depend on webhook delivery order.
+//     StripeBillingProvider.ensureCustomer, now called under
+//     BillingService.createCheckout's per-user advisory lock), so the local
+//     customer row is already resolvable by the time any webhook arrives.
+//     Depending on this event instead would make correctness depend on
+//     webhook delivery order.
 //   - `invoice.paid` / `invoice.payment_failed` — the subscription status
 //     transitions they imply (e.g. past_due) already arrive via
 //     `customer.subscription.updated`. They are still recorded in the webhook

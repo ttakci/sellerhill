@@ -192,6 +192,44 @@ export function advisoryLockKey(
 }
 
 /**
+ * key1 for {@link billingCustomerLockKey}. Deliberately outside the 1-3 range
+ * `LOCK_DISCRIMINATOR` uses: `pg_advisory_xact_lock` keys on the (key1, key2)
+ * PAIR, so as long as key1 differs, this lock domain can never collide with a
+ * quota-reservation lock no matter what key2 hashes to.
+ */
+const BILLING_CUSTOMER_LOCK_DISCRIMINATOR = 1000;
+
+/**
+ * A stable 64-bit advisory-lock key derived from a user id, for serializing
+ * "does this user already have a provider (Stripe) customer id" resolution.
+ *
+ * Deliberately NOT built on {@link advisoryLockKey}: that function is keyed on
+ * (subscription_id, BillingLimitKey) because it exists to serialize QUOTA
+ * reservations against a subscription that already exists. Resolving a
+ * user's Stripe customer id happens BEFORE any subscription exists (it is a
+ * precondition of opening checkout at all) and has nothing to do with a
+ * metered dimension — forcing a BillingLimitKey onto this call would misuse
+ * an enum that means something else. Same mechanism as advisoryLockKey
+ * (FNV-1a hash into a 32-bit int, stable across processes), different,
+ * non-colliding key space.
+ *
+ * Closes the race where two concurrent checkouts for a brand-new user (no
+ * linked Stripe customer yet) each read "no customer" and each mint a
+ * separate Stripe customer: billing_customers.user_id is UNIQUE, so whichever
+ * linkProviderCustomer call lands second silently overwrites the first's
+ * link, orphaning the first (now-unreferenced) Stripe customer — and any
+ * subscription created under it — from all local tracking.
+ */
+export function billingCustomerLockKey(userId: string): { key1: number; key2: number } {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < userId.length; i++) {
+    hash ^= userId.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return { key1: BILLING_CUSTOMER_LOCK_DISCRIMINATOR, key2: hash >>> 0 };
+}
+
+/**
  * Inclusive start / exclusive end of the UTC calendar month containing `now`.
  *
  * UTC, not the server's local time: the monthly meters must roll at the same

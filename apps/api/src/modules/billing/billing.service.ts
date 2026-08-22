@@ -431,24 +431,40 @@ export class BillingService {
       throw new Error('billing.errors.providerNotConfigured');
     }
 
-    // Ensure a local customer row exists first: the provider links the Stripe
-    // customer id onto this row (linkProviderCustomer) before opening
-    // checkout, which is what lets webhook processing resolve the subscription
-    // back to this user.
-    const customer = await this.repository.ensureLocalCustomer(userId, customerEmail);
+    // Resolve the Stripe customer id under a per-user advisory lock, and
+    // RE-READ the local row INSIDE the lock (a lock that does not recheck
+    // after acquiring is not a lock). Two concurrent checkouts for a
+    // brand-new user (no linked customer yet) must not each mint a SEPARATE
+    // Stripe customer: billing_customers.user_id is UNIQUE, so whichever
+    // provider.ensureCustomer call links second would silently overwrite the
+    // first's link, orphaning the first (now-unreferenced) Stripe customer —
+    // and any subscription created under it — from all local tracking. That
+    // is the same class of bug this task exists to prevent, one step
+    // earlier: the duplicate-subscription check below is only trustworthy if
+    // the customer id it asks Stripe about is the one true id for this user.
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async () => {
+      const customer = await this.repository.ensureLocalCustomer(userId, customerEmail);
+      if (customer.providerCustomerId) {
+        return customer.providerCustomerId;
+      }
+      // No linked Stripe customer yet — create it now, still holding the
+      // lock, so a second request blocked on this same lock re-reads the id
+      // THIS request just linked (via the branch above) instead of racing to
+      // mint its own.
+      return this.provider.ensureCustomer(userId, customerEmail);
+    });
 
     // Ask Stripe itself, not our tables. This is the layer that cannot be
     // fooled by our own state being stale — and stale state is exactly what
-    // produced three live subscriptions for one seller on 2026-08-22. A user
-    // with no linked provider customer id yet has never reached checkout, so
-    // there is nothing on Stripe's side to ask about.
-    if (customer.providerCustomerId) {
-      const alreadySubscribed = await this.provider.hasActiveProviderSubscription(
-        customer.providerCustomerId,
-      );
-      if (alreadySubscribed) {
-        throw new Error('billing.errors.alreadySubscribed');
-      }
+    // produced three live subscriptions for one seller on 2026-08-22. Runs
+    // AFTER the lock above is released: it is a pure read, so nothing here
+    // corrupts data if two requests run it concurrently — unlike the customer
+    // resolution above, holding a DB connection across this second Stripe
+    // call on EVERY checkout attempt (rather than only the rare first-ever
+    // one that creates a customer) would cost more than it protects.
+    const alreadySubscribed = await this.provider.hasActiveProviderSubscription(providerCustomerId);
+    if (alreadySubscribed) {
+      throw new Error('billing.errors.alreadySubscribed');
     }
 
     const plan = await this.repository.loadPlanWithPricing(planId);
