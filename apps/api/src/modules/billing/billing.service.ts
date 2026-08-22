@@ -384,6 +384,16 @@ export class BillingService {
     this.logger.log(`User ${userId} switched to plan ${plan.slug}`);
   }
 
+  /** Release a pending downgrade. The seller stays on their current plan. */
+  async cancelScheduledChange(userId: string): Promise<void> {
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription?.providerSubscriptionId) {
+      throw new Error('billing.errors.noSubscription');
+    }
+    await this.provider.cancelScheduledChange(subscription.providerSubscriptionId);
+    this.logger.log(`User ${userId} cancelled their scheduled plan change`);
+  }
+
   /**
    * What will this plan change cost? Answered before anything is applied.
    *

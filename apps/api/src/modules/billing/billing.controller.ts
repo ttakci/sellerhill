@@ -21,6 +21,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -146,6 +147,21 @@ export class BillingController {
   ): Promise<{ ok: true }> {
     try {
       await this.billingService.changePlan(req.user.sub, dto.planId, dto.interval);
+      return { ok: true };
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
+  @Delete('scheduled-change')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cancel a pending downgrade' })
+  async cancelScheduledChange(
+    @Req() req: { user: { sub: string } },
+  ): Promise<{ ok: true }> {
+    try {
+      await this.billingService.cancelScheduledChange(req.user.sub);
       return { ok: true };
     } catch (error) {
       rethrowBillingError(error);
