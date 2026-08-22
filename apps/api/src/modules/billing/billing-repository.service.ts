@@ -240,6 +240,11 @@ export class BillingRepositoryService {
        JOIN billing_customers c ON c.id = s.customer_id
        WHERE c.user_id = $1
        ORDER BY
+         -- A real Stripe subscription outranks a local-only trial row, whatever
+         -- their statuses. This used to sort purely by status with 'trialing'
+         -- first, so a trial row that was never closed masked the paid
+         -- subscription underneath it and the FE kept opening new checkouts.
+         (s.provider_subscription_id IS NULL) ASC,
          CASE s.status
            WHEN 'trialing' THEN 1
            WHEN 'active' THEN 2
@@ -692,6 +697,59 @@ export class BillingRepositoryService {
       ],
     );
     return rows.length > 0 ? this.mapSubscription(rows[0]) : null;
+  }
+
+  /**
+   * Repoint a subscription at a different plan, in place.
+   *
+   * Used by `changePlan` the moment Stripe accepts the reprice, rather than
+   * waiting for the `customer.subscription.updated` webhook to carry it back.
+   * The webhook is authoritative for everything a plan change does NOT decide
+   * (status, period boundaries) and re-applies this same plan_id when it lands,
+   * so the two cannot disagree — but it arrives a second or two later, and the
+   * FE refetches its summary immediately after the mutation resolves. Leaving
+   * the local row stale in that window showed the seller their OLD quotas right
+   * after a successful upgrade, with nothing scheduled to correct it until they
+   * reloaded the page by hand.
+   *
+   * Safe to write ahead of the webhook because Stripe has already returned
+   * success for the exact price we asked for: the new plan IS the truth at this
+   * point, not a prediction.
+   */
+  async updateSubscriptionPlan(subscriptionId: string, planId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_subscriptions
+          SET plan_id = $2, updated_at = NOW()
+        WHERE id = $1`,
+      [subscriptionId, planId],
+    );
+  }
+
+  /**
+   * End this user's local trial rows.
+   *
+   * The trial exists only in our tables — it has no Stripe subscription — and
+   * it is over the moment the seller actually pays. Nothing closed it before,
+   * so a converted seller kept a live `trialing` row forever; combined with
+   * findCurrentSubscription's ordering that row MASKED their real subscription,
+   * `hasProviderSubscription` read false, and every later plan click opened a
+   * fresh Checkout and minted another live subscription.
+   *
+   * `provider_subscription_id IS NULL` is the safety catch: this must never be
+   * able to touch a provider-backed row, because doing so would suspend a
+   * paying customer.
+   */
+  async endTrialSubscriptionsForUser(userId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_subscriptions s
+          SET status = $2, ended_at = NOW(), updated_at = NOW()
+         FROM billing_customers c
+        WHERE c.id = s.customer_id
+          AND c.user_id = $1
+          AND s.provider_subscription_id IS NULL
+          AND s.status <> $2`,
+      [userId, BillingSubscriptionStatus.ENDED],
+    );
   }
 
   /**

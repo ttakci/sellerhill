@@ -191,6 +191,19 @@ export async function applyStripeEvent(
     return { kind: 'ignored', reason: 'no_plan' };
   }
 
+  // The seller is paying now, so their local trial is over. Best-effort: a
+  // failure here must not reject the webhook (Stripe would redeliver forever
+  // against an event we already applied), and A2's ordering keeps the result
+  // correct even if this row is left behind. `userId` is nullable on the DTO
+  // (survives a hard-deleted user for audit) — nothing to end a trial for then.
+  if (customer.userId) {
+    try {
+      await repository.endTrialSubscriptionsForUser(customer.userId);
+    } catch {
+      // Intentionally swallowed — see above.
+    }
+  }
+
   const subscription = await repository.upsertSubscriptionByProvider(customer.id, planId, fields);
   return { kind: 'upserted', subscription };
 }
