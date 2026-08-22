@@ -121,6 +121,43 @@ describe('A4 — code review round 1 fixes (paused status; customer-creation rac
   });
 });
 
+describe('A5 — top-up checkout closes the same customer-creation race as createCheckout', () => {
+  const service = read('modules', 'billing', 'billing.service.ts');
+
+  it('createAddonCheckout resolves the customer under the per-user lock and re-reads inside it', () => {
+    // Identical defect class to A4's createCheckout race, on the top-up path:
+    // an unlocked read-then-maybe-create let two concurrent top-up purchases
+    // by a brand-new user mint two separate Stripe customers, and
+    // billing_customers.user_id being UNIQUE means the local row can only
+    // point at one — silently orphaning the other purchase from all local
+    // tracking. Asserts order, not just presence, for the same reason A4
+    // does: a lock that does not recheck after acquiring protects nothing.
+    const body = service.slice(
+      service.indexOf('async createAddonCheckout('),
+      service.indexOf('async startTrialForUser('),
+    );
+    const lockIdx = body.indexOf('withUserBillingLock(');
+    expect(lockIdx).toBeGreaterThan(-1);
+    const lockedSection = body.slice(lockIdx);
+    expect(lockedSection).toMatch(/ensureLocalCustomer\(/);
+    expect(lockedSection).toMatch(/ensureCustomer\(/);
+  });
+
+  it('does not resolve the customer via an unlocked findCustomerByUserId read', () => {
+    // The pre-fix version read the customer with a plain, unlocked query and
+    // handed the (possibly null) result straight to the provider, which then
+    // raced its own unlocked ensureCustomer fallback. Locking further down
+    // the call while this earlier read still exists would just discard its
+    // result and could mislead a future reader into removing the lock as
+    // "redundant."
+    const body = service.slice(
+      service.indexOf('async createAddonCheckout('),
+      service.indexOf('async startTrialForUser('),
+    );
+    expect(body).not.toMatch(/findCustomerByUserId\(/);
+  });
+});
+
 describe('plan changes are billed by direction', () => {
   const provider = read('modules', 'billing', 'billing-provider.ts');
   const service = read('modules', 'billing', 'billing.service.ts');

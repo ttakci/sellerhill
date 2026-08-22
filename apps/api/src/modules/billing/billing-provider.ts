@@ -284,6 +284,9 @@ export class StripeBillingProvider implements BillingProviderPort {
         // this is what triggers reverse charge — without the field a
         // VAT-registered buyer is charged tax they should not pay.
         tax_id_collection: { enabled: true },
+        // Checkout renders its own "Add promotion code" field. Coupons live in
+        // the Stripe Dashboard — no local coupon model, no admin surface.
+        allow_promotion_codes: true,
         metadata: { plan_id: req.planId, user_id: req.userId },
         success_url: `${this.config.frontendUrl}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${this.config.frontendUrl}/billing?checkout=cancelled`,
@@ -374,6 +377,14 @@ export class StripeBillingProvider implements BillingProviderPort {
         customer_update: { address: 'auto', name: 'auto' },
         billing_address_collection: 'required',
         tax_id_collection: { enabled: true },
+        // `mode: 'payment'` creates NO invoice by default, so without this a
+        // top-up purchase would be missing from the invoice history — and
+        // "what did I pay for" has to mean everything or it means nothing.
+        // Deliberately no allow_promotion_codes here (unlike the subscription
+        // checkout above): a discount on a consumable already priced against a
+        // hard ~$0.10/conversion supplier cost erodes a thin margin with no
+        // acquisition benefit.
+        invoice_creation: { enabled: true },
         metadata: { addon_slug: req.addonSlug, user_id: req.userId },
         success_url: `${this.config.frontendUrl}/billing?topup=success`,
         cancel_url: `${this.config.frontendUrl}/billing?topup=cancelled`,

@@ -479,13 +479,29 @@ export class BillingService {
       throw new Error('billing.errors.planNotMirrored');
     }
     const priceId = await this.repository.resolveAddonProviderPriceId(addon.id);
-    const customer = await this.repository.findCustomerByUserId(userId);
+
+    // Same race createCheckout closes above (see its comment on
+    // withUserBillingLock): resolve the Stripe customer under the per-user
+    // advisory lock and RE-READ inside it, so two concurrent top-up purchases
+    // by a brand-new user cannot each independently mint a separate Stripe
+    // customer. billing_customers.user_id is UNIQUE, so whichever
+    // linkProviderCustomer call landed second would silently overwrite the
+    // first's link — orphaning the first (now-unreferenced) Stripe customer,
+    // and the purchase made under it, from all local tracking.
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async () => {
+      const customer = await this.repository.ensureLocalCustomer(userId, email);
+      if (customer.providerCustomerId) {
+        return customer.providerCustomerId;
+      }
+      return this.provider.ensureCustomer(userId, email);
+    });
+
     return this.provider.createAddonCheckout({
       userId,
       email,
       addonSlug: addon.slug,
       providerPriceId: priceId ?? '',
-      providerCustomerId: customer?.providerCustomerId ?? null,
+      providerCustomerId,
     });
   }
 
