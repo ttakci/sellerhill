@@ -225,6 +225,26 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
     transition && transition !== 'active' && transition !== 'full_access'
       ? `billing:billing.transition.${transition}`
       : 'billing:billing.subscription.manageHint';
+
+  /**
+   * A past-due seller needs their CARD fixed, not a plan list.
+   *
+   * Every gate is closed for them (`past_due` -> SUSPENDED), AppLayout has just
+   * redirected them here, and the notice above literally says "update your
+   * payment method" — but the one button next to it used to open the twelve-plan
+   * drawer, with the Stripe portal link buried inside it as a secondary action.
+   * That is the wrong content for this state (they do not want a different plan)
+   * and the label did not describe what the button did. Send them straight to
+   * the portal instead, which is the only place a card can be changed.
+   *
+   * Guarded on `hasProviderSubscription` because the portal has nothing to show
+   * without a Stripe subscription, and on `providerUnconfigured` because the
+   * call would 409 — in both cases the plans drawer is still the right home for
+   * the action. Every other transition keeps the drawer: `no_subscription` and
+   * `canceled` need a plan chosen, not a card updated.
+   */
+  const needsPaymentFix =
+    transition === 'past_due' && hasProviderSubscription && !providerUnconfigured;
   const planNameKey = currentPlanSlug ? `billing:billing.plans.${currentPlanSlug}.name` : null;
 
   return (
@@ -305,8 +325,13 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             nothing is wrong.
           */}
           <InfoMessage
-            action={t('billing:billing.subscription.manage')}
-            onAction={onOpenPlans}
+            action={
+              needsPaymentFix
+                ? t('billing:billing.subscription.updatePayment')
+                : t('billing:billing.subscription.manage')
+            }
+            onAction={needsPaymentFix ? onManage : onOpenPlans}
+            isActionLoading={needsPaymentFix ? isPortalLoading : false}
           >
             {t(noticeKey)}
           </InfoMessage>

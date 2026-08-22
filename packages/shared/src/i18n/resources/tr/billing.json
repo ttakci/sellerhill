@@ -134,6 +134,7 @@
       "canceledAt": "İptal tarihi",
       "endedAt": "Bitiş tarihi",
       "manage": "Aboneliği yönet",
+      "updatePayment": "Ödeme yöntemini güncelle",
       "cancel": "Aboneliği iptal et",
       "resume": "Aboneliği sürdür",
       "upgrade": "Planı yükselt",

@@ -303,6 +303,18 @@ export function App() {
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
         <Route path="/ebay/callback" element={<LocaleRedirect to="settings" />} />
+        {/*
+         * Stripe's checkout success_url / cancel_url / portal return_url
+         * (billing-provider.ts) are built as `${FRONTEND_URL}/billing?...` with
+         * no locale segment — the backend has no reliable way to know which
+         * locale the seller was on when checkout started. Without this route,
+         * "billing" itself gets matched as the `:locale` param below, landing on
+         * that route's empty `index` redirect (-> "register"), so a completed
+         * Stripe checkout bounced to /billing/register instead of back to the
+         * billing page. preserveQuery carries checkout=success/session_id (and
+         * topup=success/cancelled) through so BillingPage can react to them.
+         */}
+        <Route path="/billing" element={<LocaleRedirect to="billing" preserveQuery />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

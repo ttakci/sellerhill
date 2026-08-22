@@ -24,10 +24,15 @@ export const StateCard = styled(Card)`
  * it read as mostly empty white space. `align-self: flex-start` opts out of
  * the stretch so `max-width` can actually take effect; `width: 100%` under
  * that ceiling keeps it filling the row on any viewport narrower than the cap.
+ *
+ * `40rem` specifically: below that the three usage rings (see `UsageGrid`'s
+ * own `11rem` floor) don't all fit on one row and the middle one drops to a
+ * second line — the card was still too narrow to earn the row-of-3 grid was
+ * built for.
  */
 export const SubscriptionCard = styled(SettingsCard)`
   width: 100%;
-  max-width: 34rem;
+  max-width: 40rem;
   align-self: flex-start;
 `;
 
@@ -77,11 +82,13 @@ export const PlanDivider = styled.div`
  * `auto-fit`/`minmax` rather than a fixed `repeat(3, 1fr)`: the same pattern
  * `DataTable`'s card grid uses, so a row never needs a hand-picked breakpoint
  * to reflow — it collapses to fewer columns, then one, purely from available
- * width.
+ * width. `11rem` (down from `13rem`) is sized to actually fit 3 across inside
+ * `SubscriptionCard`'s own `40rem` cap — the floor and the card width are a
+ * matched pair, not independent numbers.
  */
 export const UsageGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   gap: ${tkn('spacing.md')};
   width: 100%;
 

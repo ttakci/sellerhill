@@ -305,6 +305,23 @@ export class BillingService {
       providerPriceId: price.providerPriceId,
       planId,
     });
+    // Apply the change locally now that Stripe has accepted it, instead of
+    // waiting for `customer.subscription.updated` to bring it back. That
+    // webhook lands a second or two later, while the FE refetches its summary
+    // as soon as this call resolves — so relying on the webhook alone showed
+    // the seller their OLD plan and quotas immediately after a successful
+    // upgrade. The webhook re-applies the same plan_id (we set it in the
+    // subscription's metadata), so this is a head start, not a second source of
+    // truth. Best-effort: a failure here is corrected by the webhook, and must
+    // not turn a completed upgrade into an error the seller sees.
+    try {
+      await this.repository.updateSubscriptionPlan(subscription.id, planId);
+    } catch (err) {
+      this.logger.warn(
+        `Local plan write failed after Stripe accepted the change for user ${userId}; ` +
+          `the webhook will reconcile it: ${(err as Error).message}`,
+      );
+    }
     this.logger.log(`User ${userId} switched to plan ${plan.slug}`);
   }
 

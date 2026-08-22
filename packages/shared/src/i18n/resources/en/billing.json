@@ -134,6 +134,7 @@
       "canceledAt": "Canceled on",
       "endedAt": "Ended on",
       "manage": "Manage subscription",
+      "updatePayment": "Update payment method",
       "cancel": "Cancel subscription",
       "resume": "Resume subscription",
       "upgrade": "Upgrade plan",
