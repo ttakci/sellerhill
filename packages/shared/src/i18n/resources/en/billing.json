@@ -150,6 +150,13 @@
       "cancelScheduledChange": "Cancel",
       "scheduledChangeCancelled": "Your plan change has been cancelled."
     },
+    "paymentMethod": {
+      "title": "Payment method",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Expires {{month}}/{{year}}",
+      "expiringSoon": "This card expires soon. Update it to avoid a failed renewal.",
+      "change": "Change"
+    },
     "customer": {
       "title": "Billing details",
       "billingEmail": "Billing email",

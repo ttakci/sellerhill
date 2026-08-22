@@ -150,6 +150,13 @@
       "cancelScheduledChange": "Vazgeç",
       "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi."
     },
+    "paymentMethod": {
+      "title": "Ödeme yöntemi",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "{{month}}/{{year}} tarihinde doluyor",
+      "expiringSoon": "Bu kartın süresi yakında doluyor. Yenilemenin başarısız olmaması için güncelleyin.",
+      "change": "Değiştir"
+    },
     "customer": {
       "title": "Fatura bilgileri",
       "billingEmail": "Fatura e-postası",

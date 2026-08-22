@@ -20,6 +20,8 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { PaymentMethodCard } from '../components/PaymentMethodCard';
+
 import * as S from './BillingPage.style';
 import type {
   BillingPageComponentProps,
@@ -181,6 +183,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   scheduledChangeLine,
   onCancelScheduledChange,
   isCancellingChange,
+  paymentMethod,
 }) => {
   const { t } = useTranslation(['translation', 'billing']);
 
@@ -362,6 +365,14 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           </InfoMessage>
         </S.NoticeRow>
       </S.SubscriptionCard>
+
+      {paymentMethod ? (
+        <PaymentMethodCard
+          paymentMethod={paymentMethod}
+          onChange={onManage}
+          isChangeLoading={isPortalLoading}
+        />
+      ) : null}
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
 

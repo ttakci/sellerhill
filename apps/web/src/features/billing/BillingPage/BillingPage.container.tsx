@@ -514,6 +514,7 @@ export const BillingPage: React.FC = () => {
       scheduledChangeLine={scheduledChangeLine}
       onCancelScheduledChange={handleCancelScheduledChange}
       isCancellingChange={isCancellingChange}
+      paymentMethod={details?.paymentMethod ?? null}
     />
   );
 };

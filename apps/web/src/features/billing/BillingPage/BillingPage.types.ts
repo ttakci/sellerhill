@@ -1,5 +1,6 @@
 import type {
   BillingInterval,
+  BillingPaymentMethodDto,
   BillingSubscriptionStatus,
   BillingSummaryDto,
 } from '@repo/shared';
@@ -91,4 +92,8 @@ export interface BillingPageComponentProps {
   scheduledChangeLine: string | null;
   onCancelScheduledChange: () => void;
   isCancellingChange: boolean;
+  /** The customer's default Stripe payment method, from `GET /billing/details`.
+   *  Null for a trialing seller (no Stripe customer yet) — a normal state, not
+   *  an empty one, so the card renders nothing rather than a placeholder. */
+  paymentMethod: BillingPaymentMethodDto | null;
 }
