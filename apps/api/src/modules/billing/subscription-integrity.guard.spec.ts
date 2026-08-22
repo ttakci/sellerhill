@@ -53,3 +53,26 @@ describe('one live subscription per user', () => {
     });
   });
 });
+
+describe('A3 — checkout asks Stripe, not just our database', () => {
+  const provider = read('modules', 'billing', 'billing-provider.ts');
+  const service = read('modules', 'billing', 'billing.service.ts');
+  const controller = read('modules', 'billing', 'billing.controller.ts');
+
+  it('the provider can ask Stripe whether a subscription already exists', () => {
+    expect(provider).toMatch(/async hasActiveProviderSubscription\(/);
+    expect(provider).toMatch(/subscriptions\.list\(/);
+  });
+
+  it('createCheckout refuses when Stripe already reports one', () => {
+    // Our DB being wrong is exactly how three subscriptions got created, so
+    // this check must not read from our own tables.
+    const body = service.slice(service.indexOf('async createCheckout('));
+    expect(body).toMatch(/hasActiveProviderSubscription\(/);
+    expect(body).toMatch(/billing\.errors\.alreadySubscribed/);
+  });
+
+  it('the refusal is a 409, not a 500', () => {
+    expect(controller).toMatch(/'billing\.errors\.alreadySubscribed':\s*HttpStatus\.CONFLICT/);
+  });
+});

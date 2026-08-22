@@ -227,7 +227,8 @@
       "noSubscription": "Değiştirilecek aktif bir aboneliğiniz yok.",
       "planChangeFailed": "Paket şu anda değiştirilemedi. Tekrar deneyin ya da \"Aboneliği yönet\" üzerinden ilerleyin.",
       "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
-      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin."
+      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin.",
+      "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Planı değiştir\" ile geçiş yapın."
     },
     "actions": {
       "subscribe": "Abone ol",

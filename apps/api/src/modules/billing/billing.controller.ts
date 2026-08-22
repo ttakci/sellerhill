@@ -64,6 +64,7 @@ const BILLING_ERROR_STATUS: Record<string, HttpStatus> = {
   'billing.errors.providerNotConfigured': HttpStatus.CONFLICT,
   'billing.errors.planNotMirrored': HttpStatus.CONFLICT,
   'billing.errors.checkoutFailed': HttpStatus.CONFLICT,
+  'billing.errors.alreadySubscribed': HttpStatus.CONFLICT,
   'billing.errors.portalFailed': HttpStatus.CONFLICT,
   'billing.errors.noCustomer': HttpStatus.CONFLICT,
   'billing.errors.planNotFound': HttpStatus.NOT_FOUND,

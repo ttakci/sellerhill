@@ -49,6 +49,14 @@ export interface BillingProviderPort {
   isConfigured(): boolean;
   /** Create a checkout session. Throws when not configured. */
   createCheckout(req: CheckoutRequest): Promise<BillingCheckoutDto>;
+  /**
+   * Does this customer already have a subscription Stripe considers live?
+   *
+   * Asked BEFORE opening a checkout, and deliberately asked of Stripe rather
+   * than of our own tables: our tables being wrong is precisely how one
+   * customer ended up with three concurrent subscriptions on 2026-08-22.
+   */
+  hasActiveProviderSubscription(providerCustomerId: string): Promise<boolean>;
   /** Create a customer portal session. Throws when not configured or when the
    *  user has no Stripe customer id. */
   createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto>;
@@ -211,6 +219,37 @@ export class StripeBillingProvider implements BillingProviderPort {
       planId: req.planId,
       interval: req.interval,
     };
+  }
+
+  /** Statuses that mean "this customer is already subscribed". `incomplete`
+   *  and `incomplete_expired` are excluded: those never became a subscription
+   *  the customer is being billed for, and blocking on them would trap a
+   *  seller whose first card attempt failed. */
+  private static readonly LIVE_SUBSCRIPTION_STATUSES = new Set([
+    'active',
+    'trialing',
+    'past_due',
+    'unpaid',
+  ]);
+
+  async hasActiveProviderSubscription(providerCustomerId: string): Promise<boolean> {
+    const stripe = this.getClient();
+    try {
+      const list = await stripe.subscriptions.list({
+        customer: providerCustomerId,
+        status: 'all',
+        limit: 100,
+      });
+      return list.data.some((sub) =>
+        StripeBillingProvider.LIVE_SUBSCRIPTION_STATUSES.has(sub.status),
+      );
+    } catch (error) {
+      // Fail CLOSED. An unreadable answer here must not be read as "no
+      // subscription" — that is the branch that double-bills. Refusing the
+      // checkout is recoverable; a duplicate subscription is a refund.
+      this.logger.error(`Stripe subscription lookup failed: ${describeError(error)}`);
+      throw new Error('billing.errors.checkoutFailed');
+    }
   }
 
   /**

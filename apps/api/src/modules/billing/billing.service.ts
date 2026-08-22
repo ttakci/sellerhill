@@ -435,7 +435,21 @@ export class BillingService {
     // customer id onto this row (linkProviderCustomer) before opening
     // checkout, which is what lets webhook processing resolve the subscription
     // back to this user.
-    await this.repository.ensureLocalCustomer(userId, customerEmail);
+    const customer = await this.repository.ensureLocalCustomer(userId, customerEmail);
+
+    // Ask Stripe itself, not our tables. This is the layer that cannot be
+    // fooled by our own state being stale — and stale state is exactly what
+    // produced three live subscriptions for one seller on 2026-08-22. A user
+    // with no linked provider customer id yet has never reached checkout, so
+    // there is nothing on Stripe's side to ask about.
+    if (customer.providerCustomerId) {
+      const alreadySubscribed = await this.provider.hasActiveProviderSubscription(
+        customer.providerCustomerId,
+      );
+      if (alreadySubscribed) {
+        throw new Error('billing.errors.alreadySubscribed');
+      }
+    }
 
     const plan = await this.repository.loadPlanWithPricing(planId);
     if (!plan) {
