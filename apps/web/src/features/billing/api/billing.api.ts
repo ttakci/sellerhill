@@ -30,6 +30,9 @@ import {
   BillingInterval,
   type BillingCatalogDto,
   type BillingCheckoutDto,
+  type BillingDetailsDto,
+  type BillingInvoiceListDto,
+  type BillingPlanChangePreviewDto,
   type BillingPortalDto,
   type BillingSummaryDto,
 } from '@repo/shared';
@@ -77,7 +80,11 @@ export const billingApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: 'Billing', id: 'SUMMARY' }],
+      invalidatesTags: [
+        { type: 'Billing', id: 'SUMMARY' },
+        { type: 'Billing', id: 'DETAILS' },
+        { type: 'Billing', id: 'INVOICES' },
+      ],
     }),
 
     /**
@@ -110,7 +117,11 @@ export const billingApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: 'Billing', id: 'SUMMARY' }],
+      invalidatesTags: [
+        { type: 'Billing', id: 'SUMMARY' },
+        { type: 'Billing', id: 'DETAILS' },
+        { type: 'Billing', id: 'INVOICES' },
+      ],
     }),
 
     /**
@@ -123,6 +134,46 @@ export const billingApi = baseApi.injectEndpoints({
       // Query (not mutation) because the backend is GET — the FE uses a
       // lazy trigger so the portal URL is only fetched on explicit click.
     }),
+
+    /** Live-from-Stripe detail. Separate from the summary because AppLayout
+     *  calls the summary on every page load and must not pay provider latency. */
+    getBillingDetails: builder.query<BillingDetailsDto, void>({
+      query: () => ({ url: '/billing/details' }),
+      providesTags: [{ type: 'Billing', id: 'DETAILS' }],
+    }),
+
+    /**
+     * Paginated invoice history. `startingAfter` is the cursor from a
+     * previous page's `nextCursor` — omit for the first page.
+     */
+    getBillingInvoices: builder.query<BillingInvoiceListDto, { startingAfter?: string } | void>({
+      query: (args) => ({
+        url: '/billing/invoices',
+        params: args?.startingAfter ? { startingAfter: args.startingAfter } : undefined,
+      }),
+      providesTags: [{ type: 'Billing', id: 'INVOICES' }],
+    }),
+
+    /**
+     * What a plan change will actually cost, from Stripe's own arithmetic
+     * (`invoices.createPreview`) — not an estimate computed here. Read-only:
+     * does not itself change the subscription.
+     */
+    previewPlanChange: builder.mutation<BillingPlanChangePreviewDto, CheckoutRequestBody>({
+      query: (body) => ({ url: '/billing/plan-change/preview', method: 'POST', body }),
+    }),
+
+    /**
+     * Cancel a downgrade that is scheduled for the end of the current
+     * period, keeping the seller on their current plan.
+     */
+    cancelScheduledChange: builder.mutation<{ ok: true }, void>({
+      query: () => ({ url: '/billing/scheduled-change', method: 'DELETE' }),
+      invalidatesTags: [
+        { type: 'Billing', id: 'SUMMARY' },
+        { type: 'Billing', id: 'DETAILS' },
+      ],
+    }),
   }),
 });
 
@@ -133,4 +184,8 @@ export const {
   useInitiateAddonCheckoutMutation,
   useChangePlanMutation,
   useLazyOpenBillingPortalQuery,
+  useGetBillingDetailsQuery,
+  useGetBillingInvoicesQuery,
+  usePreviewPlanChangeMutation,
+  useCancelScheduledChangeMutation,
 } = billingApi;

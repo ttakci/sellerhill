@@ -265,17 +265,27 @@ export const BillingPage: React.FC = () => {
   // Surface a billing error (checkout 409, portal 409, etc.) via MessageModal.
   const surfaceBillingError = useCallback(
     (error: Parameters<typeof getErrorI18nKey>[0]) => {
+      const key = getErrorI18nKey(error);
+      // `getErrorI18nKey` already returns the fully namespaced key
+      // (e.g. "billing:billing.errors.alreadySubscribed") — see errorHandler.ts.
+      if (key === 'billing:billing.errors.alreadySubscribed') {
+        // Our summary was stale — that staleness is what let one seller end up
+        // with three subscriptions. Pull the truth again so the page stops
+        // offering checkout; never auto-retry, which is what would create the
+        // duplicate.
+        void refetchSummary();
+      }
       showMessage(
         {
           type: 'error',
           headerKey: 'translation:message.error.header',
-          descriptionKey: getErrorI18nKey(error),
+          descriptionKey: key,
           primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
         },
         t,
       );
     },
-    [showMessage, closeMessage, t],
+    [refetchSummary, showMessage, closeMessage, t],
   );
 
   /**
