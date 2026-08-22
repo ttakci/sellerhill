@@ -25,7 +25,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BillingInterval,
   BillingLimitKey,
+  PlanChangeDirection,
   PlatformSettingKey,
+  resolvePlanChangeDirection,
   type BillingQuotaAddonDto,
   type BillingQuotaUsageDto,
   type BillingSubscriptionDto,
@@ -279,6 +281,11 @@ export class BillingService {
    *
    * A trial user has a subscription in OUR tables but none in Stripe, so they
    * correctly go through checkout: there is nothing to reprice.
+   *
+   * Which way the reprice goes ALSO decides how (and when) it is billed —
+   * see {@link PlanChangeDirection}. An upgrade is charged now (Stripe bills
+   * in advance, so it hands over the higher quota immediately); a downgrade
+   * is scheduled for the end of the period the seller already paid for.
    */
   async changePlan(userId: string, planId: string, interval: BillingInterval): Promise<void> {
     if (!this.provider.isConfigured()) {
@@ -300,10 +307,56 @@ export class BillingService {
       this.logger.error(`Plan ${planId} has no provider_price_id for ${interval}`);
       throw new Error('billing.errors.planNotMirrored');
     }
+
+    // The seller's CURRENT plan, priced at the same interval as the target —
+    // there is no interval switch on this endpoint (SubscribeDto carries one
+    // fixed interval for both), so comparing at `interval` on both sides is
+    // comparing like for like. A plan the seller is no longer subscribed to
+    // (or a corrupted row) resolves to 0, which reads as "any real price is
+    // an upgrade" — the safer default, since it charges now rather than
+    // silently deferring.
+    const currentPlan = subscription.planId
+      ? await this.repository.loadPlanWithPricing(subscription.planId)
+      : null;
+    const direction = resolvePlanChangeDirection(
+      currentPlan?.prices[interval]?.amountMicros ?? 0,
+      price.amountMicros,
+    );
+
+    if (direction === PlanChangeDirection.DOWNGRADE) {
+      // Takes effect at period end. No money moves now, and the local plan row
+      // is deliberately NOT touched — the seller is still on the plan they
+      // paid for until the schedule fires, and writing the new plan_id now
+      // would enforce its lower quota and report it a month early.
+      await this.provider.scheduleDowngrade({
+        providerSubscriptionId: subscription.providerSubscriptionId,
+        providerPriceId: price.providerPriceId,
+        planId,
+        direction,
+      });
+      this.logger.log(`User ${userId} scheduled a downgrade to ${plan.slug}`);
+      return;
+    }
+
+    // Upgrading cancels any pending downgrade. A seller who changes their mind
+    // upward must not have a stale schedule fire a month later and silently
+    // undo the change they just paid for. Best-effort: a subscription with no
+    // schedule is the normal case and `cancelScheduledChange` already treats
+    // that as a no-op, so a failure here must not block an upgrade the seller
+    // is waiting on.
+    try {
+      await this.provider.cancelScheduledChange(subscription.providerSubscriptionId);
+    } catch (err) {
+      this.logger.warn(
+        `Could not release a pending schedule before upgrading ${userId}: ${(err as Error).message}`,
+      );
+    }
+
     await this.provider.changeSubscriptionPlan({
       providerSubscriptionId: subscription.providerSubscriptionId,
       providerPriceId: price.providerPriceId,
       planId,
+      direction,
     });
     // Apply the change locally now that Stripe has accepted it, instead of
     // waiting for `customer.subscription.updated` to bring it back. That
@@ -314,6 +367,11 @@ export class BillingService {
     // subscription's metadata), so this is a head start, not a second source of
     // truth. Best-effort: a failure here is corrected by the webhook, and must
     // not turn a completed upgrade into an error the seller sees.
+    //
+    // UPGRADE ONLY: a scheduled downgrade must not write the new plan_id here
+    // — it returned above, before this line, precisely so the seller stays on
+    // record as their current (paid-for) plan until the schedule actually
+    // fires.
     try {
       await this.repository.updateSubscriptionPlan(subscription.id, planId);
     } catch (err) {

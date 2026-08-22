@@ -13,7 +13,7 @@
 // as unreachable dead code, and is recoverable from git.
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BillingInterval } from '@repo/shared';
+import { BillingInterval, PlanChangeDirection } from '@repo/shared';
 import Stripe from 'stripe';
 
 import type { BillingConfig } from './billing-helpers';
@@ -86,17 +86,41 @@ export interface BillingProviderPort {
    * subscription for a customer who already has one — it does not treat that
    * as a mistake — and the customer would then be charged for both. Checkout
    * subscribes; this changes what an existing subscription bills for.
+   *
+   * UPGRADE path only. Stripe bills in advance, so an upgrade hands over the
+   * higher quota immediately — this charges the prorated difference NOW and
+   * throws if the charge cannot be completed, rather than billing it up to 30
+   * days later. Downgrades never call this; see {@link scheduleDowngrade}.
    */
   changeSubscriptionPlan(req: ChangePlanRequest): Promise<void>;
+  /**
+   * DOWNGRADE path: move the subscription to a cheaper price at the END of the
+   * current paid period, via a Stripe Subscription Schedule, instead of
+   * applying it now. The seller already paid for this period, so nothing is
+   * refunded and nothing changes until the period runs out.
+   */
+  scheduleDowngrade(req: ChangePlanRequest): Promise<void>;
+  /**
+   * Release a pending downgrade schedule — e.g. because the seller upgraded
+   * before it took effect — leaving the subscription exactly as it currently
+   * is. A no-op when nothing is scheduled, so callers can call it
+   * unconditionally before every upgrade.
+   */
+  cancelScheduledChange(providerSubscriptionId: string): Promise<void>;
 }
 
-/** Everything an in-place plan change needs. */
+/** Everything a plan change needs, upgrade or downgrade. */
 export interface ChangePlanRequest {
   providerSubscriptionId: string;
   providerPriceId: string;
-  /** Our plan id, written to the subscription's metadata so the resulting
-   *  `customer.subscription.updated` webhook resolves to the right local plan. */
+  /** Our plan id, written to the subscription's (or, for a downgrade, the new
+   *  schedule phase's) metadata so the resulting `customer.subscription.updated`
+   *  webhook resolves to the right local plan. */
   planId: string;
+  /** Which way this change goes — see {@link PlanChangeDirection}. Carried on
+   *  the request so the provider's own logs/metadata can record it; the
+   *  service has already used it to pick which provider method to call. */
+  direction: PlanChangeDirection;
 }
 
 /** Everything a one-time top-up checkout needs. */
@@ -336,11 +360,15 @@ export class StripeBillingProvider implements BillingProviderPort {
       }
       await stripe.subscriptions.update(req.providerSubscriptionId, {
         items: [{ id: itemId, price: req.providerPriceId }],
-        // Stripe credits the unused part of the old plan and charges the
-        // prorated new one. `create_prorations` rather than
-        // `always_invoice` so an upgrade does not fire an immediate charge the
-        // seller did not expect — it lands on the next invoice.
-        proration_behavior: 'create_prorations',
+        // Stripe bills in ADVANCE, and an upgrade hands over the higher quota
+        // the moment it applies. `always_invoice` charges the prorated
+        // difference NOW rather than up to 30 days later, and
+        // `error_if_incomplete` makes the whole update fail if that charge
+        // cannot be completed — so a declined card leaves the seller on the
+        // plan they were already paying for instead of on one they have not
+        // paid for.
+        proration_behavior: 'always_invoice',
+        payment_behavior: 'error_if_incomplete',
         // The webhook applier reads the local plan from here, so it has to move
         // with the price. Leaving stale metadata would have the subscription
         // report the OLD plan back to us on its next update.
@@ -348,6 +376,80 @@ export class StripeBillingProvider implements BillingProviderPort {
       });
     } catch (error) {
       this.logger.error(`Stripe plan change failed: ${describeError(error)}`);
+      throw new Error('billing.errors.planChangeFailed');
+    }
+  }
+
+  /**
+   * Move a subscription to a cheaper price at the END of the paid period.
+   *
+   * The seller has already paid for this period, so they keep the plan they
+   * paid for until it runs out. Applying it now would also strand a seller
+   * with 24,000 active listings under a 200-listing ceiling, and would need a
+   * credit balance we deliberately do not have.
+   */
+  async scheduleDowngrade(req: ChangePlanRequest): Promise<void> {
+    const stripe = this.getClient();
+    try {
+      const current = await stripe.subscriptions.retrieve(req.providerSubscriptionId);
+      const existingScheduleId =
+        typeof current.schedule === 'string' ? current.schedule : current.schedule?.id;
+
+      // Replace, never stack: only one pending change may exist.
+      const schedule = existingScheduleId
+        ? await stripe.subscriptionSchedules.retrieve(existingScheduleId)
+        : await stripe.subscriptionSchedules.create({
+            from_subscription: req.providerSubscriptionId,
+          });
+
+      const currentPhase = schedule.phases[0];
+      if (!currentPhase) {
+        throw new Error('billing.errors.planChangeFailed');
+      }
+
+      await stripe.subscriptionSchedules.update(schedule.id, {
+        end_behavior: 'release',
+        phases: [
+          {
+            // NOTE: this carries forward price + quantity ONLY. A phase can
+            // also carry a discount/coupon, custom tax rates, billing
+            // thresholds, etc., and none of that is copied here. Nothing in
+            // this codebase applies a Stripe coupon to a subscription today,
+            // so there is nothing to lose yet — but if that ever changes,
+            // this needs to copy those fields too, or scheduling a downgrade
+            // will silently strip them off the still-open current phase.
+            items: currentPhase.items.map((item) => ({
+              price: typeof item.price === 'string' ? item.price : item.price.id,
+              quantity: item.quantity ?? 1,
+            })),
+            start_date: currentPhase.start_date,
+            end_date: currentPhase.end_date,
+          },
+          {
+            items: [{ price: req.providerPriceId, quantity: 1 }],
+            metadata: { plan_id: req.planId },
+          },
+        ],
+      });
+    } catch (error) {
+      this.logger.error(`Stripe downgrade schedule failed: ${describeError(error)}`);
+      throw new Error('billing.errors.planChangeFailed');
+    }
+  }
+
+  /** Release a pending downgrade, leaving the subscription as it is. */
+  async cancelScheduledChange(providerSubscriptionId: string): Promise<void> {
+    const stripe = this.getClient();
+    try {
+      const current = await stripe.subscriptions.retrieve(providerSubscriptionId);
+      const scheduleId =
+        typeof current.schedule === 'string' ? current.schedule : current.schedule?.id;
+      if (!scheduleId) {
+        return; // Nothing pending — treat as already done rather than an error.
+      }
+      await stripe.subscriptionSchedules.release(scheduleId);
+    } catch (error) {
+      this.logger.error(`Stripe schedule release failed: ${describeError(error)}`);
       throw new Error('billing.errors.planChangeFailed');
     }
   }

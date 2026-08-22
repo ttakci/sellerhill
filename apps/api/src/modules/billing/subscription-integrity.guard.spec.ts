@@ -120,3 +120,32 @@ describe('A4 — code review round 1 fixes (paused status; customer-creation rac
     expect(lockedSection).toMatch(/ensureCustomer\(/);
   });
 });
+
+describe('plan changes are billed by direction', () => {
+  const provider = read('modules', 'billing', 'billing-provider.ts');
+  const service = read('modules', 'billing', 'billing.service.ts');
+
+  it('an upgrade charges immediately and rolls back if the card declines', () => {
+    // create_prorations would hand over the quota now and bill up to 30 days
+    // later — the abuse window the spec describes.
+    expect(provider).toMatch(/proration_behavior:\s*'always_invoice'/);
+    expect(provider).toMatch(/payment_behavior:\s*'error_if_incomplete'/);
+  });
+
+  it('a downgrade is scheduled rather than applied immediately', () => {
+    expect(provider).toMatch(/async scheduleDowngrade\(/);
+    expect(provider).toMatch(/subscriptionSchedules/);
+  });
+
+  it('the service picks the path from the shared direction resolver', () => {
+    expect(service).toMatch(/resolvePlanChangeDirection\(/);
+    expect(service).toMatch(/PlanChangeDirection\.DOWNGRADE/);
+  });
+
+  it('an upgrade releases any pending downgrade first', () => {
+    // Otherwise a stale schedule fires a month later and undoes the upgrade
+    // the seller just paid for.
+    const body = service.slice(service.indexOf('async changePlan('));
+    expect(body).toMatch(/cancelScheduledChange\(/);
+  });
+});
