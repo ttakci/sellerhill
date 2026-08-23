@@ -55,10 +55,40 @@ by the seller.
 
 | # | Decision | Rationale |
 |---|---|---|
-| D1 | One Aquiline profile per **Amazon buyer account** | The profile carries `amazonAccountEmail` + `marketplaceHost`, and the ship-track HTML comes from that account's session. Any other granularity makes `tracking_url_mismatch` structurally likely. |
+| D1 | One Aquiline profile per **(SellerHill user × Amazon marketplace)**, id `sh-{userId}-{marketplace}` | Profiles are a hard, paid, **non-deletable** plan resource. `users.id` is stable across Amazon-account churn; `storeAddress` is already a per-seller value (D2); embedding the marketplace keeps `marketplaceHost` single-valued. `amazonAccountEmail` is documented as *optional*, so per-account granularity buys little for ~1.4× the profiles. |
 | D2 | `storeAddress` comes from **new full-address columns on `store_settings`** | Every other tracking setting already lives there with Store > Global > Default resolution. `store_settings` today holds only `country`/`state`/`zip_code`; street, city, name and phone are new. |
 | D3 | Delivery is detected by **continued Amazon polling**, in the same page visit that feeds the HTML | We must visit the page anyway. Delivery then costs nothing extra and needs no new mechanism. |
 | D4 | A failed first conversion **defers the eBay push up to 12h, retrying hourly** | eBay's Fulfillment API has no update endpoint (`createShippingFulfillment` is `POST`-only), so the first push is the only chance to give the buyer an AQUA number. |
+
+### 2.1 The purchased plan, and why the profile ceiling drove D1
+
+Aquiline **Starter** was purchased on 2026-08-23: $42/mo, 3,000 trackings,
+**300 Aquiline shipments**, **10 seller profiles**, $0.14/shipment. The ladder
+above it is Professional ($130 / 1,000 / 25), Business ($240 / 2,000 / 50),
+Enterprise ($330 / 3,000 / 100) and Huge ($500 / 5,000 / 250).
+
+Three things follow, and the first is the one that changed a decision.
+
+**Profiles cannot be deleted.** `/v1/profiles/{profileId}` exposes only `get`
+and `patch` — there is no `delete`, and the omission is deliberate, since
+`/v1/webhooks/{webhookId}` does have one. Every profile ever created therefore
+consumes one of the plan's slots permanently, and there is no sandbox, so even
+test profiles come out of the production allowance. That makes profile identity
+a one-way door: keying it on `amazon_accounts.id` would mint a fresh, permanent
+profile every time a seller removed and re-added a buyer account, orphaning the
+old one forever. `users.id` does not churn, hence D1.
+
+**Shipments are not the near-term constraint.** 300/month comfortably covers the
+first sellers; SellerHill's own per-seller conversion quotas run 25–800/month, so
+the ceiling starts to bind around a handful of fully-utilised sellers and is
+answered by moving up the ladder.
+
+**The unit cost assumption in CLAUDE.md is wrong and needs a separate pass.** The
+12-tier pricing model was built on ~$0.10/shipment; Starter bills $0.14 — 40%
+higher — and $0.10 is only reached on Huge. Since CLAUDE.md puts Aquiline at
+"65% of unit cost at the 10,000-listing tier", the claimed 18% worst-case margin
+no longer holds at full utilisation. **Out of scope here** — flagged as a
+follow-up to re-run the cost model, not silently folded into this work.
 
 ### Why D4 is insurance, not a refinement
 
@@ -102,19 +132,30 @@ listWebhooks() / createWebhook(…)          GET/POST /v1/webhooks
 
 ### 3.2 `AquilineProfileService` — new
 
-Maps `amazon_accounts.id` → Aquiline `profileId`.
+Maps `(users.id, AmazonMarketplace)` → Aquiline `profileId`.
 
 `profileId` is **client-chosen** (spec: *"Optional client-chosen id; server
 generates one if omitted"*), so it is derived deterministically as
-`sh-{amazonAccountId}`. That makes creation naturally idempotent and means the
-id can never be lost.
+`sh-{userId}-{marketplace}`. Creation is therefore naturally idempotent and the
+id can never be lost or need looking up.
 
-- `ensureProfile(amazonAccountId)` runs under a **pg advisory lock keyed on the
-  account** (the `resolveProductData` / `ensureSeeded` idiom), so N concurrent
-  shipped transitions on one account create exactly one profile.
-- `aquiline_profile_fingerprint` is a hash of the label + resolved
-  `storeAddress`. Unchanged fingerprint → no call. Changed → `PATCH`. Without it
-  every conversion would re-PATCH the profile.
+- `ensureProfile(userId, marketplace)` runs under a **pg advisory lock keyed on
+  the user** (the `resolveProductData` / `ensureSeeded` idiom), so N concurrent
+  shipped transitions for one seller create exactly one profile.
+- **Creation is lazy** — it happens inside `resolveForOrder`, *after* the whole
+  guard chain, so a seller on the local provider never consumes a slot. Adding
+  an Amazon buyer account does not create a profile.
+- **A ceiling guard runs before every creation.** `GET /v1/profiles` is counted
+  against `AQUILINE_MAX_PROFILES` (panel-tunable, default 10 to match Starter).
+  At the ceiling, creation is refused locally → pass-through + an admin/Action
+  Center warning, rather than an opaque provider 402. This exists because the
+  resource is non-deletable: burning the last slot on the wrong thing is not
+  recoverable.
+- `aquiline_profile_fingerprint` hashes the label + resolved `storeAddress`.
+  Unchanged → no call; changed → `PATCH`. Without it every conversion would
+  re-PATCH. `amazonAccountEmail` is sent once as a hint (from the buyer account
+  whose order triggered creation) and is deliberately **excluded** from the
+  fingerprint, so a second Amazon account never causes profile churn.
 - A profile that cannot be created **fails the conversion soft**: pass-through.
 
 ### 3.3 `AmazonScrapingService` — one new method
@@ -148,6 +189,12 @@ Three reasons this is one slot rather than two:
   (`tracking_url_mismatch`, `wrong_page_type`), which is evidence they are
   common. Reading the link while still on order-details removes the class.
 
+Reading the link also sidesteps a naming inconsistency in the provider's own
+material: the schema example uses `gp/your-account/ship-track?orderId=…` while
+support's reply used `progress-tracker/package/?orderId=…`. The endpoint accepts
+both (*"progress tracker / ship-track"*), and taking whichever URL Amazon itself
+renders removes the need to pick.
+
 `trackingHtml` is `null` when the order has not shipped; conversion is not
 attempted then.
 
@@ -167,10 +214,14 @@ direction, no cycle.
 ## 4. Data model — migration `089`
 
 ```sql
-amazon_accounts
-  + aquiline_profile_id          VARCHAR(128)
-  + aquiline_profile_synced_at   TIMESTAMPTZ
-  + aquiline_profile_fingerprint VARCHAR(64)
+aquiline_profiles                    -- (user, marketplace) is the natural key
+  user_id      UUID        NOT NULL,      -- deliberately NOT a foreign key, see below
+  marketplace  VARCHAR(20) NOT NULL DEFAULT 'AMAZON_US',
+  profile_id   VARCHAR(128) NOT NULL,     -- sh-{userId}-{marketplace}
+  fingerprint  VARCHAR(64),
+  synced_at    TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, marketplace)
 
 store_settings                       -- storeAddress; country/state/zip already exist
   + ship_from_name           VARCHAR(120)
@@ -189,8 +240,18 @@ orders
   + ebay_tracking_pushed_at         TIMESTAMPTZ
 
 aquiline_plan_snapshot               -- mirrors keepa_balance
-  (id, plan_code, plan_limit, plan_used, plan_remaining, captured_at)
+  (id, plan_code, plan_limit, plan_used, plan_remaining,
+   profiles_used, profiles_limit, captured_at)
 ```
+
+`aquiline_profiles` carries **no foreign key to `users`**, the same reasoning as
+`ebay_trial_ledger`: the remote profile is permanent and keeps consuming a plan
+slot whether or not the SellerHill account still exists, so the row that accounts
+for it must outlive a `users` cascade. Deleting it would make the platform lose
+track of a paid, non-recoverable resource.
+
+`profiles_used` is on the snapshot for the same reason the ceiling guard exists —
+profiles are as metered as shipments and, unlike shipments, they never reset.
 
 `ebay_tracking_pushed_number` is not bookkeeping for its own sake. Once the raw
 Amazon number has been pushed, eBay cannot be corrected, so a later conversion
@@ -215,7 +276,7 @@ scrapeOrderStatusWithTrackingHtml()
     └ handleShipped(order, {trackingUrl, trackingHtml})
        └ resolveForOrder(...)
             ① guard chain (unchanged)
-            ② ensureProfile(amazonAccountId)
+            ② ensureProfile(userId, marketplace)   -- lazy, ceiling-guarded
             ③ upsertOrders(profileId, [order])
             ④ uploadTrackingHtml(profileId, amazonOrderId, {trackingUrl, html})
             ⑤ assign(...) → AQUA + planUsed/planRemaining
@@ -223,9 +284,28 @@ scrapeOrderStatusWithTrackingHtml()
        └ createShippingFulfillment(eBay, AQUA, 'AQUILINE')
 ```
 
-For a non-Amazon-Logistics carrier under `scope = all`, ④ is skipped and ⑤ uses
-the carrier shape (`carrier: UPS|USPS|FEDEX|ONTRAC`, tracking number in
-`trackingUrl`). Marked `TODO(confirm)` — see §8.
+**There is exactly one Amazon path, whatever the carrier.** The API document's
+introduction partitions by *marketplace*, not by carrier: Amazon uses the HTML +
+ship-track-URL route, while the carrier-code route (`FEDEX`, `UPS`, `USPS`,
+`ONTRAC`, …) belongs to AliExpress and Walmart. `AssignOrderBody.carrier` says
+so directly — *"Required for **non-Amazon** assign"* — and the schema's own
+Amazon example omits `carrier` entirely in favour of `retailer: amazon-us` +
+`marketplaceHost` + `sourceTracking`.
+
+The reason is stated in the introduction: the HTML is wanted *"so Aquiline can
+keep **carrier** and delivery context current"*. Aquiline derives the carrier
+from the page itself, so an Amazon order shipping via UPS needs no special
+handling on our side.
+
+Consequence: `TrackingConversionScope` still decides **whether** to convert (it
+is a quota control — see migration `086`), but no longer influences **how**.
+Under `scope = all` a UPS-carried Amazon shipment runs the identical ④→⑤
+sequence.
+
+The assign body follows the schema example (`retailer`, no `carrier`). Aquiline
+support's 2026-08-13 reply showed `carrier: "Amazon"` instead; the machine-readable
+schema wins, since sending `carrier` on an Amazon assign risks `assign_validation`
+against a field documented as non-Amazon-only.
 
 ### 5.2 Deferral (D4)
 
@@ -299,8 +379,14 @@ New on top of that:
 - `planRemaining <= 0` from an `assign` response is persisted to
   `aquiline_plan_snapshot`; subsequent conversions short-circuit to pass-through
   without spending a call on a guaranteed 402. Same shape as `keepa_balance`.
-- `UNAUTHORIZED` and `QUOTA_EXCEEDED` log at `error` (they silently un-hide the
-  supplier for every order); everything else logs at `warn`.
+- **Profile ceiling reached** → refuse locally, pass through, warn. Distinct from
+  a shipment quota wall in both cause and fix: shipments reset monthly and are
+  answered by waiting or upgrading, whereas profiles never reset and the only
+  fix is an operator decision. Never folded into `QUOTA_EXCEEDED`, for the same
+  reason `AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED` is kept separate from
+  `QUOTA_EXHAUSTED`.
+- `UNAUTHORIZED`, `QUOTA_EXCEEDED` and the profile ceiling log at `error` (they
+  silently un-hide the supplier for every order); everything else logs at `warn`.
 
 ## 7. Surfaces
 
@@ -320,13 +406,19 @@ New on top of that:
 
 1. Does `assign` succeed immediately after an `accepted` (not yet `applied`)
    HTML upload? — D4 covers both.
-2. Can an **Amazon** profile assign by `carrier` + tracking number for a 3PL
-   shipment (UPS/USPS/FedEx/OnTrac)? The `carrier` field description says
-   "Walmart/Amazon 3PL", which implies yes. Needed for `scope = all`; under the
-   default `amazon_logistics_only` it is never exercised.
-3. What is the **profile limit** on the purchased plan? D1 creates one profile
-   per Amazon buyer account. If the ceiling is low, profile creation must fail
-   soft (it does) and the granularity is revisited.
+2. ~~Can an Amazon profile assign by `carrier` + tracking number?~~ **Answered by
+   the API document itself.** Its introduction partitions by marketplace — Amazon
+   uses the HTML route, the carrier-code route belongs to AliExpress/Walmart —
+   and `carrier` is documented as *"Required for non-Amazon assign"*. Aquiline
+   reads the carrier out of the uploaded HTML. One Amazon path, all carriers;
+   see §5.1. (The residual ambiguity is cosmetic: support's example sent
+   `carrier: "Amazon"` where the schema example sends `retailer: amazon-us`. We
+   follow the schema.)
+3. ~~What is the profile limit?~~ **Answered 2026-08-23: 10 on Starter**
+   (25 / 50 / 100 / 250 up the ladder). This is what drove D1 to per-user
+   granularity and added the ceiling guard. Still worth confirming with support
+   whether an exhausted profile allowance can be **reclaimed** — the API has no
+   `DELETE /v1/profiles/{id}`, so today the answer is assumed to be no.
 4. What does `suggestAmazonEmailFetch` in the upsert / tracking-html responses
    expect? Ignored for now — SellerHill has no mailbox access.
 5. Does reading `GET …/orders/{orderId}` consume the plan's "trackings"
