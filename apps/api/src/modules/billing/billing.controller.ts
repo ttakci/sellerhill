@@ -80,6 +80,7 @@ const BILLING_ERROR_STATUS: Record<string, HttpStatus> = {
   'billing.errors.planChangeFailed': HttpStatus.CONFLICT,
   'billing.errors.priceNotFound': HttpStatus.NOT_FOUND,
   'billing.errors.ebayTrialAlreadyUsed': HttpStatus.CONFLICT,
+  'billing.errors.invoicesFailed': HttpStatus.CONFLICT,
 };
 
 /**
@@ -143,9 +144,14 @@ export class BillingController {
     @Query('startingAfter') startingAfter?: string,
   ): Promise<BillingInvoiceListDto> {
     try {
+      // `Number('abc')` is NaN, which fails both the service's Math.max and
+      // Math.min clamp and would reach the Stripe SDK as `limit: NaN` — an
+      // unparseable value must resolve to "absent" (the service's own
+      // default) rather than propagate a non-finite number downstream.
+      const parsedLimit = limit ? Number(limit) : undefined;
       return await this.billingService.listInvoices(
         req.user.sub,
-        limit ? Number(limit) : undefined,
+        Number.isFinite(parsedLimit) ? parsedLimit : undefined,
         startingAfter,
       );
     } catch (error) {

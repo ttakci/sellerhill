@@ -29,16 +29,44 @@ export const InvoiceHistoryCard = (): React.ReactElement => {
   // RTK Query cache (an external source), which is exactly what an effect is
   // for — same justification as the other set-state-in-effect disables in
   // this codebase (ListingDetailPage.container.tsx, AppLayout.container.tsx).
+  //
+  // MERGE by id, never skip an id already seen. The rows most likely to
+  // change are the unpaid ones, and "Pay now" opens Stripe's hosted page in a
+  // NEW tab — so a seller who pays a past-due invoice there and comes back to
+  // this tab needs the refreshed status, not the open/unpaid snapshot this
+  // card first fetched. A dedupe-by-id-forever (the previous behaviour) froze
+  // every invoice at whatever it looked like on first load, so a paid invoice
+  // kept rendering "open" with Pay Now still offered, indefinitely.
   useEffect(() => {
     if (!data) {
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync local accumulated list from the RTK Query cache
     setAccumulated((prev) => {
-      const seen = new Set(prev.map((invoice) => invoice.id));
-      return [...prev, ...data.items.filter((invoice) => !seen.has(invoice.id))];
+      const incoming = new Map(data.items.map((invoice) => [invoice.id, invoice]));
+      // Existing rows are updated in place (order preserved) so a refetched
+      // page's fresher copy replaces the stale one; only genuinely new ids
+      // from this page are appended at the end.
+      const merged = prev.map((invoice) => incoming.get(invoice.id) ?? invoice);
+      const seenIds = new Set(prev.map((invoice) => invoice.id));
+      const appended = data.items.filter((invoice) => !seenIds.has(invoice.id));
+      return [...merged, ...appended];
     });
   }, [data]);
+
+  // Refresh the first page on window focus, so a payment completed in the
+  // Pay Now tab (or Stripe's own portal) shows up without a manual reload.
+  // Scoped to this component only — the RTK Query store-wide focus-refetch
+  // listener (setupListeners) is not wired up anywhere in this app, and
+  // adding it here would change refetch behaviour for every query, not just
+  // this card.
+  useEffect(() => {
+    const handleFocus = (): void => {
+      void refetch();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refetch]);
 
   const handleShowMore = useCallback(() => {
     if (data?.nextCursor) {

@@ -86,9 +86,20 @@ export function extractStripeSubscriptionFields(event: ParsedStripeEvent): Strip
   const status = mapStatus(sub.status);
   if (status === null) {return null;} // incomplete / paused — not a state we track
 
-  const interval = mapInterval(sub);
-  const start = parseUnixSeconds(sub.current_period_start) ?? new Date();
-  const end = parseUnixSeconds(sub.current_period_end) ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const item = firstSubscriptionItem(sub);
+  const interval = mapInterval(item);
+  // current_period_start/end do NOT exist on Stripe's Subscription object at
+  // this codebase's pinned API version — they moved to SubscriptionItem in
+  // API version 2025-03-31.basil. Reading them off `sub` directly (the
+  // pre-fix code) always missed and silently fell through to the
+  // now()/now()+30d fallback below on EVERY webhook, which is why a real
+  // subscription in the dev DB showed a period spanning exactly 30 days
+  // starting at webhook-receipt time instead of its real Stripe dates. The
+  // fallback stays as a genuine last resort (a malformed/itemless payload),
+  // not the common path it silently became.
+  const start = parseUnixSeconds(item?.current_period_start) ?? new Date();
+  const end =
+    parseUnixSeconds(item?.current_period_end) ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   const canceledAt = status === BillingSubscriptionStatus.CANCELED ? parseUnixSeconds(sub.canceled_at) ?? new Date() : null;
   const endedAt = status === BillingSubscriptionStatus.ENDED ? parseUnixSeconds(sub.ended_at) ?? new Date() : null;
@@ -130,11 +141,17 @@ function mapStatus(rawStatus: unknown): BillingSubscriptionStatus | null {
   }
 }
 
-function mapInterval(sub: Record<string, unknown>): BillingInterval {
+/** The first subscription item — the object that carries per-item price/period
+ *  fields (`current_period_start/end` live here, not on the Subscription
+ *  itself, at this codebase's pinned API version). */
+function firstSubscriptionItem(sub: Record<string, unknown>): Record<string, unknown> | undefined {
   const items = sub.items as Record<string, unknown> | undefined;
   const list = items && typeof items === 'object' ? (items.data as unknown[] | undefined) : undefined;
-  const first = Array.isArray(list) && list.length > 0 ? (list[0] as Record<string, unknown>) : undefined;
-  const price = first?.price as Record<string, unknown> | undefined;
+  return Array.isArray(list) && list.length > 0 ? (list[0] as Record<string, unknown>) : undefined;
+}
+
+function mapInterval(item: Record<string, unknown> | undefined): BillingInterval {
+  const price = item?.price as Record<string, unknown> | undefined;
   const recurring = price?.recurring as Record<string, unknown> | undefined;
   return recurring?.interval === 'year' ? BillingInterval.ANNUAL : BillingInterval.MONTHLY;
 }

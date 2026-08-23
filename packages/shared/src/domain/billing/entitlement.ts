@@ -74,3 +74,43 @@ export const ENTITLED_SUBSCRIPTION_STATUSES: readonly BillingSubscriptionStatus[
   BillingSubscriptionStatus.ACTIVE,
   BillingSubscriptionStatus.TRIALING,
 ];
+
+/**
+ * Local statuses under which Stripe still has a real subscription object for
+ * this customer — as opposed to {@link ENTITLED_SUBSCRIPTION_STATUSES} above,
+ * which answers a different question ("should this account be granted access
+ * right now?").
+ *
+ * The two sets diverge on `PAST_DUE`: a seller with a failed charge is
+ * SUSPENDED (no entitlement — see {@link resolveEntitlementState}) but
+ * Stripe's subscription object is still live, still billing, and still the
+ * thing `changePlan`/`previewPlanChange` must reprice — sending them through
+ * checkout instead would try to create a SECOND subscription, which Stripe
+ * does not refuse and would double-bill them.
+ * `StripeBillingProvider.hasActiveProviderSubscription` already treats
+ * `past_due`/`unpaid` (both of which map onto our single `PAST_DUE`) as
+ * already-subscribed for exactly this reason — a checkout attempt for one of
+ * these sellers would be refused with `billing.errors.alreadySubscribed`
+ * regardless, so the FE must not route them there in the first place.
+ *
+ * `CANCELED` and `ENDED` are excluded on purpose: those are the two terminal
+ * states, Stripe has nothing left under either one to reprice, and a
+ * returning customer must go through checkout to start a fresh subscription.
+ */
+export const LIVE_LOCAL_SUBSCRIPTION_STATUSES: readonly BillingSubscriptionStatus[] = [
+  BillingSubscriptionStatus.ACTIVE,
+  BillingSubscriptionStatus.TRIALING,
+  BillingSubscriptionStatus.PAST_DUE,
+];
+
+/**
+ * Does this subscription status mean the seller has a live Stripe
+ * subscription to manage (repriced via change-plan) rather than none to
+ * subscribe fresh (via checkout)? The single definition both `BillingService`
+ * and any other layer must use — see {@link LIVE_LOCAL_SUBSCRIPTION_STATUSES}.
+ */
+export function hasLiveSubscriptionStatus(
+  status: BillingSubscriptionStatus | null | undefined,
+): boolean {
+  return status !== null && status !== undefined && LIVE_LOCAL_SUBSCRIPTION_STATUSES.includes(status);
+}

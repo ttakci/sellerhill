@@ -225,9 +225,17 @@ describe('entitlement enforcement invariants', () => {
       expect(provider).toMatch(/subscriptions\.update\([\s\S]{0,1500}metadata: \{ plan_id/);
     });
 
-    it('tells the FE which of the two applies', () => {
+    it('tells the FE which of the two applies, gated on a LIVE status not just the id', () => {
+      // providerSubscriptionId survives a CANCELED/ENDED subscription (Stripe
+      // never clears it), so an id-only check permanently routed a lapsed
+      // seller at "Switch to X" -> previewPlanChange/changePlan instead of
+      // back through checkout — and both of those dead-end against a
+      // canceled subscription. hasLiveSubscriptionStatus is the one place
+      // that decides which statuses still count.
       const service = read('modules', 'billing', 'billing.service.ts');
-      expect(service).toMatch(/hasProviderSubscription: Boolean\(subscription\?\.providerSubscriptionId\)/);
+      expect(service).toMatch(
+        /hasProviderSubscription: Boolean\(\s*subscription\?\.providerSubscriptionId && hasLiveSubscriptionStatus\(subscription\.status\)/,
+      );
     });
   });
 

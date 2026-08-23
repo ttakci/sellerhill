@@ -464,13 +464,41 @@ export class StripeBillingProvider implements BillingProviderPort {
             from_subscription: req.providerSubscriptionId,
           });
 
-      const currentPhase = schedule.phases[0];
+      // The LIVE phase — NOT necessarily phases[0]. On a schedule that
+      // already carries a PRIOR pending downgrade (the seller downgrades a
+      // second time before the first one lands), phases[0] is a COMPLETED,
+      // past phase: Stripe refuses to rewrite it, so reading it here silently
+      // broke every second downgrade. `schedule.current_phase` is Stripe's
+      // own answer to "which entry in `phases` is live right now" (a
+      // window, not the phase object itself); a schedule's phases never
+      // share a start_date, so matching on it recovers the real entry. Fall
+      // back to phases[0] only for a schedule THIS call just created via
+      // `from_subscription` a few lines up, where current_phase can be
+      // momentarily unset on the create response even though there is
+      // exactly one phase to find.
+      const currentPhaseWindow = schedule.current_phase;
+      const currentPhase =
+        (currentPhaseWindow
+          ? schedule.phases.find((phase) => phase.start_date === currentPhaseWindow.start_date)
+          : undefined) ?? schedule.phases[0];
       if (!currentPhase) {
         throw new Error('billing.errors.planChangeFailed');
       }
 
       await stripe.subscriptionSchedules.update(schedule.id, {
         end_behavior: 'release',
+        // `automatic_tax` is a real field on BOTH `default_settings` AND each
+        // individual phase ("Automatic tax settings for this phase" per the
+        // Stripe SDK's own Phase type) — and the phase reconstruction below
+        // only copies items/quantity/dates off `currentPhase`, dropping
+        // whatever automatic_tax setting that phase actually carried. Setting
+        // it explicitly at BOTH levels, on BOTH phases, turns "does Stripe
+        // inherit it from the source subscription" into a fact this call
+        // guarantees rather than an unprovable runtime assumption — the
+        // Wyoming tax registration went live 2026-08-22, so a downgrade that
+        // silently stopped collecting sales tax is a compliance exposure, not
+        // a cosmetic gap.
+        default_settings: { automatic_tax: { enabled: true } },
         phases: [
           {
             // NOTE: this carries forward price + quantity ONLY. A phase can
@@ -486,10 +514,12 @@ export class StripeBillingProvider implements BillingProviderPort {
             })),
             start_date: currentPhase.start_date,
             end_date: currentPhase.end_date,
+            automatic_tax: { enabled: true },
           },
           {
             items: [{ price: req.providerPriceId, quantity: 1 }],
             metadata: { plan_id: req.planId },
+            automatic_tax: { enabled: true },
           },
         ],
       });
@@ -521,24 +551,35 @@ export class StripeBillingProvider implements BillingProviderPort {
     providerPriceId: string,
   ): Promise<{ amountDueMicros: number; currency: string }> {
     const stripe = this.getClient();
-    const current = await stripe.subscriptions.retrieve(providerSubscriptionId);
-    const itemId = current.items.data[0]?.id;
-    if (!itemId) {
+    try {
+      const current = await stripe.subscriptions.retrieve(providerSubscriptionId);
+      const itemId = current.items.data[0]?.id;
+      if (!itemId) {
+        throw new Error('billing.errors.planChangeFailed');
+      }
+      const preview = await stripe.invoices.createPreview({
+        customer: typeof current.customer === 'string' ? current.customer : current.customer.id,
+        subscription: providerSubscriptionId,
+        subscription_details: {
+          items: [{ id: itemId, price: providerPriceId }],
+          proration_behavior: 'always_invoice',
+        },
+      });
+      // Stripe amounts are minor units (cents); our DTOs are micro-units.
+      return {
+        amountDueMicros: preview.amount_due * 10_000,
+        currency: preview.currency.toUpperCase(),
+      };
+    } catch (error) {
+      // Sibling to changeSubscriptionPlan/scheduleDowngrade above: without
+      // this, a raw Stripe error (or the missing-itemId throw two lines up)
+      // reached the controller's rethrowBillingError, missed
+      // BILLING_ERROR_STATUS entirely (it only recognizes our own
+      // 'billing.errors.*' keys), and surfaced as a blank 500 instead of the
+      // mapped 409 every other provider failure gets.
+      this.logger.error(`Stripe plan-change preview failed: ${describeError(error)}`);
       throw new Error('billing.errors.planChangeFailed');
     }
-    const preview = await stripe.invoices.createPreview({
-      customer: typeof current.customer === 'string' ? current.customer : current.customer.id,
-      subscription: providerSubscriptionId,
-      subscription_details: {
-        items: [{ id: itemId, price: providerPriceId }],
-        proration_behavior: 'always_invoice',
-      },
-    });
-    // Stripe amounts are minor units (cents); our DTOs are micro-units.
-    return {
-      amountDueMicros: preview.amount_due * 10_000,
-      currency: preview.currency.toUpperCase(),
-    };
   }
 
   async getBillingDetails(providerCustomerId: string): Promise<ProviderBillingDetails> {
@@ -582,11 +623,22 @@ export class StripeBillingProvider implements BillingProviderPort {
       if (scheduleId) {
         const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
         const pending = schedule.phases[1];
-        const priceRef = pending?.items[0]?.price;
-        scheduledPriceId = typeof priceRef === 'string' ? priceRef : (priceRef?.id ?? null);
-        scheduledAt = pending?.start_date
-          ? new Date(pending.start_date * 1000).toISOString()
-          : null;
+        // A phase whose start_date has already passed is not "pending" — it
+        // IS the current phase now. scheduleDowngrade's final phase carries
+        // no end_date, so the schedule never "completes" (end_behavior:
+        // 'release' never fires) and phases[1] stays populated forever once
+        // the change lands. Reading it unconditionally made the "Switches to
+        // X on <date>" banner permanent instead of clearing when the
+        // downgrade actually applied, and made a SECOND downgrade land on a
+        // now-past phases[0] that Stripe refuses to rewrite (see
+        // scheduleDowngrade's own current_phase lookup for that half of the
+        // fix).
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        if (pending && pending.start_date > nowSeconds) {
+          const priceRef = pending.items[0]?.price;
+          scheduledPriceId = typeof priceRef === 'string' ? priceRef : (priceRef?.id ?? null);
+          scheduledAt = new Date(pending.start_date * 1000).toISOString();
+        }
       }
 
       return {
@@ -621,20 +673,32 @@ export class StripeBillingProvider implements BillingProviderPort {
     startingAfter?: string,
   ): Promise<{ items: BillingInvoiceDto[]; hasMore: boolean; nextCursor: string | null }> {
     const stripe = this.getClient();
-    const page = await stripe.invoices.list({
-      customer: providerCustomerId,
-      limit,
-      ...(startingAfter ? { starting_after: startingAfter } : {}),
-    });
-    const items = page.data.map((inv) => mapStripeInvoice(inv as unknown as StripeInvoiceLike));
-    return {
-      items,
-      hasMore: page.has_more,
-      // Stripe's starting_after cursor is a position in the LIST's own return
-      // order, not a timestamp — so "the last id we returned" is exactly the
-      // cursor that resumes correctly on the next page, no matter the sort.
-      nextCursor: page.has_more ? (items[items.length - 1]?.id ?? null) : null,
-    };
+    try {
+      const page = await stripe.invoices.list({
+        customer: providerCustomerId,
+        limit,
+        ...(startingAfter ? { starting_after: startingAfter } : {}),
+      });
+      const items = page.data.map((inv) => mapStripeInvoice(inv as unknown as StripeInvoiceLike));
+      return {
+        items,
+        hasMore: page.has_more,
+        // Stripe's starting_after cursor is a position in the LIST's own return
+        // order, not a timestamp — so "the last id we returned" is exactly the
+        // cursor that resumes correctly on the next page, no matter the sort.
+        nextCursor: page.has_more ? (items[items.length - 1]?.id ?? null) : null,
+      };
+    } catch (error) {
+      // Sibling to every other provider method: without this, a raw Stripe
+      // error reached the controller's rethrowBillingError, missed
+      // BILLING_ERROR_STATUS, and surfaced as a blank 500 to the FE card
+      // whose whole job is rendering its own retry state for exactly this
+      // failure.
+      this.logger.error(
+        `Stripe invoice list failed for customer ${providerCustomerId}: ${describeError(error)}`,
+      );
+      throw new Error('billing.errors.invoicesFailed');
+    }
   }
 
   async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {

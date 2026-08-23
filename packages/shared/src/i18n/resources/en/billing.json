@@ -272,7 +272,8 @@
       "planChangeFailed": "The plan could not be changed right now. Please try again, or use \"Manage billing\".",
       "subscriptionSuspended": "Your subscription is not active, so new listings are paused. Choose a plan to resume — everything restarts on its own.",
       "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan.",
-      "alreadySubscribed": "You already have an active subscription. Use \"Switch plan\" to change it instead of subscribing again."
+      "alreadySubscribed": "You already have an active subscription. Use \"Switch plan\" to change it instead of subscribing again.",
+      "invoicesFailed": "Invoice history could not be loaded. Please try again in a moment."
     },
     "actions": {
       "subscribe": "Subscribe",

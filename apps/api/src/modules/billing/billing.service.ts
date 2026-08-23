@@ -25,6 +25,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BillingInterval,
   BillingLimitKey,
+  hasLiveSubscriptionStatus,
   PlanChangeDirection,
   PlatformSettingKey,
   resolvePlanChangeDirection,
@@ -130,10 +131,22 @@ export class BillingService {
       usagePeriods,
       quotas,
       quotaAddons,
-      // True when the seller already has a Stripe subscription, i.e. picking a
-      // plan must REPRICE it rather than open a checkout — the FE labels the
-      // button accordingly instead of the two paths looking identical.
-      hasProviderSubscription: Boolean(subscription?.providerSubscriptionId),
+      // True when the seller already has a LIVE Stripe subscription, i.e.
+      // picking a plan must REPRICE it (via change-plan) rather than open a
+      // checkout — the FE labels the button accordingly instead of the two
+      // paths looking identical. Gated on status, not just the id being
+      // non-null: `providerSubscriptionId` survives a CANCELED/ENDED
+      // subscription (Stripe never clears it), so an id-only check left a
+      // lapsed seller permanently routed at "Switch to X" -> previewPlanChange,
+      // which dead-ends (Stripe refuses to preview/reprice a canceled
+      // subscription) with no way back to checkout. See
+      // hasLiveSubscriptionStatus's own doc for why PAST_DUE stays on this
+      // side of the line: checkout (A3's own guard) is the correct path for a
+      // lapsed customer, and remains the authority on refusing a genuine
+      // duplicate.
+      hasProviderSubscription: Boolean(
+        subscription?.providerSubscriptionId && hasLiveSubscriptionStatus(subscription.status),
+      ),
       enforcementEnabled,
       provider: config.provider,
       transition,

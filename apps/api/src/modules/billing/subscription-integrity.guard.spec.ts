@@ -221,3 +221,112 @@ describe('plan changes are billed by direction', () => {
     expect(previewBody).toMatch(directionCallPattern);
   });
 });
+
+describe('final whole-branch review fixes (2026-08-23)', () => {
+  const provider = read('modules', 'billing', 'billing-provider.ts');
+  const applier = read('modules', 'billing', 'stripe-event-applier.ts');
+  const service = read('modules', 'billing', 'billing.service.ts');
+  const controller = read('modules', 'billing', 'billing.controller.ts');
+
+  describe('C1 — a downgrade schedule keeps collecting tax on both phases', () => {
+    it('sets automatic_tax at default_settings AND on both phases of the update call', () => {
+      // Wide window: the call is heavily commented (see the review context for
+      // why this is load-bearing — a Wyoming tax registration went live
+      // 2026-08-22), and this asserts all three appear in the SAME
+      // subscriptionSchedules.update() call, not merely somewhere in the file.
+      const body = provider.slice(
+        provider.indexOf('async scheduleDowngrade('),
+        provider.indexOf('async cancelScheduledChange('),
+      );
+      const updateIdx = body.indexOf('subscriptionSchedules.update(');
+      expect(updateIdx).toBeGreaterThan(-1);
+      const updateCall = body.slice(updateIdx, body.indexOf('} catch (error) {', updateIdx));
+      expect(updateCall).toMatch(/default_settings:\s*\{\s*automatic_tax:\s*\{\s*enabled:\s*true/);
+      // Two phases in the literal, each carrying its own automatic_tax.
+      const automaticTaxOccurrences = updateCall.match(/automatic_tax:\s*\{\s*enabled:\s*true/g) ?? [];
+      expect(automaticTaxOccurrences.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('does NOT pass automatic_tax on the from_subscription create call (SDK forbids other params there)', () => {
+      const body = provider.slice(
+        provider.indexOf('async scheduleDowngrade('),
+        provider.indexOf('async cancelScheduledChange('),
+      );
+      const createIdx = body.indexOf('subscriptionSchedules.create(');
+      const updateIdx = body.indexOf('subscriptionSchedules.update(');
+      const createCall = body.slice(createIdx, updateIdx);
+      expect(createCall).not.toMatch(/automatic_tax/);
+    });
+  });
+
+  describe('C2 — subscription period dates are read from the item, not the Subscription object', () => {
+    it('extracts current_period_start/end from the first subscription item', () => {
+      // current_period_start/end moved to SubscriptionItem at this codebase's
+      // pinned API version (2025-03-31.basil) — reading them off `sub`
+      // directly always misses and silently fabricates a now()..now()+30d
+      // span, which this codebase's seller-facing copy now quotes verbatim
+      // (plan meta line, downgrade/upgrade confirmation dialogs).
+      const body = applier.slice(applier.indexOf('export function extractStripeSubscriptionFields('));
+      expect(body).toMatch(/firstSubscriptionItem\(sub\)/);
+      expect(body).toMatch(/parseUnixSeconds\(item\?\.current_period_start\)/);
+      expect(body).toMatch(/parseUnixSeconds\(item\?\.current_period_end\)/);
+      expect(body).not.toMatch(/parseUnixSeconds\(sub\.current_period_start\)/);
+      expect(body).not.toMatch(/parseUnixSeconds\(sub\.current_period_end\)/);
+    });
+  });
+
+  describe('I1 — a lapsed subscriber can resubscribe', () => {
+    it('hasProviderSubscription requires a LIVE status, not just a stored provider id', () => {
+      // providerSubscriptionId survives a CANCELED/ENDED subscription (Stripe
+      // never clears it), so an id-only check permanently routed a lapsed
+      // seller at "Switch to X" -> previewPlanChange/changePlan — both of
+      // which dead-end against a canceled subscription — with no way back to
+      // checkout.
+      expect(service).toMatch(
+        /hasProviderSubscription: Boolean\(\s*subscription\?\.providerSubscriptionId && hasLiveSubscriptionStatus\(subscription\.status\)/,
+      );
+    });
+  });
+
+  describe('I2 — a pending downgrade banner clears once the change lands, and a second downgrade works', () => {
+    it('getBillingDetails only reports a schedule phase as pending when its start is still in the future', () => {
+      const body = provider.slice(
+        provider.indexOf('async getBillingDetails('),
+        provider.indexOf('async listInvoices('),
+      );
+      expect(body).toMatch(/pending && pending\.start_date > nowSeconds/);
+    });
+
+    it('scheduleDowngrade locates the live phase via current_phase, not by assuming index 0', () => {
+      const body = provider.slice(
+        provider.indexOf('async scheduleDowngrade('),
+        provider.indexOf('async cancelScheduledChange('),
+      );
+      expect(body).toMatch(/schedule\.current_phase/);
+      expect(body).toMatch(/phases\.find\(/);
+    });
+  });
+
+  describe('I3 — previewPlanChange and listInvoices map provider failures like every sibling method', () => {
+    it('previewPlanChange wraps its Stripe calls in a try/catch that throws a mapped billing.errors key', () => {
+      const body = provider.slice(
+        provider.indexOf('async previewPlanChange('),
+        provider.indexOf('async getBillingDetails('),
+      );
+      expect(body).toMatch(/try\s*\{/);
+      expect(body).toMatch(/catch \(error\)/);
+      expect(body).toMatch(/throw new Error\('billing\.errors\.planChangeFailed'\)/);
+    });
+
+    it('listInvoices wraps its Stripe call in a try/catch that throws a mapped billing.errors key', () => {
+      const body = provider.slice(
+        provider.indexOf('async listInvoices('),
+        provider.indexOf('async createPortal('),
+      );
+      expect(body).toMatch(/try\s*\{/);
+      expect(body).toMatch(/catch \(error\)/);
+      expect(body).toMatch(/throw new Error\('billing\.errors\.invoicesFailed'\)/);
+      expect(controller).toMatch(/'billing\.errors\.invoicesFailed':\s*HttpStatus\.CONFLICT/);
+    });
+  });
+});
