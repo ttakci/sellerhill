@@ -143,8 +143,19 @@ Maps `(users.id, AmazonMarketplace)` → Aquiline `profileId`.
 
 `profileId` is **client-chosen** (spec: *"Optional client-chosen id; server
 generates one if omitted"*), so it is derived deterministically as
-`sh-{userId}-{marketplace}`. Creation is therefore naturally idempotent and the
-id can never be lost or need looking up.
+`{prefix}-{userId}-{marketplace}`. Creation is therefore naturally idempotent
+and the id can never be lost or need looking up.
+
+**The prefix is a setting (`AQUILINE_PROFILE_PREFIX`, default `sh`), and it
+exists because one Aquiline account is shared by every environment.** There is
+no test environment (confirmed with support), so development necessarily creates
+real profiles against the same 10-slot allowance production draws on, and local /
+test / production all have different `users.id` values. Without a prefix, a
+profile burned during development is indistinguishable from a production
+seller's — which matters precisely because the resource cannot be reclaimed.
+Local sets `sh-dev`, the Coolify test stack `sh-test`, production keeps `sh`. It
+also makes it impossible for a development order to be upserted into a real
+seller's profile.
 
 - `ensureProfile(userId, marketplace)` runs under a **pg advisory lock keyed on
   the user** (the `resolveProductData` / `ensureSeeded` idiom), so N concurrent

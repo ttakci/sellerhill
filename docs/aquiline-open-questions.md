@@ -1,53 +1,23 @@
 # Aquiline Integration API — open questions
 
-Context for support: we are on the **Starter** plan and integrating the
-Integration API server-side (no browser extension). Our platform hosts many
-sellers; each seller gets one profile, and we upload Amazon ship-track HTML from
-our own authenticated Amazon sessions.
+**Status:** final list, ready to send. Everything else we asked ourselves by
+calling the API (`pnpm --filter api aquiline:probe`).
+
+**Context for support:** we are on the **Starter** plan and integrating the
+Integration API **server-side**, not through the browser extension. Our platform
+hosts many sellers; each seller gets one profile, and we upload Amazon
+ship-track HTML from our own authenticated Amazon sessions.
 
 ---
 
-## Which of these actually need an answer from support
+## 1. Can you send example webhook payloads?
 
-Most of this list is answerable by calling the API, which is faster and more
-precise than relaying a question through their engineering team. Run
-`pnpm --filter api aquiline:probe` first; it settles §1–§5 (except rate limits),
-§9, §10, §11, §13 and §14 empirically.
-
-**Send to support — cannot be discovered safely:**
-
-- **§6 profile slot reclamation** — there is no `DELETE`, and testing it means
-  permanently burning slots.
-- **§8 `amazonCustomerId`** — omitting it works; what it *improves* is not
-  observable.
-- **§12 `suggestAmazonEmailFetch`** — same, its meaning is not observable.
-- **§5 rate limits** — only if the probe finds no `X-RateLimit-*` headers.
-  Discovering them by hammering the API is rude and risks being flagged.
-- **§15 test mode** (below) — worth asking before spending anything.
-
-### 15. Is there a test mode, or an assign that is not billed?
-
-There is no sandbox, so every integration test we run consumes real plan
-allowance and, for profiles, consumes it permanently. Is there a test flag, a
-staging tenant, or a way to create and then reverse a test shipment?
-
----
-
-## Blocking — we cannot finish the integration without these
-
-### 1. Is there a size limit on the `html` field of `POST /v1/profiles/{profileId}/orders/{orderId}/tracking-html`?
-
-A full Amazon ship-track page is typically 0.5–2 MB of HTML. Is there a maximum
-request body size? If so, what is it, and should we send only a subset of the
-page (for example just the progress-tracker container) rather than the full
-document? Which elements must be present for parsing to succeed?
-
-### 2. Can you send example webhook payloads?
-
-The OpenAPI document specifies the signature header
+This is our largest gap. The OpenAPI document specifies the signature header
 (`X-Webhook-Signature: sha256=<hex hmac of raw body with your secret>`) and the
-event names, but not the payload body schema. We need one sample body for each
-of the five events so we can write a parser:
+event names, but not the payload body — and it cannot, since the document is
+OpenAPI 3.0.3, which has no `webhooks:` section.
+
+We need one sample body for each event so we can write the receiver:
 
 - `tracking.html.accepted`
 - `tracking.html.applied`
@@ -55,107 +25,73 @@ of the five events so we can write a parser:
 - `tracking.problem.opened`
 - `tracking.problem.cleared`
 
-In particular: which field carries the `problemCode`, and which field identifies
-the order (marketplace order id? profile id? Aquiline tracking number?).
+Specifically: which field carries the `problemCode`, and which field identifies
+the order — the marketplace order id, the profile id, or the Aquiline tracking
+number?
 
-### 3. How does a repeated `assign` on the same order behave?
+## 2. What are the rate limits on the Integration API?
 
-Your team told us "Same order assign is idempotent (reused: true)", but `reused`
-does not appear in the documented response schema. Please confirm:
+Requests per second / minute / day, per token or per account. `GET /v1/me`
+returns no `X-RateLimit-*` headers, so we cannot discover this without
+deliberately hammering the endpoint, which we would rather not do.
 
-- Does a second `assign` on the same order return the **same** AQUA number?
-- Is `chargedCents` zero on that repeat, i.e. are we billed only once?
-- Is there any condition under which a repeat mints a **second** shipment?
+Our expected shape: one `tracking-html` upload per in-flight order per day,
+plus a burst of `upsert` + `tracking-html` + `assign` whenever an order ships.
 
-We retry on transport failures, so we need certainty that a retry cannot be
-billed twice.
-
-### 4. Can `assign` be called immediately after `tracking-html` returns `outcome: accepted`?
-
-The docs say `outcome` may be `accepted` with `trackingUpdateStatus: processing`,
-and warn "Never treat success alone as applied". Must we wait for `applied`
-before calling `assign`, or is `accepted` sufficient? If we must wait, what is
-the typical processing time, and does `assign` return `needs_tracking_upload`
-until then?
-
-### 5. What are the rate limits on the Integration API?
-
-Requests per second / minute / day, per token or per account. We expect roughly
-one `tracking-html` upload per in-flight order per day, plus a burst of
-`upsert` + `tracking-html` + `assign` whenever an order ships.
-
----
-
-## Operational
-
-### 6. Can seller profile slots be reclaimed?
+## 3. Can seller profile slots be reclaimed?
 
 `/v1/profiles/{profileId}` exposes only `GET` and `PATCH` — there is no
-`DELETE` (unlike `/v1/webhooks/{webhookId}`). Our Starter plan includes 10
-profiles. If a profile becomes obsolete (a seller leaves), can the slot be
-freed, either through the API or by your support team? If not, we will treat
-profile creation as permanent and guard it accordingly.
+`DELETE`, unlike `/v1/webhooks/{webhookId}`. Starter includes 10 profiles.
 
-### 7. Where can we read the trackings allowance and the profile count?
+Since there is no test environment, our development and testing necessarily
+create real profiles. If a profile becomes obsolete — a test profile, or a
+seller who leaves — can the slot be freed, through the API or by your team? If
+not, we will treat every creation as permanent and guard it accordingly.
 
-Resolved by probing that `billing.usage.limit` and `plan.trackLimitPerMonth`
-both report 300 on Starter, i.e. the **shipment** allowance. Two gaps remain,
-and they are small:
+## 4. Where can we read the trackings allowance and the profile count?
 
-- The plan page also lists **3,000 trackings per month** for Starter. That
-  allowance is not exposed by `GET /v1/me`. Is it readable anywhere, and what
-  consumes it?
-- The **profile count** (used / allowed) is likewise not exposed. We currently
-  count `GET /v1/profiles` ourselves. Is there a canonical source?
+`GET /v1/me` returns `billing.usage {used: 0, limit: 300, remaining: 300}` and
+`plan.trackLimitPerMonth: 300`, which matches the **300 Aquiline shipments** on
+our plan rather than the **3,000 trackings per month** the plan page also lists.
 
-Also, please confirm our reading of the usage window: `windowKey` came back as
+- Is the trackings allowance readable anywhere in the API, and what consumes it?
+- Is the profile count (used / allowed) readable anywhere? We currently count
+  `GET /v1/profiles` ourselves.
+
+Please also confirm our reading of the usage window: `windowKey` came back as
 `2026-08-23`, matching `currentPeriodStart`, with `currentPeriodEnd`
-`2026-09-23`. We are treating the allowance as resetting on the subscription
-anniversary rather than on the 1st of each calendar month.
+`2026-09-23`. We are treating the allowance as resetting on the **subscription
+anniversary**, not on the 1st of each calendar month.
 
-### 8. What is `amazonCustomerId`, and what does it improve?
+## 5. What is `amazonCustomerId`, and what does it improve?
 
-It is accepted by both `tracking-html` and `assign` but not explained. Where do
+Both `tracking-html` and `assign` accept it, but it is not explained. Where do
 we obtain it, and what changes if we omit it?
+
+## 6. What does `suggestAmazonEmailFetch` expect us to do?
+
+It appears in the `upsert` and `tracking-html` responses. We have no access to
+the seller's Amazon mailbox, so we currently ignore it. Does ignoring it degrade
+tracking quality?
 
 ---
 
-## Clarifying (non-blocking)
+## Answered — no longer being asked
 
-### 9. How many orders may one `POST .../orders/upsert` carry?
+| Question | Answer | Source |
+|---|---|---|
+| Which surface converts Amazon TBA → AQUA? | Integration API, not the v3 partner API | support, 2026-08-13 |
+| Can an Amazon profile assign by `carrier` + number? | No — Amazon uses the HTML route; `carrier` is "required for non-Amazon assign". Aquiline reads the carrier from the uploaded HTML | API document introduction |
+| What is the profile limit? | 10 on Starter (25 / 50 / 100 / 250 above) | plan page |
+| Is there a test environment? | No | support, asked previously |
+| Does `trackLimitPerMonth` count shipments? | Yes — 300, despite the name | probe |
+| What does an error body look like? | `{success: false, code: "not-found", message: "…"}` — a machine-readable `code` | probe |
 
-Is there a maximum array length? We normally send one order, but a backfill
-would batch.
+## Being answered by probing, not by asking
 
-### 10. Does `MarketplaceOrder.status` accept arbitrary strings?
-
-The example uses `"Shipping"`. Is there a fixed vocabulary, and does the value
-affect processing, or is it purely informational?
-
-### 11. What happens on `POST /v1/profiles` with a `profileId` that already exists?
-
-Does it return 200 (idempotent upsert), 409, or create a duplicate? We derive
-`profileId` deterministically, so we would like to rely on repeated creation
-being safe.
-
-### 12. What does `suggestAmazonEmailFetch` in the `upsert` and `tracking-html`
-responses expect us to do?
-
-We have no access to the seller's Amazon mailbox, so we currently ignore it.
-Does ignoring it degrade tracking quality?
-
-### 13. For an Amazon profile, is the assign body `retailer: amazon-us` (per the
-schema example) or `carrier: "Amazon"` (per your 2026-08-13 reply)?
-
-The schema's Amazon example sends `retailer` + `marketplaceHost` +
-`sourceTracking` and no `carrier`, and documents `carrier` as "Required for
-non-Amazon assign". Your reply showed `carrier: "Amazon"`. We are following the
-schema — please confirm that is correct.
-
-### 14. Must the `trackingUrl` sent to `assign` be byte-identical to the one sent
-to `tracking-html`?
-
-The `tracking_url_mismatch` problem code suggests yes. We read the real URL from
-Amazon's own "Track package" link and reuse it for both calls, so it should
-match — we want to confirm that is the expected behaviour, including for orders
-that ship as multiple packages (where the URL carries a package index).
+`pnpm --filter api aquiline:probe` settles these once a real shipped Amazon
+order is connected: the HTML size limit, `assign` idempotency and billing on
+repeat, whether `assign` works immediately after an `accepted` upload, the
+`upsert` batch limit, accepted `status` values, what a repeat `POST /v1/profiles`
+with the same id does, `retailer` vs `carrier` on an Amazon assign, and whether
+the `trackingUrl` must match byte-for-byte between `tracking-html` and `assign`.
