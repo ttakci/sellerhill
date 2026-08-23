@@ -148,30 +148,6 @@ export const AQUILINE_TRACKING_NUMBER_PATTERN = /^AQ[A-Z]{1,4}\d{6,}[A-Z]{0,3}$/
 // These are removed when the webhook receiver is rewritten (plan 2).
 // ============================================================================
 
-/** One entry in a tracking timeline. */
-export interface TrackingProviderEvent {
-  /** Free-text description from the underlying carrier. */
-  content: string;
-  location?: string | null;
-  /** Provider format is `YYYY-MM-DD HH:mm:ss` — NOT ISO 8601, and not zoned. */
-  time: string;
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Status returned by `GET /v3/tracking/{trackingNumber}`.
- */
-export enum TrackingProviderStatus {
-  SHIPPING = 'Shipping',
-  DELIVERED = 'delivered',
-  OUT_FOR_DELIVERY = 'out_for_delivery',
-  CREATED = 'created',
-  EXCEPTION = 'exception',
-  CANCELLED = 'cancelled',
-  DELAYED = 'delayed',
-  ERROR = 'error',
-}
-
 /**
  * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
  * Webhook event names accepted by `POST /v3/webhooks/subscriptions`.
