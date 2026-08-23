@@ -4,81 +4,103 @@
 // Values here are THEIR strings, not ours — they are matched against live
 // payloads, so renaming a value silently breaks status handling.
 //
-// Sourced from the published v3 OpenAPI spec + webhook docs
-// (developer.aquiline-tracking.com, read 2026-08-11).
+// Sourced from the published v3 Integration API spec
+// (developer.aquiline-tracking.com, read 2026-08-23).
 
 /**
- * Status returned by `GET /v3/tracking/{trackingNumber}`.
- *
- * Note the inconsistent casing — `Shipping` is capitalised while the others are
- * not. That is how the provider sends it; normalise on read
- * (`parseTrackingProviderStatus`) rather than "fixing" it here.
+ * Public problem codes. The document is explicit that payloads use these and
+ * never internal parser names, so this enum is the whole vocabulary a seller
+ * or an operator can ever be shown.
  */
-export enum TrackingProviderStatus {
-  /** In transit. The normal state between conversion and delivery. */
-  SHIPPING = 'Shipping',
-  DELIVERED = 'delivered',
-  OUT_FOR_DELIVERY = 'out_for_delivery',
-  /** Assigned but not yet moving. */
-  CREATED = 'created',
-  /** Provider-side problem with the shipment. NOT the same as a failed request. */
-  EXCEPTION = 'exception',
-  CANCELLED = 'cancelled',
-  DELAYED = 'delayed',
-  ERROR = 'error',
-}
-
-/** Webhook event names accepted by `POST /v3/webhooks/subscriptions`. */
-export enum TrackingWebhookEvent {
-  IN_TRANSIT = 'shipment.in_transit',
-  OUT_FOR_DELIVERY = 'shipment.out_for_delivery',
-  DELIVERED = 'shipment.delivered',
-  EXCEPTION = 'shipment.exception',
-  /** Catch-all the provider sends for any status it has not mapped. */
-  UPDATED = 'shipment.updated',
-  PICKUP_UPDATED = 'pickup.updated',
+export enum AquilineProblemCode {
+  WRONG_PAGE_TYPE = 'wrong_page_type',
+  AMAZON_SESSION_EXPIRED = 'amazon_session_expired',
+  TRACKING_URL_MISMATCH = 'tracking_url_mismatch',
+  NEEDS_TRACKING_UPLOAD = 'needs_tracking_upload',
+  UPDATE_NOT_APPLIED = 'update_not_applied',
+  ASSIGN_VALIDATION = 'assign_validation',
+  SHIPMENT_EXCEPTION = 'shipment_exception',
+  TRACKING_UPDATE_UNAVAILABLE = 'tracking_update_unavailable',
 }
 
 /**
- * Whether the webhook carries new timeline entries or only a status move.
- * The provider sends `status_change` even when there are no new events, so a
- * handler that only reads `newEvents` would miss delivery.
+ * Narrow an arbitrary provider string. The provider may add codes; an unknown
+ * one must degrade to "some problem" rather than be cast into the enum, which
+ * would let it masquerade as a known code everywhere downstream.
  */
-export enum TrackingWebhookChangeType {
-  EVENT_APPEND = 'event_append',
-  STATUS_CHANGE = 'status_change',
+export function isAquilineProblemCode(value: string): value is AquilineProblemCode {
+  return (Object.values(AquilineProblemCode) as string[]).includes(value);
 }
 
-/** One entry in a tracking timeline. */
-export interface TrackingProviderEvent {
-  /** Free-text description from the underlying carrier. */
-  content: string;
-  location?: string | null;
-  /** Provider format is `YYYY-MM-DD HH:mm:ss` — NOT ISO 8601, and not zoned. */
-  time: string;
+export enum AquilineWebhookEvent {
+  HTML_ACCEPTED = 'tracking.html.accepted',
+  HTML_APPLIED = 'tracking.html.applied',
+  HTML_REJECTED = 'tracking.html.rejected',
+  PROBLEM_OPENED = 'tracking.problem.opened',
+  PROBLEM_CLEARED = 'tracking.problem.cleared',
 }
 
-/** Response body of `GET /v3/tracking/{trackingNumber}`. */
-export interface TrackingProviderStatusDto {
-  number: string;
-  status: string;
-  oriCountry?: string | null;
-  destCountry?: string | null;
-  events?: TrackingProviderEvent[];
+/**
+ * `accepted` means stored and validated, NOT applied. The API document warns
+ * against treating success alone as applied, which is why the deferral in
+ * Task 7 exists.
+ */
+export enum AquilineHtmlOutcome {
+  ACCEPTED = 'accepted',
+  APPLIED = 'applied',
 }
 
-/** Webhook envelope delivered to our receiver. */
-export interface TrackingWebhookPayload {
-  type: string;
-  /** ISO 8601, unlike the event timestamps inside `data`. */
-  occurredAt: string;
-  data: {
-    trackingNumber: string;
-    status?: string | null;
-    statusCode?: string | null;
-    changeType?: string | null;
-    newEvents?: TrackingProviderEvent[];
-  };
+export enum AquilineAccountOrigin {
+  AMAZON = 'amazon',
+  ALIEXPRESS = 'aliexpress',
+  WALMART = 'walmart',
+}
+
+/** Provider address shape — snake_case on the wire, unlike the rest of the API. */
+export interface AquilineStoreAddress {
+  first_name?: string;
+  last_name?: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  zip_code?: string;
+  country: string;
+  phone_number?: string;
+}
+
+export interface AquilineMarketplaceOrder {
+  marketplaceOrderId: string;
+  orderPlacedAt?: string;
+  shipToName?: string;
+  shippingAddress?: AquilineStoreAddress;
+  productTitle?: string;
+  productId?: string;
+  productUrl?: string;
+  orderUrl?: string;
+  trackingUrl?: string;
+  sourceTracking?: string;
+  status?: string;
+}
+
+export interface AquilineAssignResult {
+  aquiline: string;
+  chargedCents: number | null;
+  planLimit: number | null;
+  planUsed: number | null;
+  planRemaining: number | null;
+  /** Undocumented, reported by support for a repeated assign. Read defensively. */
+  reused: boolean;
+}
+
+/** `GET /v1/me` billing block. Observed live 2026-08-23. */
+export interface AquilinePlanUsage {
+  planCode: string | null;
+  /** Window key equals `currentPeriodStart` — the SUBSCRIPTION period, not a month. */
+  windowKey: string | null;
+  used: number | null;
+  limit: number | null;
+  remaining: number | null;
 }
 
 /**
@@ -120,3 +142,82 @@ export const AQUILINE_EBAY_CARRIER_CODE = 'AQUILINE';
  * family rather than one exact prefix.
  */
 export const AQUILINE_TRACKING_NUMBER_PATTERN = /^AQ[A-Z]{1,4}\d{6,}[A-Z]{0,3}$/i;
+
+// ============================================================================
+// DEPRECATED ALIASES — V3 vocabulary kept for backwards compatibility
+// These are removed when the webhook receiver is rewritten (plan 2).
+// ============================================================================
+
+/** One entry in a tracking timeline. */
+export interface TrackingProviderEvent {
+  /** Free-text description from the underlying carrier. */
+  content: string;
+  location?: string | null;
+  /** Provider format is `YYYY-MM-DD HH:mm:ss` — NOT ISO 8601, and not zoned. */
+  time: string;
+}
+
+/**
+ * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
+ * Status returned by `GET /v3/tracking/{trackingNumber}`.
+ */
+export enum TrackingProviderStatus {
+  SHIPPING = 'Shipping',
+  DELIVERED = 'delivered',
+  OUT_FOR_DELIVERY = 'out_for_delivery',
+  CREATED = 'created',
+  EXCEPTION = 'exception',
+  CANCELLED = 'cancelled',
+  DELAYED = 'delayed',
+  ERROR = 'error',
+}
+
+/**
+ * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
+ * Webhook event names accepted by `POST /v3/webhooks/subscriptions`.
+ */
+export enum TrackingWebhookEvent {
+  IN_TRANSIT = 'shipment.in_transit',
+  OUT_FOR_DELIVERY = 'shipment.out_for_delivery',
+  DELIVERED = 'shipment.delivered',
+  EXCEPTION = 'shipment.exception',
+  UPDATED = 'shipment.updated',
+  PICKUP_UPDATED = 'pickup.updated',
+}
+
+/**
+ * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
+ * Whether the webhook carries new timeline entries or only a status move.
+ */
+export enum TrackingWebhookChangeType {
+  EVENT_APPEND = 'event_append',
+  STATUS_CHANGE = 'status_change',
+}
+
+/**
+ * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
+ * Response body of `GET /v3/tracking/{trackingNumber}`.
+ */
+export interface TrackingProviderStatusDto {
+  number: string;
+  status: string;
+  oriCountry?: string | null;
+  destCountry?: string | null;
+  events?: Array<{ content: string; location?: string | null; time: string }>;
+}
+
+/**
+ * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
+ * Webhook envelope delivered to our receiver.
+ */
+export interface TrackingWebhookPayload {
+  type: string;
+  occurredAt: string;
+  data: {
+    trackingNumber: string;
+    status?: string | null;
+    statusCode?: string | null;
+    changeType?: string | null;
+    newEvents?: unknown[];
+  };
+}
