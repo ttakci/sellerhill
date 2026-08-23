@@ -7,6 +7,32 @@ our own authenticated Amazon sessions.
 
 ---
 
+## Which of these actually need an answer from support
+
+Most of this list is answerable by calling the API, which is faster and more
+precise than relaying a question through their engineering team. Run
+`pnpm --filter api aquiline:probe` first; it settles §1–§5 (except rate limits),
+§9, §10, §11, §13 and §14 empirically.
+
+**Send to support — cannot be discovered safely:**
+
+- **§6 profile slot reclamation** — there is no `DELETE`, and testing it means
+  permanently burning slots.
+- **§8 `amazonCustomerId`** — omitting it works; what it *improves* is not
+  observable.
+- **§12 `suggestAmazonEmailFetch`** — same, its meaning is not observable.
+- **§5 rate limits** — only if the probe finds no `X-RateLimit-*` headers.
+  Discovering them by hammering the API is rude and risks being flagged.
+- **§15 test mode** (below) — worth asking before spending anything.
+
+### 15. Is there a test mode, or an assign that is not billed?
+
+There is no sandbox, so every integration test we run consumes real plan
+allowance and, for profiles, consumes it permanently. Is there a test flag, a
+staging tenant, or a way to create and then reverse a test shipment?
+
+---
+
 ## Blocking — we cannot finish the integration without these
 
 ### 1. Is there a size limit on the `html` field of `POST /v1/profiles/{profileId}/orders/{orderId}/tracking-html`?
