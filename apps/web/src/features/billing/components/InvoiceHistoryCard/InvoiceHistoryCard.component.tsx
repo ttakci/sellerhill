@@ -5,7 +5,7 @@
 // each made the three states look like three different screens.
 
 import type { BillingInvoiceDto } from '@repo/shared';
-import { Badge, Button, EmptyState, Table, Text, formatDate, formatMicroCurrency } from '@repo/ui';
+import { Badge, Button, EmptyState, InfoMessage, Table, Text, formatDate, formatMicroCurrency } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +31,7 @@ export const InvoiceHistoryCard = ({
   invoices,
   isLoading,
   isError,
+  hasLoadMoreError,
   hasMore,
   isLoadingMore,
   locale,
@@ -142,7 +143,17 @@ export const InvoiceHistoryCard = ({
             ]}
           />
         </S.TableScroll>
-        {hasMore ? (
+        {hasLoadMoreError ? (
+          <S.LoadMoreErrorRow>
+            <InfoMessage
+              action={t('billing:billing.invoices.retry')}
+              onAction={onRetry}
+              isActionLoading={isLoadingMore}
+            >
+              {t('billing:billing.invoices.showMoreError')}
+            </InfoMessage>
+          </S.LoadMoreErrorRow>
+        ) : hasMore ? (
           <S.MoreRow>
             <Button variant="secondary" size="small" isLoading={isLoadingMore} onClick={onShowMore}>
               <Text variant="body-sm">{t('billing:billing.invoices.showMore')}</Text>

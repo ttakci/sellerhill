@@ -48,6 +48,14 @@ import type {
 
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
+/**
+ * Every date on this page is money-adjacent (a charge, a cancellation, a plan
+ * switch), so it must never be ambiguous about the year — `formatDate`'s own
+ * default is day + month only. Shared so every call site here renders the
+ * same shape as `currentPeriodEndDisplay` below.
+ */
+const BILLING_DATE_OPTIONS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+
 /** Format a micros price into a display string. Free → the localized "Free" label. */
 function formatPriceMicros(micros: number, currency: string, locale: string, freeLabel: string): string {
   if (micros === 0) {
@@ -144,7 +152,7 @@ export const BillingPage: React.FC = () => {
   const hasProviderSubscription = summary?.hasProviderSubscription ?? false;
   const [isPlansOpen, setIsPlansOpen] = useState(false);
   const currentPeriodEndDisplay = subscription?.currentPeriodEnd
-    ? formatDate(subscription.currentPeriodEnd, localeCfg.locale, { day: 'numeric', month: 'short', year: 'numeric' })
+    ? formatDate(subscription.currentPeriodEnd, localeCfg.locale, BILLING_DATE_OPTIONS)
     : null;
 
   const [initiateAddonCheckout] = useInitiateAddonCheckoutMutation();
@@ -203,7 +211,7 @@ export const BillingPage: React.FC = () => {
       return null;
     }
     return t('billing:billing.subscription.nextCharge', {
-      date: formatDate(details.nextChargeAt, localeCfg.locale),
+      date: formatDate(details.nextChargeAt, localeCfg.locale, BILLING_DATE_OPTIONS),
       amount: formatMicroCurrency(
         details.nextChargeAmountMicros,
         localeCfg.locale,
@@ -222,7 +230,7 @@ export const BillingPage: React.FC = () => {
       return null;
     }
     return t('billing:billing.subscription.cancelsAtPeriodEnd', {
-      date: formatDate(details.cancelAt, localeCfg.locale),
+      date: formatDate(details.cancelAt, localeCfg.locale, BILLING_DATE_OPTIONS),
     });
   }, [details, t, localeCfg.locale]);
 
@@ -236,12 +244,12 @@ export const BillingPage: React.FC = () => {
     // line (with a different copy) rather than hiding the pending change.
     if (!details.scheduledChange.planSlug) {
       return t('billing:billing.subscription.scheduledChangeUnknownPlan', {
-        date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale),
+        date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale, BILLING_DATE_OPTIONS),
       });
     }
     return t('billing:billing.subscription.scheduledChange', {
       plan: t(`billing:billing.plans.${details.scheduledChange.planSlug}.name`),
-      date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale),
+      date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale, BILLING_DATE_OPTIONS),
     });
   }, [details, t, localeCfg.locale]);
 
@@ -270,12 +278,14 @@ export const BillingPage: React.FC = () => {
           preview.nextInvoiceAmountMicros === null
             ? '—'
             : formatMicroCurrency(preview.nextInvoiceAmountMicros, localeCfg.locale, preview.currency),
-        nextDate: preview.nextInvoiceAt ? formatDate(preview.nextInvoiceAt, localeCfg.locale) : '—',
+        nextDate: preview.nextInvoiceAt
+          ? formatDate(preview.nextInvoiceAt, localeCfg.locale, BILLING_DATE_OPTIONS)
+          : '—',
       });
     }
     return t('billing:billing.planChange.downgradeBody', {
       plan: planName,
-      date: formatDate(preview.effectiveAt, localeCfg.locale),
+      date: formatDate(preview.effectiveAt, localeCfg.locale, BILLING_DATE_OPTIONS),
     });
   }, [pendingChange, t, localeCfg.locale]);
 
@@ -598,6 +608,7 @@ export const BillingPage: React.FC = () => {
       enforcementEnabled={enforcementEnabled}
       providerUnconfigured={providerUnconfigured}
       subscriptionStatus={subscriptionStatus}
+      cancelAtPeriodEnd={Boolean(details?.cancelAtPeriodEnd)}
       currentPlanSlug={currentPlanSlug}
       usageRows={usageRows}
       plans={plans}

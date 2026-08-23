@@ -311,8 +311,11 @@ export function App() {
          * "billing" itself gets matched as the `:locale` param below, landing on
          * that route's empty `index` redirect (-> "register"), so a completed
          * Stripe checkout bounced to /billing/register instead of back to the
-         * billing page. preserveQuery carries checkout=success/session_id (and
-         * topup=success/cancelled) through so BillingPage can react to them.
+         * billing page. preserveQuery carries checkout=success/session_id
+         * (and topup=success/cancelled) through so they aren't silently
+         * dropped by the redirect — BillingPage does not currently read
+         * either param itself; it re-fetches the summary/details on mount,
+         * which is what actually reflects a completed checkout or top-up.
          */}
         <Route path="/billing" element={<LocaleRedirect to="billing" preserveQuery />} />
 

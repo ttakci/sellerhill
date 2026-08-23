@@ -74,6 +74,14 @@ export interface BillingPageComponentProps {
   enforcementEnabled: boolean;
   providerUnconfigured: boolean;
   subscriptionStatus: BillingSubscriptionStatus | null;
+  /** True when the subscription is scheduled to cancel at period end — see
+   *  `cancelsAtPeriodEndLine`. The status badge derives from BOTH this and
+   *  `subscriptionStatus`: `subscriptionStatus` stays `active` in our own
+   *  tables until Stripe's period actually ends (a portal cancellation
+   *  writes nothing to our tables — only `cancelAtPeriodEnd`, read live from
+   *  Stripe, changes), so without this flag the badge kept reading plain
+   *  "Active" for a subscription that is already winding down. */
+  cancelAtPeriodEnd: boolean;
   currentPlanSlug: string | null;
   usageRows: BillingUsageRow[];
   plans: BillingPlanCard[];

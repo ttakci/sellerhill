@@ -78,13 +78,22 @@ export const InvoiceHistoryCard = (): React.ReactElement => {
     void refetch();
   }, [refetch]);
 
+  // `isError` reflects only the CURRENT page's fetch — a failed "Show more"
+  // after page one already rendered must not blank the whole card. Only a
+  // failure with NOTHING accumulated yet takes over the card; a failure with
+  // rows already on screen degrades to an inline retry row instead (see
+  // `hasLoadMoreError` below), and the accumulated rows stay exactly as they
+  // were.
+  const hasAccumulated = accumulated.length > 0;
+
   return (
     <View
       invoices={accumulated}
-      isLoading={isFetching && accumulated.length === 0}
-      isError={isError}
+      isLoading={isFetching && !hasAccumulated}
+      isError={isError && !hasAccumulated}
+      hasLoadMoreError={isError && hasAccumulated}
       hasMore={Boolean(data?.hasMore)}
-      isLoadingMore={isFetching && accumulated.length > 0}
+      isLoadingMore={isFetching && hasAccumulated}
       locale={localeCfg.locale}
       onShowMore={handleShowMore}
       onRetry={handleRetry}

@@ -124,6 +124,7 @@
         "label": "Durum",
         "trialing": "Deneme",
         "active": "Aktif",
+        "cancelling": "İptal ediliyor",
         "past_due": "Vadesi geçmiş",
         "canceled": "İptal edildi",
         "ended": "Sona erdi"
@@ -184,6 +185,7 @@
       "errorDescription": "Fatura geçmişiniz yüklenirken bir sorun oluştu.",
       "retry": "Tekrar dene",
       "showMore": "Daha fazla göster",
+      "showMoreError": "Daha fazla fatura yüklenemedi.",
       "statusLabel": {
         "paid": "Ödendi",
         "open": "Açık",

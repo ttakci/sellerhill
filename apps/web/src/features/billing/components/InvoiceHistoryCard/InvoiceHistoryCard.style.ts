@@ -26,3 +26,13 @@ export const MoreRow = styled.div`
   justify-content: center;
   margin-top: ${tkn('spacing.md')};
 `;
+
+/** The inline load-more-failed notice stretches to the row's full width
+ *  (matches `BillingPage.style.ts`'s `NoticeRow` pattern) — the plain "Show
+ *  more" button beside it in `MoreRow` stays a centered, content-sized pill. */
+export const LoadMoreErrorRow = styled(MoreRow)`
+  & > * {
+    flex: 1;
+    width: 100%;
+  }
+`;

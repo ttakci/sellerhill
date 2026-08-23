@@ -31,8 +31,27 @@ import type {
   BillingUsageCellViewProps,
 } from './BillingPage.types';
 
-/** Map a subscription status to a Badge variant. Pure, no hook deps. */
-function statusBadgeVariant(status: BillingSubscriptionStatus): 'success' | 'warning' | 'neutral' {
+/**
+ * Map a subscription status to a Badge variant. Pure, no hook deps.
+ *
+ * `cancelAtPeriodEnd` overrides an otherwise-'success' status to 'warning' —
+ * `status` itself stays `active`/`trialing` in our tables right up until
+ * Stripe's period actually ends (a Billing-Portal cancellation is read live
+ * via `cancelAtPeriodEnd`, not written to our tables — see
+ * `BillingDetailsDto.cancelAtPeriodEnd`), so without this override the badge
+ * kept reading plain "Active" for a subscription already winding down, right
+ * beside a meta line that said the opposite.
+ */
+function statusBadgeVariant(
+  status: BillingSubscriptionStatus,
+  cancelAtPeriodEnd: boolean,
+): 'success' | 'warning' | 'neutral' {
+  if (
+    cancelAtPeriodEnd &&
+    (status === BillingSubscriptionStatus.ACTIVE || status === BillingSubscriptionStatus.TRIALING)
+  ) {
+    return 'warning';
+  }
   switch (status) {
     case BillingSubscriptionStatus.ACTIVE:
     case BillingSubscriptionStatus.TRIALING:
@@ -165,6 +184,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   enforcementEnabled,
   providerUnconfigured,
   subscriptionStatus,
+  cancelAtPeriodEnd,
   currentPlanSlug,
   usageRows,
   plans,
@@ -283,8 +303,18 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           // instead of the corner a status badge conventionally occupies (see
           // the listing-detail hero card's own StatusBadgeSlot).
           subscriptionStatus ? (
-            <Badge variant={statusBadgeVariant(subscriptionStatus)} size="sm" isPill>
-              {t(`billing:billing.subscription.status.${subscriptionStatus}`)}
+            <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" isPill>
+              {/*
+                Same override as the variant above: a status that is
+                technically still 'active'/'trialing' in our own tables reads
+                as "Cancelling" once Stripe has the period end scheduled,
+                instead of contradicting the warning line right below it.
+              */}
+              {cancelAtPeriodEnd &&
+              (subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
+                subscriptionStatus === BillingSubscriptionStatus.TRIALING)
+                ? t('billing:billing.subscription.status.cancelling')
+                : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
             </Badge>
           ) : undefined
         }

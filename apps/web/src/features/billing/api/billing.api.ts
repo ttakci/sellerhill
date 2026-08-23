@@ -144,12 +144,18 @@ export const billingApi = baseApi.injectEndpoints({
 
     /**
      * Paginated invoice history. `startingAfter` is the cursor from a
-     * previous page's `nextCursor` — omit for the first page.
+     * previous page's `nextCursor` — omit for the first page. `limit` is
+     * optional and forwarded as-is when the caller supplies one; omitted
+     * entirely otherwise so the server's own default page size governs
+     * (existing call sites keep working unchanged).
      */
-    getBillingInvoices: builder.query<BillingInvoiceListDto, { startingAfter?: string } | void>({
+    getBillingInvoices: builder.query<BillingInvoiceListDto, { startingAfter?: string; limit?: number } | void>({
       query: (args) => ({
         url: '/billing/invoices',
-        params: args?.startingAfter ? { startingAfter: args.startingAfter } : undefined,
+        params: {
+          ...(args?.startingAfter ? { startingAfter: args.startingAfter } : undefined),
+          ...(typeof args?.limit === 'number' ? { limit: args.limit } : undefined),
+        },
       }),
       providesTags: [{ type: 'Billing', id: 'INVOICES' }],
     }),

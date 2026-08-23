@@ -124,6 +124,7 @@
         "label": "Status",
         "trialing": "Trial",
         "active": "Active",
+        "cancelling": "Cancelling",
         "past_due": "Past due",
         "canceled": "Canceled",
         "ended": "Ended"
@@ -184,6 +185,7 @@
       "errorDescription": "Something went wrong while loading your invoice history.",
       "retry": "Try again",
       "showMore": "Show more",
+      "showMoreError": "Couldn't load more invoices.",
       "statusLabel": {
         "paid": "Paid",
         "open": "Open",
