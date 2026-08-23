@@ -13,7 +13,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   ebayOrderId,
   status,
   statusLabel,
-  statsBadge,
+  statsBadges,
   meta,
   stats,
   onClick,
@@ -72,11 +72,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </S.HeaderBlock>
 
         <S.StatsGrid>
-          {statsBadge && (
+          {statsBadges && statsBadges.length > 0 && (
             <S.StatsBadge>
-              <Badge variant={statsBadge.variant ?? 'warning'} size="xs">
-                {statsBadge.label}
-              </Badge>
+              {statsBadges.map((badge) => (
+                <Badge key={badge.label} variant={badge.variant ?? 'warning'} size="xs">
+                  {badge.label}
+                </Badge>
+              ))}
             </S.StatsBadge>
           )}
           {stats.map((stat) => (

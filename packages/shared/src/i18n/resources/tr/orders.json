@@ -20,12 +20,14 @@
       "loadingSubtitle": "En güncel eBay siparişleriniz getiriliyor.",
       "filtersTitle": "Filtrelere uyan sipariş yok",
       "filtersSubtitle": "Tarih aralığını, durumu veya mağazayı genişletmeyi deneyin.",
+      "filtersAction": "Filtreleri temizle",
       "emptyTitle": "Henüz sipariş yok",
       "emptySubtitle": "eBay senkronizasyonu çalıştığında siparişler burada otomatik görünür."
     },
     "filters": {
       "allStatuses": "Tüm durumlar",
       "allStores": "Tüm mağazalar",
+      "allTrackingStates": "Tüm takip durumları",
       "clearAll": "Temizle",
       "resultCount": "{{count}} sonuç"
     },
@@ -86,6 +88,10 @@
         "notAutomatedNotice": "Bu sipariş için otomatik sipariş kapalı.",
         "attemptedAt": "Son deneme"
       }
+    },
+    "tracking": {
+      "tracked": "SellerHill tarafından takip ediliyor",
+      "untracked": "Takip edilmiyor"
     },
     "autoFulfill": {
       "column": "Otomatik Sipariş",

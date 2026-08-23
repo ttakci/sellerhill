@@ -31,7 +31,8 @@ export interface OrderCardProps {
   ebayOrderId: string;
   status: OrderStatus;
   statusLabel: string;
-  statsBadge?: OrderCardStatBadge;
+  /** Chips shown above the stats row (estimated profit, untracked, …) — a card can carry more than one at once. */
+  statsBadges?: OrderCardStatBadge[];
   /** Labeled rows under title (order #, buyer, qty, ASIN, …) */
   meta: OrderCardMetaItem[];
   /** Bottom strip: sale / cost / profit (or similar) */

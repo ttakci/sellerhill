@@ -289,6 +289,16 @@ export interface OrderFiltersDto {
    * and left "which orders were actually bought on Amazon?" unanswerable.
    */
   fulfillmentState?: OrderFulfillmentState;
+  /**
+   * Filter by whether the order matched a SellerHill listing (`listing_id`).
+   * An unmatched order — e.g. a seller migrating from another tool, whose
+   * eBay item was never imported here — is never priced/stocked/auto-ordered
+   * by this platform; `cost_capture_status` stays `untracked` forever. This
+   * is independent of `fulfillmentState`: an order CAN have a matched listing
+   * and still report `NOT_AUTOMATED` (auto-fulfill simply off/pending), so
+   * `fulfillmentState` alone cannot answer "is this even one of ours".
+   */
+  isTracked?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

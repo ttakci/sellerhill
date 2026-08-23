@@ -34,6 +34,7 @@ export class OrdersController {
     @Query('dateTo') dateTo?: string,
     @Query('autoFulfillNeedsAttention') autoFulfillNeedsAttention?: string,
     @Query('fulfillmentState') fulfillmentState?: string,
+    @Query('tracked') tracked?: string,
     @Query('sortBy') sortBy?: string,
     @Query('sortOrder') sortOrder?: 'asc' | 'desc'
   ): Promise<{ orders: OrderDto[]; total: number }> {
@@ -43,6 +44,8 @@ export class OrdersController {
     const isKnownState = Object.values(OrderFulfillmentState).includes(
       fulfillmentState as OrderFulfillmentState
     );
+    // Tri-state: 'true'/'false' → boolean, anything else (incl. absent) → no filter.
+    const isTracked = tracked === 'true' ? true : tracked === 'false' ? false : undefined;
     const filters: OrderFiltersDto = {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -56,6 +59,7 @@ export class OrdersController {
       fulfillmentState: isKnownState
         ? (fulfillmentState as OrderFulfillmentState)
         : undefined,
+      isTracked,
       sortBy,
       sortOrder,
     };

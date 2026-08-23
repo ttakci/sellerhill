@@ -183,6 +183,11 @@ export const StatsBadge = styled.div`
   top: ${tkn('spacing.xs')};
   right: ${tkn('spacing.xs')};
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  flex-wrap: wrap;
+  justify-content: flex-end;
 `;
 
 export const StatCell = styled.div`

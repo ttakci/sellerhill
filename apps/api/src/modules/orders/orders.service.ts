@@ -176,6 +176,14 @@ export class OrdersService {
       paramIndex++;
     }
 
+    if (filters?.isTracked !== undefined) {
+      // Whether the order matched a SellerHill listing at all — independent of
+      // `fulfillmentState`, which only describes automation on an order this
+      // platform already recognizes. `listing_id IS NULL` is exactly the
+      // condition `recomputeProfit` uses to set `cost_capture_status = 'untracked'`.
+      conditions.push(`o.listing_id IS ${filters.isTracked ? 'NOT NULL' : 'NULL'}`);
+    }
+
     const whereClause = conditions.join(' AND ');
     const fromJoin = `
       FROM orders o

@@ -20,12 +20,14 @@
       "loadingSubtitle": "Fetching your latest eBay orders.",
       "filtersTitle": "No orders match your filters",
       "filtersSubtitle": "Try widening the date range, status or store.",
+      "filtersAction": "Clear filters",
       "emptyTitle": "No orders yet",
       "emptySubtitle": "Orders appear here automatically once eBay sync runs."
     },
     "filters": {
       "allStatuses": "All statuses",
       "allStores": "All stores",
+      "allTrackingStates": "All tracking states",
       "clearAll": "Clear all",
       "resultCount": "{{count}} results"
     },
@@ -86,6 +88,10 @@
         "notAutomatedNotice": "Automatic ordering is off for this order.",
         "attemptedAt": "Last attempt"
       }
+    },
+    "tracking": {
+      "tracked": "Tracked by SellerHill",
+      "untracked": "Not tracked"
     },
     "autoFulfill": {
       "column": "Auto-Fulfill",
