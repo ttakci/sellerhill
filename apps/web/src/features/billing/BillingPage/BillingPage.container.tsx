@@ -53,8 +53,23 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
  * switch), so it must never be ambiguous about the year — `formatDate`'s own
  * default is day + month only. Shared so every call site here renders the
  * same shape as `currentPeriodEndDisplay` below.
+ *
+ * `timeZone: 'UTC'` is load-bearing, not cosmetic: every value passed through
+ * this options object is a Stripe timestamp (`currentPeriodEnd`, `nextChargeAt`,
+ * `cancelAt`, a schedule's `effectiveAt`), and Stripe's own hosted portal
+ * renders the calendar date it assigned at creation, not the viewer's local
+ * day. Without an explicit `timeZone`, `Intl.DateTimeFormat` falls back to the
+ * browser's local timezone, so a Stripe event stamped close to UTC midnight
+ * rolled onto the next (or previous) local day here while Stripe's own page
+ * kept showing the UTC date — observed live for `InvoiceHistoryCard`'s
+ * `issuedAt` column/card, which carries the identical fix for the same reason.
  */
-const BILLING_DATE_OPTIONS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+const BILLING_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+};
 
 /** Format a micros price into a display string. Free → the localized "Free" label. */
 function formatPriceMicros(micros: number, currency: string, locale: string, freeLabel: string): string {
