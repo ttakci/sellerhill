@@ -304,3 +304,21 @@ carry an i18n key; raw provider text stays in the log, same audience split as
    several are attached.
 8. Killing Stripe connectivity degrades only the live sections; plan and quota
    still render.
+9. **A downgraded subscription still collects sales tax.** `scheduleDowngrade`
+   (`billing-provider.ts`) calls `subscriptionSchedules.create({
+   from_subscription })` and never sets `default_settings.automatic_tax`
+   itself — and it could not be established from the Stripe SDK's type
+   definitions whether `from_subscription` seeds that field from the source
+   subscription. `automatic_tax` is governed by the schedule's
+   `default_settings`, not by the per-phase fields the downgrade code copies
+   (price, quantity, start/end date), so the phase reconstruction in
+   `scheduleDowngrade` does not drop it — but if `create({ from_subscription
+   })` itself never seeds `default_settings`, a downgraded subscription could
+   stop collecting tax silently, with no error anywhere in this flow. The
+   Wyoming registration went live the same day as this design (2026-08-22),
+   so this is a compliance exposure, not a cosmetic gap: confirm against a
+   live test-mode subscription — create one with tax enabled, downgrade it,
+   and read `subscriptionSchedules.retrieve(id).default_settings` — before
+   `BILLING_ENFORCEMENT_ENABLED` is switched on. If it is not seeded, pass
+   `default_settings: { automatic_tax: { enabled: true } }` explicitly on
+   both the `create` and the `update` call in `scheduleDowngrade`.
