@@ -70,8 +70,13 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
     : t('listings.overview.subtitle', { count: resultCount });
 
   const isEmpty = !isInitialLoading && listings.length === 0;
-  /** True empty catalog/drafts or filter miss — chrome (filters/toolbar) is noise next to EmptyState. */
-  const showListChrome = !isEmpty;
+  /**
+   * A true empty catalog/drafts view (no filters, nothing to filter) hides the
+   * toolbar as noise next to EmptyState. A filtered-to-zero result must keep it —
+   * otherwise a search/filter that matches nothing strands the user on a single
+   * "clear all" button with no way to see or adjust what they typed.
+   */
+  const showListChrome = !isEmpty || hasActiveFilters;
 
   const renderGridCard = (listing: ListingDto) => {
     const card = toListingCardProps(listing, t);
