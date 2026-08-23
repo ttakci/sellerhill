@@ -189,8 +189,17 @@ export const BillingPage: React.FC = () => {
 
   // A trialing seller has no upcoming invoice; the existing trial-end meta line
   // stands in for this, so render nothing rather than an em dash beside a label.
+  // A subscription set to cancel at period end also has no REAL next charge —
+  // Stripe stops billing it — so that case is excluded here too, in favor of
+  // cancelsAtPeriodEndLine below. Without this exclusion a cancelled
+  // subscription still showed "Next payment: <date> · <amount>" for a charge
+  // that was never going to happen.
   const nextChargeLine = useMemo(() => {
-    if (typeof details?.nextChargeAmountMicros !== 'number' || !details.nextChargeAt) {
+    if (
+      typeof details?.nextChargeAmountMicros !== 'number' ||
+      !details.nextChargeAt ||
+      details.cancelAtPeriodEnd
+    ) {
       return null;
     }
     return t('billing:billing.subscription.nextCharge', {
@@ -203,9 +212,32 @@ export const BillingPage: React.FC = () => {
     });
   }, [details, t, localeCfg.locale]);
 
+  // Read live from Stripe on every load (see BillingDetailsDto.cancelAtPeriodEnd)
+  // — a seller who cancelled via the Billing Portal wrote nothing to our
+  // tables, so without this the plan card kept showing them as a normal
+  // renewing subscriber (active badge, upcoming charge) right up until the
+  // period actually ended.
+  const cancelsAtPeriodEndLine = useMemo(() => {
+    if (!details?.cancelAtPeriodEnd || !details.cancelAt) {
+      return null;
+    }
+    return t('billing:billing.subscription.cancelsAtPeriodEnd', {
+      date: formatDate(details.cancelAt, localeCfg.locale),
+    });
+  }, [details, t, localeCfg.locale]);
+
   const scheduledChangeLine = useMemo(() => {
     if (!details?.scheduledChange) {
       return null;
+    }
+    // planSlug is null when the backend could not resolve the schedule's
+    // Stripe price back to one of our plans — the date and the Cancel action
+    // are still real, only the name is unavailable, so this still renders a
+    // line (with a different copy) rather than hiding the pending change.
+    if (!details.scheduledChange.planSlug) {
+      return t('billing:billing.subscription.scheduledChangeUnknownPlan', {
+        date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale),
+      });
     }
     return t('billing:billing.subscription.scheduledChange', {
       plan: t(`billing:billing.plans.${details.scheduledChange.planSlug}.name`),
@@ -583,6 +615,7 @@ export const BillingPage: React.FC = () => {
       onBuyAddon={handleBuyAddon}
       onManage={handleManage}
       nextChargeLine={nextChargeLine}
+      cancelsAtPeriodEndLine={cancelsAtPeriodEndLine}
       scheduledChangeLine={scheduledChangeLine}
       onCancelScheduledChange={handleCancelScheduledChange}
       isCancellingChange={isCancellingChange}

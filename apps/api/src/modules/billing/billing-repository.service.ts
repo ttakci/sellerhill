@@ -27,7 +27,7 @@ import {
 } from '@repo/shared';
 import { PoolClient } from 'pg';
 
-import { DatabaseService } from '../../common/database/database.service';
+import { DatabaseService, type QueryParam } from '../../common/database/database.service';
 
 import {
   expandPlan,
@@ -165,28 +165,37 @@ export class BillingRepositoryService {
     return rows.map(mapPlanRow);
   }
 
-  async findPricesForPlans(planIds: string[]): Promise<BillingPlanPriceDto[]> {
+  async findPricesForPlans(
+    planIds: string[],
+    client?: PoolClient,
+  ): Promise<BillingPlanPriceDto[]> {
     if (planIds.length === 0) {return [];}
-    const rows = await this.databaseService.query<PriceEntity>(
+    const rows = await this.run<PriceEntity>(
       `SELECT * FROM billing_plan_prices WHERE plan_id = ANY($1::uuid[]) ORDER BY effective_from DESC`,
-      [planIds as unknown as string],
+      [planIds],
+      client,
     );
     return rows.map(mapPriceRow);
   }
 
-  async findLimitsForPlans(planIds: string[]): Promise<BillingPlanLimitDto[]> {
+  async findLimitsForPlans(
+    planIds: string[],
+    client?: PoolClient,
+  ): Promise<BillingPlanLimitDto[]> {
     if (planIds.length === 0) {return [];}
-    const rows = await this.databaseService.query<LimitEntity>(
+    const rows = await this.run<LimitEntity>(
       `SELECT * FROM billing_plan_limits WHERE plan_id = ANY($1::uuid[])`,
-      [planIds as unknown as string],
+      [planIds],
+      client,
     );
     return rows.map(mapLimitRow);
   }
 
-  async findPlanById(id: string): Promise<BillingPlanDto | null> {
-    const rows = await this.databaseService.query<PlanEntity>(
+  async findPlanById(id: string, client?: PoolClient): Promise<BillingPlanDto | null> {
+    const rows = await this.run<PlanEntity>(
       `SELECT * FROM billing_plans WHERE id = $1`,
       [id],
+      client,
     );
     return rows.length > 0 ? mapPlanRow(rows[0]) : null;
   }
@@ -223,12 +232,15 @@ export class BillingRepositoryService {
     return plans.map((p) => expandPlan(p, prices, limits));
   }
 
-  async loadPlanWithPricing(planId: string): Promise<BillingPlanWithPricingDto | null> {
-    const plan = await this.findPlanById(planId);
+  async loadPlanWithPricing(
+    planId: string,
+    client?: PoolClient,
+  ): Promise<BillingPlanWithPricingDto | null> {
+    const plan = await this.findPlanById(planId, client);
     if (!plan) {return null;}
     const [prices, limits] = await Promise.all([
-      this.findPricesForPlans([planId]),
-      this.findLimitsForPlans([planId]),
+      this.findPricesForPlans([planId], client),
+      this.findLimitsForPlans([planId], client),
     ]);
     return expandPlan(plan, prices, limits);
   }
@@ -237,10 +249,11 @@ export class BillingRepositoryService {
   // Customer + subscription reads (summary)
   // -------------------------------------------------------------------------
 
-  async findCustomerByUserId(userId: string): Promise<BillingCustomerDto | null> {
-    const rows = await this.databaseService.query<CustomerEntity>(
+  async findCustomerByUserId(userId: string, client?: PoolClient): Promise<BillingCustomerDto | null> {
+    const rows = await this.run<CustomerEntity>(
       `SELECT * FROM billing_customers WHERE user_id = $1`,
       [userId],
+      client,
     );
     return rows.length > 0 ? this.mapCustomer(rows[0]) : null;
   }
@@ -250,8 +263,11 @@ export class BillingRepositoryService {
    * contains now, preferring active/trialing/past_due over canceled/ended).
    * Returns null when the user has no subscription at all.
    */
-  async findCurrentSubscription(userId: string): Promise<BillingSubscriptionDto | null> {
-    const rows = await this.databaseService.query<SubscriptionEntity>(
+  async findCurrentSubscription(
+    userId: string,
+    client?: PoolClient,
+  ): Promise<BillingSubscriptionDto | null> {
+    const rows = await this.run<SubscriptionEntity>(
       `SELECT s.* FROM billing_subscriptions s
        JOIN billing_customers c ON c.id = s.customer_id
        WHERE c.user_id = $1
@@ -270,6 +286,7 @@ export class BillingRepositoryService {
          END ASC,
          s.current_period_end DESC`,
       [userId],
+      client,
     );
     return rows.length > 0 ? this.mapSubscription(rows[0]) : null;
   }
@@ -732,12 +749,17 @@ export class BillingRepositoryService {
    * success for the exact price we asked for: the new plan IS the truth at this
    * point, not a prediction.
    */
-  async updateSubscriptionPlan(subscriptionId: string, planId: string): Promise<void> {
-    await this.databaseService.query(
+  async updateSubscriptionPlan(
+    subscriptionId: string,
+    planId: string,
+    client?: PoolClient,
+  ): Promise<void> {
+    await this.run(
       `UPDATE billing_subscriptions
           SET plan_id = $2, updated_at = NOW()
         WHERE id = $1`,
       [subscriptionId, planId],
+      client,
     );
   }
 
@@ -868,15 +890,20 @@ export class BillingRepositoryService {
     });
   }
 
-  async ensureLocalCustomer(userId: string, billingEmail: string | null): Promise<BillingCustomerDto> {
-    const existing = await this.findCustomerByUserId(userId);
+  async ensureLocalCustomer(
+    userId: string,
+    billingEmail: string | null,
+    client?: PoolClient,
+  ): Promise<BillingCustomerDto> {
+    const existing = await this.findCustomerByUserId(userId, client);
     if (existing) {return existing;}
-    const rows = await this.databaseService.query<CustomerEntity>(
+    const rows = await this.run<CustomerEntity>(
       `INSERT INTO billing_customers (user_id, provider, billing_email)
        VALUES ($1, 'local', $2)
        ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
        RETURNING *`,
       [userId, billingEmail],
+      client,
     );
     return this.mapCustomer(rows[0]);
   }
@@ -893,12 +920,18 @@ export class BillingRepositoryService {
    * upsert/conflict handling needed. Idempotent: re-running with the same
    * values is a no-op write.
    */
-  async linkProviderCustomer(userId: string, provider: string, providerCustomerId: string): Promise<void> {
-    await this.databaseService.query(
+  async linkProviderCustomer(
+    userId: string,
+    provider: string,
+    providerCustomerId: string,
+    client?: PoolClient,
+  ): Promise<void> {
+    await this.run(
       `UPDATE billing_customers
        SET provider = $2, provider_customer_id = $3, updated_at = NOW()
        WHERE user_id = $1`,
       [userId, provider, providerCustomerId],
+      client,
     );
   }
 
@@ -908,28 +941,41 @@ export class BillingRepositoryService {
    * whether it commits or the callback throws — `pg_advisory_xact_lock`
    * cannot be left held by a crashed process).
    *
-   * Used by BillingService.createCheckout to serialize Stripe-customer
-   * resolution: two concurrent checkouts for a brand-new user (no linked
-   * provider customer yet) must not each read "no customer" and each mint a
-   * separate Stripe customer — billing_customers.user_id is UNIQUE, so
-   * whichever linkProviderCustomer call lands second silently overwrites the
-   * first's link, orphaning the first (now-unreferenced) Stripe customer, and
-   * any subscription created under it, from all local tracking. This is the
-   * same class of bug subscription-integrity.guard.spec.ts exists to prevent.
+   * Used by BillingService.createCheckout/createAddonCheckout to serialize
+   * Stripe-customer resolution, and by changePlan to serialize the whole
+   * resolve-decide-mutate sequence: two concurrent checkouts for a brand-new
+   * user (no linked provider customer yet) must not each read "no customer"
+   * and each mint a separate Stripe customer — billing_customers.user_id is
+   * UNIQUE, so whichever linkProviderCustomer call lands second silently
+   * overwrites the first's link, orphaning the first (now-unreferenced)
+   * Stripe customer, and any subscription created under it, from all local
+   * tracking. This is the same class of bug
+   * subscription-integrity.guard.spec.ts exists to prevent.
    *
    * Same shape as reserveSlotsBulk (DatabaseService.transaction +
    * pg_advisory_xact_lock), a different key space (billingCustomerLockKey,
-   * not advisoryLockKey — see that function's doc for why). `fn` is free to
-   * use the repository's normal pooled queries, including an external call
-   * (Stripe): the lock only needs to be HELD while `fn` runs so a second
-   * caller blocked on the same key waits for it, not to run `fn`'s work on
-   * the same connection that holds the lock.
+   * not advisoryLockKey — see that function's doc for why).
+   *
+   * `fn` receives the LOCKED client and should pass it to every repository
+   * call it makes inside the critical section, rather than letting those
+   * calls fall back to their default pooled connection. `transaction` already
+   * holds one connection from the pool for the advisory lock itself; a
+   * repository call inside `fn` that ignores this client checks out a SECOND
+   * connection from the same pool for the duration of the lock — at high
+   * concurrency (many users each holding their own lock + a second borrowed
+   * connection) that can starve the pool for unrelated requests. `fn` is
+   * still free to make an external call (Stripe) in between — the lock only
+   * needs to stay held while `fn` runs, whatever mix of DB and network work
+   * that involves.
    */
-  async withUserBillingLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+  async withUserBillingLock<T>(
+    userId: string,
+    fn: (client: PoolClient) => Promise<T>,
+  ): Promise<T> {
     return this.databaseService.transaction(async (client) => {
       const { key1, key2 } = billingCustomerLockKey(userId);
       await client.query('SELECT pg_advisory_xact_lock($1, $2)', [key1, key2]);
-      return fn();
+      return fn(client);
     });
   }
 
@@ -1184,10 +1230,19 @@ export class BillingRepositoryService {
     return Number(rows[0].limit_value);
   }
 
-  /** Run a query either on the pool or on a provided transaction client. */
+  /**
+   * Run a query either on the pool or on a provided transaction client.
+   *
+   * `params` takes the same shape `DatabaseService.query` does (scalars OR
+   * arrays — an array param is how e.g. `findPricesForPlans` sends
+   * `ANY($1::uuid[])` in one round trip), not the narrower scalar-only type
+   * this used to declare, which happened to be enough for every call site
+   * that existed before methods like `findPlanById`/`findPricesForPlans`
+   * needed to take a client too (see `withUserBillingLock`'s doc).
+   */
   private async run<T>(
     text: string,
-    params: (string | number | boolean | null | undefined)[],
+    params: QueryParam[],
     client?: PoolClient,
   ): Promise<T[]> {
     if (client) {

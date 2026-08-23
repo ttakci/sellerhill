@@ -98,10 +98,18 @@ export interface BillingPageComponentProps {
   onBuyAddon: (addonSlug: string) => void;
   onManage: () => void;
   /** "Next payment: {date} · {amount}", already localized — null when there is
-   *  no upcoming Stripe invoice (a trialing seller, or no subscription yet).
-   *  The existing trial-end meta line covers that case, so this renders
-   *  nothing rather than an em dash beside a label. */
+   *  no upcoming Stripe invoice (a trialing seller, or no subscription yet),
+   *  OR when the subscription is set to cancel at period end (there is no
+   *  real next payment to show — see `cancelsAtPeriodEndLine`). The existing
+   *  trial-end meta line covers the trial case, so this renders nothing
+   *  rather than an em dash beside a label. */
   nextChargeLine: string | null;
+  /** "Cancels on {date} — no further charges after this period", already
+   *  localized — null unless the seller cancelled via the Stripe Billing
+   *  Portal (`cancel_at_period_end`). Read live from Stripe on every load, so
+   *  this reflects a portal cancellation immediately, with nothing written to
+   *  our own tables. */
+  cancelsAtPeriodEndLine: string | null;
   /** "Switches to {plan} on {date}" for a downgrade scheduled at period end,
    *  already localized — null when nothing is scheduled. */
   scheduledChangeLine: string | null;

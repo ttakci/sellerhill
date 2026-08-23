@@ -182,6 +182,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   addonSlugInFlight,
   onBuyAddon,
   nextChargeLine,
+  cancelsAtPeriodEndLine,
   scheduledChangeLine,
   onCancelScheduledChange,
   isCancellingChange,
@@ -310,6 +311,11 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             {nextChargeLine ? (
               <Text variant="body-sm" color="text.secondary" numeric>
                 {nextChargeLine}
+              </Text>
+            ) : null}
+            {cancelsAtPeriodEndLine ? (
+              <Text variant="body-sm" weight="semibold" color="semantic.warning" numeric>
+                {cancelsAtPeriodEndLine}
               </Text>
             ) : null}
           </S.PlanNameStack>

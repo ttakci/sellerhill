@@ -14,6 +14,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { BillingInterval, PlanChangeDirection, type BillingInvoiceDto } from '@repo/shared';
+import type { PoolClient } from 'pg';
 import Stripe from 'stripe';
 
 import type { BillingConfig } from './billing-helpers';
@@ -68,8 +69,15 @@ export interface BillingProviderPort {
    * mint a SEPARATE Stripe customer for the same user. By the time
    * `createCheckout` below reaches its own call, the customer is already
    * resolved and linked, so that call is a fast, no-Stripe-call re-read.
+   *
+   * `client` is the connection `withUserBillingLock` is already holding for
+   * the advisory lock — pass it through so the DB reads/writes this method
+   * does (`findCustomerByUserId`, `linkProviderCustomer`) reuse that
+   * connection instead of checking out a second one from the pool for the
+   * duration of the lock. Omit it for a call made outside a lock (there is
+   * none today, but the DB layer must not assume one).
    */
-  ensureCustomer(userId: string, customerEmail: string): Promise<string>;
+  ensureCustomer(userId: string, customerEmail: string, client?: PoolClient): Promise<string>;
   /** Create a customer portal session. Throws when not configured or when the
    *  user has no Stripe customer id. */
   createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto>;
@@ -123,8 +131,10 @@ export interface BillingProviderPort {
   ): Promise<{ amountDueMicros: number; currency: string }>;
   /**
    * Live billing detail for the /billing/details endpoint: the DEFAULT
-   * payment method, the next invoice's amount/currency/date, and any pending
-   * downgrade schedule. All Stripe-side — nothing here is stored locally.
+   * payment method, the next invoice's amount/currency/date, any pending
+   * downgrade schedule, and whether the subscription is set to cancel at
+   * period end (the Billing Portal's own cancel action, which writes nothing
+   * to our tables). All Stripe-side — nothing here is stored locally.
    */
   getBillingDetails(providerCustomerId: string): Promise<ProviderBillingDetails>;
   /**
@@ -148,6 +158,18 @@ export interface ProviderBillingDetails {
   nextChargeAt: string | null;
   scheduledPriceId: string | null;
   scheduledAt: string | null;
+  /**
+   * True when the Stripe Billing Portal's default "cancel" action has been
+   * used on this subscription (`cancel_at_period_end`). Read live from
+   * Stripe, same as everything else here — cancelling from the Portal writes
+   * nothing to our tables, so without this field a cancelled-but-not-yet-
+   * expired subscription looked identical to a normal renewing one: badged
+   * active, with a next-charge amount for a charge that will never happen.
+   */
+  cancelAtPeriodEnd: boolean;
+  /** When `cancelAtPeriodEnd` is true, the date access ends (Stripe's
+   *  `cancel_at`, normally equal to the current period end). Null otherwise. */
+  cancelAt: string | null;
 }
 
 /** Everything a plan change needs, upgrade or downgrade. */
@@ -196,6 +218,8 @@ const EMPTY_PROVIDER_BILLING_DETAILS: ProviderBillingDetails = {
   nextChargeAt: null,
   scheduledPriceId: null,
   scheduledAt: null,
+  cancelAtPeriodEnd: false,
+  cancelAt: null,
 };
 
 /**
@@ -613,11 +637,24 @@ export class StripeBillingProvider implements BillingProviderPort {
         // failure. Leaving these null makes the FE render an em dash.
       }
 
-      const subs = await stripe.subscriptions.list({ customer: providerCustomerId, limit: 1 });
+      // `status` on `subscriptions.list` takes ONE value, not a set, so it
+      // cannot express LIVE_SUBSCRIPTION_STATUSES directly — fetch a small
+      // page (newest first, Stripe's default list order) and pick the first
+      // one that is actually live, rather than trusting `limit: 1` with no
+      // status filter at all. Unfiltered, that previously returned whatever
+      // subscription happened to be newest — including a cancelled or
+      // otherwise dead one — and reported ITS payment method/schedule as the
+      // seller's current billing detail.
+      const subsPage = await stripe.subscriptions.list({
+        customer: providerCustomerId,
+        status: 'all',
+        limit: 10,
+      });
+      const liveSub = subsPage.data.find((sub) =>
+        StripeBillingProvider.LIVE_SUBSCRIPTION_STATUSES.has(sub.status),
+      );
       const scheduleId =
-        typeof subs.data[0]?.schedule === 'string'
-          ? subs.data[0].schedule
-          : (subs.data[0]?.schedule?.id ?? null);
+        typeof liveSub?.schedule === 'string' ? liveSub.schedule : (liveSub?.schedule?.id ?? null);
       let scheduledPriceId: string | null = null;
       let scheduledAt: string | null = null;
       if (scheduleId) {
@@ -655,6 +692,12 @@ export class StripeBillingProvider implements BillingProviderPort {
         nextChargeAt,
         scheduledPriceId,
         scheduledAt,
+        // Same subscription object the schedule lookup above already fetched
+        // — Stripe's Billing Portal cancel action sets these two fields
+        // directly on the subscription (no separate event/object), so no
+        // extra call is needed to read them.
+        cancelAtPeriodEnd: Boolean(liveSub?.cancel_at_period_end),
+        cancelAt: liveSub?.cancel_at ? new Date(liveSub.cancel_at * 1000).toISOString() : null,
       };
     } catch (error) {
       // BillingService.getDetails fails this whole request soft to an
@@ -742,10 +785,16 @@ export class StripeBillingProvider implements BillingProviderPort {
    * acquired by the caller, so a call from createCheckout/createAddonCheckout
    * below (already inside, or after, the service's lock has resolved things)
    * is a correct, ordinary re-read.
+   *
+   * `client` (see the interface doc) is threaded straight through to both
+   * repository calls, so the read-then-maybe-write here runs on the SAME
+   * connection `withUserBillingLock` is holding for the advisory lock,
+   * instead of each borrowing its own from the pool for the duration of the
+   * lock.
    */
-  async ensureCustomer(userId: string, customerEmail: string): Promise<string> {
+  async ensureCustomer(userId: string, customerEmail: string, client?: PoolClient): Promise<string> {
     const stripe = this.getClient();
-    const existing = await this.repository.findCustomerByUserId(userId);
+    const existing = await this.repository.findCustomerByUserId(userId, client);
     if (existing?.provider === BillingProvider.STRIPE && existing.providerCustomerId) {
       return existing.providerCustomerId;
     }
@@ -761,7 +810,7 @@ export class StripeBillingProvider implements BillingProviderPort {
       throw new Error('billing.errors.checkoutFailed');
     }
 
-    await this.repository.linkProviderCustomer(userId, BillingProvider.STRIPE, customer.id);
+    await this.repository.linkProviderCustomer(userId, BillingProvider.STRIPE, customer.id, client);
     return customer.id;
   }
 }

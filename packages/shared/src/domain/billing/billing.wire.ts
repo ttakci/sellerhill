@@ -222,11 +222,12 @@ export interface BillingPlanChangePreviewDto {
   /** Charged immediately for an upgrade; 0 for a downgrade (nothing moves now). */
   amountDueMicros: number;
   currency: string;
-  /** ISO date the change takes effect — now for an upgrade, period end for a
-   *  downgrade. */
+  /** ISO timestamp the change takes effect — now for an upgrade, period end
+   *  for a downgrade. */
   effectiveAt: string;
   /** The recurring amount from the next full period onward. */
   nextInvoiceAmountMicros: number | null;
+  /** ISO timestamp of the next invoice. */
   nextInvoiceAt: string | null;
 }
 
@@ -243,7 +244,17 @@ export interface BillingPaymentMethodDto {
 
 /** A downgrade waiting for the current period to end. */
 export interface BillingScheduledChangeDto {
-  planSlug: string;
+  /**
+   * null when the schedule's next-phase Stripe price could not be resolved
+   * back to one of our plans (e.g. a schedule edited by hand in the Stripe
+   * Dashboard, or a catalog price that has since been retired) — the seller
+   * genuinely does not know which plan they are switching to, but the date
+   * and the ability to cancel the pending change are both still real and
+   * must still be shown. A resolve miss here used to drop this whole object,
+   * which hid a live pending change from the seller AND removed their only
+   * way to cancel it.
+   */
+  planSlug: string | null;
   effectiveAt: string;
 }
 
@@ -262,6 +273,16 @@ export interface BillingDetailsDto {
   nextChargeCurrency: string | null;
   nextChargeAt: string | null;
   scheduledChange: BillingScheduledChangeDto | null;
+  /**
+   * True when the subscription is scheduled to cancel at the end of the
+   * current period — set by the Stripe Billing Portal's own default cancel
+   * action, which writes nothing to our tables. Without this, a seller who
+   * cancelled from the portal still saw their subscription badged active,
+   * with a next-charge amount for a charge that will never happen.
+   */
+  cancelAtPeriodEnd: boolean;
+  /** The date access ends, when `cancelAtPeriodEnd` is true. Null otherwise. */
+  cancelAt: string | null;
 }
 
 /** One invoice as the seller sees it. Amounts are micro-units of `currency`. */

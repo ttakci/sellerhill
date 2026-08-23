@@ -153,7 +153,9 @@
       "portalHint": "Kartınızı güncellemek, fatura indirmek veya iptal etmek için Stripe açılır.",
       "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin.",
       "nextCharge": "Bir sonraki ödeme: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "{{date}} tarihinde iptal edilecek — bu dönemden sonra ücret alınmayacak",
       "scheduledChange": "{{date}} tarihinde {{plan}} paketine geçecek",
+      "scheduledChangeUnknownPlan": "Paketiniz {{date}} tarihinde değişecek",
       "cancelScheduledChange": "Vazgeç",
       "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi."
     },

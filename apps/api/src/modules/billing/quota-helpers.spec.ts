@@ -237,14 +237,20 @@ describe('billingCustomerLockKey', () => {
 
   it('never collides with a quota-reservation lock, whatever key2 hashes to', () => {
     // pg_advisory_xact_lock keys on the (key1, key2) PAIR, so this only needs
-    // key1 to differ from every value LOCK_DISCRIMINATOR can produce (1-3,
-    // plus the unreachable 0 fallback) — it does not matter whether key2
-    // happens to collide with a quota lock's key2 for some other id.
+    // key1 to differ from every value LOCK_DISCRIMINATOR can produce (plus the
+    // unreachable 0 fallback) — it does not matter whether key2 happens to
+    // collide with a quota lock's key2 for some other id.
+    //
+    // Enumerated programmatically over the real enum (Object.values), not
+    // hand-picked members: BillingLimitKey has grown before (AO ->
+    // AO+conversions) and a hand-picked pair silently stops covering a new
+    // member the moment one is added, which is exactly the kind of omission
+    // this guard exists to catch.
     const customerLock = billingCustomerLockKey('any-user');
-    const listingsLock = advisoryLockKey('any-user', BillingLimitKey.LISTINGS_PER_MONTH);
-    const aoLock = advisoryLockKey('any-user', BillingLimitKey.AMAZON_ORDERS_PER_MONTH);
-    expect(customerLock.key1).not.toBe(listingsLock.key1);
-    expect(customerLock.key1).not.toBe(aoLock.key1);
     expect(customerLock.key1).not.toBe(0);
+    for (const kind of Object.values(BillingLimitKey)) {
+      const lock = advisoryLockKey('any-user', kind);
+      expect(customerLock.key1).not.toBe(lock.key1);
+    }
   });
 });

@@ -36,6 +36,7 @@ import {
   type BillingQuotaUsageDto,
   type BillingSubscriptionDto,
 } from '@repo/shared';
+import type { PoolClient } from 'pg';
 
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
@@ -308,11 +309,34 @@ export class BillingService {
     if (!this.provider.isConfigured()) {
       throw new Error('billing.errors.providerNotConfigured');
     }
-    const subscription = await this.repository.findCurrentSubscription(userId);
+    // Serialize the whole resolve-decide-mutate sequence per user, the same
+    // per-user Postgres advisory lock createCheckout/createAddonCheckout use
+    // for customer resolution (BillingRepositoryService.withUserBillingLock).
+    // Without it, two concurrent requests for the same user (two tabs, or a
+    // direct API call) can both read the same starting subscription, both
+    // resolve direction=UPGRADE, and both fire an `always_invoice` +
+    // `error_if_incomplete` Stripe update — two real charges, not a
+    // theoretical race, since an upgrade now bills immediately rather than
+    // merely double-writing a value.
+    await this.repository.withUserBillingLock(userId, (client) =>
+      this.applyPlanChange(userId, planId, interval, client),
+    );
+  }
+
+  /** The locked body of {@link changePlan} — see its own comment for why this
+   *  runs under `withUserBillingLock`. Split out only so the lock wrapper
+   *  above reads as a single, obviously-correct line. */
+  private async applyPlanChange(
+    userId: string,
+    planId: string,
+    interval: BillingInterval,
+    client: PoolClient,
+  ): Promise<void> {
+    const subscription = await this.repository.findCurrentSubscription(userId, client);
     if (!subscription?.providerSubscriptionId) {
       throw new Error('billing.errors.noSubscription');
     }
-    const plan = await this.repository.loadPlanWithPricing(planId);
+    const plan = await this.repository.loadPlanWithPricing(planId, client);
     if (!plan) {
       throw new Error('billing.errors.planNotFound');
     }
@@ -333,7 +357,7 @@ export class BillingService {
     // an upgrade" — the safer default, since it charges now rather than
     // silently deferring.
     const currentPlan = subscription.planId
-      ? await this.repository.loadPlanWithPricing(subscription.planId)
+      ? await this.repository.loadPlanWithPricing(subscription.planId, client)
       : null;
     const direction = resolvePlanChangeDirection(
       currentPlan?.prices[interval]?.amountMicros ?? 0,
@@ -390,7 +414,7 @@ export class BillingService {
     // record as their current (paid-for) plan until the schedule actually
     // fires.
     try {
-      await this.repository.updateSubscriptionPlan(subscription.id, planId);
+      await this.repository.updateSubscriptionPlan(subscription.id, planId, client);
     } catch (err) {
       this.logger.warn(
         `Local plan write failed after Stripe accepted the change for user ${userId}; ` +
@@ -422,6 +446,9 @@ export class BillingService {
     planId: string,
     interval: BillingInterval,
   ): Promise<BillingPlanChangePreviewDto> {
+    if (!this.provider.isConfigured()) {
+      throw new Error('billing.errors.providerNotConfigured');
+    }
     const subscription = await this.repository.findCurrentSubscription(userId);
     if (!subscription?.providerSubscriptionId) {
       throw new Error('billing.errors.noSubscription');
@@ -493,7 +520,7 @@ export class BillingService {
     }
     const priceId = await this.repository.resolveAddonProviderPriceId(addon.id);
 
-    // Same race createCheckout closes above (see its comment on
+    // Same race createCheckout closes below (see its comment on
     // withUserBillingLock): resolve the Stripe customer under the per-user
     // advisory lock and RE-READ inside it, so two concurrent top-up purchases
     // by a brand-new user cannot each independently mint a separate Stripe
@@ -501,12 +528,12 @@ export class BillingService {
     // linkProviderCustomer call landed second would silently overwrite the
     // first's link — orphaning the first (now-unreferenced) Stripe customer,
     // and the purchase made under it, from all local tracking.
-    const providerCustomerId = await this.repository.withUserBillingLock(userId, async () => {
-      const customer = await this.repository.ensureLocalCustomer(userId, email);
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async (client) => {
+      const customer = await this.repository.ensureLocalCustomer(userId, email, client);
       if (customer.providerCustomerId) {
         return customer.providerCustomerId;
       }
-      return this.provider.ensureCustomer(userId, email);
+      return this.provider.ensureCustomer(userId, email, client);
     });
 
     return this.provider.createAddonCheckout({
@@ -598,8 +625,8 @@ export class BillingService {
     // is the same class of bug this task exists to prevent, one step
     // earlier: the duplicate-subscription check below is only trustworthy if
     // the customer id it asks Stripe about is the one true id for this user.
-    const providerCustomerId = await this.repository.withUserBillingLock(userId, async () => {
-      const customer = await this.repository.ensureLocalCustomer(userId, customerEmail);
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async (client) => {
+      const customer = await this.repository.ensureLocalCustomer(userId, customerEmail, client);
       if (customer.providerCustomerId) {
         return customer.providerCustomerId;
       }
@@ -607,7 +634,7 @@ export class BillingService {
       // lock, so a second request blocked on this same lock re-reads the id
       // THIS request just linked (via the branch above) instead of racing to
       // mint its own.
-      return this.provider.ensureCustomer(userId, customerEmail);
+      return this.provider.ensureCustomer(userId, customerEmail, client);
     });
 
     // Ask Stripe itself, not our tables. This is the layer that cannot be
@@ -675,6 +702,8 @@ export class BillingService {
       nextChargeCurrency: null,
       nextChargeAt: null,
       scheduledChange: null,
+      cancelAtPeriodEnd: false,
+      cancelAt: null,
     };
     const customer = await this.repository.findCustomerByUserId(userId);
     if (!customer?.providerCustomerId || !this.provider.isConfigured()) {
@@ -699,10 +728,17 @@ export class BillingService {
         nextChargeAmountMicros: raw.nextChargeAmountMicros,
         nextChargeCurrency: raw.nextChargeCurrency,
         nextChargeAt: raw.nextChargeAt,
-        scheduledChange:
-          scheduledPlan && raw.scheduledAt
-            ? { planSlug: scheduledPlan.slug, effectiveAt: raw.scheduledAt }
-            : null,
+        // Gated on raw.scheduledAt alone, NOT on scheduledPlan resolving —
+        // a resolve miss (e.g. the schedule's price was edited by hand in
+        // Stripe, or the catalog price it points at has since been retired)
+        // must not hide a live pending change from the seller. The date and
+        // the Cancel action are both still real and actionable even when the
+        // plan name is not; only planSlug degrades to null.
+        scheduledChange: raw.scheduledAt
+          ? { planSlug: scheduledPlan?.slug ?? null, effectiveAt: raw.scheduledAt }
+          : null,
+        cancelAtPeriodEnd: raw.cancelAtPeriodEnd,
+        cancelAt: raw.cancelAt,
       };
     } catch (err) {
       this.logger.warn(`Billing details unavailable for ${userId}: ${(err as Error).message}`);

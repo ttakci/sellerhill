@@ -25,10 +25,17 @@
 //     inbox, so the audit trail is complete and dunning/receipt logic can be
 //     added later without changing the transport.
 
+import { Logger } from '@nestjs/common';
 import { BillingInterval, BillingSubscriptionStatus, type BillingSubscriptionDto } from '@repo/shared';
 
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type ParsedStripeEvent } from './billing.types';
+
+// Module-scope logger (not a class member — this file is a set of pure/
+// impure functions, not a NestJS provider) for the one place below that
+// swallows an error rather than propagating or returning it as an `ignored`
+// reason.
+const logger = new Logger('StripeEventApplier');
 
 export interface StripeSubscriptionFields {
   providerSubscriptionId: string;
@@ -218,8 +225,15 @@ export async function applyStripeEvent(
   if (customer.userId) {
     try {
       await repository.endTrialSubscriptionsForUser(customer.userId);
-    } catch {
-      // Intentionally swallowed — see above.
+    } catch (err) {
+      // Non-throwing on purpose — see above — but NOT silent: a systematic
+      // failure here (a bad migration, a revoked DB permission) would
+      // otherwise leave orphaned trial rows with no trace anywhere. A
+      // subscription still gets upserted below even when this fails, so the
+      // seller is unaffected; this is purely so the failure is discoverable.
+      logger.warn(
+        `Failed to close trial rows for user ${customer.userId} after a real Stripe subscription started (event=${event.eventId ?? 'none'}): ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

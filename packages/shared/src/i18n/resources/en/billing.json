@@ -153,7 +153,9 @@
       "portalHint": "Opens Stripe to update your card, download invoices, or cancel.",
       "manageHint": "Manage your payment method, plan and invoices here.",
       "nextCharge": "Next payment: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "Cancels on {{date}} — no further charges after this period",
       "scheduledChange": "Switches to {{plan}} on {{date}}",
+      "scheduledChangeUnknownPlan": "Your plan changes on {{date}}",
       "cancelScheduledChange": "Cancel",
       "scheduledChangeCancelled": "Your plan change has been cancelled."
     },

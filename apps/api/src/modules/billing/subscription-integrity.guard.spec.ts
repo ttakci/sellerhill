@@ -29,8 +29,15 @@ describe('one live subscription per user', () => {
     });
 
     it('only ever ends TRIAL rows, never a provider-backed one', () => {
-      // Ending a paid row here would suspend a paying customer.
-      const body = repository.slice(repository.indexOf('async endTrialSubscriptionsForUser('));
+      // Ending a paid row here would suspend a paying customer. Bounded to the
+      // next method (findCustomerByProviderId) — an unbounded slice runs to
+      // EOF and would pass vacuously if this same literal ever showed up in a
+      // later method (it already does, in findCurrentSubscription, just
+      // before this one).
+      const body = repository.slice(
+        repository.indexOf('async endTrialSubscriptionsForUser('),
+        repository.indexOf('async findCustomerByProviderId('),
+      );
       expect(body).toMatch(/provider_subscription_id IS NULL/);
     });
 
@@ -66,8 +73,13 @@ describe('A3 — checkout asks Stripe, not just our database', () => {
 
   it('createCheckout refuses when Stripe already reports one', () => {
     // Our DB being wrong is exactly how three subscriptions got created, so
-    // this check must not read from our own tables.
-    const body = service.slice(service.indexOf('async createCheckout('));
+    // this check must not read from our own tables. Bounded to the next
+    // method (createPortal) — createCheckout is the last of the checkout
+    // methods, so an unbounded slice here ran all the way to EOF.
+    const body = service.slice(
+      service.indexOf('async createCheckout('),
+      service.indexOf('async createPortal('),
+    );
     expect(body).toMatch(/hasActiveProviderSubscription\(/);
     expect(body).toMatch(/billing\.errors\.alreadySubscribed/);
   });
@@ -109,8 +121,12 @@ describe('A4 — code review round 1 fixes (paused status; customer-creation rac
     // protects nothing — so this asserts ORDER, not just presence: the
     // re-read (ensureLocalCustomer) and the create-if-needed
     // (provider.ensureCustomer) must both sit BETWEEN the lock call and the
-    // duplicate-subscription check that depends on their result.
-    const body = service.slice(service.indexOf('async createCheckout('));
+    // duplicate-subscription check that depends on their result. Bounded to
+    // the next method (createPortal), same reason as the A3 test above.
+    const body = service.slice(
+      service.indexOf('async createCheckout('),
+      service.indexOf('async createPortal('),
+    );
     const lockIdx = body.indexOf('withUserBillingLock(');
     const guardIdx = body.indexOf('hasActiveProviderSubscription(');
     expect(lockIdx).toBeGreaterThan(-1);
@@ -181,8 +197,15 @@ describe('plan changes are billed by direction', () => {
 
   it('an upgrade releases any pending downgrade first', () => {
     // Otherwise a stale schedule fires a month later and undoes the upgrade
-    // the seller just paid for.
-    const body = service.slice(service.indexOf('async changePlan('));
+    // the seller just paid for. Bounded to the next method — cancelScheduledChange
+    // is declared IMMEDIATELY after changePlan, so an unbounded slice here
+    // would match this assertion against that method's own declaration
+    // (`async cancelScheduledChange(`) even if changePlan's body never called
+    // it at all.
+    const body = service.slice(
+      service.indexOf('async changePlan('),
+      service.indexOf('async cancelScheduledChange('),
+    );
     expect(body).toMatch(/cancelScheduledChange\(/);
   });
 
@@ -266,7 +289,15 @@ describe('final whole-branch review fixes (2026-08-23)', () => {
       // directly always misses and silently fabricates a now()..now()+30d
       // span, which this codebase's seller-facing copy now quotes verbatim
       // (plan meta line, downgrade/upgrade confirmation dialogs).
-      const body = applier.slice(applier.indexOf('export function extractStripeSubscriptionFields('));
+      // Bounded to the next function (mapStatus) — an unbounded slice runs to
+      // EOF and, besides the vacuous-pass risk on the toMatch assertions,
+      // would make the not.toMatch assertions below fail on a false positive
+      // if some unrelated LATER function ever read sub.current_period_start
+      // directly for a different reason.
+      const body = applier.slice(
+        applier.indexOf('export function extractStripeSubscriptionFields('),
+        applier.indexOf('function mapStatus('),
+      );
       expect(body).toMatch(/firstSubscriptionItem\(sub\)/);
       expect(body).toMatch(/parseUnixSeconds\(item\?\.current_period_start\)/);
       expect(body).toMatch(/parseUnixSeconds\(item\?\.current_period_end\)/);
@@ -327,6 +358,91 @@ describe('final whole-branch review fixes (2026-08-23)', () => {
       expect(body).toMatch(/catch \(error\)/);
       expect(body).toMatch(/throw new Error\('billing\.errors\.invoicesFailed'\)/);
       expect(controller).toMatch(/'billing\.errors\.invoicesFailed':\s*HttpStatus\.CONFLICT/);
+    });
+  });
+});
+
+describe('backend cleanup pass (2026-08-23)', () => {
+  const provider = read('modules', 'billing', 'billing-provider.ts');
+  const service = read('modules', 'billing', 'billing.service.ts');
+  const repository = read('modules', 'billing', 'billing-repository.service.ts');
+
+  describe('D — changePlan is serialized per user, like the checkout paths', () => {
+    it('changePlan resolves-decides-mutates under withUserBillingLock', () => {
+      // Bounded to the next method (cancelScheduledChange) so this cannot
+      // pass because the literal appears somewhere later in the file — see
+      // the "an upgrade releases any pending downgrade first" test above,
+      // which failed exactly this way before its own bound was added.
+      const body = service.slice(
+        service.indexOf('async changePlan('),
+        service.indexOf('async cancelScheduledChange('),
+      );
+      expect(body).toMatch(/withUserBillingLock\(/);
+      // The mutating call that can double-charge on a race must be INSIDE
+      // the locked section, not merely somewhere in the method.
+      const lockIdx = body.indexOf('withUserBillingLock(');
+      const mutateIdx = body.indexOf('changeSubscriptionPlan(');
+      expect(lockIdx).toBeGreaterThan(-1);
+      expect(mutateIdx).toBeGreaterThan(lockIdx);
+    });
+  });
+
+  describe('E — previewPlanChange fails fast when the provider is not configured', () => {
+    it('checks isConfigured() before doing anything else, same as changePlan', () => {
+      const body = service.slice(
+        service.indexOf('async previewPlanChange('),
+        service.indexOf('async createAddonCheckout('),
+      );
+      const guardIdx = body.indexOf('this.provider.isConfigured()');
+      const downgradeIdx = body.indexOf('PlanChangeDirection.DOWNGRADE');
+      expect(guardIdx).toBeGreaterThan(-1);
+      // Must come before the downgrade short-circuit — that branch returns
+      // without ever touching Stripe, which is exactly how this was missed:
+      // an unconfigured deployment could "successfully" preview a downgrade.
+      expect(guardIdx).toBeLessThan(downgradeIdx);
+    });
+  });
+
+  describe('F — getBillingDetails resolves a LIVE subscription, not just the newest one', () => {
+    it('filters the listed subscriptions against LIVE_SUBSCRIPTION_STATUSES', () => {
+      const body = provider.slice(
+        provider.indexOf('async getBillingDetails('),
+        provider.indexOf('async listInvoices('),
+      );
+      expect(body).toMatch(/subscriptions\.list\(/);
+      expect(body).toMatch(/LIVE_SUBSCRIPTION_STATUSES\.has\(/);
+    });
+  });
+
+  describe('H — withUserBillingLock passes its locked client through, closing the ' +
+    'nested-connection gap', () => {
+    it('the lock hands its client to the callback', () => {
+      const body = repository.slice(
+        repository.indexOf('async withUserBillingLock<T>('),
+        repository.indexOf('// -------------------------------------------------------------------------\n  // eBay trial ledger'),
+      );
+      expect(body).toMatch(/fn:\s*\(client:\s*PoolClient\)\s*=>\s*Promise<T>/);
+      expect(body).toMatch(/return fn\(client\);/);
+    });
+
+    it('every withUserBillingLock call site threads the client into its repository/provider calls', () => {
+      // createCheckout, createAddonCheckout, and changePlan (via
+      // applyPlanChange) each open a lock and must pass its client onward —
+      // a call site that re-adds the lock without threading the client
+      // reopens exactly the pool-starvation risk this closes.
+      const checkoutBody = service.slice(
+        service.indexOf('async createCheckout('),
+        service.indexOf('async createPortal('),
+      );
+      expect(checkoutBody).toMatch(/ensureLocalCustomer\([^)]*client\)/);
+      expect(checkoutBody).toMatch(/ensureCustomer\([^)]*client\)/);
+
+      const addonBody = service.slice(
+        service.indexOf('async createAddonCheckout('),
+        service.indexOf('async startTrialForUser('),
+      );
+      expect(addonBody).toMatch(/ensureLocalCustomer\([^)]*client\)/);
+      expect(addonBody).toMatch(/ensureCustomer\([^)]*client\)/);
     });
   });
 });
