@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import { InvoiceHistoryCard } from '../components/InvoiceHistoryCard';
 import { PaymentMethodCard } from '../components/PaymentMethodCard';
+import { PlanChangeConfirm } from '../components/PlanChangeConfirm';
 
 import * as S from './BillingPage.style';
 import type {
@@ -185,6 +186,11 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   onCancelScheduledChange,
   isCancellingChange,
   paymentMethod,
+  isPlanChangeOpen,
+  planChangeBody,
+  isChangingPlan,
+  onConfirmPlanChange,
+  onCancelPlanChange,
 }) => {
   const { t } = useTranslation(['translation', 'billing']);
 
@@ -478,6 +484,19 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           </S.DrawerPlanList>
         </S.DrawerSection>
       </Drawer>
+
+      {/*
+        A sibling of the Drawer, not nested inside it — the drawer may already
+        be closed (checkoutPlanId's spinner runs on the plan card, which lives
+        inside the drawer) by the time the preview comes back and this opens.
+      */}
+      <PlanChangeConfirm
+        isOpen={isPlanChangeOpen}
+        body={planChangeBody}
+        isConfirming={isChangingPlan}
+        onConfirm={onConfirmPlanChange}
+        onCancel={onCancelPlanChange}
+      />
     </S.Container>
   );
 };

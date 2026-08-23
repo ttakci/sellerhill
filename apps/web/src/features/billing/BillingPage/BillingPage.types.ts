@@ -1,9 +1,24 @@
 import type {
   BillingInterval,
   BillingPaymentMethodDto,
+  BillingPlanChangePreviewDto,
   BillingSubscriptionStatus,
   BillingSummaryDto,
 } from '@repo/shared';
+
+/**
+ * The change the seller has previewed but not yet confirmed. Holding the
+ * preview here (rather than re-fetching on confirm) guarantees the figure
+ * they agreed to in `PlanChangeConfirm` is the figure `changePlan` applies —
+ * `planSlug` is captured at the same moment as `planId` so the confirm
+ * dialog's plan name can never resolve to a different plan than the preview
+ * it is showing.
+ */
+export interface BillingPendingPlanChange {
+  planId: string;
+  planSlug: string;
+  preview: BillingPlanChangePreviewDto;
+}
 
 export interface BillingUsageRow {
   /** Short text inside the ring, e.g. "100%". Separate from `ofDisplay` so the
@@ -96,4 +111,20 @@ export interface BillingPageComponentProps {
    *  Null for a trialing seller (no Stripe customer yet) — a normal state, not
    *  an empty one, so the card renders nothing rather than a placeholder. */
   paymentMethod: BillingPaymentMethodDto | null;
+  /**
+   * True once the seller has picked a plan to switch to (on an EXISTING
+   * subscription) and its Stripe proration preview has come back — drives
+   * the confirm dialog. False while previewing (the plan card's own spinner,
+   * via `checkoutPlanId`, covers that wait) and after cancel/confirm.
+   */
+  isPlanChangeOpen: boolean;
+  /** Fully assembled, localized confirmation message for the previewed
+   *  change — see `PlanChangeConfirmProps.body`. Null until a preview has
+   *  come back. */
+  planChangeBody: string | null;
+  /** True while the confirmed change is being applied (`POST
+   *  /billing/change-plan`) — drives the confirm button's spinner. */
+  isChangingPlan: boolean;
+  onConfirmPlanChange: () => void;
+  onCancelPlanChange: () => void;
 }

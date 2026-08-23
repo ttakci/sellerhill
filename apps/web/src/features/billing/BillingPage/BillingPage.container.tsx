@@ -17,6 +17,7 @@ import {
   BillingInterval,
   BillingLimitKey,
   BillingSubscriptionStatus,
+  PlanChangeDirection,
   TRIAL_PLAN_SLUG,
   BillingProvider,
 } from '@repo/shared';
@@ -33,11 +34,17 @@ import {
   useInitiateAddonCheckoutMutation,
   useInitiateCheckoutMutation,
   useLazyOpenBillingPortalQuery,
+  usePreviewPlanChangeMutation,
 } from '../api/billing.api';
 import { formatBillingLimit, planLimitValue, usageBarValue, usageBarVariant } from '../utils/usage';
 
 import { BillingPageComponent } from './BillingPage.component';
-import type { BillingAddonCard, BillingPlanCard, BillingUsageRow } from './BillingPage.types';
+import type {
+  BillingAddonCard,
+  BillingPendingPlanChange,
+  BillingPlanCard,
+  BillingUsageRow,
+} from './BillingPage.types';
 
 import { getErrorI18nKey } from '@/utils/errorHandler';
 
@@ -81,6 +88,12 @@ export const BillingPage: React.FC = () => {
   // checkout call are still keyed by interval, hence the value still exists.
   const compareInterval = BillingInterval.MONTHLY;
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
+
+  const [previewPlanChange] = usePreviewPlanChangeMutation();
+  const [changePlan, { isLoading: isChangingPlan }] = useChangePlanMutation();
+  /** The change the seller has previewed but not yet confirmed — see
+   *  `BillingPendingPlanChange`. */
+  const [pendingChange, setPendingChange] = useState<BillingPendingPlanChange | null>(null);
 
   const isInitialLoading = isCatalogLoading || isSummaryLoading;
   const isUnavailable = !isInitialLoading && !catalog;
@@ -135,7 +148,6 @@ export const BillingPage: React.FC = () => {
     : null;
 
   const [initiateAddonCheckout] = useInitiateAddonCheckoutMutation();
-  const [changePlan] = useChangePlanMutation();
   const [addonSlugInFlight, setAddonSlugInFlight] = useState<string | null>(null);
 
   /*
@@ -200,6 +212,40 @@ export const BillingPage: React.FC = () => {
       date: formatDate(details.scheduledChange.effectiveAt, localeCfg.locale),
     });
   }, [details, t, localeCfg.locale]);
+
+  /*
+   * The confirm dialog's body, fully assembled here rather than in
+   * `PlanChangeConfirm` — `formatMicroCurrency`/`formatDate` are forbidden in
+   * a `.component.tsx` file (see the plan-meta-line note above; same rule,
+   * same reason), and this needs both.
+   *
+   * An upgrade takes money now; a downgrade takes none and lands at period
+   * end, so the two read genuinely different sentences — telling a
+   * downgrading seller they are "about to be charged" would describe a debit
+   * that never happens.
+   */
+  const planChangeBody = useMemo(() => {
+    if (!pendingChange) {
+      return null;
+    }
+    const { preview, planSlug } = pendingChange;
+    const planName = t(`billing:billing.plans.${planSlug}.name`);
+    if (preview.direction === PlanChangeDirection.UPGRADE) {
+      return t('billing:billing.planChange.upgradeBody', {
+        plan: planName,
+        amount: formatMicroCurrency(preview.amountDueMicros, localeCfg.locale, preview.currency),
+        nextAmount:
+          preview.nextInvoiceAmountMicros === null
+            ? '—'
+            : formatMicroCurrency(preview.nextInvoiceAmountMicros, localeCfg.locale, preview.currency),
+        nextDate: preview.nextInvoiceAt ? formatDate(preview.nextInvoiceAt, localeCfg.locale) : '—',
+      });
+    }
+    return t('billing:billing.planChange.downgradeBody', {
+      plan: planName,
+      date: formatDate(preview.effectiveAt, localeCfg.locale),
+    });
+  }, [pendingChange, t, localeCfg.locale]);
 
   const usageRows: BillingUsageRow[] = useMemo(() => {
     if (!summary || !subscription || !summary.plan) {
@@ -413,24 +459,20 @@ export const BillingPage: React.FC = () => {
        * subscription — Stripe permits that without complaint, and both would
        * bill. With only a local trial (or nothing) there is nothing to reprice,
        * so checkout is correct.
+       *
+       * The reprice itself does not fire from here anymore. It previews
+       * first — Stripe's own proration arithmetic, not an estimate — and
+       * opens the confirm dialog; `handleConfirmPlanChange` is what actually
+       * calls `changePlan`, against the exact plan/preview pair captured at
+       * this moment (`planSlug` alongside `planId`, so the dialog's plan name
+       * can never resolve to a different plan than the preview it shows).
        */
       if (hasProviderSubscription) {
-        void changePlan({ planId, interval: compareInterval })
+        const planSlug = plans.find((plan) => plan.planId === planId)?.slug ?? '';
+        void previewPlanChange({ planId, interval: compareInterval })
           .unwrap()
-          .then(() => {
-            showMessage(
-              {
-                type: 'success',
-                headerKey: 'translation:message.success.header',
-                descriptionKey: 'billing:billing.plans.switchDone',
-                primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-              },
-              t,
-            );
-          })
-          .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
-            surfaceBillingError(error);
-          })
+          .then((preview) => setPendingChange({ planId, planSlug, preview }))
+          .catch((error: Parameters<typeof getErrorI18nKey>[0]) => surfaceBillingError(error))
           .finally(() => setCheckoutPlanId(null));
         return;
       }
@@ -451,7 +493,8 @@ export const BillingPage: React.FC = () => {
       providerUnconfigured,
       compareInterval,
       hasProviderSubscription,
-      changePlan,
+      plans,
+      previewPlanChange,
       initiateCheckout,
       showMessage,
       closeMessage,
@@ -459,6 +502,35 @@ export const BillingPage: React.FC = () => {
       surfaceBillingError,
     ],
   );
+
+  const handleConfirmPlanChange = useCallback(() => {
+    if (!pendingChange) {
+      return;
+    }
+    void changePlan({ planId: pendingChange.planId, interval: compareInterval })
+      .unwrap()
+      .then(() => {
+        setPendingChange(null);
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: 'billing:billing.plans.switchDone',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t,
+        );
+      })
+      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
+        // A declined card leaves the subscription UNCHANGED (the backend
+        // uses error_if_incomplete) — the seller is still on their old plan,
+        // so say why rather than closing silently.
+        setPendingChange(null);
+        surfaceBillingError(error);
+      });
+  }, [pendingChange, compareInterval, changePlan, showMessage, closeMessage, t, surfaceBillingError]);
+
+  const handleCancelPlanChange = useCallback(() => setPendingChange(null), []);
 
   const handleManage = useCallback(() => {
     if (providerUnconfigured) {
@@ -515,6 +587,11 @@ export const BillingPage: React.FC = () => {
       onCancelScheduledChange={handleCancelScheduledChange}
       isCancellingChange={isCancellingChange}
       paymentMethod={details?.paymentMethod ?? null}
+      isPlanChangeOpen={Boolean(pendingChange)}
+      planChangeBody={planChangeBody}
+      isChangingPlan={isChangingPlan}
+      onConfirmPlanChange={handleConfirmPlanChange}
+      onCancelPlanChange={handleCancelPlanChange}
     />
   );
 };

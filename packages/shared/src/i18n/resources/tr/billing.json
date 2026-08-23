@@ -82,6 +82,13 @@
       "switchTo": "{{plan}} paketine geç",
       "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak."
     },
+    "planChange": {
+      "title": "Plan değişikliğini onaylayın",
+      "upgradeBody": "{{plan}} paketine geçiyorsunuz. Şimdi {{amount}} tahsil edilecek. Bir sonraki faturanız {{nextDate}} tarihinde {{nextAmount}} olacak.",
+      "downgradeBody": "{{date}} tarihinde {{plan}} paketine geçeceksiniz. Şimdi hiçbir tahsilat yapılmaz — o tarihe kadar mevcut planınızda kalırsınız.",
+      "confirm": "Onayla",
+      "cancel": "Vazgeç"
+    },
     "limits": {
       "listings_per_month": {
         "label": "Aktif listeler",

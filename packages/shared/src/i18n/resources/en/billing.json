@@ -82,6 +82,13 @@
       "switchTo": "Switch to {{plan}}",
       "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice."
     },
+    "planChange": {
+      "title": "Confirm plan change",
+      "upgradeBody": "Switching to {{plan}}. {{amount}} will be charged now. Your next invoice will be {{nextAmount}} on {{nextDate}}.",
+      "downgradeBody": "Switching to {{plan}} on {{date}}. Nothing is charged now — you keep your current plan until then.",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
     "limits": {
       "listings_per_month": {
         "label": "Active listings",
