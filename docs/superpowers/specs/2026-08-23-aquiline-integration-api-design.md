@@ -125,6 +125,13 @@ listWebhooks() / createWebhook(…)          GET/POST /v1/webhooks
   `secret: true`, AES-encrypted at rest). No settings migration.
 - `AquilineErrorKind` survives, extended with `PROBLEM` carrying an
   `AquilineProblemCode`.
+- **Failures are classified on the response's own `code` field, not on free
+  text.** A probe run on 2026-08-23 showed the error body is
+  `{ success: false, code: "not-found", message: "Profile not found." }`, so the
+  provider does expose a machine-readable code. The shipped
+  `classifyHttpFailure` greps the message for `/quota|limit reached|exceeded/`,
+  which would mistake any message merely containing those words. HTTP status
+  stays the fallback for a body that carries no `code`.
 - Bounded retry stays: 429/5xx/network only, 3 attempts. A 4xx is never retried
   — on the conversion path a blind retry risks paying twice.
 - `AQUILINE_PARTNER_ID` becomes dead (the Integration API has no `X-Partner-Id`).
@@ -379,6 +386,22 @@ New on top of that:
 - `planRemaining <= 0` from an `assign` response is persisted to
   `aquiline_plan_snapshot`; subsequent conversions short-circuit to pass-through
   without spending a call on a guaranteed 402. Same shape as `keepa_balance`.
+
+  **This guard is the only real protection, because the two quota windows do not
+  line up.** A probe on 2026-08-23 returned
+  `currentPeriodStart: 2026-08-23`, `currentPeriodEnd: 2026-09-23` and
+  `windowKey: "2026-08-23"` — Aquiline's allowance resets on the **subscription
+  anniversary**, while `QuotaEnforcementService` meters each seller against a
+  **UTC calendar month**. So "the conversion quotas we sold this month total less
+  than the Aquiline limit" is never a sufficient safety condition on a given day:
+  between the 1st and the 22nd our counters have reset while Aquiline's have not.
+  Reconciling the two windows is not worth it — reading the provider's own
+  counter is both simpler and authoritative.
+
+  Note `plan.trackLimitPerMonth` is misleadingly named: it reported 300, which is
+  the **shipment** allowance, not the plan page's separate "3,000 trackings".
+  The tracking allowance and the profile count are not exposed by the API at all,
+  which is why the ceiling guard counts `GET /v1/profiles` itself.
 - **Profile ceiling reached** → refuse locally, pass through, warn. Distinct from
   a shipment quota wall in both cause and fix: shipments reset monthly and are
   answered by waiting or upgrading, whereas profiles never reset and the only
@@ -422,7 +445,18 @@ New on top of that:
 4. What does `suggestAmazonEmailFetch` in the upsert / tracking-html responses
    expect? Ignored for now — SellerHill has no mailbox access.
 5. Does reading `GET …/orders/{orderId}` consume the plan's "trackings"
-   allowance? Only used for reconciliation, never on a schedule.
+   allowance? Only used for reconciliation, never on a schedule. **Partly
+   answered by probe:** the API exposes only the shipment counter, so a
+   trackings balance cannot be observed even if it is being spent.
+
+**Probe findings, 2026-08-23 (`pnpm --filter api aquiline:probe`):** auth and
+base URL confirmed; the account holds 0 profiles and 0 webhooks;
+`plan.trackLimitPerMonth` is the **shipment** allowance (300) despite its name,
+and neither the tracking allowance nor the profile count is exposed; the usage
+window is the subscription period, not a calendar month (§6); the error body
+carries a machine-readable `code` (§3.1); no rate-limit headers are advertised,
+so Q5 above stands. Undocumented response fields observed on `/v1/me`:
+`currentPeriodStart`, `pendingPlanCode`, `pendingCadence`.
 
 ## 9. Testing
 

@@ -96,16 +96,22 @@ profiles. If a profile becomes obsolete (a seller leaves), can the slot be
 freed, either through the API or by your support team? If not, we will treat
 profile creation as permanent and guard it accordingly.
 
-### 7. Which plan counters does the API expose?
+### 7. Where can we read the trackings allowance and the profile count?
 
-The plan page shows two separate allowances for Starter: **3,000 trackings per
-month** and **300 Aquiline shipments**. But `GET /v1/me` returns a single
-`billing.usage {used, limit, remaining}` and `billing.plan.trackLimitPerMonth`,
-whose example value is 300 — which matches shipments, not trackings.
+Resolved by probing that `billing.usage.limit` and `plan.trackLimitPerMonth`
+both report 300 on Starter, i.e. the **shipment** allowance. Two gaps remain,
+and they are small:
 
-- Does `trackLimitPerMonth` count **shipments** (i.e. `assign` calls)?
-- Is the separate "trackings" allowance readable anywhere in the API?
-- Is the number of profiles used / allowed readable anywhere?
+- The plan page also lists **3,000 trackings per month** for Starter. That
+  allowance is not exposed by `GET /v1/me`. Is it readable anywhere, and what
+  consumes it?
+- The **profile count** (used / allowed) is likewise not exposed. We currently
+  count `GET /v1/profiles` ourselves. Is there a canonical source?
+
+Also, please confirm our reading of the usage window: `windowKey` came back as
+`2026-08-23`, matching `currentPeriodStart`, with `currentPeriodEnd`
+`2026-09-23`. We are treating the allowance as resetting on the subscription
+anniversary rather than on the 1st of each calendar month.
 
 ### 8. What is `amazonCustomerId`, and what does it improve?
 
