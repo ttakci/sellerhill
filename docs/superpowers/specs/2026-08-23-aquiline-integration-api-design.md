@@ -444,7 +444,40 @@ Pure and unit-testable without the provider:
 first live order is the gate, exactly as A2 auto-fulfill treats its first real
 placement. Until then, no part of the Aquiline path may be described as working.
 
-## 10. Verification plan (first live order)
+## 10. Edge cases, and what this deliberately does not do
+
+- **No backfill.** Conversion happens only at the shipped transition. Orders
+  already shipped when Aquiline is switched on keep their raw numbers forever,
+  because eBay has already received them and cannot be corrected. Switching a
+  seller from `local` to `aquiline` therefore affects future shipments only.
+- **One tracking number per order.** `orders.amazon_tracking_number` is
+  single-valued, so an Amazon order that ships as several packages converts its
+  primary number only. This is a pre-existing limitation, not one introduced
+  here, and it is why the tracking URL must be read from the page rather than
+  constructed — the real link carries the package index that identifies *which*
+  package the URL and the HTML both refer to.
+- **A crashed profile creation is self-healing.** If Aquiline creates the
+  profile but our row write fails, the slot is consumed with nothing recorded —
+  normally unrecoverable, since profiles cannot be deleted. The deterministic
+  `sh-{userId}-{marketplace}` id removes the problem: the next attempt derives
+  the identical id, the provider reports it already exists, and we adopt it and
+  write the row. This is the main operational payoff of not letting the provider
+  generate the id.
+- **Webhook registration is conditional.** It requires a publicly reachable
+  receiver, which local development does not have. Registration is skipped
+  unless a public base URL and a webhook secret are both configured; the
+  conversion path works without it, only problem reporting is lost.
+- **Adjacent defects in `extractTracking` are fixed as part of this work**, since
+  the same function is being extended. Carrier detection scans the whole page
+  body with `/ups/i` (matches "groups"), tests `amazon logistics` **last**, and
+  pulls the tracking number with patterns as loose as `/\d{12,14}/`. A
+  mislabelled Amazon Logistics shipment silently fails the default
+  `amazon_logistics_only` scope, i.e. the shipment that most needs converting is
+  the one skipped. Carrier detection moves to the tracking number first (which
+  is unambiguous) with the page text as a fallback, and `amazon logistics` is
+  tested before the substring-prone carrier names.
+
+## 11. Verification plan (first live order)
 
 1. `getMe()` returns the plan — token and base URL are right.
 2. A profile appears in the Aquiline dashboard under `sh-{amazonAccountId}`.
