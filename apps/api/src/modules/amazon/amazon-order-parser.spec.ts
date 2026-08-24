@@ -1,4 +1,4 @@
-import { AmazonOrderParserService } from './amazon-order-parser.service';
+import { AmazonOrderParserService, resolveTrackingCarrier } from './amazon-order-parser.service';
 
 describe('AmazonOrderParserService.parseFinancialsFromText', () => {
   let service: AmazonOrderParserService;
@@ -43,5 +43,29 @@ describe('AmazonOrderParserService.parseFinancialsFromText', () => {
       expect(result.subtotal).toBeCloseTo(25, 2);
       expect(result.grandTotal).toBeCloseTo(25, 2);
     }
+  });
+});
+
+describe('resolveTrackingCarrier', () => {
+  it('reads the carrier from the tracking number before the page text', () => {
+    // The shipped implementation scanned the whole page with /ups/i and tested
+    // "amazon logistics" LAST, so any page containing a word like "groups"
+    // labelled an Amazon Logistics shipment as UPS — which then silently failed
+    // the default amazon_logistics_only conversion scope.
+    expect(resolveTrackingCarrier('TBA303940404000', 'Join our groups for updates')).toBe(
+      'Amazon Logistics',
+    );
+  });
+
+  it('still recognises a real UPS number', () => {
+    expect(resolveTrackingCarrier('1Z999AA10123456784', '')).toBe('UPS');
+  });
+
+  it('falls back to the page text when the number is unrecognised', () => {
+    expect(resolveTrackingCarrier('X123', 'Shipped with USPS')).toBe('USPS');
+  });
+
+  it('never matches a carrier inside an unrelated word', () => {
+    expect(resolveTrackingCarrier('X123', 'backups completed')).toBeUndefined();
   });
 });

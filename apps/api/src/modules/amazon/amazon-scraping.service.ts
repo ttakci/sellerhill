@@ -295,6 +295,94 @@ export class AmazonScrapingService {
   }
 
   /**
+   * Order status AND the ship-track page HTML, in ONE rate-limiter slot.
+   *
+   * Aquiline wants the ship-track page (never order-details) roughly daily for an
+   * in-flight order. Doing it in a second slot would cost a second Chromium page,
+   * a second session check and a 3s per-account wait, and would double the slots
+   * an in-flight order consumes against a platform ceiling of
+   * AMAZON_GLOBAL_CONCURRENCY x 86,400 browser-seconds/day.
+   *
+   * The decisive reason is correctness, though: an Amazon order can ship as
+   * several packages and the real tracking URL carries a package index. Reading
+   * the link Amazon itself renders — while still on order-details — is what
+   * avoids the provider's own `tracking_url_mismatch` / `wrong_page_type`
+   * problems. A constructed URL cannot know the index.
+   */
+  async scrapeOrderStatusWithTrackingHtml(
+    userId: string,
+    amazonAccountId: string,
+    amazonOrderId: string
+  ): Promise<{
+    status: string;
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
+    trackingHtml?: string;
+  }> {
+    return this.rateLimiter.schedule(amazonAccountId, () =>
+      this.doScrapeOrderStatusWithTrackingHtml(userId, amazonAccountId, amazonOrderId)
+    );
+  }
+
+  private async doScrapeOrderStatusWithTrackingHtml(
+    userId: string,
+    amazonAccountId: string,
+    amazonOrderId: string
+  ): Promise<{
+    status: string;
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
+    trackingHtml?: string;
+  }> {
+    const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+
+    const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
+
+    let page;
+    if (hasValidSession) {
+      const context = await this.browserStateManager.getContext(amazonAccountId);
+      page = await context.newPage();
+    } else {
+      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+    }
+
+    try {
+      const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+      await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2000);
+
+      // Save state after successful navigation
+      await this.browserStateManager.saveState(amazonAccountId);
+
+      const parsed = await this.parserService.parseOrderStatus(page);
+
+      let trackingHtml: string | undefined;
+      if (parsed.trackingUrl) {
+        try {
+          const trackingHref = new URL(
+            parsed.trackingUrl,
+            buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)
+          ).toString();
+          await page.goto(trackingHref, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForTimeout(1500);
+          trackingHtml = await page.content();
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.warn(
+            `Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`
+          );
+        }
+      }
+
+      return { ...parsed, trackingHtml };
+    } finally {
+      await page.close();
+    }
+  }
+
+  /**
    * Verifies that stored credentials can log into Amazon (2FA-aware).
    * Runs under the per-account rate limiter, reuses performLogin (the only
    * login code path), and never throws — callers get a result object.
