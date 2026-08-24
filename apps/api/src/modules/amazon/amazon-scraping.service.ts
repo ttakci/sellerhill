@@ -22,6 +22,26 @@ export interface ScrapingProgress {
 }
 
 /**
+ * True when `href`, resolved against `originUrl`, is a safe target to navigate an
+ * authenticated Amazon session to: HTTPS and the SAME hostname as the marketplace
+ * origin we already trust (built via `buildAmazonSiteUrl`, never hardcoded). The
+ * "Track package" anchor comes from Amazon's own rendered page and is expected to
+ * resolve within Amazon's own site — a different host, a non-https scheme
+ * (`http:`, `javascript:`, `data:`, …) or a malformed href is refused rather than
+ * navigated to, because that navigation happens inside a session holding the
+ * seller's real, logged-in Amazon cookies.
+ */
+export function isTrustedAmazonTrackingUrl(href: string, originUrl: string): boolean {
+  try {
+    const resolved = new URL(href, originUrl);
+    const origin = new URL(originUrl);
+    return resolved.protocol === 'https:' && resolved.hostname === origin.hostname;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * One row from the account "Your Orders" list page (Amazon order-list scrape).
  * Returned by `AmazonScrapingService.scrapeAccountOrders`. Mirrors what the
  * per-order detail-page scrape produces, but limited to the fields the auto
@@ -360,19 +380,23 @@ export class AmazonScrapingService {
 
       let trackingHtml: string | undefined;
       if (parsed.trackingUrl) {
-        try {
-          const trackingHref = new URL(
-            parsed.trackingUrl,
-            buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)
-          ).toString();
-          await page.goto(trackingHref, { waitUntil: 'domcontentloaded', timeout: 30000 });
-          await page.waitForTimeout(1500);
-          trackingHtml = await page.content();
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : String(error);
+        const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
+        if (!isTrustedAmazonTrackingUrl(parsed.trackingUrl, origin)) {
           this.logger.warn(
-            `Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`
+            `Ship-track HTML capture skipped for order ${amazonOrderId}: tracking URL is not a trusted Amazon host`
           );
+        } else {
+          try {
+            const trackingHref = new URL(parsed.trackingUrl, origin).toString();
+            await page.goto(trackingHref, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForTimeout(1500);
+            trackingHtml = await page.content();
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(
+              `Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`
+            );
+          }
         }
       }
 
