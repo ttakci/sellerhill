@@ -40,6 +40,13 @@ interface StoreSettingsEntity {
   // Buyer auto-messaging config JSONB (migration 054). Nullable — NULL means
   // the feature is off (no automated buyer messages). Parsed in mapToDto.
   buyer_messaging: unknown;
+  // Ship-from / return address for Aquiline profiles (migration 089). All
+  // nullable — a seller on the local pass-through provider never sets them.
+  ship_from_name: string | null;
+  ship_from_phone: string | null;
+  ship_from_address_line1: string | null;
+  ship_from_address_line2: string | null;
+  ship_from_city: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -138,6 +145,11 @@ export class StoreSettingsService {
       trackingConversionScope,
       trackingConvertManualOrders,
       buyerMessaging,
+      shipFromName,
+      shipFromPhone,
+      shipFromAddressLine1,
+      shipFromAddressLine2,
+      shipFromCity,
     } = dto;
 
     // A focused drawer omits fields it does not own. Empty location strings are
@@ -166,14 +178,25 @@ export class StoreSettingsService {
     const buyerMessagingProvided = buyerMessaging !== undefined;
     const buyerMessagingJson = buyerMessaging ? JSON.stringify(buyerMessaging) : null;
 
+    // Ship-from / return address for Aquiline profiles. Same "omitted or
+    // blank means leave unchanged" rule as country/state/zipCode above — the
+    // columns are nullable, so a trimmed-empty value is just passed through
+    // as NULL and COALESCE on the UPDATE branch preserves whatever is
+    // already stored.
+    const shipFromNameValue = shipFromName?.trim() ? shipFromName.trim() : null;
+    const shipFromPhoneValue = shipFromPhone?.trim() ? shipFromPhone.trim() : null;
+    const shipFromAddressLine1Value = shipFromAddressLine1?.trim() ? shipFromAddressLine1.trim() : null;
+    const shipFromAddressLine2Value = shipFromAddressLine2?.trim() ? shipFromAddressLine2.trim() : null;
+    const shipFromCityValue = shipFromCity?.trim() ? shipFromCity.trim() : null;
+
     let result: StoreSettingsEntity[];
 
     if (isGlobal) {
       // Upsert global settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging)
-            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10)
+            INSERT INTO store_settings (user_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city)
+            VALUES ($1, TRUE, COALESCE($2, ''), COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, TRUE), COALESCE($6::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $7, COALESCE($8, FALSE), COALESCE($9, 'local'), COALESCE($12, 'amazon_logistics_only'), COALESCE($13, TRUE), $10, $14, $15, $16, $17, $18)
             ON CONFLICT (user_id, is_global) WHERE is_global = TRUE
             DO UPDATE SET
                 country = COALESCE($2, store_settings.country),
@@ -190,6 +213,11 @@ export class StoreSettingsService {
                   WHEN $11 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
                 END,
+                ship_from_name = COALESCE($14, store_settings.ship_from_name),
+                ship_from_phone = COALESCE($15, store_settings.ship_from_phone),
+                ship_from_address_line1 = COALESCE($16, store_settings.ship_from_address_line1),
+                ship_from_address_line2 = COALESCE($17, store_settings.ship_from_address_line2),
+                ship_from_city = COALESCE($18, store_settings.ship_from_city),
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -207,14 +235,19 @@ export class StoreSettingsService {
           buyerMessagingProvided,
           trackingScopeValue,
           trackingManualValue,
+          shipFromNameValue,
+          shipFromPhoneValue,
+          shipFromAddressLine1Value,
+          shipFromAddressLine2Value,
+          shipFromCityValue,
         ]
       );
     } else {
       // Upsert store-specific settings for THIS user
       result = await this.databaseService.query<StoreSettingsEntity>(
         `
-            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging)
-            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11)
+            INSERT INTO store_settings (user_id, store_id, is_global, country, state, zip_code, check_blacklist, blacklist, amazon_tax_rate, auto_fulfill_enabled, tracking_conversion_provider, tracking_conversion_scope, tracking_convert_manual_orders, buyer_messaging, ship_from_name, ship_from_phone, ship_from_address_line1, ship_from_address_line2, ship_from_city)
+            VALUES ($1, $2, FALSE, COALESCE($3, ''), COALESCE($4, ''), COALESCE($5, ''), COALESCE($6, TRUE), COALESCE($7::jsonb, '[{"keyword":"Amazon","types":["title","description","feature_specification","brand_manufacturer"]}]'::jsonb), $8, COALESCE($9, FALSE), COALESCE($10, 'local'), COALESCE($13, 'amazon_logistics_only'), COALESCE($14, TRUE), $11, $15, $16, $17, $18, $19)
             ON CONFLICT (user_id, store_id) WHERE store_id IS NOT NULL
             DO UPDATE SET
                 country = COALESCE($3, store_settings.country),
@@ -231,6 +264,11 @@ export class StoreSettingsService {
                   WHEN $12 THEN EXCLUDED.buyer_messaging
                   ELSE store_settings.buyer_messaging
                 END,
+                ship_from_name = COALESCE($15, store_settings.ship_from_name),
+                ship_from_phone = COALESCE($16, store_settings.ship_from_phone),
+                ship_from_address_line1 = COALESCE($17, store_settings.ship_from_address_line1),
+                ship_from_address_line2 = COALESCE($18, store_settings.ship_from_address_line2),
+                ship_from_city = COALESCE($19, store_settings.ship_from_city),
                 updated_at = CURRENT_TIMESTAMP
             RETURNING *
         `,
@@ -249,6 +287,11 @@ export class StoreSettingsService {
           buyerMessagingProvided,
           trackingScopeValue,
           trackingManualValue,
+          shipFromNameValue,
+          shipFromPhoneValue,
+          shipFromAddressLine1Value,
+          shipFromAddressLine2Value,
+          shipFromCityValue,
         ]
       );
     }
@@ -296,6 +339,11 @@ export class StoreSettingsService {
       // Default TRUE for rows written before migration 086 added the column.
       trackingConvertManualOrders: entity.tracking_convert_manual_orders !== false,
       buyerMessaging: this.parseBuyerMessaging(entity.buyer_messaging),
+      shipFromName: entity.ship_from_name || undefined,
+      shipFromPhone: entity.ship_from_phone || undefined,
+      shipFromAddressLine1: entity.ship_from_address_line1 || undefined,
+      shipFromAddressLine2: entity.ship_from_address_line2 || undefined,
+      shipFromCity: entity.ship_from_city || undefined,
       createdAt: entity.created_at,
       updatedAt: entity.updated_at,
     };

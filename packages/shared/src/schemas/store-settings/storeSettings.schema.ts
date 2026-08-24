@@ -30,6 +30,14 @@ export const storeSettingsSchema = (t: TFunction) => z.object({
   blacklist: z.array(blacklistKeywordSchema(t)),
 
   amazonTaxRate: z.number().min(0).max(100),
+
+  // Ship-from / return address for Aquiline profiles. Optional end to end —
+  // a seller on the local pass-through provider never needs them.
+  shipFromName: z.string().optional(),
+  shipFromPhone: z.string().optional(),
+  shipFromAddressLine1: z.string().optional(),
+  shipFromAddressLine2: z.string().optional(),
+  shipFromCity: z.string().optional(),
 });
 
 export type StoreSettingsFormData = z.infer<ReturnType<typeof storeSettingsSchema>>;

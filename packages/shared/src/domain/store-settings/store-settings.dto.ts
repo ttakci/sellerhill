@@ -26,6 +26,16 @@ export interface SaveStoreSettingsRequest {
     // (see class doc above), same pattern as autoFulfillEnabled.
     checkBlacklist?: boolean;
 
+    // Ship-from / return address for Aquiline profiles. Owned by
+    // StoreSettingsDrawer. Optional — omitted means "leave unchanged" (same
+    // pattern as country/state/zipCode), and every field stays optional end
+    // to end since a seller on the local provider never needs them.
+    shipFromName?: string;
+    shipFromPhone?: string;
+    shipFromAddressLine1?: string;
+    shipFromAddressLine2?: string;
+    shipFromCity?: string;
+
     // Owned by BlacklistDrawer. Omitted by the store-settings drawer.
     blacklist?: Omit<BlacklistKeyword, 'id'>[];
 

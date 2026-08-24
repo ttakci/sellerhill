@@ -94,6 +94,16 @@
     "trackingConversionScopeAmazonOnly": "Amazon Logistics only (TBA)",
     "trackingConversionScopeHint": "Amazon Logistics (TBA) numbers say \"Amazon\" outright, so converting only those hides the clearest sign of your supplier and uses far less of your monthly conversion allowance. Converting every carrier hides more — an Amazon-shipped UPS or USPS number can often be looked up — but costs more, and eBay treats a native carrier scan as stronger proof of delivery if a buyer claims their item never arrived.",
     "trackingConvertManualOrders": "Also convert orders I link by hand",
-    "trackingConvertManualOrdersHint": "On by default. Turn it off if you would rather convert manually linked orders one at a time from the order page."
+    "trackingConvertManualOrdersHint": "On by default. Turn it off if you would rather convert manually linked orders one at a time from the order page.",
+    "shipFrom": {
+      "title": "Ship-from address",
+      "description": "This is the return address shown on converted tracking. While it is incomplete, tracking conversion falls back to the raw Amazon tracking number, so your supplier stays visible to the buyer.",
+      "name": "Name",
+      "phone": "Phone number",
+      "addressLine1": "Address line 1",
+      "addressLine2": "Address line 2 (optional)",
+      "city": "City",
+      "incompleteHint": "Address line 1, city, and country are required for tracking conversion. Until all three are set, converted tracking is not available and the raw Amazon number is sent instead."
+    }
   }
 }

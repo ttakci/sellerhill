@@ -69,6 +69,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [country, setCountry] = useState(config?.country ?? '');
   const [stateField, setStateField] = useState(config?.state ?? '');
   const [zipCode, setZipCode] = useState(config?.zipCode ?? '');
+  const [shipFromName, setShipFromName] = useState(config?.shipFromName ?? '');
+  const [shipFromPhone, setShipFromPhone] = useState(config?.shipFromPhone ?? '');
+  const [shipFromAddressLine1, setShipFromAddressLine1] = useState(config?.shipFromAddressLine1 ?? '');
+  const [shipFromAddressLine2, setShipFromAddressLine2] = useState(config?.shipFromAddressLine2 ?? '');
+  const [shipFromCity, setShipFromCity] = useState(config?.shipFromCity ?? '');
   const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
@@ -104,6 +109,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCountry(next?.country ?? '');
       setStateField(next?.state ?? '');
       setZipCode(next?.zipCode ?? '');
+      setShipFromName(next?.shipFromName ?? '');
+      setShipFromPhone(next?.shipFromPhone ?? '');
+      setShipFromAddressLine1(next?.shipFromAddressLine1 ?? '');
+      setShipFromAddressLine2(next?.shipFromAddressLine2 ?? '');
+      setShipFromCity(next?.shipFromCity ?? '');
       setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
@@ -126,6 +136,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         country: country.trim(),
         state: stateField.trim(),
         zipCode: zipCode.trim(),
+        shipFromName: shipFromName.trim(),
+        shipFromPhone: shipFromPhone.trim(),
+        shipFromAddressLine1: shipFromAddressLine1.trim(),
+        shipFromAddressLine2: shipFromAddressLine2.trim(),
+        shipFromCity: shipFromCity.trim(),
         checkBlacklist,
         amazonTaxRate,
         autoFulfillEnabled,
@@ -151,6 +166,15 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setStep((step + 1) as StoreSettingsDrawerStep);
     }
   };
+
+  // Mirrors AquilineProfileService.resolveShipFromAddress: a profile is only
+  // created/PATCHed once address_line1 + city + country are all present —
+  // anything less and tracking conversion falls back to the raw Amazon
+  // number, so the seller is told that here rather than discovering it later
+  // as a silent pass-through.
+  const isShipFromAddressComplete = Boolean(
+    country.trim() && shipFromAddressLine1.trim() && shipFromCity.trim()
+  );
 
   const updateEvent = (event: BuyerMessageEventType, update: (current: BuyerMessageEventConfig) => BuyerMessageEventConfig): void => {
     setBuyerMessagingConfig((current) => ({
@@ -179,6 +203,12 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       country={country}
       state={stateField}
       zipCode={zipCode}
+      shipFromName={shipFromName}
+      shipFromPhone={shipFromPhone}
+      shipFromAddressLine1={shipFromAddressLine1}
+      shipFromAddressLine2={shipFromAddressLine2}
+      shipFromCity={shipFromCity}
+      isShipFromAddressComplete={isShipFromAddressComplete}
       checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
@@ -195,6 +225,11 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onCountryChange={(e) => setCountry(e.target.value)}
       onStateChange={(e) => setStateField(e.target.value)}
       onZipCodeChange={(e) => setZipCode(e.target.value)}
+      onShipFromNameChange={(e) => setShipFromName(e.target.value)}
+      onShipFromPhoneChange={(e) => setShipFromPhone(e.target.value)}
+      onShipFromAddressLine1Change={(e) => setShipFromAddressLine1(e.target.value)}
+      onShipFromAddressLine2Change={(e) => setShipFromAddressLine2(e.target.value)}
+      onShipFromCityChange={(e) => setShipFromCity(e.target.value)}
       onToggleCheckBlacklist={setCheckBlacklist}
       onAmazonTaxRateChange={(e) => setAmazonTaxRate(Number(e.target.value) || 0)}
       onAutoFulfillEnabledChange={setAutoFulfillEnabled}
