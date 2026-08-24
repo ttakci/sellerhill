@@ -104,17 +104,45 @@ export interface AquilinePlanUsage {
 }
 
 /**
+ * Whether `resolveForOrder` produced a real conversion or is falling back to
+ * the honest pass-through, and — for a pass-through — whether the same order
+ * is worth trying again shortly.
+ *
+ * `RETRYABLE` mirrors `isRetryableConversionFailure`'s classification
+ * (transport blip, "HTML not parsed yet"): the caller (the shipped-transition
+ * processor) may choose to defer the eBay push a short while rather than
+ * commit to the raw Amazon number immediately. Every other pass-through —
+ * including a deliberately terminal business decision like "scope excludes
+ * this carrier" or "quota exhausted" — is `TERMINAL`: retrying changes
+ * nothing, so the eBay push should happen now with whatever number was
+ * produced.
+ */
+export enum ConversionOutcome {
+  CONVERTED = 'converted',
+  PASSTHROUGH_TERMINAL = 'passthrough_terminal',
+  PASSTHROUGH_RETRYABLE = 'passthrough_retryable',
+}
+
+/**
  * Outcome of converting one Amazon tracking number.
  *
  * `shipmentId` is persisted alongside the number because the provider's own
  * integration guide requires it for later retrieval/cancellation, and because
  * it is the only handle on a paid resource we have already been billed for.
+ *
+ * `outcome` is OPTIONAL and additive: `LocalTrackingConverter`'s pure
+ * transform never sets it (there is no failure to classify — it always
+ * "succeeds" at being the honest pass-through), so this stays a non-breaking
+ * change for every existing caller. Only `TrackingConversionService` sets it,
+ * and only so a caller outside that file (the shipped-transition processor)
+ * can read the retryable/terminal bit without importing anything from it.
  */
 export interface TrackingConversionResult {
   trackingNumber: string;
   shippingCarrierCode: string;
   /** Provider-side shipment handle; null for the local pass-through converter. */
   shipmentId: string | null;
+  outcome?: ConversionOutcome;
 }
 
 /**

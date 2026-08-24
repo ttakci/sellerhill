@@ -23,6 +23,7 @@ import {
   AquilineProblemCode,
   AutoFulfillStatus,
   buildAmazonProductUrl,
+  ConversionOutcome,
   isAquilineProblemCode,
   PlatformSettingKey,
   TrackingConversionProvider,
@@ -174,7 +175,7 @@ export class TrackingConversionService {
     const order = await this.loadOrder(request.orderId);
     if (!order) {
       // No row to persist against; the honest transform is still correct.
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     if (order.converted_tracking_number) {
@@ -185,13 +186,14 @@ export class TrackingConversionService {
         trackingNumber: order.converted_tracking_number,
         shippingCarrierCode: order.converted_tracking_carrier || AQUILINE_EBAY_CARRIER_CODE,
         shipmentId: order.tracking_provider_shipment_id,
+        outcome: ConversionOutcome.CONVERTED,
       };
     }
 
     const settings = await this.resolveSettings(order);
     const provider = normalizeProvider(settings.tracking_conversion_provider);
     if (!isExternalProvider(provider)) {
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // Scope: does this carrier qualify under the seller's setting?
@@ -207,7 +209,7 @@ export class TrackingConversionService {
       this.logger.debug(
         `Order ${order.id}: carrier is not Amazon Logistics and scope is ${scope} — passing through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // Manually linked orders: converted only when the seller allows it. The
@@ -224,7 +226,7 @@ export class TrackingConversionService {
       this.logger.debug(
         `Order ${order.id}: manually linked and manual conversion is off — passing through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // Entitlement: a lapsed account does not get paid conversions.
@@ -232,7 +234,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: subscription suspended — falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // Monthly conversion quota. Exhaustion DEGRADES rather than blocks: the
@@ -246,7 +248,7 @@ export class TrackingConversionService {
         `Order ${order.id}: monthly tracking-conversion quota exhausted ` +
           `(${quota.used}/${quota.limitValue ?? '?'}) — falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     const config = await this.resolveConfig();
@@ -254,7 +256,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: provider is ${provider} but no API key is configured — falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     const recipient = toProviderAddress(order.shipping_address);
@@ -264,7 +266,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: buyer address incomplete — cannot convert, falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // Two cheap local preconditions, checked before any network call so a
@@ -281,7 +283,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: missing Amazon order id or tracking URL — cannot convert, falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     // One Aquiline profile per (user, Amazon marketplace) — lazy, cached,
@@ -297,7 +299,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: no Aquiline profile available — falling back to pass-through`,
       );
-      return this.local.convertSync(request);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
     }
 
     try {
@@ -319,6 +321,9 @@ export class TrackingConversionService {
         sourceTracking: AQUILINE_SOURCE_TRACKING,
       };
       await this.aquiline.upsertOrders(profileId, [marketplaceOrder], config);
+      // Diagnostic only — a failed stamp must never fail the conversion that
+      // already succeeded. See `stampOrderSynced`.
+      await this.stampOrderSynced(order.id);
 
       if (request.trackingHtml) {
         await this.aquiline.uploadTrackingHtml(
@@ -327,6 +332,7 @@ export class TrackingConversionService {
           { trackingUrl, html: request.trackingHtml },
           config,
         );
+        await this.stampHtmlUploaded(order.id);
       }
 
       // Consulted immediately before `assign`, so a plan we already know is
@@ -337,7 +343,7 @@ export class TrackingConversionService {
           `Order ${order.id}: Aquiline plan is exhausted (remaining ${snapshot?.planRemaining ?? '?'}) — ` +
             `falling back to pass-through`,
         );
-        return this.local.convertSync(request);
+        return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
       }
 
       const assigned = await this.aquiline.assign(
@@ -356,9 +362,12 @@ export class TrackingConversionService {
         config,
       );
 
-      // The assign response carries no separate shipment handle — the AQUA
-      // number itself is the only one. Never fabricate one.
-      await this.persist(order.id, provider, assigned.aquiline, null);
+      // Aquiline has ALREADY issued and billed this number — everything past
+      // this point is bookkeeping, and a bookkeeping failure must never be
+      // reported as "conversion did not happen" (Finding 1). `persistConverted`
+      // never throws; it always tries its best and we always return the real
+      // number regardless of which layer, if any, actually wrote it.
+      await this.persistConverted(order.id, provider, assigned.aquiline);
       await this.recordPlanSnapshot(assigned);
 
       this.logger.log(
@@ -368,27 +377,36 @@ export class TrackingConversionService {
         trackingNumber: assigned.aquiline,
         shippingCarrierCode: AQUILINE_EBAY_CARRIER_CODE,
         shipmentId: null,
+        outcome: ConversionOutcome.CONVERTED,
       };
     } catch (err) {
-      this.logConversionFailure(order.id, err);
-      return this.local.convertSync(request);
+      const retryable = this.logConversionFailure(order.id, err);
+      return this.passthroughResult(
+        request,
+        retryable ? ConversionOutcome.PASSTHROUGH_RETRYABLE : ConversionOutcome.PASSTHROUGH_TERMINAL,
+      );
     }
   }
 
+  /** Wrap the honest pass-through with the outcome classification Task 7's
+   *  `shouldDeferEbayPush` reads — every non-converted return goes through
+   *  this so the field is never forgotten on a new early exit. */
+  private passthroughResult(request: ConversionRequest, outcome: ConversionOutcome): TrackingConversionResult {
+    return { ...this.local.convertSync(request), outcome };
+  }
+
   /**
-   * Failure logging that distinguishes an operator problem from a blip.
+   * Failure logging that distinguishes an operator problem from a blip, and
+   * returns whether the failure was retryable so the caller can classify the
+   * `ConversionOutcome` it returns (Finding 2 — Task 7's `shouldDeferEbayPush`
+   * needs that bit and cannot see inside this file).
    *
    * A revoked key, an exhausted plan quota or a full profile ceiling silently
    * degrades every order to pass-through — the supplier stops being hidden,
    * which is the thing the seller is paying to avoid. That has to be loud,
-   * and it must not read like a transient network warning. The
-   * retryable/terminal classification (`isRetryableConversionFailure`) is
-   * folded into the message so an operator reading the log can tell a
-   * self-clearing blip from something that needs attention, even though
-   * `resolveForOrder` itself always degrades to pass-through either way —
-   * see the module header.
+   * and it must not read like a transient network warning.
    */
-  private logConversionFailure(orderId: string, err: unknown): void {
+  private logConversionFailure(orderId: string, err: unknown): boolean {
     if (err instanceof AquilineError) {
       const problem = toProblemCode(err.code);
       const retryable = isRetryableConversionFailure(err.kind, problem);
@@ -405,12 +423,13 @@ export class TrackingConversionService {
       } else {
         this.logger.warn(message);
       }
-      return;
+      return retryable;
     }
     this.logger.warn(
       `Order ${orderId}: tracking conversion failed unexpectedly — falling back to pass-through. ` +
         `${(err as Error).message}`,
     );
+    return false;
   }
 
   /**
@@ -549,8 +568,9 @@ export class TrackingConversionService {
     };
   }
 
-  /** Persist the paid result. Failure here is fatal to the conversion path —
-   *  an unrecorded conversion would be re-bought on the next retry. */
+  /** Layer 1 of `persistConverted` — the full write. Throws on failure; the
+   *  caller is the only one that decides what happens next. Never call this
+   *  directly from `resolveForOrder` — go through `persistConverted`. */
   private async persist(
     orderId: string,
     provider: TrackingConversionProvider,
@@ -568,6 +588,80 @@ export class TrackingConversionService {
        WHERE id = $5`,
       [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, shipmentId, provider, orderId],
     );
+  }
+
+  /**
+   * Record a converted tracking number in up to three fail-soft layers,
+   * mirroring `AmazonCheckoutService.onPlaced` (CLAUDE.md "Money safety —
+   * onPlaced (fail-soft layered)"). By the time this runs, Aquiline has
+   * ALREADY issued and billed the AQUA number — a persistence failure here
+   * must never be reported as "conversion did not happen", or the next
+   * retry finds nothing stored and calls `assign` again: a real re-buy.
+   *
+   * Layer 1: the full write (`persist`) — number, carrier, shipment id,
+   *   provider, timestamps.
+   * Layer 2: a minimal write — just the two columns eBay actually needs
+   *   (`converted_tracking_number`/`converted_tracking_carrier`), fewer
+   *   columns and fewer ways to fail.
+   * Layer 3: both writes failed. Nothing local now records a real, billed
+   *   AQUA number, so this is logged at `error` (not `warn`) WITH the
+   *   number, so it can be recovered by hand — the log line is the only
+   *   remaining record.
+   *
+   * Never throws. `resolveForOrder` returns the converted number in every
+   * case regardless of which layer (if any) actually wrote it.
+   */
+  private async persistConverted(
+    orderId: string,
+    provider: TrackingConversionProvider,
+    trackingNumber: string,
+  ): Promise<void> {
+    try {
+      await this.persist(orderId, provider, trackingNumber, null);
+      return;
+    } catch (err) {
+      this.logger.warn(
+        `Order ${orderId}: full persist of converted tracking ${trackingNumber} failed ` +
+          `(${(err as Error).message}) — trying a minimal write`,
+      );
+    }
+
+    try {
+      await this.databaseService.query(
+        `UPDATE orders SET converted_tracking_number = $1, converted_tracking_carrier = $2 WHERE id = $3`,
+        [trackingNumber, AQUILINE_EBAY_CARRIER_CODE, orderId],
+      );
+    } catch (err) {
+      this.logger.error(
+        `Order ${orderId}: Aquiline issued AQUA number ${trackingNumber} but BOTH persist layers failed ` +
+          `(${(err as Error).message}) — nothing local records this conversion; recover it by hand.`,
+      );
+    }
+  }
+
+  /** Diagnostic timestamp — `orders.aquiline_order_synced_at` (migration 089).
+   *  Best-effort: a failed stamp must never fail a conversion that already
+   *  succeeded. */
+  private async stampOrderSynced(orderId: string): Promise<void> {
+    try {
+      await this.databaseService.query(`UPDATE orders SET aquiline_order_synced_at = NOW() WHERE id = $1`, [
+        orderId,
+      ]);
+    } catch (err) {
+      this.logger.warn(`Order ${orderId}: could not stamp aquiline_order_synced_at: ${(err as Error).message}`);
+    }
+  }
+
+  /** Diagnostic timestamp — `orders.tracking_html_uploaded_at` (migration 089).
+   *  Same best-effort contract as `stampOrderSynced`. */
+  private async stampHtmlUploaded(orderId: string): Promise<void> {
+    try {
+      await this.databaseService.query(`UPDATE orders SET tracking_html_uploaded_at = NOW() WHERE id = $1`, [
+        orderId,
+      ]);
+    } catch (err) {
+      this.logger.warn(`Order ${orderId}: could not stamp tracking_html_uploaded_at: ${(err as Error).message}`);
+    }
   }
 
   private async loadOrder(orderId: string): Promise<ConversionOrderRow | null> {
