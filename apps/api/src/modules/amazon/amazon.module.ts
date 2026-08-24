@@ -21,6 +21,7 @@ import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import { AmazonVerifyProcessorService } from './amazon-verify-processor.service';
 import { AmazonVerifyQueueService } from './amazon-verify-queue.service';
 import { AmazonController } from './amazon.controller';
+import { AquilineProfileService } from './aquiline-profile.service';
 import { AquilineClient } from './aquiline.client';
 import { AutoFulfillProcessor } from './auto-fulfill-processor.service';
 import { BrowserProfileGcService } from './browser-profile-gc.service';
@@ -63,6 +64,11 @@ import { TrackingWebhookService } from './tracking-webhook.service';
     // eBay BUYER sees; the webhook receiver is what lets delivery detection
     // stop costing Playwright time once a conversion exists.
     AquilineClient,
+    // Creates/maintains the one Aquiline profile a seller's orders are
+    // grouped under. Profiles cannot be deleted (no DELETE endpoint) and the
+    // plan caps them at AQUILINE_MAX_PROFILES, so this owns the "create as
+    // late as possible, exactly once" discipline — never speculatively.
+    AquilineProfileService,
     TrackingConversionService,
     TrackingWebhookService,
     AmazonVerifyQueueService,
