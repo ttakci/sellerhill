@@ -19,10 +19,17 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  AmazonMarketplace,
+  AquilineProblemCode,
   AutoFulfillStatus,
+  buildAmazonProductUrl,
+  isAquilineProblemCode,
   PlatformSettingKey,
   TrackingConversionProvider,
   TrackingConversionScope,
+  type AquilineAssignResult,
+  type AquilineMarketplaceOrder,
+  type AquilineStoreAddress,
   type TrackingConversionResult,
 } from '@repo/shared';
 
@@ -30,13 +37,8 @@ import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
-import {
-  AquilineClient,
-  AquilineError,
-  AquilineErrorKind,
-  type AquilineAddress,
-  type AquilineConfig,
-} from './aquiline.client';
+import { AquilineProfileService } from './aquiline-profile.service';
+import { AquilineClient, AquilineError, AquilineErrorKind, type AquilineConfig } from './aquiline.client';
 import {
   AQUILINE_EBAY_CARRIER_CODE,
   isAmazonLogisticsTracking,
@@ -44,6 +46,31 @@ import {
   LocalTrackingConverter,
   type ConversionRequest,
 } from './tracking-converter';
+
+/** Amazon has no sandbox and no non-US site the platform supports today (see
+ *  CLAUDE.md "Multi-marketplace architecture") — mirrors the same literal
+ *  `AquilineProfileService` already navigates to for profile creation; kept
+ *  local since this file has its own single Amazon-only call site. */
+const AQUILINE_AMAZON_MARKETPLACE_HOST = 'www.amazon.com';
+
+/** `AssignOrderBody.retailer` for the schema's Amazon example. */
+const AQUILINE_AMAZON_RETAILER = 'amazon-us';
+
+/**
+ * Not a tracking NUMBER — the Integration API has no field for one (see the
+ * design doc: "no such field; Amazon passes a ship-track page URL"). This
+ * literal marks the order's origin, matching Aquiline's own schema example
+ * for an Amazon assign (`retailer` + `marketplaceHost` + `sourceTracking`,
+ * never `carrier`).
+ */
+const AQUILINE_SOURCE_TRACKING = 'Amazon';
+
+/** Snapshot staleness. Aquiline's plan resets on the SUBSCRIPTION anniversary
+ *  (`windowKey` equals `currentPeriodStart`, verified live 2026-08-23), not a
+ *  calendar month, so the reset date cannot be computed locally. Expiring the
+ *  snapshot after 24h means at worst one wasted call per day re-learns the
+ *  real state, and a reset is never missed. */
+export const PLAN_SNAPSHOT_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Buyer address as stored in `orders.shipping_address`. */
 interface StoredAddress {
@@ -68,6 +95,18 @@ interface ConversionOrderRow {
   converted_tracking_number: string | null;
   converted_tracking_carrier: string | null;
   tracking_provider_shipment_id: string | null;
+  /** Everything below is only needed for the Aquiline sequence (profile
+   *  resolution + `upsertOrders`/`assign` bodies) — joined in from
+   *  `amazon_accounts`/`listings`, never written by this service. */
+  amazon_account_id: string | null;
+  amazon_order_id: string | null;
+  amazon_order_url: string | null;
+  amazon_tracking_url: string | null;
+  order_date: Date | null;
+  amazon_marketplace: string | null;
+  amazon_account_email: string | null;
+  listing_asin: string | null;
+  listing_title: string | null;
 }
 
 interface ResolvedSettingsRow {
@@ -96,6 +135,7 @@ export class TrackingConversionService {
     private readonly platformSettings: PlatformSettingsService,
     private readonly aquiline: AquilineClient,
     private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly aquilineProfile: AquilineProfileService,
   ) {}
 
   /**
@@ -227,27 +267,107 @@ export class TrackingConversionService {
       return this.local.convertSync(request);
     }
 
+    // Two cheap local preconditions, checked before any network call so a
+    // permanently unconvertible order never costs a profile-creation attempt:
+    //   - `marketplaceOrderId` is what `upsertOrders`/`uploadTrackingHtml`/
+    //     `assign` all key on — without it there is nothing to upsert.
+    //   - `trackingUrl` is required by `assign`'s schema. The processor
+    //     (Task 7) supplies the real ship-track href on `request.trackingUrl`;
+    //     the stored `amazon_tracking_url` column is the fallback for the
+    //     on-demand path, which has no live page to read one from.
+    const marketplaceOrderId = order.amazon_order_id;
+    const trackingUrl = request.trackingUrl || order.amazon_tracking_url;
+    if (!marketplaceOrderId || !trackingUrl) {
+      this.logger.warn(
+        `Order ${order.id}: missing Amazon order id or tracking URL — cannot convert, falling back to pass-through`,
+      );
+      return this.local.convertSync(request);
+    }
+
+    // One Aquiline profile per (user, Amazon marketplace) — lazy, cached,
+    // ceiling-guarded. `ensureProfile` never throws; `null` means the caller
+    // must fall back, same as every other precondition here.
+    const marketplace = (order.amazon_marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US;
+    const profileId = await this.aquilineProfile.ensureProfile(
+      order.user_id,
+      marketplace,
+      order.amazon_account_email,
+    );
+    if (!profileId) {
+      this.logger.warn(
+        `Order ${order.id}: no Aquiline profile available — falling back to pass-through`,
+      );
+      return this.local.convertSync(request);
+    }
+
     try {
-      const converted = await this.aquiline.createConversion(
+      const marketplaceOrder: AquilineMarketplaceOrder = {
+        marketplaceOrderId,
+        ...(order.order_date ? { orderPlacedAt: order.order_date.toISOString() } : {}),
+        ...(order.shipping_address?.fullName?.trim()
+          ? { shipToName: order.shipping_address.fullName.trim() }
+          : {}),
+        shippingAddress: recipient,
+        ...(order.listing_title ? { productTitle: order.listing_title } : {}),
+        ...(order.listing_asin
+          ? { productId: order.listing_asin, productUrl: buildAmazonProductUrl(order.listing_asin, marketplace) }
+          : {}),
+        ...(order.amazon_order_url ? { orderUrl: order.amazon_order_url } : {}),
+        trackingUrl,
+        // Not a tracking number — the Integration API has no field for one.
+        // This marks the order's origin the same way `assign`'s body does.
+        sourceTracking: AQUILINE_SOURCE_TRACKING,
+      };
+      await this.aquiline.upsertOrders(profileId, [marketplaceOrder], config);
+
+      if (request.trackingHtml) {
+        await this.aquiline.uploadTrackingHtml(
+          profileId,
+          marketplaceOrderId,
+          { trackingUrl, html: request.trackingHtml },
+          config,
+        );
+      }
+
+      // Consulted immediately before `assign`, so a plan we already know is
+      // exhausted never spends a call on a guaranteed 402.
+      const snapshot = await this.loadLatestPlanSnapshot();
+      if (isPlanExhausted(snapshot, new Date())) {
+        this.logger.error(
+          `Order ${order.id}: Aquiline plan is exhausted (remaining ${snapshot?.planRemaining ?? '?'}) — ` +
+            `falling back to pass-through`,
+        );
+        return this.local.convertSync(request);
+      }
+
+      const assigned = await this.aquiline.assign(
+        profileId,
+        marketplaceOrderId,
         {
-          externalOrderId: order.id,
-          sourceTrackingNumber: request.rawNumber,
-          sourceCarrier: request.rawCarrier || null,
-          recipient,
-          partnerId: settings.tracking_provider_profile_id,
+          trackingUrl,
+          // Amazon has exactly one assign shape whatever the shipping
+          // carrier — Aquiline derives the carrier from the uploaded HTML.
+          // NEVER send `carrier` here: the schema documents it as required
+          // for a NON-Amazon assign only.
+          retailer: AQUILINE_AMAZON_RETAILER,
+          marketplaceHost: AQUILINE_AMAZON_MARKETPLACE_HOST,
+          sourceTracking: AQUILINE_SOURCE_TRACKING,
         },
         config,
       );
 
-      await this.persist(order.id, provider, converted.trackingNumber, converted.shipmentId);
+      // The assign response carries no separate shipment handle — the AQUA
+      // number itself is the only one. Never fabricate one.
+      await this.persist(order.id, provider, assigned.aquiline, null);
+      await this.recordPlanSnapshot(assigned);
 
       this.logger.log(
-        `Order ${order.id}: converted ${request.rawNumber} -> ${converted.trackingNumber} (${provider})`,
+        `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider})`,
       );
       return {
-        trackingNumber: converted.trackingNumber,
+        trackingNumber: assigned.aquiline,
         shippingCarrierCode: AQUILINE_EBAY_CARRIER_CODE,
-        shipmentId: converted.shipmentId,
+        shipmentId: null,
       };
     } catch (err) {
       this.logConversionFailure(order.id, err);
@@ -258,18 +378,28 @@ export class TrackingConversionService {
   /**
    * Failure logging that distinguishes an operator problem from a blip.
    *
-   * A revoked key or an exhausted plan quota silently degrades every order to
-   * pass-through — the supplier stops being hidden, which is the thing the
-   * seller is paying to avoid. That has to be loud, and it must not read like
-   * a transient network warning.
+   * A revoked key, an exhausted plan quota or a full profile ceiling silently
+   * degrades every order to pass-through — the supplier stops being hidden,
+   * which is the thing the seller is paying to avoid. That has to be loud,
+   * and it must not read like a transient network warning. The
+   * retryable/terminal classification (`isRetryableConversionFailure`) is
+   * folded into the message so an operator reading the log can tell a
+   * self-clearing blip from something that needs attention, even though
+   * `resolveForOrder` itself always degrades to pass-through either way —
+   * see the module header.
    */
   private logConversionFailure(orderId: string, err: unknown): void {
     if (err instanceof AquilineError) {
+      const problem = toProblemCode(err.code);
+      const retryable = isRetryableConversionFailure(err.kind, problem);
       const actionable =
-        err.kind === AquilineErrorKind.UNAUTHORIZED || err.kind === AquilineErrorKind.QUOTA_EXCEEDED;
+        err.kind === AquilineErrorKind.UNAUTHORIZED ||
+        err.kind === AquilineErrorKind.QUOTA_EXCEEDED ||
+        err.kind === AquilineErrorKind.PROFILE_CEILING;
       const message =
-        `Order ${orderId}: tracking conversion failed (${err.kind}) — ` +
-        `falling back to the Amazon number, so the supplier is visible to the buyer. ${err.message}`;
+        `Order ${orderId}: tracking conversion failed (${err.kind}${problem ? `/${problem}` : ''}, ` +
+        `${retryable ? 'retryable' : 'terminal'}) — falling back to the Amazon number, so the supplier ` +
+        `is visible to the buyer. ${err.message}`;
       if (actionable) {
         this.logger.error(message);
       } else {
@@ -442,10 +572,16 @@ export class TrackingConversionService {
 
   private async loadOrder(orderId: string): Promise<ConversionOrderRow | null> {
     const rows = await this.databaseService.query<ConversionOrderRow>(
-      `SELECT id, user_id, ebay_account_id, shipping_address, auto_fulfill_status,
-              converted_tracking_number, converted_tracking_carrier,
-              tracking_provider_shipment_id
-       FROM orders WHERE id = $1`,
+      `SELECT o.id, o.user_id, o.ebay_account_id, o.shipping_address, o.auto_fulfill_status,
+              o.converted_tracking_number, o.converted_tracking_carrier,
+              o.tracking_provider_shipment_id, o.amazon_account_id, o.amazon_order_id,
+              o.amazon_order_url, o.amazon_tracking_url, o.order_date,
+              aa.marketplace AS amazon_marketplace, aa.email AS amazon_account_email,
+              l.asin AS listing_asin, l.title AS listing_title
+       FROM orders o
+       LEFT JOIN amazon_accounts aa ON aa.id = o.amazon_account_id
+       LEFT JOIN listings l ON l.id = o.listing_id
+       WHERE o.id = $1`,
       [orderId],
     );
     return rows[0] ?? null;
@@ -478,47 +614,158 @@ export class TrackingConversionService {
     }
   }
 
-  /** Effective provider credentials/config (panel override → env → default). */
+  /** Effective provider credentials/config (panel override → env → default).
+   *  Same resolution — and, necessarily, the same duplication — as
+   *  `AquilineProfileService`'s private `resolveConfig`: that method isn't
+   *  reachable from here, and this task's file list doesn't include it. */
   async resolveConfig(): Promise<AquilineConfig> {
-    const [baseUrl, apiKey, partnerId, timeoutMs] = await Promise.all([
+    const [baseUrl, token, profilePrefix, maxProfiles, timeoutMs] = await Promise.all([
       this.platformSettings.getString(PlatformSettingKey.AQUILINE_BASE_URL),
       this.platformSettings.getString(PlatformSettingKey.AQUILINE_API_KEY),
-      this.platformSettings.getString(PlatformSettingKey.AQUILINE_PARTNER_ID),
+      this.platformSettings.getString(PlatformSettingKey.AQUILINE_PROFILE_PREFIX),
+      this.platformSettings.getNumber(PlatformSettingKey.AQUILINE_MAX_PROFILES),
       this.platformSettings.getNumber(PlatformSettingKey.AQUILINE_TIMEOUT_MS),
     ]);
     return {
-      baseUrl: baseUrl || 'https://api.aquiline-tracking.com/v3',
-      apiKey: apiKey || null,
-      partnerId: partnerId || null,
+      baseUrl: baseUrl || 'https://aquiline-tracking.com/app/api/integration',
+      token: token || null,
+      profilePrefix: profilePrefix || 'sh',
+      maxProfiles: Number.isFinite(maxProfiles) && maxProfiles > 0 ? maxProfiles : 10,
       timeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 15_000,
     };
   }
+
+  /** Most recent `aquiline_plan_snapshot` row, or `null` on no row / a read
+   *  failure — both read by `isPlanExhausted` as "unknown", which fails open
+   *  (never short-circuits) rather than fabricating exhaustion. */
+  private async loadLatestPlanSnapshot(): Promise<{ planRemaining: number | null; capturedAt: Date } | null> {
+    try {
+      const rows = await this.databaseService.query<{
+        plan_remaining: number | null;
+        captured_at: Date;
+      }>(`SELECT plan_remaining, captured_at FROM aquiline_plan_snapshot ORDER BY captured_at DESC LIMIT 1`);
+      const row = rows[0];
+      if (!row) {
+        return null;
+      }
+      return { planRemaining: row.plan_remaining, capturedAt: new Date(row.captured_at) };
+    } catch (err) {
+      this.logger.warn(`Could not load the Aquiline plan snapshot: ${(err as Error).message}`);
+      return null;
+    }
+  }
+
+  /** Append-only, mirroring `keepa_balance` — one row per `assign` response.
+   *  A write failure only costs the next call's early-exit optimisation, so
+   *  it is logged and swallowed rather than allowed to fail the conversion
+   *  that already succeeded. */
+  private async recordPlanSnapshot(result: AquilineAssignResult): Promise<void> {
+    try {
+      await this.databaseService.query(
+        `INSERT INTO aquiline_plan_snapshot (plan_limit, plan_used, plan_remaining, captured_at)
+         VALUES ($1, $2, $3, NOW())`,
+        [result.planLimit, result.planUsed, result.planRemaining],
+      );
+    } catch (err) {
+      this.logger.warn(`Could not record the Aquiline plan snapshot: ${(err as Error).message}`);
+    }
+  }
 }
 
-/** Buyer address → provider address, or null when it is not deliverable. */
-export function toProviderAddress(address: StoredAddress | null): AquilineAddress | null {
+/** Buyer address → the provider's wire shape (`AquilineStoreAddress`, snake_case
+ *  and split first/last name — unlike the rest of this API), or null when it is
+ *  not deliverable. */
+export function toProviderAddress(address: StoredAddress | null): AquilineStoreAddress | null {
   if (!address) {
     return null;
   }
   const name = address.fullName?.trim();
   const addressLine1 = address.street?.trim();
   const city = address.city?.trim();
-  const countryCode = (address.country?.trim() || 'US').toUpperCase();
+  const country = (address.country?.trim() || 'US').toUpperCase();
   // Name, street and city are the minimum a carrier can deliver against. A
   // missing postcode is tolerated (some countries have none); a missing street
   // is not.
   if (!name || !addressLine1 || !city) {
     return null;
   }
+  const { firstName, lastName } = splitBuyerName(name);
   return {
-    name,
-    phone: address.phone?.trim() || null,
-    countryCode,
+    ...(firstName ? { first_name: firstName } : {}),
+    ...(lastName ? { last_name: lastName } : {}),
+    address_line1: addressLine1,
+    ...(address.street2?.trim() ? { address_line2: address.street2.trim() } : {}),
     city,
-    addressLine1,
-    addressLine2: address.street2?.trim() || null,
-    postalCode: address.zipCode?.trim() || null,
+    ...(address.state?.trim() ? { state: address.state.trim() } : {}),
+    ...(address.zipCode?.trim() ? { zip_code: address.zipCode.trim() } : {}),
+    country,
+    ...(address.phone?.trim() ? { phone_number: address.phone.trim() } : {}),
   };
+}
+
+/** First/last split of a single display name, since `AquilineStoreAddress`
+ *  carries them separately. Mirrors `AquilineProfileService`'s own
+ *  `splitShipFromName` — that one is private to its file, and this is a
+ *  two-line function, so a small duplicate beats a cross-file import for it. */
+function splitBuyerName(name: string): { firstName?: string; lastName?: string } {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0] };
+  }
+  return { firstName: parts.slice(0, -1).join(' '), lastName: parts[parts.length - 1] };
+}
+
+/** Narrow the provider's raw `code` string to the known vocabulary. An
+ *  unrecognised code degrades to `null` ("some problem") rather than being
+ *  cast — see `isAquilineProblemCode`'s own doc comment. */
+function toProblemCode(code: string | null | undefined): AquilineProblemCode | null {
+  return typeof code === 'string' && isAquilineProblemCode(code) ? code : null;
+}
+
+/**
+ * Whether a failed conversion is worth deferring the eBay push for.
+ *
+ * Retryable means "the same request may succeed shortly". A plan wall, a
+ * revoked token, a full profile ceiling and a rejected page all give the same
+ * answer next time, so deferring only delays the seller's fulfilment.
+ */
+export function isRetryableConversionFailure(
+  kind: AquilineErrorKind,
+  problem: AquilineProblemCode | null,
+): boolean {
+  if (problem === AquilineProblemCode.NEEDS_TRACKING_UPLOAD) {
+    return true;
+  }
+  if (problem === AquilineProblemCode.UPDATE_NOT_APPLIED) {
+    return true;
+  }
+  if (problem !== null) {
+    return false;
+  }
+  return kind === AquilineErrorKind.TRANSPORT;
+}
+
+/**
+ * Whether the last known Aquiline plan snapshot says nothing is left.
+ *
+ * Spending a call on a guaranteed 402 wastes a request and logs noise, so
+ * this short-circuits BEFORE `assign` — see `resolveForOrder`. A `null`
+ * `planRemaining` (never observed, or the read itself failed) fails open: an
+ * unknown count must never be read as exhaustion. A snapshot older than
+ * `PLAN_SNAPSHOT_TTL_MS` is treated the same way, since Aquiline's window
+ * resets on the subscription anniversary, not a date this code can compute.
+ */
+export function isPlanExhausted(
+  snapshot: { planRemaining: number | null; capturedAt: Date } | null,
+  now: Date,
+): boolean {
+  if (!snapshot || snapshot.planRemaining === null) {
+    return false;
+  }
+  if (now.getTime() - snapshot.capturedAt.getTime() > PLAN_SNAPSHOT_TTL_MS) {
+    return false;
+  }
+  return snapshot.planRemaining <= 0;
 }
 
 /** Stored provider string → enum, defaulting to LOCAL for anything unknown. */
