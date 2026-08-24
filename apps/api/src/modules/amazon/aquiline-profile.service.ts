@@ -83,13 +83,14 @@ export class AquilineProfileService {
    *     provider call at all, so a misconfigured/revoked token still serves
    *     the cached id.
    *  4. A cached row with a stale fingerprint PATCHes and updates the row.
-   *  5. No row: an advisory lock (keyed on the user, same idiom as
-   *     `listing-processor.service.ts`'s `resolveProductData` and
-   *     `buyer-message-template.repository.ts`'s `ensureSeeded`) serializes
-   *     concurrent first-creates, the row is re-read inside the lock, the
-   *     profile ceiling is checked against `listProfiles()` BEFORE creating
-   *     (the resource cannot be reclaimed), and only then is the profile
-   *     created.
+   *  5. No row: a GLOBAL advisory lock (fixed namespace, no per-user
+   *     component — see the lock acquisition below for why) serializes EVERY
+   *     seller's first-create against every other seller's, because
+   *     `AQUILINE_MAX_PROFILES` is a ceiling on the whole provider account,
+   *     not per user. The row is re-read inside the lock, the profile
+   *     ceiling is checked against `listProfiles()` BEFORE creating (the
+   *     resource cannot be reclaimed), and only then is the profile created
+   *     — all of it under the one lock, held for the whole sequence.
    */
   async ensureProfile(
     userId: string,
@@ -127,105 +128,153 @@ export class AquilineProfileService {
       if (!patched) {
         return null;
       }
-      await this.db.query(
-        `UPDATE aquiline_profiles SET fingerprint = $1, synced_at = NOW() WHERE user_id = $2 AND marketplace = $3`,
-        [fingerprint, userId, marketplace],
-      );
-      return existing.profile_id;
-    }
-
-    return this.db.transaction(async (client) => {
-      // Advisory lock scope: this transaction/connection only. Namespaced
-      // hashtext() pair, same idiom as `resolveProductData` (keyed on the
-      // ASIN there, on the user here) and `ensureSeeded` — never invented
-      // from scratch.
-      await client.query(
-        `SELECT pg_advisory_xact_lock(hashtext('aquiline-profile'), hashtext($1))`,
-        [userId],
-      );
-
-      // Another request may have created the profile while we waited on the
-      // lock.
-      const rowAfterLock = await this.readRowWithClient(client, userId, marketplace);
-      if (rowAfterLock) {
-        if (rowAfterLock.fingerprint === fingerprint) {
-          return rowAfterLock.profile_id;
-        }
-        const patched = await this.callPatchProfile(
-          rowAfterLock.profile_id,
-          userId,
-          label,
-          address,
-          config,
-        );
-        if (!patched) {
-          return null;
-        }
-        await client.query(
+      // A failed fingerprint write must not lose a profile id we already
+      // hold — log and keep the id; the next call simply re-PATCHes.
+      try {
+        await this.db.query(
           `UPDATE aquiline_profiles SET fingerprint = $1, synced_at = NOW() WHERE user_id = $2 AND marketplace = $3`,
           [fingerprint, userId, marketplace],
         );
-        return rowAfterLock.profile_id;
-      }
-
-      // Ceiling guard — checked BEFORE creation, because the slot can never
-      // be reclaimed once spent.
-      let profileCount: number;
-      try {
-        const list = await this.client.listProfiles(config);
-        profileCount = list.items.length;
       } catch (err) {
         this.logger.error(
-          `Aquiline profile-ceiling check failed for user ${userId}: ${describeAquilineError(err)}`,
+          `Aquiline profile ${existing.profile_id} PATCHed but the fingerprint write failed for user ${userId}: ${describeAquilineError(err)}`,
         );
-        return null;
       }
-      if (profileCount >= config.maxProfiles) {
-        this.logger.error(
-          `Aquiline profile ceiling reached (${profileCount}/${config.maxProfiles}) — refusing to create a profile for user ${userId}, marketplace ${marketplace}`,
-        );
-        return null;
-      }
+      return existing.profile_id;
+    }
 
-      let createdProfileId: string | null;
-      try {
-        const created = await this.client.createProfile(
-          {
-            accountOrigin: AquilineAccountOrigin.AMAZON,
-            profileId,
+    try {
+      return await this.db.transaction(async (client) => {
+        // GLOBAL lock — fixed namespace, deliberately NO per-user component.
+        // A per-user key (the original, reviewed-out version of this lock)
+        // only stops one user creating two profiles; it does nothing to stop
+        // two DIFFERENT users, each taking a different lock key, both
+        // observing 9/10 from `listProfiles()` and both creating — 11
+        // profiles on a 10-profile plan, permanently, with no DELETE to
+        // recover. `AQUILINE_MAX_PROFILES` is a ceiling on the whole
+        // provider account, not per user, so the lock that protects it must
+        // be too. A global lock is strictly stronger than a per-user one —
+        // it already serializes two attempts for the SAME user — so there is
+        // no separate per-user lock to keep. Contention is a non-issue: a
+        // profile is created once per seller for the lifetime of the
+        // account. Held for the WHOLE sequence below (re-read, ceiling
+        // check, create, insert) — releasing it early would reopen exactly
+        // the race this fixes.
+        await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [
+          'aquiline-profile-create',
+        ]);
+
+        // Another request may have created the profile while we waited on
+        // the lock.
+        const rowAfterLock = await this.readRowWithClient(client, userId, marketplace);
+        if (rowAfterLock) {
+          if (rowAfterLock.fingerprint === fingerprint) {
+            return rowAfterLock.profile_id;
+          }
+          const patched = await this.callPatchProfile(
+            rowAfterLock.profile_id,
+            userId,
             label,
-            marketplaceHost: AMAZON_MARKETPLACE_HOST,
-            ...(hintEmail ? { amazonAccountEmail: hintEmail } : {}),
-            storeAddress: address,
-          },
-          config,
-        );
-        createdProfileId = created.profileId || profileId;
-      } catch (err) {
-        createdProfileId = await this.recoverFromCreateConflict(profileId, err, config);
-        if (!createdProfileId) {
+            address,
+            config,
+          );
+          if (!patched) {
+            return null;
+          }
+          // A failed fingerprint write must not lose a profile id we already
+          // hold — log and keep the id rather than forcing pass-through over
+          // a bookkeeping failure. The next call re-PATCHes (harmless) since
+          // the stored fingerprint is still stale.
+          try {
+            await client.query(
+              `UPDATE aquiline_profiles SET fingerprint = $1, synced_at = NOW() WHERE user_id = $2 AND marketplace = $3`,
+              [fingerprint, userId, marketplace],
+            );
+          } catch (err) {
+            this.logger.error(
+              `Aquiline profile ${rowAfterLock.profile_id} PATCHed but the fingerprint write failed for user ${userId}: ${describeAquilineError(err)}`,
+            );
+          }
+          return rowAfterLock.profile_id;
+        }
+
+        // Ceiling guard — checked BEFORE creation, because the slot can
+        // never be reclaimed once spent.
+        let profileCount: number;
+        try {
+          const list = await this.client.listProfiles(config);
+          profileCount = list.items.length;
+        } catch (err) {
           this.logger.error(
-            `Aquiline createProfile failed for user ${userId}, marketplace ${marketplace}: ${describeAquilineError(err)}`,
+            `Aquiline profile-ceiling check failed for user ${userId}: ${describeAquilineError(err)}`,
           );
           return null;
         }
-        this.logger.warn(
-          `Aquiline createProfile for user ${userId} answered a conflict; recovered existing profile ${createdProfileId} via GET (crash-recovery path)`,
-        );
-      }
+        if (profileCount >= config.maxProfiles) {
+          this.logger.error(
+            `Aquiline profile ceiling reached (${profileCount}/${config.maxProfiles}) — refusing to create a profile for user ${userId}, marketplace ${marketplace}`,
+          );
+          return null;
+        }
 
-      await client.query(
-        `INSERT INTO aquiline_profiles (user_id, marketplace, profile_id, fingerprint, synced_at)
-         VALUES ($1, $2, $3, $4, NOW())
-         ON CONFLICT (user_id, marketplace) DO UPDATE
-           SET profile_id = EXCLUDED.profile_id,
-               fingerprint = EXCLUDED.fingerprint,
-               synced_at = NOW()`,
-        [userId, marketplace, createdProfileId, fingerprint],
+        let createdProfileId: string | null;
+        try {
+          const created = await this.client.createProfile(
+            {
+              accountOrigin: AquilineAccountOrigin.AMAZON,
+              profileId,
+              label,
+              marketplaceHost: AMAZON_MARKETPLACE_HOST,
+              ...(hintEmail ? { amazonAccountEmail: hintEmail } : {}),
+              storeAddress: address,
+            },
+            config,
+          );
+          createdProfileId = created.profileId || profileId;
+        } catch (err) {
+          createdProfileId = await this.recoverFromCreateConflict(profileId, err, config);
+          if (!createdProfileId) {
+            this.logger.error(
+              `Aquiline createProfile failed for user ${userId}, marketplace ${marketplace}: ${describeAquilineError(err)}`,
+            );
+            return null;
+          }
+          this.logger.warn(
+            `Aquiline createProfile for user ${userId} answered a conflict; recovered existing profile ${createdProfileId} via GET (crash-recovery path)`,
+          );
+        }
+
+        // Same "don't lose an id we already hold" rule as the PATCH branch
+        // above: the provider profile now genuinely exists (created or
+        // recovered), so a local persistence failure must not turn a real,
+        // billable resource into a `null` that forces pass-through. The
+        // deterministic id makes this self-healing — the next call's
+        // createProfile will hit the same conflict and recover the same id
+        // via GET, then persist it.
+        try {
+          await client.query(
+            `INSERT INTO aquiline_profiles (user_id, marketplace, profile_id, fingerprint, synced_at)
+             VALUES ($1, $2, $3, $4, NOW())
+             ON CONFLICT (user_id, marketplace) DO UPDATE
+               SET profile_id = EXCLUDED.profile_id,
+                   fingerprint = EXCLUDED.fingerprint,
+                   synced_at = NOW()`,
+            [userId, marketplace, createdProfileId, fingerprint],
+          );
+        } catch (err) {
+          this.logger.error(
+            `Aquiline profile ${createdProfileId} created but the local row write failed for user ${userId}: ${describeAquilineError(err)}`,
+          );
+        }
+
+        return createdProfileId;
+      });
+    } catch (err) {
+      this.logger.error(
+        `Aquiline profile creation failed for user ${userId}, marketplace ${marketplace}: ${describeAquilineError(err)}`,
       );
-
-      return createdProfileId;
-    });
+      return null;
+    }
   }
 
   /** Resolve the effective Aquiline provider config (DB override → env →
@@ -250,42 +299,73 @@ export class AquilineProfileService {
     };
   }
 
+  /** Never throws — a read failure is reported the same way as "no row
+   *  found": the caller falls through to the create-or-recover path, which
+   *  is safe even on a false negative because the id is deterministic and
+   *  `recoverFromCreateConflict` adopts the real row via GET if it turns out
+   *  one already existed. */
   private async readRow(
     userId: string,
     marketplace: AmazonMarketplace,
   ): Promise<AquilineProfileRow | null> {
-    const rows = await this.db.query<AquilineProfileRow>(
-      `SELECT profile_id, fingerprint FROM aquiline_profiles WHERE user_id = $1 AND marketplace = $2`,
-      [userId, marketplace],
-    );
-    return rows[0] ?? null;
+    try {
+      const rows = await this.db.query<AquilineProfileRow>(
+        `SELECT profile_id, fingerprint FROM aquiline_profiles WHERE user_id = $1 AND marketplace = $2`,
+        [userId, marketplace],
+      );
+      return rows[0] ?? null;
+    } catch (err) {
+      this.logger.error(
+        `Aquiline profile lookup failed for user ${userId}: ${describeAquilineError(err)}`,
+      );
+      return null;
+    }
   }
 
+  /** Same never-throws contract as `readRow`, for use inside the advisory-lock
+   *  transaction. */
   private async readRowWithClient(
     client: PoolClient,
     userId: string,
     marketplace: AmazonMarketplace,
   ): Promise<AquilineProfileRow | null> {
-    const { rows } = await client.query<AquilineProfileRow>(
-      `SELECT profile_id, fingerprint FROM aquiline_profiles WHERE user_id = $1 AND marketplace = $2`,
-      [userId, marketplace],
-    );
-    return rows[0] ?? null;
+    try {
+      const { rows } = await client.query<AquilineProfileRow>(
+        `SELECT profile_id, fingerprint FROM aquiline_profiles WHERE user_id = $1 AND marketplace = $2`,
+        [userId, marketplace],
+      );
+      return rows[0] ?? null;
+    } catch (err) {
+      this.logger.error(
+        `Aquiline profile lookup (locked) failed for user ${userId}: ${describeAquilineError(err)}`,
+      );
+      return null;
+    }
   }
 
   /** Ship-from address the profile is created/PATCHed with, read from the
    *  user's GLOBAL `store_settings` row — a profile is a user-level resource
    *  while `store_settings` also has per-store rows, so the global one is the
-   *  only coherent source. Required: `address_line1`, `city`, `country`. */
+   *  only coherent source. Required: `address_line1`, `city`, `country`.
+   *  Never throws — a DB failure here is indistinguishable from "no complete
+   *  address configured" and returns `null` the same way. */
   private async resolveShipFromAddress(userId: string): Promise<AquilineStoreAddress | null> {
-    const rows = await this.db.query<GlobalStoreSettingsAddressRow>(
-      `SELECT ship_from_name, ship_from_phone, ship_from_address_line1,
-              ship_from_address_line2, ship_from_city, country, state, zip_code
-       FROM store_settings
-       WHERE user_id = $1 AND is_global = TRUE
-       LIMIT 1`,
-      [userId],
-    );
+    let rows: GlobalStoreSettingsAddressRow[];
+    try {
+      rows = await this.db.query<GlobalStoreSettingsAddressRow>(
+        `SELECT ship_from_name, ship_from_phone, ship_from_address_line1,
+                ship_from_address_line2, ship_from_city, country, state, zip_code
+         FROM store_settings
+         WHERE user_id = $1 AND is_global = TRUE
+         LIMIT 1`,
+        [userId],
+      );
+    } catch (err) {
+      this.logger.error(
+        `Aquiline ship-from address lookup failed for user ${userId}: ${describeAquilineError(err)}`,
+      );
+      return null;
+    }
     const row = rows[0];
     if (!row) {
       return null;
