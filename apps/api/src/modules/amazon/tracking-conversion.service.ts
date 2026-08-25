@@ -96,6 +96,10 @@ interface ConversionOrderRow {
   converted_tracking_number: string | null;
   converted_tracking_carrier: string | null;
   tracking_provider_shipment_id: string | null;
+  /** What eBay actually received (Task 3, migration 089). eBay's Fulfillment
+   *  API has no update endpoint, so once this is set the buyer's number can
+   *  never be corrected — see `shouldRefuseOnDemandConversion`. */
+  ebay_tracking_pushed_number: string | null;
   /** Everything below is only needed for the Aquiline sequence (profile
    *  resolution + `upsertOrders`/`assign` bodies) — joined in from
    *  `amazon_accounts`/`listings`, never written by this service. */
@@ -469,6 +473,24 @@ export class TrackingConversionService {
       };
     }
 
+    // eBay's Fulfillment API has no update endpoint (createShippingFulfillment
+    // is POST-only), so once the raw Amazon number has been pushed the buyer's
+    // tracking number can never be corrected. Buying a conversion now would be
+    // pure spend with zero buyer-visible effect — refuse BEFORE the quota is
+    // touched or the provider is ever called.
+    if (
+      shouldRefuseOnDemandConversion({
+        convertedTrackingNumber: order.converted_tracking_number,
+        ebayTrackingPushedNumber: order.ebay_tracking_pushed_number,
+      })
+    ) {
+      return {
+        converted: false,
+        trackingNumber: null,
+        reasonKey: 'orders.errors.trackingAlreadyPushed',
+      };
+    }
+
     // The order must be one we can actually publish to eBay, or converting it
     // is worse than doing nothing.
     //
@@ -668,7 +690,8 @@ export class TrackingConversionService {
     const rows = await this.databaseService.query<ConversionOrderRow>(
       `SELECT o.id, o.user_id, o.ebay_account_id, o.shipping_address, o.auto_fulfill_status,
               o.converted_tracking_number, o.converted_tracking_carrier,
-              o.tracking_provider_shipment_id, o.amazon_account_id, o.amazon_order_id,
+              o.tracking_provider_shipment_id, o.ebay_tracking_pushed_number,
+              o.amazon_account_id, o.amazon_order_id,
               o.amazon_order_url, o.amazon_tracking_url, o.order_date,
               aa.marketplace AS amazon_marketplace, aa.email AS amazon_account_email,
               l.asin AS listing_asin, l.title AS listing_title
@@ -860,6 +883,28 @@ export function isPlanExhausted(
     return false;
   }
   return snapshot.planRemaining <= 0;
+}
+
+/**
+ * Whether an on-demand conversion must be refused because eBay already has
+ * the raw Amazon number.
+ *
+ * `createShippingFulfillment` is POST-only — eBay's Fulfillment API has no
+ * update endpoint — so once `ebayTrackingPushedNumber` is set, the buyer's
+ * tracking number is permanent. Converting after that point would spend a
+ * paid conversion with no buyer-visible effect: the buyer already saw (and
+ * will always see) the raw number.
+ *
+ * `convertedTrackingNumber` is checked too so this predicate is safe to call
+ * even when a conversion already exists on the order — that case is a
+ * success (the existing AQUA number is returned), never a refusal, and
+ * `convertOnDemand` short-circuits on it first regardless.
+ */
+export function shouldRefuseOnDemandConversion(args: {
+  convertedTrackingNumber: string | null;
+  ebayTrackingPushedNumber: string | null;
+}): boolean {
+  return !args.convertedTrackingNumber && Boolean(args.ebayTrackingPushedNumber);
 }
 
 /** Stored provider string → enum, defaulting to LOCAL for anything unknown. */

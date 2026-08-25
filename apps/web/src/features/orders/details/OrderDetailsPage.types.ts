@@ -15,9 +15,11 @@ export interface OrderDetailsPageProps {
   onOpenAmazonOrderUrl?: () => void;
   /**
    * Whether this order's tracking can still be converted: Amazon has given us a
-   * number and it has not already been converted. A conversion is paid for, so
-   * offering the action on an already-converted order would invite paying twice
-   * for one shipment.
+   * number, it has not already been converted, and nothing has been pushed to
+   * eBay yet. A conversion is paid for, so offering the action on an
+   * already-converted order would invite paying twice for one shipment — and
+   * eBay's Fulfillment API has no update endpoint, so offering it once the raw
+   * number is already on eBay would offer an action that can no longer help.
    */
   canConvertTracking: boolean;
   isConvertingTracking: boolean;

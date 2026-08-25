@@ -113,13 +113,21 @@ export const OrderDetailsPageContainer: React.FC = () => {
    *     number could never be pushed to eBay (the fulfillment needs the
    *     listing's eBay item id as its line item);
    *   - Amazon has given us a number to convert;
-   *   - and it has not already been converted, since a conversion is paid for
-   *     and buying a second one for the same shipment is pure loss.
-   * The server refuses all three independently — this only keeps a button that
+   *   - it has not already been converted, since a conversion is paid for
+   *     and buying a second one for the same shipment is pure loss;
+   *   - and nothing has been pushed to eBay yet — the Fulfillment API has no
+   *     update endpoint, so a converted number bought after the push would
+   *     never reach the buyer. An offered action that then refuses is worse
+   *     than no action at all, so this mirrors `shouldRefuseOnDemandConversion`
+   *     on the server rather than letting the two drift.
+   * The server refuses all four independently — this only keeps a button that
    * would decline out of the seller's way.
    */
   const canConvertTracking = Boolean(
-    order?.isTracked && order.amazonTrackingNumber && !order.convertedTrackingNumber
+    order?.isTracked &&
+      order.amazonTrackingNumber &&
+      !order.convertedTrackingNumber &&
+      !order.ebayTrackingPushedNumber
   );
 
   const handleConvertTracking = useCallback(() => {

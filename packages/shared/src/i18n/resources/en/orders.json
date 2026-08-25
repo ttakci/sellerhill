@@ -91,7 +91,18 @@
     },
     "tracking": {
       "tracked": "Tracked by SellerHill",
-      "untracked": "Not tracked"
+      "untracked": "Not tracked",
+      "problem": {
+        "wrongPageType": "The tracking provider could not read Amazon's order page — it may have changed format. This will be retried automatically.",
+        "amazonSessionExpired": "The Amazon session used to read this order has expired and needs to be signed in again.",
+        "trackingUrlMismatch": "The tracking link on Amazon's order page did not match what we expected. This will be retried automatically.",
+        "needsTrackingUpload": "Waiting on the shipment details to be uploaded before the tracking number can be converted.",
+        "updateNotApplied": "The tracking update has not been applied by the provider yet. This will be retried automatically.",
+        "assignValidation": "The tracking provider rejected the shipment details for this order.",
+        "shipmentException": "The tracking provider reported an exception on this shipment.",
+        "trackingUpdateUnavailable": "The tracking provider could not update this shipment right now.",
+        "generic": "There is a problem with this order's tracking conversion. It will be retried automatically."
+      }
     },
     "autoFulfill": {
       "column": "Auto-Fulfill",
@@ -174,6 +185,7 @@
       "amazonTax": "Amazon Tax",
       "amazonShipping": "Amazon Shipping",
       "totalAmazonCost": "Total Amazon Cost",
+      "convertedTracking": "Converted Tracking",
       "amazonOrder": "Amazon Order",
       "linkAmazon": "Link Amazon Order",
       "calcEarnings": "Earnings",
@@ -209,7 +221,8 @@
       "noTrackingYet": "This order has no Amazon tracking number yet — it has not shipped.",
       "conversionUnavailable": "Tracking could not be converted right now. Check your plan limit and conversion settings, then try again.",
       "conversionDone": "Tracking converted.",
-      "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first."
+      "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
+      "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees."
     }
   }
 }

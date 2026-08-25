@@ -50,6 +50,8 @@ interface OrderRow {
   amazon_tracking_url: string;
   amazon_tracking_number: string | null;
   converted_tracking_number: string | null;
+  ebay_tracking_pushed_number: string | null;
+  tracking_problem_code: string | null;
   amazon_tax: string;
   amazon_shipping: string;
   transaction_fee: string;
@@ -489,6 +491,8 @@ export class OrdersService {
       amazonTrackingUrl: row.amazon_tracking_url || undefined,
       amazonTrackingNumber: row.amazon_tracking_number || null,
       convertedTrackingNumber: row.converted_tracking_number || null,
+      ebayTrackingPushedNumber: row.ebay_tracking_pushed_number || null,
+      trackingProblemCode: row.tracking_problem_code || null,
       amazonTax: row.amazon_tax ? parseFloat(row.amazon_tax) : undefined,
       amazonShipping: row.amazon_shipping ? parseFloat(row.amazon_shipping) : undefined,
       netProfit: parseFloat(row.net_profit) || 0,

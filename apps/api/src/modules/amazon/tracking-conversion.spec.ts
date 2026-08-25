@@ -10,6 +10,7 @@ import { AquilineErrorKind, type AquilineClient } from './aquiline.client';
 import {
   isPlanExhausted,
   isRetryableConversionFailure,
+  shouldRefuseOnDemandConversion,
   TrackingConversionService,
 } from './tracking-conversion.service';
 
@@ -74,6 +75,37 @@ describe('isPlanExhausted', () => {
 
   it('does not short-circuit when no snapshot has ever been captured', () => {
     expect(isPlanExhausted(null, new Date())).toBe(false);
+  });
+});
+
+describe('shouldRefuseOnDemandConversion', () => {
+  it('refuses an on-demand conversion once eBay already has the raw number', () => {
+    // eBay's Fulfillment API cannot be corrected, so converting now would spend
+    // a paid conversion the buyer will never see.
+    expect(
+      shouldRefuseOnDemandConversion({
+        convertedTrackingNumber: null,
+        ebayTrackingPushedNumber: 'TBA303940404000',
+      }),
+    ).toBe(true);
+  });
+
+  it('allows it when nothing has been pushed yet', () => {
+    expect(
+      shouldRefuseOnDemandConversion({
+        convertedTrackingNumber: null,
+        ebayTrackingPushedNumber: null,
+      }),
+    ).toBe(false);
+  });
+
+  it('never refuses an order that is already converted — that is a success, not a refusal', () => {
+    expect(
+      shouldRefuseOnDemandConversion({
+        convertedTrackingNumber: 'AQUAA1234567YQ',
+        ebayTrackingPushedNumber: 'TBA303940404000',
+      }),
+    ).toBe(false);
   });
 });
 

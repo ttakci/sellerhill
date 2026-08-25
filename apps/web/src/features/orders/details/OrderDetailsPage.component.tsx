@@ -6,6 +6,7 @@ import {
   Icon,
   IconName,
   IdBadge,
+  InfoMessage,
   PageHeader,
   SettingsCard,
   StatusBadge,
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 import { fulfillmentStateNoticeKey, fulfillmentStateToBadgeVariant } from '../shared/fulfillment-state';
 import { orderStatusToBadgeStatus } from '../shared/order-status';
+import { trackingProblemToI18nKey } from '../shared/tracking-problem';
 
 import * as S from './OrderDetailsPage.style';
 import type { OrderDetailsPageProps } from './OrderDetailsPage.types';
@@ -377,7 +379,17 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   {formatCurrency(totalAmazonCost)}
                 </Text>
               </Meta>
+              {order.convertedTrackingNumber && (
+                <Meta icon="repeat" label={t('orders.detail.convertedTracking')}>
+                  <Text variant="mono" color="text.primary">
+                    {order.convertedTrackingNumber}
+                  </Text>
+                </Meta>
+              )}
             </S.MetaList>
+            {order.trackingProblemCode && (
+              <InfoMessage>{t(trackingProblemToI18nKey(order.trackingProblemCode))}</InfoMessage>
+            )}
             <Button variant="primary" size="small" onClick={onOpenLinkAmazon} fullWidth isLoading={isUpdating}>
               <Text variant="body-sm">{t('orders.detail.linkAmazon')}</Text>
             </Button>
