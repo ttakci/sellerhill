@@ -147,7 +147,7 @@ export class AdminController {
   @ApiOperation({
     summary: 'Admin overview (observability)',
     description:
-      'Top-level counts (users, stores, accounts, listings, recent orders), usage summaries, and BullMQ queue health. Read-only.',
+      'Top-level counts (users, stores, accounts, listings, recent orders), usage summaries, BullMQ queue health, and the latest Aquiline provider-plan snapshot (shipments consumed this window + permanent profile count). Read-only.',
   })
   @ApiQuery({ name: 'from', required: false, type: String, description: 'Usage period start (ISO 8601). Defaults to start of current month.' })
   @ApiQuery({ name: 'to', required: false, type: String, description: 'Usage period end (ISO 8601). Defaults to now.' })

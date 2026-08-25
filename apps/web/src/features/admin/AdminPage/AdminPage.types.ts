@@ -73,4 +73,6 @@ export interface AdminPageComponentProps {
   onEmailTest: () => void;
   /** Renders a micro-USD amount; returns the em-dash placeholder for null (unknown). */
   formatCost: (micros: number | null, currency: string | null) => string;
+  /** Renders the Aquiline snapshot's captured-at timestamp; em-dash for null (no snapshot yet). */
+  formatCapturedAt: (iso: string | null) => string;
 }
