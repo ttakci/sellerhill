@@ -20,6 +20,10 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { InvoiceHistoryCard } from '../components/InvoiceHistoryCard';
+import { PaymentMethodCard } from '../components/PaymentMethodCard';
+import { PlanChangeConfirm } from '../components/PlanChangeConfirm';
+
 import * as S from './BillingPage.style';
 import type {
   BillingPageComponentProps,
@@ -27,8 +31,27 @@ import type {
   BillingUsageCellViewProps,
 } from './BillingPage.types';
 
-/** Map a subscription status to a Badge variant. Pure, no hook deps. */
-function statusBadgeVariant(status: BillingSubscriptionStatus): 'success' | 'warning' | 'neutral' {
+/**
+ * Map a subscription status to a Badge variant. Pure, no hook deps.
+ *
+ * `cancelAtPeriodEnd` overrides an otherwise-'success' status to 'warning' —
+ * `status` itself stays `active`/`trialing` in our tables right up until
+ * Stripe's period actually ends (a Billing-Portal cancellation is read live
+ * via `cancelAtPeriodEnd`, not written to our tables — see
+ * `BillingDetailsDto.cancelAtPeriodEnd`), so without this override the badge
+ * kept reading plain "Active" for a subscription already winding down, right
+ * beside a meta line that said the opposite.
+ */
+function statusBadgeVariant(
+  status: BillingSubscriptionStatus,
+  cancelAtPeriodEnd: boolean,
+): 'success' | 'warning' | 'neutral' {
+  if (
+    cancelAtPeriodEnd &&
+    (status === BillingSubscriptionStatus.ACTIVE || status === BillingSubscriptionStatus.TRIALING)
+  ) {
+    return 'warning';
+  }
   switch (status) {
     case BillingSubscriptionStatus.ACTIVE:
     case BillingSubscriptionStatus.TRIALING:
@@ -161,6 +184,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   enforcementEnabled,
   providerUnconfigured,
   subscriptionStatus,
+  cancelAtPeriodEnd,
   currentPlanSlug,
   usageRows,
   plans,
@@ -177,6 +201,17 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   addons,
   addonSlugInFlight,
   onBuyAddon,
+  nextChargeLine,
+  cancelsAtPeriodEndLine,
+  scheduledChangeLine,
+  onCancelScheduledChange,
+  isCancellingChange,
+  paymentMethod,
+  isPlanChangeOpen,
+  planChangeBody,
+  isChangingPlan,
+  onConfirmPlanChange,
+  onCancelPlanChange,
 }) => {
   const { t } = useTranslation(['translation', 'billing']);
 
@@ -225,6 +260,26 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
     transition && transition !== 'active' && transition !== 'full_access'
       ? `billing:billing.transition.${transition}`
       : 'billing:billing.subscription.manageHint';
+
+  /**
+   * A past-due seller needs their CARD fixed, not a plan list.
+   *
+   * Every gate is closed for them (`past_due` -> SUSPENDED), AppLayout has just
+   * redirected them here, and the notice above literally says "update your
+   * payment method" — but the one button next to it used to open the twelve-plan
+   * drawer, with the Stripe portal link buried inside it as a secondary action.
+   * That is the wrong content for this state (they do not want a different plan)
+   * and the label did not describe what the button did. Send them straight to
+   * the portal instead, which is the only place a card can be changed.
+   *
+   * Guarded on `hasProviderSubscription` because the portal has nothing to show
+   * without a Stripe subscription, and on `providerUnconfigured` because the
+   * call would 409 — in both cases the plans drawer is still the right home for
+   * the action. Every other transition keeps the drawer: `no_subscription` and
+   * `canceled` need a plan chosen, not a card updated.
+   */
+  const needsPaymentFix =
+    transition === 'past_due' && hasProviderSubscription && !providerUnconfigured;
   const planNameKey = currentPlanSlug ? `billing:billing.plans.${currentPlanSlug}.name` : null;
 
   return (
@@ -248,8 +303,18 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           // instead of the corner a status badge conventionally occupies (see
           // the listing-detail hero card's own StatusBadgeSlot).
           subscriptionStatus ? (
-            <Badge variant={statusBadgeVariant(subscriptionStatus)} size="sm" isPill>
-              {t(`billing:billing.subscription.status.${subscriptionStatus}`)}
+            <Badge variant={statusBadgeVariant(subscriptionStatus, cancelAtPeriodEnd)} size="sm" isPill>
+              {/*
+                Same override as the variant above: a status that is
+                technically still 'active'/'trialing' in our own tables reads
+                as "Cancelling" once Stripe has the period end scheduled,
+                instead of contradicting the warning line right below it.
+              */}
+              {cancelAtPeriodEnd &&
+              (subscriptionStatus === BillingSubscriptionStatus.ACTIVE ||
+                subscriptionStatus === BillingSubscriptionStatus.TRIALING)
+                ? t('billing:billing.subscription.status.cancelling')
+                : t(`billing:billing.subscription.status.${subscriptionStatus}`)}
             </Badge>
           ) : undefined
         }
@@ -273,8 +338,34 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
                 </Text>
               </S.PlanMetaRow>
             ) : null}
+            {nextChargeLine ? (
+              <Text variant="body-sm" color="text.secondary" numeric>
+                {nextChargeLine}
+              </Text>
+            ) : null}
+            {cancelsAtPeriodEndLine ? (
+              <Text variant="body-sm" weight="semibold" color="semantic.warning" numeric>
+                {cancelsAtPeriodEndLine}
+              </Text>
+            ) : null}
           </S.PlanNameStack>
         </S.PlanHeaderRow>
+
+        {scheduledChangeLine ? (
+          <S.ScheduledChangeRow>
+            <Text variant="body-sm">{scheduledChangeLine}</Text>
+            <Button
+              variant="secondary"
+              size="small"
+              isLoading={isCancellingChange}
+              onClick={onCancelScheduledChange}
+            >
+              <Text variant="body-sm">
+                {t('billing:billing.subscription.cancelScheduledChange')}
+              </Text>
+            </Button>
+          </S.ScheduledChangeRow>
+        ) : null}
 
         {usageRows.length > 0 ? (
           <S.UsageSection>
@@ -305,13 +396,28 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
             nothing is wrong.
           */}
           <InfoMessage
-            action={t('billing:billing.subscription.manage')}
-            onAction={onOpenPlans}
+            action={
+              needsPaymentFix
+                ? t('billing:billing.subscription.updatePayment')
+                : t('billing:billing.subscription.manage')
+            }
+            onAction={needsPaymentFix ? onManage : onOpenPlans}
+            isActionLoading={needsPaymentFix ? isPortalLoading : false}
           >
             {t(noticeKey)}
           </InfoMessage>
         </S.NoticeRow>
       </S.SubscriptionCard>
+
+      {paymentMethod ? (
+        <PaymentMethodCard
+          paymentMethod={paymentMethod}
+          onChange={onManage}
+          isChangeLoading={isPortalLoading}
+        />
+      ) : null}
+
+      <InvoiceHistoryCard />
 
       {providerUnconfigured ? <InfoMessage>{t('billing:billing.provider.unconfiguredBody')}</InfoMessage> : null}
 
@@ -414,6 +520,19 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
           </S.DrawerPlanList>
         </S.DrawerSection>
       </Drawer>
+
+      {/*
+        A sibling of the Drawer, not nested inside it — the drawer may already
+        be closed (checkoutPlanId's spinner runs on the plan card, which lives
+        inside the drawer) by the time the preview comes back and this opens.
+      */}
+      <PlanChangeConfirm
+        isOpen={isPlanChangeOpen}
+        body={planChangeBody}
+        isConfirming={isChangingPlan}
+        onConfirm={onConfirmPlanChange}
+        onCancel={onCancelPlanChange}
+      />
     </S.Container>
   );
 };

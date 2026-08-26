@@ -55,6 +55,14 @@ export const Description = styled.div<{ $size: EmptyStateSize }>`
   line-height: ${tkn('typography.lineHeight.relaxed')};
 `;
 
+/**
+ * Full width only below `sm` — same reasoning as InfoMessage's `ActionSlot`:
+ * a right-sized pill button centered on a phone is a small, easy-to-miss tap
+ * target, so it spans the row like every other primary mobile action in this
+ * app. `& > button` is a plain DOM child selector, not an Emotion
+ * component-selector interpolation, so it needs no babel plugin — Button's
+ * root element is a real `<button>`.
+ */
 export const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -62,4 +70,12 @@ export const Actions = styled.div`
   justify-content: center;
   gap: ${tkn('spacing.sm')};
   margin-top: ${tkn('spacing.xs')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    width: 100%;
+
+    & > button {
+      width: 100%;
+    }
+  }
 `;

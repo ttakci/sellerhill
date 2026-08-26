@@ -55,6 +55,17 @@ export function useOrdersColumns(
               title={order.product?.title || t('translation:common.unknownProduct')}
               imageUrl={order.product?.imageUrl}
               meta={meta}
+              subtitle={
+                // No matched listing — price/stock/auto-fulfill/tracking never
+                // run for this order, and cost_capture_status stays 'untracked'
+                // forever. Independent of the fulfillment-state badge, which
+                // only describes automation on an order we already recognize.
+                !order.isTracked ? (
+                  <Badge variant="neutral" size="xs">
+                    {t('orders.tracking.untracked')}
+                  </Badge>
+                ) : undefined
+              }
             />
           );
         },

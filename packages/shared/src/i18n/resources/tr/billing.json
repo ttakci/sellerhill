@@ -82,6 +82,13 @@
       "switchTo": "{{plan}} paketine geç",
       "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak."
     },
+    "planChange": {
+      "title": "Plan değişikliğini onaylayın",
+      "upgradeBody": "{{plan}} paketine geçiyorsunuz. Şimdi {{amount}} tahsil edilecek. Bir sonraki faturanız {{nextDate}} tarihinde {{nextAmount}} olacak.",
+      "downgradeBody": "{{date}} tarihinde {{plan}} paketine geçeceksiniz. Şimdi hiçbir tahsilat yapılmaz — o tarihe kadar mevcut planınızda kalırsınız.",
+      "confirm": "Onayla",
+      "cancel": "Vazgeç"
+    },
     "limits": {
       "listings_per_month": {
         "label": "Aktif listeler",
@@ -117,6 +124,7 @@
         "label": "Durum",
         "trialing": "Deneme",
         "active": "Aktif",
+        "cancelling": "İptal ediliyor",
         "past_due": "Vadesi geçmiş",
         "canceled": "İptal edildi",
         "ended": "Sona erdi"
@@ -134,6 +142,7 @@
       "canceledAt": "İptal tarihi",
       "endedAt": "Bitiş tarihi",
       "manage": "Aboneliği yönet",
+      "updatePayment": "Ödeme yöntemini güncelle",
       "cancel": "Aboneliği iptal et",
       "resume": "Aboneliği sürdür",
       "upgrade": "Planı yükselt",
@@ -143,7 +152,47 @@
       "accessEnds": "Erişim bitişi",
       "portal": "Ödeme yöntemi ve faturalar",
       "portalHint": "Kartınızı güncellemek, fatura indirmek veya iptal etmek için Stripe açılır.",
-      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin."
+      "manageHint": "Ödeme yönteminizi, paketinizi ve faturalarınızı buradan yönetin.",
+      "nextCharge": "Bir sonraki ödeme: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "{{date}} tarihinde iptal edilecek — bu dönemden sonra ücret alınmayacak",
+      "scheduledChange": "{{date}} tarihinde {{plan}} paketine geçecek",
+      "scheduledChangeUnknownPlan": "Paketiniz {{date}} tarihinde değişecek",
+      "cancelScheduledChange": "Vazgeç",
+      "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi."
+    },
+    "paymentMethod": {
+      "title": "Ödeme yöntemi",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "{{month}}/{{year}} tarihinde doluyor",
+      "expiringSoon": "Bu kartın süresi yakında doluyor. Yenilemenin başarısız olmaması için güncelleyin.",
+      "change": "Değiştir"
+    },
+    "invoices": {
+      "title": "Fatura geçmişi",
+      "subtitle": "Ödediğiniz her şey, doğrudan Stripe'tan.",
+      "date": "Tarih",
+      "description": "Açıklama",
+      "amount": "Tutar",
+      "status": "Durum",
+      "pdf": "PDF",
+      "download": "İndir",
+      "payNow": "Şimdi öde",
+      "empty": "Henüz faturanız yok.",
+      "emptyDescription": "Ücretli bir aboneliğiniz olduğunda faturalarınız burada görünecek.",
+      "loading": "Faturalar yükleniyor…",
+      "loadingDescription": "Fatura geçmişiniz Stripe'tan alınıyor.",
+      "error": "Faturalar yüklenemedi.",
+      "errorDescription": "Fatura geçmişiniz yüklenirken bir sorun oluştu.",
+      "retry": "Tekrar dene",
+      "showMore": "Daha fazla göster",
+      "showMoreError": "Daha fazla fatura yüklenemedi.",
+      "statusLabel": {
+        "paid": "Ödendi",
+        "open": "Açık",
+        "void": "İptal",
+        "uncollectible": "Tahsil edilemedi",
+        "draft": "Taslak"
+      }
     },
     "customer": {
       "title": "Fatura bilgileri",
@@ -226,7 +275,9 @@
       "noSubscription": "Değiştirilecek aktif bir aboneliğiniz yok.",
       "planChangeFailed": "Paket şu anda değiştirilemedi. Tekrar deneyin ya da \"Aboneliği yönet\" üzerinden ilerleyin.",
       "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
-      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin."
+      "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin.",
+      "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Planı değiştir\" ile geçiş yapın.",
+      "invoicesFailed": "Fatura geçmişi yüklenemedi. Lütfen biraz sonra tekrar deneyin."
     },
     "actions": {
       "subscribe": "Abone ol",

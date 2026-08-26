@@ -17,6 +17,7 @@ import {
   Textarea,
   TextInput,
   Toggle,
+  Tooltip,
 } from '@repo/ui';
 import type { TFunction } from 'i18next';
 import React from 'react';
@@ -122,6 +123,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   groupDefaultQuantityLabel,
   groupStockBufferLabel,
   groupMarginSummaryLabel,
+  groupMarginRangeDetails,
   paymentPolicyLabel,
   shippingPolicyLabel,
   returnPolicyLabel,
@@ -132,6 +134,11 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   isTitleDrawerOpen,
   onOpenTitleDrawer,
   onCloseTitleDrawer,
+  isGroupDrawerOpen,
+  onOpenGroupDrawer,
+  onCloseGroupDrawer,
+  onSaveGroup,
+  isSavingGroup,
   isAutomationDrawerOpen,
   onOpenAutomationDrawer,
   onCloseAutomationDrawer,
@@ -409,16 +416,14 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
         {/* Same compact fact-grid pattern as Performance — the group's own
             settings, not just its name. Edit lives in the header now that the
-            body is plain facts, same drawer as the Otomasyon Durumu card. */}
+            body is plain facts, and opens a dedicated drawer that changes
+            ONLY the group — the automation overrides below have their own
+            edit action and their own drawer. */}
         <SettingsCard
           variant="section"
           header={{ title: t('listings.detail.strategyGroupCardTitle') }}
           headerRight={
-            <IconButton
-              variant="ghost"
-              onClick={onOpenAutomationDrawer}
-              aria-label={t('listings.detail.automationDrawerTitle')}
-            >
+            <IconButton variant="ghost" onClick={onOpenGroupDrawer} aria-label={t('listings.detail.groupDrawerTitle')}>
               <Icon name="edit" size={16} color="brand.primary" />
             </IconButton>
           }
@@ -440,17 +445,39 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               </Text>
             </Meta>
             <Meta icon="badge-percent" label={t('listings.detail.groupMarginLabel')}>
-              <Text variant="body" weight="semibold">
-                {groupMarginSummaryLabel}
-              </Text>
+              <S.MarginValueRow>
+                <Text variant="body" weight="semibold">
+                  {groupMarginSummaryLabel}
+                </Text>
+                {groupMarginRangeDetails.length > 0 ? (
+                  <Tooltip
+                    content={
+                      <>
+                        {groupMarginRangeDetails.map((row) => (
+                          <div key={row}>{row}</div>
+                        ))}
+                      </>
+                    }
+                    position="left"
+                    variant="dark"
+                  >
+                    <IconButton variant="ghost" aria-label={t('listings.detail.groupMarginTooltipLabel')}>
+                      <Icon name="info" size={14} color="text.tertiary" />
+                    </IconButton>
+                  </Tooltip>
+                ) : null}
+              </S.MarginValueRow>
             </Meta>
           </S.MetaList>
+
+          <S.AutomationSyncNoteSlot>
+            <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+          </S.AutomationSyncNoteSlot>
         </SettingsCard>
 
-        {/* Strategy group + automation overrides feed the same price/quantity
-            computation, so they're edited together in one drawer — same
-            headerRight edit action as the group card above. Each row is a
-            plain fact (state + the value it applies), not a filled box. */}
+        {/* Automation overrides only — the strategy group has its own card and
+            drawer above. Each row is a plain fact (state + the value it
+            applies), not a filled box. */}
         <SettingsCard
           variant="section"
           header={{ title: t('listings.detail.automationStatus') }}
@@ -575,15 +602,15 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
       </Drawer>
 
       <Drawer
-        isOpen={isAutomationDrawerOpen}
-        onClose={onCloseAutomationDrawer}
-        title={t('listings.detail.automationDrawerTitle')}
-        subtitle={t('listings.detail.automationDrawerSubtitle')}
+        isOpen={isGroupDrawerOpen}
+        onClose={onCloseGroupDrawer}
+        title={t('listings.detail.groupDrawerTitle')}
+        subtitle={t('listings.detail.groupDrawerSubtitle')}
         size="md"
         primaryAction={{
-          label: t('listings.detail.saveOverrides'),
-          onClick: onSaveOverrides,
-          isLoading: isSavingOverrides,
+          label: t('translation:common.save'),
+          onClick: onSaveGroup,
+          isLoading: isSavingGroup,
         }}
       >
         <S.SectionContent>
@@ -596,7 +623,23 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             searchPlaceholder={t('translation:common.search')}
             noResultsMessage={t('translation:common.noResults')}
           />
+          <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+        </S.SectionContent>
+      </Drawer>
 
+      <Drawer
+        isOpen={isAutomationDrawerOpen}
+        onClose={onCloseAutomationDrawer}
+        title={t('listings.detail.automationDrawerTitle')}
+        subtitle={t('listings.detail.automationDrawerSubtitle')}
+        size="md"
+        primaryAction={{
+          label: t('listings.detail.saveOverrides'),
+          onClick: onSaveOverrides,
+          isLoading: isSavingOverrides,
+        }}
+      >
+        <S.SectionContent>
           <S.AutomationBlockList>
             <S.AutomationBlock>
               <S.ToggleRow>

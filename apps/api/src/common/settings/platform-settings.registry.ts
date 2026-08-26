@@ -435,7 +435,9 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     category: PlatformSettingCategory.AMAZON,
     type: PlatformSettingType.STRING,
     envVar: 'AQUILINE_BASE_URL',
-    defaultValue: 'https://api.aquiline-tracking.com/v3',
+    // Was https://api.aquiline-tracking.com/v3 — the partner/courier API, which
+    // has no Amazon TBA conversion at all.
+    defaultValue: 'https://aquiline-tracking.com/app/api/integration',
   }),
   def({
     key: PlatformSettingKey.AQUILINE_API_KEY,
@@ -446,9 +448,9 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     isSecret: true,
   }),
   def({
-    // Aquiline meters "seller profiles" per plan tier (10/25/50/100/250), so a
-    // profile is a scarce plan-bound resource, not something to mint per user.
-    // This is the account-level default; a store may override it.
+    // DORMANT — the Integration API has no X-Partner-Id header (that was a v3
+    // partner/courier API concept). Left registered, never read by new code,
+    // because a deployed database may already hold an override row for it.
     key: PlatformSettingKey.AQUILINE_PARTNER_ID,
     category: PlatformSettingCategory.AMAZON,
     type: PlatformSettingType.STRING,
@@ -480,6 +482,26 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: '1440',
     min: 5,
     max: 20160,
+  }),
+  def({
+    // One Aquiline account serves every environment and there is no test
+    // tenant, so a profile created in development burns a production slot
+    // permanently. The prefix keeps those distinguishable and stops a dev
+    // order being upserted into a real seller's profile.
+    key: PlatformSettingKey.AQUILINE_PROFILE_PREFIX,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.STRING,
+    envVar: 'AQUILINE_PROFILE_PREFIX',
+    defaultValue: 'sh',
+  }),
+  def({
+    key: PlatformSettingKey.AQUILINE_MAX_PROFILES,
+    category: PlatformSettingCategory.AMAZON,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'AQUILINE_MAX_PROFILES',
+    defaultValue: '10', // Starter. 25 / 50 / 100 / 250 up the ladder.
+    min: 1,
+    max: 1000,
   }),
 
   // --- Chromium profile disk GC ---

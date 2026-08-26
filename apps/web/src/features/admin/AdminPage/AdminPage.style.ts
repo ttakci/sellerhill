@@ -80,6 +80,18 @@ export const SummaryCard = styled(Card)`
   padding: ${tkn('spacing.md')};
 `;
 
+/**
+ * A KPI figure paired with an emphasis badge (e.g. the Aquiline profile
+ * count's "never resets" badge) — the figure and its callout read as one
+ * unit instead of stacking as two separate lines.
+ */
+export const FigureRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${tkn('spacing.sm')};
+`;
+
 export const Rows = styled.div`
   display: flex;
   flex-direction: column;

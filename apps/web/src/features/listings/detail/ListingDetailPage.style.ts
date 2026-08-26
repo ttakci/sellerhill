@@ -395,6 +395,15 @@ export const MetaValue = styled.div`
   overflow-wrap: anywhere;
 `;
 
+/** Kâr Marjı row's value + its info tooltip trigger, side by side on the
+ *  single line `MetaValue` right-aligns — the tooltip icon sits directly next
+ *  to "3 farklı kural" instead of on its own stacked line. */
+export const MarginValueRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.2xs')};
+`;
+
 /** Row icon + label, left side of a Meta row — matches SettingsInfoRow's icon/label pairing. */
 export const MetaLabel = styled.div`
   display: flex;
@@ -418,8 +427,9 @@ export const ProductContentBlock = styled.div`
   gap: ${tkn('spacing.sm')};
 `;
 
-/** Spacing for the InfoMessage under the Automation card's summary rows —
- *  changes aren't pushed instantly, so this stays visible rather than
+/** Spacing for the InfoMessage under a card's summary rows — used by both the
+ *  Listeleme Ayar Grubu and Otomasyon Durumu cards, since a group swap and an
+ *  override both only apply on the next sync. Stays visible rather than
  *  hidden behind a hover tooltip. */
 export const AutomationSyncNoteSlot = styled.div`
   margin-top: ${tkn('spacing.sm')};

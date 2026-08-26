@@ -14,19 +14,28 @@
 // Deliberately NOT handled:
 //   - `checkout.session.completed` — nothing left to do. The Stripe customer is
 //     created and linked when the checkout session is created (see
-//     StripeBillingProvider.ensureStripeCustomer), so the local customer row is
-//     already resolvable by the time any webhook arrives. Depending on this
-//     event instead would make correctness depend on webhook delivery order.
+//     StripeBillingProvider.ensureCustomer, now called under
+//     BillingService.createCheckout's per-user advisory lock), so the local
+//     customer row is already resolvable by the time any webhook arrives.
+//     Depending on this event instead would make correctness depend on
+//     webhook delivery order.
 //   - `invoice.paid` / `invoice.payment_failed` — the subscription status
 //     transitions they imply (e.g. past_due) already arrive via
 //     `customer.subscription.updated`. They are still recorded in the webhook
 //     inbox, so the audit trail is complete and dunning/receipt logic can be
 //     added later without changing the transport.
 
+import { Logger } from '@nestjs/common';
 import { BillingInterval, BillingSubscriptionStatus, type BillingSubscriptionDto } from '@repo/shared';
 
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type ParsedStripeEvent } from './billing.types';
+
+// Module-scope logger (not a class member — this file is a set of pure/
+// impure functions, not a NestJS provider) for the one place below that
+// swallows an error rather than propagating or returning it as an `ignored`
+// reason.
+const logger = new Logger('StripeEventApplier');
 
 export interface StripeSubscriptionFields {
   providerSubscriptionId: string;
@@ -84,9 +93,20 @@ export function extractStripeSubscriptionFields(event: ParsedStripeEvent): Strip
   const status = mapStatus(sub.status);
   if (status === null) {return null;} // incomplete / paused — not a state we track
 
-  const interval = mapInterval(sub);
-  const start = parseUnixSeconds(sub.current_period_start) ?? new Date();
-  const end = parseUnixSeconds(sub.current_period_end) ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const item = firstSubscriptionItem(sub);
+  const interval = mapInterval(item);
+  // current_period_start/end do NOT exist on Stripe's Subscription object at
+  // this codebase's pinned API version — they moved to SubscriptionItem in
+  // API version 2025-03-31.basil. Reading them off `sub` directly (the
+  // pre-fix code) always missed and silently fell through to the
+  // now()/now()+30d fallback below on EVERY webhook, which is why a real
+  // subscription in the dev DB showed a period spanning exactly 30 days
+  // starting at webhook-receipt time instead of its real Stripe dates. The
+  // fallback stays as a genuine last resort (a malformed/itemless payload),
+  // not the common path it silently became.
+  const start = parseUnixSeconds(item?.current_period_start) ?? new Date();
+  const end =
+    parseUnixSeconds(item?.current_period_end) ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   const canceledAt = status === BillingSubscriptionStatus.CANCELED ? parseUnixSeconds(sub.canceled_at) ?? new Date() : null;
   const endedAt = status === BillingSubscriptionStatus.ENDED ? parseUnixSeconds(sub.ended_at) ?? new Date() : null;
@@ -128,11 +148,17 @@ function mapStatus(rawStatus: unknown): BillingSubscriptionStatus | null {
   }
 }
 
-function mapInterval(sub: Record<string, unknown>): BillingInterval {
+/** The first subscription item — the object that carries per-item price/period
+ *  fields (`current_period_start/end` live here, not on the Subscription
+ *  itself, at this codebase's pinned API version). */
+function firstSubscriptionItem(sub: Record<string, unknown>): Record<string, unknown> | undefined {
   const items = sub.items as Record<string, unknown> | undefined;
   const list = items && typeof items === 'object' ? (items.data as unknown[] | undefined) : undefined;
-  const first = Array.isArray(list) && list.length > 0 ? (list[0] as Record<string, unknown>) : undefined;
-  const price = first?.price as Record<string, unknown> | undefined;
+  return Array.isArray(list) && list.length > 0 ? (list[0] as Record<string, unknown>) : undefined;
+}
+
+function mapInterval(item: Record<string, unknown> | undefined): BillingInterval {
+  const price = item?.price as Record<string, unknown> | undefined;
   const recurring = price?.recurring as Record<string, unknown> | undefined;
   return recurring?.interval === 'year' ? BillingInterval.ANNUAL : BillingInterval.MONTHLY;
 }
@@ -189,6 +215,26 @@ export async function applyStripeEvent(
   const planId = resolvePlanId(sub);
   if (!planId) {
     return { kind: 'ignored', reason: 'no_plan' };
+  }
+
+  // The seller is paying now, so their local trial is over. Best-effort: a
+  // failure here must not reject the webhook (Stripe would redeliver forever
+  // against an event we already applied), and A2's ordering keeps the result
+  // correct even if this row is left behind. `userId` is nullable on the DTO
+  // (survives a hard-deleted user for audit) — nothing to end a trial for then.
+  if (customer.userId) {
+    try {
+      await repository.endTrialSubscriptionsForUser(customer.userId);
+    } catch (err) {
+      // Non-throwing on purpose — see above — but NOT silent: a systematic
+      // failure here (a bad migration, a revoked DB permission) would
+      // otherwise leave orphaned trial rows with no trace anywhere. A
+      // subscription still gets upserted below even when this fails, so the
+      // seller is unaffected; this is purely so the failure is discoverable.
+      logger.warn(
+        `Failed to close trial rows for user ${customer.userId} after a real Stripe subscription started (event=${event.eventId ?? 'none'}): ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   const subscription = await repository.upsertSubscriptionByProvider(customer.id, planId, fields);

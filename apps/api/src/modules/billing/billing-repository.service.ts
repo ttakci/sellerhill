@@ -27,7 +27,7 @@ import {
 } from '@repo/shared';
 import { PoolClient } from 'pg';
 
-import { DatabaseService } from '../../common/database/database.service';
+import { DatabaseService, type QueryParam } from '../../common/database/database.service';
 
 import {
   expandPlan,
@@ -37,7 +37,7 @@ import {
   type BillingConfig,
 } from './billing-helpers';
 import type { ParsedStripeEvent } from './billing.types';
-import { advisoryLockKey, utcMonthBounds } from './quota-helpers';
+import { advisoryLockKey, billingCustomerLockKey, utcMonthBounds } from './quota-helpers';
 
 
 interface PlanEntity {
@@ -165,30 +165,55 @@ export class BillingRepositoryService {
     return rows.map(mapPlanRow);
   }
 
-  async findPricesForPlans(planIds: string[]): Promise<BillingPlanPriceDto[]> {
+  async findPricesForPlans(
+    planIds: string[],
+    client?: PoolClient,
+  ): Promise<BillingPlanPriceDto[]> {
     if (planIds.length === 0) {return [];}
-    const rows = await this.databaseService.query<PriceEntity>(
+    const rows = await this.run<PriceEntity>(
       `SELECT * FROM billing_plan_prices WHERE plan_id = ANY($1::uuid[]) ORDER BY effective_from DESC`,
-      [planIds as unknown as string],
+      [planIds],
+      client,
     );
     return rows.map(mapPriceRow);
   }
 
-  async findLimitsForPlans(planIds: string[]): Promise<BillingPlanLimitDto[]> {
+  async findLimitsForPlans(
+    planIds: string[],
+    client?: PoolClient,
+  ): Promise<BillingPlanLimitDto[]> {
     if (planIds.length === 0) {return [];}
-    const rows = await this.databaseService.query<LimitEntity>(
+    const rows = await this.run<LimitEntity>(
       `SELECT * FROM billing_plan_limits WHERE plan_id = ANY($1::uuid[])`,
-      [planIds as unknown as string],
+      [planIds],
+      client,
     );
     return rows.map(mapLimitRow);
   }
 
-  async findPlanById(id: string): Promise<BillingPlanDto | null> {
-    const rows = await this.databaseService.query<PlanEntity>(
+  async findPlanById(id: string, client?: PoolClient): Promise<BillingPlanDto | null> {
+    const rows = await this.run<PlanEntity>(
       `SELECT * FROM billing_plans WHERE id = $1`,
       [id],
+      client,
     );
     return rows.length > 0 ? mapPlanRow(rows[0]) : null;
+  }
+
+  /**
+   * Resolve a Stripe price id (a pending downgrade schedule's next phase,
+   * from getBillingDetails) back to our plan slug. Only the slug — this is a
+   * display lookup for /billing/details, not a full plan load.
+   */
+  async findPlanByProviderPriceId(providerPriceId: string): Promise<{ slug: string } | null> {
+    const rows = await this.databaseService.query<{ slug: string }>(
+      `SELECT p.slug FROM billing_plans p
+         JOIN billing_plan_prices pr ON pr.plan_id = p.id
+        WHERE pr.provider_price_id = $1
+        LIMIT 1`,
+      [providerPriceId],
+    );
+    return rows[0] ?? null;
   }
 
   /**
@@ -207,12 +232,15 @@ export class BillingRepositoryService {
     return plans.map((p) => expandPlan(p, prices, limits));
   }
 
-  async loadPlanWithPricing(planId: string): Promise<BillingPlanWithPricingDto | null> {
-    const plan = await this.findPlanById(planId);
+  async loadPlanWithPricing(
+    planId: string,
+    client?: PoolClient,
+  ): Promise<BillingPlanWithPricingDto | null> {
+    const plan = await this.findPlanById(planId, client);
     if (!plan) {return null;}
     const [prices, limits] = await Promise.all([
-      this.findPricesForPlans([planId]),
-      this.findLimitsForPlans([planId]),
+      this.findPricesForPlans([planId], client),
+      this.findLimitsForPlans([planId], client),
     ]);
     return expandPlan(plan, prices, limits);
   }
@@ -221,10 +249,11 @@ export class BillingRepositoryService {
   // Customer + subscription reads (summary)
   // -------------------------------------------------------------------------
 
-  async findCustomerByUserId(userId: string): Promise<BillingCustomerDto | null> {
-    const rows = await this.databaseService.query<CustomerEntity>(
+  async findCustomerByUserId(userId: string, client?: PoolClient): Promise<BillingCustomerDto | null> {
+    const rows = await this.run<CustomerEntity>(
       `SELECT * FROM billing_customers WHERE user_id = $1`,
       [userId],
+      client,
     );
     return rows.length > 0 ? this.mapCustomer(rows[0]) : null;
   }
@@ -234,12 +263,20 @@ export class BillingRepositoryService {
    * contains now, preferring active/trialing/past_due over canceled/ended).
    * Returns null when the user has no subscription at all.
    */
-  async findCurrentSubscription(userId: string): Promise<BillingSubscriptionDto | null> {
-    const rows = await this.databaseService.query<SubscriptionEntity>(
+  async findCurrentSubscription(
+    userId: string,
+    client?: PoolClient,
+  ): Promise<BillingSubscriptionDto | null> {
+    const rows = await this.run<SubscriptionEntity>(
       `SELECT s.* FROM billing_subscriptions s
        JOIN billing_customers c ON c.id = s.customer_id
        WHERE c.user_id = $1
        ORDER BY
+         -- A real Stripe subscription outranks a local-only trial row, whatever
+         -- their statuses. This used to sort purely by status with 'trialing'
+         -- first, so a trial row that was never closed masked the paid
+         -- subscription underneath it and the FE kept opening new checkouts.
+         (s.provider_subscription_id IS NULL) ASC,
          CASE s.status
            WHEN 'trialing' THEN 1
            WHEN 'active' THEN 2
@@ -249,6 +286,7 @@ export class BillingRepositoryService {
          END ASC,
          s.current_period_end DESC`,
       [userId],
+      client,
     );
     return rows.length > 0 ? this.mapSubscription(rows[0]) : null;
   }
@@ -695,6 +733,64 @@ export class BillingRepositoryService {
   }
 
   /**
+   * Repoint a subscription at a different plan, in place.
+   *
+   * Used by `changePlan` the moment Stripe accepts the reprice, rather than
+   * waiting for the `customer.subscription.updated` webhook to carry it back.
+   * The webhook is authoritative for everything a plan change does NOT decide
+   * (status, period boundaries) and re-applies this same plan_id when it lands,
+   * so the two cannot disagree — but it arrives a second or two later, and the
+   * FE refetches its summary immediately after the mutation resolves. Leaving
+   * the local row stale in that window showed the seller their OLD quotas right
+   * after a successful upgrade, with nothing scheduled to correct it until they
+   * reloaded the page by hand.
+   *
+   * Safe to write ahead of the webhook because Stripe has already returned
+   * success for the exact price we asked for: the new plan IS the truth at this
+   * point, not a prediction.
+   */
+  async updateSubscriptionPlan(
+    subscriptionId: string,
+    planId: string,
+    client?: PoolClient,
+  ): Promise<void> {
+    await this.run(
+      `UPDATE billing_subscriptions
+          SET plan_id = $2, updated_at = NOW()
+        WHERE id = $1`,
+      [subscriptionId, planId],
+      client,
+    );
+  }
+
+  /**
+   * End this user's local trial rows.
+   *
+   * The trial exists only in our tables — it has no Stripe subscription — and
+   * it is over the moment the seller actually pays. Nothing closed it before,
+   * so a converted seller kept a live `trialing` row forever; combined with
+   * findCurrentSubscription's ordering that row MASKED their real subscription,
+   * `hasProviderSubscription` read false, and every later plan click opened a
+   * fresh Checkout and minted another live subscription.
+   *
+   * `provider_subscription_id IS NULL` is the safety catch: this must never be
+   * able to touch a provider-backed row, because doing so would suspend a
+   * paying customer.
+   */
+  async endTrialSubscriptionsForUser(userId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_subscriptions s
+          SET status = $2, ended_at = NOW(), updated_at = NOW()
+         FROM billing_customers c
+        WHERE c.id = s.customer_id
+          AND c.user_id = $1
+          AND s.provider_subscription_id IS NULL
+          AND s.status <> $2`,
+      [userId, BillingSubscriptionStatus.ENDED],
+    );
+  }
+
+  /**
    * Find a customer by provider customer id (for webhook processing — the
    * Stripe event carries the provider customer id, not our user_id).
    */
@@ -794,15 +890,20 @@ export class BillingRepositoryService {
     });
   }
 
-  async ensureLocalCustomer(userId: string, billingEmail: string | null): Promise<BillingCustomerDto> {
-    const existing = await this.findCustomerByUserId(userId);
+  async ensureLocalCustomer(
+    userId: string,
+    billingEmail: string | null,
+    client?: PoolClient,
+  ): Promise<BillingCustomerDto> {
+    const existing = await this.findCustomerByUserId(userId, client);
     if (existing) {return existing;}
-    const rows = await this.databaseService.query<CustomerEntity>(
+    const rows = await this.run<CustomerEntity>(
       `INSERT INTO billing_customers (user_id, provider, billing_email)
        VALUES ($1, 'local', $2)
        ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
        RETURNING *`,
       [userId, billingEmail],
+      client,
     );
     return this.mapCustomer(rows[0]);
   }
@@ -819,13 +920,63 @@ export class BillingRepositoryService {
    * upsert/conflict handling needed. Idempotent: re-running with the same
    * values is a no-op write.
    */
-  async linkProviderCustomer(userId: string, provider: string, providerCustomerId: string): Promise<void> {
-    await this.databaseService.query(
+  async linkProviderCustomer(
+    userId: string,
+    provider: string,
+    providerCustomerId: string,
+    client?: PoolClient,
+  ): Promise<void> {
+    await this.run(
       `UPDATE billing_customers
        SET provider = $2, provider_customer_id = $3, updated_at = NOW()
        WHERE user_id = $1`,
       [userId, provider, providerCustomerId],
+      client,
     );
+  }
+
+  /**
+   * Run `fn` while holding a Postgres advisory lock scoped to this user, for
+   * the duration of `fn` (released when the wrapping transaction ends,
+   * whether it commits or the callback throws — `pg_advisory_xact_lock`
+   * cannot be left held by a crashed process).
+   *
+   * Used by BillingService.createCheckout/createAddonCheckout to serialize
+   * Stripe-customer resolution, and by changePlan to serialize the whole
+   * resolve-decide-mutate sequence: two concurrent checkouts for a brand-new
+   * user (no linked provider customer yet) must not each read "no customer"
+   * and each mint a separate Stripe customer — billing_customers.user_id is
+   * UNIQUE, so whichever linkProviderCustomer call lands second silently
+   * overwrites the first's link, orphaning the first (now-unreferenced)
+   * Stripe customer, and any subscription created under it, from all local
+   * tracking. This is the same class of bug
+   * subscription-integrity.guard.spec.ts exists to prevent.
+   *
+   * Same shape as reserveSlotsBulk (DatabaseService.transaction +
+   * pg_advisory_xact_lock), a different key space (billingCustomerLockKey,
+   * not advisoryLockKey — see that function's doc for why).
+   *
+   * `fn` receives the LOCKED client and should pass it to every repository
+   * call it makes inside the critical section, rather than letting those
+   * calls fall back to their default pooled connection. `transaction` already
+   * holds one connection from the pool for the advisory lock itself; a
+   * repository call inside `fn` that ignores this client checks out a SECOND
+   * connection from the same pool for the duration of the lock — at high
+   * concurrency (many users each holding their own lock + a second borrowed
+   * connection) that can starve the pool for unrelated requests. `fn` is
+   * still free to make an external call (Stripe) in between — the lock only
+   * needs to stay held while `fn` runs, whatever mix of DB and network work
+   * that involves.
+   */
+  async withUserBillingLock<T>(
+    userId: string,
+    fn: (client: PoolClient) => Promise<T>,
+  ): Promise<T> {
+    return this.databaseService.transaction(async (client) => {
+      const { key1, key2 } = billingCustomerLockKey(userId);
+      await client.query('SELECT pg_advisory_xact_lock($1, $2)', [key1, key2]);
+      return fn(client);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -1079,10 +1230,19 @@ export class BillingRepositoryService {
     return Number(rows[0].limit_value);
   }
 
-  /** Run a query either on the pool or on a provided transaction client. */
+  /**
+   * Run a query either on the pool or on a provided transaction client.
+   *
+   * `params` takes the same shape `DatabaseService.query` does (scalars OR
+   * arrays — an array param is how e.g. `findPricesForPlans` sends
+   * `ANY($1::uuid[])` in one round trip), not the narrower scalar-only type
+   * this used to declare, which happened to be enough for every call site
+   * that existed before methods like `findPlanById`/`findPricesForPlans`
+   * needed to take a client too (see `withUserBillingLock`'s doc).
+   */
   private async run<T>(
     text: string,
-    params: (string | number | boolean | null | undefined)[],
+    params: QueryParam[],
     client?: PoolClient,
   ): Promise<T[]> {
     if (client) {

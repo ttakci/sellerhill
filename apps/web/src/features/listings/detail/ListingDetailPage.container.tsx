@@ -93,10 +93,12 @@ export const ListingDetailPageContainer: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [isTitleDrawerOpen, setIsTitleDrawerOpen] = useState(false);
+  const [isGroupDrawerOpen, setIsGroupDrawerOpen] = useState(false);
   const [isAutomationDrawerOpen, setIsAutomationDrawerOpen] = useState(false);
   const [isRevisionsDrawerOpen, setIsRevisionsDrawerOpen] = useState(false);
   const [overrides, setOverrides] = useState<ListingOverridesUiState>(emptyOverrides);
   const [isSavingOverrides, setIsSavingOverrides] = useState(false);
+  const [isSavingGroup, setIsSavingGroup] = useState(false);
 
   const {
     data: listing,
@@ -119,7 +121,7 @@ export const ListingDetailPageContainer: React.FC = () => {
   const [deleteListings, { isLoading: isDeleting }] = useDeleteListingsMutation();
   const [publishListing, { isLoading: isPublishing }] = usePublishListingMutation();
 
-  useLoading(isSaving || isSavingOverrides || isEnding || isDeleting || isPublishing);
+  useLoading(isSaving || isSavingOverrides || isSavingGroup || isEnding || isDeleting || isPublishing);
 
   const form = useForm<UpdateListingFormData>({
     resolver: zodResolver(updateListingSchema(t)) as never,
@@ -330,6 +332,26 @@ export const ListingDetailPageContainer: React.FC = () => {
     [selectedGroup, fmtCurrency, t, dash]
   );
 
+  /** Per-range breakdown backing the Kâr Marjı info tooltip — only meaningful
+   *  once there's more than one range to distinguish; a single range already
+   *  says everything in `groupMarginSummaryLabel` itself. */
+  const groupMarginRangeDetails = useMemo(() => {
+    const ranges = selectedGroup?.repricingStrategy;
+    if (!ranges || ranges.length <= 1) {
+      return [];
+    }
+    return ranges.map((range) => {
+      const bounds = `${fmtCurrency(range.minPrice)} – ${fmtCurrency(range.maxPrice)}`;
+      const value =
+        typeof range.profitMarginPercent === 'number'
+          ? `%${range.profitMarginPercent}`
+          : typeof range.fixedProfitAmount === 'number'
+            ? fmtCurrency(range.fixedProfitAmount)
+            : dash;
+      return t('listings.detail.groupMarginRow', { range: bounds, value });
+    });
+  }, [selectedGroup, fmtCurrency, t, dash]);
+
   const statusLabel = useMemo(() => {
     if (!listing) {
       return '';
@@ -351,6 +373,16 @@ export const ListingDetailPageContainer: React.FC = () => {
   const handleCloseTitleDrawer = () => {
     resetFormFromListing();
     setIsTitleDrawerOpen(false);
+  };
+
+  const handleOpenGroupDrawer = () => {
+    resetFormFromListing();
+    setIsGroupDrawerOpen(true);
+  };
+
+  const handleCloseGroupDrawer = () => {
+    resetFormFromListing();
+    setIsGroupDrawerOpen(false);
   };
 
   const handleOpenAutomationDrawer = () => {
@@ -401,17 +433,18 @@ export const ListingDetailPageContainer: React.FC = () => {
     })();
   };
 
+  /** Group swap now lives entirely in its own drawer (`handleSaveGroup`) — this
+   *  only ever sends the override columns, so a stale/unsaved group pick made
+   *  while this drawer happens to be open can never leak into the request. */
   const handleSaveOverrides = () => {
     if (!listingId) {
       return;
     }
     setIsSavingOverrides(true);
-    const groupId = getValues('listingSettingsGroupId');
     // Map simplified UI → DB columns (fixed price drives lockPrice + disableRepricing)
     void updateListing({
       id: listingId,
       data: {
-        listingSettingsGroupId: groupId || undefined,
         disableOrdering: overrides.pauseSales,
         disableRepricing: overrides.fixedPrice,
         lockPrice: overrides.fixedPrice,
@@ -446,6 +479,42 @@ export const ListingDetailPageContainer: React.FC = () => {
         );
       })
       .finally(() => setIsSavingOverrides(false));
+  };
+
+  const handleSaveGroup = () => {
+    if (!listingId) {
+      return;
+    }
+    setIsSavingGroup(true);
+    const groupId = getValues('listingSettingsGroupId');
+    void updateListing({
+      id: listingId,
+      data: { listingSettingsGroupId: groupId || undefined },
+    })
+      .unwrap()
+      .then(() => {
+        setIsGroupDrawerOpen(false);
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: 'listings:listings.detail.saveSuccess',
+            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+          },
+          t
+        );
+      })
+      .catch(() => {
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: 'listings:listings.detail.saveFailed',
+          },
+          t
+        );
+      })
+      .finally(() => setIsSavingGroup(false));
   };
 
   const handleEnd = () => {
@@ -665,6 +734,7 @@ export const ListingDetailPageContainer: React.FC = () => {
       groupDefaultQuantityLabel={groupDefaultQuantityLabel}
       groupStockBufferLabel={groupStockBufferLabel}
       groupMarginSummaryLabel={groupMarginSummaryLabel}
+      groupMarginRangeDetails={groupMarginRangeDetails}
       paymentPolicyLabel={paymentPolicyLabel}
       shippingPolicyLabel={shippingPolicyLabel}
       returnPolicyLabel={returnPolicyLabel}
@@ -675,6 +745,11 @@ export const ListingDetailPageContainer: React.FC = () => {
       isTitleDrawerOpen={isTitleDrawerOpen}
       onOpenTitleDrawer={handleOpenTitleDrawer}
       onCloseTitleDrawer={handleCloseTitleDrawer}
+      isGroupDrawerOpen={isGroupDrawerOpen}
+      onOpenGroupDrawer={handleOpenGroupDrawer}
+      onCloseGroupDrawer={handleCloseGroupDrawer}
+      onSaveGroup={handleSaveGroup}
+      isSavingGroup={isSavingGroup}
       isAutomationDrawerOpen={isAutomationDrawerOpen}
       onOpenAutomationDrawer={handleOpenAutomationDrawer}
       onCloseAutomationDrawer={handleCloseAutomationDrawer}

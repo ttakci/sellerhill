@@ -20,6 +20,7 @@ import {
   type BillingSubscriptionDto,
   type BillingUsagePeriodDto,
 } from './billing.types';
+import { type PlanChangeDirection } from './plan-change';
 
 /**
  * The billing provider a record belongs to. Stored as
@@ -208,4 +209,103 @@ export interface BillingPortalDto {
   provider: BillingProvider;
   /** Provider-side portal URL to redirect the browser to (Paddle). */
   portalUrl: string | null;
+}
+
+/**
+ * What a plan change will actually cost, from Stripe's own arithmetic.
+ *
+ * Not an estimate we computed: it comes from `invoices.createPreview`, so it
+ * carries tax, discounts and proration exactly as they will be billed.
+ */
+export interface BillingPlanChangePreviewDto {
+  direction: PlanChangeDirection;
+  /** Charged immediately for an upgrade; 0 for a downgrade (nothing moves now). */
+  amountDueMicros: number;
+  currency: string;
+  /** ISO timestamp the change takes effect — now for an upgrade, period end
+   *  for a downgrade. */
+  effectiveAt: string;
+  /** The recurring amount from the next full period onward. */
+  nextInvoiceAmountMicros: number | null;
+  /** ISO timestamp of the next invoice. */
+  nextInvoiceAt: string | null;
+}
+
+/** The card Stripe actually charges — the customer's DEFAULT payment method,
+ *  never an arbitrary one from the attached list. */
+export interface BillingPaymentMethodDto {
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  /** True within CARD_EXPIRY_WARNING_DAYS of expiry, or already expired. */
+  expiringSoon: boolean;
+}
+
+/** A downgrade waiting for the current period to end. */
+export interface BillingScheduledChangeDto {
+  /**
+   * null when the schedule's next-phase Stripe price could not be resolved
+   * back to one of our plans (e.g. a schedule edited by hand in the Stripe
+   * Dashboard, or a catalog price that has since been retired) — the seller
+   * genuinely does not know which plan they are switching to, but the date
+   * and the ability to cancel the pending change are both still real and
+   * must still be shown. A resolve miss here used to drop this whole object,
+   * which hid a live pending change from the seller AND removed their only
+   * way to cancel it.
+   */
+  planSlug: string | null;
+  effectiveAt: string;
+}
+
+/**
+ * Live-from-Stripe billing detail. Deliberately NOT part of
+ * BillingSummaryDto: AppLayout calls the summary on every page load, and
+ * provider latency does not belong on that path.
+ *
+ * Every field is nullable because each is independently unavailable — a
+ * trialing seller has no card and no upcoming invoice, and that is normal, not
+ * an error.
+ */
+export interface BillingDetailsDto {
+  paymentMethod: BillingPaymentMethodDto | null;
+  nextChargeAmountMicros: number | null;
+  nextChargeCurrency: string | null;
+  nextChargeAt: string | null;
+  scheduledChange: BillingScheduledChangeDto | null;
+  /**
+   * True when the subscription is scheduled to cancel at the end of the
+   * current period — set by the Stripe Billing Portal's own default cancel
+   * action, which writes nothing to our tables. Without this, a seller who
+   * cancelled from the portal still saw their subscription badged active,
+   * with a next-charge amount for a charge that will never happen.
+   */
+  cancelAtPeriodEnd: boolean;
+  /** The date access ends, when `cancelAtPeriodEnd` is true. Null otherwise. */
+  cancelAt: string | null;
+}
+
+/** One invoice as the seller sees it. Amounts are micro-units of `currency`. */
+export interface BillingInvoiceDto {
+  id: string;
+  /** ISO timestamp the invoice was created. */
+  issuedAt: string;
+  /** Line-item description ("Growth plan", "100 conversions pack"), or null —
+   *  never a fabricated label. */
+  description: string | null;
+  amountMicros: number;
+  /** The currency ACTUALLY charged. Adaptive Pricing means this is often not USD. */
+  currency: string;
+  status: string;
+  /** Stripe-hosted payment page. Present on an unpaid invoice — the one-click
+   *  way a suspended seller clears their debt. */
+  hostedUrl: string | null;
+  pdfUrl: string | null;
+}
+
+export interface BillingInvoiceListDto {
+  items: BillingInvoiceDto[];
+  hasMore: boolean;
+  /** Cursor for the next page — pass back as `startingAfter`. */
+  nextCursor: string | null;
 }

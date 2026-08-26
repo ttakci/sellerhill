@@ -79,12 +79,25 @@ export class AmazonTrackingQueueService implements OnModuleInit {
     }
   }
 
-  async scheduleOrderTracking(orderId: string, amazonAccountId: string, orderStatus?: string) {
+  async scheduleOrderTracking(
+    orderId: string,
+    amazonAccountId: string,
+    orderStatus?: string,
+    intervalHoursOverride?: number
+  ) {
     const schedulerId = `track-amazon-${orderId}`;
 
     // Adjust interval based on order status (env-tunable, see field docs).
+    // An explicit override (the eBay-push deferral retry, see
+    // `tracking-deferral.ts`) always wins — it re-arms the scheduler tighter
+    // than the status-derived interval for the duration of the deferral
+    // window, without touching either env-tunable default.
     const interval =
-      orderStatus === 'shipped' ? this.shippedIntervalMs : this.preShipIntervalMs;
+      intervalHoursOverride !== undefined
+        ? intervalHoursOverride * 60 * 60 * 1000
+        : orderStatus === 'shipped'
+          ? this.shippedIntervalMs
+          : this.preShipIntervalMs;
 
     await this.trackingQueue.upsertJobScheduler(
       schedulerId,

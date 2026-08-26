@@ -22,6 +22,49 @@ export interface ScrapingProgress {
 }
 
 /**
+ * True when `href`, resolved against `originUrl`, is a safe target to navigate an
+ * authenticated Amazon session to: HTTPS and the SAME hostname as the marketplace
+ * origin we already trust (built via `buildAmazonSiteUrl`, never hardcoded). The
+ * "Track package" anchor comes from Amazon's own rendered page and is expected to
+ * resolve within Amazon's own site — a different host, a non-https scheme
+ * (`http:`, `javascript:`, `data:`, …) or a malformed href is refused rather than
+ * navigated to, because that navigation happens inside a session holding the
+ * seller's real, logged-in Amazon cookies.
+ */
+export function isTrustedAmazonTrackingUrl(href: string, originUrl: string): boolean {
+  return resolveTrustedAmazonTrackingUrl(href, originUrl) !== null;
+}
+
+/**
+ * The same trust decision as `isTrustedAmazonTrackingUrl`, but returning the
+ * ABSOLUTE url rather than a boolean — `null` when the href is untrusted or
+ * cannot be resolved.
+ *
+ * This exists because the absolutized value is not merely a navigation
+ * convenience: Amazon renders the "Track package" anchor site-relative
+ * (`/progress-tracker/package/?orderId=...`), and that raw `href` is what the
+ * parser returns. Handing a relative path onward is a silent, expensive
+ * failure — `assign`/`upsertOrders` send it to Aquiline as `trackingUrl`,
+ * which rejects it (`tracking_url_mismatch` / `assign_validation`), the
+ * conversion falls back to the raw Amazon number, and eBay's Fulfillment API
+ * has NO update endpoint, so that buyer sees the supplier's own tracking
+ * number forever. Resolving once, here, is what makes the value that is
+ * navigated to and the value that is sent to the provider the SAME string.
+ */
+export function resolveTrustedAmazonTrackingUrl(href: string, originUrl: string): string | null {
+  try {
+    const resolved = new URL(href, originUrl);
+    const origin = new URL(originUrl);
+    if (resolved.protocol !== 'https:' || resolved.hostname !== origin.hostname) {
+      return null;
+    }
+    return resolved.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * One row from the account "Your Orders" list page (Amazon order-list scrape).
  * Returned by `AmazonScrapingService.scrapeAccountOrders`. Mirrors what the
  * per-order detail-page scrape produces, but limited to the fields the auto
@@ -223,6 +266,22 @@ export class AmazonScrapingService {
 
         const scrapedData = await this.parserService.parseOrderPage(page, amazonOrderId);
 
+        // Amazon renders the "Track package" anchor site-relative
+        // (/progress-tracker/package/?orderId=...); parseOrderPage returns that raw
+        // href. The scheduled scrape (doScrapeOrderStatusWithTrackingHtml) already
+        // absolutizes+trust-checks this exact value before handing it to Aquiline —
+        // the manual link path must do the same, or a conversion fired via
+        // convertOnDemand before the first tracking tick sends a relative URL the
+        // provider rejects (tracking_url_mismatch/assign_validation), and since
+        // eBay's Fulfillment API has no update endpoint, that buyer keeps the raw
+        // Amazon number forever. Refuse rather than navigate on an untrusted host —
+        // this only resolves the string, it never triggers a second navigation.
+        if (scrapedData.trackingUrl) {
+          const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
+          const resolved = resolveTrustedAmazonTrackingUrl(scrapedData.trackingUrl, origin);
+          scrapedData.trackingUrl = resolved ?? undefined;
+        }
+
         onProgress?.({ stage: 'saving', message: 'Saving order data...' });
 
         // Save browser state for session reuse
@@ -289,6 +348,109 @@ export class AmazonScrapingService {
       await this.browserStateManager.saveState(amazonAccountId);
 
       return await this.parserService.parseOrderStatus(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  /**
+   * Order status AND the ship-track page HTML, in ONE rate-limiter slot.
+   *
+   * Aquiline wants the ship-track page (never order-details) roughly daily for an
+   * in-flight order. Doing it in a second slot would cost a second Chromium page,
+   * a second session check and a 3s per-account wait, and would double the slots
+   * an in-flight order consumes against a platform ceiling of
+   * AMAZON_GLOBAL_CONCURRENCY x 86,400 browser-seconds/day.
+   *
+   * The decisive reason is correctness, though: an Amazon order can ship as
+   * several packages and the real tracking URL carries a package index. Reading
+   * the link Amazon itself renders — while still on order-details — is what
+   * avoids the provider's own `tracking_url_mismatch` / `wrong_page_type`
+   * problems. A constructed URL cannot know the index.
+   */
+  async scrapeOrderStatusWithTrackingHtml(
+    userId: string,
+    amazonAccountId: string,
+    amazonOrderId: string
+  ): Promise<{
+    status: string;
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
+    trackingHtml?: string;
+  }> {
+    return this.rateLimiter.schedule(amazonAccountId, () =>
+      this.doScrapeOrderStatusWithTrackingHtml(userId, amazonAccountId, amazonOrderId)
+    );
+  }
+
+  private async doScrapeOrderStatusWithTrackingHtml(
+    userId: string,
+    amazonAccountId: string,
+    amazonOrderId: string
+  ): Promise<{
+    status: string;
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
+    trackingHtml?: string;
+  }> {
+    const account = await this.accountsService.getDecrypted(userId, amazonAccountId);
+
+    const hasValidSession = await this.browserStateManager.isSessionValid(amazonAccountId);
+
+    let page;
+    if (hasValidSession) {
+      const context = await this.browserStateManager.getContext(amazonAccountId);
+      page = await context.newPage();
+    } else {
+      page = await this.performLogin(amazonAccountId, account.email, account.decryptedPassword, account.decryptedTwoFactorSecret, account.marketplace as AmazonMarketplace);
+    }
+
+    try {
+      const orderUrl = `${buildAmazonSiteUrl(account.marketplace as AmazonMarketplace)}/gp/your-account/order-details/ref=ppx_yo_dt_b_order_details_o00?ie=UTF8&orderID=${amazonOrderId}`;
+      await page.goto(orderUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2000);
+
+      // Save state after successful navigation
+      await this.browserStateManager.saveState(amazonAccountId);
+
+      const parsed = await this.parserService.parseOrderStatus(page);
+
+      // The parser returns Amazon's raw `href`, which is normally SITE-RELATIVE.
+      // Resolve it ONCE here, and hand onward only the absolute value that
+      // passed the trusted-host check — the same string this page navigates to
+      // is the one `TrackingConversionService` sends the provider as
+      // `trackingUrl`. An untrusted or unresolvable href yields NO trackingUrl
+      // at all rather than a relative one: a missing URL makes the conversion
+      // fall back visibly (and is logged), while a relative one is accepted by
+      // our own code and rejected only by the provider, after the call is paid
+      // for and after eBay has already been handed the raw Amazon number.
+      let trackingUrl: string | undefined;
+      let trackingHtml: string | undefined;
+      if (parsed.trackingUrl) {
+        const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
+        const resolvedTrackingUrl = resolveTrustedAmazonTrackingUrl(parsed.trackingUrl, origin);
+        if (!resolvedTrackingUrl) {
+          this.logger.warn(
+            `Ship-track HTML capture skipped for order ${amazonOrderId}: tracking URL is not a trusted Amazon host`
+          );
+        } else {
+          trackingUrl = resolvedTrackingUrl;
+          try {
+            await page.goto(resolvedTrackingUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.waitForTimeout(1500);
+            trackingHtml = await page.content();
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(
+              `Ship-track HTML capture failed for order ${amazonOrderId}: ${message}`
+            );
+          }
+        }
+      }
+
+      return { ...parsed, trackingUrl, trackingHtml };
     } finally {
       await page.close();
     }

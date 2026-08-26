@@ -20,12 +20,14 @@
       "loadingSubtitle": "En güncel eBay siparişleriniz getiriliyor.",
       "filtersTitle": "Filtrelere uyan sipariş yok",
       "filtersSubtitle": "Tarih aralığını, durumu veya mağazayı genişletmeyi deneyin.",
+      "filtersAction": "Filtreleri temizle",
       "emptyTitle": "Henüz sipariş yok",
       "emptySubtitle": "eBay senkronizasyonu çalıştığında siparişler burada otomatik görünür."
     },
     "filters": {
       "allStatuses": "Tüm durumlar",
       "allStores": "Tüm mağazalar",
+      "allTrackingStates": "Tüm takip durumları",
       "clearAll": "Temizle",
       "resultCount": "{{count}} sonuç"
     },
@@ -85,6 +87,21 @@
         "cancelledNotice": "Amazon siparişi iptal edildi. eBay satışı hâlâ alıcıya borçlu — başka bir yolla karşılayın.",
         "notAutomatedNotice": "Bu sipariş için otomatik sipariş kapalı.",
         "attemptedAt": "Son deneme"
+      }
+    },
+    "tracking": {
+      "tracked": "SellerHill tarafından takip ediliyor",
+      "untracked": "Takip edilmiyor",
+      "problem": {
+        "wrongPageType": "Takip sağlayıcısı Amazon sipariş sayfasını okuyamadı — sayfa biçimi değişmiş olabilir. Bu otomatik olarak yeniden denenecek.",
+        "amazonSessionExpired": "Bu siparişi okumak için kullanılan Amazon oturumunun süresi doldu ve yeniden giriş yapılması gerekiyor.",
+        "trackingUrlMismatch": "Amazon sipariş sayfasındaki takip bağlantısı beklenenle eşleşmedi. Bu otomatik olarak yeniden denenecek.",
+        "needsTrackingUpload": "Takip numarası dönüştürülebilmesi için sevkiyat bilgilerinin yüklenmesi bekleniyor.",
+        "updateNotApplied": "Takip güncellemesi sağlayıcı tarafından henüz uygulanmadı. Bu otomatik olarak yeniden denenecek.",
+        "assignValidation": "Takip sağlayıcısı bu sipariş için sevkiyat bilgilerini reddetti.",
+        "shipmentException": "Takip sağlayıcısı bu sevkiyatta bir sorun bildirdi.",
+        "trackingUpdateUnavailable": "Takip sağlayıcısı şu anda bu sevkiyatı güncelleyemedi.",
+        "generic": "Bu siparişin takip dönüştürmesiyle ilgili bir sorun var. Otomatik olarak yeniden denenecek."
       }
     },
     "autoFulfill": {
@@ -168,6 +185,7 @@
       "amazonTax": "Amazon Vergisi",
       "amazonShipping": "Amazon Kargosu",
       "totalAmazonCost": "Toplam Amazon Maliyeti",
+      "convertedTracking": "Dönüştürülmüş Takip",
       "amazonOrder": "Amazon Siparişi",
       "linkAmazon": "Amazon Siparişi Bağla",
       "calcEarnings": "Kazanç",
@@ -203,7 +221,8 @@
       "noTrackingYet": "Bu siparişin henüz Amazon takip numarası yok — kargoya verilmemiş.",
       "conversionUnavailable": "Kargo takibi şu anda dönüştürülemedi. Paket limitinizi ve dönüşüm ayarlarınızı kontrol edip tekrar deneyin.",
       "conversionDone": "Kargo takibi dönüştürüldü.",
-      "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin."
+      "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
+      "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir."
     }
   }
 }

@@ -33,6 +33,7 @@ export function useOrdersFilters() {
   const [status, setStatus] = useState('');
   const [ebayAccountId, setEbayAccountId] = useState(storeFromUrl);
   const [fulfillmentState, setFulfillmentState] = useState(fulfillmentStateFromUrl);
+  const [trackingState, setTrackingState] = useState(() => searchParams.get('tracking') ?? '');
 
   // Sync store from URL (e.g. deep-link from dashboard)
   useEffect(() => {
@@ -98,8 +99,23 @@ export function useOrdersFilters() {
     [t]
   );
 
+  /**
+   * Whether the order matched a SellerHill listing at all — independent of
+   * `fulfillmentState`. A matched order can still report `not_automated`
+   * (auto-fulfill simply off/pending), so that dropdown alone cannot answer
+   * "is this even one of ours" for a seller migrating in existing eBay sales.
+   */
+  const trackingOptions = useMemo(
+    () => [
+      { value: '', label: t('orders.filters.allTrackingStates') },
+      { value: 'tracked', label: t('orders.tracking.tracked') },
+      { value: 'untracked', label: t('orders.tracking.untracked') },
+    ],
+    [t]
+  );
+
   const hasActiveFilters = Boolean(
-    search || status || ebayAccountId || dateFrom || dateTo || fulfillmentState,
+    search || status || ebayAccountId || dateFrom || dateTo || fulfillmentState || trackingState,
   );
 
   const serverQuery: OrderFiltersDto = useMemo(
@@ -112,10 +128,11 @@ export function useOrdersFilters() {
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
       fulfillmentState: (fulfillmentState as OrderFulfillmentState) || undefined,
+      isTracked: trackingState === 'tracked' ? true : trackingState === 'untracked' ? false : undefined,
       sortBy: 'order_date',
       sortOrder: 'desc',
     }),
-    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, fulfillmentState]
+    [page, rowsPerPage, search, status, ebayAccountId, dateFrom, dateTo, fulfillmentState, trackingState]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +165,22 @@ export function useOrdersFilters() {
     setPage(1);
   }, []);
 
+  const handleTrackingStateChange = useCallback(
+    (value: string | number) => {
+      const v = String(value);
+      setTrackingState(v);
+      setPage(1);
+      const next = new URLSearchParams(searchParams);
+      if (v) {
+        next.set('tracking', v);
+      } else {
+        next.delete('tracking');
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
   // No date-range setters here on purpose: `dateFrom`/`dateTo` are read-only
   // inbound state, arriving from the dashboard's "view all" deep link. The list
   // has no date inputs of its own, and `handleClearFilters` already drops them.
@@ -158,6 +191,7 @@ export function useOrdersFilters() {
     setStatus('');
     setEbayAccountId('');
     setFulfillmentState('');
+    setTrackingState('');
     setPage(1);
     const next = new URLSearchParams();
     if (fromDashboard) {
@@ -186,6 +220,9 @@ export function useOrdersFilters() {
     fulfillmentState,
     fulfillmentStateOptions,
     handleFulfillmentStateChange,
+    trackingState,
+    trackingOptions,
+    handleTrackingStateChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,

@@ -2,6 +2,35 @@ import { Injectable, Logger } from '@nestjs/common';
 import { type AmazonFinancials, type AmazonScrapedOrderData } from '@repo/shared';
 import type { Page } from 'playwright';
 
+/**
+ * Carrier for a tracking number.
+ *
+ * The number is checked FIRST because it is unambiguous, and Amazon Logistics
+ * is checked before every other carrier. The previous implementation scanned
+ * the page body with bare substrings (`/ups/i` matches "groups", "backups")
+ * and tested Amazon Logistics last, so a TB* shipment on a page mentioning any
+ * such word was labelled UPS. That is the worst possible direction: the
+ * default conversion scope is amazon_logistics_only, so the shipment most in
+ * need of hiding the supplier was the one skipped.
+ */
+export function resolveTrackingCarrier(
+  trackingNumber: string | undefined,
+  pageText: string
+): string | undefined {
+  const num = (trackingNumber || '').trim().toUpperCase();
+  if (/^TB[A-Z]/.test(num)) { return 'Amazon Logistics'; }
+  if (/^1Z[0-9A-Z]{16}$/.test(num)) { return 'UPS'; }
+  if (/^9[2-5]\d{18,24}$/.test(num)) { return 'USPS'; }
+
+  // Word-bounded so a carrier name inside another word cannot match.
+  if (/amazon\s*logistics/i.test(pageText)) { return 'Amazon Logistics'; }
+  if (/\bUSPS\b|\bUnited States Postal\b/i.test(pageText)) { return 'USPS'; }
+  if (/\bUPS\b/.test(pageText)) { return 'UPS'; }
+  if (/\bFedEx\b/i.test(pageText)) { return 'FedEx'; }
+  if (/\bDHL\b/i.test(pageText)) { return 'DHL'; }
+  return undefined;
+}
+
 @Injectable()
 export class AmazonOrderParserService {
   private readonly logger = new Logger(AmazonOrderParserService.name);
@@ -35,9 +64,12 @@ export class AmazonOrderParserService {
     };
   }
 
-  async parseOrderStatus(
-    page: Page
-  ): Promise<{ status: string; trackingNumber?: string; trackingCarrier?: string }> {
+  async parseOrderStatus(page: Page): Promise<{
+    status: string;
+    trackingNumber?: string;
+    trackingCarrier?: string;
+    trackingUrl?: string;
+  }> {
     const status = await this.extractStatus(page);
     const tracking = await this.extractTracking(page);
     return { status, ...tracking };
@@ -196,15 +228,9 @@ export class AmazonOrderParserService {
         }
       }
 
-      // Try to determine carrier from URL or text
+      // Determine carrier from the tracking number first, page text second.
       const text = await page.textContent('body').catch(() => '');
-      if (text) {
-        if (/usps/i.test(text)) {result.trackingCarrier = 'USPS';}
-        else if (/ups/i.test(text)) {result.trackingCarrier = 'UPS';}
-        else if (/fedex/i.test(text)) {result.trackingCarrier = 'FedEx';}
-        else if (/dhl/i.test(text)) {result.trackingCarrier = 'DHL';}
-        else if (/amazon\s*logistics/i.test(text)) {result.trackingCarrier = 'Amazon Logistics';}
-      }
+      result.trackingCarrier = resolveTrackingCarrier(result.trackingNumber, text || '');
     }
 
     return result;

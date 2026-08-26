@@ -19,7 +19,17 @@
     "cost": {
       "keepaBalance": "Keepa token balance",
       "users": "Total users",
-      "quantity": "Quantity: {{quantity}}"
+      "quantity": "Quantity: {{quantity}}",
+      "of": "{{used}} of {{limit}}",
+      "aquilineShipments": {
+        "label": "Aquiline shipments (this window)",
+        "caption": "Plan {{planCode}} · Window {{windowKey}} · As of {{capturedAt}}"
+      },
+      "aquilineProfiles": {
+        "label": "Aquiline profiles",
+        "permanentBadge": "Never resets",
+        "hint": "Aquiline profiles cannot be deleted — the provider API only supports reading and updating one, not removing it. A profile created by mistake, a race, or a test permanently consumes one of the plan's slots. Shipments above reset every billing window; this count never does."
+      }
     },
     "users": {
       "unattributed": "Unattributed platform usage",

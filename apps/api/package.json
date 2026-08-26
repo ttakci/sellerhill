@@ -16,6 +16,7 @@
     "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
     "stripe:sync-catalog": "tsx src/scripts/stripe-sync-catalog.ts",
+    "aquiline:probe": "tsx src/scripts/aquiline-probe.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:integration": "jest --config jest.integration.config.js --runInBand"

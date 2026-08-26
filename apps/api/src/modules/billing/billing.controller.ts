@@ -21,17 +21,24 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
   HttpStatus,
   Logger,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SubscribeDto } from '@repo/shared';
+import {
+  SubscribeDto,
+  type BillingDetailsDto,
+  type BillingInvoiceListDto,
+  type BillingPlanChangePreviewDto,
+} from '@repo/shared';
 import type { Request } from 'express';
 import Stripe from 'stripe';
 
@@ -64,6 +71,7 @@ const BILLING_ERROR_STATUS: Record<string, HttpStatus> = {
   'billing.errors.providerNotConfigured': HttpStatus.CONFLICT,
   'billing.errors.planNotMirrored': HttpStatus.CONFLICT,
   'billing.errors.checkoutFailed': HttpStatus.CONFLICT,
+  'billing.errors.alreadySubscribed': HttpStatus.CONFLICT,
   'billing.errors.portalFailed': HttpStatus.CONFLICT,
   'billing.errors.noCustomer': HttpStatus.CONFLICT,
   'billing.errors.planNotFound': HttpStatus.NOT_FOUND,
@@ -72,6 +80,7 @@ const BILLING_ERROR_STATUS: Record<string, HttpStatus> = {
   'billing.errors.planChangeFailed': HttpStatus.CONFLICT,
   'billing.errors.priceNotFound': HttpStatus.NOT_FOUND,
   'billing.errors.ebayTrialAlreadyUsed': HttpStatus.CONFLICT,
+  'billing.errors.invoicesFailed': HttpStatus.CONFLICT,
 };
 
 /**
@@ -115,6 +124,41 @@ export class BillingController {
     return this.billingService.getSummary(req.user.sub);
   }
 
+  // Live-from-Stripe (card, next charge, pending change) — deliberately
+  // separate from /summary, which AppLayout calls on every page load. See
+  // BillingDetailsDto's own doc comment for why provider latency must not
+  // land on that path.
+  @Get('details')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Live card, next charge and pending plan change' })
+  async getDetails(@Req() req: { user: { sub: string } }): Promise<BillingDetailsDto> {
+    return this.billingService.getDetails(req.user.sub);
+  }
+
+  @Get('invoices')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Paginated invoice history, read live from Stripe' })
+  async listInvoices(
+    @Req() req: { user: { sub: string } },
+    @Query('limit') limit?: string,
+    @Query('startingAfter') startingAfter?: string,
+  ): Promise<BillingInvoiceListDto> {
+    try {
+      // `Number('abc')` is NaN, which fails both the service's Math.max and
+      // Math.min clamp and would reach the Stripe SDK as `limit: NaN` — an
+      // unparseable value must resolve to "absent" (the service's own
+      // default) rather than propagate a non-finite number downstream.
+      const parsedLimit = limit ? Number(limit) : undefined;
+      return await this.billingService.listInvoices(
+        req.user.sub,
+        Number.isFinite(parsedLimit) ? parsedLimit : undefined,
+        startingAfter,
+      );
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
   @Post('checkout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
@@ -146,6 +190,36 @@ export class BillingController {
     try {
       await this.billingService.changePlan(req.user.sub, dto.planId, dto.interval);
       return { ok: true };
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
+  @Delete('scheduled-change')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cancel a pending downgrade' })
+  async cancelScheduledChange(
+    @Req() req: { user: { sub: string } },
+  ): Promise<{ ok: true }> {
+    try {
+      await this.billingService.cancelScheduledChange(req.user.sub);
+      return { ok: true };
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
+  @Post('plan-change/preview')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'What a plan change will cost, before applying it' })
+  async previewPlanChange(
+    @Req() req: { user: { sub: string } },
+    @Body() dto: SubscribeDto,
+  ): Promise<BillingPlanChangePreviewDto> {
+    try {
+      return await this.billingService.previewPlanChange(req.user.sub, dto.planId, dto.interval);
     } catch (error) {
       rethrowBillingError(error);
     }

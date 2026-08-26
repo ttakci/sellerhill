@@ -101,7 +101,7 @@ describe('extractStripeSubscriptionFields', () => {
     expect(fields?.interval).toBe(BillingInterval.MONTHLY);
   });
 
-  it('falls back to a 1-month window when period dates are missing', () => {
+  it('falls back to a 1-month window when the item carries no period dates', () => {
     const fields = extractStripeSubscriptionFields(makeEvent({ id: 'sub_1', status: 'active' }));
     expect(fields).not.toBeNull();
     const startMs = fields!.currentPeriodStart.getTime();
@@ -110,9 +110,44 @@ describe('extractStripeSubscriptionFields', () => {
     expect(endMs - startMs).toBeLessThan(32 * 24 * 60 * 60 * 1000);
   });
 
-  it('parses current_period_start/end as unix seconds', () => {
+  it('does NOT read current_period_start/end off the Subscription object — those fields moved to SubscriptionItem at this API version, and a top-level value here must still fall back to the 1-month window', () => {
+    // This is the regression lock for the 2026-08-22 defect: the pre-fix code
+    // read sub.current_period_start/end directly, which always missed
+    // (Stripe never sends them there at API version 2025-03-31.basil) and
+    // silently produced a fabricated now()..now()+30d span on every webhook.
+    // Setting them at the top level here and asserting the fallback STILL
+    // fires proves the read genuinely moved to the item, not merely that it
+    // also accepts this shape.
     const fields = extractStripeSubscriptionFields(
-      makeEvent({ id: 'sub_1', status: 'active', current_period_start: 1753776000, current_period_end: 1756368000 }),
+      makeEvent({
+        id: 'sub_1',
+        status: 'active',
+        current_period_start: 1753776000,
+        current_period_end: 1756368000,
+      }),
+    );
+    expect(fields).not.toBeNull();
+    const startMs = fields!.currentPeriodStart.getTime();
+    const endMs = fields!.currentPeriodEnd.getTime();
+    expect(endMs - startMs).toBeGreaterThan(28 * 24 * 60 * 60 * 1000);
+    expect(endMs - startMs).toBeLessThan(32 * 24 * 60 * 60 * 1000);
+  });
+
+  it('parses current_period_start/end from the first subscription item', () => {
+    const fields = extractStripeSubscriptionFields(
+      makeEvent({
+        id: 'sub_1',
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: { recurring: { interval: 'month' } },
+              current_period_start: 1753776000,
+              current_period_end: 1756368000,
+            },
+          ],
+        },
+      }),
     );
     expect(fields?.currentPeriodStart).toEqual(new Date(1753776000 * 1000));
     expect(fields?.currentPeriodEnd).toEqual(new Date(1756368000 * 1000));

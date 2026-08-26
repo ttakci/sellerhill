@@ -103,11 +103,14 @@ describe('entitlement enforcement invariants', () => {
     it('conversion DEGRADES rather than blocks when quota runs out', () => {
       // Unlike listings and orders, exhausting conversions must not stop the
       // shipment — eBay still needs a scannable number. The fallback is the
-      // honest pass-through.
+      // honest pass-through — today routed through `passthroughResult`, which
+      // itself calls `this.local.convertSync` (Task 6 fix round 1: every
+      // pass-through now also carries a `ConversionOutcome` for Task 7).
       const src = read('modules', 'amazon', 'tracking-conversion.service.ts');
       expect(src).toMatch(
-        /quota-conversion|quota exhausted[\s\S]{0,200}this\.local\.convertSync\(request\)/i,
+        /quota-conversion|quota exhausted[\s\S]{0,200}this\.passthroughResult\(request/i,
       );
+      expect(src).toMatch(/passthroughResult[\s\S]{0,120}this\.local\.convertSync\(request\)/);
     });
   });
 
@@ -225,9 +228,17 @@ describe('entitlement enforcement invariants', () => {
       expect(provider).toMatch(/subscriptions\.update\([\s\S]{0,1500}metadata: \{ plan_id/);
     });
 
-    it('tells the FE which of the two applies', () => {
+    it('tells the FE which of the two applies, gated on a LIVE status not just the id', () => {
+      // providerSubscriptionId survives a CANCELED/ENDED subscription (Stripe
+      // never clears it), so an id-only check permanently routed a lapsed
+      // seller at "Switch to X" -> previewPlanChange/changePlan instead of
+      // back through checkout — and both of those dead-end against a
+      // canceled subscription. hasLiveSubscriptionStatus is the one place
+      // that decides which statuses still count.
       const service = read('modules', 'billing', 'billing.service.ts');
-      expect(service).toMatch(/hasProviderSubscription: Boolean\(subscription\?\.providerSubscriptionId\)/);
+      expect(service).toMatch(
+        /hasProviderSubscription: Boolean\(\s*subscription\?\.providerSubscriptionId && hasLiveSubscriptionStatus\(subscription\.status\)/,
+      );
     });
   });
 

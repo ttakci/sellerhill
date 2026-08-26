@@ -49,6 +49,9 @@ export interface ListingDetailPageProps {
   groupDefaultQuantityLabel: string;
   groupStockBufferLabel: string;
   groupMarginSummaryLabel: string;
+  /** Per-range breakdown for the Kâr Marjı info tooltip — empty when there's
+   *  only one range (nothing to break down beyond the summary label itself). */
+  groupMarginRangeDetails: string[];
   /** Read-only — eBay policy reassignment from this page is not pushed to eBay yet. */
   paymentPolicyLabel: string;
   shippingPolicyLabel: string;
@@ -60,6 +63,11 @@ export interface ListingDetailPageProps {
   isTitleDrawerOpen: boolean;
   onOpenTitleDrawer: () => void;
   onCloseTitleDrawer: () => void;
+  isGroupDrawerOpen: boolean;
+  onOpenGroupDrawer: () => void;
+  onCloseGroupDrawer: () => void;
+  onSaveGroup: () => void;
+  isSavingGroup: boolean;
   isAutomationDrawerOpen: boolean;
   onOpenAutomationDrawer: () => void;
   onCloseAutomationDrawer: () => void;

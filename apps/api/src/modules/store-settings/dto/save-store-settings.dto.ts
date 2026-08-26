@@ -141,4 +141,47 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @ValidateNested({ each: true })
   @Type(() => BlacklistKeywordDto)
   blacklist?: Omit<BlacklistKeyword, 'id'>[];
+
+  @ApiPropertyOptional({
+    description:
+      'Ship-from / return address name sent to Aquiline as the profile storeAddress. ' +
+      'Optional — omitted means "leave unchanged". While the address is incomplete, ' +
+      'tracking conversion falls back to the raw Amazon number.',
+    example: 'Jane Seller',
+  })
+  @IsOptional()
+  @IsString()
+  shipFromName?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ship-from / return address phone number. Optional — omitted means "leave unchanged".',
+    example: '+1 555 010 1234',
+  })
+  @IsOptional()
+  @IsString()
+  shipFromPhone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ship-from / return address, line 1. Optional — omitted means "leave unchanged".',
+    example: '123 Main St',
+  })
+  @IsOptional()
+  @IsString()
+  shipFromAddressLine1?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ship-from / return address, line 2. Optional — omitted means "leave unchanged".',
+    example: 'Suite 400',
+  })
+  @IsOptional()
+  @IsString()
+  shipFromAddressLine2?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ship-from / return address city. Optional — omitted means "leave unchanged".',
+    example: 'Austin',
+  })
+  @IsOptional()
+  @IsString()
+  shipFromCity?: string;
 }

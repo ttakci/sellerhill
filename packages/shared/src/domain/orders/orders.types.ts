@@ -210,6 +210,22 @@ export interface OrderDto {
    */
   amazonTrackingNumber?: string | null;
   convertedTrackingNumber?: string | null;
+  /**
+   * What eBay actually received via `createShippingFulfillment`. eBay's
+   * Fulfillment API is POST-only with no update endpoint, so once this is
+   * set the buyer's tracking number is permanent — the convert action must
+   * never be offered once it is non-null. See `TrackingConversionService`.
+   */
+  ebayTrackingPushedNumber?: string | null;
+  /**
+   * The provider's own code for the latest tracking problem, when one is
+   * open. Raw and unmapped — the caller must never render it directly; map
+   * it to a localized sentence and fall back to a generic message for a
+   * code outside `AquilineProblemCode` (the provider may add codes we do
+   * not know about yet). NULL for every order until the webhook receiver
+   * that writes it ships (a later, separate plan).
+   */
+  trackingProblemCode?: string | null;
   amazonTax?: number;
   amazonShipping?: number;
 
@@ -289,6 +305,16 @@ export interface OrderFiltersDto {
    * and left "which orders were actually bought on Amazon?" unanswerable.
    */
   fulfillmentState?: OrderFulfillmentState;
+  /**
+   * Filter by whether the order matched a SellerHill listing (`listing_id`).
+   * An unmatched order — e.g. a seller migrating from another tool, whose
+   * eBay item was never imported here — is never priced/stocked/auto-ordered
+   * by this platform; `cost_capture_status` stays `untracked` forever. This
+   * is independent of `fulfillmentState`: an order CAN have a matched listing
+   * and still report `NOT_AUTOMATED` (auto-fulfill simply off/pending), so
+   * `fulfillmentState` alone cannot answer "is this even one of ours".
+   */
+  isTracked?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

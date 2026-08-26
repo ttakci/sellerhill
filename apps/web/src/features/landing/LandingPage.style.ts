@@ -1695,8 +1695,8 @@ export const CtaButton = styled.button`
  * ========================================================================= */
 
 export const Footer = styled.footer`
-  background: ${tkn('colors.landing.sectionDeep')};
-  border-top: 1px solid ${tkn('colors.landing.heroBorder')};
+  background: ${tkn('colors.sidebar.background')};
+  border-top: 1px solid ${tkn('colors.sidebar.divider')};
   padding: ${tkn('spacing.xxl')} ${tkn('spacing.xl')} ${tkn('spacing.lg')};
 
   @media (max-width: 900px) {
@@ -1730,7 +1730,7 @@ export const FooterDescription = styled.p`
   font-family: ${FONT_BODY};
   font-size: ${TYPE.small};
   line-height: 1.65;
-  color: ${tkn('colors.landing.heroTextMuted')};
+  color: ${tkn('colors.sidebar.textMuted')};
 `;
 
 export const FooterColumns = styled.div`
@@ -1751,7 +1751,7 @@ export const FooterColTitle = styled.h4`
   font-family: ${FONT_BODY};
   font-size: ${TYPE.small};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.landing.heroText')};
+  color: ${tkn('colors.sidebar.text')};
 `;
 
 export const FooterLink = styled.button`
@@ -1762,7 +1762,7 @@ export const FooterLink = styled.button`
   text-align: left;
   font-family: ${FONT_BODY};
   font-size: ${TYPE.small};
-  color: ${tkn('colors.landing.heroTextMuted')};
+  color: ${tkn('colors.sidebar.textMuted')};
   transition: color 140ms ease;
 
   &:hover {
@@ -1774,7 +1774,7 @@ export const FooterDivider = styled.div`
   max-width: ${CONTENT_MAX};
   margin: ${tkn('spacing.xl')} auto ${tkn('spacing.md')};
   height: 1px;
-  background: ${tkn('colors.landing.heroBorder')};
+  background: ${tkn('colors.sidebar.divider')};
 `;
 
 export const FooterBottom = styled.div`
@@ -1789,5 +1789,5 @@ export const Copyright = styled.p`
   margin: 0;
   font-family: ${FONT_BODY};
   font-size: ${TYPE.micro};
-  color: ${tkn('colors.text.tertiary')};
+  color: ${tkn('colors.sidebar.textMuted')};
 `;

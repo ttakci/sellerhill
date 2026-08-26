@@ -25,11 +25,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BillingInterval,
   BillingLimitKey,
+  hasLiveSubscriptionStatus,
+  PlanChangeDirection,
   PlatformSettingKey,
+  resolvePlanChangeDirection,
+  type BillingDetailsDto,
+  type BillingInvoiceListDto,
+  type BillingPlanChangePreviewDto,
   type BillingQuotaAddonDto,
   type BillingQuotaUsageDto,
   type BillingSubscriptionDto,
 } from '@repo/shared';
+import type { PoolClient } from 'pg';
 
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
@@ -47,6 +54,7 @@ import {
   type BillingPortalDto,
   type BillingSummaryDto,
 } from './billing.types';
+import { isCardExpiringSoon } from './payment-method-helpers';
 import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
@@ -124,10 +132,22 @@ export class BillingService {
       usagePeriods,
       quotas,
       quotaAddons,
-      // True when the seller already has a Stripe subscription, i.e. picking a
-      // plan must REPRICE it rather than open a checkout — the FE labels the
-      // button accordingly instead of the two paths looking identical.
-      hasProviderSubscription: Boolean(subscription?.providerSubscriptionId),
+      // True when the seller already has a LIVE Stripe subscription, i.e.
+      // picking a plan must REPRICE it (via change-plan) rather than open a
+      // checkout — the FE labels the button accordingly instead of the two
+      // paths looking identical. Gated on status, not just the id being
+      // non-null: `providerSubscriptionId` survives a CANCELED/ENDED
+      // subscription (Stripe never clears it), so an id-only check left a
+      // lapsed seller permanently routed at "Switch to X" -> previewPlanChange,
+      // which dead-ends (Stripe refuses to preview/reprice a canceled
+      // subscription) with no way back to checkout. See
+      // hasLiveSubscriptionStatus's own doc for why PAST_DUE stays on this
+      // side of the line: checkout (A3's own guard) is the correct path for a
+      // lapsed customer, and remains the authority on refusing a genuine
+      // duplicate.
+      hasProviderSubscription: Boolean(
+        subscription?.providerSubscriptionId && hasLiveSubscriptionStatus(subscription.status),
+      ),
       enforcementEnabled,
       provider: config.provider,
       transition,
@@ -279,16 +299,44 @@ export class BillingService {
    *
    * A trial user has a subscription in OUR tables but none in Stripe, so they
    * correctly go through checkout: there is nothing to reprice.
+   *
+   * Which way the reprice goes ALSO decides how (and when) it is billed —
+   * see {@link PlanChangeDirection}. An upgrade is charged now (Stripe bills
+   * in advance, so it hands over the higher quota immediately); a downgrade
+   * is scheduled for the end of the period the seller already paid for.
    */
   async changePlan(userId: string, planId: string, interval: BillingInterval): Promise<void> {
     if (!this.provider.isConfigured()) {
       throw new Error('billing.errors.providerNotConfigured');
     }
-    const subscription = await this.repository.findCurrentSubscription(userId);
+    // Serialize the whole resolve-decide-mutate sequence per user, the same
+    // per-user Postgres advisory lock createCheckout/createAddonCheckout use
+    // for customer resolution (BillingRepositoryService.withUserBillingLock).
+    // Without it, two concurrent requests for the same user (two tabs, or a
+    // direct API call) can both read the same starting subscription, both
+    // resolve direction=UPGRADE, and both fire an `always_invoice` +
+    // `error_if_incomplete` Stripe update — two real charges, not a
+    // theoretical race, since an upgrade now bills immediately rather than
+    // merely double-writing a value.
+    await this.repository.withUserBillingLock(userId, (client) =>
+      this.applyPlanChange(userId, planId, interval, client),
+    );
+  }
+
+  /** The locked body of {@link changePlan} — see its own comment for why this
+   *  runs under `withUserBillingLock`. Split out only so the lock wrapper
+   *  above reads as a single, obviously-correct line. */
+  private async applyPlanChange(
+    userId: string,
+    planId: string,
+    interval: BillingInterval,
+    client: PoolClient,
+  ): Promise<void> {
+    const subscription = await this.repository.findCurrentSubscription(userId, client);
     if (!subscription?.providerSubscriptionId) {
       throw new Error('billing.errors.noSubscription');
     }
-    const plan = await this.repository.loadPlanWithPricing(planId);
+    const plan = await this.repository.loadPlanWithPricing(planId, client);
     if (!plan) {
       throw new Error('billing.errors.planNotFound');
     }
@@ -300,12 +348,148 @@ export class BillingService {
       this.logger.error(`Plan ${planId} has no provider_price_id for ${interval}`);
       throw new Error('billing.errors.planNotMirrored');
     }
+
+    // The seller's CURRENT plan, priced at the same interval as the target —
+    // there is no interval switch on this endpoint (SubscribeDto carries one
+    // fixed interval for both), so comparing at `interval` on both sides is
+    // comparing like for like. A plan the seller is no longer subscribed to
+    // (or a corrupted row) resolves to 0, which reads as "any real price is
+    // an upgrade" — the safer default, since it charges now rather than
+    // silently deferring.
+    const currentPlan = subscription.planId
+      ? await this.repository.loadPlanWithPricing(subscription.planId, client)
+      : null;
+    const direction = resolvePlanChangeDirection(
+      currentPlan?.prices[interval]?.amountMicros ?? 0,
+      price.amountMicros,
+    );
+
+    if (direction === PlanChangeDirection.DOWNGRADE) {
+      // Takes effect at period end. No money moves now, and the local plan row
+      // is deliberately NOT touched — the seller is still on the plan they
+      // paid for until the schedule fires, and writing the new plan_id now
+      // would enforce its lower quota and report it a month early.
+      await this.provider.scheduleDowngrade({
+        providerSubscriptionId: subscription.providerSubscriptionId,
+        providerPriceId: price.providerPriceId,
+        planId,
+        direction,
+      });
+      this.logger.log(`User ${userId} scheduled a downgrade to ${plan.slug}`);
+      return;
+    }
+
+    // Upgrading cancels any pending downgrade. A seller who changes their mind
+    // upward must not have a stale schedule fire a month later and silently
+    // undo the change they just paid for. Best-effort: a subscription with no
+    // schedule is the normal case and `cancelScheduledChange` already treats
+    // that as a no-op, so a failure here must not block an upgrade the seller
+    // is waiting on.
+    try {
+      await this.provider.cancelScheduledChange(subscription.providerSubscriptionId);
+    } catch (err) {
+      this.logger.warn(
+        `Could not release a pending schedule before upgrading ${userId}: ${(err as Error).message}`,
+      );
+    }
+
     await this.provider.changeSubscriptionPlan({
       providerSubscriptionId: subscription.providerSubscriptionId,
       providerPriceId: price.providerPriceId,
       planId,
+      direction,
     });
+    // Apply the change locally now that Stripe has accepted it, instead of
+    // waiting for `customer.subscription.updated` to bring it back. That
+    // webhook lands a second or two later, while the FE refetches its summary
+    // as soon as this call resolves — so relying on the webhook alone showed
+    // the seller their OLD plan and quotas immediately after a successful
+    // upgrade. The webhook re-applies the same plan_id (we set it in the
+    // subscription's metadata), so this is a head start, not a second source of
+    // truth. Best-effort: a failure here is corrected by the webhook, and must
+    // not turn a completed upgrade into an error the seller sees.
+    //
+    // UPGRADE ONLY: a scheduled downgrade must not write the new plan_id here
+    // — it returned above, before this line, precisely so the seller stays on
+    // record as their current (paid-for) plan until the schedule actually
+    // fires.
+    try {
+      await this.repository.updateSubscriptionPlan(subscription.id, planId, client);
+    } catch (err) {
+      this.logger.warn(
+        `Local plan write failed after Stripe accepted the change for user ${userId}; ` +
+          `the webhook will reconcile it: ${(err as Error).message}`,
+      );
+    }
     this.logger.log(`User ${userId} switched to plan ${plan.slug}`);
+  }
+
+  /** Release a pending downgrade. The seller stays on their current plan. */
+  async cancelScheduledChange(userId: string): Promise<void> {
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription?.providerSubscriptionId) {
+      throw new Error('billing.errors.noSubscription');
+    }
+    await this.provider.cancelScheduledChange(subscription.providerSubscriptionId);
+    this.logger.log(`User ${userId} cancelled their scheduled plan change`);
+  }
+
+  /**
+   * What will this plan change cost? Answered before anything is applied.
+   *
+   * A downgrade returns 0 due now: it takes effect at period end and moves no
+   * money today. Returning the preview's proration figure there would tell the
+   * seller they are about to be charged for a change that costs nothing now.
+   */
+  async previewPlanChange(
+    userId: string,
+    planId: string,
+    interval: BillingInterval,
+  ): Promise<BillingPlanChangePreviewDto> {
+    if (!this.provider.isConfigured()) {
+      throw new Error('billing.errors.providerNotConfigured');
+    }
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription?.providerSubscriptionId) {
+      throw new Error('billing.errors.noSubscription');
+    }
+    const plan = await this.repository.loadPlanWithPricing(planId);
+    const price = plan?.prices[interval];
+    if (!plan || !price?.providerPriceId) {
+      throw new Error('billing.errors.planNotMirrored');
+    }
+    // Same resolution as changePlan (current plan, priced at the SAME
+    // interval as the target) — the preview must agree with what the change
+    // actually does, or the seller is shown one number and charged another.
+    const currentPlan = await this.repository.loadPlanWithPricing(subscription.planId);
+    const direction = resolvePlanChangeDirection(
+      currentPlan?.prices[interval]?.amountMicros ?? 0,
+      price.amountMicros,
+    );
+
+    if (direction === PlanChangeDirection.DOWNGRADE) {
+      return {
+        direction,
+        amountDueMicros: 0,
+        currency: price.currency,
+        effectiveAt: subscription.currentPeriodEnd,
+        nextInvoiceAmountMicros: price.amountMicros,
+        nextInvoiceAt: subscription.currentPeriodEnd,
+      };
+    }
+
+    const preview = await this.provider.previewPlanChange(
+      subscription.providerSubscriptionId,
+      price.providerPriceId,
+    );
+    return {
+      direction,
+      amountDueMicros: preview.amountDueMicros,
+      currency: preview.currency,
+      effectiveAt: new Date().toISOString(),
+      nextInvoiceAmountMicros: price.amountMicros,
+      nextInvoiceAt: subscription.currentPeriodEnd,
+    };
   }
 
   /**
@@ -335,13 +519,29 @@ export class BillingService {
       throw new Error('billing.errors.planNotMirrored');
     }
     const priceId = await this.repository.resolveAddonProviderPriceId(addon.id);
-    const customer = await this.repository.findCustomerByUserId(userId);
+
+    // Same race createCheckout closes below (see its comment on
+    // withUserBillingLock): resolve the Stripe customer under the per-user
+    // advisory lock and RE-READ inside it, so two concurrent top-up purchases
+    // by a brand-new user cannot each independently mint a separate Stripe
+    // customer. billing_customers.user_id is UNIQUE, so whichever
+    // linkProviderCustomer call landed second would silently overwrite the
+    // first's link — orphaning the first (now-unreferenced) Stripe customer,
+    // and the purchase made under it, from all local tracking.
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async (client) => {
+      const customer = await this.repository.ensureLocalCustomer(userId, email, client);
+      if (customer.providerCustomerId) {
+        return customer.providerCustomerId;
+      }
+      return this.provider.ensureCustomer(userId, email, client);
+    });
+
     return this.provider.createAddonCheckout({
       userId,
       email,
       addonSlug: addon.slug,
       providerPriceId: priceId ?? '',
-      providerCustomerId: customer?.providerCustomerId ?? null,
+      providerCustomerId,
     });
   }
 
@@ -414,11 +614,41 @@ export class BillingService {
       throw new Error('billing.errors.providerNotConfigured');
     }
 
-    // Ensure a local customer row exists first: the provider links the Stripe
-    // customer id onto this row (linkProviderCustomer) before opening
-    // checkout, which is what lets webhook processing resolve the subscription
-    // back to this user.
-    await this.repository.ensureLocalCustomer(userId, customerEmail);
+    // Resolve the Stripe customer id under a per-user advisory lock, and
+    // RE-READ the local row INSIDE the lock (a lock that does not recheck
+    // after acquiring is not a lock). Two concurrent checkouts for a
+    // brand-new user (no linked customer yet) must not each mint a SEPARATE
+    // Stripe customer: billing_customers.user_id is UNIQUE, so whichever
+    // provider.ensureCustomer call links second would silently overwrite the
+    // first's link, orphaning the first (now-unreferenced) Stripe customer —
+    // and any subscription created under it — from all local tracking. That
+    // is the same class of bug this task exists to prevent, one step
+    // earlier: the duplicate-subscription check below is only trustworthy if
+    // the customer id it asks Stripe about is the one true id for this user.
+    const providerCustomerId = await this.repository.withUserBillingLock(userId, async (client) => {
+      const customer = await this.repository.ensureLocalCustomer(userId, customerEmail, client);
+      if (customer.providerCustomerId) {
+        return customer.providerCustomerId;
+      }
+      // No linked Stripe customer yet — create it now, still holding the
+      // lock, so a second request blocked on this same lock re-reads the id
+      // THIS request just linked (via the branch above) instead of racing to
+      // mint its own.
+      return this.provider.ensureCustomer(userId, customerEmail, client);
+    });
+
+    // Ask Stripe itself, not our tables. This is the layer that cannot be
+    // fooled by our own state being stale — and stale state is exactly what
+    // produced three live subscriptions for one seller on 2026-08-22. Runs
+    // AFTER the lock above is released: it is a pure read, so nothing here
+    // corrupts data if two requests run it concurrently — unlike the customer
+    // resolution above, holding a DB connection across this second Stripe
+    // call on EVERY checkout attempt (rather than only the rare first-ever
+    // one that creates a customer) would cost more than it protects.
+    const alreadySubscribed = await this.provider.hasActiveProviderSubscription(providerCustomerId);
+    if (alreadySubscribed) {
+      throw new Error('billing.errors.alreadySubscribed');
+    }
 
     const plan = await this.repository.loadPlanWithPricing(planId);
     if (!plan) {
@@ -456,5 +686,87 @@ export class BillingService {
       throw new Error('billing.errors.noCustomer');
     }
     return this.provider.createPortal(userId, customer.providerCustomerId);
+  }
+
+  /**
+   * Live billing detail for the billing page only.
+   *
+   * Fails soft to an all-null shape: a Stripe hiccup must leave the plan card
+   * and the quota rings on screen, not blank the page a suspended seller was
+   * just redirected to.
+   */
+  async getDetails(userId: string): Promise<BillingDetailsDto> {
+    const empty: BillingDetailsDto = {
+      paymentMethod: null,
+      nextChargeAmountMicros: null,
+      nextChargeCurrency: null,
+      nextChargeAt: null,
+      scheduledChange: null,
+      cancelAtPeriodEnd: false,
+      cancelAt: null,
+    };
+    const customer = await this.repository.findCustomerByUserId(userId);
+    if (!customer?.providerCustomerId || !this.provider.isConfigured()) {
+      return empty;
+    }
+    try {
+      const raw = await this.provider.getBillingDetails(customer.providerCustomerId);
+      const scheduledPlan = raw.scheduledPriceId
+        ? await this.repository.findPlanByProviderPriceId(raw.scheduledPriceId)
+        : null;
+      return {
+        paymentMethod: raw.paymentMethod
+          ? {
+              ...raw.paymentMethod,
+              expiringSoon: isCardExpiringSoon(
+                raw.paymentMethod.expMonth,
+                raw.paymentMethod.expYear,
+                new Date(),
+              ),
+            }
+          : null,
+        nextChargeAmountMicros: raw.nextChargeAmountMicros,
+        nextChargeCurrency: raw.nextChargeCurrency,
+        nextChargeAt: raw.nextChargeAt,
+        // Gated on raw.scheduledAt alone, NOT on scheduledPlan resolving —
+        // a resolve miss (e.g. the schedule's price was edited by hand in
+        // Stripe, or the catalog price it points at has since been retired)
+        // must not hide a live pending change from the seller. The date and
+        // the Cancel action are both still real and actionable even when the
+        // plan name is not; only planSlug degrades to null.
+        scheduledChange: raw.scheduledAt
+          ? { planSlug: scheduledPlan?.slug ?? null, effectiveAt: raw.scheduledAt }
+          : null,
+        cancelAtPeriodEnd: raw.cancelAtPeriodEnd,
+        cancelAt: raw.cancelAt,
+      };
+    } catch (err) {
+      this.logger.warn(`Billing details unavailable for ${userId}: ${(err as Error).message}`);
+      return empty;
+    }
+  }
+
+  /**
+   * Paginated invoice history. Throws rather than failing soft (unlike
+   * getDetails above) because the FE renders its own retry state for this
+   * card specifically, so a Stripe hiccup should surface there, not as a
+   * silently empty list.
+   */
+  async listInvoices(
+    userId: string,
+    limit = 10,
+    startingAfter?: string,
+  ): Promise<BillingInvoiceListDto> {
+    const customer = await this.repository.findCustomerByUserId(userId);
+    if (!customer?.providerCustomerId || !this.provider.isConfigured()) {
+      // No Stripe customer yet (e.g. a trialing seller) is a normal state,
+      // not an error — an empty page is the correct answer.
+      return { items: [], hasMore: false, nextCursor: null };
+    }
+    return this.provider.listInvoices(
+      customer.providerCustomerId,
+      Math.min(Math.max(limit, 1), 50),
+      startingAfter,
+    );
   }
 }

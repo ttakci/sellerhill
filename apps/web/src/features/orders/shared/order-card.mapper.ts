@@ -59,6 +59,16 @@ export const toOrderCardProps = (
   const profitTone =
     order.netProfit > 0 ? 'positive' : order.netProfit < 0 ? 'negative' : 'default';
 
+  // A card can carry both at once: an untracked order (no matched listing)
+  // can never reach `linked`, so its profit is also always an estimate/unknown.
+  const statsBadges: OrderCardProps['statsBadges'] = [];
+  if (!order.isTracked) {
+    statsBadges.push({ label: t('orders.tracking.untracked'), variant: 'neutral' });
+  }
+  if (order.profitBasis === ProfitBasis.ESTIMATED) {
+    statsBadges.push({ label: t('orders.estimateBadge'), variant: 'warning' });
+  }
+
   return {
     productTitle,
     imageUrl: order.product?.imageUrl,
@@ -69,10 +79,7 @@ export const toOrderCardProps = (
       const translated = t(key);
       return translated === key ? order.status : translated;
     })(),
-    statsBadge:
-      order.profitBasis === ProfitBasis.ESTIMATED
-        ? { label: t('orders.estimateBadge'), variant: 'warning' }
-        : undefined,
+    statsBadges: statsBadges.length > 0 ? statsBadges : undefined,
     meta,
     stats: [
       {

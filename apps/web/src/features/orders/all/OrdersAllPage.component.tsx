@@ -34,6 +34,9 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
   fulfillmentState,
   onFulfillmentStateChange,
   fulfillmentStateOptions,
+  trackingState,
+  onTrackingStateChange,
+  trackingStateOptions,
   onClearFilters,
   hasActiveFilters,
   resultCount,
@@ -114,6 +117,16 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               fullWidth
             />
           </S.SelectWrapper>
+          <S.SelectWrapper>
+            <Select
+              value={trackingState}
+              onChange={onTrackingStateChange}
+              options={trackingStateOptions}
+              placeholder={t('orders.filters.allTrackingStates')}
+              size="medium"
+              fullWidth
+            />
+          </S.SelectWrapper>
           <S.FilterActions>
             <S.ResultCount variant="caption" weight="medium">
               {t('orders.filters.resultCount', { count: resultCount })}
@@ -141,7 +154,7 @@ export const OrdersAllPageComponent: React.FC<OrdersAllPageProps> = ({
               icon="search"
               title={t('orders.all.filtersTitle')}
               description={t('orders.all.filtersSubtitle')}
-              action={t('orders.filters.clearAll')}
+              action={t('orders.all.filtersAction')}
               onAction={onClearFilters}
               size="lg"
             />

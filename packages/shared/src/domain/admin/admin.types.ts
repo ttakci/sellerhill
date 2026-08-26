@@ -112,6 +112,48 @@ export interface QueueHealthDto {
   prioritized: number;
 }
 
+/**
+ * Latest Aquiline provider-plan snapshot, captured from every conversion
+ * response (`TrackingConversionService`, migration `089`). Two independently
+ * behaving counters live on one row:
+ *
+ * - `planUsed`/`planLimit`/`planRemaining` — shipments (conversions) consumed
+ *   in the CURRENT provider window (`windowKey`). These reset every billing
+ *   period, same as `keepa_balance`'s refill.
+ * - `profilesUsed` — Aquiline seller profiles created. `/v1/profiles/{id}`
+ *   has only GET and PATCH, no DELETE, so this counter NEVER resets and NEVER
+ *   goes down: a profile created by a mistake, a race, or a test permanently
+ *   consumes one of the plan's slots.
+ *
+ * All measured fields are `null` when no snapshot row exists yet (no
+ * conversion has ever run against the real provider, which is the state as
+ * of this writing) — the same unknown-vs-zero rule every other FinOps DTO in
+ * this file follows: never fabricate a zero for an unmeasured quantity.
+ *
+ * `profilesLimit` is the one field that is NOT a provider measurement — the
+ * Integration API does not expose a profile ceiling, so it is resolved from
+ * `PlatformSettingKey.AQUILINE_MAX_PROFILES` (a registered platform setting,
+ * default 10). It therefore resolves even when no snapshot row exists.
+ */
+export interface AquilinePlanSnapshotDto {
+  /** Aquiline plan tier code (e.g. 'starter'). Null until a snapshot exists. */
+  planCode: string | null;
+  /** Provider billing-window identifier the counters below belong to. */
+  windowKey: string | null;
+  /** Shipment (conversion) ceiling for the current window. */
+  planLimit: number | null;
+  /** Shipments consumed in the current window. */
+  planUsed: number | null;
+  /** Shipments remaining in the current window. */
+  planRemaining: number | null;
+  /** Seller profiles created. Cumulative — never decreases, never resets. */
+  profilesUsed: number | null;
+  /** Configured profile ceiling (`AQUILINE_MAX_PROFILES`), not provider data. */
+  profilesLimit: number | null;
+  /** ISO 8601 timestamp the row was captured at. Null when no row exists. */
+  capturedAt: string | null;
+}
+
 /** Top-level admin overview payload returned by GET /admin/overview. */
 export interface AdminOverviewDto {
   /** ISO 8601 timestamp the overview was generated at. */
@@ -130,6 +172,8 @@ export interface AdminOverviewDto {
   usage: UsageSummaryDto[];
   /** BullMQ queue health snapshots. */
   queues: QueueHealthDto[];
+  /** Latest Aquiline provider-plan snapshot (shipments + profiles). */
+  aquilinePlanSnapshot: AquilinePlanSnapshotDto;
 }
 
 /** Query params for GET /admin/overview. */

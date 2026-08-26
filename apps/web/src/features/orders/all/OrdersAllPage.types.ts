@@ -26,6 +26,9 @@ export interface OrdersAllPageProps {
   fulfillmentState: string;
   onFulfillmentStateChange: (value: string | number) => void;
   fulfillmentStateOptions: { value: string | number; label: string }[];
+  trackingState: string;
+  onTrackingStateChange: (value: string | number) => void;
+  trackingStateOptions: { value: string | number; label: string }[];
   dateFrom: string;
   dateTo: string;
   onDateFromChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

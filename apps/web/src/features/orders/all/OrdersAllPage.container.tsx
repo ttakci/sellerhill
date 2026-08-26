@@ -33,6 +33,9 @@ export const OrdersAllPageContainer: React.FC = () => {
     fulfillmentState,
     fulfillmentStateOptions,
     handleFulfillmentStateChange,
+    trackingState,
+    trackingOptions,
+    handleTrackingStateChange,
     handleClearFilters,
     hasActiveFilters,
     serverQuery,
@@ -150,6 +153,9 @@ export const OrdersAllPageContainer: React.FC = () => {
         fulfillmentState={fulfillmentState}
         onFulfillmentStateChange={handleFulfillmentStateChange}
         fulfillmentStateOptions={fulfillmentStateOptions}
+        trackingState={trackingState}
+        onTrackingStateChange={handleTrackingStateChange}
+        trackingStateOptions={trackingOptions}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
         resultCount={totalCount}

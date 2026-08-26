@@ -7,12 +7,13 @@
 // the authentication, and it is verified against the RAW request bytes before
 // the body is parsed.
 
-import { Controller, HttpCode, Post, Req } from '@nestjs/common';
+import { Controller, HttpCode, Logger, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PlatformSettingKey } from '@repo/shared';
 import type { Request } from 'express';
 
+import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import {
@@ -22,12 +23,19 @@ import {
 } from './tracking-webhook.helpers';
 import { TrackingWebhookService } from './tracking-webhook.service';
 
+/** Only these headers are ever persisted by `captureRaw` — never cookies,
+ *  auth, or anything else, even from a signature-verified request. */
+const CAPTURED_HEADER_NAMES = ['content-type', 'x-webhook-signature', 'x-event-type'] as const;
+
 @ApiTags('tracking')
 @Controller({ path: 'tracking', version: '1' })
 export class TrackingWebhookController {
+  private readonly logger = new Logger(TrackingWebhookController.name);
+
   constructor(
     private readonly webhookService: TrackingWebhookService,
     private readonly platformSettings: PlatformSettingsService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   /**
@@ -65,19 +73,51 @@ export class TrackingWebhookController {
     }
 
     let parsedBody: unknown;
+    let jsonOk = true;
     try {
       parsedBody = JSON.parse(rawBody) as unknown;
     } catch {
-      throw httpError('tracking.errors.malformedBody', 400);
+      jsonOk = false;
     }
 
-    const payload = parseTrackingWebhookPayload(parsedBody);
-    if (!payload) {
+    const payload = jsonOk ? parseTrackingWebhookPayload(parsedBody) : null;
+
+    // Capture the RAW body of every signature-verified request, regardless of
+    // whether our current (v3-shaped) parser accepts it. The Integration API's
+    // real payload shape is undocumented — its OpenAPI document is 3.0.3, which
+    // has no `webhooks:` section at all — so `parsed_ok = false` here is not a
+    // failure, it is the answer: the next real Aquiline delivery lands in this
+    // table verbatim. Best-effort; a capture failure must never affect the
+    // response Aquiline sees.
+    await this.captureRaw(req, rawBody, payload !== null);
+
+    if (!jsonOk || !payload) {
       throw httpError('tracking.errors.malformedBody', 400);
     }
 
     const outcome = await this.webhookService.process(payload);
     return { ok: true, outcome };
+  }
+
+  private async captureRaw(req: Request, rawBody: string, parsedOk: boolean): Promise<void> {
+    try {
+      const headers: Record<string, string> = {};
+      for (const name of CAPTURED_HEADER_NAMES) {
+        const value = req.headers[name];
+        if (typeof value === 'string') {
+          headers[name] = value;
+        }
+      }
+      await this.databaseService.query(
+        `INSERT INTO tracking_webhook_raw_captures (headers, body, parsed_ok)
+         VALUES ($1, $2, $3)`,
+        [JSON.stringify(headers), rawBody.slice(0, 20_000), parsedOk],
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Could not capture raw tracking webhook (diagnostic only): ${(err as Error).message}`,
+      );
+    }
   }
 }
 

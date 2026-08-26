@@ -82,6 +82,13 @@
       "switchTo": "Switch to {{plan}}",
       "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice."
     },
+    "planChange": {
+      "title": "Confirm plan change",
+      "upgradeBody": "Switching to {{plan}}. {{amount}} will be charged now. Your next invoice will be {{nextAmount}} on {{nextDate}}.",
+      "downgradeBody": "Switching to {{plan}} on {{date}}. Nothing is charged now — you keep your current plan until then.",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
     "limits": {
       "listings_per_month": {
         "label": "Active listings",
@@ -117,6 +124,7 @@
         "label": "Status",
         "trialing": "Trial",
         "active": "Active",
+        "cancelling": "Cancelling",
         "past_due": "Past due",
         "canceled": "Canceled",
         "ended": "Ended"
@@ -134,6 +142,7 @@
       "canceledAt": "Canceled on",
       "endedAt": "Ended on",
       "manage": "Manage subscription",
+      "updatePayment": "Update payment method",
       "cancel": "Cancel subscription",
       "resume": "Resume subscription",
       "upgrade": "Upgrade plan",
@@ -143,7 +152,47 @@
       "accessEnds": "Access ends",
       "portal": "Payment method and invoices",
       "portalHint": "Opens Stripe to update your card, download invoices, or cancel.",
-      "manageHint": "Manage your payment method, plan and invoices here."
+      "manageHint": "Manage your payment method, plan and invoices here.",
+      "nextCharge": "Next payment: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "Cancels on {{date}} — no further charges after this period",
+      "scheduledChange": "Switches to {{plan}} on {{date}}",
+      "scheduledChangeUnknownPlan": "Your plan changes on {{date}}",
+      "cancelScheduledChange": "Cancel",
+      "scheduledChangeCancelled": "Your plan change has been cancelled."
+    },
+    "paymentMethod": {
+      "title": "Payment method",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Expires {{month}}/{{year}}",
+      "expiringSoon": "This card expires soon. Update it to avoid a failed renewal.",
+      "change": "Change"
+    },
+    "invoices": {
+      "title": "Invoice history",
+      "subtitle": "Everything you have paid, straight from Stripe.",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "status": "Status",
+      "pdf": "PDF",
+      "download": "Download",
+      "payNow": "Pay now",
+      "empty": "No invoices yet.",
+      "emptyDescription": "Your invoices will appear here once you have a paid subscription.",
+      "loading": "Loading invoices…",
+      "loadingDescription": "Fetching your invoice history from Stripe.",
+      "error": "Invoices could not be loaded.",
+      "errorDescription": "Something went wrong while loading your invoice history.",
+      "retry": "Try again",
+      "showMore": "Show more",
+      "showMoreError": "Couldn't load more invoices.",
+      "statusLabel": {
+        "paid": "Paid",
+        "open": "Open",
+        "void": "Void",
+        "uncollectible": "Uncollectible",
+        "draft": "Draft"
+      }
     },
     "customer": {
       "title": "Billing details",
@@ -226,7 +275,9 @@
       "noSubscription": "You do not have an active subscription to change.",
       "planChangeFailed": "The plan could not be changed right now. Please try again, or use \"Manage billing\".",
       "subscriptionSuspended": "Your subscription is not active, so new listings are paused. Choose a plan to resume — everything restarts on its own.",
-      "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan."
+      "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan.",
+      "alreadySubscribed": "You already have an active subscription. Use \"Switch plan\" to change it instead of subscribing again.",
+      "invoicesFailed": "Invoice history could not be loaded. Please try again in a moment."
     },
     "actions": {
       "subscribe": "Subscribe",
