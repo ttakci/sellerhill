@@ -11,7 +11,7 @@ published OpenAPI document, and could not resolve by testing against our
 Starter account ourselves. Details and context for each are below so you can
 forward this straight to engineering if needed.
 
-For context: we are a multi-seller dropshipping platform. Each of our sellers
+For context: we run a multi-seller e-commerce platform. Each of our sellers
 gets one Aquiline profile (id pattern `sh-{ourUserId}-{marketplace}`), and we
 upload Amazon ship-track HTML from our own authenticated Amazon Playwright
 sessions — not the browser extension.
