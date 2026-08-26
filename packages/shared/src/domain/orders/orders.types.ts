@@ -210,6 +210,22 @@ export interface OrderDto {
    */
   amazonTrackingNumber?: string | null;
   convertedTrackingNumber?: string | null;
+  /**
+   * What eBay actually received via `createShippingFulfillment`. eBay's
+   * Fulfillment API is POST-only with no update endpoint, so once this is
+   * set the buyer's tracking number is permanent — the convert action must
+   * never be offered once it is non-null. See `TrackingConversionService`.
+   */
+  ebayTrackingPushedNumber?: string | null;
+  /**
+   * The provider's own code for the latest tracking problem, when one is
+   * open. Raw and unmapped — the caller must never render it directly; map
+   * it to a localized sentence and fall back to a generic message for a
+   * code outside `AquilineProblemCode` (the provider may add codes we do
+   * not know about yet). NULL for every order until the webhook receiver
+   * that writes it ships (a later, separate plan).
+   */
+  trackingProblemCode?: string | null;
   amazonTax?: number;
   amazonShipping?: number;
 

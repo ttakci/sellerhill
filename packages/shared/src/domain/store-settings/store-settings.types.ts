@@ -61,6 +61,17 @@ export interface StoreSettings {
     state: string;
     zipCode: string;
 
+    // Ship-from / return address sent to Aquiline as the profile's storeAddress
+    // (migration 089). All optional — a seller on the local pass-through
+    // provider never needs them. While incomplete (address_line1 + city +
+    // country all required), AquilineProfileService.ensureProfile returns
+    // null and tracking conversion falls back to the raw Amazon number.
+    shipFromName?: string;
+    shipFromPhone?: string;
+    shipFromAddressLine1?: string;
+    shipFromAddressLine2?: string;
+    shipFromCity?: string;
+
     // Master toggle for blacklist scanning at listing create. Each keyword's
     // own `types` already scopes WHERE it is checked (title/description/
     // features/brand), so this is the only validation switch left — on/off,

@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { BuyerMessagingSection } from './BuyerMessagingSection/BuyerMessagingSection.container';
-import { BodyStack, FieldGrid, FormCard, ToggleRow } from './StoreSettingsDrawer.style';
+import { BodyStack, FieldGrid, FormCard, ShipFromSection, ToggleRow } from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
 
 export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponentProps> = (props) => {
@@ -62,6 +62,54 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
                 onChange={props.onZipCodeChange}
               />
             </FieldGrid>
+            <ShipFromSection>
+              <Text variant="h5">{t('storeSettings:storeSettings.shipFrom.title')}</Text>
+              <InfoMessage>{t('storeSettings:storeSettings.shipFrom.description')}</InfoMessage>
+              {props.isGlobalScope ? (
+                <>
+                  <FieldGrid>
+                    <ModernTextInput
+                      name="shipFromName"
+                      label={t('storeSettings:storeSettings.shipFrom.name')}
+                      value={props.shipFromName}
+                      onChange={props.onShipFromNameChange}
+                    />
+                    <ModernTextInput
+                      name="shipFromPhone"
+                      type="tel"
+                      label={t('storeSettings:storeSettings.shipFrom.phone')}
+                      value={props.shipFromPhone}
+                      onChange={props.onShipFromPhoneChange}
+                    />
+                  </FieldGrid>
+                  <ModernTextInput
+                    name="shipFromAddressLine1"
+                    label={t('storeSettings:storeSettings.shipFrom.addressLine1')}
+                    value={props.shipFromAddressLine1}
+                    onChange={props.onShipFromAddressLine1Change}
+                  />
+                  <ModernTextInput
+                    name="shipFromAddressLine2"
+                    label={t('storeSettings:storeSettings.shipFrom.addressLine2')}
+                    value={props.shipFromAddressLine2}
+                    onChange={props.onShipFromAddressLine2Change}
+                  />
+                  <ModernTextInput
+                    name="shipFromCity"
+                    label={t('storeSettings:storeSettings.shipFrom.city')}
+                    value={props.shipFromCity}
+                    onChange={props.onShipFromCityChange}
+                  />
+                  {!props.isShipFromAddressComplete && (
+                    <InfoMessage>
+                      {t('storeSettings:storeSettings.shipFrom.incompleteHint')}
+                    </InfoMessage>
+                  )}
+                </>
+              ) : (
+                <InfoMessage>{t('storeSettings:storeSettings.shipFrom.globalOnly')}</InfoMessage>
+              )}
+            </ShipFromSection>
             <ToggleRow>
               <Text variant="body-sm">{t('storeSettings:storeSettings.autoFulfillEnabled')}</Text>
               <Toggle checked={props.autoFulfillEnabled} onChange={props.onAutoFulfillEnabledChange} />

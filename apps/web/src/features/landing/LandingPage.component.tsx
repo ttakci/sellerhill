@@ -737,8 +737,8 @@ export const LandingPageComponent = ({
               align="right"
               width="8rem"
               trigger={
-                <S.LanguageTrigger>
-                  <S.LanguageText>{t(`translation:languages.${currentLocale}`)}</S.LanguageText>
+                <S.LanguageTrigger $onDark>
+                  <S.LanguageText $onDark>{t(`translation:languages.${currentLocale}`)}</S.LanguageText>
                   <Icon name="chevron-down" size={12} />
                 </S.LanguageTrigger>
               }

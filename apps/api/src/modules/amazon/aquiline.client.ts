@@ -1,82 +1,123 @@
 // apps/api/src/modules/amazon/aquiline.client.ts
 //
-// HTTP client for the Aquiline tracking-conversion API (v3).
-// Spec: developer.aquiline-tracking.com, read 2026-08-11.
+// HTTP client for the Aquiline tracking-conversion API.
 //
-//   POST /v3/shipments                  create a conversion  (X-API-Key + Idempotency-Key)
-//   GET  /v3/tracking/{trackingNumber}  status + event history
-//   POST /v3/webhooks/subscriptions     subscribe            (X-API-Key + X-Partner-Id)
+// REWRITTEN 2026-08-24. Everything that lived here before targeted the WRONG
+// API — the v3 "partner" surface, which books couriers (`sender`/`recipient`/
+// `parcels[{weightKg,...}]`) and has no concept of converting an inbound
+// Amazon tracking number at all. Aquiline support confirmed the real surface
+// is their subscriber-only **Integration API**. Nothing about the old
+// endpoints, auth scheme or request shapes survives; only the bounded-retry
+// discipline and the typed-error idea were worth keeping.
 //
-// CONTRACT GAP — READ BEFORE TOUCHING `createConversion`
-// ------------------------------------------------------
-// The published v3 OpenAPI spec models `POST /v3/shipments` as a REAL courier
-// booking: it requires `sender`, `recipient`, `parcels[{weightKg, lengthCm,
-// widthCm, heightCm}]` and `serviceLevel`, and has NO property anywhere for an
-// inbound/source carrier tracking number. That cannot be the call that turns an
-// Amazon TBA number into an `AQUAA…YQ` number, which is the product we actually
-// buy (Aquiline support, 2026-08: "Aquiline Shipments are used when creating
-// new AQUA tracking numbers from the original shipment/tracking information").
-// The provider confirms detailed docs are only released after subscribing, and
-// offers no sandbox.
+// GROUND TRUTH (verified live against the provider on 2026-08-23 — trust this
+// over anything the deleted v3 client implied):
+//   Base URL   https://aquiline-tracking.com/app/api/integration
+//   Auth       Authorization: Bearer {tokenId}.{tokenSecret} — ONE opaque
+//              string; the token is never split into two config fields.
+//   Errors     {"success": false, "code": "not-found", "message": "..."} —
+//              there IS a machine-readable `code`. The deleted client grepped
+//              the free-text message for /quota|limit reached|exceeded/, which
+//              would call ANY message merely containing those words a plan
+//              wall and silently stop every later conversion — never do that
+//              again. See `classifyAquilineFailure`.
+//   GET /v1/me {success, uid, subscriptionActive, billing: {
+//                subscription: {planCode, cadence, status, currentPeriodStart,
+//                  currentPeriodEnd, pendingPlanCode, pendingCadence},
+//                usage: {windowKey, used, limit, remaining},
+//                plan: {code, label, trackLimitPerMonth}}}
+//   assign     {success, aquiline, chargedCents, planLimit, planUsed,
+//                planRemaining}. Support says a repeat assign also returns
+//                `reused: true`, but that field is in NO published schema —
+//                read it defensively (`json.reused === true`), never require
+//                it.
 //
-// So the request body below is a best-effort reading of the documented schema
-// plus the source-tracking fields the product must accept, and it is marked
-// TODO(confirm) — the same port-isolated treatment `buyer-message.provider.ts`
-// gives the eBay Message API. Two properties make that safe rather than
-// reckless: the body is built in ONE place (`buildConversionBody`), and every
-// failure is typed so `TrackingConversionService` falls back to the local
-// pass-through instead of blocking a shipment. Confirm the real shape with the
-// provider, fix it here, and nothing else changes.
+// Everything below the four confirmed shapes above (profile/webhook response
+// envelopes, the upsert/tracking-html response bodies) is a best-effort
+// reading of the published OpenAPI document and `aquiline-probe.ts`'s route
+// map, not a live-observed shape — the provider has no sandbox, so this is
+// the same port-isolated, TODO(confirm)-marked treatment
+// `buyer-message.provider.ts` gives the eBay Message API. Every failure here
+// is typed so `TrackingConversionService` (a later task) can fall back to the
+// local pass-through instead of blocking a shipment on a wrong guess.
+//
+// Routes (from `docs/superpowers/specs/2026-08-23-aquiline-integration-api-
+// design.md` §3.1 and `pnpm --filter api aquiline:probe`):
+//   GET    /v1/me
+//   GET    /v1/profiles
+//   GET    /v1/profiles/{profileId}
+//   POST   /v1/profiles
+//   PATCH  /v1/profiles/{profileId}
+//   POST   /v1/profiles/{profileId}/orders/upsert
+//   POST   /v1/profiles/{profileId}/orders/{orderId}/tracking-html
+//   POST   /v1/profiles/{profileId}/orders/{orderId}/assign
+//   GET    /v1/profiles/{profileId}/orders/{orderId}
+//   GET    /v1/webhooks
+//   POST   /v1/webhooks
+//
+// Deliberately NOT ported:
+//   - `getTracking` (`GET /v3/tracking/{n}`) — that route does not exist on
+//     the Integration API. It was the only consumer of the deprecated
+//     `TrackingProviderStatusDto` alias; no replacement is added here.
+//   - `subscribeWebhook` in its v3 form — webhook management on the
+//     Integration API is `listWebhooks`/`createWebhook` below, a different
+//     body shape. The webhook RECEIVER (verifying `X-Webhook-Signature`,
+//     applying `tracking.*` events) is a later task, not this one.
+//   - `createConversion`/`buildConversionBody`/`conversionIdempotencyKey` —
+//     there is no single "convert" call on this API. A conversion is the
+//     orchestrated sequence `upsertOrders` → `uploadTrackingHtml` → `assign`,
+//     which belongs to the service layer (a later task), not this port.
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AQUILINE_TRACKING_NUMBER_PATTERN,
-  type TrackingProviderStatusDto,
+  AquilineAccountOrigin,
+  AquilineHtmlOutcome,
+  type AquilineAssignResult,
+  type AquilineMarketplaceOrder,
+  type AquilinePlanUsage,
+  type AquilineStoreAddress,
+  type AquilineWebhookEvent,
 } from '@repo/shared';
 
-/** Recipient address for a conversion, taken from the eBay buyer. */
-export interface AquilineAddress {
-  name: string;
-  phone?: string | null;
-  countryCode: string;
-  city: string;
-  addressLine1: string;
-  addressLine2?: string | null;
-  postalCode?: string | null;
-}
+// ============================================================================
+// Config + errors
+// ============================================================================
 
-export interface CreateConversionInput {
-  /** Our order id — the provider's `externalOrderId` and our idempotency seed. */
-  externalOrderId: string;
-  /** The Amazon tracking number being converted. */
-  sourceTrackingNumber: string;
-  /** Amazon's carrier label (e.g. "Amazon Logistics"). */
-  sourceCarrier?: string | null;
-  recipient: AquilineAddress;
-  sender?: AquilineAddress | null;
-  /** Aquiline seller profile this conversion is billed to, when assigned. */
-  partnerId?: string | null;
-}
-
-export interface CreateConversionOutput {
-  trackingNumber: string;
-  shipmentId: string | null;
-  status: string | null;
+export interface AquilineConfig {
+  baseUrl: string;
+  /** The whole `{tokenId}.{tokenSecret}` string. Null when not configured. */
+  token: string | null;
+  /** Deterministic profile-id prefix (`sh` / `sh-dev` / `sh-test`) — carried
+   *  here for the profile-service layer; this client never reads it itself. */
+  profilePrefix: string;
+  /** Plan's profile ceiling (10 on Starter) — same note as `profilePrefix`. */
+  maxProfiles: number;
+  timeoutMs: number;
 }
 
 /** Why a provider call failed, so callers can decide without parsing strings. */
 export enum AquilineErrorKind {
-  /** Not configured (no API key) — feature is off, not broken. */
+  /** Not configured (no token) — feature is off, not broken. */
   NOT_CONFIGURED = 'not_configured',
-  /** 401/403 — bad or revoked key. */
+  /** 401/403 — bad or revoked token. */
   UNAUTHORIZED = 'unauthorized',
-  /** 4xx we caused: malformed body, unknown tracking number. */
+  /** 404 — profile/order/webhook does not exist. */
+  NOT_FOUND = 'not_found',
+  /** 4xx we caused: malformed body, validation failure. */
   BAD_REQUEST = 'bad_request',
-  /** Plan quota exhausted. Distinct because the fix is commercial, not technical. */
+  /** 402 — plan quota exhausted. Distinct because the fix is commercial. */
   QUOTA_EXCEEDED = 'quota_exceeded',
+  /** The plan's non-deletable profile ceiling. Never returned by the
+   *  provider itself — reserved for the profile-service layer's own local
+   *  ceiling guard (a later task), kept here because it is part of the same
+   *  vocabulary every caller switches on. */
+  PROFILE_CEILING = 'profile_ceiling',
+  /** 413 — an uploaded tracking-HTML payload was too large. */
+  PAYLOAD_TOO_LARGE = 'payload_too_large',
   /** 429/5xx/network/timeout — retryable. */
   TRANSPORT = 'transport',
-  /** 2xx whose body we could not use (missing/!AQUA tracking number). */
+  /** 2xx whose body we could not use (e.g. a non-AQUA tracking number). */
   MALFORMED_RESPONSE = 'malformed_response',
 }
 
@@ -85,137 +126,333 @@ export class AquilineError extends Error {
     readonly kind: AquilineErrorKind,
     message: string,
     readonly status?: number,
+    readonly code?: string | null,
   ) {
     super(message);
     this.name = 'AquilineError';
   }
 }
 
-export interface AquilineConfig {
-  baseUrl: string;
-  apiKey: string | null;
-  /** Default seller profile when a store has none assigned. */
-  partnerId: string | null;
-  timeoutMs: number;
+interface AquilineErrorBody {
+  success?: boolean;
+  code?: string;
+  message?: string;
 }
+
+/**
+ * Classify a failure from the response's own `code`, falling back to status.
+ *
+ * The deleted v3 client grepped the message for /quota|limit reached|exceeded/,
+ * which mistakes any message merely containing those words for a plan wall —
+ * and a false quota verdict silently stops every later conversion. A probe on
+ * 2026-08-23 confirmed the provider does send a machine-readable `code`, so
+ * that guesswork is gone: status decides the KIND, `code` rides along for
+ * logging/diagnostics.
+ */
+export function classifyAquilineFailure(status: number, body: unknown): AquilineError {
+  const parsed = (typeof body === 'object' && body !== null ? body : {}) as AquilineErrorBody;
+  const code = typeof parsed.code === 'string' ? parsed.code : null;
+  const message = parsed.message ?? `HTTP ${status}`;
+
+  if (status === 401 || status === 403) {
+    return new AquilineError(AquilineErrorKind.UNAUTHORIZED, message, status, code);
+  }
+  if (status === 402) {
+    return new AquilineError(AquilineErrorKind.QUOTA_EXCEEDED, message, status, code);
+  }
+  if (status === 404) {
+    return new AquilineError(AquilineErrorKind.NOT_FOUND, message, status, code);
+  }
+  if (status === 413) {
+    return new AquilineError(AquilineErrorKind.PAYLOAD_TOO_LARGE, message, status, code);
+  }
+  if (status === 429 || status >= 500) {
+    return new AquilineError(AquilineErrorKind.TRANSPORT, message, status, code);
+  }
+  return new AquilineError(AquilineErrorKind.BAD_REQUEST, message, status, code);
+}
+
+// ============================================================================
+// Wire shapes
+//
+// Everything in this block below `AquilineMeResult` is a best-effort reading
+// (see the file header) and is marked TODO(confirm) where the field is not
+// independently confirmed. `AquilineMeResult` and the `assign` response are
+// the two shapes actually observed live.
+// ============================================================================
+
+/** `GET /v1/me`. Observed live 2026-08-23 — trust this over the design doc's
+ *  earlier sketch of the same endpoint. */
+export interface AquilineMeResult {
+  success: boolean;
+  uid: string | null;
+  subscriptionActive: boolean;
+  billing: {
+    subscription: {
+      planCode: string | null;
+      cadence: string | null;
+      status: string | null;
+      currentPeriodStart: string | null;
+      currentPeriodEnd: string | null;
+      pendingPlanCode: string | null;
+      pendingCadence: string | null;
+    };
+    usage: {
+      windowKey: string | null;
+      used: number | null;
+      limit: number | null;
+      remaining: number | null;
+    };
+    plan: {
+      code: string | null;
+      label: string | null;
+      trackLimitPerMonth: number | null;
+    };
+  };
+}
+
+/** Project the `GET /v1/me` billing block onto the shared `AquilinePlanUsage`
+ *  shape, so callers (the profile-service layer) get the normalized tuple
+ *  that type exists for instead of re-deriving it from the raw response. */
+export function extractPlanUsage(me: AquilineMeResult): AquilinePlanUsage {
+  return {
+    planCode: me.billing.subscription.planCode,
+    windowKey: me.billing.usage.windowKey,
+    used: me.billing.usage.used,
+    limit: me.billing.usage.limit,
+    remaining: me.billing.usage.remaining,
+  };
+}
+
+/**
+ * `POST /v1/profiles` body / `PATCH /v1/profiles/{id}` body / profile
+ * response shape. TODO(confirm): the response envelope beyond these fields —
+ * the published spec documents the request; the provider has no sandbox to
+ * observe a live response against.
+ */
+export interface AquilineProfileInput {
+  accountOrigin: AquilineAccountOrigin;
+  /** Client-chosen (spec: "Optional client-chosen id; server generates one if
+   *  omitted"). SellerHill always supplies one — see the profile-service
+   *  layer's deterministic `{prefix}-{userId}-{marketplace}` id. */
+  profileId: string;
+  label: string;
+  marketplaceHost: string;
+  amazonAccountEmail?: string;
+  storeAddress?: AquilineStoreAddress;
+}
+
+/** A profile as returned by list/get/create/patch. `profileId` is immutable
+ *  once created, so `patchProfile` never sends it in the body. */
+export interface AquilineProfile extends AquilineProfileInput {
+  createdAt?: string | null;
+}
+
+export type AquilineProfilePatch = Partial<Omit<AquilineProfileInput, 'profileId'>>;
+
+export interface AquilineProfileListResult {
+  items: AquilineProfile[];
+}
+
+/** TODO(confirm): exact response shape. `suggestAmazonEmailFetch` is
+ *  documented as appearing on this response but is explicitly ignored per
+ *  `docs/aquiline-open-questions.md` Q6 — we have no seller Amazon mailbox
+ *  access to act on it. */
+export interface AquilineOrderUpsertResult {
+  success: boolean;
+  suggestAmazonEmailFetch?: boolean;
+}
+
+export interface AquilineTrackingHtmlInput {
+  trackingUrl: string;
+  html: string;
+  /** Undocumented optional field accepted by both `tracking-html` and
+   *  `assign` (`docs/aquiline-open-questions.md` Q5) — passed through when
+   *  the caller has one, never required. */
+  amazonCustomerId?: string;
+}
+
+/**
+ * TODO(confirm): `outcome`/`trackingUpdateStatus` field names. The design
+ * doc's own reading of the spec: "`uploadTrackingHtml` may answer
+ * `outcome: accepted` with `trackingUpdateStatus: processing`" — and warns
+ * "never treat success alone as applied". `outcome` is parsed defensively
+ * against the known `AquilineHtmlOutcome` values; anything else is `null`
+ * rather than cast, matching `isAquilineProblemCode`'s narrowing discipline.
+ */
+export interface AquilineTrackingHtmlResult {
+  success: boolean;
+  outcome: AquilineHtmlOutcome | null;
+  trackingUpdateStatus: string | null;
+  suggestAmazonEmailFetch?: boolean;
+}
+
+/**
+ * Amazon assign body. Follows the schema's own Amazon example — `retailer` +
+ * `marketplaceHost` + `sourceTracking`, no `carrier` (`carrier` is documented
+ * as "required for non-Amazon assign", and Aquiline support's reply showing
+ * `carrier: "Amazon"` is NOT followed here — the machine-readable schema
+ * wins, since sending `carrier` on an Amazon assign risks `assign_validation`
+ * against a field documented as non-Amazon-only).
+ */
+export interface AquilineAssignBody {
+  trackingUrl: string;
+  retailer?: string;
+  marketplaceHost?: string;
+  sourceTracking?: string;
+  /** Non-Amazon assigns only (AliExpress/Walmart carrier code). Present in
+   *  the type for completeness; the Amazon path never sets it. */
+  carrier?: string;
+  amazonCustomerId?: string;
+}
+
+export interface AquilineWebhook {
+  id: string;
+  url: string;
+  events: string[];
+}
+
+export interface AquilineWebhookListResult {
+  items: AquilineWebhook[];
+}
+
+export interface AquilineWebhookCreateInput {
+  url: string;
+  events: readonly AquilineWebhookEvent[];
+}
+
+/** The secret is returned ONCE at creation (per `aquiline-probe.ts`'s own
+ *  operator note) — there is no way to read it back later. */
+export interface AquilineWebhookCreateResult extends AquilineWebhook {
+  secret: string | null;
+}
+
+// ============================================================================
+// Client
+// ============================================================================
 
 /** Attempts for a retryable failure. Kept small — a seller is not waiting. */
 const MAX_ATTEMPTS = 3;
+
+type AquilineHttpMethod = 'GET' | 'POST' | 'PATCH';
 
 @Injectable()
 export class AquilineClient {
   private readonly logger = new Logger(AquilineClient.name);
 
   isConfigured(config: AquilineConfig): boolean {
-    return Boolean(config.apiKey && config.baseUrl);
+    return Boolean(config.token && config.baseUrl);
   }
 
-  /**
-   * Convert a source tracking number into an Aquiline number.
-   *
-   * The `Idempotency-Key` is derived from OUR order id, not generated per call.
-   * That is what makes a retry free: the provider returns the original
-   * shipment rather than minting (and billing) a second one. Since conversions
-   * are the scarce half of every plan tier, this is a cost control as much as
-   * a correctness one.
-   */
-  async createConversion(
-    input: CreateConversionInput,
+  async getMe(config: AquilineConfig): Promise<AquilineMeResult> {
+    return this.request<AquilineMeResult>('GET', '/v1/me', config);
+  }
+
+  async listProfiles(config: AquilineConfig): Promise<AquilineProfileListResult> {
+    return this.request<AquilineProfileListResult>('GET', '/v1/profiles', config);
+  }
+
+  async getProfile(profileId: string, config: AquilineConfig): Promise<AquilineProfile> {
+    return this.request<AquilineProfile>(
+      'GET',
+      `/v1/profiles/${encodeURIComponent(profileId)}`,
+      config,
+    );
+  }
+
+  async createProfile(
+    input: AquilineProfileInput,
     config: AquilineConfig,
-  ): Promise<CreateConversionOutput> {
-    this.assertConfigured(config);
+  ): Promise<AquilineProfile> {
+    return this.request<AquilineProfile>('POST', '/v1/profiles', config, { body: input });
+  }
 
-    const body = buildConversionBody(input);
-    const headers: Record<string, string> = {
-      'Idempotency-Key': conversionIdempotencyKey(input),
-    };
-    const partnerId = input.partnerId ?? config.partnerId;
-    if (partnerId) {
-      headers['X-Partner-Id'] = partnerId;
-    }
+  async patchProfile(
+    profileId: string,
+    patch: AquilineProfilePatch,
+    config: AquilineConfig,
+  ): Promise<AquilineProfile> {
+    return this.request<AquilineProfile>(
+      'PATCH',
+      `/v1/profiles/${encodeURIComponent(profileId)}`,
+      config,
+      { body: patch },
+    );
+  }
 
+  async upsertOrders(
+    profileId: string,
+    orders: readonly AquilineMarketplaceOrder[],
+    config: AquilineConfig,
+  ): Promise<AquilineOrderUpsertResult> {
+    return this.request<AquilineOrderUpsertResult>(
+      'POST',
+      `/v1/profiles/${encodeURIComponent(profileId)}/orders/upsert`,
+      config,
+      { body: { orders: [...orders] } },
+    );
+  }
+
+  async uploadTrackingHtml(
+    profileId: string,
+    orderId: string,
+    input: AquilineTrackingHtmlInput,
+    config: AquilineConfig,
+  ): Promise<AquilineTrackingHtmlResult> {
     const json = await this.request<Record<string, unknown>>(
       'POST',
-      '/shipments',
+      `/v1/profiles/${encodeURIComponent(profileId)}/orders/${encodeURIComponent(orderId)}/tracking-html`,
       config,
-      { body, headers },
+      { body: input },
     );
-
-    const trackingNumber = typeof json.trackingNumber === 'string' ? json.trackingNumber.trim() : '';
-    if (!trackingNumber) {
-      throw new AquilineError(
-        AquilineErrorKind.MALFORMED_RESPONSE,
-        'Conversion response carried no trackingNumber',
-      );
-    }
-    // A number that is not AQUA-shaped means we are talking to the courier
-    // product, not the conversion product. Pushing it to eBay under the
-    // AQUILINE carrier would give the buyer a number that tracks nothing, so
-    // refuse it here and let the caller fall back to the honest pass-through.
-    if (!AQUILINE_TRACKING_NUMBER_PATTERN.test(trackingNumber)) {
-      throw new AquilineError(
-        AquilineErrorKind.MALFORMED_RESPONSE,
-        `Conversion returned a non-Aquiline tracking number: ${trackingNumber}`,
-      );
-    }
-
-    return {
-      trackingNumber,
-      shipmentId: typeof json.shipmentId === 'string' ? json.shipmentId : null,
-      status: typeof json.status === 'string' ? json.status : null,
-    };
+    return parseTrackingHtmlResult(json);
   }
 
   /**
-   * Current status + event history for a converted number.
-   *
-   * Only a reconciliation path: webhooks are the primary signal. Each call
-   * spends one unit of the plan's "trackings" allowance, so it is used for
-   * support tooling and for orders whose webhook never arrived — never on a
-   * schedule for every open order.
+   * Amazon assign. Rejects a tracking number that does not match
+   * `AQUILINE_TRACKING_NUMBER_PATTERN` as `MALFORMED_RESPONSE` rather than
+   * handing the caller a number that is not actually an AQUA number — see
+   * the pattern's own doc comment in `@repo/shared` for why that failure mode
+   * is preferred over a stricter/looser regex.
    */
-  async getTracking(
-    trackingNumber: string,
+  async assign(
+    profileId: string,
+    orderId: string,
+    input: AquilineAssignBody,
     config: AquilineConfig,
-  ): Promise<TrackingProviderStatusDto> {
-    this.assertConfigured(config);
-    return this.request<TrackingProviderStatusDto>(
+  ): Promise<AquilineAssignResult> {
+    const json = await this.request<Record<string, unknown>>(
+      'POST',
+      `/v1/profiles/${encodeURIComponent(profileId)}/orders/${encodeURIComponent(orderId)}/assign`,
+      config,
+      { body: input },
+    );
+    return parseAssignResult(json);
+  }
+
+  async getOrder(
+    profileId: string,
+    orderId: string,
+    config: AquilineConfig,
+  ): Promise<AquilineMarketplaceOrder> {
+    return this.request<AquilineMarketplaceOrder>(
       'GET',
-      `/tracking/${encodeURIComponent(trackingNumber)}`,
+      `/v1/profiles/${encodeURIComponent(profileId)}/orders/${encodeURIComponent(orderId)}`,
       config,
     );
   }
 
-  /**
-   * Register our webhook receiver. Idempotent on the provider side by URL, and
-   * called at boot, so a redeploy does not accumulate subscriptions.
-   */
-  async subscribeWebhook(
-    input: { webhookUrl: string; events: readonly string[]; secret: string | null },
-    config: AquilineConfig,
-  ): Promise<{ subscriptionId: string | null }> {
-    this.assertConfigured(config);
-    if (!config.partnerId) {
-      throw new AquilineError(
-        AquilineErrorKind.NOT_CONFIGURED,
-        'X-Partner-Id is required for webhook subscription management',
-      );
-    }
-    const json = await this.request<Record<string, unknown>>('POST', '/webhooks/subscriptions', config, {
-      body: {
-        webhookUrl: input.webhookUrl,
-        events: [...input.events],
-        secret: input.secret,
-      },
-      headers: { 'X-Partner-Id': config.partnerId },
-    });
-    return { subscriptionId: typeof json.subscriptionId === 'string' ? json.subscriptionId : null };
+  async listWebhooks(config: AquilineConfig): Promise<AquilineWebhookListResult> {
+    return this.request<AquilineWebhookListResult>('GET', '/v1/webhooks', config);
   }
 
-  private assertConfigured(config: AquilineConfig): void {
-    if (!this.isConfigured(config)) {
-      throw new AquilineError(AquilineErrorKind.NOT_CONFIGURED, 'Aquiline API key is not configured');
-    }
+  async createWebhook(
+    input: AquilineWebhookCreateInput,
+    config: AquilineConfig,
+  ): Promise<AquilineWebhookCreateResult> {
+    return this.request<AquilineWebhookCreateResult>('POST', '/v1/webhooks', config, {
+      body: { url: input.url, events: [...input.events] },
+    });
   }
 
   /**
@@ -226,11 +463,15 @@ export class AquilineClient {
    * retry risks paying twice.
    */
   private async request<T>(
-    method: 'GET' | 'POST',
+    method: AquilineHttpMethod,
     path: string,
     config: AquilineConfig,
-    options?: { body?: unknown; headers?: Record<string, string> },
+    options?: { body?: unknown },
   ): Promise<T> {
+    if (!this.isConfigured(config)) {
+      throw new AquilineError(AquilineErrorKind.NOT_CONFIGURED, 'Aquiline token is not configured');
+    }
+
     const url = `${config.baseUrl.replace(/\/+$/, '')}${path}`;
     let lastError: AquilineError | null = null;
 
@@ -239,21 +480,22 @@ export class AquilineClient {
         const response = await fetch(url, {
           method,
           headers: {
-            'X-API-Key': config.apiKey as string,
+            Authorization: `Bearer ${config.token as string}`,
             Accept: 'application/json',
-            ...(options?.body ? { 'Content-Type': 'application/json' } : {}),
-            ...options?.headers,
+            ...(options?.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
           },
-          body: options?.body ? JSON.stringify(options.body) : undefined,
+          body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
           signal: AbortSignal.timeout(config.timeoutMs),
         });
 
+        const raw = await safeText(response);
+        const parsedBody = parseJsonBody(raw);
+
         if (response.ok) {
-          return (await response.json()) as T;
+          return (parsedBody ?? {}) as T;
         }
 
-        const detail = await safeText(response);
-        const error = classifyHttpFailure(response.status, detail);
+        const error = classifyAquilineFailure(response.status, parsedBody);
         if (error.kind !== AquilineErrorKind.TRANSPORT || attempt === MAX_ATTEMPTS) {
           throw error;
         }
@@ -288,68 +530,71 @@ export class AquilineClient {
 }
 
 /**
- * Build the conversion request body.
+ * Parse the `assign` response. Ground truth (verified live 2026-08-23):
+ * `{success, aquiline, chargedCents, planLimit, planUsed, planRemaining}`.
  *
- * TODO(confirm): the source-tracking fields are unverified — see the contract
- * gap at the top of this file. They are sent under several plausible names
- * because the provider's published schema documents none of them and an
- * unknown property is normally ignored, whereas a missing one fails the
- * conversion. Collapse this to the single real field once the provider
- * confirms it.
+ * `reused` is read defensively — support reports it appears on a repeat
+ * assign, but it is in NO published schema, so it must never be required.
+ *
+ * A tracking number that does not match `AQUILINE_TRACKING_NUMBER_PATTERN`
+ * means we are looking at the wrong product (or a malformed response) and is
+ * rejected as `MALFORMED_RESPONSE` rather than handed to a caller who would
+ * push it to eBay under the AQUILINE carrier as a number that tracks nothing.
  */
-export function buildConversionBody(input: CreateConversionInput): Record<string, unknown> {
+export function parseAssignResult(json: Record<string, unknown>): AquilineAssignResult {
+  const aquiline = typeof json.aquiline === 'string' ? json.aquiline.trim() : '';
+  if (!aquiline || !AQUILINE_TRACKING_NUMBER_PATTERN.test(aquiline)) {
+    throw new AquilineError(
+      AquilineErrorKind.MALFORMED_RESPONSE,
+      `Assign response carried a non-Aquiline tracking number: ${aquiline || '(empty)'}`,
+    );
+  }
   return {
-    externalOrderId: input.externalOrderId,
-    // TODO(confirm) — source tracking, exact property name unknown.
-    trackingNumber: input.sourceTrackingNumber,
-    sourceTrackingNumber: input.sourceTrackingNumber,
-    originalTrackingNumber: input.sourceTrackingNumber,
-    carrier: input.sourceCarrier ?? undefined,
-    recipient: input.recipient,
-    ...(input.sender ? { sender: input.sender } : {}),
+    aquiline,
+    chargedCents: typeof json.chargedCents === 'number' ? json.chargedCents : null,
+    planLimit: typeof json.planLimit === 'number' ? json.planLimit : null,
+    planUsed: typeof json.planUsed === 'number' ? json.planUsed : null,
+    planRemaining: typeof json.planRemaining === 'number' ? json.planRemaining : null,
+    reused: json.reused === true,
   };
 }
 
-/**
- * Idempotency key for a conversion.
- *
- * Derived ONLY from the order id and the source tracking number, so a retry
- * produces a byte-identical key and the provider returns the original
- * shipment. It deliberately contains no timestamp or random component — that
- * would defeat the entire mechanism and bill us twice.
- */
-export function conversionIdempotencyKey(input: CreateConversionInput): string {
-  return `sellerhill-${input.externalOrderId}-${input.sourceTrackingNumber}`;
-}
-
-/**
- * Map an HTTP failure onto a typed kind.
- *
- * 429 is TRANSPORT (retry) unless the body names a quota — a plan wall is not
- * something a retry fixes, and treating it as transport would burn the retry
- * budget on every order once the month's allowance runs out.
- */
-export function classifyHttpFailure(status: number, detail: string): AquilineError {
-  const body = detail.toLowerCase();
-  const quotaWorded = /quota|limit reached|exceeded|upgrade your plan|insufficient/.test(body);
-
-  if (status === 401 || status === 403) {
-    return new AquilineError(AquilineErrorKind.UNAUTHORIZED, `Aquiline auth failed (${status}): ${detail}`, status);
-  }
-  if (status === 402 || (status === 429 && quotaWorded) || ((status === 400 || status === 409) && quotaWorded)) {
-    return new AquilineError(AquilineErrorKind.QUOTA_EXCEEDED, `Aquiline quota exhausted (${status}): ${detail}`, status);
-  }
-  if (status === 429 || status >= 500) {
-    return new AquilineError(AquilineErrorKind.TRANSPORT, `Aquiline transient failure (${status}): ${detail}`, status);
-  }
-  return new AquilineError(AquilineErrorKind.BAD_REQUEST, `Aquiline rejected the request (${status}): ${detail}`, status);
+function parseTrackingHtmlResult(json: Record<string, unknown>): AquilineTrackingHtmlResult {
+  const rawOutcome = json.outcome;
+  const outcome: AquilineHtmlOutcome | null =
+    rawOutcome === AquilineHtmlOutcome.ACCEPTED || rawOutcome === AquilineHtmlOutcome.APPLIED
+      ? rawOutcome
+      : null;
+  return {
+    success: json.success === true,
+    outcome,
+    trackingUpdateStatus:
+      typeof json.trackingUpdateStatus === 'string' ? json.trackingUpdateStatus : null,
+    ...(typeof json.suggestAmazonEmailFetch === 'boolean'
+      ? { suggestAmazonEmailFetch: json.suggestAmazonEmailFetch }
+      : {}),
+  };
 }
 
 async function safeText(response: Response): Promise<string> {
   try {
-    return (await response.text()).slice(0, 500);
+    return await response.text();
   } catch {
     return '';
+  }
+}
+
+/** Parse a response body as JSON; a non-JSON body (or empty body) degrades to
+ *  a synthetic object carrying the raw text under `message`, so
+ *  `classifyAquilineFailure` still has something to report on a failure. */
+function parseJsonBody(raw: string): unknown {
+  if (!raw) {
+    return {};
+  }
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return { message: raw.slice(0, 500) };
   }
 }
 

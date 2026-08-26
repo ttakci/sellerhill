@@ -27,6 +27,23 @@ export interface ConversionRequest {
    * the monthly quota is still spent and still enforced.
    */
   forceManual?: boolean;
+  /**
+   * The real Amazon ship-track page URL, read from the order-details page's
+   * own "Track package" link (never constructed) while the processor is
+   * already there. Required by Aquiline's `assign` call. When absent (e.g.
+   * the on-demand path, which has no live page), `TrackingConversionService`
+   * falls back to the stored `orders.amazon_tracking_url` column.
+   */
+  trackingUrl?: string;
+  /**
+   * The ship-track page's HTML, captured in the same page visit as
+   * `trackingUrl`. Optional: only the automatic (shipped-transition) path
+   * captures it today, and `assign` may still succeed without a fresh upload
+   * if Aquiline already has one on file. Fed to `uploadTrackingHtml` so
+   * Aquiline can read the carrier/status off the page itself — there is no
+   * separate carrier field on the Amazon assign body.
+   */
+  trackingHtml?: string;
 }
 
 /**

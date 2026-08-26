@@ -103,11 +103,14 @@ describe('entitlement enforcement invariants', () => {
     it('conversion DEGRADES rather than blocks when quota runs out', () => {
       // Unlike listings and orders, exhausting conversions must not stop the
       // shipment — eBay still needs a scannable number. The fallback is the
-      // honest pass-through.
+      // honest pass-through — today routed through `passthroughResult`, which
+      // itself calls `this.local.convertSync` (Task 6 fix round 1: every
+      // pass-through now also carries a `ConversionOutcome` for Task 7).
       const src = read('modules', 'amazon', 'tracking-conversion.service.ts');
       expect(src).toMatch(
-        /quota-conversion|quota exhausted[\s\S]{0,200}this\.local\.convertSync\(request\)/i,
+        /quota-conversion|quota exhausted[\s\S]{0,200}this\.passthroughResult\(request/i,
       );
+      expect(src).toMatch(/passthroughResult[\s\S]{0,120}this\.local\.convertSync\(request\)/);
     });
   });
 

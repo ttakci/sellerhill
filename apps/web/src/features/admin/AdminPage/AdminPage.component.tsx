@@ -67,6 +67,7 @@ export const AdminPageComponent = ({
   onSettingReset,
   onEmailTest,
   formatCost,
+  formatCapturedAt,
 }: AdminPageComponentProps): React.ReactElement => {
   const { t } = useTranslation(['admin', 'translation']);
   return (
@@ -195,6 +196,54 @@ export const AdminPageComponent = ({
               </Text>
             </S.SummaryCard>
           ))}
+          {/* Shipments reset every provider billing window — a wait-or-upgrade
+              problem, same read as the Keepa balance above it. */}
+          <S.SummaryCard>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.cost.aquilineShipments.label')}
+            </Text>
+            <Text variant="metric" weight="semibold" numeric>
+              {t('admin.cost.of', {
+                used: overview?.aquilinePlanSnapshot?.planUsed ?? '—',
+                limit: overview?.aquilinePlanSnapshot?.planLimit ?? '—',
+              })}
+            </Text>
+            <Text variant="caption" color="text.secondary">
+              {t('admin.cost.aquilineShipments.caption', {
+                planCode: overview?.aquilinePlanSnapshot?.planCode ?? '—',
+                windowKey: overview?.aquilinePlanSnapshot?.windowKey ?? '—',
+                capturedAt: formatCapturedAt(overview?.aquilinePlanSnapshot?.capturedAt ?? null),
+              })}
+            </Text>
+          </S.SummaryCard>
+          {/* Profiles NEVER reset — /v1/profiles/{id} has no DELETE, so this
+              counter only ever climbs. Reading it next to shipments without a
+              hint would imply it recovers the same way; it does not. */}
+          <S.SummaryCard>
+            <S.LabelRow>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.cost.aquilineProfiles.label')}
+              </Text>
+              <Tooltip content={t('admin.cost.aquilineProfiles.hint')} position="right" variant="dark">
+                <S.InfoButton
+                  type="button"
+                  variant="ghost"
+                  aria-label={t('admin.cost.aquilineProfiles.hint')}
+                >
+                  <Icon name="info" size={14} color="text.tertiary" />
+                </S.InfoButton>
+              </Tooltip>
+            </S.LabelRow>
+            <S.FigureRow>
+              <Text variant="metric" weight="semibold" numeric>
+                {t('admin.cost.of', {
+                  used: overview?.aquilinePlanSnapshot?.profilesUsed ?? '—',
+                  limit: overview?.aquilinePlanSnapshot?.profilesLimit ?? '—',
+                })}
+              </Text>
+              <Badge variant="warning">{t('admin.cost.aquilineProfiles.permanentBadge')}</Badge>
+            </S.FigureRow>
+          </S.SummaryCard>
         </S.Grid>
       )}
 

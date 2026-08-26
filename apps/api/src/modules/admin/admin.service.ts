@@ -21,6 +21,7 @@ import {
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
   type AdminWarningDto,
+  type AquilinePlanSnapshotDto,
   type ProviderCostSummaryDto,
   type QueueEventType,
   type QueueHealthDto,
@@ -70,6 +71,17 @@ interface QueueObservationRow {
   recorded_at: Date;
 }
 
+/** Raw row shape from `aquiline_plan_snapshot` (migration `089`). */
+interface AquilinePlanSnapshotRow {
+  plan_code: string | null;
+  window_key: string | null;
+  plan_limit: number | null;
+  plan_used: number | null;
+  plan_remaining: number | null;
+  profiles_used: number | null;
+  captured_at: Date;
+}
+
 /** Names of the BullMQ queues surfaced in the admin overview. */
 export const ADMIN_QUEUE_NAMES = [
   'order-sync',
@@ -106,10 +118,11 @@ export class AdminService {
     toIso: string | null,
   ): Promise<AdminOverviewDto> {
     const period = this.resolvePeriod(fromIso, toIso);
-    const [counts, usage, queueHealth] = await Promise.allSettled([
+    const [counts, usage, queueHealth, aquilinePlanSnapshot] = await Promise.allSettled([
       this.getCounts(),
       this.getUsageSummaries(period.from, period.to),
       this.getQueueHealth(queues),
+      this.getAquilinePlanSnapshot(),
     ]);
 
     const c = counts.status === 'fulfilled' ? counts.value : this.emptyCounts();
@@ -124,6 +137,13 @@ export class AdminService {
     if (queueHealth.status === 'rejected') {
       this.logger.warn(`getQueueHealth failed: ${this.errMsg(queueHealth.reason)}`);
     }
+    const aq =
+      aquilinePlanSnapshot.status === 'fulfilled'
+        ? aquilinePlanSnapshot.value
+        : this.emptyAquilinePlanSnapshot();
+    if (aquilinePlanSnapshot.status === 'rejected') {
+      this.logger.warn(`getAquilinePlanSnapshot failed: ${this.errMsg(aquilinePlanSnapshot.reason)}`);
+    }
 
     return {
       generatedAt: new Date().toISOString(),
@@ -134,6 +154,51 @@ export class AdminService {
       ordersLast30Days: c.ordersLast30Days,
       usage: u,
       queues: q,
+      aquilinePlanSnapshot: aq,
+    };
+  }
+
+  /**
+   * Latest Aquiline provider-plan snapshot. `profilesLimit` is a platform
+   * setting, not provider data, so it is resolved independently of whether a
+   * snapshot row exists — a brand-new deployment with zero conversions still
+   * reports the configured ceiling, only the measured counters are null.
+   */
+  private async getAquilinePlanSnapshot(): Promise<AquilinePlanSnapshotDto> {
+    const [rows, profilesLimit] = await Promise.all([
+      this.databaseService.query<AquilinePlanSnapshotRow>(
+        `SELECT plan_code, window_key, plan_limit, plan_used, plan_remaining,
+                profiles_used, captured_at
+           FROM aquiline_plan_snapshot
+          ORDER BY captured_at DESC
+          LIMIT 1`,
+      ),
+      this.platformSettings.getNumber(PlatformSettingKey.AQUILINE_MAX_PROFILES),
+    ]);
+    const row = rows[0];
+    return {
+      planCode: row?.plan_code ?? null,
+      windowKey: row?.window_key ?? null,
+      planLimit: row?.plan_limit ?? null,
+      planUsed: row?.plan_used ?? null,
+      planRemaining: row?.plan_remaining ?? null,
+      profilesUsed: row?.profiles_used ?? null,
+      profilesLimit,
+      capturedAt: row?.captured_at ? row.captured_at.toISOString() : null,
+    };
+  }
+
+  /** Fallback when `getAquilinePlanSnapshot` itself fails (DB unreachable). */
+  private emptyAquilinePlanSnapshot(): AquilinePlanSnapshotDto {
+    return {
+      planCode: null,
+      windowKey: null,
+      planLimit: null,
+      planUsed: null,
+      planRemaining: null,
+      profilesUsed: null,
+      profilesLimit: null,
+      capturedAt: null,
     };
   }
 

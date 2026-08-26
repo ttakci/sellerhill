@@ -101,7 +101,11 @@ export enum PlatformSettingKey {
   AQUILINE_BASE_URL = 'tracking.aquiline.baseUrl',
   /** Write-only secret. Without it every order degrades to the pass-through. */
   AQUILINE_API_KEY = 'tracking.aquiline.apiKey',
-  /** Default seller profile (X-Partner-Id) when a store has none assigned. */
+  /**
+   * Dormant. Kept only because a deployed database may still hold a value for
+   * it. The Integration API (2026-08-23) has no `X-Partner-Id` header — that
+   * was a v3 partner/courier API concept. Do not read this key from new code.
+   */
   AQUILINE_PARTNER_ID = 'tracking.aquiline.partnerId',
   AQUILINE_TIMEOUT_MS = 'tracking.aquiline.timeoutMs',
   /** HMAC secret for inbound webhooks. Empty = receiver refuses everything. */
@@ -109,6 +113,15 @@ export enum PlatformSettingKey {
   /** Reject delivery events older than this, so a replayed backlog cannot
    *  fire a burst of days-late "delivered" messages at buyers. */
   AQUILINE_WEBHOOK_MAX_AGE_MINUTES = 'tracking.aquiline.webhookMaxAgeMinutes',
+  /**
+   * One Aquiline account serves every environment (dev/test/production) and
+   * there is no test tenant, so a profile created locally would otherwise
+   * permanently burn a slot on the same paid plan production uses. Prefixed
+   * onto the profile id sent to the provider so environments never collide.
+   */
+  AQUILINE_PROFILE_PREFIX = 'tracking.aquiline.profilePrefix',
+  /** Our plan's profile ceiling. Enforced by us — the API does not expose it. */
+  AQUILINE_MAX_PROFILES = 'tracking.aquiline.maxProfiles',
 
   // --- Chromium profile disk GC (see amazon/browser-profile-gc.ts) ---
   /** Master switch for the per-account profile sweeper. */

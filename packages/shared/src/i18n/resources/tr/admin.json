@@ -19,7 +19,17 @@
     "cost": {
       "keepaBalance": "Keepa token bakiyesi",
       "users": "Toplam kullanıcı",
-      "quantity": "Miktar: {{quantity}}"
+      "quantity": "Miktar: {{quantity}}",
+      "of": "{{limit}} üzerinden {{used}}",
+      "aquilineShipments": {
+        "label": "Aquiline gönderimleri (bu dönem)",
+        "caption": "Plan {{planCode}} · Dönem {{windowKey}} · {{capturedAt}} itibarıyla"
+      },
+      "aquilineProfiles": {
+        "label": "Aquiline profilleri",
+        "permanentBadge": "Asla sıfırlanmaz",
+        "hint": "Aquiline profilleri silinemez — sağlayıcı API'si yalnızca okuma ve güncellemeyi destekler, kaldırmayı değil. Yanlışlıkla, bir yarış durumunda veya test amacıyla oluşturulan bir profil, planın kotasından kalıcı olarak bir yer kaplar. Yukarıdaki gönderimler her fatura döneminde sıfırlanır; bu sayaç asla sıfırlanmaz."
+      }
     },
     "users": {
       "unattributed": "Dağıtılmamış platform kullanımı",

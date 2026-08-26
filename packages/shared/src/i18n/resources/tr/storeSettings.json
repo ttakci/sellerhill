@@ -94,6 +94,17 @@
     "trackingConversionScopeAmazonOnly": "Sadece Amazon Logistics (TBA)",
     "trackingConversionScopeHint": "Amazon Logistics (TBA) numaraları doğrudan \"Amazon\" der; sadece onları dönüştürmek tedarikçinizin en açık işaretini gizler ve aylık dönüşüm hakkınızdan çok daha az harcar. Tüm kargoları dönüştürmek daha fazlasını gizler — Amazon’dan çıkan bir UPS ya da USPS numarası çoğu zaman sorgulanabilir — ama daha pahalıdır ve alıcı \"ürün gelmedi\" derse eBay gerçek kargo firmasının kaydını daha güçlü kanıt sayar.",
     "trackingConvertManualOrders": "Elle bağladığım siparişleri de dönüştür",
-    "trackingConvertManualOrdersHint": "Varsayılan olarak açık. Elle bağlanan siparişleri tek tek sipariş sayfasından dönüştürmeyi tercih ederseniz kapatın."
+    "trackingConvertManualOrdersHint": "Varsayılan olarak açık. Elle bağlanan siparişleri tek tek sipariş sayfasından dönüştürmeyi tercih ederseniz kapatın.",
+    "shipFrom": {
+      "title": "Gönderen adresi",
+      "description": "Bu adres, dönüştürülmüş takip numaralarında iade adresi olarak gösterilir. Adres eksik olduğu sürece takip dönüşümü yapılamaz ve ham Amazon takip numarası gönderilir; bu da tedarikçinizi alıcıya karşı görünür bırakır.",
+      "globalOnly": "Bu adres mağaza bazında değil, hesabınızın tamamı için bir kez tanımlanır. Düzenlemek için “Uygulandığı yer” seçimini genel ayara geri alın — takip dönüşümü her zaman hesap düzeyindeki adresi okur.",
+      "name": "Ad Soyad",
+      "phone": "Telefon numarası",
+      "addressLine1": "Adres satırı 1",
+      "addressLine2": "Adres satırı 2 (opsiyonel)",
+      "city": "Şehir",
+      "incompleteHint": "Takip dönüşümü için adres satırı 1, şehir ve ülke gereklidir. Üçü de girilmeden dönüştürülmüş takip kullanılamaz ve ham Amazon numarası gönderilir."
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { PlatformSettingCategory, UserRole } from '@repo/shared';
-import { formatMicroCurrency, getLocaleConfig } from '@repo/ui';
+import { formatDate, formatMicroCurrency, getLocaleConfig } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -104,6 +104,12 @@ export const AdminPageContainer = (): React.ReactElement => {
       micros === null ? '—' : formatMicroCurrency(micros, locale, currency ?? 'USD'),
     [locale]
   );
+  /* The Aquiline plan snapshot's `capturedAt` — null when no conversion has
+     ever run, so the caption must render the same em-dash the figures do. */
+  const formatCapturedAt = useCallback(
+    (iso: string | null): string => (iso === null ? '—' : formatDate(iso, locale, { hour: 'numeric', minute: '2-digit' })),
+    [locale]
+  );
   /* Must sit above the role guard — hooks cannot be called after an early return. */
   const userColumns = useAdminUserColumns(formatCost);
   const { budgetColumns, failureColumns } = useAdminEbayColumns();
@@ -140,6 +146,7 @@ export const AdminPageContainer = (): React.ReactElement => {
       onSettingReset={settings.onSettingReset}
       onEmailTest={settings.onEmailTest}
       formatCost={formatCost}
+      formatCapturedAt={formatCapturedAt}
     />
   );
 };
