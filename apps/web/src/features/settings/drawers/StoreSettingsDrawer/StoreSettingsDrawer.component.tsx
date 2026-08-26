@@ -65,41 +65,49 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             <ShipFromSection>
               <Text variant="h5">{t('storeSettings:storeSettings.shipFrom.title')}</Text>
               <InfoMessage>{t('storeSettings:storeSettings.shipFrom.description')}</InfoMessage>
-              <FieldGrid>
-                <ModernTextInput
-                  name="shipFromName"
-                  label={t('storeSettings:storeSettings.shipFrom.name')}
-                  value={props.shipFromName}
-                  onChange={props.onShipFromNameChange}
-                />
-                <ModernTextInput
-                  name="shipFromPhone"
-                  type="tel"
-                  label={t('storeSettings:storeSettings.shipFrom.phone')}
-                  value={props.shipFromPhone}
-                  onChange={props.onShipFromPhoneChange}
-                />
-              </FieldGrid>
-              <ModernTextInput
-                name="shipFromAddressLine1"
-                label={t('storeSettings:storeSettings.shipFrom.addressLine1')}
-                value={props.shipFromAddressLine1}
-                onChange={props.onShipFromAddressLine1Change}
-              />
-              <ModernTextInput
-                name="shipFromAddressLine2"
-                label={t('storeSettings:storeSettings.shipFrom.addressLine2')}
-                value={props.shipFromAddressLine2}
-                onChange={props.onShipFromAddressLine2Change}
-              />
-              <ModernTextInput
-                name="shipFromCity"
-                label={t('storeSettings:storeSettings.shipFrom.city')}
-                value={props.shipFromCity}
-                onChange={props.onShipFromCityChange}
-              />
-              {!props.isShipFromAddressComplete && (
-                <InfoMessage>{t('storeSettings:storeSettings.shipFrom.incompleteHint')}</InfoMessage>
+              {props.isGlobalScope ? (
+                <>
+                  <FieldGrid>
+                    <ModernTextInput
+                      name="shipFromName"
+                      label={t('storeSettings:storeSettings.shipFrom.name')}
+                      value={props.shipFromName}
+                      onChange={props.onShipFromNameChange}
+                    />
+                    <ModernTextInput
+                      name="shipFromPhone"
+                      type="tel"
+                      label={t('storeSettings:storeSettings.shipFrom.phone')}
+                      value={props.shipFromPhone}
+                      onChange={props.onShipFromPhoneChange}
+                    />
+                  </FieldGrid>
+                  <ModernTextInput
+                    name="shipFromAddressLine1"
+                    label={t('storeSettings:storeSettings.shipFrom.addressLine1')}
+                    value={props.shipFromAddressLine1}
+                    onChange={props.onShipFromAddressLine1Change}
+                  />
+                  <ModernTextInput
+                    name="shipFromAddressLine2"
+                    label={t('storeSettings:storeSettings.shipFrom.addressLine2')}
+                    value={props.shipFromAddressLine2}
+                    onChange={props.onShipFromAddressLine2Change}
+                  />
+                  <ModernTextInput
+                    name="shipFromCity"
+                    label={t('storeSettings:storeSettings.shipFrom.city')}
+                    value={props.shipFromCity}
+                    onChange={props.onShipFromCityChange}
+                  />
+                  {!props.isShipFromAddressComplete && (
+                    <InfoMessage>
+                      {t('storeSettings:storeSettings.shipFrom.incompleteHint')}
+                    </InfoMessage>
+                  )}
+                </>
+              ) : (
+                <InfoMessage>{t('storeSettings:storeSettings.shipFrom.globalOnly')}</InfoMessage>
               )}
             </ShipFromSection>
             <ToggleRow>

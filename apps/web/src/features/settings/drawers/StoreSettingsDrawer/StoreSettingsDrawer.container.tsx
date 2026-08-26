@@ -127,8 +127,14 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
     }
   }
 
+  // The ship-from address is a USER-level value: it feeds the Aquiline profile,
+  // which `AquilineProfileService.resolveShipFromAddress` reads from the global
+  // `store_settings` row only. A per-store copy has no consumer, so the drawer
+  // must not offer a scope it cannot honour — the fields are shown in the
+  // global scope and explained in a per-store one.
+  const isGlobal = selectedScope === GLOBAL_SCOPE;
+
   const save = (): void => {
-    const isGlobal = selectedScope === GLOBAL_SCOPE;
     void Promise.all([
       saveSettings({
         isGlobal,
@@ -208,6 +214,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       shipFromAddressLine1={shipFromAddressLine1}
       shipFromAddressLine2={shipFromAddressLine2}
       shipFromCity={shipFromCity}
+      isGlobalScope={isGlobal}
       isShipFromAddressComplete={isShipFromAddressComplete}
       checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}

@@ -228,3 +228,117 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
     expect(layer2Call).toBeDefined();
   });
 });
+
+
+describe('TrackingConversionService.refreshTrackingHtml', () => {
+  function build(orderRow: Record<string, unknown> | null) {
+    const uploadTrackingHtml = jest.fn().mockResolvedValue({ accepted: true });
+    const queries: string[] = [];
+    const dbService = {
+      query: jest.fn((sql: string): unknown[] => {
+        queries.push(sql);
+        if (sql.includes('FROM orders o')) {
+          return orderRow ? [orderRow] : [];
+        }
+        return [];
+      }),
+    } as unknown as DatabaseService;
+    const aquilineClient = {
+      isConfigured: () => true,
+      uploadTrackingHtml,
+      assign: jest.fn(),
+      upsertOrders: jest.fn(),
+    } as unknown as AquilineClient;
+    const isSuspended = jest.fn();
+    const canConvertTracking = jest.fn();
+    const quotaEnforcement = { isSuspended, canConvertTracking } as unknown as QuotaEnforcementService;
+    const platformSettings = {
+      getString: jest.fn().mockResolvedValue(null),
+      getNumber: jest.fn().mockResolvedValue(null),
+    } as unknown as PlatformSettingsService;
+    const aquilineProfile = {
+      ensureProfile: jest.fn().mockResolvedValue('sh-user-1-AMAZON_US'),
+    } as unknown as AquilineProfileService;
+    const service = new TrackingConversionService(
+      dbService,
+      platformSettings,
+      aquilineClient,
+      quotaEnforcement,
+      aquilineProfile,
+    );
+    return { service, uploadTrackingHtml, queries, isSuspended, canConvertTracking };
+  }
+
+  const input = {
+    orderId: 'order-1',
+    trackingUrl: 'https://www.amazon.com/progress-tracker/package/?orderId=1&packageIndex=0',
+    trackingHtml: '<html>ship-track</html>',
+  };
+
+  it('uploads and stamps tracking_html_uploaded_at for a converted order', async () => {
+    const { service, uploadTrackingHtml, queries } = build({
+      id: 'order-1',
+      user_id: 'user-1',
+      amazon_order_id: '111-2222222-3333333',
+      amazon_marketplace: 'AMAZON_US',
+      amazon_account_email: 'buyer@example.com',
+      converted_tracking_number: 'AQUAA1234567890YQ',
+    });
+
+    await expect(service.refreshTrackingHtml(input)).resolves.toBe(true);
+
+    expect(uploadTrackingHtml).toHaveBeenCalledWith(
+      'sh-user-1-AMAZON_US',
+      '111-2222222-3333333',
+      { trackingUrl: input.trackingUrl, html: input.trackingHtml },
+      expect.anything(),
+    );
+    expect(queries.some((sql) => sql.includes('tracking_html_uploaded_at'))).toBe(true);
+  });
+
+  it('refuses an order with NO stored conversion — there is nothing to refresh', async () => {
+    // An unconverted order has no shipment on the provider side, so uploading
+    // for it would be a side effect on something the seller may never convert.
+    const { service, uploadTrackingHtml } = build({
+      id: 'order-1',
+      user_id: 'user-1',
+      amazon_order_id: '111-2222222-3333333',
+      amazon_marketplace: 'AMAZON_US',
+      amazon_account_email: null,
+      converted_tracking_number: null,
+    });
+
+    await expect(service.refreshTrackingHtml(input)).resolves.toBe(false);
+    expect(uploadTrackingHtml).not.toHaveBeenCalled();
+  });
+
+  it('never consults the conversion quota — a refresh is not a billed conversion', async () => {
+    const { service, isSuspended, canConvertTracking } = build({
+      id: 'order-1',
+      user_id: 'user-1',
+      amazon_order_id: '111-2222222-3333333',
+      amazon_marketplace: 'AMAZON_US',
+      amazon_account_email: null,
+      converted_tracking_number: 'AQUAA1234567890YQ',
+    });
+
+    await service.refreshTrackingHtml(input);
+
+    expect(canConvertTracking).not.toHaveBeenCalled();
+    expect(isSuspended).not.toHaveBeenCalled();
+  });
+
+  it('returns false rather than throwing when the provider refuses the upload', async () => {
+    const { service, uploadTrackingHtml } = build({
+      id: 'order-1',
+      user_id: 'user-1',
+      amazon_order_id: '111-2222222-3333333',
+      amazon_marketplace: 'AMAZON_US',
+      amazon_account_email: null,
+      converted_tracking_number: 'AQUAA1234567890YQ',
+    });
+    uploadTrackingHtml.mockRejectedValue(new Error('502'));
+
+    await expect(service.refreshTrackingHtml(input)).resolves.toBe(false);
+  });
+});

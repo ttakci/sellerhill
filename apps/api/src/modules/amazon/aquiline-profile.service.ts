@@ -26,6 +26,10 @@ import type { PoolClient } from 'pg';
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
+import {
+  AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
+  buildAquilinePlanSnapshotParams,
+} from './aquiline-plan-snapshot.sql';
 import { buildAquilineProfileId, fingerprintProfile } from './aquiline-profile.helpers';
 import {
   AquilineClient,
@@ -40,6 +44,27 @@ import {
  *  to, kept local since profile creation is the only Aquiline concern that
  *  needs it. */
 const AMAZON_MARKETPLACE_HOST = 'www.amazon.com';
+
+/**
+ * Per-call ceiling for the two provider calls made while the GLOBAL
+ * profile-create advisory lock is held.
+ *
+ * The lock is deliberately global (one profile ceiling for the whole provider
+ * account) and is held across `listProfiles` + `createProfile`. At the normal
+ * `AQUILINE_TIMEOUT_MS` (15s) each of those can take ~46s after the client's
+ * three bounded retries, so the worst case is ~90s of a Postgres transaction —
+ * and every other seller's first conversion queues behind it, each holding a
+ * pooled connection while it waits.
+ *
+ * Bounding the TIMEOUT is the right lever, and restructuring the lock is not:
+ * the ceiling check and the create have to be atomic or two users can both see
+ * 9/10 and both create, and a profile can never be deleted to recover. So the
+ * race stays closed and the wait is made short — worst case ~16s per call
+ * instead of ~46s. A call that trips this bound fails the same way any other
+ * provider failure does: `ensureProfile` returns null and the conversion falls
+ * back to the honest pass-through, retried on the next tick.
+ */
+const AQUILINE_LOCKED_CALL_TIMEOUT_MS = 5_000;
 
 interface AquilineProfileRow {
   profile_id: string;
@@ -198,11 +223,20 @@ export class AquilineProfileService {
           return rowAfterLock.profile_id;
         }
 
+        // Both provider calls below run with a SHORTER per-call timeout than
+        // the rest of this service — see AQUILINE_LOCKED_CALL_TIMEOUT_MS. It is
+        // the only config field that differs; base URL, token, prefix and
+        // ceiling are untouched.
+        const lockedConfig: AquilineConfig = {
+          ...config,
+          timeoutMs: Math.min(config.timeoutMs, AQUILINE_LOCKED_CALL_TIMEOUT_MS),
+        };
+
         // Ceiling guard — checked BEFORE creation, because the slot can
         // never be reclaimed once spent.
         let profileCount: number;
         try {
-          const list = await this.client.listProfiles(config);
+          const list = await this.client.listProfiles(lockedConfig);
           profileCount = list.items.length;
         } catch (err) {
           this.logger.error(
@@ -210,6 +244,15 @@ export class AquilineProfileService {
           );
           return null;
         }
+        // The ceiling check is the ONLY place the platform ever learns how many
+        // profiles are in use, and profiles are the one metered Aquiline
+        // resource that never resets. Recording it here is what stops the
+        // admin card's profile figure rendering an em dash forever. Best-effort
+        // and outside the lock's own client on purpose: a bookkeeping failure
+        // must not abort the transaction that is about to create a permanent,
+        // paid resource.
+        void this.recordProfilesUsed(profileCount);
+
         if (profileCount >= config.maxProfiles) {
           this.logger.error(
             `Aquiline profile ceiling reached (${profileCount}/${config.maxProfiles}) — refusing to create a profile for user ${userId}, marketplace ${marketplace}`,
@@ -228,7 +271,7 @@ export class AquilineProfileService {
               ...(hintEmail ? { amazonAccountEmail: hintEmail } : {}),
               storeAddress: address,
             },
-            config,
+            lockedConfig,
           );
           createdProfileId = created.profileId || profileId;
         } catch (err) {
@@ -274,6 +317,23 @@ export class AquilineProfileService {
         `Aquiline profile creation failed for user ${userId}, marketplace ${marketplace}: ${describeAquilineError(err)}`,
       );
       return null;
+    }
+  }
+
+  /** Persist the observed profile count into `aquiline_plan_snapshot`,
+   *  carrying the shipment counters forward from the previous row (see
+   *  `aquiline-plan-snapshot.sql.ts` for why the carry-forward matters). Never
+   *  throws and is never awaited by the create path — it is bookkeeping. */
+  private async recordProfilesUsed(profilesUsed: number): Promise<void> {
+    try {
+      await this.db.query(
+        AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
+        buildAquilinePlanSnapshotParams({ profilesUsed }),
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Could not record the Aquiline profile count (${profilesUsed}): ${describeAquilineError(err)}`,
+      );
     }
   }
 

@@ -165,6 +165,15 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         order.amazon_tracking_carrier = amazonStatus.trackingCarrier || '';
       }
 
+      // Persist the ship-track URL Amazon itself rendered. Until now only the
+      // MANUAL link path ever wrote `orders.amazon_tracking_url`, so for an
+      // auto-fulfilled order the column stayed NULL — and `convertOnDemand`,
+      // which has no live page and falls back to that column, refused with
+      // `conversionUnavailable`. The documented recovery path for a failed
+      // conversion therefore failed on exactly the orders that need it.
+      // Best-effort: a diagnostic URL is never worth failing a tracking tick.
+      await this.storeTrackingUrl(orderId, amazonStatus.trackingUrl);
+
       // Amazon-side cancellation is NOT an eBay-side cancellation: the eBay
       // sale is still live and must be fulfilled another way. Never overwrite
       // the local order status — stamp amazon_cancelled_at (surfaces in the
@@ -230,6 +239,26 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         });
       }
 
+      // Recurring ship-track HTML feed (spec 5.3). Aquiline wants fresh HTML
+      // roughly 1-2x per day for an in-flight order so its carrier and
+      // delivery context stay current; without it the provider's view of the
+      // shipment goes stale. The only tick that used to upload was the shipped
+      // TRANSITION, and `shouldApplyStatus` makes sure that runs exactly once.
+      //
+      // Gated on the order ALREADY being SHIPPED coming into this tick, which
+      // covers both cases in one condition and cannot double-upload: while it
+      // is still SHIPPED this is the recurring feed, and on the delivered
+      // transition (SHIPPED -> COMPLETED) it is the final upload that makes the
+      // provider's last state match reality. When the previous status was NOT
+      // shipped, `handleShipped` ran above and did its own upload as part of
+      // the conversion, so there is nothing to repeat here.
+      //
+      // It pushes NOTHING to eBay and changes NO status — it is a payload
+      // refresh on a shipment the provider already owns.
+      if (previousStatus === OrderStatus.SHIPPED) {
+        await this.refreshTrackingHtml(order, amazonStatus.trackingUrl, amazonStatus.trackingHtml);
+      }
+
       if (applyStatus) {
         await this.databaseService.query(
           `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
@@ -256,6 +285,68 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Amazon tracking failed for order ${orderId}: ${message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Record the real ship-track URL on the order. It is written for BOTH the
+   * automatic and the manual path so `convertOnDemand` — which has no live
+   * Amazon page and reads `orders.amazon_tracking_url` as its only source for
+   * the URL `assign` requires — can actually run on an auto-fulfilled order.
+   *
+   * `IS DISTINCT FROM` keeps a re-scrape of an unchanged URL from writing, and
+   * every failure is swallowed: this is a diagnostic/recovery aid, and losing
+   * it must never fail a tracking tick that is otherwise doing real work.
+   */
+  private async storeTrackingUrl(orderId: string, trackingUrl?: string): Promise<void> {
+    if (!trackingUrl) {
+      return;
+    }
+    try {
+      await this.databaseService.query(
+        `UPDATE orders SET
+           amazon_tracking_url = $1,
+           updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2 AND amazon_tracking_url IS DISTINCT FROM $1`,
+        [trackingUrl, orderId],
+      );
+    } catch (err: unknown) {
+      this.logger.warn(
+        `Order ${orderId}: could not store the Amazon ship-track URL: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+
+  /**
+   * Hand the provider a fresh copy of the ship-track page for an order it has
+   * already issued a number for. Delegates to `TrackingConversionService`,
+   * which owns every provider call, the profile lookup and the
+   * `tracking_html_uploaded_at` stamp — the processor must not talk to
+   * `AquilineClient` directly, or the guard chain and the persistence rules
+   * would have a second, divergent implementation.
+   *
+   * Fully best-effort: a refused or failed upload leaves the order exactly as
+   * it was. It is not a conversion, spends no quota, and touches neither eBay
+   * nor `orders.status`.
+   */
+  private async refreshTrackingHtml(
+    order: AmazonOrderRow,
+    trackingUrl?: string,
+    trackingHtml?: string,
+  ): Promise<void> {
+    if (!trackingUrl || !trackingHtml) {
+      return;
+    }
+    try {
+      await this.trackingConversion.refreshTrackingHtml({
+        orderId: order.id,
+        trackingUrl,
+        trackingHtml,
+      });
+    } catch (err: unknown) {
+      this.logger.warn(
+        `Order ${order.id}: ship-track HTML refresh skipped: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

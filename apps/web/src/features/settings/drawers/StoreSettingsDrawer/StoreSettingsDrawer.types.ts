@@ -36,6 +36,11 @@ export interface StoreSettingsDrawerComponentProps {
   shipFromAddressLine1: string;
   shipFromAddressLine2: string;
   shipFromCity: string;
+  /** The ship-from address feeds the user-level Aquiline profile, which is
+   *  read from the GLOBAL store_settings row only — so the fields are
+   *  editable in the global scope and replaced by an explanatory notice in
+   *  a per-store scope, rather than offering a scope nothing consumes. */
+  isGlobalScope: boolean;
   isShipFromAddressComplete: boolean;
   checkBlacklist: boolean;
   amazonTaxRate: number;

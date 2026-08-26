@@ -38,6 +38,10 @@ import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
+import {
+  AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
+  buildAquilinePlanSnapshotParams,
+} from './aquiline-plan-snapshot.sql';
 import { AquilineProfileService } from './aquiline-profile.service';
 import { AquilineClient, AquilineError, AquilineErrorKind, type AquilineConfig } from './aquiline.client';
 import {
@@ -397,6 +401,83 @@ export class TrackingConversionService {
    *  this so the field is never forgotten on a new early exit. */
   private passthroughResult(request: ConversionRequest, outcome: ConversionOutcome): TrackingConversionResult {
     return { ...this.local.convertSync(request), outcome };
+  }
+
+  /**
+   * Re-upload the ship-track page HTML for an order the provider has ALREADY
+   * issued a number for (spec 5.3 — the recurring feed).
+   *
+   * The provider derives the shipment's carrier and delivery context from this
+   * page, and wants it roughly 1-2x per day while the order is in flight. Only
+   * the shipped transition ever uploaded, and that runs exactly once, so
+   * everything the provider knew about a shipment was frozen at the moment it
+   * was converted.
+   *
+   * Three deliberate limits:
+   *   - A STORED CONVERSION is the gate. An unconverted order has nothing on
+   *     the provider side to refresh, and uploading for one would be an
+   *     unpaid-for side effect on an order the seller may never convert.
+   *   - It is NOT a conversion: no quota is consulted, no `assign` is called,
+   *     nothing about the order's tracking number changes.
+   *   - It never throws. Returning `false` is the whole error contract — a
+   *     stale provider record is a degradation, and the caller is a tracking
+   *     tick whose real job is detecting delivery.
+   */
+  async refreshTrackingHtml(input: {
+    orderId: string;
+    trackingUrl: string;
+    trackingHtml: string;
+  }): Promise<boolean> {
+    if (!input.trackingUrl || !input.trackingHtml) {
+      return false;
+    }
+
+    let order: ConversionOrderRow | null;
+    try {
+      order = await this.loadOrder(input.orderId);
+    } catch (err) {
+      this.logger.warn(
+        `Order ${input.orderId}: ship-track HTML refresh skipped, order read failed: ${describeError(err)}`,
+      );
+      return false;
+    }
+    if (!order || !order.converted_tracking_number || !order.amazon_order_id) {
+      return false;
+    }
+
+    const config = await this.resolveConfig();
+    if (!this.aquiline.isConfigured(config)) {
+      return false;
+    }
+
+    // Cached: the order is already converted, so a profile row exists and this
+    // returns its id without a provider call. It never throws.
+    const marketplace = (order.amazon_marketplace as AmazonMarketplace) || AmazonMarketplace.AMAZON_US;
+    const profileId = await this.aquilineProfile.ensureProfile(
+      order.user_id,
+      marketplace,
+      order.amazon_account_email,
+    );
+    if (!profileId) {
+      return false;
+    }
+
+    try {
+      await this.aquiline.uploadTrackingHtml(
+        profileId,
+        order.amazon_order_id,
+        { trackingUrl: input.trackingUrl, html: input.trackingHtml },
+        config,
+      );
+      await this.stampHtmlUploaded(order.id);
+      this.logger.debug(`Order ${order.id}: refreshed the ship-track HTML held by the provider`);
+      return true;
+    } catch (err) {
+      this.logger.warn(
+        `Order ${order.id}: ship-track HTML refresh failed — the provider's copy stays stale. ${describeError(err)}`,
+      );
+      return false;
+    }
   }
 
   /**
@@ -779,14 +860,27 @@ export class TrackingConversionService {
   private async recordPlanSnapshot(result: AquilineAssignResult): Promise<void> {
     try {
       await this.databaseService.query(
-        `INSERT INTO aquiline_plan_snapshot (plan_limit, plan_used, plan_remaining, captured_at)
-         VALUES ($1, $2, $3, NOW())`,
-        [result.planLimit, result.planUsed, result.planRemaining],
+        AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
+        buildAquilinePlanSnapshotParams({
+          planLimit: result.planLimit,
+          planUsed: result.planUsed,
+          planRemaining: result.planRemaining,
+        }),
       );
     } catch (err) {
       this.logger.warn(`Could not record the Aquiline plan snapshot: ${(err as Error).message}`);
     }
   }
+}
+
+/** One-line description of any thrown value, naming the provider failure kind
+ *  when there is one. Used by the paths that only LOG a failure, so an
+ *  `AquilineError` never degrades to a bare message with no kind on it. */
+function describeError(err: unknown): string {
+  if (err instanceof AquilineError) {
+    return `${err.kind}${err.code ? ` (${err.code})` : ''}: ${err.message}`;
+  }
+  return err instanceof Error ? err.message : String(err);
 }
 
 /** Buyer address → the provider's wire shape (`AquilineStoreAddress`, snake_case

@@ -98,6 +98,7 @@
     "shipFrom": {
       "title": "Ship-from address",
       "description": "This is the return address shown on converted tracking. While it is incomplete, tracking conversion falls back to the raw Amazon tracking number, so your supplier stays visible to the buyer.",
+      "globalOnly": "This address is set once for your whole account, not per store. Switch “Applies to” back to the global setting to edit it — tracking conversion always reads the account-level address.",
       "name": "Name",
       "phone": "Phone number",
       "addressLine1": "Address line 1",

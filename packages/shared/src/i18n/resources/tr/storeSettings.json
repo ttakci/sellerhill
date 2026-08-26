@@ -98,6 +98,7 @@
     "shipFrom": {
       "title": "Gönderen adresi",
       "description": "Bu adres, dönüştürülmüş takip numaralarında iade adresi olarak gösterilir. Adres eksik olduğu sürece takip dönüşümü yapılamaz ve ham Amazon takip numarası gönderilir; bu da tedarikçinizi alıcıya karşı görünür bırakır.",
+      "globalOnly": "Bu adres mağaza bazında değil, hesabınızın tamamı için bir kez tanımlanır. Düzenlemek için “Uygulandığı yer” seçimini genel ayara geri alın — takip dönüşümü her zaman hesap düzeyindeki adresi okur.",
       "name": "Ad Soyad",
       "phone": "Telefon numarası",
       "addressLine1": "Adres satırı 1",

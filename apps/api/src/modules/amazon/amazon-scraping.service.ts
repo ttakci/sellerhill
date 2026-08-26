@@ -32,12 +32,35 @@ export interface ScrapingProgress {
  * seller's real, logged-in Amazon cookies.
  */
 export function isTrustedAmazonTrackingUrl(href: string, originUrl: string): boolean {
+  return resolveTrustedAmazonTrackingUrl(href, originUrl) !== null;
+}
+
+/**
+ * The same trust decision as `isTrustedAmazonTrackingUrl`, but returning the
+ * ABSOLUTE url rather than a boolean — `null` when the href is untrusted or
+ * cannot be resolved.
+ *
+ * This exists because the absolutized value is not merely a navigation
+ * convenience: Amazon renders the "Track package" anchor site-relative
+ * (`/progress-tracker/package/?orderId=...`), and that raw `href` is what the
+ * parser returns. Handing a relative path onward is a silent, expensive
+ * failure — `assign`/`upsertOrders` send it to Aquiline as `trackingUrl`,
+ * which rejects it (`tracking_url_mismatch` / `assign_validation`), the
+ * conversion falls back to the raw Amazon number, and eBay's Fulfillment API
+ * has NO update endpoint, so that buyer sees the supplier's own tracking
+ * number forever. Resolving once, here, is what makes the value that is
+ * navigated to and the value that is sent to the provider the SAME string.
+ */
+export function resolveTrustedAmazonTrackingUrl(href: string, originUrl: string): string | null {
   try {
     const resolved = new URL(href, originUrl);
     const origin = new URL(originUrl);
-    return resolved.protocol === 'https:' && resolved.hostname === origin.hostname;
+    if (resolved.protocol !== 'https:' || resolved.hostname !== origin.hostname) {
+      return null;
+    }
+    return resolved.toString();
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -378,17 +401,28 @@ export class AmazonScrapingService {
 
       const parsed = await this.parserService.parseOrderStatus(page);
 
+      // The parser returns Amazon's raw `href`, which is normally SITE-RELATIVE.
+      // Resolve it ONCE here, and hand onward only the absolute value that
+      // passed the trusted-host check — the same string this page navigates to
+      // is the one `TrackingConversionService` sends the provider as
+      // `trackingUrl`. An untrusted or unresolvable href yields NO trackingUrl
+      // at all rather than a relative one: a missing URL makes the conversion
+      // fall back visibly (and is logged), while a relative one is accepted by
+      // our own code and rejected only by the provider, after the call is paid
+      // for and after eBay has already been handed the raw Amazon number.
+      let trackingUrl: string | undefined;
       let trackingHtml: string | undefined;
       if (parsed.trackingUrl) {
         const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
-        if (!isTrustedAmazonTrackingUrl(parsed.trackingUrl, origin)) {
+        const resolvedTrackingUrl = resolveTrustedAmazonTrackingUrl(parsed.trackingUrl, origin);
+        if (!resolvedTrackingUrl) {
           this.logger.warn(
             `Ship-track HTML capture skipped for order ${amazonOrderId}: tracking URL is not a trusted Amazon host`
           );
         } else {
+          trackingUrl = resolvedTrackingUrl;
           try {
-            const trackingHref = new URL(parsed.trackingUrl, origin).toString();
-            await page.goto(trackingHref, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.goto(resolvedTrackingUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await page.waitForTimeout(1500);
             trackingHtml = await page.content();
           } catch (error: unknown) {
@@ -400,7 +434,7 @@ export class AmazonScrapingService {
         }
       }
 
-      return { ...parsed, trackingHtml };
+      return { ...parsed, trackingUrl, trackingHtml };
     } finally {
       await page.close();
     }
