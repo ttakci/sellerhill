@@ -189,6 +189,18 @@ export class AquilineProfileService {
           'aquiline-profile-create',
         ]);
 
+        // Every provider call made while this transaction holds the lock uses a
+        // SHORTER per-call timeout than the rest of this service — see
+        // AQUILINE_LOCKED_CALL_TIMEOUT_MS. It is the only config field that
+        // differs; base URL, token, prefix and ceiling are untouched. Defined
+        // here, right after acquiring the lock, so EVERY call under the lock
+        // uses it — a slow/hung provider must hold this transaction's pooled
+        // connection for a bounded time, not up to the full outer timeout.
+        const lockedConfig: AquilineConfig = {
+          ...config,
+          timeoutMs: Math.min(config.timeoutMs, AQUILINE_LOCKED_CALL_TIMEOUT_MS),
+        };
+
         // Another request may have created the profile while we waited on
         // the lock.
         const rowAfterLock = await this.readRowWithClient(client, userId, marketplace);
@@ -201,7 +213,7 @@ export class AquilineProfileService {
             userId,
             label,
             address,
-            config,
+            lockedConfig,
           );
           if (!patched) {
             return null;
@@ -222,15 +234,6 @@ export class AquilineProfileService {
           }
           return rowAfterLock.profile_id;
         }
-
-        // Both provider calls below run with a SHORTER per-call timeout than
-        // the rest of this service — see AQUILINE_LOCKED_CALL_TIMEOUT_MS. It is
-        // the only config field that differs; base URL, token, prefix and
-        // ceiling are untouched.
-        const lockedConfig: AquilineConfig = {
-          ...config,
-          timeoutMs: Math.min(config.timeoutMs, AQUILINE_LOCKED_CALL_TIMEOUT_MS),
-        };
 
         // Ceiling guard — checked BEFORE creation, because the slot can
         // never be reclaimed once spent.
@@ -275,7 +278,7 @@ export class AquilineProfileService {
           );
           createdProfileId = created.profileId || profileId;
         } catch (err) {
-          createdProfileId = await this.recoverFromCreateConflict(profileId, err, config);
+          createdProfileId = await this.recoverFromCreateConflict(profileId, err, lockedConfig);
           if (!createdProfileId) {
             this.logger.error(
               `Aquiline createProfile failed for user ${userId}, marketplace ${marketplace}: ${describeAquilineError(err)}`,

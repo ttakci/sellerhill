@@ -266,6 +266,22 @@ export class AmazonScrapingService {
 
         const scrapedData = await this.parserService.parseOrderPage(page, amazonOrderId);
 
+        // Amazon renders the "Track package" anchor site-relative
+        // (/progress-tracker/package/?orderId=...); parseOrderPage returns that raw
+        // href. The scheduled scrape (doScrapeOrderStatusWithTrackingHtml) already
+        // absolutizes+trust-checks this exact value before handing it to Aquiline —
+        // the manual link path must do the same, or a conversion fired via
+        // convertOnDemand before the first tracking tick sends a relative URL the
+        // provider rejects (tracking_url_mismatch/assign_validation), and since
+        // eBay's Fulfillment API has no update endpoint, that buyer keeps the raw
+        // Amazon number forever. Refuse rather than navigate on an untrusted host —
+        // this only resolves the string, it never triggers a second navigation.
+        if (scrapedData.trackingUrl) {
+          const origin = buildAmazonSiteUrl(account.marketplace as AmazonMarketplace);
+          const resolved = resolveTrustedAmazonTrackingUrl(scrapedData.trackingUrl, origin);
+          scrapedData.trackingUrl = resolved ?? undefined;
+        }
+
         onProgress?.({ stage: 'saving', message: 'Saving order data...' });
 
         // Save browser state for session reuse
