@@ -1,106 +1,119 @@
-# Aquiline Integration API — open questions
+# Aquiline Integration API — questions and answers
 
-**Status:** final list, ready to send. Everything below was tried in code first
-(live probe calls against the production account — we have no sandbox and are
-on the Starter plan bought for development, so testing against production is
-accepted) and each of these 4 questions is what remained unanswerable that way.
+**Status: CLOSED.** All four questions were answered by Aquiline support on
+2026-08-26. Nothing is outstanding. This file is kept as the record of what was
+asked and what came back, because several of the answers are load-bearing and
+appear nowhere in the provider's OpenAPI document — that document is 3.0.3,
+which has no `webhooks:` section, so the payload shape in particular can only
+ever come from here.
 
-**Context for support:** we are integrating the Integration API **server-side**,
-not through the browser extension. Our platform hosts many sellers; each
-seller gets one profile, and we upload Amazon ship-track HTML from our own
-authenticated Amazon sessions.
-
----
-
-## 1. Can you send example webhook payloads?
-
-The OpenAPI document specifies the signature header
-(`X-Webhook-Signature: sha256=<hex hmac of raw body with your secret>`) and the
-event names, but not the payload body — and it structurally cannot: the
-document is OpenAPI **3.0.3**, which has no `webhooks:` section at all.
-
-We have already built a receiver that captures the raw body of every
-signature-verified delivery regardless of shape, so once we register a
-webhook against a reachable URL we expect to answer this ourselves from a
-real delivery. If you can send samples in the meantime, that saves us the
-wait — we still need one for each event:
-
-- `tracking.html.accepted`
-- `tracking.html.applied`
-- `tracking.html.rejected`
-- `tracking.problem.opened`
-- `tracking.problem.cleared`
-
-Specifically: which field carries the `problemCode`, and which field
-identifies the order — the marketplace order id, the profile id, or the
-Aquiline tracking number?
-
-## 2. What are the rate limits on the Integration API?
-
-We ran 15 rapid sequential `GET /v1/me` calls against production and saw no
-`429`, no `Retry-After`, and no `X-RateLimit-*` (or similarly named) response
-header on any of them — so light GET traffic is not visibly throttled, at
-least not below that volume. We have not tested sustained load or the
-**billed** `POST .../assign` calls, and don't want to probe those blindly
-since each one is a real charge. What are the actual limits (requests per
-second/minute/day, per token or per account), particularly on `assign` and
-`tracking-html`?
-
-Our expected shape: roughly one `tracking-html` upload per in-flight order per
-day, plus a burst of `upsert` + `tracking-html` + `assign` whenever an order
-ships.
-
-## 3. Can seller profile slots be reclaimed?
-
-`/v1/profiles/{profileId}` exposes only `GET` and `PATCH` — there is no
-`DELETE`, unlike `/v1/webhooks/{webhookId}`. Our Starter plan includes 10
-profiles.
-
-Since there is no test environment, our development and testing necessarily
-create real profiles against that same 10-profile allowance. If a profile
-becomes obsolete — a test profile, or a seller who leaves — can the slot be
-freed, through the API or by your team? If not, we will treat every creation
-as permanent and guard it accordingly (which is what our code already does).
-
-## 4. Where can we read the trackings allowance and the profile count?
-
-`GET /v1/me` returns `billing.usage {used, limit, remaining}` and
-`plan.trackLimitPerMonth`, both of which report our plan's **shipment**
-allowance (300 on Starter) rather than the separate **3,000 trackings per
-month** the plan page also lists. We checked every response shape in the
-published document for a second counter and found none.
-
-- Is the trackings allowance readable anywhere in the API, and what consumes
-  it, given there is no delivery webhook to poll status with?
-- Is the profile count (used / allowed) readable anywhere? We currently count
-  `GET /v1/profiles` ourselves, which works but costs a call we would rather
-  not need.
-
-Please also confirm our reading of the usage window: `windowKey` came back as
-`2026-08-23`, matching `currentPeriodStart`, with `currentPeriodEnd`
-`2026-09-23`. We are treating the allowance as resetting on the **subscription
-anniversary**, not on the 1st of each calendar month.
+The email that was sent is `aquiline-support-email.md` in this folder.
 
 ---
 
-## Answered — no longer being asked
+## 1. Webhook payload shape — ANSWERED
+
+Common envelope, with `X-Webhook-Event` and `X-Webhook-Signature: sha256=<hex>`
+(HMAC-SHA256 over the raw body) as headers:
+
+```json
+{ "event": "<event-name>", "createdAt": "…", "data": { "profileId": "…", "orderId": "…" } }
+```
+
+- `data` **always** carries `profileId` and `orderId`, where `orderId` is the
+  **marketplace order id** — the Amazon order id we sent to `upsertOrders`.
+- **The AQUA number is never in a webhook.** Read it from
+  `GET /v1/profiles/{profileId}/orders/{orderId}` → `aquilineNumber`.
+- `problemCode` appears on `tracking.problem.opened`, `tracking.html.rejected`,
+  and optionally on `tracking.html.accepted` when accepted in a degraded state.
+  `tracking.problem.cleared` carries `previousProblemCode` instead.
+- `tracking.html.rejected` also returns its HTTP 4xx; the webhook is
+  best-effort on top of that.
+- Delivery: up to 4 attempts (1s / 5s / 20s), 8s timeout each, then dropped
+  permanently. The receiver must be idempotent and fast.
+
+Implemented in `tracking-webhook.helpers.ts` / `.service.ts`; migration `091`
+reshaped `tracking_webhook_events` for it (the `075` schema required a
+`tracking_number`, which a real payload never has — every genuine delivery
+would have failed to insert).
+
+## 2. Rate limits — ANSWERED
+
+No application-level 429 limiter is enforced today. No separate limits for
+`assign` vs `tracking-html`. The token is bound to one account, so limits are
+de facto per account. The published "~100 req/min" was a pacing recommendation,
+not a hard limit; their rollout guidance is **1–2 req/sec sustained**.
+Infrastructure-level 429s remain possible on aggressive bursts.
+
+(The 250 req/min figure in their docs belongs to the separate v3 partner API.)
+
+No client-side limiter was built: HTML uploads ride the Amazon scrape, which
+`AMAZON_GLOBAL_CONCURRENCY` caps at 5 concurrent browser actions
+platform-wide — far below the guidance. `AquilineClient` already treats 429 as
+retryable transport.
+
+## 3. Profile slot reclamation — ANSWERED
+
+> "Once created via the API, a profile is persistent: the slot is not freed
+> automatically, and profiles cannot be deleted through the Integration API."
+
+There is no `DELETE /v1/profiles/{profileId}` — only `GET` / `POST` / `PATCH`.
+
+This is exactly what the design already assumed, so nothing changed: profile
+ids are deterministic (`{prefix}-{userId}-{marketplace}`) so a crashed creation
+can reclaim its own slot rather than stranding it, creation is lazy and runs
+behind a global advisory lock, and `AQUILINE_MAX_PROFILES` (10 on Starter) is
+checked before every create because the resource cannot be recovered.
+
+## 4. Shipment / tracking / profile — ANSWERED, and it corrected us
+
+| Term | Meaning |
+|---|---|
+| **Profile** | One `profileId` resource. |
+| **Shipment** | One successful **new** `assign` that issues an AQUA number. **This is the only thing that consumes plan usage** — Starter's 300 is 300 new assigns per billing period. |
+| **Tracking** | Looking up tracking for Aquiline shipments **created by other users**. Not our meter at all. |
+
+Two consequences we had wrong before this answer:
+
+- **Our own shipments are not metered again after assign.** `upsertOrders`,
+  `tracking-html` uploads, status updates, webhooks and `GET`s on our own
+  orders consume **zero** monthly usage. An earlier reading treated the "3,000
+  trackings" line as a second ceiling and used it to argue that continued
+  polling was expensive — that was simply wrong, and it means the recurring
+  HTML feed is free to run daily.
+- **A re-assign that returns `reused: true` is not billed.** This closes the
+  double-billing exposure the design had flagged as its main money risk: the
+  bounded retry and deferral paths can re-enter `assign` for an order that
+  already has an AQUA number without being charged twice.
+
+Usage window: **the subscription period, not the calendar month.** `windowKey`
+is `currentPeriodStart` and `used` resets on the anniversary (23 Aug → 23 Sep).
+Our own `QuotaEnforcementService` meters a UTC calendar month, so the two
+windows are deliberately offset — which is why `isPlanExhausted` reads the
+provider's own `planRemaining` from a TTL'd snapshot rather than inferring
+anything from our counters.
+
+Profile used/limit/remaining is **not** exposed by the API; only
+`GET /v1/profiles` (list), which is what `AquilineProfileService` counts.
+
+---
+
+## Answered earlier, kept for the record
 
 | Question | Answer | Source |
 |---|---|---|
-| Which surface converts Amazon TBA → AQUA? | Integration API, not the v3 partner API | support, 2026-08-13 |
-| Can an Amazon profile assign by `carrier` + tracking number? | No — Amazon uses the HTML route; `carrier` is "required for non-Amazon assign". Aquiline reads the carrier from the uploaded HTML | API document introduction |
+| Which surface converts Amazon TBA → AQUA? | The Integration API, not the v3 partner API | support, 2026-08-13 |
+| Can an Amazon profile assign by `carrier` + number? | No — Amazon uses the HTML route; `carrier` is "required for non-Amazon assign". Aquiline derives the carrier from the uploaded HTML | API document introduction |
 | What is the profile limit? | 10 on Starter (25 / 50 / 100 / 250 above) | plan page |
-| Is there a test environment? | No | support, asked previously |
+| Is there a test environment? | No | support |
 | Does `trackLimitPerMonth` count shipments? | Yes — 300, despite the name | live probe |
-| What does an error body look like? | `{success: false, code: "not-found", message: "…"}` — a machine-readable `code` | live probe |
-| Are light `GET` calls rate-limited? | Not visibly at 15 rapid calls — no `429`, no rate-limit headers | live probe (2026-08-26) |
-| What is `amazonCustomerId` / `suggestAmazonEmailFetch`? | Not asked — no observable effect exists to test, and no code path depends on either; low priority, dropped from the list to keep it short. Ask only if support has spare bandwidth. |
+| What does an error body look like? | `{success: false, code: "not-found", message: "…"}` | live probe |
+| Are light `GET` calls rate-limited? | Not at 15 rapid calls — no 429, no rate-limit headers | live probe |
 
-## Being answered by probing, not by asking
+## Still unproven — but not a question for support
 
-`pnpm --filter api aquiline:probe` settles these once a real shipped Amazon
-order is connected: the HTML size limit, `assign` idempotency and billing on
-repeat, whether `assign` works immediately after an `accepted` upload, the
-`upsert` batch limit, accepted `status` values, what a repeat `POST /v1/profiles`
-with the same id does, and whether the `trackingUrl` must match byte-for-byte
-between `tracking-html` and `assign`.
+No **conversion** has ever run against the real provider: the four-call
+sequence (profile → upsert → tracking-html → assign) needs a connected Amazon
+buyer account with a shipped order, which does not exist yet. That is a
+verification gap, not an unanswered question. The verification plan for the
+first live order is in CLAUDE.md under "Tracking conversion (Aquiline)".
