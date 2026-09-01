@@ -390,8 +390,19 @@ export class TrackingConversionService {
       await this.persistConverted(order.id, provider, assigned.aquiline);
       await this.recordPlanSnapshot(assigned);
 
+      // `reused` and `chargedCents` are logged because they are the only
+      // direct evidence of what the provider actually billed for this call.
+      // Aquiline states that a re-assign for an order that already holds an
+      // AQUA number returns `reused: true` and costs nothing — that claim is
+      // what makes every retry and deferral path in this file safe, and it has
+      // never been observed live. The first real conversion should confirm it
+      // here rather than in a monthly invoice. `reused` is also in no
+      // published schema, so a provider that silently stops sending it shows
+      // up as `reused=false` on a call we know was a repeat.
       this.logger.log(
-        `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider})`,
+        `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider}) ` +
+          `reused=${assigned.reused} chargedCents=${assigned.chargedCents ?? 'unknown'} ` +
+          `planUsed=${assigned.planUsed ?? 'unknown'}/${assigned.planLimit ?? 'unknown'}`,
       );
       return {
         trackingNumber: assigned.aquiline,
@@ -750,10 +761,21 @@ export class TrackingConversionService {
   /**
    * Record a converted tracking number in up to three fail-soft layers,
    * mirroring `AmazonCheckoutService.onPlaced` (CLAUDE.md "Money safety —
-   * onPlaced (fail-soft layered)"). By the time this runs, Aquiline has
-   * ALREADY issued and billed the AQUA number — a persistence failure here
-   * must never be reported as "conversion did not happen", or the next
-   * retry finds nothing stored and calls `assign` again: a real re-buy.
+   * onPlaced (fail-soft layered)").
+   *
+   * WHAT IS AT STAKE HERE CHANGED on 2026-08-26, and the layers stayed. The
+   * original reason was money: lose the number, and the next retry re-runs
+   * `assign` and buys a second one. Aquiline then confirmed that a re-assign
+   * for an order that already has an AQUA number returns `reused: true` and is
+   * NOT billed, so that particular risk is gone.
+   *
+   * The layers remain because the real exposure was never only the money. A
+   * number that Aquiline issued but we failed to store is a number the buyer
+   * can never be given: `resolveForOrder` finds nothing stored, the conversion
+   * is reported as failed, and the order is HELD off eBay indefinitely (the
+   * platform refuses to push the raw Amazon number). So a lost write turns a
+   * paid, working conversion into a stuck shipment — which is worse than the
+   * double charge it used to mean.
    *
    * Layer 1: the full write (`persist`) — number, carrier, shipment id,
    *   provider, timestamps.

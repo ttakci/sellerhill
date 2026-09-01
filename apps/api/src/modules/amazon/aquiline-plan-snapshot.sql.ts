@@ -20,10 +20,19 @@
 // guaranteed 402. So each write CARRIES FORWARD whatever it does not know from
 // the previous row, and the latest row is always the whole current picture.
 //
-// `plan_code` / `window_key` stay NULL and are carried forward the same way:
-// populating them needs a `getMe` call, and that call has no business on the
-// conversion hot path. An em dash in the admin card is honest; a fabricated
-// value is not.
+// `plan_code` / `window_key` stay NULL and are carried forward the same way.
+// The original reason was cost — a `getMe` call was assumed to spend plan
+// usage. Aquiline confirmed on 2026-08-26 that it does not: only a successful
+// new `assign` is metered, and every GET is free. So the remaining reason is
+// latency, not money: `getMe` is a network round-trip and the conversion path
+// is already four provider calls deep, so it does not belong there either.
+//
+// That leaves `window_key` — the date the allowance resets, which is genuinely
+// useful to an operator — unavailable to the admin card. Populating it is now
+// a free call from somewhere OFF the hot path (an admin read, or a low-rate
+// scheduled refresh); it is deliberately not built yet because adding a
+// provider round-trip to an admin page load needs its own fail-soft handling.
+// Until then an em dash is honest; a fabricated value is not.
 
 /**
  * Insert one snapshot row, carrying forward every counter the caller passes as
