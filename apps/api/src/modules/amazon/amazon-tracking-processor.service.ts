@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import {
   BuyerMessageEventType,
   ConversionOutcome,
+  mayPushToEbay,
   EbayAccountStatus,
   extractCorrelationId,
   generateCorrelationId,
@@ -448,8 +449,10 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     //   AQUILINE  → AQUAA…YQ number under the AQUILINE carrier, which eBay's
     //               Add-Tracking form accepts (verified 2026-08-11).
     //
-    // Any provider failure degrades to the pass-through rather than blocking
-    // the fulfilment: late-but-honest tracking beats no tracking at all.
+    // A provider failure still RESOLVES to the pass-through result — the
+    // service never throws — but that result is CLASSIFIED, and the block
+    // below refuses to push it. Resolving and pushing are two decisions, not
+    // one; only the seller's own configuration makes a raw number pushable.
     const conversion = await this.trackingConversion.resolveForOrder({
       orderId: order.id,
       rawNumber: order.amazon_tracking_number || '',
@@ -458,29 +461,49 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       trackingHtml,
     });
 
-    // Whether `assign` succeeds immediately after an `accepted` HTML upload
-    // is unresolved with the provider — its own docs warn against treating
-    // success alone as applied. `PASSTHROUGH_RETRYABLE` mirrors
-    // `isRetryableConversionFailure`'s classification (transport blip, "HTML
-    // not parsed yet"). Deferring is bounded: a shipment with NO tracking
-    // number is worse than one with the raw Amazon number, so past the
-    // window the push goes through with whatever number is available.
-    const retryable = conversion.outcome === ConversionOutcome.PASSTHROUGH_RETRYABLE;
-    if (
-      shouldDeferEbayPush({
-        retryable,
+    // THE RAW AMAZON NUMBER NEVER REACHES eBAY WHEN A CONVERSION WAS EXPECTED.
+    //
+    // This is the rule the whole feature exists for. A seller pays to keep
+    // their supplier hidden; handing the buyer the supplier's own tracking
+    // number is the single worst outcome, and eBay's Fulfillment API has NO
+    // update endpoint, so it could never be corrected afterwards. An earlier
+    // version of this code pushed the raw number once a 12h window expired,
+    // on the argument that tracking a buyer can see beats none at all — which
+    // traded the product's entire purpose for a shipping-status timeliness the
+    // seller never asked us to prioritise. `raw-tracking-never-pushed.guard.spec.ts`
+    // locks the reversal.
+    //
+    // So: hold indefinitely and keep retrying. `mayPushToEbay` is the single
+    // place that decision lives — `PASSTHROUGH_NOT_REQUIRED` (the seller chose
+    // not to convert this order) still pushes, because there the raw number IS
+    // the intended result.
+    //
+    // The cost is real and deliberate: an order held past eBay's handling time
+    // accrues a late-shipment defect, and eventually an Item-Not-Received case.
+    // `ORDER_TRACKING_CONVERSION_HELD` raises that as a CRITICAL Action Center
+    // item so the seller can fix the cause (usually quota, ship-from address,
+    // or an expired Amazon session) rather than discovering it from a case.
+    if (!mayPushToEbay(conversion.outcome)) {
+      // The window no longer decides whether to give up — nothing gives up. It
+      // only decides how HARD to retry: hourly while a transient cause could
+      // still clear, then back to the normal shipped cadence so a permanently
+      // stuck order is not scraped every hour forever.
+      const retryFast = shouldDeferEbayPush({
+        retryable: conversion.outcome === ConversionOutcome.PASSTHROUGH_RETRYABLE,
         shippedDetectedAt: order.shipped_detected_at,
         now: new Date(),
         windowHours: DEFERRAL_WINDOW_HOURS,
-      })
-    ) {
-      this.logger.log(
-        `Order ${order.id}: tracking conversion is retryable and still inside the ` +
-          `${DEFERRAL_WINDOW_HOURS}h deferral window — holding the eBay push`,
+      });
+      this.logger.warn(
+        `Order ${order.id}: tracking conversion did not produce a converted number ` +
+          `(${conversion.outcome ?? 'unknown'}) — HOLDING the eBay push. The raw Amazon ` +
+          `tracking number is never sent when a conversion was expected.`,
       );
       return {
         pushed: false,
-        retryAt: new Date(Date.now() + DEFERRAL_RETRY_INTERVAL_HOURS * 3_600_000),
+        retryAt: retryFast
+          ? new Date(Date.now() + DEFERRAL_RETRY_INTERVAL_HOURS * 3_600_000)
+          : undefined,
       };
     }
 

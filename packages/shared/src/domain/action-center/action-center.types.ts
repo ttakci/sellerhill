@@ -108,6 +108,21 @@ export enum ActionCenterItemKey {
    * re-verifying the Amazon account, the others are ours to investigate.
    */
   ORDER_TRACKING_PROBLEM = 'order_tracking_problem',
+  /**
+   * Shipped on Amazon, but deliberately NOT marked shipped on eBay, because a
+   * conversion was expected and did not produce a number. The platform will
+   * never push the raw Amazon tracking number in that state — that would hand
+   * the buyer the supplier's own number, which is the one outcome the feature
+   * exists to prevent and which eBay's Fulfillment API could never take back.
+   *
+   * CRITICAL because money is at risk from the OTHER side: an order held past
+   * eBay's handling time earns a late-shipment defect and eventually an
+   * Item-Not-Received case. It is the deliberate cost of the rule above, and
+   * the seller has to be able to see and fix the cause (usually an exhausted
+   * conversion quota, an incomplete ship-from address, or an expired Amazon
+   * session) rather than learn about it from a case.
+   */
+  ORDER_TRACKING_CONVERSION_HELD = 'order_tracking_conversion_held',
 
   /** An eBay store's OAuth grant is revoked/errored — sync and publishing stop. */
   EBAY_ACCOUNT_DISCONNECTED = 'ebay_account_disconnected',

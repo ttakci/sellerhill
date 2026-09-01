@@ -78,6 +78,14 @@ import {
  */
 const AWAITING_PURCHASE_GRACE_HOURS = 12;
 
+/**
+ * How long an order may sit shipped-on-Amazon-but-held-from-eBay before it is
+ * raised. Matches `DEFERRAL_WINDOW_HOURS`, the period the tracking processor
+ * retries the conversion hourly: inside it, a held order is a normal retry in
+ * progress, and most transient causes clear. Past it, the hold is real.
+ */
+const HELD_GRACE_HOURS = 12;
+
 /** Lookback for "recent" signals. Older noise is history, not an action. */
 const RECENT_WINDOW_DAYS = 30;
 /** Job failures age out faster — a two-week-old failed batch is not today's work. */
@@ -332,6 +340,45 @@ export class ActionCenterService {
       severity: ActionCenterSeverity.WARNING,
       count: problemTotal,
       breakdown: buildBreakdown(problemTally),
+      actionPath: '/orders',
+    });
+
+    /*
+     * Shipped on Amazon, held back from eBay because the conversion failed.
+     *
+     * The platform refuses to push the raw Amazon number when a conversion was
+     * expected — that would expose the supplier permanently, since eBay's
+     * Fulfillment API has no update endpoint. The deliberate cost is that the
+     * order is not marked shipped at all, which after eBay's handling time
+     * becomes a late-shipment defect and eventually an Item-Not-Received case.
+     * That is why this is CRITICAL and not a warning: the seller has to see it.
+     *
+     * Detected structurally rather than from a status flag: `shipped_detected_at`
+     * is stamped on the first Amazon SHIPPED observation, and
+     * `ebay_tracking_pushed_at` only when a push actually succeeded. One set
+     * without the other IS the held state, so the count cannot drift from what
+     * the processor is really doing.
+     *
+     * The grace window keeps a normal in-flight retry from flashing as critical
+     * — the processor retries hourly for the first `HELD_GRACE_HOURS` before
+     * backing off, and most transient causes clear inside that.
+     */
+    const held = await this.db.query<CountRow>(
+      `SELECT COUNT(*) AS count
+         FROM orders o
+        WHERE o.user_id = $1
+          AND o.shipped_detected_at IS NOT NULL
+          AND o.ebay_tracking_pushed_at IS NULL
+          AND o.status <> $2
+          AND o.shipped_detected_at <= NOW() - ($3 || ' hours')::INTERVAL`,
+      [userId, OrderStatus.CANCELLED, String(HELD_GRACE_HOURS)],
+    );
+    items.push({
+      key: ActionCenterItemKey.ORDER_TRACKING_CONVERSION_HELD,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.CRITICAL,
+      count: toCount(held[0]?.count),
+      context: { hours: HELD_GRACE_HOURS },
       actionPath: '/orders',
     });
 

@@ -90,6 +90,12 @@
         "description_other": "Kargoya verilmiş {{count}} siparişte takip sağlayıcısı kaynaklı açık sorunlar var. Sorunlar çözülene kadar o siparişler, alıcılarınıza dönüştürülmüş numara yerine orijinal Amazon takip numaralarını gösteriyor.",
         "action": "Siparişleri görüntüle"
       },
+      "order_tracking_conversion_held": {
+        "title": "eBay'de kargolandı olarak işaretlenmeyen siparişler",
+        "description_one": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numarası dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numarasını alıcınıza asla göndermiyoruz. Sebebi giderdiğinizde sipariş otomatik olarak kargolanır; o zamana kadar geç kargo riski taşır.",
+        "description_other": "{{count}} sipariş {{hours}} saatten uzun süre önce Amazon'da kargoya verildi ama takip numaraları dönüştürülemediği için eBay'de kargolandı olarak işaretlenmedi. Orijinal Amazon takip numaralarını alıcılarınıza asla göndermiyoruz. Sebebi giderdiğinizde siparişler otomatik olarak kargolanır; o zamana kadar geç kargo riski taşırlar.",
+        "action": "Siparişleri görüntüle"
+      },
       "ebay_account_disconnected": {
         "title": "Bir eBay mağazasının bağlantısı koptu",
         "description_one": "{{count}} mağazanın yetkisi düştü. Yeniden bağlayana kadar o mağazada sipariş senkronu, fiyatlama ve yayınlama durdu.",

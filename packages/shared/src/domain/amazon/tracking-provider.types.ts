@@ -118,9 +118,54 @@ export interface AquilinePlanUsage {
  * produced.
  */
 export enum ConversionOutcome {
+  /** An AQUA number was issued (or reused) and persisted. Safe to push to eBay. */
   CONVERTED = 'converted',
-  PASSTHROUGH_TERMINAL = 'passthrough_terminal',
+  /**
+   * No conversion was ever going to happen for this order, and that is the
+   * SELLER'S OWN CHOICE — the provider is `local`, the carrier is outside their
+   * configured scope, or they turned conversion off for hand-linked orders.
+   * The raw Amazon number is the intended, honest result here, so it IS pushed
+   * to eBay.
+   */
+  PASSTHROUGH_NOT_REQUIRED = 'passthrough_not_required',
+  /**
+   * Conversion WAS expected and did not happen, permanently: suspended
+   * subscription, exhausted quota, missing API key, incomplete ship-from
+   * address, no usable profile, provider plan exhausted.
+   *
+   * The raw Amazon number MUST NOT reach eBay in this state. The seller pays
+   * to hide their supplier; handing the buyer the supplier's own tracking
+   * number is the one outcome the whole feature exists to prevent, and eBay's
+   * Fulfillment API has no update endpoint, so it could never be taken back.
+   * The order is held unshipped and surfaced in the Action Center instead.
+   */
+  PASSTHROUGH_FAILED = 'passthrough_failed',
+  /**
+   * Conversion was expected and failed for a reason that may resolve on its
+   * own (transport blip, "HTML not parsed yet"). Same push rule as
+   * `PASSTHROUGH_FAILED` — hold — but retried more aggressively first.
+   */
   PASSTHROUGH_RETRYABLE = 'passthrough_retryable',
+}
+
+/**
+ * Whether this outcome may be pushed to eBay.
+ *
+ * The single place that rule lives. `CONVERTED` carries a real AQUA number;
+ * `PASSTHROUGH_NOT_REQUIRED` carries the raw Amazon number the seller
+ * deliberately chose. Everything else is a failure that must never reach a
+ * buyer — see `PASSTHROUGH_FAILED`.
+ */
+export function mayPushToEbay(outcome: ConversionOutcome | undefined): boolean {
+  return (
+    outcome === ConversionOutcome.CONVERTED ||
+    outcome === ConversionOutcome.PASSTHROUGH_NOT_REQUIRED ||
+    // A converter that classifies nothing (the pure LocalTrackingConverter)
+    // is the honest pass-through by construction — there was no conversion to
+    // fail. Treating an absent outcome as "hold" would strand every order on
+    // a seller who never enabled conversion at all.
+    outcome === undefined
+  );
 }
 
 /**
