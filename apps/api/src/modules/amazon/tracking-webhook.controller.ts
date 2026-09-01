@@ -24,8 +24,16 @@ import {
 import { TrackingWebhookService } from './tracking-webhook.service';
 
 /** Only these headers are ever persisted by `captureRaw` — never cookies,
- *  auth, or anything else, even from a signature-verified request. */
-const CAPTURED_HEADER_NAMES = ['content-type', 'x-webhook-signature', 'x-event-type'] as const;
+ *  auth, or anything else, even from a signature-verified request.
+ *  `x-webhook-event` is the provider's confirmed header name (2026-08-26);
+ *  `x-event-type` was the guess it replaced and is kept so a capture taken
+ *  before the correction is still readable. */
+const CAPTURED_HEADER_NAMES = [
+  'content-type',
+  'x-webhook-signature',
+  'x-webhook-event',
+  'x-event-type',
+] as const;
 
 @ApiTags('tracking')
 @Controller({ path: 'tracking', version: '1' })

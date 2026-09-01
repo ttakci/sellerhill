@@ -172,56 +172,46 @@ export const AQUILINE_EBAY_CARRIER_CODE = 'AQUILINE';
 export const AQUILINE_TRACKING_NUMBER_PATTERN = /^AQ[A-Z]{1,4}\d{6,}[A-Z]{0,3}$/i;
 
 // ============================================================================
-// DEPRECATED ALIASES — V3 vocabulary kept for backwards compatibility
-// These are removed when the webhook receiver is rewritten (plan 2).
+// Webhook envelope — CONFIRMED BY THE PROVIDER (support, 2026-08-26)
+//
+// The published OpenAPI is 3.0.3, which has no `webhooks:` section, so this
+// shape can never appear in it. It was obtained from support directly and is
+// the ONLY authority for these fields; do not "correct" them against the
+// OpenAPI document, which is silent by construction.
+//
+// Delivery: up to 4 attempts (1s / 5s / 20s), 8s timeout per attempt, then the
+// provider gives up. So the receiver must be idempotent AND fast — an event
+// that takes longer than 8s to acknowledge is retried, and after four tries it
+// is lost for good.
 // ============================================================================
 
 /**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Webhook event names accepted by `POST /v3/webhooks/subscriptions`.
+ * One inbound webhook.
+ *
+ * Note what is NOT here: the `AQUA…YQ` number. The provider confirmed webhook
+ * payloads never carry it, so a receiver that needs it must read
+ * `GET /v1/profiles/{profileId}/orders/{orderId}` → `aquilineNumber`. That is
+ * also why `orderId` (the MARKETPLACE order id — the same Amazon order id we
+ * sent to `upsertOrders`, not our internal UUID) is the join key on our side,
+ * not the tracking number.
  */
-export enum TrackingWebhookEvent {
-  IN_TRANSIT = 'shipment.in_transit',
-  OUT_FOR_DELIVERY = 'shipment.out_for_delivery',
-  DELIVERED = 'shipment.delivered',
-  EXCEPTION = 'shipment.exception',
-  UPDATED = 'shipment.updated',
-  PICKUP_UPDATED = 'pickup.updated',
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Whether the webhook carries new timeline entries or only a status move.
- */
-export enum TrackingWebhookChangeType {
-  EVENT_APPEND = 'event_append',
-  STATUS_CHANGE = 'status_change',
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Response body of `GET /v3/tracking/{trackingNumber}`.
- */
-export interface TrackingProviderStatusDto {
-  number: string;
-  status: string;
-  oriCountry?: string | null;
-  destCountry?: string | null;
-  events?: Array<{ content: string; location?: string | null; time: string }>;
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Webhook envelope delivered to our receiver.
- */
-export interface TrackingWebhookPayload {
-  type: string;
-  occurredAt: string;
+export interface AquilineWebhookPayload {
+  /** One of `AquilineWebhookEvent`, but typed wide — the provider may add events. */
+  event: string;
+  /** ISO 8601. */
+  createdAt: string;
   data: {
-    trackingNumber: string;
-    status?: string | null;
-    statusCode?: string | null;
-    changeType?: string | null;
-    newEvents?: unknown[];
+    /** Provider profile id, i.e. our `{prefix}-{userId}-{marketplace}`. */
+    profileId: string;
+    /** Marketplace order id — matches `orders.amazon_order_id`. */
+    orderId: string;
+    /** `applied` | `accepted` | `rejected` on the `tracking.html.*` events. */
+    outcome?: string | null;
+    /** Present on a problem, and on `tracking.html.accepted` when degraded. */
+    problemCode?: string | null;
+    /** The code that was just resolved — `tracking.problem.cleared` only. */
+    previousProblemCode?: string | null;
+    /** Provider's human-readable explanation; seller-facing text is ours, not this. */
+    message?: string | null;
   };
 }

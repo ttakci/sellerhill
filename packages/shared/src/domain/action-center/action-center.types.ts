@@ -98,6 +98,16 @@ export enum ActionCenterItemKey {
    * profit can never be resolved for it. Fixed by importing the listing.
    */
   ORDER_UNTRACKED = 'order_untracked',
+  /**
+   * The tracking-conversion provider reported a problem on a shipped order.
+   * This matters more than its wording suggests: while it stands, the
+   * conversion silently falls back to the raw Amazon number, so the supplier
+   * the seller pays to hide is exposed on every affected shipment and nothing
+   * else in the flow says so. Carries a breakdown by
+   * {@link AquilineProblemCode} — `amazon_session_expired` is fixed by
+   * re-verifying the Amazon account, the others are ours to investigate.
+   */
+  ORDER_TRACKING_PROBLEM = 'order_tracking_problem',
 
   /** An eBay store's OAuth grant is revoked/errored — sync and publishing stop. */
   EBAY_ACCOUNT_DISCONNECTED = 'ebay_account_disconnected',

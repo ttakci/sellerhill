@@ -69,6 +69,11 @@ const BREAKDOWN_NAMESPACE: Partial<Record<ActionCenterItemKey, string>> = {
   [ActionCenterItemKey.ORDER_FULFILLMENT_BLOCKED]: 'orders:orders.autoFulfill.reason',
   [ActionCenterItemKey.LISTING_JOB_FAILURES]: 'listings:listings.jobs.failure',
   [ActionCenterItemKey.AMAZON_ACCOUNT_NEEDS_ATTENTION]: 'actionCenter.reasons.amazonAccount',
+  // Not reusing `orders:orders.tracking.problem` even though it covers the same
+  // eight codes: those are camelCase full sentences written for the order
+  // detail page, while a breakdown chip needs a short snake_case-keyed label.
+  // Same reason the Amazon account statuses got their own set.
+  [ActionCenterItemKey.ORDER_TRACKING_PROBLEM]: 'actionCenter.reasons.trackingProblem',
 };
 
 /**

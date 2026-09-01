@@ -84,6 +84,12 @@
         "description_other": "Son {{days}} gündeki {{count}} sipariş, SellerHill ilanlarına bağlı olmayan eBay ürünlerinden geldi; maliyetleri ve kârları hiçbir zaman hesaplanamaz. Sonraki satışları takip etmek için o ilanları içe aktarın.",
         "action": "İlanları içe aktar"
       },
+      "order_tracking_problem": {
+        "title": "Takip dönüşümünde sorun var",
+        "description_one": "Kargoya verilmiş {{count}} siparişte takip sağlayıcısı kaynaklı açık bir sorun var. Sorun çözülene kadar o sipariş, alıcınıza dönüştürülmüş numara yerine orijinal Amazon takip numarasını gösteriyor.",
+        "description_other": "Kargoya verilmiş {{count}} siparişte takip sağlayıcısı kaynaklı açık sorunlar var. Sorunlar çözülene kadar o siparişler, alıcılarınıza dönüştürülmüş numara yerine orijinal Amazon takip numaralarını gösteriyor.",
+        "action": "Siparişleri görüntüle"
+      },
       "ebay_account_disconnected": {
         "title": "Bir eBay mağazasının bağlantısı koptu",
         "description_one": "{{count}} mağazanın yetkisi düştü. Yeniden bağlayana kadar o mağazada sipariş senkronu, fiyatlama ve yayınlama durdu.",
@@ -182,6 +188,16 @@
         "needs_reauth": "Yeniden kimlik doğrulaması gerekiyor",
         "invalid": "Geçersiz kimlik bilgileri",
         "locked": "Amazon tarafından kilitlendi"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Yanlış Amazon sayfası",
+        "amazon_session_expired": "Amazon oturumu sona erdi",
+        "tracking_url_mismatch": "Takip bağlantısı uyuşmuyor",
+        "needs_tracking_upload": "Kargo bilgisi bekleniyor",
+        "update_not_applied": "Güncelleme henüz uygulanmadı",
+        "assign_validation": "Sağlayıcı tarafından reddedildi",
+        "shipment_exception": "Kargo firması istisnası",
+        "tracking_update_unavailable": "Sağlayıcı şu an kullanılamıyor"
       }
     }
   }

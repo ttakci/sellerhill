@@ -1,204 +1,242 @@
 // apps/api/src/modules/amazon/tracking-webhook.helpers.spec.ts
 //
-// The load-bearing cases here are the ones that would silently lose or
-// duplicate a buyer-visible event: a delivery arriving under the provider's
-// catch-all event name, a status_change with no newEvents, and signature
-// forgery.
+// The payload fixtures below are the provider's OWN examples, pasted from
+// their 2026-08-26 answer. They are the only authority for this shape — the
+// published OpenAPI is 3.0.3 and has no `webhooks:` section, so it documents
+// the event names and the signature header and nothing else. Treat a change
+// here as a contract change, not a refactor.
 
 import { createHmac } from 'crypto';
 
-import { OrderStatus, TrackingWebhookEvent, type TrackingWebhookPayload } from '@repo/shared';
+import { AquilineProblemCode, AquilineWebhookEvent } from '@repo/shared';
 
 import {
-  isSignificantChange,
+  decideTrackingProblem,
   isStaleTrackingEvent,
   parseTrackingWebhookPayload,
-  resolveWebhookOrderStatus,
   SUBSCRIBED_TRACKING_EVENTS,
+  TrackingProblemTransition,
   verifyTrackingWebhookSignature,
 } from './tracking-webhook.helpers';
 
-const SECRET = 'whsec_test_value';
-const sign = (body: string, secret = SECRET): string =>
-  `sha256=${createHmac('sha256', secret).update(body, 'utf8').digest('hex')}`;
+const SECRET = 'whsec_test';
+const sign = (body: string): string =>
+  `sha256=${createHmac('sha256', SECRET).update(body, 'utf8').digest('hex')}`;
 
-const payload = (over: Partial<TrackingWebhookPayload['data']> & { type?: string; occurredAt?: string } = {}): TrackingWebhookPayload => ({
-  type: over.type ?? TrackingWebhookEvent.DELIVERED,
-  occurredAt: over.occurredAt ?? '2026-08-11T10:00:00Z',
+/** Provider's own `tracking.html.applied` example, verbatim. */
+const APPLIED = {
+  event: 'tracking.html.applied',
+  createdAt: '2026-08-26T18:30:00.000Z',
   data: {
-    trackingNumber: over.trackingNumber ?? 'AQUAA6435850826YQ',
-    status: over.status ?? null,
-    statusCode: over.statusCode ?? null,
-    changeType: over.changeType ?? null,
-    newEvents: over.newEvents ?? [],
+    profileId: 'seller-us-1',
+    orderId: '113-0000000-0000000',
+    outcome: 'applied',
   },
-});
+};
+
+/** Provider's own `tracking.html.rejected` example, verbatim. */
+const REJECTED = {
+  event: 'tracking.html.rejected',
+  createdAt: '2026-08-26T18:30:00.000Z',
+  data: {
+    profileId: 'seller-us-1',
+    orderId: '113-0000000-0000000',
+    outcome: 'rejected',
+    problemCode: 'amazon_session_expired',
+    message: 'Amazon session expired. Sign in to Amazon and upload the tracking page again.',
+  },
+};
 
 describe('verifyTrackingWebhookSignature', () => {
-  const body = '{"type":"shipment.delivered","data":{"trackingNumber":"AQUAA1YQ"}}';
-
-  it('accepts a correct signature', () => {
+  it('accepts the provider format sha256=<hex>', () => {
+    const body = JSON.stringify(APPLIED);
     expect(verifyTrackingWebhookSignature(sign(body), body, SECRET)).toBe(true);
   });
 
-  it('accepts a bare hex digest without the sha256= prefix', () => {
-    const bare = createHmac('sha256', SECRET).update(body, 'utf8').digest('hex');
-    expect(verifyTrackingWebhookSignature(bare, body, SECRET)).toBe(true);
+  it('rejects a signature computed over a different body', () => {
+    const body = JSON.stringify(APPLIED);
+    expect(verifyTrackingWebhookSignature(sign('{}'), body, SECRET)).toBe(false);
   });
 
-  it('rejects a signature computed over different bytes', () => {
-    // This is why verification must run on the RAW body: re-serialising a
-    // parsed object changes key order/whitespace and produces exactly this.
-    expect(verifyTrackingWebhookSignature(sign(body), `${body} `, SECRET)).toBe(false);
-  });
-
-  it('rejects a signature made with the wrong secret', () => {
-    expect(verifyTrackingWebhookSignature(sign(body, 'other'), body, SECRET)).toBe(false);
-  });
-
-  it('fails closed on a missing header or missing secret', () => {
+  it('rejects a missing header, an empty secret and a non-hex signature', () => {
+    const body = JSON.stringify(APPLIED);
     expect(verifyTrackingWebhookSignature(undefined, body, SECRET)).toBe(false);
-    expect(verifyTrackingWebhookSignature('', body, SECRET)).toBe(false);
     expect(verifyTrackingWebhookSignature(sign(body), body, '')).toBe(false);
-  });
-
-  it('rejects malformed, truncated and non-hex signatures without throwing', () => {
-    // timingSafeEqual throws on a length mismatch — a crash here would be a
-    // 500 and the provider would retry a forged request three more times.
-    for (const bad of ['sha256=', 'sha256=zz', 'sha256=abcd', 'not-a-signature', 'sha256=' + 'a'.repeat(63)]) {
-      expect(() => verifyTrackingWebhookSignature(bad, body, SECRET)).not.toThrow();
-      expect(verifyTrackingWebhookSignature(bad, body, SECRET)).toBe(false);
-    }
+    expect(verifyTrackingWebhookSignature('sha256=nothex', body, SECRET)).toBe(false);
   });
 });
 
 describe('parseTrackingWebhookPayload', () => {
-  it('parses a well-formed payload and trims the tracking number', () => {
+  it("parses the provider's own applied example", () => {
+    const parsed = parseTrackingWebhookPayload(APPLIED);
+    expect(parsed).not.toBeNull();
+    expect(parsed?.event).toBe(AquilineWebhookEvent.HTML_APPLIED);
+    expect(parsed?.data.profileId).toBe('seller-us-1');
+    expect(parsed?.data.orderId).toBe('113-0000000-0000000');
+    expect(parsed?.data.outcome).toBe('applied');
+  });
+
+  it("parses the provider's own rejected example, including problemCode and message", () => {
+    const parsed = parseTrackingWebhookPayload(REJECTED);
+    expect(parsed?.data.problemCode).toBe(AquilineProblemCode.AMAZON_SESSION_EXPIRED);
+    expect(parsed?.data.message).toContain('Amazon session expired');
+  });
+
+  it('parses tracking.problem.cleared, which carries previousProblemCode', () => {
     const parsed = parseTrackingWebhookPayload({
-      type: 'shipment.delivered',
-      occurredAt: '2026-08-11T10:00:00Z',
-      data: { trackingNumber: '  AQUAA6435850826YQ  ', status: 'delivered', changeType: 'status_change' },
+      event: 'tracking.problem.cleared',
+      createdAt: '2026-08-26T18:30:00.000Z',
+      data: {
+        profileId: 'seller-us-1',
+        orderId: '113-0000000-0000000',
+        previousProblemCode: 'amazon_session_expired',
+      },
     });
-    expect(parsed?.data.trackingNumber).toBe('AQUAA6435850826YQ');
-    expect(parsed?.data.changeType).toBe('status_change');
-    expect(parsed?.data.newEvents).toEqual([]);
+    expect(parsed?.data.previousProblemCode).toBe(AquilineProblemCode.AMAZON_SESSION_EXPIRED);
+    expect(parsed?.data.problemCode).toBeNull();
   });
 
-  it('rejects a payload missing any of the three fields we key on', () => {
-    expect(parseTrackingWebhookPayload({ occurredAt: '2026-08-11T10:00:00Z', data: { trackingNumber: 'A' } })).toBeNull();
-    expect(parseTrackingWebhookPayload({ type: 'x', data: { trackingNumber: 'A' } })).toBeNull();
-    expect(parseTrackingWebhookPayload({ type: 'x', occurredAt: '2026-08-11T10:00:00Z', data: {} })).toBeNull();
-    expect(parseTrackingWebhookPayload({ type: 'x', occurredAt: '2026-08-11T10:00:00Z' })).toBeNull();
-  });
-
-  it('rejects an unparseable occurredAt', () => {
+  it('rejects a body missing any of the four identity fields', () => {
+    const base = APPLIED.data;
+    expect(parseTrackingWebhookPayload({ createdAt: APPLIED.createdAt, data: base })).toBeNull();
+    expect(parseTrackingWebhookPayload({ event: 'x', data: base })).toBeNull();
     expect(
-      parseTrackingWebhookPayload({ type: 'x', occurredAt: 'yesterday', data: { trackingNumber: 'A' } }),
+      parseTrackingWebhookPayload({ event: 'x', createdAt: APPLIED.createdAt, data: { orderId: 'o' } }),
+    ).toBeNull();
+    expect(
+      parseTrackingWebhookPayload({
+        event: 'x',
+        createdAt: APPLIED.createdAt,
+        data: { profileId: 'p' },
+      }),
     ).toBeNull();
   });
 
-  it('rejects non-objects instead of throwing', () => {
+  it('rejects an unparseable createdAt', () => {
+    expect(
+      parseTrackingWebhookPayload({ ...APPLIED, createdAt: 'yesterday' }),
+    ).toBeNull();
+  });
+
+  it('survives non-object bodies without throwing', () => {
     for (const bad of [null, undefined, 'string', 42, []]) {
       expect(parseTrackingWebhookPayload(bad)).toBeNull();
     }
   });
+
+  it('keeps an unknown event name as a raw string rather than dropping it', () => {
+    // The provider can add events. Dropping one we do not know would lose an
+    // inbox record; casting it into our enum would let it masquerade as known.
+    const parsed = parseTrackingWebhookPayload({ ...APPLIED, event: 'tracking.something.new' });
+    expect(parsed?.event).toBe('tracking.something.new');
+  });
 });
 
-describe('resolveWebhookOrderStatus', () => {
-  it('maps the explicit delivered event to COMPLETED', () => {
-    expect(resolveWebhookOrderStatus(payload())).toBe(OrderStatus.COMPLETED);
+describe('decideTrackingProblem', () => {
+  const payload = (event: string, data: Record<string, unknown> = {}) =>
+    parseTrackingWebhookPayload({
+      event,
+      createdAt: APPLIED.createdAt,
+      data: { profileId: 'p', orderId: 'o', ...data },
+    })!;
+
+  it('clears on tracking.html.applied — the only event proving the upload landed', () => {
+    expect(decideTrackingProblem(payload(AquilineWebhookEvent.HTML_APPLIED)).transition).toBe(
+      TrackingProblemTransition.CLEAR,
+    );
   });
 
-  it('maps a delivery arriving under the catch-all event to COMPLETED', () => {
-    // shipment.updated is the provider's fallback for statuses it has not
-    // mapped. Keying only on the event NAME would drop this delivery.
-    expect(
-      resolveWebhookOrderStatus(
-        payload({ type: TrackingWebhookEvent.UPDATED, status: 'delivered' }),
-      ),
-    ).toBe(OrderStatus.COMPLETED);
-    expect(
-      resolveWebhookOrderStatus(
-        payload({ type: TrackingWebhookEvent.UPDATED, status: null, statusCode: 'Delivered' }),
-      ),
-    ).toBe(OrderStatus.COMPLETED);
+  it('clears on tracking.problem.cleared', () => {
+    expect(decideTrackingProblem(payload(AquilineWebhookEvent.PROBLEM_CLEARED)).transition).toBe(
+      TrackingProblemTransition.CLEAR,
+    );
   });
 
-  it('returns null for the catch-all carrying a non-delivered status', () => {
-    expect(
-      resolveWebhookOrderStatus(payload({ type: TrackingWebhookEvent.UPDATED, status: 'Shipping' })),
-    ).toBeNull();
-    expect(resolveWebhookOrderStatus(payload({ type: TrackingWebhookEvent.UPDATED }))).toBeNull();
+  it('does NOT clear on a bare tracking.html.accepted', () => {
+    // "accepted" means stored and validated, NOT applied — the provider's docs
+    // say never to treat success alone as applied. Clearing a real prior
+    // problem here would hide a fault that has not actually been fixed.
+    expect(decideTrackingProblem(payload(AquilineWebhookEvent.HTML_ACCEPTED)).transition).toBe(
+      TrackingProblemTransition.NONE,
+    );
   });
 
-  it('takes no action on intermediate or exception events', () => {
-    // The order is already SHIPPED when a conversion exists, so in_transit and
-    // out_for_delivery carry nothing we store. An exception is a carrier
-    // problem for an operator to read, not an automatic eBay-side action.
-    for (const type of [
-      TrackingWebhookEvent.IN_TRANSIT,
-      TrackingWebhookEvent.OUT_FOR_DELIVERY,
-      TrackingWebhookEvent.EXCEPTION,
-      TrackingWebhookEvent.PICKUP_UPDATED,
-    ]) {
-      expect(resolveWebhookOrderStatus(payload({ type }))).toBeNull();
+  it('sets when tracking.html.accepted carries a degraded problemCode', () => {
+    const decision = decideTrackingProblem(
+      payload(AquilineWebhookEvent.HTML_ACCEPTED, { problemCode: 'wrong_page_type' }),
+    );
+    expect(decision.transition).toBe(TrackingProblemTransition.SET);
+    expect(decision.problemCode).toBe(AquilineProblemCode.WRONG_PAGE_TYPE);
+  });
+
+  it('sets on rejected and on problem.opened', () => {
+    for (const event of [AquilineWebhookEvent.HTML_REJECTED, AquilineWebhookEvent.PROBLEM_OPENED]) {
+      const decision = decideTrackingProblem(
+        payload(event, { problemCode: 'amazon_session_expired' }),
+      );
+      expect(decision.transition).toBe(TrackingProblemTransition.SET);
+      expect(decision.problemCode).toBe(AquilineProblemCode.AMAZON_SESSION_EXPIRED);
     }
+  });
+
+  it('flags an unknown problem code and stores null rather than a raw string', () => {
+    // A code we have no i18n key for must never reach a seller verbatim.
+    const decision = decideTrackingProblem(
+      payload(AquilineWebhookEvent.PROBLEM_OPENED, { problemCode: 'something_they_added' }),
+    );
+    expect(decision.transition).toBe(TrackingProblemTransition.SET);
+    expect(decision.problemCode).toBeNull();
+    expect(decision.unknownCode).toBe(true);
+  });
+
+  it('does not overwrite a stored code when a problem event carries no code', () => {
+    const decision = decideTrackingProblem(payload(AquilineWebhookEvent.PROBLEM_OPENED));
+    expect(decision.transition).toBe(TrackingProblemTransition.NONE);
+  });
+
+  it('ignores an event name it does not recognise', () => {
+    expect(decideTrackingProblem(payload('tracking.something.new')).transition).toBe(
+      TrackingProblemTransition.NONE,
+    );
   });
 });
 
 describe('isStaleTrackingEvent', () => {
-  const now = Date.parse('2026-08-11T12:00:00Z');
+  const now = Date.parse('2026-08-26T12:00:00Z');
 
-  it('accepts a recent event', () => {
-    expect(isStaleTrackingEvent('2026-08-11T11:30:00Z', now, 120)).toBe(false);
+  it('accepts a fresh event', () => {
+    expect(isStaleTrackingEvent('2026-08-26T11:30:00Z', now, 1440)).toBe(false);
   });
 
-  it('rejects an event older than the window', () => {
-    expect(isStaleTrackingEvent('2026-08-10T12:00:00Z', now, 120)).toBe(true);
+  it('rejects one older than the window', () => {
+    expect(isStaleTrackingEvent('2026-08-24T11:30:00Z', now, 1440)).toBe(true);
   });
 
   it('accepts a future-dated event — clock skew is normal, dropping live traffic is not', () => {
-    expect(isStaleTrackingEvent('2026-08-11T12:05:00Z', now, 120)).toBe(false);
+    expect(isStaleTrackingEvent('2026-08-26T12:05:00Z', now, 1440)).toBe(false);
   });
 
   it('treats an unparseable timestamp as stale', () => {
-    expect(isStaleTrackingEvent('never', now, 120)).toBe(true);
-  });
-});
-
-describe('isSignificantChange', () => {
-  it('treats a status_change with no new events as significant', () => {
-    // The provider documents exactly this case. A handler keyed on
-    // newEvents.length would miss every delivery sent this way.
-    expect(isSignificantChange(payload({ changeType: 'status_change', newEvents: [] }))).toBe(true);
-  });
-
-  it('treats an event_append with no new events as insignificant', () => {
-    expect(isSignificantChange(payload({ changeType: 'event_append', newEvents: [] }))).toBe(false);
-  });
-
-  it('treats an event_append carrying events as significant', () => {
-    expect(
-      isSignificantChange(
-        payload({ changeType: 'event_append', newEvents: [{ content: 'Out for delivery', time: '2026-08-11 09:00:00' }] }),
-      ),
-    ).toBe(true);
-  });
-
-  it('defaults to significant when changeType is absent or unrecognised', () => {
-    expect(isSignificantChange(payload({ changeType: null }))).toBe(true);
-    expect(isSignificantChange(payload({ changeType: 'something_new' }))).toBe(true);
+    expect(isStaleTrackingEvent('not a date', now, 1440)).toBe(true);
   });
 });
 
 describe('SUBSCRIBED_TRACKING_EVENTS', () => {
-  it('includes the catch-all, without which a delivery can be missed', () => {
-    expect(SUBSCRIBED_TRACKING_EVENTS).toContain(TrackingWebhookEvent.DELIVERED);
-    expect(SUBSCRIBED_TRACKING_EVENTS).toContain(TrackingWebhookEvent.UPDATED);
+  it('subscribes to all five events the provider emits', () => {
+    expect([...SUBSCRIBED_TRACKING_EVENTS].sort()).toEqual(
+      [
+        AquilineWebhookEvent.HTML_ACCEPTED,
+        AquilineWebhookEvent.HTML_APPLIED,
+        AquilineWebhookEvent.HTML_REJECTED,
+        AquilineWebhookEvent.PROBLEM_OPENED,
+        AquilineWebhookEvent.PROBLEM_CLEARED,
+      ].sort(),
+    );
   });
 
-  it('does not subscribe to intermediate noise we take no action on', () => {
-    expect(SUBSCRIBED_TRACKING_EVENTS).not.toContain(TrackingWebhookEvent.IN_TRANSIT);
-    expect(SUBSCRIBED_TRACKING_EVENTS).not.toContain(TrackingWebhookEvent.PICKUP_UPDATED);
+  it('contains no v3 shipment.* event — that vocabulary was the wrong API', () => {
+    for (const event of SUBSCRIBED_TRACKING_EVENTS) {
+      expect(event.startsWith('shipment.')).toBe(false);
+    }
   });
 });

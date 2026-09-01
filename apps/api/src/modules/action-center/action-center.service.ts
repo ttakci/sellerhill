@@ -290,6 +290,51 @@ export class ActionCenterService {
       actionPath: '/listings?drawer=import',
     });
 
+    /*
+     * The tracking-conversion provider has an open problem on a shipped order.
+     *
+     * WARNING rather than INFO because the consequence is invisible everywhere
+     * else: while a problem stands, the conversion falls back to the raw
+     * Amazon number, so the supplier the seller pays to hide is exposed on
+     * that shipment and nothing errors. Only the provider knows, and only
+     * through this column.
+     *
+     * The breakdown is what makes it actionable — `amazon_session_expired` is
+     * fixed by re-verifying the Amazon account, while `wrong_page_type` or
+     * `tracking_url_mismatch` are defects on our side, not the seller's. A
+     * bare count would send every seller to support.
+     *
+     * Self-clearing: the provider sends `tracking.problem.cleared` (or a
+     * successful `tracking.html.applied`) and the column is nulled, so this
+     * count falls on its own once the cause is fixed.
+     */
+    const trackingProblems = await this.db.query<{ code: string | null; count: string }>(
+      `SELECT o.tracking_problem_code AS code, COUNT(*) AS count
+         FROM orders o
+        WHERE o.user_id = $1
+          AND o.tracking_problem_code IS NOT NULL
+          AND o.status <> $2
+        GROUP BY o.tracking_problem_code`,
+      [userId, OrderStatus.CANCELLED],
+    );
+    const problemTally: Record<string, number> = {};
+    let problemTotal = 0;
+    for (const row of trackingProblems) {
+      const count = toCount(row.count);
+      problemTotal += count;
+      if (row.code) {
+        problemTally[row.code] = (problemTally[row.code] ?? 0) + count;
+      }
+    }
+    items.push({
+      key: ActionCenterItemKey.ORDER_TRACKING_PROBLEM,
+      group: ActionCenterGroup.ORDERS,
+      severity: ActionCenterSeverity.WARNING,
+      count: problemTotal,
+      breakdown: buildBreakdown(problemTally),
+      actionPath: '/orders',
+    });
+
     return items;
   }
 
