@@ -45,6 +45,11 @@ export interface StoreSettingsDrawerComponentProps {
   checkBlacklist: boolean;
   amazonTaxRate: number;
   autoFulfillEnabled: boolean;
+  /** Whether tracking numbers are converted at all. Maps to
+   *  `tracking_conversion_provider` being `aquiline` rather than `local` —
+   *  presented as one on/off choice because there is only ever one external
+   *  provider, and naming vendors asks the seller to pick an implementation. */
+  trackingConversionEnabled: boolean;
   trackingConversionScope: TrackingConversionScope;
   trackingConvertManualOrders: boolean;
   buyerMessagingConfig: BuyerMessagingConfig;
@@ -64,6 +69,7 @@ export interface StoreSettingsDrawerComponentProps {
   onToggleCheckBlacklist: (checked: boolean) => void;
   onAmazonTaxRateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAutoFulfillEnabledChange: (checked: boolean) => void;
+  onTrackingConversionEnabledChange: (enabled: boolean) => void;
   onTrackingConversionScopeChange: (scope: TrackingConversionScope) => void;
   onTrackingConvertManualOrdersChange: (checked: boolean) => void;
 }

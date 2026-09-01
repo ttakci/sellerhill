@@ -7,7 +7,7 @@
 // the authentication, and it is verified against the RAW request bytes before
 // the body is parsed.
 
-import { Controller, HttpCode, Logger, Post, Req } from '@nestjs/common';
+import { Controller, HttpCode, HttpException, Logger, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PlatformSettingKey } from '@repo/shared';
@@ -129,10 +129,29 @@ export class TrackingWebhookController {
   }
 }
 
-function httpError(message: string, status: number): Error {
-  const err = new Error(message);
-  (err as Error & { status?: number }).status = status;
-  return err;
+/**
+ * Reject a delivery with a real HTTP status.
+ *
+ * MUST be `HttpException`. This previously built a plain `Error` and hung a
+ * `.status` property on it, which the app's global exception filter does not
+ * read — so every rejection surfaced as a 500 "Internal server error" instead
+ * of the intended 401/400. Verified live 2026-09-01: an unsigned POST to the
+ * receiver returned 500.
+ *
+ * Two things made that worse than a cosmetic status mismatch. A 500 is logged
+ * as an unhandled internal fault, so a hostile or misconfigured caller looked
+ * identical to a real crash in the error log — the one place an operator would
+ * look to notice either. And it hid the distinction the codes carry: 401 means
+ * "your signature did not verify", 400 means "we could not read this body",
+ * and the provider's own retry budget (4 attempts, then dropped forever) is
+ * spent identically on both while nothing says which happened.
+ *
+ * The message is an i18n key, matching `rethrowBillingError`'s contract in
+ * `billing.controller.ts` — the same pattern this receiver was always meant to
+ * mirror.
+ */
+function httpError(messageKey: string, status: number): HttpException {
+  return new HttpException(messageKey, status);
 }
 
 /**

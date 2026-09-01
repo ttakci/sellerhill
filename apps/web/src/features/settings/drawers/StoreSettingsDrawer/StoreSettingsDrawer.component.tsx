@@ -123,10 +123,26 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               isDisabled={!props.autoFulfillEnabled}
             />
             <InfoMessage>{t('storeSettings:storeSettings.amazonTaxRateDesc')}</InfoMessage>
+            <ToggleRow>
+              <Text variant="body-sm">
+                {t('storeSettings:storeSettings.trackingConversionEnabled')}
+              </Text>
+              <Toggle
+                checked={props.trackingConversionEnabled}
+                onChange={props.onTrackingConversionEnabledChange}
+                disabled={!props.isShipFromAddressComplete}
+              />
+            </ToggleRow>
+            <InfoMessage>
+              {props.isShipFromAddressComplete
+                ? t('storeSettings:storeSettings.trackingConversionEnabledHint')
+                : t('storeSettings:storeSettings.trackingConversionNeedsAddress')}
+            </InfoMessage>
             <ModernSelect
               name="trackingConversionScope"
               label={t('storeSettings:storeSettings.trackingConversionScope')}
               value={props.trackingConversionScope}
+              isDisabled={!props.trackingConversionEnabled}
               options={[
                 {
                   value: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
@@ -147,6 +163,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               <Toggle
                 checked={props.trackingConvertManualOrders}
                 onChange={props.onTrackingConvertManualOrdersChange}
+                disabled={!props.trackingConversionEnabled}
               />
             </ToggleRow>
             <InfoMessage>

@@ -77,6 +77,14 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   const [checkBlacklist, setCheckBlacklist] = useState(config?.checkBlacklist ?? true);
   const [amazonTaxRate, setAmazonTaxRate] = useState(config?.amazonTaxRate ?? 0);
   const [autoFulfillEnabled, setAutoFulfillEnabled] = useState(config?.autoFulfillEnabled ?? false);
+  // The provider is stored as an enum but presented as a single on/off choice:
+  // `local` (send the Amazon number as-is) vs `aquiline` (convert it). Showing
+  // the seller two vendor names would ask them to pick an implementation
+  // instead of a behaviour, and there is only ever one external provider.
+  const [trackingConversionEnabled, setTrackingConversionEnabled] = useState(
+    (config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL) !==
+      TrackingConversionProvider.LOCAL
+  );
   const [trackingConversionScope, setTrackingConversionScope] = useState<TrackingConversionScope>(
     config?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
   );
@@ -117,6 +125,10 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setCheckBlacklist(next?.checkBlacklist ?? true);
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
+      setTrackingConversionEnabled(
+        (next?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL) !==
+          TrackingConversionProvider.LOCAL
+      );
       setTrackingConversionScope(
         next?.trackingConversionScope ?? TrackingConversionScope.AMAZON_LOGISTICS_ONLY
       );
@@ -150,7 +162,15 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
         checkBlacklist,
         amazonTaxRate,
         autoFulfillEnabled,
-        trackingConversionProvider: config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL,
+        // Refuse to persist `aquiline` without a complete ship-from address:
+        // the profile service requires street/city/country and returns null
+        // without them, so the conversion would fail on every order and the
+        // seller would see nothing but held shipments. The toggle is disabled
+        // in that state too — this is the server-bound half of the same rule.
+        trackingConversionProvider:
+          trackingConversionEnabled && isShipFromAddressComplete
+            ? TrackingConversionProvider.AQUILINE
+            : TrackingConversionProvider.LOCAL,
         trackingConversionScope,
         trackingConvertManualOrders,
       }).unwrap(),
@@ -219,6 +239,8 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       checkBlacklist={checkBlacklist}
       amazonTaxRate={amazonTaxRate}
       autoFulfillEnabled={autoFulfillEnabled}
+      trackingConversionEnabled={trackingConversionEnabled}
+      onTrackingConversionEnabledChange={setTrackingConversionEnabled}
       trackingConversionScope={trackingConversionScope}
       onTrackingConversionScopeChange={setTrackingConversionScope}
       trackingConvertManualOrders={trackingConvertManualOrders}

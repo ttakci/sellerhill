@@ -89,6 +89,9 @@
         "deleteConfirmDescription": "This will permanently delete \"{{name}}\". If a messaging event is currently using it, that event will stop sending until you pick another template."
       }
     },
+    "trackingConversionEnabled": "Hide my supplier's tracking numbers",
+    "trackingConversionEnabledHint": "Your buyer sees a new tracking number issued by our tracking partner instead of the original Amazon one, so nothing on eBay points back to your supplier. If a number cannot be converted we never fall back to the Amazon one — the order is held and shown to you in the Action Center instead.",
+    "trackingConversionNeedsAddress": "Add your complete ship-from address above to turn this on. Our tracking partner needs it to register shipments with carriers, and it is the return address your buyer sees.",
     "trackingConversionScope": "Convert which carriers",
     "trackingConversionScopeAll": "All carriers",
     "trackingConversionScopeAmazonOnly": "Amazon Logistics only (TBA)",

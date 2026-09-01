@@ -89,6 +89,9 @@
         "deleteConfirmDescription": "\"{{name}}\" kalıcı olarak silinecek. Bu şablon aktif bir mesajlaşma olayında kullanılıyorsa, siz başka bir şablon seçene kadar o olay için mesaj gönderilmeyecek."
       }
     },
+    "trackingConversionEnabled": "Tedarikçimin takip numaralarını gizle",
+    "trackingConversionEnabledHint": "Alıcınız, orijinal Amazon takip numarası yerine takip iş ortağımızın verdiği yeni bir numara görür; böylece eBay'de tedarikçinize işaret eden hiçbir şey kalmaz. Bir numara dönüştürülemezse Amazon numarasına asla geri dönmeyiz — sipariş bekletilir ve size Aksiyon Merkezi'nde gösterilir.",
+    "trackingConversionNeedsAddress": "Bunu açmak için yukarıdaki gönderici adresinizi eksiksiz doldurun. Takip iş ortağımızın gönderileri kargo firmalarına kaydetmek için buna ihtiyacı var ve bu adres alıcınızın gördüğü iade adresidir.",
     "trackingConversionScope": "Hangi kargolar dönüştürülsün",
     "trackingConversionScopeAll": "Tüm kargo firmaları",
     "trackingConversionScopeAmazonOnly": "Sadece Amazon Logistics (TBA)",
