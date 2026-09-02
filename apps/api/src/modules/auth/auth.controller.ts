@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Ip,
   Patch,
   Post,
   Req,
@@ -21,16 +22,25 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { AuthResponse, GenericSuccessResponse, RegistrationResponse, UserDto } from '@repo/shared';
+import { Throttle } from '@nestjs/throttler';
+import type {
+  AuthResponse,
+  GenericSuccessResponse,
+  PasswordResetRequestResponse,
+  RegistrationResponse,
+  UserDto,
+} from '@repo/shared';
 import type { Request as ExpressRequest, Response } from 'express';
 
 import { clearRefreshTokenCookie, REFRESH_COOKIE_NAME, setRefreshTokenCookie } from './auth-cookies';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { GoogleAuthService } from './google-auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -99,6 +109,37 @@ export class AuthController {
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   async resendVerification(@Body() body: ResendVerificationDto): Promise<void> {
     return this.authService.resendVerification(body.email, body.locale);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ short: { limit: 3, ttl: 60_000 } })
+  @ApiOperation({
+    summary: 'Request a password-reset email',
+    description:
+      'Always returns the same generic acknowledgement. An email is sent only when the address belongs to an active password account.',
+  })
+  @ApiOkResponse({ description: 'Request accepted (response does not reveal whether an email was sent)' })
+  async forgotPassword(
+    @Body() body: ForgotPasswordDto,
+    @Ip() ip: string
+  ): Promise<PasswordResetRequestResponse> {
+    await this.authService.requestPasswordReset(body.email, body.locale, ip);
+    return { message: 'auth.passwordReset.emailSent' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ short: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({
+    summary: 'Set a new password with a reset token',
+    description: 'Consumes the token, updates the password, and revokes all existing sessions.',
+  })
+  @ApiOkResponse({ description: 'Password updated' })
+  @ApiUnauthorizedResponse({ description: 'Invalid, expired, or already-used token' })
+  @ApiBadRequestResponse({ description: 'New password equals the current one, or invalid input' })
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<GenericSuccessResponse> {
+    return this.authService.resetPassword(body.token, body.password);
   }
 
   @Post('login')

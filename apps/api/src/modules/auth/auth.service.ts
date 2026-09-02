@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, HttpException, Injectable, Logg
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
+  AUTH_CONSTANTS,
   DEFAULT_LOCALE,
   UserRole,
   UserStatus,
@@ -20,6 +21,12 @@ import { BillingService } from '../billing/billing.service';
 import { EmailService } from '../email/email.service';
 
 import { AuthSessionService } from './auth-session.service';
+import {
+  generateResetToken,
+  hashResetToken,
+  isWithinResetCooldown,
+  resetTokenExpiry,
+} from './password-reset-helpers';
 
 /**
  * User entity from database
@@ -448,6 +455,131 @@ export class AuthService {
     });
 
     this.logger.log(`Password changed successfully for user: ${userId}`);
+    return { success: true };
+  }
+
+  /**
+   * Start a password reset: email a single-use link to the account, if one
+   * exists and can accept one. Returns `void` and NEVER throws for a missing /
+   * Google-only / non-active account or a failed send — the caller's response
+   * must be identical in every case (no account enumeration).
+   */
+  async requestPasswordReset(email: string, locale?: string, ip?: string): Promise<void> {
+    this.logger.log(`Password reset requested for: ${email}`);
+
+    const users = await this.databaseService.query<UserEntity>(
+      'SELECT * FROM users WHERE LOWER(email) = LOWER($1)',
+      [email]
+    );
+    const user = users[0];
+
+    if (!user || !user.password_hash || user.status !== UserStatus.ACTIVE) {
+      // Unknown email, Google-only account, or pending/inactive/banned: do
+      // nothing, but look exactly like the success path to the caller.
+      return;
+    }
+
+    // Per-account cooldown — a rapid second request keeps the first live link.
+    const recent = await this.databaseService.query<{ created_at: Date }>(
+      `SELECT created_at FROM password_reset_tokens
+       WHERE user_id = $1 AND consumed_at IS NULL
+       ORDER BY created_at DESC LIMIT 1`,
+      [user.id]
+    );
+    if (
+      isWithinResetCooldown(
+        recent[0]?.created_at ?? null,
+        AUTH_CONSTANTS.PASSWORD_RESET_COOLDOWN_SECONDS
+      )
+    ) {
+      return;
+    }
+
+    const token = generateResetToken();
+    const tokenHash = hashResetToken(token);
+    const expiresAt = resetTokenExpiry(AUTH_CONSTANTS.PASSWORD_RESET_TOKEN_TTL_MINUTES);
+
+    await this.databaseService.transaction(async (client) => {
+      // Only one live token per user — requesting again retires the old ones.
+      await client.query(
+        `UPDATE password_reset_tokens SET consumed_at = NOW()
+         WHERE user_id = $1 AND consumed_at IS NULL`,
+        [user.id]
+      );
+      await client.query(
+        `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at, requested_ip)
+         VALUES ($1, $2, $3, $4)`,
+        [user.id, tokenHash, expiresAt.toISOString(), ip ?? null]
+      );
+    });
+
+    const userLocale = locale || user.locale || DEFAULT_LOCALE;
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
+    const resetUrl = `${frontendUrl}/${userLocale}/reset-password?token=${encodeURIComponent(token)}`;
+
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, user.first_name, resetUrl, userLocale);
+      this.logger.log(`Password reset email sent to: ${user.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email to ${user.email}`, {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      // Swallowed on purpose — the HTTP response must not vary on send failure.
+    }
+  }
+
+  /**
+   * Complete a password reset with the opaque token from the emailed link.
+   * On success: sets the new hash, bumps `session_version`, revokes every
+   * refresh session, and consumes this token plus any siblings. Issues NO
+   * session — the client is sent to the login screen.
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean }> {
+    const tokenHash = hashResetToken(token);
+
+    const rows = await this.databaseService.query<{
+      token_id: string;
+      user_id: string;
+      password_hash: string | null;
+      status: UserStatus;
+    }>(
+      `SELECT prt.id AS token_id, u.id AS user_id, u.password_hash, u.status
+       FROM password_reset_tokens prt
+       JOIN users u ON u.id = prt.user_id
+       WHERE prt.token_hash = $1 AND prt.consumed_at IS NULL AND prt.expires_at > NOW()`,
+      [tokenHash]
+    );
+
+    const row = rows[0];
+    if (!row || !row.password_hash || row.status !== UserStatus.ACTIVE) {
+      // Same message for "not found", "expired", "already used" and
+      // "account no longer eligible" — do not leak which.
+      throw new UnauthorizedException('auth.errors.resetTokenInvalid');
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, row.password_hash);
+    if (isSamePassword) {
+      throw new BadRequestException('auth.errors.samePassword');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await this.databaseService.transaction(async (client) => {
+      await client.query(
+        'UPDATE users SET password_hash = $1, session_version = session_version + 1, updated_at = NOW() WHERE id = $2',
+        [newHash, row.user_id]
+      );
+      await client.query(
+        'UPDATE auth_refresh_sessions SET revoked_at = COALESCE(revoked_at, NOW()) WHERE user_id = $1 AND revoked_at IS NULL',
+        [row.user_id]
+      );
+      await client.query(
+        'UPDATE password_reset_tokens SET consumed_at = NOW() WHERE user_id = $1 AND consumed_at IS NULL',
+        [row.user_id]
+      );
+    });
+
+    this.logger.log(`Password reset completed for user: ${row.user_id}`);
     return { success: true };
   }
 

@@ -222,6 +222,26 @@ export class EmailService {
   }
 
   /**
+   * Send a password-reset link. `resetUrl` already carries the opaque token.
+   */
+  async sendPasswordResetEmail(
+    email: string,
+    firstName: string,
+    resetUrl: string,
+    locale: string = 'en'
+  ): Promise<void> {
+    await this.sendTemplatedEmail(
+      email,
+      'password_reset',
+      {
+        firstName,
+        resetUrl,
+      },
+      locale
+    );
+  }
+
+  /**
    * Send welcome email after successful verification
    */
   async sendWelcomeEmail(email: string, firstName: string, locale: string = 'en'): Promise<void> {
