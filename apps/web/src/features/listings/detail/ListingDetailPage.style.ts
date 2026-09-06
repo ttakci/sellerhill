@@ -338,28 +338,17 @@ export const SpecRow = styled.div`
 `;
 
 /**
- * The page's shared compact-facts pattern — a 2-column grid of icon+label+
- * value rows instead of a tall single-column list. Used by Performance,
- * Listeleme Ayar Grubu and Otomasyon Durumu alike, all three always exactly
- * 4 items, which is what \`MetaRow\`'s border logic below depends on. Single
- * column below \`sm\`, where a card this narrow can't fit two value columns
- * without truncating a date like "16 Ağu 2026".
+ * The page's shared compact-facts pattern — a single-column list of
+ * icon+label+value rows. Used by Performance, Listeleme Ayar Grubu and
+ * Otomasyon Durumu alike. Was a 2-column grid above \`sm\`; collapsed to one
+ * column so every card reads top-to-bottom the same on any width.
  */
 export const MetaList = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0 ${tkn('spacing.lg')};
-
-  @media (min-width: ${tkn('breakpoints.sm')}) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 `;
 
-/** Every MetaList on this page renders exactly 4 rows, so the bottom row
- *  (items 3 and 4, once paired 2-up) can safely lose its border by position.
- *  Below \`sm\`, MetaList collapses to one column, so item 3 goes back to
- *  being a middle row and needs its border restored. A 5th consumer would
- *  need this rule revisited — it is not a general-purpose list border. */
+/** One fact per line, a divider between each; the last row drops its border. */
 export const MetaRow = styled.div`
   display: flex;
   align-items: center;
@@ -368,15 +357,8 @@ export const MetaRow = styled.div`
   padding: ${tkn('spacing.sm-md')} 0;
   border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
 
-  &:nth-of-type(3),
-  &:nth-of-type(4) {
+  &:last-of-type {
     border-bottom: none;
-  }
-
-  @media (max-width: ${tkn('breakpoints.smBelow')}) {
-    &:nth-of-type(3) {
-      border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
-    }
   }
 `;
 

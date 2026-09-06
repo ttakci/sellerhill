@@ -125,6 +125,10 @@ export const shadowTokens = {
  * Mono stays JetBrains Mono for codes / IDs only.
  *
  * This is the ONE sanctioned two-typeface pairing — do not add a third stack.
+ * The landing page's Montserrat/Poppins is NOT a candidate to unify on: adopting
+ * it app-wide was tried on 2026-09-03 and rejected on sight — those faces carry a
+ * marketing page at 56px, and at the app's 14px body / 23px headings they read
+ * heavy and wide in dense tables and forms.
  *
  * The size / weight / line-height steps below mirror a proven production scale
  * (headings 23/19/17/15/13 over a 14px body — one step down from the original

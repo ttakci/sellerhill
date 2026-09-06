@@ -156,9 +156,9 @@ export enum TrackingConversionScope {
 
 /**
  * Proxy transport for a user-supplied, per-Amazon-account proxy (migration
- * 080). Replaces the platform-paid `proxies` pool (that table and
- * `ProxyStatus` are retired, not deleted — see CLAUDE.md "Amazon Scraping —
- * Anti-Ban Strategy").
+ * 080). Replaces the platform-paid `proxies` pool — its code was deleted
+ * 2026-08-13 and the table itself dropped by migration 094 (see CLAUDE.md
+ * "Amazon Scraping — Anti-Ban Strategy").
  */
 export enum ProxyConnectionType {
   HTTP = 'http',

@@ -72,17 +72,20 @@ export const BuyerMessageTemplateDrawerComponent: React.FC<BuyerMessageTemplateD
           searchPlaceholder={t('translation:common.search')}
           noResultsMessage={t('translation:common.noResults')}
         />
-        <S.BodyHeaderRow>
-          <Text variant="body-sm" weight="semibold">
-            {t('storeSettings:storeSettings.messaging.templates.body')}
-          </Text>
-          {showReset && (
+        {showReset && (
+          <S.ResetRow>
             <Button variant="tertiary" size="small" onClick={onResetRequest} isLoading={isResetting}>
               <Text>{resetLabel}</Text>
             </Button>
-          )}
-        </S.BodyHeaderRow>
-        <Textarea value={editor.body} onChange={(e) => onBodyChange(e.target.value)} rows={6} fullWidth />
+          </S.ResetRow>
+        )}
+        <Textarea
+          label={t('storeSettings:storeSettings.messaging.templates.body')}
+          value={editor.body}
+          onChange={(e) => onBodyChange(e.target.value)}
+          autoResize
+          fullWidth
+        />
         <S.ChipRow>
           {PLACEHOLDER_TOKENS.map((token) => (
             <Button key={token} variant="tertiary" size="small" onClick={() => onInsertPlaceholder(token)}>
@@ -90,12 +93,13 @@ export const BuyerMessageTemplateDrawerComponent: React.FC<BuyerMessageTemplateD
             </Button>
           ))}
         </S.ChipRow>
-        <S.PreviewTitle variant="caption" weight="semibold">
-          {t('storeSettings:storeSettings.messaging.templates.preview')}
-        </S.PreviewTitle>
-        <S.PreviewBox>
-          <Text variant="caption">{preview}</Text>
-        </S.PreviewBox>
+        <Textarea
+          label={t('storeSettings:storeSettings.messaging.templates.preview')}
+          value={preview}
+          readOnly
+          autoResize
+          fullWidth
+        />
       </S.FormCard>
 
       <ConfirmModal

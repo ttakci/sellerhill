@@ -1,5 +1,5 @@
 import { TemplateType, type ListingSettingsGroupFormData } from '@repo/shared';
-import { Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
+import { Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle, Tooltip } from '@repo/ui';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -91,9 +91,20 @@ export const ListingGroupDrawerComponent = ({
           control={control}
           render={({ field }) => (
             <S.ContentToggleRow>
-              <Text variant="body-sm" weight="semibold">
-                {t('listingSettingsGroup.stripBrandFromTitle')}
-              </Text>
+              <S.ToggleTitleRow>
+                <Text variant="body-sm" weight="semibold">
+                  {t('listingSettingsGroup.stripBrandFromTitle')}
+                </Text>
+                <Tooltip content={t('listingSettingsGroup.stripBrandFromTitleInfo')} position="top" variant="dark">
+                  <S.InfoButton
+                    type="button"
+                    variant="ghost"
+                    aria-label={t('listingSettingsGroup.stripBrandFromTitleInfo')}
+                  >
+                    <Icon name="info" size={14} color="text.tertiary" />
+                  </S.InfoButton>
+                </Tooltip>
+              </S.ToggleTitleRow>
               <Toggle checked={Boolean(field.value)} onChange={field.onChange} />
             </S.ContentToggleRow>
           )}
@@ -102,15 +113,23 @@ export const ListingGroupDrawerComponent = ({
           name="content.aiTitleEnabled"
           control={control}
           render={({ field }) => (
-            <>
-              <S.ContentToggleRow>
+            <S.ContentToggleRow>
+              <S.ToggleTitleRow>
                 <Text variant="body-sm" weight="semibold">
                   {t('listingSettingsGroup.aiTitleEnabled')}
                 </Text>
-                <Toggle checked={Boolean(field.value)} onChange={field.onChange} />
-              </S.ContentToggleRow>
-              <InfoMessage>{t('listingSettingsGroup.aiTitleEnabledInfo')}</InfoMessage>
-            </>
+                <Tooltip content={t('listingSettingsGroup.aiTitleEnabledInfo')} position="top" variant="dark">
+                  <S.InfoButton
+                    type="button"
+                    variant="ghost"
+                    aria-label={t('listingSettingsGroup.aiTitleEnabledInfo')}
+                  >
+                    <Icon name="info" size={14} color="text.tertiary" />
+                  </S.InfoButton>
+                </Tooltip>
+              </S.ToggleTitleRow>
+              <Toggle checked={Boolean(field.value)} onChange={field.onChange} />
+            </S.ContentToggleRow>
           )}
         />
       </S.FormCard>

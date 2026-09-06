@@ -11,6 +11,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { notifyDrawerDone } from '../shared/notifyDrawerDone';
+
 import { ListingGroupDrawerComponent } from './ListingGroupDrawer.component';
 import type { ListingGroupDrawerProps, ListingGroupDrawerStep } from './ListingGroupDrawer.types';
 
@@ -139,21 +141,15 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     if (createSuccess || updateSuccess) {
       resetCreate();
       resetUpdate();
-      onClose();
-      showMessage(
-        {
-          type: 'success',
-          headerKey: 'translation:message.success.header',
-          descriptionKey: createSuccess
-            ? 'listingSettingsGroup:listingSettingsGroup.success.created'
-            : 'listingSettingsGroup:listingSettingsGroup.success.updated',
-          primaryButton: {
-            labelKey: 'translation:common.ok',
-            onClick: closeMessage,
-          },
-        },
-        t
-      );
+      notifyDrawerDone({
+        onClose,
+        showMessage,
+        closeMessage,
+        t,
+        descriptionKey: createSuccess
+          ? 'listingSettingsGroup:listingSettingsGroup.success.created'
+          : 'listingSettingsGroup:listingSettingsGroup.success.updated',
+      });
     }
   }, [createSuccess, updateSuccess, showMessage, t, onClose, closeMessage, resetCreate, resetUpdate]);
 

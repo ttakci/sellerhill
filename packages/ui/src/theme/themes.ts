@@ -16,10 +16,28 @@ import type { AppTheme, ThemeColors } from './theme.types';
  */
 const lightColors: ThemeColors = {
   background: {
-    primary: '#f4f7ff',
+    // Ramp deepened one step (was #f4f7ff / #eef3ff, both a hair off white) so
+    // borderless white cards and drawer surfaces (surface.primary #fff) read
+    // clearly against the page/drawer ground. Tint tracks the brand/sidebar
+    // blue (#2563eb / sidebar #0c1f52) — R < G < B with G close to B, so it
+    // reads as a cool azure, never lavender/purple. Ramp order: tertiary < primary.
+    primary: '#e9f0fb',
     secondary: '#FFFFFF',
-    tertiary: '#eef3ff',
-    gradient: 'linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 40%, #F0F4FF 100%)',
+    tertiary: '#e0e9f7',
+    /*
+     * Page wash: clearly blue at the top, fading to near-white at the bottom —
+     * the deep-navy sidebar reads as the top of one continuous surface instead
+     * of a rail glued onto a flat page. The old ramp ran the other way (lightest
+     * at the top, deepest at the bottom) and was too narrow to be seen at all.
+     *
+     * EVERY stop sits at hue ~213-216 (a clean azure: R < G < B with a wide
+     * R->B spread). Do not raise R toward B here — the moment R meets B the wash
+     * turns lavender, which is the one thing this gradient was rejected for.
+     * The bottom stop stays a hair off #FFFFFF so white cards (surface.primary)
+     * still lift off the page down there.
+     */
+    gradient:
+      'linear-gradient(165deg, #d7e5fb 0%, #e3edfc 30%, #edf4fd 62%, #f4f8fe 100%)',
   },
 
   surface: {
@@ -37,9 +55,11 @@ const lightColors: ThemeColors = {
     // surface, well past AA.
     primary: '#27272a',
     secondary: '#475569',
-    // Darkened from #64748b: the old value fell to 4.28:1 on background.tertiary
-    // (#eef3ff), below AA. Now >=4.88:1 on every surface it is used over.
-    tertiary: '#5d6b7f',
+    // Darkened from #64748b: the old value fell to 4.28:1 on background.tertiary,
+    // below AA. Darkened again when the background ramp was deepened (tertiary
+    // #eef3ff -> #e0e9f7) so it still clears AA (4.85:1) on the new
+    // background.tertiary and >=5:1 on every other surface it is used over.
+    tertiary: '#586576',
     disabled: '#cbd5e1',
     inverse: '#FFFFFF',
   },
@@ -76,7 +96,10 @@ const lightColors: ThemeColors = {
     error: '#fef2f2',
     warning: '#fffbeb',
     info: '#eff6ff',
-    infoStrong: '#dbeafe',
+    /* A hair darker than blue-100 (#dbeafe) — ~25% toward blue-200 — so an
+       InfoMessage still reads as a distinct block on the near-white drawer
+       canvas (background.primary ≈ #f4f7ff) without a white card behind it. */
+    infoStrong: '#d4e6fe',
     neutral: '#f3f4f6',
   },
 
@@ -239,7 +262,7 @@ const darkColors: ThemeColors = {
     error: 'rgba(248, 113, 113, 0.1)',
     warning: 'rgba(251, 191, 36, 0.1)',
     info: 'rgba(96, 165, 250, 0.1)',
-    infoStrong: 'rgba(96, 165, 250, 0.18)',
+    infoStrong: 'rgba(96, 165, 250, 0.22)',
     neutral: 'rgba(107, 114, 128, 0.1)',
   },
 

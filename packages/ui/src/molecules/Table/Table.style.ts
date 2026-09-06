@@ -265,7 +265,9 @@ export const SortIcon = styled.div<{ $active: boolean; $rotated: boolean }>`
   justify-content: center;
   transform: ${(props) => (props.$rotated ? 'rotate(180deg)' : 'rotate(0deg)')};
   opacity: ${(props) => (props.$active ? 1 : 0.3)};
-  transition: transform ${tkn('transitions.fast')}, opacity ${tkn('transitions.fast')};
+  transition:
+    transform ${tkn('transitions.fast')},
+    opacity ${tkn('transitions.fast')};
 `;
 
 export const Td = styled.td<{
@@ -356,12 +358,27 @@ export const Td = styled.td<{
   }
 `;
 
-export const EmptyRow = styled.tr``;
-
-export const EmptyCell = styled(Td)`
+/*
+ * Empty state renders OUTSIDE the scrolling <table> (the whole <table> is
+ * skipped when there are no rows — no orphan column headers). A colSpan <td>
+ * inside a `table-layout: fixed` table wider than its `overflow-x: auto`
+ * viewport centers its content in the full scroll width, so the old fake-row
+ * empty state drifted right of what the user actually sees. This panel is
+ * always exactly container-wide, so it centers like the grid view. Kept
+ * byte-for-byte in step with DataTable's `GridEmptyState` (same min-height,
+ * padding, box-sizing) so the empty state is identical in both views — only the
+ * border/radius/shadow/background are dropped here, because TableContainer
+ * already draws that card around this panel.
+ */
+export const EmptyPanel = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  min-height: 18rem;
+  padding: ${tkn('spacing.xxxl')} ${tkn('spacing.lg')};
   color: ${tkn('colors.text.tertiary')};
-  padding: ${tkn('spacing.xxl')} ${tkn('spacing.md+')};
+  box-sizing: border-box;
 `;
 
 export const Toolbar = styled.div`

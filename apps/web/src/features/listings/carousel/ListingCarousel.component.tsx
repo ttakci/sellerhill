@@ -32,7 +32,7 @@ export const ListingCarouselComponent: React.FC<ListingCarouselComponentProps> =
         icon="inventory"
         title={emptyTitle ?? t('listings.overview.emptyTitle')}
         description={emptySubtitle ?? t('listings.overview.emptySubtitle')}
-        size="md"
+        size="sm"
       />
     );
   }

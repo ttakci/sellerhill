@@ -36,7 +36,8 @@ import {
   useLazyOpenBillingPortalQuery,
   usePreviewPlanChangeMutation,
 } from '../api/billing.api';
-import { formatBillingLimit, planLimitValue, usageBarValue, usageBarVariant } from '../utils/usage';
+import { formatBillingLimit, planLimitValue } from '../utils/usage';
+import { buildBillingUsageRows } from '../utils/usageRows';
 
 import { BillingPageComponent } from './BillingPage.component';
 import type {
@@ -304,59 +305,15 @@ export const BillingPage: React.FC = () => {
     });
   }, [pendingChange, t, localeCfg.locale]);
 
-  const usageRows: BillingUsageRow[] = useMemo(() => {
-    if (!summary || !subscription || !summary.plan) {
-      return [];
-    }
-    const plan = summary.plan;
-    const unlimitedLabel = t('billing:billing.limits.unlimited');
-    const disabledLabel = t('billing:billing.limits.disabled');
-    // `summary.quotas` is computed server-side from what actually exists.
-    // `usagePeriods[].usedQty` — what this used to read — is a ledger column
-    // nothing increments, so every bar sat at zero regardless of real usage.
-    /*
-     * BOTH figures come from `summary.quotas`, not half from the plan.
-     *
-     * `quotas[].limitValue` is the EFFECTIVE ceiling — plan allowance plus any
-     * top-up bought this month — and it is the number the gate enforces.
-     * Reading the limit from the plan instead showed a seller who had just
-     * topped up their old ceiling, and showed nothing at all for a dimension
-     * the catalog row happened not to carry.
-     */
-    const quotaByKey = new Map(summary.quotas.map((q) => [q.limitKey, q]));
-
-    const rows: BillingUsageRow[] = [];
-    for (const key of [
-      BillingLimitKey.LISTINGS_PER_MONTH,
-      BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
-      BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
-    ]) {
-      const quota = quotaByKey.get(key);
-      const limit = quota?.limitValue ?? planLimitValue({ plan }, key);
-      const used = quota?.used ?? 0;
-      const labelKey = `billing:billing.limits.${key}.label`;
-      const limitDisplay = formatBillingLimit({ limit, unlimitedLabel, disabledLabel, locale: localeCfg.locale });
-      const usedDisplay = new Intl.NumberFormat(localeCfg.locale).format(used);
-      const ofDisplay = t('billing:billing.limits.of', { used: usedDisplay, limit: limitDisplay });
-      /*
-       * Percentage for inside the ring. `ofDisplay` ("50 / 50") stays as the
-       * text beside it — rendering the used figure on its own AND inside
-       * "used of limit" is what produced "50 50 / 50".
-       */
-      const ringLabel =
-        limit > 0 ? `${Math.min(999, Math.round((used / limit) * 100))}%` : '—';
-      rows.push({
-        ringLabel,
-        labelKey,
-        usedDisplay,
-        ofDisplay,
-        barValue: usageBarValue(used, limit),
-        barVariant: usageBarVariant(used, limit),
-        barAriaLabel: `${t(labelKey)}: ${usedDisplay} / ${limitDisplay}`,
-      });
-    }
-    return rows;
-  }, [summary, subscription, t, localeCfg.locale]);
+  // Assembled by the shared builder so this list and the identical one in the
+  // top-right profile dropdown can never drift. `summary.quotas` is computed
+  // server-side from what actually exists — `usagePeriods[].usedQty` (what this
+  // used to read) is a ledger column nothing increments, so every bar sat at
+  // zero regardless of real usage.
+  const usageRows: BillingUsageRow[] = useMemo(
+    () => buildBillingUsageRows(summary, t, localeCfg.locale),
+    [summary, t, localeCfg.locale],
+  );
 
   const plans: BillingPlanCard[] = useMemo(() => {
     if (!catalog) {

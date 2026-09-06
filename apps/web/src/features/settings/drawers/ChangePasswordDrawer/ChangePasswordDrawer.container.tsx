@@ -3,6 +3,8 @@ import { useUI } from '@repo/ui';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { notifyDrawerDone } from '../shared/notifyDrawerDone';
+
 import { ChangePasswordDrawerComponent } from './ChangePasswordDrawer.component';
 import type { ChangePasswordDrawerProps } from './ChangePasswordDrawer.types';
 
@@ -58,16 +60,14 @@ export const ChangePasswordDrawer: React.FC<ChangePasswordDrawerProps> = ({ isOp
       .unwrap()
       .then(() => {
         reset();
-        onClose();
-        showMessage(
-          {
-            type: 'success',
-            headerKey: 'translation:settingsHub.drawer.password.successHeader',
-            descriptionKey: 'translation:settingsHub.drawer.password.successDescription',
-            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
-          },
-          t
-        );
+        notifyDrawerDone({
+          onClose,
+          showMessage,
+          closeMessage,
+          t,
+          headerKey: 'translation:settingsHub.drawer.password.successHeader',
+          descriptionKey: 'translation:settingsHub.drawer.password.successDescription',
+        });
       })
       .catch(() => {
         showMessage(

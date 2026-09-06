@@ -1,5 +1,5 @@
 import { TemplateType } from '@repo/shared';
-import { Icon, Text } from '@repo/ui';
+import { formatCurrency, Icon, Text, Tooltip, type IconName } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,13 +8,33 @@ import { CARD_ACTION_ICON_SIZE } from '../cardMetrics';
 import * as S from './ListingGroupCard.style';
 import type { ListingGroupCardProps } from './ListingGroupCard.types';
 
+import { buildMarginRangeDetails, summarizeMarginStrategy } from '@/features/listings/shared/margin-strategy';
+
+/**
+ * One fact row — the listing detail page's `Meta` row, so a group's numbers
+ * read identically wherever they appear.
+ */
+const Fact = ({ icon, label, value }: { icon: IconName; label: string; value: string }): React.ReactElement => (
+  <S.MetaRow>
+    <S.MetaLabel>
+      <Icon name={icon} size={16} color="brand.primary" />
+      <Text variant="body-sm" color="text.secondary" truncate>
+        {label}
+      </Text>
+    </S.MetaLabel>
+    <S.MetaValue variant="body-sm" weight="semibold" numeric>
+      {value}
+    </S.MetaValue>
+  </S.MetaRow>
+);
+
 /**
  * Compact, info-dense summary card for a Listing Settings Group.
  * Shown in compact grids (e.g. the Settings hub). Clicking navigates to the
  * group's edit page. Full detail/delete lives on the dedicated list page.
  */
 export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onClick, templateName, selected }) => {
-  const { t } = useTranslation(['listingSettingsGroup', 'translation']);
+  const { t } = useTranslation(['listingSettingsGroup', 'listings', 'translation']);
 
   const handleActivate = (): void => onClick(group.id);
 
@@ -33,6 +53,14 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
       ? t('listingSettingsGroup.predefined')
       : t('listingSettingsGroup.card.customTemplate'));
 
+  // Kâr Marjı row — the same summary + per-range tooltip the listing detail
+  // page shows for this group, via the shared helper so the two never drift.
+  // `NUMERIC` columns can arrive as strings over the wire, hence the coercion.
+  const fmtMoney = (value: number): string => formatCurrency(value, undefined, undefined, 2);
+  const marginNotSet = t('listings:listings.detail.notSet');
+  const marginSummary = summarizeMarginStrategy(group.repricingStrategy, fmtMoney, t) ?? marginNotSet;
+  const marginRangeDetails = buildMarginRangeDetails(group.repricingStrategy, fmtMoney, t, marginNotSet);
+
   return (
     <S.InteractiveCard
       variant="elevated"
@@ -49,9 +77,9 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
           <S.CardName variant="h5" weight="semibold" className="card-title" truncate>
             {group.name}
           </S.CardName>
-          <S.ActiveBadge variant={isPredefined ? 'info' : 'neutral'} size="md">
+          <S.TemplateBadge variant={isPredefined ? 'info' : 'neutral'} size="md">
             {templateLabel}
-          </S.ActiveBadge>
+          </S.TemplateBadge>
         </S.TitleRow>
         {group.description && (
           <Text variant="caption" color="text.secondary" truncate>
@@ -59,43 +87,55 @@ export const ListingGroupCard: React.FC<ListingGroupCardProps> = ({ group, onCli
           </Text>
         )}
 
-        <S.StatColumns>
-          <S.StatColumn>
-            <S.StatColumnTitle variant="overline" color="text.tertiary">
-              {t('listingSettingsGroup.card.generalTitle')}
-            </S.StatColumnTitle>
-            <S.StatItem>
-              <Icon name="inventory" size={16} color="text.tertiary" />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.card.stock')}: {group.stock.defaultQuantity}
+        <S.MetaList>
+          <Fact
+            icon="box"
+            label={t('listingSettingsGroup.card.defaultQuantity')}
+            value={String(group.stock.defaultQuantity)}
+          />
+          <Fact
+            icon="sliders-horizontal"
+            label={t('listingSettingsGroup.card.stockBuffer')}
+            value={String(group.stock.stockBuffer ?? 0)}
+          />
+          <S.MetaRow>
+            <S.MetaLabel>
+              <Icon name="badge-percent" size={16} color="brand.primary" />
+              <Text variant="body-sm" color="text.secondary" truncate>
+                {t('listings:listings.detail.groupMarginLabel')}
               </Text>
-            </S.StatItem>
-            <S.StatItem>
-              <Icon name="shield-check" size={16} color="text.tertiary" />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.card.buffer')}: {group.stock.stockBuffer ?? 0}
+            </S.MetaLabel>
+            <S.MarginValueRow>
+              <Text variant="body-sm" weight="semibold">
+                {marginSummary}
               </Text>
-            </S.StatItem>
-          </S.StatColumn>
-
-          <S.StatColumn>
-            <S.StatColumnTitle variant="overline" color="text.tertiary">
-              {t('listingSettingsGroup.card.deductionsTitle')}
-            </S.StatColumnTitle>
-            <S.StatItem>
-              <Icon name="percent" size={16} color="text.tertiary" />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.card.fee')}: {group.fees.ebayFeePercent}%
-              </Text>
-            </S.StatItem>
-            <S.StatItem>
-              <Icon name="receipt" size={16} color="text.tertiary" />
-              <Text variant="caption" color="text.secondary">
-                {t('listingSettingsGroup.card.fixedFee')}: ${group.fees.fixedFeeAmount}
-              </Text>
-            </S.StatItem>
-          </S.StatColumn>
-        </S.StatColumns>
+              {marginRangeDetails.length > 0 && (
+                <Tooltip
+                  content={
+                    <S.MarginTooltipList>
+                      {marginRangeDetails.map((row) => (
+                        <span key={row}>{row}</span>
+                      ))}
+                    </S.MarginTooltipList>
+                  }
+                  position="left"
+                  variant="dark"
+                >
+                  <S.MarginInfoButton
+                    variant="ghost"
+                    aria-label={t('listings:listings.detail.groupMarginTooltipLabel')}
+                    // Info icon lives inside the clickable card — opening the
+                    // tooltip must not also trigger the card's "edit group" action.
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    <Icon name="info" size={14} color="text.tertiary" />
+                  </S.MarginInfoButton>
+                </Tooltip>
+              )}
+            </S.MarginValueRow>
+          </S.MetaRow>
+        </S.MetaList>
 
         <S.BottomRow>
           <S.DetailAction>

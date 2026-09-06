@@ -12,6 +12,7 @@
       "marketplaceFR": "France (eBay.fr)",
       "marketplaceIT": "Italy (eBay.it)",
       "marketplaceES": "Spain (eBay.es)",
+      "marketplaceUsOnlyNote": "Only the United States (eBay.com) marketplace is supported at this time.",
       "successMessage": "eBay account connected successfully!",
       "errorMessage": "Failed to connect eBay account",
       "alreadyConnected": "This eBay account is already connected"

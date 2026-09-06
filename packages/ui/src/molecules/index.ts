@@ -4,6 +4,7 @@ export * from './Drawer';
 export * from './EmptyState';
 export * from './Select';
 export * from './TextInput';
+export * from './PhoneInput';
 export * from './SearchField';
 export * from './StatusBadge';
 export * from './ViewToggle';

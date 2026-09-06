@@ -17,6 +17,7 @@ function settings(
     country: 'US',
     state: 'CA',
     zipCode: '90210',
+    shipFromCity: 'Los Angeles',
     checkBlacklist: true,
     blacklist: [],
     amazonTaxRate: 0,
@@ -39,6 +40,7 @@ describe('inheritMissingStoreLocation', () => {
     country: 'US',
     state: 'NY',
     zipCode: '10001',
+    shipFromCity: 'New York',
     amazonTaxRate: 9,
     autoFulfillEnabled: true,
     blacklist: [{ id: 'global-keyword', keyword: 'global', types: [BlacklistType.TITLE, BlacklistType.DESCRIPTION] }],
@@ -49,6 +51,7 @@ describe('inheritMissingStoreLocation', () => {
       country: '',
       state: '  ',
       zipCode: '',
+      shipFromCity: '',
       amazonTaxRate: 3,
       autoFulfillEnabled: false,
       blacklist: [{ id: 'store-keyword', keyword: 'store', types: [BlacklistType.TITLE] }],
@@ -58,6 +61,7 @@ describe('inheritMissingStoreLocation', () => {
       country: 'US',
       state: 'NY',
       zipCode: '10001',
+      shipFromCity: 'New York',
       amazonTaxRate: 3,
       autoFulfillEnabled: false,
       blacklist: [{ id: 'store-keyword', keyword: 'store', types: [BlacklistType.TITLE] }],
@@ -69,13 +73,27 @@ describe('inheritMissingStoreLocation', () => {
       country: 'GB',
       state: 'London',
       zipCode: 'SW1A 1AA',
+      shipFromCity: 'London',
     });
 
     expect(inheritMissingStoreLocation(storeSettings, globalSettings)).toMatchObject({
       country: 'GB',
       state: 'London',
       zipCode: 'SW1A 1AA',
+      shipFromCity: 'London',
     });
+  });
+
+  // A store row created by a focused drawer (blacklist / buyer messaging) has
+  // no city of its own. Without inheritance that row publishes an eBay item
+  // location with an empty city while the user's global row has one — the same
+  // failure the postcode inheritance above exists to prevent.
+  it('inherits the city when a store row was created without one', () => {
+    const storeSettings = settings({ shipFromCity: undefined });
+
+    expect(inheritMissingStoreLocation(storeSettings, globalSettings).shipFromCity).toBe(
+      'New York',
+    );
   });
 
   it('inherits location field by field without replacing store-owned settings', () => {

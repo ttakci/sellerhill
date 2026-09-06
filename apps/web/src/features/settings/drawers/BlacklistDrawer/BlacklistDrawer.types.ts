@@ -31,6 +31,8 @@ export interface BlacklistDrawerComponentProps {
   errorMessage: string | null;
   // list (filtered by search)
   items: BlacklistItem[];
+  /** True when the scope has any keywords at all, regardless of the search filter. */
+  hasKeywords: boolean;
   onRemove: (keyword: string) => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -51,6 +53,7 @@ export interface BlacklistDrawerComponentProps {
   typeLabel: string;
   addLabel: string;
   emptyMessage: string;
+  noResultsMessage: string;
   searchPlaceholder: string;
   selectAllLabel: string;
   selectedCountLabel: string;

@@ -9,7 +9,10 @@ import type {
 } from './TextInput.types';
 
 const TextInputInnerContainer = (
-  props: Omit<TextInputInnerComponentProps, 'isFocused' | 'isPasswordVisible' | 'inputRef' | 'hasValue' | 'effectiveType' | 'effectiveIconRight' | 'isPassword' | 'onFocus' | 'onBlurField' | 'onContainerClick' | 'onTogglePasswordVisibility'>
+  props: Omit<TextInputInnerComponentProps, 'isFocused' | 'isPasswordVisible' | 'inputRef' | 'hasValue' | 'effectiveType' | 'effectiveIconRight' | 'isPassword' | 'onFocus' | 'onBlurField' | 'onContainerClick' | 'onTogglePasswordVisibility'> & {
+    /** Optional caller focus handler, invoked after the internal focus state is set. */
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  }
 ) => {
   // hasValue is omitted from props and computed by TextInputInner itself.
   const [isFocused, setIsFocused] = useState(false);
@@ -22,7 +25,7 @@ const TextInputInnerContainer = (
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    void e;
+    props.onFocus?.(e);
   };
 
   const handleBlur = () => {
@@ -58,7 +61,7 @@ const TextInputInnerContainer = (
 export const TextInput = <TFieldValues extends FieldValues = FieldValues>(
   props: TextInputProps<TFieldValues>
 ) => {
-  const { name, control, rules, ...rest } = props;
+  const { name, control, rules, errorMessage, ...rest } = props;
 
   // Manual usage support
   if (!control) {
@@ -69,7 +72,8 @@ export const TextInput = <TFieldValues extends FieldValues = FieldValues>(
       onChange: (e: unknown) => onChange?.(e as React.ChangeEvent<HTMLInputElement>),
       onBlur: () => onBlur?.({} as React.FocusEvent<HTMLInputElement>),
     };
-    return <TextInputInnerContainer {...rest} field={manualField} />;
+    const manualError = errorMessage ? { type: 'manual', message: errorMessage } : undefined;
+    return <TextInputInnerContainer {...rest} field={manualField} error={manualError} />;
   }
 
   return (

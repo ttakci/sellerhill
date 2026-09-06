@@ -1,15 +1,27 @@
 import { StoreSettingsDrawerStep, TrackingConversionScope } from '@repo/shared';
-import { Drawer, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle } from '@repo/ui';
+import { ConfirmModal, Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle, Tooltip } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { BuyerMessagingSection } from './BuyerMessagingSection/BuyerMessagingSection.container';
-import { BodyStack, FieldGrid, FormCard, ShipFromSection, ToggleRow } from './StoreSettingsDrawer.style';
+import { AutomationField, BodyStack, FieldGroup, FormCard, InfoButton, LabelWithInfo, ToggleRow } from './StoreSettingsDrawer.style';
 import type { StoreSettingsDrawerComponentProps } from './StoreSettingsDrawer.types';
+
+/** Label text plus an "i" that reveals the field's explanation on hover/focus —
+ *  the automation step's replacement for a stack of always-on `InfoMessage`
+ *  blocks. Mirrors the trigger in `BuyerMessagingSection`. */
+const InfoTip: React.FC<{ text: string }> = ({ text }) => (
+  <Tooltip content={text} position="top" variant="dark">
+    <InfoButton type="button" variant="ghost" aria-label={text}>
+      <Icon name="info" size={14} color="text.tertiary" />
+    </InfoButton>
+  </Tooltip>
+);
 
 export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponentProps> = (props) => {
   const { t } = useTranslation(['translation', 'storeSettings']);
-  const isFirst = props.step === StoreSettingsDrawerStep.GENERAL;
+  const isAddress = props.step === StoreSettingsDrawerStep.ADDRESS;
+  const isAutomation = props.step === StoreSettingsDrawerStep.AUTOMATION;
   const isMessaging = props.step === StoreSettingsDrawerStep.BUYER_MESSAGING;
   const isLast = props.step === StoreSettingsDrawerStep.BLACKLIST;
 
@@ -17,7 +29,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
     <Drawer
       isOpen={props.isOpen}
       onClose={props.onClose}
-      onBack={isFirst ? undefined : props.onBack}
+      onBack={isAddress ? undefined : props.onBack}
       backAriaLabel={t('translation:common.back')}
       title={t('translation:settingsHub.drawer.storeSettings.title')}
       subtitle={t('translation:settingsHub.drawer.storeSettings.subtitle')}
@@ -31,7 +43,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
     >
       <BodyStack>
         <Stepper steps={props.steps} currentStep={props.step} />
-        {isFirst && (
+        {isAddress && (
           <FormCard>
             <ModernSelect
               label={t('translation:settingsHub.drawer.storeSettings.appliesTo')}
@@ -42,133 +54,127 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
               searchPlaceholder={t('translation:common.search')}
               noResultsMessage={t('translation:common.noResults')}
             />
-            <ModernTextInput
-              name="country"
-              label={t('translation:settingsHub.drawer.storeSettings.country')}
-              value={props.country}
-              onChange={props.onCountryChange}
-            />
-            <FieldGrid>
+            <FieldGroup>
+              <Text variant="h5">{t('storeSettings:storeSettings.address.title')}</Text>
+              <ModernTextInput
+                name="country"
+                label={t('translation:settingsHub.drawer.storeSettings.country')}
+                value={props.country}
+                onChange={props.onCountryChange}
+                errorMessage={props.addressFieldErrors.country ? t('translation:validation.required') : undefined}
+              />
               <ModernTextInput
                 name="region"
                 label={t('translation:settingsHub.drawer.storeSettings.region')}
                 value={props.state}
                 onChange={props.onStateChange}
+                errorMessage={props.addressFieldErrors.state ? t('translation:validation.required') : undefined}
+              />
+              <ModernTextInput
+                name="city"
+                label={t('storeSettings:storeSettings.address.city')}
+                value={props.city}
+                onChange={props.onCityChange}
+                errorMessage={props.addressFieldErrors.city ? t('translation:validation.required') : undefined}
               />
               <ModernTextInput
                 name="zipCode"
                 label={t('translation:settingsHub.drawer.storeSettings.zipCode')}
                 value={props.zipCode}
                 onChange={props.onZipCodeChange}
+                errorMessage={props.addressFieldErrors.zipCode ? t('translation:validation.required') : undefined}
               />
-            </FieldGrid>
-            <ShipFromSection>
-              <Text variant="h5">{t('storeSettings:storeSettings.shipFrom.title')}</Text>
-              <InfoMessage>{t('storeSettings:storeSettings.shipFrom.description')}</InfoMessage>
-              {props.isGlobalScope ? (
-                <>
-                  <FieldGrid>
-                    <ModernTextInput
-                      name="shipFromName"
-                      label={t('storeSettings:storeSettings.shipFrom.name')}
-                      value={props.shipFromName}
-                      onChange={props.onShipFromNameChange}
-                    />
-                    <ModernTextInput
-                      name="shipFromPhone"
-                      type="tel"
-                      label={t('storeSettings:storeSettings.shipFrom.phone')}
-                      value={props.shipFromPhone}
-                      onChange={props.onShipFromPhoneChange}
-                    />
-                  </FieldGrid>
-                  <ModernTextInput
-                    name="shipFromAddressLine1"
-                    label={t('storeSettings:storeSettings.shipFrom.addressLine1')}
-                    value={props.shipFromAddressLine1}
-                    onChange={props.onShipFromAddressLine1Change}
-                  />
-                  <ModernTextInput
-                    name="shipFromAddressLine2"
-                    label={t('storeSettings:storeSettings.shipFrom.addressLine2')}
-                    value={props.shipFromAddressLine2}
-                    onChange={props.onShipFromAddressLine2Change}
-                  />
-                  <ModernTextInput
-                    name="shipFromCity"
-                    label={t('storeSettings:storeSettings.shipFrom.city')}
-                    value={props.shipFromCity}
-                    onChange={props.onShipFromCityChange}
-                  />
-                  {!props.isShipFromAddressComplete && (
-                    <InfoMessage>
-                      {t('storeSettings:storeSettings.shipFrom.incompleteHint')}
-                    </InfoMessage>
-                  )}
-                </>
-              ) : (
-                <InfoMessage>{t('storeSettings:storeSettings.shipFrom.globalOnly')}</InfoMessage>
-              )}
-            </ShipFromSection>
+              <InfoMessage>{t('storeSettings:storeSettings.address.description')}</InfoMessage>
+            </FieldGroup>
+          </FormCard>
+        )}
+        {isAutomation && (
+          <FormCard>
             <ToggleRow>
-              <Text variant="body-sm">{t('storeSettings:storeSettings.autoFulfillEnabled')}</Text>
+              <LabelWithInfo>
+                <Text variant="body-sm">{t('storeSettings:storeSettings.autoFulfillEnabled')}</Text>
+                <InfoTip text={t('storeSettings:storeSettings.autoFulfillEnabledHint')} />
+              </LabelWithInfo>
               <Toggle checked={props.autoFulfillEnabled} onChange={props.onAutoFulfillEnabledChange} />
             </ToggleRow>
-            <ModernTextInput
-              name="amazonTaxRate"
-              type="number"
-              label={t('storeSettings:storeSettings.amazonTaxRate')}
-              value={String(props.amazonTaxRate)}
-              onChange={props.onAmazonTaxRateChange}
-              isDisabled={!props.autoFulfillEnabled}
-            />
-            <InfoMessage>{t('storeSettings:storeSettings.amazonTaxRateDesc')}</InfoMessage>
+            <AutomationField>
+              <LabelWithInfo>
+                <Text variant="body-sm">{t('storeSettings:storeSettings.amazonTaxRate')}</Text>
+                <InfoTip text={t('storeSettings:storeSettings.amazonTaxRateDesc')} />
+              </LabelWithInfo>
+              <ModernTextInput
+                name="amazonTaxRate"
+                type="number"
+                value={String(props.amazonTaxRate)}
+                onChange={props.onAmazonTaxRateChange}
+                isDisabled={!props.autoFulfillEnabled}
+                suffixText="%"
+              />
+            </AutomationField>
             <ToggleRow>
-              <Text variant="body-sm">
-                {t('storeSettings:storeSettings.trackingConversionEnabled')}
-              </Text>
+              <LabelWithInfo>
+                <Text variant="body-sm">
+                  {t('storeSettings:storeSettings.trackingConversionEnabled')}
+                </Text>
+                <InfoTip text={t('storeSettings:storeSettings.trackingConversionEnabledHint')} />
+              </LabelWithInfo>
               <Toggle
                 checked={props.trackingConversionEnabled}
                 onChange={props.onTrackingConversionEnabledChange}
-                disabled={!props.isShipFromAddressComplete}
               />
             </ToggleRow>
-            <InfoMessage>
-              {props.isShipFromAddressComplete
-                ? t('storeSettings:storeSettings.trackingConversionEnabledHint')
-                : t('storeSettings:storeSettings.trackingConversionNeedsAddress')}
-            </InfoMessage>
-            <ModernSelect
-              name="trackingConversionScope"
-              label={t('storeSettings:storeSettings.trackingConversionScope')}
-              value={props.trackingConversionScope}
-              isDisabled={!props.trackingConversionEnabled}
-              options={[
-                {
-                  value: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
-                  label: t('storeSettings:storeSettings.trackingConversionScopeAmazonOnly'),
-                },
-                {
-                  value: TrackingConversionScope.ALL,
-                  label: t('storeSettings:storeSettings.trackingConversionScopeAll'),
-                },
-              ]}
-              onChange={(value) => props.onTrackingConversionScopeChange(value as TrackingConversionScope)}
-            />
-            <InfoMessage>{t('storeSettings:storeSettings.trackingConversionScopeHint')}</InfoMessage>
+            {props.showConversionOffWarning && (
+              <InfoMessage type="error">
+                {t('storeSettings:storeSettings.trackingExposure.conversionOff')}
+              </InfoMessage>
+            )}
+            <AutomationField>
+              <LabelWithInfo>
+                <Text variant="body-sm">
+                  {t('storeSettings:storeSettings.trackingConversionScope')}
+                </Text>
+                <InfoTip text={t('storeSettings:storeSettings.trackingConversionScopeHint')} />
+              </LabelWithInfo>
+              <ModernSelect
+                name="trackingConversionScope"
+                value={props.trackingConversionScope}
+                isDisabled={!props.trackingConversionEnabled}
+                fullWidth
+                options={[
+                  {
+                    value: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
+                    label: t('storeSettings:storeSettings.trackingConversionScopeAmazonOnly'),
+                  },
+                  {
+                    value: TrackingConversionScope.ALL,
+                    label: t('storeSettings:storeSettings.trackingConversionScopeAll'),
+                  },
+                ]}
+                onChange={(value) => props.onTrackingConversionScopeChange(value as TrackingConversionScope)}
+              />
+            </AutomationField>
             <ToggleRow>
-              <Text variant="body-sm">
-                {t('storeSettings:storeSettings.trackingConvertManualOrders')}
-              </Text>
+              <LabelWithInfo>
+                <Text variant="body-sm">
+                  {t('storeSettings:storeSettings.trackingConvertManualOrders')}
+                </Text>
+                <InfoTip text={t('storeSettings:storeSettings.trackingConvertManualOrdersHint')} />
+              </LabelWithInfo>
               <Toggle
                 checked={props.trackingConvertManualOrders}
                 onChange={props.onTrackingConvertManualOrdersChange}
                 disabled={!props.trackingConversionEnabled}
               />
             </ToggleRow>
-            <InfoMessage>
-              {t('storeSettings:storeSettings.trackingConvertManualOrdersHint')}
-            </InfoMessage>
+            {props.showManualExposureWarning && (
+              <InfoMessage type="error">
+                {t(
+                  props.isEveryOrderManual
+                    ? 'storeSettings:storeSettings.trackingExposure.manualAll'
+                    : 'storeSettings:storeSettings.trackingExposure.manualSome'
+                )}
+              </InfoMessage>
+            )}
           </FormCard>
         )}
         {isMessaging && (
@@ -191,6 +197,40 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           </FormCard>
         )}
       </BodyStack>
+
+      {/* Both confirmations are `type="error"`, not "warning": the consequence
+          is a raw Amazon number on a live eBay order, and eBay has no endpoint
+          to revise a fulfillment once it is sent. */}
+      <ConfirmModal
+        isOpen={props.isConfirmingConversionOff}
+        onClose={props.onCancelConversionOff}
+        onConfirm={props.onConfirmConversionOff}
+        type="error"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('storeSettings:storeSettings.trackingExposure.confirmConversionOff')}
+        confirmLabel={t('storeSettings:storeSettings.trackingExposure.confirmDisable')}
+        cancelLabel={t('translation:common.cancel')}
+      />
+      <ConfirmModal
+        isOpen={props.isConfirmingManualOff}
+        onClose={props.onCancelManualOff}
+        onConfirm={props.onConfirmManualOff}
+        type="error"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('storeSettings:storeSettings.trackingExposure.confirmManualOff')}
+        confirmLabel={t('storeSettings:storeSettings.trackingExposure.confirmDisable')}
+        cancelLabel={t('translation:common.cancel')}
+      />
     </Drawer>
   );
 };

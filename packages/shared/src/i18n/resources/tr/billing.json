@@ -80,7 +80,8 @@
         "description": "Kaldırılmış paket. Mevcut abonelikler çalışmaya devam eder; yeni kayıtlar yukarıdaki paketlerden seçer."
       },
       "switchTo": "{{plan}} paketine geç",
-      "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak."
+      "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak.",
+      "planNamed": "{{plan}} Planı"
     },
     "planChange": {
       "title": "Plan değişikliğini onaylayın",

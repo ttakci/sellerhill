@@ -3,7 +3,7 @@
  */
 
 import styled from '@emotion/styled';
-import { tkn } from '@repo/ui';
+import { Card, tkn } from '@repo/ui';
 
 export const Root = styled.div`
   display: flex;
@@ -44,12 +44,20 @@ export const CarouselSection = styled.section`
   min-width: 0;
 `;
 
-export const EmptyCard = styled.div`
-  background: ${tkn('colors.surface.primary')};
-  border: 0.0625rem solid ${tkn('colors.border.primary')};
-  border-radius: ${tkn('radius.lg')};
-  box-shadow: ${tkn('shadows.sm')};
-  box-sizing: border-box;
+/*
+ * Was a hand-rolled surface (border + radius + shadow) that only sized to the
+ * EmptyState's own airy padding, so an empty section stood taller than a real
+ * populated card. Now the Card atom (mirrors ListingsOverviewPage's EmptyCard)
+ * with a min-height of exactly one populated ListingCard/OrderCard — image
+ * (10.5rem) + the card's own vertical padding (2 x spacing.lg) — and its
+ * content centered in that box.
+ */
+export const EmptyCard = styled(Card)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(10.5rem + 2 * ${tkn('spacing.lg')});
 `;
 
 export const SectionHeading = styled.div`

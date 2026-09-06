@@ -87,6 +87,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
             $hasValue={hasValue}
             $isDisabled={!!isDisabled}
             $hasIconLeft={!!iconLeft}
+            $hasIconRight={!!effectiveIconRight || !!suffixText}
             $hasError={!!error}
             $size={size}
           >

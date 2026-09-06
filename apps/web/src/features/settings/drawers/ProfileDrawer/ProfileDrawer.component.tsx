@@ -1,4 +1,4 @@
-import { Drawer, ModernTextInput } from '@repo/ui';
+import { Drawer, ModernTextInput, PhoneInput } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,13 +12,15 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
   firstName,
   lastName,
   phoneNumber,
+  phoneError,
+  defaultCountry,
   isSaving,
   onFirstNameChange,
   onLastNameChange,
   onPhoneNumberChange,
   onSave,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <Drawer
@@ -53,11 +55,17 @@ export const ProfileDrawerComponent: React.FC<ProfileDrawerComponentProps> = ({
             value={email}
             readOnly
           />
-          <ModernTextInput
+          <PhoneInput
             name="phoneNumber"
             label={t('translation:settingsHub.drawer.profile.phone')}
+            countryLabel={t('translation:settingsHub.drawer.profile.phoneCountry')}
             value={phoneNumber}
             onChange={onPhoneNumberChange}
+            errorMessage={phoneError}
+            defaultCountry={defaultCountry}
+            locale={i18n.language}
+            searchPlaceholder={t('translation:settingsHub.drawer.profile.phoneCountrySearch')}
+            noResultsMessage={t('translation:common.noResults')}
           />
         </S.FormCard>
       </S.BodyStack>

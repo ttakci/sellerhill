@@ -16,13 +16,15 @@ export const BodyStack = styled.div`
 `;
 
 /**
- * White, borderless form surface inside drawers.
+ * White form surface inside drawers.
  * Drawer body uses a soft canvas (background.primary); this card is pure white
- * with a light shadow so fields read as one elevated block.
+ * with a light border + shadow so fields read as one elevated block. The border
+ * is what keeps the card's edge legible where the canvas behind it is nearly as
+ * light as the card itself — the shadow alone disappears at that contrast.
  */
 export const FormCard = styled.div`
   background: ${tkn('colors.surface.primary')};
-  border: none;
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.sm')};
   box-shadow: ${tkn('shadows.sm')};
   padding: ${tkn('spacing.lg')};

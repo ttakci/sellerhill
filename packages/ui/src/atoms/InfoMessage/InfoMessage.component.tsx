@@ -1,22 +1,46 @@
 import React from 'react';
 
+import type { MessageType } from '../../context';
 import { Button } from '../Button';
-import { Icon } from '../Icon';
+import { Icon, type IconName } from '../Icon';
 import { Text } from '../Text';
 
 import * as S from './InfoMessage.style';
 import type { InfoMessageProps } from './InfoMessage.types';
 
+/**
+ * The same glyph per type as `Dialog`, so a warning note and the dialog that
+ * reports the same condition cannot drift apart. `info` keeps the outlined
+ * triangle it has always drawn.
+ */
+const iconsByType: Record<MessageType, IconName> = {
+  success: 'check-circle',
+  error: 'triangle-info',
+  warning: 'alert-triangle',
+  info: 'triangle-info',
+};
+
 export const InfoMessage = ({
   children,
+  type = 'info',
   action,
   onAction,
   isActionLoading,
   className,
 }: InfoMessageProps): React.ReactElement => (
-  <S.Container className={className} role="note">
-    <S.IconWell>
-      <Icon name="triangle-info" size={18} color="semantic.info" />
+  <S.Container
+    className={className}
+    // A note is passive; anything louder is a consequence of what the user
+    // just changed, so it is announced rather than left to be discovered.
+    role={type === 'info' ? 'note' : 'alert'}
+    $type={type}
+  >
+    <S.IconWell $type={type}>
+      <Icon
+        name={iconsByType[type]}
+        size={18}
+        color={type === 'info' ? 'semantic.info' : 'text.inverse'}
+      />
     </S.IconWell>
     <S.Content>
       <Text variant="caption" color="text.primary">

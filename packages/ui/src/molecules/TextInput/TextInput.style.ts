@@ -30,6 +30,18 @@ export const FieldWrapper = styled.div<FieldContainerProps>`
   position: relative;
   flex-direction: column;
   width: 100%;
+  /* border-box so the 1px border sits inside the fixed height (otherwise every
+     field is 2px taller than controlHeight and misaligns with Select /
+     SearchField, which already do this), and 100% width never overflows the
+     flex parent. */
+  box-sizing: border-box;
+  /* A flex item's default min-width is its content's min-content size. A long
+     unbroken value (a pasted 2FA key, a URL) gives the inner input a large
+     min-content, which - without this - pushes the wrapper past its flex
+     parent, so the field renders wider than its siblings with the label and
+     padding visibly misaligned. Pinning it to 0 lets overflow:hidden do its
+     job and the value just scrolls inside a fixed-width field. */
+  min-width: 0;
   overflow: hidden;
   height: ${({ $size = 'medium', $hasLabel }) => controlHeight($size, !!$hasLabel)};
   background-color: ${({ theme, $isDisabled }) =>
@@ -60,6 +72,7 @@ interface LabelProps {
   $hasValue: boolean;
   $isDisabled: boolean;
   $hasIconLeft: boolean;
+  $hasIconRight?: boolean;
   $hasError: boolean;
   $size?: ControlSize;
 }
@@ -68,6 +81,12 @@ export const FloatingLabel = styled.label<LabelProps>`
   position: absolute;
   top: 0;
   left: ${({ $hasIconLeft }) => ($hasIconLeft ? CONTROL_ICON_WIDTH : CONTROL_PADDING_X)};
+  /* Bound the right edge too, so a long label truncates with an ellipsis
+     inside the field instead of running to the field's edge (where the
+     wrapper's overflow: hidden hard-clips it with no ellipsis) or under a
+     right-side icon. Without this the declared text-overflow: ellipsis never
+     fires — the label element otherwise sizes to its own content. */
+  right: ${({ $hasIconRight }) => ($hasIconRight ? CONTROL_ICON_WIDTH : CONTROL_PADDING_X)};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -123,6 +142,18 @@ export const Input = styled.input<{
   border: none;
   background: transparent;
   width: 100%;
+  /* THE fix for "a long value breaks the field padding": a bare input element
+     is content-box (there is no global reset), so width 100% plus horizontal
+     padding makes its border box wider than the wrapper. That turns the
+     overflow:hidden wrapper into a scroll container, and on focus the browser
+     scrolls it - dragging the absolutely-positioned label AND the input left
+     until the left inset visibly collapses. border-box folds the padding into
+     the 100%, so nothing ever overflows. */
+  box-sizing: border-box;
+  /* Same flexbox guard as FieldWrapper: an <input> in a flex container keeps
+     its intrinsic (size-attr / content) min-width unless this is set, so a
+     long value would otherwise stretch the field. */
+  min-width: 0;
   height: 100%;
   padding-top: ${({ $hasLabel, $size }) => {
     if (!$hasLabel) {
@@ -153,6 +184,21 @@ export const Input = styled.input<{
 
   &::placeholder {
     color: ${tkn('colors.text.tertiary')};
+  }
+
+  /* Native number-stepper buttons are browser chrome the design system does not
+     own — every other affordance on this control is ours. Hide them so a
+     type="number" field reads like every other input; a field that needs
+     stepping renders its own controls. */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
 `;
 

@@ -8,6 +8,8 @@ export const StyledTextarea = styled.textarea<{
   $hasError?: boolean;
   $fill?: boolean;
   $mono?: boolean;
+  $hasLabel?: boolean;
+  $autoResize?: boolean;
 }>`
   width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   box-sizing: border-box;
@@ -49,6 +51,24 @@ export const StyledTextarea = styled.textarea<{
     line-height: ${theme.typography.lineHeight.relaxed};
   `}
 
+  /* Reserve room at the top for the floated label. */
+  ${({ $hasLabel }) =>
+    $hasLabel &&
+    `
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  `}
+
+  /* Grow with content, bounded by min/max height. */
+  ${({ $autoResize }) =>
+    $autoResize &&
+    `
+    field-sizing: content;
+    max-height: 22rem;
+    overflow-y: auto;
+    resize: none;
+  `}
+
   /* Occupy the whole positioned parent instead of sizing to rows. */
   ${({ $fill }) =>
     $fill &&
@@ -61,6 +81,26 @@ export const StyledTextarea = styled.textarea<{
     resize: none;
     overflow-y: auto;
   `}
+`;
+
+export const FloatingLabel = styled.label`
+  position: absolute;
+  top: 0;
+  left: ${CONTROL_PADDING_X};
+  transform: translateY(1.5rem) scale(1);
+  transform-origin: top left;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - ${CONTROL_PADDING_X} * 2);
+  color: ${tkn('colors.text.tertiary')};
+  font-family: ${tkn('typography.fontFamily.body')};
+  font-size: ${tkn('typography.fontSize.sm')};
+  font-weight: ${tkn('typography.fontWeight.normal')};
+  transition:
+    transform ${tkn('transitions.fast')},
+    color ${tkn('transitions.fast')};
 `;
 
 export const Container = styled.div<{ $fill?: boolean }>`
@@ -77,4 +117,25 @@ export const Container = styled.div<{ $fill?: boolean }>`
     position: static;
     height: 100%;
   `}
+`;
+
+/**
+ * Wraps the textarea + its floating label. The float animation is driven purely
+ * by CSS state on the bare `textarea` / `label` children (scoped to this
+ * wrapper), so the atom needs no focus state of its own. The textarea carries
+ * `placeholder=" "` so `:placeholder-shown` reflects emptiness.
+ */
+export const LabeledWrapper = styled.div`
+  position: relative;
+  width: 100%;
+
+  & > textarea:focus ~ label,
+  & > textarea:not(:placeholder-shown) ~ label {
+    transform: translateY(0.5rem) scale(0.75);
+    font-weight: ${tkn('typography.fontWeight.semibold')};
+  }
+
+  & > textarea:focus ~ label {
+    color: ${tkn('colors.brand.primary')};
+  }
 `;

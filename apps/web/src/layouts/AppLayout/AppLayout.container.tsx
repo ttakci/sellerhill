@@ -4,7 +4,7 @@ import {
   resolveEntitlementState,
   type SupportedLocale,
 } from '@repo/shared';
-import { SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
+import { getLocaleConfig, SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,6 +21,7 @@ import {
 import { useGetMeQuery, useLogoutMutation } from '@/features/auth/api/authApi';
 import { logout, selectIsAuthenticated } from '@/features/auth/store/authSlice';
 import { useGetBillingSummaryQuery } from '@/features/billing/api/billing.api';
+import { buildBillingUsageRows } from '@/features/billing/utils/usageRows';
 import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
 
@@ -41,7 +42,7 @@ export const AppLayout: React.FC = () => {
 
   const { buildPath } = useLocale();
   const { data: user, isLoading: isUserLoading } = useGetMeQuery();
-  const { t, i18n } = useTranslation(['translation', 'listings', 'orders']);
+  const { t, i18n } = useTranslation(['translation', 'listings', 'orders', 'billing']);
   const { loadingState } = useUI();
   const { localeNavigate, changeLocale } = useLocale();
 
@@ -52,6 +53,9 @@ export const AppLayout: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [openSections, setOpenSections] = useState({ inventory: true, configuration: true });
+  // Usage meters in the profile dropdown default to expanded — the whole point
+  // is a glanceable shortcut — but collapse for anyone who wants a tidy menu.
+  const [isProfileUsageOpen, setIsProfileUsageOpen] = useState(true);
 
   // Close mobile sidebar on route change & auto-open the section containing the current route
   useEffect(() => {
@@ -68,6 +72,10 @@ export const AppLayout: React.FC = () => {
 
   const handleToggleSection = useCallback((section: 'inventory' | 'configuration') => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  }, []);
+
+  const handleToggleProfileUsage = useCallback(() => {
+    setIsProfileUsageOpen((prev) => !prev);
   }, []);
 
   const userName = user ? `${user.firstName} ${user.lastName}` : t('translation:common.notSet');
@@ -146,6 +154,22 @@ export const AppLayout: React.FC = () => {
     resolveEntitlementState(billingSummary?.subscription?.status ?? null) ===
       EntitlementState.SUSPENDED;
 
+  /*
+   * The same three meters the Billing page shows, surfaced in the profile
+   * dropdown as a shortcut. `billingSummary` is already fetched above for the
+   * suspension gate, so this costs no extra request; the shared builder keeps
+   * the figures identical to the Billing page's own list.
+   */
+  const billingUsageRows = useMemo(
+    () => buildBillingUsageRows(billingSummary, t, getLocaleConfig(i18n.language).locale),
+    [billingSummary, t, i18n.language],
+  );
+  // Same key the Billing page renders — one label catalog, no drift.
+  const billingPlanSlug = billingSummary?.plan?.slug ?? null;
+  const billingPlanName = billingPlanSlug
+    ? t(`billing:billing.plans.${billingPlanSlug}.name`)
+    : null;
+
   if (!isAuthenticated) {
     return <Navigate to={buildPath('/login')} state={{ from: location }} replace />;
   }
@@ -191,6 +215,10 @@ export const AppLayout: React.FC = () => {
       onToggleSection={handleToggleSection}
       pendingActionCount={actionCenter?.totalCount ?? 0}
       hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
+      billingUsageRows={billingUsageRows}
+      billingPlanName={billingPlanName}
+      isProfileUsageOpen={isProfileUsageOpen}
+      onToggleProfileUsage={handleToggleProfileUsage}
       i18nLanguage={(i18n.language || 'en').split('-')[0]}
     />
   );

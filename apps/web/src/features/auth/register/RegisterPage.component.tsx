@@ -6,10 +6,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerFormDataSchema, type RegisterFormData } from '@repo/shared';
-import { Button, Icon, Logo, MeshBackground, ModernTextInput, Text, Typewriter } from '@repo/ui';
+import { Button, Icon, ModernTextInput, Text } from '@repo/ui';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+
+import { AuthShowcase } from '../shared/AuthShowcase';
 
 import * as S from './RegisterPage.style';
 import type { RegisterPageComponentProps } from './RegisterPage.types';
@@ -43,38 +45,14 @@ export const RegisterPageComponent = ({
   return (
     <S.Container>
       <S.LayoutWrapper>
-        {/* Left Panel: Branding */}
-        <S.BrandingPanel>
-          <S.DecorationArea>
-            <MeshBackground animate={true} />
-          </S.DecorationArea>
-
-          <S.BrandingContent>
-            <S.BrandingLogoWrapper>
-              <Logo height={280} />
-            </S.BrandingLogoWrapper>
-
-            <S.SloganWrapper>
-              <Typewriter
-                phrases={[
-                  t('auth:auth.branding.slogan1'),
-                  t('auth:auth.branding.slogan2'),
-                  t('auth:auth.branding.slogan3'),
-                  t('auth:auth.branding.slogan4'),
-                ]}
-                typingSpeed={70}
-                deletingSpeed={40}
-                pauseTime={2500}
-              />
-            </S.SloganWrapper>
-          </S.BrandingContent>
-        </S.BrandingPanel>
+        {/* Left Panel: Branding + demo showcase */}
+        <AuthShowcase />
 
         {/* Right Panel: Form */}
         <S.FormPanel>
           <S.AuthCard>
             <S.Header>
-              <Text variant="h2" weight="semibold">
+              <Text variant="display" weight="bold">
                 {t('auth:auth.register.title')}
               </Text>
               <Text variant="body" color="text.secondary">

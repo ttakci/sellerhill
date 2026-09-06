@@ -12,6 +12,7 @@
       "marketplaceFR": "Fransa (eBay.fr)",
       "marketplaceIT": "İtalya (eBay.it)",
       "marketplaceES": "İspanya (eBay.es)",
+      "marketplaceUsOnlyNote": "Şu an için yalnızca Amerika Birleşik Devletleri (eBay.com) pazar yeri desteklenmektedir.",
       "successMessage": "eBay hesabı başarıyla bağlandı!",
       "errorMessage": "eBay hesabı bağlanırken hata oluştu",
       "alreadyConnected": "Bu eBay hesabı zaten bağlı"

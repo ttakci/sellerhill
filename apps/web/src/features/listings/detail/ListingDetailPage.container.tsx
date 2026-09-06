@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ListingStatus, PolicyType, updateListingSchema, type PriceRange, type UpdateListingFormData } from '@repo/shared';
+import { ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData } from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
-import type { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,7 @@ import {
   usePublishListingMutation,
   useUpdateListingMutation,
 } from '../api/listings.api';
+import { buildMarginRangeDetails, summarizeMarginStrategy } from '../shared/margin-strategy';
 
 import { ListingDetailPageComponent } from './ListingDetailPage.component';
 import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
@@ -50,38 +50,6 @@ const parseOptionalNumber = (raw: string): number | null => {
   }
   const n = Number(raw);
   return Number.isNaN(n) ? null : n;
-};
-
-/** One-line read of a group's repricing strategy for the Listeleme Ayar Grubu
- *  card — a range (or single value) of whichever margin shape the group's
- *  price ranges actually use. Mixed percent+fixed ranges fall back to a count,
- *  since a min/max across two different units would misrepresent the group. */
-const summarizeMarginStrategy = (
-  ranges: PriceRange[] | undefined,
-  fmtCurrency: (value: number) => string,
-  t: TFunction
-): string | undefined => {
-  if (!ranges || ranges.length === 0) {
-    return undefined;
-  }
-  const percents = ranges
-    .map((r) => r.profitMarginPercent)
-    .filter((v): v is number => typeof v === 'number');
-  const fixedAmounts = ranges
-    .map((r) => r.fixedProfitAmount)
-    .filter((v): v is number => typeof v === 'number');
-
-  if (percents.length > 0 && fixedAmounts.length === 0) {
-    const min = Math.min(...percents);
-    const max = Math.max(...percents);
-    return min === max ? `%${min}` : `%${min}–%${max}`;
-  }
-  if (fixedAmounts.length > 0 && percents.length === 0) {
-    const min = Math.min(...fixedAmounts);
-    const max = Math.max(...fixedAmounts);
-    return min === max ? fmtCurrency(min) : `${fmtCurrency(min)}–${fmtCurrency(max)}`;
-  }
-  return t('listings.detail.groupMarginMixed', { count: ranges.length });
 };
 
 export const ListingDetailPageContainer: React.FC = () => {
@@ -332,25 +300,12 @@ export const ListingDetailPageContainer: React.FC = () => {
     [selectedGroup, fmtCurrency, t, dash]
   );
 
-  /** Per-range breakdown backing the Kâr Marjı info tooltip — only meaningful
-   *  once there's more than one range to distinguish; a single range already
-   *  says everything in `groupMarginSummaryLabel` itself. */
-  const groupMarginRangeDetails = useMemo(() => {
-    const ranges = selectedGroup?.repricingStrategy;
-    if (!ranges || ranges.length <= 1) {
-      return [];
-    }
-    return ranges.map((range) => {
-      const bounds = `${fmtCurrency(range.minPrice)} – ${fmtCurrency(range.maxPrice)}`;
-      const value =
-        typeof range.profitMarginPercent === 'number'
-          ? `%${range.profitMarginPercent}`
-          : typeof range.fixedProfitAmount === 'number'
-            ? fmtCurrency(range.fixedProfitAmount)
-            : dash;
-      return t('listings.detail.groupMarginRow', { range: bounds, value });
-    });
-  }, [selectedGroup, fmtCurrency, t, dash]);
+  /** Per-range breakdown backing the Kâr Marjı info tooltip — see
+   *  `buildMarginRangeDetails`; empty for a single-range group. */
+  const groupMarginRangeDetails = useMemo(
+    () => buildMarginRangeDetails(selectedGroup?.repricingStrategy, fmtCurrency, t, dash),
+    [selectedGroup, fmtCurrency, t, dash]
+  );
 
   const statusLabel = useMemo(() => {
     if (!listing) {

@@ -74,8 +74,15 @@
       "eBaySyncShipped": "eBay siparişi kargolandı olarak işaretlendi",
       "eBaySyncDelivered": "eBay siparişi teslim edildi olarak işaretlendi"
     },
+    "accountDrawer": {
+      "steps": {
+        "account": "Hesap",
+        "proxy": "Proxy"
+      }
+    },
     "autoFulfill": {
       "autoFulfillEnabled": "Bu hesabı otomatik karşılama için kullan",
+      "autoFulfillEnabledHint": "Açıldığında, eşleşen eBay siparişleri bu Amazon hesabı üzerinden (diğer etkin hesaplarla sırayla) otomatik olarak satın alınır. Ayrıca Mağaza Ayarları'nda genel otomatik karşılama açık olmalı ve aşağıda bir harcama limiti belirlenmelidir.",
       "autoFulfillCapTotal": "Maksimum sipariş tutarı (otomatik karşılama limiti)",
       "autoFulfillCapTotalHint": "Hesap başına harcama tavanı (USD). Bu tutarın üzerindeki siparişler bu hesabı atlar. Otomatik karşılamanın etkinleştirilmesi için gereklidir.",
       "autoFulfillCapTotalPlaceholder": "ör. 250",
@@ -84,6 +91,7 @@
     },
     "proxy": {
       "sectionTitle": "Proxy",
+      "stepSubtitle": "İsteğe bağlı — bu hesabın otomasyonunu kendi proxy'niz üzerinden yönlendirin",
       "enabled": "Proxy'yi etkinleştir",
       "enabledHint": "Hesabınızı korumak için bir proxy sunucusu kullanın",
       "connectionType": "Bağlantı Türü",
@@ -95,13 +103,16 @@
     },
     "marketplace": {
       "label": "Pazar Yeri",
+      "usOnlyNote": "Şu an için yalnızca Amerika Birleşik Devletleri (amazon.com) pazar yeri desteklenmektedir.",
       "AMAZON_US": "Amerika Birleşik Devletleri (amazon.com)",
       "readOnlyHint": "Hesap oluşturulduktan sonra pazar yeri değiştirilemez."
     },
     "errors": {
       "autoFulfillCapRequired": "Bu hesapta otomatik karşılamayı etkinleştirmek için bir maksimum sipariş tutarı belirleyin.",
       "proxyHostPortRequired": "Bu hesap için proxy kullanmak üzere bir sunucu adresi ve port girin.",
-      "unsupportedMarketplace": "Bu Amazon pazar yeri henüz kullanılamıyor."
+      "unsupportedMarketplace": "Bu Amazon pazar yeri henüz kullanılamıyor.",
+      "twoFactorSecretRequired": "Hesabın authenticator (2FA) gizli anahtarını ekleyin. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister ve sizin adınıza cevaplayabileceğimiz tek yöntem budur.",
+      "twoFactorSecretInvalid": "Bu bir authenticator gizli anahtarına benzemiyor. Amazon'un authenticator uygulaması kurulumundaki kurulum anahtarını yapıştırın (A–Z harfleri ve 2–7 rakamları), 6 haneli kodu değil."
     }
   }
 }

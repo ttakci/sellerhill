@@ -82,11 +82,13 @@ export const AmazonAccountCard: React.FC<AmazonAccountCardProps> = ({ account, o
               </S.DetailAction>
             )}
           </S.BottomRow>
-          {account.status === AmazonAccountStatus.INVALID && account.lastVerificationError && (
+          {account.status === AmazonAccountStatus.INVALID && account.verificationErrorCode && (
             <S.AccountMetaLine>
               <Icon name="alert-triangle" size={14} color="semantic.error" />
               <Text variant="caption" color="semantic.error">
-                {account.lastVerificationError}
+                {t(
+                  `translation:settingsHub.sections.amazon.verificationError.${account.verificationErrorCode}`,
+                )}
               </Text>
             </S.AccountMetaLine>
           )}

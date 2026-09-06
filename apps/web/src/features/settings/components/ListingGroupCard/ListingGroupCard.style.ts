@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import { Badge, Card, Text, tkn } from '@repo/ui';
+import { Badge, Card, IconButton, Text, tkn } from '@repo/ui';
 
-import { CARD_ACTION_ARROW_INSET, CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
+import { CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
 
 /**
  * Shared carousel height — every card is the same size regardless of whether
@@ -46,72 +46,118 @@ export const InteractiveCard = styled(Card, {
       : ''}
 `;
 
-export const TitleRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.sm')};
-  min-width: 0;
-`;
-
-export const CardName = styled(Text)`
-  transition: color ${tkn('transitions.normal')};
-  min-width: 0;
-`;
-
 export const CardBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.xl')};
   flex: 1;
 `;
 
-export const StatColumns = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: ${tkn('spacing.lg')};
-  margin-top: ${tkn('spacing.sm')};
+/** Group name on the left, template badge on the same line pinned right — the
+ *  name flexes and truncates first (`CardName` is `flex: 1`), the badge keeps
+ *  its own capped width. */
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  flex-shrink: 0;
 `;
 
-export const StatColumn = styled.div`
+export const CardName = styled(Text)`
+  flex: 1;
+  min-width: 0;
+  transition: color ${tkn('transitions.normal')};
+`;
+
+/**
+ * The listing detail page's compact fact grid, reused here so a group reads the
+ * same in Settings as it does on the listing it governs: icon + label left, the
+ * value right-aligned. It replaced two stacked `OVERLINE` column headings whose
+ * captions glued label and value into one run ("Stok: 1"), which had neither a
+ * value column to scan nor room for the labels to be spelled out.
+ *
+ * Single column always — every row stacks, nothing pairs 2-up.
+ */
+export const MetaList = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-top: ${tkn('spacing.2xs')};
+  border-top: 0.0625rem solid ${tkn('colors.border.primary')};
+`;
+
+/** One fact per line, divider between each; the last row drops its border. */
+export const MetaRow = styled.div`
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm')} 0;
+  min-width: 0;
+  border-bottom: 0.0625rem solid ${tkn('colors.border.primary')};
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+`;
+
+/** Row icon + label — matches `SettingsInfoRow`'s icon/label pairing. */
+export const MetaLabel = styled.div`
+  display: flex;
+  align-items: center;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
-export const StatColumnTitle = styled(Text)`
-  text-transform: uppercase;
-  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+export const MetaValue = styled(Text)`
+  flex-shrink: 0;
+  text-align: right;
 `;
 
-export const StatItem = styled.div`
+/** Kâr Marjı row: summary value + its info-tooltip trigger on one line.
+ *  Same `2xs` text↔icon gap and same ghost `IconButton` (hover included) as the
+ *  listing detail card's `MarginValueRow`. */
+export const MarginValueRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xs')};
-  min-width: 0;
-
-  & > span,
-  & > p {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  gap: ${tkn('spacing.2xs')};
 `;
 
-/** Arrow bottom-right — the same "this card opens something" affordance the
- *  buyer message template card carries. `margin-top: auto` pins it to the
- *  bottom of the fixed-height card whatever the content above it measures. */
+/** `styled(IconButton)` so the ghost hover / focus ring stay identical to the
+ *  listing detail card. The negative right margin cancels the button's own
+ *  right padding so the info glyph lands on the same column as the plain
+ *  numeric values in the rows above. */
+export const MarginInfoButton = styled(IconButton)`
+  margin-right: calc(-1 * ${tkn('spacing.sm')});
+`;
+
+/** Tooltip body — one price range per line, each kept on a single unbroken
+ *  line so the box widens to fit instead of the portal's `word-break` chopping
+ *  every range into a vertical stack of fragments in the narrow drawer. */
+export const MarginTooltipList = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  white-space: nowrap;
+`;
+
+/** "Detay →" pinned bottom-right — `DetailAction`'s auto margin keeps it at the
+ *  end. The template badge lives on the title row now, not here. */
 export const BottomRow = styled.div`
   display: flex;
   align-items: center;
+  gap: ${tkn('spacing.sm')};
   margin-top: auto;
+  padding-top: ${tkn('spacing.sm')};
   flex-shrink: 0;
 `;
 
-/** "Detay" label + arrow. The arrow keeps its own fixed-width slot so its tip
- *  lines up with the "add new" card's arrow below it — see `cardMetrics`. */
+/** "Detay" label + arrow, flush to the card's content edge so it sits in the
+ *  same vertical column as the row values / the Kâr Marjı info icon above.
+ *  (The other carousel cards inset this arrow by `CARD_ACTION_ARROW_INSET` to
+ *  line up with the "add new" card's arrow instead — this one aligns to its own
+ *  data column.) */
 export const DetailAction = styled.span`
   display: inline-flex;
   align-items: center;
@@ -122,12 +168,13 @@ export const DetailAction = styled.span`
 export const ArrowSlot = styled.span`
   display: inline-flex;
   align-items: center;
-  margin-right: ${tkn(CARD_ACTION_ARROW_INSET)};
   flex-shrink: 0;
 `;
 
-export const ActiveBadge = styled(Badge)`
-  max-width: 11rem; /* 176px — long template names / "Customized Template" */
+/** Shares the title line with the group name, pinned right — capped so a long
+ *  template name ellipsizes rather than pushing the name out. */
+export const TemplateBadge = styled(Badge)`
+  max-width: 9rem; /* 144px — shares the title line, so cap tighter; name truncates first */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

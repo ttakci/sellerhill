@@ -77,6 +77,9 @@ export type { FilePickerProps } from './molecules/FilePicker';
 export { TextInput } from './molecules/TextInput';
 export type { TextInputProps, TextInputSize } from './molecules/TextInput';
 
+export { PhoneInput, buildCountryOptions, describePhoneNumber, isValidPhone, toE164, DEFAULT_COUNTRY } from './molecules/PhoneInput';
+export type { PhoneInputProps, CountryOption, CountryCode } from './molecules/PhoneInput';
+
 export { ValidationMessage } from './molecules/ValidationMessage';
 export type { ValidationMessageProps } from './molecules/ValidationMessage';
 

@@ -6,6 +6,7 @@ import {
   EBAY_TITLE_MAX_LENGTH,
   TemplateType,
   buildListingTemplateContext,
+  buildStoreStreetLine,
   calculateListingPrice,
   renderListingTemplate,
   type ListingPriceMetrics,
@@ -133,10 +134,18 @@ export class ListingStrategyService {
       asin: product.asin,
       category: product.category,
       categoryPath: product.categoryPath,
-      // Location data from Store Settings
+      // Seller address from Store Settings (Store > Global). `city` used to be
+      // absent here entirely, so `ebay.service.ts` sent the STATE as the city
+      // on every inventory location; `address1` was never populated at all, so
+      // eBay received the literal string 'Use Store Address' as the street.
       country: storeSettings.country || 'US',
       postalCode: storeSettings.zipCode,
-      location: storeSettings.state, // Using state as location, or could be city+state
+      location: storeSettings.state,
+      city: storeSettings.shipFromCity,
+      address1: buildStoreStreetLine({
+        city: storeSettings.shipFromCity,
+        state: storeSettings.state,
+      }),
     };
   }
 

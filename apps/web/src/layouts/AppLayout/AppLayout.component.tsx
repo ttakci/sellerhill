@@ -1,4 +1,13 @@
-import { Breadcrumb, ConfirmModal, Dropdown, Icon, Logo, MeshBackground, Text } from '@repo/ui';
+import {
+  Breadcrumb,
+  ConfirmModal,
+  Dropdown,
+  Icon,
+  Logo,
+  MeshBackground,
+  ProgressRing,
+  Text,
+} from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
@@ -34,8 +43,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   pendingActionCount,
   hasCriticalActions,
   i18nLanguage,
+  billingUsageRows,
+  billingPlanName,
+  isProfileUsageOpen,
+  onToggleProfileUsage,
 }) => {
-  const { t } = useTranslation(['translation', 'actionCenter', 'listings', 'orders']);
+  const { t } = useTranslation(['translation', 'actionCenter', 'listings', 'orders', 'billing']);
 
   return (
     <ErrorBoundary>
@@ -63,7 +76,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               onClick={() => onLocaleNavigate('/dashboard')}
               title={t('translation:menu.dashboard')}
             >
-              <Logo layout="wordmark" height={30} />
+              <Logo layout="wordmark" height={32} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 
@@ -268,7 +281,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
                 <Dropdown
                   align="right"
-                  width="12rem"
+                  width={billingUsageRows.length > 0 ? '18rem' : '12rem'}
                   header={
                     <S.ProfileDropdownHeader>
                       <Text variant="body-sm" weight="semibold" color="text.primary">
@@ -277,6 +290,52 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                       <Text variant="caption" color="text.tertiary">
                         {user?.email || ''}
                       </Text>
+                      {billingUsageRows.length > 0 && (
+                        <S.ProfileUsageBlock>
+                          <S.ProfileUsageToggle
+                            type="button"
+                            onClick={onToggleProfileUsage}
+                            aria-expanded={isProfileUsageOpen}
+                          >
+                            <Icon name="bar-chart" size={18} strokeWidth={1.75} />
+                            <S.ProfileUsageToggleLabel>
+                              <Text variant="body-sm" color="text.primary">
+                                {billingPlanName
+                                  ? t('billing:billing.plans.planNamed', { plan: billingPlanName })
+                                  : t('billing:billing.usage.title')}
+                              </Text>
+                            </S.ProfileUsageToggleLabel>
+                            <Icon
+                              name={isProfileUsageOpen ? 'chevron-up' : 'chevron-down'}
+                              size={16}
+                              strokeWidth={1.75}
+                            />
+                          </S.ProfileUsageToggle>
+                          {isProfileUsageOpen && (
+                            <S.ProfileUsageList>
+                              {billingUsageRows.map((row) => (
+                                <S.ProfileUsageRow key={row.labelKey}>
+                                  <ProgressRing
+                                    value={row.barValue}
+                                    variant={row.barVariant}
+                                    size="sm"
+                                    centerLabel={row.ringLabel}
+                                    label={row.barAriaLabel}
+                                  />
+                                  <S.ProfileUsageText>
+                                    <Text variant="body-sm" color="text.primary">
+                                      {t(row.labelKey)}
+                                    </Text>
+                                    <Text variant="caption" color="text.tertiary" numeric>
+                                      {row.ofDisplay}
+                                    </Text>
+                                  </S.ProfileUsageText>
+                                </S.ProfileUsageRow>
+                              ))}
+                            </S.ProfileUsageList>
+                          )}
+                        </S.ProfileUsageBlock>
+                      )}
                     </S.ProfileDropdownHeader>
                   }
                   trigger={

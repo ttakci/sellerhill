@@ -4,9 +4,9 @@ export interface BuyerMessageTemplateCardProps {
   template: BuyerMessageTemplate;
   /** Localized display label for the template's event type. */
   eventLabel: string;
-  /** Shown bottom-left when the template is one of the user's seeded per-event defaults. */
+  /** Shown top-left (after the event badge) when the template is one of the user's seeded per-event defaults. */
   defaultBadgeLabel: string;
-  /** Shown bottom-left (in place of the default badge) for a user-authored template. */
+  /** Shown top-left (after the event badge, in place of the default badge) for a user-authored template. */
   customBadgeLabel: string;
   /** Called with the template id when the card is clicked or activated by keyboard. */
   onClick: (id: string) => void;

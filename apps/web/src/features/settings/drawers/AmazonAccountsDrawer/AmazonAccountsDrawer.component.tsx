@@ -1,8 +1,8 @@
-import { Drawer, QuickActionCard } from '@repo/ui';
+import { Drawer, EmptyState, QuickActionCard } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { BodyStack } from './AmazonAccountsDrawer.style';
+import { BodyStack, EmptyCard } from './AmazonAccountsDrawer.style';
 import type { AmazonAccountsDrawerComponentProps } from './AmazonAccountsDrawer.types';
 
 import { AccountCarousel } from '@/features/settings/components/AccountCarousel';
@@ -27,13 +27,23 @@ export const AmazonAccountsDrawerComponent: React.FC<AmazonAccountsDrawerCompone
       size="md"
     >
       <BodyStack>
-        <AccountCarousel
-          items={accounts}
-          keyExtractor={(account) => account.id}
-          renderCard={(account) => <AmazonAccountCard account={account} onClick={() => onEdit(account.id)} />}
-          onViewAll={onViewAll}
-          viewAllLabel={t('translation:settingsHub.drawer.amazonAccounts.viewAll.title')}
-        />
+        {accounts.length > 0 ? (
+          <AccountCarousel
+            items={accounts}
+            keyExtractor={(account) => account.id}
+            renderCard={(account) => <AmazonAccountCard account={account} onClick={() => onEdit(account.id)} />}
+            onViewAll={onViewAll}
+            viewAllLabel={t('translation:settingsHub.drawer.amazonAccounts.viewAll.title')}
+          />
+        ) : (
+          <EmptyCard>
+            <EmptyState
+              icon="shopping-bag"
+              title={t('translation:settingsHub.drawer.amazonAccounts.empty.title')}
+              description={t('translation:settingsHub.drawer.amazonAccounts.empty.description')}
+            />
+          </EmptyCard>
+        )}
         <QuickActionCard
           variant="brand"
           title={t('translation:settingsHub.drawer.amazonAccounts.addNew.title')}

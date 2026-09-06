@@ -162,7 +162,15 @@ export const DropdownContainer = styled.div<{ $placement?: 'bottom' | 'top' }>`
   position: absolute;
   top: calc(100% + 0.25rem);
   left: 0;
-  right: 0;
+  /*
+   * No "right: 0" here — the actual position/width are always set inline
+   * (Select.container.tsx measures the trigger and passes width explicitly).
+   * A stray "right: 0" alongside an inline left+width is inert per spec,
+   * but box-sizing has to be border-box or the inline content-box width
+   * plus this element's own border renders ~2px wider than the trigger,
+   * so the dropdown's right edge visibly overhangs it.
+   */
+  box-sizing: border-box;
   background: ${tkn('colors.surface.primary')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.md')};

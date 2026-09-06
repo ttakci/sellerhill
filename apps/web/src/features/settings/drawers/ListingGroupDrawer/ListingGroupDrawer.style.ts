@@ -39,6 +39,18 @@ export const ContentToggleRow = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
+/** Label + info-tooltip trigger, grouped on the left of a `ContentToggleRow`. */
+export const ToggleTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+export const InfoButton = styled(IconButtonAtom)`
+  flex-shrink: 0;
+`;
+
 /**
  * Plain title + action row, matching every other card header in this drawer
  * (no icon badge) — the icon-box `StepHeader` this replaced was a leftover

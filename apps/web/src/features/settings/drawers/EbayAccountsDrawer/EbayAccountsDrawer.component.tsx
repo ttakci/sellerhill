@@ -1,8 +1,8 @@
-import { Drawer, ModernSelect, QuickActionCard } from '@repo/ui';
+import { Drawer, InfoMessage, QuickActionCard } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { BodyStack, MarketplaceSelectWrapper } from './EbayAccountsDrawer.style';
+import { BodyStack } from './EbayAccountsDrawer.style';
 import type { EbayAccountsDrawerComponentProps } from './EbayAccountsDrawer.types';
 
 import { AccountCarousel } from '@/features/settings/components/AccountCarousel';
@@ -14,9 +14,6 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
   stores,
   onConnectNew,
   onViewAll,
-  marketplaceOptions,
-  selectedMarketplace,
-  onMarketplaceChange,
 }) => {
   const { t } = useTranslation(['ebay', 'translation']);
 
@@ -36,22 +33,13 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
           onViewAll={onViewAll}
           viewAllLabel={t('translation:settingsHub.drawer.ebayAccounts.viewAll.title')}
         />
-        <MarketplaceSelectWrapper>
-          <ModernSelect
-            label={t('ebay:ebay.connect.marketplaceLabel')}
-            options={marketplaceOptions}
-            value={selectedMarketplace}
-            onChange={(value) => onMarketplaceChange(value as typeof selectedMarketplace)}
-            isDisabled={marketplaceOptions.length <= 1}
-            fullWidth
-          />
-        </MarketplaceSelectWrapper>
         <QuickActionCard
           variant="brand"
           title={t('translation:settingsHub.drawer.ebayAccounts.addNew.title')}
           subtitle={t('translation:settingsHub.drawer.ebayAccounts.addNew.subtitle')}
           onClick={onConnectNew}
         />
+        <InfoMessage>{t('ebay:ebay.connect.marketplaceUsOnlyNote')}</InfoMessage>
       </BodyStack>
     </Drawer>
   );

@@ -83,6 +83,13 @@ const outlineGlow = (color: string): string => `0 0.25rem 0.625rem 0 ${color}18`
 
 export const ActionSurface = styled.button<ActionSurfaceProps>`
   all: unset;
+  /* all:unset above also resets user-select, and Chrome does NOT make button text
+     unselectable on its own — so pressing a button and moving the mouse a pixel
+     selected its label and painted it with the OS selection colour (purple on a
+     Windows accent theme). A label is not content anyone copies; the press must
+     look like a press. */
+  user-select: none;
+  -webkit-user-select: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;

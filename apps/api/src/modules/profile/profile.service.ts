@@ -60,8 +60,12 @@ export class ProfileService {
     Object.entries(request).forEach(([key, value]) => {
         const dbField = fieldsTemplate[key as keyof UpdateProfileRequest];
         if (dbField && value !== undefined) {
+             // An empty phone means "clear it" — store NULL so the column stays
+             // E.164-or-nothing for any future consumer.
+             const typedValue = value as string | number | boolean | null;
+             const normalized = key === 'phoneNumber' && typedValue === '' ? null : typedValue;
              updates.push(`${dbField} = $${paramIndex++}`);
-             values.push(value as string | number | boolean | null);
+             values.push(normalized);
         }
     });
 

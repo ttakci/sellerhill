@@ -65,7 +65,15 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  /** Fires when the input gains focus (symmetric with `onBlur`). */
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   required?: boolean;
   readOnly?: boolean;
+  /**
+   * Validation message for MANUAL usage (no `control`/react-hook-form).
+   * RHF-controlled inputs get their error from `fieldState` instead — pass
+   * this only when the field is driven by plain `value`/`onChange` props.
+   */
+  errorMessage?: string;
 }
