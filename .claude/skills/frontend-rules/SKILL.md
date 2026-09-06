@@ -53,6 +53,13 @@ Atoms/Molecules (`packages/ui/src/{atoms,molecules}/`) follow the same rules. **
 - Every interactive atom needs a `:focus-visible` ring. Checkbox/Radio/Toggle mirror it from the hidden input via `input:focus-visible + &` — a plain sibling selector, never an Emotion component selector.
 - Toolbar rows (filters): all compact same size so Search + Select + Button align.
 
+### Required-field validation (mandatory)
+- A required field is validated on submit attempt, not by silently disabling the submit/Continue button. Disabling gives the user no way to discover *which* field is wrong or why; a rejected click that turns the empty field(s) red does.
+- Pattern: track an `xSubmitAttempted` boolean (starts `false`, reset whenever the form/step is (re)opened with fresh data). The submit/Continue handler checks validity first — if invalid, set `xSubmitAttempted = true` and return without proceeding; only advance/save once valid.
+- Per-field error flags are `submitAttempted && !field.trim()` (or the field's own emptiness rule), computed in the **container** and passed down as booleans/strings — never a raw `.trim()` call inside a `.component.tsx` ternary.
+- Render the error via the field atom's own error prop, not a separate static `InfoMessage` sitting near the form. `ModernTextInput` supports this for **manual** (non-RHF) usage via `errorMessage?: string` — RHF-controlled fields get theirs from `fieldState.error` automatically. A static "N fields are required" info box that's always visible regardless of what the user has typed is not validation and should not be used as a substitute.
+- Do not gate the button's `disabled` state on form completeness for this purpose — `isContinueDisabled`/`isSubmitDisabled` should reflect only genuine in-flight state (`isSaving`), not field validity.
+
 ### Layout
 - Cards → `Card` variants: `default | bordered | elevated | flat | interactive | stat | section`. **Never hand-roll a card** — extend with `styled(Card)` + layout-only CSS.
 - Radius tiers: cards/tables/filter bars `lg` (12px) · controls `md` (8px) · badges `sm` (6px) · modals `xl`.

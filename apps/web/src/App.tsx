@@ -45,6 +45,8 @@ const CheckEmailPage = lazy(() => import('./features/auth/check-email'));
 const LoginPage = lazy(() => import('./features/auth/login'));
 const RegisterPage = lazy(() => import('./features/auth/register'));
 const VerifyEmailPage = lazy(() => import('./features/auth/verify-email'));
+const ForgotPasswordPage = lazy(() => import('./features/auth/forgot-password'));
+const ResetPasswordPage = lazy(() => import('./features/auth/reset-password'));
 
 // App shell pages
 const ActionCenterPage = lazy(() =>
@@ -124,6 +126,22 @@ export function App() {
             element={
               <Lazy>
                 <CheckEmailPage />
+              </Lazy>
+            }
+          />
+          <Route
+            path="forgot-password"
+            element={
+              <Lazy>
+                <ForgotPasswordPage />
+              </Lazy>
+            }
+          />
+          <Route
+            path="reset-password"
+            element={
+              <Lazy>
+                <ResetPasswordPage />
               </Lazy>
             }
           />
@@ -299,6 +317,9 @@ export function App() {
         <Route path="/login" element={<LocaleRedirect to="login" />} />
         <Route path="/verify-email" element={<LocaleRedirect to="verify-email" preserveQuery />} />
         <Route path="/auth/check-email" element={<LocaleRedirect to="auth/check-email" preserveQuery />} />
+        <Route path="/forgot-password" element={<LocaleRedirect to="forgot-password" />} />
+        {/* preserveQuery carries the reset token through the locale redirect. */}
+        <Route path="/reset-password" element={<LocaleRedirect to="reset-password" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />

@@ -27,7 +27,19 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
 
   const [getConnectUrl, { isLoading, isSuccess, data, error }] = useLazyGetEbayConnectUrlQuery();
 
-  useLoading(isLoading);
+  /**
+   * The connect-URL request resolves in a few hundred ms, then we assign
+   * `window.location.href` and the browser starts a full-page navigation to
+   * eBay. By that point RTK Query's `isLoading` has already flipped back to
+   * false, so the global overlay and the button spinner would go idle right
+   * when the page freezes for the redirect — the click reads as "nothing
+   * happened". Holding `isSuccess` in the flag keeps the feedback up from the
+   * click straight through to unload; `error` drops it so a failed attempt
+   * releases the UI instead of spinning forever.
+   */
+  const isConnecting = (isLoading || isSuccess) && !error;
+
+  useLoading(isConnecting);
 
   useEffect(() => {
     if (isSuccess && data) {window.location.href = data.url;}
@@ -47,6 +59,7 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   }, [error, showMessage, closeMessage, i18n]);
 
   const handleConnect = (): void => {
+    if (isConnecting) {return;}
     void getConnectUrl({ marketplaceId: selectedMarketplace });
   };
 
@@ -57,7 +70,7 @@ export const OnboardingEbayPageContainer = (): React.ReactElement => {
   return (
     <OnboardingEbayPageComponent
       onConnect={handleConnect}
-      isLoading={isLoading}
+      isLoading={isConnecting}
       onSkip={handleSkip}
       marketplaceOptions={getEbayMarketplaceOptions(t)}
       selectedMarketplace={selectedMarketplace}

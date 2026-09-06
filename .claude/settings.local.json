@@ -149,7 +149,9 @@
       "Bash(wc -l packages/ui/src/theme/*.ts)",
       "Bash(pnpm --filter @zonds/web exec eslint apps/web/src/features/settings/SettingsPage/SettingsHubPage.component.tsx apps/web/src/features/settings/SettingsPage/SettingsHubPage.style.ts --max-warnings 0)",
       "Bash(pnpm --filter @zonds/web exec tsc --noEmit -p apps/web/tsconfig.json)",
-      "Bash(pnpm exec *)"
+      "Bash(pnpm exec *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)"
     ]
   }
 }

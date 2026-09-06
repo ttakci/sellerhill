@@ -82,6 +82,31 @@ export interface ResendVerificationRequest {
 }
 
 /**
+ * Request a password-reset email.
+ * The response is deliberately identical whether or not an account exists.
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+  locale?: SupportedLocale;
+}
+
+/**
+ * Complete a password reset with the opaque token from the emailed link.
+ */
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+/**
+ * Generic acknowledgement for a reset request (carries an i18n key only —
+ * never reveals whether an email was actually sent).
+ */
+export interface PasswordResetRequestResponse {
+  message: string; // i18n key
+}
+
+/**
  * Refresh token request body (optional — cookie is preferred).
  */
 export interface RefreshTokenRequest {

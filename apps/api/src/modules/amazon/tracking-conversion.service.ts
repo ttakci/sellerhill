@@ -11,11 +11,21 @@
 // without persistence that retry would buy a second tracking number and hand
 // eBay a different one, leaving the buyer with a number that tracks nothing.
 //
-// FAIL-SOFT BY DESIGN. Every external failure degrades to the local
-// pass-through (`Amazon_Logistics`), which is exactly today's behaviour. A
-// provider outage, an exhausted plan quota or a revoked key must never stop a
-// shipment being marked shipped on eBay — late tracking is a defect, missing
-// fulfilment is worse.
+// FAIL-SOFT, BUT NOT PUSH-ANYWAY. Every external failure still RESOLVES to the
+// local pass-through rather than throwing — a provider outage must never crash
+// the shipped transition. What changed (2026-09-01) is that resolving is no
+// longer the same as being publishable: each pass-through carries a
+// `ConversionOutcome` saying WHY, and the caller pushes to eBay only when
+// `mayPushToEbay` allows it.
+//
+// The distinction is the point. `PASSTHROUGH_NOT_REQUIRED` — the seller left
+// the provider on `local`, put this carrier outside their scope, or turned
+// conversion off for hand-linked orders — is pushed, because the raw Amazon
+// number IS what they asked for. `PASSTHROUGH_FAILED` and
+// `PASSTHROUGH_RETRYABLE` are NOT: a conversion was expected and did not
+// happen, and handing the buyer the supplier's own tracking number is the one
+// outcome this feature exists to prevent. eBay's Fulfillment API has no update
+// endpoint, so that number could never be taken back.
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
@@ -38,6 +48,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
+import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import {
   AQUILINE_PLAN_SNAPSHOT_INSERT_SQL,
   buildAquilinePlanSnapshotParams,
@@ -145,6 +156,7 @@ export class TrackingConversionService {
     private readonly aquiline: AquilineClient,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly aquilineProfile: AquilineProfileService,
+    private readonly trackingQueue: AmazonTrackingQueueService,
   ) {}
 
   /**
@@ -183,7 +195,7 @@ export class TrackingConversionService {
     const order = await this.loadOrder(request.orderId);
     if (!order) {
       // No row to persist against; the honest transform is still correct.
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
     if (order.converted_tracking_number) {
@@ -201,7 +213,7 @@ export class TrackingConversionService {
     const settings = await this.resolveSettings(order);
     const provider = normalizeProvider(settings.tracking_conversion_provider);
     if (!isExternalProvider(provider)) {
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
     // Scope: does this carrier qualify under the seller's setting?
@@ -217,7 +229,7 @@ export class TrackingConversionService {
       this.logger.debug(
         `Order ${order.id}: carrier is not Amazon Logistics and scope is ${scope} — passing through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
     // Manually linked orders: converted only when the seller allows it. The
@@ -234,7 +246,7 @@ export class TrackingConversionService {
       this.logger.debug(
         `Order ${order.id}: manually linked and manual conversion is off — passing through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_NOT_REQUIRED);
     }
 
     // Entitlement: a lapsed account does not get paid conversions.
@@ -242,7 +254,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: subscription suspended — falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     // Monthly conversion quota. Exhaustion DEGRADES rather than blocks: the
@@ -256,7 +268,7 @@ export class TrackingConversionService {
         `Order ${order.id}: monthly tracking-conversion quota exhausted ` +
           `(${quota.used}/${quota.limitValue ?? '?'}) — falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     const config = await this.resolveConfig();
@@ -264,7 +276,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: provider is ${provider} but no API key is configured — falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     const recipient = toProviderAddress(order.shipping_address);
@@ -274,7 +286,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: buyer address incomplete — cannot convert, falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     // Two cheap local preconditions, checked before any network call so a
@@ -291,7 +303,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: missing Amazon order id or tracking URL — cannot convert, falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     // One Aquiline profile per (user, Amazon marketplace) — lazy, cached,
@@ -307,7 +319,7 @@ export class TrackingConversionService {
       this.logger.warn(
         `Order ${order.id}: no Aquiline profile available — falling back to pass-through`,
       );
-      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+      return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
     }
 
     try {
@@ -351,7 +363,7 @@ export class TrackingConversionService {
           `Order ${order.id}: Aquiline plan is exhausted (remaining ${snapshot?.planRemaining ?? '?'}) — ` +
             `falling back to pass-through`,
         );
-        return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_TERMINAL);
+        return this.passthroughResult(request, ConversionOutcome.PASSTHROUGH_FAILED);
       }
 
       const assigned = await this.aquiline.assign(
@@ -378,8 +390,19 @@ export class TrackingConversionService {
       await this.persistConverted(order.id, provider, assigned.aquiline);
       await this.recordPlanSnapshot(assigned);
 
+      // `reused` and `chargedCents` are logged because they are the only
+      // direct evidence of what the provider actually billed for this call.
+      // Aquiline states that a re-assign for an order that already holds an
+      // AQUA number returns `reused: true` and costs nothing — that claim is
+      // what makes every retry and deferral path in this file safe, and it has
+      // never been observed live. The first real conversion should confirm it
+      // here rather than in a monthly invoice. `reused` is also in no
+      // published schema, so a provider that silently stops sending it shows
+      // up as `reused=false` on a call we know was a repeat.
       this.logger.log(
-        `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider})`,
+        `Order ${order.id}: converted ${request.rawNumber} -> ${assigned.aquiline} (${provider}) ` +
+          `reused=${assigned.reused} chargedCents=${assigned.chargedCents ?? 'unknown'} ` +
+          `planUsed=${assigned.planUsed ?? 'unknown'}/${assigned.planLimit ?? 'unknown'}`,
       );
       return {
         trackingNumber: assigned.aquiline,
@@ -391,7 +414,7 @@ export class TrackingConversionService {
       const retryable = this.logConversionFailure(order.id, err);
       return this.passthroughResult(
         request,
-        retryable ? ConversionOutcome.PASSTHROUGH_RETRYABLE : ConversionOutcome.PASSTHROUGH_TERMINAL,
+        retryable ? ConversionOutcome.PASSTHROUGH_RETRYABLE : ConversionOutcome.PASSTHROUGH_FAILED,
       );
     }
   }
@@ -620,6 +643,20 @@ export class TrackingConversionService {
     // absence of a thrown error.
     const after = await this.loadOrder(orderId);
     if (after?.converted_tracking_number) {
+      // The order is very likely sitting HELD: the shipped transition refuses
+      // to push anything but a converted number, so a failed conversion leaves
+      // it unshipped on eBay. Now that a number exists, kick the tracking tick
+      // immediately rather than waiting up to a day for the next scheduled one
+      // — a seller who just clicked "convert" is entitled to see the order go
+      // shipped, not to wonder whether the click worked.
+      //
+      // Deliberately re-triggering the processor rather than pushing to eBay
+      // here: that push involves a fresh eBay token, the line-item lookup and
+      // the `ebay_tracking_pushed_number` write, all of which already exist in
+      // `handleShipped`. A second implementation is how the two drift.
+      // Best-effort — the conversion itself succeeded and must be reported as
+      // such even if the nudge fails; the scheduled tick still picks it up.
+      await this.triggerTrackingPush(orderId);
       return {
         converted: true,
         trackingNumber: after.converted_tracking_number,
@@ -655,6 +692,34 @@ export class TrackingConversionService {
   }
 
   /** Amazon's own tracking number/carrier for an order, if it has shipped. */
+  /**
+   * Nudge the per-order tracking tick so a freshly converted, held order gets
+   * its eBay push now instead of at the next scheduled run.
+   *
+   * Fully best-effort: the conversion has already succeeded and been persisted
+   * by the time this runs, so a failure here delays the push to the next tick
+   * rather than losing anything. It must never turn a completed conversion
+   * into a reported failure.
+   */
+  private async triggerTrackingPush(orderId: string): Promise<void> {
+    try {
+      const rows = await this.databaseService.query<{ amazon_account_id: string | null }>(
+        `SELECT amazon_account_id FROM orders WHERE id = $1`,
+        [orderId],
+      );
+      const amazonAccountId = rows[0]?.amazon_account_id;
+      if (!amazonAccountId) {
+        return;
+      }
+      await this.trackingQueue.triggerImmediateTracking(orderId, amazonAccountId);
+    } catch (err) {
+      this.logger.warn(
+        `Order ${orderId}: converted, but the immediate tracking nudge failed ` +
+          `(${(err as Error).message}) — the scheduled tick will push it`,
+      );
+    }
+  }
+
   private async loadRawTracking(
     orderId: string,
   ): Promise<{ number: string | null; carrier: string | null }> {
@@ -696,10 +761,21 @@ export class TrackingConversionService {
   /**
    * Record a converted tracking number in up to three fail-soft layers,
    * mirroring `AmazonCheckoutService.onPlaced` (CLAUDE.md "Money safety —
-   * onPlaced (fail-soft layered)"). By the time this runs, Aquiline has
-   * ALREADY issued and billed the AQUA number — a persistence failure here
-   * must never be reported as "conversion did not happen", or the next
-   * retry finds nothing stored and calls `assign` again: a real re-buy.
+   * onPlaced (fail-soft layered)").
+   *
+   * WHAT IS AT STAKE HERE CHANGED on 2026-08-26, and the layers stayed. The
+   * original reason was money: lose the number, and the next retry re-runs
+   * `assign` and buys a second one. Aquiline then confirmed that a re-assign
+   * for an order that already has an AQUA number returns `reused: true` and is
+   * NOT billed, so that particular risk is gone.
+   *
+   * The layers remain because the real exposure was never only the money. A
+   * number that Aquiline issued but we failed to store is a number the buyer
+   * can never be given: `resolveForOrder` finds nothing stored, the conversion
+   * is reported as failed, and the order is HELD off eBay indefinitely (the
+   * platform refuses to push the raw Amazon number). So a lost write turns a
+   * paid, working conversion into a stuck shipment — which is worse than the
+   * double charge it used to mean.
    *
    * Layer 1: the full write (`persist`) — number, carrier, shipment id,
    *   provider, timestamps.

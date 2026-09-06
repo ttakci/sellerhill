@@ -93,11 +93,16 @@ const LoginPageContainerPasswordOnly = (): React.ReactElement => {
     localeNavigate('/register');
   };
 
+  const handleNavigateToForgotPassword = (): void => {
+    localeNavigate('/forgot-password');
+  };
+
   return (
     <LoginPageComponent
       onSubmit={handleSubmit}
       isLoading={isLoading}
       onNavigateToRegister={handleNavigateToRegister}
+      onNavigateToForgotPassword={handleNavigateToForgotPassword}
       onGoogleSignIn={(): void => undefined}
       isGoogleLoading={false}
       googleEnabled={false}
@@ -177,6 +182,10 @@ const LoginPageContainerWithGoogle = (): React.ReactElement => {
     localeNavigate('/register');
   };
 
+  const handleNavigateToForgotPassword = (): void => {
+    localeNavigate('/forgot-password');
+  };
+
   const handleGoogleSignIn = (): void => {
     startGoogleOAuth();
   };
@@ -186,6 +195,7 @@ const LoginPageContainerWithGoogle = (): React.ReactElement => {
       onSubmit={handleSubmit}
       isLoading={isLoading}
       onNavigateToRegister={handleNavigateToRegister}
+      onNavigateToForgotPassword={handleNavigateToForgotPassword}
       onGoogleSignIn={handleGoogleSignIn}
       isGoogleLoading={isGoogleLoading}
       googleEnabled

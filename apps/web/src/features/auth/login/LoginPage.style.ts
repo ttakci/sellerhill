@@ -43,57 +43,23 @@ export const FormPanel = styled.div`
 
   @media (min-width: ${tkn('breakpoints.lg')}) {
     /* 1024px */
-    flex: 0 0 50%;
-    width: 50%;
+    flex: 0 0 36%;
+    width: 36%;
     padding: ${tkn('spacing.xl')};
   }
 `;
 
-export const BrandingPanel = styled.div`
-  flex: 1 1 100%;
-  width: 100%;
-  height: 100%;
-  padding: ${tkn('spacing.xl')};
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    /* 1024px */
-    display: flex;
-    flex: 0 0 50%;
-    width: 50%;
-  }
-`;
-
-export const DecorationArea = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-`;
-
 export const AuthCard = styled.div`
   width: 100%;
-  max-width: 34.375rem; /* 550px */
+  max-width: 25rem; /* 400px */
   background: ${tkn('colors.surface.primary')};
 `;
 
-export const LogoWrapper = styled.div`
-  margin-bottom: ${tkn('spacing.md')};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
 export const Header = styled.div`
-  margin-bottom: ${tkn('spacing.lg')};
+  margin-bottom: ${tkn('spacing.xl')};
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
 `;
 
 export const Form = styled.form`
@@ -101,6 +67,14 @@ export const Form = styled.form`
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
 `;
+
+export const ForgotRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * ${tkn('spacing.sm')});
+`;
+
+export const ForgotLink = styled(Button)``;
 
 export const ButtonContainer = styled.div`
   margin-top: ${tkn('spacing.md')};
@@ -138,47 +112,4 @@ export const OrDivider = styled.div`
     height: 1px;
     background: ${tkn('colors.border.primary')};
   }
-`;
-
-export const BrandingContent = styled.div`
-  max-width: 25rem; /* 400px */
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: ${tkn('spacing.md')};
-  z-index: 2;
-`;
-
-export const BrandingLogoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: ${tkn('spacing.md')};
-  width: 100%;
-  max-width: 22rem; /* ~352px — full mark fits without edge clip */
-  overflow: visible;
-
-  /* Let the wide delivered artwork shrink to the available auth-panel width. */
-  & img {
-    width: 100% !important;
-    height: auto !important;
-    max-width: 100% !important;
-    max-height: 18rem !important;
-    object-fit: contain !important;
-  }
-`;
-
-export const SloganWrapper = styled.div`
-  font-family: ${tkn('typography.fontFamily.sans')};
-  color: ${tkn('colors.text.inverse')};
-  font-size: ${tkn('typography.fontSize.xxxl')};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  min-height: 6.5rem;
-  line-height: ${tkn('typography.lineHeight.tight')};
-  display: flex;
-  align-items: flex-start;
-  text-align: center;
-  justify-content: center;
 `;

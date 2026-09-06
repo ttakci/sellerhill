@@ -221,7 +221,16 @@
         "twoFactorOn": "2FA enabled",
         "twoFactorOff": "No 2FA",
         "autoFulfillOn": "Auto-fulfill on · cap {{cap}}",
-        "autoFulfillOff": "Auto-fulfill off"
+        "autoFulfillOff": "Auto-fulfill off",
+        "verificationError": {
+          "invalid_credentials": "Amazon rejected the email or password. Update the credentials and verify again.",
+          "captcha": "Amazon asked for a captcha and blocked the automated sign-in. Try again shortly.",
+          "two_factor_required": "This account has 2FA turned on but no authenticator secret is saved. Add the 2FA secret key and verify again.",
+          "auth_not_proven": "Sign-in did not complete. Check the credentials and 2FA secret, then verify again.",
+          "unexpected_login_page": "Amazon's sign-in flow could not be completed automatically. Try again shortly; if it keeps failing, contact support.",
+          "transport": "Could not reach Amazon to verify this account. Try again shortly.",
+          "unknown": "Could not verify this account. Try again shortly; if it keeps failing, contact support."
+        }
       },
       "storeConfig": {
         "title": "Store Configuration",
@@ -283,6 +292,9 @@
         "lastName": "Last Name",
         "email": "Email",
         "phone": "Phone",
+        "phoneInvalid": "Enter a valid phone number for the selected country",
+        "phoneCountry": "Country",
+        "phoneCountrySearch": "Search country",
         "bio": "Bio",
         "address": "Address"
       },
@@ -308,6 +320,10 @@
           "title": "New Amazon Account",
           "subtitle": "Connect a new buyer account for order scraping"
         },
+        "empty": {
+          "title": "No buyer accounts yet",
+          "description": "Connect an Amazon buyer account to scan your orders and capture real costs."
+        },
         "viewAll": {
           "title": "All"
         }
@@ -322,7 +338,8 @@
         "label": "Account Label",
         "email": "Email",
         "password": "Password",
-        "twoFactorSecret": "2FA Secret (optional)"
+        "twoFactorSecret": "2FA secret key",
+        "twoFactorSecretHint": "Required. Amazon asks for a verification code on almost every automated sign-in, and an authenticator key is the only one we can answer for you. In Amazon's Login & Security settings turn on an authenticator app and paste the setup key here — not a 6-digit code. When editing an existing account, leave this blank to keep the saved key."
       },
       "amazonEdit": {
         "title": "Edit Amazon Account",
@@ -332,7 +349,7 @@
         "emailReadOnly": "Email cannot be changed after creation",
         "password": "New Password",
         "passwordHint": "Leave blank to keep current password",
-        "twoFactorSecret": "2FA Secret (optional)",
+        "twoFactorSecret": "2FA secret key",
         "twoFactorHint": "Leave blank to keep the current 2FA secret",
         "twoFactorBadgeSet": "2FA set",
         "twoFactorBadgeNotSet": "2FA not set"
@@ -358,7 +375,8 @@
         "region": "Region",
         "zipCode": "Zip Code",
         "steps": {
-          "general": "General",
+          "address": "Address",
+          "automation": "Automation",
           "messaging": "Buyer messaging",
           "blacklist": "Blacklist"
         }
@@ -387,6 +405,7 @@
         },
         "list": {
           "empty": "No blacklist keywords for the selected scope",
+          "noResults": "No keywords match your search",
           "removeLabel": "Remove keyword",
           "selectAll": "Select all",
           "selectedCount": "{{count}} selected",

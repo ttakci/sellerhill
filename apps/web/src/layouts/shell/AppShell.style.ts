@@ -93,7 +93,10 @@ const APP_CHROME_HEIGHT = '4rem';
  * happened to bind first. Height is the binding constraint now, so the mark is
  * a predictable size instead of a side effect of the rail width.
  */
-const SIDEBAR_LOGO_HEIGHT = '2.25rem'; /* 36px — matches the hamburger beside it */
+const SIDEBAR_LOGO_HEIGHT = '2.25rem'; /* 36px — the collapse-button box beside the logo */
+/* The icon-less wordmark is ~8:1, so it is sized by WIDTH; at 8rem it stands
+   ~15.8px tall — a notch under the collapse-button icon it sits next to. */
+const SIDEBAR_WORDMARK_WIDTH = '8rem'; /* 128px */
 
 /**
  * Content column cap. Header and page content MUST share it, otherwise the
@@ -115,7 +118,7 @@ export const SidebarBrandRow = styled.div<{ $isCollapsed: boolean }>`
   flex-wrap: nowrap;
   align-items: center;
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
-  gap: ${tkn('spacing.sm+')};
+  gap: ${tkn('spacing.sm')};
   flex-shrink: 0;
   height: ${APP_CHROME_HEIGHT};
   min-height: ${APP_CHROME_HEIGHT};
@@ -162,12 +165,10 @@ export const LogoArea = styled.div<{ $isCollapsed: boolean; $hideOnDesktopCollap
 
   & img {
     display: block;
-    height: ${SIDEBAR_LOGO_HEIGHT} !important;
-    width: auto !important;
+    width: ${SIDEBAR_WORDMARK_WIDTH} !important;
+    height: auto !important;
     max-width: 100% !important;
-    max-height: ${SIDEBAR_LOGO_HEIGHT} !important;
     margin: 0 !important;
-    object-fit: contain !important;
     object-position: left center;
     background: transparent !important;
   }
@@ -375,13 +376,14 @@ export const SidebarCollapseButton = styled.button<{ $isCollapsed: boolean }>`
   position: static;
   flex: 0 0 auto;
   align-items: center;
-  /* Expanded: left-aligned + left/right padding (like a nav item), so the
-     icon sits in the same column as the menu icons below instead of being
-     centred in a fixed square. Collapsed: unchanged centred square. */
+  /* Expanded: left padding matches a nav item so the icon sits in the same
+     column as the menu icons below; the right side is trimmed so the wordmark
+     sits close to the toggle. Collapsed: unchanged centred square. */
   justify-content: ${({ $isCollapsed }) => ($isCollapsed ? 'center' : 'flex-start')};
   width: ${({ $isCollapsed }) => ($isCollapsed ? SIDEBAR_LOGO_HEIGHT : 'auto')};
   height: ${SIDEBAR_LOGO_HEIGHT};
-  padding: ${({ $isCollapsed, theme }) => ($isCollapsed ? '0' : `0 ${tkn('spacing.md')({ theme })}`)};
+  padding: ${({ $isCollapsed, theme }) =>
+    $isCollapsed ? '0' : `0 ${tkn('spacing.xs')({ theme })} 0 ${tkn('spacing.md')({ theme })}`};
   margin: 0;
   border-radius: ${tkn('radius.sm')};
   cursor: pointer;

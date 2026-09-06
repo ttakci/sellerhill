@@ -72,63 +72,57 @@ export const TableComponent = <T,>({
           </S.ToolbarSection>
         </S.Toolbar>
       )}
-      <S.OverflowWrapper
-        ref={overflowRef}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUpOrLeave}
-        onMouseLeave={onMouseUpOrLeave}
-      >
-        <S.StyledTable>
-          <colgroup>
-            {selectable ? <S.ColSelection /> : null}
-            {columns.map((column) => (
-              <S.ColAuto key={`col-${column.key}`} $width={column.width} />
-            ))}
-          </colgroup>
-          <S.Thead>
-            <S.Tr>
-              {selectable && (
-                <S.Th $selection $sticky={columns.some((c) => c.sticky)} $left={0}>
-                  <S.CheckboxCell>
-                    <Checkbox checked={isAllSelected} onChange={onSelectAll} />
-                  </S.CheckboxCell>
-                </S.Th>
-              )}
+      {data.length > 0 && (
+        <S.OverflowWrapper
+          ref={overflowRef}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUpOrLeave}
+          onMouseLeave={onMouseUpOrLeave}
+        >
+          <S.StyledTable>
+            <colgroup>
+              {selectable ? <S.ColSelection /> : null}
               {columns.map((column) => (
-                <S.Th
-                  key={column.key}
-                  $align={column.align}
-                  $sticky={column.sticky}
-                  $left={selectable ? 52 : 0}
-                  $width={column.width}
-                >
-                  <S.ThContent $align={column.align}>
-                    {column.header}
-                    {column.sortable && (
-                      <S.SortIconWrapper onClick={() => onSort(column.key)}>
-                        <S.SortIcon
-                          $active={sortColumn === column.key}
-                          $rotated={sortColumn === column.key && sortDirection === 'asc'}
-                        >
-                          <Icon name="chevron-down" size={16} />
-                        </S.SortIcon>
-                      </S.SortIconWrapper>
-                    )}
-                  </S.ThContent>
-                </S.Th>
+                <S.ColAuto key={`col-${column.key}`} $width={column.width} />
               ))}
-            </S.Tr>
-          </S.Thead>
-          <S.Tbody>
-            {data.length === 0 ? (
-              <S.EmptyRow>
-                <S.EmptyCell colSpan={columns.length + (selectable ? 1 : 0)}>
-                  {emptyContent ?? emptyMessage}
-                </S.EmptyCell>
-              </S.EmptyRow>
-            ) : (
-              data.map((row, rowIndex) => {
+            </colgroup>
+            <S.Thead>
+              <S.Tr>
+                {selectable && (
+                  <S.Th $selection $sticky={columns.some((c) => c.sticky)} $left={0}>
+                    <S.CheckboxCell>
+                      <Checkbox checked={isAllSelected} onChange={onSelectAll} />
+                    </S.CheckboxCell>
+                  </S.Th>
+                )}
+                {columns.map((column) => (
+                  <S.Th
+                    key={column.key}
+                    $align={column.align}
+                    $sticky={column.sticky}
+                    $left={selectable ? 52 : 0}
+                    $width={column.width}
+                  >
+                    <S.ThContent $align={column.align}>
+                      {column.header}
+                      {column.sortable && (
+                        <S.SortIconWrapper onClick={() => onSort(column.key)}>
+                          <S.SortIcon
+                            $active={sortColumn === column.key}
+                            $rotated={sortColumn === column.key && sortDirection === 'asc'}
+                          >
+                            <Icon name="chevron-down" size={16} />
+                          </S.SortIcon>
+                        </S.SortIconWrapper>
+                      )}
+                    </S.ThContent>
+                  </S.Th>
+                ))}
+              </S.Tr>
+            </S.Thead>
+            <S.Tbody>
+              {data.map((row, rowIndex) => {
                 const isSelected = selectedRows.includes(row);
                 return (
                   <S.Tr
@@ -166,11 +160,12 @@ export const TableComponent = <T,>({
                     ))}
                   </S.Tr>
                 );
-              })
-            )}
-          </S.Tbody>
-        </S.StyledTable>
-      </S.OverflowWrapper>
+              })}
+            </S.Tbody>
+          </S.StyledTable>
+        </S.OverflowWrapper>
+      )}
+      {data.length === 0 && <S.EmptyPanel>{emptyContent ?? emptyMessage}</S.EmptyPanel>}
       {pagination && (
         <TablePagination
           count={pagination.count}

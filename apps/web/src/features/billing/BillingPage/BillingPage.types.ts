@@ -6,6 +6,14 @@ import type {
   BillingSummaryDto,
 } from '@repo/shared';
 
+// Single definition lives beside the shared builder that produces it, so the
+// Billing page and the profile-dropdown shortcut share one shape. Imported for
+// use below AND re-exported so existing `./BillingPage.types` consumers keep
+// resolving it.
+import type { BillingUsageRow } from '../utils/usageRows.types';
+
+export type { BillingUsageRow };
+
 /**
  * The change the seller has previewed but not yet confirmed. Holding the
  * preview here (rather than re-fetching on confirm) guarantees the figure
@@ -18,18 +26,6 @@ export interface BillingPendingPlanChange {
   planId: string;
   planSlug: string;
   preview: BillingPlanChangePreviewDto;
-}
-
-export interface BillingUsageRow {
-  /** Short text inside the ring, e.g. "100%". Separate from `ofDisplay` so the
-   *  ring shows proportion and the text beside it shows the real figures. */
-  ringLabel: string;
-  labelKey: string;
-  usedDisplay: string;
-  ofDisplay: string;
-  barValue: number;
-  barVariant: 'default' | 'success' | 'warning' | 'error';
-  barAriaLabel: string;
 }
 
 export interface BillingPlanCard {

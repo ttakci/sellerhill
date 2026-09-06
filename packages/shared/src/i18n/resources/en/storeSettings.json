@@ -18,7 +18,7 @@
     "blacklistType_feature_specification": "Features & specifications",
     "blacklistType_brand_manufacturer": "Brand & manufacturer",
     "copyright": "© {{year}} SellerHill Platform. All rights reserved.",
-    "amazonTaxRate": "Amazon Purchase Tax Rate (%)",
+    "amazonTaxRate": "Amazon Sales Tax Rate (%)",
     "amazonTaxRateDesc": "Estimated Amazon sales-tax rate applied to the purchase cost. Used two ways: it raises your eBay listing price so this cost is covered, and — while an order's profit is still provisional and the Amazon order has not yet been placed — it estimates that order's profit.",
     "autoFulfillEnabled": "Automatically place Amazon orders after eBay sales",
     "autoFulfillEnabledHint": "When on, SellerHill buys the item on Amazon with your linked buyer account. Disable to order manually.",
@@ -89,22 +89,26 @@
         "deleteConfirmDescription": "This will permanently delete \"{{name}}\". If a messaging event is currently using it, that event will stop sending until you pick another template."
       }
     },
+    "trackingConversionEnabled": "Hide my supplier's tracking numbers",
+    "trackingConversionEnabledHint": "Your buyer sees a new tracking number issued by our tracking partner instead of the original Amazon one, so nothing on eBay points back to your supplier. If a number cannot be converted we never fall back to the Amazon one — the order is held and shown to you in the Action Center instead.",
     "trackingConversionScope": "Convert which carriers",
     "trackingConversionScopeAll": "All carriers",
     "trackingConversionScopeAmazonOnly": "Amazon Logistics only (TBA)",
     "trackingConversionScopeHint": "Amazon Logistics (TBA) numbers say \"Amazon\" outright, so converting only those hides the clearest sign of your supplier and uses far less of your monthly conversion allowance. Converting every carrier hides more — an Amazon-shipped UPS or USPS number can often be looked up — but costs more, and eBay treats a native carrier scan as stronger proof of delivery if a buyer claims their item never arrived.",
-    "trackingConvertManualOrders": "Also convert orders I link by hand",
-    "trackingConvertManualOrdersHint": "On by default. Turn it off if you would rather convert manually linked orders one at a time from the order page.",
-    "shipFrom": {
-      "title": "Ship-from address",
-      "description": "This is the return address shown on converted tracking. While it is incomplete, tracking conversion falls back to the raw Amazon tracking number, so your supplier stays visible to the buyer.",
-      "globalOnly": "This address is set once for your whole account, not per store. Switch “Applies to” back to the global setting to edit it — tracking conversion always reads the account-level address.",
-      "name": "Name",
-      "phone": "Phone number",
-      "addressLine1": "Address line 1",
-      "addressLine2": "Address line 2 (optional)",
-      "city": "City",
-      "incompleteHint": "Address line 1, city, and country are required for tracking conversion. Until all three are set, converted tracking is not available and the raw Amazon number is sent instead."
+    "trackingConvertManualOrders": "Convert orders linked by hand",
+    "trackingConvertManualOrdersHint": "An order counts as linked by hand whenever SellerHill did not make the Amazon purchase itself: you bought it and entered the order number, or the system matched it for you. If automatic ordering is off, every one of your orders falls into this group — so turning this off means no tracking number is converted at all and your buyer sees the raw Amazon one. On by default; with it off you can still convert these orders one at a time from the order page.",
+    "trackingExposure": {
+      "conversionOff": "Tracking-number conversion is off. Your buyers see Amazon's raw tracking number (TBA…) and can trace your supplier directly.",
+      "manualAll": "Because automatic ordering is off, EVERY one of your orders counts as linked by hand. With this setting off nothing is converted — the raw Amazon number, TBA included, goes to eBay and exposes your supplier.",
+      "manualSome": "Orders you link by hand will ship with the raw Amazon tracking number (TBA…), exposing your supplier on those orders.",
+      "confirmConversionOff": "If you turn conversion off, every order from now on shows your buyer the raw Amazon tracking number (TBA…) and exposes your supplier. Once a tracking number has been sent to eBay it cannot be changed. Are you sure you want to turn it off?",
+      "confirmManualOff": "If you turn this off, orders you link by hand will ship with the raw Amazon tracking number (TBA…). With automatic ordering off, that means all of your orders. Once a tracking number has been sent to eBay it cannot be changed. Are you sure you want to turn it off?",
+      "confirmDisable": "Turn it off anyway"
+    },
+    "address": {
+      "title": "Seller address",
+      "description": "Published as the item location on your eBay listings. eBay shows buyers only the city, region and country.",
+      "city": "City"
     }
   }
 }

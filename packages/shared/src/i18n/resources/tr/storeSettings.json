@@ -18,7 +18,7 @@
     "blacklistType_feature_specification": "Özellikler ve spesifikasyonlar",
     "blacklistType_brand_manufacturer": "Marka ve üretici",
     "copyright": "© {{year}} SellerHill Platformu. Tüm hakları saklıdır.",
-    "amazonTaxRate": "Amazon Satış Alış Vergi Oranı (%)",
+    "amazonTaxRate": "Amazon Satış Vergisi Oranı (%)",
     "amazonTaxRateDesc": "Alış maliyetine uygulanan tahmini Amazon satış vergisi oranı. İki şekilde kullanılır: bu maliyeti karşılamak için eBay liste fiyatınızı yükseltir, ve bir siparişin kârı hâlâ geçiciyken (Amazon siparişi henüz verilmediğinde) o siparişin kârını tahmin eder.",
     "autoFulfillEnabled": "eBay satışlarından sonra Amazon siparişlerini otomatik oluştur",
     "autoFulfillEnabledHint": "Açık olduğunda SellerHill, bağlı alıcı hesabınızla ürünü Amazon'da satın alır. Manuel sipariş için kapatın.",
@@ -89,22 +89,26 @@
         "deleteConfirmDescription": "\"{{name}}\" kalıcı olarak silinecek. Bu şablon aktif bir mesajlaşma olayında kullanılıyorsa, siz başka bir şablon seçene kadar o olay için mesaj gönderilmeyecek."
       }
     },
+    "trackingConversionEnabled": "Tedarikçimin takip numaralarını gizle",
+    "trackingConversionEnabledHint": "Alıcınız, orijinal Amazon takip numarası yerine takip iş ortağımızın verdiği yeni bir numara görür; böylece eBay'de tedarikçinize işaret eden hiçbir şey kalmaz. Bir numara dönüştürülemezse Amazon numarasına asla geri dönmeyiz — sipariş bekletilir ve size Aksiyon Merkezi'nde gösterilir.",
     "trackingConversionScope": "Hangi kargolar dönüştürülsün",
     "trackingConversionScopeAll": "Tüm kargo firmaları",
     "trackingConversionScopeAmazonOnly": "Sadece Amazon Logistics (TBA)",
     "trackingConversionScopeHint": "Amazon Logistics (TBA) numaraları doğrudan \"Amazon\" der; sadece onları dönüştürmek tedarikçinizin en açık işaretini gizler ve aylık dönüşüm hakkınızdan çok daha az harcar. Tüm kargoları dönüştürmek daha fazlasını gizler — Amazon’dan çıkan bir UPS ya da USPS numarası çoğu zaman sorgulanabilir — ama daha pahalıdır ve alıcı \"ürün gelmedi\" derse eBay gerçek kargo firmasının kaydını daha güçlü kanıt sayar.",
-    "trackingConvertManualOrders": "Elle bağladığım siparişleri de dönüştür",
-    "trackingConvertManualOrdersHint": "Varsayılan olarak açık. Elle bağlanan siparişleri tek tek sipariş sayfasından dönüştürmeyi tercih ederseniz kapatın.",
-    "shipFrom": {
-      "title": "Gönderen adresi",
-      "description": "Bu adres, dönüştürülmüş takip numaralarında iade adresi olarak gösterilir. Adres eksik olduğu sürece takip dönüşümü yapılamaz ve ham Amazon takip numarası gönderilir; bu da tedarikçinizi alıcıya karşı görünür bırakır.",
-      "globalOnly": "Bu adres mağaza bazında değil, hesabınızın tamamı için bir kez tanımlanır. Düzenlemek için “Uygulandığı yer” seçimini genel ayara geri alın — takip dönüşümü her zaman hesap düzeyindeki adresi okur.",
-      "name": "Ad Soyad",
-      "phone": "Telefon numarası",
-      "addressLine1": "Adres satırı 1",
-      "addressLine2": "Adres satırı 2 (opsiyonel)",
-      "city": "Şehir",
-      "incompleteHint": "Takip dönüşümü için adres satırı 1, şehir ve ülke gereklidir. Üçü de girilmeden dönüştürülmüş takip kullanılamaz ve ham Amazon numarası gönderilir."
+    "trackingConvertManualOrders": "Elle bağlanan siparişleri dönüştür",
+    "trackingConvertManualOrdersHint": "Amazon alışverişini SellerHill'in kendisi yapmadığı her sipariş \"elle bağlanmış\" sayılır: ürünü siz alıp sipariş numarasını girdiyseniz ya da sistem siparişi kendisi eşleştirdiyse. Otomatik sipariş kapalıysa siparişlerinizin tamamı bu kapsama girer — yani bu ayarı kapatmak, hiçbir takip numarasının dönüştürülmemesi ve alıcınızın ham Amazon numarasını görmesi demektir. Varsayılan olarak açıktır; kapatırsanız bu siparişleri sipariş sayfasından tek tek dönüştürebilirsiniz.",
+    "trackingExposure": {
+      "conversionOff": "Takip numarası dönüştürme kapalı. Alıcılarınız Amazon'un ham takip numarasını (TBA…) görür ve tedarikçinizi doğrudan bulabilir.",
+      "manualAll": "Otomatik sipariş kapalı olduğu için siparişlerinizin TAMAMI \"elle bağlanmış\" sayılır. Bu ayar kapalıyken hiçbir numara dönüştürülmez — TBA dahil ham Amazon numarası eBay'e gider ve tedarikçiniz açığa çıkar.",
+      "manualSome": "Elle bağladığınız siparişlerde ham Amazon numarası (TBA…) eBay'e gider ve o siparişlerde tedarikçiniz açığa çıkar.",
+      "confirmConversionOff": "Dönüştürmeyi kapatırsanız bundan sonraki her siparişte alıcınız ham Amazon takip numarasını (TBA…) görür ve tedarikçiniz açığa çıkar. eBay'e bir kez gönderilen takip numarası sonradan değiştirilemez. Kapatmak istediğinize emin misiniz?",
+      "confirmManualOff": "Bunu kapatırsanız elle bağladığınız siparişlerde ham Amazon takip numarası (TBA…) eBay'e gider. Otomatik sipariş kapalıysa bu, siparişlerinizin tamamı demektir. eBay'e bir kez gönderilen takip numarası sonradan değiştirilemez. Kapatmak istediğinize emin misiniz?",
+      "confirmDisable": "Yine de kapat"
+    },
+    "address": {
+      "title": "Satıcı adresi",
+      "description": "eBay ilanlarınızda ürün konumu olarak yayınlanır. eBay alıcıya yalnızca şehir, bölge ve ülkeyi gösterir.",
+      "city": "Şehir"
     }
   }
 }

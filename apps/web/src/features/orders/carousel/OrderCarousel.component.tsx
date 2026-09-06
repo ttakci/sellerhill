@@ -33,7 +33,7 @@ export const OrderCarouselComponent: React.FC<OrderCarouselComponentProps> = ({
           icon="shopping-bag"
           title={emptyTitle ?? t('orders.overview.emptyTitle')}
           description={emptySubtitle ?? t('orders.overview.emptySubtitle')}
-          size="md"
+          size="sm"
         />
       </S.CarouselWrapper>
     );

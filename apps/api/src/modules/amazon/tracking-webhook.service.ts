@@ -1,45 +1,46 @@
 // apps/api/src/modules/amazon/tracking-webhook.service.ts
 //
-// Applies an inbound tracking-provider webhook to an order.
+// Applies one inbound Aquiline webhook to an order.
 //
-// This is the half that replaces Playwright polling for delivery detection:
-// before it existed, "has this been delivered?" was answered by scraping the
-// Amazon order page every 24h for the whole post-shipment week. Now the
-// provider pushes `shipment.delivered` and we act on it immediately — the
-// order completes sooner AND costs no browser time.
+// WHAT THIS IS NOT: a delivery pipeline. The Integration API has NO delivery
+// event — its catalog is `tracking.html.*` and `tracking.problem.*` only, which
+// the provider confirmed on 2026-08-26. Delivery is still detected by the
+// Amazon polling in `AmazonTrackingProcessorService`, and nothing here may stop
+// that polling. `tracking-webhook-coverage.guard.spec.ts` locks that rule.
 //
-// Everything here is idempotent because the provider retries any non-2xx on
-// 1s/5s/20s. Applying a delivery twice would re-enqueue the buyer's
-// "delivered" message and a second feedback request.
+// What this DOES is surface conversion health: whether the ship-track HTML we
+// upload is being accepted and applied, and whether the provider has opened a
+// problem the seller can act on (an expired Amazon session, most importantly).
+// Without it, a rejected upload is invisible — the conversion silently falls
+// back to the raw Amazon number and the supplier the seller pays to hide is
+// exposed, with nothing anywhere saying so.
+//
+// Everything is idempotent because the provider retries any non-2xx on
+// 1s / 5s / 20s and then gives up after four attempts.
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  BuyerMessageEventType,
-  OrderStatus,
+  AquilineProblemCode,
   PlatformSettingKey,
   TrackingConversionProvider,
-  type TrackingWebhookPayload,
+  type AquilineWebhookPayload,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
-import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 
-import { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import {
-  isSignificantChange,
+  decideTrackingProblem,
   isStaleTrackingEvent,
-  resolveWebhookOrderStatus,
+  TrackingProblemTransition,
   TrackingWebhookOutcome,
 } from './tracking-webhook.helpers';
 
 interface MatchedOrderRow {
   id: string;
   user_id: string;
-  ebay_account_id: string;
   ebay_order_id: string;
-  status: OrderStatus;
-  amazon_account_id: string | null;
+  tracking_problem_code: string | null;
 }
 
 @Injectable()
@@ -49,170 +50,173 @@ export class TrackingWebhookService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly platformSettings: PlatformSettingsService,
-    private readonly buyerMessages: BuyerMessageQueueService,
-    private readonly trackingQueue: AmazonTrackingQueueService,
   ) {}
 
   /**
    * Process one verified webhook. Always records an inbox row, always resolves
    * to an outcome, never throws — the caller answers 200 regardless, because a
-   * non-2xx buys three provider retries of an event we already understood.
+   * non-2xx buys provider retries of an event we already understood, and the
+   * provider only retries four times before dropping it for good.
    */
-  async process(payload: TrackingWebhookPayload): Promise<TrackingWebhookOutcome> {
-    const trackingNumber = payload.data.trackingNumber;
-
-    if (!isSignificantChange(payload)) {
-      await this.record(payload, TrackingWebhookOutcome.IGNORED, null);
-      return TrackingWebhookOutcome.IGNORED;
-    }
-
+  async process(payload: AquilineWebhookPayload): Promise<TrackingWebhookOutcome> {
     const maxAge = await this.resolveMaxAgeMinutes();
-    if (isStaleTrackingEvent(payload.occurredAt, Date.now(), maxAge)) {
-      this.logger.warn(`Tracking webhook for ${trackingNumber} is stale (${payload.occurredAt}) — recorded, not applied`);
+    if (isStaleTrackingEvent(payload.createdAt, Date.now(), maxAge)) {
+      this.logger.warn(
+        `Aquiline webhook ${payload.event} for order ${payload.data.orderId} is stale (${payload.createdAt}) — recorded, not applied`,
+      );
       await this.record(payload, TrackingWebhookOutcome.STALE, null);
       return TrackingWebhookOutcome.STALE;
     }
 
-    const order = await this.findOrder(trackingNumber);
+    const decision = decideTrackingProblem(payload);
+    if (decision.transition === TrackingProblemTransition.NONE) {
+      await this.record(payload, TrackingWebhookOutcome.IGNORED, null);
+      return TrackingWebhookOutcome.IGNORED;
+    }
+
+    const order = await this.findOrder(payload.data.profileId, payload.data.orderId);
     if (!order) {
-      // Not necessarily an error: the provider may push for a number issued
-      // outside SellerHill, or before our row was written. Recorded so support can
-      // see it rather than it vanishing.
-      this.logger.warn(`Tracking webhook for unknown number ${trackingNumber} — no matching order`);
+      // Not necessarily an error: the provider may push for an order created
+      // outside SellerHill, or before our own row exists. Recorded so support
+      // can see it rather than it vanishing.
+      this.logger.warn(
+        `Aquiline webhook ${payload.event} for unknown order ${payload.data.orderId} (profile ${payload.data.profileId}) — no match`,
+      );
       await this.record(payload, TrackingWebhookOutcome.UNMATCHED, null);
       return TrackingWebhookOutcome.UNMATCHED;
     }
 
-    const nextStatus = resolveWebhookOrderStatus(payload);
-    if (nextStatus === null) {
-      await this.record(payload, TrackingWebhookOutcome.IGNORED, order.id);
-      return TrackingWebhookOutcome.IGNORED;
-    }
-
-    // Terminal states are sticky. A late `delivered` for an order already
-    // completed (or cancelled on our side) must not re-run its side effects.
-    if (order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELLED) {
-      await this.record(payload, TrackingWebhookOutcome.DUPLICATE, order.id);
-      return TrackingWebhookOutcome.DUPLICATE;
-    }
-
-    // Claim the event BEFORE side effects. The partial unique index on
-    // (provider, tracking_number, event_type, occurred_at) WHERE outcome =
-    // 'applied' is what makes two concurrent retries safe: the loser's insert
-    // fails and it exits without touching the order.
+    // Claim BEFORE the side effect. The partial unique index on
+    // (provider, profile_id, marketplace_order_id, event_type, occurred_at)
+    // WHERE outcome = 'applied' is what makes two concurrent retries safe: the
+    // loser's insert fails and it exits without touching the order.
     const claimed = await this.claim(payload, order.id);
     if (!claimed) {
       return TrackingWebhookOutcome.DUPLICATE;
     }
 
     try {
-      await this.applyDelivered(order);
+      await this.applyDecision(order, payload, decision);
       return TrackingWebhookOutcome.APPLIED;
     } catch (err) {
       // Release the claim so a provider retry can legitimately try again.
       await this.releaseClaim(payload, order.id, (err as Error).message);
       this.logger.error(
-        `Failed to apply delivery for order ${order.id} (${trackingNumber}): ${(err as Error).message}`,
+        `Failed to apply Aquiline webhook ${payload.event} for order ${order.id}: ${(err as Error).message}`,
       );
       return TrackingWebhookOutcome.FAILED;
     }
   }
 
   /**
-   * The delivered transition, mirroring the Amazon-poller path so the two
-   * cannot drift: complete the order, tell the buyer, schedule the feedback
-   * request, and stop any per-order Amazon polling still running.
+   * Write or clear `orders.tracking_problem_code`.
    *
-   * `handleShipped` is deliberately NOT called here. A conversion only exists
-   * because the order already reached SHIPPED, so eBay has its fulfilment.
+   * An `amazon_session_expired` problem is logged at ERROR rather than warn:
+   * it means our stored Amazon session stopped working, so every subsequent
+   * ship-track upload for that seller fails and every conversion silently
+   * degrades to the raw Amazon number. Nothing else in the flow reports that,
+   * and the seller keeps paying for concealment they are no longer getting.
    */
-  private async applyDelivered(order: MatchedOrderRow): Promise<void> {
-    await this.databaseService.query(
-      `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [OrderStatus.COMPLETED, order.id],
-    );
-
-    await this.enqueueBuyerMessage(order, BuyerMessageEventType.DELIVERED);
-    const delayDays = await this.platformSettings.getNumber(
-      PlatformSettingKey.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS,
-    );
-    await this.enqueueBuyerMessage(order, BuyerMessageEventType.FEEDBACK_REQUEST, {
-      delayMs: delayDays * 86_400_000,
-    });
-
-    // The order is terminal; a per-order Amazon scheduler would otherwise keep
-    // scraping until its own next tick noticed.
-    await this.trackingQueue.removeOrderTracking(order.id).catch((err: unknown) => {
-      this.logger.warn(
-        `Order ${order.id} completed by webhook but its tracking scheduler could not be removed: ${(err as Error).message}`,
-      );
-    });
-
-    this.logger.log(`Order ${order.id} marked delivered from provider webhook`);
-  }
-
-  /** Buyer messaging is best-effort: it must never fail a delivery. */
-  private async enqueueBuyerMessage(
+  private async applyDecision(
     order: MatchedOrderRow,
-    event: BuyerMessageEventType,
-    options?: { delayMs?: number },
+    payload: AquilineWebhookPayload,
+    decision: ReturnType<typeof decideTrackingProblem>,
   ): Promise<void> {
-    try {
-      await this.buyerMessages.enqueue(
-        {
-          ebayOrderId: order.ebay_order_id,
-          userId: order.user_id,
-          ebayAccountId: order.ebay_account_id,
-          storeId: null,
-          event,
-        },
-        options,
+    if (decision.transition === TrackingProblemTransition.CLEAR) {
+      await this.databaseService.query(
+        `UPDATE orders SET tracking_problem_code = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [order.id],
       );
-    } catch (err) {
-      this.logger.warn(
-        `Buyer message ${event} for order ${order.id} could not be enqueued: ${(err as Error).message}`,
+      this.logger.log(
+        `Order ${order.id}: Aquiline cleared its tracking problem (${payload.event})`,
       );
+      return;
     }
+
+    await this.databaseService.query(
+      `UPDATE orders SET tracking_problem_code = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [decision.problemCode, order.id],
+    );
+
+    if (decision.unknownCode) {
+      // Recorded, stored as NULL, and flagged — the seller-facing renderer has
+      // no key for a code we have never seen, and inventing one would show
+      // them a raw provider string.
+      this.logger.warn(
+        `Order ${order.id}: Aquiline reported an UNKNOWN problem code "${payload.data.problemCode ?? ''}" (${payload.event}) — stored as null; add it to AquilineProblemCode if it recurs`,
+      );
+      return;
+    }
+
+    if (decision.problemCode === AquilineProblemCode.AMAZON_SESSION_EXPIRED) {
+      this.logger.error(
+        `Order ${order.id}: Aquiline reports the Amazon session expired — every ship-track upload for this seller now fails and their conversions silently fall back to the raw Amazon number`,
+      );
+      return;
+    }
+
+    this.logger.warn(
+      `Order ${order.id}: Aquiline opened tracking problem ${decision.problemCode ?? 'unknown'} (${payload.event})`,
+    );
   }
 
-  private async findOrder(trackingNumber: string): Promise<MatchedOrderRow | null> {
+  /**
+   * Find the order a webhook refers to.
+   *
+   * Keyed on `(profileId, amazon_order_id)`, NOT on a tracking number — the
+   * provider confirmed the AQUA number is never in a webhook payload. The
+   * profile id is `{prefix}-{userId}-{marketplace}`, so joining through
+   * `aquiline_profiles` scopes the match to the right seller: two sellers can
+   * legitimately hold the same Amazon order id, and matching on the order id
+   * alone would let one seller's problem be written onto another's order.
+   */
+  private async findOrder(
+    profileId: string,
+    marketplaceOrderId: string,
+  ): Promise<MatchedOrderRow | null> {
     const rows = await this.databaseService.query<MatchedOrderRow>(
-      `SELECT id, user_id, ebay_account_id, ebay_order_id, status, amazon_account_id
-       FROM orders WHERE converted_tracking_number = $1`,
-      [trackingNumber],
+      `SELECT o.id, o.user_id, o.ebay_order_id, o.tracking_problem_code
+         FROM orders o
+         JOIN aquiline_profiles p ON p.user_id = o.user_id
+        WHERE p.profile_id = $1
+          AND o.amazon_order_id = $2
+        LIMIT 1`,
+      [profileId, marketplaceOrderId],
     );
     return rows[0] ?? null;
   }
 
   /** Insert the 'applied' inbox row. False when another delivery won the race. */
-  private async claim(payload: TrackingWebhookPayload, orderId: string): Promise<boolean> {
+  private async claim(payload: AquilineWebhookPayload, orderId: string): Promise<boolean> {
     try {
       const rows = await this.databaseService.query<{ id: string }>(
         `INSERT INTO tracking_webhook_events
-           (provider, event_type, tracking_number, occurred_at, status, change_type, outcome, order_id)
-         VALUES ($1, $2, $3, $4, $5, $6, 'applied', $7)
+           (provider, event_type, profile_id, marketplace_order_id, occurred_at,
+            problem_code, outcome_detail, outcome, order_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'applied', $8)
          ON CONFLICT DO NOTHING
          RETURNING id`,
         [
           TrackingConversionProvider.AQUILINE,
-          payload.type,
-          payload.data.trackingNumber,
-          payload.occurredAt,
-          payload.data.status ?? null,
-          payload.data.changeType ?? null,
+          payload.event,
+          payload.data.profileId,
+          payload.data.orderId,
+          payload.createdAt,
+          payload.data.problemCode ?? payload.data.previousProblemCode ?? null,
+          payload.data.outcome ?? null,
           orderId,
         ],
       );
       return rows.length > 0;
     } catch (err) {
-      this.logger.error(`Could not claim tracking webhook: ${(err as Error).message}`);
+      this.logger.error(`Could not claim Aquiline webhook: ${(err as Error).message}`);
       return false;
     }
   }
 
   /** Demote a failed claim so the provider's retry is not treated as a duplicate. */
   private async releaseClaim(
-    payload: TrackingWebhookPayload,
+    payload: AquilineWebhookPayload,
     orderId: string,
     error: string,
   ): Promise<void> {
@@ -220,46 +224,50 @@ export class TrackingWebhookService {
       await this.databaseService.query(
         `UPDATE tracking_webhook_events
             SET outcome = 'failed', error = $1
-          WHERE provider = $2 AND tracking_number = $3 AND event_type = $4
-            AND occurred_at = $5 AND outcome = 'applied' AND order_id = $6`,
+          WHERE provider = $2 AND profile_id = $3 AND marketplace_order_id = $4
+            AND event_type = $5 AND occurred_at = $6 AND outcome = 'applied'
+            AND order_id = $7`,
         [
           error.slice(0, 500),
           TrackingConversionProvider.AQUILINE,
-          payload.data.trackingNumber,
-          payload.type,
-          payload.occurredAt,
+          payload.data.profileId,
+          payload.data.orderId,
+          payload.event,
+          payload.createdAt,
           orderId,
         ],
       );
     } catch (err) {
-      this.logger.error(`Could not release tracking webhook claim: ${(err as Error).message}`);
+      this.logger.error(`Could not release Aquiline webhook claim: ${(err as Error).message}`);
     }
   }
 
   /** Append-only audit row for a non-applied outcome. Never throws. */
   private async record(
-    payload: TrackingWebhookPayload,
+    payload: AquilineWebhookPayload,
     outcome: TrackingWebhookOutcome,
     orderId: string | null,
   ): Promise<void> {
     try {
       await this.databaseService.query(
         `INSERT INTO tracking_webhook_events
-           (provider, event_type, tracking_number, occurred_at, status, change_type, outcome, order_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+           (provider, event_type, profile_id, marketplace_order_id, occurred_at,
+            problem_code, outcome_detail, outcome, order_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           TrackingConversionProvider.AQUILINE,
-          payload.type,
-          payload.data.trackingNumber,
-          payload.occurredAt,
-          payload.data.status ?? null,
-          payload.data.changeType ?? null,
+          payload.event,
+          payload.data.profileId,
+          payload.data.orderId,
+          payload.createdAt,
+          payload.data.problemCode ?? payload.data.previousProblemCode ?? null,
+          payload.data.outcome ?? null,
           outcome,
           orderId,
         ],
       );
     } catch (err) {
-      this.logger.warn(`Could not record tracking webhook (${outcome}): ${(err as Error).message}`);
+      this.logger.warn(`Could not record Aquiline webhook (${outcome}): ${(err as Error).message}`);
     }
   }
 

@@ -1,4 +1,5 @@
 import type { ProfileDto } from '@repo/shared';
+import type { CountryCode } from '@repo/ui';
 import type React from 'react';
 
 export interface ProfileDrawerProps {
@@ -15,9 +16,11 @@ export interface ProfileDrawerComponentProps {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+  phoneError?: string;
+  defaultCountry: CountryCode;
   isSaving: boolean;
   onFirstNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLastNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onPhoneNumberChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onPhoneNumberChange: (value: string) => void;
   onSave: () => void;
 }

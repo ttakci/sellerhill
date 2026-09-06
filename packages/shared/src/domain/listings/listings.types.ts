@@ -470,9 +470,19 @@ export interface ListingCreationData {
   imageUrls: string[];
   price: number;
   currency: string;
+  // Seller address, resolved from store settings (Store > Global). eBay builds
+  // the inventory location from these; a `STORE` location requires ALL of
+  // addressLine1 + city + stateOrProvince + postalCode + country.
   country: string;
   postalCode?: string;
+  /** State / province. Was ALSO used as the city for a long time — eBay
+   *  received `city === stateOrProvince` on every listing — which is why `city`
+   *  below exists as its own field. */
   location?: string;
+  city?: string;
+  /** Derived by `buildStoreStreetLine`, not collected from the seller. Empty
+   *  only when city and state are both missing, which
+   *  `isStoreAddressComplete` already refuses. */
   address1?: string;
   // Calculated metrics
   purchasePrice?: number;

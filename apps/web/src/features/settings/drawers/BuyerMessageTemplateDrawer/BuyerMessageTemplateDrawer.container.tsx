@@ -3,6 +3,8 @@ import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { notifyDrawerDone } from '../shared/notifyDrawerDone';
+
 import { BuyerMessageTemplateDrawerComponent } from './BuyerMessageTemplateDrawer.component';
 import type { BuyerMessageTemplateDrawerProps, TemplateEditorState } from './BuyerMessageTemplateDrawer.types';
 
@@ -104,19 +106,7 @@ export const BuyerMessageTemplateDrawer: React.FC<BuyerMessageTemplateDrawerProp
       return;
     }
     const onSuccess = (): void => {
-      onClose();
-      showMessage(
-        {
-          type: 'success',
-          headerKey: 'translation:message.success.header',
-          descriptionKey: 'translation:message.success.saved',
-          primaryButton: {
-            labelKey: 'translation:common.ok',
-            onClick: closeMessage,
-          },
-        },
-        t,
-      );
+      notifyDrawerDone({ onClose, showMessage, closeMessage, t });
     };
     if (isEdit && editingTemplateId) {
       void updateTpl({ id: editingTemplateId, body: { name: editor.name, body: editor.body } })

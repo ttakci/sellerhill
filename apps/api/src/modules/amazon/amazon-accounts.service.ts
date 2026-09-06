@@ -11,7 +11,7 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
 
-import { normalizeTotpSecret } from './totp-secret';
+import { isValidTotpSecret, normalizeTotpSecret } from './totp-secret';
 
 export interface AmazonAccountRow {
   id: string;
@@ -123,7 +123,9 @@ export class AmazonAccountsService {
       label?: string;
       email: string;
       password: string;
-      twoFactorSecret?: string;
+      // Required — enforced by CreateAmazonAccountDto and re-checked by
+      // `assertTwoFactorSecret` below (format + presence).
+      twoFactorSecret: string;
       marketplace?: AmazonMarketplace;
     } & AmazonAccountAutoFulfillData &
       AmazonAccountProxyData
@@ -136,6 +138,7 @@ export class AmazonAccountsService {
     if (data.autoFulfillEnabled) {
       this.assertCanEnable(data.autoFulfillCapTotal ?? null);
     }
+    this.assertTwoFactorSecret(data.twoFactorSecret, true);
     this.validateProxyFields(data);
 
     // Storefront this buyer account operates on (migration 081). Immutable
@@ -227,6 +230,15 @@ export class AmazonAccountsService {
     if (enablingNow) {
       this.assertCanEnable(effectiveCap);
     }
+    // Every account must carry a TOTP secret. If the row has none yet (legacy,
+    // or INVALID for exactly this reason) the edit must supply one; if it
+    // already has one, a blank field keeps it and only a provided value is
+    // format-checked.
+    if (!existing.two_factor_secret) {
+      this.assertTwoFactorSecret(data.twoFactorSecret, true);
+    } else if (data.twoFactorSecret !== undefined) {
+      this.assertTwoFactorSecret(data.twoFactorSecret, false);
+    }
     this.validateProxyFields(data);
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
@@ -255,13 +267,14 @@ export class AmazonAccountsService {
       credentialsChanged = true;
     }
 
-    if (data.twoFactorSecret !== undefined) {
+    // The TOTP secret is mandatory and has no "remove" flow, so a blank value
+    // here is treated as "no change" — it must NEVER null the stored secret
+    // (an empty string used to reach the `: null` branch and wipe it). Only a
+    // real, normalizable value replaces it, and that is what triggers re-verify.
+    const nextTwoFactorSecret = normalizeTotpSecret(data.twoFactorSecret);
+    if (nextTwoFactorSecret) {
       updates.push(`two_factor_secret = $${paramIndex}`);
-      params.push(
-        data.twoFactorSecret
-          ? this.encryption.encrypt(normalizeTotpSecret(data.twoFactorSecret) ?? '')
-          : null
-      );
+      params.push(this.encryption.encrypt(nextTwoFactorSecret));
       paramIndex++;
       credentialsChanged = true;
     }
@@ -351,6 +364,33 @@ export class AmazonAccountsService {
     if (capTotal === null) {
       // FE maps via getErrorI18nKey → amazon:amazon.errors.autoFulfillCapRequired
       throw new BadRequestException('amazon.errors.autoFulfillCapRequired');
+    }
+  }
+
+  /**
+   * A TOTP secret is mandatory for every buyer account: Amazon challenges
+   * almost every automated sign-in with an OTP, and a TOTP from this secret is
+   * the only challenge the workers can answer without a human (see
+   * `performLogin`). Without it the account connects and then never verifies.
+   *
+   * `required` is `true` on create and on an edit of an account that has no
+   * stored secret yet (a legacy row, or one already INVALID for this reason).
+   * When the account already has a secret, an edit that leaves the field blank
+   * keeps it — so `required` is `false` there and only a *provided* value is
+   * format-checked.
+   */
+  private assertTwoFactorSecret(raw: string | undefined, required: boolean): void {
+    const normalized = normalizeTotpSecret(raw);
+    if (!normalized) {
+      if (required) {
+        // FE maps via getErrorI18nKey → amazon:amazon.errors.twoFactorSecretRequired
+        throw new BadRequestException('amazon.errors.twoFactorSecretRequired');
+      }
+      return;
+    }
+    if (!isValidTotpSecret(normalized)) {
+      // FE maps via getErrorI18nKey → amazon:amazon.errors.twoFactorSecretInvalid
+      throw new BadRequestException('amazon.errors.twoFactorSecretInvalid');
     }
   }
 

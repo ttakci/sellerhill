@@ -10,16 +10,26 @@ export const AddStack = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
+/**
+ * A 2-column grid, not a wrapping flex row: one option label ("Özellikler ve
+ * spesifikasyonlar") is long enough that a flex row let it overflow the drawer
+ * instead of wrapping. `minmax(0, 1fr)` cells force the label to wrap inside
+ * its own column; below `sm` the options stack.
+ */
 export const TypeOptionsRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.md')};
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const CardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: ${tkn('spacing.md')};
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const ToolbarRow = styled.div`

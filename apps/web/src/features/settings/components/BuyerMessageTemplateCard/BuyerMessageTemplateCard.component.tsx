@@ -11,9 +11,11 @@ import type { BuyerMessageTemplateCardProps } from './BuyerMessageTemplateCard.t
  * Summary card for a buyer message template — including the user's seeded
  * per-event defaults, which are ordinary editable/deletable rows like any
  * custom template (just flagged `isDefault` for the badge + "Reset to
- * default" action in the edit drawer). Clicking selects the card for editing;
- * the delete action is a stopPropagation'd icon button so it never triggers
- * selection. Every card is a fixed height with the body clamped to a few
+ * default" action in the edit drawer). The header row clusters the event
+ * badge and the custom/default status badge (both blue-toned) on the left,
+ * with the delete action pinned top-right — a stopPropagation'd icon button
+ * so it never triggers selection. Clicking anywhere else selects the card
+ * for editing. Every card is a fixed height with the body clamped to a few
  * lines, so cards stay uniform (and the carousel never reflows) regardless
  * of how long a given template's body is.
  */
@@ -54,32 +56,32 @@ export const BuyerMessageTemplateCard: React.FC<BuyerMessageTemplateCardProps> =
       onKeyDown={handleKeyDown}
     >
       <S.CardBody>
-        <S.TitleRow>
-          <S.CardName variant="h5" weight="semibold" className="card-title" truncate>
-            {template.name}
-          </S.CardName>
-          <S.BadgeRow>
-            <S.EventBadge variant="neutral" size="md">
+        <S.HeaderRow>
+          <S.HeaderBadges>
+            <S.EventBadge variant="info" size="md">
               {eventLabel}
             </S.EventBadge>
-          </S.BadgeRow>
+            {template.isDefault ? (
+              <S.DefaultBadge variant="primary" size="md">
+                {defaultBadgeLabel}
+              </S.DefaultBadge>
+            ) : (
+              <S.CustomBadge variant="info" size="md">
+                {customBadgeLabel}
+              </S.CustomBadge>
+            )}
+          </S.HeaderBadges>
           <S.DeleteButton variant="ghost" onClick={handleDelete} aria-label={deleteLabel}>
             <Icon name="trash" size={16} />
           </S.DeleteButton>
-        </S.TitleRow>
+        </S.HeaderRow>
+        <S.CardName variant="h5" weight="semibold" className="card-title" truncate>
+          {template.name}
+        </S.CardName>
         <S.BodyPreview variant="body-sm" color="text.secondary">
           {template.body}
         </S.BodyPreview>
         <S.BottomRow>
-          {template.isDefault ? (
-            <S.DefaultBadge variant="info" size="md">
-              {defaultBadgeLabel}
-            </S.DefaultBadge>
-          ) : (
-            <S.CustomBadge variant="secondary" size="md">
-              {customBadgeLabel}
-            </S.CustomBadge>
-          )}
           <S.DetailAction>
             <Text variant="body-sm" weight="semibold" color="brand.primary">
               {t('translation:common.details')}

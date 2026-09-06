@@ -436,10 +436,40 @@ New on top of that:
 - **i18n** — all new strings in EN + TR. Problem codes map to seller-readable
   sentences; an unmapped code renders a generic message, never the enum.
 
-## 8. Open questions for Aquiline (design is safe under either answer)
+## 8. Questions for Aquiline — ALL ANSWERED (2026-08-26)
 
-1. Does `assign` succeed immediately after an `accepted` (not yet `applied`)
-   HTML upload? — D4 covers both.
+Nothing here is outstanding. Kept as the record, because several answers are
+load-bearing and cannot appear in the provider's OpenAPI document. Full text in
+`docs/aquiline-open-questions.md`.
+
+**Answered 2026-08-26, and two of them changed the design:**
+
+- **Webhook payload shape.** `{event, createdAt, data:{profileId, orderId, …}}`,
+  headers `X-Webhook-Event` + `X-Webhook-Signature`. The AQUA number is never in
+  a payload — read it back from `GET …/orders/{orderId}`. `orderId` is the
+  MARKETPLACE order id, which is the join key. Delivery is 4 attempts
+  (1s/5s/20s, 8s timeout) then dropped. Migration `091` reshaped
+  `tracking_webhook_events` for this: `075`'s `tracking_number NOT NULL` made a
+  real delivery structurally impossible to insert.
+- **Billing.** Only a successful NEW `assign` consumes plan usage. "Trackings"
+  meters looking up OTHER users' shipments — `upsertOrders`, `tracking-html`,
+  webhooks and `GET`s on our own orders are free, so the §5.3 recurring feed
+  costs nothing. **A re-assign returning `reused: true` is not billed**, which
+  closes the double-billing exposure this design flagged as its main money risk.
+- **Profile reclamation.** "Profiles cannot be deleted through the Integration
+  API" and the slot is not freed. Exactly what D1 assumed; no change.
+- **Rate limits.** None enforced today; guidance is 1–2 req/sec sustained. No
+  client-side limiter built — HTML uploads ride the Amazon scrape, capped at
+  `AMAZON_GLOBAL_CONCURRENCY` (5) platform-wide.
+
+**Answered earlier:**
+
+1. ~~Does `assign` succeed immediately after an `accepted` (not yet `applied`)
+   HTML upload?~~ Still not stated outright by the provider, but it no longer
+   matters and is no longer worth asking: D4's deferral is correct under either
+   answer, and since 2026-09-01 a failed conversion never falls through to the
+   raw Amazon number at all — it holds. The only thing an answer would change is
+   how long the hold typically lasts.
 2. ~~Can an Amazon profile assign by `carrier` + tracking number?~~ **Answered by
    the API document itself.** Its introduction partitions by marketplace — Amazon
    uses the HTML route, the carrier-code route belongs to AliExpress/Walmart —
@@ -448,26 +478,27 @@ New on top of that:
    see §5.1. (The residual ambiguity is cosmetic: support's example sent
    `carrier: "Amazon"` where the schema example sends `retailer: amazon-us`. We
    follow the schema.)
-3. ~~What is the profile limit?~~ **Answered 2026-08-23: 10 on Starter**
-   (25 / 50 / 100 / 250 up the ladder). This is what drove D1 to per-user
-   granularity and added the ceiling guard. Still worth confirming with support
-   whether an exhausted profile allowance can be **reclaimed** — the API has no
-   `DELETE /v1/profiles/{id}`, so today the answer is assumed to be no.
-4. What does `suggestAmazonEmailFetch` in the upsert / tracking-html responses
-   expect? Ignored for now — SellerHill has no mailbox access.
-5. Does reading `GET …/orders/{orderId}` consume the plan's "trackings"
-   allowance? Only used for reconciliation, never on a schedule. **Partly
-   answered by probe:** the API exposes only the shipment counter, so a
-   trackings balance cannot be observed even if it is being spent.
+3. ~~What is the profile limit, and can a slot be reclaimed?~~ **Answered: 10 on
+   Starter** (25 / 50 / 100 / 250 up the ladder), and **no** — profiles cannot be
+   deleted through the Integration API and the slot is not freed. This drove D1
+   to per-user granularity and the ceiling guard, both of which already assumed
+   permanence.
+4. ~~What does `suggestAmazonEmailFetch` expect?~~ Dropped, not asked. It has no
+   observable effect to test and no code path depends on it; SellerHill has no
+   mailbox access.
+5. ~~Does reading `GET …/orders/{orderId}` consume the "trackings" allowance?~~
+   **Answered: no.** Our own orders are never metered again after assign —
+   "trackings" counts looking up shipments created by OTHER users.
 
 **Probe findings, 2026-08-23 (`pnpm --filter api aquiline:probe`):** auth and
 base URL confirmed; the account holds 0 profiles and 0 webhooks;
 `plan.trackLimitPerMonth` is the **shipment** allowance (300) despite its name,
 and neither the tracking allowance nor the profile count is exposed; the usage
 window is the subscription period, not a calendar month (§6); the error body
-carries a machine-readable `code` (§3.1); no rate-limit headers are advertised,
-so Q5 above stands. Undocumented response fields observed on `/v1/me`:
-`currentPeriodStart`, `pendingPlanCode`, `pendingCadence`.
+carries a machine-readable `code` (§3.1); and no rate-limit headers are
+advertised, which support later confirmed is because none are enforced.
+Undocumented response fields observed on `/v1/me`: `currentPeriodStart`,
+`pendingPlanCode`, `pendingCadence`.
 
 ## 9. Testing
 

@@ -3,6 +3,7 @@ import { useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { notifyDrawerDone } from '../shared/notifyDrawerDone';
 import { GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
 import { BlacklistDrawerComponent } from './BlacklistDrawer.component';
@@ -164,15 +165,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     })
       .unwrap()
       .then(() => {
-        showMessage(
-          {
-            type: 'success',
-            headerKey: 'translation:message.success.header',
-            descriptionKey: 'translation:common.saveSuccess',
-            primaryButton: { labelKey: 'translation:message.success.ok', onClick: closeMessage },
-          },
-          t,
-        );
+        notifyDrawerDone({ onClose, showMessage, closeMessage, t });
       })
       .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         showMessage(
@@ -203,6 +196,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       onAdd={handleAdd}
       errorMessage={errorMessage}
       items={items}
+      hasKeywords={blacklist.length > 0}
       onRemove={handleRemove}
       searchValue={searchValue}
       onSearchChange={setSearchValue}
@@ -221,6 +215,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
       typeLabel={t('translation:settingsHub.drawer.blacklist.add.typeLabel')}
       addLabel={t('translation:settingsHub.drawer.blacklist.add.add')}
       emptyMessage={t('translation:settingsHub.drawer.blacklist.list.empty')}
+      noResultsMessage={t('translation:settingsHub.drawer.blacklist.list.noResults')}
       searchPlaceholder={t('translation:common.search')}
       selectAllLabel={t('translation:settingsHub.drawer.blacklist.list.selectAll')}
       selectedCountLabel={t('translation:settingsHub.drawer.blacklist.list.selectedCount', {

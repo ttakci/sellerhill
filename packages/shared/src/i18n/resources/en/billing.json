@@ -80,7 +80,8 @@
         "description": "A retired plan. Existing subscriptions keep working; new sign-ups choose from the plans above."
       },
       "switchTo": "Switch to {{plan}}",
-      "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice."
+      "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice.",
+      "planNamed": "{{plan}} Plan"
     },
     "planChange": {
       "title": "Confirm plan change",

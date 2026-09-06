@@ -40,9 +40,15 @@ export class CreateAmazonAccountDto {
   @MinLength(6)
   password!: string;
 
-  @IsOptional()
+  // Required on create: Amazon challenges nearly every automated sign-in with
+  // an OTP, and the only challenge we can answer without a human is a TOTP
+  // from this stored secret (see `performLogin`). An account with no secret
+  // would connect and then never verify. Format is validated (base32, ≥16
+  // chars) in AmazonAccountsService via `isValidTotpSecret`.
   @IsString()
-  twoFactorSecret?: string;
+  @IsNotEmpty()
+  @MinLength(16)
+  twoFactorSecret!: string;
 
   // A2 auto-fulfillment per-account overrides. Enabling requires the proxy to be
   // configured and a non-null cap; the guardrail is enforced in AmazonAccountsService.
@@ -182,7 +188,10 @@ export const createAmazonAccountSchema = z.object({
   label: z.string().max(100).optional(),
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  twoFactorSecret: z.string().optional(),
+  // Required on create — see the CreateAmazonAccountDto comment. `min(1)` here
+  // (not `min(16)`): the strict base32/length check runs server-side after the
+  // secret is normalized (authenticator UIs group it with spaces).
+  twoFactorSecret: z.string().min(1, 'Authenticator secret is required'),
   // Storefront this buyer account operates on. Optional — defaults to
   // AmazonMarketplace.AMAZON_US server-side. Immutable after creation, so
   // updateAmazonAccountSchema deliberately has no matching field.

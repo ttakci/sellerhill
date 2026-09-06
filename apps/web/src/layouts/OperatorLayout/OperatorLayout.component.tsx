@@ -60,7 +60,7 @@ export const OperatorLayout: React.FC<OperatorLayoutProps> = ({
               onClick={() => onLocaleNavigate(navItems[0]?.path ?? '/')}
               title={t('translation:operator.console')}
             >
-              <Logo layout="wordmark" height={30} />
+              <Logo layout="wordmark" height={32} />
             </S.LogoArea>
           </S.SidebarBrandRow>
 

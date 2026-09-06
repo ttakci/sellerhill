@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { type UpdateProfileRequest } from '@repo/shared';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, Matches, ValidateIf } from 'class-validator';
 
 export class UpdateProfileDto implements UpdateProfileRequest {
   @ApiPropertyOptional({ description: 'User first name', example: 'John' })
@@ -13,9 +13,11 @@ export class UpdateProfileDto implements UpdateProfileRequest {
   @IsString()
   lastName?: string;
 
-  @ApiPropertyOptional({ description: 'Phone number', example: '+1234567890' })
+  @ApiPropertyOptional({ description: 'Phone number in E.164 format', example: '+14155552671' })
   @IsOptional()
   @IsString()
+  @ValidateIf((o: UpdateProfileDto) => o.phoneNumber !== undefined && o.phoneNumber !== '')
+  @Matches(/^\+[1-9]\d{6,14}$/, { message: 'phoneNumber must be a valid E.164 phone number' })
   phoneNumber?: string;
 
   @ApiPropertyOptional({ description: 'Avatar URL', example: 'https://example.com/avatar.png' })

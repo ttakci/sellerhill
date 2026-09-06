@@ -1,11 +1,14 @@
 import styled from '@emotion/styled';
 import { Card, tkn } from '@repo/ui';
 
-import { CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
-
 /**
- * The shared carousel height keeps this card the same size as the template and
- * listing-group cards in their own drawers. `width: 100%` is load-bearing: inside the carousel's row-flex slide, a flex
+ * This card is content-height, unlike the other carousel cards (template /
+ * listing-group / Amazon), which share `CAROUSEL_CARD_MIN_HEIGHT`. The eBay
+ * card is read-only and always shows the same four short lines, so the shared
+ * floor (sized for the template card's three-line preview) left a large empty
+ * band beneath it.
+ *
+ * `width: 100%` is load-bearing: inside the carousel's row-flex slide, a flex
  * item without an explicit width shrinks to its content instead of filling
  * the slide, so the card renders narrower (and misaligned) than the single-
  * item path, where the column-flex `BodyStack` stretches it to full width
@@ -14,7 +17,7 @@ import { CAROUSEL_CARD_MIN_HEIGHT } from '../cardMetrics';
 export const CardRoot = styled(Card)`
   width: 100%;
   max-width: 100%;
-  min-height: ${CAROUSEL_CARD_MIN_HEIGHT};
+  min-height: 0;
   display: flex;
   flex-direction: column;
 `;

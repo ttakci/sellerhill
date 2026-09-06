@@ -11,6 +11,12 @@ export class AmazonAccountPublicDto {
   marketplace!: AmazonMarketplace;
   status!: AmazonAccountStatus;
   hasTwoFactor?: boolean;
+  // A stable `AmazonVerificationFailureCode` value (persisted by the verify
+  // processor), NOT a raw provider message. The web app localizes it via
+  // `settingsHub.sections.amazon.verificationError.<code>`. Typed as string
+  // because rows written before the enum existed may still hold a raw phrase
+  // until the account is re-verified — the FE falls back to `unknown` for
+  // any value it does not recognize.
   lastVerificationError?: string | null;
   lastVerifiedAt?: string;
   lastUsedAt?: string;

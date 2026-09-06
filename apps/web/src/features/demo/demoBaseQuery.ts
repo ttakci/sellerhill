@@ -9,6 +9,8 @@ import {
 
 import {
   buildDemoActionCenter,
+  buildDemoBillingDetails,
+  buildDemoBillingInvoices,
   buildDemoBillingSummary,
   buildDemoDashboard,
   buildDemoOrderStats,
@@ -420,6 +422,19 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 
   if (path === '/billing/summary') {
     return ok(buildDemoBillingSummary());
+  }
+
+  // The "live billing page" reads these two straight from Stripe on every
+  // load. In demo mode they are pure fixtures — and they must be mapped
+  // explicitly rather than left to the catch-all: `/billing/invoices` does
+  // not match the `list`-shaped regex below, so it would fall through to
+  // `ok({})` and `InvoiceHistoryCard`'s `data.items.map(...)` would throw.
+  if (path === '/billing/details') {
+    return ok(buildDemoBillingDetails());
+  }
+
+  if (path === '/billing/invoices') {
+    return ok(buildDemoBillingInvoices());
   }
 
   /*

@@ -23,18 +23,34 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
 
   return (
     <S.CardWrapper $selectable={selectable}>
-      <Card variant="bordered" padding="sm" onClick={handleCardClick}>
-        <S.CardContent>
-          {selectable && (
-            <S.CheckboxSection onClick={(e) => e.stopPropagation()}>
-              <Checkbox checked={selected} onChange={onSelect} aria-label={t('translation:common.select')} />
-            </S.CheckboxSection>
-          )}
-          <S.KeywordSection title={keyword}>
-            <Text weight="semibold" color="text.primary">
-              {keyword}
-            </Text>
-          </S.KeywordSection>
+      <Card variant="flat" padding="sm" onClick={handleCardClick}>
+        <S.CardHeader>
+          <S.HeaderLeft>
+            {selectable && (
+              <S.CheckboxSection onClick={(e) => e.stopPropagation()}>
+                <Checkbox checked={selected} onChange={onSelect} aria-label={t('translation:common.select')} />
+              </S.CheckboxSection>
+            )}
+            <S.KeywordSection title={keyword}>
+              <Text weight="semibold" color="text.primary">
+                {keyword}
+              </Text>
+            </S.KeywordSection>
+          </S.HeaderLeft>
+          <S.ActionButton
+            variant="ghost"
+            onClick={(e) => {
+              // Stop the click bubbling to the card, which would toggle
+              // selection and re-add this keyword to the bulk-delete set.
+              e.stopPropagation();
+              onRemove();
+            }}
+            aria-label={t('translation:common.delete')}
+          >
+            <Icon name="trash" size={16} />
+          </S.ActionButton>
+        </S.CardHeader>
+        <S.CardBody>
           <S.ScopeSection>
             {types.map((type) => (
               <S.ScopeTag key={type} $status={type}>
@@ -42,10 +58,7 @@ export const BlacklistCard: React.FC<BlacklistCardProps> = ({
               </S.ScopeTag>
             ))}
           </S.ScopeSection>
-          <S.ActionButton variant="ghost" onClick={onRemove} aria-label={t('translation:common.delete')}>
-            <Icon name="trash" size={16} />
-          </S.ActionButton>
-        </S.CardContent>
+        </S.CardBody>
       </Card>
     </S.CardWrapper>
   );

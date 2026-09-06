@@ -7,7 +7,7 @@
  * - getMe: Get current user information
  */
 
-import type { AuthResponse, ChangePasswordRequest, GenericSuccessResponse, GoogleAuthRequest, LoginRequest, RegisterRequest, RegistrationResponse, UserDto } from '@repo/shared';
+import type { AuthResponse, ChangePasswordRequest, ForgotPasswordRequest, GenericSuccessResponse, GoogleAuthRequest, LoginRequest, PasswordResetRequestResponse, RegisterRequest, RegistrationResponse, ResetPasswordRequest, UserDto } from '@repo/shared';
 
 import { baseApi } from '@/api/baseApi';
 
@@ -46,6 +46,29 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+    }),
+
+    /**
+     * Request a password-reset email. Response is always a generic ack.
+     */
+    forgotPassword: builder.mutation<PasswordResetRequestResponse, ForgotPasswordRequest>({
+      query: (body) => ({
+        url: '/auth/forgot-password',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    /**
+     * Set a new password with the token from the emailed link.
+     */
+    resetPassword: builder.mutation<GenericSuccessResponse, ResetPasswordRequest>({
+      query: (body) => ({
+        url: '/auth/reset-password',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
     }),
 
     /**
@@ -136,6 +159,8 @@ export const {
   useGoogleLoginMutation,
   useVerifyEmailMutation,
   useResendVerificationMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useRefreshMutation,
   useLogoutMutation,
   useGetMeQuery,

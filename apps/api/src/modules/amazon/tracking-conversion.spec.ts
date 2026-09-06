@@ -5,6 +5,7 @@ import type { DatabaseService } from '../../common/database/database.service';
 import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import type { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
+import type { AmazonTrackingQueueService } from './amazon-tracking-queue.service';
 import type { AquilineProfileService } from './aquiline-profile.service';
 import { AquilineErrorKind, type AquilineClient } from './aquiline.client';
 import {
@@ -194,6 +195,10 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
       getNumber: jest.fn().mockResolvedValue(null),
     } as unknown as PlatformSettingsService;
 
+    const trackingQueue = {
+      triggerImmediateTracking: jest.fn().mockResolvedValue(undefined),
+    } as unknown as AmazonTrackingQueueService;
+
     const aquilineProfile = {
       ensureProfile: jest.fn().mockResolvedValue('sh-user-1-AMAZON_US'),
     } as unknown as AquilineProfileService;
@@ -204,6 +209,7 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
+      trackingQueue,
     );
 
     const result = await service.resolveForOrder({
@@ -218,7 +224,7 @@ describe('TrackingConversionService.resolveForOrder — Layer 1 persist failure'
     expect(result.trackingNumber).toBe('AQUAA1234567890YQ');
     expect(result.shippingCarrierCode).toBe(AQUILINE_EBAY_CARRIER_CODE);
     expect(result.outcome).toBe(ConversionOutcome.CONVERTED);
-    expect(result.outcome).not.toBe(ConversionOutcome.PASSTHROUGH_TERMINAL);
+    expect(result.outcome).not.toBe(ConversionOutcome.PASSTHROUGH_FAILED);
     expect(result.outcome).not.toBe(ConversionOutcome.PASSTHROUGH_RETRYABLE);
 
     // Layer 2's minimal write was attempted after Layer 1 failed.
@@ -256,6 +262,10 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
       getString: jest.fn().mockResolvedValue(null),
       getNumber: jest.fn().mockResolvedValue(null),
     } as unknown as PlatformSettingsService;
+    const trackingQueue = {
+      triggerImmediateTracking: jest.fn().mockResolvedValue(undefined),
+    } as unknown as AmazonTrackingQueueService;
+
     const aquilineProfile = {
       ensureProfile: jest.fn().mockResolvedValue('sh-user-1-AMAZON_US'),
     } as unknown as AquilineProfileService;
@@ -265,6 +275,7 @@ describe('TrackingConversionService.refreshTrackingHtml', () => {
       aquilineClient,
       quotaEnforcement,
       aquilineProfile,
+      trackingQueue,
     );
     return { service, uploadTrackingHtml, queries, isSuspended, canConvertTracking };
   }

@@ -74,8 +74,15 @@
       "eBaySyncShipped": "eBay order marked as shipped",
       "eBaySyncDelivered": "eBay order marked as delivered"
     },
+    "accountDrawer": {
+      "steps": {
+        "account": "Account",
+        "proxy": "Proxy"
+      }
+    },
     "autoFulfill": {
       "autoFulfillEnabled": "Use this account for auto-fulfillment",
+      "autoFulfillEnabledHint": "When on, matching eBay orders are automatically purchased through this Amazon account (round-robin with your other enabled accounts). The master Auto-Fulfillment toggle in Store Settings must also be on, and a spend cap must be set below.",
       "autoFulfillCapTotal": "Max order total (auto-fulfill cap)",
       "autoFulfillCapTotalHint": "Per-account spend ceiling (USD). Orders above this total skip this account. Required to enable auto-fulfillment.",
       "autoFulfillCapTotalPlaceholder": "e.g., 250",
@@ -84,6 +91,7 @@
     },
     "proxy": {
       "sectionTitle": "Proxy",
+      "stepSubtitle": "Optional — route this account's automation through your own proxy",
       "enabled": "Enable proxy",
       "enabledHint": "Use a proxy server to protect your account",
       "connectionType": "Connection Type",
@@ -95,13 +103,16 @@
     },
     "marketplace": {
       "label": "Marketplace",
+      "usOnlyNote": "Only the United States (amazon.com) marketplace is supported at this time.",
       "AMAZON_US": "United States (amazon.com)",
       "readOnlyHint": "Marketplace can't be changed after the account is created."
     },
     "errors": {
       "autoFulfillCapRequired": "Set a max order total to enable auto-fulfillment on this account.",
       "proxyHostPortRequired": "Enter a host and port to use a proxy for this account.",
-      "unsupportedMarketplace": "This Amazon marketplace isn't available yet."
+      "unsupportedMarketplace": "This Amazon marketplace isn't available yet.",
+      "twoFactorSecretRequired": "Add the account's authenticator (2FA) secret key. Amazon requires a verification code on almost every automated sign-in, and this is the only one we can answer for you.",
+      "twoFactorSecretInvalid": "That doesn't look like an authenticator secret key. Paste the setup key from Amazon's authenticator-app setup (letters A–Z and digits 2–7), not a 6-digit code."
     }
   }
 }

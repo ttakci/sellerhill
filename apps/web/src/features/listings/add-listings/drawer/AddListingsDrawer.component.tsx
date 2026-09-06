@@ -76,7 +76,9 @@ export const AddListingsDrawerComponent = ({
                 noResultsMessage={t('translation:common.noResults')}
               />
             </S.SectionBlock>
+          </S.Card>
 
+          <S.Card>
             <S.SectionBlock>
               <S.SectionTitle variant="h5" weight="semibold" color="text.primary">
                 {t('listings.listingSettings.title')}
@@ -96,7 +98,9 @@ export const AddListingsDrawerComponent = ({
                 noResultsMessage={t('translation:common.noResults')}
               />
             </S.SectionBlock>
+          </S.Card>
 
+          <S.Card>
             <S.SectionBlock>
               <S.SectionTitle variant="h5" weight="semibold" color="text.primary">
                 {t('listings.businessPolicies.title')}
@@ -146,8 +150,10 @@ export const AddListingsDrawerComponent = ({
                 />
               </S.PolicyGrid>
             </S.SectionBlock>
+          </S.Card>
 
-            <S.SectionBlock $last>
+          <S.Card>
+            <S.SectionBlock>
               <S.DraftRow>
                 <S.DraftCopy>
                   <Text variant="h5" weight="semibold" color="text.primary">

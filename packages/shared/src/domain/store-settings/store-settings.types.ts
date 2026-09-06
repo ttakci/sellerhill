@@ -7,9 +7,13 @@ import type { BuyerMessagingConfig } from '../buyer-messaging/buyer-messaging.ty
  * separate drawer (`BlacklistDrawer`).
  */
 export enum StoreSettingsDrawerStep {
-    GENERAL = 0,
-    BUYER_MESSAGING = 1,
-    BLACKLIST = 2,
+    /** Scope + the four location fields. Nothing else — the address is what
+     *  eBay refuses a listing without, so it gets a step of its own. */
+    ADDRESS = 0,
+    /** Auto-fulfill, the Amazon tax estimate and tracking conversion. */
+    AUTOMATION = 1,
+    BUYER_MESSAGING = 2,
+    BLACKLIST = 3,
 }
 
 /**
@@ -56,21 +60,40 @@ export interface StoreSettings {
     storeId?: string; // If undefined, applies to all stores
     isGlobal: boolean;
 
-    // Location Settings
+    // Location Settings — ONE address, serving both the eBay inventory
+    // location (published as the listing's item location) and the tracking
+    // provider's seller profile. Together with `shipFromCity` below these are
+    // the four fields the drawer collects, and `isStoreAddressComplete`
+    // requires all four: eBay refuses a STORE location without the full set
+    // and the tracking provider refuses a profile without street/city/country.
+    // No street is collected — see `buildStoreStreetLine` for why one is
+    // derived instead.
     country: string;
     state: string;
     zipCode: string;
 
-    // Ship-from / return address sent to Aquiline as the profile's storeAddress
-    // (migration 089). All optional — a seller on the local pass-through
-    // provider never needs them. While incomplete (address_line1 + city +
-    // country all required), AquilineProfileService.ensureProfile returns
-    // null and tracking conversion falls back to the raw Amazon number.
+    // The location city. Persists to `store_settings.ship_from_city`
+    // (migration 089), which was minted for a SEPARATE tracking-provider
+    // "ship-from" address that no longer exists as its own form — sellers read
+    // two address blocks in one drawer as being asked for the same thing
+    // twice, when it was always one address split across two groups. The
+    // column is reused rather than replaced because a new column would be a
+    // migration for a rename, and the existing values are already cities.
+    //
+    // OPTIONAL on the wire only for backwards compatibility with rows saved
+    // before this became required; treat a missing value as an incomplete
+    // address, not as a valid empty one.
+    shipFromCity?: string;
+
+    // Dormant since the ship-from form was merged into the address above.
+    // Never written by any UI and read by nothing; kept on the type (and in
+    // the schema) because existing rows still carry values and the repo does
+    // not drop applied-migration columns. Do not reintroduce inputs for these
+    // without re-reading why the two-address drawer was merged.
     shipFromName?: string;
     shipFromPhone?: string;
     shipFromAddressLine1?: string;
     shipFromAddressLine2?: string;
-    shipFromCity?: string;
 
     // Master toggle for blacklist scanning at listing create. Each keyword's
     // own `types` already scopes WHERE it is checked (title/description/

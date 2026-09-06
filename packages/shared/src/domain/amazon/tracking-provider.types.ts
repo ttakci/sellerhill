@@ -118,9 +118,54 @@ export interface AquilinePlanUsage {
  * produced.
  */
 export enum ConversionOutcome {
+  /** An AQUA number was issued (or reused) and persisted. Safe to push to eBay. */
   CONVERTED = 'converted',
-  PASSTHROUGH_TERMINAL = 'passthrough_terminal',
+  /**
+   * No conversion was ever going to happen for this order, and that is the
+   * SELLER'S OWN CHOICE — the provider is `local`, the carrier is outside their
+   * configured scope, or they turned conversion off for hand-linked orders.
+   * The raw Amazon number is the intended, honest result here, so it IS pushed
+   * to eBay.
+   */
+  PASSTHROUGH_NOT_REQUIRED = 'passthrough_not_required',
+  /**
+   * Conversion WAS expected and did not happen, permanently: suspended
+   * subscription, exhausted quota, missing API key, incomplete ship-from
+   * address, no usable profile, provider plan exhausted.
+   *
+   * The raw Amazon number MUST NOT reach eBay in this state. The seller pays
+   * to hide their supplier; handing the buyer the supplier's own tracking
+   * number is the one outcome the whole feature exists to prevent, and eBay's
+   * Fulfillment API has no update endpoint, so it could never be taken back.
+   * The order is held unshipped and surfaced in the Action Center instead.
+   */
+  PASSTHROUGH_FAILED = 'passthrough_failed',
+  /**
+   * Conversion was expected and failed for a reason that may resolve on its
+   * own (transport blip, "HTML not parsed yet"). Same push rule as
+   * `PASSTHROUGH_FAILED` — hold — but retried more aggressively first.
+   */
   PASSTHROUGH_RETRYABLE = 'passthrough_retryable',
+}
+
+/**
+ * Whether this outcome may be pushed to eBay.
+ *
+ * The single place that rule lives. `CONVERTED` carries a real AQUA number;
+ * `PASSTHROUGH_NOT_REQUIRED` carries the raw Amazon number the seller
+ * deliberately chose. Everything else is a failure that must never reach a
+ * buyer — see `PASSTHROUGH_FAILED`.
+ */
+export function mayPushToEbay(outcome: ConversionOutcome | undefined): boolean {
+  return (
+    outcome === ConversionOutcome.CONVERTED ||
+    outcome === ConversionOutcome.PASSTHROUGH_NOT_REQUIRED ||
+    // A converter that classifies nothing (the pure LocalTrackingConverter)
+    // is the honest pass-through by construction — there was no conversion to
+    // fail. Treating an absent outcome as "hold" would strand every order on
+    // a seller who never enabled conversion at all.
+    outcome === undefined
+  );
 }
 
 /**
@@ -172,56 +217,46 @@ export const AQUILINE_EBAY_CARRIER_CODE = 'AQUILINE';
 export const AQUILINE_TRACKING_NUMBER_PATTERN = /^AQ[A-Z]{1,4}\d{6,}[A-Z]{0,3}$/i;
 
 // ============================================================================
-// DEPRECATED ALIASES — V3 vocabulary kept for backwards compatibility
-// These are removed when the webhook receiver is rewritten (plan 2).
+// Webhook envelope — CONFIRMED BY THE PROVIDER (support, 2026-08-26)
+//
+// The published OpenAPI is 3.0.3, which has no `webhooks:` section, so this
+// shape can never appear in it. It was obtained from support directly and is
+// the ONLY authority for these fields; do not "correct" them against the
+// OpenAPI document, which is silent by construction.
+//
+// Delivery: up to 4 attempts (1s / 5s / 20s), 8s timeout per attempt, then the
+// provider gives up. So the receiver must be idempotent AND fast — an event
+// that takes longer than 8s to acknowledge is retried, and after four tries it
+// is lost for good.
 // ============================================================================
 
 /**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Webhook event names accepted by `POST /v3/webhooks/subscriptions`.
+ * One inbound webhook.
+ *
+ * Note what is NOT here: the `AQUA…YQ` number. The provider confirmed webhook
+ * payloads never carry it, so a receiver that needs it must read
+ * `GET /v1/profiles/{profileId}/orders/{orderId}` → `aquilineNumber`. That is
+ * also why `orderId` (the MARKETPLACE order id — the same Amazon order id we
+ * sent to `upsertOrders`, not our internal UUID) is the join key on our side,
+ * not the tracking number.
  */
-export enum TrackingWebhookEvent {
-  IN_TRANSIT = 'shipment.in_transit',
-  OUT_FOR_DELIVERY = 'shipment.out_for_delivery',
-  DELIVERED = 'shipment.delivered',
-  EXCEPTION = 'shipment.exception',
-  UPDATED = 'shipment.updated',
-  PICKUP_UPDATED = 'pickup.updated',
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Whether the webhook carries new timeline entries or only a status move.
- */
-export enum TrackingWebhookChangeType {
-  EVENT_APPEND = 'event_append',
-  STATUS_CHANGE = 'status_change',
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Response body of `GET /v3/tracking/{trackingNumber}`.
- */
-export interface TrackingProviderStatusDto {
-  number: string;
-  status: string;
-  oriCountry?: string | null;
-  destCountry?: string | null;
-  events?: Array<{ content: string; location?: string | null; time: string }>;
-}
-
-/**
- * @deprecated v3 vocabulary. Removed when the webhook receiver is rewritten (plan 2).
- * Webhook envelope delivered to our receiver.
- */
-export interface TrackingWebhookPayload {
-  type: string;
-  occurredAt: string;
+export interface AquilineWebhookPayload {
+  /** One of `AquilineWebhookEvent`, but typed wide — the provider may add events. */
+  event: string;
+  /** ISO 8601. */
+  createdAt: string;
   data: {
-    trackingNumber: string;
-    status?: string | null;
-    statusCode?: string | null;
-    changeType?: string | null;
-    newEvents?: unknown[];
+    /** Provider profile id, i.e. our `{prefix}-{userId}-{marketplace}`. */
+    profileId: string;
+    /** Marketplace order id — matches `orders.amazon_order_id`. */
+    orderId: string;
+    /** `applied` | `accepted` | `rejected` on the `tracking.html.*` events. */
+    outcome?: string | null;
+    /** Present on a problem, and on `tracking.html.accepted` when degraded. */
+    problemCode?: string | null;
+    /** The code that was just resolved — `tracking.problem.cleared` only. */
+    previousProblemCode?: string | null;
+    /** Provider's human-readable explanation; seller-facing text is ours, not this. */
+    message?: string | null;
   };
 }

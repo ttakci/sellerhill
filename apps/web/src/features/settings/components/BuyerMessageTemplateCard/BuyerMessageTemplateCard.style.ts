@@ -46,25 +46,30 @@ export const CardBody = styled.div`
   min-height: 0;
 `;
 
-export const TitleRow = styled.div`
+/** Top row: event + status badges clustered left, delete button pinned right. */
+export const HeaderRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: ${tkn('spacing.sm')};
   min-width: 0;
   flex-shrink: 0;
 `;
 
-export const CardName = styled(Text)`
-  flex: 1;
-  min-width: 0;
-  transition: color ${tkn('transitions.normal')};
-`;
-
-export const BadgeRow = styled.div`
+/** Left cluster of the header — event badge, then the custom/default badge. */
+export const HeaderBadges = styled.div`
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
+  min-width: 0;
+  flex-wrap: wrap;
+`;
+
+export const CardName = styled(Text)`
+  min-width: 0;
+  max-width: 100%;
   flex-shrink: 0;
+  transition: color ${tkn('transitions.normal')};
 `;
 
 export const DefaultBadge = styled(Badge)`
@@ -86,6 +91,7 @@ export const DeleteButton = styled(IconButton)`
 /** Clamped to a fixed number of lines so the card's fixed height never overflows. */
 export const BodyPreview = styled(Text)`
   white-space: pre-wrap;
+  margin-top: ${tkn('spacing.sm-md')};
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -94,8 +100,8 @@ export const BodyPreview = styled(Text)`
   -webkit-box-orient: vertical;
 `;
 
-/** Default badge bottom-left, arrow bottom-right — `ArrowSlot`'s auto margin
- *  keeps the arrow pinned to the end whether or not the badge is present. */
+/** Trailing "Detay →" action only — `DetailAction`'s auto margin keeps the
+ *  arrow pinned to the end. All badges live in `HeaderRow`. */
 export const BottomRow = styled.div`
   display: flex;
   align-items: center;

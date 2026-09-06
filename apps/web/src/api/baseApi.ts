@@ -96,8 +96,6 @@ export const baseApi = createApi({
     'EbayPolicies',
     'Amazon',
     'Orders',
-    'Assistant',
-    'Support',
     'Admin',
     'Billing',
     'BuyerMessagingConfig',

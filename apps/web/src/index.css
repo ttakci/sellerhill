@@ -21,3 +21,24 @@ body {
 code {
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* Controls are pressed, not read. Chrome leaves button text selectable, so a
+   press that drags a pixel highlighted the label in the OS accent colour — a
+   foreign purple on a purple-accent Windows theme. Covers every control, not
+   just the Button atom (nav rows, tabs, dropdown triggers are buttons too). */
+button,
+[role='button'],
+[role='tab'],
+summary {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Second net: real selectable text (tables, IDs, descriptions) highlights in
+   the brand blue instead of whatever accent colour the OS hands us. Mirrors
+   colors.brand.primary #2563eb — this file sits outside the theme system, same
+   as the body ink above. */
+::selection {
+  background: #2563eb33;
+  color: #27272a;
+}

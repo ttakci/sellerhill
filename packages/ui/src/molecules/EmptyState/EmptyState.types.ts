@@ -1,4 +1,5 @@
 import type { IconName } from '../../atoms/Icon';
+import type { MessageType } from '../../context';
 
 export type EmptyStateSize = 'sm' | 'md' | 'lg';
 
@@ -21,6 +22,18 @@ export interface EmptyStateProps {
   onSecondaryAction?: () => void;
   /** Size variant controlling icon and spacing scale */
   size?: EmptyStateSize;
+  /**
+   * Renders this empty state in the format `Dialog` (and therefore
+   * `MessageModal`) uses for a message popup: a solid semantic disc with a
+   * large white glyph, a 23px brand-coloured headline and `body` copy — instead
+   * of the default pale brand-tinted disc, 15px card title and 13px caption.
+   *
+   * Set it on failure surfaces so a crash screen and an error popup read as the
+   * same thing. It is deliberately ONE prop rather than three: matching only the
+   * disc left the mark right and the type scale wrong, which is how the error
+   * boundary ended up looking like a quiet empty list.
+   */
+  iconTone?: MessageType;
   /** Additional CSS class */
   className?: string;
 }

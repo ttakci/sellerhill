@@ -3,20 +3,43 @@ import { IconButton as IconButtonAtom, tkn } from '@repo/ui';
 
 export const CardWrapper = styled.div<{ $selectable?: boolean }>`
   background: ${tkn('colors.surface.primary')};
-  border: none;
+  /* Light border at rest; turns brand-blue on hover, matching the job /
+     listing card pattern. */
+  border: 0.0625rem solid ${tkn('colors.border.primary')};
   border-radius: ${tkn('radius.sm')};
-  box-shadow: ${tkn('shadows.sm')};
   box-sizing: border-box;
   width: 100%;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.sm-md')};
   cursor: ${({ $selectable }) => ($selectable ? 'pointer' : 'default')};
+  transition:
+    border-color ${tkn('transitions.fast')},
+    box-shadow ${tkn('transitions.fast')};
+
+  &:hover {
+    border-color: ${tkn('colors.brand.primary')};
+    box-shadow: ${tkn('shadows.md')};
+  }
 `;
 
-export const CardContent = styled.div`
+/** Header row: keyword (left, card title) + delete action (right). */
+export const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tkn('spacing.sm-md')};
-  min-height: 2.5rem;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+  flex: 1 1 auto;
+`;
+
+/** Body row: the fields this keyword is checked against, below the header. */
+export const CardBody = styled.div`
+  margin-top: ${tkn('spacing.sm')};
 `;
 
 export const CheckboxSection = styled.div`
@@ -29,7 +52,6 @@ export const KeywordSection = styled.div`
   display: flex;
   align-items: center;
   min-width: 0;
-  flex: 0 0 50%;
   overflow: hidden;
 
   > span,
@@ -46,8 +68,6 @@ export const ScopeSection = styled.div`
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: ${tkn('spacing.xs')};
-  flex: 0 0 45%;
-  min-width: 0;
 `;
 
 export const ScopeTag = styled.div<{ $status: string }>`
@@ -62,7 +82,9 @@ export const ScopeTag = styled.div<{ $status: string }>`
   color: ${tkn('colors.text.secondary')};
   text-transform: uppercase;
   letter-spacing: ${tkn('typography.letterSpacing.wider')};
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 `;
 
 export const ActionButton = styled(IconButtonAtom)`

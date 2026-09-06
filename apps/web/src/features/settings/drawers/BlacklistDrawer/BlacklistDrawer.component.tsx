@@ -28,6 +28,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   onAdd,
   errorMessage,
   items,
+  hasKeywords,
   onRemove,
   searchValue,
   onSearchChange,
@@ -46,6 +47,7 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
   typeLabel,
   addLabel,
   emptyMessage,
+  noResultsMessage,
   searchPlaceholder,
   selectAllLabel,
   selectedCountLabel,
@@ -81,20 +83,20 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
     >
       <BodyStack>
         <FormCard>
+          <Text variant="body-sm" weight="semibold">
+            {typeLabel}
+          </Text>
+          <TypeOptionsRow>
+            {typeOptions.map((option) => (
+              <Checkbox
+                key={option.value}
+                checked={selectedTypes.includes(option.value)}
+                onChange={() => onToggleType(option.value)}
+                label={option.label}
+              />
+            ))}
+          </TypeOptionsRow>
           <AddStack>
-            <Text variant="body-sm" weight="semibold">
-              {typeLabel}
-            </Text>
-            <TypeOptionsRow>
-              {typeOptions.map((option) => (
-                <Checkbox
-                  key={option.value}
-                  checked={selectedTypes.includes(option.value)}
-                  onChange={() => onToggleType(option.value)}
-                  label={option.label}
-                />
-              ))}
-            </TypeOptionsRow>
             <Textarea
               value={keywords}
               onChange={onKeywordsChange}
@@ -115,7 +117,9 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
               </Text>
             )}
           </AddStack>
-          {hasItems ? (
+        </FormCard>
+        <FormCard>
+          {hasKeywords ? (
             <>
               <SearchField
                 value={searchValue}
@@ -124,23 +128,44 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
                 fullWidth
                 aria-label={searchPlaceholder}
               />
-              <ToolbarRow>
-                <ToolbarLeft>
-                  <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
-                  {hasSelection && (
-                    <Text variant="caption" color="text.secondary">
-                      {selectedCountLabel}
-                    </Text>
-                  )}
-                </ToolbarLeft>
-                {hasSelection && (
-                  <ToolbarRight>
-                    <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
-                      <Text weight="semibold">{bulkDeleteLabel}</Text>
-                    </Button>
-                  </ToolbarRight>
-                )}
-              </ToolbarRow>
+              {hasItems ? (
+                <>
+                  <ToolbarRow>
+                    <ToolbarLeft>
+                      <Checkbox checked={isAllSelected} onChange={onToggleSelectAll} label={selectAllLabel} />
+                      {hasSelection && (
+                        <Text variant="caption" color="text.secondary">
+                          {selectedCountLabel}
+                        </Text>
+                      )}
+                    </ToolbarLeft>
+                    {hasSelection && (
+                      <ToolbarRight>
+                        <Button variant="danger" size="small" onClick={onOpenConfirm} fullWidth>
+                          <Text weight="semibold">{bulkDeleteLabel}</Text>
+                        </Button>
+                      </ToolbarRight>
+                    )}
+                  </ToolbarRow>
+                  <CardGrid>
+                    {items.map((item) => (
+                      <BlacklistCard
+                        key={item.keyword}
+                        keyword={item.keyword}
+                        types={item.types}
+                        onRemove={() => onRemove(item.keyword)}
+                        selectable
+                        selected={selectedItems.includes(item.keyword)}
+                        onSelect={() => onToggleSelect(item.keyword)}
+                      />
+                    ))}
+                  </CardGrid>
+                </>
+              ) : (
+                <Text variant="body-sm" color="text.secondary">
+                  {noResultsMessage}
+                </Text>
+              )}
             </>
           ) : (
             <Text variant="body-sm" color="text.secondary">
@@ -148,21 +173,6 @@ export const BlacklistDrawerComponent: React.FC<BlacklistDrawerComponentProps> =
             </Text>
           )}
         </FormCard>
-        {hasItems && (
-          <CardGrid>
-            {items.map((item) => (
-              <BlacklistCard
-                key={item.keyword}
-                keyword={item.keyword}
-                types={item.types}
-                onRemove={() => onRemove(item.keyword)}
-                selectable
-                selected={selectedItems.includes(item.keyword)}
-                onSelect={() => onToggleSelect(item.keyword)}
-              />
-            ))}
-          </CardGrid>
-        )}
       </BodyStack>
 
       <ConfirmModal

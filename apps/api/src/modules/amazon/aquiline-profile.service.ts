@@ -7,19 +7,28 @@
 // Starter) of them. Every path here is written around that: create as late as
 // possible, exactly once, and never speculatively.
 //
-// `ensureProfile` NEVER throws. Every failure — an incomplete address, a
-// provider error of any kind, the profile ceiling, a DB error — returns
-// `null`, and the caller (a later task, `TrackingConversionService`) falls
-// back to sending the raw Amazon tracking number under its real carrier. That
-// fallback is honest and correct, so a profile is an optimization on top of
-// it, never a hard dependency the conversion pipeline can be blocked by.
+// `ensureProfile` NEVER throws. Every failure — a provider error of any kind,
+// the profile ceiling, a DB error — returns `null`, and the caller
+// (`TrackingConversionService`) falls back to sending the raw Amazon tracking
+// number under its real carrier. That fallback is honest and correct, so a
+// profile is an optimization on top of it, never a hard dependency the
+// conversion pipeline can be blocked by.
+//
+// NO `storeAddress` IS SENT, and that is deliberate. A live probe on
+// 2026-09-02 created a profile from `{"accountOrigin":"amazon"}` alone — the
+// provider accepted it and stored `storeAddress: null` — so `accountOrigin` is
+// the only field it actually requires. Our sellers are dropshippers with no
+// premises, so any address we sent would have been synthesized from their eBay
+// listing location. This service used to REFUSE to create a profile until that
+// synthesized address was complete, blocking conversion over a field the
+// provider never asked for. Do not reintroduce it without new evidence that
+// the provider needs it.
 
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AmazonMarketplace,
   AquilineAccountOrigin,
   PlatformSettingKey,
-  type AquilineStoreAddress,
 } from '@repo/shared';
 import type { PoolClient } from 'pg';
 
@@ -71,17 +80,6 @@ interface AquilineProfileRow {
   fingerprint: string | null;
 }
 
-interface GlobalStoreSettingsAddressRow {
-  ship_from_name: string | null;
-  ship_from_phone: string | null;
-  ship_from_address_line1: string | null;
-  ship_from_address_line2: string | null;
-  ship_from_city: string | null;
-  country: string | null;
-  state: string | null;
-  zip_code: string | null;
-}
-
 @Injectable()
 export class AquilineProfileService {
   private readonly logger = new Logger(AquilineProfileService.name);
@@ -97,18 +95,14 @@ export class AquilineProfileService {
    * PATCHing it as needed — or `null` when the caller must pass the raw
    * Amazon tracking number through instead.
    *
-   * Decision order (mirrors the task brief):
-   *  1. Resolve the ship-from address from the user's global `store_settings`
-   *     row. Incomplete (missing street/city/country) → `null`. Creating a
-   *     profile without a deliverable address burns a permanent slot on
-   *     something the provider may refuse outright.
-   *  2. Compute the deterministic id + a fingerprint of everything a PATCH
+   * Decision order:
+   *  1. Compute the deterministic id + a fingerprint of everything a PATCH
    *     would change.
-   *  3. A cached row with a matching fingerprint returns immediately — NO
+   *  2. A cached row with a matching fingerprint returns immediately — NO
    *     provider call at all, so a misconfigured/revoked token still serves
    *     the cached id.
-   *  4. A cached row with a stale fingerprint PATCHes and updates the row.
-   *  5. No row: a GLOBAL advisory lock (fixed namespace, no per-user
+   *  3. A cached row with a stale fingerprint PATCHes and updates the row.
+   *  4. No row: a GLOBAL advisory lock (fixed namespace, no per-user
    *     component — see the lock acquisition below for why) serializes EVERY
    *     seller's first-create against every other seller's, because
    *     `AQUILINE_MAX_PROFILES` is a ceiling on the whole provider account,
@@ -122,34 +116,20 @@ export class AquilineProfileService {
     marketplace: AmazonMarketplace,
     hintEmail: string | null,
   ): Promise<string | null> {
-    const address = await this.resolveShipFromAddress(userId);
-    if (!address) {
-      this.logger.warn(
-        `Aquiline profile skipped for user ${userId}: no complete ship-from address configured in Store Settings`,
-      );
-      return null;
-    }
-
     const config = await this.resolveConfig();
     const profileId = buildAquilineProfileId(config.profilePrefix, userId, marketplace);
     // The label has no separate source field in `store_settings` — the
     // profile id itself is deterministic, always available and matches the
     // precedent `aquiline-probe.ts` already uses (`label: args.createProfile`).
     const label = profileId;
-    const fingerprint = fingerprintProfile(label, address);
+    const fingerprint = fingerprintProfile(label);
 
     const existing = await this.readRow(userId, marketplace);
     if (existing) {
       if (existing.fingerprint === fingerprint) {
         return existing.profile_id;
       }
-      const patched = await this.callPatchProfile(
-        existing.profile_id,
-        userId,
-        label,
-        address,
-        config,
-      );
+      const patched = await this.callPatchProfile(existing.profile_id, userId, label, config);
       if (!patched) {
         return null;
       }
@@ -212,7 +192,6 @@ export class AquilineProfileService {
             rowAfterLock.profile_id,
             userId,
             label,
-            address,
             lockedConfig,
           );
           if (!patched) {
@@ -272,7 +251,6 @@ export class AquilineProfileService {
               label,
               marketplaceHost: AMAZON_MARKETPLACE_HOST,
               ...(hintEmail ? { amazonAccountEmail: hintEmail } : {}),
-              storeAddress: address,
             },
             lockedConfig,
           );
@@ -406,58 +384,6 @@ export class AquilineProfileService {
     }
   }
 
-  /** Ship-from address the profile is created/PATCHed with, read from the
-   *  user's GLOBAL `store_settings` row — a profile is a user-level resource
-   *  while `store_settings` also has per-store rows, so the global one is the
-   *  only coherent source. Required: `address_line1`, `city`, `country`.
-   *  Never throws — a DB failure here is indistinguishable from "no complete
-   *  address configured" and returns `null` the same way. */
-  private async resolveShipFromAddress(userId: string): Promise<AquilineStoreAddress | null> {
-    let rows: GlobalStoreSettingsAddressRow[];
-    try {
-      rows = await this.db.query<GlobalStoreSettingsAddressRow>(
-        `SELECT ship_from_name, ship_from_phone, ship_from_address_line1,
-                ship_from_address_line2, ship_from_city, country, state, zip_code
-         FROM store_settings
-         WHERE user_id = $1 AND is_global = TRUE
-         LIMIT 1`,
-        [userId],
-      );
-    } catch (err) {
-      this.logger.error(
-        `Aquiline ship-from address lookup failed for user ${userId}: ${describeAquilineError(err)}`,
-      );
-      return null;
-    }
-    const row = rows[0];
-    if (!row) {
-      return null;
-    }
-
-    const addressLine1 = row.ship_from_address_line1?.trim();
-    const city = row.ship_from_city?.trim();
-    const country = row.country?.trim();
-    if (!addressLine1 || !city || !country) {
-      return null;
-    }
-
-    const { firstName, lastName } = splitShipFromName(row.ship_from_name);
-
-    return {
-      ...(firstName ? { first_name: firstName } : {}),
-      ...(lastName ? { last_name: lastName } : {}),
-      address_line1: addressLine1,
-      ...(row.ship_from_address_line2?.trim()
-        ? { address_line2: row.ship_from_address_line2.trim() }
-        : {}),
-      city,
-      ...(row.state?.trim() ? { state: row.state.trim() } : {}),
-      ...(row.zip_code?.trim() ? { zip_code: row.zip_code.trim() } : {}),
-      country,
-      ...(row.ship_from_phone?.trim() ? { phone_number: row.ship_from_phone.trim() } : {}),
-    };
-  }
-
   /** Issue the PATCH; the two callers differ only in how they persist the
    *  refreshed fingerprint afterward (plain query vs. inside the advisory-lock
    *  transaction), so only that HTTP call is shared. Returns whether it
@@ -466,13 +392,12 @@ export class AquilineProfileService {
     profileId: string,
     userId: string,
     label: string,
-    address: AquilineStoreAddress,
     config: AquilineConfig,
   ): Promise<boolean> {
     try {
       await this.client.patchProfile(
         profileId,
-        { label, marketplaceHost: AMAZON_MARKETPLACE_HOST, storeAddress: address },
+        { label, marketplaceHost: AMAZON_MARKETPLACE_HOST },
         config,
       );
       return true;
@@ -527,22 +452,6 @@ export class AquilineProfileService {
       return null;
     }
   }
-}
-
-/** First/last split of the single `ship_from_name` column, since
- *  `AquilineStoreAddress` (the provider's wire shape) carries them separately.
- *  The last whitespace-delimited token is the last name; everything before it
- *  is the first name. A single-token name has no last name. */
-function splitShipFromName(name: string | null): { firstName?: string; lastName?: string } {
-  const trimmed = name?.trim();
-  if (!trimmed) {
-    return {};
-  }
-  const parts = trimmed.split(/\s+/);
-  if (parts.length === 1) {
-    return { firstName: parts[0] };
-  }
-  return { firstName: parts.slice(0, -1).join(' '), lastName: parts[parts.length - 1] };
 }
 
 function describeAquilineError(err: unknown): string {

@@ -84,10 +84,19 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
 
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const [placement, setPlacement] = useState<'bottom' | 'top'>('bottom');
+  // Last committed position, compared each frame so re-renders only fire
+  // while the trigger is actually moving (see the effect below).
+  const lastPositionRef = useRef<{
+    top: number;
+    left: number;
+    width: number;
+    placement: 'bottom' | 'top';
+  } | null>(null);
 
   useLayoutEffect(() => {
     if (isOpen && !isMobile && containerRef.current) {
       const ESTIMATED_MENU_HEIGHT = 260;
+      let frameId: number;
 
       const updatePosition = () => {
         if (!containerRef.current) {return;}
@@ -99,27 +108,52 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
         const spaceAbove = rect.top;
         const shouldFlip = spaceBelow < ESTIMATED_MENU_HEIGHT && spaceAbove > spaceBelow;
 
-        setPlacement(shouldFlip ? 'top' : 'bottom');
-
-        setDropdownStyle({
-          position: 'absolute',
+        const next = {
           top: shouldFlip
             ? rect.top + window.scrollY - margin
             : rect.bottom + window.scrollY + margin,
           left: rect.left + window.scrollX,
           width: rect.width,
-          transform: shouldFlip ? 'translateY(-100%)' : 'none',
-          zIndex: 9999,
-        });
+          placement: (shouldFlip ? 'top' : 'bottom') as 'bottom' | 'top',
+        };
+
+        const last = lastPositionRef.current;
+        // The trigger can still be moving when this opens — most commonly a
+        // parent Drawer sliding in via CSS transform (transitions.normal,
+        // 300ms). A transform transition fires neither `resize` nor
+        // `scroll`, so a one-shot measurement freezes the dropdown at the
+        // trigger's mid-animation position while the trigger keeps moving
+        // to its resting place. Polling every frame while open — and only
+        // committing state when the measured position actually changed —
+        // keeps the dropdown glued to the trigger through any such
+        // animation/reflow without re-rendering once things settle.
+        if (
+          !last ||
+          last.top !== next.top ||
+          last.left !== next.left ||
+          last.width !== next.width ||
+          last.placement !== next.placement
+        ) {
+          lastPositionRef.current = next;
+          setPlacement(next.placement);
+          setDropdownStyle({
+            position: 'absolute',
+            top: next.top,
+            left: next.left,
+            width: next.width,
+            transform: next.placement === 'top' ? 'translateY(-100%)' : 'none',
+            zIndex: 9999,
+          });
+        }
+
+        frameId = requestAnimationFrame(updatePosition);
       };
 
       updatePosition();
-      window.addEventListener('resize', updatePosition);
-      window.addEventListener('scroll', updatePosition, true);
 
       return () => {
-        window.removeEventListener('resize', updatePosition);
-        window.removeEventListener('scroll', updatePosition, true);
+        cancelAnimationFrame(frameId);
+        lastPositionRef.current = null;
       };
     }
   }, [isOpen, isMobile, options.length]);

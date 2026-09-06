@@ -47,6 +47,7 @@ export const EmptyCard = styled(Card)`
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: calc(10.5rem + 2 * ${tkn('spacing.lg')});
 `;
 
 export const AddColumn = styled.div`

@@ -33,8 +33,8 @@ export class LlmUsageService {
     try {
       const rows = await this.databaseService.query<{ id: string }>(
         `INSERT INTO llm_usage_log
-         (user_id,tenant_id,purpose,model,provider,prompt_tokens,completion_tokens,embedding_tokens,usage_source,latency_ms,success,error)
-         VALUES($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+         (user_id,purpose,model,provider,prompt_tokens,completion_tokens,embedding_tokens,usage_source,latency_ms,success,error)
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
         [params.userId??null,params.purpose,params.model,params.provider??null,params.promptTokens??null,params.completionTokens??null,params.embeddingTokens??null,
           params.promptTokens===undefined&&params.completionTokens===undefined?LlmUsageSource.ESTIMATED:LlmUsageSource.PROVIDER,
           params.latencyMs??null,params.success,params.error?.slice(0,200)??null]

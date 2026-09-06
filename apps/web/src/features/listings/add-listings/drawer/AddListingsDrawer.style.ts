@@ -6,24 +6,38 @@ import { Text as UIText, Textarea, tkn } from '@repo/ui';
  * Step 2: ASIN card fills drawer body; the shared Textarea atom (fill mode)
  * occupies the remaining card area.
  */
+/**
+ * height/min-height are deliberately NOT forced here. A flex item's used
+ * height is already definite once flexed (feeding the $fill ASIN step's
+ * height:100% chain below), but forcing height:100% + min-height:0
+ * unconditionally let this shrink BELOW its own step-0 card content once
+ * that content grew taller than the drawer viewport — cards overlapped
+ * instead of the Drawer's own scrollable Body (overflow-y:auto) taking
+ * over. Leaving min-height at its default 'auto' keeps the content-based
+ * floor that makes the ancestor scroll instead.
+ */
 export const BodyStack = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   align-self: stretch;
-  min-height: 0;
   width: 100%;
-  height: 100%;
   gap: ${tkn('spacing.lg')};
 `;
 
-/** Keep inactive steps mounted so RHF field values are not lost on step change. */
+/**
+ * Keep inactive steps mounted so RHF field values are not lost on step change.
+ * min-height:0 is scoped to $fill only (the ASIN step, which must clamp to
+ * the available height so its textarea can fill it) — the default step-0
+ * panel keeps its content-based automatic min-height so a tall settings
+ * step pushes the Drawer's Body into scrolling rather than being squeezed
+ * shorter than its own cards.
+ */
 export const StepPanel = styled.div<{ $active: boolean; $fill?: boolean }>`
   display: ${({ $active }) => ($active ? 'flex' : 'none')};
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
   width: 100%;
-  min-height: 0;
   ${({ $fill }) =>
     $fill
       ? `
@@ -68,18 +82,11 @@ export const CardHeader = styled.div`
   flex-shrink: 0;
 `;
 
-/** Soft sections inside a single white card (step 0). */
-export const SectionBlock = styled.div<{ $last?: boolean }>`
+/** Each step-0 section is its own card, separated by BodyStack/StepPanel gap. */
+export const SectionBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  ${({ $last, theme }) =>
-    $last
-      ? ''
-      : `
-    padding-bottom: ${tkn('spacing.lg')({ theme })};
-    border-bottom: 0.0625rem solid ${theme.colors.border.secondary};
-  `}
 `;
 
 export const SectionTitle = styled(UIText)`

@@ -36,6 +36,8 @@ import {
   type ActionCenterSummaryDto,
   type AmazonAccountPublicDto,
   type BillingCatalogDto,
+  type BillingDetailsDto,
+  type BillingInvoiceListDto,
   type BillingPlanWithPricingDto,
   type BillingSummaryDto,
   type BuyerMessageTemplate,
@@ -1287,4 +1289,62 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
     provider: BillingProvider.STRIPE,
     transition: 'active',
   };
+}
+
+/**
+ * Live-from-Stripe billing detail for the demo account.
+ *
+ * The real endpoint (`GET /billing/details`) calls Stripe on every load; in
+ * demo mode nothing may leave the browser, so this is a pure fixture. It must
+ * not contradict `buildDemoBillingSummary` — the account is an ACTIVE Growth
+ * customer that is NOT set to cancel, so:
+ *   - a card is on file,
+ *   - the next charge is Growth's monthly price at the period boundary,
+ *   - nothing is scheduled and `cancelAtPeriodEnd` is false.
+ *
+ * `hostedUrl`/`pdfUrl`-style external links are deliberately absent from the
+ * details shape; the sibling invoice fixture keeps them null for the same
+ * "nothing external in demo" reason `/billing/portal` returns an empty URL.
+ */
+export function buildDemoBillingDetails(): BillingDetailsDto {
+  const growth =
+    DEMO_BILLING_PLANS.find((candidate) => candidate.slug === 'growth') ?? DEMO_BILLING_PLANS[0];
+  const now = new Date();
+  const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+  const monthlyMicros = growth.prices[BillingInterval.MONTHLY]?.amountMicros ?? 0;
+
+  return {
+    paymentMethod: {
+      brand: 'visa',
+      last4: '4242',
+      expMonth: 11,
+      expYear: now.getFullYear() + 2,
+      expiringSoon: false,
+    },
+    nextChargeAmountMicros: monthlyMicros,
+    nextChargeCurrency: 'USD',
+    nextChargeAt: periodEnd,
+    scheduledChange: null,
+    cancelAtPeriodEnd: false,
+    cancelAt: null,
+  };
+}
+
+/**
+ * The demo account's invoice history (`GET /billing/invoices`).
+ *
+ * Deliberately empty. The real endpoint reads invoices live from Stripe; demo
+ * mode has no Stripe, and a fabricated invoice row would carry a fake amount
+ * and a dead "Pay now" / download link. `InvoiceHistoryCard` renders its own
+ * empty state for this, so the screen is still complete without inventing
+ * financial records.
+ *
+ * To populate it later, return `BillingInvoiceDto` rows (see
+ * `packages/shared/src/domain/billing/billing.wire.ts`): all `status: 'paid'`
+ * (the summary says the account owes nothing), `amountMicros` = Growth's
+ * monthly price, `currency: 'USD'`, `issuedAt` anchored via `isoDaysAgo(...)`
+ * newest-first, and `hostedUrl`/`pdfUrl` left `null`.
+ */
+export function buildDemoBillingInvoices(): BillingInvoiceListDto {
+  return { items: [], hasMore: false, nextCursor: null };
 }

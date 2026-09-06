@@ -7,6 +7,7 @@ import { withCorrelation } from '../../common/observability/correlation.context'
 
 import { AmazonAccountsService } from './amazon-accounts.service';
 import { AmazonScrapingService } from './amazon-scraping.service';
+import { classifyAmazonVerificationFailure } from './amazon-verify-helpers';
 
 interface VerifyAmazonAccountData {
   userId: string;
@@ -69,12 +70,14 @@ export class AmazonVerifyProcessorService extends WorkerHost {
     // the last failure because BullMQ has no third run in which to mark INVALID.
     const isFinalAttempt = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
     if (isFinalAttempt) {
-      await this.accountsService.markInvalid(
-        userId,
-        accountId,
-        result.error ?? 'Verification failed'
+      // Persist only a stable code — never the raw Playwright/Amazon message,
+      // which is unbounded and can echo account identifiers (see the throw
+      // sites in amazon-scraping.service.ts). The raw text stays in this log.
+      const failureCode = classifyAmazonVerificationFailure(result.error);
+      await this.accountsService.markInvalid(userId, accountId, failureCode);
+      this.logger.warn(
+        `Account ${accountId} marked invalid (${failureCode}): ${result.error ?? 'unknown'}`
       );
-      this.logger.warn(`Account ${accountId} marked invalid: ${result.error ?? 'unknown'}`);
     } else {
       // Let BullMQ retry by rethrowing; status stays `verifying`.
       throw new Error(result.error ?? 'Verification failed');

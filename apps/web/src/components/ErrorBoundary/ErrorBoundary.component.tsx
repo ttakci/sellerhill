@@ -66,9 +66,13 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
         <S.Container>
           <S.Panel variant="elevated" padding="lg">
             {/* Same EmptyState molecule every other failure/empty screen uses —
-                this was an emoji glyph over hand-margined text. */}
+                this was an emoji glyph over hand-margined text. `triangle-info`
+                is the app's canonical error glyph (Dialog / Toast / MessageModal /
+                ValidationMessage all use it); `alert-triangle` is the warning
+                glyph, so a crash rendered with the wrong severity mark. */}
             <EmptyState
-              icon="alert-triangle"
+              icon="triangle-info"
+              iconTone="error"
               title={t('errorBoundary.title')}
               description={t('errorBoundary.message')}
               action={t('errorBoundary.reload')}

@@ -4,7 +4,7 @@ export interface LogoProps {
   /** @deprecated Use `height`. */
   size?: number;
   className?: string;
-  /** Retained for source compatibility; every layout uses the canonical delivered artwork. */
+  /** `wordmark` renders the icon-less lettermark (`/logo-wordmark.svg`); `default` and `full` render the full badge + wordmark artwork. */
   layout?: 'default' | 'full' | 'wordmark';
   onClick?: () => void;
 }

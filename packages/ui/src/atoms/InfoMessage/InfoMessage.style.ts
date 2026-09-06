@@ -1,16 +1,48 @@
 import styled from '@emotion/styled';
 
+import type { MessageType } from '../../context';
 import { tkn } from '../../theme/tkn';
 
-export const Container = styled.div`
+/**
+ * The hairline is drawn as an INSET box-shadow rather than a real `border`
+ * so the box geometry is byte-identical across types. `info` predates the
+ * other variants and is rendered on ~40 existing surfaces; a 1px border on it
+ * would nudge every one of them.
+ */
+export const Container = styled.div<{ $type: MessageType }>`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: ${tkn('spacing.md')};
   padding: ${tkn('spacing.md')};
   border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.semanticTint.infoStrong')};
   color: ${tkn('colors.text.primary')};
+  background: ${({ theme, $type }) => {
+    switch ($type) {
+      case 'error':
+        return theme.colors.semanticTint.error;
+      case 'warning':
+        return theme.colors.semanticTint.warning;
+      case 'success':
+        return theme.colors.semanticTint.success;
+      case 'info':
+      default:
+        return theme.colors.semanticTint.infoStrong;
+    }
+  }};
+  box-shadow: ${({ theme, $type }) => {
+    switch ($type) {
+      case 'error':
+        return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.error}`;
+      case 'warning':
+        return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.warning}`;
+      case 'success':
+        return `inset 0 0 0 0.0625rem ${theme.colors.semanticTintBorder.success}`;
+      case 'info':
+      default:
+        return 'none';
+    }
+  }};
 `;
 
 /**
@@ -41,10 +73,16 @@ export const ActionSlot = styled.div`
 `;
 
 /**
- * White circular well behind the outlined triangle glyph — the same shape
- * Dialog/Toast/ValidationMessage use, so a note reads the same wherever it surfaces.
+ * Circular well behind the glyph — the same shape Dialog/Toast/ValidationMessage
+ * use, so a note reads the same wherever it surfaces.
+ *
+ * `info` keeps the white well with a tinted glyph. Every other type fills the
+ * disc with its semantic colour and inverts the glyph, which is exactly what
+ * `Dialog` does — including using the SAME red for `warning` as for `error`,
+ * because a warning that reads amber next to a red dialog about the same
+ * condition looks like a lesser problem than it is.
  */
-export const IconWell = styled.span`
+export const IconWell = styled.span<{ $type: MessageType }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -52,7 +90,24 @@ export const IconWell = styled.span`
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: ${tkn('colors.surface.primary')};
+  background: ${({ theme, $type }) => {
+    switch ($type) {
+      case 'error':
+      case 'warning':
+        return theme.colors.semantic.error;
+      case 'success':
+        return theme.colors.semantic.success;
+      case 'info':
+      default:
+        return theme.colors.surface.primary;
+    }
+  }};
+
+  /* Ensure stroke icons read as solid white glyphs on a filled disc. */
+  ${({ theme, $type }) =>
+    $type === 'info'
+      ? ''
+      : `svg { color: ${theme.colors.text.inverse}; stroke: ${theme.colors.text.inverse}; }`}
 `;
 
 /**

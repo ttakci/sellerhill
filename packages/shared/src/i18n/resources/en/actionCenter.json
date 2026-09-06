@@ -84,6 +84,18 @@
         "description_other": "{{count}} orders in the last {{days}} days came from eBay items that are not linked to SellerHill listings, so their cost and profit can never be calculated. Import those listings to track future sales.",
         "action": "Import listings"
       },
+      "order_tracking_problem": {
+        "title": "Tracking conversion has a problem",
+        "description_one": "{{count}} shipped order has an open problem with the tracking provider. Until it is resolved, that order shows the original Amazon tracking number to your buyer instead of a converted one.",
+        "description_other": "{{count}} shipped orders have open problems with the tracking provider. Until they are resolved, those orders show the original Amazon tracking numbers to your buyers instead of converted ones.",
+        "action": "View orders"
+      },
+      "order_tracking_conversion_held": {
+        "title": "Orders not marked shipped on eBay",
+        "description_one": "{{count}} order shipped on Amazon over {{hours}} hours ago but has not been marked shipped on eBay, because its tracking number could not be converted. We never send the original Amazon tracking number to your buyer. Resolve the cause and the order ships automatically — until then it risks a late shipment defect.",
+        "description_other": "{{count}} orders shipped on Amazon over {{hours}} hours ago but have not been marked shipped on eBay, because their tracking numbers could not be converted. We never send original Amazon tracking numbers to your buyers. Resolve the cause and they ship automatically — until then they risk late shipment defects.",
+        "action": "View orders"
+      },
       "ebay_account_disconnected": {
         "title": "An eBay store lost its connection",
         "description_one": "{{count}} store is no longer authorized. Order sync, repricing and publishing are stopped for it until you reconnect.",
@@ -182,6 +194,16 @@
         "needs_reauth": "Needs re-authentication",
         "invalid": "Invalid credentials",
         "locked": "Locked by Amazon"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Wrong Amazon page",
+        "amazon_session_expired": "Amazon session expired",
+        "tracking_url_mismatch": "Tracking link mismatch",
+        "needs_tracking_upload": "Awaiting shipment details",
+        "update_not_applied": "Update not applied yet",
+        "assign_validation": "Rejected by provider",
+        "shipment_exception": "Carrier exception",
+        "tracking_update_unavailable": "Provider unavailable"
       }
     }
   }

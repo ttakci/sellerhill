@@ -3,6 +3,8 @@ import { useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { notifyDrawerDone } from '../shared/notifyDrawerDone';
+
 import { BuyerMessageTemplatesAllDrawerComponent } from './BuyerMessageTemplatesAllDrawer.component';
 import type { BuyerMessageEventFilter, BuyerMessageTemplatesAllDrawerProps } from './BuyerMessageTemplatesAllDrawer.types';
 
@@ -80,6 +82,7 @@ export const BuyerMessageTemplatesAllDrawer: React.FC<BuyerMessageTemplatesAllDr
       .then(() => {
         setPendingDeleteId(null);
         setSelectedId((prev) => (prev === id ? null : prev));
+        notifyDrawerDone({ onClose, showMessage, closeMessage, t });
       })
       .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
         setPendingDeleteId(null);

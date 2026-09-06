@@ -147,12 +147,13 @@ export const LandingPageComponent = ({
       <S.Navbar $scrolled={scrolled}>
         <S.NavInner>
           {/*
-            The horizontal wordmark, as in the app shell. The default layout is
-            the tall mark-plus-tagline built for the 280px auth panels; at
-            navbar height it collapses into an illegible smudge.
+            The full badge + wordmark artwork. `layout="wordmark"` is the
+            icon-less lettermark used in the app shell's dark sidebar; the
+            landing keeps the badge, and its mobile menu panel is a near-white
+            surface where the wordmark's white "SELLER" would vanish.
           */}
           <S.NavBrand type="button" onClick={() => scrollTo('top')} aria-label="SellerHill">
-            <Logo layout="wordmark" height={38} />
+            <Logo layout="full" height={38} />
           </S.NavBrand>
           <S.NavLinks>
             <Dropdown
@@ -212,7 +213,8 @@ export const LandingPageComponent = ({
       <S.MobileMenuOverlay $open={mobileMenuOpen} onClick={onCloseMobileMenu} />
       <S.MobileMenu $open={mobileMenuOpen}>
         <S.MobileMenuHead>
-          <Logo layout="wordmark" height={32} />
+          {/* Panel is a near-white surface — keep the full artwork, not the icon-less wordmark. */}
+          <Logo layout="full" height={32} />
           <S.MobileClose type="button" onClick={onCloseMobileMenu} aria-label="Close">
             <Icon name="x" size={20} />
           </S.MobileClose>
@@ -731,7 +733,7 @@ export const LandingPageComponent = ({
       <S.Footer>
         <S.FooterInner>
           <S.FooterBrand>
-            <Logo layout="wordmark" height={34} />
+            <Logo layout="full" height={34} />
             <S.FooterDescription>{t('translation:landing.footer.description')}</S.FooterDescription>
             <Dropdown
               align="right"

@@ -1,4 +1,4 @@
-import type { AmazonAccountStatus } from '@repo/shared';
+import type { AmazonAccountStatus, AmazonVerificationFailureCode } from '@repo/shared';
 
 /**
  * Pre-formatted, presentation-ready view of a connected Amazon account. The
@@ -11,8 +11,13 @@ export interface AmazonAccountCardView {
   email: string;
   connectedSince: string;
   status: AmazonAccountStatus;
-  /** Reason the last verification failed — shown under an invalid card. */
-  lastVerificationError?: string;
+  /**
+   * Reason the last verification failed — a normalized code the card localizes
+   * via `settingsHub.sections.amazon.verificationError.<code>`. `undefined`
+   * when the last verification did not fail. Any unrecognized backend value
+   * (incl. pre-enum raw strings) is mapped to `UNKNOWN` by the mapper.
+   */
+  verificationErrorCode?: AmazonVerificationFailureCode;
   /** Whether a 2FA secret is stored for this account. */
   hasTwoFactor: boolean;
   /** A2 auto-fulfillment eligibility — see `AmazonAccountPublicDto`. */

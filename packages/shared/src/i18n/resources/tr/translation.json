@@ -221,7 +221,16 @@
         "twoFactorOn": "2FA aktif",
         "twoFactorOff": "2FA yok",
         "autoFulfillOn": "Otomatik sipariş açık · limit {{cap}}",
-        "autoFulfillOff": "Otomatik sipariş kapalı"
+        "autoFulfillOff": "Otomatik sipariş kapalı",
+        "verificationError": {
+          "invalid_credentials": "Amazon e-posta veya şifreyi kabul etmedi. Bilgileri güncelleyip yeniden doğrulayın.",
+          "captcha": "Amazon captcha istedi ve otomatik girişi engelledi. Kısa süre sonra tekrar deneyin.",
+          "two_factor_required": "Bu hesapta 2FA açık ama kayıtlı bir doğrulayıcı anahtarı yok. 2FA gizli anahtarını ekleyip yeniden doğrulayın.",
+          "auth_not_proven": "Giriş tamamlanamadı. Bilgileri ve 2FA anahtarını kontrol edip yeniden doğrulayın.",
+          "unexpected_login_page": "Amazon giriş akışı otomatik olarak tamamlanamadı. Kısa süre sonra tekrar deneyin; sürerse destekle iletişime geçin.",
+          "transport": "Bu hesabı doğrulamak için Amazon'a ulaşılamadı. Kısa süre sonra tekrar deneyin.",
+          "unknown": "Bu hesap doğrulanamadı. Kısa süre sonra tekrar deneyin; sürerse destekle iletişime geçin."
+        }
       },
       "storeConfig": {
         "title": "Mağaza Yapılandırması",
@@ -283,6 +292,9 @@
         "lastName": "Soyad",
         "email": "E-posta",
         "phone": "Telefon",
+        "phoneInvalid": "Seçili ülke için geçerli bir telefon numarası girin",
+        "phoneCountry": "Ülke",
+        "phoneCountrySearch": "Ülke ara",
         "bio": "Biyografi",
         "address": "Adres"
       },
@@ -308,6 +320,10 @@
           "title": "Yeni Amazon Hesabı",
           "subtitle": "Sipariş taraması için yeni bir alıcı hesabı bağlayın"
         },
+        "empty": {
+          "title": "Henüz alıcı hesabı yok",
+          "description": "Siparişlerinizi taramak ve gerçek maliyetleri yakalamak için bir Amazon alıcı hesabı bağlayın."
+        },
         "viewAll": {
           "title": "Tümü"
         }
@@ -322,7 +338,8 @@
         "label": "Hesap Etiketi",
         "email": "E-posta",
         "password": "Şifre",
-        "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)"
+        "twoFactorSecret": "2FA gizli anahtarı",
+        "twoFactorSecretHint": "Zorunlu. Amazon otomatik girişlerin neredeyse hepsinde doğrulama kodu ister ve sizin adınıza cevaplayabileceğimiz tek yöntem authenticator anahtarıdır. Amazon'un Giriş ve Güvenlik ayarlarından bir authenticator uygulaması açıp kurulum anahtarını (6 haneli kodu değil) buraya yapıştırın. Mevcut bir hesabı düzenlerken, kayıtlı anahtarı korumak için boş bırakın."
       },
       "amazonEdit": {
         "title": "Amazon Hesabını Düzenle",
@@ -332,7 +349,7 @@
         "emailReadOnly": "E-posta oluşturulduktan sonra değiştirilemez",
         "password": "Yeni Şifre",
         "passwordHint": "Mevcut şifreyi korumak için boş bırakın",
-        "twoFactorSecret": "2FA Gizli Anahtarı (isteğe bağlı)",
+        "twoFactorSecret": "2FA gizli anahtarı",
         "twoFactorHint": "Mevcut 2FA secret'ını korumak için boş bırakın",
         "twoFactorBadgeSet": "2FA kurulu",
         "twoFactorBadgeNotSet": "2FA yok"
@@ -358,7 +375,8 @@
         "region": "Bölge",
         "zipCode": "Posta Kodu",
         "steps": {
-          "general": "Genel",
+          "address": "Adres",
+          "automation": "Otomasyon",
           "messaging": "Alıcı mesajları",
           "blacklist": "Kara liste"
         }
@@ -387,6 +405,7 @@
         },
         "list": {
           "empty": "Seçili kapsam için blacklist kelimesi yok",
+          "noResults": "Aramanızla eşleşen kelime yok",
           "removeLabel": "Kelimeyi kaldır",
           "selectAll": "Tümünü seç",
           "selectedCount": "{{count}} seçildi",

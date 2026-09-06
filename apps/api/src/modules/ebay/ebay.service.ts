@@ -6,6 +6,7 @@ import {
   EBAY_MARKETPLACE_CONFIG,
   EbayAccountStatus,
   SUPPORTED_EBAY_MARKETPLACES,
+  buildStoreStreetLine,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
   type EbayMarketplaceId,
@@ -454,17 +455,29 @@ export class EbayService implements OnModuleInit {
 
     // Create if 404
     const url = `${this.configService.get('EBAY_REST_API_URL')}/sell/inventory/v1/location/${merchantLocationKey}`;
+    // eBay requires the FULL address for a `STORE` location — addressLine1 +
+    // city + stateOrProvince + postalCode + country — and publishes the city,
+    // region and country to buyers as the listing's item location.
+    //
+    // Two values here were wrong for the life of this method. `addressLine1`
+    // fell back to the literal `'Use Store Address'` because `data.address1`
+    // was never populated by any caller, so that string reached eBay as every
+    // seller's street. And `city` was fed from `data.location`, which is the
+    // STATE — a seller in Sheridan, WY published an item location of "WY, WY".
+    // Both now come from real store-settings fields; `address1` is derived by
+    // `buildStoreStreetLine` since no street is collected.
+    const address = {
+      addressLine1:
+        data.address1 || buildStoreStreetLine({ city: data.city, state: data.location }),
+      city: data.city,
+      stateOrProvince: data.location,
+      postalCode: data.postalCode,
+      country: data.country || config.countryCode,
+    };
+
     const payload = {
       name: 'Default Warehouse',
-      location: {
-        address: {
-          addressLine1: data.address1 || 'Use Store Address',
-          city: data.location,
-          stateOrProvince: data.location,
-          postalCode: data.postalCode,
-          country: data.country || config.countryCode,
-        },
-      },
+      location: { address },
       merchantLocationStatus: 'ENABLED',
       locationTypes: ['STORE'],
     };
