@@ -12,38 +12,98 @@ import type { LandingPageProps } from './LandingPage.types';
  * honest set of images instead of a screenshot per claim.
  */
 const SCREEN = {
-  dashboardCards: '/landing-screens/dashboard-cards.jpg',
   dashboardPnl: '/landing-screens/dashboard-pnl.jpg',
   orders: '/landing-screens/orders.jpg',
+  orderDetail: '/landing-screens/order-detail.jpg',
   listings: '/landing-screens/listings.jpg',
+  listingDetail: '/landing-screens/listing-detail.jpg',
+  buyerMessages: '/landing-screens/buyer-messages.jpg',
+  stores: '/landing-screens/stores.jpg',
   heroDashboard: '/landing-screens/hero-dashboard.jpg',
   heroKpiCard: '/landing-screens/hero-kpi-card.jpg',
 } as const;
 
+/**
+ * Each tab shows the screen that actually does the thing it claims.
+ *
+ * This used to be four images across six tabs — `orders.jpg` answered
+ * "automatic orders", "tracking updates" AND "automated buyer messages", and
+ * "multiple eBay stores" showed the dashboard. A visitor clicking "buyer
+ * messages" and getting an order list reads it as stock filler and stops
+ * trusting the rest of the screenshots, which is the opposite of why the page
+ * uses real captures at all. Every pairing below is now the screen a seller
+ * would actually be looking at for that feature.
+ */
 const FEATURES: { key: string; icon: IconName; image: string }[] = [
   { key: 'asinListing', icon: 'rocket', image: SCREEN.listings },
-  { key: 'priceStock', icon: 'sync', image: SCREEN.listings },
+  { key: 'priceStock', icon: 'sync', image: SCREEN.listingDetail },
   { key: 'autoOrder', icon: 'shopping-cart', image: SCREEN.orders },
-  { key: 'tracking', icon: 'local-shipping', image: SCREEN.orders },
-  { key: 'buyerMessages', icon: 'message-circle', image: SCREEN.orders },
-  { key: 'multiStore', icon: 'storefront', image: SCREEN.dashboardCards },
+  { key: 'tracking', icon: 'local-shipping', image: SCREEN.orderDetail },
+  { key: 'buyerMessages', icon: 'message-circle', image: SCREEN.buyerMessages },
+  { key: 'multiStore', icon: 'storefront', image: SCREEN.stores },
+];
+
+/**
+ * The end-to-end pipeline, named step by step. The page used to show three
+ * chips (supplier → SellerHill → eBay), which said "we sit in the middle" but
+ * not what we actually do there — and a visitor comparing us to AutoDS/Easync
+ * is looking for exactly this list. Ends on real profit, so the differentiator
+ * reads as the last stage of the automation rather than a separate product.
+ */
+const FLOW_STEPS: { key: string; icon: IconName }[] = [
+  { key: 'asin', icon: 'barcode' },
+  { key: 'listing', icon: 'storefront' },
+  { key: 'aiTitle', icon: 'sparkles' },
+  { key: 'sync', icon: 'sync' },
+  { key: 'order', icon: 'shopping-cart' },
+  { key: 'tracking', icon: 'local-shipping' },
+  { key: 'messages', icon: 'message-circle' },
+  { key: 'profit', icon: 'circle-dollar-sign' },
 ];
 
 const PROFIT_TAB_IDS = ['overview', 'pnl', 'perOrder'] as const;
 type ProfitTabId = (typeof PROFIT_TAB_IDS)[number];
 
+/**
+ * `actuals` leads because it is the claim the whole section rests on — both
+ * sides of the subtraction are real transactions. Confirmed/estimated is the
+ * qualifier on that claim, not the claim itself.
+ */
 const PROFIT_POINTS: { key: string; icon: IconName }[] = [
+  { key: 'actuals', icon: 'circle-dollar-sign' },
   { key: 'confirmed', icon: 'shield-check' },
   { key: 'estimated', icon: 'triangle-info' },
-  { key: 'honest', icon: 'eye' },
   { key: 'pnl', icon: 'chart-line' },
 ];
 
+/** The worked example behind the ladder. `$` figures are illustrative, not live data. */
+const PROFIT_CALC_ROWS: { key: string; value: string; strong?: boolean; total?: boolean }[] = [
+  { key: 'sale', value: '$59.99' },
+  { key: 'fees', value: '−$9.20' },
+  { key: 'net', value: '$50.79', strong: true },
+  { key: 'cost', value: '−$32.45' },
+  { key: 'profit', value: '$18.34', total: true },
+];
+
 const PILLARS = ['p1', 'p2', 'p3'] as const;
-const STEPS = ['step1', 'step2', 'step3'] as const;
-const PRODUCTS = ['productA', 'productB', 'productC'] as const;
-const PRODUCT_SETTINGS = ['margin', 'stock', 'template'] as const;
-const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
+const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
+/** Setting Groups — a reusable bundle of listing settings, applied to many products. */
+const SETTING_GROUPS = ['groupA', 'groupB', 'groupC'] as const;
+const GROUP_SETTINGS = ['pricing', 'stock', 'template'] as const;
+const FAQ_KEYS = [
+  'q1',
+  'q2',
+  'q3',
+  'q4',
+  'q5',
+  'q6',
+  'q7',
+  'q8',
+  'q9',
+  'q10',
+  'q11',
+  'q12',
+] as const;
 const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
 const FALLBACK_PLANS = ['nano', 'starter', 'growth', 'pro'] as const;
 
@@ -54,7 +114,15 @@ const FALLBACK_PLANS = ['nano', 'starter', 'growth', 'pro'] as const;
  * X, plus…" ladder would be inventing feature tiers that the product does not
  * enforce, and would need twelve copies to drift out of sync.
  */
-const INCLUDED_FEATURE_KEYS = ['sync', 'autoOrder', 'tracking', 'profit', 'support'] as const;
+const INCLUDED_FEATURE_KEYS = [
+  'sync',
+  'autoOrder',
+  'tracking',
+  'messages',
+  'profit',
+  'multiStore',
+  'support',
+] as const;
 
 export const LandingPageComponent = ({
   currentLocale,
@@ -247,6 +315,7 @@ export const LandingPageComponent = ({
         <S.HeroGlow />
         <S.HeroInner>
           <S.HeroContent>
+            <S.HeroEyebrow>{t('translation:landing.hero.eyebrow')}</S.HeroEyebrow>
             <S.HeroTitle>{t('translation:landing.hero.headline')}</S.HeroTitle>
             <S.HeroSubtitle>{t('translation:landing.hero.subheading')}</S.HeroSubtitle>
 
@@ -275,12 +344,6 @@ export const LandingPageComponent = ({
           */}
           <S.HeroPreview>
             <S.PreviewFrame>
-              <S.PreviewBar>
-                <S.PreviewDot $c="error" />
-                <S.PreviewDot $c="warning" />
-                <S.PreviewDot $c="success" />
-                <S.PreviewUrl>app.sellerhill.com/dashboard</S.PreviewUrl>
-              </S.PreviewBar>
               <S.PreviewImage src={SCREEN.heroDashboard} alt="SellerHill dashboard" loading="lazy" />
             </S.PreviewFrame>
             <S.HeroFloatCard>
@@ -294,24 +357,20 @@ export const LandingPageComponent = ({
       <S.FlowStrip>
         <S.FlowLabel>{t('translation:landing.flow.title')}</S.FlowLabel>
         <S.FlowRow>
-          <S.FlowChip>
-            <Icon name="package-open" size={16} />
-            {t('translation:landing.flow.source')}
-          </S.FlowChip>
-          <S.FlowArrow>
-            <Icon name="arrow-right" size={17} />
-          </S.FlowArrow>
-          <S.FlowChip $accent>
-            <Icon name="bolt" size={16} />
-            {t('translation:landing.flow.engine')}
-          </S.FlowChip>
-          <S.FlowArrow>
-            <Icon name="arrow-right" size={17} />
-          </S.FlowArrow>
-          <S.FlowChip>
-            <Icon name="storefront" size={16} />
-            {t('translation:landing.flow.destination')}
-          </S.FlowChip>
+          {FLOW_STEPS.map((step, i) => (
+            <React.Fragment key={step.key}>
+              {i > 0 ? (
+                <S.FlowArrow>
+                  <Icon name="arrow-right" size={17} />
+                </S.FlowArrow>
+              ) : null}
+              {/* Real profit is the last stage and the differentiator, so it carries the accent. */}
+              <S.FlowChip $accent={step.key === 'profit'}>
+                <Icon name={step.icon} size={16} />
+                {t(`translation:landing.flow.steps.${step.key}`)}
+              </S.FlowChip>
+            </React.Fragment>
+          ))}
         </S.FlowRow>
       </S.FlowStrip>
 
@@ -373,19 +432,13 @@ export const LandingPageComponent = ({
                 </S.FeatureDetailBody>
               </S.FeatureDetailHead>
 
-              <S.PreviewFrame>
-                <S.PreviewBar>
-                  <S.PreviewDot $c="error" />
-                  <S.PreviewDot $c="warning" />
-                  <S.PreviewDot $c="success" />
-                  <S.PreviewUrl>app.sellerhill.com</S.PreviewUrl>
-                </S.PreviewBar>
+              <S.FeaturePreviewFrame>
                 <S.PreviewImage
                   src={activeFeature.image}
                   alt={t(`translation:landing.features.${activeFeature.key}.title`)}
                   loading="lazy"
                 />
-              </S.PreviewFrame>
+              </S.FeaturePreviewFrame>
             </S.FeatureDetail>
           </S.FeatureTabsLayout>
         </S.Reveal>
@@ -435,6 +488,27 @@ export const LandingPageComponent = ({
               {activeProfitTab === 'overview' ? (
                 <S.ProfitPanel>
                   <S.ProfitPanelTitle>{t('translation:landing.profit.panel.title')}</S.ProfitPanelTitle>
+                  {/*
+                    The worked sum, in the order a seller thinks about it. It is
+                    the fastest way to show that the profit figure comes from
+                    two real transactions rather than an assumed margin.
+                  */}
+                  <S.ProfitCalc>
+                    {PROFIT_CALC_ROWS.map((row) => (
+                      <S.ProfitCalcRow key={row.key} $strong={row.strong} $total={row.total}>
+                        <S.ProfitCalcLabel $strong={row.strong || row.total}>
+                          {t(`translation:landing.profit.panel.rows.${row.key}`)}
+                        </S.ProfitCalcLabel>
+                        <S.ProfitCalcValue $strong={row.strong} $total={row.total}>
+                          {row.value}
+                        </S.ProfitCalcValue>
+                      </S.ProfitCalcRow>
+                    ))}
+                  </S.ProfitCalc>
+                  <S.ProfitFormula>{t('translation:landing.profit.panel.formula')}</S.ProfitFormula>
+                  <S.ProfitPanelTitle>
+                    {t('translation:landing.profit.panel.monthTitle')}
+                  </S.ProfitPanelTitle>
                   <S.ProfitTier $tone="confirmed">
                     <S.ProfitTierLabel>
                       <S.ProfitTierName>
@@ -463,16 +537,14 @@ export const LandingPageComponent = ({
                 </S.ProfitPanel>
               ) : (
                 <S.PreviewFrame>
-                  <S.PreviewBar>
-                    <S.PreviewDot $c="error" />
-                    <S.PreviewDot $c="warning" />
-                    <S.PreviewDot $c="success" />
-                    <S.PreviewUrl>
-                      app.sellerhill.com/{activeProfitTab === 'pnl' ? 'dashboard' : 'orders'}
-                    </S.PreviewUrl>
-                  </S.PreviewBar>
+                  {/*
+                    "Per order" shows the order DETAIL, not the order list: that
+                    screen renders the section's own formula as real UI — order
+                    earnings − total Amazon cost = net profit — which the list
+                    only summarises.
+                  */}
                   <S.PreviewImage
-                    src={activeProfitTab === 'pnl' ? SCREEN.dashboardPnl : SCREEN.orders}
+                    src={activeProfitTab === 'pnl' ? SCREEN.dashboardPnl : SCREEN.orderDetail}
                     alt={t(`translation:landing.profit.tabs.${activeProfitTab}`)}
                     loading="lazy"
                   />
@@ -483,28 +555,32 @@ export const LandingPageComponent = ({
         </S.Reveal>
       </S.Section>
 
-      {/* ── Per-product control ────────────────────────── */}
-      <S.Section $alt data-reveal="per-product">
-        <S.Reveal $visible={seen('per-product')}>
+      {/* ── Setting Groups ─────────────────────────────── */}
+      <S.Section $alt data-reveal="setting-groups">
+        <S.Reveal $visible={seen('setting-groups')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.perProduct.sectionEyebrow')}</S.Eyebrow>
-            <S.SectionTitle>{t('translation:landing.perProduct.sectionTitle')}</S.SectionTitle>
-            <S.SectionSubtitle>{t('translation:landing.perProduct.sectionSubtitle')}</S.SectionSubtitle>
+            <S.Eyebrow>{t('translation:landing.settingGroups.sectionEyebrow')}</S.Eyebrow>
+            <S.SectionTitle>{t('translation:landing.settingGroups.sectionTitle')}</S.SectionTitle>
+            <S.SectionSubtitle>
+              {t('translation:landing.settingGroups.sectionSubtitle')}
+            </S.SectionSubtitle>
           </S.SectionHead>
         </S.Reveal>
-        <S.Reveal $visible={seen('per-product')} $delay={1}>
+        <S.Reveal $visible={seen('setting-groups')} $delay={1}>
           <S.ProductGrid>
-            {PRODUCTS.map((product) => (
-              <S.ProductCard key={product}>
-                <S.ProductName>{t(`translation:landing.perProduct.${product}.name`)}</S.ProductName>
+            {SETTING_GROUPS.map((group) => (
+              <S.ProductCard key={group}>
+                <S.ProductName>
+                  {t(`translation:landing.settingGroups.${group}.name`)}
+                </S.ProductName>
                 <S.ProductSettings>
-                  {PRODUCT_SETTINGS.map((setting) => (
+                  {GROUP_SETTINGS.map((setting) => (
                     <S.SettingRow key={setting}>
                       <S.SettingLabel>
-                        {t(`translation:landing.perProduct.labels.${setting}`)}
+                        {t(`translation:landing.settingGroups.labels.${setting}`)}
                       </S.SettingLabel>
                       <S.SettingValue>
-                        {t(`translation:landing.perProduct.${product}.${setting}`)}
+                        {t(`translation:landing.settingGroups.${group}.${setting}`)}
                       </S.SettingValue>
                     </S.SettingRow>
                   ))}

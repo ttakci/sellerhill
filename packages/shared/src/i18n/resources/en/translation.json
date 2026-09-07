@@ -459,7 +459,7 @@
     "navbar": {
       "features": "Features",
       "howItWorks": "How it works",
-      "profit": "Profit",
+      "profit": "Real profit",
       "pricing": "Pricing",
       "faq": "FAQ",
       "login": "Log in",
@@ -467,190 +467,210 @@
       "demo": "Demo"
     },
     "hero": {
-      "headline": "Run your store on autopilot. Know exactly what you earned.",
-      "subheading": "SellerHill lists your products, keeps price and stock in sync, buys each order from your supplier and pushes tracking back to eBay. Then it shows the real profit behind every sale — measured, not guessed.",
+      "eyebrow": "Amazon → eBay dropshipping automation",
+      "headline": "Automate Your eBay Store. Know Your Real Profit.",
+      "subheading": "SellerHill automates your Amazon-to-eBay workflow — listings, AI-optimized titles, price and stock sync, automatic orders, tracking updates and buyer messages. Then it shows your real profit from actual eBay net earnings and actual Amazon order costs.",
       "ctaPrimary": "Start free",
-      "ctaSecondary": "Demo account",
-      "trialTitle": "1 week free trial",
+      "ctaSecondary": "Live demo",
+      "trialTitle": "7-day free trial",
       "trialNoCard": "No credit card required.",
       "trialCancelAnytime": "Cancel anytime."
     },
     "flow": {
-      "title": "Built for one job, done properly",
-      "source": "Your supplier",
-      "engine": "SellerHill",
-      "destination": "Your eBay store"
+      "title": "The full automation flow",
+      "steps": {
+        "asin": "Amazon ASIN",
+        "listing": "eBay listing",
+        "aiTitle": "AI title",
+        "sync": "Price & stock sync",
+        "order": "Automatic order",
+        "tracking": "Tracking update",
+        "messages": "Buyer messages",
+        "profit": "Real profit"
+      }
     },
     "pillars": {
       "p1": {
-        "title": "One flow, not five tools",
-        "description": "Listing, repricing, stock, ordering and tracking run as a single pipeline — nothing to stitch together or reconcile by hand."
+        "title": "The automation you expect",
+        "description": "Listings, price and stock sync, automatic orders, tracking updates and buyer messages — the full Amazon-to-eBay workflow in one platform."
       },
       "p2": {
-        "title": "Profit you can act on",
-        "description": "Confirmed costs and estimates are reported separately. An unknown cost is never quietly rounded down to zero."
+        "title": "Real profit, not an estimate",
+        "description": "Your profit comes from the net earnings eBay actually paid you and the amount you actually paid on Amazon — not from an assumed margin."
       },
       "p3": {
-        "title": "Rules per product",
-        "description": "Margin, stock cap and listing template are set item by item — not one blanket rule stretched across your whole catalogue."
+        "title": "A strategy per product group",
+        "description": "Setting Groups let you run different pricing rules, HTML templates and listing settings across different parts of your catalog."
       }
     },
     "features": {
-      "sectionEyebrow": "Everything automated",
-      "sectionTitle": "The daily work, handled for you",
-      "sectionSubtitle": "The jobs that fill a seller's day — listing, watching prices, buying, chasing tracking — run on their own, around the clock.",
+      "sectionEyebrow": "Features",
+      "sectionTitle": "Everything You Need to Automate Your eBay Store",
+      "sectionSubtitle": "The daily work of an Amazon-to-eBay store — listing, repricing, ordering, tracking and buyer communication — handled for you.",
       "asinListing": {
-        "title": "List in minutes",
-        "description": "Add a product and it goes live on eBay with a clean, search-ready title, proper images and the item details buyers filter by already filled in.",
-        "detail": "Search-ready title, gallery images and the item specifics buyers filter by are filled in from your source product — nothing to type twice, nothing published half-finished."
+        "title": "AI-powered eBay listings",
+        "description": "Add an Amazon ASIN and SellerHill builds the eBay listing: product images, item specifics and an AI-optimized title.",
+        "detail": "Enter the Amazon ASINs you want to sell and SellerHill turns them into eBay-ready listings — product images, the item specifics buyers filter by, and a title optimized for eBay search with AI. Apply your own HTML listing template to control how the description looks."
       },
       "priceStock": {
-        "title": "Price and stock stay current",
-        "description": "When your source price or stock moves, your eBay offer follows in the same cycle. No overselling what you can't get, no leaving margin behind.",
-        "detail": "Every refresh compares your source price and stock to what is live on eBay and only pushes a change when something actually moved, so your listing stays accurate without being touched on a fixed schedule."
+        "title": "Automatic price & stock sync",
+        "description": "SellerHill checks your Amazon products about twice a day and updates your eBay listings when the price or availability changes.",
+        "detail": "SellerHill monitors the Amazon price and stock of every product you list, checking around twice a day. When something changes, your eBay listing is updated to match — so you are not selling an item that went out of stock, or holding a price that no longer leaves you a margin."
       },
       "autoOrder": {
-        "title": "Orders bought for you",
-        "description": "An eBay sale becomes a supplier purchase automatically, shipped to your buyer. You set a spending ceiling per account, so it can never overpay.",
-        "detail": "A matched sale places the purchase on a rotating buyer account and ships straight to your eBay buyer, staying under the spending cap you set — anything at risk of going over it stops for your review instead of going through."
+        "title": "Automatic order fulfillment",
+        "description": "When an eBay order comes in, SellerHill places the matching Amazon order and ships it to your buyer.",
+        "detail": "Every eBay sale is turned into an Amazon order automatically and shipped to your buyer's address. You set a spending cap per buyer account, and any order that would go over it stops for your review instead of going through."
       },
       "tracking": {
-        "title": "Tracking that files itself",
-        "description": "Tracking is picked up as soon as it exists and pushed to eBay, so your order is marked shipped on time — and your buyer sees a clean delivery, not your supply chain.",
-        "detail": "As soon as a tracking number exists it is picked up and pushed to eBay as the shipment update, so a sale reads as shipped without you checking in on it."
+        "title": "Automatic tracking updates",
+        "description": "SellerHill follows the Amazon order, marks the eBay order shipped and uploads the tracking number.",
+        "detail": "SellerHill monitors the Amazon order after it is placed. When it ships, the eBay order status is updated and the tracking number is uploaded to eBay — converted first when you have tracking conversion enabled, so your buyer sees a clean tracking number instead of your supplier."
       },
       "buyerMessages": {
-        "title": "Buyer messages on schedule",
-        "description": "Thank-you, shipped, delivered and feedback requests go out on your own templates, at the right moment, without you remembering to send them.",
-        "detail": "Order-received, shipped, delivered and feedback-request messages send themselves on your own wording, at the moment each one is actually true — not a guess at when it probably happened."
+        "title": "Automated buyer messages",
+        "description": "Order received, shipped, delivered and feedback request messages send themselves, using your own templates.",
+        "detail": "Set up messages for order received, shipped, delivered and feedback request. SellerHill sends each one at the right stage of the order using your own templates, so you never have to track who to contact and when."
       },
       "multiStore": {
-        "title": "Several stores, one desk",
-        "description": "Run more than one eBay store and more than one buyer account side by side, each filtered and reported on its own.",
-        "detail": "Each store and buyer account keeps its own margin rules, its own reporting and its own automation settings, so running three storefronts never means averaging them into one."
+        "title": "Multiple eBay stores",
+        "description": "Run several eBay stores from one account, each with its own settings, listings and reporting.",
+        "detail": "Manage more than one eBay store from a single SellerHill account. Each store keeps its own settings, listings, orders and profit reporting, and every screen can be filtered down to one store."
       }
     },
     "profit": {
-      "sectionEyebrow": "Profit, not guesswork",
-      "sectionTitle": "Most tools show revenue. SellerHill shows what is left.",
-      "sectionSubtitle": "Every sale is matched to its real cost — what you paid, the tax, the shipping and eBay's cut. When a cost isn't known yet, the number says so instead of pretending.",
+      "sectionEyebrow": "Real profit",
+      "sectionTitle": "Revenue Isn't Profit. Know What You Actually Made.",
+      "sectionSubtitle": "SellerHill doesn't apply an estimated margin. It matches the net earnings eBay actually paid you with the amount you actually paid on Amazon, and reports what is left.",
+      "actuals": {
+        "title": "Actual numbers on both sides",
+        "description": "The eBay net earnings come from the real sale. The order cost comes from the real Amazon order. Nothing in between is assumed."
+      },
       "confirmed": {
         "title": "Confirmed profit",
-        "description": "Sales whose costs are fully captured. This is the figure you can plan against."
+        "description": "Profit calculated from complete transaction data. This is the figure you can plan against."
       },
       "estimated": {
         "title": "Estimated profit",
-        "description": "Costs only partly known. Shown apart, clearly labelled, and never blended into your headline number."
-      },
-      "honest": {
-        "title": "Nothing invented",
-        "description": "A missing cost stays a dash. So when you do see a zero, it is a real zero — not an absence dressed up as one."
+        "description": "When cost data is still incomplete, the profit is labeled as an estimate and kept separate from your confirmed total."
       },
       "pnl": {
         "title": "Month-by-month P&L",
-        "description": "Revenue, costs, margin and ROI across twelve months, on one screen and exportable in a click."
+        "description": "Revenue, costs, margin and ROI across twelve months on one screen, exportable in a click."
       },
       "panel": {
-        "title": "This month",
+        "title": "How a sale becomes profit",
+        "formula": "Actual eBay net earnings − actual Amazon order cost = real profit",
+        "monthTitle": "This month",
+        "rows": {
+          "sale": "eBay sale",
+          "fees": "eBay fees & expenses",
+          "net": "eBay net earnings",
+          "cost": "Amazon order cost",
+          "profit": "Real profit"
+        },
         "confirmedLabel": "Confirmed profit",
         "estimatedLabel": "Estimated profit",
-        "unknownLabel": "Revenue, cost unknown",
-        "footnote": "Only confirmed profit counts toward your headline figure."
+        "unknownLabel": "Revenue, cost not yet known",
+        "footnote": "Only confirmed profit counts toward your headline figure. Estimates are shown separately, so you always know which numbers are final."
       },
       "tabs": {
         "overview": "Overview",
         "pnl": "P&L",
-        "perOrder": "Per order",
-        "pnlRows": {
-          "sales": "Sales",
-          "fees": "Fees & referral",
-          "cost": "Cost of goods",
-          "netProfit": "Net profit"
-        }
+        "perOrder": "Per order"
       }
     },
-    "perProduct": {
-      "sectionEyebrow": "Granular control",
-      "sectionTitle": "Your rules. Per product, not per account.",
-      "sectionSubtitle": "One blanket setting quietly costs you money on every product it doesn't suit. Set the margin, the stock cap and the template on the items that need their own.",
+    "settingGroups": {
+      "sectionEyebrow": "Setting Groups",
+      "sectionTitle": "Different Products. Different Strategies.",
+      "sectionSubtitle": "Not every product should be priced or listed the same way. Create a Setting Group with its own pricing rule, HTML template and listing settings, then apply it to the products that need it. Build a strategy once and reuse it across your catalog.",
       "labels": {
-        "margin": "Profit margin",
-        "stock": "Stock cap",
-        "template": "Listing template"
+        "pricing": "Pricing rule",
+        "stock": "Stock buffer",
+        "template": "HTML template"
       },
-      "productA": {
-        "name": "Wireless Earbuds Pro",
-        "margin": "12%",
-        "stock": "3",
-        "template": "Electronics — Standard"
+      "groupA": {
+        "name": "Valentine's Day",
+        "pricing": "Seasonal margin",
+        "stock": "2 units",
+        "template": "Valentine's"
       },
-      "productB": {
-        "name": "USB-C Fast Charger 65W",
-        "margin": "22%",
-        "stock": "1",
-        "template": "Fast Shipping"
+      "groupB": {
+        "name": "Electronics",
+        "pricing": "12% margin",
+        "stock": "3 units",
+        "template": "Electronics"
       },
-      "productC": {
-        "name": "Ergonomic Laptop Stand",
-        "margin": "18%",
-        "stock": "5",
-        "template": "Home Office"
+      "groupC": {
+        "name": "High-ticket",
+        "pricing": "18% margin",
+        "stock": "1 unit",
+        "template": "Premium"
       }
     },
     "howItWorks": {
       "sectionEyebrow": "How it works",
-      "sectionTitle": "Three steps, then it runs itself",
-      "sectionSubtitle": "Connect once, set your rules once, and the daily work stops being yours.",
+      "sectionTitle": "From ASIN to an Automated Store",
+      "sectionSubtitle": "Set it up once, and the daily work stops being yours.",
       "step1": {
         "title": "Connect your accounts",
-        "description": "Link your eBay store and the buyer account you source from. It takes a couple of minutes and nothing is installed."
+        "description": "Connect your eBay store and your Amazon account. It takes a couple of minutes and there is nothing to install."
       },
       "step2": {
-        "title": "Add products and set rules",
-        "description": "Bring in the items you want to sell, then choose your margin, stock cap and template — globally, or one product at a time."
+        "title": "Add your products",
+        "description": "Enter the Amazon ASINs you want to sell. SellerHill matches each product and builds the eBay listing from it."
       },
       "step3": {
-        "title": "Let it run",
-        "description": "Listings publish, prices track, orders get bought, tracking flows back to eBay, and your profit figures keep themselves up to date."
+        "title": "Choose your settings",
+        "description": "Pick the Setting Group that fits, or set the pricing rule, stock buffer and listing template yourself."
+      },
+      "step4": {
+        "title": "Let SellerHill automate the work",
+        "description": "Listings go live, price and stock stay in sync, orders are placed, tracking is updated and buyer messages go out."
+      },
+      "step5": {
+        "title": "Track your profit",
+        "description": "See the real profit on every order, from your actual eBay earnings and your actual Amazon order costs."
       }
     },
     "demo": {
-      "sectionEyebrow": "See it first",
-      "sectionTitle": "Look around before you sign up.",
-      "sectionSubtitle": "The full application, loaded with sample data. Every screen, every number, nothing to fill in and nothing to cancel.",
-      "button": "Open the live demo",
-      "note": "No sign-up, no card, nothing installed.",
+      "sectionEyebrow": "Live demo",
+      "sectionTitle": "See SellerHill Before You Sign Up.",
+      "sectionSubtitle": "Explore the dashboard, listings, orders and profit reporting with sample data. Nothing to fill in, nothing to cancel.",
+      "button": "Try live demo",
+      "note": "No account required · No credit card · Nothing saved.",
       "bullets": {
         "b1": "The real dashboard, with confirmed and estimated profit side by side",
         "b2": "Listings, orders and the month-by-month P&L",
-        "b3": "Leave whenever you like — nothing is saved"
+        "b3": "Nothing is saved — leave whenever you like"
       }
     },
     "pricing": {
       "sectionEyebrow": "Pricing",
-      "sectionTitle": "Straightforward pricing",
-      "sectionSubtitle": "Priced on what you actually use: how many listings you keep active, and how many orders are bought for you each month.",
+      "sectionTitle": "Professional Automation Without the Premium Price",
+      "sectionSubtitle": "Plans are priced on what you actually use: how many listings you keep active, and how many orders SellerHill handles for you each month. Every plan includes the full automation set.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",
       "mostPopular": "Most popular",
       "planCta": "Start free",
       "showAllPlans": "See all {{count}} plans",
       "showFewerPlans": "Show fewer plans",
-      "unlimited": "Unlimited",
       "notIncluded": "Not included",
-      "listingsLabel": "listings",
-      "ordersLabel": "orders",
       "upToListings": "Up to {{limit}} active listings",
       "unlimitedListings": "Unlimited active listings",
       "upToOrders": "Up to {{limit}} automatic orders / month",
       "unlimitedOrders": "Unlimited automatic orders",
+      "upToConversions": "{{limit}} tracking conversions / month",
+      "unlimitedConversions": "Unlimited tracking conversions",
       "catalogError": "Live pricing couldn't be loaded right now. Plan overview shown below.",
       "included": {
-        "sync": "Price and stock kept in sync",
-        "autoOrder": "Orders bought automatically",
-        "tracking": "Tracking pushed to eBay",
-        "profit": "Confirmed and estimated profit reporting",
-        "support": "Email support"
+        "sync": "Automatic price & stock sync",
+        "autoOrder": "Automatic order fulfillment",
+        "tracking": "Automatic tracking updates",
+        "messages": "Automated buyer messages",
+        "profit": "Real profit reporting",
+        "multiStore": "Multiple eBay stores",
+        "support": "Email & chat support"
       },
       "catalogFallback": {
         "nano": {
@@ -677,52 +697,69 @@
           "orders": "Up to 1,000 automatic orders / month",
           "conversions": "500 tracking conversions / month"
         }
-      },
-      "upToConversions": "{{limit}} tracking conversions / month",
-      "unlimitedConversions": "Unlimited tracking conversions"
+      }
     },
     "faq": {
       "sectionTitle": "Frequently asked questions",
       "sectionSubtitle": "The things worth knowing before you start.",
       "q1": {
-        "question": "How does automatic ordering work?",
-        "answer": "When a buyer orders on eBay, SellerHill places the matching order on your connected supplier account and ships it to the buyer's address. You set a spending ceiling per account, and any order above it stops for your approval rather than going through."
+        "question": "How does automatic order fulfillment work?",
+        "answer": "When a buyer orders on eBay, SellerHill places the matching order on your connected Amazon account and ships it to the buyer's address. You set a spending cap per buyer account, and any order above that cap stops for your approval instead of going through."
       },
       "q2": {
-        "question": "Can I still handle an order myself?",
-        "answer": "Yes. Automation is a setting, not a lock-in — it can be off entirely, off for a particular store, or stepped over on any individual order you want to place yourself."
+        "question": "How often does price and stock sync run?",
+        "answer": "SellerHill checks the Amazon price and stock of your listed products about twice a day. When the price or availability changes, the matching eBay listing is updated in that cycle. This is scheduled monitoring, not real-time tracking."
       },
       "q3": {
-        "question": "What happens when something goes wrong?",
-        "answer": "It stops rather than guessing, and tells you why in plain language. Anything waiting on you — a purchase that couldn't complete, a disconnected store, a listing that fell out of stock — is collected on one page instead of being something you have to go looking for."
+        "question": "How does tracking automation work?",
+        "answer": "After the Amazon order is placed, SellerHill keeps monitoring it. When Amazon ships, the eBay order is marked shipped and the tracking number is uploaded to eBay, so your order is updated on time without you checking in on it."
       },
       "q4": {
-        "question": "Why do you separate confirmed and estimated profit?",
-        "answer": "Because a profit figure you can't trust is worse than none. Until the real cost of a sale is known, that sale is reported as an estimate and kept out of your headline number. When a cost can't be resolved at all, you see a dash — so a zero on your dashboard always means a genuine zero."
+        "question": "What is tracking number conversion?",
+        "answer": "An Amazon tracking number tells your buyer where the item came from. When conversion is enabled, SellerHill converts it into a different trackable number before uploading it to eBay. You choose whether conversion is on and which carriers it applies to."
       },
       "q5": {
-        "question": "Do I need to install anything?",
-        "answer": "No. SellerHill runs in the browser and connects to your accounts directly. There is no extension, no desktop app and nothing to keep running on your own machine."
+        "question": "Can I customize the buyer messages?",
+        "answer": "Yes. Order received, shipped, delivered and feedback request each have their own template that you can edit, and you can turn any of the four on or off independently."
       },
       "q6": {
-        "question": "Can I try it before paying?",
-        "answer": "Yes, two ways. The live demo opens the full application with sample data and needs no sign-up at all. Or create an account and start free — no card is required to begin."
+        "question": "How is real profit calculated?",
+        "answer": "SellerHill takes the net earnings eBay actually paid you for the sale — after eBay fees — and subtracts the amount you actually paid for the Amazon order, including tax and shipping. It compares two real transactions, rather than a selling price minus an estimated cost."
+      },
+      "q7": {
+        "question": "What's the difference between confirmed and estimated profit?",
+        "answer": "Confirmed profit is calculated from complete transaction data on both sides. Estimated profit is shown while the cost data is still incomplete — for example before the Amazon order costs have been captured. Estimates are labeled and kept separate, so you always know which numbers are final."
+      },
+      "q8": {
+        "question": "What are Setting Groups?",
+        "answer": "A Setting Group is a reusable set of listing settings — pricing rule, stock buffer, HTML template and other listing options. You create the group once and apply it to as many products as you like, instead of configuring each product separately."
+      },
+      "q9": {
+        "question": "Can different product groups use different pricing and templates?",
+        "answer": "Yes, that is exactly what Setting Groups are for. Seasonal products can run a seasonal margin and template while your electronics run their own, and you can move products between groups at any time."
+      },
+      "q10": {
+        "question": "Can I manage multiple eBay stores?",
+        "answer": "Yes. You can connect more than one eBay store to a single SellerHill account. Each store keeps its own settings, listings, orders and profit reporting, and you can filter every screen by store."
+      },
+      "q11": {
+        "question": "Do I need to install any software?",
+        "answer": "No. SellerHill runs in the browser and connects to your accounts directly. There is no browser extension, no desktop app and nothing to keep running on your own machine."
+      },
+      "q12": {
+        "question": "Can I try SellerHill before paying?",
+        "answer": "Yes, in two ways. The live demo opens the full application with sample data and needs no sign-up at all. Or create an account and start a 7-day free trial — no credit card required."
       }
     },
     "ctaBanner": {
-      "variant1": {
-        "headline": "See it working before you commit.",
-        "subheading": "Open the demo and click through the real thing — the dashboard, the listings, the orders and the profit figures behind them.",
-        "button": "Open the live demo"
-      },
       "variant2": {
-        "headline": "Stop doing this by hand.",
-        "subheading": "Put the listing, the pricing, the buying and the tracking on autopilot — and get a profit number you can actually plan against.",
+        "headline": "Automate Your eBay Store Today",
+        "subheading": "Let SellerHill handle the repetitive work — listing, syncing, ordering, tracking and messaging — while you focus on growing your business, and always know exactly what you are making.",
         "button": "Start free"
       }
     },
     "footer": {
-      "description": "SellerHill automates the daily work of an Amazon-to-eBay store — listing, repricing, ordering and tracking — and reports the real profit behind every sale.",
+      "description": "SellerHill is an Amazon-to-eBay dropshipping automation platform: listings, price and stock sync, automatic orders, tracking updates and buyer messages — with real profit reporting from your actual eBay and Amazon transactions.",
       "product": "Product",
       "company": "Company",
       "legal": "Legal",
@@ -730,14 +767,10 @@
         "features": "Features",
         "pricing": "Pricing",
         "howItWorks": "How it works",
-        "profit": "Profit reporting",
-        "demo": "Live demo",
-        "faq": "FAQ"
+        "profit": "Real profit",
+        "demo": "Live demo"
       },
       "companyLinks": {
-        "about": "About",
-        "blog": "Blog",
-        "careers": "Careers",
         "contact": "Contact"
       },
       "legalLinks": {

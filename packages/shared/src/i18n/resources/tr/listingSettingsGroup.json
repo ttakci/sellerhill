@@ -106,6 +106,22 @@
       "brand-story": {
         "name": "Marka Hikayesi",
         "description": "Markayı öne çıkaran editoryal düzen - özel markalı ve markalı ürünler için"
+      },
+      "neon-gamer": {
+        "name": "Neon Oyuncu",
+        "description": "Koyu tema, neon vurgular ve oyuncu ekipmanları için yüksek kontrastlı modern düzen"
+      },
+      "vintage-craft": {
+        "name": "Vintage Zanaat",
+        "description": "El yapımı, antika ve butik ürünler için klasik, zarif ve sıcak tonlu düzen"
+      },
+      "auto-parts-pro": {
+        "name": "Oto Yedek Parça Pro",
+        "description": "Otomotiv, endüstriyel parçalar ve donanımlar için yüksek teknik detaylı düzen"
+      },
+      "luxury-gold": {
+        "name": "Lüks Altın",
+        "description": "Mücevher, saat ve üst düzey moda ürünleri için altın vurgulu premium şık düzen"
       }
     },
     "validation": {
