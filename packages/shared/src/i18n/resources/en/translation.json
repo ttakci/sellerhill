@@ -495,12 +495,12 @@
         "description": "Listings, price and stock sync, automatic orders, tracking updates and buyer messages — the full Amazon-to-eBay workflow in one platform."
       },
       "p2": {
-        "title": "Real profit, not an estimate",
-        "description": "Your profit comes from the net earnings eBay actually paid you and the amount you actually paid on Amazon — not from an assumed margin."
-      },
-      "p3": {
         "title": "A strategy per product group",
         "description": "Setting Groups let you run different pricing rules, HTML templates and listing settings across different parts of your catalog."
+      },
+      "p3": {
+        "title": "Real profit, not an estimate",
+        "description": "Your profit comes from the net earnings eBay actually paid you and the amount you actually paid on Amazon — not from an assumed margin."
       }
     },
     "features": {

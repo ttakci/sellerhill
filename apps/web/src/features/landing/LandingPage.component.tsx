@@ -10,18 +10,30 @@ import type { LandingPageProps } from './LandingPage.types';
  * mockups) — see `apps/web/public/landing-screens/`. Reused across the
  * features tabs and the profit tabs so the whole page draws from one small,
  * honest set of images instead of a screenshot per claim.
+ *
+ * Captured once per locale under `en/` and `tr/`, because the app inside the
+ * screenshot is the product: a Turkish visitor reading Turkish copy and seeing
+ * an English dashboard is being shown a different product than the one they
+ * would get. Both folders hold the same nine file names, so the only thing that
+ * varies is the folder.
  */
-const SCREEN = {
-  dashboardPnl: '/landing-screens/dashboard-pnl.jpg',
-  orders: '/landing-screens/orders.jpg',
-  orderDetail: '/landing-screens/order-detail.jpg',
-  listings: '/landing-screens/listings.jpg',
-  listingDetail: '/landing-screens/listing-detail.jpg',
-  buyerMessages: '/landing-screens/buyer-messages.jpg',
-  stores: '/landing-screens/stores.jpg',
-  heroDashboard: '/landing-screens/hero-dashboard.jpg',
-  heroKpiCard: '/landing-screens/hero-kpi-card.jpg',
+const SCREEN_NAMES = {
+  dashboardPnl: 'dashboard-pnl',
+  orders: 'orders',
+  orderDetail: 'order-detail',
+  listings: 'listings',
+  listingDetail: 'listing-detail',
+  buyerMessages: 'buyer-messages',
+  stores: 'stores',
+  heroDashboard: 'hero-dashboard',
+  heroKpiCard: 'hero-kpi-card',
 } as const;
+
+type ScreenKey = keyof typeof SCREEN_NAMES;
+
+/** Only `tr` and `en` are captured; anything else falls back to the English set. */
+const screenSrc = (key: ScreenKey, locale: string): string =>
+  `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/${SCREEN_NAMES[key]}.jpg`;
 
 /**
  * Each tab shows the screen that actually does the thing it claims.
@@ -34,13 +46,13 @@ const SCREEN = {
  * uses real captures at all. Every pairing below is now the screen a seller
  * would actually be looking at for that feature.
  */
-const FEATURES: { key: string; icon: IconName; image: string }[] = [
-  { key: 'asinListing', icon: 'rocket', image: SCREEN.listings },
-  { key: 'priceStock', icon: 'sync', image: SCREEN.listingDetail },
-  { key: 'autoOrder', icon: 'shopping-cart', image: SCREEN.orders },
-  { key: 'tracking', icon: 'local-shipping', image: SCREEN.orderDetail },
-  { key: 'buyerMessages', icon: 'message-circle', image: SCREEN.buyerMessages },
-  { key: 'multiStore', icon: 'storefront', image: SCREEN.stores },
+const FEATURES: { key: string; icon: IconName; screen: ScreenKey }[] = [
+  { key: 'asinListing', icon: 'rocket', screen: 'listings' },
+  { key: 'priceStock', icon: 'sync', screen: 'listingDetail' },
+  { key: 'autoOrder', icon: 'shopping-cart', screen: 'orders' },
+  { key: 'tracking', icon: 'local-shipping', screen: 'orderDetail' },
+  { key: 'buyerMessages', icon: 'message-circle', screen: 'buyerMessages' },
+  { key: 'multiStore', icon: 'storefront', screen: 'stores' },
 ];
 
 /**
@@ -344,10 +356,10 @@ export const LandingPageComponent = ({
           */}
           <S.HeroPreview>
             <S.PreviewFrame>
-              <S.PreviewImage src={SCREEN.heroDashboard} alt="SellerHill dashboard" loading="lazy" />
+              <S.PreviewImage src={screenSrc('heroDashboard', currentLocale)} alt="SellerHill dashboard" loading="lazy" />
             </S.PreviewFrame>
             <S.HeroFloatCard>
-              <S.HeroFloatImage src={SCREEN.heroKpiCard} alt="" loading="lazy" />
+              <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" loading="lazy" />
             </S.HeroFloatCard>
           </S.HeroPreview>
         </S.HeroInner>
@@ -386,7 +398,7 @@ export const LandingPageComponent = ({
       </S.Pillars>
 
       {/* ── Features ───────────────────────────────────── */}
-      <S.Section $alt id="features" data-reveal="features">
+      <S.Section $alt $tightTop id="features" data-reveal="features">
         <S.Reveal $visible={seen('features')}>
           <S.SectionHead>
             <S.Eyebrow>{t('translation:landing.features.sectionEyebrow')}</S.Eyebrow>
@@ -434,7 +446,7 @@ export const LandingPageComponent = ({
 
               <S.FeaturePreviewFrame>
                 <S.PreviewImage
-                  src={activeFeature.image}
+                  src={screenSrc(activeFeature.screen, currentLocale)}
                   alt={t(`translation:landing.features.${activeFeature.key}.title`)}
                   loading="lazy"
                 />
@@ -544,7 +556,7 @@ export const LandingPageComponent = ({
                     only summarises.
                   */}
                   <S.PreviewImage
-                    src={activeProfitTab === 'pnl' ? SCREEN.dashboardPnl : SCREEN.orderDetail}
+                    src={screenSrc(activeProfitTab === 'pnl' ? 'dashboardPnl' : 'orderDetail', currentLocale)}
                     alt={t(`translation:landing.profit.tabs.${activeProfitTab}`)}
                     loading="lazy"
                   />

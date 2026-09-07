@@ -17,9 +17,19 @@ import { tkn } from '@repo/ui';
 const CONTENT_MAX = '1180px';
 const NARROW_MAX = '900px';
 
-/** Section rhythm. One value, so no section invents its own vertical spacing. */
-const SECTION_Y = '7.5rem';
-const SECTION_Y_SM = '4.5rem';
+/**
+ * Section rhythm. One value, so no section invents its own vertical spacing.
+ *
+ * Tightened 2026-09-07 (7.5/4.5rem → 5.5/3.5rem) after three separate reports
+ * of dead space above a section heading. The cause was structural rather than
+ * local: at 7.5rem, two adjacent sections put 120px of their own padding on
+ * each side of the boundary, so every seam carried 240px of empty page — enough
+ * that a section eyebrow read as detached from the content it belongs to. Fix
+ * it here, once, rather than per section; a section that needs less still uses
+ * `$tightTop` instead of a literal.
+ */
+const SECTION_Y = '5.5rem';
+const SECTION_Y_SM = '3.5rem';
 
 /*
  * Sellerboard's own fonts, loaded as extra families in `index.html` alongside
@@ -838,16 +848,23 @@ export const FlowArrow = styled.span`
   color: ${tkn('colors.text.tertiary')};
 `;
 
+/**
+ * The bottom padding matters as much as the top: the next element is a
+ * `Section $alt`, which changes the page background and draws a border, and
+ * that colour edge landed directly under the last line of pillar text when the
+ * bottom padding was 0. The section's own top padding sits *below* the edge, so
+ * it cannot do this job — the gap above the edge has to come from here.
+ */
 export const Pillars = styled.div`
   max-width: ${CONTENT_MAX};
   margin: 0 auto;
-  padding: ${SECTION_Y_SM} ${tkn('spacing.xl')} 0;
+  padding: ${SECTION_Y_SM} ${tkn('spacing.xl')} ${tkn('spacing.xxl')};
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: ${tkn('spacing.lg')};
 
   @media (max-width: 900px) {
-    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')} 0;
+    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')} ${tkn('spacing.lg')};
   }
 `;
 
@@ -879,8 +896,16 @@ export const PillarText = styled.p`
  * Generic section
  * ========================================================================= */
 
-export const Section = styled.section<{ $alt?: boolean; $narrow?: boolean }>`
-  padding: ${SECTION_Y} ${tkn('spacing.xl')};
+/**
+ * `$tightTop` halves the top padding for a section that follows content of its
+ * own rather than opening a new stretch of page. Features is the one case: it
+ * sits right under the pillars, which already have bottom padding of their own,
+ * and the background change plus border between them is a strong enough
+ * separator on its own — a full `SECTION_Y` on top of that stacked into a
+ * visible dead gap above the "Features" chip.
+ */
+export const Section = styled.section<{ $alt?: boolean; $narrow?: boolean; $tightTop?: boolean }>`
+  padding: ${(p) => (p.$tightTop ? SECTION_Y_SM : SECTION_Y)} ${tkn('spacing.xl')} ${SECTION_Y};
   background: ${(p) => (p.$alt ? tkn('colors.landing.sectionAlt')(p) : 'transparent')};
   border-top: 1px solid ${(p) => (p.$alt ? tkn('colors.landing.heroBorder')(p) : 'transparent')};
   border-bottom: 1px solid ${(p) => (p.$alt ? tkn('colors.landing.heroBorder')(p) : 'transparent')};
@@ -891,7 +916,8 @@ export const Section = styled.section<{ $alt?: boolean; $narrow?: boolean }>`
   }
 
   @media (max-width: 900px) {
-    padding: ${SECTION_Y_SM} ${tkn('spacing.md')};
+    padding: ${(p) => (p.$tightTop ? tkn('spacing.xxl')(p) : SECTION_Y_SM)} ${tkn('spacing.md')}
+      ${SECTION_Y_SM};
   }
 `;
 
