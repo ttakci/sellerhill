@@ -77,7 +77,7 @@
     "predefinedTemplates": {
       "ds-general-store": {
         "name": "DS Genel Mağaza",
-        "description": "Genel dropshipping ürünleri için uygun, yüksek dönüşümlü, aciliyet odaklı ve güven rozetleri içeren düzen"
+        "description": "Genel ürünler için uygun, yüksek dönüşümlü, aciliyet odaklı ve güven rozetleri içeren düzen"
       },
       "ds-minimalist": {
         "name": "DS Minimalist",
