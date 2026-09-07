@@ -23,7 +23,7 @@ import { sanitizeListingHtml } from '../../common/utils/sanitize';
  *    settings-drawer preview injects this HTML straight into the app document.
  */
 
-const CATALOG_SQL = path.join(__dirname, '../../../migrations/071_predefined_templates_catalog.sql');
+const CATALOG_SQL = path.join(__dirname, '../../../migrations/073_dropshipping_templates_catalog.sql');
 const STRUCTURE_SQL = path.join(__dirname, '../../../migrations/070_predefined_templates_slug.sql');
 const SERVICE_TS = path.join(
   __dirname,
@@ -90,7 +90,7 @@ describe('predefined template catalog', () => {
     // A repeated slug in one VALUES list raises
     // "ON CONFLICT DO UPDATE command cannot affect row a second time".
     expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs).toEqual(expect.arrayContaining(['modern-professional', 'elite-trust']));
+    expect(slugs).toEqual(expect.arrayContaining(['ds-general-store', 'ds-minimalist']));
   });
 
   it('never lets a template body contain its own dollar-quote tag', () => {
@@ -210,7 +210,7 @@ describe('predefined template catalog', () => {
   it('renders no images at all in minimal-mono', () => {
     // The template exists specifically so a seller can publish a description
     // with no Amazon-hosted image URL in the page source.
-    const minimal = catalog.find((template) => template.slug === 'minimal-mono');
+    const minimal = catalog.find((template) => template.slug === 'ds-minimalist');
     expect(minimal).toBeDefined();
     expect((minimal as CatalogTemplate).html).not.toMatch(/<img\b/i);
   });
