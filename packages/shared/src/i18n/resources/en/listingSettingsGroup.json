@@ -106,6 +106,22 @@
       "brand-story": {
         "name": "Brand Story",
         "description": "Editorial layout that leads with the brand - suits private-label and branded goods"
+      },
+      "neon-gamer": {
+        "name": "Neon Gamer",
+        "description": "Dark theme with neon accents and high contrast layout perfect for gaming gear"
+      },
+      "vintage-craft": {
+        "name": "Vintage Craft",
+        "description": "Classic, elegant and warm layout for handmade, antique and boutique products"
+      },
+      "auto-parts-pro": {
+        "name": "Auto Parts Pro",
+        "description": "Highly technical layout tailored for automotive, industrial parts and hardware"
+      },
+      "luxury-gold": {
+        "name": "Luxury Gold",
+        "description": "Premium layout with gold accents for jewelry, watches, and high-end fashion"
       }
     },
     "validation": {

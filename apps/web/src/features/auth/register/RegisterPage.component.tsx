@@ -89,20 +89,18 @@ export const RegisterPageComponent = ({
                 void handleSubmit(onSubmit)(e);
               }}
             >
-              <S.FormRow>
-                <ModernTextInput
-                  name="firstName"
-                  control={control}
-                  label={t('auth:auth.register.firstNameLabel')}
-                  isDisabled={isLoading || isSubmitting}
-                />
-                <ModernTextInput
-                  name="lastName"
-                  control={control}
-                  label={t('auth:auth.register.lastNameLabel')}
-                  isDisabled={isLoading || isSubmitting}
-                />
-              </S.FormRow>
+              <ModernTextInput
+                name="firstName"
+                control={control}
+                label={t('auth:auth.register.firstNameLabel')}
+                isDisabled={isLoading || isSubmitting}
+              />
+              <ModernTextInput
+                name="lastName"
+                control={control}
+                label={t('auth:auth.register.lastNameLabel')}
+                isDisabled={isLoading || isSubmitting}
+              />
 
               <ModernTextInput
                 name="email"

@@ -515,6 +515,29 @@ export const HeroContent = styled.div`
   gap: ${tkn('spacing.md')};
 `;
 
+/**
+ * The Hero sits on the dark navy `sidebar.background`, so it needs its own
+ * eyebrow — the light-surface `Eyebrow` below uses `landing.chipBg` +
+ * `brand.primary`, which all but disappears against navy. This one states the
+ * category ("Amazon → eBay dropshipping automation") above the headline, so a
+ * visitor who already knows AutoDS/Easync/Yaballe places the product in the
+ * first second rather than inferring it from the subheading.
+ */
+export const HeroEyebrow = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  background: ${tkn('colors.sidebar.hover')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  letter-spacing: 0.03em;
+  color: ${tkn('colors.landing.accentAmber')};
+`;
+
 export const Eyebrow = styled.div`
   display: inline-flex;
   align-items: center;
@@ -663,10 +686,9 @@ export const HeroNoteLine = styled.p`
 /* =========================================================================
  * Hero product preview — a real screenshot (from the sign-up-free demo
  * account), not a hand-drawn mockup, floating on the dark hero exactly like
- * sellerboard's own dashboard screenshot. \`PreviewFrame\`/\`PreviewBar\`/
- * \`PreviewDot\`/\`PreviewUrl\`/\`PreviewImage\` below are shared with the
- * Features and Profit sections further down the page — every screenshot on
- * the site reads as one consistent browser-chrome "window".
+ * sellerboard's own dashboard screenshot. \`PreviewFrame\`/\`PreviewImage\`
+ * below are shared with the Features and Profit sections further down the
+ * page — every screenshot on the site sits in the same matted frame.
  * ========================================================================= */
 
 export const HeroPreview = styled.div`
@@ -710,9 +732,22 @@ export const HeroFloatImage = styled.img`
   height: auto;
 `;
 
+/**
+ * A matted frame around a real product screenshot — a thin surface-coloured
+ * mount, a hairline edge and one strong shadow.
+ *
+ * It replaced a fake browser chrome (a title bar with red/amber/green traffic
+ * lights and an `app.sellerhill.com/dashboard` URL). That chrome was decoration
+ * pretending to be evidence: it drew the eye to a browser we did not capture,
+ * dated the page the way skeuomorphic mockups do, and spent ~40px of vertical
+ * space on every screenshot for a URL nobody reads. The mount does the one job
+ * the chrome was actually there for — separating the screenshot from the page
+ * behind it — while keeping the product itself the only thing on screen.
+ */
 export const PreviewFrame = styled.div`
-  border-radius: ${tkn('radius.xl')};
-  border: 1px solid ${tkn('colors.landing.heroBorder')};
+  padding: ${tkn('spacing.xs+')};
+  border-radius: ${tkn('radius.2xl')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('colors.landing.shadowStrong')};
   overflow: hidden;
@@ -720,56 +755,41 @@ export const PreviewFrame = styled.div`
 `;
 
 /**
- * A real product screenshot (from the sign-up-free demo account) inside the
- * same browser-chrome frame as the hand-drawn hero preview — reused by the
- * profit and features sections so every screenshot on the page reads as one
- * consistent "window", not a mixed bag of raw images.
+ * Radius sits one tier below the frame's so the mount reads as an even border
+ * on all four sides; without it the image's square corners crowd the frame's
+ * rounded ones. The hairline is what stops a screenshot whose own edge is
+ * near-white from bleeding into the mount.
  */
 export const PreviewImage = styled.img`
   display: block;
   width: 100%;
   height: auto;
-`;
-
-export const PreviewBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.625rem 0.875rem;
-  background: ${tkn('colors.background.tertiary')};
-  border-bottom: 1px solid ${tkn('colors.landing.heroBorder')};
-`;
-
-export const PreviewDot = styled.span<{ $c: 'error' | 'warning' | 'success' }>`
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: ${(p) => tkn(`colors.semantic.${p.$c}` as 'colors.semantic.error')(p)};
-  opacity: 0.65;
-`;
-
-export const PreviewUrl = styled.span`
-  margin-left: 0.5rem;
-  font-size: ${tkn('typography.fontSize.xs')};
-  color: ${tkn('colors.text.tertiary')};
-  font-family: ${tkn('typography.fontFamily.mono')};
+  border-radius: ${tkn('radius.xl')};
+  border: 1px solid ${tkn('colors.border.secondary')};
 `;
 
 /* =========================================================================
  * Flow strip + pillars
  * ========================================================================= */
 
+/**
+ * The strip's top padding is load-bearing, not cosmetic: `Hero` ends on a hard
+ * dark-navy → light edge (there is deliberately no gradient — see the Hero
+ * notes above), and with `padding-top: 0` the "the full automation flow" label
+ * sat directly against that edge, reading as part of the navy band rather than
+ * as the first thing on the light page.
+ */
 export const FlowStrip = styled.div`
   max-width: ${CONTENT_MAX};
   margin: 0 auto;
-  padding: 0 ${tkn('spacing.xl')};
+  padding: ${SECTION_Y_SM} ${tkn('spacing.xl')} 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: ${tkn('spacing.md')};
 
   @media (max-width: 900px) {
-    padding: 0 ${tkn('spacing.md')};
+    padding: ${tkn('spacing.xxl')} ${tkn('spacing.md')} 0;
   }
 `;
 
@@ -985,6 +1005,36 @@ export const FeatureDetail = styled.div`
   gap: ${tkn('spacing.lg')};
 `;
 
+/**
+ * The features tab's own frame: the shared `PreviewFrame`, with the screenshot
+ * capped in height.
+ *
+ * At full height a 1600×1120 screenshot renders ~600px tall here, which pushed
+ * the image below the fold — so clicking a tab appeared to do nothing until you
+ * scrolled, and each tab's panel was a different height, making the whole
+ * section jump. Capping it fixes both: the panel is a stable height, so the tab
+ * you click swaps content *in place* next to the tab list.
+ *
+ * `object-fit: cover` + `object-position: top` crops from the BOTTOM, keeping
+ * the part of every screen that identifies it — page title, filters, first rows
+ * — rather than letterboxing the whole screen down to an unreadable strip.
+ * `img` is a plain element selector, never an Emotion component selector
+ * (those need the babel plugin this app does not run and crash at runtime).
+ */
+export const FeaturePreviewFrame = styled(PreviewFrame)`
+  img {
+    height: 21rem;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  @media (max-width: 900px) {
+    img {
+      height: 15rem;
+    }
+  }
+`;
+
 export const FeatureDetailHead = styled.div`
   display: flex;
   align-items: flex-start;
@@ -1149,6 +1199,58 @@ export const ProfitPanelTitle = styled.span`
   color: ${tkn('colors.text.tertiary')};
 `;
 
+/**
+ * The calculation ladder — eBay sale → fees → net earnings → Amazon order cost
+ * → real profit. This is the section's whole argument made visible: the profit
+ * figure is the difference between two REAL transactions, not a selling price
+ * minus an assumed cost, and a paragraph never lands that as fast as the sum.
+ */
+export const ProfitCalc = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ProfitCalcRow = styled.div<{ $strong?: boolean; $total?: boolean }>`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${tkn('spacing.md')};
+  padding: 0.55rem 0;
+  border-top: ${(p) => (p.$strong || p.$total ? `1px solid ${tkn('colors.border.secondary')(p)}` : 'none')};
+`;
+
+export const ProfitCalcLabel = styled.span<{ $strong?: boolean }>`
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: ${(p) =>
+    p.$strong ? tkn('typography.fontWeight.semibold')(p) : tkn('typography.fontWeight.normal')(p)};
+  color: ${(p) => (p.$strong ? tkn('colors.text.primary')(p) : tkn('colors.text.secondary')(p))};
+`;
+
+export const ProfitCalcValue = styled.span<{ $strong?: boolean; $total?: boolean }>`
+  font-family: ${FONT_BODY};
+  font-size: ${(p) => (p.$total ? TYPE.cardMd : TYPE.small)};
+  font-weight: ${(p) => (p.$strong || p.$total ? 700 : 400)};
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: ${(p) =>
+    p.$total ? tkn('colors.semantic.success')(p) : tkn('colors.text.primary')(p)};
+`;
+
+export const ProfitFormula = styled.p`
+  margin: 0;
+  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.surface.secondary')};
+  border: 1px solid ${tkn('colors.border.secondary')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  font-weight: ${tkn('typography.fontWeight.semibold')};
+  line-height: 1.5;
+  text-align: center;
+  color: ${tkn('colors.text.secondary')};
+`;
+
 export const ProfitTier = styled.div<{ $tone: 'confirmed' | 'estimated' | 'unknown' }>`
   display: flex;
   align-items: center;
@@ -1263,10 +1365,16 @@ export const SettingValue = styled.span`
  * Steps
  * ========================================================================= */
 
+/**
+ * Five steps, so the track minimum is narrower than the three-step version it
+ * replaced (16rem): at 16rem the grid fits four across and orphans the fifth on
+ * a row of its own. 12.5rem lets all five sit on one line at desktop width and
+ * still reflows to 3 / 2 / 1 as the viewport narrows.
+ */
 export const Steps = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: ${tkn('spacing.lg')};
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  gap: ${tkn('spacing.md')};
 `;
 
 export const StepCard = styled.div`

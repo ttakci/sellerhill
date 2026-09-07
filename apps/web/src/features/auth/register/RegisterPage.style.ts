@@ -80,17 +80,6 @@ export const Form = styled.form`
   gap: ${tkn('spacing.lg')};
 `;
 
-export const FormRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: ${tkn('spacing.lg')};
-
-  @media (min-width: 40rem) {
-    /* 640px */
-    grid-template-columns: 1fr 1fr;
-  }
-`;
-
 export const ButtonContainer = styled.div`
   margin-top: ${tkn('spacing.md')};
 `;

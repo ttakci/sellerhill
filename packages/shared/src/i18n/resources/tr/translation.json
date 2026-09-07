@@ -459,7 +459,7 @@
     "navbar": {
       "features": "Özellikler",
       "howItWorks": "Nasıl çalışır",
-      "profit": "Kâr",
+      "profit": "Gerçek kâr",
       "pricing": "Fiyatlandırma",
       "faq": "SSS",
       "login": "Giriş yap",
@@ -467,262 +467,299 @@
       "demo": "Demo"
     },
     "hero": {
-      "headline": "Mağazanız kendi çalışsın. Ne kazandığınızı tam olarak bilin.",
-      "subheading": "SellerHill ürünlerinizi listeler, fiyat ve stoğu senkron tutar, gelen siparişi tedarikçinizden satın alır ve kargo takibini eBay'e işler. Ardından her satışın arkasındaki gerçek kârı gösterir — tahminle değil, ölçerek.",
+      "eyebrow": "Amazon → eBay dropshipping otomasyonu",
+      "headline": "eBay Mağazanızı Otomatikleştirin. Gerçek Kârınızı Bilin.",
+      "subheading": "SellerHill Amazon'dan eBay'e iş akışınızı otomatikleştirir: listeleme, yapay zekâ başlıkları, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları. Ardından gerçek eBay net kazancınız ve gerçek Amazon sipariş maliyetinizle gerçek kârınızı gösterir.",
       "ctaPrimary": "Ücretsiz başla",
-      "ctaSecondary": "Demo hesap",
-      "trialTitle": "1 hafta ücretsiz deneme",
+      "ctaSecondary": "Canlı demo",
+      "trialTitle": "7 gün ücretsiz deneme",
       "trialNoCard": "Kredi kartı gerekmez.",
-      "trialCancelAnytime": "İstediğiniz zaman iptal edebilirsiniz."
+      "trialCancelAnytime": "İstediğiniz zaman iptal edin."
     },
     "flow": {
-      "title": "Tek bir iş için kuruldu, düzgün yapmak için",
-      "source": "Tedarikçiniz",
-      "engine": "SellerHill",
-      "destination": "eBay mağazanız"
+      "title": "Uçtan uca otomasyon akışı",
+      "steps": {
+        "asin": "Amazon ASIN",
+        "listing": "eBay ilanı",
+        "aiTitle": "Yapay zekâ başlık",
+        "sync": "Fiyat & stok senkronu",
+        "order": "Otomatik sipariş",
+        "tracking": "Kargo takibi",
+        "messages": "Alıcı mesajları",
+        "profit": "Gerçek kâr"
+      }
     },
     "pillars": {
       "p1": {
-        "title": "Beş araç değil, tek akış",
-        "description": "Listeleme, fiyatlama, stok, satın alma ve takip tek bir hat olarak çalışır — birbirine bağlanacak ya da elle karşılaştırılacak bir şey kalmaz."
+        "title": "Beklediğiniz otomasyon",
+        "description": "Listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — Amazon'dan eBay'e tüm iş akışı tek platformda."
       },
       "p2": {
-        "title": "Üzerine karar verilebilir kâr",
-        "description": "Onaylanmış maliyetlerle tahminler ayrı ayrı raporlanır. Bilinmeyen bir maliyet sessizce sıfıra yuvarlanmaz."
+        "title": "Tahmin değil, gerçek kâr",
+        "description": "Kârınız, eBay'in size gerçekten ödediği net kazanç ile Amazon'da gerçekten ödediğiniz tutardan hesaplanır — varsayılan bir marjdan değil."
       },
       "p3": {
-        "title": "Ürün bazında kural",
-        "description": "Marj, stok tavanı ve şablon ürün ürün ayarlanır — tüm kataloğa gerilmiş tek bir kural değil."
+        "title": "Her ürün grubuna ayrı strateji",
+        "description": "Ayar Grupları ile kataloğunuzun farklı bölümlerinde farklı fiyat kuralları, HTML şablonları ve listeleme ayarları kullanabilirsiniz."
       }
     },
     "features": {
-      "sectionEyebrow": "Hepsi otomatik",
-      "sectionTitle": "Günlük iş, sizin yerinize",
-      "sectionSubtitle": "Bir satıcının gününü dolduran işler — listelemek, fiyat kollamak, satın almak, kargo peşinde koşmak — kendi başına, günün her saati çalışır.",
+      "sectionEyebrow": "Özellikler",
+      "sectionTitle": "eBay Mağazanızı Otomatikleştirmek İçin Gereken Her Şey",
+      "sectionSubtitle": "Bir Amazon-eBay mağazasının günlük işi — listeleme, fiyatlama, sipariş, kargo takibi ve alıcı iletişimi — sizin yerinize yürüyor.",
       "asinListing": {
-        "title": "Dakikalar içinde listeleyin",
-        "description": "Ürünü ekleyin; temiz ve aramaya uygun bir başlık, düzgün görseller ve alıcıların filtrelediği ürün özellikleri hazır şekilde eBay'de yayına girsin.",
-        "detail": "Aramaya uygun başlık, galeri görselleri ve alıcıların filtrelediği ürün özellikleri kaynak üründen otomatik doldurulur — iki kez yazmanız, yarım yayınlamanız gerekmez."
+        "title": "Yapay zekâ destekli eBay ilanları",
+        "description": "Amazon ASIN'ini ekleyin; SellerHill eBay ilanını oluştursun: ürün görselleri, ürün özellikleri ve yapay zekâ ile optimize edilmiş başlık.",
+        "detail": "Satmak istediğiniz Amazon ASIN'lerini girin, SellerHill bunları yayına hazır eBay ilanlarına dönüştürsün — ürün görselleri, alıcıların filtrelediği ürün özellikleri ve eBay aramasına göre yapay zekâ ile optimize edilmiş başlık. Açıklamanın görünümünü kendi HTML ilan şablonunuzla belirleyebilirsiniz."
       },
       "priceStock": {
-        "title": "Fiyat ve stok hep güncel",
-        "description": "Kaynaktaki fiyat ya da stok oynadığında eBay ilanınız aynı turda onu takip eder. Tedarik edemeyeceğinizi satmazsınız, marjı da masada bırakmazsınız.",
-        "detail": "Her yenilemede kaynak fiyat ve stoğunuz eBay'deki canlı değerle karşılaştırılır, yalnızca gerçekten bir şey değiştiğinde güncelleme gönderilir — ilanınız sabit bir takvimle değil, gerçek değişikliklerle güncel kalır."
+        "title": "Otomatik fiyat & stok senkronizasyonu",
+        "description": "SellerHill Amazon ürünlerinizi günde yaklaşık iki kez kontrol eder ve fiyat ya da stok değiştiğinde eBay ilanlarınızı günceller.",
+        "detail": "SellerHill listelediğiniz her ürünün Amazon fiyatını ve stoğunu takip eder, günde yaklaşık iki kez kontrol eder. Bir değişiklik olduğunda eBay ilanınız buna göre güncellenir — böylece stoğu biten bir ürünü satmaya devam etmez, marjınızı bitiren bir fiyatta kalmazsınız."
       },
       "autoOrder": {
-        "title": "Siparişler sizin yerinize alınır",
-        "description": "eBay'deki satış, otomatik olarak tedarikçi siparişine dönüşür ve alıcınıza gönderilir. Hesap başına harcama tavanını siz koyarsınız; asla fazlasını ödeyemez.",
-        "detail": "Eşleşen satış, sırası gelen alıcı hesabından satın alınır ve doğrudan eBay alıcınıza gönderilir; belirlediğiniz harcama tavanının altında kalır — tavanı aşma riski olan sipariş geçip gitmez, onayınız için durur."
+        "title": "Otomatik sipariş karşılama",
+        "description": "eBay'de sipariş geldiğinde SellerHill karşılık gelen Amazon siparişini oluşturur ve alıcınıza gönderir.",
+        "detail": "Her eBay satışı otomatik olarak Amazon siparişine dönüşür ve doğrudan alıcınızın adresine gönderilir. Alıcı hesabı başına harcama üst sınırını siz belirlersiniz; bu sınırı aşacak bir sipariş geçmez, onayınız için bekler."
       },
       "tracking": {
-        "title": "Kendini işleyen kargo takibi",
-        "description": "Takip numarası oluşur oluşmaz alınıp eBay'e işlenir; sipariş zamanında kargolandı görünür ve alıcınız tedarik zincirinizi değil, düzgün bir teslimat görür.",
-        "detail": "Takip numarası oluşur oluşmaz alınır ve eBay'e kargo güncellemesi olarak işlenir; siz kontrol etmeden sipariş kargolandı görünür."
+        "title": "Otomatik kargo takibi güncellemesi",
+        "description": "SellerHill Amazon siparişini izler, kargolandığında eBay siparişini günceller ve takip numarasını yükler.",
+        "detail": "SellerHill sipariş verildikten sonra Amazon siparişini izlemeye devam eder. Kargolandığında eBay sipariş durumu güncellenir ve takip numarası eBay'e yüklenir — takip numarası dönüştürme açıksa önce dönüştürülür, böylece alıcınız tedarikçinizi değil temiz bir takip numarası görür."
       },
       "buyerMessages": {
-        "title": "Zamanında alıcı mesajları",
-        "description": "Teşekkür, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi şablonlarınızla, doğru anda, siz hatırlamak zorunda kalmadan gider.",
-        "detail": "Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi metninizle, her biri gerçekten doğru olduğu anda kendiliğinden gider — ne zaman olmuş olabileceğine dair bir tahmin değil."
+        "title": "Otomatik alıcı mesajları",
+        "description": "Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi mesajları kendi şablonlarınızla otomatik gider.",
+        "detail": "Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi için mesajlarınızı tanımlayın. SellerHill her birini siparişin doğru aşamasında kendi şablonunuzla gönderir; kime ne zaman yazacağınızı takip etmeniz gerekmez."
       },
       "multiStore": {
-        "title": "Birkaç mağaza, tek masa",
-        "description": "Birden fazla eBay mağazasını ve birden fazla alıcı hesabını yan yana yürütün; her biri kendi başına filtrelenir ve raporlanır.",
-        "detail": "Her mağaza ve alıcı hesabı kendi marj kuralını, kendi raporunu ve kendi otomasyon ayarını korur; üç mağaza yürütmek onları tek bir ortalamaya indirmek anlamına gelmez."
+        "title": "Birden fazla eBay mağazası",
+        "description": "Tek hesaptan birden fazla eBay mağazası yönetin; her biri kendi ayarları, ilanları ve raporlamasıyla.",
+        "detail": "Tek bir SellerHill hesabından birden fazla eBay mağazası yönetin. Her mağaza kendi ayarlarını, ilanlarını, siparişlerini ve kâr raporlamasını korur; her ekranı tek bir mağazaya göre filtreleyebilirsiniz."
       }
     },
     "profit": {
-      "sectionEyebrow": "Tahmin değil, kâr",
-      "sectionTitle": "Çoğu araç ciroyu gösterir. SellerHill geriye ne kaldığını gösterir.",
-      "sectionSubtitle": "Her satış kendi gerçek maliyetiyle eşleştirilir — ödediğiniz tutar, vergi, kargo ve eBay'in kestiği. Bir maliyet henüz bilinmiyorsa rakam bunu saklamaz, söyler.",
+      "sectionEyebrow": "Gerçek kâr",
+      "sectionTitle": "Ciro Kâr Değildir. Gerçekte Ne Kazandığınızı Görün.",
+      "sectionSubtitle": "SellerHill tahmini bir marj uygulamaz. eBay'in size gerçekten ödediği net kazancı, Amazon'da gerçekten ödediğiniz tutarla eşleştirir ve geriye ne kaldığını raporlar.",
+      "actuals": {
+        "title": "İki tarafta da gerçek rakamlar",
+        "description": "eBay net kazancı gerçek satıştan, sipariş maliyeti gerçek Amazon siparişinden gelir. Arada varsayılan hiçbir şey yoktur."
+      },
       "confirmed": {
         "title": "Onaylanmış kâr",
-        "description": "Maliyeti eksiksiz toplanmış satışlar. Plan yapabileceğiniz rakam budur."
+        "description": "Eksiksiz işlem verisiyle hesaplanan kâr. Plan yapabileceğiniz rakam budur."
       },
       "estimated": {
         "title": "Tahmini kâr",
-        "description": "Maliyeti yalnızca kısmen bilinen satışlar. Ayrı gösterilir, açıkça etiketlenir ve manşet rakamınıza asla karıştırılmaz."
-      },
-      "honest": {
-        "title": "Uydurulan hiçbir şey yok",
-        "description": "Eksik maliyet tire olarak kalır. Böylece sıfır gördüğünüzde bu gerçek bir sıfırdır — sıfır kılığına sokulmuş bir bilinmezlik değil."
+        "description": "Maliyet verisi henüz tamamlanmadığında kâr tahmini olarak etiketlenir ve onaylanmış toplamınızdan ayrı tutulur."
       },
       "pnl": {
         "title": "Ay ay kâr-zarar",
         "description": "On iki aylık ciro, maliyet, marj ve ROI tek ekranda; tek tıkla dışa aktarılabilir."
       },
       "panel": {
-        "title": "Bu ay",
+        "title": "Bir satış nasıl kâra dönüşür",
+        "formula": "Gerçek eBay net kazancı − gerçek Amazon sipariş maliyeti = gerçek kâr",
+        "monthTitle": "Bu ay",
+        "rows": {
+          "sale": "eBay satışı",
+          "fees": "eBay ücretleri ve giderleri",
+          "net": "eBay net kazancı",
+          "cost": "Amazon sipariş maliyeti",
+          "profit": "Gerçek kâr"
+        },
         "confirmedLabel": "Onaylanmış kâr",
         "estimatedLabel": "Tahmini kâr",
-        "unknownLabel": "Ciro, maliyeti bilinmiyor",
-        "footnote": "Manşet rakamınıza yalnızca onaylanmış kâr sayılır."
+        "unknownLabel": "Ciro, maliyeti henüz bilinmiyor",
+        "footnote": "Manşet rakamınıza yalnızca onaylanmış kâr sayılır. Tahminler ayrı gösterilir; hangi rakamın kesin olduğunu her zaman bilirsiniz."
       },
       "tabs": {
         "overview": "Genel bakış",
         "pnl": "Kâr-zarar",
-        "perOrder": "Sipariş bazında",
-        "pnlRows": {
-          "sales": "Satış",
-          "fees": "Ücretler",
-          "cost": "Ürün maliyeti",
-          "netProfit": "Net kâr"
-        }
+        "perOrder": "Sipariş bazında"
       }
     },
-    "perProduct": {
-      "sectionEyebrow": "İnce ayar",
-      "sectionTitle": "Sizin kurallarınız. Hesap başına değil, ürün başına.",
-      "sectionSubtitle": "Tek bir genel ayar, uymadığı her üründe sessizce para kaybettirir. Marjı, stok tavanını ve şablonu kendi kuralını hak eden ürünlerde ayrı belirleyin.",
+    "settingGroups": {
+      "sectionEyebrow": "Ayar Grupları",
+      "sectionTitle": "Farklı Ürünler. Farklı Stratejiler.",
+      "sectionSubtitle": "Her ürün aynı şekilde fiyatlanmak ya da listelenmek zorunda değil. Kendi fiyat kuralı, HTML şablonu ve listeleme ayarlarıyla bir Ayar Grubu oluşturun ve ihtiyaç duyan ürünlere uygulayın. Stratejiyi bir kez kurun, kataloğunuz boyunca yeniden kullanın.",
       "labels": {
-        "margin": "Kâr marjı",
-        "stock": "Stok tavanı",
-        "template": "İlan şablonu"
+        "pricing": "Fiyat kuralı",
+        "stock": "Stok tamponu",
+        "template": "HTML şablonu"
       },
-      "productA": {
-        "name": "Kablosuz Kulaklık Pro",
-        "margin": "%12",
-        "stock": "3",
-        "template": "Elektronik — Standart"
+      "groupA": {
+        "name": "Sevgililer Günü",
+        "pricing": "Sezonluk marj",
+        "stock": "2 adet",
+        "template": "Sevgililer Günü"
       },
-      "productB": {
-        "name": "USB-C Hızlı Şarj 65W",
-        "margin": "%22",
-        "stock": "1",
-        "template": "Hızlı Kargo"
+      "groupB": {
+        "name": "Elektronik",
+        "pricing": "%12 marj",
+        "stock": "3 adet",
+        "template": "Elektronik"
       },
-      "productC": {
-        "name": "Ergonomik Laptop Standı",
-        "margin": "%18",
-        "stock": "5",
-        "template": "Ev Ofis"
+      "groupC": {
+        "name": "Yüksek fiyatlı ürünler",
+        "pricing": "%18 marj",
+        "stock": "1 adet",
+        "template": "Premium"
       }
     },
     "howItWorks": {
       "sectionEyebrow": "Nasıl çalışır",
-      "sectionTitle": "Üç adım, sonrası kendiliğinden",
-      "sectionSubtitle": "Bir kez bağlayın, bir kez kuralınızı koyun; günlük iş sizden çıksın.",
+      "sectionTitle": "ASIN'den Otomatik Mağazaya",
+      "sectionSubtitle": "Bir kez kurun, günlük iş sizden çıksın.",
       "step1": {
         "title": "Hesaplarınızı bağlayın",
-        "description": "eBay mağazanızı ve tedarik ettiğiniz alıcı hesabını bağlayın. Birkaç dakika sürer, kurulacak hiçbir şey yok."
+        "description": "eBay mağazanızı ve Amazon hesabınızı bağlayın. Birkaç dakika sürer, kurulacak hiçbir şey yoktur."
       },
       "step2": {
-        "title": "Ürünleri ekleyin, kuralı koyun",
-        "description": "Satmak istediğiniz ürünleri getirin; marjınızı, stok tavanınızı ve şablonunuzu seçin — toplu ya da ürün ürün."
+        "title": "Ürünlerinizi ekleyin",
+        "description": "Satmak istediğiniz Amazon ASIN'lerini girin. SellerHill ürünü eşleştirir ve eBay ilanını bu bilgilerle oluşturur."
       },
       "step3": {
-        "title": "Bırakın çalışsın",
-        "description": "İlanlar yayına girer, fiyatlar takip edilir, siparişler satın alınır, takip eBay'e döner ve kâr rakamlarınız kendini günceller."
+        "title": "Ayarlarınızı seçin",
+        "description": "Uygun Ayar Grubunu seçin ya da fiyat kuralını, stok tamponunu ve ilan şablonunu kendiniz belirleyin."
+      },
+      "step4": {
+        "title": "Otomasyonu SellerHill yürütsün",
+        "description": "İlanlar yayına girer, fiyat ve stok senkron kalır, siparişler oluşturulur, kargo takibi işlenir ve alıcı mesajları gider."
+      },
+      "step5": {
+        "title": "Kârınızı takip edin",
+        "description": "Her siparişin gerçek kârını görün: gerçek eBay kazancınız ve gerçek Amazon sipariş maliyetiniz üzerinden."
       }
     },
     "demo": {
-      "sectionEyebrow": "Önce görün",
-      "sectionTitle": "Üye olmadan önce içeride dolaşın.",
-      "sectionSubtitle": "Örnek veriyle doldurulmuş uygulamanın tamamı. Her ekran, her rakam; doldurulacak bir form ve iptal edilecek bir şey yok.",
-      "button": "Canlı demoyu aç",
-      "note": "Üyelik yok, kart yok, kurulum yok.",
+      "sectionEyebrow": "Canlı demo",
+      "sectionTitle": "Kaydolmadan Önce SellerHill'i Görün.",
+      "sectionSubtitle": "Panoyu, ilanları, siparişleri ve kâr raporlamasını örnek verilerle inceleyin. Doldurulacak form yok, iptal edilecek bir şey yok.",
+      "button": "Canlı demoyu dene",
+      "note": "Hesap gerekmez · Kredi kartı gerekmez · Hiçbir şey kaydedilmez.",
       "bullets": {
-        "b1": "Onaylanmış ve tahmini kârın yan yana durduğu gerçek panel",
+        "b1": "Onaylanmış ve tahmini kârın yan yana göründüğü gerçek pano",
         "b2": "İlanlar, siparişler ve ay ay kâr-zarar tablosu",
-        "b3": "İstediğiniz an çıkın — hiçbir şey kaydedilmez"
+        "b3": "Hiçbir şey kaydedilmez — istediğiniz zaman çıkabilirsiniz"
       }
     },
     "pricing": {
       "sectionEyebrow": "Fiyatlandırma",
-      "sectionTitle": "Açık ve net fiyatlandırma",
-      "sectionSubtitle": "Gerçekten kullandığınız kadar ödeyin: kaç ilanı aktif tuttuğunuz ve ayda sizin için kaç sipariş satın alındığı.",
-      "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dahil değildir.",
+      "sectionTitle": "Yüksek Fiyat Ödemeden Profesyonel Otomasyon",
+      "sectionSubtitle": "Paketler gerçekten kullandığınıza göre fiyatlanır: kaç ilanı aktif tuttuğunuz ve SellerHill her ay sizin için kaç sipariş yürüttüğü. Otomasyonun tamamı her pakette vardır.",
+      "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
       "planCta": "Ücretsiz başla",
-      "showAllPlans": "Tüm {{count}} paketi gör",
+      "showAllPlans": "{{count}} paketin tümünü gör",
       "showFewerPlans": "Daha az paket göster",
-      "unlimited": "Sınırsız",
-      "notIncluded": "Dahil değil",
-      "listingsLabel": "ilan",
-      "ordersLabel": "sipariş",
+      "notIncluded": "Dâhil değil",
       "upToListings": "{{limit}} aktif ilana kadar",
       "unlimitedListings": "Sınırsız aktif ilan",
       "upToOrders": "Ayda {{limit}} otomatik siparişe kadar",
       "unlimitedOrders": "Sınırsız otomatik sipariş",
+      "upToConversions": "Ayda {{limit}} takip numarası dönüştürme",
+      "unlimitedConversions": "Sınırsız takip numarası dönüştürme",
       "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
       "included": {
-        "sync": "Fiyat ve stok otomatik senkronize",
-        "autoOrder": "Siparişler otomatik satın alınır",
-        "tracking": "Kargo takibi eBay'e iletilir",
-        "profit": "Doğrulanmış ve tahmini kâr raporlaması",
-        "support": "E-posta desteği"
+        "sync": "Otomatik fiyat & stok senkronizasyonu",
+        "autoOrder": "Otomatik sipariş karşılama",
+        "tracking": "Otomatik kargo takibi güncellemesi",
+        "messages": "Otomatik alıcı mesajları",
+        "profit": "Gerçek kâr raporlaması",
+        "multiStore": "Birden fazla eBay mağazası",
+        "support": "E-posta ve sohbet desteği"
       },
       "catalogFallback": {
         "nano": {
           "price": "$24.99",
           "listings": "500 aktif ilana kadar",
           "orders": "Ayda 100 otomatik siparişe kadar",
-          "conversions": "Ayda 50 kargo takip dönüşümü"
+          "conversions": "Ayda 50 takip numarası dönüştürme"
         },
         "starter": {
           "price": "$44.99",
-          "listings": "2.000 aktif ilana kadar",
+          "listings": "2,000 aktif ilana kadar",
           "orders": "Ayda 300 otomatik siparişe kadar",
-          "conversions": "Ayda 150 kargo takip dönüşümü"
+          "conversions": "Ayda 150 takip numarası dönüştürme"
         },
         "growth": {
           "price": "$104.99",
-          "listings": "5.000 aktif ilana kadar",
+          "listings": "5,000 aktif ilana kadar",
           "orders": "Ayda 600 otomatik siparişe kadar",
-          "conversions": "Ayda 300 kargo takip dönüşümü"
+          "conversions": "Ayda 300 takip numarası dönüştürme"
         },
         "pro": {
           "price": "$179.99",
-          "listings": "10.000 aktif ilana kadar",
-          "orders": "Ayda 1.000 otomatik siparişe kadar",
-          "conversions": "Ayda 500 kargo takip dönüşümü"
+          "listings": "10,000 aktif ilana kadar",
+          "orders": "Ayda 1,000 otomatik siparişe kadar",
+          "conversions": "Ayda 500 takip numarası dönüştürme"
         }
-      },
-      "upToConversions": "Ayda {{limit}} kargo takip dönüşümü",
-      "unlimitedConversions": "Sınırsız kargo takip dönüşümü"
+      }
     },
     "faq": {
-      "sectionTitle": "Sık sorulan sorular",
-      "sectionSubtitle": "Başlamadan önce bilmeye değer olanlar.",
+      "sectionTitle": "Sıkça sorulan sorular",
+      "sectionSubtitle": "Başlamadan önce bilmekte fayda olanlar.",
       "q1": {
-        "question": "Otomatik sipariş nasıl çalışıyor?",
-        "answer": "Bir alıcı eBay'de sipariş verdiğinde SellerHill, bağlı tedarikçi hesabınızda eşleşen siparişi oluşturur ve alıcının adresine gönderir. Hesap başına bir harcama tavanı belirlersiniz; bu tavanın üstündeki sipariş geçip gitmez, onayınız için durur."
+        "question": "Otomatik sipariş karşılama nasıl çalışır?",
+        "answer": "Bir alıcı eBay'den sipariş verdiğinde SellerHill bağlı Amazon hesabınızdan karşılık gelen siparişi oluşturur ve alıcının adresine gönderir. Alıcı hesabı başına bir harcama üst sınırı belirlersiniz; bu sınırın üzerindeki siparişler geçmez, onayınız için bekler."
       },
       "q2": {
-        "question": "Bir siparişi kendim yönetebilir miyim?",
-        "answer": "Evet. Otomasyon bir ayardır, bağlayıcı değil — tamamen kapatılabilir, belirli bir mağaza için kapatılabilir ya da kendiniz vermek istediğiniz herhangi bir siparişte devreye girebilirsiniz."
+        "question": "Fiyat ve stok senkronizasyonu ne sıklıkla çalışır?",
+        "answer": "SellerHill listelediğiniz ürünlerin Amazon fiyat ve stoğunu günde yaklaşık iki kez kontrol eder. Fiyat ya da stok değiştiğinde ilgili eBay ilanı aynı turda güncellenir. Bu planlı bir kontroldür, anlık takip değildir."
       },
       "q3": {
-        "question": "Bir şey ters gittiğinde ne oluyor?",
-        "answer": "Tahmin yürütmek yerine durur ve nedenini sade bir dille söyler. Sizi bekleyen her şey — tamamlanamayan bir satın alma, bağlantısı kopmuş bir mağaza, stoğu tükenmiş bir ilan — aramaya çıkmanız gereken bir şey olmaktan çıkıp tek bir sayfada toplanır."
+        "question": "Kargo takibi otomasyonu nasıl çalışır?",
+        "answer": "Amazon siparişi oluşturulduktan sonra SellerHill siparişi izlemeye devam eder. Amazon kargoladığında eBay siparişi kargolandı olarak işaretlenir ve takip numarası eBay'e yüklenir; siz kontrol etmeden sipariş zamanında güncellenir."
       },
       "q4": {
-        "question": "Onaylanmış ve tahmini kârı neden ayırıyorsunuz?",
-        "answer": "Çünkü güvenemediğiniz bir kâr rakamı, hiç olmamasından kötüdür. Bir satışın gerçek maliyeti bilinene kadar o satış tahmin olarak raporlanır ve manşet rakamınızın dışında tutulur. Maliyet hiç çözülemiyorsa tire görürsünüz — böylece panelinizdeki sıfır her zaman gerçek bir sıfırdır."
+        "question": "Takip numarası dönüştürme nedir?",
+        "answer": "Amazon takip numarası, ürünün nereden geldiğini alıcınıza gösterir. Dönüştürme açıkken SellerHill bu numarayı eBay'e yüklemeden önce farklı ve takip edilebilir bir numaraya dönüştürür. Dönüştürmenin açık olup olmayacağına ve hangi kargo firmalarını kapsayacağına siz karar verirsiniz."
       },
       "q5": {
-        "question": "Bir şey kurmam gerekiyor mu?",
-        "answer": "Hayır. SellerHill tarayıcıda çalışır ve hesaplarınıza doğrudan bağlanır. Eklenti yok, masaüstü uygulaması yok, kendi bilgisayarınızda açık tutmanız gereken hiçbir şey yok."
+        "question": "Alıcı mesajlarını özelleştirebilir miyim?",
+        "answer": "Evet. Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi mesajlarının her birinin kendi düzenlenebilir şablonu vardır ve dördünü birbirinden bağımsız olarak açıp kapatabilirsiniz."
       },
       "q6": {
-        "question": "Ödeme yapmadan deneyebilir miyim?",
-        "answer": "Evet, iki şekilde. Canlı demo uygulamanın tamamını örnek veriyle açar ve hiçbir üyelik istemez. Ya da hesap açıp ücretsiz başlayın — başlamak için kart gerekmiyor."
+        "question": "Gerçek kâr nasıl hesaplanır?",
+        "answer": "SellerHill, eBay'in satış için size gerçekten ödediği net kazancı — eBay ücretleri düşüldükten sonra — alır ve Amazon siparişi için vergi ve kargo dâhil gerçekten ödediğiniz tutarı çıkarır. Yani satış fiyatından tahmini bir maliyeti değil, iki gerçek işlemi karşılaştırır."
+      },
+      "q7": {
+        "question": "Onaylanmış kâr ile tahmini kâr arasındaki fark nedir?",
+        "answer": "Onaylanmış kâr, iki tarafta da eksiksiz işlem verisiyle hesaplanır. Tahmini kâr ise maliyet verisi henüz tamamlanmadığında gösterilir — örneğin Amazon sipariş maliyetleri henüz alınmamışken. Tahminler etiketlenir ve ayrı tutulur; hangi rakamın kesin olduğunu her zaman bilirsiniz."
+      },
+      "q8": {
+        "question": "Ayar Grupları nedir?",
+        "answer": "Ayar Grubu; fiyat kuralı, stok tamponu, HTML şablonu ve diğer listeleme seçeneklerinden oluşan, yeniden kullanılabilir bir ayar setidir. Grubu bir kez oluşturur ve her ürünü ayrı ayrı yapılandırmak yerine dilediğiniz kadar ürüne uygularsınız."
+      },
+      "q9": {
+        "question": "Farklı ürün grupları farklı fiyat ve şablon kullanabilir mi?",
+        "answer": "Evet, Ayar Grupları tam olarak bunun için var. Sezonluk ürünleriniz sezonluk bir marj ve şablonla çalışırken elektronik ürünleriniz kendi ayarlarıyla çalışabilir; ürünleri gruplar arasında istediğiniz zaman taşıyabilirsiniz."
+      },
+      "q10": {
+        "question": "Birden fazla eBay mağazası yönetebilir miyim?",
+        "answer": "Evet. Tek bir SellerHill hesabına birden fazla eBay mağazası bağlayabilirsiniz. Her mağaza kendi ayarlarını, ilanlarını, siparişlerini ve kâr raporlamasını korur; her ekranı mağazaya göre filtreleyebilirsiniz."
+      },
+      "q11": {
+        "question": "Herhangi bir yazılım kurmam gerekiyor mu?",
+        "answer": "Hayır. SellerHill tarayıcıda çalışır ve hesaplarınıza doğrudan bağlanır. Tarayıcı eklentisi, masaüstü uygulaması ya da kendi bilgisayarınızda sürekli açık tutmanız gereken bir şey yoktur."
+      },
+      "q12": {
+        "question": "Ödeme yapmadan önce deneyebilir miyim?",
+        "answer": "Evet, iki şekilde. Canlı demo, kayıt gerektirmeden uygulamanın tamamını örnek verilerle açar. Ya da hesap oluşturup 7 günlük ücretsiz denemeyi başlatabilirsiniz — kredi kartı gerekmez."
       }
     },
     "ctaBanner": {
-      "variant1": {
-        "headline": "Karar vermeden önce çalışırken görün.",
-        "subheading": "Demoyu açın ve gerçeğinin içinde dolaşın — panel, ilanlar, siparişler ve arkalarındaki kâr rakamları.",
-        "button": "Canlı demoyu aç"
-      },
       "variant2": {
-        "headline": "Bunu elle yapmayı bırakın.",
-        "subheading": "Listelemeyi, fiyatlamayı, satın almayı ve takibi otomatiğe alın — ve gerçekten plan yapabileceğiniz bir kâr rakamı edinin.",
+        "headline": "eBay Mağazanızı Bugün Otomatikleştirin",
+        "subheading": "Listeleme, senkronizasyon, sipariş, kargo takibi ve mesajlaşma gibi tekrar eden işleri SellerHill yürütsün; siz işinizi büyütmeye odaklanın ve ne kazandığınızı her zaman tam olarak bilin.",
         "button": "Ücretsiz başla"
       }
     },
     "footer": {
-      "description": "SellerHill, Amazon'dan eBay'e satış yapan bir mağazanın günlük işini — listeleme, fiyatlama, satın alma ve takip — otomatikleştirir ve her satışın arkasındaki gerçek kârı raporlar.",
+      "description": "SellerHill bir Amazon-eBay dropshipping otomasyon platformudur: listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — üstelik gerçek eBay ve Amazon işlemlerinizden hesaplanan gerçek kâr raporlamasıyla.",
       "product": "Ürün",
       "company": "Şirket",
       "legal": "Yasal",
@@ -730,14 +767,10 @@
         "features": "Özellikler",
         "pricing": "Fiyatlandırma",
         "howItWorks": "Nasıl çalışır",
-        "profit": "Kâr raporlaması",
-        "demo": "Canlı demo",
-        "faq": "SSS"
+        "profit": "Gerçek kâr",
+        "demo": "Canlı demo"
       },
       "companyLinks": {
-        "about": "Hakkımızda",
-        "blog": "Blog",
-        "careers": "Kariyer",
         "contact": "İletişim"
       },
       "legalLinks": {
