@@ -11,8 +11,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-general-store',
   'DS General Store',
-  $desc_general$A high-conversion, urgency-driven layout suitable for any general dropshipping product with clear trust badges.$desc_general$,
-  $html_general$<div class="sh-gs-container">
+  $desc_ds_general_store$A high-conversion, urgency-driven layout suitable for any general dropshipping product with clear trust badges.$desc_ds_general_store$,
+  $html_ds_general_store$<div class="sh-gs-container">
   <div class="sh-gs-header">
     <h1>{{title}}</h1>
     <div class="sh-gs-badges">
@@ -66,7 +66,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-gs-badge { background: #e11d48; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
 .sh-gs-main { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
 .sh-gs-image { flex: 1 1 350px; text-align: center; }
-.sh-gs-image img { max-width: 100%; border: 1px solid #ddd; border-radius: 8px; }
+.sh-gs-image img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; }
 .sh-gs-content { flex: 1.2 1 350px; }
 .sh-gs-section { margin-bottom: 25px; }
 .sh-gs-section h2 { font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 8px; color: #e11d48; margin-top: 0; }
@@ -85,8 +85,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   .sh-gs-main { flex-direction: column; }
   .sh-gs-badges { flex-direction: column; align-items: center; }
 }
-</style>$html_general$,
-  $json_general${
+</style>$html_ds_general_store$,
+  $json_ds_general_store${
       "title": "Smart Fitness Watch with Heart Rate Monitor",
       "main_image": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -103,7 +103,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Charging Time: 2 hours"
       ],
       "product_description": "Stay on top of your health goals with this premium smartwatch. Tracks steps, calories, and sleep automatically."
-  }$json_general$::jsonb,
+  }$json_ds_general_store$::jsonb,
   10,
   TRUE
 ),
@@ -114,8 +114,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-minimalist',
   'DS Minimalist',
-  $desc_minimalist$Ultra-clean, single-column, black & white layout focusing purely on specs and trust. The safest and fastest-loading option.$desc_minimalist$,
-  $html_minimalist$<div class="sh-min-wrapper">
+  $desc_ds_minimalist$Ultra-clean, single-column, black & white layout focusing purely on specs and trust. The safest and fastest-loading option.$desc_ds_minimalist$,
+  $html_ds_minimalist$<div class="sh-min-wrapper">
   <h1 class="sh-min-title">{{title}}</h1>
   
   <div class="sh-min-promises">
@@ -155,8 +155,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-min-list li { margin-bottom: 8px; color: #333; }
 .sh-min-policies { border-top: 1px solid #eee; padding-top: 20px; font-size: 14px; color: #666; }
 .sh-min-policies p { margin-bottom: 10px; }
-</style>$html_minimalist$,
-  $json_minimalist${
+</style>$html_ds_minimalist$,
+  $json_ds_minimalist${
       "title": "Minimalist Leather Wallet for Men",
       "has_details": "1",
       "has_features": "1",
@@ -171,7 +171,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Color: Matte Black"
       ],
       "product_description": "A slim, front-pocket wallet designed to carry your essentials without the bulk. Crafted from premium leather that ages beautifully over time."
-  }$json_minimalist$::jsonb,
+  }$json_ds_minimalist$::jsonb,
   20,
   TRUE
 ),
@@ -182,8 +182,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-tech-gadgets',
   'DS Tech Gadgets',
-  $desc_tech$Modern, dark-accented layout ideal for electronics, featuring a prominent specs table.$desc_tech$,
-  $html_tech$<div class="sh-tg-wrap">
+  $desc_ds_tech_gadgets$Modern, dark-accented layout ideal for electronics, featuring a prominent specs table.$desc_ds_tech_gadgets$,
+  $html_ds_tech_gadgets$<div class="sh-tg-wrap">
   <div class="sh-tg-head">
     <div class="sh-tg-head-inner">
       <h1>{{title}}</h1>
@@ -254,8 +254,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   .sh-tg-body { padding: 20px; }
   .sh-tg-image img { max-width: 100%; }
 }
-</style>$html_tech$,
-  $json_tech${
+</style>$html_ds_tech_gadgets$,
+  $json_ds_tech_gadgets${
       "title": "Pro Wireless Gaming Mouse 16000 DPI RGB",
       "main_image": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -272,7 +272,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Sensor: Optical PWM3389"
       ],
       "product_description": "Designed for esports professionals, this wireless gaming mouse offers unmatched speed and precision."
-  }$json_tech$::jsonb,
+  }$json_ds_tech_gadgets$::jsonb,
   30,
   TRUE
 ),
@@ -283,8 +283,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-home-decor',
   'DS Home Decor',
-  $desc_home$Warm, aesthetic layout with soft colors, large image emphasis, and a cozy typography setup.$desc_home$,
-  $html_home$<div class="sh-hd-container">
+  $desc_ds_home_decor$Warm, aesthetic layout with soft colors, large image emphasis, and a cozy typography setup.$desc_ds_home_decor$,
+  $html_ds_home_decor$<div class="sh-hd-container">
   <div class="sh-hd-banner">
     <h1 class="sh-hd-title">{{title}}</h1>
     <p class="sh-hd-subtitle">Premium Home Collection</p>
@@ -354,8 +354,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   .sh-hd-box { padding: 20px; }
   .sh-hd-policy-item { border-right: none; border-bottom: 1px solid #eae2d8; }
 }
-</style>$html_home$,
-  $json_home${
+</style>$html_ds_home_decor$,
+  $json_ds_home_decor${
       "title": "Boho Macrame Wall Hanging Large Handwoven Tapestry",
       "main_image": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -371,7 +371,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Style: Bohemian / Minimalist"
       ],
       "product_description": "Add warmth and texture to any room with this beautiful, handcrafted macrame wall hanging. Perfect for living rooms, bedrooms, or nurseries."
-  }$json_home$::jsonb,
+  }$json_ds_home_decor$::jsonb,
   40,
   TRUE
 ),
@@ -382,8 +382,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-auto-parts',
   'DS Auto Parts',
-  $desc_auto$High-contrast technical layout with clear fitment warnings and rugged styling.$desc_auto$,
-  $html_auto$<div class="sh-ap-wrap">
+  $desc_ds_auto_parts$High-contrast technical layout with clear fitment warnings and rugged styling.$desc_ds_auto_parts$,
+  $html_ds_auto_parts$<div class="sh-ap-wrap">
   <div class="sh-ap-header">
     <h1>{{title}}</h1>
   </div>
@@ -456,8 +456,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 @media (max-width: 600px) {
   .sh-ap-main { flex-direction: column; }
 }
-</style>$html_auto$,
-  $json_auto${
+</style>$html_ds_auto_parts$,
+  $json_ds_auto_parts${
       "title": "Front Ceramic Brake Pads For 2010-2015 Honda Civic",
       "main_image": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -475,7 +475,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Surface Finish: Premium Powder Coat"
       ],
       "product_description": "Upgrade your stopping power with our premium ceramic brake pads. Engineered to minimize dust and eliminate noise for a smooth, reliable ride."
-  }$json_auto$::jsonb,
+  }$json_ds_auto_parts$::jsonb,
   50,
   TRUE
 ),
@@ -486,8 +486,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-apparel-fashion',
   'DS Apparel Fashion',
-  $desc_apparel$Lookbook-style elegant layout, emphasizing sizing charts and fabric care.$desc_apparel$,
-  $html_apparel$<div class="sh-af-wrap">
+  $desc_ds_apparel_fashion$Lookbook-style elegant layout, emphasizing sizing charts and fabric care.$desc_ds_apparel_fashion$,
+  $html_ds_apparel_fashion$<div class="sh-af-wrap">
   <div class="sh-af-header">
     <h1>{{title}}</h1>
   </div>
@@ -553,8 +553,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-af-footer-col { flex: 1 1 250px; padding: 30px; text-align: center; }
 .sh-af-footer-col h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0; color: #333; }
 .sh-af-footer-col p { font-size: 13px; color: #777; margin: 0; line-height: 1.5; }
-</style>$html_apparel$,
-  $json_apparel${
+</style>$html_ds_apparel_fashion$,
+  $json_ds_apparel_fashion${
       "title": "Women's Oversized Knit Sweater Cozy Fall Winter Pullover",
       "main_image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -571,7 +571,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Fit: True to size for an oversized look"
       ],
       "product_description": "Embrace the cold weather with our ultra-cozy oversized knit sweater. Perfect for layering over leggings or jeans for an effortlessly chic seasonal look."
-  }$json_apparel$::jsonb,
+  }$json_ds_apparel_fashion$::jsonb,
   60,
   TRUE
 ),
@@ -582,8 +582,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-beauty-health',
   'DS Beauty Health',
-  $desc_beauty$Spa-like, clean design with structured sections for ingredients and how-to-use.$desc_beauty$,
-  $html_beauty$<div class="sh-bh-container">
+  $desc_ds_beauty_health$Spa-like, clean design with structured sections for ingredients and how-to-use.$desc_ds_beauty_health$,
+  $html_ds_beauty_health$<div class="sh-bh-container">
   <div class="sh-bh-header">
     <h1>{{title}}</h1>
     <div class="sh-bh-divider"></div>
@@ -641,8 +641,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   .sh-bh-body { gap: 20px; }
   .sh-bh-guarantee { gap: 15px; flex-direction: column; align-items: center; }
 }
-</style>$html_beauty$,
-  $json_beauty${
+</style>$html_ds_beauty_health$,
+  $json_ds_beauty_health${
       "title": "Vitamin C Radiance Face Serum with Hyaluronic Acid",
       "main_image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -660,7 +660,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Formulated without: Parabens, Sulfates, Phthalates"
       ],
       "product_description": "Revitalize your skin with our potent Vitamin C serum. Designed to boost radiance and improve texture, it absorbs quickly to deliver lasting hydration and a youthful glow."
-  }$json_beauty$::jsonb,
+  }$json_ds_beauty_health$::jsonb,
   70,
   TRUE
 ),
@@ -671,8 +671,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-pet-supplies',
   'DS Pet Supplies',
-  $desc_pets$Playful yet structured layout with bright accents, focusing on material safety and sizing.$desc_pets$,
-  $html_pets$<div class="sh-pt-wrap">
+  $desc_ds_pet_supplies$Playful yet structured layout with bright accents, focusing on material safety and sizing.$desc_ds_pet_supplies$,
+  $html_ds_pet_supplies$<div class="sh-pt-wrap">
   <div class="sh-pt-hero">
     <h1>{{title}}</h1>
   </div>
@@ -725,8 +725,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-pt-note { font-family: Arial, sans-serif; font-size: 13px; color: #d2691e; margin-top: 15px; }
 .sh-pt-footer { background: #fff; padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 14px; border-top: 3px solid #ffb020; }
 .sh-pt-footer p { margin: 5px 0; }
-</style>$html_pets$,
-  $json_pets${
+</style>$html_ds_pet_supplies$,
+  $json_ds_pet_supplies${
       "title": "Calming Donut Dog Bed - Fluffy Anti-Anxiety Pet Cushion",
       "main_image": "https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -744,7 +744,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Colors: Grey, Brown, Pink"
       ],
       "product_description": "Give your best friend the gift of better sleep. Our calming donut bed is designed to ease anxiety and provide unparalleled comfort for dogs and cats alike."
-  }$json_pets$::jsonb,
+  }$json_ds_pet_supplies$::jsonb,
   80,
   TRUE
 ),
@@ -755,8 +755,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-fitness-sports',
   'DS Fitness Sports',
-  $desc_fitness$High-energy, bold typography layout focusing on durability, materials, and active lifestyle.$desc_fitness$,
-  $html_fitness$<div class="sh-fs-wrap">
+  $desc_ds_fitness_sports$High-energy, bold typography layout focusing on durability, materials, and active lifestyle.$desc_ds_fitness_sports$,
+  $html_ds_fitness_sports$<div class="sh-fs-wrap">
   <div class="sh-fs-hero">
     <h1>{{title}}</h1>
   </div>
@@ -825,8 +825,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
   .sh-fs-stats { flex-direction: column; }
   .sh-fs-stat { border-right: none; border-bottom: 1px solid #333; }
 }
-</style>$html_fitness$,
-  $json_fitness${
+</style>$html_ds_fitness_sports$,
+  $json_ds_fitness_sports${
       "title": "Adjustable Dumbbell Set 50lbs with Non-Slip Grip",
       "main_image": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -844,7 +844,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Included: 1 Dumbbell, 1 Base Tray"
       ],
       "product_description": "Maximize your home workouts with this versatile adjustable dumbbell. Seamlessly switch from light raises to heavy squats with a simple turn of the dial."
-  }$json_fitness$::jsonb,
+  }$json_ds_fitness_sports$::jsonb,
   90,
   TRUE
 ),
@@ -855,8 +855,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-outdoor-survival',
   'DS Outdoor Survival',
-  $desc_outdoor$Rugged earth tones layout with a focus on weather-resistance specs and durability.$desc_outdoor$,
-  $html_outdoor$<div class="sh-os-wrap">
+  $desc_ds_outdoor_survival$Rugged earth tones layout with a focus on weather-resistance specs and durability.$desc_ds_outdoor_survival$,
+  $html_ds_outdoor_survival$<div class="sh-os-wrap">
   <div class="sh-os-header">
     <h1>{{title}}</h1>
   </div>
@@ -920,8 +920,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-os-specs { list-style: none; padding: 0; margin: 0; font-size: 14px; }
 .sh-os-specs li { padding: 8px 0; border-bottom: 1px dashed #4a5d4a; }
 .sh-os-card p { font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
-</style>$html_outdoor$,
-  $json_outdoor${
+</style>$html_ds_outdoor_survival$,
+  $json_ds_outdoor_survival${
       "title": "Tactical Waterproof Backpack 45L Military MOLLE Bug Out Bag",
       "main_image": "https://images.unsplash.com/photo-1622260614153-03223fb72052?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -939,7 +939,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Hydration Compatible: Yes (bladder not included)"
       ],
       "product_description": "Built for the harshest environments. Whether you are trekking, camping, or building a 72-hour bug out bag, this 45L tactical backpack provides the durability and space you need."
-  }$json_outdoor$::jsonb,
+  }$json_ds_outdoor_survival$::jsonb,
   100,
   TRUE
 ),
@@ -950,8 +950,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-toys-kids',
   'DS Toys Kids',
-  $desc_toys$Fun, safe, and brightly colored layout with prominent age-recommendation and safety warning blocks.$desc_toys$,
-  $html_toys$<div class="sh-tk-container">
+  $desc_ds_toys_kids$Fun, safe, and brightly colored layout with prominent age-recommendation and safety warning blocks.$desc_ds_toys_kids$,
+  $html_ds_toys_kids$<div class="sh-tk-container">
   <div class="sh-tk-header">
     <h1>{{title}}</h1>
   </div>
@@ -1021,8 +1021,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 .sh-tk-footer-item { flex: 1 1 250px; padding: 20px; text-align: center; }
 .sh-tk-footer-item h3 { color: #ff6b6b; margin: 0 0 10px 0; }
 .sh-tk-footer-item p { font-family: Arial, sans-serif; font-size: 14px; margin: 0; }
-</style>$html_toys$,
-  $json_toys${
+</style>$html_ds_toys_kids$,
+  $json_ds_toys_kids${
       "title": "Educational Wooden Building Blocks Set - 100 Pieces",
       "main_image": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -1040,7 +1040,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Safety Certification: ASTM F963"
       ],
       "product_description": "Spark your child's imagination! This classic 100-piece wooden block set helps develop motor skills, color recognition, and early math concepts through fun, hands-on play."
-  }$json_toys$::jsonb,
+  }$json_ds_toys_kids$::jsonb,
   110,
   TRUE
 ),
@@ -1051,8 +1051,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 (
   'ds-kitchen-dining',
   'DS Kitchen Dining',
-  $desc_kitchen$Recipe and lifestyle-focused layout, emphasizing food-grade safety and care instructions.$desc_kitchen$,
-  $html_kitchen$<div class="sh-kd-wrap">
+  $desc_ds_kitchen_dining$Recipe and lifestyle-focused layout, emphasizing food-grade safety and care instructions.$desc_ds_kitchen_dining$,
+  $html_ds_kitchen_dining$<div class="sh-kd-wrap">
   <div class="sh-kd-header">
     <div class="sh-kd-header-inner">
       <h1>{{title}}</h1>
@@ -1121,8 +1121,8 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
 @media (max-width: 600px) {
   .sh-kd-footer-box { border-right: none; border-bottom: 1px solid #e0e0e0; }
 }
-</style>$html_kitchen$,
-  $json_kitchen${
+</style>$html_ds_kitchen_dining$,
+  $json_ds_kitchen_dining${
       "title": "Professional Damascus Steel Chef Knife 8 Inch",
       "main_image": "https://images.unsplash.com/photo-1593998066526-65fcab3021a2?auto=format&fit=crop&q=80&w=800",
       "has_details": "1",
@@ -1140,7 +1140,7 @@ INSERT INTO predefined_templates (slug, name, description, html_content, sample_
           "Care: Hand wash only, dry immediately"
       ],
       "product_description": "Elevate your culinary skills with a knife designed for precision and durability. Whether you're slicing meat or dicing vegetables, this chef's knife delivers professional performance in every cut."
-  }$json_kitchen$::jsonb,
+  }$json_ds_kitchen_dining$::jsonb,
   120,
   TRUE
 );
