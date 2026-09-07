@@ -459,11 +459,17 @@ export const MobileCtas = styled.div`
 export const Hero = styled.section`
   position: relative;
   background: ${tkn('colors.sidebar.background')};
-  padding: 9.5rem ${tkn('spacing.xl')} ${SECTION_Y};
+  /*
+   * The top padding has to clear the fixed navbar (~82px: 1.375rem × 2 plus the
+   * 38px logo) and then leave a deliberate gap. 9.5rem left ~70px of empty navy
+   * above the eyebrow, which read as a gap rather than as breathing room;
+   * 7.5rem leaves ~38px, and 6.5rem ~30px against the shorter mobile navbar.
+   */
+  padding: 7.5rem ${tkn('spacing.xl')} ${SECTION_Y};
   overflow: hidden;
 
   @media (max-width: 980px) {
-    padding: 7.5rem ${tkn('spacing.md')} ${SECTION_Y_SM};
+    padding: 6.5rem ${tkn('spacing.md')} ${SECTION_Y_SM};
   }
 `;
 
@@ -519,7 +525,7 @@ export const HeroContent = styled.div`
  * The Hero sits on the dark navy `sidebar.background`, so it needs its own
  * eyebrow — the light-surface `Eyebrow` below uses `landing.chipBg` +
  * `brand.primary`, which all but disappears against navy. This one states the
- * category ("Amazon → eBay dropshipping automation") above the headline, so a
+ * category ("Amazon → eBay automation") above the headline, so a
  * visitor who already knows AutoDS/Easync/Yaballe places the product in the
  * first second rather than inferring it from the subheading.
  */

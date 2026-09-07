@@ -467,7 +467,7 @@
       "demo": "Demo"
     },
     "hero": {
-      "eyebrow": "Amazon → eBay dropshipping otomasyonu",
+      "eyebrow": "Amazon → eBay otomasyonu",
       "headline": "eBay Mağazanızı Otomatikleştirin. Gerçek Kârınızı Bilin.",
       "subheading": "SellerHill Amazon'dan eBay'e iş akışınızı otomatikleştirir: listeleme, yapay zekâ başlıkları, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları. Ardından gerçek eBay net kazancınız ve gerçek Amazon sipariş maliyetinizle gerçek kârınızı gösterir.",
       "ctaPrimary": "Ücretsiz başla",
@@ -759,7 +759,7 @@
       }
     },
     "footer": {
-      "description": "SellerHill bir Amazon-eBay dropshipping otomasyon platformudur: listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — üstelik gerçek eBay ve Amazon işlemlerinizden hesaplanan gerçek kâr raporlamasıyla.",
+      "description": "SellerHill bir Amazon-eBay otomasyon platformudur: listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — üstelik gerçek eBay ve Amazon işlemlerinizden hesaplanan gerçek kâr raporlamasıyla.",
       "product": "Ürün",
       "company": "Şirket",
       "legal": "Yasal",
