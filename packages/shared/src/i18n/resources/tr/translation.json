@@ -495,12 +495,12 @@
         "description": "Listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — Amazon'dan eBay'e tüm iş akışı tek platformda."
       },
       "p2": {
-        "title": "Tahmin değil, gerçek kâr",
-        "description": "Kârınız, eBay'in size gerçekten ödediği net kazanç ile Amazon'da gerçekten ödediğiniz tutardan hesaplanır — varsayılan bir marjdan değil."
-      },
-      "p3": {
         "title": "Her ürün grubuna ayrı strateji",
         "description": "Ayar Grupları ile kataloğunuzun farklı bölümlerinde farklı fiyat kuralları, HTML şablonları ve listeleme ayarları kullanabilirsiniz."
+      },
+      "p3": {
+        "title": "Tahmin değil, gerçek kâr",
+        "description": "Kârınız, eBay'in size gerçekten ödediği net kazanç ile Amazon'da gerçekten ödediğiniz tutardan hesaplanır — varsayılan bir marjdan değil."
       }
     },
     "features": {
