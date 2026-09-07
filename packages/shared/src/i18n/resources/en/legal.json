@@ -1,0 +1,2749 @@
+{
+  "legal": {
+    "backToHome": "Back to home",
+    "tocTitle": "On this page",
+    "unavailable": "This document could not be loaded. Please try again later.",
+    "privacy": {
+      "documentTitle": "SellerHill Privacy Policy",
+      "lastUpdated": "Last Updated: September 7, 2026",
+      "intro": [
+        "This Privacy Policy explains how 2B Trading, LLC, a Wyoming limited liability company (“SellerHill”, “we”, “us”, or “our”), collects, uses, stores, discloses, and protects personal information when you access or use the SellerHill website, web application, software, and related services (collectively, the “Services”).",
+        "SellerHill provides software that helps e-commerce sellers automate and manage certain activities involving third-party marketplaces and services, including eBay and Amazon.",
+        "By creating an account or using the Services, you acknowledge that you have read this Privacy Policy. Where applicable law requires your consent for a particular processing activity, we will obtain that consent separately.",
+        "If you do not agree with this Privacy Policy, you should not use the Services."
+      ],
+      "sections": [
+        {
+          "id": "who-we-are",
+          "heading": "1. Who We Are",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Services are operated by:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, United States"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "For privacy-related questions, requests, or concerns, contact:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "For purposes of applicable data protection laws, including the GDPR and, where applicable, the Turkish Personal Data Protection Law No. 6698 (“KVKK”), SellerHill may act as a data controller for personal information relating to your SellerHill account, subscription, website usage, and support interactions."
+            },
+            {
+              "type": "p",
+              "text": "When SellerHill processes information on your behalf in connection with your use of third-party marketplace integrations, the parties may have different roles depending on the nature and purpose of the processing."
+            }
+          ]
+        },
+        {
+          "id": "information-we-collect",
+          "heading": "2. Information We Collect",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "We collect only the information reasonably necessary to operate, secure, maintain, and improve the Services."
+            },
+            {
+              "type": "h",
+              "text": "2.1. Account Information"
+            },
+            {
+              "type": "p",
+              "text": "When you create a SellerHill account, we may collect:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Email address",
+                "Password or authentication credentials",
+                "Name, if provided",
+                "Country",
+                "City, state/province, and postal code, if provided",
+                "Phone number, job title, biography, and profile image, if provided",
+                "Account status",
+                "Language preference",
+                "Account creation and verification information"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "We use this information to create and manage your account, authenticate you, provide the Services, communicate with you, and protect the security of the platform."
+            },
+            {
+              "type": "h",
+              "text": "2.2. Connected eBay Account Information"
+            },
+            {
+              "type": "p",
+              "text": "If you connect an eBay account to SellerHill through eBay’s authorization process, we may receive and process information made available through the authorization and the eBay APIs."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the permissions granted, this may include:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay seller/account identifiers",
+                "Store name",
+                "Marketplace information",
+                "Listing information",
+                "Inventory information",
+                "Product and item information",
+                "Orders",
+                "Buyer information associated with orders",
+                "Shipping information",
+                "Tracking information",
+                "Sales and transaction information",
+                "eBay business policies",
+                "Analytics information made available through authorized APIs",
+                "OAuth access and refresh tokens"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "OAuth tokens are encrypted at rest using industry-standard authenticated encryption mechanisms."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill uses the permissions granted by you only to provide the connected functionality."
+            },
+            {
+              "type": "p",
+              "text": "You may revoke SellerHill’s authorization through the applicable eBay account controls."
+            }
+          ]
+        },
+        {
+          "id": "amazon",
+          "heading": "3. Amazon Account Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill provides optional automated order-fulfillment functionality that may allow SellerHill to access an Amazon account on your behalf."
+            },
+            {
+              "type": "p",
+              "text": "If you enable this functionality, SellerHill may process information necessary to perform the actions you have authorized, including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon account information",
+                "Amazon login credentials",
+                "Two-factor authentication information",
+                "Amazon order history",
+                "Product and order information",
+                "Shipping addresses",
+                "Payment-method selection information",
+                "Order status",
+                "Tracking information",
+                "Checkout information",
+                "Browser session information"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Amazon passwords and two-factor authentication secrets are encrypted at rest."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may maintain an encrypted browser session associated with an authorized Amazon account in order to perform the automation you requested."
+            },
+            {
+              "type": "p",
+              "text": "To verify that an automated purchase was carried out correctly, SellerHill may capture screenshots of the checkout process. These screenshots may contain the buyer name and shipping address associated with the corresponding order, and are retained for a limited period as described in the Data Retention section."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not receive or store your full payment-card number merely because you use Amazon through SellerHill. Payment information remains subject to the applicable payment provider and marketplace systems."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for ensuring that your use of SellerHill with Amazon complies with Amazon’s applicable terms, policies, and requirements."
+            },
+            {
+              "type": "p",
+              "text": "You may disconnect or disable your Amazon account from SellerHill at any time."
+            }
+          ]
+        },
+        {
+          "id": "orders-buyers",
+          "heading": "4. Order and Buyer Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "When SellerHill synchronizes an eBay order, the Services may process personal information relating to the buyer."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the information made available by eBay, this may include:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay username",
+                "Buyer name",
+                "Buyer email address",
+                "Buyer telephone number",
+                "Shipping address",
+                "City",
+                "State/province",
+                "Postal code",
+                "Country",
+                "eBay order ID",
+                "Order details",
+                "Shipping and tracking information",
+                "Transaction and financial information related to the order"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "This information is processed primarily to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "synchronize orders;",
+                "facilitate fulfillment;",
+                "transmit necessary shipping information;",
+                "upload tracking information;",
+                "send authorized buyer communications;",
+                "calculate transaction and profit information;",
+                "maintain records necessary to operate the Services;",
+                "prevent fraud and abuse; and",
+                "comply with legal obligations."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Where you have enabled the corresponding functionality, buyer shipping information may be transmitted to Amazon in order to complete an authorized purchase, and order and tracking information may be transmitted to a tracking conversion provider as described below."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not use buyer information for unrelated advertising purposes."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for ensuring that you have a lawful basis and appropriate authorization to provide buyer information to SellerHill and to use the Services to process such information."
+            }
+          ]
+        },
+        {
+          "id": "user-content",
+          "heading": "5. Listing and User Content",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may provide information and content to SellerHill, including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ASINs",
+                "Product titles",
+                "Product descriptions",
+                "Product features",
+                "Brand information",
+                "eBay listing information",
+                "HTML descriptions",
+                "Custom HTML templates",
+                "Pricing rules",
+                "Stock settings",
+                "Setting Groups",
+                "Blacklists",
+                "Listing mappings",
+                "Product identifiers",
+                "Other information you enter into the Services"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "This information is processed to provide the functionality you request."
+            },
+            {
+              "type": "p",
+              "text": "You retain your rights in content that you own."
+            },
+            {
+              "type": "p",
+              "text": "You grant SellerHill a limited, non-exclusive, worldwide, royalty-free license to host, reproduce, process, transmit, modify where technically necessary, and otherwise use your content solely to provide, maintain, secure, and improve the Services."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not acquire ownership of your listing content merely because you use the Services."
+            },
+            {
+              "type": "p",
+              "text": "Marketplace catalog data obtained from third-party sources, such as product attributes associated with a given product identifier, may be cached and reused across the Services. Such catalog data is not your personal information and is not user content that you own."
+            }
+          ]
+        },
+        {
+          "id": "ai",
+          "heading": "6. AI Processing",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill uses artificial intelligence for certain listing-related functionality."
+            },
+            {
+              "type": "p",
+              "text": "At the time of this Privacy Policy, AI functionality may be used to assist with:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay listing title optimization;",
+                "eBay description generation or rewriting; and",
+                "certain item-specific selection processes."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "When AI functionality is used, SellerHill may send relevant listing/product information to its AI service provider."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the feature, this may include:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Product title",
+                "Product description",
+                "Brand",
+                "Product features",
+                "Category information",
+                "eBay item-specific information"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not intentionally send the following to its AI provider for listing-generation purposes:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon passwords",
+                "eBay OAuth tokens",
+                "Buyer payment information",
+                "Buyer passwords",
+                "Amazon two-factor authentication secrets",
+                "Buyer personal information unrelated to the listing"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "At the time of this Privacy Policy, SellerHill may use Google’s generative AI services for these functions."
+            },
+            {
+              "type": "p",
+              "text": "AI-generated content may contain inaccuracies. You remain responsible for reviewing listing content before or after publication and ensuring that it complies with applicable marketplace rules."
+            }
+          ]
+        },
+        {
+          "id": "product-data",
+          "heading": "7. Product Data and Third-Party Services",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may obtain product-related information from third-party services, including Keepa, in order to provide product data, pricing, availability, and related functionality."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may also use third-party services for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Marketplace integrations",
+                "Tracking-number conversion",
+                "AI processing",
+                "Payment processing",
+                "Customer support",
+                "Authentication",
+                "Infrastructure and hosting",
+                "Security",
+                "Email delivery",
+                "Error monitoring or operational logging"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Third-party services may process information according to their own privacy policies and terms."
+            },
+            {
+              "type": "p",
+              "text": "Where required, SellerHill will enter into appropriate contractual arrangements with service providers that process personal information on SellerHill’s behalf."
+            }
+          ]
+        },
+        {
+          "id": "tracking-conversion",
+          "heading": "8. Tracking Conversion",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may use third-party tracking conversion services to convert or process tracking information for supported fulfillment workflows."
+            },
+            {
+              "type": "p",
+              "text": "For example, when you request tracking conversion functionality, SellerHill may transmit information necessary to perform the conversion, which may include:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Tracking number",
+                "Tracking information",
+                "Amazon order information",
+                "Shipping information",
+                "Related order data"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "At the time of this Privacy Policy, SellerHill may use Aquiline for tracking conversion functionality."
+            },
+            {
+              "type": "p",
+              "text": "The processing of such information is limited to providing the requested service."
+            }
+          ]
+        },
+        {
+          "id": "payments",
+          "heading": "9. Payment Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill uses Stripe for payment processing and subscription billing."
+            },
+            {
+              "type": "p",
+              "text": "When you subscribe to a paid SellerHill plan, payment information is entered into Stripe’s payment environment rather than directly into SellerHill’s application infrastructure."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not store your complete credit-card number."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may receive and store limited billing information and payment metadata necessary to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "identify your subscription;",
+                "determine subscription status;",
+                "process upgrades and downgrades;",
+                "manage billing;",
+                "calculate applicable taxes;",
+                "issue refunds where applicable;",
+                "prevent fraud;",
+                "maintain financial records; and",
+                "provide customer support."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Stripe processes payment information according to its own privacy policy and terms."
+            }
+          ]
+        },
+        {
+          "id": "support",
+          "heading": "10. Customer Support",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may use third-party customer support tools, including Tawk.to, to provide live customer support."
+            },
+            {
+              "type": "p",
+              "text": "When you communicate with SellerHill through customer support, we may process:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Name",
+                "Email address",
+                "Account information",
+                "Messages",
+                "Support history",
+                "Technical information necessary to resolve your request"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Support providers may process information according to their own privacy policies."
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "heading": "11. Email Communications",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill currently sends transactional and service-related emails such as:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Email verification",
+                "Password reset",
+                "Welcome/account communications",
+                "Certain essential account notifications"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not currently use your email address for unrelated third-party advertising."
+            },
+            {
+              "type": "p",
+              "text": "If SellerHill introduces marketing communications in the future, we will provide appropriate consent and unsubscribe mechanisms where required by law."
+            }
+          ]
+        },
+        {
+          "id": "automatic",
+          "heading": "12. Information Collected Automatically",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "When you use SellerHill, we may automatically collect certain technical information, including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "IP address",
+                "Browser type",
+                "Operating system",
+                "Device information",
+                "Language preference",
+                "Login and authentication events",
+                "Application areas accessed",
+                "Error information",
+                "Security and audit logs",
+                "Usage information",
+                "API activity",
+                "Performance information"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "We use this information to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "operate the Services;",
+                "maintain security;",
+                "prevent abuse;",
+                "diagnose technical problems;",
+                "improve performance;",
+                "maintain reliability;",
+                "detect unauthorized access; and",
+                "comply with legal obligations."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cookies",
+          "heading": "13. Cookies and Similar Technologies",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill uses cookies and similar technologies."
+            },
+            {
+              "type": "h",
+              "text": "13.1. Strictly Necessary Technologies"
+            },
+            {
+              "type": "p",
+              "text": "Some cookies or similar technologies are necessary for the Services to function."
+            },
+            {
+              "type": "p",
+              "text": "These may include technologies used for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "authentication;",
+                "session management;",
+                "security;",
+                "fraud prevention; and",
+                "essential application functionality."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "For example, SellerHill may use an HTTP-only authentication refresh cookie to maintain an authenticated session."
+            },
+            {
+              "type": "p",
+              "text": "These technologies cannot necessarily be disabled without affecting the operation of the Services."
+            },
+            {
+              "type": "h",
+              "text": "13.2. Non-Essential Technologies"
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may use non-essential third-party technologies for purposes such as:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "customer support;",
+                "website functionality;",
+                "analytics, if introduced in the future; or",
+                "other optional features."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "The Website also loads web fonts from a third-party font provider in order to render the interface."
+            },
+            {
+              "type": "p",
+              "text": "Where legally required, non-essential cookies and similar technologies will only be activated after obtaining the appropriate consent."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not currently use advertising pixels such as Meta Pixel or Google Ads tracking pixels."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not currently use Google Analytics, Mixpanel, PostHog, or similar behavioral analytics platforms."
+            }
+          ]
+        },
+        {
+          "id": "how-we-use",
+          "heading": "14. How We Use Personal Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may use personal information for the following purposes:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "Providing and operating the Services;",
+                "Creating and managing accounts;",
+                "Authenticating users;",
+                "Connecting third-party marketplace accounts;",
+                "Performing automated listing and inventory functions;",
+                "Synchronizing orders;",
+                "Facilitating authorized fulfillment;",
+                "Uploading tracking information;",
+                "Sending authorized buyer communications;",
+                "Providing AI-powered listing functionality;",
+                "Processing payments and subscriptions;",
+                "Providing customer support;",
+                "Communicating important service information;",
+                "Detecting fraud and abuse;",
+                "Protecting the security of the Services;",
+                "Troubleshooting and debugging;",
+                "Measuring and improving reliability and performance;",
+                "Complying with applicable laws;",
+                "Responding to lawful governmental requests;",
+                "Enforcing our Terms of Service; and",
+                "Protecting the rights, property, and safety of SellerHill, our users, and others."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "legal-bases",
+          "heading": "15. Legal Bases for Processing",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Where the GDPR applies, SellerHill may process personal information based on one or more of the following legal bases:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Contract",
+                  "text": "Processing necessary to provide the Services you requested or to perform our agreement with you."
+                },
+                {
+                  "term": "Legitimate Interests",
+                  "text": "Processing necessary for legitimate business interests such as security, fraud prevention, service improvement, technical administration, customer support, enforcing contractual terms, and protecting our business. We balance these interests against applicable privacy rights."
+                },
+                {
+                  "term": "Legal Obligations",
+                  "text": "Processing necessary to comply with applicable legal, tax, accounting, regulatory, or governmental requirements."
+                },
+                {
+                  "term": "Consent",
+                  "text": "Where required, SellerHill will rely on your consent for specific processing activities, including certain non-essential cookies or marketing communications."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "You may withdraw consent where applicable. Withdrawal of consent does not affect processing that was lawful before withdrawal."
+            }
+          ]
+        },
+        {
+          "id": "sharing",
+          "heading": "16. How We Share Personal Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may share personal information with the following categories of recipients:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Marketplace Providers",
+                  "text": "Such as eBay and Amazon, when you connect or use those services."
+                },
+                {
+                  "term": "Service Providers",
+                  "text": "Companies that provide hosting, infrastructure, security, email, customer support, AI, payment, tracking conversion, database, or other services necessary to operate SellerHill."
+                },
+                {
+                  "term": "Payment Providers",
+                  "text": "Including Stripe."
+                },
+                {
+                  "term": "AI Providers",
+                  "text": "Including Google, where AI functionality is used."
+                },
+                {
+                  "term": "Tracking Providers",
+                  "text": "Including Aquiline, where tracking conversion functionality is used."
+                },
+                {
+                  "term": "Legal and Government Authorities",
+                  "text": "Where disclosure is required by law, court order, legal process, or to protect rights, safety, or property."
+                },
+                {
+                  "term": "Business Transfers",
+                  "text": "If SellerHill is involved in a merger, acquisition, financing, restructuring, sale of assets, or similar transaction, personal information may be transferred as part of that transaction, subject to applicable law."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not sell or share your personal information as those terms are defined under applicable privacy laws."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not share buyer information with unrelated advertisers for advertising purposes."
+            }
+          ]
+        },
+        {
+          "id": "transfers",
+          "heading": "17. International Data Transfers",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill is operated by a company based in the United States."
+            },
+            {
+              "type": "p",
+              "text": "Because SellerHill serves users internationally and relies on service providers located in different countries, personal information may be transferred to, stored in, or processed in countries outside your country of residence."
+            },
+            {
+              "type": "p",
+              "text": "These countries may include the United States and other jurisdictions where SellerHill or its service providers operate."
+            },
+            {
+              "type": "p",
+              "text": "Where required by applicable law, SellerHill will use appropriate safeguards for international transfers, which may include contractual safeguards, adequacy mechanisms, or other legally recognized transfer mechanisms."
+            }
+          ]
+        },
+        {
+          "id": "security",
+          "heading": "18. Data Security",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill uses reasonable technical and organizational measures designed to protect personal information against unauthorized access, alteration, disclosure, loss, or destruction."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the type of information, security measures may include:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Encryption at rest;",
+                "AES-256-GCM encryption for certain sensitive credentials and tokens;",
+                "HTTPS/TLS encryption in transit;",
+                "Access controls;",
+                "Authentication controls;",
+                "Security logging;",
+                "Audit logging;",
+                "Spending limits for automated purchases;",
+                "Operational monitoring;",
+                "Restricted access to sensitive information;",
+                "Secure infrastructure practices."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "No internet-based service can guarantee absolute security."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for maintaining the confidentiality of your SellerHill credentials and for protecting access to your connected marketplace accounts."
+            }
+          ]
+        },
+        {
+          "id": "retention",
+          "heading": "19. Data Retention",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill retains personal information only for as long as reasonably necessary for the purposes described in this Privacy Policy, unless a longer period is required or permitted by law."
+            },
+            {
+              "type": "p",
+              "text": "Our intended retention practices include:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Account Information",
+                  "text": "Retained while your account remains active and for a reasonable period after account closure for security, fraud prevention, legal, and operational purposes."
+                },
+                {
+                  "term": "Order and Buyer Information",
+                  "text": "Retained while your account remains active, because the Services calculate profitability and support dispute resolution across your order history. Following account closure or a deletion request, order and buyer information is deleted or anonymized where technically and legally possible, subject to legal, accounting, tax, fraud-prevention, and dispute-resolution requirements."
+                },
+                {
+                  "term": "Financial and Billing Records",
+                  "text": "May be retained for the period necessary to comply with applicable tax, accounting, financial, and legal requirements."
+                },
+                {
+                  "term": "Security and Audit Logs",
+                  "text": "Generally retained for up to 24 months, unless a longer period is reasonably necessary for security investigations, legal claims, or compliance."
+                },
+                {
+                  "term": "Buyer Message Logs",
+                  "text": "Generally retained for up to approximately 13 months, unless a longer period is necessary for legal or operational reasons."
+                },
+                {
+                  "term": "Automated Purchase Evidence",
+                  "text": "Screenshots generated during automated checkout processes may contain buyer names and shipping addresses and are generally retained for approximately 7 days for operational verification and dispute resolution."
+                },
+                {
+                  "term": "Amazon Browser Sessions",
+                  "text": "Persistent browser session information associated with inactive Amazon accounts may be deleted after approximately 90 days of inactivity, subject to security, legal, or operational requirements."
+                },
+                {
+                  "term": "Fraud-Prevention Records",
+                  "text": "In order to prevent repeated abuse of free trials and similar offers, SellerHill retains a limited record of which marketplace store identifiers have previously claimed a trial. This record is retained on an ongoing basis and may persist after an account is closed."
+                },
+                {
+                  "term": "Backups",
+                  "text": "Deleted information may remain temporarily in encrypted backups until those backups are securely overwritten or expire according to our backup procedures."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Retention periods may be changed where necessary to comply with law, resolve disputes, prevent fraud, enforce agreements, or protect the Services."
+            }
+          ]
+        },
+        {
+          "id": "deletion",
+          "heading": "20. Account Deletion",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may request deletion of your SellerHill account by contacting:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Where technically and legally possible, SellerHill will delete or anonymize personal information associated with the account."
+            },
+            {
+              "type": "p",
+              "text": "Certain information may be retained where necessary for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "legal obligations;",
+                "tax or accounting requirements;",
+                "fraud prevention;",
+                "security;",
+                "dispute resolution;",
+                "enforcement of agreements;",
+                "establishing, exercising, or defending legal claims."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Deleting an account does not automatically delete information that SellerHill is legally required to retain."
+            }
+          ]
+        },
+        {
+          "id": "rights",
+          "heading": "21. Your Privacy Rights",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Depending on your location and applicable law, you may have rights including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Right to access personal information;",
+                "Right to correct inaccurate information;",
+                "Right to request deletion;",
+                "Right to restrict processing;",
+                "Right to object to certain processing;",
+                "Right to data portability;",
+                "Right to withdraw consent;",
+                "Right to lodge a complaint with a supervisory authority;",
+                "Right to request information regarding international transfers;",
+                "Other rights provided by applicable privacy laws."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "To exercise applicable rights, contact:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "We may need to verify your identity before completing certain requests."
+            }
+          ]
+        },
+        {
+          "id": "eu",
+          "heading": "22. European Union / EEA / United Kingdom",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "If the GDPR or substantially similar data protection law applies to you, you may exercise the rights described above."
+            },
+            {
+              "type": "p",
+              "text": "Where SellerHill acts as a controller, you may contact us directly regarding your personal information."
+            },
+            {
+              "type": "p",
+              "text": "You may also have the right to complain to the relevant data protection supervisory authority in your country."
+            },
+            {
+              "type": "p",
+              "text": "Where SellerHill processes personal information on behalf of a business customer, that customer may remain responsible for determining the purposes and legal basis of processing."
+            }
+          ]
+        },
+        {
+          "id": "kvkk",
+          "heading": "23. Turkey — KVKK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Where Turkish Personal Data Protection Law No. 6698 (“KVKK”) applies, SellerHill may process personal data within the scope and purposes described in this Privacy Policy."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the circumstances, data subjects may have rights including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "learning whether personal data is processed;",
+                "requesting information regarding processing;",
+                "learning the purpose of processing;",
+                "learning third parties to whom data is transferred;",
+                "requesting correction;",
+                "requesting deletion or destruction where legally appropriate;",
+                "objecting to certain results arising from automated processing;",
+                "requesting compensation for unlawful processing where applicable."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Requests may be submitted to:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Requests will be handled in accordance with applicable law."
+            }
+          ]
+        },
+        {
+          "id": "us-states",
+          "heading": "24. California and Other U.S. State Privacy Rights",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Depending on your state of residence and whether applicable thresholds are met, you may have additional privacy rights under U.S. state privacy laws."
+            },
+            {
+              "type": "p",
+              "text": "These rights may include rights to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "know or access personal information;",
+                "delete personal information;",
+                "correct inaccurate information;",
+                "obtain a portable copy of information;",
+                "opt out of certain forms of sale, sharing, targeted advertising, or profiling where applicable;",
+                "limit certain sensitive-information processing where applicable."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not sell or share personal information as those terms are defined under applicable U.S. state privacy laws."
+            },
+            {
+              "type": "p",
+              "text": "If applicable law provides you with additional rights, SellerHill will honor those rights subject to applicable legal exceptions."
+            }
+          ]
+        },
+        {
+          "id": "children",
+          "heading": "25. Children’s Privacy",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill is intended for users who are 18 years of age or older."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not knowingly collect personal information from children under 18."
+            },
+            {
+              "type": "p",
+              "text": "If you believe a person under 18 has provided personal information to SellerHill, please contact:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "We will take reasonable steps to investigate and delete such information where appropriate."
+            }
+          ]
+        },
+        {
+          "id": "third-parties",
+          "heading": "26. Third-Party Websites and Services",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may contain links to or integrations with third-party services, including eBay, Amazon, Stripe, Google, Aquiline, Tawk.to, and other providers."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not control the privacy practices of third-party services."
+            },
+            {
+              "type": "p",
+              "text": "Your use of third-party services is governed by the applicable third party’s own terms and privacy policy."
+            },
+            {
+              "type": "p",
+              "text": "We encourage you to review those policies before using connected services."
+            }
+          ]
+        },
+        {
+          "id": "aggregated",
+          "heading": "27. Aggregated and De-Identified Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may create aggregated, statistical, or de-identified information from information collected through the Services."
+            },
+            {
+              "type": "p",
+              "text": "Such information will be processed in a manner designed not to identify you or another individual."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may use this information to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "understand service performance;",
+                "improve product functionality;",
+                "detect technical problems;",
+                "improve automation;",
+                "develop new features;",
+                "understand general usage patterns;",
+                "improve security; and",
+                "generate internal statistics."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill will not intentionally use aggregated or de-identified information to identify you."
+            }
+          ]
+        },
+        {
+          "id": "changes",
+          "heading": "28. Changes to This Privacy Policy",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "We may update this Privacy Policy from time to time to reflect:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "changes to the Services;",
+                "changes in technology;",
+                "changes to third-party providers;",
+                "changes in applicable law; or",
+                "changes in our business practices."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "When we make material changes, we may provide notice through the Website, Services, email, or other appropriate means where required by law."
+            },
+            {
+              "type": "p",
+              "text": "The “Last Updated” date at the top of this Privacy Policy indicates when it was most recently revised."
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "heading": "29. Contact Us",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "For privacy questions, requests, complaints, or data-rights inquiries:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, United States"
+              ]
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            }
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "documentTitle": "SellerHill Terms of Service",
+      "lastUpdated": "Last Updated: September 7, 2026",
+      "intro": [
+        "These Terms of Service (“Terms”) constitute a legally binding agreement between you (“you”, “your”, or “User”) and 2B Trading, LLC, a Wyoming limited liability company (“SellerHill”, “we”, “us”, or “our”).",
+        "These Terms govern your access to and use of the SellerHill website, web application, software, and related services (collectively, the “Services”).",
+        "By creating an account, accessing, or using the Services, you agree to be bound by these Terms and our Privacy Policy.",
+        "If you do not agree to these Terms, you must not access or use the Services."
+      ],
+      "sections": [
+        {
+          "id": "services",
+          "heading": "1. Description of the Services",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill is a software-as-a-service platform designed to help e-commerce sellers automate and manage certain activities involving third-party marketplaces and services."
+            },
+            {
+              "type": "p",
+              "text": "Depending on your selected plan and enabled features, SellerHill may provide functionality including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Connecting eBay seller accounts;",
+                "Managing multiple supported eBay stores;",
+                "Importing product information using ASINs and supported data sources;",
+                "Creating and managing eBay listings;",
+                "Updating listing prices and inventory;",
+                "Importing existing eBay listings;",
+                "Creating listing content;",
+                "AI-assisted title and description generation;",
+                "Item-specific assistance;",
+                "HTML listing templates;",
+                "Synchronizing orders;",
+                "Automated order fulfillment;",
+                "Purchasing products from Amazon on your behalf when authorized;",
+                "Uploading tracking information to eBay;",
+                "Tracking-number conversion;",
+                "Sending authorized buyer messages;",
+                "Calculating estimated or actual transaction profitability;",
+                "Dashboard and reporting functionality;",
+                "Setting Groups, pricing rules, inventory buffers, and templates;",
+                "Blacklists and automation controls; and",
+                "Other features that may be introduced from time to time."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that every feature will be available at all times or in every geographic location, marketplace, account, or subscription plan."
+            }
+          ]
+        },
+        {
+          "id": "eligibility",
+          "heading": "2. Eligibility",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You must be at least 18 years old to use SellerHill."
+            },
+            {
+              "type": "p",
+              "text": "By using the Services, you represent and warrant that:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "You are at least 18 years old;",
+                "You have legal capacity to enter into these Terms;",
+                "The information you provide to SellerHill is accurate and current;",
+                "You will use the Services only for lawful purposes; and",
+                "You will comply with all applicable laws, regulations, and third-party platform rules."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is intended primarily for business and commercial use."
+            }
+          ]
+        },
+        {
+          "id": "automation-provider",
+          "heading": "3. SellerHill Is an Automation Software Provider",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill provides software and automation tools."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "an eBay seller;",
+                "an Amazon seller;",
+                "a marketplace;",
+                "a payment processor;",
+                "a shipping carrier;",
+                "a product supplier;",
+                "a dropshipping supplier;",
+                "a tax advisor;",
+                "a legal advisor; or",
+                "an agent of eBay or Amazon."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not control the policies, systems, availability, pricing, inventory, APIs, accounts, or decisions of third-party platforms."
+            },
+            {
+              "type": "p",
+              "text": "You remain responsible for your own e-commerce business and all activities performed through your connected accounts."
+            }
+          ]
+        },
+        {
+          "id": "marketplaces",
+          "heading": "4. Third-Party Marketplaces",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may integrate with third-party platforms such as eBay and Amazon."
+            },
+            {
+              "type": "p",
+              "text": "Your use of those platforms remains subject to their respective terms, policies, seller requirements, API rules, and other applicable agreements."
+            },
+            {
+              "type": "p",
+              "text": "You are solely responsible for ensuring that your use of SellerHill does not violate:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay policies;",
+                "Amazon policies;",
+                "marketplace seller agreements;",
+                "API terms;",
+                "product restrictions;",
+                "intellectual-property rules;",
+                "pricing rules;",
+                "shipping requirements;",
+                "tax requirements;",
+                "consumer-protection laws; or",
+                "any other applicable requirements."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not represent or warrant that your use of the Services will comply with the policies of every third-party platform."
+            }
+          ]
+        },
+        {
+          "id": "ebay-connection",
+          "heading": "5. Connecting Your eBay Account",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may connect an eBay account to SellerHill through eBay’s authorization system."
+            },
+            {
+              "type": "p",
+              "text": "By connecting an eBay account, you authorize SellerHill to perform actions permitted by the permissions granted through the applicable eBay authorization process."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the enabled functionality, SellerHill may be able to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "create listings;",
+                "update listings;",
+                "end listings;",
+                "modify prices;",
+                "modify inventory quantities;",
+                "read orders;",
+                "access buyer information associated with orders;",
+                "upload tracking information;",
+                "mark orders as shipped;",
+                "send buyer messages using your configured templates;",
+                "read business policies; and",
+                "access permitted sales analytics."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Some automated actions may occur without requiring you to manually approve each individual action."
+            },
+            {
+              "type": "p",
+              "text": "You acknowledge and accept this automation when you enable the relevant features."
+            },
+            {
+              "type": "p",
+              "text": "You remain responsible for reviewing and configuring your automation settings."
+            }
+          ]
+        },
+        {
+          "id": "price-stock",
+          "heading": "6. Automated Price and Inventory Updates",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may automatically update prices and inventory quantities on supported marketplaces according to your configured settings."
+            },
+            {
+              "type": "p",
+              "text": "You acknowledge that:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "marketplace prices may change;",
+                "supplier prices may change;",
+                "inventory may become unavailable;",
+                "marketplace data may be delayed;",
+                "API data may be incomplete or inaccurate;",
+                "synchronization may fail;",
+                "third-party APIs may become unavailable; and",
+                "SellerHill may not detect every change immediately."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill’s inventory and pricing synchronization is not guaranteed to be real-time."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for selecting appropriate pricing rules, stock buffers, and other automation settings."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not responsible for losses resulting from inaccurate, delayed, unavailable, or conflicting marketplace or supplier information."
+            }
+          ]
+        },
+        {
+          "id": "auto-purchase",
+          "heading": "7. Automated Amazon Purchases",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may provide automated Amazon purchasing functionality."
+            },
+            {
+              "type": "p",
+              "text": "If you enable this feature, you expressly authorize SellerHill to access your authorized Amazon account and perform purchasing actions on your behalf according to your configuration."
+            },
+            {
+              "type": "p",
+              "text": "Depending on the workflow, SellerHill may:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "log into your Amazon account;",
+                "use your authorized authentication information;",
+                "access product and order information;",
+                "add products to a cart;",
+                "select delivery addresses;",
+                "select payment methods already available within your Amazon account;",
+                "complete purchases;",
+                "retrieve order status;",
+                "retrieve tracking information; and",
+                "perform other actions reasonably necessary to complete the authorized fulfillment workflow."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "You are solely responsible for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "the Amazon account;",
+                "the payment methods connected to that account;",
+                "the delivery addresses;",
+                "purchase settings;",
+                "spending limits;",
+                "supplier selection;",
+                "products purchased; and",
+                "compliance with Amazon’s policies."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill provides spending-limit controls intended to reduce the risk of unintended purchases. However, such controls do not constitute a guarantee against unauthorized, incorrect, duplicate, or otherwise undesirable purchases."
+            },
+            {
+              "type": "p",
+              "text": "You should not enable automated purchasing unless you understand and accept the risks associated with automated transactions."
+            }
+          ]
+        },
+        {
+          "id": "fulfillment-risks",
+          "heading": "8. Automated Fulfillment Risks",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Automated fulfillment may fail for reasons including, but not limited to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon website changes;",
+                "marketplace changes;",
+                "API changes;",
+                "CAPTCHA or anti-bot systems;",
+                "authentication failures;",
+                "two-factor authentication failures;",
+                "account restrictions;",
+                "product unavailability;",
+                "price changes;",
+                "payment failures;",
+                "shipping-address issues;",
+                "Amazon order cancellations;",
+                "browser automation failures;",
+                "network failures;",
+                "infrastructure failures;",
+                "third-party service failures; or",
+                "changes to third-party websites."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that every automated order will be successfully completed."
+            },
+            {
+              "type": "p",
+              "text": "You remain responsible for monitoring your orders and taking corrective action when necessary."
+            }
+          ]
+        },
+        {
+          "id": "tracking",
+          "heading": "9. Tracking Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may automatically retrieve tracking information and upload it to supported marketplace accounts."
+            },
+            {
+              "type": "p",
+              "text": "Certain marketplace tracking operations may be irreversible."
+            },
+            {
+              "type": "p",
+              "text": "You acknowledge that an incorrect tracking number, incorrect carrier, delayed tracking information, converted tracking number, or marketplace-side error may affect your order or account."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that tracking information will be accepted, updated, displayed, or processed correctly by a third-party marketplace."
+            }
+          ]
+        },
+        {
+          "id": "tracking-conversion",
+          "heading": "10. Tracking Conversion",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may provide tracking-number conversion functionality through third-party services."
+            },
+            {
+              "type": "p",
+              "text": "Tracking conversion may be subject to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "third-party availability;",
+                "conversion quotas;",
+                "provider limitations;",
+                "API restrictions;",
+                "processing errors;",
+                "marketplace compatibility; and",
+                "changes in third-party services."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that every tracking number can be converted successfully."
+            }
+          ]
+        },
+        {
+          "id": "buyer-messages",
+          "heading": "11. Buyer Communications",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may allow you to configure templates for automated buyer communications."
+            },
+            {
+              "type": "p",
+              "text": "Depending on your settings, SellerHill may send messages relating to events such as:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "order receipt;",
+                "shipment;",
+                "delivery;",
+                "feedback requests; or",
+                "other supported order events."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "You are solely responsible for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "the content of your templates;",
+                "the legality of your communications;",
+                "compliance with marketplace messaging policies;",
+                "compliance with applicable consumer-protection and anti-spam laws; and",
+                "ensuring that your messages are appropriate."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that a marketplace will accept or deliver every message."
+            }
+          ]
+        },
+        {
+          "id": "ai-content",
+          "heading": "12. AI-Generated Content",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may use artificial intelligence to assist with listing titles, descriptions, and certain item-specific selections."
+            },
+            {
+              "type": "p",
+              "text": "AI-generated content may:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "contain errors;",
+                "contain inaccurate information;",
+                "omit relevant information;",
+                "produce inappropriate wording;",
+                "incorrectly interpret product information; or",
+                "fail to comply with marketplace requirements."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "AI output is provided as an automation and productivity aid and should not be treated as guaranteed factual or legally compliant content."
+            },
+            {
+              "type": "p",
+              "text": "You are solely responsible for reviewing and approving listing content."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that AI-generated content will improve sales, search rankings, conversion rates, or profitability."
+            }
+          ]
+        },
+        {
+          "id": "product-data",
+          "heading": "13. Product Information",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may use third-party product data providers, including Keepa, to obtain product-related information."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee the accuracy, completeness, availability, or timeliness of third-party product data."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for verifying the following before publishing or selling a product:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "product information;",
+                "pricing;",
+                "availability;",
+                "identifiers;",
+                "specifications;",
+                "images;",
+                "descriptions;",
+                "restrictions; and",
+                "other listing information."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not provide product sourcing or product-research services unless expressly stated in the applicable Service description."
+            }
+          ]
+        },
+        {
+          "id": "listing-responsibility",
+          "heading": "14. User Responsibility for Listings",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You are solely responsible for all listings created, imported, modified, or published through your SellerHill account."
+            },
+            {
+              "type": "p",
+              "text": "This includes responsibility for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "product legality;",
+                "intellectual-property rights;",
+                "trademarks;",
+                "copyrights;",
+                "product descriptions;",
+                "product claims;",
+                "product images;",
+                "prices;",
+                "shipping terms;",
+                "return policies;",
+                "item specifics;",
+                "product identifiers;",
+                "restricted products;",
+                "marketplace category requirements; and",
+                "applicable consumer laws."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that a listing created through the Services complies with the requirements of eBay, Amazon, or any other platform."
+            }
+          ]
+        },
+        {
+          "id": "user-content",
+          "heading": "15. User Content",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You retain ownership of content you submit to SellerHill that you own, including listing content, templates, titles, descriptions, settings, and other materials."
+            },
+            {
+              "type": "p",
+              "text": "You grant SellerHill a limited, non-exclusive, worldwide, royalty-free license to host, process, reproduce, transmit, modify where technically necessary, and otherwise use such content solely as necessary to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "provide the Services;",
+                "operate the Services;",
+                "maintain the Services;",
+                "secure the Services;",
+                "troubleshoot the Services;",
+                "improve the Services; and",
+                "develop related functionality."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not obtain ownership of your content under these Terms."
+            },
+            {
+              "type": "p",
+              "text": "You represent and warrant that you have all rights necessary to provide the content to SellerHill and authorize SellerHill to process it."
+            }
+          ]
+        },
+        {
+          "id": "aggregated-data",
+          "heading": "16. Shared and Aggregated System Data",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may maintain shared product, technical, performance, or configuration information generated through the operation of the Services."
+            },
+            {
+              "type": "p",
+              "text": "This may include aggregated or de-identified information such as:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "product-data cache information;",
+                "technical performance information;",
+                "successful configuration patterns;",
+                "item-specific defaults;",
+                "system statistics; and",
+                "other non-identifying operational information."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may use such information to operate, improve, secure, and develop the Services."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill will not intentionally use de-identified or aggregated information to identify you."
+            }
+          ]
+        },
+        {
+          "id": "account-security",
+          "heading": "17. Account Security",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You are responsible for maintaining the security of your SellerHill account."
+            },
+            {
+              "type": "p",
+              "text": "You must:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "use appropriate account credentials;",
+                "keep your credentials confidential;",
+                "use secure authentication methods;",
+                "protect your connected marketplace accounts;",
+                "notify SellerHill of suspected unauthorized access; and",
+                "ensure that only authorized persons access your account."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for activities performed through your account unless caused by SellerHill’s own unauthorized conduct."
+            }
+          ]
+        },
+        {
+          "id": "credentials",
+          "heading": "18. Amazon and eBay Credentials",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Where necessary for enabled functionality, SellerHill may securely store encrypted marketplace credentials or authentication information."
+            },
+            {
+              "type": "p",
+              "text": "By providing such credentials, you authorize SellerHill to use them solely for the functionality you have enabled."
+            },
+            {
+              "type": "p",
+              "text": "You may disable the relevant integration or request account deletion in accordance with our Privacy Policy."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that a third-party marketplace will continue to permit automated access using the credentials or authentication methods currently supported."
+            }
+          ]
+        },
+        {
+          "id": "subscriptions",
+          "heading": "19. Subscriptions and Plans",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill offers subscription plans with different limits and features."
+            },
+            {
+              "type": "p",
+              "text": "The applicable terms are those displayed on the SellerHill Website at the time of purchase or renewal, including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "price;",
+                "listing limit;",
+                "tracking-conversion allowance;",
+                "automated-order allowance;",
+                "features; and",
+                "other limitations."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may change plans, limits, features, or pricing from time to time."
+            },
+            {
+              "type": "p",
+              "text": "Changes to pricing will not retroactively modify a billing period already paid for, unless otherwise permitted or required by law."
+            }
+          ]
+        },
+        {
+          "id": "trial",
+          "heading": "20. Free Trial",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may offer a free trial."
+            },
+            {
+              "type": "p",
+              "text": "The current trial may include limited allowances for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "active listings;",
+                "tracking conversions; and",
+                "automated orders."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Unless otherwise stated, the free trial is available once per supported eBay store, rather than once per email address or SellerHill account."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may maintain a record of previously used trial eligibility to prevent repeated use of the same trial."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may modify or discontinue trial availability at any time."
+            },
+            {
+              "type": "p",
+              "text": "We reserve the right to suspend or terminate accounts that attempt to abuse, circumvent, or manipulate trial limitations."
+            }
+          ]
+        },
+        {
+          "id": "billing",
+          "heading": "21. Billing",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Paid subscriptions are billed in advance through Stripe."
+            },
+            {
+              "type": "p",
+              "text": "By subscribing to a paid plan, you authorize SellerHill and its payment provider to charge the applicable payment method for:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "subscription fees;",
+                "applicable taxes;",
+                "upgrades;",
+                "other charges expressly disclosed at purchase."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not store your complete payment-card number."
+            }
+          ]
+        },
+        {
+          "id": "plan-changes",
+          "heading": "22. Upgrades and Downgrades",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "When you upgrade a subscription, the applicable additional amount may be charged immediately."
+            },
+            {
+              "type": "p",
+              "text": "If the payment required for an upgrade is declined, the upgrade may not be completed."
+            },
+            {
+              "type": "p",
+              "text": "Downgrades generally take effect at the end of the current billing period."
+            },
+            {
+              "type": "p",
+              "text": "The exact billing treatment may depend on the subscription configuration displayed at the time of the transaction."
+            }
+          ]
+        },
+        {
+          "id": "cancellation",
+          "heading": "23. Cancellation",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may cancel a subscription through the available billing-management functionality."
+            },
+            {
+              "type": "p",
+              "text": "Unless otherwise required by law or expressly stated at purchase:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "cancellation does not automatically entitle you to a refund for the current billing period;",
+                "your access generally continues until the end of the paid billing period; and",
+                "the subscription will not renew after cancellation."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "failed-payments",
+          "heading": "24. Failed Payments",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "If a subscription payment fails, SellerHill may suspend access to paid functionality immediately."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not required to provide a grace period."
+            },
+            {
+              "type": "p",
+              "text": "You remain responsible for amounts validly owed before or after suspension where applicable."
+            }
+          ]
+        },
+        {
+          "id": "refunds",
+          "heading": "25. Refunds",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Unless otherwise required by applicable law, subscription fees and other charges are generally non-refundable once the applicable service period has started."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may, at its discretion, provide refunds or credits in exceptional circumstances."
+            },
+            {
+              "type": "p",
+              "text": "Any refund rights that cannot legally be waived remain unaffected."
+            }
+          ]
+        },
+        {
+          "id": "topups",
+          "heading": "26. Tracking Conversion Top-Ups",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may offer one-time tracking-conversion top-up packages."
+            },
+            {
+              "type": "p",
+              "text": "Top-ups may be offered in different quantities and at the prices displayed at the time of purchase."
+            },
+            {
+              "type": "p",
+              "text": "Unless otherwise stated:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "top-ups are one-time purchases;",
+                "they are not recurring subscriptions;",
+                "they are non-transferable;",
+                "they are not redeemable for cash; and",
+                "unused conversions may expire according to the validity period displayed at purchase."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "The applicable terms displayed at checkout control the purchase."
+            }
+          ]
+        },
+        {
+          "id": "taxes",
+          "heading": "27. Taxes",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Prices may not include all applicable taxes unless expressly stated."
+            },
+            {
+              "type": "p",
+              "text": "You are responsible for taxes applicable to your use of the Services except taxes that SellerHill is legally required to collect and remit."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may use Stripe and related tax functionality to calculate and collect applicable taxes."
+            },
+            {
+              "type": "p",
+              "text": "Providing accurate billing information, address information, and tax-identification information is your responsibility."
+            }
+          ]
+        },
+        {
+          "id": "prohibited",
+          "heading": "28. Prohibited Uses",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may not use SellerHill to:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "Violate any law or regulation;",
+                "Violate eBay, Amazon, or another marketplace’s terms;",
+                "Commit fraud;",
+                "Misrepresent products;",
+                "Sell prohibited or illegal products;",
+                "Infringe intellectual-property rights;",
+                "Circumvent marketplace restrictions;",
+                "Abuse APIs;",
+                "Attempt to bypass SellerHill limits;",
+                "Abuse free trials;",
+                "Reverse engineer the Services;",
+                "Copy or reproduce SellerHill functionality;",
+                "Interfere with infrastructure;",
+                "Introduce malicious software;",
+                "Attempt unauthorized access;",
+                "Resell access without authorization;",
+                "Use automated methods to attack or overload the Services;",
+                "Use the Services to transmit unlawful or harmful content;",
+                "Use another person’s account without authorization; or",
+                "Use the Services in a manner that creates unreasonable risk to SellerHill or third parties."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "suspension-risk",
+          "heading": "29. Marketplace Suspension and Account Restrictions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee that using the Services will prevent suspension, restriction, limitation, termination, or other enforcement action by eBay, Amazon, payment providers, suppliers, or other third parties."
+            },
+            {
+              "type": "p",
+              "text": "Your marketplace account may be affected by factors outside SellerHill’s control, including:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "marketplace policy enforcement;",
+                "product restrictions;",
+                "account history;",
+                "seller performance;",
+                "automated activity;",
+                "pricing;",
+                "inventory;",
+                "shipping performance;",
+                "customer complaints;",
+                "intellectual-property complaints;",
+                "payment problems;",
+                "marketplace algorithm changes;",
+                "API restrictions; or",
+                "marketplace security systems."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not responsible for third-party account suspension or termination."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not provide any anti-suspension or account-survival guarantee."
+            }
+          ]
+        },
+        {
+          "id": "availability",
+          "heading": "30. Service Availability",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill aims to provide reliable Services but does not guarantee uninterrupted availability."
+            },
+            {
+              "type": "p",
+              "text": "The Services may be unavailable or degraded because of:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "maintenance;",
+                "infrastructure failures;",
+                "software errors;",
+                "third-party API failures;",
+                "marketplace outages;",
+                "hosting failures;",
+                "network failures;",
+                "security incidents;",
+                "force majeure events;",
+                "browser changes;",
+                "third-party website changes; or",
+                "other circumstances beyond SellerHill’s reasonable control."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "third-parties",
+          "heading": "31. Third-Party Services",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill depends on third-party services, including potentially:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay;",
+                "Amazon;",
+                "Stripe;",
+                "Google;",
+                "Keepa;",
+                "Aquiline;",
+                "Tawk.to;",
+                "hosting providers;",
+                "infrastructure providers; and",
+                "other service providers."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not responsible for third-party services, including their:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "availability;",
+                "accuracy;",
+                "policies;",
+                "pricing;",
+                "functionality;",
+                "security;",
+                "data processing;",
+                "API changes; or",
+                "discontinuation."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "A third-party service becoming unavailable may cause SellerHill functionality to stop working."
+            }
+          ]
+        },
+        {
+          "id": "ip",
+          "heading": "32. Intellectual Property",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The SellerHill software, Website, interface, branding, logos, design, source code, object code, databases, documentation, and other materials provided by SellerHill are owned by or licensed to SellerHill and are protected by applicable intellectual-property laws."
+            },
+            {
+              "type": "p",
+              "text": "Except for the limited right to use the Services under these Terms, no ownership rights are transferred to you."
+            },
+            {
+              "type": "p",
+              "text": "You may not do any of the following with SellerHill’s software or proprietary materials without prior written authorization:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "copy;",
+                "modify;",
+                "reproduce;",
+                "distribute;",
+                "sell;",
+                "sublicense;",
+                "lease;",
+                "reverse engineer;",
+                "decompile;",
+                "disassemble;",
+                "create derivative works from; or",
+                "commercially exploit."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "feedback",
+          "heading": "33. Feedback",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "If you voluntarily provide suggestions, ideas, recommendations, or other feedback regarding SellerHill, you grant SellerHill the right to use such feedback without restriction or compensation."
+            },
+            {
+              "type": "p",
+              "text": "This does not transfer ownership of your underlying intellectual property."
+            }
+          ]
+        },
+        {
+          "id": "confidentiality",
+          "heading": "34. Confidentiality",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Each party may receive confidential information from the other party."
+            },
+            {
+              "type": "p",
+              "text": "The receiving party will use reasonable measures to protect confidential information and will not disclose it except:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "to authorized personnel or service providers who need it;",
+                "as necessary to provide the Services;",
+                "where required by law; or",
+                "with the other party’s authorization."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "This section does not apply to information that is publicly available without breach, independently developed, lawfully received from another source, or already known without confidentiality obligations."
+            }
+          ]
+        },
+        {
+          "id": "disclaimers",
+          "heading": "35. Disclaimers",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SERVICES ARE PROVIDED ON AN “AS IS” AND “AS AVAILABLE” BASIS."
+            },
+            {
+              "type": "p",
+              "text": "SELLERHILL DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "MERCHANTABILITY;",
+                "FITNESS FOR A PARTICULAR PURPOSE;",
+                "NON-INFRINGEMENT;",
+                "ACCURACY;",
+                "RELIABILITY;",
+                "AVAILABILITY; AND",
+                "UNINTERRUPTED OPERATION."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill does not warrant that:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "the Services will always work;",
+                "marketplace integrations will remain available;",
+                "third-party APIs will remain unchanged;",
+                "automated purchases will always succeed;",
+                "inventory and pricing will always be accurate;",
+                "tracking will always be accepted;",
+                "listings will comply with marketplace policies;",
+                "AI output will be accurate;",
+                "the Services will prevent marketplace suspension; or",
+                "use of the Services will generate revenue or profit."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "no-guarantee",
+          "heading": "36. No Guarantee of Profits or Business Results",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill does not guarantee:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "sales;",
+                "revenue;",
+                "profit;",
+                "conversion rates;",
+                "search rankings;",
+                "account growth;",
+                "successful product sales;",
+                "marketplace approval;",
+                "supplier availability;",
+                "account longevity; or",
+                "any specific financial result."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Any examples, estimates, calculations, or projections provided through the Website or Services are informational only."
+            }
+          ]
+        },
+        {
+          "id": "liability",
+          "heading": "37. Limitation of Liability",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, SELLERHILL AND ITS MEMBERS, MANAGERS, OFFICERS, EMPLOYEES, CONTRACTORS, AND SERVICE PROVIDERS SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOSS OF:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "PROFITS;",
+                "REVENUE;",
+                "SALES;",
+                "BUSINESS;",
+                "DATA;",
+                "GOODWILL;",
+                "MARKETPLACE ACCOUNTS;",
+                "OPPORTUNITIES; OR",
+                "EXPECTED SAVINGS."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "This includes losses resulting from:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "marketplace suspension;",
+                "account termination;",
+                "listing removal;",
+                "incorrect pricing;",
+                "incorrect inventory;",
+                "failed orders;",
+                "duplicate orders;",
+                "supplier price changes;",
+                "supplier stock changes;",
+                "tracking errors;",
+                "shipping delays;",
+                "payment failures;",
+                "AI-generated content;",
+                "third-party service failures;",
+                "API changes;",
+                "automation errors; or",
+                "unauthorized marketplace actions."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "To the maximum extent permitted by law, SellerHill’s total aggregate liability arising out of or relating to the Services or these Terms shall not exceed the greater of: (a) the amount you paid to SellerHill for the Services during the three (3) months immediately preceding the event giving rise to the claim; or (b) USD $100."
+            },
+            {
+              "type": "p",
+              "text": "Nothing in these Terms limits liability that cannot legally be limited under applicable law."
+            }
+          ]
+        },
+        {
+          "id": "indemnification",
+          "heading": "38. Indemnification",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You agree to defend, indemnify, and hold harmless SellerHill, 2B Trading, LLC, and their respective members, managers, officers, employees, contractors, and service providers from claims, damages, losses, liabilities, costs, and expenses, including reasonable legal fees, arising out of or relating to:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "your use of the Services;",
+                "your violation of these Terms;",
+                "your violation of third-party platform rules;",
+                "your listings;",
+                "your products;",
+                "your customer relationships;",
+                "your buyer communications;",
+                "your misuse of marketplace accounts;",
+                "your infringement of third-party rights;",
+                "your violation of applicable law;",
+                "your connected Amazon or eBay accounts; or",
+                "your negligence or intentional misconduct."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill reserves the right to assume exclusive control of the defense of any matter subject to indemnification, and you agree to cooperate reasonably."
+            }
+          ]
+        },
+        {
+          "id": "suspension-by-us",
+          "heading": "39. Suspension and Termination by SellerHill",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may suspend, restrict, or terminate your account or access to the Services if we reasonably believe that:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "you violated these Terms;",
+                "you violated applicable law;",
+                "you violated marketplace rules;",
+                "you engaged in fraud or abuse;",
+                "you abused a trial;",
+                "you failed to pay applicable fees;",
+                "your use creates a security risk;",
+                "your use creates unreasonable infrastructure load;",
+                "you attempted unauthorized access;",
+                "you reverse engineered or copied the Services;",
+                "you used the Services for prohibited activities;",
+                "your account creates legal or regulatory risk; or",
+                "suspension is reasonably necessary to protect SellerHill, users, or third parties."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may also discontinue particular features or Services."
+            }
+          ]
+        },
+        {
+          "id": "termination-by-you",
+          "heading": "40. Termination by You",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may stop using SellerHill at any time."
+            },
+            {
+              "type": "p",
+              "text": "You may request account deletion according to our Privacy Policy."
+            },
+            {
+              "type": "p",
+              "text": "Termination does not automatically eliminate amounts already owed or obligations that by their nature should survive termination."
+            }
+          ]
+        },
+        {
+          "id": "termination-effect",
+          "heading": "41. Effect of Termination",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "After termination:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "your access may be disabled;",
+                "active automation may stop;",
+                "connected marketplace integrations may be disconnected;",
+                "subscriptions may be canceled;",
+                "data may be deleted according to our Privacy Policy and applicable retention obligations."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill is not responsible for losses caused by the termination of automation after your account is suspended or terminated."
+            }
+          ]
+        },
+        {
+          "id": "survival",
+          "heading": "42. Survival",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The following provisions survive termination:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Intellectual Property;",
+                "User Content rights;",
+                "Confidentiality;",
+                "Disclaimers;",
+                "Limitation of Liability;",
+                "Indemnification;",
+                "Dispute Resolution;",
+                "Governing Law; and",
+                "any other provision that by its nature should survive termination."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "disputes",
+          "heading": "43. Dispute Resolution",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Before initiating formal legal proceedings, you agree to contact SellerHill at the address below, or another official SellerHill support or contact address made available through the Website, and provide a reasonable opportunity to resolve the dispute informally."
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Nothing in this section prevents either party from seeking emergency or injunctive relief where legally available."
+            }
+          ]
+        },
+        {
+          "id": "governing-law",
+          "heading": "44. Governing Law",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "These Terms shall be governed by and construed in accordance with the laws of the State of Wyoming, United States, without regard to conflict-of-law principles."
+            },
+            {
+              "type": "p",
+              "text": "To the extent permitted by law, disputes arising from or relating to these Terms or the Services shall be subject to the applicable courts located in Wyoming."
+            },
+            {
+              "type": "p",
+              "text": "Nothing in this section deprives a consumer of mandatory rights that cannot legally be waived under the laws of the consumer’s jurisdiction."
+            }
+          ]
+        },
+        {
+          "id": "changes",
+          "heading": "45. Changes to These Terms",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill may update these Terms from time to time."
+            },
+            {
+              "type": "p",
+              "text": "If we make material changes, we may provide notice through:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "the Website;",
+                "the Services;",
+                "email; or",
+                "another reasonable method."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Your continued use of the Services after the effective date of updated Terms constitutes acceptance of the revised Terms to the extent permitted by law."
+            }
+          ]
+        },
+        {
+          "id": "electronic",
+          "heading": "46. Electronic Communications",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You agree that SellerHill may communicate with you electronically regarding:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "your account;",
+                "subscriptions;",
+                "payments;",
+                "security;",
+                "service changes;",
+                "legal notices;",
+                "support;",
+                "important operational matters."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Electronic communications satisfy written-notice requirements to the extent permitted by applicable law."
+            }
+          ]
+        },
+        {
+          "id": "entire-agreement",
+          "heading": "47. Entire Agreement",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "These Terms, together with the Privacy Policy and any other terms expressly incorporated by reference, constitute the entire agreement between you and SellerHill regarding the Services."
+            },
+            {
+              "type": "p",
+              "text": "If a separate written agreement exists between you and SellerHill concerning specific Services, that agreement may supersede these Terms to the extent of any conflict."
+            }
+          ]
+        },
+        {
+          "id": "severability",
+          "heading": "48. Severability",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "If any provision of these Terms is determined to be invalid or unenforceable, the remaining provisions will remain in full force and effect."
+            },
+            {
+              "type": "p",
+              "text": "The invalid provision will be interpreted or modified to the minimum extent necessary to make it enforceable while preserving its intended purpose."
+            }
+          ]
+        },
+        {
+          "id": "no-waiver",
+          "heading": "49. No Waiver",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill’s failure to enforce any provision of these Terms does not constitute a waiver of that provision or the right to enforce it later."
+            }
+          ]
+        },
+        {
+          "id": "assignment",
+          "heading": "50. Assignment",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "You may not assign or transfer your rights or obligations under these Terms without SellerHill’s prior written consent."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill may assign these Terms in connection with:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "a merger;",
+                "acquisition;",
+                "corporate restructuring;",
+                "sale of assets;",
+                "financing transaction; or",
+                "transfer of the SellerHill business."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "heading": "51. Contact",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "For questions regarding these Terms:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, United States"
+              ]
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

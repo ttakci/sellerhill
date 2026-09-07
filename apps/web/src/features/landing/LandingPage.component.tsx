@@ -146,6 +146,8 @@ export const LandingPageComponent = ({
   onNavigateLogin,
   onNavigateRegister,
   onOpenDemo,
+  onNavigatePrivacy,
+  onNavigateTerms,
   onToggleMobileMenu,
   onCloseMobileMenu,
 }: LandingPageProps): React.ReactElement => {
@@ -862,9 +864,15 @@ export const LandingPageComponent = ({
             </S.FooterColumn>
             <S.FooterColumn>
               <S.FooterColTitle>{t('translation:landing.footer.legal')}</S.FooterColTitle>
-              <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.privacy')}</S.FooterLink>
-              <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.terms')}</S.FooterLink>
-              <S.FooterLink type="button">{t('translation:landing.footer.legalLinks.cookies')}</S.FooterLink>
+              <S.FooterLink type="button" onClick={() => onNavigatePrivacy()}>
+                {t('translation:landing.footer.legalLinks.privacy')}
+              </S.FooterLink>
+              <S.FooterLink type="button" onClick={onNavigateTerms}>
+                {t('translation:landing.footer.legalLinks.terms')}
+              </S.FooterLink>
+              <S.FooterLink type="button" onClick={() => onNavigatePrivacy('cookies')}>
+                {t('translation:landing.footer.legalLinks.cookies')}
+              </S.FooterLink>
             </S.FooterColumn>
           </S.FooterColumns>
         </S.FooterInner>

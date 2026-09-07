@@ -1,0 +1,2674 @@
+{
+  "legal": {
+    "backToHome": "Ana sayfaya dön",
+    "tocTitle": "Bu sayfada",
+    "unavailable": "Bu belge yüklenemedi. Lütfen daha sonra tekrar deneyin.",
+    "privacy": {
+      "documentTitle": "SellerHill Gizlilik Politikası",
+      "lastUpdated": "Son Güncelleme: 7 Eylül 2026",
+      "intro": [
+        "Bu Gizlilik Politikası; Wyoming, ABD merkezli 2B Trading, LLC adlı şirketin (“SellerHill”, “biz”, “bize” veya “bizim”) SellerHill internet sitesine, web uygulamasına, yazılımına ve ilgili hizmetlerine (topluca “Hizmetler”) eriştiğinizde veya bunları kullandığınızda kişisel verileri nasıl topladığını, kullandığını, sakladığını, aktardığını ve koruduğunu açıklar.",
+        "SellerHill; e-ticaret satıcılarının eBay ve Amazon dahil olmak üzere üçüncü taraf pazaryerleri ve hizmetlerle gerçekleştirdiği belirli faaliyetleri otomatikleştirmesine ve yönetmesine yardımcı olan bir yazılım sunar.",
+        "Hesap oluşturarak veya Hizmetleri kullanarak bu Gizlilik Politikası'nı okuduğunuzu kabul etmiş olursunuz. Yürürlükteki mevzuat belirli bir işleme faaliyeti için rızanızı gerektiriyorsa, bu rızayı ayrıca alacağız.",
+        "Bu Gizlilik Politikası'nı kabul etmiyorsanız Hizmetleri kullanmamalısınız."
+      ],
+      "sections": [
+        {
+          "id": "who-we-are",
+          "heading": "1. Biz Kimiz?",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Hizmetler aşağıdaki şirket tarafından işletilmektedir:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, Amerika Birleşik Devletleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Gizlilikle ilgili soru, talep veya şikayetleriniz için:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Uygulanabilir veri koruma mevzuatı bakımından, GDPR ve gerektiğinde 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında SellerHill; SellerHill hesabınız, aboneliğiniz, internet sitesi kullanımınız ve destek taleplerinizle ilgili kişisel veriler bakımından veri sorumlusu olarak hareket edebilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in üçüncü taraf pazaryeri entegrasyonları kapsamında sizin adınıza gerçekleştirdiği veri işleme faaliyetlerinde tarafların rolleri, işlemenin niteliğine ve amacına göre değişebilir."
+            }
+          ]
+        },
+        {
+          "id": "information-we-collect",
+          "heading": "2. Topladığımız Bilgiler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, Hizmetleri işletmek, güvenliğini sağlamak, sürdürmek ve geliştirmek için makul ölçüde gerekli olan bilgileri toplar."
+            },
+            {
+              "type": "h",
+              "text": "2.1. Hesap Bilgileri"
+            },
+            {
+              "type": "p",
+              "text": "Hesap oluşturduğunuzda aşağıdaki bilgiler toplanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "E-posta adresi",
+                "Şifre veya kimlik doğrulama bilgileri",
+                "Ad ve soyad, verilmesi halinde",
+                "Ülke",
+                "Şehir, eyalet/il ve posta kodu, verilmesi halinde",
+                "Telefon numarası, unvan, biyografi ve profil görseli, verilmesi halinde",
+                "Hesap durumu",
+                "Dil tercihi",
+                "Hesap oluşturma ve doğrulama bilgileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgiler hesabınızı oluşturmak ve yönetmek, kimlik doğrulamak, Hizmetleri sağlamak, sizinle iletişim kurmak ve platformun güvenliğini korumak amacıyla kullanılır."
+            },
+            {
+              "type": "h",
+              "text": "2.2. Bağlanan eBay Hesabı Bilgileri"
+            },
+            {
+              "type": "p",
+              "text": "eBay hesabınızı eBay'in yetkilendirme sistemi aracılığıyla SellerHill'e bağladığınızda, yetkilendirme ve eBay API'leri aracılığıyla sağlanan bilgileri işleyebiliriz."
+            },
+            {
+              "type": "p",
+              "text": "Verilen yetkilere bağlı olarak bunlar şunları içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay satıcı/hesap kimlikleri",
+                "Mağaza adı",
+                "Pazaryeri bilgileri",
+                "İlan bilgileri",
+                "Stok bilgileri",
+                "Ürün bilgileri",
+                "Siparişler",
+                "Siparişlerle ilişkili alıcı bilgileri",
+                "Gönderim bilgileri",
+                "Takip bilgileri",
+                "Satış ve işlem bilgileri",
+                "eBay iş politikaları",
+                "Yetkili API'ler üzerinden sağlanan analitik bilgiler",
+                "OAuth erişim ve yenileme tokenları"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "OAuth tokenları, sektör standardı kimlik doğrulamalı şifreleme yöntemleriyle şifrelenerek saklanır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, verilen yetkileri yalnızca bağlantılı özellikleri sağlamak amacıyla kullanır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in eBay hesabınıza erişim yetkisini ilgili eBay hesap ayarlarından iptal edebilirsiniz."
+            }
+          ]
+        },
+        {
+          "id": "amazon",
+          "heading": "3. Amazon Hesabı Bilgileri",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, isteğe bağlı otomatik sipariş karşılama özelliği kapsamında Amazon hesabınıza sizin adınıza erişebilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu özelliği etkinleştirmeniz halinde, yetkilendirdiğiniz işlemleri gerçekleştirmek için gerekli olan aşağıdaki bilgiler işlenebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon hesap bilgileri",
+                "Amazon giriş bilgileri",
+                "İki faktörlü kimlik doğrulama bilgileri",
+                "Amazon sipariş geçmişi",
+                "Ürün ve sipariş bilgileri",
+                "Teslimat adresleri",
+                "Ödeme yöntemi seçim bilgileri",
+                "Sipariş durumu",
+                "Takip bilgileri",
+                "Ödeme/checkout bilgileri",
+                "Tarayıcı oturum bilgileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Amazon şifreleri ve iki faktörlü doğrulama secret bilgileri şifrelenerek saklanır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, yetkilendirdiğiniz otomasyon işlemlerini gerçekleştirmek amacıyla Amazon hesabıyla ilişkili şifrelenmiş tarayıcı oturum bilgilerini tutabilir."
+            },
+            {
+              "type": "p",
+              "text": "Otomatik satın alma işleminin doğru şekilde gerçekleştirildiğini doğrulamak amacıyla SellerHill, ödeme sürecine ait ekran görüntüleri alabilir. Bu ekran görüntüleri ilgili siparişe ait alıcı adını ve teslimat adresini içerebilir ve Veri Saklama Süreleri bölümünde belirtilen sınırlı süre boyunca saklanır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, Amazon'u SellerHill üzerinden kullanmanız nedeniyle tam kredi kartı numaranızı almaz veya saklamaz. Ödeme bilgileri ilgili ödeme sağlayıcısının ve pazaryerinin sistemlerine tabidir."
+            },
+            {
+              "type": "p",
+              "text": "Amazon kullanımınızın Amazon'un geçerli şartlarına, politikalarına ve kurallarına uygun olmasından siz sorumlusunuz."
+            },
+            {
+              "type": "p",
+              "text": "Amazon hesabınızı istediğiniz zaman SellerHill'den ayırabilir veya otomasyonu devre dışı bırakabilirsiniz."
+            }
+          ]
+        },
+        {
+          "id": "orders-buyers",
+          "heading": "4. Sipariş ve Alıcı Bilgileri",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill bir eBay siparişini senkronize ettiğinde, alıcıya ilişkin kişisel bilgileri işleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "eBay tarafından sağlanan bilgilere bağlı olarak bunlar şunları içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay kullanıcı adı",
+                "Alıcının adı",
+                "E-posta adresi",
+                "Telefon numarası",
+                "Teslimat adresi",
+                "Şehir",
+                "Eyalet/il",
+                "Posta kodu",
+                "Ülke",
+                "eBay sipariş numarası",
+                "Sipariş bilgileri",
+                "Kargo ve takip bilgileri",
+                "Siparişe ilişkin işlem ve finansal bilgiler"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgiler esas olarak aşağıdaki amaçlarla işlenir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "siparişleri senkronize etmek;",
+                "siparişlerin karşılanmasını sağlamak;",
+                "gerekli teslimat bilgilerini iletmek;",
+                "takip bilgilerini yüklemek;",
+                "yetkilendirilmiş alıcı mesajlarını göndermek;",
+                "işlem ve kâr hesaplamaları yapmak;",
+                "Hizmetleri işletmek için gerekli kayıtları tutmak;",
+                "dolandırıcılık ve kötüye kullanımı önlemek; ve",
+                "yasal yükümlülüklere uymak."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "İlgili özelliği etkinleştirmiş olmanız halinde, yetkilendirilmiş bir satın alma işlemini tamamlamak amacıyla alıcının teslimat bilgileri Amazon'a iletilebilir; sipariş ve takip bilgileri ise aşağıda açıklandığı şekilde bir takip dönüştürme sağlayıcısına iletilebilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, alıcı bilgilerini ilgisiz reklam faaliyetleri için kullanmaz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'e alıcı bilgilerini sağlamak ve SellerHill üzerinden işlemek için gerekli hukuki dayanağa ve yetkiye sahip olmak sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "user-content",
+          "heading": "5. İlan ve Kullanıcı İçeriği",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'e aşağıdaki gibi bilgiler ve içerikler sağlayabilirsiniz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ASIN",
+                "Ürün başlığı",
+                "Ürün açıklaması",
+                "Ürün özellikleri",
+                "Marka bilgisi",
+                "eBay ilan bilgileri",
+                "HTML açıklamaları",
+                "Özel HTML şablonları",
+                "Fiyatlandırma kuralları",
+                "Stok ayarları",
+                "Ayar Grupları",
+                "Kara liste bilgileri",
+                "İlan eşleştirmeleri",
+                "Ürün tanımlayıcıları",
+                "Hizmetlere girdiğiniz diğer bilgiler"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgiler talep ettiğiniz hizmetleri sağlamak amacıyla işlenir."
+            },
+            {
+              "type": "p",
+              "text": "Sahibi olduğunuz içerik üzerindeki haklarınız size aittir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'e; içeriklerinizi yalnızca Hizmetleri sağlamak, sürdürmek, güvenliğini sağlamak ve geliştirmek amacıyla barındırmak, çoğaltmak, işlemek, iletmek, teknik olarak gerekli olduğu ölçüde değiştirmek ve başka şekilde kullanmak üzere sınırlı, münhasır olmayan, dünya çapında ve telifsiz bir lisans verirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, Hizmetleri kullanmanız nedeniyle ilan içeriklerinizin mülkiyetini elde etmez."
+            },
+            {
+              "type": "p",
+              "text": "Üçüncü taraf kaynaklardan elde edilen pazaryeri katalog verileri, örneğin belirli bir ürün tanımlayıcısına ait ürün özellikleri, Hizmetler genelinde önbelleğe alınabilir ve yeniden kullanılabilir. Bu tür katalog verileri sizin kişisel veriniz değildir ve mülkiyeti size ait kullanıcı içeriği sayılmaz."
+            }
+          ]
+        },
+        {
+          "id": "ai",
+          "heading": "6. Yapay Zeka İşleme",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, ilanlarla ilgili bazı özelliklerde yapay zeka teknolojilerinden yararlanır."
+            },
+            {
+              "type": "p",
+              "text": "Bu Gizlilik Politikası tarihi itibarıyla yapay zeka özellikleri aşağıdaki işlevlerde kullanılabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay ilan başlığı optimizasyonu;",
+                "eBay açıklaması oluşturma veya yeniden yazma; ve",
+                "belirli ürün özelliklerinin seçilmesine yardımcı olma."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Yapay zeka özellikleri kullanıldığında SellerHill, ilgili ilan/ürün bilgilerini yapay zeka hizmet sağlayıcısına gönderebilir."
+            },
+            {
+              "type": "p",
+              "text": "Özelliğe bağlı olarak bu bilgiler şunları içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Ürün başlığı",
+                "Ürün açıklaması",
+                "Marka",
+                "Ürün özellikleri",
+                "Kategori bilgileri",
+                "eBay ürün özelliği (item specific) bilgileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, ilan oluşturma amacıyla aşağıdaki bilgileri yapay zeka sağlayıcısına göndermeyi amaçlamaz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon şifreleri",
+                "eBay OAuth tokenları",
+                "Alıcı ödeme bilgileri",
+                "Alıcı şifreleri",
+                "Amazon iki faktörlü doğrulama secret bilgileri",
+                "İlanla ilgisi olmayan alıcı kişisel bilgileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu Gizlilik Politikası tarihi itibarıyla SellerHill bu işlevlerde Google'ın üretken yapay zeka hizmetlerini kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yapay zeka tarafından oluşturulan içerikler hata içerebilir. İlan içeriğini yayımlanmadan önce veya sonra incelemek ve ilgili pazaryeri kurallarına uygunluğunu sağlamak sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "product-data",
+          "heading": "7. Ürün Verileri ve Üçüncü Taraf Hizmetler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill; ürün verileri, fiyat, stok durumu ve ilgili özellikleri sağlamak amacıyla Keepa dahil olmak üzere üçüncü taraf hizmetlerden ürün bilgileri elde edebilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill ayrıca aşağıdaki amaçlarla üçüncü taraf hizmetlerden yararlanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Pazaryeri entegrasyonları",
+                "Takip numarası dönüştürme",
+                "Yapay zeka işlemleri",
+                "Ödeme işlemleri",
+                "Müşteri desteği",
+                "Kimlik doğrulama",
+                "Altyapı ve barındırma",
+                "Güvenlik",
+                "E-posta gönderimi",
+                "Hata izleme ve operasyonel kayıtlar"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Üçüncü taraf hizmetler, bilgileri kendi gizlilik politikalarına ve şartlarına göre işleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Gerekli olduğu durumlarda SellerHill, kişisel verileri SellerHill adına işleyen hizmet sağlayıcılarla uygun sözleşmesel düzenlemeler yapacaktır."
+            }
+          ]
+        },
+        {
+          "id": "tracking-conversion",
+          "heading": "8. Takip Numarası Dönüştürme",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, desteklenen sipariş karşılama süreçlerinde takip bilgilerini dönüştürmek veya işlemek amacıyla üçüncü taraf takip dönüştürme hizmetlerinden yararlanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Örneğin, takip dönüştürme özelliğini talep ettiğinizde SellerHill, dönüştürmeyi gerçekleştirmek için gerekli olan aşağıdaki bilgileri iletebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Takip numarası",
+                "Takip bilgileri",
+                "Amazon sipariş bilgileri",
+                "Teslimat bilgileri",
+                "İlgili sipariş verileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu Gizlilik Politikası tarihi itibarıyla SellerHill, takip dönüştürme işlevlerinde Aquiline kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgilerin işlenmesi, yalnızca talep edilen hizmetin sağlanmasıyla sınırlıdır."
+            }
+          ]
+        },
+        {
+          "id": "payments",
+          "heading": "9. Ödeme Bilgileri",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, ödeme işlemleri ve abonelik faturalandırması için Stripe kullanmaktadır."
+            },
+            {
+              "type": "p",
+              "text": "Ücretli bir SellerHill planına abone olduğunuzda ödeme bilgileriniz, doğrudan SellerHill'in uygulama altyapısına değil, Stripe'ın ödeme ortamına girilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill tam kredi kartı numaranızı saklamaz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, aşağıdaki amaçlar için gerekli olan sınırlı faturalandırma bilgilerini ve ödeme meta verilerini alabilir ve saklayabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "aboneliğinizi tanımlamak;",
+                "abonelik durumunu belirlemek;",
+                "plan yükseltme ve düşürme işlemlerini gerçekleştirmek;",
+                "faturalandırmayı yönetmek;",
+                "geçerli vergileri hesaplamak;",
+                "uygulanabilir olduğu durumlarda iade yapmak;",
+                "dolandırıcılığı önlemek;",
+                "finansal kayıtları tutmak; ve",
+                "müşteri desteği sağlamak."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Stripe, ödeme bilgilerini kendi gizlilik politikası ve şartlarına göre işler."
+            }
+          ]
+        },
+        {
+          "id": "support",
+          "heading": "10. Müşteri Desteği",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, canlı müşteri desteği sağlamak amacıyla Tawk.to dahil olmak üzere üçüncü taraf müşteri destek araçlarını kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Müşteri desteği aracılığıyla SellerHill ile iletişim kurduğunuzda aşağıdaki bilgiler işlenebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Ad",
+                "E-posta adresi",
+                "Hesap bilgileri",
+                "Mesajlar",
+                "Destek geçmişi",
+                "Talebinizi çözmek için gerekli teknik bilgiler"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Destek sağlayıcıları, bilgileri kendi gizlilik politikalarına göre işleyebilir."
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "heading": "11. E-posta İletişimleri",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill hâlihazırda aşağıdaki gibi işlem ve hizmet e-postaları göndermektedir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "E-posta doğrulama",
+                "Şifre sıfırlama",
+                "Hoş geldiniz ve hesap iletişimleri",
+                "Zorunlu hesap bildirimleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill şu anda e-posta adresinizi ilgisiz üçüncü taraf reklamları için kullanmamaktadır."
+            },
+            {
+              "type": "p",
+              "text": "Gelecekte pazarlama iletişimleri başlatılması halinde, mevzuatın gerektirdiği ölçüde uygun onay ve abonelikten çıkma mekanizmaları sağlanacaktır."
+            }
+          ]
+        },
+        {
+          "id": "automatic",
+          "heading": "12. Otomatik Olarak Toplanan Bilgiler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'i kullandığınızda aşağıdaki teknik bilgiler otomatik olarak toplanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "IP adresi",
+                "Tarayıcı türü",
+                "İşletim sistemi",
+                "Cihaz bilgileri",
+                "Dil tercihi",
+                "Giriş ve kimlik doğrulama kayıtları",
+                "Erişilen uygulama bölümleri",
+                "Hata bilgileri",
+                "Güvenlik ve denetim kayıtları",
+                "Kullanım bilgileri",
+                "API aktiviteleri",
+                "Performans bilgileri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgileri aşağıdaki amaçlarla kullanırız:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Hizmetleri işletmek;",
+                "güvenliği sağlamak;",
+                "kötüye kullanımı önlemek;",
+                "teknik sorunları teşhis etmek;",
+                "performansı geliştirmek;",
+                "güvenilirliği sürdürmek;",
+                "yetkisiz erişimi tespit etmek; ve",
+                "yasal yükümlülüklere uymak."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cookies",
+          "heading": "13. Çerezler ve Benzer Teknolojiler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill çerezler ve benzer teknolojiler kullanır."
+            },
+            {
+              "type": "h",
+              "text": "13.1. Zorunlu Teknolojiler"
+            },
+            {
+              "type": "p",
+              "text": "Bazı çerezler veya benzer teknolojiler Hizmetlerin çalışması için zorunludur."
+            },
+            {
+              "type": "p",
+              "text": "Bunlar aşağıdaki amaçlarla kullanılan teknolojileri içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "kimlik doğrulama;",
+                "oturum yönetimi;",
+                "güvenlik;",
+                "dolandırıcılığın önlenmesi; ve",
+                "temel uygulama işlevleri."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Örneğin SellerHill, kimliği doğrulanmış bir oturumu sürdürmek amacıyla yalnızca HTTP üzerinden erişilebilen (HTTP-only) bir oturum yenileme çerezi kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu teknolojiler, Hizmetlerin işleyişi etkilenmeden devre dışı bırakılamayabilir."
+            },
+            {
+              "type": "h",
+              "text": "13.2. Zorunlu Olmayan Teknolojiler"
+            },
+            {
+              "type": "p",
+              "text": "SellerHill aşağıdaki gibi amaçlarla zorunlu olmayan üçüncü taraf teknolojileri kullanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "müşteri desteği;",
+                "internet sitesi işlevleri;",
+                "gelecekte eklenmesi halinde analitik; veya",
+                "diğer isteğe bağlı özellikler."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "İnternet sitesi ayrıca arayüzü görüntülemek amacıyla üçüncü taraf bir yazı tipi sağlayıcısından web yazı tipleri yükler."
+            },
+            {
+              "type": "p",
+              "text": "Yasal olarak gerekli olduğu durumlarda, zorunlu olmayan çerezler ve benzer teknolojiler yalnızca uygun onay alındıktan sonra etkinleştirilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill şu anda Meta Pixel veya Google Ads takip pikselleri gibi reklam piksellerini kullanmamaktadır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill şu anda Google Analytics, Mixpanel, PostHog veya benzeri davranışsal analiz platformlarını kullanmamaktadır."
+            }
+          ]
+        },
+        {
+          "id": "how-we-use",
+          "heading": "14. Kişisel Verileri Kullanma Amaçlarımız",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill kişisel verileri aşağıdaki amaçlarla kullanabilir:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "Hizmetleri sağlamak ve işletmek;",
+                "Hesap oluşturmak ve yönetmek;",
+                "Kullanıcı kimliğini doğrulamak;",
+                "Üçüncü taraf pazaryeri hesaplarını bağlamak;",
+                "Otomatik ilan ve stok işlemlerini gerçekleştirmek;",
+                "Siparişleri senkronize etmek;",
+                "Yetkilendirilmiş sipariş karşılama işlemlerini kolaylaştırmak;",
+                "Takip bilgilerini yüklemek;",
+                "Yetkilendirilmiş alıcı mesajlarını göndermek;",
+                "Yapay zeka destekli ilan özelliklerini sağlamak;",
+                "Ödeme ve abonelik işlemlerini gerçekleştirmek;",
+                "Müşteri desteği sağlamak;",
+                "Önemli hizmet bildirimleri iletmek;",
+                "Dolandırıcılık ve kötüye kullanımı tespit etmek;",
+                "Hizmetlerin güvenliğini korumak;",
+                "Sorun gidermek ve hata ayıklamak;",
+                "Güvenilirliği ve performansı ölçmek ve geliştirmek;",
+                "Yürürlükteki mevzuata uymak;",
+                "Yetkili makamların hukuka uygun taleplerine cevap vermek;",
+                "Kullanım Koşullarımızı uygulamak; ve",
+                "SellerHill'in, kullanıcılarımızın ve diğer kişilerin haklarını, mülkiyetini ve güvenliğini korumak."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "legal-bases",
+          "heading": "15. Hukuki İşleme Dayanakları",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "GDPR'ın uygulandığı durumlarda SellerHill, kişisel verileri aşağıdaki hukuki dayanaklardan biri veya birkaçı kapsamında işleyebilir:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Sözleşme",
+                  "text": "Talep ettiğiniz Hizmetleri sağlamak veya sizinle yaptığımız sözleşmeyi ifa etmek için gerekli olan işleme faaliyetleri."
+                },
+                {
+                  "term": "Meşru Menfaat",
+                  "text": "Güvenlik, dolandırıcılığın önlenmesi, hizmet geliştirme, teknik yönetim, müşteri desteği, sözleşme şartlarının uygulanması ve işimizin korunması gibi meşru ticari menfaatler için gerekli olan işleme faaliyetleri. Bu menfaatleri, ilgili gizlilik haklarıyla dengeleriz."
+                },
+                {
+                  "term": "Yasal Yükümlülük",
+                  "text": "Yürürlükteki hukuki, vergisel, muhasebesel, düzenleyici veya idari gerekliliklere uymak için gerekli olan işleme faaliyetleri."
+                },
+                {
+                  "term": "Açık Rıza",
+                  "text": "Gerekli olduğu durumlarda SellerHill, belirli işleme faaliyetleri için (zorunlu olmayan bazı çerezler veya pazarlama iletişimleri dahil) açık rızanıza dayanacaktır."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Uygulanabilir olduğu ölçüde rızanızı geri çekebilirsiniz. Rızanın geri çekilmesi, geri çekilmeden önce hukuka uygun olarak gerçekleştirilen işleme faaliyetlerini etkilemez."
+            }
+          ]
+        },
+        {
+          "id": "sharing",
+          "heading": "16. Kişisel Verilerin Paylaşılması",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill kişisel verileri aşağıdaki alıcı kategorileriyle paylaşabilir:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Pazaryeri Sağlayıcıları",
+                  "text": "Bu hizmetleri bağladığınızda veya kullandığınızda eBay ve Amazon gibi sağlayıcılar."
+                },
+                {
+                  "term": "Hizmet Sağlayıcılar",
+                  "text": "SellerHill'i işletmek için gerekli olan barındırma, altyapı, güvenlik, e-posta, müşteri desteği, yapay zeka, ödeme, takip dönüştürme, veritabanı veya diğer hizmetleri sunan şirketler."
+                },
+                {
+                  "term": "Ödeme Sağlayıcıları",
+                  "text": "Stripe dahil."
+                },
+                {
+                  "term": "Yapay Zeka Sağlayıcıları",
+                  "text": "Yapay zeka özelliklerinin kullanıldığı durumlarda Google dahil."
+                },
+                {
+                  "term": "Takip Sağlayıcıları",
+                  "text": "Takip dönüştürme özelliğinin kullanıldığı durumlarda Aquiline dahil."
+                },
+                {
+                  "term": "Yasal ve İdari Makamlar",
+                  "text": "Mevzuat, mahkeme kararı veya yasal süreç gereği ya da hakların, güvenliğin veya mülkiyetin korunması amacıyla açıklamanın zorunlu olduğu durumlarda."
+                },
+                {
+                  "term": "Şirket Devirleri",
+                  "text": "SellerHill'in birleşme, devralma, finansman, yeniden yapılanma, varlık satışı veya benzeri bir işleme taraf olması halinde, kişisel veriler yürürlükteki mevzuata tabi olarak bu işlemin bir parçası olarak aktarılabilir."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, yürürlükteki gizlilik mevzuatında tanımlandığı şekliyle kişisel verilerinizi satmaz veya paylaşmaz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, alıcı bilgilerini reklam amacıyla ilgisiz reklam verenlerle paylaşmaz."
+            }
+          ]
+        },
+        {
+          "id": "transfers",
+          "heading": "17. Uluslararası Veri Aktarımları",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, Amerika Birleşik Devletleri merkezli bir şirket tarafından işletilmektedir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill dünya çapında kullanıcılara hizmet verdiğinden ve farklı ülkelerde bulunan hizmet sağlayıcılardan yararlandığından, kişisel veriler ikamet ettiğiniz ülke dışındaki ülkelere aktarılabilir, buralarda saklanabilir veya işlenebilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu ülkeler, Amerika Birleşik Devletleri'ni ve SellerHill'in veya hizmet sağlayıcılarının faaliyet gösterdiği diğer ülkeleri kapsayabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yürürlükteki mevzuatın gerektirdiği durumlarda SellerHill, uluslararası aktarımlar için sözleşmesel güvenceler, yeterlilik mekanizmaları veya hukuken tanınan diğer aktarım mekanizmalarını içerebilecek uygun güvenceleri kullanacaktır."
+            }
+          ]
+        },
+        {
+          "id": "security",
+          "heading": "18. Veri Güvenliği",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, kişisel verileri yetkisiz erişime, değiştirilmeye, ifşaya, kayba veya imhaya karşı korumak amacıyla makul teknik ve idari tedbirler uygular."
+            },
+            {
+              "type": "p",
+              "text": "Bilginin türüne bağlı olarak güvenlik tedbirleri şunları içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Saklama sırasında şifreleme;",
+                "Belirli hassas kimlik bilgileri ve tokenlar için AES-256-GCM şifreleme;",
+                "İletim sırasında HTTPS/TLS şifreleme;",
+                "Erişim kontrolleri;",
+                "Kimlik doğrulama kontrolleri;",
+                "Güvenlik kayıtları;",
+                "Denetim kayıtları;",
+                "Otomatik satın alma işlemleri için harcama limitleri;",
+                "Operasyonel izleme;",
+                "Hassas bilgilere sınırlı erişim;",
+                "Güvenli altyapı uygulamaları."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "İnternet üzerinden çalışan hiçbir hizmet mutlak güvenlik garantisi veremez."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill giriş bilgilerinizin gizliliğini korumak ve bağlı pazaryeri hesaplarınıza erişimi güvence altına almak sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "retention",
+          "heading": "19. Veri Saklama Süreleri",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill kişisel verileri, mevzuat daha uzun bir süre gerektirmedikçe veya buna izin vermedikçe, yalnızca bu Gizlilik Politikası'nda açıklanan amaçlar için makul ölçüde gerekli olduğu süre boyunca saklar."
+            },
+            {
+              "type": "p",
+              "text": "Öngörülen saklama uygulamalarımız şunlardır:"
+            },
+            {
+              "type": "dl",
+              "items": [
+                {
+                  "term": "Hesap Bilgileri",
+                  "text": "Hesabınız aktif olduğu sürece ve hesabın kapatılmasından sonra güvenlik, dolandırıcılığın önlenmesi, hukuki ve operasyonel amaçlarla makul bir süre boyunca saklanır."
+                },
+                {
+                  "term": "Sipariş ve Alıcı Bilgileri",
+                  "text": "Hizmetler kârlılık hesaplaması yaptığı ve uyuşmazlık çözümünü desteklediği için, sipariş geçmişiniz boyunca hesabınız aktif olduğu sürece saklanır. Hesabın kapatılması veya silme talebi sonrasında sipariş ve alıcı bilgileri; hukuki, muhasebesel, vergisel, dolandırıcılığın önlenmesi ve uyuşmazlık çözümü gereklilikleri saklı kalmak kaydıyla, teknik ve hukuki olarak mümkün olduğu ölçüde silinir veya anonim hale getirilir."
+                },
+                {
+                  "term": "Finansal ve Faturalandırma Kayıtları",
+                  "text": "Yürürlükteki vergi, muhasebe, finans ve hukuk gerekliliklerine uymak için gerekli olan süre boyunca saklanabilir."
+                },
+                {
+                  "term": "Güvenlik ve Denetim Kayıtları",
+                  "text": "Güvenlik soruşturmaları, hukuki talepler veya uyum gereklilikleri daha uzun bir süre gerektirmedikçe genel olarak 24 aya kadar saklanır."
+                },
+                {
+                  "term": "Alıcı Mesaj Kayıtları",
+                  "text": "Hukuki veya operasyonel nedenler daha uzun bir süre gerektirmedikçe genel olarak yaklaşık 13 aya kadar saklanır."
+                },
+                {
+                  "term": "Otomatik Satın Alma Kanıtları",
+                  "text": "Otomatik ödeme süreçlerinde oluşturulan ekran görüntüleri alıcı adlarını ve teslimat adreslerini içerebilir ve operasyonel doğrulama ile uyuşmazlık çözümü amacıyla genel olarak yaklaşık 7 gün saklanır."
+                },
+                {
+                  "term": "Amazon Tarayıcı Oturumları",
+                  "text": "Aktif olmayan Amazon hesaplarıyla ilişkili kalıcı tarayıcı oturum bilgileri, güvenlik, hukuki veya operasyonel gereklilikler saklı kalmak kaydıyla yaklaşık 90 günlük hareketsizlik sonrasında silinebilir."
+                },
+                {
+                  "term": "Dolandırıcılık Önleme Kayıtları",
+                  "text": "Ücretsiz deneme ve benzeri tekliflerin tekrar tekrar kötüye kullanılmasını önlemek amacıyla SellerHill, hangi pazaryeri mağaza kimliklerinin daha önce deneme hakkı kullandığına dair sınırlı bir kayıt tutar. Bu kayıt süreklilik arz eden şekilde saklanır ve hesap kapatıldıktan sonra da varlığını sürdürebilir."
+                },
+                {
+                  "term": "Yedekler",
+                  "text": "Silinen bilgiler, yedekleme prosedürlerimize göre güvenli şekilde üzerine yazılana veya süresi dolana kadar şifrelenmiş yedeklerde geçici olarak kalabilir."
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Saklama süreleri; mevzuata uymak, uyuşmazlıkları çözmek, dolandırıcılığı önlemek, sözleşmeleri uygulamak veya Hizmetleri korumak için gerekli olduğu durumlarda değiştirilebilir."
+            }
+          ]
+        },
+        {
+          "id": "deletion",
+          "heading": "20. Hesap Silme",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill hesabınızın silinmesini aşağıdaki adrese başvurarak talep edebilirsiniz:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Teknik ve hukuki olarak mümkün olduğu ölçüde SellerHill, hesapla ilişkili kişisel verileri siler veya anonim hale getirir."
+            },
+            {
+              "type": "p",
+              "text": "Aşağıdaki amaçlar için gerekli olduğu durumlarda bazı bilgiler saklanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "yasal yükümlülükler;",
+                "vergi veya muhasebe gereklilikleri;",
+                "dolandırıcılığın önlenmesi;",
+                "güvenlik;",
+                "uyuşmazlık çözümü;",
+                "sözleşmelerin uygulanması;",
+                "hukuki taleplerin oluşturulması, kullanılması veya savunulması."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Bir hesabın silinmesi, SellerHill'in hukuken saklamakla yükümlü olduğu bilgileri otomatik olarak silmez."
+            }
+          ]
+        },
+        {
+          "id": "rights",
+          "heading": "21. Gizlilik Haklarınız",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bulunduğunuz yere ve yürürlükteki mevzuata bağlı olarak aşağıdaki haklara sahip olabilirsiniz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Kişisel verilere erişme hakkı;",
+                "Yanlış bilgilerin düzeltilmesini isteme hakkı;",
+                "Silinmesini talep etme hakkı;",
+                "İşlemenin kısıtlanmasını isteme hakkı;",
+                "Belirli işleme faaliyetlerine itiraz etme hakkı;",
+                "Veri taşınabilirliği hakkı;",
+                "Rızayı geri çekme hakkı;",
+                "Denetim makamına şikayette bulunma hakkı;",
+                "Uluslararası aktarımlar hakkında bilgi talep etme hakkı;",
+                "Yürürlükteki gizlilik mevzuatının tanıdığı diğer haklar."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Geçerli haklarınızı kullanmak için:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Bazı talepleri tamamlamadan önce kimliğinizi doğrulamamız gerekebilir."
+            }
+          ]
+        },
+        {
+          "id": "eu",
+          "heading": "22. Avrupa Birliği / AEA / Birleşik Krallık",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "GDPR veya büyük ölçüde benzer bir veri koruma mevzuatı size uygulanıyorsa, yukarıda açıklanan hakları kullanabilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in veri sorumlusu olarak hareket ettiği durumlarda kişisel verilerinizle ilgili olarak doğrudan bize başvurabilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "Ayrıca ülkenizdeki ilgili veri koruma denetim makamına şikayette bulunma hakkınız olabilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in kişisel verileri bir kurumsal müşteri adına işlediği durumlarda, işlemenin amaçlarını ve hukuki dayanağını belirlemekten o müşteri sorumlu olmaya devam edebilir."
+            }
+          ]
+        },
+        {
+          "id": "kvkk",
+          "heading": "23. Türkiye — KVKK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uygulandığı ölçüde SellerHill, kişisel verileri bu Gizlilik Politikası'nda belirtilen kapsam ve amaçlarla işleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Koşullara bağlı olarak ilgili kişiler aşağıdaki haklara sahip olabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "kişisel verilerinin işlenip işlenmediğini öğrenme;",
+                "işlenmişse buna ilişkin bilgi talep etme;",
+                "işlenme amacını öğrenme;",
+                "verilerin aktarıldığı üçüncü kişileri öğrenme;",
+                "düzeltilmesini isteme;",
+                "hukuken uygun olduğu hallerde silinmesini veya yok edilmesini isteme;",
+                "otomatik işleme sonucunda ortaya çıkan sonuçlara itiraz etme;",
+                "hukuka aykırı işleme nedeniyle zarar oluşması halinde tazminat talep etme."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Talepler aşağıdaki adrese iletilebilir:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Talepler yürürlükteki mevzuata uygun şekilde değerlendirilecektir."
+            }
+          ]
+        },
+        {
+          "id": "us-states",
+          "heading": "24. California ve Diğer ABD Eyalet Gizlilik Hakları",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "İkamet ettiğiniz eyalete ve ilgili eşiklerin karşılanıp karşılanmadığına bağlı olarak, ABD eyalet gizlilik mevzuatı kapsamında ek gizlilik haklarına sahip olabilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "Bu haklar aşağıdakileri içerebilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "kişisel verileri öğrenme veya bunlara erişme;",
+                "kişisel verilerin silinmesini isteme;",
+                "yanlış bilgilerin düzeltilmesini isteme;",
+                "verilerin taşınabilir bir kopyasını edinme;",
+                "uygulanabilir olduğu durumlarda belirli satış, paylaşım, hedefli reklam veya profilleme faaliyetlerinden çıkma;",
+                "uygulanabilir olduğu durumlarda belirli hassas veri işleme faaliyetlerini sınırlama."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, yürürlükteki ABD eyalet gizlilik mevzuatında tanımlandığı şekliyle kişisel verileri satmaz veya paylaşmaz."
+            },
+            {
+              "type": "p",
+              "text": "Yürürlükteki mevzuat size ek haklar tanıyorsa, SellerHill bu hakları geçerli yasal istisnalar saklı kalmak kaydıyla yerine getirecektir."
+            }
+          ]
+        },
+        {
+          "id": "children",
+          "heading": "25. Çocukların Gizliliği",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, 18 yaş ve üzerindeki kullanıcılar için tasarlanmıştır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, 18 yaşından küçük çocuklardan bilerek kişisel veri toplamaz."
+            },
+            {
+              "type": "p",
+              "text": "18 yaşından küçük bir kişinin SellerHill'e kişisel veri sağladığını düşünüyorsanız lütfen bizimle iletişime geçin:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Bu tür bilgileri araştırmak ve uygun olduğu durumlarda silmek için makul adımları atacağız."
+            }
+          ]
+        },
+        {
+          "id": "third-parties",
+          "heading": "26. Üçüncü Taraf Siteler ve Hizmetler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill; eBay, Amazon, Stripe, Google, Aquiline, Tawk.to ve diğer sağlayıcılar dahil olmak üzere üçüncü taraf hizmetlere bağlantılar veya entegrasyonlar içerebilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, üçüncü taraf hizmetlerin gizlilik uygulamalarını kontrol etmez."
+            },
+            {
+              "type": "p",
+              "text": "Üçüncü taraf hizmetleri kullanımınız, ilgili üçüncü tarafın kendi şartlarına ve gizlilik politikasına tabidir."
+            },
+            {
+              "type": "p",
+              "text": "Bağlı hizmetleri kullanmadan önce bu politikaları incelemenizi öneririz."
+            }
+          ]
+        },
+        {
+          "id": "aggregated",
+          "heading": "27. Toplulaştırılmış ve Anonimleştirilmiş Bilgiler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, Hizmetler aracılığıyla toplanan bilgilerden toplulaştırılmış, istatistiksel veya anonimleştirilmiş bilgiler oluşturabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgiler, sizi veya başka bir bireyi tanımlamayacak şekilde işlenir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill bu bilgileri aşağıdaki amaçlarla kullanabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "hizmet performansını anlamak;",
+                "ürün işlevselliğini geliştirmek;",
+                "teknik sorunları tespit etmek;",
+                "otomasyonu iyileştirmek;",
+                "yeni özellikler geliştirmek;",
+                "genel kullanım eğilimlerini anlamak;",
+                "güvenliği geliştirmek; ve",
+                "kurum içi istatistikler oluşturmak."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, toplulaştırılmış veya anonimleştirilmiş bilgileri sizi tanımlamak amacıyla bilerek kullanmaz."
+            }
+          ]
+        },
+        {
+          "id": "changes",
+          "heading": "28. Bu Gizlilik Politikasındaki Değişiklikler",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bu Gizlilik Politikası'nı zaman zaman aşağıdaki nedenlerle güncelleyebiliriz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Hizmetlerdeki değişiklikler;",
+                "teknolojideki değişiklikler;",
+                "üçüncü taraf sağlayıcılardaki değişiklikler;",
+                "yürürlükteki mevzuattaki değişiklikler; veya",
+                "ticari uygulamalarımızdaki değişiklikler."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Önemli değişiklikler yaptığımızda, mevzuatın gerektirdiği ölçüde internet sitesi, Hizmetler, e-posta veya diğer uygun yollarla bildirimde bulunabiliriz."
+            },
+            {
+              "type": "p",
+              "text": "Bu Gizlilik Politikası'nın başındaki “Son Güncelleme” tarihi, politikanın en son ne zaman revize edildiğini gösterir."
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "heading": "29. İletişim",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Gizlilik soruları, talepleri, şikayetleri veya veri hakları başvuruları için:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, Amerika Birleşik Devletleri"
+              ]
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            }
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "documentTitle": "SellerHill Kullanım Koşulları",
+      "lastUpdated": "Son Güncelleme: 7 Eylül 2026",
+      "intro": [
+        "Bu Kullanım Koşulları (“Koşullar”), Wyoming eyaletinde kurulmuş 2B Trading, LLC (“SellerHill”, “biz”, “bize” veya “bizim”) ile SellerHill hizmetlerini kullanan kişi (“siz”, “sizin” veya “Kullanıcı”) arasında hukuken bağlayıcı bir sözleşme oluşturur.",
+        "Bu Koşullar; SellerHill internet sitesi, web uygulaması, yazılımı ve ilgili hizmetlerin (topluca “Hizmetler”) kullanımını düzenler.",
+        "Hesap oluşturarak, SellerHill'e erişerek veya Hizmetleri kullanarak bu Koşulları ve Gizlilik Politikası'nı kabul etmiş olursunuz.",
+        "Bu Koşulları kabul etmiyorsanız Hizmetleri kullanmamalısınız."
+      ],
+      "sections": [
+        {
+          "id": "services",
+          "heading": "1. HİZMETLERİN TANIMI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, e-ticaret satıcılarının üçüncü taraf pazaryerleri ve hizmetlerle gerçekleştirdiği belirli işlemleri otomatikleştirmesine ve yönetmesine yardımcı olan bir SaaS yazılımıdır."
+            },
+            {
+              "type": "p",
+              "text": "Planınıza ve etkinleştirdiğiniz özelliklere bağlı olarak SellerHill:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay satıcı hesaplarını bağlama;",
+                "birden fazla eBay mağazasını yönetme;",
+                "ASIN ve desteklenen veri kaynakları üzerinden ürün bilgisi alma;",
+                "eBay ilanları oluşturma ve yönetme;",
+                "fiyat ve stok güncelleme;",
+                "mevcut ilanları içe aktarma;",
+                "ilan içeriği oluşturma;",
+                "yapay zeka destekli başlık ve açıklama oluşturma;",
+                "item-specific desteği;",
+                "HTML ilan şablonları;",
+                "sipariş senkronizasyonu;",
+                "otomatik sipariş karşılama;",
+                "yetki verilmesi halinde Amazon üzerinden sizin adınıza ürün satın alma;",
+                "eBay'e takip bilgisi yükleme;",
+                "takip numarası dönüştürme;",
+                "yetkilendirilmiş alıcı mesajları gönderme;",
+                "kârlılık hesaplama;",
+                "dashboard ve raporlama;",
+                "Setting Groups, fiyat kuralları, stok tamponları ve şablonlar;",
+                "blacklist ve otomasyon kontrolleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi özellikler sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Her özellik her zaman, her ülkede, her pazaryerinde veya her abonelik planında kullanılabilir olmayabilir."
+            }
+          ]
+        },
+        {
+          "id": "eligibility",
+          "heading": "2. UYGUNLUK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'i kullanabilmek için en az 18 yaşında olmanız gerekir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'i kullanarak:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "18 yaşından büyük olduğunuzu;",
+                "Bu sözleşmeyi yapma hukuki ehliyetine sahip olduğunuzu;",
+                "Verdiğiniz bilgilerin doğru ve güncel olduğunu;",
+                "Hizmetleri yalnızca hukuka uygun amaçlarla kullanacağınızı;",
+                "Yürürlükteki tüm kanunlara ve üçüncü taraf platform kurallarına uyacağınızı"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "beyan etmiş olursunuz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill esas olarak ticari ve profesyonel kullanım için tasarlanmıştır."
+            }
+          ]
+        },
+        {
+          "id": "automation-provider",
+          "heading": "3. SELLERHILL BİR OTOMASYON YAZILIMIDIR",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill bir yazılım ve otomasyon sağlayıcısıdır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay satıcısı;",
+                "Amazon satıcısı;",
+                "pazaryeri;",
+                "ödeme kuruluşu;",
+                "kargo şirketi;",
+                "ürün tedarikçisi;",
+                "dropshipping tedarikçisi;",
+                "vergi danışmanı;",
+                "hukuk danışmanı"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "değildir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill üçüncü taraf platformların politikalarını, sistemlerini, fiyatlarını, stoklarını, API'lerini veya hesap kararlarını kontrol etmez."
+            },
+            {
+              "type": "p",
+              "text": "Bağladığınız hesaplar üzerinden gerçekleştirdiğiniz e-ticaret faaliyetlerinden siz sorumlusunuz."
+            }
+          ]
+        },
+        {
+          "id": "marketplaces",
+          "heading": "4. ÜÇÜNCÜ TARAF PAZARYERLERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill eBay ve Amazon gibi üçüncü taraf platformlarla entegre olabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu platformların kullanımı ilgili platformların kendi kullanım koşullarına, satıcı kurallarına, API şartlarına ve diğer politikalarına tabidir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill kullanımınızın:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay kurallarına;",
+                "Amazon kurallarına;",
+                "API şartlarına;",
+                "ürün kısıtlamalarına;",
+                "fikri mülkiyet kurallarına;",
+                "fiyatlandırma kurallarına;",
+                "kargo gerekliliklerine;",
+                "vergi yükümlülüklerine;",
+                "tüketici hukuku kurallarına"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "uygun olmasını sağlamak sizin sorumluluğunuzdadır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, Hizmetlerin üçüncü taraf platformların tüm kurallarına uygun olacağını garanti etmez."
+            }
+          ]
+        },
+        {
+          "id": "ebay-connection",
+          "heading": "5. EBAY HESABININ BAĞLANMASI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "eBay hesabınızı eBay'in yetkilendirme sistemi aracılığıyla SellerHill'e bağlayabilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "Hesabınızı bağladığınızda, verdiğiniz yetkilere bağlı olarak SellerHill'in belirli işlemleri otomatik gerçekleştirmesine izin vermiş olursunuz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in gerçekleştirebileceği işlemler arasında:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ilan oluşturma;",
+                "ilan güncelleme;",
+                "ilan sonlandırma;",
+                "fiyat değiştirme;",
+                "stok miktarı değiştirme;",
+                "siparişleri okuma;",
+                "siparişlerle ilişkili alıcı bilgilerine erişme;",
+                "takip bilgisi yükleme;",
+                "siparişleri gönderilmiş olarak işaretleme;",
+                "oluşturduğunuz şablonlarla alıcı mesajı gönderme;",
+                "iş politikalarını okuma;",
+                "izin verilen satış analitiklerine erişme"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "bulunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bazı otomatik işlemler her işlem için ayrıca manuel onayınız alınmadan gerçekleştirilebilir."
+            },
+            {
+              "type": "p",
+              "text": "İlgili otomasyon özelliğini etkinleştirdiğinizde bunu kabul etmiş olursunuz."
+            }
+          ]
+        },
+        {
+          "id": "price-stock",
+          "heading": "6. OTOMATİK FİYAT VE STOK GÜNCELLEMELERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill, ayarlarınız doğrultusunda desteklenen pazaryerlerinde fiyat ve stok miktarlarını otomatik olarak güncelleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Şunları kabul edersiniz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "pazaryeri fiyatları değişebilir;",
+                "tedarikçi fiyatları değişebilir;",
+                "stok tükenebilir;",
+                "pazaryeri verileri gecikebilir;",
+                "API verileri eksik veya hatalı olabilir;",
+                "senkronizasyon başarısız olabilir;",
+                "üçüncü taraf API'leri kullanılamaz hale gelebilir."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill fiyat ve stok senkronizasyonunun gerçek zamanlı olduğunu garanti etmez."
+            },
+            {
+              "type": "p",
+              "text": "Fiyat kurallarını, stok tamponlarını ve otomasyon ayarlarını doğru şekilde yapılandırmak sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "auto-purchase",
+          "heading": "7. OTOMATİK AMAZON SATIN ALIMLARI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill otomatik Amazon satın alma özelliği sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu özelliği etkinleştirmeniz halinde, yetkilendirdiğiniz Amazon hesabınıza erişmemize ve yapılandırmalarınıza göre sizin adınıza satın alma işlemleri gerçekleştirmemize açıkça izin vermiş olursunuz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill gerektiğinde:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon hesabınıza giriş yapabilir;",
+                "yetkilendirilmiş kimlik doğrulama bilgilerini kullanabilir;",
+                "ürün ve sipariş bilgilerini okuyabilir;",
+                "ürünleri sepete ekleyebilir;",
+                "teslimat adresi seçebilir;",
+                "Amazon hesabınızda kayıtlı ödeme yöntemlerinden birini seçebilir;",
+                "satın alma işlemini tamamlayabilir;",
+                "sipariş durumunu okuyabilir;",
+                "takip bilgilerini alabilir."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Amazon hesabı, ödeme yöntemleri, teslimat adresleri, ürünler ve satın alma işlemleri üzerindeki sorumluluk size aittir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in harcama limitleri, istenmeyen satın alma riskini azaltmak amacıyla tasarlanmıştır; ancak yanlış, tekrarlanan, yetkisiz veya istenmeyen satın alımları tamamen önleyeceği garanti edilmez."
+            }
+          ]
+        },
+        {
+          "id": "fulfillment-risks",
+          "heading": "8. OTOMATİK SİPARİŞ KARŞILAMA RİSKLERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Otomatik sipariş işlemleri:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Amazon web sitesi değişiklikleri;",
+                "pazaryeri değişiklikleri;",
+                "API değişiklikleri;",
+                "CAPTCHA veya anti-bot sistemleri;",
+                "kimlik doğrulama problemleri;",
+                "iki faktörlü doğrulama sorunları;",
+                "hesap kısıtlamaları;",
+                "ürün stok sorunları;",
+                "fiyat değişiklikleri;",
+                "ödeme problemleri;",
+                "adres problemleri;",
+                "Amazon sipariş iptalleri;",
+                "tarayıcı otomasyonu hataları;",
+                "ağ problemleri;",
+                "altyapı sorunları;",
+                "üçüncü taraf hizmet sorunları"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi nedenlerle başarısız olabilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill her otomatik siparişin başarıyla tamamlanacağını garanti etmez."
+            },
+            {
+              "type": "p",
+              "text": "Siparişleri izlemek ve gerektiğinde müdahale etmek sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "tracking",
+          "heading": "9. TAKİP BİLGİLERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill takip bilgilerini otomatik olarak alabilir ve desteklenen pazaryerlerine yükleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Bazı pazaryeri takip işlemleri geri alınamaz nitelikte olabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yanlış takip numarası, yanlış kargo şirketi, gecikmiş takip bilgisi veya üçüncü taraf kaynaklı hatalar siparişinizi veya hesabınızı etkileyebilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill takip bilgilerinin üçüncü taraf pazaryeri tarafından kabul edileceğini veya doğru şekilde işleneceğini garanti etmez."
+            }
+          ]
+        },
+        {
+          "id": "tracking-conversion",
+          "heading": "10. TAKİP NUMARASI DÖNÜŞTÜRME",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill üçüncü taraf hizmetler aracılığıyla takip numarası dönüştürme hizmeti sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu hizmet:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "sağlayıcı erişilebilirliği;",
+                "kullanım kotaları;",
+                "API sınırlamaları;",
+                "işlem hataları;",
+                "pazaryeri uyumluluğu"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi faktörlere bağlıdır."
+            },
+            {
+              "type": "p",
+              "text": "Her takip numarasının başarıyla dönüştürülebileceği garanti edilmez."
+            }
+          ]
+        },
+        {
+          "id": "buyer-messages",
+          "heading": "11. ALICI MESAJLARI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill otomatik alıcı mesajları için şablon oluşturmanıza izin verebilir."
+            },
+            {
+              "type": "p",
+              "text": "Ayarlarınıza bağlı olarak:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "sipariş alındı;",
+                "kargoya verildi;",
+                "teslim edildi;",
+                "geri bildirim talebi"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi mesajlar gönderilebilir."
+            },
+            {
+              "type": "p",
+              "text": "Mesaj içeriklerinin ve ilgili mevzuat ile pazaryeri kurallarına uygunluğunun sorumluluğu size aittir."
+            }
+          ]
+        },
+        {
+          "id": "ai-content",
+          "heading": "12. YAPAY ZEKA İLE OLUŞTURULAN İÇERİK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill ilan başlığı, açıklaması ve bazı item-specific seçimlerinde yapay zekadan yararlanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yapay zeka çıktıları:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "hata içerebilir;",
+                "yanlış bilgi içerebilir;",
+                "önemli bilgileri atlayabilir;",
+                "uygunsuz ifadeler oluşturabilir;",
+                "pazaryeri kurallarına uymayabilir."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Yapay zeka yalnızca üretkenlik ve otomasyon amacıyla sunulmaktadır."
+            },
+            {
+              "type": "p",
+              "text": "İlan içeriğini incelemek ve onaylamak sizin sorumluluğunuzdadır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill yapay zeka kullanımının satışlarınızı, sıralamanızı, dönüşüm oranınızı veya kârlılığınızı artıracağını garanti etmez."
+            }
+          ]
+        },
+        {
+          "id": "product-data",
+          "heading": "13. ÜRÜN BİLGİLERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill ürün bilgileri için Keepa gibi üçüncü taraf veri sağlayıcılarını kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Üçüncü taraf ürün verilerinin doğruluğu, eksiksizliği veya güncelliği garanti edilmez."
+            },
+            {
+              "type": "p",
+              "text": "Ürün bilgilerini, fiyatı, stok durumunu, ürün kimliklerini, açıklamaları ve diğer bilgileri kontrol etmek sizin sorumluluğunuzdadır."
+            }
+          ]
+        },
+        {
+          "id": "listing-responsibility",
+          "heading": "14. İLANLARDAN KULLANICI SORUMLULUĞU",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill hesabınız üzerinden oluşturulan, içe aktarılan veya yayınlanan tüm ilanlardan siz sorumlusunuz."
+            },
+            {
+              "type": "p",
+              "text": "Bunlara:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ürünün yasallığı;",
+                "telif hakkı;",
+                "marka hakkı;",
+                "ürün açıklamaları;",
+                "ürün görselleri;",
+                "fiyat;",
+                "kargo;",
+                "iade şartları;",
+                "item-specific bilgileri;",
+                "ürün kimlikleri;",
+                "yasaklı ürünler;",
+                "kategori kuralları"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "dahildir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill oluşturulan ilanların eBay, Amazon veya başka bir platformun tüm kurallarına uygun olduğunu garanti etmez."
+            }
+          ]
+        },
+        {
+          "id": "user-content",
+          "heading": "15. KULLANICI İÇERİĞİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'e sağladığınız ve size ait olan ilan içerikleri, şablonlar, başlıklar, açıklamalar ve diğer materyaller üzerindeki mülkiyet hakları size aittir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'e bu içerikleri yalnızca Hizmetleri sağlamak, işletmek, sürdürmek, güvenliğini sağlamak ve geliştirmek için gerekli ölçüde kullanmak üzere sınırlı, münhasır olmayan ve telifsiz bir lisans verirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill içeriklerinizin mülkiyetini elde etmez."
+            },
+            {
+              "type": "p",
+              "text": "İçeriği SellerHill'e sağlama ve SellerHill'in bu içeriği işlemesine izin verme hakkına sahip olduğunuzu garanti edersiniz."
+            }
+          ]
+        },
+        {
+          "id": "aggregated-data",
+          "heading": "16. TOPLULAŞTIRILMIŞ VERİLER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill Hizmetlerin çalışması sonucunda oluşturulan toplulaştırılmış, anonimleştirilmiş veya teknik verileri kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bunlar:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ürün veri önbelleği;",
+                "teknik performans bilgileri;",
+                "başarılı yapılandırma örüntüleri;",
+                "item-specific varsayılanları;",
+                "sistem istatistikleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi verileri içerebilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgiler Hizmetleri işletmek, geliştirmek ve güvenliğini sağlamak amacıyla kullanılabilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill anonimleştirilmiş verileri sizi yeniden tanımlamak amacıyla kullanmaz."
+            }
+          ]
+        },
+        {
+          "id": "account-security",
+          "heading": "17. HESAP GÜVENLİĞİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill hesabınızın güvenliğini korumak sizin sorumluluğunuzdadır."
+            },
+            {
+              "type": "p",
+              "text": "Şüpheli yetkisiz erişim durumlarını SellerHill'e bildirmeniz gerekir."
+            },
+            {
+              "type": "p",
+              "text": "Hesabınız üzerinden gerçekleştirilen işlemlerden, SellerHill'in kendi yetkisiz davranışından kaynaklanmadığı sürece siz sorumlusunuz."
+            }
+          ]
+        },
+        {
+          "id": "credentials",
+          "heading": "18. AMAZON VE EBAY KİMLİK DOĞRULAMA BİLGİLERİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Gerekli olduğu durumlarda SellerHill, marketplace kimlik bilgilerini veya doğrulama bilgilerini şifreli şekilde saklayabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu bilgileri sağladığınızda SellerHill'in bunları yalnızca etkinleştirdiğiniz işlevleri gerçekleştirmek için kullanmasına izin vermiş olursunuz."
+            },
+            {
+              "type": "p",
+              "text": "Üçüncü taraf pazaryerlerinin gelecekte otomatik erişime izin vermeye devam edeceği garanti edilmez."
+            }
+          ]
+        },
+        {
+          "id": "subscriptions",
+          "heading": "19. ABONELİKLER VE PLANLAR",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill farklı limit ve özelliklere sahip abonelik planları sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Geçerli:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "fiyat;",
+                "ilan limiti;",
+                "tracking conversion limiti;",
+                "otomatik sipariş limiti;",
+                "özellikler;",
+                "diğer kullanım limitleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "satın alma veya yenileme sırasında Website üzerinde gösterilen şartlardır."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill planları, limitleri, özellikleri veya fiyatları zaman zaman değiştirebilir."
+            }
+          ]
+        },
+        {
+          "id": "trial",
+          "heading": "20. ÜCRETSİZ DENEME",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill ücretsiz deneme sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Deneme kapsamında sınırlı:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "aktif ilan;",
+                "tracking conversion;",
+                "otomatik sipariş"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "limitleri bulunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Aksi belirtilmedikçe ücretsiz deneme desteklenen eBay mağazası başına bir kez kullanılabilir."
+            },
+            {
+              "type": "p",
+              "text": "Aynı mağazanın yeni hesaplarla tekrar tekrar deneme kullanmasını önlemek için SellerHill deneme uygunluk kaydı tutabilir."
+            },
+            {
+              "type": "p",
+              "text": "Deneme sistemini kötüye kullanan hesaplar askıya alınabilir veya kapatılabilir."
+            }
+          ]
+        },
+        {
+          "id": "billing",
+          "heading": "21. FATURALANDIRMA",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Ücretli abonelikler Stripe üzerinden peşin olarak faturalandırılır."
+            },
+            {
+              "type": "p",
+              "text": "Abone olduğunuzda SellerHill ve ödeme sağlayıcısına geçerli ödeme yönteminizi ücretlendirme yetkisi verirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill tam kredi kartı numaranızı saklamaz."
+            }
+          ]
+        },
+        {
+          "id": "plan-changes",
+          "heading": "22. PLAN YÜKSELTME VE DÜŞÜRME",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Plan yükseltmelerinde gerekli fark tutarı derhal tahsil edilebilir."
+            },
+            {
+              "type": "p",
+              "text": "Ödeme başarısız olursa yükseltme gerçekleşmeyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Plan düşürme işlemleri genel olarak mevcut faturalandırma döneminin sonunda yürürlüğe girer."
+            }
+          ]
+        },
+        {
+          "id": "cancellation",
+          "heading": "23. İPTAL",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Aboneliğinizi mevcut billing yönetim sistemi üzerinden iptal edebilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "Yürürlükteki hukuk veya satın alma sırasında açıkça belirtilen farklı bir hüküm gerektirmedikçe:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "iptal mevcut dönem için otomatik iade hakkı oluşturmaz;",
+                "erişiminiz ödenmiş dönem sonuna kadar devam edebilir;",
+                "abonelik sonraki dönem için yenilenmez."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "failed-payments",
+          "heading": "24. BAŞARISIZ ÖDEMELER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Abonelik ödemesi başarısız olduğunda SellerHill ücretli özelliklere erişiminizi derhal askıya alabilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill bir ek ödeme süresi vermek zorunda değildir."
+            }
+          ]
+        },
+        {
+          "id": "refunds",
+          "heading": "25. İADELER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Yürürlükteki mevzuat aksini gerektirmedikçe abonelik ücretleri ve hizmet dönemi başladıktan sonra yapılan ödemeler genel olarak iade edilmez."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill istisnai durumlarda kendi takdirine bağlı olarak iade veya kredi sağlayabilir."
+            },
+            {
+              "type": "p",
+              "text": "Kanunen vazgeçilemeyen tüketici hakları saklıdır."
+            }
+          ]
+        },
+        {
+          "id": "topups",
+          "heading": "26. TRACKING CONVERSION TOP-UP",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill tek seferlik tracking conversion paketleri sunabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu paketlerin miktarı ve fiyatı satın alma sırasında gösterilir."
+            },
+            {
+              "type": "p",
+              "text": "Aksi belirtilmedikçe:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "tek seferlik satın alımdır;",
+                "abonelik değildir;",
+                "devredilemez;",
+                "nakde çevrilemez;",
+                "kullanılmayan haklar satın alma sırasında belirtilen süre sonunda sona erebilir."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "taxes",
+          "heading": "27. VERGİLER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Fiyatlara açıkça belirtilmediği sürece tüm vergiler dahil olmayabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yasal olarak SellerHill'in toplamakla yükümlü olduğu vergiler dışındaki vergilerden kullanıcı sorumludur."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill Stripe ve ilgili vergi araçlarını kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Fatura adresi ve vergi numarası bilgilerinin doğru verilmesi kullanıcının sorumluluğundadır."
+            }
+          ]
+        },
+        {
+          "id": "prohibited",
+          "heading": "28. YASAKLI KULLANIMLAR",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'i:"
+            },
+            {
+              "type": "ol",
+              "items": [
+                "Kanunları ihlal etmek;",
+                "eBay/Amazon kurallarını ihlal etmek;",
+                "Dolandırıcılık yapmak;",
+                "Ürünleri yanlış tanıtmak;",
+                "Yasadışı ürün satmak;",
+                "Fikri mülkiyet haklarını ihlal etmek;",
+                "Pazaryeri kısıtlamalarını aşmak;",
+                "API'leri kötüye kullanmak;",
+                "SellerHill limitlerini aşmaya çalışmak;",
+                "Ücretsiz deneme sistemini kötüye kullanmak;",
+                "Yazılımı tersine mühendislik yapmak;",
+                "SellerHill işlevlerini kopyalamak;",
+                "Altyapıya zarar vermek;",
+                "Zararlı yazılım göndermek;",
+                "Yetkisiz erişim sağlamaya çalışmak;",
+                "Yetkisiz şekilde erişimi yeniden satmak;",
+                "Altyapıyı aşırı yüklemek;",
+                "Hukuka aykırı içerik göndermek;",
+                "Başka bir kişinin hesabını izinsiz kullanmak;",
+                "SellerHill veya üçüncü kişiler açısından makul olmayan risk oluşturmak"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "amacıyla kullanamazsınız."
+            }
+          ]
+        },
+        {
+          "id": "suspension-risk",
+          "heading": "29. PAZARYERİ SUSPENSION VE HESAP KISITLAMALARI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill kullanmanızın eBay, Amazon, ödeme sağlayıcıları veya diğer üçüncü tarafların hesabınızı askıya almasını, kısıtlamasını veya kapatmasını önleyeceği garanti edilmez."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill herhangi bir anti-suspension veya hesap koruma garantisi vermez."
+            },
+            {
+              "type": "p",
+              "text": "Hesap işlemleri; platform politikaları, ürünler, fiyatlar, performans, kargo, müşteri şikayetleri, fikri mülkiyet şikayetleri, otomatik aktiviteler, API değişiklikleri ve platform güvenlik sistemleri gibi SellerHill'in kontrolü dışındaki faktörlerden etkilenebilir."
+            }
+          ]
+        },
+        {
+          "id": "availability",
+          "heading": "30. HİZMETİN KULLANILABİLİRLİĞİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill güvenilir bir hizmet sunmayı amaçlar ancak kesintisiz veya hatasız çalışmayı garanti etmez."
+            },
+            {
+              "type": "p",
+              "text": "Bakım, altyapı sorunları, API problemleri, hosting sorunları, ağ problemleri, güvenlik olayları, üçüncü taraf kesintileri veya kontrolümüz dışındaki diğer nedenlerle Hizmetler geçici olarak kullanılamayabilir."
+            }
+          ]
+        },
+        {
+          "id": "third-parties",
+          "heading": "31. ÜÇÜNCÜ TARAF HİZMETLER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "eBay;",
+                "Amazon;",
+                "Stripe;",
+                "Google;",
+                "Keepa;",
+                "Aquiline;",
+                "Tawk.to;",
+                "hosting sağlayıcıları;",
+                "altyapı sağlayıcıları"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "gibi üçüncü taraf hizmetlere bağlı olabilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill bu hizmetlerin:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "erişilebilirliğinden;",
+                "doğruluğundan;",
+                "politikalarından;",
+                "fiyatlarından;",
+                "güvenliğinden;",
+                "API değişikliklerinden;",
+                "sona erdirilmesinden"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "sorumlu değildir."
+            }
+          ]
+        },
+        {
+          "id": "ip",
+          "heading": "32. FİKRİ MÜLKİYET",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill yazılımı, Website, arayüz, marka, logo, tasarım, kaynak kodu, veritabanları, dokümantasyon ve diğer SellerHill materyalleri SellerHill'e ait veya lisanslıdır."
+            },
+            {
+              "type": "p",
+              "text": "Bu Koşullar kapsamında size yalnızca Hizmetleri kullanmak için sınırlı bir kullanım hakkı verilir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill yazılımını izinsiz olarak:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "kopyalayamaz;",
+                "değiştiremez;",
+                "dağıtamaz;",
+                "satamaz;",
+                "lisanslayamaz;",
+                "kiralayamaz;",
+                "reverse engineer yapamaz;",
+                "decompile edemez;",
+                "türev eser oluşturamaz;",
+                "ticari olarak sömüremezsiniz."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "feedback",
+          "heading": "33. GERİ BİLDİRİM",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'e gönüllü olarak öneri, fikir veya geri bildirim gönderirseniz SellerHill bunları herhangi bir sınırlama veya ücret ödeme yükümlülüğü olmaksızın kullanabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bu durum size ait temel fikri mülkiyet haklarının devredildiği anlamına gelmez."
+            }
+          ]
+        },
+        {
+          "id": "confidentiality",
+          "heading": "34. GİZLİLİK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Taraflar birbirlerinden gizli bilgiler alabilir."
+            },
+            {
+              "type": "p",
+              "text": "Bilgiyi alan taraf makul güvenlik önlemleri kullanacak ve bu bilgileri yalnızca:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "yetkili personel;",
+                "hizmet sağlayıcılar;",
+                "Hizmetlerin sağlanması;",
+                "yasal zorunluluk"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "çerçevesinde paylaşacaktır."
+            }
+          ]
+        },
+        {
+          "id": "disclaimers",
+          "heading": "35. GARANTİ REDDİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "YASALARIN İZİN VERDİĞİ AZAMİ ÖLÇÜDE HİZMETLER “OLDUĞU GİBİ” VE “MEVCUT OLDUĞU ŞEKİLDE” SUNULUR."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill açık veya zımni olarak:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "ticari elverişlilik;",
+                "belirli bir amaca uygunluk;",
+                "ihlal etmeme;",
+                "doğruluk;",
+                "güvenilirlik;",
+                "erişilebilirlik;",
+                "kesintisiz çalışma"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "garantisi vermez."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Hizmetlerin her zaman çalışacağını;",
+                "marketplace entegrasyonlarının devam edeceğini;",
+                "API'lerin değişmeyeceğini;",
+                "otomatik satın almaların her zaman başarılı olacağını;",
+                "fiyat ve stok bilgilerinin her zaman doğru olacağını;",
+                "tracking'in her zaman kabul edileceğini;",
+                "ilanların marketplace kurallarına uygun olacağını;",
+                "AI çıktılarının doğru olacağını;",
+                "marketplace suspension'ını önleyeceğini;",
+                "Hizmetlerin gelir veya kâr sağlayacağını"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "garanti etmez."
+            }
+          ]
+        },
+        {
+          "id": "no-guarantee",
+          "heading": "36. KÂR VE İŞ SONUCU GARANTİSİ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "satış;",
+                "gelir;",
+                "kâr;",
+                "dönüşüm oranı;",
+                "arama sıralaması;",
+                "hesap büyümesi;",
+                "ürün satışı;",
+                "marketplace onayı;",
+                "tedarikçi stokları;",
+                "hesap ömrü;",
+                "herhangi bir finansal sonuç"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "garantisi vermez."
+            },
+            {
+              "type": "p",
+              "text": "Website veya Hizmetlerde sunulan hesaplama, tahmin ve örnekler yalnızca bilgilendirme amaçlıdır."
+            }
+          ]
+        },
+        {
+          "id": "liability",
+          "heading": "37. SORUMLULUĞUN SINIRLANDIRILMASI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "YASALARIN İZİN VERDİĞİ AZAMİ ÖLÇÜDE SellerHill ve 2B Trading, LLC'nin üyeleri, yöneticileri, çalışanları, yüklenicileri ve hizmet sağlayıcıları aşağıdaki dolaylı veya sonuçsal zararlardan sorumlu tutulamaz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "kâr kaybı;",
+                "gelir kaybı;",
+                "satış kaybı;",
+                "iş kaybı;",
+                "veri kaybı;",
+                "itibar kaybı;",
+                "marketplace hesabı kaybı;",
+                "fırsat kaybı."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Buna:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "marketplace suspension;",
+                "hesap kapatılması;",
+                "ilan silinmesi;",
+                "yanlış fiyat;",
+                "yanlış stok;",
+                "başarısız sipariş;",
+                "mükerrer sipariş;",
+                "tedarikçi fiyat değişikliği;",
+                "tedarikçi stok değişikliği;",
+                "tracking hatası;",
+                "ödeme hatası;",
+                "AI çıktıları;",
+                "üçüncü taraf hizmet arızaları;",
+                "API değişiklikleri;",
+                "otomasyon hataları"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "dahildir."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill'in toplam sorumluluğu, yasaların izin verdiği azami ölçüde:"
+            },
+            {
+              "type": "p",
+              "text": "(a) talebe neden olan olaydan önceki üç (3) ay içerisinde SellerHill'e ödediğiniz toplam ücret veya"
+            },
+            {
+              "type": "p",
+              "text": "(b) 100 ABD doları"
+            },
+            {
+              "type": "p",
+              "text": "tutarından yüksek olanla sınırlıdır."
+            },
+            {
+              "type": "p",
+              "text": "Yasalar uyarınca sınırlandırılamayan sorumluluklar bu hükmün dışındadır."
+            }
+          ]
+        },
+        {
+          "id": "indemnification",
+          "heading": "38. TAZMİNAT",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Aşağıdaki nedenlerden kaynaklanan talepler, zararlar, masraflar ve makul avukatlık ücretlerine karşı SellerHill'i, 2B Trading, LLC'yi ve bunların üyelerini, yöneticilerini, çalışanlarını ve hizmet sağlayıcılarını savunmayı, tazmin etmeyi ve zarar görmemelerini sağlamayı kabul edersiniz:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Hizmetleri kullanımınız;",
+                "bu Koşulları ihlal etmeniz;",
+                "üçüncü taraf platform kurallarını ihlal etmeniz;",
+                "ilanlarınız;",
+                "ürünleriniz;",
+                "müşterilerinizle ilişkileriniz;",
+                "alıcı mesajlarınız;",
+                "marketplace hesaplarının kötüye kullanılması;",
+                "üçüncü taraf haklarının ihlali;",
+                "kanun ihlali;",
+                "ihmaliniz veya kasıtlı davranışınız."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, tazminat kapsamına giren herhangi bir konunun savunmasını münhasıran üstlenme hakkını saklı tutar ve bu durumda makul ölçüde iş birliği yapmayı kabul edersiniz."
+            }
+          ]
+        },
+        {
+          "id": "suspension-by-us",
+          "heading": "39. SELLERHILL TARAFINDAN ASKIYA ALMA VE FESİH",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill aşağıdaki durumlarda hesabınızı askıya alabilir, kısıtlayabilir veya kapatabilir:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "bu Koşulların ihlal edilmesi;",
+                "yürürlükteki kanunların ihlal edilmesi;",
+                "marketplace kurallarının ihlal edilmesi;",
+                "dolandırıcılık veya kötüye kullanım;",
+                "ücretsiz deneme sisteminin kötüye kullanılması;",
+                "ödeme yapılmaması;",
+                "güvenlik riski oluşturulması;",
+                "altyapının makul olmayan ölçüde kullanılması;",
+                "yetkisiz erişim girişimi;",
+                "reverse engineering veya yazılımın kopyalanması;",
+                "yasaklı faaliyetlerde bulunulması;",
+                "SellerHill açısından hukuki veya düzenleyici risk oluşturulması."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill ayrıca belirli özellikleri veya Hizmetlerin tamamını sonlandırabilir."
+            }
+          ]
+        },
+        {
+          "id": "termination-by-you",
+          "heading": "40. KULLANICI TARAFINDAN FESİH",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'i kullanmayı istediğiniz zaman bırakabilirsiniz."
+            },
+            {
+              "type": "p",
+              "text": "Hesap silme talepleri Gizlilik Politikası kapsamında yapılabilir."
+            },
+            {
+              "type": "p",
+              "text": "Fesih, daha önce oluşmuş ödeme yükümlülüklerini veya fesih sonrasında devam etmesi gereken hükümleri ortadan kaldırmaz."
+            }
+          ]
+        },
+        {
+          "id": "termination-effect",
+          "heading": "41. FESİH SONRASI",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Fesih sonrasında:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "hesabınıza erişim kapatılabilir;",
+                "otomasyonlar durdurulabilir;",
+                "marketplace bağlantıları kesilebilir;",
+                "abonelikler iptal edilebilir;",
+                "veriler Gizlilik Politikası ve yasal saklama yükümlülükleri kapsamında silinebilir."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "SellerHill, hesabın askıya alınması veya kapatılması nedeniyle otomasyonun durmasından kaynaklanan kayıplardan sorumlu değildir."
+            }
+          ]
+        },
+        {
+          "id": "survival",
+          "heading": "42. FESHİN ARDINDAN DEVAM EDEN HÜKÜMLER",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Aşağıdaki hükümler fesih sonrasında da yürürlükte kalır:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Fikri mülkiyet;",
+                "Kullanıcı İçeriği;",
+                "Gizlilik;",
+                "Garanti Reddi;",
+                "Sorumluluğun Sınırlandırılması;",
+                "Tazminat;",
+                "Uyuşmazlık Çözümü;",
+                "Uygulanacak Hukuk."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "disputes",
+          "heading": "43. UYUŞMAZLIKLAR",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Herhangi bir resmi hukuki süreç başlatmadan önce taraflar uyuşmazlığı iyi niyetle çözmeye çalışacaktır."
+            },
+            {
+              "type": "p",
+              "text": "Bu amaçla SellerHill ile aşağıdaki adresten iletişime geçebilirsiniz:"
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            },
+            {
+              "type": "p",
+              "text": "Bu madde, tarafların acil hukuki veya ihtiyati tedbir talep etme haklarını ortadan kaldırmaz."
+            }
+          ]
+        },
+        {
+          "id": "governing-law",
+          "heading": "44. UYGULANACAK HUKUK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bu Koşullar Amerika Birleşik Devletleri, Wyoming Eyaleti hukukuna tabi olacaktır."
+            },
+            {
+              "type": "p",
+              "text": "Kanunlar ihtilafı kuralları dikkate alınmaksızın uygulanacaktır."
+            },
+            {
+              "type": "p",
+              "text": "Yasaların izin verdiği ölçüde, bu Koşullardan veya Hizmetlerden kaynaklanan uyuşmazlıklar Wyoming'deki yetkili mahkemelerin yargı yetkisine tabi olacaktır."
+            },
+            {
+              "type": "p",
+              "text": "Ancak bu hüküm, tüketicilerin kendi ülkelerinin hukukundan doğan ve kanunen vazgeçilemeyen haklarını ortadan kaldırmaz."
+            }
+          ]
+        },
+        {
+          "id": "changes",
+          "heading": "45. KOŞULLARDA DEĞİŞİKLİK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill bu Koşulları zaman zaman güncelleyebilir."
+            },
+            {
+              "type": "p",
+              "text": "Önemli değişikliklerde:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "Website;",
+                "Hizmetler;",
+                "e-posta;",
+                "veya diğer uygun iletişim yöntemleri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "aracılığıyla bildirim yapılabilir."
+            },
+            {
+              "type": "p",
+              "text": "Güncellenen Koşullar yürürlüğe girdikten sonra Hizmetleri kullanmaya devam etmeniz, yasaların izin verdiği ölçüde yeni Koşulları kabul ettiğiniz anlamına gelir."
+            }
+          ]
+        },
+        {
+          "id": "electronic",
+          "heading": "46. ELEKTRONİK İLETİŞİM",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill sizinle elektronik olarak:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "hesap;",
+                "abonelik;",
+                "ödeme;",
+                "güvenlik;",
+                "hizmet değişiklikleri;",
+                "hukuki bildirimler;",
+                "destek;",
+                "operasyonel konular"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "hakkında iletişim kurabilir."
+            },
+            {
+              "type": "p",
+              "text": "Yürürlükteki mevzuatın izin verdiği ölçüde elektronik bildirimler yazılı bildirim hükmündedir."
+            }
+          ]
+        },
+        {
+          "id": "entire-agreement",
+          "heading": "47. SÖZLEŞMENİN BÜTÜNLÜĞÜ",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bu Koşullar, Gizlilik Politikası ve açıkça atıf yapılan diğer koşullar SellerHill Hizmetleri hakkındaki anlaşmanın tamamını oluşturur."
+            },
+            {
+              "type": "p",
+              "text": "Belirli bir hizmet için ayrıca imzalanmış yazılı bir sözleşme bulunması halinde, çelişki olduğu ölçüde özel sözleşme geçerli olabilir."
+            }
+          ]
+        },
+        {
+          "id": "severability",
+          "heading": "48. BÖLÜNEBİLİRLİK",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bu Koşulların herhangi bir hükmünün geçersiz veya uygulanamaz olduğuna karar verilirse diğer hükümler yürürlükte kalmaya devam eder."
+            },
+            {
+              "type": "p",
+              "text": "Geçersiz veya uygulanamaz hüküm, amaçlanan hukuki sonucu mümkün olduğunca koruyacak şekilde ve yalnızca gerekli olduğu ölçüde değiştirilmiş veya yorumlanmış kabul edilir."
+            }
+          ]
+        },
+        {
+          "id": "no-waiver",
+          "heading": "49. FERAGAT ETMEME",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "SellerHill'in herhangi bir hükmü hemen uygulamaması, ileride bu hükmü uygulama hakkından feragat ettiği anlamına gelmez."
+            }
+          ]
+        },
+        {
+          "id": "assignment",
+          "heading": "50. DEVİR",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Kullanıcı, SellerHill'in yazılı onayı olmadan bu Koşullardan doğan hak ve yükümlülüklerini devredemez."
+            },
+            {
+              "type": "p",
+              "text": "SellerHill bu Koşulları:"
+            },
+            {
+              "type": "ul",
+              "items": [
+                "birleşme;",
+                "satın alma;",
+                "yeniden yapılanma;",
+                "varlık satışı;",
+                "finansman işlemi;",
+                "SellerHill işletmesinin devri"
+              ]
+            },
+            {
+              "type": "p",
+              "text": "kapsamında devredebilir."
+            }
+          ]
+        },
+        {
+          "id": "contact",
+          "heading": "51. İLETİŞİM",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Bu Koşullar hakkında sorularınız için:"
+            },
+            {
+              "type": "address",
+              "lines": [
+                "2B Trading, LLC",
+                "Wyoming, Amerika Birleşik Devletleri"
+              ]
+            },
+            {
+              "type": "email",
+              "address": "privacy@sellerhill.com"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

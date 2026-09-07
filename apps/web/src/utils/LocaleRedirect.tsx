@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { buildLocalePath, resolveLocale } from './locale';
 
@@ -17,18 +17,30 @@ export interface LocaleRedirectProps {
   to: string;
   /** Whether to preserve query params from current URL */
   preserveQuery?: boolean;
+  /**
+   * Whether to carry the URL fragment through the redirect. Off by default
+   * because no app route used one; legal documents deep-link to a section
+   * (e.g. /privacy#cookies) and would otherwise land at the top.
+   */
+  preserveHash?: boolean;
 }
 
-export const LocaleRedirect = ({ to, preserveQuery = false }: LocaleRedirectProps): React.ReactElement => {
+export const LocaleRedirect = ({
+  to,
+  preserveQuery = false,
+  preserveHash = false,
+}: LocaleRedirectProps): React.ReactElement => {
   const navigate = useNavigate();
+  const { hash } = useLocation();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const locale = resolveLocale();
     const path = buildLocalePath(`/${to}`, locale);
     const queryString = preserveQuery && searchParams.toString() ? `?${searchParams.toString()}` : '';
-    void navigate(`${path}${queryString}`, { replace: true });
-  }, [to, preserveQuery, navigate, searchParams]);
+    const fragment = preserveHash ? hash : '';
+    void navigate(`${path}${queryString}${fragment}`, { replace: true });
+  }, [to, preserveQuery, preserveHash, hash, navigate, searchParams]);
 
   return <></>;
 };

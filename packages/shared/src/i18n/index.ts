@@ -5,6 +5,7 @@ import enAuth from './resources/en/auth.json';
 import enBilling from './resources/en/billing.json';
 import enDashboard from './resources/en/dashboard.json';
 import enEbay from './resources/en/ebay.json';
+import enLegal from './resources/en/legal.json';
 import enListings from './resources/en/listings.json';
 import enListingSettingsGroup from './resources/en/listingSettingsGroup.json';
 import enOrders from './resources/en/orders.json';
@@ -18,6 +19,7 @@ import trAuth from './resources/tr/auth.json';
 import trBilling from './resources/tr/billing.json';
 import trDashboard from './resources/tr/dashboard.json';
 import trEbay from './resources/tr/ebay.json';
+import trLegal from './resources/tr/legal.json';
 import trListings from './resources/tr/listings.json';
 import trListingSettingsGroup from './resources/tr/listingSettingsGroup.json';
 import trOrders from './resources/tr/orders.json';
@@ -34,6 +36,7 @@ export {
   enBilling,
   enDashboard,
   enEbay,
+  enLegal,
   enListings,
   enListingSettingsGroup,
   enOrders,
@@ -47,6 +50,7 @@ export {
   trBilling,
   trDashboard,
   trEbay,
+  trLegal,
   trListings,
   trListingSettingsGroup,
   trOrders,
