@@ -54,6 +54,15 @@ export interface LandingPageProps {
    * leaving) it always starts from a clean store and RTK Query cache.
    */
   onOpenDemo: () => void;
+  /**
+   * Opens the privacy policy, optionally scrolled to one of its sections.
+   * The footer's "Cookies" entry passes the cookies section rather than
+   * linking to a separate cookie policy — there is one document, and section
+   * 13 of it is the cookie disclosure.
+   */
+  onNavigatePrivacy: (sectionId?: string) => void;
+  /** Opens the terms of service. */
+  onNavigateTerms: () => void;
   onToggleMobileMenu: () => void;
   onCloseMobileMenu: () => void;
 }

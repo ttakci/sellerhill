@@ -43,6 +43,10 @@ export * from './domain/store-settings/index';
 // Domain - Listing Settings Groups
 export * from './domain/listing-settings-groups/index';
 
+// Domain - Legal documents (privacy policy / terms) rendered from the i18n
+// `legal` namespace as structured blocks.
+export * from './domain/legal/index';
+
 // Domain - Listings
 export * from './domain/listings/index';
 

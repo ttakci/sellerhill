@@ -181,6 +181,19 @@ export const LandingPageContainer = (): React.ReactElement => {
     enterDemoMode(`/${currentLocale}/dashboard`);
   }, [currentLocale]);
 
+  const handleNavigatePrivacy = useCallback(
+    (sectionId?: string) => {
+      setMobileMenuOpen(false);
+      void navigate(`/${currentLocale}/privacy${sectionId ? `#${sectionId}` : ''}`);
+    },
+    [navigate, currentLocale]
+  );
+
+  const handleNavigateTerms = useCallback(() => {
+    setMobileMenuOpen(false);
+    void navigate(`/${currentLocale}/terms`);
+  }, [navigate, currentLocale]);
+
   const handleToggleMobileMenu = useCallback(() => {
     setMobileMenuOpen((prev) => !prev);
   }, []);
@@ -206,6 +219,8 @@ export const LandingPageContainer = (): React.ReactElement => {
         onNavigateLogin={handleNavigateLogin}
         onNavigateRegister={handleNavigateRegister}
         onOpenDemo={handleOpenDemo}
+        onNavigatePrivacy={handleNavigatePrivacy}
+        onNavigateTerms={handleNavigateTerms}
         onToggleMobileMenu={handleToggleMobileMenu}
         onCloseMobileMenu={handleCloseMobileMenu}
       />

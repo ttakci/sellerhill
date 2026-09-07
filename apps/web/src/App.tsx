@@ -47,6 +47,16 @@ const RegisterPage = lazy(() => import('./features/auth/register'));
 const VerifyEmailPage = lazy(() => import('./features/auth/verify-email'));
 const ForgotPasswordPage = lazy(() => import('./features/auth/forgot-password'));
 const ResetPasswordPage = lazy(() => import('./features/auth/reset-password'));
+/*
+ * Legal documents are public and locale-prefixed like the auth pages. One
+ * container serves every document; the route picks which one.
+ */
+const PrivacyPolicyPage = lazy(() =>
+  import('./features/legal').then((m) => ({ default: m.PrivacyPolicyPageContainer }))
+);
+const TermsOfServicePage = lazy(() =>
+  import('./features/legal').then((m) => ({ default: m.TermsOfServicePageContainer }))
+);
 
 // App shell pages
 const ActionCenterPage = lazy(() =>
@@ -147,6 +157,24 @@ export function App() {
           />
 
           {/* Protected routes with layout */}
+          {/* Public legal documents */}
+          <Route
+            path="privacy"
+            element={
+              <Lazy>
+                <PrivacyPolicyPage />
+              </Lazy>
+            }
+          />
+          <Route
+            path="terms"
+            element={
+              <Lazy>
+                <TermsOfServicePage />
+              </Lazy>
+            }
+          />
+
           <Route element={<AppLayout />}>
             <Route
               path="dashboard"
@@ -318,6 +346,11 @@ export function App() {
         <Route path="/verify-email" element={<LocaleRedirect to="verify-email" preserveQuery />} />
         <Route path="/auth/check-email" element={<LocaleRedirect to="auth/check-email" preserveQuery />} />
         <Route path="/forgot-password" element={<LocaleRedirect to="forgot-password" />} />
+        {/* Legal documents are linked from outside the app (and from email), so the
+            locale-less form has to resolve. preserveHash carries a deep link such as
+            /privacy#cookies through the redirect. */}
+        <Route path="/privacy" element={<LocaleRedirect to="privacy" preserveHash />} />
+        <Route path="/terms" element={<LocaleRedirect to="terms" preserveHash />} />
         {/* preserveQuery carries the reset token through the locale redirect. */}
         <Route path="/reset-password" element={<LocaleRedirect to="reset-password" preserveQuery />} />
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
