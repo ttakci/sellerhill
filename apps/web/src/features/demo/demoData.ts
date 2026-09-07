@@ -959,7 +959,7 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
     ],
     3,
     1,
-    'demo-tpl-modern-professional',
+    'demo-tpl-ds-general-store',
     { strip: true, aiTitle: true, aiDesc: false }
   ),
   group(
@@ -972,7 +972,7 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
     ],
     2,
     1,
-    'demo-tpl-elite-trust',
+    'demo-tpl-ds-minimalist',
     { strip: true, aiTitle: true, aiDesc: true }
   ),
   group(
@@ -982,20 +982,24 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
     [{ min: 0, max: 500, pct: 11 }],
     5,
     2,
-    'demo-tpl-compact-mobile',
+    'demo-tpl-ds-tech-gadgets',
     { strip: false, aiTitle: false, aiDesc: false }
   ),
 ];
 
 export const DEMO_PREDEFINED_TEMPLATES = [
-  { slug: 'modern-professional', name: 'Modern Professional' },
-  { slug: 'elite-trust', name: 'Elite Trust' },
-  { slug: 'spec-sheet', name: 'Spec Sheet' },
-  { slug: 'gallery-grid', name: 'Gallery Grid' },
-  { slug: 'minimal-mono', name: 'Minimal Mono' },
-  { slug: 'boutique-card', name: 'Boutique Card' },
-  { slug: 'compact-mobile', name: 'Compact Mobile' },
-  { slug: 'brand-story', name: 'Brand Story' },
+  { slug: 'ds-general-store', name: 'DS General Store' },
+  { slug: 'ds-minimalist', name: 'DS Minimalist' },
+  { slug: 'ds-tech-gadgets', name: 'DS Tech Gadgets' },
+  { slug: 'ds-home-decor', name: 'DS Home Decor' },
+  { slug: 'ds-auto-parts', name: 'DS Auto Parts' },
+  { slug: 'ds-apparel-fashion', name: 'DS Apparel Fashion' },
+  { slug: 'ds-beauty-health', name: 'DS Beauty Health' },
+  { slug: 'ds-pet-supplies', name: 'DS Pet Supplies' },
+  { slug: 'ds-fitness-sports', name: 'DS Fitness Sports' },
+  { slug: 'ds-outdoor-survival', name: 'DS Outdoor Survival' },
+  { slug: 'ds-kids-toys', name: 'DS Kids Toys' },
+  { slug: 'ds-kitchen-dining', name: 'DS Kitchen Dining' },
 ].map((t, i) => ({
   id: `demo-tpl-${t.slug}`,
   slug: t.slug,

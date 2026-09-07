@@ -75,53 +75,53 @@
       "action": "Create New Group"
     },
     "predefinedTemplates": {
-      "modern-professional": {
-        "name": "Modern Professional",
-        "description": "Clean typography and a professional two-column layout for high-end products"
+      "ds-general-store": {
+        "name": "DS General Store",
+        "description": "A high-conversion, urgency-driven layout suitable for any general dropshipping product with clear trust badges"
       },
-      "elite-trust": {
-        "name": "Elite Trust",
-        "description": "Buyer-confidence layout with clear handling, delivery and guarantee blocks"
+      "ds-minimalist": {
+        "name": "DS Minimalist",
+        "description": "Ultra-clean, single-column, black & white layout focusing purely on specs and trust"
       },
-      "spec-sheet": {
-        "name": "Spec Sheet",
-        "description": "Technical layout with a full specification table - best for electronics, tools and parts"
+      "ds-tech-gadgets": {
+        "name": "DS Tech Gadgets",
+        "description": "Modern, dark-accented layout ideal for electronics, featuring a prominent specs table"
       },
-      "gallery-grid": {
-        "name": "Gallery Grid",
-        "description": "Photo-led layout that shows the complete image set beneath a large hero shot"
+      "ds-home-decor": {
+        "name": "DS Home Decor",
+        "description": "Warm, aesthetic layout with soft colors, large image emphasis, and a cozy typography setup"
       },
-      "minimal-mono": {
-        "name": "Minimal Mono",
-        "description": "Text-only editorial layout with no images at all - the lightest, most neutral option"
+      "ds-auto-parts": {
+        "name": "DS Auto Parts",
+        "description": "High-contrast technical layout with clear fitment warnings and rugged styling"
       },
-      "boutique-card": {
-        "name": "Boutique Card",
-        "description": "Warm serif card layout for home, beauty and fashion listings"
+      "ds-apparel-fashion": {
+        "name": "DS Apparel Fashion",
+        "description": "Lookbook-style elegant layout, emphasizing sizing charts and fabric care"
       },
-      "compact-mobile": {
-        "name": "Compact Mobile",
-        "description": "Single-column layout tuned for the eBay mobile app, with features shown first"
+      "ds-beauty-health": {
+        "name": "DS Beauty Health",
+        "description": "Spa-like, clean design with structured sections for ingredients and how-to-use"
       },
-      "brand-story": {
-        "name": "Brand Story",
-        "description": "Editorial layout that leads with the brand - suits private-label and branded goods"
+      "ds-pet-supplies": {
+        "name": "DS Pet Supplies",
+        "description": "Playful yet structured layout with bright accents, focusing on material safety and sizing"
       },
-      "neon-gamer": {
-        "name": "Neon Gamer",
-        "description": "Dark theme with neon accents and high contrast layout perfect for gaming gear"
+      "ds-fitness-sports": {
+        "name": "DS Fitness Sports",
+        "description": "High-energy, bold typography layout focusing on durability, materials, and active lifestyle"
       },
-      "vintage-craft": {
-        "name": "Vintage Craft",
-        "description": "Classic, elegant and warm layout for handmade, antique and boutique products"
+      "ds-outdoor-survival": {
+        "name": "DS Outdoor Survival",
+        "description": "Rugged, earthy layout with focus on durability, weather resistance, and tactical specs"
       },
-      "auto-parts-pro": {
-        "name": "Auto Parts Pro",
-        "description": "Highly technical layout tailored for automotive, industrial parts and hardware"
+      "ds-kids-toys": {
+        "name": "DS Kids Toys",
+        "description": "Fun, colorful layout focusing on safety certifications and age appropriateness"
       },
-      "luxury-gold": {
-        "name": "Luxury Gold",
-        "description": "Premium layout with gold accents for jewelry, watches, and high-end fashion"
+      "ds-kitchen-dining": {
+        "name": "DS Kitchen Dining",
+        "description": "Clean, recipe-book style layout focusing on material safety and dimensions"
       }
     },
     "validation": {

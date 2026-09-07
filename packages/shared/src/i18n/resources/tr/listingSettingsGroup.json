@@ -75,53 +75,53 @@
       "action": "Yeni Grup Oluştur"
     },
     "predefinedTemplates": {
-      "modern-professional": {
-        "name": "Modern Profesyonel",
-        "description": "Üst segment ürünler için sade tipografi ve profesyonel iki kolonlu düzen"
+      "ds-general-store": {
+        "name": "DS Genel Mağaza",
+        "description": "Genel dropshipping ürünleri için uygun, yüksek dönüşümlü, aciliyet odaklı ve güven rozetleri içeren düzen"
       },
-      "elite-trust": {
-        "name": "Güven Odaklı",
-        "description": "Hazırlık, teslimat ve garanti bloklarıyla alıcı güvenini öne çıkaran düzen"
+      "ds-minimalist": {
+        "name": "DS Minimalist",
+        "description": "Tamamen özelliklere ve güvene odaklanan, ultra temiz, tek sütunlu, siyah-beyaz düzen"
       },
-      "spec-sheet": {
-        "name": "Teknik Föy",
-        "description": "Tam teknik özellik tablosu içeren düzen - elektronik, alet ve yedek parça için ideal"
+      "ds-tech-gadgets": {
+        "name": "DS Teknoloji Cihazları",
+        "description": "Elektronik ürünler için ideal, belirgin özellik tablosuna sahip modern ve koyu vurgulu düzen"
       },
-      "gallery-grid": {
-        "name": "Galeri Izgarası",
-        "description": "Büyük bir ana görselin altında tüm fotoğraf setini gösteren görsel ağırlıklı düzen"
+      "ds-home-decor": {
+        "name": "DS Ev Dekorasyonu",
+        "description": "Yumuşak renkler, büyük görsel vurgusu ve samimi tipografi düzeni ile sıcak, estetik düzen"
       },
-      "minimal-mono": {
-        "name": "Minimal Mono",
-        "description": "Hiç görsel içermeyen, yalnızca metin tabanlı en hafif ve en yalın seçenek"
+      "ds-auto-parts": {
+        "name": "DS Oto Parça",
+        "description": "Net uyumluluk uyarıları ve dayanıklı tasarımıyla yüksek kontrastlı teknik düzen"
       },
-      "boutique-card": {
-        "name": "Butik Kart",
-        "description": "Ev, kozmetik ve moda listeleri için sıcak serif kart düzeni"
+      "ds-apparel-fashion": {
+        "name": "DS Giyim ve Moda",
+        "description": "Beden tablolarına ve kumaş bakımına önem veren, katalog tarzı zarif düzen"
       },
-      "compact-mobile": {
-        "name": "Kompakt Mobil",
-        "description": "eBay mobil uygulaması için tek kolonlu düzen, özellikler en üstte"
+      "ds-beauty-health": {
+        "name": "DS Güzellik ve Sağlık",
+        "description": "İçerikler ve kullanım talimatları için yapılandırılmış bölümlere sahip, spa tarzı temiz tasarım"
       },
-      "brand-story": {
-        "name": "Marka Hikayesi",
-        "description": "Markayı öne çıkaran editoryal düzen - özel markalı ve markalı ürünler için"
+      "ds-pet-supplies": {
+        "name": "DS Evcil Hayvan",
+        "description": "Malzeme güvenliği ve boyutlara odaklanan, parlak vurgulara sahip eğlenceli ancak yapılandırılmış düzen"
       },
-      "neon-gamer": {
-        "name": "Neon Oyuncu",
-        "description": "Koyu tema, neon vurgular ve oyuncu ekipmanları için yüksek kontrastlı modern düzen"
+      "ds-fitness-sports": {
+        "name": "DS Fitness ve Spor",
+        "description": "Dayanıklılık, malzemeler ve aktif yaşama odaklanan yüksek enerjili, kalın tipografili düzen"
       },
-      "vintage-craft": {
-        "name": "Vintage Zanaat",
-        "description": "El yapımı, antika ve butik ürünler için klasik, zarif ve sıcak tonlu düzen"
+      "ds-outdoor-survival": {
+        "name": "DS Outdoor ve Hayatta Kalma",
+        "description": "Dayanıklılık, hava koşullarına direnç ve taktiksel özelliklere odaklanan, toprak tonlarında sağlam düzen"
       },
-      "auto-parts-pro": {
-        "name": "Oto Yedek Parça Pro",
-        "description": "Otomotiv, endüstriyel parçalar ve donanımlar için yüksek teknik detaylı düzen"
+      "ds-kids-toys": {
+        "name": "DS Çocuk Oyuncakları",
+        "description": "Güvenlik sertifikalarına ve yaşa uygunluğa odaklanan eğlenceli ve renkli düzen"
       },
-      "luxury-gold": {
-        "name": "Lüks Altın",
-        "description": "Mücevher, saat ve üst düzey moda ürünleri için altın vurgulu premium şık düzen"
+      "ds-kitchen-dining": {
+        "name": "DS Mutfak ve Yemek",
+        "description": "Malzeme güvenliği ve boyutlara odaklanan temiz, yemek kitabı tarzı düzen"
       }
     },
     "validation": {
