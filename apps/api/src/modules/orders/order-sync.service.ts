@@ -99,6 +99,20 @@ export class OrderSyncService {
 
     this.logger.log(`Syncing orders for user ${userId}, account ${ebayAccountId}`);
 
+    // Suspension stops order ingestion. THE POSITION OF THIS RETURN IS
+    // LOAD-BEARING: it must precede both the fetch loop and the
+    // `last_ebay_sync_at` write below. Advancing the watermark while skipping
+    // the fetch would permanently lose every order that arrived during the
+    // suspension, because the next run starts from that timestamp and nothing
+    // ever looks further back. Leaving it untouched is what lets a reinstated
+    // account back-fill the whole suspended period on its next tick.
+    if (await this.quotaEnforcement.isSuspended(account.user_id)) {
+      this.logger.log(
+        `Order sync skipped for user ${account.user_id}: subscription suspended (watermark preserved)`
+      );
+      return 0;
+    }
+
     // Get fresh access token
     const accessToken = await this.ebayService.getActiveAccountAccessToken(userId);
     if (!accessToken) {
