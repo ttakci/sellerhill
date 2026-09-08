@@ -18,6 +18,7 @@ import type { Job } from 'bullmq';
 
 import type { DatabaseService } from '../../common/database/database.service';
 import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import type { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import type { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import type { EbayService } from '../ebay/ebay.service';
 import type { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
@@ -113,6 +114,10 @@ function buildHarness(options: {
     resolveForOrder,
   } as unknown as TrackingConversionService;
 
+  const quotaEnforcement = {
+    isSuspended: jest.fn().mockResolvedValue(false),
+  } as unknown as QuotaEnforcementService;
+
   const processor = new AmazonTrackingProcessorService(
     scrapingService,
     databaseService,
@@ -122,6 +127,7 @@ function buildHarness(options: {
     buyerMessages,
     platformSettings,
     trackingConversion,
+    quotaEnforcement,
   );
 
   return {
