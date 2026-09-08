@@ -26,6 +26,7 @@ import { ListingSettingsGroupService } from '../listing-settings-groups/listing-
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
 import { ContentGenerationService } from './content-generation.service';
+import { containsBlacklistedKeyword } from './listing-blacklist';
 import type { StrategyCommerce } from './listing-pricing.helpers';
 import {
   normalizeTitleWhitespace,
@@ -231,8 +232,9 @@ export class ListingStrategyService {
           continue;
         }
 
-        const normalizedKeyword = keyword.toLowerCase();
-        if (values.some((value) => value.toLowerCase().includes(normalizedKeyword))) {
+        // Whole-word, never substring — see `listing-blacklist.ts` for the six
+        // live false positives ("gin" in "packaging") that rule exists to stop.
+        if (containsBlacklistedKeyword(values, keyword)) {
           throw new BadRequestException(
             `${type} contains blacklisted keyword: ${item.keyword}`
           );
@@ -247,7 +249,10 @@ export class ListingStrategyService {
     // Each keyword carries its own `types` (title/description/features/brand),
     // so `checkBlacklist` is the only remaining switch — on/off, not per-field.
     // Description deliberately scans buyer-visible text only, so Amazon-hosted
-    // image URLs remain valid.
+    // image URLs remain valid. Every field below matches whole words only;
+    // `title` and the feature/spec/brand values are raw provider text, so a
+    // substring match there was the same defect the visible-text rule fixed for
+    // the description — just without the URL to make it obvious.
     if (!checkBlacklist) {
       return;
     }
