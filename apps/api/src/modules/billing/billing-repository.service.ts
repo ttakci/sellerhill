@@ -1111,30 +1111,25 @@ export class BillingRepositoryService {
     usagePeriodId: string | null,
     client?: PoolClient,
   ): Promise<boolean> {
-    const table =
-      kind === BillingLimitKey.LISTINGS_PER_MONTH
-        ? 'billing_listing_reservations'
-        : 'billing_ao_reservations';
-    const listingCol =
-      kind === BillingLimitKey.LISTINGS_PER_MONTH ? '$4' : 'NULL';
-    const aoCol =
-      kind === BillingLimitKey.AMAZON_ORDERS_PER_MONTH ? '$5' : 'NULL';
+    // The two reservation ledgers carry different ref columns:
+    // billing_listing_reservations has listing_id (no ebay_order_id),
+    // billing_ao_reservations has ebay_order_id (no listing_id). A single
+    // column list naming both fails on whichever table lacks one — so the
+    // ref column + value are branched per kind, mirroring reserveSlotsBulk.
+    const isListing = kind === BillingLimitKey.LISTINGS_PER_MONTH;
+    const table = isListing
+      ? 'billing_listing_reservations'
+      : 'billing_ao_reservations';
+    const refColumn = isListing ? 'listing_id' : 'ebay_order_id';
+    const refValue = isListing ? (ref.listingId ?? null) : (ref.ebayOrderId ?? null);
     const q = await this.run<{ inserted: boolean }>(
       `INSERT INTO ${table}
-         (subscription_id, source_key, listing_id, ebay_order_id,
-          usage_period_id, status)
-       VALUES ($1, $2, ${listingCol}, ${aoCol}, $6, 'reserved')
+         (subscription_id, source_key, ${refColumn}, usage_period_id, status)
+       VALUES ($1, $2, $3, $4, 'reserved')
        ON CONFLICT (subscription_id, source_key) DO UPDATE SET
          updated_at = NOW()
        RETURNING (xmax = 0) AS inserted`,
-      [
-        subscriptionId,
-        sourceKey,
-        ref.listingId ?? null,
-        ref.ebayOrderId ?? null,
-        ref.ebayOrderId ?? null,
-        usagePeriodId,
-      ],
+      [subscriptionId, sourceKey, refValue, usagePeriodId],
       client,
     );
     return Boolean(q[0]?.inserted);
