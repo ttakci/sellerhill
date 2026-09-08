@@ -3,17 +3,27 @@
 // Pure-logic invariant tests for the billing quota helpers. No DB, no Nest.
 // These lock the behavioral contract the enforcement service relies on.
 
-import { AutoFulfillBlockedReason, BillingLimitKey } from '@repo/shared';
+import {
+  AutoFulfillBlockedReason,
+  BillingLimitKey,
+  BillingSubscriptionStatus,
+  EntitlementState,
+} from '@repo/shared';
 
 import {
   advisoryLockKey,
   billingCustomerLockKey,
   buildSourceKey,
   decideQuota,
+  DEFAULT_WEBHOOK_GRACE_HOURS,
   isEnforcementEnabled,
   quotaExhaustedBlockedReason,
+  QuotaWindowOutcome,
   reservationTargetFor,
+  resolveEffectiveEntitlement,
+  resolveQuotaWindow,
   shouldReleaseOnWorkerFailure,
+  utcMonthBounds,
 } from './quota-helpers';
 
 describe('isEnforcementEnabled', () => {
@@ -252,5 +262,118 @@ describe('billingCustomerLockKey', () => {
       const lock = advisoryLockKey('any-user', kind);
       expect(customerLock.key1).not.toBe(lock.key1);
     }
+  });
+});
+
+const sub = (start: string, end: string, status = BillingSubscriptionStatus.ACTIVE) => ({
+  status,
+  currentPeriodStart: start,
+  currentPeriodEnd: end,
+});
+
+describe('resolveQuotaWindow', () => {
+  it('falls back to the calendar month with no subscription', () => {
+    const now = new Date('2026-09-20T00:00:00.000Z');
+    const w = resolveQuotaWindow(null, now);
+    expect(w.periodStart).toEqual(utcMonthBounds(now).periodStart);
+    expect(w.outcome).toBe(QuotaWindowOutcome.NORMAL);
+  });
+
+  it('falls back to the calendar month when the period is unparseable or inverted', () => {
+    const now = new Date('2026-09-20T00:00:00.000Z');
+    expect(resolveQuotaWindow(sub('not-a-date', 'also-bad'), now).periodStart).toEqual(
+      utcMonthBounds(now).periodStart,
+    );
+    // end <= start is malformed; an unbounded window must never result.
+    expect(resolveQuotaWindow(sub('2026-10-15T00:00:00Z', '2026-09-15T00:00:00Z'), now).periodStart).toEqual(
+      utcMonthBounds(now).periodStart,
+    );
+  });
+
+  it('uses the subscription period, NOT the calendar month', () => {
+    const w = resolveQuotaWindow(
+      sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'),
+      new Date('2026-09-20T00:00:00Z'),
+    );
+    expect(w.periodStart.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    expect(w.periodEnd.toISOString()).toBe('2026-10-15T00:00:00.000Z');
+    expect(w.outcome).toBe(QuotaWindowOutcome.NORMAL);
+  });
+
+  it('keeps the declared window when now is before it (clock skew)', () => {
+    const w = resolveQuotaWindow(
+      sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'),
+      new Date('2026-09-14T00:00:00Z'),
+    );
+    expect(w.periodStart.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    expect(w.outcome).toBe(QuotaWindowOutcome.NORMAL);
+  });
+
+  it('inside the grace it extends the END but PINS the START', () => {
+    // THE central guarantee: usage is counted from periodStart, so a pinned
+    // start means no new allowance can be created. This is the test that
+    // encodes "never a free extra month".
+    const w = resolveQuotaWindow(
+      sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'),
+      new Date('2026-10-15T03:00:00Z'),
+    );
+    expect(w.periodStart.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    expect(w.periodEnd.toISOString()).toBe('2026-10-15T06:00:00.000Z');
+    expect(w.outcome).toBe(QuotaWindowOutcome.GRACE);
+  });
+
+  it('past the grace it reports UNPAID and still does not move the start', () => {
+    const w = resolveQuotaWindow(
+      sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'),
+      new Date('2026-10-15T07:00:00Z'),
+    );
+    expect(w.periodStart.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    expect(w.outcome).toBe(QuotaWindowOutcome.UNPAID);
+  });
+
+  it('never rolls the start forward, however stale the window is', () => {
+    // A month later must NOT produce a fresh [15 Oct, 15 Nov) allowance.
+    const w = resolveQuotaWindow(
+      sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'),
+      new Date('2026-11-20T00:00:00Z'),
+    );
+    expect(w.periodStart.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    expect(w.outcome).toBe(QuotaWindowOutcome.UNPAID);
+  });
+
+  it('honours a custom grace length', () => {
+    const now = new Date('2026-10-15T03:00:00Z');
+    expect(resolveQuotaWindow(sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z'), now, 1).outcome).toBe(
+      QuotaWindowOutcome.UNPAID,
+    );
+    expect(DEFAULT_WEBHOOK_GRACE_HOURS).toBe(6);
+  });
+});
+
+describe('resolveEffectiveEntitlement', () => {
+  const live = sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z');
+
+  it('is ACTIVE inside the window and inside the grace', () => {
+    expect(resolveEffectiveEntitlement(live, new Date('2026-09-20T00:00:00Z'))).toBe(EntitlementState.ACTIVE);
+    expect(resolveEffectiveEntitlement(live, new Date('2026-10-15T03:00:00Z'))).toBe(EntitlementState.ACTIVE);
+  });
+
+  it('SUSPENDS an active subscription whose window is stale past the grace', () => {
+    // Read-time fail-closed guard, mirroring normalizeExpiredTrial. Absence of
+    // a webhook is not evidence of payment.
+    expect(resolveEffectiveEntitlement(live, new Date('2026-10-15T07:00:00Z'))).toBe(
+      EntitlementState.SUSPENDED,
+    );
+  });
+
+  it('still SUSPENDS on a suspended status even inside a valid window', () => {
+    const pastDue = sub('2026-09-15T00:00:00Z', '2026-10-15T00:00:00Z', BillingSubscriptionStatus.PAST_DUE);
+    expect(resolveEffectiveEntitlement(pastDue, new Date('2026-09-20T00:00:00Z'))).toBe(
+      EntitlementState.SUSPENDED,
+    );
+  });
+
+  it('leaves NONE alone — no subscription is not suspension', () => {
+    expect(resolveEffectiveEntitlement(null, new Date('2026-09-20T00:00:00Z'))).toBe(EntitlementState.NONE);
   });
 });

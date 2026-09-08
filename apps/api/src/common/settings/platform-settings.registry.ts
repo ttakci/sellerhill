@@ -416,6 +416,15 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 90,
   }),
   def({
+    key: PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    category: PlatformSettingCategory.BILLING,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BILLING_WEBHOOK_GRACE_HOURS',
+    defaultValue: '6',
+    min: 0,
+    max: 72,
+  }),
+  def({
     key: PlatformSettingKey.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS,
     category: PlatformSettingCategory.BUYER_MESSAGING,
     type: PlatformSettingType.NUMBER,
