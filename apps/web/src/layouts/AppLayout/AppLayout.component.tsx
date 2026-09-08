@@ -1,3 +1,4 @@
+import { ListingStatus } from '@repo/shared';
 import {
   Breadcrumb,
   ConfirmModal,
@@ -29,6 +30,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   mobileSidebarOpen,
   isLogoutConfirmOpen,
   pathWithoutLocale,
+  isDraftsActive,
   userName,
   loadingIsLoading,
   breadcrumbItems,
@@ -81,6 +83,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </S.SidebarBrandRow>
 
           <S.NavSection $isCollapsed={sidebarCollapsed}>
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.inventory')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
+
             <NavTooltip label={t('translation:menu.dashboard')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={pathWithoutLocale === '/dashboard'}
@@ -147,12 +157,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             <NavTooltip label={t('translation:menu.ebayListings')} collapsed={sidebarCollapsed}>
               <S.NavItem
                 $active={
-                  pathWithoutLocale === '/listings' ||
-                  pathWithoutLocale === '/listings/all' ||
-                  (pathWithoutLocale.startsWith('/listings/') &&
-                    !pathWithoutLocale.startsWith('/listings/jobs') &&
-                    pathWithoutLocale !== '/listings/products' &&
-                    pathWithoutLocale !== '/listings/add')
+                  !isDraftsActive &&
+                  (pathWithoutLocale === '/listings' ||
+                    pathWithoutLocale === '/listings/all' ||
+                    (pathWithoutLocale.startsWith('/listings/') &&
+                      !pathWithoutLocale.startsWith('/listings/jobs') &&
+                      pathWithoutLocale !== '/listings/products' &&
+                      pathWithoutLocale !== '/listings/add'))
                 }
                 $isCollapsed={sidebarCollapsed}
                 onClick={() => onLocaleNavigate('/listings')}
@@ -178,6 +189,30 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </S.NavItemContent>
               </S.NavItem>
             </NavTooltip>
+
+            <NavTooltip label={t('translation:menu.drafts')} collapsed={sidebarCollapsed}>
+              <S.NavItem
+                $active={isDraftsActive}
+                $isCollapsed={sidebarCollapsed}
+                onClick={() => onLocaleNavigate(`/listings/all?status=${ListingStatus.DRAFT}`)}
+                aria-label={t('translation:menu.drafts')}
+              >
+                <S.NavItemContent $isCollapsed={sidebarCollapsed}>
+                  <Icon name="file-text" size={20} />
+                  {!sidebarCollapsed && <S.NavItemLabel>{t('translation:menu.drafts')}</S.NavItemLabel>}
+                </S.NavItemContent>
+              </S.NavItem>
+            </NavTooltip>
+
+            <S.NavDivider />
+
+            {!sidebarCollapsed && (
+              <S.NavLabelWrapper $isCollapsed={sidebarCollapsed}>
+                <Text variant="overline" color="sidebar.textMuted">
+                  {t('translation:menu.configuration')}
+                </Text>
+              </S.NavLabelWrapper>
+            )}
 
             <NavTooltip label={t('translation:menu.billing')} collapsed={sidebarCollapsed}>
               <S.NavItem

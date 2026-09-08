@@ -10,6 +10,8 @@ export interface AppLayoutProps {
   mobileSidebarOpen: boolean;
   isLogoutConfirmOpen: boolean;
   pathWithoutLocale: string;
+  /** True when the current route is the dedicated drafts view (`/listings/all?status=draft`). */
+  isDraftsActive: boolean;
   userName: string;
   loadingIsLoading: boolean;
   breadcrumbItems: BreadcrumbItem[];
@@ -22,8 +24,6 @@ export interface AppLayoutProps {
   onCloseLogoutConfirm: () => void;
   onLocaleNavigate: (path: string) => void;
   i18nLanguage: string;
-  openSections: { inventory: boolean; configuration: boolean };
-  onToggleSection: (section: 'inventory' | 'configuration') => void;
   /**
    * Number of pending actions waiting on the seller, for the nav badge.
    * `0` hides the badge — a chip reading "0" is chrome, not information.

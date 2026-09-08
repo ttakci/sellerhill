@@ -1,6 +1,7 @@
 import {
   EntitlementState,
   isOperatorRole,
+  ListingStatus,
   resolveEntitlementState,
   type SupportedLocale,
 } from '@repo/shared';
@@ -13,7 +14,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
-import { resolveBreadcrumbs, resolveNavSection } from '@/app/routeMeta';
+import { resolveBreadcrumbs } from '@/app/routeMeta';
 import {
   ACTION_CENTER_POLL_INTERVAL_MS,
   useGetActionCenterQuery,
@@ -52,27 +53,22 @@ export const AppLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [openSections, setOpenSections] = useState({ inventory: true, configuration: true });
   // Usage meters in the profile dropdown default to expanded — the whole point
   // is a glanceable shortcut — but collapse for anyone who wants a tidy menu.
   const [isProfileUsageOpen, setIsProfileUsageOpen] = useState(true);
 
-  // Close mobile sidebar on route change & auto-open the section containing the current route
+  // Close mobile sidebar on route change
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     setMobileSidebarOpen(false);
+  }, [location.pathname]);
 
-    const section = resolveNavSection(pathWithoutLocale);
-    setOpenSections((prev) => ({
-      inventory: section === 'inventory' ? true : prev.inventory,
-      configuration: section === 'configuration' ? true : prev.configuration,
-    }));
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [location.pathname, pathWithoutLocale]);
-
-  const handleToggleSection = useCallback((section: 'inventory' | 'configuration') => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  }, []);
+  // The dedicated drafts view shares its path with the ordinary listings list
+  // (`/listings/all`) and is distinguished only by its query string — so the
+  // sidebar's own `pathWithoutLocale` isn't enough to tell them apart.
+  const isDraftsActive =
+    pathWithoutLocale === '/listings/all' &&
+    new URLSearchParams(location.search).get('status') === ListingStatus.DRAFT;
 
   const handleToggleProfileUsage = useCallback(() => {
     setIsProfileUsageOpen((prev) => !prev);
@@ -200,10 +196,10 @@ export const AppLayout: React.FC = () => {
       mobileSidebarOpen={mobileSidebarOpen}
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       pathWithoutLocale={pathWithoutLocale}
+      isDraftsActive={isDraftsActive}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}
       breadcrumbItems={breadcrumbItems}
-      openSections={openSections}
       onToggleSidebar={handleToggleSidebar}
       onNavigate={handleNavigate}
       onLogoutConfirm={handleLogout}
@@ -212,7 +208,6 @@ export const AppLayout: React.FC = () => {
       onOpenLogoutConfirm={() => setIsLogoutConfirmOpen(true)}
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}
       onLocaleNavigate={localeNavigate}
-      onToggleSection={handleToggleSection}
       pendingActionCount={actionCenter?.totalCount ?? 0}
       hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
       billingUsageRows={billingUsageRows}
