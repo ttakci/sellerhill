@@ -41,6 +41,7 @@ import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
+import { classifyListingFailure } from './listing-failure';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
@@ -1638,10 +1639,127 @@ export class ListingsService {
 
   /**
    * Bulk publish draft listings. Continues on individual failures.
+   *
+   * Synchronous (the seller is waiting), but every run is also written as a
+   * `kind = 'publish'` listing_jobs record so a partial failure shows up in
+   * the jobs list and its per-item reasons in the job detail — the same
+   * surface create/import failures already use. `jobId` lets the caller deep
+   * link there when something failed.
    */
-  async publishListings(userId: string, listingIds: string[]): Promise<number> {
+  async publishListings(
+    userId: string,
+    listingIds: string[],
+  ): Promise<{ published: number; failed: number; jobId: string | null }> {
     const outcomes = await this.publishDrafts(userId, listingIds);
-    return outcomes.filter((outcome) => outcome.ok).length;
+    const published = outcomes.filter((outcome) => outcome.ok).length;
+    const failed = outcomes.length - published;
+
+    let jobId: string | null = null;
+    try {
+      jobId = await this.recordPublishJob(userId, listingIds, outcomes);
+    } catch (error: unknown) {
+      // The publish itself already happened; a bookkeeping failure here must
+      // not turn a successful publish into an error the seller sees.
+      this.logger.error(`Failed to record publish job: ${getErrorMessage(error)}`);
+    }
+
+    return { published, failed, jobId };
+  }
+
+  /**
+   * Persist a synchronous draft-publish run as a listing_jobs + listing_job_items
+   * record. No BullMQ worker — the rows are written here already terminal, so
+   * the job detail page renders them exactly like a finished create/import job.
+   */
+  private async recordPublishJob(
+    userId: string,
+    listingIds: string[],
+    outcomes: PublishOutcome[],
+  ): Promise<string | null> {
+    if (outcomes.length === 0) {
+      return null;
+    }
+
+    // listing_job_items.asin is VARCHAR(10) NOT NULL. Resolve it per listing;
+    // a draft whose row vanished mid-run has none — record it anyway so the
+    // failure is not silently dropped.
+    const rows = await this.databaseService.query<{ id: string; asin: string }>(
+      `SELECT id, asin FROM listings WHERE id = ANY($1::uuid[]) AND user_id = $2`,
+      [listingIds, userId],
+    );
+    const asinById = new Map(rows.map((r) => [r.id, r.asin]));
+
+    const succeeded = outcomes.filter((o) => o.ok).length;
+    const failedCount = outcomes.length - succeeded;
+    const jobStatus = failedCount === 0 ? ListingJobStatus.COMPLETED : ListingJobStatus.FAILED;
+
+    const jobRows = await this.databaseService.query<{ id: string }>(
+      `INSERT INTO listing_jobs
+         (user_id, total_asins, kind, status, processed_count, success_count, failed_count)
+       VALUES ($1, $2, $3, $4, $2, $5, $6)
+       RETURNING id`,
+      [userId, outcomes.length, ListingJobKind.PUBLISH, jobStatus, succeeded, failedCount],
+    );
+    const jobId = jobRows[0].id;
+
+    for (const outcome of outcomes) {
+      const asin = asinById.get(outcome.listingId) ?? 'UNKNOWN';
+
+      if (outcome.ok) {
+        await this.databaseService.query(
+          `INSERT INTO listing_job_items (job_id, asin, listing_id, status)
+           VALUES ($1, $2, $3, $4)`,
+          [jobId, asin, outcome.listingId, ListingStatus.ACTIVE],
+        );
+        continue;
+      }
+
+      const { failureCode, failureDetails, errorMessage } = this.classifyPublishFailure(outcome.error);
+      await this.databaseService.query(
+        `INSERT INTO listing_job_items
+           (job_id, asin, listing_id, status, error_message, failure_code, failure_details)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+        [
+          jobId,
+          asin,
+          outcome.listingId,
+          ListingStatus.ERROR,
+          errorMessage || null,
+          failureCode || null,
+          failureDetails ? JSON.stringify(failureDetails) : null,
+        ],
+      );
+    }
+
+    return jobId;
+  }
+
+  /**
+   * Map one failed publish outcome to the columns a job item stores.
+   *
+   *   - failureCode    → picks the localized message (listings.jobs.failure.*)
+   *   - failureDetails  → structured context that message interpolates, plus
+   *                       `retryable` (a ListingFailureDetails object)
+   *   - errorMessage    → operator-only raw text (admin listing-failures panel);
+   *                       NEVER rendered to the seller (failure-visibility.guard)
+   *
+   * Reuses `classifyListingFailure` so a failed publish reads identically to a
+   * failed create/import. Publish-specific special-casing (e.g. a dedicated
+   * code for "stock fell to 0 after the draft was saved") would go here — the
+   * BadRequestException `prepareDraftForPublish` throws for that currently maps
+   * to QUOTA_EXHAUSTED / UNKNOWN via the generic classifier.
+   */
+  private classifyPublishFailure(error: unknown): {
+    failureCode: ListingFailureCode | null;
+    failureDetails: ListingFailureDetails | null;
+    errorMessage: string;
+  } {
+    const classified = classifyListingFailure(error);
+    return {
+      failureCode: classified.code,
+      failureDetails: classified.details,
+      errorMessage: classified.message,
+    };
   }
 
   /**

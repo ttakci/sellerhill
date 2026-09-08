@@ -112,7 +112,8 @@
     "dashboard": "Panel",
     "listings": "Listeler",
     "ebayListings": "eBay Listeleri",
-    "listingJobs": "İçe Aktarma İşleri",
+    "listingJobs": "Liste İşleri",
+    "drafts": "Taslaklar",
     "products": "Ürünler",
     "inventory": "Envanter",
     "orders": "Siparişler",
@@ -134,7 +135,6 @@
   },
   "chatbot": {
     "sidebarTitle": "Sorularınız mı var?",
-    "sidebarSubtitle": "Destek ekibimizle sohbet edin.",
     "ctaLabel": "Bize ulaşın",
     "openAria": "Destek sohbetini aç",
     "unreadAria": "{{count}} okunmamış destek mesajı",

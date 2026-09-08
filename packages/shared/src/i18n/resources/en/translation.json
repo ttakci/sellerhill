@@ -112,7 +112,8 @@
     "dashboard": "Dashboard",
     "listings": "Listings",
     "ebayListings": "eBay Listings",
-    "listingJobs": "Import Jobs",
+    "listingJobs": "Listing jobs",
+    "drafts": "Drafts",
     "products": "Products",
     "inventory": "Inventory",
     "orders": "Orders",
@@ -134,7 +135,6 @@
   },
   "chatbot": {
     "sidebarTitle": "Have questions?",
-    "sidebarSubtitle": "Chat with our support team.",
     "ctaLabel": "Contact us",
     "openAria": "Open support chat",
     "unreadAria": "{{count}} unread support messages",

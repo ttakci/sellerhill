@@ -259,7 +259,10 @@ export const listingsApi = baseApi.injectEndpoints({
     /**
      * Bulk publish draft listings
      */
-    publishListings: builder.mutation<{ success: boolean; count: number }, string[]>({
+    publishListings: builder.mutation<
+      { success: boolean; count: number; failed: number; jobId: string | null },
+      string[]
+    >({
       query: (listingIds) => ({
         url: '/listings/bulk-publish',
         method: 'POST',

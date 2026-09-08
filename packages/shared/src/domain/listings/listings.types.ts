@@ -43,6 +43,12 @@ export enum EbayListingApiModel {
 export enum ListingJobKind {
   CREATE = 'create',
   EXISTING_IMPORT = 'existing_import',
+  /**
+   * Draft → live publish. Written synchronously by the drafts page's bulk
+   * publish (no BullMQ worker — the seller is waiting), purely as a record so
+   * per-item failures get the same job-detail view as create/import.
+   */
+  PUBLISH = 'publish',
 }
 
 export enum ListingJobStatus {

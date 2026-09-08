@@ -2,14 +2,14 @@
   "listings": {
     "tabs": {
       "active": "Aktif Listeler",
-      "jobs": "İçe Aktarma İşleri"
+      "jobs": "Liste İşleri"
     },
     "jobs": {
-      "title": "İçe Aktarma İşleri",
-      "subtitle": "eBay toplu aktarma ilerlemesini takip edin. Detay için bir işe dokunun.",
-      "empty": "İçe aktarma işi bulunamadı.",
-      "emptyTitle": "Henüz içe aktarma işi yok",
-      "emptySubtitle": "Liste oluşturduğunuzda işler burada görünür; ilerleme ve hataları takip edebilirsiniz.",
+      "title": "Liste İşleri",
+      "subtitle": "Toplu oluşturma, içe aktarma ve yayınlama işlemlerinin ilerlemesi ve ürün bazlı sonuçları. Detay için bir işe dokunun.",
+      "empty": "İş bulunamadı.",
+      "emptyTitle": "Henüz iş yok",
+      "emptySubtitle": "Liste oluşturduğunuzda, içe aktardığınızda veya yayınladığınızda işler burada görünür; ilerleme ve hataları takip edebilirsiniz.",
       "emptyLoading": "İşler yükleniyor…",
       "filters": {
         "searchPlaceholder": "ASIN ile ara…",
@@ -55,7 +55,7 @@
       },
       "details": {
         "title": "İş detayı",
-        "subtitle": "Bu aktarma işinin ürün bazlı durumu",
+        "subtitle": "Bu işin ürün bazlı durumu",
         "summary": "Özet",
         "itemsTitle": "İş kalemleri",
         "itemsSubtitle": "Bu işte {{count}} ASIN",
@@ -250,7 +250,7 @@
       "title": "Yeni Liste Ekle",
       "subtitle": "ASIN ile Amazon ürünlerini eBay mağazanıza aktarın.",
       "create": "Yeni Liste Oluştur",
-      "jobs": "İçe Aktarma İşlerini Gör"
+      "jobs": "Liste İşlerini Gör"
     },
     "draftMode": {
       "title": "Taslak olarak kaydet",
@@ -262,8 +262,8 @@
     "otherActions": {
       "title": "Diğer İşlemler",
       "subtitle": "Listelerinizle ilgili ek işlemleri buradan yapabilirsiniz.",
-      "jobsTitle": "İçe Aktarma İşlerini Gör",
-      "jobsSubtitle": "Toplu içe aktarma işlemlerinin durumunu takip edin.",
+      "jobsTitle": "Liste İşlerini Gör",
+      "jobsSubtitle": "Toplu liste işlemlerinin durumunu takip edin.",
       "draftsTitle": "Taslakları gör",
       "draftsSubtitle": "eBay'e yayınlamadan önce hazırlanan listeleri inceleyin."
     },
@@ -298,7 +298,10 @@
       "publishSuccessTitle": "Yayınlandı",
       "publishSuccess": "{{count}} liste eBay'de başarıyla yayınlandı.",
       "publishErrorTitle": "Yayın başarısız",
-      "publishError": "Bir veya daha fazla taslak yayınlanamadı. Stok ve eBay hesabını kontrol edin."
+      "publishError": "Seçili taslakların hiçbiri yayınlanamadı. Her birinin nedenini görmek için detayları açın.",
+      "publishPartialTitle": "Kısmen yayınlandı",
+      "publishPartial": "{{count}} taslak yayınlandı, {{failed}} tanesi başarısız oldu. Her birinin neden başarısız olduğunu görmek için detayları açın.",
+      "publishViewDetails": "Detayları gör"
     },
     "modals": {
       "endTitle": "Seçili Listeler Bitirilsin mi?",
@@ -324,7 +327,7 @@
     },
     "success": {
       "created": "{{count}} liste başarıyla oluşturuldu",
-      "queued": "{{count}} ürün içe aktarma sırasına alındı. Durumu 'İçe Aktarma İşleri' sekmesinden takip edebilirsiniz.",
+      "queued": "{{count}} ürün işleme sırasına alındı. Durumu 'Liste İşleri' sekmesinden takip edebilirsiniz.",
       "queuedDraft": "{{count}} taslak sıraya alındı — yayınlayana kadar eBay'de canlı olmayacak"
     },
     "errors": {
