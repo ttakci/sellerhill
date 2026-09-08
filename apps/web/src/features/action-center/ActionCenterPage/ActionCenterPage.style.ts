@@ -4,24 +4,13 @@ import { Badge, Card, PageContainer, SettingsCard, Text, tkn } from '@repo/ui';
 export const Container = PageContainer;
 
 /**
- * Filter rail. `nowrap` + horizontal scroll rather than wrapping, for the same
- * reason the dashboard toolbar does it: a control that reflows onto a second
- * line on a narrow screen shifts every card below it.
+ * Spacing wrapper for the severity filter rail. The rail itself is the shared
+ * `TabNav` atom (`underline` variant — the same rail the Dashboard section tabs
+ * use), which owns its own `nowrap` + horizontal-scroll behaviour and paints
+ * its own bottom border; this wrapper only holds it off the group grid below.
  */
 export const Toolbar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: ${tkn('spacing.md')};
   margin-bottom: ${tkn('spacing.lg')};
-
-  /* The rail scrolls; it must not paint its own scrollbar over the page. */
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
 `;
 
 /**

@@ -23,6 +23,7 @@
       "info": "Öneri"
     },
     "filter": {
+      "ariaLabel": "Aciliyet seviyesi",
       "all": "Tümü",
       "critical": "Kritik",
       "warning": "Uyarı",

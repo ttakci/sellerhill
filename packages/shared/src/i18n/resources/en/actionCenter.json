@@ -23,6 +23,7 @@
       "info": "Suggestion"
     },
     "filter": {
+      "ariaLabel": "Urgency level",
       "all": "All",
       "critical": "Critical",
       "warning": "Warning",

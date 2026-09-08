@@ -13,10 +13,10 @@ import type { BadgeVariant, IconName } from '@repo/ui';
 /**
  * The severity filter's "no filter" value.
  *
- * A real value rather than `undefined` because it feeds `SegmentedControl`,
- * which is a controlled string input — an undefined value renders the rail with
- * nothing selected. It lives here and not in `.types.ts`, which holds type
- * declarations only.
+ * A real value rather than `undefined` because it feeds the shared `TabNav`
+ * rail, which is a controlled string input — an undefined value renders the
+ * rail with nothing selected. It lives here and not in `.types.ts`, which holds
+ * type declarations only.
  */
 export const ACTION_CENTER_FILTER_ALL = 'all';
 
@@ -32,6 +32,23 @@ export const severityToBadgeVariant = (severity: ActionCenterSeverity): BadgeVar
   };
   return map[severity] ?? 'neutral';
 };
+
+/**
+ * Tab icon for the severity filter rail. `all` gets a neutral "everything
+ * listed" glyph; the three severities reuse the SAME urgency language as their
+ * badge colour above — `shield-alert` / `alert-triangle` / `triangle-info` —
+ * so a tab and the item badges it filters to can never read differently.
+ */
+const FILTER_ICON: Record<ActionCenterSeverity | typeof ACTION_CENTER_FILTER_ALL, IconName> = {
+  [ACTION_CENTER_FILTER_ALL]: 'format-list-bulleted',
+  [ActionCenterSeverity.CRITICAL]: 'shield-alert',
+  [ActionCenterSeverity.WARNING]: 'alert-triangle',
+  [ActionCenterSeverity.INFO]: 'triangle-info',
+};
+
+export const filterToIcon = (
+  filter: ActionCenterSeverity | typeof ACTION_CENTER_FILTER_ALL,
+): IconName => FILTER_ICON[filter];
 
 /**
  * Group header icon. Reuses the exact glyph the sidebar nav already draws for

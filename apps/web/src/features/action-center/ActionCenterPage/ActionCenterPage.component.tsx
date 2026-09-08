@@ -6,7 +6,7 @@
  * makes no decisions — it only lays them out.
  */
 
-import { EmptyState, Icon, PageHeader, SegmentedControl, Text } from '@repo/ui';
+import { EmptyState, Icon, PageHeader, TabNav, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -142,13 +142,18 @@ export const ActionCenterPage: React.FC<ActionCenterPageComponentProps> = ({
       ) : (
         <>
           <S.Toolbar>
-            <SegmentedControl options={filterOptions} value={filter} onChange={onFilterChange} />
+            <TabNav
+              items={filterOptions}
+              value={filter}
+              onChange={onFilterChange}
+              ariaLabel={t('actionCenter.filter.ariaLabel')}
+            />
           </S.Toolbar>
 
           {groups.length === 0 ? (
             <S.StateCard padding="lg">
               <EmptyState
-                icon="filter"
+                icon="shield-check"
                 title={t('actionCenter.emptyFiltered.title')}
                 description={t('actionCenter.emptyFiltered.description')}
               />

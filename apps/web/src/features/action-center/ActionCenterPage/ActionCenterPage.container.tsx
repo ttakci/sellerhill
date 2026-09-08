@@ -8,10 +8,11 @@
  */
 
 import { ActionCenterSeverity, type ActionCenterGroupDto, type ActionCenterItemDto } from '@repo/shared';
+import type { TabNavItem } from '@repo/ui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey } from '../actionCenterPresentation';
+import { ACTION_CENTER_FILTER_ALL, breakdownLabelKey, filterToIcon } from '../actionCenterPresentation';
 import { ACTION_CENTER_POLL_INTERVAL_MS, useGetActionCenterQuery } from '../api/actionCenterApi';
 
 import { ActionCenterPage as ActionCenterPageComponent } from './ActionCenterPage.component';
@@ -87,27 +88,32 @@ export const ActionCenterPageContainer: React.FC = () => {
   }, [data?.groups, filter, toGroupView]);
 
   /**
-   * Filter options carry their own counts, so the rail doubles as the summary
-   * strip — one control instead of a chip row and a filter that repeat each
-   * other.
+   * Tab items for the shared `TabNav` rail (`underline` variant — the same rail
+   * the Dashboard section tabs use). Each carries its own count, so the rail
+   * doubles as the summary strip — one control instead of a chip row and a
+   * filter that repeat each other.
    */
-  const filterOptions = useMemo(
+  const filterOptions = useMemo<TabNavItem[]>(
     () => [
       {
+        id: ACTION_CENTER_FILTER_ALL,
         label: `${t('actionCenter.filter.all')} · ${data?.totalCount ?? 0}`,
-        value: ACTION_CENTER_FILTER_ALL,
+        icon: filterToIcon(ACTION_CENTER_FILTER_ALL),
       },
       {
+        id: ActionCenterSeverity.CRITICAL,
         label: `${t('actionCenter.filter.critical')} · ${data?.criticalCount ?? 0}`,
-        value: ActionCenterSeverity.CRITICAL,
+        icon: filterToIcon(ActionCenterSeverity.CRITICAL),
       },
       {
+        id: ActionCenterSeverity.WARNING,
         label: `${t('actionCenter.filter.warning')} · ${data?.warningCount ?? 0}`,
-        value: ActionCenterSeverity.WARNING,
+        icon: filterToIcon(ActionCenterSeverity.WARNING),
       },
       {
+        id: ActionCenterSeverity.INFO,
         label: `${t('actionCenter.filter.info')} · ${data?.infoCount ?? 0}`,
-        value: ActionCenterSeverity.INFO,
+        icon: filterToIcon(ActionCenterSeverity.INFO),
       },
     ],
     [t, data?.totalCount, data?.criticalCount, data?.warningCount, data?.infoCount],
