@@ -37,7 +37,7 @@ import {
   type BillingConfig,
 } from './billing-helpers';
 import type { ParsedStripeEvent } from './billing.types';
-import { advisoryLockKey, billingCustomerLockKey, utcMonthBounds } from './quota-helpers';
+import { advisoryLockKey, billingCustomerLockKey, type QuotaWindow } from './quota-helpers';
 
 
 interface PlanEntity {
@@ -302,8 +302,11 @@ export class BillingRepositoryService {
   }
 
   /**
-   * Open the current calendar month's usage period for a (subscription, limit)
-   * if it is not open already, and close any period whose end has passed.
+   * Open the usage period covering `window` for a (subscription, limit) if it
+   * is not open already, and close any OTHER period still open for the pair.
+   * The window is the subscription's own billing period (Task 1), not the UTC
+   * calendar month — a seller who subscribed mid-month was otherwise handed
+   * roughly two allowances per payment.
    *
    * THIS IS THE FIX FOR A DEAD TABLE. Nothing in the codebase had ever
    * INSERTed into `billing_usage_periods` — there was a SELECT and a
@@ -331,17 +334,21 @@ export class BillingRepositoryService {
     subscriptionId: string,
     kind: BillingLimitKey,
     limitValue: number,
-    now: Date = new Date(),
+    window: QuotaWindow,
   ): Promise<string | null> {
-    const { periodStart, periodEnd } = utcMonthBounds(now);
+    const { periodStart, periodEnd } = window;
     try {
-      // Close anything that has run out, so a stale period cannot be picked up
-      // as "the current one" below.
+      // Close every other open period for this pair. The old predicate was
+      // `period_end <= $3`, which cannot close an overlapping calendar-era row
+      // ([Sep 1, Oct 1) against a new [Sep 15, Oct 15) window) and left two
+      // rows open. One open period per (subscription, limit_key) is the
+      // invariant; concurrent callers derive the identical window from the same
+      // subscription row, so they cannot close each other's.
       await this.databaseService.query(
         `UPDATE billing_usage_periods
             SET status = 'closed', closed_at = COALESCE(closed_at, NOW()), updated_at = NOW()
           WHERE subscription_id = $1 AND limit_key = $2
-            AND status = 'open' AND period_end <= $3`,
+            AND status = 'open' AND period_start <> $3`,
         [subscriptionId, kind, periodStart.toISOString()],
       );
 
@@ -393,7 +400,7 @@ export class BillingRepositoryService {
   }
 
   /**
-   * Count tracking conversions actually performed this calendar month.
+   * Count tracking conversions actually performed inside `window`.
    *
    * Read straight from `orders` rather than from a reservation ledger, and that
    * is deliberate. A conversion is a single synchronous act with a durable
@@ -402,13 +409,16 @@ export class BillingRepositoryService {
    * from what really happened. Here the count IS the conversions that occurred:
    * a failed conversion writes nothing and therefore costs no quota, which is
    * also the correct billing answer since we only pay the provider on success.
+   *
+   * Bounded at BOTH ends. The old query had no upper bound, which was safe only
+   * because a calendar window always contains "now"; a pinned, possibly-lapsed
+   * billing window does not, so a conversion outside it must not be counted.
    */
-  async countMonthlyConversions(
+  async countConversionsInWindow(
     userId: string,
-    now: Date = new Date(),
+    window: QuotaWindow,
     client?: PoolClient,
   ): Promise<number> {
-    const { periodStart } = utcMonthBounds(now);
     const rows = await this.run<{ cnt: string }>(
       // Both spellings: `normalizeProvider` collapses the legacy 'api' alias
       // onto AQUILINE before persisting, but matching only the canonical value
@@ -417,12 +427,14 @@ export class BillingRepositoryService {
       `SELECT COUNT(*)::text AS cnt FROM orders
         WHERE user_id = $1
           AND tracking_provider IN ($2, $3)
-          AND tracking_converted_at >= $4`,
+          AND tracking_converted_at >= $4
+          AND tracking_converted_at < $5`,
       [
         userId,
         TrackingConversionProvider.AQUILINE,
         TrackingConversionProvider.API,
-        periodStart.toISOString(),
+        window.periodStart.toISOString(),
+        window.periodEnd.toISOString(),
       ],
       client,
     );
@@ -455,25 +467,28 @@ export class BillingRepositoryService {
   }
 
   /**
-   * Extra allowance the user bought for the CURRENT calendar month.
+   * Extra allowance the user bought for the CURRENT billing window.
    *
    * Summed rather than decremented: a credit raises the ceiling, and usage is
    * still counted the one way it always was. That is what keeps the number the
    * seller sees and the number the gate enforces from ever disagreeing — a
    * separate consumption ledger would be a second accounting of the same
    * quantity, and those drift.
+   *
+   * Keyed on `window.periodStart`, the same value `grantQuotaCredit` stamps on
+   * the credit row, so a top-up and its lookup always agree on which window
+   * they belong to.
    */
   async sumQuotaCredits(
     userId: string,
     limitKey: BillingLimitKey,
-    now: Date = new Date(),
+    window: QuotaWindow,
   ): Promise<number> {
-    const { periodStart } = utcMonthBounds(now);
     const rows = await this.databaseService.query<{ total: string | null }>(
       `SELECT COALESCE(SUM(quantity), 0)::text AS total
          FROM billing_quota_credits
         WHERE user_id = $1 AND limit_key = $2 AND period_start = $3`,
-      [userId, limitKey, periodStart.toISOString()],
+      [userId, limitKey, window.periodStart.toISOString()],
     );
     return Number(rows[0]?.total ?? 0);
   }
@@ -494,9 +509,8 @@ export class BillingRepositoryService {
     providerEventId: string;
     amountMicros: number | null;
     currency: string | null;
-    now?: Date;
+    window: QuotaWindow;
   }): Promise<boolean> {
-    const { periodStart } = utcMonthBounds(params.now ?? new Date());
     const rows = await this.databaseService.query<{ id: string }>(
       `INSERT INTO billing_quota_credits
          (user_id, limit_key, quantity, period_start, addon_id,
@@ -508,7 +522,7 @@ export class BillingRepositoryService {
         params.userId,
         params.limitKey,
         params.quantity,
-        periodStart.toISOString(),
+        params.window.periodStart.toISOString(),
         params.addonId,
         params.providerEventId,
         params.amountMicros,
@@ -520,7 +534,7 @@ export class BillingRepositoryService {
 
   /**
    * The ceiling that is actually enforced: the plan's limit PLUS credits bought
-   * for the current calendar month.
+   * for the current billing window.
    *
    * Lives here, not in a service, because BOTH the quota gate and the billing
    * summary need it. If the gate resolved the plan limit while the summary
@@ -535,14 +549,14 @@ export class BillingRepositoryService {
     userId: string,
     subscriptionId: string,
     limitKey: BillingLimitKey,
-    now: Date = new Date(),
+    window: QuotaWindow,
   ): Promise<{ limitValue: number | null; creditValue: number }> {
     const planLimit = await this.resolveLimitValue(subscriptionId, limitKey);
     if (planLimit === null || planLimit === -1) {
       return { limitValue: planLimit, creditValue: 0 };
     }
     try {
-      const creditValue = await this.sumQuotaCredits(userId, limitKey, now);
+      const creditValue = await this.sumQuotaCredits(userId, limitKey, window);
       return { limitValue: planLimit + creditValue, creditValue };
     } catch (err) {
       // Fail to the PLAN limit, never to unlimited. A credit lookup that fails

@@ -30,6 +30,7 @@ import { BillingInterval, BillingSubscriptionStatus, type BillingSubscriptionDto
 
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type ParsedStripeEvent } from './billing.types';
+import { resolveQuotaWindow } from './quota-helpers';
 
 // Module-scope logger (not a class member — this file is a set of pure/
 // impure functions, not a NestJS provider) for the one place below that
@@ -296,6 +297,13 @@ async function applyAddonPurchase(
     return { kind: 'ignored', reason: 'unknown_addon' };
   }
 
+  // The webhook carries only a userId, so the window is resolved here — the one
+  // added query in this change. No subscription (rule 1) means the calendar
+  // month, which is harmless: a user with no subscription cannot have reached a
+  // top-up checkout.
+  const creditSubscription = await repository.findCurrentSubscription(userId);
+  const creditWindow = resolveQuotaWindow(creditSubscription, new Date());
+
   const granted = await repository.grantQuotaCredit({
     userId,
     limitKey: addon.limitKey,
@@ -307,6 +315,7 @@ async function applyAddonPurchase(
     providerEventId: event.eventId ?? `session:${String(session.id ?? '')}`,
     amountMicros: typeof session.amount_total === 'number' ? session.amount_total * 10_000 : null,
     currency: typeof session.currency === 'string' ? session.currency.toUpperCase() : null,
+    window: creditWindow,
   });
 
   return granted

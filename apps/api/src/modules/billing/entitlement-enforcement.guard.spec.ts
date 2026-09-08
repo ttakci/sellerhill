@@ -26,8 +26,10 @@ describe('entitlement enforcement invariants', () => {
 
     it('resolves entitlement from the shared function, not a local status list', () => {
       // A hand-written status check here is how five enforcement points drift
-      // apart; resolveEntitlementState is the single definition.
-      expect(src).toMatch(/resolveEntitlementState\(/);
+      // apart; resolveEffectiveEntitlement (which wraps the shared
+      // resolveEntitlementState and adds the stale-window guard) is the single
+      // definition.
+      expect(src).toMatch(/resolveEffectiveEntitlement\(/);
       expect(src).toMatch(/EntitlementState\.SUSPENDED/);
     });
 

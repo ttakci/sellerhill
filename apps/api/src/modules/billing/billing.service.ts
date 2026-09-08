@@ -55,6 +55,7 @@ import {
   type BillingSummaryDto,
 } from './billing.types';
 import { isCardExpiringSoon } from './payment-method-helpers';
+import { resolveQuotaWindow } from './quota-helpers';
 import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
@@ -222,6 +223,13 @@ export class BillingService {
       return [];
     }
 
+    // Resolve the metering window from the SAME subscription the gate reads, so
+    // the figure shown here and the figure the gate enforces cannot disagree.
+    const graceHours = await this.platformSettings.getNumber(
+      PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    );
+    const window = resolveQuotaWindow(sub, new Date(), graceHours);
+
     const dimensions: Array<{
       limitKey: BillingLimitKey;
       resolve: () => Promise<number>;
@@ -243,11 +251,13 @@ export class BillingService {
             userId,
             sub.id,
             BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+            window,
           );
           const periodId = await this.repository.ensureOpenUsagePeriod(
             sub.id,
             BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
             limit ?? -1,
+            window,
           );
           return this.repository.countReservedSlots(
             sub.id,
@@ -258,7 +268,7 @@ export class BillingService {
       },
       {
         limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
-        resolve: () => this.repository.countMonthlyConversions(userId),
+        resolve: () => this.repository.countConversionsInWindow(userId, window),
       },
     ];
 
@@ -267,7 +277,7 @@ export class BillingService {
         try {
           const [used, effective] = await Promise.all([
             resolve(),
-            this.repository.resolveEffectiveLimit(userId, sub.id, limitKey),
+            this.repository.resolveEffectiveLimit(userId, sub.id, limitKey, window),
           ]);
           // The effective ceiling, not the plan's own number: a seller who just
           // topped up must not still be shown at 100%.
