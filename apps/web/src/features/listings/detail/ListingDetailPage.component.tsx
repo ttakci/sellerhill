@@ -195,6 +195,10 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
     );
   }
 
+  /* A draft is not on eBay, so "applied on the next sync" is untrue for it —
+     its edits take effect at publish. Hide the sync note entirely rather than
+     reword it: a draft's whole job is to be configured before it goes live. */
+  const isDraft = listing.status === ListingStatus.DRAFT;
   const images = listing.imageUrls?.length ? listing.imageUrls : [];
   const mainImage = images[selectedImageIndex] ?? images[0];
   const profit = listing.estimatedProfit ?? 0;
@@ -236,7 +240,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
         </S.DraftPublishBar>
       ) : null}
 
-      <S.Hero variant="elevated" padding="lg">
+      <S.Hero variant="elevated">
         <S.StatusBadgeSlot>
           <Badge variant={statusVariant(listing.status)} size="sm">
             {statusLabel}
@@ -305,37 +309,52 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
               strings was more chrome than they are worth. */}
           <S.IdList>
             <S.IdItem>
-              <Text variant="caption" color="text.secondary" weight="medium">
-                {t('listings.table.asin')}
-              </Text>
-              <IdBadge id={listing.asin} storeType="amazon" size="sm" />
+              <S.IdItemLabel>
+                <Icon name="barcode" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.table.asin')}
+                </Text>
+              </S.IdItemLabel>
+              <IdBadge id={listing.asin} storeType="amazon" size="sm" plain />
             </S.IdItem>
             {listing.ebayListingId ? (
               <S.IdItem>
-                <Text variant="caption" color="text.secondary" weight="medium">
-                  {t('listings.table.ebayId')}
-                </Text>
-                <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" />
+                <S.IdItemLabel>
+                  <Icon name="tag" size={16} color="brand.primary" />
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('listings.table.ebayId')}
+                  </Text>
+                </S.IdItemLabel>
+                <IdBadge id={listing.ebayListingId} storeType="ebay" size="sm" plain />
               </S.IdItem>
             ) : null}
             <S.IdItem>
-              <Text variant="caption" color="text.secondary" weight="medium">
-                {t('listings.detail.listingId')}
-              </Text>
+              <S.IdItemLabel>
+                <Icon name="key-round" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.detail.listingId')}
+                </Text>
+              </S.IdItemLabel>
               <S.IdValue variant="body-sm">{listing.id}</S.IdValue>
             </S.IdItem>
             <S.IdItem>
-              <Text variant="caption" color="text.secondary" weight="medium">
-                {t('listings.detail.createdAt')}
-              </Text>
+              <S.IdItemLabel>
+                <Icon name="calendar" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.detail.createdAt')}
+                </Text>
+              </S.IdItemLabel>
               <Text variant="body-sm" numeric>
                 {formatDateTime(listing.createdAt)}
               </Text>
             </S.IdItem>
             <S.IdItem>
-              <Text variant="caption" color="text.secondary" weight="medium">
-                {t('listings.detail.updatedAt')}
-              </Text>
+              <S.IdItemLabel>
+                <Icon name="history" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('listings.detail.updatedAt')}
+                </Text>
+              </S.IdItemLabel>
               <S.UpdatedValueRow>
                 <Text variant="body-sm" numeric>
                   {formatDateTime(listing.updatedAt)}
@@ -470,9 +489,11 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             </Meta>
           </S.MetaList>
 
-          <S.AutomationSyncNoteSlot>
-            <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
-          </S.AutomationSyncNoteSlot>
+          {!isDraft ? (
+            <S.AutomationSyncNoteSlot>
+              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+            </S.AutomationSyncNoteSlot>
+          ) : null}
         </SettingsCard>
 
         {/* Automation overrides only — the strategy group has its own card and
@@ -506,16 +527,18 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             ))}
           </S.MetaList>
 
-          <S.AutomationSyncNoteSlot>
-            <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
-          </S.AutomationSyncNoteSlot>
+          {!isDraft ? (
+            <S.AutomationSyncNoteSlot>
+              <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+            </S.AutomationSyncNoteSlot>
+          ) : null}
         </SettingsCard>
 
         <S.FullWidthSettingsCard variant="section" header={{ title: t('listings.detail.productContent') }}>
           <S.ProductContentStack>
             {hasDescription && (
               <S.ProductContentBlock>
-                <Text variant="body-sm" weight="semibold">
+                <Text variant="h5" weight="semibold">
                   {t('listings.detail.description')}
                 </Text>
                 <S.DescriptionBody>
@@ -535,7 +558,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
             {features.length > 0 && (
               <S.ProductContentBlock>
-                <Text variant="body-sm" weight="semibold">
+                <Text variant="h5" weight="semibold">
                   {t('listings.detail.features')}
                 </Text>
                 <S.FeatureList>
@@ -548,13 +571,13 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
             {specEntries.length > 0 && (
               <S.ProductContentBlock>
-                <Text variant="body-sm" weight="semibold">
+                <Text variant="h5" weight="semibold">
                   {t('listings.detail.specs')}
                 </Text>
                 <S.SpecList>
                   {specEntries.map(([key, value]) => (
                     <S.SpecRow key={key}>
-                      <Text variant="caption" color="text.secondary" weight="medium">
+                      <Text variant="body-sm" color="text.secondary">
                         {key}
                       </Text>
                       <Text variant="body-sm" weight="semibold">
@@ -623,7 +646,7 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             searchPlaceholder={t('translation:common.search')}
             noResultsMessage={t('translation:common.noResults')}
           />
-          <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage>
+          {!isDraft ? <InfoMessage>{t('listings.detail.automationSyncNote')}</InfoMessage> : null}
         </S.SectionContent>
       </Drawer>
 

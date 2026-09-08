@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 
 import { tkn } from '../../theme/tkn';
 
-export const BadgeContainer = styled.a<{ $size: 'sm' | 'md'; $isHovered?: boolean }>`
+export const BadgeContainer = styled.a<{ $size: 'sm' | 'md'; $isHovered?: boolean; $plain?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
@@ -15,7 +15,13 @@ export const BadgeContainer = styled.a<{ $size: 'sm' | 'md'; $isHovered?: boolea
     color: ${(p) => p.theme.colors.brand.primary};
   }
 
-  ${({ $size, theme }) => {
+  ${({ $size, $plain, theme }) => {
+    // `plain` matches the surrounding body-sm text; the size switch is skipped.
+    if ($plain) {
+      return css`
+        font-size: ${tkn('typography.fontSize.sm')({ theme })};
+      `;
+    }
     switch ($size) {
       case 'sm':
         return css`
@@ -31,11 +37,15 @@ export const BadgeContainer = styled.a<{ $size: 'sm' | 'md'; $isHovered?: boolea
   }}
 `;
 
-export const IdText = styled.span<{ $size: 'sm' | 'md'; $isHovered?: boolean }>`
-  font-family: ${tkn('typography.fontFamily.mono')};
+export const IdText = styled.span<{ $size: 'sm' | 'md'; $isHovered?: boolean; $plain?: boolean }>`
+  font-family: ${({ $plain }) => ($plain ? tkn('typography.fontFamily.body') : tkn('typography.fontFamily.mono'))};
   font-weight: ${tkn('typography.fontWeight.normal')};
-  color: ${({ $isHovered }) =>
-    $isHovered ? (p: { theme: Theme }) => p.theme.colors.brand.primary : tkn('colors.text.secondary')};
+  color: ${({ $isHovered, $plain }) =>
+    $isHovered
+      ? (p: { theme: Theme }) => p.theme.colors.brand.primary
+      : $plain
+        ? tkn('colors.text.primary')
+        : tkn('colors.text.secondary')};
   transition: color ${tkn('transitions.fast')};
 `;
 

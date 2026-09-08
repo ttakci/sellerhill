@@ -24,8 +24,11 @@ export const ProductTableCell: React.FC<ProductTableCellProps> = ({
         <S.Meta>
           {meta.map((row) => (
             <S.MetaRow key={`${row.label}-${row.id}`}>
-              <S.MetaLabel>{row.label}</S.MetaLabel>
-              <IdBadge id={row.id} storeType={row.storeType} size="sm" />
+              <S.MetaLabelRow>
+                {row.icon ? <Icon name={row.icon} size={14} color="brand.primary" /> : null}
+                <S.MetaLabel>{row.label}</S.MetaLabel>
+              </S.MetaLabelRow>
+              <IdBadge id={row.id} storeType={row.storeType} size="sm" plain />
             </S.MetaRow>
           ))}
         </S.Meta>

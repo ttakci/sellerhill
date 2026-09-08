@@ -113,14 +113,25 @@ export const MetaList = styled.div`
 
 export const MetaRow = styled.div`
   display: grid;
-  grid-template-columns: 5rem minmax(0, 1fr);
+  grid-template-columns: 5.75rem minmax(0, 1fr);
   column-gap: ${tkn('spacing.sm')};
-  align-items: baseline;
+  align-items: center;
+  min-width: 0;
+`;
+
+/** Leading icon + label, left column of a meta row — mirrors the job-item cards. */
+export const MetaLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
   min-width: 0;
 `;
 
 export const MetaLabel = styled(Text)`
   line-height: ${tkn('typography.lineHeight.tight')};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const MetaValue = styled.div`

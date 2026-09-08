@@ -32,22 +32,28 @@ export const Hero = styled(Card)`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
+  /* Roomier than the Card atom's own \`lg\` inset (~17px) — this is the page's
+     headline surface and read as cramped at the smaller padding. Set here
+     rather than via the \`padding\` prop because the atom's scale stops at \`lg\`. */
+  padding: ${tkn('spacing.lg')};
 
   @media (min-width: ${tkn('breakpoints.md')}) {
-    grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+    align-items: stretch;
+    gap: ${tkn('spacing.xl')};
+    padding: ${tkn('spacing.xl')};
   }
 
   @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
   }
 `;
 
 /** Status badge pinned to the hero card's top-right corner. */
 export const StatusBadgeSlot = styled.div`
   position: absolute;
-  top: ${tkn('spacing.md')};
-  right: ${tkn('spacing.md')};
+  top: ${tkn('spacing.lg')};
+  right: ${tkn('spacing.lg')};
 `;
 
 export const GalleryBlock = styled.div`
@@ -121,6 +127,15 @@ export const HeroInfo = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
+
+  /* The grid stretches this column to the card's full height (align-items:
+     stretch), so the content can spread top-to-bottom instead of bunching at
+     the top with dead white space beneath. Small top padding nudges the title
+     clear of the gallery's top edge; \`KpiStrip\`'s \`margin-top: auto\` takes the
+     slack below. */
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding-top: ${tkn('spacing.md')};
+  }
 `;
 
 export const TitleRow = styled.div`
@@ -186,6 +201,14 @@ export const IdItem = styled.div`
   }
 `;
 
+/** Leading icon + label for an id / timestamp row — matches the fact-card Meta rows. */
+export const IdItemLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
 /** The internal listing UUID — long, unwrappable, and never read in full. */
 export const IdValue = styled(Text)`
   overflow: hidden;
@@ -216,9 +239,17 @@ export const KpiStrip = styled.div`
   display: flex;
   flex-wrap: wrap;
   row-gap: ${tkn('spacing.md')};
+  /* Base: a small separation from the id list above (on top of HeroInfo's gap). */
+  margin-top: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.md')};
   border-radius: ${tkn('radius.md')};
   background: ${tkn('colors.background.tertiary')};
+
+  /* From md up HeroInfo is card-height, so push the profit bar to the bottom —
+     it fills the card and gains breathing room above it in one move. */
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    margin-top: auto;
+  }
 `;
 
 export const KpiItem = styled.div`

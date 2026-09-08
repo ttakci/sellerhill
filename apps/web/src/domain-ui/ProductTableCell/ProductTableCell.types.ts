@@ -1,10 +1,12 @@
-import type { StoreType } from '@repo/ui';
+import type { IconName, StoreType } from '@repo/ui';
 import type { ReactNode } from 'react';
 
 export interface ProductTableCellMetaRow {
   label: string;
   id: string;
   storeType: StoreType;
+  /** Leading row icon — matches the listing cards (barcode for ASIN, tag for eBay ID). */
+  icon?: IconName;
 }
 
 /**

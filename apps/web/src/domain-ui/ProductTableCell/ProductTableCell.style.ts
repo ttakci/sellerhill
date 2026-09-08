@@ -3,9 +3,13 @@ import { tkn } from '@repo/ui';
 
 export const Cell = styled.div`
   display: flex;
-  align-items: flex-start;
+  /* Image centred against the copy block — the two-line title + id rows are
+     usually taller than the 4.5rem thumb, so flex-start left it hugging the top. */
+  align-items: center;
   /* Image ↔ copy separation (was tight at spacing.sm on the orders table) */
   gap: ${tkn('spacing.md')};
+  /* A little more room than the shared Td padding gives the densest column. */
+  padding: ${tkn('spacing.sm')} 0;
   min-width: 0;
   width: 100%;
 `;
@@ -38,7 +42,7 @@ export const MainInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm+')};
 `;
 
 /** Two-line clamp; the full string is on the tooltip. */
@@ -61,22 +65,42 @@ export const Title = styled.div`
 export const Meta = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
 export const MetaRow = styled.div`
   display: grid;
-  grid-template-columns: 2.75rem minmax(0, 1fr);
+  grid-template-columns: 5.75rem minmax(0, 1fr);
   column-gap: ${tkn('spacing.xs')};
   align-items: center;
   min-width: 0;
+
+  /* The id value (an \`IdBadge plain\`, an <a>) sits one step below the title and
+     the numeric columns — small enough to read as secondary, still body font. */
+  & > a {
+    font-size: ${tkn('typography.fontSize.xs')};
+  }
 `;
 
+/** Leading icon + label — mirrors the listing card's meta rows. */
+export const MetaLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+`;
+
+/** Body font like the rest of the table, one size down (fontSize.xs) so the
+ *  ASIN / eBay ID pair reads as secondary detail under the title — matched to
+ *  its `IdBadge plain` value beside it. */
 export const MetaLabel = styled.span`
   font-family: ${tkn('typography.fontFamily.body')};
   font-size: ${tkn('typography.fontSize.xs')};
   font-weight: ${tkn('typography.fontWeight.medium')};
   color: ${tkn('colors.text.secondary')};
   line-height: ${tkn('typography.lineHeight.tight')};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
