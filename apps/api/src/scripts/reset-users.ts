@@ -35,6 +35,7 @@ import { Pool, type PoolClient } from 'pg';
 
 import {
   assertResetPlanIsSafe,
+  isLocalDatabaseUrl,
   parseResetUsersArgs,
   ResetUsersArgError,
   type ResetUsersArgs,
@@ -50,6 +51,7 @@ const USAGE = [
   '',
   '  --email <email>  Delete only this user (default: every user)',
   '  --products       Also clear the shared products ASIN cache',
+  '  --allow-remote   Permit a DATABASE_URL that is not on this machine',
   '  --yes            Actually perform the deletion',
 ].join('\n');
 
@@ -197,6 +199,19 @@ async function run(): Promise<number> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     logError('DATABASE_URL not set');
+    return 1;
+  }
+
+  // The NODE_ENV check above is fail-OPEN and cannot stand alone: unset,
+  // misspelled or dropped by the shell, it silently passes — and unset is the
+  // COMMON case, since `pnpm dev` never sets it. So the dangerous condition is
+  // established positively from DATABASE_URL. An unparseable URL counts as
+  // remote: "we could not tell" must never read as "safe to wipe".
+  if (!isLocalDatabaseUrl(databaseUrl) && !args.allowRemote) {
+    logError(
+      `refusing to run: ${describeDatabase(databaseUrl)} is not a local database.\n` +
+        'If you really mean to wipe a remote database, re-run with --allow-remote.',
+    );
     return 1;
   }
 

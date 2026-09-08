@@ -21,6 +21,32 @@ export interface ResetUsersArgs {
   confirmed: boolean;
   /** Also clear the shared `products` ASIN cache. Off by default. */
   includeProducts: boolean;
+  /** Required to target a database that is not on this machine. */
+  allowRemote: boolean;
+}
+
+/**
+ * Hosts treated as "this machine".
+ *
+ * The NODE_ENV check alone is fail-OPEN and cannot be the only guard: an unset,
+ * misspelled or shell-dropped NODE_ENV silently passes it — and unset is the
+ * COMMON case, since `pnpm dev` never sets it. So the dangerous condition is
+ * established positively from DATABASE_URL instead: anything not resolvably
+ * local needs --allow-remote.
+ */
+const LOCAL_DB_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']);
+
+/**
+ * Whether DATABASE_URL points at this machine. An unparseable URL is reported
+ * as NOT local — the guard fails closed, because "we could not tell" must never
+ * read as "safe to wipe".
+ */
+export function isLocalDatabaseUrl(databaseUrl: string): boolean {
+  try {
+    return LOCAL_DB_HOSTS.has(new URL(databaseUrl).hostname);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -119,6 +145,7 @@ export function parseResetUsersArgs(argv: readonly string[]): ResetUsersArgs {
   let email: string | null = null;
   let confirmed = false;
   let includeProducts = false;
+  let allowRemote = false;
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -134,6 +161,9 @@ export function parseResetUsersArgs(argv: readonly string[]): ResetUsersArgs {
         break;
       case '--products':
         includeProducts = true;
+        break;
+      case '--allow-remote':
+        allowRemote = true;
         break;
       case '--email': {
         const value = argv[i + 1];
@@ -152,7 +182,7 @@ export function parseResetUsersArgs(argv: readonly string[]): ResetUsersArgs {
     }
   }
 
-  return { email, confirmed, includeProducts };
+  return { email, confirmed, includeProducts, allowRemote };
 }
 
 /** The delete plan for a run, in execution order. */

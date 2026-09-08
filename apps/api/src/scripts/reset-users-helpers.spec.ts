@@ -1,11 +1,32 @@
 import {
   assertResetPlanIsSafe,
   buildResetPlan,
+  isLocalDatabaseUrl,
   parseResetUsersArgs,
   PROTECTED_TABLES,
   RESET_TARGET_TABLES,
   ResetUsersArgError,
 } from './reset-users-helpers';
+
+describe('isLocalDatabaseUrl', () => {
+  it('accepts the usual local hosts', () => {
+    expect(isLocalDatabaseUrl('postgres://u:p@localhost:5432/db')).toBe(true);
+    expect(isLocalDatabaseUrl('postgres://u:p@127.0.0.1:5432/db')).toBe(true);
+  });
+
+  it('rejects a remote host', () => {
+    expect(isLocalDatabaseUrl('postgres://u:p@db.example.com:5432/db')).toBe(false);
+    expect(isLocalDatabaseUrl('postgres://u:p@10.0.0.7:5432/db')).toBe(false);
+  });
+
+  it('treats an unparseable URL as remote — the guard fails CLOSED', () => {
+    // "We could not tell" must never read as "safe to wipe". The NODE_ENV check
+    // this backs up is fail-open on its own: unset is both the common case and
+    // the one that silently passes it.
+    expect(isLocalDatabaseUrl('not a url')).toBe(false);
+    expect(isLocalDatabaseUrl('')).toBe(false);
+  });
+});
 
 describe('parseResetUsersArgs', () => {
   it('defaults to a dry run over every user, keeping the products cache', () => {
@@ -13,6 +34,7 @@ describe('parseResetUsersArgs', () => {
       email: null,
       confirmed: false,
       includeProducts: false,
+      allowRemote: false,
     });
   });
 
@@ -21,6 +43,7 @@ describe('parseResetUsersArgs', () => {
       email: 'a@b.c',
       confirmed: true,
       includeProducts: true,
+      allowRemote: false,
     });
   });
 
@@ -35,6 +58,7 @@ describe('parseResetUsersArgs', () => {
       email: null,
       confirmed: true,
       includeProducts: false,
+      allowRemote: false,
     });
     expect(parseResetUsersArgs(['--', '--email', 'a@b.c']).email).toBe('a@b.c');
   });
@@ -87,7 +111,7 @@ describe('reset plan safety', () => {
 });
 
 describe('buildResetPlan', () => {
-  const args = { email: null, confirmed: true, includeProducts: false };
+  const args = { email: null, confirmed: true, includeProducts: false, allowRemote: false };
 
   it('omits the products cache unless it was asked for', () => {
     expect(buildResetPlan(args).map((t) => t.table)).not.toContain('products');
