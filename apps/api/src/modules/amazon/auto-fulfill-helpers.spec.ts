@@ -1,4 +1,4 @@
-import { AutoFulfillBlockedReason, AutoFulfillStatus } from '@repo/shared';
+import { AutoFulfillBlockedReason, AutoFulfillStatus, OrderStatus } from '@repo/shared';
 
 import {
   meetsCoarseCapGate,
@@ -60,10 +60,14 @@ describe('shouldSkipFulfillStart', () => {
 });
 
 describe('selectResumableOrders', () => {
+  // A row that IS resumable — a suspension-blocked order the seller never
+  // touched (no Amazon id, still pre-shipment on eBay).
   const blocked = (reason: AutoFulfillBlockedReason) => ({
     ebay_order_id: 'o1',
     auto_fulfill_status: AutoFulfillStatus.BLOCKED,
     auto_fulfill_blocked_reason: reason,
+    status: OrderStatus.PROCESSING,
+    amazon_order_id: null,
   });
 
   it('selects only orders blocked by subscription_suspended', () => {
@@ -96,6 +100,8 @@ describe('selectResumableOrders', () => {
           ebay_order_id: 'o2',
           auto_fulfill_status: AutoFulfillStatus.PLACED,
           auto_fulfill_blocked_reason: AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
+          status: OrderStatus.PROCESSING,
+          amazon_order_id: null,
         },
       ]),
     ).toEqual([]);
@@ -103,6 +109,30 @@ describe('selectResumableOrders', () => {
 
   it('is empty for an empty input', () => {
     expect(selectResumableOrders([])).toEqual([]);
+  });
+
+  // DUPLICATE-PURCHASE GUARD: an order the seller already handled by hand during
+  // the lapse must NOT be re-armed for a second real Amazon purchase.
+  it('excludes a row that already has an amazon_order_id (manual link / dry run)', () => {
+    expect(
+      selectResumableOrders([
+        { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), amazon_order_id: 'AMZ-123' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('excludes a row whose eBay status is SHIPPED or COMPLETED', () => {
+    expect(
+      selectResumableOrders([
+        { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.SHIPPED },
+        { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.COMPLETED },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('still selects a suspension block that is pre-shipment with no amazon id', () => {
+    const row = { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.WAITING_SHIPMENT };
+    expect(selectResumableOrders([row])).toEqual([row]);
   });
 });
 

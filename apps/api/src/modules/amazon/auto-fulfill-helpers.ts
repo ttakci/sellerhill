@@ -1,4 +1,8 @@
-import { AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum, AutoFulfillStatus } from '@repo/shared';
+import {
+  AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum,
+  AutoFulfillStatus,
+  OrderStatus,
+} from '@repo/shared';
 
 /**
  * Fail-closed obstacle reasons. Derived from the shared enum
@@ -62,6 +66,10 @@ export interface ResumableOrderRow {
   ebay_order_id: string;
   auto_fulfill_status: string;
   auto_fulfill_blocked_reason: string | null;
+  /** `orders.status` — eBay-side fulfillment state. */
+  status: string;
+  /** Non-null once *anything* bought this item (manual link, dry run). */
+  amazon_order_id: string | null;
 }
 
 /**
@@ -70,15 +78,30 @@ export interface ResumableOrderRow {
  * Scoped to SUBSCRIPTION_SUSPENDED alone. Every other blocked reason describes
  * a condition payment does not change — and CAP is a spend guard, so reviving
  * one would place a purchase the seller capped.
+ *
+ * DUPLICATE-PURCHASE GUARD — this predicate (and the sweep SELECT that mirrors
+ * it) is the ONLY thing in the codebase that moves a `blocked` order back to
+ * `pending`, so it is the only place that can re-arm an order for a real Amazon
+ * purchase. If a seller bought the item by hand during the lapse to save the
+ * eBay sale, re-enqueueing here ships a duplicate. Two independent signals of
+ * "already handled", because they catch different cases:
+ *   - `amazon_order_id` set — someone bought/linked it; a blocked order never
+ *     reached a purchase, so a non-null id is always a manual link or dry run.
+ *     Catches an order still sitting at `processing` after a hand purchase.
+ *   - `status` SHIPPED / COMPLETED — the buyer has been served (eBay tracking
+ *     pushed, or delivery observed). Catches a hand purchase not yet linked.
  */
 export function selectResumableOrders(rows: ResumableOrderRow[]): ResumableOrderRow[] {
-  // The two columns hold enum string values; cast so the comparison is against
-  // the shared enum, not a bare string (`no-unsafe-enum-comparison`).
+  // The enum-typed columns hold enum string values; cast so each comparison is
+  // against the shared enum, not a bare string (`no-unsafe-enum-comparison`).
   return rows.filter(
     (row) =>
       (row.auto_fulfill_status as AutoFulfillStatus) === AutoFulfillStatus.BLOCKED &&
       (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReasonEnum | null) ===
-        AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED,
+        AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED &&
+      row.amazon_order_id === null &&
+      (row.status as OrderStatus) !== OrderStatus.SHIPPED &&
+      (row.status as OrderStatus) !== OrderStatus.COMPLETED,
   );
 }
 

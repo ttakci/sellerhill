@@ -13,6 +13,7 @@ import {
   EbayAccountStatus,
   ListingStatus,
   OrderCostCaptureStatus,
+  OrderStatus,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
@@ -659,14 +660,38 @@ export class OrderSyncService {
    */
   private async resumeSuspendedAutoFulfill(userId: string): Promise<void> {
     try {
+      // DUPLICATE-PURCHASE GUARD. This sweep is the ONLY mechanism in the
+      // codebase that moves a `blocked` order back to `pending`
+      // (`maybeEnqueueAutoFulfill` fires only on a genuine order INSERT, and a
+      // blocked row is never re-inserted), so it is the only place that can
+      // re-arm an order for a real Amazon purchase. If a seller bought the item
+      // by hand during the lapse to save the eBay sale, re-enqueueing here ships
+      // a duplicate. Two independent exclusions, catching different cases:
+      //   - `amazon_order_id IS NULL` — anything non-null means someone already
+      //     bought/linked it (a blocked order never reached a purchase);
+      //     catches a hand purchase still sitting at `processing`.
+      //   - `status NOT IN (shipped, completed)` — the buyer has been served;
+      //     catches a hand purchase not yet linked to an Amazon order id.
+      // `selectResumableOrders` re-applies both in code so the rule stays
+      // unit-testable.
       const rows = await this.databaseService.query<
         ResumableOrderRow & { ebay_account_id: string; sale_total: string | number | null }
       >(
-        `SELECT ebay_order_id, ebay_account_id, sale_total,
+        `SELECT ebay_order_id, ebay_account_id, sale_total, status, amazon_order_id,
                 auto_fulfill_status, auto_fulfill_blocked_reason
            FROM orders
-          WHERE user_id = $1 AND auto_fulfill_status = $2 AND auto_fulfill_blocked_reason = $3`,
-        [userId, AutoFulfillStatus.BLOCKED, AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED]
+          WHERE user_id = $1
+            AND auto_fulfill_status = $2
+            AND auto_fulfill_blocked_reason = $3
+            AND amazon_order_id IS NULL
+            AND status NOT IN ($4, $5)`,
+        [
+          userId,
+          AutoFulfillStatus.BLOCKED,
+          AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
+          OrderStatus.SHIPPED,
+          OrderStatus.COMPLETED,
+        ]
       );
       const resumableIds = new Set(selectResumableOrders(rows).map((r) => r.ebay_order_id));
       if (resumableIds.size === 0) {
@@ -684,26 +709,39 @@ export class OrderSyncService {
         // resolution re-checks the store toggle, the account pool, the
         // round-robin pick, the coarse cap and the AO quota, and writes
         // SKIPPED / BLOCKED itself if any of them still refuse.
-        await this.databaseService.query(
-          `UPDATE orders
-              SET auto_fulfill_status = $1,
-                  auto_fulfill_blocked_reason = NULL,
-                  updated_at = CURRENT_TIMESTAMP
-            WHERE ebay_order_id = $2`,
-          [AutoFulfillStatus.PENDING, row.ebay_order_id]
-        );
-        await this.resolveAndEnqueueAutoFulfill({
-          userId,
-          ebayAccountId: row.ebay_account_id,
-          ebayOrderId: row.ebay_order_id,
-          saleTotal: Number(row.sale_total) || 0,
-        });
-        requeued += 1;
+        try {
+          await this.databaseService.query(
+            `UPDATE orders
+                SET auto_fulfill_status = $1,
+                    auto_fulfill_blocked_reason = NULL,
+                    updated_at = CURRENT_TIMESTAMP
+              WHERE ebay_order_id = $2`,
+            [AutoFulfillStatus.PENDING, row.ebay_order_id]
+          );
+          await this.resolveAndEnqueueAutoFulfill({
+            userId,
+            ebayAccountId: row.ebay_account_id,
+            ebayOrderId: row.ebay_order_id,
+            saleTotal: Number(row.sale_total) || 0,
+          });
+          requeued += 1;
+        } catch (rowErr) {
+          // Restore the blocked state so the row is not stranded at PENDING with
+          // no job — the next tick will pick it up again.
+          const rowMsg = rowErr instanceof Error ? rowErr.message : String(rowErr);
+          this.logger.warn(`Auto-fulfill resume failed for order ${row.ebay_order_id}: ${rowMsg}`);
+          await this.setAutoFulfillBlocked(
+            row.ebay_order_id,
+            AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED
+          ).catch(() => undefined);
+        }
       }
 
-      this.logger.log(
-        `Auto-fulfill resume: re-evaluated ${requeued} suspension-blocked order(s) for user ${userId}`
-      );
+      if (requeued > 0) {
+        this.logger.log(
+          `Auto-fulfill resume: re-evaluated ${requeued} suspension-blocked order(s) for user ${userId}`
+        );
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(`Auto-fulfill resume sweep skipped for user ${userId}: ${msg}`);
