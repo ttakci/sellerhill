@@ -240,6 +240,59 @@ export function deriveSummaryTransition(
 }
 
 // ---------------------------------------------------------------------------
+// Subscription upsert SQL (pure — the monotonic-period guard)
+// ---------------------------------------------------------------------------
+
+/**
+ * The `INSERT … ON CONFLICT … DO UPDATE` for
+ * `BillingRepositoryService.upsertSubscriptionByProvider`, built pure so the
+ * period-rewind guard can be unit-tested without a database.
+ *
+ * `current_period_start` is the quota window's anchor: usage is counted from
+ * it, so moving it BACKWARD instantly makes the window look stale and would
+ * suspend a live, paid account. Stripe only ever moves the period start
+ * forward (a renewal, a scheduled downgrade's start), but `isStaleEvent` only
+ * rejects deliveries older than `BILLING_WEBHOOK_STALE_MINUTES` (default
+ * 1440) — a retried delivery landing within 24h AFTER a newer one would
+ * otherwise rewrite the anchor backward.
+ *
+ * So the webhook path (`allowPeriodRewind = false`) guards the UPDATE with
+ * `EXCLUDED.current_period_start >= billing_subscriptions.current_period_start`:
+ * an out-of-order delivery becomes a no-op (the UPDATE is skipped, `RETURNING`
+ * yields no row, and the caller keeps the newer row).
+ *
+ * `billing:reconcile` passes `allowPeriodRewind = true` and is the ONE caller
+ * that legitimately writes an EARLIER start: a row corrupted by
+ * `extractStripeSubscriptionFields`' `now()/+30d` fallback carries a start of
+ * "webhook-receipt time", and repairing it means writing Stripe's real,
+ * earlier date. Reconcile is an explicit operator action asserting Stripe's
+ * truth, so it is exactly the caller that should bypass the guard — the
+ * webhook, which cannot vouch for delivery order, must not.
+ */
+export function buildSubscriptionUpsertSql(allowPeriodRewind: boolean): string {
+  const monotonicGuard = allowPeriodRewind
+    ? ''
+    : '\n       WHERE EXCLUDED.current_period_start >= billing_subscriptions.current_period_start';
+  return `INSERT INTO billing_subscriptions
+         (customer_id, plan_id, status, interval,
+          current_period_start, current_period_end, canceled_at, ended_at,
+          provider_subscription_id, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       ON CONFLICT (provider_subscription_id) WHERE provider_subscription_id IS NOT NULL
+       DO UPDATE SET
+         plan_id = EXCLUDED.plan_id,
+         status = EXCLUDED.status,
+         interval = EXCLUDED.interval,
+         current_period_start = EXCLUDED.current_period_start,
+         current_period_end = EXCLUDED.current_period_end,
+         canceled_at = EXCLUDED.canceled_at,
+         ended_at = EXCLUDED.ended_at,
+         metadata = EXCLUDED.metadata,
+         updated_at = NOW()${monotonicGuard}
+       RETURNING *`;
+}
+
+// ---------------------------------------------------------------------------
 // Stale-event protection (pure)
 // ---------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@
 // applyStripeEvent (which calls the repository) is not tested here; it is an
 // orchestrator over repository methods that are themselves DB-backed.
 
+import { Logger } from '@nestjs/common';
 import { BillingInterval, BillingSubscriptionStatus } from '@repo/shared';
 
 import type { ParsedStripeEvent } from './billing.types';
@@ -20,6 +21,17 @@ function makeEvent(object: Record<string, unknown>, eventType = 'customer.subscr
 }
 
 describe('extractStripeSubscriptionFields', () => {
+  // The now()/+30d fallback for a missing billing period is now logged at
+  // `error` (it silently synthesises the quota window's anchor). Silence it for
+  // the bulk of these tests and assert it explicitly in the two below.
+  let errorSpy: jest.SpyInstance;
+  beforeEach(() => {
+    errorSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+  });
+  afterEach(() => {
+    errorSpy.mockRestore();
+  });
+
   it('returns null for an event type that is not a subscription lifecycle event', () => {
     expect(extractStripeSubscriptionFields(makeEvent({ id: 'sub_1', status: 'active' }, 'invoice.paid'))).toBeNull();
   });
@@ -131,6 +143,32 @@ describe('extractStripeSubscriptionFields', () => {
     const endMs = fields!.currentPeriodEnd.getTime();
     expect(endMs - startMs).toBeGreaterThan(28 * 24 * 60 * 60 * 1000);
     expect(endMs - startMs).toBeLessThan(32 * 24 * 60 * 60 * 1000);
+  });
+
+  it('logs LOUDLY at error when a period date is missing and the window is synthesised', () => {
+    // The fallback stays (a missing period must not reject the webhook) but it
+    // is no longer silent: synthesising the anchor from webhook-receipt time
+    // grants a fresh allowance on no evidence of payment.
+    extractStripeSubscriptionFields(makeEvent({ id: 'sub_LOUD', status: 'active' }));
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    const msg = String((errorSpy.mock.calls as unknown[][])[0]?.[0]);
+    expect(msg).toContain('sub_LOUD');
+    expect(msg).toContain('current_period_start + current_period_end');
+    expect(msg).toMatch(/SYNTHESIS/i);
+    expect(msg).toContain('billing:reconcile');
+  });
+
+  it('does NOT log when both period dates are present on the item', () => {
+    extractStripeSubscriptionFields(
+      makeEvent({
+        id: 'sub_ok',
+        status: 'active',
+        items: {
+          data: [{ current_period_start: 1753776000, current_period_end: 1756368000 }],
+        },
+      }),
+    );
+    expect(errorSpy).not.toHaveBeenCalled();
   });
 
   it('parses current_period_start/end from the first subscription item', () => {

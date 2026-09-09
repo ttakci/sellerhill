@@ -105,9 +105,32 @@ export function extractStripeSubscriptionFields(event: ParsedStripeEvent): Strip
   // starting at webhook-receipt time instead of its real Stripe dates. The
   // fallback stays as a genuine last resort (a malformed/itemless payload),
   // not the common path it silently became.
-  const start = parseUnixSeconds(item?.current_period_start) ?? new Date();
-  const end =
-    parseUnixSeconds(item?.current_period_end) ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+  //
+  // It is now LOUD. `current_period_start` anchors the quota window (usage is
+  // counted from it), so a webhook that hits this fallback grants a fresh full
+  // allowance dated from receipt time — the original defect through a new
+  // door. A missing period must still not reject the webhook, so the fallback
+  // stays; but it is logged at `error` so it is visible and recoverable
+  // (`pnpm --filter api billing:reconcile --email <user>`).
+  const rawStart = parseUnixSeconds(item?.current_period_start);
+  const rawEnd = parseUnixSeconds(item?.current_period_end);
+  if (rawStart === null || rawEnd === null) {
+    const missing = [
+      rawStart === null ? 'current_period_start' : null,
+      rawEnd === null ? 'current_period_end' : null,
+    ]
+      .filter(Boolean)
+      .join(' + ');
+    logger.error(
+      `Stripe subscription ${providerSubscriptionId}: webhook payload carried no ${missing} ` +
+        `on its first item — SYNTHESISING the quota window (start=now, end=start+30d). ` +
+        `Usage allowance for this account is now anchored to webhook-receipt time, not ` +
+        `Stripe's real billing period. Run \`pnpm --filter api billing:reconcile\` for this ` +
+        `account to restore the true dates.`,
+    );
+  }
+  const start = rawStart ?? new Date();
+  const end = rawEnd ?? new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   const canceledAt = status === BillingSubscriptionStatus.CANCELED ? parseUnixSeconds(sub.canceled_at) ?? new Date() : null;
   const endedAt = status === BillingSubscriptionStatus.ENDED ? parseUnixSeconds(sub.ended_at) ?? new Date() : null;

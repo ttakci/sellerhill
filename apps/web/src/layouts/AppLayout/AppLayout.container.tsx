@@ -2,7 +2,6 @@ import {
   EntitlementState,
   isOperatorRole,
   ListingStatus,
-  resolveEntitlementState,
   type SupportedLocale,
 } from '@repo/shared';
 import { getLocaleConfig, SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
@@ -145,10 +144,14 @@ export const AppLayout: React.FC = () => {
   const { data: billingSummary } = useGetBillingSummaryQuery(undefined, {
     skip: !isAuthenticated || isOperatorRole(user?.role),
   });
+  // Reads the server-resolved EFFECTIVE entitlement, not the raw subscription
+  // status: a lost renewal webhook leaves `subscription.status` at 'active'
+  // while every backend gate has already stopped. `getSummary` folds the
+  // stale-window guard into `entitlement` so this predicate — and the
+  // redirect below — catch that case.
   const isSuspended =
     Boolean(billingSummary?.enforcementEnabled) &&
-    resolveEntitlementState(billingSummary?.subscription?.status ?? null) ===
-      EntitlementState.SUSPENDED;
+    billingSummary?.entitlement === EntitlementState.SUSPENDED;
 
   /*
    * The same three meters the Billing page shows, surfaced in the profile

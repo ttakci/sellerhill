@@ -18,6 +18,7 @@ import {
   DashboardPeriodKey,
   EbayAccountStatus,
   EbayMarketplaceId,
+  EntitlementState,
   ListingFailureCode,
   ListingJobKind,
   ListingJobStatus,
@@ -1319,6 +1320,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
     enforcementEnabled: true,
     provider: BillingProvider.STRIPE,
     transition: 'active',
+    entitlement: EntitlementState.ACTIVE,
   };
 }
 

@@ -11,6 +11,7 @@ import {
 
 import {
   buildSubscriptionsQuery,
+  buildSubscriptionUpsertSql,
   deriveSummaryTransition,
   expandPlan,
   isProviderConfigured,
@@ -258,5 +259,44 @@ describe('buildSubscriptionsQuery', () => {
     expect(where).toContain('current_period_start');
     expect(where).toContain('current_period_end');
     expect(params).toEqual(['2026-07-27T12:00:00Z']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildSubscriptionUpsertSql — the monotonic current_period_start guard
+// ---------------------------------------------------------------------------
+
+describe('buildSubscriptionUpsertSql', () => {
+  it('is a valid upsert in both modes (ON CONFLICT + RETURNING)', () => {
+    for (const sql of [buildSubscriptionUpsertSql(false), buildSubscriptionUpsertSql(true)]) {
+      expect(sql).toContain('INSERT INTO billing_subscriptions');
+      expect(sql).toContain(
+        'ON CONFLICT (provider_subscription_id) WHERE provider_subscription_id IS NOT NULL',
+      );
+      expect(sql).toContain('DO UPDATE SET');
+      expect(sql.trimEnd().endsWith('RETURNING *')).toBe(true);
+    }
+  });
+
+  it('the webhook path (allowPeriodRewind=false) refuses a backward period start', () => {
+    // An out-of-order redelivery must not rewrite the quota window's anchor
+    // backward — the UPDATE is guarded so it becomes a no-op instead.
+    const sql = buildSubscriptionUpsertSql(false);
+    expect(sql).toContain(
+      'WHERE EXCLUDED.current_period_start >= billing_subscriptions.current_period_start',
+    );
+    // The guard sits between the SET list and RETURNING (it is a DO UPDATE …
+    // WHERE, not a statement-level WHERE).
+    expect(sql.indexOf('WHERE EXCLUDED.current_period_start')).toBeGreaterThan(
+      sql.indexOf('updated_at = NOW()'),
+    );
+    expect(sql.indexOf('WHERE EXCLUDED.current_period_start')).toBeLessThan(
+      sql.indexOf('RETURNING *'),
+    );
+  });
+
+  it('reconcile (allowPeriodRewind=true) drops the guard so it can write Stripe’s real earlier start', () => {
+    const sql = buildSubscriptionUpsertSql(true);
+    expect(sql).not.toContain('EXCLUDED.current_period_start >=');
   });
 });

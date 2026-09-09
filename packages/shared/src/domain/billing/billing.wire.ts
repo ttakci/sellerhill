@@ -20,6 +20,7 @@ import {
   type BillingSubscriptionDto,
   type BillingUsagePeriodDto,
 } from './billing.types';
+import { type EntitlementState } from './entitlement';
 import { type PlanChangeDirection } from './plan-change';
 
 /**
@@ -174,6 +175,23 @@ export interface BillingSummaryDto {
   provider: BillingProvider;
   /** High-level state the FE renders against — see {@link BillingSummaryTransition}. */
   transition: BillingSummaryTransition;
+  /**
+   * The EFFECTIVE entitlement: `resolveEntitlementState` of the raw status,
+   * tightened by the stale-window guard. An `active`/`trialing` subscription
+   * whose billing period has lapsed past the webhook grace reports `SUSPENDED`
+   * here while {@link subscription}.status still reads `active` — because a
+   * lost renewal webhook halts every backend gate (quota `limitValue: 0`,
+   * order sync, tracking polling, auto-fulfill, the Keepa claim) without ever
+   * writing a suspension.
+   *
+   * The FE reads THIS, not the raw status, to drive the suspended-account
+   * redirect — otherwise the account most likely to be a paying customer has
+   * its automation stopped dead while every screen says nothing is wrong.
+   * `subscription.status` is deliberately left raw: the plan-change / checkout
+   * routing (`hasProviderSubscription`, `hasLiveSubscriptionStatus`) needs
+   * Stripe's real state, and misreporting it there re-breaks that routing.
+   */
+  entitlement: EntitlementState;
 }
 
 /**

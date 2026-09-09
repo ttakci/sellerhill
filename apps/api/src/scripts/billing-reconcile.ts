@@ -233,19 +233,45 @@ async function run(): Promise<number> {
       return 0;
     }
 
-    // Mirror the webhook applier: a paying customer's stale local trial row
-    // must not outrank the reconciled subscription in findCurrentSubscription.
-    // Best-effort — a failure here must not abort the reconcile.
+    // Write the subscription FIRST, then close any local trial rows.
+    //
+    // The reverse order (trial-close then upsert, which the webhook applier
+    // uses) has a failure mode this recovery tool must not have: if the
+    // trial-close succeeds and the upsert then throws, the local trial row is
+    // ENDED and no subscription row exists — findCurrentSubscription returns
+    // the ended trial and the account reads SUSPENDED. The tool whose whole
+    // job is to UN-suspend an account would have left it suspended, with no
+    // Stripe redelivery to retry.
+    //
+    // Doing the upsert first needs no transaction: findCurrentSubscription's
+    // `ORDER BY (provider_subscription_id IS NULL) ASC` ranks the freshly
+    // written provider-backed row ABOVE an un-closed trial, so the
+    // intermediate state (subscription written, trial not yet closed) already
+    // resolves correctly.
+    //
+    // `allowPeriodRewind = true`: this CLI exists partly to repair a row whose
+    // current_period_start was stamped with webhook-receipt time by the
+    // now()/+30d fallback, so it must be able to write Stripe's real, EARLIER
+    // start — the one place that bypass is correct. See
+    // upsertSubscriptionByProvider's own doc.
+    const updated = await repository.upsertSubscriptionByProvider(
+      customer.id,
+      planId,
+      fields,
+      true,
+    );
+    if (!updated) {
+      logError('upsertSubscriptionByProvider returned no row — the write did not land.');
+      return 1;
+    }
+
+    // Now that the provider-backed row exists, retire any local trial rows so
+    // they cannot linger. Best-effort — a failure here must not abort the
+    // reconcile, and the ORDER BY above already keeps the result correct.
     try {
       await repository.endTrialSubscriptionsForUser(userId);
     } catch (error: unknown) {
       logError(`warning: could not close local trial rows for ${args.email}: ${describeError(error)}`);
-    }
-
-    const updated = await repository.upsertSubscriptionByProvider(customer.id, planId, fields);
-    if (!updated) {
-      logError('upsertSubscriptionByProvider returned no row — the write did not land.');
-      return 1;
     }
 
     log('reconciled billing_subscriptions:');

@@ -20,9 +20,21 @@ function read(rel: string): string {
 
 describe('billing quota enforcement wiring invariants', () => {
   describe('master bypass (foundation integration)', () => {
-    it('foundation env.example documents BILLING_ENFORCEMENT_ENABLED default false', () => {
+    it('foundation env.example ships BILLING_ENFORCEMENT_ENABLED=true (matches the code default)', () => {
+      // The registry default is `true` (migration 097 / the 30-day trial): a
+      // fresh install must enforce quotas. `.env.example` is copied verbatim to
+      // `.env`, and an explicit env var beats the code default — so shipping
+      // `=false` here silently opted every developer machine and every
+      // scaffolded environment out of the whole billing plan.
       const src = read('../../../.env.example');
-      expect(src).toMatch(/BILLING_ENFORCEMENT_ENABLED=false/);
+      expect(src).toMatch(/^BILLING_ENFORCEMENT_ENABLED=true$/m);
+      expect(src).not.toMatch(/^BILLING_ENFORCEMENT_ENABLED=false$/m);
+    });
+
+    it('foundation env.example documents the trial-length and webhook-grace knobs', () => {
+      const src = read('../../../.env.example');
+      expect(src).toMatch(/^BILLING_TRIAL_DAYS=30$/m);
+      expect(src).toMatch(/^BILLING_WEBHOOK_GRACE_HOURS=6$/m);
     });
 
     it('QuotaEnforcementService delegates bypass to foundation resolveBillingConfig', () => {

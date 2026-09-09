@@ -30,6 +30,7 @@ import { PoolClient } from 'pg';
 import { DatabaseService, type QueryParam } from '../../common/database/database.service';
 
 import {
+  buildSubscriptionUpsertSql,
   expandPlan,
   mapLimitRow,
   mapPlanRow,
@@ -697,6 +698,19 @@ export class BillingRepositoryService {
    * provider_subscription_id — a repeated subscription.activated event
    * updates the row in place rather than inserting a duplicate. The caller
    * passes the resolved customer_id (from billing_customers.provider_customer_id).
+   *
+   * `allowPeriodRewind` decides whether `current_period_start` may move
+   * BACKWARD. It defaults to `false` and MUST stay false for the webhook
+   * path: `current_period_start` anchors the quota window, `isStaleEvent`
+   * only rejects deliveries older than ~24h, and an out-of-order redelivery
+   * landing after a newer one would otherwise rewrite the anchor backward and
+   * suspend a live, paid account. Only `billing:reconcile` passes `true` — it
+   * is an explicit operator assertion of Stripe's real (possibly earlier)
+   * dates, used to repair a row that `extractStripeSubscriptionFields`'
+   * `now()/+30d` fallback stamped with webhook-receipt time. See
+   * {@link buildSubscriptionUpsertSql}. When the guard blocks the UPDATE the
+   * statement returns no row and this method returns null — the caller keeps
+   * the newer row, which is the correct outcome.
    */
   async upsertSubscriptionByProvider(
     customerId: string,
@@ -711,25 +725,10 @@ export class BillingRepositoryService {
       endedAt: Date | null;
       metadata?: Record<string, unknown>;
     },
+    allowPeriodRewind = false,
   ): Promise<BillingSubscriptionDto | null> {
     const rows = await this.databaseService.query<SubscriptionEntity>(
-      `INSERT INTO billing_subscriptions
-         (customer_id, plan_id, status, interval,
-          current_period_start, current_period_end, canceled_at, ended_at,
-          provider_subscription_id, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       ON CONFLICT (provider_subscription_id) WHERE provider_subscription_id IS NOT NULL
-       DO UPDATE SET
-         plan_id = EXCLUDED.plan_id,
-         status = EXCLUDED.status,
-         interval = EXCLUDED.interval,
-         current_period_start = EXCLUDED.current_period_start,
-         current_period_end = EXCLUDED.current_period_end,
-         canceled_at = EXCLUDED.canceled_at,
-         ended_at = EXCLUDED.ended_at,
-         metadata = EXCLUDED.metadata,
-         updated_at = NOW()
-       RETURNING *`,
+      buildSubscriptionUpsertSql(allowPeriodRewind),
       [
         customerId,
         planId,

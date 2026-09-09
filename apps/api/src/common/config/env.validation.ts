@@ -189,20 +189,26 @@ class EnvironmentVariables {
   @IsOptional()
   GOOGLE_CLIENT_SECRET?: string;
 
-  // --- Billing (Stripe). All optional — BILLING_ENFORCEMENT_ENABLED defaults
-  // to false so the app runs in "full access" transition mode without Stripe
-  // configured. Checkout/portal need STRIPE_SECRET_KEY and webhooks need
-  // STRIPE_WEBHOOK_SECRET; without them the billing module fails safe
-  // (catalog + summary still work; checkout/portal return 409; webhooks 401).
-  // Stripe's own test mode is what local dev and the test environment use —
-  // there is no separate sandbox/environment switch to configure. ---
-  /** Master enforcement toggle. When false (default), all users have full
-   *  access and the summary reports `transition: 'full_access'` with NO fake
-   *  subscription. Set to true only after Stripe is wired and plans are
-   *  meant to gate features. */
+  // --- Billing (Stripe). All optional. Checkout/portal need STRIPE_SECRET_KEY
+  // and webhooks need STRIPE_WEBHOOK_SECRET; without them the billing module
+  // fails safe (catalog + summary still work; checkout/portal return 409;
+  // webhooks 401). Stripe's own test mode is what local dev and the test
+  // environment use — there is no separate sandbox/environment switch. ---
+  /**
+   * Master enforcement toggle. NO class-field default on purpose: the
+   * authoritative default is the platform-settings registry
+   * (`billing.enforcementEnabled`, currently `true` — migration 097 / the
+   * 30-day trial), resolved DB override -> env -> registry default. A `= false`
+   * initializer here is copied onto the validated config when the env var is
+   * absent, and `PlatformSettingsService` reads that via `ConfigService.get`,
+   * so it would silently mask the registry's `true` on every deployment that
+   * does not set the var — the exact "an explicit value beats the default"
+   * defect that also lived in `.env.example`. Leave it `undefined` here so the
+   * registry default wins.
+   */
   @IsBoolean()
   @IsOptional()
-  BILLING_ENFORCEMENT_ENABLED: boolean = false;
+  BILLING_ENFORCEMENT_ENABLED?: boolean;
 
   /** Stripe secret key (`sk_test_...` / `sk_live_...`, or a restricted
    *  `rk_...`). Required for checkout + portal; without it they return 409. */
