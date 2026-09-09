@@ -1,8 +1,9 @@
-import { AutoFulfillStatus } from '@repo/shared';
+import { AutoFulfillBlockedReason, AutoFulfillStatus } from '@repo/shared';
 
 import {
   meetsCoarseCapGate,
   pickRoundRobinAccount,
+  selectResumableOrders,
   shouldSkipFulfillStart,
   proxySessionToken,
 } from './auto-fulfill-helpers';
@@ -55,6 +56,53 @@ describe('shouldSkipFulfillStart', () => {
     expect(shouldSkipFulfillStart(AutoFulfillStatus.PENDING)).toBe(false);
     expect(shouldSkipFulfillStart(AutoFulfillStatus.RUNNING)).toBe(false);
     expect(shouldSkipFulfillStart(AutoFulfillStatus.FAILED)).toBe(false);
+  });
+});
+
+describe('selectResumableOrders', () => {
+  const blocked = (reason: AutoFulfillBlockedReason) => ({
+    ebay_order_id: 'o1',
+    auto_fulfill_status: AutoFulfillStatus.BLOCKED,
+    auto_fulfill_blocked_reason: reason,
+  });
+
+  it('selects only orders blocked by subscription_suspended', () => {
+    // Reviving a captcha / cap / out-of-stock block would re-run a purchase
+    // refused for a reason payment does not change — and `cap` is a spend guard.
+    const rows = [
+      blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED),
+      blocked(AutoFulfillBlockedReason.CAPTCHA),
+      blocked(AutoFulfillBlockedReason.CAP),
+      blocked(AutoFulfillBlockedReason.OUT_OF_STOCK),
+    ];
+    expect(selectResumableOrders(rows).map((r) => r.auto_fulfill_blocked_reason)).toEqual([
+      AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
+    ]);
+  });
+
+  it('leaves captcha, cap and out_of_stock blocks alone', () => {
+    const rows = [
+      blocked(AutoFulfillBlockedReason.CAPTCHA),
+      blocked(AutoFulfillBlockedReason.CAP),
+      blocked(AutoFulfillBlockedReason.OUT_OF_STOCK),
+    ];
+    expect(selectResumableOrders(rows)).toEqual([]);
+  });
+
+  it('does not select a non-BLOCKED row that still carries the suspended reason', () => {
+    expect(
+      selectResumableOrders([
+        {
+          ebay_order_id: 'o2',
+          auto_fulfill_status: AutoFulfillStatus.PLACED,
+          auto_fulfill_blocked_reason: AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('is empty for an empty input', () => {
+    expect(selectResumableOrders([])).toEqual([]);
   });
 });
 

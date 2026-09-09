@@ -58,6 +58,30 @@ export function shouldSkipFulfillStart(status: AutoFulfillStatus): boolean {
   );
 }
 
+export interface ResumableOrderRow {
+  ebay_order_id: string;
+  auto_fulfill_status: string;
+  auto_fulfill_blocked_reason: string | null;
+}
+
+/**
+ * Which blocked orders may be retried once the account is entitled again.
+ *
+ * Scoped to SUBSCRIPTION_SUSPENDED alone. Every other blocked reason describes
+ * a condition payment does not change — and CAP is a spend guard, so reviving
+ * one would place a purchase the seller capped.
+ */
+export function selectResumableOrders(rows: ResumableOrderRow[]): ResumableOrderRow[] {
+  // The two columns hold enum string values; cast so the comparison is against
+  // the shared enum, not a bare string (`no-unsafe-enum-comparison`).
+  return rows.filter(
+    (row) =>
+      (row.auto_fulfill_status as AutoFulfillStatus) === AutoFulfillStatus.BLOCKED &&
+      (row.auto_fulfill_blocked_reason as AutoFulfillBlockedReasonEnum | null) ===
+        AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED,
+  );
+}
+
 /** Sticky residential-proxy session token — per user (default) or per account. */
 export function proxySessionToken(
   strategy: 'perUser' | 'perAccount',
