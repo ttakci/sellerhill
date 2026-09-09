@@ -89,34 +89,34 @@ export const ActionCenterPageContainer: React.FC = () => {
 
   /**
    * Tab items for the shared `TabNav` rail (`underline` variant — the same rail
-   * the Dashboard section tabs use). Each carries its own count, so the rail
-   * doubles as the summary strip — one control instead of a chip row and a
-   * filter that repeat each other.
+   * the Dashboard section tabs use). Labels are the severity name only — the
+   * per-tab counts were dropped on request; each item card already carries its
+   * own count, and the sidebar badge carries the total.
    */
   const filterOptions = useMemo<TabNavItem[]>(
     () => [
       {
         id: ACTION_CENTER_FILTER_ALL,
-        label: `${t('actionCenter.filter.all')} · ${data?.totalCount ?? 0}`,
+        label: t('actionCenter.filter.all'),
         icon: filterToIcon(ACTION_CENTER_FILTER_ALL),
       },
       {
         id: ActionCenterSeverity.CRITICAL,
-        label: `${t('actionCenter.filter.critical')} · ${data?.criticalCount ?? 0}`,
+        label: t('actionCenter.filter.critical'),
         icon: filterToIcon(ActionCenterSeverity.CRITICAL),
       },
       {
         id: ActionCenterSeverity.WARNING,
-        label: `${t('actionCenter.filter.warning')} · ${data?.warningCount ?? 0}`,
+        label: t('actionCenter.filter.warning'),
         icon: filterToIcon(ActionCenterSeverity.WARNING),
       },
       {
         id: ActionCenterSeverity.INFO,
-        label: `${t('actionCenter.filter.info')} · ${data?.infoCount ?? 0}`,
+        label: t('actionCenter.filter.info'),
         icon: filterToIcon(ActionCenterSeverity.INFO),
       },
     ],
-    [t, data?.totalCount, data?.criticalCount, data?.warningCount, data?.infoCount],
+    [t],
   );
 
   const handleFilterChange = useCallback((value: string) => {
