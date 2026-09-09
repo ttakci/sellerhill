@@ -173,6 +173,7 @@ export enum PlatformSettingKey {
   EBAY_ASPECTS_LLM_MAX_PER_LISTING = 'ebay.aspects.llmMaxPerListing',
   BILLING_ENFORCEMENT_ENABLED = 'billing.enforcementEnabled',
   BILLING_TRIAL_DAYS = 'billing.trialDays',
+  BILLING_WEBHOOK_GRACE_HOURS = 'billing.webhookGraceHours',
   BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS = 'buyerMessaging.feedbackDefaultDelayDays',
 }
 

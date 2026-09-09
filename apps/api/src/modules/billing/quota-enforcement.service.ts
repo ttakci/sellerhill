@@ -25,7 +25,6 @@ import {
   BillingLimitKey,
   EntitlementState,
   PlatformSettingKey,
-  resolveEntitlementState,
 } from '@repo/shared';
 
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
@@ -35,6 +34,10 @@ import {
   buildSourceKey,
   decideQuota,
   quotaExhaustedBlockedReason,
+  QuotaWindowOutcome,
+  resolveEffectiveEntitlement,
+  resolveQuotaWindow,
+  type QuotaWindow,
 } from './quota-helpers';
 
 /**
@@ -98,6 +101,8 @@ export class QuotaEnforcementService {
     limitValue: number | null;
     /** True when the account owes money or its entitlement has lapsed. */
     suspended: boolean;
+    /** The billing window this call's usage is metered against. */
+    window: QuotaWindow;
   } | null> {
     const subscription = await this.repository.findCurrentSubscription(userId);
     if (!subscription) {
@@ -106,35 +111,52 @@ export class QuotaEnforcementService {
       return null;
     }
 
+    const now = new Date();
+    const graceHours = await this.platformSettings.getNumber(
+      PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    );
+    const window = resolveQuotaWindow(subscription, now, graceHours);
+    if (window.outcome === QuotaWindowOutcome.UNPAID) {
+      this.logger.error(
+        `Subscription window for user ${userId} is stale past the grace; treating as unpaid`,
+      );
+    }
+
     // Entitlement comes BEFORE the limit. This check did not exist: the method
     // resolved a subscription and read its plan's limits without ever looking
     // at `subscription.status`, so a past_due, cancelled, or expired-trial
     // account kept the full allowance of a plan it was no longer paying for.
     // A suspended account gets a limit of 0, which every caller below already
     // knows how to refuse — no second refusal path to keep in step.
-    const entitlement = resolveEntitlementState(subscription.status);
+    //
+    // resolveEffectiveEntitlement, not resolveEntitlementState: an `active`
+    // subscription whose window has lapsed past the grace is treated as unpaid.
+    // Absence of a renewal webhook is not evidence of payment.
+    const entitlement = resolveEffectiveEntitlement(subscription, now, graceHours);
     if (entitlement === EntitlementState.SUSPENDED) {
       return {
         subscriptionId: subscription.id,
         usagePeriodId: null,
         limitValue: 0,
         suspended: true,
+        window,
       };
     }
 
     // The EFFECTIVE limit — plan allowance plus any top-up bought for this
-    // month. Resolving the plan limit alone here would refuse a seller who had
+    // window. Resolving the plan limit alone here would refuse a seller who had
     // just paid for extra headroom while the billing page showed it to them.
     const { limitValue } = await this.repository.resolveEffectiveLimit(
       userId,
       subscription.id,
       kind,
+      window,
     );
 
-    // Open the current month's period on demand. Nothing had ever created one,
+    // Open the current window's period on demand. Nothing had ever created one,
     // so `findOpenUsagePeriods` always returned an empty array and every
     // monthly meter counted against the whole life of the subscription instead
-    // of the current month. Listings are a level, not a monthly flow, so they
+    // of the current window. Listings are a level, not a monthly flow, so they
     // deliberately get no period.
     let usagePeriodId: string | null = null;
     if (kind !== BillingLimitKey.LISTINGS_PER_MONTH) {
@@ -142,6 +164,7 @@ export class QuotaEnforcementService {
         subscription.id,
         kind,
         limitValue ?? -1,
+        window,
       );
     }
 
@@ -150,6 +173,7 @@ export class QuotaEnforcementService {
       usagePeriodId,
       limitValue,
       suspended: false,
+      window,
     };
   }
 
@@ -211,7 +235,7 @@ export class QuotaEnforcementService {
       if (ctx.limitValue === null || ctx.limitValue === -1) {
         return { allowed: true, used: 0, limitValue: ctx.limitValue };
       }
-      const used = await this.repository.countMonthlyConversions(userId);
+      const used = await this.repository.countConversionsInWindow(userId, ctx.window);
       const decision = decideQuota({
         inUse: used,
         limitValue: ctx.limitValue,
@@ -237,8 +261,23 @@ export class QuotaEnforcementService {
       return false;
     }
     try {
+      const now = new Date();
+      const graceHours = await this.platformSettings.getNumber(
+        PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+      );
       const subscription = await this.repository.findCurrentSubscription(userId);
-      return resolveEntitlementState(subscription?.status ?? null) === EntitlementState.SUSPENDED;
+      const window = resolveQuotaWindow(subscription, now, graceHours);
+      if (window.outcome === QuotaWindowOutcome.UNPAID) {
+        this.logger.error(
+          `Subscription window for user ${userId} is stale past the grace; treating as unpaid`,
+        );
+      }
+      // resolveEffectiveEntitlement, not resolveEntitlementState: an `active`
+      // subscription whose window has lapsed past the grace is treated as
+      // unpaid. Absence of a renewal webhook is not evidence of payment.
+      return (
+        resolveEffectiveEntitlement(subscription, now, graceHours) === EntitlementState.SUSPENDED
+      );
     } catch (err) {
       this.logger.warn(
         `Entitlement check failed for user ${userId}, allowing: ${(err as Error).message}`,

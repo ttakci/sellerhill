@@ -181,24 +181,51 @@ export const ListingsAllPage: React.FC = () => {
   }, [isDeleteSuccess, deleteData, showMessage, t]);
 
   useEffect(() => {
-    if (isPublishSuccess && publishData?.success) {
+    if (!isPublishSuccess || !publishData?.success) {
+      return;
+    }
+    const { count, failed, jobId } = publishData;
+
+    // All succeeded — plain success, nothing to investigate.
+    if (failed === 0) {
       showMessage(
         {
-          type: publishData.count > 0 ? 'success' : 'warning',
-          headerKey:
-            publishData.count > 0
-              ? 'listings:listings.notifications.publishSuccessTitle'
-              : 'listings:listings.notifications.publishErrorTitle',
-          descriptionKey:
-            publishData.count > 0
-              ? 'listings:listings.notifications.publishSuccess'
-              : 'listings:listings.notifications.publishError',
-          descriptionParams: { count: publishData.count.toString() },
+          type: 'success',
+          headerKey: 'listings:listings.notifications.publishSuccessTitle',
+          descriptionKey: 'listings:listings.notifications.publishSuccess',
+          descriptionParams: { count: count.toString() },
         },
         t
       );
+      return;
     }
-  }, [isPublishSuccess, publishData, showMessage, t]);
+
+    // Something failed. The run is now a `kind='publish'` job record, so a
+    // "View details" button deep-links to the per-item failure reasons instead
+    // of leaving the seller with only a generic modal.
+    const partial = count > 0;
+    showMessage(
+      {
+        type: 'warning',
+        headerKey: partial
+          ? 'listings:listings.notifications.publishPartialTitle'
+          : 'listings:listings.notifications.publishErrorTitle',
+        descriptionKey: partial
+          ? 'listings:listings.notifications.publishPartial'
+          : 'listings:listings.notifications.publishError',
+        descriptionParams: { count: count.toString(), failed: failed.toString() },
+        ...(jobId
+          ? {
+              primaryButton: {
+                labelKey: 'listings:listings.notifications.publishViewDetails',
+                onClick: () => localeNavigate(`/listings/jobs/${jobId}`),
+              },
+            }
+          : {}),
+      },
+      t
+    );
+  }, [isPublishSuccess, publishData, showMessage, localeNavigate, t]);
 
   const handleToggleListingSelection = useCallback((id: string, selected: boolean) => {
     setSelectedListingIds((prev) => {

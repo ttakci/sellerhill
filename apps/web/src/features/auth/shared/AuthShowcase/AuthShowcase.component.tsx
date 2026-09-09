@@ -14,7 +14,9 @@ import * as S from './AuthShowcase.style';
 import type { AuthShowcaseProps } from './AuthShowcase.types';
 
 export const AuthShowcase = ({ className }: AuthShowcaseProps): React.ReactElement => {
-  const { t } = useTranslation(['auth']);
+  const { t, i18n } = useTranslation(['auth']);
+  const locale = i18n.language || 'en';
+  const screenSrc = `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/hero-dashboard.jpg`;
 
   return (
     <S.Panel className={className}>
@@ -28,9 +30,9 @@ export const AuthShowcase = ({ className }: AuthShowcaseProps): React.ReactEleme
 
       <S.Center>
         <S.DeviceArt>
-          <S.DesktopShot src="/landing-screens/hero-dashboard.jpg" alt={t('auth:auth.showcase.previewAlt')} />
+          <S.DesktopShot src={screenSrc} alt={t('auth:auth.showcase.previewAlt')} />
           <S.PhoneFrame>
-            <S.PhoneShot src="/landing-screens/hero-dashboard.jpg" alt="" />
+            <S.PhoneShot src={screenSrc} alt="" />
           </S.PhoneFrame>
         </S.DeviceArt>
 

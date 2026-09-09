@@ -14,6 +14,9 @@ import {
   AutoFulfillBlockedReason,
   BillingLimitKey,
   BillingReservationStatus,
+  EntitlementState,
+  resolveEntitlementState,
+  type BillingSubscriptionDto,
 } from '@repo/shared';
 
 import { resolveBillingConfig, type BillingConfig } from './billing-helpers';
@@ -248,4 +251,116 @@ export function utcMonthBounds(now: Date = new Date()): {
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0),
   );
   return { periodStart, periodEnd };
+}
+
+/** How the current usage window was arrived at. */
+export enum QuotaWindowOutcome {
+  /** The subscription's own period contains `now`. */
+  NORMAL = 'normal',
+  /** The period has just lapsed and we are tolerating webhook latency. */
+  GRACE = 'grace',
+  /** Lapsed past the grace: treat as unpaid. */
+  UNPAID = 'unpaid',
+}
+
+export interface QuotaWindow {
+  periodStart: Date;
+  periodEnd: Date;
+  outcome: QuotaWindowOutcome;
+}
+
+export type QuotaWindowSubscription = Pick<
+  BillingSubscriptionDto,
+  'status' | 'currentPeriodStart' | 'currentPeriodEnd'
+>;
+
+/**
+ * Tolerance for a late renewal webhook. Stripe normally delivers within
+ * seconds, but the window goes stale the instant `current_period_end` passes —
+ * without a grace, every paying seller would be briefly suspended at their own
+ * renewal moment, long enough for a shipped order to be held.
+ */
+export const DEFAULT_WEBHOOK_GRACE_HOURS = 6;
+
+const HOUR_MS = 60 * 60 * 1000;
+
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value) {
+    return null;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
+ * The window this account's monthly usage is counted in.
+ *
+ * Stripe bills on the subscription anniversary; metering on the calendar month
+ * handed a seller who subscribed mid-month roughly two allowances per payment.
+ *
+ * THE START NEVER MOVES without a confirmed payment. Usage is counted from
+ * `periodStart`, so pinning it makes a fresh allowance arithmetically
+ * impossible — the grace extends only the END, letting the seller finish
+ * spending the period they already paid for. An earlier design rolled the start
+ * forward by whole months when a window went stale; that really did reset the
+ * quota on no evidence of payment, and was rejected.
+ */
+export function resolveQuotaWindow(
+  subscription: QuotaWindowSubscription | null,
+  now: Date = new Date(),
+  graceHours: number = DEFAULT_WEBHOOK_GRACE_HOURS,
+): QuotaWindow {
+  const calendar = (): QuotaWindow => ({
+    ...utcMonthBounds(now),
+    outcome: QuotaWindowOutcome.NORMAL,
+  });
+
+  // Rule 1 — no subscription. The gate already fails open here.
+  if (!subscription) {
+    return calendar();
+  }
+
+  const start = parseDate(subscription.currentPeriodStart);
+  const end = parseDate(subscription.currentPeriodEnd);
+
+  // Rule 2 — a malformed row must never yield an unbounded window.
+  if (!start || !end || end.getTime() <= start.getTime()) {
+    return calendar();
+  }
+
+  // Rules 3 and 4 — inside the period, or before it (clock skew: use the row
+  // we were given rather than invent one).
+  if (now.getTime() < end.getTime()) {
+    return { periodStart: start, periodEnd: end, outcome: QuotaWindowOutcome.NORMAL };
+  }
+
+  // Rule 5 — grace. Same start, extended end.
+  const graceEnd = new Date(end.getTime() + Math.max(0, graceHours) * HOUR_MS);
+  if (now.getTime() < graceEnd.getTime()) {
+    return { periodStart: start, periodEnd: graceEnd, outcome: QuotaWindowOutcome.GRACE };
+  }
+
+  // Rule 6 — unpaid. The start is reported unchanged; no allowance is created.
+  return { periodStart: start, periodEnd: end, outcome: QuotaWindowOutcome.UNPAID };
+}
+
+/**
+ * Entitlement including the stale-window guard.
+ *
+ * A read-time fail-closed check, never a write — the same shape as
+ * `normalizeExpiredTrial`. Nothing persists a suspension we only inferred, so
+ * the moment a real Stripe event lands the account returns to normal by itself.
+ */
+export function resolveEffectiveEntitlement(
+  subscription: QuotaWindowSubscription | null,
+  now: Date = new Date(),
+  graceHours: number = DEFAULT_WEBHOOK_GRACE_HOURS,
+): EntitlementState {
+  const base = resolveEntitlementState(subscription?.status ?? null);
+  if (base !== EntitlementState.ACTIVE) {
+    return base;
+  }
+  return resolveQuotaWindow(subscription, now, graceHours).outcome === QuotaWindowOutcome.UNPAID
+    ? EntitlementState.SUSPENDED
+    : EntitlementState.ACTIVE;
 }

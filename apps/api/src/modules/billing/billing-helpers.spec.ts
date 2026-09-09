@@ -11,6 +11,7 @@ import {
 
 import {
   buildSubscriptionsQuery,
+  buildSubscriptionUpsertSql,
   deriveSummaryTransition,
   expandPlan,
   isProviderConfigured,
@@ -258,5 +259,47 @@ describe('buildSubscriptionsQuery', () => {
     expect(where).toContain('current_period_start');
     expect(where).toContain('current_period_end');
     expect(params).toEqual(['2026-07-27T12:00:00Z']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildSubscriptionUpsertSql — the monotonic current_period_start guard
+// ---------------------------------------------------------------------------
+
+describe('buildSubscriptionUpsertSql', () => {
+  it('is a valid upsert in both modes (ON CONFLICT + RETURNING)', () => {
+    for (const sql of [buildSubscriptionUpsertSql(false), buildSubscriptionUpsertSql(true)]) {
+      expect(sql).toContain('INSERT INTO billing_subscriptions');
+      expect(sql).toContain(
+        'ON CONFLICT (provider_subscription_id) WHERE provider_subscription_id IS NOT NULL',
+      );
+      expect(sql).toContain('DO UPDATE SET');
+      expect(sql.trimEnd().endsWith('RETURNING *')).toBe(true);
+    }
+  });
+
+  it('the webhook path (allowPeriodRewind=false) protects the anchor column only, never the row', () => {
+    // An out-of-order or corrupted redelivery must not rewrite the quota
+    // window's anchor backward — but every OTHER column must still land, so a
+    // cancellation can never be swallowed. That means GREATEST() on the one
+    // column, not a WHERE on the whole DO UPDATE.
+    const sql = buildSubscriptionUpsertSql(false);
+    expect(sql).toContain(
+      'current_period_start = GREATEST(EXCLUDED.current_period_start, billing_subscriptions.current_period_start)',
+    );
+    // The over-broad form must not come back: no WHERE anywhere in the
+    // DO UPDATE (the only WHERE is the ON CONFLICT partial-index predicate).
+    const doUpdate = sql.slice(sql.indexOf('DO UPDATE SET'));
+    expect(doUpdate).not.toMatch(/\bWHERE\b/);
+    // status / canceled_at / ended_at still update unconditionally.
+    expect(sql).toContain('status = EXCLUDED.status');
+    expect(sql).toContain('canceled_at = EXCLUDED.canceled_at');
+    expect(sql).toContain('ended_at = EXCLUDED.ended_at');
+  });
+
+  it('reconcile (allowPeriodRewind=true) writes Stripe’s real (possibly earlier) start verbatim', () => {
+    const sql = buildSubscriptionUpsertSql(true);
+    expect(sql).toContain('current_period_start = EXCLUDED.current_period_start');
+    expect(sql).not.toContain('GREATEST(');
   });
 });

@@ -14,6 +14,7 @@ export const IdBadgeComponent = ({
   isHovered,
   onMouseEnter,
   onMouseLeave,
+  plain = false,
 }: IdBadgeComponentProps): React.ReactElement => {
   return (
     <S.BadgeContainer
@@ -21,13 +22,14 @@ export const IdBadgeComponent = ({
       target="_blank"
       rel="noopener noreferrer"
       $size={size}
+      $plain={plain}
       className={className}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       $isHovered={isHovered}
     >
-      <S.IdText $size={size} $isHovered={isHovered}>
+      <S.IdText $size={size} $isHovered={isHovered} $plain={plain}>
         {id}
       </S.IdText>
       <S.ExternalIcon $size={size} $isHovered={isHovered}>

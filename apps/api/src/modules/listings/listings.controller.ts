@@ -469,10 +469,12 @@ export class ListingsController {
   async bulkPublish(
     @Request() req: { user: { sub: string } },
     @Body() body: { listingIds: string[] }
-  ): Promise<{ success: boolean; count: number }> {
+  ): Promise<{ success: boolean; count: number; failed: number; jobId: string | null }> {
     const userId = req.user.sub;
-    const count = await this.listingsService.publishListings(userId, body.listingIds);
-    return { success: true, count };
+    // `count` is kept for backward compatibility with the existing modal; `jobId`
+    // deep-links to the per-item failure detail when something did not publish.
+    const { published, failed, jobId } = await this.listingsService.publishListings(userId, body.listingIds);
+    return { success: true, count: published, failed, jobId };
   }
 
   /**

@@ -8,6 +8,11 @@ export interface AppRouteMeta {
   path: string;
   /** Exact match unless endsWithMatch is set */
   match?: 'exact' | 'prefix';
+  /**
+   * Which static sidebar group ("Envanter" / "Yapılandırma") the route
+   * belongs to. Documentary only — the sidebar's item order is hand-authored
+   * in `AppLayout.component.tsx`, not derived from this list.
+   */
   section?: NavSection;
   /** Breadcrumb segments after home (label keys resolved via t) */
   breadcrumbs: Array<{
@@ -20,7 +25,7 @@ export interface AppRouteMeta {
 
 /**
  * Single source of truth for app shell navigation metadata.
- * AppLayout breadcrumbs and section auto-open derive from this list.
+ * AppLayout breadcrumbs derive from this list.
  */
 export const APP_ROUTE_META: AppRouteMeta[] = [
   {
@@ -172,8 +177,4 @@ export function resolveBreadcrumbs(pathWithoutLocale: string, t: TFunction): Bre
     });
   }
   return items;
-}
-
-export function resolveNavSection(pathWithoutLocale: string): NavSection | undefined {
-  return resolveRouteMeta(pathWithoutLocale)?.section;
 }

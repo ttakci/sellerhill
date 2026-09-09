@@ -42,13 +42,18 @@ export const TawkToWidgetComponent = ({
       <Text variant="body" weight="semibold" color="sidebar.text">
         {t('translation:chatbot.sidebarTitle')}
       </Text>
-      <Text variant="body-sm" color="sidebar.textMuted">
-        {t('translation:chatbot.sidebarSubtitle')}
-      </Text>
       <S.LauncherButtonAnchor>
-        <S.LauncherButton variant="primary" size="small" fullWidth onClick={onOpen}>
+        {/*
+          `S.LauncherButton` overrides the atom's variant colors with the
+          sidebar's own tokens (see TawkToWidget.style.ts) — `primary`'s fill
+          is the exact hex of `colors.sidebar.accent`, the SELECTED nav-item
+          color, so a filled-blue CTA here read as if this card were an
+          active menu item. `Text` never inherits `currentColor`, so its
+          color must be named explicitly, same as the title/subtitle above.
+        */}
+        <S.LauncherButton variant="secondary" size="small" fullWidth onClick={onOpen}>
           <Icon name="headset" size={16} />
-          <Text variant="body-sm" weight="semibold" color="text.inverse">
+          <Text variant="body-sm" weight="semibold" color="sidebar.text">
             {t('translation:chatbot.ctaLabel')}
           </Text>
         </S.LauncherButton>

@@ -317,7 +317,11 @@ export const ListingDetailPageContainer: React.FC = () => {
   }, [listing, t]);
 
   const handleBack = () => {
-    localeNavigate('/listings/all');
+    // A draft was reached from the dedicated drafts view (`?status=draft`);
+    // dropping back to the default "all" list loses that context.
+    localeNavigate(
+      listing?.status === ListingStatus.DRAFT ? `/listings/all?status=${ListingStatus.DRAFT}` : '/listings/all'
+    );
   };
 
   const handleOpenTitleDrawer = () => {

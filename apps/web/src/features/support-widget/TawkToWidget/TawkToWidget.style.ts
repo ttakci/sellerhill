@@ -17,7 +17,46 @@ export const LauncherButtonAnchor = styled.div`
   position: relative;
 `;
 
-export const LauncherButton = styled(Button)``;
+/**
+ * Color override, not layout-only — a deliberate exception to the usual
+ * "extend an atom for layout only" rule. `Button`'s variants (`primary`,
+ * `secondary`, …) are tuned for the app's own light/dark THEME surfaces
+ * (`brand.primary`, `surface.primary`); this card sits on the sidebar's
+ * separate, theme-invariant dark surface. `primary`'s fill is the exact hex
+ * of `colors.sidebar.accent` — the SELECTED nav-item color — so it read as
+ * if this card were an active menu item. `secondary`'s light fill then
+ * rendered a stark white block against the navy card. Pulling the button
+ * into the sidebar's own token family (`sidebar.text`/`sidebar.divider`)
+ * fixes both: it stays legible on the dark card without borrowing either
+ * the app theme's or the nav's own colors.
+ */
+export const LauncherButton = styled(Button)`
+  background: transparent;
+  /* sidebar.textMuted, not sidebar.divider — divider's ~8% alpha is tuned for
+     a hairline separator, not a button's own outline; it read as barely
+     there against the card. */
+  border: 0.0625rem solid ${tkn('colors.sidebar.textMuted')};
+  color: ${tkn('colors.sidebar.text')};
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    background: ${tkn('colors.sidebar.hover')};
+    border-color: ${tkn('colors.sidebar.text')};
+    /* The secondary variant's own hover rule sets color: brand.primaryHover
+       (blue) at the same specificity — restate white here or the icon/label
+       flip blue on hover even though the base override above already fixed
+       the rest state. */
+    color: ${tkn('colors.sidebar.text')};
+    box-shadow: none;
+    filter: brightness(1.15);
+  }
+
+  &:active:not(:disabled) {
+    color: ${tkn('colors.sidebar.text')};
+    filter: brightness(0.95);
+    box-shadow: none;
+  }
+`;
 
 export const CollapsedLauncher = styled(IconButton)`
   position: relative;

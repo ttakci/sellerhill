@@ -13,11 +13,17 @@ import {
   EbayAccountStatus,
   ListingStatus,
   OrderCostCaptureStatus,
+  OrderStatus,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
-import { meetsCoarseCapGate, pickRoundRobinAccount } from '../amazon/auto-fulfill-helpers';
+import {
+  meetsCoarseCapGate,
+  pickRoundRobinAccount,
+  selectResumableOrders,
+  type ResumableOrderRow,
+} from '../amazon/auto-fulfill-helpers';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
@@ -98,6 +104,28 @@ export class OrderSyncService {
     const marketplaceId = account.marketplace_id as EbayMarketplaceId;
 
     this.logger.log(`Syncing orders for user ${userId}, account ${ebayAccountId}`);
+
+    // Suspension stops order ingestion. THE POSITION OF THIS RETURN IS
+    // LOAD-BEARING: it must precede both the fetch loop and the
+    // `last_ebay_sync_at` write below. Advancing the watermark while skipping
+    // the fetch would permanently lose every order that arrived during the
+    // suspension, because the next run starts from that timestamp and nothing
+    // ever looks further back. Leaving it untouched is what lets a reinstated
+    // account back-fill the whole suspended period on its next tick.
+    if (await this.quotaEnforcement.isSuspended(account.user_id)) {
+      this.logger.log(
+        `Order sync skipped for user ${account.user_id}: subscription suspended (watermark preserved)`
+      );
+      return 0;
+    }
+
+    // Reaching here means the account is entitled again — the early return above
+    // ran for the whole account while it was suspended. Six of the seven
+    // suspended capabilities resume on their own; auto-fulfill is the exception
+    // (`maybeEnqueueAutoFulfill` fires only on a genuine order insert, and a
+    // blocked reason is treated as permanent), so restart it by hand here for
+    // any order this user has parked at BLOCKED / subscription_suspended.
+    await this.resumeSuspendedAutoFulfill(userId);
 
     // Get fresh access token
     const accessToken = await this.ebayService.getActiveAccountAccessToken(userId);
@@ -532,20 +560,49 @@ export class OrderSyncService {
   private async maybeEnqueueAutoFulfill(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
   ): Promise<void> {
-    // 1. Master toggle — store-specific override falls back to the user's
-    // global setting (Store specific > Global > Default, same resolution
-    // order as everywhere else `getResolvedSettings` is used). Passing the
-    // order's OWN ebayAccountId (not null) is required: a user can flip
-    // auto-fulfill off for one store while leaving it on globally/for other
-    // stores, and the previous `null` here silently ignored that override,
-    // always enforcing only the global row regardless of which store the
-    // order came from.
-    const settings = await this.storeSettingsService.getResolvedSettings(entity.userId, entity.ebayAccountId);
+    await this.resolveAndEnqueueAutoFulfill({
+      userId: entity.userId,
+      ebayAccountId: entity.ebayAccountId,
+      ebayOrderId: entity.ebayOrderId,
+      saleTotal: Number(entity.saleTotal) || 0,
+    });
+  }
+
+  /**
+   * The shared toggle -> account-pool -> round-robin -> coarse-cap -> AO-reserve
+   * chain, resolved at CALL time. Reached from two places — a genuine order
+   * insert (`maybeEnqueueAutoFulfill`) and the suspension-resume sweep
+   * (`resumeSuspendedAutoFulfill`) — which must not carry two copies of it.
+   *
+   * Resolution order:
+   *  1. Master toggle (`store_settings.auto_fulfill_enabled`) resolved for the
+   *     order's OWN eBay store (Store specific > Global > Default). A user can
+   *     flip auto-fulfill off for one store while leaving it on elsewhere;
+   *     passing the store id (not null) is what honours that override. Off ->
+   *     status `skipped`, no enqueue.
+   *  2. Pool of enabled Amazon accounts (`auto_fulfill_enabled = true` AND a
+   *     non-null `auto_fulfill_cap_total`). Empty pool -> `skipped`.
+   *  3. Round-robin pick (oldest `last_used_at` first) across the pool.
+   *  4. Coarse cap gate on `sale_total` vs the picked account's cap. Over cap ->
+   *     `skipped`. The HARD cap is the Amazon review-step grand-total check.
+   *  5. AO monthly quota reserve (BILLING_ENFORCEMENT_ENABLED). Idempotent on
+   *     `ebayOrderId` — a re-enqueue from a later tick collapses onto the
+   *     existing reservation. Exhausted -> BLOCKED with the shared reason, no
+   *     enqueue; existing tracking/cost-capture is untouched.
+   *  6. Stamp `last_used_at` on the picked account, then enqueue one BullMQ job
+   *     (deduped per eBay order id).
+   */
+  private async resolveAndEnqueueAutoFulfill(input: {
+    userId: string;
+    ebayAccountId: string;
+    ebayOrderId: string;
+    saleTotal: number;
+  }): Promise<void> {
+    const settings = await this.storeSettingsService.getResolvedSettings(input.userId, input.ebayAccountId);
     if (!settings.autoFulfillEnabled) {
-      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
-    // 2. Round-robin across enabled accounts with a cap.
     const enabled = await this.databaseService.query<{
       id: string;
       last_used_at: Date | null;
@@ -553,34 +610,26 @@ export class OrderSyncService {
     }>(
       `SELECT id, last_used_at, auto_fulfill_cap_total FROM amazon_accounts
         WHERE user_id = $1 AND auto_fulfill_enabled = TRUE AND auto_fulfill_cap_total IS NOT NULL`,
-      [entity.userId]
+      [input.userId]
     );
     if (enabled.length === 0) {
-      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
     const pick = pickRoundRobinAccount(enabled.map((a) => ({ id: a.id, lastUsedAt: a.last_used_at })));
     if (!pick) {
-      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+      await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
     const cap = Number(enabled.find((a) => a.id === pick.id)!.auto_fulfill_cap_total);
-    // 3. Coarse pre-filter (hard check is the Amazon review step in the checkout service).
-    if (!meetsCoarseCapGate(Number(entity.saleTotal) || 0, cap)) {
-      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED);
+    if (!meetsCoarseCapGate(input.saleTotal, cap)) {
+      await this.setAutoFulfillStatus(input.ebayOrderId, AutoFulfillStatus.SKIPPED);
       return;
     }
-    // 4. AO monthly quota gate (BILLING_ENFORCEMENT_ENABLED). Idempotent reserve
-    //    keyed by ebayOrderId — a re-enqueue from a later order-sync tick
-    //    collapses onto the existing reservation and proceeds. On quota
-    //    exhaustion, mark the order BLOCKED with the shared QUOTA_EXHAUSTED
-    //    reason (surfaces in the "needs attention" filter) and do NOT enqueue.
-    //    Existing tracking is unaffected — the order stays in its current
-    //    cost-capture tier; only auto_fulfill_status moves.
-    const quota = await this.quotaEnforcement.reserveAmazonOrder(entity.userId, entity.ebayOrderId);
+    const quota = await this.quotaEnforcement.reserveAmazonOrder(input.userId, input.ebayOrderId);
     if (!quota.allowed) {
       await this.setAutoFulfillBlocked(
-        entity.ebayOrderId,
+        input.ebayOrderId,
         quota.blockedReason ?? AutoFulfillBlockedReason.QUOTA_EXHAUSTED
       );
       return;
@@ -589,7 +638,114 @@ export class OrderSyncService {
     await this.databaseService.query(`UPDATE amazon_accounts SET last_used_at = CURRENT_TIMESTAMP WHERE id = $1`, [
       pick.id,
     ]);
-    await this.autoFulfillQueue.enqueue(entity.ebayOrderId, pick.id);
+    await this.autoFulfillQueue.enqueue(input.ebayOrderId, pick.id);
+  }
+
+  /**
+   * Re-enqueue every order this user has sitting at
+   * `auto_fulfill_status = 'blocked'` / `auto_fulfill_blocked_reason =
+   * 'subscription_suspended'`. Called once per `syncOrdersForAccount` run, which
+   * only reaches this point when the account is entitled — so arriving here IS
+   * the "entitlement restored" signal, and no webhook, queue or service is
+   * needed to drive it.
+   *
+   * Scoped strictly to `subscription_suspended` (`selectResumableOrders` is the
+   * single predicate): every other blocked reason describes a condition payment
+   * does not change, and `cap` is a spend guard.
+   *
+   * Best-effort — the whole method is wrapped so a failure can never break order
+   * sync. Idempotent — the PENDING reset moves a row out of the SELECT, so a
+   * user with several eBay stores (one `syncOrdersForAccount` call each per
+   * tick) does the work on the first pass and finds nothing on the rest.
+   */
+  private async resumeSuspendedAutoFulfill(userId: string): Promise<void> {
+    try {
+      // DUPLICATE-PURCHASE GUARD. This sweep is the ONLY mechanism in the
+      // codebase that moves a `blocked` order back to `pending`
+      // (`maybeEnqueueAutoFulfill` fires only on a genuine order INSERT, and a
+      // blocked row is never re-inserted), so it is the only place that can
+      // re-arm an order for a real Amazon purchase. If a seller bought the item
+      // by hand during the lapse to save the eBay sale, re-enqueueing here ships
+      // a duplicate. Two independent exclusions, catching different cases:
+      //   - `amazon_order_id IS NULL` — anything non-null means someone already
+      //     bought/linked it (a blocked order never reached a purchase);
+      //     catches a hand purchase still sitting at `processing`.
+      //   - `status NOT IN (shipped, completed)` — the buyer has been served;
+      //     catches a hand purchase not yet linked to an Amazon order id.
+      // `selectResumableOrders` re-applies both in code so the rule stays
+      // unit-testable.
+      const rows = await this.databaseService.query<
+        ResumableOrderRow & { ebay_account_id: string; sale_total: string | number | null }
+      >(
+        `SELECT ebay_order_id, ebay_account_id, sale_total, status, amazon_order_id,
+                auto_fulfill_status, auto_fulfill_blocked_reason
+           FROM orders
+          WHERE user_id = $1
+            AND auto_fulfill_status = $2
+            AND auto_fulfill_blocked_reason = $3
+            AND amazon_order_id IS NULL
+            AND status NOT IN ($4, $5)`,
+        [
+          userId,
+          AutoFulfillStatus.BLOCKED,
+          AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED,
+          OrderStatus.SHIPPED,
+          OrderStatus.COMPLETED,
+        ]
+      );
+      const resumableIds = new Set(selectResumableOrders(rows).map((r) => r.ebay_order_id));
+      if (resumableIds.size === 0) {
+        return;
+      }
+
+      let requeued = 0;
+      for (const row of rows) {
+        if (!resumableIds.has(row.ebay_order_id)) {
+          continue;
+        }
+        // Reset to PENDING and clear the reason BEFORE re-resolving: the
+        // processor's `shouldSkipFulfillStart` refuses a BLOCKED row, so an
+        // order left blocked would enqueue and then silently no-op. The shared
+        // resolution re-checks the store toggle, the account pool, the
+        // round-robin pick, the coarse cap and the AO quota, and writes
+        // SKIPPED / BLOCKED itself if any of them still refuse.
+        try {
+          await this.databaseService.query(
+            `UPDATE orders
+                SET auto_fulfill_status = $1,
+                    auto_fulfill_blocked_reason = NULL,
+                    updated_at = CURRENT_TIMESTAMP
+              WHERE ebay_order_id = $2`,
+            [AutoFulfillStatus.PENDING, row.ebay_order_id]
+          );
+          await this.resolveAndEnqueueAutoFulfill({
+            userId,
+            ebayAccountId: row.ebay_account_id,
+            ebayOrderId: row.ebay_order_id,
+            saleTotal: Number(row.sale_total) || 0,
+          });
+          requeued += 1;
+        } catch (rowErr) {
+          // Restore the blocked state so the row is not stranded at PENDING with
+          // no job — the next tick will pick it up again.
+          const rowMsg = rowErr instanceof Error ? rowErr.message : String(rowErr);
+          this.logger.warn(`Auto-fulfill resume failed for order ${row.ebay_order_id}: ${rowMsg}`);
+          await this.setAutoFulfillBlocked(
+            row.ebay_order_id,
+            AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED
+          ).catch(() => undefined);
+        }
+      }
+
+      if (requeued > 0) {
+        this.logger.log(
+          `Auto-fulfill resume: re-evaluated ${requeued} suspension-blocked order(s) for user ${userId}`
+        );
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Auto-fulfill resume sweep skipped for user ${userId}: ${msg}`);
+    }
   }
 
   private async setAutoFulfillStatus(ebayOrderId: string, status: AutoFulfillStatus): Promise<void> {

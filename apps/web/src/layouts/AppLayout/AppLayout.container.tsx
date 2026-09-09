@@ -1,7 +1,7 @@
 import {
   EntitlementState,
   isOperatorRole,
-  resolveEntitlementState,
+  ListingStatus,
   type SupportedLocale,
 } from '@repo/shared';
 import { getLocaleConfig, SIDEBAR_MOBILE_BREAKPOINT_PX, useUI } from '@repo/ui';
@@ -13,7 +13,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { AppLayout as AppLayoutComponent } from './AppLayout.component';
 
 import { resolveHomePath } from '@/app/operatorRouting';
-import { resolveBreadcrumbs, resolveNavSection } from '@/app/routeMeta';
+import { resolveBreadcrumbs } from '@/app/routeMeta';
 import {
   ACTION_CENTER_POLL_INTERVAL_MS,
   useGetActionCenterQuery,
@@ -52,27 +52,22 @@ export const AppLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
-  const [openSections, setOpenSections] = useState({ inventory: true, configuration: true });
   // Usage meters in the profile dropdown default to expanded — the whole point
   // is a glanceable shortcut — but collapse for anyone who wants a tidy menu.
   const [isProfileUsageOpen, setIsProfileUsageOpen] = useState(true);
 
-  // Close mobile sidebar on route change & auto-open the section containing the current route
+  // Close mobile sidebar on route change
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
     setMobileSidebarOpen(false);
+  }, [location.pathname]);
 
-    const section = resolveNavSection(pathWithoutLocale);
-    setOpenSections((prev) => ({
-      inventory: section === 'inventory' ? true : prev.inventory,
-      configuration: section === 'configuration' ? true : prev.configuration,
-    }));
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [location.pathname, pathWithoutLocale]);
-
-  const handleToggleSection = useCallback((section: 'inventory' | 'configuration') => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  }, []);
+  // The dedicated drafts view shares its path with the ordinary listings list
+  // (`/listings/all`) and is distinguished only by its query string — so the
+  // sidebar's own `pathWithoutLocale` isn't enough to tell them apart.
+  const isDraftsActive =
+    pathWithoutLocale === '/listings/all' &&
+    new URLSearchParams(location.search).get('status') === ListingStatus.DRAFT;
 
   const handleToggleProfileUsage = useCallback(() => {
     setIsProfileUsageOpen((prev) => !prev);
@@ -149,10 +144,14 @@ export const AppLayout: React.FC = () => {
   const { data: billingSummary } = useGetBillingSummaryQuery(undefined, {
     skip: !isAuthenticated || isOperatorRole(user?.role),
   });
+  // Reads the server-resolved EFFECTIVE entitlement, not the raw subscription
+  // status: a lost renewal webhook leaves `subscription.status` at 'active'
+  // while every backend gate has already stopped. `getSummary` folds the
+  // stale-window guard into `entitlement` so this predicate — and the
+  // redirect below — catch that case.
   const isSuspended =
     Boolean(billingSummary?.enforcementEnabled) &&
-    resolveEntitlementState(billingSummary?.subscription?.status ?? null) ===
-      EntitlementState.SUSPENDED;
+    billingSummary?.entitlement === EntitlementState.SUSPENDED;
 
   /*
    * The same three meters the Billing page shows, surfaced in the profile
@@ -200,10 +199,10 @@ export const AppLayout: React.FC = () => {
       mobileSidebarOpen={mobileSidebarOpen}
       isLogoutConfirmOpen={isLogoutConfirmOpen}
       pathWithoutLocale={pathWithoutLocale}
+      isDraftsActive={isDraftsActive}
       userName={userName}
       loadingIsLoading={loadingState.isLoading}
       breadcrumbItems={breadcrumbItems}
-      openSections={openSections}
       onToggleSidebar={handleToggleSidebar}
       onNavigate={handleNavigate}
       onLogoutConfirm={handleLogout}
@@ -212,7 +211,6 @@ export const AppLayout: React.FC = () => {
       onOpenLogoutConfirm={() => setIsLogoutConfirmOpen(true)}
       onCloseLogoutConfirm={() => setIsLogoutConfirmOpen(false)}
       onLocaleNavigate={localeNavigate}
-      onToggleSection={handleToggleSection}
       pendingActionCount={actionCenter?.totalCount ?? 0}
       hasCriticalActions={(actionCenter?.criticalCount ?? 0) > 0}
       billingUsageRows={billingUsageRows}

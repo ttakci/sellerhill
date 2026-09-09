@@ -15,6 +15,7 @@ import { Job } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { withCorrelation } from '../../common/observability/correlation.context';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { BuyerMessageQueueService } from '../buyer-messaging/buyer-message-queue.service';
 import { EbayService } from '../ebay/ebay.service';
 import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
@@ -76,7 +77,8 @@ export class AmazonTrackingProcessorService extends WorkerHost {
     private readonly trackingQueueService: AmazonTrackingQueueService,
     private readonly buyerMessages: BuyerMessageQueueService,
     private readonly platformSettings: PlatformSettingsService,
-    private readonly trackingConversion: TrackingConversionService
+    private readonly trackingConversion: TrackingConversionService,
+    private readonly quotaEnforcement: QuotaEnforcementService
   ) {
     super();
   }
@@ -129,6 +131,18 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       if ([OrderStatus.COMPLETED, OrderStatus.CANCELLED].includes(order.status)) {
         this.logger.log(`Order ${orderId} is ${order.status}, removing tracking`);
         await this.trackingQueueService.removeOrderTracking(orderId);
+        return;
+      }
+
+      // Suspension stops the scrape, NOT the scheduler. The scrape is the cost
+      // (~330-450s of the shared Playwright pool per order); the scheduler is one
+      // lookup per tick. Leaving it registered means the very next tick after
+      // payment resumes this order exactly where it stopped, with no restart and
+      // no manual action.
+      if (await this.quotaEnforcement.isSuspended(order.user_id)) {
+        this.logger.log(
+          `Tracking scrape skipped for order ${order.id}: subscription suspended (scheduler retained)`
+        );
         return;
       }
 

@@ -41,6 +41,7 @@ export function useOrdersColumns(
               label: t('orders.table.asin'),
               id: order.product.asin,
               storeType: 'amazon',
+              icon: 'barcode',
             });
           }
           if (order.product?.ebayItemId) {
@@ -48,6 +49,7 @@ export function useOrdersColumns(
               label: t('orders.table.ebayId'),
               id: order.product.ebayItemId,
               storeType: 'ebay',
+              icon: 'tag',
             });
           }
           return (

@@ -91,9 +91,14 @@ export const ListingCard = ({
             <S.MetaList>
               {meta.map((item) => (
                 <S.MetaRow key={`${item.label}-${item.value}`}>
-                  <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
-                    {item.label}
-                  </S.MetaLabel>
+                  <S.MetaLabelRow>
+                    {item.icon ? (
+                      <Icon name={item.icon} size={14} color="brand.primary" />
+                    ) : null}
+                    <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
+                      {item.label}
+                    </S.MetaLabel>
+                  </S.MetaLabelRow>
                   <S.MetaValue>
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" />

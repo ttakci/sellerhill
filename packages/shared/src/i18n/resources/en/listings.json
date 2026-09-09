@@ -2,14 +2,14 @@
   "listings": {
     "tabs": {
       "active": "Active Listings",
-      "jobs": "Import Jobs"
+      "jobs": "Listing jobs"
     },
     "jobs": {
-      "title": "Import Jobs",
-      "subtitle": "Track bulk import progress to eBay. Tap a job for item-level detail.",
-      "empty": "No import jobs found.",
-      "emptyTitle": "No import jobs yet",
-      "emptySubtitle": "When you create listings, jobs appear here so you can follow progress and errors.",
+      "title": "Listing jobs",
+      "subtitle": "Progress and per-item results for bulk create, import and publish. Tap a job for detail.",
+      "empty": "No jobs found.",
+      "emptyTitle": "No jobs yet",
+      "emptySubtitle": "When you create, import or publish listings, jobs appear here so you can follow progress and errors.",
       "emptyLoading": "Loading jobs…",
       "filters": {
         "searchPlaceholder": "Search by ASIN…",
@@ -55,7 +55,7 @@
       },
       "details": {
         "title": "Job details",
-        "subtitle": "Item-level status for this import job",
+        "subtitle": "Item-level status for this job",
         "summary": "Summary",
         "itemsTitle": "Job items",
         "itemsSubtitle": "{{count}} ASINs in this job",
@@ -250,7 +250,7 @@
       "title": "Add New Listing",
       "subtitle": "Import products from Amazon to your eBay store using ASINs.",
       "create": "Create New Listing",
-      "jobs": "View Import Jobs"
+      "jobs": "View listing jobs"
     },
     "draftMode": {
       "title": "Save as drafts",
@@ -262,8 +262,8 @@
     "otherActions": {
       "title": "Other Actions",
       "subtitle": "Manage additional operations related to your listings.",
-      "jobsTitle": "View Import Jobs",
-      "jobsSubtitle": "Track the status of your bulk import operations.",
+      "jobsTitle": "View listing jobs",
+      "jobsSubtitle": "Track the status of your bulk listing operations.",
       "draftsTitle": "View drafts",
       "draftsSubtitle": "Review prepared listings before publishing them to eBay."
     },
@@ -298,7 +298,10 @@
       "publishSuccessTitle": "Published",
       "publishSuccess": "Successfully published {{count}} listing(s) to eBay.",
       "publishErrorTitle": "Publish failed",
-      "publishError": "Could not publish one or more drafts. Check stock and eBay account."
+      "publishError": "None of the selected drafts could be published. Open the details to see the reason for each.",
+      "publishPartialTitle": "Partly published",
+      "publishPartial": "{{count}} draft(s) published, {{failed}} failed. Open the details to see why each one failed.",
+      "publishViewDetails": "View details"
     },
     "modals": {
       "endTitle": "End Selected Listings?",

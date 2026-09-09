@@ -25,9 +25,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BillingInterval,
   BillingLimitKey,
+  BillingSubscriptionStatus,
+  EntitlementState,
   hasLiveSubscriptionStatus,
   PlanChangeDirection,
   PlatformSettingKey,
+  resolveEntitlementState,
   resolvePlanChangeDirection,
   type BillingDetailsDto,
   type BillingInvoiceListDto,
@@ -55,6 +58,7 @@ import {
   type BillingSummaryDto,
 } from './billing.types';
 import { isCardExpiringSoon } from './payment-method-helpers';
+import { resolveEffectiveEntitlement, resolveQuotaWindow } from './quota-helpers';
 import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
@@ -124,7 +128,37 @@ export class BillingService {
     const quotas = await this.getQuotaUsage(userId, subscription);
     const quotaAddons = await this.resolveQuotaAddonOffer(quotas, enforcementEnabled);
 
-    const transition = deriveSummaryTransition(enforcementEnabled, subscription?.status ?? null);
+    // The EFFECTIVE entitlement — the raw status PLUS the stale-window guard.
+    // When a renewal webhook is lost and the billing period lapses past the
+    // grace, every backend gate treats the account as SUSPENDED (quota
+    // limitValue 0, order sync stopped, tracking polling stopped, auto-fulfill
+    // blocked, Aquiline falls back to pass-through, the Keepa claim excludes
+    // them) while `subscription.status` still reads `active` — nothing writes
+    // a suspension, it is a fail-closed READ. Resolving it here is what lets
+    // the shell redirect to /billing and the Action Center fire for the
+    // account MOST likely to be a paying customer. `subscription.status`
+    // itself stays raw in the DTO on purpose (see `entitlement`'s doc and
+    // `hasProviderSubscription` below).
+    const graceHours = await this.platformSettings.getNumber(
+      PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    );
+    const now = new Date();
+    const entitlement = resolveEffectiveEntitlement(subscription, now, graceHours);
+    // Only the stale-window case is remapped: the raw status was ACTIVE/
+    // TRIALING but the window resolved to UNPAID. A genuinely canceled/ended
+    // row keeps its own transition ('no_subscription').
+    const staleWindowSuspension =
+      resolveEntitlementState(subscription?.status ?? null) === EntitlementState.ACTIVE &&
+      entitlement === EntitlementState.SUSPENDED;
+
+    // A stale window maps naturally onto the `past_due` branch — the billing
+    // page's "your subscription needs attention" copy is exactly right for it.
+    const transition = deriveSummaryTransition(
+      enforcementEnabled,
+      staleWindowSuspension
+        ? BillingSubscriptionStatus.PAST_DUE
+        : (subscription?.status ?? null),
+    );
 
     return {
       subscription,
@@ -132,6 +166,7 @@ export class BillingService {
       usagePeriods,
       quotas,
       quotaAddons,
+      entitlement,
       // True when the seller already has a LIVE Stripe subscription, i.e.
       // picking a plan must REPRICE it (via change-plan) rather than open a
       // checkout — the FE labels the button accordingly instead of the two
@@ -222,6 +257,13 @@ export class BillingService {
       return [];
     }
 
+    // Resolve the metering window from the SAME subscription the gate reads, so
+    // the figure shown here and the figure the gate enforces cannot disagree.
+    const graceHours = await this.platformSettings.getNumber(
+      PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    );
+    const window = resolveQuotaWindow(sub, new Date(), graceHours);
+
     const dimensions: Array<{
       limitKey: BillingLimitKey;
       resolve: () => Promise<number>;
@@ -243,11 +285,13 @@ export class BillingService {
             userId,
             sub.id,
             BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
+            window,
           );
           const periodId = await this.repository.ensureOpenUsagePeriod(
             sub.id,
             BillingLimitKey.AMAZON_ORDERS_PER_MONTH,
             limit ?? -1,
+            window,
           );
           return this.repository.countReservedSlots(
             sub.id,
@@ -258,7 +302,7 @@ export class BillingService {
       },
       {
         limitKey: BillingLimitKey.TRACKING_CONVERSIONS_PER_MONTH,
-        resolve: () => this.repository.countMonthlyConversions(userId),
+        resolve: () => this.repository.countConversionsInWindow(userId, window),
       },
     ];
 
@@ -267,7 +311,7 @@ export class BillingService {
         try {
           const [used, effective] = await Promise.all([
             resolve(),
-            this.repository.resolveEffectiveLimit(userId, sub.id, limitKey),
+            this.repository.resolveEffectiveLimit(userId, sub.id, limitKey, window),
           ]);
           // The effective ceiling, not the plan's own number: a seller who just
           // topped up must not still be shown at 100%.

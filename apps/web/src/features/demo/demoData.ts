@@ -18,6 +18,7 @@ import {
   DashboardPeriodKey,
   EbayAccountStatus,
   EbayMarketplaceId,
+  EntitlementState,
   ListingFailureCode,
   ListingJobKind,
   ListingJobStatus,
@@ -126,29 +127,26 @@ interface DemoProduct {
   price: number;
   /** Filename (sans extension) under `apps/web/public/demo-products/`. */
   slug: string;
+  description?: string;
+  features?: string[];
 }
 
 const PRODUCTS: DemoProduct[] = [
-  { asin: 'B0CJ4X2LMN', title: 'Wireless Earbuds Pro, Active Noise Cancelling, 36H Playtime', category: 'Consumer Electronics', brand: 'Aurio', cost: 21.4, price: 39.99, slug: 'wireless-earbuds' },
-  { asin: 'B09H7RT4KP', title: 'USB-C Fast Charger 65W GaN, 3-Port Wall Adapter', category: 'Consumer Electronics', brand: 'Voltek', cost: 18.9, price: 34.5, slug: 'usb-c-charger' },
-  { asin: 'B08N5WRWNW', title: 'Ergonomic Laptop Stand, Adjustable Aluminium Riser', category: 'Computers/Tablets', brand: 'Deskly', cost: 15.75, price: 29.95, slug: 'laptop-stand' },
-  { asin: 'B07QK9ZM3T', title: 'Stainless Steel Insulated Water Bottle 32oz, Wide Mouth', category: 'Home & Garden', brand: 'Northvale', cost: 12.3, price: 24.99, slug: 'water-bottle' },
-  { asin: 'B0B3MPT7XL', title: 'LED Desk Lamp with USB Charging Port, 5 Colour Modes', category: 'Home & Garden', brand: 'Lumira', cost: 16.5, price: 32.0, slug: 'desk-lamp' },
-  { asin: 'B0C6K9VW21', title: 'Mechanical Keyboard TKL, Hot-Swappable Red Switches', category: 'Computers/Tablets', brand: 'Keyforge', cost: 34.2, price: 62.5, slug: 'mechanical-keyboard' },
-  { asin: 'B08XYQ4M6D', title: 'Bluetooth Speaker Waterproof IPX7, 24H Battery', category: 'Consumer Electronics', brand: 'Aurio', cost: 19.8, price: 37.99, slug: 'bluetooth-speaker' },
-  { asin: 'B07T5N9YQ2', title: 'Memory Foam Pillow, Cooling Gel Cover, Queen', category: 'Home & Garden', brand: 'Restwell', cost: 17.6, price: 33.5, slug: 'memory-foam-pillow' },
-  { asin: 'B00006JSUA', title: 'Cast Iron Skillet 12 inch, Pre-Seasoned', category: 'Home & Garden', brand: 'Ironcraft', cost: 22.0, price: 41.0, slug: 'cast-iron-skillet' },
-  { asin: 'B09MTQ8FZ3', title: 'Yoga Mat Non-Slip 6mm, Carrying Strap Included', category: 'Sporting Goods', brand: 'Flexa', cost: 13.4, price: 26.99, slug: 'yoga-mat' },
-  { asin: 'B0BV7K2QLM', title: 'Digital Kitchen Scale, 0.1g Precision, Tare Function', category: 'Home & Garden', brand: 'Northvale', cost: 9.6, price: 19.95, slug: 'kitchen-scale' },
-  { asin: 'B0C3H8NRQ4', title: 'Air Fryer 5.8QT, Digital Touchscreen, 8 Presets', category: 'Home & Garden', brand: 'Crispa', cost: 48.5, price: 84.99, slug: 'air-fryer' },
-  { asin: 'B08RL5T7WQ', title: 'Resistance Bands Set of 5, Latex-Free with Door Anchor', category: 'Sporting Goods', brand: 'Flexa', cost: 8.25, price: 18.5, slug: 'resistance-bands' },
-  { asin: 'B09PQ2MJ7X', title: 'Cable Management Box, Bamboo Lid, Large', category: 'Home & Garden', brand: 'Deskly', cost: 14.1, price: 27.5, slug: 'cable-management-box' },
-  { asin: 'B0BXQ9L4TV', title: 'Webcam 1080p with Ring Light and Privacy Cover', category: 'Computers/Tablets', brand: 'Clarion', cost: 20.7, price: 38.95, slug: 'webcam' },
-  { asin: 'B07YW6K3PZ', title: 'Insulated Lunch Bag, Leakproof, 12L Cooler Tote', category: 'Home & Garden', brand: 'Northvale', cost: 10.9, price: 22.5, slug: 'lunch-bag' },
-  { asin: 'B0C9TR5NKD', title: 'Electric Milk Frother, Stainless Steel, 4 Settings', category: 'Home & Garden', brand: 'Crispa', cost: 15.2, price: 29.99, slug: 'milk-frother' },
-  { asin: 'B08LM2ZQ7H', title: 'Adjustable Dumbbell 25lb, Quick-Change Weight Plates', category: 'Sporting Goods', brand: 'Ironcraft', cost: 39.9, price: 71.0, slug: 'dumbbell' },
-  { asin: 'B0BK7VQ2ML', title: 'Robot Vacuum Filter Pack, 6-Piece Replacement Set', category: 'Home & Garden', brand: 'Purevo', cost: 7.4, price: 16.99, slug: 'vacuum-filter' },
-  { asin: 'B0CN4X8TQR', title: 'Standing Desk Converter, 32 inch Height Adjustable', category: 'Business & Industrial', brand: 'Deskly', cost: 62.0, price: 108.5, slug: 'standing-desk-converter' },
+  { asin: 'B0C6K9VW20', title: 'VR Headset, Advanced All-In-One Virtual Reality', category: 'Consumer Electronics', brand: 'Meta', cost: 210.0, price: 399.0, slug: 'vr-headset', description: 'Immerse yourself in a virtual world with this advanced all-in-one VR headset. Enjoy high-resolution displays, built-in spatial audio, and an extensive library of games and apps without needing a PC or console.', features: ['High-resolution displays', 'Built-in spatial audio', 'Extensive app library'] },
+  { asin: 'B0C3H8NRQ0', title: 'Luxury Eau de Parfum, 50ml, Floral & Woody', category: 'Health & Beauty', brand: 'Tom Ford', cost: 85.0, price: 175.0, slug: 'luxury-perfume', description: 'Experience the ultimate luxury with this exquisite eau de parfum. Featuring a captivating blend of floral and woody notes, this long-lasting fragrance is perfect for any occasion.', features: ['50ml spray bottle', 'Floral & Woody notes', 'Long-lasting'] },
+  { asin: 'B08XYQ4M6E', title: 'Mechanical Gaming Keyboard, RGB, Cherry MX Switches', category: 'Computers/Tablets', brand: 'Keychron', cost: 55.2, price: 119.95, slug: 'mechanical-keyboard', description: 'Dominate your games with this mechanical keyboard featuring authentic Cherry MX switches. Customizable RGB lighting and a durable aluminum frame make it a must-have for any gamer or typist.', features: ['Cherry MX Switches', 'Customizable RGB lighting', 'Durable aluminum frame'] },
+  { asin: 'B08N5WRWN1', title: 'Active Noise Cancelling Headphones, Over-Ear', category: 'Consumer Electronics', brand: 'Sony', cost: 145.0, price: 298.0, slug: 'anc-headphones', description: 'Enjoy pure audio bliss with these over-ear headphones featuring industry-leading active noise cancellation. Up to 30 hours of battery life and touch controls for seamless operation.', features: ['Active Noise Cancelling', '30 hours battery life', 'Touch controls'] },
+  { asin: 'B0B3MPT7X1', title: 'Minimalist Automatic Watch, Sapphire Crystal', category: 'Jewelry & Watches', brand: 'Seiko', cost: 110.0, price: 249.99, slug: 'luxury-watch', description: 'Elevate your style with this minimalist automatic watch. Featuring a durable sapphire crystal, precise automatic movement, and a premium leather strap for timeless elegance.', features: ['Sapphire crystal', 'Automatic movement', 'Premium leather strap'] },
+  { asin: 'B07QK9ZM31', title: 'Professional Blender 1500W, Auto-iQ Technology', category: 'Home & Garden', brand: 'Ninja', cost: 75.0, price: 159.99, slug: 'professional-blender', description: 'Blend smoothies, crush ice, and puree ingredients with this powerful 1500W professional blender. Auto-iQ technology ensures perfect results with a single touch.', features: ['1500W power', 'Auto-iQ technology', 'Crushes ice'] },
+  { asin: 'B0CJ4X2LM0', title: '4K Camera Drone, 3-Axis Gimbal, 60 Min Flight Time', category: 'Consumer Electronics', brand: 'DJI', cost: 320.0, price: 599.0, slug: 'camera-drone', description: 'Capture stunning aerial photography in 4K resolution. This drone features a 3-axis gimbal for ultra-smooth video, intelligent flight modes, and an impressive 60-minute flight time.', features: ['4K resolution', '3-axis gimbal', '60 Min Flight Time'] },
+  { asin: 'B0C9M8N7P6', title: 'Smart Home Thermostat, Wi-Fi Enabled, Energy Saving', category: 'Home & Garden', brand: 'Nest', cost: 95.0, price: 189.0, slug: 'smart-thermostat', description: 'Save energy and stay comfortable with this smart Wi-Fi thermostat. Learns your habits and programs itself, while allowing you to control the temperature from anywhere using your phone.', features: ['Wi-Fi enabled', 'Energy saving', 'Learns your habits'] },
+  { asin: 'B09H7RT4K0', title: 'Ergonomic Office Chair with Lumbar Support', category: 'Home & Garden', brand: 'Herman Miller', cost: 350.0, price: 799.0, slug: 'ergonomic-chair', description: 'Work in comfort all day with this premium ergonomic office chair. Features adjustable lumbar support, breathable mesh material, and customizable armrests for perfect posture.', features: ['Adjustable lumbar support', 'Breathable mesh', 'Customizable armrests'] },
+  { asin: 'B07T5N9YQ0', title: 'Smart Security Camera, 1080p, 2-Way Audio', category: 'Consumer Electronics', brand: 'Ring', cost: 42.0, price: 89.95, slug: 'security-camera', description: 'Keep your home safe with this 1080p smart security camera. Features motion detection, night vision, and two-way audio to let you see, hear, and speak to visitors from anywhere.', features: ['1080p resolution', '2-Way Audio', 'Motion detection'] },
+  { asin: 'B00006JSU0', title: 'Robot Vacuum and Mop Combo, Lidar Navigation', category: 'Home & Garden', brand: 'Roborock', cost: 280.0, price: 549.99, slug: 'robot-vacuum', description: 'Effortlessly clean your floors with this advanced robot vacuum and mop combo. Lidar navigation creates accurate maps for efficient cleaning, while strong suction handles dirt and pet hair.', features: ['Lidar navigation', 'Mop combo', 'Strong suction'] },
+  { asin: 'B08RL5T7W0', title: 'Professional Percussion Massage Gun, Deep Tissue', category: 'Health & Beauty', brand: 'Theragun', cost: 120.0, price: 249.0, slug: 'massage-gun', description: 'Relieve muscle tension and accelerate recovery with this professional deep tissue massage gun. Features multiple speed settings, interchangeable attachments, and a quiet motor.', features: ['Deep tissue massage', 'Multiple speed settings', 'Interchangeable attachments'] },
+  { asin: 'B0BXQ9L4T0', title: 'Polarized Aviator Sunglasses, UV400 Protection', category: 'Apparel & Accessories', brand: 'Ray-Ban', cost: 65.0, price: 145.0, slug: 'aviator-sunglasses', description: 'Protect your eyes in style with these classic aviator sunglasses. Polarized lenses reduce glare and provide 100% UV400 protection against harmful rays.', features: ['Polarized lenses', 'UV400 protection', 'Classic aviator style'] },
+  { asin: 'B0C9TR5NK0', title: 'Adjustable Smart Dumbbells Set, App Connected', category: 'Sporting Goods', brand: 'Bowflex', cost: 210.0, price: 399.0, slug: 'smart-dumbbells', description: 'Transform your home gym with these adjustable smart dumbbells. Easily change weights with a simple turn, and connect to the fitness app to track your workouts and progress.', features: ['Adjustable weights', 'App connected', 'Space-saving'] },
+  { asin: 'B08LM2ZQ70', title: 'Premium Conical Burr Coffee Grinder, 40 Settings', category: 'Home & Garden', brand: 'Baratza', cost: 85.0, price: 169.95, slug: 'coffee-grinder', description: 'Unlock the full flavor of your coffee beans with this conical burr grinder. Offers 40 precise grind settings from espresso to French press, ensuring a perfect cup every time.', features: ['Conical burr grinder', '40 grind settings', 'Precise dosing'] },
 ];
 
 /* ── Identity ─────────────────────────────────────────────────────────── */
@@ -196,6 +194,24 @@ export const DEMO_EBAY_ACCOUNTS = {
 
 /* ── Listings ─────────────────────────────────────────────────────────── */
 
+/**
+ * Listings pinned to the top of the default `/listings` view. That view sorts by
+ * `createdAt` desc (see `useListingsFilters`), so giving these ASINs the most
+ * recent timestamps — in this exact order — floats them to the front as the
+ * first 3 and next 4 cards, without reordering `PRODUCTS` (which would shift
+ * every index-derived field: eBay ids, store split, sample-order sampling, RNG
+ * sequence). All other listings keep their 100+‑day spread and stay below.
+ */
+const PINNED_LISTING_ASINS: readonly string[] = [
+  'B08N5WRWN1', // Active Noise Cancelling Headphones, Over-Ear — Sony
+  'B08XYQ4M6E', // Mechanical Gaming Keyboard, RGB, Cherry MX Switches — Keychron
+  'B0C3H8NRQ0', // Luxury Eau de Parfum, 50ml, Floral & Woody — Tom Ford
+  'B0C9M8N7P6', // Smart Home Thermostat, Wi-Fi Enabled, Energy Saving — Nest
+  'B0CJ4X2LM0', // 4K Camera Drone, 3-Axis Gimbal, 60 Min Flight Time — DJI
+  'B07QK9ZM31', // Professional Blender 1500W, Auto-iQ Technology — Ninja
+  'B0B3MPT7X1', // Minimalist Automatic Watch, Sapphire Crystal — Seiko
+];
+
 function buildListings(): ListingDto[] {
   const rand = seeded(97);
   return PRODUCTS.map((p, i) => {
@@ -204,12 +220,18 @@ function buildListings(): ListingDto[] {
     const status = i % 11 === 0 ? ListingStatus.DRAFT : ListingStatus.ACTIVE;
     const profit = round2(p.price * 0.87 - p.cost);
     const daysSinceSale = Math.floor(rand() * 20) + 1;
+    const pinnedRank = PINNED_LISTING_ASINS.indexOf(p.asin);
+    // Pinned listings: created 1–7 days ago in pin order (newest-first sort puts
+    // rank 0 on top). Everyone else keeps `200 − i·6` days, always far older.
+    const createdAt = pinnedRank === -1 ? isoDaysAgo(200 - i * 6, i) : isoDaysAgo(pinnedRank + 1, i);
     return {
       id: `demo-listing-${i + 1}`,
       userId: DEMO_USER_ID,
       asin: p.asin,
       productId: `demo-product-${i + 1}`,
       title: p.title,
+      description: p.description,
+      features: p.features,
       price: p.price,
       currency: DEMO_CURRENCY,
       quantity,
@@ -231,9 +253,15 @@ function buildListings(): ListingDto[] {
       brand: p.brand,
       sourceStock: quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
       ebayAccountId: i % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
-      lastSaleAt: status === ListingStatus.DRAFT ? null : isoDaysAgo(daysSinceSale, i),
-      createdAt: isoDaysAgo(200 - i * 6, i),
-      updatedAt: isoDaysAgo(daysSinceSale, i),
+      lastSaleAt:
+        status === ListingStatus.DRAFT
+          ? null
+          : isoDaysAgo(pinnedRank === -1 ? daysSinceSale : Math.min(daysSinceSale, pinnedRank + 1), i),
+      createdAt,
+      updatedAt:
+        pinnedRank === -1
+          ? isoDaysAgo(daysSinceSale, i)
+          : isoDaysAgo(Math.min(daysSinceSale, pinnedRank + 1), i),
     } satisfies ListingDto;
   });
 }
@@ -1292,6 +1320,7 @@ export function buildDemoBillingSummary(): BillingSummaryDto {
     enforcementEnabled: true,
     provider: BillingProvider.STRIPE,
     transition: 'active',
+    entitlement: EntitlementState.ACTIVE,
   };
 }
 

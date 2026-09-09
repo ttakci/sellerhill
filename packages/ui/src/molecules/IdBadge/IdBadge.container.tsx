@@ -11,6 +11,7 @@ export const IdBadge = ({
   size = 'sm',
   className,
   onClick,
+  plain = false,
 }: IdBadgeProps) => {
   // URL building is injected by the app: eBay item links are environment-scoped
   // (a sandbox item id does not resolve on ebay.com), and the design system
@@ -29,6 +30,7 @@ export const IdBadge = ({
       isHovered={isHovered}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      plain={plain}
     />
   );
 };

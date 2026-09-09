@@ -400,20 +400,34 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     max: 20,
   }),
   def({
+    // THE master switch for the whole billing plan. Default `true` since the
+    // 30-day trial (migration 097): with it `false`, every quota limit — the
+    // trial's included — is inert and the trial has no cost ceiling at all.
+    // A fresh install with no DB override and no env var now enforces quotas,
+    // which is the point. Flip it off per deployment only to stage a rollout.
     key: PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
     category: PlatformSettingCategory.BILLING,
     type: PlatformSettingType.BOOLEAN,
     envVar: 'BILLING_ENFORCEMENT_ENABLED',
-    defaultValue: 'false',
+    defaultValue: 'true',
   }),
   def({
     key: PlatformSettingKey.BILLING_TRIAL_DAYS,
     category: PlatformSettingCategory.BILLING,
     type: PlatformSettingType.NUMBER,
     envVar: 'BILLING_TRIAL_DAYS',
-    defaultValue: '7',
+    defaultValue: '30',
     min: 1,
     max: 90,
+  }),
+  def({
+    key: PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    category: PlatformSettingCategory.BILLING,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'BILLING_WEBHOOK_GRACE_HOURS',
+    defaultValue: '6',
+    min: 0,
+    max: 72,
   }),
   def({
     key: PlatformSettingKey.BUYER_MESSAGING_FEEDBACK_DEFAULT_DELAY_DAYS,

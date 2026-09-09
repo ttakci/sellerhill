@@ -1,4 +1,5 @@
 import type { ActionCenterGroupDto, ActionCenterItemDto, ActionCenterSeverity } from '@repo/shared';
+import type { TabNavItem } from '@repo/ui';
 
 import type { ACTION_CENTER_FILTER_ALL } from '../actionCenterPresentation';
 
@@ -42,12 +43,13 @@ export interface ActionCenterPageComponentProps {
   groups: ActionCenterGroupView[];
   filter: ActionCenterFilter;
   /**
-   * Takes a raw string because it is wired straight to `SegmentedControl`,
-   * whose value is untyped. The container narrows it back to
+   * Takes a raw string because it is wired straight to the shared `TabNav`
+   * atom, whose `onChange` is untyped. The container narrows it back to
    * {@link ActionCenterFilter} — the component makes no decisions about it.
    */
   onFilterChange: (value: string) => void;
-  filterOptions: Array<{ label: string; value: string }>;
+  /** Rail items for the shared `TabNav` atom — id + counted label + severity icon. */
+  filterOptions: TabNavItem[];
   /** True on the very first fetch, before any data has arrived. */
   isInitialLoading: boolean;
   /** True when the seller genuinely has nothing pending (not merely filtered out). */

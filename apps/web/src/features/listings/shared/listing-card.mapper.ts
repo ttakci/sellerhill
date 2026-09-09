@@ -22,6 +22,7 @@ export const toListingCardProps = (
     meta.push({
       label: t('listings.table.brand'),
       value: listing.brand,
+      icon: 'building-2',
     });
   }
 
@@ -29,6 +30,7 @@ export const toListingCardProps = (
     label: t('listings.table.asin'),
     value: listing.asin,
     storeType: 'amazon',
+    icon: 'barcode',
   });
 
   if (listing.ebayListingId) {
@@ -36,6 +38,7 @@ export const toListingCardProps = (
       label: t('listings.table.ebayId'),
       value: listing.ebayListingId,
       storeType: 'ebay',
+      icon: 'tag',
     });
   }
 

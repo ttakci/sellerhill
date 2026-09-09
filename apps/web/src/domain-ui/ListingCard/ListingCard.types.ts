@@ -1,3 +1,5 @@
+import type { IconName } from '@repo/ui';
+
 export type ListingCardOrientation = 'horizontal' | 'vertical';
 export type StatTone = 'default' | 'positive' | 'negative' | 'info';
 
@@ -12,6 +14,8 @@ export interface ListingCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
+  /** Leading row icon — mirrors the job-item cards (barcode for ASIN, tag for eBay ID, …). */
+  icon?: IconName;
 }
 
 /** @deprecated Prefer meta[] — kept for callers not yet migrated. */
