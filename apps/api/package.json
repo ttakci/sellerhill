@@ -13,6 +13,7 @@
     "migrate:prod": "node dist/scripts/migrate.js",
     "user:set-role": "tsx src/scripts/user-set-role.ts",
     "reset-users": "tsx src/scripts/reset-users.ts",
+    "billing:reconcile": "tsx src/scripts/billing-reconcile.ts",
     "llm:check": "tsx src/scripts/llm-check.ts",
     "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
