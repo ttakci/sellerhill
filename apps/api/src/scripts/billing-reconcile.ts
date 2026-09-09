@@ -51,12 +51,13 @@ import Stripe from 'stripe';
 
 import { DatabaseService } from '../common/database/database.service';
 import { BillingRepositoryService } from '../modules/billing/billing-repository.service';
-import { type ParsedStripeEvent } from '../modules/billing/billing.types';
 import { extractStripeSubscriptionFields } from '../modules/billing/stripe-event-applier';
 
 import {
+  buildReconcileEvent,
   parseReconcileArgs,
   ReconcileArgError,
+  resolveReconcilePlanId,
   type ReconcileArgs,
 } from './billing-reconcile-helpers';
 
@@ -72,11 +73,6 @@ const USAGE = [
   '  --email <email>  The account to reconcile (matched on LOWER(email))',
   '  --dry-run        Print what would be written and exit without writing',
 ].join('\n');
-
-// The synthetic envelope's event type. Must be one `extractStripeSubscriptionFields`
-// accepts (its SUBSCRIPTION_EVENT_TYPES set) — the mapper reads Stripe's own
-// `status` off the object regardless of which of the three it is.
-const SYNTHETIC_EVENT_TYPE = 'customer.subscription.updated';
 
 // Statuses that mean "this customer is currently subscribed", mirroring
 // StripeBillingProvider.LIVE_SUBSCRIPTION_STATUSES. When more than one
@@ -191,17 +187,7 @@ async function run(): Promise<number> {
       );
     }
 
-    const event: ParsedStripeEvent = {
-      // Not a real Stripe event id. It lands in the persisted subscription
-      // metadata's `stripe_event_id`; the `reconcile:` prefix is a deliberate
-      // breadcrumb that this row was written by the CLI, not a webhook.
-      eventId: `reconcile:${new Date().toISOString()}`,
-      eventType: SYNTHETIC_EVENT_TYPE,
-      occurredAt: new Date().toISOString(),
-      payload: { data: { object: target } },
-    };
-
-    const fields = extractStripeSubscriptionFields(event);
+    const fields = extractStripeSubscriptionFields(buildReconcileEvent(target));
     if (!fields) {
       logError(
         `Stripe reports subscription ${target.id} with status "${target.status}", which this system does not track. Nothing to re-apply.`,
@@ -209,10 +195,7 @@ async function run(): Promise<number> {
       return 1;
     }
 
-    const planId =
-      typeof target.metadata.plan_id === 'string' && target.metadata.plan_id.length > 0
-        ? target.metadata.plan_id
-        : null;
+    const planId = resolveReconcilePlanId(target);
     if (!planId) {
       logError(
         `subscription ${target.id} carries no plan_id in its Stripe metadata — it was created outside our checkout flow and cannot be mapped to a local plan.`,
