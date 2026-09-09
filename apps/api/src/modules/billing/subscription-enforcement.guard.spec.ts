@@ -37,9 +37,13 @@ describe('amazon tracking suspension guard', () => {
     // is the Playwright scrape, and the scheduler costs one lookup per tick.
     // Tearing it down would need reconcileSchedulers(), which runs only at API
     // startup — an unacceptable recovery path for a paying customer.
+    // The teardown call in this file is `trackingQueueService.removeOrderTracking`
+    // (it removes the per-order job scheduler). The window starts AT the
+    // suspension check, so the legitimate terminal/not-found calls above it are
+    // out of range.
     const idx = source.indexOf('isSuspended');
     expect(idx).toBeGreaterThan(-1);
     const suspendedBlock = source.slice(idx, idx + 600);
-    expect(suspendedBlock).not.toContain('removeJobScheduler');
+    expect(suspendedBlock).not.toContain('removeOrderTracking');
   });
 });
