@@ -47,3 +47,25 @@ describe('amazon tracking suspension guard', () => {
     expect(suspendedBlock).not.toContain('removeOrderTracking');
   });
 });
+
+describe('quota window invariants', () => {
+  const repo = read('./billing-repository.service.ts');
+  const helpers = read('./quota-helpers.ts');
+
+  it('no repository method resolves the calendar month directly', () => {
+    // The defect class this whole change addresses is "one rule, implemented at
+    // only some of its call sites". There are seven here.
+    expect(repo).not.toContain('utcMonthBounds(');
+  });
+
+  it('the conversion count is bounded at both ends', () => {
+    expect(repo).toContain('tracking_converted_at >=');
+    expect(repo).toContain('tracking_converted_at <');
+  });
+
+  it('resolveQuotaWindow never advances periodStart', () => {
+    // Guards against a future reintroduction of the rejected roll-forward: the
+    // grace must extend the END only.
+    expect(helpers).not.toMatch(/addUtcMonths|rollForward/);
+  });
+});
