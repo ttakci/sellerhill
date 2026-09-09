@@ -278,25 +278,28 @@ describe('buildSubscriptionUpsertSql', () => {
     }
   });
 
-  it('the webhook path (allowPeriodRewind=false) refuses a backward period start', () => {
-    // An out-of-order redelivery must not rewrite the quota window's anchor
-    // backward — the UPDATE is guarded so it becomes a no-op instead.
+  it('the webhook path (allowPeriodRewind=false) protects the anchor column only, never the row', () => {
+    // An out-of-order or corrupted redelivery must not rewrite the quota
+    // window's anchor backward — but every OTHER column must still land, so a
+    // cancellation can never be swallowed. That means GREATEST() on the one
+    // column, not a WHERE on the whole DO UPDATE.
     const sql = buildSubscriptionUpsertSql(false);
     expect(sql).toContain(
-      'WHERE EXCLUDED.current_period_start >= billing_subscriptions.current_period_start',
+      'current_period_start = GREATEST(EXCLUDED.current_period_start, billing_subscriptions.current_period_start)',
     );
-    // The guard sits between the SET list and RETURNING (it is a DO UPDATE …
-    // WHERE, not a statement-level WHERE).
-    expect(sql.indexOf('WHERE EXCLUDED.current_period_start')).toBeGreaterThan(
-      sql.indexOf('updated_at = NOW()'),
-    );
-    expect(sql.indexOf('WHERE EXCLUDED.current_period_start')).toBeLessThan(
-      sql.indexOf('RETURNING *'),
-    );
+    // The over-broad form must not come back: no WHERE anywhere in the
+    // DO UPDATE (the only WHERE is the ON CONFLICT partial-index predicate).
+    const doUpdate = sql.slice(sql.indexOf('DO UPDATE SET'));
+    expect(doUpdate).not.toMatch(/\bWHERE\b/);
+    // status / canceled_at / ended_at still update unconditionally.
+    expect(sql).toContain('status = EXCLUDED.status');
+    expect(sql).toContain('canceled_at = EXCLUDED.canceled_at');
+    expect(sql).toContain('ended_at = EXCLUDED.ended_at');
   });
 
-  it('reconcile (allowPeriodRewind=true) drops the guard so it can write Stripe’s real earlier start', () => {
+  it('reconcile (allowPeriodRewind=true) writes Stripe’s real (possibly earlier) start verbatim', () => {
     const sql = buildSubscriptionUpsertSql(true);
-    expect(sql).not.toContain('EXCLUDED.current_period_start >=');
+    expect(sql).toContain('current_period_start = EXCLUDED.current_period_start');
+    expect(sql).not.toContain('GREATEST(');
   });
 });

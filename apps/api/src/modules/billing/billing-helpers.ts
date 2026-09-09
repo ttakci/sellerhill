@@ -246,7 +246,7 @@ export function deriveSummaryTransition(
 /**
  * The `INSERT … ON CONFLICT … DO UPDATE` for
  * `BillingRepositoryService.upsertSubscriptionByProvider`, built pure so the
- * period-rewind guard can be unit-tested without a database.
+ * period-anchor rule can be unit-tested without a database.
  *
  * `current_period_start` is the quota window's anchor: usage is counted from
  * it, so moving it BACKWARD instantly makes the window look stale and would
@@ -256,23 +256,31 @@ export function deriveSummaryTransition(
  * 1440) — a retried delivery landing within 24h AFTER a newer one would
  * otherwise rewrite the anchor backward.
  *
- * So the webhook path (`allowPeriodRewind = false`) guards the UPDATE with
- * `EXCLUDED.current_period_start >= billing_subscriptions.current_period_start`:
- * an out-of-order delivery becomes a no-op (the UPDATE is skipped, `RETURNING`
- * yields no row, and the caller keeps the newer row).
+ * **The monotonicity is scoped to the ONE column, never to the row.** An
+ * earlier form guarded the whole `DO UPDATE` with a `WHERE` comparing the
+ * incoming period start against the stored one — but that gated EVERY column,
+ * so once a row had been corrupted by `extractStripeSubscriptionFields`'
+ * `now()/+30d` fallback (its start stamped at webhook-receipt time, LATER
+ * than Stripe's real start) every subsequent legitimate webhook was rejected
+ * wholesale, INCLUDING `customer.subscription.deleted` — a cancellation could
+ * sit unrecorded for ~30 days while the account kept reading `active`. Now
+ * every other column (`status`, `plan_id`, `interval`, `canceled_at`,
+ * `ended_at`, `metadata`, `current_period_end`) always lands; only the anchor
+ * is protected, via
+ * `GREATEST(EXCLUDED.current_period_start, billing_subscriptions.current_period_start)`.
  *
  * `billing:reconcile` passes `allowPeriodRewind = true` and is the ONE caller
- * that legitimately writes an EARLIER start: a row corrupted by
- * `extractStripeSubscriptionFields`' `now()/+30d` fallback carries a start of
- * "webhook-receipt time", and repairing it means writing Stripe's real,
- * earlier date. Reconcile is an explicit operator action asserting Stripe's
- * truth, so it is exactly the caller that should bypass the guard — the
- * webhook, which cannot vouch for delivery order, must not.
+ * that legitimately writes an EARLIER start: repairing a `now()/+30d`-corrupted
+ * row means writing Stripe's real, earlier date, so it sets the anchor to
+ * `EXCLUDED.current_period_start` verbatim. Reconcile is an explicit operator
+ * action asserting Stripe's truth; the webhook, which cannot vouch for
+ * delivery order, keeps the `GREATEST` form. That contrast — verbatim on
+ * reconcile, `GREATEST` on the webhook — is the subtle part.
  */
 export function buildSubscriptionUpsertSql(allowPeriodRewind: boolean): string {
-  const monotonicGuard = allowPeriodRewind
-    ? ''
-    : '\n       WHERE EXCLUDED.current_period_start >= billing_subscriptions.current_period_start';
+  const periodStart = allowPeriodRewind
+    ? 'EXCLUDED.current_period_start'
+    : 'GREATEST(EXCLUDED.current_period_start, billing_subscriptions.current_period_start)';
   return `INSERT INTO billing_subscriptions
          (customer_id, plan_id, status, interval,
           current_period_start, current_period_end, canceled_at, ended_at,
@@ -283,12 +291,12 @@ export function buildSubscriptionUpsertSql(allowPeriodRewind: boolean): string {
          plan_id = EXCLUDED.plan_id,
          status = EXCLUDED.status,
          interval = EXCLUDED.interval,
-         current_period_start = EXCLUDED.current_period_start,
+         current_period_start = ${periodStart},
          current_period_end = EXCLUDED.current_period_end,
          canceled_at = EXCLUDED.canceled_at,
          ended_at = EXCLUDED.ended_at,
          metadata = EXCLUDED.metadata,
-         updated_at = NOW()${monotonicGuard}
+         updated_at = NOW()
        RETURNING *`;
 }
 

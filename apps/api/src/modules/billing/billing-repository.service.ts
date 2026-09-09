@@ -699,18 +699,29 @@ export class BillingRepositoryService {
    * updates the row in place rather than inserting a duplicate. The caller
    * passes the resolved customer_id (from billing_customers.provider_customer_id).
    *
-   * `allowPeriodRewind` decides whether `current_period_start` may move
-   * BACKWARD. It defaults to `false` and MUST stay false for the webhook
-   * path: `current_period_start` anchors the quota window, `isStaleEvent`
-   * only rejects deliveries older than ~24h, and an out-of-order redelivery
-   * landing after a newer one would otherwise rewrite the anchor backward and
-   * suspend a live, paid account. Only `billing:reconcile` passes `true` — it
-   * is an explicit operator assertion of Stripe's real (possibly earlier)
-   * dates, used to repair a row that `extractStripeSubscriptionFields`'
-   * `now()/+30d` fallback stamped with webhook-receipt time. See
-   * {@link buildSubscriptionUpsertSql}. When the guard blocks the UPDATE the
-   * statement returns no row and this method returns null — the caller keeps
-   * the newer row, which is the correct outcome.
+   * `allowPeriodRewind` decides whether `current_period_start` — and ONLY
+   * that column — may move BACKWARD. It defaults to `false` and MUST stay
+   * false for the webhook path: the column anchors the quota window,
+   * `isStaleEvent` only rejects deliveries older than ~24h, and an
+   * out-of-order redelivery landing after a newer one would otherwise rewrite
+   * the anchor backward and suspend a live, paid account. The rest of the row
+   * ALWAYS updates on both paths, so a cancellation or a status change can
+   * never be swallowed by an anchor that happens to be stale — the previous
+   * form, a `WHERE` on the whole `DO UPDATE`, could and did.
+   *
+   * Only `billing:reconcile` passes `true` — an explicit operator assertion
+   * of Stripe's real (possibly earlier) dates, used to repair a row that
+   * `extractStripeSubscriptionFields`' `now()/+30d` fallback stamped with
+   * webhook-receipt time. On that path the anchor is written verbatim; on the
+   * webhook path it is `GREATEST(sent, stored)`. See
+   * {@link buildSubscriptionUpsertSql}.
+   *
+   * Because the row now always updates, a suppressed rewind is invisible in
+   * the return value alone — so on the webhook path this method compares the
+   * stored anchor against the one it sent and logs at `warn` when the stored
+   * one is later, i.e. a later out-of-order or corrupted event was ignored
+   * for the anchor. That log line is the signal that a row may need
+   * `billing:reconcile`.
    */
   async upsertSubscriptionByProvider(
     customerId: string,
@@ -742,7 +753,30 @@ export class BillingRepositoryService {
         JSON.stringify(fields.metadata ?? {}),
       ],
     );
-    return rows.length > 0 ? this.mapSubscription(rows[0]) : null;
+    if (rows.length === 0) {
+      return null;
+    }
+    const mapped = this.mapSubscription(rows[0]);
+    // The row always updates now — the anchor is protected by GREATEST() on
+    // its own column, not by a WHERE on the DO UPDATE — so a suppressed
+    // rewind is only visible by comparing what was stored against what was
+    // sent. On the webhook path a stored start LATER than the one just passed
+    // means a later out-of-order or corrupted event was ignored for the
+    // anchor; surface it so an operator knows the row may need
+    // `billing:reconcile`.
+    if (!allowPeriodRewind) {
+      const storedStartMs = Date.parse(mapped.currentPeriodStart);
+      const sentStartMs = fields.currentPeriodStart.getTime();
+      if (Number.isFinite(storedStartMs) && storedStartMs > sentStartMs) {
+        this.logger.warn(
+          `Subscription ${fields.providerSubscriptionId}: current_period_start rewind suppressed — ` +
+            `kept stored ${mapped.currentPeriodStart}, ignored earlier ` +
+            `${fields.currentPeriodStart.toISOString()} from a later out-of-order or corrupted event. ` +
+            `Run billing:reconcile if this row's anchor is wrong.`,
+        );
+      }
+    }
+    return mapped;
   }
 
   /**

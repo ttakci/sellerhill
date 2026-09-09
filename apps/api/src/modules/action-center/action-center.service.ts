@@ -47,7 +47,6 @@ import {
   BillingLimitKey,
   BillingSubscriptionStatus,
   EntitlementState,
-  resolveEntitlementState,
   EbayAccountStatus,
   LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD,
   ListingStatus,
@@ -601,7 +600,20 @@ export class ActionCenterService {
     }
 
     const subscription = summary.subscription;
+    // Read the EFFECTIVE entitlement (`summary.entitlement`), not the raw
+    // subscription status. In a stale-window suspension the renewal webhook
+    // was lost, the quota window aged past the grace, and every backend gate
+    // treats the account as SUSPENDED — but `subscription.status` still reads
+    // `active`, so a raw-status check here fired for nothing and the seller
+    // whose automation just halted got no row on the one surface built to
+    // tell them. The quota probe cannot compensate: a suspended account
+    // reports `limitValue: 0` and `resolveQuotaSeverity` returns null for a
+    // non-positive limit.
     if (subscription?.status === BillingSubscriptionStatus.PAST_DUE) {
+      // A genuine Stripe `past_due` — distinct copy ("update your card"), so
+      // this one branch stays keyed on the raw status, which is its true
+      // source. It is also a subset of `entitlement === SUSPENDED`, so the
+      // `else if` keeps it from double-reporting with PLAN_SUSPENDED.
       items.push({
         key: ActionCenterItemKey.PLAN_PAST_DUE,
         group: ActionCenterGroup.PLAN,
@@ -609,15 +621,11 @@ export class ActionCenterService {
         count: 1,
         actionPath: '/billing',
       });
-    } else if (
-      // `else if` because PAST_DUE is already suspended under the immediate-stop
-      // policy — reporting both would tell the seller the same thing twice with
-      // two different calls to action. This branch is the cases a payment
-      // cannot fix by itself: a cancelled subscription or an expired trial,
-      // where the seller has to choose a plan.
-      subscription &&
-      resolveEntitlementState(subscription.status) === EntitlementState.SUSPENDED
-    ) {
+    } else if (summary.entitlement === EntitlementState.SUSPENDED) {
+      // Everything else the seller has to act on: a cancelled/ended
+      // subscription, an expired trial, OR a stale renewal window where the
+      // raw status is still `active`. All three read as "choose/renew a
+      // plan" and all three now surface here.
       items.push({
         key: ActionCenterItemKey.PLAN_SUSPENDED,
         group: ActionCenterGroup.PLAN,

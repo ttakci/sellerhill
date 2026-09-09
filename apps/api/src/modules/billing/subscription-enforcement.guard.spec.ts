@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { buildSubscriptionUpsertSql } from './billing-helpers';
+
 const read = (rel: string): string =>
   fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
 
@@ -138,10 +140,45 @@ describe('the webhook upsert is monotonic on current_period_start', () => {
   const applier = read('./stripe-event-applier.ts');
   void helpers;
 
-  it('buildSubscriptionUpsertSql guards the UPDATE unless rewind is explicitly allowed', () => {
+  it('buildSubscriptionUpsertSql protects only the anchor column, never the whole row', () => {
+    // The monotonicity is GREATEST() on current_period_start — NOT a WHERE on
+    // the DO UPDATE. The over-broad form rejected every subsequent webhook
+    // (customer.subscription.deleted included) once a row's anchor was
+    // corrupted, so a cancellation could sit unrecorded for ~30 days.
+    // The anchor column is set from the ternary, and the non-rewind branch is
+    // GREATEST(sent, stored) — never a WHERE on the DO UPDATE.
+    expect(billingHelpers).toContain('current_period_start = ${periodStart}');
     expect(billingHelpers).toContain(
+      "'GREATEST(EXCLUDED.current_period_start, billing_subscriptions.current_period_start)'",
+    );
+    expect(billingHelpers).not.toContain(
       'EXCLUDED.current_period_start >= billing_subscriptions.current_period_start',
     );
+    // reconcile (allowPeriodRewind) still writes Stripe's real earlier start verbatim.
+    expect(billingHelpers).toMatch(
+      /allowPeriodRewind\s*\n?\s*\?\s*'EXCLUDED\.current_period_start'/,
+    );
+
+    // Build both shapes and assert the guarantee on the actual SQL, not just
+    // the source: every non-anchor column updates unconditionally, and the
+    // DO UPDATE carries no WHERE.
+    const webhookSql = buildSubscriptionUpsertSql(false);
+    const doUpdate = webhookSql.slice(webhookSql.indexOf('DO UPDATE SET'));
+    expect(doUpdate).not.toMatch(/\bWHERE\b/);
+    expect(webhookSql).toContain('status = EXCLUDED.status');
+    expect(webhookSql).toContain('canceled_at = EXCLUDED.canceled_at');
+    expect(webhookSql).toContain('ended_at = EXCLUDED.ended_at');
+    expect(buildSubscriptionUpsertSql(true)).toContain(
+      'current_period_start = EXCLUDED.current_period_start',
+    );
+  });
+
+  it('upsertSubscriptionByProvider logs when a webhook-path rewind is suppressed', () => {
+    // The row always updates now, so a suppressed rewind is invisible in the
+    // return value — the method must compare stored vs sent and warn.
+    const repo = read('./billing-repository.service.ts');
+    expect(repo).toMatch(/rewind suppressed/);
+    expect(repo).toMatch(/if \(!allowPeriodRewind\)/);
   });
 
   it('the applier logs at error before synthesising a window from a missing period', () => {
