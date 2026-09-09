@@ -33,7 +33,7 @@ Prices, limits, ordering, active state, and Stripe price IDs are stored in billi
 - `052_create_billing_foundation.sql` creates plans, prices, limits, customers, subscriptions, usage periods, listing reservations, AO reservations, and webhook inbox tables.
 - `053_billing_quota_enforcement.sql` adjusts reservation key types/nullability and adds idempotent quota reservation support.
 - `083_billing_plans_v2.sql` replaces the placeholder 3-plan catalog with the costed 11-tier ladder above, retires `scale` (deactivated, not deleted), and closes the annual prices. Superseded prices get `effective_to = CURRENT_DATE` rather than being edited, so historical subscriptions keep the price that applied when they were created.
-- Plan limits are resolved from the current subscription and catalog. A subscription-less user has full access while `BILLING_ENFORCEMENT_ENABLED=false`.
+- Plan limits are resolved from the current subscription and catalog. A user with **no subscription row at all** fails OPEN regardless of enforcement: `EntitlementState.NONE` is the pre-billing state, deliberately not the same as suspension, so turning enforcement on never locks out an account that has never been billed.
 
 Migrations run automatically through the existing API migration runner. Stripe identifiers (`billing_plans.provider_product_id`, `billing_plan_prices.provider_price_id`) remain nullable until the catalog is mirrored to Stripe — see the launch checklist below.
 
@@ -46,7 +46,8 @@ The module is under `apps/api/src/modules/billing/`.
 - `StripeBillingProvider` is behind a provider port; missing Stripe configuration fails safely (409) and never fabricates a successful checkout. Checkout and the billing portal are both Stripe-hosted, so card data, SCA/3DS and PCI scope stay with Stripe.
 - The Stripe customer is created and linked to the local `billing_customers` row **when the checkout session is created**, not from a webhook. Webhook delivery order is not guaranteed, so linking on `checkout.session.completed` would let a `customer.subscription.created` that arrived first be dropped — a paid user with no subscription row.
 - `BillingWebhookProcessor` verifies signatures via the Stripe SDK, stores an idempotent inbox event, rejects stale/out-of-order state, and applies subscription updates. Only `customer.subscription.created|updated|deleted` mutate state; Stripe's own `status` field is authoritative.
-- `BILLING_ENFORCEMENT_ENABLED=false` is the migration/transition default. It reports `full_access` without creating a fake subscription.
+- **`BILLING_ENFORCEMENT_ENABLED` defaults to `true`** (registry default, flipped alongside migration `097` and the 30-day trial). It was `false` through the pre-launch transition, and a limit nobody enforces is not a limit — the trial's cost ceiling only exists while this is on. Set it `false` per deployment to stage a slower rollout; with it off the summary reports `full_access` without creating a fake subscription. Note there is deliberately **no class-field default** for it in `env.validation.ts`: an initializer there is copied onto the validated config and read back as a present env value, which silently masked the registry default on every deployment with no override row.
+- **Quota windows follow the Stripe billing period, not the calendar month.** `resolveQuotaWindow` (`quota-helpers.ts`) anchors usage to the subscription's own `current_period_start`, which **never moves without confirmed payment** — metering on the calendar month handed a mid-month subscriber roughly two allowances per payment. A 6-hour grace (`billing.webhookGraceHours`) extends only `periodEnd` to absorb webhook latency; past it the window resolves to `UNPAID` and entitlement reports `SUSPENDED` at read time, never as a database write. `BillingSummaryDto.entitlement` carries that effective state, while `subscription.status` keeps reporting Stripe's raw status for the checkout-vs-plan-change routing.
 
 Required runtime settings are documented in `apps/api/.env.example` and validated in `env.validation.ts`. Unlike a Merchant of Record, **Stripe does not assume tax liability** — Stripe Tax calculates and collects, but SellerHill remains the merchant of record and owns registration, remittance and filing, alongside its LLC income/accounting obligations. `automatic_tax` silently collects zero tax until a head office address and at least one active registration exist in the Stripe Dashboard.
 
@@ -76,10 +77,10 @@ Admin billing metrics are exposed by `GET /v1/admin/billing/metrics` and display
 2. Mirror the catalog: `pnpm --filter api stripe:sync-catalog` creates the Stripe Products/Prices and writes their IDs back to the billing catalog rows. Idempotent, safe to re-run per environment.
 3. Point a webhook endpoint at `POST /api/v1/billing/webhooks/stripe` (locally: `stripe listen --forward-to localhost:3000/api/v1/billing/webhooks/stripe`), subscribing to `customer.subscription.created|updated|deleted`.
 4. Stripe Tax: set the head office address and add an active registration per jurisdiction the business is obliged to collect in. Without a registration, tax is silently zero. Registration obligations are a decision for the account owner and their tax advisor.
-5. Keep enforcement disabled while testing catalog, checkout, webhook, cancellation, renewal, failed-payment, and portal flows.
+5. Optionally set `BILLING_ENFORCEMENT_ENABLED=false` for this environment while testing catalog, checkout, webhook, cancellation, renewal, failed-payment, and portal flows — it now defaults to `true`, so disabling is the explicit step, not enabling.
 6. Verify webhook retries, duplicate events, stale events, upgrades, downgrades, and period rollover.
 7. Run a low-volume live subscription test with live-mode keys and a live-mode registration.
-8. Enable `BILLING_ENFORCEMENT_ENABLED=true` only after the live test and operational monitoring are ready.
+8. Remove any `BILLING_ENFORCEMENT_ENABLED=false` override once the live test and operational monitoring are ready, so the environment returns to the enforced default.
 
 ## Future technical documents
 
