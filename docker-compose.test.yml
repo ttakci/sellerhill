@@ -68,6 +68,12 @@ services:
       EBAY_REST_API_URL: https://api.sandbox.ebay.com
       EBAY_XML_API_URL: https://api.sandbox.ebay.com/ws/api.dll
 
+      # Marketplace Account Deletion notification (challenge/response endpoint).
+      # eBay validates this per keyset; the sandbox keyset uses it too. See
+      # CLAUDE.md "eBay Marketplace Account Deletion notification".
+      EBAY_VERIFICATION_TOKEN: ${EBAY_VERIFICATION_TOKEN:-}
+      EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
+
       # Keepa hits the LIVE API even from the test env (there is no sandbox),
       # so it spends real tokens. Turn "Background refresh enabled" OFF at
       # /admin → Settings when the test env is idle.

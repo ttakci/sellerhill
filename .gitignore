@@ -37,6 +37,10 @@ apps/web/.env
 apps/web/.env.local
 apps/api/.env
 apps/api/.env.local
+# Currently a clean template (verified 2026-09-10, no real secrets), but the
+# name invites a future edit to fill in real production values and commit
+# them by accident — untracked like every other apps/api/.env* file.
+apps/api/.env.production
 
 # Docker volumes and data
 postgres_data/

@@ -10,6 +10,8 @@ import { EbayFulfillmentService } from '../orders/ebay-fulfillment.service';
 
 import { AspectLlmService } from './aspect-llm.service';
 import { AspectResolverService } from './aspect-resolver.service';
+import { EbayAccountDeletionController } from './ebay-account-deletion.controller';
+import { EbayAccountDeletionService } from './ebay-account-deletion.service';
 import { EbayBulkService } from './ebay-bulk.service';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
@@ -24,7 +26,7 @@ import { EbayService } from './ebay.service';
   // ledger before writing the account row. Billing does not import Ebay, so
   // this does not create a cycle (module-cycle.guard.spec.ts covers that).
   imports: [ConfigModule, AuthModule, DatabaseModule, LlmModule, BillingModule],
-  controllers: [EbayController],
+  controllers: [EbayController, EbayAccountDeletionController],
   providers: [
     EbayService,
     EbayBulkService,
@@ -34,6 +36,7 @@ import { EbayService } from './ebay.service';
     AspectLlmService,
     EmailVerifiedGuard,
     EbayFulfillmentService,
+    EbayAccountDeletionService,
   ],
   exports: [
     EbayService,
