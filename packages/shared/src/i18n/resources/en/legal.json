@@ -1,7 +1,6 @@
 {
   "legal": {
     "backToHome": "Back to home",
-    "tocTitle": "On this page",
     "unavailable": "This document could not be loaded. Please try again later.",
     "privacy": {
       "documentTitle": "SellerHill Privacy Policy",
@@ -34,7 +33,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -888,7 +887,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -945,7 +944,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1006,7 +1005,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1065,7 +1064,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1175,7 +1174,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             }
           ]
         }
@@ -2575,7 +2574,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -2735,7 +2734,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             }
           ]
         }

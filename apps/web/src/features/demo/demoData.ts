@@ -272,6 +272,94 @@ export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
   new Set(PRODUCTS.map((p) => p.category))
 ).sort();
 
+/* ── Listing price/stock revision history ─────────────────────────────────
+ * The revisions feature (drawer + `GET /listings/:id/revisions`) exists in
+ * full; without fixtures the demo listing detail page just never shows the
+ * "revisions" action because the preview count is zero. This makes every
+ * ACTIVE demo listing look like it has been price/stock-tracked for a couple
+ * of months.
+ *
+ * Generated per listing from a fixed seed, anchored to "now", newest-first —
+ * same discipline as every other fixture here. Real revisions are written
+ * only when a value actually moves; price moves on every row below, so each
+ * one is a legitimate change. Drafts get none — the refresh pipeline never
+ * touches a draft.
+ */
+export function demoListingRevisions(listingId: string): {
+  id: string;
+  previousPrice: number;
+  newPrice: number;
+  previousQuantity: number;
+  newQuantity: number;
+  recordedAt: string;
+}[] {
+  const listing = DEMO_LISTINGS.find((l) => l.id === listingId);
+  if (!listing || listing.status === ListingStatus.DRAFT) {
+    return [];
+  }
+
+  const idx = Number(listingId.replace('demo-listing-', '')) || 1;
+  const rand = seeded(9200 + idx);
+
+  // Roughly one recorded change every ~2 days the listing has existed — so an
+  // old listing has hundreds of rows and exercises the "load more" paging,
+  // while a freshly added one has only a handful.
+  const daysListed = Math.max(
+    3,
+    Math.round((Date.now() - new Date(listing.createdAt).getTime()) / 86_400_000)
+  );
+  // Floor of 24 so even a week-old listing spills past one page and shows the
+  // "load more" control; an old listing climbs toward hundreds of rows.
+  const rowCount = Math.min(240, Math.max(24, Math.round(daysListed * 0.9)));
+  const avgStepDays = Math.max(0.75, daysListed / rowCount);
+
+  const rows: ReturnType<typeof demoListingRevisions> = [];
+
+  // Walk backwards from the listing's live values: the newest row lands on
+  // exactly today's price/quantity so the drawer's "previous → current"
+  // column reads consistently, and each older row's `newX` is the next
+  // (older) row's `previousX`.
+  let newPrice = listing.price;
+  let newQuantity = listing.quantity;
+  let hoursAgo = 6 + Math.floor(rand() * 18); // most recent change: within ~1 day
+
+  for (let i = 0; i < rowCount; i += 1) {
+    // Mostly small repricer nudges tracking a competitor; the occasional
+    // larger correction.
+    const isJump = rand() < 0.18;
+    const magnitude = isJump ? 0.05 + rand() * 0.09 : 0.008 + rand() * 0.025;
+    const direction = rand() < 0.5 ? -1 : 1;
+    let previousPrice = round2(newPrice * (1 - direction * magnitude));
+    if (previousPrice <= 1) {
+      previousPrice = round2(newPrice + 1);
+    }
+
+    // Stock drifts within the buffer band and dips toward 0 now and then.
+    let previousQuantity = newQuantity;
+    const qRoll = rand();
+    if (qRoll < 0.35) {
+      previousQuantity = newQuantity + 1 + Math.floor(rand() * 3);
+    } else if (qRoll < 0.5) {
+      previousQuantity = Math.max(0, newQuantity - 1);
+    }
+
+    rows.push({
+      id: `demo-rev-${idx}-${i + 1}`,
+      previousPrice,
+      newPrice,
+      previousQuantity,
+      newQuantity,
+      recordedAt: isoHoursAgo(hoursAgo),
+    });
+
+    newPrice = previousPrice;
+    newQuantity = previousQuantity;
+    hoursAgo += Math.round(avgStepDays * (0.5 + rand()) * 24) + Math.floor(rand() * 12);
+  }
+
+  return rows; // newest-first
+}
+
 /* ── Orders ───────────────────────────────────────────────────────────── */
 
 const BUYER_NAMES = [
@@ -379,6 +467,31 @@ function buildOrders(): OrderDto[] {
     const [city, state, zip] = CITIES[i % CITIES.length];
     const buyerName = BUYER_NAMES[i % BUYER_NAMES.length];
 
+    /*
+     * Tracking conversion, as it looks once a shipped order has been through
+     * the Aquiline path: `amazonTrackingNumber` is the raw Amazon Logistics
+     * number, `convertedTrackingNumber` the `AQUA…YQ` number the eBay buyer
+     * actually sees, and `ebayTrackingPushedNumber` equals it because
+     * `mayPushToEbay(CONVERTED)` sends the converted number. Only orders that
+     * are actually shipped/completed AND auto-purchased get it. `i === 1` (a
+     * recent SHIPPED order) is left source-only so the "Convert tracking"
+     * action still has something to act on in the demo.
+     */
+    const isShippedOrder =
+      status === OrderStatus.SHIPPED || status === OrderStatus.COMPLETED;
+    const hasTracking =
+      isShippedOrder && autoFulfillStatus === AutoFulfillStatus.PLACED && isLinked;
+    const amazonTrackingNumber = hasTracking
+      ? `TBA${915_000_000_000 + i * 3607}`
+      : null;
+    const trackRng = seeded(5100 + i);
+    const aquaBody = Array.from(
+      { length: 9 },
+      () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(trackRng() * 31)]
+    ).join('');
+    const convertedTrackingNumber =
+      hasTracking && i !== 1 ? `AQUA${aquaBody}YQ` : null;
+
     orders.push({
       id: `demo-order-${i + 1}`,
       ebayOrderId: `12-${11000 + i * 13}-${40000 + i * 7}`,
@@ -413,6 +526,12 @@ function buildOrders(): OrderDto[] {
       ebayEarnings,
       purchasePrice: costCaptureStatus === OrderCostCaptureStatus.UNTRACKED ? 0 : purchasePrice,
       amazonOrderId: isLinked ? `112-${3000000 + i * 91}-${1000000 + i * 17}` : null,
+      amazonTrackingNumber,
+      convertedTrackingNumber,
+      ebayTrackingPushedNumber: convertedTrackingNumber,
+      amazonTrackingUrl: amazonTrackingNumber
+        ? `https://www.amazon.com/progress-tracker/package/ref=demo?itemId=${amazonTrackingNumber}`
+        : undefined,
       amazonTax,
       amazonShipping,
       netProfit,

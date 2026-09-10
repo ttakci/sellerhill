@@ -74,12 +74,13 @@ function formatAmazonOrdersLine(
 }
 
 /**
- * The plans shown before the visitor expands the grid — one per tier band, so
- * the section reads as a comparison rather than the full twelve-row price list.
- * A slug that is not in the catalog simply contributes nothing, so a future
- * catalog edit degrades to "fewer featured cards", never to a broken grid.
+ * The plans shown before the visitor expands the grid: the three cheapest paid
+ * tiers, so the collapsed section reads as "here is where the ladder starts"
+ * rather than the full twelve-row price list. The rest are one click away via
+ * the expander. Derived from the catalog's own monthly prices (below), never a
+ * hardcoded slug list, so a catalog re-price can never leave it stale.
  */
-const FEATURED_PLAN_SLUGS = new Set(['nano', 'starter', 'growth', 'pro']);
+const COLLAPSED_PLAN_COUNT = 3;
 
 /** The plan carrying the "most popular" badge. */
 const HIGHLIGHTED_PLAN_SLUG = 'growth';
@@ -132,6 +133,18 @@ export const LandingPageContainer = (): React.ReactElement => {
     // `translation:billing.billing.…` form resolved to nothing and rendered the
     // raw key as the price label for any zero-priced plan.
     const freeLabel = t('billing:billing.plans.free.name');
+    const cheapestPaidSlugs = new Set(
+      [...catalog.plans]
+        .map((plan) => ({
+          slug: plan.slug,
+          amountMicros:
+            plan.prices[BillingInterval.MONTHLY]?.amountMicros ?? Number.POSITIVE_INFINITY,
+        }))
+        .filter((entry) => Number.isFinite(entry.amountMicros) && entry.amountMicros > 0)
+        .sort((a, b) => a.amountMicros - b.amountMicros)
+        .slice(0, COLLAPSED_PLAN_COUNT)
+        .map((entry) => entry.slug)
+    );
     return catalog.plans.map((plan) => {
       const monthlyPrice = plan.prices[BillingInterval.MONTHLY];
       const listingsLimit = plan.limits[BillingLimitKey.LISTINGS_PER_MONTH]?.limitValue ?? 0;
@@ -147,10 +160,37 @@ export const LandingPageContainer = (): React.ReactElement => {
         trackingConversionsDisplay: formatConversionsLine(conversionsLimit, t),
         amazonOrdersDisplay: formatAmazonOrdersLine(ordersLimit, t),
         isHighlighted: plan.slug === HIGHLIGHTED_PLAN_SLUG,
-        isFeatured: FEATURED_PLAN_SLUGS.has(plan.slug),
+        isFeatured: cheapestPaidSlugs.has(plan.slug),
       };
     });
   }, [catalog, t]);
+
+  /**
+   * The "plans from $X" figure on the hero price badge. Derived from the
+   * catalog's cheapest paid monthly tier so it can never drift from the pricing
+   * section further down the page; the literal fallback matches the real
+   * cheapest tier (Lite, $19.99) the same way `landing.pricing.catalogFallback`
+   * has to stay aligned with the catalog.
+   */
+  const startingPriceDisplay = useMemo(() => {
+    const FALLBACK = '$19.99';
+    if (!catalog || catalog.plans.length === 0) {
+      return FALLBACK;
+    }
+    let cheapest: { amountMicros: number; currency: string } | null = null;
+    for (const plan of catalog.plans) {
+      const monthly = plan.prices[BillingInterval.MONTHLY];
+      if (!monthly || monthly.amountMicros <= 0) {
+        continue;
+      }
+      if (!cheapest || monthly.amountMicros < cheapest.amountMicros) {
+        cheapest = { amountMicros: monthly.amountMicros, currency: monthly.currency };
+      }
+    }
+    return cheapest
+      ? formatLandingPrice(cheapest.amountMicros, cheapest.currency, FALLBACK)
+      : FALLBACK;
+  }, [catalog]);
 
   const handleLocaleChange = useCallback(
     (locale: SupportedLocale) => {
@@ -214,6 +254,7 @@ export const LandingPageContainer = (): React.ReactElement => {
         scrolled={scrolled}
         mobileMenuOpen={mobileMenuOpen}
         pricingPlans={pricingPlans}
+        startingPriceDisplay={startingPriceDisplay}
         pricingCatalogError={isCatalogError}
         onLocaleChange={handleLocaleChange}
         onNavigateLogin={handleNavigateLogin}

@@ -116,24 +116,31 @@ export const Title = styled(Text)`
 export const MetaList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
 export const MetaRow = styled.div`
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
+  grid-template-columns: 5.75rem minmax(0, 1fr);
   column-gap: ${tkn('spacing.sm')};
-  align-items: baseline;
+  align-items: center;
   min-width: 0;
+`;
 
-  @media (min-width: ${tkn('breakpoints.sm')}) {
-    grid-template-columns: 5rem minmax(0, 1fr);
-  }
+/** Leading icon + label, left column of a meta row — mirrors ListingCard. */
+export const MetaLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
 `;
 
 export const MetaLabel = styled(Text)`
   line-height: ${tkn('typography.lineHeight.tight')};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const MetaValue = styled.div`
@@ -148,7 +155,7 @@ export const MetaValue = styled.div`
   }
 
   a > span:first-of-type {
-    font-weight: ${tkn('typography.fontWeight.semibold')};
+    font-weight: ${tkn('typography.fontWeight.bold')};
     color: ${tkn('colors.text.primary')};
     overflow: hidden;
     text-overflow: ellipsis;
@@ -161,6 +168,7 @@ export const MetaValueText = styled(Text)`
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: ${tkn('typography.lineHeight.tight')};
+  font-family: ${tkn('typography.fontFamily.mono')};
 `;
 
 export const StatsGrid = styled.div`

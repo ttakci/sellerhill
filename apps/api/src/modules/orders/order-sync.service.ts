@@ -330,14 +330,16 @@ export class OrderSyncService {
         purchase_price, transaction_fee, ad_fee, net_profit,
         shipping_address,
         order_date, last_ebay_event_at,
-        cost_capture_status
+        cost_capture_status,
+        ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
         $13, $14, $15, $16, $17, $18,
         $19, $20, $21, $22,
         $23, $24, $25,
-        $26
+        $26,
+        $27, $28, $29
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -352,6 +354,13 @@ export class OrderSyncService {
         quantity = EXCLUDED.quantity,
         shipping_address = EXCLUDED.shipping_address,
         last_ebay_event_at = EXCLUDED.last_ebay_event_at,
+        -- COALESCE, never a bare EXCLUDED: eBay assesses the marketplace fee
+        -- when the buyer's payment settles, which can be after we first pulled
+        -- the order. A later sync that DOES carry the figure fills it in; one
+        -- that doesn't must never blank out a value we already captured.
+        ebay_marketplace_fee = COALESCE(EXCLUDED.ebay_marketplace_fee, orders.ebay_marketplace_fee),
+        ebay_fee_basis_amount = COALESCE(EXCLUDED.ebay_fee_basis_amount, orders.ebay_fee_basis_amount),
+        ebay_collect_remit_tax = COALESCE(EXCLUDED.ebay_collect_remit_tax, orders.ebay_collect_remit_tax),
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id, (xmax = 0) AS inserted`,
@@ -382,6 +391,9 @@ export class OrderSyncService {
         entity.orderDate ? entity.orderDate.toISOString() : null,
         entity.lastEbayEventAt ? entity.lastEbayEventAt.toISOString() : null,
         entity.costCaptureStatus,
+        entity.ebayMarketplaceFee,
+        entity.ebayFeeBasisAmount,
+        entity.ebayCollectRemitTax,
       ]
     );
 

@@ -42,6 +42,14 @@ export const toListingCardProps = (
     });
   }
 
+  if (typeof listing.soldCount === 'number' && listing.soldCount > 0) {
+    meta.push({
+      label: t('listings.table.sold'),
+      value: String(listing.soldCount),
+      icon: 'shopping-cart',
+    });
+  }
+
   const statusLabel =
     listing.status === ListingStatus.DRAFT
       ? t('listings.status.draft')
@@ -53,7 +61,6 @@ export const toListingCardProps = (
     title,
     imageUrl: listing.imageUrls?.[0],
     meta,
-    soldCount: listing.soldCount,
     status: statusLabel
       ? {
           label: statusLabel,

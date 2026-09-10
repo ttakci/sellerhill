@@ -43,6 +43,12 @@ export interface LandingPageProps {
   mobileMenuOpen: boolean;
   /** Catalog-driven pricing plans (empty when the catalog call failed → use fallback). */
   pricingPlans: LandingPricingPlan[];
+  /**
+   * Pre-formatted "plans from $X" amount for the hero price badge — the catalog's
+   * cheapest paid monthly tier, or the literal `$19.99` fallback when the catalog
+   * call failed.
+   */
+  startingPriceDisplay: string;
   /** True when the public catalog call failed and the landing should render the i18n fallback. */
   pricingCatalogError: boolean;
   onLocaleChange: (locale: SupportedLocale) => void;

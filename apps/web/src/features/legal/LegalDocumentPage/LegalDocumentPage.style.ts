@@ -1,11 +1,11 @@
 /**
  * LegalDocumentPage Styles
  *
- * A reading surface, not an app screen: one measured column on a plain ground,
- * a sticky bar carrying only the brand and the language control, and a table of
- * contents beside the text on wide viewports. The document runs to twenty-nine
- * sections, so the column is capped near 46rem — long legal prose set full-bleed
- * is the fastest way to make someone stop reading it.
+ * A reading surface, not an app screen: one measured column on a plain ground
+ * and a sticky bar carrying only the brand and the language control. The
+ * document runs to twenty-nine sections, so the column is capped near 46rem —
+ * long legal prose set full-bleed is the fastest way to make someone stop
+ * reading it.
  */
 
 import styled from '@emotion/styled';
@@ -99,26 +99,16 @@ export const LanguageTrigger = styled.div`
 `;
 
 export const Layout = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: ${tkn('spacing.xxl')};
-  max-width: 72rem;
+  max-width: 46rem;
   margin: 0 auto;
   padding: ${tkn('spacing.xxl')} ${tkn('spacing.xl')};
 
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    grid-template-columns: minmax(0, 1fr) 17rem;
-    align-items: start;
-  }
-
   @media (max-width: ${tkn('breakpoints.mdBelow')}) {
     padding: ${tkn('spacing.xl')} ${tkn('spacing.md')};
-    gap: ${tkn('spacing.xl')};
   }
 `;
 
 export const Article = styled.article`
-  max-width: 46rem;
   min-width: 0;
 `;
 
@@ -231,51 +221,6 @@ export const EmailLink = styled.a`
   &:focus-visible {
     outline: 2px solid ${tkn('colors.brand.primary')};
     outline-offset: 2px;
-  }
-`;
-
-export const Toc = styled.nav`
-  display: none;
-
-  @media (min-width: ${tkn('breakpoints.lg')}) {
-    display: block;
-    position: sticky;
-    top: ${tkn('spacing.xxxl')};
-    max-height: calc(100vh - 8rem);
-    overflow-y: auto;
-    padding: ${tkn('spacing.md')};
-    background: ${tkn('colors.surface.primary')};
-    border: 1px solid ${tkn('colors.border.primary')};
-    border-radius: ${tkn('radius.lg')};
-    box-shadow: ${tkn('shadows.sm')};
-  }
-`;
-
-export const TocList = styled.ol`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  margin: ${tkn('spacing.sm')} 0 0;
-  padding: 0;
-  list-style: none;
-`;
-
-export const TocLink = styled.a`
-  display: block;
-  padding: ${tkn('spacing.2xs')} ${tkn('spacing.xs')};
-  border-radius: ${tkn('radius.sm')};
-  color: ${tkn('colors.text.secondary')};
-  text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &:hover {
-    background: ${tkn('colors.background.tertiary')};
-    color: ${tkn('colors.text.primary')};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${tkn('colors.brand.primary')};
-    outline-offset: -2px;
   }
 `;
 

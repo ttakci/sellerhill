@@ -17,6 +17,8 @@ import axios from 'axios';
 
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
+import { parseEbayAmount, sumCollectAndRemitTax } from './ebay-order-financials';
+
 /**
  * Raw eBay order from Fulfillment API
  */
@@ -30,6 +32,8 @@ interface EbayOrderLineItem {
   itemUrl?: string;
   sku?: string;
   lineItemFulfillmentInstructions?: { minEstimatedDeliveryDate?: string; maxEstimatedDeliveryDate?: string };
+  /** Sales tax eBay collects from the buyer and remits itself. See `sumCollectAndRemitTax`. */
+  ebayCollectAndRemitTaxes?: Array<{ amount?: { value?: string; currency?: string } }>;
 }
 
 interface EbayFulfillmentOrder {
@@ -54,6 +58,10 @@ interface EbayFulfillmentOrder {
     total?: { value: string; currency: string };
   };
   lineItems?: EbayOrderLineItem[];
+  /** The REAL fees eBay deducted from the payout — free in this payload, see migration 098. */
+  totalMarketplaceFee?: { value: string; currency: string };
+  /** The amount `totalMarketplaceFee` was calculated on. */
+  totalFeeBasisAmount?: { value: string; currency: string };
   fulfillments?: Array<{
     shipmentTrackingNumber?: string;
     shippingCarrierCode?: string;
@@ -248,8 +256,19 @@ export class EbayFulfillmentService {
       // multi-marketplace account's orders are correct from day one instead
       // of needing a backfill.
       currency: pricing?.total?.currency || totalDueSeller?.currency || 'USD',
+      // Derived from the seller's own `ebayFeePercent`/`fixedFeeAmount` later in
+      // `recomputeProfit` — a PRICING input, not what eBay charged. The real
+      // figures are the three `ebay*` fields below; nothing consumes them yet.
       transactionFee: 0,
       adFee: 0,
+      // Captured, not used (migration 098). NULL is meaningful here: it means
+      // eBay reported nothing, which is different from a genuine zero — and
+      // whether these arrive at all on the first fetch is itself what we are
+      // trying to learn, since order sync pulls an order exactly once, minutes
+      // after creation and possibly before eBay has assessed the fee.
+      ebayMarketplaceFee: parseEbayAmount(ebayOrder.totalMarketplaceFee),
+      ebayFeeBasisAmount: parseEbayAmount(ebayOrder.totalFeeBasisAmount),
+      ebayCollectRemitTax: sumCollectAndRemitTax(ebayOrder.lineItems),
       netProfit: null,
       costCaptureStatus: OrderCostCaptureStatus.PENDING,
       purchasePrice: purchasePrice || 0,

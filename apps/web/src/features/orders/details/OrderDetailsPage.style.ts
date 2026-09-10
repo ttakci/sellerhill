@@ -10,6 +10,7 @@ export const Container = PageContainerWithMobileBar;
  * this page too.
  */
 export const Hero = styled(Card)`
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   gap: ${tkn('spacing.lg')};
@@ -17,7 +18,56 @@ export const Hero = styled(Card)`
   @media (min-width: ${tkn('breakpoints.md')}) {
     grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
     align-items: start;
+    gap: ${tkn('spacing.xl')};
   }
+`;
+
+/**
+ * Status + fulfillment badges. Flows above the title on phones; pins to the
+ * hero card's top-right corner from `md` up — the listing detail page's
+ * StatusBadgeSlot pattern, widened to hold two or three badges.
+ */
+export const StatusBadgeSlot = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    position: absolute;
+    top: ${tkn('spacing.lg')};
+    right: ${tkn('spacing.lg')};
+    z-index: 1;
+    max-width: 45%;
+    justify-content: flex-end;
+  }
+`;
+
+/**
+ * Wraps the fulfillment notices + product title. Given right padding from `md`
+ * up so long lines clear the badge slot pinned to the card's top-right corner.
+ */
+export const HeroLede = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  min-width: 0;
+
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding-right: 45%;
+  }
+`;
+
+/**
+ * The product title heads the hero, not the page (see PageHeader). Clamped —
+ * Amazon titles run long.
+ */
+export const ProductTitle = styled(Text)`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
 `;
 
 export const ProductImage = styled.div`
@@ -48,47 +98,99 @@ export const HeroInfo = styled.div`
   flex-direction: column;
   gap: ${tkn('spacing.md')};
   min-width: 0;
+
+  /* Small top padding nudges the first row clear of the badge slot pinned to
+     the card's top-right corner from md up. */
+  @media (min-width: ${tkn('breakpoints.md')}) {
+    padding-top: ${tkn('spacing.md')};
+  }
 `;
 
-export const BadgeRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${tkn('spacing.sm')};
-`;
-
-export const IdRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.sm')};
-  align-items: center;
-`;
-
-export const ProfitHighlight = styled.div<{ $positive: boolean }>`
+/** Marketplace ids + record facts as labelled icon rows — the listing detail
+ *  page's IdList pattern, so the two detail heroes read identically. */
+export const IdList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  padding: ${tkn('spacing.md')};
-  border-radius: ${tkn('radius.md')};
-  /* semanticTint carries the themed tint; the old code appended a raw "12" hex
-     alpha onto a resolved token, which silently breaks if a token ever becomes
-     rgb()/rgba() and produced a different opacity than the same effect elsewhere. */
-  background: ${({ $positive, theme }) =>
-    $positive ? theme.colors.semanticTint.success : theme.colors.semanticTint.error};
-  border: 0.0625rem solid
-    ${({ $positive, theme }) =>
-      $positive ? theme.colors.semanticTintBorder.success : theme.colors.semanticTintBorder.error};
+  gap: ${tkn('spacing.xs')};
 `;
 
-export const ProfitLabelRow = styled.div`
+export const IdItem = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  gap: ${tkn('spacing.sm')};
+  align-items: center;
+  min-width: 0;
+
+  @media (max-width: ${tkn('breakpoints.smBelow')}) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.2xs')};
+  }
+`;
+
+/** Leading icon + label for an id / fact row. */
+export const IdItemLabel = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+/** A plain fact value (order #, buyer, date) sharing the IdList's right column. */
+export const IdValue = styled(Text)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 `;
 
 export const EstimateNote = styled(Text)`
   line-height: ${tkn('typography.lineHeight.normal')};
+`;
+
+/**
+ * The money story as ONE strip — Net Kâr, ROI, eBay earnings, total Amazon cost,
+ * sale — sharing a single neutral surface separated by hairlines. Copied from
+ * the listing detail hero's KpiStrip so the two pages are the same design.
+ * Replaces the old standalone green "Net Kâr" box AND the separate "Net Kâr
+ * Analizi" formula card, whose numbers all appear here now.
+ */
+export const KpiStrip = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: ${tkn('spacing.md')};
+  margin-top: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.md')};
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.background.tertiary')};
+`;
+
+export const KpiItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.2xs')};
+  flex: 1 1 8rem;
+  min-width: 8rem;
+  padding: 0 ${tkn('spacing.sm')};
+  border-left: 0.0625rem solid ${tkn('colors.border.secondary')};
+
+  &:first-of-type {
+    border-left: none;
+  }
+`;
+
+/** Order KPI labels ("Toplam Amazon Maliyeti", "Sipariş Kazancı") run longer
+ *  than the listing detail's, so they wrap rather than collide with a sibling. */
+export const KpiLabel = styled(Text)`
+  text-transform: uppercase;
+  letter-spacing: ${tkn('typography.letterSpacing.widest')};
+  line-height: ${tkn('typography.lineHeight.tight')};
+`;
+
+/** Net Kâr's label + its "Tahmini" badge, sharing the KpiItem's label line. */
+export const KpiLabelRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const SectionGrid = styled.div`
@@ -108,18 +210,6 @@ export const SectionGrid = styled.div`
 /** Wrapper for the shared EmptyState on the loading / not-found screens. */
 export const StateCard = styled(Card)`
   width: 100%;
-`;
-
-export const FormulaTerm = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.2xs')};
-  min-width: 0;
-`;
-
-export const FormulaOperator = styled(Text)`
-  align-self: flex-end;
-  padding-bottom: ${tkn('spacing.2xs')};
 `;
 
 /** Vertical rhythm for a SettingsCard body with multiple top-level children
@@ -194,18 +284,6 @@ export const AddressBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.2xs')};
-`;
-
-/*
- * The derivation is now `earnings − total Amazon cost = net profit`. It used to
- * re-list purchase price, tax and shipping individually — the third appearance
- * of those same three numbers on one page (they live in the Amazon Costs card).
- */
-export const FormulaRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
 `;
 
 export const MobileActionBar = styled.div`

@@ -107,7 +107,7 @@ export const Title = styled(Text)`
 export const MetaList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${tkn('spacing.xs')};
+  gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
 
@@ -160,20 +160,6 @@ export const MetaValueText = styled(Text)`
   white-space: nowrap;
   line-height: ${tkn('typography.lineHeight.tight')};
   font-family: ${tkn('typography.fontFamily.mono')};
-`;
-
-export const ExtraFields = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.md')};
-  flex-wrap: wrap;
-  align-items: center;
-`;
-
-export const ExtraItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.2xs')};
-  color: ${tkn('colors.text.secondary')};
 `;
 
 export const StatsGrid = styled.div`

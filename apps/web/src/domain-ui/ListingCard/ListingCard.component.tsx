@@ -36,7 +36,6 @@ export const ListingCard = ({
   imageUrl,
   stats,
   status,
-  soldCount,
   orientation,
   onClick,
   className,
@@ -48,7 +47,6 @@ export const ListingCard = ({
 }: ListingCardProps): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   const meta = resolveMeta({ title, imageUrl, stats, status, orientation, ...rest });
-  const hasExtras = (soldCount ?? 0) > 0;
   const statusVariant = status?.tone === 'active' ? 'success' : 'neutral';
 
   return (
@@ -113,19 +111,6 @@ export const ListingCard = ({
             </S.MetaList>
           )}
         </S.HeaderBlock>
-
-        {hasExtras && (
-          <S.ExtraFields>
-            {(soldCount ?? 0) > 0 && (
-              <S.ExtraItem>
-                <Icon name="shopping-bag" size={12} />
-                <Text variant="caption" color="text.secondary">
-                  {soldCount}
-                </Text>
-              </S.ExtraItem>
-            )}
-          </S.ExtraFields>
-        )}
 
         <S.StatsGrid>
           {stats.map((stat) => (

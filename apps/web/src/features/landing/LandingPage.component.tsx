@@ -27,6 +27,7 @@ const SCREEN_NAMES = {
   stores: 'stores',
   heroDashboard: 'hero-dashboard',
   heroKpiCard: 'hero-kpi-card',
+  dashboardChart: 'dashboard-chart',
 } as const;
 
 type ScreenKey = keyof typeof SCREEN_NAMES;
@@ -36,45 +37,44 @@ const screenSrc = (key: ScreenKey, locale: string): string =>
   `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/${SCREEN_NAMES[key]}.jpg`;
 
 /**
- * Each tab shows the screen that actually does the thing it claims.
+ * Each feature row shows the screen that actually does the thing it claims.
  *
- * This used to be four images across six tabs — `orders.jpg` answered
- * "automatic orders", "tracking updates" AND "automated buyer messages", and
- * "multiple eBay stores" showed the dashboard. A visitor clicking "buyer
- * messages" and getting an order list reads it as stock filler and stops
- * trusting the rest of the screenshots, which is the opposite of why the page
- * uses real captures at all. Every pairing below is now the screen a seller
- * would actually be looking at for that feature.
+ * This used to be four images shared across the rows — `orders.jpg` answered
+ * "automatic orders", "tracking updates" AND "automated buyer messages". A
+ * visitor clicking "buyer messages" and getting an order list reads it as stock
+ * filler and stops trusting the rest of the screenshots, which is the opposite
+ * of why the page uses real captures at all. Every pairing below is now the
+ * screen a seller would actually be looking at for that feature.
+ *
+ * The "multiple eBay stores" row was removed on request — multi-store is still a
+ * real capability and stays listed in the pricing cards' included-features list,
+ * it just no longer gets its own spotlight row.
  */
 const FEATURES: { key: string; icon: IconName; screen: ScreenKey }[] = [
-  { key: 'asinListing', icon: 'rocket', screen: 'listings' },
+  { key: 'asinListing', icon: 'edit-note', screen: 'listings' },
   { key: 'priceStock', icon: 'sync', screen: 'listingDetail' },
   { key: 'autoOrder', icon: 'shopping-cart', screen: 'orders' },
-  { key: 'tracking', icon: 'local-shipping', screen: 'orderDetail' },
-  { key: 'buyerMessages', icon: 'message-circle', screen: 'buyerMessages' },
-  { key: 'multiStore', icon: 'storefront', screen: 'stores' },
+  { key: 'tracking', icon: 'truck', screen: 'orderDetail' },
 ];
+
+
+
+const PROFIT_TAB_IDS = ['overview', 'chart', 'pnl', 'perOrder'] as const;
+type ProfitTabId = (typeof PROFIT_TAB_IDS)[number];
 
 /**
- * The end-to-end pipeline, named step by step. The page used to show three
- * chips (supplier → SellerHill → eBay), which said "we sit in the middle" but
- * not what we actually do there — and a visitor comparing us to AutoDS/Easync
- * is looking for exactly this list. Ends on real profit, so the differentiator
- * reads as the last stage of the automation rather than a separate product.
+ * Every profit tab now shows a real screen from the app — the hand-drawn
+ * arithmetic panel was replaced with the dashboard it was illustrating. The
+ * "Per order" tab shows the order DETAIL, not the order list: that screen
+ * renders this section's own formula as live UI (order earnings − total Amazon
+ * cost = net profit).
  */
-const FLOW_STEPS: { key: string; icon: IconName }[] = [
-  { key: 'asin', icon: 'barcode' },
-  { key: 'listing', icon: 'storefront' },
-  { key: 'aiTitle', icon: 'sparkles' },
-  { key: 'sync', icon: 'sync' },
-  { key: 'order', icon: 'shopping-cart' },
-  { key: 'tracking', icon: 'local-shipping' },
-  { key: 'messages', icon: 'message-circle' },
-  { key: 'profit', icon: 'circle-dollar-sign' },
-];
-
-const PROFIT_TAB_IDS = ['overview', 'pnl', 'perOrder'] as const;
-type ProfitTabId = (typeof PROFIT_TAB_IDS)[number];
+const PROFIT_TAB_SCREEN: Record<ProfitTabId, ScreenKey> = {
+  overview: 'heroDashboard',
+  chart: 'dashboardChart',
+  pnl: 'dashboardPnl',
+  perOrder: 'orderDetail',
+};
 
 /**
  * `actuals` leads because it is the claim the whole section rests on — both
@@ -88,20 +88,19 @@ const PROFIT_POINTS: { key: string; icon: IconName }[] = [
   { key: 'pnl', icon: 'chart-line' },
 ];
 
-/** The worked example behind the ladder. `$` figures are illustrative, not live data. */
-const PROFIT_CALC_ROWS: { key: string; value: string; strong?: boolean; total?: boolean }[] = [
-  { key: 'sale', value: '$59.99' },
-  { key: 'fees', value: '−$9.20' },
-  { key: 'net', value: '$50.79', strong: true },
-  { key: 'cost', value: '−$32.45' },
-  { key: 'profit', value: '$18.34', total: true },
-];
-
-const PILLARS = ['p1', 'p2', 'p3'] as const;
 const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
-/** Setting Groups — a reusable bundle of listing settings, applied to many products. */
-const SETTING_GROUPS = ['groupA', 'groupB', 'groupC'] as const;
-const GROUP_SETTINGS = ['pricing', 'stock', 'template'] as const;
+/**
+ * Setting Groups — a reusable bundle of listing settings, applied to many
+ * products in the SAME store. Each row here is one group with its own margin
+ * and its own HTML template, so the section shows the idea instead of listing
+ * it: three mini listing previews, visibly built from three different
+ * templates, each carrying a different margin.
+ */
+const SETTING_GROUPS = [
+  { key: 'groupA', mock: 'clean' },
+  { key: 'groupB', mock: 'spec' },
+  { key: 'groupC', mock: 'gallery' },
+] as const;
 const FAQ_KEYS = [
   'q1',
   'q2',
@@ -117,7 +116,7 @@ const FAQ_KEYS = [
   'q12',
 ] as const;
 const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
-const FALLBACK_PLANS = ['nano', 'starter', 'growth', 'pro'] as const;
+const FALLBACK_PLANS = ['nano', 'starter', 'growth'] as const;
 
 /**
  * Capabilities every plan includes. The catalog meters exactly two things —
@@ -141,6 +140,7 @@ export const LandingPageComponent = ({
   scrolled,
   mobileMenuOpen,
   pricingPlans,
+  startingPriceDisplay,
   pricingCatalogError,
   onLocaleChange,
   onNavigateLogin,
@@ -154,7 +154,6 @@ export const LandingPageComponent = ({
   const { t } = useTranslation(['translation', 'billing']);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [revealState, setRevealState] = useState<Record<string, boolean>>({});
-  const [activeFeatureKey, setActiveFeatureKey] = useState<string>(FEATURES[0].key);
   const [activeProfitTab, setActiveProfitTab] = useState<ProfitTabId>('overview');
   const [showAllPlans, setShowAllPlans] = useState(false);
 
@@ -208,12 +207,10 @@ export const LandingPageComponent = ({
   ];
 
   const seen = (id: string): boolean => revealState[id] ?? false;
-  const activeFeature = FEATURES.find((f) => f.key === activeFeatureKey) ?? FEATURES[0];
 
   const openFeature = useCallback(
     (key: string) => {
-      setActiveFeatureKey(key);
-      scrollTo('features');
+      scrollTo(`feature-${key}`);
     },
     [scrollTo]
   );
@@ -344,7 +341,6 @@ export const LandingPageComponent = ({
               </S.GhostButton>
             </S.HeroCtas>
             <S.HeroNote>
-              <S.HeroNoteTitle>{t('translation:landing.hero.trialTitle')}</S.HeroNoteTitle>
               <S.HeroNoteLine>{t('translation:landing.hero.trialNoCard')}</S.HeroNoteLine>
               <S.HeroNoteLine>{t('translation:landing.hero.trialCancelAnytime')}</S.HeroNoteLine>
             </S.HeroNote>
@@ -357,9 +353,27 @@ export const LandingPageComponent = ({
             same screenshot rather than a second, invented set of numbers.
           */}
           <S.HeroPreview>
-            <S.PreviewFrame>
-              <S.PreviewImage src={screenSrc('heroDashboard', currentLocale)} alt="SellerHill dashboard" loading="lazy" />
-            </S.PreviewFrame>
+            <S.HeroPreviewGlass>
+              <S.HeroPreviewImage
+                src={screenSrc('heroDashboard', currentLocale)}
+                alt="SellerHill dashboard"
+                loading="lazy"
+              />
+            </S.HeroPreviewGlass>
+            {/*
+              Price + trial merged into one frosted-glass "offer" module over the
+              top-right corner. The amount comes from the catalog's cheapest tier
+              (see the container), so it can never disagree with the pricing
+              section.
+            */}
+            <S.HeroOfferCard>
+              <S.HeroOfferTag>{t('translation:landing.hero.trialTitle')}</S.HeroOfferTag>
+              <S.HeroOfferPrice>
+                <S.HeroOfferAmount>{startingPriceDisplay}</S.HeroOfferAmount>
+                <S.HeroOfferPer>{t('translation:landing.hero.priceBadge.per')}</S.HeroOfferPer>
+              </S.HeroOfferPrice>
+              <S.HeroOfferCaption>{t('translation:landing.hero.priceBadge.caption')}</S.HeroOfferCaption>
+            </S.HeroOfferCard>
             <S.HeroFloatCard>
               <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" loading="lazy" />
             </S.HeroFloatCard>
@@ -367,94 +381,47 @@ export const LandingPageComponent = ({
         </S.HeroInner>
       </S.Hero>
 
-      {/* ── Flow strip + pillars ───────────────────────── */}
-      <S.FlowStrip>
-        <S.FlowLabel>{t('translation:landing.flow.title')}</S.FlowLabel>
-        <S.FlowRow>
-          {FLOW_STEPS.map((step, i) => (
-            <React.Fragment key={step.key}>
-              {i > 0 ? (
-                <S.FlowArrow>
-                  <Icon name="arrow-right" size={17} />
-                </S.FlowArrow>
-              ) : null}
-              {/* Real profit is the last stage and the differentiator, so it carries the accent. */}
-              <S.FlowChip $accent={step.key === 'profit'}>
-                <Icon name={step.icon} size={16} />
-                {t(`translation:landing.flow.steps.${step.key}`)}
-              </S.FlowChip>
-            </React.Fragment>
-          ))}
-        </S.FlowRow>
-      </S.FlowStrip>
-
-      <S.Pillars data-reveal="pillars">
-        {PILLARS.map((key, i) => (
-          <S.Reveal key={key} $visible={seen('pillars')} $delay={i}>
-            <S.Pillar>
-              <S.PillarTitle>{t(`translation:landing.pillars.${key}.title`)}</S.PillarTitle>
-              <S.PillarText>{t(`translation:landing.pillars.${key}.description`)}</S.PillarText>
-            </S.Pillar>
-          </S.Reveal>
-        ))}
-      </S.Pillars>
-
       {/* ── Features ───────────────────────────────────── */}
-      <S.Section $alt $tightTop id="features" data-reveal="features">
+      <S.Section $alt id="features" data-reveal="features">
         <S.Reveal $visible={seen('features')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.features.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.features.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.features.sectionSubtitle')}</S.SectionSubtitle>
+            <S.SectionTimelineStem aria-hidden="true" />
           </S.SectionHead>
         </S.Reveal>
         <S.Reveal $visible={seen('features')} $delay={1}>
-          <S.FeatureTabsLayout>
-            <S.FeatureTabList>
-              {FEATURES.map((f) => {
-                const active = f.key === activeFeatureKey;
-                return (
-                  <S.FeatureTabButton
-                    key={f.key}
-                    type="button"
-                    $active={active}
-                    onClick={() => setActiveFeatureKey(f.key)}
-                  >
-                    <S.FeatureTabIconWrap $active={active}>
-                      <Icon name={f.icon} size={17} />
-                    </S.FeatureTabIconWrap>
-                    <S.FeatureTabLabel $active={active}>
+          <S.FeatureZigzagList>
+            {FEATURES.map((f, i) => {
+              const isReversed = i % 2 === 1;
+              return (
+                <S.FeatureRow key={f.key} id={`feature-${f.key}`} $reversed={isReversed}>
+                  <S.FeatureCopy>
+                    <S.FeatureTitle>
                       {t(`translation:landing.features.${f.key}.title`)}
-                    </S.FeatureTabLabel>
-                  </S.FeatureTabButton>
-                );
-              })}
-            </S.FeatureTabList>
+                    </S.FeatureTitle>
+                    <S.FeatureDetailText>
+                      {t(`translation:landing.features.${f.key}.detail`)}
+                    </S.FeatureDetailText>
+                    <S.FeatureKeyPoint>
+                      <Icon name="check-circle" size={17} />
+                      <span>{t(`translation:landing.features.${f.key}.description`)}</span>
+                    </S.FeatureKeyPoint>
+                  </S.FeatureCopy>
 
-            <S.FeatureDetail>
-              <S.FeatureDetailHead>
-                <S.FeatureDetailIconWrap>
-                  <Icon name={activeFeature.icon} size={24} color="brand.primary" />
-                </S.FeatureDetailIconWrap>
-                <S.FeatureDetailBody>
-                  <S.FeatureDetailTitle>
-                    {t(`translation:landing.features.${activeFeature.key}.title`)}
-                  </S.FeatureDetailTitle>
-                  <S.FeatureDetailText>
-                    {t(`translation:landing.features.${activeFeature.key}.detail`)}
-                  </S.FeatureDetailText>
-                </S.FeatureDetailBody>
-              </S.FeatureDetailHead>
+                  <S.FeatureTimelineNode aria-hidden="true" />
 
-              <S.FeaturePreviewFrame>
-                <S.PreviewImage
-                  src={screenSrc(activeFeature.screen, currentLocale)}
-                  alt={t(`translation:landing.features.${activeFeature.key}.title`)}
-                  loading="lazy"
-                />
-              </S.FeaturePreviewFrame>
-            </S.FeatureDetail>
-          </S.FeatureTabsLayout>
+                  <S.FeatureMedia>
+                    <S.FeatureMediaImage
+                      src={screenSrc(f.screen, currentLocale)}
+                      alt={t(`translation:landing.features.${f.key}.title`)}
+                      loading="lazy"
+                    />
+                  </S.FeatureMedia>
+                </S.FeatureRow>
+              );
+            })}
+          </S.FeatureZigzagList>
         </S.Reveal>
       </S.Section>
 
@@ -463,7 +430,6 @@ export const LandingPageComponent = ({
         <S.Reveal $visible={seen('profit')}>
           <S.SplitLayout>
             <S.SplitCopy>
-              <S.SplitEyebrow>{t('translation:landing.profit.sectionEyebrow')}</S.SplitEyebrow>
               <S.SplitTitle>{t('translation:landing.profit.sectionTitle')}</S.SplitTitle>
               <S.SplitSubtitle>{t('translation:landing.profit.sectionSubtitle')}</S.SplitSubtitle>
               <S.ProfitList>
@@ -489,7 +455,7 @@ export const LandingPageComponent = ({
               <S.ProfitTabsWrap>
                 <TabNav
                   variant="pill"
-                  ariaLabel={t('translation:landing.profit.panel.title')}
+                  ariaLabel={t('translation:landing.profit.sectionTitle')}
                   value={activeProfitTab}
                   onChange={(id) => setActiveProfitTab(id as ProfitTabId)}
                   items={PROFIT_TAB_IDS.map((id) => ({
@@ -499,71 +465,20 @@ export const LandingPageComponent = ({
                 />
               </S.ProfitTabsWrap>
 
-              {activeProfitTab === 'overview' ? (
-                <S.ProfitPanel>
-                  <S.ProfitPanelTitle>{t('translation:landing.profit.panel.title')}</S.ProfitPanelTitle>
-                  {/*
-                    The worked sum, in the order a seller thinks about it. It is
-                    the fastest way to show that the profit figure comes from
-                    two real transactions rather than an assumed margin.
-                  */}
-                  <S.ProfitCalc>
-                    {PROFIT_CALC_ROWS.map((row) => (
-                      <S.ProfitCalcRow key={row.key} $strong={row.strong} $total={row.total}>
-                        <S.ProfitCalcLabel $strong={row.strong || row.total}>
-                          {t(`translation:landing.profit.panel.rows.${row.key}`)}
-                        </S.ProfitCalcLabel>
-                        <S.ProfitCalcValue $strong={row.strong} $total={row.total}>
-                          {row.value}
-                        </S.ProfitCalcValue>
-                      </S.ProfitCalcRow>
-                    ))}
-                  </S.ProfitCalc>
-                  <S.ProfitFormula>{t('translation:landing.profit.panel.formula')}</S.ProfitFormula>
-                  <S.ProfitPanelTitle>
-                    {t('translation:landing.profit.panel.monthTitle')}
-                  </S.ProfitPanelTitle>
-                  <S.ProfitTier $tone="confirmed">
-                    <S.ProfitTierLabel>
-                      <S.ProfitTierName>
-                        {t('translation:landing.profit.panel.confirmedLabel')}
-                      </S.ProfitTierName>
-                    </S.ProfitTierLabel>
-                    <S.ProfitTierValue>$3,186.40</S.ProfitTierValue>
-                  </S.ProfitTier>
-                  <S.ProfitTier $tone="estimated">
-                    <S.ProfitTierLabel>
-                      <S.ProfitTierName>
-                        {t('translation:landing.profit.panel.estimatedLabel')}
-                      </S.ProfitTierName>
-                    </S.ProfitTierLabel>
-                    <S.ProfitTierValue>$742.10</S.ProfitTierValue>
-                  </S.ProfitTier>
-                  <S.ProfitTier $tone="unknown">
-                    <S.ProfitTierLabel>
-                      <S.ProfitTierName>
-                        {t('translation:landing.profit.panel.unknownLabel')}
-                      </S.ProfitTierName>
-                    </S.ProfitTierLabel>
-                    <S.ProfitTierValue $muted>—</S.ProfitTierValue>
-                  </S.ProfitTier>
-                  <S.ProfitFootnote>{t('translation:landing.profit.panel.footnote')}</S.ProfitFootnote>
-                </S.ProfitPanel>
-              ) : (
-                <S.PreviewFrame>
-                  {/*
-                    "Per order" shows the order DETAIL, not the order list: that
-                    screen renders the section's own formula as real UI — order
-                    earnings − total Amazon cost = net profit — which the list
-                    only summarises.
-                  */}
-                  <S.PreviewImage
-                    src={screenSrc(activeProfitTab === 'pnl' ? 'dashboardPnl' : 'orderDetail', currentLocale)}
-                    alt={t(`translation:landing.profit.tabs.${activeProfitTab}`)}
-                    loading="lazy"
-                  />
-                </S.PreviewFrame>
-              )}
+              {/*
+                One capped frame, four real screens. The frame height is fixed
+                and the screenshot is cropped from the top, so switching tabs
+                swaps the image in place instead of resizing the panel and
+                shoving the rest of the page up or down.
+              */}
+              <S.ProfitPreviewFrame>
+                <S.ProfitPreviewImage
+                  key={activeProfitTab}
+                  src={screenSrc(PROFIT_TAB_SCREEN[activeProfitTab], currentLocale)}
+                  alt={t(`translation:landing.profit.tabs.${activeProfitTab}`)}
+                  loading="lazy"
+                />
+              </S.ProfitPreviewFrame>
             </div>
           </S.SplitLayout>
         </S.Reveal>
@@ -573,7 +488,6 @@ export const LandingPageComponent = ({
       <S.Section $alt data-reveal="setting-groups">
         <S.Reveal $visible={seen('setting-groups')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.settingGroups.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.settingGroups.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>
               {t('translation:landing.settingGroups.sectionSubtitle')}
@@ -581,27 +495,71 @@ export const LandingPageComponent = ({
           </S.SectionHead>
         </S.Reveal>
         <S.Reveal $visible={seen('setting-groups')} $delay={1}>
-          <S.ProductGrid>
-            {SETTING_GROUPS.map((group) => (
-              <S.ProductCard key={group}>
-                <S.ProductName>
-                  {t(`translation:landing.settingGroups.${group}.name`)}
-                </S.ProductName>
-                <S.ProductSettings>
-                  {GROUP_SETTINGS.map((setting) => (
-                    <S.SettingRow key={setting}>
-                      <S.SettingLabel>
-                        {t(`translation:landing.settingGroups.labels.${setting}`)}
-                      </S.SettingLabel>
-                      <S.SettingValue>
-                        {t(`translation:landing.settingGroups.${group}.${setting}`)}
-                      </S.SettingValue>
-                    </S.SettingRow>
-                  ))}
-                </S.ProductSettings>
-              </S.ProductCard>
-            ))}
-          </S.ProductGrid>
+          <S.StoreShowcase>
+            <S.StoreShowcaseBar>
+              <Icon name="storefront" size={15} />
+              <span>{t('translation:landing.settingGroups.storeLabel')}</span>
+            </S.StoreShowcaseBar>
+            <S.GroupShowcaseGrid>
+              {SETTING_GROUPS.map((group) => (
+                <S.GroupShowcaseCard key={group.key}>
+                  <S.GroupShowcaseHead>
+                    <S.GroupShowcaseName>
+                      {t(`translation:landing.settingGroups.${group.key}.name`)}
+                    </S.GroupShowcaseName>
+                    <S.GroupMarginBadge>
+                      <Icon name="percent" size={12} />
+                      {t(`translation:landing.settingGroups.${group.key}.pricing`)}
+                    </S.GroupMarginBadge>
+                  </S.GroupShowcaseHead>
+
+                  {/* Each variant is a different HTML template's silhouette. */}
+                  <S.TemplateMock>
+                    {group.mock === 'clean' ? (
+                      <>
+                        <S.MockImage $tall />
+                        <S.MockLine $w="82%" />
+                        <S.MockLine $w="44%" $strong />
+                      </>
+                    ) : null}
+                    {group.mock === 'spec' ? (
+                      <S.MockSpecRow>
+                        <S.MockImage $sm />
+                        <S.MockSpecLines>
+                          <S.MockLine $w="92%" />
+                          <S.MockLine $w="74%" />
+                          <S.MockLine $w="84%" />
+                          <S.MockLine $w="52%" $strong />
+                        </S.MockSpecLines>
+                      </S.MockSpecRow>
+                    ) : null}
+                    {group.mock === 'gallery' ? (
+                      <>
+                        <S.MockGallery>
+                          <span />
+                          <span />
+                          <span />
+                          <span />
+                        </S.MockGallery>
+                        <S.MockLine $w="58%" $strong />
+                      </>
+                    ) : null}
+                  </S.TemplateMock>
+
+                  <S.GroupShowcaseFoot>
+                    <S.GroupChip>
+                      <Icon name="layers" size={13} />
+                      {t(`translation:landing.settingGroups.${group.key}.template`)}
+                    </S.GroupChip>
+                    <S.GroupChip>
+                      <Icon name="gauge" size={13} />
+                      {t(`translation:landing.settingGroups.${group.key}.stock`)}
+                    </S.GroupChip>
+                  </S.GroupShowcaseFoot>
+                </S.GroupShowcaseCard>
+              ))}
+            </S.GroupShowcaseGrid>
+          </S.StoreShowcase>
         </S.Reveal>
       </S.Section>
 
@@ -609,7 +567,6 @@ export const LandingPageComponent = ({
       <S.Section id="how-it-works" data-reveal="how-it-works">
         <S.Reveal $visible={seen('how-it-works')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.howItWorks.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.howItWorks.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.howItWorks.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
@@ -632,7 +589,6 @@ export const LandingPageComponent = ({
         <S.Reveal $visible={seen('demo')}>
           <S.DemoBand>
             <S.DemoCopy>
-              <S.SplitEyebrow>{t('translation:landing.demo.sectionEyebrow')}</S.SplitEyebrow>
               <S.SplitTitle>{t('translation:landing.demo.sectionTitle')}</S.SplitTitle>
               <S.SplitSubtitle>{t('translation:landing.demo.sectionSubtitle')}</S.SplitSubtitle>
               <S.DemoBullets>
@@ -659,7 +615,6 @@ export const LandingPageComponent = ({
       <S.Section $alt id="pricing" data-reveal="pricing">
         <S.Reveal $visible={seen('pricing')}>
           <S.SectionHead>
-            <S.Eyebrow>{t('translation:landing.pricing.sectionEyebrow')}</S.Eyebrow>
             <S.SectionTitle>{t('translation:landing.pricing.sectionTitle')}</S.SectionTitle>
             <S.SectionSubtitle>{t('translation:landing.pricing.sectionSubtitle')}</S.SectionSubtitle>
           </S.SectionHead>
