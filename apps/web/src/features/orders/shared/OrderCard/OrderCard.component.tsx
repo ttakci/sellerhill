@@ -53,14 +53,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             <S.MetaList>
               {meta.map((item) => (
                 <S.MetaRow key={`${item.label}-${item.value}`}>
-                  <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
-                    {item.label}
-                  </S.MetaLabel>
+                  <S.MetaLabelRow>
+                    {item.icon ? <Icon name={item.icon} size={14} color="brand.primary" /> : null}
+                    <S.MetaLabel variant="caption" weight="medium" color="text.secondary">
+                      {item.label}
+                    </S.MetaLabel>
+                  </S.MetaLabelRow>
                   <S.MetaValue>
                     {item.storeType ? (
                       <IdBadge id={item.value} storeType={item.storeType} size="sm" />
                     ) : (
-                      <S.MetaValueText variant="caption" weight="semibold" color="text.primary">
+                      <S.MetaValueText variant="caption" weight="bold" color="text.primary">
                         {item.value}
                       </S.MetaValueText>
                     )}

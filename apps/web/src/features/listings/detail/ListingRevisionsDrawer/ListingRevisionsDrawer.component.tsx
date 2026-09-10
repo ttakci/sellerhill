@@ -1,75 +1,94 @@
-import { Drawer, EmptyState, Icon, Text } from '@repo/ui';
+import { Button, Drawer, EmptyState, Icon, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as S from './ListingRevisionsDrawer.style';
 import type { ListingRevisionRow, ListingRevisionsDrawerComponentProps } from './ListingRevisionsDrawer.types';
 
-const directionTone = (changed: boolean, increased: boolean): 'up' | 'down' | 'flat' => {
-  if (!changed) {
-    return 'flat';
-  }
-  return increased ? 'up' : 'down';
-};
-
-const ChangeCell = ({
+const ChangeLine = ({
   label,
   previous,
   next,
   changed,
   increased,
+  delta,
 }: {
   label: string;
   previous: string;
   next: string;
   changed: boolean;
   increased: boolean;
-}): React.ReactElement => (
-  <S.ChangeItem>
-    <Text variant="caption" color="text.tertiary">
-      {label}
-    </Text>
-    <S.ChangeValues>
-      <Text variant="body-sm" color="text.secondary" numeric>
-        {previous}
-      </Text>
-      <S.Arrow $tone={directionTone(changed, increased)}>
-        <Icon
-          name={changed ? (increased ? 'arrow-up-right' : 'arrow-down-right') : 'arrow-right'}
-          size={14}
-        />
-      </S.Arrow>
-      <Text variant="body-sm" color="text.primary" numeric>
-        {next}
-      </Text>
-    </S.ChangeValues>
-  </S.ChangeItem>
-);
-
-const RevisionRow = ({ row }: { row: ListingRevisionRow }): React.ReactElement => {
+  delta: string | null;
+}): React.ReactElement => {
   const { t } = useTranslation(['listings']);
   return (
-    <S.Row>
-      <Text variant="caption" color="text.tertiary">
-        {row.recordedAt}
-      </Text>
-      <S.ChangeGrid>
-        <ChangeCell
+    <S.ChangeRow>
+      <S.ChangeLabel>
+        <Text variant="caption" color="text.tertiary">
+          {label}
+        </Text>
+      </S.ChangeLabel>
+      <S.ChangeValues>
+        {changed ? (
+          <>
+            <Text variant="body-sm" color="text.secondary" numeric>
+              {previous}
+            </Text>
+            <S.Arrow $tone={increased ? 'up' : 'down'}>
+              <Icon name={increased ? 'arrow-up-right' : 'arrow-down-right'} size={14} />
+            </S.Arrow>
+            <Text variant="body-sm" color="text.primary" weight="medium" numeric>
+              {next}
+            </Text>
+          </>
+        ) : (
+          <Text variant="body-sm" color="text.secondary" numeric>
+            {next}
+          </Text>
+        )}
+      </S.ChangeValues>
+      {changed && delta ? (
+        <S.DeltaPill $tone={increased ? 'up' : 'down'}>{delta}</S.DeltaPill>
+      ) : (
+        <S.MutedNote>
+          <Text variant="caption" color="text.tertiary">
+            {t('listings.detail.revisions.unchanged')}
+          </Text>
+        </S.MutedNote>
+      )}
+    </S.ChangeRow>
+  );
+};
+
+const RevisionCard = ({ row }: { row: ListingRevisionRow }): React.ReactElement => {
+  const { t } = useTranslation(['listings']);
+  return (
+    <S.Card>
+      <S.CardHead>
+        <Icon name="clock" size={13} color="text.tertiary" />
+        <Text variant="caption" color="text.tertiary" numeric>
+          {row.recordedAt}
+        </Text>
+      </S.CardHead>
+      <S.ChangeStack>
+        <ChangeLine
           label={t('listings.detail.revisions.priceChange')}
           previous={row.previousPrice}
           next={row.newPrice}
           changed={row.priceChanged}
           increased={row.priceIncreased}
+          delta={row.priceDelta}
         />
-        <ChangeCell
+        <ChangeLine
           label={t('listings.detail.revisions.quantityChange')}
           previous={row.previousQuantity}
           next={row.newQuantity}
           changed={row.quantityChanged}
           increased={row.quantityIncreased}
+          delta={row.quantityDelta}
         />
-      </S.ChangeGrid>
-    </S.Row>
+      </S.ChangeStack>
+    </S.Card>
   );
 };
 
@@ -79,12 +98,11 @@ export const ListingRevisionsDrawerComponent = ({
   isLoading,
   isError,
   rows,
-  page,
-  totalPages,
-  hasPrev,
-  hasNext,
-  onPrevPage,
-  onNextPage,
+  shown,
+  total,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
 }: ListingRevisionsDrawerComponentProps): React.ReactElement => {
   const { t } = useTranslation(['listings', 'translation']);
 
@@ -115,34 +133,28 @@ export const ListingRevisionsDrawerComponent = ({
           <>
             <S.List>
               {rows.map((row) => (
-                <RevisionRow key={row.id} row={row} />
+                <RevisionCard key={row.id} row={row} />
               ))}
             </S.List>
-            {totalPages > 1 && (
-              <S.PagerRow>
-                <S.PagerButton
+            <S.LoadMoreRow>
+              {hasMore ? (
+                <Button
                   type="button"
-                  variant="ghost"
-                  disabled={!hasPrev}
-                  onClick={onPrevPage}
-                  aria-label={t('translation:common.previous')}
+                  variant="secondary"
+                  size="small"
+                  fullWidth
+                  isLoading={isLoadingMore}
+                  onClick={onLoadMore}
                 >
-                  <Icon name="chevron-left" size={16} />
-                </S.PagerButton>
-                <Text variant="caption" color="text.secondary">
-                  {t('listings.detail.revisions.pageInfo', { page, totalPages })}
-                </Text>
-                <S.PagerButton
-                  type="button"
-                  variant="ghost"
-                  disabled={!hasNext}
-                  onClick={onNextPage}
-                  aria-label={t('translation:common.next')}
-                >
-                  <Icon name="chevron-right" size={16} />
-                </S.PagerButton>
-              </S.PagerRow>
-            )}
+                  <Text variant="body-sm" weight="medium">
+                    {t('listings.detail.revisions.loadMore')}
+                  </Text>
+                </Button>
+              ) : null}
+              <Text variant="caption" color="text.tertiary">
+                {t('listings.detail.revisions.shownInfo', { shown, total })}
+              </Text>
+            </S.LoadMoreRow>
           </>
         )}
       </S.BodyStack>

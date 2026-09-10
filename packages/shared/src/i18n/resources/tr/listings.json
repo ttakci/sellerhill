@@ -352,7 +352,7 @@
       "createdAt": "Oluşturulma",
       "updatedAt": "Güncellenme",
       "revisions": {
-        "action": "Detay",
+        "action": "Revizyonlar",
         "title": "Revizyonlar",
         "subtitle": "Bu listenin fiyat ve stok değişiklikleri",
         "previousPrice": "Önceki fiyat",
@@ -361,10 +361,12 @@
         "newQuantity": "Yeni stok",
         "priceChange": "Fiyat",
         "quantityChange": "Stok",
+        "unchanged": "Değişmedi",
         "empty": "Henüz revizyon yok",
         "emptySubtitle": "Fiyat ve stok değişiklikleri gerçekleştikçe burada görünecek.",
         "loadFailed": "Revizyonlar yüklenemedi.",
-        "pageInfo": "Sayfa {{page}} / {{totalPages}}"
+        "loadMore": "Daha fazla göster",
+        "shownInfo": "{{total}} kayıttan {{shown}} tanesi"
       },
       "notSet": "Ayarlanmadı",
       "editSettings": "Düzenle",

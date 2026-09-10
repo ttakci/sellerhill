@@ -352,7 +352,7 @@
       "createdAt": "Created",
       "updatedAt": "Updated",
       "revisions": {
-        "action": "Details",
+        "action": "Revisions",
         "title": "Revisions",
         "subtitle": "Price and stock changes for this listing",
         "previousPrice": "Previous price",
@@ -361,10 +361,12 @@
         "newQuantity": "New stock",
         "priceChange": "Price",
         "quantityChange": "Stock",
+        "unchanged": "No change",
         "empty": "No revisions yet",
         "emptySubtitle": "Price and stock changes will appear here as they happen.",
         "loadFailed": "Failed to load revisions.",
-        "pageInfo": "Page {{page}} of {{totalPages}}"
+        "loadMore": "Load more",
+        "shownInfo": "{{shown}} of {{total}}"
       },
       "notSet": "Not set",
       "editSettings": "Edit",

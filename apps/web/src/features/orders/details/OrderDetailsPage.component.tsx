@@ -43,6 +43,27 @@ const Meta = ({
   </S.MetaRow>
 );
 
+/** One headline number in the hero money strip — mirrors the listing detail
+ *  page's Kpi. Only Net Kâr passes a `color`. */
+const Kpi = ({
+  label,
+  value,
+  color = 'text.primary',
+}: {
+  label: string;
+  value: string;
+  color?: string;
+}): React.ReactElement => (
+  <S.KpiItem>
+    <S.KpiLabel variant="caption" color="text.tertiary">
+      {label}
+    </S.KpiLabel>
+    <Text variant="metric-sm" weight="semibold" numeric color={color}>
+      {value}
+    </Text>
+  </S.KpiItem>
+);
+
 /** Same row, but the value stacks below the label — for multi-line content
  *  (a shipping address, an email + phone pair) that reads better left-aligned. */
 const MetaBlock = ({
@@ -154,104 +175,156 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
         </S.ProductImage>
 
         <S.HeroInfo>
-          <S.BadgeRow>
-            <StatusBadge status={orderStatusToBadgeStatus(order.status)}>{statusLabel}</StatusBadge>
+          <S.StatusBadgeSlot>
+            <StatusBadge status={orderStatusToBadgeStatus(order.status)} size="lg">
+              {statusLabel}
+            </StatusBadge>
             {order.fulfillmentState && (
-              <Badge variant={fulfillmentStateToBadgeVariant(order.fulfillmentState)} size="xs" isPill>
+              <Badge variant={fulfillmentStateToBadgeVariant(order.fulfillmentState)} size="md" isPill>
                 {t(`orders.fulfillmentState.${order.fulfillmentState}`)}
               </Badge>
             )}
-          </S.BadgeRow>
+          </S.StatusBadgeSlot>
+
           {/*
             State-specific guidance instead of a bare reason code. "blocked ·
             address" told the seller nothing about what to DO; each state now
             explains the consequence and the next step.
           */}
-          {fulfillmentNotice && (
-            <Text variant="caption" color="text.secondary">
-              {fulfillmentNotice}
-            </Text>
-          )}
-          {autoFulfillReasonLabel && (
-            <Text variant="caption" color="text.secondary">
-              {autoFulfillReasonLabel}
-            </Text>
-          )}
-
-          <Text variant="h3" weight="semibold">
-            {productTitle}
-          </Text>
-
-          <S.IdRow>
-            {order.product?.asin ? <IdBadge id={order.product.asin} storeType="amazon" size="sm" /> : null}
-            {order.product?.ebayItemId ? <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" /> : null}
-          </S.IdRow>
-
-          <S.ProfitHighlight $positive={profitPositive}>
-            <S.ProfitLabelRow>
-              <Text variant="caption" color="text.secondary" weight="medium">
-                {t('orders.detail.netProfitResult')}
+          <S.HeroLede>
+            {fulfillmentNotice && (
+              <Text variant="caption" color="text.secondary">
+                {fulfillmentNotice}
               </Text>
-              {isEstimated && (
-                <Badge variant="warning" size="xs">
-                  {t('orders.estimateBadge')}
-                </Badge>
-              )}
-            </S.ProfitLabelRow>
-            <Text variant="metric" weight="semibold" color={profitPositive ? 'semantic.success' : 'semantic.error'}>
-              {formatCurrency(order.netProfit)}
-            </Text>
-            <Text variant="body-sm" color="text.secondary">
-              {t('orders.detail.roi')}: {roiLabel}
-            </Text>
-            {isEstimated && (
-              <S.EstimateNote variant="caption" color="text.tertiary">
-                {t('orders.estimateNote')}
-              </S.EstimateNote>
             )}
-          </S.ProfitHighlight>
+            {autoFulfillReasonLabel && (
+              <Text variant="caption" color="text.secondary">
+                {autoFulfillReasonLabel}
+              </Text>
+            )}
+            <S.ProductTitle variant="h3" weight="semibold">
+              {productTitle}
+            </S.ProductTitle>
+          </S.HeroLede>
+
+          {/* Record facts as labelled icon rows — the listing detail hero's
+              IdList pattern, so the two detail pages read as one design. */}
+          <S.IdList>
+            <S.IdItem>
+              <S.IdItemLabel>
+                <Icon name="receipt" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('orders.table.orderNumber')}
+                </Text>
+              </S.IdItemLabel>
+              <S.IdValue variant="body-sm" numeric>
+                {order.ebayOrderId}
+              </S.IdValue>
+            </S.IdItem>
+            <S.IdItem>
+              <S.IdItemLabel>
+                <Icon name="user" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('orders.table.buyer')}
+                </Text>
+              </S.IdItemLabel>
+              <S.IdValue variant="body-sm">{order.buyerName || '—'}</S.IdValue>
+            </S.IdItem>
+            <S.IdItem>
+              <S.IdItemLabel>
+                <Icon name="calendar" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('orders.table.date')}
+                </Text>
+              </S.IdItemLabel>
+              <Text variant="body-sm" numeric>
+                {formatDate(order.createdAt)}
+              </Text>
+            </S.IdItem>
+            <S.IdItem>
+              <S.IdItemLabel>
+                <Icon name="box" size={16} color="brand.primary" />
+                <Text variant="body-sm" color="text.secondary">
+                  {t('orders.detail.quantity')}
+                </Text>
+              </S.IdItemLabel>
+              <Text variant="body-sm" weight="semibold" numeric>
+                {order.product?.quantity || 1} {t('orders.detail.unit')}
+              </Text>
+            </S.IdItem>
+            {order.product?.sku ? (
+              <S.IdItem>
+                <S.IdItemLabel>
+                  <Icon name="scan-barcode" size={16} color="brand.primary" />
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('orders.detail.sku')}
+                  </Text>
+                </S.IdItemLabel>
+                <S.IdValue variant="body-sm">{order.product.sku}</S.IdValue>
+              </S.IdItem>
+            ) : null}
+            {order.product?.asin ? (
+              <S.IdItem>
+                <S.IdItemLabel>
+                  <Icon name="barcode" size={16} color="brand.primary" />
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('orders.detail.asin')}
+                  </Text>
+                </S.IdItemLabel>
+                <IdBadge id={order.product.asin} storeType="amazon" size="sm" plain />
+              </S.IdItem>
+            ) : null}
+            {order.product?.ebayItemId ? (
+              <S.IdItem>
+                <S.IdItemLabel>
+                  <Icon name="tag" size={16} color="brand.primary" />
+                  <Text variant="body-sm" color="text.secondary">
+                    {t('orders.detail.ebayItemId')}
+                  </Text>
+                </S.IdItemLabel>
+                <IdBadge id={order.product.ebayItemId} storeType="ebay" size="sm" plain />
+              </S.IdItem>
+            ) : null}
+          </S.IdList>
+
+          {/* The whole money story in one neutral strip — the listing detail
+              hero's KpiStrip. This absorbed the old standalone green "Net Kâr"
+              box AND the separate "Net Kâr Analizi" formula card: eBay earnings
+              and total Amazon cost (the formula's two terms) are KPIs here now. */}
+          <S.KpiStrip>
+            <S.KpiItem>
+              <S.KpiLabelRow>
+                <S.KpiLabel variant="caption" color="text.tertiary">
+                  {t('orders.detail.netProfitResult')}
+                </S.KpiLabel>
+                {isEstimated && (
+                  <Badge variant="warning" size="xs">
+                    {t('orders.estimateBadge')}
+                  </Badge>
+                )}
+              </S.KpiLabelRow>
+              <Text
+                variant="metric-sm"
+                weight="semibold"
+                numeric
+                color={profitPositive ? 'semantic.success' : 'semantic.error'}
+              >
+                {formatCurrency(order.netProfit)}
+              </Text>
+            </S.KpiItem>
+            <Kpi label={t('orders.detail.roi')} value={roiLabel} />
+            <Kpi label={t('orders.detail.orderEarnings')} value={formatCurrency(order.ebayEarnings)} />
+            <Kpi label={t('orders.detail.totalAmazonCost')} value={formatCurrency(totalAmazonCost)} />
+            <Kpi label={t('orders.table.salePrice')} value={formatCurrency(order.salePrice)} />
+          </S.KpiStrip>
+
+          {isEstimated && (
+            <S.EstimateNote variant="caption" color="text.tertiary">
+              {t('orders.estimateNote')}
+            </S.EstimateNote>
+          )}
         </S.HeroInfo>
       </S.Hero>
-
-      {/*
-        Net profit derivation. Deliberately reduced to earnings − total cost:
-        the three cost components (purchase / tax / shipping) are itemised once,
-        in the Amazon Costs card, and this row used to repeat them verbatim.
-      */}
-      <SettingsCard variant="section" header={{ title: t('orders.detail.netProfitAnalysis') }}>
-        <S.FormulaRow>
-          <S.FormulaTerm>
-            <Text variant="caption" color="text.secondary">
-              {t('orders.detail.orderEarnings')}
-            </Text>
-            <Text variant="metric-sm" weight="semibold">
-              {formatCurrency(order.ebayEarnings)}
-            </Text>
-          </S.FormulaTerm>
-          <S.FormulaOperator variant="metric-sm" color="text.tertiary">
-            −
-          </S.FormulaOperator>
-          <S.FormulaTerm>
-            <Text variant="caption" color="text.secondary">
-              {t('orders.detail.totalAmazonCost')}
-            </Text>
-            <Text variant="metric-sm" weight="semibold">
-              {formatCurrency(totalAmazonCost)}
-            </Text>
-          </S.FormulaTerm>
-          <S.FormulaOperator variant="metric-sm" color="text.tertiary">
-            =
-          </S.FormulaOperator>
-          <S.FormulaTerm>
-            <Text variant="caption" color="text.secondary">
-              {t('orders.detail.netProfitResult')}
-            </Text>
-            <Text variant="metric-sm" weight="semibold" color={profitPositive ? 'semantic.success' : 'semantic.error'}>
-              {formatCurrency(order.netProfit)}
-            </Text>
-          </S.FormulaTerm>
-        </S.FormulaRow>
-      </SettingsCard>
 
       <S.SectionGrid>
         {/* Customer */}
@@ -379,9 +452,16 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
                   {formatCurrency(totalAmazonCost)}
                 </Text>
               </Meta>
+              {order.amazonTrackingNumber && (
+                <Meta icon="truck" label={t('orders.detail.amazonTracking')}>
+                  <Text variant="body" weight="semibold">
+                    {order.amazonTrackingNumber}
+                  </Text>
+                </Meta>
+              )}
               {order.convertedTrackingNumber && (
                 <Meta icon="repeat" label={t('orders.detail.convertedTracking')}>
-                  <Text variant="mono" color="text.primary">
+                  <Text variant="body" weight="semibold">
                     {order.convertedTrackingNumber}
                   </Text>
                 </Meta>

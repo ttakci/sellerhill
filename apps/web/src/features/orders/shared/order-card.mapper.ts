@@ -22,14 +22,17 @@ export const toOrderCardProps = (
     {
       label: t('orders.table.orderNumber'),
       value: order.ebayOrderId,
+      icon: 'receipt',
     },
     {
       label: t('orders.table.buyer'),
       value: order.buyerName || '—',
+      icon: 'user',
     },
     {
       label: t('orders.table.date'),
       value: formatDate(order.createdAt),
+      icon: 'calendar',
     },
   ];
 
@@ -37,6 +40,7 @@ export const toOrderCardProps = (
     meta.push({
       label: t('orders.detail.quantity'),
       value: String(order.product.quantity),
+      icon: 'box',
     });
   }
 
@@ -45,6 +49,7 @@ export const toOrderCardProps = (
       label: t('orders.table.asin'),
       value: order.product.asin,
       storeType: 'amazon',
+      icon: 'barcode',
     });
   }
 
@@ -53,6 +58,7 @@ export const toOrderCardProps = (
       label: t('orders.table.ebayId'),
       value: order.product.ebayItemId,
       storeType: 'ebay',
+      icon: 'tag',
     });
   }
 

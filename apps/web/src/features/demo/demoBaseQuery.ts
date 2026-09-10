@@ -15,6 +15,7 @@ import {
   buildDemoDashboard,
   buildDemoOrderStats,
   demoJobItems,
+  demoListingRevisions,
   demoStoreSettingsFor,
   DEMO_AMAZON_ACCOUNTS,
   DEMO_BILLING_CATALOG,
@@ -345,8 +346,9 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
     return found ? ok(found) : { error: { status: 404, data: { message: 'Not found' } } };
   }
 
-  if (/^\/listings\/[\w-]+\/revisions$/.test(path)) {
-    return ok({ items: [], total: 0, page: 1, limit: 20 });
+  const listingRevisions = /^\/listings\/(demo-listing-[\w-]+)\/revisions$/.exec(path);
+  if (listingRevisions) {
+    return ok(paginate(demoListingRevisions(listingRevisions[1]), params));
   }
 
   if (path === '/orders') {

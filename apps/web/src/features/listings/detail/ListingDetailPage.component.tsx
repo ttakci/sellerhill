@@ -1,6 +1,5 @@
 import { ListingStatus, type UpdateListingFormData } from '@repo/shared';
 import {
-  Badge,
   Button,
   Drawer,
   EmptyState,
@@ -13,6 +12,7 @@ import {
   PageHeader,
   SettingsCard,
   SettingsInfoRow,
+  StatusBadge,
   Text,
   Textarea,
   TextInput,
@@ -28,20 +28,11 @@ import * as S from './ListingDetailPage.style';
 import type { AutomationRuleState, ListingDetailPageProps } from './ListingDetailPage.types';
 import { ListingRevisionsDrawer } from './ListingRevisionsDrawer';
 
-const statusVariant = (status: ListingStatus): 'success' | 'neutral' | 'error' | 'warning' => {
-  switch (status) {
-    case ListingStatus.ACTIVE:
-      return 'success';
-    case ListingStatus.ERROR:
-      return 'error';
-    case ListingStatus.RETRYING:
-      return 'warning';
-    case ListingStatus.DRAFT:
-      return 'warning';
-    default:
-      return 'neutral';
-  }
-};
+/** RETRYING has no StatusBadge status of its own; `pending` carries the same
+ *  amber "in progress" tint. Every other ListingStatus value matches a
+ *  StatusBadge status 1:1. */
+const listingStatusToBadgeStatus = (status: ListingStatus): string =>
+  status === ListingStatus.RETRYING ? 'pending' : status;
 
 const Meta = ({
   icon,
@@ -242,9 +233,9 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
 
       <S.Hero variant="elevated">
         <S.StatusBadgeSlot>
-          <Badge variant={statusVariant(listing.status)} size="sm">
+          <StatusBadge status={listingStatusToBadgeStatus(listing.status)} size="lg">
             {statusLabel}
-          </Badge>
+          </StatusBadge>
         </S.StatusBadgeSlot>
 
         <S.GalleryBlock>

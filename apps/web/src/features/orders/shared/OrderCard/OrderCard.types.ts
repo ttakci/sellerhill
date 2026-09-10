@@ -1,5 +1,5 @@
 import type { OrderStatus } from '@repo/shared';
-import type { BadgeVariant } from '@repo/ui';
+import type { BadgeVariant, IconName } from '@repo/ui';
 
 export type OrderCardStatTone = 'default' | 'positive' | 'negative';
 
@@ -18,6 +18,8 @@ export interface OrderCardMetaItem {
   label: string;
   value: string;
   storeType?: 'amazon' | 'ebay';
+  /** Leading row icon — mirrors ListingCard's meta rows (receipt for order #, user for buyer, …). */
+  icon?: IconName;
 }
 
 /**

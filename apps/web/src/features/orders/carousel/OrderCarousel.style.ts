@@ -7,6 +7,12 @@ export const CarouselWrapper = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* Fill the section when the parent gives us a height (dashboard Cards tab
+     renders this beside ListingCarousel in an equal-height grid row) so both
+     cards render at the SAME height and the prev/next arrows line up. Where the
+     parent is content-height this is a no-op. */
+  flex: 1 1 auto;
+  min-height: 0;
 
   &:hover .carousel-arrow {
     opacity: 1;
@@ -15,8 +21,11 @@ export const CarouselWrapper = styled.div`
 
 export const CarouselViewport = styled.div`
   position: relative;
+  display: flex;
   overflow: hidden;
   min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
 `;
 
 /**

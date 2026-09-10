@@ -183,21 +183,6 @@ export const LegalDocumentPageComponent = ({
               </S.Section>
             ))}
           </S.Article>
-
-          <S.Toc aria-label={t('legal.tocTitle')}>
-            <Text variant="caption" weight="semibold" color="text.tertiary">
-              {t('legal.tocTitle')}
-            </Text>
-            <S.TocList>
-              {document.sections.map((section) => (
-                <li key={section.id}>
-                  <S.TocLink href={`#${section.id}`}>
-                    <Text variant="body-sm">{section.heading}</Text>
-                  </S.TocLink>
-                </li>
-              ))}
-            </S.TocList>
-          </S.Toc>
         </S.Layout>
       ) : (
         <S.Layout>

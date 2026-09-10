@@ -1,7 +1,6 @@
 {
   "legal": {
     "backToHome": "Ana sayfaya dön",
-    "tocTitle": "Bu sayfada",
     "unavailable": "Bu belge yüklenemedi. Lütfen daha sonra tekrar deneyin.",
     "privacy": {
       "documentTitle": "SellerHill Gizlilik Politikası",
@@ -34,7 +33,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -888,7 +887,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -945,7 +944,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1006,7 +1005,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1065,7 +1064,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -1175,7 +1174,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             }
           ]
         }
@@ -2488,7 +2487,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             },
             {
               "type": "p",
@@ -2664,7 +2663,7 @@
             },
             {
               "type": "email",
-              "address": "privacy@sellerhill.com"
+              "address": "support@sellerhill.com"
             }
           ]
         }
