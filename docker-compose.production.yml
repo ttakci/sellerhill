@@ -83,6 +83,17 @@ services:
       EBAY_REST_API_URL: https://api.ebay.com
       EBAY_XML_API_URL: https://api.ebay.com/ws/api.dll
 
+      # Marketplace Account Deletion notification — eBay disables every new
+      # PRODUCTION keyset until this endpoint is validated. Set the token (32–80
+      # chars of A–Z a–z 0–9 _ -) here AND paste the same value into the eBay
+      # developer portal, then register the endpoint URL there. Until the token
+      # is set the endpoint returns 503 and the API still boots. See CLAUDE.md
+      # "eBay Marketplace Account Deletion notification".
+      EBAY_VERIFICATION_TOKEN: ${EBAY_VERIFICATION_TOKEN:-}
+      # The exact public URL registered in the portal, used verbatim in the
+      # challenge hash. Leave unset to derive `${FRONTEND_URL}/api/v1/ebay/marketplace-deletion-notification`.
+      EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
+
       # Keepa — sole product data provider (metadata + price + stock).
       # Only the API key lives here. Refresh cadence, batch size, quarantine
       # policy and the master kill switch are managed at /admin → Settings.
