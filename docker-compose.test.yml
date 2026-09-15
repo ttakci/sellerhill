@@ -160,6 +160,11 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    # Declared so Coolify's domain/port tooling recognizes 80 as the
+    # service's real listening port (nginx.conf: `listen 80`) instead of
+    # treating every domain assignment as an unrecognized-port guess.
+    expose:
+      - '80'
     networks:
       - coolify
 
