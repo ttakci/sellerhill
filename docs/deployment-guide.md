@@ -231,7 +231,6 @@ CORS_ORIGINS=https://sellerhill.takci.cloud
 
 # JWT (en az 32 karakter, rastgele)
 JWT_SECRET=
-JWT_REFRESH_SECRET=
 ```
 
 JWT secret üretmek için:
@@ -515,7 +514,7 @@ docker system prune -f
 - [ ] `DATABASE_URL`, `REDIS_HOST/PORT` internal connection bilgileri alındı
 - [ ] Coolify'da app (Docker Compose) oluşturuldu, repo bağlandı — branch **`UAT`**, compose **`docker-compose.test.yml`**
 - [ ] Domain SADECE `web` servisine atandı (`api`'ye verilmedi)
-- [ ] Env var'lar ayarlandı: `DATABASE_URL`, `REDIS_*`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `FRONTEND_URL`, `CORS_ORIGINS`
+- [ ] Env var'lar ayarlandı: `DATABASE_URL`, `REDIS_*`, `JWT_SECRET`, `FRONTEND_URL`, `CORS_ORIGINS`
 - [ ] **`GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` girildi** (yoksa `grafana` container'ı başlamaz)
 - [ ] eBay sandbox redirect URI = `https://<domain>/api/v1/ebay/callback`
 - [ ] DNS A kaydı eklendi (domain → VPS IP)

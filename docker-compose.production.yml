@@ -63,11 +63,12 @@ services:
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
 
-      # JWT
+      # JWT — access-token signing secret only. There is no refresh-token
+      # secret or configurable expiry: the refresh token is an opaque random
+      # value (auth-session.service.ts), hashed and stored in
+      # auth_refresh_sessions, not a signed JWT — and both token lifetimes
+      # are hardcoded in AUTH_CONSTANTS, not env-driven.
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in Coolify env vars}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in Coolify env vars}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
-      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
 
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -95,10 +96,11 @@ services:
       EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
 
       # Keepa — sole product data provider (metadata + price + stock).
-      # Only the API key lives here. Refresh cadence, batch size, quarantine
-      # policy and the master kill switch are managed at /admin → Settings.
+      # Only the API key lives here. The base URL is hardcoded in
+      # keepa.service.ts (never read from env), and refresh cadence, batch
+      # size, quarantine policy and the master kill switch are managed at
+      # /admin → Settings.
       KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
-      KEEPA_API_URL: https://api.keepa.com/product
       # Worker concurrency is read at worker registration, so it stays here.
       KEEPA_REFRESH_WORKER_CONCURRENCY: ${KEEPA_REFRESH_WORKER_CONCURRENCY:-1}
 
@@ -142,10 +144,6 @@ services:
       # separate admin-panel toggle.
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-
-      # Rate Limiting
-      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
 
       # Email (SMTP) — bootstrap values only. Once an admin edits mail settings
       # at /admin → Settings the DB override wins, and the password there is

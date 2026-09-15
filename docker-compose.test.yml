@@ -50,10 +50,11 @@ services:
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
 
+      # Access-token signing secret only — the refresh token is an opaque
+      # random value (auth-session.service.ts), hashed and stored in
+      # auth_refresh_sessions, not a signed JWT; both token lifetimes are
+      # hardcoded in AUTH_CONSTANTS, not env-driven. See docker-compose.production.yml.
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in Coolify env vars}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in Coolify env vars}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
-      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
 
       LOG_LEVEL: ${LOG_LEVEL:-debug}
 
@@ -77,8 +78,8 @@ services:
       # Keepa hits the LIVE API even from the test env (there is no sandbox),
       # so it spends real tokens. Turn "Background refresh enabled" OFF at
       # /admin → Settings when the test env is idle.
+      # The base URL is hardcoded in keepa.service.ts, never read from env.
       KEEPA_API_KEY: ${KEEPA_API_KEY:?Set KEEPA_API_KEY in Coolify env vars}
-      KEEPA_API_URL: https://api.keepa.com/product
       KEEPA_REFRESH_WORKER_CONCURRENCY: ${KEEPA_REFRESH_WORKER_CONCURRENCY:-1}
 
       AMAZON_ENCRYPTION_KEY: ${AMAZON_ENCRYPTION_KEY:?Set AMAZON_ENCRYPTION_KEY in Coolify env vars}
@@ -110,9 +111,6 @@ services:
       # Without them billing fails safe: catalog/summary work, checkout 409s.
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-
-      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
 
       # Leave unset and configure mail entirely from /admin → Settings.
       SMTP_HOST: ${SMTP_HOST:-}
