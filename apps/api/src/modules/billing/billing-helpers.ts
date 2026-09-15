@@ -184,7 +184,11 @@ export function expandPlan(
   for (const interval of [BillingInterval.MONTHLY, BillingInterval.ANNUAL]) {
     const candidates = planPrices
       .filter((p) => p.interval === interval)
-      .filter((p) => p.effectiveFrom <= today && (p.effectiveTo === null || p.effectiveTo > today))
+      .filter(
+        (p) =>
+          p.effectiveFrom.slice(0, 10) <= today &&
+          (p.effectiveTo === null || p.effectiveTo.slice(0, 10) > today),
+      )
       .sort((a, b) => (a.effectiveFrom < b.effectiveFrom ? 1 : -1));
     if (candidates.length > 0) {
       effectivePrices[interval] = candidates[0];
