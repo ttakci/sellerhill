@@ -53,7 +53,7 @@ export enum PlatformSettingSource {
  * Keys NOT in this enum are env-only by design and must stay that way:
  * connection bootstrap (DATABASE_*, REDIS_*), crypto/auth secrets (JWT_*,
  * AMAZON_ENCRYPTION_KEY), provider API credentials (KEEPA_API_KEY, EBAY_*,
- * GOOGLE_*, PADDLE_*, LLM_API_KEY) and process identity (NODE_ENV, PORT,
+ * GOOGLE_*, STRIPE_*, LLM_API_KEY) and process identity (NODE_ENV, PORT,
  * CORS_ORIGINS). They are read before the DB exists, are rotated as an ops
  * action, and must not be reachable over HTTP.
  */
