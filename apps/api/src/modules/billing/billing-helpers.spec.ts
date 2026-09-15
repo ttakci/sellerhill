@@ -181,6 +181,19 @@ describe('expandPlan', () => {
     expect(expanded.limits[BillingLimitKey.LISTINGS_PER_MONTH]?.limitValue).toBe(1500);
   });
 
+  it('includes a price whose effectiveFrom is a full ISO timestamp for today (regression: toIso() on a pg date column produces "YYYY-MM-DDT00:00:00.000Z", not a bare date)', () => {
+    const prices = [
+      {
+        id: 'p1', planId: 'plan-1', interval: BillingInterval.MONTHLY,
+        amountMicros: 39_000_000, currency: 'USD',
+        effectiveFrom: '2026-07-27T00:00:00.000Z', effectiveTo: null,
+        providerPriceId: 'pri', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
+      },
+    ];
+    const expanded = expandPlan(plan, prices, [], now);
+    expect(expanded.prices[BillingInterval.MONTHLY]?.amountMicros).toBe(39_000_000);
+  });
+
   it('excludes prices whose effective window has not started', () => {
     const prices = [
       {
