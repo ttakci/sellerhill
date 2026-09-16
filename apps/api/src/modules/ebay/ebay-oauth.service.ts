@@ -24,6 +24,17 @@ export class EbayOAuthService {
   private readonly authUrl: string;
   private readonly tokenUrl: string;
   private readonly apiBaseUrl: string;
+  /**
+   * eBay's Commerce Identity API is hosted on a different subdomain than
+   * every other REST API — `apiz.ebay.com`/`apiz.sandbox.ebay.com`, not
+   * `api.ebay.com`/`api.sandbox.ebay.com`. This is documented eBay behavior,
+   * not a typo: hitting `commerce/identity/v1/user` on the normal API host
+   * returns a plain 404 (verified live in production, 2026-09-16 — a
+   * connected seller's identity call failed with "Request failed with
+   * status code 404", leaving `ebay_accounts.seller_id`/`store_name` stuck
+   * at the JWT-decode fallback value `'unknown'` for every connection).
+   */
+  private readonly identityApiBaseUrl: string;
   private readonly scopes: readonly string[];
 
   constructor(private readonly configService: ConfigService) {
@@ -37,6 +48,7 @@ export class EbayOAuthService {
     this.authUrl = this.configService.get<string>('EBAY_AUTH_URL') || '';
     this.tokenUrl = this.configService.get<string>('EBAY_TOKEN_URL') || '';
     this.apiBaseUrl = this.configService.get<string>('EBAY_REST_API_URL') || '';
+    this.identityApiBaseUrl = this.apiBaseUrl.replace(/^(https?:\/\/)api\./, '$1apiz.');
 
     if (!this.clientId || !this.clientSecret) {
       this.logger.warn(
@@ -173,8 +185,9 @@ export class EbayOAuthService {
     }
 
     try {
-      // Get User/Identity info
-      const identityResponse = await axios.get(`${this.apiBaseUrl}/commerce/identity/v1/user`, {
+      // Get User/Identity info. Deliberately identityApiBaseUrl, not
+      // apiBaseUrl — see the field comment above.
+      const identityResponse = await axios.get(`${this.identityApiBaseUrl}/commerce/identity/v1/user`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
