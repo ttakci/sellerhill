@@ -5,7 +5,7 @@
  */
 
 import type { ProfileDto } from '@repo/shared';
-import { InfoMessage, PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
+import { ConfirmModal, InfoMessage, PageHeader, SettingsActionRow, SettingsCard, SettingsInfoRow } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -213,6 +213,11 @@ export const SettingsHubPageComponent = ({
   onViewAllListingGroups,
   onCreateListingGroup,
   onConnectEbay,
+  onRequestDisconnectEbay,
+  onConfirmDisconnectEbay,
+  onCancelDisconnectEbay,
+  pendingDisconnectId,
+  disconnectingEbayId,
   ebayMarketplaceOptions,
   selectedEbayMarketplace,
   onEbayMarketplaceChange,
@@ -269,6 +274,8 @@ export const SettingsHubPageComponent = ({
         accounts={ebayAccounts}
         onConnectNew={onConnectEbay}
         onViewAll={() => onOpenDrawer('ebayAccountsAll')}
+        onDisconnect={onRequestDisconnectEbay}
+        disconnectingId={disconnectingEbayId}
         marketplaceOptions={ebayMarketplaceOptions}
         selectedMarketplace={selectedEbayMarketplace}
         onMarketplaceChange={onEbayMarketplaceChange}
@@ -364,6 +371,22 @@ export const SettingsHubPageComponent = ({
       />
 
       <DeactivateAccountModal isOpen={isDeactivateModalOpen} onClose={onCloseDeactivateModal} />
+
+      <ConfirmModal
+        isOpen={Boolean(pendingDisconnectId)}
+        onClose={onCancelDisconnectEbay}
+        onConfirm={onConfirmDisconnectEbay}
+        type="warning"
+        typeTitles={{
+          info: t('translation:dialog.title.info'),
+          success: t('translation:dialog.title.success'),
+          warning: t('translation:dialog.title.warning'),
+          error: t('translation:dialog.title.error'),
+        }}
+        description={t('translation:settingsHub.sections.ebay.disconnect.confirmDescription')}
+        confirmLabel={t('translation:settingsHub.sections.ebay.disconnect.confirmLabel')}
+        cancelLabel={t('translation:common.cancel')}
+      />
     </S.Container>
   );
 };

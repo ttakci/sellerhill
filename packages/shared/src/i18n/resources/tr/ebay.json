@@ -39,7 +39,9 @@
       "tokenExchangeFailed": "Yetkilendirme kodunun token'a dönüştürülmesi başarısız",
       "accountAlreadyConnected": "Bu eBay hesabı zaten bağlı",
       "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz deneme hakkını kullanmış. Bağlamak için bir paket seçin.",
-      "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı"
+      "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı",
+      "storeOwnedByAnotherAccount": "Bu eBay mağazası başka bir SellerHill hesabına bağlı. Devretmek için destek ile iletişime geçin.",
+      "accountNotFound": "Bu eBay mağazası bulunamadı."
     },
     "onboarding": {
       "title": "eBay Mağazanızı Bağlayın",

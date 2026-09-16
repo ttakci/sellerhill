@@ -14,6 +14,8 @@ export const EbayAccountsDrawer: React.FC<EbayAccountsDrawerProps> = ({
   accounts,
   onConnectNew,
   onViewAll,
+  onDisconnect,
+  disconnectingId,
   marketplaceOptions,
   selectedMarketplace,
   onMarketplaceChange,
@@ -30,6 +32,8 @@ export const EbayAccountsDrawer: React.FC<EbayAccountsDrawerProps> = ({
       stores={stores}
       onConnectNew={onConnectNew}
       onViewAll={onViewAll}
+      onDisconnect={onDisconnect}
+      disconnectingId={disconnectingId}
       marketplaceOptions={marketplaceOptions}
       selectedMarketplace={selectedMarketplace}
       onMarketplaceChange={onMarketplaceChange}

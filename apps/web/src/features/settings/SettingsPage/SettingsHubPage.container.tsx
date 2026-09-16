@@ -4,6 +4,8 @@
  * account/security, notifications, plan, and danger zone into single page.
  */
 
+import type { SerializedError } from '@reduxjs/toolkit';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { AmazonAccountStatus, SUPPORTED_EBAY_MARKETPLACES, type EbayMarketplaceId } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -19,7 +21,11 @@ import { EbayAccountGuard } from '@/components/EbayAccountGuard';
 import { useGetAmazonAccountsQuery } from '@/features/amazon/api/amazon.api';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
 import { useGetBuyerMessageTemplatesQuery } from '@/features/buyer-messaging/api/buyer-messaging.api';
-import { useGetEbayAccountsQuery, useLazyGetEbayConnectUrlQuery } from '@/features/ebay/api/ebayApi';
+import {
+  useDisconnectEbayAccountMutation,
+  useGetEbayAccountsQuery,
+  useLazyGetEbayConnectUrlQuery,
+} from '@/features/ebay/api/ebayApi';
 import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
 import {
   useGetListingSettingsGroupsQuery,
@@ -45,8 +51,13 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingAmazonId, setEditingAmazonId] = useState<string | null>(null);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  /** Store awaiting disconnect confirmation; also drives the confirm dialog's open state. */
+  const [pendingDisconnectId, setPendingDisconnectId] = useState<string | null>(null);
   // Shared store-settings scope — hub + nested blacklist drawer stay in sync via this.
   const [storeScope, setStoreScope] = useState<string>(GLOBAL_SCOPE);
+
+  const [disconnectEbayAccount, { isLoading: isDisconnecting, originalArgs: disconnectArgs }] =
+    useDisconnectEbayAccountMutation();
 
   const { data: user, error: userError } = useGetMeQuery();
   const { data: profile, error: profileError } = useGetProfileQuery();
@@ -176,6 +187,47 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const handleOpenDeactivateModal = (): void => setIsDeactivateModalOpen(true);
   const handleCloseDeactivateModal = (): void => setIsDeactivateModalOpen(false);
 
+  // Disconnecting a store stops every automation behind it, so it is confirmed
+  // first. The pending id doubles as the confirmation's open state — there is
+  // no second boolean that could disagree with which store is being severed.
+  const handleRequestDisconnectEbay = (storeId: string): void => setPendingDisconnectId(storeId);
+  const handleCancelDisconnectEbay = (): void => setPendingDisconnectId(null);
+
+  const handleConfirmDisconnectEbay = (): void => {
+    if (!pendingDisconnectId) {
+      return;
+    }
+    const storeId = pendingDisconnectId;
+    setPendingDisconnectId(null);
+    void disconnectEbayAccount({ accountId: storeId })
+      .unwrap()
+      .then(() => {
+        showMessage(
+          {
+            type: 'success',
+            headerKey: 'translation:message.success.header',
+            descriptionKey: 'translation:settingsHub.sections.ebay.disconnect.success',
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t,
+        );
+      })
+      .catch((error: FetchBaseQueryError | SerializedError) => {
+        // A mutation failure needs its own surface: the effect above only
+        // folds in QUERY errors, so without this a failed disconnect would
+        // look like nothing happened at all.
+        showMessage(
+          {
+            type: 'error',
+            headerKey: 'translation:message.error.header',
+            descriptionKey: getErrorI18nKey(error),
+            primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+          },
+          t,
+        );
+      });
+  };
+
   const isImpersonatingAdmin = useMemo(() => Boolean(user) && (user as unknown as { role?: string }).role === 'admin', [user]);
 
   const storeConfigs = useMemo(() => storeConfigsData ?? [], [storeConfigsData]);
@@ -214,6 +266,11 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
         onViewAllListingGroups={handleViewAllListingGroups}
         onCreateListingGroup={handleCreateListingGroup}
         onConnectEbay={handleConnectEbay}
+        onRequestDisconnectEbay={handleRequestDisconnectEbay}
+        onConfirmDisconnectEbay={handleConfirmDisconnectEbay}
+        onCancelDisconnectEbay={handleCancelDisconnectEbay}
+        pendingDisconnectId={pendingDisconnectId}
+        disconnectingEbayId={isDisconnecting ? (disconnectArgs?.accountId ?? null) : null}
         ebayMarketplaceOptions={getEbayMarketplaceOptions(t)}
         selectedEbayMarketplace={selectedEbayMarketplace}
         onEbayMarketplaceChange={setSelectedEbayMarketplace}

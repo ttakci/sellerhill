@@ -211,6 +211,12 @@
       "ebay": {
         "sellerId": "Seller ID",
         "connectedSince": "Connected Since",
+        "disconnect": {
+          "action": "Disconnect",
+          "confirmDescription": "Disconnecting stops order syncing, automatic purchasing and tracking updates for this store. Your existing orders and listings are kept, and reconnecting the store later restores everything. To also withdraw access on eBay's side, remove SellerHill under eBay's \"Third-party app access\" settings.",
+          "confirmLabel": "Disconnect store",
+          "success": "The eBay store was disconnected."
+        },
         "manageStores": {
           "empty": "No eBay stores connected yet"
         }
