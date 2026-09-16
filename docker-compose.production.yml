@@ -197,10 +197,17 @@ services:
         # Mirrors the api service's EBAY_ENVIRONMENT.
         VITE_EBAY_ENVIRONMENT: production
         VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-        # tawk.to live-chat widget (optional). See CLAUDE.md "Customer support
-        # widget — tawk.to".
-        VITE_TAWKTO_PROPERTY_ID: ${VITE_TAWKTO_PROPERTY_ID:-6a77cbcad1e0df1d455e2131}
-        VITE_TAWKTO_WIDGET_ID: ${VITE_TAWKTO_WIDGET_ID:-1jvhv843q}
+        # tawk.to live-chat widget (optional, currently OFF by operator choice —
+        # 2026-09-16). No hardcoded fallback IDs: `TawkToWidget` no-ops when
+        # either is unset, so this must resolve to empty unless a Coolify env
+        # var is explicitly set. A `:-<real-id>` fallback here would silently
+        # re-enable the widget for anyone who merely leaves the Coolify
+        # variable blank — the same class of bug CLAUDE.md documents for
+        # CORS_ORIGINS (an explicitly-empty env var is NOT the same as unset,
+        # but `${VAR:-default}` treats them identically and picks the default
+        # either way). See CLAUDE.md "Customer support widget — tawk.to".
+        VITE_TAWKTO_PROPERTY_ID: ${VITE_TAWKTO_PROPERTY_ID:-}
+        VITE_TAWKTO_WIDGET_ID: ${VITE_TAWKTO_WIDGET_ID:-}
         # Stripe publishable key — unconsumed by any FE code today, provisioned
         # ahead of a future Stripe.js/Elements surface.
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
