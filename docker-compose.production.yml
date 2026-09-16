@@ -266,6 +266,14 @@ services:
       - coolify
     depends_on:
       - loki
+    # Bound to the VPS's own loopback ONLY — never reachable from the public
+    # internet, even though the port is "published". This is what an SSH
+    # local-port-forward (`ssh -L 3001:127.0.0.1:3001 <user>@<vps-ip>`, or the
+    # equivalent PuTTY tunnel) connects to, so Grafana's web UI can be reached
+    # from a developer's own browser without exposing it publicly. See
+    # CLAUDE.md "Observability — log tracing (Loki/Promtail/Grafana)".
+    ports:
+      - '127.0.0.1:3001:3000'
 
 volumes:
   browser_state:
