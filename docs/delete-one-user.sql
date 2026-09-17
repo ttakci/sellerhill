@@ -3,9 +3,14 @@
 -- DESTRUCTIVE AND IRREVERSIBLE. Read this header before running it.
 --
 -- HOW TO RUN
--- Put the account's e-mail in the one place marked below, then run the three
--- numbered blocks in order. Plain SQL only — no psql-specific commands — so it
--- works the same in DBeaver, pgAdmin, psql or any other client.
+-- Search the file for the placeholder below and replace all FOUR of its
+-- occurrences (one in block 1, one in block 2, two in block 3) with the
+-- account's e-mail address — use replace-all rather than editing by hand, and
+-- note this comment deliberately does not spell the placeholder out, so the
+-- count stays exactly four. Then run the three numbered blocks in order.
+--
+-- Plain SQL only — no psql-specific commands — so it works the same in
+-- DBeaver, pgAdmin, psql or any other client.
 --
 -- WHY THIS IS SQL AND NOT A COMMAND
 -- `pnpm --filter api reset-users` refuses to run when NODE_ENV=production and
@@ -41,8 +46,8 @@
 -- exists here.
 
 -- ===========================================================================
--- 1. NAME THE ACCOUNT, AND LOOK BEFORE YOU DELETE.
---    Replace the e-mail below, run this block, and check the numbers.
+-- 1. LOOK BEFORE YOU DELETE.
+--    Run this block and check the numbers: is this the right account?
 -- ===========================================================================
 SELECT u.id,
        u.email,
@@ -58,8 +63,9 @@ SELECT u.id,
  WHERE LOWER(u.email) = LOWER('REPLACE_WITH_EMAIL');
 
 -- ===========================================================================
--- 2. DELETE. Replace the SAME e-mail once more, then run this whole block.
---    It is one transaction: it all happens, or none of it does.
+-- 2. DELETE. Run this whole block at once (in DBeaver: Execute script, not
+--    Execute statement). It is one transaction: it all happens, or none of it
+--    does — and it refuses to run at all unless exactly one account matched.
 -- ===========================================================================
 BEGIN;
 
@@ -101,7 +107,7 @@ DELETE FROM users
 COMMIT;
 
 -- ===========================================================================
--- 3. CONFIRM. Same e-mail; every count must be 0.
+-- 3. CONFIRM. Every count must be 0.
 -- ===========================================================================
 SELECT (SELECT count(*) FROM users
           WHERE LOWER(email) = LOWER('REPLACE_WITH_EMAIL'))                    AS users_left,
