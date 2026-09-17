@@ -66,7 +66,10 @@ export type StripeApplyResult =
         | 'not_paid'
         | 'no_addon_metadata'
         | 'unknown_addon'
-        | 'already_granted';
+        | 'already_granted'
+        // A payment dispute (chargeback). Recorded and reported loudly; see
+        // the branch in applyStripeEvent for why it changes no state here.
+        | 'dispute_recorded';
     };
 
 const SUBSCRIPTION_EVENT_TYPES = new Set([
@@ -212,6 +215,28 @@ export async function applyStripeEvent(
   // below returns early only for `mode: 'payment'`.
   if (event.eventType === 'checkout.session.completed') {
     return applyAddonPurchase(repository, event);
+  }
+
+  // A chargeback. Reported at `error` because nothing else in the system will
+  // ever mention it: the money is being pulled back while the subscription
+  // stays active, so without this line the first sign is the bank statement.
+  //
+  // Deliberately does NOT suspend the account. The dispute payload carries a
+  // charge/payment-intent id but no customer, so resolving the seller needs a
+  // Stripe fetch this applier does not make — and auto-suspending on a signal
+  // that is sometimes a bank error, sometimes fraud, and sometimes a dispute
+  // the operator will win, is a decision for a person. The event is persisted
+  // in the webhook inbox either way, so the audit trail is complete.
+  if (event.eventType.startsWith('charge.dispute.')) {
+    const disputeData = (event.payload.data ?? {}) as Record<string, unknown>;
+    const dispute = (disputeData.object ?? {}) as Record<string, unknown>;
+    logger.error(
+      `Stripe payment dispute ${event.eventType}: dispute=${String(dispute.id)} ` +
+        `charge=${String(dispute.charge)} amount=${String(dispute.amount)} ` +
+        `currency=${String(dispute.currency)} reason=${String(dispute.reason)} ` +
+        `status=${String(dispute.status)} — review it in the Stripe Dashboard.`,
+    );
+    return { kind: 'ignored', reason: 'dispute_recorded' };
   }
 
   const fields = extractStripeSubscriptionFields(event);

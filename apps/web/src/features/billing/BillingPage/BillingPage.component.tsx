@@ -519,6 +519,14 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
               />
             ))}
           </S.DrawerPlanList>
+
+          {/* Prices are tax-exclusive and Stripe adds the buyer's local tax at
+              checkout, so a Turkish seller sees +20% KDV on a figure this page
+              printed without one. The landing page has always said so; the
+              in-app list did not. */}
+          <Text variant="caption" color="text.secondary">
+            {t('billing:billing.plans.taxNote')}
+          </Text>
         </S.DrawerSection>
       </Drawer>
 

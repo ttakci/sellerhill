@@ -42,6 +42,21 @@ export interface ProcessResult {
   applyResult?: StripeApplyResult;
 }
 
+/**
+ * The one mail call this processor makes, as its own tiny port. Declared here
+ * rather than importing EmailService so the billing module does not depend on
+ * the mail module's shape, and so the processor's existing unit tests keep
+ * constructing it with two arguments.
+ */
+export interface BillingNotificationSender {
+  sendPaymentFailedEmail(
+    email: string,
+    firstName: string,
+    planName: string,
+    locale?: string,
+  ): Promise<void>;
+}
+
 @Injectable()
 export class BillingWebhookProcessor {
   private readonly logger = new Logger(BillingWebhookProcessor.name);
@@ -49,6 +64,10 @@ export class BillingWebhookProcessor {
   constructor(
     private readonly repository: BillingRepositoryService,
     private readonly config: BillingConfig,
+    /** Optional so the processor stays constructible without the mail stack
+     *  (its unit tests do exactly that); a missing service simply sends no
+     *  e-mail, it never fails the webhook. */
+    private readonly email?: BillingNotificationSender,
   ) {}
 
   /**
@@ -84,6 +103,10 @@ export class BillingWebhookProcessor {
     try {
       const applyResult = await applyStripeEvent(this.repository, event);
       await this.repository.markWebhookProcessed(row.id);
+      // 5. Tell the seller, for the one event they cannot discover on their
+      //    own. Deliberately AFTER the state write and fully swallowed: a mail
+      //    failure must never make Stripe redeliver an event we have applied.
+      await this.notifyPaymentFailed(event);
       return { webhookId: row.id, processed: true, applyResult };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -92,6 +115,50 @@ export class BillingWebhookProcessor {
       // Re-throw so the controller returns a non-200 and Stripe redelivers.
       // The idempotency seam (claim + dedup) keeps redelivery safe.
       throw error;
+    }
+  }
+
+  /**
+   * E-mail the seller that their payment failed and automation has stopped.
+   *
+   * `invoice.payment_failed` is the right signal: it fires on each failed
+   * attempt of Stripe's retry schedule, which is exactly when the seller can
+   * still act. Redeliveries of the SAME attempt cannot double-send, because
+   * the inbox short-circuits a duplicate event id long before this point.
+   *
+   * Entirely best-effort. Everything here is a nice-to-have on top of a
+   * webhook that has already been applied.
+   */
+  private async notifyPaymentFailed(event: ParsedStripeEvent): Promise<void> {
+    if (event.eventType !== 'invoice.payment_failed' || !this.email) {
+      return;
+    }
+    try {
+      const data = (event.payload.data ?? {}) as Record<string, unknown>;
+      const invoice = (data.object ?? {}) as Record<string, unknown>;
+      const providerCustomerId =
+        typeof invoice.customer === 'string' ? invoice.customer : null;
+      if (!providerCustomerId) {
+        return;
+      }
+      const contact = await this.repository.findBillingContactByProviderCustomerId(
+        BillingProvider.STRIPE,
+        providerCustomerId,
+      );
+      if (!contact) {
+        return;
+      }
+      await this.email.sendPaymentFailedEmail(
+        contact.email,
+        contact.firstName,
+        contact.planName ?? '',
+        contact.locale,
+      );
+      this.logger.log(`Payment-failed e-mail sent to user ${contact.userId}`);
+    } catch (err) {
+      this.logger.warn(
+        `Payment-failed e-mail not sent: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }

@@ -7,12 +7,26 @@ import { BillingRepositoryService } from './billing-repository.service';
 export const BILLING_TRIAL_EXPIRY_QUEUE = 'billing-trial-expiry';
 const BILLING_TRIAL_EXPIRY_JOB = 'expire-trials';
 const DEFAULT_EXPIRY_CRON = '23 2 * * *';
+/** How many days before a trial ends the one reminder goes out. */
+const TRIAL_REMINDER_DAYS = 3;
 
 /**
  * Daily idempotent trial closer. Existing listings are deliberately untouched:
  * trial expiry is a downgrade, and billing's contract blocks future create/
  * publish only when enforcement is enabled.
  */
+/** The one mail call this processor makes — see BillingNotificationSender in
+ *  billing-webhook-processor.ts for why it is a local port. */
+export interface TrialReminderSender {
+  sendTrialEndingEmail(
+    email: string,
+    firstName: string,
+    daysLeft: number,
+    trialEndDate: string,
+    locale?: string,
+  ): Promise<void>;
+}
+
 @Processor(BILLING_TRIAL_EXPIRY_QUEUE, { concurrency: 1 })
 @Injectable()
 export class TrialExpiryProcessor extends WorkerHost implements OnModuleInit {
@@ -21,6 +35,9 @@ export class TrialExpiryProcessor extends WorkerHost implements OnModuleInit {
   constructor(
     @InjectQueue(BILLING_TRIAL_EXPIRY_QUEUE) private readonly queue: Queue,
     private readonly repository: BillingRepositoryService,
+    /** Optional so the processor stays constructible without the mail stack;
+     *  absent means no reminder is sent, never a failed tick. */
+    private readonly email?: TrialReminderSender,
   ) {
     super();
   }
@@ -44,12 +61,65 @@ export class TrialExpiryProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
-  async process(job: Job): Promise<{ expired: number }> {
+  async process(job: Job): Promise<{ expired: number; reminded: number }> {
     if (job.name !== BILLING_TRIAL_EXPIRY_JOB) {
-      return { expired: 0 };
+      return { expired: 0, reminded: 0 };
     }
+    // Remind BEFORE expiring, so a trial that ends today still gets its
+    // reminder counted against the trialing state rather than being closed
+    // out of the query first.
+    const reminded = await this.sendTrialReminders();
     const expired = await this.repository.expireElapsedTrials();
-    this.logger.log(`Expired ${expired} billing trial(s).`);
-    return { expired };
+    this.logger.log(`Expired ${expired} billing trial(s); reminded ${reminded}.`);
+    return { expired, reminded };
+  }
+
+  /**
+   * One e-mail per trial, a few days out. The in-app Action Center already
+   * warns at five days, but a trial that quietly ends is the one case where
+   * the seller has no reason to be logged in — they are still evaluating.
+   *
+   * Rows are claimed by the query itself (see `claimTrialsEndingSoon`), so a
+   * failure here costs one reminder rather than risking a duplicate.
+   */
+  private async sendTrialReminders(): Promise<number> {
+    if (!this.email) {
+      return 0;
+    }
+    let sent = 0;
+    try {
+      const due = await this.repository.claimTrialsEndingSoon(TRIAL_REMINDER_DAYS);
+      for (const trial of due) {
+        try {
+          const daysLeft = Math.max(
+            1,
+            Math.ceil((trial.trialEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000)),
+          );
+          const trialEndDate = trial.trialEndsAt.toLocaleDateString(
+            trial.locale === 'tr' ? 'tr-TR' : 'en-US',
+            { day: 'numeric', month: 'long', year: 'numeric' },
+          );
+          await this.email.sendTrialEndingEmail(
+            trial.email,
+            trial.firstName,
+            daysLeft,
+            trialEndDate,
+            trial.locale,
+          );
+          sent += 1;
+        } catch (err) {
+          this.logger.warn(
+            `Trial-ending e-mail not sent to user ${trial.userId}: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Trial reminder sweep failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    return sent;
   }
 }

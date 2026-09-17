@@ -69,6 +69,46 @@ interface AddonRow {
   provider_price_id: string | null;
 }
 
+/**
+ * Compare one already-mirrored price against Stripe and describe any
+ * divergence. Returns [] when they agree (or when the Price cannot be read —
+ * an unreadable answer is reported, never treated as agreement).
+ *
+ * A Stripe Price is IMMUTABLE. So a changed amount in `billing_plan_prices`
+ * can only be shipped as a NEW price row plus a new Stripe Price; editing the
+ * figure in place leaves the app advertising one price while Stripe charges
+ * the old one, with nothing anywhere to notice.
+ */
+async function collectPriceMismatch(
+  stripe: Stripe,
+  args: {
+    label: string;
+    providerPriceId: string;
+    expectedUnitAmount: number;
+    expectedCurrency: string;
+    log: (message: string) => void;
+  },
+): Promise<string[]> {
+  try {
+    const remote = await stripe.prices.retrieve(args.providerPriceId);
+    const sameAmount = remote.unit_amount === args.expectedUnitAmount;
+    const sameCurrency = remote.currency === args.expectedCurrency.toLowerCase();
+    if (sameAmount && sameCurrency) {
+      args.log(`  ${args.label}: Stripe Price ${args.providerPriceId} matches (${args.expectedUnitAmount} ${args.expectedCurrency}).`);
+      return [];
+    }
+    return [
+      `${args.label}: local ${args.expectedUnitAmount} ${args.expectedCurrency.toUpperCase()} ` +
+        `vs Stripe ${String(remote.unit_amount)} ${remote.currency.toUpperCase()} (${args.providerPriceId})`,
+    ];
+  } catch (error: unknown) {
+    return [
+      `${args.label}: could not read Stripe Price ${args.providerPriceId} — ` +
+        `${error instanceof Error ? error.message : String(error)}`,
+    ];
+  }
+}
+
 async function run(): Promise<number> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -82,6 +122,10 @@ async function run(): Promise<number> {
   }
 
   const stripe = new Stripe(stripeSecretKey);
+  // Every already-mirrored row whose Stripe Price no longer matches the local
+  // catalog. Collected rather than thrown on, so ONE run reports every
+  // divergence instead of stopping at the first.
+  const mismatches: string[] = [];
   const pool = new Pool({ connectionString: databaseUrl });
 
   try {
@@ -122,7 +166,20 @@ async function run(): Promise<number> {
 
       for (const price of prices) {
         if (price.provider_price_id) {
-          log(`  Price ${price.interval} for "${plan.slug}" already has Stripe Price ${price.provider_price_id} — skipping.`);
+          // Already mirrored — but VERIFY the amount instead of taking the
+          // presence of an id as proof. A Stripe Price is immutable, so editing
+          // `billing_plan_prices.amount_micros` without minting a new one makes
+          // the app advertise one figure while Stripe charges another, silently
+          // and forever. Nothing else in the system compares the two.
+          mismatches.push(
+            ...(await collectPriceMismatch(stripe, {
+              label: `plan "${plan.slug}" (${price.interval})`,
+              providerPriceId: price.provider_price_id,
+              expectedUnitAmount: Math.round(Number(price.amount_micros) / 10_000),
+              expectedCurrency: price.currency,
+              log,
+            })),
+          );
           continue;
         }
         // amount_micros is 1/1,000,000 of the major unit; Stripe unit_amount
@@ -163,7 +220,15 @@ async function run(): Promise<number> {
 
     for (const addon of addons) {
       if (addon.provider_price_id) {
-        log(`Top-up "${addon.slug}" already has Stripe Price ${addon.provider_price_id} — skipping.`);
+        mismatches.push(
+          ...(await collectPriceMismatch(stripe, {
+            label: `top-up "${addon.slug}"`,
+            providerPriceId: addon.provider_price_id,
+            expectedUnitAmount: Math.round(Number(addon.amount_micros) / 10_000),
+            expectedCurrency: addon.currency,
+            log,
+          })),
+        );
         continue;
       }
       const product = await stripe.products.create({
@@ -184,6 +249,22 @@ async function run(): Promise<number> {
         [stripePrice.id, addon.id],
       );
       log(`Created Stripe Price ${stripePrice.id} (${unitAmount} ${addon.currency}) for top-up "${addon.slug}"`);
+    }
+
+    if (mismatches.length > 0) {
+      logError('');
+      logError('PRICE MISMATCH — the app and Stripe disagree about what these cost:');
+      for (const line of mismatches) {
+        logError(`  ${line}`);
+      }
+      logError('');
+      logError(
+        'A Stripe Price cannot be edited. Fix this by closing the local price row ' +
+          '(effective_to) and inserting a new one with no provider_price_id, then re-running this script.',
+      );
+      // Non-zero: a CI/deploy step running this must fail rather than report
+      // a successful sync while customers are charged the wrong amount.
+      return 1;
     }
 
     log('Stripe catalog sync complete.');

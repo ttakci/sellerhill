@@ -23,6 +23,67 @@ import { BillingProvider, type BillingCheckoutDto, type BillingPortalDto } from 
 import { mapStripeInvoice, type StripeInvoiceLike } from './stripe-invoice-mapper';
 
 /**
+ * The Stripe API version every call in this file is made against.
+ *
+ * Pinned deliberately: leaving it unset makes the effective version whatever
+ * the installed `stripe` package defaults to, so a routine dependency bump can
+ * reshape the payloads this module parses. That is not hypothetical here —
+ * `current_period_start`/`current_period_end` moved from the Subscription to
+ * the SubscriptionItem in `2025-03-31.basil`, and every webhook silently
+ * synthesised a 30-day quota window until it was found.
+ *
+ * This value is the version the SDK was already using, so pinning it changed
+ * nothing at the time it was introduced. Raising it is a deliberate migration:
+ * read Stripe's upgrade notes, then re-verify the subscription payload fields
+ * `extractStripeSubscriptionFields` reads.
+ */
+const STRIPE_API_VERSION = '2026-07-29.dahlia' satisfies Stripe.LatestApiVersion;
+
+/**
+ * Idempotency key for a write whose accidental repetition costs real money.
+ *
+ * Bucketed by the hour rather than made unique per request: the duplicate this
+ * guards against is a seller double-submitting (two separate HTTP requests, so
+ * no shared request id exists), and Stripe replays the first result for a
+ * repeated key instead of performing the write twice. An hour is short enough
+ * that a deliberate repeat later in the day still goes through, and Stripe
+ * expires keys after 24h regardless.
+ *
+ * Deliberately NOT used for top-up purchases: buying two conversion packs in
+ * one hour is a legitimate thing to do, and collapsing them would take the
+ * money for one and deliver nothing. Those rely on the SDK's own retry keys.
+ */
+function hourlyIdempotencyKey(scope: string, ...parts: string[]): string {
+  const hourBucket = new Date().toISOString().slice(0, 13);
+  return [scope, ...parts, hourBucket].join(':');
+}
+
+/**
+ * Stripe error codes meaning "the card needs the buyer present to authenticate"
+ * (3-D Secure). Common on European and Turkish cards for an off-session charge.
+ *
+ * It matters because `payment_behavior: 'error_if_incomplete'` turns it into a
+ * failed update: the seller stays on their old plan, which is correct, but
+ * "plan change failed" tells them nothing they can act on. Reported separately
+ * so the message can say what actually happened and where to fix it.
+ */
+const STRIPE_AUTHENTICATION_REQUIRED_CODES = new Set([
+  'subscription_payment_intent_requires_action',
+  'invoice_payment_intent_requires_action',
+  'payment_intent_authentication_failure',
+  'authentication_required',
+]);
+
+function isAuthenticationRequiredError(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  const declineCode = (error as { decline_code?: unknown } | null)?.decline_code;
+  return (
+    (typeof code === 'string' && STRIPE_AUTHENTICATION_REQUIRED_CODES.has(code)) ||
+    (typeof declineCode === 'string' && STRIPE_AUTHENTICATION_REQUIRED_CODES.has(declineCode))
+  );
+}
+
+/**
  * Provider-facing checkout request. The controller builds this from the
  * authenticated user + SubscribeDto; the provider turns it into a Stripe
  * Checkout Session.
@@ -108,6 +169,14 @@ export interface BillingProviderPort {
    * applying it now. The seller already paid for this period, so nothing is
    * refunded and nothing changes until the period runs out.
    */
+  /**
+   * Re-read one subscription straight from Stripe, as the raw object, for the
+   * reconcile paths (periodic job + operator CLI) to feed through
+   * `extractStripeSubscriptionFields`. Returns null when Stripe has no such
+   * subscription; THROWS on any other failure, so a transport problem is never
+   * mistaken for "this subscription is gone".
+   */
+  fetchSubscription(providerSubscriptionId: string): Promise<unknown>;
   scheduleDowngrade(req: ChangePlanRequest): Promise<void>;
   /**
    * Release a pending downgrade schedule — e.g. because the seller upgraded
@@ -256,7 +325,23 @@ export class StripeBillingProvider implements BillingProviderPort {
     if (!this.config.stripeSecretKey) {
       throw new Error('billing.errors.providerNotConfigured');
     }
-    this.client ??= new Stripe(this.config.stripeSecretKey);
+    // The API version is PINNED, not left to the SDK's default. Without this,
+    // the effective API version moves whenever the `stripe` package is
+    // upgraded — and that has already cost this codebase a real defect once:
+    // `current_period_start`/`current_period_end` moved from the Subscription
+    // to the SubscriptionItem in 2025-03-31.basil, so every webhook silently
+    // fell through to a synthesised 30-day quota window (see the comment in
+    // stripe-event-applier.ts). A dependency bump must never be able to
+    // reshape a payload this module reads.
+    this.client ??= new Stripe(this.config.stripeSecretKey, {
+      apiVersion: STRIPE_API_VERSION,
+      // Retry a request Stripe never answered (connection reset, timeout,
+      // 500). The SDK replays it under the SAME idempotency key it generated
+      // for the first attempt, so a retry can never create a second
+      // subscription or charge — which is exactly why the retry belongs here
+      // rather than in a caller's try/catch.
+      maxNetworkRetries: 2,
+    });
     return this.client;
   }
 
@@ -284,7 +369,8 @@ export class StripeBillingProvider implements BillingProviderPort {
 
     let session: Stripe.Checkout.Session;
     try {
-      session = await stripe.checkout.sessions.create({
+      session = await stripe.checkout.sessions.create(
+        {
         mode: 'subscription',
         customer: customerId,
         client_reference_id: req.userId,
@@ -315,7 +401,14 @@ export class StripeBillingProvider implements BillingProviderPort {
         success_url: `${this.config.frontendUrl}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${this.config.frontendUrl}/billing?checkout=cancelled`,
         integration_identifier: `sellerhill_checkout_${randomLetterSuffix()}`,
-      });
+        },
+        {
+          // A double-submitted subscribe must not open two checkout sessions:
+          // each one can be completed, and Stripe does not refuse a second
+          // subscription for a customer who already has one.
+          idempotencyKey: hourlyIdempotencyKey('checkout', req.userId, req.providerPriceId),
+        },
+      );
     } catch (error) {
       this.logger.error(`Stripe checkout failed: ${describeError(error)}`);
       throw new Error('billing.errors.checkoutFailed');
@@ -444,8 +537,10 @@ export class StripeBillingProvider implements BillingProviderPort {
         // charges for both.
         throw new Error('billing.errors.planChangeFailed');
       }
-      await stripe.subscriptions.update(req.providerSubscriptionId, {
-        items: [{ id: itemId, price: req.providerPriceId }],
+      await stripe.subscriptions.update(
+        req.providerSubscriptionId,
+        {
+          items: [{ id: itemId, price: req.providerPriceId }],
         // Stripe bills in ADVANCE, and an upgrade hands over the higher quota
         // the moment it applies. `always_invoice` charges the prorated
         // difference NOW rather than up to 30 days later, and
@@ -453,15 +548,29 @@ export class StripeBillingProvider implements BillingProviderPort {
         // cannot be completed — so a declined card leaves the seller on the
         // plan they were already paying for instead of on one they have not
         // paid for.
-        proration_behavior: 'always_invoice',
-        payment_behavior: 'error_if_incomplete',
-        // The webhook applier reads the local plan from here, so it has to move
-        // with the price. Leaving stale metadata would have the subscription
-        // report the OLD plan back to us on its next update.
-        metadata: { plan_id: req.planId },
-      });
+          proration_behavior: 'always_invoice',
+          payment_behavior: 'error_if_incomplete',
+          // The webhook applier reads the local plan from here, so it has to move
+          // with the price. Leaving stale metadata would have the subscription
+          // report the OLD plan back to us on its next update.
+          metadata: { plan_id: req.planId },
+        },
+        {
+          idempotencyKey: hourlyIdempotencyKey(
+            'plan-change',
+            req.providerSubscriptionId,
+            req.providerPriceId,
+          ),
+        },
+      );
     } catch (error) {
       this.logger.error(`Stripe plan change failed: ${describeError(error)}`);
+      if (isAuthenticationRequiredError(error)) {
+        // The plan did NOT change (error_if_incomplete rolled it back), so the
+        // seller is still on what they were paying for. They need a card that
+        // can be charged off-session, which is a portal action, not a retry.
+        throw new Error('billing.errors.paymentRequiresAction');
+      }
       throw new Error('billing.errors.planChangeFailed');
     }
   }
@@ -474,6 +583,24 @@ export class StripeBillingProvider implements BillingProviderPort {
    * with 24,000 active listings under a 200-listing ceiling, and would need a
    * credit balance we deliberately do not have.
    */
+  async fetchSubscription(providerSubscriptionId: string): Promise<unknown> {
+    const stripe = this.getClient();
+    try {
+      return await stripe.subscriptions.retrieve(providerSubscriptionId);
+    } catch (error) {
+      const code = (error as { code?: unknown } | null)?.code;
+      if (code === 'resource_missing') {
+        // Deleted in Stripe. A real answer, not a failure — the caller records
+        // it rather than retrying forever.
+        return null;
+      }
+      this.logger.error(
+        `Stripe subscription fetch failed (${providerSubscriptionId}): ${describeError(error)}`,
+      );
+      throw error;
+    }
+  }
+
   async scheduleDowngrade(req: ChangePlanRequest): Promise<void> {
     const stripe = this.getClient();
     try {
