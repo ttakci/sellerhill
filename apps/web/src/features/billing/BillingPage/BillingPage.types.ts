@@ -134,6 +134,9 @@ export interface BillingPageComponentProps {
    *  change — see `PlanChangeConfirmProps.body`. Null until a preview has
    *  come back. */
   planChangeBody: string | null;
+  /** Downgrade-only warning that listings beyond the new plan's limit stop
+   *  being automated — see `PlanChangeConfirmProps.listingLimitWarning`. */
+  planChangeListingLimitWarning: string | null;
   /** True while the confirmed change is being applied (`POST
    *  /billing/change-plan`) — drives the confirm button's spinner. */
   isChangingPlan: boolean;

@@ -401,6 +401,82 @@ export class BillingRepositoryService {
   }
 
   /**
+   * Every user the listing-plan-limit reconcile may need to touch: anyone with
+   * an ACTIVE listing or a row still flagged. One aggregate per run — the job
+   * runs every few minutes, not per request, so a scan of `listings` is fine.
+   */
+  async listListingPlanLimitCandidates(): Promise<
+    { userId: string; activeCount: number; flaggedCount: number }[]
+  > {
+    const rows = await this.databaseService.query<{
+      user_id: string;
+      active_count: string;
+      flagged_count: string;
+    }>(
+      `SELECT user_id,
+              COUNT(*) FILTER (WHERE status = $1)::text AS active_count,
+              COUNT(*) FILTER (WHERE over_plan_limit)::text AS flagged_count
+         FROM listings
+        GROUP BY user_id
+       HAVING COUNT(*) FILTER (WHERE status = $1) > 0
+           OR COUNT(*) FILTER (WHERE over_plan_limit) > 0`,
+      [ListingStatus.ACTIVE],
+    );
+    return rows.map((r) => ({
+      userId: r.user_id,
+      activeCount: Number(r.active_count),
+      flaggedCount: Number(r.flagged_count),
+    }));
+  }
+
+  /**
+   * Flag every ACTIVE listing past the `limit` oldest as over the plan limit,
+   * and unflag the rest. Oldest-first is the operator's rule; `id` breaks ties
+   * so two listings created in one batch rank deterministically and a listing
+   * can never bounce between tracked and untracked from one run to the next.
+   *
+   * Only rows whose flag actually changes are written. Non-active rows are
+   * cleared too, so an ended listing does not keep counting as flagged.
+   */
+  async applyListingPlanLimit(userId: string, limit: number): Promise<number> {
+    return this.databaseService.transaction(async (client) => {
+      const ranked = await client.query(
+        `WITH ranked AS (
+           SELECT id,
+                  ROW_NUMBER() OVER (ORDER BY created_at ASC NULLS FIRST, id ASC) AS rn
+             FROM listings
+            WHERE user_id = $1 AND status = $2
+         )
+         UPDATE listings l
+            SET over_plan_limit = (r.rn > $3)
+           FROM ranked r
+          WHERE l.id = r.id
+            AND l.over_plan_limit IS DISTINCT FROM (r.rn > $3)`,
+        [userId, ListingStatus.ACTIVE, limit],
+      );
+      const cleared = await client.query(
+        `UPDATE listings SET over_plan_limit = FALSE
+          WHERE user_id = $1 AND status <> $2 AND over_plan_limit = TRUE`,
+        [userId, ListingStatus.ACTIVE],
+      );
+      return (ranked.rowCount ?? 0) + (cleared.rowCount ?? 0);
+    });
+  }
+
+  /** Unflag a user's listings (or every listing, when `userId` is null). */
+  async clearListingPlanLimit(userId: string | null): Promise<number> {
+    const rows = await this.databaseService.query<{ id: string }>(
+      userId
+        ? `UPDATE listings SET over_plan_limit = FALSE
+            WHERE user_id = $1 AND over_plan_limit = TRUE RETURNING id`
+        : `UPDATE listings SET over_plan_limit = FALSE
+            WHERE over_plan_limit = TRUE RETURNING id`,
+      userId ? [userId] : [],
+    );
+    return rows.length;
+  }
+
+  /**
    * Count tracking conversions actually performed inside `window`.
    *
    * Read straight from `orders` rather than from a reservation ledger, and that
