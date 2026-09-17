@@ -12,6 +12,7 @@ import {
   renderTemplate,
   resolveEventConfig,
   buyerMessageJobId,
+  isSuspendedMessageExpired,
   templateVersionHash,
 } from './buyer-message-helpers';
 
@@ -77,5 +78,35 @@ describe('templateVersionHash', () => {
     expect(h).toBe(createHash('sha256').update('hello').digest('hex').slice(0, 12));
     expect(templateVersionHash('hello')).toBe(h);
     expect(templateVersionHash('hellox')).not.toBe(h);
+  });
+});
+
+describe('isSuspendedMessageExpired', () => {
+  const HOUR = 60 * 60 * 1000;
+  const DAY = 24 * HOUR;
+  const MAX = 30 * DAY;
+
+  it('keeps a message inside the window after its due time', () => {
+    const created = 1_000_000;
+    expect(isSuspendedMessageExpired(created, 0, created + 29 * DAY, MAX)).toBe(false);
+  });
+
+  it('expires a message once it is past the window', () => {
+    const created = 1_000_000;
+    expect(isSuspendedMessageExpired(created, 0, created + 31 * DAY, MAX)).toBe(true);
+  });
+
+  it('measures from the ORIGINAL due time, counting the scheduled delay', () => {
+    // A feedback request scheduled 3 days out is not "late" during those 3 days.
+    const created = 1_000_000;
+    const delay = 3 * DAY;
+    expect(isSuspendedMessageExpired(created, delay, created + 32 * DAY, MAX)).toBe(false);
+    expect(isSuspendedMessageExpired(created, delay, created + 34 * DAY, MAX)).toBe(true);
+  });
+
+  it('treats a missing or negative delay as zero', () => {
+    const created = 1_000_000;
+    expect(isSuspendedMessageExpired(created, undefined, created + 31 * DAY, MAX)).toBe(true);
+    expect(isSuspendedMessageExpired(created, -5 * DAY, created + 31 * DAY, MAX)).toBe(true);
   });
 });

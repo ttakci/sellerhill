@@ -257,4 +257,61 @@ export class EmailService {
       locale
     );
   }
+
+  /**
+   * The card was declined, so automation has stopped. Sent because this is one
+   * of only two billing moments a seller cannot be expected to discover on
+   * their own — the in-app notice is no use to somebody who is not logged in,
+   * and every automated job has already gone quiet by the time they are.
+   */
+  async sendPaymentFailedEmail(
+    email: string,
+    firstName: string,
+    planName: string,
+    locale: string = 'en'
+  ): Promise<void> {
+    await this.sendTemplatedEmail(
+      email,
+      'billing_payment_failed',
+      { firstName, planName, billingUrl: this.billingUrl(locale) },
+      locale
+    );
+  }
+
+  /** The free trial is about to end. Sent once per trial. */
+  async sendTrialEndingEmail(
+    email: string,
+    firstName: string,
+    daysLeft: number,
+    trialEndDate: string,
+    locale: string = 'en'
+  ): Promise<void> {
+    await this.sendTemplatedEmail(
+      email,
+      'billing_trial_ending',
+      {
+        firstName,
+        daysLeft: String(daysLeft),
+        trialEndDate,
+        billingUrl: this.billingUrl(locale),
+      },
+      locale
+    );
+  }
+
+  /**
+   * Billing page link, WITH the locale segment.
+   *
+   * The router reads the first path segment as the locale, so a bare
+   * `/billing` is matched as locale="billing" and redirected to
+   * `/billing/register` — the exact defect that sent a paying customer to a
+   * registration page after checkout (see CLAUDE.md, "The first real Stripe
+   * subscription"). A backend-built link must carry the locale itself.
+   */
+  private billingUrl(locale: string): string {
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL', { infer: true }) || 'http://localhost:5173';
+    const safeLocale = locale === 'tr' ? 'tr' : 'en';
+    return `${frontendUrl}/${safeLocale}/billing`;
+  }
 }

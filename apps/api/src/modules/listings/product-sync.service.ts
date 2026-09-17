@@ -117,7 +117,12 @@ export class ProductSyncService {
               COALESCE(lock_quantity, false) as lock_quantity,
               price_override, quantity_override, margin_percent_override, margin_fixed_override
        FROM listings
-       WHERE product_id = $1 AND status = $2`,
+       WHERE product_id = $1 AND status = $2
+         -- Listings past the owner's plan limit get no price/stock sync; eBay
+         -- keeps whatever they last had. The flag is only ever set while
+         -- billing enforcement is on (ListingPlanLimitProcessor clears it
+         -- otherwise), so this predicate needs no enforcement check of its own.
+         AND over_plan_limit = FALSE`,
       [productId, ListingStatus.ACTIVE]
     );
 

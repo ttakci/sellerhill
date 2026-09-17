@@ -153,10 +153,18 @@ export class OrderSyncService {
           // Match order to listing using legacyItemId → listings.ebay_item_id
           const lineItem = ebayOrder.lineItems?.[0];
           let listingId: string | null = null;
+          // Decided once, here, from the listing's flag at the moment the order
+          // arrives — never re-read later, so an order already being automated
+          // cannot lose its tracking when a downgrade lands mid-flight.
+          let listingOverPlanLimit = false;
 
           if (lineItem?.legacyItemId) {
-            const match = await this.databaseService.query<{ id: string; product_id: string }>(
-              `SELECT id, product_id FROM listings
+            const match = await this.databaseService.query<{
+              id: string;
+              product_id: string;
+              over_plan_limit: boolean;
+            }>(
+              `SELECT id, product_id, over_plan_limit FROM listings
                WHERE ebay_item_id = $1 AND user_id = $2 AND status = $3
                LIMIT 1`,
               [lineItem.legacyItemId, userId, ListingStatus.ACTIVE]
@@ -164,6 +172,7 @@ export class OrderSyncService {
 
             if (match.length > 0) {
               listingId = match[0].id;
+              listingOverPlanLimit = match[0].over_plan_limit === true;
             }
           }
 
@@ -185,7 +194,7 @@ export class OrderSyncService {
             purchasePrice
           );
 
-          const { inserted } = await this.upsertOrder(entity);
+          const { inserted } = await this.upsertOrder(entity, listingOverPlanLimit);
 
           // Recompute net_profit + cost_capture_status only for brand-new
           // inserts. Re-syncs that changed ebay_earnings are already handled
@@ -241,7 +250,7 @@ export class OrderSyncService {
           // `maybeEnqueueAutoFulfill` for the toggle/cap/round-robin resolution.
           if (inserted && listingId && entity.quantity > 0) {
             try {
-              await this.maybeEnqueueAutoFulfill(entity);
+              await this.maybeEnqueueAutoFulfill(entity, listingOverPlanLimit);
             } catch (err) {
               const msg = err instanceof Error ? err.message : String(err);
               this.logger.warn(`Auto-fulfill enqueue skipped for ${entity.ebayOrderId}: ${msg}`);
@@ -305,7 +314,8 @@ export class OrderSyncService {
    * re-synced order. Used to gate one-time side effects (stock decrement).
    */
   private async upsertOrder(
-    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
+    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
+    listingOverPlanLimit = false
   ): Promise<{ id: string; inserted: boolean }> {
     // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
     // the seller's payout (partial refund, adjusted shipping, etc.). When the
@@ -331,7 +341,8 @@ export class OrderSyncService {
         shipping_address,
         order_date, last_ebay_event_at,
         cost_capture_status,
-        ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax
+        ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
+        listing_over_plan_limit
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
@@ -339,7 +350,8 @@ export class OrderSyncService {
         $19, $20, $21, $22,
         $23, $24, $25,
         $26,
-        $27, $28, $29
+        $27, $28, $29,
+        $30
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -394,6 +406,9 @@ export class OrderSyncService {
         entity.ebayMarketplaceFee,
         entity.ebayFeeBasisAmount,
         entity.ebayCollectRemitTax,
+        // INSERT only — deliberately absent from ON CONFLICT DO UPDATE, like
+        // listing_id: the decision belongs to the order's first ingest.
+        listingOverPlanLimit,
       ]
     );
 
@@ -570,8 +585,25 @@ export class OrderSyncService {
    * processor (Task 8) to pick up. Only the skip paths write `skipped` here.
    */
   private async maybeEnqueueAutoFulfill(
-    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>
+    entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
+    listingOverPlanLimit = false
   ): Promise<void> {
+    // Only listings within the plan's listing limit are automated. SKIPPED with
+    // a reason, not BLOCKED: this is the plan working as designed, so it must
+    // not raise an action-required alarm — the order stays visible and the
+    // reason explains why nothing was bought. Checked before the store toggle
+    // so the reason shown is the real one even when auto-fulfill is also off.
+    if (listingOverPlanLimit) {
+      await this.databaseService.query(
+        `UPDATE orders
+            SET auto_fulfill_status = $1,
+                auto_fulfill_blocked_reason = $2,
+                updated_at = CURRENT_TIMESTAMP
+          WHERE ebay_order_id = $3`,
+        [AutoFulfillStatus.SKIPPED, AutoFulfillBlockedReason.LISTING_OVER_PLAN_LIMIT, entity.ebayOrderId]
+      );
+      return;
+    }
     await this.resolveAndEnqueueAutoFulfill({
       userId: entity.userId,
       ebayAccountId: entity.ebayAccountId,

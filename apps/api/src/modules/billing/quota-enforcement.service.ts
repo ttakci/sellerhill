@@ -287,6 +287,41 @@ export class QuotaEnforcementService {
   }
 
   /**
+   * The listing limit that decides which listings stay automated, for the
+   * `billing-listing-plan-limit` reconcile job. `null` = nothing is over the
+   * limit (enforcement off, no subscription, or unlimited).
+   *
+   * Deliberately IGNORES suspension, unlike the quota gate. A suspended account
+   * already has every automation stopped by `isSuspended`, and resolving its
+   * limit as 0 here would flag every listing — which would then outlive the
+   * suspension by up to one reconcile interval after the seller pays, holding
+   * back exactly the "resume where it left off" the suspension design promises.
+   *
+   * Throws on a read failure; the caller skips that user and leaves its flags
+   * as they were rather than guessing.
+   */
+  async resolveListingPlanLimit(userId: string): Promise<number | null> {
+    if (!(await this.isEnabled())) {
+      return null;
+    }
+    const subscription = await this.repository.findCurrentSubscription(userId);
+    if (!subscription) {
+      return null;
+    }
+    const graceHours = await this.platformSettings.getNumber(
+      PlatformSettingKey.BILLING_WEBHOOK_GRACE_HOURS,
+    );
+    const window = resolveQuotaWindow(subscription, new Date(), graceHours);
+    const { limitValue } = await this.repository.resolveEffectiveLimit(
+      userId,
+      subscription.id,
+      BillingLimitKey.LISTINGS_PER_MONTH,
+      window,
+    );
+    return limitValue === -1 ? null : limitValue;
+  }
+
+  /**
    * Reserve N listing slots for a bulk non-draft create. Race-safe (advisory-
    * locked inside reserveSlotsBulk). Throws QuotaExhaustedError iff the limit
    * would be exceeded AND enforcement is on AND the user has a subscription

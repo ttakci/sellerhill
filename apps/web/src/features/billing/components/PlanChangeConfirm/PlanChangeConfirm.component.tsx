@@ -7,19 +7,18 @@
 // component only lays out the Modal shell around it. No `.container.tsx`,
 // matching PaymentMethodCard's stateless convention: everything arrives as
 // props.
-//
-// No `.style.ts` — Modal/Button/Text already supply every visual need here,
-// so there is nothing to style locally.
 
-import { Button, Modal, Text } from '@repo/ui';
+import { Button, InfoMessage, Modal, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import * as S from './PlanChangeConfirm.style';
 import type { PlanChangeConfirmProps } from './PlanChangeConfirm.types';
 
 export const PlanChangeConfirm = ({
   isOpen,
   body,
+  listingLimitWarning,
   isConfirming,
   onConfirm,
   onCancel,
@@ -42,7 +41,10 @@ export const PlanChangeConfirm = ({
         </>
       }
     >
-      <Text variant="body">{body}</Text>
+      <S.Body>
+        <Text variant="body">{body}</Text>
+        {listingLimitWarning ? <InfoMessage type="warning">{listingLimitWarning}</InfoMessage> : null}
+      </S.Body>
     </Modal>
   );
 };

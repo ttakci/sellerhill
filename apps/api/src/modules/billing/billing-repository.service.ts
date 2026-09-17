@@ -292,6 +292,50 @@ export class BillingRepositoryService {
     return rows.length > 0 ? this.mapSubscription(rows[0]) : null;
   }
 
+  /**
+   * Provider-backed subscriptions whose local copy says the paid period has
+   * run out (or is about to), plus anything already reported PAST_DUE.
+   *
+   * This is the input to the periodic reconcile. The read-time rule treats a
+   * window stale past the webhook grace as UNPAID and suspends the account, so
+   * these rows are exactly the ones about to be suspended on nothing more than
+   * webhook silence — and are therefore the only ones worth spending a Stripe
+   * call on. A healthy subscription mid-period is never touched.
+   */
+  async listSubscriptionsNeedingReconcile(staleBefore: Date, limit = 200): Promise<
+    { subscriptionId: string; customerId: string; providerSubscriptionId: string; userId: string }[]
+  > {
+    const rows = await this.databaseService.query<{
+      id: string;
+      customer_id: string;
+      provider_subscription_id: string;
+      user_id: string;
+    }>(
+      `SELECT s.id, s.customer_id, s.provider_subscription_id, c.user_id
+         FROM billing_subscriptions s
+         JOIN billing_customers c ON c.id = s.customer_id
+        WHERE s.provider_subscription_id IS NOT NULL
+          AND (s.current_period_end <= $1 OR s.status = $2)
+          AND s.status <> $3
+        ORDER BY s.current_period_end ASC
+        LIMIT $4`,
+      [
+        staleBefore.toISOString(),
+        BillingSubscriptionStatus.PAST_DUE,
+        // An ENDED subscription is a closed book: Stripe will send nothing more
+        // for it, and re-reading it every hour forever would be pure spend.
+        BillingSubscriptionStatus.ENDED,
+        limit,
+      ],
+    );
+    return rows.map((r) => ({
+      subscriptionId: r.id,
+      customerId: r.customer_id,
+      providerSubscriptionId: r.provider_subscription_id,
+      userId: r.user_id,
+    }));
+  }
+
   async findOpenUsagePeriods(subscriptionId: string): Promise<BillingUsagePeriodDto[]> {
     const rows = await this.databaseService.query<UsagePeriodEntity>(
       `SELECT * FROM billing_usage_periods
@@ -398,6 +442,82 @@ export class BillingRepositoryService {
       client,
     );
     return Number(rows[0]?.cnt ?? 0);
+  }
+
+  /**
+   * Every user the listing-plan-limit reconcile may need to touch: anyone with
+   * an ACTIVE listing or a row still flagged. One aggregate per run — the job
+   * runs every few minutes, not per request, so a scan of `listings` is fine.
+   */
+  async listListingPlanLimitCandidates(): Promise<
+    { userId: string; activeCount: number; flaggedCount: number }[]
+  > {
+    const rows = await this.databaseService.query<{
+      user_id: string;
+      active_count: string;
+      flagged_count: string;
+    }>(
+      `SELECT user_id,
+              COUNT(*) FILTER (WHERE status = $1)::text AS active_count,
+              COUNT(*) FILTER (WHERE over_plan_limit)::text AS flagged_count
+         FROM listings
+        GROUP BY user_id
+       HAVING COUNT(*) FILTER (WHERE status = $1) > 0
+           OR COUNT(*) FILTER (WHERE over_plan_limit) > 0`,
+      [ListingStatus.ACTIVE],
+    );
+    return rows.map((r) => ({
+      userId: r.user_id,
+      activeCount: Number(r.active_count),
+      flaggedCount: Number(r.flagged_count),
+    }));
+  }
+
+  /**
+   * Flag every ACTIVE listing past the `limit` oldest as over the plan limit,
+   * and unflag the rest. Oldest-first is the operator's rule; `id` breaks ties
+   * so two listings created in one batch rank deterministically and a listing
+   * can never bounce between tracked and untracked from one run to the next.
+   *
+   * Only rows whose flag actually changes are written. Non-active rows are
+   * cleared too, so an ended listing does not keep counting as flagged.
+   */
+  async applyListingPlanLimit(userId: string, limit: number): Promise<number> {
+    return this.databaseService.transaction(async (client) => {
+      const ranked = await client.query(
+        `WITH ranked AS (
+           SELECT id,
+                  ROW_NUMBER() OVER (ORDER BY created_at ASC NULLS FIRST, id ASC) AS rn
+             FROM listings
+            WHERE user_id = $1 AND status = $2
+         )
+         UPDATE listings l
+            SET over_plan_limit = (r.rn > $3)
+           FROM ranked r
+          WHERE l.id = r.id
+            AND l.over_plan_limit IS DISTINCT FROM (r.rn > $3)`,
+        [userId, ListingStatus.ACTIVE, limit],
+      );
+      const cleared = await client.query(
+        `UPDATE listings SET over_plan_limit = FALSE
+          WHERE user_id = $1 AND status <> $2 AND over_plan_limit = TRUE`,
+        [userId, ListingStatus.ACTIVE],
+      );
+      return (ranked.rowCount ?? 0) + (cleared.rowCount ?? 0);
+    });
+  }
+
+  /** Unflag a user's listings (or every listing, when `userId` is null). */
+  async clearListingPlanLimit(userId: string | null): Promise<number> {
+    const rows = await this.databaseService.query<{ id: string }>(
+      userId
+        ? `UPDATE listings SET over_plan_limit = FALSE
+            WHERE user_id = $1 AND over_plan_limit = TRUE RETURNING id`
+        : `UPDATE listings SET over_plan_limit = FALSE
+            WHERE over_plan_limit = TRUE RETURNING id`,
+      userId ? [userId] : [],
+    );
+    return rows.length;
   }
 
   /**
@@ -841,6 +961,49 @@ export class BillingRepositoryService {
    * Find a customer by provider customer id (for webhook processing — the
    * Stripe event carries the provider customer id, not our user_id).
    */
+  /**
+   * Who to write to, for a billing e-mail: the account behind a Stripe customer
+   * id, plus the plan name its current subscription carries. Returns null when
+   * the customer is unknown locally (an event for someone else's Stripe
+   * account, or a customer created outside our flow).
+   */
+  async findBillingContactByProviderCustomerId(
+    provider: string,
+    providerCustomerId: string,
+  ): Promise<{ userId: string; email: string; firstName: string; locale: string; planName: string | null } | null> {
+    const rows = await this.databaseService.query<{
+      user_id: string;
+      email: string;
+      first_name: string | null;
+      locale: string | null;
+      plan_name: string | null;
+    }>(
+      `SELECT u.id AS user_id, u.email, u.first_name, u.locale, p.name AS plan_name
+         FROM billing_customers c
+         JOIN users u ON u.id = c.user_id
+         LEFT JOIN LATERAL (
+           SELECT s.plan_id FROM billing_subscriptions s
+            WHERE s.customer_id = c.id
+            ORDER BY (s.provider_subscription_id IS NULL) ASC, s.current_period_end DESC
+            LIMIT 1
+         ) cur ON TRUE
+         LEFT JOIN billing_plans p ON p.id = cur.plan_id
+        WHERE c.provider = $1 AND c.provider_customer_id = $2`,
+      [provider, providerCustomerId],
+    );
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+    return {
+      userId: row.user_id,
+      email: row.email,
+      firstName: row.first_name ?? '',
+      locale: row.locale ?? 'en',
+      planName: row.plan_name,
+    };
+  }
+
   async findCustomerByProviderId(
     provider: string,
     providerCustomerId: string,
@@ -914,6 +1077,56 @@ export class BillingRepositoryService {
       }
       return this.mapSubscription(subscription);
     });
+  }
+
+  /**
+   * Trials ending within `days`, whose reminder has not been sent yet, with
+   * everything needed to write the e-mail. Claims each row by stamping
+   * `trial_reminder_sent_at` in the SAME statement it returns them, so a
+   * second worker (or the next tick, after a partial failure) cannot send a
+   * duplicate. The cost of that ordering is that a send which then fails is
+   * not retried — the right trade for a courtesy e-mail, where sending twice
+   * is worse than not sending at all.
+   */
+  async claimTrialsEndingSoon(days: number): Promise<
+    { userId: string; email: string; firstName: string; locale: string; trialEndsAt: Date }[]
+  > {
+    const rows = await this.databaseService.query<{
+      user_id: string;
+      email: string;
+      first_name: string | null;
+      locale: string | null;
+      trial_ends_at: Date;
+    }>(
+      `WITH due AS (
+         SELECT s.id
+           FROM billing_subscriptions s
+          WHERE s.status = 'trialing'
+            AND s.trial_reminder_sent_at IS NULL
+            AND s.trial_ends_at IS NOT NULL
+            AND s.trial_ends_at > NOW()
+            AND s.trial_ends_at <= NOW() + make_interval(days => $1::int)
+          FOR UPDATE SKIP LOCKED
+       )
+       UPDATE billing_subscriptions s
+          SET trial_reminder_sent_at = NOW(), updated_at = NOW()
+         FROM due
+         JOIN billing_customers c ON TRUE
+        WHERE s.id = due.id AND c.id = s.customer_id
+       RETURNING c.user_id,
+                 (SELECT email FROM users WHERE id = c.user_id) AS email,
+                 (SELECT first_name FROM users WHERE id = c.user_id) AS first_name,
+                 (SELECT locale FROM users WHERE id = c.user_id) AS locale,
+                 s.trial_ends_at`,
+      [days],
+    );
+    return rows.map((r) => ({
+      userId: r.user_id,
+      email: r.email,
+      firstName: r.first_name ?? '',
+      locale: r.locale ?? 'en',
+      trialEndsAt: new Date(r.trial_ends_at),
+    }));
   }
 
   async expireElapsedTrials(): Promise<number> {

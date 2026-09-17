@@ -8,7 +8,6 @@ import type { ConnectEbayPromptProps } from './ConnectEbayPrompt.types';
 export const ConnectEbayPrompt = ({
   onConnect,
   onSkip,
-  onDeactivateAccount,
   isLoading,
   footnote,
   className,
@@ -24,12 +23,12 @@ export const ConnectEbayPrompt = ({
   // entry lands in SUPPORTED_EBAY_MARKETPLACES the picker renders itself again.
   const showMarketplaceSelect = marketplaceOptions.length > 1;
 
-  const onSecondaryAction = onDeactivateAccount ?? onSkip;
-  const secondaryAction = onDeactivateAccount
-    ? t('ebay:ebay.onboarding.deactivateAccountButton')
-    : onSkip
-      ? t('ebay:ebay.onboarding.skipButton')
-      : undefined;
+  // Skip is the only secondary action. A "deactivate my account" button used to
+  // live here for a seller with no store connected; it is gone (operator
+  // decision, 2026-09-17) — leaving is done by cancelling the subscription in
+  // the Stripe portal, and self-service deactivation offered a destructive
+  // action to someone who had simply not finished connecting yet.
+  const secondaryAction = onSkip ? t('ebay:ebay.onboarding.skipButton') : undefined;
 
   return (
     <S.Layout>
@@ -54,7 +53,7 @@ export const ConnectEbayPrompt = ({
           onAction={onConnect}
           isActionLoading={isLoading}
           secondaryAction={secondaryAction}
-          onSecondaryAction={onSecondaryAction}
+          onSecondaryAction={onSkip}
         />
       </S.StyledCard>
       {footnote && <S.Footnote type="info">{footnote}</S.Footnote>}

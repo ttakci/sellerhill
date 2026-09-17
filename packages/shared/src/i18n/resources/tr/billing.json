@@ -87,6 +87,7 @@
       "title": "Plan değişikliğini onaylayın",
       "upgradeBody": "{{plan}} paketine geçiyorsunuz. Şimdi {{amount}} tahsil edilecek. Bir sonraki faturanız {{nextDate}} tarihinde {{nextAmount}} olacak.",
       "downgradeBody": "{{date}} tarihinde {{plan}} paketine geçeceksiniz. Şimdi hiçbir tahsilat yapılmaz — o tarihe kadar mevcut planınızda kalırsınız.",
+      "listingLimitWarning": "Şu an {{active}} aktif ilanınız var, yeni paketin limiti ise {{limit}}. {{date}} tarihinden itibaren yalnızca en eski {{limit}} ilanınız takip edilir; kalan {{over}} ilanın fiyat/stok takibi ve siparişlerinin otomatik işlenmesi durur. Hangi ilanların takipte kalacağını seçmek isterseniz bu tarihe kadar istemediğiniz ilanları sonlandırabilirsiniz.",
       "confirm": "Onayla",
       "cancel": "Vazgeç"
     },
@@ -278,7 +279,8 @@
       "subscriptionSuspended": "Aboneliğiniz aktif olmadığı için yeni ilan açma durduruldu. Devam etmek için bir paket seçin — her şey kendiliğinden yeniden başlar.",
       "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin.",
       "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Planı değiştir\" ile geçiş yapın.",
-      "invoicesFailed": "Fatura geçmişi yüklenemedi. Lütfen biraz sonra tekrar deneyin."
+      "invoicesFailed": "Fatura geçmişi yüklenemedi. Lütfen biraz sonra tekrar deneyin.",
+      "paymentRequiresAction": "Bankanız bu kart için ek doğrulama istedi; plan değişikliği iptal edildi ve mevcut paketinizde kaldınız. “Faturalandırmayı yönet” ile ödeme yönteminizi güncelleyip tekrar deneyin."
     },
     "actions": {
       "subscribe": "Abone ol",

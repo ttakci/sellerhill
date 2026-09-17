@@ -267,7 +267,19 @@ export class ListingsController {
     if (!file) {
       throw new NotFoundException('Import workbook is required');
     }
-    return this.listingImportService.importWorkbook(req.user.sub, body.ebayAccountId, file.buffer, body);
+    // Same refusal mapping as create/publish: an import consumes listing
+    // allowance, so a suspended account or a full plan must reach the seller
+    // as a 409 with a reason, not as a generic 500.
+    try {
+      return await this.listingImportService.importWorkbook(
+        req.user.sub,
+        body.ebayAccountId,
+        file.buffer,
+        body,
+      );
+    } catch (error) {
+      rethrowListingRefusal(error);
+    }
   }
 
   /**

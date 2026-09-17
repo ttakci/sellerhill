@@ -29,10 +29,10 @@ export interface OrdersAllPageProps {
   trackingState: string;
   onTrackingStateChange: (value: string | number) => void;
   trackingStateOptions: { value: string | number; label: string }[];
-  dateFrom: string;
-  dateTo: string;
-  onDateFromChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onDateToChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // No date props: `dateFrom`/`dateTo` are read-only inbound state from the
+  // dashboard's "view all" deep link (see useOrdersFilters), the list renders
+  // no date inputs, and the component never read them — so declaring them here
+  // only made every render of this page a type error.
   onClearFilters: () => void;
   hasActiveFilters: boolean;
   resultCount: number;

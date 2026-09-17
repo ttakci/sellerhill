@@ -129,7 +129,8 @@
         "quota_exhausted": "Aylık kota doldu",
         "cart": "Sepet uyuşmazlığı",
         "review_unreadable": "Sipariş toplamı okunamadı",
-        "subscription_suspended": "Abonelik askıya alındı"
+        "subscription_suspended": "Abonelik askıya alındı",
+        "listing_over_plan_limit": "İlan, paket limitinin dışında"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
@@ -223,7 +224,8 @@
       "conversionUnavailable": "Kargo takibi şu anda dönüştürülemedi. Paket limitinizi ve dönüşüm ayarlarınızı kontrol edip tekrar deneyin.",
       "conversionDone": "Kargo takibi dönüştürüldü.",
       "orderNotTracked": "Bu sipariş ilanlarınızdan birine bağlı değil; dönüştürülmüş takip numarası eBay’e hiçbir şekilde gönderilemez. Önce siparişi ilanıyla ilişkilendirin.",
-      "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir."
+      "trackingAlreadyPushed": "eBay bu sipariş için orijinal takip numarasına zaten sahip ve bu numara değiştirilemez; şimdi dönüştürmek alıcının gördüğü numarayı değiştirmeyecektir.",
+      "listingOverPlanLimit": "Bu siparişin ilanı, sipariş geldiğinde paketinizin ilan limitinin dışındaydı. Limit dışındaki ilanların siparişlerinde kargo takibi ve takip numarası dönüşümü yapılmaz."
     }
   }
 }

@@ -111,6 +111,13 @@ export enum AutoFulfillBlockedReason {
    * never misreported as the spend guard doing its job.
    */
   REVIEW_UNREADABLE = 'review_unreadable',
+  /**
+   * The order's listing was outside the plan's listing limit when the order
+   * arrived (only the oldest listings up to the limit are automated). Written
+   * with status SKIPPED, not BLOCKED: it is the plan working as designed, not
+   * something that went wrong, so it must not raise an action-required alarm.
+   */
+  LISTING_OVER_PLAN_LIMIT = 'listing_over_plan_limit',
 }
 
 /**

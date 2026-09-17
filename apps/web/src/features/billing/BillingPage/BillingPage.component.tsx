@@ -209,6 +209,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
   paymentMethod,
   isPlanChangeOpen,
   planChangeBody,
+  planChangeListingLimitWarning,
   isChangingPlan,
   onConfirmPlanChange,
   onCancelPlanChange,
@@ -518,6 +519,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
               />
             ))}
           </S.DrawerPlanList>
+
         </S.DrawerSection>
       </Drawer>
 
@@ -529,6 +531,7 @@ export const BillingPageComponent: React.FC<BillingPageComponentProps> = ({
       <PlanChangeConfirm
         isOpen={isPlanChangeOpen}
         body={planChangeBody}
+        listingLimitWarning={planChangeListingLimitWarning}
         isConfirming={isChangingPlan}
         onConfirm={onConfirmPlanChange}
         onCancel={onCancelPlanChange}

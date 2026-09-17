@@ -129,7 +129,8 @@
         "quota_exhausted": "Monthly quota reached",
         "cart": "Cart mismatch",
         "review_unreadable": "Order total unreadable",
-        "subscription_suspended": "Subscription suspended"
+        "subscription_suspended": "Subscription suspended",
+        "listing_over_plan_limit": "Listing outside plan limit"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",
@@ -223,7 +224,8 @@
       "conversionUnavailable": "Tracking could not be converted right now. Check your plan limit and conversion settings, then try again.",
       "conversionDone": "Tracking converted.",
       "orderNotTracked": "This order is not linked to one of your listings, so a converted tracking number could never be sent to eBay. Link the order to its listing first.",
-      "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees."
+      "trackingAlreadyPushed": "eBay already has the original tracking number for this order and it cannot be replaced, so converting now would not change what the buyer sees.",
+      "listingOverPlanLimit": "This order's listing was outside your plan's listing limit when the order arrived. Orders from listings outside the limit get no shipment tracking or tracking conversion."
     }
   }
 }
