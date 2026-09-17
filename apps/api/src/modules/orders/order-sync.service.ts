@@ -194,7 +194,11 @@ export class OrderSyncService {
             purchasePrice
           );
 
-          const { inserted } = await this.upsertOrder(entity, listingOverPlanLimit);
+          const { inserted } = await this.upsertOrder(
+            entity,
+            listingOverPlanLimit,
+            lineItem?.legacyItemId ?? null,
+          );
 
           // Recompute net_profit + cost_capture_status only for brand-new
           // inserts. Re-syncs that changed ebay_earnings are already handled
@@ -308,6 +312,73 @@ export class OrderSyncService {
   }
 
   /**
+   * Link a newly imported eBay listing to the PAST orders of that same eBay
+   * item, which were ingested before the listing existed here.
+   *
+   * Called only from the existing-listing import. Without it those orders are
+   * stranded for ever: they show "Unknown product", their profit stays
+   * unknown, and eBay refuses a shipment for them because a fulfillment needs
+   * the line item a listing carries — so neither the tracking push nor a
+   * tracking conversion can run even when the seller links the Amazon order by
+   * hand.
+   *
+   * WHAT THIS DELIBERATELY DOES NOT DO: trigger automatic purchasing. Linking
+   * an order is not the same thing as deciding to buy it, and auto-fulfill
+   * fires ONLY on a genuine order INSERT (`maybeEnqueueAutoFulfill`), never
+   * over existing rows. That separation is what makes adoption safe — the
+   * reason orders were never back-matched in the first place was the fear of a
+   * listing import sending months-old orders shopping on Amazon.
+   *
+   * Only rows with NO listing are touched, so an order already matched to a
+   * different listing can never be moved. Profit is recomputed for each one
+   * through the single writer, which turns 'untracked' into 'provisional'.
+   */
+  async adoptUntrackedOrdersForListing(input: {
+    userId: string;
+    ebayAccountId: string;
+    ebayItemId: string;
+    listingId: string;
+    listingOverPlanLimit: boolean;
+  }): Promise<number> {
+    const rows = await this.databaseService.query<{ ebay_order_id: string }>(
+      `UPDATE orders
+          SET listing_id = $1,
+              listing_over_plan_limit = $2,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $3
+          AND ebay_account_id = $4
+          AND ebay_legacy_item_id = $5
+          AND listing_id IS NULL
+        RETURNING ebay_order_id`,
+      [
+        input.listingId,
+        input.listingOverPlanLimit,
+        input.userId,
+        input.ebayAccountId,
+        input.ebayItemId,
+      ]
+    );
+
+    for (const row of rows) {
+      // Best-effort per order: a profit recompute failure must not undo a
+      // link that is already correct.
+      try {
+        await this.recomputeProfit(row.ebay_order_id);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Profit recompute after adoption failed for ${row.ebay_order_id}: ${msg}`);
+      }
+    }
+
+    if (rows.length > 0) {
+      this.logger.log(
+        `Linked ${rows.length} previously untracked order(s) to imported listing ${input.listingId}`
+      );
+    }
+    return rows.length;
+  }
+
+  /**
    * Insert or update an order from eBay data.
    * Returns whether the row was a brand-new INSERT (`inserted`) vs. an UPDATE of
    * an existing order — detected via Postgres `xmax` so we never double-process a
@@ -315,7 +386,8 @@ export class OrderSyncService {
    */
   private async upsertOrder(
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
-    listingOverPlanLimit = false
+    listingOverPlanLimit = false,
+    ebayLegacyItemId: string | null = null
   ): Promise<{ id: string; inserted: boolean }> {
     // Capture pre-upsert ebay_earnings so we can detect a re-sync that changed
     // the seller's payout (partial refund, adjusted shipping, etc.). When the
@@ -342,7 +414,7 @@ export class OrderSyncService {
         order_date, last_ebay_event_at,
         cost_capture_status,
         ebay_marketplace_fee, ebay_fee_basis_amount, ebay_collect_remit_tax,
-        listing_over_plan_limit
+        listing_over_plan_limit, ebay_legacy_item_id
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12,
@@ -351,7 +423,7 @@ export class OrderSyncService {
         $23, $24, $25,
         $26,
         $27, $28, $29,
-        $30
+        $30, $31
       )
       ON CONFLICT (ebay_order_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -373,6 +445,10 @@ export class OrderSyncService {
         ebay_marketplace_fee = COALESCE(EXCLUDED.ebay_marketplace_fee, orders.ebay_marketplace_fee),
         ebay_fee_basis_amount = COALESCE(EXCLUDED.ebay_fee_basis_amount, orders.ebay_fee_basis_amount),
         ebay_collect_remit_tax = COALESCE(EXCLUDED.ebay_collect_remit_tax, orders.ebay_collect_remit_tax),
+        -- Which eBay item the order came from never changes, so this only ever
+        -- fills a blank (an order ingested before migration 111). It is NOT the
+        -- listing link: adopting an order into a listing stays an explicit act.
+        ebay_legacy_item_id = COALESCE(orders.ebay_legacy_item_id, EXCLUDED.ebay_legacy_item_id),
         last_synced_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP
       RETURNING id, (xmax = 0) AS inserted`,
@@ -409,6 +485,7 @@ export class OrderSyncService {
         // INSERT only — deliberately absent from ON CONFLICT DO UPDATE, like
         // listing_id: the decision belongs to the order's first ingest.
         listingOverPlanLimit,
+        ebayLegacyItemId,
       ]
     );
 

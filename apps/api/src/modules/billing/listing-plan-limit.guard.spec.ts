@@ -48,7 +48,8 @@ describe('listing plan-limit invariants', () => {
   it('decides the order flag once, at first ingest, never on re-sync', () => {
     const src = read('modules', 'orders', 'order-sync.service.ts');
     expect(src).toMatch(/SELECT id, product_id, over_plan_limit FROM listings/);
-    expect(src).toMatch(/listing_over_plan_limit\n\s*\) VALUES/);
+    const columns = src.slice(src.indexOf('INSERT INTO orders ('));
+    expect(columns.slice(0, columns.indexOf(') VALUES'))).toMatch(/listing_over_plan_limit/);
     const onConflict = src.slice(src.indexOf('ON CONFLICT (ebay_order_id) DO UPDATE SET'));
     const setClause = onConflict.slice(0, onConflict.indexOf('RETURNING'));
     expect(setClause).not.toMatch(/listing_over_plan_limit/);
