@@ -1,37 +1,43 @@
 // apps/api/src/modules/billing/price-migration.ts
 //
-// Moving existing subscribers onto a plan's NEW price (operator decision,
-// 2026-09-17).
+// Moving existing subscribers onto a plan's NEW price, automatically
+// (operator decision, 2026-09-17).
 //
-// A Stripe Price is immutable, so changing a plan's price creates a new Price
-// and leaves every existing subscriber on the old one indefinitely. The
-// operator has two options when that happens:
+// A Stripe Price is immutable, so a price change creates a new Price and would
+// leave every existing subscriber on the old one for ever. The rule instead:
+// a seller finishes the period they are in at the price they already paid, and
+// their NEXT period starts at the new price. No operator step — the
+// `billing-price-migration` job applies it to everyone, hourly.
 //
-//   - keep existing subscribers on the old price  → do nothing;
-//   - move them                                    → `billing:migrate-price`.
-//
-// Moving is never immediate. The current paid period finishes at the price the
-// seller already paid, and the next period starts at the new one — through the
-// same Subscription Schedule mechanism a downgrade uses — and the seller is
-// e-mailed the old price, the new price and the date first.
-//
-// This file is the pure decision per subscription, kept out of the script so
-// the rules are testable without Stripe or a database.
+// This file is the pure decision per subscription, so the rules are testable
+// without Stripe or a database.
 
-/** What `billing:migrate-price` does with one subscription. */
+/**
+ * Recorded as `metadata.source` on every Stripe Subscription Schedule we write,
+ * so the automatic migration can tell ITS schedule from a downgrade the seller
+ * chose: it may replace its own, never theirs.
+ */
+export enum ScheduleSource {
+  PLAN_CHANGE = 'plan_change',
+  PRICE_MIGRATION = 'price_migration',
+}
+
+/** What the job does with one subscription. */
 export enum PriceMigrationAction {
-  /** Schedule the new price from the next renewal, then notify the seller. */
+  /** Schedule the new price from the next renewal (none scheduled yet, or ours is stale). */
   MIGRATE = 'migrate',
-  /** Already billed at the target price — a re-run after a previous migration. */
+  /** Our schedule for exactly this price already exists — only the notice may be outstanding. */
+  ALREADY_SCHEDULED = 'already_scheduled',
+  /** Already billed at the target price. */
   ALREADY_ON_TARGET = 'already_on_target',
   /**
-   * A change is already scheduled (a pending downgrade, or a migration from an
-   * earlier run). Scheduling replaces a schedule outright, so migrating here
-   * would silently cancel the seller's own downgrade. Left for the operator;
-   * once that change has landed, a re-run picks the subscription up.
+   * The SELLER has a change pending (a downgrade). Scheduling replaces a
+   * schedule outright, so migrating now would silently cancel their choice.
+   * Re-checked on the next run; once their change lands, their plan is
+   * different and is evaluated against that plan's price.
    */
   SKIP_PENDING_CHANGE = 'skip_pending_change',
-  /** Set to cancel at period end — it will never renew, so there is nothing to move. */
+  /** Set to cancel at period end — it will never renew at any price. */
   SKIP_CANCELLING = 'skip_cancelling',
   /** Not a live subscription in Stripe (canceled, incomplete, …). */
   SKIP_NOT_LIVE = 'skip_not_live',
@@ -44,9 +50,9 @@ export interface PriceMigrationInput {
   currentPriceId: string | null;
   /** The plan's current Stripe Price (the one new subscribers get). */
   targetPriceId: string;
-  /** True when a Subscription Schedule is already attached. */
-  hasSchedule: boolean;
   cancelAtPeriodEnd: boolean;
+  /** A schedule phase still to come, or null. */
+  pendingChange: { source: string | null; priceId: string | null } | null;
 }
 
 /** Stripe statuses that renew, and so can be moved to a new price. */
@@ -62,8 +68,16 @@ export function decidePriceMigration(input: PriceMigrationInput): PriceMigration
   if (input.cancelAtPeriodEnd) {
     return PriceMigrationAction.SKIP_CANCELLING;
   }
-  if (input.hasSchedule) {
-    return PriceMigrationAction.SKIP_PENDING_CHANGE;
+  const pending = input.pendingChange;
+  if (pending) {
+    if (pending.source !== ScheduleSource.PRICE_MIGRATION) {
+      return PriceMigrationAction.SKIP_PENDING_CHANGE;
+    }
+    if (pending.priceId === input.targetPriceId) {
+      return PriceMigrationAction.ALREADY_SCHEDULED;
+    }
+    // Our own schedule, but for an earlier price: the plan's price changed
+    // again before it took effect. Ours to replace.
   }
   return PriceMigrationAction.MIGRATE;
 }

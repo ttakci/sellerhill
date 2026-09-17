@@ -336,6 +336,107 @@ export class BillingRepositoryService {
     }));
   }
 
+  /**
+   * Live subscriptions not yet brought in line with their plan's CURRENT price,
+   * plus any whose move is scheduled but whose notice has not gone out. This is
+   * the automatic price migration's whole input; a subscription already on its
+   * plan's price costs no Stripe call. See migration 110.
+   */
+  async listPriceMigrationCandidates(limit = 200): Promise<
+    {
+      subscriptionId: string;
+      providerSubscriptionId: string;
+      planId: string;
+      planName: string;
+      targetPriceId: string;
+      targetAmountMicros: number;
+      targetCurrency: string;
+      scheduledPriceId: string | null;
+      notifiedPriceId: string | null;
+      userId: string;
+      email: string;
+      firstName: string;
+      locale: string;
+    }[]
+  > {
+    const rows = await this.databaseService.query<{
+      id: string;
+      provider_subscription_id: string;
+      plan_id: string;
+      plan_name: string;
+      target_price_id: string;
+      target_amount_micros: string;
+      target_currency: string;
+      price_change_scheduled_price_id: string | null;
+      price_change_notified_price_id: string | null;
+      user_id: string;
+      email: string;
+      first_name: string | null;
+      locale: string | null;
+    }>(
+      `SELECT s.id, s.provider_subscription_id, s.plan_id, p.name AS plan_name,
+              pp.provider_price_id AS target_price_id,
+              pp.amount_micros AS target_amount_micros, pp.currency AS target_currency,
+              s.price_change_scheduled_price_id, s.price_change_notified_price_id,
+              u.id AS user_id, u.email, u.first_name, u.locale
+         FROM billing_subscriptions s
+         JOIN billing_plans p ON p.id = s.plan_id
+         JOIN billing_plan_prices pp
+           ON pp.plan_id = s.plan_id
+          AND pp.interval = s.interval
+          AND pp.effective_to IS NULL
+          AND pp.provider_price_id IS NOT NULL
+         JOIN billing_customers c ON c.id = s.customer_id
+         JOIN users u ON u.id = c.user_id
+        WHERE s.provider_subscription_id IS NOT NULL
+          AND s.status IN ('active', 'past_due', 'trialing')
+          AND (
+            s.price_evaluated_for_price_id IS DISTINCT FROM pp.provider_price_id
+            OR (s.price_change_scheduled_price_id = pp.provider_price_id
+                AND s.price_change_notified_price_id IS DISTINCT FROM pp.provider_price_id)
+          )
+        ORDER BY s.current_period_end ASC
+        LIMIT $1`,
+      [limit],
+    );
+    return rows.map((r) => ({
+      subscriptionId: r.id,
+      providerSubscriptionId: r.provider_subscription_id,
+      planId: r.plan_id,
+      planName: r.plan_name,
+      targetPriceId: r.target_price_id,
+      targetAmountMicros: Number(r.target_amount_micros),
+      targetCurrency: r.target_currency,
+      scheduledPriceId: r.price_change_scheduled_price_id,
+      notifiedPriceId: r.price_change_notified_price_id,
+      userId: r.user_id,
+      email: r.email,
+      firstName: r.first_name ?? '',
+      locale: r.locale ?? 'en',
+    }));
+  }
+
+  /** Record price-migration progress for one subscription (migration 110). */
+  async markPriceMigration(
+    subscriptionId: string,
+    update: { evaluatedFor?: string; scheduledTo?: string; notifiedFor?: string },
+  ): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_subscriptions
+          SET price_evaluated_for_price_id = COALESCE($2, price_evaluated_for_price_id),
+              price_change_scheduled_price_id = COALESCE($3, price_change_scheduled_price_id),
+              price_change_notified_price_id = COALESCE($4, price_change_notified_price_id),
+              updated_at = NOW()
+        WHERE id = $1`,
+      [
+        subscriptionId,
+        update.evaluatedFor ?? null,
+        update.scheduledTo ?? null,
+        update.notifiedFor ?? null,
+      ],
+    );
+  }
+
   async findOpenUsagePeriods(subscriptionId: string): Promise<BillingUsagePeriodDto[]> {
     const rows = await this.databaseService.query<UsagePeriodEntity>(
       `SELECT * FROM billing_usage_periods

@@ -51,6 +51,8 @@ export const OBSERVED_QUEUE_NAMES = [
   'buyer-message',
   'billing-trial-expiry',
   'billing-listing-plan-limit',
+  'billing-subscription-reconcile',
+  'billing-price-migration',
   'data-retention',
 ] as const;
 
