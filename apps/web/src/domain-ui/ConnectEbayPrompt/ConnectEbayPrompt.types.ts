@@ -8,8 +8,6 @@ export interface EbayMarketplaceOption {
 export interface ConnectEbayPromptProps {
   onConnect: () => void;
   onSkip?: () => void;
-  /** Opens the account-deactivation flow instead of a skip action — takes priority over `onSkip` when both are provided. */
-  onDeactivateAccount?: () => void;
   isLoading?: boolean;
   /** Extra caption rendered under the actions — e.g. the onboarding flow's marketplace-support note. */
   footnote?: string;

@@ -139,17 +139,6 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Auth'],
     }),
-
-    /**
-     * Deactivate (soft-delete) the authenticated account
-     */
-    deactivateAccount: builder.mutation<GenericSuccessResponse, void>({
-      query: () => ({
-        url: '/auth/deactivate',
-        method: 'POST',
-      }),
-      invalidatesTags: ['Auth'],
-    }),
   }),
 });
 
@@ -166,5 +155,4 @@ export const {
   useGetMeQuery,
   useLazyGetMeQuery,
   useChangePasswordMutation,
-  useDeactivateAccountMutation,
 } = authApi;

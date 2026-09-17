@@ -282,12 +282,6 @@
         "subtitle": "Password preferences",
         "changePassword": "Change Password",
         "changePasswordSubtitle": "Update your login password"
-      },
-      "danger": {
-        "title": "Danger Zone",
-        "subtitle": "Irreversible account actions",
-        "deactivate": "Deactivate Account",
-        "deactivateDescription": "Permanently delete your account and all associated data. This action cannot be undone."
       }
     },
     "drawer": {
@@ -440,18 +434,6 @@
         "sameAsCurrent": "New password must be different from current",
         "successHeader": "Password updated",
         "successDescription": "Your password has been changed successfully."
-      }
-    },
-    "modal": {
-      "deactivate": {
-        "title": "Deactivate account",
-        "warning": "This will revoke your access to SellerHill. Your listings, orders, and connected accounts will remain in the system but you will not be able to sign in.",
-        "typeEmail": "To confirm, type your email address below:",
-        "emailFieldLabel": "Email address",
-        "confirmLabel": "Deactivate account",
-        "cancelLabel": "Cancel",
-        "successHeader": "Account deactivated",
-        "successDescription": "Your account has been deactivated. You will be signed out."
       }
     }
   },

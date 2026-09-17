@@ -9,7 +9,6 @@ import { ConfirmModal, InfoMessage, PageHeader, SettingsActionRow, SettingsCard,
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DeactivateAccountModal } from '../components/DeactivateAccountModal';
 import {
   AmazonAccountDrawer,
   AmazonAccountsAllDrawer,
@@ -168,12 +167,16 @@ const ListingGroupsSection = ({ onManage }: { onManage: () => void }): React.Rea
   );
 };
 
+// Password is the only row here. The "deactivate my account" row was removed
+// (operator decision, 2026-09-17): a seller who wants to leave cancels their
+// subscription in the Stripe portal, and account deletion is handled by
+// support (see the Terms' §20 e-mail route). A self-service button that
+// blocked login while keeping every row was a destructive action nobody asked
+// for and that support had to undo by hand.
 const AccountSecuritySection = ({
   onAction,
-  onDeactivate,
 }: {
   onAction: (key: 'password') => void;
-  onDeactivate: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation(['translation']);
   return (
@@ -188,13 +191,6 @@ const AccountSecuritySection = ({
         label={t('translation:settingsHub.sections.account.changePassword')}
         subtitle={t('translation:settingsHub.sections.account.changePasswordSubtitle')}
         onClick={() => onAction('password')}
-      />
-      <SettingsActionRow
-        icon="trash"
-        variant="danger"
-        label={t('translation:settingsHub.sections.danger.deactivate')}
-        subtitle={t('translation:settingsHub.sections.danger.deactivateDescription')}
-        onClick={onDeactivate}
       />
     </SettingsCard>
   );
@@ -221,9 +217,6 @@ export const SettingsHubPageComponent = ({
   ebayMarketplaceOptions,
   selectedEbayMarketplace,
   onEbayMarketplaceChange,
-  isDeactivateModalOpen,
-  onOpenDeactivateModal,
-  onCloseDeactivateModal,
   storeConfigs,
   availableStores,
   predefinedTemplateNames,
@@ -263,7 +256,7 @@ export const SettingsHubPageComponent = ({
         />
         <S.ColumnStack>
           <ListingGroupsSection onManage={onViewAllListingGroups} />
-          <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} onDeactivate={onOpenDeactivateModal} />
+          <AccountSecuritySection onAction={(key) => onOpenDrawer(key)} />
         </S.ColumnStack>
       </S.TwoColGrid>
 
@@ -370,7 +363,6 @@ export const SettingsHubPageComponent = ({
         onEdit={onEditBuyerMessageTemplate}
       />
 
-      <DeactivateAccountModal isOpen={isDeactivateModalOpen} onClose={onCloseDeactivateModal} />
 
       <ConfirmModal
         isOpen={Boolean(pendingDisconnectId)}

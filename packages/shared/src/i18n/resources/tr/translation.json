@@ -282,12 +282,6 @@
         "subtitle": "Şifre tercihleri",
         "changePassword": "Şifre Değiştir",
         "changePasswordSubtitle": "Giriş şifrenizi güncelleyin"
-      },
-      "danger": {
-        "title": "Tehlikeli Bölge",
-        "subtitle": "Geri alınamaz hesap işlemleri",
-        "deactivate": "Hesabı Devre Dışı Bırak",
-        "deactivateDescription": "Hesabınızı ve ilişkili tüm verileri kalıcı olarak silin. Bu işlem geri alınamaz."
       }
     },
     "drawer": {
@@ -440,18 +434,6 @@
         "sameAsCurrent": "Yeni şifre mevcut şifreden farklı olmalı",
         "successHeader": "Şifre güncellendi",
         "successDescription": "Şifreniz başarıyla değiştirildi."
-      }
-    },
-    "modal": {
-      "deactivate": {
-        "title": "Hesabı devre dışı bırak",
-        "warning": "SellerHill erişiminiz iptal edilir. Listeleriniz, siparişleriniz ve bağlı hesaplarınız sistemde kalır ancak oturum açamazsınız.",
-        "typeEmail": "Onaylamak için aşağıya e-posta adresinizi yazın:",
-        "emailFieldLabel": "E-posta adresi",
-        "confirmLabel": "Hesabı devre dışı bırak",
-        "cancelLabel": "Vazgeç",
-        "successHeader": "Hesap devre dışı bırakıldı",
-        "successDescription": "Hesabınız devre dışı bırakıldı. Oturumunuz kapatılacak."
       }
     }
   },
