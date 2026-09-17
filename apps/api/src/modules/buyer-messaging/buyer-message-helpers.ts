@@ -46,6 +46,23 @@ export function buyerMessageJobId(ebayOrderId: string, event: BuyerMessageEventT
   return `buyer-msg-${ebayOrderId}-${event}`;
 }
 
+/**
+ * Whether a message parked by a suspension has waited too long to still send.
+ *
+ * Measured from the message's ORIGINAL due time (BullMQ creation timestamp +
+ * its scheduled delay), never from the latest re-park — each re-park moves the
+ * job forward, so measuring from it would let a message defer forever.
+ */
+export function isSuspendedMessageExpired(
+  createdAtMs: number,
+  scheduledDelayMs: number | undefined,
+  nowMs: number,
+  maxAgeMs: number,
+): boolean {
+  const dueAtMs = createdAtMs + Math.max(0, scheduledDelayMs ?? 0);
+  return nowMs - dueAtMs > maxAgeMs;
+}
+
 /** Short hash of a template body, stored on the log for audit/versioning. */
 export function templateVersionHash(body: string): string {
   return createHash('sha256').update(body).digest('hex').slice(0, 12);

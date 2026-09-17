@@ -1,11 +1,12 @@
 // apps/api/src/modules/buyer-messaging/buyer-message.processor.ts
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
+import { DelayedError, Job } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 
-import { redactForLog, renderTemplate } from './buyer-message-helpers';
+import { isSuspendedMessageExpired, redactForLog, renderTemplate } from './buyer-message-helpers';
 import { type BuyerMessageJobData } from './buyer-message-queue.service';
 import { BuyerMessagingProvider } from './buyer-message.provider';
 import { BuyerMessageService } from './buyer-message.service';
@@ -36,17 +37,29 @@ export class BuyerMessageProcessor extends WorkerHost {
     private readonly db: DatabaseService,
     private readonly messageService: BuyerMessageService,
     @Inject(BUYER_MESSAGE_TOKEN) private readonly provider: BuyerMessagingProvider,
+    private readonly quotaEnforcement: QuotaEnforcementService,
   ) {
     super();
   }
 
-  async process(job: Job<BuyerMessageJobData>): Promise<void> {
+  async process(job: Job<BuyerMessageJobData>, token?: string): Promise<void> {
     const { ebayOrderId, userId, ebayAccountId, storeId, event } = job.data;
 
     // 0. Silent no-op for users who haven't opted in — avoids skipped-log spam
     //    (and the idempotency query) for the common case. The per-user/per-event
     //    store_settings config is the SOLE gate; there is no env master switch.
     if (!(await this.messageService.isMessagingEnabled(userId, storeId))) {
+      return;
+    }
+
+    // 0b. Suspension PARKS the message rather than dropping it. The triggers for
+    //     new messages (order sync, tracking) already stop while suspended, but
+    //     a message queued before the suspension — above all a feedback request
+    //     delayed for days after delivery — would otherwise fire regardless.
+    //     Dropping it would break "resume where it left off after payment", so
+    //     it is re-parked and re-checked until the seller pays or it expires.
+    if (await this.quotaEnforcement.isSuspended(userId)) {
+      await this.parkWhileSuspended(job, token);
       return;
     }
 
@@ -196,6 +209,51 @@ export class BuyerMessageProcessor extends WorkerHost {
       storeName: r.store_name || 'our store',
       lineItemId: r.legacy_item_id ?? undefined,
     };
+  }
+
+  /**
+   * Re-park a message whose sender is suspended, or retire it once it has
+   * waited too long. Uses the same `moveToDelayed` + `DelayedError` pattern as
+   * the listing worker's eBay-budget deferral, so a parked message never
+   * consumes one of its BullMQ attempts — a suspension is not a send failure.
+   */
+  private async parkWhileSuspended(job: Job<BuyerMessageJobData>, token?: string): Promise<void> {
+    const { ebayOrderId, userId, ebayAccountId, event } = job.data;
+
+    if (
+      isSuspendedMessageExpired(
+        job.timestamp,
+        job.opts.delay,
+        Date.now(),
+        BUYER_MESSAGING_DEFAULTS.SUSPENDED_MAX_AGE_MS,
+      )
+    ) {
+      this.logger.log(
+        `Buyer message ${event} for ${ebayOrderId} expired while suspended — not sending`,
+      );
+      await this.recordLog({
+        ebayOrderId,
+        userId,
+        ebayAccountId,
+        event,
+        status: 'skipped',
+        templateKind: 'system',
+        templateRef: 'suspended-expired',
+      });
+      return;
+    }
+
+    if (!token) {
+      // Without a worker token the job cannot be re-parked. Ending here would
+      // drop it silently, so hand it to BullMQ's retry instead.
+      throw new Error(`Buyer message ${event} for ${ebayOrderId} parked: subscription suspended`);
+    }
+
+    this.logger.log(
+      `Buyer message ${event} for ${ebayOrderId} parked: subscription suspended`,
+    );
+    await job.moveToDelayed(Date.now() + BUYER_MESSAGING_DEFAULTS.SUSPENDED_DEFER_MS, token);
+    throw new DelayedError();
   }
 
   private async recordLog(args: {
