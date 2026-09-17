@@ -37,7 +37,7 @@ import {
   mapPriceRow,
   type BillingConfig,
 } from './billing-helpers';
-import type { ParsedStripeEvent } from './billing.types';
+import { BillingProvider, type ParsedStripeEvent } from './billing.types';
 import { advisoryLockKey, billingCustomerLockKey, type QuotaWindow } from './quota-helpers';
 
 
@@ -945,16 +945,44 @@ export class BillingRepositoryService {
    * paying customer.
    */
   async endTrialSubscriptionsForUser(userId: string): Promise<void> {
-    await this.databaseService.query(
+    const ended = await this.databaseService.query<{ id: string }>(
       `UPDATE billing_subscriptions s
           SET status = $2, ended_at = NOW(), updated_at = NOW()
          FROM billing_customers c
         WHERE c.id = s.customer_id
           AND c.user_id = $1
           AND s.provider_subscription_id IS NULL
-          AND s.status <> $2`,
+          AND s.status <> $2
+        RETURNING s.id`,
       [userId, BillingSubscriptionStatus.ENDED],
     );
+    await this.releaseReservationsForSubscriptions(ended.map((r) => r.id));
+  }
+
+  /**
+   * Hand back every slot still reserved under subscriptions that just ended.
+   *
+   * Reservations are keyed on the subscription that took them, and release
+   * looks them up under the seller's CURRENT subscription. So a slot reserved
+   * during a trial and settled after the seller paid (a bulk create still in
+   * flight, an order still queued for auto-fulfill) is released against the NEW
+   * subscription, matches nothing, and stays `reserved` for ever. It never
+   * counts against the paid plan — counts are per subscription — but it is a
+   * row that claims to hold quota nobody holds. Closing them with the
+   * subscription keeps the ledger truthful.
+   */
+  private async releaseReservationsForSubscriptions(subscriptionIds: string[]): Promise<void> {
+    if (subscriptionIds.length === 0) {
+      return;
+    }
+    for (const table of ['billing_listing_reservations', 'billing_ao_reservations']) {
+      await this.databaseService.query(
+        `UPDATE ${table}
+            SET status = 'released', updated_at = NOW()
+          WHERE subscription_id = ANY($1::uuid[]) AND status = 'reserved'`,
+        [subscriptionIds],
+      );
+    }
   }
 
   /**
@@ -1106,6 +1134,16 @@ export class BillingRepositoryService {
             AND s.trial_ends_at IS NOT NULL
             AND s.trial_ends_at > NOW()
             AND s.trial_ends_at <= NOW() + make_interval(days => $1::int)
+            -- Someone who already subscribed must not be told their trial is
+            -- ending. The trial row is normally closed the moment a paid
+            -- subscription is recorded, but that close is best-effort; this
+            -- keeps a lingering row from producing a wrong e-mail.
+            AND NOT EXISTS (
+              SELECT 1 FROM billing_subscriptions paid
+               WHERE paid.customer_id = s.customer_id
+                 AND paid.provider_subscription_id IS NOT NULL
+                 AND paid.status IN ('active', 'trialing', 'past_due')
+            )
           FOR UPDATE SKIP LOCKED
        )
        UPDATE billing_subscriptions s
@@ -1145,6 +1183,16 @@ export class BillingRepositoryService {
            WHERE subscription_id = ANY($1::uuid[]) AND status = 'open'`,
           [subscriptionIds],
         );
+        // Same reasoning as releaseReservationsForSubscriptions, inside this
+        // transaction so the trial and its reservations end together.
+        for (const table of ['billing_listing_reservations', 'billing_ao_reservations']) {
+          await client.query(
+            `UPDATE ${table}
+                SET status = 'released', updated_at = NOW()
+              WHERE subscription_id = ANY($1::uuid[]) AND status = 'reserved'`,
+            [subscriptionIds],
+          );
+        }
       }
       return subscriptionIds.length;
     });
@@ -1180,6 +1228,57 @@ export class BillingRepositoryService {
    * upsert/conflict handling needed. Idempotent: re-running with the same
    * values is a no-op write.
    */
+  /**
+   * Stamp "this seller just opened a subscription checkout". It is the signal
+   * the hourly reconcile uses to find a paid subscription that never reached
+   * our tables (see `listRecentCheckoutsWithoutSubscription`). Best-effort by
+   * design: a failed stamp only narrows a safety net.
+   */
+  async touchCustomerCheckout(userId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE billing_customers SET updated_at = NOW() WHERE user_id = $1`,
+      [userId],
+    );
+  }
+
+  /**
+   * Stripe-linked customers who opened a checkout recently and still have NO
+   * provider-backed subscription row. Either they abandoned the checkout (the
+   * common case — Stripe returns nothing and nothing is written) or they paid
+   * and the `customer.subscription.created` webhook never landed, which is the
+   * case this exists for: without it, that seller stays on trial, or stays
+   * suspended, forever. Bounded by a recency window so abandoned checkouts are
+   * not re-asked about every hour for ever.
+   */
+  async listRecentCheckoutsWithoutSubscription(
+    sinceHours: number,
+    limit = 200,
+  ): Promise<{ customerId: string; userId: string | null; providerCustomerId: string }[]> {
+    const rows = await this.databaseService.query<{
+      id: string;
+      user_id: string | null;
+      provider_customer_id: string;
+    }>(
+      `SELECT c.id, c.user_id, c.provider_customer_id
+         FROM billing_customers c
+        WHERE c.provider = $1
+          AND c.provider_customer_id IS NOT NULL
+          AND c.updated_at >= NOW() - make_interval(hours => $2::int)
+          AND NOT EXISTS (
+            SELECT 1 FROM billing_subscriptions s
+             WHERE s.customer_id = c.id AND s.provider_subscription_id IS NOT NULL
+          )
+        ORDER BY c.updated_at DESC
+        LIMIT $3`,
+      [BillingProvider.STRIPE, sinceHours, limit],
+    );
+    return rows.map((r) => ({
+      customerId: r.id,
+      userId: r.user_id,
+      providerCustomerId: r.provider_customer_id,
+    }));
+  }
+
   async linkProviderCustomer(
     userId: string,
     provider: string,

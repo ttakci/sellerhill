@@ -37,7 +37,7 @@ import { mapStripeInvoice, type StripeInvoiceLike } from './stripe-invoice-mappe
  * read Stripe's upgrade notes, then re-verify the subscription payload fields
  * `extractStripeSubscriptionFields` reads.
  */
-const STRIPE_API_VERSION = '2026-07-29.dahlia' satisfies Stripe.LatestApiVersion;
+export const STRIPE_API_VERSION = '2026-07-29.dahlia' satisfies Stripe.LatestApiVersion;
 
 /**
  * Idempotency key for a write whose accidental repetition costs real money.
@@ -177,6 +177,19 @@ export interface BillingProviderPort {
    * mistaken for "this subscription is gone".
    */
   fetchSubscription(providerSubscriptionId: string): Promise<unknown>;
+  /**
+   * The subscription a completed Checkout Session produced, with the two ids
+   * needed to prove the session belongs to the caller. Used on the checkout
+   * return page so a first subscription is recorded without waiting for (or
+   * depending on) the webhook. Null when the session has no subscription yet.
+   */
+  retrieveCheckoutSubscription(sessionId: string): Promise<{
+    customerId: string | null;
+    clientReferenceId: string | null;
+    subscription: unknown;
+  } | null>;
+  /** Every subscription Stripe holds for a customer, newest first, raw. */
+  listCustomerSubscriptions(providerCustomerId: string): Promise<unknown[]>;
   scheduleDowngrade(req: ChangePlanRequest): Promise<void>;
   /**
    * Release a pending downgrade schedule — e.g. because the seller upgraded
@@ -599,6 +612,41 @@ export class StripeBillingProvider implements BillingProviderPort {
       );
       throw error;
     }
+  }
+
+  async retrieveCheckoutSubscription(sessionId: string): Promise<{
+    customerId: string | null;
+    clientReferenceId: string | null;
+    subscription: unknown;
+  } | null> {
+    const stripe = this.getClient();
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription'],
+    });
+    if (session.mode !== 'subscription' || !session.subscription) {
+      return null;
+    }
+    const subscription =
+      typeof session.subscription === 'string'
+        ? await stripe.subscriptions.retrieve(session.subscription)
+        : session.subscription;
+    const customerId =
+      typeof session.customer === 'string' ? session.customer : (session.customer?.id ?? null);
+    return {
+      customerId,
+      clientReferenceId: session.client_reference_id ?? null,
+      subscription,
+    };
+  }
+
+  async listCustomerSubscriptions(providerCustomerId: string): Promise<unknown[]> {
+    const stripe = this.getClient();
+    const page = await stripe.subscriptions.list({
+      customer: providerCustomerId,
+      status: 'all',
+      limit: 10,
+    });
+    return page.data;
   }
 
   async scheduleDowngrade(req: ChangePlanRequest): Promise<void> {

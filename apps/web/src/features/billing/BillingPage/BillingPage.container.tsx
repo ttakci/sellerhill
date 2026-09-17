@@ -22,8 +22,9 @@ import {
   BillingProvider,
 } from '@repo/shared';
 import { formatCurrency, formatDate, formatMicroCurrency, getLocaleConfig, useLoading, useUI } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import {
   useGetBillingCatalogQuery,
@@ -35,6 +36,7 @@ import {
   useInitiateCheckoutMutation,
   useLazyOpenBillingPortalQuery,
   usePreviewPlanChangeMutation,
+  useConfirmCheckoutMutation,
 } from '../api/billing.api';
 import { formatBillingLimit, planLimitValue } from '../utils/usage';
 import { buildBillingUsageRows } from '../utils/usageRows';
@@ -114,6 +116,39 @@ export const BillingPage: React.FC = () => {
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
 
   const [previewPlanChange] = usePreviewPlanChangeMutation();
+
+  /*
+   * Checkout return: Stripe sends the seller back to
+   * `/billing?checkout=success&session_id=cs_...`. Confirm that session with
+   * the backend straight away, so the new subscription is recorded now instead
+   * of whenever (or whether) its webhook arrives. Runs once per session id;
+   * the query params are removed afterwards so a reload does not repeat it.
+   * Failures are silent on purpose — the webhook and the hourly reconcile are
+   * still coming, and a paying seller must not see an error for a payment that
+   * succeeded.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [confirmCheckout] = useConfirmCheckoutMutation();
+  const confirmedSessionRef = useRef<string | null>(null);
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (searchParams.get('checkout') !== 'success' || !sessionId) {
+      return;
+    }
+    if (confirmedSessionRef.current === sessionId) {
+      return;
+    }
+    confirmedSessionRef.current = sessionId;
+    void confirmCheckout({ sessionId })
+      .unwrap()
+      .catch(() => undefined)
+      .finally(() => {
+        const next = new URLSearchParams(searchParams);
+        next.delete('checkout');
+        next.delete('session_id');
+        setSearchParams(next, { replace: true });
+      });
+  }, [searchParams, setSearchParams, confirmCheckout]);
   const [changePlan, { isLoading: isChangingPlan }] = useChangePlanMutation();
   /** The change the seller has previewed but not yet confirmed — see
    *  `BillingPendingPlanChange`. */

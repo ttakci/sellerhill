@@ -182,7 +182,9 @@ export class BuyerMessageProcessor extends WorkerHost {
               o.ebay_order_id AS order_id,
               o.amazon_tracking_number AS tracking_number,
               o.amazon_tracking_carrier  AS carrier,
-              COALESCE(ea.store_name, ea.seller_id) AS store_name,
+              -- Never seller_id: since migration 108 it is eBay's opaque immutable
+              -- user id, and this value reaches buyers through {{store_name}}.
+              COALESCE(NULLIF(ea.store_name, ''), ea.ebay_username) AS store_name,
               l.ebay_item_id AS legacy_item_id
          FROM orders o
          LEFT JOIN listings l ON l.id = o.listing_id

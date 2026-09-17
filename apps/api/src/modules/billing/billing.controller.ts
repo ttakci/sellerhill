@@ -184,6 +184,27 @@ export class BillingController {
     }
   }
 
+  @Post('checkout/confirm')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Record the subscription a completed checkout created (return page)' })
+  async confirmCheckout(
+    @Req() req: { user: { sub: string } },
+    @Body() body: { sessionId?: unknown },
+  ): Promise<{ applied: boolean }> {
+    // Checkout Session ids are `cs_` + base62. Anything else is refused before
+    // a Stripe call is made on its behalf.
+    const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : '';
+    if (!/^cs_[A-Za-z0-9_]{10,200}$/.test(sessionId)) {
+      throw new HttpException('billing.errors.invalidCheckoutSession', HttpStatus.BAD_REQUEST);
+    }
+    try {
+      return await this.billingService.confirmCheckout(req.user.sub, sessionId);
+    } catch (error) {
+      rethrowBillingError(error);
+    }
+  }
+
   @Post('change-plan')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)

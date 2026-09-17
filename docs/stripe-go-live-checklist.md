@@ -85,7 +85,21 @@ Developers → Webhooks → the endpoint pointing at
   `billing_plan_prices` row (`effective_to`) and inserting a new one with no
   `provider_price_id`, then re-running the sync.
 
-## 7. Before announcing it works
+## 7. Changing a price later
+
+Not a launch step, but it involves Stripe and is easy to get wrong:
+
+1. Close the plan's current `billing_plan_prices` row (`effective_to`) and insert
+   the new one without a `provider_price_id` (a new migration).
+2. `pnpm --filter api stripe:sync-catalog` — mints the new Stripe Price. From here
+   on, NEW subscribers pay the new price.
+3. Existing subscribers stay on the old price until you decide otherwise:
+   - to keep them there, do nothing;
+   - to move them from their next renewal (with an e-mail notice), run
+     `pnpm --filter api billing:migrate-price -- --plan <slug>` first as a dry
+     run, read the list, then again with `--apply`.
+
+## 8. Before announcing it works
 
 - Subscribe once with a real card, on the live keys, and confirm: the
   subscription row, the quota window dates, the invoice in the billing page, and

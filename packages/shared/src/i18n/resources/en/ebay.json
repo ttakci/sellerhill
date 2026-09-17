@@ -41,7 +41,8 @@
       "ebayTrialAlreadyUsed": "This eBay store has already used its free trial. Choose a plan to connect it.",
       "noAuthorizationCode": "No authorization code received from eBay",
       "storeOwnedByAnotherAccount": "This eBay store is linked to a different SellerHill account. Contact support to transfer it.",
-      "accountNotFound": "That eBay store was not found."
+      "accountNotFound": "That eBay store was not found.",
+      "identityUnavailable": "We could not confirm your eBay account with eBay. Nothing was connected — please try again in a moment."
     },
     "onboarding": {
       "title": "Connect Your eBay Store",

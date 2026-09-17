@@ -76,7 +76,7 @@ export const AddListingsDrawer: React.FC<AddListingsDrawerProps> = ({ isOpen, on
     () =>
       (ebayAccountsData?.items ?? []).map((account) => ({
         id: account.id,
-        name: account.storeName || account.sellerId || account.id,
+        name: account.storeName || account.ebayUsername || account.sellerId || account.id,
       })),
     [ebayAccountsData?.items]
   );
