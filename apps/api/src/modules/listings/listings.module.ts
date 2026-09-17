@@ -8,6 +8,7 @@ import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { LlmModule } from '../llm/llm.module';
+import { OrdersModule } from '../orders/orders.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
 import { ContentGenerationService } from './content-generation.service';
@@ -32,6 +33,10 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     ConfigModule,
     EbayModule,
     ListingSettingsGroupModule,
+    // For adopting a newly imported listing's PAST orders (OrderSyncService).
+    // Orders does not import Listings, so this adds no cycle —
+    // module-cycle.guard.spec.ts proves it.
+    OrdersModule,
     LlmModule,
     StoreSettingsModule,
     BullModule.registerQueue(
