@@ -16,6 +16,7 @@ import ExcelJS from 'exceljs';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { ListingProcessorService } from './listing-processor.service';
@@ -29,7 +30,8 @@ export class ListingImportService {
     private readonly ebay: EbayService,
     @Inject(forwardRef(() => ListingProcessorService))
     private readonly listingProcessor: ListingProcessorService,
-    @InjectQueue('listings') private readonly listingQueue: Queue
+    @InjectQueue('listings') private readonly listingQueue: Queue,
+    private readonly quotaEnforcement: QuotaEnforcementService
   ) {}
 
   async buildTemplate(): Promise<Buffer> {
@@ -101,6 +103,26 @@ export class ListingImportService {
       }
       return { id: jobs.rows[0].id, items };
     });
+    // Importing an existing eBay listing produces an ACTIVE listing exactly
+    // like a create does, so it consumes the same plan allowance and must pass
+    // the same gate. It did not: this path had no entitlement check and no
+    // reservation at all, so a suspended account could import, and a seller on
+    // a 200-listing plan could import thousands. Reservation happens after the
+    // rows exist because reservations are keyed on listing_job_item ids (same
+    // ordering as ListingsService.createJob).
+    try {
+      await this.quotaEnforcement.reserveForBulkCreate(userId, job.items.map((item) => item.id));
+    } catch (err) {
+      // Nothing has been queued yet, so the job can be removed outright rather
+      // than left in the list at "0 / N, waiting" forever with no worker
+      // coming for it. Items go with it (ON DELETE CASCADE). Best-effort: the
+      // refusal must still reach the seller even if the tidy-up fails.
+      await this.database
+        .query(`DELETE FROM listing_jobs WHERE id = $1`, [job.id])
+        .catch(() => undefined);
+      throw err;
+    }
+
     await this.listingQueue.addBulk(job.items.map((item) => ({
       name: 'import-existing-listing',
       data: stampCurrentCorrelation({
@@ -144,6 +166,10 @@ export class ListingImportService {
         `UPDATE listing_job_items SET product_id=$1,listing_id=$2,status=$3,ebay_item_id=$4,updated_at=NOW() WHERE id=$5`,
         [productId, listing.rows[0].id, ListingStatus.ACTIVE, data.ebayItemId, data.listingJobItemId]);
     });
+    // The ACTIVE listing row is now the durable entitlement, so the in-flight
+    // reservation is handed over to it (same release-on-success rule as the
+    // create path — see QuotaEnforcementService.consumeForCreate).
+    await this.quotaEnforcement.consumeForCreate(data.userId, data.listingJobItemId);
     await this.updateJobCounts(data.jobId);
   }
 
@@ -151,6 +177,12 @@ export class ListingImportService {
     await this.database.query(
       `UPDATE listing_job_items SET status=$1,error_message=$2,updated_at=NOW() WHERE id=$3`,
       [terminal ? ListingStatus.ERROR : ListingStatus.RETRYING, message, data.listingJobItemId]);
+    if (terminal) {
+      // Hand the reserved slot back only once the item can no longer succeed.
+      // A RETRYING item still holds its reservation, so a BullMQ retry cannot
+      // oversell the plan against itself.
+      await this.quotaEnforcement.releaseForCreate(data.userId, data.listingJobItemId);
+    }
     await this.updateJobCounts(data.jobId);
   }
 

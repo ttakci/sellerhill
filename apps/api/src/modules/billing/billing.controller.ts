@@ -78,6 +78,11 @@ const BILLING_ERROR_STATUS: Record<string, HttpStatus> = {
   'billing.errors.addonNotFound': HttpStatus.NOT_FOUND,
   'billing.errors.noSubscription': HttpStatus.CONFLICT,
   'billing.errors.planChangeFailed': HttpStatus.CONFLICT,
+  // The card asked for 3-D Secure on an off-session charge, so the upgrade was
+  // rolled back and the seller is still on their old plan. Separate from
+  // planChangeFailed because the fix is theirs to make (a card that can be
+  // charged off-session), not ours.
+  'billing.errors.paymentRequiresAction': HttpStatus.CONFLICT,
   'billing.errors.priceNotFound': HttpStatus.NOT_FOUND,
   'billing.errors.ebayTrialAlreadyUsed': HttpStatus.CONFLICT,
   'billing.errors.invoicesFailed': HttpStatus.CONFLICT,
