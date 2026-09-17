@@ -10,6 +10,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from '../../common/database/database.module';
+import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
@@ -27,6 +28,7 @@ import { BUYER_MESSAGE_QUEUE, BUYER_MESSAGE_TOKEN } from './buyer-messaging.cons
 @Module({
   imports: [
     DatabaseModule,
+    BillingModule,
     EbayModule,
     StoreSettingsModule,
     BullModule.registerQueue({ name: BUYER_MESSAGE_QUEUE }),

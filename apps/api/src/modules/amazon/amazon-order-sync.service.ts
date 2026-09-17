@@ -3,6 +3,7 @@ import { OrderCostCaptureStatus, PlatformSettingKey } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
 import { AmazonScrapingService } from './amazon-scraping.service';
@@ -48,6 +49,7 @@ export class AmazonOrderSyncService {
     private readonly orderSync: OrderSyncService,
     private readonly trackingQueue: AmazonTrackingQueueService,
     private readonly platformSettings: PlatformSettingsService,
+    private readonly quotaEnforcement: QuotaEnforcementService,
   ) {}
 
   /**
@@ -65,6 +67,26 @@ export class AmazonOrderSyncService {
       return;
     }
     const account = accountRows[0];
+
+    // Suspension stops the scrape. It was the one Amazon-side pipeline with no
+    // entitlement check at all: this tick runs per ACCOUNT on its own cron,
+    // independent of order sync, so a suspended seller's buyer accounts kept
+    // being logged into and scraped every tick, indefinitely — Playwright pool
+    // time spent on an account that pays for nothing.
+    //
+    // THE POSITION OF THIS RETURN IS LOAD-BEARING, same rule as order sync: it
+    // must precede both the scrape and every `advanceSyncedAt` below. Skipping
+    // while advancing `last_orders_sync_at` would permanently drop the Amazon
+    // orders placed during the suspension from cost capture, because the next
+    // run scrapes only from that timestamp forward. Returning here leaves the
+    // watermark untouched, so the first tick after payment re-pulls the whole
+    // suspended window with no manual step.
+    if (await this.quotaEnforcement.isSuspended(account.user_id)) {
+      this.logger.log(
+        `Amazon cost-capture skipped for account ${accountId}: subscription suspended (watermark preserved)`,
+      );
+      return;
+    }
 
     // Default window: 30 days back on first sync (covers typical eBay→Amazon
     // purchase lag) — subsequent runs use the previous successful timestamp.
