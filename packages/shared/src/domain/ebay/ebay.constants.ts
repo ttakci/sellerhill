@@ -11,6 +11,7 @@ export const EBAY_ACCOUNT_STATUS: Record<string, EbayAccountStatus> = {
   ACTIVE: EbayAccountStatus.ACTIVE,
   REVOKED: EbayAccountStatus.REVOKED,
   ERROR: EbayAccountStatus.ERROR,
+  DISCONNECTED: EbayAccountStatus.DISCONNECTED,
 } as const;
 
 /**

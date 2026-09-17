@@ -33,7 +33,19 @@ export const ebayApi = baseApi.injectEndpoints({
       }),
       providesTags: ['Ebay'],
     }),
+
+    /**
+     * Disconnect a connected eBay store. The store's order and listing
+     * history is kept; reconnecting the same store later restores it.
+     */
+    disconnectEbayAccount: builder.mutation<{ success: true }, { accountId: string }>({
+      query: ({ accountId }) => ({
+        url: `/ebay/accounts/${accountId}/disconnect`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Ebay'],
+    }),
   }),
 });
 
-export const { useLazyGetEbayConnectUrlQuery, useGetEbayAccountsQuery } = ebayApi;
+export const { useLazyGetEbayConnectUrlQuery, useGetEbayAccountsQuery, useDisconnectEbayAccountMutation } = ebayApi;

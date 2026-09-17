@@ -255,16 +255,34 @@ export class EbayService implements OnModuleInit {
     // Get seller information
     const { sellerId, storeName } = await this.oauthService.getSellerInfo(tokenResponse.access_token);
 
-    // Check if this seller account is already connected (by seller_id or user token)
-    const existingAccounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT id FROM ebay_accounts
+    // Check if this seller account is already connected. `(seller_id,
+    // marketplace_id)` is UNIQUE, so at most one row can exist — and a
+    // previously DISCONNECTED row is the one case we reactivate instead of
+    // refusing (a plain INSERT would violate that constraint).
+    const existingAccounts = await this.databaseService.query<
+      Pick<EbayAccountEntity, 'id' | 'user_id' | 'status'>
+    >(
+      `SELECT id, user_id, status FROM ebay_accounts
        WHERE seller_id = $1 AND marketplace_id = $2
        LIMIT 1`,
       [sellerId, marketplaceId]
     );
 
-    if (existingAccounts.length > 0) {
+    const existing = existingAccounts[0];
+    if (existing && existing.status !== EBAY_ACCOUNT_STATUS.DISCONNECTED) {
       throw new ConflictException('ebay.errors.accountAlreadyConnected');
+    }
+    if (existing && existing.user_id !== userId) {
+      // The store is disconnected but its row — and therefore its order and
+      // listing history — belongs to a different SellerHill account. Holding
+      // the eBay credentials does not entitle this user to that history, so
+      // reactivating someone else's row would hand over their data. Refused
+      // deliberately; resolving a genuine ownership transfer is a support
+      // action, not something to infer from an OAuth grant.
+      this.logger.warn(
+        `Refusing eBay connect: store ${sellerId}/${marketplaceId} is a disconnected row owned by another user`
+      );
+      throw new ConflictException('ebay.errors.storeOwnedByAnotherAccount');
     }
 
     // One free trial per eBay store, ever. Checked BEFORE the row is written so
@@ -287,6 +305,35 @@ export class EbayService implements OnModuleInit {
 
     // Calculate token expiry
     const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
+
+    // Reconnect: adopt the existing (disconnected) row rather than inserting a
+    // second one. This is what puts the store's own order and listing history
+    // back in service — they reference this row's id, so a new row would leave
+    // all of it stranded behind a store the seller can no longer see.
+    if (existing) {
+      const reactivated = await this.databaseService.query<EbayAccountEntity>(
+        `UPDATE ebay_accounts
+         SET store_name = $1,
+             access_token = $2,
+             refresh_token = $3,
+             access_token_expires_at = $4,
+             status = $5,
+             disconnected_at = NULL,
+             updated_at = NOW()
+         WHERE id = $6
+         RETURNING *`,
+        [
+          storeName,
+          this.encryptToken(tokenResponse.access_token),
+          this.encryptToken(tokenResponse.refresh_token),
+          expiresAt.toISOString(),
+          EBAY_ACCOUNT_STATUS.ACTIVE,
+          existing.id,
+        ]
+      );
+      this.logger.log(`eBay account reconnected: ${existing.id} for user: ${userId}`);
+      return { accountId: reactivated[0].id, userId };
+    }
 
     // Insert account into database
     const accounts = await this.databaseService.query<EbayAccountEntity>(
@@ -318,16 +365,96 @@ export class EbayService implements OnModuleInit {
   }
 
   /**
+   * Sever a connected eBay store at the seller's own request.
+   *
+   * The row is NEVER deleted — `orders.ebay_account_id` cascades, so deleting
+   * it would destroy the store's entire order history (financial/tax
+   * evidence), and `listings.ebay_account_id` would orphan every listing.
+   *
+   * The tokens are nulled rather than merely left behind a status flag. Every
+   * account accessor already filters on `status = 'active'`, so the flag alone
+   * would stop all background work today — but a credential we are no longer
+   * entitled to use should not sit at rest waiting for one future query that
+   * forgets the filter. Removing it makes "we can no longer act on this
+   * seller's behalf" structural rather than conditional.
+   *
+   * NOTE: this does not revoke the grant on eBay's side; eBay publishes no
+   * revocation endpoint we rely on here, so the token stays technically valid
+   * upstream until it expires. A seller who wants the grant itself withdrawn
+   * must do so from eBay's own "Third-party app access" settings — which the
+   * UI tells them.
+   */
+  async disconnectAccount(userId: string, accountId: string): Promise<void> {
+    const rows = await this.databaseService.query<Pick<EbayAccountEntity, 'id' | 'seller_id' | 'marketplace_id'>>(
+      `UPDATE ebay_accounts
+       SET status = $1,
+           disconnected_at = NOW(),
+           access_token = NULL,
+           refresh_token = NULL,
+           access_token_expires_at = NULL,
+           updated_at = NOW()
+       WHERE id = $2
+         AND user_id = $3
+         AND status <> $1
+       RETURNING id, seller_id, marketplace_id`,
+      [EBAY_ACCOUNT_STATUS.DISCONNECTED, accountId, userId]
+    );
+
+    if (rows.length === 0) {
+      // Either no such account, it belongs to someone else, or it is already
+      // disconnected. All three are reported identically on purpose: a
+      // per-case message would confirm the existence of another user's
+      // account id to whoever probed for it.
+      throw new NotFoundException('ebay.errors.accountNotFound');
+    }
+
+    const account = rows[0];
+    this.logger.log(`eBay account disconnected: ${account.id} by user: ${userId}`);
+
+    // Severing an integration is the same class of event as a role change or
+    // a platform-setting edit, both of which this codebase audits. Best
+    // effort: a bookkeeping failure must not turn a completed disconnect into
+    // an error the seller sees and retries.
+    try {
+      await this.databaseService.query(
+        `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details)
+         VALUES ($1, 'EBAY_ACCOUNT_DISCONNECT', 'ebay_account', $2, $3)`,
+        [
+          userId,
+          account.id,
+          JSON.stringify({
+            sellerId: account.seller_id,
+            marketplaceId: account.marketplace_id,
+            disconnectedAt: new Date().toISOString(),
+          }),
+        ]
+      );
+    } catch (error: unknown) {
+      this.logger.warn(`Failed to audit eBay disconnect for ${account.id}: ${getErrorMessage(error)}`);
+    }
+  }
+
+  /**
    * Get all eBay accounts for a user
    */
   async getAccountsByUserId(userId: string): Promise<GetEbayAccountsResponse> {
     this.logger.log(`Getting eBay accounts for user: ${userId}`);
 
+    // Disconnected stores are deliberately excluded: the row is retained only
+    // so its orders and listings keep a real parent, not because the store is
+    // still connected. Filtering here rather than in each caller is also what
+    // keeps `EbayAccountGuard` correct — it gates on "this list is non-empty",
+    // so a seller who disconnects their only store is sent back to the
+    // connect prompt instead of landing on data screens with nothing behind
+    // them. (Known trade-off: a disconnected store no longer appears in the
+    // orders/listings store filter, so its historical rows can only be seen
+    // unfiltered until it is reconnected.)
     const accounts = await this.databaseService.query<EbayAccountEntity>(
-      `SELECT * FROM ebay_accounts 
-       WHERE user_id = $1 
+      `SELECT * FROM ebay_accounts
+       WHERE user_id = $1
+         AND status <> $2
        ORDER BY created_at DESC`,
-      [userId]
+      [userId, EBAY_ACCOUNT_STATUS.DISCONNECTED]
     );
 
     return {

@@ -44,6 +44,14 @@ export interface SettingsHubPageComponentProps {
   onViewAllListingGroups: () => void;
   onCreateListingGroup: () => void;
   onConnectEbay: () => void;
+  /** Asks to disconnect a store — opens the confirmation, does not sever yet. */
+  onRequestDisconnectEbay: (storeId: string) => void;
+  onConfirmDisconnectEbay: () => void;
+  onCancelDisconnectEbay: () => void;
+  /** Store awaiting confirmation; non-null means the confirm dialog is open. */
+  pendingDisconnectId: string | null;
+  /** Store whose disconnect request is in flight. */
+  disconnectingEbayId: string | null;
   ebayMarketplaceOptions: EbayMarketplaceOption[];
   selectedEbayMarketplace: EbayMarketplaceId;
   onEbayMarketplaceChange: (value: EbayMarketplaceId) => void;

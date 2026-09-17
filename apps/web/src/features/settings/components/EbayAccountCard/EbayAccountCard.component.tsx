@@ -1,4 +1,4 @@
-import { Icon, StatusBadge, Text } from '@repo/ui';
+import { Button, Icon, StatusBadge, Text } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,11 +6,11 @@ import * as S from './EbayAccountCard.style';
 import type { EbayAccountCardProps } from './EbayAccountCard.types';
 
 /**
- * Read-only eBay store card — eBay accounts are OAuth-connected, so there is
- * nothing to edit here (unlike Amazon's credential-based accounts). Every
- * field the seller might want is already on the card.
+ * eBay store card — OAuth-connected, so there is nothing to EDIT here (unlike
+ * Amazon's credential-based accounts). The one action it carries is
+ * disconnect, and only where a handler is supplied.
  */
-export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store }) => {
+export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store, onDisconnect, isDisconnecting }) => {
   const { t } = useTranslation(['translation']);
 
   return (
@@ -40,6 +40,21 @@ export const EbayAccountCard: React.FC<EbayAccountCardProps> = ({ store }) => {
             </Text>
           </S.StoreMetaLine>
         </S.StoreMetaList>
+
+        {onDisconnect && (
+          <S.StoreActions>
+            <Button
+              variant="danger-tint"
+              size="small"
+              onClick={() => onDisconnect(store.id)}
+              isLoading={isDisconnecting}
+            >
+              <Text variant="body-sm" weight="semibold">
+                {t('translation:settingsHub.sections.ebay.disconnect.action')}
+              </Text>
+            </Button>
+          </S.StoreActions>
+        )}
       </S.StoreMain>
     </S.CardRoot>
   );

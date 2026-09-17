@@ -12,6 +12,17 @@ export enum EbayAccountStatus {
   ACTIVE = 'active',
   REVOKED = 'revoked',
   ERROR = 'error',
+  /**
+   * The SELLER deliberately severed this connection from our own UI — not a
+   * failure. Kept distinct from REVOKED because the Action Center treats
+   * REVOKED as a CRITICAL "fix your broken connection" alarm, and an alarm
+   * raised by an intentional action is one the seller can never clear.
+   *
+   * The row survives (orders cascade off it, listings reference it), its
+   * tokens are nulled, and every token accessor's `status = 'active'` filter
+   * is what actually stops all background work for the store.
+   */
+  DISCONNECTED = 'disconnected',
 }
 
 /**
