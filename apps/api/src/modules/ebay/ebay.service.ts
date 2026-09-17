@@ -118,7 +118,10 @@ interface _EbayInventoryResponse {
 interface EbayAccountEntity {
   id: string;
   user_id: string;
+  /** eBay's IMMUTABLE user id (migration 108). The identity key — never the username. */
   seller_id: string;
+  /** Display only; the seller can change it and eBay may omit it. */
+  ebay_username?: string | null;
   store_name?: string;
   marketplace_id: EbayMarketplaceId;
   access_token: string;
@@ -253,7 +256,9 @@ export class EbayService implements OnModuleInit {
     const tokenResponse = await this.oauthService.exchangeCodeForTokens(code);
 
     // Get seller information
-    const { sellerId, storeName } = await this.oauthService.getSellerInfo(tokenResponse.access_token);
+    const { sellerId, username, storeName } = await this.oauthService.getSellerInfo(
+      tokenResponse.access_token
+    );
 
     // Check if this seller account is already connected. `(seller_id,
     // marketplace_id)` is UNIQUE, so at most one row can exist — and a
@@ -319,6 +324,7 @@ export class EbayService implements OnModuleInit {
              access_token_expires_at = $4,
              status = $5,
              disconnected_at = NULL,
+             ebay_username = $7,
              updated_at = NOW()
          WHERE id = $6
          RETURNING *`,
@@ -329,6 +335,9 @@ export class EbayService implements OnModuleInit {
           expiresAt.toISOString(),
           EBAY_ACCOUNT_STATUS.ACTIVE,
           existing.id,
+          // Refreshed on every reconnect: this is exactly the value that
+          // changes when a seller renames their eBay account.
+          username,
         ]
       );
       this.logger.log(`eBay account reconnected: ${existing.id} for user: ${userId}`);
@@ -338,11 +347,11 @@ export class EbayService implements OnModuleInit {
     // Insert account into database
     const accounts = await this.databaseService.query<EbayAccountEntity>(
       `INSERT INTO ebay_accounts (
-        user_id, seller_id, store_name, marketplace_id, 
-        access_token, refresh_token, access_token_expires_at, 
-        status
+        user_id, seller_id, store_name, marketplace_id,
+        access_token, refresh_token, access_token_expires_at,
+        status, ebay_username
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *`,
       [
         userId,
@@ -353,6 +362,7 @@ export class EbayService implements OnModuleInit {
         this.encryptToken(tokenResponse.refresh_token),
         expiresAt.toISOString(),
         EBAY_ACCOUNT_STATUS.ACTIVE,
+        username,
       ]
     );
 
@@ -1263,6 +1273,7 @@ export class EbayService implements OnModuleInit {
       id: entity.id,
       userId: entity.user_id,
       sellerId: entity.seller_id,
+      ebayUsername: entity.ebay_username ?? null,
       storeName: entity.store_name,
       marketplaceId: entity.marketplace_id,
       status: entity.status,

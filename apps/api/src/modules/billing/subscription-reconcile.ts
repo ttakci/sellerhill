@@ -9,7 +9,9 @@
 // writer, so a reconciled row is byte-for-byte what a webhook would have
 // written.
 
+import type { BillingRepositoryService } from './billing-repository.service';
 import { type ParsedStripeEvent } from './billing.types';
+import { extractStripeSubscriptionFields } from './stripe-event-applier';
 
 /**
  * The synthetic envelope's event type. Must be one
@@ -49,4 +51,50 @@ export function resolveReconcilePlanId(subscription: unknown): string | null {
   }
   const meta = ((subscription as Record<string, unknown>).metadata ?? {}) as Record<string, unknown>;
   return typeof meta.plan_id === 'string' && meta.plan_id.length > 0 ? meta.plan_id : null;
+}
+
+/**
+ * Write a raw Stripe subscription onto a local customer, exactly as the
+ * webhook would: the one shared mapper, the one repository writer, then close
+ * any local trial rows.
+ *
+ * Used by the two paths that do NOT come from a webhook — the checkout return
+ * page and the hourly reconcile — so a subscription that exists in Stripe is
+ * never missing locally just because its webhook was lost. Returns false,
+ * writing nothing, for a status this system does not track or a subscription
+ * with no plan_id metadata (created outside our checkout).
+ */
+export async function applyProviderSubscription(
+  repository: Pick<
+    BillingRepositoryService,
+    'upsertSubscriptionByProvider' | 'endTrialSubscriptionsForUser'
+  >,
+  customer: { id: string; userId: string | null },
+  subscription: unknown,
+): Promise<boolean> {
+  const fields = extractStripeSubscriptionFields(buildReconcileEvent(subscription));
+  if (!fields) {
+    return false;
+  }
+  const planId = resolveReconcilePlanId(subscription);
+  if (!planId) {
+    return false;
+  }
+  // Subscription FIRST, trial close second — the order the operator CLI uses,
+  // and for the same reason: if the trial close ran first and the upsert then
+  // failed, the account would be left with an ended trial and no subscription,
+  // i.e. suspended by the very path meant to un-suspend it.
+  const row = await repository.upsertSubscriptionByProvider(customer.id, planId, fields);
+  if (!row) {
+    return false;
+  }
+  if (customer.userId) {
+    try {
+      await repository.endTrialSubscriptionsForUser(customer.userId);
+    } catch {
+      // Best-effort: a provider-backed row already outranks a trial row in
+      // findCurrentSubscription, so a lingering trial cannot mask the payment.
+    }
+  }
+  return true;
 }

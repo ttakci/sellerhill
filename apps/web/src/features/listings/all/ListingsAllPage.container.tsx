@@ -74,7 +74,7 @@ export const ListingsAllPage: React.FC = () => {
       { value: '', label: t('listings.filters.allStores') },
       ...(ebayAccountsData?.items ?? []).map((acc) => ({
         value: acc.id,
-        label: acc.storeName || acc.sellerId || acc.id,
+        label: acc.storeName || acc.ebayUsername || acc.sellerId || acc.id,
       })),
     ],
     [ebayAccountsData?.items, t]

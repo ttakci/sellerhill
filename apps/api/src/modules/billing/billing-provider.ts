@@ -20,6 +20,12 @@ import Stripe from 'stripe';
 import type { BillingConfig } from './billing-helpers';
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type BillingCheckoutDto, type BillingPortalDto } from './billing.types';
+import { ScheduleSource } from './price-migration';
+import {
+  syncStripeCatalog,
+  type CatalogQuery,
+  type CatalogSyncResult,
+} from './stripe-catalog-sync';
 import { mapStripeInvoice, type StripeInvoiceLike } from './stripe-invoice-mapper';
 
 /**
@@ -37,7 +43,7 @@ import { mapStripeInvoice, type StripeInvoiceLike } from './stripe-invoice-mappe
  * read Stripe's upgrade notes, then re-verify the subscription payload fields
  * `extractStripeSubscriptionFields` reads.
  */
-const STRIPE_API_VERSION = '2026-07-29.dahlia' satisfies Stripe.LatestApiVersion;
+export const STRIPE_API_VERSION = '2026-07-29.dahlia' satisfies Stripe.LatestApiVersion;
 
 /**
  * Idempotency key for a write whose accidental repetition costs real money.
@@ -177,7 +183,24 @@ export interface BillingProviderPort {
    * mistaken for "this subscription is gone".
    */
   fetchSubscription(providerSubscriptionId: string): Promise<unknown>;
+  /**
+   * The subscription a completed Checkout Session produced, with the two ids
+   * needed to prove the session belongs to the caller. Used on the checkout
+   * return page so a first subscription is recorded without waiting for (or
+   * depending on) the webhook. Null when the session has no subscription yet.
+   */
+  retrieveCheckoutSubscription(sessionId: string): Promise<{
+    customerId: string | null;
+    clientReferenceId: string | null;
+    subscription: unknown;
+  } | null>;
+  /** Every subscription Stripe holds for a customer, newest first, raw. */
+  listCustomerSubscriptions(providerCustomerId: string): Promise<unknown[]>;
   scheduleDowngrade(req: ChangePlanRequest): Promise<void>;
+  /** Read one subscription for the automatic price migration. Throws on failure. */
+  inspectForPriceMigration(providerSubscriptionId: string): Promise<PriceMigrationInspection>;
+  /** Mirror the local catalog into Stripe and verify it — see stripe-catalog-sync.ts. */
+  syncCatalog(query: CatalogQuery): Promise<CatalogSyncResult>;
   /**
    * Release a pending downgrade schedule — e.g. because the seller upgraded
    * before it took effect — leaving the subscription exactly as it currently
@@ -253,6 +276,35 @@ export interface ChangePlanRequest {
    *  the request so the provider's own logs/metadata can record it; the
    *  service has already used it to pick which provider method to call. */
   direction: PlanChangeDirection;
+  /**
+   * Who is scheduling this change, written to the Stripe schedule's metadata.
+   * The automatic price migration must be able to tell ITS schedule apart from
+   * a downgrade the seller chose: it may replace its own, never theirs, and the
+   * billing page must not offer the seller a "cancel" button for a price
+   * change. Defaults to a seller plan change.
+   */
+  scheduleSource?: ScheduleSource;
+}
+
+
+/** What the price-migration job needs to know about one live subscription. */
+export interface PriceMigrationInspection {
+  status: string;
+  /** The Stripe Price the subscription is billed at today. */
+  priceId: string | null;
+  unitAmount: number | null;
+  currency: string | null;
+  cancelAtPeriodEnd: boolean;
+  /** When the current period ends — i.e. when a scheduled price takes effect. */
+  currentPeriodEnd: Date | null;
+  /**
+   * A change that is still to come: a schedule phase starting in the future.
+   * Null when there is none. A schedule whose last phase has already begun is
+   * NOT pending — Stripe leaves such schedules attached for ever, so treating
+   * "has a schedule" as "has a pending change" would skip every seller who has
+   * ever downgraded.
+   */
+  pendingChange: { source: string | null; priceId: string | null } | null;
 }
 
 /** Everything a one-time top-up checkout needs. */
@@ -601,6 +653,79 @@ export class StripeBillingProvider implements BillingProviderPort {
     }
   }
 
+  async retrieveCheckoutSubscription(sessionId: string): Promise<{
+    customerId: string | null;
+    clientReferenceId: string | null;
+    subscription: unknown;
+  } | null> {
+    const stripe = this.getClient();
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription'],
+    });
+    if (session.mode !== 'subscription' || !session.subscription) {
+      return null;
+    }
+    const subscription =
+      typeof session.subscription === 'string'
+        ? await stripe.subscriptions.retrieve(session.subscription)
+        : session.subscription;
+    const customerId =
+      typeof session.customer === 'string' ? session.customer : (session.customer?.id ?? null);
+    return {
+      customerId,
+      clientReferenceId: session.client_reference_id ?? null,
+      subscription,
+    };
+  }
+
+  async listCustomerSubscriptions(providerCustomerId: string): Promise<unknown[]> {
+    const stripe = this.getClient();
+    const page = await stripe.subscriptions.list({
+      customer: providerCustomerId,
+      status: 'all',
+      limit: 10,
+    });
+    return page.data;
+  }
+
+  async inspectForPriceMigration(
+    providerSubscriptionId: string,
+  ): Promise<PriceMigrationInspection> {
+    const stripe = this.getClient();
+    const sub = await stripe.subscriptions.retrieve(providerSubscriptionId);
+    const item = sub.items.data[0];
+    const price = item?.price;
+
+    let pendingChange: PriceMigrationInspection['pendingChange'] = null;
+    const scheduleId = typeof sub.schedule === 'string' ? sub.schedule : (sub.schedule?.id ?? null);
+    if (scheduleId) {
+      const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const future = schedule.phases.find((phase) => phase.start_date > nowSeconds);
+      if (future) {
+        const ref = future.items[0]?.price;
+        pendingChange = {
+          source: typeof schedule.metadata?.source === 'string' ? schedule.metadata.source : null,
+          priceId: typeof ref === 'string' ? ref : (ref?.id ?? null),
+        };
+      }
+    }
+
+    return {
+      status: sub.status,
+      priceId: price?.id ?? null,
+      unitAmount: price?.unit_amount ?? null,
+      currency: price?.currency ?? null,
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      currentPeriodEnd: item?.current_period_end ? new Date(item.current_period_end * 1000) : null,
+      pendingChange,
+    };
+  }
+
+  async syncCatalog(query: CatalogQuery): Promise<CatalogSyncResult> {
+    return syncStripeCatalog(query, this.getClient());
+  }
+
   async scheduleDowngrade(req: ChangePlanRequest): Promise<void> {
     const stripe = this.getClient();
     try {
@@ -638,6 +763,9 @@ export class StripeBillingProvider implements BillingProviderPort {
 
       await stripe.subscriptionSchedules.update(schedule.id, {
         end_behavior: 'release',
+        // Overwritten on every write, so a seller downgrade that replaces an
+        // automatic price migration (or the reverse) is labelled correctly.
+        metadata: { source: req.scheduleSource ?? ScheduleSource.PLAN_CHANGE },
         // `automatic_tax` is a real field on BOTH `default_settings` AND each
         // individual phase ("Automatic tax settings for this phase" per the
         // Stripe SDK's own Phase type) — and the phase reconstruction below
@@ -786,7 +914,13 @@ export class StripeBillingProvider implements BillingProviderPort {
       let scheduledAt: string | null = null;
       if (scheduleId) {
         const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
-        const pending = schedule.phases[1];
+        // An automatic price migration keeps the seller on the SAME plan, so it
+        // is not a "scheduled plan change" — surfacing it would show "switches
+        // to Growth" to someone already on Growth, next to a Cancel button that
+        // would quietly undo the migration. The seller learns about it by the
+        // price-change e-mail instead.
+        const pending =
+          schedule.metadata?.source === ScheduleSource.PRICE_MIGRATION ? undefined : schedule.phases[1];
         // A phase whose start_date has already passed is not "pending" — it
         // IS the current phase now. scheduleDowngrade's final phase carries
         // no end_date, so the schedule never "completes" (end_behavior:

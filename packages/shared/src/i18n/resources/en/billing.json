@@ -280,7 +280,8 @@
       "listingQuotaExhausted": "You have used all the active listings your plan allows. End a listing to free a slot, or move up a plan.",
       "alreadySubscribed": "You already have an active subscription. Use \"Switch plan\" to change it instead of subscribing again.",
       "invoicesFailed": "Invoice history could not be loaded. Please try again in a moment.",
-      "paymentRequiresAction": "Your bank asked for extra confirmation for this card, so the plan change was cancelled and you are still on your current plan. Open “Manage billing” to update your payment method, then try again."
+      "paymentRequiresAction": "Your bank asked for extra confirmation for this card, so the plan change was cancelled and you are still on your current plan. Open “Manage billing” to update your payment method, then try again.",
+      "invalidCheckoutSession": "This payment confirmation link is not valid."
     },
     "actions": {
       "subscribe": "Subscribe",

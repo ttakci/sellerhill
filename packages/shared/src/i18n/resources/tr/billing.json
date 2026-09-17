@@ -280,7 +280,8 @@
       "listingQuotaExhausted": "Paketinizin izin verdiği tüm aktif ilan hakkını kullandınız. Yer açmak için bir ilanı sonlandırın ya da üst pakete geçin.",
       "alreadySubscribed": "Zaten aktif bir aboneliğiniz var. Yeniden abone olmak yerine \"Planı değiştir\" ile geçiş yapın.",
       "invoicesFailed": "Fatura geçmişi yüklenemedi. Lütfen biraz sonra tekrar deneyin.",
-      "paymentRequiresAction": "Bankanız bu kart için ek doğrulama istedi; plan değişikliği iptal edildi ve mevcut paketinizde kaldınız. “Faturalandırmayı yönet” ile ödeme yönteminizi güncelleyip tekrar deneyin."
+      "paymentRequiresAction": "Bankanız bu kart için ek doğrulama istedi; plan değişikliği iptal edildi ve mevcut paketinizde kaldınız. “Faturalandırmayı yönet” ile ödeme yönteminizi güncelleyip tekrar deneyin.",
+      "invalidCheckoutSession": "Bu ödeme onay bağlantısı geçerli değil."
     },
     "actions": {
       "subscribe": "Abone ol",

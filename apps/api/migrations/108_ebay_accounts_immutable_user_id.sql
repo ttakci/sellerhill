@@ -1,0 +1,32 @@
+-- eBay stores are identified by eBay's IMMUTABLE user id, not the username
+-- (2026-09-17).
+--
+-- `ebay_accounts.seller_id` — and the `ebay_trial_ledger` key built from it —
+-- held the eBay USERNAME, preferred over the immutable id when both came back
+-- from the Commerce Identity API. eBay's own reference for that API is
+-- explicit about the difference:
+--
+--   userId   — "The eBay immutable user ID of the user's account and can
+--               always be used to identify the user."
+--   username — "This value can be changed by the user." (and, since
+--               2025-09-26, is not returned at all for some U.S. users)
+--
+-- Keying on the username had two real consequences. A seller could rename
+-- their eBay account and connect it again for a SECOND free trial, because the
+-- trial ledger no longer recognised the store. And an honest seller who renamed
+-- and then reconnected got a brand-new store row, stranding every order and
+-- listing on the old one.
+--
+-- From this migration on, `seller_id` receives the immutable id and the
+-- username is kept only for display, in `ebay_username`.
+--
+-- NO BACKFILL, deliberately. The immutable id cannot be derived in SQL — it
+-- needs the seller's own OAuth token. And rows written before this change are
+-- NOT adopted by username on reconnect: a username eBay has released can be
+-- taken by a different person, and matching on it would hand that store's
+-- order history to a stranger. The only such row in production belongs to the
+-- operator's own store with no data behind it, and is removed and reconnected
+-- by hand.
+
+ALTER TABLE ebay_accounts
+  ADD COLUMN IF NOT EXISTS ebay_username VARCHAR(255);

@@ -41,7 +41,8 @@
       "ebayTrialAlreadyUsed": "Bu eBay mağazası ücretsiz deneme hakkını kullanmış. Bağlamak için bir paket seçin.",
       "noAuthorizationCode": "eBay'den yetkilendirme kodu alınamadı",
       "storeOwnedByAnotherAccount": "Bu eBay mağazası başka bir SellerHill hesabına bağlı. Devretmek için destek ile iletişime geçin.",
-      "accountNotFound": "Bu eBay mağazası bulunamadı."
+      "accountNotFound": "Bu eBay mağazası bulunamadı.",
+      "identityUnavailable": "eBay hesabınızı eBay üzerinden doğrulayamadık. Hiçbir şey bağlanmadı; lütfen biraz sonra tekrar deneyin."
     },
     "onboarding": {
       "title": "eBay Mağazanızı Bağlayın",

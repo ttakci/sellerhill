@@ -50,6 +50,7 @@ import * as dotenv from 'dotenv';
 import Stripe from 'stripe';
 
 import { DatabaseService } from '../common/database/database.service';
+import { STRIPE_API_VERSION } from '../modules/billing/billing-provider';
 import { BillingRepositoryService } from '../modules/billing/billing-repository.service';
 import { extractStripeSubscriptionFields } from '../modules/billing/stripe-event-applier';
 
@@ -132,8 +133,10 @@ async function run(): Promise<number> {
   // no internal config reads straight from process.env.
   const database = new DatabaseService(new ConfigService());
   const repository = new BillingRepositoryService(database);
-  // Same construction as StripeBillingProvider.getClient (no apiVersion pin).
-  const stripe = new Stripe(stripeSecretKey);
+  // Same pinned API version as StripeBillingProvider — an operator tool that
+  // read payloads in a different shape than the app writes them would be
+  // exactly the drift the pin exists to prevent.
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: STRIPE_API_VERSION });
 
   try {
     const userRows = await database.query<{ id: string }>(

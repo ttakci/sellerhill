@@ -44,8 +44,8 @@ export const StoresPageComponent = ({
                 <StatusBadge status={account.status} size="sm" />
               </S.StoreCardHeader>
               <S.StoreCardBody>
-                <Text variant="h4" weight="semibold">{account.storeName || account.sellerId}</Text>
-                <Text variant="body-sm" color="text.secondary">{account.sellerId}</Text>
+                <Text variant="h4" weight="semibold">{account.storeName || account.ebayUsername || account.sellerId}</Text>
+                <Text variant="body-sm" color="text.secondary">{account.ebayUsername || account.sellerId}</Text>
               </S.StoreCardBody>
               <S.StoreMeta>
                 <Text variant="caption" color="text.tertiary">

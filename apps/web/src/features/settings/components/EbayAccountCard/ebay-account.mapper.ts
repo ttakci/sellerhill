@@ -12,8 +12,11 @@ export const toEbayStoreCardView = (
   t: TFunction
 ): EbayStoreCardView => ({
   id: account.id,
-  displayName: account.storeName || account.sellerId,
-  sellerId: account.sellerId,
+  // sellerId is eBay's opaque immutable id since migration 108 — show the
+  // username wherever a person reads it, and fall back to the id only when
+  // eBay returned no username at all.
+  displayName: account.storeName || account.ebayUsername || account.sellerId,
+  sellerId: account.ebayUsername || account.sellerId,
   // Same i18n keys the marketplace picker resolves through (getEbayMarketplaceOptions)
   // — this used to be its own drifted "eBay US"-style formatter.
   marketplaceLabel: getEbayMarketplaceLabel(t, account.marketplaceId),

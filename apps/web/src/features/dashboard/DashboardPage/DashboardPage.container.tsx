@@ -212,7 +212,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
         onClick: () => setStoreId(ALL_STORES),
       },
       ...ebayAccounts.map((account) => ({
-        label: account.storeName || account.sellerId,
+        label: account.storeName || account.ebayUsername || account.sellerId,
         icon: storeId === account.id ? ('check' as const) : undefined,
         onClick: () => setStoreId(account.id),
       })),
@@ -225,7 +225,7 @@ export const DashboardPageContainer = (): React.ReactElement => {
       return t('dashboard.allStores');
     }
     const account = ebayAccounts.find((entry) => entry.id === storeId);
-    return account?.storeName || account?.sellerId || t('dashboard.allStores');
+    return account?.storeName || account?.ebayUsername || account?.sellerId || t('dashboard.allStores');
   }, [storeId, ebayAccounts, t]);
 
   /* ─── errors ─── */

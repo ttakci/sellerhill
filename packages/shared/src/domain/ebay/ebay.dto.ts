@@ -28,7 +28,10 @@ export class EbayAccountDto {
 export class EbayAccountPublicDto {
   id!: string;
   userId!: string;
+  /** eBay's IMMUTABLE user id — the store's identity. Opaque; not for display. */
   sellerId!: string;
+  /** The seller's eBay username, for display. Can change, may be null. */
+  ebayUsername?: string | null;
   storeName?: string;
   marketplaceId!: EbayMarketplaceId;
   status!: EbayAccountStatus;
