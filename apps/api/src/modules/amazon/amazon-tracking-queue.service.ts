@@ -55,7 +55,11 @@ export class AmazonTrackingQueueService implements OnModuleInit {
        FROM orders
        WHERE amazon_account_id IS NOT NULL
          AND amazon_order_id IS NOT NULL
-         AND status NOT IN ('completed', 'cancelled', 'delivered')`
+         AND status NOT IN ('completed', 'cancelled', 'delivered')
+         -- Orders from listings outside the plan limit are never tracked
+         -- (migration 106). Excluding them here also removes a scheduler one
+         -- may still have, as an orphan, on the next boot.
+         AND listing_over_plan_limit = FALSE`
     );
 
     this.logger.log(`Found ${trackedOrders.length} orders needing Amazon tracking`);

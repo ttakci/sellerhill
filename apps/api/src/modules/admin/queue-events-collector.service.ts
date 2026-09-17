@@ -50,6 +50,7 @@ export const OBSERVED_QUEUE_NAMES = [
   'keepa-refresh',
   'buyer-message',
   'billing-trial-expiry',
+  'billing-listing-plan-limit',
   'data-retention',
 ] as const;
 

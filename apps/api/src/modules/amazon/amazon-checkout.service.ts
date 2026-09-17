@@ -4,6 +4,7 @@ import * as path from 'path';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {
   AmazonMarketplace,
+  AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum,
   AutoFulfillStatus,
   buildAmazonProductUrl,
   buildAmazonSiteUrl,
@@ -336,12 +337,26 @@ export class AmazonCheckoutService implements OnModuleInit, OnModuleDestroy {
    */
   async runForOrder(ebayOrderId: string, amazonAccountId: string): Promise<void> {
     // Idempotency: never double-order on BullMQ retry.
-    const [order] = await this.db.query<{ auto_fulfill_status: AutoFulfillStatus }>(
-      `SELECT auto_fulfill_status FROM orders WHERE ebay_order_id = $1`,
+    const [order] = await this.db.query<{ auto_fulfill_status: AutoFulfillStatus; user_id: string }>(
+      `SELECT auto_fulfill_status, user_id FROM orders WHERE ebay_order_id = $1`,
       [ebayOrderId],
     );
     if (!order || shouldSkipFulfillStart(order.auto_fulfill_status)) {
       this.logger.log(`skip fulfill ${ebayOrderId}: status ${order?.auto_fulfill_status}`);
+      return;
+    }
+    // Entitlement is re-checked at EXECUTION, not only at enqueue. The job can
+    // sit in the queue (retry backoff, a busy rate limiter) while the account
+    // lapses, and without this a purchase with real money would still go out
+    // for a suspended seller. Blocked with the suspension reason — the same one
+    // the enqueue gate writes — so `resumeSuspendedAutoFulfill` re-queues it on
+    // its own the moment the seller pays. `block` also releases the AO slot.
+    if (await this.quotaEnforcement.isSuspended(order.user_id)) {
+      await this.block(
+        ebayOrderId,
+        AutoFulfillBlockedReasonEnum.SUBSCRIPTION_SUSPENDED,
+        'subscription suspended at execution time',
+      );
       return;
     }
     // A platform-level proxy gate used to sit here (pool empty/exhausted).

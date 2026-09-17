@@ -47,6 +47,9 @@ interface AmazonOrderRow {
   // Start of the bounded deferral window — first time this order was
   // observed SHIPPED. Stamped with COALESCE so a retry never resets it.
   shipped_detected_at: Date | null;
+  // Fixed at first ingest (migration 106): the listing was outside the plan's
+  // listing limit, so this order gets no shipment tracking.
+  listing_over_plan_limit: boolean;
 }
 
 interface EbayAccountRow {
@@ -111,7 +114,7 @@ export class AmazonTrackingProcessorService extends WorkerHost {
         `SELECT o.id, o.user_id, o.ebay_account_id, o.ebay_order_id, o.status,
                 o.amazon_order_id, o.amazon_account_id, o.amazon_tracking_number,
                 o.amazon_tracking_carrier, o.listing_id, o.quantity,
-                o.shipped_detected_at,
+                o.shipped_detected_at, o.listing_over_plan_limit,
                 l.ebay_item_id as listing_ebay_item_id
          FROM orders o
          LEFT JOIN listings l ON o.listing_id = l.id
@@ -130,6 +133,20 @@ export class AmazonTrackingProcessorService extends WorkerHost {
       // Skip if already in a terminal state
       if ([OrderStatus.COMPLETED, OrderStatus.CANCELLED].includes(order.status)) {
         this.logger.log(`Order ${orderId} is ${order.status}, removing tracking`);
+        await this.trackingQueueService.removeOrderTracking(orderId);
+        return;
+      }
+
+      // An order whose listing was outside the plan's listing limit when it
+      // arrived gets no shipment tracking (and therefore no tracking push or
+      // conversion). Unlike suspension this never changes for the order — the
+      // flag is fixed at ingest — so the scheduler is removed, not kept. One
+      // check here covers every way tracking can start: manual link, auto
+      // cost-capture, boot reconcile and immediate triggers.
+      if (order.listing_over_plan_limit) {
+        this.logger.log(
+          `Order ${orderId}: listing was outside the plan limit at ingest — removing tracking`
+        );
         await this.trackingQueueService.removeOrderTracking(orderId);
         return;
       }

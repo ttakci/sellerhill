@@ -140,6 +140,10 @@ export class RefreshProcessorService extends WorkerHost {
               JOIN billing_subscriptions bs ON bs.customer_id = bc.id
                 AND bs.status IN (${entitledStatuses})`
       : '';
+    // Same cost stop for listings past the owner's plan limit (only the oldest
+    // listings up to the limit are automated — see ListingPlanLimitProcessor).
+    // A product whose only active listings are over the limit is not refreshed.
+    const planLimitFilter = enforcementOn ? 'AND l.over_plan_limit = FALSE' : '';
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (
@@ -150,6 +154,7 @@ export class RefreshProcessorService extends WorkerHost {
              SELECT 1 FROM listings l
              ${entitlementJoin}
              WHERE l.product_id = p.id AND l.status = '${ListingStatus.ACTIVE}'
+               ${planLimitFilter}
            )
          ORDER BY p.next_refresh_at ASC NULLS FIRST
          LIMIT $1

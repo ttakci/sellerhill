@@ -305,6 +305,39 @@ export const BillingPage: React.FC = () => {
     });
   }, [pendingChange, t, localeCfg.locale]);
 
+  /*
+   * Downgrade-only warning: the seller holds more active listings than the new
+   * plan allows. Nothing is ended for them — from the effective date only the
+   * oldest listings up to the new limit keep price/stock sync and automated
+   * orders — so they are told the number and the date while they can still
+   * choose which listings to keep.
+   *
+   * "Active" is read from `summary.quotas`, the same figure the quota gate
+   * refuses on, so the warning cannot disagree with what the backend counts.
+   */
+  const planChangeListingLimitWarning = useMemo(() => {
+    if (!pendingChange || pendingChange.preview.direction !== PlanChangeDirection.DOWNGRADE) {
+      return null;
+    }
+    const targetPlan = catalog?.plans.find((plan) => plan.id === pendingChange.planId);
+    // Read directly, not via `planLimitValue`: that helper maps a missing limit
+    // to 0, which here would warn that every listing is over a limit that does
+    // not exist.
+    const newLimit = targetPlan?.limits[BillingLimitKey.LISTINGS_PER_MONTH]?.limitValue ?? null;
+    const activeListings =
+      summary?.quotas.find((quota) => quota.limitKey === BillingLimitKey.LISTINGS_PER_MONTH)?.used ?? null;
+    if (newLimit === null || newLimit === -1 || activeListings === null || activeListings <= newLimit) {
+      return null;
+    }
+    const numberFormat = new Intl.NumberFormat(localeCfg.locale);
+    return t('billing:billing.planChange.listingLimitWarning', {
+      date: formatDate(pendingChange.preview.effectiveAt, localeCfg.locale, BILLING_DATE_OPTIONS),
+      active: numberFormat.format(activeListings),
+      limit: numberFormat.format(newLimit),
+      over: numberFormat.format(activeListings - newLimit),
+    });
+  }, [pendingChange, catalog, summary, t, localeCfg.locale]);
+
   // Assembled by the shared builder so this list and the identical one in the
   // top-right profile dropdown can never drift. `summary.quotas` is computed
   // server-side from what actually exists — `usagePeriods[].usedQty` (what this
@@ -605,6 +638,7 @@ export const BillingPage: React.FC = () => {
       paymentMethod={details?.paymentMethod ?? null}
       isPlanChangeOpen={Boolean(pendingChange)}
       planChangeBody={planChangeBody}
+      planChangeListingLimitWarning={planChangeListingLimitWarning}
       isChangingPlan={isChangingPlan}
       onConfirmPlanChange={handleConfirmPlanChange}
       onCancelPlanChange={handleCancelPlanChange}

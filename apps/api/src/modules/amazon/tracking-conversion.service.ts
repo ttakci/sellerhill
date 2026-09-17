@@ -115,6 +115,9 @@ interface ConversionOrderRow {
    *  API has no update endpoint, so once this is set the buyer's number can
    *  never be corrected — see `shouldRefuseOnDemandConversion`. */
   ebay_tracking_pushed_number: string | null;
+  /** Fixed at first ingest (migration 106): the listing was outside the
+   *  plan's listing limit, so the order gets no conversion. */
+  listing_over_plan_limit: boolean;
   /** Everything below is only needed for the Aquiline sequence (profile
    *  resolution + `upsertOrders`/`assign` bodies) — joined in from
    *  `amazon_accounts`/`listings`, never written by this service. */
@@ -577,6 +580,18 @@ export class TrackingConversionService {
       };
     }
 
+    // Orders from listings outside the plan's listing limit are not converted —
+    // automatically or on demand. Refused before the quota or the provider is
+    // touched, with its own reason so the seller learns WHY rather than seeing
+    // a generic failure.
+    if (order.listing_over_plan_limit) {
+      return {
+        converted: false,
+        trackingNumber: null,
+        reasonKey: 'orders.errors.listingOverPlanLimit',
+      };
+    }
+
     // eBay's Fulfillment API has no update endpoint (createShippingFulfillment
     // is POST-only), so once the raw Amazon number has been pushed the buyer's
     // tracking number can never be corrected. Buying a conversion now would be
@@ -848,6 +863,7 @@ export class TrackingConversionService {
       `SELECT o.id, o.user_id, o.ebay_account_id, o.shipping_address, o.auto_fulfill_status,
               o.converted_tracking_number, o.converted_tracking_carrier,
               o.tracking_provider_shipment_id, o.ebay_tracking_pushed_number,
+              o.listing_over_plan_limit,
               o.amazon_account_id, o.amazon_order_id,
               o.amazon_order_url, o.amazon_tracking_url, o.order_date,
               aa.marketplace AS amazon_marketplace, aa.email AS amazon_account_email,

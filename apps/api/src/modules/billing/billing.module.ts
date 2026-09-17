@@ -24,6 +24,10 @@ import { BillingRepositoryService } from './billing-repository.service';
 import { BillingWebhookProcessor } from './billing-webhook-processor';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
+import {
+  BILLING_LISTING_PLAN_LIMIT_QUEUE,
+  ListingPlanLimitProcessor,
+} from './listing-plan-limit.processor';
 import { QuotaEnforcementService } from './quota-enforcement.service';
 import { BILLING_TRIAL_EXPIRY_QUEUE, TrialExpiryProcessor } from './trial-expiry.processor';
 
@@ -31,12 +35,16 @@ export const BILLING_PROVIDER_TOKEN = 'BILLING_PROVIDER';
 export const BILLING_CONFIG_TOKEN = 'BILLING_CONFIG';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: BILLING_TRIAL_EXPIRY_QUEUE })],
+  imports: [
+    BullModule.registerQueue({ name: BILLING_TRIAL_EXPIRY_QUEUE }),
+    BullModule.registerQueue({ name: BILLING_LISTING_PLAN_LIMIT_QUEUE }),
+  ],
   controllers: [BillingController],
   providers: [
     BillingRepositoryService,
     QuotaEnforcementService,
     TrialExpiryProcessor,
+    ListingPlanLimitProcessor,
     {
       // BillingService injects this token and treats the result as the port,
       // so it never needs a Stripe client of its own.
