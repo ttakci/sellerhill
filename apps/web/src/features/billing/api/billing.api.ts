@@ -180,6 +180,20 @@ export const billingApi = baseApi.injectEndpoints({
         { type: 'Billing', id: 'DETAILS' },
       ],
     }),
+
+    /**
+     * Record the subscription a just-completed checkout created, from the
+     * checkout return page — so a first subscription never depends on the
+     * webhook alone. The backend verifies the session belongs to this seller.
+     */
+    confirmCheckout: builder.mutation<{ applied: boolean }, { sessionId: string }>({
+      query: (body) => ({ url: '/billing/checkout/confirm', method: 'POST', body }),
+      invalidatesTags: [
+        { type: 'Billing', id: 'SUMMARY' },
+        { type: 'Billing', id: 'DETAILS' },
+        { type: 'Billing', id: 'INVOICES' },
+      ],
+    }),
   }),
 });
 
@@ -194,4 +208,5 @@ export const {
   useGetBillingInvoicesQuery,
   usePreviewPlanChangeMutation,
   useCancelScheduledChangeMutation,
+  useConfirmCheckoutMutation,
 } = billingApi;

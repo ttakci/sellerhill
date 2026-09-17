@@ -8,12 +8,19 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 import type { BillingProviderPort } from './billing-provider';
 import { BillingRepositoryService } from './billing-repository.service';
 import { BILLING_PROVIDER_TOKEN } from './billing.tokens';
-import { extractStripeSubscriptionFields } from './stripe-event-applier';
-import { buildReconcileEvent, resolveReconcilePlanId } from './subscription-reconcile';
+import { applyProviderSubscription } from './subscription-reconcile';
 
 export const BILLING_RECONCILE_QUEUE = 'billing-subscription-reconcile';
 const BILLING_RECONCILE_JOB = 'reconcile-subscriptions';
 const DEFAULT_RECONCILE_CRON = '41 * * * *';
+/**
+ * How far back a checkout still counts as "may have paid, webhook lost".
+ * Stripe retries a webhook for up to three days, so past that window a missing
+ * row is an abandoned checkout, not a lost event.
+ */
+const RECENT_CHECKOUT_HOURS = 72;
+/** Stripe statuses that mean a checkout really produced a subscription. */
+const LIVE_PROVIDER_STATUSES = new Set(['active', 'trialing', 'past_due', 'unpaid']);
 
 /**
  * Hourly safety net for subscriptions whose paid period has run out locally.
@@ -112,12 +119,66 @@ export class SubscriptionReconcileProcessor extends WorkerHost implements OnModu
       }
     }
 
-    if (candidates.length > 0) {
+    const recovered = await this.recoverMissingFirstSubscriptions();
+
+    if (candidates.length > 0 || recovered > 0) {
       this.logger.log(
-        `Subscription reconcile: re-read ${candidates.length} at-risk subscription(s), updated ${updated}.`,
+        `Subscription reconcile: re-read ${candidates.length} at-risk subscription(s), updated ${updated}; ` +
+          `recovered ${recovered} subscription(s) missing locally.`,
       );
     }
-    return { checked: candidates.length, updated };
+    return { checked: candidates.length, updated: updated + recovered };
+  }
+
+  /**
+   * A seller paid, but `customer.subscription.created` never reached us and
+   * they closed the tab before the checkout return page could confirm it. The
+   * at-risk sweep above cannot see this case — it reads subscriptions that
+   * already have a local row, and this one has none — so without this pass the
+   * seller stays on their trial, or stays suspended, indefinitely.
+   *
+   * Scoped to customers who opened a checkout recently and still have no
+   * provider-backed row; an abandoned checkout returns nothing and writes
+   * nothing. Fail-soft per customer.
+   */
+  private async recoverMissingFirstSubscriptions(): Promise<number> {
+    let recovered = 0;
+    const customers = await this.repository.listRecentCheckoutsWithoutSubscription(
+      RECENT_CHECKOUT_HOURS,
+    );
+    for (const customer of customers) {
+      try {
+        const subscriptions = await this.provider.listCustomerSubscriptions(
+          customer.providerCustomerId,
+        );
+        const live = subscriptions.find((sub) =>
+          LIVE_PROVIDER_STATUSES.has(String((sub as { status?: unknown }).status)),
+        );
+        if (!live) {
+          continue;
+        }
+        if (
+          await applyProviderSubscription(
+            this.repository,
+            { id: customer.customerId, userId: customer.userId },
+            live,
+          )
+        ) {
+          recovered += 1;
+          this.logger.warn(
+            `Recovered a subscription with no local row for customer ${customer.customerId} — ` +
+              'its webhook never arrived; check the Stripe webhook endpoint.',
+          );
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Missing-subscription recovery failed for customer ${customer.customerId}: ${
+            (err as Error).message
+          }`,
+        );
+      }
+    }
+    return recovered;
   }
 
   /** Returns true when the local row was re-written from Stripe's answer. */
@@ -138,29 +199,14 @@ export class SubscriptionReconcileProcessor extends WorkerHost implements OnModu
       return false;
     }
 
-    const fields = extractStripeSubscriptionFields(buildReconcileEvent(subscription));
-    if (!fields) {
-      // A status this system does not track ('incomplete' / 'paused'). Not an
-      // error, and not something to guess at.
-      return false;
-    }
-    const planId = resolveReconcilePlanId(subscription);
-    if (!planId) {
-      this.logger.warn(
-        `Subscription ${candidate.providerSubscriptionId} carries no plan_id metadata — cannot map it to a local plan.`,
-      );
-      return false;
-    }
-
-    // allowPeriodRewind stays FALSE here, unlike the operator CLI. This job is
-    // unattended and runs against every at-risk row, so it may only move a
-    // period FORWARD on Stripe's own evidence; repairing a corrupted earlier
-    // start stays a deliberate, per-account operator action.
-    const row = await this.repository.upsertSubscriptionByProvider(
-      candidate.customerId,
-      planId,
-      fields,
+    // Same writer as the webhook and the checkout return page. allowPeriodRewind
+    // stays FALSE (the helper never passes it): an unattended sweep may only
+    // move a period FORWARD on Stripe's own evidence; repairing a corrupted
+    // earlier start stays a deliberate, per-account operator action.
+    return applyProviderSubscription(
+      this.repository,
+      { id: candidate.customerId, userId: candidate.userId },
+      subscription,
     );
-    return Boolean(row);
   }
 }

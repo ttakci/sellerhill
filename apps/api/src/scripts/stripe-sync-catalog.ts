@@ -30,6 +30,8 @@ import * as dotenv from 'dotenv';
 import { Pool } from 'pg';
 import Stripe from 'stripe';
 
+import { STRIPE_API_VERSION } from '../modules/billing/billing-provider';
+
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const SAAS_TAX_CODE = 'txcd_10103001';
@@ -121,7 +123,10 @@ async function run(): Promise<number> {
     return 1;
   }
 
-  const stripe = new Stripe(stripeSecretKey);
+  // Same pinned API version as StripeBillingProvider — an operator tool that
+  // read payloads in a different shape than the app writes them would be
+  // exactly the drift the pin exists to prevent.
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: STRIPE_API_VERSION });
   // Every already-mirrored row whose Stripe Price no longer matches the local
   // catalog. Collected rather than thrown on, so ONE run reports every
   // divergence instead of stopping at the first.

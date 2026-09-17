@@ -59,6 +59,7 @@ import {
 } from './billing.types';
 import { isCardExpiringSoon } from './payment-method-helpers';
 import { resolveEffectiveEntitlement, resolveQuotaWindow } from './quota-helpers';
+import { applyProviderSubscription } from './subscription-reconcile';
 import { normalizeExpiredTrial, trialEndFrom } from './trial-helpers';
 
 @Injectable()
@@ -330,6 +331,60 @@ export class BillingService {
       }),
     );
     return results.filter((row): row is BillingQuotaUsageDto => row !== null);
+  }
+
+  /**
+   * Record the subscription a just-completed checkout produced, from the
+   * checkout RETURN page, without waiting for the webhook.
+   *
+   * Before this, a first subscription existed locally only once
+   * `customer.subscription.created` arrived. If that one webhook was lost, the
+   * seller had paid and stayed on their trial — or stayed suspended, if the
+   * trial had already run out — and nothing would ever notice: the hourly
+   * reconcile only re-reads subscriptions that already have a local row.
+   * Retrieving the session on the success page is Stripe's own recommendation
+   * for exactly this reason. The webhook still arrives and re-applies the same
+   * values; both go through the same writer, so the result is identical.
+   *
+   * OWNERSHIP IS VERIFIED, because `sessionId` comes from a URL the browser
+   * controls. The session must name THIS user as its client_reference_id and
+   * belong to THIS user's Stripe customer; otherwise nothing is written.
+   * Idempotent — calling it twice writes the same row twice.
+   */
+  async confirmCheckout(userId: string, sessionId: string): Promise<{ applied: boolean }> {
+    if (!this.provider.isConfigured()) {
+      throw new Error('billing.errors.providerNotConfigured');
+    }
+    const customer = await this.repository.findCustomerByUserId(userId);
+    if (!customer?.providerCustomerId) {
+      return { applied: false };
+    }
+    let result: Awaited<ReturnType<BillingProviderPort['retrieveCheckoutSubscription']>>;
+    try {
+      result = await this.provider.retrieveCheckoutSubscription(sessionId);
+    } catch (err) {
+      // Not fatal to the seller: the webhook and the hourly reconcile are both
+      // still coming. Reported, not thrown, so the billing page still loads.
+      this.logger.warn(
+        `Checkout confirm could not read session for user ${userId}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return { applied: false };
+    }
+    if (!result) {
+      return { applied: false };
+    }
+    if (result.clientReferenceId !== userId || result.customerId !== customer.providerCustomerId) {
+      this.logger.warn(
+        `Checkout confirm refused for user ${userId}: session ${sessionId} belongs to another customer`,
+      );
+      return { applied: false };
+    }
+    const applied = await applyProviderSubscription(
+      this.repository,
+      { id: customer.id, userId },
+      result.subscription,
+    );
+    return { applied };
   }
 
   /**
@@ -689,6 +744,11 @@ export class BillingService {
       // mint its own.
       return this.provider.ensureCustomer(userId, customerEmail, client);
     });
+
+    // Mark the checkout as recent, so the hourly reconcile can find this
+    // subscription even if its webhook never arrives and the seller closes
+    // the tab before the return page confirms it. Never blocks a checkout.
+    await this.repository.touchCustomerCheckout(userId).catch(() => undefined);
 
     // Ask Stripe itself, not our tables. This is the layer that cannot be
     // fooled by our own state being stale — and stale state is exactly what

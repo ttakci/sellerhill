@@ -164,57 +164,67 @@ export class EbayOAuthService {
   }
 
   /**
-   * Get seller information from eBay
+   * Resolve who the connected seller is.
+   *
+   * `sellerId` is eBay's IMMUTABLE user id and nothing else. It is the key for
+   * `ebay_accounts (seller_id, marketplace_id)` and for the one-trial-per-store
+   * ledger, so it must be a value the seller cannot change. eBay's Identity API
+   * reference says so directly: `userId` "is the eBay immutable user ID of the
+   * user's account and can always be used to identify the user", while
+   * `username` "can be changed by the user" (and, since 2025-09-26, is not even
+   * returned for some U.S. users). This method used to prefer the username,
+   * which let a renamed account claim a second free trial and gave an honest
+   * seller who renamed a duplicate store on reconnect.
+   *
+   * FAILS CLOSED when the immutable id cannot be read. The previous fallbacks
+   * (a JWT `sub` that eBay user tokens do not carry, a `privilege` call that
+   * returns no user id, then the literal string 'unknown') meant every failed
+   * lookup shared ONE seller id — one seller's trial claim would then block
+   * everyone else's, or collide on the unique key. A refused connect the
+   * seller can simply retry is the correct outcome.
    */
-  async getSellerInfo(accessToken: string): Promise<{ sellerId: string; storeName: string }> {
+  async getSellerInfo(
+    accessToken: string
+  ): Promise<{ sellerId: string; username: string | null; storeName: string }> {
     this.logger.log(`Fetching seller information from eBay APIs (${this.environment})`);
 
-    let sellerId = 'unknown';
-    let storeName = '';
-
-    // Try extracting seller ID from the JWT access token first (most reliable)
-    try {
-      const tokenParts = accessToken.split('.');
-      if (tokenParts.length === 3) {
-        const decoded = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString('utf-8')) as Record<string, string>;
-        sellerId = decoded.sub || decoded.username || decoded.user_id || 'unknown';
-        this.logger.debug(`Extracted seller ID from JWT: ${sellerId}`);
-      }
-    } catch {
-      this.logger.debug('Could not decode access token JWT');
+    interface IdentityData {
+      username?: string;
+      userId?: string;
+      businessName?: string;
     }
-
+    let identity: IdentityData | undefined;
     try {
-      // Get User/Identity info. Deliberately identityApiBaseUrl, not
-      // apiBaseUrl — see the field comment above.
-      const identityResponse = await axios.get(`${this.identityApiBaseUrl}/commerce/identity/v1/user`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      interface IdentityData {
-        username?: string;
-        userId?: string;
-        businessName?: string;
-      }
-      const identityData = identityResponse.data as IdentityData | undefined;
-      if (identityData?.username || identityData?.userId) {
-        sellerId = identityData.username || identityData.userId || sellerId;
-      }
-      storeName = identityData?.businessName || identityData?.username || '';
-
-      this.logger.debug('Identity API Response:', identityData);
+      // Deliberately identityApiBaseUrl, not apiBaseUrl — see the field comment.
+      const identityResponse = await axios.get<IdentityData>(
+        `${this.identityApiBaseUrl}/commerce/identity/v1/user`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      identity = identityResponse.data;
     } catch (error: unknown) {
-      this.logger.warn(
-        'Identity API failed, will try fallback',
+      this.logger.error(
+        'eBay Identity API call failed; refusing the connect rather than guessing the seller',
         error instanceof Error ? error.message : String(error)
       );
+      throw new InternalServerErrorException('ebay.errors.identityUnavailable');
     }
 
+    const sellerId = identity?.userId?.trim();
+    if (!sellerId) {
+      this.logger.error('eBay Identity API returned no immutable userId; refusing the connect');
+      throw new InternalServerErrorException('ebay.errors.identityUnavailable');
+    }
+    // Display only. It can change and may be absent, so nothing keys on it.
+    const username = identity?.username?.trim() || null;
+
+    let storeName = identity?.businessName?.trim() || '';
     try {
-      // Try to get Store specific info (more accurate for store name)
+      // The official store name, when the seller has a Store subscription.
       interface StoreData {
         name?: string;
       }
@@ -224,38 +234,22 @@ export class EbayOAuthService {
           'Content-Type': 'application/json',
         },
       });
-
       if (storeResponse.data?.name) {
         storeName = storeResponse.data.name;
         this.logger.log(`Found official eBay store name: ${storeName}`);
       }
     } catch (error: unknown) {
-      // Many sellers don't have a "Store" subscription, so 404 is common and expected
+      // Many sellers have no Store subscription; a 404 here is normal.
       this.logger.debug(
         'Store API failed (likely no store subscription):',
         error instanceof Error ? error.message : String(error)
       );
     }
 
-    // Final fallback for sellerId if still unknown
-    if (sellerId === 'unknown') {
-      try {
-        interface PrivilegeData {
-          userId?: string;
-        }
-        const fallbackResponse = await axios.get<PrivilegeData>(`${this.apiBaseUrl}/sell/account/v1/privilege`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        sellerId = fallbackResponse.data?.userId || 'unknown';
-      } catch {
-        // No reliable fallback — keep as 'unknown'
-      }
-    }
-
-    return { sellerId, storeName: storeName || sellerId };
+    // Never fall back to the immutable id for a NAME: it is an opaque string,
+    // and store_name reaches buyers through the {{store_name}} message
+    // placeholder. An empty name lets that placeholder use its own default.
+    return { sellerId, username, storeName: storeName || username || '' };
   }
 
   /**

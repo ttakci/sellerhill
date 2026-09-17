@@ -278,6 +278,25 @@ export class EmailService {
     );
   }
 
+  /**
+   * A plan's price is changing and this subscriber is being moved onto it from
+   * their next renewal. Sent by `billing:migrate-price` only AFTER the change is
+   * scheduled in Stripe, so nobody is told about a change that did not happen.
+   */
+  async sendPriceChangeEmail(
+    email: string,
+    firstName: string,
+    details: { planName: string; oldPrice: string; newPrice: string; effectiveDate: string },
+    locale: string = 'en'
+  ): Promise<void> {
+    await this.sendTemplatedEmail(
+      email,
+      'billing_price_change',
+      { firstName, ...details, billingUrl: this.billingUrl(locale) },
+      locale
+    );
+  }
+
   /** The free trial is about to end. Sent once per trial. */
   async sendTrialEndingEmail(
     email: string,

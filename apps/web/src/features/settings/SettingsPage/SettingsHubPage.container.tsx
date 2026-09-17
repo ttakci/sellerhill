@@ -239,7 +239,7 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
     () =>
       (ebayData?.items ?? []).map((acc) => ({
         id: acc.id,
-        name: acc.storeName || acc.sellerId,
+        name: acc.storeName || acc.ebayUsername || acc.sellerId,
       })),
     [ebayData],
   );
