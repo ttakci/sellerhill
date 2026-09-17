@@ -633,6 +633,15 @@ export class BillingService {
     if (claimed) {
       return; // first time this store is seen — its trial is now spent
     }
+    // The SAME user re-linking a store they already claimed is not a second
+    // free ride — it is every disconnect/reconnect, and every re-authorization
+    // after a token problem. The ledger exists to stop a DIFFERENT
+    // registration from farming a fresh trial on a store that already had
+    // one; refusing the original claimant would make self-service reconnect
+    // impossible for exactly the users who are entitled to it.
+    if ((await this.repository.getEbayTrialClaimant(sellerId, marketplaceId)) === userId) {
+      return;
+    }
     if (await this.repository.hasPaidSubscription(userId)) {
       return;
     }

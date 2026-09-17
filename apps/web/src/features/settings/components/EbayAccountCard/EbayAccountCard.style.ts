@@ -56,3 +56,10 @@ export const StoreMetaLine = styled.div`
   gap: ${tkn('spacing.sm')};
   min-width: 0;
 `;
+
+export const StoreActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-top: ${tkn('spacing.sm')};
+  border-top: 1px solid ${tkn('colors.border.secondary')};
+`;

@@ -1056,6 +1056,29 @@ export class BillingRepositoryService {
   }
 
   /**
+   * Who first claimed this store's free trial, or null when the ledger has no
+   * row for it (or the claimant's account has since been deleted —
+   * `first_user_id` is ON DELETE SET NULL precisely so the CLAIM outlives the
+   * account, which is what stops trial farming).
+   *
+   * Exists so `assertEbayStoreMayConnect` can tell two cases apart that
+   * `claimEbayTrial` alone reports identically (it returns false for both):
+   * a DIFFERENT registration trying to farm a second free trial on a store
+   * that already had one, versus the SAME user re-linking a store they
+   * already claimed — which is what every disconnect/reconnect is, and must
+   * not be refused.
+   */
+  async getEbayTrialClaimant(sellerId: string, marketplaceId: string): Promise<string | null> {
+    const rows = await this.databaseService.query<{ first_user_id: string | null }>(
+      `SELECT first_user_id FROM ebay_trial_ledger
+       WHERE seller_id = $1 AND marketplace_id = $2
+       LIMIT 1`,
+      [sellerId, marketplaceId],
+    );
+    return rows[0]?.first_user_id ?? null;
+  }
+
+  /**
    * Whether the user holds an entitlement that is NOT the free trial — i.e. a
    * real subscription that has been paid for. Used to decide whether a store
    * whose trial is already spent may still be connected: a paying customer is

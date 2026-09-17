@@ -14,6 +14,8 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
   stores,
   onConnectNew,
   onViewAll,
+  onDisconnect,
+  disconnectingId,
 }) => {
   const { t } = useTranslation(['ebay', 'translation']);
 
@@ -29,7 +31,13 @@ export const EbayAccountsDrawerComponent: React.FC<EbayAccountsDrawerComponentPr
         <AccountCarousel
           items={stores}
           keyExtractor={(store) => store.id}
-          renderCard={(store) => <EbayAccountCard store={store} />}
+          renderCard={(store) => (
+            <EbayAccountCard
+              store={store}
+              onDisconnect={onDisconnect}
+              isDisconnecting={disconnectingId === store.id}
+            />
+          )}
           onViewAll={onViewAll}
           viewAllLabel={t('translation:settingsHub.drawer.ebayAccounts.viewAll.title')}
         />

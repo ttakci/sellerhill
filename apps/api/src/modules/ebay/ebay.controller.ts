@@ -1,4 +1,15 @@
-import { BadRequestException, Controller, Get, Logger, Query, Redirect, Request, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+  Redirect,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
@@ -106,6 +117,27 @@ export class EbayController {
   async getAccounts(@Request() req: { user: { sub: string } }): Promise<GetEbayAccountsResponse> {
     const userId = req.user.sub;
     return this.ebayService.getAccountsByUserId(userId);
+  }
+
+  @Post('accounts/:accountId/disconnect')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Disconnect a connected eBay store',
+    description:
+      'Stops all automation for the store and discards its stored OAuth tokens. The account record is kept so the ' +
+      'store’s order and listing history survives, and reconnecting the same store later reactivates this same record. ' +
+      'Does not revoke the grant on eBay’s side — the seller does that from eBay’s own third-party app settings.',
+  })
+  @ApiOkResponse({ description: 'eBay account disconnected successfully' })
+  @ApiUnauthorizedResponse({ description: 'User not authenticated' })
+  @ApiForbiddenResponse({ description: 'Email not verified' })
+  async disconnectAccount(
+    @Request() req: { user: { sub: string } },
+    @Param('accountId') accountId: string
+  ): Promise<{ success: true }> {
+    await this.ebayService.disconnectAccount(req.user.sub, accountId);
+    return { success: true };
   }
 
   @Get('business-policies')

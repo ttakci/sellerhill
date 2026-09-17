@@ -211,6 +211,12 @@
       "ebay": {
         "sellerId": "Satıcı ID",
         "connectedSince": "Bağlanma Tarihi",
+        "disconnect": {
+          "action": "Bağlantıyı Kes",
+          "confirmDescription": "Bağlantıyı kestiğinizde bu mağaza için sipariş senkronizasyonu, otomatik satın alma ve kargo takibi güncellemeleri durur. Mevcut siparişleriniz ve ilanlarınız korunur; mağazayı tekrar bağladığınızda her şey geri gelir. eBay tarafındaki yetkiyi de kaldırmak isterseniz, eBay hesabınızdaki \"Üçüncü taraf uygulama erişimi\" ayarlarından SellerHill'i kaldırın.",
+          "confirmLabel": "Bağlantıyı kes",
+          "success": "eBay mağazasının bağlantısı kesildi."
+        },
         "manageStores": {
           "empty": "Henüz bağlı eBay mağaza yok"
         }
