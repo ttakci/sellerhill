@@ -81,8 +81,7 @@
       },
       "switchTo": "Switch to {{plan}}",
       "switchDone": "Your plan has been changed. Stripe will prorate the difference on your next invoice.",
-      "planNamed": "{{plan}} Plan",
-      "taxNote": "Prices exclude VAT and local taxes; any tax that applies is added at checkout."
+      "planNamed": "{{plan}} Plan"
     },
     "planChange": {
       "title": "Confirm plan change",

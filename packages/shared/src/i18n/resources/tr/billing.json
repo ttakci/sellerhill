@@ -81,8 +81,7 @@
       },
       "switchTo": "{{plan}} paketine geç",
       "switchDone": "Paketiniz değiştirildi. Stripe aradaki farkı bir sonraki faturanızda oranlayarak yansıtacak.",
-      "planNamed": "{{plan}} Planı",
-      "taxNote": "Fiyatlara KDV ve yerel vergiler dâhil değildir; geçerli vergi ödeme adımında eklenir."
+      "planNamed": "{{plan}} Planı"
     },
     "planChange": {
       "title": "Plan değişikliğini onaylayın",
