@@ -56,9 +56,6 @@ export interface SettingsHubPageComponentProps {
   selectedEbayMarketplace: EbayMarketplaceId;
   onEbayMarketplaceChange: (value: EbayMarketplaceId) => void;
   isImpersonatingAdmin: boolean;
-  isDeactivateModalOpen: boolean;
-  onOpenDeactivateModal: () => void;
-  onCloseDeactivateModal: () => void;
   // Store configuration
   storeConfigs: StoreSettingsResponse[];
   availableStores: Array<{ id: string; name: string }>;

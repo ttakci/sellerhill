@@ -15,12 +15,10 @@ import type {
 
 import { ConnectEbayPrompt } from '@/domain-ui';
 import { getEbayMarketplaceOptions } from '@/features/ebay/utils/ebayMarketplaceOptions';
-import { DeactivateAccountModal } from '@/features/settings/components/DeactivateAccountModal';
 
 export const EbayAccountGuard = ({ children }: EbayAccountGuardProps): React.ReactElement => {
   const { showMessage, closeMessage } = useUI();
   const { t, i18n } = useTranslation(['ebay', 'translation']);
-  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [selectedMarketplace, setSelectedMarketplace] = useState<EbayMarketplaceId>(
     SUPPORTED_EBAY_MARKETPLACES[0],
   );
@@ -66,22 +64,15 @@ export const EbayAccountGuard = ({ children }: EbayAccountGuardProps): React.Rea
 
   if (!hasAccounts) {
     return (
-      <>
-        <ConnectEbayPrompt
-          onConnect={() => {
-            void getConnectUrl({ marketplaceId: selectedMarketplace });
-          }}
-          onDeactivateAccount={() => setIsDeactivateModalOpen(true)}
-          isLoading={isConnectLoading}
-          marketplaceOptions={getEbayMarketplaceOptions(t)}
-          selectedMarketplace={selectedMarketplace}
-          onMarketplaceChange={setSelectedMarketplace}
-        />
-        <DeactivateAccountModal
-          isOpen={isDeactivateModalOpen}
-          onClose={() => setIsDeactivateModalOpen(false)}
-        />
-      </>
+      <ConnectEbayPrompt
+        onConnect={() => {
+          void getConnectUrl({ marketplaceId: selectedMarketplace });
+        }}
+        isLoading={isConnectLoading}
+        marketplaceOptions={getEbayMarketplaceOptions(t)}
+        selectedMarketplace={selectedMarketplace}
+        onMarketplaceChange={setSelectedMarketplace}
+      />
     );
   }
 

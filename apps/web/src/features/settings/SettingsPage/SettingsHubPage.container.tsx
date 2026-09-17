@@ -44,7 +44,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeDrawer = (searchParams.get(DRAWER_PARAM) as SettingsDrawerKey) ?? null;
-  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [selectedEbayMarketplace, setSelectedEbayMarketplace] = useState<EbayMarketplaceId>(
     SUPPORTED_EBAY_MARKETPLACES[0]
   );
@@ -184,8 +183,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       });
   };
 
-  const handleOpenDeactivateModal = (): void => setIsDeactivateModalOpen(true);
-  const handleCloseDeactivateModal = (): void => setIsDeactivateModalOpen(false);
 
   // Disconnecting a store stops every automation behind it, so it is confirmed
   // first. The pending id doubles as the confirmation's open state — there is
@@ -275,9 +272,6 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
         selectedEbayMarketplace={selectedEbayMarketplace}
         onEbayMarketplaceChange={setSelectedEbayMarketplace}
         isImpersonatingAdmin={isImpersonatingAdmin}
-        isDeactivateModalOpen={isDeactivateModalOpen}
-        onOpenDeactivateModal={handleOpenDeactivateModal}
-        onCloseDeactivateModal={handleCloseDeactivateModal}
         storeConfigs={storeConfigs}
         availableStores={availableStores}
         predefinedTemplateNames={predefinedTemplateNames}
