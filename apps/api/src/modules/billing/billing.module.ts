@@ -17,6 +17,7 @@ import { BullModule, getQueueToken } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 
+import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { EmailModule } from '../email/email.module';
 import { EmailService } from '../email/email.service';
@@ -32,6 +33,10 @@ import {
   BILLING_LISTING_PLAN_LIMIT_QUEUE,
   ListingPlanLimitProcessor,
 } from './listing-plan-limit.processor';
+import {
+  BILLING_PRICE_MIGRATION_QUEUE,
+  PriceMigrationProcessor,
+} from './price-migration.processor';
 import { QuotaEnforcementService } from './quota-enforcement.service';
 import {
   BILLING_RECONCILE_QUEUE,
@@ -52,6 +57,7 @@ export { BILLING_CONFIG_TOKEN, BILLING_PROVIDER_TOKEN };
     BullModule.registerQueue({ name: BILLING_TRIAL_EXPIRY_QUEUE }),
     BullModule.registerQueue({ name: BILLING_LISTING_PLAN_LIMIT_QUEUE }),
     BullModule.registerQueue({ name: BILLING_RECONCILE_QUEUE }),
+    BullModule.registerQueue({ name: BILLING_PRICE_MIGRATION_QUEUE }),
   ],
   controllers: [BillingController],
   providers: [
@@ -67,6 +73,24 @@ export { BILLING_CONFIG_TOKEN, BILLING_PROVIDER_TOKEN };
     },
     ListingPlanLimitProcessor,
     SubscriptionReconcileProcessor,
+    {
+      // Factory only to hand EmailService in as the optional notice sender.
+      provide: PriceMigrationProcessor,
+      inject: [
+        getQueueToken(BILLING_PRICE_MIGRATION_QUEUE),
+        BillingRepositoryService,
+        DatabaseService,
+        BILLING_PROVIDER_TOKEN,
+        EmailService,
+      ],
+      useFactory: (
+        queue: Queue,
+        repo: BillingRepositoryService,
+        database: DatabaseService,
+        provider: BillingProviderPort,
+        email: EmailService,
+      ) => new PriceMigrationProcessor(queue, repo, database, provider, email),
+    },
     {
       // BillingService injects this token and treats the result as the port,
       // so it never needs a Stripe client of its own.

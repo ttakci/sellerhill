@@ -78,26 +78,27 @@ Developers → Webhooks → the endpoint pointing at
 
 ## 6. Catalog
 
-- Run `pnpm --filter api stripe:sync-catalog` against the live key. It creates
-  the Products/Prices that are missing **and verifies the ones already mirrored**
-  — it now exits non-zero if a local price and its Stripe Price disagree.
+- The catalog is mirrored into Stripe automatically every hour. To see the
+  result immediately after switching to live keys, run
+  `pnpm --filter api stripe:sync-catalog` — it exits non-zero if a local price and
+  its Stripe Price disagree.
 - A Stripe Price is immutable. Changing a price means closing the local
   `billing_plan_prices` row (`effective_to`) and inserting a new one with no
-  `provider_price_id`, then re-running the sync.
+  `provider_price_id` — see section 7.
 
 ## 7. Changing a price later
 
-Not a launch step, but it involves Stripe and is easy to get wrong:
+Nothing to run. Ship the change as a migration — close the plan's current
+`billing_plan_prices` row (`effective_to`) and insert the new one without a
+`provider_price_id`. Within the hour the `billing-price-migration` job:
 
-1. Close the plan's current `billing_plan_prices` row (`effective_to`) and insert
-   the new one without a `provider_price_id` (a new migration).
-2. `pnpm --filter api stripe:sync-catalog` — mints the new Stripe Price. From here
-   on, NEW subscribers pay the new price.
-3. Existing subscribers stay on the old price until you decide otherwise:
-   - to keep them there, do nothing;
-   - to move them from their next renewal (with an e-mail notice), run
-     `pnpm --filter api billing:migrate-price -- --plan <slug>` first as a dry
-     run, read the list, then again with `--apply`.
+- creates the new Stripe Price;
+- schedules every existing subscriber onto it from their next renewal (the
+  period they are in finishes at the price they paid);
+- e-mails each of them the old price, the new price and the date.
+
+New subscribers pay the new price immediately. A seller with their own plan
+change pending is left alone until it lands.
 
 ## 8. Before announcing it works
 
