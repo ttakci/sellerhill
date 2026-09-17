@@ -51,6 +51,7 @@ pgadmin_data/
 *.sql
 !docker/postgres/init.sql
 !apps/api/migrations/*.sql
+!docs/*.sql
 *.dump
 *.backup
 
