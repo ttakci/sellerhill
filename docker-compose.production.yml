@@ -131,8 +131,6 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gemini-3.1-flash-lite}
-      EBAY_ASPECTS_LLM_ENABLED: ${EBAY_ASPECTS_LLM_ENABLED:-false}
-      EBAY_ASPECTS_LLM_MAX_PER_LISTING: ${EBAY_ASPECTS_LLM_MAX_PER_LISTING:-3}
 
       # Google OAuth (optional — the API boots without it and the FE hides the button).
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -145,15 +143,9 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
 
-      # Tracking conversion (Aquiline). Conversion is ON by default as of
-      # migration 112, and a shipment that cannot be converted is HELD rather
-      # than shipped with the raw Amazon number — so without AQUILINE_API_KEY
-      # every shipped order stalls and shows up as a CRITICAL Action Center
-      # item. Only the two that have no code default are wired here; the rest
-      # (base URL, timeout, profile cap, ...) fall back to the settings registry
-      # and are tunable at /admin -> Settings.
-      AQUILINE_API_KEY: ${AQUILINE_API_KEY:-}
-      AQUILINE_WEBHOOK_SECRET: ${AQUILINE_WEBHOOK_SECRET:-}
+      # Aquiline (tracking conversion) is configured at /admin -> Settings, not here:
+      # the API key and webhook secret are stored encrypted and apply without a
+      # redeploy, which matters when the Aquiline plan is upgraded.
 
       # Email (SMTP) — bootstrap values only. Once an admin edits mail settings
       # at /admin → Settings the DB override wins, and the password there is

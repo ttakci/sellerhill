@@ -110,15 +110,18 @@ describe('conversion is ON by default (migration 112)', () => {
     expect(defaultArm.slice(0, 120)).toContain('return TrackingConversionProvider.AQUILINE;');
   });
 
-  it('ships the provider key to the container, or every order is held', () => {
-    // With conversion expected, a missing key classifies as
-    // PASSTHROUGH_FAILED and the push is held — correct, and useless if the
-    // key can never arrive. It was documented in .env.example and wired into
-    // neither compose file.
-    for (const file of ['docker-compose.production.yml', 'docker-compose.test.yml']) {
-      const compose = readFileSync(join(__dirname, '..', '..', '..', '..', '..', file), 'utf8');
-      expect(compose).toMatch(/AQUILINE_API_KEY:/);
-      expect(compose).toMatch(/AQUILINE_WEBHOOK_SECRET:/);
+  it('keeps the provider key a panel setting, so a plan change needs no redeploy', () => {
+    // With conversion expected, a missing key classifies as PASSTHROUGH_FAILED
+    // and the push is held. The key therefore has to be settable while the
+    // system runs: it is an encrypted, write-only platform setting read at call
+    // time, and NOT requiresRestart. Wiring it through compose would make every
+    // rotation or Aquiline plan upgrade a redeploy.
+    const registry = read('common', 'settings', 'platform-settings.registry.ts');
+    for (const key of ['AQUILINE_API_KEY', 'AQUILINE_WEBHOOK_SECRET']) {
+      const at = registry.indexOf("envVar: '" + key + "'");
+      const entry = registry.slice(registry.lastIndexOf('def({', at), registry.indexOf('}),', at));
+      expect(entry).toContain('isSecret: true');
+      expect(entry).not.toContain('requiresRestart');
     }
   });
 });

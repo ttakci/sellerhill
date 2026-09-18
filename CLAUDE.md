@@ -1734,7 +1734,7 @@ a variant to the atom rather than forking it.
 | `109` | `email_templates` rows for `billing_price_change` (EN+TR), sent automatically by `PriceMigrationProcessor` when a subscriber is moved onto a plan's new price from their next renewal. |
 | `110` | `billing_subscriptions.price_evaluated_for_price_id` / `price_change_scheduled_price_id` / `price_change_notified_price_id` — the automatic price migration's bookkeeping, so a subscriber already on their plan's price costs no Stripe call and a notice is sent exactly once. |
 | `111` | `orders.ebay_legacy_item_id` (+ partial index on untracked orders) — remembers which eBay item an order came from so a listing imported later can adopt its past orders. Linking only; it never triggers an automatic purchase. |
-| `112` | `store_settings.tracking_conversion_provider` default `local` → `aquiline`, existing rows backfilled — tracking conversion is ON unless the seller turns it off. The scope default (`amazon_logistics_only`) is unchanged. Precondition: `AQUILINE_API_KEY` must reach the API, or every shipment is HELD rather than shipped with the raw number. |
+| `112` | `store_settings.tracking_conversion_provider` default `local` → `aquiline`, existing rows backfilled — tracking conversion is ON unless the seller turns it off. The scope default (`amazon_logistics_only`) is unchanged. Precondition: the Aquiline API key must be set — at `/admin` → Settings (encrypted, no redeploy; it is deliberately NOT wired through compose) — or every shipment is HELD rather than shipped with the raw number. |
 
 API runs pending migrations on boot (`DatabaseService.onModuleInit` → `MigrationRunner`). Production Docker also runs `migrate` in entrypoint. **Restart API** after pulling new SQL files.
 
