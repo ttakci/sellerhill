@@ -141,7 +141,9 @@ describe('entitlement enforcement invariants', () => {
       // not a boundary — removing the quota gate must not leave the endpoint
       // open.
       expect(src).toMatch(/isSuspended\(userId\)/);
-      expect(src).toMatch(/billing\.errors\.subscriptionSuspended/);
+      // The order-context wording, not the listing one: the same state has to
+      // be explained in the words of what the seller was doing.
+      expect(src).toMatch(/billing\.errors\.subscriptionSuspendedOrders/);
     });
   });
 
