@@ -18,6 +18,7 @@
     "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
     "stripe:sync-catalog": "tsx src/scripts/stripe-sync-catalog.ts",
+    "stripe:test-clock": "tsx src/scripts/stripe-test-clock.ts",
     "aquiline:probe": "tsx src/scripts/aquiline-probe.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
