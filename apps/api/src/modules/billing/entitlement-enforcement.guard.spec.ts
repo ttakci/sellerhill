@@ -116,21 +116,34 @@ describe('entitlement enforcement invariants', () => {
     });
   });
 
-  describe('the manual link path is metered like the automatic one', () => {
+  describe('the manual link path costs no automatic-order quota', () => {
     const src = read('modules', 'amazon', 'amazon.controller.ts');
 
-    it('reserves an AO slot before scraping', () => {
-      // Without this a seller at their limit could place the order by hand and
-      // link it: same cost to us, zero quota consumed.
-      expect(src).toMatch(/reserveAmazonOrder\(/);
-      expect(src).toMatch(/ConflictException\('billing\.errors\.quotaExhausted'\)/);
+    it('neither reserves nor releases an AO slot', () => {
+      // Operator decision, 2026-09-18, reversing the earlier rule. The old
+      // justification was the browser time a linked order goes on to spend —
+      // but the Playwright pool is our own server capacity, not a per-unit
+      // charge from a third party. The one third-party cost in this flow, the
+      // Aquiline conversion, has its own meter.
+      //
+      // The release half is asserted too, and not only for symmetry: the
+      // reservation was idempotent on the eBay order id, so a failed manual
+      // link on an order auto-fulfill had already paid for used to release
+      // THAT order's slot — handing back quota the seller really spent.
+      expect(src).not.toMatch(/reserveAmazonOrder\(/);
+      expect(src).not.toMatch(/releaseAmazonOrder\(/);
     });
 
-    it('releases the slot on every failure path', () => {
-      // A reservation held for a link that never happened is a slot the seller
-      // can never get back.
-      const releases = src.match(/releaseAmazonOrder\(/g) ?? [];
-      expect(releases.length).toBeGreaterThanOrEqual(2);
+    it('still refuses a suspended account', () => {
+      // The AO gate reported limit 0 while suspended, so it was incidentally
+      // the only server-side check on this route. The seller app redirects a
+      // suspended account away from the orders page, but that is a redirect,
+      // not a boundary — removing the quota gate must not leave the endpoint
+      // open.
+      expect(src).toMatch(/isSuspended\(userId\)/);
+      // The order-context wording, not the listing one: the same state has to
+      // be explained in the words of what the seller was doing.
+      expect(src).toMatch(/billing\.errors\.subscriptionSuspendedOrders/);
     });
   });
 

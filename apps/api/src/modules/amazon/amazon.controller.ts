@@ -167,24 +167,35 @@ export class AmazonController {
       return { success: false, message: 'Order not found' };
     }
 
-    // AO quota — checked BEFORE the scrape, which is the expensive half.
+    // A manual link consumes NO automatic-order quota, by operator decision
+    // (2026-09-18). It used to reserve an AO slot, justified by the browser
+    // time a linked order goes on to spend (the scrape here, then the per-order
+    // tracking scheduler). That justification does not hold: the Playwright
+    // pool is our own server capacity, already paid for, not a per-unit charge
+    // from anyone. The only third-party cost in this flow is the Aquiline
+    // tracking conversion, and that has its own meter. Placing an order by hand
+    // is also self-limiting in a way automation is not — it costs the seller
+    // real work per order — so it is not the ceiling-evasion route the old
+    // comment described. Capacity is handled where capacity belongs:
+    // AMAZON_GLOBAL_CONCURRENCY and monitoring.
     //
-    // This gate was missing entirely, and `BillingLimitKey.AMAZON_ORDERS_PER_MONTH`'s
-    // own docstring already said the quota covers "auto-fulfill + manual link".
-    // Without it a seller at their limit could place the order on Amazon by
-    // hand and link it here: identical cost to us (browser time, tracking
-    // pipeline, a paid conversion) for zero quota consumed, which made the
-    // automatic-order limit trivially avoidable.
+    // Removing the reservation also closed a real leak. It was idempotent on
+    // the eBay order id, so a manual link attempted on an order auto-fulfill
+    // had already paid for reserved nothing — but the release on the failure
+    // paths below deleted THAT order's slot, handing back quota the seller had
+    // legitimately spent.
     //
-    // The reservation is idempotent on the eBay order id, so re-linking the
-    // same order — a retry, or fixing a typo'd Amazon order id — never spends
-    // a second slot.
-    const quota = await this.quotaEnforcement.reserveAmazonOrder(
-      userId,
-      orders[0].ebay_order_id,
-    );
-    if (!quota.allowed) {
-      throw new ConflictException('billing.errors.quotaExhausted');
+    // Suspension is still refused. The AO gate reported limit 0 for a suspended
+    // account, so it was incidentally the only server-side check on this route;
+    // the seller app's redirect keeps a suspended account off the orders page
+    // entirely, but a frontend redirect is not a security boundary.
+    //
+    // `subscriptionSuspendedOrders`, not the listing-specific
+    // `subscriptionSuspended`: the same state has to be explained in the words
+    // of whatever the seller was trying to do. "New listings are paused" is
+    // wrong copy on an order screen.
+    if (await this.quotaEnforcement.isSuspended(userId)) {
+      throw new ConflictException('billing.errors.subscriptionSuspendedOrders');
     }
 
     try {
@@ -205,10 +216,6 @@ export class AmazonController {
         await this.orderSyncService.recomputeProfit(orders[0].ebay_order_id, {
           scrapeFailed: true,
         });
-        // Nothing was linked, so the slot must go back. A reservation held for
-        // an order that never linked is a slot the seller can never recover —
-        // the same leak the auto-fulfill path releases for on BLOCKED/FAILED.
-        await this.quotaEnforcement.releaseAmazonOrder(userId, orders[0].ebay_order_id);
         return {
           success: false,
           linked: false,
@@ -267,8 +274,6 @@ export class AmazonController {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to link Amazon order: ${message}`);
-      // Same reason as above: the link did not happen, so the slot is not owed.
-      await this.quotaEnforcement.releaseAmazonOrder(userId, orders[0].ebay_order_id);
       return { success: false, message };
     }
   }

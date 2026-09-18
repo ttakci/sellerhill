@@ -62,7 +62,11 @@
       "costCaptureFailed": "Amazon order was found but the cost details couldn't be read. Profit kept at last known value.",
       "noAccountsTitle": "No Amazon Accounts",
       "noAccountsMessage": "You need to add an Amazon buyer account first to link orders.",
-      "addAccountLink": "Add Amazon Account"
+      "addAccountLink": "Add Amazon Account",
+      "noListingTitle": "Import this eBay listing first",
+      "noListingMessage": "This order's eBay listing has not been imported, so the order is not linked to one. You can still link the Amazon order and get its real costs — but when it ships, the tracking number cannot be sent to eBay, because eBay needs the line item a listing carries. That push is not retried later. Import the listing first and this order is linked to it automatically.",
+      "importListingButton": "Import the listing",
+      "linkAnywayButton": "Link anyway"
     },
     "tracking": {
       "statusPending": "Pending",

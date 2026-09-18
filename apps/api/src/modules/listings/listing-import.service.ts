@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   EbayListingApiModel,
   ListingJobKind,
@@ -18,6 +18,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
+import { OrderSyncService } from '../orders/order-sync.service';
 
 import { ListingProcessorService } from './listing-processor.service';
 
@@ -25,13 +26,16 @@ interface ImportRow { row: number; asin: string; ebayItemId: string }
 
 @Injectable()
 export class ListingImportService {
+  private readonly logger = new Logger(ListingImportService.name);
+
   constructor(
     private readonly database: DatabaseService,
     private readonly ebay: EbayService,
     @Inject(forwardRef(() => ListingProcessorService))
     private readonly listingProcessor: ListingProcessorService,
     @InjectQueue('listings') private readonly listingQueue: Queue,
-    private readonly quotaEnforcement: QuotaEnforcementService
+    private readonly quotaEnforcement: QuotaEnforcementService,
+    private readonly orderSync: OrderSyncService
   ) {}
 
   async buildTemplate(): Promise<Buffer> {
@@ -149,7 +153,7 @@ export class ListingImportService {
     }
     const strategy = await this.listingProcessor.prepareImportedListingData(
       data.userId, productData, data.listingSettingsGroupId, data.ebayAccountId);
-    await this.database.transaction(async (client) => {
+    const importedListingId = await this.database.transaction(async (client) => {
       const listing = await client.query<{ id: string }>(
         `INSERT INTO listings
           (user_id,asin,product_id,listing_settings_group_id,ebay_item_id,payment_policy_id,shipping_policy_id,
@@ -165,7 +169,32 @@ export class ListingImportService {
       await client.query(
         `UPDATE listing_job_items SET product_id=$1,listing_id=$2,status=$3,ebay_item_id=$4,updated_at=NOW() WHERE id=$5`,
         [productId, listing.rows[0].id, ListingStatus.ACTIVE, data.ebayItemId, data.listingJobItemId]);
+      return listing.rows[0].id;
     });
+
+    // Orders of this eBay item that arrived before the listing existed here are
+    // now linked to it, so they stop reading as "Unknown product", get a
+    // profit estimate, and become publishable to eBay (a fulfillment needs the
+    // line item a listing carries). Linking is NOT buying: auto-fulfill fires
+    // only on a genuine order insert, never over existing rows.
+    //
+    // Best-effort — an import that succeeded must not fail over historical
+    // bookkeeping.
+    if (importedListingId) {
+      try {
+        await this.orderSync.adoptUntrackedOrdersForListing({
+          userId: data.userId,
+          ebayAccountId: data.ebayAccountId,
+          ebayItemId: data.ebayItemId,
+          listingId: importedListingId,
+          // An over-limit listing's orders are not automated; migration 106.
+          listingOverPlanLimit: false,
+        });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Order adoption skipped for listing ${importedListingId}: ${message}`);
+      }
+    }
     // The ACTIVE listing row is now the durable entitlement, so the in-flight
     // reservation is handed over to it (same release-on-success rule as the
     // create path — see QuotaEnforcementService.consumeForCreate).

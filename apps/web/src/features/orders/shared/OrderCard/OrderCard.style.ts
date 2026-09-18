@@ -172,7 +172,6 @@ export const MetaValueText = styled(Text)`
 `;
 
 export const StatsGrid = styled.div`
-  position: relative;
   display: grid;
   /* Was a rigid repeat(3, 1fr) with vertical dividers, which is exactly what
      crushed at a narrow track: three currency values in ~55px each. Cells now
@@ -186,11 +185,12 @@ export const StatsGrid = styled.div`
   flex-shrink: 0;
 `;
 
+/* A row of its own, spanning every column, so the stat labels below it start
+   one line lower. It used to be absolutely positioned in the strip's top-right
+   corner, where it sat on top of the last column's heading — "KÂR" was covered
+   by "Takip edilmiyor" on every untracked order. */
 export const StatsBadge = styled.div`
-  position: absolute;
-  top: ${tkn('spacing.xs')};
-  right: ${tkn('spacing.xs')};
-  z-index: 1;
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: ${tkn('spacing.xs')};
