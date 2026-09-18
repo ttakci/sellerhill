@@ -132,9 +132,16 @@ export enum BillingLimitKey {
    */
   LISTINGS_PER_MONTH = 'listings_per_month',
   /**
-   * Maximum Amazon orders (auto-fulfill + manual link) per calendar month.
-   * A generous anti-abuse ceiling rather than the priced dimension — the real
+   * Maximum AUTOMATIC Amazon orders per calendar month — auto-fulfill only.
+   * A generous anti-abuse ceiling rather than the priced dimension: the real
    * per-unit cost sits on TRACKING_CONVERSIONS_PER_MONTH below.
+   *
+   * Linking an Amazon order BY HAND deliberately consumes none of this
+   * (operator decision, 2026-09-18). It used to, justified by the browser time
+   * a linked order goes on to spend — but that pool is our own server
+   * capacity, not a third-party charge, and placing an order by hand is
+   * self-limiting in a way automation is not. Capacity is governed by
+   * AMAZON_GLOBAL_CONCURRENCY and monitoring, not by a seller-facing meter.
    */
   AMAZON_ORDERS_PER_MONTH = 'amazon_orders_per_month',
   /**
