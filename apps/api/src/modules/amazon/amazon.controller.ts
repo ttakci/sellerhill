@@ -189,8 +189,13 @@ export class AmazonController {
     // account, so it was incidentally the only server-side check on this route;
     // the seller app's redirect keeps a suspended account off the orders page
     // entirely, but a frontend redirect is not a security boundary.
+    //
+    // `subscriptionSuspendedOrders`, not the listing-specific
+    // `subscriptionSuspended`: the same state has to be explained in the words
+    // of whatever the seller was trying to do. "New listings are paused" is
+    // wrong copy on an order screen.
     if (await this.quotaEnforcement.isSuspended(userId)) {
-      throw new ConflictException('billing.errors.subscriptionSuspended');
+      throw new ConflictException('billing.errors.subscriptionSuspendedOrders');
     }
 
     try {

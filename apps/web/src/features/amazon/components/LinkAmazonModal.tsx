@@ -11,6 +11,7 @@ import {
 import * as S from './LinkAmazonModal.style';
 import type { LinkAmazonModalProps, LinkResult } from './LinkAmazonModal.types';
 
+import { getErrorI18nKey } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
 export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
@@ -84,9 +85,15 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
           );
         }
       })
-      .catch((err: { data?: { message?: string } }) => {
+      .catch((err: unknown) => {
         setProgress(null);
-        setError(err?.data?.message || t('amazon.linking.errorScraping'));
+        // The API answers with an i18n KEY, never a sentence — printing
+        // `err.data.message` straight out put `billing.errors.…` in front of
+        // the seller. `getErrorI18nKey` is the same resolver the rest of the
+        // app uses; an empty fallback means "no key came back", which is the
+        // only case the generic scraping message is right for.
+        const key = getErrorI18nKey(err as Parameters<typeof getErrorI18nKey>[0], '');
+        setError(key ? t(key) : t('amazon.linking.errorScraping'));
       });
   };
 
