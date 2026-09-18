@@ -205,6 +205,7 @@ export const OrderDetailsPageContainer: React.FC = () => {
           isOpen={isLinkModalOpen}
           onClose={() => setIsLinkModalOpen(false)}
           orderId={id}
+          hasListing={Boolean(order?.product)}
           onLinked={handleLinked}
         />
       )}

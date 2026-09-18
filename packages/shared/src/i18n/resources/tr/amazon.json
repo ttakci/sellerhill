@@ -62,7 +62,11 @@
       "costCaptureFailed": "Amazon siparişi bulundu ancak maliyet detayları okunamadı. Kâr son bilinen değerde korundu.",
       "noAccountsTitle": "Amazon Hesabı Yok",
       "noAccountsMessage": "Sipariş bağlamak için önce bir Amazon alışveriş hesabı eklemeniz gerekiyor.",
-      "addAccountLink": "Amazon Hesabı Ekle"
+      "addAccountLink": "Amazon Hesabı Ekle",
+      "noListingTitle": "Önce bu eBay ilanını içe aktarın",
+      "noListingMessage": "Bu siparişin eBay ilanı içe aktarılmadığı için sipariş bir ilana bağlı değil. Amazon siparişini yine de bağlayıp gerçek maliyetleri alabilirsiniz; ancak kargolandığında takip numarası eBay’e gönderilemez, çünkü eBay ilanın taşıdığı satır kalemini ister. Bu gönderim sonradan tekrar denenmez. Önce ilanı içe aktarırsanız bu sipariş ona kendiliğinden bağlanır.",
+      "importListingButton": "İlanı içe aktar",
+      "linkAnywayButton": "Yine de bağla"
     },
     "tracking": {
       "statusPending": "Beklemede",
