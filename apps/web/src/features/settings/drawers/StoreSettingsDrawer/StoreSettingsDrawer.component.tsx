@@ -200,7 +200,11 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
 
       {/* Both confirmations are `type="error"`, not "warning": the consequence
           is a raw Amazon number on a live eBay order, and eBay has no endpoint
-          to revise a fulfillment once it is sent. */}
+          to revise a fulfillment once it is sent — the red disc is earned.
+          The TITLE is the warning one on purpose. `error` would render "Hata" /
+          "Error" over a question nobody has answered yet; nothing has failed
+          here, the seller is being asked to confirm. Severity and tense are
+          separate things, and only the severity belongs to `type`. */}
       <ConfirmModal
         isOpen={props.isConfirmingConversionOff}
         onClose={props.onCancelConversionOff}
@@ -210,7 +214,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           info: t('translation:dialog.title.info'),
           success: t('translation:dialog.title.success'),
           warning: t('translation:dialog.title.warning'),
-          error: t('translation:dialog.title.error'),
+          error: t('translation:dialog.title.warning'),
         }}
         description={t('storeSettings:storeSettings.trackingExposure.confirmConversionOff')}
         confirmLabel={t('storeSettings:storeSettings.trackingExposure.confirmDisable')}
@@ -225,7 +229,7 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
           info: t('translation:dialog.title.info'),
           success: t('translation:dialog.title.success'),
           warning: t('translation:dialog.title.warning'),
-          error: t('translation:dialog.title.error'),
+          error: t('translation:dialog.title.warning'),
         }}
         description={t('storeSettings:storeSettings.trackingExposure.confirmManualOff')}
         confirmLabel={t('storeSettings:storeSettings.trackingExposure.confirmDisable')}
