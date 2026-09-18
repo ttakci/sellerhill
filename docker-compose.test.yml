@@ -116,15 +116,11 @@ services:
       # migration 112, and a shipment that cannot be converted is HELD rather
       # than shipped with the raw Amazon number — so without AQUILINE_API_KEY
       # every shipped order stalls and shows up as a CRITICAL Action Center
-      # item. These were documented in apps/api/.env.example but wired into
-      # neither compose file, so nothing guaranteed they reached the container.
+      # item. Only the two that have no code default are wired here; the rest
+      # (base URL, timeout, profile cap, ...) fall back to the settings registry
+      # and are tunable at /admin -> Settings.
       AQUILINE_API_KEY: ${AQUILINE_API_KEY:-}
-      AQUILINE_BASE_URL: ${AQUILINE_BASE_URL:-}
       AQUILINE_WEBHOOK_SECRET: ${AQUILINE_WEBHOOK_SECRET:-}
-      AQUILINE_MAX_PROFILES: ${AQUILINE_MAX_PROFILES:-}
-      AQUILINE_PROFILE_PREFIX: ${AQUILINE_PROFILE_PREFIX:-}
-      AQUILINE_TIMEOUT_MS: ${AQUILINE_TIMEOUT_MS:-}
-      AQUILINE_WEBHOOK_MAX_AGE_MINUTES: ${AQUILINE_WEBHOOK_MAX_AGE_MINUTES:-}
 
       # Leave unset and configure mail entirely from /admin → Settings.
       SMTP_HOST: ${SMTP_HOST:-}
