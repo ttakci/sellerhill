@@ -94,7 +94,9 @@ export class StoreSettingsService {
         blacklist: createDefaultBlacklist(),
         amazonTaxRate: 0,
         autoFulfillEnabled: false,
-        trackingConversionProvider: TrackingConversionProvider.LOCAL,
+        // Conversion is ON by default (migration 112). A seller with no row has
+        // not chosen the raw Amazon number — they have chosen nothing.
+        trackingConversionProvider: TrackingConversionProvider.AQUILINE,
         trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
         trackingConvertManualOrders: true,
         buyerMessaging: null,

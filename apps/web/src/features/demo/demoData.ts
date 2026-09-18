@@ -973,7 +973,7 @@ function storeSettings(
     ],
     amazonTaxRate: 6,
     autoFulfillEnabled: true,
-    trackingConversionProvider: TrackingConversionProvider.LOCAL,
+    trackingConversionProvider: TrackingConversionProvider.AQUILINE,
     trackingConversionScope: TrackingConversionScope.AMAZON_LOGISTICS_ONLY,
     trackingConvertManualOrders: true,
     buyerMessaging: BUYER_MESSAGING,

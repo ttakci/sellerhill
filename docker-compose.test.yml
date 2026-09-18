@@ -112,6 +112,20 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
 
+      # Tracking conversion (Aquiline). Conversion is ON by default as of
+      # migration 112, and a shipment that cannot be converted is HELD rather
+      # than shipped with the raw Amazon number — so without AQUILINE_API_KEY
+      # every shipped order stalls and shows up as a CRITICAL Action Center
+      # item. These were documented in apps/api/.env.example but wired into
+      # neither compose file, so nothing guaranteed they reached the container.
+      AQUILINE_API_KEY: ${AQUILINE_API_KEY:-}
+      AQUILINE_BASE_URL: ${AQUILINE_BASE_URL:-}
+      AQUILINE_WEBHOOK_SECRET: ${AQUILINE_WEBHOOK_SECRET:-}
+      AQUILINE_MAX_PROFILES: ${AQUILINE_MAX_PROFILES:-}
+      AQUILINE_PROFILE_PREFIX: ${AQUILINE_PROFILE_PREFIX:-}
+      AQUILINE_TIMEOUT_MS: ${AQUILINE_TIMEOUT_MS:-}
+      AQUILINE_WEBHOOK_MAX_AGE_MINUTES: ${AQUILINE_WEBHOOK_MAX_AGE_MINUTES:-}
+
       # Leave unset and configure mail entirely from /admin → Settings.
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-}

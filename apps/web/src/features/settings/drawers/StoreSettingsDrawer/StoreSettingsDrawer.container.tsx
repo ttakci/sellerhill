@@ -79,7 +79,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // the seller two vendor names would ask them to pick an implementation
   // instead of a behaviour, and there is only ever one external provider.
   const [trackingConversionEnabled, setTrackingConversionEnabled] = useState(
-    (config?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL) !==
+    // Conversion is ON by default (migration 112), so an absent config reads as
+    // enabled — the toggle must not show OFF for a store that will convert.
+    (config?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
       TrackingConversionProvider.LOCAL
   );
   const [trackingConversionScope, setTrackingConversionScope] = useState<TrackingConversionScope>(
@@ -146,7 +148,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       setAmazonTaxRate(next?.amazonTaxRate ?? 0);
       setAutoFulfillEnabled(next?.autoFulfillEnabled ?? false);
       setTrackingConversionEnabled(
-        (next?.trackingConversionProvider ?? TrackingConversionProvider.LOCAL) !==
+        (next?.trackingConversionProvider ?? TrackingConversionProvider.AQUILINE) !==
           TrackingConversionProvider.LOCAL
       );
       setTrackingConversionScope(
