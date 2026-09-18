@@ -11,8 +11,17 @@ import {
 import * as S from './LinkAmazonModal.style';
 import type { LinkAmazonModalProps, LinkResult } from './LinkAmazonModal.types';
 
-export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClose, orderId, onLinked }) => {
+import { useLocale } from '@/utils/useLocale';
+
+export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({
+  isOpen,
+  onClose,
+  orderId,
+  hasListing,
+  onLinked,
+}) => {
   const { t } = useTranslation(['amazon', 'translation']);
+  const { localeNavigate } = useLocale();
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const { data: accountsData } = useGetAmazonAccountsQuery();
@@ -25,6 +34,12 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
   const [amazonOrderId, setAmazonOrderId] = useState('');
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * The seller was warned that this order has no listing and chose to link
+   * anyway. Reset on close, so the warning is shown once per attempt rather
+   * than once per session.
+   */
+  const [linkWithoutListing, setLinkWithoutListing] = useState(false);
 
   const handleClose = () => {
     if (isLinking) {
@@ -34,6 +49,7 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
     setAmazonOrderId('');
     setProgress(null);
     setError(null);
+    setLinkWithoutListing(false);
     onClose();
   };
 
@@ -102,6 +118,31 @@ export const LinkAmazonModal: React.FC<LinkAmazonModalProps> = ({ isOpen, onClos
         secondaryAction={{
           label: t('translation:common.cancel'),
           onClick: handleClose,
+          variant: 'secondary',
+        }}
+      />
+    );
+  }
+
+  if (!hasListing && !linkWithoutListing) {
+    return (
+      <Dialog
+        isOpen={isOpen}
+        onClose={handleClose}
+        type="warning"
+        title={t('amazon.linking.noListingTitle')}
+        description={t('amazon.linking.noListingMessage')}
+        primaryAction={{
+          label: t('amazon.linking.importListingButton'),
+          onClick: () => {
+            handleClose();
+            localeNavigate('/listings?drawer=import');
+          },
+          variant: 'primary',
+        }}
+        secondaryAction={{
+          label: t('amazon.linking.linkAnywayButton'),
+          onClick: () => setLinkWithoutListing(true),
           variant: 'secondary',
         }}
       />
