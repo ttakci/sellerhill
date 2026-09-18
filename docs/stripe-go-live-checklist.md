@@ -105,8 +105,13 @@ change pending is left alone until it lands.
 - Subscribe once with a real card, on the live keys, and confirm: the
   subscription row, the quota window dates, the invoice in the billing page, and
   the `/billing` redirect after checkout.
-- Use a **Test Clock** in test mode to walk one subscription through renewal, a
-  failed payment and a cancellation. Nothing in this repository has ever
-  exercised that sequence end to end.
+- Walk one subscription through renewal, a failed payment, recovery and a
+  cancellation with `pnpm --filter api run stripe:test-clock` (test keys only; it
+  refuses `sk_live_`). Needs the API running and `stripe listen --api-key <sk_test>
+  --forward-to http://localhost:3000/api/v1/billing/webhooks/stripe`. Rehearsed
+  2026-09-19: renewal moved the local period forward, a declining card left the
+  account `past_due` (suspended) and sent the payment-failed e-mail, paying the
+  open invoice reopened it on its own, and a period-end cancellation ended as
+  `canceled`.
 - Confirm the trial-ending and payment-failed e-mails arrive (SMTP settings live
   in the admin panel, not in Stripe).
