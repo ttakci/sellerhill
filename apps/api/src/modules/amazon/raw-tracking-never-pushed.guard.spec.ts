@@ -23,6 +23,9 @@ const PROCESSOR = readFileSync(
   'utf8',
 );
 
+const read = (...segments: string[]): string =>
+  readFileSync(join(__dirname, '..', '..', ...segments), 'utf8');
+
 describe('mayPushToEbay', () => {
   it('allows a real conversion', () => {
     expect(mayPushToEbay(ConversionOutcome.CONVERTED)).toBe(true);
@@ -73,5 +76,49 @@ describe('the shipped-transition processor', () => {
     // these reappears, the raw number is reaching buyers again.
     expect(PROCESSOR).not.toMatch(/late-but-honest/i);
     expect(PROCESSOR).not.toMatch(/past the\s*\n?\s*\/\/\s*window the push goes through/i);
+  });
+});
+
+describe('conversion is ON by default (migration 112)', () => {
+  // The rule above only protects an order where a conversion was EXPECTED.
+  // `PASSTHROUGH_NOT_REQUIRED` is publishable, and it is what a seller on the
+  // `local` provider produces — so while `local` was the DEFAULT, a seller who
+  // never opened Store Settings shipped every order with the raw Amazon number
+  // and the guard above never applied. The default is the other half of the
+  // rule, and nothing tested it.
+
+  it('defaults a store with no settings row to converting', () => {
+    const service = read('modules', 'store-settings', 'store-settings.service.ts');
+    expect(service).toMatch(
+      /trackingConversionProvider: TrackingConversionProvider\.AQUILINE/,
+    );
+    expect(service).not.toMatch(
+      /trackingConversionProvider: TrackingConversionProvider\.LOCAL/,
+    );
+  });
+
+  it('reads an absent or unrecognised stored provider as converting', () => {
+    // The two failure directions are not symmetric: a value we cannot read
+    // must never put the supplier in front of a buyer. An explicit `local` is
+    // a seller who opted out and still means off.
+    const service = read('modules', 'amazon', 'tracking-conversion.service.ts');
+    const fn = service.slice(service.indexOf('export function normalizeProvider('));
+    const body = fn.slice(0, 1200);
+    const localArm = body.slice(body.indexOf('case TrackingConversionProvider.LOCAL:'));
+    expect(localArm.slice(0, 120)).toContain('return TrackingConversionProvider.LOCAL;');
+    const defaultArm = body.slice(body.indexOf('default:'));
+    expect(defaultArm.slice(0, 120)).toContain('return TrackingConversionProvider.AQUILINE;');
+  });
+
+  it('ships the provider key to the container, or every order is held', () => {
+    // With conversion expected, a missing key classifies as
+    // PASSTHROUGH_FAILED and the push is held — correct, and useless if the
+    // key can never arrive. It was documented in .env.example and wired into
+    // neither compose file.
+    for (const file of ['docker-compose.production.yml', 'docker-compose.test.yml']) {
+      const compose = readFileSync(join(__dirname, '..', '..', '..', '..', '..', file), 'utf8');
+      expect(compose).toMatch(/AQUILINE_API_KEY:/);
+      expect(compose).toMatch(/AQUILINE_WEBHOOK_SECRET:/);
+    }
   });
 });

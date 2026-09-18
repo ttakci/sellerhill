@@ -1093,13 +1093,22 @@ export function shouldRefuseOnDemandConversion(args: {
   return !args.convertedTrackingNumber && Boolean(args.ebayTrackingPushedNumber);
 }
 
-/** Stored provider string → enum, defaulting to LOCAL for anything unknown. */
+/**
+ * Stored provider string → enum.
+ *
+ * An EXPLICIT `local` is a seller who turned conversion off, and stays off.
+ * Anything absent or unrecognised converts instead (migration 112): the two
+ * failure directions are not symmetric — a value we cannot read must not put
+ * the raw Amazon number in front of a buyer, and an order held for a
+ * conversion that could not happen is recoverable, an exposed supplier is not.
+ */
 export function normalizeProvider(value: string | null): TrackingConversionProvider {
   switch (value) {
+    case TrackingConversionProvider.LOCAL:
+      return TrackingConversionProvider.LOCAL;
     case TrackingConversionProvider.AQUILINE:
     case TrackingConversionProvider.API:
-      return TrackingConversionProvider.AQUILINE;
     default:
-      return TrackingConversionProvider.LOCAL;
+      return TrackingConversionProvider.AQUILINE;
   }
 }
