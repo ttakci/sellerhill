@@ -105,7 +105,7 @@
       "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI'ı ile değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."
     },
     "settings": {
-      "intro": "Çalışma zamanı yapılandırması. Her ayar önce veritabanı geçersiz kılması, sonra ortam değişkeni, sonra kod varsayılanı olarak çözülür — sıfırlarsanız ortam değerine geri döner. Sırlar ve bağlantı kimlik bilgileri ortamda kalır, buradan düzenlenemez.",
+      "intro": "Çalışma anında geçerli olan ayarlar. Her ayar sırasıyla panel değeri, ortam değişkeni ve kod varsayılanından çözülür; bir ayarı sıfırlarsanız ortam değerine döner. Gizli anahtarlar şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Bağlantı altyapısı ve sunucu kimlik bilgileri yalnızca ortam değişkeninden yönetilir.",
       "valueLabel": "Değer",
       "reset": "Sıfırla",
       "requiresRestart": "Yeniden başlatma gerekir",
@@ -260,6 +260,26 @@
         "billing.trialDays": "Yeni kayıt olan satıcıya verilen ücretsiz deneme süresi, 1 ile 90 arası. Değişiklik yalnızca kaydedildikten sonra kayıt olanlar için geçerlidir.",
         "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz.",
         "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir."
+      },
+      "newValueLabel": "Yeni değer",
+      "search": "Ayar ara (ad veya ortam değişkeni)",
+      "filter": {
+        "all": "Tümü",
+        "changed": "Değiştirilenler"
+      },
+      "count": "{{count}} ayar",
+      "changedCount": "{{count}} değiştirildi",
+      "saved": "Kaydedildi",
+      "noResults": {
+        "title": "Eşleşen ayar yok",
+        "description": "Aramayı veya filtreyi değiştirin."
+      },
+      "resetSecretConfirm": "“{{title}}” için kayıtlı değer silinecek ve ortam değişkenindeki değere dönülecek. Kayıtlı değer geri getirilemez. Devam edilsin mi?",
+      "validation": {
+        "required": "Bir değer girin.",
+        "notANumber": "Geçerli bir sayı girin.",
+        "belowMin": "En az {{bound}} olmalı.",
+        "aboveMax": "En fazla {{bound}} olmalı."
       }
     },
     "listingQuality": {

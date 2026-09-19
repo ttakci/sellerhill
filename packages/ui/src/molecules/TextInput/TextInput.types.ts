@@ -24,6 +24,7 @@ export interface TextInputInnerComponentProps {
   maxLength?: number;
   id?: string;
   autoComplete?: string;
+  ariaLabel?: string;
   onPressIcon?: () => void;
   size?: TextInputSize;
   suffixText?: string;
@@ -70,6 +71,12 @@ export interface TextInputProps<TFieldValues extends FieldValues = FieldValues>
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   required?: boolean;
   readOnly?: boolean;
+  /**
+   * Accessible name for the input when the visible floating label is not unique
+   * enough on its own (e.g. a column of identical "Value" fields). Overrides the
+   * label for assistive technology only; the visible label is unchanged.
+   */
+  ariaLabel?: string;
   /**
    * Validation message for MANUAL usage (no `control`/react-hook-form).
    * RHF-controlled inputs get their error from `fieldState` instead — pass

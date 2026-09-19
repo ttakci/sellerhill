@@ -1,6 +1,6 @@
-import { PlatformSettingCategory, UserRole } from '@repo/shared';
+import { UserRole } from '@repo/shared';
 import { formatDate, formatMicroCurrency, getLocaleConfig } from '@repo/ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
@@ -15,11 +15,10 @@ import {
 } from '../api/admin.api';
 import { useAdminEbayColumns } from '../hooks/useAdminEbayColumns';
 import { useAdminListingQuality } from '../hooks/useAdminListingQuality';
-import { useAdminSettings } from '../hooks/useAdminSettings';
 import { useAdminUserColumns } from '../hooks/useAdminUserColumns';
 
 import { AdminPageComponent } from './AdminPage.component';
-import type { AdminTabId, SettingGroup } from './AdminPage.types';
+import type { AdminTabId } from './AdminPage.types';
 
 import { resolveHomePath } from '@/app/operatorRouting';
 import { useGetMeQuery } from '@/features/auth/api/authApi';
@@ -38,18 +37,6 @@ const VALID_TABS: AdminTabId[] = [
 ];
 
 /** Category render order — cost levers first, cosmetics last. */
-const CATEGORY_ORDER: PlatformSettingCategory[] = [
-  PlatformSettingCategory.KEEPA,
-  PlatformSettingCategory.LLM,
-  PlatformSettingCategory.AMAZON,
-  PlatformSettingCategory.AUTO_FULFILL,
-  PlatformSettingCategory.BILLING,
-  PlatformSettingCategory.BUYER_MESSAGING,
-  PlatformSettingCategory.EMAIL,
-  PlatformSettingCategory.ADMIN,
-  PlatformSettingCategory.RETENTION,
-];
-
 export const AdminPageContainer = (): React.ReactElement => {
   const { buildPath } = useLocale();
   const { i18n } = useTranslation(['admin', 'translation']);
@@ -57,9 +44,6 @@ export const AdminPageContainer = (): React.ReactElement => {
      happens through real sidebar links (OperatorLayout), not an in-page
      switcher, so this page never needs to write the query string itself. */
   const [searchParams] = useSearchParams();
-  const [collapsedSettingCategories, setCollapsedSettingCategories] = useState<Set<PlatformSettingCategory>>(
-    () => new Set()
-  );
 
   const { data: user, isLoading } = useGetMeQuery();
   const skip = isLoading || user?.role !== UserRole.ADMIN;
@@ -72,31 +56,8 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: listingFailures } = useGetAdminListingFailuresQuery(undefined, { skip });
   const listingQuality = useAdminListingQuality(skip);
 
-  const settings = useAdminSettings(skip);
-
   const tabParam = searchParams.get('tab') as AdminTabId | null;
   const activeTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'overview';
-
-  const handleToggleSettingCategory = useCallback((category: PlatformSettingCategory) => {
-    setCollapsedSettingCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(category)) {
-        next.delete(category);
-      } else {
-        next.add(category);
-      }
-      return next;
-    });
-  }, []);
-
-  const settingGroups = useMemo<SettingGroup[]>(
-    () =>
-      CATEGORY_ORDER.map((category) => ({
-        category,
-        settings: settings.settings.filter((s) => s.category === category),
-      })).filter((group) => group.settings.length > 0),
-    [settings.settings]
-  );
 
   const { locale } = getLocaleConfig(i18n.language);
   const formatCost = useCallback(
@@ -133,18 +94,7 @@ export const AdminPageContainer = (): React.ReactElement => {
       userColumns={userColumns}
       budgetColumns={budgetColumns}
       failureColumns={failureColumns}
-      settingGroups={settingGroups}
-      collapsedSettingCategories={collapsedSettingCategories}
-      onToggleSettingCategory={handleToggleSettingCategory}
-      settingDrafts={settings.settingDrafts}
-      isSavingSetting={settings.isSavingSetting}
-      emailTestResult={settings.emailTestResult}
-      isTestingEmail={settings.isTestingEmail}
-      onSettingDraftChange={settings.onSettingDraftChange}
-      onSettingSave={settings.onSettingSave}
-      onSettingToggle={settings.onSettingToggle}
-      onSettingReset={settings.onSettingReset}
-      onEmailTest={settings.onEmailTest}
+      skip={skip}
       formatCost={formatCost}
       formatCapturedAt={formatCapturedAt}
     />

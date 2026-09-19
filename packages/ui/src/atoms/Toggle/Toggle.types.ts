@@ -20,6 +20,13 @@ export interface ToggleProps {
   label?: string;
 
   /**
+   * Accessible name when there is no visible `label` (e.g. a switch in a
+   * settings row whose title sits elsewhere). Without either, a screen reader
+   * announces an unnamed switch.
+   */
+  ariaLabel?: string;
+
+  /**
    * Disabled state
    */
   disabled?: boolean;

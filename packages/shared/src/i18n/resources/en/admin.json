@@ -105,7 +105,7 @@
       "roleCliNotice": "User roles are changed only through the operator CLI. HTTP role escalation is disabled."
     },
     "settings": {
-      "intro": "Runtime configuration. Each setting resolves as database override, then environment variable, then code default — reset a setting to fall back to the environment. Secrets and connection credentials stay in the environment and are not editable here.",
+      "intro": "Runtime configuration. Each setting resolves as panel value, then environment variable, then code default; resetting a setting falls back to the environment. Secrets are stored encrypted and are never shown again once written. Connection infrastructure and server credentials are managed only from the environment.",
       "valueLabel": "Value",
       "reset": "Reset",
       "requiresRestart": "Restart required",
@@ -260,6 +260,26 @@
         "billing.trialDays": "The free trial given to a newly registered seller, between 1 and 90. A change applies only to sellers who register after it is saved.",
         "billing.webhookGraceHours": "How long to wait after a subscription period ends, if the renewal notification is late, before the account is suspended (default 6). A paying seller is not interrupted at the renewal moment.",
         "llm.apiKey": "The AI provider's API key. Stored encrypted and never shown again once written. If the panel holds no value, the LLM_API_KEY environment variable is used. With no key, AI title and item-specific writing does not run and listings still open with the normal title. The provider address and model are managed only from the environment, for security."
+      },
+      "newValueLabel": "New value",
+      "search": "Search settings (name or environment variable)",
+      "filter": {
+        "all": "All",
+        "changed": "Changed"
+      },
+      "count": "{{count}} settings",
+      "changedCount": "{{count}} changed",
+      "saved": "Saved",
+      "noResults": {
+        "title": "No matching settings",
+        "description": "Change the search or the filter."
+      },
+      "resetSecretConfirm": "The stored value for “{{title}}” will be deleted and the environment value used instead. A stored value cannot be recovered. Continue?",
+      "validation": {
+        "required": "Enter a value.",
+        "notANumber": "Enter a valid number.",
+        "belowMin": "Must be at least {{bound}}.",
+        "aboveMax": "Must be at most {{bound}}."
       }
     },
     "listingQuality": {
