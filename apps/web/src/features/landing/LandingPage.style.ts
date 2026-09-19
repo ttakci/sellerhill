@@ -2103,6 +2103,29 @@ export const FooterLink = styled.button`
   }
 `;
 
+export const FooterContactText = styled.address`
+  margin: 0;
+  font-style: normal;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+export const FooterContactLink = styled.a`
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  overflow-wrap: anywhere;
+  color: ${tkn('colors.sidebar.textMuted')};
+  text-decoration: none;
+  transition: color 140ms ease;
+
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+  }
+`;
+
 export const FooterDivider = styled.div`
   max-width: ${CONTENT_MAX};
   margin: ${tkn('spacing.xl')} auto ${tkn('spacing.md')};
