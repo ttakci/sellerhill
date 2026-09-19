@@ -1,9 +1,6 @@
 import {
   AdminWarningLevel,
   AspectDefaultSourceDto,
-  PlatformSettingCategory,
-  PlatformSettingSource,
-  PlatformSettingType,
   QuotaPressureBand,
 } from '@repo/shared';
 import {
@@ -11,16 +8,16 @@ import {
   Button,
   EmptyState,
   Icon,
-  ModernTextInput,
   PageHeader,
   SearchField,
   Table,
   Text,
-  Toggle,
   Tooltip,
 } from '@repo/ui';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AdminSettingsPanel } from '../components/AdminSettingsPanel';
 
 import * as S from './AdminPage.style';
 import type { AdminPageComponentProps } from './AdminPage.types';
@@ -32,13 +29,6 @@ const BAND_VARIANT: Record<QuotaPressureBand, 'neutral' | 'success' | 'warning' 
   [QuotaPressureBand.NEAR_LIMIT]: 'warning',
   [QuotaPressureBand.AT_LIMIT]: 'error',
   [QuotaPressureBand.OVER_LIMIT]: 'error',
-};
-
-/** A database override is the only source worth calling out visually. */
-const SOURCE_VARIANT: Record<PlatformSettingSource, 'neutral' | 'success' | 'warning' | 'error'> = {
-  [PlatformSettingSource.DATABASE]: 'success',
-  [PlatformSettingSource.ENV]: 'neutral',
-  [PlatformSettingSource.DEFAULT]: 'neutral',
 };
 
 export const AdminPageComponent = ({
@@ -54,18 +44,7 @@ export const AdminPageComponent = ({
   userColumns,
   budgetColumns,
   failureColumns,
-  settingGroups,
-  collapsedSettingCategories,
-  onToggleSettingCategory,
-  settingDrafts,
-  isSavingSetting,
-  emailTestResult,
-  isTestingEmail,
-  onSettingDraftChange,
-  onSettingSave,
-  onSettingToggle,
-  onSettingReset,
-  onEmailTest,
+  skip,
   formatCost,
   formatCapturedAt,
 }: AdminPageComponentProps): React.ReactElement => {
@@ -247,158 +226,7 @@ export const AdminPageComponent = ({
         </S.Grid>
       )}
 
-      {activeTab === 'settings' && (
-        <S.Rows>
-          <Text variant="body-sm" color="text.secondary">
-            {t('admin.settings.intro')}
-          </Text>
-          {settingGroups.map((group) => {
-            const isOpen = !collapsedSettingCategories.has(group.category);
-            return (
-              <S.SettingsCategoryCard key={group.category}>
-                <S.SettingsCategoryHeader
-                  type="button"
-                  $isOpen={isOpen}
-                  onClick={() => onToggleSettingCategory(group.category)}
-                  aria-expanded={isOpen}
-                >
-                  <S.SettingsCategoryHeaderTitle>
-                    <Text variant="h4" weight="semibold">
-                      {t(`admin.settings.category.${group.category}`)}
-                    </Text>
-                    <Text variant="caption" color="text.tertiary" numeric>
-                      {group.settings.length}
-                    </Text>
-                  </S.SettingsCategoryHeaderTitle>
-                  <Icon name="chevron-down" size={18} />
-                </S.SettingsCategoryHeader>
-                {isOpen && (
-                  <>
-                    {group.category === PlatformSettingCategory.EMAIL && (
-                      <S.FormActions>
-                        {emailTestResult && (
-                          <Badge variant={emailTestResult.ok ? 'success' : 'error'}>
-                            {emailTestResult.ok ? t('admin.settings.emailTestOk') : t('admin.settings.emailTestFailed')}
-                          </Badge>
-                        )}
-                        <Button
-                          variant="secondary"
-                          size="small"
-                          onClick={onEmailTest}
-                          isLoading={isTestingEmail}
-                          disabled={isTestingEmail}
-                        >
-                          <Text variant="body-sm" weight="semibold">
-                            {t('admin.settings.emailTest')}
-                          </Text>
-                        </Button>
-                      </S.FormActions>
-                    )}
-                    <S.Rows>
-                      {group.settings.map((setting) => (
-                        <S.Row key={setting.key}>
-                          <S.RowMain>
-                            <S.LabelRow>
-                              <Text variant="body" weight="semibold">
-                                {t(`admin.settings.keys.${setting.key}`, { defaultValue: setting.key })}
-                              </Text>
-                              <Tooltip
-                                content={t(`admin.settings.descriptions.${setting.key}`, {
-                                  defaultValue: t('admin.settings.noDescription'),
-                                })}
-                                position="right"
-                                variant="dark"
-                              >
-                                <S.InfoButton
-                                  type="button"
-                                  variant="ghost"
-                                  aria-label={t(`admin.settings.descriptions.${setting.key}`, {
-                                    defaultValue: t('admin.settings.noDescription'),
-                                  })}
-                                >
-                                  <Icon name="info" size={14} color="text.tertiary" />
-                                </S.InfoButton>
-                              </Tooltip>
-                            </S.LabelRow>
-                            <Text variant="caption" color="text.secondary">
-                              {t('admin.settings.envHint', { envVar: setting.envVar })}
-                              {setting.defaultValue !== null
-                                ? ` · ${t('admin.settings.defaultHint', { value: setting.defaultValue })}`
-                                : ''}
-                            </Text>
-                            <S.RowSide>
-                              <Badge variant={SOURCE_VARIANT[setting.source]}>
-                                {t(`admin.settings.source.${setting.source}`)}
-                              </Badge>
-                              {setting.requiresRestart && (
-                                <Badge variant="warning">{t('admin.settings.requiresRestart')}</Badge>
-                              )}
-                              {setting.isSecret && (
-                                <Badge variant={setting.hasValue ? 'success' : 'neutral'}>
-                                  {setting.hasValue ? t('admin.settings.secretSet') : t('admin.settings.secretUnset')}
-                                </Badge>
-                              )}
-                            </S.RowSide>
-                          </S.RowMain>
-                          <S.RowSide>
-                            {setting.type === PlatformSettingType.BOOLEAN ? (
-                              <Toggle
-                                checked={setting.value === 'true'}
-                                onChange={() => onSettingToggle(setting)}
-                                disabled={isSavingSetting}
-                              />
-                            ) : (
-                              <>
-                                <S.SettingInput>
-                                  <ModernTextInput
-                                    name={setting.key}
-                                    type={
-                                      setting.isSecret
-                                        ? 'password'
-                                        : setting.type === PlatformSettingType.NUMBER
-                                          ? 'number'
-                                          : 'text'
-                                    }
-                                    label={t('admin.settings.valueLabel')}
-                                    value={settingDrafts[setting.key] ?? (setting.isSecret ? '' : setting.value ?? '')}
-                                    onChange={(e) => onSettingDraftChange(setting.key, e.target.value)}
-                                  />
-                                </S.SettingInput>
-                                <Button
-                                  variant="primary"
-                                  size="small"
-                                  onClick={() => onSettingSave(setting.key)}
-                                  disabled={isSavingSetting || settingDrafts[setting.key] === undefined}
-                                >
-                                  <Text variant="body-sm" weight="semibold">
-                                    {t('translation:common.save')}
-                                  </Text>
-                                </Button>
-                              </>
-                            )}
-                            {setting.source === PlatformSettingSource.DATABASE && (
-                              <Button
-                                variant="secondary"
-                                size="small"
-                                onClick={() => onSettingReset(setting.key)}
-                                disabled={isSavingSetting}
-                              >
-                                <Text variant="body-sm" weight="semibold">
-                                  {t('admin.settings.reset')}
-                                </Text>
-                              </Button>
-                            )}
-                          </S.RowSide>
-                        </S.Row>
-                      ))}
-                    </S.Rows>
-                  </>
-                )}
-              </S.SettingsCategoryCard>
-            );
-          })}
-        </S.Rows>
-      )}
+      {activeTab === 'settings' && <AdminSettingsPanel skip={skip} />}
 
       {activeTab === 'billing' && (
         <S.Rows>

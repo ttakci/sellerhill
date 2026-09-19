@@ -8,8 +8,6 @@ import type {
   AdminOverviewDto,
   AdminUserDto,
   AdminUsersListDto,
-  PlatformSettingCategory,
-  PlatformSettingDto,
   ProviderCostSummaryDto,
   EbayCallBudgetStatusDto,
 } from '@repo/shared';
@@ -25,12 +23,6 @@ export type AdminTabId =
   | 'users'
   | 'ebayLimits'
   | 'listingFailures';
-
-/** Settings grouped for rendering, one block per registry category. */
-export interface SettingGroup {
-  category: PlatformSettingCategory;
-  settings: PlatformSettingDto[];
-}
 
 /** Listing-quality tab data + actions. */
 export interface AdminListingQualityView {
@@ -58,19 +50,8 @@ export interface AdminPageComponentProps {
   userColumns: TableColumn<AdminUserDto>[];
   budgetColumns: TableColumn<EbayCallBudgetStatusDto>[];
   failureColumns: TableColumn<AdminListingFailureDto>[];
-  settingGroups: SettingGroup[];
-  /** Categories currently collapsed in the Settings tab accordion. Absent = expanded. */
-  collapsedSettingCategories: Set<PlatformSettingCategory>;
-  onToggleSettingCategory: (category: PlatformSettingCategory) => void;
-  settingDrafts: Record<string, string>;
-  isSavingSetting: boolean;
-  emailTestResult: { ok: boolean; error: string | null } | null;
-  isTestingEmail: boolean;
-  onSettingDraftChange: (key: string, value: string) => void;
-  onSettingSave: (key: string) => void;
-  onSettingToggle: (setting: PlatformSettingDto) => void;
-  onSettingReset: (key: string) => void;
-  onEmailTest: () => void;
+  /** True until the admin role is confirmed; child panels that fetch on their own must not query before then. */
+  skip: boolean;
   /** Renders a micro-USD amount; returns the em-dash placeholder for null (unknown). */
   formatCost: (micros: number | null, currency: string | null) => string;
   /** Renders the Aquiline snapshot's captured-at timestamp; em-dash for null (no snapshot yet). */
