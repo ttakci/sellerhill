@@ -194,7 +194,8 @@
         "tracking.aquiline.profilePrefix": "Aquiline profil öneki",
         "tracking.aquiline.maxProfiles": "Aquiline profil sınırı",
         "billing.trialDays": "Deneme süresi (gün)",
-        "billing.webhookGraceHours": "Ödeme bildirimi tolerans süresi (saat)"
+        "billing.webhookGraceHours": "Ödeme bildirimi tolerans süresi (saat)",
+        "llm.apiKey": "Yapay zekâ API anahtarı"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka planda Keepa yenileme zamanlayıcısının ana anahtarı. Kapatıldığında arka plan token harcaması, yeniden başlatma gerekmeden anında durur.",
@@ -257,7 +258,8 @@
         "tracking.aquiline.profilePrefix": "Aquiline'da oluşturulan satıcı profillerinin ad öneki (varsayılan sh). Tek bir Aquiline hesabı tüm ortamlara hizmet ettiği için ortamları birbirinden ayırır.",
         "tracking.aquiline.maxProfiles": "Aquiline planınızın izin verdiği satıcı profili sayısı (Starter 10; ardından 25, 50, 100, 250). Planı yükseltince buradan artırın. Profiller kalıcıdır, silinemez.",
         "billing.trialDays": "Yeni kayıt olan satıcıya verilen ücretsiz deneme süresi, 1 ile 90 arası. Değişiklik yalnızca kaydedildikten sonra kayıt olanlar için geçerlidir.",
-        "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz."
+        "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz.",
+        "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir."
       }
     },
     "listingQuality": {

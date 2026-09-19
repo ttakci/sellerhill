@@ -53,7 +53,7 @@ export enum PlatformSettingSource {
  * Keys NOT in this enum are env-only by design and must stay that way:
  * connection bootstrap (DATABASE_*, REDIS_*), crypto/auth secrets (JWT_*,
  * AMAZON_ENCRYPTION_KEY), provider API credentials (KEEPA_API_KEY, EBAY_*,
- * GOOGLE_*, STRIPE_*, LLM_API_KEY) and process identity (NODE_ENV, PORT,
+ * GOOGLE_*, STRIPE_*) and process identity (NODE_ENV, PORT,
  * CORS_ORIGINS). They are read before the DB exists, are rotated as an ops
  * action, and must not be reachable over HTTP.
  */
@@ -167,6 +167,15 @@ export enum PlatformSettingKey {
 
   // --- Feature toggles ---
   LLM_CONTENT_ENABLED = 'llm.contentEnabled',
+  /**
+   * The LLM provider's API key. A panel setting with an env fallback, unlike the
+   * provider's ADDRESS (`LLM_BASE_URL`) and model, which stay env-only: the key
+   * is write-only here, so if the address were editable too, a compromised admin
+   * session could point it at a host it controls and receive the key on the next
+   * call. Keeping the destination in the environment keeps that decision with
+   * whoever can deploy.
+   */
+  LLM_API_KEY = 'llm.apiKey',
   /** Let a model pick a required item specific from eBay's allowed values (local provider). */
   EBAY_ASPECTS_LLM_ENABLED = 'ebay.aspects.llmEnabled',
   /** Hard per-listing ceiling on those calls. */
