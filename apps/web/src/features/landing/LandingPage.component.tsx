@@ -2,6 +2,7 @@ import { Dropdown, Icon, type IconName, Logo, TabNav } from '@repo/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { BUSINESS_CONTACT } from './LandingPage.constants';
 import * as S from './LandingPage.style';
 import type { LandingPageProps } from './LandingPage.types';
 
@@ -214,11 +215,6 @@ export const LandingPageComponent = ({
     },
     [scrollTo]
   );
-
-  /** tawk.to's own bubble is already live on the landing (see TawkToWidget); this just opens it. */
-  const openSupportChat = useCallback(() => {
-    window.Tawk_API?.maximize?.();
-  }, []);
 
   return (
     <S.Page>
@@ -812,10 +808,22 @@ export const LandingPageComponent = ({
               </S.FooterLink>
             </S.FooterColumn>
             <S.FooterColumn>
-              <S.FooterColTitle>{t('translation:landing.footer.company')}</S.FooterColTitle>
-              <S.FooterLink type="button" onClick={openSupportChat}>
-                {t('translation:landing.footer.companyLinks.contact')}
-              </S.FooterLink>
+              <S.FooterColTitle>{t('translation:landing.footer.companyLinks.contact')}</S.FooterColTitle>
+              <S.FooterContactText>
+                {BUSINESS_CONTACT.legalName}
+                {BUSINESS_CONTACT.addressLines.map((line) => (
+                  <React.Fragment key={line}>
+                    <br />
+                    {line}
+                  </React.Fragment>
+                ))}
+              </S.FooterContactText>
+              <S.FooterContactLink href={BUSINESS_CONTACT.phoneHref}>
+                {BUSINESS_CONTACT.phoneDisplay}
+              </S.FooterContactLink>
+              <S.FooterContactLink href={BUSINESS_CONTACT.emailHref}>
+                {BUSINESS_CONTACT.email}
+              </S.FooterContactLink>
             </S.FooterColumn>
             <S.FooterColumn>
               <S.FooterColTitle>{t('translation:landing.footer.legal')}</S.FooterColTitle>
