@@ -1,4 +1,4 @@
-import { PlatformSettingCategory, PlatformSettingSource, PlatformSettingType } from '@repo/shared';
+import { PlatformSettingCategory, PlatformSettingType } from '@repo/shared';
 import {
   Badge,
   Button,
@@ -16,13 +16,6 @@ import { useTranslation } from 'react-i18next';
 
 import * as S from './AdminSettingsPanel.style';
 import type { AdminSettingsPanelComponentProps } from './AdminSettingsPanel.types';
-
-/** A database override is the only source worth calling out visually. */
-const SOURCE_VARIANT: Record<PlatformSettingSource, 'neutral' | 'success'> = {
-  [PlatformSettingSource.DATABASE]: 'success',
-  [PlatformSettingSource.ENV]: 'neutral',
-  [PlatformSettingSource.DEFAULT]: 'neutral',
-};
 
 export const AdminSettingsPanelComponent = ({
   groups,
@@ -140,9 +133,6 @@ export const AdminSettingsPanelComponent = ({
                           </Text>
                         </S.Meta>
                         <S.Meta>
-                          <Badge variant={SOURCE_VARIANT[setting.source]}>
-                            {t(`admin.settings.source.${setting.source}`)}
-                          </Badge>
                           {setting.requiresRestart && (
                             <Badge variant="warning">{t('admin.settings.requiresRestart')}</Badge>
                           )}
