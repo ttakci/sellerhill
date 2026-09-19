@@ -101,12 +101,6 @@ export enum PlatformSettingKey {
   AQUILINE_BASE_URL = 'tracking.aquiline.baseUrl',
   /** Write-only secret. Without it every order degrades to the pass-through. */
   AQUILINE_API_KEY = 'tracking.aquiline.apiKey',
-  /**
-   * Dormant. Kept only because a deployed database may still hold a value for
-   * it. The Integration API (2026-08-23) has no `X-Partner-Id` header — that
-   * was a v3 partner/courier API concept. Do not read this key from new code.
-   */
-  AQUILINE_PARTNER_ID = 'tracking.aquiline.partnerId',
   AQUILINE_TIMEOUT_MS = 'tracking.aquiline.timeoutMs',
   /** HMAC secret for inbound webhooks. Empty = receiver refuses everything. */
   AQUILINE_WEBHOOK_SECRET = 'tracking.aquiline.webhookSecret',
