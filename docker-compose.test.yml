@@ -97,8 +97,11 @@ services:
       BROWSER_STATE_DIR: /app/.browser-state
       FULFILLMENT_EVIDENCE_DIR: /app/fulfillment-evidence
 
+      # LLM transport — address + model only. The API key is configured at
+      # /admin -> Settings (stored encrypted, applies without a redeploy);
+      # keeping the address here and the key panel-only is deliberate, see
+      # CLAUDE.md "A secret's DESTINATION stays out of the panel".
       LLM_BASE_URL: ${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai}
-      LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_CONTENT_MODEL: ${LLM_CONTENT_MODEL:-gemini-3.1-flash-lite}
 
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -114,13 +117,8 @@ services:
       # the API key and webhook secret are stored encrypted and apply without a
       # redeploy, which matters when the Aquiline plan is upgraded.
 
-      # Leave unset and configure mail entirely from /admin → Settings.
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-}
-      SMTP_SECURE: ${SMTP_SECURE:-}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_FROM: ${SMTP_FROM:-}
+      # Email (SMTP) is configured at /admin -> Settings, not here: host, port,
+      # user and the encrypted password all apply without a redeploy.
     volumes:
       - browser_state:/app/.browser-state
       - fulfillment_evidence:/app/fulfillment-evidence
