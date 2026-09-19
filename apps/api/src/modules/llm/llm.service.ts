@@ -5,12 +5,15 @@ import {
   LlmStreamTerminalReason,
   LlmUsagePurpose,
   LlmUsageSource,
+  PlatformSettingKey,
   type LlmChatChunk,
   type LlmChatOptions,
   type LlmChatResult,
   type LlmMessage,
   type LlmTokenUsage,
 } from '@repo/shared';
+
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { LlmUsageService } from './llm-usage.service';
 import { LlmAbortError, LlmError, LlmRateLimitError, LlmResponseError, LlmTimeoutError, LlmUnavailableError } from './llm.errors';
@@ -25,6 +28,7 @@ export class LlmService {
   constructor(
     private readonly config: ConfigService,
     private readonly usage: LlmUsageService,
+    private readonly platformSettings: PlatformSettingsService,
   ) {}
   isAvailable():boolean { const base=(this.config.get<string>('LLM_BASE_URL')??'').trim(); return base.length>0&&(this.config.get<string>('LLM_CONTENT_MODEL')??'').trim().length>0; }
 
@@ -71,13 +75,13 @@ export class LlmService {
     }
   }
 
-  private buildRequest(messages:LlmMessage[],opts:LlmChatOptions,model:string,stream:boolean):ResolvedRequest{
-    const provider=this.resolveProvider(),headers:Record<string,string>={'Content-Type':'application/json'}; if(provider.apiKey){headers.Authorization=`Bearer ${provider.apiKey}`;}
+  private async buildRequest(messages:LlmMessage[],opts:LlmChatOptions,model:string,stream:boolean):Promise<ResolvedRequest>{
+    const provider=this.resolveProvider(),apiKey=await this.resolveApiKey(),headers:Record<string,string>={'Content-Type':'application/json'}; if(apiKey){headers.Authorization=`Bearer ${apiKey}`;}
     const base=provider.baseUrl;
     return{url:`${base}/chat/completions`,headers,body:JSON.stringify({model,messages,temperature:opts.temperature??DEFAULT_TEMPERATURE,max_tokens:opts.maxTokens??DEFAULT_MAX_TOKENS,stream,...(stream?{stream_options:{include_usage:true}}:{})}),model,timeoutMs:opts.timeoutMs??this.readTimeout()};
   }
   private async request(messages:LlmMessage[],opts:LlmChatOptions,model:string,stream:boolean):Promise<Response>{
-    const spec=this.buildRequest(messages,opts,model,stream),deadline=Date.now()+spec.timeoutMs,controller=new AbortController(); let timedOut=false,callerAborted=opts.signal?.aborted??false;
+    const spec=await this.buildRequest(messages,opts,model,stream),deadline=Date.now()+spec.timeoutMs,controller=new AbortController(); let timedOut=false,callerAborted=opts.signal?.aborted??false;
     const timer=setTimeout(()=>{timedOut=true;controller.abort();},spec.timeoutMs),handler=()=>{callerAborted=true;controller.abort();}; if(opts.signal&&!opts.signal.aborted){opts.signal.addEventListener('abort',handler,{once:true});} else if(callerAborted){controller.abort();}
     try{for(let attempt=1;attempt<=MAX_ATTEMPTS;attempt++){let res:Response;try{res=await fetch(spec.url,{method:'POST',headers:spec.headers,body:spec.body,signal:controller.signal});}catch(caught){if(caught instanceof Error&&caught.name==='AbortError'){if(callerAborted){throw new LlmAbortError();}if(timedOut){throw new LlmTimeoutError();}}throw caught instanceof LlmError?caught:new LlmUnavailableError(caught instanceof Error?caught.message:undefined);}
       if(res.status===429){const retry=this.parseRetryAfterMs(res.headers.get('Retry-After'));if(attempt===MAX_ATTEMPTS||retry>deadline-Date.now()){throw new LlmRateLimitError('LLM rate limited',retry);}await new Promise(resolve=>setTimeout(resolve,retry));continue;} if(!res.ok){const text=await res.text().catch(()=>'');throw new LlmResponseError(`LLM request failed (${res.status})${text?`: ${text.slice(0,200)}`:''}`,res.status);}return res;} throw new LlmRateLimitError();}
@@ -87,11 +91,18 @@ export class LlmService {
   private tokenUsage(value:StreamEvent['usage']):LlmTokenUsage|undefined{if(!value){return undefined;}const prompt=value.prompt_tokens??0,completion=value.completion_tokens??0;return{promptTokens:prompt,completionTokens:completion,totalTokens:value.total_tokens??prompt+completion,source:LlmUsageSource.PROVIDER};}
   private resolveModel(opts:LlmChatOptions):string{return opts.model?.trim()||this.resolveProvider().model;}
 
-  /** Provider config — one group (`LLM_BASE_URL` / `LLM_API_KEY` / `LLM_CONTENT_MODEL`) for every purpose. */
-  private resolveProvider():{baseUrl:string;apiKey:string;model:string}{
+  /**
+   * Where requests go and with which model (`LLM_BASE_URL` / `LLM_CONTENT_MODEL`),
+   * for every purpose. Environment-only ON PURPOSE: the API key is a write-only
+   * panel setting, and an address editable from the same panel would let a
+   * compromised admin session redirect the key to a host it controls.
+   */
+  private resolveProvider():{baseUrl:string;model:string}{
     const read=(name:string):string=>(this.config.get<string>(name)??'').trim();
-    return{baseUrl:read('LLM_BASE_URL').replace(/\/$/,''),apiKey:read('LLM_API_KEY'),model:read('LLM_CONTENT_MODEL')};
+    return{baseUrl:read('LLM_BASE_URL').replace(/\/$/,''),model:read('LLM_CONTENT_MODEL')};
   }
+  /** The key: panel override, else the `LLM_API_KEY` env var, else none. Read per request so a change applies without a redeploy. */
+  private async resolveApiKey():Promise<string>{return((await this.platformSettings.getString(PlatformSettingKey.LLM_API_KEY))??'').trim();}
   private purpose(opts:LlmChatOptions):LlmUsagePurpose{
     const purpose = opts.purpose ?? LlmUsagePurpose.CONTENT;
     return purpose as LlmUsagePurpose;

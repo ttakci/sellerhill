@@ -1,6 +1,8 @@
 // apps/api/src/modules/llm/llm.service.spec.ts
 import { ConfigService } from '@nestjs/config';
-import type { LlmChatChunk } from '@repo/shared';
+import { PlatformSettingKey, type LlmChatChunk } from '@repo/shared';
+
+import type { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import type { LlmUsageService } from './llm-usage.service';
 import { LlmRateLimitError, LlmResponseError, LlmTimeoutError, LlmUnavailableError } from './llm.errors';
@@ -27,6 +29,14 @@ function makeConfig(map: Record<string, string | undefined> = {}): ConfigService
     get: (key: string, fallback?: string) =>
       merged[key] !== undefined ? merged[key] : fallback,
   } as unknown as ConfigService;
+}
+
+// The API key comes from the platform settings service (panel override, then the
+// LLM_API_KEY env var — that fallback lives inside the settings service itself),
+// not from ConfigService, so the tests hand the service a fake of that instead.
+function makeSettings(apiKey = ''): { service: PlatformSettingsService; getString: jest.Mock } {
+  const getString = jest.fn().mockResolvedValue(apiKey === '' ? null : apiKey);
+  return { service: { getString } as unknown as PlatformSettingsService, getString };
 }
 
 function makeUsage(): LlmUsageService {
@@ -77,12 +87,12 @@ describe('LlmService', () => {
   });
 
   it('isAvailable is true when base URL and content model are set', () => {
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     expect(svc.isAvailable()).toBe(true);
   });
 
   it('isAvailable is false when base URL empty', () => {
-    const svc = new LlmService(makeConfig({ LLM_BASE_URL: '' }), makeUsage());
+    const svc = new LlmService(makeConfig({ LLM_BASE_URL: '' }), makeUsage(), makeSettings().service);
     expect(svc.isAvailable()).toBe(false);
   });
 
@@ -96,7 +106,7 @@ describe('LlmService', () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const usage = makeUsage();
-    const svc = new LlmService(makeConfig(), usage);
+    const svc = new LlmService(makeConfig(), usage, makeSettings().service);
     const result = await svc.chat([{ role: 'user', content: 'hi' }], { purpose: 'content' });
 
     expect(result.text).toBe('hello');
@@ -120,10 +130,41 @@ describe('LlmService', () => {
     mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig({ LLM_API_KEY: 'sk-test' }), makeUsage());
+    const settings = makeSettings('sk-test');
+    const svc = new LlmService(makeConfig(), makeUsage(), settings.service);
     await svc.chat([{ role: 'user', content: 'hi' }]);
     const init = getCallInit(fetchMock);
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer sk-test');
+    // Resolved through the settings service on every request, so a panel change
+    // applies without a redeploy.
+    expect(settings.getString).toHaveBeenCalledWith(PlatformSettingKey.LLM_API_KEY);
+  });
+
+  it('chat sends no Authorization header when no key is configured', async () => {
+    const fetchMock = jest.fn();
+    mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
+    await svc.chat([{ role: 'user', content: 'hi' }]);
+    const init = getCallInit(fetchMock);
+    expect((init.headers as Record<string, string>).Authorization).toBeUndefined();
+  });
+
+  it('never reads the provider address from the settings service', async () => {
+    // The API key is a write-only panel setting; the address it is sent to must
+    // stay environment-only, or a compromised admin session could redirect it.
+    const fetchMock = jest.fn();
+    mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const settings = makeSettings('sk-test');
+    const svc = new LlmService(makeConfig(), makeUsage(), settings.service);
+    await svc.chat([{ role: 'user', content: 'hi' }]);
+    const url = (fetchMock.mock.calls[0] as [string])[0];
+    expect(url).toBe('http://llm.test/v1/chat/completions');
+    const asked = settings.getString.mock.calls.map((call: unknown[]) => String(call[0]));
+    expect(asked).toEqual([PlatformSettingKey.LLM_API_KEY]);
   });
 
   it('purpose aspect still uses the single content model', async () => {
@@ -131,7 +172,7 @@ describe('LlmService', () => {
     mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     await svc.chat([{ role: 'user', content: 'hi' }], { purpose: 'aspect' });
     const body = JSON.parse(getCallInit(fetchMock).body as string) as Record<string, unknown>;
     expect(body.model).toBe('content-model');
@@ -142,7 +183,7 @@ describe('LlmService', () => {
     mockResponse(fetchMock, okJson({ choices: [{ message: { content: 'x' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     await svc.chat([{ role: 'user', content: 'hi' }], {
       purpose: 'aspect',
       model: 'override',
@@ -156,7 +197,7 @@ describe('LlmService', () => {
     mockResponse(fetchMock, httpError(500, 'boom'));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     await expect(svc.chat([{ role: 'user', content: 'hi' }])).rejects.toBeInstanceOf(
       LlmResponseError
     );
@@ -167,7 +208,7 @@ describe('LlmService', () => {
     mockResponse(fetchMock, okJson({ choices: [{ message: { content: '' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     await expect(svc.chat([{ role: 'user', content: 'hi' }])).rejects.toBeInstanceOf(
       LlmResponseError
     );
@@ -176,7 +217,7 @@ describe('LlmService', () => {
   it('network failure throws LlmUnavailableError', async () => {
     const fetchMock = jest.fn().mockRejectedValue(new TypeError('fetch failed'));
     global.fetch = fetchMock as unknown as typeof fetch;
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     await expect(svc.chat([{ role: 'user', content: 'hi' }])).rejects.toBeInstanceOf(
       LlmUnavailableError
     );
@@ -195,7 +236,7 @@ describe('LlmService', () => {
     );
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '20' }), makeUsage());
+    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '20' }), makeUsage(), makeSettings().service);
     await expect(svc.chat([{ role: 'user', content: 'hi' }])).rejects.toBeInstanceOf(
       LlmTimeoutError
     );
@@ -207,7 +248,7 @@ describe('LlmService', () => {
     mockResponseOnce(fetchMock, okJson({ choices: [{ message: { content: 'ok' } }] }));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '10000' }), makeUsage());
+    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '10000' }), makeUsage(), makeSettings().service);
     const result = await svc.chat([{ role: 'user', content: 'hi' }]);
     expect(result.text).toBe('ok');
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -218,7 +259,7 @@ describe('LlmService', () => {
     mockResponse(fetchMock, httpError(429, 'no', new Headers({ 'Retry-After': '0' })));
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '10000' }), makeUsage());
+    const svc = new LlmService(makeConfig({ LLM_TIMEOUT_MS: '10000' }), makeUsage(), makeSettings().service);
     await expect(svc.chat([{ role: 'user', content: 'hi' }])).rejects.toBeInstanceOf(
       LlmRateLimitError
     );
@@ -246,7 +287,7 @@ describe('LlmService', () => {
     });
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    const svc = new LlmService(makeConfig(), makeUsage());
+    const svc = new LlmService(makeConfig(), makeUsage(), makeSettings().service);
     const chunks: string[] = [];
     let lastDone = false;
     for await (const c of svc.chatStream([{ role: 'user', content: 'hi' }])) {
@@ -279,7 +320,7 @@ describe('LlmService', () => {
 
     const usage = makeUsage();
     const logMock = usageLogMock(usage);
-    const svc = new LlmService(makeConfig(), usage);
+    const svc = new LlmService(makeConfig(), usage, makeSettings().service);
 
     for await (const chunk of svc.chatStream([{ role: 'user', content: 'hi' }])) {
       if (chunk.done) {
@@ -319,7 +360,7 @@ describe('LlmService', () => {
 
     const usage = makeUsage();
     const logMock = usageLogMock(usage);
-    const svc = new LlmService(makeConfig(), usage);
+    const svc = new LlmService(makeConfig(), usage, makeSettings().service);
 
     // Consume exactly ONE chunk, then break — NOT the done chunk. This is
     // the canonical "early break" pattern that exposed the bug. Using
