@@ -381,6 +381,17 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     defaultValue: 'false',
   }),
   def({
+    // Secret: stored encrypted and never returned. Resolution is DB override ->
+    // LLM_API_KEY env -> unset, so an existing deployment that already carries
+    // the env var behaves exactly as before.
+    key: PlatformSettingKey.LLM_API_KEY,
+    category: PlatformSettingCategory.LLM,
+    type: PlatformSettingType.STRING,
+    envVar: 'LLM_API_KEY',
+    defaultValue: null,
+    isSecret: true,
+  }),
+  def({
     // Off by default: it needs a local model pulled (`ollama pull qwen3:1.7b`).
     // Turning it on costs nothing on the local provider, and a failure falls
     // back to the deterministic layers.
@@ -460,16 +471,6 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'AQUILINE_API_KEY',
     defaultValue: null,
     isSecret: true,
-  }),
-  def({
-    // DORMANT — the Integration API has no X-Partner-Id header (that was a v3
-    // partner/courier API concept). Left registered, never read by new code,
-    // because a deployed database may already hold an override row for it.
-    key: PlatformSettingKey.AQUILINE_PARTNER_ID,
-    category: PlatformSettingCategory.AMAZON,
-    type: PlatformSettingType.STRING,
-    envVar: 'AQUILINE_PARTNER_ID',
-    defaultValue: null,
   }),
   def({
     key: PlatformSettingKey.AQUILINE_TIMEOUT_MS,

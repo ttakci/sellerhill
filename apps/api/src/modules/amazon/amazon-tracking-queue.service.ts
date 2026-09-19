@@ -1,42 +1,40 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { PlatformSettingKey } from '@repo/shared';
 import { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
-
-/** Env int with fallback + inclusive clamp (typo'd env must not break cadence). */
-function clampIntEnv(raw: string | undefined, fallback: number, min: number, max: number): number {
-  if (raw === undefined || raw === '') {
-    return fallback;
-  }
-  const parsed = Number.parseInt(raw, 10);
-  if (!Number.isFinite(parsed)) {
-    return fallback;
-  }
-  return Math.min(max, Math.max(min, parsed));
-}
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 @Injectable()
 export class AmazonTrackingQueueService implements OnModuleInit {
   private readonly logger = new Logger(AmazonTrackingQueueService.name);
-  /**
-   * Poll cadence, env-tunable (hours). Pre-ship default 6h: the only urgency
-   * is pushing the tracking number to eBay reasonably fast after Amazon
-   * ships. Shipped default 24h: delivered-detection has NO time-critical
-   * side effect (it only flips the local status to completed), and the
-   * shipping phase is the longest part of an order's life — polling it at
-   * 12h doubled scrape traffic for zero functional gain.
-   */
-  private readonly preShipIntervalMs =
-    clampIntEnv(process.env.AMAZON_TRACKING_PRESHIP_INTERVAL_HOURS, 6, 1, 72) * 60 * 60 * 1000;
-  private readonly shippedIntervalMs =
-    clampIntEnv(process.env.AMAZON_TRACKING_SHIPPED_INTERVAL_HOURS, 24, 1, 168) * 60 * 60 * 1000;
 
   constructor(
     @InjectQueue('amazon-tracking') private readonly trackingQueue: Queue,
-    private readonly databaseService: DatabaseService
+    private readonly databaseService: DatabaseService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
+
+  /**
+   * Poll cadence (hours), panel-tunable (DB override -> env -> default).
+   * Pre-ship default 6h: the only urgency is pushing the tracking number to
+   * eBay reasonably fast after Amazon ships. Shipped default 24h:
+   * delivered-detection has NO time-critical side effect (it only flips the
+   * local status to completed), and the shipping phase is the longest part
+   * of an order's life — polling it at 12h doubled scrape traffic for zero
+   * functional gain. Read fresh (not cached on the instance) so a change
+   * applies to the next scheduled tick without a restart — `getNumber`
+   * itself is cached for 30s, so this costs nothing on the hot path.
+   */
+  private async preShipIntervalMs(): Promise<number> {
+    return (await this.platformSettings.getNumber(PlatformSettingKey.AMAZON_TRACKING_PRESHIP_INTERVAL_HOURS)) * 60 * 60 * 1000;
+  }
+
+  private async shippedIntervalMs(): Promise<number> {
+    return (await this.platformSettings.getNumber(PlatformSettingKey.AMAZON_TRACKING_SHIPPED_INTERVAL_HOURS)) * 60 * 60 * 1000;
+  }
 
   async onModuleInit() {
     await this.reconcileSchedulers();
@@ -100,8 +98,8 @@ export class AmazonTrackingQueueService implements OnModuleInit {
       intervalHoursOverride !== undefined
         ? intervalHoursOverride * 60 * 60 * 1000
         : orderStatus === 'shipped'
-          ? this.shippedIntervalMs
-          : this.preShipIntervalMs;
+          ? await this.shippedIntervalMs()
+          : await this.preShipIntervalMs();
 
     await this.trackingQueue.upsertJobScheduler(
       schedulerId,

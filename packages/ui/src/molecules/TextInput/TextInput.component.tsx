@@ -20,6 +20,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
     maxLength,
     id,
     autoComplete,
+    ariaLabel,
     onPressIcon: _onPressIcon,
     size = 'medium',
     suffixText,
@@ -68,6 +69,7 @@ export const TextInputInner = forwardRef<HTMLInputElement, TextInputInnerCompone
           autoFocus={autoFocus}
           maxLength={maxLength}
           autoComplete={autoComplete}
+          aria-label={ariaLabel}
           aria-invalid={!!error}
           aria-describedby={errorId}
           onFocus={onFocus}

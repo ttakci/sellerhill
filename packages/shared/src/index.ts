@@ -27,6 +27,15 @@ export type {
 export { applyEbayFees, calculateListingPrice } from './utils/listing-pricing';
 export type { ListingPriceBreakdown, ListingPriceMetrics } from './utils/listing-pricing';
 export { isValidTotpSecret, normalizeTotpSecret } from './utils/totp-secret';
+export {
+  PlatformSettingDraftIssue,
+  checkPlatformSettingDraft,
+  isPlatformSettingDraftDirty,
+} from './utils/platform-setting-draft';
+export type {
+  PlatformSettingDraftCheck,
+  PlatformSettingDraftRules,
+} from './utils/platform-setting-draft';
 
 // Domain - User
 export * from './domain/user/user.types';

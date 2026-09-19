@@ -1,9 +1,11 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PlatformSettingKey } from '@repo/shared';
 import { Queue } from 'bullmq';
 
 import { stampCurrentCorrelation } from '../../common/observability/queue-correlation';
+import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 /**
  * Registers the stale-driven refresh tick.
@@ -19,7 +21,8 @@ export class RefreshSchedulerService implements OnModuleInit {
 
   constructor(
     @InjectQueue('keepa-refresh') private readonly refreshQueue: Queue,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly platformSettings: PlatformSettingsService
   ) {}
 
   async onModuleInit() {
@@ -50,7 +53,10 @@ export class RefreshSchedulerService implements OnModuleInit {
   }
 
   private async setupRepeatableTick() {
-    const cron = this.configService.get<string>('KEEPA_REFRESH_SCHEDULER_CRON') ?? '* * * * *';
+    // DB override -> env -> default, same as every other panel-tunable knob.
+    // Read here (not at construction) because a repeatable tick is only ever
+    // (re-)registered at boot, so this is the one place a fresh value matters.
+    const cron = (await this.platformSettings.getString(PlatformSettingKey.KEEPA_REFRESH_SCHEDULER_CRON)) ?? '* * * * *';
     this.logger.log(`Configuring Keepa refresh tick: cron="${cron}"`);
 
     await this.refreshQueue.add(
