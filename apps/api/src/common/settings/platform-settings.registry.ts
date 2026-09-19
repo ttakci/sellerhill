@@ -473,16 +473,6 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     isSecret: true,
   }),
   def({
-    // DORMANT — the Integration API has no X-Partner-Id header (that was a v3
-    // partner/courier API concept). Left registered, never read by new code,
-    // because a deployed database may already hold an override row for it.
-    key: PlatformSettingKey.AQUILINE_PARTNER_ID,
-    category: PlatformSettingCategory.AMAZON,
-    type: PlatformSettingType.STRING,
-    envVar: 'AQUILINE_PARTNER_ID',
-    defaultValue: null,
-  }),
-  def({
     key: PlatformSettingKey.AQUILINE_TIMEOUT_MS,
     category: PlatformSettingCategory.AMAZON,
     type: PlatformSettingType.NUMBER,
