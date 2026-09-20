@@ -131,7 +131,8 @@
         "billing": "Faturalandırma",
         "llm": "Yapay zekâ içerik",
         "buyer_messaging": "Alıcı mesajlaşma",
-        "retention": "Veri saklama & disk"
+        "retention": "Veri saklama & disk",
+        "ebay": "eBay çağrı bütçesi"
       },
       "keys": {
         "keepa.refresh.enabled": "Arka plan yenileme açık",

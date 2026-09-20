@@ -131,7 +131,8 @@
         "billing": "Billing",
         "llm": "AI content",
         "buyer_messaging": "Buyer messaging",
-        "retention": "Data retention & disk"
+        "retention": "Data retention & disk",
+        "ebay": "eBay call budget"
       },
       "keys": {
         "keepa.refresh.enabled": "Background refresh enabled",
