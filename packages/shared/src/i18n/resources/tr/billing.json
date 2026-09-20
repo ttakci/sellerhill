@@ -160,7 +160,9 @@
       "scheduledChange": "{{date}} tarihinde {{plan}} paketine geçecek",
       "scheduledChangeUnknownPlan": "Paketiniz {{date}} tarihinde değişecek",
       "cancelScheduledChange": "Vazgeç",
-      "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi."
+      "scheduledChangeCancelled": "Plan değişikliğiniz iptal edildi.",
+      "confirmCancelScheduledChangeTitle": "Plan değişikliğinden vazgeç",
+      "confirmCancelScheduledChangeMessage": "Zamanlanmış plan değişikliğini iptal etmek istediğinizden emin misiniz? Mevcut planınızda kalmaya devam edersiniz."
     },
     "paymentMethod": {
       "title": "Ödeme yöntemi",

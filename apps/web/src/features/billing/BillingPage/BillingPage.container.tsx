@@ -497,20 +497,42 @@ export const BillingPage: React.FC = () => {
   );
 
   const handleCancelScheduledChange = useCallback(() => {
-    void cancelScheduledChange()
-      .unwrap()
-      .then(() => {
-        showMessage(
-          {
-            type: 'success',
-            headerKey: 'translation:message.success.header',
-            descriptionKey: 'billing:billing.subscription.scheduledChangeCancelled',
-            primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+    // A one-click, no-confirm cancel here read as an accident waiting to
+    // happen — the button undoes a plan change the seller just chose, so it
+    // deserves the same "are you sure" step every other reversible-but-not-
+    // trivial action in this app gets (delete a template, delete a group).
+    showMessage(
+      {
+        type: 'warning',
+        headerKey: 'billing:billing.subscription.confirmCancelScheduledChangeTitle',
+        descriptionKey: 'billing:billing.subscription.confirmCancelScheduledChangeMessage',
+        primaryButton: {
+          labelKey: 'billing:billing.subscription.cancelScheduledChange',
+          onClick: () => {
+            closeMessage();
+            void cancelScheduledChange()
+              .unwrap()
+              .then(() => {
+                showMessage(
+                  {
+                    type: 'success',
+                    headerKey: 'translation:message.success.header',
+                    descriptionKey: 'billing:billing.subscription.scheduledChangeCancelled',
+                    primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
+                  },
+                  t,
+                );
+              })
+              .catch((error: Parameters<typeof getErrorI18nKey>[0]) => surfaceBillingError(error));
           },
-          t,
-        );
-      })
-      .catch((error: Parameters<typeof getErrorI18nKey>[0]) => surfaceBillingError(error));
+        },
+        secondaryButton: {
+          labelKey: 'translation:common.cancel',
+          onClick: closeMessage,
+        },
+      },
+      t,
+    );
   }, [cancelScheduledChange, showMessage, closeMessage, t, surfaceBillingError]);
 
   const handleOpenPlans = useCallback(() => setIsPlansOpen(true), []);
