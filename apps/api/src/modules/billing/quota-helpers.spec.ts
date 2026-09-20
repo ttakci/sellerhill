@@ -377,3 +377,30 @@ describe('resolveEffectiveEntitlement', () => {
     expect(resolveEffectiveEntitlement(null, new Date('2026-09-20T00:00:00Z'))).toBe(EntitlementState.NONE);
   });
 });
+
+describe('advisory lock keys fit Postgres int4', () => {
+  // pg_advisory_xact_lock(int, int) takes SIGNED 32-bit ints. An unsigned hash
+  // (`>>> 0`) overflowed for roughly half of all ids — "value 4232461583 is out
+  // of range for type integer" — and only surfaced on a real user's checkout.
+  const INT4_MIN = -2147483648;
+  const INT4_MAX = 2147483647;
+  const ids = Array.from({ length: 5000 }, (_, i) => `d6e06138-006a-4250-a0ca-${i.toString(16).padStart(12, '0')}`);
+
+  it('billingCustomerLockKey stays within int4 for many ids', () => {
+    for (const id of ids) {
+      const { key1, key2 } = billingCustomerLockKey(id);
+      expect(key1).toBeGreaterThanOrEqual(INT4_MIN);
+      expect(key1).toBeLessThanOrEqual(INT4_MAX);
+      expect(key2).toBeGreaterThanOrEqual(INT4_MIN);
+      expect(key2).toBeLessThanOrEqual(INT4_MAX);
+    }
+  });
+
+  it('advisoryLockKey stays within int4 for many ids', () => {
+    for (const id of ids) {
+      const { key2 } = advisoryLockKey(id, BillingLimitKey.LISTINGS_PER_MONTH);
+      expect(key2).toBeGreaterThanOrEqual(INT4_MIN);
+      expect(key2).toBeLessThanOrEqual(INT4_MAX);
+    }
+  });
+});
