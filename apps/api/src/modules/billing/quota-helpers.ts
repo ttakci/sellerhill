@@ -191,7 +191,7 @@ export function advisoryLockKey(
     hash ^= subscriptionId.charCodeAt(i);
     hash = Math.imul(hash, 0x01000193);
   }
-  return { key1: kindDisc, key2: hash >>> 0 };
+  return { key1: kindDisc, key2: hash | 0 };
 }
 
 /**
@@ -229,7 +229,7 @@ export function billingCustomerLockKey(userId: string): { key1: number; key2: nu
     hash ^= userId.charCodeAt(i);
     hash = Math.imul(hash, 0x01000193);
   }
-  return { key1: BILLING_CUSTOMER_LOCK_DISCRIMINATOR, key2: hash >>> 0 };
+  return { key1: BILLING_CUSTOMER_LOCK_DISCRIMINATOR, key2: hash | 0 };
 }
 
 /**
