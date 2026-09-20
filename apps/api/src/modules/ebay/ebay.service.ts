@@ -5,6 +5,8 @@ import {
   EBAY_MARKETPLACE,
   EBAY_MARKETPLACE_CONFIG,
   EbayAccountStatus,
+  EbayApiResource,
+  EbayCallPriority,
   SUPPORTED_EBAY_MARKETPLACES,
   buildStoreStreetLine,
   type CreateEbayConnectUrlResponse,
@@ -17,6 +19,7 @@ import {
 import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 import { EncryptionUtil } from '../../common/utils/encryption.util';
 import { BillingService } from '../billing/billing.service';
 
@@ -155,7 +158,8 @@ export class EbayService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly taxonomyService: EbayTaxonomyService,
     private readonly aspectResolver: AspectResolverService,
-    private readonly billingService: BillingService
+    private readonly billingService: BillingService,
+    private readonly ebayCallBudget: EbayCallBudgetService
   ) {
     const key = this.configService.get<string>('AMAZON_ENCRYPTION_KEY');
     if (!key) {
@@ -1100,6 +1104,10 @@ export class EbayService implements OnModuleInit {
   <ActiveList><Include>true</Include><Pagination><EntriesPerPage>200</EntriesPerPage><PageNumber>${page}</PageNumber></Pagination></ActiveList>
   <DetailLevel>ReturnAll</DetailLevel>
 </GetMyeBaySellingRequest>`;
+      // Charged per PAGE, not per discovery run: each page is its own metered
+      // Trading call, and a large store is dozens of them. Interactive, because
+      // a seller is waiting on the import screen.
+      await this.ebayCallBudget.acquire(EbayApiResource.TRADING, EbayCallPriority.INTERACTIVE);
       const response = await this.withRateLimitRetry(() => axios.post<string>(baseUrl, xml, { headers: {
         'Content-Type': 'text/xml', 'X-EBAY-API-SITEID': this.resolveSiteId(account.marketplace_id),
         'X-EBAY-API-COMPATIBILITY-LEVEL': '967', 'X-EBAY-API-CALL-NAME': 'GetMyeBaySelling',
@@ -1201,8 +1209,14 @@ export class EbayService implements OnModuleInit {
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
     const siteId = this.resolveSiteId(account.marketplace_id);
 
+    // Trading is the platform's scarcest quota (5,000/day for EVERY seller
+    // combined) and this is its highest-volume consumer: bulk end/delete calls
+    // it once per listing in a loop. Without the charge, one seller clearing a
+    // large catalogue could spend the whole platform's day here unseen.
+    await this.ebayCallBudget.acquire(EbayApiResource.TRADING, EbayCallPriority.INTERACTIVE);
+
     try {
-      const response = await axios.post(baseUrl, xml, {
+      const response = await this.withRateLimitRetry(() => axios.post(baseUrl, xml, {
         headers: {
           'Content-Type': 'text/xml',
           'X-EBAY-API-SITEID': siteId,
@@ -1210,7 +1224,7 @@ export class EbayService implements OnModuleInit {
           'X-EBAY-API-CALL-NAME': 'EndItem',
           'X-EBAY-API-IAF-TOKEN': accessToken,
         },
-      });
+      }));
 
       const responseBody = response.data as string;
       if (responseBody.includes('<Ack>Success</Ack>') || responseBody.includes('<Ack>Warning</Ack>')) {
@@ -1241,6 +1255,10 @@ export class EbayService implements OnModuleInit {
     marketplaceId: string
   ): Promise<Record<string, unknown>[]> {
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || '';
+
+    // Charged per policy type: getBusinessPolicies fans out to three of these
+    // in parallel, which is three real Account API calls, not one.
+    await this.ebayCallBudget.acquire(EbayApiResource.ACCOUNT, EbayCallPriority.INTERACTIVE);
 
     try {
       const response = await axios.get(`${baseUrl}/sell/account/v1/${policyType}?marketplace_id=${marketplaceId}`, {

@@ -151,7 +151,28 @@
       "Bash(pnpm --filter @zonds/web exec tsc --noEmit -p apps/web/tsconfig.json)",
       "Bash(pnpm exec *)",
       "Bash(git checkout *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "WebFetch(domain:developer.ebay.com)",
+      "Bash(command -v bdata brightdata)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/131.0.0.0 Safari/537.36\" \"https://developer.ebay.com/api-docs/static/oauth-best-practices.html\" --max-time 20)",
+      "WebFetch(domain:forums.developer.ebay.com)",
+      "Bash(curl -sS --max-time 25 \"https://archive.org/wayback/available?url=developer.ebay.com/devzone/xml/docs/reference/ebay/revoketoken.html\")",
+      "WebFetch(domain:web.archive.org)",
+      "Bash(curl -sS -L -A 'Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/131.0.0.0 Safari/537.36' --compressed --max-time 40 -w '%{http_code}' -o C:/Users/2B/AppData/Local/Temp/claude/d--dev-projects-sellerhill-sellerhill/d7f66bf8-d15c-498d-a9e9-07301b8d4d9f/scratchpad/revoketoken.html https://web.archive.org/web/2023id_/https://developer.ebay.com/devzone/xml/docs/reference/ebay/revoketoken.html)",
+      "Bash(awk '{print $5\" bytes\"}')",
+      "Bash(f=\"C:/Users/2B/AppData/Local/Temp/claude/d--dev-projects-sellerhill-sellerhill/d7f66bf8-d15c-498d-a9e9-07031b8d4d9f/scratchpad/revoketoken.html\" *)",
+      "Read(//c/Users/2B/AppData/Local/Temp/claude/d--dev-projects-sellerhill-sellerhill/**)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(perl -0777 -ne 'while \\(/<a[^>]*href=\"\\([^\"]*\\\\.pdf\\)\"[^>]*>\\(.*?\\)<\\\\/a>/gsi\\) { my \\($h,$t\\)=\\($1,$2\\); $t =~ s/<[^>]*>//g; $t =~ s/&amp;/&/g; $t =~ s/^\\\\s+|\\\\s+$//g; $t =~ s/\\\\s+/ /g; print \"$t\\\\n\" if length\\($t\\) }' C:/Users/2B/AppData/Local/Temp/claude/d--dev-projects-sellerhill-sellerhill/d7f66bf8-d15c-498d-a9e9-07301b8d4d9f/scratchpad/vero-dir.html)",
+      "Bash(shuf -n 10 C:/Users/2B/AppData/Local/Temp/claude/d--dev-projects-sellerhill-sellerhill/d7f66bf8-d15c-498d-a9e9-07301b8d4d9f/scratchpad/vero-brands-raw.txt)",
+      "Bash(shuf -n 18)",
+      "Bash(npx jest *)",
+      "Bash(npx tsc *)",
+      "Bash(break)",
+      "Bash(npx eslint *)",
+      "Bash(docker exec *)",
+      "Bash(grep -n \"^### A refused create leaves nothing behind\\\\|^| \\\\`105\\\\`\\\\|^| \\\\`098\\\\`\\\\|13 values incl\" CLAUDE.md)"
     ]
   }
 }

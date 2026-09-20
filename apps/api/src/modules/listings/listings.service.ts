@@ -2153,17 +2153,17 @@ export class ListingsService {
 
           const { ebay_item_id: ebayItemId, status, product_id: productId } = results.rows[0];
 
-          // 2. If it's active, try to end it on eBay first
+          // 2. If it's active, end it on eBay FIRST — and let a failure abort
+          // the whole item. Deleting our row while the listing is still live on
+          // eBay is a permanent, silent desync: buyers keep ordering it, and
+          // every resulting order arrives with no listing to match, so it is
+          // `untracked` for ever — no cost capture, no profit, no auto-fulfill,
+          // and no row left to end the listing through. A lower success count
+          // with an accurate database is the correct outcome.
+          // (`withdrawOffer` already treats eBay's "already ended" as success,
+          // so a listing ended outside the app does not block its deletion.)
           if (status === ListingStatus.ACTIVE && ebayItemId) {
-            try {
-              await this.ebayService.withdrawOffer(userId, ebayItemId);
-            } catch (ebayError: unknown) {
-              this.logger.error(
-                `Failed to end listing ${listingId} on eBay, but proceeding with DB deletion: ${getErrorMessage(
-                  ebayError
-                )}`
-              );
-            }
+            await this.ebayService.withdrawOffer(userId, ebayItemId);
           }
 
           // 3. Delete listing from DB
