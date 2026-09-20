@@ -178,7 +178,7 @@
       "description": "Açıklama",
       "amount": "Tutar",
       "status": "Durum",
-      "pdf": "PDF",
+      "pdf": "Fatura",
       "download": "İndir",
       "payNow": "Şimdi öde",
       "empty": "Henüz faturanız yok.",
