@@ -141,6 +141,9 @@ export type { EmptyStateProps } from './molecules/EmptyState';
 export { Tooltip } from './molecules/Tooltip';
 export type { TooltipPosition, TooltipProps, TooltipVariant } from './molecules/Tooltip';
 
+export { CopyableText } from './molecules/CopyableText';
+export type { CopyableTextProps } from './molecules/CopyableText';
+
 export { Popover } from './molecules/Popover';
 export type { PopoverPosition, PopoverProps } from './molecules/Popover';
 

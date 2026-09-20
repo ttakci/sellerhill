@@ -2,6 +2,7 @@ import { ProfitBasis } from '@repo/shared';
 import {
   Badge,
   Button,
+  CopyableText,
   EmptyState,
   Icon,
   IconName,
@@ -333,18 +334,58 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <S.MetaList>
               <MetaBlock icon="map-pin" label={t('orders.detail.shipTo')}>
                 <Text variant="body" weight="semibold">
-                  {order.buyerName || '—'}
+                  {order.shippingAddress?.fullName || order.buyerName ? (
+                    <CopyableText
+                      value={order.shippingAddress?.fullName || order.buyerName || ''}
+                      label={t('orders.detail.copyName')}
+                      copiedLabel={t('orders.detail.copied')}
+                    />
+                  ) : (
+                    '—'
+                  )}
                 </Text>
                 {order.shippingAddress ? (
                   <S.AddressBlock>
                     <Text variant="body-sm" color="text.secondary">
-                      {order.shippingAddress.street}
+                      <CopyableText
+                        value={order.shippingAddress.street}
+                        label={t('orders.detail.copyStreet')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
+                    </Text>
+                    {order.shippingAddress.street2 ? (
+                      <Text variant="body-sm" color="text.secondary">
+                        <CopyableText
+                          value={order.shippingAddress.street2}
+                          label={t('orders.detail.copyStreet2')}
+                          copiedLabel={t('orders.detail.copied')}
+                        />
+                      </Text>
+                    ) : null}
+                    <Text variant="body-sm" color="text.secondary">
+                      <CopyableText
+                        value={order.shippingAddress.city}
+                        label={t('orders.detail.copyCity')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
+                      {', '}
+                      <CopyableText
+                        value={order.shippingAddress.state}
+                        label={t('orders.detail.copyState')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />{' '}
+                      <CopyableText
+                        value={order.shippingAddress.zipCode}
+                        label={t('orders.detail.copyZip')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
                     </Text>
                     <Text variant="body-sm" color="text.secondary">
-                      {`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`}
-                    </Text>
-                    <Text variant="body-sm" color="text.secondary">
-                      {order.shippingAddress.country}
+                      <CopyableText
+                        value={order.shippingAddress.country}
+                        label={t('orders.detail.copyCountry')}
+                        copiedLabel={t('orders.detail.copied')}
+                      />
                     </Text>
                   </S.AddressBlock>
                 ) : null}
@@ -409,16 +450,43 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               {t('orders.detail.whatYouEarned')}
             </Text>
             <S.MetaList>
+              <Meta icon="receipt" label={t('orders.detail.earningsOrderTotal')}>
+                <Text variant="body" weight="semibold" numeric>
+                  {formatCurrency(order.saleTotal)}
+                </Text>
+              </Meta>
+            </S.MetaList>
+            <Text variant="caption" color="text.tertiary">
+              {t('orders.detail.ebayCollectedFromBuyer')}
+            </Text>
+            <S.MetaList>
+              <Meta icon="percent" label={t('orders.detail.ebayCollectedTax')}>
+                <Text variant="body" weight="semibold" numeric>
+                  −{formatCurrency(order.ebayCollectRemitTax ?? order.saleTax)}
+                </Text>
+              </Meta>
+            </S.MetaList>
+            <Text variant="caption" color="text.tertiary">
+              {t('orders.detail.sellingCosts')}
+            </Text>
+            <S.MetaList>
+              {/* `ebayMarketplaceFee` is eBay's own reported figure (migration
+                  098); `transactionFee` is only the seller's configured-percent
+                  ESTIMATE, shown here solely when eBay has not reported yet. */}
               <Meta icon="coins" label={t('orders.detail.transactionFees')}>
                 <Text variant="body" weight="semibold" numeric>
-                  −{formatCurrency(order.transactionFee)}
+                  −{formatCurrency(order.ebayMarketplaceFee ?? order.transactionFee)}
                 </Text>
               </Meta>
-              <Meta icon="megaphone" label={t('orders.detail.adFee')}>
-                <Text variant="body" weight="semibold" numeric>
-                  −{formatCurrency(order.adFee)}
-                </Text>
-              </Meta>
+              {order.adFee > 0 ? (
+                <Meta icon="megaphone" label={t('orders.detail.adFee')}>
+                  <Text variant="body" weight="semibold" numeric>
+                    −{formatCurrency(order.adFee)}
+                  </Text>
+                </Meta>
+              ) : null}
+            </S.MetaList>
+            <S.MetaList>
               <Meta icon="wallet-cards" label={t('orders.detail.orderEarnings')}>
                 <Text variant="body" weight="semibold" numeric>
                   {formatCurrency(order.ebayEarnings)}
