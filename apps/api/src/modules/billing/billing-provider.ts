@@ -17,7 +17,7 @@ import { BillingInterval, PlanChangeDirection, type BillingInvoiceDto } from '@r
 import type { PoolClient } from 'pg';
 import Stripe from 'stripe';
 
-import type { BillingConfig } from './billing-helpers';
+import type { BillingConfig, SupportedStripeLocale } from './billing-helpers';
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type BillingCheckoutDto, type BillingPortalDto } from './billing.types';
 import { ScheduleSource } from './price-migration';
@@ -105,6 +105,9 @@ export interface CheckoutRequest {
    *  (billing_plan_prices.provider_price_id). */
   providerPriceId: string | null;
   interval: BillingInterval;
+  /** The seller's in-app language (resolveStripeLocale) — Checkout renders in
+   *  this language rather than guessing from the browser/OS. */
+  locale: SupportedStripeLocale;
 }
 
 /**
@@ -147,7 +150,11 @@ export interface BillingProviderPort {
   ensureCustomer(userId: string, customerEmail: string, client?: PoolClient): Promise<string>;
   /** Create a customer portal session. Throws when not configured or when the
    *  user has no Stripe customer id. */
-  createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto>;
+  createPortal(
+    userId: string,
+    providerCustomerId: string | null,
+    locale: SupportedStripeLocale,
+  ): Promise<BillingPortalDto>;
   /**
    * Create a ONE-TIME checkout session for a quota top-up (`mode: 'payment'`).
    * Separate from `createCheckout` rather than a flag on it: the two produce
@@ -315,6 +322,8 @@ export interface AddonCheckoutRequest {
   addonSlug: string;
   providerPriceId: string;
   providerCustomerId: string | null;
+  /** See `CheckoutRequest.locale`. */
+  locale: SupportedStripeLocale;
 }
 
 /**
@@ -450,6 +459,7 @@ export class StripeBillingProvider implements BillingProviderPort {
         // the Stripe Dashboard — no local coupon model, no admin surface.
         allow_promotion_codes: true,
         metadata: { plan_id: req.planId, user_id: req.userId },
+        locale: req.locale,
         success_url: `${this.config.frontendUrl}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${this.config.frontendUrl}/billing?checkout=cancelled`,
         integration_identifier: `sellerhill_checkout_${randomLetterSuffix()}`,
@@ -555,6 +565,7 @@ export class StripeBillingProvider implements BillingProviderPort {
         // acquisition benefit.
         invoice_creation: { enabled: true },
         metadata: { addon_slug: req.addonSlug, user_id: req.userId },
+        locale: req.locale,
         success_url: `${this.config.frontendUrl}/billing?topup=success`,
         cancel_url: `${this.config.frontendUrl}/billing?topup=cancelled`,
         integration_identifier: `sellerhill_topup_${randomLetterSuffix()}`,
@@ -1015,7 +1026,11 @@ export class StripeBillingProvider implements BillingProviderPort {
     }
   }
 
-  async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {
+  async createPortal(
+    userId: string,
+    providerCustomerId: string | null,
+    locale: SupportedStripeLocale,
+  ): Promise<BillingPortalDto> {
     const stripe = this.getClient();
     if (!providerCustomerId) {
       // The user has never reached checkout, so there is no Stripe customer to
@@ -1027,6 +1042,7 @@ export class StripeBillingProvider implements BillingProviderPort {
       const session = await stripe.billingPortal.sessions.create({
         customer: providerCustomerId,
         return_url: `${this.config.frontendUrl}/billing`,
+        locale,
       });
       return { provider: BillingProvider.STRIPE, portalUrl: session.url };
     } catch (error) {

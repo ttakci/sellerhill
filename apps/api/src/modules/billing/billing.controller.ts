@@ -23,6 +23,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -44,7 +45,7 @@ import Stripe from 'stripe';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-import { isStaleEvent } from './billing-helpers';
+import { isStaleEvent, resolveStripeLocale } from './billing-helpers';
 import { BillingWebhookProcessor } from './billing-webhook-processor';
 import { BillingService } from './billing.service';
 import {
@@ -171,6 +172,7 @@ export class BillingController {
   async checkout(
     @Req() req: { user: { sub: string; email?: string } },
     @Body() dto: SubscribeDto,
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<BillingCheckoutDto> {
     try {
       return await this.billingService.createCheckout(
@@ -178,6 +180,7 @@ export class BillingController {
         req.user.email ?? '',
         dto.planId,
         dto.interval,
+        resolveStripeLocale(acceptLanguage),
       );
     } catch (error) {
       rethrowBillingError(error);
@@ -258,12 +261,14 @@ export class BillingController {
   async addonCheckout(
     @Req() req: { user: { sub: string; email?: string } },
     @Body() dto: { addonSlug: string },
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<BillingCheckoutDto> {
     try {
       return await this.billingService.createAddonCheckout(
         req.user.sub,
         req.user.email ?? '',
         dto.addonSlug,
+        resolveStripeLocale(acceptLanguage),
       );
     } catch (error) {
       rethrowBillingError(error);
@@ -273,9 +278,12 @@ export class BillingController {
   @Get('portal')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a Stripe Billing Portal session' })
-  async portal(@Req() req: { user: { sub: string } }): Promise<BillingPortalDto> {
+  async portal(
+    @Req() req: { user: { sub: string } },
+    @Headers('accept-language') acceptLanguage?: string,
+  ): Promise<BillingPortalDto> {
     try {
-      return await this.billingService.createPortal(req.user.sub);
+      return await this.billingService.createPortal(req.user.sub, resolveStripeLocale(acceptLanguage));
     } catch (error) {
       rethrowBillingError(error);
     }

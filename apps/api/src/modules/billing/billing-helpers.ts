@@ -323,6 +323,39 @@ export function isStaleEvent(occurredAt: string | null, staleMinutes: number, no
 }
 
 // ---------------------------------------------------------------------------
+// Stripe locale (pure)
+// ---------------------------------------------------------------------------
+
+/**
+ * Stripe locale codes this app actively supports (the app only ships EN/TR
+ * copy — see `i18n.config.ts`'s `supportedLngs`). Stripe accepts many more,
+ * but sending one we never verified would be an unfounded promise.
+ */
+const SUPPORTED_STRIPE_LOCALES = ['en', 'tr'] as const;
+export type SupportedStripeLocale = (typeof SUPPORTED_STRIPE_LOCALES)[number];
+
+/**
+ * Resolve the Stripe Checkout/Billing Portal `locale` param from the `Accept-Language`
+ * header the FE sends (mirrored from `i18n.language`, NOT the browser's own
+ * header — see `baseApi.ts`'s `prepareHeaders`). Without this, Stripe's
+ * default (`'auto'`) reads the browser/OS locale instead of the language the
+ * seller actually chose inside the app, so a Turkish OS with the app set to
+ * English still saw a Turkish Checkout page.
+ *
+ * Falls back to `'en'` (never `'auto'`) when the header is missing or
+ * unrecognized: an explicit language beats guessing from browser headers
+ * Stripe would otherwise fall back to, and `'en'` matches this app's own
+ * `fallbackLng`.
+ */
+export function resolveStripeLocale(acceptLanguage: string | undefined | null): SupportedStripeLocale {
+  const primary = (acceptLanguage ?? '').split(',')[0]?.trim().toLowerCase();
+  const bare = primary?.split('-')[0];
+  return (SUPPORTED_STRIPE_LOCALES as readonly string[]).includes(bare ?? '')
+    ? (bare as SupportedStripeLocale)
+    : 'en';
+}
+
+// ---------------------------------------------------------------------------
 // Misc
 // ---------------------------------------------------------------------------
 
