@@ -152,6 +152,19 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
   const fulfillmentNotice = noticeKey ? t(noticeKey) : undefined;
 
   /*
+   * `saleTax`/`saleTotal` are captured once at order-sync ingest from eBay's
+   * `pricingSummary`, which has been observed to come back as a stale 0 on at
+   * least one real order even though eBay's own Sales tax and Order total
+   * were non-zero — while `ebayCollectRemitTax` (migration 098, read from a
+   * different field on the same response) had the correct figure. Prefer the
+   * newer, independently-sourced field everywhere a tax/total is shown, and
+   * recompute the total from parts rather than trusting a `saleTotal` that
+   * may have been derived from the same stale tax at ingest time.
+   */
+  const resolvedSaleTax = order.ebayCollectRemitTax ?? order.saleTax;
+  const resolvedSaleTotal = order.salePrice + order.saleShipping + resolvedSaleTax;
+
+  /*
    * No header action cluster. "Link Amazon" and "Copy address" used to render
    * BOTH here and inside their own cards — on desktop that meant two identical
    * primary CTAs competing on one screen. Each action now lives once, in the
@@ -437,12 +450,12 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
               </Meta>
               <Meta icon="percent" label={t('orders.detail.salesTax')}>
                 <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.saleTax)}
+                  {formatCurrency(resolvedSaleTax)}
                 </Text>
               </Meta>
               <Meta icon="receipt" label={t('orders.detail.orderTotal')}>
                 <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.saleTotal)}
+                  {formatCurrency(resolvedSaleTotal)}
                 </Text>
               </Meta>
             </S.MetaList>
@@ -452,7 +465,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <S.MetaList>
               <Meta icon="receipt" label={t('orders.detail.earningsOrderTotal')}>
                 <Text variant="body" weight="semibold" numeric>
-                  {formatCurrency(order.saleTotal)}
+                  {formatCurrency(resolvedSaleTotal)}
                 </Text>
               </Meta>
             </S.MetaList>
@@ -462,7 +475,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             <S.MetaList>
               <Meta icon="percent" label={t('orders.detail.ebayCollectedTax')}>
                 <Text variant="body" weight="semibold" numeric>
-                  −{formatCurrency(order.ebayCollectRemitTax ?? order.saleTax)}
+                  −{formatCurrency(resolvedSaleTax)}
                 </Text>
               </Meta>
             </S.MetaList>
@@ -488,7 +501,7 @@ export const OrderDetailsPageComponent: React.FC<OrderDetailsPageProps> = ({
             </S.MetaList>
             <S.MetaList>
               <Meta icon="wallet-cards" label={t('orders.detail.orderEarnings')}>
-                <Text variant="body" weight="semibold" numeric>
+                <Text variant="metric-sm" weight="bold" numeric>
                   {formatCurrency(order.ebayEarnings)}
                 </Text>
               </Meta>
