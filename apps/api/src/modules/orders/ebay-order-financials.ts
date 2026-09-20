@@ -7,18 +7,18 @@
  * Settings Group — a pricing input, not a record of what eBay actually charged.
  * `totalMarketplaceFee` is the real figure and costs zero extra API calls.
  *
- * `ebayCollectAndRemitTaxes` is here for a narrower reason: eBay's own docs
- * contradict each other about whether Collect & Remit sales tax sits inside
- * `paymentSummary.totalDueSeller` for a Managed Payments seller (the
- * PaymentSummary type page says it does; the Collect & Remit announcement says
- * that for managed-payments sellers it "appears in the eBayCollectAndRemitTaxes
- * container only"). Every one of our sellers is Managed Payments and eBay US is
- * our only marketplace, so the answer decides whether `net_profit` is
- * overstated by the sales tax on every order. Capturing the number makes the
- * check exact arithmetic on the first real order rather than an inference from
- * an assumed fee percentage.
+ * `ebayCollectAndRemitTaxes` was added for a narrower reason, since resolved:
+ * eBay's own docs contradicted each other about whether Collect & Remit sales
+ * tax sits inside `paymentSummary.totalDueSeller` for a Managed Payments
+ * seller. CONFIRMED 2026-09-20 against a real order's exact arithmetic: it
+ * does NOT — `totalDueSeller` is subtotal minus `totalMarketplaceFee` only, tax
+ * never enters it. `net_profit` needed no change as a result.
  *
- * NOTHING in this module feeds profit yet. It is capture only.
+ * This module's sum is now also the FALLBACK for `orders.sale_tax`/`sale_total`
+ * (see `EbayFulfillmentService.mapEbayOrderToEntity`): `pricingSummary.tax` was
+ * found to read a flat 0 for every Collect & Remit order on a real account,
+ * even though eBay genuinely charged tax — the true figure lives only here,
+ * on each line item. `net_profit` itself still does not read this module.
  */
 
 /** eBay renders every money field as `{ value, currency }` with a string value. */
