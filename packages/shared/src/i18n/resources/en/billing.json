@@ -160,7 +160,9 @@
       "scheduledChange": "Switches to {{plan}} on {{date}}",
       "scheduledChangeUnknownPlan": "Your plan changes on {{date}}",
       "cancelScheduledChange": "Cancel",
-      "scheduledChangeCancelled": "Your plan change has been cancelled."
+      "scheduledChangeCancelled": "Your plan change has been cancelled.",
+      "confirmCancelScheduledChangeTitle": "Cancel plan change",
+      "confirmCancelScheduledChangeMessage": "Are you sure you want to cancel the scheduled plan change? You'll stay on your current plan."
     },
     "paymentMethod": {
       "title": "Payment method",
