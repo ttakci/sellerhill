@@ -258,12 +258,20 @@ export interface ProviderBillingDetails {
   scheduledPriceId: string | null;
   scheduledAt: string | null;
   /**
-   * True when the Stripe Billing Portal's default "cancel" action has been
-   * used on this subscription (`cancel_at_period_end`). Read live from
-   * Stripe, same as everything else here — cancelling from the Portal writes
-   * nothing to our tables, so without this field a cancelled-but-not-yet-
-   * expired subscription looked identical to a normal renewing one: badged
-   * active, with a next-charge amount for a charge that will never happen.
+   * True when the subscription is on track to end instead of renew. Read
+   * live from Stripe, same as everything else here — cancelling from the
+   * Portal writes nothing to our tables, so without this field a
+   * cancelled-but-not-yet-expired subscription looked identical to a normal
+   * renewing one: badged active, with a next-charge amount for a charge that
+   * will never happen.
+   *
+   * Derived as `cancel_at_period_end || Boolean(cancel_at)`, NOT
+   * `cancel_at_period_end` alone — observed live 2026-09-20: the Billing
+   * Portal's own "Cancel subscription" action set `cancel_at` to the period
+   * end timestamp while leaving `cancel_at_period_end` FALSE, so a real
+   * cancellation reported `cancelAtPeriodEnd: false` (with `cancelAt`
+   * correctly populated) and the plan card kept showing an untroubled
+   * "Active" badge with no warning line at all.
    */
   cancelAtPeriodEnd: boolean;
   /** When `cancelAtPeriodEnd` is true, the date access ends (Stripe's
@@ -727,7 +735,11 @@ export class StripeBillingProvider implements BillingProviderPort {
       priceId: price?.id ?? null,
       unitAmount: price?.unit_amount ?? null,
       currency: price?.currency ?? null,
-      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      // Same fix as getBillingDetails' cancelAtPeriodEnd — the Portal's
+      // cancel action can set `cancel_at` without ever setting
+      // `cancel_at_period_end`, and a subscription slated to end must never
+      // be moved onto a new price by the automatic migration.
+      cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end) || Boolean(sub.cancel_at),
       currentPeriodEnd: item?.current_period_end ? new Date(item.current_period_end * 1000) : null,
       pendingChange,
     };
@@ -975,10 +987,12 @@ export class StripeBillingProvider implements BillingProviderPort {
         scheduledPriceId,
         scheduledAt,
         // Same subscription object the schedule lookup above already fetched
-        // — Stripe's Billing Portal cancel action sets these two fields
-        // directly on the subscription (no separate event/object), so no
-        // extra call is needed to read them.
-        cancelAtPeriodEnd: Boolean(liveSub?.cancel_at_period_end),
+        // — no extra call needed to read these. `cancel_at_period_end` alone
+        // is NOT a reliable signal (see the field comment on
+        // ProviderBillingDetails.cancelAtPeriodEnd) — the Portal's cancel
+        // action can set `cancel_at` without ever flipping that boolean, so a
+        // populated `cancel_at` is treated as equally conclusive.
+        cancelAtPeriodEnd: Boolean(liveSub?.cancel_at_period_end) || Boolean(liveSub?.cancel_at),
         cancelAt: liveSub?.cancel_at ? new Date(liveSub.cancel_at * 1000).toISOString() : null,
       };
     } catch (error) {
