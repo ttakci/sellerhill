@@ -877,21 +877,6 @@ export class StripeBillingProvider implements BillingProviderPort {
       const pm = customer.invoice_settings?.default_payment_method;
       const card = pm && typeof pm !== 'string' ? pm.card : null;
 
-      let nextChargeAmountMicros: number | null = null;
-      let nextChargeCurrency: string | null = null;
-      let nextChargeAt: string | null = null;
-      try {
-        const upcoming = await stripe.invoices.createPreview({ customer: providerCustomerId });
-        nextChargeAmountMicros = upcoming.amount_due * 10_000;
-        nextChargeCurrency = upcoming.currency.toUpperCase();
-        nextChargeAt = upcoming.next_payment_attempt
-          ? new Date(upcoming.next_payment_attempt * 1000).toISOString()
-          : null;
-      } catch {
-        // No upcoming invoice (no subscription yet) is a normal state, not a
-        // failure. Leaving these null makes the FE render an em dash.
-      }
-
       // `status` on `subscriptions.list` takes ONE value, not a set, so it
       // cannot express LIVE_SUBSCRIPTION_STATUSES directly — fetch a small
       // page (newest first, Stripe's default list order) and pick the first
@@ -908,6 +893,31 @@ export class StripeBillingProvider implements BillingProviderPort {
       const liveSub = subsPage.data.find((sub) =>
         StripeBillingProvider.LIVE_SUBSCRIPTION_STATUSES.has(sub.status),
       );
+      // The upcoming-invoice preview must name the subscription: Stripe (API
+      // 2026-07-29) rejects a customer-only createPreview with "You must
+      // provide at least one of: subscription, schedule, ...", so the old
+      // customer-only call always failed into the catch below and the next
+      // charge amount/date were never shown. Skipped when there is no live
+      // subscription — that is a normal state, not a failure.
+      let nextChargeAmountMicros: number | null = null;
+      let nextChargeCurrency: string | null = null;
+      let nextChargeAt: string | null = null;
+      if (liveSub) {
+        try {
+          const upcoming = await stripe.invoices.createPreview({
+            customer: providerCustomerId,
+            subscription: liveSub.id,
+          });
+          nextChargeAmountMicros = upcoming.amount_due * 10_000;
+          nextChargeCurrency = upcoming.currency.toUpperCase();
+          nextChargeAt = upcoming.next_payment_attempt
+            ? new Date(upcoming.next_payment_attempt * 1000).toISOString()
+            : null;
+        } catch (error) {
+          this.logger.warn(`Stripe upcoming-invoice preview failed: ${describeError(error)}`);
+        }
+      }
+
       const scheduleId =
         typeof liveSub?.schedule === 'string' ? liveSub.schedule : (liveSub?.schedule?.id ?? null);
       let scheduledPriceId: string | null = null;
