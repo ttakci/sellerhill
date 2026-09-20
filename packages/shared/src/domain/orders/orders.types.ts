@@ -240,6 +240,23 @@ export interface OrderDto {
   netProfit: number;
   transactionFee: number;
   adFee: number;
+  /**
+   * eBay's own reported final value fee total (migration 098), captured from
+   * the same `getOrders` response order sync already downloads. NULL means
+   * eBay had not reported it when this order was last synced — `transactionFee`
+   * above (the seller's own configured fee-percent estimate) is what to show
+   * instead in that case. When present, this is the real number and should
+   * be preferred everywhere `transactionFee` would otherwise be shown.
+   */
+  ebayMarketplaceFee?: number | null;
+  /**
+   * The sales tax eBay collected from the buyer and remits directly — never
+   * part of the seller's earnings. Usually equal to `saleTax`, captured
+   * separately because eBay reports it distinctly and NULL here specifically
+   * means "not confirmed from this field yet" (see CLAUDE.md's Collect & Remit
+   * note), not that no tax was charged.
+   */
+  ebayCollectRemitTax?: number | null;
 
   // Shipping
   // Buyer ship-to address. `fullName`/`street2`/`phone` are optional because
