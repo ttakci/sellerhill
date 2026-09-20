@@ -48,6 +48,7 @@ import {
   isProviderConfigured,
   resolveBillingConfig,
   type BillingConfig,
+  type SupportedStripeLocale,
 } from './billing-helpers';
 import type { BillingProviderPort, CheckoutRequest } from './billing-provider';
 import { BillingRepositoryService } from './billing-repository.service';
@@ -603,6 +604,7 @@ export class BillingService {
     userId: string,
     email: string,
     addonSlug: string,
+    locale: SupportedStripeLocale,
   ): Promise<BillingCheckoutDto> {
     if (!this.provider.isConfigured()) {
       throw new Error('billing.errors.providerNotConfigured');
@@ -641,6 +643,7 @@ export class BillingService {
       addonSlug: addon.slug,
       providerPriceId: priceId ?? '',
       providerCustomerId,
+      locale,
     });
   }
 
@@ -716,6 +719,7 @@ export class BillingService {
     customerEmail: string,
     planId: string,
     interval: BillingInterval,
+    locale: SupportedStripeLocale,
   ): Promise<BillingCheckoutDto> {
     const config = this.getConfig();
     if (!isProviderConfigured(config)) {
@@ -780,6 +784,7 @@ export class BillingService {
       providerProductId: plan.providerProductId,
       providerPriceId: effectivePrice.providerPriceId,
       interval,
+      locale,
     };
     return this.provider.createCheckout(req);
   }
@@ -789,7 +794,7 @@ export class BillingService {
    * linked provider customer id (the user must have checked out at least
    * once).
    */
-  async createPortal(userId: string): Promise<BillingPortalDto> {
+  async createPortal(userId: string, locale: SupportedStripeLocale): Promise<BillingPortalDto> {
     const config = this.getConfig();
     if (!isProviderConfigured(config)) {
       throw new Error('billing.errors.providerNotConfigured');
@@ -798,7 +803,7 @@ export class BillingService {
     if (!customer || !customer.providerCustomerId) {
       throw new Error('billing.errors.noCustomer');
     }
-    return this.provider.createPortal(userId, customer.providerCustomerId);
+    return this.provider.createPortal(userId, customer.providerCustomerId, locale);
   }
 
   /**

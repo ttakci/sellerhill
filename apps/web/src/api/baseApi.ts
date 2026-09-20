@@ -11,6 +11,7 @@ import { refreshAuthSession } from './authRefreshCoordinator';
 
 import { demoBaseQuery } from '@/features/demo/demoBaseQuery';
 import { isDemoMode } from '@/features/demo/demoMode';
+import i18n from '@/i18n.config';
 
 /** Minimal auth slice shape used by baseQuery (avoids circular import with store). */
 interface AuthSliceState {
@@ -26,6 +27,12 @@ const rawBaseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { getState, endpoint }) => {
     const requestId = generateRequestId();
     headers.set('X-Request-ID', requestId);
+    // The seller's IN-APP language, not the browser's own header (which the
+    // browser would set independently and which is what made Stripe Checkout
+    // render in Turkish for a visitor whose OS/browser was Turkish even
+    // though they had switched the app to English). Consumed by
+    // billing.controller.ts to pick Stripe Checkout/Portal's `locale`.
+    headers.set('Accept-Language', i18n.language || 'en');
 
     const publicEndpoints = [
       'login',

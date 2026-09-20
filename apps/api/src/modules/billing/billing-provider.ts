@@ -17,7 +17,7 @@ import { BillingInterval, PlanChangeDirection, type BillingInvoiceDto } from '@r
 import type { PoolClient } from 'pg';
 import Stripe from 'stripe';
 
-import type { BillingConfig } from './billing-helpers';
+import type { BillingConfig, SupportedStripeLocale } from './billing-helpers';
 import type { BillingRepositoryService } from './billing-repository.service';
 import { BillingProvider, type BillingCheckoutDto, type BillingPortalDto } from './billing.types';
 import { ScheduleSource } from './price-migration';
@@ -105,6 +105,9 @@ export interface CheckoutRequest {
    *  (billing_plan_prices.provider_price_id). */
   providerPriceId: string | null;
   interval: BillingInterval;
+  /** The seller's in-app language (resolveStripeLocale) — Checkout renders in
+   *  this language rather than guessing from the browser/OS. */
+  locale: SupportedStripeLocale;
 }
 
 /**
@@ -147,7 +150,11 @@ export interface BillingProviderPort {
   ensureCustomer(userId: string, customerEmail: string, client?: PoolClient): Promise<string>;
   /** Create a customer portal session. Throws when not configured or when the
    *  user has no Stripe customer id. */
-  createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto>;
+  createPortal(
+    userId: string,
+    providerCustomerId: string | null,
+    locale: SupportedStripeLocale,
+  ): Promise<BillingPortalDto>;
   /**
    * Create a ONE-TIME checkout session for a quota top-up (`mode: 'payment'`).
    * Separate from `createCheckout` rather than a flag on it: the two produce
@@ -251,12 +258,20 @@ export interface ProviderBillingDetails {
   scheduledPriceId: string | null;
   scheduledAt: string | null;
   /**
-   * True when the Stripe Billing Portal's default "cancel" action has been
-   * used on this subscription (`cancel_at_period_end`). Read live from
-   * Stripe, same as everything else here — cancelling from the Portal writes
-   * nothing to our tables, so without this field a cancelled-but-not-yet-
-   * expired subscription looked identical to a normal renewing one: badged
-   * active, with a next-charge amount for a charge that will never happen.
+   * True when the subscription is on track to end instead of renew. Read
+   * live from Stripe, same as everything else here — cancelling from the
+   * Portal writes nothing to our tables, so without this field a
+   * cancelled-but-not-yet-expired subscription looked identical to a normal
+   * renewing one: badged active, with a next-charge amount for a charge that
+   * will never happen.
+   *
+   * Derived as `cancel_at_period_end || Boolean(cancel_at)`, NOT
+   * `cancel_at_period_end` alone — observed live 2026-09-20: the Billing
+   * Portal's own "Cancel subscription" action set `cancel_at` to the period
+   * end timestamp while leaving `cancel_at_period_end` FALSE, so a real
+   * cancellation reported `cancelAtPeriodEnd: false` (with `cancelAt`
+   * correctly populated) and the plan card kept showing an untroubled
+   * "Active" badge with no warning line at all.
    */
   cancelAtPeriodEnd: boolean;
   /** When `cancelAtPeriodEnd` is true, the date access ends (Stripe's
@@ -315,6 +330,8 @@ export interface AddonCheckoutRequest {
   addonSlug: string;
   providerPriceId: string;
   providerCustomerId: string | null;
+  /** See `CheckoutRequest.locale`. */
+  locale: SupportedStripeLocale;
 }
 
 /**
@@ -450,6 +467,7 @@ export class StripeBillingProvider implements BillingProviderPort {
         // the Stripe Dashboard — no local coupon model, no admin surface.
         allow_promotion_codes: true,
         metadata: { plan_id: req.planId, user_id: req.userId },
+        locale: req.locale,
         success_url: `${this.config.frontendUrl}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${this.config.frontendUrl}/billing?checkout=cancelled`,
         integration_identifier: `sellerhill_checkout_${randomLetterSuffix()}`,
@@ -555,6 +573,7 @@ export class StripeBillingProvider implements BillingProviderPort {
         // acquisition benefit.
         invoice_creation: { enabled: true },
         metadata: { addon_slug: req.addonSlug, user_id: req.userId },
+        locale: req.locale,
         success_url: `${this.config.frontendUrl}/billing?topup=success`,
         cancel_url: `${this.config.frontendUrl}/billing?topup=cancelled`,
         integration_identifier: `sellerhill_topup_${randomLetterSuffix()}`,
@@ -716,7 +735,11 @@ export class StripeBillingProvider implements BillingProviderPort {
       priceId: price?.id ?? null,
       unitAmount: price?.unit_amount ?? null,
       currency: price?.currency ?? null,
-      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      // Same fix as getBillingDetails' cancelAtPeriodEnd — the Portal's
+      // cancel action can set `cancel_at` without ever setting
+      // `cancel_at_period_end`, and a subscription slated to end must never
+      // be moved onto a new price by the automatic migration.
+      cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end) || Boolean(sub.cancel_at),
       currentPeriodEnd: item?.current_period_end ? new Date(item.current_period_end * 1000) : null,
       pendingChange,
     };
@@ -877,21 +900,6 @@ export class StripeBillingProvider implements BillingProviderPort {
       const pm = customer.invoice_settings?.default_payment_method;
       const card = pm && typeof pm !== 'string' ? pm.card : null;
 
-      let nextChargeAmountMicros: number | null = null;
-      let nextChargeCurrency: string | null = null;
-      let nextChargeAt: string | null = null;
-      try {
-        const upcoming = await stripe.invoices.createPreview({ customer: providerCustomerId });
-        nextChargeAmountMicros = upcoming.amount_due * 10_000;
-        nextChargeCurrency = upcoming.currency.toUpperCase();
-        nextChargeAt = upcoming.next_payment_attempt
-          ? new Date(upcoming.next_payment_attempt * 1000).toISOString()
-          : null;
-      } catch {
-        // No upcoming invoice (no subscription yet) is a normal state, not a
-        // failure. Leaving these null makes the FE render an em dash.
-      }
-
       // `status` on `subscriptions.list` takes ONE value, not a set, so it
       // cannot express LIVE_SUBSCRIPTION_STATUSES directly — fetch a small
       // page (newest first, Stripe's default list order) and pick the first
@@ -908,6 +916,31 @@ export class StripeBillingProvider implements BillingProviderPort {
       const liveSub = subsPage.data.find((sub) =>
         StripeBillingProvider.LIVE_SUBSCRIPTION_STATUSES.has(sub.status),
       );
+      // The upcoming-invoice preview must name the subscription: Stripe (API
+      // 2026-07-29) rejects a customer-only createPreview with "You must
+      // provide at least one of: subscription, schedule, ...", so the old
+      // customer-only call always failed into the catch below and the next
+      // charge amount/date were never shown. Skipped when there is no live
+      // subscription — that is a normal state, not a failure.
+      let nextChargeAmountMicros: number | null = null;
+      let nextChargeCurrency: string | null = null;
+      let nextChargeAt: string | null = null;
+      if (liveSub) {
+        try {
+          const upcoming = await stripe.invoices.createPreview({
+            customer: providerCustomerId,
+            subscription: liveSub.id,
+          });
+          nextChargeAmountMicros = upcoming.amount_due * 10_000;
+          nextChargeCurrency = upcoming.currency.toUpperCase();
+          nextChargeAt = upcoming.next_payment_attempt
+            ? new Date(upcoming.next_payment_attempt * 1000).toISOString()
+            : null;
+        } catch (error) {
+          this.logger.warn(`Stripe upcoming-invoice preview failed: ${describeError(error)}`);
+        }
+      }
+
       const scheduleId =
         typeof liveSub?.schedule === 'string' ? liveSub.schedule : (liveSub?.schedule?.id ?? null);
       let scheduledPriceId: string | null = null;
@@ -954,10 +987,12 @@ export class StripeBillingProvider implements BillingProviderPort {
         scheduledPriceId,
         scheduledAt,
         // Same subscription object the schedule lookup above already fetched
-        // — Stripe's Billing Portal cancel action sets these two fields
-        // directly on the subscription (no separate event/object), so no
-        // extra call is needed to read them.
-        cancelAtPeriodEnd: Boolean(liveSub?.cancel_at_period_end),
+        // — no extra call needed to read these. `cancel_at_period_end` alone
+        // is NOT a reliable signal (see the field comment on
+        // ProviderBillingDetails.cancelAtPeriodEnd) — the Portal's cancel
+        // action can set `cancel_at` without ever flipping that boolean, so a
+        // populated `cancel_at` is treated as equally conclusive.
+        cancelAtPeriodEnd: Boolean(liveSub?.cancel_at_period_end) || Boolean(liveSub?.cancel_at),
         cancelAt: liveSub?.cancel_at ? new Date(liveSub.cancel_at * 1000).toISOString() : null,
       };
     } catch (error) {
@@ -1005,7 +1040,11 @@ export class StripeBillingProvider implements BillingProviderPort {
     }
   }
 
-  async createPortal(userId: string, providerCustomerId: string | null): Promise<BillingPortalDto> {
+  async createPortal(
+    userId: string,
+    providerCustomerId: string | null,
+    locale: SupportedStripeLocale,
+  ): Promise<BillingPortalDto> {
     const stripe = this.getClient();
     if (!providerCustomerId) {
       // The user has never reached checkout, so there is no Stripe customer to
@@ -1017,6 +1056,7 @@ export class StripeBillingProvider implements BillingProviderPort {
       const session = await stripe.billingPortal.sessions.create({
         customer: providerCustomerId,
         return_url: `${this.config.frontendUrl}/billing`,
+        locale,
       });
       return { provider: BillingProvider.STRIPE, portalUrl: session.url };
     } catch (error) {
