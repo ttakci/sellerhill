@@ -73,19 +73,32 @@ interface EbayFulfillmentOrder {
       amount?: { value: string; currency: string };
     }>;
   };
+  /**
+   * Where eBay's Fulfillment API really puts the ship-to address:
+   * `fulfillmentStartInstructions[].shippingStep.shipTo`. There is no
+   * `shippingDetail` on the order object — reading only that left
+   * `shipping_address` NULL on every order (confirmed on a live account,
+   * 2026-09-20), which also made auto-fulfill refuse each one with `address`.
+   */
+  fulfillmentStartInstructions?: Array<{
+    shippingStep?: { shipTo?: EbayShipTo };
+  }>;
+  /** Legacy path this code originally read. Kept as a fallback only. */
   shippingDetail?: {
-    shipToAddress?: {
-      fullName?: string;
-      primaryPhone?: { phoneNumber?: string };
-      contactAddress?: {
-        addressLine1?: string;
-        addressLine2?: string;
-        city?: string;
-        stateOrProvince?: string;
-        postalCode?: string;
-        countryCode?: string;
-      };
-    };
+    shipToAddress?: EbayShipTo;
+  };
+}
+
+interface EbayShipTo {
+  fullName?: string;
+  primaryPhone?: { phoneNumber?: string };
+  contactAddress?: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    stateOrProvince?: string;
+    postalCode?: string;
+    countryCode?: string;
   };
 }
 
@@ -228,9 +241,28 @@ export class EbayFulfillmentService {
     const lineItem = ebayOrder.lineItems?.[0];
     const pricing = ebayOrder.pricingSummary;
     const buyer = ebayOrder.buyer;
-    const shipTo = ebayOrder.shippingDetail?.shipToAddress;
+    const shipTo =
+      ebayOrder.fulfillmentStartInstructions?.find((i) => i.shippingStep?.shipTo)?.shippingStep?.shipTo ??
+      ebayOrder.shippingDetail?.shipToAddress;
     const address = shipTo?.contactAddress;
     const totalDueSeller = ebayOrder.paymentSummary?.totalDueSeller;
+
+    // CONFIRMED live 2026-09-20 (verified against real orders + eBay's own
+    // Seller Hub screen): `pricingSummary.tax` reads 0 for every Collect &
+    // Remit order on this account, even though eBay genuinely charged tax —
+    // the real figure is only on each line item's `ebayCollectAndRemitTaxes`.
+    // `pricingSummary.total` inherits the same gap (it is computed from the
+    // same missing tax), so both are corrected here rather than only in the
+    // migration-098 columns, since `saleTax`/`saleTotal` also feed the
+    // dashboard's revenue/tax aggregates — a display-only fix would have left
+    // those wrong. This also resolves the open question in
+    // `ebay-order-financials.ts`: Collect & Remit tax is genuinely NOT part
+    // of `totalDueSeller` (the arithmetic checked out to the cent on a real
+    // order), so `ebayEarnings` below needed no change.
+    const rawTax = parseFloat(pricing?.tax?.value || '0');
+    const collectRemitTax = sumCollectAndRemitTax(ebayOrder.lineItems);
+    const resolvedTax = rawTax || collectRemitTax || 0;
+    const rawTotal = parseFloat(pricing?.total?.value || '0');
 
     return {
       userId,
@@ -247,8 +279,8 @@ export class EbayFulfillmentService {
       quantity: lineItem?.quantity || 1,
       salePrice: parseFloat(pricing?.priceSubtotal?.value || '0'),
       saleShipping: parseFloat(ebayOrder.pricingSummary?.deliveryCost?.value || '0'),
-      saleTax: parseFloat(pricing?.tax?.value || '0'),
-      saleTotal: parseFloat(pricing?.total?.value || '0'),
+      saleTax: resolvedTax,
+      saleTotal: rawTotal + (resolvedTax - rawTax),
       ebayEarnings: parseFloat(totalDueSeller?.value || '0'),
       // eBay stamps a currency on every money field; only US accounts can be
       // connected today (see migration 074), so this is always 'USD' in
@@ -268,7 +300,7 @@ export class EbayFulfillmentService {
       // after creation and possibly before eBay has assessed the fee.
       ebayMarketplaceFee: parseEbayAmount(ebayOrder.totalMarketplaceFee),
       ebayFeeBasisAmount: parseEbayAmount(ebayOrder.totalFeeBasisAmount),
-      ebayCollectRemitTax: sumCollectAndRemitTax(ebayOrder.lineItems),
+      ebayCollectRemitTax: collectRemitTax,
       netProfit: null,
       costCaptureStatus: OrderCostCaptureStatus.PENDING,
       purchasePrice: purchasePrice || 0,
