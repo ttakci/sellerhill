@@ -56,17 +56,23 @@ interface OrderRow {
   amazon_shipping: string;
   transaction_fee: string;
   ad_fee: string;
+  ebay_marketplace_fee: string | null;
+  ebay_fee_basis_amount: string | null;
+  ebay_collect_remit_tax: string | null;
   net_profit: string;
   cost_capture_status: string;
   auto_fulfill_status: string | null;
   auto_fulfill_blocked_reason: string | null;
   amazon_cancelled_at: Date | null;
   shipping_address: {
+    fullName?: string;
     street?: string;
+    street2?: string;
     city?: string;
     state?: string;
     zipCode?: string;
     country?: string;
+    phone?: string;
     [key: string]: unknown;
   } | null;
   order_date: Date | null;
@@ -81,11 +87,14 @@ interface OrderRow {
 
 /** Shape of a parsed shipping address */
 interface ShippingAddressData {
+  fullName?: string;
   street?: string;
+  street2?: string;
   city?: string;
   state?: string;
   zipCode?: string;
   country?: string;
+  phone?: string;
 }
 
 @Injectable()
@@ -498,6 +507,11 @@ export class OrdersService {
       netProfit: parseFloat(row.net_profit) || 0,
       transactionFee: parseFloat(row.transaction_fee) || 0,
       adFee: parseFloat(row.ad_fee) || 0,
+      // NULL genuinely means "eBay had not reported this yet" — never coerced
+      // to 0, which would read as a real zero fee/tax and be indistinguishable
+      // from the estimate this is meant to replace.
+      ebayMarketplaceFee: row.ebay_marketplace_fee !== null ? parseFloat(row.ebay_marketplace_fee) : null,
+      ebayCollectRemitTax: row.ebay_collect_remit_tax !== null ? parseFloat(row.ebay_collect_remit_tax) : null,
       details: {
         purchaseSummary: {
           subtotal: parseFloat(row.sale_price) || 0,
@@ -517,13 +531,20 @@ export class OrdersService {
         transactionFee: parseFloat(row.transaction_fee) || 0,
         advertisingFee: parseFloat(row.ad_fee) || 0,
       },
+      // fullName/street2/phone are optional (eBay does not always supply
+      // them — see the shared type's comment) but were being dropped here
+      // even when the row had them, so the address shown/copied on the
+      // order detail page never matched what auto-fulfill itself uses.
       shippingAddress: shippingAddress
         ? {
+            fullName: shippingAddress.fullName || undefined,
             street: shippingAddress.street || '',
+            street2: shippingAddress.street2 || undefined,
             city: shippingAddress.city || '',
             state: shippingAddress.state || '',
             zipCode: shippingAddress.zipCode || '',
             country: shippingAddress.country || '',
+            phone: shippingAddress.phone || undefined,
           }
         : undefined,
     };
