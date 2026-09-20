@@ -178,7 +178,7 @@
       "description": "Description",
       "amount": "Amount",
       "status": "Status",
-      "pdf": "PDF",
+      "pdf": "Invoice",
       "download": "Download",
       "payNow": "Pay now",
       "empty": "No invoices yet.",
