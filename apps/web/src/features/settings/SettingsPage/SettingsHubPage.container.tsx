@@ -38,6 +38,16 @@ import { getErrorI18nKey } from '@/utils/errorHandler';
 
 const DRAWER_PARAM = 'drawer';
 
+/**
+ * A refused eBay connect comes back from `/ebay/callback` as `?error=<i18n key>`
+ * (`ebay.errors.*` / `billing.errors.*`). Only keys of that exact shape are
+ * shown: the param is attacker-controllable and other values (eBay's own
+ * `access_denied` when a seller cancels consent, raw messages) must neither be
+ * rendered nor interpolated.
+ */
+const CALLBACK_ERROR_PARAM = 'error';
+const CALLBACK_ERROR_KEY = /^(ebay|billing)\.errors\.[A-Za-z]+$/;
+
 export const SettingsHubPageContainer = (): React.ReactElement => {
   const { t } = useTranslation(['translation', 'ebay']);
   const { showMessage, closeMessage } = useUI();
@@ -109,6 +119,29 @@ export const SettingsHubPageContainer = (): React.ReactElement => {
       t,
     );
   }, [userError, profileError, ebayError, amazonError, groupsError, storeConfigsError, connectError, buyerMessageTemplatesError, showMessage, closeMessage, t]);
+
+  // Surface why an eBay connect was refused. Before this, the callback route
+  // dropped the query string and nothing here read it, so a seller whose store
+  // was already connected elsewhere (or whose free trial was already spent)
+  // landed on Settings with no explanation at all.
+  useEffect(() => {
+    const callbackError = searchParams.get(CALLBACK_ERROR_PARAM);
+    if (!callbackError) {return;}
+    const next = new URLSearchParams(searchParams);
+    next.delete(CALLBACK_ERROR_PARAM);
+    setSearchParams(next, { replace: true });
+    if (!CALLBACK_ERROR_KEY.test(callbackError)) {return;}
+    const namespace = callbackError.split('.')[0];
+    showMessage(
+      {
+        type: 'error',
+        headerKey: 'translation:message.error.header',
+        descriptionKey: `${namespace}:${callbackError}`,
+        primaryButton: { labelKey: 'translation:message.error.close', onClick: closeMessage },
+      },
+      t,
+    );
+  }, [searchParams, setSearchParams, showMessage, closeMessage, t]);
 
   const handleOpenDrawer = (drawer: SettingsDrawerKey): void => {
     const next = new URLSearchParams(searchParams);
