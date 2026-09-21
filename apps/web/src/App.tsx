@@ -356,7 +356,7 @@ export function App() {
         <Route path="/dashboard" element={<LocaleRedirect to="dashboard" preserveQuery />} />
         <Route path="/actions" element={<LocaleRedirect to="actions" preserveQuery />} />
         <Route path="/stores" element={<LocaleRedirect to="stores" preserveQuery />} />
-        <Route path="/ebay/callback" element={<LocaleRedirect to="settings" />} />
+        <Route path="/ebay/callback" element={<LocaleRedirect to="settings" preserveQuery />} />
         {/*
          * Stripe's checkout success_url / cancel_url / portal return_url
          * (billing-provider.ts) are built as `${FRONTEND_URL}/billing?...` with
