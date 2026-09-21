@@ -6,12 +6,19 @@ import { BillingRepositoryService } from './billing-repository.service';
 
 export const BILLING_TRIAL_EXPIRY_QUEUE = 'billing-trial-expiry';
 const BILLING_TRIAL_EXPIRY_JOB = 'expire-trials';
-const DEFAULT_EXPIRY_CRON = '23 2 * * *';
+/**
+ * Hourly, at :23. It was once-a-day (`23 2 * * *`), which let a seller whose
+ * trial had ended keep using the product for up to ~24 more hours — for a
+ * 1-day trial that is nearly double the advertised length. The work is one
+ * indexed UPDATE plus a small reminder query, so the cadence costs nothing;
+ * it now matches the other billing sweeps (price migration, reconcile).
+ */
+const DEFAULT_EXPIRY_CRON = '23 * * * *';
 /** How many days before a trial ends the one reminder goes out. */
 const TRIAL_REMINDER_DAYS = 3;
 
 /**
- * Daily idempotent trial closer. Existing listings are deliberately untouched:
+ * Hourly idempotent trial closer. Existing listings are deliberately untouched:
  * trial expiry is a downgrade, and billing's contract blocks future create/
  * publish only when enforcement is enabled.
  */
@@ -44,6 +51,16 @@ export class TrialExpiryProcessor extends WorkerHost implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     try {
+      // A repeatable job is keyed by its cron pattern, so changing the pattern
+      // does not replace the old schedule — it adds a second one. Drop any
+      // schedule for this job that is not the current pattern (the old daily
+      // one lingers in Redis after a deploy otherwise).
+      const existing = await this.queue.getRepeatableJobs();
+      for (const repeatable of existing) {
+        if (repeatable.name === BILLING_TRIAL_EXPIRY_JOB && repeatable.pattern !== DEFAULT_EXPIRY_CRON) {
+          await this.queue.removeRepeatableByKey(repeatable.key);
+        }
+      }
       await this.queue.add(
         BILLING_TRIAL_EXPIRY_JOB,
         {},
