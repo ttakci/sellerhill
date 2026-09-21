@@ -26,13 +26,14 @@ import { stripLocaleFromPath } from '@/utils/locale';
 import { useLocale } from '@/utils/useLocale';
 
 /**
- * The only paths a suspended account may open.
+ * The only path a suspended account may open.
  *
- * `/billing` is where the problem is fixed; `/settings` is read-mostly and
- * spends nothing, and a seller deciding which plan to buy may reasonably want
- * to look at what they have configured first.
+ * `/billing` is where the problem is fixed. `/settings` was allowed until
+ * 2026-09-21 (read-mostly, spends nothing) but it also hosts connecting eBay
+ * and Amazon accounts, which a suspended account has no business doing, so
+ * the operator closed it.
  */
-const SUSPENDED_ALLOWED_PATHS = ['/billing', '/settings'];
+const SUSPENDED_ALLOWED_PATHS = ['/billing'];
 
 export const AppLayout: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
