@@ -3,6 +3,7 @@ import { AutoFulfillBlockedReason, AutoFulfillStatus, OrderStatus } from '@repo/
 import {
   meetsCoarseCapGate,
   pickRoundRobinAccount,
+  resolveAutoFulfillEligibility,
   selectResumableOrders,
   shouldSkipFulfillStart,
   proxySessionToken,
@@ -133,6 +134,40 @@ describe('selectResumableOrders', () => {
   it('still selects a suspension block that is pre-shipment with no amazon id', () => {
     const row = { ...blocked(AutoFulfillBlockedReason.SUBSCRIPTION_SUSPENDED), status: OrderStatus.WAITING_SHIPMENT };
     expect(selectResumableOrders([row])).toEqual([row]);
+  });
+});
+
+describe('resolveAutoFulfillEligibility', () => {
+  it('allows only a paid, unshipped order', () => {
+    expect(resolveAutoFulfillEligibility(OrderStatus.WAITING_SHIPMENT)).toEqual({ eligible: true });
+  });
+
+  it('refuses an order eBay already fulfilled', () => {
+    // The returning-seller case: a settled backlog must not be re-purchased.
+    for (const status of [OrderStatus.SHIPPED, OrderStatus.COMPLETED, OrderStatus.PROCESSING]) {
+      expect(resolveAutoFulfillEligibility(status)).toEqual({
+        eligible: false,
+        reason: AutoFulfillBlockedReason.ORDER_ALREADY_FULFILLED,
+      });
+    }
+  });
+
+  it('refuses an unpaid order, and reports it as unpaid rather than fulfilled', () => {
+    // The two reasons send the seller to different places, and PENDING also
+    // covers "eBay reported no fulfilment status", which must fail closed.
+    expect(resolveAutoFulfillEligibility(OrderStatus.PENDING)).toEqual({
+      eligible: false,
+      reason: AutoFulfillBlockedReason.ORDER_NOT_PAID,
+    });
+  });
+
+  it('refuses every status the resume sweep refuses', () => {
+    // The two rules are written independently but must not disagree: anything
+    // `selectResumableOrders` excludes as already-served has to be ineligible
+    // here too, or the insert path would buy what the sweep refuses to re-arm.
+    for (const status of [OrderStatus.SHIPPED, OrderStatus.COMPLETED]) {
+      expect(resolveAutoFulfillEligibility(status).eligible).toBe(false);
+    }
   });
 });
 

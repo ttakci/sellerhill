@@ -56,9 +56,14 @@ describe('listing plan-limit invariants', () => {
   });
 
   it('skips auto-fulfill (not blocks) for an order from a listing over the limit', () => {
+    // SKIPPED, never BLOCKED: the plan working as designed must not raise an
+    // action-required alarm the seller cannot clear.
     const src = read('modules', 'orders', 'order-sync.service.ts');
     expect(src).toMatch(
-      /\[AutoFulfillStatus\.SKIPPED, AutoFulfillBlockedReason\.LISTING_OVER_PLAN_LIMIT, entity\.ebayOrderId\]/,
+      /AutoFulfillStatus\.SKIPPED,\s*AutoFulfillBlockedReason\.LISTING_OVER_PLAN_LIMIT/,
+    );
+    expect(src).not.toMatch(
+      /AutoFulfillStatus\.BLOCKED,\s*AutoFulfillBlockedReason\.LISTING_OVER_PLAN_LIMIT/,
     );
   });
 

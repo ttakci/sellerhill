@@ -14,6 +14,7 @@ import {
   ListingStatus,
   OrderCostCaptureStatus,
   OrderStatus,
+  isOrderAlreadyFulfilled,
   type EbayMarketplaceId,
 } from '@repo/shared';
 
@@ -21,6 +22,7 @@ import { DatabaseService } from '../../common/database/database.service';
 import {
   meetsCoarseCapGate,
   pickRoundRobinAccount,
+  resolveAutoFulfillEligibility,
   selectResumableOrders,
   type ResumableOrderRow,
 } from '../amazon/auto-fulfill-helpers';
@@ -34,6 +36,27 @@ import { AutoFulfillQueueService } from './auto-fulfill-queue.service';
 import { EbayFulfillmentService } from './ebay-fulfillment.service';
 import { computeNetProfit, deriveCostCaptureStatus, estimateProvisionalNetProfit } from './profit-calculation';
 import { StockSyncQueueService } from './stock-sync-queue.service';
+
+/**
+ * How many unpaid orders `releaseOrdersAwaitingPayment` re-checks per tick.
+ * Each one is a metered eBay call, so this bounds the worst case: a seller
+ * with a pile of unpaid orders drains over several 20-minute ticks rather than
+ * spending a burst of the shared per-application Fulfillment quota at once.
+ */
+const AWAITING_PAYMENT_RECHECK_LIMIT = 20;
+
+/**
+ * Minimum gap between two eBay re-checks of the SAME unpaid order.
+ *
+ * This, not the per-tick limit, is what actually bounds the cost. Order sync
+ * ticks every 20 minutes, so a per-tick-only bound scales with ticks × sellers
+ * (72 × 500 × 20 ≈ 720k calls/day against a 100k Fulfillment ceiling — the
+ * sweep alone would exhaust the quota for every seller on the platform). Per
+ * order the ceiling is instead 24 calls a day, so the real cost tracks the
+ * number of unpaid orders in flight, which is small and self-limiting: eBay
+ * cancels them after four days and the window closes after seven.
+ */
+const AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS = 1;
 
 export interface EbayAccountForSync {
   id: string;
@@ -133,6 +156,12 @@ export class OrderSyncService {
       this.logger.warn(`No access token for user ${userId}`);
       return 0;
     }
+
+    // An order that arrived unpaid was skipped rather than purchased. Order
+    // sync never re-fetches an order (the window filters on creationdate and
+    // never overlaps), so without this sweep that skip would be permanent and
+    // the seller would silently lose automation on every slow-paying order.
+    await this.releaseOrdersAwaitingPayment(userId, accessToken, marketplaceId);
 
     // Only fetch orders since last sync (or account creation if never synced)
     const syncFromDate = account.last_ebay_sync_at
@@ -262,10 +291,19 @@ export class OrderSyncService {
           }
 
           // Buyer auto-messaging (best-effort; never fails order sync). The
-          // order_received "thank you" fires on EVERY genuine new order (env
-          // master switch + per-user store config are re-checked at send time,
-          // so a disabled feature is a cheap no-op enqueue).
-          if (inserted) {
+          // order_received "thank you" fires on a genuine new order (env master
+          // switch + per-user store config are re-checked at send time, so a
+          // disabled feature is a cheap no-op enqueue) — EXCEPT for an order
+          // eBay already reports as shipped or delivered.
+          //
+          // That exclusion is the same returning-seller case the auto-fulfill
+          // gate covers, and it is the same predicate: a settled backlog
+          // arriving in one tick would otherwise send every one of those buyers
+          // "thanks for your order, we're getting it ready" weeks after their
+          // parcel landed. Unlike the purchase gate, an UNPAID order is still
+          // messaged — eBay only surfaces orders that cleared checkout, and a
+          // thank-you costs nothing if the payment later fails.
+          if (inserted && !isOrderAlreadyFulfilled(entity.status)) {
             await this.buyerMessages
               .enqueue({
                 ebayOrderId: entity.ebayOrderId,
@@ -665,19 +703,28 @@ export class OrderSyncService {
     entity: ReturnType<EbayFulfillmentService['mapEbayOrderToEntity']>,
     listingOverPlanLimit = false
   ): Promise<void> {
+    // FIRST GATE — what eBay says about the order itself. Only a paid,
+    // unshipped order may be purchased; see `resolveAutoFulfillEligibility` for
+    // why both other directions fail closed. Checked ahead of the plan limit
+    // because it is the more fundamental fact: an already-shipped order needed
+    // no purchase at any plan size, so reporting "over plan limit" there would
+    // point the seller at an upgrade that would have changed nothing.
+    const eligibility = resolveAutoFulfillEligibility(entity.status);
+    if (!eligibility.eligible) {
+      await this.setAutoFulfillStatus(entity.ebayOrderId, AutoFulfillStatus.SKIPPED, eligibility.reason);
+      return;
+    }
+
     // Only listings within the plan's listing limit are automated. SKIPPED with
     // a reason, not BLOCKED: this is the plan working as designed, so it must
     // not raise an action-required alarm — the order stays visible and the
     // reason explains why nothing was bought. Checked before the store toggle
     // so the reason shown is the real one even when auto-fulfill is also off.
     if (listingOverPlanLimit) {
-      await this.databaseService.query(
-        `UPDATE orders
-            SET auto_fulfill_status = $1,
-                auto_fulfill_blocked_reason = $2,
-                updated_at = CURRENT_TIMESTAMP
-          WHERE ebay_order_id = $3`,
-        [AutoFulfillStatus.SKIPPED, AutoFulfillBlockedReason.LISTING_OVER_PLAN_LIMIT, entity.ebayOrderId]
+      await this.setAutoFulfillStatus(
+        entity.ebayOrderId,
+        AutoFulfillStatus.SKIPPED,
+        AutoFulfillBlockedReason.LISTING_OVER_PLAN_LIMIT
       );
       return;
     }
@@ -869,10 +916,172 @@ export class OrderSyncService {
     }
   }
 
-  private async setAutoFulfillStatus(ebayOrderId: string, status: AutoFulfillStatus): Promise<void> {
+  /**
+   * Re-check orders that were skipped as unpaid, and release the ones that
+   * have since been paid for.
+   *
+   * This is the other half of the ORDER_NOT_PAID gate. Refusing to buy an
+   * unpaid order is only safe if the refusal can be undone — and order sync
+   * cannot undo it on its own, because it filters on `creationdate` with
+   * non-overlapping windows, so an order is fetched exactly once and its later
+   * payment is never observed. Each candidate therefore costs one metered
+   * `getOrder` call, which is why the candidate set is bounded hard:
+   *
+   *  - `order_date` within 7 days. eBay cancels an unpaid order after four, so
+   *    anything older will never be paid and asking again buys nothing.
+   *  - `amazon_order_id IS NULL` — the same duplicate-purchase guard the
+   *    suspension sweep uses. A non-null id means somebody already bought it.
+   *  - LIMIT, so a backlog costs a bounded number of calls per tick and drains
+   *    over several ticks instead of in one burst.
+   *
+   * In the normal case the SELECT returns nothing and no eBay call is made.
+   * Fail-soft throughout: this is a recovery path, and a failure here must
+   * never stop the order sync it runs in front of.
+   */
+  private async releaseOrdersAwaitingPayment(
+    userId: string,
+    accessToken: string,
+    marketplaceId: EbayMarketplaceId
+  ): Promise<void> {
+    try {
+      const rows = await this.databaseService.query<{
+        ebay_order_id: string;
+        ebay_account_id: string;
+        sale_total: string | number | null;
+      }>(
+        `SELECT ebay_order_id, ebay_account_id, sale_total
+           FROM orders
+          WHERE user_id = $1
+            AND auto_fulfill_status = $2
+            AND auto_fulfill_blocked_reason = $3
+            AND amazon_order_id IS NULL
+            AND order_date > NOW() - INTERVAL '7 days'
+            AND (
+              auto_fulfill_attempted_at IS NULL
+              OR auto_fulfill_attempted_at < NOW() - ($4 || ' hours')::INTERVAL
+            )
+          ORDER BY order_date DESC
+          LIMIT $5`,
+        [
+          userId,
+          AutoFulfillStatus.SKIPPED,
+          AutoFulfillBlockedReason.ORDER_NOT_PAID,
+          String(AWAITING_PAYMENT_RECHECK_INTERVAL_HOURS),
+          AWAITING_PAYMENT_RECHECK_LIMIT,
+        ]
+      );
+      if (rows.length === 0) {
+        return;
+      }
+
+      let released = 0;
+      for (const row of rows) {
+        try {
+          // Stamp BEFORE the call, not after. The stamp is what enforces the
+          // one-call-per-hour bound, so it has to cost an attempt even when the
+          // attempt then fails — otherwise a row that always throws is retried
+          // on every tick and the bound is only honoured on the happy path.
+          await this.databaseService.query(
+            `UPDATE orders SET auto_fulfill_attempted_at = NOW() WHERE ebay_order_id = $1`,
+            [row.ebay_order_id]
+          );
+
+          const fresh = await this.fulfillmentService.fetchOrderById(
+            accessToken,
+            marketplaceId,
+            row.ebay_order_id
+          );
+          // 404 — the order is gone from eBay (cancelled for non-payment is the
+          // usual reason). Leave the row as it is; it ages out of the window.
+          if (!fresh) {
+            continue;
+          }
+
+          const status = this.fulfillmentService.mapEbayOrderToEntity(
+            fresh,
+            userId,
+            row.ebay_account_id
+          ).status;
+
+          // Still unpaid — nothing to do, ask again next tick.
+          if (status === OrderStatus.PENDING) {
+            continue;
+          }
+
+          // The eBay-side state moved, so persist it before deciding: the
+          // eligibility rule reads the mapped status, and it must decide on
+          // what the row now says rather than on what it said at ingest.
+          await this.databaseService.query(
+            `UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
+            [status, row.ebay_order_id]
+          );
+
+          const eligibility = resolveAutoFulfillEligibility(status);
+          if (!eligibility.eligible) {
+            // Paid but already fulfilled while we waited — somebody shipped it
+            // by hand. Re-label it so the reason matches what actually happened.
+            await this.setAutoFulfillStatus(
+              row.ebay_order_id,
+              AutoFulfillStatus.SKIPPED,
+              eligibility.reason
+            );
+            continue;
+          }
+
+          // Clear the skip BEFORE re-resolving, for the same reason the
+          // suspension sweep does: `shouldSkipFulfillStart` refuses a SKIPPED
+          // row, so an order left skipped would enqueue and then no-op.
+          await this.setAutoFulfillStatus(row.ebay_order_id, AutoFulfillStatus.PENDING);
+          await this.resolveAndEnqueueAutoFulfill({
+            userId,
+            ebayAccountId: row.ebay_account_id,
+            ebayOrderId: row.ebay_order_id,
+            saleTotal: Number(row.sale_total) || 0,
+          });
+          released += 1;
+        } catch (rowErr) {
+          // Restore the skip so the row is not stranded at PENDING with no job.
+          const rowMsg = rowErr instanceof Error ? rowErr.message : String(rowErr);
+          this.logger.warn(
+            `Awaiting-payment recheck failed for order ${row.ebay_order_id}: ${rowMsg}`
+          );
+          await this.setAutoFulfillStatus(
+            row.ebay_order_id,
+            AutoFulfillStatus.SKIPPED,
+            AutoFulfillBlockedReason.ORDER_NOT_PAID
+          ).catch(() => undefined);
+        }
+      }
+
+      if (released > 0) {
+        this.logger.log(
+          `Awaiting-payment recheck: released ${released} now-paid order(s) for user ${userId}`
+        );
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Awaiting-payment recheck skipped for user ${userId}: ${msg}`);
+    }
+  }
+
+  /**
+   * The reason is written with the status, and omitting it CLEARS any stored
+   * one — a reason describes the status it arrived with, so leaving a stale
+   * `subscription_suspended` on a row the resume sweep has just moved to
+   * SKIPPED would explain the wrong thing.
+   */
+  private async setAutoFulfillStatus(
+    ebayOrderId: string,
+    status: AutoFulfillStatus,
+    reason: AutoFulfillBlockedReason | null = null
+  ): Promise<void> {
     await this.databaseService.query(
-      `UPDATE orders SET auto_fulfill_status = $1, updated_at = CURRENT_TIMESTAMP WHERE ebay_order_id = $2`,
-      [status, ebayOrderId]
+      `UPDATE orders
+          SET auto_fulfill_status = $1,
+              auto_fulfill_blocked_reason = $2,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE ebay_order_id = $3`,
+      [status, reason, ebayOrderId]
     );
   }
 

@@ -130,7 +130,9 @@
         "cart": "Sepet uyuşmazlığı",
         "review_unreadable": "Sipariş toplamı okunamadı",
         "subscription_suspended": "Abonelik askıya alındı",
-        "listing_over_plan_limit": "İlan, paket limitinin dışında"
+        "listing_over_plan_limit": "İlan, paket limitinin dışında",
+        "order_already_fulfilled": "Zaten kargolanmış — alınacak bir şey yok",
+        "order_not_paid": "Alıcının ödemesi bekleniyor"
       },
       "reasonLabel": "Sebep: {{reason}}",
       "amazonCancelledBadge": "Amazon iptal etti",
