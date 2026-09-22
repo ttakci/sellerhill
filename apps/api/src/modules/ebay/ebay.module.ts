@@ -13,6 +13,7 @@ import { AspectResolverService } from './aspect-resolver.service';
 import { EbayAccountDeletionController } from './ebay-account-deletion.controller';
 import { EbayAccountDeletionService } from './ebay-account-deletion.service';
 import { EbayBulkService } from './ebay-bulk.service';
+import { EbayFeedService } from './ebay-feed.service';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
@@ -30,6 +31,7 @@ import { EbayService } from './ebay.service';
   providers: [
     EbayService,
     EbayBulkService,
+    EbayFeedService,
     EbayOAuthService,
     EbayTaxonomyService,
     AspectResolverService,
@@ -41,6 +43,7 @@ import { EbayService } from './ebay.service';
   exports: [
     EbayService,
     EbayBulkService,
+    EbayFeedService,
     EbayFulfillmentService,
     EbayTaxonomyService,
     AspectResolverService,
