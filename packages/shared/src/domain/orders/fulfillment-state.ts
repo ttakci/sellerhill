@@ -26,6 +26,31 @@ function isSettled(status: OrderStatus): boolean {
 }
 
 /**
+ * eBay already considers this order shipped, or part-shipped.
+ *
+ * Shared deliberately, because two unrelated features need exactly this fact
+ * and would otherwise each hand-roll it:
+ *  - auto-fulfill must not BUY an item the buyer is already getting;
+ *  - the `order_received` buyer message must not greet a month-old delivered
+ *    order with "thanks, we're preparing your order".
+ *
+ * Both cases are the same underlying situation — a seller who was away and
+ * whose settled backlog arrives in one sync tick — which is why one predicate
+ * is better than two that can drift apart.
+ *
+ * `PROCESSING` counts: eBay's `IN_PROGRESS` means at least one line item has
+ * shipped, and we only ever look at the first line item, so treating it as
+ * unfulfilled is the expensive direction to be wrong in.
+ */
+export function isOrderAlreadyFulfilled(status: OrderStatus): boolean {
+  return (
+    status === OrderStatus.SHIPPED ||
+    status === OrderStatus.COMPLETED ||
+    status === OrderStatus.PROCESSING
+  );
+}
+
+/**
  * Collapse the three separate axes into the one state a seller acts on.
  *
  * Precedence is deliberate:

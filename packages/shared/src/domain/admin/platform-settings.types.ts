@@ -81,6 +81,31 @@ export enum PlatformSettingKey {
   EBAY_BUDGET_ACCOUNT_DAILY_LIMIT = 'ebay.budget.accountDailyLimit',
   EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT = 'ebay.budget.fulfillmentDailyLimit',
   EBAY_BUDGET_TRADING_DAILY_LIMIT = 'ebay.budget.tradingDailyLimit',
+  EBAY_BUDGET_FEED_DAILY_LIMIT = 'ebay.budget.feedDailyLimit',
+
+  // --- Periodic listing reconciliation (eBay Feed API) ---
+  /**
+   * Master switch. Default OFF: this calls a live eBay surface whose TASK
+   * limits (errors 160024/160025) eBay does not publish, so it is turned on
+   * deliberately rather than by deploying.
+   */
+  EBAY_FEED_SYNC_ENABLED = 'ebay.feedSync.enabled',
+  /**
+   * Download the report and change NOTHING — write it verbatim to disk and log
+   * its opening lines.
+   *
+   * Default ON, and that is the point: eBay's reference documents the task
+   * lifecycle but defers the report FILE's schema to the Merchant Data XSD, so
+   * the column names are not established. Rather than ship a parser written
+   * against a guess, the first real report is captured from a real store and
+   * the parser is written against it. Turned off once that has happened.
+   */
+  EBAY_FEED_SYNC_CAPTURE_ONLY = 'ebay.feedSync.captureOnly',
+  EBAY_FEED_SYNC_CRON = 'ebay.feedSync.cron',
+  /** Hours before a store is due again. */
+  EBAY_FEED_SYNC_INTERVAL_HOURS = 'ebay.feedSync.intervalHours',
+  /** Stores per tick — the pacing that keeps the unpublished task limits safe. */
+  EBAY_FEED_SYNC_MAX_ACCOUNTS_PER_RUN = 'ebay.feedSync.maxAccountsPerRun',
 
   // --- Amazon order sync / tracking ---
   /**

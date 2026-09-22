@@ -12,6 +12,8 @@ import { OrdersModule } from '../orders/orders.module';
 import { StoreSettingsModule } from '../store-settings/store-settings.module';
 
 import { ContentGenerationService } from './content-generation.service';
+import { EbayFeedSyncProcessor, EBAY_FEED_SYNC_QUEUE } from './ebay-feed-sync.processor';
+import { EbayFeedSyncService } from './ebay-feed-sync.service';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { ListingImportService } from './listing-import.service';
@@ -42,7 +44,8 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     BullModule.registerQueue(
       { name: 'listings' },
       { name: 'stock-sync' },
-      { name: 'keepa-refresh' }
+      { name: 'keepa-refresh' },
+      { name: EBAY_FEED_SYNC_QUEUE }
     ),
   ],
   controllers: [ListingsController],
@@ -59,6 +62,8 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     ListingStrategyService,
     ContentGenerationService,
     StockSyncProcessorService,
+    EbayFeedSyncService,
+    EbayFeedSyncProcessor,
   ],
   exports: [ListingsService, ListingQueueService],
 })

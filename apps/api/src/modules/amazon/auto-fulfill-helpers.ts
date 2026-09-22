@@ -2,6 +2,7 @@ import {
   AutoFulfillBlockedReason as AutoFulfillBlockedReasonEnum,
   AutoFulfillStatus,
   OrderStatus,
+  isOrderAlreadyFulfilled,
 } from '@repo/shared';
 
 /**
@@ -46,6 +47,40 @@ export function pickRoundRobinAccount<T extends { id: string; lastUsedAt: Date |
     }
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   })[0];
+}
+
+export type AutoFulfillEligibility =
+  | { eligible: true }
+  | { eligible: false; reason: AutoFulfillBlockedReasonEnum };
+
+/**
+ * May an Amazon purchase be made for an order in this eBay state?
+ *
+ * ONLY `WAITING_SHIPMENT` — paid, and nothing shipped yet — is eligible.
+ * Everything else fails closed, because both other directions cost real money:
+ *
+ *  - SHIPPED / COMPLETED / PROCESSING: fulfilment has already happened or
+ *    begun, so a purchase buys a second copy of an item the buyer is already
+ *    getting. This is what makes a returning seller's settled backlog safe:
+ *    their orders arrive already fulfilled and are skipped, rather than each
+ *    one triggering a real Amazon order.
+ *  - PENDING: the buyer has not paid. eBay cancels unpaid orders after four
+ *    days, and we would be holding the stock. PENDING also covers "eBay sent
+ *    no fulfilment status at all", which is deliberately treated the same way —
+ *    an unreadable state is not evidence of payment.
+ *
+ * Read from the MAPPED `OrderStatus` rather than eBay's raw pair so that the
+ * value this decision is made on is the same one persisted on the row and
+ * shown to the seller; the two cannot disagree about why nothing was bought.
+ */
+export function resolveAutoFulfillEligibility(status: OrderStatus): AutoFulfillEligibility {
+  if (isOrderAlreadyFulfilled(status)) {
+    return { eligible: false, reason: AutoFulfillBlockedReasonEnum.ORDER_ALREADY_FULFILLED };
+  }
+  if (status === OrderStatus.WAITING_SHIPMENT) {
+    return { eligible: true };
+  }
+  return { eligible: false, reason: AutoFulfillBlockedReasonEnum.ORDER_NOT_PAID };
 }
 
 /**

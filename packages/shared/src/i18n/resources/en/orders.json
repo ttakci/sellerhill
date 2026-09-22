@@ -130,7 +130,9 @@
         "cart": "Cart mismatch",
         "review_unreadable": "Order total unreadable",
         "subscription_suspended": "Subscription suspended",
-        "listing_over_plan_limit": "Listing outside plan limit"
+        "listing_over_plan_limit": "Listing outside plan limit",
+        "order_already_fulfilled": "Already shipped — nothing to buy",
+        "order_not_paid": "Waiting for buyer payment"
       },
       "reasonLabel": "Reason: {{reason}}",
       "amazonCancelledBadge": "Amazon cancelled",

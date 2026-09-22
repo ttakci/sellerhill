@@ -163,3 +163,19 @@ export function describeBulkErrors(entry: EbayBulkResponseEntry | null | undefin
   }
   return `eBay rejected this item with status ${entry.statusCode ?? 'unknown'}.`;
 }
+
+/**
+ * The numeric eBay error ids on a rejected entry.
+ *
+ * Kept separate from `describeBulkErrors` because the two have different
+ * audiences and different reliability: the message is prose for an operator's
+ * log, while these ids are what code is allowed to BRANCH on. eBay rewords its
+ * messages and localizes them; the ids are contract. Anything that acts on a
+ * failure — above all `classifyEndedListingFailure`, which can retire a
+ * listing — must key on these.
+ */
+export function extractBulkErrorIds(entry: EbayBulkResponseEntry | null | undefined): number[] {
+  return (entry?.errors ?? [])
+    .map((error) => error.errorId)
+    .filter((id): id is number => typeof id === 'number');
+}

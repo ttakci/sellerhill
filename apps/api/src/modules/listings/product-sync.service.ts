@@ -6,6 +6,7 @@ import { EbayBulkService, type BulkPriceQuantityItem } from '../ebay/ebay-bulk.s
 import { EbayService } from '../ebay/ebay.service';
 import { StoreSettingsService } from '../store-settings/store-settings.service';
 
+import { isEndedListingFailure } from './ended-listing';
 import {
   applyListingOverrides,
   hasCommerceDelta,
@@ -223,6 +224,24 @@ export class ProductSyncService {
         });
 
         const failures = results.filter((result) => !result.ok);
+
+        // eBay answering "there is no such offer" is proof the listing ended,
+        // and it costs nothing extra: this is the reply to a write we were
+        // making anyway. Retiring the row stops the Keepa refresh claim from
+        // buying tokens for a product with no eBay surface left to update.
+        // Best-effort and last, so a bookkeeping failure cannot affect the
+        // pushes that succeeded.
+        const ended = failures.filter((failure) => isEndedListingFailure(failure.errorIds ?? []));
+        if (ended.length > 0) {
+          await this.markListingsEnded(ended.map((failure) => failure.listingId)).catch(
+            (err: unknown) => {
+              this.logger.warn(
+                `Failed to mark ended listings: ${err instanceof Error ? err.message : String(err)}`
+              );
+            }
+          );
+        }
+
         for (const failure of failures) {
           this.logger.warn(`eBay rejected the update for listing ${failure.listingId}: ${failure.error}`);
         }
@@ -389,6 +408,42 @@ export class ProductSyncService {
        WHERE l.id = v.id AND l.ebay_offer_id IS NULL`,
       [results.map((result) => result.listingId), results.map((result) => result.offerId)]
     );
+  }
+
+  /**
+   * Retire listings eBay says no longer exist.
+   *
+   * INACTIVE, not a new "ended" status: the enum already has a state for "we
+   * hold this listing but it is not live on eBay", the listings filter already
+   * offers it, and the Keepa refresh claim already requires an ACTIVE listing —
+   * so this one write stops the token spend with nothing else to change. A
+   * separate ENDED value would have to be threaded through the filter, the
+   * badge, both locales and the claim query to buy a distinction the seller
+   * does not act on differently.
+   *
+   * Scoped to `status = ACTIVE` so it can only ever move a row one way. The
+   * fan-out only selects active listings, so that predicate is about what this
+   * statement is ALLOWED to do rather than what it currently does — it means a
+   * future caller cannot use it to resurrect-then-retire a draft.
+   */
+  private async markListingsEnded(listingIds: string[]): Promise<void> {
+    if (listingIds.length === 0) {
+      return;
+    }
+
+    const result = await this.databaseService.query(
+      `UPDATE listings
+          SET status = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ANY($2::uuid[]) AND status = $3
+        RETURNING id`,
+      [ListingStatus.INACTIVE, listingIds, ListingStatus.ACTIVE]
+    );
+
+    if (result.length > 0) {
+      this.logger.log(
+        `Marked ${result.length} listing(s) inactive — eBay reports the offer no longer exists`
+      );
+    }
   }
 
   /**

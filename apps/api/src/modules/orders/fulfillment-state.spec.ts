@@ -4,6 +4,7 @@ import {
   OrderStatus,
   deriveFulfillmentState,
   isActionableFulfillmentState,
+  isOrderAlreadyFulfilled,
   isSimulatedAmazonOrderId,
 } from '@repo/shared';
 
@@ -167,5 +168,21 @@ describe('isSimulatedAmazonOrderId', () => {
     expect(isSimulatedAmazonOrderId('123-4567890-1234567')).toBe(false);
     expect(isSimulatedAmazonOrderId(null)).toBe(false);
     expect(isSimulatedAmazonOrderId(undefined)).toBe(false);
+  });
+});
+
+describe('isOrderAlreadyFulfilled', () => {
+  it('is true for every state where eBay has begun or finished shipping', () => {
+    // PROCESSING is eBay's IN_PROGRESS — at least one line item shipped. We
+    // only ever read the first line item, so this is the safe direction.
+    for (const status of [OrderStatus.SHIPPED, OrderStatus.COMPLETED, OrderStatus.PROCESSING]) {
+      expect(isOrderAlreadyFulfilled(status)).toBe(true);
+    }
+  });
+
+  it('is false for an order that still needs fulfilling', () => {
+    for (const status of [OrderStatus.WAITING_SHIPMENT, OrderStatus.PENDING]) {
+      expect(isOrderAlreadyFulfilled(status)).toBe(false);
+    }
   });
 });

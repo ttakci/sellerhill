@@ -37,7 +37,7 @@
       "invalidState": "Invalid state parameter",
       "authorizationFailed": "eBay authorization failed",
       "tokenExchangeFailed": "Failed to exchange authorization code for tokens",
-      "accountAlreadyConnected": "This eBay account is already connected",
+      "accountAlreadyConnected": "This eBay store is connected to another SellerHill account. Sign in with the account you connected it to; if you can't access it, contact support.",
       "ebayTrialAlreadyUsed": "This eBay store has already used its free trial. Choose a plan to connect it.",
       "noAuthorizationCode": "No authorization code received from eBay",
       "storeOwnedByAnotherAccount": "This eBay store is linked to a different SellerHill account. Contact support to transfer it.",
