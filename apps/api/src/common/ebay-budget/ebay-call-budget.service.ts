@@ -49,6 +49,7 @@ const LIMIT_SETTING: Record<EbayApiResource, PlatformSettingKey> = {
   [EbayApiResource.ACCOUNT]: PlatformSettingKey.EBAY_BUDGET_ACCOUNT_DAILY_LIMIT,
   [EbayApiResource.FULFILLMENT]: PlatformSettingKey.EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT,
   [EbayApiResource.TRADING]: PlatformSettingKey.EBAY_BUDGET_TRADING_DAILY_LIMIT,
+  [EbayApiResource.FEED]: PlatformSettingKey.EBAY_BUDGET_FEED_DAILY_LIMIT,
   [EbayApiResource.ANALYTICS]: PlatformSettingKey.EBAY_BUDGET_TRADING_DAILY_LIMIT,
 };
 

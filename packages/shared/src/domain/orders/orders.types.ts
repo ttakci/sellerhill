@@ -118,6 +118,26 @@ export enum AutoFulfillBlockedReason {
    * something that went wrong, so it must not raise an action-required alarm.
    */
   LISTING_OVER_PLAN_LIMIT = 'listing_over_plan_limit',
+  /**
+   * eBay already reported the order as fulfilled (or part-fulfilled) when it
+   * first reached us, so there is nothing left to buy — the seller shipped it
+   * themselves, or another tool did. Written with status SKIPPED, not BLOCKED:
+   * the buyer has been served, so nothing needs the seller's attention.
+   *
+   * This is the guard that stops a seller returning after a lapse from having
+   * their whole settled backlog re-purchased on Amazon. The suspension-resume
+   * sweep has always excluded SHIPPED/COMPLETED for exactly this reason
+   * (`selectResumableOrders`); the insert path was missing the same rule.
+   */
+  ORDER_ALREADY_FULFILLED = 'order_already_fulfilled',
+  /**
+   * The buyer had not paid yet. Money must never leave on an order that may
+   * still be cancelled for non-payment, so this fails closed — including when
+   * eBay reports no fulfillment status at all, since an unreadable state is not
+   * evidence of payment. The order-sync tick re-checks these against eBay and
+   * releases them once payment settles, so the skip is not permanent.
+   */
+  ORDER_NOT_PAID = 'order_not_paid',
 }
 
 /**

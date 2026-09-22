@@ -196,13 +196,21 @@ export class EbayFulfillmentService {
   }
 
   /**
-   * Fetch a single order by eBay order ID
+   * Fetch a single order by eBay order ID.
+   *
+   * Metered like `fetchOrders` — one order is still one Fulfillment call
+   * against the shared per-application ceiling, and an unmetered read is
+   * exactly how that resource came to sit closest to its limit while the admin
+   * panel reported it idle. BACKGROUND priority: every caller is a sweep, not
+   * a seller waiting on a screen.
    */
   async fetchOrderById(
     accessToken: string,
     marketplaceId: EbayMarketplaceId,
     ebayOrderId: string
   ): Promise<EbayFulfillmentOrder | null> {
+    await this.ebayCallBudget.acquire(EbayApiResource.FULFILLMENT, EbayCallPriority.BACKGROUND);
+
     const baseUrl = this.configService.get<string>('EBAY_REST_API_URL') || 'https://apiz.ebay.com';
     const url = `${baseUrl}/sell/fulfillment/v1/order/${ebayOrderId}`;
 

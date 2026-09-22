@@ -23,6 +23,20 @@ export enum EbayApiResource {
   FULFILLMENT = 'sell.fulfillment',
   /** Legacy XML calls (store discovery, EndItem). */
   TRADING = 'trading',
+  /**
+   * Bulk report tasks (create → poll → download).
+   *
+   * 100,000/day, 20x Trading's ceiling, and the reason periodic listing
+   * reconciliation is affordable at all: one report covers a seller's ENTIRE
+   * catalogue, so the cost is per seller rather than per 200 listings the way
+   * `GetMyeBaySelling` is.
+   *
+   * Note eBay meters feed TASKS separately from these calls (errors 160024 and
+   * 160025 — concurrent, and per hour/day). eBay publishes no figure for
+   * either, so a sweep has to be paced and must treat both as live limits
+   * rather than assuming this daily ceiling is the only one.
+   */
+  FEED = 'sell.feed',
   /** Rate-limit introspection itself. */
   ANALYTICS = 'developer.analytics',
 }

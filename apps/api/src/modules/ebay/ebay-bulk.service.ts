@@ -17,6 +17,7 @@ import {
   chunkForBulk,
   correlateBulkResponses,
   describeBulkErrors,
+  extractBulkErrorIds,
   extractExistingOfferId,
   extractMissingAspectName,
   extractRejectedAspect,
@@ -46,6 +47,13 @@ export interface BulkPriceQuantityResult {
   /** Resolved offer id, so the caller can persist it and stop paying for the lookup. */
   offerId: string | null;
   error?: string;
+  /**
+   * eBay's own numeric error ids for this rejection. Empty on a transport
+   * failure, where eBay never answered at all — which is why callers that act
+   * on a failure branch on these rather than on `error`, whose prose eBay is
+   * free to change. See `ended-listing.ts`.
+   */
+  errorIds?: number[];
 }
 
 interface OffersLookupResponse {
@@ -207,7 +215,12 @@ export class EbayBulkService {
             listingId: outcome.item.listingId,
             offerId: outcome.item.offerId,
             ok: outcome.ok,
-            ...(outcome.ok ? {} : { error: describeBulkErrors(outcome.entry) }),
+            ...(outcome.ok
+              ? {}
+              : {
+                  error: describeBulkErrors(outcome.entry),
+                  errorIds: extractBulkErrorIds(outcome.entry),
+                }),
           });
         }
       } catch (error: unknown) {
