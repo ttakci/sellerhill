@@ -3,33 +3,47 @@ import * as path from 'path';
 import * as zlib from 'zlib';
 
 import { Injectable, Logger } from '@nestjs/common';
-import { PlatformSettingKey } from '@repo/shared';
+import { ListingStatus, PlatformSettingKey } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { EbayFeedService } from '../ebay/ebay-feed.service';
 
+import { decodeReportBody, parseActiveInventoryReportXml } from './feed-report-parser';
+
 /**
  * Periodic listing reconciliation against eBay's own catalogue.
  *
- * Nothing in the platform ever asks eBay "which of these listings still
+ * Nothing in the platform ever asked eBay "which of these listings still
  * exist?". Orders are pulled, price and stock are pushed, but a listing the
- * seller ended in Seller Hub — or that eBay ended — stays ACTIVE here
+ * seller ended in Seller Hub — or that eBay ended — stayed ACTIVE here
  * indefinitely, drawing Keepa refresh tokens for a product with no eBay
- * surface left to update. The push path now catches some of those (see
+ * surface left to update. The push path catches some of those (see
  * `ended-listing.ts`), but only for listings we happen to be updating.
  *
- * SHIPPED IN CAPTURE-ONLY MODE, AND THAT IS NOT A HEDGE
- * -----------------------------------------------------
+ * THE PARSER IS WRITTEN AGAINST A REAL CAPTURED REPORT, NOT A GUESS
+ * -------------------------------------------------------------------
  * eBay documents the feed task lifecycle precisely and the report FILE's schema
- * not at all — the reference defers to the Merchant Data XSD. A parser written
- * against guessed column names is the exact failure this codebase has paid for
- * before (the Aquiline v3 integration was built against the wrong API surface
- * entirely and could never have worked). So the first phase downloads the real
- * report from a real store, writes it verbatim, and changes NOTHING. The parser
- * is written against that sample; `ebay.feedSync.captureOnly` then goes off.
+ * not at all — the reference defers to the Merchant Data XSD. Rather than ship
+ * a parser against guessed column names (the exact failure that made the
+ * Aquiline v3 integration unworkable), `ebay.feedSync.captureOnly` shipped
+ * first: download the real report from a real store, write it verbatim, change
+ * nothing. A real report was captured 2026-09-22; `feed-report-parser.ts` is
+ * written against that sample. See its header comment for the confirmed shape.
  *
- * Until then this service deliberately cannot affect a seller's data.
+ * WHAT RECONCILIATION ACTUALLY DOES (once captureOnly is off)
+ * -------------------------------------------------------------------
+ * Only ONE direction: a TRACKED listing (`listings.ebay_item_id` set, status
+ * ACTIVE) that is ABSENT from a report eBay reported COMPLETE is retired to
+ * INACTIVE. Nothing is ever created or reactivated from this report — a
+ * listing appearing here that we have no row for is not adopted (that is the
+ * import flow's job, with its own explicit ASIN mapping), and a listing
+ * present in both report and our table is left untouched.
+ *
+ * A report that could not be parsed, or a `COMPLETED_WITH_ERROR` status, or a
+ * `COMPLETED` report with zero readable items, never retires anything —
+ * "eBay's answer is unusable" is not evidence of an empty catalogue, and
+ * confusing the two would end every listing that store owns.
  */
 @Injectable()
 export class EbayFeedSyncService {
@@ -128,14 +142,71 @@ export class EbayFeedSyncService {
       return;
     }
 
-    // The parser and the reconciliation it feeds land once a real report has
-    // pinned the schema down. Reaching here before that is a configuration
-    // mistake, and saying so is better than silently doing nothing.
-    this.logger.error(
-      `Feed sync for account ${ebayAccountId} (user ${userId}) ran with captureOnly off, ` +
-        'but no report parser exists yet — nothing was reconciled. ' +
-        'Re-enable ebay.feedSync.captureOnly until the parser ships.'
+    // COMPLETED_WITH_ERROR means eBay itself flagged some records as
+    // unreliable. We cannot tell WHICH ones, so the whole report is untrusted
+    // for retirement — acting on it risks ending a listing that is, in fact,
+    // one of the erroring records rather than a genuinely absent one.
+    if (report.status !== 'COMPLETED') {
+      this.logger.warn(
+        `Feed report for account ${ebayAccountId} ended as ${report.status}; skipping reconciliation`
+      );
+      return;
+    }
+
+    const items = parseActiveInventoryReportXml(decodeReportBody(report.body));
+    if (items.length === 0) {
+      // A COMPLETED report with nothing readable in it is more likely a parser
+      // problem (or a genuinely empty store) than something to act on. Either
+      // way, retiring every tracked listing on an unreadable "confirmation" of
+      // emptiness is the expensive direction to be wrong in — log and stop.
+      this.logger.warn(
+        `Feed report for account ${ebayAccountId} parsed to zero items; skipping reconciliation ` +
+          '(this is expected for a store with no live listings, but also what a parser mismatch looks like)'
+      );
+      return;
+    }
+
+    const seenItemIds = new Set(items.map((item) => item.ebayItemId));
+    await this.retireAbsentListings(ebayAccountId, userId, seenItemIds);
+  }
+
+  /**
+   * Retire our TRACKED, ACTIVE listings that the report does not mention.
+   *
+   * Scoped to `ebay_account_id = $1 AND status = 'active' AND ebay_item_id IS
+   * NOT NULL` — a draft (no `ebay_item_id` yet) is never touched, and only
+   * this store's own listings are considered, never another store's.
+   */
+  private async retireAbsentListings(
+    ebayAccountId: string,
+    userId: string,
+    seenItemIds: ReadonlySet<string>
+  ): Promise<void> {
+    const tracked = await this.database.query<{ id: string; ebay_item_id: string }>(
+      `SELECT id, ebay_item_id FROM listings
+        WHERE ebay_account_id = $1 AND status = $2 AND ebay_item_id IS NOT NULL`,
+      [ebayAccountId, ListingStatus.ACTIVE]
     );
+
+    const absentIds = tracked.filter((row) => !seenItemIds.has(row.ebay_item_id)).map((row) => row.id);
+    if (absentIds.length === 0) {
+      return;
+    }
+
+    const result = await this.database.query<{ id: string }>(
+      `UPDATE listings
+          SET status = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ANY($2::uuid[]) AND status = $3
+        RETURNING id`,
+      [ListingStatus.INACTIVE, absentIds, ListingStatus.ACTIVE]
+    );
+
+    if (result.length > 0) {
+      this.logger.log(
+        `Feed reconciliation: marked ${result.length} listing(s) inactive for account ${ebayAccountId} ` +
+          `(user ${userId}) — absent from eBay's active inventory report`
+      );
+    }
   }
 
   /**
