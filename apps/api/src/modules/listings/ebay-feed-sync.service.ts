@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as zlib from 'zlib';
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PlatformSettingKey } from '@repo/shared';
@@ -138,12 +139,24 @@ export class EbayFeedSyncService {
   }
 
   /**
-   * Write the report exactly as eBay served it.
+   * Write the report exactly as eBay served it, and log enough of it to READ.
    *
-   * Verbatim matters: the file may be gzipped, and the whole point of this
-   * phase is to learn its true shape, so anything that decodes or reformats it
-   * on the way to disk defeats the exercise. The log line carries the size and
-   * content type so the schema can be identified without opening the file.
+   * Two outputs, because each alone is useless here:
+   *
+   *  - The FILE is verbatim. It may be gzipped, and the point of this phase is
+   *    to learn the report's true shape, so anything that decodes or reformats
+   *    it on the way to disk defeats the exercise. It defaults under `logs/`
+   *    because that path is a mounted volume in both Coolify compose files —
+   *    written anywhere else it would sit inside the container and vanish on
+   *    the next deploy, which is exactly when someone would go looking for it.
+   *    Promtail globs `*.log`, so a `.raw` file is correctly not shipped.
+   *
+   *  - The LOG PREVIEW is what actually gets read. Reaching a file inside a
+   *    running container needs shell access; a log line reaches Grafana and
+   *    `docker logs` on its own. So the preview is decompressed first (a
+   *    gzipped report logged raw is unreadable bytes) and truncated — the
+   *    header row and a few records are all that is needed to write the
+   *    parser, and the whole report could be megabytes.
    */
   private async captureRaw(
     ebayAccountId: string,
@@ -152,7 +165,7 @@ export class EbayFeedSyncService {
     contentType?: string
   ): Promise<void> {
     const dir = path.join(
-      process.env.EBAY_FEED_CAPTURE_DIR || path.join(process.cwd(), 'ebay-feed-captures'),
+      process.env.EBAY_FEED_CAPTURE_DIR || path.join(process.cwd(), 'logs', 'ebay-feed-captures'),
       ebayAccountId
     );
     await fs.mkdir(dir, { recursive: true });
@@ -164,5 +177,40 @@ export class EbayFeedSyncService {
       `Captured eBay feed report for account ${ebayAccountId}: ${body.length} bytes, ` +
         `content-type ${contentType ?? 'unknown'}, written to ${file}`
     );
+    this.logger.log(
+      `eBay feed report preview (account ${ebayAccountId}):\n${previewReport(body)}`
+    );
   }
+}
+
+/** How much of the report to put in the log. Enough for the header + a few rows. */
+const PREVIEW_CHARS = 2_000;
+
+/** gzip's magic number. eBay serves the report compressed or not, per its docs. */
+function isGzip(body: Buffer): boolean {
+  return body.length > 2 && body[0] === 0x1f && body[1] === 0x8b;
+}
+
+/**
+ * A readable opening slice of the report, whatever eBay wrapped it in.
+ *
+ * Decompression is best-effort on purpose: if the bytes turn out not to be
+ * gzip after all, a preview of the raw bytes still tells us more than an
+ * exception would, and the verbatim file on disk is the real artefact either
+ * way. This must never be able to fail the capture it is describing.
+ */
+export function previewReport(body: Buffer): string {
+  let text: Buffer = body;
+  if (isGzip(body)) {
+    try {
+      text = zlib.gunzipSync(body);
+    } catch {
+      return `[gzip header present but the body would not decompress; ${body.length} raw bytes on disk]`;
+    }
+  }
+
+  const slice = text.subarray(0, PREVIEW_CHARS).toString('utf8');
+  return text.length > PREVIEW_CHARS
+    ? `${slice}\n… [truncated; ${text.length} bytes total]`
+    : slice;
 }
