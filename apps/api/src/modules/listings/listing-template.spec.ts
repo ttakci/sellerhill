@@ -1,4 +1,9 @@
-import { buildListingTemplateContext, renderListingTemplate } from '@repo/shared';
+import {
+  LISTING_TEMPLATE_SAFE_PLACEHOLDERS,
+  buildListingTemplateContext,
+  buildListingTemplateSnippet,
+  renderListingTemplate,
+} from '@repo/shared';
 
 /**
  * Regression coverage for the bug that shipped raw `{{{product_description}}}`
@@ -107,5 +112,36 @@ describe('renderListingTemplate', () => {
     );
     expect(html).toContain('<li>Gluten free</li>');
     expect(html).toContain('<div>');
+  });
+});
+
+describe('buildListingTemplateSnippet', () => {
+  const context = buildListingTemplateContext({
+    title: 'Fruit Roll-Ups Variety Pack',
+    description: '',
+    imageUrls: ['https://img.example/a.jpg', 'https://img.example/b.jpg'],
+  });
+
+  it('renders every image as an <img>, never as joined URL text', () => {
+    // A bare {{images}} joins the array with ", ", so the one-click shortcut has
+    // to insert the repeating section instead — otherwise the description ships
+    // a wall of raw image URLs as buyer-visible text.
+    const html = renderListingTemplate(buildListingTemplateSnippet('images'), context);
+
+    expect(html).toContain('src="https://img.example/a.jpg"');
+    expect(html).toContain('src="https://img.example/b.jpg"');
+    expect(html).not.toContain('.jpg, https://');
+  });
+
+  it('is the plain placeholder for every other offered key', () => {
+    for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS.filter((k) => k !== 'images')) {
+      expect(buildListingTemplateSnippet(key)).toBe(`{{${key}}}`);
+    }
+  });
+
+  it('leaves no unresolved template syntax for any offered key', () => {
+    for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS) {
+      expect(renderListingTemplate(buildListingTemplateSnippet(key), context)).not.toContain('{{');
+    }
   });
 });
