@@ -15,9 +15,9 @@ import {
 import {
   AmazonAccountStatus,
   type AmazonAccountPublicDto,
-  type CreateAmazonAccountDto,
-  type LinkAmazonOrderDto,
-  type UpdateAmazonAccountDto,
+  CreateAmazonAccountDto,
+  LinkAmazonOrderDto,
+  UpdateAmazonAccountDto,
 } from '@repo/shared';
 
 import { DatabaseService } from '../../common/database/database.service';

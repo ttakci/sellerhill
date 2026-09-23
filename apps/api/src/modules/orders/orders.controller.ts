@@ -5,7 +5,7 @@ import {
   type OrderDto,
   type OrderFiltersDto,
   type OrderStatsDto,
-  type UpdateOrderAmazonDetailsDto,
+  UpdateOrderAmazonDetailsDto,
   type OrderSyncResponseDto,
 } from '@repo/shared';
 
