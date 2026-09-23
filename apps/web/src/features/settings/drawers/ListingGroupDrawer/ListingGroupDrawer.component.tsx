@@ -1,4 +1,4 @@
-import { TemplateType, type ListingSettingsGroupFormData } from '@repo/shared';
+import { LISTING_TEMPLATE_SAFE_PLACEHOLDERS, TemplateType, type ListingSettingsGroupFormData } from '@repo/shared';
 import { Drawer, Icon, InfoMessage, ModernSelect, ModernTextInput, Stepper, Text, Toggle, Tooltip } from '@repo/ui';
 import React from 'react';
 import { Controller } from 'react-hook-form';
@@ -26,16 +26,22 @@ export const ListingGroupDrawerComponent = ({
   fields,
   remove,
   onAddRange,
-  predefinedTemplateOptions,
+  templateOptions,
+  selectedTemplateValue,
+  onTemplateChange,
+  onEditTemplate,
   renderedPreview,
   onOpenPreview,
+  onCustomTemplateRef,
+  onCustomTemplateSelect,
+  onInsertKeyword,
   onNext,
   onBack,
   onSubmit,
   canProceed,
 }: ListingGroupDrawerComponentProps) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
-  const { control, watch, setValue } = form;
+  const { control, watch } = form;
 
   const watchedValues = watch();
   const stepLabels = [
@@ -242,45 +248,55 @@ export const ListingGroupDrawerComponent = ({
   const renderTemplateStep = () => (
     <S.BodyStack>
       <S.FormCard>
-        <Controller
-          name="templates.predefinedTemplateId"
-          control={control}
-          render={({ field }) => (
-            <ModernSelect
-              label={t('listingSettingsGroup.activeTemplate')}
-              value={watchedValues.templates?.type === TemplateType.CUSTOM ? '__custom__' : field.value}
-              options={[
-                ...predefinedTemplateOptions,
-                { value: '__custom__', label: t('listingSettingsGroup.custom') },
-              ]}
-              fullWidth
-              searchPlaceholder={t('translation:common.search')}
-              noResultsMessage={t('translation:common.noResults')}
-              onChange={(value: string | number) => {
-                if (value === '__custom__') {
-                  field.onChange(undefined);
-                  setValue('templates.type', TemplateType.CUSTOM, { shouldValidate: true });
-                } else {
-                  field.onChange(value);
-                  setValue('templates.type', TemplateType.PREDEFINED, { shouldValidate: true });
-                }
-              }}
-            />
-          )}
+        <ModernSelect
+          label={t('listingSettingsGroup.activeTemplate')}
+          value={selectedTemplateValue}
+          options={templateOptions}
+          fullWidth
+          searchPlaceholder={t('translation:common.search')}
+          noResultsMessage={t('translation:common.noResults')}
+          onChange={onTemplateChange}
         />
         {watchedValues.templates?.type === TemplateType.CUSTOM && (
-          <Controller
-            name="templates.customTemplateHtml"
-            control={control}
-            render={({ field }) => (
-              <S.CustomTemplateTextarea
-                mono
-                value={field.value ?? ''}
-                onChange={field.onChange}
-                placeholder={t('listingSettingsGroup.templatePlaceholder')}
-              />
-            )}
-          />
+          <>
+            <Controller
+              name="templates.customTemplateHtml"
+              control={control}
+              render={({ field }) => (
+                <S.CustomTemplateTextarea
+                  ref={(node: HTMLTextAreaElement | null) => {
+                    field.ref(node);
+                    onCustomTemplateRef(node);
+                  }}
+                  mono
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onSelect={onCustomTemplateSelect}
+                  placeholder={t('listingSettingsGroup.templatePlaceholder')}
+                />
+              )}
+            />
+            <S.KeywordSection>
+              <Text variant="h5" weight="semibold">
+                {t('listingSettingsGroup.keywords.title')}
+              </Text>
+              <Text variant="body-sm" color="text.secondary">
+                {t('listingSettingsGroup.keywords.hint')}
+              </Text>
+              <S.KeywordList>
+                {LISTING_TEMPLATE_SAFE_PLACEHOLDERS.map((key) => (
+                  <S.KeywordItem key={key}>
+                    <S.KeywordButton type="button" variant="secondary" size="small" onClick={() => onInsertKeyword(key)}>
+                      <Text variant="caption">{`{{${key}}}`}</Text>
+                    </S.KeywordButton>
+                    <Text variant="body-sm" color="text.secondary">
+                      {t(`listingSettingsGroup.keywords.items.${key}`)}
+                    </Text>
+                  </S.KeywordItem>
+                ))}
+              </S.KeywordList>
+            </S.KeywordSection>
+          </>
         )}
       </S.FormCard>
       <S.PreviewCard variant="elevated">
@@ -288,6 +304,17 @@ export const ListingGroupDrawerComponent = ({
           <Text variant="h4" weight="semibold">
             {t('listingSettingsGroup.livePreview')}
           </Text>
+          <S.PreviewHeaderActions>
+          {watchedValues.templates?.type !== TemplateType.CUSTOM && (
+            <S.PreviewIconButton
+              type="button"
+              variant="ghost"
+              onClick={onEditTemplate}
+              aria-label={t('listingSettingsGroup.editTemplate')}
+            >
+              <Icon name="edit" size={16} />
+            </S.PreviewIconButton>
+          )}
           <S.PreviewIconButton
             type="button"
             variant="ghost"
@@ -296,6 +323,7 @@ export const ListingGroupDrawerComponent = ({
           >
             <Icon name="external-link" size={16} />
           </S.PreviewIconButton>
+          </S.PreviewHeaderActions>
         </S.PreviewCardHeader>
         <S.PreviewCardBody>
           <S.PreviewViewport>

@@ -1,13 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TemplateType,
+  buildListingTemplateSnippet,
   listingSettingsGroupSchema,
   renderListingTemplate,
   type ListingSettingsGroupFormData,
+  type ListingTemplatePlaceholder,
   type PredefinedTemplateResponse,
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFieldArray, useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +25,15 @@ import {
   useUpdateListingSettingsGroupMutation,
 } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { predefinedTemplateName } from '@/features/settings/utils/predefinedTemplateLabel';
+
+/**
+ * Sentinel for the "Custom" row of the Active Template select. Custom is a
+ * `templates.type`, not a template id, so it needs a value the id space cannot
+ * collide with. It stays in the container: the select's options, its value and
+ * its change handler are all resolved here, so the component never has to know
+ * this exists.
+ */
+const CUSTOM_TEMPLATE_OPTION = '__custom__';
 
 const STEP_FIELDS: Partial<Record<number, FieldPath<ListingSettingsGroupFormData>[]>> = {
   0: ['name', 'stock.defaultQuantity', 'stock.stockBuffer'],
@@ -55,8 +66,11 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
 
   const isSaving = isCreating || isUpdating;
   const isLoading = isGroupLoading || isTemplatesLoading;
-  const predefinedTemplateOptions = useMemo(
-    () => templates.map((template) => ({ value: template.id, label: predefinedTemplateName(t, template) })),
+  const templateOptions = useMemo(
+    () => [
+      ...templates.map((template) => ({ value: template.id, label: predefinedTemplateName(t, template) })),
+      { value: CUSTOM_TEMPLATE_OPTION, label: t('listingSettingsGroup.custom') },
+    ],
     [t, templates]
   );
   /* useLoading is for BLOCKING MUTATIONS only. The initial query flags used
@@ -85,7 +99,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     },
   });
 
-  const { reset, control, getValues, clearErrors, trigger, handleSubmit: rhfSubmit } = form;
+  const { reset, control, getValues, setValue, clearErrors, trigger, handleSubmit: rhfSubmit } = form;
 
   // Sync form with data when editing
   useEffect(() => {
@@ -194,11 +208,19 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
   // Preview Logic
   const watchedTemplates = useWatch({ control, name: 'templates' });
 
+  // Remembered so a custom template that started as a ready-made one keeps
+  // previewing with that template's own sample data (the id is cleared on switch).
+  const [lastPredefinedId, setLastPredefinedId] = useState<string | undefined>(undefined);
+  if (watchedTemplates?.predefinedTemplateId && watchedTemplates.predefinedTemplateId !== lastPredefinedId) {
+    setLastPredefinedId(watchedTemplates.predefinedTemplateId);
+  }
+
   const activeTemplate = useMemo(() => {
     if (watchedTemplates?.type === TemplateType.CUSTOM) {
+      const base = templates.find((tpl: PredefinedTemplateResponse) => tpl.id === lastPredefinedId);
       return {
         htmlContent: watchedTemplates.customTemplateHtml || '',
-        sampleData: {
+        sampleData: base?.sampleData ?? {
           title: t('listingSettingsGroup.sample.productTitle'),
           main_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000',
           product_description: t('listingSettingsGroup.sample.productDescription'),
@@ -226,6 +248,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     t,
     watchedTemplates?.type,
     watchedTemplates?.predefinedTemplateId,
+    lastPredefinedId,
     watchedTemplates?.customTemplateHtml,
     templates,
   ]);
@@ -237,6 +260,103 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     () => renderListingTemplate(activeTemplate.htmlContent || '', activeTemplate.sampleData ?? {}),
     [activeTemplate]
   );
+
+  const customTemplateRef = useRef<HTMLTextAreaElement | null>(null);
+  // Clicking a keyword button blurs the textarea, so the live selection is read
+  // here while it is still trustworthy. `null` = never placed, so an insert
+  // appends rather than landing at index 0 (a blurred textarea reports 0, which
+  // is indistinguishable from the caret genuinely sitting at the start).
+  const templateSelectionRef = useRef<{ start: number; end: number } | null>(null);
+  const pendingCaretRef = useRef<number | null>(null);
+
+  const handleCustomTemplateSelect = (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    templateSelectionRef.current = {
+      start: event.currentTarget.selectionStart,
+      end: event.currentTarget.selectionEnd,
+    };
+  };
+
+  // Fallback caret restore only — the execCommand path below never needs it.
+  const customHtml = watchedTemplates?.customTemplateHtml;
+  useEffect(() => {
+    const el = customTemplateRef.current;
+    const caret = pendingCaretRef.current;
+    if (el && caret !== null) {
+      pendingCaretRef.current = null;
+      el.focus();
+      el.setSelectionRange(caret, caret);
+    }
+  }, [customHtml]);
+
+  const selectedTemplateValue =
+    watchedTemplates?.type === TemplateType.CUSTOM
+      ? CUSTOM_TEMPLATE_OPTION
+      : (watchedTemplates?.predefinedTemplateId ?? '');
+
+  /**
+   * Picking a row in the Active Template select DISCARDS any custom HTML.
+   *
+   * Keeping it would make the select lie: the seller picks "Gallery Grid", then
+   * picks Custom again and is handed whatever they had typed against some other
+   * template — code the preview above no longer matches. The pencil beside the
+   * preview is the non-destructive route, since it carries the current
+   * template's own code across.
+   */
+  const handleTemplateChange = (value: string | number) => {
+    const isCustom = value === CUSTOM_TEMPLATE_OPTION;
+    templateSelectionRef.current = null;
+    setValue('templates.customTemplateHtml', '');
+    setValue('templates.predefinedTemplateId', isCustom ? undefined : String(value));
+    setValue('templates.type', isCustom ? TemplateType.CUSTOM : TemplateType.PREDEFINED, {
+      shouldValidate: true,
+    });
+  };
+
+  /** Pencil beside the preview: customize the template currently being shown. */
+  const handleEditTemplate = () => {
+    templateSelectionRef.current = null;
+    setValue('templates.customTemplateHtml', activeTemplate.htmlContent);
+    setValue('templates.predefinedTemplateId', undefined);
+    setValue('templates.type', TemplateType.CUSTOM, { shouldValidate: true });
+  };
+
+  /**
+   * Drops `{{key}}` at the caret (replacing any selection).
+   *
+   * The insert goes through the browser's own `insertText` command rather than
+   * `setValue`. Writing the new string into a controlled <textarea> makes React
+   * assign `node.value`, and assigning `value` resets the caret to the end — a
+   * caret fix afterwards is a race against React's own commit, which is why the
+   * earlier rAF/effect attempts kept losing it. `insertText` mutates the text
+   * the way typing does: the browser itself leaves the caret after the inserted
+   * token and emits a real `input` event, so RHF ends up holding exactly what
+   * the DOM already shows and React never rewrites `value`. Undo (Ctrl+Z) keeps
+   * working for the same reason.
+   */
+  const handleInsertKeyword = (key: ListingTemplatePlaceholder) => {
+    const current = getValues('templates.customTemplateHtml') ?? '';
+    const token = buildListingTemplateSnippet(key);
+    const el = customTemplateRef.current;
+    const selection = templateSelectionRef.current;
+    const start = selection ? selection.start : current.length;
+    const end = selection ? selection.end : current.length;
+
+    if (el && typeof document.execCommand === 'function') {
+      el.focus();
+      el.setSelectionRange(start, end);
+      if (document.execCommand('insertText', false, token)) {
+        templateSelectionRef.current = { start: start + token.length, end: start + token.length };
+        return;
+      }
+    }
+
+    setValue('templates.customTemplateHtml', current.slice(0, start) + token + current.slice(end), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    templateSelectionRef.current = { start: start + token.length, end: start + token.length };
+    pendingCaretRef.current = start + token.length;
+  };
 
   const handleOpenPreview = () => {
     const win = window.open('', '_blank');
@@ -370,10 +490,17 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       append={append}
       remove={remove}
       onAddRange={handleAddRange}
-      predefinedTemplateOptions={predefinedTemplateOptions}
+      templateOptions={templateOptions}
+      selectedTemplateValue={selectedTemplateValue}
+      onTemplateChange={handleTemplateChange}
+      onEditTemplate={handleEditTemplate}
       renderedPreview={renderedPreview}
-      activeTemplate={activeTemplate}
       onOpenPreview={handleOpenPreview}
+      onCustomTemplateRef={(node) => {
+        customTemplateRef.current = node;
+      }}
+      onCustomTemplateSelect={handleCustomTemplateSelect}
+      onInsertKeyword={handleInsertKeyword}
       onNext={() => void handleNext()}
       onBack={handleBack}
       onSubmit={handleSubmit}
