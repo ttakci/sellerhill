@@ -40,9 +40,9 @@
     "selectTemplatePlaceholder": "Choose a predefined template...",
     "htmlEditor": "HTML Editor",
     "templatePlaceholder": "Enter your custom HTML template...",
-    "templateVariablesHelp": "Use variables like {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}",
     "preview": "Preview",
     "livePreview": "Live Preview",
+    "editTemplate": "Edit this template",
     "darkModePreview": "Dark Mode Preview",
     "desktopView": "Desktop View",
     "mobileView": "Mobile View",
@@ -76,51 +76,51 @@
     },
     "predefinedTemplates": {
       "ds-general-store": {
-        "name": "DS General Store",
+        "name": "General Store",
         "description": "A high-conversion, urgency-driven layout suitable for any general product with clear trust badges"
       },
       "ds-minimalist": {
-        "name": "DS Minimalist",
+        "name": "Minimalist",
         "description": "Ultra-clean, single-column, black & white layout focusing purely on specs and trust"
       },
       "ds-tech-gadgets": {
-        "name": "DS Tech Gadgets",
+        "name": "Tech Gadgets",
         "description": "Modern, dark-accented layout ideal for electronics, featuring a prominent specs table"
       },
       "ds-home-decor": {
-        "name": "DS Home Decor",
+        "name": "Home Decor",
         "description": "Warm, aesthetic layout with soft colors, large image emphasis, and a cozy typography setup"
       },
       "ds-auto-parts": {
-        "name": "DS Auto Parts",
+        "name": "Auto Parts",
         "description": "High-contrast technical layout with clear fitment warnings and rugged styling"
       },
       "ds-apparel-fashion": {
-        "name": "DS Apparel Fashion",
+        "name": "Apparel Fashion",
         "description": "Lookbook-style elegant layout, emphasizing sizing charts and fabric care"
       },
       "ds-beauty-health": {
-        "name": "DS Beauty Health",
+        "name": "Beauty Health",
         "description": "Spa-like, clean design with structured sections for ingredients and how-to-use"
       },
       "ds-pet-supplies": {
-        "name": "DS Pet Supplies",
+        "name": "Pet Supplies",
         "description": "Playful yet structured layout with bright accents, focusing on material safety and sizing"
       },
       "ds-fitness-sports": {
-        "name": "DS Fitness Sports",
+        "name": "Fitness Sports",
         "description": "High-energy, bold typography layout focusing on durability, materials, and active lifestyle"
       },
       "ds-outdoor-survival": {
-        "name": "DS Outdoor Survival",
+        "name": "Outdoor Survival",
         "description": "Rugged, earthy layout with focus on durability, weather resistance, and tactical specs"
       },
-      "ds-kids-toys": {
-        "name": "DS Kids Toys",
+      "ds-toys-kids": {
+        "name": "Kids Toys",
         "description": "Fun, colorful layout focusing on safety certifications and age appropriateness"
       },
       "ds-kitchen-dining": {
-        "name": "DS Kitchen Dining",
+        "name": "Kitchen Dining",
         "description": "Clean, recipe-book style layout focusing on material safety and dimensions"
       }
     },
@@ -139,6 +139,7 @@
       "maxFeePercent": "Fee percentage cannot exceed 100%",
       "minFeePercent": "Fee percentage must be 0 or greater",
       "minFixedFee": "Fixed fee must be 0 or greater",
+      "invalidNumber": "Enter a valid number without a leading zero (for example 0.4, not 04)",
       "templateRequired": "Template content is required",
       "templateMinLength": "Template must be at least 10 characters",
       "predefinedTemplateRequired": "Please select a predefined template",
@@ -184,8 +185,7 @@
       "fixedFee": "eBay's fixed listing fee (typically $0.30).",
       "tax": "Sales tax percentage for your location.",
       "customTemplate": "Write your own HTML template with custom styling.",
-      "predefinedTemplate": "Choose from professionally designed templates.",
-      "templateVariables": "Use {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} in your template."
+      "predefinedTemplate": "Choose from professionally designed templates."
     },
     "editorTitle": "Listing Group Editor",
     "editorDescription": "Configure your listing settings, pricing strategies, and templates.",
@@ -231,6 +231,21 @@
     "drawer": {
       "deductions": "Deductions"
     },
-    "copyright": "© {{year}} SellerHill Platform. All rights reserved."
+    "copyright": "© {{year}} SellerHill Platform. All rights reserved.",
+    "keywords": {
+      "title": "Available keywords",
+      "hint": "Write these in double curly braces; they are replaced with the product data when the listing is created.",
+      "items": {
+        "title": "Product title",
+        "product_description": "Product description",
+        "feature_bullets": "Feature bullet list",
+        "product_details": "Specifications list",
+        "main_image": "Main product image URL",
+        "images": "Every product image",
+        "brand": "Brand",
+        "manufacturer": "Manufacturer",
+        "category": "Product category"
+      }
+    }
   }
 }

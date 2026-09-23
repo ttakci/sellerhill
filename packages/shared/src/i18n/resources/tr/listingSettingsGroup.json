@@ -40,9 +40,9 @@
     "selectTemplatePlaceholder": "Öntanımlı bir şablon seçin...",
     "htmlEditor": "HTML Editörü",
     "templatePlaceholder": "Özel HTML şablonunuzu girin...",
-    "templateVariablesHelp": "{{product_title}}, {{product_price}}, {{product_image}}, {{product_description}} gibi değişkenler kullanın",
     "preview": "Önizleme",
     "livePreview": "Canlı Önizleme",
+    "editTemplate": "Bu şablonu düzenle",
     "darkModePreview": "Karanlık Mod Önizlemesi",
     "desktopView": "Masaüstü Görünümü",
     "mobileView": "Mobil Görünüm",
@@ -76,51 +76,51 @@
     },
     "predefinedTemplates": {
       "ds-general-store": {
-        "name": "DS Genel Mağaza",
+        "name": "Genel Mağaza",
         "description": "Genel ürünler için uygun, yüksek dönüşümlü, aciliyet odaklı ve güven rozetleri içeren düzen"
       },
       "ds-minimalist": {
-        "name": "DS Minimalist",
+        "name": "Minimalist",
         "description": "Tamamen özelliklere ve güvene odaklanan, ultra temiz, tek sütunlu, siyah-beyaz düzen"
       },
       "ds-tech-gadgets": {
-        "name": "DS Teknoloji Cihazları",
+        "name": "Teknoloji Cihazları",
         "description": "Elektronik ürünler için ideal, belirgin özellik tablosuna sahip modern ve koyu vurgulu düzen"
       },
       "ds-home-decor": {
-        "name": "DS Ev Dekorasyonu",
+        "name": "Ev Dekorasyonu",
         "description": "Yumuşak renkler, büyük görsel vurgusu ve samimi tipografi düzeni ile sıcak, estetik düzen"
       },
       "ds-auto-parts": {
-        "name": "DS Oto Parça",
+        "name": "Oto Parça",
         "description": "Net uyumluluk uyarıları ve dayanıklı tasarımıyla yüksek kontrastlı teknik düzen"
       },
       "ds-apparel-fashion": {
-        "name": "DS Giyim ve Moda",
+        "name": "Giyim ve Moda",
         "description": "Beden tablolarına ve kumaş bakımına önem veren, katalog tarzı zarif düzen"
       },
       "ds-beauty-health": {
-        "name": "DS Güzellik ve Sağlık",
+        "name": "Güzellik ve Sağlık",
         "description": "İçerikler ve kullanım talimatları için yapılandırılmış bölümlere sahip, spa tarzı temiz tasarım"
       },
       "ds-pet-supplies": {
-        "name": "DS Evcil Hayvan",
+        "name": "Evcil Hayvan",
         "description": "Malzeme güvenliği ve boyutlara odaklanan, parlak vurgulara sahip eğlenceli ancak yapılandırılmış düzen"
       },
       "ds-fitness-sports": {
-        "name": "DS Fitness ve Spor",
+        "name": "Fitness ve Spor",
         "description": "Dayanıklılık, malzemeler ve aktif yaşama odaklanan yüksek enerjili, kalın tipografili düzen"
       },
       "ds-outdoor-survival": {
-        "name": "DS Outdoor ve Hayatta Kalma",
+        "name": "Outdoor ve Hayatta Kalma",
         "description": "Dayanıklılık, hava koşullarına direnç ve taktiksel özelliklere odaklanan, toprak tonlarında sağlam düzen"
       },
-      "ds-kids-toys": {
-        "name": "DS Çocuk Oyuncakları",
+      "ds-toys-kids": {
+        "name": "Çocuk Oyuncakları",
         "description": "Güvenlik sertifikalarına ve yaşa uygunluğa odaklanan eğlenceli ve renkli düzen"
       },
       "ds-kitchen-dining": {
-        "name": "DS Mutfak ve Yemek",
+        "name": "Mutfak ve Yemek",
         "description": "Malzeme güvenliği ve boyutlara odaklanan temiz, yemek kitabı tarzı düzen"
       }
     },
@@ -139,6 +139,7 @@
       "maxFeePercent": "Ücret yüzdesi %100'ü geçemez",
       "minFeePercent": "Ücret yüzdesi 0 veya daha büyük olmalıdır",
       "minFixedFee": "Sabit ücret 0 veya daha büyük olmalıdır",
+      "invalidNumber": "Başında gereksiz sıfır olmadan geçerli bir sayı girin (örneğin 04 değil 0.4)",
       "templateRequired": "Şablon içeriği gereklidir",
       "templateMinLength": "Şablon en az 10 karakter olmalıdır",
       "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",
@@ -184,8 +185,7 @@
       "fixedFee": "eBay'in sabit listeleme ücreti (genellikle $0.30).",
       "tax": "Konumunuz için satış vergisi yüzdesi.",
       "customTemplate": "Özel stil ile kendi HTML şablonunuzu yazın.",
-      "predefinedTemplate": "Profesyonel olarak tasarlanmış şablonlardan seçim yapın.",
-      "templateVariables": "Şablonunuzda {{product_title}}, {{product_price}}, {{product_image}}, {{product_description}}, {{product_specs}} kullanın."
+      "predefinedTemplate": "Profesyonel olarak tasarlanmış şablonlardan seçim yapın."
     },
     "editorTitle": "Listeleme Grubu Editörü",
     "editorDescription": "Listeleme ayarlarınızı, fiyatlandırma stratejilerinizi ve şablonlarınızı yapılandırın.",
@@ -231,6 +231,21 @@
     "drawer": {
       "deductions": "Kesintiler"
     },
-    "copyright": "© {{year}} SellerHill Platformu. Tüm hakları saklıdır."
+    "copyright": "© {{year}} SellerHill Platformu. Tüm hakları saklıdır.",
+    "keywords": {
+      "title": "Kullanılabilir anahtar kelimeler",
+      "hint": "Bunları çift süslü parantez içinde yazın; ilan oluşturulurken ürün verisiyle değiştirilir.",
+      "items": {
+        "title": "Ürün başlığı",
+        "product_description": "Ürün açıklaması",
+        "feature_bullets": "Özellik maddeleri listesi",
+        "product_details": "Teknik özellikler listesi",
+        "main_image": "Ana ürün görseli URL'si",
+        "images": "Tüm ürün görselleri",
+        "brand": "Marka",
+        "manufacturer": "Üretici",
+        "category": "Ürün kategorisi"
+      }
+    }
   }
 }
