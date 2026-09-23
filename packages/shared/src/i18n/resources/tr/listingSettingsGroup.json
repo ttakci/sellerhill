@@ -139,6 +139,7 @@
       "maxFeePercent": "Ücret yüzdesi %100'ü geçemez",
       "minFeePercent": "Ücret yüzdesi 0 veya daha büyük olmalıdır",
       "minFixedFee": "Sabit ücret 0 veya daha büyük olmalıdır",
+      "invalidNumber": "Başında gereksiz sıfır olmadan geçerli bir sayı girin (örneğin 04 değil 0.4)",
       "templateRequired": "Şablon içeriği gereklidir",
       "templateMinLength": "Şablon en az 10 karakter olmalıdır",
       "predefinedTemplateRequired": "Lütfen öntanımlı bir şablon seçin",

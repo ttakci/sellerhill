@@ -4,20 +4,37 @@ import { z } from 'zod';
 import { TemplateType } from '../../domain/listing-settings-groups/listing-settings-group.types';
 
 /**
+ * A number typed into a form field. `z.coerce.number()` alone accepts "04" and
+ * silently stores 4, so a mistyped "0.4" passes as four dollars. A leading zero
+ * followed by another digit is never a number a person meant, so the raw text is
+ * refused before coercion. "0", "0.4" and "4" are unaffected.
+ */
+const LEADING_ZERO = /^[+-]?0\d/;
+
+const formNumber = <T extends z.ZodType>(
+  t: TFunction,
+  build: (base: z.ZodNumber) => T = (base) => base as unknown as T
+) =>
+  z.preprocess(
+    (raw) => (typeof raw === 'string' && LEADING_ZERO.test(raw.trim()) ? Number.NaN : raw),
+    build(z.coerce.number({ error: t('listingSettingsGroup.validation.invalidNumber') }))
+  );
+
+/**
  * Price Range Schema
  */
 export const priceRangeSchema = (t: TFunction) =>
   z
     .object({
       id: z.string(),
-      minPrice: z.coerce.number().min(0, t('listingSettingsGroup.validation.minPrice')),
-      maxPrice: z.coerce.number().min(0, t('listingSettingsGroup.validation.maxPrice')),
-      profitMarginPercent: z.coerce
-        .number()
-        .min(0, t('listingSettingsGroup.validation.profitMarginRange'))
-        .max(100, t('listingSettingsGroup.validation.profitMarginRange'))
-        .optional(),
-      fixedProfitAmount: z.coerce.number().min(0, t('listingSettingsGroup.validation.fixedProfitMin')).optional(),
+      minPrice: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.minPrice'))),
+      maxPrice: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.maxPrice'))),
+      profitMarginPercent: formNumber(t, (n) =>
+        n
+          .min(0, t('listingSettingsGroup.validation.profitMarginRange'))
+          .max(100, t('listingSettingsGroup.validation.profitMarginRange'))
+      ).optional(),
+      fixedProfitAmount: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.fixedProfitMin'))).optional(),
     })
     .refine((data) => data.profitMarginPercent !== undefined || data.fixedProfitAmount !== undefined, {
       message: t('listingSettingsGroup.validation.profitRequired'),
@@ -33,11 +50,8 @@ export const priceRangeSchema = (t: TFunction) =>
  */
 export const stockConfigSchema = (t: TFunction) =>
   z.object({
-    defaultQuantity: z.coerce.number().int().min(1, t('listingSettingsGroup.validation.minQuantity')),
-    stockBuffer: z.coerce
-      .number()
-      .int()
-      .min(0, t('listingSettingsGroup.validation.minStockBuffer'))
+    defaultQuantity: formNumber(t, (n) => n.int().min(1, t('listingSettingsGroup.validation.minQuantity'))),
+    stockBuffer: formNumber(t, (n) => n.int().min(0, t('listingSettingsGroup.validation.minStockBuffer')))
       .optional()
       .default(0),
   });
@@ -47,11 +61,12 @@ export const stockConfigSchema = (t: TFunction) =>
  */
 export const feeConfigSchema = (t: TFunction) =>
   z.object({
-    ebayFeePercent: z.coerce
-      .number()
-      .min(0, t('listingSettingsGroup.validation.minFeePercent'))
-      .max(100, t('listingSettingsGroup.validation.maxFeePercent')),
-    fixedFeeAmount: z.coerce.number().min(0, t('listingSettingsGroup.validation.minFixedFee')),
+    ebayFeePercent: formNumber(t, (n) =>
+      n
+        .min(0, t('listingSettingsGroup.validation.minFeePercent'))
+        .max(100, t('listingSettingsGroup.validation.maxFeePercent'))
+    ),
+    fixedFeeAmount: formNumber(t, (n) => n.min(0, t('listingSettingsGroup.validation.minFixedFee'))),
   });
 
 /**
