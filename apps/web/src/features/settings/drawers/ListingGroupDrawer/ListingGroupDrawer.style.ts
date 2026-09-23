@@ -177,6 +177,38 @@ export const CustomTemplateTextarea = styled(Textarea)`
   min-height: 12rem;
 `;
 
+export const KeywordSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs')};
+  margin-top: ${tkn('spacing.md')};
+`;
+
+export const KeywordList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const KeywordItem = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  min-width: 0;
+`;
+
+export const KeywordButton = styled(Button)`
+  font-family: ${tkn('typography.fontFamily.mono')};
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: ${tkn('spacing.xs')} ${tkn('spacing.sm')};
+  white-space: normal;
+  overflow-wrap: anywhere;
+`;
+
 /**
  * Sits directly under `PreviewCardHeader` inside `PreviewCard`, with no
  * wrapper of its own — a nested box here (as there used to be, with its own
@@ -214,6 +246,12 @@ export const PreviewContent = styled.div`
 export const PreviewHTMLContent = styled.div`
   width: 100%;
   height: 100%;
+`;
+
+export const PreviewHeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${tkn('spacing.xs')};
 `;
 
 export const PreviewIconButton = styled(IconButtonAtom)<{ $active?: boolean }>`

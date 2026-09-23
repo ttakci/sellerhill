@@ -52,9 +52,10 @@ export interface ListingTemplateInput {
 }
 
 /**
- * Canonical placeholders, surfaced in the UI so users authoring a custom
- * template are not guessing. Aliases exist for backwards compatibility with
- * templates written against the old backend vocabulary.
+ * Every placeholder the renderer understands. Aliases exist for backwards
+ * compatibility with templates written against the old backend vocabulary.
+ *
+ * NOT the list to offer a seller — see `LISTING_TEMPLATE_SAFE_PLACEHOLDERS`.
  */
 export const LISTING_TEMPLATE_PLACEHOLDERS = [
   'title',
@@ -74,6 +75,55 @@ export const LISTING_TEMPLATE_PLACEHOLDERS = [
 ] as const;
 
 export type ListingTemplatePlaceholder = (typeof LISTING_TEMPLATE_PLACEHOLDERS)[number];
+
+/**
+ * Placeholders the renderer resolves but that must never reach a buyer. The
+ * seeded catalog uses none of them and `predefined-templates.guard.spec.ts`
+ * refuses a catalog template that does — this constant is the same rule for the
+ * hand-written templates a seller authors in the settings drawer.
+ *
+ * - `price`/`currency` carry the AMAZON SOURCE price, not the eBay price: the
+ *   description is rendered before `calculatePrice` runs, from
+ *   `product.price.current`. Publishing them shows the buyer the seller's cost.
+ * - `condition`/`quantity` are never passed by `processDescriptionTemplate`, so
+ *   they always render empty.
+ * - `asin` is a source-marketplace identifier and names the supplier.
+ */
+const UNSAFE_LISTING_TEMPLATE_PLACEHOLDERS: readonly ListingTemplatePlaceholder[] = [
+  'asin',
+  'price',
+  'currency',
+  'condition',
+  'quantity',
+];
+
+/**
+ * The placeholders a seller may be offered when authoring a template — the
+ * canonical set minus the ones above. Derived, so a placeholder added to
+ * `LISTING_TEMPLATE_PLACEHOLDERS` is offered unless it is named unsafe.
+ */
+export const LISTING_TEMPLATE_SAFE_PLACEHOLDERS: readonly ListingTemplatePlaceholder[] =
+  LISTING_TEMPLATE_PLACEHOLDERS.filter((key) => !UNSAFE_LISTING_TEMPLATE_PLACEHOLDERS.includes(key));
+
+/**
+ * The template text a one-click placeholder shortcut inserts.
+ *
+ * Usually just `{{key}}`. `images` is the exception and has to be: it holds an
+ * array of URLs, and a bare `{{images}}` joins them with ", " (see
+ * `toDisplayString`), so it publishes a wall of raw image URLs as buyer-visible
+ * text instead of pictures. The only form that renders images is the repeating
+ * section, which is what `gallery-grid` — the one catalog template using the
+ * full image set — writes by hand.
+ *
+ * `feature_bullets` / `product_details` are arrays too, but their joined form
+ * is readable prose, so they keep the plain placeholder.
+ */
+export function buildListingTemplateSnippet(placeholder: ListingTemplatePlaceholder): string {
+  if (placeholder === 'images') {
+    return '{{#images}}<img src="{{.}}" alt="{{title}}" style="max-width:100%;height:auto;" />{{/images}}';
+  }
+  return `{{${placeholder}}}`;
+}
 
 /** Old backend vocabulary → canonical key. Kept so existing custom templates keep working. */
 const PLACEHOLDER_ALIASES: Record<string, ListingTemplatePlaceholder> = {
