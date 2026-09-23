@@ -139,6 +139,7 @@
       "maxFeePercent": "Fee percentage cannot exceed 100%",
       "minFeePercent": "Fee percentage must be 0 or greater",
       "minFixedFee": "Fixed fee must be 0 or greater",
+      "invalidNumber": "Enter a valid number without a leading zero (for example 0.4, not 04)",
       "templateRequired": "Template content is required",
       "templateMinLength": "Template must be at least 10 characters",
       "predefinedTemplateRequired": "Please select a predefined template",

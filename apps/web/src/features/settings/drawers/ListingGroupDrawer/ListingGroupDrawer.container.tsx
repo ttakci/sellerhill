@@ -8,7 +8,7 @@ import {
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
@@ -23,6 +23,12 @@ import {
   useUpdateListingSettingsGroupMutation,
 } from '@/features/listing-settings-groups/api/listing-settings-group.api';
 import { predefinedTemplateName } from '@/features/settings/utils/predefinedTemplateLabel';
+
+const STEP_FIELDS: Partial<Record<number, FieldPath<ListingSettingsGroupFormData>[]>> = {
+  0: ['name', 'stock.defaultQuantity', 'stock.stockBuffer'],
+  1: ['fees.ebayFeePercent', 'fees.fixedFeeAmount'],
+  2: ['repricingStrategy'],
+};
 
 export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, onClose, editingGroupId }) => {
   const { t } = useTranslation(['listingSettingsGroup', 'translation']);
@@ -79,7 +85,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     },
   });
 
-  const { reset, control, getValues, clearErrors, handleSubmit: rhfSubmit } = form;
+  const { reset, control, getValues, clearErrors, trigger, handleSubmit: rhfSubmit } = form;
 
   // Sync form with data when editing
   useEffect(() => {
@@ -290,8 +296,15 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
     }
   }, [currentStep, watchedValues]);
 
-  const handleNext = () => {
+  // The gate above only reads values, so it cannot tell "025" from "25" (Number()
+  // accepts both). The schema can: on Continue, run it over THIS step's fields and
+  // stay put with the error painted under the field if it refuses.
+  const handleNext = async () => {
     if (!canProceed || currentStep >= 3) {
+      return;
+    }
+    const stepFields = STEP_FIELDS[currentStep];
+    if (stepFields && !(await trigger(stepFields))) {
       return;
     }
     clearErrors();
@@ -361,7 +374,7 @@ export const ListingGroupDrawer: React.FC<ListingGroupDrawerProps> = ({ isOpen, 
       renderedPreview={renderedPreview}
       activeTemplate={activeTemplate}
       onOpenPreview={handleOpenPreview}
-      onNext={handleNext}
+      onNext={() => void handleNext()}
       onBack={handleBack}
       onSubmit={handleSubmit}
       canProceed={canProceed}
