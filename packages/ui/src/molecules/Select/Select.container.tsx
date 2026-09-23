@@ -95,7 +95,15 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
 
   useLayoutEffect(() => {
     if (isOpen && !isMobile && containerRef.current) {
-      const ESTIMATED_MENU_HEIGHT = 260;
+      // Size the flip check to the real list: a 1-2 option menu needs ~100px, not the
+      // 260px a full list needs, and flipping it upward for lack of room it never uses
+      // is what made short menus open above the trigger.
+      const ROW_HEIGHT_ESTIMATE = 44;
+      const MENU_MAX_HEIGHT = 260;
+      const ESTIMATED_MENU_HEIGHT = Math.min(
+        MENU_MAX_HEIGHT,
+        Math.max(1, options.length) * ROW_HEIGHT_ESTIMATE + (isSearchable ? ROW_HEIGHT_ESTIMATE : 0)
+      );
       let frameId: number;
 
       const updatePosition = () => {
@@ -156,7 +164,7 @@ export const Select = <TFieldValues extends FieldValues = FieldValues>(
         lastPositionRef.current = null;
       };
     }
-  }, [isOpen, isMobile, options.length]);
+  }, [isOpen, isMobile, options.length, isSearchable]);
 
   const standaloneProps = {
     value,
