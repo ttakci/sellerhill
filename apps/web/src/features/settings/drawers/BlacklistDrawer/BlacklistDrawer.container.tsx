@@ -25,7 +25,7 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
   storeConfigs,
   selectedScope,
 }) => {
-  const { t } = useTranslation(['translation']);
+  const { t, i18n } = useTranslation(['translation']);
   const { showMessage, closeMessage } = useUI();
 
   const [saveSettings, { isLoading: isSaving }] = useSaveStoreSettingsMutation();
@@ -61,13 +61,16 @@ export const BlacklistDrawer: React.FC<BlacklistDrawerProps> = ({
     }
   }
 
+  // Cards are shown alphabetically (locale-aware, so Turkish ç/ğ/ı/ö/ş/ü sort correctly).
+  // Display-only: the draft keeps its own order, so what gets saved is unchanged.
   const items = useMemo(() => {
-    if (!searchValue.trim()) {
-      return blacklist;
-    }
     const query = searchValue.toLowerCase().trim();
-    return blacklist.filter((item) => item.keyword.toLowerCase().includes(query));
-  }, [blacklist, searchValue]);
+    const visible = query
+      ? blacklist.filter((item) => item.keyword.toLowerCase().includes(query))
+      : blacklist;
+    return [...visible].sort((a, b) =>
+      a.keyword.localeCompare(b.keyword, i18n.language, { sensitivity: 'base' }));
+  }, [blacklist, searchValue, i18n.language]);
 
   const isAllSelected =
     items.length > 0 && items.every((item) => selectedItems.includes(item.keyword));
