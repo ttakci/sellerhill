@@ -25,6 +25,7 @@
     "test:integration": "jest --config jest.integration.config.js --runInBand"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1139.0",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^4.0.2",
