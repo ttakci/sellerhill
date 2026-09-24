@@ -105,16 +105,36 @@ the OpenAPI error table: `190204` (eBay could not download the URL), `190201`
 (too large), `190202` (dimensions), `190203` (unsupported format), `190013`
 (unauthorized), `190000` (eBay internal).
 
-### D6 — The R2 mirror is retired in a separate, later step
+### D6 — The R2 mirror is removed in this same change
 
-EPS ships first and is verified on live listings. Only then is the R2
-subsystem removed. During the overlap the description keeps rendering from R2,
-so there is no window in which a listing publishes without an image.
+Operator decision, 2026-09-25. EPS replaces it outright; the two do not overlap.
 
-Retiring it later means removing `ImageMirrorService`, `ImageMirrorGcService`,
-the `mirror:images` script, the five R2 environment variables, and the
-`products.image_mirrored_at` / `mirrored_image_name` columns. Migrations `116`,
-`117` and `118` are not edited; the columns are dropped by a new one.
+**Keeping R2 as a safety net would not buy one**, which is why removing it now
+costs nothing. R2 is not a fallback for EPS — they are alternatives that obey
+the same rule: when no mirrored URL exists the description renders no image and
+never an Amazon URL. So an EPS upload failure produces exactly the same outcome
+whether or not R2 is still installed. What an overlap would buy is a second
+system doing one job, and the cost of that is paid every time either one is
+changed.
+
+Removed here, in full: `ImageMirrorService`, `ImageMirrorGcService`,
+`image-mirror-gc.ts` and their specs, `ImageMirrorModule`, the
+`mirror-product-images.ts` script and its `mirror:images` entry, the
+`image-mirror-gc` queue (including its `ADMIN_QUEUE_NAMES` and
+`OBSERVED_QUEUE_NAMES` registrations), the five R2 environment variables from
+`.env.example` and both Coolify compose files, the `@aws-sdk/client-s3`
+dependency, `ProductData.mainImageMirroredUrl`, `attachMirroredImage`, and the
+`image-mirror-invariants` guard spec — which is rewritten against EPS rather
+than deleted, because the invariant it protects (no Amazon URL in a rendered
+description) survives the change of mechanism.
+
+`products.image_mirrored_at` and `products.mirrored_image_name` are dropped by a
+NEW migration. Migrations `116`, `117` and `118` are not edited — an applied
+migration never is.
+
+The Cloudflare bucket and the `img.sellerhill.com` binding are outside the
+codebase and are the operator's to remove once EPS is verified on live listings.
+Nothing in the code refers to them after this change.
 
 ## Architecture
 
@@ -194,8 +214,13 @@ Guard specs, in the established source-grep style:
 ## Before go-live
 
 1. Publish one listing through the new path and confirm the gallery image on the
-   live listing resolves to `i.ebayimg.com`.
+   live listing resolves to `i.ebayimg.com`, and that the description image does
+   too.
 2. Re-read `getImage` for one of those images and record what happened to
-   `expirationDate`. This is risk 1's verification and it gates the R2 retirement.
+   `expirationDate`. This is risk 1's verification.
 3. Re-run `ebay:limits-probe --api-name image` once real upload volume exists, in
    case a daily figure appears only under load.
+4. Only after 1 and 2: remove the Cloudflare bucket and the `img.sellerhill.com`
+   custom domain. The code stops referring to them in this change, but leaving
+   them standing for a few days costs about a dollar and keeps the rollback
+   cheap — a revert of this branch would need them back.
