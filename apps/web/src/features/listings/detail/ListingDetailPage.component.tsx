@@ -10,6 +10,7 @@ import {
   InfoMessage,
   ModernSelect,
   PageHeader,
+  SettingsActionRow,
   SettingsCard,
   SettingsInfoRow,
   StatusBadge,
@@ -142,12 +143,16 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   formatDateTime,
   onBack,
   onSave,
+  onEnd,
+  onDelete,
   onPublish,
   onManage,
   isRevisionsDrawerOpen,
   hasRevisions,
   onOpenRevisions,
   onCloseRevisions,
+  canEnd,
+  canDelete,
   canPublish,
   statusLabel,
 }) => {
@@ -581,6 +586,40 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             )}
           </S.ProductContentStack>
         </S.FullWidthSettingsCard>
+
+        {/* Ending and deleting a listing lived ONLY in the mobile Manage sheet,
+            whose bar is `display: none` from `md` up — so on desktop `onEnd` and
+            `onDelete` were handed to this component and never rendered, and a
+            seller had no way to take one listing down from its own page. A zone
+            card at the foot of the page reaches them at every width without
+            putting destructive buttons in the PageHeader. */}
+        {(canEnd || canDelete) && (
+          <S.FullWidthSettingsCard
+            variant="section"
+            header={{
+              title: t('listings.detail.dangerTitle'),
+              subtitle: t('listings.detail.dangerSubtitle'),
+            }}
+          >
+            {canEnd && (
+              <SettingsActionRow
+                icon="block"
+                label={t('listings.detail.endShort')}
+                subtitle={t('listings.detail.endHint')}
+                onClick={onEnd}
+              />
+            )}
+            {canDelete && (
+              <SettingsActionRow
+                icon="trash"
+                variant="danger"
+                label={t('listings.detail.deleteShort')}
+                subtitle={t('listings.detail.deleteHint')}
+                onClick={onDelete}
+              />
+            )}
+          </S.FullWidthSettingsCard>
+        )}
       </S.SectionGrid>
 
       <S.MobileActionBar>

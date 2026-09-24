@@ -483,9 +483,8 @@ export const ListingDetailPageContainer: React.FC = () => {
     showMessage(
       {
         type: 'warning',
-        headerKey: 'listings:listings.modals.endTitle',
-        descriptionKey: 'listings:listings.modals.endDescription',
-        descriptionParams: { count: 1 },
+        headerKey: 'listings:listings.modals.endOneTitle',
+        descriptionKey: 'listings:listings.modals.endOneDescription',
         primaryButton: {
           labelKey: 'listings:listings.actions.endListing',
           onClick: () => {
@@ -496,9 +495,8 @@ export const ListingDetailPageContainer: React.FC = () => {
                 showMessage(
                   {
                     type: 'success',
-                    headerKey: 'listings:listings.notifications.endSuccessTitle',
-                    descriptionKey: 'listings:listings.notifications.endSuccess',
-                    descriptionParams: { count: 1 },
+                    headerKey: 'listings:listings.notifications.endOneSuccessTitle',
+                    descriptionKey: 'listings:listings.notifications.endOneSuccess',
                     primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
                   },
                   t
@@ -529,11 +527,10 @@ export const ListingDetailPageContainer: React.FC = () => {
     showMessage(
       {
         type: 'warning',
-        headerKey: 'listings:listings.modals.deleteTitle',
-        descriptionKey: 'listings:listings.modals.deleteDescription',
-        descriptionParams: { count: 1 },
+        headerKey: 'listings:listings.modals.deleteOneTitle',
+        descriptionKey: 'listings:listings.modals.deleteOneDescription',
         primaryButton: {
-          labelKey: 'listings:listings.actions.deleteListings',
+          labelKey: 'listings:listings.actions.deleteListing',
           onClick: () => {
             closeMessage();
             void deleteListings([listingId])
@@ -542,9 +539,8 @@ export const ListingDetailPageContainer: React.FC = () => {
                 showMessage(
                   {
                     type: 'success',
-                    headerKey: 'listings:listings.notifications.deleteSuccessTitle',
-                    descriptionKey: 'listings:listings.notifications.deleteSuccess',
-                    descriptionParams: { count: 1 },
+                    headerKey: 'listings:listings.notifications.deleteOneSuccessTitle',
+                    descriptionKey: 'listings:listings.notifications.deleteOneSuccess',
                     primaryButton: {
                       labelKey: 'translation:common.ok',
                       onClick: () => {
@@ -619,7 +615,10 @@ export const ListingDetailPageContainer: React.FC = () => {
     );
   };
 
-  /** Mobile manage sheet: edit / publish / end / delete without header button clutter */
+  /** Mobile manage sheet: the non-destructive shortcut (publish a draft, or edit
+      automation) without header button clutter. End and delete deliberately do
+      NOT appear here — they live in the Danger Zone card, which renders at every
+      width, and one irreversible action must have exactly one route to it. */
   const handleManage = () => {
     if (listing?.status === ListingStatus.DRAFT) {
       showMessage(
@@ -634,13 +633,7 @@ export const ListingDetailPageContainer: React.FC = () => {
               handlePublish();
             },
           },
-          secondaryButton: {
-            labelKey: 'listings:listings.detail.deleteShort',
-            onClick: () => {
-              closeMessage();
-              handleDelete();
-            },
-          },
+          secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
         },
         t
       );
@@ -659,22 +652,7 @@ export const ListingDetailPageContainer: React.FC = () => {
             handleOpenAutomationDrawer();
           },
         },
-        secondaryButton:
-          listing?.status === ListingStatus.ACTIVE
-            ? {
-                labelKey: 'listings:listings.detail.endShort',
-                onClick: () => {
-                  closeMessage();
-                  handleEnd();
-                },
-              }
-            : {
-                labelKey: 'listings:listings.detail.deleteShort',
-                onClick: () => {
-                  closeMessage();
-                  handleDelete();
-                },
-              },
+        secondaryButton: { labelKey: 'translation:common.cancel', onClick: closeMessage },
       },
       t
     );
