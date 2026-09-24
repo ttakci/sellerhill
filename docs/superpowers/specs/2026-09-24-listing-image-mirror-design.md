@@ -116,6 +116,11 @@ is therefore the image's entire identity, which means:
 
 - the R2 key is the filename — **no ID table, no mapping, no lookup**;
 
+**CORRECTED 2026-09-24 during execution — the key IS stored, on `products.mirrored_image_name` (migration `117`).** The original decision said the garbage collector could derive its live set from `image_urls->>0` and that no column was needed. That was wrong for a reason the design missed: **`image_urls` is mutable and the published description is not.** `refresh-processor.service.ts` overwrites `image_urls` on every Keepa tick, so when Amazon rotates an ASIN's primary image the derived live set stops containing the name the already-published description embeds — and the GC deletes an object a live listing still needs. Amazon rotates images routinely, so this was a slow silent breakage, not a rare race.
+
+Storing the name makes the model more coherent rather than less: a product is mirrored exactly once (the `alreadyMirrored` branch short-circuits for ever), so the column is effectively write-once, the description and the bucket agree permanently, and when the reference-count path deletes the product row the name goes with it and the object becomes a genuine orphan. What survives from D4 is the part that was actually load-bearing — the key is still the Keepa filename, so the same physical image is still one object shared across ASINs and sellers, and the render path still needs no lookup.
+
+
 Note that the Keepa name **already carries its extension** (`71nx65qZq6L.jpg`),
 since it is interpolated straight into the URL. So the two derivations differ:
 the R2 key is the name verbatim, while the source URL is built by splitting on
