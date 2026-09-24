@@ -214,7 +214,7 @@ A product already mirrored costs one indexed column read and nothing else.
 | `apps/api` (new module) | `ImageMirrorService` — HEAD/PUT to R2, idempotent, fail-soft; `ImageMirrorGcService` — daily reconcile |
 | `listing-processor.service.ts` | `resolveProductData` awaits the mirror on both branches |
 | `listing-strategy.service.ts` | Passes `mainImageUrl` (mirrored, or empty) into the template context |
-| web template preview | Passes `mainImageUrl` too; the preview may use the Amazon URL, since it is seller-facing and never published. Same renderer, different input — the one-renderer rule is preserved |
+| ~~web template preview~~ | Nothing to change (corrected 2026-09-24 during execution). This row assumed the preview called `buildListingTemplateContext`; it does not. `ListingGroupDrawer.container.tsx` calls `renderListingTemplate` directly with a hand-built sample-data object, so it never sees `ListingTemplateInput` and is unaffected. The one-renderer rule still holds — `renderListingTemplate` is the shared renderer, and only the context builder's single production caller changed |
 | `apps/api/src/modules/listings/listing-template.spec.ts` | `has_images` assertions removed |
 
 ## Failure handling
