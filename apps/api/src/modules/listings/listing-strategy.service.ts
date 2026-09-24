@@ -351,7 +351,7 @@ export class ListingStrategyService {
       category: product.category,
       features,
       specs: product.specs,
-      imageUrls: product.imageUrls,
+      mainImageUrl: product.mainImageMirroredUrl,
       price: product.price?.current,
       currency: product.price?.currency,
     });

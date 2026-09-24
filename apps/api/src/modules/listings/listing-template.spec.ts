@@ -22,6 +22,7 @@ describe('renderListingTemplate', () => {
     features: ['Gluten free', '16 pouches'],
     specs: { Brand: 'Fruit by the Foot', Flavor: 'Assorted' },
     imageUrls: ['https://img/1.jpg', 'https://img/2.jpg'],
+    mainImageUrl: 'https://img/1.jpg',
     price: 12.05,
     currency: 'USD',
   });
@@ -156,5 +157,24 @@ describe('buildListingTemplateSnippet', () => {
     for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS) {
       expect(renderListingTemplate(buildListingTemplateSnippet(key), context)).not.toContain('{{');
     }
+  });
+});
+
+describe('main_image never carries the source URL', () => {
+  const AMAZON = 'https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg';
+
+  it('renders the mirrored URL when one is supplied', () => {
+    const context = buildListingTemplateContext({
+      title: 'T',
+      imageUrls: [AMAZON],
+      mainImageUrl: 'https://img.example.com/71nx65qZq6L.jpg',
+    });
+    expect(context.main_image).toBe('https://img.example.com/71nx65qZq6L.jpg');
+  });
+
+  it('renders nothing when no mirrored URL is supplied, even with imageUrls present', () => {
+    const context = buildListingTemplateContext({ title: 'T', imageUrls: [AMAZON] });
+    expect(context.main_image).toBe('');
+    expect(renderListingTemplate('A{{#main_image}}<img src="{{.}}">{{/main_image}}B', context)).toBe('AB');
   });
 });

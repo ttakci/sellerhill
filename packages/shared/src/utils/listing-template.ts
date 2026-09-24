@@ -45,6 +45,18 @@ export interface ListingTemplateInput {
   features?: string[];
   specs?: Record<string, string>;
   imageUrls?: string[];
+  /**
+   * The already-resolved URL for the single rendered image.
+   *
+   * `main_image` reads this and nothing else. It deliberately does NOT fall
+   * back to `imageUrls`: the description is written once at publish and never
+   * revised, so one fallback would name the supplier on that listing for ever.
+   * Rendering no image is the correct outcome — the eBay gallery still shows
+   * every photo. The caller decides what to pass: the publish path passes the
+   * mirrored URL or nothing, while the seller-facing template preview may pass
+   * the source URL, since a preview is never published.
+   */
+  mainImageUrl?: string;
   price?: number;
   currency?: string;
   quantity?: number;
@@ -200,7 +212,6 @@ const PRESENCE_FLAG_UNSET = '';
  * seeded templates iterate over.
  */
 export function buildListingTemplateContext(input: ListingTemplateInput): ListingTemplateContext {
-  const images = (input.imageUrls ?? []).filter((url) => typeof url === 'string' && url.length > 0);
   const features = (input.features ?? []).filter((f) => typeof f === 'string' && f.trim().length > 0);
   const productDetails = Object.entries(input.specs ?? {})
     .filter(([key, value]) => Boolean(key) && typeof value === 'string' && value.trim().length > 0)
@@ -211,7 +222,7 @@ export function buildListingTemplateContext(input: ListingTemplateInput): Listin
     product_description: input.description ?? '',
     feature_bullets: features,
     product_details: productDetails,
-    main_image: images[0] ?? '',
+    main_image: input.mainImageUrl ?? '',
     brand: input.brand ?? '',
     manufacturer: input.manufacturer ?? input.brand ?? '',
     asin: input.asin ?? '',
