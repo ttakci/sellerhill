@@ -1162,7 +1162,9 @@ Create `apps/api/src/modules/image-mirror/image-mirror-gc.service.ts`:
 
 ```typescript
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+// SCHEDULING CORRECTED 2026-09-24: this codebase has no @nestjs/schedule.
+// Every scheduled job is a BullMQ repeatable job. Follow
+// billing/listing-plan-limit.processor.ts as the template.
 import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { extractKeepaImageName } from '@repo/shared';
@@ -1190,7 +1192,7 @@ export class ImageMirrorGcService {
     private readonly mirror: ImageMirrorService
   ) {}
 
-  @Cron('23 4 * * *')
+  // Registered as a BullMQ repeatable tick, not a @Cron decorator.
   async sweep(): Promise<void> {
     if (!this.mirror.isConfigured()) {
       return;
