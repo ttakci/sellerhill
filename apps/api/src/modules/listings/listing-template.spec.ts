@@ -1,4 +1,6 @@
 import {
+  LISTING_TEMPLATE_PLACEHOLDERS,
+  LISTING_TEMPLATE_PRESENCE_FLAGS,
   LISTING_TEMPLATE_SAFE_PLACEHOLDERS,
   buildListingTemplateContext,
   buildListingTemplateSnippet,
@@ -20,6 +22,7 @@ describe('renderListingTemplate', () => {
     features: ['Gluten free', '16 pouches'],
     specs: { Brand: 'Fruit by the Foot', Flavor: 'Assorted' },
     imageUrls: ['https://img/1.jpg', 'https://img/2.jpg'],
+    mainImageUrl: 'https://img/1.jpg',
     price: 12.05,
     currency: 'USD',
   });
@@ -99,10 +102,8 @@ describe('renderListingTemplate', () => {
   it('sets every presence flag from its own list', () => {
     const empty = buildListingTemplateContext({ title: 'X' });
     expect(renderListingTemplate('{{#has_features}}F{{/has_features}}', context)).toBe('F');
-    expect(renderListingTemplate('{{#has_images}}I{{/has_images}}', context)).toBe('I');
     expect(renderListingTemplate('{{#has_features}}F{{/has_features}}', empty)).toBe('');
     expect(renderListingTemplate('{{#has_details}}D{{/has_details}}', empty)).toBe('');
-    expect(renderListingTemplate('{{#has_images}}I{{/has_images}}', empty)).toBe('');
   });
 
   it('handles sections nested inside other sections', () => {
@@ -115,6 +116,30 @@ describe('renderListingTemplate', () => {
   });
 });
 
+describe('images vocabulary removal', () => {
+  const context = buildListingTemplateContext({
+    title: 'T',
+    imageUrls: ['https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg'],
+  });
+
+  it('renders nothing for an images section, even with images present', () => {
+    expect(renderListingTemplate('A{{#images}}<img src="{{.}}">{{/images}}B', context)).toBe('AB');
+  });
+
+  it('renders nothing for a has_images section', () => {
+    expect(renderListingTemplate('A{{#has_images}}X{{/has_images}}B', context)).toBe('AB');
+  });
+
+  it('does not offer images as a placeholder', () => {
+    expect(LISTING_TEMPLATE_PLACEHOLDERS).not.toContain('images');
+    expect(LISTING_TEMPLATE_SAFE_PLACEHOLDERS).not.toContain('images');
+  });
+
+  it('does not list has_images as a presence flag', () => {
+    expect(LISTING_TEMPLATE_PRESENCE_FLAGS).not.toContain('has_images');
+  });
+});
+
 describe('buildListingTemplateSnippet', () => {
   const context = buildListingTemplateContext({
     title: 'Fruit Roll-Ups Variety Pack',
@@ -122,19 +147,8 @@ describe('buildListingTemplateSnippet', () => {
     imageUrls: ['https://img.example/a.jpg', 'https://img.example/b.jpg'],
   });
 
-  it('renders every image as an <img>, never as joined URL text', () => {
-    // A bare {{images}} joins the array with ", ", so the one-click shortcut has
-    // to insert the repeating section instead — otherwise the description ships
-    // a wall of raw image URLs as buyer-visible text.
-    const html = renderListingTemplate(buildListingTemplateSnippet('images'), context);
-
-    expect(html).toContain('src="https://img.example/a.jpg"');
-    expect(html).toContain('src="https://img.example/b.jpg"');
-    expect(html).not.toContain('.jpg, https://');
-  });
-
-  it('is the plain placeholder for every other offered key', () => {
-    for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS.filter((k) => k !== 'images')) {
+  it('is the plain placeholder for every offered key', () => {
+    for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS) {
       expect(buildListingTemplateSnippet(key)).toBe(`{{${key}}}`);
     }
   });
@@ -143,5 +157,24 @@ describe('buildListingTemplateSnippet', () => {
     for (const key of LISTING_TEMPLATE_SAFE_PLACEHOLDERS) {
       expect(renderListingTemplate(buildListingTemplateSnippet(key), context)).not.toContain('{{');
     }
+  });
+});
+
+describe('main_image never carries the source URL', () => {
+  const AMAZON = 'https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg';
+
+  it('renders the mirrored URL when one is supplied', () => {
+    const context = buildListingTemplateContext({
+      title: 'T',
+      imageUrls: [AMAZON],
+      mainImageUrl: 'https://img.example.com/71nx65qZq6L.jpg',
+    });
+    expect(context.main_image).toBe('https://img.example.com/71nx65qZq6L.jpg');
+  });
+
+  it('renders nothing when no mirrored URL is supplied, even with imageUrls present', () => {
+    const context = buildListingTemplateContext({ title: 'T', imageUrls: [AMAZON] });
+    expect(context.main_image).toBe('');
+    expect(renderListingTemplate('A{{#main_image}}<img src="{{.}}">{{/main_image}}B', context)).toBe('AB');
   });
 });

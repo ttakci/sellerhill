@@ -20,9 +20,8 @@
  *                              renders once for a truthy scalar, drops when empty
  *   {{^key}}…{{/key}}  inverted section: renders only when key is empty/falsy
  *
- * Plus three scalar presence flags — `has_features`, `has_details`,
- * `has_images` — for conditionally wrapping a LIST block. See
- * `LISTING_TEMPLATE_PRESENCE_FLAGS`.
+ * Plus two scalar presence flags — `has_features`, `has_details` — for
+ * conditionally wrapping a LIST block. See `LISTING_TEMPLATE_PRESENCE_FLAGS`.
  *
  * Anything left over after rendering (unknown keys, unbalanced sections) is
  * stripped by `stripUnresolvedPlaceholders` so template syntax can never reach
@@ -46,6 +45,18 @@ export interface ListingTemplateInput {
   features?: string[];
   specs?: Record<string, string>;
   imageUrls?: string[];
+  /**
+   * The already-resolved URL for the single rendered image.
+   *
+   * `main_image` reads this and nothing else. It deliberately does NOT fall
+   * back to `imageUrls`: the description is written once at publish and never
+   * revised, so one fallback would name the supplier on that listing for ever.
+   * Rendering no image is the correct outcome — the eBay gallery still shows
+   * every photo. The caller decides what to pass: the publish path passes the
+   * mirrored URL or nothing, while the seller-facing template preview may pass
+   * the source URL, since a preview is never published.
+   */
+  mainImageUrl?: string;
   price?: number;
   currency?: string;
   quantity?: number;
@@ -63,7 +74,6 @@ export const LISTING_TEMPLATE_PLACEHOLDERS = [
   'feature_bullets',
   'product_details',
   'main_image',
-  'images',
   'brand',
   'manufacturer',
   'asin',
@@ -108,20 +118,13 @@ export const LISTING_TEMPLATE_SAFE_PLACEHOLDERS: readonly ListingTemplatePlaceho
 /**
  * The template text a one-click placeholder shortcut inserts.
  *
- * Usually just `{{key}}`. `images` is the exception and has to be: it holds an
- * array of URLs, and a bare `{{images}}` joins them with ", " (see
- * `toDisplayString`), so it publishes a wall of raw image URLs as buyer-visible
- * text instead of pictures. The only form that renders images is the repeating
- * section, which is what `gallery-grid` — the one catalog template using the
- * full image set — writes by hand.
- *
- * `feature_bullets` / `product_details` are arrays too, but their joined form
- * is readable prose, so they keep the plain placeholder.
+ * Every remaining placeholder inserts as a plain `{{key}}`. `images` used to be
+ * an exception here — it needed a hand-written repeating section, because a
+ * bare `{{images}}` joins the URLs with ", " and publishes a wall of raw text.
+ * It is gone from the vocabulary entirely (2026-09-24): only one image per
+ * listing is rendered, and it is served from our own domain.
  */
 export function buildListingTemplateSnippet(placeholder: ListingTemplatePlaceholder): string {
-  if (placeholder === 'images') {
-    return '{{#images}}<img src="{{.}}" alt="{{title}}" style="max-width:100%;height:auto;" />{{/images}}';
-  }
   return `{{${placeholder}}}`;
 }
 
@@ -181,7 +184,7 @@ function isEmptyValue(value: ListingTemplateValue): boolean {
 }
 
 /**
- * Presence flags for the three list placeholders.
+ * Presence flags for the two list placeholders.
  *
  * A section cannot be nested inside another section of the SAME key (the
  * closing tag is matched by backreference), so `{{#product_details}}` cannot
@@ -197,7 +200,7 @@ function isEmptyValue(value: ListingTemplateValue): boolean {
  * Empty is `''` (never `'0'`) — `isEmptyValue('0')` is false, so a "0" flag
  * would render the very block it is meant to suppress.
  */
-export const LISTING_TEMPLATE_PRESENCE_FLAGS = ['has_features', 'has_details', 'has_images'] as const;
+export const LISTING_TEMPLATE_PRESENCE_FLAGS = ['has_features', 'has_details'] as const;
 
 /** Truthy value for a presence flag. Any non-blank string works; this is the canonical one. */
 const PRESENCE_FLAG_SET = '1';
@@ -209,7 +212,6 @@ const PRESENCE_FLAG_UNSET = '';
  * seeded templates iterate over.
  */
 export function buildListingTemplateContext(input: ListingTemplateInput): ListingTemplateContext {
-  const images = (input.imageUrls ?? []).filter((url) => typeof url === 'string' && url.length > 0);
   const features = (input.features ?? []).filter((f) => typeof f === 'string' && f.trim().length > 0);
   const productDetails = Object.entries(input.specs ?? {})
     .filter(([key, value]) => Boolean(key) && typeof value === 'string' && value.trim().length > 0)
@@ -220,8 +222,7 @@ export function buildListingTemplateContext(input: ListingTemplateInput): Listin
     product_description: input.description ?? '',
     feature_bullets: features,
     product_details: productDetails,
-    main_image: images[0] ?? '',
-    images,
+    main_image: input.mainImageUrl ?? '',
     brand: input.brand ?? '',
     manufacturer: input.manufacturer ?? input.brand ?? '',
     asin: input.asin ?? '',
@@ -232,7 +233,6 @@ export function buildListingTemplateContext(input: ListingTemplateInput): Listin
     quantity: typeof input.quantity === 'number' ? String(input.quantity) : '',
     has_features: features.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
     has_details: productDetails.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
-    has_images: images.length > 0 ? PRESENCE_FLAG_SET : PRESENCE_FLAG_UNSET,
   };
 }
 

@@ -6,6 +6,7 @@ import { DatabaseModule } from '../../common/database/database.module';
 import { AdminModule } from '../admin/admin.module';
 import { BillingModule } from '../billing/billing.module';
 import { EbayModule } from '../ebay/ebay.module';
+import { ImageMirrorModule } from '../image-mirror/image-mirror.module';
 import { ListingSettingsGroupModule } from '../listing-settings-groups/listing-settings-group.module';
 import { LlmModule } from '../llm/llm.module';
 import { OrdersModule } from '../orders/orders.module';
@@ -34,6 +35,7 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     BillingModule,
     ConfigModule,
     EbayModule,
+    ImageMirrorModule,
     ListingSettingsGroupModule,
     // For adopting a newly imported listing's PAST orders (OrderSyncService).
     // Orders does not import Listings, so this adds no cycle —
