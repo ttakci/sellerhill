@@ -24,6 +24,7 @@ import { getCorrelation, withCorrelation } from '../../common/observability/corr
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
+import { ImageMirrorService } from '../image-mirror/image-mirror.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { KeepaUsageService } from './keepa-usage.service';
@@ -48,6 +49,43 @@ export class AsinNotFoundError extends Error {
   }
 }
 
+/**
+ * Fill `mainImageMirroredUrl` in place, best-effort.
+ *
+ * Exported so it can be tested without standing up the processor. It never
+ * throws: an image is not worth failing a listing over, and an unmirrored
+ * product simply renders no image and is retried on the next listing for the
+ * same ASIN.
+ *
+ * `mirroredImageName` must be the name ACTUALLY uploaded for this product
+ * (`products.mirrored_image_name`), never a boolean "was this mirrored at
+ * some point" flag — `ensureMirrored`'s reuse path returns a URL built from
+ * this value, and `product.imageUrls[0]` (the CURRENT, mutable image) is not
+ * a substitute for it. Pass `null` for a product that has never been mirrored.
+ */
+export async function attachMirroredImage(
+  mirror: {
+    ensureMirrored: (productId: string, imageUrl: string | undefined, mirroredImageName: string | null) => Promise<string | null>;
+  },
+  productId: string,
+  product: ProductData,
+  mirroredImageName: string | null
+): Promise<void> {
+  const first = product.imageUrls?.[0];
+  if (!first) {
+    return;
+  }
+  try {
+    const mirrored = await mirror.ensureMirrored(productId, first, mirroredImageName);
+    if (mirrored) {
+      product.mainImageMirroredUrl = mirrored;
+    }
+  } catch {
+    // Deliberately silent — ImageMirrorService already logs, and this must not
+    // be able to interrupt listing creation.
+  }
+}
+
 function listingsWorkerConcurrency(): number {
   const raw = Number(process.env.LISTINGS_WORKER_CONCURRENCY ?? 2);
   if (!Number.isFinite(raw)) {
@@ -69,6 +107,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly listingStrategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
+    private readonly imageMirror: ImageMirrorService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -550,6 +589,7 @@ export class ListingProcessorService extends WorkerHost {
     const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
+      await attachMirroredImage(this.imageMirror, cached.productId, cached.productData, cached.mirroredImageName);
       return cached;
     }
 
@@ -566,6 +606,12 @@ export class ListingProcessorService extends WorkerHost {
       const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
+        await attachMirroredImage(
+          this.imageMirror,
+          cachedAfterLock.productId,
+          cachedAfterLock.productData,
+          cachedAfterLock.mirroredImageName
+        );
         return cachedAfterLock;
       }
 
@@ -598,6 +644,8 @@ export class ListingProcessorService extends WorkerHost {
       );
 
       const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct, marketplace);
+      // A row just inserted by findOrCreateProduct has never been mirrored.
+      await attachMirroredImage(this.imageMirror, productId, keepaProduct, null);
       return { productData: keepaProduct, productId };
     });
   }
@@ -618,15 +666,29 @@ export class ListingProcessorService extends WorkerHost {
 
   /** A cached product row is reusable when it has a real title and ≥1 image. */
   private asUsableCache(
-    existing: { id: string; data: ProductData } | null
-  ): { productData: ProductData; productId: string } | null {
+    existing: {
+      id: string;
+      data: ProductData;
+      image_mirrored_at?: Date | string | null;
+      mirrored_image_name?: string | null;
+    } | null
+  ): { productData: ProductData; productId: string; mirroredImageName: string | null } | null {
     if (
       existing &&
       existing.data.title &&
       existing.data.title !== 'Unknown Product' &&
       existing.data.imageUrls?.length > 0
     ) {
-      return { productData: existing.data, productId: existing.id };
+      return {
+        productData: existing.data,
+        productId: existing.id,
+        // The name ACTUALLY uploaded, not a derived-from-image_urls guess. A
+        // row with image_mirrored_at set but no stored name (a pre-117 row,
+        // or one backfilled with empty image_urls) falls through to null,
+        // which sends it back through ensureMirrored's upload path — a
+        // self-heal, not a defect.
+        mirroredImageName: existing.mirrored_image_name ?? null,
+      };
     }
     return null;
   }

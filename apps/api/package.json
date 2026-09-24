@@ -20,11 +20,13 @@
     "stripe:sync-catalog": "tsx src/scripts/stripe-sync-catalog.ts",
     "stripe:test-clock": "tsx src/scripts/stripe-test-clock.ts",
     "aquiline:probe": "tsx src/scripts/aquiline-probe.ts",
+    "mirror:images": "tsx src/scripts/mirror-product-images.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:integration": "jest --config jest.integration.config.js --runInBand"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1139.0",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^4.0.2",

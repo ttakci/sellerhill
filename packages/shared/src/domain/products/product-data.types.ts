@@ -33,6 +33,14 @@ export interface ProductData {
   title: string;
   description: string;
   imageUrls: string[];
+  /**
+   * Our own URL for this product's first image, when it has been mirrored.
+   *
+   * Resolved on the create path and read by the description template. Undefined
+   * means not mirrored, and the template then renders no image at all — it must
+   * never fall back to the `imageUrls` entry, which names the supplier.
+   */
+  mainImageMirroredUrl?: string;
   brand: string;
   /** Leaf Amazon category name, e.g. `Espresso Machines`. A search hint. */
   category?: string;

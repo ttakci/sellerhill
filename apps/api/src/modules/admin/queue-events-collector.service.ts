@@ -54,6 +54,7 @@ export const OBSERVED_QUEUE_NAMES = [
   'billing-subscription-reconcile',
   'billing-price-migration',
   'data-retention',
+  'image-mirror-gc',
 ] as const;
 
 /** A BullMQ QueueEvents job event payload (minimal shape we consume). */

@@ -126,6 +126,12 @@ export class AdminController {
     @InjectQueue('listings') private readonly listingsQueue: Queue,
     @InjectQueue('keepa-refresh') private readonly keepaRefreshQueue: Queue,
     @InjectQueue('buyer-message') private readonly buyerMessageQueue: Queue,
+    @InjectQueue('data-retention') private readonly dataRetentionQueue: Queue,
+    @InjectQueue('billing-trial-expiry') private readonly billingTrialExpiryQueue: Queue,
+    @InjectQueue('billing-listing-plan-limit') private readonly billingListingPlanLimitQueue: Queue,
+    @InjectQueue('billing-subscription-reconcile') private readonly billingReconcileQueue: Queue,
+    @InjectQueue('billing-price-migration') private readonly billingPriceMigrationQueue: Queue,
+    @InjectQueue('image-mirror-gc') private readonly imageMirrorGcQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -139,6 +145,12 @@ export class AdminController {
       { name: 'listings', queue: this.listingsQueue },
       { name: 'keepa-refresh', queue: this.keepaRefreshQueue },
       { name: 'buyer-message', queue: this.buyerMessageQueue },
+      { name: 'data-retention', queue: this.dataRetentionQueue },
+      { name: 'billing-trial-expiry', queue: this.billingTrialExpiryQueue },
+      { name: 'billing-listing-plan-limit', queue: this.billingListingPlanLimitQueue },
+      { name: 'billing-subscription-reconcile', queue: this.billingReconcileQueue },
+      { name: 'billing-price-migration', queue: this.billingPriceMigrationQueue },
+      { name: 'image-mirror-gc', queue: this.imageMirrorGcQueue },
     ];
   }
 
