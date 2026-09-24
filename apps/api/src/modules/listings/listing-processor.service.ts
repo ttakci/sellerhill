@@ -24,6 +24,7 @@ import { getCorrelation, withCorrelation } from '../../common/observability/corr
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayService } from '../ebay/ebay.service';
+import { ImageMirrorService } from '../image-mirror/image-mirror.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
 import { KeepaUsageService } from './keepa-usage.service';
@@ -48,6 +49,35 @@ export class AsinNotFoundError extends Error {
   }
 }
 
+/**
+ * Fill `mainImageMirroredUrl` in place, best-effort.
+ *
+ * Exported so it can be tested without standing up the processor. It never
+ * throws: an image is not worth failing a listing over, and an unmirrored
+ * product simply renders no image and is retried on the next listing for the
+ * same ASIN.
+ */
+export async function attachMirroredImage(
+  mirror: { ensureMirrored: (productId: string, imageUrl: string | undefined, already: boolean) => Promise<string | null> },
+  productId: string,
+  product: ProductData,
+  alreadyMirrored: boolean
+): Promise<void> {
+  const first = product.imageUrls?.[0];
+  if (!first) {
+    return;
+  }
+  try {
+    const mirrored = await mirror.ensureMirrored(productId, first, alreadyMirrored);
+    if (mirrored) {
+      product.mainImageMirroredUrl = mirrored;
+    }
+  } catch {
+    // Deliberately silent — ImageMirrorService already logs, and this must not
+    // be able to interrupt listing creation.
+  }
+}
+
 function listingsWorkerConcurrency(): number {
   const raw = Number(process.env.LISTINGS_WORKER_CONCURRENCY ?? 2);
   if (!Number.isFinite(raw)) {
@@ -69,6 +99,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly listingStrategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
+    private readonly imageMirror: ImageMirrorService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -550,6 +581,7 @@ export class ListingProcessorService extends WorkerHost {
     const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
+      await attachMirroredImage(this.imageMirror, cached.productId, cached.productData, cached.alreadyMirrored);
       return cached;
     }
 
@@ -566,6 +598,12 @@ export class ListingProcessorService extends WorkerHost {
       const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
+        await attachMirroredImage(
+          this.imageMirror,
+          cachedAfterLock.productId,
+          cachedAfterLock.productData,
+          cachedAfterLock.alreadyMirrored
+        );
         return cachedAfterLock;
       }
 
@@ -598,6 +636,7 @@ export class ListingProcessorService extends WorkerHost {
       );
 
       const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct, marketplace);
+      await attachMirroredImage(this.imageMirror, productId, keepaProduct, false);
       return { productData: keepaProduct, productId };
     });
   }
@@ -618,15 +657,19 @@ export class ListingProcessorService extends WorkerHost {
 
   /** A cached product row is reusable when it has a real title and ≥1 image. */
   private asUsableCache(
-    existing: { id: string; data: ProductData } | null
-  ): { productData: ProductData; productId: string } | null {
+    existing: { id: string; data: ProductData; image_mirrored_at?: Date | string | null } | null
+  ): { productData: ProductData; productId: string; alreadyMirrored: boolean } | null {
     if (
       existing &&
       existing.data.title &&
       existing.data.title !== 'Unknown Product' &&
       existing.data.imageUrls?.length > 0
     ) {
-      return { productData: existing.data, productId: existing.id };
+      return {
+        productData: existing.data,
+        productId: existing.id,
+        alreadyMirrored: Boolean(existing.image_mirrored_at),
+      };
     }
     return null;
   }

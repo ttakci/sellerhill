@@ -1040,7 +1040,7 @@ export class ListingsService {
   async getProductByAsin(
     asin: string,
     marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
-  ): Promise<{ id: string; data: ProductData } | null> {
+  ): Promise<{ id: string; data: ProductData; image_mirrored_at: Date | string | null } | null> {
     const results = await this.databaseService.query<ProductQueryRow>(
       `
       SELECT id, asin, title, description, price, currency, image_urls, image_mirrored_at, brand, manufacturer,
@@ -1091,7 +1091,7 @@ export class ListingsService {
         : undefined,
     };
 
-    return { id: row.id, data };
+    return { id: row.id, data, image_mirrored_at: row.image_mirrored_at };
   }
 
   /**
