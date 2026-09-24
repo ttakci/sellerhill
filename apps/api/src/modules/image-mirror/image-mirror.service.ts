@@ -46,12 +46,36 @@ export class ImageMirrorService {
     );
   }
 
+  /**
+   * `mirroredImageName` is the name ACTUALLY uploaded for this product
+   * (`products.mirrored_image_name`), or `null` when nothing has been
+   * mirrored yet — never a boolean flag. This is load-bearing: `imageUrl` is
+   * always the CURRENT, mutable `product.imageUrls[0]`, which a Keepa refresh
+   * can rotate at any time, while the eBay description that already embeds
+   * this product's image was rendered once and is never revised. A prior
+   * version of this method derived the returned URL from `imageUrl` even on
+   * reuse (gated only by a boolean "was this mirrored at some point"), so a
+   * rotated image silently pointed every future listing's description at an
+   * object nobody uploaded. See the image-mirror invariants guard.
+   */
   async ensureMirrored(
     productId: string,
     imageUrl: string | undefined,
-    alreadyMirrored: boolean
+    mirroredImageName: string | null
   ): Promise<string | null> {
-    if (!this.isConfigured() || !imageUrl) {
+    if (!this.isConfigured()) {
+      return null;
+    }
+
+    if (mirroredImageName) {
+      // Write-once reuse: return the URL of what was ACTUALLY uploaded, never
+      // re-derive a name from the caller's current (possibly rotated) source
+      // and never re-upload — the stored object already exists and other
+      // already-published descriptions reference it by this exact name.
+      return buildMirroredImageUrl(mirroredImageName, this.config.get<string>('IMAGE_CDN_BASE_URL') as string);
+    }
+
+    if (!imageUrl) {
       return null;
     }
     const name = extractKeepaImageName(imageUrl);
@@ -62,9 +86,6 @@ export class ImageMirrorService {
     const publicUrl = buildMirroredImageUrl(name, this.config.get<string>('IMAGE_CDN_BASE_URL') as string);
     if (!publicUrl) {
       return null;
-    }
-    if (alreadyMirrored) {
-      return publicUrl;
     }
 
     try {

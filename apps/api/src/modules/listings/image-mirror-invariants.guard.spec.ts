@@ -80,6 +80,50 @@ describe('image mirror invariants', () => {
     expect(registry).not.toContain('R2_');
   });
 
+  it("ensureMirrored's reuse path builds its URL from the STORED name, never the caller's imageUrl", () => {
+    // This is the read-side twin of the write-side bug above: that one let the
+    // GC delete an object a live listing still needs by deriving the "live"
+    // name from the current (mutable) image_urls instead of the name actually
+    // uploaded. This one is worse, because it fires on the CREATE path for
+    // every new listing of an already-cached ASIN, not just in a GC sweep.
+    //
+    // `imageUrl` passed into `ensureMirrored` is always the CURRENT
+    // `product.imageUrls[0]`, which a Keepa refresh tick can rotate at any
+    // time (default every 12h). The eBay description that already embeds
+    // this product's mirrored image was rendered once at publish and is
+    // NEVER revised. So once a product has a stored `mirrored_image_name`,
+    // the only name that is safe to hand back is that stored one — deriving
+    // a name from `imageUrl` on the reuse path re-points every FUTURE
+    // listing's description at an object that was never uploaded under that
+    // name, silently. The listing publishes; the image is a permanent 404;
+    // nothing logs an error, because nothing failed from the code's point of
+    // view — it faithfully built and returned a URL, just not one anything
+    // ever wrote to R2.
+    //
+    // A behavioral test alone did not catch this the first time: the
+    // original "already mirrored" test reused the SAME url for both the
+    // stored name and the current imageUrl, so the two values could never
+    // disagree and the assertion could not tell "built from the stored name"
+    // apart from "built from imageUrl". The behavioral regression test in
+    // image-mirror.service.spec.ts now uses two DIFFERENT names for exactly
+    // this reason; this structural guard is the second, independent check.
+    const source = read('apps/api/src/modules/image-mirror/image-mirror.service.ts');
+    const body = methodBody(source, 'async ensureMirrored(');
+
+    const reuseBranchStart = body.indexOf('if (mirroredImageName)');
+    expect(reuseBranchStart).toBeGreaterThan(-1);
+    const reuseReturnEnd = body.indexOf(';', body.indexOf('return', reuseBranchStart));
+    const reuseBranch = body.slice(reuseBranchStart, reuseReturnEnd);
+
+    // The reuse branch must build the URL from the stored name...
+    expect(reuseBranch).toContain('buildMirroredImageUrl(mirroredImageName');
+    // ...and must never re-derive a name from the caller-supplied URL. If
+    // this branch ever needs extractKeepaImageName again, it has regressed
+    // to computing a name from the current image instead of trusting the
+    // one actually uploaded.
+    expect(reuseBranch).not.toContain('extractKeepaImageName');
+  });
+
   it("the garbage collector's live set comes from mirrored_image_name, never image_urls", () => {
     // Migration 117/118: `image_urls` is overwritten on every Keepa refresh
     // tick. When Amazon rotates an ASIN's primary image, a live set derived

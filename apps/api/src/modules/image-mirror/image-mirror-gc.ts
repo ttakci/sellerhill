@@ -28,9 +28,9 @@ export const GC_MIN_OBJECT_AGE_MS = 48 * 60 * 60 * 1000;
  * live set. If the GC's read of the live set lands in that window, the
  * brand-new object is absent from `liveNames` and looks orphaned — and
  * deleting it is permanent, because once the watermark commits,
- * `ensureMirrored`'s `alreadyMirrored` branch never re-uploads. Requiring an
- * object to be older than a safety margin before it is even a deletion
- * candidate closes that window.
+ * `ensureMirrored`'s reuse path (a non-null stored `mirrored_image_name`)
+ * never re-uploads. Requiring an object to be older than a safety margin
+ * before it is even a deletion candidate closes that window.
  *
  * A missing `LastModified` is treated as NOT old enough: absence of evidence
  * that an object is old is not evidence that it is.

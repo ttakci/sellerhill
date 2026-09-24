@@ -56,19 +56,27 @@ export class AsinNotFoundError extends Error {
  * throws: an image is not worth failing a listing over, and an unmirrored
  * product simply renders no image and is retried on the next listing for the
  * same ASIN.
+ *
+ * `mirroredImageName` must be the name ACTUALLY uploaded for this product
+ * (`products.mirrored_image_name`), never a boolean "was this mirrored at
+ * some point" flag — `ensureMirrored`'s reuse path returns a URL built from
+ * this value, and `product.imageUrls[0]` (the CURRENT, mutable image) is not
+ * a substitute for it. Pass `null` for a product that has never been mirrored.
  */
 export async function attachMirroredImage(
-  mirror: { ensureMirrored: (productId: string, imageUrl: string | undefined, already: boolean) => Promise<string | null> },
+  mirror: {
+    ensureMirrored: (productId: string, imageUrl: string | undefined, mirroredImageName: string | null) => Promise<string | null>;
+  },
   productId: string,
   product: ProductData,
-  alreadyMirrored: boolean
+  mirroredImageName: string | null
 ): Promise<void> {
   const first = product.imageUrls?.[0];
   if (!first) {
     return;
   }
   try {
-    const mirrored = await mirror.ensureMirrored(productId, first, alreadyMirrored);
+    const mirrored = await mirror.ensureMirrored(productId, first, mirroredImageName);
     if (mirrored) {
       product.mainImageMirroredUrl = mirrored;
     }
@@ -581,7 +589,7 @@ export class ListingProcessorService extends WorkerHost {
     const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
-      await attachMirroredImage(this.imageMirror, cached.productId, cached.productData, cached.alreadyMirrored);
+      await attachMirroredImage(this.imageMirror, cached.productId, cached.productData, cached.mirroredImageName);
       return cached;
     }
 
@@ -602,7 +610,7 @@ export class ListingProcessorService extends WorkerHost {
           this.imageMirror,
           cachedAfterLock.productId,
           cachedAfterLock.productData,
-          cachedAfterLock.alreadyMirrored
+          cachedAfterLock.mirroredImageName
         );
         return cachedAfterLock;
       }
@@ -636,7 +644,8 @@ export class ListingProcessorService extends WorkerHost {
       );
 
       const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct, marketplace);
-      await attachMirroredImage(this.imageMirror, productId, keepaProduct, false);
+      // A row just inserted by findOrCreateProduct has never been mirrored.
+      await attachMirroredImage(this.imageMirror, productId, keepaProduct, null);
       return { productData: keepaProduct, productId };
     });
   }
@@ -657,8 +666,13 @@ export class ListingProcessorService extends WorkerHost {
 
   /** A cached product row is reusable when it has a real title and ≥1 image. */
   private asUsableCache(
-    existing: { id: string; data: ProductData; image_mirrored_at?: Date | string | null } | null
-  ): { productData: ProductData; productId: string; alreadyMirrored: boolean } | null {
+    existing: {
+      id: string;
+      data: ProductData;
+      image_mirrored_at?: Date | string | null;
+      mirrored_image_name?: string | null;
+    } | null
+  ): { productData: ProductData; productId: string; mirroredImageName: string | null } | null {
     if (
       existing &&
       existing.data.title &&
@@ -668,7 +682,12 @@ export class ListingProcessorService extends WorkerHost {
       return {
         productData: existing.data,
         productId: existing.id,
-        alreadyMirrored: Boolean(existing.image_mirrored_at),
+        // The name ACTUALLY uploaded, not a derived-from-image_urls guess. A
+        // row with image_mirrored_at set but no stored name (a pre-117 row,
+        // or one backfilled with empty image_urls) falls through to null,
+        // which sends it back through ensureMirrored's upload path — a
+        // self-heal, not a defect.
+        mirroredImageName: existing.mirrored_image_name ?? null,
       };
     }
     return null;

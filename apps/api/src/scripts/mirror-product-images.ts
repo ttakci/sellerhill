@@ -135,8 +135,10 @@ async function run(): Promise<number> {
     let skipped = 0;
     for (const [index, row] of rows.entries()) {
       // ensureMirrored never throws: a failure returns null, leaves the
-      // watermark NULL, and is retried on that ASIN's next listing.
-      const url = await mirror.ensureMirrored(row.id, row.url, false);
+      // watermark NULL, and is retried on that ASIN's next listing. Every row
+      // here was selected WHERE image_mirrored_at IS NULL, so it has never
+      // been mirrored — the third argument is always null, never a name.
+      const url = await mirror.ensureMirrored(row.id, row.url, null);
       if (url) {
         mirrored += 1;
       } else {
