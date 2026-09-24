@@ -113,6 +113,18 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
 
+      # Listing description image mirror (Cloudflare R2). ALL FIVE are optional:
+      # with any one unset the mirror is disabled, descriptions render with no
+      # image, and nothing else changes. Env-only by design — an editable CDN
+      # destination would let a compromised admin session repoint every listing
+      # image at a host it controls, which is why this is not an /admin setting
+      # the way the Aquiline key is.
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      IMAGE_CDN_BASE_URL: ${IMAGE_CDN_BASE_URL:-}
+
       # Aquiline (tracking conversion) is configured at /admin -> Settings, not here:
       # the API key and webhook secret are stored encrypted and apply without a
       # redeploy, which matters when the Aquiline plan is upgraded.
