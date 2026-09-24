@@ -2,12 +2,11 @@ import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/c
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { extractKeepaImageName } from '@repo/shared';
 import type { Job, Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 
-import { selectOrphanKeys } from './image-mirror-gc';
+import { isObjectOldEnoughToDelete, selectOrphanKeys } from './image-mirror-gc';
 import { ImageMirrorService } from './image-mirror.service';
 
 /** Dedicated BullMQ queue for the nightly sweep. */
@@ -21,6 +20,13 @@ const IMAGE_MIRROR_GC_JOB = 'collect-orphaned-images';
  */
 const DEFAULT_GC_CRON = '23 4 * * *';
 const DELETE_BATCH = 1000;
+/**
+ * Same value and same reasoning as `ImageMirrorService`'s S3 client: the SDK's
+ * own default is no timeout at all, and `requestTimeout` alone only WARNS on
+ * breach — `throwOnRequestTimeout` is required to actually bound the call. A
+ * stalled R2 list/delete must not hang the nightly job indefinitely.
+ */
+const S3_REQUEST_TIMEOUT_MS = 15_000;
 
 /**
  * Collects mirrored images no live product references.
@@ -39,6 +45,7 @@ const DELETE_BATCH = 1000;
 @Injectable()
 export class ImageMirrorGcService extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(ImageMirrorGcService.name);
+  private s3Client: S3Client | null = null;
 
   constructor(
     @InjectQueue(IMAGE_MIRROR_GC_QUEUE) private readonly queue: Queue,
@@ -106,29 +113,42 @@ export class ImageMirrorGcService extends WorkerHost implements OnModuleInit {
     }
   }
 
+  /**
+   * Reads the name actually mirrored for each product, not the current
+   * `image_urls->>0` — see migration 117. `image_urls` is refreshed from
+   * Keepa and changes when Amazon rotates the primary image; the published
+   * description was written once and still embeds the old name, so the live
+   * set has to reflect what was embedded, not what is current.
+   */
   private async loadLiveNames(): Promise<Set<string>> {
-    const rows = await this.database.query<{ url: string | null }>(
-      `SELECT image_urls->>0 AS url FROM products WHERE image_mirrored_at IS NOT NULL`
+    const rows = await this.database.query<{ name: string | null }>(
+      `SELECT mirrored_image_name AS name FROM products WHERE mirrored_image_name IS NOT NULL`
     );
     const names = new Set<string>();
     for (const row of rows) {
-      const name = row.url ? extractKeepaImageName(row.url) : null;
-      if (name) {
-        names.add(name);
+      if (row.name) {
+        names.add(row.name);
       }
     }
     return names;
   }
 
   private client(): S3Client {
-    return new S3Client({
-      region: 'auto',
-      endpoint: `https://${this.config.get<string>('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: this.config.get<string>('R2_ACCESS_KEY_ID') as string,
-        secretAccessKey: this.config.get<string>('R2_SECRET_ACCESS_KEY') as string,
-      },
-    });
+    if (!this.s3Client) {
+      this.s3Client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${this.config.get<string>('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: this.config.get<string>('R2_ACCESS_KEY_ID') as string,
+          secretAccessKey: this.config.get<string>('R2_SECRET_ACCESS_KEY') as string,
+        },
+        requestHandler: {
+          requestTimeout: S3_REQUEST_TIMEOUT_MS,
+          throwOnRequestTimeout: true,
+        },
+      });
+    }
+    return this.s3Client;
   }
 
   private async deleteOrphans(liveNames: Set<string>): Promise<number> {
@@ -136,13 +156,20 @@ export class ImageMirrorGcService extends WorkerHost implements OnModuleInit {
     const client = this.client();
     let token: string | undefined;
     let removed = 0;
+    // Computed once per sweep — pagination completes in seconds, far shorter
+    // than the 48h safety margin, so a single "now" for the whole run is fine.
+    const now = new Date();
 
     do {
       const page = await client.send(
         new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: token, MaxKeys: DELETE_BATCH })
       );
-      const keys = (page.Contents ?? []).map((o) => o.Key).filter((k): k is string => Boolean(k));
-      const orphans = selectOrphanKeys(keys, liveNames);
+      const contents = page.Contents ?? [];
+      const keys = contents.map((o) => o.Key).filter((k): k is string => Boolean(k));
+      const lastModifiedByKey = new Map(contents.map((o) => [o.Key, o.LastModified]));
+      const orphans = selectOrphanKeys(keys, liveNames).filter((key) =>
+        isObjectOldEnoughToDelete(lastModifiedByKey.get(key), now)
+      );
       if (orphans.length > 0) {
         await client.send(
           new DeleteObjectsCommand({

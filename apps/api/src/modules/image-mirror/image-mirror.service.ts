@@ -73,7 +73,12 @@ export class ImageMirrorService {
         return null;
       }
       await this.putObject(name, body.bytes, body.contentType, body.cacheControl);
-      await this.database.query(`UPDATE products SET image_mirrored_at = NOW() WHERE id = $1`, [productId]);
+      // One statement: the watermark and the mirrored name must never be able
+      // to disagree (see migration 117 — the GC's live set reads this column).
+      await this.database.query(
+        `UPDATE products SET image_mirrored_at = NOW(), mirrored_image_name = $2 WHERE id = $1`,
+        [productId, name]
+      );
       return publicUrl;
     } catch (error) {
       this.logger.warn(
