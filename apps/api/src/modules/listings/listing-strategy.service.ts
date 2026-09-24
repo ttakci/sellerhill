@@ -62,33 +62,49 @@ export class ListingStrategyService {
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 
     let title = this.buildListingTitle(product, group);
-    let description = await this.processDescriptionTemplate(product, group);
 
     const applyAi = Boolean(options?.applyContentAi);
     const wantAiTitle = applyAi && Boolean(group.content?.aiTitleEnabled);
     const wantAiDescription = applyAi && Boolean(group.content?.aiDescriptionEnabled);
-    if ((wantAiTitle || wantAiDescription) && (await this.contentGeneration.isEnabled())) {
-      const base = {
+    const aiAvailable =
+      (wantAiTitle || wantAiDescription) && (await this.contentGeneration.isEnabled());
+    const stripBrand = Boolean(group.content?.stripBrandFromTitle);
+
+    // The title is settled BEFORE the template renders. `{{title}}` used to be
+    // fed `product.title` — the raw Amazon one — so the description showed a
+    // different title than the listing itself: the seller's brand-strip setting
+    // was ignored there, and an AI-rewritten title never reached it at all,
+    // because the rewrite ran after the template had already been rendered.
+    // `rewriteTitle` reads the full source from `product.title` and never looks
+    // at `baseDescription`, so nothing here needs the description to exist yet.
+    if (aiAvailable && wantAiTitle) {
+      // Model output is untrusted for length/whitespace as much as for content.
+      title = truncateTitleAtWordBoundary(
+        normalizeTitleWhitespace(
+          await this.contentGeneration.rewriteTitle({
+            product,
+            baseTitle: title,
+            baseDescription: '',
+            stripBrand,
+          })
+        ),
+        EBAY_TITLE_MAX_LENGTH
+      );
+    }
+
+    let description = await this.processDescriptionTemplate(product, group, title);
+
+    if (aiAvailable && wantAiDescription) {
+      const aiDescription = await this.contentGeneration.rewriteDescription({
         product,
         baseTitle: title,
         baseDescription: description,
-        stripBrand: Boolean(group.content?.stripBrandFromTitle),
-      };
-      if (wantAiTitle) {
-        // Model output is untrusted for length/whitespace as much as for content.
-        title = truncateTitleAtWordBoundary(
-          normalizeTitleWhitespace(await this.contentGeneration.rewriteTitle(base)),
-          EBAY_TITLE_MAX_LENGTH
-        );
-      }
-      if (wantAiDescription) {
-        const aiDescription = await this.contentGeneration.rewriteDescription({
-          ...base,
-          baseTitle: title,
-        });
-        description = truncateHtml(sanitizeListingHtml(aiDescription), EBAY_DESCRIPTION_MAX_LENGTH);
-      }
-    } else if (applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
+        stripBrand,
+      });
+      description = truncateHtml(sanitizeListingHtml(aiDescription), EBAY_DESCRIPTION_MAX_LENGTH);
+    }
+
+    if (!aiAvailable && applyAi && (group.content?.aiTitleEnabled || group.content?.aiDescriptionEnabled)) {
       this.logger.debug(
         `Content AI flags on for group but LLM_CONTENT_ENABLED is false — using deterministic title/description`
       );
@@ -309,9 +325,15 @@ export class ListingStrategyService {
    * (`{{{product_description}}}`, `{{#feature_bullets}}…`) as literal text on
    * live listings.
    */
+  /**
+   * @param listingTitle The title the LISTING will carry — brand-stripped,
+   * truncated, and AI-rewritten if the group asks for it. Never `product.title`:
+   * the description must not advertise a different title than the listing.
+   */
   private async processDescriptionTemplate(
     product: ProductData,
-    group: ListingSettingsGroup
+    group: ListingSettingsGroup,
+    listingTitle: string
   ): Promise<string> {
     const template = await this.resolveTemplateHtml(group);
 
@@ -319,7 +341,7 @@ export class ListingStrategyService {
     const description = sanitizeHtml((product.description || '').trim());
 
     const context = buildListingTemplateContext({
-      title: product.title,
+      title: listingTitle,
       // Amazon descriptions are often empty; the feature bullets are then the
       // only real copy we have and must not be dropped silently.
       description: description || (features.length > 0 ? `<ul><li>${features.join('</li><li>')}</li></ul>` : ''),

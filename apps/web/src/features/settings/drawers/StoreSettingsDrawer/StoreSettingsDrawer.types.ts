@@ -28,7 +28,12 @@ export interface StoreSettingsDrawerComponentProps {
   scopeOptions: Array<{ value: string; label: string }>;
   selectedScope: string;
   onSelectScope: (value: string) => void;
+  /** ISO 3166-1 alpha-2, guaranteed by the picker. eBay's `country` is an enum
+   *  and it reports a value it cannot map as a MISSING field, so free text here
+   *  produced a create failure that pointed at the one field that was full. */
   country: string;
+  /** Localized country names, one option per ISO code. */
+  countryOptions: Array<{ value: string | number; label: string }>;
   state: string;
   /** Wire name stays `shipFromCity` (the migration-089 column it persists to);
    *  it is the ONE location city now, feeding both the eBay inventory location
@@ -88,7 +93,7 @@ export interface StoreSettingsDrawerComponentProps {
   onToggleBuyerMessagingEvent: (event: BuyerMessageEventType, enabled: boolean) => void;
   onPickBuyerMessageTemplate: (event: BuyerMessageEventType, templateId: string) => void;
   onChangeBuyerMessageDelayDays: (event: BuyerMessageEventType, delayDays: number) => void;
-  onCountryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCountryChange: (value: string) => void;
   onStateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCityChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onZipCodeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

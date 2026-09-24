@@ -4,6 +4,8 @@
 // address feeds two providers with different required-field sets, and a second
 // hand-rolled derivation at one of the two call sites is how they drift.
 
+import { isValidCountryCode } from '../common/country-codes';
+
 /** The four fields the Store Settings drawer actually collects. */
 export interface StoreAddressParts {
   country?: string | null;
@@ -47,10 +49,15 @@ export function buildStoreStreetLine(address: StoreAddressParts): string {
  * + country. Tracking provider profile: address_line1 + city + country.
  * `addressLine1` is derived by `buildStoreStreetLine`, so it is satisfied
  * exactly when city or state is present — already implied by requiring both.
+ *
+ * `country` is checked for VALIDITY, not just presence: eBay's field is an
+ * enum, and a value it cannot map is refused as a missing one (see
+ * `country-codes.ts`). The other three are free text on eBay's side, so
+ * non-empty is the whole requirement there.
  */
 export function isStoreAddressComplete(address: StoreAddressParts): boolean {
   return Boolean(
-    address.country?.trim() &&
+    isValidCountryCode(address.country) &&
       address.state?.trim() &&
       address.city?.trim() &&
       address.zipCode?.trim(),

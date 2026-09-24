@@ -56,12 +56,21 @@ export const StoreSettingsDrawerComponent: React.FC<StoreSettingsDrawerComponent
             />
             <FieldGroup>
               <Text variant="h5">{t('storeSettings:storeSettings.address.title')}</Text>
-              <ModernTextInput
-                name="country"
+              <ModernSelect
                 label={t('translation:settingsHub.drawer.storeSettings.country')}
+                options={props.countryOptions}
                 value={props.country}
-                onChange={props.onCountryChange}
-                errorMessage={props.addressFieldErrors.country ? t('translation:validation.required') : undefined}
+                onChange={(value) => props.onCountryChange(String(value))}
+                fullWidth
+                isSearchable
+                placeholder={t('translation:settingsHub.drawer.storeSettings.countryPlaceholder')}
+                searchPlaceholder={t('translation:common.search')}
+                noResultsMessage={t('translation:common.noResults')}
+                error={
+                  props.addressFieldErrors.country
+                    ? { message: t('translation:validation.required') }
+                    : undefined
+                }
               />
               <ModernTextInput
                 name="region"

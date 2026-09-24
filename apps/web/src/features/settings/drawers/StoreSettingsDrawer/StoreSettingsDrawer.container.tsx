@@ -8,11 +8,13 @@ import {
   StoreSettingsDrawerStep,
   TrackingConversionProvider,
   TrackingConversionScope,
+  isValidCountryCode,
 } from '@repo/shared';
 import { useLoading, useUI } from '@repo/ui';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getCountryOptions } from '../../utils/countryOptions';
 import { notifyDrawerDone } from '../shared/notifyDrawerDone';
 import { buildScopeOptions, GLOBAL_SCOPE, resolveScopeConfig } from '../storeScope';
 
@@ -53,8 +55,9 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   selectedScope,
   onSelectScope,
 }) => {
-  const { t } = useTranslation(['translation']);
+  const { t, i18n } = useTranslation(['translation']);
   const { showMessage, closeMessage } = useUI();
+  const countryOptions = useMemo(() => getCountryOptions(i18n.language), [i18n.language]);
   const storeId = selectedScope === GLOBAL_SCOPE ? undefined : selectedScope;
   const config = resolveScopeConfig(storeConfigs, selectedScope);
 
@@ -212,8 +215,14 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   // The tracking provider is NOT a reason: it requires only `accountOrigin` to
   // create a profile (verified against the live API, 2026-09-02) and we send
   // it no address at all.
+  //
+  // `country` is checked for VALIDITY, not presence. The picker cannot produce
+  // an invalid code, but a row saved while this field was free text can still
+  // hold a country NAME — and eBay refuses that as a missing field. Requiring a
+  // real code here is what forces such a seller to re-pick instead of saving
+  // the old value straight back through the new control.
   const isAddressComplete = Boolean(
-    country.trim() && stateField.trim() && city.trim() && zipCode.trim()
+    isValidCountryCode(country) && stateField.trim() && city.trim() && zipCode.trim()
   );
 
   const handleContinue = (): void => {
@@ -231,7 +240,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
   };
 
   const addressFieldErrors = {
-    country: addressSubmitAttempted && !country.trim(),
+    country: addressSubmitAttempted && !isValidCountryCode(country),
     state: addressSubmitAttempted && !stateField.trim(),
     city: addressSubmitAttempted && !city.trim(),
     zipCode: addressSubmitAttempted && !zipCode.trim(),
@@ -283,6 +292,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       selectedScope={selectedScope}
       onSelectScope={onSelectScope}
       country={country}
+      countryOptions={countryOptions}
       state={stateField}
       city={city}
       zipCode={zipCode}
@@ -318,7 +328,7 @@ export const StoreSettingsDrawer: React.FC<StoreSettingsDrawerProps> = ({
       onToggleBuyerMessagingEvent={(event, enabled) => updateEvent(event, (current) => ({ ...current, enabled }))}
       onPickBuyerMessageTemplate={(event, templateId) => updateEvent(event, (current) => ({ ...current, template: { kind: BuyerMessageTemplateKind.CUSTOM, id: templateId } }))}
       onChangeBuyerMessageDelayDays={(event, delayDays) => updateEvent(event, (current) => ({ ...current, delayDays }))}
-      onCountryChange={(e) => setCountry(e.target.value)}
+      onCountryChange={setCountry}
       onStateChange={(e) => setStateField(e.target.value)}
       onCityChange={(e) => setCity(e.target.value)}
       onZipCodeChange={(e) => setZipCode(e.target.value)}

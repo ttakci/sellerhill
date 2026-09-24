@@ -9,6 +9,7 @@ import {
   EbayCallPriority,
   SUPPORTED_EBAY_MARKETPLACES,
   buildStoreStreetLine,
+  normalizeCountryCode,
   type CreateEbayConnectUrlResponse,
   type EbayAccountPublicDto,
   type EbayMarketplaceId,
@@ -607,13 +608,21 @@ export class EbayService implements OnModuleInit {
     // STATE — a seller in Sheridan, WY published an item location of "WY, WY".
     // Both now come from real store-settings fields; `address1` is derived by
     // `buildStoreStreetLine` since no street is collected.
+    //
+    // `country` is NORMALIZED, not just defaulted. It is an enum on eBay's side
+    // and the store-settings field was free text until 2026-09-23, so rows
+    // still hold country NAMES — and `||` cannot catch those: a name is truthy,
+    // so the marketplace default never fired and the name went to eBay, which
+    // answered "Missing field country" (errorId 25801) for a field that was
+    // full. The picker stops new ones; this is what stops the stored ones,
+    // without making every affected seller re-save their address first.
     const address = {
       addressLine1:
         data.address1 || buildStoreStreetLine({ city: data.city, state: data.location }),
       city: data.city,
       stateOrProvince: data.location,
       postalCode: data.postalCode,
-      country: data.country || config.countryCode,
+      country: normalizeCountryCode(data.country) ?? config.countryCode,
     };
 
     const payload = {
