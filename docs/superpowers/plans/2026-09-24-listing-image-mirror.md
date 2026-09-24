@@ -16,7 +16,7 @@
 - **Source variant is `_SL800_`.** The Keepa name already carries its extension, so the source URL is built by splitting on the final dot: `71nx65qZq6L.jpg` → `71nx65qZq6L._SL800_.jpg`. The R2 key is the name verbatim. (Spec D3, D4)
 - **The eBay gallery payload is never rewritten.** `ebay-listing-payload.ts` keeps Amazon URLs. (Spec, out-of-scope section)
 - **Never DELETE a `predefined_templates` row** — soft-retire with `is_active = FALSE`. There is no FK protecting catalog rows.
-- **An applied migration is never edited.** New behaviour ships as a new numbered file. Next free numbers: `116`, `117`.
+- **An applied migration is never edited.** New behaviour ships as a new numbered file. Next free number: `116` (see Task 2).
 - **All new configuration is env-only**, never in `platform-settings.registry.ts`. (Spec, Configuration section)
 - **Nothing on the image path may block listing creation.** Every mirror failure is swallowed and logged.
 - After changing `packages/shared`, run `pnpm --filter @repo/shared build` before API tests — `apps/api` resolves `@repo/shared` to `dist/cjs`.
@@ -152,83 +152,29 @@ EOF
 
 ---
 
-### Task 2: Soft-retire the `gallery-grid` catalog template
+### Task 2: DROPPED — `gallery-grid` no longer exists
 
-`gallery-grid` (migration `072`) is the one catalog template built around the image loop. With `images` gone from the vocabulary it would render a heading over nothing, so it is retired. `073`'s 12 live templates each carry exactly one `{{#main_image}}` and are unaffected.
+**Do not implement this task.** It rested on a false premise, and the commit
+that implemented it has been reverted (`d4c91b1` → `3882476`).
 
-**Files:**
-- Create: `apps/api/migrations/116_retire_gallery_grid_template.sql`
+The plan claimed `gallery-grid` was still a selectable catalog row because
+migration `073` "only inserts new rows". It does not. `073` line 4 is
+`DELETE FROM predefined_templates;`, which wipes the whole catalog before
+inserting its 12 replacements — so `gallery-grid` was destroyed there, and a
+migration retiring it updates zero rows.
 
-**Interfaces:**
-- Consumes: Task 1's removal of `images`.
-- Produces: no catalog template renders a multi-image block.
+The task's goal turns out to need no migration at all: each of the 12 live
+templates carries exactly one `{{#main_image}}` and none carries `{{#images}}`,
+so Task 1's vocabulary removal is the entire guarantee.
 
-- [ ] **Step 1: Write the migration**
+Two things worth carrying forward, neither in this plan's scope:
 
-Create `apps/api/migrations/116_retire_gallery_grid_template.sql`:
-
-```sql
--- Retire the one catalog template built around the multi-image loop.
---
--- `images` and `has_images` left the template vocabulary on 2026-09-24: the
--- description now renders exactly one image, served from our own domain rather
--- than hot-linked from Amazon, so a buyer reading the listing source cannot
--- identify the supplier. `gallery-grid` is built entirely around
--- `{{#has_images}}<div>{{#images}}...{{/images}}</div>{{/has_images}}`, which
--- would now render a styled wrapper over nothing.
---
--- Soft-retired, never deleted. `listing_settings_groups.templates` stores the
--- chosen template id inside JSONB with no foreign key, so a DELETE would
--- silently degrade every group already pointing at it to the default template
--- while the UI kept showing the chosen name. `is_active = FALSE` hides it from
--- the picker while `getPredefinedTemplateHtml` can still resolve it, so groups
--- already on it keep rendering (now with the image block stripped).
-
-UPDATE predefined_templates
-   SET is_active = FALSE
- WHERE slug = 'gallery-grid';
-```
-
-- [ ] **Step 2: Verify the migration applies to a stock Postgres**
-
-Per CLAUDE.md's replay recipe, apply all migrations in order to a clean `postgres:18-alpine` and confirm `116` succeeds:
-
-```bash
-docker run -d --name mirror-migrate-test -e POSTGRES_PASSWORD=x -e POSTGRES_DB=testdb -p 55432:5432 postgres:18-alpine
-sleep 5
-docker exec -i mirror-migrate-test psql -U postgres -d testdb -c "CREATE ROLE sellerhill_user LOGIN;"
-for f in apps/api/migrations/*.sql; do
-  docker exec -i mirror-migrate-test psql -v ON_ERROR_STOP=1 -U postgres -d testdb < "$f" || { echo "FAILED: $f"; break; }
-done
-docker exec -i mirror-migrate-test psql -U postgres -d testdb -c \
-  "SELECT slug, is_active FROM predefined_templates WHERE slug = 'gallery-grid';"
-```
-
-Expected: every file applies, and the final query reports `gallery-grid | f`.
-
-- [ ] **Step 3: Tear down the test database**
-
-```bash
-docker rm -f mirror-migrate-test
-```
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add apps/api/migrations/116_retire_gallery_grid_template.sql
-git commit -m "$(cat <<'EOF'
-feat(listings): soft-retire the gallery-grid template
-
-It is built entirely around the multi-image loop that left the vocabulary, so
-it would now render a styled wrapper over nothing. Soft-retired rather than
-deleted: groups store the template id inside JSONB with no foreign key, so a
-DELETE would silently detach every group already on it.
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
-EOF
-)"
-```
-
+- **`073` violated CLAUDE.md's own rule** — "Never DELETE a catalog row —
+  there is no FK to protect it." Every `listing_settings_groups.templates ->>
+  'predefinedTemplateId'` pointing at a `072`-era template was silently
+  detached by that DELETE and now degrades to the default template while the
+  UI keeps showing the chosen name. Pre-existing; this plan did not cause it.
+- **Task 4 takes migration number `116`**, freed by the reversal.
 ---
 
 ### Task 3: Pure image-name helpers
@@ -274,6 +220,10 @@ describe('isValidKeepaImageName', () => {
     expect(isValidKeepaImageName('71nx65qZq6L')).toBe(false);
   });
 
+  it('rejects an interior dot — the allowlist stays strict', () => {
+    expect(isValidKeepaImageName('a.b.jpg')).toBe(false);
+  });
+
   it('rejects path separators, traversal and query strings', () => {
     expect(isValidKeepaImageName('../secret.jpg')).toBe(false);
     expect(isValidKeepaImageName('a/b.jpg')).toBe(false);
@@ -307,15 +257,14 @@ describe('buildAmazonSourceImageUrl', () => {
     );
   });
 
-  it('splits on the LAST dot, not the first', () => {
-    expect(buildAmazonSourceImageUrl('a.b.jpg')).toBe(
-      'https://images-na.ssl-images-amazon.com/images/I/a.b._SL800_.jpg'
-    );
-  });
-
   it('returns null for an invalid name rather than a broken URL', () => {
     expect(buildAmazonSourceImageUrl('71nx65qZq6L')).toBeNull();
     expect(buildAmazonSourceImageUrl('../x.jpg')).toBeNull();
+    // An interior dot is rejected by isValidKeepaImageName, so there is no
+    // "which dot do we split on" question to answer. Real Keepa names are
+    // `<stem>.<ext>` with no interior dot; keeping the allowlist strict keeps
+    // the SSRF and key-injection guard tight.
+    expect(buildAmazonSourceImageUrl('a.b.jpg')).toBeNull();
   });
 });
 
@@ -458,7 +407,7 @@ EOF
 `products.image_mirrored_at` records that this product's first image is in the bucket, so the render path needs no R2 round-trip and the GC has a cheap live set (`image_urls->>0` where the column is set).
 
 **Files:**
-- Create: `apps/api/migrations/117_products_image_mirrored_at.sql`
+- Create: `apps/api/migrations/116_products_image_mirrored_at.sql`
 - Modify: `packages/shared/src/domain/products/product-data.types.ts`
 - Modify: `apps/api/src/modules/listings/listings.service.ts`
 
@@ -468,7 +417,7 @@ EOF
 
 - [ ] **Step 1: Write the migration**
 
-Create `apps/api/migrations/117_products_image_mirrored_at.sql`:
+Create `apps/api/migrations/116_products_image_mirrored_at.sql`:
 
 ```sql
 -- Watermark for the description-image mirror.
@@ -525,7 +474,7 @@ Add `p.image_mirrored_at` (or `image_mirrored_at` where the query has no alias) 
 
 - [ ] **Step 4: Verify the migration and typecheck**
 
-Run the replay from Task 2 Step 2 (through `117`), then:
+Replay every migration in order against a clean stock Postgres (CLAUDE.md's recipe): `docker run -d --name mirror-migrate-test -e POSTGRES_PASSWORD=x -e POSTGRES_DB=testdb -p 55432:5432 postgres:18-alpine`, then `CREATE ROLE sellerhill_user LOGIN;`, then pipe every file in `apps/api/migrations/` through `psql -v ON_ERROR_STOP=1` in order. Then:
 
 ```bash
 docker exec -i mirror-migrate-test psql -U postgres -d testdb -c "\d products" | grep image_mirrored_at
@@ -537,7 +486,7 @@ Expected: the column is listed. Then run `pnpm --filter @repo/shared build && pn
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/api/migrations/117_products_image_mirrored_at.sql packages/shared/src/domain/products/product-data.types.ts apps/api/src/modules/listings/listings.service.ts
+git add apps/api/migrations/116_products_image_mirrored_at.sql packages/shared/src/domain/products/product-data.types.ts apps/api/src/modules/listings/listings.service.ts
 git commit -m "$(cat <<'EOF'
 feat(listings): record whether a product image has been mirrored
 
@@ -878,6 +827,7 @@ The mirror is awaited rather than queued. The description is written once at pub
 **Files:**
 - Modify: `apps/api/src/modules/listings/listing-processor.service.ts`
 - Modify: `apps/api/src/modules/listings/listings.module.ts`
+- Modify: `apps/api/src/modules/listings/listings.service.ts` — `getProductByAsin` returns `image_mirrored_at` alongside `id` and `data` (Task 4 added the column to the row interfaces and SELECT lists; this widens the method's own return shape)
 - Test: `apps/api/src/modules/listings/listing-processor-image.spec.ts`
 
 **Interfaces:**

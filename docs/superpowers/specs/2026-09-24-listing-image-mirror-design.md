@@ -50,9 +50,17 @@ true rather than hoped for:
 - `has_images` is removed from `LISTING_TEMPLATE_PRESENCE_FLAGS` with it. It
   exists only to wrap an `{{#images}}` list; leaving it behind would let a
   custom template render an empty but styled wrapper.
-- `gallery-grid` (migration `072`, the one catalog template using the image
-  loop) is soft-retired with `is_active = FALSE` in a new migration. Catalog
-  rows are never DELETEd — there is no FK protecting them.
+- **No catalog template needs retiring** (corrected 2026-09-24 during
+  execution). An earlier revision of this spec claimed `gallery-grid` — the one
+  `072` template built around the image loop — was still selectable, because
+  `073` appeared to only insert rows. It does not: `073` line 4 is
+  `DELETE FROM predefined_templates;`, so the whole `072` catalog was destroyed
+  when it ran. Each of the 12 live templates carries exactly one
+  `{{#main_image}}`, so the vocabulary removal above is the entire guarantee.
+  - Worth recording separately: that DELETE violated CLAUDE.md's own rule
+    ("never DELETE a catalog row — there is no FK to protect it") and silently
+    detached every settings group whose stored `predefinedTemplateId` pointed
+    at a `072` template. Pre-existing, outside this feature's scope.
 - Removing `images` from the const array narrows the `ListingTemplatePlaceholder`
   union, so every remaining reference to it fails to compile. The cleanup is
   enforced by the type checker, not by grep.
@@ -202,7 +210,7 @@ A product already mirrored costs one indexed column read and nothing else.
 | `packages/shared/src/utils/listing-template.ts` | Remove `images` from `LISTING_TEMPLATE_PLACEHOLDERS`; remove `has_images` from `LISTING_TEMPLATE_PRESENCE_FLAGS` and from `buildListingTemplateContext`; delete the `images` branch of `buildListingTemplateSnippet` and its comment; `ListingTemplateInput` gains `mainImageUrl?: string`, and `main_image` resolves to it or to the empty string |
 | `packages/shared` (new) | `buildMirroredImageUrl(name, baseUrl)` and `isValidKeepaImageName(name)` — pure, name matched against a strict character/length bound |
 | migration | `products.image_mirrored_at TIMESTAMPTZ NULL` |
-| migration | soft-retire `gallery-grid` (`is_active = FALSE`) |
+| ~~migration~~ | ~~soft-retire `gallery-grid`~~ — dropped: `073` already deleted the whole `072` catalog, so there is nothing to retire (see D1) |
 | `apps/api` (new module) | `ImageMirrorService` — HEAD/PUT to R2, idempotent, fail-soft; `ImageMirrorGcService` — daily reconcile |
 | `listing-processor.service.ts` | `resolveProductData` awaits the mirror on both branches |
 | `listing-strategy.service.ts` | Passes `mainImageUrl` (mirrored, or empty) into the template context |
