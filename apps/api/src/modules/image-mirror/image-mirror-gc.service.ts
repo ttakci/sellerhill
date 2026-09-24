@@ -1,14 +1,25 @@
 import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
-import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 import { extractKeepaImageName } from '@repo/shared';
+import type { Job, Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 
 import { selectOrphanKeys } from './image-mirror-gc';
 import { ImageMirrorService } from './image-mirror.service';
 
+/** Dedicated BullMQ queue for the nightly sweep. */
+export const IMAGE_MIRROR_GC_QUEUE = 'image-mirror-gc';
+/** Job name on that queue. */
+const IMAGE_MIRROR_GC_JOB = 'collect-orphaned-images';
+/**
+ * No env/platform-settings override, matching `ListingPlanLimitProcessor` —
+ * this is an internal housekeeping cadence with no operator-facing reason to
+ * retune it, unlike `DATA_RETENTION_CRON`'s windows.
+ */
+const DEFAULT_GC_CRON = '23 4 * * *';
 const DELETE_BATCH = 1000;
 
 /**
@@ -18,18 +29,53 @@ const DELETE_BATCH = 1000;
  * row with it (`listings.service.ts:2189`). That path fires only on explicit
  * listing deletion, not on INACTIVE, plan-limit retirement or account cascade,
  * so this sweep is what eventually collects the rest.
+ *
+ * Runs as a BullMQ repeatable job, like every other scheduled job in this
+ * codebase (`ListingPlanLimitProcessor`, `DataRetentionService`,
+ * `SubscriptionReconcileProcessor`) — not `@nestjs/schedule`, which this
+ * codebase does not otherwise use.
  */
+@Processor(IMAGE_MIRROR_GC_QUEUE, { concurrency: 1 })
 @Injectable()
-export class ImageMirrorGcService {
+export class ImageMirrorGcService extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(ImageMirrorGcService.name);
 
   constructor(
+    @InjectQueue(IMAGE_MIRROR_GC_QUEUE) private readonly queue: Queue,
     private readonly config: ConfigService,
     private readonly database: DatabaseService,
     private readonly mirror: ImageMirrorService
-  ) {}
+  ) {
+    super();
+  }
 
-  @Cron('23 4 * * *')
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.queue.add(
+        IMAGE_MIRROR_GC_JOB,
+        {},
+        {
+          repeat: { pattern: DEFAULT_GC_CRON },
+          jobId: 'image-mirror-gc-tick',
+          removeOnComplete: true,
+          removeOnFail: { age: 86_400 },
+        }
+      );
+    } catch (error: unknown) {
+      // Fail-soft: a scheduling failure must not abort boot.
+      this.logger.warn(
+        `Failed to schedule image GC: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async process(job: Job): Promise<void> {
+    if (job.name !== IMAGE_MIRROR_GC_JOB) {
+      return;
+    }
+    await this.sweep();
+  }
+
   async sweep(): Promise<void> {
     if (!this.mirror.isConfigured()) {
       return;
