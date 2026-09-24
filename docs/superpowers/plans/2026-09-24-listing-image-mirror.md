@@ -406,6 +406,8 @@ EOF
 
 `products.image_mirrored_at` records that this product's first image is in the bucket, so the render path needs no R2 round-trip and the GC has a cheap live set (`image_urls->>0` where the column is set).
 
+**CORRECTED 2026-09-24 during execution (matches spec D4) — a second column, `mirrored_image_name`, turned out to be required, not optional.** The paragraph above is the ORIGINAL Task 4 design and it shipped first, exactly as written, as migration `116` — but "the GC has a cheap live set (`image_urls->>0` where the column is set)" is the part that was wrong. `image_urls` is overwritten wholesale on every Keepa refresh tick, and its first entry rotates whenever Amazon changes an ASIN's primary image — so a live set derived from the CURRENT `image_urls->>0` silently stops matching the name a past listing's already-published description embeds. Two independent consumers need the name actually uploaded, not a name re-derived from the current image: the GC's live set (Task 8, or the whole bucket gets emptied over time) and `ensureMirrored`'s own reuse path (Task 5/6 — reusing a cached product must return the URL of what was ACTUALLY uploaded, never a name derived from a since-rotated `image_urls[0]`). Migration `117` adds `products.mirrored_image_name`, written by `ensureMirrored` in the same statement that stamps `image_mirrored_at`; migration `118` backfills it for rows `116` alone had already stamped. Task 6 and Task 8 below are left as originally written (they show what was actually built at that point and are historically accurate for `116` alone) — read them together with their own "CORRECTED" notes, not in isolation.
+
 **Files:**
 - Create: `apps/api/migrations/116_products_image_mirrored_at.sql`
 - Modify: `packages/shared/src/domain/products/product-data.types.ts`
@@ -824,6 +826,8 @@ EOF
 
 The mirror is awaited rather than queued. The description is written once at publish and never revised, so a mirror that finished afterwards would leave that listing permanently without an image.
 
+**CORRECTED 2026-09-24 during execution (matches spec D4 / the Task 4 correction above) — the third argument below is `alreadyMirrored: boolean` throughout this task as originally written; it shipped as `mirroredImageName: string | null` instead.** The steps and code below are left as originally planned because they are what was actually built and tested for `ImageMirrorService`'s FIRST shape (migration `116` alone, no stored name yet) — they are not wrong for that moment, only superseded by it. The reuse branch built with a boolean flag can only ever answer "was this mirrored at some point?", and answering that with a URL means re-deriving the name from the caller's `imageUrl` — which is `product.imageUrls[0]`, the CURRENT and mutable value. Once `117` exists, `asUsableCache` reads `existing.mirrored_image_name` (not `existing.image_mirrored_at`) and threads that STRING-OR-NULL value through `attachMirroredImage` into `ensureMirrored`, which returns a URL built from it directly on the reuse path and never touches `imageUrl` at all in that branch. Every `false`/`alreadyMirrored: Boolean(...)` below should be read as `null`/`existing.mirrored_image_name ?? null` in the shipped code. `image-mirror-invariants.guard.spec.ts` and the regression test in `image-mirror.service.spec.ts` (two DIFFERENT image names, so a test reusing one name for both the stored value and the current URL cannot catch a regression) lock the final shape.
+
 **Files:**
 - Modify: `apps/api/src/modules/listings/listing-processor.service.ts`
 - Modify: `apps/api/src/modules/listings/listings.module.ts`
@@ -1091,6 +1095,8 @@ EOF
 
 A product deleted by the reference-count path at `listings.service.ts:2189` leaves its object behind. This reconcile collects them — and refuses to run when it cannot see the live set, because treating a database outage as "no products exist" would empty the bucket.
 
+**CORRECTED 2026-09-24 during execution (matches spec D4 / the Task 4 correction above) — `loadLiveNames` below reads `image_urls->>0 AS url FROM products WHERE image_mirrored_at IS NOT NULL` and re-derives the name via `extractKeepaImageName(row.url)`. The shipped version reads `mirrored_image_name AS name FROM products WHERE mirrored_image_name IS NOT NULL` directly, with no re-derivation at all.** This is the exact bug the Task 4 correction describes, on the delete side rather than the reuse side: `image_urls` rotates on a routine Keepa refresh, so a live set built from the CURRENT `image_urls->>0` stops containing the name an already-published description embeds, and the GC then deletes an object a live listing still needs — permanently, since the deletion itself is what makes it unrecoverable. The code block in Step 5 below also predates the 48-hour age-margin gate (`isObjectOldEnoughToDelete`/`GC_MIN_OBJECT_AGE_MS`) that was added afterward to close the upload-then-watermark race window; the shipped `deleteOrphans` filters candidates through that gate before ever calling `DeleteObjectsCommand`. Migrations `117`/`118` are Task 4's, not this task's own — nothing new is added to the schema here, only the query this task's `loadLiveNames` issues against the column `117` adds.
+
 **Files:**
 - Create: `apps/api/src/modules/image-mirror/image-mirror-gc.ts`
 - Create: `apps/api/src/modules/image-mirror/image-mirror-gc.service.ts`
@@ -1098,7 +1104,7 @@ A product deleted by the reference-count path at `listings.service.ts:2189` leav
 - Modify: `apps/api/src/modules/image-mirror/image-mirror.module.ts`
 
 **Interfaces:**
-- Consumes: `extractKeepaImageName` (Task 3); `products.image_mirrored_at` (Task 4).
+- Consumes: `extractKeepaImageName` (Task 3); `products.image_mirrored_at` (Task 4). **Superseded**: the shipped `loadLiveNames` consumes `products.mirrored_image_name` (Task 4's `117` correction) directly and does not call `extractKeepaImageName` at all.
 - Produces: `selectOrphanKeys(storedKeys: string[], liveNames: Set<string>): string[]`.
 
 - [ ] **Step 1: Write the failing test**
