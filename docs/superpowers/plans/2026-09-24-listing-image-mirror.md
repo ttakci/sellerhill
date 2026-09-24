@@ -642,7 +642,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { buildAmazonSourceImageUrl, buildMirroredImageUrl, extractKeepaImageName } from '@repo/shared';
-import { DatabaseService } from '../database/database.service';
+import { DatabaseService } from '../../common/database/database.service';
 
 /** Amazon's own header on these objects; copied so our copy ages the same way. */
 const DEFAULT_CACHE_CONTROL = 'public, max-age=630720000, immutable';
@@ -1166,7 +1166,7 @@ import { Cron } from '@nestjs/schedule';
 import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { extractKeepaImageName } from '@repo/shared';
-import { DatabaseService } from '../database/database.service';
+import { DatabaseService } from '../../common/database/database.service';
 import { ImageMirrorService } from './image-mirror.service';
 import { selectOrphanKeys } from './image-mirror-gc';
 
