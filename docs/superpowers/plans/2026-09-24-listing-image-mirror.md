@@ -431,6 +431,12 @@ Create `apps/api/migrations/116_products_image_mirrored_at.sql`:
 -- re-hosts those images itself, so there is nothing to conceal and proxying
 -- them would put a failure point on the synchronous publish path.)
 --
+-- CORRECTED 2026-09-24: the parenthesis above is FALSE. eBay does not re-host
+-- `imageUrls` — it serves the URL we supply, so the gallery shows the raw Keepa
+-- URL too, up to 24 of them per listing. The comment shipped in migration 116
+-- and cannot be edited there; this note is the record. See the spec's
+-- correction block and CLAUDE.md section 1b.
+--
 -- NULL means "not mirrored", which is also the retry signal: the create path
 -- re-attempts whenever it sees NULL, so a transient failure is repaired by the
 -- next listing for that ASIN rather than persisting. The description renders
