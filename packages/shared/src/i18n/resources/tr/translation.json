@@ -372,6 +372,7 @@
         "checkBlacklist": "Kara liste kelimelerini kontrol et",
         "checkBlacklistDesc": "Yayınlamadan önce listing başlığını, açıklamasını, özelliklerini ve markayı kara listenize göre tarar. Her kelimenin kendi alan seçimi nerede kontrol edileceğini belirler.",
         "country": "Ülke",
+        "countryPlaceholder": "Ülke seçin",
         "region": "Bölge",
         "zipCode": "Posta Kodu",
         "steps": {

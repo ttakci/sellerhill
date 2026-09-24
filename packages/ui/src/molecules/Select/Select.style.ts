@@ -203,12 +203,21 @@ export const DropdownContainer = styled.div<{ $placement?: 'bottom' | 'top' }>`
 `;
 
 export const SearchWrapper = styled.div`
-  padding: ${tkn('spacing.sm')};
+  padding: ${tkn('spacing.sm+')};
   border-bottom: 0.0625rem solid ${tkn('colors.border.secondary')};
 `;
 
 export const SearchInput = styled.input`
   width: 100%;
+  /*
+   * Without this the field is content-box (there is no global reset), so
+   * "width: 100%" plus its own padding and border renders ~13px WIDER than the
+   * wrapper. The dropdown clips the overflow, which eats the left inset too —
+   * the search box then reads as flush to both edges with no padding at all.
+   * Same defect TextInput's inner input carries a fix for; this control is
+   * only rendered when "isSearchable" is set, which is why it went unnoticed.
+   */
+  box-sizing: border-box;
   padding: ${tkn('spacing.xs+')} ${tkn('spacing.sm+')};
   border-radius: ${tkn('radius.sm')};
   border: 0.0625rem solid ${tkn('colors.border.primary')};

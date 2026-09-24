@@ -1,12 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   BlacklistType,
+  COUNTRY_CODES,
   TrackingConversionProvider,
   TrackingConversionScope,
+  normalizeCountryCode,
   type SaveStoreSettingsRequest,
   type BlacklistKeyword,
 } from '@repo/shared';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -14,6 +16,7 @@ import {
   IsBoolean,
   IsArray,
   ArrayNotEmpty,
+  ValidateIf,
   ValidateNested,
   IsIn,
   IsNumber,
@@ -49,9 +52,21 @@ export class SaveStoreSettingsDto implements SaveStoreSettingsRequest {
   @IsString()
   storeId?: string;
 
-  @ApiPropertyOptional({ description: 'Country code. Omitted by focused drawers.', example: 'US' })
+  @ApiPropertyOptional({
+    description: 'ISO 3166-1 alpha-2 country code. Omitted by focused drawers.',
+    example: 'US',
+  })
   @IsOptional()
   @IsString()
+  // Blank is meaningful and must stay accepted: the focused drawers omit this
+  // field entirely and the service reads a blank as "leave unchanged". So only
+  // a non-blank value is checked — and it has to be a code eBay's enum can map,
+  // because eBay reports one it cannot as a MISSING field (see country-codes.ts).
+  @ValidateIf((dto: SaveStoreSettingsDto) => Boolean(dto.country?.trim()))
+  @Transform(({ value }: { value: unknown }): unknown =>
+    typeof value === 'string' ? normalizeCountryCode(value) ?? value : value,
+  )
+  @IsIn(COUNTRY_CODES as readonly string[])
   country?: string;
 
   @ApiPropertyOptional({ description: 'State. Omitted by focused drawers.', example: 'CA' })
