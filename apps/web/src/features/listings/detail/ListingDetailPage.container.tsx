@@ -536,18 +536,24 @@ export const ListingDetailPageContainer: React.FC = () => {
             void deleteListings([listingId])
               .unwrap()
               .then(() => {
+                // Navigate away FIRST, before the success dialog. The delete
+                // mutation invalidates the generic 'Listings' tag, which also
+                // matches this page's own `{ type: 'Listings', id }` query tag
+                // (RTK Query: an id-less invalidation matches every id too) —
+                // so while this component stays mounted, it auto-refetches a
+                // listing that no longer exists, gets a 404, and the isError
+                // effect below fires a second showMessage that clobbers this
+                // success one. GlobalMessageModal lives above the router
+                // (main.tsx), so it survives the navigate() unmount and still
+                // shows; the query subscription is gone by then, so the stray
+                // refetch has no listener left to report an error to.
+                localeNavigate('/listings/all');
                 showMessage(
                   {
                     type: 'success',
                     headerKey: 'listings:listings.notifications.deleteOneSuccessTitle',
                     descriptionKey: 'listings:listings.notifications.deleteOneSuccess',
-                    primaryButton: {
-                      labelKey: 'translation:common.ok',
-                      onClick: () => {
-                        closeMessage();
-                        localeNavigate('/listings/all');
-                      },
-                    },
+                    primaryButton: { labelKey: 'translation:common.ok', onClick: closeMessage },
                   },
                   t
                 );
