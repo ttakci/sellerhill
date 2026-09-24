@@ -10,7 +10,7 @@ and only one of them leaks the supplier.
 
 | Surface | Built by | What eBay does | Amazon domain visible to a buyer? |
 |---|---|---|---|
-| Gallery (`product.imageUrls`) | `ebay-listing-payload.ts:108` | Downloads at publish and **re-hosts on `i.ebayimg.com`** | No |
+| Gallery (`product.imageUrls`) | `ebay-listing-payload.ts:108` | ~~Downloads at publish and re-hosts on `i.ebayimg.com`~~ — **FALSE, corrected 2026-09-24: eBay serves the URL we supply** | **Yes — up to 24 of them** |
 | Description HTML (`{{main_image}}`) | `listing-template.ts:141` | Nothing — the `<img src>` stays as written | **Yes, permanently** |
 
 The description image is hot-linked, so `images-na.ssl-images-amazon.com` sits
@@ -22,19 +22,38 @@ this spec addresses.
 
 The gallery keeps its Amazon URLs.
 
-- There is **no concealment to win** — eBay copies the image to its own servers,
-  so the Amazon URL never reaches a buyer. Confirmed by the operator on
-  2026-09-24 against a live listing: the gallery image resolves to
-  `i.ebayimg.com`.
+> **THIS ENTIRE SECTION IS WRONG AND THE FEATURE IS INCOMPLETE BECAUSE OF IT.**
+> Corrected 2026-09-24, the same day it was written. Read the correction before
+> the reasoning it replaces.
+>
+> The gallery does **not** get re-hosted. eBay serves the `imageUrls` we supply,
+> so a listing this system publishes shows the raw Keepa URL as its gallery
+> image — verified against a live one:
+> `https://images-na.ssl-images-amazon.com/images/I/9106K0FD50L.jpg`. Up to
+> `EBAY_MAX_IMAGES` (24) per listing.
+>
+> The `i.ebayimg.com` URL that appeared to confirm the original claim came from
+> a listing the operator had created BY HAND, not one this system published.
+> Evidence from the wrong population, used to put the larger surface out of
+> scope. **The mirror as built closes one image and leaves up to twenty-four
+> open**, and the gallery is what a buyer sees first.
+>
+> The second bullet below still stands on its own terms — a gallery URL really
+> is fetched synchronously at publish, so whatever replaces this must not put a
+> slow origin on the publish path. The eBay Media API is the candidate precisely
+> because it moves the fetch to upload time and hands eBay its own URL.
+
+- ~~There is **no concealment to win** — eBay copies the image to its own
+  servers, so the Amazon URL never reaches a buyer.~~ **False; see above.**
 - There is a **real risk to take on**. eBay fetches the gallery URL
   *synchronously during publish*; a slow or unavailable origin fails
   `bulk_publish_offer` outright. The description image, by contrast, is fetched
   by the buyer's browser long after publish, so an outage there degrades the
   description and nothing else.
 
-Putting the same mirror on both surfaces would convert a cosmetic failure mode
-into one that stops listing creation. A guard spec locks the gallery payload
-against rewriting.
+A guard spec locks the gallery payload against rewriting. That guard is now
+protecting the wrong thing and must be revisited with the replacement, not
+silently deleted.
 
 ## Decisions
 
@@ -263,8 +282,10 @@ Guard specs (source-grep, in the style of `tracking-webhook-coverage.guard.spec.
 
 ## Before go-live
 
-1. ~~Confirm the gallery image resolves to `i.ebayimg.com`.~~ Done —
-   operator-verified against a live listing, 2026-09-24.
+1. ~~Confirm the gallery image resolves to `i.ebayimg.com`.~~ **Checked and
+   FALSIFIED, 2026-09-24.** A listing this system published serves its gallery
+   image from `images-na.ssl-images-amazon.com`. The earlier "confirmation" read
+   a hand-made listing. See the correction at the top of this document.
 2. Confirm current R2 pricing.
 3. Bind the image domain to the bucket; confirm `.jpg` is covered by
    Cloudflare's default cached extensions, and enable the tiered cache topology
