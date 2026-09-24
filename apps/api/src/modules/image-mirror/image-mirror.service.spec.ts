@@ -59,6 +59,24 @@ describe('ImageMirrorService.ensureMirrored', () => {
     expect(database.query).not.toHaveBeenCalled();
   });
 
+  it('refuses an oversized response by content-length before reading the body', async () => {
+    const arrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(1024));
+    const fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        'content-type': 'image/jpeg',
+        'content-length': String(10 * 1024 * 1024),
+      }),
+      arrayBuffer,
+    });
+    const { service, put, database } = makeService({ fetch });
+    await expect(service.ensureMirrored('p1', SOURCE, false)).resolves.toBeNull();
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+    expect(database.query).not.toHaveBeenCalled();
+  });
+
   it('returns null on a non-200 from Amazon', async () => {
     const fetch = jest.fn().mockResolvedValue({ ok: false, status: 404, headers: new Headers() });
     const { service, put } = makeService({ fetch });

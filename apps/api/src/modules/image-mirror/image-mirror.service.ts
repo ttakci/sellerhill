@@ -9,6 +9,13 @@ import { DatabaseService } from '../../common/database/database.service';
 const DEFAULT_CACHE_CONTROL = 'public, max-age=630720000, immutable';
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+/**
+ * The AWS SDK's own default is 0 (no timeout) — `NodeHttpHandlerOptions.requestTimeout`
+ * is opt-in, and even set it only WARNS on breach unless `throwOnRequestTimeout` is
+ * also set. This runs inline on the listing-creation path on a box where RAM/CPU are
+ * shared with the Playwright pool, so a stalled R2 PUT must not hang indefinitely.
+ */
+const S3_REQUEST_TIMEOUT_MS = 15_000;
 
 /**
  * Copies a product's first image into our own bucket so the eBay description
@@ -88,6 +95,10 @@ export class ImageMirrorService {
     if (!sourceUrl) {
       return null;
     }
+    // Verified 2026-09-24 (Node 22 / undici): an AbortSignal passed to fetch() also
+    // aborts an in-progress body read, not just the connect+headers phase — a response
+    // that stalls mid-body during response.arrayBuffer() below still aborts at
+    // FETCH_TIMEOUT_MS. Do not add a second timeout around the body read for this.
     const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!response.ok) {
       this.logger.warn(`Amazon answered ${response.status} for ${name}; not mirroring`);
@@ -97,6 +108,18 @@ export class ImageMirrorService {
     if (!contentType.startsWith('image/')) {
       this.logger.warn(`Amazon answered ${contentType || 'no content-type'} for ${name}; not mirroring`);
       return null;
+    }
+    // Refuse an oversized body BEFORE buffering it: content-length is Amazon's own
+    // claim, so it can be absent or wrong, but when present it lets us reject a huge
+    // response without ever reading its bytes into memory. The post-read byte-length
+    // check below still stands as the real bound when content-length is missing/lying.
+    const contentLengthHeader = response.headers.get('content-length');
+    if (contentLengthHeader !== null) {
+      const declaredLength = Number(contentLengthHeader);
+      if (Number.isFinite(declaredLength) && declaredLength > MAX_IMAGE_BYTES) {
+        this.logger.warn(`Amazon declared ${declaredLength} bytes for ${name}; refusing before download`);
+        return null;
+      }
     }
     const bytes = new Uint8Array(await response.arrayBuffer());
     if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) {
@@ -118,6 +141,13 @@ export class ImageMirrorService {
         credentials: {
           accessKeyId: this.config.get<string>('R2_ACCESS_KEY_ID') as string,
           secretAccessKey: this.config.get<string>('R2_SECRET_ACCESS_KEY') as string,
+        },
+        // Explicit — the SDK's own default is no timeout at all, and `requestTimeout`
+        // alone only logs a warning on breach; `throwOnRequestTimeout` is required to
+        // actually bound the call with an error `putObject`'s caller can catch.
+        requestHandler: {
+          requestTimeout: S3_REQUEST_TIMEOUT_MS,
+          throwOnRequestTimeout: true,
         },
       });
     }
