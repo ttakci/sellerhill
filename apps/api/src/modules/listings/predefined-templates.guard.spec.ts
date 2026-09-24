@@ -144,6 +144,7 @@ describe('predefined template catalog', () => {
             'https://images-na.ssl-images-amazon.com/images/I/guard-one.jpg',
             'https://m.media-amazon.com/images/I/guard-two.jpg',
           ],
+          mainImageUrl: 'https://images-na.ssl-images-amazon.com/images/I/guard-one.jpg',
         })
       );
       const outsideImageSources = withSourceHostedImage.replace(/\s+src=(['"])[\s\S]*?\1/gi, '');
