@@ -48,4 +48,18 @@ describe('isStoreAddressComplete', () => {
   it('guarantees a derivable street line whenever it reports complete', () => {
     expect(buildStoreStreetLine(complete)).not.toBe('');
   });
+
+  // The field used to be free text, so a country NAME passed every presence
+  // check and then reached eBay, which answered "Missing field country" for a
+  // field that was full. Presence is not the requirement — mappability is.
+  it.each(['United States', 'USA', 'Türkiye', 'Amerika', 'U.S.', 'ZZ'])(
+    'rejects %s, which is not an ISO 3166-1 alpha-2 code',
+    (country) => {
+      expect(isStoreAddressComplete({ ...complete, country })).toBe(false);
+    },
+  );
+
+  it('accepts a lower-case code — casing is not something eBay cares about', () => {
+    expect(isStoreAddressComplete({ ...complete, country: 'us' })).toBe(true);
+  });
 });

@@ -7,6 +7,8 @@ export {
   isValidLocale,
 } from './domain/common/common.constants';
 export type { SupportedLocale } from './domain/common/common.constants';
+export { COUNTRY_CODES, isValidCountryCode, normalizeCountryCode } from './domain/common/country-codes';
+export type { CountryCode } from './domain/common/country-codes';
 
 // Utilities
 export { generateRequestId, getRequestIdFromHeaders, isValidRequestId } from './utils/requestId';

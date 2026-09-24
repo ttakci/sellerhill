@@ -372,6 +372,7 @@
         "checkBlacklist": "Check blacklist keywords",
         "checkBlacklistDesc": "Scan listing titles, descriptions, specifics, and brand against your blacklist before publishing. Each keyword's own field selection controls where it's checked.",
         "country": "Country",
+        "countryPlaceholder": "Select a country",
         "region": "Region",
         "zipCode": "Zip Code",
         "steps": {
