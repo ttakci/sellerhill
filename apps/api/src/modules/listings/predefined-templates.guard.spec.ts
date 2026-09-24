@@ -79,6 +79,12 @@ const fullContext = buildListingTemplateContext({
   features: ['First feature', 'Second feature'],
   specs: { Brand: 'GuardBrand', Color: 'Black' },
   imageUrls: ['https://img.test/1.jpg', 'https://img.test/2.jpg'],
+  // main_image no longer falls back to imageUrls[0] (see
+  // image-mirror-invariants.guard.spec.ts), so without this every check built
+  // on `rendered` below sees an empty {{#main_image}} section and stops
+  // testing the <img> path at all. Same fix as the source-neutrality test's
+  // own local context further down this file (commit cd079872).
+  mainImageUrl: 'https://images-na.ssl-images-amazon.com/images/I/guard-one.jpg',
 });
 
 /** Nothing but a title — every optional block must collapse cleanly. */
