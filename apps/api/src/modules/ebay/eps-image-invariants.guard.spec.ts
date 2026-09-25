@@ -32,15 +32,37 @@ function read(dir: string, file: string): string {
   return fs.readFileSync(path.join(dir, file), 'utf8').replace(/\r\n/g, '\n');
 }
 
-/** Body of one class method, bounded by the next method declaration. */
+/**
+ * Body of one class method, bounded by brace-matching to the method's OWN
+ * closing brace — not, as `listing-invariants.guard.spec.ts`'s `methodBody`
+ * does, by the next `\n  private ` in the file. That bound is wrong here: the
+ * member immediately after `processDescriptionTemplate` is `calculateQuantity`,
+ * a PUBLIC method with no `private` modifier, so the next-`private` search
+ * would silently sweep it into whatever body guard 2 checks. It is harmless
+ * today only because `calculateQuantity` has no `product` in scope — the next
+ * method inserted into that gap would have nothing to signal it landed inside
+ * the assertion's blast radius. Brace-matching has no such gap: it always
+ * stops at the method's real end, whichever member (public or private) comes
+ * next, or none at all.
+ */
 function methodBody(source: string, declaration: string): string {
   const start = source.indexOf(declaration);
   if (start === -1) {
     throw new Error(`Method not found: ${declaration}`);
   }
-  const rest = source.slice(start + declaration.length);
-  const next = rest.indexOf('\n  private ');
-  return next > -1 ? rest.slice(0, next) : rest;
+  const bodyStart = start + declaration.length;
+  let depth = 0;
+  for (let index = source.indexOf('{', start); index < source.length; index += 1) {
+    if (source[index] === '{') {
+      depth += 1;
+    } else if (source[index] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return source.slice(bodyStart, index + 1);
+      }
+    }
+  }
+  throw new Error(`Could not find the end of ${declaration}`);
 }
 
 /**
@@ -114,13 +136,19 @@ describe('EPS description never falls back to a source URL', () => {
   // the field it actually gates. `product.imageUrls` legitimately appears
   // elsewhere in this same file (the GALLERY assignment, which correctly
   // falls back per image) — that is why this check is scoped to the method
-  // body, not a whole-file grep.
+  // body via brace-matched `methodBody`, not a whole-file grep.
   it('processDescriptionTemplate builds its context from mainImageUrl only, never the raw gallery array', () => {
     const source = read(LISTINGS_DIR, 'listing-strategy.service.ts');
     const body = methodBody(source, 'private async processDescriptionTemplate(');
 
     expect(body).toMatch(/mainImageUrl:\s*product\.mainImageUrl,/);
     expect(body).not.toMatch(/product\.imageUrls/);
+    // Proves the scoping itself: `calculateQuantity` is the very next class
+    // member after this method, and it carries no `private` modifier — a
+    // boundary search for the next `\n  private ` would silently include it
+    // in the checked region. It stays out of scope here on the strength of
+    // `methodBody`'s brace-matching, not by coincidence.
+    expect(body).not.toMatch(/calculateQuantity/);
   });
 });
 
@@ -172,6 +200,15 @@ describe('EbayMediaService.uploadFromUrl cannot throw', () => {
 
     expect(body).toMatch(/^\s*try \{/);
     expect(body).toMatch(/\} catch \(error\) \{[\s\S]*?return null;/);
+    // The two checks above prove a try/catch exists SOMEWHERE in the body —
+    // they do not prove it IS the body. Code inserted after the catch's own
+    // closing brace, still inside the method, would satisfy both regexes
+    // above while reopening a path that can throw uncaught. This anchors to
+    // the end of the (brace-matched, so genuinely whole) method body: after
+    // the catch's `return null;`, only whitespace and the catch's closing
+    // brace, then only whitespace and the method's own closing brace, then
+    // nothing else.
+    expect(body).toMatch(/return null;\s*\}\s*\}$/);
   });
 });
 
