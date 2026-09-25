@@ -44,17 +44,15 @@ export interface ListingTemplateInput {
   condition?: string;
   features?: string[];
   specs?: Record<string, string>;
-  imageUrls?: string[];
   /**
-   * The already-resolved URL for the single rendered image.
+   * The already-resolved URL for the single rendered image — an eBay Picture
+   * Services (`i.ebayimg.com`) URL, or nothing at all.
    *
-   * `main_image` reads this and nothing else. It deliberately does NOT fall
-   * back to `imageUrls`: the description is written once at publish and never
-   * revised, so one fallback would name the supplier on that listing for ever.
-   * Rendering no image is the correct outcome — the eBay gallery still shows
-   * every photo. The caller decides what to pass: the publish path passes the
-   * mirrored URL or nothing, while the seller-facing template preview may pass
-   * the source URL, since a preview is never published.
+   * `main_image` reads this and nothing else, and there is deliberately no
+   * gallery array on this input to fall back to. The description is written
+   * once at publish and never revised, so one fallback to a source URL would
+   * name the supplier on that listing for ever. Rendering no image is the
+   * correct outcome — the eBay gallery still shows every photo.
    */
   mainImageUrl?: string;
   price?: number;

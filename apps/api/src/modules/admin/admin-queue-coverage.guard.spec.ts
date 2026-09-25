@@ -5,7 +5,7 @@
 // hand-written array, because each entry needs a real `Queue` instance from
 // `@InjectQueue`. Nothing tied the two together, so they drifted: the constant
 // listed fifteen queues while the controller returned nine, and six were
-// invisible in the panel. One of those six DELETES things — `data-retention`
+// invisible in the panel. One of those six DELETES data — `data-retention`
 // removes database rows — which is exactly the kind of job an operator most
 // needs to see the health of.
 //
