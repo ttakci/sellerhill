@@ -37,9 +37,11 @@ import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
+import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
+import { attachEpsImages } from './attach-eps-images';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { classifyListingFailure } from './listing-failure';
 import { ListingStrategyService } from './listing-strategy.service';
@@ -198,7 +200,8 @@ export class ListingsService {
     private readonly ebayBulkService: EbayBulkService,
     private readonly strategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly ebayImages: EbayImageResolver
   ) {}
 
   /**
@@ -1849,6 +1852,8 @@ export class ListingsService {
     }
 
     const ebayAccountId = listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
+
+    await attachEpsImages(this.ebayImages, product.id, ebayAccountId, product.data);
 
     // Recompute price/qty from strategy (no AI on publish — draft already has prepared title)
     const prepared = await this.strategyService.prepareListingData(

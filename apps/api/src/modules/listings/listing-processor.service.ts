@@ -23,10 +23,11 @@ import { deferralDelayMs } from '../../common/ebay-budget/ebay-call-budget.helpe
 import { getCorrelation, withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
+import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
-import { ImageMirrorService } from '../image-mirror/image-mirror.service';
 
 import { summarizeAspectResolution } from './aspect-audit';
+import { attachEpsImages } from './attach-eps-images';
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
@@ -46,43 +47,6 @@ export class AsinNotFoundError extends Error {
   constructor(public readonly asin: string) {
     super(`No product could be resolved for ASIN ${asin}.`);
     this.name = 'AsinNotFoundError';
-  }
-}
-
-/**
- * Fill `mainImageMirroredUrl` in place, best-effort.
- *
- * Exported so it can be tested without standing up the processor. It never
- * throws: an image is not worth failing a listing over, and an unmirrored
- * product simply renders no image and is retried on the next listing for the
- * same ASIN.
- *
- * `mirroredImageName` must be the name ACTUALLY uploaded for this product
- * (`products.mirrored_image_name`), never a boolean "was this mirrored at
- * some point" flag — `ensureMirrored`'s reuse path returns a URL built from
- * this value, and `product.imageUrls[0]` (the CURRENT, mutable image) is not
- * a substitute for it. Pass `null` for a product that has never been mirrored.
- */
-export async function attachMirroredImage(
-  mirror: {
-    ensureMirrored: (productId: string, imageUrl: string | undefined, mirroredImageName: string | null) => Promise<string | null>;
-  },
-  productId: string,
-  product: ProductData,
-  mirroredImageName: string | null
-): Promise<void> {
-  const first = product.imageUrls?.[0];
-  if (!first) {
-    return;
-  }
-  try {
-    const mirrored = await mirror.ensureMirrored(productId, first, mirroredImageName);
-    if (mirrored) {
-      product.mainImageMirroredUrl = mirrored;
-    }
-  } catch {
-    // Deliberately silent — ImageMirrorService already logs, and this must not
-    // be able to interrupt listing creation.
   }
 }
 
@@ -107,7 +71,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly listingStrategyService: ListingStrategyService,
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
-    private readonly imageMirror: ImageMirrorService,
+    private readonly ebayImages: EbayImageResolver,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -219,6 +183,7 @@ export class ListingProcessorService extends WorkerHost {
         }
 
         const { productData, productId } = await this.resolveProductData(item.asin, userId);
+        await attachEpsImages(this.ebayImages, productId, ebayAccountId, productData);
         const listingData = await this.listingStrategyService.prepareListingData(
           userId,
           productData,
@@ -589,7 +554,6 @@ export class ListingProcessorService extends WorkerHost {
     const cached = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
     if (cached) {
       this.logger.log(`Using cached product data for ASIN ${asin} (no Keepa call)`);
-      await attachMirroredImage(this.imageMirror, cached.productId, cached.productData, cached.mirroredImageName);
       return cached;
     }
 
@@ -606,12 +570,6 @@ export class ListingProcessorService extends WorkerHost {
       const cachedAfterLock = this.asUsableCache(await this.listingsService.getProductByAsin(asin, marketplace));
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
-        await attachMirroredImage(
-          this.imageMirror,
-          cachedAfterLock.productId,
-          cachedAfterLock.productData,
-          cachedAfterLock.mirroredImageName
-        );
         return cachedAfterLock;
       }
 
@@ -644,8 +602,6 @@ export class ListingProcessorService extends WorkerHost {
       );
 
       const productId = await this.listingsService.findOrCreateProduct(asin, keepaProduct, marketplace);
-      // A row just inserted by findOrCreateProduct has never been mirrored.
-      await attachMirroredImage(this.imageMirror, productId, keepaProduct, null);
       return { productData: keepaProduct, productId };
     });
   }
