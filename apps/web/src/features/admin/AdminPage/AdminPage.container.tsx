@@ -1,6 +1,6 @@
 import { UserRole } from '@repo/shared';
 import { formatDate, formatMicroCurrency, getLocaleConfig } from '@repo/ui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
@@ -16,6 +16,7 @@ import {
 import { useAdminEbayColumns } from '../hooks/useAdminEbayColumns';
 import { useAdminListingQuality } from '../hooks/useAdminListingQuality';
 import { useAdminUserColumns } from '../hooks/useAdminUserColumns';
+import { buildEbayFigureNote } from '../utils/ebayFigureNote';
 
 import { AdminPageComponent } from './AdminPage.component';
 import type { AdminTabId } from './AdminPage.types';
@@ -39,7 +40,7 @@ const VALID_TABS: AdminTabId[] = [
 /** Category render order — cost levers first, cosmetics last. */
 export const AdminPageContainer = (): React.ReactElement => {
   const { buildPath } = useLocale();
-  const { i18n } = useTranslation(['admin', 'translation']);
+  const { t, i18n } = useTranslation(['admin', 'translation']);
   /* The tab comes from the URL only — navigation between admin sections now
      happens through real sidebar links (OperatorLayout), not an in-page
      switcher, so this page never needs to write the query string itself. */
@@ -54,6 +55,18 @@ export const AdminPageContainer = (): React.ReactElement => {
   const { data: usersList } = useGetAdminUsersQuery(undefined, { skip });
   const { data: ebayBudget } = useGetAdminEbayBudgetQuery(undefined, { skip });
   const { data: listingFailures } = useGetAdminListingFailuresQuery(undefined, { skip });
+
+  // The age sentence for eBay's own figures — empty until eBay has ever
+  // answered, since there is then nothing to date. `Date.now()` lives in the
+  // plain helper, not here, because the render-purity lint refuses an impure
+  // call inside a hook's body.
+  const ebayFetchedAtIso = ebayBudget?.fetchedAt ?? null;
+  const ebayFigureNote = useMemo(
+    () => buildEbayFigureNote(ebayFetchedAtIso, i18n.language, t),
+    [ebayFetchedAtIso, i18n.language, t]
+  );
+  const ebayFigureStale = !(ebayBudget?.live ?? true) && ebayFetchedAtIso !== null;
+  const ebayFigureMissing = ebayFetchedAtIso === null;
   const listingQuality = useAdminListingQuality(skip);
 
   const tabParam = searchParams.get('tab') as AdminTabId | null;
@@ -73,7 +86,7 @@ export const AdminPageContainer = (): React.ReactElement => {
   );
   /* Must sit above the role guard — hooks cannot be called after an early return. */
   const userColumns = useAdminUserColumns(formatCost);
-  const { budgetColumns, failureColumns } = useAdminEbayColumns();
+  const { budgetColumns, unmappedColumns, failureColumns } = useAdminEbayColumns();
 
   /* A SUPPORT operator lands on the support console, a seller on its own app. */
   if (!isLoading && user?.role !== UserRole.ADMIN) {
@@ -89,10 +102,15 @@ export const AdminPageContainer = (): React.ReactElement => {
       providerCosts={providerCosts}
       billingMetrics={billingMetrics}
       usersList={usersList}
-      ebayBudget={ebayBudget ?? []}
+      ebayBudgetRows={ebayBudget?.rows ?? []}
+      ebayUnmapped={ebayBudget?.unmapped ?? []}
+      ebayFigureNote={ebayFigureNote}
+      ebayFigureStale={ebayFigureStale}
+      ebayFigureMissing={ebayFigureMissing}
       listingFailures={listingFailures}
       userColumns={userColumns}
       budgetColumns={budgetColumns}
+      unmappedColumns={unmappedColumns}
       failureColumns={failureColumns}
       skip={skip}
       formatCost={formatCost}

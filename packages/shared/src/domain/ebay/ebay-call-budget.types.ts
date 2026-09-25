@@ -62,21 +62,6 @@ export enum EbayCallPriority {
   BACKGROUND = 'background',
 }
 
-/** Live utilization for one resource, as shown in the admin panel. */
-export interface EbayCallBudgetStatusDto {
-  resource: EbayApiResource;
-  /** Full daily ceiling. */
-  limit: number;
-  used: number;
-  remaining: number;
-  /** Ceiling background work is held to (limit minus the interactive reserve). */
-  backgroundLimit: number;
-  /** ISO timestamp at which the counter resets. */
-  resetAt: string;
-  /** True when eBay's own Analytics API confirmed this ceiling, false when it is a configured default. */
-  observed: boolean;
-}
-
 /** One rate window eBay reports for a resource. A resource may report several. */
 export interface EbayRateWindowDto {
   limit: number;

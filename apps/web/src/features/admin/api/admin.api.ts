@@ -11,7 +11,7 @@ import type {
   AdminUsersListDto,
   PlatformSettingsListDto,
   ProviderCostSummaryDto,
-  EbayCallBudgetStatusDto,
+  EbayBudgetOverviewDto,
   UpsertAspectDefaultRequest,
   UserCostSummaryDto,
 } from '@repo/shared';
@@ -45,8 +45,9 @@ export const adminApi = baseApi.injectEndpoints({
       providesTags: ['Admin'],
     }),
     // eBay meters calls per APPLICATION, so this is one pool shared by every
-    // seller — the panel is how an operator watches it drain.
-    getAdminEbayBudget: builder.query<EbayCallBudgetStatusDto[], void>({
+    // seller — the panel is how an operator watches it drain, beside eBay's
+    // own reported ceilings (never a typed-in default).
+    getAdminEbayBudget: builder.query<EbayBudgetOverviewDto, void>({
       query: () => '/admin/ebay/budget',
       providesTags: ['Admin'],
     }),
