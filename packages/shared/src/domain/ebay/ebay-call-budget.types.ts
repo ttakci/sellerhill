@@ -21,7 +21,14 @@ export enum EbayApiResource {
   ACCOUNT = 'sell.account',
   /** Order retrieval and shipping fulfillment. */
   FULFILLMENT = 'sell.fulfillment',
-  /** Legacy XML calls (store discovery, EndItem). */
+  /**
+   * Legacy XML calls (store discovery, EndItem).
+   *
+   * eBay meters Trading PER METHOD, not as one pool (AddItem 100,000/day,
+   * GetMyeBaySelling 5,000/day, ...). This single member is therefore mapped to
+   * the lowest daily limit among the methods we actually call — a mapping, not
+   * the whole truth about Trading.
+   */
   TRADING = 'trading',
   /**
    * Bulk report tasks (create → poll → download).
@@ -68,4 +75,63 @@ export interface EbayCallBudgetStatusDto {
   resetAt: string;
   /** True when eBay's own Analytics API confirmed this ceiling, false when it is a configured default. */
   observed: boolean;
+}
+
+/** One rate window eBay reports for a resource. A resource may report several. */
+export interface EbayRateWindowDto {
+  limit: number;
+  remaining: number;
+  /** Window length in seconds. A "day" is not always exactly 86400. */
+  timeWindowSeconds: number;
+  /** When eBay's own window resets — NOT UTC midnight in general. */
+  resetAt: string | null;
+}
+
+/** One resource exactly as eBay's `getRateLimits` reports it, flattened. */
+export interface EbayRateLimitResourceDto {
+  apiContext: string;
+  apiName: string;
+  apiVersion: string;
+  resourceName: string;
+  /** Empty when eBay reports no rate at all (e.g. the Media API image resource). */
+  windows: EbayRateWindowDto[];
+}
+
+/**
+ * One governed resource in the admin panel: eBay's figure beside our counter.
+ *
+ * The two are deliberately never subtracted. eBay's day resets at its own time
+ * and ours at UTC midnight, so a difference would be meaningless — the operator
+ * compares them by eye, and a large mismatch means some caller bypasses the
+ * governor.
+ */
+export interface EbayBudgetResourceRowDto {
+  resource: EbayApiResource;
+  /** eBay's daily ceiling; null when eBay reported none — the governor then does not gate. */
+  ebayLimit: number | null;
+  ebayRemaining: number | null;
+  ebayResetAt: string | null;
+  /** eBay resource names this row was derived from. */
+  sourceResources: string[];
+  /** True when the row stands for part of what eBay meters (Trading). */
+  partial: boolean;
+  /** Sub-daily windows eBay also enforces on the same source. */
+  otherWindows: EbayRateWindowDto[];
+  /** Calls our governor counted today (UTC). */
+  ourCount: number;
+  /** Ceiling background work is held to; null when there is no eBay ceiling. */
+  backgroundLimit: number | null;
+  /** When our counter resets (UTC midnight). */
+  ourResetAt: string;
+}
+
+/** `GET /v1/admin/ebay/budget`. */
+export interface EbayBudgetOverviewDto {
+  /** When eBay's figures were captured; null when eBay has never answered. */
+  fetchedAt: string | null;
+  /** False when the latest fetch failed and a stored snapshot is being shown. */
+  live: boolean;
+  rows: EbayBudgetResourceRowDto[];
+  /** Everything eBay reports that no governed resource uses — shown, never hidden. */
+  unmapped: EbayRateLimitResourceDto[];
 }
