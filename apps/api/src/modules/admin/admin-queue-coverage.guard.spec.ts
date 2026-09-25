@@ -5,9 +5,9 @@
 // hand-written array, because each entry needs a real `Queue` instance from
 // `@InjectQueue`. Nothing tied the two together, so they drifted: the constant
 // listed fifteen queues while the controller returned nine, and six were
-// invisible in the panel. Two of those six DELETE things — `data-retention`
-// removes database rows and `image-mirror-gc` removes stored objects — so they
-// are exactly the jobs an operator most needs to see the health of.
+// invisible in the panel. One of those six DELETES things — `data-retention`
+// removes database rows — which is exactly the kind of job an operator most
+// needs to see the health of.
 //
 // These are source-greps rather than a DI test on purpose: instantiating the
 // controller would mean standing up fifteen injected queues, and the failure

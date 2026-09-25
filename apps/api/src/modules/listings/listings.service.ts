@@ -63,7 +63,6 @@ interface ListingQueryRow {
   quantity: number;
   source_stock: number | null;
   image_urls: string[] | null;
-  image_mirrored_at: Date | string | null;
   ebay_item_id: string | null;
   listing_settings_group_id: string;
   ebay_category_name: string | null;
@@ -104,8 +103,6 @@ interface ProductQueryRow {
   price: string | ProductPriceData;
   currency: string;
   image_urls: string[] | string;
-  image_mirrored_at: Date | string | null;
-  mirrored_image_name: string | null;
   brand: string | null;
   category: string | null;
   category_path: string | null;
@@ -555,7 +552,6 @@ export class ListingsService {
       `
       SELECT l.*,
              p.image_urls,
-             p.image_mirrored_at,
              p.category as product_category,
              p.stock as source_stock,
              p.brand,
@@ -825,7 +821,6 @@ export class ListingsService {
       SELECT
         l.*,
         p.image_urls,
-        p.image_mirrored_at,
         p.category AS product_category,
         p.stock AS source_stock,
         p.brand,
@@ -1047,12 +1042,10 @@ export class ListingsService {
   ): Promise<{
     id: string;
     data: ProductData;
-    image_mirrored_at: Date | string | null;
-    mirrored_image_name: string | null;
   } | null> {
     const results = await this.databaseService.query<ProductQueryRow>(
       `
-      SELECT id, asin, title, description, price, currency, image_urls, image_mirrored_at, mirrored_image_name,
+      SELECT id, asin, title, description, price, currency, image_urls,
              brand, manufacturer, category, category_path, features, specs, identifiers, stock,
              raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1 AND marketplace = $2
@@ -1100,7 +1093,7 @@ export class ListingsService {
         : undefined,
     };
 
-    return { id: row.id, data, image_mirrored_at: row.image_mirrored_at, mirrored_image_name: row.mirrored_image_name };
+    return { id: row.id, data };
   }
 
   /**

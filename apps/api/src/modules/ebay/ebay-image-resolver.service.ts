@@ -82,13 +82,11 @@ export class EbayImageResolver {
         // parseCacheHit, so it would read as a permanent HIT on every future
         // listing of this (product, store) — the exact Amazon-URL leak this
         // feature exists to close, with nothing left to retry it. A missing
-        // row is already this design's retry signal (same convention as
-        // ImageMirrorService.ensureMirrored's NULL watermark), so skipping the
-        // write here just lets the next listing try again from scratch. It
-        // also protects a pre-existing GOOD row from being overwritten by a
-        // transient outage on re-upload — ON CONFLICT DO UPDATE would
-        // otherwise clobber it. A partial failure (at least one success) is
-        // still stored, per the brief.
+        // row is the retry signal instead, so skipping the write here just
+        // lets the next listing try again from scratch. It also protects a
+        // pre-existing GOOD row from being overwritten by a transient outage
+        // on re-upload — ON CONFLICT DO UPDATE would otherwise clobber it. A
+        // partial failure (at least one success) is still stored, per the brief.
         const allFailed = uploaded.every((entry) => entry === '');
         if (!allFailed) {
           await client.query(

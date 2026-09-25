@@ -137,8 +137,7 @@ describe('EbayMediaService.uploadFromUrl', () => {
 
   /**
    * A `Retry-After` this large would sleep for roughly eleven days if honoured
-   * verbatim. `sleep` is overridden on the instance (the same pattern
-   * `image-mirror.service.spec.ts` uses for `putObject`) so this asserts the
+   * verbatim. `sleep` is overridden on the instance so this asserts the
    * CLAMPED duration actually passed to it, never the wall-clock — the test
    * must not, and does not, wait for anything close to the header's value.
    */

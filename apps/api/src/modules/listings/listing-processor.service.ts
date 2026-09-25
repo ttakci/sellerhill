@@ -636,10 +636,8 @@ export class ListingProcessorService extends WorkerHost {
     existing: {
       id: string;
       data: ProductData;
-      image_mirrored_at?: Date | string | null;
-      mirrored_image_name?: string | null;
     } | null
-  ): { productData: ProductData; productId: string; mirroredImageName: string | null } | null {
+  ): { productData: ProductData; productId: string } | null {
     if (
       existing &&
       existing.data.title &&
@@ -649,12 +647,6 @@ export class ListingProcessorService extends WorkerHost {
       return {
         productData: existing.data,
         productId: existing.id,
-        // The name ACTUALLY uploaded, not a derived-from-image_urls guess. A
-        // row with image_mirrored_at set but no stored name (a pre-117 row,
-        // or one backfilled with empty image_urls) falls through to null,
-        // which sends it back through ensureMirrored's upload path — a
-        // self-heal, not a defect.
-        mirroredImageName: existing.mirrored_image_name ?? null,
       };
     }
     return null;

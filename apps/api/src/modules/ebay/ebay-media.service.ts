@@ -161,9 +161,8 @@ export class EbayMediaService {
 
   /**
    * Its own instance method — not a module-level function — so a test can
-   * override it on the instance (the same pattern `image-mirror.service.spec.ts`
-   * uses for `putObject`) to assert the clamped duration without ever sleeping
-   * for it.
+   * override it on the instance to assert the clamped duration without ever
+   * sleeping for it.
    */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
