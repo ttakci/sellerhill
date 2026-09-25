@@ -21,7 +21,6 @@ describe('renderListingTemplate', () => {
     asin: 'B00TEST123',
     features: ['Gluten free', '16 pouches'],
     specs: { Brand: 'Fruit by the Foot', Flavor: 'Assorted' },
-    imageUrls: ['https://img/1.jpg', 'https://img/2.jpg'],
     mainImageUrl: 'https://img/1.jpg',
     price: 12.05,
     currency: 'USD',
@@ -117,12 +116,14 @@ describe('renderListingTemplate', () => {
 });
 
 describe('images vocabulary removal', () => {
+  // There is no gallery array on this input at all any more — the `imageUrls`
+  // field was removed, so a template asking for `{{#images}}` has nothing it
+  // could possibly be fed from.
   const context = buildListingTemplateContext({
     title: 'T',
-    imageUrls: ['https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg'],
   });
 
-  it('renders nothing for an images section, even with images present', () => {
+  it('renders nothing for an images section', () => {
     expect(renderListingTemplate('A{{#images}}<img src="{{.}}">{{/images}}B', context)).toBe('AB');
   });
 
@@ -144,7 +145,6 @@ describe('buildListingTemplateSnippet', () => {
   const context = buildListingTemplateContext({
     title: 'Fruit Roll-Ups Variety Pack',
     description: '',
-    imageUrls: ['https://img.example/a.jpg', 'https://img.example/b.jpg'],
   });
 
   it('is the plain placeholder for every offered key', () => {
@@ -161,19 +161,18 @@ describe('buildListingTemplateSnippet', () => {
 });
 
 describe('main_image never carries the source URL', () => {
-  const AMAZON = 'https://images-na.ssl-images-amazon.com/images/I/71nx65qZq6L.jpg';
-
-  it('renders the mirrored URL when one is supplied', () => {
+  it('renders the resolved EPS URL when one is supplied', () => {
     const context = buildListingTemplateContext({
       title: 'T',
-      imageUrls: [AMAZON],
-      mainImageUrl: 'https://img.example.com/71nx65qZq6L.jpg',
+      mainImageUrl: 'https://i.ebayimg.com/00/s/abc/$_1.JPG',
     });
-    expect(context.main_image).toBe('https://img.example.com/71nx65qZq6L.jpg');
+    expect(context.main_image).toBe('https://i.ebayimg.com/00/s/abc/$_1.JPG');
   });
 
-  it('renders nothing when no mirrored URL is supplied, even with imageUrls present', () => {
-    const context = buildListingTemplateContext({ title: 'T', imageUrls: [AMAZON] });
+  it('renders nothing when no resolved URL is supplied', () => {
+    // There is deliberately no gallery array on ListingTemplateInput to fall
+    // back to — `mainImageUrl` is the only image this context can ever carry.
+    const context = buildListingTemplateContext({ title: 'T' });
     expect(context.main_image).toBe('');
     expect(renderListingTemplate('A{{#main_image}}<img src="{{.}}">{{/main_image}}B', context)).toBe('AB');
   });

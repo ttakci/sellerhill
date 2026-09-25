@@ -160,9 +160,24 @@ URL. That was an operator decision on 2026-09-24 and it still holds: the
 description is written once at publish and never revised, so one fallback
 exposes the supplier there permanently.
 
-The gallery is different and *does* fall back per image, because eBay revises
-`imageUrls` on every price/stock sync — a gallery image is correctable, a
-description is not.
+The gallery is different and *does* fall back per image — but **not** because
+it is correctable later. Nothing in this codebase re-sends `imageUrls` after
+create: `buildInventoryItemPayload` is the only emitter and
+`EbayBulkService.createListings` its only caller, while `updatePriceQuantity`
+carries quantity and price alone. A gallery image that falls back is therefore
+Amazon-hosted for the life of that listing, exactly like a description.
+
+It falls back anyway because the alternative there is `EBAY_PLACEHOLDER_IMAGE`
+on a listing with no photos at all, and one Amazon-hosted photo beats none. The
+description has no such cost: the gallery is already showing every photo, so
+rendering nothing loses the buyer nothing.
+
+*Corrected 2026-09-25, during this branch's final review.* This section
+originally justified the gallery fallback with "eBay revises `imageUrls` on
+every price/stock sync". That is false — and it is the same class of error
+this whole design exists to fix: an unverified belief about what eBay does
+with `imageUrls`, written down and then relied on. It also understated how
+much upload reliability matters.
 
 ## Rate limits
 

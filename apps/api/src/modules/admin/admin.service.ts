@@ -98,7 +98,6 @@ export const ADMIN_QUEUE_NAMES = [
   'billing-subscription-reconcile',
   'billing-price-migration',
   'data-retention',
-  'image-mirror-gc',
 ] as const;
 
 @Injectable()
