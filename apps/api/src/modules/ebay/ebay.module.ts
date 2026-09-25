@@ -14,6 +14,8 @@ import { EbayAccountDeletionController } from './ebay-account-deletion.controlle
 import { EbayAccountDeletionService } from './ebay-account-deletion.service';
 import { EbayBulkService } from './ebay-bulk.service';
 import { EbayFeedService } from './ebay-feed.service';
+import { EbayImageResolver } from './ebay-image-resolver.service';
+import { EbayMediaService } from './ebay-media.service';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { EbayController } from './ebay.controller';
@@ -32,6 +34,8 @@ import { EbayService } from './ebay.service';
     EbayService,
     EbayBulkService,
     EbayFeedService,
+    EbayImageResolver,
+    EbayMediaService,
     EbayOAuthService,
     EbayTaxonomyService,
     AspectResolverService,
@@ -44,6 +48,8 @@ import { EbayService } from './ebay.service';
     EbayService,
     EbayBulkService,
     EbayFeedService,
+    EbayImageResolver,
+    EbayMediaService,
     EbayFulfillmentService,
     EbayTaxonomyService,
     AspectResolverService,

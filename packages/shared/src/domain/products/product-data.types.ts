@@ -34,13 +34,17 @@ export interface ProductData {
   description: string;
   imageUrls: string[];
   /**
-   * Our own URL for this product's first image, when it has been mirrored.
+   * The eBay Picture Services (EPS) URL for this product's first image, for
+   * the store publishing it.
    *
-   * Resolved on the create path and read by the description template. Undefined
-   * means not mirrored, and the template then renders no image at all — it must
-   * never fall back to the `imageUrls` entry, which names the supplier.
+   * Resolved by `EbayImageResolver` before the listing template renders, and
+   * read only by the description template. Undefined means no EPS upload
+   * exists yet (or every attempt failed), and the template then renders no
+   * image at all — it must never fall back to the `imageUrls` entry, which is
+   * an Amazon-hosted URL and would name the supplier in the page source for
+   * the life of the listing.
    */
-  mainImageMirroredUrl?: string;
+  mainImageUrl?: string;
   brand: string;
   /** Leaf Amazon category name, e.g. `Espresso Machines`. A search hint. */
   category?: string;

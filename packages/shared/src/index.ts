@@ -30,7 +30,14 @@ export type {
 } from './utils/listing-template';
 export { applyEbayFees, calculateListingPrice } from './utils/listing-pricing';
 export type { ListingPriceBreakdown, ListingPriceMetrics } from './utils/listing-pricing';
-export * from './utils/product-image';
+export {
+  EBAY_EPS_IMAGE_BASE_URL,
+  extractEpsImageId,
+  isEpsImageUrl,
+  readEpsImageUrl,
+  resolveDescriptionUrl,
+  resolveGalleryUrls,
+} from './utils/ebay-eps';
 export { isValidTotpSecret, normalizeTotpSecret } from './utils/totp-secret';
 export {
   PlatformSettingDraftIssue,
