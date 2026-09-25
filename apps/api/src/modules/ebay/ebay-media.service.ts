@@ -17,21 +17,27 @@ import { EbayService } from './ebay.service';
 const MAX_ATTEMPTS = 3;
 const BASE_BACKOFF_MS = 500;
 
+/**
+ * Ceiling on any single backoff wait, `Retry-After` included. This call sits on
+ * the SYNCHRONOUS listing-creation path (Task 5), so an unbounded sleep here
+ * does not degrade a listing — it stops one. Two windows of the documented
+ * 50-per-5s limit is generous; past that, a misconfigured/rewritten header is
+ * not information worth honouring and giving up (returning `null`, per the
+ * fail-soft contract) is the better outcome.
+ */
+export const MAX_BACKOFF_MS = 10_000;
+
 interface EbayErrorBody {
   errors?: Array<{ errorId?: number; message?: string }>;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 /**
- * Delta-seconds `Retry-After` only, matching `parseRetryAfterMs` in
- * `ebay-http-retry.ts` — mirrored rather than imported, since that module's
- * retry loop is axios-specific (see the task's "do not use it" ruling) and
- * charges the eBay call budget, which this resource is deliberately kept out of.
+ * Parses `Retry-After` as delta-seconds (eBay's REST error responses use that
+ * form). Unlike the same-named helper in `ebay-http-retry.ts` — which this
+ * module deliberately does not import, see the class doc — the value here is
+ * NEVER used verbatim: `fetchWithRetry` clamps whatever comes back against
+ * `MAX_BACKOFF_MS` before sleeping, because the header is eBay's word, not a
+ * bound we control.
  */
 function parseRetryAfterMs(value: string | null): number | null {
   if (!value) {
@@ -135,7 +141,10 @@ export class EbayMediaService {
     return url;
   }
 
-  /** Retries a 429 with backoff, honouring `Retry-After` when eBay sends one. */
+  /**
+   * Retries a 429 with backoff, honouring `Retry-After` when eBay sends one —
+   * but never sleeping longer than `MAX_BACKOFF_MS`, whatever the header says.
+   */
   private async fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
     for (let attempt = 1; ; attempt += 1) {
       const response = await fetch(url, init);
@@ -143,9 +152,22 @@ export class EbayMediaService {
         return response;
       }
       const retryAfterMs = parseRetryAfterMs(response.headers.get('retry-after'));
-      const backoffMs = retryAfterMs ?? BASE_BACKOFF_MS * 2 ** (attempt - 1);
+      const uncappedMs = retryAfterMs ?? BASE_BACKOFF_MS * 2 ** (attempt - 1);
+      const backoffMs = Math.min(uncappedMs, MAX_BACKOFF_MS);
       this.logger.warn(`EPS ${url} answered 429 (attempt ${attempt}/${MAX_ATTEMPTS}) — retrying in ${backoffMs}ms`);
-      await sleep(backoffMs);
+      await this.sleep(backoffMs);
     }
+  }
+
+  /**
+   * Its own instance method — not a module-level function — so a test can
+   * override it on the instance (the same pattern `image-mirror.service.spec.ts`
+   * uses for `putObject`) to assert the clamped duration without ever sleeping
+   * for it.
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }

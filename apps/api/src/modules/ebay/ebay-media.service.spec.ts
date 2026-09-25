@@ -1,4 +1,4 @@
-import { EbayMediaService } from './ebay-media.service';
+import { EbayMediaService, MAX_BACKOFF_MS } from './ebay-media.service';
 
 const ACCOUNT_ID = 'acct-1';
 const TOKEN = 'test-token';
@@ -133,5 +133,35 @@ describe('EbayMediaService.uploadFromUrl', () => {
 
     await expect(service.uploadFromUrl(ACCOUNT_ID, SOURCE_URL)).resolves.toBe(epsUrl);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  /**
+   * A `Retry-After` this large would sleep for roughly eleven days if honoured
+   * verbatim. `sleep` is overridden on the instance (the same pattern
+   * `image-mirror.service.spec.ts` uses for `putObject`) so this asserts the
+   * CLAMPED duration actually passed to it, never the wall-clock — the test
+   * must not, and does not, wait for anything close to the header's value.
+   */
+  it('clamps an absurd Retry-After to MAX_BACKOFF_MS instead of sleeping it verbatim', async () => {
+    const epsUrl = 'https://i.ebayimg.com/00/s/clamped/$_1.JPG?set_id=4';
+    const fetchMock = jest
+      .fn<Promise<FakeResponse>, [string, FakeRequestInit]>()
+      .mockResolvedValueOnce(response({ status: 429, headers: new Headers({ 'retry-after': '999999' }) }))
+      .mockResolvedValueOnce(
+        response({
+          status: 201,
+          headers: new Headers({ location: 'https://apim.ebay.com/commerce/media/v1_beta/image/img999' }),
+          body: JSON.stringify({ imageUrl: epsUrl }),
+        })
+      );
+    const { service } = makeService(fetchMock);
+    const sleepSpy = jest.fn<Promise<void>, [number]>().mockResolvedValue(undefined);
+    (service as unknown as { sleep: unknown }).sleep = sleepSpy;
+
+    await expect(service.uploadFromUrl(ACCOUNT_ID, SOURCE_URL)).resolves.toBe(epsUrl);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(sleepSpy).toHaveBeenCalledTimes(1);
+    expect(sleepSpy).toHaveBeenCalledWith(MAX_BACKOFF_MS);
+    expect(sleepSpy.mock.calls[0][0]).toBeLessThan(999_999 * 1000);
   });
 });
