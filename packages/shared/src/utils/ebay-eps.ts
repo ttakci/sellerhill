@@ -2,11 +2,22 @@
  * Reading eBay Picture Services responses, and deciding which URL each surface
  * gets.
  *
- * The two surfaces deliberately behave differently. The GALLERY falls back per
- * image to the source URL, because eBay revises `imageUrls` on every price and
- * stock sync — a missing mirror there is correctable later. The DESCRIPTION
- * never falls back: it is written once at publish and never revised, so one
- * Amazon URL there names the supplier for the life of the listing.
+ * The two surfaces deliberately behave differently, and NOT because one is
+ * correctable later — neither is. Nothing in this codebase ever re-sends
+ * `imageUrls` to eBay after create: `buildInventoryItemPayload` is the only
+ * function that emits them and `EbayBulkService.createListings` is its only
+ * caller, while `updatePriceQuantity` carries quantity and price alone. So a
+ * failed upload is permanent on BOTH surfaces, for the life of the listing.
+ *
+ * The GALLERY still falls back per image to the source URL, because the
+ * alternative is `EBAY_PLACEHOLDER_IMAGE` on a listing with no photos at all,
+ * and a listing with one Amazon-hosted photo outsells a listing with none.
+ * The DESCRIPTION never falls back, because there the choice is between an
+ * Amazon URL and no image — and the gallery is already showing every photo,
+ * so no image costs the listing nothing.
+ *
+ * That asymmetry is a trade, not a safety net. Upload reliability is what
+ * actually keeps the supplier's domain off a listing.
  */
 
 /**
@@ -61,7 +72,13 @@ export function readEpsImageUrl(body: string): string | null {
   }
 }
 
-/** Gallery URLs: EPS where we have it, the source URL where we do not. */
+/**
+ * Gallery URLs: EPS where we have it, the source URL where we do not.
+ *
+ * The fallback is NOT correctable on a later sync (see this file's header) —
+ * it is accepted because a listing with no photos is worse than a listing with
+ * one Amazon-hosted photo.
+ */
 export function resolveGalleryUrls(sourceUrls: string[], epsBySource: Map<string, string>): string[] {
   return (sourceUrls ?? []).map((source) => epsBySource.get(source) ?? source);
 }
