@@ -195,7 +195,7 @@ describe('EbayMediaService.uploadFromUrl cannot throw', () => {
     const source = read(EBAY_DIR, 'ebay-media.service.ts');
     const body = methodBody(
       source,
-      'async uploadFromUrl(accountId: string, sourceUrl: string): Promise<string | null> {'
+      'async uploadFromUrl(accessToken: string, sourceUrl: string): Promise<string | null> {'
     );
 
     expect(body).toMatch(/^\s*try \{/);
