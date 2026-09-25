@@ -131,6 +131,51 @@ describe('EbayImageResolver.resolve', () => {
     expect(ebayMedia.uploadFromUrl).not.toHaveBeenCalled();
   });
 
+  it('issues no write when every upload fails, and still falls back to the source URLs', async () => {
+    const sourceUrls = ['https://amazon.example/a.jpg', 'https://amazon.example/b.jpg'];
+    const client = makeClient({ query: jest.fn().mockResolvedValue({ rows: [] }) });
+    const database = makeDatabase({ query: jest.fn().mockResolvedValue([]), client });
+    const uploadFromUrl = jest.fn().mockResolvedValue(null);
+    const ebayMedia = makeEbayMediaService({ uploadFromUrl });
+    const { resolver } = makeResolver({ database, ebayMedia });
+
+    const result = await resolver.resolve(PRODUCT_ID, ACCOUNT_ID, sourceUrls);
+
+    expect(uploadFromUrl).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ galleryUrls: sourceUrls, descriptionUrl: '' });
+    // A total failure must not write an all-empty row — that row would
+    // satisfy the length-only cache check forever after, permanently hiding
+    // the fallback-to-source-URL behaviour behind a false HIT with nothing
+    // left to retry it.
+    expect(findInsertCall(client)).toBeUndefined();
+  });
+
+  it('does not overwrite an existing cached row when a later re-upload fails entirely', async () => {
+    const sourceUrls = ['https://amazon.example/a.jpg', 'https://amazon.example/b.jpg'];
+    // A row from an earlier run, for a DIFFERENT image count than the product
+    // carries today — parseCacheHit reads this as a miss (length mismatch),
+    // which is exactly the situation that re-triggers an upload attempt on an
+    // otherwise-good, already-cached product.
+    const staleGoodRow = ['https://i.ebayimg.com/old-a.jpg', 'https://i.ebayimg.com/old-b.jpg', 'https://i.ebayimg.com/old-c.jpg'];
+    const client = makeClient({ query: jest.fn().mockResolvedValue({ rows: [{ image_urls: staleGoodRow }] }) });
+    const database = makeDatabase({
+      query: jest.fn().mockResolvedValue([{ image_urls: staleGoodRow }]),
+      client,
+    });
+    const uploadFromUrl = jest.fn().mockResolvedValue(null);
+    const ebayMedia = makeEbayMediaService({ uploadFromUrl });
+    const { resolver } = makeResolver({ database, ebayMedia });
+
+    const result = await resolver.resolve(PRODUCT_ID, ACCOUNT_ID, sourceUrls);
+
+    expect(uploadFromUrl).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ galleryUrls: sourceUrls, descriptionUrl: '' });
+    // The pre-existing (mismatched-length, otherwise good) row must survive a
+    // transient total-failure re-upload attempt — ON CONFLICT DO UPDATE would
+    // otherwise clobber a working cache with an all-empty array.
+    expect(findInsertCall(client)).toBeUndefined();
+  });
+
   it('uploads only the first EBAY_MAX_IMAGES source URLs, and a later call recognizes the capped cache as a hit', async () => {
     const sourceUrls = Array.from({ length: EBAY_MAX_IMAGES + 6 }, (_, i) => `https://amazon.example/${i}.jpg`);
     const uploadFromUrl = jest.fn().mockImplementation((_accountId: string, url: string) =>

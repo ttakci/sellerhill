@@ -76,14 +76,30 @@ export class EbayImageResolver {
           uploaded.push(epsUrl ?? '');
         }
 
-        await client.query(
-          `INSERT INTO product_ebay_images (product_id, ebay_account_id, image_urls, uploaded_at)
-           VALUES ($1, $2, $3, NOW())
-           ON CONFLICT (product_id, ebay_account_id) DO UPDATE SET
-             image_urls = EXCLUDED.image_urls,
-             uploaded_at = NOW()`,
-          [productId, ebayAccountId, JSON.stringify(uploaded)]
-        );
+        // A TOTAL failure (every upload came back null — eBay down, a bad
+        // token, the product's images momentarily unfetchable) must never be
+        // written. A stored all-empty row still satisfies the length check in
+        // parseCacheHit, so it would read as a permanent HIT on every future
+        // listing of this (product, store) — the exact Amazon-URL leak this
+        // feature exists to close, with nothing left to retry it. A missing
+        // row is already this design's retry signal (same convention as
+        // ImageMirrorService.ensureMirrored's NULL watermark), so skipping the
+        // write here just lets the next listing try again from scratch. It
+        // also protects a pre-existing GOOD row from being overwritten by a
+        // transient outage on re-upload — ON CONFLICT DO UPDATE would
+        // otherwise clobber it. A partial failure (at least one success) is
+        // still stored, per the brief.
+        const allFailed = uploaded.every((entry) => entry === '');
+        if (!allFailed) {
+          await client.query(
+            `INSERT INTO product_ebay_images (product_id, ebay_account_id, image_urls, uploaded_at)
+             VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (product_id, ebay_account_id) DO UPDATE SET
+               image_urls = EXCLUDED.image_urls,
+               uploaded_at = NOW()`,
+            [productId, ebayAccountId, JSON.stringify(uploaded)]
+          );
+        }
 
         return this.toResult(sourceUrls, uploaded);
       });
