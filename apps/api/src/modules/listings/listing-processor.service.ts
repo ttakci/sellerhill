@@ -183,7 +183,18 @@ export class ListingProcessorService extends WorkerHost {
         }
 
         const { productData, productId } = await this.resolveProductData(item.asin, userId);
-        await attachEpsImages(this.ebayImages, productId, ebayAccountId, productData);
+        // Skipped for a draft: persistDraft below never reads imageUrls or
+        // mainImageUrl (it persists only price/quantity/category fields), so
+        // resolving EPS images here would spend a real eBay Media API upload
+        // per item that the draft branch discards outright — contradicting
+        // the "stop before every eBay call" comment a few lines down. The one
+        // point a draft's images actually matter is publish, which resolves
+        // them itself in ListingsService.prepareDraftForPublish against a
+        // freshly loaded product row; the (product, store) cache means that
+        // is still only ever one upload, never two.
+        if (!asDraft) {
+          await attachEpsImages(this.ebayImages, productId, ebayAccountId, productData);
+        }
         const listingData = await this.listingStrategyService.prepareListingData(
           userId,
           productData,
