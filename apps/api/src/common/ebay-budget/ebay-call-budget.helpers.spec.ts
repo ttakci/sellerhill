@@ -1,6 +1,7 @@
-import { EbayCallPriority } from '@repo/shared';
+import { EbayApiResource, EbayCallPriority } from '@repo/shared';
 
-import { budgetWindow, deferralDelayMs, effectiveLimit } from './ebay-call-budget.helpers';
+import { budgetWindow, buildBudgetOverview, deferralDelayMs, effectiveLimit } from './ebay-call-budget.helpers';
+import { mapRateLimits } from './ebay-rate-limits';
 
 describe('budgetWindow', () => {
   it('keys the counter by UTC calendar day', () => {
@@ -83,5 +84,30 @@ describe('deferralDelayMs', () => {
     expect(
       deferralDelayMs(new Date('2026-08-10T00:00:00.000Z'), new Date('2026-08-10T00:00:01.000Z'))
     ).toBe(60_000);
+  });
+});
+
+describe('buildBudgetOverview', () => {
+  const now = new Date('2026-09-25T10:00:00Z');
+  const counts = Object.fromEntries(Object.values(EbayApiResource).map((r) => [r, 3])) as Record<EbayApiResource, number>;
+  const resources = [
+    { apiContext: 'commerce', apiName: 'Taxonomy', apiVersion: 'v1', resourceName: 'commerce.taxonomy', windows: [{ limit: 5_000, remaining: 4_100, timeWindowSeconds: 86_400, resetAt: '2026-09-25T20:13:30.000Z' }] },
+    { apiContext: 'commerce', apiName: 'Media', apiVersion: 'v1_beta', resourceName: 'Image', windows: [] },
+  ];
+
+  it('puts eBay\'s figures beside our count, never a difference', () => {
+    const dto = buildBudgetOverview({ snapshot: { resources, fetchedAt: now, mapped: mapRateLimits(resources) }, live: true, counts, reservePercent: 20, now });
+    const row = dto.rows.find((r) => r.resource === EbayApiResource.TAXONOMY);
+    expect(row).toMatchObject({ ebayLimit: 5_000, ebayRemaining: 4_100, ebayResetAt: '2026-09-25T20:13:30.000Z', ourCount: 3, backgroundLimit: 4_000, ourResetAt: '2026-09-26T00:00:00.000Z' });
+    expect(dto.fetchedAt).toBe(now.toISOString());
+    expect(dto.unmapped.map((r) => r.resourceName)).toEqual(['Image']);
+  });
+
+  it('shows a row for every governed resource even without an eBay figure', () => {
+    const dto = buildBudgetOverview({ snapshot: null, live: false, counts, reservePercent: 20, now });
+    expect(dto.rows).toHaveLength(Object.values(EbayApiResource).length);
+    expect(dto.rows.every((r) => r.ebayLimit === null && r.backgroundLimit === null)).toBe(true);
+    expect(dto.fetchedAt).toBeNull();
+    expect(dto.unmapped).toEqual([]);
   });
 });

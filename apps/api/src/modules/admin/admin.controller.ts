@@ -76,7 +76,7 @@ import {
   type AdminListingQualitySummaryDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
-  type EbayCallBudgetStatusDto,
+  type EbayBudgetOverviewDto,
   type ListingFailureCode,
   type AdminUsersListDto,
   type PlatformSettingsListDto,
@@ -89,7 +89,7 @@ import {
 } from '@repo/shared';
 import type { Queue } from 'bullmq';
 
-import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
+import { EbayBudgetOverviewService } from '../../common/ebay-budget/ebay-budget-overview.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OperatorSurface } from '../auth/operator-surface.decorator';
@@ -114,7 +114,7 @@ export class AdminController {
     private readonly adminListingQualityService: AdminListingQualityService,
     private readonly adminUsersService: AdminUsersService,
     private readonly listingFailures: AdminListingFailuresService,
-    private readonly ebayCallBudget: EbayCallBudgetService,
+    private readonly ebayBudgetOverview: EbayBudgetOverviewService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly emailService: EmailService,
     @InjectQueue('order-sync') private readonly orderSyncQueue: Queue,
@@ -226,13 +226,13 @@ export class AdminController {
   @Get('ebay/budget')
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'eBay API call budget (read-only)',
+    summary: "eBay's own daily limits beside our call counter (read-only)",
     description:
       'Daily quota, consumption and reset time per eBay API resource. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
   })
   @ApiOkResponse({ description: 'Budget status retrieved' })
-  async getEbayCallBudget(): Promise<EbayCallBudgetStatusDto[]> {
-    return this.ebayCallBudget.status();
+  async getEbayCallBudget(): Promise<EbayBudgetOverviewDto> {
+    return this.ebayBudgetOverview.get();
   }
 
   @Get('listing-failures')

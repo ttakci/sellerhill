@@ -1,16 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import {
-  EbayApiResource,
-  EbayCallPriority,
-  PlatformSettingKey,
-  type EbayCallBudgetStatusDto,
-} from '@repo/shared';
+import { EbayApiResource, EbayCallPriority, PlatformSettingKey } from '@repo/shared';
 
 import { RedisService } from '../redis/redis.service';
 import { PlatformSettingsService } from '../settings/platform-settings.service';
 
 import { EbayBudgetExhaustedError } from './ebay-budget.errors';
 import { budgetWindow, effectiveLimit } from './ebay-call-budget.helpers';
+import { EbayRateLimitStore } from './ebay-rate-limit.store';
 
 /** Redis script name for the atomic acquire. */
 const ACQUIRE_SCRIPT = 'ebayBudgetAcquire';
@@ -25,13 +21,16 @@ const ACQUIRE_SCRIPT = 'ebayBudgetAcquire';
  *
  * KEYS[1] counter, ARGV[1] limit, ARGV[2] cost, ARGV[3] ttl seconds.
  * Returns { granted, remaining }.
+ *
+ * ARGV[1] = -1 means eBay has given no ceiling for this resource — count,
+ * never refuse (spec D2).
  */
 const ACQUIRE_LUA = `
 local used = tonumber(redis.call('GET', KEYS[1]) or '0')
 local limit = tonumber(ARGV[1])
 local cost = tonumber(ARGV[2])
 
-if used + cost > limit then
+if limit >= 0 and used + cost > limit then
   return { 0, limit - used }
 end
 
@@ -42,23 +41,19 @@ end
 return { 1, limit - total }
 `;
 
-/** Which platform setting carries each resource's ceiling. */
-const LIMIT_SETTING: Record<EbayApiResource, PlatformSettingKey> = {
-  [EbayApiResource.INVENTORY]: PlatformSettingKey.EBAY_BUDGET_INVENTORY_DAILY_LIMIT,
-  [EbayApiResource.TAXONOMY]: PlatformSettingKey.EBAY_BUDGET_TAXONOMY_DAILY_LIMIT,
-  [EbayApiResource.ACCOUNT]: PlatformSettingKey.EBAY_BUDGET_ACCOUNT_DAILY_LIMIT,
-  [EbayApiResource.FULFILLMENT]: PlatformSettingKey.EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT,
-  [EbayApiResource.TRADING]: PlatformSettingKey.EBAY_BUDGET_TRADING_DAILY_LIMIT,
-  [EbayApiResource.FEED]: PlatformSettingKey.EBAY_BUDGET_FEED_DAILY_LIMIT,
-  [EbayApiResource.ANALYTICS]: PlatformSettingKey.EBAY_BUDGET_TRADING_DAILY_LIMIT,
-};
-
 /**
  * Distributed daily budget for eBay API calls.
  *
  * eBay's quotas are per APPLICATION — every seller on the platform draws from
  * the same pool — so the counter has to be shared across API replicas and queue
  * workers, which is why it lives in Redis rather than in process memory.
+ *
+ * Ceilings come from eBay's own `getRateLimits` response, via
+ * `EbayRateLimitStore` — there is no configured ceiling. When eBay has not
+ * reported a limit for a resource (never fetched, or a resource it stopped
+ * naming), the governor counts the call but never refuses it: eBay is the
+ * only source of a ceiling, and inventing one here would be exactly the
+ * guesswork this design replaces.
  *
  * This is a governor, not a gate: when it runs out, background work is deferred
  * to the next reset instead of failing, and if Redis itself is unavailable the
@@ -72,7 +67,8 @@ export class EbayCallBudgetService implements OnModuleInit {
 
   constructor(
     private readonly redis: RedisService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly rateLimits: EbayRateLimitStore
   ) {}
 
   onModuleInit(): void {
@@ -98,7 +94,7 @@ export class EbayCallBudgetService implements OnModuleInit {
     const window = budgetWindow(new Date());
     const limit = await this.resolveLimit(resource);
     const reserve = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_BUDGET_RESERVE_PERCENT);
-    const ceiling = effectiveLimit(limit, reserve, priority);
+    const ceiling = limit === null ? -1 : effectiveLimit(limit, reserve, priority);
 
     let granted: boolean;
     let remaining: number;
@@ -143,37 +139,25 @@ export class EbayCallBudgetService implements OnModuleInit {
     }
   }
 
-  /** Current utilization for every resource — the admin panel's read model. */
-  async status(): Promise<EbayCallBudgetStatusDto[]> {
-    const window = budgetWindow(new Date());
-    const reserve = await this.platformSettings.getNumber(PlatformSettingKey.EBAY_BUDGET_RESERVE_PERCENT);
-
-    return Promise.all(
+  /** Our own count for today, per resource — compared against eBay's, never substituted for it. */
+  async countsToday(): Promise<Record<EbayApiResource, number>> {
+    const day = budgetWindow(new Date()).day;
+    const entries = await Promise.all(
       Object.values(EbayApiResource).map(async (resource) => {
-        const limit = await this.resolveLimit(resource);
-        let used = 0;
         try {
-          used = Number(await this.redis.command.get(this.counterKey(resource, window.day))) || 0;
+          return [resource, Number(await this.redis.command.get(this.counterKey(resource, day))) || 0] as const;
         } catch {
-          used = 0;
+          return [resource, 0] as const;
         }
-
-        return {
-          resource,
-          limit,
-          used,
-          remaining: Math.max(0, limit - used),
-          backgroundLimit: effectiveLimit(limit, reserve, EbayCallPriority.BACKGROUND),
-          resetAt: window.resetAt.toISOString(),
-          // Ceilings are configured today; an Analytics-API sync would flip this.
-          observed: false,
-        };
       })
     );
+    return Object.fromEntries(entries) as Record<EbayApiResource, number>;
   }
 
-  private async resolveLimit(resource: EbayApiResource): Promise<number> {
-    return this.platformSettings.getNumber(LIMIT_SETTING[resource]);
+  /** eBay's own daily ceiling, or null when eBay has not given one — never a number we made up. */
+  private async resolveLimit(resource: EbayApiResource): Promise<number | null> {
+    const snapshot = await this.rateLimits.current();
+    return snapshot?.mapped.byResource[resource]?.limit ?? null;
   }
 
   private counterKey(resource: EbayApiResource, day: string): string {

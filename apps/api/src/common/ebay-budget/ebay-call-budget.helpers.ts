@@ -1,4 +1,10 @@
-import { EbayCallPriority } from '@repo/shared';
+import {
+  EbayApiResource,
+  EbayCallPriority,
+  type EbayBudgetOverviewDto,
+} from '@repo/shared';
+
+import type { EbayRateLimitSnapshot } from './ebay-rate-limit.store';
 
 /**
  * Pure arithmetic behind the eBay call-budget governor.
@@ -56,4 +62,40 @@ export function effectiveLimit(limit: number, reservePercent: number, priority: 
 /** Milliseconds to defer a job that ran out of budget, floored so a retry never busy-loops. */
 export function deferralDelayMs(resetAt: Date, now: Date, minimumMs = 60_000): number {
   return Math.max(minimumMs, resetAt.getTime() - now.getTime());
+}
+
+/**
+ * The admin panel's read model: eBay's own figures beside our counter.
+ *
+ * A row exists for every governed resource even when eBay never reported a
+ * ceiling for it — the panel must show that gap, not hide the resource.
+ */
+export function buildBudgetOverview(input: {
+  snapshot: EbayRateLimitSnapshot | null;
+  live: boolean;
+  counts: Record<EbayApiResource, number>;
+  reservePercent: number;
+  now: Date;
+}): EbayBudgetOverviewDto {
+  const ourResetAt = budgetWindow(input.now).resetAt.toISOString();
+  return {
+    fetchedAt: input.snapshot ? input.snapshot.fetchedAt.toISOString() : null,
+    live: input.live,
+    rows: Object.values(EbayApiResource).map((resource) => {
+      const mapped = input.snapshot?.mapped.byResource[resource] ?? null;
+      return {
+        resource,
+        ebayLimit: mapped?.limit ?? null,
+        ebayRemaining: mapped?.remaining ?? null,
+        ebayResetAt: mapped?.resetAt ?? null,
+        sourceResources: mapped?.sourceResources ?? [],
+        partial: resource === EbayApiResource.TRADING,
+        otherWindows: mapped?.otherWindows ?? [],
+        ourCount: input.counts[resource] ?? 0,
+        backgroundLimit: mapped ? effectiveLimit(mapped.limit, input.reservePercent, EbayCallPriority.BACKGROUND) : null,
+        ourResetAt,
+      };
+    }),
+    unmapped: input.snapshot?.mapped.unmapped ?? [],
+  };
 }
