@@ -9,7 +9,14 @@
  * Amazon URL there names the supplier for the life of the listing.
  */
 
-/** Image operations only. Documents are on api.ebay.com, post-order on apiz. */
+/**
+ * Image operations only — not the host this app's other REST calls use.
+ * eBay's own docs name `apim.ebay.com` in one place and `apiz.ebay.com` in
+ * another for the Media API; `apps/api/src/scripts/ebay-media-probe.ts`
+ * tried all three candidate hosts against production and confirmed this is
+ * the one that actually serves images. Do not assume it also serves
+ * anything else this app calls.
+ */
 export const EBAY_EPS_IMAGE_BASE_URL = 'https://apim.ebay.com/commerce/media/v1_beta';
 
 const EPS_HOST = 'https://i.ebayimg.com/';
