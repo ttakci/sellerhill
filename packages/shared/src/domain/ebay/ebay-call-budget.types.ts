@@ -35,7 +35,7 @@ export enum EbayApiResource {
   /**
    * Bulk report tasks (create → poll → download).
    *
-   * 100,000/day, 20x Trading's ceiling, and the reason periodic listing
+   * 100,000/day, 20x the ceiling of the Trading methods we call, and the reason periodic listing
    * reconciliation is affordable at all: one report covers a seller's ENTIRE
    * catalogue, so the cost is per seller rather than per 200 listings the way
    * `GetMyeBaySelling` is.
@@ -98,11 +98,9 @@ export interface EbayBudgetResourceRowDto {
   ebayLimit: number | null;
   ebayRemaining: number | null;
   ebayResetAt: string | null;
-  /** eBay resource names this row was derived from. */
-  sourceResources: string[];
-  /** True when the row stands for part of what eBay meters (Trading). */
-  partial: boolean;
-  /** Sub-daily windows eBay also enforces on the same source. */
+  /** The exact eBay resource this row is metered under (e.g. `sell.inventory`, `EndItem`). */
+  ebayResource: string;
+  /** Sub-daily windows eBay also enforces on this resource. The governor enforces them too. */
   otherWindows: EbayRateWindowDto[];
   /** Calls our governor counted today (UTC). */
   ourCount: number;

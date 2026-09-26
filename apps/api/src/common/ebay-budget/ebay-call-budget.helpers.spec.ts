@@ -154,7 +154,12 @@ describe('buildBudgetOverview', () => {
   it('names the governed Trading resource even with no snapshot', () => {
     const dto = buildBudgetOverview({ snapshot: null, live: false, counts, reservePercent: 20, now });
     const row = dto.rows.find((r) => r.resource === EbayApiResource.TRADING_END_ITEM);
-    expect(row?.sourceResources).toEqual(['EndItem']);
-    expect(row?.partial).toBe(false);
+    expect(row?.ebayResource).toBe('EndItem');
+  });
+
+  it('names the exact eBay resource for a REST row too', () => {
+    const dto = buildBudgetOverview({ snapshot: null, live: false, counts, reservePercent: 20, now });
+    const row = dto.rows.find((r) => r.resource === EbayApiResource.TAXONOMY);
+    expect(row?.ebayResource).toBe('commerce.taxonomy');
   });
 });

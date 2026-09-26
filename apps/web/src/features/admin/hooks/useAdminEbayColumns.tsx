@@ -1,5 +1,5 @@
 import type { AdminListingFailureDto, EbayBudgetResourceRowDto, EbayRateLimitResourceDto } from '@repo/shared';
-import { Badge, Text, Tooltip, type TableColumn } from '@repo/ui';
+import { Badge, Text, type TableColumn } from '@repo/ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -42,25 +42,12 @@ export function useAdminEbayColumns(): {
         key: 'resource',
         header: t('admin.ebayLimits.resource'),
         render: (_value, row) => (
-          <Text variant="body-sm">
-            {row.resource}
-            {row.partial ? (
-              <>
-                {' '}
-                <Tooltip
-                  content={t('admin.ebayLimits.partialHint', {
-                    methods: row.sourceResources.join(', '),
-                  })}
-                  position="right"
-                  variant="dark"
-                >
-                  <Badge variant="warning" size="sm">
-                    {t('admin.ebayLimits.partial')}
-                  </Badge>
-                </Tooltip>
-              </>
-            ) : null}
-          </Text>
+          <>
+            <Text variant="body-sm">{row.resource}</Text>
+            <Text variant="caption" color="text.tertiary">
+              {row.ebayResource}
+            </Text>
+          </>
         ),
       },
       {

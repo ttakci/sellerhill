@@ -138,8 +138,7 @@ export function buildBudgetOverview(input: {
         ebayLimit: mapped?.daily?.limit ?? null,
         ebayRemaining: mapped?.daily?.remaining ?? null,
         ebayResetAt: mapped?.daily?.resetAt ?? null,
-        sourceResources: [RESOURCE_SOURCE[resource].name],
-        partial: false,
+        ebayResource: RESOURCE_SOURCE[resource].name,
         otherWindows: mapped?.shortWindows ?? [],
         ourCount: input.counts[resource] ?? 0,
         backgroundLimit: mapped?.daily
