@@ -5,7 +5,7 @@ import {
 } from '@repo/shared';
 
 import type { EbayRateLimitSnapshot } from './ebay-rate-limit.store';
-import { RESOURCE_SOURCE } from './ebay-rate-limits';
+import { RESOURCE_SOURCE, type MappedLimit } from './ebay-rate-limits';
 
 /**
  * Pure arithmetic behind the eBay call-budget governor.
@@ -58,6 +58,55 @@ export function effectiveLimit(limit: number, reservePercent: number, priority: 
   }
   const reserve = Math.min(50, Math.max(0, reservePercent));
   return Math.max(0, Math.floor((limit * (100 - reserve)) / 100));
+}
+
+/** Slack on a short window's counter TTL so a key never expires before its bucket ends. */
+export const SHORT_WINDOW_TTL_GRACE_SECONDS = 60;
+
+/** One counter the governor checks for a resource. */
+export interface GovernedWindow {
+  windowSeconds: number;
+  /** Appended to `ebay:budget:{resource}` to form the Redis key. */
+  keyParts: string[];
+  /** eBay's limit for this window; null = count only. */
+  limit: number | null;
+  ttlSeconds: number;
+  resetAt: Date;
+}
+
+/**
+ * Every counter a call must pass.
+ *
+ * The daily counter is ALWAYS present, even with no eBay figure: it is what
+ * the admin panel's "our count" reads, and its key is unchanged from before
+ * windows existed so counts survive a deploy. Sub-daily windows use fixed
+ * buckets (`floor(now / window)`). eBay's own windows may roll differently, so
+ * a fixed bucket can admit up to one extra window's worth across a boundary —
+ * eBay's 429 (handled by `withEbayRateLimitRetry`) stays the hard stop.
+ */
+export function governedWindows(mapped: MappedLimit | null, now: Date): GovernedWindow[] {
+  const day = budgetWindow(now);
+  const windows: GovernedWindow[] = [
+    {
+      windowSeconds: 86_400,
+      keyParts: [day.day],
+      limit: mapped?.daily?.limit ?? null,
+      ttlSeconds: day.ttlSeconds,
+      resetAt: day.resetAt,
+    },
+  ];
+  for (const short of mapped?.shortWindows ?? []) {
+    const lengthMs = short.timeWindowSeconds * 1000;
+    const bucket = Math.floor(now.getTime() / lengthMs);
+    windows.push({
+      windowSeconds: short.timeWindowSeconds,
+      keyParts: [`w${short.timeWindowSeconds}`, String(bucket)],
+      limit: short.limit,
+      ttlSeconds: short.timeWindowSeconds + SHORT_WINDOW_TTL_GRACE_SECONDS,
+      resetAt: new Date((bucket + 1) * lengthMs),
+    });
+  }
+  return windows;
 }
 
 /** Milliseconds to defer a job that ran out of budget, floored so a retry never busy-loops. */

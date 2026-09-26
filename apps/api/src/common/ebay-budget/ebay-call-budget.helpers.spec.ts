@@ -1,6 +1,12 @@
 import { EbayApiResource, EbayCallPriority } from '@repo/shared';
 
-import { budgetWindow, buildBudgetOverview, deferralDelayMs, effectiveLimit } from './ebay-call-budget.helpers';
+import {
+  budgetWindow,
+  buildBudgetOverview,
+  deferralDelayMs,
+  effectiveLimit,
+  governedWindows,
+} from './ebay-call-budget.helpers';
 import { mapRateLimits } from './ebay-rate-limits';
 
 describe('budgetWindow', () => {
@@ -84,6 +90,40 @@ describe('deferralDelayMs', () => {
     expect(
       deferralDelayMs(new Date('2026-08-10T00:00:00.000Z'), new Date('2026-08-10T00:00:01.000Z'))
     ).toBe(60_000);
+  });
+});
+
+describe('governedWindows', () => {
+  const now = new Date('2026-09-26T10:00:30.000Z');
+  const daily = { limit: 5_000, remaining: 5_000, timeWindowSeconds: 86_400, resetAt: null };
+  const minute = { limit: 100, remaining: 100, timeWindowSeconds: 60, resetAt: null };
+
+  it('always returns the daily counter first, even with no eBay figure', () => {
+    const [first, ...rest] = governedWindows(null, now);
+    expect(first).toMatchObject({ windowSeconds: 86_400, keyParts: ['2026-09-26'], limit: null });
+    expect(first.resetAt.toISOString()).toBe('2026-09-27T00:00:00.000Z');
+    expect(rest).toEqual([]);
+  });
+
+  it('adds one bucketed counter per sub-daily window', () => {
+    const windows = governedWindows({ daily, shortWindows: [minute], sourceResource: 'sell.inventory' }, now);
+    expect(windows.map((w) => w.limit)).toEqual([5_000, 100]);
+    const bucket = Math.floor(now.getTime() / 60_000);
+    expect(windows[1]).toMatchObject({ windowSeconds: 60, keyParts: ['w60', String(bucket)], ttlSeconds: 120 });
+    expect(windows[1].resetAt.getTime()).toBe((bucket + 1) * 60_000);
+  });
+
+  it('moves to a new bucket at the window boundary while the daily key stays', () => {
+    const mapped = { daily, shortWindows: [minute], sourceResource: 'sell.inventory' };
+    const before = governedWindows(mapped, new Date('2026-09-26T10:00:59.999Z'));
+    const after = governedWindows(mapped, new Date('2026-09-26T10:01:00.000Z'));
+    expect(after[0].keyParts).toEqual(before[0].keyParts);
+    expect(after[1].keyParts).not.toEqual(before[1].keyParts);
+  });
+
+  it('keeps a sub-daily-only resource gated by its short window and count-only daily', () => {
+    const windows = governedWindows({ daily: null, shortWindows: [minute], sourceResource: 'sell.feed' }, now);
+    expect(windows.map((w) => w.limit)).toEqual([null, 100]);
   });
 });
 
