@@ -22,6 +22,7 @@ import { ListingQueueService } from './listing-queue.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { ListingsController } from './listings.controller';
 import { ListingsService } from './listings.service';
+import { ProductSourceModule } from './product-source.module';
 import { ProductSyncService } from './product-sync.service';
 import { RefreshProcessorService } from './refresh-processor.service';
 import { RefreshSchedulerService } from './refresh-scheduler.service';
@@ -41,6 +42,11 @@ import { StockSyncProcessorService } from './stock-sync-processor.service';
     OrdersModule,
     LlmModule,
     StoreSettingsModule,
+    // ScraperClient + ProductSourceService live in their own module — see
+    // product-source.module.ts for why (AdminModule, which this module
+    // already imports, needs them too in Task 12, and importing ListingsModule
+    // from AdminModule back would close a cycle).
+    ProductSourceModule,
     BullModule.registerQueue(
       { name: 'listings' },
       { name: 'stock-sync' },
