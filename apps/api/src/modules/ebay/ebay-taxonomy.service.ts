@@ -4,6 +4,7 @@ import { EbayApiResource } from '@repo/shared';
 import axios from 'axios';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.errors';
 import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
 
 import type { CategoryAspect } from './aspect-builder';
@@ -155,6 +156,11 @@ export class EbayTaxonomyService {
         );
         return snapshot.aspects;
       }
+      if (error instanceof EbayBudgetExhaustedError) {
+        // The work is valid and untried — a quota refusal must defer, never
+        // fail terminally as CategoryAspectsUnavailableError would.
+        throw error;
+      }
       this.logger.error(
         `Failed to fetch aspects for category ${input.categoryId}: ${
           error instanceof Error ? error.message : String(error)
@@ -281,6 +287,11 @@ export class EbayTaxonomyService {
       );
       data = response.data;
     } catch (error: unknown) {
+      if (error instanceof EbayBudgetExhaustedError) {
+        // The work is valid and untried — a quota refusal must defer, never
+        // fail terminally as CategoryResolutionError would.
+        throw error;
+      }
       this.logger.error(
         `Category suggestion failed for "${query}": ${error instanceof Error ? error.message : String(error)}`
       );
