@@ -4,6 +4,7 @@ import re
 
 import bottle
 
+from amazon import sites
 from sellerhill import egress
 from sellerhill.fetcher import fetch_one as default_fetch_one
 from sellerhill.pool import ProxyPool
@@ -40,8 +41,13 @@ def _validate(body):
     rate = body.get("perIpRequestsPerSecond")
     if not isinstance(rate, (int, float)) or not 0.1 <= rate <= 100:
         return "perIpRequestsPerSecond: 0.1..100"
-    if not isinstance(body.get("marketplace"), str):
+    marketplace = body.get("marketplace")
+    if not isinstance(marketplace, str):
         return "marketplace required"
+    try:
+        sites.site(marketplace)
+    except ValueError:
+        return "marketplace: unknown"
     return None
 
 

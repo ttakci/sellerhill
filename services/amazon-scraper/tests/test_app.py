@@ -49,7 +49,7 @@ def test_empty_proxies_is_no_proxy_without_fetching(client):
 
 @pytest.mark.parametrize("bad", [
     {"asins": ["short"]}, {"asins": [f"B{i:09d}" for i in range(101)]}, {"mode": "x"},
-    {"lane": "x"}, {"proxies": ["ftp://h:1"]}, {"perIpRequestsPerSecond": 0},
+    {"lane": "x"}, {"proxies": ["ftp://h:1"]}, {"perIpRequestsPerSecond": 0}, {"marketplace": "XX"},
 ])
 def test_invalid_body_is_400(client, bad):
     app, _ = client

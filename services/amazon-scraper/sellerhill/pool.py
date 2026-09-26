@@ -4,6 +4,7 @@ mid-session), a shared two-lane priority queue (interactive before
 background), a per-proxy token-bucket rate limit, cooldown after repeated
 blocks, and a deadline after which a queued task resolves as blocked."""
 import itertools
+import logging
 import queue
 import threading
 import time
@@ -12,6 +13,8 @@ from concurrent.futures import Future, InvalidStateError
 from concurrent.futures import TimeoutError as FutureTimeout
 
 from sellerhill import egress
+
+_log = logging.getLogger(__name__)
 
 _LANE_PRIORITY = {"interactive": 0, "background": 1}
 _OUTCOMES = ("found", "not_found", "blocked", "parse_failed", "no_proxy")
@@ -128,21 +131,42 @@ class ProxyPool:
                 self._expire(asin, fut)
                 continue
             proxy.wait_turn()
+            if proxy.retired.is_set() or self._stop.is_set():
+                # wait_turn() can sleep for seconds (a low per-proxy rate, or a
+                # backlog behind it) — a proxy removed by ensure() during that
+                # sleep must still never carry the request. Requeue the SAME
+                # item, unchanged, and stop, exactly as the pre-wait_turn check
+                # above does.
+                self._queue.put(item)
+                break
             started = time.monotonic()
+            no_streak_change = False
             with egress.bind(proxy.url):
                 try:
                     result = self._fetch_one(asin, marketplace, mode)
-                except Exception:  # never let one page kill a worker
-                    result = {"asin": asin, "outcome": "blocked", "fetchedAt": None, "signals": None, "content": None}
+                except egress.NoProxyError:
+                    no_streak_change = True
+                    result = {"asin": asin, "outcome": "no_proxy", "fetchedAt": None, "signals": None, "content": None}
+                except Exception as exc:  # never let one page kill a worker
+                    # A parser/logic bug (bad marketplace, a crash inside
+                    # signals/content extraction) is OUR failure, not evidence
+                    # Amazon is blocking this proxy — it must never accrue
+                    # block_streak or cool the proxy down. Only the exception
+                    # TYPE is logged: a curl/network error's str() can embed
+                    # the proxy URL (credentials included).
+                    no_streak_change = True
+                    _log.warning("fetch_one raised %s for asin=%s", type(exc).__name__, asin)
+                    result = {"asin": asin, "outcome": "parse_failed", "fetchedAt": None, "signals": None, "content": None}
             latency = (time.monotonic() - started) * 1000
             outcome = result.get("outcome")
-            if outcome == "blocked":
-                proxy.block_streak += 1
-                if proxy.block_streak >= self._streak_limit:
-                    proxy.cool_until = time.monotonic() + self._cooldown
+            if not no_streak_change:
+                if outcome == "blocked":
+                    proxy.block_streak += 1
+                    if proxy.block_streak >= self._streak_limit:
+                        proxy.cool_until = time.monotonic() + self._cooldown
+                        proxy.block_streak = 0
+                else:
                     proxy.block_streak = 0
-            else:
-                proxy.block_streak = 0
             self._record(outcome, proxy.id, latency)
             self._resolve(fut, result)
 

@@ -82,3 +82,51 @@ def test_removed_proxy_stops_taking_work():
     results = [f.result(5) for f in [pool.submit(f"A{i:09d}", "US", "commerce", "background") for i in range(6)]]
     assert all(r["proxy"] == "http://b:1" for r in results)
     pool.shutdown()
+
+
+def test_retired_proxy_inside_wait_turn_never_executes_fetch():
+    """A retired proxy can already be asleep inside wait_turn (a low rate, or
+    a backlog, can make that sleep last seconds) when ensure() removes it.
+    That sleep must not be allowed to finish into a fetch call."""
+    calls = []
+
+    def counting_fetch(asin, marketplace, mode):
+        calls.append(asin)
+        return {"asin": asin, "outcome": "found"}
+
+    pool = ProxyPool(counting_fetch, threads_per_proxy=1)
+    pool.ensure(["http://h:1"], rate=1)  # the second request on this proxy must wait ~1s
+    first = pool.submit("A000000001", "US", "commerce", "background")
+    first.result(5)  # clears the rate-limit slot; the proxy's next request now sleeps ~1s
+    pool.submit("A000000002", "US", "commerce", "background")
+    time.sleep(0.2)  # the lone worker has taken the second task and is asleep inside wait_turn
+    pool.ensure([], rate=1)  # retire the proxy while that sleep is still in progress
+    time.sleep(1.0)  # longer than the remaining sleep — if unfixed, the fetch would have run by now
+    assert calls == ["A000000001"]
+    pool.shutdown()
+
+
+def test_exception_from_fetch_one_is_parse_failed_and_does_not_cool_the_proxy():
+    """A crash inside our own code (e.g. a bad marketplace, a parser bug) is
+    not evidence Amazon is blocking this proxy — it must never accrue
+    block_streak or trigger a cooldown."""
+    def boom(asin, marketplace, mode):
+        raise ValueError("bad marketplace")
+
+    pool = ProxyPool(boom, threads_per_proxy=1, block_streak_for_cooldown=3, cooldown_seconds=60)
+    pool.ensure(["http://h:1"], rate=100)
+    results = [f.result(5) for f in [pool.submit(f"A{i:09d}", "US", "commerce", "background") for i in range(3)]]
+    assert all(r["outcome"] == "parse_failed" for r in results)
+    assert pool.stats()["proxies"][0]["coolingDown"] is False
+    pool.shutdown()
+
+
+def test_no_proxy_error_from_fetch_one_maps_to_no_proxy_outcome():
+    def boom(asin, marketplace, mode):
+        raise egress.NoProxyError("no proxy bound")
+
+    pool = ProxyPool(boom, threads_per_proxy=1)
+    pool.ensure(["http://h:1"], rate=100)
+    f = pool.submit("A000000001", "US", "commerce", "background")
+    assert f.result(5)["outcome"] == "no_proxy"
+    pool.shutdown()
