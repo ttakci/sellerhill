@@ -714,7 +714,7 @@ export const ListingDetailPageContainer: React.FC = () => {
       onOpenRevisions={handleOpenRevisions}
       onCloseRevisions={handleCloseRevisions}
       canEnd={listing?.status === ListingStatus.ACTIVE}
-      canDelete={Boolean(listing)}
+      canDelete={listing?.status === ListingStatus.DRAFT}
       canPublish={listing?.status === ListingStatus.DRAFT}
       statusLabel={statusLabel}
       statusTone={listing?.status ?? ListingStatus.INACTIVE}
