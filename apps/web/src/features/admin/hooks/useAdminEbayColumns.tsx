@@ -77,8 +77,8 @@ export function useAdminEbayColumns(): {
               <Text variant="body-sm" numeric>
                 {row.ebayLimit.toLocaleString(i18n.language)}
               </Text>
-              {row.otherWindows.map((window, index) => (
-                <div key={index}>
+              {row.otherWindows.map((window) => (
+                <div key={`${window.timeWindowSeconds}-${window.limit}`}>
                   <Text variant="caption" color="text.tertiary">
                     {t('admin.ebayLimits.otherWindow', {
                       limit: window.limit.toLocaleString(i18n.language),
@@ -100,7 +100,14 @@ export function useAdminEbayColumns(): {
               —
             </Text>
           ) : (
-            <Badge variant={utilizationVariant(row.ourCount, row.ebayLimit)} size="sm">
+            <Badge
+              variant={
+                row.ebayLimit === null
+                  ? 'neutral'
+                  : utilizationVariant(row.ebayLimit - row.ebayRemaining, row.ebayLimit)
+              }
+              size="sm"
+            >
               {row.ebayRemaining.toLocaleString(i18n.language)}
             </Badge>
           ),
@@ -171,8 +178,8 @@ export function useAdminEbayColumns(): {
             </Text>
           ) : (
             <>
-              {row.windows.map((window, index) => (
-                <div key={index}>
+              {row.windows.map((window) => (
+                <div key={`${window.timeWindowSeconds}-${window.limit}`}>
                   <Text variant="caption" color="text.secondary">
                     {t('admin.ebayLimits.windowLine', {
                       limit: window.limit.toLocaleString(i18n.language),
