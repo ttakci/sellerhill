@@ -110,4 +110,13 @@ describe('buildBudgetOverview', () => {
     expect(dto.fetchedAt).toBeNull();
     expect(dto.unmapped).toEqual([]);
   });
+
+  it('carries the Trading method names on the partial hint even with no snapshot', () => {
+    // Without this, the web hint renders "...methods we call ()" — an empty
+    // list — because `mapped` is null and there is nothing else to fall back to.
+    const dto = buildBudgetOverview({ snapshot: null, live: false, counts, reservePercent: 20, now });
+    const row = dto.rows.find((r) => r.resource === EbayApiResource.TRADING);
+    expect(row?.sourceResources).toEqual(['GetMyeBaySelling', 'EndItem']);
+    expect(row?.partial).toBe(true);
+  });
 });

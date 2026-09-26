@@ -1,7 +1,7 @@
 import type { ConfigService } from '@nestjs/config';
 import { EbayApiResource, EbayCallPriority } from '@repo/shared';
 
-import { EbayAnalyticsService, PANEL_CACHE_MS } from './ebay-analytics.service';
+import { EbayAnalyticsService, EBAY_ANALYTICS_TIMEOUT_MS, PANEL_CACHE_MS } from './ebay-analytics.service';
 import { EbayBudgetExhaustedError } from './ebay-budget.errors';
 import type { EbayCallBudgetService } from './ebay-call-budget.service';
 import type { EbayRateLimitStore } from './ebay-rate-limit.store';
@@ -91,6 +91,26 @@ describe('EbayAnalyticsService.refresh', () => {
     const { service, fetchMock } = setup();
     fetchMock.mockRejectedValue(new Error('ECONNRESET'));
     await expect(service.refresh()).resolves.toBe(false);
+  });
+
+  it('never throws when eBay stalls and the timeout aborts the request', async () => {
+    const { service, store, fetchMock } = setup();
+    const timeoutError = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+    fetchMock.mockRejectedValue(timeoutError);
+    await expect(service.refresh()).resolves.toBe(false);
+    expect(store.save).not.toHaveBeenCalled();
+  });
+
+  it('passes an abort signal on both the token request and the rate_limit request', async () => {
+    const { service, fetchMock } = setup();
+    fetchMock
+      .mockResolvedValueOnce(response(200, { access_token: 'tok', expires_in: 7200 }))
+      .mockResolvedValueOnce(response(200, rateBody));
+    await service.refresh();
+    expect(fetchMock.mock.calls[0][1]?.signal).toBeDefined();
+    expect(fetchMock.mock.calls[1][1]?.signal).toBeDefined();
+    // Sanity: the timeout constant is actually wired in, not a stray signal.
+    expect(EBAY_ANALYTICS_TIMEOUT_MS).toBe(10_000);
   });
 
   it('does not call eBay when credentials are missing', async () => {

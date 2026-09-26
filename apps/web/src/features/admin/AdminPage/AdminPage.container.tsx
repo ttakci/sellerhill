@@ -66,7 +66,11 @@ export const AdminPageContainer = (): React.ReactElement => {
     [ebayFetchedAtIso, i18n.language, t]
   );
   const ebayFigureStale = !(ebayBudget?.live ?? true) && ebayFetchedAtIso !== null;
-  const ebayFigureMissing = ebayFetchedAtIso === null;
+  // Only once the query has actually resolved does "fetchedAt: null" mean
+  // eBay has never reported its limits — while `ebayBudget` is still
+  // undefined (loading, or skipped pending the role check) this must not
+  // render the "not reported yet" notice.
+  const ebayFigureMissing = ebayBudget !== undefined && ebayFetchedAtIso === null;
   const listingQuality = useAdminListingQuality(skip);
 
   const tabParam = searchParams.get('tab') as AdminTabId | null;

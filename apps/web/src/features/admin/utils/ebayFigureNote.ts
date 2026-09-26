@@ -12,7 +12,13 @@ export function buildEbayFigureNote(fetchedAt: string | null, language: string, 
   }
   const at = new Date(fetchedAt);
   const minutes = Math.round((at.getTime() - Date.now()) / 60_000);
+  const hours = Math.round(minutes / 60);
   const rtf = new Intl.RelativeTimeFormat(language, { numeric: 'auto' });
-  const relative = Math.abs(minutes) < 60 ? rtf.format(minutes, 'minute') : rtf.format(Math.round(minutes / 60), 'hour');
+  const relative =
+    Math.abs(minutes) < 60
+      ? rtf.format(minutes, 'minute')
+      : Math.abs(hours) < 24
+        ? rtf.format(hours, 'hour')
+        : rtf.format(Math.round(hours / 24), 'day');
   return t('admin.ebayLimits.figuresAsOf', { time: at.toLocaleString(language), relative });
 }

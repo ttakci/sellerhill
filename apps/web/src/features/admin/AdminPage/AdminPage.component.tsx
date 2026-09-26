@@ -475,11 +475,15 @@ export const AdminPageComponent = ({
               />
             }
           />
-          <Text variant="h5">{t('admin.ebayLimits.unmappedTitle')}</Text>
-          <Text variant="caption" color="text.secondary">
-            {t('admin.ebayLimits.unmappedDescription')}
-          </Text>
-          {ebayUnmapped.length > 0 && <Table columns={unmappedColumns} data={ebayUnmapped} />}
+          {ebayUnmapped.length > 0 && (
+            <>
+              <Text variant="h5">{t('admin.ebayLimits.unmappedTitle')}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.ebayLimits.unmappedDescription')}
+              </Text>
+              <Table columns={unmappedColumns} data={ebayUnmapped} />
+            </>
+          )}
         </S.Rows>
       )}
 

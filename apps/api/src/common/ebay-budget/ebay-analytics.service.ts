@@ -13,6 +13,15 @@ export const PANEL_CACHE_MS = 60_000;
 const TOKEN_SAFETY_MS = 60_000;
 
 /**
+ * Both eBay calls below get this timeout. `forPanel()` runs a live refresh
+ * inline in `GET /v1/admin/ebay/budget`, so a stalled eBay endpoint must not
+ * hang that request (or the hourly job, concurrency 1) for Node's default of
+ * ~300s — the existing catch already turns an abort into "keep the stored
+ * snapshot".
+ */
+export const EBAY_ANALYTICS_TIMEOUT_MS = 10_000;
+
+/**
  * Asks eBay what THIS keyset's real call limits are.
  *
  * Uses an APPLICATION token (client credentials): limits belong to the keyset,
@@ -48,6 +57,7 @@ export class EbayAnalyticsService {
       await this.budget.acquire(EbayApiResource.ANALYTICS, EbayCallPriority.INTERACTIVE, 1);
       const response = await fetch(`${restBase.replace(/\/+$/, '')}/developer/analytics/v1_beta/rate_limit/`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        signal: AbortSignal.timeout(EBAY_ANALYTICS_TIMEOUT_MS),
       });
       const text = await response.text();
       if (!response.ok) {
@@ -94,6 +104,7 @@ export class EbayAnalyticsService {
       },
       // eBay wants the production scope string even against the sandbox host.
       body: 'grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope',
+      signal: AbortSignal.timeout(EBAY_ANALYTICS_TIMEOUT_MS),
     });
     const text = await response.text();
     if (!response.ok) {

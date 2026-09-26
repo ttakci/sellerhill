@@ -5,6 +5,7 @@ import {
 } from '@repo/shared';
 
 import type { EbayRateLimitSnapshot } from './ebay-rate-limit.store';
+import { TRADING_METHODS_WE_CALL } from './ebay-rate-limits';
 
 /**
  * Pure arithmetic behind the eBay call-budget governor.
@@ -88,7 +89,13 @@ export function buildBudgetOverview(input: {
         ebayLimit: mapped?.limit ?? null,
         ebayRemaining: mapped?.remaining ?? null,
         ebayResetAt: mapped?.resetAt ?? null,
-        sourceResources: mapped?.sourceResources ?? [],
+        // TRADING has no `mapped` entry when eBay's response never surfaced
+        // either method we call — the hint still needs the method names it
+        // is warning about, so fall back to the same list `mapRateLimits`
+        // filters on, never an empty array.
+        sourceResources:
+          mapped?.sourceResources ??
+          (resource === EbayApiResource.TRADING ? [...TRADING_METHODS_WE_CALL] : []),
         partial: resource === EbayApiResource.TRADING,
         otherWindows: mapped?.otherWindows ?? [],
         ourCount: input.counts[resource] ?? 0,

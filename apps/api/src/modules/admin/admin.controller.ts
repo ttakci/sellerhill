@@ -230,7 +230,7 @@ export class AdminController {
     description:
       'Daily quota, consumption and reset time per eBay API resource. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
   })
-  @ApiOkResponse({ description: 'Budget status retrieved' })
+  @ApiOkResponse({ description: 'eBay limits and our call count retrieved' })
   async getEbayCallBudget(): Promise<EbayBudgetOverviewDto> {
     return this.ebayBudgetOverview.get();
   }
