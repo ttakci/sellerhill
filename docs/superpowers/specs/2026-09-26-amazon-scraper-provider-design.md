@@ -1,7 +1,7 @@
 # Amazon product data from our own scraper, with Keepa behind a switch
 
 Date: 2026-09-26
-Status: design approved by the operator in conversation; written spec awaiting review. Not yet planned or implemented.
+Status: spec approved by the operator (2026-09-26). Not yet planned or implemented.
 
 This is sub-project 1 of 3. The other two are deliberately out of scope here:
 - **2. Content-change sync**: detect title/description/image changes on Amazon and revise the eBay listing. The codebase has no eBay revise path yet.
@@ -52,7 +52,7 @@ This was established from 777 + 150 + 400 product pages. It is not documented by
 | D2 | Python extracts **signals**. TypeScript decides what they mean (stock status, floor, limit, removed). | Same split as `keepa-normalizer.ts`. The business rules stay pure and Jest-tested. |
 | D3 | One provider port. `KeepaProvider` and `ScraperProvider` both return `SourceProduct`. | Create, import and refresh stop knowing which source they talk to. |
 | D4 | The setting `product.dataProvider` is `keepa` or `scraper`, **default `scraper`**. There is no mixing and **no fallback to Keepa**, not even for a missing barcode. | Operator decision. Keepa exists only as a rollback. |
-| D5 | **Never scrape from the VPS IP.** No proxies means no requests. The one exception is local development via an env flag that no compose file sets. | Auto-fulfill checkouts leave from the VPS IP. Flagging it would break real purchases. |
+| D5 | **Never scrape from the VPS IP.** No proxies means no requests. The one exception is local development on the developer's own machine, via an env flag that no compose file sets. | Auto-fulfill checkouts leave from the VPS IP. Flagging it would break real purchases. |
 | D6 | Keep the listing-create cache rule unchanged: a cached row with a valid title and at least one image is not re-fetched. | Operator decision. Capacity is reserved for refresh. |
 | D7 | Refresh interval default drops from 720 to **360 minutes** (4×/day), and is lowered by hand as the catalogue grows. | Operator decision, driven by capacity. |
 | D8 | Refresh uses **commerce mode** (lean extraction). Create uses **full mode**. | A full parse at 400k refreshes a day would hold about 5 cores permanently. |
@@ -281,12 +281,12 @@ New item `SOURCE_UNAVAILABLE_ON_AMAZON` ("Amazon'da erişilemiyor"), severity WA
 
 ## Rollout
 
-1. Merge and push. Deployment is automatic, and the default provider is `scraper`.
-2. **Enter the proxies in the panel immediately.** Until proxies exist, no listing can be created and refresh is paused. Prices and stock are preserved, and `SCRAPER_NO_PROXIES` is shown.
-3. Check the admin scraper stats, run `provider:compare`, and create a few test listings.
-4. Watch refresh lag and capacity for a few days.
+1. Merge and push; deployment is automatic, default provider `scraper`. There are no customers yet, so no listing traffic depends on the window before proxies are entered.
+2. Enter proxies in the panel. Until then `SCRAPER_NO_PROXIES` shows, creates fail as retryable and refresh pauses (prices and stock preserved).
+3. Verify: admin scraper stats, `provider:compare`, a few test listings.
+4. Watch refresh lag and capacity.
 
-**Rollback:** set `product.dataProvider = keepa`.
+Rollback: `product.dataProvider = keepa`.
 
 ## Known limitations and unverified assumptions
 
