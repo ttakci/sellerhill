@@ -48,7 +48,7 @@ export interface RetryLogger {
 }
 
 /**
- * Charges the application's daily eBay quota before a call goes out.
+ * Charges the application's shared eBay quota before a call goes out.
  *
  * Injected as a callback rather than imported so this module stays free of Nest
  * DI and remains unit-testable, and so a caller that has no budget context
@@ -60,9 +60,9 @@ export type BudgetGate = () => Promise<void>;
  * Run `request`, retrying transient eBay failures with `Retry-After`-aware backoff.
  *
  * When `acquireBudget` is supplied it runs before EVERY attempt, not once per
- * call: a retry is a real HTTP request that eBay counts against the daily
- * quota, so charging only the first attempt would let a run of 429s spend four
- * times what the governor recorded.
+ * call: a retry is a real HTTP request that eBay counts against its quota
+ * (daily or a shorter window), so charging only the first attempt would let a
+ * run of 429s spend four times what the governor recorded.
  */
 export async function withEbayRateLimitRetry<T>(
   request: () => Promise<T>,
@@ -74,8 +74,9 @@ export async function withEbayRateLimitRetry<T>(
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       // Throws EbayBudgetExhaustedError, which is deliberately NOT retryable
-      // here — waiting out a daily quota inside an HTTP retry loop would pin a
-      // worker for hours. The queue defers the job instead.
+      // here — waiting out a quota window inside an HTTP retry loop would pin
+      // a worker for as long as that window takes to reset. The queue defers
+      // the job instead.
       await options.acquireBudget?.();
       return await request();
     } catch (error: unknown) {

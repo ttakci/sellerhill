@@ -52,6 +52,7 @@ import { UsageEventsService } from './usage-events.service';
       { name: 'billing-listing-plan-limit' },
       { name: 'billing-subscription-reconcile' },
       { name: 'billing-price-migration' },
+      { name: 'ebay-rate-limit-refresh' },
     ),
   ],
   controllers: [AdminController],

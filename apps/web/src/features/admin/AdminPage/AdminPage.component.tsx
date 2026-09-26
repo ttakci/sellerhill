@@ -8,6 +8,7 @@ import {
   Button,
   EmptyState,
   Icon,
+  InfoMessage,
   PageHeader,
   SearchField,
   Table,
@@ -39,10 +40,15 @@ export const AdminPageComponent = ({
   providerCosts,
   billingMetrics,
   usersList,
-  ebayBudget,
+  ebayBudgetRows,
+  ebayUnmapped,
+  ebayFigureNote,
+  ebayFigureStale,
+  ebayFigureMissing,
   listingFailures,
   userColumns,
   budgetColumns,
+  unmappedColumns,
   failureColumns,
   skip,
   formatCost,
@@ -436,13 +442,30 @@ export const AdminPageComponent = ({
           {/* eBay meters calls per APPLICATION, so this pool is shared by every
               seller: running a resource dry stops that operation platform-wide,
               not for one customer. Background work is additionally capped below
-              the ceiling so a seller's own action always has budget left. */}
+              the ceiling so a seller's own action always has budget left. The
+              ceilings themselves come from eBay's own `getRateLimits` — never a
+              typed-in default — so this tab shows eBay's figure beside ours. */}
           <Text variant="caption" color="text.secondary">
             {t('admin.ebayLimits.description')}
           </Text>
+          {ebayFigureMissing ? (
+            <InfoMessage type="info">{t('admin.ebayLimits.figuresMissing')}</InfoMessage>
+          ) : (
+            <>
+              <Text variant="caption" color="text.secondary">
+                {ebayFigureNote}
+              </Text>
+              {ebayFigureStale && (
+                <InfoMessage type="warning">{t('admin.ebayLimits.figuresStale')}</InfoMessage>
+              )}
+            </>
+          )}
+          <Text variant="caption" color="text.secondary">
+            {t('admin.ebayLimits.compareHint')}
+          </Text>
           <Table
             columns={budgetColumns}
-            data={ebayBudget}
+            data={ebayBudgetRows}
             emptyContent={
               <EmptyState
                 icon="gauge"
@@ -452,6 +475,15 @@ export const AdminPageComponent = ({
               />
             }
           />
+          {ebayUnmapped.length > 0 && (
+            <>
+              <Text variant="h5">{t('admin.ebayLimits.unmappedTitle')}</Text>
+              <Text variant="caption" color="text.secondary">
+                {t('admin.ebayLimits.unmappedDescription')}
+              </Text>
+              <Table columns={unmappedColumns} data={ebayUnmapped} />
+            </>
+          )}
         </S.Rows>
       )}
 
