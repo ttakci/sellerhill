@@ -123,7 +123,7 @@
         "default": "Default"
       },
       "category": {
-        "keepa": "Keepa product refresh",
+        "keepa": "Product data & refresh",
         "amazon": "Amazon order sync & tracking",
         "auto_fulfill": "Auto-fulfillment",
         "email": "Email (SMTP)",
@@ -132,7 +132,8 @@
         "llm": "AI content",
         "buyer_messaging": "Buyer messaging",
         "retention": "Data retention & disk",
-        "ebay": "eBay call budget"
+        "ebay": "eBay call budget",
+        "scraper": "Scraper"
       },
       "keys": {
         "keepa.refresh.enabled": "Background refresh enabled",
@@ -195,7 +196,12 @@
         "tracking.aquiline.maxProfiles": "Aquiline profile limit",
         "billing.trialDays": "Trial length (days)",
         "billing.webhookGraceHours": "Payment notification grace (hours)",
-        "llm.apiKey": "AI API key"
+        "llm.apiKey": "AI API key",
+        "product.dataProvider": "Product data source",
+        "scraper.proxies": "Scraper proxies",
+        "scraper.perIpRequestsPerSecond": "Requests per second per proxy",
+        "scraper.inStockFloor": "\"In Stock\" stock floor",
+        "scraper.blockRateWarnPercent": "Block-rate warning (%)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Master switch for the background Keepa refresh scheduler. Turning it off stops all background token spend immediately, with no restart needed.",
@@ -258,7 +264,12 @@
         "tracking.aquiline.maxProfiles": "The number of seller profiles your Aquiline plan allows (Starter 10; then 25, 50, 100, 250). Raise it here when you upgrade the plan. Profiles are permanent and cannot be deleted.",
         "billing.trialDays": "The free trial given to a newly registered seller, between 1 and 90. A change applies only to sellers who register after it is saved.",
         "billing.webhookGraceHours": "How long to wait after a subscription period ends, if the renewal notification is late, before the account is suspended (default 6). A paying seller is not interrupted at the renewal moment.",
-        "llm.apiKey": "The AI provider's API key. Stored encrypted and never shown again once written. If the panel holds no value, the LLM_API_KEY environment variable is used. With no key, AI title and item-specific writing does not run and listings still open with the normal title. The provider address and model are managed only from the environment, for security."
+        "llm.apiKey": "The AI provider's API key. Stored encrypted and never shown again once written. If the panel holds no value, the LLM_API_KEY environment variable is used. With no key, AI title and item-specific writing does not run and listings still open with the normal title. The provider address and model are managed only from the environment, for security.",
+        "product.dataProvider": "Where Amazon product data comes from. \"scraper\" is our own service; \"keepa\" is the rollback. The two never mix.",
+        "scraper.proxies": "Proxy URLs, one per line (http://user:pass@host:port). Without any, no Amazon data is fetched. The server's own IP is never used.",
+        "scraper.perIpRequestsPerSecond": "How fast each proxy may fetch pages. Total capacity = this × proxy count.",
+        "scraper.inStockFloor": "Stock recorded when Amazon shows \"In Stock\" without a count. Displayed as N+.",
+        "scraper.blockRateWarnPercent": "Admin warning when this share of scraper requests was blocked in the last hour."
       },
       "newValueLabel": "New value",
       "search": "Search settings (name or environment variable)",

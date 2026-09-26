@@ -123,7 +123,7 @@
         "default": "Varsayılan"
       },
       "category": {
-        "keepa": "Keepa ürün yenileme",
+        "keepa": "Ürün verisi ve yenileme",
         "amazon": "Amazon sipariş eşleme & takip",
         "auto_fulfill": "Otomatik satın alma",
         "email": "E-posta (SMTP)",
@@ -132,7 +132,8 @@
         "llm": "Yapay zekâ içerik",
         "buyer_messaging": "Alıcı mesajlaşma",
         "retention": "Veri saklama & disk",
-        "ebay": "eBay çağrı bütçesi"
+        "ebay": "eBay çağrı bütçesi",
+        "scraper": "Scraper"
       },
       "keys": {
         "keepa.refresh.enabled": "Arka plan yenileme açık",
@@ -195,7 +196,12 @@
         "tracking.aquiline.maxProfiles": "Aquiline profil sınırı",
         "billing.trialDays": "Deneme süresi (gün)",
         "billing.webhookGraceHours": "Ödeme bildirimi tolerans süresi (saat)",
-        "llm.apiKey": "Yapay zekâ API anahtarı"
+        "llm.apiKey": "Yapay zekâ API anahtarı",
+        "product.dataProvider": "Ürün veri kaynağı",
+        "scraper.proxies": "Scraper proxy'leri",
+        "scraper.perIpRequestsPerSecond": "Proxy başına saniyelik istek",
+        "scraper.inStockFloor": "\"In Stock\" stok tabanı",
+        "scraper.blockRateWarnPercent": "Blok oranı uyarısı (%)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka planda Keepa yenileme zamanlayıcısının ana anahtarı. Kapatıldığında arka plan token harcaması, yeniden başlatma gerekmeden anında durur.",
@@ -258,7 +264,12 @@
         "tracking.aquiline.maxProfiles": "Aquiline planınızın izin verdiği satıcı profili sayısı (Starter 10; ardından 25, 50, 100, 250). Planı yükseltince buradan artırın. Profiller kalıcıdır, silinemez.",
         "billing.trialDays": "Yeni kayıt olan satıcıya verilen ücretsiz deneme süresi, 1 ile 90 arası. Değişiklik yalnızca kaydedildikten sonra kayıt olanlar için geçerlidir.",
         "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz.",
-        "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir."
+        "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir.",
+        "product.dataProvider": "Amazon ürün verisinin nereden alındığı. \"scraper\" kendi servisimiz, \"keepa\" geri dönüş seçeneği. İkisi karışmaz.",
+        "scraper.proxies": "Her satıra bir proxy (http://kullanıcı:şifre@host:port). Hiç yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
+        "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Toplam kapasite = bu değer × proxy sayısı.",
+        "scraper.inStockFloor": "Amazon sayı vermeden \"In Stock\" gösterdiğinde kaydedilen stok. N+ olarak gösterilir.",
+        "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar."
       },
       "newValueLabel": "Yeni değer",
       "search": "Ayar ara (ad veya ortam değişkeni)",

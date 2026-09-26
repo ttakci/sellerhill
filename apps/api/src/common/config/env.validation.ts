@@ -80,6 +80,23 @@ class EnvironmentVariables {
   @IsOptional()
   KEEPA_API_KEY?: string;
 
+  // --- Amazon scraper service (spec 2026-09-26-amazon-scraper-provider) ---
+  @IsString()
+  @IsOptional()
+  SCRAPER_SERVICE_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  SCRAPER_SERVICE_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  SCRAPER_PROXIES?: string;
+
+  @IsString()
+  @IsOptional()
+  PRODUCT_DATA_PROVIDER?: string;
+
   // --- Keepa stale-driven refresh pipeline (all optional, sensible defaults) ---
   @IsNumber()
   @IsOptional()

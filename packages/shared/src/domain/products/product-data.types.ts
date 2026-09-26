@@ -3,6 +3,8 @@
  * These types represent normalized product data regardless of source (ScraperAPI, etc.)
  */
 
+import type { SourceStockStatus } from './source-product.types';
+
 /**
  * Global trade identifiers + manufacturer part numbers for a product.
  *
@@ -71,6 +73,12 @@ export interface ProductData {
     avg90?: number; // 90-day average price
   };
   stock?: number;
+  /** How precisely `stock` is known (exact count vs. "at least this many" vs. out of stock). */
+  stockStatus?: SourceStockStatus;
+  /** The Buy Box quantity-dropdown maximum (seller's per-order limit, or Amazon's default). */
+  maxOrderQuantity?: number | null;
+  /** True when the source product page returned 404/"couldn't find that page". */
+  sourceRemoved?: boolean;
   raw?: Record<string, unknown>; // Original provider response for debugging (ScraperAPI)
   rawKeepaData?: Record<string, unknown>; // Keepa API response for price/stock debugging
   updatedAt?: string;

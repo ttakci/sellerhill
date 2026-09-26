@@ -96,6 +96,12 @@ export interface ListingFailureDetails {
   correlationId?: string;
   /** False when retrying the same input cannot succeed. */
   retryable?: boolean;
+  /** Amazon stock at zero-stock failure time (ZERO_STOCK). */
+  amazonStock?: number;
+  /** True when `amazonStock` is a floor ("at least this many"), not an exact count. */
+  amazonStockAtLeast?: boolean;
+  /** The listing settings group's stock buffer that pushed quantity to zero. */
+  stockBuffer?: number;
 }
 
 /**
