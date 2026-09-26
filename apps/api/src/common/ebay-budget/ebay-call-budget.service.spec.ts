@@ -73,13 +73,18 @@ describe('EbayCallBudgetService.acquire', () => {
     runScript.mockRejectedValueOnce(new Error('redis down'));
     await expect(service.acquire(EbayApiResource.INVENTORY)).resolves.toBeUndefined();
   });
-});
 
-describe('EbayCallBudgetService.release', () => {
-  it('decrements every window’s current key', async () => {
-    const { service, redis } = setup([inventoryWithMinute]);
-    await service.release(EbayApiResource.INVENTORY);
-    expect(redis.command.decrby).toHaveBeenCalledTimes(2);
+  it('a refusal at index 1 (the daily window) throws EbayBudgetExhaustedError with an 86,400s window resetting at the next UTC midnight', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-09T13:45:00.000Z'));
+    try {
+      const { service } = setup([inventoryWithMinute], [0, 1]);
+      const error = await service.acquire(EbayApiResource.INVENTORY).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(EbayBudgetExhaustedError);
+      expect((error as EbayBudgetExhaustedError).windowSeconds).toBe(86_400);
+      expect((error as EbayBudgetExhaustedError).resetAt.toISOString()).toBe('2026-08-10T00:00:00.000Z');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

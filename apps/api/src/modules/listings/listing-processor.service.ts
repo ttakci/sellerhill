@@ -514,8 +514,9 @@ export class ListingProcessorService extends WorkerHost {
    *
    * `moveToDelayed` is used rather than rethrowing so BullMQ does NOT count
    * this as a failed attempt: the listing is untried, and burning its three
-   * retries against a quota that only refills at UTC midnight would turn a
-   * temporary platform-wide condition into a permanent per-listing failure.
+   * retries against a quota window that may not reset for hours (or, for a
+   * sub-daily window, only seconds) would turn a temporary platform-wide
+   * condition into a permanent per-listing failure.
    */
   private async deferUntilBudgetResets(
     job: Job,

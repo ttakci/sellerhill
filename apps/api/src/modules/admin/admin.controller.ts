@@ -24,7 +24,7 @@
 //   GET    /admin/finops/users        — per-user cost summaries
 //   GET    /admin/finops/providers    — per-provider cost summaries
 //   GET    /admin/billing/metrics     — quota pressure + cost totals
-//   GET    /admin/ebay/budget         — daily eBay API quota usage per resource
+//   GET    /admin/ebay/budget         — eBay API quota usage per resource (daily + shorter windows)
 //   GET    /admin/listing-failures    — failed listing attempts WITH raw provider text
 //   GET    /admin/operations/summary  — queue summaries + warnings
 //   GET    /admin/listing-quality/summary   — how item specifics got filled
@@ -226,9 +226,9 @@ export class AdminController {
   @Get('ebay/budget')
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: "eBay's own daily limits beside our call counter (read-only)",
+    summary: "eBay's own limits beside our call counter (read-only)",
     description:
-      'Daily quota, consumption and reset time per eBay API resource. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
+      'Quota, consumption and reset time per eBay API resource — daily and, where eBay reports one, shorter windows too. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
   })
   @ApiOkResponse({ description: 'eBay limits and our call count retrieved' })
   async getEbayCallBudget(): Promise<EbayBudgetOverviewDto> {

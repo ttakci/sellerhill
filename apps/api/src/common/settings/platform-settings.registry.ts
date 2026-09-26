@@ -36,7 +36,7 @@ const def = (d: PlatformSettingDefinition): PlatformSettingDefinition => d;
 
 export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
   // --- eBay API call budget ---
-  // eBay meters calls PER APPLICATION, so all users share one daily quota and
+  // eBay meters calls PER APPLICATION, so all users share one quota pool and
   // exhausting it locks out every seller at once. Per-resource ceilings are
   // NOT configured here — the governor (`EbayCallBudgetService`) reads them
   // from eBay's own `getRateLimits` response via `EbayRateLimitStore`; there

@@ -86,8 +86,9 @@ export class EbayCallBudgetService implements OnModuleInit {
    * Charge `cost` calls against a resource, or throw `EbayBudgetExhaustedError`.
    *
    * Callers on a queue should catch that error and re-schedule the job for
-   * `error.resetAt` rather than marking the work failed — the work is fine, the
-   * day's allowance is not.
+   * `error.resetAt` rather than marking the work failed — the work is fine,
+   * the exhausted window's allowance is not (which may reset in seconds, not
+   * at UTC midnight, when the refusal came from a sub-daily window).
    */
   async acquire(
     resource: EbayApiResource,
@@ -125,22 +126,6 @@ export class EbayCallBudgetService implements OnModuleInit {
           `(${priority}); deferring until ${refused.resetAt.toISOString()}`
       );
       throw new EbayBudgetExhaustedError(resource, refused.resetAt, refused.windowSeconds);
-    }
-  }
-
-  /**
-   * Give budget back after a call that never reached eBay.
-   *
-   * Only correct when the request demonstrably did not leave — a failed
-   * pre-flight, an aborted batch. A call that reached eBay and errored still
-   * consumed quota and must NOT be refunded.
-   */
-  async release(resource: EbayApiResource, cost = 1): Promise<void> {
-    try {
-      const windows = governedWindows(await this.resolveMapped(resource), new Date());
-      await Promise.all(windows.map((w) => this.redis.command.decrby(this.counterKey(resource, w.keyParts), cost)));
-    } catch {
-      // Best-effort: an un-refunded call only makes us slightly more conservative.
     }
   }
 
