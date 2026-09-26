@@ -30,7 +30,7 @@ describe('EbayRateLimitStore', () => {
     const { db } = fakeDb([{ resources: [inventory], fetched_at: fetchedAt }]);
     const snapshot = await new EbayRateLimitStore(db).current();
     expect(snapshot?.fetchedAt).toEqual(fetchedAt);
-    expect(snapshot?.mapped.byResource[EbayApiResource.INVENTORY]?.limit).toBe(2_000_000);
+    expect(snapshot?.mapped.byResource[EbayApiResource.INVENTORY]?.daily?.limit).toBe(2_000_000);
   });
 
   it('upserts the single row on save and serves it from memory afterwards', async () => {

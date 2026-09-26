@@ -16,37 +16,6 @@ import {
 /** A window at least this long is a daily ceiling. eBay reports 89,999s for some. */
 export const DAILY_WINDOW_MIN_SECONDS = 86_400;
 
-/**
- * The Trading methods this codebase actually calls — the only two
- * `X-EBAY-API-CALL-NAME` values in `apps/api/src/modules`. Adding a Trading call
- * means adding its name here, or its quota is not governed.
- */
-export const TRADING_METHODS_WE_CALL: readonly string[] = ['GetMyeBaySelling', 'EndItem'];
-
-/** Exact eBay resource name per REST resource. Exact on purpose: `sell.fulfillment.payment_dispute` is a different bucket. */
-const REST_SOURCE: Record<Exclude<EbayApiResource, EbayApiResource.TRADING>, string> = {
-  [EbayApiResource.INVENTORY]: 'sell.inventory',
-  [EbayApiResource.TAXONOMY]: 'commerce.taxonomy',
-  [EbayApiResource.ACCOUNT]: 'sell.account',
-  [EbayApiResource.FULFILLMENT]: 'sell.fulfillment',
-  [EbayApiResource.FEED]: 'sell.feed',
-  [EbayApiResource.ANALYTICS]: 'developer.analytics.app_rate_limit',
-};
-
-export interface MappedLimit {
-  limit: number;
-  remaining: number;
-  resetAt: string | null;
-  sourceResources: string[];
-  partial: boolean;
-  otherWindows: EbayRateWindowDto[];
-}
-
-export interface MappedRateLimits {
-  byResource: Record<EbayApiResource, MappedLimit | null>;
-  unmapped: EbayRateLimitResourceDto[];
-}
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -57,7 +26,14 @@ function parseWindow(raw: unknown): EbayRateWindowDto | null {
     return null;
   }
   const { limit, remaining, timeWindow, reset } = raw;
-  if (typeof limit !== 'number' || typeof timeWindow !== 'number' || !Number.isFinite(limit) || !Number.isFinite(timeWindow)) {
+  if (
+    typeof limit !== 'number' ||
+    typeof timeWindow !== 'number' ||
+    !Number.isFinite(limit) ||
+    !Number.isFinite(timeWindow) ||
+    limit < 0 ||
+    timeWindow <= 0
+  ) {
     return null;
   }
   return {
@@ -107,6 +83,62 @@ export function pickDailyWindow(windows: EbayRateWindowDto[]): EbayRateWindowDto
   return best;
 }
 
+/** Where eBay reports each governed resource. Trading methods are resource names inside the Trading entry. */
+export interface ResourceSource {
+  trading: boolean;
+  name: string;
+}
+
+/**
+ * Exact eBay resource name per governed resource. Exact on purpose:
+ * `sell.fulfillment.payment_dispute` is a different bucket from
+ * `sell.fulfillment`, and a Trading method name only counts inside the
+ * Trading entry.
+ */
+export const RESOURCE_SOURCE: Record<EbayApiResource, ResourceSource> = {
+  [EbayApiResource.INVENTORY]: { trading: false, name: 'sell.inventory' },
+  [EbayApiResource.TAXONOMY]: { trading: false, name: 'commerce.taxonomy' },
+  [EbayApiResource.ACCOUNT]: { trading: false, name: 'sell.account' },
+  [EbayApiResource.FULFILLMENT]: { trading: false, name: 'sell.fulfillment' },
+  [EbayApiResource.FEED]: { trading: false, name: 'sell.feed' },
+  [EbayApiResource.ANALYTICS]: { trading: false, name: 'developer.analytics.app_rate_limit' },
+  [EbayApiResource.TRADING_GET_MY_EBAY_SELLING]: { trading: true, name: 'GetMyeBaySelling' },
+  [EbayApiResource.TRADING_END_ITEM]: { trading: true, name: 'EndItem' },
+};
+
+/**
+ * What eBay says about one governed resource. A resource may carry several
+ * windows (eBay reports e.g. 5,400/60s AND 5,000/day for one resource); the
+ * governor enforces every one of them.
+ */
+export interface MappedLimit {
+  /** The daily window (lowest limit among windows >= 1 day), or null when eBay reports only shorter ones. */
+  daily: EbayRateWindowDto | null;
+  /** One window per distinct sub-daily length, lowest limit, sorted by length. */
+  shortWindows: EbayRateWindowDto[];
+  /** The eBay resource name this came from. */
+  sourceResource: string;
+}
+
+export interface MappedRateLimits {
+  byResource: Record<EbayApiResource, MappedLimit | null>;
+  unmapped: EbayRateLimitResourceDto[];
+}
+
+export function pickShortWindows(windows: EbayRateWindowDto[]): EbayRateWindowDto[] {
+  const byLength = new Map<number, EbayRateWindowDto>();
+  for (const window of windows) {
+    if (window.timeWindowSeconds >= DAILY_WINDOW_MIN_SECONDS) {
+      continue;
+    }
+    const current = byLength.get(window.timeWindowSeconds);
+    if (!current || window.limit < current.limit) {
+      byLength.set(window.timeWindowSeconds, window);
+    }
+  }
+  return [...byLength.values()].sort((a, b) => a.timeWindowSeconds - b.timeWindowSeconds);
+}
+
 const isTradingEntry = (r: EbayRateLimitResourceDto): boolean =>
   /trading/i.test(r.apiContext) || /trading/i.test(r.apiName);
 
@@ -115,30 +147,17 @@ export function mapRateLimits(resources: EbayRateLimitResourceDto[]): MappedRate
   const byResource = {} as Record<EbayApiResource, MappedLimit | null>;
 
   for (const resource of Object.values(EbayApiResource)) {
-    const sources =
-      resource === EbayApiResource.TRADING
-        ? resources.filter((r) => isTradingEntry(r) && TRADING_METHODS_WE_CALL.includes(r.resourceName))
-        : resources.filter((r) => r.resourceName === REST_SOURCE[resource]);
-    sources.forEach((s) => used.add(s));
+    const source = RESOURCE_SOURCE[resource];
+    const matches = resources.filter(
+      (r) => r.resourceName === source.name && isTradingEntry(r) === source.trading,
+    );
+    matches.forEach((m) => used.add(m));
 
-    let chosen: { source: EbayRateLimitResourceDto; daily: EbayRateWindowDto } | null = null;
-    for (const source of sources) {
-      const daily = pickDailyWindow(source.windows);
-      if (daily && (!chosen || daily.limit < chosen.daily.limit)) {
-        chosen = { source, daily };
-      }
-    }
-
-    byResource[resource] = chosen
-      ? {
-          limit: chosen.daily.limit,
-          remaining: chosen.daily.remaining,
-          resetAt: chosen.daily.resetAt,
-          sourceResources: sources.map((s) => s.resourceName),
-          partial: resource === EbayApiResource.TRADING,
-          otherWindows: chosen.source.windows.filter((w) => w.timeWindowSeconds < DAILY_WINDOW_MIN_SECONDS),
-        }
-      : null;
+    const windows = matches.flatMap((m) => m.windows);
+    const daily = pickDailyWindow(windows);
+    const shortWindows = pickShortWindows(windows);
+    byResource[resource] =
+      daily || shortWindows.length > 0 ? { daily, shortWindows, sourceResource: source.name } : null;
   }
 
   return { byResource, unmapped: resources.filter((r) => !used.has(r)) };

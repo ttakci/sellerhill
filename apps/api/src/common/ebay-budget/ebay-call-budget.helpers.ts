@@ -5,7 +5,7 @@ import {
 } from '@repo/shared';
 
 import type { EbayRateLimitSnapshot } from './ebay-rate-limit.store';
-import { TRADING_METHODS_WE_CALL } from './ebay-rate-limits';
+import { RESOURCE_SOURCE } from './ebay-rate-limits';
 
 /**
  * Pure arithmetic behind the eBay call-budget governor.
@@ -86,20 +86,16 @@ export function buildBudgetOverview(input: {
       const mapped = input.snapshot?.mapped.byResource[resource] ?? null;
       return {
         resource,
-        ebayLimit: mapped?.limit ?? null,
-        ebayRemaining: mapped?.remaining ?? null,
-        ebayResetAt: mapped?.resetAt ?? null,
-        // TRADING has no `mapped` entry when eBay's response never surfaced
-        // either method we call — the hint still needs the method names it
-        // is warning about, so fall back to the same list `mapRateLimits`
-        // filters on, never an empty array.
-        sourceResources:
-          mapped?.sourceResources ??
-          (resource === EbayApiResource.TRADING ? [...TRADING_METHODS_WE_CALL] : []),
-        partial: resource === EbayApiResource.TRADING,
-        otherWindows: mapped?.otherWindows ?? [],
+        ebayLimit: mapped?.daily?.limit ?? null,
+        ebayRemaining: mapped?.daily?.remaining ?? null,
+        ebayResetAt: mapped?.daily?.resetAt ?? null,
+        sourceResources: [RESOURCE_SOURCE[resource].name],
+        partial: false,
+        otherWindows: mapped?.shortWindows ?? [],
         ourCount: input.counts[resource] ?? 0,
-        backgroundLimit: mapped ? effectiveLimit(mapped.limit, input.reservePercent, EbayCallPriority.BACKGROUND) : null,
+        backgroundLimit: mapped?.daily
+          ? effectiveLimit(mapped.daily.limit, input.reservePercent, EbayCallPriority.BACKGROUND)
+          : null,
         ourResetAt,
       };
     }),

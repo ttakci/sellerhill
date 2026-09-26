@@ -1116,7 +1116,7 @@ export class EbayService implements OnModuleInit {
       // Charged per PAGE, not per discovery run: each page is its own metered
       // Trading call, and a large store is dozens of them. Interactive, because
       // a seller is waiting on the import screen.
-      await this.ebayCallBudget.acquire(EbayApiResource.TRADING, EbayCallPriority.INTERACTIVE);
+      await this.ebayCallBudget.acquire(EbayApiResource.TRADING_GET_MY_EBAY_SELLING, EbayCallPriority.INTERACTIVE);
       const response = await this.withRateLimitRetry(() => axios.post<string>(baseUrl, xml, { headers: {
         'Content-Type': 'text/xml', 'X-EBAY-API-SITEID': this.resolveSiteId(account.marketplace_id),
         'X-EBAY-API-COMPATIBILITY-LEVEL': '967', 'X-EBAY-API-CALL-NAME': 'GetMyeBaySelling',
@@ -1218,11 +1218,11 @@ export class EbayService implements OnModuleInit {
     const baseUrl = this.configService.get<string>('EBAY_XML_API_URL') || '';
     const siteId = this.resolveSiteId(account.marketplace_id);
 
-    // Trading is the platform's scarcest quota (5,000/day for EVERY seller
-    // combined) and this is its highest-volume consumer: bulk end/delete calls
+    // EndItem's own 5,000/day (metered separately from every other Trading
+    // method) and this is its highest-volume consumer: bulk end/delete calls
     // it once per listing in a loop. Without the charge, one seller clearing a
     // large catalogue could spend the whole platform's day here unseen.
-    await this.ebayCallBudget.acquire(EbayApiResource.TRADING, EbayCallPriority.INTERACTIVE);
+    await this.ebayCallBudget.acquire(EbayApiResource.TRADING_END_ITEM, EbayCallPriority.INTERACTIVE);
 
     try {
       const response = await this.withRateLimitRetry(() => axios.post(baseUrl, xml, {

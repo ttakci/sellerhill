@@ -4,6 +4,7 @@ import {
   mapRateLimits,
   parseRateLimitsResponse,
   pickDailyWindow,
+  pickShortWindows,
 } from './ebay-rate-limits';
 
 const rate = (limit: number, timeWindow: number, remaining = limit, reset = '2026-09-26T00:00:00.000Z') => ({
@@ -72,6 +73,17 @@ describe('parseRateLimitsResponse', () => {
   it.each([null, undefined, 'text', 42, {}, { rateLimits: 'x' }])('returns [] for %p', (input) => {
     expect(parseRateLimitsResponse(input)).toEqual([]);
   });
+
+  it.each([
+    ['a zero window', { limit: 10, remaining: 10, timeWindow: 0 }],
+    ['a negative window', { limit: 10, remaining: 10, timeWindow: -60 }],
+    ['a negative limit', { limit: -1, remaining: 0, timeWindow: 86_400 }],
+  ])('drops %s instead of gating on it', (_label, badRate) => {
+    const flat = parseRateLimitsResponse({
+      rateLimits: [{ apiContext: 'sell', apiName: 'Inventory', apiVersion: 'v1', resources: [{ name: 'sell.inventory', rates: [badRate] }] }],
+    });
+    expect(flat[0].windows).toEqual([]);
+  });
 });
 
 describe('pickDailyWindow', () => {
@@ -97,6 +109,25 @@ describe('pickDailyWindow', () => {
   });
 });
 
+describe('pickShortWindows', () => {
+  it('keeps one window per sub-daily length, the lowest limit, sorted by length', () => {
+    const picked = pickShortWindows([
+      { limit: 5_000, remaining: 5_000, timeWindowSeconds: 300, resetAt: null },
+      { limit: 5_400, remaining: 5_400, timeWindowSeconds: 60, resetAt: null },
+      { limit: 4_000, remaining: 4_000, timeWindowSeconds: 300, resetAt: null },
+      { limit: 250_000, remaining: 250_000, timeWindowSeconds: 86_400, resetAt: null },
+    ]);
+    expect(picked.map((w) => [w.timeWindowSeconds, w.limit])).toEqual([
+      [60, 5_400],
+      [300, 4_000],
+    ]);
+  });
+
+  it('returns [] when every window is daily', () => {
+    expect(pickShortWindows([{ limit: 1, remaining: 1, timeWindowSeconds: 86_400, resetAt: null }])).toEqual([]);
+  });
+});
+
 describe('mapRateLimits', () => {
   const mapped = mapRateLimits(parseRateLimitsResponse(body));
 
@@ -107,23 +138,15 @@ describe('mapRateLimits', () => {
     [EbayApiResource.FULFILLMENT, 100_000, 90_000],
     [EbayApiResource.FEED, 100_000, 100_000],
     [EbayApiResource.ANALYTICS, 5_000, 5_000],
+    [EbayApiResource.TRADING_GET_MY_EBAY_SELLING, 5_000, 4_000],
+    [EbayApiResource.TRADING_END_ITEM, 5_000, 4_900],
   ])('maps %s by its exact eBay resource name', (resource, limit, remaining) => {
-    expect(mapped.byResource[resource]).toMatchObject({ limit, remaining, partial: false });
+    expect(mapped.byResource[resource]?.daily).toMatchObject({ limit, remaining });
   });
 
-  it('does not let a longer name that merely starts with a mapped one take its place', () => {
-    // sell.fulfillment.payment_dispute is 250,000 — it must not become Fulfillment's ceiling.
-    expect(mapped.byResource[EbayApiResource.FULFILLMENT]?.sourceResources).toEqual(['sell.fulfillment']);
-  });
-
-  it('maps Trading to the lowest daily limit among the methods we call, marked partial', () => {
-    expect(mapped.byResource[EbayApiResource.TRADING]).toMatchObject({
-      limit: 5_000,
-      partial: true,
-      sourceResources: ['GetMyeBaySelling', 'EndItem'],
-    });
-    // Remaining is that of the method the limit came from (GetMyeBaySelling, first of equals).
-    expect(mapped.byResource[EbayApiResource.TRADING]?.remaining).toBe(4_000);
+  it('names the single eBay resource each row came from', () => {
+    expect(mapped.byResource[EbayApiResource.FULFILLMENT]?.sourceResource).toBe('sell.fulfillment');
+    expect(mapped.byResource[EbayApiResource.TRADING_END_ITEM]?.sourceResource).toBe('EndItem');
   });
 
   it('puts every resource no governed resource uses in unmapped', () => {
@@ -131,42 +154,56 @@ describe('mapRateLimits', () => {
     expect(names).toEqual(['AddItem', 'Image', 'commerce.taxonomy.bulk', 'sell.fulfillment.payment_dispute'].sort());
   });
 
-  it('keeps sub-daily windows of a mapped source as otherWindows', () => {
+  it('keeps sub-daily windows as shortWindows beside the daily one', () => {
     const m = mapRateLimits(
       parseRateLimitsResponse({
         rateLimits: [{ apiContext: 'sell', apiName: 'Inventory', apiVersion: 'v1', resources: [{ name: 'sell.inventory', rates: [rate(2_000_000, 86_400), rate(5_400, 60)] }] }],
       }),
     );
-    expect(m.byResource[EbayApiResource.INVENTORY]?.otherWindows).toEqual([
+    expect(m.byResource[EbayApiResource.INVENTORY]?.daily?.limit).toBe(2_000_000);
+    expect(m.byResource[EbayApiResource.INVENTORY]?.shortWindows).toEqual([
       { limit: 5_400, remaining: 5_400, timeWindowSeconds: 60, resetAt: '2026-09-26T00:00:00.000Z' },
     ]);
   });
 
-  it('returns null — never 0 — when eBay no longer reports a mapped name', () => {
+  it('governs a source that reports only sub-daily windows, with no daily ceiling', () => {
+    const m = mapRateLimits(
+      parseRateLimitsResponse({
+        rateLimits: [{ apiContext: 'sell', apiName: 'Feed', apiVersion: 'v1', resources: [{ name: 'sell.feed', rates: [rate(50, 3_600)] }] }],
+      }),
+    );
+    expect(m.byResource[EbayApiResource.FEED]).toMatchObject({ daily: null, shortWindows: [expect.objectContaining({ limit: 50 })] });
+    expect(m.unmapped).toEqual([]);
+  });
+
+  it('returns null — never 0 — when eBay does not report a governed name', () => {
     const m = mapRateLimits([]);
     for (const resource of Object.values(EbayApiResource)) {
       expect(m.byResource[resource]).toBeNull();
     }
   });
 
-  it('returns null when a mapped source reports only sub-daily windows', () => {
+  it('returns null for a Trading method eBay reports with no usable rates, and does not list it as unmapped', () => {
     const m = mapRateLimits(
       parseRateLimitsResponse({
-        rateLimits: [{ apiContext: 'sell', apiName: 'Feed', apiVersion: 'v1', resources: [{ name: 'sell.feed', rates: [rate(50, 3_600)] }] }],
+        rateLimits: [{ apiContext: 'TradingAPI', apiName: 'TradingAPI', apiVersion: 'v1', resources: [{ name: 'EndItem' }] }],
       }),
     );
-    expect(m.byResource[EbayApiResource.FEED]).toBeNull();
-    // Matched, so it is not unmapped either.
+    expect(m.byResource[EbayApiResource.TRADING_END_ITEM]).toBeNull();
     expect(m.unmapped).toEqual([]);
   });
 
-  it('does not match Trading method names outside a Trading entry', () => {
+  it('does not match a Trading method name outside a Trading entry', () => {
     const m = mapRateLimits(
       parseRateLimitsResponse({
         rateLimits: [{ apiContext: 'sell', apiName: 'Other', apiVersion: 'v1', resources: [{ name: 'EndItem', rates: [rate(1, 86_400)] }] }],
       }),
     );
-    expect(m.byResource[EbayApiResource.TRADING]).toBeNull();
+    expect(m.byResource[EbayApiResource.TRADING_END_ITEM]).toBeNull();
     expect(m.unmapped).toHaveLength(1);
+  });
+
+  it('does not let a longer name that merely starts with a mapped one take its place', () => {
+    expect(mapped.byResource[EbayApiResource.FULFILLMENT]?.daily?.limit).toBe(100_000);
   });
 });

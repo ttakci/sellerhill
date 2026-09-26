@@ -157,7 +157,7 @@ export class EbayCallBudgetService implements OnModuleInit {
   /** eBay's own daily ceiling, or null when eBay has not given one — never a number we made up. */
   private async resolveLimit(resource: EbayApiResource): Promise<number | null> {
     const snapshot = await this.rateLimits.current();
-    return snapshot?.mapped.byResource[resource]?.limit ?? null;
+    return snapshot?.mapped.byResource[resource]?.daily?.limit ?? null;
   }
 
   private counterKey(resource: EbayApiResource, day: string): string {

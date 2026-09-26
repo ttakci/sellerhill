@@ -22,14 +22,16 @@ export enum EbayApiResource {
   /** Order retrieval and shipping fulfillment. */
   FULFILLMENT = 'sell.fulfillment',
   /**
-   * Legacy XML calls (store discovery, EndItem).
+   * Trading `GetMyeBaySelling` — existing-listing discovery on import.
    *
-   * eBay meters Trading PER METHOD, not as one pool (AddItem 100,000/day,
-   * GetMyeBaySelling 5,000/day, ...). This single member is therefore mapped to
-   * the lowest daily limit among the methods we actually call — a mapping, not
-   * the whole truth about Trading.
+   * eBay meters Trading PER METHOD (AddItem 100,000/day, GetMyeBaySelling
+   * 5,000/day, …), so every Trading method we call is its own resource. Adding
+   * a Trading call means adding a member here and a row in `RESOURCE_SOURCE`;
+   * `trading-methods.guard.spec.ts` fails until both exist.
    */
-  TRADING = 'trading',
+  TRADING_GET_MY_EBAY_SELLING = 'trading.GetMyeBaySelling',
+  /** Trading `EndItem` — ending a listing. */
+  TRADING_END_ITEM = 'trading.EndItem',
   /**
    * Bulk report tasks (create → poll → download).
    *
