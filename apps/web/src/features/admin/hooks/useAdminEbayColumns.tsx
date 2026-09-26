@@ -43,10 +43,14 @@ export function useAdminEbayColumns(): {
         header: t('admin.ebayLimits.resource'),
         render: (_value, row) => (
           <>
-            <Text variant="body-sm">{row.resource}</Text>
-            <Text variant="caption" color="text.tertiary">
-              {row.ebayResource}
-            </Text>
+            <div>
+              <Text variant="body-sm">{row.resource}</Text>
+            </div>
+            <div>
+              <Text variant="caption" color="text.tertiary">
+                {row.ebayResource}
+              </Text>
+            </div>
           </>
         ),
       },
