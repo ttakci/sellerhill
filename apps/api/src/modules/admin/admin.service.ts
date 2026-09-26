@@ -98,6 +98,7 @@ export const ADMIN_QUEUE_NAMES = [
   'billing-subscription-reconcile',
   'billing-price-migration',
   'data-retention',
+  'ebay-rate-limit-refresh',
 ] as const;
 
 @Injectable()

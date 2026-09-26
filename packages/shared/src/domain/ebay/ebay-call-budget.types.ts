@@ -21,12 +21,21 @@ export enum EbayApiResource {
   ACCOUNT = 'sell.account',
   /** Order retrieval and shipping fulfillment. */
   FULFILLMENT = 'sell.fulfillment',
-  /** Legacy XML calls (store discovery, EndItem). */
-  TRADING = 'trading',
+  /**
+   * Trading `GetMyeBaySelling` — existing-listing discovery on import.
+   *
+   * eBay meters Trading PER METHOD (AddItem 100,000/day, GetMyeBaySelling
+   * 5,000/day, …), so every Trading method we call is its own resource. Adding
+   * a Trading call means adding a member here and a row in `RESOURCE_SOURCE`;
+   * `trading-methods.guard.spec.ts` fails until both exist.
+   */
+  TRADING_GET_MY_EBAY_SELLING = 'trading.GetMyeBaySelling',
+  /** Trading `EndItem` — ending a listing. */
+  TRADING_END_ITEM = 'trading.EndItem',
   /**
    * Bulk report tasks (create → poll → download).
    *
-   * 100,000/day, 20x Trading's ceiling, and the reason periodic listing
+   * 100,000/day, 20x the ceiling of the Trading methods we call, and the reason periodic listing
    * reconciliation is affordable at all: one report covers a seller's ENTIRE
    * catalogue, so the cost is per seller rather than per 200 listings the way
    * `GetMyeBaySelling` is.
@@ -55,17 +64,59 @@ export enum EbayCallPriority {
   BACKGROUND = 'background',
 }
 
-/** Live utilization for one resource, as shown in the admin panel. */
-export interface EbayCallBudgetStatusDto {
-  resource: EbayApiResource;
-  /** Full daily ceiling. */
+/** One rate window eBay reports for a resource. A resource may report several. */
+export interface EbayRateWindowDto {
   limit: number;
-  used: number;
   remaining: number;
-  /** Ceiling background work is held to (limit minus the interactive reserve). */
-  backgroundLimit: number;
-  /** ISO timestamp at which the counter resets. */
-  resetAt: string;
-  /** True when eBay's own Analytics API confirmed this ceiling, false when it is a configured default. */
-  observed: boolean;
+  /** Window length in seconds. A "day" is not always exactly 86400. */
+  timeWindowSeconds: number;
+  /** When eBay's own window resets — NOT UTC midnight in general. */
+  resetAt: string | null;
+}
+
+/** One resource exactly as eBay's `getRateLimits` reports it, flattened. */
+export interface EbayRateLimitResourceDto {
+  apiContext: string;
+  apiName: string;
+  apiVersion: string;
+  resourceName: string;
+  /** Empty when eBay reports no rate at all (e.g. the Media API image resource). */
+  windows: EbayRateWindowDto[];
+}
+
+/**
+ * One governed resource in the admin panel: eBay's figure beside our counter.
+ *
+ * The two are deliberately never subtracted. eBay's day resets at its own time
+ * and ours at UTC midnight, so a difference would be meaningless — the operator
+ * compares them by eye, and a large mismatch means some caller bypasses the
+ * governor.
+ */
+export interface EbayBudgetResourceRowDto {
+  resource: EbayApiResource;
+  /** eBay's daily ceiling; null when eBay reported none — the governor then does not gate. */
+  ebayLimit: number | null;
+  ebayRemaining: number | null;
+  ebayResetAt: string | null;
+  /** The exact eBay resource this row is metered under (e.g. `sell.inventory`, `EndItem`). */
+  ebayResource: string;
+  /** Sub-daily windows eBay also enforces on this resource. The governor enforces them too. */
+  otherWindows: EbayRateWindowDto[];
+  /** Calls our governor counted today (UTC). */
+  ourCount: number;
+  /** Ceiling background work is held to; null when there is no eBay ceiling. */
+  backgroundLimit: number | null;
+  /** When our counter resets (UTC midnight). */
+  ourResetAt: string;
+}
+
+/** `GET /v1/admin/ebay/budget`. */
+export interface EbayBudgetOverviewDto {
+  /** When eBay's figures were captured; null when eBay has never answered. */
+  fetchedAt: string | null;
+  /** False when the latest fetch failed and a stored snapshot is being shown. */
+  live: boolean;
+  rows: EbayBudgetResourceRowDto[];
+  /** Everything eBay reports that no governed resource uses — shown, never hidden. */
+  unmapped: EbayRateLimitResourceDto[];
 }

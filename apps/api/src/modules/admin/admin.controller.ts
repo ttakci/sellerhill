@@ -24,7 +24,7 @@
 //   GET    /admin/finops/users        — per-user cost summaries
 //   GET    /admin/finops/providers    — per-provider cost summaries
 //   GET    /admin/billing/metrics     — quota pressure + cost totals
-//   GET    /admin/ebay/budget         — daily eBay API quota usage per resource
+//   GET    /admin/ebay/budget         — eBay API quota usage per resource (daily + shorter windows)
 //   GET    /admin/listing-failures    — failed listing attempts WITH raw provider text
 //   GET    /admin/operations/summary  — queue summaries + warnings
 //   GET    /admin/listing-quality/summary   — how item specifics got filled
@@ -76,7 +76,7 @@ import {
   type AdminListingQualitySummaryDto,
   type AdminOperationsSummaryDto,
   type AdminOverviewDto,
-  type EbayCallBudgetStatusDto,
+  type EbayBudgetOverviewDto,
   type ListingFailureCode,
   type AdminUsersListDto,
   type PlatformSettingsListDto,
@@ -89,7 +89,7 @@ import {
 } from '@repo/shared';
 import type { Queue } from 'bullmq';
 
-import { EbayCallBudgetService } from '../../common/ebay-budget/ebay-call-budget.service';
+import { EbayBudgetOverviewService } from '../../common/ebay-budget/ebay-budget-overview.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OperatorSurface } from '../auth/operator-surface.decorator';
@@ -114,7 +114,7 @@ export class AdminController {
     private readonly adminListingQualityService: AdminListingQualityService,
     private readonly adminUsersService: AdminUsersService,
     private readonly listingFailures: AdminListingFailuresService,
-    private readonly ebayCallBudget: EbayCallBudgetService,
+    private readonly ebayBudgetOverview: EbayBudgetOverviewService,
     private readonly platformSettings: PlatformSettingsService,
     private readonly emailService: EmailService,
     @InjectQueue('order-sync') private readonly orderSyncQueue: Queue,
@@ -131,6 +131,7 @@ export class AdminController {
     @InjectQueue('billing-listing-plan-limit') private readonly billingListingPlanLimitQueue: Queue,
     @InjectQueue('billing-subscription-reconcile') private readonly billingReconcileQueue: Queue,
     @InjectQueue('billing-price-migration') private readonly billingPriceMigrationQueue: Queue,
+    @InjectQueue('ebay-rate-limit-refresh') private readonly ebayRateLimitRefreshQueue: Queue,
   ) {}
 
   private queues(): Array<{ name: string; queue: Queue }> {
@@ -149,6 +150,7 @@ export class AdminController {
       { name: 'billing-listing-plan-limit', queue: this.billingListingPlanLimitQueue },
       { name: 'billing-subscription-reconcile', queue: this.billingReconcileQueue },
       { name: 'billing-price-migration', queue: this.billingPriceMigrationQueue },
+      { name: 'ebay-rate-limit-refresh', queue: this.ebayRateLimitRefreshQueue },
     ];
   }
 
@@ -224,13 +226,13 @@ export class AdminController {
   @Get('ebay/budget')
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'eBay API call budget (read-only)',
+    summary: "eBay's own limits beside our call counter (read-only)",
     description:
-      'Daily quota, consumption and reset time per eBay API resource. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
+      'Quota, consumption and reset time per eBay API resource — daily and, where eBay reports one, shorter windows too. Quotas are metered PER APPLICATION, so this pool is shared by every seller — exhausting one resource stops that operation platform-wide.',
   })
-  @ApiOkResponse({ description: 'Budget status retrieved' })
-  async getEbayCallBudget(): Promise<EbayCallBudgetStatusDto[]> {
-    return this.ebayCallBudget.status();
+  @ApiOkResponse({ description: 'eBay limits and our call count retrieved' })
+  async getEbayCallBudget(): Promise<EbayBudgetOverviewDto> {
+    return this.ebayBudgetOverview.get();
   }
 
   @Get('listing-failures')

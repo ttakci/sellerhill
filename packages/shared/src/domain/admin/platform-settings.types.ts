@@ -74,14 +74,10 @@ export enum PlatformSettingKey {
   KEEPA_REFRESH_SCHEDULER_CRON = 'keepa.refresh.schedulerCron',
 
   // --- eBay API call budget (quotas are per APPLICATION, shared by all users) ---
+  // Per-resource ceilings are no longer typed in here — the governor takes
+  // them from eBay's own `getRateLimits` response (EbayRateLimitStore).
   EBAY_BUDGET_ENABLED = 'ebay.budget.enabled',
   EBAY_BUDGET_RESERVE_PERCENT = 'ebay.budget.reservePercent',
-  EBAY_BUDGET_INVENTORY_DAILY_LIMIT = 'ebay.budget.inventoryDailyLimit',
-  EBAY_BUDGET_TAXONOMY_DAILY_LIMIT = 'ebay.budget.taxonomyDailyLimit',
-  EBAY_BUDGET_ACCOUNT_DAILY_LIMIT = 'ebay.budget.accountDailyLimit',
-  EBAY_BUDGET_FULFILLMENT_DAILY_LIMIT = 'ebay.budget.fulfillmentDailyLimit',
-  EBAY_BUDGET_TRADING_DAILY_LIMIT = 'ebay.budget.tradingDailyLimit',
-  EBAY_BUDGET_FEED_DAILY_LIMIT = 'ebay.budget.feedDailyLimit',
 
   // --- Periodic listing reconciliation (eBay Feed API) ---
   /**
