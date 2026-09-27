@@ -600,7 +600,13 @@
         "homeDecor": "Ev & Dekorasyon",
         "kitchenDining": "Mutfak",
         "fitnessSports": "Spor & Fitness",
-        "outdoorSurvival": "Outdoor"
+        "outdoorSurvival": "Outdoor",
+        "beautyHealth": "Güzellik & Sağlık",
+        "apparelFashion": "Giyim & Moda",
+        "autoParts": "Oto Parça",
+        "petSupplies": "Evcil Hayvan",
+        "toysKids": "Oyuncak & Çocuk",
+        "minimalist": "Minimalist"
       },
       "points": {
         "editable": "Tamamen düzenlenebilir: şablonu açın, dilediğiniz gibi değiştirin.",

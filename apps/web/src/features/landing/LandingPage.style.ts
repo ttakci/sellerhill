@@ -1951,12 +1951,13 @@ export const TemplateSide = styled.div`
 `;
 
 export const TemplateTabs = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
 
   @media (max-width: 940px) {
     min-width: 0;
+    display: flex;
     flex-direction: row;
     overflow-x: auto;
     padding-bottom: 0.25rem;
@@ -1974,7 +1975,8 @@ export const TemplateTab = styled.button<{ $active: boolean }>`
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.8rem 1rem;
+  min-width: 0;
+  padding: 0.65rem 0.85rem;
   border-radius: ${tkn('radius.md')};
   border: 1px solid ${(p) => (p.$active ? tkn('colors.landing.chipBorder')(p) : 'transparent')};
   background: ${(p) => (p.$active ? tkn('colors.surface.primary')(p) : 'transparent')};
@@ -1982,7 +1984,7 @@ export const TemplateTab = styled.button<{ $active: boolean }>`
   cursor: pointer;
   text-align: left;
   font-family: ${FONT_BODY};
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: ${(p) => (p.$active ? 700 : 500)};
   color: ${(p) => (p.$active ? tkn('colors.brand.primary')(p) : tkn('colors.landing.heroTextMuted')(p))};
   transition:

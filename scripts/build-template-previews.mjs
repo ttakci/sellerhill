@@ -45,7 +45,7 @@ function templateHtml(slug) {
   return sql.slice(start + tag.length, end);
 }
 
-/** One believable, unbranded product per template. Output file = slug without the `ds-` prefix. */
+/** One believable, unbranded product per template (photos repeat — only public-domain ones are used, see CREDITS.md). Output file = slug without the `ds-` prefix. */
 const products = {
   'ds-general-store': {
     img: 'bluetooth-speaker',
@@ -159,6 +159,120 @@ const products = {
       Features: 'Non-Slip, Lightweight',
       Color: 'Teal',
       Activity: 'Yoga, Pilates',
+    },
+  },
+  'ds-minimalist': {
+    img: 'milk-frother',
+    title: 'Handheld Milk Frother, Battery Powered Whisk for Coffee, Latte & Matcha',
+    desc: 'Froth milk in seconds for lattes, cappuccinos and matcha. A stainless steel whisk and a single button make it simple to use and easy to rinse clean.',
+    features: [
+      'Creamy froth in 15 to 20 seconds',
+      'Stainless steel whisk head',
+      'One-button operation',
+      'Runs on two AA batteries',
+    ],
+    specs: {
+      Material: 'Stainless Steel, ABS',
+      'Power Source': 'Battery (2 x AA)',
+      Speed: '19,000 RPM',
+      Length: '9 in',
+      Color: 'Black',
+      'Care Instructions': 'Rinse Under Water',
+    },
+  },
+  'ds-auto-parts': {
+    img: 'usb-c-charger',
+    title: '30W USB-C Fast Charger with 6 ft Cable and USB-A Adapter, Foldable Plug',
+    desc: 'A compact 30W USB-C power delivery charger for phones, tablets and small laptops, with a 6 ft cable and a USB-A adapter for older accessories.',
+    features: [
+      '30W USB-C Power Delivery',
+      'Foldable prongs for travel',
+      '6 ft USB-C to USB-C cable included',
+      'Over-current and over-heat protection',
+    ],
+    specs: {
+      'Output Power': '30 W',
+      'Connector Type': 'USB-C',
+      'Cable Length': '6 ft',
+      'Input Voltage': '100-240 V',
+      Color: 'White',
+      'Included Components': 'Charger, Cable, Adapter',
+    },
+  },
+  'ds-apparel-fashion': {
+    img: 'lunch-bag',
+    title: 'Striped Canvas Tote Bag with Insulated Lining and Leather-Look Tag',
+    desc: 'A classic striped canvas tote with sturdy handles and an insulated, wipe-clean lining, easy to carry from the office to the market.',
+    features: [
+      'Durable striped canvas exterior',
+      'Insulated, wipe-clean lining',
+      'Full-length zip closure',
+      'Padded carry handles',
+    ],
+    specs: {
+      Material: 'Canvas',
+      Style: 'Tote',
+      Pattern: 'Striped',
+      Closure: 'Zipper',
+      Color: 'Navy, White',
+      Department: 'Unisex Adult',
+    },
+  },
+  'ds-beauty-health': {
+    img: 'desk-lamp',
+    title: 'Clip-On LED Ring Light, Flexible Gooseneck, 3 Color Modes for Makeup',
+    desc: 'An even, shadow-free ring of light for makeup, skincare and video calls. Clip it to a mirror or desk and bend the gooseneck to any angle.',
+    features: [
+      'Soft, even ring of light with no harsh shadows',
+      '3 color temperatures, dimmable',
+      'Strong clamp fits mirrors and desks',
+      'USB powered',
+    ],
+    specs: {
+      'Light Source': 'LED',
+      'Color Modes': 'Warm, Neutral, Cool',
+      'Power Source': 'USB',
+      Mounting: 'Clamp',
+      Color: 'White',
+      Brightness: 'Dimmable',
+    },
+  },
+  'ds-pet-supplies': {
+    img: 'kitchen-scale',
+    title: 'Digital Pet Food Scale, Portion Control for Dog & Cat Meals, 1 g Accuracy',
+    desc: 'Measure every meal to the gram and keep your pet at a healthy weight. One-touch tare lets you weigh straight into the food bowl.',
+    features: [
+      'Accurate portions to 1 g / 0.1 oz',
+      'Tare function weighs directly in the bowl',
+      'Backlit display, easy to read',
+      'Stainless steel platform wipes clean',
+    ],
+    specs: {
+      'Pet Type': 'Dog, Cat',
+      'Maximum Weight': '11 lb',
+      Display: 'Backlit LCD',
+      Material: 'Stainless Steel',
+      'Power Source': 'Battery',
+      Color: 'Silver',
+    },
+  },
+  'ds-toys-kids': {
+    img: 'webcam',
+    title: 'Kids Webcam for Online Classes, 720p with Built-In Microphone, Plug & Play',
+    desc: 'A simple plug-and-play webcam for online lessons and video calls with family. Clips onto any monitor or laptop, no software to install.',
+    features: [
+      '720p video for clear online classes',
+      'Built-in microphone',
+      'Universal clip fits laptops and monitors',
+      'Plug and play over USB',
+    ],
+    specs: {
+      Resolution: '720p',
+      Connectivity: 'USB',
+      Microphone: 'Built-In',
+      Mounting: 'Clip',
+      'Age Range': '6 Years and Up',
+      Color: 'Black',
     },
   },
 };

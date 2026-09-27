@@ -600,7 +600,13 @@
         "homeDecor": "Home & Decor",
         "kitchenDining": "Kitchen",
         "fitnessSports": "Sports & Fitness",
-        "outdoorSurvival": "Outdoor"
+        "outdoorSurvival": "Outdoor",
+        "beautyHealth": "Beauty & Health",
+        "apparelFashion": "Apparel & Fashion",
+        "autoParts": "Auto Parts",
+        "petSupplies": "Pet Supplies",
+        "toysKids": "Toys & Kids",
+        "minimalist": "Minimalist"
       },
       "points": {
         "editable": "Fully editable: open the template and change anything you like.",
