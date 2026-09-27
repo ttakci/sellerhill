@@ -34,6 +34,14 @@ export interface PendingListingUpdate {
    *  `recordRevisions` can log a from→to pair without a second read. */
   previousPrice: number;
   previousQuantity: number;
+  /**
+   * The product's stored Amazon price is not > 0: only the quantity is pushed
+   * (the offer goes out with no price, so eBay keeps its own), and only the
+   * quantity is persisted — the listing's price and profit figures stay as
+   * they are. `price` then carries the listing's current price, for the
+   * revision log only.
+   */
+  quantityOnly: boolean;
 }
 
 interface ListingRow extends ListingOverrideRow {
@@ -138,14 +146,15 @@ export class ProductSyncService {
 
     // A stored price of 0 means "no usable Amazon price" (an out-of-stock page
     // imported without one, a legacy Keepa `?? 0`), never "free". Pricing from
-    // it hands back fees + fixed profit or the price floor, so every listing of
-    // this product is skipped — eBay keeps what it last had — until a refresh
-    // reads a real price. Logged once per product, not once per listing.
-    if (!(Number(productInfo.data.price?.current) > 0)) {
+    // it hands back fees + fixed profit or the price floor, so no price is ever
+    // sent for such a product — but its QUANTITY still is, exactly as for any
+    // other product: skipping it entirely would leave a listing live at its old
+    // quantity after Amazon ran out, and oversell. Logged once per product.
+    const priceUnknown = !(Number(productInfo.data.price?.current) > 0);
+    if (priceUnknown) {
       this.logger.warn(
-        `Product ${asin} has no usable Amazon price — skipping price/stock sync for its ${listings.length} active listing(s)`
+        `Product ${asin}: price unknown — quantity synced, price left as is (${listings.length} active listing(s))`
       );
-      return [];
     }
 
     // One settings-group read per (user, group) instead of one per listing:
@@ -168,7 +177,8 @@ export class ProductSyncService {
           productInfo.data,
           groupCache,
           accountCache,
-          taxRateCache
+          taxRateCache,
+          priceUnknown
         );
         if (update) {
           pending.push(update);
@@ -211,7 +221,8 @@ export class ProductSyncService {
           listingId: update.listingId,
           sku: update.sku,
           offerId: update.offerId,
-          price: update.price,
+          // Quantity-only: no price in the offer, so eBay keeps its own.
+          price: update.quantityOnly ? null : update.price,
           quantity: update.quantity,
         }));
 
@@ -274,7 +285,8 @@ export class ProductSyncService {
     product: ProductData,
     groupCache: Map<string, ListingSettingsGroup>,
     accountCache: Map<string, string | null>,
-    taxRateCache: Map<string, number>
+    taxRateCache: Map<string, number>,
+    priceUnknown = false
   ): Promise<PendingListingUpdate | null> {
     const groupKey = `${listing.user_id}:${listing.listing_settings_group_id}`;
     let group = groupCache.get(groupKey);
@@ -311,7 +323,12 @@ export class ProductSyncService {
       group,
       amazonTaxRatePct
     );
-    const resolved = applyListingOverrides(strategy, listing);
+    const overridden = applyListingOverrides(strategy, listing);
+    // Price unknown: only the quantity is ours to change. The price (and every
+    // figure derived from it) stays exactly what the listing already holds, so
+    // the delta check compares quantity alone.
+    const currentPrice = Number(listing.price) || 0;
+    const resolved = priceUnknown ? { ...overridden, price: currentPrice } : overridden;
 
     if (!hasCommerceDelta(listing, resolved)) {
       this.logger.debug(
@@ -352,15 +369,18 @@ export class ProductSyncService {
       estimatedProfit: resolved.estimatedProfit,
       profitMargin: resolved.profitMargin,
       roi: resolved.roi,
-      previousPrice: Number(listing.price) || 0,
+      previousPrice: currentPrice,
       previousQuantity: Number(listing.quantity) || 0,
+      quantityOnly: priceUnknown,
     };
   }
 
   /** One round trip for the whole batch instead of one UPDATE per listing. */
   private async persistApplied(
-    applied: Array<{ result: { offerId: string | null }; update: PendingListingUpdate }>
+    all: Array<{ result: { offerId: string | null }; update: PendingListingUpdate }>
   ): Promise<void> {
+    await this.persistQuantityOnly(all.filter((entry) => entry.update.quantityOnly));
+    const applied = all.filter((entry) => !entry.update.quantityOnly);
     if (applied.length === 0) {
       return;
     }
@@ -395,6 +415,38 @@ export class ProductSyncService {
         applied.map((entry) => entry.update.estimatedProfit),
         applied.map((entry) => entry.update.profitMargin),
         applied.map((entry) => entry.update.roi),
+        applied.map((entry) => entry.update.sku),
+        applied.map((entry) => entry.result.offerId),
+      ]
+    );
+  }
+
+  /**
+   * Quantity-only updates (source price unknown): write the quantity and the
+   * identifiers eBay confirmed, and NOTHING priced — `price`, `purchase_price`,
+   * `estimated_profit`, `profit_margin` and `roi` stay what the listing held,
+   * because any recomputed figure would be derived from a price of 0.
+   */
+  private async persistQuantityOnly(
+    applied: Array<{ result: { offerId: string | null }; update: PendingListingUpdate }>
+  ): Promise<void> {
+    if (applied.length === 0) {
+      return;
+    }
+
+    await this.databaseService.query(
+      `UPDATE listings AS l
+       SET quantity = v.quantity,
+           sku = CASE WHEN v.offer_id IS NOT NULL THEN COALESCE(l.sku, v.sku) ELSE l.sku END,
+           ebay_offer_id = COALESCE(v.offer_id, l.ebay_offer_id),
+           updated_at = CURRENT_TIMESTAMP
+       FROM (
+         SELECT * FROM unnest($1::uuid[], $2::int[], $3::text[], $4::text[]) AS t(id, quantity, sku, offer_id)
+       ) AS v
+       WHERE l.id = v.id`,
+      [
+        applied.map((entry) => entry.update.listingId),
+        applied.map((entry) => entry.update.quantity),
         applied.map((entry) => entry.update.sku),
         applied.map((entry) => entry.result.offerId),
       ]

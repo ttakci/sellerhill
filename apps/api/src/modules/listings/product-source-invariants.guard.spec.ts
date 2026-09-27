@@ -118,19 +118,32 @@ describe('product source invariants', () => {
     }
   });
 
-  it('the price/stock fan-out skips a product whose stored price is not > 0, before any listing is priced', () => {
+  it('the price/stock fan-out: a product priced <= 0 syncs quantity only — no price sent, no priced column written', () => {
     const sync = stripComments(
       fs.readFileSync(path.join(__dirname, 'product-sync.service.ts'), 'utf8').replace(/\r\n/g, '\n'),
     );
-    const startAt = sync.indexOf('async computePendingUpdates(');
-    expect(startAt).toBeGreaterThan(-1);
-    const body = sync.slice(startAt, sync.indexOf('async flushUpdates(', startAt));
-    const guard = /if \(!\(Number\(productInfo\.data\.price\?\.current\) > 0\)\) \{/.exec(body);
-    expect(guard).not.toBeNull();
-    const open = (guard?.index ?? 0) + (guard?.[0].length ?? 0) - 1;
-    const close = matchingBrace(body, open);
-    expect(body.slice(open, close)).toMatch(/return \[\];/);
-    expect(body.indexOf('this.buildPendingUpdate(')).toBeGreaterThan(close);
+    const compute = sync.slice(sync.indexOf('async computePendingUpdates('), sync.indexOf('async flushUpdates('));
+    expect(compute).toMatch(/const priceUnknown = !\(Number\(productInfo\.data\.price\?\.current\) > 0\);/);
+    // The flag reaches the per-listing builder (the product is NOT skipped).
+    expect(compute).toMatch(/this\.buildPendingUpdate\([\s\S]*?priceUnknown\s*\)/);
+
+    // The builder keeps the listing's own price when the source price is unknown.
+    const build = sync.slice(sync.indexOf('private async buildPendingUpdate('), sync.indexOf('private async persistApplied('));
+    expect(build).toMatch(/priceUnknown \? \{ \.\.\.overridden, price: currentPrice \} : overridden/);
+    expect(build).toMatch(/quantityOnly: priceUnknown/);
+
+    // The eBay payload carries no price for a quantity-only update.
+    const flush = sync.slice(sync.indexOf('async flushUpdates('), sync.indexOf('private async buildPendingUpdate('));
+    expect(flush).toMatch(/price: update\.quantityOnly \? null : update\.price/);
+
+    // Quantity-only rows are written by their own UPDATE, which touches no priced column.
+    const persist = sync.slice(sync.indexOf('private async persistApplied('), sync.indexOf('private async persistQuantityOnly('));
+    expect(persist).toMatch(/this\.persistQuantityOnly\(all\.filter\(\(entry\) => entry\.update\.quantityOnly\)\)/);
+    expect(persist).toMatch(/const applied = all\.filter\(\(entry\) => !entry\.update\.quantityOnly\)/);
+    const qtyAt = sync.indexOf('private async persistQuantityOnly(');
+    const qtyOnly = sync.slice(qtyAt, sync.indexOf('private async persistResolvedOfferIds(', qtyAt));
+    expect(qtyOnly).toMatch(/SET quantity = v\.quantity/);
+    expect(qtyOnly).not.toMatch(/\bprice =|purchase_price|estimated_profit|profit_margin|\broi\b/);
   });
 
   it('an unanswered scraper fetch is retryable PRODUCT_DATA_UNAVAILABLE, never ASIN_NOT_FOUND', () => {

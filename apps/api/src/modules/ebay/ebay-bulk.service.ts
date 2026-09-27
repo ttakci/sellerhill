@@ -37,7 +37,12 @@ export interface BulkPriceQuantityItem {
   sku: string;
   /** `listings.ebay_offer_id`; null on rows created before migration 067. */
   offerId: string | null;
-  price: number;
+  /**
+   * null = quantity only: the offer is sent WITHOUT a price, so eBay keeps the
+   * listing's current price. Used when the source price is unknown (stored 0),
+   * where any price we computed would be derived from nothing.
+   */
+  price: number | null;
   quantity: number;
 }
 
@@ -186,7 +191,9 @@ export class EbayBulkService {
                 {
                   offerId: item.offerId,
                   availableQuantity: item.quantity,
-                  price: { currency: context.currency, value: item.price.toFixed(2) },
+                  ...(item.price === null
+                    ? {}
+                    : { price: { currency: context.currency, value: item.price.toFixed(2) } }),
                 },
               ],
             }
