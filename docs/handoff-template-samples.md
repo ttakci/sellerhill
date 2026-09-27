@@ -62,6 +62,15 @@ Selection rules for the replacements:
 - Update migration 122's product copy to match the new photos (and the file
   names if they change), then CREDITS.md.
 
+## Update 2026-09-27 (late)
+
+Replaced with operator-supplied Pexels photos: `ceramic-dog-bowl.jpg` (Pet),
+`natural-soap-bars.jpg` (Beauty), `wooden-blocks.jpg` (Toys); copy in 122
+updated, previews + catalog.json rebuilt, guard spec 140/140.
+STILL OPEN: `knit-cardigan.jpg` (Apparel) looks vintage — ask the operator for a
+new-looking Pexels/Pixabay apparel photo. Also record the three Pexels page URLs
+in CREDITS.md (ask the operator). Browser check still not done.
+
 ## Remaining (not yet run / done)
 
 0. Replace the four photos above (see the decision section).

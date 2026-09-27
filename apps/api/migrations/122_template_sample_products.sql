@@ -5,8 +5,8 @@
 -- photo and branded-sounding copy ("…For 2010-2015 Honda Civic"). An Unsplash
 -- licence covers the photograph, not the product or brand pictured in it, so
 -- neither may be shown to sellers. Every sample below is:
---   - photographed CC0 / public domain (verified against the Wikimedia Commons
---     API, see apps/web/public/template-samples/CREDITS.md), served same-origin
+--   - CC0 / public domain (verified via the Wikimedia Commons API) or Pexels
+--     (see apps/web/public/template-samples/CREDITS.md), served same-origin
 --     from /template-samples/ so the preview makes no external request;
 --   - `Brand: Unbranded`, with no real model number, MPN or UPC;
 --   - written to describe the item actually in the photo.
@@ -143,44 +143,44 @@ FROM jsonb_each($template_samples$
     "product_description": "A fitted, fine-gauge knit cardigan with a stand collar and a long row of small buttons. It dresses up with a skirt and down with jeans."
   },
   "ds-beauty-health": {
-    "title": "Handmade Glycerin Soap Bar, Heart Shaped, Layered Pink, Purple & Blue, 4 oz",
-    "main_image": "/template-samples/heart-soap.jpg",
+    "title": "Natural Handmade Soap Bars, Set of 5, Plant-Based, Assorted Scents",
+    "main_image": "/template-samples/natural-soap-bars.jpg",
     "has_features": "1",
     "has_details": "1",
     "feature_bullets": [
-      "Gentle glycerin base for everyday use",
-      "Three hand-poured color layers",
-      "Heart shape, a ready-made gift",
-      "Individually shrink-wrapped"
+      "Set of 5 assorted bars",
+      "Plant-based oils and butters",
+      "No synthetic dyes or parabens",
+      "Gentle on face and body"
     ],
     "product_details": [
       "Brand: Unbranded",
-      "Weight: 4 oz",
+      "Weight: 5 x 3.5 oz",
       "Skin Type: All",
       "Form: Bar",
-      "Color: Pink, Purple, Blue"
+      "Scent: Assorted"
     ],
-    "product_description": "A gentle glycerin soap poured by hand in three colored layers and shaped like a heart. Mild enough for daily use, pretty enough to give as a gift."
+    "product_description": "Five hand-cut, plant-based soap bars in creamy neutral tones, from a gentle unscented bar to an oat-flecked exfoliating one. Rich lather, no synthetic dyes."
   },
   "ds-pet-supplies": {
-    "title": "Slow Feeder Dog Bowl, Anti-Gulping Maze Design, Non-Slip Base",
-    "main_image": "/template-samples/slow-feeder-bowl.jpg",
+    "title": "Ceramic Dog Bowl with Faux Leather Base, Non-Slip, 2 Cups",
+    "main_image": "/template-samples/ceramic-dog-bowl.jpg",
     "has_features": "1",
     "has_details": "1",
     "feature_bullets": [
-      "Slows eating up to 10 times",
-      "Raised maze pattern",
-      "Non-slip base",
-      "Dishwasher safe"
+      "Glazed ceramic bowl, easy to clean",
+      "Stitched faux-leather non-slip base",
+      "Heavy enough not to tip over",
+      "Suits food or water"
     ],
     "product_details": [
       "Brand: Unbranded",
-      "Pet Type: Dog",
-      "Material: BPA-Free Plastic",
+      "Pet Type: Dog, Cat",
+      "Material: Ceramic, Faux Leather",
       "Capacity: 2 Cups",
-      "Color: Blue"
+      "Color: White, Brown"
     ],
-    "product_description": "Raised studs and ridges turn every meal into a gentle puzzle, so fast eaters slow down and swallow less air. The non-slip base keeps the bowl in place."
+    "product_description": "A heavy glazed ceramic bowl set in a stitched faux-leather base that keeps it from sliding. Easy to clean and good-looking enough for any kitchen floor."
   },
   "ds-fitness-sports": {
     "title": "Non-Slip Yoga Mat, 6mm Thick, Lightweight Exercise Mat with Carry Strap",
@@ -223,24 +223,24 @@ FROM jsonb_each($template_samples$
     "product_description": "A compact aluminum flashlight with nine bright LEDs, a textured grip and a wrist strap. Tough enough for the trail, small enough for a glove box."
   },
   "ds-toys-kids": {
-    "title": "Wooden Building Blocks, Colorful Stacking Set for Kids, Natural Wood",
+    "title": "Wooden Building Blocks, 60 Pieces, Natural Beech Wood Stacking Set",
     "main_image": "/template-samples/wooden-blocks.jpg",
     "has_features": "1",
     "has_details": "1",
     "feature_bullets": [
-      "Smooth, sanded hardwood blocks",
-      "Bright, child-safe water-based paint",
-      "Arches, cubes, cylinders and bars",
+      "60 smooth, sanded beech wood pieces",
+      "Unfinished natural wood, no paint",
+      "Cubes, bars, cylinders and triangles",
       "Builds balance and fine motor skills"
     ],
     "product_details": [
       "Brand: Unbranded",
-      "Material: Wood",
+      "Material: Beech Wood",
       "Age Range: 3 Years and Up",
-      "Piece Count: 50",
-      "Color: Multicolor"
+      "Piece Count: 60",
+      "Color: Natural"
     ],
-    "product_description": "A classic set of smooth, sanded wooden blocks in bright colors and natural wood. Build towers, bridges and castles, then knock them down and start again."
+    "product_description": "A classic set of smooth, sanded natural beech blocks — cubes, bars, cylinders and triangles. Build towers, bridges and castles, then knock them down and start again."
   },
   "ds-kitchen-dining": {
     "title": "Digital Kitchen Scale, 0.1 oz Precision, Tare Function, Stainless Steel",

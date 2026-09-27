@@ -9,7 +9,7 @@ sign-up-free demo; it is not a photo.
 
 **Rules for this folder (2026-09-27):**
 
-- **CC0 or public domain only**, and the license is checked against the
+- **CC0 / public domain, or Pexels / Pixabay** (operator decision 2026-09-27); CC0/PD the license is checked against the
   Wikimedia Commons API (`imageinfo` → `extmetadata.LicenseShortName` must be
   `CC0` or `Public domain`) — not read off a stock site's own label. No CC BY /
   CC BY-SA: neither surface carries an attribution line. No stock-site licenses
@@ -30,9 +30,17 @@ sign-up-free demo; it is not a photo.
 | air-filter.jpg | Auto Parts | Public domain | Elwood | https://commons.wikimedia.org/wiki/File:Filtro_aria_pannello.JPG |
 | led-flashlight.jpg | Outdoor Survival | CC0 | Kathy Zinn | https://commons.wikimedia.org/wiki/File:Small_black_flashlight.jpg |
 | knit-cardigan.jpg | Apparel Fashion | CC0 | The Metropolitan Museum of Art | https://commons.wikimedia.org/wiki/File:Sweater_MET_CI55.45.7.jpg |
-| heart-soap.jpg | Beauty Health | CC0 | Brainy J | https://commons.wikimedia.org/wiki/File:Bi_pride_soap_heart.jpg |
-| slow-feeder-bowl.jpg | Pet Supplies | CC0 | ELTORO.VET | https://commons.wikimedia.org/wiki/File:Blue_Slow_Feeder_Dog_Bowl_with_Raised_Studs_and_Ridges.jpg |
-| wooden-blocks.jpg | Toys Kids | CC0 | Reseletti | https://commons.wikimedia.org/wiki/File:Block_tower_on_narrow_base.jpg |
+
+## From Pexels (Pexels License: free commercial use, no attribution required)
+
+Downloaded by the operator on 2026-09-27; cropped to a square around the
+product (the dog-bowl photo's hand and scoop are outside the crop).
+
+| File | Template | License | Source |
+|---|---|---|---|
+| ceramic-dog-bowl.jpg | Pet Supplies | Pexels License | pexels.com (operator download, URL to be recorded) |
+| natural-soap-bars.jpg | Beauty Health | Pexels License | pexels.com (operator download, URL to be recorded) |
+| wooden-blocks.jpg | Toys Kids | Pexels License | pexels.com (operator download, URL to be recorded) |
 
 ## Carried over from `apps/web/public/demo-products/`
 
@@ -55,9 +63,10 @@ every template photo lives in one folder.
 - `wireless-earbuds.jpg` — maker's logo on both earbud caps painted out (done for the demo copy).
 - None of the six Commons photos needed a mark painted out. They were only
   squared: `air-filter.jpg` / `led-flashlight.jpg` extend their own backdrop,
-  `knit-cardigan.jpg` / `slow-feeder-bowl.jpg` sit on a flat backdrop colour
-  (the bowl's source photo carried a matte frame, which was cropped off), and
-  `wooden-blocks.jpg` mirrors its own wall and floor sideways.
+  `knit-cardigan.jpg` sits on a flat backdrop colour.
+- `knit-cardigan.jpg` still looks vintage (museum piece) and should be replaced
+  with a new-looking photo; `slow-feeder-bowl`, `heart-soap` and the old
+  `wooden-blocks` were replaced by the Pexels photos for looking used.
 
 ## Rejected during selection (so they are not re-proposed)
 
