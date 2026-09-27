@@ -37,10 +37,10 @@ product (the tiny garment care labels are unreadable at 640px).
 
 | File | Template | License | Source |
 |---|---|---|---|
-| steel-dog-bowl.jpg | Pet Supplies | Pexels License | pexels.com (operator download, URL to be recorded) |
-| knit-cardigans.jpg | Apparel Fashion | Pexels License | pexels.com (operator download, URL to be recorded) |
-| natural-soap-bars.jpg | Beauty Health | Pexels License | pexels.com (operator download, URL to be recorded) |
-| wooden-blocks.jpg | Toys Kids | Pexels License | pexels.com (operator download, URL to be recorded) |
+| steel-dog-bowl.jpg | Pet Supplies | Pexels License | Pexels (downloaded by the operator, 2026-09-27) |
+| knit-cardigans.jpg | Apparel Fashion | Pexels License | Pexels (downloaded by the operator, 2026-09-27) |
+| natural-soap-bars.jpg | Beauty Health | Pexels License | Pexels (downloaded by the operator, 2026-09-27) |
+| wooden-blocks.jpg | Toys Kids | Pexels License | Pexels (downloaded by the operator, 2026-09-27) |
 
 ## Carried over from `apps/web/public/demo-products/`
 
