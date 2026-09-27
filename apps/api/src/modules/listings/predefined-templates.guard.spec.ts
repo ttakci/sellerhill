@@ -25,6 +25,8 @@ import { sanitizeListingHtml } from '../../common/utils/sanitize';
 
 const CATALOG_SQL = path.join(__dirname, '../../../migrations/073_dropshipping_templates_catalog.sql');
 const STRUCTURE_SQL = path.join(__dirname, '../../../migrations/070_predefined_templates_slug.sql');
+/** Migration 122 replaces every template's sample_data by slug; it wins over 073's seed. */
+const SAMPLES_SQL = path.join(__dirname, '../../../migrations/122_template_sample_products.sql');
 const SERVICE_TS = path.join(
   __dirname,
   '../listing-settings-groups/listing-settings-group.service.ts'
@@ -51,6 +53,16 @@ function dollarQuoted(sql: string, tag: string): string {
   return sql.slice(bodyStart, end);
 }
 
+/** slug → sample_data from migration 122, the preview data the picker actually shows. */
+function loadSampleOverrides(): Record<string, Record<string, unknown>> {
+  return JSON.parse(dollarQuoted(fs.readFileSync(SAMPLES_SQL, 'utf8'), 'template_samples')) as Record<
+    string,
+    Record<string, unknown>
+  >;
+}
+
+const sampleOverrides = loadSampleOverrides();
+
 function loadCatalog(): CatalogTemplate[] {
   const sql = fs.readFileSync(CATALOG_SQL, 'utf8');
   // Slugs are the first column of each VALUES row: `  'slug',`
@@ -62,7 +74,8 @@ function loadCatalog(): CatalogTemplate[] {
     return {
       slug,
       html: dollarQuoted(sql, `html_${tag}`),
-      sampleData: JSON.parse(dollarQuoted(sql, `json_${tag}`)) as Record<string, unknown>,
+      sampleData:
+        sampleOverrides[slug] ?? (JSON.parse(dollarQuoted(sql, `json_${tag}`)) as Record<string, unknown>),
     };
   });
 }
@@ -206,6 +219,34 @@ describe('predefined template catalog', () => {
       }
       expect(template.html).toMatch(/max-width:\s*100%/);
       expect(template.html).toMatch(/height:\s*auto/);
+    });
+  });
+
+  it('replaces the sample product of every catalog template, and only those', () => {
+    // A slug in 122 that matches no catalog row would be a silent no-op UPDATE.
+    expect(Object.keys(sampleOverrides).sort()).toEqual(catalog.map((template) => template.slug).sort());
+  });
+
+  describe.each(Object.entries(sampleOverrides))('sample product for %s', (_slug, sample) => {
+    it('serves its photo same-origin from the licensed template-samples folder', () => {
+      // Stock-site hotlinks (Unsplash etc.) license the photo, not the product
+      // in it; only the CC0 / public-domain files in CREDITS.md may be used.
+      if (sample.main_image === undefined) {
+        return;
+      }
+      expect(sample.main_image).toMatch(/^\/template-samples\/[a-z0-9-]+\.jpg$/);
+      const file = path.join(
+        __dirname,
+        '../../../../web/public',
+        String(sample.main_image)
+      );
+      expect(fs.existsSync(file)).toBe(true);
+    });
+
+    it('is unbranded', () => {
+      const details = (sample.product_details ?? []) as string[];
+      expect(details).toContain('Brand: Unbranded');
+      expect(JSON.stringify(sample)).not.toMatch(/\b(MPN|UPC|EAN|Model Number)\b/);
     });
   });
 
