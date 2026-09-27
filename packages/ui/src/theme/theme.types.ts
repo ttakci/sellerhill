@@ -173,10 +173,8 @@ export interface ThemeColors {
      * adding a hue never needs a second background token.
      */
     accentBlue: string;
-    accentViolet: string;
     accentEmerald: string;
     accentAmber: string;
-    accentRose: string;
     statsBg: string;
     accentPurple: string;
     accentCyan: string;

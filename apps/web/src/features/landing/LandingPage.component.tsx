@@ -56,7 +56,8 @@ const TEMPLATE_PREVIEWS = [
 
 type TemplateKey = (typeof TEMPLATE_PREVIEWS)[number]['key'];
 
-const templateSrc = (file: string): string => `/landing-screens/templates/${file}.webp`;
+const templateSrc = (file: string, phone = false): string =>
+  `/landing-screens/templates/${phone ? 'mobile/' : ''}${file}.webp`;
 
 const COUNT_UP_MS = 1100;
 
@@ -98,11 +99,17 @@ const CountUp: React.FC<{ value: string; active: boolean }> = ({ value, active }
   );
 };
 
+/** Bar heights (%) of the two faint equaliser clusters behind the hero. */
+const SPECTRUM_BARS = {
+  left: [38, 62, 44, 80, 56, 30, 50, 26, 42],
+  right: [46, 72, 54, 90, 64, 36, 82, 48],
+} as const;
+
 /** The three example groups on the dark Setting Groups card. Figures match the demo account's groups. */
 const GROUP_CHIPS = [
-  { chip: 'chipA', margin: 30, buffer: 1, icon: 'sparkles' },
+  { chip: 'chipA', margin: 30, buffer: 1, icon: 'calendar' },
   { chip: 'chipB', margin: 20, buffer: 2, icon: 'truck' },
-  { chip: 'chipC', margin: 16, buffer: 3, icon: 'bolt' },
+  { chip: 'chipC', margin: 16, buffer: 3, icon: 'monitor' },
 ] as const satisfies readonly { chip: string; margin: number; buffer: number; icon: IconName }[];
 
 const GROUP_PARAMS: { key: string; icon: IconName }[] = [
@@ -116,7 +123,7 @@ const GROUP_PARAMS: { key: string; icon: IconName }[] = [
 const GROUP_EXAMPLES: { key: string; icon: IconName }[] = [
   { key: 'seasonal', icon: 'calendar' },
   { key: 'category', icon: 'truck' },
-  { key: 'electronics', icon: 'bolt' },
+  { key: 'electronics', icon: 'monitor' },
 ];
 
 /** Real screens, each paired with the claim it proves. */
@@ -160,7 +167,7 @@ const TRUST_ITEMS: { key: string; icon: IconName }[] = [
 
 const STANDARD_ITEMS: { key: string; icon: IconName }[] = [
   { key: 'bulkAsin', icon: 'barcode' },
-  { key: 'aiTitle', icon: 'sparkles' },
+  { key: 'aiTitle', icon: 'edit-note' },
   { key: 'autoOrder', icon: 'shopping-cart' },
   { key: 'tracking', icon: 'truck' },
   { key: 'messages', icon: 'message-circle' },
@@ -179,7 +186,7 @@ const MARQUEE_ITEMS: { key: string; icon: IconName }[] = [
   { key: 'translation:landing.standard.items.autoOrder.title', icon: 'shopping-cart' },
   { key: 'translation:landing.standard.items.tracking.title', icon: 'truck' },
   { key: 'translation:landing.standard.items.blacklist.title', icon: 'block' },
-  { key: 'translation:landing.standard.items.aiTitle.title', icon: 'sparkles' },
+  { key: 'translation:landing.standard.items.aiTitle.title', icon: 'edit-note' },
   { key: 'translation:landing.standard.items.messages.title', icon: 'message-circle' },
   { key: 'translation:landing.standard.items.multiStore.title', icon: 'storefront' },
   { key: 'translation:landing.navbar.menu.mobile', icon: 'smartphone' },
@@ -209,7 +216,7 @@ const INCLUDED_FEATURE_KEYS = [
 
 /** Feature-menu entries in the navbar: each scrolls to its own anchor. */
 const FEATURE_MENU: { key: string; target: string; icon: IconName }[] = [
-  { key: 'why', target: 'why', icon: 'star' },
+  { key: 'why', target: 'why', icon: 'check-list' },
   { key: 'groups', target: 'groups', icon: 'layers' },
   { key: 'templates', target: 'templates', icon: 'file-text' },
   { key: 'actions', target: 'showcase-actionCenter', icon: 'bell-ring' },
@@ -396,7 +403,18 @@ export const LandingPageComponent = ({
       {/* ── Hero ───────────────────────────────────────── */}
       <S.Hero id="top">
         <S.HeroGlow />
-        <S.HeroGlowWarm />
+        {(['left', 'right'] as const).map((side) => (
+          <S.HeroSpectrum key={side} $side={side} aria-hidden="true">
+            {SPECTRUM_BARS[side].map((height, index) => (
+              <S.HeroSpectrumBar
+                key={`${side}-${index}`}
+                $h={height}
+                $delay={-(index * 0.37)}
+                $warm={index % 3 === 2}
+              />
+            ))}
+          </S.HeroSpectrum>
+        ))}
         <S.HeroInner>
           <S.HeroContent>
             <S.HeroEyebrow>
@@ -414,13 +432,11 @@ export const LandingPageComponent = ({
                 <Icon name="arrow-right" size={17} />
               </S.PrimaryButton>
               <S.GhostButton $lg $onDark type="button" onClick={onOpenDemo}>
-                <S.PlayBadge>
-                  <Icon name="play-arrow" size={14} />
-                </S.PlayBadge>
+                <Icon name="play-arrow" size={18} />
                 {t('translation:landing.hero.ctaSecondary')}
               </S.GhostButton>
             </S.HeroCtas>
-            {/* Below 1080px the floating offer card is hidden; the offer rides here instead. */}
+            {/* Below 1080px the offer placard is hidden; the offer rides here instead. */}
             <S.MobileOffer>
               <S.MobileOfferTag>{t('translation:landing.hero.trialTitle')}</S.MobileOfferTag>
               <S.MobileOfferPrice>
@@ -428,60 +444,35 @@ export const LandingPageComponent = ({
                 {t('translation:landing.hero.priceBadge.per')}
               </S.MobileOfferPrice>
             </S.MobileOffer>
-            <S.HeroTrust>
-              {(['trialNoCard', 'trialCancelAnytime', 'trialMobile'] as const).map((key) => (
-                <S.HeroTrustItem key={key}>
-                  <Icon name="check-circle" size={15} />
+            <S.HeroNote>
+              {(['trialNoCard', 'trialCancelAnytime'] as const).map((key) => (
+                <S.HeroNoteLine key={key}>
+                  <Icon name="check" size={14} />
                   {t(`translation:landing.hero.${key}`)}
-                </S.HeroTrustItem>
+                </S.HeroNoteLine>
               ))}
-            </S.HeroTrust>
+            </S.HeroNote>
           </S.HeroContent>
 
           <S.HeroPreview>
-            <S.HeroTilt>
-              <S.HeroPreviewGlass>
-                <S.HeroPreviewImage
-                  src={screenSrc('heroDashboard', currentLocale)}
-                  alt="SellerHill dashboard"
-                />
-              </S.HeroPreviewGlass>
-              <S.HeroFloatCard>
-                <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" />
-              </S.HeroFloatCard>
-              <S.HeroToast>
-                <S.HeroToastIcon>
-                  <Icon name="package-check" size={18} />
-                </S.HeroToastIcon>
-                <span>
-                  <S.HeroToastTitle>{t('translation:landing.hero.toast.title')}</S.HeroToastTitle>
-                  <S.HeroToastText>{t('translation:landing.hero.toast.text')}</S.HeroToastText>
-                </span>
-              </S.HeroToast>
-            </S.HeroTilt>
+            <S.HeroPreviewGlass>
+              <S.HeroPreviewImage
+                src={screenSrc('heroDashboard', currentLocale)}
+                alt="SellerHill dashboard"
+              />
+            </S.HeroPreviewGlass>
+            <S.HeroFloatCard>
+              <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" />
+            </S.HeroFloatCard>
             {/* The offer: amount from the catalog's cheapest tier (see the container). */}
             <S.HeroOfferCard>
               <S.HeroOfferInner>
-                <S.HeroOfferTag>
-                  <Icon name="sparkles" size={13} />
-                  {t('translation:landing.hero.trialTitle')}
-                </S.HeroOfferTag>
+                <S.HeroOfferTag>{t('translation:landing.hero.trialTitle')}</S.HeroOfferTag>
                 <S.HeroOfferPrice>
                   <S.HeroOfferAmount>{startingPriceDisplay}</S.HeroOfferAmount>
                   <S.HeroOfferPer>{t('translation:landing.hero.priceBadge.per')}</S.HeroOfferPer>
                 </S.HeroOfferPrice>
                 <S.HeroOfferCaption>{t('translation:landing.hero.priceBadge.caption')}</S.HeroOfferCaption>
-                <S.HeroOfferRule />
-                <S.HeroOfferPoints>
-                  <span>
-                    <Icon name="check" size={12} />
-                    {t('translation:landing.hero.trialNoCard')}
-                  </span>
-                  <span>
-                    <Icon name="check" size={12} />
-                    {t('translation:landing.hero.trialCancelAnytime')}
-                  </span>
-                </S.HeroOfferPoints>
               </S.HeroOfferInner>
             </S.HeroOfferCard>
           </S.HeroPreview>
@@ -531,7 +522,7 @@ export const LandingPageComponent = ({
                   <Icon name="layers" size={20} />
                 </S.BentoIcon>
                 <S.ExclusiveBadge>
-                  <Icon name="star" size={12} />
+                  <Icon name="check-circle" size={12} />
                   {t('translation:landing.why.exclusive')}
                 </S.ExclusiveBadge>
               </S.BentoTop>
@@ -742,7 +733,7 @@ export const LandingPageComponent = ({
         </S.Reveal>
         <S.Reveal $visible={seen('templates')} $delay={1}>
           <S.TemplatesLayout>
-            <div>
+            <S.TemplateSide>
               <S.TemplateTabs role="tablist" aria-label={t('translation:landing.templates.eyebrow')}>
                 {TEMPLATE_PREVIEWS.map((tpl) => (
                   <S.TemplateTab
@@ -766,14 +757,17 @@ export const LandingPageComponent = ({
                   </S.TemplatePoint>
                 ))}
               </S.TemplatePoints>
-            </div>
+            </S.TemplateSide>
             <S.TemplatePreview>
-              <S.TemplateImage
-                key={activeTemplateFile}
-                src={templateSrc(activeTemplateFile)}
-                alt={t(`translation:landing.templates.names.${activeTemplate}`)}
-                loading="lazy"
-              />
+              {/* Phones get the phone render of the same listing — a desktop render shrunk to 340px is unreadable. */}
+              <picture key={activeTemplateFile}>
+                <source media="(max-width: 640px)" srcSet={templateSrc(activeTemplateFile, true)} />
+                <S.TemplateImage
+                  src={templateSrc(activeTemplateFile)}
+                  alt={t(`translation:landing.templates.names.${activeTemplate}`)}
+                  loading="lazy"
+                />
+              </picture>
               <S.PreviewBadge>{t('translation:landing.templates.previewNote')}</S.PreviewBadge>
             </S.TemplatePreview>
           </S.TemplatesLayout>
