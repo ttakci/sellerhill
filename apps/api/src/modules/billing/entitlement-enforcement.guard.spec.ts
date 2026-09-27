@@ -20,6 +20,23 @@ function read(...segments: string[]): string {
   return fs.readFileSync(path.join(API_SRC, ...segments), 'utf8');
 }
 
+// CRLF normalized: refresh-processor.service.ts is checked out CRLF on
+// Windows, and the method-boundary slicing below looks for multi-line shapes.
+function readNormalized(...segments: string[]): string {
+  return read(...segments).replace(/\r\n/g, '\n');
+}
+
+// Strips `//` line comments and `/* */` block comments before matching, so a
+// comment that happens to name a function or literal cannot satisfy an
+// assertion meant to prove the CODE calls/uses it. This is exactly the gap
+// task-12-rereview.md found: a bare `/buildRefreshEntitlementSql/` match
+// against the whole (uncommented) file was satisfied by the explanatory
+// comment above the call site even in a mutated version of the claim that
+// never calls the function at all.
+function stripComments(code: string): string {
+  return code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
 describe('entitlement enforcement invariants', () => {
   describe('the quota gate consults subscription status', () => {
     const src = read('modules', 'billing', 'quota-enforcement.service.ts');
@@ -85,14 +102,30 @@ describe('entitlement enforcement invariants', () => {
   });
 
   describe('cost-bearing pipelines refuse a lapsed account', () => {
-    it('the Keepa refresh claim filters on entitled subscription status', () => {
+    it('the Keepa refresh claim actually calls the entitlement builder and applies its output', () => {
       // The single largest recurring cost. This query had no billing awareness
       // at all, so a non-payer kept burning tokens indefinitely.
-      const src = read('modules', 'listings', 'refresh-processor.service.ts');
-      expect(src).toMatch(/buildRefreshEntitlementSql/);
+      //
+      // Sliced to the selectRefreshBatch method body (same method-boundary
+      // technique as scraper-refresh.guard.spec.ts) and comment-stripped
+      // BEFORE matching: a bare `/buildRefreshEntitlementSql/` against the
+      // whole raw file — the previous version of this assertion — is also
+      // satisfied by the explanatory comment sitting right above the call
+      // site, so a regression that hardcodes both fragments to '' and drops
+      // the import still passed it. See the mutation-resistance test below.
+      const src = readNormalized('modules', 'listings', 'refresh-processor.service.ts');
+      const start = src.indexOf('private async selectRefreshBatch(');
+      const end = src.indexOf('private async resolveBatchSize(');
+      expect(start).toBeGreaterThan(-1);
+      expect(end).toBeGreaterThan(start);
+      const body = stripComments(src.slice(start, end));
+
+      expect(body).toMatch(/buildRefreshEntitlementSql\(enforcementOn\)/);
+      expect(body).toMatch(/\$\{entitlementJoin\}/);
       // …and is a no-op with enforcement off, so adopting this changes nothing
       // until the operator turns it on.
-      expect(src).toMatch(/BILLING_ENFORCEMENT_ENABLED/);
+      expect(body).toMatch(/BILLING_ENFORCEMENT_ENABLED/);
+
       // The predicate itself lives in the shared builder both the refresh
       // claim and the admin operations summary's refresh-lag/capacity query
       // read from (Task 12 review fix round 1), so the two queries can never
@@ -100,6 +133,33 @@ describe('entitlement enforcement invariants', () => {
       const entitlementSrc = read('modules', 'listings', 'refresh-entitlement-sql.ts');
       expect(entitlementSrc).toMatch(/ENTITLED_SUBSCRIPTION_STATUSES/);
       expect(entitlementSrc).toMatch(/JOIN billing_subscriptions bs/);
+    });
+
+    it('is not vacuous: fails against the exact mutation that slipped past fix round 1', () => {
+      // Reproduces task-12-rereview.md's mutation M1 against the REAL method
+      // body, comments included: replace the builder call with hardcoded
+      // empty-string assignments (compiles, lint-clean). The explanatory
+      // comment naming `buildRefreshEntitlementSql` sits just above the call
+      // site and survives this mutation untouched — which is exactly what let
+      // the OLD, unscoped assertion pass. Prove the CURRENT assertion (call
+      // shape, sliced to the method body, comments stripped) correctly fails.
+      const src = readNormalized('modules', 'listings', 'refresh-processor.service.ts');
+      const start = src.indexOf('private async selectRefreshBatch(');
+      const end = src.indexOf('private async resolveBatchSize(');
+      const rawBody = src.slice(start, end);
+
+      const mutatedRawBody = rawBody.replace(
+        'const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);',
+        `const entitlementJoin = ''; const planLimitFilter = '';`
+      );
+      // Sanity: the mutation actually landed, and it did NOT touch the
+      // explanatory comment — i.e. this is a faithful reproduction of M1, not
+      // a strawman that also happens to erase the trap.
+      expect(mutatedRawBody).not.toBe(rawBody);
+      expect(mutatedRawBody).toMatch(/buildRefreshEntitlementSql/);
+
+      const mutatedBody = stripComments(mutatedRawBody);
+      expect(mutatedBody).not.toMatch(/buildRefreshEntitlementSql\(enforcementOn\)/);
     });
 
     it('tracking conversion checks entitlement and quota before paying', () => {
