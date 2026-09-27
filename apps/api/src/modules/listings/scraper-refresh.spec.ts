@@ -1,6 +1,6 @@
 import { KeepaStockStatus, SourceFetchOutcome, SourceStockStatus, type ScraperProductResult } from '@repo/shared';
 
-import { keepaStockStatusToSource, planScraperRefresh, resolveScraperRefreshBatchSize } from './scraper-refresh';
+import { keepaStockStatusToSource, planKeepaRollback, planScraperRefresh, resolveScraperRefreshBatchSize } from './scraper-refresh';
 
 const row = { price: 10, stock: 20, stockStatus: SourceStockStatus.AT_LEAST, maxOrderQuantity: 30, removed: false };
 const found = (over = {}): ScraperProductResult => ({
@@ -56,5 +56,29 @@ describe('keepaStockStatusToSource (rollback path)', () => {
     expect(keepaStockStatusToSource(KeepaStockStatus.KNOWN)).toBe(SourceStockStatus.EXACT);
     expect(keepaStockStatusToSource(KeepaStockStatus.OUT_OF_STOCK)).toBe(SourceStockStatus.OUT_OF_STOCK);
     expect(keepaStockStatusToSource(KeepaStockStatus.UNKNOWN)).toBeNull();
+  });
+});
+
+describe('planKeepaRollback', () => {
+  it('KNOWN clears scraper state and fans out once when a cap existed', () => {
+    expect(planKeepaRollback(KeepaStockStatus.KNOWN, 4)).toEqual({
+      clearScraperState: true,
+      stockStatus: SourceStockStatus.EXACT,
+      commerceChangedByRollback: true,
+    });
+  });
+  it('OUT_OF_STOCK clears scraper state, but no cap to remove means no extra fan-out', () => {
+    expect(planKeepaRollback(KeepaStockStatus.OUT_OF_STOCK, null)).toEqual({
+      clearScraperState: true,
+      stockStatus: SourceStockStatus.OUT_OF_STOCK,
+      commerceChangedByRollback: false,
+    });
+  });
+  it('UNKNOWN leaves scraper-era state untouched, even with a stored cap', () => {
+    expect(planKeepaRollback(KeepaStockStatus.UNKNOWN, 4)).toEqual({
+      clearScraperState: false,
+      stockStatus: null,
+      commerceChangedByRollback: false,
+    });
   });
 });

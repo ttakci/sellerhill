@@ -84,3 +84,35 @@ export function keepaStockStatusToSource(status: KeepaStockStatus): SourceStockS
   }
   return null;
 }
+
+/**
+ * Keepa rollback: what to do with scraper-era columns Keepa itself never
+ * writes to (`max_order_quantity`, `source_removed_at`).
+ *
+ * Keepa's own read is authoritative whenever it is not UNKNOWN — a rollback
+ * to Keepa must not leave a listing permanently capped by a stale scraper
+ * order-limit, nor flagged `source_removed_at` from a scraper-era 404 Keepa
+ * cannot see at all. When Keepa itself returns UNKNOWN, none of this fires:
+ * an unresolved observation is never evidence the scraper's own findings
+ * were wrong, so the scraper-era columns are left exactly as they were.
+ */
+export interface KeepaRollbackPlan {
+  /** Clear max_order_quantity + source_removed_at back to their Keepa defaults (both NULL). */
+  clearScraperState: boolean;
+  /** stock_status to persist (a COALESCE target — null keeps the stored value, i.e. UNKNOWN). */
+  stockStatus: SourceStockStatus | null;
+  /** A previously-set order cap disappearing changes the listed quantity, so it must fan out once. */
+  commerceChangedByRollback: boolean;
+}
+
+export function planKeepaRollback(
+  stockStatus: KeepaStockStatus,
+  previousMaxOrderQuantity: number | null,
+): KeepaRollbackPlan {
+  const clearScraperState = stockStatus !== KeepaStockStatus.UNKNOWN;
+  return {
+    clearScraperState,
+    stockStatus: keepaStockStatusToSource(stockStatus),
+    commerceChangedByRollback: clearScraperState && previousMaxOrderQuantity !== null,
+  };
+}

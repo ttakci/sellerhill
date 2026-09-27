@@ -28,7 +28,7 @@ import { ProductSourceService } from './product-source.service';
 import { ProductSyncService, type PendingListingUpdate } from './product-sync.service';
 import { dataFailureDelayMinutes } from './refresh-backoff';
 import { resolveRefreshBatchSize } from './refresh-batch-size';
-import { keepaStockStatusToSource, planScraperRefresh, resolveScraperRefreshBatchSize, type ScraperRefreshPlan } from './scraper-refresh';
+import { planKeepaRollback, planScraperRefresh, resolveScraperRefreshBatchSize, type ScraperRefreshPlan } from './scraper-refresh';
 
 interface ProductRow {
   id: string;
@@ -124,7 +124,11 @@ export class RefreshProcessorService extends WorkerHost {
     }
     const provider = await this.productSource.activeProvider();
     if (provider === ProductDataProviderKind.SCRAPER && (await this.productSource.proxies()).length === 0) {
-      this.logger.warn('Scraper provider active but no proxies configured — refresh paused (prices/stock kept).');
+      // debug, not warn: this fires every scheduler tick (once a minute)
+      // while proxies are absent — a persistent no-proxy config belongs on
+      // an operator-facing admin surface, not as ~1,440 warn lines/day into
+      // Loki for a condition that never changes tick to tick.
+      this.logger.debug('Scraper provider active but no proxies configured — refresh paused (prices/stock kept).');
       return;
     }
     const batchSize = await this.resolveBatchSize();
@@ -457,9 +461,17 @@ export class RefreshProcessorService extends WorkerHost {
     const effectivePrice = kp.price ?? previousPrice;
     const effectiveStock = kp.stockStatus === KeepaStockStatus.UNKNOWN ? row.stock : kp.stock;
 
+    // Rollback safety: Keepa never writes max_order_quantity/source_removed_at
+    // itself, so switching back from the scraper provider must actively clear
+    // them (Keepa's own read is authoritative whenever it isn't UNKNOWN) —
+    // otherwise a listing stays capped/flagged by scraper-era state forever.
+    // A cleared cap changes the listed quantity, so it counts as commerce.
+    const rollback = planKeepaRollback(kp.stockStatus, row.max_order_quantity);
+
     const commerceChanged =
       (effectivePrice !== null && effectivePrice !== previousPrice) ||
-      (effectiveStock !== null && Number(row.stock ?? 0) !== Number(effectiveStock));
+      (effectiveStock !== null && Number(row.stock ?? 0) !== Number(effectiveStock)) ||
+      rollback.commerceChangedByRollback;
     const metadataChanged =
       (kp.title !== undefined && kp.title !== row.title) ||
       (kp.brand !== undefined && kp.brand !== row.brand) ||
@@ -488,8 +500,12 @@ export class RefreshProcessorService extends WorkerHost {
              raw_keepa_data = $8,
              -- Rollback safety: after switching back from the scraper provider,
              -- rows Keepa refreshes read 'exact' (or 'out_of_stock') again
-             -- rather than keeping a stale scraper-derived status.
+             -- rather than keeping a stale scraper-derived status, and the
+             -- scraper-only columns (order cap, 404 flag) are cleared back to
+             -- their Keepa defaults whenever Keepa's own read isn't UNKNOWN.
              stock_status = COALESCE($13, stock_status),
+             max_order_quantity = CASE WHEN $14::boolean THEN NULL ELSE max_order_quantity END,
+             source_removed_at = CASE WHEN $14::boolean THEN NULL ELSE source_removed_at END,
              last_refresh_attempt_at = NOW(),
              last_successful_refresh_at = NOW(),
              next_refresh_at = NOW() + make_interval(mins => $9::int),
@@ -509,7 +525,8 @@ export class RefreshProcessorService extends WorkerHost {
           row.id,
           JSON.stringify(kp.specs ?? {}),
           JSON.stringify(kp.identifiers ?? {}),
-          keepaStockStatusToSource(kp.stockStatus),
+          rollback.stockStatus,
+          rollback.clearScraperState,
         ]
       );
 
@@ -530,14 +547,22 @@ export class RefreshProcessorService extends WorkerHost {
       }
       return [];
     } else {
+      // Nothing commerce/metadata-wise moved, but stock_status and the
+      // scraper-only columns still need the same rollback treatment here —
+      // otherwise a row whose Keepa stock happens to equal its old scraper
+      // stock (taking THIS branch) would keep a stale 'at_least'/404 flag
+      // forever, since Keepa never revisits this branch's fields again.
       await this.databaseService.query(
         `UPDATE products
-         SET last_refresh_attempt_at = NOW(),
+         SET stock_status = COALESCE($3, stock_status),
+             max_order_quantity = CASE WHEN $4::boolean THEN NULL ELSE max_order_quantity END,
+             source_removed_at = CASE WHEN $4::boolean THEN NULL ELSE source_removed_at END,
+             last_refresh_attempt_at = NOW(),
              last_successful_refresh_at = NOW(),
              next_refresh_at = NOW() + make_interval(mins => $1::int),
              consecutive_failures = 0
          WHERE id = $2`,
-        [intervalMinutes, row.id]
+        [intervalMinutes, row.id, rollback.stockStatus, rollback.clearScraperState]
       );
       this.logger.debug(`Refreshed (unchanged) ASIN ${row.asin}`);
     }
