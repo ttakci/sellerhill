@@ -37,7 +37,7 @@ describe('scraper ops helpers', () => {
     const legacy = { window1h: { found: 10, notFound: 0, blocked: 0, parseFailed: 0, noProxy: 0 } } as ScraperStats;
     expect(transportFailureRatePercent(legacy)).toBe(0);
   });
-  it('syncs/day =proxies × rps × 86400 × (1 − reserve) / unique ASINs', () => {
+  it('syncs/day = proxies × rps × 86400 × (1 − reserve) / unique ASINs', () => {
     expect(achievableSyncsPerDay(5, 1, 200_000, 0)).toBeCloseTo(2.16, 2);
     expect(achievableSyncsPerDay(5, 1, 200_000, 20)).toBeCloseTo(1.728, 3);
     expect(achievableSyncsPerDay(5, 1, 0, 20)).toBeNull();
