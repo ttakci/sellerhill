@@ -41,13 +41,25 @@ const SAMPLES_MIGRATION = path.resolve(__dirname, '../apps/api/migrations/122_te
 const DEMO_CATALOG = path.resolve(__dirname, '../apps/web/public/template-samples/catalog.json');
 
 const sql = fs.readFileSync(CATALOG_MIGRATION, 'utf8');
+/** `replace(html_content, 'from', 'to') … WHERE slug = 'x'` patches from later migrations. */
+const HTML_FIX_MIGRATIONS = ['123_tech_gadgets_image_fit.sql'];
+const HTML_FIXES = HTML_FIX_MIGRATIONS.flatMap((file) => {
+  const src = fs.readFileSync(path.resolve(__dirname, '../apps/api/migrations', file), 'utf8');
+  return [...src.matchAll(/replace\(html_content,\s*'([^']*)',\s*'([^']*)'\)[\s\S]*?WHERE slug = '([^']+)'/g)].map(
+    ([, from, to, slug]) => ({ from, to, slug })
+  );
+});
 /** Pulls one template's HTML out of its `$html_<slug>$ … $html_<slug>$` dollar-quoted literal. */
 function templateHtml(slug) {
   const tag = `$html_${slug.replace(/-/g, '_')}$`;
   const start = sql.indexOf(tag);
   const end = sql.indexOf(tag, start + tag.length);
   if (start < 0 || end < 0) throw new Error(`Template ${slug} not found in ${CATALOG_MIGRATION}`);
-  return sql.slice(start + tag.length, end);
+  let html = sql.slice(start + tag.length, end);
+  // Later migrations patch a template's HTML with replace(); apply the same
+  // patches here so the previews match what the database serves.
+  for (const fix of HTML_FIXES.filter((f) => f.slug === slug)) html = html.split(fix.from).join(fix.to);
+  return html;
 }
 
 /**
