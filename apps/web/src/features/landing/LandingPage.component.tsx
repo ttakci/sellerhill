@@ -406,6 +406,7 @@ export const LandingPageComponent = ({
         </S.MobileLinks>
         <S.MobileCtas>
           <S.LoginButton $block $onDark type="button" onClick={onNavigateLogin}>
+            <Icon name="user" size={18} />
             {t('translation:landing.navbar.login')}
           </S.LoginButton>
           <S.NavCta $block type="button" onClick={onNavigateRegister}>
