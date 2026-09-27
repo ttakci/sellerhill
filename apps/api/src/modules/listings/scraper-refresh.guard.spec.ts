@@ -30,21 +30,47 @@ function read(...segments: string[]): string {
   return fs.readFileSync(path.join(API_SRC, ...segments), 'utf8').replace(/\r\n/g, '\n');
 }
 
+/** Block and line comments removed, so a comment can never satisfy a guard. */
+function stripComments(text: string): string {
+  return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
+}
+
+/** Index of the `}` closing the `{` at `open`. */
+function matchingBrace(text: string, open: number): number {
+  let depth = 0;
+  for (let i = open; i < text.length; i += 1) {
+    if (text[i] === '{') {depth += 1;}
+    if (text[i] === '}') {
+      depth -= 1;
+      if (depth === 0) {return i;}
+    }
+  }
+  return -1;
+}
+
 describe('scraper refresh invariants (refresh-processor.service.ts)', () => {
   const src = read('modules', 'listings', 'refresh-processor.service.ts');
 
-  it('the no-proxy pause check runs before the claim query in selectRefreshBatch', () => {
+  it('the no-proxy pause check RETURNS before the claim query in selectRefreshBatch', () => {
     const start = src.indexOf('private async selectRefreshBatch(');
     const end = src.indexOf('private async resolveBatchSize(');
     expect(start).toBeGreaterThan(-1);
     expect(end).toBeGreaterThan(start);
-    const body = src.slice(start, end);
+    const body = stripComments(src.slice(start, end));
 
-    const pauseIndex = body.indexOf('no proxies configured');
+    // The `if` whose condition is the empty-proxy check, and its block.
+    const condition = /if \(provider === ProductDataProviderKind\.SCRAPER && \(await this\.productSource\.proxies\(\)\)\.length === 0\) \{/;
+    const match = condition.exec(body);
+    expect(match).not.toBeNull();
+    const blockStart = (match?.index ?? 0) + (match?.[0].length ?? 0);
+    const blockEnd = matchingBrace(body, blockStart - 1);
+    expect(blockEnd).toBeGreaterThan(blockStart);
+    // The log line alone would still pass if the `return` were deleted — the
+    // mutation that makes a paused tick lease rows. Assert the return itself.
+    expect(body.slice(blockStart, blockEnd)).toMatch(/\breturn;/);
+
     const claimIndex = body.indexOf('FOR UPDATE SKIP LOCKED');
-    expect(pauseIndex).toBeGreaterThan(-1);
-    expect(claimIndex).toBeGreaterThan(-1);
-    expect(pauseIndex).toBeLessThan(claimIndex);
+    expect(claimIndex).toBeGreaterThan(blockEnd);
   });
 
   it('the Keepa UPDATE writes stock_status on both the changed and unchanged branches', () => {

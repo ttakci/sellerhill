@@ -215,8 +215,18 @@ export class ListingProcessorService extends WorkerHost {
     // PRODUCT_DATA_UNAVAILABLE via resolveProductData's `unavailable` branch).
     let prefetched: Map<string, CreateFetchResult> | undefined;
     if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+      // Only ASINs the loop below can actually create: a malformed identifier
+      // fails as ASIN_NOT_FOUND without a fetch, an already-listed one is a
+      // duplicate, and a repeat within the batch needs one fetch, not two —
+      // each skipped page is proxy capacity not spent.
       const uncached: string[] = [];
       for (const item of items) {
+        if (!isValidAsinShape(item.asin) || uncached.includes(item.asin)) {
+          continue;
+        }
+        if (await this.listingsService.isAsinListed(userId, item.asin)) {
+          continue;
+        }
         if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin))) {
           uncached.push(item.asin);
         }

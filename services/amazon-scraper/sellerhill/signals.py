@@ -61,6 +61,18 @@ def extract_quantity_max(html):
     return max(values) if values else None
 
 
+def _id_tag_start(html, element_id):
+    """Start of the first tag carrying a real `id="element_id"` ATTRIBUTE.
+
+    A raw substring find also matched decoys — `data-csa-c-slot-id="price"`,
+    `aria-describedby`-style attributes ending in `id=`, or the text inside a
+    script — and the slice then started at the wrong element, which surfaces
+    as a parse failure. The attribute must be preceded by whitespace inside an
+    opening tag."""
+    m = re.search(r'<[A-Za-z][^<>]*\sid="' + re.escape(element_id) + '"', html)
+    return m.start() if m else -1
+
+
 def _fragments(html):
     """One clean, independently-closed fragment per id in _FRAGMENT_IDS.
 
@@ -78,10 +90,9 @@ def _fragments(html):
     isolates fragments from each other before they are ever joined."""
     parts = []
     for element_id in _FRAGMENT_IDS:
-        start = html.find(f'id="{element_id}"')
-        if start == -1:
+        tag_start = _id_tag_start(html, element_id)
+        if tag_start == -1:
             continue
-        tag_start = html.rfind("<", 0, start)
         raw = html[tag_start: tag_start + _FRAGMENT_CHARS]
         node = P.first(P.soup(raw), f'[id="{element_id}"]')
         if node is not None:

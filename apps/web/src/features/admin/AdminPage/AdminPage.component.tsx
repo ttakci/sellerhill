@@ -115,6 +115,20 @@ export const AdminPageComponent = ({
                 </Text>
               </S.SummaryCard>
             )}
+            {/* Refresh lag is provider-neutral (the REFRESH_LAG warning is too);
+                capacity is a scraper-pool figure, so it stays scraper-only. */}
+            {operations && (
+              <S.SummaryCard>
+                <Text variant="caption" color="text.secondary">
+                  {t('admin.overview.refreshLag')}
+                </Text>
+                <Text variant="metric" weight="semibold" numeric>
+                  {operations.refreshLagMinutes !== null
+                    ? t('admin.overview.refreshLagValue', { minutes: operations.refreshLagMinutes })
+                    : '—'}
+                </Text>
+              </S.SummaryCard>
+            )}
             {operations?.productDataProvider === ProductDataProviderKind.SCRAPER && (
               <>
                 <S.SummaryCard>
@@ -128,16 +142,6 @@ export const AdminPageComponent = ({
                           blocked: operations.scraperStats.window1h.blocked,
                           parseFailed: operations.scraperStats.window1h.parseFailed,
                         })
-                      : '—'}
-                  </Text>
-                </S.SummaryCard>
-                <S.SummaryCard>
-                  <Text variant="caption" color="text.secondary">
-                    {t('admin.overview.refreshLag')}
-                  </Text>
-                  <Text variant="metric" weight="semibold" numeric>
-                    {operations.refreshLagMinutes !== null
-                      ? t('admin.overview.refreshLagValue', { minutes: operations.refreshLagMinutes })
                       : '—'}
                   </Text>
                 </S.SummaryCard>

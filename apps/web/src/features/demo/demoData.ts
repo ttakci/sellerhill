@@ -213,6 +213,9 @@ const PINNED_LISTING_ASINS: readonly string[] = [
   'B0B3MPT7X1', // Minimalist Automatic Watch, Sapphire Crystal — Seiko
 ];
 
+/** An active listing already at quantity 0 (`i % 9 === 0`), shown as unavailable on Amazon. */
+const SOURCE_REMOVED_DEMO_INDEX = 9;
+
 function buildListings(): ListingDto[] {
   const rand = seeded(97);
   return PRODUCTS.map((p, i) => {
@@ -255,8 +258,18 @@ function buildListings(): ListingDto[] {
       // Amazon often only reports a lower bound ("In Stock" caps at 20, or an
       // order-quantity dropdown caps lower) — every third listing and one
       // low-stock outlier demonstrate the "N+" display; the rest are exact.
-      sourceStock: i === 1 ? 4 : i % 3 === 0 ? 20 : quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
-      sourceStockStatus: i === 1 || i % 3 === 0 ? SourceStockStatus.AT_LEAST : SourceStockStatus.EXACT,
+      // One live listing (index 9, already at quantity 0) points at a product
+      // Amazon answered 404 for, so the "unavailable on Amazon" caption is
+      // exercised in the demo too.
+      sourceStock:
+        i === SOURCE_REMOVED_DEMO_INDEX
+          ? 0
+          : i === 1 ? 4 : i % 3 === 0 ? 20 : quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
+      sourceStockStatus:
+        i === SOURCE_REMOVED_DEMO_INDEX
+          ? SourceStockStatus.OUT_OF_STOCK
+          : i === 1 || i % 3 === 0 ? SourceStockStatus.AT_LEAST : SourceStockStatus.EXACT,
+      sourceRemoved: i === SOURCE_REMOVED_DEMO_INDEX,
       ebayAccountId: i % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
       lastSaleAt:
         status === ListingStatus.DRAFT

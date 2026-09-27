@@ -1,6 +1,9 @@
-bottle
-cheroot
-curl_cffi
-beautifulsoup4
-lxml
-marshmallow
+# Pinned to the versions the test suite runs against (.venv). A curl_cffi
+# impersonation-target change is exactly the silent "suddenly blocked" failure
+# this service is most sensitive to, so an upgrade is a deliberate edit here.
+bottle==0.13.4
+cheroot==11.1.2
+curl_cffi==0.16.3
+beautifulsoup4==4.15.0
+lxml==6.1.3
+marshmallow==4.3.1

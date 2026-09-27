@@ -1,5 +1,6 @@
 import {
   AMAZON_MARKETPLACE_CONFIG,
+  ProductDataProviderKind,
   SourceStockStatus,
   type AmazonMarketplace,
   type ProductData,
@@ -223,6 +224,6 @@ export function mapScraperProduct(
     stockStatus: unknown ? SourceStockStatus.OUT_OF_STOCK : commerce.stockStatus,
     maxOrderQuantity: commerce.maxOrderQuantity,
     sourceRemoved: commerce.removed,
-    raw: { provider: 'scraper', content, commerce } as unknown as Record<string, unknown>,
+    raw: { provider: ProductDataProviderKind.SCRAPER, content, commerce } as unknown as Record<string, unknown>,
   };
 }

@@ -45,8 +45,21 @@ describe('scraper egress guard', () => {
     }
   });
 
-  it('ProductSourceService short-circuits on an empty proxy list', () => {
-    expect(read('apps/api/src/modules/listings/product-source.service.ts')).toMatch(/proxies\.length === 0[\s\S]{0,300}NO_PROXY/);
+  it('ProductSourceService short-circuits on an empty proxy list, before any client call', () => {
+    // Sliced to fetch() with comments stripped: a comment, or a condition like
+    // `proxies.length === 0 && false`, must not satisfy this.
+    const src = read('apps/api/src/modules/listings/product-source.service.ts')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
+    const start = src.indexOf('private async fetch(');
+    const end = src.indexOf('function marketplaceCountry(');
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    const body = src.slice(start, end);
+    const guard = /if \(proxies\.length === 0\) \{\s*return [^;]*SourceFetchOutcome\.NO_PROXY[^;]*;\s*\}/.exec(body);
+    expect(guard).not.toBeNull();
+    const clientCall = body.indexOf('this.client.fetchProducts(');
+    expect(clientCall).toBeGreaterThan(guard?.index ?? Infinity);
   });
 
   it('the Python service refuses direct egress', () => {

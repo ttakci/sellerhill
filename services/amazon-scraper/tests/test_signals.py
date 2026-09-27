@@ -59,3 +59,13 @@ def test_no_signals_on_garbage():
     s = signals.extract_commerce_signals("<html><body>nothing</body></html>", US)
     assert s["price"] is None and s["isInStock"] is None and s["quantityMax"] is None
     assert signals.extract_gallery("<html></html>") == []
+
+
+def test_fragment_anchor_ignores_decoy_id_substrings():
+    from sellerhill.signals import _id_tag_start
+    html = ('<div data-csa-c-slot-id="availability">decoy</div>'
+            '<script>var x = \'id="availability"\';</script>'
+            '<div class="a" id="availability"><span>In Stock</span></div>')
+    start = _id_tag_start(html, "availability")
+    assert html[start:].startswith('<div class="a" id="availability">')
+    assert _id_tag_start('<div data-id="price"></div>', "price") == -1

@@ -2,14 +2,12 @@
 environment variable; the defaults work out of the box.
 
     PORT          port the API listens on (default 8000)
-    AMAZON_PROXY  proxy URL for every request, e.g. http://user:pass@host:port
-                  (default: none — direct). The US, UK, German, French,
-                  Indian, Canadian … storefronts answer direct requests, so you
-                  very likely don't need this. Two exceptions: amazon.co.jp and
-                  amazon.com.au only serve visitors from their own country —
-                  for country=JP / country=AU set a proxy that exits in Japan /
-                  Australia. A residential proxy also helps if you run very
-                  high volumes from one IP.
+
+There is NO environment proxy (SellerHill patch, see UPSTREAM.md): upstream's
+AMAZON_PROXY / AMAZON_PROXY_COUNTRY variables are ignored. Every Amazon request
+leaves through a proxy the API sends per request, bound to the worker thread by
+sellerhill.pool / sellerhill.egress; with no proxy there is no request at all
+(SCRAPER_ALLOW_DIRECT=1 is a developer-machine exception only).
 
 Everything else below is a plain constant with a working default — edit it
 here if you need to.
