@@ -49,7 +49,7 @@ def test_empty_proxies_is_no_proxy_without_fetching(client):
 
 @pytest.mark.parametrize("bad", [
     {"asins": ["short"]}, {"asins": [f"B{i:09d}" for i in range(101)]}, {"mode": "x"},
-    {"lane": "x"}, {"proxies": ["ftp://h:1"]}, {"perIpRequestsPerSecond": 0}, {"marketplace": "XX"},
+    {"lane": "x"}, {"proxies": "http://h:1"}, {"perIpRequestsPerSecond": 0}, {"marketplace": "XX"},
 ])
 def test_invalid_body_is_400(client, bad):
     app, _ = client
@@ -64,6 +64,31 @@ def test_stats_never_contain_credentials(client):
     assert "p@" not in json.dumps(stats) and stats["window1h"]["found"] == 1
 
 
-def test_health_is_open(client):
+def test_health_is_open_and_reports_direct_egress(client):
     app, _ = client
-    assert app.get("/health").json == {"ok": True}
+    assert app.get("/health").json == {"ok": True, "directAllowed": False}
+    stats = app.get("/v1/stats", headers={"X-Scraper-Secret": "s3cret"}).json
+    assert stats["directAllowed"] is False
+
+
+def test_malformed_proxy_entries_are_dropped_not_fatal(client):
+    app, calls = client
+    res = app.post_json("/v1/products", body(proxies=["h:1:u:p", "ftp://h:1", "http://h:70000", "http://u:p@1.2.3.4:8000"]),
+                        headers={"X-Scraper-Secret": "s3cret"})
+    assert res.status_int == 200 and res.json["results"][0]["outcome"] == "found" and calls == ["B000000001"]
+
+
+def test_all_malformed_proxies_is_no_proxy_never_direct(client, monkeypatch):
+    monkeypatch.setenv("SCRAPER_ALLOW_DIRECT", "1")  # even on a developer machine
+    app, calls = client
+    res = app.post_json("/v1/products", body(proxies=["h:1:u:p"]), headers={"X-Scraper-Secret": "s3cret"})
+    assert res.json["results"][0]["outcome"] == "no_proxy" and calls == []
+
+
+def test_empty_proxy_list_retires_previous_workers(client):
+    app, _ = client
+    app.post_json("/v1/products", body(), headers={"X-Scraper-Secret": "s3cret"})
+    pool = app.app.config["pool"]
+    assert len(pool._proxies) == 1
+    app.post_json("/v1/products", body(proxies=[]), headers={"X-Scraper-Secret": "s3cret"})
+    assert pool._proxies == {}

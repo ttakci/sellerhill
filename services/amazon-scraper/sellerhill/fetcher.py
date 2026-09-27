@@ -1,5 +1,6 @@
-"""One ASIN → one result dict. Classifies every failure into an outcome the
-NestJS normalizer understands; never raises except NoProxyError."""
+"""One ASIN → one result dict. Classifies every failure into an outcome; the
+pool maps the stat-only `proxy_error` to the wire's `blocked` before the
+NestJS normalizer sees it. Never raises except NoProxyError."""
 from datetime import datetime, timezone
 
 from amazon import fetch, sites
@@ -20,8 +21,13 @@ def fetch_one(asin, marketplace, mode):
                           referer=f"{site['base']}/s?k={asin}", label=f"product {asin}")
     except fetch.AmazonNotFound:
         return {**base, "outcome": "not_found"}
-    except fetch.AmazonUpstreamError:  # includes AmazonBlocked
+    except fetch.AmazonBlocked:  # captcha / dogs page: Amazon refusing us
         return {**base, "outcome": "blocked"}
+    except fetch.AmazonUpstreamError:
+        # Transport failure through the proxy (auth 407, dead exit, timeouts)
+        # or repeated 5xx — not Amazon blocking this IP. The pool reports it
+        # as `proxy_error` in stats and as `blocked` (transient) on the wire.
+        return {**base, "outcome": "proxy_error"}
     if 'id="productTitle"' not in html:
         return {**base, "outcome": "parse_failed"}
     result = {**base, "outcome": "found", "signals": extract_commerce_signals(html, site)}

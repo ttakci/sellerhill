@@ -262,6 +262,17 @@ export enum AdminWarningKind {
   SCRAPER_UNREACHABLE = 'scraper_unreachable',
   /** Share of scraper requests blocked in the last hour crossed `scraper.blockRateWarnPercent`. */
   SCRAPER_BLOCK_RATE_HIGH = 'scraper_block_rate_high',
+  /**
+   * Share of scraper requests whose page could not be parsed in the last hour
+   * crossed `scraper.blockRateWarnPercent` (one knob for "the scraper is
+   * unhealthy"). Usually an Amazon layout change: those products go down the
+   * data-failure path and are quarantined within ~5.5 h.
+   */
+  SCRAPER_PARSE_FAILURE_HIGH = 'scraper_parse_failure_high',
+  /** `scraper.proxies` holds entries that are not proxy URLs; they are skipped. Value = how many. */
+  SCRAPER_PROXY_INVALID = 'scraper_proxy_invalid',
+  /** The scraper service reports `SCRAPER_ALLOW_DIRECT=1`: it may fetch from the server's own IP. */
+  SCRAPER_DIRECT_EGRESS = 'scraper_direct_egress',
   /** The oldest overdue product refresh is further behind than the configured refresh interval. */
   REFRESH_LAG = 'refresh_lag',
 }

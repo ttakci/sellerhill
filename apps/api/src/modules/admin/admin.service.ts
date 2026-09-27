@@ -49,7 +49,7 @@ import {
   buildQuotaPressureSummary,
   resolveCostTotal,
 } from './billing-metrics.helpers';
-import { achievableSyncsPerDay, blockRatePercent } from './scraper-ops.helpers';
+import { achievableSyncsPerDay, blockRatePercent, parseFailureRatePercent } from './scraper-ops.helpers';
 
 interface CountRow {
   count: string;
@@ -501,16 +501,34 @@ export class AdminService {
         }
       }
     } else {
-      scraperProxies = await this.productSource.proxies();
+      const proxyConfig = await this.productSource.proxyConfig();
+      scraperProxies = proxyConfig.proxies;
       if (scraperProxies.length === 0) {
         warnings.push({ kind: AdminWarningKind.SCRAPER_NO_PROXIES, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 1 });
       }
+      // Malformed entries are skipped, never sent — but silently skipping them
+      // would leave the operator believing the whole list is in use. The count
+      // only: the value is write-only and carries credentials.
+      if (proxyConfig.dropped > 0) {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_PROXY_INVALID, level: AdminWarningLevel.WARNING, value: proxyConfig.dropped, threshold: 0 });
+      }
       try {
         scraperStats = await this.scraperClient.getStats();
-        const rate = blockRatePercent(scraperStats);
+        // One knob for "the scraper is unhealthy" — the block and the parse-
+        // failure rates are shown separately, but both warn at the same value.
         const warnAt = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_BLOCK_RATE_WARN_PERCENT);
+        const rate = blockRatePercent(scraperStats);
         if (rate !== null && rate >= warnAt) {
           warnings.push({ kind: AdminWarningKind.SCRAPER_BLOCK_RATE_HIGH, level: rate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: rate, threshold: warnAt });
+        }
+        const parseRate = parseFailureRatePercent(scraperStats);
+        if (parseRate !== null && parseRate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_PARSE_FAILURE_HIGH, level: parseRate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: parseRate, threshold: warnAt });
+        }
+        // Compose never sets SCRAPER_ALLOW_DIRECT on a server, but a PaaS env
+        // panel can inject it straight into the container.
+        if (scraperStats.directAllowed === true) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_DIRECT_EGRESS, level: AdminWarningLevel.CRITICAL, value: 1, threshold: 0 });
         }
       } catch {
         warnings.push({ kind: AdminWarningKind.SCRAPER_UNREACHABLE, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 0 });
@@ -570,7 +588,13 @@ export class AdminService {
     // scraperProxies was already fetched once above, in the same branch that
     // set productDataProvider to SCRAPER — never re-fetched here.
     const achievable = productDataProvider === ProductDataProviderKind.SCRAPER && scraperProxies
-      ? achievableSyncsPerDay(scraperProxies.length, await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS), uniqueRefreshedAsins)
+      ? achievableSyncsPerDay(
+          scraperProxies.length,
+          await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS),
+          uniqueRefreshedAsins,
+          // The same reserve the refresh batch size keeps for creates.
+          await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_RESERVE_PERCENT),
+        )
       : null;
 
     return {

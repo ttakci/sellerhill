@@ -33,12 +33,32 @@ describe('parseProxyList', () => {
     expect(parseProxyList('http://a:1\n http://b:2 ,http://a:1\n\n')).toEqual(['http://a:1', 'http://b:2']);
     expect(parseProxyList(null)).toEqual([]);
   });
+  it('drops malformed entries instead of sending them', () => {
+    expect(parseProxyList('h:1:u:p, http://u:p@h:1 ,ftp://h:2,http://h:70000,socks5h://h:1080')).toEqual([
+      'http://u:p@h:1',
+      'socks5h://h:1080',
+    ]);
+  });
 });
 
 describe('ProductSourceService', () => {
   it('defaults to scraper when the setting is empty', async () => {
     const { svc } = service({});
     expect(await svc.activeProvider()).toBe(ProductDataProviderKind.SCRAPER);
+  });
+
+  it('reports how many configured entries were dropped, never sending them', async () => {
+    const { svc, calls } = service({ [PlatformSettingKey.SCRAPER_PROXIES]: 'h:1:u:p,http://u:p@h:1' });
+    expect(await svc.proxyConfig()).toEqual({ proxies: ['http://u:p@h:1'], dropped: 1 });
+    await svc.fetchCommerce(['B000000001'], AmazonMarketplace.AMAZON_US);
+    expect(calls[0]).toMatchObject({ proxies: ['http://u:p@h:1'] });
+  });
+
+  it('a list of only malformed entries is treated as no proxy — no request', async () => {
+    const { svc, calls } = service({ [PlatformSettingKey.SCRAPER_PROXIES]: 'h:1:u:p' });
+    const out = await svc.fetchCommerce(['B000000001'], AmazonMarketplace.AMAZON_US);
+    expect(out[0].outcome).toBe(SourceFetchOutcome.NO_PROXY);
+    expect(calls).toHaveLength(0);
   });
 
   it('never calls the service without proxies', async () => {

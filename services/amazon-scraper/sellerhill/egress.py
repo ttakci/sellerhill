@@ -19,10 +19,19 @@ def allow_direct() -> bool:
     return os.environ.get("SCRAPER_ALLOW_DIRECT") == "1"
 
 
+def remote_dns(proxy):
+    """`socks5://` makes libcurl resolve the Amazon hostname LOCALLY, so the
+    lookup leaves from this host's resolver; `socks5h://` resolves at the
+    proxy. Every SOCKS proxy is used as socks5h."""
+    if isinstance(proxy, str) and proxy.lower().startswith("socks5://"):
+        return "socks5h://" + proxy[len("socks5://"):]
+    return proxy
+
+
 @contextmanager
 def bind(proxy):
     previous = getattr(_local, "proxy", None)
-    _local.proxy = proxy
+    _local.proxy = remote_dns(proxy)
     try:
         yield
     finally:

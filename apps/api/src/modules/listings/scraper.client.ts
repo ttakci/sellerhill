@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { ScraperProductResult, ScraperProductsRequest, ScraperStats } from '@repo/shared';
+import { partitionProxyList, type ScraperProductResult, type ScraperProductsRequest, type ScraperStats } from '@repo/shared';
 import axios from 'axios';
 
 /** The scraper service could not be reached or answered with an error. Retryable. */
@@ -8,9 +8,13 @@ export class ScraperUnavailableError extends Error {
   override name = 'ScraperUnavailableError';
 }
 
-/** Newline/comma-separated proxy URLs from the `scraper.proxies` setting. */
+/**
+ * Valid, de-duplicated proxy URLs from a newline/comma-separated value. A
+ * malformed entry is dropped here rather than sent — the service would skip
+ * it anyway, and before it did, one bad line 400'd every call.
+ */
 export function parseProxyList(value: string | null): string[] {
-  return [...new Set((value ?? '').split(/[\n,]/).map((p) => p.trim()).filter(Boolean))];
+  return partitionProxyList(value).valid;
 }
 
 const REQUEST_TIMEOUT_MS = 200_000; // service resolves each ASIN by its own 150 s deadline

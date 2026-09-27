@@ -49,3 +49,11 @@ def test_fetch_session_refuses_without_proxy(monkeypatch):
 def test_redact_hides_credentials():
     assert egress.redact("http://user:secret@10.0.0.1:3128") == "10.0.0.1:3128"
     assert egress.redact("socks5://h.example.com:1080") == "h.example.com:1080"
+
+
+def test_socks5_is_bound_as_socks5h(monkeypatch):
+    monkeypatch.delenv("SCRAPER_ALLOW_DIRECT", raising=False)
+    with egress.bind("socks5://u:p@1.2.3.4:1080"):
+        assert egress.require_proxy() == "socks5h://u:p@1.2.3.4:1080"
+    with egress.bind("http://u:p@1.2.3.4:8000"):
+        assert egress.require_proxy() == "http://u:p@1.2.3.4:8000"

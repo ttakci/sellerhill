@@ -112,6 +112,13 @@ export interface ScraperOutcomeCounts {
   blocked: number;
   parseFailed: number;
   noProxy: number;
+  /**
+   * Resolved at the deadline (queued or in flight), reported to the caller as
+   * `blocked` but NOT Amazon blocking us. Optional: an older service omits it.
+   */
+  expired?: number;
+  /** Transport/proxy failure (dead exit, auth 407, repeated 5xx), also `blocked` on the wire. */
+  proxyError?: number;
 }
 
 /** Scraper service health/usage snapshot (admin observability). */
@@ -120,6 +127,8 @@ export interface ScraperStats {
   window24h: ScraperOutcomeCounts;
   meanLatencyMs: number | null;
   proxies: Array<{ id: string; requests1h: number; blocked1h: number; coolingDown: boolean }>;
+  /** The service may fetch without a proxy (`SCRAPER_ALLOW_DIRECT=1`). Optional: an older service omits it. */
+  directAllowed?: boolean;
 }
 
 /**

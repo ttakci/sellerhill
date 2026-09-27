@@ -40,6 +40,8 @@ export {
 } from './utils/ebay-eps';
 export { isValidTotpSecret, normalizeTotpSecret } from './utils/totp-secret';
 export { formatSourceStock } from './utils/source-stock';
+export { isValidProxyUrl, partitionProxyList, splitProxyList } from './utils/proxy-url';
+export type { ProxyListPartition } from './utils/proxy-url';
 export {
   PlatformSettingDraftIssue,
   checkPlatformSettingDraft,

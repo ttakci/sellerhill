@@ -1,20 +1,30 @@
-import { achievableSyncsPerDay, blockRatePercent } from './scraper-ops.helpers';
+import type { ScraperStats } from '@repo/shared';
 
-const stats = (found: number, blocked: number) => ({
-  window1h: { found, notFound: 0, blocked, parseFailed: 0, noProxy: 0 },
-  window24h: { found, notFound: 0, blocked, parseFailed: 0, noProxy: 0 },
-  meanLatencyMs: null,
-  proxies: [],
-});
+import { achievableSyncsPerDay, blockRatePercent, parseFailureRatePercent } from './scraper-ops.helpers';
+
+const stats = (over: Partial<ScraperStats['window1h']> = {}): ScraperStats => {
+  const w = { found: 0, notFound: 0, blocked: 0, parseFailed: 0, noProxy: 0, expired: 0, proxyError: 0, ...over };
+  return { window1h: w, window24h: w, meanLatencyMs: null, proxies: [] };
+};
 
 describe('scraper ops helpers', () => {
   it('block rate over the last hour, null with no traffic', () => {
-    expect(blockRatePercent(stats(90, 10))).toBe(10);
-    expect(blockRatePercent(stats(0, 0))).toBeNull();
+    expect(blockRatePercent(stats({ found: 90, blocked: 10 }))).toBe(10);
+    expect(blockRatePercent(stats())).toBeNull();
   });
-  it('syncs/day = proxies × rps × 86400 / unique ASINs', () => {
-    expect(achievableSyncsPerDay(5, 1, 200_000)).toBeCloseTo(2.16, 2);
-    expect(achievableSyncsPerDay(5, 1, 0)).toBeNull();
-    expect(achievableSyncsPerDay(0, 1, 1000)).toBe(0);
+  it('deadline expiry and proxy errors are never counted as blocked', () => {
+    expect(blockRatePercent(stats({ found: 90, blocked: 10, expired: 500, proxyError: 500 }))).toBe(10);
+    expect(blockRatePercent(stats({ expired: 5, proxyError: 5 }))).toBeNull();
+  });
+  it('parse-failure rate over the last hour, null with no traffic', () => {
+    expect(parseFailureRatePercent(stats({ found: 60, notFound: 5, blocked: 5, parseFailed: 30 }))).toBe(30);
+    expect(parseFailureRatePercent(stats({ found: 100 }))).toBe(0);
+    expect(parseFailureRatePercent(stats())).toBeNull();
+  });
+  it('syncs/day = proxies × rps × 86400 × (1 − reserve) / unique ASINs', () => {
+    expect(achievableSyncsPerDay(5, 1, 200_000, 0)).toBeCloseTo(2.16, 2);
+    expect(achievableSyncsPerDay(5, 1, 200_000, 20)).toBeCloseTo(1.728, 3);
+    expect(achievableSyncsPerDay(5, 1, 0, 20)).toBeNull();
+    expect(achievableSyncsPerDay(0, 1, 1000, 20)).toBe(0);
   });
 });

@@ -41,6 +41,13 @@ def test_block_is_blocked(monkeypatch):
     assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "blocked"
 
 
+def test_transport_failure_is_proxy_error_not_blocked(monkeypatch):
+    def boom(*a, **k):
+        raise fetch.AmazonUpstreamError("ProxyError 407")
+    monkeypatch.setattr(fetch, "page", boom)
+    assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "proxy_error"
+
+
 def test_page_without_title_is_parse_failed(monkeypatch):
     monkeypatch.setattr(fetch, "page", lambda *a, **k: "<html><body>odd</body></html>")
     assert fetcher.fetch_one("B000000001", "US", "commerce")["outcome"] == "parse_failed"

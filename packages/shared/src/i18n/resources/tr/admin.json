@@ -1,5 +1,10 @@
 {
   "admin": {
+    "errors": {
+      "setting": {
+        "notProxyUrl": "Bir veya daha fazla girdi proxy URL'si değil (şema://host:port bekleniyor)."
+      }
+    },
     "title": "Yönetim operasyonları",
     "subtitle": "Platform maliyetlerini, kuyrukları, sağlayıcı kullanımını ve müşteri dağılımını izleyin.",
     "tabs": {
@@ -55,7 +60,10 @@
       "scraper_no_proxies": "Scraper proxy'si tanımlı değil — Amazon'dan veri çekilmiyor",
       "scraper_unreachable": "Scraper servisine ulaşılamıyor",
       "scraper_block_rate_high": "Scraper blok oranı yüksek (%)",
-      "refresh_lag": "Ürün yenileme takvimin gerisinde (dakika)"
+      "refresh_lag": "Ürün yenileme takvimin gerisinde (dakika)",
+      "scraper_proxy_invalid": "Hatalı biçimli scraper proxy girdileri atlanıyor (adet)",
+      "scraper_parse_failure_high": "Scraper ayrıştırma hataları yüksek (%) — Amazon sayfa düzenini değiştirmiş olabilir",
+      "scraper_direct_egress": "Scraper proxy'siz çekim yapabiliyor — bu sunucuda SCRAPER_ALLOW_DIRECT'i kapatın"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -276,7 +284,7 @@
         "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir.",
         "product.dataProvider": "Amazon ürün verisinin nereden alındığı. \"scraper\" kendi servisimiz, \"keepa\" geri dönüş seçeneği. İkisi karışmaz.",
         "scraper.proxies": "Her satıra bir proxy (http://kullanıcı:şifre@host:port). Hiç yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
-        "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Toplam kapasite = bu değer × proxy sayısı.",
+        "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Her proxy bu hıza yetecek kadar işçi çalıştırır; Amazon ~2 sn içinde yanıt verdiği sürece toplam verim ≈ hız × proxy sayısı.",
         "scraper.inStockFloor": "Amazon sayı vermeden \"In Stock\" gösterdiğinde kaydedilen stok. N+ olarak gösterilir.",
         "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar."
       },
@@ -298,7 +306,8 @@
         "required": "Bir değer girin.",
         "notANumber": "Geçerli bir sayı girin.",
         "belowMin": "En az {{bound}} olmalı.",
-        "aboveMax": "En fazla {{bound}} olmalı."
+        "aboveMax": "En fazla {{bound}} olmalı.",
+        "notAProxyUrl": "{{entry}}. girdi bir proxy URL'si değil (http(s)://, socks5:// veya socks5h:// ile host:port bekleniyor)."
       }
     },
     "listingQuality": {

@@ -5,6 +5,7 @@ import {
   ScraperFetchMode,
   ScraperLane,
   SourceFetchOutcome,
+  partitionProxyList,
   type AmazonMarketplace,
   type ProductData,
   type ScraperProductResult,
@@ -13,7 +14,7 @@ import {
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 
 import { chunkAsins, dedupeAsins } from './keepa-normalizer';
-import { ScraperClient, parseProxyList } from './scraper.client';
+import { ScraperClient } from './scraper.client';
 import { mapScraperProduct } from './source-content-mapper';
 import { normalizeScraperCommerce } from './source-product-normalizer';
 
@@ -38,8 +39,19 @@ export class ProductSourceService {
     return value === ProductDataProviderKind.KEEPA ? ProductDataProviderKind.KEEPA : ProductDataProviderKind.SCRAPER;
   }
 
+  /** Valid proxies only — a malformed entry is never sent to the service. */
   async proxies(): Promise<string[]> {
-    return parseProxyList(await this.platformSettings.getString(PlatformSettingKey.SCRAPER_PROXIES));
+    return (await this.proxyConfig()).proxies;
+  }
+
+  /**
+   * The configured proxy list split into what is used and how many entries
+   * were dropped as malformed (`SCRAPER_PROXY_INVALID` reports the count; no
+   * value is ever surfaced — entries carry credentials).
+   */
+  async proxyConfig(): Promise<{ proxies: string[]; dropped: number }> {
+    const { valid, invalidEntries } = partitionProxyList(await this.platformSettings.getString(PlatformSettingKey.SCRAPER_PROXIES));
+    return { proxies: valid, dropped: invalidEntries.length };
   }
 
   async fetchForCreate(asins: string[], marketplace: AmazonMarketplace): Promise<Map<string, CreateFetchResult>> {

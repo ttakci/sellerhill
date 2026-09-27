@@ -6,6 +6,14 @@ import { normalizeScraperCommerce } from './source-product-normalizer';
  * Products claimed per 1-minute tick under the scraper provider. The tick
  * rate is fixed, so this IS the refresh throughput; the reserve keeps
  * headroom for seller-triggered creates (interactive lane).
+ *
+ * `rate × proxies` is achievable only because the service sizes its worker
+ * threads from the same rate (`threads_for_rate` in `pool.py`: ceil(rate × 4)
+ * per proxy). A worker is busy for the whole ~2 s page fetch, so with a fixed
+ * two threads a raised rate used to be unreachable: the batch outgrew what the
+ * pool could finish, the tail hit the 150 s deadline and was counted as
+ * blocked. The formula is unchanged; what changed is that the pool now follows
+ * it while Amazon answers within ~2 s.
  */
 export function resolveScraperRefreshBatchSize(input: {
   proxyCount: number; perIpRequestsPerSecond: number; reservePercent: number; min: number; max: number;

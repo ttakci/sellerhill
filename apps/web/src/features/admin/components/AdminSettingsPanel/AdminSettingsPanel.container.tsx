@@ -70,7 +70,7 @@ export const AdminSettingsPanelContainer = ({ skip }: AdminSettingsPanelProps): 
       if (serverError) {
         errorText = t(serverError, { defaultValue: t('translation:error.serverError') });
       } else if (isDirty && !check.valid) {
-        errorText = t(`admin.settings.validation.${check.issue}`, { bound: check.bound });
+        errorText = t(`admin.settings.validation.${check.issue}`, { bound: check.bound, entry: check.entry });
       }
       let inputType: SettingRowView['inputType'] = 'text';
       if (setting.isSecret) {
