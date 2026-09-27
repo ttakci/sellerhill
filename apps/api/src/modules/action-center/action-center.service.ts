@@ -478,9 +478,10 @@ export class ActionCenterService {
     );
 
     /*
-     * The source ASIN has failed refresh enough times to be quarantined —
-     * almost always because Amazon delisted it. The eBay listing is still live
-     * and still sellable, which is the whole danger: a sale on it cannot be
+     * The source ASIN is unavailable on Amazon — either the scraper detected
+     * a 404 or the product has failed refresh enough times to be quarantined.
+     * Usually because Amazon delisted it. The eBay listing is still live and
+     * still sellable, which is the whole danger: a sale on it cannot be
      * fulfilled. The platform stops refreshing such products but deliberately
      * does not end the listing, so this is the only place the seller learns.
      */
@@ -490,7 +491,7 @@ export class ActionCenterService {
          JOIN products p ON p.id = l.product_id
         WHERE l.user_id = $1
           AND l.status = $2
-          AND p.consecutive_failures >= $3`,
+          AND (p.consecutive_failures >= $3 OR p.source_removed_at IS NOT NULL)`,
       [userId, ListingStatus.ACTIVE, SOURCE_UNAVAILABLE_FAILURE_THRESHOLD],
     );
 

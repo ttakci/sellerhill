@@ -512,7 +512,7 @@ export class ListingsService {
     // same threshold the count query uses, so "N listings need you" and this
     // list can never disagree about which ones qualify.
     if (query.sourceUnavailable) {
-      conditions.push(`p.consecutive_failures >= $${paramIndex}`);
+      conditions.push(`(p.consecutive_failures >= $${paramIndex} OR p.source_removed_at IS NOT NULL)`);
       params.push(LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD);
       paramIndex++;
     }

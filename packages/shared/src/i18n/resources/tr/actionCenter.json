@@ -116,9 +116,9 @@
         "action": "İşleri görüntüle"
       },
       "listing_source_unavailable": {
-        "title": "Amazon ürünü kaybolmuş yayındaki ilanlar",
-        "description_one": "{{count}} aktif ilan, sürekli yüklenemeyen bir Amazon ürününe bakıyor — genellikle ürün kaldırılmıştır. İlan eBay'de hâlâ satın alınabilir durumda ve gelen siparişi karşılayamazsınız.",
-        "description_other": "{{count}} aktif ilan, sürekli yüklenemeyen Amazon ürünlerine bakıyor — genellikle ürünler kaldırılmıştır. İlanlar eBay'de hâlâ satın alınabilir durumda ve gelen siparişleri karşılayamazsınız.",
+        "title": "Amazon'da erişilemeyen ürünler hâlâ eBay'de listeli",
+        "description_one": "{{count}} aktif listeleme Amazon'da erişilemeyen bir ürüne bağlı. eBay'de hâlâ satın alınabiliyor ve bu satışı karşılayamazsınız.",
+        "description_other": "{{count}} aktif listeleme Amazon'da erişilemeyen ürünlere bağlı. eBay'de hâlâ satın alınabiliyorlar ve bu satışları karşılayamazsınız.",
         "action": "İlanları incele"
       },
       "listing_out_of_stock": {

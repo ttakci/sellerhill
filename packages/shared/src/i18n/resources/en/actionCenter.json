@@ -116,9 +116,9 @@
         "action": "View jobs"
       },
       "listing_source_unavailable": {
-        "title": "Live listings whose Amazon product is gone",
-        "description_one": "{{count}} active listing points at an Amazon product that keeps failing to load — usually delisted. It is still buyable on eBay and you would not be able to fulfil that sale.",
-        "description_other": "{{count}} active listings point at Amazon products that keep failing to load — usually delisted. They are still buyable on eBay and you would not be able to fulfil those sales.",
+        "title": "Live listings unavailable on Amazon",
+        "description_one": "{{count}} active listing points at a product that is unavailable on Amazon. It is still buyable on eBay and you would not be able to fulfil that sale.",
+        "description_other": "{{count}} active listings point at products that are unavailable on Amazon. They are still buyable on eBay and you would not be able to fulfil those sales.",
         "action": "Review listings"
       },
       "listing_out_of_stock": {
