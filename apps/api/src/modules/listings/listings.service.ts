@@ -150,7 +150,6 @@ interface EbayItemIdRow {
 
 /** Row type for deleteListings transaction query */
 interface DeleteListingRow {
-  ebay_item_id: string;
   status: ListingStatus;
   product_id: string | null;
 }
@@ -2136,7 +2135,13 @@ export class ListingsService {
   }
 
   /**
-   * Bulk delete listings (ends them on eBay first)
+   * Bulk delete DRAFT listings.
+   *
+   * eBay has no delete for a listing — only end — so a live or ended listing is
+   * never deleted here: ending it is the whole action, and dropping our row
+   * would only orphan its orders (they become `untracked` for good). A draft has
+   * no eBay footprint, so removing its row is a true delete. Anything that is
+   * not a draft is skipped, whatever the caller sent.
    */
   async deleteListings(userId: string, listingIds: string[]): Promise<number> {
     this.logger.log(`Deleting ${listingIds.length} listings for user ${userId}`);
@@ -2149,8 +2154,8 @@ export class ListingsService {
           // 1. Get listing from DB (including product_id)
           const results = await client.query<DeleteListingRow>(
             `
-            SELECT ebay_item_id, status, product_id FROM listings
-            WHERE id = $1 AND user_id = $2
+            SELECT status, product_id FROM listings
+            WHERE id = $1 AND user_id = $2 AND status = '${ListingStatus.DRAFT}'
           `,
             [listingId, userId]
           );
@@ -2159,22 +2164,9 @@ export class ListingsService {
             return;
           }
 
-          const { ebay_item_id: ebayItemId, status, product_id: productId } = results.rows[0];
+          const { product_id: productId } = results.rows[0];
 
-          // 2. If it's active, end it on eBay FIRST — and let a failure abort
-          // the whole item. Deleting our row while the listing is still live on
-          // eBay is a permanent, silent desync: buyers keep ordering it, and
-          // every resulting order arrives with no listing to match, so it is
-          // `untracked` for ever — no cost capture, no profit, no auto-fulfill,
-          // and no row left to end the listing through. A lower success count
-          // with an accurate database is the correct outcome.
-          // (`withdrawOffer` already treats eBay's "already ended" as success,
-          // so a listing ended outside the app does not block its deletion.)
-          if (status === ListingStatus.ACTIVE && ebayItemId) {
-            await this.ebayService.withdrawOffer(userId, ebayItemId);
-          }
-
-          // 3. Delete listing from DB
+          // 2. Delete listing from DB
           await client.query(
             `
             DELETE FROM listings WHERE id = $1

@@ -347,13 +347,11 @@ export const ListingsAllPage: React.FC = () => {
             },
           ]
         : [
+            // eBay cannot delete a listing, only end it — so a live listing has
+            // no "delete" here. Only drafts (no eBay footprint) can be deleted.
             {
               label: t('listings.actions.endListing'),
               onClick: handleEndSelected,
-            },
-            {
-              label: t('listings.actions.deleteListings'),
-              onClick: handleDeleteSelected,
             },
           ],
     [t, isDraftMode, handleEndSelected, handleDeleteSelected, handlePublishSelected]
