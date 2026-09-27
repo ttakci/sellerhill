@@ -120,6 +120,13 @@ export const Page = styled.div`
  * it. \`colors.sidebar.background\` is reused deliberately — same deep blue
  * (light theme) / near-black (dark theme) as the app's own sidebar.
  */
+/**
+ * Width below which the navbar links give way to the hamburger menu. Sized to
+ * the widest locale's full link row (Turkish, with "Hakkımızda") plus the
+ * logo and the right-hand actions — the row may not scroll (see \`NavLinks\`).
+ */
+const NAV_COLLAPSE = '1280px';
+
 export const Navbar = styled.header<{ $scrolled: boolean }>`
   position: fixed;
   inset: 0 0 auto 0;
@@ -168,29 +175,29 @@ export const NavBrand = styled.button`
 `;
 
 /**
- * Scrolls horizontally instead of wrapping when the row is tight — same
- * principle as \`TabNav\`. Flexbox's default \`flex-shrink: 1\` on the nav
- * buttons let the browser compress them below their text's natural width
- * (with \`white-space\` left at its default \`normal\`), which wrapped
- * "Nasıl çalışır" and "Giriş yap" onto two lines instead of just tightening
- * the row. \`min-width: 0\` is required for a flex child to be allowed to
- * shrink/scroll at all — without it this ignores overflow and pushes the
- * pinned \`NavActions\` off the row instead.
+ * Never \`overflow\` here: any overflow value other than \`visible\` also
+ * clips vertically, and the Features \`Dropdown\` menu is absolutely
+ * positioned BELOW this row — an \`overflow-x: auto\` that was added to stop
+ * the links wrapping cut the whole menu off, so "Features" opened to nothing.
+ * Links keep their natural width (\`flex-shrink: 0\`, \`nowrap\`) instead, and
+ * the row hands over to the hamburger menu at \`NAV_COLLAPSE\` before it
+ * could run out of room.
  */
 export const NavLinks = styled.div`
   display: flex;
   align-items: center;
   gap: 0.125rem;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 
-  &::-webkit-scrollbar {
-    display: none;
+  /* \`width: auto\` overrides the Dropdown atom's own \`width: 100%\`, which
+     would otherwise claim the whole row once shrinking is off. Doubled \`&&\`
+     so this outranks the atom's own single-class rule regardless of order. */
+  && > * {
+    flex-shrink: 0;
+    width: auto;
+    white-space: nowrap;
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: ${NAV_COLLAPSE}) {
     display: none;
   }
 `;
@@ -317,7 +324,7 @@ export const LoginButton = styled.button<{ $block?: boolean; $onDark?: boolean }
     background: ${(p) => (p.$onDark ? tkn('colors.sidebar.hover')(p) : tkn('colors.landing.chipBg')(p))};
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: ${NAV_COLLAPSE}) {
     display: ${(p) => (p.$block ? 'inline-flex' : 'none')};
   }
 `;
@@ -355,7 +362,7 @@ export const NavCta = styled.button<{ $block?: boolean }>`
     transform: translateY(0);
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: ${NAV_COLLAPSE}) {
     display: ${(p) => (p.$block ? 'inline-flex' : 'none')};
   }
 `;
@@ -372,7 +379,7 @@ export const Hamburger = styled.button<{ $open: boolean }>`
   color: ${tkn('colors.sidebar.text')};
   cursor: pointer;
 
-  @media (max-width: 960px) {
+  @media (max-width: ${NAV_COLLAPSE}) {
     display: inline-flex;
   }
 `;
@@ -3243,4 +3250,88 @@ export const Copyright = styled.p`
   font-family: ${FONT_BODY};
   font-size: ${TYPE.micro};
   color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+/* ── About ─────────────────────────────────────────── */
+
+export const AboutLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: ${tkn('spacing.xxl')};
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xl')};
+  }
+`;
+
+export const AboutText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const AboutTitle = styled(SectionTitle)`
+  text-align: left;
+`;
+
+export const AboutLead = styled.p`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.lead};
+  line-height: 1.6;
+  font-weight: 600;
+  color: ${tkn('colors.landing.heroText')};
+`;
+
+export const AboutCompany = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.xs')};
+  font-family: ${FONT_BODY};
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${tkn('colors.landing.heroTextMuted')};
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const AboutFacts = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.md')};
+`;
+
+export const AboutFact = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${tkn('spacing.md')};
+  padding: 1.35rem 1.5rem;
+  border-radius: ${tkn('radius.xl')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowSoft')};
+
+  h3 {
+    font-size: 1.0625rem;
+    margin-bottom: 0.3rem;
+  }
+`;
+
+export const AboutFactIcon = styled.span`
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: ${tkn('radius.lg')};
+  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 10%, transparent);
+  color: ${tkn('colors.brand.primary')};
 `;
