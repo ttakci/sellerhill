@@ -14,6 +14,7 @@ import {
   isValidAsinShape,
   OrderStatus,
   PlatformSettingKey,
+  SourceStockStatus,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
@@ -112,6 +113,9 @@ interface ProductQueryRow {
   raw_keepa_data?: string | Record<string, unknown> | null;
   manufacturer: string | null;
   stock: number;
+  stock_status?: string | null;
+  max_order_quantity?: number | null;
+  source_removed_at?: Date | string | null;
   raw_provider_data: string | Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date | string;
@@ -1046,6 +1050,7 @@ export class ListingsService {
       `
       SELECT id, asin, title, description, price, currency, image_urls,
              brand, manufacturer, category, category_path, features, specs, identifiers, stock,
+             stock_status, max_order_quantity, source_removed_at,
              raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1 AND marketplace = $2
     `,
@@ -1085,6 +1090,9 @@ export class ListingsService {
       // them a re-listed ASIN published with almost no eBay item specifics.
       ...this.resolveCachedAttributes(row),
       stock: row.stock || 0,
+      stockStatus: (row.stock_status as SourceStockStatus) ?? SourceStockStatus.EXACT,
+      maxOrderQuantity: row.max_order_quantity ?? null,
+      sourceRemoved: row.source_removed_at !== null && row.source_removed_at !== undefined,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
           ? (JSON.parse(row.raw_provider_data) as Record<string, unknown>)
@@ -1344,10 +1352,12 @@ export class ListingsService {
       INSERT INTO products (
         asin, marketplace, title, price, currency, image_urls, description,
         brand, manufacturer, category, features, specs, identifiers,
-        stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at
+        stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at,
+        stock_status, max_order_quantity, source_removed_at
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
-              NOW() + make_interval(mins => $18::int))
+              NOW() + make_interval(mins => $18::int),
+              $19, $20, CASE WHEN $21::boolean THEN NOW() ELSE NULL END)
       ON CONFLICT (asin, marketplace) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,
@@ -1364,6 +1374,9 @@ export class ListingsService {
         identifiers = CASE WHEN EXCLUDED.identifiers = '{}'::jsonb
                            THEN products.identifiers ELSE EXCLUDED.identifiers END,
         stock = EXCLUDED.stock,
+        stock_status = EXCLUDED.stock_status,
+        max_order_quantity = EXCLUDED.max_order_quantity,
+        source_removed_at = CASE WHEN $21::boolean THEN COALESCE(products.source_removed_at, NOW()) ELSE NULL END,
         raw_provider_data = EXCLUDED.raw_provider_data,
         raw_keepa_data = COALESCE(EXCLUDED.raw_keepa_data, products.raw_keepa_data),
         -- Keep the last known path when a fetch resolved none, same grow-only
@@ -1393,6 +1406,9 @@ export class ListingsService {
         productData.rawKeepaData ? JSON.stringify(productData.rawKeepaData) : null,
         productData.categoryPath || null,
         intervalMinutes,
+        productData.stockStatus ?? SourceStockStatus.EXACT,
+        productData.maxOrderQuantity ?? null,
+        productData.sourceRemoved === true,
       ]
     );
 

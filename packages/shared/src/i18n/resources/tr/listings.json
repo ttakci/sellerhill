@@ -89,6 +89,8 @@
         "duplicate_listing": "Zaten listelenmiş — bu ASIN aktif veya taslak listelerinizde var.",
         "ebay_duplicate_item": "Bu ürün için eBay'de zaten aktif, birebir aynı bir listeniz var. eBay'deki mevcut listeyi sonlandırın ya da yeni oluşturmak yerine onu içeri aktarın.",
         "zero_stock": "Stok tamponunuz sonrası Amazon stoğu yetersiz, miktar 0 olurdu.",
+        "zero_stock_detail": "Amazon stoğu ({{stock}}) güvenlik payınızdan ({{buffer}}) az, miktar 0 olurdu.",
+        "zero_stock_detail_at_least": "Amazon stoğu (en az {{stock}}) güvenlik payınızdan ({{buffer}}) az, miktar 0 olurdu.",
         "quota_exhausted": "Paket limitine ulaşıldı. Devam etmek için yükseltin veya yer açın.",
         "asin_not_found": "ASIN bulunamadı — bu tanımlayıcıyla eşleşen bir ürün yok.",
         "product_data_unavailable": "Bu ASIN için Amazon ürün verisi alınamadı.",

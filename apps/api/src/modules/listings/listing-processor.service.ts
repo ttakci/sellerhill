@@ -9,6 +9,9 @@ import {
   ListingFailureCode,
   ListingJobKind,
   ListingStatus,
+  ProductDataProviderKind,
+  SourceFetchOutcome,
+  SourceStockStatus,
   type ExistingListingImportQueueData,
   type ListingBatchQueueJobData,
   type ListingCreationData,
@@ -35,6 +38,7 @@ import { ListingImportService } from './listing-import.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
+import { ProductSourceService, type CreateFetchResult } from './product-source.service';
 
 /**
  * The identifier could not be resolved to a real product — never a leading-'B'
@@ -47,6 +51,27 @@ export class AsinNotFoundError extends Error {
   constructor(public readonly asin: string) {
     super(`No product could be resolved for ASIN ${asin}.`);
     this.name = 'AsinNotFoundError';
+  }
+}
+
+/** Scraper could not produce data for this ASIN (blocked, no proxy, unreadable page). Retryable. */
+export class ProductDataUnavailableError extends Error {
+  override name = 'ProductDataUnavailableError';
+  constructor(asin: string, outcome: string) {
+    super(`scraper: ${outcome} for ${asin}`);
+  }
+}
+
+/** Buffer or stock drove a live create to quantity 0. Carries the numbers the seller message shows. */
+export class ZeroStockError extends Error {
+  override name = 'ZeroStockError';
+  constructor(
+    asin: string,
+    readonly amazonStock: number,
+    readonly amazonStockAtLeast: boolean,
+    readonly stockBuffer: number,
+  ) {
+    super(`Cannot list ASIN ${asin}: Stock is 0. Amazon stock (${amazonStockAtLeast ? 'at least ' : ''}${amazonStock}) minus buffer ${stockBuffer}.`);
   }
 }
 
@@ -72,6 +97,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
     private readonly ebayImages: EbayImageResolver,
+    private readonly productSource: ProductSourceService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -175,6 +201,21 @@ export class ListingProcessorService extends WorkerHost {
     let merchantLocationKey = 'default';
     let accountId = ebayAccountId;
 
+    // Scraper: fetch every uncached ASIN of this batch in ONE service call
+    // (parallel across proxies) instead of one page per loop iteration.
+    let prefetched: Map<string, CreateFetchResult> | undefined;
+    if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+      const uncached: string[] = [];
+      for (const item of items) {
+        if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin))) {
+          uncached.push(item.asin);
+        }
+      }
+      if (uncached.length > 0) {
+        prefetched = await this.productSource.fetchForCreate(uncached, AmazonMarketplace.AMAZON_US).catch(() => undefined);
+      }
+    }
+
     for (const item of items) {
       try {
         if (await this.listingsService.isAsinListed(userId, item.asin)) {
@@ -182,7 +223,12 @@ export class ListingProcessorService extends WorkerHost {
           continue;
         }
 
-        const { productData, productId } = await this.resolveProductData(item.asin, userId);
+        const { productData, productId } = await this.resolveProductData(
+          item.asin,
+          userId,
+          AmazonMarketplace.AMAZON_US,
+          prefetched
+        );
         // Skipped for a draft: persistDraft below never reads imageUrls or
         // mainImageUrl (it persists only price/quantity/category fields), so
         // resolving EPS images here would spend a real eBay Media API upload
@@ -206,9 +252,12 @@ export class ListingProcessorService extends WorkerHost {
         // Drafts may hold a zero-stock ASIN so the seller can prepare it and
         // publish once Amazon restocks; a live publish must never push qty 0.
         if (!asDraft && listingData.quantity === 0) {
-          throw new Error(
-            `Cannot list ASIN ${item.asin}: Stock is 0. ` +
-              `Amazon stock (${productData.stock}) is less than user preferred quantity.`
+          const group = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
+          throw new ZeroStockError(
+            item.asin,
+            productData.stock ?? 0,
+            productData.stockStatus === SourceStockStatus.AT_LEAST,
+            group.stock?.stockBuffer ?? 0
           );
         }
 
@@ -553,7 +602,8 @@ export class ListingProcessorService extends WorkerHost {
   async resolveProductData(
     asin: string,
     userId: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    prefetched?: Map<string, CreateFetchResult>
   ): Promise<{ productData: ProductData; productId: string }> {
     // A malformed identifier (wrong length/characters — never a leading-'B'
     // requirement) can never resolve to a real ASIN. Reject it here, before any
@@ -583,6 +633,19 @@ export class ListingProcessorService extends WorkerHost {
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
         return cachedAfterLock;
+      }
+
+      if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+        const result =
+          prefetched?.get(asin) ?? (await this.productSource.fetchForCreate([asin], marketplace)).get(asin);
+        if (!result || result.kind === 'unavailable') {
+          throw new ProductDataUnavailableError(asin, result?.outcome ?? SourceFetchOutcome.BLOCKED);
+        }
+        if (result.kind === 'not_found' || !result.product.title || result.product.title === 'Unknown Product') {
+          throw new AsinNotFoundError(asin);
+        }
+        const productId = await this.listingsService.findOrCreateProduct(asin, result.product, marketplace);
+        return { productData: result.product, productId };
       }
 
       this.logger.log(`Fetching product data for ASIN ${asin} from Keepa`);

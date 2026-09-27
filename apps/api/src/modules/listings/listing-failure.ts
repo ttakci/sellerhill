@@ -168,6 +168,28 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
     // refusal at create time — not on a failed row after the fact.
     return { code: ListingFailureCode.QUOTA_EXHAUSTED, message: raw, details: { retryable: false } };
   }
+  // The active provider (scraper) could not produce data for this ASIN at all
+  // — blocked, no proxy, an unreadable page, or a transport failure reaching
+  // the scraper service. Retryable: none of these are evidence the ASIN is
+  // invalid, only that this attempt didn't get an answer.
+  if (name === 'ProductDataUnavailableError' || name === 'ScraperUnavailableError') {
+    return { code: ListingFailureCode.PRODUCT_DATA_UNAVAILABLE, message: raw, details: { retryable: true } };
+  }
+  // Buffer or stock drove a live create to quantity 0. Carries the numbers the
+  // seller message shows, so "why is this 0" doesn't require reading a log.
+  if (name === 'ZeroStockError') {
+    const e = error as Error & { amazonStock?: number; amazonStockAtLeast?: boolean; stockBuffer?: number };
+    return {
+      code: ListingFailureCode.ZERO_STOCK,
+      message: raw,
+      details: {
+        retryable: true,
+        amazonStock: e.amazonStock,
+        amazonStockAtLeast: e.amazonStockAtLeast,
+        stockBuffer: e.stockBuffer,
+      },
+    };
+  }
   // A definitive miss — either the identifier never had a valid ASIN shape, or
   // the provider has no data for it. Never the same thing as a transient
   // provider fault (network/429/5xx), which propagates as a raw axios error and

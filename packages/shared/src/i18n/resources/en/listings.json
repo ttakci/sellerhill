@@ -89,6 +89,8 @@
         "duplicate_listing": "Already listed — this ASIN is in your active or draft listings.",
         "ebay_duplicate_item": "You already have an identical listing live on eBay for this product. End that eBay listing, or import it instead of creating a new one.",
         "zero_stock": "Out of stock on Amazon after your stock buffer, so the quantity would be 0.",
+        "zero_stock_detail": "Amazon stock ({{stock}}) is below your stock buffer ({{buffer}}), so the quantity would be 0.",
+        "zero_stock_detail_at_least": "Amazon stock (at least {{stock}}) is below your stock buffer ({{buffer}}), so the quantity would be 0.",
         "quota_exhausted": "Plan limit reached. Upgrade or free up listing slots to continue.",
         "asin_not_found": "ASIN not found — no matching product exists for this identifier.",
         "product_data_unavailable": "Amazon product data could not be retrieved for this ASIN.",
