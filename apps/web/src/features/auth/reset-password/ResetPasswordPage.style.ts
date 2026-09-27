@@ -27,6 +27,16 @@ export const LayoutWrapper = styled.div`
   height: 100%;
   flex-wrap: wrap;
 
+  /* Below lg the showcase collapses to a navy brand bar stacked above the form. */
+  @media (max-width: ${tkn('breakpoints.lgBelow')}) {
+    flex-direction: column;
+    flex-wrap: nowrap;
+
+    & > * {
+      min-height: 0;
+    }
+  }
+
   @media (min-width: ${tkn('breakpoints.lg')}) {
     flex-wrap: nowrap;
   }
