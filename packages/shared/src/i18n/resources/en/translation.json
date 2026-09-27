@@ -705,21 +705,21 @@
     },
     "about": {
       "eyebrow": "About us",
-      "sectionTitle": "Software born from selling experience.",
-      "lead": "SellerHill is a product of 2B Trading, LLC. Founded in Wyoming in 2022, our company has sold on Amazon and eBay firsthand.",
-      "body": "We have run every step of this business in our own stores, from listing products and fulfilling orders to tracking shipments and answering buyers. Today we combine that experience with 20 years of software engineering to build software for sellers. Our principles have not changed since day one: honesty, reliability and straightforward service.",
+      "sectionTitle": "A software team that knows selling from the inside.",
+      "lead": "SellerHill is a software product developed by 2B Trading, LLC. Founded in Wyoming in 2022, our team learned this business firsthand by selling on Amazon and eBay.",
+      "body": "We build SellerHill by combining that selling experience with 20 years of software engineering. Our goal is a platform that runs a seller's daily work on its own, grounds every decision in accurate data and keeps that data safe. We keep improving the product with feedback from the sellers who use it.",
       "facts": {
-        "trade": {
-          "title": "Amazon and eBay selling experience",
-          "description": "We have sold on both marketplaces ourselves. Every tool in SellerHill comes from a real need we ran into while doing this work."
+        "experience": {
+          "title": "Features born from real needs",
+          "description": "Setting Groups, complete item specifics and Pending Actions came out of problems we hit while selling. We add features that do the job, not ones that only look good on paper."
         },
-        "engineering": {
-          "title": "20 years of software engineering",
-          "description": "We design the platform as a team that has been building software for two decades and knows a seller's needs from the inside."
+        "data": {
+          "title": "Accurate data, no inflated numbers",
+          "description": "Profit is calculated from actual eBay earnings and actual Amazon cost. When an order's cost is not known yet, we do not fill it with a guess; we show it clearly."
         },
-        "company": {
-          "title": "A registered company behind it",
-          "description": "SellerHill is developed and operated by 2B Trading, LLC, founded in 2022 in Wyoming, USA."
+        "security": {
+          "title": "Security by design",
+          "description": "Account credentials are stored encrypted and payment details never reach us. Security is the foundation of the architecture, not a feature added later."
         }
       }
     },

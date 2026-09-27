@@ -705,21 +705,21 @@
     },
     "about": {
       "eyebrow": "Hakkımızda",
-      "sectionTitle": "Satış deneyiminden doğan bir yazılım.",
-      "lead": "SellerHill, 2B Trading, LLC'nin ürünüdür. 2022'de Wyoming'de kurulan şirketimiz, Amazon ve eBay'de bizzat satış yaptı.",
-      "body": "Ürün listelemekten sipariş karşılamaya, kargo takibinden alıcı mesajlarına kadar bu işin her adımını kendi mağazalarımızda yaşadık. Bugün bu deneyimi 20 yıllık yazılım tecrübesiyle birleştirip satıcılar için yazılım geliştiriyoruz. Kuruluşumuzdan beri ilkelerimiz aynı: dürüstlük, güvenilirlik ve sade, anlaşılır hizmet.",
+      "sectionTitle": "Satıcılığı içeriden bilen bir yazılım ekibi.",
+      "lead": "SellerHill, 2B Trading, LLC'nin geliştirdiği bir yazılım ürünüdür. 2022'de Wyoming'de kurulan ekibimiz, Amazon ve eBay'de bizzat satış yaparak bu işi içeriden öğrendi.",
+      "body": "SellerHill'i bu satış deneyimini 20 yıllık yazılım tecrübesiyle birleştirerek geliştiriyoruz. Hedefimiz, satıcının günlük işini kendi kendine yürüten, kararlarını doğru veriye dayandıran ve verisini güvende tutan bir platform. Ürünü, kullanan satıcıların geri bildirimleriyle sürekli geliştiriyoruz.",
       "facts": {
-        "trade": {
-          "title": "Amazon ve eBay satış deneyimi",
-          "description": "İki pazaryerinde bizzat satış yaptık. SellerHill'deki her araç, bu işi yaparken karşılaştığımız gerçek bir ihtiyaçtan çıktı."
+        "experience": {
+          "title": "Gerçek ihtiyaçtan doğan özellikler",
+          "description": "Ayar Grupları, eksiksiz ürün özellikleri ve Bekleyen Aksiyonlar gibi araçlar, satış yaparken yaşadığımız sorunlardan çıktı. Kâğıt üzerinde güzel görünen değil, işe yarayan özellikleri ekliyoruz."
         },
-        "engineering": {
-          "title": "20 yıllık yazılım tecrübesi",
-          "description": "Platformu, yirmi yıldır yazılım geliştiren ve satıcının ihtiyacını içeriden bilen bir ekip olarak tasarlıyoruz."
+        "data": {
+          "title": "Doğru veri, abartısız rakam",
+          "description": "Kârı gerçek eBay kazancı ve gerçek Amazon maliyetiyle hesaplarız. Maliyeti henüz bilinmeyen bir siparişi tahminle doldurmaz, bunu açıkça gösteririz."
         },
-        "company": {
-          "title": "Arkasında kayıtlı bir şirket",
-          "description": "SellerHill, 2022'de ABD'nin Wyoming eyaletinde kurulan 2B Trading, LLC tarafından geliştirilir ve işletilir."
+        "security": {
+          "title": "Güvenlik tasarımın parçası",
+          "description": "Hesap bilgileri şifrelenerek saklanır, ödeme bilgileri hiç bize ulaşmaz. Güvenliği sonradan eklenen bir özellik olarak değil, mimarinin temeli olarak ele alıyoruz."
         }
       }
     },

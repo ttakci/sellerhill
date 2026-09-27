@@ -220,11 +220,11 @@ const INCLUDED_FEATURE_KEYS = [
   'support',
 ] as const;
 
-/** Facts on the About card — the operator's own statements about the company. */
+/** About-section principles — each one describes how the product actually behaves. */
 const ABOUT_FACTS: { key: string; icon: IconName }[] = [
-  { key: 'trade', icon: 'storefront' },
-  { key: 'engineering', icon: 'settings-suggest' },
-  { key: 'company', icon: 'shield-check' },
+  { key: 'experience', icon: 'storefront' },
+  { key: 'data', icon: 'chart-line' },
+  { key: 'security', icon: 'shield-check' },
 ];
 
 /** Feature-menu entries in the navbar: each scrolls to its own anchor. */
