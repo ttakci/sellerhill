@@ -21,7 +21,7 @@ import { asPartNumber, formatLengthFromMillimeters, formatWeightFromGrams } from
  */
 const CANONICAL: Record<string, string> = {
   brand: 'Brand', brand_name: 'Brand', manufacturer: 'Manufacturer', color: 'Color', colour: 'Color',
-  size: 'Size', material: 'Material', material_type: 'Material', style: 'Style', pattern: 'Pattern',
+  size: 'Size', material: 'Material', material_type: 'Material', material_type_free: 'Material', style: 'Style', pattern: 'Pattern',
   scent: 'Scent', item_form: 'Item Form', item_weight: 'Item Weight', item_length: 'Item Length',
   item_width: 'Item Width', item_height: 'Item Height', number_of_items: 'Number of Items',
   number_of_pieces: 'Number of Items', unit_count: 'Unit Quantity', package_quantity: 'Package Quantity',
