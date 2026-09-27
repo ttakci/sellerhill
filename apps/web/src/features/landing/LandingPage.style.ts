@@ -1,4 +1,4 @@
-import { keyframes } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
@@ -33,19 +33,17 @@ const SECTION_Y = '5.5rem';
 const SECTION_Y_SM = '3.5rem';
 
 /*
- * Sellerboard's own fonts, loaded as extra families in `index.html` alongside
- * the app's Inter/Lexend (see the Google Fonts `<link>` there) — landing is
- * the one surface that deliberately does NOT use the app's type system.
- * Montserrat Bold is sellerboard's headline face (h1 56px, h2 48px, h3 40px);
- * Poppins is everything else (body, nav, buttons, card titles, the pricing
- * figure). Sizes below are copied from sellerboard.com/tr's live computed
- * styles, not our app's own (smaller) type scale — do not "fix" them to
- * match `typographyTokens`, that would undo the point of this file.
+ * Landing-only type (2026-09-27, modernization pass): Plus Jakarta Sans for
+ * headlines — tight, geometric, the face most newer SaaS pages use — and Inter
+ * for everything else, which the app already loads. It replaced sellerboard's
+ * Montserrat/Poppins, which read dated next to the rest of the refresh. The
+ * app's own Inter/Lexend system is untouched; landing stays the one surface
+ * that sets its own type.
  */
 const FONT_HEADING =
-  "'Montserrat', Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 const FONT_BODY =
-  "'Poppins', Verdana, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 /** Sellerboard-matched type scale (px, as rem @ 16px root). */
 const TYPE = {
@@ -56,7 +54,7 @@ const TYPE = {
   cardMd: '1.25rem' /* 20px */,
   cardSm: '1.125rem' /* 18px */,
   price: '2rem' /* 32px */,
-  lead: '1.25rem' /* 20px */,
+  lead: '1.125rem' /* 18px */,
   body: '1rem' /* 16px */,
   small: '0.875rem' /* 14px */,
   micro: '0.8125rem' /* 13px */,
@@ -81,7 +79,7 @@ const NAV_FONT_SIZE = '0.9375rem' /* 15px */;
  */
 export const Reveal = styled.div<{ $visible: boolean; $delay?: number }>`
   opacity: ${(p) => (p.$visible ? 1 : 0)};
-  transform: translateY(${(p) => (p.$visible ? '0' : '12px')});
+  transform: ${(p) => (p.$visible ? 'none' : 'translateY(14px)')};
   transition:
     opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -103,6 +101,10 @@ export const Page = styled.div`
   background: ${tkn('colors.landing.heroBg')};
   color: ${tkn('colors.landing.heroText')};
   font-family: ${FONT_BODY};
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 `;
 
@@ -501,6 +503,24 @@ const breathe = keyframes`
   50%      { transform: scale(1.07); }
 `;
 
+const railPulse = keyframes`
+  0%   { transform: translateX(-10%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(calc(100cqw - 90%)); opacity: 0; }
+`;
+
+const tickRing = keyframes`
+  0%, 70%, 100% { box-shadow: 0 0 0 0 transparent; }
+  8%  { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.18); }
+`;
+
+const dotPulse = keyframes`
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+`;
+
 const REDUCED = '@media (prefers-reduced-motion: reduce)';
 
 export const Hero = styled.section`
@@ -648,7 +668,7 @@ export const HeroTitle = styled.h1`
   font-family: ${FONT_HEADING};
   font-size: clamp(2.35rem, 4.3vw, 3.6rem);
   line-height: 1.08;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.022em;
   font-weight: 800;
   color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
@@ -678,7 +698,7 @@ export const HeroTitleAccent = styled.span`
 
 export const HeroSubtitle = styled.p`
   margin: 0;
-  max-width: 34rem;
+  max-width: 31rem;
   font-family: ${FONT_BODY};
   font-size: 1.125rem;
   line-height: 1.7;
@@ -850,7 +870,6 @@ export const HeroPreview = styled.div`
   width: 100%;
   max-width: 41rem;
   justify-self: end;
-  perspective: 1600px;
 
   @media (max-width: 980px) {
     max-width: 34rem;
@@ -859,19 +878,21 @@ export const HeroPreview = styled.div`
 `;
 
 /** Slight 3D tilt that settles flat on hover. */
+/**
+ * Flat on purpose. A rotateY/rotateX tilt rasterises the screenshot through a
+ * 3D transform, which Chrome resamples — text in the capture went visibly soft.
+ * Motion is a gentle float + lift instead, both 2D and pixel-aligned at rest.
+ */
 export const HeroTilt = styled.div`
   position: relative;
-  transform: rotateY(-8deg) rotateX(4deg);
-  transform-style: preserve-3d;
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
-    transform: rotateY(-2deg) rotateX(1deg);
+    transform: translateY(-4px);
   }
 
-  @media (max-width: 980px) {
-    transform: none;
-
+  ${REDUCED} {
+    transition: none;
     &:hover {
       transform: none;
     }
@@ -1088,7 +1109,7 @@ export const HeroOfferAmount = styled.span`
   font-size: 3.4rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.025em;
   background: linear-gradient(180deg, ${tkn('colors.sidebar.text')} 30%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 55%, white));
   -webkit-background-clip: text;
   background-clip: text;
@@ -1255,7 +1276,7 @@ export const ProofValue = styled.span`
   font-size: clamp(1.75rem, 2.8vw, 2.35rem);
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.018em;
   background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
   -webkit-background-clip: text;
   background-clip: text;
@@ -1319,7 +1340,7 @@ export const SectionTitle = styled.h2`
   font-family: ${FONT_HEADING};
   font-size: clamp(1.9rem, 3.4vw, 2.75rem);
   line-height: 1.12;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.018em;
   font-weight: 800;
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
@@ -1574,6 +1595,7 @@ export const GroupStat = styled.span`
 /* Sync visual — a 24-hour rail with four checks on it. */
 export const SyncRail = styled.div`
   position: relative;
+  container-type: inline-size;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   padding-top: 1.6rem;
@@ -1591,6 +1613,29 @@ export const SyncRail = styled.div`
       color-mix(in srgb, ${tkn('colors.brand.primary')} 25%, transparent),
       ${tkn('colors.brand.primary')}
     );
+  }
+
+  /* A light pulse travelling the rail — "a check is always on its way". */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0.2rem;
+    left: 0;
+    width: 3.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, ${tkn('colors.brand.primary')} 70%, transparent),
+      transparent
+    );
+    animation: ${railPulse} 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  ${REDUCED} {
+    &::after {
+      display: none;
+    }
   }
 `;
 
@@ -1611,6 +1656,23 @@ export const SyncTick = styled.span`
     border-radius: 50%;
     background: ${tkn('colors.surface.primary')};
     border: 3px solid ${tkn('colors.brand.primary')};
+    animation: ${tickRing} 4s ease-out infinite;
+  }
+
+  &:nth-of-type(2)::before {
+    animation-delay: 1s;
+  }
+  &:nth-of-type(3)::before {
+    animation-delay: 2s;
+  }
+  &:nth-of-type(4)::before {
+    animation-delay: 3s;
+  }
+
+  ${REDUCED} {
+    &::before {
+      animation: none;
+    }
   }
 `;
 
@@ -1623,39 +1685,78 @@ export const VisualCaption = styled.span`
   color: ${tkn('colors.brand.primary')};
 `;
 
-/* Item-specifics visual — "theirs" vs "ours", three rows. */
-export const SpecTable = styled.div`
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
-  border: 1px solid ${tkn('colors.landing.cardBorder')};
-  border-radius: ${tkn('radius.md')};
-  overflow: hidden;
-  font-family: ${FONT_BODY};
-  font-size: 0.75rem;
+/* Item-specifics visual — "theirs" vs "ours". A comparison table, styled as one:
+ * a quiet header row, hairline rows, and the winning column carried by a tinted
+ * lane rather than by colour on every cell. Rows fade in one after another. */
+const specRowIn = keyframes`
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
 `;
 
-export const SpecCell = styled.span<{ $head?: boolean; $muted?: boolean; $good?: boolean }>`
+export const SpecTable = styled.div`
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr);
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.lg')};
+  overflow: hidden;
+  background: ${tkn('colors.surface.primary')};
+  box-shadow: ${tkn('colors.landing.shadowSoft')};
+  font-family: ${FONT_BODY};
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+
+  @media (max-width: 420px) {
+    font-size: 0.7rem;
+  }
+`;
+
+export const SpecCell = styled.span<{ $head?: boolean; $muted?: boolean; $good?: boolean; $row?: number }>`
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   min-width: 0;
-  padding: 0.45rem 0.6rem;
+  padding: ${(p) => (p.$head ? '0.6rem 0.75rem' : '0.62rem 0.75rem')};
   border-top: 1px solid ${tkn('colors.landing.cardBorder')};
-  background: ${(p) => (p.$head ? tkn('colors.landing.sectionAlt')(p) : 'transparent')};
-  font-weight: ${(p) => (p.$head || p.$good ? 600 : 400)};
+  background: ${(p) =>
+    p.$good
+      ? `color-mix(in srgb, ${tkn('colors.semantic.success')(p)} 8%, transparent)`
+      : p.$head
+        ? tkn('colors.landing.sectionAlt')(p)
+        : 'transparent'};
+  font-size: ${(p) => (p.$head ? '0.66rem' : 'inherit')};
+  letter-spacing: ${(p) => (p.$head ? '0.08em' : 'normal')};
+  text-transform: ${(p) => (p.$head ? 'uppercase' : 'none')};
+  font-weight: ${(p) => (p.$head ? 700 : p.$good ? 600 : 500)};
   color: ${(p) =>
-    p.$muted
+    p.$head
       ? tkn('colors.text.tertiary')(p)
-      : p.$good
-        ? tkn('colors.semantic.success')(p)
-        : tkn('colors.landing.heroText')(p)};
+      : p.$muted
+        ? tkn('colors.text.tertiary')(p)
+        : p.$good
+          ? tkn('colors.semantic.success')(p)
+          : tkn('colors.landing.heroText')(p)};
   text-decoration: ${(p) => (p.$muted ? 'line-through' : 'none')};
+  text-decoration-color: color-mix(in srgb, ${tkn('colors.semantic.error')} 55%, transparent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  animation: ${specRowIn} 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: ${(p) => `${(p.$row ?? 0) * 110}ms`};
+  animation-play-state: ${(p) => (p.$row === undefined ? 'paused' : 'running')};
 
   &:nth-of-type(-n + 3) {
     border-top: none;
+  }
+
+  @media (max-width: 420px) {
+    padding: 0.55rem 0.5rem;
+  }
+
+  ${REDUCED} {
+    animation: none;
   }
 `;
 
@@ -1698,6 +1799,16 @@ export const SeverityDot = styled.span<{ $level: 'critical' | 'warning' | 'info'
       : p.$level === 'warning'
         ? tkn('colors.semantic.warning')(p)
         : tkn('colors.semantic.info')(p)};
+  ${(p) =>
+    p.$level === 'critical'
+      ? css`
+          animation: ${dotPulse} 2s ease-out infinite;
+        `
+      : undefined}
+
+  ${REDUCED} {
+    animation: none;
+  }
 `;
 
 export const ActionCount = styled.span`
@@ -1846,6 +1957,13 @@ export const ScreenImage = styled.img<{ $maxHeight?: string }>`
   object-position: top;
   border-radius: ${tkn('radius.xl')};
   border: 1px solid ${tkn('colors.border.secondary')};
+
+  /* On a phone a whole desktop screen shrinks past legibility. Show its
+   * top-left corner larger instead — the part that names the screen. */
+  @media (max-width: 640px) {
+    height: ${(p) => p.$maxHeight ?? '19rem'};
+    object-position: top left;
+  }
 `;
 
 export const ScreenCaption = styled.figcaption`
@@ -2400,13 +2518,13 @@ export const SplitCopy = styled.div`
   text-align: left;
 `;
 
-/** Matches sellerboard's sub-hero h3 (e.g. "Doğru kâr panosuyla tanışın"): Montserrat 700, 40px. */
+/** Sub-hero headline tier (profit + demo bands). */
 export const SplitTitle = styled.h2`
   margin: 0;
   font-family: ${FONT_HEADING};
   font-size: clamp(1.75rem, 3vw, 2.5rem);
   line-height: 1.12;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.018em;
   font-weight: 800;
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
@@ -2487,7 +2605,7 @@ export const ProfitPreviewImage = styled.img`
   width: 100%;
   height: 26rem;
   object-fit: cover;
-  object-position: top;
+  object-position: top left;
   border-radius: ${tkn('radius.xl')};
   border: 1px solid ${tkn('colors.border.secondary')};
   animation: profitPreviewFade 260ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -2623,11 +2741,10 @@ export const DemoPreview = styled.button`
   cursor: pointer;
   background: ${tkn('colors.surface.primary')};
   box-shadow: ${tkn('colors.landing.shadowStrong')};
-  transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
   transition: transform 400ms ease, box-shadow 400ms ease;
 
   &:hover {
-    transform: perspective(1400px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+    transform: translateY(-4px);
   }
 
   &:focus-visible {
@@ -2833,7 +2950,7 @@ export const PlanPrice = styled.div`
   gap: 0.25rem;
 `;
 
-/** Matches sellerboard's price figure ("15$"): Poppins bold, 32px — not the Montserrat headline face. */
+/** Pricing figure — the headline face, tabular digits. */
 export const PlanAmount = styled.span`
   font-family: ${FONT_BODY};
   font-size: ${TYPE.price};
@@ -3020,7 +3137,7 @@ export const CtaTitle = styled.h2`
   font-family: ${FONT_HEADING};
   font-size: clamp(1.9rem, 3.6vw, 2.9rem);
   line-height: 1.12;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.018em;
   font-weight: 800;
   color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
