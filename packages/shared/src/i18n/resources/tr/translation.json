@@ -608,7 +608,8 @@
         "clean": "Tedarikçi adı yok: açıklamada ve görsellerde tedarikçiye ait hiçbir iz kalmaz.",
         "specs": "Ürün özellikleri ve öne çıkan maddeler otomatik yerleşir."
       },
-      "previewNote": "Gerçek şablon önizlemesi"
+      "previewNote": "Canlı şablon, kaydırarak inceleyin",
+      "openFull": "Tam sayfa aç"
     },
     "showcase": {
       "eyebrow": "Ürünün içinden",
