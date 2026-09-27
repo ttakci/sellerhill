@@ -52,6 +52,11 @@ export interface ListingDetailPageProps {
   /** Per-range breakdown for the Kâr Marjı info tooltip — empty when there's
    *  only one range (nothing to break down beyond the summary label itself). */
   groupMarginRangeDetails: string[];
+  /** "N+" when the source only reports a lower bound, formatted via
+   *  `formatSourceStock` in the container — never a bare number. */
+  amazonStockText: string;
+  /** True when the source product page is no longer reachable (404/removed). */
+  sourceRemoved: boolean;
   /** Read-only — eBay policy reassignment from this page is not pushed to eBay yet. */
   paymentPolicyLabel: string;
   shippingPolicyLabel: string;

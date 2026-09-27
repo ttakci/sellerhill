@@ -29,6 +29,7 @@ import {
   OrderStatus,
   PolicyType,
   ProfitBasis,
+  SourceStockStatus,
   TemplateType,
   TrackingConversionProvider,
   TrackingConversionScope,
@@ -251,7 +252,11 @@ function buildListings(): ListingDto[] {
       soldCount,
       category: p.category,
       brand: p.brand,
-      sourceStock: quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
+      // Amazon often only reports a lower bound ("In Stock" caps at 20, or an
+      // order-quantity dropdown caps lower) — every third listing and one
+      // low-stock outlier demonstrate the "N+" display; the rest are exact.
+      sourceStock: i === 1 ? 4 : i % 3 === 0 ? 20 : quantity === 0 ? 0 : quantity + Math.floor(rand() * 8),
+      sourceStockStatus: i === 1 || i % 3 === 0 ? SourceStockStatus.AT_LEAST : SourceStockStatus.EXACT,
       ebayAccountId: i % 4 === 0 ? DEMO_EBAY_ACCOUNT_ID_2 : DEMO_EBAY_ACCOUNT_ID,
       lastSaleAt:
         status === ListingStatus.DRAFT

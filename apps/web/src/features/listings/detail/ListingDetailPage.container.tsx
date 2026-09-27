@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData } from '@repo/shared';
+import {
+  formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
+} from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -315,6 +317,15 @@ export const ListingDetailPageContainer: React.FC = () => {
     const translated = t(key);
     return translated === key ? listing.status : translated;
   }, [listing, t]);
+
+  /** "N+" when the source only reports a lower bound (e.g. Amazon's "In
+   *  Stock" or an order-limit dropdown) — a bare number would read as an
+   *  exact count. Formatting stays out of the component per frontend rules. */
+  const amazonStockText = useMemo(
+    () => formatSourceStock(listing?.sourceStock, listing?.sourceStockStatus),
+    [listing?.sourceStock, listing?.sourceStockStatus]
+  );
+  const sourceRemoved = listing?.sourceRemoved === true;
 
   const handleBack = () => {
     // A draft was reached from the dedicated drafts view (`?status=draft`);
@@ -678,6 +689,8 @@ export const ListingDetailPageContainer: React.FC = () => {
       groupStockBufferLabel={groupStockBufferLabel}
       groupMarginSummaryLabel={groupMarginSummaryLabel}
       groupMarginRangeDetails={groupMarginRangeDetails}
+      amazonStockText={amazonStockText}
+      sourceRemoved={sourceRemoved}
       paymentPolicyLabel={paymentPolicyLabel}
       shippingPolicyLabel={shippingPolicyLabel}
       returnPolicyLabel={returnPolicyLabel}

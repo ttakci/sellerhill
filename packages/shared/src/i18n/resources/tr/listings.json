@@ -122,6 +122,7 @@
       "resultCount": "{{count}} sonuç",
       "min": "Min",
       "max": "Maks",
+      "sourceStockNote": "20 üstü stok bilinmez; \"20+\" ürünler 20 sayılır.",
       "fields": {
         "price": "Satış Fiyatı",
         "purchasePrice": "Alış Fiyatı",
@@ -359,6 +360,7 @@
       "features": "Özellikler",
       "specs": "Ürün özellikleri",
       "titleField": "eBay başlığı",
+      "unavailableOnAmazon": "Amazon'da erişilemiyor",
       "listingId": "Dahili ID",
       "createdAt": "Oluşturulma",
       "updatedAt": "Güncellenme",

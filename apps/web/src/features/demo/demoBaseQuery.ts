@@ -309,6 +309,7 @@ export const demoBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
       price: l.purchasePrice ?? 0,
       currency: 'USD',
       stock: l.sourceStock ?? 0,
+      stockStatus: l.sourceStockStatus,
       imageUrls: l.imageUrls,
       listingCount: 1,
       updatedAt: l.updatedAt,

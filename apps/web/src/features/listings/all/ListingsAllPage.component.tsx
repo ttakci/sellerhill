@@ -244,6 +244,11 @@ export const ListingsAllPageComponent: React.FC<ListingsAllPageProps> = ({
                         fullWidth
                       />
                     </S.NumericRangeRow>
+                    {field.note && (
+                      <Text variant="caption" color="text.secondary">
+                        {field.note}
+                      </Text>
+                    )}
                   </S.NumericFilterField>
                 ))}
               </S.NumericFilterGrid>

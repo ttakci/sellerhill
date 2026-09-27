@@ -122,6 +122,7 @@
       "resultCount": "{{count}} results",
       "min": "Min",
       "max": "Max",
+      "sourceStockNote": "Stock above 20 is not known; \"20+\" counts as 20.",
       "fields": {
         "price": "Sell Price",
         "purchasePrice": "Buy Price",
@@ -359,6 +360,7 @@
       "features": "Features",
       "specs": "Item specifics",
       "titleField": "eBay title",
+      "unavailableOnAmazon": "Unavailable on Amazon",
       "listingId": "Internal ID",
       "createdAt": "Created",
       "updatedAt": "Updated",

@@ -116,6 +116,8 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
   groupStockBufferLabel,
   groupMarginSummaryLabel,
   groupMarginRangeDetails,
+  amazonStockText,
+  sourceRemoved,
   paymentPolicyLabel,
   shippingPolicyLabel,
   returnPolicyLabel,
@@ -393,8 +395,13 @@ export const ListingDetailPageComponent: React.FC<ListingDetailPageProps> = ({
             </Meta>
             <Meta icon="shopping-bag" label={t('listings.table.amazonStock')}>
               <Text variant="body" weight="semibold" numeric>
-                {listing.sourceStock ?? '—'}
+                {amazonStockText}
               </Text>
+              {sourceRemoved && (
+                <Text variant="caption" color="semantic.error">
+                  {t('listings.detail.unavailableOnAmazon')}
+                </Text>
+              )}
             </Meta>
             <Meta icon="shopping-cart" label={t('listings.table.sold')}>
               <Text variant="body" weight="semibold" numeric>

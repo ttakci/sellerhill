@@ -11,6 +11,7 @@ import {
   EbayListingApiModel,
   EBAY_MARKETPLACE_CONFIG,
   EbayMarketplaceId,
+  formatSourceStock,
   isValidAsinShape,
   OrderStatus,
   PlatformSettingKey,
@@ -63,6 +64,8 @@ interface ListingQueryRow {
   sold_count: string | number;
   quantity: number;
   source_stock: number | null;
+  source_stock_status?: string | null;
+  source_removed?: boolean | null;
   image_urls: string[] | null;
   ebay_item_id: string | null;
   listing_settings_group_id: string;
@@ -310,6 +313,8 @@ export class ListingsService {
       soldCount: parseInt(String(row.sold_count), 10) || 0,
       quantity: row.quantity,
       sourceStock: row.source_stock ?? undefined,
+      sourceStockStatus: (row.source_stock_status as SourceStockStatus) ?? undefined,
+      sourceRemoved: row.source_removed ?? false,
       imageUrls: row.image_urls || [],
       ebayListingId: row.ebay_item_id ?? undefined,
       listingSettingsGroupId: row.listing_settings_group_id,
@@ -557,6 +562,8 @@ export class ListingsService {
              p.image_urls,
              p.category as product_category,
              p.stock as source_stock,
+             p.stock_status AS source_stock_status,
+             (p.source_removed_at IS NOT NULL) AS source_removed,
              p.brand,
              ea.marketplace_id AS ebay_marketplace_id,
              (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
@@ -716,7 +723,7 @@ export class ListingsService {
           item.profitMargin ?? '',
           item.soldCount ?? '',
           item.quantity,
-          item.sourceStock ?? '',
+          item.sourceStock === undefined ? '' : formatSourceStock(item.sourceStock, item.sourceStockStatus),
           item.status,
           item.createdAt,
         ]
@@ -826,6 +833,8 @@ export class ListingsService {
         p.image_urls,
         p.category AS product_category,
         p.stock AS source_stock,
+        p.stock_status AS source_stock_status,
+        (p.source_removed_at IS NOT NULL) AS source_removed,
         p.brand,
         p.features,
         p.specs,
