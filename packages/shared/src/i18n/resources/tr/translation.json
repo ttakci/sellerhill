@@ -478,6 +478,10 @@
       "priceBadge": {
         "caption": "piyasanın en uygun fiyatı",
         "per": "/AY"
+      },
+      "toast": {
+        "title": "Sipariş otomatik verildi",
+        "text": "Takip numarası eBay'e yüklendi · az önce"
       }
     },
     "proof": {

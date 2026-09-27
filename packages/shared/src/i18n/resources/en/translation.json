@@ -478,6 +478,10 @@
       "priceBadge": {
         "caption": "lowest price on the market",
         "per": "/MO"
+      },
+      "toast": {
+        "title": "Order placed automatically",
+        "text": "Tracking uploaded to eBay · just now"
       }
     },
     "proof": {
