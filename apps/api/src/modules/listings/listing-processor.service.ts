@@ -38,6 +38,7 @@ import { ListingImportService } from './listing-import.service';
 import { ListingStrategyService } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
+import { buildUnavailablePrefetchMap } from './product-source-prefetch.helpers';
 import { ProductSourceService, type CreateFetchResult } from './product-source.service';
 
 /**
@@ -203,6 +204,15 @@ export class ListingProcessorService extends WorkerHost {
 
     // Scraper: fetch every uncached ASIN of this batch in ONE service call
     // (parallel across proxies) instead of one page per loop iteration.
+    //
+    // A failed batch call must NOT be swallowed into `undefined` here — that
+    // used to leave every uncached item to retry `fetchForCreate` on its own,
+    // one at a time, INSIDE resolveProductData's per-ASIN advisory-lock
+    // transaction. A hung/unreachable scraper service means each of those
+    // retries can take up to the client's own timeout (~200s), so a 25-item
+    // batch could hold a pg client for up to ~80 minutes. Instead, one failure
+    // here fails every uncached item immediately (retryable
+    // PRODUCT_DATA_UNAVAILABLE via resolveProductData's `unavailable` branch).
     let prefetched: Map<string, CreateFetchResult> | undefined;
     if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
       const uncached: string[] = [];
@@ -212,7 +222,16 @@ export class ListingProcessorService extends WorkerHost {
         }
       }
       if (uncached.length > 0) {
-        prefetched = await this.productSource.fetchForCreate(uncached, AmazonMarketplace.AMAZON_US).catch(() => undefined);
+        try {
+          prefetched = await this.productSource.fetchForCreate(uncached, AmazonMarketplace.AMAZON_US);
+        } catch (error: unknown) {
+          // Never log the error body — it may carry proxy endpoints/credentials.
+          this.logger.error(
+            `Batch prefetch failed for job ${jobId} (${uncached.length} ASIN(s)): ` +
+              `${error instanceof Error ? error.name : 'unknown'}`
+          );
+          prefetched = buildUnavailablePrefetchMap(uncached);
+        }
       }
     }
 

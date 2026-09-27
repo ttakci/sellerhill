@@ -112,12 +112,15 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
         return null;
       }
       // A zero-stock failure gets the stock-aware message (with the actual
-      // Amazon stock and buffer numbers) whenever those numbers are present —
-      // older rows written before this detail existed fall back to the plain
-      // zero_stock key.
+      // Amazon stock and buffer numbers) only when there IS a positive Amazon
+      // stock number to show — `amazonStock === 0` means Amazon itself has
+      // none, and "Amazon stock (0) is below your stock buffer (0)" would be
+      // false (and confusing) when the buffer is also unset/0. Older rows
+      // written before this detail existed, and the true "Amazon has zero"
+      // case, both fall back to the plain zero_stock key.
       const d = item.failureDetails;
       const code =
-        item.failureCode === ListingFailureCode.ZERO_STOCK && d?.amazonStock !== undefined
+        item.failureCode === ListingFailureCode.ZERO_STOCK && d?.amazonStock !== undefined && d.amazonStock > 0
           ? d.amazonStockAtLeast
             ? 'zero_stock_detail_at_least'
             : 'zero_stock_detail'
