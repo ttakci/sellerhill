@@ -62,6 +62,29 @@ services:
     depends_on:
       - postgres
 
+  # Amazon scraper (spec 2026-09-26). The api runs on the host, so it reaches
+  # this at http://localhost:8080 (apps/api/.env). Bound to loopback only.
+  # Proxies come from /admin → Settings → Scraper (or SCRAPER_PROXIES in
+  # apps/api/.env). SCRAPER_ALLOW_DIRECT=1 lets a developer fetch from their
+  # OWN machine's IP with no proxy — it exists only here and must never be set
+  # in a deployment file. SCRAPER_SERVICE_SECRET must match apps/api/.env;
+  # unset, the service answers 503.
+  scraper:
+    build:
+      context: ./services/amazon-scraper
+      dockerfile: Dockerfile
+    container_name: sellerhill_scraper
+    restart: unless-stopped
+    environment:
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-}
+      SCRAPER_PORT: 8080
+      SCRAPER_THREADS_PER_PROXY: ${SCRAPER_THREADS_PER_PROXY:-2}
+      SCRAPER_ALLOW_DIRECT: ${SCRAPER_ALLOW_DIRECT:-0}
+    ports:
+      - '127.0.0.1:8080:8080'
+    networks:
+      - sellerhill_network
+
   # No local LLM service. Every environment — including dev — talks to the same
   # hosted OpenAI-compatible provider configured in LLM_BASE_URL, so what you
   # test locally is what runs in production. See apps/api/.env.example.

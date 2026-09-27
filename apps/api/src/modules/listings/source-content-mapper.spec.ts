@@ -1,6 +1,13 @@
 import { AmazonMarketplace, SourceStockStatus, type ScraperContent, type SourceCommerce } from '@repo/shared';
 
-import { mapScraperIdentifiers, mapScraperProduct, translateScraperSpecs } from './source-content-mapper';
+import {
+  buildScraperSpecs,
+  mapScraperIdentifiers,
+  mapScraperProduct,
+  parseDimensionsCell,
+  parseWeightCell,
+  translateScraperSpecs,
+} from './source-content-mapper';
 
 const content = (over: Partial<ScraperContent> = {}): ScraperContent => ({
   title: 'Mobil 1 Extended Performance Oil Filter, M1-113A | 2 Pack', brand: 'Mobil', manufacturer: 'Mobil 1',
@@ -50,6 +57,74 @@ describe('mapScraperIdentifiers', () => {
   it('accepts no barcode at all', () => {
     expect(mapScraperIdentifiers({}, 'Mobil')).toEqual({});
   });
+  // provider:compare 2026-09-27, B0784BFHMQ: the page lists several barcodes in
+  // one cell ("071924213920 071924414518" / "00071924213920, 00071924414518").
+  // The whole cell failed the check digit, so the product lost a UPC Keepa had.
+  it('takes the first valid barcode from a multi-value cell', () => {
+    expect(
+      mapScraperIdentifiers({ upc: '071924213920 071924414518', gtin: '00071924213920, 00071924414518' }, null),
+    ).toMatchObject({ upc: '071924213920' });
+    expect(mapScraperIdentifiers({ gtin: 'bogus, 4006381333931' }, null)).toMatchObject({ ean: '4006381333931' });
+  });
+});
+
+describe('parseDimensionsCell / parseWeightCell', () => {
+  it('splits Amazon L x W x H cells into Keepa-formatted inches', () => {
+    expect(parseDimensionsCell('5.91 x 5.91 x 11.81 inches')).toEqual({ length: '5.9 in', width: '5.9 in', height: '11.8 in' });
+    expect(parseDimensionsCell('8.43 x 5.04 x 4.92 inches; 1.72 pounds')).toEqual({ length: '8.4 in', width: '5 in', height: '4.9 in', weight: '1.72 lbs' });
+    expect(parseDimensionsCell('10 x 20 cm')).toEqual({ length: '3.9 in', width: '7.9 in' });
+  });
+  it('honours explicit axis letters', () => {
+    expect(parseDimensionsCell('13"L x 3"W')).toEqual({ length: '13 in', width: '3 in' });
+    expect(parseDimensionsCell('12"W x 8"H x 4"D')).toEqual({ width: '12 in', height: '8 in' });
+  });
+  it('yields nothing for prose or a missing unit', () => {
+    expect(parseDimensionsCell('Fits most cars')).toEqual({});
+    expect(parseDimensionsCell('5 x 7')).toEqual({});
+    expect(parseDimensionsCell(undefined)).toEqual({});
+  });
+  it('normalises page weights to Keepa\'s oz/lbs spelling', () => {
+    expect(parseWeightCell('2.88 ounces')).toBe('2.9 oz');
+    expect(parseWeightCell('680 g')).toBe('1.5 lbs');
+    expect(parseWeightCell('1.72 pounds')).toBe('1.72 lbs');
+    expect(parseWeightCell('heavy')).toBeUndefined();
+  });
+});
+
+describe('buildScraperSpecs', () => {
+  // provider:compare 2026-09-27 (50 ASINs): Brand, Model/MPN, Color/Size/Scent
+  // and Item Length/Width/Height were on the page but never reached specs, so
+  // 27 of 50 products carried fewer item specifics than Keepa gave them.
+  it('adds brand, identifiers, twister selection and per-axis dimensions the page carries elsewhere', () => {
+    const c = content({
+      specs: { item_dimensions: '2.75 x 2.75 x 3.5 inches; 7 ounces', package_dimensions: '4 x 4 x 4 inches' },
+      variationAttributes: { Scent: 'Unscented', Size: '90 Count (Pack of 1)' },
+    });
+    const s = buildScraperSpecs(c, mapScraperIdentifiers(c.identifiers, c.brand));
+    expect(s).toMatchObject({
+      Brand: 'Mobil', Manufacturer: 'Mobil 1', Model: 'M1-113A-2PK', MPN: 'M1-113A-2PK',
+      Scent: 'Unscented', Size: '90 Count (Pack of 1)',
+      'Item Length': '2.8 in', 'Item Width': '2.8 in', 'Item Height': '3.5 in', 'Item Weight': '7 oz',
+      'Item Dimensions': '2.75 x 2.75 x 3.5 inches; 7 ounces',
+    });
+  });
+  it('never overwrites what the page table already said', () => {
+    const c = content({ specs: { brand: 'PageBrand', color: 'Blue', item_weight: '680 g' }, variationAttributes: { Color: 'Red' } });
+    const s = buildScraperSpecs(c, {});
+    expect(s.Brand).toBe('PageBrand');
+    expect(s.Color).toBe('Blue');
+    expect(s['Item Weight']).toBe('1.5 lbs');
+  });
+  it('falls back to the package cell only for weight, never for item dimensions', () => {
+    const s = buildScraperSpecs(content({ specs: { package_dimensions: '8.43 x 5.04 x 4.92 inches; 1.72 pounds' }, identifiers: {} }), {});
+    expect(s['Item Length']).toBeUndefined();
+    expect(s['Item Weight']).toBe('1.72 lbs');
+  });
+  it('tolerates a service build without variationAttributes', () => {
+    const c = content({ identifiers: {} });
+    delete (c as Partial<ScraperContent>).variationAttributes;
+    expect(() => buildScraperSpecs(c, {})).not.toThrow();
+  });
 });
 
 describe('mapScraperProduct', () => {
@@ -63,6 +138,8 @@ describe('mapScraperProduct', () => {
     expect(p.maxOrderQuantity).toBe(30);
     expect(p.features).toEqual(['a', 'b']);
     expect(p.imageUrls).toHaveLength(1);
+    expect(p.specs).toMatchObject({ Brand: 'Mobil', MPN: 'M1-113A-2PK' });
+    expect(p.identifiers).toMatchObject({ upc: '071924414402', mpn: 'M1-113A-2PK' });
   });
   it('never uses A+ text as the description', () => {
     expect(mapScraperProduct('B077PVLBZ4', content({ description: null }), commerce, AmazonMarketplace.AMAZON_US).description).toBe('');

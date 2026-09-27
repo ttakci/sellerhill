@@ -79,6 +79,11 @@ export interface ScraperContent {
   categories: string[];
   specs: Record<string, string>;
   identifiers: Record<string, string>;
+  /**
+   * The twister selection for THIS asin (`{ Color: 'Black' }`). Optional: an
+   * older service build omits it, and a non-variation page sends `{}`.
+   */
+  variationAttributes?: Record<string, string>;
 }
 
 /** One ASIN's result from the scraper service. */
