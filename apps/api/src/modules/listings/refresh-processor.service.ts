@@ -2,7 +2,6 @@ import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
   AmazonMarketplace,
-  ENTITLED_SUBSCRIPTION_STATUSES,
   extractCorrelationId,
   generateCorrelationId,
   KeepaStockStatus,
@@ -28,6 +27,7 @@ import { ProductSourceService } from './product-source.service';
 import { ProductSyncService, type PendingListingUpdate } from './product-sync.service';
 import { dataFailureDelayMinutes } from './refresh-backoff';
 import { resolveRefreshBatchSize } from './refresh-batch-size';
+import { buildRefreshEntitlementSql } from './refresh-entitlement-sql';
 import { planKeepaRollback, planScraperRefresh, resolveScraperRefreshBatchSize, type ScraperRefreshPlan } from './scraper-refresh';
 
 interface ProductRow {
@@ -151,19 +151,14 @@ export class RefreshProcessorService extends WorkerHost {
     //
     // Built as a conditional fragment rather than a permanent join so that with
     // enforcement off the statement is byte-identical to the original.
+    //
+    // The fragments themselves live in `buildRefreshEntitlementSql` (shared
+    // with the admin operations summary's refresh-lag/capacity query, which
+    // must count exactly the products this claim would actually pick up).
     const enforcementOn = await this.platformSettings.getBoolean(
       PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
     );
-    const entitledStatuses = ENTITLED_SUBSCRIPTION_STATUSES.map((v) => `'${v}'`).join(', ');
-    const entitlementJoin = enforcementOn
-      ? `JOIN billing_customers bc ON bc.user_id = l.user_id
-              JOIN billing_subscriptions bs ON bs.customer_id = bc.id
-                AND bs.status IN (${entitledStatuses})`
-      : '';
-    // Same cost stop for listings past the owner's plan limit (only the oldest
-    // listings up to the limit are automated — see ListingPlanLimitProcessor).
-    // A product whose only active listings are over the limit is not refreshed.
-    const planLimitFilter = enforcementOn ? 'AND l.over_plan_limit = FALSE' : '';
+    const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (

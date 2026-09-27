@@ -36,8 +36,12 @@ describe('listing plan-limit invariants', () => {
 
   it('keeps Keepa refresh off products whose only active listings are over the limit', () => {
     const src = read('modules', 'listings', 'refresh-processor.service.ts');
-    expect(src).toMatch(/AND l\.over_plan_limit = FALSE/);
     expect(src).toMatch(/\$\{planLimitFilter\}/);
+    // The predicate itself now lives in the shared builder both the refresh
+    // claim and the admin operations summary's refresh-lag query read from
+    // (Task 12 review fix round 1), so the two can never drift apart.
+    const entitlementSrc = read('modules', 'listings', 'refresh-entitlement-sql.ts');
+    expect(entitlementSrc).toMatch(/AND l\.over_plan_limit = FALSE/);
   });
 
   it('pushes no price/stock update to a listing over the limit', () => {

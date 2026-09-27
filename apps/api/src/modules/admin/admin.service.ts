@@ -39,6 +39,7 @@ import type { Queue } from 'bullmq';
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { ProductSourceService } from '../listings/product-source.service';
+import { buildRefreshEntitlementSql } from '../listings/refresh-entitlement-sql';
 import { ScraperClient } from '../listings/scraper.client';
 
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
@@ -523,20 +524,49 @@ export class AdminService {
     // Refresh lag: how far behind schedule the oldest overdue ACTIVE-listed
     // product is, and how many distinct products the refresh pipeline is
     // actually responsible for — the real denominator for capacity planning,
-    // not the whole `products` table (draft/ended listings are never refreshed).
-    const [lagRow] = await this.databaseService.query<{ lag_minutes: string | null; unique_asins: string }>(
-      `SELECT EXTRACT(EPOCH FROM (NOW() - MIN(p.next_refresh_at)) FILTER (WHERE p.next_refresh_at < NOW())) / 60 AS lag_minutes,
-              COUNT(*)::text AS unique_asins
-         FROM products p
-        WHERE EXISTS (SELECT 1 FROM listings l WHERE l.product_id = p.id AND l.status = $1)`,
-      [ListingStatus.ACTIVE]
-    );
-    const refreshLagMinutes = lagRow?.lag_minutes !== null && lagRow?.lag_minutes !== undefined ? Math.round(Number(lagRow.lag_minutes)) : null;
+    // not the whole `products` table (draft/ended listings are never
+    // refreshed, and neither is a product whose only ACTIVE listings belong
+    // to an unentitled owner or are over that owner's plan limit — see
+    // `buildRefreshEntitlementSql`, shared with the real refresh claim in
+    // `RefreshProcessorService.selectRefreshBatch` so this count can never
+    // drift from what the pipeline actually does).
+    //
+    // `MIN(p.next_refresh_at) FILTER (WHERE p.next_refresh_at < NOW())` — the
+    // FILTER binds directly to the aggregate call, never to the surrounding
+    // `NOW() - ...` expression: PostgreSQL only accepts FILTER immediately
+    // after a bare aggregate/window function. Attaching it to the expression
+    // is a syntax error on every execution (verified live against a local
+    // Postgres 16 instance running this schema).
+    //
+    // Wrapped in try/catch: this is one metric on a health endpoint that also
+    // reports queue health and Keepa/scraper warnings, so a failure here must
+    // degrade to "unknown lag", never take the whole summary down with it.
+    let refreshLagMinutes: number | null = null;
+    let uniqueRefreshedAsins = 0;
+    try {
+      const enforcementOnForRefresh = await this.platformSettings.getBoolean(PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED);
+      const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOnForRefresh);
+      const [lagRow] = await this.databaseService.query<{ lag_minutes: string | null; unique_asins: string }>(
+        `SELECT EXTRACT(EPOCH FROM (NOW() - MIN(p.next_refresh_at) FILTER (WHERE p.next_refresh_at < NOW()))) / 60 AS lag_minutes,
+                COUNT(*)::text AS unique_asins
+           FROM products p
+          WHERE EXISTS (
+            SELECT 1 FROM listings l
+            ${entitlementJoin}
+            WHERE l.product_id = p.id AND l.status = $1
+              ${planLimitFilter}
+          )`,
+        [ListingStatus.ACTIVE]
+      );
+      refreshLagMinutes = lagRow?.lag_minutes !== null && lagRow?.lag_minutes !== undefined ? Math.round(Number(lagRow.lag_minutes)) : null;
+      uniqueRefreshedAsins = Number(lagRow?.unique_asins ?? 0);
+    } catch (error) {
+      this.logger.warn(`Refresh-lag query failed — reporting unknown lag: ${error instanceof Error ? error.message : String(error)}`);
+    }
     const intervalMinutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
     if (refreshLagMinutes !== null && refreshLagMinutes > intervalMinutes) {
       warnings.push({ kind: AdminWarningKind.REFRESH_LAG, level: refreshLagMinutes > intervalMinutes * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: refreshLagMinutes, threshold: intervalMinutes });
     }
-    const uniqueRefreshedAsins = Number(lagRow?.unique_asins ?? 0);
     // scraperProxies was already fetched once above, in the same branch that
     // set productDataProvider to SCRAPER — never re-fetched here.
     const achievable = productDataProvider === ProductDataProviderKind.SCRAPER && scraperProxies

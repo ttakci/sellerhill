@@ -105,6 +105,7 @@
       "amazonAccounts": "Amazon alıcı hesapları",
       "keepaBalance": "Kalan Keepa token",
       "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan)",
+      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}}",
       "refreshLag": "Yenileme gecikmesi",
       "refreshLagValue": "{{minutes}} dk",
       "syncsPerDay": "Ulaşılabilir günlük sync",

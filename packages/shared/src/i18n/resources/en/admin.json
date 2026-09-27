@@ -105,6 +105,7 @@
       "amazonAccounts": "Amazon buyer accounts",
       "keepaBalance": "Keepa tokens left",
       "scraperLastHour": "Scraper, last hour (ok · blocked · unreadable)",
+      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}}",
       "refreshLag": "Refresh lag",
       "refreshLagValue": "{{minutes}} min",
       "syncsPerDay": "Achievable syncs per day",

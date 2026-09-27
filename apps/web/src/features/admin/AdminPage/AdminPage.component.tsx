@@ -123,7 +123,11 @@ export const AdminPageComponent = ({
                   </Text>
                   <Text variant="metric" weight="semibold" numeric>
                     {operations.scraperStats
-                      ? `${operations.scraperStats.window1h.found} · ${operations.scraperStats.window1h.blocked} · ${operations.scraperStats.window1h.parseFailed}`
+                      ? t('admin.overview.scraperLastHourValue', {
+                          found: operations.scraperStats.window1h.found,
+                          blocked: operations.scraperStats.window1h.blocked,
+                          parseFailed: operations.scraperStats.window1h.parseFailed,
+                        })
                       : '—'}
                   </Text>
                 </S.SummaryCard>

@@ -89,11 +89,17 @@ describe('entitlement enforcement invariants', () => {
       // The single largest recurring cost. This query had no billing awareness
       // at all, so a non-payer kept burning tokens indefinitely.
       const src = read('modules', 'listings', 'refresh-processor.service.ts');
-      expect(src).toMatch(/ENTITLED_SUBSCRIPTION_STATUSES/);
-      expect(src).toMatch(/JOIN billing_subscriptions bs/);
+      expect(src).toMatch(/buildRefreshEntitlementSql/);
       // …and is a no-op with enforcement off, so adopting this changes nothing
       // until the operator turns it on.
       expect(src).toMatch(/BILLING_ENFORCEMENT_ENABLED/);
+      // The predicate itself lives in the shared builder both the refresh
+      // claim and the admin operations summary's refresh-lag/capacity query
+      // read from (Task 12 review fix round 1), so the two queries can never
+      // drift apart — see refresh-entitlement-sql.ts.
+      const entitlementSrc = read('modules', 'listings', 'refresh-entitlement-sql.ts');
+      expect(entitlementSrc).toMatch(/ENTITLED_SUBSCRIPTION_STATUSES/);
+      expect(entitlementSrc).toMatch(/JOIN billing_subscriptions bs/);
     });
 
     it('tracking conversion checks entitlement and quota before paying', () => {
