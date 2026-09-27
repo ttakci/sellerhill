@@ -10,8 +10,8 @@ import { tkn } from '@repo/ui';
  * `colors.landing.onAccent` instead. Do not swap those two back.
  *
  * This feature is exempt from the design-system ESLint rules, but it still
- * reads tokens rather than literals — the landing carries its own theme
- * toggle, so a hardcoded colour would simply break in dark mode.
+ * reads tokens rather than literals, so a token change reaches it like any
+ * other surface.
  * ========================================================================= */
 
 const CONTENT_MAX = '1180px';
@@ -72,22 +72,23 @@ const TYPE = {
  */
 const NAV_FONT_SIZE = '0.9375rem' /* 15px */;
 
+/**
+ * Scroll reveal — a short fade and a small rise, nothing more. The blur and
+ * scale it used to carry were part of what made the page feel busy; the brief
+ * (2026-09-27) was modern but calm, closer to the established competitors'
+ * pages than to the heavily animated new ones.
+ */
 export const Reveal = styled.div<{ $visible: boolean; $delay?: number }>`
   opacity: ${(p) => (p.$visible ? 1 : 0)};
-  transform: translateY(${(p) => (p.$visible ? '0' : '18px')})
-    scale(${(p) => (p.$visible ? '1' : '0.985')});
-  filter: blur(${(p) => (p.$visible ? '0' : '2px')});
+  transform: translateY(${(p) => (p.$visible ? '0' : '12px')});
   transition:
-    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: ${(p) => (p.$delay ? `${p.$delay * 80}ms` : '0ms')};
-  will-change: opacity, transform, filter;
+    opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: ${(p) => (p.$delay ? `${p.$delay * 70}ms` : '0ms')};
 
   @media (prefers-reduced-motion: reduce) {
     opacity: 1;
     transform: none;
-    filter: none;
     transition: none;
   }
 `;
@@ -455,101 +456,41 @@ export const MobileCtas = styled.div`
 
 /* =========================================================================
  * Hero
+ *
+ * Dark-navy band that cuts straight to the light page below (no gradient —
+ * see CLAUDE.md "Landing page"). Rebuilt 2026-09-27 to be CALMER than the
+ * version before it: the "audio spectrum" bars, the 3D tilt on the screenshot
+ * and the glowing gold placard all went. The brief was a page that reads as
+ * modern without the motion-heavy feel of the newer competitors, so depth now
+ * comes from two soft washes and one quiet glass frame, and nothing moves on
+ * its own.
  * ========================================================================= */
 
-/**
- * Sellerboard-format hero: a full-bleed dark-navy band (the "üst taraf mavi"
- * — top part blue), fading into the page's own light background at the
- * bottom ("alt beyaz" — bottom white). \`colors.sidebar.background\` is
- * reused rather than a new landing token — same deep blue in the light
- * theme / near-black in the dark theme as the app's own sidebar, so the
- * hero and the real product screenshot floating inside it read as one
- * consistent brand colour instead of two unrelated blues.
- */
 export const Hero = styled.section`
   position: relative;
   background: ${tkn('colors.sidebar.background')};
-  /*
-   * The top padding has to clear the fixed navbar (~82px: 1.375rem × 2 plus the
-   * 38px logo) and then leave a deliberate gap. 9.5rem left ~70px of empty navy
-   * above the eyebrow, which read as a gap rather than as breathing room;
-   * 7.5rem leaves ~38px, and 6.5rem ~30px against the shorter mobile navbar.
-   */
-  padding: 7.5rem ${tkn('spacing.xl')} ${SECTION_Y};
+  /* Clears the fixed navbar (~82px), then a deliberate ~38px gap. The bottom
+   * padding is larger than a plain section's because the proof bar straddles
+   * the hero's lower edge. */
+  padding: 7.5rem ${tkn('spacing.xl')} 7rem;
   overflow: hidden;
 
   @media (max-width: 980px) {
-    padding: 6.5rem ${tkn('spacing.md')} ${SECTION_Y_SM};
+    padding: 6.5rem ${tkn('spacing.md')} 6rem;
   }
 `;
 
-/**
- * Layered colour wash behind the hero.
- *
- * This replaced a visible square grid (two repeating 1px linear-gradients).
- * A ruled grid is a stock landing-page motif and at this scale it read as
- * graph paper sitting behind the headline — the single most amateur thing on
- * the page. Offset radial washes give depth without drawing anything the eye
- * can resolve as a pattern. The fourth, cooler wash at the bottom-right keeps
- * the preview frame from sitting on a flat field.
- */
+/** Two offset radial washes — depth without a pattern the eye can resolve. */
 export const HeroGlow = styled.div`
   position: absolute;
-  inset: -38% -16% auto -16%;
-  height: 62rem;
+  inset: -30% -10% auto -10%;
+  height: 56rem;
   pointer-events: none;
   background:
-    radial-gradient(48rem 32rem at 16% 14%, ${tkn('colors.landing.heroGlow')} 0%, transparent 70%),
-    radial-gradient(44rem 30rem at 84% 6%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 72%),
-    radial-gradient(36rem 26rem at 72% 48%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 68%),
-    radial-gradient(64rem 28rem at 48% 46%, ${tkn('colors.landing.heroGlow')} 0%, transparent 78%);
-  opacity: 0.95;
-
-  /* The Audio Spectrum effect */
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-repeat: no-repeat;
-    opacity: 0.5;
-    filter: blur(1.5px);
-    
-    background-image:
-      /* Left cluster (behind text) */
-      linear-gradient(to top, transparent, #518567, transparent),
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #d4a055, transparent),
-      linear-gradient(to top, transparent, #518567, transparent),
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #518567, transparent),
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #d4a055, transparent),
-      linear-gradient(to top, transparent, #518567, transparent),
-      /* Right cluster (above tablet) */
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #518567, transparent),
-      linear-gradient(to top, transparent, #d4a055, transparent),
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #518567, transparent),
-      linear-gradient(to top, transparent, #8cb89f, transparent),
-      linear-gradient(to top, transparent, #d4a055, transparent),
-      linear-gradient(to top, transparent, #518567, transparent);
-
-    background-size:
-      /* Left heights */
-      4px 8%, 4px 14%, 4px 9%, 4px 18%, 4px 12%, 4px 7%, 4px 11%, 4px 6%, 4px 9%,
-      /* Right heights */
-      4px 10%, 4px 16%, 4px 12%, 4px 20%, 4px 14%, 4px 8%, 4px 18%, 4px 10%;
-      
-    background-position:
-      /* Left X/Y */
-      30% 65%, 31% 65%, 32% 65%, 33% 65%, 34% 65%, 35% 65%, 36% 65%, 37% 65%, 38% 65%,
-      /* Right X/Y */
-      62% 25%, 63% 25%, 64% 25%, 65% 25%, 66% 25%, 67% 25%, 68% 25%, 69% 25%;
-  }
+    radial-gradient(46rem 30rem at 12% 18%, ${tkn('colors.landing.heroGlow')} 0%, transparent 70%),
+    radial-gradient(42rem 30rem at 86% 30%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 72%);
 `;
 
-/** Left content / right screenshot split — sellerboard's asymmetric hero, not a centered block. */
 export const HeroInner = styled.div`
   position: relative;
   max-width: ${CONTENT_MAX};
@@ -567,21 +508,14 @@ export const HeroInner = styled.div`
 `;
 
 export const HeroContent = styled.div`
-  max-width: 34rem;
+  max-width: 35rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: ${tkn('spacing.md')};
 `;
 
-/**
- * The Hero's category line ("Amazon → eBay automation"), above the headline, so
- * a visitor who already knows AutoDS/Easync/Yaballe places the product in the
- * first second rather than inferring it from the subheading. It sits on the dark
- * navy `sidebar.background`, so it uses `sidebar.hover` / `accentAmber` rather
- * than the light chip tokens. This is the only eyebrow left on the page — the
- * section-level ones repeated their own navbar label and were removed.
- */
+/** Category line above the headline. Sits on navy, so it uses the sidebar + amber tokens. */
 export const HeroEyebrow = styled.span`
   display: inline-flex;
   align-items: center;
@@ -597,25 +531,28 @@ export const HeroEyebrow = styled.span`
   color: ${tkn('colors.landing.accentAmber')};
 `;
 
-/** Matches sellerboard's h1 exactly: Montserrat 700, 56px, 1.14 line-height. */
 export const HeroTitle = styled.h1`
   margin: 0;
   font-family: ${FONT_HEADING};
-  font-size: clamp(2.5rem, 4.2vw, ${TYPE.h1});
+  font-size: clamp(2.1rem, 3.4vw, 2.9rem);
   line-height: 1.14;
   letter-spacing: -0.02em;
-  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  font-weight: 700;
   color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
 `;
 
-/** Matches sellerboard's lead paragraph: Poppins 400, 20px, 1.6 line-height. */
+/** The "at the lowest price" half of the headline, set in the logo's amber. */
+export const HeroTitleAccent = styled.span`
+  color: ${tkn('colors.landing.accentAmber')};
+`;
+
 export const HeroSubtitle = styled.p`
   margin: 0;
-  max-width: 30rem;
+  max-width: 33rem;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.lead};
-  line-height: 1.6;
+  font-size: 1.125rem;
+  line-height: 1.65;
   color: ${tkn('colors.sidebar.textMuted')};
   text-wrap: pretty;
 `;
@@ -625,16 +562,13 @@ export const HeroCtas = styled.div`
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: ${tkn('spacing.sm')};
+  margin-top: ${tkn('spacing.xs')};
 `;
 
 /**
- * \`$accent\` swaps to an amber-fill/navy-text pill — used for the Hero's
- * primary CTA. Matches sellerboard's own orange primary button, and reuses
- * the exact amber \`HillAccent\` is set in ("hill" in the SellerHill
- * wordmark) so the CTA and the logo read as the same brand color. A
- * blue-on-blue button would otherwise barely separate from the dark-navy
- * hero. Every other usage sits on a light surface, where the default
- * blue-fill/white-text reads normally.
+ * `$accent` = amber fill / navy text, for the hero's primary CTA only — a
+ * blue-on-blue button would barely separate from the navy band. The amber is
+ * the same one the wordmark's "HILL" is set in.
  */
 export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>`
   display: inline-flex;
@@ -645,10 +579,10 @@ export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>
   border: none;
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${(p) => (p.$lg ? TYPE.cardSm : TYPE.body)};
+  font-size: ${(p) => (p.$lg ? '1.0625rem' : TYPE.body)};
   font-weight: ${tkn('typography.fontWeight.semibold')};
   color: ${(p) => (p.$accent ? tkn('colors.sidebar.background')(p) : tkn('colors.landing.onAccent')(p))};
-  padding: ${(p) => (p.$lg ? '0.95rem 1.85rem' : '0.75rem 1.5rem')};
+  padding: ${(p) => (p.$lg ? '0.9rem 1.75rem' : '0.75rem 1.5rem')};
   border-radius: ${tkn('radius.md')};
   box-shadow: ${tkn('colors.landing.shadowSoft')};
   transition:
@@ -659,7 +593,7 @@ export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>
   &:hover {
     background: ${(p) =>
       p.$accent ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primaryHover')(p)};
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: ${tkn('colors.landing.shadowStrong')};
   }
 
@@ -668,135 +602,109 @@ export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>
   }
 `;
 
-export const GhostButton = styled.button<{ $lg?: boolean }>`
+/** Secondary hero CTA. `$onDark` = outlined in the sidebar tokens for the navy band. */
+export const GhostButton = styled.button<{ $lg?: boolean; $onDark?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: color-mix(in srgb, ${tkn('colors.surface.primary')} 88%, transparent);
-  border: 1px solid ${tkn('colors.landing.heroBorder')};
+  background: ${(p) => (p.$onDark ? 'transparent' : tkn('colors.surface.primary')(p))};
+  border: 1px solid
+    ${(p) => (p.$onDark ? tkn('colors.sidebar.divider')(p) : tkn('colors.landing.heroBorder')(p))};
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${(p) => (p.$lg ? TYPE.cardSm : TYPE.body)};
+  font-size: ${(p) => (p.$lg ? '1.0625rem' : TYPE.body)};
   font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.landing.heroText')};
-  padding: ${(p) => (p.$lg ? '0.95rem 1.85rem' : '0.75rem 1.5rem')};
+  color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
+  padding: ${(p) => (p.$lg ? '0.9rem 1.6rem' : '0.75rem 1.5rem')};
   border-radius: ${tkn('radius.md')};
-  box-shadow: ${tkn('colors.landing.shadowSoft')};
-  backdrop-filter: blur(8px);
   transition:
     border-color 160ms ease,
-    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 160ms ease,
     background 160ms ease;
 
   &:hover {
-    border-color: ${tkn('colors.landing.cardBorderHover')};
-    background: ${tkn('colors.surface.primary')};
-    transform: translateY(-2px);
-    box-shadow: ${tkn('colors.landing.shadowStrong')};
-  }
-
-  &:active {
-    transform: translateY(0);
+    border-color: ${(p) =>
+      p.$onDark ? tkn('colors.sidebar.textMuted')(p) : tkn('colors.landing.cardBorderHover')(p)};
+    background: ${(p) => (p.$onDark ? tkn('colors.sidebar.hover')(p) : tkn('colors.surface.primary')(p))};
   }
 `;
 
-/**
- * Trust microcopy under the primary CTA — two muted lines only. The trial
- * headline lives in `S.HeroOfferCard` on the screenshot; the price is there too.
- */
-export const HeroNote = styled.div`
+/** Three short trust facts under the CTAs, each with a check. */
+export const HeroTrust = styled.ul`
+  margin: ${tkn('spacing.xs')} 0 0;
+  padding: 0;
+  list-style: none;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-top: ${tkn('spacing.xs')};
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
 `;
 
-export const HeroNoteLine = styled.p`
-  margin: 0;
+export const HeroTrustItem = styled.li`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
+  font-size: ${TYPE.small};
   color: ${tkn('colors.sidebar.textMuted')};
+
+  svg {
+    color: ${tkn('colors.landing.accentEmerald')};
+  }
 `;
 
-/* =========================================================================
- * Hero product preview — a real screenshot (from the sign-up-free demo
- * account), not a hand-drawn mockup, floating on the dark hero exactly like
- * sellerboard's own dashboard screenshot. \`PreviewFrame\`/\`PreviewImage\`
- * below are shared with the Features and Profit sections further down the
- * page — every screenshot on the site sits in the same matted frame.
- * ========================================================================= */
+/* ── Hero product preview ──────────────────────────────────────────────── */
 
 export const HeroPreview = styled.div`
   position: relative;
-  /* Own stacking context, so the \`z-index: -1\` glow below sits behind the
-   * frame but cannot escape to behind the whole hero. */
   isolation: isolate;
   width: 100%;
   max-width: 40rem;
-  margin-top: -2.75rem;
-  
-  /* 3D Transform to make the dashboard look like it's turning */
-  transform: perspective(1500px) rotateY(-10deg) rotateX(4deg) translateZ(0);
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  
-  &:hover {
-    transform: perspective(1500px) rotateY(-4deg) rotateX(2deg) translateZ(0);
-  }
+  justify-self: end;
 
-  /*
-   * A large, soft glow bleeding out from behind the frame so the screenshot
-   * reads as floating over the navy and catching light — the premium cue
-   * sellerboard's own hero has and ours did not. Purely ambient: no shape the
-   * eye can resolve, behind the frame (\`z-index: -1\`), and it never reaches the
-   * price badge / float card at \`z-index: 2\`.
-   */
+  /* One soft, shapeless glow behind the frame so it reads as lifted off the navy. */
   &::before {
     content: '';
     position: absolute;
-    inset: -20% -16% -26% -16%;
+    inset: -12% -10% -16% -10%;
     z-index: -1;
     pointer-events: none;
     background:
-      /* Existing glows */
-      radial-gradient(38% 40% at 16% 88%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 32%, transparent) 0%, transparent 70%),
-      radial-gradient(42% 46% at 30% 30%, ${tkn('colors.landing.heroGlow')} 0%, transparent 72%),
-      radial-gradient(46% 44% at 76% 66%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 74%),
-      linear-gradient(122deg, transparent 38%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 16%, transparent) 47%, transparent 55%),
-      linear-gradient(122deg, transparent 62%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 12%, transparent) 70%, transparent 77%);
-    filter: blur(30px);
-    opacity: 0.9;
+      radial-gradient(45% 45% at 25% 80%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 30%, transparent) 0%, transparent 70%),
+      radial-gradient(45% 45% at 80% 25%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 72%);
+    filter: blur(28px);
   }
 
   @media (max-width: 980px) {
-    max-width: 30rem;
-    margin: 0 auto;
-    transform: none;
-    
-    &:hover {
-      transform: none;
-    }
-
-    &::before {
-      opacity: 0.5;
-    }
+    max-width: 32rem;
+    justify-self: center;
   }
 `;
 
-/**
- * The floating stat-card overlay — a real crop of one KPI card from the same
- * demo screenshot (never a second, fabricated set of numbers), clipped to a
- * rounded rect. Sits over the LEFT edge, mid-height: the top-right corner is
- * now the offer module's spot (see `HeroOfferCard`).
- */
+/** A thin translucent rim around the real screenshot — glass, not a costume browser. */
+export const HeroPreviewGlass = styled.div`
+  position: relative;
+  z-index: 1;
+  padding: 0.55rem;
+  border-radius: calc(${tkn('radius.xl')} + 0.45rem);
+  background: color-mix(in srgb, ${tkn('colors.sidebar.hover')} 70%, transparent);
+  border: 1px solid ${tkn('colors.sidebar.divider')};
+  backdrop-filter: blur(10px);
+  box-shadow: 0 40px 80px -40px ${tkn('colors.landing.auroraBg')};
+`;
+
+export const HeroPreviewImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: ${tkn('radius.xl')};
+`;
+
+/** A real cropped KPI card from the same demo screen, over the frame's left edge. */
 export const HeroFloatCard = styled.div`
   position: absolute;
-  top: 40%;
-  left: -2.25rem;
-  transform: translateY(-50%);
-  width: 10.25rem;
+  bottom: -1.75rem;
+  left: -2rem;
+  width: 10rem;
   border-radius: ${tkn('radius.lg')};
   overflow: hidden;
   border: 1px solid ${tkn('colors.landing.cardBorder')};
@@ -814,190 +722,142 @@ export const HeroFloatImage = styled.img`
   height: auto;
 `;
 
-/* =========================================================================
- * Premium offer module — the price + trial merged into ONE frosted-glass card
- * with a metallic-orange rim, floating over the screenshot's top-right corner
- * (2026-09-09, per the reference mock). Replaces the two separate blue/amber
- * badges. `HeroFloatCard` (the real KPI crop) moved to the left edge to make
- * room. Hidden ≤1080px — the CTA + `HeroNoteLine`s carry the offer there.
- * ========================================================================= */
-
+/**
+ * Price + trial in one compact card over the screenshot's top-right corner.
+ * Deliberately quieter than the glowing gold placard it replaced: a white
+ * card with an amber tag reads as an offer without competing with the headline.
+ * The amount comes from the catalog (see the container), never from copy.
+ */
 export const HeroOfferCard = styled.div`
   position: absolute;
-  top: 0;
-  right: -8rem;
-  transform: translateY(-30%) translateZ(80px); /* 30% above the top frame, 70% below */
+  top: -1.5rem;
+  right: -1.5rem;
   z-index: 3;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 22rem; /* Wider placard style */
-  padding: 0 1.5rem 1.5rem; /* No top padding, tag will float over the edge */
-  border-radius: 1.5rem;
-  
-  /* Extremely glassy background with an intense orange/gold glowing rim */
-  background:
-    linear-gradient(
-      135deg, 
-      rgba(30, 35, 50, 0.4) 0%, 
-      rgba(15, 20, 35, 0.6) 100%
-    ) padding-box,
-    linear-gradient(
-      135deg,
-      #ffc77d 0%,
-      #c46b27 25%,
-      rgba(196, 107, 39, 0.2) 50%,
-      #c46b27 75%,
-      #ffc77d 100%
-    ) border-box;
-  border: 2px solid transparent;
-  
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  
-  box-shadow:
-    0 30px 60px -15px rgba(0, 0, 0, 0.8),
-    0 0 40px -5px rgba(255, 160, 50, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.4),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.85rem 1.1rem 0.95rem;
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
 
   @media (max-width: 1080px) {
     display: none;
   }
 `;
 
-/** The intense glowing orange/gold tag popping out of the top */
 export const HeroOfferTag = styled.span`
-  display: inline-block;
-  margin-top: -1.25rem; /* Float over the top edge */
-  margin-bottom: 1.25rem;
-  padding: 0.5rem 1.5rem;
-  border-radius: 2rem; /* Pill shape */
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 16%, transparent);
+  color: ${tkn('colors.semantic.warning')};
+  font-family: ${FONT_BODY};
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   white-space: nowrap;
-
-  /* Intense 3D glowing orange gradient (Restored to solid color) */
-  background: linear-gradient(180deg, #ffc060 0%, #d46b1a 100%);
-  border: 1px solid #ffe8b5;
-  border-bottom-color: #8c3f05;
-  
-  box-shadow: 
-    0 12px 24px -6px rgba(212, 107, 26, 0.8),
-    inset 0 2px 4px rgba(255, 255, 255, 0.6),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-  
-  font-family: ${FONT_HEADING};
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 `;
 
 export const HeroOfferPrice = styled.span`
   display: inline-flex;
   align-items: baseline;
-  gap: 0.25rem;
-  margin-bottom: 0.5rem;
+  gap: 0.2rem;
+  margin-top: 0.2rem;
 `;
 
 export const HeroOfferAmount = styled.span`
   font-family: ${FONT_HEADING};
-  font-size: 4.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.03em;
-  
-  /* Very bright glowing white/gold text */
-  background: linear-gradient(180deg, #ffffff 0%, #ffe4b5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: #ffe4b5; /* fallback */
-  
-  /* Intense drop shadow on the text itself */
-  filter: drop-shadow(0 4px 16px rgba(255, 200, 100, 0.6));
+  letter-spacing: -0.02em;
+  color: ${tkn('colors.landing.heroText')};
 `;
 
 export const HeroOfferPer = styled.span`
-  font-family: ${FONT_HEADING};
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #ffe4b5;
-  text-shadow: 0 2px 8px rgba(255, 200, 100, 0.4);
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: 600;
+  color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
 export const HeroOfferCaption = styled.span`
-  margin-top: 0.5rem;
   font-family: ${FONT_BODY};
-  font-size: 0.8125rem;
-  font-weight: ${tkn('typography.fontWeight.medium')};
-  line-height: 1.3;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
-/**
- * Frosted-glass frame for the hero screenshot (2026-09-09, per the reference
- * mock). Not the opaque white mat that was rejected earlier — a thin translucent
- * rim with a blue→amber gradient hairline and a soft blue/amber neon outer glow,
- * so the real screenshot reads as sitting inside a lit glass panel on the navy.
- * The Features screenshots sit in `FeatureMedia`, the Profit tabs in the capped
- * `ProfitPreviewFrame` further down — neither carries this glass treatment.
- */
-export const HeroPreviewGlass = styled.div`
-  position: relative;
-  z-index: 1;
-  padding: 0.7rem;
-  border-radius: calc(${tkn('radius.xl')} + 0.5rem);
-  background:
-    linear-gradient(
-        160deg,
-        color-mix(in srgb, ${tkn('colors.sidebar.hover')} 55%, transparent),
-        color-mix(in srgb, ${tkn('colors.sidebar.background')} 42%, transparent)
-      )
-      padding-box,
-    linear-gradient(
-        135deg,
-        color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 92%, transparent) 0%,
-        color-mix(in srgb, ${tkn('colors.landing.onAccent')} 34%, transparent) 46%,
-        color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 85%, transparent) 100%
-      )
-      border-box;
-  border: 1.5px solid transparent;
-  backdrop-filter: blur(12px);
-  box-shadow:
-    ${tkn('colors.landing.shadowStrong')},
-    0 40px 90px -34px rgba(0, 0, 0, 0.6),
-    0 0 64px -14px color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 60%, transparent),
-    0 30px 70px -28px color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 50%, transparent);
+/* =========================================================================
+ * Proof bar — four verifiable facts, straddling the hero's lower edge
+ * ========================================================================= */
 
-  /* A brighter blue neon bloom hugging the bottom-left, per the reference mock. */
-  &::after {
-    content: '';
-    position: absolute;
-    left: -8%;
-    bottom: -12%;
-    width: 55%;
-    height: 45%;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(
-      closest-side,
-      color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 45%, transparent),
-      transparent
-    );
-    filter: blur(26px);
+export const ProofWrap = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: ${CONTENT_MAX};
+  margin: -3.25rem auto 0;
+  padding: 0 ${tkn('spacing.xl')};
+
+  @media (max-width: 980px) {
+    padding: 0 ${tkn('spacing.md')};
   }
 `;
 
-export const HeroPreviewImage = styled.img`
-  display: block;
-  width: 100%;
-  height: auto;
+export const ProofBar = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-radius: ${tkn('radius.xl')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  overflow: hidden;
+
+  @media (max-width: 820px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 `;
 
+export const ProofItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.35rem 1.5rem;
+  border-left: 1px solid ${tkn('colors.landing.cardBorder')};
 
+  &:first-of-type {
+    border-left: none;
+  }
+
+  @media (max-width: 820px) {
+    padding: 1.1rem 1.15rem;
+
+    &:nth-of-type(3) {
+      border-left: none;
+    }
+
+    &:nth-of-type(n + 3) {
+      border-top: 1px solid ${tkn('colors.landing.cardBorder')};
+    }
+  }
+`;
+
+export const ProofValue = styled.span`
+  font-family: ${FONT_HEADING};
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: ${tkn('colors.brand.primary')};
+`;
+
+export const ProofLabel = styled.span`
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  line-height: 1.45;
+  color: ${tkn('colors.landing.heroTextMuted')};
+`;
 
 /* =========================================================================
  * Generic section
@@ -1037,12 +897,16 @@ export const SectionHead = styled.div`
   margin-bottom: ${tkn('spacing.md')};
 `;
 
-/** Matches sellerboard's h2 exactly: Montserrat 700, 48px, 1.17 line-height. */
+/**
+ * Section h2. Capped at ~42px (was sellerboard's 48px): the 2026-09-27 titles
+ * are full sentences that argue a point, and at 48px they broke into three
+ * lines and shouted.
+ */
 export const SectionTitle = styled.h2`
   margin: 0;
-  max-width: 42rem;
+  max-width: 46rem;
   font-family: ${FONT_HEADING};
-  font-size: clamp(2rem, 3.6vw, ${TYPE.h2});
+  font-size: clamp(1.85rem, 3.2vw, 2.6rem);
   line-height: 1.17;
   letter-spacing: -0.015em;
   font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
@@ -1060,161 +924,705 @@ export const SectionSubtitle = styled.p`
   text-wrap: pretty;
 `;
 
+/** Small label above a section title — one short phrase, brand-coloured. */
+export const Eyebrow = styled.span`
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.micro};
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${tkn('colors.brand.primary')};
+`;
+
+/** Left-aligned variant of `SectionHead`, for split layouts. */
+export const SplitHead = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.sm')};
+  text-align: left;
+`;
+
 /* =========================================================================
- * Features — Timeline Spine & Zigzag Showcase
+ * Why SellerHill — bento grid of the differentiators
+ *
+ * The competitors' pages list the same automation set; this grid is where the
+ * page stops listing and starts arguing. Each card carries a small, static,
+ * token-drawn visual rather than a screenshot, so the claim is legible at a
+ * glance and nothing on the grid animates.
  * ========================================================================= */
 
-/** Subtle dashed timeline stem descending from the section header into the timeline spine */
-export const SectionTimelineStem = styled.div`
-  width: 0;
-  height: 4rem;
-  margin: ${tkn('spacing.lg')} auto -${tkn('spacing.md')};
-  border-left: 2px dashed color-mix(in srgb, ${tkn('colors.brand.primary')} 45%, transparent);
-  mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 100%);
+export const Bento = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: ${tkn('spacing.xl')};
 
   @media (max-width: 980px) {
-    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-/**
- * Zigzag list container with a continuous vertical timeline spine
- * running down the exact horizontal center on desktop.
- */
-export const FeatureZigzagList = styled.div`
-  position: relative;
+export const BentoCard = styled.article<{ $span?: 2 | 3; $dark?: boolean }>`
+  grid-column: span ${(p) => p.$span ?? 1};
   display: flex;
   flex-direction: column;
-  gap: 5.5rem;
-  margin-top: 0;
+  gap: 0.75rem;
+  padding: 1.75rem;
+  border-radius: ${tkn('radius.xl')};
+  background: ${(p) => (p.$dark ? tkn('colors.sidebar.background')(p) : tkn('colors.surface.primary')(p))};
+  border: 1px solid ${(p) => (p.$dark ? tkn('colors.sidebar.divider')(p) : tkn('colors.landing.cardBorder')(p))};
+  box-shadow: ${tkn('colors.landing.shadowSoft')};
+  min-width: 0;
 
-  /* Continuous vertical spine connecting all steps */
+  @media (max-width: 980px) {
+    grid-column: span ${(p) => Math.min(p.$span ?? 1, 2)};
+  }
+
+  @media (max-width: 680px) {
+    grid-column: span 1;
+    padding: 1.35rem;
+  }
+`;
+
+export const BentoIcon = styled.span<{ $dark?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: ${tkn('radius.md')};
+  background: ${(p) => (p.$dark ? tkn('colors.sidebar.hover')(p) : tkn('colors.landing.chipBg')(p))};
+  color: ${(p) => (p.$dark ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primary')(p))};
+`;
+
+export const BentoTop = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+`;
+
+export const ExclusiveBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 18%, transparent);
+  color: ${tkn('colors.landing.accentAmber')};
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+`;
+
+export const BentoTitle = styled.h3<{ $dark?: boolean }>`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: ${(p) => (p.$dark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
+`;
+
+export const BentoText = styled.p<{ $dark?: boolean }>`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: ${(p) => (p.$dark ? tkn('colors.sidebar.textMuted')(p) : tkn('colors.landing.heroTextMuted')(p))};
+`;
+
+/** The visual sits at the bottom of the card so text heights never misalign it. */
+export const BentoVisual = styled.div`
+  margin-top: auto;
+  padding-top: 0.5rem;
+`;
+
+/* Setting-groups visual — three groups, each with its own margin/buffer/template. */
+export const GroupRows = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const GroupRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.sidebar.hover')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
+`;
+
+export const GroupRowName = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ${FONT_BODY};
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: ${tkn('colors.sidebar.text')};
+`;
+
+export const GroupRowStats = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+`;
+
+export const GroupStat = styled.span`
+  padding: 0.15rem 0.5rem;
+  border-radius: ${tkn('radius.sm')};
+  background: ${tkn('colors.sidebar.background')};
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${tkn('colors.landing.accentAmber')};
+`;
+
+
+/* Sync visual — a 24-hour rail with four checks on it. */
+export const SyncRail = styled.div`
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-top: 1.6rem;
+
   &::before {
     content: '';
     position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 3rem;
-    width: 0;
-    transform: translateX(-50%);
-    border-left: 2px dashed color-mix(in srgb, ${tkn('colors.brand.primary')} 45%, transparent);
-    mask-image: linear-gradient(180deg, black 0%, black calc(100% - 3rem), transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, black 0%, black calc(100% - 3rem), transparent 100%);
-    z-index: 0;
+    top: 0.45rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, ${tkn('colors.brand.primary')} 25%, transparent),
+      ${tkn('colors.brand.primary')}
+    );
+  }
+`;
+
+export const SyncTick = styled.span`
+  position: relative;
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${tkn('colors.landing.heroTextMuted')};
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1.52rem;
+    left: 0;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: ${tkn('colors.surface.primary')};
+    border: 3px solid ${tkn('colors.brand.primary')};
+  }
+`;
+
+export const VisualCaption = styled.span`
+  display: block;
+  margin-top: 0.75rem;
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${tkn('colors.brand.primary')};
+`;
+
+/* Item-specifics visual — "theirs" vs "ours", three rows. */
+export const SpecTable = styled.div`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.md')};
+  overflow: hidden;
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+`;
+
+export const SpecCell = styled.span<{ $head?: boolean; $muted?: boolean; $good?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  border-top: 1px solid ${tkn('colors.landing.cardBorder')};
+  background: ${(p) => (p.$head ? tkn('colors.landing.sectionAlt')(p) : 'transparent')};
+  font-weight: ${(p) => (p.$head || p.$good ? 600 : 400)};
+  color: ${(p) =>
+    p.$muted
+      ? tkn('colors.text.tertiary')(p)
+      : p.$good
+        ? tkn('colors.semantic.success')(p)
+        : tkn('colors.landing.heroText')(p)};
+  text-decoration: ${(p) => (p.$muted ? 'line-through' : 'none')};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:nth-of-type(-n + 3) {
+    border-top: none;
+  }
+`;
+
+/* Pending-actions visual — three rows with a severity dot and a count. */
+export const ActionRows = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+`;
+
+export const ActionRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: ${tkn('radius.md')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  background: ${tkn('colors.landing.sectionAlt')};
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  color: ${tkn('colors.landing.heroText')};
+
+  span:nth-of-type(2) {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+export const SeverityDot = styled.span<{ $level: 'critical' | 'warning' | 'info' }>`
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: ${(p) =>
+    p.$level === 'critical'
+      ? tkn('colors.semantic.error')(p)
+      : p.$level === 'warning'
+        ? tkn('colors.semantic.warning')(p)
+        : tkn('colors.semantic.info')(p)};
+`;
+
+export const ActionCount = styled.span`
+  flex-shrink: 0;
+  min-width: 1.4rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+`;
+
+/* Supplier visual — three chips. */
+export const ChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+`;
+
+export const Chip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${tkn('colors.brand.primary')};
+`;
+
+/* Price strip — the full-width closing card of the grid. */
+export const PriceStrip = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.lg')};
+
+  @media (max-width: 680px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+export const PriceStripCopy = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 46rem;
+`;
+
+/* =========================================================================
+ * Setting Groups spotlight
+ * ========================================================================= */
+
+export const GroupsLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: ${tkn('spacing.xxl')};
+  align-items: center;
+
+  @media (max-width: 940px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xl')};
+  }
+`;
+
+export const ParamGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: ${tkn('spacing.sm')};
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ParamItem = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+`;
+
+export const ParamIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${tkn('radius.sm')};
+  background: ${tkn('colors.landing.chipBg')};
+  color: ${tkn('colors.brand.primary')};
+`;
+
+export const ParamTitle = styled.h3`
+  margin: 0 0 0.1rem;
+  font-family: ${FONT_BODY};
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${tkn('colors.landing.heroText')};
+`;
+
+export const ParamText = styled.p`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: ${tkn('colors.landing.heroTextMuted')};
+`;
+
+/** Real screenshot of the "All groups" drawer — tall, so it is capped and cropped from the top. */
+export const ScreenFrame = styled.figure`
+  margin: 0;
+  padding: ${tkn('spacing.xs+')};
+  border-radius: ${tkn('radius.2xl')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+`;
+
+export const ScreenImage = styled.img<{ $maxHeight?: string }>`
+  display: block;
+  width: 100%;
+  height: ${(p) => p.$maxHeight ?? 'auto'};
+  object-fit: cover;
+  object-position: top;
+  border-radius: ${tkn('radius.xl')};
+  border: 1px solid ${tkn('colors.border.secondary')};
+`;
+
+export const ScreenCaption = styled.figcaption`
+  padding: 0.6rem 0.4rem 0.2rem;
+  text-align: center;
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  color: ${tkn('colors.text.tertiary')};
+`;
+
+export const ExamplesTitle = styled.span`
+  display: block;
+  margin: ${tkn('spacing.xl')} 0 ${tkn('spacing.sm')};
+  font-family: ${FONT_BODY};
+  font-size: ${TYPE.small};
+  font-weight: 700;
+  color: ${tkn('colors.landing.heroTextMuted')};
+`;
+
+export const ExampleGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ExampleCard = styled.div`
+  display: flex;
+  gap: 0.85rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: ${tkn('radius.lg')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+`;
+
+export const ExampleName = styled.span`
+  display: block;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: ${tkn('colors.landing.heroText')};
+`;
+
+export const ExampleNote = styled.span`
+  display: block;
+  margin-top: 0.15rem;
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: ${tkn('colors.landing.heroTextMuted')};
+`;
+
+/* =========================================================================
+ * Templates gallery — real templates, rendered by the production renderer
+ * ========================================================================= */
+
+export const TemplatesLayout = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: ${tkn('spacing.xxl')};
+  align-items: start;
+  margin-top: ${tkn('spacing.xl')};
+
+  /* Grid items default to min-width: auto, so the horizontally scrolling tab
+   * row below 940px would otherwise widen its column past the viewport. */
+  & > * {
+    min-width: 0;
   }
 
-  @media (max-width: 980px) {
-    gap: 4rem;
-    margin-top: 1.5rem;
+  @media (max-width: 940px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.lg')};
+  }
+`;
 
-    &::before {
+export const TemplateTabs = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  @media (max-width: 940px) {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
       display: none;
     }
   }
 `;
 
-export const FeatureRow = styled.div<{ $reversed?: boolean }>`
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+export const TemplateTab = styled.button<{ $active: boolean }>`
+  display: flex;
   align-items: center;
-  gap: ${tkn('spacing.xl')};
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: ${tkn('radius.md')};
+  border: 1px solid ${(p) => (p.$active ? tkn('colors.landing.chipBorder')(p) : 'transparent')};
+  background: ${(p) => (p.$active ? tkn('colors.surface.primary')(p) : 'transparent')};
+  box-shadow: ${(p) => (p.$active ? tkn('colors.landing.shadowSoft')(p) : 'none')};
+  cursor: pointer;
+  text-align: left;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  font-weight: ${(p) => (p.$active ? 700 : 500)};
+  color: ${(p) => (p.$active ? tkn('colors.brand.primary')(p) : tkn('colors.landing.heroTextMuted')(p))};
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 
-  ${(p) =>
-    p.$reversed &&
-    `
-    > :nth-of-type(1) {
-      grid-column: 3;
-      grid-row: 1;
-    }
-    > :nth-of-type(2) {
-      grid-column: 2;
-      grid-row: 1;
-    }
-    > :nth-of-type(3) {
-      grid-column: 1;
-      grid-row: 1;
-    }
-  `}
+  &:hover {
+    color: ${tkn('colors.brand.primary')};
+  }
 
-  @media (max-width: 980px) {
-    display: flex;
-    flex-direction: column;
-    gap: ${tkn('spacing.lg')};
+  @media (max-width: 940px) {
+    width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    border-radius: 999px;
+    padding: 0.5rem 0.95rem;
+    border-color: ${(p) => (p.$active ? tkn('colors.landing.chipBorder')(p) : tkn('colors.landing.cardBorder')(p))};
+    background: ${tkn('colors.surface.primary')};
 
-    > :nth-of-type(1) {
-      order: 1;
-    }
-    > :nth-of-type(2) {
+    svg {
       display: none;
     }
-    > :nth-of-type(3) {
+  }
+`;
+
+export const TemplatePoints = styled.ul`
+  margin: ${tkn('spacing.lg')} 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+`;
+
+export const TemplatePoint = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: ${tkn('colors.landing.heroText')};
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    color: ${tkn('colors.semantic.success')};
+  }
+`;
+
+export const TemplatePreview = styled.div`
+  position: relative;
+  padding: ${tkn('spacing.xs+')};
+  border-radius: ${tkn('radius.2xl')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+`;
+
+export const TemplateImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 34rem;
+  object-fit: cover;
+  object-position: top;
+  border-radius: ${tkn('radius.xl')};
+  border: 1px solid ${tkn('colors.border.secondary')};
+  animation: templateFade 220ms ease-out;
+
+  @keyframes templateFade {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 940px) {
+    height: 26rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+export const PreviewBadge = styled.span`
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: ${tkn('colors.sidebar.background')};
+  color: ${tkn('colors.sidebar.text')};
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  font-weight: 600;
+`;
+
+/* =========================================================================
+ * Showcase — real screens, alternating sides
+ * ========================================================================= */
+
+export const ShowcaseList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+  margin-top: ${tkn('spacing.xl')};
+
+  @media (max-width: 940px) {
+    gap: 3.5rem;
+  }
+`;
+
+export const ShowcaseRow = styled.div<{ $reversed?: boolean }>`
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: ${tkn('spacing.xxl')};
+  align-items: center;
+
+  & > :first-of-type {
+    order: ${(p) => (p.$reversed ? 2 : 1)};
+  }
+
+  & > :last-of-type {
+    order: ${(p) => (p.$reversed ? 1 : 2)};
+  }
+
+  @media (max-width: 940px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.lg')};
+
+    & > :first-of-type {
+      order: 1;
+    }
+
+    & > :last-of-type {
       order: 2;
     }
   }
 `;
 
-/** Minimal precision dot sitting quietly on the timeline spine */
-export const FeatureTimelineNode = styled.div`
-  position: relative;
-  z-index: 1;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: ${tkn('colors.brand.primary')};
-  box-shadow:
-    0 0 0 4px ${tkn('colors.surface.primary')},
-    0 0 0 6px color-mix(in srgb, ${tkn('colors.brand.primary')} 28%, transparent);
-  flex-shrink: 0;
-
-  @media (max-width: 980px) {
-    display: none;
-  }
-`;
-
-export const FeatureCopy = styled.div`
+export const ShowcaseCopy = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.md')};
-  text-align: left;
-
-  @media (max-width: 980px) {
-    order: 2;
-  }
 `;
 
-export const FeatureBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 8%, transparent);
-  border: 1px solid color-mix(in srgb, ${tkn('colors.brand.primary')} 18%, transparent);
-  color: ${tkn('colors.brand.primary')};
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.bold')};
-  letter-spacing: 0.04em;
-  width: fit-content;
-`;
-
-export const FeatureTitle = styled.h3`
+export const ShowcaseTitle = styled.h3`
   margin: 0;
   font-family: ${FONT_HEADING};
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: ${tkn('colors.landing.heroText')};
+  font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+  font-weight: 700;
   line-height: 1.25;
-  letter-spacing: -0.02em;
-
-  @media (max-width: 640px) {
-    font-size: 1.5rem;
-  }
+  letter-spacing: -0.015em;
+  color: ${tkn('colors.landing.heroText')};
 `;
 
-export const FeatureDetailText = styled.p`
+export const ShowcaseText = styled.p`
   margin: 0;
   font-family: ${FONT_BODY};
   font-size: 1rem;
@@ -1222,71 +1630,255 @@ export const FeatureDetailText = styled.p`
   color: ${tkn('colors.landing.heroTextMuted')};
 `;
 
-export const FeatureKeyPoint = styled.div`
+export const KeyPoint = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.85rem 1.15rem;
+  gap: 0.65rem;
+  padding: 0.85rem 1.1rem;
   border-radius: ${tkn('radius.lg')};
-  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 4%, ${tkn('colors.surface.primary')});
-  border: 1px solid color-mix(in srgb, ${tkn('colors.brand.primary')} 14%, transparent);
-  color: ${tkn('colors.landing.heroText')};
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
   font-family: ${FONT_BODY};
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.5;
+  color: ${tkn('colors.landing.heroText')};
 
   svg {
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: 0.15rem;
     color: ${tkn('colors.brand.primary')};
   }
 `;
 
-/**
- * Thin matted frame around the feature screenshot — deliberately the same
- * language as `PreviewFrame` (a hairline mount, a few px of surface, layered
- * soft shadow), not a chunky card. The mat is ~3px so the product fills the
- * frame; depth comes from three stacked shadows (a tight contact line, a soft
- * ambient wash, one wide brand-tinted lift) rather than one blunt drop shadow.
- */
-export const FeatureMedia = styled.div`
+/* =========================================================================
+ * Mobile — a navy band with three real phone captures
+ * ========================================================================= */
+
+export const DarkSection = styled.section`
   position: relative;
-  border-radius: ${tkn('radius.2xl')};
-  padding: ${tkn('spacing.xs+')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.landing.cardBorder')};
-  box-shadow:
-    0 1px 2px color-mix(in srgb, ${tkn('colors.text.primary')} 8%, transparent),
-    ${tkn('colors.landing.shadowSoft')},
-    0 26px 60px -30px color-mix(in srgb, ${tkn('colors.brand.primary')} 22%, transparent);
-  transition:
-    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  padding: ${SECTION_Y} ${tkn('spacing.xl')};
+  background: ${tkn('colors.sidebar.background')};
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      0 1px 2px color-mix(in srgb, ${tkn('colors.text.primary')} 10%, transparent),
-      ${tkn('colors.landing.shadowStrong')},
-      0 34px 72px -32px color-mix(in srgb, ${tkn('colors.brand.primary')} 28%, transparent);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-
-    &:hover {
-      transform: none;
-    }
+  @media (max-width: 900px) {
+    padding: ${SECTION_Y_SM} ${tkn('spacing.md')};
   }
 `;
 
-export const FeatureMediaImage = styled.img`
+export const MobileLayout = styled.div`
+  position: relative;
+  max-width: ${CONTENT_MAX};
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: ${tkn('spacing.xxl')};
+  align-items: center;
+
+  @media (max-width: 940px) {
+    grid-template-columns: 1fr;
+    gap: ${tkn('spacing.xl')};
+  }
+`;
+
+export const DarkEyebrow = styled(Eyebrow)`
+  color: ${tkn('colors.landing.accentAmber')};
+`;
+
+export const DarkTitle = styled.h2`
+  margin: 0;
+  font-family: ${FONT_HEADING};
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.17;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+  color: ${tkn('colors.sidebar.text')};
+  text-wrap: balance;
+`;
+
+export const DarkText = styled.p`
+  margin: 0;
+  font-family: ${FONT_BODY};
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+export const DarkBullets = styled.ul`
+  margin: ${tkn('spacing.xs')} 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+`;
+
+export const DarkBullet = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: ${tkn('colors.sidebar.text')};
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    color: ${tkn('colors.landing.accentEmerald')};
+  }
+`;
+
+export const Phones = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1.25rem;
+`;
+
+export const Phone = styled.figure<{ $raised?: boolean }>`
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  width: 13.5rem;
+  transform: translateY(${(p) => (p.$raised ? '-1.75rem' : '0')});
+
+  @media (max-width: 1080px) {
+    width: 11.5rem;
+  }
+
+  @media (max-width: 680px) {
+    display: ${(p) => (p.$raised ? 'flex' : 'none')};
+    width: 15rem;
+    transform: none;
+  }
+`;
+
+export const PhoneBezel = styled.div`
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 2.1rem;
+  background: ${tkn('colors.landing.auroraBg')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
+  box-shadow: 0 30px 60px -30px ${tkn('colors.landing.auroraBg')};
+`;
+
+export const PhoneScreen = styled.img`
   display: block;
   width: 100%;
-  height: auto;
+  aspect-ratio: 390 / 844;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 1.7rem;
+`;
+
+export const PhoneLabel = styled.figcaption`
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+/* =========================================================================
+ * Trust — privacy facts, each a card, with the legal documents one click away
+ * ========================================================================= */
+
+export const TrustGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: ${tkn('spacing.xl')};
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const TrustCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.6rem;
   border-radius: ${tkn('radius.xl')};
-  border: 1px solid ${tkn('colors.border.secondary')};
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowSoft')};
+`;
+
+export const TrustIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, ${tkn('colors.semantic.success')} 12%, transparent);
+  color: ${tkn('colors.semantic.success')};
+`;
+
+export const TrustLinks = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: ${tkn('spacing.lg')};
+`;
+
+export const TextLink = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-family: ${FONT_BODY};
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: ${tkn('colors.brand.primary')};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+/* =========================================================================
+ * Standard features — compact icon grid
+ * ========================================================================= */
+
+export const StandardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.75rem 1.5rem;
+  margin-top: ${tkn('spacing.xl')};
+
+  @media (max-width: 980px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const StandardItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+`;
+
+export const StandardIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 0.25rem;
+  border-radius: ${tkn('radius.md')};
+  background: ${tkn('colors.landing.chipBg')};
+  color: ${tkn('colors.brand.primary')};
 `;
 
 /* =========================================================================
@@ -1418,171 +2010,6 @@ export const ProfitPreviewImage = styled.img`
 
   @media (max-width: 940px) {
     height: 20rem;
-  }
-`;
-
-/* =========================================================================
- * Setting Groups — one store, three groups, three template silhouettes
- *
- * The old version was three text tables ("Valentine's Day → Seasonal margin →
- * 2 units"), which named the feature without showing it. This shows it: one
- * store frame holding three mini listing previews, each drawn from a visibly
- * different template and carrying its own margin.
- * ========================================================================= */
-
-export const StoreShowcase = styled.div`
-  border-radius: ${tkn('radius.2xl')};
-  border: 1px solid ${tkn('colors.landing.cardBorder')};
-  background: ${tkn('colors.surface.primary')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
-  overflow: hidden;
-`;
-
-export const StoreShowcaseBar = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${tkn('spacing.xs')};
-  padding: ${tkn('spacing.sm')} ${tkn('spacing.md')};
-  border-bottom: 1px solid ${tkn('colors.border.secondary')};
-  background: ${tkn('colors.surface.secondary')};
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: ${tkn('colors.text.tertiary')};
-
-  svg {
-    color: ${tkn('colors.brand.primary')};
-  }
-`;
-
-/** A 1px gap on a divider-coloured field draws the seams between groups. */
-export const GroupShowcaseGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: ${tkn('colors.border.secondary')};
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const GroupShowcaseCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tkn('spacing.sm')};
-  padding: ${tkn('spacing.md')};
-  background: ${tkn('colors.surface.primary')};
-`;
-
-export const GroupShowcaseHead = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const GroupShowcaseName = styled.span`
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.landing.heroText')};
-`;
-
-export const GroupMarginBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: ${tkn('radius.sm')};
-  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 12%, transparent);
-  color: ${tkn('colors.brand.primary')};
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  white-space: nowrap;
-`;
-
-/** Fixed height so all three template silhouettes line up regardless of shape. */
-export const TemplateMock = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  height: 9.5rem;
-  padding: ${tkn('spacing.sm')};
-  border-radius: ${tkn('radius.md')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 3%, ${tkn('colors.surface.secondary')});
-  overflow: hidden;
-`;
-
-export const MockImage = styled.div<{ $tall?: boolean; $sm?: boolean }>`
-  border-radius: ${tkn('radius.sm')};
-  background: color-mix(in srgb, ${tkn('colors.brand.primary')} 16%, ${tkn('colors.surface.primary')});
-  flex: ${(p) => (p.$tall ? '1 1 auto' : '0 0 auto')};
-  width: ${(p) => (p.$sm ? '3.25rem' : '100%')};
-  height: ${(p) => (p.$sm ? '3.25rem' : 'auto')};
-  min-height: ${(p) => (p.$sm ? 'auto' : '2.5rem')};
-`;
-
-export const MockLine = styled.div<{ $w?: string; $strong?: boolean }>`
-  height: ${(p) => (p.$strong ? '0.7rem' : '0.5rem')};
-  width: ${(p) => p.$w ?? '100%'};
-  border-radius: ${tkn('radius.sm')};
-  background: ${(p) =>
-    p.$strong
-      ? `color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 40%, ${tkn('colors.surface.primary')(p)})`
-      : `color-mix(in srgb, ${tkn('colors.text.tertiary')(p)} 28%, transparent)`};
-`;
-
-export const MockSpecRow = styled.div`
-  display: flex;
-  gap: ${tkn('spacing.sm')};
-  align-items: flex-start;
-`;
-
-export const MockSpecLines = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  flex: 1 1 auto;
-  padding-top: 0.15rem;
-`;
-
-export const MockGallery = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-  flex: 1 1 auto;
-
-  & > span {
-    border-radius: ${tkn('radius.sm')};
-    background: color-mix(in srgb, ${tkn('colors.brand.primary')} 15%, ${tkn('colors.surface.primary')});
-  }
-`;
-
-export const GroupShowcaseFoot = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tkn('spacing.xs')};
-`;
-
-export const GroupChip = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: ${tkn('radius.sm')};
-  border: 1px solid ${tkn('colors.landing.chipBorder')};
-  background: ${tkn('colors.landing.chipBg')};
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
-  color: ${tkn('colors.text.secondary')};
-
-  svg {
-    color: ${tkn('colors.text.tertiary')};
   }
 `;
 

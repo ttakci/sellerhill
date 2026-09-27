@@ -16,3 +16,22 @@ export const BUSINESS_CONTACT = {
   email: 'support@sellerhill.com',
   emailHref: 'mailto:support@sellerhill.com',
 } as const;
+
+/**
+ * Sample rows for the "item specifics" card in the Why section: what another
+ * tool publishes for a required field versus what SellerHill fills in. The
+ * names and values are eBay-US listing data (always English on eBay.com), and
+ * "Does not apply" is eBay's own non-value quoted verbatim — so, like the
+ * screenshots, these are the same in every locale and are not i18n copy.
+ */
+export const SPEC_SAMPLES = [
+  { name: 'Color', value: 'Black' },
+  { name: 'Material', value: 'Aluminum' },
+  { name: 'Connectivity', value: 'Bluetooth 5.3' },
+  { name: 'Battery Life', value: '30 Hours' },
+] as const;
+
+export const SPEC_PLACEHOLDER = 'Does not apply';
+
+/** The four daily checks on the sync card's 24-hour rail (UTC-neutral clock labels). */
+export const SYNC_TIMES = ['00:00', '06:00', '12:00', '18:00'] as const;

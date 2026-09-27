@@ -447,109 +447,196 @@
   "landing": {
     "navbar": {
       "features": "Özellikler",
-      "howItWorks": "Nasıl çalışır",
+      "templates": "Şablonlar",
       "profit": "Gerçek kâr",
       "pricing": "Fiyatlandırma",
       "faq": "SSS",
       "login": "Giriş yap",
       "getStarted": "Ücretsiz başla",
-      "demo": "Demo"
+      "demo": "Demo",
+      "menu": {
+        "why": "Neden SellerHill",
+        "groups": "Ayar Grupları",
+        "templates": "İlan şablonları",
+        "actions": "Bekleyen Aksiyonlar",
+        "specifics": "Ürün özellikleri",
+        "mobile": "Mobil kullanım",
+        "trust": "Güvenlik ve gizlilik"
+      }
     },
     "hero": {
       "eyebrow": "Amazon → eBay otomasyonu",
-      "headline": "eBay Mağazanızı Otomatikleştirin. Gerçek Kârınızı Bilin.",
-      "subheading": "SellerHill Amazon'dan eBay'e iş akışınızı otomatikleştirir: listeleme, yapay zekâ başlıkları, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları. Ardından gerçek eBay net kazancınız ve gerçek Amazon sipariş maliyetinizle gerçek kârınızı gösterir.",
+      "headline": "eBay mağazanız için tam otomasyon.",
+      "headlineAccent": "Piyasanın en uygun fiyatıyla.",
+      "subheading": "Ürün grubuna özel fiyat ve şablon kuralları, günde 4 kez fiyat ve stok takibi, eksiksiz doldurulan ürün özellikleri, otomatik sipariş ve kargo takibi. Üstelik sizi her adımda yönlendiren bir Bekleyen Aksiyonlar ekranıyla.",
       "ctaPrimary": "Ücretsiz başla",
       "ctaSecondary": "Canlı demo",
       "trialTitle": "1 AY ÜCRETSİZ DENE!",
-      "trialNoCard": "Kredi kartı gerekmez.",
-      "trialCancelAnytime": "İstediğiniz zaman iptal edin.",
+      "trialNoCard": "Kredi kartı gerekmez",
+      "trialCancelAnytime": "İstediğiniz zaman iptal",
+      "trialMobile": "Telefonunuzdan yönetin",
       "priceBadge": {
-        "caption": "aylık başlayan fiyatlarla",
+        "caption": "piyasanın en uygun fiyatı",
         "per": "/AY"
       }
     },
-    "flow": {
-      "title": "Uçtan uca otomasyon akışı",
-      "stepBadge": "Adım {{number}}",
-      "steps": {
-        "asin": "Amazon ASIN",
-        "listing": "eBay ilanı",
-        "aiTitle": "Yapay zekâ başlık",
-        "sync": "Fiyat & stok senkronu",
-        "order": "Otomatik sipariş",
-        "tracking": "Kargo takibi",
-        "messages": "Alıcı mesajları",
-        "profit": "Gerçek kâr"
+    "proof": {
+      "sync": {
+        "value": "4×",
+        "label": "günde fiyat ve stok kontrolü"
       },
-      "descriptions": {
-        "asin": "Satmak istediğiniz ürünlerin Amazon ASIN kodlarını sisteme aktarın.",
-        "listing": "Görseller, varyasyonlar ve ürün detayları otomatik hazırlanıp eBay'de listelenir.",
-        "sync": "Tedarikçideki fiyat ve stok değişiklikleri anlık olarak eBay ilanlarınıza yansır.",
-        "order": "eBay'de satış gerçekleştiğinde sipariş Amazon'da otomatik olarak verilir.",
-        "tracking": "Amazon kargo takip numarası alınıp eBay siparişine otomatik işlenir.",
-        "messages": "Sipariş durumu ve kargo güncellemeleri alıcıya otomatik mesajla iletilir.",
-        "profit": "eBay net ödemesi ile gerçek Amazon maliyeti karşılaştırılarak net kârınız hesaplanır."
+      "specifics": {
+        "value": "45",
+        "label": "ilan başına ürün özelliğine kadar"
+      },
+      "templates": {
+        "value": "12",
+        "label": "hazır profesyonel ilan şablonu"
+      },
+      "trial": {
+        "value": "1 ay",
+        "label": "ücretsiz deneme, kartsız"
       }
     },
-    "pillars": {
-      "p1": {
-        "title": "Beklediğiniz otomasyon",
-        "description": "Listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — Amazon'dan eBay'e tüm iş akışı tek platformda."
-      },
-      "p2": {
+    "why": {
+      "eyebrow": "Neden SellerHill?",
+      "sectionTitle": "Temel otomasyon herkeste var. Farkımız geri kalanında.",
+      "sectionSubtitle": "Listeleme, sipariş ve kargo takibi bu kategorideki her aracın temel işi. SellerHill bunların üstüne, mağazanızı gerçekten farklı yöneteceğiniz araçları ekler.",
+      "exclusive": "Yalnızca SellerHill'de",
+      "groups": {
         "title": "Her ürün grubuna ayrı strateji",
-        "description": "Ayar Grupları ile kataloğunuzun farklı bölümlerinde farklı fiyat kuralları, HTML şablonları ve listeleme ayarları kullanabilirsiniz."
+        "description": "Bütün mağazaya tek ayar uygulamak zorunda değilsiniz. Kâr marjı, ilan şablonu, stok, stok tamponu ve ücret kesintilerini ürün grubuna göre belirleyin: Anneler Günü için bir grup, sadece otomotiv ürünleri için başka bir grup.",
+        "chipA": "Anneler Günü",
+        "chipB": "Otomotiv",
+        "chipC": "Elektronik",
+        "margin": "%{{value}} marj",
+        "buffer": "{{value}} adet tampon"
       },
-      "p3": {
-        "title": "Tahmin değil, gerçek kâr",
-        "description": "Kârınız, eBay'in size gerçekten ödediği net kazanç ile Amazon'da gerçekten ödediğiniz tutardan hesaplanır — varsayılan bir marjdan değil."
+      "sync": {
+        "title": "Günde 4 kez fiyat ve stok takibi",
+        "description": "Kaynak fiyat ve stok her gün dört kez kontrol edilir; değişiklik aynı turda eBay ilanınıza yansır. Günlük kontrol bile nadirken, siz stoğu biten ürünü satmaz, zarar ettiren fiyatla beklemezsiniz.",
+        "caption": "Her 6 saatte bir kontrol"
+      },
+      "specifics": {
+        "title": "Ürün özellikleri gerçekten dolu",
+        "description": "Zorunlu alanları \"Does not apply\" ile geçmeyiz. Her özellik, eBay kategorisinin kabul ettiği değerle eşleştirilir; ilanınız alıcı filtrelerinde görünür.",
+        "others": "Diğerleri",
+        "us": "SellerHill"
+      },
+      "actions": {
+        "title": "Bekleyen Aksiyonlar sizi yönlendirir",
+        "description": "Takılan bir sipariş, bağlantısı kopan bir hesap, stoğu biten bir ilan… Sizi bekleyen her şey tek ekranda, en acilden başlayarak.",
+        "rowA": "Onayınızı bekleyen sipariş",
+        "rowB": "Kara listeye takılan ilan",
+        "rowC": "Stoğu biten aktif ilan"
+      },
+      "supplier": {
+        "title": "Tedarikçiniz hiçbir yerde görünmez",
+        "description": "Görseller eBay'in kendi sunucularına yüklenir, başlıktan marka temizlenir, kargo takip numarası otomatik dönüştürülür. Kara liste kelimeleriniz her ilanda yayından önce kontrol edilir.",
+        "chipImages": "Görseller eBay'de",
+        "chipTracking": "Takip no. dönüştürülür",
+        "chipBlacklist": "Kara liste kontrolü"
+      },
+      "price": {
+        "title": "Piyasanın en uygun fiyatlı otomasyonu",
+        "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette; paketler yalnızca ilan ve sipariş hacmine göre ayrılır.",
+        "cta": "Paketleri gör"
       }
     },
-    "features": {
-      "sectionEyebrow": "Özellikler",
-      "sectionTitle": "eBay Mağazanızı Otomatik Yönetin",
-      "sectionSubtitle": "Amazon’dan eBay’e satış sürecinin tamamını tek yerden yönetin. Listeleme, fiyat ve stok takibi, sipariş ve kargo gibi günlük işler SellerHill ile sizin yerinize yürüsün.",
-      "pipeline": {
-        "asinListing": "İlan Hazırlama",
-        "priceStock": "Fiyat & Stok",
-        "autoOrder": "Otomatik Sipariş",
-        "tracking": "Kargo Takibi",
-        "buyerMessages": "Alıcı İletişimi",
-        "multiStore": "Çoklu Mağaza"
+    "groups": {
+      "eyebrow": "Ayar Grupları",
+      "sectionTitle": "Tek mağaza. İhtiyacınız kadar strateji.",
+      "sectionSubtitle": "Ayar Grubu; fiyat kuralını, ilan şablonunu ve stok ayarlarını bir kez tanımlayıp istediğiniz ürünlere uyguladığınız yeniden kullanılabilir bir settir. Sezonluk kampanyalar, kategoriye özel kurallar ya da yüksek marjlı ürünler için ayrı gruplar açın.",
+      "params": {
+        "margin": {
+          "title": "Kâr marjı",
+          "description": "Fiyat aralığına göre kademeli marj kuralları."
+        },
+        "template": {
+          "title": "İlan şablonu",
+          "description": "Gruba özel açıklama tasarımı."
+        },
+        "stock": {
+          "title": "Stok ve stok tamponu",
+          "description": "eBay'de gösterilen adet ve güvenlik payı."
+        },
+        "fees": {
+          "title": "Ücret kesintileri",
+          "description": "eBay komisyonu ve sabit ücretler fiyata dâhil edilir."
+        },
+        "content": {
+          "title": "Başlık ve içerik",
+          "description": "Marka temizleme ve yapay zekâ başlığı gruba göre."
+        }
       },
-      "asinListing": {
-        "title": "Yapay Zekâ ile eBay İlanlarınızı Hazırlayın",
-        "description": "ASIN’inizi ekleyin, eBay ilanınız hazır olsun.",
-        "detail": "Amazon ASIN’inizi ekleyin, SellerHill ürünü eBay’de satışa hazır hale getirsin. Ürün görselleri ve özellikleri otomatik alınır; eBay aramalarına uygun, yapay zekâ ile optimize edilmiş başlık oluşturulur. Açıklamanızın görünümünü kendi HTML ilan şablonunuzla özelleştirebilirsiniz."
+      "examplesTitle": "Örnek kullanım",
+      "examples": {
+        "seasonal": {
+          "name": "Anneler Günü",
+          "note": "Sezonluk kampanya: hediyeye uygun şablon, Mayıs ortasına kadar yüksek marj."
+        },
+        "category": {
+          "name": "Otomotiv",
+          "note": "Sadece araç parçaları: uyumluluk odaklı şablon ve kendi stok tamponu."
+        },
+        "electronics": {
+          "name": "Elektronik",
+          "note": "Teknik özellik tablolu şablon, hızlı satan ürünler için geniş tampon."
+        }
+      },
+      "screenCaption": "Demo hesaptaki gerçek Ayar Grupları ekranı"
+    },
+    "templates": {
+      "eyebrow": "İlan şablonları",
+      "sectionTitle": "Tasarımcıya ihtiyaç duymadan profesyonel ilanlar.",
+      "sectionSubtitle": "12 hazır şablondan birini seçin ya da kendi HTML'inizi yazın. Her Ayar Grubu kendi şablonunu kullanabilir. Aşağıdakiler gerçek şablonlarımızla oluşturulmuş önizlemelerdir.",
+      "names": {
+        "generalStore": "Genel Mağaza",
+        "techGadgets": "Teknoloji",
+        "homeDecor": "Ev & Dekorasyon",
+        "kitchenDining": "Mutfak",
+        "fitnessSports": "Spor & Fitness",
+        "outdoorSurvival": "Outdoor"
+      },
+      "points": {
+        "editable": "Tamamen düzenlenebilir: şablonu açın, dilediğiniz gibi değiştirin.",
+        "mobile": "Mobil uyumlu: eBay uygulamasında da düzgün görünür.",
+        "clean": "Tedarikçi adı yok: açıklamada ve görsellerde tedarikçiye ait hiçbir iz kalmaz.",
+        "specs": "Ürün özellikleri ve öne çıkan maddeler otomatik yerleşir."
+      },
+      "previewNote": "Gerçek şablon önizlemesi"
+    },
+    "showcase": {
+      "eyebrow": "Ürünün içinden",
+      "sectionTitle": "Her gün kullanacağınız ekranlar.",
+      "sectionSubtitle": "Aşağıdaki görseller tasarım taslağı değil; kayıt gerektirmeyen demo hesabımızdan alınmış gerçek ekranlardır.",
+      "actionCenter": {
+        "title": "Bekleyen Aksiyonlar: sıradaki işiniz hep belli",
+        "detail": "Otomasyon kendi başına çözemediği her durumu buraya bırakır: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, dolmak üzere olan paket limitleri. Her madde ne olduğunu, neden önemli olduğunu ve tek tıkla nereye gitmeniz gerektiğini söyler.",
+        "point": "Kenar çubuğundaki sayaç, sizi bekleyen iş sayısını her ekranda gösterir."
+      },
+      "itemSpecifics": {
+        "title": "eBay'in istediği ürün özellikleri, eksiksiz",
+        "detail": "SellerHill ürünün kaynak katalogdaki tüm özelliklerini toplar ve eBay kategorisinin tanımladığı alanlarla eşleştirir. Kategori yalnızca listedeki değerleri kabul ediyorsa uygun değeri seçer; ilan başına 45'e kadar özellik gönderir.",
+        "point": "Alıcı filtrelerinde görünen ilan, arama sonuçlarında daha çok görünür."
+      },
+      "orders": {
+        "title": "Sipariş otomatik verilir, takip numarası otomatik işlenir",
+        "detail": "eBay'de satış olduğunda sipariş kaynakta otomatik verilir ve doğrudan alıcının adresine gönderilir. Kargo çıktığında takip numarası dönüştürülerek eBay'e yüklenir; alıcı tedarikçinizi görmez.",
+        "point": "Sipariş başına harcama üst sınırını siz belirlersiniz; sınırı aşan sipariş onayınızı bekler."
       },
       "priceStock": {
-        "title": "Fiyat ve Stok Otomatik Güncellensin",
-        "description": "Amazon’daki fiyat ve stok değişiklikleri eBay’e otomatik yansısın.",
-        "detail": "SellerHill Amazon’daki fiyat ve stok durumunu otomatik olarak takip eder. Değişiklik olduğunda eBay ilanınızı günceller; böylece stokta olmayan ürünleri satmaz, fiyat değişiklikleri nedeniyle kârınızı riske atmazsınız."
-      },
-      "autoOrder": {
-        "title": "eBay Siparişlerinizi Otomatik Karşılayın",
-        "description": "eBay siparişi gelir, Amazon siparişi otomatik oluşturulur.",
-        "detail": "eBay’de bir sipariş geldiğinde SellerHill, ilgili Amazon siparişini otomatik olarak oluşturur ve doğrudan müşterinizin adresine gönderilmesini sağlar. Alıcı başına harcama limitini siz belirlersiniz. Limit aşıldığında sipariş otomatik olarak verilmez ve onayınızı bekler."
-      },
-      "tracking": {
-        "title": "Kargo Takibini Otomatikleştirin",
-        "description": "Kargo çıktığında takip numarası eBay’e otomatik yüklensin.",
-        "detail": "SellerHill Amazon siparişinizi kargoya verilene kadar takip eder. Sipariş kargolandığında eBay’deki sipariş durumu otomatik güncellenir ve takip numarası yüklenir. Takip numarası dönüştürme özelliği açıksa, müşterinize uygun takip bilgisi gösterilir."
-      },
-      "buyerMessages": {
-        "title": "Alıcı İletişimini Otomatikleştirin",
-        "description": "Doğru mesaj, doğru zamanda, otomatik olarak gönderilsin.",
-        "detail": "Sipariş alındığında, ürün kargolandığında, teslim edildiğinde veya değerlendirme zamanı geldiğinde gönderilecek mesajlarınızı bir kez oluşturun. SellerHill, doğru mesajı doğru zamanda otomatik olarak gönderir."
+        "title": "Fiyat ve stok günde 4 kez senkron",
+        "detail": "Her ilanın kaynak fiyatı ve stoğu günde dört kez kontrol edilir. Değişiklik olduğunda eBay fiyatı Ayar Grubunuzdaki marj kuralıyla yeniden hesaplanır ve stok, tamponunuz düşülerek güncellenir.",
+        "point": "İlan bazında fiyatı ya da adedi sabitleyebilir, satışı tek tıkla duraklatabilirsiniz."
       }
     },
     "profit": {
-      "sectionTitle": "Ciro Kâr Değildir. Gerçekte Ne Kazandığınızı Görün.",
-      "sectionSubtitle": "SellerHill tahmini bir marj uygulamaz. eBay'in size gerçekten ödediği net kazancı, Amazon'da gerçekten ödediğiniz tutarla eşleştirir ve geriye ne kaldığını raporlar.",
+      "sectionTitle": "Ciro kâr değildir. Gerçekte ne kazandığınızı görün.",
+      "sectionSubtitle": "SellerHill tahmini bir marj uygulamaz. eBay'in size gerçekten ödediği net kazancı, sipariş için gerçekten ödediğiniz tutarla eşleştirir ve geriye ne kaldığını raporlar.",
       "actuals": {
         "title": "İki tarafta da gerçek rakamlar",
-        "description": "eBay net kazancı gerçek satıştan, sipariş maliyeti gerçek Amazon siparişinden gelir. Arada varsayılan hiçbir şey yoktur."
+        "description": "eBay net kazancı gerçek satıştan, sipariş maliyeti gerçek kaynak siparişinden gelir. Arada varsayılan hiçbir şey yoktur."
       },
       "confirmed": {
         "title": "Onaylanmış kâr",
@@ -570,67 +657,117 @@
         "perOrder": "Sipariş bazında"
       }
     },
-    "settingGroups": {
-      "sectionTitle": "Farklı Ürünler. Farklı Stratejiler.",
-      "sectionSubtitle": "Her ürün aynı şekilde fiyatlanmak ya da listelenmek zorunda değil. Kendi fiyat kuralı, HTML şablonu ve listeleme ayarlarıyla bir Ayar Grubu oluşturun ve ihtiyaç duyan ürünlere uygulayın. Stratejiyi bir kez kurun, kataloğunuz boyunca yeniden kullanın.",
-      "storeLabel": "Tek mağaza, üç Ayar Grubu",
-      "groupA": {
-        "name": "Günlük ürünler",
-        "pricing": "%8 marj",
-        "stock": "2 adet tampon",
-        "template": "Sade şablon"
+    "mobile": {
+      "eyebrow": "Mobil uyumlu",
+      "sectionTitle": "Masaüstünde yaptığınız her şeyi telefonunuzdan yapın.",
+      "sectionSubtitle": "SellerHill ayrı bir uygulama indirmenizi istemez. Tarayıcıda açılan arayüz her ekran boyutuna uyum sağlar; kart tasarımı sayesinde telefonda da rahatça okunur ve kullanılır.",
+      "bullets": {
+        "b1": "Siparişleri, kârı ve bekleyen aksiyonları yolda takip edin",
+        "b2": "Ürün ekleyin, ilan ayarlarını değiştirin, satışı duraklatın",
+        "b3": "Kurulacak uygulama yok; aynı hesap, aynı ekranlar"
       },
-      "groupB": {
-        "name": "Elektronik",
-        "pricing": "%12 marj",
-        "stock": "3 adet tampon",
-        "template": "Özellik tablosu şablonu"
+      "screens": {
+        "dashboard": "Panel",
+        "actions": "Bekleyen Aksiyonlar",
+        "orders": "Siparişler"
+      }
+    },
+    "trust": {
+      "eyebrow": "Güvenlik ve gizlilik",
+      "sectionTitle": "Bilgileriniz sizindir, öyle de kalır.",
+      "sectionSubtitle": "Hesaplarınızı bir otomasyon platformuna bağlamak güven ister. Neyi saklayıp neyi saklamadığımızı açıkça yazıyoruz.",
+      "card": {
+        "title": "Kart numaranız bize hiç ulaşmaz",
+        "description": "Ödemeler Stripe'ın güvenli ödeme sayfasında alınır. Kart numaranızı görmeyiz, saklamayız."
       },
-      "groupC": {
-        "name": "Yüksek fiyatlı",
-        "pricing": "%18 marj",
-        "stock": "1 adet tampon",
-        "template": "Galeri şablonu"
+      "session": {
+        "title": "Oturum bilgileriniz kimseyle paylaşılmaz",
+        "description": "Amazon hesabınızın giriş ve oturum bilgileri şifrelenerek saklanır, yalnızca sizin işlemleriniz için kullanılır ve hiçbir üçüncü taraf uygulamaya verilmez."
+      },
+      "policy": {
+        "title": "Açık yazılı politikalar",
+        "description": "Hangi veriyi neden işlediğimizi Gizlilik Politikası'nda, hizmet şartlarını Kullanım Koşulları'nda açıkça anlattık. İstediğiniz zaman inceleyebilirsiniz."
+      },
+      "privacyLink": "Gizlilik Politikası",
+      "termsLink": "Kullanım Koşulları"
+    },
+    "standard": {
+      "sectionTitle": "Ve bir otomasyon platformundan beklediğiniz her şey.",
+      "sectionSubtitle": "Temel özellikler eksiksiz; hepsi her pakette.",
+      "items": {
+        "bulkAsin": {
+          "title": "Toplu ASIN ile listeleme",
+          "description": "Yüzlerce ASIN'i yapıştırın, ilanlar kuyrukta hazırlansın."
+        },
+        "aiTitle": {
+          "title": "Yapay zekâ başlıkları",
+          "description": "80 karakterin tamamını aramaya uygun kullanan başlıklar."
+        },
+        "autoOrder": {
+          "title": "Otomatik sipariş",
+          "description": "Satış olunca sipariş kaynakta otomatik verilir."
+        },
+        "tracking": {
+          "title": "Kargo takibi ve dönüştürme",
+          "description": "Takip numarası otomatik dönüştürülüp eBay'e yüklenir."
+        },
+        "messages": {
+          "title": "Otomatik alıcı mesajları",
+          "description": "Sipariş, kargo, teslimat ve değerlendirme mesajları."
+        },
+        "multiStore": {
+          "title": "Birden fazla eBay mağazası",
+          "description": "Tek hesaptan tüm mağazalarınızı yönetin."
+        },
+        "import": {
+          "title": "Mevcut ilanları içe aktarın",
+          "description": "eBay'de zaten yayında olan ilanlarınızı sisteme alın."
+        },
+        "blacklist": {
+          "title": "Kara liste kontrolü",
+          "description": "Yasaklı kelimeler başlık, açıklama ve özelliklerde aranır."
+        }
       }
     },
     "howItWorks": {
-      "sectionTitle": "ASIN'den Otomatik Mağazaya",
+      "sectionTitle": "ASIN'den otomatik mağazaya",
       "sectionSubtitle": "Bir kez kurun, günlük iş sizden çıksın.",
       "step1": {
         "title": "Hesaplarınızı bağlayın",
         "description": "eBay mağazanızı ve Amazon hesabınızı bağlayın. Birkaç dakika sürer, kurulacak hiçbir şey yoktur."
       },
       "step2": {
-        "title": "Ürünlerinizi ekleyin",
-        "description": "Satmak istediğiniz Amazon ASIN'lerini girin. SellerHill ürünü eşleştirir ve eBay ilanını bu bilgilerle oluşturur."
+        "title": "Ayar Gruplarınızı oluşturun",
+        "description": "Marj, şablon, stok ve ücret kurallarını ürün gruplarınıza göre bir kez tanımlayın."
       },
       "step3": {
-        "title": "Ayarlarınızı seçin",
-        "description": "Uygun Ayar Grubunu seçin ya da fiyat kuralını, stok tamponunu ve ilan şablonunu kendiniz belirleyin."
+        "title": "Ürünlerinizi ekleyin",
+        "description": "ASIN'leri yapıştırın ve bir Ayar Grubu seçin. İlanlar eksiksiz ürün özellikleriyle hazırlanır."
       },
       "step4": {
         "title": "Otomasyonu SellerHill yürütsün",
-        "description": "İlanlar yayına girer, fiyat ve stok senkron kalır, siparişler oluşturulur, kargo takibi işlenir ve alıcı mesajları gider."
+        "description": "Fiyat ve stok günde 4 kez senkron kalır, siparişler verilir, takip numaraları işlenir, alıcı mesajları gider."
       },
       "step5": {
-        "title": "Kârınızı takip edin",
-        "description": "Her siparişin gerçek kârını görün: gerçek eBay kazancınız ve gerçek Amazon sipariş maliyetiniz üzerinden."
+        "title": "Bekleyen Aksiyonları takip edin",
+        "description": "Sizin kararınızı gerektiren her şey tek ekranda; kârınız her siparişte gerçek rakamlarla."
       }
     },
     "demo": {
-      "sectionTitle": "Kaydolmadan Önce SellerHill'i Görün.",
-      "sectionSubtitle": "Panoyu, ilanları, siparişleri ve kâr raporlamasını örnek verilerle inceleyin. Doldurulacak form yok, iptal edilecek bir şey yok.",
+      "sectionTitle": "Kaydolmadan önce SellerHill'i görün.",
+      "sectionSubtitle": "Panoyu, ilanları, siparişleri, Ayar Gruplarını ve Bekleyen Aksiyonları örnek verilerle inceleyin. Doldurulacak form yok, iptal edilecek bir şey yok.",
       "button": "Canlı demoyu dene",
       "note": "Hesap gerekmez · Kredi kartı gerekmez · Hiçbir şey kaydedilmez.",
       "bullets": {
-        "b1": "Onaylanmış ve tahmini kârın yan yana göründüğü gerçek pano",
-        "b2": "İlanlar, siparişler ve ay ay kâr-zarar tablosu",
-        "b3": "Hiçbir şey kaydedilmez — istediğiniz zaman çıkabilirsiniz"
+        "b1": "Onaylanmış ve tahmini kârın yan yana göründüğü gerçek panel",
+        "b2": "Anneler Günü ve Otomotiv gibi örnek Ayar Grupları",
+        "b3": "Hiçbir şey kaydedilmez; istediğiniz zaman çıkabilirsiniz"
       }
     },
     "pricing": {
-      "sectionTitle": "Yüksek Fiyat Ödemeden Profesyonel Otomasyon",
-      "sectionSubtitle": "Paketler gerçekten kullandığınıza göre fiyatlanır: kaç ilanı aktif tuttuğunuz ve SellerHill her ay sizin için kaç sipariş yürüttüğü. Otomasyonun tamamı her pakette vardır.",
+      "eyebrow": "Fiyatlandırma",
+      "sectionTitle": "Piyasanın en uygun fiyatlı otomasyonu.",
+      "sectionSubtitle": "Her pakette bütün özellikler var. Paketler yalnızca aktif ilan sayınıza ve aylık sipariş hacminize göre ayrılır; başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
       "mostPopular": "En popüler",
@@ -646,10 +783,11 @@
       "unlimitedConversions": "Sınırsız takip numarası dönüştürme",
       "catalogError": "Güncel fiyatlar şu anda yüklenemedi. Aşağıda paket özeti gösteriliyor.",
       "included": {
-        "sync": "Otomatik fiyat & stok senkronizasyonu",
-        "autoOrder": "Otomatik sipariş karşılama",
-        "tracking": "Otomatik kargo takibi güncellemesi",
-        "messages": "Otomatik alıcı mesajları",
+        "groups": "Ayar Grupları ve 12 ilan şablonu",
+        "sync": "Günde 4 kez fiyat ve stok takibi",
+        "specifics": "Eksiksiz eBay ürün özellikleri",
+        "autoOrder": "Otomatik sipariş ve kargo takibi",
+        "actions": "Bekleyen Aksiyonlar ekranı",
         "profit": "Gerçek kâr raporlaması",
         "multiStore": "Birden fazla eBay mağazası",
         "support": "E-posta ve sohbet desteği"
@@ -685,69 +823,69 @@
       "sectionTitle": "Sıkça sorulan sorular",
       "sectionSubtitle": "Başlamadan önce bilmekte fayda olanlar.",
       "q1": {
-        "question": "Otomatik sipariş karşılama nasıl çalışır?",
-        "answer": "Bir alıcı eBay'den sipariş verdiğinde SellerHill bağlı Amazon hesabınızdan karşılık gelen siparişi oluşturur ve alıcının adresine gönderir. Alıcı hesabı başına bir harcama üst sınırı belirlersiniz; bu sınırın üzerindeki siparişler geçmez, onayınız için bekler."
+        "question": "Ayar Grupları nedir, neden önemlidir?",
+        "answer": "Ayar Grubu; kâr marjı kuralı, ilan şablonu, stok, stok tamponu ve ücret kesintilerinden oluşan yeniden kullanılabilir bir settir. Bütün mağazaya tek ayar uygulamak yerine her ürün grubuna ayrı strateji verirsiniz: Anneler Günü ürünleriniz sezonluk bir marj ve şablonla, otomotiv ürünleriniz kendi kurallarıyla çalışır. Ürünleri gruplar arasında istediğiniz zaman taşıyabilirsiniz."
       },
       "q2": {
         "question": "Fiyat ve stok senkronizasyonu ne sıklıkla çalışır?",
-        "answer": "SellerHill listelediğiniz ürünlerin Amazon fiyat ve stoğunu günde yaklaşık iki kez kontrol eder. Fiyat ya da stok değiştiğinde ilgili eBay ilanı aynı turda güncellenir. Bu planlı bir kontroldür, anlık takip değildir."
+        "answer": "SellerHill listelediğiniz ürünlerin kaynak fiyatını ve stoğunu günde dört kez kontrol eder. Fiyat ya da stok değiştiğinde ilgili eBay ilanı aynı turda güncellenir. Ayrıca eBay'de bir satış olduğunda stok, bir sonraki kontrolü beklemeden düşürülür."
       },
       "q3": {
-        "question": "Kargo takibi otomasyonu nasıl çalışır?",
-        "answer": "Amazon siparişi oluşturulduktan sonra SellerHill siparişi izlemeye devam eder. Amazon kargoladığında eBay siparişi kargolandı olarak işaretlenir ve takip numarası eBay'e yüklenir; siz kontrol etmeden sipariş zamanında güncellenir."
+        "question": "Ürün özelliklerini (item specifics) nasıl dolduruyorsunuz?",
+        "answer": "Ürünün kaynak katalogdaki tüm özelliklerini toplar ve eBay kategorisinin tanımladığı alanlarla eşleştiririz. Kategori yalnızca belirli değerleri kabul ediyorsa listeden uygun değeri seçeriz. Zorunlu alanları \"Does not apply\" ile geçmek yerine gerçek değerle doldururuz ve ilan başına 45'e kadar özellik göndeririz."
       },
       "q4": {
-        "question": "Takip numarası dönüştürme nedir?",
-        "answer": "Amazon takip numarası, ürünün nereden geldiğini alıcınıza gösterir. Dönüştürme açıkken SellerHill bu numarayı eBay'e yüklemeden önce farklı ve takip edilebilir bir numaraya dönüştürür. Dönüştürmenin açık olup olmayacağına ve hangi kargo firmalarını kapsayacağına siz karar verirsiniz."
+        "question": "Otomatik sipariş nasıl çalışır?",
+        "answer": "Bir alıcı eBay'den sipariş verdiğinde SellerHill bağlı Amazon hesabınızdan karşılık gelen siparişi oluşturur ve alıcının adresine gönderir. Hesap başına bir harcama üst sınırı belirlersiniz; bu sınırın üzerindeki siparişler geçmez, Bekleyen Aksiyonlar ekranında onayınızı bekler."
       },
       "q5": {
-        "question": "Alıcı mesajlarını özelleştirebilir miyim?",
-        "answer": "Evet. Sipariş alındı, kargolandı, teslim edildi ve değerlendirme talebi mesajlarının her birinin kendi düzenlenebilir şablonu vardır ve dördünü birbirinden bağımsız olarak açıp kapatabilirsiniz."
+        "question": "Takip numarası dönüştürme nedir?",
+        "answer": "Kaynaktan gelen takip numarası, ürünün nereden geldiğini alıcınıza gösterebilir. Dönüştürme açıkken SellerHill bu numarayı eBay'e yüklemeden önce farklı ve takip edilebilir bir numaraya dönüştürür. Dönüştürmenin açık olup olmayacağına ve hangi kargo firmalarını kapsayacağına siz karar verirsiniz."
       },
       "q6": {
-        "question": "Gerçek kâr nasıl hesaplanır?",
-        "answer": "SellerHill, eBay'in satış için size gerçekten ödediği net kazancı — eBay ücretleri düşüldükten sonra — alır ve Amazon siparişi için vergi ve kargo dâhil gerçekten ödediğiniz tutarı çıkarır. Yani satış fiyatından tahmini bir maliyeti değil, iki gerçek işlemi karşılaştırır."
+        "question": "İlanlarımda tedarikçimin adı görünür mü?",
+        "answer": "Hayır. Ürün görselleri eBay'in kendi sunucularına yüklenir, başlıktan marka isteğe bağlı olarak temizlenir ve açıklama şablonları tedarikçiye ait hiçbir ifade içermez. Kara listenize eklediğiniz kelimeler her ilanda yayından önce aranır; eşleşen ilan yayınlanmaz."
       },
       "q7": {
-        "question": "Onaylanmış kâr ile tahmini kâr arasındaki fark nedir?",
-        "answer": "Onaylanmış kâr, iki tarafta da eksiksiz işlem verisiyle hesaplanır. Tahmini kâr ise maliyet verisi henüz tamamlanmadığında gösterilir — örneğin Amazon sipariş maliyetleri henüz alınmamışken. Tahminler etiketlenir ve ayrı tutulur; hangi rakamın kesin olduğunu her zaman bilirsiniz."
+        "question": "Bekleyen Aksiyonlar ekranı ne işe yarar?",
+        "answer": "Otomasyonun kendi başına çözemediği her durum buraya düşer: onay bekleyen siparişler, kara listeye takılan ilanlar, bağlantısı kopan hesaplar, stoğu biten aktif ilanlar ya da dolmak üzere olan paket limitleri. Her madde en acilden başlayarak sıralanır ve sizi doğrudan ilgili ekrana götürür."
       },
       "q8": {
-        "question": "Ayar Grupları nedir?",
-        "answer": "Ayar Grubu; fiyat kuralı, stok tamponu, HTML şablonu ve diğer listeleme seçeneklerinden oluşan, yeniden kullanılabilir bir ayar setidir. Grubu bir kez oluşturur ve her ürünü ayrı ayrı yapılandırmak yerine dilediğiniz kadar ürüne uygularsınız."
+        "question": "İlan şablonlarını değiştirebilir miyim?",
+        "answer": "Evet. 12 hazır şablondan birini seçebilir, dilediğinizi düzenleyebilir ya da kendi HTML şablonunuzu yazabilirsiniz. Her Ayar Grubu farklı bir şablon kullanabilir; önizleme, ilanınızın eBay'de nasıl görüneceğini kaydetmeden önce gösterir."
       },
       "q9": {
-        "question": "Farklı ürün grupları farklı fiyat ve şablon kullanabilir mi?",
-        "answer": "Evet, Ayar Grupları tam olarak bunun için var. Sezonluk ürünleriniz sezonluk bir marj ve şablonla çalışırken elektronik ürünleriniz kendi ayarlarıyla çalışabilir; ürünleri gruplar arasında istediğiniz zaman taşıyabilirsiniz."
+        "question": "Kart bilgilerimi ve hesap bilgilerimi saklıyor musunuz?",
+        "answer": "Kart numaranızı saklamayız; ödemeler Stripe'ın güvenli ödeme sayfasında alınır ve kart bilgileriniz bize hiç ulaşmaz. Amazon hesabınızın giriş ve oturum bilgileri şifrelenerek saklanır, yalnızca sizin işlemleriniz için kullanılır ve hiçbir üçüncü taraf uygulamayla paylaşılmaz. Ayrıntılar Gizlilik Politikası'ndadır."
       },
       "q10": {
-        "question": "Birden fazla eBay mağazası yönetebilir miyim?",
-        "answer": "Evet. Tek bir SellerHill hesabına birden fazla eBay mağazası bağlayabilirsiniz. Her mağaza kendi ayarlarını, ilanlarını, siparişlerini ve kâr raporlamasını korur; her ekranı mağazaya göre filtreleyebilirsiniz."
+        "question": "Telefondan kullanabilir miyim?",
+        "answer": "Evet. SellerHill tarayıcıda çalışır ve arayüz her ekran boyutuna uyum sağlar. Ürün eklemek, ayar değiştirmek, siparişleri ve bekleyen aksiyonları takip etmek dâhil, masaüstünde yaptığınız her şeyi telefonunuzdan yapabilirsiniz; ayrı bir uygulama kurmanız gerekmez."
       },
       "q11": {
-        "question": "Herhangi bir yazılım kurmam gerekiyor mu?",
-        "answer": "Hayır. SellerHill tarayıcıda çalışır ve hesaplarınıza doğrudan bağlanır. Tarayıcı eklentisi, masaüstü uygulaması ya da kendi bilgisayarınızda sürekli açık tutmanız gereken bir şey yoktur."
+        "question": "Gerçek kâr nasıl hesaplanır?",
+        "answer": "SellerHill, eBay'in satış için size gerçekten ödediği net kazancı (eBay ücretleri düşüldükten sonra) alır ve sipariş için vergi ve kargo dâhil gerçekten ödediğiniz tutarı çıkarır. Maliyet verisi henüz tamamlanmamış siparişler \"tahmini\" olarak etiketlenir ve onaylanmış toplamdan ayrı tutulur."
       },
       "q12": {
         "question": "Ödeme yapmadan önce deneyebilir miyim?",
-        "answer": "Evet, iki şekilde. Canlı demo, kayıt gerektirmeden uygulamanın tamamını örnek verilerle açar. Ya da hesap oluşturup bir aylık ücretsiz denemeyi başlatabilirsiniz — kredi kartı gerekmez."
+        "answer": "Evet, iki şekilde. Canlı demo, kayıt gerektirmeden uygulamanın tamamını örnek verilerle açar. Ya da hesap oluşturup bir aylık ücretsiz denemeyi başlatabilirsiniz; kredi kartı gerekmez."
       }
     },
     "ctaBanner": {
       "variant2": {
-        "headline": "eBay Mağazanızı Bugün Otomatikleştirin",
-        "subheading": "Listeleme, senkronizasyon, sipariş, kargo takibi ve mesajlaşma gibi tekrar eden işleri SellerHill yürütsün; siz işinizi büyütmeye odaklanın ve ne kazandığınızı her zaman tam olarak bilin.",
+        "headline": "Daha akıllı otomasyon. Daha düşük fiyat.",
+        "subheading": "Ürün grubuna özel stratejiler, günde 4 kez senkron, eksiksiz ürün özellikleri ve sizi yönlendiren Bekleyen Aksiyonlar. Bir ay ücretsiz deneyin, kredi kartı gerekmez.",
         "button": "Ücretsiz başla"
       }
     },
     "footer": {
-      "description": "SellerHill bir Amazon-eBay otomasyon platformudur: listeleme, fiyat ve stok senkronizasyonu, otomatik sipariş, kargo takibi ve alıcı mesajları — üstelik gerçek eBay ve Amazon işlemlerinizden hesaplanan gerçek kâr raporlamasıyla.",
+      "description": "SellerHill, Amazon'dan eBay'e otomasyon platformudur: ürün grubuna özel stratejiler, günde 4 kez fiyat ve stok takibi, eksiksiz ürün özellikleri, otomatik sipariş ve kargo takibi, gerçek kâr raporlaması.",
       "product": "Ürün",
       "legal": "Yasal",
       "links": {
         "features": "Özellikler",
         "pricing": "Fiyatlandırma",
-        "howItWorks": "Nasıl çalışır",
+        "templates": "Şablonlar",
         "profit": "Gerçek kâr",
         "demo": "Canlı demo"
       },

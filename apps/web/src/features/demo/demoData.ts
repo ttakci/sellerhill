@@ -212,6 +212,97 @@ const PINNED_LISTING_ASINS: readonly string[] = [
   'B0B3MPT7X1', // Minimalist Automatic Watch, Sapphire Crystal — Seiko
 ];
 
+/**
+ * Which Setting Group a sample listing belongs to. The groups are chosen to
+ * show what the feature is FOR — a seasonal campaign and category-specific
+ * strategies living side by side in one store — rather than generic
+ * "default / high margin" labels, so the settings screen and the landing
+ * screenshots taken from it tell the same story.
+ */
+function demoGroupFor(p: DemoProduct): { id: string; name: string } {
+  if (p.category === 'Health & Beauty' || p.category === 'Jewelry & Watches') {
+    return { id: 'demo-group-2', name: DEMO_GROUP_NAMES.mothersDay };
+  }
+  if (p.category === 'Consumer Electronics' || p.category === 'Computers/Tablets') {
+    return { id: 'demo-group-3', name: DEMO_GROUP_NAMES.electronics };
+  }
+  return { id: 'demo-group-1', name: DEMO_GROUP_NAMES.everyday };
+}
+
+/**
+ * Item specifics as the create path would publish them: a real value for
+ * every attribute the source catalogue carries, not a "Does not apply"
+ * placeholder. Three pinned products carry a full table (they are the ones
+ * the landing screenshots are taken from); every other product still gets a
+ * believable handful so no listing detail renders an empty specs card.
+ */
+const DEMO_RICH_SPECS: Record<string, Record<string, string>> = {
+  B08N5WRWN1: {
+    Brand: 'Sony',
+    Model: 'WH-1000XM4',
+    MPN: 'WH1000XM4/B',
+    Type: 'Over-Ear',
+    'Form Factor': 'Over the Ear',
+    Connectivity: 'Bluetooth 5.0, 3.5 mm Jack',
+    'Noise Control': 'Active Noise Cancellation',
+    'Battery Life': '30 Hours',
+    'Charging Time': '3 Hours',
+    Microphone: 'Built-In',
+    Color: 'Black',
+    Features: 'Touch Controls, Foldable, Voice Assistant',
+    'Item Weight': '8.96 oz',
+    'Included Components': 'Carrying Case, USB-C Cable, Audio Cable',
+    UPC: '027242919419',
+  },
+  B0C3H8NRQ0: {
+    Brand: 'Tom Ford',
+    'Product Line': 'Private Blend',
+    Type: 'Eau de Parfum',
+    Volume: '50 ml',
+    'Fragrance Family': 'Floral, Woody',
+    'Top Notes': 'Bergamot, Pink Pepper',
+    'Heart Notes': 'Rose, Jasmine',
+    'Base Notes': 'Sandalwood, Amber',
+    Department: 'Women',
+    Formulation: 'Spray',
+    'Country of Manufacture': 'Italy',
+    Features: 'Long-Lasting',
+  },
+  B08XYQ4M6E: {
+    Brand: 'Keychron',
+    Model: 'K8 Pro',
+    Type: 'Mechanical Keyboard',
+    'Keyboard Layout': 'QWERTY (US)',
+    'Switch Type': 'Cherry MX Red',
+    Connectivity: 'Bluetooth, USB-C Wired',
+    Backlighting: 'RGB',
+    'Number of Keys': '87',
+    Material: 'Aluminum Frame, PBT Keycaps',
+    Compatibility: 'Mac, Windows, Linux',
+    Color: 'Space Gray',
+    Features: 'Hot-Swappable, Programmable Keys',
+  },
+};
+
+function demoSpecsFor(p: DemoProduct): Record<string, string> {
+  const rich = DEMO_RICH_SPECS[p.asin];
+  if (rich) {
+    return rich;
+  }
+  const specs: Record<string, string> = { Brand: p.brand, Type: p.category };
+  (p.features ?? []).slice(0, 3).forEach((feature, index) => {
+    specs[`Feature ${index + 1}`] = feature;
+  });
+  return specs;
+}
+
+const DEMO_GROUP_NAMES = {
+  everyday: 'Everyday essentials',
+  mothersDay: "Mother's Day gifts",
+  electronics: 'Electronics',
+  automotive: 'Automotive',
+} as const;
+
 function buildListings(): ListingDto[] {
   const rand = seeded(97);
   return PRODUCTS.map((p, i) => {
@@ -232,13 +323,14 @@ function buildListings(): ListingDto[] {
       title: p.title,
       description: p.description,
       features: p.features,
+      specs: demoSpecsFor(p),
       price: p.price,
       currency: DEMO_CURRENCY,
       quantity,
       imageUrls: [demoProductImage(p.slug)],
       ebayListingId: status === ListingStatus.DRAFT ? undefined : `1${(255000000000 + i * 137).toString()}`,
-      listingSettingsGroupId: 'demo-group-1',
-      listingSettingsGroupName: i % 3 === 0 ? 'High margin' : 'Default strategy',
+      listingSettingsGroupId: demoGroupFor(p).id,
+      listingSettingsGroupName: demoGroupFor(p).name,
       paymentPolicyId: 'demo-payment',
       shippingPolicyId: 'demo-shipping',
       returnPolicyId: 'demo-return',
@@ -271,6 +363,9 @@ export const DEMO_LISTINGS: ListingDto[] = buildListings();
 export const DEMO_LISTING_CATEGORIES: string[] = Array.from(
   new Set(PRODUCTS.map((p) => p.category))
 ).sort();
+
+/** Hours between two price/stock checks (four a day). */
+const REFRESH_STEP_HOURS = 6;
 
 /* ── Listing price/stock revision history ─────────────────────────────────
  * The revisions feature (drawer + `GET /listings/:id/revisions`) exists in
@@ -311,7 +406,7 @@ export function demoListingRevisions(listingId: string): {
   // Floor of 24 so even a week-old listing spills past one page and shows the
   // "load more" control; an old listing climbs toward hundreds of rows.
   const rowCount = Math.min(240, Math.max(24, Math.round(daysListed * 0.9)));
-  const avgStepDays = Math.max(0.75, daysListed / rowCount);
+  const avgStepDays = Math.max(0.5, daysListed / rowCount);
 
   const rows: ReturnType<typeof demoListingRevisions> = [];
 
@@ -321,7 +416,12 @@ export function demoListingRevisions(listingId: string): {
   // (older) row's `previousX`.
   let newPrice = listing.price;
   let newQuantity = listing.quantity;
-  let hoursAgo = 6 + Math.floor(rand() * 18); // most recent change: within ~1 day
+  // Changes land on the refresh schedule — four checks a day, one every six
+  // hours — so the history reads like the cadence the product runs on. A check
+  // that found nothing to change writes no row, which is why rows skip slots.
+  const now = new Date();
+  const sinceLastCheck = (now.getUTCHours() % REFRESH_STEP_HOURS) + now.getUTCMinutes() / 60 - 0.05;
+  let hoursAgo = sinceLastCheck + REFRESH_STEP_HOURS * Math.floor(rand() * 3);
 
   for (let i = 0; i < rowCount; i += 1) {
     // Mostly small repricer nudges tracking a competitor; the occasional
@@ -354,7 +454,8 @@ export function demoListingRevisions(listingId: string): {
 
     newPrice = previousPrice;
     newQuantity = previousQuantity;
-    hoursAgo += Math.round(avgStepDays * (0.5 + rand()) * 24) + Math.floor(rand() * 12);
+    const slots = Math.max(1, Math.round((avgStepDays * (0.5 + rand()) * 24) / REFRESH_STEP_HOURS));
+    hoursAgo += slots * REFRESH_STEP_HOURS;
   }
 
   return rows; // newest-first
@@ -805,6 +906,21 @@ export function buildDemoActionCenter(): ActionCenterSummaryDto {
   ].filter(Boolean) as ActionCenterSummaryDto['groups'][number]['items'];
 
   const listingItems = [
+    // A blacklist hit is the seller's own rule working as intended — the
+    // listing was stopped before a banned word reached a buyer — so the demo
+    // shows it the way a real account would see it: something to review.
+    {
+      key: ActionCenterItemKey.LISTING_JOB_FAILURES,
+      group: ActionCenterGroup.LISTINGS,
+      severity: ActionCenterSeverity.WARNING,
+      count: 3,
+      breakdown: [
+        { code: ListingFailureCode.BLACKLISTED_KEYWORD, count: 2 },
+        { code: ListingFailureCode.ZERO_STOCK, count: 1 },
+      ],
+      context: { days: 7 },
+      actionPath: '/listings/jobs',
+    },
     outOfStock > 0 && {
       key: ActionCenterItemKey.LISTING_OUT_OF_STOCK,
       group: ActionCenterGroup.LISTINGS,
@@ -1097,8 +1213,8 @@ function group(
 export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
   group(
     'demo-group-1',
-    'Default strategy',
-    'Everyday products. Margin tapers as price climbs.',
+    DEMO_GROUP_NAMES.everyday,
+    'Home and kitchen staples. Margin tapers as price climbs.',
     [
       { min: 0, max: 25, pct: 25 },
       { min: 25, max: 60, pct: 18 },
@@ -1111,26 +1227,39 @@ export const DEMO_LISTING_GROUPS: ListingSettingsGroupResponse[] = [
   ),
   group(
     'demo-group-2',
-    'High margin',
-    'Slower-moving items where margin matters more than volume.',
+    DEMO_GROUP_NAMES.mothersDay,
+    'Seasonal campaign: gift-ready template, higher margin until mid-May.',
     [
-      { min: 0, max: 40, pct: 32 },
-      { min: 40, max: 500, pct: 24 },
+      { min: 0, max: 100, pct: 30 },
+      { min: 100, max: 500, pct: 22 },
     ],
     2,
     1,
-    'demo-tpl-ds-minimalist',
+    'demo-tpl-ds-beauty-health',
     { strip: true, aiTitle: true, aiDesc: true }
   ),
   group(
     'demo-group-3',
-    'Fast movers',
-    'Thin margin, higher quantity, no AI rewrite.',
-    [{ min: 0, max: 500, pct: 11 }],
-    5,
-    2,
+    DEMO_GROUP_NAMES.electronics,
+    'Spec-heavy template, larger stock buffer for fast-moving tech.',
+    [
+      { min: 0, max: 150, pct: 16 },
+      { min: 150, max: 1000, pct: 11 },
+    ],
+    4,
+    3,
     'demo-tpl-ds-tech-gadgets',
-    { strip: false, aiTitle: false, aiDesc: false }
+    { strip: true, aiTitle: true, aiDesc: false }
+  ),
+  group(
+    'demo-group-4',
+    DEMO_GROUP_NAMES.automotive,
+    'Car parts and accessories only: fitment-focused template.',
+    [{ min: 0, max: 500, pct: 20 }],
+    2,
+    2,
+    'demo-tpl-ds-auto-parts',
+    { strip: true, aiTitle: false, aiDesc: false }
   ),
 ];
 
