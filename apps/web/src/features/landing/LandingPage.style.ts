@@ -415,10 +415,19 @@ export const MobileMenu = styled.div<{ $open: boolean }>`
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 `;
 
+/**
+ * Navy band across the top of the panel. The logo's "SELLER" is hardcoded
+ * white, so on the panel's near-white surface it disappeared — the band gives
+ * it the same dark ground as the navbar. Negative margins cancel the panel's
+ * own padding so the band runs edge to edge.
+ */
 export const MobileMenuHead = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: calc(-1 * ${tkn('spacing.lg')}) calc(-1 * ${tkn('spacing.lg')}) 0;
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
+  background: ${tkn('colors.sidebar.background')};
 `;
 
 export const MobileClose = styled.button`
@@ -428,9 +437,9 @@ export const MobileClose = styled.button`
   width: 2.25rem;
   height: 2.25rem;
   background: none;
-  border: 1px solid ${tkn('colors.landing.heroBorder')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
   border-radius: ${tkn('radius.md')};
-  color: ${tkn('colors.landing.heroText')};
+  color: ${tkn('colors.sidebar.text')};
   cursor: pointer;
 `;
 

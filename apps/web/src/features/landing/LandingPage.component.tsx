@@ -382,7 +382,7 @@ export const LandingPageComponent = ({
       <S.MobileMenuOverlay $open={mobileMenuOpen} onClick={onCloseMobileMenu} />
       <S.MobileMenu $open={mobileMenuOpen}>
         <S.MobileMenuHead>
-          {/* Panel is a near-white surface — keep the full artwork, not the icon-less wordmark. */}
+          {/* The head is a navy band (the logo's "SELLER" is white); keep the full artwork with its badge. */}
           <Logo layout="full" height={32} />
           <S.MobileClose type="button" onClick={onCloseMobileMenu} aria-label="Close">
             <Icon name="x" size={20} />
