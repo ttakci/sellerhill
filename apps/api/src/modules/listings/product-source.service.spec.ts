@@ -76,6 +76,19 @@ describe('ProductSourceService', () => {
     expect(out.get('B000000003')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.BLOCKED });
   });
 
+  it('an in-stock page with an unreadable price is unavailable, never a product priced at 0', async () => {
+    const { svc } = service(
+      { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },
+      [
+        { asin: 'B000000001', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', signals: { ...signals, price: null }, content },
+        { asin: 'B000000002', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', signals: { ...signals, price: 0, onlyLeft: 3 }, content },
+      ],
+    );
+    const out = await svc.fetchForCreate(['B000000001', 'B000000002'], AmazonMarketplace.AMAZON_US);
+    expect(out.get('B000000001')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
+    expect(out.get('B000000002')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
+  });
+
   it('chunks commerce requests at 100 ASINs and uses the background lane', async () => {
     const { svc, calls } = service({ [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1' });
     const asins = Array.from({ length: 150 }, (_, i) => `B${String(i).padStart(9, '0')}`);

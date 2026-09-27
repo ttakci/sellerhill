@@ -94,6 +94,7 @@
         "quota_exhausted": "Paket limitine ulaşıldı. Devam etmek için yükseltin veya yer açın.",
         "asin_not_found": "ASIN bulunamadı — bu tanımlayıcıyla eşleşen bir ürün yok.",
         "product_data_unavailable": "Bu ASIN için Amazon ürün verisi alınamadı.",
+        "source_price_unavailable": "Amazon fiyatı okunamadı.",
         "category_unresolved": "eBay bu ürün için bir listeleme kategorisi bulamadı.",
         "category_aspects_unavailable": "eBay ürün özellik bilgisi geçici olarak alınamadı.",
         "aspect_missing": "eBay {{aspects}} özelliğini zorunlu tutuyor ve bir değer türetilemedi.",

@@ -52,6 +52,7 @@ import {
   ListingStatus,
   OrderFulfillmentState,
   OrderStatus,
+  SourceUnavailableReason,
   buildFulfillmentStateSql,
   type ActionCenterItemDto,
   type ActionCenterSummaryDto,
@@ -478,15 +479,21 @@ export class ActionCenterService {
     );
 
     /*
-     * The source ASIN is unavailable on Amazon — either the scraper detected
-     * a 404 or the product has failed refresh enough times to be quarantined.
-     * Usually because Amazon delisted it. The eBay listing is still live and
-     * still sellable, which is the whole danger: a sale on it cannot be
-     * fulfilled. The platform stops refreshing such products but deliberately
-     * does not end the listing, so this is the only place the seller learns.
+     * The source ASIN is either unavailable on Amazon (a real HTTP 404 —
+     * `source_removed_at`, whose quantity the refresh already pushed to 0) or
+     * its data could not be read enough times to be quarantined. The second is
+     * NOT evidence Amazon delisted it: under the scraper it is our parser
+     * failing (a DOM change quarantines a whole catalogue within ~5.5 h). So
+     * the item carries one chip per cause and the copy claims only what each
+     * predicate proves. The chips are exclusive (removed wins) and sum to the
+     * count; the WHERE is the same predicate the listings deep-link filters on.
+     * The platform deliberately does not end the listing, so this is the only
+     * place the seller learns.
      */
-    const deadSource = await this.db.query<CountRow>(
-      `SELECT COUNT(*) AS count
+    const deadSource = await this.db.query<CountRow & { removed: string | number; unreadable: string | number }>(
+      `SELECT COUNT(*) AS count,
+              COUNT(*) FILTER (WHERE p.source_removed_at IS NOT NULL) AS removed,
+              COUNT(*) FILTER (WHERE p.source_removed_at IS NULL) AS unreadable
          FROM listings l
          JOIN products p ON p.id = l.product_id
         WHERE l.user_id = $1
@@ -528,6 +535,10 @@ export class ActionCenterService {
         group: ActionCenterGroup.LISTINGS,
         severity: ActionCenterSeverity.WARNING,
         count: toCount(deadSource[0]?.count),
+        breakdown: buildBreakdown({
+          [SourceUnavailableReason.REMOVED]: toCount(deadSource[0]?.removed),
+          [SourceUnavailableReason.UNREADABLE]: toCount(deadSource[0]?.unreadable),
+        }),
         actionPath: '/listings/all?status=active&sourceUnavailable=true',
       },
       {

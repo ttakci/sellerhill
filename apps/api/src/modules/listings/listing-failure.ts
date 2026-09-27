@@ -175,6 +175,12 @@ function classifyTypedError(error: unknown, raw: string): ClassifiedListingFailu
   if (name === 'ProductDataUnavailableError' || name === 'ScraperUnavailableError') {
     return { code: ListingFailureCode.PRODUCT_DATA_UNAVAILABLE, message: raw, details: { retryable: true } };
   }
+  // A live create or publish would have been priced from an unknown/0 Amazon
+  // price. Terminal for the attempt: the same page returns the same unreadable
+  // price block, and a retry would re-pay the fetch for the same refusal.
+  if (name === 'SourcePriceUnavailableError') {
+    return { code: ListingFailureCode.SOURCE_PRICE_UNAVAILABLE, message: raw, details: { retryable: false } };
+  }
   // Buffer or stock drove a live create to quantity 0. Carries the numbers the
   // seller message shows, so "why is this 0" doesn't require reading a log.
   if (name === 'ZeroStockError') {

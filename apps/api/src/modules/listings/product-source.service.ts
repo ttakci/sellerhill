@@ -62,6 +62,15 @@ export class ProductSourceService {
         out.set(asin, { kind: 'unavailable', outcome: r.outcome === SourceFetchOutcome.FOUND ? SourceFetchOutcome.PARSE_FAILED : r.outcome });
         continue;
       }
+      // An in-stock page whose price block could not be read ("see price in
+      // cart", a coupon layout, a price-only DOM change) must never become a
+      // product row: the mapper would store price 0, the listing would publish
+      // at the price floor, and the cached row would serve every later seller
+      // of that ASIN. Retryable, like any other unreadable page.
+      if (observation.commerce.price === null) {
+        out.set(asin, { kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
+        continue;
+      }
       out.set(asin, { kind: 'product', product: mapScraperProduct(asin, r.content, observation.commerce, marketplace) });
     }
     return out;

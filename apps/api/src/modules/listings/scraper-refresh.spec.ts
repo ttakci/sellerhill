@@ -40,6 +40,14 @@ describe('planScraperRefresh', () => {
   it('missing price keeps the previous price', () => {
     expect(planScraperRefresh(row, found({ price: null }), 20)).toMatchObject({ price: 10, commerceChanged: false });
   });
+  it('an in-stock observation with a null price never plans a price of 0', () => {
+    const inStockNoPrice = planScraperRefresh(row, found({ price: null, onlyLeft: 3 }), 20);
+    expect(inStockNoPrice).toMatchObject({ kind: 'observed', price: 10, stock: 3 });
+    // A row with no stored price stays null (the UPDATE keeps the column), never 0.
+    const noStored = planScraperRefresh({ ...row, price: null }, found({ price: null }), 20);
+    expect(noStored).toMatchObject({ kind: 'observed', price: null });
+    expect(planScraperRefresh(row, found({ price: 0 }), 20)).toMatchObject({ price: 10 });
+  });
   it('404 → stock 0, removed, change', () => {
     expect(planScraperRefresh(row, { ...found(), outcome: SourceFetchOutcome.NOT_FOUND, signals: null }, 20)).toMatchObject({ stock: 0, removed: true, commerceChanged: true });
   });

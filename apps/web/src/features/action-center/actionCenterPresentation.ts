@@ -91,6 +91,8 @@ const BREAKDOWN_NAMESPACE: Partial<Record<ActionCenterItemKey, string>> = {
   // detail page, while a breakdown chip needs a short snake_case-keyed label.
   // Same reason the Amazon account statuses got their own set.
   [ActionCenterItemKey.ORDER_TRACKING_PROBLEM]: 'actionCenter.reasons.trackingProblem',
+  // `SourceUnavailableReason` codes: a real 404 vs product data we could not read.
+  [ActionCenterItemKey.LISTING_SOURCE_UNAVAILABLE]: 'actionCenter.reasons.sourceUnavailable',
 };
 
 /**

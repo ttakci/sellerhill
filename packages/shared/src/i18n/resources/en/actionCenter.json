@@ -116,9 +116,9 @@
         "action": "View jobs"
       },
       "listing_source_unavailable": {
-        "title": "Live listings unavailable on Amazon",
-        "description_one": "{{count}} active listing points at a product that is unavailable on Amazon. It is still buyable on eBay and you would not be able to fulfil that sale.",
-        "description_other": "{{count}} active listings point at products that are unavailable on Amazon. They are still buyable on eBay and you would not be able to fulfil those sales.",
+        "title": "Live listings whose Amazon product is unavailable or unreadable",
+        "description_one": "{{count}} active listing points at an Amazon product that is unavailable or whose data could not be read. Check the product and end the listing if it is gone.",
+        "description_other": "{{count}} active listings point at Amazon products that are unavailable or whose data could not be read. Check the products and end the listings that are gone.",
         "action": "Review listings"
       },
       "listing_out_of_stock": {
@@ -195,6 +195,10 @@
         "needs_reauth": "Needs re-authentication",
         "invalid": "Invalid credentials",
         "locked": "Locked by Amazon"
+      },
+      "sourceUnavailable": {
+        "removed": "unavailable on Amazon (quantity set to 0)",
+        "unreadable": "product data could not be read"
       },
       "trackingProblem": {
         "wrong_page_type": "Wrong Amazon page",

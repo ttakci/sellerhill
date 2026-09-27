@@ -1897,7 +1897,7 @@ export class ListingsService {
       product.data,
       listing.listingSettingsGroupId,
       ebayAccountId,
-      { applyContentAi: false }
+      { applyContentAi: false, live: true }
     );
 
     // Prefer user-edited draft title; keep draft economics if lock overrides apply

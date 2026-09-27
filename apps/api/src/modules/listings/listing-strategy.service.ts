@@ -34,6 +34,22 @@ import {
   truncateTitleAtWordBoundary,
 } from './listing-title';
 
+/**
+ * A live listing would be priced from an Amazon price that is unknown or 0.
+ *
+ * Provider-neutral: the scraper can read "In Stock" while the price block is
+ * unreadable, and Keepa maps a missing Buy Box price to 0. Pricing from 0 hands
+ * back fees + fixed profit (or the price floor), so every sale would buy the
+ * item on Amazon at full price. A draft may still be saved; publishing it
+ * re-checks. Terminal for the attempt — see `classifyListingFailure`.
+ */
+export class SourcePriceUnavailableError extends Error {
+  override name = 'SourcePriceUnavailableError';
+  constructor(asin: string) {
+    super(`Cannot list ASIN ${asin}: the Amazon price is unknown or 0.`);
+  }
+}
+
 @Injectable()
 export class ListingStrategyService {
   private readonly logger = new Logger(ListingStrategyService.name);
@@ -50,14 +66,21 @@ export class ListingStrategyService {
    * @param options.applyContentAi — **create path only**. When true and group AI flags
    * are on, may call the shared LLM client. Product-sync / Keepa refresh must pass false (default)
    * so we never rewrite 100k titles on every price tick.
+   * @param options.live — the result will be published to eBay now (a live
+   * create or a draft publish). Refuses a non-positive source price; a draft
+   * create and an import of an already-live eBay listing leave it unset.
    */
   async prepareListingData(
     userId: string,
     product: ProductData,
     settingsGroupId: string,
     storeId: string | null = null,
-    options?: { applyContentAi?: boolean }
+    options?: { applyContentAi?: boolean; live?: boolean }
   ) {
+    // Checked first, before the settings lookup and any LLM spend.
+    if (options?.live && !(Number(product.price?.current) > 0)) {
+      throw new SourcePriceUnavailableError(product.asin || 'unknown');
+    }
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 

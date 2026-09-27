@@ -28,6 +28,12 @@ export enum ListingFailureCode {
   ASIN_NOT_FOUND = 'asin_not_found',
   /** Keepa returned nothing usable for the ASIN. */
   PRODUCT_DATA_UNAVAILABLE = 'product_data_unavailable',
+  /**
+   * The Amazon price could not be read (or read as 0), so a live listing would
+   * be priced from nothing. Terminal for that attempt: the seller re-adds the
+   * ASIN once the page shows a price. A draft may still be saved.
+   */
+  SOURCE_PRICE_UNAVAILABLE = 'source_price_unavailable',
   /** eBay's taxonomy could not name a listable leaf category. */
   CATEGORY_UNRESOLVED = 'category_unresolved',
   /** Category aspect metadata is unavailable and nothing was cached. */

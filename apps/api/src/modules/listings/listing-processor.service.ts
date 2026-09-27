@@ -265,7 +265,7 @@ export class ListingProcessorService extends WorkerHost {
           productData,
           listingSettingsGroupId,
           ebayAccountId,
-          { applyContentAi: true }
+          { applyContentAi: true, live: !asDraft }
         );
 
         // Drafts may hold a zero-stock ASIN so the seller can prepare it and
