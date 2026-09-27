@@ -123,24 +123,24 @@ FROM jsonb_each($template_samples$
     "product_description": "A pleated paper panel filter that traps dust and debris before it reaches the engine. A flexible polyurethane seal gives a tight fit in the air box."
   },
   "ds-apparel-fashion": {
-    "title": "Women's Fine-Knit Button-Front Cardigan, Stand Collar, Long Sleeve, Burgundy",
-    "main_image": "/template-samples/knit-cardigan.jpg",
+    "title": "Women's Chunky Rib-Knit Cardigan, V-Neck Button Front, Relaxed Fit",
+    "main_image": "/template-samples/knit-cardigans.jpg",
     "has_features": "1",
     "has_details": "1",
     "feature_bullets": [
-      "Fine-gauge knit with a soft hand",
-      "Full-length button placket",
-      "Stand collar and long sleeves",
-      "Fitted silhouette"
+      "Chunky rib knit, soft and warm",
+      "V-neck with button front",
+      "Ribbed cuffs and hem",
+      "Relaxed, easy-layering fit"
     ],
     "product_details": [
       "Brand: Unbranded",
-      "Material: Wool Blend",
+      "Material: Cotton Blend",
       "Style: Cardigan",
       "Sleeve Length: Long Sleeve",
-      "Color: Burgundy"
+      "Color: Grey, Cream, Camel"
     ],
-    "product_description": "A fitted, fine-gauge knit cardigan with a stand collar and a long row of small buttons. It dresses up with a skirt and down with jeans."
+    "product_description": "A soft, chunky rib-knit cardigan with a V-neck, a two-button front and ribbed cuffs. Relaxed enough to layer, available in grey, cream and camel."
   },
   "ds-beauty-health": {
     "title": "Natural Handmade Soap Bars, Set of 5, Plant-Based, Assorted Scents",
@@ -163,24 +163,24 @@ FROM jsonb_each($template_samples$
     "product_description": "Five hand-cut, plant-based soap bars in creamy neutral tones, from a gentle unscented bar to an oat-flecked exfoliating one. Rich lather, no synthetic dyes."
   },
   "ds-pet-supplies": {
-    "title": "Ceramic Dog Bowl with Faux Leather Base, Non-Slip, 2 Cups",
-    "main_image": "/template-samples/ceramic-dog-bowl.jpg",
+    "title": "Stainless Steel Dog Bowl with Melamine Stand, Non-Slip, 3 Cups",
+    "main_image": "/template-samples/steel-dog-bowl.jpg",
     "has_features": "1",
     "has_details": "1",
     "feature_bullets": [
-      "Glazed ceramic bowl, easy to clean",
-      "Stitched faux-leather non-slip base",
-      "Heavy enough not to tip over",
-      "Suits food or water"
+      "Removable stainless steel bowl",
+      "Sturdy melamine outer stand",
+      "Non-slip rubber base",
+      "Dishwasher safe"
     ],
     "product_details": [
       "Brand: Unbranded",
       "Pet Type: Dog, Cat",
-      "Material: Ceramic, Faux Leather",
-      "Capacity: 2 Cups",
-      "Color: White, Brown"
+      "Material: Stainless Steel, Melamine",
+      "Capacity: 3 Cups",
+      "Color: White"
     ],
-    "product_description": "A heavy glazed ceramic bowl set in a stitched faux-leather base that keeps it from sliding. Easy to clean and good-looking enough for any kitchen floor."
+    "product_description": "A removable stainless steel bowl set in a sturdy melamine stand with a non-slip rubber base. Rust-resistant, dishwasher-safe and easy to keep clean."
   },
   "ds-fitness-sports": {
     "title": "Non-Slip Yoga Mat, 6mm Thick, Lightweight Exercise Mat with Carry Strap",

@@ -67,8 +67,8 @@ Selection rules for the replacements:
 Replaced with operator-supplied Pexels photos: `ceramic-dog-bowl.jpg` (Pet),
 `natural-soap-bars.jpg` (Beauty), `wooden-blocks.jpg` (Toys); copy in 122
 updated, previews + catalog.json rebuilt, guard spec 140/140.
-STILL OPEN: `knit-cardigan.jpg` (Apparel) looks vintage — ask the operator for a
-new-looking Pexels/Pixabay apparel photo. Also record the three Pexels page URLs
+Apparel (`knit-cardigans.jpg`) and Pet (`steel-dog-bowl.jpg`) also replaced with Pexels photos.
+STILL OPEN: record the three Pexels page URLs
 in CREDITS.md (ask the operator). Browser check still not done.
 
 ## Remaining (not yet run / done)

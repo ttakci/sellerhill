@@ -29,16 +29,16 @@ sign-up-free demo; it is not a photo.
 |---|---|---|---|---|
 | air-filter.jpg | Auto Parts | Public domain | Elwood | https://commons.wikimedia.org/wiki/File:Filtro_aria_pannello.JPG |
 | led-flashlight.jpg | Outdoor Survival | CC0 | Kathy Zinn | https://commons.wikimedia.org/wiki/File:Small_black_flashlight.jpg |
-| knit-cardigan.jpg | Apparel Fashion | CC0 | The Metropolitan Museum of Art | https://commons.wikimedia.org/wiki/File:Sweater_MET_CI55.45.7.jpg |
 
 ## From Pexels (Pexels License: free commercial use, no attribution required)
 
 Downloaded by the operator on 2026-09-27; cropped to a square around the
-product (the dog-bowl photo's hand and scoop are outside the crop).
+product (the tiny garment care labels are unreadable at 640px).
 
 | File | Template | License | Source |
 |---|---|---|---|
-| ceramic-dog-bowl.jpg | Pet Supplies | Pexels License | pexels.com (operator download, URL to be recorded) |
+| steel-dog-bowl.jpg | Pet Supplies | Pexels License | pexels.com (operator download, URL to be recorded) |
+| knit-cardigans.jpg | Apparel Fashion | Pexels License | pexels.com (operator download, URL to be recorded) |
 | natural-soap-bars.jpg | Beauty Health | Pexels License | pexels.com (operator download, URL to be recorded) |
 | wooden-blocks.jpg | Toys Kids | Pexels License | pexels.com (operator download, URL to be recorded) |
 
@@ -63,10 +63,9 @@ every template photo lives in one folder.
 - `wireless-earbuds.jpg` — maker's logo on both earbud caps painted out (done for the demo copy).
 - None of the six Commons photos needed a mark painted out. They were only
   squared: `air-filter.jpg` / `led-flashlight.jpg` extend their own backdrop,
-  `knit-cardigan.jpg` sits on a flat backdrop colour.
-- `knit-cardigan.jpg` still looks vintage (museum piece) and should be replaced
-  with a new-looking photo; `slow-feeder-bowl`, `heart-soap` and the old
-  `wooden-blocks` were replaced by the Pexels photos for looking used.
+- The earlier Commons picks `knit-cardigan` (museum piece), `slow-feeder-bowl`,
+  `heart-soap` and the old `wooden-blocks` were replaced by Pexels photos for
+  looking used/vintage.
 
 ## Rejected during selection (so they are not re-proposed)
 
