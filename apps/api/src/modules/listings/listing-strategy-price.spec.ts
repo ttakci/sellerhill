@@ -64,6 +64,11 @@ describe('ListingStrategyService — non-positive source price', () => {
     expect(result.price).toBeGreaterThan(10);
   });
 
+  it('the cheap price/quantity path never refuses, so the create worker can report zero stock first', async () => {
+    const outOfStock = { ...product(0), stock: 0 } as ProductData;
+    await expect(service.computePricing('u', outOfStock, 'group-1', group)).resolves.toMatchObject({ quantity: 0 });
+  });
+
   it('classifies as a terminal, seller-readable failure', () => {
     const classified = classifyListingFailure(new SourcePriceUnavailableError('B0C1HJV7BJ'));
     expect(classified.code).toBe(ListingFailureCode.SOURCE_PRICE_UNAVAILABLE);

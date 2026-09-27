@@ -258,6 +258,31 @@ export class ListingProcessorService extends WorkerHost {
           AmazonMarketplace.AMAZON_US,
           prefetched
         );
+
+        // Drafts may hold a zero-stock ASIN so the seller can prepare it and
+        // publish once Amazon restocks; a live publish must never push qty 0.
+        // Checked FIRST, with the cheap price/quantity path: an out-of-stock
+        // page carries no price, and the reason the seller needs is "out of
+        // stock", not the price refusal `prepareListingData({ live })` would
+        // otherwise raise — and a refused item should spend no image upload
+        // and no LLM call.
+        if (!asDraft) {
+          const group = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
+          const { quantity } = await this.listingStrategyService.computePricing(
+            userId,
+            productData,
+            listingSettingsGroupId,
+            group
+          );
+          if (quantity === 0) {
+            throw new ZeroStockError(
+              item.asin,
+              productData.stock ?? 0,
+              productData.stockStatus === SourceStockStatus.AT_LEAST,
+              group.stock?.stockBuffer ?? 0
+            );
+          }
+        }
         // Skipped for a draft: persistDraft below never reads imageUrls or
         // mainImageUrl (it persists only price/quantity/category fields), so
         // resolving EPS images here would spend a real eBay Media API upload
@@ -277,18 +302,6 @@ export class ListingProcessorService extends WorkerHost {
           ebayAccountId,
           { applyContentAi: true, live: !asDraft }
         );
-
-        // Drafts may hold a zero-stock ASIN so the seller can prepare it and
-        // publish once Amazon restocks; a live publish must never push qty 0.
-        if (!asDraft && listingData.quantity === 0) {
-          const group = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
-          throw new ZeroStockError(
-            item.asin,
-            productData.stock ?? 0,
-            productData.stockStatus === SourceStockStatus.AT_LEAST,
-            group.stock?.stockBuffer ?? 0
-          );
-        }
 
         if (asDraft) {
           // Stop before every eBay call. Category and item specifics are

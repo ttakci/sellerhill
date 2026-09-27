@@ -3,6 +3,7 @@ import {
   PlatformSettingKey,
   ProductDataProviderKind,
   SourceFetchOutcome,
+  SourceStockStatus,
   type ScraperProductResult,
 } from '@repo/shared';
 
@@ -107,6 +108,23 @@ describe('ProductSourceService', () => {
     const out = await svc.fetchForCreate(['B000000001', 'B000000002'], AmazonMarketplace.AMAZON_US);
     expect(out.get('B000000001')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
     expect(out.get('B000000002')).toEqual({ kind: 'unavailable', outcome: SourceFetchOutcome.PARSE_FAILED });
+  });
+
+  it('an out-of-stock page with no price is still a product (price 0, stock 0) — a permanent condition, not a retry', async () => {
+    const { svc } = service(
+      { [PlatformSettingKey.SCRAPER_PROXIES]: 'http://h:1', [PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR]: 20 },
+      [
+        {
+          asin: 'B000000001', outcome: SourceFetchOutcome.FOUND, fetchedAt: 't', content,
+          signals: { ...signals, price: null, isInStock: false, availabilityText: 'Currently unavailable', quantityMax: null },
+        },
+      ],
+    );
+    const out = await svc.fetchForCreate(['B000000001'], AmazonMarketplace.AMAZON_US);
+    expect(out.get('B000000001')).toMatchObject({
+      kind: 'product',
+      product: { price: { current: 0 }, stock: 0, stockStatus: SourceStockStatus.OUT_OF_STOCK },
+    });
   });
 
   it('chunks commerce requests at 100 ASINs and uses the background lane', async () => {

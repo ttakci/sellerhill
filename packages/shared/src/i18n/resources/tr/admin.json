@@ -2,7 +2,7 @@
   "admin": {
     "errors": {
       "setting": {
-        "notProxyUrl": "Bir veya daha fazla girdi proxy URL'si değil (şema://host:port bekleniyor)."
+        "notProxyUrl": "{{entry}}. girdi bir proxy URL'si değil (http(s)://, socks5:// veya socks5h:// ile host:port bekleniyor)."
       }
     },
     "title": "Yönetim operasyonları",
@@ -283,7 +283,7 @@
         "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz.",
         "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir.",
         "product.dataProvider": "Amazon ürün verisinin nereden alındığı. \"scraper\" kendi servisimiz, \"keepa\" geri dönüş seçeneği. İkisi karışmaz.",
-        "scraper.proxies": "Her satıra bir proxy (http://kullanıcı:şifre@host:port). Hiç yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
+        "scraper.proxies": "Virgülle ayrılmış proxy URL'leri (http://kullanıcı:şifre@host:port; https://, socks5:// ve socks5h:// da geçerli). Hiç yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
         "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Her proxy bu hıza yetecek kadar işçi çalıştırır; Amazon ~2 sn içinde yanıt verdiği sürece toplam verim ≈ hız × proxy sayısı.",
         "scraper.inStockFloor": "Amazon sayı vermeden \"In Stock\" gösterdiğinde kaydedilen stok. N+ olarak gösterilir.",
         "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar."

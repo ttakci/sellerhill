@@ -65,6 +65,18 @@ describe('product source invariants', () => {
     expect(keepaCall).toBeGreaterThan(close);
   });
 
+  it('a live create checks zero stock BEFORE the price refusal, so an out-of-stock page reads as out of stock', () => {
+    const batchStart = src.indexOf('private async processListingBatch(');
+    expect(batchStart).toBeGreaterThan(-1);
+    const batch = src.slice(batchStart);
+    const zeroStock = batch.indexOf('throw new ZeroStockError(');
+    const prepare = batch.indexOf('this.listingStrategyService.prepareListingData(');
+    expect(zeroStock).toBeGreaterThan(-1);
+    expect(prepare).toBeGreaterThan(zeroStock);
+    // ...and the price refusal is still requested for every live create.
+    expect(batch.slice(prepare, prepare + 400)).toMatch(/live: !asDraft/);
+  });
+
   it('an unanswered scraper fetch is retryable PRODUCT_DATA_UNAVAILABLE, never ASIN_NOT_FOUND', () => {
     for (const name of ['ProductDataUnavailableError', 'ScraperUnavailableError']) {
       const error = Object.assign(new Error('scraper: blocked for B000000001'), { name });
