@@ -14,7 +14,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   AdminWarningKind,
   AdminWarningLevel,
+  ListingStatus,
   PlatformSettingKey,
+  ProductDataProviderKind,
   UsageEventSource,
   UsageMetric,
   type AdminBillingMetricsDto,
@@ -28,6 +30,7 @@ import {
   type QueueObservationDto,
   type QueueObservationQuery,
   type QueueOperationSummaryDto,
+  type ScraperStats,
   type UsageSummaryDto,
   type UserCostSummaryDto,
 } from '@repo/shared';
@@ -35,6 +38,8 @@ import type { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { ProductSourceService } from '../listings/product-source.service';
+import { ScraperClient } from '../listings/scraper.client';
 
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
 import {
@@ -43,6 +48,7 @@ import {
   buildQuotaPressureSummary,
   resolveCostTotal,
 } from './billing-metrics.helpers';
+import { achievableSyncsPerDay, blockRatePercent } from './scraper-ops.helpers';
 
 interface CountRow {
   count: string;
@@ -107,7 +113,9 @@ export class AdminService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly productSource: ProductSourceService,
+    private readonly scraperClient: ScraperClient
   ) {}
 
   /**
@@ -477,16 +485,76 @@ export class AdminService {
       const warning = thresholdWarning(AdminWarningKind.QUEUE_WAITING, queue.waiting, queueThreshold);
       if (warning) {warnings.push({ ...warning, subject: queue.name });}
     }
-    if (keepaTokensLeft !== null) {
-      const threshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_KEEPA_LOW_TOKENS_THRESHOLD);
-      if (keepaTokensLeft <= threshold) {
-        warnings.push({ kind: AdminWarningKind.KEEPA_LOW_TOKENS, level: keepaTokensLeft <= threshold / 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: keepaTokensLeft, threshold });
+
+    // Which provider decides which health cards render — Keepa's token
+    // balance is meaningless once the scraper is the active provider, and the
+    // scraper's own health (proxies, block rate) is meaningless under Keepa.
+    const productDataProvider = await this.productSource.activeProvider();
+    let scraperStats: ScraperStats | null = null;
+    let scraperProxies: string[] | null = null;
+    if (productDataProvider === ProductDataProviderKind.KEEPA) {
+      if (keepaTokensLeft !== null) {
+        const threshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_KEEPA_LOW_TOKENS_THRESHOLD);
+        if (keepaTokensLeft <= threshold) {
+          warnings.push({ kind: AdminWarningKind.KEEPA_LOW_TOKENS, level: keepaTokensLeft <= threshold / 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: keepaTokensLeft, threshold });
+        }
+      }
+    } else {
+      scraperProxies = await this.productSource.proxies();
+      if (scraperProxies.length === 0) {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_NO_PROXIES, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 1 });
+      }
+      try {
+        scraperStats = await this.scraperClient.getStats();
+        const rate = blockRatePercent(scraperStats);
+        const warnAt = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_BLOCK_RATE_WARN_PERCENT);
+        if (rate !== null && rate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_BLOCK_RATE_HIGH, level: rate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: rate, threshold: warnAt });
+        }
+      } catch {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_UNREACHABLE, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 0 });
       }
     }
+
     const llmThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LLM_FAILURE_RATE_THRESHOLD);
     const llmWarning = thresholdWarning(AdminWarningKind.LLM_FAILURE_RATE, llmFailureRatePct, llmThreshold);
     if (llmWarning) {warnings.push(llmWarning);}
-    return { generatedAt: new Date().toISOString(), queues: queueSummaries, keepaTokensLeft, llmFailureRatePct, warnings };
+
+    // Refresh lag: how far behind schedule the oldest overdue ACTIVE-listed
+    // product is, and how many distinct products the refresh pipeline is
+    // actually responsible for — the real denominator for capacity planning,
+    // not the whole `products` table (draft/ended listings are never refreshed).
+    const [lagRow] = await this.databaseService.query<{ lag_minutes: string | null; unique_asins: string }>(
+      `SELECT EXTRACT(EPOCH FROM (NOW() - MIN(p.next_refresh_at)) FILTER (WHERE p.next_refresh_at < NOW())) / 60 AS lag_minutes,
+              COUNT(*)::text AS unique_asins
+         FROM products p
+        WHERE EXISTS (SELECT 1 FROM listings l WHERE l.product_id = p.id AND l.status = $1)`,
+      [ListingStatus.ACTIVE]
+    );
+    const refreshLagMinutes = lagRow?.lag_minutes !== null && lagRow?.lag_minutes !== undefined ? Math.round(Number(lagRow.lag_minutes)) : null;
+    const intervalMinutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
+    if (refreshLagMinutes !== null && refreshLagMinutes > intervalMinutes) {
+      warnings.push({ kind: AdminWarningKind.REFRESH_LAG, level: refreshLagMinutes > intervalMinutes * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: refreshLagMinutes, threshold: intervalMinutes });
+    }
+    const uniqueRefreshedAsins = Number(lagRow?.unique_asins ?? 0);
+    // scraperProxies was already fetched once above, in the same branch that
+    // set productDataProvider to SCRAPER — never re-fetched here.
+    const achievable = productDataProvider === ProductDataProviderKind.SCRAPER && scraperProxies
+      ? achievableSyncsPerDay(scraperProxies.length, await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS), uniqueRefreshedAsins)
+      : null;
+
+    return {
+      generatedAt: new Date().toISOString(),
+      queues: queueSummaries,
+      keepaTokensLeft,
+      llmFailureRatePct,
+      warnings,
+      productDataProvider,
+      scraperStats,
+      refreshLagMinutes,
+      uniqueRefreshedAsins,
+      achievableSyncsPerDay: achievable === null ? null : Math.round(achievable * 10) / 10,
+    };
   }
 
   // --- internals -------------------------------------------------------------

@@ -51,7 +51,11 @@
     "warnings": {
       "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
       "keepa_low_tokens": "Keepa token bakiyesi düşük",
-      "llm_failure_rate": "LLM hata oranı yükseldi"
+      "llm_failure_rate": "LLM hata oranı yükseldi",
+      "scraper_no_proxies": "Scraper proxy'si tanımlı değil — Amazon'dan veri çekilmiyor",
+      "scraper_unreachable": "Scraper servisine ulaşılamıyor",
+      "scraper_block_rate_high": "Scraper blok oranı yüksek (%)",
+      "refresh_lag": "Ürün yenileme takvimin gerisinde (dakika)"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -100,6 +104,10 @@
       "ebayStores": "Aktif eBay mağazaları",
       "amazonAccounts": "Amazon alıcı hesapları",
       "keepaBalance": "Kalan Keepa token",
+      "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan)",
+      "refreshLag": "Yenileme gecikmesi",
+      "refreshLagValue": "{{minutes}} dk",
+      "syncsPerDay": "Ulaşılabilir günlük sync",
       "warningsTitle": "Uyarılar",
       "noWarnings": "Aktif uyarı yok.",
       "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI'ı ile değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."

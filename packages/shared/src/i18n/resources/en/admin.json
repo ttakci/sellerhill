@@ -51,7 +51,11 @@
     "warnings": {
       "queue_waiting": "{{subject}} queue waiting threshold exceeded",
       "keepa_low_tokens": "Keepa token balance is low",
-      "llm_failure_rate": "LLM failure rate is elevated"
+      "llm_failure_rate": "LLM failure rate is elevated",
+      "scraper_no_proxies": "No scraper proxies configured — no Amazon data is being fetched",
+      "scraper_unreachable": "Scraper service is unreachable",
+      "scraper_block_rate_high": "Scraper block rate is elevated (%)",
+      "refresh_lag": "Product refresh is behind schedule (minutes)"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokens",
@@ -100,6 +104,10 @@
       "ebayStores": "Active eBay stores",
       "amazonAccounts": "Amazon buyer accounts",
       "keepaBalance": "Keepa tokens left",
+      "scraperLastHour": "Scraper, last hour (ok · blocked · unreadable)",
+      "refreshLag": "Refresh lag",
+      "refreshLagValue": "{{minutes}} min",
+      "syncsPerDay": "Achievable syncs per day",
       "warningsTitle": "Warnings",
       "noWarnings": "No active warnings.",
       "roleCliNotice": "User roles are changed only through the operator CLI. HTTP role escalation is disabled."

@@ -21,6 +21,7 @@ import {
 
 const CATEGORY_ORDER: PlatformSettingCategory[] = [
   PlatformSettingCategory.KEEPA,
+  PlatformSettingCategory.SCRAPER,
   PlatformSettingCategory.LLM,
   PlatformSettingCategory.EBAY,
   PlatformSettingCategory.AMAZON,

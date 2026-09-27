@@ -1,6 +1,7 @@
 import {
   AdminWarningLevel,
   AspectDefaultSourceDto,
+  ProductDataProviderKind,
   QuotaPressureBand,
 } from '@repo/shared';
 import {
@@ -104,14 +105,48 @@ export const AdminPageComponent = ({
                 {overview?.activeAmazonAccounts ?? '—'}
               </Text>
             </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.overview.keepaBalance')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {operations?.keepaTokensLeft ?? '—'}
-              </Text>
-            </S.SummaryCard>
+            {operations?.productDataProvider === ProductDataProviderKind.KEEPA && (
+              <S.SummaryCard>
+                <Text variant="caption" color="text.secondary">
+                  {t('admin.overview.keepaBalance')}
+                </Text>
+                <Text variant="metric" weight="semibold" numeric>
+                  {operations?.keepaTokensLeft ?? '—'}
+                </Text>
+              </S.SummaryCard>
+            )}
+            {operations?.productDataProvider === ProductDataProviderKind.SCRAPER && (
+              <>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.scraperLastHour')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {operations.scraperStats
+                      ? `${operations.scraperStats.window1h.found} · ${operations.scraperStats.window1h.blocked} · ${operations.scraperStats.window1h.parseFailed}`
+                      : '—'}
+                  </Text>
+                </S.SummaryCard>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.refreshLag')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {operations.refreshLagMinutes !== null
+                      ? t('admin.overview.refreshLagValue', { minutes: operations.refreshLagMinutes })
+                      : '—'}
+                  </Text>
+                </S.SummaryCard>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.syncsPerDay')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {operations.achievableSyncsPerDay ?? '—'}
+                  </Text>
+                </S.SummaryCard>
+              </>
+            )}
           </S.Grid>
 
           <S.Section>
