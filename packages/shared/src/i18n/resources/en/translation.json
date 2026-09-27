@@ -462,12 +462,13 @@
         "specifics": "Item specifics",
         "mobile": "Mobile",
         "trust": "Security & privacy"
-      }
+      },
+      "about": "About us"
     },
     "hero": {
       "eyebrow": "Amazon → eBay automation",
       "headline": "Full automation for your eBay store.",
-      "headlineAccent": "At the lowest price on the market.",
+      "headlineAccent": "At an affordable price.",
       "subheading": "Pricing and template rules per product group, price and stock checks four times a day, item specifics filled in completely, automatic orders and tracking. Plus a Pending Actions screen that tells you exactly what needs you next.",
       "ctaPrimary": "Start free",
       "ctaSecondary": "Live demo",
@@ -476,7 +477,7 @@
       "trialCancelAnytime": "Cancel anytime",
       "trialMobile": "Run it from your phone",
       "priceBadge": {
-        "caption": "lowest price on the market",
+        "caption": "affordable monthly price",
         "per": "/MO"
       },
       "toast": {
@@ -542,7 +543,7 @@
         "chipBlacklist": "Blacklist check"
       },
       "price": {
-        "title": "The most affordable automation on the market",
+        "title": "Affordable automation",
         "description": "The complete professional automation set for a far lower monthly fee. Every feature is in every plan; plans only differ by listing and order volume.",
         "cta": "See plans"
       }
@@ -702,6 +703,26 @@
       "privacyLink": "Privacy Policy",
       "termsLink": "Terms of Service"
     },
+    "about": {
+      "eyebrow": "About us",
+      "sectionTitle": "A software team that knows selling from the inside.",
+      "lead": "SellerHill is a software product developed by 2B Trading, LLC. Founded in Wyoming in 2022, our team learned this business firsthand by selling on Amazon and eBay.",
+      "body": "We build SellerHill by combining that selling experience with 20 years of software engineering. Our goal is a platform that runs a seller's daily work on its own, grounds every decision in accurate data and keeps that data safe. We keep improving the product with feedback from the sellers who use it.",
+      "facts": {
+        "experience": {
+          "title": "Features born from real needs",
+          "description": "Setting Groups, complete item specifics and Pending Actions came out of problems we hit while selling. We add features that do the job, not ones that only look good on paper."
+        },
+        "data": {
+          "title": "Accurate data, no inflated numbers",
+          "description": "Profit is calculated from actual eBay earnings and actual Amazon cost. When an order's cost is not known yet, we do not fill it with a guess; we show it clearly."
+        },
+        "security": {
+          "title": "Security by design",
+          "description": "Account credentials are stored encrypted and payment details never reach us. Security is the foundation of the architecture, not a feature added later."
+        }
+      }
+    },
     "standard": {
       "sectionTitle": "And everything you expect from an automation platform.",
       "sectionSubtitle": "The fundamentals, complete, and all of them in every plan.",
@@ -777,7 +798,7 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "sectionTitle": "The most affordable automation on the market.",
+      "sectionTitle": "Affordable automation.",
       "sectionSubtitle": "Every plan includes every feature. Plans differ only by active listings and monthly order volume, so features other tools keep for their top tiers are yours even on the smallest plan.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",

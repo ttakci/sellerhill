@@ -462,12 +462,13 @@
         "specifics": "Ürün özellikleri",
         "mobile": "Mobil kullanım",
         "trust": "Güvenlik ve gizlilik"
-      }
+      },
+      "about": "Hakkımızda"
     },
     "hero": {
       "eyebrow": "Amazon → eBay otomasyonu",
       "headline": "eBay mağazanız için tam otomasyon.",
-      "headlineAccent": "Piyasanın en uygun fiyatıyla.",
+      "headlineAccent": "Uygun fiyatla.",
       "subheading": "Ürün grubuna özel fiyat ve şablon kuralları, günde 4 kez fiyat ve stok takibi, eksiksiz doldurulan ürün özellikleri, otomatik sipariş ve kargo takibi. Üstelik sizi her adımda yönlendiren bir Bekleyen Aksiyonlar ekranıyla.",
       "ctaPrimary": "Ücretsiz başla",
       "ctaSecondary": "Canlı demo",
@@ -476,7 +477,7 @@
       "trialCancelAnytime": "İstediğiniz zaman iptal",
       "trialMobile": "Telefonunuzdan yönetin",
       "priceBadge": {
-        "caption": "piyasanın en uygun fiyatı",
+        "caption": "uygun aylık fiyat",
         "per": "/AY"
       },
       "toast": {
@@ -542,7 +543,7 @@
         "chipBlacklist": "Kara liste kontrolü"
       },
       "price": {
-        "title": "Piyasanın en uygun fiyatlı otomasyonu",
+        "title": "Uygun fiyatlı otomasyon",
         "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette; paketler yalnızca ilan ve sipariş hacmine göre ayrılır.",
         "cta": "Paketleri gör"
       }
@@ -702,6 +703,26 @@
       "privacyLink": "Gizlilik Politikası",
       "termsLink": "Kullanım Koşulları"
     },
+    "about": {
+      "eyebrow": "Hakkımızda",
+      "sectionTitle": "Satıcılığı içeriden bilen bir yazılım ekibi.",
+      "lead": "SellerHill, 2B Trading, LLC'nin geliştirdiği bir yazılım ürünüdür. 2022'de Wyoming'de kurulan ekibimiz, Amazon ve eBay'de bizzat satış yaparak bu işi içeriden öğrendi.",
+      "body": "SellerHill'i bu satış deneyimini 20 yıllık yazılım tecrübesiyle birleştirerek geliştiriyoruz. Hedefimiz, satıcının günlük işini kendi kendine yürüten, kararlarını doğru veriye dayandıran ve verisini güvende tutan bir platform. Ürünü, kullanan satıcıların geri bildirimleriyle sürekli geliştiriyoruz.",
+      "facts": {
+        "experience": {
+          "title": "Gerçek ihtiyaçtan doğan özellikler",
+          "description": "Ayar Grupları, eksiksiz ürün özellikleri ve Bekleyen Aksiyonlar gibi araçlar, satış yaparken yaşadığımız sorunlardan çıktı. Kâğıt üzerinde güzel görünen değil, işe yarayan özellikleri ekliyoruz."
+        },
+        "data": {
+          "title": "Doğru veri, abartısız rakam",
+          "description": "Kârı gerçek eBay kazancı ve gerçek Amazon maliyetiyle hesaplarız. Maliyeti henüz bilinmeyen bir siparişi tahminle doldurmaz, bunu açıkça gösteririz."
+        },
+        "security": {
+          "title": "Güvenlik tasarımın parçası",
+          "description": "Hesap bilgileri şifrelenerek saklanır, ödeme bilgileri hiç bize ulaşmaz. Güvenliği sonradan eklenen bir özellik olarak değil, mimarinin temeli olarak ele alıyoruz."
+        }
+      }
+    },
     "standard": {
       "sectionTitle": "Ve bir otomasyon platformundan beklediğiniz her şey.",
       "sectionSubtitle": "Temel özellikler eksiksiz; hepsi her pakette.",
@@ -777,7 +798,7 @@
     },
     "pricing": {
       "eyebrow": "Fiyatlandırma",
-      "sectionTitle": "Piyasanın en uygun fiyatlı otomasyonu.",
+      "sectionTitle": "Uygun fiyatlı otomasyon.",
       "sectionSubtitle": "Her pakette bütün özellikler var. Paketler yalnızca aktif ilan sayınıza ve aylık sipariş hacminize göre ayrılır; başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
