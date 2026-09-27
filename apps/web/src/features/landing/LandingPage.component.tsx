@@ -53,6 +53,12 @@ const TEMPLATE_PREVIEWS = [
   { key: 'kitchenDining', file: 'kitchen-dining' },
   { key: 'fitnessSports', file: 'fitness-sports' },
   { key: 'outdoorSurvival', file: 'outdoor-survival' },
+  { key: 'beautyHealth', file: 'beauty-health' },
+  { key: 'apparelFashion', file: 'apparel-fashion' },
+  { key: 'autoParts', file: 'auto-parts' },
+  { key: 'petSupplies', file: 'pet-supplies' },
+  { key: 'toysKids', file: 'toys-kids' },
+  { key: 'minimalist', file: 'minimalist' },
 ] as const;
 
 type TemplateKey = (typeof TEMPLATE_PREVIEWS)[number]['key'];
