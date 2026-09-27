@@ -462,12 +462,13 @@
         "specifics": "Item specifics",
         "mobile": "Mobile",
         "trust": "Security & privacy"
-      }
+      },
+      "about": "About us"
     },
     "hero": {
       "eyebrow": "Amazon → eBay automation",
       "headline": "Full automation for your eBay store.",
-      "headlineAccent": "At the lowest price on the market.",
+      "headlineAccent": "At an affordable price.",
       "subheading": "Pricing and template rules per product group, price and stock checks four times a day, item specifics filled in completely, automatic orders and tracking. Plus a Pending Actions screen that tells you exactly what needs you next.",
       "ctaPrimary": "Start free",
       "ctaSecondary": "Live demo",
@@ -476,7 +477,7 @@
       "trialCancelAnytime": "Cancel anytime",
       "trialMobile": "Run it from your phone",
       "priceBadge": {
-        "caption": "lowest price on the market",
+        "caption": "affordable monthly price",
         "per": "/MO"
       },
       "toast": {
@@ -542,7 +543,7 @@
         "chipBlacklist": "Blacklist check"
       },
       "price": {
-        "title": "The most affordable automation on the market",
+        "title": "Affordable automation",
         "description": "The complete professional automation set for a far lower monthly fee. Every feature is in every plan; plans only differ by listing and order volume.",
         "cta": "See plans"
       }
@@ -702,6 +703,26 @@
       "privacyLink": "Privacy Policy",
       "termsLink": "Terms of Service"
     },
+    "about": {
+      "eyebrow": "About us",
+      "sectionTitle": "Software born from selling experience.",
+      "lead": "SellerHill is a product of 2B Trading, LLC. Founded in Wyoming in 2022, our company has sold on Amazon and eBay firsthand.",
+      "body": "We have run every step of this business in our own stores, from listing products and fulfilling orders to tracking shipments and answering buyers. Today we combine that experience with 20 years of software engineering to build software for sellers. Our principles have not changed since day one: honesty, reliability and straightforward service.",
+      "facts": {
+        "trade": {
+          "title": "Amazon and eBay selling experience",
+          "description": "We have sold on both marketplaces ourselves. Every tool in SellerHill comes from a real need we ran into while doing this work."
+        },
+        "engineering": {
+          "title": "20 years of software engineering",
+          "description": "We design the platform as a team that has been building software for two decades and knows a seller's needs from the inside."
+        },
+        "company": {
+          "title": "A registered company behind it",
+          "description": "SellerHill is developed and operated by 2B Trading, LLC, founded in 2022 in Wyoming, USA."
+        }
+      }
+    },
     "standard": {
       "sectionTitle": "And everything you expect from an automation platform.",
       "sectionSubtitle": "The fundamentals, complete, and all of them in every plan.",
@@ -777,7 +798,7 @@
     },
     "pricing": {
       "eyebrow": "Pricing",
-      "sectionTitle": "The most affordable automation on the market.",
+      "sectionTitle": "Affordable automation.",
       "sectionSubtitle": "Every plan includes every feature. Plans differ only by active listings and monthly order volume, so features other tools keep for their top tiers are yours even on the smallest plan.",
       "billingNote": "Cancel anytime. Prices exclude local taxes where applicable.",
       "perMonth": "/mo",

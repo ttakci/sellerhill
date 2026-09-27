@@ -220,6 +220,13 @@ const INCLUDED_FEATURE_KEYS = [
   'support',
 ] as const;
 
+/** Facts on the About card — the operator's own statements about the company. */
+const ABOUT_FACTS: { key: string; icon: IconName }[] = [
+  { key: 'trade', icon: 'storefront' },
+  { key: 'engineering', icon: 'settings-suggest' },
+  { key: 'company', icon: 'shield-check' },
+];
+
 /** Feature-menu entries in the navbar: each scrolls to its own anchor. */
 const FEATURE_MENU: { key: string; target: string; icon: IconName }[] = [
   { key: 'why', target: 'why', icon: 'check-list' },
@@ -303,6 +310,7 @@ export const LandingPageComponent = ({
     { id: 'profit', label: t('translation:landing.navbar.profit') },
     { id: 'pricing', label: t('translation:landing.navbar.pricing') },
     { id: 'faq', label: t('translation:landing.navbar.faq') },
+    { id: 'about', label: t('translation:landing.navbar.about') },
   ];
 
   const seen = (id: string): boolean => revealState[id] ?? false;
@@ -1167,6 +1175,41 @@ export const LandingPageComponent = ({
             })}
           </S.FaqList>
         </S.Reveal>
+      </S.Section>
+
+      {/* ── About ──────────────────────────────────────── */}
+      <S.Section $alt id="about" data-reveal="about">
+        <S.AboutLayout>
+          <S.Reveal $visible={seen('about')}>
+            <S.AboutText>
+              <S.Eyebrow>{t('translation:landing.about.eyebrow')}</S.Eyebrow>
+              <S.AboutTitle>{t('translation:landing.about.sectionTitle')}</S.AboutTitle>
+              <S.AboutLead>{t('translation:landing.about.lead')}</S.AboutLead>
+              <S.BentoText>{t('translation:landing.about.body')}</S.BentoText>
+              <S.AboutCompany>
+                <Icon name="map-pin" size={16} />
+                <span>
+                  {BUSINESS_CONTACT.legalName} · {BUSINESS_CONTACT.addressLines.join(', ')}
+                </span>
+              </S.AboutCompany>
+            </S.AboutText>
+          </S.Reveal>
+          <S.Reveal $visible={seen('about')} $delay={1}>
+            <S.AboutFacts>
+              {ABOUT_FACTS.map((fact) => (
+                <S.AboutFact key={fact.key}>
+                  <S.AboutFactIcon>
+                    <Icon name={fact.icon} size={20} />
+                  </S.AboutFactIcon>
+                  <div>
+                    <S.BentoTitle>{t(`translation:landing.about.facts.${fact.key}.title`)}</S.BentoTitle>
+                    <S.BentoText>{t(`translation:landing.about.facts.${fact.key}.description`)}</S.BentoText>
+                  </div>
+                </S.AboutFact>
+              ))}
+            </S.AboutFacts>
+          </S.Reveal>
+        </S.AboutLayout>
       </S.Section>
 
       {/* ── Final CTA ──────────────────────────────────── */}

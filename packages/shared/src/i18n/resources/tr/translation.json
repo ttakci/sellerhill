@@ -462,12 +462,13 @@
         "specifics": "Ürün özellikleri",
         "mobile": "Mobil kullanım",
         "trust": "Güvenlik ve gizlilik"
-      }
+      },
+      "about": "Hakkımızda"
     },
     "hero": {
       "eyebrow": "Amazon → eBay otomasyonu",
       "headline": "eBay mağazanız için tam otomasyon.",
-      "headlineAccent": "Piyasanın en uygun fiyatıyla.",
+      "headlineAccent": "Uygun fiyatla.",
       "subheading": "Ürün grubuna özel fiyat ve şablon kuralları, günde 4 kez fiyat ve stok takibi, eksiksiz doldurulan ürün özellikleri, otomatik sipariş ve kargo takibi. Üstelik sizi her adımda yönlendiren bir Bekleyen Aksiyonlar ekranıyla.",
       "ctaPrimary": "Ücretsiz başla",
       "ctaSecondary": "Canlı demo",
@@ -476,7 +477,7 @@
       "trialCancelAnytime": "İstediğiniz zaman iptal",
       "trialMobile": "Telefonunuzdan yönetin",
       "priceBadge": {
-        "caption": "piyasanın en uygun fiyatı",
+        "caption": "uygun aylık fiyat",
         "per": "/AY"
       },
       "toast": {
@@ -542,7 +543,7 @@
         "chipBlacklist": "Kara liste kontrolü"
       },
       "price": {
-        "title": "Piyasanın en uygun fiyatlı otomasyonu",
+        "title": "Uygun fiyatlı otomasyon",
         "description": "Profesyonel bir otomasyonun tamamı, çok daha düşük bir aylık ücretle. Tüm özellikler her pakette; paketler yalnızca ilan ve sipariş hacmine göre ayrılır.",
         "cta": "Paketleri gör"
       }
@@ -702,6 +703,26 @@
       "privacyLink": "Gizlilik Politikası",
       "termsLink": "Kullanım Koşulları"
     },
+    "about": {
+      "eyebrow": "Hakkımızda",
+      "sectionTitle": "Satış deneyiminden doğan bir yazılım.",
+      "lead": "SellerHill, 2B Trading, LLC'nin ürünüdür. 2022'de Wyoming'de kurulan şirketimiz, Amazon ve eBay'de bizzat satış yaptı.",
+      "body": "Ürün listelemekten sipariş karşılamaya, kargo takibinden alıcı mesajlarına kadar bu işin her adımını kendi mağazalarımızda yaşadık. Bugün bu deneyimi 20 yıllık yazılım tecrübesiyle birleştirip satıcılar için yazılım geliştiriyoruz. Kuruluşumuzdan beri ilkelerimiz aynı: dürüstlük, güvenilirlik ve sade, anlaşılır hizmet.",
+      "facts": {
+        "trade": {
+          "title": "Amazon ve eBay satış deneyimi",
+          "description": "İki pazaryerinde bizzat satış yaptık. SellerHill'deki her araç, bu işi yaparken karşılaştığımız gerçek bir ihtiyaçtan çıktı."
+        },
+        "engineering": {
+          "title": "20 yıllık yazılım tecrübesi",
+          "description": "Platformu, yirmi yıldır yazılım geliştiren ve satıcının ihtiyacını içeriden bilen bir ekip olarak tasarlıyoruz."
+        },
+        "company": {
+          "title": "Arkasında kayıtlı bir şirket",
+          "description": "SellerHill, 2022'de ABD'nin Wyoming eyaletinde kurulan 2B Trading, LLC tarafından geliştirilir ve işletilir."
+        }
+      }
+    },
     "standard": {
       "sectionTitle": "Ve bir otomasyon platformundan beklediğiniz her şey.",
       "sectionSubtitle": "Temel özellikler eksiksiz; hepsi her pakette.",
@@ -777,7 +798,7 @@
     },
     "pricing": {
       "eyebrow": "Fiyatlandırma",
-      "sectionTitle": "Piyasanın en uygun fiyatlı otomasyonu.",
+      "sectionTitle": "Uygun fiyatlı otomasyon.",
       "sectionSubtitle": "Her pakette bütün özellikler var. Paketler yalnızca aktif ilan sayınıza ve aylık sipariş hacminize göre ayrılır; başka araçlarda üst paketlere saklanan özellikleri en küçük pakette bile kullanırsınız.",
       "billingNote": "İstediğiniz zaman iptal edin. Fiyatlara yerel vergiler dâhil değildir.",
       "perMonth": "/ay",
