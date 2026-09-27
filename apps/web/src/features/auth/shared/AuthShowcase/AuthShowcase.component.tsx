@@ -16,7 +16,7 @@ import type { AuthShowcaseProps } from './AuthShowcase.types';
 export const AuthShowcase = ({ className }: AuthShowcaseProps): React.ReactElement => {
   const { t, i18n } = useTranslation(['auth']);
   const locale = i18n.language || 'en';
-  const screenSrc = `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/hero-dashboard.jpg`;
+  const screenSrc = `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/hero-dashboard.webp`;
 
   return (
     <S.Panel className={className}>

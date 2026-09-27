@@ -65,7 +65,7 @@ const browser = await puppeteer.launch({
 });
 try {
   const page = await browser.newPage();
-  await page.setViewport({ width: 960, height: 1200 });
+  await page.setViewport({ width: 960, height: 1200, deviceScaleFactor: 2 });
   for (const [slug, p] of Object.entries(products)) {
     const context = buildListingTemplateContext({
       title: p.title,
@@ -83,9 +83,9 @@ try {
     );
     await page.goto(`file://${file}`, { waitUntil: 'networkidle0' });
     await page.screenshot({
-      path: path.join(OUT_DIR, `${slug.replace(/^ds-/, '')}.jpg`),
-      type: 'jpeg',
-      quality: 82,
+      path: path.join(OUT_DIR, `${slug.replace(/^ds-/, '')}.webp`),
+      type: 'webp',
+      quality: 86,
     });
     console.log(`Rendered ${slug}`);
   }
