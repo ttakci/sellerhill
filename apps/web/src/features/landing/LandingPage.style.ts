@@ -307,7 +307,10 @@ export const LoginButton = styled.button<{ $block?: boolean; $onDark?: boolean }
   white-space: nowrap;
   gap: ${tkn('spacing.xs')};
   background: none;
-  border: ${(p) => (p.$block ? `1px solid ${tkn('colors.landing.heroBorder')(p)}` : 'none')};
+  border: ${(p) =>
+    p.$block
+      ? `1px solid ${(p.$onDark ? tkn('colors.sidebar.divider') : tkn('colors.landing.heroBorder'))(p)}`
+      : 'none'};
   cursor: pointer;
   font-family: ${FONT_BODY};
   font-size: ${NAV_FONT_SIZE};
@@ -398,21 +401,27 @@ export const MobileMenuOverlay = styled.div<{ $open: boolean }>`
   transition: opacity 200ms ease;
 `;
 
+/**
+ * Mobile menu (2026-09-27, rebuilt): a full-screen navy sheet, the same colour
+ * and ink as the navbar it opens from, so the logo's white "SELLER" is always
+ * on a dark ground and the menu reads as the navbar expanded rather than a
+ * second, light-themed surface.
+ */
 export const MobileMenu = styled.div<{ $open: boolean }>`
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 61;
-  width: min(20rem, 86vw);
-  background: ${tkn('colors.landing.heroBg')};
-  border-left: 1px solid ${tkn('colors.landing.heroBorder')};
-  padding: ${tkn('spacing.lg')};
+  background: ${tkn('colors.sidebar.background')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')} calc(${tkn('spacing.lg')} + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.lg')};
+  overflow-y: auto;
+  visibility: ${(p) => (p.$open ? 'visible' : 'hidden')};
   transform: translateX(${(p) => (p.$open ? '0' : '100%')});
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 260ms;
 `;
 
 /**
@@ -425,9 +434,7 @@ export const MobileMenuHead = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: calc(-1 * ${tkn('spacing.lg')}) calc(-1 * ${tkn('spacing.lg')}) 0;
-  padding: ${tkn('spacing.md')} ${tkn('spacing.lg')};
-  background: ${tkn('colors.sidebar.background')};
+  min-height: 3rem;
 `;
 
 export const MobileClose = styled.button`
@@ -452,17 +459,18 @@ export const MobileLinks = styled.div`
 export const MobileLink = styled.button`
   background: none;
   border: none;
+  border-bottom: 1px solid ${tkn('colors.sidebar.divider')};
   cursor: pointer;
   text-align: left;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.body};
+  font-size: ${TYPE.lead};
   font-weight: ${tkn('typography.fontWeight.medium')};
-  color: ${tkn('colors.landing.heroText')};
-  padding: 0.75rem;
-  border-radius: ${tkn('radius.md')};
+  color: ${tkn('colors.sidebar.text')};
+  padding: ${tkn('spacing.md')} ${tkn('spacing.xs')};
 
-  &:hover {
-    background: ${tkn('colors.landing.chipBg')};
+  &:hover,
+  &:focus-visible {
+    background: ${tkn('colors.sidebar.hover')};
   }
 `;
 
@@ -471,6 +479,13 @@ export const MobileCtas = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
+
+  /* Both CTAs: same height, full width, label centred. */
+  & > button {
+    justify-content: center;
+    min-height: 3rem;
+    font-size: ${TYPE.body};
+  }
 `;
 
 /* =========================================================================
