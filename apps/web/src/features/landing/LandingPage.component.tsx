@@ -37,7 +37,7 @@ type ScreenKey = keyof typeof SCREEN_NAMES;
 
 /** Only `tr` and `en` are captured; anything else falls back to the English set. */
 const screenSrc = (key: ScreenKey, locale: string): string =>
-  `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/${SCREEN_NAMES[key]}.jpg`;
+  `/landing-screens/${locale.toLowerCase().startsWith('tr') ? 'tr' : 'en'}/${SCREEN_NAMES[key]}.webp`;
 
 /**
  * Listing-template previews. These are NOT app UI — they are what a buyer sees
@@ -56,7 +56,47 @@ const TEMPLATE_PREVIEWS = [
 
 type TemplateKey = (typeof TEMPLATE_PREVIEWS)[number]['key'];
 
-const templateSrc = (file: string): string => `/landing-screens/templates/${file}.jpg`;
+const templateSrc = (file: string): string => `/landing-screens/templates/${file}.webp`;
+
+const COUNT_UP_MS = 1100;
+
+/**
+ * Counts the leading number of a proof value ("45", "4×", "1 ay") up from zero
+ * once `active` turns on, keeping whatever text follows the number. A value with
+ * no leading number, or a visitor who prefers reduced motion, gets the final
+ * text at once.
+ */
+const CountUp: React.FC<{ value: string; active: boolean }> = ({ value, active }) => {
+  const match = /^(\d+)(.*)$/s.exec(value);
+  const target = match ? Number(match[1]) : 0;
+  const hasNumber = match !== null;
+  const reducedMotion =
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    if (!active || !hasNumber || reducedMotion) {
+      return undefined;
+    }
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / COUNT_UP_MS);
+      setShown(Math.round(target * (1 - Math.pow(1 - progress, 3))));
+      if (progress < 1) {frame = requestAnimationFrame(tick);}
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [active, target, hasNumber, reducedMotion]);
+
+  if (!match) {return <>{value}</>;}
+  return (
+    <>
+      {!active ? 0 : reducedMotion ? target : shown}
+      {match[2]}
+    </>
+  );
+};
 
 /** The three example groups on the dark Setting Groups card. Figures match the demo account's groups. */
 const GROUP_CHIPS = [
@@ -253,6 +293,7 @@ export const LandingPageComponent = ({
   ];
 
   const seen = (id: string): boolean => revealState[id] ?? false;
+  const specRow = (row: number): number | undefined => (seen('why') ? row : undefined);
 
   return (
     <S.Page>
@@ -448,11 +489,13 @@ export const LandingPageComponent = ({
       </S.Hero>
 
       {/* ── Proof bar ──────────────────────────────────── */}
-      <S.ProofWrap>
+      <S.ProofWrap data-reveal="proof">
         <S.ProofBar>
           {PROOF_KEYS.map((key) => (
             <S.ProofItem key={key}>
-              <S.ProofValue>{t(`translation:landing.proof.${key}.value`)}</S.ProofValue>
+              <S.ProofValue>
+                <CountUp value={t(`translation:landing.proof.${key}.value`)} active={seen('proof')} />
+              </S.ProofValue>
               <S.ProofLabel>{t(`translation:landing.proof.${key}.label`)}</S.ProofLabel>
             </S.ProofItem>
           ))}
@@ -540,14 +583,22 @@ export const LandingPageComponent = ({
               <S.BentoText>{t('translation:landing.why.specifics.description')}</S.BentoText>
               <S.BentoVisual>
                 <S.SpecTable>
-                  <S.SpecCell $head>&nbsp;</S.SpecCell>
-                  <S.SpecCell $head>{t('translation:landing.why.specifics.others')}</S.SpecCell>
-                  <S.SpecCell $head>{t('translation:landing.why.specifics.us')}</S.SpecCell>
-                  {SPEC_SAMPLES.map((spec) => (
+                  <S.SpecCell $head $row={specRow(0)}>
+                    &nbsp;
+                  </S.SpecCell>
+                  <S.SpecCell $head $row={specRow(0)}>
+                    {t('translation:landing.why.specifics.others')}
+                  </S.SpecCell>
+                  <S.SpecCell $head $row={specRow(0)}>
+                    {t('translation:landing.why.specifics.us')}
+                  </S.SpecCell>
+                  {SPEC_SAMPLES.map((spec, index) => (
                     <React.Fragment key={spec.name}>
-                      <S.SpecCell>{spec.name}</S.SpecCell>
-                      <S.SpecCell $muted>{SPEC_PLACEHOLDER}</S.SpecCell>
-                      <S.SpecCell $good>
+                      <S.SpecCell $row={specRow(index + 1)}>{spec.name}</S.SpecCell>
+                      <S.SpecCell $muted $row={specRow(index + 1)}>
+                        {SPEC_PLACEHOLDER}
+                      </S.SpecCell>
+                      <S.SpecCell $good $row={specRow(index + 1)}>
                         <Icon name="check" size={12} />
                         {spec.value}
                       </S.SpecCell>
