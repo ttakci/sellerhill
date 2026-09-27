@@ -1,3 +1,4 @@
+import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { tkn } from '@repo/ui';
 
@@ -455,40 +456,138 @@ export const MobileCtas = styled.div`
 `;
 
 /* =========================================================================
- * Hero
+ * Hero — v3 (2026-09-27, second pass)
  *
- * Dark-navy band that cuts straight to the light page below (no gradient —
- * see CLAUDE.md "Landing page"). Rebuilt 2026-09-27 to be CALMER than the
- * version before it: the "audio spectrum" bars, the 3D tilt on the screenshot
- * and the glowing gold placard all went. The brief was a page that reads as
- * modern without the motion-heavy feel of the newer competitors, so depth now
- * comes from two soft washes and one quiet glass frame, and nothing moves on
- * its own.
+ * The calmer first pass read as correct but plain. This pass brings the
+ * movement back, but only in a few deliberate places, each slow enough to read
+ * as ambient rather than busy:
+ *   - an aurora of three blurred colour fields drifting behind the band (~22s),
+ *   - a masked dot grid that gives the navy texture without drawing a ruled grid,
+ *   - the offer card: a big floating price module whose border is a slowly
+ *     rotating conic gradient (the "moving thing" top-right the operator asked
+ *     to keep),
+ *   - two floating proof cards (a real KPI crop and an "order placed" toast).
+ * Everything respects `prefers-reduced-motion`.
  * ========================================================================= */
+
+const auroraDrift = keyframes`
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(4%, -3%, 0) scale(1.08); }
+  100% { transform: translate3d(-3%, 2%, 0) scale(1); }
+`;
+
+const floatY = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+`;
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
+const shimmer = keyframes`
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+`;
+
+const pulse = keyframes`
+  0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+`;
+
+const breathe = keyframes`
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.07); }
+`;
+
+const REDUCED = '@media (prefers-reduced-motion: reduce)';
 
 export const Hero = styled.section`
   position: relative;
+  isolation: isolate;
   background: ${tkn('colors.sidebar.background')};
-  /* Clears the fixed navbar (~82px), then a deliberate ~38px gap. The bottom
-   * padding is larger than a plain section's because the proof bar straddles
-   * the hero's lower edge. */
-  padding: 7.5rem ${tkn('spacing.xl')} 7rem;
+  padding: 8rem ${tkn('spacing.xl')} 8.5rem;
   overflow: hidden;
 
+  /* Dot texture, faded out toward the edges so it never reads as graph paper. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(color-mix(in srgb, ${tkn('colors.sidebar.text')} 14%, transparent) 1px, transparent 1.4px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, black 0%, transparent 75%);
+  }
+
   @media (max-width: 980px) {
-    padding: 6.5rem ${tkn('spacing.md')} 6rem;
+    padding: 6.5rem ${tkn('spacing.md')} 7rem;
   }
 `;
 
-/** Two offset radial washes — depth without a pattern the eye can resolve. */
+/** Three blurred colour fields drifting slowly — depth and life without a pattern. */
 export const HeroGlow = styled.div`
   position: absolute;
-  inset: -30% -10% auto -10%;
-  height: 56rem;
+  inset: -20% -10% -10% -10%;
+  z-index: -2;
   pointer-events: none;
-  background:
-    radial-gradient(46rem 30rem at 12% 18%, ${tkn('colors.landing.heroGlow')} 0%, transparent 70%),
-    radial-gradient(42rem 30rem at 86% 30%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 72%);
+  filter: blur(60px);
+  opacity: 0.9;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    animation: ${auroraDrift} 22s ease-in-out infinite alternate;
+  }
+
+  &::before {
+    width: 46rem;
+    height: 32rem;
+    left: 2%;
+    top: 4%;
+    background: radial-gradient(closest-side, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 55%, transparent), transparent);
+  }
+
+  &::after {
+    width: 40rem;
+    height: 30rem;
+    right: 0;
+    top: 18%;
+    background: radial-gradient(closest-side, color-mix(in srgb, ${tkn('colors.landing.accentViolet')} 42%, transparent), transparent);
+    animation-duration: 28s;
+    animation-direction: alternate-reverse;
+  }
+
+  ${REDUCED} {
+    &::before,
+    &::after {
+      animation: none;
+    }
+  }
+`;
+
+/** A warm field under the offer card, tying the amber into the band. */
+export const HeroGlowWarm = styled.div`
+  position: absolute;
+  right: 6%;
+  top: 8%;
+  width: 26rem;
+  height: 20rem;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 30%, transparent), transparent);
+  filter: blur(50px);
+  animation: ${auroraDrift} 18s ease-in-out infinite alternate-reverse;
+
+  ${REDUCED} {
+    animation: none;
+  }
 `;
 
 export const HeroInner = styled.div`
@@ -496,63 +595,93 @@ export const HeroInner = styled.div`
   max-width: ${CONTENT_MAX};
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
   align-items: center;
   gap: ${tkn('spacing.xxl')};
   text-align: left;
 
   @media (max-width: 980px) {
     grid-template-columns: 1fr;
-    gap: ${tkn('spacing.xl')};
+    gap: 3.5rem;
   }
 `;
 
 export const HeroContent = styled.div`
-  max-width: 35rem;
+  max-width: 36rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: ${tkn('spacing.md')};
+  gap: 1.35rem;
 `;
 
-/** Category line above the headline. Sits on navy, so it uses the sidebar + amber tokens. */
 export const HeroEyebrow = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.95rem;
+  gap: 0.6rem;
+  padding: 0.45rem 1rem 0.45rem 0.8rem;
   border-radius: 999px;
-  background: ${tkn('colors.sidebar.hover')};
+  background: color-mix(in srgb, ${tkn('colors.sidebar.hover')} 70%, transparent);
   border: 1px solid ${tkn('colors.sidebar.divider')};
+  backdrop-filter: blur(8px);
   font-family: ${FONT_BODY};
   font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  letter-spacing: 0.03em;
-  color: ${tkn('colors.landing.accentAmber')};
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: ${tkn('colors.sidebar.text')};
+`;
+
+/** Pulsing "live" dot inside the eyebrow. */
+export const LiveDot = styled.span`
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: ${tkn('colors.landing.accentEmerald')};
+  animation: ${pulse} 2.2s ease-out infinite;
+
+  ${REDUCED} {
+    animation: none;
+  }
 `;
 
 export const HeroTitle = styled.h1`
   margin: 0;
   font-family: ${FONT_HEADING};
-  font-size: clamp(2.1rem, 3.4vw, 2.9rem);
-  line-height: 1.14;
-  letter-spacing: -0.02em;
-  font-weight: 700;
+  font-size: clamp(2.35rem, 4.3vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 800;
   color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
 `;
 
-/** The "at the lowest price" half of the headline, set in the logo's amber. */
+/** Second line of the headline: a slowly travelling amber → orange → rose gradient. */
 export const HeroTitleAccent = styled.span`
+  display: inline;
+  background: linear-gradient(
+    90deg,
+    ${tkn('colors.landing.accentAmber')},
+    color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 50%, ${tkn('colors.landing.accentRose')}),
+    ${tkn('colors.landing.accentRose')},
+    ${tkn('colors.landing.accentAmber')}
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: ${tkn('colors.landing.accentAmber')};
+  animation: ${shimmer} 7s linear infinite;
+
+  ${REDUCED} {
+    animation: none;
+  }
 `;
 
 export const HeroSubtitle = styled.p`
   margin: 0;
-  max-width: 33rem;
+  max-width: 34rem;
   font-family: ${FONT_BODY};
   font-size: 1.125rem;
-  line-height: 1.65;
+  line-height: 1.7;
   color: ${tkn('colors.sidebar.textMuted')};
   text-wrap: pretty;
 `;
@@ -561,40 +690,59 @@ export const HeroCtas = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: ${tkn('spacing.sm')};
-  margin-top: ${tkn('spacing.xs')};
+  gap: 0.75rem;
+  margin-top: 0.35rem;
 `;
 
 /**
- * `$accent` = amber fill / navy text, for the hero's primary CTA only — a
- * blue-on-blue button would barely separate from the navy band. The amber is
- * the same one the wordmark's "HILL" is set in.
+ * `$accent` = amber fill / navy text (hero only), with a soft amber glow and a
+ * light sweep across the face on hover.
  */
 export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>`
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: ${(p) => (p.$accent ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primary')(p))};
+  background: ${(p) =>
+    p.$accent
+      ? `linear-gradient(180deg, color-mix(in srgb, ${tkn('colors.landing.accentAmber')(p)} 80%, white), ${tkn('colors.landing.accentAmber')(p)})`
+      : `linear-gradient(180deg, color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 82%, white), ${tkn('colors.brand.primary')(p)})`};
   border: none;
   cursor: pointer;
   font-family: ${FONT_BODY};
   font-size: ${(p) => (p.$lg ? '1.0625rem' : TYPE.body)};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: 700;
   color: ${(p) => (p.$accent ? tkn('colors.sidebar.background')(p) : tkn('colors.landing.onAccent')(p))};
-  padding: ${(p) => (p.$lg ? '0.9rem 1.75rem' : '0.75rem 1.5rem')};
-  border-radius: ${tkn('radius.md')};
-  box-shadow: ${tkn('colors.landing.shadowSoft')};
+  padding: ${(p) => (p.$lg ? '0.95rem 1.8rem' : '0.75rem 1.5rem')};
+  border-radius: 0.75rem;
+  box-shadow: ${(p) =>
+    p.$accent
+      ? `0 10px 30px -8px color-mix(in srgb, ${tkn('colors.landing.accentAmber')(p)} 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.45)`
+      : `0 10px 26px -10px color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 70%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)`};
   transition:
-    background 160ms ease,
-    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 160ms ease;
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-20deg);
+    transition: left 600ms ease;
+  }
 
   &:hover {
-    background: ${(p) =>
-      p.$accent ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primaryHover')(p)};
-    transform: translateY(-1px);
-    box-shadow: ${tkn('colors.landing.shadowStrong')};
+    transform: translateY(-2px);
+  }
+
+  &:hover::after {
+    left: 130%;
   }
 
   &:active {
@@ -602,36 +750,49 @@ export const PrimaryButton = styled.button<{ $lg?: boolean; $accent?: boolean }>
   }
 `;
 
-/** Secondary hero CTA. `$onDark` = outlined in the sidebar tokens for the navy band. */
+/** Secondary CTA. `$onDark` = frosted glass on the navy band. */
 export const GhostButton = styled.button<{ $lg?: boolean; $onDark?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: ${(p) => (p.$onDark ? 'transparent' : tkn('colors.surface.primary')(p))};
+  gap: 0.55rem;
+  background: ${(p) =>
+    p.$onDark ? `color-mix(in srgb, ${tkn('colors.sidebar.hover')(p)} 55%, transparent)` : tkn('colors.surface.primary')(p)};
   border: 1px solid
     ${(p) => (p.$onDark ? tkn('colors.sidebar.divider')(p) : tkn('colors.landing.heroBorder')(p))};
+  backdrop-filter: blur(10px);
   cursor: pointer;
   font-family: ${FONT_BODY};
   font-size: ${(p) => (p.$lg ? '1.0625rem' : TYPE.body)};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: 600;
   color: ${(p) => (p.$onDark ? tkn('colors.sidebar.text')(p) : tkn('colors.landing.heroText')(p))};
-  padding: ${(p) => (p.$lg ? '0.9rem 1.6rem' : '0.75rem 1.5rem')};
-  border-radius: ${tkn('radius.md')};
+  padding: ${(p) => (p.$lg ? '0.95rem 1.6rem' : '0.75rem 1.5rem')};
+  border-radius: 0.75rem;
   transition:
     border-color 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    transform 180ms ease;
 
   &:hover {
+    transform: translateY(-2px);
     border-color: ${(p) =>
       p.$onDark ? tkn('colors.sidebar.textMuted')(p) : tkn('colors.landing.cardBorderHover')(p)};
-    background: ${(p) => (p.$onDark ? tkn('colors.sidebar.hover')(p) : tkn('colors.surface.primary')(p))};
   }
 `;
 
-/** Three short trust facts under the CTAs, each with a check. */
+export const PlayBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: ${tkn('colors.sidebar.text')};
+  color: ${tkn('colors.sidebar.background')};
+`;
+
 export const HeroTrust = styled.ul`
-  margin: ${tkn('spacing.xs')} 0 0;
+  margin: 0.25rem 0 0;
   padding: 0;
   list-style: none;
   display: flex;
@@ -652,64 +813,111 @@ export const HeroTrustItem = styled.li`
   }
 `;
 
+/** Below 1080px the floating offer card is hidden, so the offer rides under the CTAs instead. */
+export const MobileOffer = styled.div`
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 45%, transparent);
+  background: color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 10%, transparent);
+  font-family: ${FONT_BODY};
+  color: ${tkn('colors.sidebar.text')};
+
+  @media (max-width: 1080px) {
+    display: inline-flex;
+  }
+`;
+
+export const MobileOfferTag = styled.span`
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: ${tkn('colors.landing.accentAmber')};
+`;
+
+export const MobileOfferPrice = styled.span`
+  font-family: ${FONT_HEADING};
+  font-size: 1.25rem;
+  font-weight: 800;
+`;
+
 /* ── Hero product preview ──────────────────────────────────────────────── */
 
 export const HeroPreview = styled.div`
   position: relative;
-  isolation: isolate;
   width: 100%;
-  max-width: 40rem;
+  max-width: 41rem;
   justify-self: end;
-
-  /* One soft, shapeless glow behind the frame so it reads as lifted off the navy. */
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -12% -10% -16% -10%;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(45% 45% at 25% 80%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 30%, transparent) 0%, transparent 70%),
-      radial-gradient(45% 45% at 80% 25%, ${tkn('colors.landing.heroGlowAlt')} 0%, transparent 72%);
-    filter: blur(28px);
-  }
+  perspective: 1600px;
 
   @media (max-width: 980px) {
-    max-width: 32rem;
+    max-width: 34rem;
     justify-self: center;
   }
 `;
 
-/** A thin translucent rim around the real screenshot — glass, not a costume browser. */
+/** Slight 3D tilt that settles flat on hover. */
+export const HeroTilt = styled.div`
+  position: relative;
+  transform: rotateY(-8deg) rotateX(4deg);
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  &:hover {
+    transform: rotateY(-2deg) rotateX(1deg);
+  }
+
+  @media (max-width: 980px) {
+    transform: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+`;
+
+/** Glass frame with a blue → amber gradient hairline. */
 export const HeroPreviewGlass = styled.div`
   position: relative;
   z-index: 1;
-  padding: 0.55rem;
-  border-radius: calc(${tkn('radius.xl')} + 0.45rem);
-  background: color-mix(in srgb, ${tkn('colors.sidebar.hover')} 70%, transparent);
-  border: 1px solid ${tkn('colors.sidebar.divider')};
-  backdrop-filter: blur(10px);
-  box-shadow: 0 40px 80px -40px ${tkn('colors.landing.auroraBg')};
+  padding: 0.6rem;
+  border-radius: 1.4rem;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, ${tkn('colors.sidebar.hover')} 75%, transparent), color-mix(in srgb, ${tkn('colors.sidebar.background')} 60%, transparent)) padding-box,
+    linear-gradient(135deg, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 85%, transparent), color-mix(in srgb, ${tkn('colors.sidebar.text')} 15%, transparent) 45%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 80%, transparent)) border-box;
+  border: 1.5px solid transparent;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 50px 100px -40px ${tkn('colors.landing.auroraBg')},
+    0 0 80px -20px color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 55%, transparent);
 `;
 
 export const HeroPreviewImage = styled.img`
   display: block;
   width: 100%;
   height: auto;
-  border-radius: ${tkn('radius.xl')};
+  border-radius: 0.95rem;
 `;
 
-/** A real cropped KPI card from the same demo screen, over the frame's left edge. */
+/** Real cropped KPI card, floating over the frame's left edge. */
 export const HeroFloatCard = styled.div`
   position: absolute;
-  bottom: -1.75rem;
-  left: -2rem;
-  width: 10rem;
-  border-radius: ${tkn('radius.lg')};
+  top: 38%;
+  left: -2.75rem;
+  width: 10.5rem;
+  z-index: 2;
+  border-radius: 1rem;
   overflow: hidden;
   border: 1px solid ${tkn('colors.landing.cardBorder')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
-  z-index: 2;
+  box-shadow: 0 24px 48px -16px ${tkn('colors.landing.auroraBg')};
+  animation: ${floatY} 7s ease-in-out infinite;
+  animation-delay: -2s;
+
+  ${REDUCED} {
+    animation: none;
+  }
 
   @media (max-width: 1080px) {
     display: none;
@@ -722,71 +930,267 @@ export const HeroFloatImage = styled.img`
   height: auto;
 `;
 
+/** "Order placed automatically" toast floating bottom-right. */
+export const HeroToast = styled.div`
+  position: absolute;
+  right: -1.5rem;
+  bottom: -1.75rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0.75rem 0.8rem;
+  border-radius: 1rem;
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: 0 24px 50px -18px ${tkn('colors.landing.auroraBg')};
+  animation: ${floatY} 6s ease-in-out infinite;
+
+  ${REDUCED} {
+    animation: none;
+  }
+
+  @media (max-width: 1080px) {
+    right: 0.5rem;
+  }
+
+  @media (max-width: 520px) {
+    display: none;
+  }
+`;
+
+export const HeroToastIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, ${tkn('colors.landing.accentEmerald')} 16%, transparent);
+  color: ${tkn('colors.semantic.success')};
+`;
+
+export const HeroToastTitle = styled.span`
+  display: block;
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: ${tkn('colors.landing.heroText')};
+`;
+
+export const HeroToastText = styled.span`
+  display: block;
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  color: ${tkn('colors.landing.heroTextMuted')};
+`;
+
 /**
- * Price + trial in one compact card over the screenshot's top-right corner.
- * Deliberately quieter than the glowing gold placard it replaced: a white
- * card with an amber tag reads as an offer without competing with the headline.
- * The amount comes from the catalog (see the container), never from copy.
+ * The offer — big, top-right, and alive. Its border is a conic gradient rotating
+ * behind a 2px inset (the card clips it), the whole card floats gently, and an
+ * amber glow sits beneath it. The amount comes from the catalog's cheapest paid
+ * tier (see the container), never from copy.
  */
 export const HeroOfferCard = styled.div`
   position: absolute;
-  top: -1.5rem;
-  right: -1.5rem;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  padding: 0.85rem 1.1rem 0.95rem;
-  border-radius: ${tkn('radius.lg')};
-  background: ${tkn('colors.surface.primary')};
-  border: 1px solid ${tkn('colors.landing.cardBorder')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  top: -3.25rem;
+  right: -3rem;
+  z-index: 4;
+  width: 17.5rem;
+  padding: 2px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  animation: ${floatY} 5.5s ease-in-out infinite;
+  box-shadow:
+    0 30px 60px -20px ${tkn('colors.landing.auroraBg')},
+    0 0 60px -10px color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 55%, transparent);
+
+  /* The rotating rim. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -60%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      ${tkn('colors.landing.accentAmber')} 60deg,
+      color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 30%, white) 110deg,
+      transparent 170deg,
+      transparent 190deg,
+      ${tkn('colors.landing.accentRose')} 250deg,
+      ${tkn('colors.landing.accentAmber')} 300deg,
+      transparent 360deg
+    );
+    animation: ${spin} 6s linear infinite;
+  }
+
+  ${REDUCED} {
+    animation: none;
+
+    &::before {
+      animation: none;
+    }
+  }
 
   @media (max-width: 1080px) {
     display: none;
   }
 `;
 
+export const HeroOfferInner = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 1.35rem 1.25rem 1.3rem;
+  border-radius: calc(1.5rem - 2px);
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 22%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, ${tkn('colors.sidebar.hover')} 96%, black), ${tkn('colors.landing.auroraBg')});
+`;
+
 export const HeroOfferTag = styled.span`
-  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 999px;
-  background: color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 16%, transparent);
-  color: ${tkn('colors.semantic.warning')};
-  font-family: ${FONT_BODY};
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 75%, white), ${tkn('colors.landing.accentAmber')});
+  color: ${tkn('colors.sidebar.background')};
+  font-family: ${FONT_HEADING};
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+  box-shadow: 0 8px 20px -6px color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 70%, transparent);
 `;
 
 export const HeroOfferPrice = styled.span`
   display: inline-flex;
   align-items: baseline;
   gap: 0.2rem;
-  margin-top: 0.2rem;
+  margin-top: 0.45rem;
+`;
+
+export const HeroOfferFrom = styled.span`
+  font-family: ${FONT_BODY};
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: ${tkn('colors.sidebar.textMuted')};
 `;
 
 export const HeroOfferAmount = styled.span`
   font-family: ${FONT_HEADING};
-  font-size: 1.75rem;
+  font-size: 3.4rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.02em;
-  color: ${tkn('colors.landing.heroText')};
+  letter-spacing: -0.04em;
+  background: linear-gradient(180deg, ${tkn('colors.sidebar.text')} 30%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 55%, white));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: ${tkn('colors.sidebar.text')};
+  filter: drop-shadow(0 4px 18px color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 45%, transparent));
 `;
 
 export const HeroOfferPer = styled.span`
-  font-family: ${FONT_BODY};
-  font-size: ${TYPE.small};
-  font-weight: 600;
-  color: ${tkn('colors.landing.heroTextMuted')};
+  font-family: ${FONT_HEADING};
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: ${tkn('colors.landing.accentAmber')};
 `;
 
 export const HeroOfferCaption = styled.span`
   font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: ${tkn('colors.sidebar.textMuted')};
+`;
+
+export const HeroOfferRule = styled.span`
+  width: 100%;
+  height: 1px;
+  margin: 0.55rem 0 0.35rem;
+  background: linear-gradient(90deg, transparent, ${tkn('colors.sidebar.divider')}, transparent);
+`;
+
+export const HeroOfferPoints = styled.span`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.8rem;
+  font-family: ${FONT_BODY};
   font-size: 0.75rem;
-  color: ${tkn('colors.landing.heroTextMuted')};
+  color: ${tkn('colors.sidebar.text')};
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  svg {
+    color: ${tkn('colors.landing.accentEmerald')};
+  }
+`;
+
+/* =========================================================================
+ * Capability marquee — an endless, slow strip of what is automated
+ * ========================================================================= */
+
+const marquee = keyframes`
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+`;
+
+export const MarqueeBand = styled.div`
+  position: relative;
+  overflow: hidden;
+  padding: 2.25rem 0 0.5rem;
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+`;
+
+export const MarqueeTrack = styled.div`
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+  animation: ${marquee} 55s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+
+  ${REDUCED} {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: center;
+  }
+`;
+
+export const MarqueeItem = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.05rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: ${tkn('colors.surface.primary')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  box-shadow: ${tkn('colors.landing.shadowSoft')};
+  font-family: ${FONT_BODY};
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${tkn('colors.landing.heroText')};
+
+  svg {
+    color: ${tkn('colors.brand.primary')};
+  }
 `;
 
 /* =========================================================================
@@ -808,10 +1212,13 @@ export const ProofWrap = styled.div`
 export const ProofBar = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-radius: ${tkn('radius.xl')};
-  background: ${tkn('colors.surface.primary')};
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, ${tkn('colors.surface.primary')} 92%, transparent);
+  backdrop-filter: blur(14px);
   border: 1px solid ${tkn('colors.landing.cardBorder')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  box-shadow:
+    0 30px 60px -30px color-mix(in srgb, ${tkn('colors.brand.primary')} 35%, transparent),
+    ${tkn('colors.landing.shadowSoft')};
   overflow: hidden;
 
   @media (max-width: 820px) {
@@ -845,10 +1252,14 @@ export const ProofItem = styled.div`
 
 export const ProofValue = styled.span`
   font-family: ${FONT_HEADING};
-  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
-  font-weight: 700;
+  font-size: clamp(1.75rem, 2.8vw, 2.35rem);
+  font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: ${tkn('colors.brand.primary')};
 `;
 
@@ -904,12 +1315,12 @@ export const SectionHead = styled.div`
  */
 export const SectionTitle = styled.h2`
   margin: 0;
-  max-width: 46rem;
+  max-width: 48rem;
   font-family: ${FONT_HEADING};
-  font-size: clamp(1.85rem, 3.2vw, 2.6rem);
-  line-height: 1.17;
-  letter-spacing: -0.015em;
-  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  font-size: clamp(1.9rem, 3.4vw, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
 `;
@@ -926,12 +1337,28 @@ export const SectionSubtitle = styled.p`
 
 /** Small label above a section title — one short phrase, brand-coloured. */
 export const Eyebrow = styled.span`
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: ${tkn('colors.landing.chipBg')};
+  border: 1px solid ${tkn('colors.landing.chipBorder')};
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.micro};
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: ${tkn('colors.brand.primary')};
+
+  &::before {
+    content: '';
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
+  }
 `;
 
 /** Left-aligned variant of `SectionHead`, for split layouts. */
@@ -967,16 +1394,56 @@ export const Bento = styled.div`
 `;
 
 export const BentoCard = styled.article<{ $span?: 2 | 3; $dark?: boolean }>`
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   grid-column: span ${(p) => p.$span ?? 1};
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1.75rem;
-  border-radius: ${tkn('radius.xl')};
-  background: ${(p) => (p.$dark ? tkn('colors.sidebar.background')(p) : tkn('colors.surface.primary')(p))};
+  padding: 1.85rem;
+  border-radius: 1.4rem;
+  background: ${(p) =>
+    p.$dark
+      ? tkn('colors.sidebar.background')(p)
+      : `linear-gradient(180deg, ${tkn('colors.surface.primary')(p)}, color-mix(in srgb, ${tkn('colors.landing.sectionAlt')(p)} 70%, ${tkn('colors.surface.primary')(p)}))`};
   border: 1px solid ${(p) => (p.$dark ? tkn('colors.sidebar.divider')(p) : tkn('colors.landing.cardBorder')(p))};
   box-shadow: ${tkn('colors.landing.shadowSoft')};
   min-width: 0;
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 300ms ease,
+    border-color 300ms ease;
+
+  /* A soft colour field that brightens on hover. */
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 22rem;
+    height: 22rem;
+    right: -8rem;
+    top: -10rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, ${(p) => (p.$dark ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primary')(p))} ${(p) => (p.$dark ? '30%' : '12%')}, transparent),
+      transparent
+    );
+    opacity: 0.8;
+    transition: opacity 300ms ease, transform 500ms ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: ${(p) => (p.$dark ? tkn('colors.sidebar.textMuted')(p) : tkn('colors.landing.cardBorderHover')(p))};
+    box-shadow: 0 30px 60px -30px color-mix(in srgb, ${tkn('colors.brand.primary')} 40%, transparent);
+  }
+
+  &:hover::before {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 
   @media (max-width: 980px) {
     grid-column: span ${(p) => Math.min(p.$span ?? 1, 2)};
@@ -984,7 +1451,15 @@ export const BentoCard = styled.article<{ $span?: 2 | 3; $dark?: boolean }>`
 
   @media (max-width: 680px) {
     grid-column: span 1;
-    padding: 1.35rem;
+    padding: 1.4rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
   }
 `;
 
@@ -992,11 +1467,15 @@ export const BentoIcon = styled.span<{ $dark?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: ${tkn('radius.md')};
-  background: ${(p) => (p.$dark ? tkn('colors.sidebar.hover')(p) : tkn('colors.landing.chipBg')(p))};
-  color: ${(p) => (p.$dark ? tkn('colors.landing.accentAmber')(p) : tkn('colors.brand.primary')(p))};
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.85rem;
+  background: ${(p) =>
+    p.$dark
+      ? `linear-gradient(135deg, ${tkn('colors.landing.accentAmber')(p)}, ${tkn('colors.landing.accentRose')(p)})`
+      : `linear-gradient(135deg, ${tkn('colors.brand.primary')(p)}, ${tkn('colors.landing.accentViolet')(p)})`};
+  color: ${tkn('colors.landing.onAccent')};
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, ${tkn('colors.brand.primary')} 70%, transparent);
 `;
 
 export const BentoTop = styled.div`
@@ -1337,12 +1816,26 @@ export const ParamText = styled.p`
 
 /** Real screenshot of the "All groups" drawer — tall, so it is capped and cropped from the top. */
 export const ScreenFrame = styled.figure`
+  position: relative;
+  isolation: isolate;
   margin: 0;
-  padding: ${tkn('spacing.xs+')};
-  border-radius: ${tkn('radius.2xl')};
+  padding: 0.45rem;
+  border-radius: 1.4rem;
   background: ${tkn('colors.surface.primary')};
   border: 1px solid ${tkn('colors.landing.cardBorder')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  box-shadow: 0 40px 80px -40px color-mix(in srgb, ${tkn('colors.brand.primary')} 45%, transparent);
+
+  /* Colour glow behind the frame so the capture sits in light, not on paper. */
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 12% -6% -8% 8%;
+    border-radius: 2rem;
+    background: linear-gradient(135deg, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 35%, transparent), color-mix(in srgb, ${tkn('colors.landing.accentViolet')} 30%, transparent));
+    filter: blur(40px);
+    opacity: 0.55;
+  }
 `;
 
 export const ScreenImage = styled.img<{ $maxHeight?: string }>`
@@ -1911,10 +2404,10 @@ export const SplitCopy = styled.div`
 export const SplitTitle = styled.h2`
   margin: 0;
   font-family: ${FONT_HEADING};
-  font-size: clamp(1.75rem, 3vw, ${TYPE.h3});
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
   color: ${tkn('colors.landing.heroText')};
   text-wrap: balance;
 `;
@@ -2045,15 +2538,16 @@ export const StepNumber = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: ${tkn('colors.brand.primary')};
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
   color: ${tkn('colors.landing.onAccent')};
-  font-family: ${FONT_BODY};
+  font-family: ${FONT_HEADING};
   font-size: ${TYPE.body};
-  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
+  font-weight: 800;
   margin-bottom: 0.25rem;
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, ${tkn('colors.brand.primary')} 70%, transparent);
 `;
 
 export const StepTitle = styled.h3`
@@ -2079,19 +2573,112 @@ export const StepDesc = styled.p`
 export const DemoBand = styled.div`
   position: relative;
   overflow: hidden;
-  border-radius: ${tkn('radius.xl')};
-  border: 1px solid ${tkn('colors.landing.chipBorder')};
-  background: ${tkn('colors.landing.chipBg')};
+  isolation: isolate;
+  border-radius: 1.75rem;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(${tkn('colors.surface.primary')}, ${tkn('colors.surface.primary')}) padding-box,
+    linear-gradient(
+        135deg,
+        color-mix(in srgb, ${tkn('colors.brand.primary')} 55%, transparent),
+        color-mix(in srgb, ${tkn('colors.landing.accentViolet')} 35%, transparent) 45%,
+        color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 55%, transparent)
+      )
+      border-box;
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
   padding: ${tkn('spacing.xxl')};
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   gap: ${tkn('spacing.xxl')};
   align-items: center;
+
+  /* Soft aurora + dot texture — the light-surface echo of the hero. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(30rem 18rem at 100% 0%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 16%, transparent), transparent 70%),
+      radial-gradient(26rem 16rem at 0% 100%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 12%, transparent), transparent 70%),
+      radial-gradient(color-mix(in srgb, ${tkn('colors.brand.primary')} 10%, transparent) 1px, transparent 1.4px) 0 0 / 22px 22px;
+  }
 
   @media (max-width: 940px) {
     grid-template-columns: 1fr;
     gap: ${tkn('spacing.lg')};
     padding: ${tkn('spacing.xl')} ${tkn('spacing.lg')};
+  }
+`;
+
+/** A screenshot tile that behaves like a video thumbnail: the whole tile opens the demo. */
+export const DemoPreview = styled.button`
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  border-radius: ${tkn('radius.xl')};
+  overflow: hidden;
+  cursor: pointer;
+  background: ${tkn('colors.surface.primary')};
+  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  transform: perspective(1400px) rotateY(-6deg) rotateX(3deg);
+  transition: transform 400ms ease, box-shadow 400ms ease;
+
+  &:hover {
+    transform: perspective(1400px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${tkn('colors.brand.primary')};
+    outline-offset: 3px;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 15rem;
+    object-fit: cover;
+    object-position: top left;
+  }
+
+  ${REDUCED} {
+    transform: none;
+    transition: none;
+    &:hover {
+      transform: none;
+    }
+  }
+`;
+
+export const DemoPlay = styled.span`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, ${tkn('colors.sidebar.background')} 35%, transparent));
+
+  & > span {
+    width: 4.25rem;
+    height: 4.25rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: ${tkn('colors.landing.onAccent')};
+    background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
+    box-shadow:
+      0 0 0 10px color-mix(in srgb, ${tkn('colors.surface.primary')} 45%, transparent),
+      0 18px 40px -12px color-mix(in srgb, ${tkn('colors.brand.primary')} 70%, transparent);
+    animation: ${breathe} 2.4s ease-in-out infinite;
+  }
+
+  ${REDUCED} {
+    & > span {
+      animation: none;
+    }
   }
 `;
 
@@ -2126,7 +2713,7 @@ export const DemoActions = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: ${tkn('spacing.sm')};
+  gap: ${tkn('spacing.md')};
   position: relative;
 
   @media (max-width: 940px) {
@@ -2198,26 +2785,38 @@ export const PricingCard = styled.div<{ $highlight?: boolean }>`
   flex-direction: column;
   gap: ${tkn('spacing.sm')};
   padding: ${tkn('spacing.xl')} ${tkn('spacing.lg')} ${tkn('spacing.lg')};
-  border-radius: ${tkn('radius.xl')};
-  border: 1px solid
-    ${(p) => (p.$highlight ? tkn('colors.brand.primary')(p) : tkn('colors.landing.cardBorder')(p))};
-  background: ${tkn('colors.surface.primary')};
-  box-shadow: ${(p) => (p.$highlight ? tkn('colors.landing.shadowStrong')(p) : tkn('colors.landing.shadowSoft')(p))};
+  border-radius: 1.4rem;
+  border: 1.5px solid transparent;
+  background: ${(p) =>
+    p.$highlight
+      ? `linear-gradient(${tkn('colors.surface.primary')(p)}, ${tkn('colors.surface.primary')(p)}) padding-box, linear-gradient(135deg, ${tkn('colors.brand.primary')(p)}, ${tkn('colors.landing.accentViolet')(p)}, ${tkn('colors.landing.accentAmber')(p)}) border-box`
+      : `linear-gradient(${tkn('colors.surface.primary')(p)}, ${tkn('colors.surface.primary')(p)}) padding-box, linear-gradient(${tkn('colors.landing.cardBorder')(p)}, ${tkn('colors.landing.cardBorder')(p)}) border-box`};
+  box-shadow: ${(p) =>
+    p.$highlight
+      ? `0 40px 80px -40px color-mix(in srgb, ${tkn('colors.brand.primary')(p)} 55%, transparent)`
+      : tkn('colors.landing.shadowSoft')(p)};
+  transform: ${(p) => (p.$highlight ? 'translateY(-6px)' : 'none')};
   text-align: left;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+
+  &:hover {
+    transform: translateY(${(p) => (p.$highlight ? '-10px' : '-4px')});
+  }
 `;
 
 export const PlanBadge = styled.span`
   position: absolute;
-  top: -0.75rem;
+  top: -0.8rem;
   left: ${tkn('spacing.lg')};
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.85rem;
   border-radius: 999px;
-  background: ${tkn('colors.brand.primary')};
+  background: linear-gradient(135deg, ${tkn('colors.brand.primary')}, ${tkn('colors.landing.accentViolet')});
   color: ${tkn('colors.landing.onAccent')};
   font-family: ${FONT_BODY};
   font-size: ${TYPE.micro};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
+  font-weight: 700;
   letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px -8px color-mix(in srgb, ${tkn('colors.brand.primary')} 80%, transparent);
 `;
 
 export const PlanName = styled.h3`
@@ -2386,41 +2985,54 @@ export const FaqAnswerText = styled.div`
 export const CtaBanner = styled.div`
   position: relative;
   overflow: hidden;
-  border-radius: ${tkn('radius.xl')};
-  padding: ${tkn('spacing.xxl')};
+  isolation: isolate;
+  border-radius: 1.75rem;
+  padding: 4.5rem ${tkn('spacing.xxl')};
   text-align: center;
-  background: ${tkn('colors.landing.heroGradient')};
-  box-shadow: ${tkn('colors.landing.shadowStrong')};
+  background: ${tkn('colors.sidebar.background')};
+  border: 1px solid ${tkn('colors.sidebar.divider')};
+  box-shadow: 0 50px 100px -50px color-mix(in srgb, ${tkn('colors.brand.primary')} 60%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: ${tkn('spacing.md')};
 
+  /* Aurora + dot texture, same language as the hero. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(40rem 20rem at 15% 0%, color-mix(in srgb, ${tkn('colors.landing.accentBlue')} 45%, transparent), transparent 70%),
+      radial-gradient(34rem 20rem at 90% 100%, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 30%, transparent), transparent 70%),
+      radial-gradient(color-mix(in srgb, ${tkn('colors.sidebar.text')} 12%, transparent) 1px, transparent 1.4px) 0 0 / 24px 24px;
+  }
+
   @media (max-width: 900px) {
-    padding: ${tkn('spacing.xl')} ${tkn('spacing.lg')};
+    padding: ${tkn('spacing.xxl')} ${tkn('spacing.lg')};
   }
 `;
 
 export const CtaTitle = styled.h2`
   margin: 0;
-  max-width: 34rem;
+  max-width: 40rem;
   font-family: ${FONT_HEADING};
-  font-size: clamp(1.75rem, 3vw, ${TYPE.h3});
-  line-height: 1.18;
-  letter-spacing: -0.015em;
-  font-weight: 700; /* sellerboard's "bold" is a literal 700; our app's own bold token has since softened to 600 */
-  color: ${tkn('colors.landing.onAccent')};
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: ${tkn('colors.sidebar.text')};
   text-wrap: balance;
 `;
 
 export const CtaSub = styled.p`
   margin: 0;
-  max-width: 36rem;
+  max-width: 38rem;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.lead};
-  line-height: 1.6;
-  color: ${tkn('colors.landing.onAccent')};
-  opacity: 0.88;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: ${tkn('colors.sidebar.textMuted')};
 `;
 
 /** Inverted primary: white pill on the gradient band. */
@@ -2430,23 +3042,20 @@ export const CtaButton = styled.button`
   justify-content: center;
   gap: 0.5rem;
   margin-top: ${tkn('spacing.xs')};
-  background: ${tkn('colors.landing.onAccent')};
+  background: linear-gradient(180deg, color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 80%, white), ${tkn('colors.landing.accentAmber')});
   border: none;
   cursor: pointer;
   font-family: ${FONT_BODY};
-  font-size: ${TYPE.cardSm};
-  font-weight: ${tkn('typography.fontWeight.semibold')};
-  color: ${tkn('colors.brand.primary')};
-  padding: 0.9rem 1.85rem;
-  border-radius: ${tkn('radius.md')};
-  box-shadow: ${tkn('colors.landing.shadowSoft')};
-  transition:
-    transform 140ms ease,
-    box-shadow 140ms ease;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: ${tkn('colors.sidebar.background')};
+  padding: 1rem 2rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 14px 34px -10px color-mix(in srgb, ${tkn('colors.landing.accentAmber')} 70%, transparent);
+  transition: transform 180ms ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: ${tkn('colors.landing.shadowStrong')};
+    transform: translateY(-2px);
   }
 `;
 

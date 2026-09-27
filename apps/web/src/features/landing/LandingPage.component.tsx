@@ -129,6 +129,22 @@ const STANDARD_ITEMS: { key: string; icon: IconName }[] = [
   { key: 'blacklist', icon: 'block' },
 ];
 
+/** The capability strip under the proof bar — reuses existing labels, no new copy. */
+const MARQUEE_ITEMS: { key: string; icon: IconName }[] = [
+  { key: 'translation:landing.navbar.menu.groups', icon: 'layers' },
+  { key: 'translation:landing.why.sync.title', icon: 'sync' },
+  { key: 'translation:landing.navbar.menu.specifics', icon: 'list-alt' },
+  { key: 'translation:landing.navbar.menu.templates', icon: 'file-text' },
+  { key: 'translation:landing.navbar.menu.actions', icon: 'bell-ring' },
+  { key: 'translation:landing.standard.items.autoOrder.title', icon: 'shopping-cart' },
+  { key: 'translation:landing.standard.items.tracking.title', icon: 'truck' },
+  { key: 'translation:landing.standard.items.blacklist.title', icon: 'block' },
+  { key: 'translation:landing.standard.items.aiTitle.title', icon: 'sparkles' },
+  { key: 'translation:landing.standard.items.messages.title', icon: 'message-circle' },
+  { key: 'translation:landing.standard.items.multiStore.title', icon: 'storefront' },
+  { key: 'translation:landing.navbar.menu.mobile', icon: 'smartphone' },
+];
+
 const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'q11', 'q12'] as const;
 const DEMO_BULLETS = ['b1', 'b2', 'b3'] as const;
@@ -339,9 +355,13 @@ export const LandingPageComponent = ({
       {/* ── Hero ───────────────────────────────────────── */}
       <S.Hero id="top">
         <S.HeroGlow />
+        <S.HeroGlowWarm />
         <S.HeroInner>
           <S.HeroContent>
-            <S.HeroEyebrow>{t('translation:landing.hero.eyebrow')}</S.HeroEyebrow>
+            <S.HeroEyebrow>
+              <S.LiveDot />
+              {t('translation:landing.hero.eyebrow')}
+            </S.HeroEyebrow>
             <S.HeroTitle>
               {t('translation:landing.hero.headline')}{' '}
               <S.HeroTitleAccent>{t('translation:landing.hero.headlineAccent')}</S.HeroTitleAccent>
@@ -353,10 +373,20 @@ export const LandingPageComponent = ({
                 <Icon name="arrow-right" size={17} />
               </S.PrimaryButton>
               <S.GhostButton $lg $onDark type="button" onClick={onOpenDemo}>
-                <Icon name="play-arrow" size={16} />
+                <S.PlayBadge>
+                  <Icon name="play-arrow" size={14} />
+                </S.PlayBadge>
                 {t('translation:landing.hero.ctaSecondary')}
               </S.GhostButton>
             </S.HeroCtas>
+            {/* Below 1080px the floating offer card is hidden; the offer rides here instead. */}
+            <S.MobileOffer>
+              <S.MobileOfferTag>{t('translation:landing.hero.trialTitle')}</S.MobileOfferTag>
+              <S.MobileOfferPrice>
+                {startingPriceDisplay}
+                {t('translation:landing.hero.priceBadge.per')}
+              </S.MobileOfferPrice>
+            </S.MobileOffer>
             <S.HeroTrust>
               {(['trialNoCard', 'trialCancelAnytime', 'trialMobile'] as const).map((key) => (
                 <S.HeroTrustItem key={key}>
@@ -368,25 +398,51 @@ export const LandingPageComponent = ({
           </S.HeroContent>
 
           <S.HeroPreview>
-            <S.HeroPreviewGlass>
-              <S.HeroPreviewImage
-                src={screenSrc('heroDashboard', currentLocale)}
-                alt="SellerHill dashboard"
-              />
-            </S.HeroPreviewGlass>
-            {/* The amount is the catalog's cheapest tier (see the container), so it
-                can never disagree with the pricing section. */}
+            <S.HeroTilt>
+              <S.HeroPreviewGlass>
+                <S.HeroPreviewImage
+                  src={screenSrc('heroDashboard', currentLocale)}
+                  alt="SellerHill dashboard"
+                />
+              </S.HeroPreviewGlass>
+              <S.HeroFloatCard>
+                <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" />
+              </S.HeroFloatCard>
+              <S.HeroToast>
+                <S.HeroToastIcon>
+                  <Icon name="package-check" size={18} />
+                </S.HeroToastIcon>
+                <span>
+                  <S.HeroToastTitle>{t('translation:landing.hero.toast.title')}</S.HeroToastTitle>
+                  <S.HeroToastText>{t('translation:landing.hero.toast.text')}</S.HeroToastText>
+                </span>
+              </S.HeroToast>
+            </S.HeroTilt>
+            {/* The offer: amount from the catalog's cheapest tier (see the container). */}
             <S.HeroOfferCard>
-              <S.HeroOfferTag>{t('translation:landing.hero.trialTitle')}</S.HeroOfferTag>
-              <S.HeroOfferPrice>
-                <S.HeroOfferAmount>{startingPriceDisplay}</S.HeroOfferAmount>
-                <S.HeroOfferPer>{t('translation:landing.hero.priceBadge.per')}</S.HeroOfferPer>
-              </S.HeroOfferPrice>
-              <S.HeroOfferCaption>{t('translation:landing.hero.priceBadge.caption')}</S.HeroOfferCaption>
+              <S.HeroOfferInner>
+                <S.HeroOfferTag>
+                  <Icon name="sparkles" size={13} />
+                  {t('translation:landing.hero.trialTitle')}
+                </S.HeroOfferTag>
+                <S.HeroOfferPrice>
+                  <S.HeroOfferAmount>{startingPriceDisplay}</S.HeroOfferAmount>
+                  <S.HeroOfferPer>{t('translation:landing.hero.priceBadge.per')}</S.HeroOfferPer>
+                </S.HeroOfferPrice>
+                <S.HeroOfferCaption>{t('translation:landing.hero.priceBadge.caption')}</S.HeroOfferCaption>
+                <S.HeroOfferRule />
+                <S.HeroOfferPoints>
+                  <span>
+                    <Icon name="check" size={12} />
+                    {t('translation:landing.hero.trialNoCard')}
+                  </span>
+                  <span>
+                    <Icon name="check" size={12} />
+                    {t('translation:landing.hero.trialCancelAnytime')}
+                  </span>
+                </S.HeroOfferPoints>
+              </S.HeroOfferInner>
             </S.HeroOfferCard>
-            <S.HeroFloatCard>
-              <S.HeroFloatImage src={screenSrc('heroKpiCard', currentLocale)} alt="" />
-            </S.HeroFloatCard>
           </S.HeroPreview>
         </S.HeroInner>
       </S.Hero>
@@ -402,6 +458,18 @@ export const LandingPageComponent = ({
           ))}
         </S.ProofBar>
       </S.ProofWrap>
+
+      {/* ── Capability marquee (duplicated once so the loop is seamless) ── */}
+      <S.MarqueeBand aria-hidden="true">
+        <S.MarqueeTrack>
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, index) => (
+            <S.MarqueeItem key={`${item.key}-${index}`}>
+              <Icon name={item.icon} size={16} />
+              {t(item.key)}
+            </S.MarqueeItem>
+          ))}
+        </S.MarqueeTrack>
+      </S.MarqueeBand>
 
       {/* ── Why SellerHill — the differentiators ──────── */}
       <S.Section id="why" data-reveal="why">
@@ -874,6 +942,14 @@ export const LandingPageComponent = ({
               </S.DemoBullets>
             </S.DemoCopy>
             <S.DemoActions>
+              <S.DemoPreview type="button" onClick={onOpenDemo} aria-label={t('translation:landing.demo.button')}>
+                <img src={screenSrc('actionCenter', currentLocale)} alt="" loading="lazy" />
+                <S.DemoPlay>
+                  <span>
+                    <Icon name="play-arrow" size={26} color="landing.onAccent" />
+                  </span>
+                </S.DemoPlay>
+              </S.DemoPreview>
               <S.PrimaryButton $lg type="button" onClick={onOpenDemo}>
                 <Icon name="play-arrow" size={17} />
                 {t('translation:landing.demo.button')}
