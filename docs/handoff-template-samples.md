@@ -29,7 +29,37 @@ CC0 / public-domain, unbranded products. Delete this file when the task is done.
   `/template-samples/wireless-earbuds.jpg` + unbranded earbuds copy; i18n
   `listingSettingsGroup.sample.productTitle/Description` (en+tr) updated to match.
 
+## Operator decision (2026-09-27): products must look NEW
+
+Sample photos must read as brand-new retail products — never used, worn,
+vintage or museum pieces. Four of the six Commons picks fail this and must be
+REPLACED before anything else:
+
+| File | Problem |
+|---|---|
+| knit-cardigan.jpg (Apparel) | MET museum object, looks vintage/worn |
+| wooden-blocks.jpg (Toys) | chipped, scratched paint — clearly played with |
+| slow-feeder-bowl.jpg (Pet) | surface scratches |
+| heart-soap.jpg (Beauty) | held in a hand, amateur snapshot |
+
+Keep: `led-flashlight.jpg`, `air-filter.jpg` (both look new), plus the five
+carried-over demo photos.
+
+Selection rules for the replacements:
+- New-looking product, studio/clean shot, white or plain backdrop, not held in
+  a hand, no wear, no visible brand.
+- Wikimedia Commons is NOT required. Allowed sources: WordPress Photo Directory
+  (wordpress.org/photos, all CC0), Openverse (openverse.org, filter
+  license=cc0,pdm — Flickr CC0/PDM, rawpixel public-domain, StockSnap).
+  Verify the license on the SOURCE page and record it in CREDITS.md.
+- Still banned: Unsplash, Pexels, Pixabay (custom licenses, incl. their
+  re-uploads on Commons), CC BY/BY-SA, AI-generated images.
+- Update migration 122's product copy to match the new photos (and the file
+  names if they change), then CREDITS.md.
+
 ## Remaining (not yet run / done)
+
+0. Replace the four photos above (see the decision section).
 
 1. `pnpm install` was done in the old session; then:
    `pnpm --filter @repo/shared build` → `node scripts/build-template-previews.mjs`
