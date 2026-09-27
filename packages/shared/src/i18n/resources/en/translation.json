@@ -608,7 +608,8 @@
         "clean": "No supplier trace: nothing in the description or images points to your supplier.",
         "specs": "Item specifics and highlights are placed in automatically."
       },
-      "previewNote": "Real template preview"
+      "previewNote": "Live template, scroll to explore",
+      "openFull": "Open full page"
     },
     "showcase": {
       "eyebrow": "Inside the product",

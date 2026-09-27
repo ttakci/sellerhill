@@ -17,7 +17,7 @@
  *   OUT_DIR           write somewhere other than apps/web/public/landing-screens
  *
  * Template previews (`landing-screens/templates/`) are a separate script,
- * `scripts/capture-template-previews.mjs`, because they are not app UI.
+ * `scripts/build-template-previews.mjs`, because they are not app UI.
  */
 import fs from 'fs';
 import path from 'path';
