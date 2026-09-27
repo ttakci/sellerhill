@@ -122,7 +122,7 @@ export class ListingStrategyService {
     // Stock Logic: Subtract buffer from Amazon stock, cap at user's max listing quantity.
     // See calculateQuantity() for the canonical formula (shared by all stock-compute paths).
     const amazonStock = product.stock ?? 0;
-    const quantity = this.calculateQuantity(amazonStock, group);
+    const quantity = this.calculateQuantity(amazonStock, group, product.maxOrderQuantity);
 
     const defaultQuantity = group.stock?.defaultQuantity || 1;
     const stockBuffer = group.stock?.stockBuffer ?? 0;
@@ -199,7 +199,7 @@ export class ListingStrategyService {
 
     return {
       price: priceMetrics.finalPrice,
-      quantity: this.calculateQuantity(product.stock ?? 0, resolved),
+      quantity: this.calculateQuantity(product.stock ?? 0, resolved, product.maxOrderQuantity),
       purchasePrice: priceMetrics.purchasePrice,
       estimatedProfit: priceMetrics.estimatedProfit,
       profitMargin: priceMetrics.profitMargin,
@@ -371,18 +371,27 @@ export class ListingStrategyService {
 
   /**
    * Canonical eBay listing quantity from (shared) Amazon stock + a group's stock policy.
-   * quantity = min(max(amazonStock − buffer, 0), defaultQuantity)
+   * quantity = min(max(amazonStock − buffer, 0), defaultQuantity, maxOrderQuantity)
    * e.g. defaultQuantity=3, buffer=5:
    *   Amazon=25 → min(max(25-5,0),3)=3  |  Amazon=7 → min(max(7-5,0),3)=2
    *   Amazon=6 → min(max(6-5,0),3)=1    |  Amazon=5 → min(max(5-5,0),3)=0 (out of stock)
    *
+   * `maxOrderQuantity` is Amazon's own per-order purchase limit on the source
+   * product (e.g. "Limit 4 per order"). One eBay order must be fulfillable by
+   * one Amazon order, so the listed quantity can never exceed it.
+   *
    * Single source of truth — used by listing creation, the 12h Keepa sync, and the
    * sale-driven stock-sync queue so every path computes quantity identically.
    */
-  calculateQuantity(amazonStock: number, group: Pick<ListingSettingsGroup, 'stock'>): number {
+  calculateQuantity(
+    amazonStock: number,
+    group: Pick<ListingSettingsGroup, 'stock'>,
+    maxOrderQuantity?: number | null
+  ): number {
     const defaultQuantity = group.stock?.defaultQuantity || 1;
     const stockBuffer = group.stock?.stockBuffer ?? 0;
-    return Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity);
+    const cap = typeof maxOrderQuantity === 'number' && maxOrderQuantity > 0 ? maxOrderQuantity : Infinity;
+    return Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity, cap);
   }
 
   /**
