@@ -48,6 +48,11 @@ carried-over demo photos.
 Selection rules for the replacements:
 - New-looking product, studio/clean shot, white or plain backdrop, not held in
   a hand, no wear, no visible brand.
+- **Update 2026-09-27: Pexels and Pixabay are now ALLOWED** (operator decision;
+  CLAUDE.md updated). pexels.com / pixabay.com return 403 from this container,
+  so the easiest route is the operator downloading 4 photos in a browser and
+  adding them here. Commons-hosted `Cream_in_round_container.jpg` was checked
+  and rejected: Shiseido logo on lid and jar.
 - Wikimedia Commons is NOT required. Allowed sources: WordPress Photo Directory
   (wordpress.org/photos, all CC0), Openverse (openverse.org, filter
   license=cc0,pdm — Flickr CC0/PDM, rawpixel public-domain, StockSnap).
@@ -61,11 +66,11 @@ Selection rules for the replacements:
 
 0. Replace the four photos above (see the decision section).
 
-1. `pnpm install` was done in the old session; then:
+1. DONE for the current photos (re-run after swapping photos): 
    `pnpm --filter @repo/shared build` → `node scripts/build-template-previews.mjs`
    (regenerates `apps/web/public/landing-screens/templates/*.html` and writes
    `apps/web/public/template-samples/catalog.json`). Commit the outputs.
-2. Verify:
+2. Verify (DONE 2026-09-27: guard spec 140/140, eslint clean, tsc errors only pre-existing in untouched .style.ts files; browser check NOT done):
    - `npx eslint --max-warnings 0 apps/web/src/features/landing apps/web/src/features/settings apps/web/src/features/demo`
    - `cd apps/web && npx tsc --noEmit -p . | grep -E "features/(landing|settings|demo)"`
    - `pnpm --filter api test -- predefined-templates`
@@ -73,7 +78,7 @@ Selection rules for the replacements:
      (`sessionStorage.sellerhill_demo=1`) Settings → Listing Settings Group
      template preview. Restart vite after adding `public/` files; use viewport
      screenshots (fullPage shows iframes blank).
-3. Update CLAUDE.md bullets "Template previews are LIVE HTML" (now reads 122's
+3. DONE — updated CLAUDE.md bullets "Template previews are LIVE HTML" (now reads 122's
    samples + photos in `template-samples/`, demo reads `catalog.json`) and
    "Nothing the landing shows may carry a real brand" (template photos rule,
    Commons-API verification, no Pixabay/Unsplash/Pexels re-uploads, no AI images).
