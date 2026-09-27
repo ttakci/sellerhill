@@ -136,6 +136,18 @@ export class ProductSyncService {
       return [];
     }
 
+    // A stored price of 0 means "no usable Amazon price" (an out-of-stock page
+    // imported without one, a legacy Keepa `?? 0`), never "free". Pricing from
+    // it hands back fees + fixed profit or the price floor, so every listing of
+    // this product is skipped — eBay keeps what it last had — until a refresh
+    // reads a real price. Logged once per product, not once per listing.
+    if (!(Number(productInfo.data.price?.current) > 0)) {
+      this.logger.warn(
+        `Product ${asin} has no usable Amazon price — skipping price/stock sync for its ${listings.length} active listing(s)`
+      );
+      return [];
+    }
+
     // One settings-group read per (user, group) instead of one per listing:
     // an ASIN listed by the same seller in several groups, or by many sellers,
     // used to re-fetch the same rows for every listing.

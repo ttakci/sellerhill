@@ -62,6 +62,7 @@
       "scraper_block_rate_high": "Scraper block rate is elevated (%)",
       "refresh_lag": "Product refresh is behind schedule (minutes)",
       "scraper_proxy_invalid": "Scraper proxy entries are malformed and are being skipped (count)",
+      "scraper_transport_failure_high": "Scraper cannot reach Amazon through its proxies (%) — check the proxy list and credentials",
       "scraper_parse_failure_high": "Scraper parse failures are elevated (%) — Amazon may have changed its page layout",
       "scraper_direct_egress": "Scraper is allowed to fetch WITHOUT a proxy — disable SCRAPER_ALLOW_DIRECT on this server"
     },
@@ -112,8 +113,8 @@
       "ebayStores": "Active eBay stores",
       "amazonAccounts": "Amazon buyer accounts",
       "keepaBalance": "Keepa tokens left",
-      "scraperLastHour": "Scraper, last hour (ok · blocked · unreadable)",
-      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}}",
+      "scraperLastHour": "Scraper, last hour (ok · blocked · unreadable · proxy error · timed out)",
+      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}} · {{proxyError}} · {{expired}}",
       "refreshLag": "Refresh lag",
       "refreshLagValue": "{{minutes}} min",
       "syncsPerDay": "Achievable syncs per day",

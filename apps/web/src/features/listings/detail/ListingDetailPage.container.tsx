@@ -23,6 +23,7 @@ import { ListingDetailPageComponent } from './ListingDetailPage.component';
 import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
 
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { getErrorI18nKey, isFetchBaseQueryError } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
 const resolveLabel = (
@@ -614,12 +615,19 @@ export const ListingDetailPageContainer: React.FC = () => {
                   t
                 );
               })
-              .catch(() => {
+              .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
                 showMessage(
                   {
                     type: 'error',
                     headerKey: 'listings:listings.notifications.publishErrorTitle',
-                    descriptionKey: 'listings:listings.notifications.publishError',
+                    // Only a mapped refusal (409 — e.g. the Amazon price could
+                    // not be read, a quota refusal) carries a localized key.
+                    // Other failures send raw text, which must not be read
+                    // as a key, so they keep the generic publish error.
+                    descriptionKey:
+                      isFetchBaseQueryError(error) && error.status === 409
+                        ? getErrorI18nKey(error, 'listings:listings.notifications.publishError')
+                        : 'listings:listings.notifications.publishError',
                   },
                   t
                 );

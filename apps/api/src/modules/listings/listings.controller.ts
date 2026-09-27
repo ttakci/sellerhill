@@ -64,6 +64,10 @@ const toPositiveInt = (value?: string): number | undefined =>
 const LISTING_REFUSAL_KEYS: Record<string, string> = {
   SubscriptionSuspendedError: 'billing.errors.subscriptionSuspended',
   QuotaExhaustedError: 'billing.errors.listingQuotaExhausted',
+  // A draft whose stored Amazon price is unknown/0 (single publish rethrows
+  // the plain Error, which was a 500). Same localized reason the job detail
+  // shows for the bulk path.
+  SourcePriceUnavailableError: 'listings.jobs.failure.source_price_unavailable',
 };
 
 function rethrowListingRefusal(error: unknown): never {
@@ -495,6 +499,10 @@ export class ListingsController {
   @ApiOperation({ summary: 'Publish a draft listing to eBay' })
   @Post(':id/publish')
   async publishListing(@Request() req: { user: { sub: string } }, @Param('id') id: string): Promise<ListingDto> {
-    return this.listingsService.publishListing(req.user.sub, id);
+    try {
+      return await this.listingsService.publishListing(req.user.sub, id);
+    } catch (error: unknown) {
+      rethrowListingRefusal(error);
+    }
   }
 }

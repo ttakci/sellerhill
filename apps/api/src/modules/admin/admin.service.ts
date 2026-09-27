@@ -49,7 +49,12 @@ import {
   buildQuotaPressureSummary,
   resolveCostTotal,
 } from './billing-metrics.helpers';
-import { achievableSyncsPerDay, blockRatePercent, parseFailureRatePercent } from './scraper-ops.helpers';
+import {
+  achievableSyncsPerDay,
+  blockRatePercent,
+  parseFailureRatePercent,
+  transportFailureRatePercent,
+} from './scraper-ops.helpers';
 
 interface CountRow {
   count: string;
@@ -524,6 +529,12 @@ export class AdminService {
         const parseRate = parseFailureRatePercent(scraperStats);
         if (parseRate !== null && parseRate >= warnAt) {
           warnings.push({ kind: AdminWarningKind.SCRAPER_PARSE_FAILURE_HIGH, level: parseRate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: parseRate, threshold: warnAt });
+        }
+        // Proxy errors and deadline expiries are in neither rate above, so a
+        // dead or wrong-password proxy list would otherwise raise nothing.
+        const transportRate = transportFailureRatePercent(scraperStats);
+        if (transportRate !== null && transportRate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_TRANSPORT_FAILURE_HIGH, level: transportRate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: transportRate, threshold: warnAt });
         }
         // Compose never sets SCRAPER_ALLOW_DIRECT on a server, but a PaaS env
         // panel can inject it straight into the container.

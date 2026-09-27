@@ -46,7 +46,7 @@ import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { classifyListingFailure } from './listing-failure';
-import { ListingStrategyService } from './listing-strategy.service';
+import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
 /** Row type for getListings / getListing queries (listings JOIN products) */
@@ -1886,6 +1886,10 @@ export class ListingsService {
     if (!product) {
       throw new BadRequestException('Product data missing for this draft — cannot publish');
     }
+
+    // Before the EPS upload: a draft saved from a page with no usable price is
+    // refused here without spending a Media API upload on it.
+    assertSourcePricePublishable(product.data);
 
     const ebayAccountId = listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
 

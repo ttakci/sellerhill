@@ -13,10 +13,10 @@ import { ListingsService } from './listings.service';
 /**
  * The safety net for a draft saved from an out-of-stock page with no price
  * (stored at price 0): publishing it is refused exactly like a live create
- * priced from 0, until a refresh reads a real price. The refusal lives in
- * `prepareListingData({ live: true })`, which the draft-publish path calls, so
- * this goes through `publishListing` with a REAL strategy service rather than
- * asserting on a mock.
+ * priced from 0. `prepareDraftForPublish` calls the shared
+ * `assertSourcePricePublishable` before the EPS upload (and
+ * `prepareListingData({ live: true })` re-checks), so this goes through
+ * `publishListing` with a REAL strategy service rather than asserting on a mock.
  */
 describe('draft publish — non-positive source price', () => {
   const group = {
@@ -37,7 +37,7 @@ describe('draft publish — non-positive source price', () => {
       features: [],
       specs: {},
       identifiers: {},
-      imageUrls: [],
+      imageUrls: ['https://m.media-amazon.com/images/I/x.jpg'],
       price: { current, currency: 'USD' },
       stock: 0,
     }) as unknown as ProductData;
@@ -49,6 +49,7 @@ describe('draft publish — non-positive source price', () => {
       { isEnabled: jest.fn().mockResolvedValue(false), rewriteTitle: jest.fn(), rewriteDescription: jest.fn() } as never,
     );
     const prepareSpy = jest.spyOn(strategy, 'prepareListingData');
+    const ebayImages = { resolve: jest.fn() };
     const service = new ListingsService(
       { query: jest.fn().mockResolvedValue([]) } as never,
       { getActiveAccountId: jest.fn().mockResolvedValue('account-1') } as never,
@@ -56,7 +57,7 @@ describe('draft publish — non-positive source price', () => {
       strategy,
       {} as never,
       {} as never,
-      { resolve: jest.fn() } as never,
+      ebayImages as never,
     );
     jest.spyOn(service, 'getListing').mockResolvedValue({
       id: 'listing-1',
@@ -66,15 +67,17 @@ describe('draft publish — non-positive source price', () => {
       ebayAccountId: 'account-1',
     } as never);
     jest.spyOn(service, 'getProductByAsin').mockResolvedValue({ id: 'product-1', data: product(current) } as never);
-    return { service, prepareSpy };
+    return { service, prepareSpy, ebayImages };
   }
 
   it('refuses to publish a draft priced from 0, with the same code as a live create', async () => {
-    const { service, prepareSpy } = build(0);
+    const { service, prepareSpy, ebayImages } = build(0);
     const error = await service.publishListing('user-1', 'listing-1').catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(SourcePriceUnavailableError);
-    expect(prepareSpy).toHaveBeenCalledWith('user-1', expect.anything(), 'group-1', 'account-1', expect.objectContaining({ live: true }));
+    // Refused before the EPS upload and before any strategy/LLM work.
+    expect(ebayImages.resolve).not.toHaveBeenCalled();
+    expect(prepareSpy).not.toHaveBeenCalled();
     const classified = classifyListingFailure(error);
     expect(classified.code).toBe(ListingFailureCode.SOURCE_PRICE_UNAVAILABLE);
     expect(classified.details.retryable).toBe(false);

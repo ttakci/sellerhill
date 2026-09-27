@@ -50,6 +50,19 @@ export class SourcePriceUnavailableError extends Error {
   }
 }
 
+/**
+ * The one price check every path that publishes to eBay calls. The create
+ * worker and the draft-publish path call it themselves BEFORE the EPS image
+ * upload (so a refused item spends no upload), and `prepareListingData`
+ * re-checks under `live` before any LLM spend — the net for a caller that
+ * forgets the early call.
+ */
+export function assertSourcePricePublishable(product: Pick<ProductData, 'asin' | 'price'>): void {
+  if (!(Number(product.price?.current) > 0)) {
+    throw new SourcePriceUnavailableError(product.asin || 'unknown');
+  }
+}
+
 @Injectable()
 export class ListingStrategyService {
   private readonly logger = new Logger(ListingStrategyService.name);
@@ -78,8 +91,8 @@ export class ListingStrategyService {
     options?: { applyContentAi?: boolean; live?: boolean }
   ) {
     // Checked first, before the settings lookup and any LLM spend.
-    if (options?.live && !(Number(product.price?.current) > 0)) {
-      throw new SourcePriceUnavailableError(product.asin || 'unknown');
+    if (options?.live) {
+      assertSourcePricePublishable(product);
     }
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);

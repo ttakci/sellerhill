@@ -65,16 +65,72 @@ describe('product source invariants', () => {
     expect(keepaCall).toBeGreaterThan(close);
   });
 
-  it('a live create checks zero stock BEFORE the price refusal, so an out-of-stock page reads as out of stock', () => {
+  it('a live create: zero stock, then the price refusal, then EPS and prepareListingData — a refused item spends nothing', () => {
     const batchStart = src.indexOf('private async processListingBatch(');
     expect(batchStart).toBeGreaterThan(-1);
     const batch = src.slice(batchStart);
     const zeroStock = batch.indexOf('throw new ZeroStockError(');
+    const priceRefusal = batch.indexOf('assertSourcePricePublishable(productData)');
+    const eps = batch.indexOf('await attachEpsImages(');
     const prepare = batch.indexOf('this.listingStrategyService.prepareListingData(');
     expect(zeroStock).toBeGreaterThan(-1);
-    expect(prepare).toBeGreaterThan(zeroStock);
-    // ...and the price refusal is still requested for every live create.
+    expect(priceRefusal).toBeGreaterThan(zeroStock);
+    expect(eps).toBeGreaterThan(priceRefusal);
+    expect(prepare).toBeGreaterThan(eps);
+    // ...and prepareListingData still re-checks for every live create.
     expect(batch.slice(prepare, prepare + 400)).toMatch(/live: !asDraft/);
+  });
+
+  it('draft publish refuses an unknown price BEFORE the EPS upload, and re-checks under live', () => {
+    const listings = stripComments(
+      fs.readFileSync(path.join(__dirname, 'listings.service.ts'), 'utf8').replace(/\r\n/g, '\n'),
+    );
+    const startAt = listings.indexOf('private async prepareDraftForPublish(');
+    expect(startAt).toBeGreaterThan(-1);
+    const publish = listings.slice(startAt, listings.indexOf('\n  }\n', startAt));
+    const priceRefusal = publish.indexOf('assertSourcePricePublishable(product.data)');
+    const eps = publish.indexOf('await attachEpsImages(');
+    expect(priceRefusal).toBeGreaterThan(-1);
+    expect(eps).toBeGreaterThan(priceRefusal);
+    expect(publish).toMatch(/applyContentAi: false, live: true/);
+  });
+
+  it('a cached row with no usable price is a cache miss, so re-adding the ASIN re-fetches it', () => {
+    const cacheAt = src.indexOf('private asUsableCache(');
+    expect(cacheAt).toBeGreaterThan(-1);
+    const cache = src.slice(cacheAt, src.indexOf('\n  }\n', cacheAt));
+    expect(cache).toMatch(/Number\(existing\.data\.price\?\.current\) > 0/);
+  });
+
+  it('a single draft publish refused for an unknown price is a 409 with a localized reason, not a 500', () => {
+    const controller = stripComments(
+      fs.readFileSync(path.join(__dirname, 'listings.controller.ts'), 'utf8').replace(/\r\n/g, '\n'),
+    );
+    expect(controller).toMatch(/SourcePriceUnavailableError: 'listings\.jobs\.failure\.source_price_unavailable'/);
+    const publishAt = controller.indexOf('async publishListing(');
+    expect(publishAt).toBeGreaterThan(-1);
+    expect(controller.slice(publishAt, publishAt + 400)).toMatch(/rethrowListingRefusal\(error\)/);
+    for (const locale of ['en', 'tr']) {
+      const json = JSON.parse(
+        fs.readFileSync(path.join(__dirname, `../../../../../packages/shared/src/i18n/resources/${locale}/listings.json`), 'utf8'),
+      ) as { listings: { jobs: { failure: Record<string, string> } } };
+      expect(json.listings.jobs.failure.source_price_unavailable).toBeTruthy();
+    }
+  });
+
+  it('the price/stock fan-out skips a product whose stored price is not > 0, before any listing is priced', () => {
+    const sync = stripComments(
+      fs.readFileSync(path.join(__dirname, 'product-sync.service.ts'), 'utf8').replace(/\r\n/g, '\n'),
+    );
+    const startAt = sync.indexOf('async computePendingUpdates(');
+    expect(startAt).toBeGreaterThan(-1);
+    const body = sync.slice(startAt, sync.indexOf('async flushUpdates(', startAt));
+    const guard = /if \(!\(Number\(productInfo\.data\.price\?\.current\) > 0\)\) \{/.exec(body);
+    expect(guard).not.toBeNull();
+    const open = (guard?.index ?? 0) + (guard?.[0].length ?? 0) - 1;
+    const close = matchingBrace(body, open);
+    expect(body.slice(open, close)).toMatch(/return \[\];/);
+    expect(body.indexOf('this.buildPendingUpdate(')).toBeGreaterThan(close);
   });
 
   it('an unanswered scraper fetch is retryable PRODUCT_DATA_UNAVAILABLE, never ASIN_NOT_FOUND', () => {

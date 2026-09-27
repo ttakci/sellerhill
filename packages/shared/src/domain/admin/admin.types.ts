@@ -271,6 +271,13 @@ export enum AdminWarningKind {
   SCRAPER_PARSE_FAILURE_HIGH = 'scraper_parse_failure_high',
   /** `scraper.proxies` holds entries that are not proxy URLs; they are skipped. Value = how many. */
   SCRAPER_PROXY_INVALID = 'scraper_proxy_invalid',
+  /**
+   * Share of scraper requests in the last hour that never reached Amazon
+   * (`proxyError` + `expired`) crossed `scraper.blockRateWarnPercent`. The
+   * alarm for a well-formed proxy list that is dead or has wrong credentials,
+   * which the block and parse-failure rates cannot see.
+   */
+  SCRAPER_TRANSPORT_FAILURE_HIGH = 'scraper_transport_failure_high',
   /** The scraper service reports `SCRAPER_ALLOW_DIRECT=1`: it may fetch from the server's own IP. */
   SCRAPER_DIRECT_EGRESS = 'scraper_direct_egress',
   /** The oldest overdue product refresh is further behind than the configured refresh interval. */

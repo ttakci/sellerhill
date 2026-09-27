@@ -36,6 +36,20 @@ export function parseFailureRatePercent(stats: ScraperStats): number | null {
 }
 
 /**
+ * Share of scraper requests in the last hour that never got an answer from
+ * Amazon at all: `proxyError` (dead exit, wrong proxy credentials, repeated
+ * 5xx) plus `expired` (deadline). Taken over EVERY outcome, since neither is
+ * in the `answered` denominator the other two rates use — a wrong-password
+ * proxy list answers nothing but these, so without this rate no warning fires
+ * and the last-hour card reads 0 · 0 · 0. `null` with no traffic at all.
+ */
+export function transportFailureRatePercent(stats: ScraperStats): number | null {
+  const w = stats.window1h;
+  const failed = (w.proxyError ?? 0) + (w.expired ?? 0);
+  return percentOf(failed, answered(stats) + failed);
+}
+
+/**
  * How many full refresh passes the scraper's proxy pool can sustain per day
  * against the given ASIN workload: `proxies × requests/sec/proxy × 86,400
  * seconds × (1 − reserve) / unique ASINs`. The reserve is the same headroom the

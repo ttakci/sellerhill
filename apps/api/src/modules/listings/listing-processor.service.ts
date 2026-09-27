@@ -35,7 +35,7 @@ import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
 import { ListingImportService } from './listing-import.service';
-import { ListingStrategyService } from './listing-strategy.service';
+import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
 import { buildUnavailablePrefetchMap } from './product-source-prefetch.helpers';
@@ -282,6 +282,9 @@ export class ListingProcessorService extends WorkerHost {
               group.stock?.stockBuffer ?? 0
             );
           }
+          // Then the price refusal — still before the EPS upload and the LLM
+          // rewrite, so an item refused for an unknown price spends nothing.
+          assertSourcePricePublishable(productData);
         }
         // Skipped for a draft: persistDraft below never reads imageUrls or
         // mainImageUrl (it persists only price/quantity/category fields), so
@@ -737,18 +740,25 @@ export class ListingProcessorService extends WorkerHost {
     );
   }
 
-  /** A cached product row is reusable when it has a real title and ≥1 image. */
+  /** A cached product row is reusable when it has a real title, ≥1 image and a price > 0. */
   private asUsableCache(
     existing: {
       id: string;
       data: ProductData;
     } | null
   ): { productData: ProductData; productId: string } | null {
+    // A row with no usable price (an out-of-stock page saved at 0, a legacy
+    // Keepa `?? 0`) is a MISS: the refresh only visits products with an ACTIVE
+    // listing, so a draft-only row is never refreshed, and without this a
+    // seller who deletes the draft and re-adds the ASIN would be served the
+    // same price-0 row for ever. A miss re-fetches, and the upsert replaces
+    // the stored price.
     if (
       existing &&
       existing.data.title &&
       existing.data.title !== 'Unknown Product' &&
-      existing.data.imageUrls?.length > 0
+      existing.data.imageUrls?.length > 0 &&
+      Number(existing.data.price?.current) > 0
     ) {
       return {
         productData: existing.data,

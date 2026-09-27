@@ -62,6 +62,7 @@
       "scraper_block_rate_high": "Scraper blok oranı yüksek (%)",
       "refresh_lag": "Ürün yenileme takvimin gerisinde (dakika)",
       "scraper_proxy_invalid": "Hatalı biçimli scraper proxy girdileri atlanıyor (adet)",
+      "scraper_transport_failure_high": "Scraper proxy'ler üzerinden Amazon'a ulaşamıyor (%) — proxy listesini ve şifreleri kontrol edin",
       "scraper_parse_failure_high": "Scraper ayrıştırma hataları yüksek (%) — Amazon sayfa düzenini değiştirmiş olabilir",
       "scraper_direct_egress": "Scraper proxy'siz çekim yapabiliyor — bu sunucuda SCRAPER_ALLOW_DIRECT'i kapatın"
     },
@@ -112,8 +113,8 @@
       "ebayStores": "Aktif eBay mağazaları",
       "amazonAccounts": "Amazon alıcı hesapları",
       "keepaBalance": "Kalan Keepa token",
-      "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan)",
-      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}}",
+      "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan · proxy hatası · zaman aşımı)",
+      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}} · {{proxyError}} · {{expired}}",
       "refreshLag": "Yenileme gecikmesi",
       "refreshLagValue": "{{minutes}} dk",
       "syncsPerDay": "Ulaşılabilir günlük sync",
