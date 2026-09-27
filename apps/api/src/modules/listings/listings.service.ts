@@ -1212,6 +1212,25 @@ export class ListingsService {
   }
 
   /**
+   * How many DRAFT (still-queued) job items this user already has waiting,
+   * excluding the job currently being enqueued. Feeds `fairBatchPriority` so a
+   * seller who already has a large upload in flight sinks behind a seller
+   * enqueuing for the first time — `listing_job_items.status` defaults to the
+   * uppercase 'DRAFT' string (migration 009) while `ListingStatus.DRAFT` is
+   * lowercase, hence `LOWER(...)`.
+   */
+  async countQueuedItems(userId: string, excludeJobId: string): Promise<number> {
+    const [{ count }] = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count
+         FROM listing_job_items i
+         JOIN listing_jobs j ON j.id = i.job_id
+        WHERE j.user_id = $1 AND j.id <> $2 AND LOWER(i.status) = $3`,
+      [userId, excludeJobId, ListingStatus.DRAFT],
+    );
+    return Number(count);
+  }
+
+  /**
    * Get job status
    */
   async getJobStatus(userId: string, jobId: string): Promise<ListingJobDto | null> {

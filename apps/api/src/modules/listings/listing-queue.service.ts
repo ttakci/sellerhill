@@ -11,6 +11,7 @@ import { stampCurrentCorrelation } from '../../common/observability/queue-correl
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { chunkForBulk } from '../ebay/ebay-bulk.helpers';
 
+import { fairBatchPriority } from './fair-priority';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
 
@@ -110,7 +111,12 @@ export class ListingQueueService {
       removeOnFail: false,
     };
 
-    const jobs = chunkForBulk(job.items).map((chunk) => ({
+    // Fair per-seller priority: a seller who already has work queued sinks
+    // behind one enqueuing for the first time, so a 500-ASIN upload cannot
+    // hold a 5-ASIN upload behind it on the shared listings queue.
+    const queuedForUser = await this.listingsService.countQueuedItems(userId, job.id);
+
+    const jobs = chunkForBulk(job.items).map((chunk, index) => ({
       name: LISTING_BATCH_JOB,
       data: stampCurrentCorrelation({
         jobId: job.id,
@@ -123,7 +129,7 @@ export class ListingQueueService {
         asDraft,
         items: chunk.map((item) => ({ asin: item.asin, listingJobItemId: item.id })),
       } as ListingBatchQueueJobData),
-      opts,
+      opts: { ...opts, priority: fairBatchPriority(queuedForUser, index) },
     }));
 
     if (jobs.length > 0) {
