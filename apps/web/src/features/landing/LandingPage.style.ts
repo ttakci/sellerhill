@@ -2041,73 +2041,86 @@ export const TemplatePoint = styled.li`
 
 export const TemplatePreview = styled.div`
   position: relative;
-
-  @media (max-width: 940px) {
-    order: 2;
-  }
-
-  picture {
-    display: block;
-  }
-
+  display: flex;
+  flex-direction: column;
+  gap: ${tkn('spacing.xs+')};
   padding: ${tkn('spacing.xs+')};
   border-radius: ${tkn('radius.2xl')};
   background: ${tkn('colors.surface.primary')};
   border: 1px solid ${tkn('colors.landing.cardBorder')};
   box-shadow: ${tkn('colors.landing.shadowStrong')};
-`;
-
-export const TemplateImage = styled.img`
-  display: block;
-  width: 100%;
-  height: 34rem;
-  object-fit: cover;
-  object-position: top;
-  border-radius: ${tkn('radius.xl')};
-  border: 1px solid ${tkn('colors.border.secondary')};
-  animation: templateFade 220ms ease-out;
-
-  @keyframes templateFade {
-    from {
-      opacity: 0.4;
-    }
-    to {
-      opacity: 1;
-    }
-  }
 
   @media (max-width: 940px) {
-    height: 26rem;
+    order: 2;
   }
+`;
 
-  /* The phone render (see the <picture> source) is already 390px wide, so it
-   * fills the frame at its own scale; a taller window shows the title, photo
-   * and the start of the description. */
-  @media (max-width: 640px) {
-    height: 32rem;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
+/** Label + "open full page" link above the live template. */
+export const TemplateBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${tkn('spacing.sm')};
+  padding: 0.15rem 0.35rem 0;
 `;
 
 export const PreviewBadge = styled.span`
-  position: absolute;
-  top: 1.1rem;
-  right: 1.1rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  background: ${tkn('colors.sidebar.background')};
-  color: ${tkn('colors.sidebar.text')};
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: ${FONT_BODY};
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
+  color: ${tkn('colors.landing.heroTextMuted')};
 
-  /* On a phone the template title spans the full width — sit below it instead. */
-  @media (max-width: 640px) {
-    top: auto;
-    bottom: 1.1rem;
+  svg {
+    color: ${tkn('colors.semantic.success')};
+  }
+`;
+
+export const TemplateOpenLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.8rem;
+  border-radius: ${tkn('radius.md')};
+  border: 1px solid ${tkn('colors.landing.cardBorder')};
+  font-family: ${FONT_BODY};
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${tkn('colors.brand.primary')};
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+
+  &:hover {
+    border-color: ${tkn('colors.landing.cardBorderHover')};
+    background: ${tkn('colors.landing.chipBg')};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${tkn('colors.brand.primary')};
+    outline-offset: 2px;
+  }
+`;
+
+/**
+ * The template itself — its real HTML, not a picture of it. Being an iframe,
+ * the template's own CSS runs at the frame's width, so on a phone it lays out
+ * exactly as it would in the eBay app. The visitor scrolls inside the frame.
+ */
+export const TemplateFrame = styled.iframe`
+  display: block;
+  width: 100%;
+  height: 34rem;
+  border: 1px solid ${tkn('colors.border.secondary')};
+  border-radius: ${tkn('radius.xl')};
+  background: ${tkn('colors.surface.primary')};
+
+  @media (max-width: 940px) {
+    height: 30rem;
   }
 `;
 

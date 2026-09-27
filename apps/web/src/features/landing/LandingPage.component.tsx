@@ -41,9 +41,10 @@ const screenSrc = (key: ScreenKey, locale: string): string =>
 
 /**
  * Listing-template previews. These are NOT app UI — they are what a buyer sees
- * on eBay.com, rendered from the real catalog (migration `073`) by the same
- * `renderListingTemplate` the publish path uses, so one English set serves
- * both locales. Product photos are the CC0 / public-domain demo images.
+ * on eBay.com: real HTML rendered from the catalog (migration `073`) by the same
+ * `renderListingTemplate` the publish path uses (`scripts/build-template-previews.mjs`),
+ * embedded live in an iframe, so one English set serves both locales. Product
+ * photos are the public-domain, unbranded demo images.
  */
 const TEMPLATE_PREVIEWS = [
   { key: 'generalStore', file: 'general-store' },
@@ -56,8 +57,7 @@ const TEMPLATE_PREVIEWS = [
 
 type TemplateKey = (typeof TEMPLATE_PREVIEWS)[number]['key'];
 
-const templateSrc = (file: string, phone = false): string =>
-  `/landing-screens/templates/${phone ? 'mobile/' : ''}${file}.webp`;
+const templateSrc = (file: string): string => `/landing-screens/templates/${file}.html`;
 
 const COUNT_UP_MS = 1100;
 
@@ -759,16 +759,24 @@ export const LandingPageComponent = ({
               </S.TemplatePoints>
             </S.TemplateSide>
             <S.TemplatePreview>
-              {/* Phones get the phone render of the same listing — a desktop render shrunk to 340px is unreadable. */}
-              <picture key={activeTemplateFile}>
-                <source media="(max-width: 640px)" srcSet={templateSrc(activeTemplateFile, true)} />
-                <S.TemplateImage
-                  src={templateSrc(activeTemplateFile)}
-                  alt={t(`translation:landing.templates.names.${activeTemplate}`)}
-                  loading="lazy"
-                />
-              </picture>
-              <S.PreviewBadge>{t('translation:landing.templates.previewNote')}</S.PreviewBadge>
+              <S.TemplateBar>
+                <S.PreviewBadge>
+                  <Icon name="check-circle" size={14} />
+                  {t('translation:landing.templates.previewNote')}
+                </S.PreviewBadge>
+                <S.TemplateOpenLink href={templateSrc(activeTemplateFile)} target="_blank" rel="noopener">
+                  {t('translation:landing.templates.openFull')}
+                  <Icon name="external-link" size={14} />
+                </S.TemplateOpenLink>
+              </S.TemplateBar>
+              {/* The real rendered template, not a screenshot; `sandbox` with no flags: it needs no script. */}
+              <S.TemplateFrame
+                key={activeTemplateFile}
+                src={templateSrc(activeTemplateFile)}
+                title={t(`translation:landing.templates.names.${activeTemplate}`)}
+                loading="lazy"
+                sandbox=""
+              />
             </S.TemplatePreview>
           </S.TemplatesLayout>
         </S.Reveal>
