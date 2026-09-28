@@ -1,3 +1,4 @@
+-- Numbered 124 (written as 122; renamed 2026-09-28 because 122/123 were taken on development meanwhile). Idempotent, so a database that already ran it under the old name is unaffected.
 -- Amazon stock as the scraper provider observes it (spec 2026-09-26-amazon-scraper-provider).
 --
 -- stock_status: 'exact' | 'at_least' | 'out_of_stock'. 'unknown' is never

@@ -24,7 +24,7 @@ export enum ProductDataProviderKind {
  * `AT_LEAST` covers Amazon's own "Only N left" cap (never shown above 20) and
  * a seller's own per-order quantity limit — both mean "at least this many",
  * never an exact count. `UNKNOWN` is never persisted; it means "keep the
- * previous row" (see migration 122).
+ * previous row" (see migration 124).
  */
 export enum SourceStockStatus {
   EXACT = 'exact',

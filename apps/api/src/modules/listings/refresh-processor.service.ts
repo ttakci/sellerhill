@@ -46,7 +46,7 @@ interface ProductRow {
   description: string | null;
   specs: Record<string, string> | null;
   consecutive_failures: number;
-  // Scraper-provider stock precision (migration 122). Keepa-sourced rows keep
+  // Scraper-provider stock precision (migration 124). Keepa-sourced rows keep
   // the 'exact' default; only the scraper branch reads/writes these.
   stock_status: string;
   max_order_quantity: number | null;
