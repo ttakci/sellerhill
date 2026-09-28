@@ -18,6 +18,10 @@ export const ordersApi = baseApi.injectEndpoints({
           if (filters.autoFulfillNeedsAttention) {
             params.autoFulfillNeedsAttention = 'true';
           }
+          if (filters.fulfillmentState) {params.fulfillmentState = filters.fulfillmentState;}
+          // The controller reads this as `tracked` ('true' | 'false'); `false` is a
+          // real filter (untracked orders), so test for undefined, not truthiness.
+          if (filters.isTracked !== undefined) {params.tracked = String(filters.isTracked);}
           if (filters.sortBy) {params.sortBy = filters.sortBy;}
           if (filters.sortOrder) {params.sortOrder = filters.sortOrder;}
         }

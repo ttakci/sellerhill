@@ -6,6 +6,15 @@ import { DatabaseService } from '../../common/database/database.service';
 
 import { EbayMediaService } from './ebay-media.service';
 import { EbayService } from './ebay.service';
+import { EpsUploadPacer } from './eps-upload-pacer';
+
+/**
+ * 8 uploads/s per store — a deliberate margin under eBay's documented 50
+ * POSTs per 5 seconds (10/s) per user. The batch worker prepares several
+ * products of one store concurrently, so the per-product sequential loop
+ * below is no longer what bounds the aggregate rate; this is.
+ */
+const EPS_UPLOAD_MIN_INTERVAL_MS = 125;
 
 /** `product_ebay_images.image_urls[N]` is the EPS URL for `sourceUrls[N]`, or `''` on a failed upload. */
 interface ProductEbayImagesRow {
@@ -54,6 +63,9 @@ function hasGaps(stored: string[]): boolean {
 @Injectable()
 export class EbayImageResolver {
   private readonly logger = new Logger(EbayImageResolver.name);
+  // One pacer per process: EbayImageResolver is a singleton provider, so every
+  // caller's uploads for one store flow through the same schedule.
+  private readonly uploadPacer = new EpsUploadPacer(EPS_UPLOAD_MIN_INTERVAL_MS);
 
   constructor(
     private readonly databaseService: DatabaseService,
@@ -117,8 +129,10 @@ export class EbayImageResolver {
         const toUpload = sourceUrls.slice(0, EBAY_MAX_IMAGES);
         const uploaded: string[] = [];
         let succeeded = 0;
-        // Sequential, never Promise.all: the limit is 50 POSTs/5s per user and
-        // the point is to stay under it, not to discover it.
+        // Sequential PER PRODUCT, never Promise.all — but the limit of 50
+        // POSTs/5s per user is enforced by `uploadPacer` across products: the
+        // batch worker runs several products of one store concurrently, so a
+        // per-product loop alone no longer bounds the store's aggregate rate.
         for (const [index, source] of toUpload.entries()) {
           const kept = existing[index];
           if (kept) {
@@ -127,6 +141,7 @@ export class EbayImageResolver {
             uploaded.push(kept);
             continue;
           }
+          await this.pause(this.uploadPacer.reserve(ebayAccountId, Date.now()));
           const epsUrl = await this.ebayMediaService.uploadFromUrl(accessToken, source);
           if (epsUrl) {
             succeeded += 1;
@@ -170,6 +185,16 @@ export class EbayImageResolver {
       );
       return bestKnown ? this.toResult(sourceUrls, bestKnown) : { galleryUrls: sourceUrls, descriptionUrl: '' };
     }
+  }
+
+  /** Awaits `ms` from the pacer; skips the timer entirely for a 0 wait. */
+  private pause(ms: number): Promise<void> {
+    if (ms <= 0) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
   private async readCached(productId: string, ebayAccountId: string, sourceUrls: string[]): Promise<string[] | null> {

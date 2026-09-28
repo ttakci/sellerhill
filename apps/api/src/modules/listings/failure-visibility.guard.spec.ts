@@ -151,7 +151,10 @@ describe('listing retry discipline', () => {
     const source = read(LISTINGS_DIR, 'listing-processor.service.ts');
     const draftBranch = source.slice(source.indexOf('if (asDraft) {'), source.indexOf('prepareListingDraft'));
     expect(draftBranch).toMatch(/persistDraft/);
-    expect(draftBranch).toMatch(/continue;/);
+    // The per-item pipeline is a bounded-concurrency closure now, so the
+    // draft's early exit is `return`, not `continue` — same invariant: the
+    // item ends before prepareListingDraft and the bulk writes.
+    expect(draftBranch).toMatch(/return;/);
 
     const persist = source.slice(source.indexOf('private async persistDraft('));
     const body = persist.slice(0, persist.indexOf('\n  /**'));
