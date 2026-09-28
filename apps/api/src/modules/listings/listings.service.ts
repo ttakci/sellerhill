@@ -38,6 +38,7 @@ import {
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
@@ -2042,7 +2043,10 @@ export class ListingsService {
         // not exist on eBay, order sync keys on that column, and the ASIN then
         // counts as already listed. Leave the listing a DRAFT instead.
         await this.quotaEnforcement.releaseForPublish(userId, item.listingId);
-        const error = new Error(result.error ?? 'eBay did not return a listing id for this item.');
+        const error = toClassifiableError(
+          result.error ?? 'eBay did not return a listing id for this item.',
+          result.ebayErrors
+        );
         if (result.errorName) {
           // Restores the typed failure the classifier keys on.
           error.name = result.errorName;

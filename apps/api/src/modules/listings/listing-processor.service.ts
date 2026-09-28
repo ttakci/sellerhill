@@ -25,6 +25,7 @@ import { EbayBudgetExhaustedError } from '../../common/ebay-budget/ebay-budget.e
 import { deferralDelayMs } from '../../common/ebay-budget/ebay-call-budget.helpers';
 import { getCorrelation, withCorrelation } from '../../common/observability/correlation.context';
 import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
+import { toClassifiableError } from '../ebay/ebay-bulk.helpers';
 import { EbayBulkService, type BulkListingDraft, type BulkListingOutcome } from '../ebay/ebay-bulk.service';
 import { EbayImageResolver } from '../ebay/ebay-image-resolver.service';
 import { EbayService } from '../ebay/ebay.service';
@@ -390,7 +391,7 @@ export class ListingProcessorService extends WorkerHost {
           userId,
           prepared.asin,
           outcome.key,
-          new Error(outcome.error ?? 'eBay did not return a listing id for this item.')
+          toClassifiableError(outcome.error ?? 'eBay did not return a listing id for this item.', outcome.ebayErrors)
         );
         continue;
       }
