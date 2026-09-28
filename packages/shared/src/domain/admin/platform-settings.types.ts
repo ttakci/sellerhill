@@ -35,6 +35,8 @@ export enum PlatformSettingCategory {
   BUYER_MESSAGING = 'buyer_messaging',
   /** Append-only table retention windows + Chromium profile disk GC. */
   RETENTION = 'retention',
+  /** The Amazon scraper service: proxies, pacing, stock-floor and block-rate warning. */
+  SCRAPER = 'scraper',
 }
 
 /** Where the effective value came from — shown in the UI so overrides are obvious. */
@@ -72,6 +74,18 @@ export enum PlatformSettingKey {
   KEEPA_REFRESH_MAX_FAILURES = 'keepa.refresh.maxFailures',
   KEEPA_REFRESH_QUARANTINE_MINUTES = 'keepa.refresh.quarantineMinutes',
   KEEPA_REFRESH_SCHEDULER_CRON = 'keepa.refresh.schedulerCron',
+
+  // --- Product data source (spec 2026-09-26-amazon-scraper-provider) ---
+  /** Whole-provider switch: 'keepa' or 'scraper'. There is no per-field fallback between the two. */
+  PRODUCT_DATA_PROVIDER = 'product.dataProvider',
+  /** Newline/comma-separated proxy URLs the scraper uses. Empty = no request is ever made. */
+  SCRAPER_PROXIES = 'scraper.proxies',
+  /** Requests per second allowed per proxy. Total capacity = this × proxy count. */
+  SCRAPER_PER_IP_RPS = 'scraper.perIpRequestsPerSecond',
+  /** Stock recorded for "In Stock" with no visible count. */
+  SCRAPER_IN_STOCK_FLOOR = 'scraper.inStockFloor',
+  /** Admin warning threshold: share of scraper requests blocked in the last hour. */
+  SCRAPER_BLOCK_RATE_WARN_PERCENT = 'scraper.blockRateWarnPercent',
 
   // --- eBay API call budget (quotas are per APPLICATION, shared by all users) ---
   // Per-resource ceilings are no longer typed in here — the governor takes

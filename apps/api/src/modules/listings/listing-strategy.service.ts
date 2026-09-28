@@ -34,6 +34,35 @@ import {
   truncateTitleAtWordBoundary,
 } from './listing-title';
 
+/**
+ * A live listing would be priced from an Amazon price that is unknown or 0.
+ *
+ * Provider-neutral: the scraper can read "In Stock" while the price block is
+ * unreadable, and Keepa maps a missing Buy Box price to 0. Pricing from 0 hands
+ * back fees + fixed profit (or the price floor), so every sale would buy the
+ * item on Amazon at full price. A draft may still be saved; publishing it
+ * re-checks. Terminal for the attempt — see `classifyListingFailure`.
+ */
+export class SourcePriceUnavailableError extends Error {
+  override name = 'SourcePriceUnavailableError';
+  constructor(asin: string) {
+    super(`Cannot list ASIN ${asin}: the Amazon price is unknown or 0.`);
+  }
+}
+
+/**
+ * The one price check every path that publishes to eBay calls. The create
+ * worker and the draft-publish path call it themselves BEFORE the EPS image
+ * upload (so a refused item spends no upload), and `prepareListingData`
+ * re-checks under `live` before any LLM spend — the net for a caller that
+ * forgets the early call.
+ */
+export function assertSourcePricePublishable(product: Pick<ProductData, 'asin' | 'price'>): void {
+  if (!(Number(product.price?.current) > 0)) {
+    throw new SourcePriceUnavailableError(product.asin || 'unknown');
+  }
+}
+
 @Injectable()
 export class ListingStrategyService {
   private readonly logger = new Logger(ListingStrategyService.name);
@@ -50,14 +79,21 @@ export class ListingStrategyService {
    * @param options.applyContentAi — **create path only**. When true and group AI flags
    * are on, may call the shared LLM client. Product-sync / Keepa refresh must pass false (default)
    * so we never rewrite 100k titles on every price tick.
+   * @param options.live — the result will be published to eBay now (a live
+   * create or a draft publish). Refuses a non-positive source price; a draft
+   * create and an import of an already-live eBay listing leave it unset.
    */
   async prepareListingData(
     userId: string,
     product: ProductData,
     settingsGroupId: string,
     storeId: string | null = null,
-    options?: { applyContentAi?: boolean }
+    options?: { applyContentAi?: boolean; live?: boolean }
   ) {
+    // Checked first, before the settings lookup and any LLM spend.
+    if (options?.live) {
+      assertSourcePricePublishable(product);
+    }
     const group = await this.settingsGroupService.getListingSettingsGroupById(userId, settingsGroupId);
     const storeSettings = await this.storeSettingsService.getResolvedSettings(userId, storeId);
 
@@ -122,7 +158,7 @@ export class ListingStrategyService {
     // Stock Logic: Subtract buffer from Amazon stock, cap at user's max listing quantity.
     // See calculateQuantity() for the canonical formula (shared by all stock-compute paths).
     const amazonStock = product.stock ?? 0;
-    const quantity = this.calculateQuantity(amazonStock, group);
+    const quantity = this.calculateQuantity(amazonStock, group, product.maxOrderQuantity);
 
     const defaultQuantity = group.stock?.defaultQuantity || 1;
     const stockBuffer = group.stock?.stockBuffer ?? 0;
@@ -199,7 +235,7 @@ export class ListingStrategyService {
 
     return {
       price: priceMetrics.finalPrice,
-      quantity: this.calculateQuantity(product.stock ?? 0, resolved),
+      quantity: this.calculateQuantity(product.stock ?? 0, resolved, product.maxOrderQuantity),
       purchasePrice: priceMetrics.purchasePrice,
       estimatedProfit: priceMetrics.estimatedProfit,
       profitMargin: priceMetrics.profitMargin,
@@ -371,18 +407,27 @@ export class ListingStrategyService {
 
   /**
    * Canonical eBay listing quantity from (shared) Amazon stock + a group's stock policy.
-   * quantity = min(max(amazonStock − buffer, 0), defaultQuantity)
+   * quantity = min(max(amazonStock − buffer, 0), defaultQuantity, maxOrderQuantity)
    * e.g. defaultQuantity=3, buffer=5:
    *   Amazon=25 → min(max(25-5,0),3)=3  |  Amazon=7 → min(max(7-5,0),3)=2
    *   Amazon=6 → min(max(6-5,0),3)=1    |  Amazon=5 → min(max(5-5,0),3)=0 (out of stock)
    *
+   * `maxOrderQuantity` is Amazon's own per-order purchase limit on the source
+   * product (e.g. "Limit 4 per order"). One eBay order must be fulfillable by
+   * one Amazon order, so the listed quantity can never exceed it.
+   *
    * Single source of truth — used by listing creation, the 12h Keepa sync, and the
    * sale-driven stock-sync queue so every path computes quantity identically.
    */
-  calculateQuantity(amazonStock: number, group: Pick<ListingSettingsGroup, 'stock'>): number {
+  calculateQuantity(
+    amazonStock: number,
+    group: Pick<ListingSettingsGroup, 'stock'>,
+    maxOrderQuantity?: number | null
+  ): number {
     const defaultQuantity = group.stock?.defaultQuantity || 1;
     const stockBuffer = group.stock?.stockBuffer ?? 0;
-    return Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity);
+    const cap = typeof maxOrderQuantity === 'number' && maxOrderQuantity > 0 ? maxOrderQuantity : Infinity;
+    return Math.min(Math.max(amazonStock - stockBuffer, 0), defaultQuantity, cap);
   }
 
   /**

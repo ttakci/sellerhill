@@ -104,6 +104,34 @@ describe('validateSettingValue', () => {
       });
     });
   });
+
+  describe('scraper.proxies', () => {
+    const proxiesDef = definition({
+      key: PlatformSettingKey.SCRAPER_PROXIES,
+      category: PlatformSettingCategory.SCRAPER,
+      type: PlatformSettingType.STRING,
+      envVar: 'SCRAPER_PROXIES',
+      defaultValue: null,
+      isSecret: true,
+    });
+
+    it('accepts a list of proxy URLs (http, https, socks5, socks5h)', () => {
+      expect(validateSettingValue(proxiesDef, 'http://u:p@h:1, https://h:443\nsocks5://h:1080,socks5h://h:1080').ok).toBe(true);
+    });
+
+    it.each(['h:1:u:p', 'http://u:p@h:1,ftp://h:2', 'http://h', 'http://h:70000'])(
+      'refuses a list containing a non-proxy entry (%#) without echoing it',
+      (raw) => {
+        const result = validateSettingValue(proxiesDef, raw);
+        expect(result).toEqual({ ok: false, reason: SettingValidationError.NOT_PROXY_URL });
+        expect(JSON.stringify(result)).not.toContain('h:');
+      },
+    );
+
+    it('leaves other string settings unvalidated', () => {
+      expect(validateSettingValue(definition({ type: PlatformSettingType.STRING }), 'h:1:u:p').ok).toBe(true);
+    });
+  });
 });
 
 describe('coerceBoolean', () => {

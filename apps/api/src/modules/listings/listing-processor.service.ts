@@ -9,6 +9,9 @@ import {
   ListingFailureCode,
   ListingJobKind,
   ListingStatus,
+  ProductDataProviderKind,
+  SourceFetchOutcome,
+  SourceStockStatus,
   type ExistingListingImportQueueData,
   type ListingBatchQueueJobData,
   type ListingCreationData,
@@ -32,9 +35,11 @@ import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
 import { classifyListingFailure } from './listing-failure';
 import { ListingImportService } from './listing-import.service';
-import { ListingStrategyService } from './listing-strategy.service';
+import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { LISTING_BATCH_JOB } from './listings.constants';
 import { ListingsService } from './listings.service';
+import { buildUnavailablePrefetchMap } from './product-source-prefetch.helpers';
+import { ProductSourceService, type CreateFetchResult } from './product-source.service';
 
 /**
  * The identifier could not be resolved to a real product — never a leading-'B'
@@ -47,6 +52,27 @@ export class AsinNotFoundError extends Error {
   constructor(public readonly asin: string) {
     super(`No product could be resolved for ASIN ${asin}.`);
     this.name = 'AsinNotFoundError';
+  }
+}
+
+/** Scraper could not produce data for this ASIN (blocked, no proxy, unreadable page). Retryable. */
+export class ProductDataUnavailableError extends Error {
+  override name = 'ProductDataUnavailableError';
+  constructor(asin: string, outcome: string) {
+    super(`scraper: ${outcome} for ${asin}`);
+  }
+}
+
+/** Buffer or stock drove a live create to quantity 0. Carries the numbers the seller message shows. */
+export class ZeroStockError extends Error {
+  override name = 'ZeroStockError';
+  constructor(
+    asin: string,
+    readonly amazonStock: number,
+    readonly amazonStockAtLeast: boolean,
+    readonly stockBuffer: number,
+  ) {
+    super(`Cannot list ASIN ${asin}: Stock is 0. Amazon stock (${amazonStockAtLeast ? 'at least ' : ''}${amazonStock}) minus buffer ${stockBuffer}.`);
   }
 }
 
@@ -72,6 +98,7 @@ export class ListingProcessorService extends WorkerHost {
     private readonly quotaEnforcement: QuotaEnforcementService,
     private readonly databaseService: DatabaseService,
     private readonly ebayImages: EbayImageResolver,
+    private readonly productSource: ProductSourceService,
     @Inject(forwardRef(() => ListingImportService))
     private readonly listingImportService: ListingImportService
   ) {
@@ -175,6 +202,49 @@ export class ListingProcessorService extends WorkerHost {
     let merchantLocationKey = 'default';
     let accountId = ebayAccountId;
 
+    // Scraper: fetch every uncached ASIN of this batch in ONE service call
+    // (parallel across proxies) instead of one page per loop iteration.
+    //
+    // A failed batch call must NOT be swallowed into `undefined` here — that
+    // used to leave every uncached item to retry `fetchForCreate` on its own,
+    // one at a time, INSIDE resolveProductData's per-ASIN advisory-lock
+    // transaction. A hung/unreachable scraper service means each of those
+    // retries can take up to the client's own timeout (~200s), so a 25-item
+    // batch could hold a pg client for up to ~80 minutes. Instead, one failure
+    // here fails every uncached item immediately (retryable
+    // PRODUCT_DATA_UNAVAILABLE via resolveProductData's `unavailable` branch).
+    let prefetched: Map<string, CreateFetchResult> | undefined;
+    if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+      // Only ASINs the loop below can actually create: a malformed identifier
+      // fails as ASIN_NOT_FOUND without a fetch, an already-listed one is a
+      // duplicate, and a repeat within the batch needs one fetch, not two —
+      // each skipped page is proxy capacity not spent.
+      const uncached: string[] = [];
+      for (const item of items) {
+        if (!isValidAsinShape(item.asin) || uncached.includes(item.asin)) {
+          continue;
+        }
+        if (await this.listingsService.isAsinListed(userId, item.asin)) {
+          continue;
+        }
+        if (!this.asUsableCache(await this.listingsService.getProductByAsin(item.asin))) {
+          uncached.push(item.asin);
+        }
+      }
+      if (uncached.length > 0) {
+        try {
+          prefetched = await this.productSource.fetchForCreate(uncached, AmazonMarketplace.AMAZON_US);
+        } catch (error: unknown) {
+          // Never log the error body — it may carry proxy endpoints/credentials.
+          this.logger.error(
+            `Batch prefetch failed for job ${jobId} (${uncached.length} ASIN(s)): ` +
+              `${error instanceof Error ? error.name : 'unknown'}`
+          );
+          prefetched = buildUnavailablePrefetchMap(uncached);
+        }
+      }
+    }
+
     for (const item of items) {
       try {
         if (await this.listingsService.isAsinListed(userId, item.asin)) {
@@ -182,7 +252,40 @@ export class ListingProcessorService extends WorkerHost {
           continue;
         }
 
-        const { productData, productId } = await this.resolveProductData(item.asin, userId);
+        const { productData, productId } = await this.resolveProductData(
+          item.asin,
+          userId,
+          AmazonMarketplace.AMAZON_US,
+          prefetched
+        );
+
+        // Drafts may hold a zero-stock ASIN so the seller can prepare it and
+        // publish once Amazon restocks; a live publish must never push qty 0.
+        // Checked FIRST, with the cheap price/quantity path: an out-of-stock
+        // page carries no price, and the reason the seller needs is "out of
+        // stock", not the price refusal `prepareListingData({ live })` would
+        // otherwise raise — and a refused item should spend no image upload
+        // and no LLM call.
+        if (!asDraft) {
+          const group = await this.listingStrategyService.getSettingsGroup(userId, listingSettingsGroupId);
+          const { quantity } = await this.listingStrategyService.computePricing(
+            userId,
+            productData,
+            listingSettingsGroupId,
+            group
+          );
+          if (quantity === 0) {
+            throw new ZeroStockError(
+              item.asin,
+              productData.stock ?? 0,
+              productData.stockStatus === SourceStockStatus.AT_LEAST,
+              group.stock?.stockBuffer ?? 0
+            );
+          }
+          // Then the price refusal — still before the EPS upload and the LLM
+          // rewrite, so an item refused for an unknown price spends nothing.
+          assertSourcePricePublishable(productData);
+        }
         // Skipped for a draft: persistDraft below never reads imageUrls or
         // mainImageUrl (it persists only price/quantity/category fields), so
         // resolving EPS images here would spend a real eBay Media API upload
@@ -200,17 +303,8 @@ export class ListingProcessorService extends WorkerHost {
           productData,
           listingSettingsGroupId,
           ebayAccountId,
-          { applyContentAi: true }
+          { applyContentAi: true, live: !asDraft }
         );
-
-        // Drafts may hold a zero-stock ASIN so the seller can prepare it and
-        // publish once Amazon restocks; a live publish must never push qty 0.
-        if (!asDraft && listingData.quantity === 0) {
-          throw new Error(
-            `Cannot list ASIN ${item.asin}: Stock is 0. ` +
-              `Amazon stock (${productData.stock}) is less than user preferred quantity.`
-          );
-        }
 
         if (asDraft) {
           // Stop before every eBay call. Category and item specifics are
@@ -553,7 +647,8 @@ export class ListingProcessorService extends WorkerHost {
   async resolveProductData(
     asin: string,
     userId: string,
-    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US
+    marketplace: AmazonMarketplace = AmazonMarketplace.AMAZON_US,
+    prefetched?: Map<string, CreateFetchResult>
   ): Promise<{ productData: ProductData; productId: string }> {
     // A malformed identifier (wrong length/characters — never a leading-'B'
     // requirement) can never resolve to a real ASIN. Reject it here, before any
@@ -583,6 +678,19 @@ export class ListingProcessorService extends WorkerHost {
       if (cachedAfterLock) {
         this.logger.log(`ASIN ${asin} was cached by a concurrent create while waiting on lock (no Keepa call)`);
         return cachedAfterLock;
+      }
+
+      if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+        const result =
+          prefetched?.get(asin) ?? (await this.productSource.fetchForCreate([asin], marketplace)).get(asin);
+        if (!result || result.kind === 'unavailable') {
+          throw new ProductDataUnavailableError(asin, result?.outcome ?? SourceFetchOutcome.BLOCKED);
+        }
+        if (result.kind === 'not_found' || !result.product.title || result.product.title === 'Unknown Product') {
+          throw new AsinNotFoundError(asin);
+        }
+        const productId = await this.listingsService.findOrCreateProduct(asin, result.product, marketplace);
+        return { productData: result.product, productId };
       }
 
       this.logger.log(`Fetching product data for ASIN ${asin} from Keepa`);
@@ -632,18 +740,25 @@ export class ListingProcessorService extends WorkerHost {
     );
   }
 
-  /** A cached product row is reusable when it has a real title and ≥1 image. */
+  /** A cached product row is reusable when it has a real title, ≥1 image and a price > 0. */
   private asUsableCache(
     existing: {
       id: string;
       data: ProductData;
     } | null
   ): { productData: ProductData; productId: string } | null {
+    // A row with no usable price (an out-of-stock page saved at 0, a legacy
+    // Keepa `?? 0`) is a MISS: the refresh only visits products with an ACTIVE
+    // listing, so a draft-only row is never refreshed, and without this a
+    // seller who deletes the draft and re-adds the ASIN would be served the
+    // same price-0 row for ever. A miss re-fetches, and the upsert replaces
+    // the stored price.
     if (
       existing &&
       existing.data.title &&
       existing.data.title !== 'Unknown Product' &&
-      existing.data.imageUrls?.length > 0
+      existing.data.imageUrls?.length > 0 &&
+      Number(existing.data.price?.current) > 0
     ) {
       return {
         productData: existing.data,

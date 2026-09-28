@@ -91,3 +91,6 @@ coverage/
 # buyer addresses and order details, is TTL-swept by FULFILLMENT_EVIDENCE_TTL_DAYS,
 # and is treated as admin-only on the server (see CLAUDE.md "Backups & monitoring").
 fulfillment-evidence/
+
+services/amazon-scraper/.venv/
+services/amazon-scraper/**/__pycache__/

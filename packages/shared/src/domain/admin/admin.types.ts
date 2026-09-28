@@ -1,6 +1,7 @@
 // packages/shared/src/domain/admin/admin.types.ts
 
 import type { UserRole } from '../auth/auth.types';
+import type { ProductDataProviderKind, ScraperStats } from '../products/source-product.types';
 import type { UserStatus } from '../user/user.types';
 
 /**
@@ -255,6 +256,32 @@ export enum AdminWarningKind {
   QUEUE_WAITING = 'queue_waiting',
   KEEPA_LOW_TOKENS = 'keepa_low_tokens',
   LLM_FAILURE_RATE = 'llm_failure_rate',
+  /** `product.dataProvider` is `scraper` and no proxy is configured — no Amazon data is being fetched at all. */
+  SCRAPER_NO_PROXIES = 'scraper_no_proxies',
+  /** The scraper service's `/v1/stats` call failed or timed out. */
+  SCRAPER_UNREACHABLE = 'scraper_unreachable',
+  /** Share of scraper requests blocked in the last hour crossed `scraper.blockRateWarnPercent`. */
+  SCRAPER_BLOCK_RATE_HIGH = 'scraper_block_rate_high',
+  /**
+   * Share of scraper requests whose page could not be parsed in the last hour
+   * crossed `scraper.blockRateWarnPercent` (one knob for "the scraper is
+   * unhealthy"). Usually an Amazon layout change: those products go down the
+   * data-failure path and are quarantined within ~5.5 h.
+   */
+  SCRAPER_PARSE_FAILURE_HIGH = 'scraper_parse_failure_high',
+  /** `scraper.proxies` holds entries that are not proxy URLs; they are skipped. Value = how many. */
+  SCRAPER_PROXY_INVALID = 'scraper_proxy_invalid',
+  /**
+   * Share of scraper requests in the last hour that never reached Amazon
+   * (`proxyError` + `expired`) crossed `scraper.blockRateWarnPercent`. The
+   * alarm for a well-formed proxy list that is dead or has wrong credentials,
+   * which the block and parse-failure rates cannot see.
+   */
+  SCRAPER_TRANSPORT_FAILURE_HIGH = 'scraper_transport_failure_high',
+  /** The scraper service reports `SCRAPER_ALLOW_DIRECT=1`: it may fetch from the server's own IP. */
+  SCRAPER_DIRECT_EGRESS = 'scraper_direct_egress',
+  /** The oldest overdue product refresh is further behind than the configured refresh interval. */
+  REFRESH_LAG = 'refresh_lag',
 }
 
 export enum AdminWarningLevel {
@@ -298,6 +325,16 @@ export interface AdminOperationsSummaryDto {
   keepaTokensLeft: number | null;
   llmFailureRatePct: number;
   warnings: AdminWarningDto[];
+  /** Which provider `product.dataProvider` currently resolves to — decides which health cards render. */
+  productDataProvider: ProductDataProviderKind;
+  /** Scraper service health/usage snapshot. Null when the provider is `keepa`, or when `/v1/stats` failed. */
+  scraperStats: ScraperStats | null;
+  /** Minutes the most-overdue product with an active listing is past its `next_refresh_at`. Null when nothing is overdue. */
+  refreshLagMinutes: number | null;
+  /** Distinct products with at least one ACTIVE listing — the refresh pipeline's real workload. */
+  uniqueRefreshedAsins: number;
+  /** Syncs/day the scraper's proxy pool can sustain against that workload. Null when the provider is `keepa` or there is no workload to divide by. */
+  achievableSyncsPerDay: number | null;
 }
 
 export interface FairShareAllocation {

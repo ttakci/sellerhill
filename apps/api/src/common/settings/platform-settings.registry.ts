@@ -115,7 +115,7 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     category: PlatformSettingCategory.KEEPA,
     type: PlatformSettingType.NUMBER,
     envVar: 'KEEPA_REFRESH_INTERVAL_MINUTES',
-    defaultValue: '720',
+    defaultValue: '360',
     min: 15,
     max: 10080,
   }),
@@ -185,6 +185,57 @@ export const PLATFORM_SETTING_DEFINITIONS: PlatformSettingDefinition[] = [
     envVar: 'KEEPA_REFRESH_SCHEDULER_CRON',
     defaultValue: '* * * * *',
     requiresRestart: true,
+  }),
+
+  // --- Product data source (spec 2026-09-26-amazon-scraper-provider) ---
+  def({
+    // Whole-provider switch. There is no per-field fallback between the two.
+    key: PlatformSettingKey.PRODUCT_DATA_PROVIDER,
+    category: PlatformSettingCategory.KEEPA,
+    type: PlatformSettingType.ENUM,
+    envVar: 'PRODUCT_DATA_PROVIDER',
+    defaultValue: 'scraper',
+    options: ['keepa', 'scraper'],
+  }),
+  def({
+    // Newline- or comma-separated proxy URLs (http/https/socks5, with port).
+    // Write-only secret. Empty means the scraper makes no request at all —
+    // it never falls back to the server's own IP.
+    key: PlatformSettingKey.SCRAPER_PROXIES,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.STRING,
+    envVar: 'SCRAPER_PROXIES',
+    defaultValue: null,
+    isSecret: true,
+  }),
+  def({
+    key: PlatformSettingKey.SCRAPER_PER_IP_RPS,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'SCRAPER_PER_IP_RPS',
+    defaultValue: '1',
+    min: 0.1,
+    max: 10,
+  }),
+  def({
+    // Stock recorded for "In Stock" with no count: Amazon prints "Only N left"
+    // only up to 20, so "In Stock" means at least this many.
+    key: PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'SCRAPER_IN_STOCK_FLOOR',
+    defaultValue: '20',
+    min: 1,
+    max: 1000,
+  }),
+  def({
+    key: PlatformSettingKey.SCRAPER_BLOCK_RATE_WARN_PERCENT,
+    category: PlatformSettingCategory.SCRAPER,
+    type: PlatformSettingType.NUMBER,
+    envVar: 'SCRAPER_BLOCK_RATE_WARN_PERCENT',
+    defaultValue: '10',
+    min: 1,
+    max: 100,
   }),
 
   // --- Amazon order sync + tracking ---

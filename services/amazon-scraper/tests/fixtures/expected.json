@@ -1,0 +1,51 @@
+{
+  "only_left": {
+    "asin": "B0GL5QQPTW",
+    "quantityMax": 6,
+    "isInStock": true,
+    "onlyLeft": 4,
+    "imageCount": 7
+  },
+  "limited_in_stock": {
+    "asin": "B000FIXQXK",
+    "quantityMax": 12,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 5
+  },
+  "plain_in_stock": {
+    "asin": "B09ZKQH99B",
+    "quantityMax": 30,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 9
+  },
+  "multi_select": {
+    "asin": "B088RG7D6J",
+    "quantityMax": 50,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 9
+  },
+  "empty_color_images": {
+    "asin": "B01KIFISX2",
+    "quantityMax": 30,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 8
+  },
+  "variations": {
+    "asin": "B0CS3B7MD8",
+    "quantityMax": 300,
+    "isInStock": true,
+    "onlyLeft": null,
+    "imageCount": 10
+  },
+  "unavailable": {
+    "asin": "B09FK9NJF4",
+    "quantityMax": null,
+    "isInStock": false,
+    "onlyLeft": null,
+    "imageCount": 4
+  }
+}

@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData } from '@repo/shared';
+import {
+  formatSourceStock, ListingStatus, PolicyType, updateListingSchema, type UpdateListingFormData,
+} from '@repo/shared';
 import { formatCurrency, formatDate, getLocaleConfig, useLoading, useUI } from '@repo/ui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,6 +23,7 @@ import { ListingDetailPageComponent } from './ListingDetailPage.component';
 import type { AutomationStatusItem, ListingOverridesUiState } from './ListingDetailPage.types';
 
 import { useGetListingSettingsGroupsQuery } from '@/features/listing-settings-groups/api/listing-settings-group.api';
+import { getErrorI18nKey, isFetchBaseQueryError } from '@/utils/errorHandler';
 import { useLocale } from '@/utils/useLocale';
 
 const resolveLabel = (
@@ -316,6 +319,15 @@ export const ListingDetailPageContainer: React.FC = () => {
     return translated === key ? listing.status : translated;
   }, [listing, t]);
 
+  /** "N+" when the source only reports a lower bound (e.g. Amazon's "In
+   *  Stock" or an order-limit dropdown) — a bare number would read as an
+   *  exact count. Formatting stays out of the component per frontend rules. */
+  const amazonStockText = useMemo(
+    () => formatSourceStock(listing?.sourceStock, listing?.sourceStockStatus),
+    [listing?.sourceStock, listing?.sourceStockStatus]
+  );
+  const sourceRemoved = listing?.sourceRemoved === true;
+
   const handleBack = () => {
     // A draft was reached from the dedicated drafts view (`?status=draft`);
     // dropping back to the default "all" list loses that context.
@@ -603,12 +615,19 @@ export const ListingDetailPageContainer: React.FC = () => {
                   t
                 );
               })
-              .catch(() => {
+              .catch((error: Parameters<typeof getErrorI18nKey>[0]) => {
                 showMessage(
                   {
                     type: 'error',
                     headerKey: 'listings:listings.notifications.publishErrorTitle',
-                    descriptionKey: 'listings:listings.notifications.publishError',
+                    // Only a mapped refusal (409 — e.g. the Amazon price could
+                    // not be read, a quota refusal) carries a localized key.
+                    // Other failures send raw text, which must not be read
+                    // as a key, so they keep the generic publish error.
+                    descriptionKey:
+                      isFetchBaseQueryError(error) && error.status === 409
+                        ? getErrorI18nKey(error, 'listings:listings.notifications.publishError')
+                        : 'listings:listings.notifications.publishError',
                   },
                   t
                 );
@@ -678,6 +697,8 @@ export const ListingDetailPageContainer: React.FC = () => {
       groupStockBufferLabel={groupStockBufferLabel}
       groupMarginSummaryLabel={groupMarginSummaryLabel}
       groupMarginRangeDetails={groupMarginRangeDetails}
+      amazonStockText={amazonStockText}
+      sourceRemoved={sourceRemoved}
       paymentPolicyLabel={paymentPolicyLabel}
       shippingPolicyLabel={shippingPolicyLabel}
       returnPolicyLabel={returnPolicyLabel}

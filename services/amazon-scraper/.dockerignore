@@ -1,0 +1,23 @@
+# Local virtualenv (a Windows one must never reach the Linux image) and caches.
+.venv
+venv
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.pytest_cache
+
+# Tests and captured pages are not needed at runtime.
+tests
+pytest.ini
+requirements-dev.txt
+amazon/test_*.py
+amazon/fixtures
+**/*.html.gz
+**/*.raw
+
+# Upstream CLI output and debug dumps.
+output
+debug
+
+Dockerfile
+.dockerignore

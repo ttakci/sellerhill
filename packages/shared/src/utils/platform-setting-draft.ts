@@ -1,4 +1,6 @@
-import { PlatformSettingType } from '../domain/admin/platform-settings.types';
+import { PlatformSettingKey, PlatformSettingType } from '../domain/admin/platform-settings.types';
+
+import { partitionProxyList } from './proxy-url';
 
 /**
  * Client-side checks for a platform setting being edited in the admin panel.
@@ -15,10 +17,14 @@ export enum PlatformSettingDraftIssue {
   NOT_A_NUMBER = 'notANumber',
   BELOW_MIN = 'belowMin',
   ABOVE_MAX = 'aboveMax',
+  /** An entry of `scraper.proxies` is not `scheme://host:port`. */
+  NOT_A_PROXY_URL = 'notAProxyUrl',
 }
 
 /** The parts of a setting the draft checks depend on. */
 export interface PlatformSettingDraftRules {
+  /** Only needed for key-specific grammars (today: `scraper.proxies`). */
+  key?: string;
   type: PlatformSettingType;
   min: number | null;
   max: number | null;
@@ -26,7 +32,7 @@ export interface PlatformSettingDraftRules {
 
 export type PlatformSettingDraftCheck =
   | { valid: true }
-  | { valid: false; issue: PlatformSettingDraftIssue; bound?: number };
+  | { valid: false; issue: PlatformSettingDraftIssue; bound?: number; entry?: number };
 
 /**
  * Whether `draft` could be saved for a setting with these rules.
@@ -42,6 +48,13 @@ export function checkPlatformSettingDraft(
   const value = draft.trim();
   if (value.length === 0) {
     return { valid: false, issue: PlatformSettingDraftIssue.REQUIRED };
+  }
+  if (rules.key === PlatformSettingKey.SCRAPER_PROXIES) {
+    // The position only — never the value, which carries credentials.
+    const [firstInvalid] = partitionProxyList(value).invalidEntries;
+    return firstInvalid === undefined
+      ? { valid: true }
+      : { valid: false, issue: PlatformSettingDraftIssue.NOT_A_PROXY_URL, entry: firstInvalid };
   }
   if (rules.type !== PlatformSettingType.NUMBER) {
     return { valid: true };

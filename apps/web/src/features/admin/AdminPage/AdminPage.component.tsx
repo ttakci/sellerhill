@@ -1,6 +1,7 @@
 import {
   AdminWarningLevel,
   AspectDefaultSourceDto,
+  ProductDataProviderKind,
   QuotaPressureBand,
 } from '@repo/shared';
 import {
@@ -104,14 +105,59 @@ export const AdminPageComponent = ({
                 {overview?.activeAmazonAccounts ?? '—'}
               </Text>
             </S.SummaryCard>
-            <S.SummaryCard>
-              <Text variant="caption" color="text.secondary">
-                {t('admin.overview.keepaBalance')}
-              </Text>
-              <Text variant="metric" weight="semibold">
-                {operations?.keepaTokensLeft ?? '—'}
-              </Text>
-            </S.SummaryCard>
+            {operations?.productDataProvider === ProductDataProviderKind.KEEPA && (
+              <S.SummaryCard>
+                <Text variant="caption" color="text.secondary">
+                  {t('admin.overview.keepaBalance')}
+                </Text>
+                <Text variant="metric" weight="semibold" numeric>
+                  {operations?.keepaTokensLeft ?? '—'}
+                </Text>
+              </S.SummaryCard>
+            )}
+            {/* Refresh lag is provider-neutral (the REFRESH_LAG warning is too);
+                capacity is a scraper-pool figure, so it stays scraper-only. */}
+            {operations && (
+              <S.SummaryCard>
+                <Text variant="caption" color="text.secondary">
+                  {t('admin.overview.refreshLag')}
+                </Text>
+                <Text variant="metric" weight="semibold" numeric>
+                  {operations.refreshLagMinutes !== null
+                    ? t('admin.overview.refreshLagValue', { minutes: operations.refreshLagMinutes })
+                    : '—'}
+                </Text>
+              </S.SummaryCard>
+            )}
+            {operations?.productDataProvider === ProductDataProviderKind.SCRAPER && (
+              <>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.scraperLastHour')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {operations.scraperStats
+                      ? t('admin.overview.scraperLastHourValue', {
+                          found: operations.scraperStats.window1h.found,
+                          blocked: operations.scraperStats.window1h.blocked,
+                          parseFailed: operations.scraperStats.window1h.parseFailed,
+                          // Optional on an older service image; absent reads as 0.
+                          proxyError: operations.scraperStats.window1h.proxyError ?? 0,
+                          expired: operations.scraperStats.window1h.expired ?? 0,
+                        })
+                      : '—'}
+                  </Text>
+                </S.SummaryCard>
+                <S.SummaryCard>
+                  <Text variant="caption" color="text.secondary">
+                    {t('admin.overview.syncsPerDay')}
+                  </Text>
+                  <Text variant="metric" weight="semibold" numeric>
+                    {operations.achievableSyncsPerDay ?? '—'}
+                  </Text>
+                </S.SummaryCard>
+              </>
+            )}
           </S.Grid>
 
           <S.Section>

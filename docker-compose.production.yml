@@ -95,7 +95,15 @@ services:
       # challenge hash. Leave unset to derive `${FRONTEND_URL}/api/v1/ebay/marketplace-deletion-notification`.
       EBAY_DELETION_ENDPOINT_URL: ${EBAY_DELETION_ENDPOINT_URL:-}
 
-      # Keepa — sole product data provider (metadata + price + stock).
+      # Amazon product data comes from the in-stack scraper service below by
+      # default (`product.dataProvider` at /admin → Settings); Keepa is the
+      # whole-provider rollback. Both values stay env-only: the URL must never
+      # be redirectable from the panel, and the secret authenticates every call.
+      # Proxies are entered at /admin → Settings → Scraper — never here.
+      SCRAPER_SERVICE_URL: http://scraper:8080
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-}
+
+      # Keepa — rollback product data provider (metadata + price + stock).
       # Only the API key lives here. The base URL is hardcoded in
       # keepa.service.ts (never read from env), and refresh cadence, batch
       # size, quarantine policy and the master kill switch are managed at
@@ -174,10 +182,45 @@ services:
           memory: ${API_MEMORY_LIMIT:-6G}
     networks:
       - coolify
+      # Private network shared with the scraper only.
+      - scraper_net
     # NOTE: no depends_on for postgres/redis — they live in separate Coolify
     # resources. Create + start the DB resources BEFORE the first app deploy
     # (see deployment guide). If the API boots before the DB is ready, the
     # migration fails and `restart: unless-stopped` retries until it connects.
+    #
+    # `service_started`, deliberately NOT `service_healthy`: the api fails soft
+    # when the scraper is unreachable (admin warning SCRAPER_UNREACHABLE, the
+    # affected products keep their last values). A health gate here would stop
+    # billing, orders and auth from booting whenever the scraper is down.
+    depends_on:
+      scraper:
+        condition: service_started
+
+  # ---- Amazon scraper (spec 2026-09-26) ----
+  # Internal only: no published port, not on the shared `coolify` network (so a
+  # test and a production stack on the same host can never reach each other's
+  # scraper by name). Proxies arrive per request from the api's panel setting;
+  # the service refuses to fetch without one. The direct-egress switch is a
+  # developer-machine flag and must never be set in a deployment file
+  # (scraper-egress.guard.spec.ts enforces it).
+  scraper:
+    build:
+      context: ./services/amazon-scraper
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Same value as the api's. Unset → every data call answers 503 and the
+      # api raises SCRAPER_UNREACHABLE; nothing else is affected.
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-}
+      SCRAPER_PORT: 8080
+      SCRAPER_THREADS_PER_PROXY: ${SCRAPER_THREADS_PER_PROXY:-2}
+    deploy:
+      resources:
+        limits:
+          memory: ${SCRAPER_MEMORY_LIMIT:-1G}
+    networks:
+      - scraper_net
 
   # ---- React Web (nginx) ----
   web:
@@ -286,3 +329,5 @@ volumes:
 networks:
   coolify:
     external: true
+  # api ↔ scraper only. Project-scoped, so each stack gets its own.
+  scraper_net: {}

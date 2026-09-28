@@ -19,6 +19,17 @@ function read(...segments: string[]): string {
   return fs.readFileSync(path.join(API_SRC, ...segments), 'utf8').replace(/\r\n/g, '\n');
 }
 
+// Strips `//` line comments and `/* */` block comments before matching, so a
+// comment that happens to name a function or literal cannot satisfy an
+// assertion meant to prove the CODE calls/uses it. This is exactly the gap
+// task-12-rereview.md found: a bare `/buildRefreshEntitlementSql/`-style match
+// against the whole (uncommented) file was satisfied by the explanatory
+// comment above the call site even in a mutated version of the claim that
+// never calls the function at all.
+function stripComments(code: string): string {
+  return code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+}
+
 describe('listing plan-limit invariants', () => {
   it('ranks oldest-first with a deterministic tie-break', () => {
     const src = read('modules', 'billing', 'billing-repository.service.ts');
@@ -35,9 +46,55 @@ describe('listing plan-limit invariants', () => {
   });
 
   it('keeps Keepa refresh off products whose only active listings are over the limit', () => {
+    // Sliced to the selectRefreshBatch method body (same method-boundary
+    // technique scraper-refresh.guard.spec.ts uses) and comment-stripped
+    // BEFORE matching: a bare `${planLimitFilter}`/name-only match against the
+    // whole raw file is also satisfied by the explanatory comment above the
+    // call site, so a regression that hardcodes the fragment to '' and drops
+    // the import still passed it. See the mutation-resistance test below.
     const src = read('modules', 'listings', 'refresh-processor.service.ts');
-    expect(src).toMatch(/AND l\.over_plan_limit = FALSE/);
-    expect(src).toMatch(/\$\{planLimitFilter\}/);
+    const start = src.indexOf('private async selectRefreshBatch(');
+    const end = src.indexOf('private async resolveBatchSize(');
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    const body = stripComments(src.slice(start, end));
+
+    expect(body).toMatch(/buildRefreshEntitlementSql\(enforcementOn\)/);
+    expect(body).toMatch(/\$\{planLimitFilter\}/);
+    expect(body).toMatch(/\$\{entitlementJoin\}/);
+
+    // The predicate itself now lives in the shared builder both the refresh
+    // claim and the admin operations summary's refresh-lag query read from
+    // (Task 12 review fix round 1), so the two can never drift apart.
+    const entitlementSrc = read('modules', 'listings', 'refresh-entitlement-sql.ts');
+    expect(entitlementSrc).toMatch(/AND l\.over_plan_limit = FALSE/);
+  });
+
+  it('is not vacuous: fails against the exact mutation that slipped past fix round 1', () => {
+    // Reproduces task-12-rereview.md's mutation M1 against the REAL method
+    // body, comments included: replace the builder call with hardcoded
+    // empty-string assignments (compiles, lint-clean). The explanatory
+    // comment naming `buildRefreshEntitlementSql` sits just above the call
+    // site and survives this mutation untouched — which is exactly what let
+    // the OLD, unscoped assertion pass. Prove the CURRENT assertion (call
+    // shape, sliced to the method body, comments stripped) correctly fails.
+    const src = read('modules', 'listings', 'refresh-processor.service.ts');
+    const start = src.indexOf('private async selectRefreshBatch(');
+    const end = src.indexOf('private async resolveBatchSize(');
+    const rawBody = src.slice(start, end);
+
+    const mutatedRawBody = rawBody.replace(
+      'const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);',
+      `const entitlementJoin = ''; const planLimitFilter = '';`
+    );
+    // Sanity: the mutation actually landed, and it did NOT touch the
+    // explanatory comment — i.e. this is a faithful reproduction of M1, not
+    // a strawman that also happens to erase the trap.
+    expect(mutatedRawBody).not.toBe(rawBody);
+    expect(mutatedRawBody).toMatch(/buildRefreshEntitlementSql/);
+
+    const mutatedBody = stripComments(mutatedRawBody);
+    expect(mutatedBody).not.toMatch(/buildRefreshEntitlementSql\(enforcementOn\)/);
   });
 
   it('pushes no price/stock update to a listing over the limit', () => {

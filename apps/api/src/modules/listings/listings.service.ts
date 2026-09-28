@@ -11,9 +11,11 @@ import {
   EbayListingApiModel,
   EBAY_MARKETPLACE_CONFIG,
   EbayMarketplaceId,
+  formatSourceStock,
   isValidAsinShape,
   OrderStatus,
   PlatformSettingKey,
+  SourceStockStatus,
   type CreateListingsRequest,
   type ListingDto,
   type ListingJobDto,
@@ -44,7 +46,7 @@ import { summarizeAspectResolution } from './aspect-audit';
 import { attachEpsImages } from './attach-eps-images';
 import { extractProductAttributes, type KeepaRawProduct } from './keepa-normalizer';
 import { classifyListingFailure } from './listing-failure';
-import { ListingStrategyService } from './listing-strategy.service';
+import { ListingStrategyService, assertSourcePricePublishable } from './listing-strategy.service';
 import { ListingJobEntity, ListingJobItemEntity } from './listings.entities';
 
 /** Row type for getListings / getListing queries (listings JOIN products) */
@@ -62,6 +64,8 @@ interface ListingQueryRow {
   sold_count: string | number;
   quantity: number;
   source_stock: number | null;
+  source_stock_status?: string | null;
+  source_removed?: boolean | null;
   image_urls: string[] | null;
   ebay_item_id: string | null;
   listing_settings_group_id: string;
@@ -112,6 +116,9 @@ interface ProductQueryRow {
   raw_keepa_data?: string | Record<string, unknown> | null;
   manufacturer: string | null;
   stock: number;
+  stock_status?: string | null;
+  max_order_quantity?: number | null;
+  source_removed_at?: Date | string | null;
   raw_provider_data: string | Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date | string;
@@ -306,6 +313,8 @@ export class ListingsService {
       soldCount: parseInt(String(row.sold_count), 10) || 0,
       quantity: row.quantity,
       sourceStock: row.source_stock ?? undefined,
+      sourceStockStatus: (row.source_stock_status as SourceStockStatus) ?? undefined,
+      sourceRemoved: row.source_removed ?? false,
       imageUrls: row.image_urls || [],
       ebayListingId: row.ebay_item_id ?? undefined,
       listingSettingsGroupId: row.listing_settings_group_id,
@@ -508,7 +517,7 @@ export class ListingsService {
     // same threshold the count query uses, so "N listings need you" and this
     // list can never disagree about which ones qualify.
     if (query.sourceUnavailable) {
-      conditions.push(`p.consecutive_failures >= $${paramIndex}`);
+      conditions.push(`(p.consecutive_failures >= $${paramIndex} OR p.source_removed_at IS NOT NULL)`);
       params.push(LISTING_SOURCE_UNAVAILABLE_FAILURE_THRESHOLD);
       paramIndex++;
     }
@@ -553,6 +562,8 @@ export class ListingsService {
              p.image_urls,
              p.category as product_category,
              p.stock as source_stock,
+             p.stock_status AS source_stock_status,
+             (p.source_removed_at IS NOT NULL) AS source_removed,
              p.brand,
              ea.marketplace_id AS ebay_marketplace_id,
              (SELECT MAX(o.order_date) FROM orders o WHERE o.listing_id = l.id) AS last_sale_at
@@ -712,7 +723,7 @@ export class ListingsService {
           item.profitMargin ?? '',
           item.soldCount ?? '',
           item.quantity,
-          item.sourceStock ?? '',
+          item.sourceStock === undefined ? '' : formatSourceStock(item.sourceStock, item.sourceStockStatus),
           item.status,
           item.createdAt,
         ]
@@ -822,6 +833,8 @@ export class ListingsService {
         p.image_urls,
         p.category AS product_category,
         p.stock AS source_stock,
+        p.stock_status AS source_stock_status,
+        (p.source_removed_at IS NOT NULL) AS source_removed,
         p.brand,
         p.features,
         p.specs,
@@ -1046,6 +1059,7 @@ export class ListingsService {
       `
       SELECT id, asin, title, description, price, currency, image_urls,
              brand, manufacturer, category, category_path, features, specs, identifiers, stock,
+             stock_status, max_order_quantity, source_removed_at,
              raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1 AND marketplace = $2
     `,
@@ -1085,6 +1099,9 @@ export class ListingsService {
       // them a re-listed ASIN published with almost no eBay item specifics.
       ...this.resolveCachedAttributes(row),
       stock: row.stock || 0,
+      stockStatus: (row.stock_status as SourceStockStatus) ?? SourceStockStatus.EXACT,
+      maxOrderQuantity: row.max_order_quantity ?? null,
+      sourceRemoved: row.source_removed_at !== null && row.source_removed_at !== undefined,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
           ? (JSON.parse(row.raw_provider_data) as Record<string, unknown>)
@@ -1201,6 +1218,25 @@ export class ListingsService {
           )`,
       [jobId, userId, ListingJobStatus.PENDING, ListingStatus.DRAFT],
     );
+  }
+
+  /**
+   * How many DRAFT (still-queued) job items this user already has waiting,
+   * excluding the job currently being enqueued. Feeds `fairBatchPriority` so a
+   * seller who already has a large upload in flight sinks behind a seller
+   * enqueuing for the first time — `listing_job_items.status` defaults to the
+   * uppercase 'DRAFT' string (migration 009) while `ListingStatus.DRAFT` is
+   * lowercase, hence `LOWER(...)`.
+   */
+  async countQueuedItems(userId: string, excludeJobId: string): Promise<number> {
+    const [{ count }] = await this.databaseService.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count
+         FROM listing_job_items i
+         JOIN listing_jobs j ON j.id = i.job_id
+        WHERE j.user_id = $1 AND j.id <> $2 AND LOWER(i.status) = $3`,
+      [userId, excludeJobId, ListingStatus.DRAFT],
+    );
+    return Number(count);
   }
 
   /**
@@ -1344,10 +1380,12 @@ export class ListingsService {
       INSERT INTO products (
         asin, marketplace, title, price, currency, image_urls, description,
         brand, manufacturer, category, features, specs, identifiers,
-        stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at
+        stock, raw_provider_data, raw_keepa_data, category_path, next_refresh_at,
+        stock_status, max_order_quantity, source_removed_at
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
-              NOW() + make_interval(mins => $18::int))
+              NOW() + make_interval(mins => $18::int),
+              $19, $20, CASE WHEN $21::boolean THEN NOW() ELSE NULL END)
       ON CONFLICT (asin, marketplace) DO UPDATE SET
         title = EXCLUDED.title,
         price = EXCLUDED.price,
@@ -1364,6 +1402,9 @@ export class ListingsService {
         identifiers = CASE WHEN EXCLUDED.identifiers = '{}'::jsonb
                            THEN products.identifiers ELSE EXCLUDED.identifiers END,
         stock = EXCLUDED.stock,
+        stock_status = EXCLUDED.stock_status,
+        max_order_quantity = EXCLUDED.max_order_quantity,
+        source_removed_at = CASE WHEN $21::boolean THEN COALESCE(products.source_removed_at, NOW()) ELSE NULL END,
         raw_provider_data = EXCLUDED.raw_provider_data,
         raw_keepa_data = COALESCE(EXCLUDED.raw_keepa_data, products.raw_keepa_data),
         -- Keep the last known path when a fetch resolved none, same grow-only
@@ -1393,6 +1434,9 @@ export class ListingsService {
         productData.rawKeepaData ? JSON.stringify(productData.rawKeepaData) : null,
         productData.categoryPath || null,
         intervalMinutes,
+        productData.stockStatus ?? SourceStockStatus.EXACT,
+        productData.maxOrderQuantity ?? null,
+        productData.sourceRemoved === true,
       ]
     );
 
@@ -1843,6 +1887,10 @@ export class ListingsService {
       throw new BadRequestException('Product data missing for this draft — cannot publish');
     }
 
+    // Before the EPS upload: a draft saved from a page with no usable price is
+    // refused here without spending a Media API upload on it.
+    assertSourcePricePublishable(product.data);
+
     const ebayAccountId = listing.ebayAccountId || (await this.ebayService.getActiveAccountId(userId)) || null;
 
     await attachEpsImages(this.ebayImages, product.id, ebayAccountId, product.data);
@@ -1853,7 +1901,7 @@ export class ListingsService {
       product.data,
       listing.listingSettingsGroupId,
       ebayAccountId,
-      { applyContentAi: false }
+      { applyContentAi: false, live: true }
     );
 
     // Prefer user-edited draft title; keep draft economics if lock overrides apply

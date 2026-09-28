@@ -17,7 +17,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../common/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { EmailModule } from '../email/email.module';
-
+import { ProductSourceModule } from '../listings/product-source.module';
 
 import { AdminListingFailuresService } from './admin-listing-failures.service';
 import { AdminListingQualityService } from './admin-listing-quality.service';
@@ -37,6 +37,12 @@ import { UsageEventsService } from './usage-events.service';
     AuthModule,
     // Only for the SMTP "test connection" action on the settings surface.
     EmailModule,
+    // ScraperClient + ProductSourceService, for the scraper health cards on
+    // the operations tab — imported directly from its own dependency-free
+    // module rather than the feature module that owns the listings queue
+    // (which already imports this module the other way round). See
+    // module-cycle.guard.spec.ts for why that direction must stay one-way.
+    ProductSourceModule,
     BullModule.registerQueue(
       { name: 'order-sync' },
       { name: 'stock-sync' },

@@ -14,7 +14,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   AdminWarningKind,
   AdminWarningLevel,
+  ListingStatus,
   PlatformSettingKey,
+  ProductDataProviderKind,
   UsageEventSource,
   UsageMetric,
   type AdminBillingMetricsDto,
@@ -28,6 +30,7 @@ import {
   type QueueObservationDto,
   type QueueObservationQuery,
   type QueueOperationSummaryDto,
+  type ScraperStats,
   type UsageSummaryDto,
   type UserCostSummaryDto,
 } from '@repo/shared';
@@ -35,6 +38,9 @@ import type { Queue } from 'bullmq';
 
 import { DatabaseService } from '../../common/database/database.service';
 import { PlatformSettingsService } from '../../common/settings/platform-settings.service';
+import { ProductSourceService } from '../listings/product-source.service';
+import { buildRefreshEntitlementSql } from '../listings/refresh-entitlement-sql';
+import { ScraperClient } from '../listings/scraper.client';
 
 import { calculateFailureRate, thresholdWarning } from './admin-warnings.helpers';
 import {
@@ -43,6 +49,12 @@ import {
   buildQuotaPressureSummary,
   resolveCostTotal,
 } from './billing-metrics.helpers';
+import {
+  achievableSyncsPerDay,
+  blockRatePercent,
+  parseFailureRatePercent,
+  transportFailureRatePercent,
+} from './scraper-ops.helpers';
 
 interface CountRow {
   count: string;
@@ -107,7 +119,9 @@ export class AdminService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly platformSettings: PlatformSettingsService
+    private readonly platformSettings: PlatformSettingsService,
+    private readonly productSource: ProductSourceService,
+    private readonly scraperClient: ScraperClient
   ) {}
 
   /**
@@ -477,16 +491,135 @@ export class AdminService {
       const warning = thresholdWarning(AdminWarningKind.QUEUE_WAITING, queue.waiting, queueThreshold);
       if (warning) {warnings.push({ ...warning, subject: queue.name });}
     }
-    if (keepaTokensLeft !== null) {
-      const threshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_KEEPA_LOW_TOKENS_THRESHOLD);
-      if (keepaTokensLeft <= threshold) {
-        warnings.push({ kind: AdminWarningKind.KEEPA_LOW_TOKENS, level: keepaTokensLeft <= threshold / 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: keepaTokensLeft, threshold });
+
+    // Which provider decides which health cards render — Keepa's token
+    // balance is meaningless once the scraper is the active provider, and the
+    // scraper's own health (proxies, block rate) is meaningless under Keepa.
+    const productDataProvider = await this.productSource.activeProvider();
+    let scraperStats: ScraperStats | null = null;
+    let scraperProxies: string[] | null = null;
+    if (productDataProvider === ProductDataProviderKind.KEEPA) {
+      if (keepaTokensLeft !== null) {
+        const threshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_KEEPA_LOW_TOKENS_THRESHOLD);
+        if (keepaTokensLeft <= threshold) {
+          warnings.push({ kind: AdminWarningKind.KEEPA_LOW_TOKENS, level: keepaTokensLeft <= threshold / 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: keepaTokensLeft, threshold });
+        }
+      }
+    } else {
+      const proxyConfig = await this.productSource.proxyConfig();
+      scraperProxies = proxyConfig.proxies;
+      if (scraperProxies.length === 0) {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_NO_PROXIES, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 1 });
+      }
+      // Malformed entries are skipped, never sent — but silently skipping them
+      // would leave the operator believing the whole list is in use. The count
+      // only: the value is write-only and carries credentials.
+      if (proxyConfig.dropped > 0) {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_PROXY_INVALID, level: AdminWarningLevel.WARNING, value: proxyConfig.dropped, threshold: 0 });
+      }
+      try {
+        scraperStats = await this.scraperClient.getStats();
+        // One knob for "the scraper is unhealthy" — the block and the parse-
+        // failure rates are shown separately, but both warn at the same value.
+        const warnAt = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_BLOCK_RATE_WARN_PERCENT);
+        const rate = blockRatePercent(scraperStats);
+        if (rate !== null && rate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_BLOCK_RATE_HIGH, level: rate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: rate, threshold: warnAt });
+        }
+        const parseRate = parseFailureRatePercent(scraperStats);
+        if (parseRate !== null && parseRate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_PARSE_FAILURE_HIGH, level: parseRate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: parseRate, threshold: warnAt });
+        }
+        // Proxy errors and deadline expiries are in neither rate above, so a
+        // dead or wrong-password proxy list would otherwise raise nothing.
+        const transportRate = transportFailureRatePercent(scraperStats);
+        if (transportRate !== null && transportRate >= warnAt) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_TRANSPORT_FAILURE_HIGH, level: transportRate >= warnAt * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: transportRate, threshold: warnAt });
+        }
+        // Compose never sets SCRAPER_ALLOW_DIRECT on a server, but a PaaS env
+        // panel can inject it straight into the container.
+        if (scraperStats.directAllowed === true) {
+          warnings.push({ kind: AdminWarningKind.SCRAPER_DIRECT_EGRESS, level: AdminWarningLevel.CRITICAL, value: 1, threshold: 0 });
+        }
+      } catch {
+        warnings.push({ kind: AdminWarningKind.SCRAPER_UNREACHABLE, level: AdminWarningLevel.CRITICAL, value: 0, threshold: 0 });
       }
     }
+
     const llmThreshold = await this.platformSettings.getNumber(PlatformSettingKey.ADMIN_LLM_FAILURE_RATE_THRESHOLD);
     const llmWarning = thresholdWarning(AdminWarningKind.LLM_FAILURE_RATE, llmFailureRatePct, llmThreshold);
     if (llmWarning) {warnings.push(llmWarning);}
-    return { generatedAt: new Date().toISOString(), queues: queueSummaries, keepaTokensLeft, llmFailureRatePct, warnings };
+
+    // Refresh lag: how far behind schedule the oldest overdue ACTIVE-listed
+    // product is, and how many distinct products the refresh pipeline is
+    // actually responsible for — the real denominator for capacity planning,
+    // not the whole `products` table (draft/ended listings are never
+    // refreshed, and neither is a product whose only ACTIVE listings belong
+    // to an unentitled owner or are over that owner's plan limit — see
+    // `buildRefreshEntitlementSql`, shared with the real refresh claim in
+    // `RefreshProcessorService.selectRefreshBatch` so this count can never
+    // drift from what the pipeline actually does).
+    //
+    // `MIN(p.next_refresh_at) FILTER (WHERE p.next_refresh_at < NOW())` — the
+    // FILTER binds directly to the aggregate call, never to the surrounding
+    // `NOW() - ...` expression: PostgreSQL only accepts FILTER immediately
+    // after a bare aggregate/window function. Attaching it to the expression
+    // is a syntax error on every execution (verified live against a local
+    // Postgres 16 instance running this schema).
+    //
+    // Wrapped in try/catch: this is one metric on a health endpoint that also
+    // reports queue health and Keepa/scraper warnings, so a failure here must
+    // degrade to "unknown lag", never take the whole summary down with it.
+    let refreshLagMinutes: number | null = null;
+    let uniqueRefreshedAsins = 0;
+    try {
+      const enforcementOnForRefresh = await this.platformSettings.getBoolean(PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED);
+      const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOnForRefresh);
+      const [lagRow] = await this.databaseService.query<{ lag_minutes: string | null; unique_asins: string }>(
+        `SELECT EXTRACT(EPOCH FROM (NOW() - MIN(p.next_refresh_at) FILTER (WHERE p.next_refresh_at < NOW()))) / 60 AS lag_minutes,
+                COUNT(*)::text AS unique_asins
+           FROM products p
+          WHERE EXISTS (
+            SELECT 1 FROM listings l
+            ${entitlementJoin}
+            WHERE l.product_id = p.id AND l.status = $1
+              ${planLimitFilter}
+          )`,
+        [ListingStatus.ACTIVE]
+      );
+      refreshLagMinutes = lagRow?.lag_minutes !== null && lagRow?.lag_minutes !== undefined ? Math.round(Number(lagRow.lag_minutes)) : null;
+      uniqueRefreshedAsins = Number(lagRow?.unique_asins ?? 0);
+    } catch (error) {
+      this.logger.warn(`Refresh-lag query failed — reporting unknown lag: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    const intervalMinutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
+    if (refreshLagMinutes !== null && refreshLagMinutes > intervalMinutes) {
+      warnings.push({ kind: AdminWarningKind.REFRESH_LAG, level: refreshLagMinutes > intervalMinutes * 2 ? AdminWarningLevel.CRITICAL : AdminWarningLevel.WARNING, value: refreshLagMinutes, threshold: intervalMinutes });
+    }
+    // scraperProxies was already fetched once above, in the same branch that
+    // set productDataProvider to SCRAPER — never re-fetched here.
+    const achievable = productDataProvider === ProductDataProviderKind.SCRAPER && scraperProxies
+      ? achievableSyncsPerDay(
+          scraperProxies.length,
+          await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS),
+          uniqueRefreshedAsins,
+          // The same reserve the refresh batch size keeps for creates.
+          await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_RESERVE_PERCENT),
+        )
+      : null;
+
+    return {
+      generatedAt: new Date().toISOString(),
+      queues: queueSummaries,
+      keepaTokensLeft,
+      llmFailureRatePct,
+      warnings,
+      productDataProvider,
+      scraperStats,
+      refreshLagMinutes,
+      uniqueRefreshedAsins,
+      achievableSyncsPerDay: achievable === null ? null : Math.round(achievable * 10) / 10,
+    };
   }
 
   // --- internals -------------------------------------------------------------

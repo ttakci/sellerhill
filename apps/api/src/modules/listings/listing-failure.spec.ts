@@ -185,6 +185,26 @@ describe('classifyListingFailure', () => {
   });
 });
 
+describe('scraper provider failures', () => {
+  it('ProductDataUnavailableError is retryable PRODUCT_DATA_UNAVAILABLE, never ASIN_NOT_FOUND', () => {
+    const e = Object.assign(new Error('scraper: blocked for B000000001'), { name: 'ProductDataUnavailableError' });
+    expect(classifyListingFailure(e)).toMatchObject({ code: ListingFailureCode.PRODUCT_DATA_UNAVAILABLE, details: { retryable: true } });
+  });
+  it('ScraperUnavailableError is retryable PRODUCT_DATA_UNAVAILABLE', () => {
+    const e = Object.assign(new Error('scraper request failed: network'), { name: 'ScraperUnavailableError' });
+    expect(classifyListingFailure(e)).toMatchObject({ code: ListingFailureCode.PRODUCT_DATA_UNAVAILABLE, details: { retryable: true } });
+  });
+  it('ZeroStockError carries the stock numbers for the seller message', () => {
+    const e = Object.assign(new Error('Cannot list ASIN B000000001: Stock is 0.'), {
+      name: 'ZeroStockError', amazonStock: 4, amazonStockAtLeast: true, stockBuffer: 5,
+    });
+    expect(classifyListingFailure(e)).toMatchObject({
+      code: ListingFailureCode.ZERO_STOCK,
+      details: { retryable: true, amazonStock: 4, amazonStockAtLeast: true, stockBuffer: 5 },
+    });
+  });
+});
+
 describe('formatEbayErrors', () => {
   it('keeps the raw provider text readable for the technical-details panel', () => {
     expect(
