@@ -29,6 +29,7 @@ import { AspectResolverService } from './aspect-resolver.service';
 import { EbayOAuthService } from './ebay-oauth.service';
 import { EbayTaxonomyService } from './ebay-taxonomy.service';
 import { CategoryAspectsUnavailableError, CategoryResolutionError } from './ebay.errors';
+import { interpretEndItemResponse } from './end-item-response';
 
 /**
  * Prefix marking an encrypted-at-rest token value in `ebay_accounts`.
@@ -1235,18 +1236,14 @@ export class EbayService implements OnModuleInit {
         },
       }));
 
-      const responseBody = response.data as string;
-      if (responseBody.includes('<Ack>Success</Ack>') || responseBody.includes('<Ack>Warning</Ack>')) {
+      const outcome = interpretEndItemResponse(response.data as string);
+      if (outcome.kind === 'ended') {
         this.logger.log(`Successfully ended eBay item: ${ebayItemId}`);
+      } else if (outcome.kind === 'already_ended') {
+        this.logger.warn(`Item ${ebayItemId} was already ended.`);
       } else {
-        const errorMatch = responseBody.match(/<LongMessage>(.*?)<\/LongMessage>/);
-        this.logger.error(`Failed to end eBay item ${ebayItemId}: ${errorMatch ? errorMatch[1] : 'Unknown error'}`);
-        // If item is already ended, skip error
-        if (responseBody.includes('291') || responseBody.includes('already ended')) {
-          this.logger.warn(`Item ${ebayItemId} was already ended.`);
-          return;
-        }
-        throw new Error(errorMatch ? errorMatch[1] : 'Unknown eBay API error');
+        this.logger.error(`Failed to end eBay item ${ebayItemId}: ${outcome.message}`);
+        throw new Error(outcome.message);
       }
     } catch (error: unknown) {
       const axiosErr = isAxiosErrorWithData(error) ? error : null;
