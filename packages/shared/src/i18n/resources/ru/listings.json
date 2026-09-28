@@ -76,6 +76,10 @@
         "emptySubtitle": "Позиции появляются по мере того, как задача начинает обрабатывать ASIN.",
         "searchPlaceholder": "Поиск по ASIN или тексту ошибки…",
         "resultCount": "Позиций: {{count}}",
+        "filterAll": "Все ({{count}})",
+        "filterFailed": "С ошибками ({{count}})",
+        "filterBlacklisted": "Заблокировано чёрным списком ({{count}})",
+        "filterNonBlacklisted": "Другие ошибки ({{count}})",
         "reason": "Причина",
         "reference": "Справочный код",
         "itemStatus": {

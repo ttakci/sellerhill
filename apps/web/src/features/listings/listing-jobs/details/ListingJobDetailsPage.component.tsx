@@ -8,6 +8,7 @@ import {
   IdBadge,
   PageHeader,
   SearchField,
+  Select,
   SettingsCard,
   StatusBadge,
   Text,
@@ -62,6 +63,9 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
   itemSearch,
   onItemSearchChange,
   onClearItemSearch,
+  itemFilter,
+  onItemFilterChange,
+  itemFilterOptions,
   filteredItemCount,
 }) => {
   const { t } = useTranslation(['listings', 'translation']);
@@ -273,6 +277,15 @@ export const ListingJobDetailsPageComponent: React.FC<ListingJobDetailsPageCompo
                 fullWidth
               />
             </S.SearchWrapper>
+            <S.SelectWrapper>
+              <Select
+                value={itemFilter}
+                onChange={onItemFilterChange}
+                options={itemFilterOptions}
+                size="medium"
+                fullWidth
+              />
+            </S.SelectWrapper>
             <S.FilterResultCount variant="caption" weight="medium" color="text.secondary">
               {t('listings.jobs.items.resultCount', { count: filteredItemCount })}
             </S.FilterResultCount>

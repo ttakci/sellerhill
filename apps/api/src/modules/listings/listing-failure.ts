@@ -79,12 +79,23 @@ function errorMessage(error: unknown): string {
 
 /** eBay reports the missing aspect either as parameter "2" or inside the message. */
 export function extractMissingAspectName(entry: EbayApiErrorEntry): string | null {
+  // eBay's `parameters` are positional per MESSAGE TEMPLATE, so parameter "2"
+  // is only the aspect name when the message actually is the missing-item-
+  // specific one. Read unguarded, an unrelated error's second placeholder (a
+  // quantity, a field name) was shown to sellers as the "missing" aspect —
+  // 'eBay requires the item specific "1"' — and misclassified the failure.
+  if (!/item specific/i.test(entry.message ?? '')) {
+    return null;
+  }
   const fromParam = entry.parameters?.find((parameter) => parameter.name === '2')?.value;
   if (fromParam) {
     return fromParam;
   }
-  const match = entry.message?.match(/item specific (.*?) is missing/i);
-  return match ? match[1] : null;
+  return (
+    entry.message?.match(/item specific (.*?) is missing/i)?.[1] ??
+    entry.message?.match(/requires the item specific ["']([^"']+)["']/i)?.[1] ??
+    null
+  );
 }
 
 /** "MPN has an invalid value of "021500000529"" → { aspect, value }. */

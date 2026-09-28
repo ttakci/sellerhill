@@ -92,6 +92,7 @@ services:
 
       # Kept low: the test VPS runs Postgres, Redis, Playwright, API and web.
       LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-1}
+      LISTING_BATCH_ITEM_CONCURRENCY: ${LISTING_BATCH_ITEM_CONCURRENCY:-5}
       AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
       AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-1}
       # Platform-wide ceiling on concurrent Playwright actions (resource guard,

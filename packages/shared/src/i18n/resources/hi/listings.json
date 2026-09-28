@@ -76,6 +76,10 @@
         "emptySubtitle": "जॉब के ASIN प्रोसेस करना शुरू करते ही आइटम यहाँ दिखने लगते हैं।",
         "searchPlaceholder": "ASIN या त्रुटि संदेश से खोजें…",
         "resultCount": "{{count}} आइटम",
+        "filterAll": "सभी ({{count}})",
+        "filterFailed": "विफल ({{count}})",
+        "filterBlacklisted": "ब्लैकलिस्ट के कारण ({{count}})",
+        "filterNonBlacklisted": "अन्य कारणों से विफल ({{count}})",
         "reason": "कारण",
         "reference": "संदर्भ",
         "itemStatus": {

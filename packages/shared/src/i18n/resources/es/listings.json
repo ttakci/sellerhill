@@ -76,6 +76,10 @@
         "emptySubtitle": "Los artículos aparecen a medida que la tarea empieza a procesar los ASIN.",
         "searchPlaceholder": "Buscar por ASIN o mensaje de error…",
         "resultCount": "{{count}} artículos",
+        "filterAll": "Todos ({{count}})",
+        "filterFailed": "Fallidos ({{count}})",
+        "filterBlacklisted": "Bloqueados por la lista negra ({{count}})",
+        "filterNonBlacklisted": "Fallidos por otros motivos ({{count}})",
         "reason": "Motivo",
         "reference": "Referencia",
         "itemStatus": {

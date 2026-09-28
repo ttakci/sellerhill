@@ -119,6 +119,10 @@ services:
 
       # Worker concurrency — read at worker registration (restart to change).
       LISTINGS_WORKER_CONCURRENCY: ${LISTINGS_WORKER_CONCURRENCY:-2}
+      # Items of one create batch prepared concurrently (images/LLM/aspects).
+      # In-flight total is this × LISTINGS_WORKER_CONCURRENCY; each item can
+      # hold a pg client, so keep the product comfortably under DB_POOL_MAX.
+      LISTING_BATCH_ITEM_CONCURRENCY: ${LISTING_BATCH_ITEM_CONCURRENCY:-5}
       AUTO_FULFILL_QUEUE_CONCURRENCY: ${AUTO_FULFILL_QUEUE_CONCURRENCY:-1}
       AMAZON_ORDER_SYNC_CONCURRENCY: ${AMAZON_ORDER_SYNC_CONCURRENCY:-2}
       # Platform-wide ceiling on concurrent Playwright actions, and therefore

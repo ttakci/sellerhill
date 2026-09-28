@@ -76,6 +76,10 @@
         "emptySubtitle": "تظهر العناصر عندما تبدأ المهمة بمعالجة أرقام ASIN.",
         "searchPlaceholder": "البحث برقم ASIN أو رسالة الخطأ…",
         "resultCount": "{{count}} عناصر",
+        "filterAll": "الكل ({{count}})",
+        "filterFailed": "الفاشلة ({{count}})",
+        "filterBlacklisted": "بسبب القائمة السوداء ({{count}})",
+        "filterNonBlacklisted": "فشل لأسباب أخرى ({{count}})",
         "reason": "السبب",
         "reference": "المرجع",
         "itemStatus": {

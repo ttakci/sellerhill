@@ -76,6 +76,10 @@
         "emptySubtitle": "Items appear as the job starts processing ASINs.",
         "searchPlaceholder": "Search by ASIN or error message…",
         "resultCount": "{{count}} items",
+        "filterAll": "All ({{count}})",
+        "filterFailed": "Failed ({{count}})",
+        "filterBlacklisted": "Blocked by blacklist ({{count}})",
+        "filterNonBlacklisted": "Failed for other reasons ({{count}})",
         "reason": "Reason",
         "reference": "Reference",
         "itemStatus": {

@@ -29,6 +29,25 @@ describe('extractMissingAspectName', () => {
   it('falls back to parsing the message', () => {
     expect(extractMissingAspectName({ message: 'The item specific Size Type is missing.' })).toBe('Size Type');
   });
+
+  it('never reads a positional parameter from an unrelated error', () => {
+    // eBay's parameters are positional per MESSAGE TEMPLATE — parameter "2" is
+    // only the aspect name on the missing-item-specific error. On any other
+    // error it is whatever that template's second placeholder happens to be
+    // (a quantity, a field name, a category id). Reading it unguarded is how a
+    // seller was shown 'eBay requires the item specific "1"' for a failure
+    // that had nothing to do with item specifics.
+    expect(
+      extractMissingAspectName({
+        errorId: 25016,
+        message: 'Invalid value for availableQuantity.',
+        parameters: [
+          { name: '1', value: 'availableQuantity' },
+          { name: '2', value: '1' },
+        ],
+      })
+    ).toBeNull();
+  });
 });
 
 describe('extractRejectedAspect', () => {
@@ -40,6 +59,22 @@ describe('extractRejectedAspect', () => {
 });
 
 describe('classifyListingFailure', () => {
+  it('does not classify an unrelated parameterised error as a missing aspect', () => {
+    const failure = classifyListingFailure(
+      ebayError([
+        {
+          errorId: 25016,
+          message: 'Invalid value for availableQuantity.',
+          parameters: [
+            { name: '1', value: 'availableQuantity' },
+            { name: '2', value: '1' },
+          ],
+        },
+      ])
+    );
+    expect(failure.code).not.toBe(ListingFailureCode.ASPECT_MISSING);
+  });
+
   it('classifies a missing item specific with the aspect name', () => {
     const failure = classifyListingFailure(
       ebayError([

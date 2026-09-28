@@ -26,8 +26,15 @@ import {
 
 import { ListingJobDetailsPageComponent } from './ListingJobDetailsPage.component';
 import * as S from './ListingJobDetailsPage.style';
+import { JobItemFilter, type JobItemFilterOption } from './ListingJobDetailsPage.types';
 
 import { useLocale } from '@/utils/useLocale';
+
+const isFailedItem = (item: ListingJobItemDto): boolean => item.status === ListingStatus.ERROR;
+
+/** The seller's own blacklist caused this failure — the one cause they can fix in Store Settings. */
+const isBlacklistedItem = (item: ListingJobItemDto): boolean =>
+  isFailedItem(item) && item.failureCode === ListingFailureCode.BLACKLISTED_KEYWORD;
 
 const jobPercent = (job: ListingJobDto): number =>
   job.totalAsins > 0 ? Math.round((job.processedCount / job.totalAsins) * 100) : 0;
@@ -42,6 +49,7 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [itemSearch, setItemSearch] = useState('');
+  const [itemFilter, setItemFilter] = useState<JobItemFilter>(JobItemFilter.ALL);
 
   const {
     data: job,
@@ -228,19 +236,62 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
 
   /** ASIN or the localized failure message — the two things a seller actually
       recognizes an item by. */
+  const filterCounts = useMemo(
+    () => ({
+      failed: items.filter(isFailedItem).length,
+      blacklisted: items.filter(isBlacklistedItem).length,
+    }),
+    [items]
+  );
+
+  /**
+   * The blacklist split is offered only when the blacklist actually failed
+   * something: with none, "non-blacklist failures" would be the same list as
+   * "failed" and a dropdown of duplicates reads as a bug.
+   */
+  const itemFilterOptions: JobItemFilterOption[] = useMemo(() => {
+    const options: JobItemFilterOption[] = [
+      { value: JobItemFilter.ALL, label: t('listings.jobs.items.filterAll', { count: items.length }) },
+      { value: JobItemFilter.FAILED, label: t('listings.jobs.items.filterFailed', { count: filterCounts.failed }) },
+    ];
+    if (filterCounts.blacklisted > 0) {
+      options.push(
+        {
+          value: JobItemFilter.BLACKLISTED,
+          label: t('listings.jobs.items.filterBlacklisted', { count: filterCounts.blacklisted }),
+        },
+        {
+          value: JobItemFilter.NON_BLACKLISTED,
+          label: t('listings.jobs.items.filterNonBlacklisted', {
+            count: filterCounts.failed - filterCounts.blacklisted,
+          }),
+        }
+      );
+    }
+    return options;
+  }, [t, items.length, filterCounts]);
+
   const filteredItems = useMemo(() => {
+    let byStatus = items;
+    if (itemFilter === JobItemFilter.FAILED) {
+      byStatus = items.filter(isFailedItem);
+    } else if (itemFilter === JobItemFilter.BLACKLISTED) {
+      byStatus = items.filter(isBlacklistedItem);
+    } else if (itemFilter === JobItemFilter.NON_BLACKLISTED) {
+      byStatus = items.filter((item) => isFailedItem(item) && !isBlacklistedItem(item));
+    }
     const q = itemSearch.trim().toLowerCase();
     if (!q) {
-      return items;
+      return byStatus;
     }
-    return items.filter((item) => {
+    return byStatus.filter((item) => {
       if (item.asin.toLowerCase().includes(q)) {
         return true;
       }
       const reason = failureLabel(item);
       return reason ? reason.toLowerCase().includes(q) : false;
     });
-  }, [items, itemSearch, failureLabel]);
+  }, [items, itemFilter, itemSearch, failureLabel]);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -252,8 +303,17 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
     setPage(1);
   }, []);
 
+  const handleItemFilterChange = useCallback((value: string | number) => {
+    // Select hands back a plain value; anything that is not a known filter
+    // (a stale option after the counts changed) falls back to "all".
+    const next = Object.values(JobItemFilter).find((filter) => filter === value);
+    setItemFilter(next ?? JobItemFilter.ALL);
+    setPage(1);
+  }, []);
+
   const handleClearItemSearch = useCallback(() => {
     setItemSearch('');
+    setItemFilter(JobItemFilter.ALL);
     setPage(1);
   }, []);
 
@@ -306,6 +366,9 @@ export const ListingJobDetailsPageContainer: React.FC = () => {
       itemSearch={itemSearch}
       onItemSearchChange={handleItemSearchChange}
       onClearItemSearch={handleClearItemSearch}
+      itemFilter={itemFilter}
+      onItemFilterChange={handleItemFilterChange}
+      itemFilterOptions={itemFilterOptions}
       filteredItemCount={filteredItems.length}
       pagination={{
         count: filteredItems.length,

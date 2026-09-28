@@ -76,6 +76,10 @@
         "emptySubtitle": "Gli articoli compaiono quando l'attività inizia a elaborare gli ASIN.",
         "searchPlaceholder": "Cerca per ASIN o messaggio di errore…",
         "resultCount": "{{count}} articoli",
+        "filterAll": "Tutti ({{count}})",
+        "filterFailed": "Non riusciti ({{count}})",
+        "filterBlacklisted": "Bloccati dalla lista nera ({{count}})",
+        "filterNonBlacklisted": "Non riusciti per altri motivi ({{count}})",
         "reason": "Motivo",
         "reference": "Riferimento",
         "itemStatus": {
