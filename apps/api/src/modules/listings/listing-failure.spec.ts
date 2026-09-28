@@ -169,6 +169,19 @@ describe('classifyListingFailure', () => {
     expect(failure.details.ebayErrorIds).toEqual([25002]);
   });
 
+  it('does not call an "Offer entity already exists" 25002 a duplicate item', () => {
+    // That reply means our own stale offer collided with the SKU, not that a
+    // live identical listing exists — telling the seller to end a listing they
+    // already ended sent them in circles.
+    const failure = classifyListingFailure(
+      ebayError([
+        { errorId: 25002, message: 'A user error has occurred. Offer entity already exists. (offerId: 281563979011)' },
+      ])
+    );
+
+    expect(failure.code).not.toBe(ListingFailureCode.EBAY_DUPLICATE_ITEM);
+  });
+
   it('classifies policy and image rejections', () => {
     expect(classifyListingFailure(ebayError([{ message: 'The fulfillment policy is not valid.' }])).code).toBe(
       ListingFailureCode.EBAY_POLICY_MISSING

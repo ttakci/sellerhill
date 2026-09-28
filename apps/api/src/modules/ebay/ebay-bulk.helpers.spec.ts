@@ -122,6 +122,33 @@ describe('extractExistingOfferId', () => {
     ).toBe('9988776655');
   });
 
+  it('recovers the offer id when eBay puts it only in the message text', () => {
+    // Observed in production (2026-09-28): re-listing an ASIN whose earlier
+    // listing was ended answered with this shape and NO offerId parameter, so
+    // the recovery never ran and the create failed.
+    expect(
+      extractExistingOfferId([
+        {
+          errorId: 25002,
+          message: 'A user error has occurred. Offer entity already exists. (offerId: 281563979011)',
+        },
+      ])
+    ).toBe('281563979011');
+    expect(
+      extractExistingOfferId([
+        { errorId: 25002, message: 'A user error has occurred.', longMessage: 'Offer entity already exists. (offerId: 55)' },
+      ])
+    ).toBe('55');
+  });
+
+  it('does not take an offerId out of a different 25002', () => {
+    expect(
+      extractExistingOfferId([
+        { errorId: 25002, message: 'It looks like this listing is for an item you already have on eBay: Widget (110590178528).' },
+      ])
+    ).toBeNull();
+  });
+
   it('returns null for an unrelated 25002', () => {
     expect(extractExistingOfferId([{ errorId: 25002, message: 'System error.' }])).toBeNull();
   });

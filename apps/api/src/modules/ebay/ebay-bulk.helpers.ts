@@ -106,8 +106,26 @@ export function correlateBulkResponses<T>(
  * already handles.
  */
 export function extractExistingOfferId(errors: readonly EbayBulkError[] | undefined): string | null {
-  const conflict = (errors ?? []).find((error) => error.errorId === 25002);
-  return conflict?.parameters?.find((parameter) => parameter.name === 'offerId')?.value ?? null;
+  for (const error of errors ?? []) {
+    if (error.errorId !== 25002) {
+      continue;
+    }
+    const fromParameter = error.parameters?.find((parameter) => parameter.name === 'offerId')?.value;
+    if (fromParameter) {
+      return fromParameter;
+    }
+    // eBay does not always send the parameter: it can put the id only in the
+    // text ("Offer entity already exists. (offerId: 123)"). Only that exact
+    // sentence counts — another 25002 must never lend us an offer id.
+    const text = `${error.message ?? ''} ${error.longMessage ?? ''}`;
+    if (/offer entity already exists/i.test(text)) {
+      const fromText = text.match(/offerId:\s*(\d+)/i)?.[1];
+      if (fromText) {
+        return fromText;
+      }
+    }
+  }
+  return null;
 }
 
 /**

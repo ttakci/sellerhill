@@ -262,7 +262,10 @@ function classifyEbayErrors(entries: EbayApiErrorEntry[]): ClassifiedListingFail
   // Checked before the generic text-matched buckets below: eBay names the
   // specific conflicting item in `message`, so a seller sees a plan-actionable
   // reason instead of the generic UNKNOWN this fell into before.
-  if (ebayErrorIds.some((id) => EBAY_DUPLICATE_ITEM_ERROR_IDS.has(id))) {
+  // "Offer entity already exists" shares the 25002 id but is our own stale
+  // offer colliding with the SKU, not a live identical listing.
+  const isOfferCollision = entries.some((entry) => /offer entity already exists/i.test(entry.message ?? ''));
+  if (!isOfferCollision && ebayErrorIds.some((id) => EBAY_DUPLICATE_ITEM_ERROR_IDS.has(id))) {
     return { code: ListingFailureCode.EBAY_DUPLICATE_ITEM, message, details: { ebayErrorIds, retryable: false } };
   }
 
