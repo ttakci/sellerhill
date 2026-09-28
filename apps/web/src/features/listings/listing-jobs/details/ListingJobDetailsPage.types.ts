@@ -1,6 +1,24 @@
 import type { ListingJobDto, ListingJobItemDto, ListingJobStatus, ListingStatus } from '@repo/shared';
 import type { TableColumn, ViewMode } from '@repo/ui';
 
+/**
+ * Which job items the list shows. `FAILED` is every item that ended in
+ * `ListingStatus.ERROR`; the two blacklist values split those by whether the
+ * seller's own blacklist caused the failure (`ListingFailureCode.BLACKLISTED_KEYWORD`)
+ * — the one failure a seller fixes themselves, so it is worth isolating.
+ */
+export enum JobItemFilter {
+  ALL = 'all',
+  FAILED = 'failed',
+  BLACKLISTED = 'blacklisted',
+  NON_BLACKLISTED = 'non_blacklisted',
+}
+
+export interface JobItemFilterOption {
+  value: JobItemFilter;
+  label: string;
+}
+
 export interface ListingJobDetailsPageComponentProps {
   jobId: string;
   job: ListingJobDto | undefined;
@@ -45,7 +63,13 @@ export interface ListingJobDetailsPageComponentProps {
   /** Client-side search over ASIN + the localized failure message. */
   itemSearch: string;
   onItemSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Clears the search AND the status filter — the empty state's "clear filters" action. */
   onClearItemSearch: () => void;
-  /** Count after the search filter, before pagination slicing. */
+  /** Status / failure-cause filter, applied before the search. */
+  itemFilter: JobItemFilter;
+  onItemFilterChange: (value: string | number) => void;
+  /** Options carry their own counts so the seller sees the size of each group before choosing. */
+  itemFilterOptions: JobItemFilterOption[];
+  /** Count after the search and status filters, before pagination slicing. */
   filteredItemCount: number;
 }

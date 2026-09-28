@@ -76,6 +76,10 @@
         "emptySubtitle": "İş ASIN işlemeye başladıkça kalemler burada listelenir.",
         "searchPlaceholder": "ASIN veya hata mesajına göre ara…",
         "resultCount": "{{count}} kalem",
+        "filterAll": "Tümü ({{count}})",
+        "filterFailed": "Hatalı ({{count}})",
+        "filterBlacklisted": "Kara liste nedeniyle ({{count}})",
+        "filterNonBlacklisted": "Kara liste dışı hatalar ({{count}})",
         "reason": "Sebep",
         "reference": "Referans",
         "itemStatus": {

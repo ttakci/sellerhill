@@ -183,6 +183,18 @@ export const SearchWrapper = styled.div`
   }
 `;
 
+/* Wider than the job list's status select: the options carry a count and the
+   longest label ("Kara liste dışı hatalar (3)") must not truncate. */
+export const SelectWrapper = styled.div`
+  min-width: 0;
+  width: 17rem;
+  flex-shrink: 0;
+
+  @media (max-width: ${tkn('breakpoints.lg')}) {
+    width: 100%;
+  }
+`;
+
 export const FilterResultCount = styled(UIText)`
   margin-left: auto;
   flex-shrink: 0;

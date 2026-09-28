@@ -76,6 +76,10 @@
         "emptySubtitle": "جاب کے ASINs پروسیس کرنا شروع کرنے پر آئٹمز یہاں نظر آئیں گی۔",
         "searchPlaceholder": "ASIN یا خرابی کے پیغام سے تلاش کریں…",
         "resultCount": "{{count}} آئٹمز",
+        "filterAll": "تمام ({{count}})",
+        "filterFailed": "ناکام ({{count}})",
+        "filterBlacklisted": "بلیک لسٹ کی وجہ سے ({{count}})",
+        "filterNonBlacklisted": "دیگر وجوہات سے ناکام ({{count}})",
         "reason": "وجہ",
         "reference": "حوالہ",
         "itemStatus": {
