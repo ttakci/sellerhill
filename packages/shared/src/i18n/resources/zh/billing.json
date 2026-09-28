@@ -1,0 +1,331 @@
+{
+  "billing": {
+    "title": "账单",
+    "subtitle": "管理您的订阅套餐、用量和账单历史。",
+    "loadingSubtitle": "正在加载您的账单详情…",
+    "unavailableTitle": "账单功能不可用",
+    "unavailableSubtitle": "我们无法加载您的账单详情，请重试。",
+    "plans": {
+      "title": "套餐",
+      "subtitle": "选择适合您销售规模的套餐。",
+      "monthly": "按月",
+      "annual": "按年",
+      "annualSavings": "按年付费可省 2 个月费用",
+      "perMonth": "/月",
+      "perYear": "/年",
+      "choosePlan": "选择 {{plan}}",
+      "currentPlan": "当前套餐",
+      "switchPlan": "切换到 {{plan}}",
+      "contactSales": "联系销售",
+      "freeTrial": "可免费试用",
+      "mostPopular": "最受欢迎",
+      "informationalOnly": "账单限制已关闭，套餐仅供参考。目前所有功能均不受限制。",
+      "free": {
+        "name": "免费版"
+      },
+      "trial": {
+        "name": "免费试用",
+        "description": "SellerHill 的限时试用。不可购买，注册时自动开始。"
+      },
+      "lite": {
+        "name": "Lite",
+        "description": "适合刚起步、商品目录较小的卖家。"
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "适合以专注的商品组合试水的卖家。"
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "适合运营精简商品目录的个人卖家。"
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "适合商品目录不断增长、订单稳定的卖家。"
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "适合商品刊登数量超过数千条的成熟卖家。"
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "适合在多个细分领域运营广泛商品目录的卖家。"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "适合拥有五千条商品刊登的大批量卖家。"
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "适合管理大型、频繁调价商品目录的高级卖家。"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "适合运营一万条商品刊登的专业团队。"
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "适合拥有一万五千条商品刊登的大型运营团队。"
+      },
+      "business": {
+        "name": "Business",
+        "description": "适合拥有两万条商品刊登的多店铺企业。"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "适合最大规模的商品目录，并提供优先支持。"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "已停售的套餐。现有订阅继续有效；新用户请从上方套餐中选择。"
+      },
+      "switchTo": "切换到 {{plan}}",
+      "switchDone": "您的套餐已更改。Stripe 会在您的下一张账单中按比例结算差额。",
+      "planNamed": "{{plan}} 套餐"
+    },
+    "planChange": {
+      "title": "确认更改套餐",
+      "upgradeBody": "即将切换到 {{plan}}。现在将收取 {{amount}}。您的下一张账单将于 {{nextDate}} 生成，金额为 {{nextAmount}}。",
+      "downgradeBody": "将于 {{date}} 切换到 {{plan}}。现在不会收取任何费用，在此之前您继续使用当前套餐。",
+      "listingLimitWarning": "您目前有 {{active}} 条在售商品刊登，而新套餐允许 {{limit}} 条。从 {{date}} 起，只会追踪您最早的 {{limit}} 条商品刊登；其余 {{over}} 条将停止价格/库存同步和订单自动处理。如果您想自行选择保留追踪的商品刊登，请在该日期之前结束不需要的那些。",
+      "confirm": "确认",
+      "cancel": "取消"
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "在售商品刊登",
+        "unit": "条商品刊登",
+        "description": "您所有店铺合计的在售商品刊登数量上限。"
+      },
+      "amazon_orders_per_month": {
+        "label": "自动订单",
+        "unit": "笔订单",
+        "description": "每月为您下达（自动或手动关联）的 Amazon 订单数量上限。"
+      },
+      "unlimited": "不限",
+      "disabled": "不包含",
+      "of": "已用 {{used}} / {{limit}}",
+      "used": "已用 {{used}}",
+      "remaining": "剩余 {{remaining}}",
+      "exceeded": "已超出上限",
+      "tracking_conversions_per_month": {
+        "label": "物流单号转换",
+        "unit": "次转换",
+        "description": "每月有多少票货件会获得转换后的物流单号，让买家永远看不到您的供应商。"
+      }
+    },
+    "subscription": {
+      "title": "您的订阅",
+      "plan": "套餐",
+      "interval": "计费周期",
+      "intervalValue": {
+        "monthly": "按月计费",
+        "annual": "按年计费"
+      },
+      "status": {
+        "label": "状态",
+        "trialing": "试用中",
+        "active": "有效",
+        "cancelling": "即将取消",
+        "past_due": "逾期未付",
+        "canceled": "已取消",
+        "ended": "已结束"
+      },
+      "trial": {
+        "title": "您正在使用免费试用",
+        "daysLeft": "还剩 {{count}} 天",
+        "lastDay": "您的试用今天结束",
+        "endsOn": "试用将于 {{date}} 结束",
+        "expired": "您的免费试用已结束。",
+        "chooseAPlan": "请选择一个套餐，以便在试用结束后继续使用。"
+      },
+      "currentPeriod": "当前周期",
+      "nextRenewal": "下次续订",
+      "canceledAt": "取消日期",
+      "endedAt": "结束日期",
+      "manage": "管理订阅",
+      "updatePayment": "更新付款方式",
+      "cancel": "取消订阅",
+      "resume": "恢复订阅",
+      "upgrade": "升级套餐",
+      "downgrade": "降级套餐",
+      "trialEnds": "试用结束",
+      "trialEnded": "试用已结束",
+      "accessEnds": "访问权限结束",
+      "portal": "付款方式和发票",
+      "portalHint": "将打开 Stripe，您可以更新银行卡、下载发票或取消订阅。",
+      "manageHint": "在此管理您的付款方式、套餐和发票。",
+      "nextCharge": "下次付款：{{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "将于 {{date}} 取消，此周期结束后不会再收费",
+      "scheduledChange": "将于 {{date}} 切换到 {{plan}}",
+      "scheduledChangeUnknownPlan": "您的套餐将于 {{date}} 变更",
+      "cancelScheduledChange": "取消",
+      "scheduledChangeCancelled": "您的套餐变更已取消。",
+      "confirmCancelScheduledChangeTitle": "取消套餐变更",
+      "confirmCancelScheduledChangeMessage": "确定要取消已预约的套餐变更吗？您将继续使用当前套餐。"
+    },
+    "paymentMethod": {
+      "title": "付款方式",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "有效期至 {{month}}/{{year}}",
+      "expiringSoon": "此银行卡即将过期。请更新，以免续订失败。",
+      "change": "更换"
+    },
+    "invoices": {
+      "title": "发票历史",
+      "subtitle": "您已支付的全部款项，直接来自 Stripe。",
+      "date": "日期",
+      "description": "说明",
+      "amount": "金额",
+      "status": "状态",
+      "pdf": "发票",
+      "download": "下载",
+      "payNow": "立即支付",
+      "empty": "暂无发票。",
+      "emptyDescription": "您拥有付费订阅后，发票会显示在这里。",
+      "loading": "正在加载发票…",
+      "loadingDescription": "正在从 Stripe 获取您的发票历史。",
+      "error": "无法加载发票。",
+      "errorDescription": "加载您的发票历史时出现问题。",
+      "retry": "重试",
+      "showMore": "显示更多",
+      "showMoreError": "无法加载更多发票。",
+      "statusLabel": {
+        "paid": "已支付",
+        "open": "待支付",
+        "void": "已作废",
+        "uncollectible": "无法收取",
+        "draft": "草稿"
+      }
+    },
+    "customer": {
+      "title": "账单详情",
+      "billingEmail": "账单邮箱",
+      "status": {
+        "label": "账号状态",
+        "active": "正常",
+        "locked": "已锁定",
+        "deleted": "已删除"
+      }
+    },
+    "transition": {
+      "full_access": "完全访问：账单限制已关闭，所有功能均不受限制。",
+      "active": "您的订阅有效。",
+      "no_subscription": "没有有效的订阅。请选择一个套餐以启用账单功能。",
+      "past_due": "您的订阅已逾期未付。请更新付款方式以恢复访问。"
+    },
+    "provider": {
+      "unconfiguredTitle": "账单功能未配置",
+      "unconfiguredBody": "由于未连接账单服务商，结账和订阅管理暂不可用。请联系您的运营人员。"
+    },
+    "usage": {
+      "title": "本周期用量",
+      "subtitle": "用量会在下一个计费周期开始时重置。",
+      "period": "周期",
+      "noOpenPeriod": "没有进行中的用量周期",
+      "status": {
+        "label": "周期状态",
+        "open": "进行中",
+        "closed": "已关闭",
+        "finalized": "已结算"
+      }
+    },
+    "webhooks": {
+      "title": "Webhook 收件箱",
+      "subtitle": "最近的账单服务商事件。",
+      "provider": "服务商",
+      "eventType": "事件类型",
+      "status": {
+        "label": "状态",
+        "received": "已接收",
+        "processing": "处理中",
+        "processed": "已处理",
+        "failed": "失败"
+      },
+      "receivedAt": "接收时间",
+      "processedAt": "处理时间",
+      "attempts": "尝试次数",
+      "empty": "暂无 Webhook 事件"
+    },
+    "reservation": {
+      "title": "预留",
+      "subtitle": "已在您的套餐额度中预留的商品刊登和 Amazon 订单名额。",
+      "kind": {
+        "listing": "商品刊登",
+        "amazon_order": "Amazon 订单"
+      },
+      "status": {
+        "label": "状态",
+        "reserved": "已预留",
+        "released": "已释放",
+        "overage": "超额"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "您已达到套餐上限。请升级以继续。",
+      "no_active_subscription": "未找到有效的订阅。",
+      "no_open_period": "此额度没有进行中的用量周期。",
+      "already_reserved": "此资源已被预留。",
+      "providerNotConfigured": "此环境尚未启用付款功能。请稍后再试。",
+      "planNotMirrored": "此套餐暂不可购买。请选择其他套餐或联系支持团队。",
+      "checkoutFailed": "无法开始结账。请稍后重试；如仍失败，请联系支持团队。",
+      "portalFailed": "无法打开账单门户。请稍后重试。",
+      "noCustomer": "尚无账单账户。请先选择一个套餐来创建。",
+      "planNotFound": "未找到该套餐。",
+      "priceNotFound": "未找到该套餐的有效价格。",
+      "ebayTrialAlreadyUsed": "此 eBay 店铺已使用过免费试用。请选择一个套餐以继续。",
+      "quotaExhausted": "您已达到套餐上限。请升级以继续。",
+      "addonNotFound": "未找到该加购包。",
+      "noSubscription": "您没有可更改的有效订阅。",
+      "planChangeFailed": "目前无法更改套餐。请重试，或使用“管理账单”。",
+      "subscriptionSuspended": "您的订阅未处于有效状态，因此新的商品刊登已暂停。选择一个套餐即可恢复，一切都会自动重新开始。",
+      "subscriptionSuspendedOrders": "您的订阅未处于有效状态，因此订单自动化已暂停。选择一个套餐即可恢复，一切都会自动重新开始。",
+      "listingQuotaExhausted": "您已用完套餐允许的全部在售商品刊登名额。请结束一条商品刊登以腾出名额，或升级套餐。",
+      "alreadySubscribed": "您已有一个有效的订阅。请使用“切换套餐”来更改，而不是重复订阅。",
+      "invoicesFailed": "无法加载发票历史。请稍后重试。",
+      "paymentRequiresAction": "您的银行要求对这张银行卡进行额外确认，因此套餐变更已被取消，您仍在使用当前套餐。请打开“管理账单”更新付款方式，然后重试。",
+      "invalidCheckoutSession": "此付款确认链接无效。"
+    },
+    "actions": {
+      "subscribe": "订阅",
+      "save": "保存更改",
+      "cancel": "取消"
+    },
+    "admin": {
+      "plans": {
+        "title": "套餐",
+        "subtitle": "管理订阅套餐、价格和额度。",
+        "add": "添加套餐",
+        "edit": "编辑套餐",
+        "activate": "启用",
+        "deactivate": "停用",
+        "slug": "标识符",
+        "name": "名称",
+        "description": "说明",
+        "isActive": "已启用",
+        "displayOrder": "显示顺序",
+        "prices": "价格",
+        "limits": "额度",
+        "providerProductId": "服务商商品 ID",
+        "providerPriceId": "服务商价格 ID",
+        "effectiveFrom": "生效起始",
+        "effectiveTo": "生效截止",
+        "amountMicros": "金额（微单位）",
+        "limitKey": "额度键",
+        "limitValue": "额度值",
+        "unit": "单位"
+      },
+      "webhooks": {
+        "title": "Webhook 收件箱",
+        "subtitle": "查看并重放账单服务商的 Webhook 事件。",
+        "replay": "重放"
+      }
+    },
+    "addons": {
+      "title": "本月还需要更多额度？",
+      "subtitle": "您已用完本月的物流单号转换次数。加购后，在本月重置之前可继续隐藏您的供应商。",
+      "buy": "购买",
+      "note": "加购仅适用于当前自然月，因此会在您达到上限时提供，而不是提前提供。您的套餐额度会在每月 1 日重置。"
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "storeSettings": {
+    "title": "Configuration de la boutique",
+    "subtitle": "Gérez la localisation globale, la validation et les paramètres de liste noire de vos boutiques.",
+    "saveChanges": "Enregistrer les modifications",
+    "viewLogs": "Voir les journaux",
+    "globalSettings": "Appliquer les paramètres à toutes les boutiques",
+    "globalDescription": "Activez cette option pour diffuser la configuration ci-dessous à chaque boutique connectée. Désactivez-la pour choisir une boutique précise.",
+    "selectStore": "Sélectionner une boutique",
+    "selectStorePlaceholder": "Rechercher et sélectionner une boutique...",
+    "locationSectionTitle": "Paramètres de localisation",
+    "locationSectionSubtitle": "Gérez l'adresse physique et la région de votre boutique",
+    "country": "Pays",
+    "state": "Région/Lieu",
+    "zipCode": "Code postal",
+    "blacklistType_title": "Titre",
+    "blacklistType_description": "Description",
+    "blacklistType_feature_specification": "Caractéristiques et spécifications",
+    "blacklistType_brand_manufacturer": "Marque et fabricant",
+    "copyright": "© {{year}} SellerHill Platform. Tous droits réservés.",
+    "amazonTaxRate": "Taux de taxe sur les ventes Amazon (%)",
+    "amazonTaxRateDesc": "Taux estimé de taxe sur les ventes Amazon appliqué au coût d'achat. Utilisé de deux façons : il augmente le prix de votre annonce eBay pour couvrir ce coût et — tant que le profit d'une commande est provisoire et que la commande Amazon n'a pas encore été passée — il estime le profit de cette commande.",
+    "autoFulfillEnabled": "Passer automatiquement les commandes Amazon après les ventes eBay",
+    "autoFulfillEnabledHint": "Lorsque cette option est activée, SellerHill achète l'article sur Amazon avec votre compte acheteur lié. Désactivez-la pour commander manuellement.",
+    "autoFulfillEnabledInfo": "Activez cette option uniquement après avoir connecté et configuré un compte acheteur Amazon. La commande automatique exige également que le paramètre d'exécution automatique et le plafond de dépense de ce compte soient activés.",
+    "trackingConversionProvider": "Conversion du numéro de suivi",
+    "trackingConversionProviderHint": "Les numéros de transporteur réels sont transmis tels quels. Amazon Logistics (TBA) passe sans modification.",
+    "trackingConversionProviderLocal": "Intégrée (locale)",
+    "trackingConversionApiComingSoon": "Un prestataire de conversion par API figure sur la feuille de route.",
+    "messaging": {
+      "title": "Messages aux acheteurs",
+      "subtitle": "Envoyez automatiquement des messages aux acheteurs aux moments clés de la commande. Facultatif et par événement.",
+      "masterEnable": "Activer les messages automatiques aux acheteurs",
+      "shippedWarning": "eBay envoie déjà une notification de suivi lorsqu'une commande est marquée comme expédiée. En envoyer une autre est facultatif.",
+      "delayDays": "Délai (jours)",
+      "delayDaysOption_one": "{{count}} jour",
+      "delayDaysOption_many": "{{count}} jours",
+      "delayDaysOption_other": "{{count}} jours",
+      "events": {
+        "order_received": "Commande reçue",
+        "shipped": "Expédiée",
+        "delivered": "Livrée",
+        "feedback_request": "Demande d'avis"
+      },
+      "eventDescriptions": {
+        "order_received": "Envoie le message sélectionné lorsqu'une nouvelle commande eBay correspondante est reçue pour la première fois.",
+        "shipped": "Envoie le message sélectionné lorsque le suivi Amazon marque la commande comme expédiée. eBay envoie également sa propre notification de suivi.",
+        "delivered": "Envoie le message sélectionné lorsque le suivi Amazon confirme la livraison.",
+        "feedback_request": "Envoie la demande d'avis sélectionnée un nombre de jours choisi après la livraison."
+      },
+      "templateSource": "Modèle",
+      "systemTemplate": "Par défaut",
+      "customTemplate": "Personnalisé",
+      "templates": {
+        "hub": {
+          "title": "Modèles de messages",
+          "subtitle": "Vos modèles de messages automatisés aux acheteurs",
+          "addNew": {
+            "title": "Nouveau modèle de message",
+            "subtitle": "Rédigez un message personnalisé pour un événement de commande"
+          },
+          "viewAll": {
+            "title": "Tout"
+          }
+        },
+        "list": {
+          "title": "Modèles de messages",
+          "subtitle": "Consultez, modifiez ou créez vos modèles de messages automatisés aux acheteurs",
+          "allEvents": "Tous les événements",
+          "empty": "Aucun modèle pour cet événement pour le moment",
+          "emptyDescription": "Créez un modèle pour utiliser votre propre formulation dans les messages aux acheteurs."
+        },
+        "create": {
+          "title": "Nouveau modèle de message",
+          "subtitle": "Rédigez un message personnalisé pour un événement de commande"
+        },
+        "edit": {
+          "title": "Modifier le modèle de message",
+          "subtitle": "Mettez à jour ce modèle de message"
+        },
+        "name": "Nom",
+        "event": "Événement",
+        "body": "Corps du message",
+        "placeholders": "Insérer un espace réservé",
+        "preview": "Aperçu",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "reset": "Rétablir par défaut",
+        "resetConfirm": "Restaurer le message par défaut d'origine ? Vos modifications du texte seront perdues.",
+        "deleteConfirmDescription": "Cette action supprimera définitivement « {{name}} ». Si un événement de messagerie l'utilise actuellement, cet événement cessera d'envoyer des messages jusqu'à ce que vous choisissiez un autre modèle."
+      }
+    },
+    "trackingConversionEnabled": "Masquer les numéros de suivi de mon fournisseur",
+    "trackingConversionEnabledHint": "Votre acheteur voit un nouveau numéro de suivi émis par notre partenaire de suivi au lieu de celui d'Amazon d'origine, de sorte que rien sur eBay ne renvoie à votre fournisseur. Si un numéro ne peut pas être converti, nous ne revenons jamais à celui d'Amazon — la commande est retenue et vous est signalée dans les actions en attente.",
+    "trackingConversionScope": "Transporteurs à convertir",
+    "trackingConversionScopeAll": "Tous les transporteurs",
+    "trackingConversionScopeAmazonOnly": "Amazon Logistics uniquement (TBA)",
+    "trackingConversionScopeHint": "Les numéros Amazon Logistics (TBA) indiquent « Amazon » sans détour ; ne convertir que ceux-là masque l'indice le plus évident de votre fournisseur et consomme bien moins de votre allocation mensuelle de conversions. Convertir tous les transporteurs masque davantage — un numéro UPS ou USPS expédié par Amazon peut souvent être retrouvé — mais coûte plus cher, et eBay considère un scan natif du transporteur comme une preuve de livraison plus solide si un acheteur prétend n'avoir jamais reçu son article.",
+    "trackingConvertManualOrders": "Convertir les commandes liées à la main",
+    "trackingConvertManualOrdersHint": "Une commande est considérée comme liée à la main dès que SellerHill n'a pas passé lui-même l'achat Amazon : vous l'avez achetée et avez saisi le numéro de commande, ou le système l'a associée pour vous. Si la commande automatique est désactivée, toutes vos commandes entrent dans ce groupe — désactiver cette option signifie donc qu'aucun numéro de suivi n'est converti et que votre acheteur voit celui d'Amazon tel quel. Activé par défaut ; désactivé, vous pouvez toujours convertir ces commandes une par une depuis la page de la commande.",
+    "trackingExposure": {
+      "conversionOff": "La conversion du numéro de suivi est désactivée. Vos acheteurs voient le numéro de suivi Amazon brut (TBA…) et peuvent remonter directement jusqu'à votre fournisseur.",
+      "manualAll": "Comme la commande automatique est désactivée, TOUTES vos commandes sont considérées comme liées à la main. Avec ce paramètre désactivé, rien n'est converti — le numéro Amazon brut, TBA compris, part vers eBay et expose votre fournisseur.",
+      "manualSome": "Les commandes que vous liez à la main seront expédiées avec le numéro de suivi Amazon brut (TBA…), ce qui expose votre fournisseur sur ces commandes.",
+      "confirmConversionOff": "Si vous désactivez la conversion, chaque commande à partir de maintenant montrera à votre acheteur le numéro de suivi Amazon brut (TBA…) et exposera votre fournisseur. Une fois qu'un numéro de suivi a été envoyé à eBay, il ne peut plus être modifié. Voulez-vous vraiment la désactiver ?",
+      "confirmManualOff": "Si vous désactivez cette option, les commandes que vous liez à la main seront expédiées avec le numéro de suivi Amazon brut (TBA…). Avec la commande automatique désactivée, cela concerne toutes vos commandes. Une fois qu'un numéro de suivi a été envoyé à eBay, il ne peut plus être modifié. Voulez-vous vraiment la désactiver ?",
+      "confirmDisable": "Désactiver quand même"
+    },
+    "address": {
+      "title": "Adresse du vendeur",
+      "description": "Publiée comme localisation de l'article sur vos annonces eBay. eBay n'affiche aux acheteurs que la ville, la région et le pays.",
+      "city": "Ville"
+    }
+  }
+}

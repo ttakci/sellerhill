@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Contas de comprador da Amazon",
+      "subtitle": "Gerencie suas contas de comprador da Amazon para rastreamento de pedidos e coleta de preços",
+      "addButton": "Adicionar conta Amazon",
+      "noAccounts": "Nenhuma conta Amazon conectada ainda",
+      "noAccountsDescription": "Adicione sua conta de comprador da Amazon para acompanhar automaticamente os preços e o status de envio dos pedidos",
+      "statusActive": "Ativa",
+      "statusVerifying": "Verificando",
+      "statusInvalid": "Credenciais inválidas",
+      "statusNeedsReauth": "Requer nova autenticação",
+      "statusLocked": "Bloqueada",
+      "verifyButton": "Verificar",
+      "editButton": "Editar",
+      "deleteButton": "Excluir",
+      "deleteConfirmTitle": "Excluir conta Amazon",
+      "deleteConfirmMessage": "Tem certeza de que deseja excluir esta conta Amazon? Esta ação não pode ser desfeita.",
+      "lastVerified": "Última verificação",
+      "lastUsed": "Último uso",
+      "never": "Nunca",
+      "addTitle": "Adicionar conta Amazon",
+      "editTitle": "Editar conta Amazon",
+      "labelField": "Nome da conta",
+      "labelPlaceholder": "ex.: Amazon pessoal",
+      "emailField": "E-mail da Amazon",
+      "emailPlaceholder": "seu-email@exemplo.com",
+      "passwordField": "Senha da Amazon",
+      "passwordPlaceholder": "Digite sua senha da Amazon",
+      "twoFactorField": "Chave secreta 2FA",
+      "twoFactorPlaceholder": "Opcional - das configurações de 2FA da Amazon",
+      "twoFactorInfo": "Se você tem o 2FA ativado, informe a chave secreta das configurações de segurança da sua conta Amazon",
+      "saveButton": "Salvar conta",
+      "savingButton": "Salvando...",
+      "verifyingButton": "Verificando...",
+      "verifySuccess": "Conta Amazon verificada com sucesso",
+      "verifyFailed": "Falha ao verificar a conta Amazon. Confira suas credenciais.",
+      "saveSuccess": "Conta Amazon salva com sucesso",
+      "deleteSuccess": "Conta Amazon excluída com sucesso",
+      "errorSaving": "Falha ao salvar a conta Amazon"
+    },
+    "linking": {
+      "title": "Vincular pedido da Amazon",
+      "selectAccount": "Selecionar conta Amazon",
+      "selectAccountPlaceholder": "Escolha uma conta Amazon...",
+      "orderId": "ID do pedido da Amazon",
+      "orderIdPlaceholder": "ex.: 112-1234567-1234567",
+      "orderIdHelp": "Informe o ID do seu pedido da Amazon (encontrado no histórico de pedidos ou no e-mail de confirmação)",
+      "linkButton": "Vincular e coletar",
+      "linkingButton": "Vinculando...",
+      "progressLoggingIn": "Entrando na Amazon...",
+      "progressNavigating": "Acessando a página do pedido...",
+      "progressScraping": "Coletando os detalhes do pedido...",
+      "progressSaving": "Salvando os dados do pedido...",
+      "successTitle": "Pedido da Amazon vinculado",
+      "successMessage": "Os detalhes do pedido foram coletados e vinculados com sucesso",
+      "errorTitle": "Falha ao vincular o pedido",
+      "errorNoAccount": "Adicione uma conta Amazon primeiro",
+      "errorScraping": "Não foi possível coletar os detalhes do pedido da Amazon. Confira o ID do pedido e tente novamente.",
+      "errorInvalidCredentials": "As credenciais da Amazon são inválidas. Atualize sua conta.",
+      "errorRateLimit": "Muitas solicitações. Tente novamente mais tarde.",
+      "costCaptureFailed": "O pedido da Amazon foi encontrado, mas não foi possível ler os detalhes de custo. O lucro foi mantido no último valor conhecido.",
+      "noAccountsTitle": "Nenhuma conta Amazon",
+      "noAccountsMessage": "Você precisa adicionar uma conta de comprador da Amazon antes de vincular pedidos.",
+      "addAccountLink": "Adicionar conta Amazon",
+      "noListingTitle": "Importe este anúncio do eBay primeiro",
+      "noListingMessage": "O anúncio do eBay deste pedido não foi importado, então o pedido não está vinculado a um anúncio. Você ainda pode vincular o pedido da Amazon e obter seus custos reais — mas, quando ele for enviado, o código de rastreio não poderá ser enviado ao eBay, porque o eBay precisa do item de linha que um anúncio contém. Esse envio não é repetido depois. Importe o anúncio primeiro e este pedido será vinculado a ele automaticamente.",
+      "importListingButton": "Importar o anúncio",
+      "linkAnywayButton": "Vincular mesmo assim"
+    },
+    "tracking": {
+      "statusPending": "Pendente",
+      "statusProcessing": "Em processamento",
+      "statusShipped": "Enviado",
+      "statusDelivered": "Entregue",
+      "statusCancelled": "Cancelado",
+      "statusReturned": "Devolvido",
+      "eBaySyncShipped": "Pedido do eBay marcado como enviado",
+      "eBaySyncDelivered": "Pedido do eBay marcado como entregue"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Conta",
+        "proxy": "Proxy"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Usar esta conta no atendimento automático",
+      "autoFulfillEnabledHint": "Quando ativado, os pedidos correspondentes do eBay são comprados automaticamente por esta conta Amazon (em rodízio com as outras contas ativadas). A chave geral de Atendimento automático nas Configurações da loja também deve estar ativada, e um limite de gasto deve ser definido abaixo.",
+      "autoFulfillCapTotal": "Total máximo do pedido (limite do atendimento automático)",
+      "autoFulfillCapTotalHint": "Teto de gasto por conta (USD). Pedidos acima deste total não usam esta conta. Obrigatório para ativar o atendimento automático.",
+      "autoFulfillCapTotalPlaceholder": "ex.: 250",
+      "autoFulfillDryRun": "Simulação (executa o fluxo sem finalizar o pedido)",
+      "autoFulfillDryRunHint": "Executa todo o fluxo de compra até (sem incluir) a finalização do pedido, para que o total da revisão seja capturado e exibido para conferência."
+    },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "stepSubtitle": "Opcional — direcione a automação desta conta pelo seu próprio proxy",
+      "enabled": "Ativar proxy",
+      "enabledHint": "Use um servidor proxy para proteger sua conta",
+      "connectionType": "Tipo de conexão",
+      "host": "Informe o host",
+      "port": "Informe a porta",
+      "username": "Usuário",
+      "password": "Senha",
+      "hint": "Opcional. Adicione seu próprio proxy para direcionar a automação desta conta por ele — útil se você quer proteção extra contra bloqueios baseados em IP. Deixe desativado e a conta se conecta diretamente; esse é o padrão normal."
+    },
+    "marketplace": {
+      "label": "Marketplace",
+      "usOnlyNote": "No momento, apenas o marketplace dos Estados Unidos (amazon.com) é compatível.",
+      "AMAZON_US": "Estados Unidos (amazon.com)",
+      "readOnlyHint": "O marketplace não pode ser alterado depois que a conta é criada."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Defina um total máximo do pedido para ativar o atendimento automático nesta conta.",
+      "proxyHostPortRequired": "Informe um host e uma porta para usar um proxy nesta conta.",
+      "unsupportedMarketplace": "Este marketplace da Amazon ainda não está disponível.",
+      "twoFactorSecretRequired": "Adicione a chave secreta do autenticador (2FA) da conta. A Amazon exige um código de verificação em quase todo login automatizado, e essa é a única forma de respondermos por você.",
+      "twoFactorSecretInvalid": "Isso não parece uma chave secreta de autenticador. Cole a chave de configuração do aplicativo autenticador da Amazon (letras A–Z e dígitos 2–7), não um código de 6 dígitos."
+    }
+  }
+}

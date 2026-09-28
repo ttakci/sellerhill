@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Ventas, ganancias y rendimiento de las publicaciones",
+    "greeting": "Hola, {{name}}",
+    "selectStore": "Seleccionar tienda",
+    "allStores": "Todas las tiendas",
+    "noData": "Aún no hay datos",
+    "backToDashboard": "Volver al panel",
+    "tabs": {
+      "cards": "Tarjetas",
+      "chart": "Gráfico",
+      "pnl": "Resultados"
+    },
+    "today": "Hoy",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mes",
+    "thisYear": "Este año",
+    "metrics": {
+      "sales": "Ventas",
+      "units": "Unidades",
+      "orders": "Pedidos",
+      "ordersUnits": "Pedidos / Unidades",
+      "refunds": "Reembolsos",
+      "refundRate": "Tasa de reembolsos",
+      "grossProfit": "Ganancia bruta",
+      "netProfit": "Ganancia neta",
+      "estimatedPayout": "Pago est.",
+      "margin": "Margen",
+      "roi": "ROI",
+      "avgOrderValue": "Pedido prom.",
+      "costOfGoods": "Costo del producto",
+      "transactionFees": "Comisiones por transacción",
+      "adFees": "Comisiones de publicidad",
+      "amazonShipping": "Envío de Amazon",
+      "amazonTax": "Impuesto de Amazon",
+      "revenueUncosted": "Ingresos sin costo"
+    },
+    "card": {
+      "showMore": "Más detalles",
+      "showLess": "Menos detalles",
+      "activeHint": "Filtrando las listas de abajo"
+    },
+    "listingsSection": "Publicaciones",
+    "ordersSection": "Pedidos",
+    "listingsCount": "{{count}} con ventas",
+    "ordersCount": "{{count}} pedidos",
+    "viewAllListings": "Ver todas",
+    "viewAllOrders": "Ver todos",
+    "listingsEmptyTitle": "No hay publicaciones con ventas",
+    "listingsEmptySubtitle": "Aquí aparecen las publicaciones que recibieron pedidos en el periodo seleccionado.",
+    "ordersEmptyTitle": "No hay pedidos en este periodo",
+    "ordersEmptySubtitle": "Los pedidos del periodo seleccionado aparecerán aquí cuando lleguen las ventas.",
+    "chart": {
+      "title": "Rendimiento",
+      "subtitle": "Ganancia neta frente al volumen de ventas",
+      "summary": "Resumen del periodo",
+      "granularity": {
+        "day": "30 días",
+        "week": "12 semanas",
+        "month": "12 meses"
+      },
+      "series": {
+        "netProfit": "Ganancia neta",
+        "sales": "Ventas",
+        "units": "Unidades",
+        "refunds": "Reembolsos"
+      }
+    },
+    "pnl": {
+      "title": "Estado de resultados",
+      "subtitle": "Desglose mes a mes de los últimos 12 meses",
+      "parameter": "Métrica / Periodo",
+      "currentPeriod": "Periodo actual",
+      "heatmap": "Mapa de calor",
+      "export": "Descargar CSV"
+    },
+    "groups": {
+      "revenue": "Ingresos",
+      "costs": "Costos",
+      "profit": "Ganancia",
+      "ratios": "Ratios"
+    },
+    "profit": {
+      "confirmedLabel": "Confirmada",
+      "confirmedTooltip": "Ganancia de los pedidos cuyos costos reales de Amazon se capturaron. Un costo desconocido nunca se cuenta como cero.",
+      "estimatedLabel": "Estimada",
+      "estimatedTooltip": "Los pedidos que esperan su cumplimiento en Amazon usan un costo estimado (impuesto de Amazon a la tasa configurada de {{rate}}%).",
+      "uncostedLabel": "Ingresos sin costo",
+      "uncostedTooltip": "Ventas cuyo costo de Amazon aún no se pudo determinar: solo ingresos, sin ganancia implícita."
+    }
+  }
+}

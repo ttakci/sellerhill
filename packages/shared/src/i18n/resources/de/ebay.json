@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "eBay-Shop verbinden",
+      "subtitle": "Verknüpfen Sie Ihr eBay-Verkäuferkonto, um Angebote und Bestellungen zu verwalten",
+      "connectButton": "eBay-Konto verbinden",
+      "connectingButton": "Verbindung wird hergestellt ...",
+      "marketplaceLabel": "Marktplatz",
+      "marketplaceUS": "Vereinigte Staaten (eBay.com)",
+      "marketplaceUK": "Vereinigtes Königreich (eBay.co.uk)",
+      "marketplaceDE": "Deutschland (eBay.de)",
+      "marketplaceFR": "Frankreich (eBay.fr)",
+      "marketplaceIT": "Italien (eBay.it)",
+      "marketplaceES": "Spanien (eBay.es)",
+      "marketplaceUsOnlyNote": "Derzeit wird nur der Marktplatz Vereinigte Staaten (eBay.com) unterstützt.",
+      "successMessage": "eBay-Konto erfolgreich verbunden!",
+      "errorMessage": "eBay-Konto konnte nicht verbunden werden",
+      "alreadyConnected": "Dieses eBay-Konto ist bereits verbunden"
+    },
+    "accounts": {
+      "title": "Verbundene eBay-Konten",
+      "loadingDescription": "Ihre verbundenen Shops werden geladen.",
+      "noAccounts": "Noch keine eBay-Konten verbunden",
+      "statusActive": "Aktiv",
+      "statusRevoked": "Widerrufen",
+      "statusError": "Fehler",
+      "disconnectButton": "Trennen",
+      "refreshTokenButton": "Token aktualisieren"
+    },
+    "callback": {
+      "processing": "eBay-Verbindung wird verarbeitet ...",
+      "success": "eBay-Konto erfolgreich verbunden! Weiterleitung zum Dashboard ...",
+      "error": "eBay-Konto konnte nicht verbunden werden. Bitte versuchen Sie es erneut.",
+      "cancelled": "Die eBay-Verbindung wurde abgebrochen."
+    },
+    "errors": {
+      "invalidState": "Ungültiger State-Parameter",
+      "authorizationFailed": "eBay-Autorisierung fehlgeschlagen",
+      "tokenExchangeFailed": "Autorisierungscode konnte nicht gegen Tokens eingetauscht werden",
+      "accountAlreadyConnected": "Dieser eBay-Shop ist mit einem anderen SellerHill-Konto verbunden. Melden Sie sich mit dem Konto an, mit dem Sie ihn verbunden haben; falls Sie darauf keinen Zugriff haben, wenden Sie sich an den Support.",
+      "ebayTrialAlreadyUsed": "Für diesen eBay-Shop wurde die kostenlose Testphase bereits genutzt. Wählen Sie einen Tarif, um ihn zu verbinden.",
+      "noAuthorizationCode": "Von eBay wurde kein Autorisierungscode empfangen",
+      "storeOwnedByAnotherAccount": "Dieser eBay-Shop ist mit einem anderen SellerHill-Konto verknüpft. Wenden Sie sich an den Support, um ihn zu übertragen.",
+      "accountNotFound": "Dieser eBay-Shop wurde nicht gefunden.",
+      "identityUnavailable": "Wir konnten Ihr eBay-Konto bei eBay nicht bestätigen. Es wurde nichts verbunden – bitte versuchen Sie es in Kürze erneut."
+    },
+    "onboarding": {
+      "title": "Verbinden Sie Ihren eBay-Shop",
+      "header": "Marktplatz-Einrichtung",
+      "description": "Um Ihre Artikel zu synchronisieren, müssen Sie zuerst Ihren eBay-Shop verbinden.",
+      "connectButton": "eBay-Konto",
+      "skipButton": "Vorerst überspringen",
+      "usOnlyNote": "Derzeit wird nur der US-Marktplatz unterstützt. Weitere Regionen folgen in Kürze.",
+      "brandingDescription": "Verknüpfen Sie Ihren eBay-Shop mit SellerHill, um alle Verkaufsprozesse zentral zu steuern."
+    }
+  }
+}

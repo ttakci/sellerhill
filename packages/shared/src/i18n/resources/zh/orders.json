@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "订单",
+      "subtitle": "{{count}} 笔订单"
+    },
+    "overview": {
+      "viewAll": "查看全部",
+      "emptyTitle": "暂无订单",
+      "emptySubtitle": "已同步的 eBay 销售订单会显示在这里。"
+    },
+    "carousel": {
+      "previous": "上一页",
+      "next": "下一页"
+    },
+    "all": {
+      "title": "全部订单",
+      "subtitle": "{{count}} 条结果",
+      "loadingTitle": "正在加载订单",
+      "loadingSubtitle": "正在获取您最新的 eBay 订单。",
+      "filtersTitle": "没有符合筛选条件的订单",
+      "filtersSubtitle": "请尝试扩大日期范围、状态或店铺范围。",
+      "filtersAction": "清除筛选",
+      "emptyTitle": "暂无订单",
+      "emptySubtitle": "eBay 同步运行后，订单会自动显示在这里。"
+    },
+    "filters": {
+      "allStatuses": "所有状态",
+      "allStores": "所有店铺",
+      "allTrackingStates": "所有追踪状态",
+      "clearAll": "全部清除",
+      "resultCount": "{{count}} 条结果"
+    },
+    "stats": {
+      "totalSales": "总销售额",
+      "netProfit": "净利润",
+      "activeOrders": "进行中的订单",
+      "returnRate": "退货率",
+      "last24Hours": "最近 24 小时",
+      "growth": "较上月 {{value}}%",
+      "profitGrowth": "较上月 {{value}}%",
+      "decrease": "较上月 {{value}}%"
+    },
+    "actions": {
+      "search": "搜索订单、买家或商品…",
+      "last30Days": "最近 30 天",
+      "export": "导出",
+      "convertTracking": "转换物流单号"
+    },
+    "table": {
+      "orderNumber": "订单号",
+      "product": "商品",
+      "date": "日期",
+      "buyer": "买家",
+      "status": "状态",
+      "salePrice": "售价",
+      "purchasePrice": "成本",
+      "netProfit": "利润",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "已完成",
+      "shipped": "已发货",
+      "processing": "处理中",
+      "cancelled": "已取消",
+      "pending": "待处理",
+      "waiting_shipment": "待发货"
+    },
+    "fulfillmentState": {
+      "column": "Amazon 履约",
+      "purchased": "已在 Amazon 采购",
+      "amazon_cancelled": "Amazon 已取消",
+      "action_required": "需要处理",
+      "in_progress": "正在 Amazon 采购",
+      "not_automated": "未自动化",
+      "manual": "手动采购",
+      "simulated": "测试运行，未实际采购",
+      "filter": {
+        "all": "所有履约状态"
+      },
+      "detail": {
+        "title": "Amazon 履约",
+        "amazonOrderId": "Amazon 订单",
+        "simulatedNotice": "这是一次测试运行。没有下达任何 Amazon 订单，也没有扣款，下方的成本和利润均为模拟数据。",
+        "actionRequiredNotice": "自动化在采购之前已停止。请查看原因，并手动履行此订单。",
+        "cancelledNotice": "Amazon 采购已被取消。该 eBay 销售仍需向买家履约，请通过其他方式发货。",
+        "notAutomatedNotice": "此订单的自动下单已关闭。",
+        "attemptedAt": "最近一次尝试"
+      }
+    },
+    "tracking": {
+      "tracked": "由 SellerHill 追踪",
+      "untracked": "未追踪",
+      "problem": {
+        "wrongPageType": "物流服务商无法读取 Amazon 的订单页面，可能是页面格式已更改。系统将自动重试。",
+        "amazonSessionExpired": "用于读取此订单的 Amazon 会话已过期，需要重新登录。",
+        "trackingUrlMismatch": "Amazon 订单页面上的物流链接与我们预期的不符。系统将自动重试。",
+        "needsTrackingUpload": "正在等待上传货件详情，之后才能转换物流单号。",
+        "updateNotApplied": "服务商尚未应用此物流更新。系统将自动重试。",
+        "assignValidation": "物流服务商拒绝了此订单的货件详情。",
+        "shipmentException": "物流服务商报告此货件出现异常。",
+        "trackingUpdateUnavailable": "物流服务商目前无法更新此货件。",
+        "generic": "此订单的物流单号转换出现问题。系统将自动重试。"
+      }
+    },
+    "autoFulfill": {
+      "column": "自动履约",
+      "status": {
+        "pending": "排队中",
+        "running": "运行中",
+        "placed": "已下单",
+        "blocked": "已拦截",
+        "failed": "失败",
+        "dry_run": "试运行",
+        "skipped": "已跳过"
+      },
+      "reason": {
+        "no_asin": "在 Amazon 上未找到商品",
+        "captcha": "需要验证码",
+        "otp": "MFA/OTP 验证",
+        "login": "登录失败",
+        "out_of_stock": "缺货",
+        "address": "地址问题",
+        "payment": "付款被拒",
+        "cap": "超出成本上限",
+        "no_confirmation": "无确认信息",
+        "proxy_required": "未配置代理",
+        "quota_exhausted": "已达月度额度",
+        "cart": "购物车不匹配",
+        "review_unreadable": "无法读取订单总额",
+        "subscription_suspended": "订阅已暂停",
+        "listing_over_plan_limit": "商品刊登超出套餐上限",
+        "order_already_fulfilled": "已发货，无需采购",
+        "order_not_paid": "等待买家付款"
+      },
+      "reasonLabel": "原因：{{reason}}",
+      "amazonCancelledBadge": "Amazon 已取消",
+      "filter": {
+        "all": "全部自动履约",
+        "needsAttention": "需要关注"
+      }
+    },
+    "pagination": {
+      "showing": "显示第 {{from}}-{{to}} 笔，共 {{total}} 笔订单"
+    },
+    "detail": {
+      "title": "订单详情",
+      "loadingSubtitle": "正在获取订单详情…",
+      "notFoundTitle": "未找到订单",
+      "notFoundSubtitle": "此订单可能已被移除，或您没有访问权限。",
+      "orderPlaced": "下单时间",
+      "viewInvoice": "查看发票",
+      "printLabels": "打印标签",
+      "customerInfo": "客户信息",
+      "buyerPayment": "买家付款",
+      "ebaySummary": "eBay 销售汇总",
+      "whatBuyerPaid": "买家支付的金额",
+      "whatYouEarned": "您的收入",
+      "earningsOrderTotal": "订单总额",
+      "ebayCollectedFromBuyer": "eBay 向买家代收",
+      "ebayCollectedTax": "销售税",
+      "sellingCosts": "销售成本",
+      "itemSubtotal": "商品小计",
+      "shippingHandling": "运费与处理费",
+      "totalBeforeTax": "税前总额",
+      "estimatedTax": "预估税费",
+      "grandTotal": "总计",
+      "paymentMethod": "付款方式",
+      "subtotal": "小计",
+      "shipping": "运费",
+      "salesTax": "销售税",
+      "orderTotal": "订单总额",
+      "feesCollected": "已扣除的费用",
+      "transactionFees": "交易费用",
+      "adFee": "常规广告费",
+      "orderEarnings": "订单收入",
+      "viewMore": "查看更多详情",
+      "updateAmazon": "填写 Amazon 信息",
+      "netProfitAnalysis": "净利润分析",
+      "analysisDesc": "此计算以您从 eBay 获得的实际收入（已扣除所有平台费用和税费）为基础，再减去最初的 Amazon 采购成本。",
+      "calculation": "计算",
+      "netProfitResult": "净利润",
+      "roi": "ROI",
+      "shipTo": "收货人",
+      "contact": "联系方式",
+      "unknownProduct": "未知商品",
+      "copyAddress": "复制地址",
+      "addressCopied": "地址已复制！",
+      "copyName": "复制姓名",
+      "copyStreet": "复制街道",
+      "copyStreet2": "复制地址第二行",
+      "copyCity": "复制城市",
+      "copyState": "复制州/省",
+      "copyZip": "复制邮政编码",
+      "copyCountry": "复制国家/地区",
+      "copied": "已复制",
+      "amazonCosts": "Amazon 订单汇总",
+      "purchasePrice": "采购价",
+      "amazonTax": "Amazon 税费",
+      "amazonShipping": "Amazon 运费",
+      "totalAmazonCost": "Amazon 总成本",
+      "amazonTracking": "Amazon 物流单号",
+      "convertedTracking": "转换后的物流单号",
+      "amazonOrder": "Amazon 订单",
+      "linkAmazon": "关联 Amazon 订单",
+      "calcEarnings": "收入",
+      "calcPurchase": "采购",
+      "calcTax": "税费",
+      "calcShipping": "运费",
+      "asin": "ASIN",
+      "ebayItemId": "eBay ID",
+      "quantity": "数量",
+      "unit": "件",
+      "sku": "SKU",
+      "na": "不适用"
+    },
+    "modal": {
+      "title": "填写 Amazon 订单信息",
+      "amazonUrl": "Amazon 订单详情 URL",
+      "trackingUrl": "物流 URL（可选）",
+      "taxAmount": "税额 ($)",
+      "shippingCost": "运费 ($)",
+      "infoText": "填写税费和运费后，将自动重新计算此订单的净利润。",
+      "save": "保存详情",
+      "cancel": "取消",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "预估",
+    "estimateNote": "预估利润，将在 Amazon 订单下达后确定。基于最近已知的 Amazon 价格；不含 Amazon 运费。",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. 保留所有权利。"
+    },
+    "errors": {
+      "notFound": "未找到订单。",
+      "noTrackingYet": "此订单还没有 Amazon 物流单号，尚未发货。",
+      "conversionUnavailable": "目前无法转换物流单号。请检查您的套餐上限和转换设置，然后重试。",
+      "conversionDone": "物流单号已转换。",
+      "orderNotTracked": "此订单未关联到您的任何商品刊登，因此转换后的物流单号永远无法发送到 eBay。请先把订单关联到对应的商品刊登。",
+      "trackingAlreadyPushed": "eBay 已有此订单的原始物流单号且无法替换，因此现在转换不会改变买家看到的内容。",
+      "listingOverPlanLimit": "此订单到达时，其商品刊登已超出您套餐的商品刊登上限。来自上限之外商品刊登的订单不会进行货件追踪，也不会转换物流单号。"
+    }
+  }
+}

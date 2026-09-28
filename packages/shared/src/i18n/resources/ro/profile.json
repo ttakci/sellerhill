@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Gestionați setările contului și informațiile personale.",
+    "personalInfo": "Informații personale",
+    "firstName": "Prenume",
+    "lastName": "Nume",
+    "emailAddress": "Adresă de e-mail",
+    "phone": "Telefon",
+    "bio": "Biografie",
+    "address": "Adresă",
+    "country": "Țară",
+    "cityState": "Oraș/Regiune",
+    "postalCode": "Cod poștal",
+    "taxId": "COD FISCAL",
+    "edit": "Editează",
+    "home": "Acasă",
+    "defaultJobTitle": "Manager de echipă",
+    "locationNotSet": "Locația nu este setată",
+    "defaultBio": "Manager profesionist de comerț electronic.",
+    "updateSuccess": "Profilul a fost actualizat cu succes.",
+    "twitter": "URL Twitter",
+    "linkedin": "URL LinkedIn",
+    "instagram": "URL Instagram",
+    "deactivateAccount": "Dezactivează contul",
+    "saveChanges": "Salvează toate modificările",
+    "storeOwner": "Proprietar de magazin"
+  }
+}

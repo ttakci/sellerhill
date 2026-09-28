@@ -1,0 +1,115 @@
+{
+  "storeSettings": {
+    "title": "Configuração da loja",
+    "subtitle": "Gerencie as configurações globais de localização, validação e lista de bloqueio das suas lojas.",
+    "saveChanges": "Salvar alterações",
+    "viewLogs": "Ver registros",
+    "globalSettings": "Aplicar configurações a todas as lojas",
+    "globalDescription": "Ative para aplicar a configuração abaixo a todas as lojas conectadas. Desative para selecionar uma loja específica.",
+    "selectStore": "Selecionar loja",
+    "selectStorePlaceholder": "Pesquise e selecione uma loja...",
+    "locationSectionTitle": "Configurações de localização",
+    "locationSectionSubtitle": "Gerencie o endereço físico e a região da sua loja",
+    "country": "País",
+    "state": "Estado/Localização",
+    "zipCode": "CEP",
+    "blacklistType_title": "Título",
+    "blacklistType_description": "Descrição",
+    "blacklistType_feature_specification": "Características e especificações",
+    "blacklistType_brand_manufacturer": "Marca e fabricante",
+    "copyright": "© {{year}} Plataforma SellerHill. Todos os direitos reservados.",
+    "amazonTaxRate": "Alíquota de imposto sobre vendas da Amazon (%)",
+    "amazonTaxRateDesc": "Alíquota estimada do imposto sobre vendas da Amazon aplicada ao custo de compra. Usada de duas formas: eleva o preço do seu anúncio no eBay para cobrir esse custo e, enquanto o lucro de um pedido ainda é provisório e o pedido na Amazon ainda não foi feito, estima o lucro desse pedido.",
+    "autoFulfillEnabled": "Fazer pedidos na Amazon automaticamente após vendas no eBay",
+    "autoFulfillEnabledHint": "Quando ativado, o SellerHill compra o item na Amazon com a sua conta de comprador vinculada. Desative para fazer os pedidos manualmente.",
+    "autoFulfillEnabledInfo": "Ative somente depois de conectar e configurar uma conta de comprador da Amazon. O pedido automático também exige que o atendimento automático e o limite de gasto dessa conta estejam ativados.",
+    "trackingConversionProvider": "Conversão de código de rastreio",
+    "trackingConversionProviderHint": "Códigos de transportadoras reais são repassados como estão. A Amazon Logistics (TBA) passa sem alteração.",
+    "trackingConversionProviderLocal": "Integrado (local)",
+    "trackingConversionApiComingSoon": "Um provedor de conversão via API está no roteiro.",
+    "messaging": {
+      "title": "Mensagens ao comprador",
+      "subtitle": "Envie mensagens automáticas aos compradores em momentos-chave do pedido. Opcional e por evento.",
+      "masterEnable": "Ativar mensagens automáticas ao comprador",
+      "shippedWarning": "O eBay já envia uma notificação de rastreio quando um pedido é marcado como enviado. Enviar outra é opcional.",
+      "delayDays": "Atraso (dias)",
+      "delayDaysOption_one": "{{count}} dia",
+      "delayDaysOption_many": "{{count}} dias",
+      "delayDaysOption_other": "{{count}} dias",
+      "events": {
+        "order_received": "Pedido recebido",
+        "shipped": "Enviado",
+        "delivered": "Entregue",
+        "feedback_request": "Pedido de avaliação"
+      },
+      "eventDescriptions": {
+        "order_received": "Envia a mensagem selecionada quando um novo pedido correspondente do eBay é recebido pela primeira vez.",
+        "shipped": "Envia a mensagem selecionada depois que o rastreio da Amazon marca o pedido como enviado. O eBay também envia sua própria notificação de rastreio.",
+        "delivered": "Envia a mensagem selecionada quando o rastreio da Amazon confirma a entrega.",
+        "feedback_request": "Envia o pedido de avaliação selecionado alguns dias após a entrega, conforme o número escolhido."
+      },
+      "templateSource": "Modelo",
+      "systemTemplate": "Padrão",
+      "customTemplate": "Personalizado",
+      "templates": {
+        "hub": {
+          "title": "Modelos de mensagem",
+          "subtitle": "Seus modelos de mensagem automática ao comprador",
+          "addNew": {
+            "title": "Novo modelo de mensagem",
+            "subtitle": "Escreva uma mensagem personalizada para um evento do pedido"
+          },
+          "viewAll": {
+            "title": "Todos"
+          }
+        },
+        "list": {
+          "title": "Modelos de mensagem",
+          "subtitle": "Veja, edite ou crie seus modelos de mensagem automática ao comprador",
+          "allEvents": "Todos os eventos",
+          "empty": "Ainda não há modelos para este evento",
+          "emptyDescription": "Crie um modelo para usar suas próprias palavras nos eventos de mensagens ao comprador."
+        },
+        "create": {
+          "title": "Novo modelo de mensagem",
+          "subtitle": "Escreva uma mensagem personalizada para um evento do pedido"
+        },
+        "edit": {
+          "title": "Editar modelo de mensagem",
+          "subtitle": "Atualize este modelo de mensagem"
+        },
+        "name": "Nome",
+        "event": "Evento",
+        "body": "Corpo da mensagem",
+        "placeholders": "Inserir variável",
+        "preview": "Pré-visualização",
+        "save": "Salvar",
+        "delete": "Excluir",
+        "reset": "Restaurar padrão",
+        "resetConfirm": "Restaurar a mensagem padrão original? As suas edições no texto serão perdidas.",
+        "deleteConfirmDescription": "Isto excluirá \"{{name}}\" permanentemente. Se algum evento de mensagem estiver usando este modelo, ele deixará de enviar mensagens até que você escolha outro modelo."
+      }
+    },
+    "trackingConversionEnabled": "Ocultar os códigos de rastreio do meu fornecedor",
+    "trackingConversionEnabledHint": "Seu comprador vê um novo código de rastreio emitido pelo nosso parceiro de rastreamento em vez do original da Amazon, de modo que nada no eBay aponte para o seu fornecedor. Se um código não puder ser convertido, nunca recorremos ao da Amazon — o pedido fica retido e é mostrado a você em Ações pendentes.",
+    "trackingConversionScope": "Quais transportadoras converter",
+    "trackingConversionScopeAll": "Todas as transportadoras",
+    "trackingConversionScopeAmazonOnly": "Somente Amazon Logistics (TBA)",
+    "trackingConversionScopeHint": "Os códigos da Amazon Logistics (TBA) dizem \"Amazon\" de forma explícita; converter só esses oculta o sinal mais claro do seu fornecedor e usa bem menos da sua cota mensal de conversões. Converter todas as transportadoras oculta mais — um código UPS ou USPS enviado pela Amazon muitas vezes pode ser consultado — mas custa mais, e o eBay considera a leitura de uma transportadora nativa uma prova de entrega mais forte caso um comprador alegue que o item nunca chegou.",
+    "trackingConvertManualOrders": "Converter pedidos vinculados manualmente",
+    "trackingConvertManualOrdersHint": "Um pedido é considerado vinculado manualmente sempre que o SellerHill não fez a compra na Amazon: você comprou e informou o número do pedido, ou o sistema o associou para você. Se o pedido automático estiver desativado, todos os seus pedidos entram neste grupo — então, desativar esta opção significa que nenhum código de rastreio é convertido e seu comprador vê o código original da Amazon. Ativado por padrão; com ela desativada, você ainda pode converter esses pedidos um a um na página do pedido.",
+    "trackingExposure": {
+      "conversionOff": "A conversão de código de rastreio está desativada. Seus compradores veem o código de rastreio original da Amazon (TBA…) e podem rastrear seu fornecedor diretamente.",
+      "manualAll": "Como o pedido automático está desativado, TODOS os seus pedidos contam como vinculados manualmente. Com esta opção desativada, nada é convertido — o código original da Amazon, incluindo TBA, vai para o eBay e expõe seu fornecedor.",
+      "manualSome": "Os pedidos que você vincular manualmente serão enviados com o código de rastreio original da Amazon (TBA…), expondo seu fornecedor nesses pedidos.",
+      "confirmConversionOff": "Se você desativar a conversão, todos os pedidos a partir de agora mostrarão ao comprador o código de rastreio original da Amazon (TBA…) e exporão seu fornecedor. Depois que um código de rastreio é enviado ao eBay, ele não pode ser alterado. Tem certeza de que deseja desativar?",
+      "confirmManualOff": "Se você desativar isto, os pedidos vinculados manualmente serão enviados com o código de rastreio original da Amazon (TBA…). Com o pedido automático desativado, isso significa todos os seus pedidos. Depois que um código de rastreio é enviado ao eBay, ele não pode ser alterado. Tem certeza de que deseja desativar?",
+      "confirmDisable": "Desativar mesmo assim"
+    },
+    "address": {
+      "title": "Endereço do vendedor",
+      "description": "Publicado como a localização do item nos seus anúncios do eBay. O eBay mostra aos compradores apenas a cidade, a região e o país.",
+      "city": "Cidade"
+    }
+  }
+}

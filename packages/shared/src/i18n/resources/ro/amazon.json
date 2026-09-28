@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Conturi de cumpărător Amazon",
+      "subtitle": "Gestionați conturile de cumpărător Amazon pentru urmărirea comenzilor și preluarea prețurilor",
+      "addButton": "Adaugă cont Amazon",
+      "noAccounts": "Niciun cont Amazon conectat încă",
+      "noAccountsDescription": "Adăugați contul dvs. de cumpărător Amazon pentru a urmări automat prețurile comenzilor și starea expedierii",
+      "statusActive": "Activ",
+      "statusVerifying": "Se verifică",
+      "statusInvalid": "Date de autentificare invalide",
+      "statusNeedsReauth": "Necesită reautentificare",
+      "statusLocked": "Blocat",
+      "verifyButton": "Verifică",
+      "editButton": "Editează",
+      "deleteButton": "Șterge",
+      "deleteConfirmTitle": "Șterge contul Amazon",
+      "deleteConfirmMessage": "Sigur doriți să ștergeți acest cont Amazon? Această acțiune nu poate fi anulată.",
+      "lastVerified": "Ultima verificare",
+      "lastUsed": "Ultima utilizare",
+      "never": "Niciodată",
+      "addTitle": "Adaugă cont Amazon",
+      "editTitle": "Editează contul Amazon",
+      "labelField": "Numele contului",
+      "labelPlaceholder": "ex.: Amazon personal",
+      "emailField": "E-mail Amazon",
+      "emailPlaceholder": "adresa-dvs@example.com",
+      "passwordField": "Parolă Amazon",
+      "passwordPlaceholder": "Introduceți parola Amazon",
+      "twoFactorField": "Cheie secretă 2FA",
+      "twoFactorPlaceholder": "Opțional - din setările 2FA Amazon",
+      "twoFactorInfo": "Dacă aveți 2FA activat, introduceți cheia secretă din setările de securitate ale contului Amazon",
+      "saveButton": "Salvează contul",
+      "savingButton": "Se salvează...",
+      "verifyingButton": "Se verifică...",
+      "verifySuccess": "Contul Amazon a fost verificat cu succes",
+      "verifyFailed": "Contul Amazon nu a putut fi verificat. Verificați datele de autentificare.",
+      "saveSuccess": "Contul Amazon a fost salvat cu succes",
+      "deleteSuccess": "Contul Amazon a fost șters cu succes",
+      "errorSaving": "Contul Amazon nu a putut fi salvat"
+    },
+    "linking": {
+      "title": "Asociază comanda Amazon",
+      "selectAccount": "Selectați contul Amazon",
+      "selectAccountPlaceholder": "Alegeți un cont Amazon...",
+      "orderId": "ID comandă Amazon",
+      "orderIdPlaceholder": "ex.: 112-1234567-1234567",
+      "orderIdHelp": "Introduceți ID-ul comenzii Amazon (îl găsiți în istoricul comenzilor sau în e-mailul de confirmare)",
+      "linkButton": "Asociază și preia datele",
+      "linkingButton": "Se asociază...",
+      "progressLoggingIn": "Autentificare în Amazon...",
+      "progressNavigating": "Se navighează la pagina comenzii...",
+      "progressScraping": "Se preiau detaliile comenzii...",
+      "progressSaving": "Se salvează datele comenzii...",
+      "successTitle": "Comanda Amazon a fost asociată",
+      "successMessage": "Detaliile comenzii au fost preluate și asociate cu succes",
+      "errorTitle": "Comanda nu a putut fi asociată",
+      "errorNoAccount": "Adăugați mai întâi un cont Amazon",
+      "errorScraping": "Detaliile comenzii Amazon nu au putut fi preluate. Verificați ID-ul comenzii și încercați din nou.",
+      "errorInvalidCredentials": "Datele de autentificare Amazon sunt invalide. Actualizați contul.",
+      "errorRateLimit": "Prea multe cereri. Încercați din nou mai târziu.",
+      "costCaptureFailed": "Comanda Amazon a fost găsită, dar detaliile de cost nu au putut fi citite. Profitul rămâne la ultima valoare cunoscută.",
+      "noAccountsTitle": "Niciun cont Amazon",
+      "noAccountsMessage": "Trebuie să adăugați mai întâi un cont de cumpărător Amazon pentru a asocia comenzi.",
+      "addAccountLink": "Adaugă cont Amazon",
+      "noListingTitle": "Importați mai întâi acest anunț eBay",
+      "noListingMessage": "Anunțul eBay al acestei comenzi nu a fost importat, deci comanda nu este asociată unui anunț. Puteți totuși asocia comanda Amazon și obține costurile ei reale — dar la expediere numărul de urmărire nu poate fi trimis către eBay, deoarece eBay are nevoie de linia de articol pe care o poartă un anunț. Acea trimitere nu este reîncercată ulterior. Importați mai întâi anunțul și această comandă îi va fi asociată automat.",
+      "importListingButton": "Importă anunțul",
+      "linkAnywayButton": "Asociază oricum"
+    },
+    "tracking": {
+      "statusPending": "În așteptare",
+      "statusProcessing": "Se procesează",
+      "statusShipped": "Expediată",
+      "statusDelivered": "Livrată",
+      "statusCancelled": "Anulată",
+      "statusReturned": "Returnată",
+      "eBaySyncShipped": "Comanda eBay a fost marcată ca expediată",
+      "eBaySyncDelivered": "Comanda eBay a fost marcată ca livrată"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Cont",
+        "proxy": "Proxy"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Folosește acest cont pentru îndeplinirea automată",
+      "autoFulfillEnabledHint": "Când este activat, comenzile eBay corespunzătoare sunt cumpărate automat prin acest cont Amazon (prin rotație cu celelalte conturi activate). Comutatorul principal de îndeplinire automată din Setări magazin trebuie să fie activat, iar mai jos trebuie setat un plafon de cheltuieli.",
+      "autoFulfillCapTotal": "Totalul maxim al comenzii (plafon de îndeplinire automată)",
+      "autoFulfillCapTotalHint": "Plafon de cheltuieli pentru fiecare cont (USD). Comenzile care depășesc acest total ocolesc acest cont. Obligatoriu pentru activarea îndeplinirii automate.",
+      "autoFulfillCapTotalPlaceholder": "ex.: 250",
+      "autoFulfillDryRun": "Rulare de probă (rulează fluxul fără a plasa comanda)",
+      "autoFulfillDryRunHint": "Rulează întregul flux de finalizare a comenzii până la (fără a include) Plasează comanda, astfel încât totalul de verificare să poată fi preluat și afișat pentru revizuire."
+    },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "stepSubtitle": "Opțional — direcționați automatizarea acestui cont printr-un proxy propriu",
+      "enabled": "Activează proxy",
+      "enabledHint": "Folosiți un server proxy pentru a vă proteja contul",
+      "connectionType": "Tip de conexiune",
+      "host": "Introduceți gazda",
+      "port": "Introduceți portul",
+      "username": "Nume de utilizator",
+      "password": "Parolă",
+      "hint": "Opțional. Adăugați propriul proxy pentru a direcționa automatizarea acestui cont prin el — util dacă doriți protecție suplimentară împotriva blocărilor bazate pe IP. Lăsați-l dezactivat și contul se conectează direct; aceasta este valoarea implicită normală."
+    },
+    "marketplace": {
+      "label": "Piață",
+      "usOnlyNote": "În prezent este acceptată doar piața Statelor Unite (amazon.com).",
+      "AMAZON_US": "Statele Unite (amazon.com)",
+      "readOnlyHint": "Piața nu poate fi modificată după crearea contului."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Setați un total maxim al comenzii pentru a activa îndeplinirea automată pe acest cont.",
+      "proxyHostPortRequired": "Introduceți o gazdă și un port pentru a folosi un proxy pentru acest cont.",
+      "unsupportedMarketplace": "Această piață Amazon nu este încă disponibilă.",
+      "twoFactorSecretRequired": "Adăugați cheia secretă a aplicației de autentificare (2FA) a contului. Amazon cere un cod de verificare la aproape fiecare autentificare automată, iar aceasta este singura la care putem răspunde în locul dvs.",
+      "twoFactorSecretInvalid": "Aceasta nu pare a fi o cheie secretă pentru aplicația de autentificare. Lipiți cheia de configurare din setările aplicației de autentificare Amazon (litere A–Z și cifre 2–7), nu un cod de 6 cifre."
+    }
+  }
+}

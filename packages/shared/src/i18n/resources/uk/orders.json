@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Замовлення",
+      "subtitle": "Замовлень: {{count}}"
+    },
+    "overview": {
+      "viewAll": "Переглянути всі",
+      "emptyTitle": "Замовлень поки немає",
+      "emptySubtitle": "Тут з’являтимуться синхронізовані продажі eBay."
+    },
+    "carousel": {
+      "previous": "Попередня",
+      "next": "Наступна"
+    },
+    "all": {
+      "title": "Усі замовлення",
+      "subtitle": "Результатів: {{count}}",
+      "loadingTitle": "Завантаження замовлень",
+      "loadingSubtitle": "Отримуємо ваші останні замовлення eBay.",
+      "filtersTitle": "Жодне замовлення не відповідає фільтрам",
+      "filtersSubtitle": "Спробуйте розширити діапазон дат, статус або магазин.",
+      "filtersAction": "Очистити фільтри",
+      "emptyTitle": "Замовлень поки немає",
+      "emptySubtitle": "Замовлення з’являться тут автоматично після синхронізації з eBay."
+    },
+    "filters": {
+      "allStatuses": "Усі статуси",
+      "allStores": "Усі магазини",
+      "allTrackingStates": "Усі стани трекінгу",
+      "clearAll": "Очистити все",
+      "resultCount": "Результатів: {{count}}"
+    },
+    "stats": {
+      "totalSales": "Загальні продажі",
+      "netProfit": "Чистий прибуток",
+      "activeOrders": "Активні замовлення",
+      "returnRate": "Частка повернень",
+      "last24Hours": "Останні 24 години",
+      "growth": "{{value}}% порівняно з минулим місяцем",
+      "profitGrowth": "{{value}}% порівняно з минулим місяцем",
+      "decrease": "{{value}}% порівняно з минулим місяцем"
+    },
+    "actions": {
+      "search": "Шукайте замовлення, покупців або товари...",
+      "last30Days": "Останні 30 днів",
+      "export": "Експорт",
+      "convertTracking": "Конвертувати трекінг"
+    },
+    "table": {
+      "orderNumber": "№ замовлення",
+      "product": "Товар",
+      "date": "Дата",
+      "buyer": "Покупець",
+      "status": "Статус",
+      "salePrice": "Продаж",
+      "purchasePrice": "Вартість",
+      "netProfit": "Прибуток",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Завершено",
+      "shipped": "Відправлено",
+      "processing": "Обробляється",
+      "cancelled": "Скасовано",
+      "pending": "Очікує",
+      "waiting_shipment": "Очікує відправлення"
+    },
+    "fulfillmentState": {
+      "column": "Виконання на Amazon",
+      "purchased": "Куплено на Amazon",
+      "amazon_cancelled": "Amazon скасував",
+      "action_required": "Потрібна дія",
+      "in_progress": "Купується на Amazon",
+      "not_automated": "Не автоматизовано",
+      "manual": "Куплено вручну",
+      "simulated": "Тестовий запуск — без покупки",
+      "filter": {
+        "all": "Усі стани виконання"
+      },
+      "detail": {
+        "title": "Виконання на Amazon",
+        "amazonOrderId": "Замовлення Amazon",
+        "simulatedNotice": "Це тестовий запуск. Замовлення на Amazon не оформлювалося, гроші не списувалися — витрати й прибуток нижче змодельовано.",
+        "actionRequiredNotice": "Автоматизація зупинилася до покупки. Перегляньте причину й виконайте це замовлення вручну.",
+        "cancelledNotice": "Покупку на Amazon скасовано. Продаж на eBay залишається обов’язком перед покупцем — виконайте його іншим способом.",
+        "notAutomatedNotice": "Для цього замовлення автоматичне оформлення вимкнено.",
+        "attemptedAt": "Остання спроба"
+      }
+    },
+    "tracking": {
+      "tracked": "Відстежується SellerHill",
+      "untracked": "Не відстежується",
+      "problem": {
+        "wrongPageType": "Провайдер трекінгу не зміг прочитати сторінку замовлення Amazon — можливо, змінився її формат. Спробу буде повторено автоматично.",
+        "amazonSessionExpired": "Сесія Amazon, яку використовували для читання цього замовлення, завершилася, і потрібно виконати вхід знову.",
+        "trackingUrlMismatch": "Посилання на трекінг на сторінці замовлення Amazon не відповідало очікуваному. Спробу буде повторено автоматично.",
+        "needsTrackingUpload": "Очікується завантаження даних про відправлення, щоб трек-номер можна було конвертувати.",
+        "updateNotApplied": "Оновлення трекінгу ще не застосовано провайдером. Спробу буде повторено автоматично.",
+        "assignValidation": "Провайдер трекінгу відхилив дані про відправлення для цього замовлення.",
+        "shipmentException": "Провайдер трекінгу повідомив про виняток для цього відправлення.",
+        "trackingUpdateUnavailable": "Провайдер трекінгу зараз не зміг оновити це відправлення.",
+        "generic": "Виникла проблема з конвертацією трекінгу цього замовлення. Спробу буде повторено автоматично."
+      }
+    },
+    "autoFulfill": {
+      "column": "Автовиконання",
+      "status": {
+        "pending": "У черзі",
+        "running": "Виконується",
+        "placed": "Оформлено",
+        "blocked": "Заблоковано",
+        "failed": "Помилка",
+        "dry_run": "Пробний запуск",
+        "skipped": "Пропущено"
+      },
+      "reason": {
+        "no_asin": "Товар не знайдено на Amazon",
+        "captcha": "Потрібна капча",
+        "otp": "Запит MFA/OTP",
+        "login": "Вхід не вдався",
+        "out_of_stock": "Немає в наявності",
+        "address": "Проблема з адресою",
+        "payment": "Платіж відхилено",
+        "cap": "Перевищено ліміт вартості",
+        "no_confirmation": "Немає підтвердження",
+        "proxy_required": "Проксі не налаштовано",
+        "quota_exhausted": "Досягнуто місячного ліміту",
+        "cart": "Невідповідність кошика",
+        "review_unreadable": "Підсумок замовлення не читається",
+        "subscription_suspended": "Підписку призупинено",
+        "listing_over_plan_limit": "Лістинг поза лімітом тарифу",
+        "order_already_fulfilled": "Уже відправлено — купувати нічого",
+        "order_not_paid": "Очікується оплата покупцем"
+      },
+      "reasonLabel": "Причина: {{reason}}",
+      "amazonCancelledBadge": "Amazon скасував",
+      "filter": {
+        "all": "Усе автовиконання",
+        "needsAttention": "Потребують уваги"
+      }
+    },
+    "pagination": {
+      "showing": "Показано {{from}}–{{to}} із {{total}} замовлень"
+    },
+    "detail": {
+      "title": "Деталі замовлення",
+      "loadingSubtitle": "Отримуємо деталі замовлення…",
+      "notFoundTitle": "Замовлення не знайдено",
+      "notFoundSubtitle": "Це замовлення могли видалити, або у вас немає до нього доступу.",
+      "orderPlaced": "Замовлення оформлено",
+      "viewInvoice": "Переглянути рахунок",
+      "printLabels": "Друкувати етикетки",
+      "customerInfo": "Дані клієнта",
+      "buyerPayment": "Оплата покупця",
+      "ebaySummary": "Підсумок продажу на eBay",
+      "whatBuyerPaid": "Що сплатив ваш покупець",
+      "whatYouEarned": "Що ви заробили",
+      "earningsOrderTotal": "Сума замовлення",
+      "ebayCollectedFromBuyer": "eBay стягнув із покупця",
+      "ebayCollectedTax": "Податок з продажів",
+      "sellingCosts": "Витрати на продаж",
+      "itemSubtotal": "Проміжна сума за товари",
+      "shippingHandling": "Доставка та обробка",
+      "totalBeforeTax": "Сума до оподаткування",
+      "estimatedTax": "Орієнтовний податок",
+      "grandTotal": "Загальна сума",
+      "paymentMethod": "Спосіб оплати",
+      "subtotal": "Проміжна сума",
+      "shipping": "Доставка",
+      "salesTax": "Податок з продажів",
+      "orderTotal": "Сума замовлення",
+      "feesCollected": "Утримані комісії",
+      "transactionFees": "Комісії за транзакції",
+      "adFee": "Загальна комісія за рекламу",
+      "orderEarnings": "Дохід із замовлення",
+      "viewMore": "Докладніше",
+      "updateAmazon": "Ввести дані Amazon",
+      "netProfitAnalysis": "АНАЛІЗ ЧИСТОГО ПРИБУТКУ",
+      "analysisDesc": "Цей розрахунок враховує ваш реальний дохід від eBay після всіх комісій і податків платформи, мінус початкова вартість закупівлі на Amazon.",
+      "calculation": "Розрахунок",
+      "netProfitResult": "Чистий прибуток",
+      "roi": "ROI",
+      "shipTo": "Одержувач",
+      "contact": "Контакт",
+      "unknownProduct": "Невідомий товар",
+      "copyAddress": "Копіювати адресу",
+      "addressCopied": "Адресу скопійовано!",
+      "copyName": "Копіювати ім’я",
+      "copyStreet": "Копіювати вулицю",
+      "copyStreet2": "Копіювати другий рядок адреси",
+      "copyCity": "Копіювати місто",
+      "copyState": "Копіювати область",
+      "copyZip": "Копіювати поштовий індекс",
+      "copyCountry": "Копіювати країну/регіон",
+      "copied": "Скопійовано",
+      "amazonCosts": "Підсумок замовлення Amazon",
+      "purchasePrice": "Ціна закупівлі",
+      "amazonTax": "Податок Amazon",
+      "amazonShipping": "Доставка Amazon",
+      "totalAmazonCost": "Загальна вартість Amazon",
+      "amazonTracking": "Трекінг Amazon",
+      "convertedTracking": "Конвертований трекінг",
+      "amazonOrder": "Замовлення Amazon",
+      "linkAmazon": "Прив’язати замовлення Amazon",
+      "calcEarnings": "Дохід",
+      "calcPurchase": "Закупівля",
+      "calcTax": "Податок",
+      "calcShipping": "Доставка",
+      "asin": "ASIN",
+      "ebayItemId": "ID eBay",
+      "quantity": "Кількість",
+      "unit": "шт.",
+      "sku": "SKU",
+      "na": "Н/д"
+    },
+    "modal": {
+      "title": "Ввести дані замовлення Amazon",
+      "amazonUrl": "URL сторінки замовлення Amazon",
+      "trackingUrl": "URL трекінгу (необов’язково)",
+      "taxAmount": "Сума податку ($)",
+      "shippingCost": "Вартість доставки ($)",
+      "infoText": "Якщо вказати суми податку та доставки, чистий прибуток за цим замовленням буде автоматично перераховано.",
+      "save": "Зберегти дані",
+      "cancel": "Скасувати",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Орієнтовно",
+    "estimateNote": "Орієнтовний прибуток — буде остаточно визначено, коли замовлення на Amazon буде оформлено. Ґрунтується на останній відомій ціні Amazon; доставку Amazon не враховано.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Усі права захищено."
+    },
+    "errors": {
+      "notFound": "Замовлення не знайдено.",
+      "noTrackingYet": "Для цього замовлення ще немає трек-номера Amazon — його не відправлено.",
+      "conversionUnavailable": "Зараз не вдалося конвертувати трекінг. Перевірте ліміт тарифу й налаштування конвертації та спробуйте ще раз.",
+      "conversionDone": "Трекінг конвертовано.",
+      "orderNotTracked": "Це замовлення не пов’язане з жодним із ваших лістингів, тому конвертований трек-номер ніколи не вдалося б надіслати на eBay. Спершу прив’яжіть замовлення до його лістингу.",
+      "trackingAlreadyPushed": "eBay уже має оригінальний трек-номер для цього замовлення, і його не можна замінити, тому конвертація зараз не змінить того, що бачить покупець.",
+      "listingOverPlanLimit": "Лістинг цього замовлення був поза лімітом лістингів вашого тарифу на момент надходження замовлення. Для замовлень із лістингів поза лімітом не відстежується відправлення й не виконується конвертація трекінгу."
+    }
+  }
+}

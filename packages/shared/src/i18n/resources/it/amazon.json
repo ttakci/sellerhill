@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Account acquirente Amazon",
+      "subtitle": "Gestisci i tuoi account acquirente Amazon per il tracciamento degli ordini e la lettura dei prezzi",
+      "addButton": "Aggiungi un account Amazon",
+      "noAccounts": "Nessun account Amazon ancora collegato",
+      "noAccountsDescription": "Aggiungi il tuo account acquirente Amazon per tracciare automaticamente i prezzi degli ordini e lo stato di spedizione",
+      "statusActive": "Attivo",
+      "statusVerifying": "In verifica",
+      "statusInvalid": "Credenziali non valide",
+      "statusNeedsReauth": "Richiede una nuova autenticazione",
+      "statusLocked": "Bloccato",
+      "verifyButton": "Verifica",
+      "editButton": "Modifica",
+      "deleteButton": "Elimina",
+      "deleteConfirmTitle": "Elimina l'account Amazon",
+      "deleteConfirmMessage": "Vuoi davvero eliminare questo account Amazon? L'operazione non può essere annullata.",
+      "lastVerified": "Ultima verifica",
+      "lastUsed": "Ultimo utilizzo",
+      "never": "Mai",
+      "addTitle": "Aggiungi un account Amazon",
+      "editTitle": "Modifica l'account Amazon",
+      "labelField": "Nome dell'account",
+      "labelPlaceholder": "es. Amazon personale",
+      "emailField": "Email Amazon",
+      "emailPlaceholder": "tua-email@esempio.com",
+      "passwordField": "Password Amazon",
+      "passwordPlaceholder": "Inserisci la tua password Amazon",
+      "twoFactorField": "Chiave segreta 2FA",
+      "twoFactorPlaceholder": "Facoltativa - dalle impostazioni 2FA di Amazon",
+      "twoFactorInfo": "Se hai attivato la 2FA, inserisci la chiave segreta dalle impostazioni di sicurezza del tuo account Amazon",
+      "saveButton": "Salva l'account",
+      "savingButton": "Salvataggio...",
+      "verifyingButton": "Verifica in corso...",
+      "verifySuccess": "Account Amazon verificato correttamente",
+      "verifyFailed": "Impossibile verificare l'account Amazon. Controlla le credenziali.",
+      "saveSuccess": "Account Amazon salvato correttamente",
+      "deleteSuccess": "Account Amazon eliminato correttamente",
+      "errorSaving": "Impossibile salvare l'account Amazon"
+    },
+    "linking": {
+      "title": "Collega un ordine Amazon",
+      "selectAccount": "Seleziona l'account Amazon",
+      "selectAccountPlaceholder": "Scegli un account Amazon...",
+      "orderId": "ID ordine Amazon",
+      "orderIdPlaceholder": "es. 112-1234567-1234567",
+      "orderIdHelp": "Inserisci l'ID del tuo ordine Amazon (lo trovi nella cronologia ordini o nell'email di conferma)",
+      "linkButton": "Collega e leggi",
+      "linkingButton": "Collegamento...",
+      "progressLoggingIn": "Accesso ad Amazon...",
+      "progressNavigating": "Apertura della pagina dell'ordine...",
+      "progressScraping": "Lettura dei dettagli dell'ordine...",
+      "progressSaving": "Salvataggio dei dati dell'ordine...",
+      "successTitle": "Ordine Amazon collegato",
+      "successMessage": "I dettagli dell'ordine sono stati letti e collegati correttamente",
+      "errorTitle": "Impossibile collegare l'ordine",
+      "errorNoAccount": "Aggiungi prima un account Amazon",
+      "errorScraping": "Impossibile leggere i dettagli dell'ordine Amazon. Controlla l'ID dell'ordine e riprova.",
+      "errorInvalidCredentials": "Le credenziali Amazon non sono valide. Aggiorna il tuo account.",
+      "errorRateLimit": "Troppe richieste. Riprova più tardi.",
+      "costCaptureFailed": "L'ordine Amazon è stato trovato ma non è stato possibile leggere i dettagli dei costi. Il profitto resta all'ultimo valore noto.",
+      "noAccountsTitle": "Nessun account Amazon",
+      "noAccountsMessage": "Per collegare gli ordini devi prima aggiungere un account acquirente Amazon.",
+      "addAccountLink": "Aggiungi un account Amazon",
+      "noListingTitle": "Importa prima questa inserzione eBay",
+      "noListingMessage": "L'inserzione eBay di questo ordine non è stata importata, quindi l'ordine non è collegato a nessuna inserzione. Puoi comunque collegare l'ordine Amazon e ottenerne i costi reali, ma alla spedizione il numero di tracciamento non potrà essere inviato a eBay, perché eBay ha bisogno della riga articolo che un'inserzione contiene. Quell'invio non viene ritentato in seguito. Importa prima l'inserzione e questo ordine verrà collegato automaticamente.",
+      "importListingButton": "Importa l'inserzione",
+      "linkAnywayButton": "Collega comunque"
+    },
+    "tracking": {
+      "statusPending": "In sospeso",
+      "statusProcessing": "In elaborazione",
+      "statusShipped": "Spedito",
+      "statusDelivered": "Consegnato",
+      "statusCancelled": "Annullato",
+      "statusReturned": "Restituito",
+      "eBaySyncShipped": "Ordine eBay segnato come spedito",
+      "eBaySyncDelivered": "Ordine eBay segnato come consegnato"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Account",
+        "proxy": "Proxy"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Usa questo account per l'evasione automatica",
+      "autoFulfillEnabledHint": "Quando è attivo, gli ordini eBay corrispondenti vengono acquistati automaticamente tramite questo account Amazon (a rotazione con gli altri tuoi account abilitati). Anche l'interruttore generale di evasione automatica in Impostazioni del negozio deve essere attivo e qui sotto deve essere impostato un limite di spesa.",
+      "autoFulfillCapTotal": "Totale massimo dell'ordine (limite di evasione automatica)",
+      "autoFulfillCapTotalHint": "Limite di spesa per account (USD). Gli ordini oltre questo totale saltano questo account. Obbligatorio per attivare l'evasione automatica.",
+      "autoFulfillCapTotalPlaceholder": "es. 250",
+      "autoFulfillDryRun": "Prova a secco (esegui il flusso senza effettuare l'ordine)",
+      "autoFulfillDryRunHint": "Esegue l'intero flusso di checkout fino a Effettua ordine (escluso), così il totale di riepilogo può essere acquisito e mostrato per la verifica."
+    },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "stepSubtitle": "Facoltativo — instrada l'automazione di questo account attraverso un tuo proxy",
+      "enabled": "Attiva il proxy",
+      "enabledHint": "Usa un server proxy per proteggere il tuo account",
+      "connectionType": "Tipo di connessione",
+      "host": "Inserisci l'host",
+      "port": "Inserisci la porta",
+      "username": "Nome utente",
+      "password": "Password",
+      "hint": "Facoltativo. Aggiungi un tuo proxy per instradare l'automazione di questo account attraverso di esso: utile se vuoi una protezione in più contro i blocchi basati sull'IP. Lascialo disattivato e l'account si collega direttamente; è la normale impostazione predefinita."
+    },
+    "marketplace": {
+      "label": "Marketplace",
+      "usOnlyNote": "Al momento è supportato solo il marketplace degli Stati Uniti (amazon.com).",
+      "AMAZON_US": "Stati Uniti (amazon.com)",
+      "readOnlyHint": "Il marketplace non può essere modificato dopo la creazione dell'account."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Imposta un totale massimo dell'ordine per attivare l'evasione automatica su questo account.",
+      "proxyHostPortRequired": "Inserisci un host e una porta per usare un proxy per questo account.",
+      "unsupportedMarketplace": "Questo marketplace Amazon non è ancora disponibile.",
+      "twoFactorSecretRequired": "Aggiungi la chiave segreta dell'app di autenticazione (2FA) dell'account. Amazon richiede un codice di verifica quasi a ogni accesso automatico e questa è l'unica chiave a cui possiamo rispondere al posto tuo.",
+      "twoFactorSecretInvalid": "Questa non sembra una chiave segreta di un'app di autenticazione. Incolla la chiave di configurazione dalla procedura di Amazon per l'app di autenticazione (lettere A–Z e cifre 2–7), non un codice a 6 cifre."
+    }
+  }
+}

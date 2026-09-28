@@ -109,6 +109,14 @@ const LOCALE_CONFIGS = {
   ur: { locale: 'ur-PK-u-nu-latn' },
   ar: { locale: 'ar-MA-u-nu-latn' },
   az: { locale: 'az-AZ' },
+  de: { locale: 'de-DE' },
+  fr: { locale: 'fr-FR' },
+  es: { locale: 'es-MX' },
+  it: { locale: 'it-IT' },
+  ro: { locale: 'ro-RO' },
+  uk: { locale: 'uk-UA' },
+  zh: { locale: 'zh-CN' },
+  pt: { locale: 'pt-BR' },
 } as const;
 
 /**

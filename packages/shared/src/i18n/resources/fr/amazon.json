@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Comptes acheteur Amazon",
+      "subtitle": "Gérez vos comptes acheteur Amazon pour le suivi des commandes et la collecte des prix",
+      "addButton": "Ajouter un compte Amazon",
+      "noAccounts": "Aucun compte Amazon connecté pour le moment",
+      "noAccountsDescription": "Ajoutez votre compte acheteur Amazon pour suivre automatiquement les prix des commandes et l'état d'expédition",
+      "statusActive": "Actif",
+      "statusVerifying": "Vérification en cours",
+      "statusInvalid": "Identifiants invalides",
+      "statusNeedsReauth": "Nouvelle authentification requise",
+      "statusLocked": "Verrouillé",
+      "verifyButton": "Vérifier",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "deleteConfirmTitle": "Supprimer le compte Amazon",
+      "deleteConfirmMessage": "Voulez-vous vraiment supprimer ce compte Amazon ? Cette action est irréversible.",
+      "lastVerified": "Dernière vérification",
+      "lastUsed": "Dernière utilisation",
+      "never": "Jamais",
+      "addTitle": "Ajouter un compte Amazon",
+      "editTitle": "Modifier le compte Amazon",
+      "labelField": "Nom du compte",
+      "labelPlaceholder": "p. ex. Amazon personnel",
+      "emailField": "E-mail Amazon",
+      "emailPlaceholder": "votre-email@exemple.com",
+      "passwordField": "Mot de passe Amazon",
+      "passwordPlaceholder": "Saisissez votre mot de passe Amazon",
+      "twoFactorField": "Clé secrète 2FA",
+      "twoFactorPlaceholder": "Facultatif - depuis les paramètres 2FA d'Amazon",
+      "twoFactorInfo": "Si la 2FA est activée, saisissez la clé secrète issue des paramètres de sécurité de votre compte Amazon",
+      "saveButton": "Enregistrer le compte",
+      "savingButton": "Enregistrement...",
+      "verifyingButton": "Vérification...",
+      "verifySuccess": "Compte Amazon vérifié avec succès",
+      "verifyFailed": "Échec de la vérification du compte Amazon. Veuillez vérifier vos identifiants.",
+      "saveSuccess": "Compte Amazon enregistré avec succès",
+      "deleteSuccess": "Compte Amazon supprimé avec succès",
+      "errorSaving": "Échec de l'enregistrement du compte Amazon"
+    },
+    "linking": {
+      "title": "Lier une commande Amazon",
+      "selectAccount": "Sélectionner un compte Amazon",
+      "selectAccountPlaceholder": "Choisissez un compte Amazon...",
+      "orderId": "ID de commande Amazon",
+      "orderIdPlaceholder": "p. ex. 112-1234567-1234567",
+      "orderIdHelp": "Saisissez votre ID de commande Amazon (visible dans votre historique de commandes ou l'e-mail de confirmation)",
+      "linkButton": "Lier et collecter",
+      "linkingButton": "Liaison...",
+      "progressLoggingIn": "Connexion à Amazon...",
+      "progressNavigating": "Accès à la page de la commande...",
+      "progressScraping": "Collecte des détails de la commande...",
+      "progressSaving": "Enregistrement des données de la commande...",
+      "successTitle": "Commande Amazon liée",
+      "successMessage": "Les détails de la commande ont été collectés et liés avec succès",
+      "errorTitle": "Échec de la liaison de la commande",
+      "errorNoAccount": "Veuillez d'abord ajouter un compte Amazon",
+      "errorScraping": "Impossible de collecter les détails de la commande Amazon. Veuillez vérifier l'ID de commande et réessayer.",
+      "errorInvalidCredentials": "Les identifiants Amazon sont invalides. Veuillez mettre à jour votre compte.",
+      "errorRateLimit": "Trop de requêtes. Veuillez réessayer plus tard.",
+      "costCaptureFailed": "La commande Amazon a été trouvée mais le détail des coûts n'a pas pu être lu. Le profit reste à sa dernière valeur connue.",
+      "noAccountsTitle": "Aucun compte Amazon",
+      "noAccountsMessage": "Vous devez d'abord ajouter un compte acheteur Amazon pour lier des commandes.",
+      "addAccountLink": "Ajouter un compte Amazon",
+      "noListingTitle": "Importez d'abord cette annonce eBay",
+      "noListingMessage": "L'annonce eBay de cette commande n'a pas été importée, la commande n'est donc liée à aucune annonce. Vous pouvez tout de même lier la commande Amazon et obtenir ses coûts réels — mais à l'expédition, le numéro de suivi ne pourra pas être envoyé à eBay, car eBay a besoin de la ligne d'article que porte une annonce. Cet envoi n'est pas retenté par la suite. Importez d'abord l'annonce et cette commande y sera liée automatiquement.",
+      "importListingButton": "Importer l'annonce",
+      "linkAnywayButton": "Lier quand même"
+    },
+    "tracking": {
+      "statusPending": "En attente",
+      "statusProcessing": "En cours de traitement",
+      "statusShipped": "Expédiée",
+      "statusDelivered": "Livrée",
+      "statusCancelled": "Annulée",
+      "statusReturned": "Retournée",
+      "eBaySyncShipped": "Commande eBay marquée comme expédiée",
+      "eBaySyncDelivered": "Commande eBay marquée comme livrée"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Compte",
+        "proxy": "Proxy"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Utiliser ce compte pour l'exécution automatique",
+      "autoFulfillEnabledHint": "Lorsque cette option est activée, les commandes eBay correspondantes sont achetées automatiquement via ce compte Amazon (à tour de rôle avec vos autres comptes activés). L'interrupteur principal d'exécution automatique dans les paramètres de la boutique doit également être activé, et un plafond de dépense doit être défini ci-dessous.",
+      "autoFulfillCapTotal": "Total maximal de commande (plafond d'exécution automatique)",
+      "autoFulfillCapTotalHint": "Plafond de dépense par compte (USD). Les commandes dépassant ce total ignorent ce compte. Obligatoire pour activer l'exécution automatique.",
+      "autoFulfillCapTotalPlaceholder": "p. ex. 250",
+      "autoFulfillDryRun": "Simulation (exécuter le processus sans passer la commande)",
+      "autoFulfillDryRunHint": "Exécute tout le processus de paiement jusqu'à Passer la commande (exclu), afin que le total de la page de vérification puisse être relevé et présenté pour examen."
+    },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "stepSubtitle": "Facultatif — faites passer l'automatisation de ce compte par votre propre proxy",
+      "enabled": "Activer le proxy",
+      "enabledHint": "Utilisez un serveur proxy pour protéger votre compte",
+      "connectionType": "Type de connexion",
+      "host": "Saisissez l'hôte",
+      "port": "Saisissez le port",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "hint": "Facultatif. Ajoutez votre propre proxy pour y faire passer l'automatisation de ce compte — utile si vous souhaitez une protection supplémentaire contre les blocages par IP. Laissez-le désactivé et le compte se connecte directement ; c'est le comportement par défaut normal."
+    },
+    "marketplace": {
+      "label": "Place de marché",
+      "usOnlyNote": "Seule la place de marché des États-Unis (amazon.com) est prise en charge pour le moment.",
+      "AMAZON_US": "États-Unis (amazon.com)",
+      "readOnlyHint": "La place de marché ne peut pas être modifiée après la création du compte."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Définissez un total maximal de commande pour activer l'exécution automatique sur ce compte.",
+      "proxyHostPortRequired": "Saisissez un hôte et un port pour utiliser un proxy avec ce compte.",
+      "unsupportedMarketplace": "Cette place de marché Amazon n'est pas encore disponible.",
+      "twoFactorSecretRequired": "Ajoutez la clé secrète d'authentification (2FA) du compte. Amazon exige un code de vérification à presque chaque connexion automatisée, et c'est le seul que nous pouvons saisir pour vous.",
+      "twoFactorSecretInvalid": "Ceci ne ressemble pas à une clé secrète d'authentification. Collez la clé de configuration issue de l'installation de l'application d'authentification d'Amazon (lettres A–Z et chiffres 2–7), et non un code à 6 chiffres."
+    }
+  }
+}

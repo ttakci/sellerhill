@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Verwalten Sie Ihre Kontoeinstellungen und persönlichen Daten.",
+    "personalInfo": "Persönliche Daten",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "emailAddress": "E-Mail-Adresse",
+    "phone": "Telefon",
+    "bio": "Über mich",
+    "address": "Adresse",
+    "country": "Land",
+    "cityState": "Stadt/Bundesland",
+    "postalCode": "Postleitzahl",
+    "taxId": "Steuernummer",
+    "edit": "Bearbeiten",
+    "home": "Startseite",
+    "defaultJobTitle": "Teamleiter",
+    "locationNotSet": "Standort nicht angegeben",
+    "defaultBio": "Professioneller E-Commerce-Manager.",
+    "updateSuccess": "Profil erfolgreich aktualisiert.",
+    "twitter": "Twitter-URL",
+    "linkedin": "LinkedIn-URL",
+    "instagram": "Instagram-URL",
+    "deactivateAccount": "Konto deaktivieren",
+    "saveChanges": "Alle Änderungen speichern",
+    "storeOwner": "Shop-Inhaber"
+  }
+}

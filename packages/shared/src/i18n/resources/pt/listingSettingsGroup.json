@@ -1,0 +1,251 @@
+{
+  "listingSettingsGroup": {
+    "title": "Grupos de configurações de anúncios",
+    "subtitle": "Gerencie e atribua modelos de estratégia aos seus anúncios de produtos para uma otimização automatizada.",
+    "loadingDescription": "Buscando seus grupos de anúncios.",
+    "createNewGroup": "Criar novo grupo",
+    "editGroup": "Editar grupo de anúncios",
+    "backToList": "Voltar aos grupos",
+    "connectorSubtitle": "CONECTOR AMAZON → EBAY",
+    "groupDetails": "Detalhes do grupo",
+    "groupName": "Nome do grupo",
+    "groupNamePlaceholder": "ex.: Eletrônicos premium",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Digite as observações internas do grupo...",
+    "stripBrandFromTitle": "Remover a marca do título",
+    "stripBrandFromTitleInfo": "Remove automaticamente o nome da marca da Amazon do seu título no eBay. Aplica-se apenas a novos anúncios.",
+    "aiTitleEnabled": "Título assistido por IA",
+    "aiTitleEnabledInfo": "Reescreve seu título do eBay com IA e o completa com palavras-chave extras. Apenas para novos anúncios; em caso de qualquer falha, usa o seu título normal.",
+    "repricingStrategy": "Estratégia de reajuste de preços",
+    "addPriceRange": "Adicionar faixa de preço",
+    "removePriceRange": "Remover faixa de preço",
+    "minPrice": "Preço mín. ($)",
+    "maxPrice": "Preço máx. ($)",
+    "profitMargin": "Margem de lucro (%)",
+    "fixedProfit": "Lucro fixo ($)",
+    "priceRangeLabel": "Faixa de preço {{index}}",
+    "stock": "Estoque",
+    "defaultQuantity": "Quantidade padrão",
+    "fees": "Taxas",
+    "ebayFee": "Taxa do eBay",
+    "ebayFeePercent": "Taxa do eBay (%)",
+    "fixedFee": "Taxa fixa",
+    "fixedFeeAmount": "Taxa fixa ($)",
+    "tax": "Imposto",
+    "taxPercent": "Imposto (%)",
+    "templates": "Modelo",
+    "customTemplate": "Personalizado",
+    "predefinedTemplate": "Predefinido",
+    "selectTemplate": "Selecionar modelo",
+    "selectTemplatePlaceholder": "Escolha um modelo predefinido...",
+    "htmlEditor": "Editor HTML",
+    "templatePlaceholder": "Digite seu modelo HTML personalizado...",
+    "preview": "Pré-visualização",
+    "livePreview": "Pré-visualização ao vivo",
+    "editTemplate": "Editar este modelo",
+    "darkModePreview": "Pré-visualização em modo escuro",
+    "desktopView": "Visualização para computador",
+    "mobileView": "Visualização para celular",
+    "renderingPreview": "Renderizando a pré-visualização...",
+    "saveChanges": "Salvar alterações",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "deleteGroup": "Excluir grupo",
+    "confirmDelete": "Tem certeza de que deseja excluir este grupo?",
+    "confirmDeleteMessage": "Esta ação não pode ser desfeita. Os produtos que usam este grupo precisarão ser reatribuídos.",
+    "deleteSuccess": "Grupo excluído com sucesso",
+    "deleteFailed": "Falha ao excluir o grupo",
+    "productsCount_one": "{{count}} produto",
+    "productsCount_many": "{{count}} produtos",
+    "productsCount_other": "{{count}} produtos",
+    "noProducts": "Nenhum produto",
+    "statusActive": "Ativo",
+    "statusDraft": "Rascunho",
+    "statusInactive": "Inativo",
+    "card": {
+      "defaultQuantity": "Quantidade padrão",
+      "stockBuffer": "Margem de estoque",
+      "fee": "Comissão",
+      "fixedFee": "Taxa fixa",
+      "customTemplate": "Modelo personalizado"
+    },
+    "emptyState": {
+      "title": "Ainda não há grupos de anúncios",
+      "description": "Crie seu primeiro grupo para começar a organizar seus anúncios",
+      "action": "Criar novo grupo"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Loja geral",
+        "description": "Um layout de alta conversão, orientado à urgência, adequado para qualquer produto geral, com selos de confiança claros"
+      },
+      "ds-minimalist": {
+        "name": "Minimalista",
+        "description": "Layout ultralimpo, de coluna única, em preto e branco, focado apenas em especificações e confiança"
+      },
+      "ds-tech-gadgets": {
+        "name": "Gadgets de tecnologia",
+        "description": "Layout moderno, com detalhes escuros, ideal para eletrônicos, com uma tabela de especificações em destaque"
+      },
+      "ds-home-decor": {
+        "name": "Decoração para casa",
+        "description": "Layout acolhedor e estético, com cores suaves, ênfase em imagens grandes e tipografia aconchegante"
+      },
+      "ds-auto-parts": {
+        "name": "Autopeças",
+        "description": "Layout técnico de alto contraste, com avisos claros de compatibilidade e visual robusto"
+      },
+      "ds-apparel-fashion": {
+        "name": "Moda e vestuário",
+        "description": "Layout elegante em estilo lookbook, com destaque para tabelas de medidas e cuidados com o tecido"
+      },
+      "ds-beauty-health": {
+        "name": "Beleza e saúde",
+        "description": "Design limpo, com aparência de spa, com seções estruturadas para ingredientes e modo de uso"
+      },
+      "ds-pet-supplies": {
+        "name": "Produtos para pets",
+        "description": "Layout divertido, mas estruturado, com detalhes vibrantes, focado na segurança dos materiais e nos tamanhos"
+      },
+      "ds-fitness-sports": {
+        "name": "Fitness e esportes",
+        "description": "Layout de alta energia, com tipografia marcante, focado em durabilidade, materiais e estilo de vida ativo"
+      },
+      "ds-outdoor-survival": {
+        "name": "Aventura e sobrevivência",
+        "description": "Layout robusto, em tons terrosos, focado em durabilidade, resistência ao clima e especificações táticas"
+      },
+      "ds-toys-kids": {
+        "name": "Brinquedos infantis",
+        "description": "Layout divertido e colorido, focado em certificações de segurança e adequação à idade"
+      },
+      "ds-kitchen-dining": {
+        "name": "Cozinha e mesa",
+        "description": "Layout limpo, em estilo de livro de receitas, focado na segurança dos materiais e nas dimensões"
+      }
+    },
+    "validation": {
+      "nameRequired": "O nome do grupo é obrigatório",
+      "nameMinLength": "O nome do grupo deve ter pelo menos 3 caracteres",
+      "nameMaxLength": "O nome do grupo não deve exceder 100 caracteres",
+      "minPrice": "O preço mínimo deve ser maior que 0",
+      "maxPrice": "O preço máximo deve ser maior que 0",
+      "maxPriceGreaterThanMin": "O preço máximo deve ser maior que o preço mínimo",
+      "profitRequired": "É necessário informar a margem de lucro ou o lucro fixo",
+      "profitMarginRange": "A margem de lucro deve estar entre 0 e 100",
+      "fixedProfitMin": "O lucro fixo deve ser 0 ou maior",
+      "minQuantity": "A quantidade deve ser de pelo menos 1",
+      "maxQuantity": "A quantidade não deve exceder 9999",
+      "maxFeePercent": "O percentual da taxa não pode exceder 100%",
+      "minFeePercent": "O percentual da taxa deve ser 0 ou maior",
+      "minFixedFee": "A taxa fixa deve ser 0 ou maior",
+      "invalidNumber": "Digite um número válido sem zero à esquerda (por exemplo, 0.4, não 04)",
+      "templateRequired": "O conteúdo do modelo é obrigatório",
+      "templateMinLength": "O modelo deve ter pelo menos 10 caracteres",
+      "predefinedTemplateRequired": "Selecione um modelo predefinido",
+      "minOnePriceRange": "É necessária pelo menos uma faixa de preço",
+      "maxPriceRanges": "São permitidas no máximo 10 faixas de preço",
+      "overlappingPriceRanges": "As faixas de preço não podem se sobrepor",
+      "minStockBuffer": "A margem de estoque deve ser 0 ou maior"
+    },
+    "errors": {
+      "loadFailed": "Falha ao carregar os grupos de anúncios",
+      "saveFailed": "Falha ao salvar as alterações",
+      "createFailed": "Falha ao criar o grupo",
+      "updateFailed": "Falha ao atualizar o grupo",
+      "deleteFailed": "Falha ao excluir o grupo",
+      "templateLoadFailed": "Falha ao carregar os modelos predefinidos",
+      "unauthorized": "Você não tem permissão para realizar esta ação",
+      "notFound": "Grupo de anúncios não encontrado",
+      "networkError": "Erro de rede. Verifique sua conexão.",
+      "unknownError": "Ocorreu um erro inesperado"
+    },
+    "success": {
+      "created": "Grupo de anúncios criado com sucesso",
+      "updated": "Grupo de anúncios atualizado com sucesso",
+      "deleted": "Grupo de anúncios excluído com sucesso",
+      "saved": "Alterações salvas com sucesso"
+    },
+    "tooltips": {
+      "editGroup": "Editar grupo",
+      "deleteGroup": "Excluir grupo",
+      "addPriceRange": "Adicionar outra faixa de preço",
+      "removePriceRange": "Remover esta faixa de preço",
+      "toggleDarkMode": "Alternar a pré-visualização em modo escuro",
+      "switchToDesktop": "Mudar para a visualização de computador",
+      "switchToMobile": "Mudar para a visualização de celular",
+      "copyTemplate": "Copiar o HTML do modelo",
+      "resetTemplate": "Restaurar o modelo padrão"
+    },
+    "help": {
+      "repricingStrategy": "Defina várias faixas de preço com diferentes margens de lucro. Os produtos terão o preço definido de acordo com a sua faixa de custo.",
+      "profitMargin": "Lucro percentual calculado a partir do custo do produto.",
+      "fixedProfit": "Valor fixo em dólares somado ao custo do produto.",
+      "ebayFee": "Percentual da taxa de valor final do eBay (normalmente 10-15%).",
+      "fixedFee": "Taxa fixa de anúncio do eBay (normalmente $0.30).",
+      "tax": "Percentual do imposto sobre vendas para a sua localidade.",
+      "customTemplate": "Escreva seu próprio modelo HTML com estilo personalizado.",
+      "predefinedTemplate": "Escolha entre modelos com design profissional."
+    },
+    "editorTitle": "Editor de grupo de anúncios",
+    "editorDescription": "Configure as definições dos anúncios, as estratégias de preço e os modelos.",
+    "generalSettings": "Configurações gerais",
+    "pricingStrategy": "Estratégia de reajuste de preços",
+    "addRange": "Adicionar faixa",
+    "calculator": {
+      "title": "Calculadora de preços",
+      "subtitle": "Teste estas configurações — não é salvo, é apenas uma prévia.",
+      "amazonPrice": "Preço de compra na Amazon",
+      "calculate": "Calcular",
+      "resultLabel": "Preço de venda no eBay",
+      "breakdown": {
+        "amazonPrice": "Preço de compra na Amazon",
+        "tax": "Imposto da compra na Amazon ({{pct}})",
+        "trueCost": "Custo real (preço + imposto)",
+        "margin": "Margem de lucro ({{pct}})",
+        "fallbackMargin": "Nenhuma faixa correspondeu, margem de reserva ({{pct}})",
+        "fixedProfit": "Lucro fixo",
+        "netTarget": "Meta antes das taxas do eBay",
+        "ebayFee": "Taxa do eBay ({{pct}})",
+        "fixedFee": "Taxa fixa",
+        "floorApplied": "Abaixo do mínimo de $0.99 do eBay, elevado para"
+      }
+    },
+    "feesAndTaxes": "Taxas e impostos",
+    "amazonTaxRateNote": "O cálculo do seu preço considera automaticamente o imposto estimado que você paga ao comprar na Amazon. Defina essa alíquota em Configuração da loja → Alíquota de imposto sobre vendas da Amazon.",
+    "stockControl": "Controle de estoque",
+    "ebayStockQuantity": "Estoque no eBay",
+    "stockBuffer": "Margem de estoque",
+    "stockBufferDescription": "Sua quantidade no eBay é o estoque da Amazon menos esta margem (nunca abaixo de 0), limitada ao valor de Estoque no eBay.",
+    "htmlTemplate": "Modelo HTML",
+    "custom": "Personalizado",
+    "predefined": "Predefinido",
+    "activeTemplate": "Modelo ativo",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "FORMATO EBAY",
+    "sample": {
+      "productTitle": "Fones de ouvido sem fio, cancelamento ativo de ruído, bateria de 40 h",
+      "productDescription": "Cancelamento ativo de ruído híbrido, estojo de carregamento de 40 horas e modo de jogo de baixa latência, em fones compactos para viagens, trabalho e treinos.",
+      "productSpecs": "<ul><li>Cancelamento ativo de ruído</li><li>Bateria de 40 horas</li><li>Compatibilidade Bluetooth universal</li><li>Microfone integrado</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Deduções"
+    },
+    "copyright": "© {{year}} Plataforma SellerHill. Todos os direitos reservados.",
+    "keywords": {
+      "title": "Palavras-chave disponíveis",
+      "hint": "Escreva-as entre chaves duplas; elas são substituídas pelos dados do produto quando o anúncio é criado.",
+      "items": {
+        "title": "Título do produto",
+        "product_description": "Descrição do produto",
+        "feature_bullets": "Lista de características",
+        "product_details": "Lista de especificações",
+        "main_image": "URL da imagem principal do produto",
+        "brand": "Marca",
+        "manufacturer": "Fabricante",
+        "category": "Categoria do produto"
+      }
+    }
+  }
+}

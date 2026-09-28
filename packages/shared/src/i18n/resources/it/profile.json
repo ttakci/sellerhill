@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Profilo",
+    "subtitle": "Gestisci le impostazioni dell'account e le tue informazioni personali.",
+    "personalInfo": "Informazioni personali",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "emailAddress": "Indirizzo email",
+    "phone": "Telefono",
+    "bio": "Biografia",
+    "address": "Indirizzo",
+    "country": "Paese",
+    "cityState": "Città/Regione",
+    "postalCode": "CAP",
+    "taxId": "Partita IVA / Codice fiscale",
+    "edit": "Modifica",
+    "home": "Home",
+    "defaultJobTitle": "Responsabile del team",
+    "locationNotSet": "Posizione non impostata",
+    "defaultBio": "Responsabile e-commerce professionale.",
+    "updateSuccess": "Profilo aggiornato correttamente.",
+    "twitter": "URL di Twitter",
+    "linkedin": "URL di LinkedIn",
+    "instagram": "URL di Instagram",
+    "deactivateAccount": "Disattiva l'account",
+    "saveChanges": "Salva tutte le modifiche",
+    "storeOwner": "Titolare del negozio"
+  }
+}

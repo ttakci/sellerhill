@@ -41,9 +41,9 @@ const SECTION_Y_SM = '3.5rem';
  * that sets its own type.
  */
 const FONT_HEADING =
-  "'Plus Jakarta Sans', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  "'Plus Jakarta Sans', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 const FONT_BODY =
-  "'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  "'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 /** Sellerboard-matched type scale (px, as rem @ 16px root). */
 const TYPE = {

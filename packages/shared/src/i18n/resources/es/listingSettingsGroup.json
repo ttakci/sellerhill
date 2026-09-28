@@ -1,0 +1,251 @@
+{
+  "listingSettingsGroup": {
+    "title": "Grupos de ajustes de publicación",
+    "subtitle": "Administra y asigna plantillas de estrategia a tus publicaciones de productos para una optimización automática.",
+    "loadingDescription": "Obteniendo tus grupos de publicaciones.",
+    "createNewGroup": "Crear grupo nuevo",
+    "editGroup": "Editar grupo de publicaciones",
+    "backToList": "Volver a los grupos",
+    "connectorSubtitle": "CONECTOR DE AMAZON A EBAY",
+    "groupDetails": "Detalles del grupo",
+    "groupName": "Nombre del grupo",
+    "groupNamePlaceholder": "p. ej., Electrónica premium",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Ingresa notas internas del grupo...",
+    "stripBrandFromTitle": "Quitar la marca del título",
+    "stripBrandFromTitleInfo": "Elimina automáticamente el nombre de la marca de Amazon de tu título de eBay. Solo se aplica a las publicaciones nuevas.",
+    "aiTitleEnabled": "Título asistido por IA",
+    "aiTitleEnabledInfo": "Reescribe tu título de eBay con IA y lo completa con palabras clave adicionales. Solo para publicaciones nuevas; si algo falla, se usa tu título normal.",
+    "repricingStrategy": "Estrategia de repricing",
+    "addPriceRange": "Agregar rango de precios",
+    "removePriceRange": "Quitar rango de precios",
+    "minPrice": "Precio mín. ($)",
+    "maxPrice": "Precio máx. ($)",
+    "profitMargin": "Margen de ganancia (%)",
+    "fixedProfit": "Ganancia fija ($)",
+    "priceRangeLabel": "Rango de precios {{index}}",
+    "stock": "Stock",
+    "defaultQuantity": "Cantidad predeterminada",
+    "fees": "Comisiones",
+    "ebayFee": "Comisión de eBay",
+    "ebayFeePercent": "Comisión de eBay (%)",
+    "fixedFee": "Comisión fija",
+    "fixedFeeAmount": "Comisión fija ($)",
+    "tax": "Impuesto",
+    "taxPercent": "Impuesto (%)",
+    "templates": "Plantilla",
+    "customTemplate": "Personalizada",
+    "predefinedTemplate": "Predefinida",
+    "selectTemplate": "Seleccionar plantilla",
+    "selectTemplatePlaceholder": "Elige una plantilla predefinida...",
+    "htmlEditor": "Editor HTML",
+    "templatePlaceholder": "Ingresa tu plantilla HTML personalizada...",
+    "preview": "Vista previa",
+    "livePreview": "Vista previa en vivo",
+    "editTemplate": "Editar esta plantilla",
+    "darkModePreview": "Vista previa en modo oscuro",
+    "desktopView": "Vista de escritorio",
+    "mobileView": "Vista móvil",
+    "renderingPreview": "Generando la vista previa...",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "deleteGroup": "Eliminar grupo",
+    "confirmDelete": "¿Seguro que quieres eliminar este grupo?",
+    "confirmDeleteMessage": "Esta acción no se puede deshacer. Los productos que usen este grupo deberán reasignarse.",
+    "deleteSuccess": "El grupo se eliminó correctamente",
+    "deleteFailed": "No se pudo eliminar el grupo",
+    "productsCount_one": "{{count}} producto",
+    "productsCount_many": "{{count}} productos",
+    "productsCount_other": "{{count}} productos",
+    "noProducts": "Sin productos",
+    "statusActive": "Activo",
+    "statusDraft": "Borrador",
+    "statusInactive": "Inactivo",
+    "card": {
+      "defaultQuantity": "Cantidad predeterminada",
+      "stockBuffer": "Colchón de stock",
+      "fee": "Comisión",
+      "fixedFee": "Comisión fija",
+      "customTemplate": "Plantilla personalizada"
+    },
+    "emptyState": {
+      "title": "Aún no hay grupos de publicaciones",
+      "description": "Crea tu primer grupo para empezar a organizar tus publicaciones",
+      "action": "Crear grupo nuevo"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Tienda general",
+        "description": "Un diseño de alta conversión, orientado a la urgencia, apto para cualquier producto general y con insignias de confianza claras"
+      },
+      "ds-minimalist": {
+        "name": "Minimalista",
+        "description": "Diseño ultralimpio, de una sola columna y en blanco y negro, centrado únicamente en las especificaciones y la confianza"
+      },
+      "ds-tech-gadgets": {
+        "name": "Tecnología",
+        "description": "Diseño moderno con acentos oscuros, ideal para electrónica, con una tabla de especificaciones destacada"
+      },
+      "ds-home-decor": {
+        "name": "Hogar y decoración",
+        "description": "Diseño cálido y estético con colores suaves, gran protagonismo de la imagen y una tipografía acogedora"
+      },
+      "ds-auto-parts": {
+        "name": "Autopartes",
+        "description": "Diseño técnico de alto contraste con advertencias claras de compatibilidad y un estilo robusto"
+      },
+      "ds-apparel-fashion": {
+        "name": "Ropa y moda",
+        "description": "Diseño elegante al estilo lookbook, que destaca las tablas de tallas y el cuidado de las telas"
+      },
+      "ds-beauty-health": {
+        "name": "Belleza y salud",
+        "description": "Diseño limpio, de estilo spa, con secciones estructuradas para ingredientes y modo de uso"
+      },
+      "ds-pet-supplies": {
+        "name": "Mascotas",
+        "description": "Diseño divertido pero estructurado, con acentos brillantes, centrado en la seguridad de los materiales y las tallas"
+      },
+      "ds-fitness-sports": {
+        "name": "Deportes y fitness",
+        "description": "Diseño lleno de energía, con tipografía marcada, centrado en la durabilidad, los materiales y un estilo de vida activo"
+      },
+      "ds-outdoor-survival": {
+        "name": "Aire libre y supervivencia",
+        "description": "Diseño robusto y de tonos tierra, centrado en la durabilidad, la resistencia a la intemperie y las especificaciones tácticas"
+      },
+      "ds-toys-kids": {
+        "name": "Juguetes infantiles",
+        "description": "Diseño divertido y colorido, centrado en las certificaciones de seguridad y la idoneidad por edad"
+      },
+      "ds-kitchen-dining": {
+        "name": "Cocina y comedor",
+        "description": "Diseño limpio, al estilo de un libro de recetas, centrado en la seguridad de los materiales y las dimensiones"
+      }
+    },
+    "validation": {
+      "nameRequired": "El nombre del grupo es obligatorio",
+      "nameMinLength": "El nombre del grupo debe tener al menos 3 caracteres",
+      "nameMaxLength": "El nombre del grupo no debe superar los 100 caracteres",
+      "minPrice": "El precio mínimo debe ser mayor que 0",
+      "maxPrice": "El precio máximo debe ser mayor que 0",
+      "maxPriceGreaterThanMin": "El precio máximo debe ser mayor que el precio mínimo",
+      "profitRequired": "Se requiere el margen de ganancia o la ganancia fija",
+      "profitMarginRange": "El margen de ganancia debe estar entre 0 y 100",
+      "fixedProfitMin": "La ganancia fija debe ser 0 o mayor",
+      "minQuantity": "La cantidad debe ser al menos 1",
+      "maxQuantity": "La cantidad no debe superar 9999",
+      "maxFeePercent": "El porcentaje de comisión no puede superar el 100%",
+      "minFeePercent": "El porcentaje de comisión debe ser 0 o mayor",
+      "minFixedFee": "La comisión fija debe ser 0 o mayor",
+      "invalidNumber": "Ingresa un número válido sin cero inicial (por ejemplo 0.4, no 04)",
+      "templateRequired": "El contenido de la plantilla es obligatorio",
+      "templateMinLength": "La plantilla debe tener al menos 10 caracteres",
+      "predefinedTemplateRequired": "Selecciona una plantilla predefinida",
+      "minOnePriceRange": "Se requiere al menos un rango de precios",
+      "maxPriceRanges": "Se permiten como máximo 10 rangos de precios",
+      "overlappingPriceRanges": "Los rangos de precios no pueden superponerse",
+      "minStockBuffer": "El colchón de stock debe ser 0 o mayor"
+    },
+    "errors": {
+      "loadFailed": "No se pudieron cargar los grupos de publicaciones",
+      "saveFailed": "No se pudieron guardar los cambios",
+      "createFailed": "No se pudo crear el grupo",
+      "updateFailed": "No se pudo actualizar el grupo",
+      "deleteFailed": "No se pudo eliminar el grupo",
+      "templateLoadFailed": "No se pudieron cargar las plantillas predefinidas",
+      "unauthorized": "No tienes permiso para realizar esta acción",
+      "notFound": "Grupo de publicaciones no encontrado",
+      "networkError": "Error de red. Revisa tu conexión.",
+      "unknownError": "Ocurrió un error inesperado"
+    },
+    "success": {
+      "created": "El grupo de publicaciones se creó correctamente",
+      "updated": "El grupo de publicaciones se actualizó correctamente",
+      "deleted": "El grupo de publicaciones se eliminó correctamente",
+      "saved": "Los cambios se guardaron correctamente"
+    },
+    "tooltips": {
+      "editGroup": "Editar grupo",
+      "deleteGroup": "Eliminar grupo",
+      "addPriceRange": "Agregar otro rango de precios",
+      "removePriceRange": "Quitar este rango de precios",
+      "toggleDarkMode": "Alternar la vista previa en modo oscuro",
+      "switchToDesktop": "Cambiar a la vista de escritorio",
+      "switchToMobile": "Cambiar a la vista móvil",
+      "copyTemplate": "Copiar el HTML de la plantilla",
+      "resetTemplate": "Restablecer la plantilla predeterminada"
+    },
+    "help": {
+      "repricingStrategy": "Define varios rangos de precios con distintos márgenes de ganancia. Los productos se fijarán según su rango de costo.",
+      "profitMargin": "Ganancia porcentual calculada sobre el costo del producto.",
+      "fixedProfit": "Importe fijo en dólares que se suma al costo del producto.",
+      "ebayFee": "Porcentaje de la comisión por valor final de eBay (normalmente 10-15%).",
+      "fixedFee": "Comisión fija por publicación de eBay (normalmente $0.30).",
+      "tax": "Porcentaje del impuesto sobre las ventas de tu ubicación.",
+      "customTemplate": "Escribe tu propia plantilla HTML con estilos personalizados.",
+      "predefinedTemplate": "Elige entre plantillas diseñadas profesionalmente."
+    },
+    "editorTitle": "Editor del grupo de publicaciones",
+    "editorDescription": "Configura los ajustes de tus publicaciones, las estrategias de precios y las plantillas.",
+    "generalSettings": "Ajustes generales",
+    "pricingStrategy": "Estrategia de repricing",
+    "addRange": "Agregar rango",
+    "calculator": {
+      "title": "Calculadora de precios",
+      "subtitle": "Prueba estos ajustes: no se guarda nada, es solo una vista previa.",
+      "amazonPrice": "Precio de compra en Amazon",
+      "calculate": "Calcular",
+      "resultLabel": "Precio de publicación en eBay",
+      "breakdown": {
+        "amazonPrice": "Precio de compra en Amazon",
+        "tax": "Impuesto de la compra en Amazon ({{pct}})",
+        "trueCost": "Costo real (precio + impuesto)",
+        "margin": "Margen de ganancia ({{pct}})",
+        "fallbackMargin": "Ningún rango coincidió, margen de respaldo ({{pct}})",
+        "fixedProfit": "Ganancia fija",
+        "netTarget": "Objetivo antes de las comisiones de eBay",
+        "ebayFee": "Comisión de eBay ({{pct}})",
+        "fixedFee": "Comisión fija",
+        "floorApplied": "Por debajo del mínimo de $0.99 de eBay, se elevó a"
+      }
+    },
+    "feesAndTaxes": "Comisiones e impuestos",
+    "amazonTaxRateNote": "El cálculo de tu precio tiene en cuenta automáticamente el impuesto estimado que pagas al comprar en Amazon. Define esta tasa en Ajustes de la tienda → Tasa de impuesto sobre las ventas de Amazon.",
+    "stockControl": "Control de stock",
+    "ebayStockQuantity": "Stock de eBay",
+    "stockBuffer": "Colchón de stock",
+    "stockBufferDescription": "Tu cantidad en eBay es el stock de Amazon menos este colchón (nunca menos de 0), limitada al valor de Stock de eBay.",
+    "htmlTemplate": "Plantilla HTML",
+    "custom": "Personalizada",
+    "predefined": "Predefinida",
+    "activeTemplate": "Plantilla activa",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "FORMATO EBAY",
+    "sample": {
+      "productTitle": "Auriculares inalámbricos, cancelación activa de ruido, batería de 40 h",
+      "productDescription": "Cancelación activa de ruido híbrida, un estuche de carga de 40 horas y un modo de juego de baja latencia, en unos auriculares compactos para viajes, trabajo y entrenamiento.",
+      "productSpecs": "<ul><li>Cancelación activa de ruido</li><li>40 horas de duración de batería</li><li>Compatibilidad universal con Bluetooth</li><li>Micrófono integrado</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Deducciones"
+    },
+    "copyright": "© {{year}} SellerHill Platform. Todos los derechos reservados.",
+    "keywords": {
+      "title": "Palabras clave disponibles",
+      "hint": "Escríbelas entre dobles llaves; se reemplazan por los datos del producto cuando se crea la publicación.",
+      "items": {
+        "title": "Título del producto",
+        "product_description": "Descripción del producto",
+        "feature_bullets": "Lista de características",
+        "product_details": "Lista de especificaciones",
+        "main_image": "URL de la imagen principal del producto",
+        "brand": "Marca",
+        "manufacturer": "Fabricante",
+        "category": "Categoría del producto"
+      }
+    }
+  }
+}

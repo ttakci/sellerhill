@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "Vendas, lucro e desempenho dos anúncios",
+    "greeting": "Olá, {{name}}",
+    "selectStore": "Selecionar loja",
+    "allStores": "Todas as lojas",
+    "noData": "Ainda sem dados",
+    "backToDashboard": "Voltar ao painel",
+    "tabs": {
+      "cards": "Cartões",
+      "chart": "Gráfico",
+      "pnl": "DRE"
+    },
+    "today": "Hoje",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mês",
+    "thisYear": "Este ano",
+    "metrics": {
+      "sales": "Vendas",
+      "units": "Unidades",
+      "orders": "Pedidos",
+      "ordersUnits": "Pedidos / Unidades",
+      "refunds": "Reembolsos",
+      "refundRate": "Taxa de reembolso",
+      "grossProfit": "Lucro bruto",
+      "netProfit": "Lucro líquido",
+      "estimatedPayout": "Repasse est.",
+      "margin": "Margem",
+      "roi": "ROI",
+      "avgOrderValue": "Pedido médio",
+      "costOfGoods": "Custo do produto",
+      "transactionFees": "Taxas de transação",
+      "adFees": "Taxas de anúncios",
+      "amazonShipping": "Frete Amazon",
+      "amazonTax": "Imposto Amazon",
+      "revenueUncosted": "Receita sem custo"
+    },
+    "card": {
+      "showMore": "Mais detalhes",
+      "showLess": "Menos detalhes",
+      "activeHint": "Filtrando as listas abaixo"
+    },
+    "listingsSection": "Anúncios",
+    "ordersSection": "Pedidos",
+    "listingsCount": "{{count}} com vendas",
+    "ordersCount": "{{count}} pedidos",
+    "viewAllListings": "Ver todos",
+    "viewAllOrders": "Ver todos",
+    "listingsEmptyTitle": "Nenhum anúncio com vendas",
+    "listingsEmptySubtitle": "Os anúncios que receberam pedidos no período selecionado aparecem aqui.",
+    "ordersEmptyTitle": "Nenhum pedido neste período",
+    "ordersEmptySubtitle": "Os pedidos do período selecionado aparecerão aqui assim que as vendas chegarem.",
+    "chart": {
+      "title": "Desempenho",
+      "subtitle": "Lucro líquido em relação ao volume de vendas",
+      "summary": "Resumo do período",
+      "granularity": {
+        "day": "30 dias",
+        "week": "12 semanas",
+        "month": "12 meses"
+      },
+      "series": {
+        "netProfit": "Lucro líquido",
+        "sales": "Vendas",
+        "units": "Unidades",
+        "refunds": "Reembolsos"
+      }
+    },
+    "pnl": {
+      "title": "Lucros e perdas",
+      "subtitle": "Detalhamento mês a mês dos últimos 12 meses",
+      "parameter": "Métrica / Período",
+      "currentPeriod": "Período atual",
+      "heatmap": "Mapa de calor",
+      "export": "Baixar CSV"
+    },
+    "groups": {
+      "revenue": "Receita",
+      "costs": "Custos",
+      "profit": "Lucro",
+      "ratios": "Indicadores"
+    },
+    "profit": {
+      "confirmedLabel": "Confirmado",
+      "confirmedTooltip": "Lucro dos pedidos cujos custos reais da Amazon foram capturados. Um custo desconhecido nunca é contado como zero.",
+      "estimatedLabel": "Estimado",
+      "estimatedTooltip": "Pedidos que aguardam o atendimento pela Amazon usam um custo estimado (imposto da Amazon na alíquota configurada de {{rate}}%).",
+      "uncostedLabel": "Receita sem custo",
+      "uncostedTooltip": "Vendas cujo custo na Amazon ainda não foi apurado — apenas receita, sem lucro implícito."
+    }
+  }
+}

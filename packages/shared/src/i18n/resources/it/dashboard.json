@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Pannello",
+    "subtitle": "Vendite, profitto e rendimento delle inserzioni",
+    "greeting": "Ciao, {{name}}",
+    "selectStore": "Seleziona il negozio",
+    "allStores": "Tutti i negozi",
+    "noData": "Ancora nessun dato",
+    "backToDashboard": "Torna al pannello",
+    "tabs": {
+      "cards": "Schede",
+      "chart": "Grafico",
+      "pnl": "Conto economico"
+    },
+    "today": "Oggi",
+    "thisWeek": "Questa settimana",
+    "thisMonth": "Questo mese",
+    "thisYear": "Quest'anno",
+    "metrics": {
+      "sales": "Vendite",
+      "units": "Unità",
+      "orders": "Ordini",
+      "ordersUnits": "Ordini / Unità",
+      "refunds": "Rimborsi",
+      "refundRate": "Tasso di rimborso",
+      "grossProfit": "Profitto lordo",
+      "netProfit": "Profitto netto",
+      "estimatedPayout": "Pagamento stimato",
+      "margin": "Margine",
+      "roi": "ROI",
+      "avgOrderValue": "Ordine medio",
+      "costOfGoods": "Costo del prodotto",
+      "transactionFees": "Commissioni di transazione",
+      "adFees": "Commissioni pubblicitarie",
+      "amazonShipping": "Spedizione Amazon",
+      "amazonTax": "Imposte Amazon",
+      "revenueUncosted": "Ricavi senza costo"
+    },
+    "card": {
+      "showMore": "Più dettagli",
+      "showLess": "Meno dettagli",
+      "activeHint": "Filtra gli elenchi qui sotto"
+    },
+    "listingsSection": "Inserzioni",
+    "ordersSection": "Ordini",
+    "listingsCount": "{{count}} con vendite",
+    "ordersCount": "{{count}} ordini",
+    "viewAllListings": "Vedi tutte",
+    "viewAllOrders": "Vedi tutti",
+    "listingsEmptyTitle": "Nessuna inserzione con vendite",
+    "listingsEmptySubtitle": "Le inserzioni che hanno ricevuto ordini nel periodo selezionato compaiono qui.",
+    "ordersEmptyTitle": "Nessun ordine in questo periodo",
+    "ordersEmptySubtitle": "Gli ordini del periodo selezionato compariranno qui quando arriveranno le vendite.",
+    "chart": {
+      "title": "Rendimento",
+      "subtitle": "Profitto netto rispetto al volume di vendite",
+      "summary": "Riepilogo del periodo",
+      "granularity": {
+        "day": "30 giorni",
+        "week": "12 settimane",
+        "month": "12 mesi"
+      },
+      "series": {
+        "netProfit": "Profitto netto",
+        "sales": "Vendite",
+        "units": "Unità",
+        "refunds": "Rimborsi"
+      }
+    },
+    "pnl": {
+      "title": "Profitti e perdite",
+      "subtitle": "Dettaglio mese per mese degli ultimi 12 mesi",
+      "parameter": "Metrica / Periodo",
+      "currentPeriod": "Periodo attuale",
+      "heatmap": "Mappa di calore",
+      "export": "Scarica il CSV"
+    },
+    "groups": {
+      "revenue": "Ricavi",
+      "costs": "Costi",
+      "profit": "Profitto",
+      "ratios": "Indici"
+    },
+    "profit": {
+      "confirmedLabel": "Confermato",
+      "confirmedTooltip": "Profitto degli ordini di cui sono stati acquisiti i costi Amazon reali. Un costo sconosciuto non viene mai conteggiato come zero.",
+      "estimatedLabel": "Stimato",
+      "estimatedTooltip": "Gli ordini in attesa dell'evasione Amazon usano un costo stimato (imposte Amazon all'aliquota configurata del {{rate}}%).",
+      "uncostedLabel": "Ricavi senza costo",
+      "uncostedTooltip": "Vendite il cui costo Amazon non è ancora stato determinato: solo ricavi, nessun profitto implicito."
+    }
+  }
+}

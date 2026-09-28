@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "Conectați magazinul eBay",
+      "subtitle": "Legați-vă contul de vânzător eBay pentru a gestiona anunțurile și comenzile",
+      "connectButton": "Conectează contul eBay",
+      "connectingButton": "Se conectează...",
+      "marketplaceLabel": "Piață",
+      "marketplaceUS": "Statele Unite (eBay.com)",
+      "marketplaceUK": "Regatul Unit (eBay.co.uk)",
+      "marketplaceDE": "Germania (eBay.de)",
+      "marketplaceFR": "Franța (eBay.fr)",
+      "marketplaceIT": "Italia (eBay.it)",
+      "marketplaceES": "Spania (eBay.es)",
+      "marketplaceUsOnlyNote": "În prezent este acceptată doar piața Statelor Unite (eBay.com).",
+      "successMessage": "Contul eBay a fost conectat cu succes!",
+      "errorMessage": "Contul eBay nu a putut fi conectat",
+      "alreadyConnected": "Acest cont eBay este deja conectat"
+    },
+    "accounts": {
+      "title": "Conturi eBay conectate",
+      "loadingDescription": "Se preiau magazinele dvs. conectate.",
+      "noAccounts": "Niciun cont eBay conectat încă",
+      "statusActive": "Activ",
+      "statusRevoked": "Revocat",
+      "statusError": "Eroare",
+      "disconnectButton": "Deconectează",
+      "refreshTokenButton": "Reîmprospătează tokenul"
+    },
+    "callback": {
+      "processing": "Se procesează conexiunea eBay...",
+      "success": "Contul eBay a fost conectat cu succes! Se redirecționează către panoul de control...",
+      "error": "Contul eBay nu a putut fi conectat. Încercați din nou.",
+      "cancelled": "Conexiunea eBay a fost anulată."
+    },
+    "errors": {
+      "invalidState": "Parametru de stare invalid",
+      "authorizationFailed": "Autorizarea eBay a eșuat",
+      "tokenExchangeFailed": "Codul de autorizare nu a putut fi schimbat cu tokenuri",
+      "accountAlreadyConnected": "Acest magazin eBay este conectat la alt cont SellerHill. Autentificați-vă cu contul la care l-ați conectat; dacă nu îl puteți accesa, contactați asistența.",
+      "ebayTrialAlreadyUsed": "Acest magazin eBay și-a folosit deja încercarea gratuită. Alegeți un plan pentru a-l conecta.",
+      "noAuthorizationCode": "Nu s-a primit niciun cod de autorizare de la eBay",
+      "storeOwnedByAnotherAccount": "Acest magazin eBay este asociat unui alt cont SellerHill. Contactați asistența pentru a-l transfera.",
+      "accountNotFound": "Magazinul eBay respectiv nu a fost găsit.",
+      "identityUnavailable": "Nu am putut confirma contul dvs. eBay cu eBay. Nu s-a conectat nimic — încercați din nou peste puțin timp."
+    },
+    "onboarding": {
+      "title": "Conectați-vă magazinul eBay",
+      "header": "Configurarea pieței",
+      "description": "Pentru a începe sincronizarea articolelor, trebuie mai întâi să vă conectați magazinul eBay.",
+      "connectButton": "Cont eBay",
+      "skipButton": "Omite deocamdată",
+      "usOnlyNote": "În prezent este acceptată doar piața din SUA. Alte regiuni vor fi disponibile în curând.",
+      "brandingDescription": "Legați-vă magazinul eBay la SellerHill pentru a gestiona toate procesele de vânzare dintr-un singur loc."
+    }
+  }
+}

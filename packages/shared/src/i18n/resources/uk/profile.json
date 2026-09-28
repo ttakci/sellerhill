@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "Профіль",
+    "subtitle": "Керуйте налаштуваннями акаунта та особистими даними.",
+    "personalInfo": "Особисті дані",
+    "firstName": "Ім’я",
+    "lastName": "Прізвище",
+    "emailAddress": "Адреса електронної пошти",
+    "phone": "Телефон",
+    "bio": "Про себе",
+    "address": "Адреса",
+    "country": "Країна",
+    "cityState": "Місто / область",
+    "postalCode": "Поштовий індекс",
+    "taxId": "Податковий номер",
+    "edit": "Редагувати",
+    "home": "Головна",
+    "defaultJobTitle": "Керівник команди",
+    "locationNotSet": "Розташування не задано",
+    "defaultBio": "Професійний менеджер з електронної комерції.",
+    "updateSuccess": "Профіль успішно оновлено.",
+    "twitter": "URL Twitter",
+    "linkedin": "URL LinkedIn",
+    "instagram": "URL Instagram",
+    "deactivateAccount": "Деактивувати акаунт",
+    "saveChanges": "Зберегти всі зміни",
+    "storeOwner": "Власник магазину"
+  }
+}

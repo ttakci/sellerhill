@@ -136,6 +136,6 @@ describe('resolveGoogleLocale', () => {
   });
 
   it('defaults when neither is supported', () => {
-    expect(resolveGoogleLocale('de', 'fr-FR')).toBe('en');
+    expect(resolveGoogleLocale('ja', 'ko-KR')).toBe('en');
   });
 });
