@@ -76,6 +76,10 @@
         "emptySubtitle": "Позиції з’являються, коли завдання починає обробляти ASIN.",
         "searchPlaceholder": "Пошук за ASIN або повідомленням про помилку…",
         "resultCount": "Позицій: {{count}}",
+        "filterAll": "Усі ({{count}})",
+        "filterFailed": "З помилками ({{count}})",
+        "filterBlacklisted": "Заблоковано чорним списком ({{count}})",
+        "filterNonBlacklisted": "Інші помилки ({{count}})",
         "reason": "Причина",
         "reference": "Довідковий код",
         "itemStatus": {

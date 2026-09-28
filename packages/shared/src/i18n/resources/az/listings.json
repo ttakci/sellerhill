@@ -76,6 +76,10 @@
         "emptySubtitle": "İş ASIN-ləri emal etməyə başladıqca məhsullar görünür.",
         "searchPlaceholder": "ASIN və ya xəta mesajı üzrə axtarın…",
         "resultCount": "{{count}} məhsul",
+        "filterAll": "Hamısı ({{count}})",
+        "filterFailed": "Uğursuz ({{count}})",
+        "filterBlacklisted": "Qara siyahı səbəbindən ({{count}})",
+        "filterNonBlacklisted": "Digər səbəblərdən uğursuz ({{count}})",
         "reason": "Səbəb",
         "reference": "İstinad",
         "itemStatus": {

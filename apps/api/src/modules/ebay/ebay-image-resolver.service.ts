@@ -3,6 +3,7 @@ import { EBAY_MAX_IMAGES, isEpsImageUrl, resolveDescriptionUrl, resolveGalleryUr
 import type { PoolClient } from 'pg';
 
 import { DatabaseService } from '../../common/database/database.service';
+import { runWithConcurrency } from '../../common/utils/concurrency';
 
 import { EbayMediaService } from './ebay-media.service';
 import { EbayService } from './ebay.service';
@@ -15,6 +16,16 @@ import { EpsUploadPacer } from './eps-upload-pacer';
  * below is no longer what bounds the aggregate rate; this is.
  */
 const EPS_UPLOAD_MIN_INTERVAL_MS = 125;
+
+/**
+ * In-flight uploads per PRODUCT. The store-level pacer above still bounds the
+ * aggregate rate, so this only decides how much of that budget one product
+ * can claim at once: sequential uploads made a 7-image product pay 7 × the
+ * full round-trip (~10s of a listing's creation time) while using a fraction
+ * of the allowed rate. 4 keeps two concurrently prepared products from
+ * monopolising the pacer window.
+ */
+const EPS_UPLOADS_PER_PRODUCT = 4;
 
 /** `product_ebay_images.image_urls[N]` is the EPS URL for `sourceUrls[N]`, or `''` on a failed upload. */
 interface ProductEbayImagesRow {
@@ -37,7 +48,7 @@ export interface EbayImageResolution {
  * 429 at first-listing time.
  *
  * Re-attempting a permanently dead image on every listing is the accepted
- * cost. The uploads are sequential and fail-soft, and a permanent leak is
+ * cost. The uploads are rate-paced and fail-soft, and a permanent leak is
  * worse than a repeated cheap failure.
  */
 function hasGaps(stored: string[]): boolean {
@@ -127,27 +138,26 @@ export class EbayImageResolver {
         // images and must not be read as if it did.
         const existing = cachedAfterLock ?? [];
         const toUpload = sourceUrls.slice(0, EBAY_MAX_IMAGES);
-        const uploaded: string[] = [];
+        // POSITIONAL: entry N is the EPS URL for source N, so results are
+        // written by index, never pushed — concurrent completions finish out
+        // of order. Kept entries (uploaded on an earlier run) are never
+        // re-uploaded and never overwritten by a later failure.
+        const uploaded: string[] = toUpload.map((_, index) => existing[index] ?? '');
         let succeeded = 0;
-        // Sequential PER PRODUCT, never Promise.all — but the limit of 50
-        // POSTs/5s per user is enforced by `uploadPacer` across products: the
-        // batch worker runs several products of one store concurrently, so a
-        // per-product loop alone no longer bounds the store's aggregate rate.
-        for (const [index, source] of toUpload.entries()) {
-          const kept = existing[index];
-          if (kept) {
-            // Already uploaded on an earlier run. Never re-uploaded, and never
-            // overwritten by a later failure — a good entry only ever survives.
-            uploaded.push(kept);
-            continue;
-          }
+        // Bounded concurrency PER PRODUCT; the 50 POSTs/5s-per-user limit is
+        // enforced by `uploadPacer` across everything this store uploads, so
+        // parallelism here spends the allowed rate instead of discovering it.
+        // `runWithConcurrency` drains in-flight uploads before returning, so
+        // nothing here outlives the transaction this block runs in.
+        const gapIndexes = toUpload.map((_, index) => index).filter((index) => !existing[index]);
+        await runWithConcurrency(gapIndexes, EPS_UPLOADS_PER_PRODUCT, async (index) => {
           await this.pause(this.uploadPacer.reserve(ebayAccountId, Date.now()));
-          const epsUrl = await this.ebayMediaService.uploadFromUrl(accessToken, source);
+          const epsUrl = await this.ebayMediaService.uploadFromUrl(accessToken, toUpload[index]);
           if (epsUrl) {
             succeeded += 1;
+            uploaded[index] = epsUrl;
           }
-          uploaded.push(epsUrl ?? '');
-        }
+        });
 
         // Written only when this run actually produced something new.
         //

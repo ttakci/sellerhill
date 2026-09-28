@@ -76,6 +76,10 @@
         "emptySubtitle": "Artikel erscheinen, sobald der Auftrag mit der Verarbeitung von ASINs beginnt.",
         "searchPlaceholder": "Nach ASIN oder Fehlermeldung suchen …",
         "resultCount": "{{count}} Artikel",
+        "filterAll": "Alle ({{count}})",
+        "filterFailed": "Fehlgeschlagen ({{count}})",
+        "filterBlacklisted": "Durch Sperrliste blockiert ({{count}})",
+        "filterNonBlacklisted": "Aus anderen Gründen fehlgeschlagen ({{count}})",
         "reason": "Grund",
         "reference": "Referenz",
         "itemStatus": {

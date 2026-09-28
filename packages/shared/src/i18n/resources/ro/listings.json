@@ -76,6 +76,10 @@
         "emptySubtitle": "Articolele apar pe măsură ce sarcina începe să proceseze ASIN-urile.",
         "searchPlaceholder": "Caută după ASIN sau mesaj de eroare…",
         "resultCount": "Articole: {{count}}",
+        "filterAll": "Toate ({{count}})",
+        "filterFailed": "Eșuate ({{count}})",
+        "filterBlacklisted": "Blocate de lista neagră ({{count}})",
+        "filterNonBlacklisted": "Eșuate din alte motive ({{count}})",
         "reason": "Motiv",
         "reference": "Referință",
         "itemStatus": {

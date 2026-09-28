@@ -76,6 +76,10 @@
         "emptySubtitle": "任务开始处理 ASIN 后，项目会显示在这里。",
         "searchPlaceholder": "按 ASIN 或错误信息搜索…",
         "resultCount": "{{count}} 个项目",
+        "filterAll": "全部 ({{count}})",
+        "filterFailed": "失败 ({{count}})",
+        "filterBlacklisted": "被黑名单拦截 ({{count}})",
+        "filterNonBlacklisted": "其他原因失败 ({{count}})",
         "reason": "原因",
         "reference": "参考编号",
         "itemStatus": {

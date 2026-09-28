@@ -1368,6 +1368,14 @@ const JOB_ASINS = [
   'B0SJ8D2E6F', 'B0SJ2G9H4K', 'B0SJ5L1M8N', 'B0SJ7P3Q2R',
 ];
 
+/** Failures cycled through a demo job's failed items — includes the seller-fixable blacklist case. */
+const JOB_FAILURE_ROTATION: readonly ListingFailureCode[] = [
+  ListingFailureCode.ZERO_STOCK,
+  ListingFailureCode.BLACKLISTED_KEYWORD,
+  ListingFailureCode.INVALID_IDENTIFIER,
+  ListingFailureCode.BLACKLISTED_KEYWORD,
+];
+
 export function demoJobItems(jobId: string): ListingJobItemDto[] {
   const job = DEMO_LISTING_JOBS.find((j) => j.id === jobId);
   if (!job) {
@@ -1390,12 +1398,15 @@ export function demoJobItems(jobId: string): ListingJobItemDto[] {
       ebayItemId: !processed || failed ? undefined : `1${(255000000000 + i * 137).toString()}`,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
-      failureCode: failed
-        ? i % 2 === 0
-          ? ListingFailureCode.ZERO_STOCK
-          : ListingFailureCode.INVALID_IDENTIFIER
+      failureCode: failed ? JOB_FAILURE_ROTATION[i % JOB_FAILURE_ROTATION.length] : undefined,
+      failureDetails: failed
+        ? {
+            correlationId: `req_demo-${jobId}-${i}`,
+            ...(JOB_FAILURE_ROTATION[i % JOB_FAILURE_ROTATION.length] === ListingFailureCode.BLACKLISTED_KEYWORD
+              ? { blacklistedKeyword: 'refurbished' }
+              : {}),
+          }
         : undefined,
-      failureDetails: failed ? { correlationId: `req_demo-${jobId}-${i}` } : undefined,
     } satisfies ListingJobItemDto;
   });
 }
