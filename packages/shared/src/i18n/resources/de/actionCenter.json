@@ -1,0 +1,215 @@
+{
+  "actionCenter": {
+    "title": "Offene Aufgaben",
+    "subtitle": "Alles, was auf Sie wartet – das Dringendste zuerst.",
+    "menu": "Offene Aufgaben",
+    "refresh": "Aktualisieren",
+    "updatedAt": "Aktualisiert {{time}}",
+    "empty": {
+      "title": "Im Moment braucht nichts Ihre Aufmerksamkeit",
+      "description": "Keine blockierten Einkäufe, unterbrochenen Verbindungen oder Tariflimits. Neue Einträge erscheinen hier, sobald etwas Ihre Entscheidung erfordert."
+    },
+    "emptyFiltered": {
+      "title": "Nichts auf dieser Stufe",
+      "description": "Es gibt keine Einträge mit dieser Dringlichkeit. Wechseln Sie zurück zu „Alle“, um den Rest zu sehen."
+    },
+    "loading": {
+      "title": "Es wird geprüft, was Ihre Aufmerksamkeit braucht",
+      "description": "Ihre Bestellungen, Verbindungen, Angebote und Ihr Tarif werden geprüft."
+    },
+    "severity": {
+      "critical": "Kritisch",
+      "warning": "Warnung",
+      "info": "Empfehlung"
+    },
+    "filter": {
+      "ariaLabel": "Dringlichkeitsstufe",
+      "all": "Alle",
+      "critical": "Kritisch",
+      "warning": "Warnung",
+      "info": "Empfehlungen"
+    },
+    "summary": {
+      "critical": "{{count}} kritisch",
+      "warning": "{{count}} Warnung",
+      "info": "{{count}} Empfehlung",
+      "total_one": "{{count}} Eintrag braucht Sie",
+      "total_other": "{{count}} Einträge brauchen Sie"
+    },
+    "breakdownLabel": "Gründe",
+    "moreReasons": "+{{count}} weitere",
+    "groups": {
+      "orders": {
+        "title": "Bestellungen",
+        "subtitle": "Verkäufe, bei denen ein Käufer auf der anderen Seite wartet."
+      },
+      "connections": {
+        "title": "Verbindungen",
+        "subtitle": "Shop- und Käuferkonten, auf denen die Automatisierung läuft."
+      },
+      "listings": {
+        "title": "Angebote",
+        "subtitle": "Angebote, die aktiv sind, aber nichts einbringen."
+      },
+      "plan": {
+        "title": "Tarif und Kapazität",
+        "subtitle": "Limits, ab denen Aufträge abgelehnt werden."
+      },
+      "setup": {
+        "title": "Einrichtung",
+        "subtitle": "Grundlegende Schritte, damit SellerHill für Sie arbeitet."
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "Amazon hat einen bereits bezahlten Einkauf storniert",
+        "description_one": "{{count}} Bestellung wurde auf Amazon-Seite storniert. Der eBay-Verkauf besteht weiterhin und ist dem Käufer noch geschuldet – bestellen Sie erneut oder erstatten Sie, bevor eBay es als Mangel wertet.",
+        "description_other": "{{count}} Bestellungen wurden auf Amazon-Seite storniert. Diese eBay-Verkäufe bestehen weiterhin und sind den Käufern noch geschuldet – bestellen Sie erneut oder erstatten Sie, bevor eBay sie als Mängel wertet.",
+        "action": "Bestellungen prüfen"
+      },
+      "order_fulfillment_blocked": {
+        "title": "Automatischer Einkauf vor der Zahlung gestoppt",
+        "description_one": "{{count}} Bestellung wurde durch eine Sicherheitsprüfung gestoppt, es wurde also kein Geld bewegt. Beheben Sie den unten genannten Grund, dann kann sie durchlaufen.",
+        "description_other": "{{count}} Bestellungen wurden durch eine Sicherheitsprüfung gestoppt, es wurde also kein Geld bewegt. Beheben Sie die unten genannten Gründe, dann können sie durchlaufen.",
+        "action": "Bestellungen prüfen"
+      },
+      "order_awaiting_purchase": {
+        "title": "Verkauft, aber noch nicht bei Amazon gekauft",
+        "description_one": "{{count}} Bestellung, die älter als {{hours}} Stunden ist, hat keinen Amazon-Einkauf und keine laufende Automatisierung. Sie wird nur versendet, wenn Sie sie selbst kaufen.",
+        "description_other": "{{count}} Bestellungen, die älter als {{hours}} Stunden sind, haben keinen Amazon-Einkauf und keine laufende Automatisierung. Sie werden nur versendet, wenn Sie sie selbst kaufen.",
+        "action": "Bestellungen prüfen"
+      },
+      "order_untracked": {
+        "title": "Verkäufe aus Angeboten, die Sie nicht verfolgen",
+        "description_one": "{{count}} Bestellung der letzten {{days}} Tage stammt von einem eBay-Artikel, der nicht mit einem SellerHill-Angebot verknüpft ist, sodass Kosten und Gewinn nie berechnet werden können. Importieren Sie das Angebot, um künftige Verkäufe zu verfolgen.",
+        "description_other": "{{count}} Bestellungen der letzten {{days}} Tage stammen von eBay-Artikeln, die nicht mit SellerHill-Angeboten verknüpft sind, sodass Kosten und Gewinn nie berechnet werden können. Importieren Sie diese Angebote, um künftige Verkäufe zu verfolgen.",
+        "action": "Angebote importieren"
+      },
+      "order_tracking_problem": {
+        "title": "Problem bei der Umwandlung der Sendungsnummer",
+        "description_one": "Bei {{count}} versendeten Bestellung besteht ein offenes Problem mit dem Tracking-Anbieter. Bis es gelöst ist, sieht Ihr Käufer bei dieser Bestellung die ursprüngliche Amazon-Sendungsnummer statt einer umgewandelten.",
+        "description_other": "Bei {{count}} versendeten Bestellungen bestehen offene Probleme mit dem Tracking-Anbieter. Bis sie gelöst sind, sehen Ihre Käufer bei diesen Bestellungen die ursprünglichen Amazon-Sendungsnummern statt umgewandelter.",
+        "action": "Bestellungen ansehen"
+      },
+      "order_tracking_conversion_held": {
+        "title": "Bestellungen nicht als versendet auf eBay markiert",
+        "description_one": "{{count}} Bestellung wurde vor über {{hours}} Stunden bei Amazon versendet, ist aber auf eBay noch nicht als versendet markiert, weil ihre Sendungsnummer nicht umgewandelt werden konnte. Wir senden die ursprüngliche Amazon-Sendungsnummer nie an Ihren Käufer. Beheben Sie die Ursache, dann wird die Bestellung automatisch versendet – bis dahin droht ein Mangel wegen verspäteten Versands.",
+        "description_other": "{{count}} Bestellungen wurden vor über {{hours}} Stunden bei Amazon versendet, sind aber auf eBay noch nicht als versendet markiert, weil ihre Sendungsnummern nicht umgewandelt werden konnten. Wir senden die ursprünglichen Amazon-Sendungsnummern nie an Ihre Käufer. Beheben Sie die Ursache, dann werden sie automatisch versendet – bis dahin drohen Mängel wegen verspäteten Versands.",
+        "action": "Bestellungen ansehen"
+      },
+      "ebay_account_disconnected": {
+        "title": "Ein eBay-Shop hat seine Verbindung verloren",
+        "description_one": "{{count}} Shop ist nicht mehr autorisiert. Bestellabgleich, Preisanpassung und Veröffentlichung sind dafür gestoppt, bis Sie die Verbindung wiederherstellen.",
+        "description_other": "{{count}} Shops sind nicht mehr autorisiert. Bestellabgleich, Preisanpassung und Veröffentlichung sind dafür gestoppt, bis Sie die Verbindung wiederherstellen.",
+        "action": "Shops verwalten"
+      },
+      "amazon_account_needs_attention": {
+        "title": "Ein Amazon-Käuferkonto kann sich nicht anmelden",
+        "description_one": "Bei {{count}} Käuferkonto schlägt die Anmeldung fehl, daher kann darüber nichts gekauft werden.",
+        "description_other": "Bei {{count}} Käuferkonten schlägt die Anmeldung fehl, daher kann darüber nichts gekauft werden.",
+        "action": "Konten verwalten"
+      },
+      "listing_job_failures": {
+        "title": "Angebote, die nicht erstellt werden konnten",
+        "description_one": "{{count}} Angebot ist in den letzten {{days}} Tagen fehlgeschlagen. Der Grund zeigt Ihnen, ob Sie es selbst beheben können.",
+        "description_other": "{{count}} Angebote sind in den letzten {{days}} Tagen fehlgeschlagen. Die Gründe zeigen Ihnen, welche Sie selbst beheben können.",
+        "action": "Aufträge ansehen"
+      },
+      "listing_source_unavailable": {
+        "title": "Aktive Angebote, deren Amazon-Produkt nicht verfügbar oder nicht lesbar ist",
+        "description_one": "{{count}} aktives Angebot verweist auf ein Amazon-Produkt, das nicht verfügbar ist oder dessen Daten nicht gelesen werden konnten. Prüfen Sie das Produkt und beenden Sie das Angebot, falls es nicht mehr existiert.",
+        "description_other": "{{count}} aktive Angebote verweisen auf Amazon-Produkte, die nicht verfügbar sind oder deren Daten nicht gelesen werden konnten. Prüfen Sie die Produkte und beenden Sie die Angebote, die nicht mehr existieren.",
+        "action": "Angebote prüfen"
+      },
+      "listing_out_of_stock": {
+        "title": "Aktive Angebote mit Menge null",
+        "description_one": "{{count}} aktives Angebot wird auf eBay angezeigt, obwohl nichts zu verkaufen ist. Es bringt nichts ein, bis die Quelle wieder auf Lager ist.",
+        "description_other": "{{count}} aktive Angebote werden auf eBay angezeigt, obwohl nichts zu verkaufen ist. Sie bringen nichts ein, bis die Quelle wieder auf Lager ist.",
+        "action": "Angebote prüfen"
+      },
+      "listing_drafts_pending": {
+        "title": "Entwürfe, die nie veröffentlicht wurden",
+        "description_one": "{{count}} Entwurf ist vorbereitet und kostet Sie nichts – verkauft aber auch nichts, solange er nicht live geht.",
+        "description_other": "{{count}} Entwürfe sind vorbereitet und kosten Sie nichts – verkaufen aber auch nichts, solange sie nicht live gehen.",
+        "action": "Entwürfe ansehen"
+      },
+      "plan_listing_quota": {
+        "title": "Limit für aktive Angebote fast erreicht",
+        "description": "Sie nutzen {{used}} von {{limit}} Angebotsplätzen. Neue Angebote werden abgelehnt, sobald das Limit erreicht ist; bestehende laufen weiter.",
+        "action": "Tarif ansehen"
+      },
+      "plan_ao_quota": {
+        "title": "Monatliches Limit für automatische Bestellungen fast erreicht",
+        "description": "Sie haben in diesem Monat {{used}} von {{limit}} automatischen Bestellungen genutzt. Ist das Limit erreicht, müssen neue Bestellungen bis zum Monatswechsel von Hand gekauft werden.",
+        "action": "Tarif ansehen"
+      },
+      "plan_past_due": {
+        "title": "Ihre letzte Zahlung ist fehlgeschlagen",
+        "description": "Aktualisieren Sie Ihre Zahlungsmethode, damit die Automatisierung weiterläuft.",
+        "action": "Zahlung korrigieren"
+      },
+      "plan_trial_ending": {
+        "title": "Ihre Testphase endet bald",
+        "description_one": "Noch {{count}} Tag. Wählen Sie einen Tarif, damit Ihre Angebote und automatischen Bestellungen weiterlaufen.",
+        "description_other": "Noch {{count}} Tage. Wählen Sie einen Tarif, damit Ihre Angebote und automatischen Bestellungen weiterlaufen.",
+        "action": "Tarif wählen"
+      },
+      "setup_no_ebay_store": {
+        "title": "Verbinden Sie Ihren eBay-Shop",
+        "description": "Ohne verbundenen eBay-Shop kann in SellerHill nichts laufen – Angebote, Bestellungen und Automatisierung hängen alle davon ab. Das ist das Erste, was Sie tun sollten.",
+        "action": "eBay verbinden"
+      },
+      "setup_no_amazon_account": {
+        "title": "Noch kein Amazon-Käuferkonto",
+        "description": "Sie verkaufen, aber es gibt kein Amazon-Konto zum Einkaufen – jede Bestellung muss von Hand gekauft werden. Mit einem Konto ist die automatische Abwicklung möglich.",
+        "action": "Konto hinzufügen"
+      },
+      "setup_no_store_settings": {
+        "title": "Shop-Einstellungen noch nicht konfiguriert",
+        "description": "Ihr Versandursprung und Ihre Sperrlisten-Schlüsselwörter sind noch nicht festgelegt. Sie werden zur Kostenberechnung verwendet und verhindern, dass Angebote mit gesperrten Inhalten veröffentlicht werden.",
+        "action": "Einstellungen konfigurieren"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "Noch keine Einstellungsgruppe für Angebote",
+        "description": "Eine Einstellungsgruppe für Angebote legt Preis-, Bestands- und Preisanpassungsregeln fest – jedes Angebot braucht eine, ohne sie können Sie Ihr erstes Angebot nicht erstellen.",
+        "action": "Gruppe erstellen"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "Automatischer Einkauf ist deaktiviert",
+        "description": "Ihre Amazon-Konten sind verbunden, aber keines ist zum Einkaufen freigegeben. Aktivieren Sie es mit einem Ausgabenlimit, dann werden neue Bestellungen für Sie gekauft.",
+        "action": "Aktivieren"
+      },
+      "plan_conversion_quota": {
+        "title": "Monatliches Limit für Sendungsnummern-Umwandlungen fast erreicht",
+        "description": "Sie haben in diesem Monat {{used}} von {{limit}} Sendungsnummern-Umwandlungen genutzt. Ist das Limit erreicht, werden Bestellungen weiterhin versendet und eBay erhält weiterhin eine Sendungsnummer – es ist dann aber die ursprüngliche Amazon-Nummer, sodass Käufer Ihren Lieferanten erkennen können.",
+        "action": "Tarif ansehen"
+      },
+      "plan_suspended": {
+        "title": "Die Automatisierung ist ausgesetzt",
+        "description": "Ihr Abonnement ist nicht mehr aktiv, daher sind neue Angebote, Preis- und Bestandsaktualisierungen, der automatische Einkauf und die Umwandlung von Sendungsnummern gestoppt. Wählen Sie einen Tarif, um fortzufahren – alles startet von selbst wieder.",
+        "action": "Tarif wählen"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "Erneute Anmeldung erforderlich",
+        "invalid": "Ungültige Zugangsdaten",
+        "locked": "Von Amazon gesperrt"
+      },
+      "sourceUnavailable": {
+        "removed": "bei Amazon nicht verfügbar (Menge auf 0 gesetzt)",
+        "unreadable": "Produktdaten konnten nicht gelesen werden"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Falsche Amazon-Seite",
+        "amazon_session_expired": "Amazon-Sitzung abgelaufen",
+        "tracking_url_mismatch": "Tracking-Link stimmt nicht überein",
+        "needs_tracking_upload": "Warten auf Versanddetails",
+        "update_not_applied": "Aktualisierung noch nicht angewendet",
+        "assign_validation": "Vom Anbieter abgelehnt",
+        "shipment_exception": "Ausnahme beim Versanddienstleister",
+        "tracking_update_unavailable": "Anbieter nicht verfügbar"
+      }
+    }
+  }
+}

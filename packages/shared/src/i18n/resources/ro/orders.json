@@ -1,0 +1,245 @@
+{
+  "orders": {
+    "page": {
+      "title": "Comenzi",
+      "subtitle": "Comenzi: {{count}}"
+    },
+    "overview": {
+      "viewAll": "Vezi tot",
+      "emptyTitle": "Nicio comandă încă",
+      "emptySubtitle": "Vânzările eBay sincronizate vor apărea aici."
+    },
+    "carousel": {
+      "previous": "Anterior",
+      "next": "Următorul"
+    },
+    "all": {
+      "title": "Toate comenzile",
+      "subtitle": "Rezultate: {{count}}",
+      "loadingTitle": "Se încarcă comenzile",
+      "loadingSubtitle": "Se preiau cele mai recente comenzi eBay.",
+      "filtersTitle": "Nicio comandă nu corespunde filtrelor",
+      "filtersSubtitle": "Încercați să extindeți intervalul de date, starea sau magazinul.",
+      "filtersAction": "Șterge filtrele",
+      "emptyTitle": "Nicio comandă încă",
+      "emptySubtitle": "Comenzile apar aici automat după rularea sincronizării eBay."
+    },
+    "filters": {
+      "allStatuses": "Toate stările",
+      "allStores": "Toate magazinele",
+      "allTrackingStates": "Toate stările de urmărire",
+      "clearAll": "Șterge tot",
+      "resultCount": "Rezultate: {{count}}"
+    },
+    "stats": {
+      "totalSales": "Vânzări totale",
+      "netProfit": "Profit net",
+      "activeOrders": "Comenzi active",
+      "returnRate": "Rata returnărilor",
+      "last24Hours": "Ultimele 24 de ore",
+      "growth": "{{value}}% față de luna trecută",
+      "profitGrowth": "{{value}}% față de luna trecută",
+      "decrease": "{{value}}% față de luna trecută"
+    },
+    "actions": {
+      "search": "Caută comenzi, cumpărători sau articole...",
+      "last30Days": "Ultimele 30 de zile",
+      "export": "Exportă",
+      "convertTracking": "Convertește urmărirea"
+    },
+    "table": {
+      "orderNumber": "Comanda nr.",
+      "product": "Produs",
+      "date": "Data",
+      "buyer": "Cumpărător",
+      "status": "Stare",
+      "salePrice": "Vânzare",
+      "purchasePrice": "Cost",
+      "netProfit": "Profit",
+      "asin": "ASIN",
+      "ebayId": "eBay"
+    },
+    "status": {
+      "completed": "Finalizată",
+      "shipped": "Expediată",
+      "processing": "Se procesează",
+      "cancelled": "Anulată",
+      "pending": "În așteptare",
+      "waiting_shipment": "Așteaptă expedierea"
+    },
+    "fulfillmentState": {
+      "column": "Îndeplinire Amazon",
+      "purchased": "Cumpărată pe Amazon",
+      "amazon_cancelled": "Anulată de Amazon",
+      "action_required": "Acțiune necesară",
+      "in_progress": "Se cumpără pe Amazon",
+      "not_automated": "Neautomatizată",
+      "manual": "Cumpărată manual",
+      "simulated": "Rulare de test — fără achiziție",
+      "filter": {
+        "all": "Toate stările de îndeplinire"
+      },
+      "detail": {
+        "title": "Îndeplinire Amazon",
+        "amazonOrderId": "Comandă Amazon",
+        "simulatedNotice": "Aceasta este o rulare de test. Nu a fost plasată nicio comandă Amazon și nu s-au taxat bani — costurile și profitul de mai jos sunt simulate.",
+        "actionRequiredNotice": "Automatizarea s-a oprit înainte de cumpărare. Verificați motivul și îndepliniți această comandă manual.",
+        "cancelledNotice": "Achiziția Amazon a fost anulată. Vânzarea eBay este încă datorată cumpărătorului — îndepliniți-o în alt mod.",
+        "notAutomatedNotice": "Comandarea automată este dezactivată pentru această comandă.",
+        "attemptedAt": "Ultima încercare"
+      }
+    },
+    "tracking": {
+      "tracked": "Urmărită de SellerHill",
+      "untracked": "Neurmărită",
+      "problem": {
+        "wrongPageType": "Furnizorul de urmărire nu a putut citi pagina comenzii Amazon — este posibil să-și fi schimbat formatul. Se va reîncerca automat.",
+        "amazonSessionExpired": "Sesiunea Amazon folosită pentru a citi această comandă a expirat și trebuie autentificată din nou.",
+        "trackingUrlMismatch": "Linkul de urmărire de pe pagina comenzii Amazon nu a corespuns cu ce ne așteptam. Se va reîncerca automat.",
+        "needsTrackingUpload": "Se așteaptă încărcarea detaliilor expedierii înainte ca numărul de urmărire să poată fi convertit.",
+        "updateNotApplied": "Actualizarea urmăririi nu a fost încă aplicată de furnizor. Se va reîncerca automat.",
+        "assignValidation": "Furnizorul de urmărire a respins detaliile expedierii pentru această comandă.",
+        "shipmentException": "Furnizorul de urmărire a raportat o excepție pentru această expediere.",
+        "trackingUpdateUnavailable": "Furnizorul de urmărire nu a putut actualiza această expediere acum.",
+        "generic": "Există o problemă cu conversia urmăririi acestei comenzi. Se va reîncerca automat."
+      }
+    },
+    "autoFulfill": {
+      "column": "Îndeplinire automată",
+      "status": {
+        "pending": "În coadă",
+        "running": "În curs de rulare",
+        "placed": "Plasată",
+        "blocked": "Blocată",
+        "failed": "Eșuată",
+        "dry_run": "Rulare de probă",
+        "skipped": "Omisă"
+      },
+      "reason": {
+        "no_asin": "Produsul nu a fost găsit pe Amazon",
+        "captcha": "Captcha necesar",
+        "otp": "Provocare MFA/OTP",
+        "login": "Autentificare eșuată",
+        "out_of_stock": "Fără stoc",
+        "address": "Problemă cu adresa",
+        "payment": "Plată refuzată",
+        "cap": "Peste plafonul de cost",
+        "no_confirmation": "Fără confirmare",
+        "proxy_required": "Niciun proxy configurat",
+        "quota_exhausted": "Cota lunară a fost atinsă",
+        "cart": "Coș necorespunzător",
+        "review_unreadable": "Totalul comenzii este ilizibil",
+        "subscription_suspended": "Abonament suspendat",
+        "listing_over_plan_limit": "Anunț în afara limitei planului",
+        "order_already_fulfilled": "Deja expediată — nu este nimic de cumpărat",
+        "order_not_paid": "Se așteaptă plata cumpărătorului"
+      },
+      "reasonLabel": "Motiv: {{reason}}",
+      "amazonCancelledBadge": "Anulată de Amazon",
+      "filter": {
+        "all": "Toată îndeplinirea automată",
+        "needsAttention": "Necesită atenție"
+      }
+    },
+    "pagination": {
+      "showing": "Comenzile {{from}}-{{to}} din {{total}}"
+    },
+    "detail": {
+      "title": "Detaliile comenzii",
+      "loadingSubtitle": "Se preiau detaliile comenzii…",
+      "notFoundTitle": "Comanda nu a fost găsită",
+      "notFoundSubtitle": "Această comandă poate fi eliminată sau nu aveți acces la ea.",
+      "orderPlaced": "Comandă plasată",
+      "viewInvoice": "Vezi factura",
+      "printLabels": "Tipărește etichetele",
+      "customerInfo": "Informații despre client",
+      "buyerPayment": "Plata cumpărătorului",
+      "ebaySummary": "Rezumatul vânzării eBay",
+      "whatBuyerPaid": "Ce a plătit cumpărătorul",
+      "whatYouEarned": "Ce ați câștigat",
+      "earningsOrderTotal": "Totalul comenzii",
+      "ebayCollectedFromBuyer": "eBay a încasat de la cumpărător",
+      "ebayCollectedTax": "Taxa pe vânzări",
+      "sellingCosts": "Costuri de vânzare",
+      "itemSubtotal": "Subtotal articole",
+      "shippingHandling": "Transport și manipulare",
+      "totalBeforeTax": "Total înainte de taxe",
+      "estimatedTax": "Taxă estimată",
+      "grandTotal": "Total general",
+      "paymentMethod": "Metoda de plată",
+      "subtotal": "Subtotal",
+      "shipping": "Transport",
+      "salesTax": "Taxa pe vânzări",
+      "orderTotal": "Totalul comenzii",
+      "feesCollected": "Comisioane încasate",
+      "transactionFees": "Comisioane de tranzacție",
+      "adFee": "Comision publicitate general",
+      "orderEarnings": "Câștigurile comenzii",
+      "viewMore": "Vezi mai multe detalii",
+      "updateAmazon": "Introduceți informațiile Amazon",
+      "netProfitAnalysis": "ANALIZA PROFITULUI NET",
+      "analysisDesc": "Acest calcul ia în considerare câștigurile dvs. reale de la eBay după toate comisioanele și taxele platformei, din care se scade costul inițial de achiziție Amazon.",
+      "calculation": "Calcul",
+      "netProfitResult": "Profit net",
+      "roi": "ROI",
+      "shipTo": "Expediere către",
+      "contact": "Contact",
+      "unknownProduct": "Produs necunoscut",
+      "copyAddress": "Copiază adresa",
+      "addressCopied": "Adresa a fost copiată!",
+      "copyName": "Copiază numele",
+      "copyStreet": "Copiază strada",
+      "copyStreet2": "Copiază linia 2 a adresei",
+      "copyCity": "Copiază orașul",
+      "copyState": "Copiază regiunea/provincia",
+      "copyZip": "Copiază codul poștal",
+      "copyCountry": "Copiază țara/regiunea",
+      "copied": "Copiat",
+      "amazonCosts": "Rezumatul comenzii Amazon",
+      "purchasePrice": "Preț de achiziție",
+      "amazonTax": "Taxă Amazon",
+      "amazonShipping": "Transport Amazon",
+      "totalAmazonCost": "Costul total Amazon",
+      "amazonTracking": "Urmărire Amazon",
+      "convertedTracking": "Urmărire convertită",
+      "amazonOrder": "Comandă Amazon",
+      "linkAmazon": "Asociază comanda Amazon",
+      "calcEarnings": "Câștiguri",
+      "calcPurchase": "Achiziție",
+      "calcTax": "Taxă",
+      "calcShipping": "Transport",
+      "asin": "ASIN",
+      "ebayItemId": "ID eBay",
+      "quantity": "Cantitate",
+      "unit": "unitate",
+      "sku": "SKU",
+      "na": "N/A"
+    },
+    "modal": {
+      "title": "Introduceți informațiile comenzii Amazon",
+      "amazonUrl": "URL-ul detaliilor comenzii Amazon",
+      "trackingUrl": "URL de urmărire (opțional)",
+      "taxAmount": "Suma taxei ($)",
+      "shippingCost": "Costul de transport ($)",
+      "infoText": "Furnizarea taxei și a costului de transport va recalcula automat profitul net al acestei comenzi.",
+      "save": "Salvează detaliile",
+      "cancel": "Anulează",
+      "amazonUrlPlaceholder": "https://www.amazon.com/gp/your-account/order-details/...",
+      "trackingUrlPlaceholder": "https://www.amazon.com/progress-tracker/..."
+    },
+    "estimateBadge": "Estimat",
+    "estimateNote": "Profit estimat — se finalizează la plasarea comenzii Amazon. Bazat pe ultimul preț Amazon cunoscut; transportul Amazon nu este inclus.",
+    "footer": {
+      "copyright": "© 2026 SellerHill E-commerce Solutions. Toate drepturile rezervate."
+    },
+    "errors": {
+      "notFound": "Comanda nu a fost găsită.",
+      "noTrackingYet": "Această comandă nu are încă un număr de urmărire Amazon — nu a fost expediată.",
+      "conversionUnavailable": "Urmărirea nu a putut fi convertită acum. Verificați limita planului și setările de conversie, apoi încercați din nou.",
+      "conversionDone": "Urmărirea a fost convertită.",
+      "orderNotTracked": "Această comandă nu este asociată unuia dintre anunțurile dvs., deci un număr de urmărire convertit nu ar putea fi trimis niciodată către eBay. Asociați mai întâi comanda cu anunțul ei.",
+      "trackingAlreadyPushed": "eBay are deja numărul de urmărire original pentru această comandă și acesta nu poate fi înlocuit, deci conversia acum nu ar schimba ce vede cumpărătorul.",
+      "listingOverPlanLimit": "Anunțul acestei comenzi se afla în afara limitei de anunțuri a planului dvs. când a sosit comanda. Comenzile din anunțurile aflate în afara limitei nu primesc urmărirea expedierii și nici conversia numărului de urmărire."
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Panou de control",
+    "subtitle": "Vânzări, profit și performanța anunțurilor",
+    "greeting": "Bună, {{name}}",
+    "selectStore": "Selectați magazinul",
+    "allStores": "Toate magazinele",
+    "noData": "Încă nu există date",
+    "backToDashboard": "Înapoi la panoul de control",
+    "tabs": {
+      "cards": "Carduri",
+      "chart": "Grafic",
+      "pnl": "P&L"
+    },
+    "today": "Astăzi",
+    "thisWeek": "Săptămâna aceasta",
+    "thisMonth": "Luna aceasta",
+    "thisYear": "Anul acesta",
+    "metrics": {
+      "sales": "Vânzări",
+      "units": "Unități",
+      "orders": "Comenzi",
+      "ordersUnits": "Comenzi / Unități",
+      "refunds": "Rambursări",
+      "refundRate": "Rata rambursărilor",
+      "grossProfit": "Profit brut",
+      "netProfit": "Profit net",
+      "estimatedPayout": "Plată est.",
+      "margin": "Marjă",
+      "roi": "ROI",
+      "avgOrderValue": "Comandă medie",
+      "costOfGoods": "Costul produselor",
+      "transactionFees": "Comisioane de tranzacție",
+      "adFees": "Comisioane de publicitate",
+      "amazonShipping": "Transport Amazon",
+      "amazonTax": "Taxă Amazon",
+      "revenueUncosted": "Venituri fără cost"
+    },
+    "card": {
+      "showMore": "Mai multe detalii",
+      "showLess": "Mai puține detalii",
+      "activeHint": "Filtrează listele de mai jos"
+    },
+    "listingsSection": "Anunțuri",
+    "ordersSection": "Comenzi",
+    "listingsCount": "{{count}} cu vânzări",
+    "ordersCount": "Comenzi: {{count}}",
+    "viewAllListings": "Vezi tot",
+    "viewAllOrders": "Vezi tot",
+    "listingsEmptyTitle": "Niciun anunț cu vânzări",
+    "listingsEmptySubtitle": "Anunțurile care au primit comenzi în perioada selectată apar aici.",
+    "ordersEmptyTitle": "Nicio comandă în această perioadă",
+    "ordersEmptySubtitle": "Comenzile din perioada selectată vor apărea aici odată ce apar vânzările.",
+    "chart": {
+      "title": "Performanță",
+      "subtitle": "Profitul net raportat la volumul vânzărilor",
+      "summary": "Rezumatul perioadei",
+      "granularity": {
+        "day": "30 de zile",
+        "week": "12 săptămâni",
+        "month": "12 luni"
+      },
+      "series": {
+        "netProfit": "Profit net",
+        "sales": "Vânzări",
+        "units": "Unități",
+        "refunds": "Rambursări"
+      }
+    },
+    "pnl": {
+      "title": "Profit și pierdere",
+      "subtitle": "Detalierea lună de lună a ultimelor 12 luni",
+      "parameter": "Indicator / Perioadă",
+      "currentPeriod": "Perioada curentă",
+      "heatmap": "Hartă termică",
+      "export": "Descarcă CSV"
+    },
+    "groups": {
+      "revenue": "Venituri",
+      "costs": "Costuri",
+      "profit": "Profit",
+      "ratios": "Rate"
+    },
+    "profit": {
+      "confirmedLabel": "Confirmat",
+      "confirmedTooltip": "Profit din comenzile ale căror costuri Amazon reale au fost înregistrate. Un cost necunoscut nu este niciodată numărat ca zero.",
+      "estimatedLabel": "Estimat",
+      "estimatedTooltip": "Comenzile care așteaptă îndeplinirea pe Amazon folosesc un cost estimat (taxa Amazon la rata configurată de {{rate}}%).",
+      "uncostedLabel": "Venituri fără cost",
+      "uncostedTooltip": "Vânzări al căror cost Amazon nu a putut fi stabilit încă — doar venit, fără profit implicat."
+    }
+  }
+}

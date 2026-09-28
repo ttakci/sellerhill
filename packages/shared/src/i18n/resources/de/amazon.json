@@ -1,0 +1,122 @@
+{
+  "amazon": {
+    "accounts": {
+      "title": "Amazon-Käuferkonten",
+      "subtitle": "Verwalten Sie Ihre Amazon-Käuferkonten für die Bestellverfolgung und das Auslesen von Preisen",
+      "addButton": "Amazon-Konto hinzufügen",
+      "noAccounts": "Noch keine Amazon-Konten verbunden",
+      "noAccountsDescription": "Fügen Sie Ihr Amazon-Käuferkonto hinzu, um Bestellpreise und Versandstatus automatisch zu verfolgen",
+      "statusActive": "Aktiv",
+      "statusVerifying": "Wird geprüft",
+      "statusInvalid": "Ungültige Zugangsdaten",
+      "statusNeedsReauth": "Erneute Anmeldung erforderlich",
+      "statusLocked": "Gesperrt",
+      "verifyButton": "Prüfen",
+      "editButton": "Bearbeiten",
+      "deleteButton": "Löschen",
+      "deleteConfirmTitle": "Amazon-Konto löschen",
+      "deleteConfirmMessage": "Möchten Sie dieses Amazon-Konto wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "lastVerified": "Zuletzt geprüft",
+      "lastUsed": "Zuletzt verwendet",
+      "never": "Nie",
+      "addTitle": "Amazon-Konto hinzufügen",
+      "editTitle": "Amazon-Konto bearbeiten",
+      "labelField": "Kontoname",
+      "labelPlaceholder": "z. B. Privates Amazon-Konto",
+      "emailField": "Amazon-E-Mail",
+      "emailPlaceholder": "ihre-email@beispiel.de",
+      "passwordField": "Amazon-Passwort",
+      "passwordPlaceholder": "Geben Sie Ihr Amazon-Passwort ein",
+      "twoFactorField": "2FA-Geheimschlüssel",
+      "twoFactorPlaceholder": "Optional – aus den 2FA-Einstellungen von Amazon",
+      "twoFactorInfo": "Wenn Sie 2FA aktiviert haben, geben Sie den Geheimschlüssel aus den Sicherheitseinstellungen Ihres Amazon-Kontos ein",
+      "saveButton": "Konto speichern",
+      "savingButton": "Wird gespeichert ...",
+      "verifyingButton": "Wird geprüft ...",
+      "verifySuccess": "Amazon-Konto erfolgreich geprüft",
+      "verifyFailed": "Das Amazon-Konto konnte nicht geprüft werden. Bitte überprüfen Sie Ihre Zugangsdaten.",
+      "saveSuccess": "Amazon-Konto erfolgreich gespeichert",
+      "deleteSuccess": "Amazon-Konto erfolgreich gelöscht",
+      "errorSaving": "Das Amazon-Konto konnte nicht gespeichert werden"
+    },
+    "linking": {
+      "title": "Amazon-Bestellung verknüpfen",
+      "selectAccount": "Amazon-Konto auswählen",
+      "selectAccountPlaceholder": "Amazon-Konto auswählen ...",
+      "orderId": "Amazon-Bestellnummer",
+      "orderIdPlaceholder": "z. B. 112-1234567-1234567",
+      "orderIdHelp": "Geben Sie Ihre Amazon-Bestellnummer ein (zu finden in Ihrer Bestellhistorie oder der Bestätigungs-E-Mail)",
+      "linkButton": "Verknüpfen und auslesen",
+      "linkingButton": "Wird verknüpft ...",
+      "progressLoggingIn": "Anmeldung bei Amazon ...",
+      "progressNavigating": "Bestellseite wird geöffnet ...",
+      "progressScraping": "Bestelldetails werden ausgelesen ...",
+      "progressSaving": "Bestelldaten werden gespeichert ...",
+      "successTitle": "Amazon-Bestellung verknüpft",
+      "successMessage": "Die Bestelldetails wurden ausgelesen und erfolgreich verknüpft",
+      "errorTitle": "Bestellung konnte nicht verknüpft werden",
+      "errorNoAccount": "Bitte fügen Sie zuerst ein Amazon-Konto hinzu",
+      "errorScraping": "Die Amazon-Bestelldetails konnten nicht ausgelesen werden. Bitte prüfen Sie die Bestellnummer und versuchen Sie es erneut.",
+      "errorInvalidCredentials": "Die Amazon-Zugangsdaten sind ungültig. Bitte aktualisieren Sie Ihr Konto.",
+      "errorRateLimit": "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
+      "costCaptureFailed": "Die Amazon-Bestellung wurde gefunden, aber die Kostendetails konnten nicht gelesen werden. Der Gewinn bleibt auf dem zuletzt bekannten Wert.",
+      "noAccountsTitle": "Keine Amazon-Konten",
+      "noAccountsMessage": "Um Bestellungen zu verknüpfen, müssen Sie zuerst ein Amazon-Käuferkonto hinzufügen.",
+      "addAccountLink": "Amazon-Konto hinzufügen",
+      "noListingTitle": "Importieren Sie zuerst dieses eBay-Angebot",
+      "noListingMessage": "Das eBay-Angebot dieser Bestellung wurde nicht importiert, daher ist die Bestellung mit keinem Angebot verknüpft. Sie können die Amazon-Bestellung trotzdem verknüpfen und die tatsächlichen Kosten erhalten – beim Versand kann die Sendungsnummer jedoch nicht an eBay übermittelt werden, da eBay die Artikelposition benötigt, die ein Angebot mitbringt. Diese Übermittlung wird später nicht erneut versucht. Importieren Sie zuerst das Angebot, dann wird diese Bestellung automatisch damit verknüpft.",
+      "importListingButton": "Angebot importieren",
+      "linkAnywayButton": "Trotzdem verknüpfen"
+    },
+    "tracking": {
+      "statusPending": "Ausstehend",
+      "statusProcessing": "In Bearbeitung",
+      "statusShipped": "Versendet",
+      "statusDelivered": "Zugestellt",
+      "statusCancelled": "Storniert",
+      "statusReturned": "Zurückgesendet",
+      "eBaySyncShipped": "eBay-Bestellung als versendet markiert",
+      "eBaySyncDelivered": "eBay-Bestellung als zugestellt markiert"
+    },
+    "accountDrawer": {
+      "steps": {
+        "account": "Konto",
+        "proxy": "Proxy"
+      }
+    },
+    "autoFulfill": {
+      "autoFulfillEnabled": "Dieses Konto für die automatische Abwicklung verwenden",
+      "autoFulfillEnabledHint": "Wenn aktiviert, werden passende eBay-Bestellungen automatisch über dieses Amazon-Konto gekauft (im Wechsel mit Ihren anderen aktivierten Konten). Der Hauptschalter für die automatische Abwicklung in den Shop-Einstellungen muss ebenfalls aktiviert sein, und unten muss ein Ausgabenlimit festgelegt werden.",
+      "autoFulfillCapTotal": "Maximaler Bestellwert (Limit der automatischen Abwicklung)",
+      "autoFulfillCapTotalHint": "Ausgabenlimit pro Konto (USD). Bestellungen über diesem Betrag überspringen dieses Konto. Erforderlich, um die automatische Abwicklung zu aktivieren.",
+      "autoFulfillCapTotalPlaceholder": "z. B. 250",
+      "autoFulfillDryRun": "Testlauf (Ablauf ausführen, ohne die Bestellung aufzugeben)",
+      "autoFulfillDryRunHint": "Führt den gesamten Bestellablauf bis vor „Bestellung aufgeben“ aus, damit der Gesamtbetrag der Übersicht erfasst und zur Prüfung angezeigt werden kann."
+    },
+    "proxy": {
+      "sectionTitle": "Proxy",
+      "stepSubtitle": "Optional – leiten Sie die Automatisierung dieses Kontos über Ihren eigenen Proxy",
+      "enabled": "Proxy aktivieren",
+      "enabledHint": "Einen Proxy-Server zum Schutz Ihres Kontos verwenden",
+      "connectionType": "Verbindungstyp",
+      "host": "Host eingeben",
+      "port": "Port eingeben",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "hint": "Optional. Fügen Sie Ihren eigenen Proxy hinzu, um die Automatisierung dieses Kontos darüber zu leiten – hilfreich, wenn Sie zusätzlichen Schutz vor IP-basierten Sperren wünschen. Ist er deaktiviert, verbindet sich das Konto direkt; das ist der normale Standard."
+    },
+    "marketplace": {
+      "label": "Marktplatz",
+      "usOnlyNote": "Derzeit wird nur der Marktplatz Vereinigte Staaten (amazon.com) unterstützt.",
+      "AMAZON_US": "Vereinigte Staaten (amazon.com)",
+      "readOnlyHint": "Der Marktplatz kann nach dem Anlegen des Kontos nicht mehr geändert werden."
+    },
+    "errors": {
+      "autoFulfillCapRequired": "Legen Sie einen maximalen Bestellwert fest, um die automatische Abwicklung für dieses Konto zu aktivieren.",
+      "proxyHostPortRequired": "Geben Sie Host und Port ein, um für dieses Konto einen Proxy zu verwenden.",
+      "unsupportedMarketplace": "Dieser Amazon-Marktplatz ist noch nicht verfügbar.",
+      "twoFactorSecretRequired": "Fügen Sie den Authenticator-Geheimschlüssel (2FA) des Kontos hinzu. Amazon verlangt bei fast jeder automatisierten Anmeldung einen Bestätigungscode, und dies ist der einzige, den wir für Sie beantworten können.",
+      "twoFactorSecretInvalid": "Das sieht nicht nach einem Authenticator-Geheimschlüssel aus. Fügen Sie den Einrichtungsschlüssel aus der Authenticator-App-Einrichtung von Amazon ein (Buchstaben A–Z und Ziffern 2–7), nicht einen 6-stelligen Code."
+    }
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "listingSettingsGroup": {
+    "title": "Groupes de paramètres d'annonces",
+    "subtitle": "Gérez et attribuez des modèles de stratégie à vos annonces de produits pour une optimisation automatisée.",
+    "loadingDescription": "Récupération de vos groupes d'annonces.",
+    "createNewGroup": "Créer un nouveau groupe",
+    "editGroup": "Modifier le groupe d'annonces",
+    "backToList": "Retour aux groupes",
+    "connectorSubtitle": "CONNECTEUR AMAZON VERS EBAY",
+    "groupDetails": "Détails du groupe",
+    "groupName": "Nom du groupe",
+    "groupNamePlaceholder": "p. ex. Électronique premium",
+    "description": "Description",
+    "descriptionPlaceholder": "Saisissez des notes internes sur le groupe...",
+    "stripBrandFromTitle": "Retirer la marque du titre",
+    "stripBrandFromTitleInfo": "Retire automatiquement le nom de la marque Amazon de votre titre eBay. S'applique uniquement aux nouvelles annonces.",
+    "aiTitleEnabled": "Titre assisté par IA",
+    "aiTitleEnabledInfo": "Réécrit votre titre eBay avec l'IA et le complète avec des mots-clés supplémentaires. Nouvelles annonces uniquement ; en cas d'échec, votre titre habituel est utilisé.",
+    "repricingStrategy": "Stratégie de repricing",
+    "addPriceRange": "Ajouter une tranche de prix",
+    "removePriceRange": "Supprimer la tranche de prix",
+    "minPrice": "Prix min ($)",
+    "maxPrice": "Prix max ($)",
+    "profitMargin": "Marge bénéficiaire (%)",
+    "fixedProfit": "Profit fixe ($)",
+    "priceRangeLabel": "Tranche de prix {{index}}",
+    "stock": "Stock",
+    "defaultQuantity": "Quantité par défaut",
+    "fees": "Frais",
+    "ebayFee": "Frais eBay",
+    "ebayFeePercent": "Frais eBay (%)",
+    "fixedFee": "Frais fixes",
+    "fixedFeeAmount": "Frais fixes ($)",
+    "tax": "Taxe",
+    "taxPercent": "Taxe (%)",
+    "templates": "Modèle",
+    "customTemplate": "Personnalisé",
+    "predefinedTemplate": "Prédéfini",
+    "selectTemplate": "Sélectionner un modèle",
+    "selectTemplatePlaceholder": "Choisissez un modèle prédéfini...",
+    "htmlEditor": "Éditeur HTML",
+    "templatePlaceholder": "Saisissez votre modèle HTML personnalisé...",
+    "preview": "Aperçu",
+    "livePreview": "Aperçu en direct",
+    "editTemplate": "Modifier ce modèle",
+    "darkModePreview": "Aperçu en mode sombre",
+    "desktopView": "Vue ordinateur",
+    "mobileView": "Vue mobile",
+    "renderingPreview": "Génération de l'aperçu...",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleteGroup": "Supprimer le groupe",
+    "confirmDelete": "Voulez-vous vraiment supprimer ce groupe ?",
+    "confirmDeleteMessage": "Cette action est irréversible. Les produits utilisant ce groupe devront être réaffectés.",
+    "deleteSuccess": "Groupe supprimé avec succès",
+    "deleteFailed": "Échec de la suppression du groupe",
+    "productsCount_one": "{{count}} produit",
+    "productsCount_many": "{{count}} produits",
+    "productsCount_other": "{{count}} produits",
+    "noProducts": "Aucun produit",
+    "statusActive": "Actif",
+    "statusDraft": "Brouillon",
+    "statusInactive": "Inactif",
+    "card": {
+      "defaultQuantity": "Quantité par défaut",
+      "stockBuffer": "Réserve de stock",
+      "fee": "Commission",
+      "fixedFee": "Frais fixes",
+      "customTemplate": "Modèle personnalisé"
+    },
+    "emptyState": {
+      "title": "Aucun groupe d'annonces pour le moment",
+      "description": "Créez votre premier groupe pour commencer à organiser vos annonces",
+      "action": "Créer un nouveau groupe"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "Boutique généraliste",
+        "description": "Une mise en page à fort taux de conversion, axée sur l'urgence, adaptée à tout produit courant, avec des badges de confiance clairs"
+      },
+      "ds-minimalist": {
+        "name": "Minimaliste",
+        "description": "Une mise en page ultra épurée, sur une seule colonne, en noir et blanc, centrée uniquement sur les spécifications et la confiance"
+      },
+      "ds-tech-gadgets": {
+        "name": "Gadgets high-tech",
+        "description": "Une mise en page moderne aux accents sombres, idéale pour l'électronique, avec un tableau de spécifications bien visible"
+      },
+      "ds-home-decor": {
+        "name": "Maison et déco",
+        "description": "Une mise en page chaleureuse et esthétique, aux couleurs douces, avec de grandes images et une typographie douillette"
+      },
+      "ds-auto-parts": {
+        "name": "Pièces auto",
+        "description": "Une mise en page technique à fort contraste, avec des avertissements de compatibilité clairs et un style robuste"
+      },
+      "ds-apparel-fashion": {
+        "name": "Vêtements et mode",
+        "description": "Une mise en page élégante façon lookbook, mettant en avant les guides des tailles et l'entretien des tissus"
+      },
+      "ds-beauty-health": {
+        "name": "Beauté et santé",
+        "description": "Un design épuré façon spa, avec des sections structurées pour les ingrédients et le mode d'emploi"
+      },
+      "ds-pet-supplies": {
+        "name": "Animalerie",
+        "description": "Une mise en page ludique mais structurée, aux accents vifs, axée sur la sécurité des matériaux et les tailles"
+      },
+      "ds-fitness-sports": {
+        "name": "Fitness et sports",
+        "description": "Une mise en page énergique à la typographie affirmée, axée sur la durabilité, les matériaux et un mode de vie actif"
+      },
+      "ds-outdoor-survival": {
+        "name": "Plein air et survie",
+        "description": "Une mise en page robuste aux tons terreux, axée sur la durabilité, la résistance aux intempéries et les spécifications tactiques"
+      },
+      "ds-toys-kids": {
+        "name": "Jouets pour enfants",
+        "description": "Une mise en page amusante et colorée, axée sur les certifications de sécurité et l'adéquation à l'âge"
+      },
+      "ds-kitchen-dining": {
+        "name": "Cuisine et arts de la table",
+        "description": "Une mise en page épurée façon livre de recettes, axée sur la sécurité des matériaux et les dimensions"
+      }
+    },
+    "validation": {
+      "nameRequired": "Le nom du groupe est obligatoire",
+      "nameMinLength": "Le nom du groupe doit contenir au moins 3 caractères",
+      "nameMaxLength": "Le nom du groupe ne doit pas dépasser 100 caractères",
+      "minPrice": "Le prix minimal doit être supérieur à 0",
+      "maxPrice": "Le prix maximal doit être supérieur à 0",
+      "maxPriceGreaterThanMin": "Le prix maximal doit être supérieur au prix minimal",
+      "profitRequired": "La marge bénéficiaire ou le profit fixe est obligatoire",
+      "profitMarginRange": "La marge bénéficiaire doit être comprise entre 0 et 100",
+      "fixedProfitMin": "Le profit fixe doit être supérieur ou égal à 0",
+      "minQuantity": "La quantité doit être d'au moins 1",
+      "maxQuantity": "La quantité ne doit pas dépasser 9999",
+      "maxFeePercent": "Le pourcentage de frais ne peut pas dépasser 100 %",
+      "minFeePercent": "Le pourcentage de frais doit être supérieur ou égal à 0",
+      "minFixedFee": "Les frais fixes doivent être supérieurs ou égaux à 0",
+      "invalidNumber": "Saisissez un nombre valide sans zéro initial (par exemple 0.4, et non 04)",
+      "templateRequired": "Le contenu du modèle est obligatoire",
+      "templateMinLength": "Le modèle doit contenir au moins 10 caractères",
+      "predefinedTemplateRequired": "Veuillez sélectionner un modèle prédéfini",
+      "minOnePriceRange": "Au moins une tranche de prix est obligatoire",
+      "maxPriceRanges": "10 tranches de prix au maximum sont autorisées",
+      "overlappingPriceRanges": "Les tranches de prix ne peuvent pas se chevaucher",
+      "minStockBuffer": "La réserve de stock doit être supérieure ou égale à 0"
+    },
+    "errors": {
+      "loadFailed": "Échec du chargement des groupes d'annonces",
+      "saveFailed": "Échec de l'enregistrement des modifications",
+      "createFailed": "Échec de la création du groupe",
+      "updateFailed": "Échec de la mise à jour du groupe",
+      "deleteFailed": "Échec de la suppression du groupe",
+      "templateLoadFailed": "Échec du chargement des modèles prédéfinis",
+      "unauthorized": "Vous n'avez pas l'autorisation d'effectuer cette action",
+      "notFound": "Groupe d'annonces introuvable",
+      "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+      "unknownError": "Une erreur inattendue s'est produite"
+    },
+    "success": {
+      "created": "Groupe d'annonces créé avec succès",
+      "updated": "Groupe d'annonces mis à jour avec succès",
+      "deleted": "Groupe d'annonces supprimé avec succès",
+      "saved": "Modifications enregistrées avec succès"
+    },
+    "tooltips": {
+      "editGroup": "Modifier le groupe",
+      "deleteGroup": "Supprimer le groupe",
+      "addPriceRange": "Ajouter une autre tranche de prix",
+      "removePriceRange": "Supprimer cette tranche de prix",
+      "toggleDarkMode": "Basculer l'aperçu en mode sombre",
+      "switchToDesktop": "Passer à la vue ordinateur",
+      "switchToMobile": "Passer à la vue mobile",
+      "copyTemplate": "Copier le HTML du modèle",
+      "resetTemplate": "Rétablir le modèle par défaut"
+    },
+    "help": {
+      "repricingStrategy": "Définissez plusieurs tranches de prix avec des marges bénéficiaires différentes. Les produits seront tarifés selon leur tranche de coût.",
+      "profitMargin": "Profit en pourcentage calculé à partir du coût du produit.",
+      "fixedProfit": "Montant fixe en dollars ajouté au coût du produit.",
+      "ebayFee": "Pourcentage des frais sur valeur finale d'eBay (généralement 10 à 15 %).",
+      "fixedFee": "Frais fixes de mise en vente d'eBay (généralement 0,30 $).",
+      "tax": "Pourcentage de taxe sur les ventes pour votre localisation.",
+      "customTemplate": "Rédigez votre propre modèle HTML avec un style personnalisé.",
+      "predefinedTemplate": "Choisissez parmi des modèles conçus par des professionnels."
+    },
+    "editorTitle": "Éditeur de groupe d'annonces",
+    "editorDescription": "Configurez les paramètres de vos annonces, vos stratégies de prix et vos modèles.",
+    "generalSettings": "Paramètres généraux",
+    "pricingStrategy": "Stratégie de repricing",
+    "addRange": "Ajouter une tranche",
+    "calculator": {
+      "title": "Calculateur de prix",
+      "subtitle": "Testez ces paramètres — rien n'est enregistré, c'est un simple aperçu.",
+      "amazonPrice": "Prix d'achat Amazon",
+      "calculate": "Calculer",
+      "resultLabel": "Prix de vente eBay",
+      "breakdown": {
+        "amazonPrice": "Prix d'achat Amazon",
+        "tax": "Taxe d'achat Amazon ({{pct}})",
+        "trueCost": "Coût réel (prix + taxe)",
+        "margin": "Marge bénéficiaire ({{pct}})",
+        "fallbackMargin": "Aucune tranche correspondante, marge de repli ({{pct}})",
+        "fixedProfit": "Profit fixe",
+        "netTarget": "Objectif avant frais eBay",
+        "ebayFee": "Frais eBay ({{pct}})",
+        "fixedFee": "Frais fixes",
+        "floorApplied": "Inférieur au minimum eBay de 0,99 $, relevé à"
+      }
+    },
+    "feesAndTaxes": "Frais et taxes",
+    "amazonTaxRateNote": "Votre calcul de prix tient automatiquement compte de la taxe estimée que vous payez en achetant sur Amazon. Définissez ce taux dans Paramètres de la boutique → Taux de taxe sur les ventes Amazon.",
+    "stockControl": "Gestion du stock",
+    "ebayStockQuantity": "Stock eBay",
+    "stockBuffer": "Réserve de stock",
+    "stockBufferDescription": "Votre quantité eBay correspond au stock d'Amazon moins cette réserve (jamais inférieure à 0), plafonnée à la valeur du stock eBay.",
+    "htmlTemplate": "Modèle HTML",
+    "custom": "Personnalisé",
+    "predefined": "Prédéfini",
+    "activeTemplate": "Modèle actif",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "FORMAT EBAY",
+    "sample": {
+      "productTitle": "Écouteurs sans fil, réduction active du bruit, 40 h d'autonomie",
+      "productDescription": "Réduction active du bruit hybride, boîtier de charge de 40 heures et mode jeu à faible latence, dans des écouteurs compacts pour les voyages, le travail et le sport.",
+      "productSpecs": "<ul><li>Réduction active du bruit</li><li>40 heures d'autonomie</li><li>Compatibilité Bluetooth universelle</li><li>Microphone intégré</li></ul>"
+    },
+    "drawer": {
+      "deductions": "Déductions"
+    },
+    "copyright": "© {{year}} SellerHill Platform. Tous droits réservés.",
+    "keywords": {
+      "title": "Mots-clés disponibles",
+      "hint": "Écrivez-les entre doubles accolades ; ils sont remplacés par les données du produit lors de la création de l'annonce.",
+      "items": {
+        "title": "Titre du produit",
+        "product_description": "Description du produit",
+        "feature_bullets": "Liste à puces des caractéristiques",
+        "product_details": "Liste des spécifications",
+        "main_image": "URL de l'image principale du produit",
+        "brand": "Marque",
+        "manufacturer": "Fabricant",
+        "category": "Catégorie du produit"
+      }
+    }
+  }
+}

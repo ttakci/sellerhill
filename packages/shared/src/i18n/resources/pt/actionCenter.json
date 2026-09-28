@@ -1,0 +1,229 @@
+{
+  "actionCenter": {
+    "title": "Ações pendentes",
+    "subtitle": "Tudo o que está esperando por você, do mais urgente ao menos urgente.",
+    "menu": "Ações pendentes",
+    "refresh": "Atualizar",
+    "updatedAt": "Atualizado {{time}}",
+    "empty": {
+      "title": "Nada precisa de você agora",
+      "description": "Sem compras bloqueadas, conexões com problemas ou limites do plano. Novos itens aparecem aqui assim que algo precisar de uma decisão."
+    },
+    "emptyFiltered": {
+      "title": "Nada neste nível",
+      "description": "Não há itens com esta urgência. Volte para Todos para ver o restante."
+    },
+    "loading": {
+      "title": "Verificando o que precisa de você",
+      "description": "Revisando seus pedidos, conexões, anúncios e plano."
+    },
+    "severity": {
+      "critical": "Crítico",
+      "warning": "Alerta",
+      "info": "Sugestão"
+    },
+    "filter": {
+      "ariaLabel": "Nível de urgência",
+      "all": "Todos",
+      "critical": "Crítico",
+      "warning": "Alerta",
+      "info": "Sugestões"
+    },
+    "summary": {
+      "critical": "{{count}} crítico(s)",
+      "warning": "{{count}} alerta(s)",
+      "info": "{{count}} sugestão(ões)",
+      "total_one": "{{count}} item precisa de você",
+      "total_many": "{{count}} itens precisam de você",
+      "total_other": "{{count}} itens precisam de você"
+    },
+    "breakdownLabel": "Motivos",
+    "moreReasons": "+{{count}} mais",
+    "groups": {
+      "orders": {
+        "title": "Pedidos",
+        "subtitle": "Vendas com um comprador esperando do outro lado."
+      },
+      "connections": {
+        "title": "Conexões",
+        "subtitle": "Contas de loja e de comprador em que a automação funciona."
+      },
+      "listings": {
+        "title": "Anúncios",
+        "subtitle": "Ofertas que estão no ar, mas não geram ganhos."
+      },
+      "plan": {
+        "title": "Plano e capacidade",
+        "subtitle": "Limites que começarão a recusar trabalho."
+      },
+      "setup": {
+        "title": "Configuração",
+        "subtitle": "Etapas básicas para o SellerHill funcionar para você."
+      }
+    },
+    "items": {
+      "order_amazon_cancelled": {
+        "title": "A Amazon cancelou uma compra que você já pagou",
+        "description_one": "{{count}} pedido foi cancelado pela Amazon. A venda no eBay continua ativa e ainda é devida ao comprador — refaça o pedido ou reembolse antes que o eBay o conte como defeito.",
+        "description_many": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e ainda são devidas aos compradores — refaça os pedidos ou reembolse antes que o eBay os conte como defeitos.",
+        "description_other": "{{count}} pedidos foram cancelados pela Amazon. Essas vendas no eBay continuam ativas e ainda são devidas aos compradores — refaça os pedidos ou reembolse antes que o eBay os conte como defeitos.",
+        "action": "Revisar pedidos"
+      },
+      "order_fulfillment_blocked": {
+        "title": "A compra automática parou antes de pagar",
+        "description_one": "{{count}} pedido foi interrompido por uma verificação de segurança, então nenhum dinheiro foi movimentado. Corrija o motivo abaixo e ele poderá prosseguir.",
+        "description_many": "{{count}} pedidos foram interrompidos por uma verificação de segurança, então nenhum dinheiro foi movimentado. Corrija os motivos abaixo e eles poderão prosseguir.",
+        "description_other": "{{count}} pedidos foram interrompidos por uma verificação de segurança, então nenhum dinheiro foi movimentado. Corrija os motivos abaixo e eles poderão prosseguir.",
+        "action": "Revisar pedidos"
+      },
+      "order_awaiting_purchase": {
+        "title": "Vendido, mas ninguém comprou na Amazon",
+        "description_one": "{{count}} pedido com mais de {{hours}} horas não tem compra na Amazon nem automação em execução. Ele não será enviado a menos que você mesmo o compre.",
+        "description_many": "{{count}} pedidos com mais de {{hours}} horas não têm compra na Amazon nem automação em execução. Eles não serão enviados a menos que você mesmo os compre.",
+        "description_other": "{{count}} pedidos com mais de {{hours}} horas não têm compra na Amazon nem automação em execução. Eles não serão enviados a menos que você mesmo os compre.",
+        "action": "Revisar pedidos"
+      },
+      "order_untracked": {
+        "title": "Vendas de anúncios que você não acompanha",
+        "description_one": "{{count}} pedido dos últimos {{days}} dias veio de um item do eBay que não está vinculado a um anúncio do SellerHill, então seu custo e lucro nunca poderão ser calculados. Importe o anúncio para acompanhar as vendas futuras.",
+        "description_many": "{{count}} pedidos dos últimos {{days}} dias vieram de itens do eBay que não estão vinculados a anúncios do SellerHill, então seus custos e lucros nunca poderão ser calculados. Importe esses anúncios para acompanhar as vendas futuras.",
+        "description_other": "{{count}} pedidos dos últimos {{days}} dias vieram de itens do eBay que não estão vinculados a anúncios do SellerHill, então seus custos e lucros nunca poderão ser calculados. Importe esses anúncios para acompanhar as vendas futuras.",
+        "action": "Importar anúncios"
+      },
+      "order_tracking_problem": {
+        "title": "A conversão de rastreio tem um problema",
+        "description_one": "{{count}} pedido enviado tem um problema em aberto com o provedor de rastreamento. Até que seja resolvido, esse pedido mostra ao seu comprador o código de rastreio original da Amazon em vez de um convertido.",
+        "description_many": "{{count}} pedidos enviados têm problemas em aberto com o provedor de rastreamento. Até que sejam resolvidos, esses pedidos mostram aos seus compradores os códigos de rastreio originais da Amazon em vez de convertidos.",
+        "description_other": "{{count}} pedidos enviados têm problemas em aberto com o provedor de rastreamento. Até que sejam resolvidos, esses pedidos mostram aos seus compradores os códigos de rastreio originais da Amazon em vez de convertidos.",
+        "action": "Ver pedidos"
+      },
+      "order_tracking_conversion_held": {
+        "title": "Pedidos não marcados como enviados no eBay",
+        "description_one": "{{count}} pedido foi enviado pela Amazon há mais de {{hours}} horas, mas não foi marcado como enviado no eBay, porque seu código de rastreio não pôde ser convertido. Nunca enviamos o código de rastreio original da Amazon ao seu comprador. Resolva a causa e o pedido é enviado automaticamente — até lá, há risco de defeito por envio atrasado.",
+        "description_many": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não foram marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Resolva a causa e eles são enviados automaticamente — até lá, há risco de defeitos por envio atrasado.",
+        "description_other": "{{count}} pedidos foram enviados pela Amazon há mais de {{hours}} horas, mas não foram marcados como enviados no eBay, porque seus códigos de rastreio não puderam ser convertidos. Nunca enviamos os códigos de rastreio originais da Amazon aos seus compradores. Resolva a causa e eles são enviados automaticamente — até lá, há risco de defeitos por envio atrasado.",
+        "action": "Ver pedidos"
+      },
+      "ebay_account_disconnected": {
+        "title": "Uma loja eBay perdeu a conexão",
+        "description_one": "{{count}} loja não está mais autorizada. A sincronização de pedidos, o reajuste de preços e a publicação estão parados para ela até você reconectar.",
+        "description_many": "{{count}} lojas não estão mais autorizadas. A sincronização de pedidos, o reajuste de preços e a publicação estão parados para elas até você reconectar.",
+        "description_other": "{{count}} lojas não estão mais autorizadas. A sincronização de pedidos, o reajuste de preços e a publicação estão parados para elas até você reconectar.",
+        "action": "Gerenciar lojas"
+      },
+      "amazon_account_needs_attention": {
+        "title": "Uma conta de comprador da Amazon não consegue entrar",
+        "description_one": "{{count}} conta de comprador está falhando no login, então nada pode ser comprado por ela.",
+        "description_many": "{{count}} contas de comprador estão falhando no login, então nada pode ser comprado por elas.",
+        "description_other": "{{count}} contas de comprador estão falhando no login, então nada pode ser comprado por elas.",
+        "action": "Gerenciar contas"
+      },
+      "listing_job_failures": {
+        "title": "Anúncios que não puderam ser criados",
+        "description_one": "{{count}} anúncio falhou nos últimos {{days}} dias. O motivo indica se ele pode ser corrigido por você.",
+        "description_many": "{{count}} anúncios falharam nos últimos {{days}} dias. Os motivos indicam quais podem ser corrigidos por você.",
+        "description_other": "{{count}} anúncios falharam nos últimos {{days}} dias. Os motivos indicam quais podem ser corrigidos por você.",
+        "action": "Ver tarefas"
+      },
+      "listing_source_unavailable": {
+        "title": "Anúncios ativos cujo produto na Amazon está indisponível ou ilegível",
+        "description_one": "{{count}} anúncio ativo aponta para um produto da Amazon que está indisponível ou cujos dados não puderam ser lidos. Verifique o produto e encerre o anúncio se ele não existir mais.",
+        "description_many": "{{count}} anúncios ativos apontam para produtos da Amazon que estão indisponíveis ou cujos dados não puderam ser lidos. Verifique os produtos e encerre os anúncios dos que não existem mais.",
+        "description_other": "{{count}} anúncios ativos apontam para produtos da Amazon que estão indisponíveis ou cujos dados não puderam ser lidos. Verifique os produtos e encerre os anúncios dos que não existem mais.",
+        "action": "Revisar anúncios"
+      },
+      "listing_out_of_stock": {
+        "title": "Anúncios ativos com quantidade zero",
+        "description_one": "{{count}} anúncio ativo aparece no eBay sem nada para vender. Ele não rende nada até que a origem reponha o estoque.",
+        "description_many": "{{count}} anúncios ativos aparecem no eBay sem nada para vender. Eles não rendem nada até que a origem reponha o estoque.",
+        "description_other": "{{count}} anúncios ativos aparecem no eBay sem nada para vender. Eles não rendem nada até que a origem reponha o estoque.",
+        "action": "Revisar anúncios"
+      },
+      "listing_drafts_pending": {
+        "title": "Rascunhos que nunca foram publicados",
+        "description_one": "{{count}} rascunho está preparado e não custa nada — mas também não vende nada até ser publicado.",
+        "description_many": "{{count}} rascunhos estão preparados e não custam nada — mas também não vendem nada até serem publicados.",
+        "description_other": "{{count}} rascunhos estão preparados e não custam nada — mas também não vendem nada até serem publicados.",
+        "action": "Ver rascunhos"
+      },
+      "plan_listing_quota": {
+        "title": "Limite de anúncios ativos quase atingido",
+        "description": "Você está usando {{used}} de {{limit}} vagas de anúncios. Novos anúncios são recusados quando o limite é atingido; os existentes continuam funcionando.",
+        "action": "Ver plano"
+      },
+      "plan_ao_quota": {
+        "title": "Limite mensal de pedidos automáticos quase atingido",
+        "description": "Você usou {{used}} de {{limit}} pedidos automáticos neste mês. Quando o limite for atingido, os novos pedidos precisarão ser comprados manualmente até o mês virar.",
+        "action": "Ver plano"
+      },
+      "plan_past_due": {
+        "title": "Seu último pagamento falhou",
+        "description": "Atualize sua forma de pagamento para manter a automação em funcionamento.",
+        "action": "Corrigir pagamento"
+      },
+      "plan_trial_ending": {
+        "title": "Seu período de avaliação está terminando",
+        "description_one": "Falta {{count}} dia. Escolha um plano para manter seus anúncios e pedidos automáticos funcionando.",
+        "description_many": "Faltam {{count}} dias. Escolha um plano para manter seus anúncios e pedidos automáticos funcionando.",
+        "description_other": "Faltam {{count}} dias. Escolha um plano para manter seus anúncios e pedidos automáticos funcionando.",
+        "action": "Escolher um plano"
+      },
+      "setup_no_ebay_store": {
+        "title": "Conecte sua loja eBay",
+        "description": "Nada mais no SellerHill funciona sem uma loja eBay conectada — anúncios, pedidos e automação dependem dela. Esta é a primeira coisa a fazer.",
+        "action": "Conectar eBay"
+      },
+      "setup_no_amazon_account": {
+        "title": "Ainda não há conta de comprador da Amazon",
+        "description": "Você está vendendo, mas não há uma conta da Amazon para comprar — todos os pedidos precisam ser comprados manualmente. Adicionar uma ativa o atendimento automático.",
+        "action": "Adicionar conta"
+      },
+      "setup_no_store_settings": {
+        "title": "Configurações da loja ainda não definidas",
+        "description": "Sua origem de envio e as palavras da lista de bloqueio ainda não foram definidas. Elas são usadas para calcular custos e evitar que anúncios sejam publicados com conteúdo bloqueado.",
+        "action": "Configurar"
+      },
+      "setup_no_listing_settings_group": {
+        "title": "Ainda não há um grupo de configurações de anúncios",
+        "description": "Um grupo de configurações de anúncios define as regras de preço, estoque e reajuste — todo anúncio precisa de um, então você não consegue criar seu primeiro anúncio sem ele.",
+        "action": "Criar um grupo"
+      },
+      "setup_auto_fulfill_off": {
+        "title": "A compra automática está desativada",
+        "description": "Suas contas da Amazon estão conectadas, mas nenhuma está autorizada a comprar. Ative com um limite de gasto e os novos pedidos serão comprados para você.",
+        "action": "Ativar"
+      },
+      "plan_conversion_quota": {
+        "title": "Limite mensal de conversões de rastreio quase atingido",
+        "description": "Você usou {{used}} de {{limit}} conversões de rastreio neste mês. Quando o limite for atingido, os pedidos continuam sendo enviados e o eBay ainda recebe um código de rastreio — mas será o original da Amazon, então os compradores poderão ver seu fornecedor.",
+        "action": "Ver plano"
+      },
+      "plan_suspended": {
+        "title": "A automação está suspensa",
+        "description": "Sua assinatura não está mais ativa, então novos anúncios, atualizações de preço e estoque, compras automáticas e conversão de rastreio foram interrompidos. Escolha um plano para retomar — tudo recomeça sozinho.",
+        "action": "Escolher um plano"
+      }
+    },
+    "reasons": {
+      "amazonAccount": {
+        "needs_reauth": "Requer nova autenticação",
+        "invalid": "Credenciais inválidas",
+        "locked": "Bloqueada pela Amazon"
+      },
+      "sourceUnavailable": {
+        "removed": "indisponível na Amazon (quantidade definida como 0)",
+        "unreadable": "os dados do produto não puderam ser lidos"
+      },
+      "trackingProblem": {
+        "wrong_page_type": "Página da Amazon incorreta",
+        "amazon_session_expired": "Sessão da Amazon expirada",
+        "tracking_url_mismatch": "Link de rastreio divergente",
+        "needs_tracking_upload": "Aguardando detalhes da remessa",
+        "update_not_applied": "Atualização ainda não aplicada",
+        "assign_validation": "Rejeitado pelo provedor",
+        "shipment_exception": "Exceção da transportadora",
+        "tracking_update_unavailable": "Provedor indisponível"
+      }
+    }
+  }
+}

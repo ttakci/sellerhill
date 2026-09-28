@@ -1,0 +1,29 @@
+{
+  "profile": {
+    "title": "个人资料",
+    "subtitle": "管理您的账号设置和个人信息。",
+    "personalInfo": "个人信息",
+    "firstName": "名",
+    "lastName": "姓",
+    "emailAddress": "电子邮箱地址",
+    "phone": "电话",
+    "bio": "个人简介",
+    "address": "地址",
+    "country": "国家/地区",
+    "cityState": "城市/州省",
+    "postalCode": "邮政编码",
+    "taxId": "税号",
+    "edit": "编辑",
+    "home": "首页",
+    "defaultJobTitle": "团队经理",
+    "locationNotSet": "未设置位置",
+    "defaultBio": "专业的电商经理。",
+    "updateSuccess": "个人资料更新成功。",
+    "twitter": "Twitter URL",
+    "linkedin": "LinkedIn URL",
+    "instagram": "Instagram URL",
+    "deactivateAccount": "停用账号",
+    "saveChanges": "保存所有更改",
+    "storeOwner": "店主"
+  }
+}

@@ -139,9 +139,9 @@ export const shadowTokens = {
  */
 export const typographyTokens = {
   fontFamily: {
-    heading: "'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    body: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    sans: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    heading: "'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    body: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
+    sans: "'Lexend', 'Inter', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   fontSize: {

@@ -1,0 +1,249 @@
+{
+  "listingSettingsGroup": {
+    "title": "刊登设置组",
+    "subtitle": "管理策略模板并将其分配给您的商品刊登，实现自动化优化。",
+    "loadingDescription": "正在获取您的刊登设置组。",
+    "createNewGroup": "创建新设置组",
+    "editGroup": "编辑刊登设置组",
+    "backToList": "返回设置组",
+    "connectorSubtitle": "AMAZON 到 EBAY 连接器",
+    "groupDetails": "设置组详情",
+    "groupName": "设置组名称",
+    "groupNamePlaceholder": "例如：高端电子产品",
+    "description": "说明",
+    "descriptionPlaceholder": "输入设置组内部备注…",
+    "stripBrandFromTitle": "从标题中移除品牌",
+    "stripBrandFromTitleInfo": "自动从您的 eBay 标题中移除 Amazon 品牌名称。仅适用于新的商品刊登。",
+    "aiTitleEnabled": "AI 辅助标题",
+    "aiTitleEnabledInfo": "使用 AI 重写您的 eBay 标题，并补充更多关键词。仅适用于新的商品刊登；任何环节失败时会回退到您的常规标题。",
+    "repricingStrategy": "调价策略",
+    "addPriceRange": "添加价格区间",
+    "removePriceRange": "移除价格区间",
+    "minPrice": "最低价格 ($)",
+    "maxPrice": "最高价格 ($)",
+    "profitMargin": "利润率 (%)",
+    "fixedProfit": "固定利润 ($)",
+    "priceRangeLabel": "价格区间 {{index}}",
+    "stock": "库存",
+    "defaultQuantity": "默认数量",
+    "fees": "费用",
+    "ebayFee": "eBay 费用",
+    "ebayFeePercent": "eBay 费用 (%)",
+    "fixedFee": "固定费用",
+    "fixedFeeAmount": "固定费用 ($)",
+    "tax": "税费",
+    "taxPercent": "税率 (%)",
+    "templates": "模板",
+    "customTemplate": "自定义",
+    "predefinedTemplate": "预设",
+    "selectTemplate": "选择模板",
+    "selectTemplatePlaceholder": "选择一个预设模板…",
+    "htmlEditor": "HTML 编辑器",
+    "templatePlaceholder": "输入您的自定义 HTML 模板…",
+    "preview": "预览",
+    "livePreview": "实时预览",
+    "editTemplate": "编辑此模板",
+    "darkModePreview": "深色模式预览",
+    "desktopView": "桌面视图",
+    "mobileView": "移动视图",
+    "renderingPreview": "正在渲染预览…",
+    "saveChanges": "保存更改",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "delete": "删除",
+    "deleteGroup": "删除设置组",
+    "confirmDelete": "确定要删除此设置组吗？",
+    "confirmDeleteMessage": "此操作无法撤销。使用此设置组的商品需要重新分配。",
+    "deleteSuccess": "设置组删除成功",
+    "deleteFailed": "删除设置组失败",
+    "productsCount_other": "{{count}} 件商品",
+    "noProducts": "没有商品",
+    "statusActive": "已启用",
+    "statusDraft": "草稿",
+    "statusInactive": "已停用",
+    "card": {
+      "defaultQuantity": "默认数量",
+      "stockBuffer": "库存缓冲",
+      "fee": "佣金",
+      "fixedFee": "固定费用",
+      "customTemplate": "自定义模板"
+    },
+    "emptyState": {
+      "title": "尚无刊登设置组",
+      "description": "创建您的第一个设置组，开始整理您的商品刊登",
+      "action": "创建新设置组"
+    },
+    "predefinedTemplates": {
+      "ds-general-store": {
+        "name": "综合店铺",
+        "description": "高转化、营造紧迫感的版式，适合任何通用商品，带有清晰的信任标识"
+      },
+      "ds-minimalist": {
+        "name": "极简",
+        "description": "极致简洁的单栏黑白版式，专注于规格和信任"
+      },
+      "ds-tech-gadgets": {
+        "name": "数码科技",
+        "description": "现代感、深色点缀的版式，适合电子产品，带有突出的规格表"
+      },
+      "ds-home-decor": {
+        "name": "家居装饰",
+        "description": "温暖而美观的版式，柔和的色彩、突出的大图和舒适的字体搭配"
+      },
+      "ds-auto-parts": {
+        "name": "汽车配件",
+        "description": "高对比度的技术型版式，带有清晰的适配警示和硬朗的风格"
+      },
+      "ds-apparel-fashion": {
+        "name": "服饰时尚",
+        "description": "画册风格的优雅版式，突出尺码表和面料护理"
+      },
+      "ds-beauty-health": {
+        "name": "美容健康",
+        "description": "水疗般的简洁设计，为成分和使用方法设置了结构化的板块"
+      },
+      "ds-pet-supplies": {
+        "name": "宠物用品",
+        "description": "活泼而有条理的版式，明亮的点缀色，专注于材质安全和尺寸"
+      },
+      "ds-fitness-sports": {
+        "name": "运动健身",
+        "description": "充满活力、字体醒目的版式，专注于耐用性、材质和活跃的生活方式"
+      },
+      "ds-outdoor-survival": {
+        "name": "户外生存",
+        "description": "硬朗、大地色调的版式，专注于耐用性、耐候性和战术规格"
+      },
+      "ds-toys-kids": {
+        "name": "儿童玩具",
+        "description": "有趣、色彩丰富的版式，专注于安全认证和适龄性"
+      },
+      "ds-kitchen-dining": {
+        "name": "厨房餐饮",
+        "description": "简洁的食谱书风格版式，专注于材质安全和尺寸"
+      }
+    },
+    "validation": {
+      "nameRequired": "设置组名称为必填项",
+      "nameMinLength": "设置组名称至少需要 3 个字符",
+      "nameMaxLength": "设置组名称不得超过 100 个字符",
+      "minPrice": "最低价格必须大于 0",
+      "maxPrice": "最高价格必须大于 0",
+      "maxPriceGreaterThanMin": "最高价格必须大于最低价格",
+      "profitRequired": "利润率或固定利润必须至少填写一项",
+      "profitMarginRange": "利润率必须在 0 到 100 之间",
+      "fixedProfitMin": "固定利润必须大于或等于 0",
+      "minQuantity": "数量至少为 1",
+      "maxQuantity": "数量不得超过 9999",
+      "maxFeePercent": "费率不得超过 100%",
+      "minFeePercent": "费率必须大于或等于 0",
+      "minFixedFee": "固定费用必须大于或等于 0",
+      "invalidNumber": "请输入有效的数字，不要以零开头（例如 0.4，而不是 04）",
+      "templateRequired": "模板内容为必填项",
+      "templateMinLength": "模板至少需要 10 个字符",
+      "predefinedTemplateRequired": "请选择一个预设模板",
+      "minOnePriceRange": "至少需要一个价格区间",
+      "maxPriceRanges": "最多允许 10 个价格区间",
+      "overlappingPriceRanges": "价格区间不能重叠",
+      "minStockBuffer": "库存缓冲必须大于或等于 0"
+    },
+    "errors": {
+      "loadFailed": "加载刊登设置组失败",
+      "saveFailed": "保存更改失败",
+      "createFailed": "创建设置组失败",
+      "updateFailed": "更新设置组失败",
+      "deleteFailed": "删除设置组失败",
+      "templateLoadFailed": "加载预设模板失败",
+      "unauthorized": "您没有权限执行此操作",
+      "notFound": "未找到刊登设置组",
+      "networkError": "网络错误。请检查您的网络连接。",
+      "unknownError": "发生意外错误"
+    },
+    "success": {
+      "created": "刊登设置组创建成功",
+      "updated": "刊登设置组更新成功",
+      "deleted": "刊登设置组删除成功",
+      "saved": "更改已成功保存"
+    },
+    "tooltips": {
+      "editGroup": "编辑设置组",
+      "deleteGroup": "删除设置组",
+      "addPriceRange": "再添加一个价格区间",
+      "removePriceRange": "移除此价格区间",
+      "toggleDarkMode": "切换深色模式预览",
+      "switchToDesktop": "切换到桌面视图",
+      "switchToMobile": "切换到移动视图",
+      "copyTemplate": "复制模板 HTML",
+      "resetTemplate": "重置为默认模板"
+    },
+    "help": {
+      "repricingStrategy": "定义多个价格区间，并为每个区间设置不同的利润率。商品将按其成本所在区间定价。",
+      "profitMargin": "基于商品成本按百分比计算的利润。",
+      "fixedProfit": "在商品成本基础上加上的固定美元金额。",
+      "ebayFee": "eBay 的成交费百分比（通常为 10-15%）。",
+      "fixedFee": "eBay 的固定刊登费（通常为 $0.30）。",
+      "tax": "您所在地区的销售税百分比。",
+      "customTemplate": "编写您自己的、带有自定义样式的 HTML 模板。",
+      "predefinedTemplate": "从专业设计的模板中选择。"
+    },
+    "editorTitle": "刊登设置组编辑器",
+    "editorDescription": "配置您的刊登设置、定价策略和模板。",
+    "generalSettings": "常规设置",
+    "pricingStrategy": "调价策略",
+    "addRange": "添加区间",
+    "calculator": {
+      "title": "价格计算器",
+      "subtitle": "测试这些设置，不会保存，仅供预览。",
+      "amazonPrice": "Amazon 采购价",
+      "calculate": "计算",
+      "resultLabel": "eBay 标价",
+      "breakdown": {
+        "amazonPrice": "Amazon 采购价",
+        "tax": "Amazon 采购税费（{{pct}}）",
+        "trueCost": "真实成本（价格 + 税费）",
+        "margin": "利润率（{{pct}}）",
+        "fallbackMargin": "没有匹配的区间，使用备用利润率（{{pct}}）",
+        "fixedProfit": "固定利润",
+        "netTarget": "扣除 eBay 费用前的目标金额",
+        "ebayFee": "eBay 费用（{{pct}}）",
+        "fixedFee": "固定费用",
+        "floorApplied": "低于 eBay 最低价 $0.99，已提高至"
+      }
+    },
+    "feesAndTaxes": "费用与税费",
+    "amazonTaxRateNote": "您的价格计算会自动计入您从 Amazon 采购时所付的预估税费。请在“店铺设置 → Amazon 销售税率”中设置此税率。",
+    "stockControl": "库存控制",
+    "ebayStockQuantity": "eBay 库存",
+    "stockBuffer": "库存缓冲",
+    "stockBufferDescription": "您的 eBay 数量等于 Amazon 库存减去此缓冲值（不低于 0），并以 eBay 库存值为上限。",
+    "htmlTemplate": "HTML 模板",
+    "custom": "自定义",
+    "predefined": "预设",
+    "activeTemplate": "当前模板",
+    "ebayLayoutFile": "EBAY_LAYOUT.HTML",
+    "ebayFormat": "EBAY 格式",
+    "sample": {
+      "productTitle": "无线耳机，主动降噪，40 小时续航",
+      "productDescription": "混合主动降噪、40 小时充电盒和低延迟游戏模式，采用小巧的耳机设计，适合出行、办公和运动。",
+      "productSpecs": "<ul><li>主动降噪</li><li>40 小时电池续航</li><li>通用蓝牙兼容</li><li>内置麦克风</li></ul>"
+    },
+    "drawer": {
+      "deductions": "扣除项"
+    },
+    "copyright": "© {{year}} SellerHill Platform. 保留所有权利。",
+    "keywords": {
+      "title": "可用关键词",
+      "hint": "请用双大括号书写这些关键词；创建商品刊登时，它们会被替换为商品数据。",
+      "items": {
+        "title": "商品标题",
+        "product_description": "商品描述",
+        "feature_bullets": "特点要点列表",
+        "product_details": "规格列表",
+        "main_image": "商品主图 URL",
+        "brand": "品牌",
+        "manufacturer": "制造商",
+        "category": "商品分类"
+      }
+    }
+  }
+}

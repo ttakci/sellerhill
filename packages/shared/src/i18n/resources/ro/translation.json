@@ -1,0 +1,960 @@
+{
+  "common": {
+    "brandName": "SellerHill",
+    "loading": "Se încarcă...",
+    "retry": "Reîncearcă",
+    "ok": "OK",
+    "cancel": "Anulează",
+    "save": "Salvează",
+    "delete": "Șterge",
+    "back": "Înapoi",
+    "previous": "Anterior",
+    "next": "Următorul",
+    "continue": "Continuă",
+    "saveSuccess": "Modificările au fost salvate cu succes",
+    "saveError": "Modificările nu au putut fi salvate",
+    "showing_info": "Se afișează {{from}}-{{to}} din {{total}} înregistrări",
+    "showing": "Se afișează",
+    "of": "din",
+    "rowsPerPage": "Înregistrări pe pagină:",
+    "search": "Caută...",
+    "noResults": "Nu s-au găsit rezultate",
+    "success": "Succes",
+    "failed": "Eșuat",
+    "views": {
+      "label": "Vizualizare",
+      "grid": "Grilă",
+      "table": "Tabel"
+    },
+    "actions": {
+      "refresh": "Reîmprospătează",
+      "edit": "Editează",
+      "delete": "Șterge",
+      "filter": "Filtrează",
+      "export": "Exportă"
+    },
+    "privacy": "Confidențialitate",
+    "support": "Asistență",
+    "notSet": "Nesetat",
+    "notProvided": "Nefurnizat",
+    "noCategory": "Fără categorie",
+    "details": "Detalii",
+    "noBrand": "Fără informații despre brand",
+    "amazonLink": "AMAZON",
+    "unknownProduct": "Produs necunoscut",
+    "languageCode": "ro-RO",
+    "select": "Selectează"
+  },
+  "validation": {
+    "required": "Acest câmp este obligatoriu",
+    "countryRequired": "Selectați o țară",
+    "stateRequired": "Introduceți o regiune sau o locație",
+    "zipCodeRequired": "Introduceți un cod poștal",
+    "invalidEmail": "Introduceți o adresă de e-mail validă",
+    "invalidUrl": "Introduceți un URL valid",
+    "invalidUuid": "Format de ID invalid",
+    "invalidPhone": "Introduceți un număr de telefon valid",
+    "invalidDate": "Introduceți o dată validă",
+    "mustBePositive": "Trebuie să fie un număr pozitiv",
+    "minLength": "Trebuie să aibă cel puțin {{min}} caractere",
+    "maxLength": "Nu poate depăși {{max}} caractere",
+    "onlyAlphanumeric": "Sunt permise doar litere, cifre, spații, cratime și liniuțe de subliniere",
+    "passwordRequirements": "Parola trebuie să conțină litere mari, litere mici și cifre",
+    "passwordStrength": "Parola trebuie să conțină cel puțin o literă mare, o literă mică și o cifră",
+    "passwordMismatch": "Parolele nu se potrivesc",
+    "invalidStatus": "Selectați o stare validă"
+  },
+  "dialog": {
+    "title": {
+      "info": "Informație",
+      "success": "Succes",
+      "warning": "Avertisment",
+      "error": "Eroare"
+    }
+  },
+  "message": {
+    "error": {
+      "header": "Eroare",
+      "goHome": "Mergi la pagina principală",
+      "close": "Închide",
+      "copyRequestId": "Copiază ID-ul cererii",
+      "requestIdCopied": "ID-ul cererii a fost copiat în clipboard"
+    },
+    "success": {
+      "header": "Succes",
+      "ok": "OK"
+    },
+    "warning": {
+      "header": "Avertisment"
+    },
+    "info": {
+      "header": "Informație"
+    }
+  },
+  "errorBoundary": {
+    "title": "Hopa! Ceva nu a funcționat",
+    "message": "Ne cerem scuze pentru neplăcere. Aplicația a întâmpinat o eroare neașteptată.",
+    "reload": "Reîncarcă pagina",
+    "goHome": "Mergi la pagina principală",
+    "details": "Detalii eroare (doar pentru dezvoltare)"
+  },
+  "error": {
+    "resourceNotFound": "{{resourceName}} cu ID-ul {{resourceId}} nu a fost găsit",
+    "validationFailed": "Validarea a eșuat",
+    "unauthorized": "Nu sunteți autorizat",
+    "forbidden": "Acces interzis",
+    "serverError": "A apărut o eroare. Încercați din nou mai târziu."
+  },
+  "products": {
+    "subtitle": "Vizualizați detaliile produselor și datele Amazon pentru toate anunțurile dvs. active."
+  },
+  "menu": {
+    "dashboard": "Panou de control",
+    "listings": "Anunțuri",
+    "ebayListings": "Anunțuri eBay",
+    "listingJobs": "Sarcini de anunțuri",
+    "drafts": "Ciorne",
+    "products": "Produse",
+    "inventory": "Inventar",
+    "orders": "Comenzi",
+    "stores": "Magazine",
+    "billing": "Facturare",
+    "settings": "Setări",
+    "admin": "Operațiuni admin",
+    "configuration": "Configurare",
+    "storeSettings": "Setări magazin",
+    "listingSettingsGroups": "Grupuri de setări pentru anunțuri",
+    "amazonAccounts": "Conturi Amazon",
+    "reports": "Rapoarte",
+    "support": "Asistență",
+    "logout": "Deconectare",
+    "logoutConfirmTitle": "Avertisment",
+    "logoutConfirmDescription": "Sigur doriți să vă deconectați?",
+    "logoutConfirmButton": "Deconectare",
+    "editProfile": "Editează profilul"
+  },
+  "chatbot": {
+    "sidebarTitle": "Aveți întrebări?",
+    "ctaLabel": "Contactați-ne",
+    "openAria": "Deschide chatul de asistență",
+    "unreadAria": "{{count}} mesaje de asistență necitite",
+    "unreadOverflow": "99+",
+    "panelTitle": "Zon",
+    "welcomeMessage": "Bună, cu ce vă pot ajuta?",
+    "placeholder": "Scrieți mesajul…",
+    "placeholderReply": "Vă mulțumim pentru mesaj. Răspunsurile complete generate de AI vor fi disponibile în curând.",
+    "send": "Trimite",
+    "cancel": "Anulează răspunsul",
+    "newConversation": "Conversație nouă",
+    "conversations": "Conversații",
+    "emptyTitle": "Începeți o conversație",
+    "emptyDescription": "Întrebați Zon despre anunțurile, comenzile, setările sau contul dvs.",
+    "offline": "Sunteți offline. Istoricul conversațiilor rămâne disponibil.",
+    "loading": "Se încarcă conversațiile…",
+    "connected": "Conectat",
+    "disconnected": "Se reconectează…",
+    "retry": "Reîncearcă răspunsul",
+    "refresh": "Reîmprospătează chatul",
+    "minimize": "Minimizează",
+    "expand": "Extinde",
+    "close": "Închide"
+  },
+  "operator": {
+    "console": "Consolă operator"
+  },
+  "header": {
+    "selectLanguage": "Selectați limba",
+    "notifications": "Notificări",
+    "openMenu": "Deschide meniul",
+    "collapseSidebar": "Restrânge bara laterală",
+    "expandSidebar": "Extinde bara laterală"
+  },
+  "profile": {
+    "accountSettings": "Setările contului"
+  },
+  "languages": {
+    "en": "English",
+    "tr": "Türkçe",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "ur": "اردو",
+    "ar": "العربية",
+    "az": "Azərbaycanca",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español",
+    "it": "Italiano",
+    "ro": "Română",
+    "uk": "Українська",
+    "zh": "简体中文",
+    "pt": "Português"
+  },
+  "notifications": {
+    "comingSoonTitle": "Acțiune disponibilă în curând",
+    "comingSoon": "Această funcție este în curs de implementare și va fi disponibilă în scurt timp."
+  },
+  "settingsHub": {
+    "title": "Setări",
+    "subtitle": "Gestionați contul, integrările și automatizarea",
+    "sections": {
+      "profile": {
+        "title": "Profil",
+        "subtitle": "Informațiile dvs. personale și avatarul",
+        "edit": "Editează informațiile personale",
+        "nameLabel": "Nume complet",
+        "phoneLabel": "Număr de telefon",
+        "emailLabel": "Adresă de e-mail",
+        "tabs": {
+          "personalInfo": "Informații personale",
+          "personalInfoSubtitle": "Numele, datele de contact și avatarul dvs.",
+          "connectedStores": "Magazine conectate"
+        }
+      },
+      "accounts": {
+        "title": "Conturi conectate",
+        "ebay": {
+          "title": "Cont eBay",
+          "subtitle": "Gestionați magazinele eBay conectate"
+        },
+        "amazon": {
+          "title": "Cont Amazon",
+          "subtitle": "Gestionați conturile de cumpărător pentru preluarea comenzilor"
+        }
+      },
+      "ebay": {
+        "sellerId": "ID vânzător",
+        "connectedSince": "Conectat din",
+        "disconnect": {
+          "action": "Deconectează",
+          "confirmDescription": "Deconectarea oprește sincronizarea comenzilor, achiziționarea automată și actualizările de urmărire pentru acest magazin. Comenzile și anunțurile existente sunt păstrate, iar reconectarea magazinului ulterior restabilește totul. Pentru a retrage accesul și din partea eBay, eliminați SellerHill din setările eBay „Third-party app access”.",
+          "confirmLabel": "Deconectează magazinul",
+          "success": "Magazinul eBay a fost deconectat."
+        },
+        "manageStores": {
+          "empty": "Niciun magazin eBay conectat încă"
+        }
+      },
+      "amazon": {
+        "noAccounts": "Niciun cont Amazon conectat",
+        "connectedSince": "Conectat din",
+        "twoFactorOn": "2FA activat",
+        "twoFactorOff": "Fără 2FA",
+        "autoFulfillOn": "Îndeplinire automată activă · plafon {{cap}}",
+        "autoFulfillOff": "Îndeplinire automată dezactivată",
+        "verificationError": {
+          "invalid_credentials": "Amazon a respins e-mailul sau parola. Actualizați datele de autentificare și verificați din nou.",
+          "captcha": "Amazon a cerut un captcha și a blocat autentificarea automată. Încercați din nou în scurt timp.",
+          "two_factor_required": "Acest cont are 2FA activat, dar nu este salvată nicio cheie secretă pentru aplicația de autentificare. Adăugați cheia secretă 2FA și verificați din nou.",
+          "auth_not_proven": "Autentificarea nu a fost finalizată. Verificați datele de autentificare și cheia secretă 2FA, apoi verificați din nou.",
+          "unexpected_login_page": "Fluxul de autentificare Amazon nu a putut fi finalizat automat. Încercați din nou în scurt timp; dacă problema persistă, contactați asistența.",
+          "transport": "Nu s-a putut contacta Amazon pentru verificarea acestui cont. Încercați din nou în scurt timp.",
+          "unknown": "Contul nu a putut fi verificat. Încercați din nou în scurt timp; dacă problema persistă, contactați asistența."
+        }
+      },
+      "storeConfig": {
+        "title": "Configurarea magazinului",
+        "subtitle": "Locația globală, validarea și setările regionale",
+        "edit": "Editează",
+        "new": "Nou",
+        "global": "Global",
+        "country": "Țară",
+        "region": "Regiune",
+        "zipCode": "Cod poștal",
+        "noLocation": "Nicio locație setată",
+        "noConfigs": "Nicio configurare de magazin încă"
+      },
+      "blacklist": {
+        "title": "Gestionarea listei negre",
+        "subtitle": "Cuvinte cheie interzise pentru anunțurile de produse",
+        "manage": "Gestionează",
+        "keywordCount": "{{count}} cuvinte cheie"
+      },
+      "storeManagement": {
+        "title": "Configurarea magazinului",
+        "subtitle": "Setările magazinului și lista neagră de cuvinte cheie pentru anunțuri",
+        "storeSettings": "Setări magazin",
+        "storeSettingsSubtitle": "Locație, validare și preferințe regionale",
+        "manageMessageTemplates": "Șabloane de mesaje",
+        "manageMessageTemplatesSubtitle": "Vizualizați, editați și creați șabloanele de mesaje automate pentru cumpărători",
+        "manageBlacklist": "Gestionează lista neagră",
+        "manageBlacklistSubtitle": "Cuvinte cheie blocate în titlurile, descrierile și specificațiile anunțurilor",
+        "infoMessage": "Șabloanele de mesaje și regulile listei negre se aplică în funcție de domeniul (global sau per magazin) ales în Setări magazin."
+      },
+      "listingGroups": {
+        "title": "Grupuri de setări pentru anunțuri",
+        "subtitle": "Strategii de repreț, logică de stoc, marje de profit",
+        "manage": "Gestionează grupurile",
+        "manageSubtitle": "Vizualizați, editați și creați grupurile de preț și stoc",
+        "viewAll": "Vezi tot",
+        "create": "Creează un grup nou",
+        "createSubtitle": "Definiți o nouă strategie de repreț și o marjă de profit",
+        "groupCount": "{{count}} grupuri"
+      },
+      "account": {
+        "title": "Cont și securitate",
+        "subtitle": "Preferințe pentru parolă",
+        "changePassword": "Schimbă parola",
+        "changePasswordSubtitle": "Actualizați parola de autentificare"
+      }
+    },
+    "drawer": {
+      "profile": {
+        "title": "Editează informațiile personale",
+        "subtitle": "Actualizați numele, datele de contact și biografia",
+        "firstName": "Prenume",
+        "lastName": "Nume",
+        "email": "E-mail",
+        "phone": "Telefon",
+        "phoneInvalid": "Introduceți un număr de telefon valid pentru țara selectată",
+        "phoneCountry": "Țară",
+        "phoneCountrySearch": "Caută țara",
+        "bio": "Biografie",
+        "address": "Adresă"
+      },
+      "ebayAccounts": {
+        "title": "Conturi eBay",
+        "subtitle": "Magazinele dvs. eBay conectate",
+        "addNew": {
+          "title": "Cont eBay nou",
+          "subtitle": "Autorizați un magazin nou prin autentificarea securizată eBay"
+        },
+        "viewAll": {
+          "title": "Toate"
+        }
+      },
+      "ebayAccountsAll": {
+        "title": "Magazine conectate",
+        "subtitle": "Toate magazinele dvs. eBay conectate"
+      },
+      "amazonAccounts": {
+        "title": "Conturi Amazon",
+        "subtitle": "Conturile dvs. de cumpărător pentru preluarea comenzilor",
+        "addNew": {
+          "title": "Cont Amazon nou",
+          "subtitle": "Conectați un nou cont de cumpărător pentru preluarea comenzilor"
+        },
+        "empty": {
+          "title": "Niciun cont de cumpărător încă",
+          "description": "Conectați un cont de cumpărător Amazon pentru a scana comenzile și a înregistra costurile reale."
+        },
+        "viewAll": {
+          "title": "Toate"
+        }
+      },
+      "amazonAccountsAll": {
+        "title": "Conturi conectate",
+        "subtitle": "Toate conturile dvs. Amazon conectate"
+      },
+      "amazonAdd": {
+        "title": "Adaugă cont Amazon",
+        "subtitle": "Furnizați datele de autentificare pentru preluarea comenzilor",
+        "label": "Etichetă cont",
+        "email": "E-mail",
+        "password": "Parolă",
+        "twoFactorSecret": "Cheie secretă 2FA",
+        "twoFactorSecretHint": "Obligatoriu. Amazon cere un cod de verificare la aproape fiecare autentificare automată, iar o cheie pentru aplicația de autentificare este singura la care putem răspunde în locul dvs. În setările Amazon „Login & Security” activați o aplicație de autentificare și lipiți aici cheia de configurare — nu un cod de 6 cifre. La editarea unui cont existent, lăsați câmpul necompletat pentru a păstra cheia salvată."
+      },
+      "amazonEdit": {
+        "title": "Editează contul Amazon",
+        "subtitle": "Actualizați eticheta sau datele de autentificare",
+        "label": "Etichetă cont",
+        "email": "E-mail",
+        "emailReadOnly": "E-mailul nu poate fi modificat după creare",
+        "password": "Parolă nouă",
+        "passwordHint": "Lăsați necompletat pentru a păstra parola curentă",
+        "twoFactorSecret": "Cheie secretă 2FA",
+        "twoFactorHint": "Lăsați necompletat pentru a păstra cheia secretă 2FA curentă",
+        "twoFactorBadgeSet": "2FA setat",
+        "twoFactorBadgeNotSet": "2FA nesetat"
+      },
+      "storeConfig": {
+        "titleEdit": "Editează configurarea magazinului",
+        "titleNew": "Configurare nouă de magazin",
+        "subtitle": "Locația și regulile de validare",
+        "global": "Global (toate magazinele)",
+        "appliesTo": "Se aplică pentru",
+        "validation": "Validarea anunțurilor",
+        "validateTitle": "Validează titlurile produselor",
+        "validateDescription": "Validează descrierile produselor"
+      },
+      "storeSettings": {
+        "title": "Setări magazin",
+        "subtitle": "Locația și validarea anunțurilor pentru domeniul selectat",
+        "global": "Global (toate magazinele)",
+        "appliesTo": "Se aplică pentru",
+        "checkBlacklist": "Verifică cuvintele cheie din lista neagră",
+        "checkBlacklistDesc": "Scanează titlurile, descrierile, specificațiile și brandul anunțurilor în raport cu lista neagră înainte de publicare. Selecția de câmpuri a fiecărui cuvânt cheie stabilește unde este verificat.",
+        "country": "Țară",
+        "countryPlaceholder": "Selectați o țară",
+        "region": "Regiune",
+        "zipCode": "Cod poștal",
+        "steps": {
+          "address": "Adresă",
+          "automation": "Automatizare",
+          "messaging": "Mesaje pentru cumpărători",
+          "blacklist": "Listă neagră"
+        }
+      },
+      "blacklist": {
+        "manage": {
+          "title": "Gestionează lista neagră",
+          "subtitle": "Cuvinte cheie blocate în titlurile, descrierile și specificațiile anunțurilor pentru domeniul selectat"
+        },
+        "add": {
+          "keyword": "Cuvânt cheie",
+          "keywordsLabel": "Cuvinte cheie",
+          "keywordsPlaceholder": "Introduceți cuvinte cheie...",
+          "keywordsHint": "Introduceți câte un cuvânt cheie pe rând sau separați-le prin virgule",
+          "typeLabel": "Verifică în",
+          "type": {
+            "title": "Titlu",
+            "description": "Descriere",
+            "feature_specification": "Caracteristici și specificații",
+            "brand_manufacturer": "Brand și producător"
+          },
+          "add": "Adaugă cuvinte cheie",
+          "duplicate": "Toate cuvintele cheie includ deja câmpurile selectate",
+          "empty": "Introduceți cel puțin un cuvânt cheie",
+          "typeRequired": "Selectați cel puțin un câmp"
+        },
+        "list": {
+          "empty": "Niciun cuvânt cheie în lista neagră pentru domeniul selectat",
+          "noResults": "Niciun cuvânt cheie nu corespunde căutării",
+          "removeLabel": "Elimină cuvântul cheie",
+          "selectAll": "Selectează tot",
+          "selectedCount": "{{count}} selectate",
+          "bulkDelete": "Șterge selecția",
+          "confirmBulkDeleteDescription": "Ștergeți {{count}} cuvinte cheie din lista neagră? Această acțiune nu poate fi anulată."
+        }
+      },
+      "listingGroup": {
+        "list": {
+          "title": "Grupuri de setări pentru anunțuri",
+          "subtitle": "Vizualizați, editați sau creați grupurile de repreț"
+        },
+        "all": {
+          "title": "Toate grupurile",
+          "subtitle": "Selectați un grup pentru a-i edita regulile de preț și stoc"
+        }
+      },
+      "password": {
+        "title": "Schimbă parola",
+        "subtitle": "Alegeți o parolă puternică și unică",
+        "current": "Parola curentă",
+        "new": "Parolă nouă",
+        "confirm": "Confirmă parola",
+        "mismatch": "Parolele nu se potrivesc",
+        "tooShort": "Parola trebuie să aibă cel puțin 8 caractere",
+        "sameAsCurrent": "Parola nouă trebuie să fie diferită de cea curentă",
+        "successHeader": "Parolă actualizată",
+        "successDescription": "Parola dvs. a fost schimbată cu succes."
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 SellerHill E-commerce Solutions. Toate drepturile rezervate.",
+    "privacyPolicy": "Politica de confidențialitate",
+    "termsOfService": "Termeni și condiții",
+    "contactSupport": "Contactați asistența"
+  },
+  "landing": {
+    "navbar": {
+      "features": "Funcții",
+      "templates": "Șabloane",
+      "profit": "Profit real",
+      "pricing": "Prețuri",
+      "faq": "Întrebări frecvente",
+      "login": "Autentificare",
+      "getStarted": "Începeți gratuit",
+      "demo": "Demo",
+      "menu": {
+        "why": "De ce SellerHill",
+        "groups": "Grupuri de setări",
+        "templates": "Șabloane de anunțuri",
+        "actions": "Acțiuni în așteptare",
+        "specifics": "Specificații ale articolului",
+        "mobile": "Mobil",
+        "trust": "Securitate și confidențialitate"
+      },
+      "about": "Despre noi"
+    },
+    "hero": {
+      "eyebrow": "Automatizare Amazon → eBay",
+      "headline": "Automatizare completă pentru magazinul dvs. eBay.",
+      "headlineAccent": "La un preț accesibil.",
+      "subheading": "Reguli de preț și de șabloane pentru fiecare grup de produse, verificări de preț și stoc de patru ori pe zi, specificații ale articolului completate integral, comenzi și urmărire automate. În plus, un ecran Acțiuni în așteptare care vă spune exact ce urmează să faceți.",
+      "ctaPrimary": "Începeți gratuit",
+      "ctaSecondary": "Demo live",
+      "trialTitle": "1 LUNĂ DE ÎNCERCARE GRATUITĂ!",
+      "trialNoCard": "Nu este necesar un card bancar",
+      "trialCancelAnytime": "Anulați oricând",
+      "trialMobile": "Rulați-l de pe telefon",
+      "priceBadge": {
+        "caption": "preț lunar accesibil",
+        "per": "/LUNĂ"
+      },
+      "toast": {
+        "title": "Comandă plasată automat",
+        "text": "Numărul de urmărire a fost încărcat pe eBay · chiar acum"
+      }
+    },
+    "proof": {
+      "sync": {
+        "value": "4×",
+        "label": "verificări de preț și stoc în fiecare zi"
+      },
+      "specifics": {
+        "value": "45",
+        "label": "specificații ale articolului completate pe anunț"
+      },
+      "templates": {
+        "value": "12",
+        "label": "șabloane profesionale de anunțuri"
+      },
+      "trial": {
+        "value": "1 lună",
+        "label": "încercare gratuită, fără card"
+      }
+    },
+    "why": {
+      "eyebrow": "De ce SellerHill",
+      "sectionTitle": "Toate instrumentele fac lucrurile de bază. Diferența o face restul.",
+      "sectionSubtitle": "Publicarea anunțurilor, comenzile și urmărirea sunt o condiție minimă în această categorie. SellerHill adaugă instrumentele cu care vă puteți conduce magazinul în mod diferit.",
+      "exclusive": "Doar pe SellerHill",
+      "groups": {
+        "title": "O strategie diferită pentru fiecare grup de produse",
+        "description": "Nu mai impuneți același set de setări întregului magazin. Setați marja, șablonul de anunț, stocul, rezerva de stoc și deducerea comisioanelor pentru fiecare grup de produse: un grup pentru Ziua Mamei, altul doar pentru piese auto.",
+        "chipA": "Ziua Mamei",
+        "chipB": "Auto",
+        "chipC": "Electronice",
+        "margin": "marjă de {{value}}%",
+        "buffer": "rezervă de {{value}} unități"
+      },
+      "sync": {
+        "title": "Preț și stoc urmărite de 4 ori pe zi",
+        "description": "Prețul și stocul sursă sunt verificate de patru ori în fiecare zi, iar orice modificare ajunge în anunțul dvs. eBay în aceeași rulare. Nu mai vindeți ce nu mai este în stoc și nu mai păstrați prețuri care aduc pierderi.",
+        "caption": "O verificare la fiecare 6 ore"
+      },
+      "specifics": {
+        "title": "Specificații ale articolului, completate cu adevărat",
+        "description": "Nu sărim peste câmpurile obligatorii cu „Does not apply”. Fiecare atribut este asociat cu o valoare acceptată de categoria eBay, astfel încât anunțul dvs. apare în filtrele cumpărătorilor.",
+        "others": "Alții",
+        "us": "SellerHill"
+      },
+      "actions": {
+        "title": "Acțiuni în așteptare vă ține pe drumul cel bun",
+        "description": "O comandă blocată, un cont deconectat, un anunț rămas fără stoc… Tot ce așteaptă o decizie din partea dvs., pe un singur ecran, cele mai urgente primele.",
+        "rowA": "Comandă în așteptarea aprobării dvs.",
+        "rowB": "Anunț oprit de lista dvs. neagră",
+        "rowC": "Anunț activ fără stoc"
+      },
+      "supplier": {
+        "title": "Furnizorul dvs. nu apare niciodată",
+        "description": "Imaginile sunt încărcate pe serverele eBay, brandurile sunt eliminate din titluri, iar numerele de urmărire sunt convertite automat. Cuvintele cheie din lista dvs. neagră sunt verificate la fiecare anunț înainte de publicare.",
+        "chipImages": "Imagini găzduite pe eBay",
+        "chipTracking": "Urmărire convertită",
+        "chipBlacklist": "Verificarea listei negre"
+      },
+      "price": {
+        "title": "Automatizare accesibilă",
+        "description": "Setul complet de automatizare profesională la un abonament lunar mult mai mic. Fiecare funcție este în fiecare plan; planurile diferă doar prin volumul de anunțuri și comenzi.",
+        "cta": "Vezi planurile"
+      }
+    },
+    "groups": {
+      "eyebrow": "Grupuri de setări",
+      "sectionTitle": "Un singur magazin. Câte strategii aveți nevoie.",
+      "sectionSubtitle": "Un grup de setări este un set reutilizabil: definiți o dată regula de preț, șablonul de anunț și setările de stoc, apoi aplicați-l oricăror produse doriți. Creați grupuri separate pentru campanii sezoniere, reguli specifice categoriilor sau articole cu marjă mare.",
+      "params": {
+        "margin": {
+          "title": "Marja de profit",
+          "description": "Reguli de marjă pe trepte, în funcție de intervalul de preț."
+        },
+        "template": {
+          "title": "Șablon de anunț",
+          "description": "Un design de descriere pentru fiecare grup."
+        },
+        "stock": {
+          "title": "Stoc și rezervă de stoc",
+          "description": "Cantitatea afișată pe eBay și marja ei de siguranță."
+        },
+        "fees": {
+          "title": "Deducerea comisioanelor",
+          "description": "Comisioanele eBay și costurile fixe sunt incluse în preț."
+        },
+        "content": {
+          "title": "Titlu și conținut",
+          "description": "Eliminarea brandului și titluri AI, pentru fiecare grup."
+        }
+      },
+      "examplesTitle": "Exemple de configurări",
+      "examples": {
+        "seasonal": {
+          "name": "Ziua Mamei",
+          "note": "Campanie sezonieră: un șablon potrivit pentru cadouri și o marjă mai mare până la jumătatea lunii mai."
+        },
+        "category": {
+          "name": "Auto",
+          "note": "Doar piese auto: un șablon axat pe compatibilitate și o rezervă de stoc proprie."
+        },
+        "electronics": {
+          "name": "Electronice",
+          "note": "Un șablon cu tabel de specificații și o rezervă mai mare pentru produsele cu vânzări rapide."
+        }
+      },
+      "screenCaption": "Ecranul real Grupuri de setări din contul demo"
+    },
+    "templates": {
+      "eyebrow": "Șabloane de anunțuri",
+      "sectionTitle": "Anunțuri cu aspect profesionist, fără designer.",
+      "sectionSubtitle": "Alegeți unul dintre cele 12 șabloane gata făcute sau scrieți propriul HTML. Fiecare grup de setări poate folosi propriul șablon. Previzualizările de mai jos sunt generate cu șabloanele noastre reale.",
+      "names": {
+        "generalStore": "Magazin general",
+        "techGadgets": "Tehnologie",
+        "homeDecor": "Casă și decorațiuni",
+        "kitchenDining": "Bucătărie",
+        "fitnessSports": "Sport și fitness",
+        "outdoorSurvival": "Aer liber",
+        "beautyHealth": "Frumusețe și sănătate",
+        "apparelFashion": "Îmbrăcăminte și modă",
+        "autoParts": "Piese auto",
+        "petSupplies": "Articole pentru animale",
+        "toysKids": "Jucării și copii",
+        "minimalist": "Minimalist"
+      },
+      "points": {
+        "editable": "Complet editabil: deschideți șablonul și schimbați orice doriți.",
+        "mobile": "Adaptat pentru mobil: arată corect și în aplicația eBay.",
+        "clean": "Fără urme ale furnizorului: nimic din descriere sau din imagini nu indică furnizorul dvs.",
+        "specs": "Specificațiile și punctele forte ale articolului sunt plasate automat."
+      },
+      "previewNote": "Șablon live, derulați pentru a explora",
+      "openFull": "Deschide pagina completă"
+    },
+    "showcase": {
+      "eyebrow": "În interiorul produsului",
+      "sectionTitle": "Ecranele pe care le veți folosi zilnic.",
+      "sectionSubtitle": "Acestea nu sunt machete de design; sunt ecrane reale din contul nostru demo, care nu necesită înregistrare.",
+      "actionCenter": {
+        "title": "Acțiuni în așteptare: următoarea sarcină este mereu clară",
+        "detail": "Tot ce nu poate rezolva automatizarea singură ajunge aici: comenzi în așteptarea aprobării, anunțuri oprite de lista neagră, conturi deconectate, limite de plan pe cale să se epuizeze. Fiecare element spune ce s-a întâmplat, de ce contează și unde să mergeți, cu un singur clic.",
+        "point": "Contorul din bara laterală arată câte lucruri vă așteaptă, din orice ecran."
+      },
+      "itemSpecifics": {
+        "title": "Specificațiile articolului pe care le cere eBay, complete",
+        "detail": "SellerHill colectează fiecare atribut pe care catalogul sursă îl are pentru un produs și îl asociază câmpurilor definite de categoria eBay. Când o categorie acceptă doar valori dintr-o listă, alege valoarea potrivită, trimițând până la 45 de specificații pe anunț.",
+        "point": "Anunțurile care apar în filtrele cumpărătorilor apar mai des în căutări."
+      },
+      "orders": {
+        "title": "Comenzi plasate automat, urmărire gestionată automat",
+        "detail": "Când un articol se vinde pe eBay, comanda este plasată automat la sursă și expediată direct către cumpărătorul dvs. După expediere, numărul de urmărire este convertit și încărcat pe eBay, astfel încât cumpărătorul dvs. nu vede niciodată furnizorul.",
+        "point": "Setați un plafon de cheltuieli pe comandă; orice depășire așteaptă aprobarea dvs."
+      },
+      "priceStock": {
+        "title": "Preț și stoc sincronizate de 4 ori pe zi",
+        "detail": "Prețul și stocul sursă ale fiecărui anunț sunt verificate de patru ori pe zi. Când ceva se schimbă, prețul eBay este recalculat cu regula de marjă a grupului dvs. de setări, iar stocul este actualizat după aplicarea rezervei.",
+        "point": "Blocați prețul sau cantitatea pentru fiecare anunț sau opriți vânzările cu un singur clic."
+      }
+    },
+    "profit": {
+      "sectionTitle": "Venitul nu înseamnă profit. Vedeți cât câștigați de fapt.",
+      "sectionSubtitle": "SellerHill nu aplică o marjă estimată. Compară ce v-a plătit efectiv eBay cu ce ați plătit efectiv pentru comandă și raportează ce rămâne.",
+      "actuals": {
+        "title": "Cifre reale de ambele părți",
+        "description": "Câștigul net eBay provine din vânzarea reală, costul comenzii din comanda reală la sursă. Nimic între ele nu este presupus."
+      },
+      "confirmed": {
+        "title": "Profit confirmat",
+        "description": "Profit calculat pe baza datelor complete ale tranzacției. Este cifra cu care puteți planifica."
+      },
+      "estimated": {
+        "title": "Profit estimat",
+        "description": "Când datele de cost nu sunt încă complete, profitul este marcat ca estimare și ținut separat de totalul dvs. confirmat."
+      },
+      "pnl": {
+        "title": "Profit și pierdere lună de lună",
+        "description": "Douăsprezece luni de venituri, costuri, marjă și ROI pe un singur ecran, exportabile cu un clic."
+      },
+      "tabs": {
+        "overview": "Prezentare generală",
+        "chart": "Grafic",
+        "pnl": "Profit și pierdere",
+        "perOrder": "Pe comandă"
+      }
+    },
+    "mobile": {
+      "eyebrow": "Pregătit pentru mobil",
+      "sectionTitle": "Tot ce faceți pe desktop, de pe telefon.",
+      "sectionSubtitle": "Nu există o aplicație separată de descărcat. Interfața rulează în browser și se adaptează oricărei dimensiuni de ecran; machetele pe carduri o păstrează ușor de citit și de folosit pe telefon.",
+      "bullets": {
+        "b1": "Urmăriți comenzile, profitul și acțiunile în așteptare din mers",
+        "b2": "Adăugați produse, schimbați setările anunțurilor, opriți vânzările",
+        "b3": "Nu trebuie să instalați nimic; același cont, aceleași ecrane"
+      },
+      "screens": {
+        "dashboard": "Panou de control",
+        "actions": "Acțiuni în așteptare",
+        "orders": "Comenzi"
+      }
+    },
+    "trust": {
+      "eyebrow": "Securitate și confidențialitate",
+      "sectionTitle": "Informațiile dvs. sunt ale dvs. și așa rămân.",
+      "sectionSubtitle": "Conectarea conturilor la o platformă de automatizare cere încredere. Spunem clar ce păstrăm și ce nu.",
+      "card": {
+        "title": "Numărul cardului dvs. nu ajunge niciodată la noi",
+        "description": "Plățile sunt procesate pe pagina de plată securizată Stripe. Nu vedem și nu stocăm niciodată numărul cardului dvs."
+      },
+      "session": {
+        "title": "Datele sesiunii dvs. nu sunt partajate niciodată",
+        "description": "Datele de autentificare și de sesiune ale contului dvs. Amazon sunt stocate criptat, folosite doar pentru operațiunile dvs. și nu sunt predate niciodată vreunei aplicații terțe."
+      },
+      "policy": {
+        "title": "Politici scrise pe înțelesul tuturor",
+        "description": "Ce prelucrăm și de ce este explicat în Politica de confidențialitate; termenii serviciului sunt în Termeni și condiții. Le puteți citi oricând."
+      },
+      "privacyLink": "Politica de confidențialitate",
+      "termsLink": "Termeni și condiții"
+    },
+    "about": {
+      "eyebrow": "Despre noi",
+      "sectionTitle": "O echipă de software care cunoaște vânzarea din interior.",
+      "lead": "SellerHill este un produs software dezvoltat de 2B Trading, LLC. Înființată în Wyoming în 2022, echipa noastră a învățat acest domeniu direct, vânzând pe Amazon și eBay.",
+      "body": "Construim SellerHill combinând această experiență de vânzare cu 20 de ani de inginerie software. Scopul nostru este o platformă care preia singură munca zilnică a unui vânzător, își bazează fiecare decizie pe date corecte și păstrează aceste date în siguranță. Continuăm să îmbunătățim produsul pe baza feedbackului vânzătorilor care îl folosesc.",
+      "facts": {
+        "experience": {
+          "title": "Funcții născute din nevoi reale",
+          "description": "Grupurile de setări, specificațiile complete ale articolului și Acțiuni în așteptare au apărut din problemele întâmpinate în timp ce vindeam. Adăugăm funcții care își fac treaba, nu unele care arată bine doar pe hârtie."
+        },
+        "data": {
+          "title": "Date corecte, fără cifre umflate",
+          "description": "Profitul este calculat din câștigurile reale eBay și costul real Amazon. Când costul unei comenzi nu este încă cunoscut, nu îl completăm cu o presupunere; îl arătăm clar."
+        },
+        "security": {
+          "title": "Securitate din proiectare",
+          "description": "Datele de autentificare ale conturilor sunt stocate criptat, iar datele de plată nu ajung niciodată la noi. Securitatea este fundamentul arhitecturii, nu o funcție adăugată ulterior."
+        }
+      }
+    },
+    "standard": {
+      "sectionTitle": "Și tot ce vă așteptați de la o platformă de automatizare.",
+      "sectionSubtitle": "Elementele fundamentale, complete, toate incluse în fiecare plan.",
+      "items": {
+        "bulkAsin": {
+          "title": "Publicare în masă cu ASIN",
+          "description": "Lipiți sute de ASIN-uri și lăsați anunțurile să se creeze în coadă."
+        },
+        "aiTitle": {
+          "title": "Titluri optimizate cu AI",
+          "description": "Titluri care folosesc toate cele 80 de caractere pentru căutare."
+        },
+        "autoOrder": {
+          "title": "Comenzi automate",
+          "description": "Când un articol se vinde, comanda este plasată la sursă."
+        },
+        "tracking": {
+          "title": "Urmărire și conversie",
+          "description": "Numere de urmărire convertite și încărcate pe eBay."
+        },
+        "messages": {
+          "title": "Mesaje automate pentru cumpărători",
+          "description": "Mesaje pentru comandă, expediere, livrare și feedback."
+        },
+        "multiStore": {
+          "title": "Mai multe magazine eBay",
+          "description": "Gestionați toate magazinele dintr-un singur cont."
+        },
+        "import": {
+          "title": "Importul anunțurilor existente",
+          "description": "Aduceți în SellerHill anunțurile deja active pe eBay."
+        },
+        "blacklist": {
+          "title": "Verificarea listei negre",
+          "description": "Cuvintele interzise sunt căutate în titluri, descrieri și specificații."
+        }
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "De la ASIN la un magazin automatizat",
+      "sectionSubtitle": "Configurați o singură dată, iar munca zilnică nu mai este a dvs.",
+      "step1": {
+        "title": "Conectați-vă conturile",
+        "description": "Conectați magazinul eBay și contul Amazon. Durează câteva minute și nu trebuie să instalați nimic."
+      },
+      "step2": {
+        "title": "Creați-vă grupurile de setări",
+        "description": "Definiți o singură dată regulile de marjă, șablon, stoc și comisioane, pentru fiecare grup de produse."
+      },
+      "step3": {
+        "title": "Adăugați produsele",
+        "description": "Lipiți ASIN-urile și alegeți un grup de setări. Anunțurile sunt create cu specificații complete ale articolului."
+      },
+      "step4": {
+        "title": "Lăsați SellerHill să se ocupe",
+        "description": "Prețul și stocul rămân sincronizate de patru ori pe zi, comenzile sunt plasate, urmărirea este gestionată și mesajele către cumpărători sunt trimise."
+      },
+      "step5": {
+        "title": "Urmăriți Acțiuni în așteptare",
+        "description": "Tot ce necesită decizia dvs., pe un singur ecran, plus profitul real pentru fiecare comandă."
+      }
+    },
+    "demo": {
+      "sectionTitle": "Vedeți SellerHill înainte de a vă înregistra.",
+      "sectionSubtitle": "Explorați panoul de control, anunțurile, comenzile, grupurile de setări și Acțiuni în așteptare cu date de exemplu. Nimic de completat, nimic de anulat.",
+      "button": "Încercați demo-ul live",
+      "note": "Fără cont · Fără card bancar · Nimic nu se salvează.",
+      "bullets": {
+        "b1": "Panoul de control real, cu profitul confirmat și cel estimat unul lângă altul",
+        "b2": "Grupuri de setări de exemplu, precum Ziua Mamei și Auto",
+        "b3": "Nimic nu se salvează; puteți ieși oricând"
+      }
+    },
+    "pricing": {
+      "eyebrow": "Prețuri",
+      "sectionTitle": "Automatizare accesibilă.",
+      "sectionSubtitle": "Fiecare plan include toate funcțiile. Planurile diferă doar prin numărul de anunțuri active și volumul lunar de comenzi, așa că funcțiile pe care alte instrumente le rezervă nivelurilor superioare sunt ale dvs. chiar și în cel mai mic plan.",
+      "billingNote": "Anulați oricând. Prețurile nu includ taxele locale, acolo unde se aplică.",
+      "perMonth": "/lună",
+      "mostPopular": "Cel mai popular",
+      "planCta": "Începeți gratuit",
+      "showAllPlans": "Vezi toate cele {{count}} planuri",
+      "showFewerPlans": "Arată mai puține planuri",
+      "notIncluded": "Nu este inclus",
+      "upToListings": "Până la {{limit}} anunțuri active",
+      "unlimitedListings": "Anunțuri active nelimitate",
+      "upToOrders": "Până la {{limit}} comenzi automate / lună",
+      "unlimitedOrders": "Comenzi automate nelimitate",
+      "upToConversions": "{{limit}} conversii de urmărire / lună",
+      "unlimitedConversions": "Conversii de urmărire nelimitate",
+      "catalogError": "Prețurile live nu au putut fi încărcate acum. Mai jos este afișată o prezentare generală a planurilor.",
+      "included": {
+        "groups": "Grupuri de setări și 12 șabloane de anunțuri",
+        "sync": "Verificări de preț și stoc de 4× pe zi",
+        "specifics": "Specificații complete ale articolului eBay",
+        "autoOrder": "Comenzi și urmărire automate",
+        "actions": "Ecranul Acțiuni în așteptare",
+        "profit": "Raportare a profitului real",
+        "multiStore": "Mai multe magazine eBay",
+        "support": "Asistență prin e-mail și chat"
+      },
+      "catalogFallback": {
+        "nano": {
+          "price": "$24.99",
+          "listings": "Până la 500 de anunțuri active",
+          "orders": "Până la 100 de comenzi automate / lună",
+          "conversions": "50 de conversii de urmărire / lună"
+        },
+        "starter": {
+          "price": "$44.99",
+          "listings": "Până la 2,000 de anunțuri active",
+          "orders": "Până la 300 de comenzi automate / lună",
+          "conversions": "150 de conversii de urmărire / lună"
+        },
+        "growth": {
+          "price": "$104.99",
+          "listings": "Până la 5,000 de anunțuri active",
+          "orders": "Până la 600 de comenzi automate / lună",
+          "conversions": "300 de conversii de urmărire / lună"
+        },
+        "pro": {
+          "price": "$179.99",
+          "listings": "Până la 10,000 de anunțuri active",
+          "orders": "Până la 1,000 de comenzi automate / lună",
+          "conversions": "500 de conversii de urmărire / lună"
+        }
+      }
+    },
+    "faq": {
+      "sectionTitle": "Întrebări frecvente",
+      "sectionSubtitle": "Bine de știut înainte de a începe.",
+      "q1": {
+        "question": "Ce sunt grupurile de setări și de ce contează?",
+        "answer": "Un grup de setări este un set reutilizabil format dintr-o regulă de marjă, un șablon de anunț, stoc, rezervă de stoc și deducerea comisioanelor. În loc să impuneți o singură configurație întregului magazin, dați fiecărui grup de produse propria strategie: produsele pentru Ziua Mamei rulează cu o marjă și un șablon sezonier, produsele auto cu propriile reguli. Puteți muta produsele între grupuri oricând."
+      },
+      "q2": {
+        "question": "Cât de des rulează sincronizarea prețului și a stocului?",
+        "answer": "SellerHill verifică de patru ori pe zi prețul și stocul sursă ale produselor dvs. listate. Când se schimbă prețul sau stocul, anunțul eBay corespunzător este actualizat în aceeași rulare. Iar când un articol se vinde pe eBay, stocul este redus imediat, fără a aștepta următoarea verificare."
+      },
+      "q3": {
+        "question": "Cum completați specificațiile articolului?",
+        "answer": "Colectăm fiecare atribut pe care catalogul sursă îl are pentru un produs și îl asociem câmpurilor definite de categoria eBay. Când o categorie acceptă doar anumite valori, o alegem pe cea potrivită din lista ei. În loc să sărim peste câmpurile obligatorii cu „Does not apply”, le completăm cu valori reale, trimițând până la 45 de specificații pe anunț."
+      },
+      "q4": {
+        "question": "Cum funcționează comanda automată?",
+        "answer": "Când un cumpărător comandă pe eBay, SellerHill plasează comanda corespunzătoare din contul dvs. Amazon conectat și o expediază la adresa cumpărătorului. Setați un plafon de cheltuieli pentru fiecare cont; comenzile care îl depășesc nu sunt trimise și așteaptă aprobarea dvs. pe ecranul Acțiuni în așteptare."
+      },
+      "q5": {
+        "question": "Ce este conversia numărului de urmărire?",
+        "answer": "Numărul de urmărire primit de la sursă poate dezvălui de unde provine articolul. Cu conversia activată, SellerHill îl transformă într-un alt număr urmăribil înainte de a-l încărca pe eBay. Dvs. decideți dacă conversia este activată și ce curieri acoperă."
+      },
+      "q6": {
+        "question": "Va apărea numele furnizorului meu în anunțuri?",
+        "answer": "Nu. Imaginile produselor sunt încărcate pe serverele eBay, brandurile pot fi eliminate din titluri, iar șabloanele de descriere nu conțin nimic care să indice un furnizor. Cuvintele cheie din lista dvs. neagră sunt căutate în fiecare anunț înainte de publicare; un anunț care corespunde nu este publicat."
+      },
+      "q7": {
+        "question": "Ce face ecranul Acțiuni în așteptare?",
+        "answer": "Tot ce nu poate rezolva automatizarea singură ajunge acolo: comenzi în așteptarea aprobării, anunțuri oprite de lista neagră, conturi deconectate, anunțuri active fără stoc sau limite de plan pe cale să se epuizeze. Elementele sunt ordonate după urgență și vă duc direct la ecranul potrivit."
+      },
+      "q8": {
+        "question": "Pot modifica șabloanele de anunțuri?",
+        "answer": "Da. Alegeți unul dintre cele 12 șabloane gata făcute, editați-l pe oricare sau scrieți propriul șablon HTML. Fiecare grup de setări poate folosi un alt șablon, iar previzualizarea arată cum va arăta anunțul pe eBay înainte de a salva."
+      },
+      "q9": {
+        "question": "Stocați datele cardului sau ale contului meu?",
+        "answer": "Nu stocăm numărul cardului dvs.; plățile sunt procesate pe pagina de plată securizată Stripe, iar datele cardului nu ajung niciodată la noi. Datele de autentificare și de sesiune ale contului dvs. Amazon sunt stocate criptat, folosite doar pentru operațiunile dvs. și nu sunt partajate cu nicio aplicație terță. Detaliile se găsesc în Politica noastră de confidențialitate."
+      },
+      "q10": {
+        "question": "Îl pot folosi de pe telefon?",
+        "answer": "Da. SellerHill rulează în browser, iar interfața se adaptează oricărei dimensiuni de ecran. Tot ce faceți pe desktop, inclusiv adăugarea produselor, schimbarea setărilor și urmărirea comenzilor și a acțiunilor în așteptare, funcționează de pe telefon, fără nicio aplicație de instalat."
+      },
+      "q11": {
+        "question": "Cum se calculează profitul real?",
+        "answer": "SellerHill ia câștigul net pe care eBay vi l-a plătit efectiv pentru vânzare (după comisioanele eBay) și scade ce ați plătit efectiv pentru comandă, inclusiv taxele și transportul. Comenzile ale căror date de cost nu sunt încă complete sunt marcate „estimat” și ținute separat de totalul dvs. confirmat."
+      },
+      "q12": {
+        "question": "Pot încerca înainte de a plăti?",
+        "answer": "Da, în două moduri. Demo-ul live deschide întreaga aplicație cu date de exemplu, fără înregistrare. Sau creați un cont și începeți perioada de încercare gratuită de o lună, fără card bancar."
+      }
+    },
+    "ctaBanner": {
+      "variant2": {
+        "headline": "Automatizare mai inteligentă. Un preț mai mic.",
+        "subheading": "Strategii pentru fiecare grup de produse, sincronizare de patru ori pe zi, specificații complete ale articolului și un ecran Acțiuni în așteptare care vă îndrumă. Încercați gratuit o lună, fără card bancar.",
+        "button": "Începeți gratuit"
+      }
+    },
+    "footer": {
+      "description": "SellerHill este o platformă de automatizare Amazon → eBay: strategii pentru fiecare grup de produse, verificări de preț și stoc de patru ori pe zi, specificații complete ale articolului, comenzi și urmărire automate și raportare a profitului real.",
+      "product": "Produs",
+      "legal": "Juridic",
+      "links": {
+        "features": "Funcții",
+        "pricing": "Prețuri",
+        "templates": "Șabloane",
+        "profit": "Profit real",
+        "demo": "Demo live"
+      },
+      "companyLinks": {
+        "contact": "Contact"
+      },
+      "legalLinks": {
+        "privacy": "Politica de confidențialitate",
+        "terms": "Termeni și condiții",
+        "cookies": "Cookie-uri"
+      },
+      "copyright": "© {{year}} SellerHill. Toate drepturile rezervate."
+    }
+  },
+  "demo": {
+    "banner": {
+      "label": "Demo",
+      "description": "Date de exemplu — nimic nu se salvează.",
+      "exit": "Ieși din demo",
+      "signUp": "Creează cont gratuit"
+    },
+    "readonly": {
+      "title": "Demo doar pentru citire",
+      "message": "Explorați un demo plin cu date de exemplu, deci modificările nu pot fi salvate. Creați un cont gratuit pentru a rula toate acestea în magazinul dvs."
+    }
+  }
+}

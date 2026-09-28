@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Ventes, profit et performance des annonces",
+    "greeting": "Bonjour, {{name}}",
+    "selectStore": "Sélectionner une boutique",
+    "allStores": "Toutes les boutiques",
+    "noData": "Aucune donnée pour le moment",
+    "backToDashboard": "Retour au tableau de bord",
+    "tabs": {
+      "cards": "Cartes",
+      "chart": "Graphique",
+      "pnl": "Résultat"
+    },
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois-ci",
+    "thisYear": "Cette année",
+    "metrics": {
+      "sales": "Ventes",
+      "units": "Unités",
+      "orders": "Commandes",
+      "ordersUnits": "Commandes / Unités",
+      "refunds": "Remboursements",
+      "refundRate": "Taux de remboursement",
+      "grossProfit": "Profit brut",
+      "netProfit": "Profit net",
+      "estimatedPayout": "Versement est.",
+      "margin": "Marge",
+      "roi": "ROI",
+      "avgOrderValue": "Commande moy.",
+      "costOfGoods": "Coût du produit",
+      "transactionFees": "Frais de transaction",
+      "adFees": "Frais publicitaires",
+      "amazonShipping": "Livraison Amazon",
+      "amazonTax": "Taxe Amazon",
+      "revenueUncosted": "Chiffre d'affaires sans coût"
+    },
+    "card": {
+      "showMore": "Plus de détails",
+      "showLess": "Moins de détails",
+      "activeHint": "Filtre les listes ci-dessous"
+    },
+    "listingsSection": "Annonces",
+    "ordersSection": "Commandes",
+    "listingsCount": "{{count}} avec des ventes",
+    "ordersCount": "{{count}} commandes",
+    "viewAllListings": "Tout afficher",
+    "viewAllOrders": "Tout afficher",
+    "listingsEmptyTitle": "Aucune annonce avec des ventes",
+    "listingsEmptySubtitle": "Les annonces qui ont reçu des commandes au cours de la période sélectionnée apparaissent ici.",
+    "ordersEmptyTitle": "Aucune commande sur cette période",
+    "ordersEmptySubtitle": "Les commandes de la période sélectionnée s'afficheront ici dès que des ventes arriveront.",
+    "chart": {
+      "title": "Performance",
+      "subtitle": "Profit net par rapport au volume des ventes",
+      "summary": "Résumé de la période",
+      "granularity": {
+        "day": "30 jours",
+        "week": "12 semaines",
+        "month": "12 mois"
+      },
+      "series": {
+        "netProfit": "Profit net",
+        "sales": "Ventes",
+        "units": "Unités",
+        "refunds": "Remboursements"
+      }
+    },
+    "pnl": {
+      "title": "Compte de résultat",
+      "subtitle": "Détail mois par mois des 12 derniers mois",
+      "parameter": "Indicateur / Période",
+      "currentPeriod": "Période en cours",
+      "heatmap": "Carte thermique",
+      "export": "Télécharger le CSV"
+    },
+    "groups": {
+      "revenue": "Chiffre d'affaires",
+      "costs": "Coûts",
+      "profit": "Profit",
+      "ratios": "Ratios"
+    },
+    "profit": {
+      "confirmedLabel": "Confirmé",
+      "confirmedTooltip": "Profit des commandes dont les coûts Amazon réels ont été relevés. Un coût inconnu n'est jamais compté comme zéro.",
+      "estimatedLabel": "Estimé",
+      "estimatedTooltip": "Les commandes en attente d'exécution Amazon utilisent un coût estimé (taxe Amazon au taux configuré de {{rate}} %).",
+      "uncostedLabel": "Chiffre d'affaires sans coût",
+      "uncostedTooltip": "Ventes dont le coût Amazon n'a pas encore pu être déterminé — chiffre d'affaires uniquement, aucun profit sous-entendu."
+    }
+  }
+}

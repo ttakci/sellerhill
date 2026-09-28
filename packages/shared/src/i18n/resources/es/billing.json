@@ -1,0 +1,331 @@
+{
+  "billing": {
+    "title": "Facturación",
+    "subtitle": "Administra tu plan de suscripción, el uso y el historial de facturación.",
+    "loadingSubtitle": "Cargando los datos de tu facturación…",
+    "unavailableTitle": "La facturación no está disponible",
+    "unavailableSubtitle": "No pudimos cargar los datos de tu facturación. Inténtalo de nuevo.",
+    "plans": {
+      "title": "Planes",
+      "subtitle": "Elige el plan que se ajuste a tu volumen de ventas.",
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "annualSavings": "Ahorra 2 meses con la facturación anual",
+      "perMonth": "/mes",
+      "perYear": "/año",
+      "choosePlan": "Elegir {{plan}}",
+      "currentPlan": "Plan actual",
+      "switchPlan": "Cambiar a {{plan}}",
+      "contactSales": "Contactar con ventas",
+      "freeTrial": "Prueba gratuita disponible",
+      "mostPopular": "Más popular",
+      "informationalOnly": "La aplicación de la facturación está desactivada: los planes son solo informativos. Por ahora todas las funciones están sin restricciones.",
+      "free": {
+        "name": "Gratis"
+      },
+      "trial": {
+        "name": "Prueba gratuita",
+        "description": "Una prueba de SellerHill por tiempo limitado. No se puede comprar: empieza automáticamente al registrarte."
+      },
+      "lite": {
+        "name": "Lite",
+        "description": "Para vendedores que recién empiezan con un catálogo pequeño."
+      },
+      "nano": {
+        "name": "Nano",
+        "description": "Para probar el terreno con un conjunto de productos acotado."
+      },
+      "micro": {
+        "name": "Micro",
+        "description": "Para vendedores independientes con un catálogo compacto."
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Para vendedores con un catálogo en crecimiento y un flujo de pedidos constante."
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "Para vendedores consolidados que superan unos pocos miles de publicaciones."
+      },
+      "plus": {
+        "name": "Plus",
+        "description": "Para vendedores con un catálogo amplio en varios nichos."
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Para vendedores de alto volumen con un catálogo de cinco mil publicaciones."
+      },
+      "advanced": {
+        "name": "Advanced",
+        "description": "Para vendedores avanzados que administran un catálogo grande con repricing activo."
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Para operaciones profesionales con diez mil publicaciones."
+      },
+      "elite": {
+        "name": "Elite",
+        "description": "Para grandes operaciones con un catálogo de quince mil publicaciones."
+      },
+      "business": {
+        "name": "Business",
+        "description": "Para negocios con varias tiendas y veinte mil publicaciones."
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Para los catálogos más grandes, con soporte prioritario."
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Un plan retirado. Las suscripciones existentes siguen funcionando; los nuevos registros eligen entre los planes anteriores."
+      },
+      "switchTo": "Cambiar a {{plan}}",
+      "switchDone": "Tu plan se cambió. Stripe prorrateará la diferencia en tu próxima factura.",
+      "planNamed": "Plan {{plan}}"
+    },
+    "planChange": {
+      "title": "Confirmar cambio de plan",
+      "upgradeBody": "Cambiando a {{plan}}. Se cobrarán {{amount}} ahora. Tu próxima factura será de {{nextAmount}} el {{nextDate}}.",
+      "downgradeBody": "Cambiando a {{plan}} el {{date}}. No se cobra nada ahora: conservas tu plan actual hasta entonces.",
+      "listingLimitWarning": "Tienes {{active}} publicaciones activas y el nuevo plan permite {{limit}}. A partir del {{date}}, solo se monitorean tus {{limit}} publicaciones más antiguas; las otras {{over}} dejan de recibir sincronización de precio y stock y gestión automática de pedidos. Si quieres elegir qué publicaciones siguen monitoreadas, finaliza las que no necesites antes de esa fecha.",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "limits": {
+      "listings_per_month": {
+        "label": "Publicaciones activas",
+        "unit": "publicaciones",
+        "description": "Máximo de publicaciones activas en todas tus tiendas."
+      },
+      "amazon_orders_per_month": {
+        "label": "Pedidos automáticos",
+        "unit": "pedidos",
+        "description": "Máximo de pedidos de Amazon realizados por ti (automáticamente o vinculados a mano) por mes."
+      },
+      "unlimited": "Ilimitado",
+      "disabled": "No incluido",
+      "of": "{{used}} de {{limit}}",
+      "used": "{{used}} usados",
+      "remaining": "{{remaining}} restantes",
+      "exceeded": "Límite superado",
+      "tracking_conversions_per_month": {
+        "label": "Conversiones de seguimiento",
+        "unit": "conversiones",
+        "description": "Cuántos envíos por mes reciben un número de seguimiento convertido, para que el comprador nunca vea a tu proveedor."
+      }
+    },
+    "subscription": {
+      "title": "Tu suscripción",
+      "plan": "Plan",
+      "interval": "Periodo de facturación",
+      "intervalValue": {
+        "monthly": "Facturación mensual",
+        "annual": "Facturación anual"
+      },
+      "status": {
+        "label": "Estado",
+        "trialing": "Prueba",
+        "active": "Activa",
+        "cancelling": "Cancelándose",
+        "past_due": "Vencida",
+        "canceled": "Cancelada",
+        "ended": "Finalizada"
+      },
+      "trial": {
+        "title": "Estás en la prueba gratuita",
+        "daysLeft": "Quedan {{count}} día(s)",
+        "lastDay": "Tu prueba termina hoy",
+        "endsOn": "La prueba termina el {{date}}",
+        "expired": "Tu prueba gratuita ha terminado.",
+        "chooseAPlan": "Elige un plan para seguir adelante cuando termine la prueba."
+      },
+      "currentPeriod": "Periodo actual",
+      "nextRenewal": "Próxima renovación",
+      "canceledAt": "Cancelada el",
+      "endedAt": "Finalizada el",
+      "manage": "Administrar suscripción",
+      "updatePayment": "Actualizar método de pago",
+      "cancel": "Cancelar suscripción",
+      "resume": "Reanudar suscripción",
+      "upgrade": "Mejorar plan",
+      "downgrade": "Reducir plan",
+      "trialEnds": "La prueba termina",
+      "trialEnded": "La prueba terminó",
+      "accessEnds": "El acceso termina",
+      "portal": "Método de pago y facturas",
+      "portalHint": "Abre Stripe para actualizar tu tarjeta, descargar facturas o cancelar.",
+      "manageHint": "Administra aquí tu método de pago, tu plan y tus facturas.",
+      "nextCharge": "Próximo pago: {{date}} · {{amount}}",
+      "cancelsAtPeriodEnd": "Se cancela el {{date}}: no habrá más cobros después de este periodo",
+      "scheduledChange": "Cambia a {{plan}} el {{date}}",
+      "scheduledChangeUnknownPlan": "Tu plan cambia el {{date}}",
+      "cancelScheduledChange": "Cancelar",
+      "scheduledChangeCancelled": "Se canceló el cambio de plan.",
+      "confirmCancelScheduledChangeTitle": "Cancelar cambio de plan",
+      "confirmCancelScheduledChangeMessage": "¿Seguro que quieres cancelar el cambio de plan programado? Seguirás en tu plan actual."
+    },
+    "paymentMethod": {
+      "title": "Método de pago",
+      "card": "{{brand}} •••• {{last4}}",
+      "expires": "Vence {{month}}/{{year}}",
+      "expiringSoon": "Esta tarjeta vence pronto. Actualízala para evitar una renovación fallida.",
+      "change": "Cambiar"
+    },
+    "invoices": {
+      "title": "Historial de facturas",
+      "subtitle": "Todo lo que has pagado, directamente desde Stripe.",
+      "date": "Fecha",
+      "description": "Descripción",
+      "amount": "Importe",
+      "status": "Estado",
+      "pdf": "Factura",
+      "download": "Descargar",
+      "payNow": "Pagar ahora",
+      "empty": "Aún no hay facturas.",
+      "emptyDescription": "Tus facturas aparecerán aquí cuando tengas una suscripción de pago.",
+      "loading": "Cargando facturas…",
+      "loadingDescription": "Obteniendo tu historial de facturas de Stripe.",
+      "error": "No se pudieron cargar las facturas.",
+      "errorDescription": "Algo salió mal al cargar tu historial de facturas.",
+      "retry": "Intentar de nuevo",
+      "showMore": "Mostrar más",
+      "showMoreError": "No se pudieron cargar más facturas.",
+      "statusLabel": {
+        "paid": "Pagada",
+        "open": "Abierta",
+        "void": "Anulada",
+        "uncollectible": "Incobrable",
+        "draft": "Borrador"
+      }
+    },
+    "customer": {
+      "title": "Datos de facturación",
+      "billingEmail": "Correo de facturación",
+      "status": {
+        "label": "Estado de la cuenta",
+        "active": "Activa",
+        "locked": "Bloqueada",
+        "deleted": "Eliminada"
+      }
+    },
+    "transition": {
+      "full_access": "Acceso completo: la aplicación de la facturación está desactivada. Todas las funciones están sin restricciones.",
+      "active": "Tu suscripción está activa.",
+      "no_subscription": "No hay una suscripción activa. Elige un plan para habilitar la facturación.",
+      "past_due": "Tu suscripción está vencida. Actualiza tu método de pago para restablecer el acceso."
+    },
+    "provider": {
+      "unconfiguredTitle": "Facturación sin configurar",
+      "unconfiguredBody": "El pago y la administración de suscripciones no están disponibles porque no hay un proveedor de facturación conectado. Contacta con tu operador."
+    },
+    "usage": {
+      "title": "Uso en este periodo",
+      "subtitle": "El uso se restablece al inicio de tu próximo periodo de facturación.",
+      "period": "Periodo",
+      "noOpenPeriod": "No hay un periodo de uso activo",
+      "status": {
+        "label": "Estado del periodo",
+        "open": "Abierto",
+        "closed": "Cerrado",
+        "finalized": "Finalizado"
+      }
+    },
+    "webhooks": {
+      "title": "Bandeja de webhooks",
+      "subtitle": "Eventos recientes del proveedor de facturación.",
+      "provider": "Proveedor",
+      "eventType": "Tipo de evento",
+      "status": {
+        "label": "Estado",
+        "received": "Recibido",
+        "processing": "Procesando",
+        "processed": "Procesado",
+        "failed": "Fallido"
+      },
+      "receivedAt": "Recibido",
+      "processedAt": "Procesado",
+      "attempts": "Intentos",
+      "empty": "Aún no hay eventos de webhook"
+    },
+    "reservation": {
+      "title": "Reservas",
+      "subtitle": "Espacios de publicaciones y de pedidos de Amazon reservados contra tu plan.",
+      "kind": {
+        "listing": "Publicación",
+        "amazon_order": "Pedido de Amazon"
+      },
+      "status": {
+        "label": "Estado",
+        "reserved": "Reservado",
+        "released": "Liberado",
+        "overage": "Excedente"
+      }
+    },
+    "errors": {
+      "quota_exceeded": "Alcanzaste el límite de tu plan. Mejora tu plan para continuar.",
+      "no_active_subscription": "No se encontró una suscripción activa.",
+      "no_open_period": "No hay un periodo de uso abierto para este límite.",
+      "already_reserved": "Este recurso ya está reservado.",
+      "providerNotConfigured": "Los pagos aún no están habilitados en este entorno. Inténtalo de nuevo más tarde.",
+      "planNotMirrored": "Este plan aún no está disponible para su compra. Elige otro plan o contacta con soporte.",
+      "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo en un momento; si sigue fallando, contacta con soporte.",
+      "portalFailed": "No se pudo abrir el portal de facturación. Inténtalo de nuevo en un momento.",
+      "noCustomer": "Aún no hay una cuenta de facturación. Elige primero un plan para crearla.",
+      "planNotFound": "No se encontró ese plan.",
+      "priceNotFound": "No se encontró un precio activo para ese plan.",
+      "ebayTrialAlreadyUsed": "Esta tienda de eBay ya usó su prueba gratuita. Elige un plan para continuar.",
+      "quotaExhausted": "Alcanzaste el límite de tu plan. Mejora tu plan para continuar.",
+      "addonNotFound": "No se encontró ese paquete adicional.",
+      "noSubscription": "No tienes una suscripción activa que cambiar.",
+      "planChangeFailed": "No se pudo cambiar el plan en este momento. Inténtalo de nuevo o usa «Administrar facturación».",
+      "subscriptionSuspended": "Tu suscripción no está activa, por lo que las publicaciones nuevas están en pausa. Elige un plan para reanudar: todo se reinicia por sí solo.",
+      "subscriptionSuspendedOrders": "Tu suscripción no está activa, por lo que la automatización de pedidos está en pausa. Elige un plan para reanudar: todo se reinicia por sí solo.",
+      "listingQuotaExhausted": "Usaste todas las publicaciones activas que permite tu plan. Finaliza una publicación para liberar un espacio, o sube de plan.",
+      "alreadySubscribed": "Ya tienes una suscripción activa. Usa «Cambiar de plan» para modificarla en lugar de suscribirte de nuevo.",
+      "invoicesFailed": "No se pudo cargar el historial de facturas. Inténtalo de nuevo en un momento.",
+      "paymentRequiresAction": "Tu banco pidió una confirmación adicional para esta tarjeta, por lo que el cambio de plan se canceló y sigues en tu plan actual. Abre «Administrar facturación» para actualizar tu método de pago y vuelve a intentarlo.",
+      "invalidCheckoutSession": "Este enlace de confirmación de pago no es válido."
+    },
+    "actions": {
+      "subscribe": "Suscribirse",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar"
+    },
+    "admin": {
+      "plans": {
+        "title": "Planes",
+        "subtitle": "Administra los planes de suscripción, los precios y los límites.",
+        "add": "Agregar plan",
+        "edit": "Editar plan",
+        "activate": "Activar",
+        "deactivate": "Desactivar",
+        "slug": "Slug",
+        "name": "Nombre",
+        "description": "Descripción",
+        "isActive": "Activo",
+        "displayOrder": "Orden de visualización",
+        "prices": "Precios",
+        "limits": "Límites",
+        "providerProductId": "ID de producto del proveedor",
+        "providerPriceId": "ID de precio del proveedor",
+        "effectiveFrom": "Vigente desde",
+        "effectiveTo": "Vigente hasta",
+        "amountMicros": "Importe (micros)",
+        "limitKey": "Clave del límite",
+        "limitValue": "Valor del límite",
+        "unit": "Unidad"
+      },
+      "webhooks": {
+        "title": "Bandeja de webhooks",
+        "subtitle": "Inspecciona y reproduce los eventos de webhook del proveedor de facturación.",
+        "replay": "Reproducir"
+      }
+    },
+    "addons": {
+      "title": "¿Necesitas más este mes?",
+      "subtitle": "Usaste tus conversiones de seguimiento mensuales. Recarga para seguir ocultando a tu proveedor hasta que el mes se reinicie.",
+      "buy": "Comprar",
+      "note": "Una recarga se aplica solo al mes calendario en curso, por eso se ofrece cuando alcanzas el límite y no por adelantado. La asignación de tu plan se restablece el día 1."
+    }
+  }
+}

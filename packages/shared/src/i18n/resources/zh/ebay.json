@@ -1,0 +1,57 @@
+{
+  "ebay": {
+    "connect": {
+      "title": "连接 eBay 店铺",
+      "subtitle": "关联您的 eBay 卖家账号，以管理商品刊登和订单",
+      "connectButton": "连接 eBay 账号",
+      "connectingButton": "连接中…",
+      "marketplaceLabel": "站点",
+      "marketplaceUS": "美国（eBay.com）",
+      "marketplaceUK": "英国（eBay.co.uk）",
+      "marketplaceDE": "德国（eBay.de）",
+      "marketplaceFR": "法国（eBay.fr）",
+      "marketplaceIT": "意大利（eBay.it）",
+      "marketplaceES": "西班牙（eBay.es）",
+      "marketplaceUsOnlyNote": "目前仅支持美国（eBay.com）站点。",
+      "successMessage": "eBay 账号连接成功！",
+      "errorMessage": "连接 eBay 账号失败",
+      "alreadyConnected": "此 eBay 账号已连接"
+    },
+    "accounts": {
+      "title": "已连接的 eBay 账号",
+      "loadingDescription": "正在获取您已连接的店铺。",
+      "noAccounts": "尚未连接 eBay 账号",
+      "statusActive": "正常",
+      "statusRevoked": "已撤销",
+      "statusError": "错误",
+      "disconnectButton": "断开连接",
+      "refreshTokenButton": "刷新令牌"
+    },
+    "callback": {
+      "processing": "正在处理 eBay 连接…",
+      "success": "eBay 账号连接成功！正在跳转到仪表盘…",
+      "error": "连接 eBay 账号失败，请重试。",
+      "cancelled": "eBay 连接已取消。"
+    },
+    "errors": {
+      "invalidState": "无效的 state 参数",
+      "authorizationFailed": "eBay 授权失败",
+      "tokenExchangeFailed": "无法用授权码换取令牌",
+      "accountAlreadyConnected": "此 eBay 店铺已连接到另一个 SellerHill 账号。请使用您连接它时所用的账号登录；如果无法访问，请联系支持团队。",
+      "ebayTrialAlreadyUsed": "此 eBay 店铺已使用过免费试用。请选择一个套餐以连接它。",
+      "noAuthorizationCode": "未从 eBay 收到授权码",
+      "storeOwnedByAnotherAccount": "此 eBay 店铺已关联到另一个 SellerHill 账号。请联系支持团队进行转移。",
+      "accountNotFound": "未找到该 eBay 店铺。",
+      "identityUnavailable": "我们无法通过 eBay 确认您的 eBay 账号。未连接任何内容，请稍后重试。"
+    },
+    "onboarding": {
+      "title": "连接您的 eBay 店铺",
+      "header": "站点设置",
+      "description": "要开始同步您的商品，您需要先连接 eBay 店铺。",
+      "connectButton": "eBay 账号",
+      "skipButton": "暂时跳过",
+      "usOnlyNote": "目前仅支持美国站点。更多地区即将推出。",
+      "brandingDescription": "将您的 eBay 店铺关联到 SellerHill，在一个平台中管理您所有的销售流程。"
+    }
+  }
+}

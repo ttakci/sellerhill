@@ -1,0 +1,960 @@
+{
+  "common": {
+    "brandName": "SellerHill",
+    "loading": "Chargement...",
+    "retry": "Réessayer",
+    "ok": "OK",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "continue": "Continuer",
+    "saveSuccess": "Modifications enregistrées avec succès",
+    "saveError": "Échec de l'enregistrement des modifications",
+    "showing_info": "Affichage de {{from}} à {{to}} sur {{total}} entrées",
+    "showing": "Affichage de",
+    "of": "sur",
+    "rowsPerPage": "Enregistrements par page :",
+    "search": "Rechercher...",
+    "noResults": "Aucun résultat",
+    "success": "Succès",
+    "failed": "Échec",
+    "views": {
+      "label": "Vue",
+      "grid": "Grille",
+      "table": "Tableau"
+    },
+    "actions": {
+      "refresh": "Actualiser",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "filter": "Filtrer",
+      "export": "Exporter"
+    },
+    "privacy": "Confidentialité",
+    "support": "Assistance",
+    "notSet": "Non défini",
+    "notProvided": "Non renseigné",
+    "noCategory": "Aucune catégorie",
+    "details": "Détails",
+    "noBrand": "Aucune information de marque",
+    "amazonLink": "AMAZON",
+    "unknownProduct": "Produit inconnu",
+    "languageCode": "fr-FR",
+    "select": "Sélectionner"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "countryRequired": "Veuillez sélectionner un pays",
+    "stateRequired": "Veuillez saisir une région ou un lieu",
+    "zipCodeRequired": "Veuillez saisir un code postal",
+    "invalidEmail": "Veuillez saisir une adresse e-mail valide",
+    "invalidUrl": "Veuillez saisir une URL valide",
+    "invalidUuid": "Format d'identifiant invalide",
+    "invalidPhone": "Veuillez saisir un numéro de téléphone valide",
+    "invalidDate": "Veuillez saisir une date valide",
+    "mustBePositive": "Doit être un nombre positif",
+    "minLength": "Doit contenir au moins {{min}} caractères",
+    "maxLength": "Ne peut pas dépasser {{max}} caractères",
+    "onlyAlphanumeric": "Seuls les lettres, les chiffres, les espaces, les tirets et les tirets bas sont autorisés",
+    "passwordRequirements": "Le mot de passe doit contenir une majuscule, une minuscule et un chiffre",
+    "passwordStrength": "Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule et un chiffre",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "invalidStatus": "Veuillez sélectionner un statut valide"
+  },
+  "dialog": {
+    "title": {
+      "info": "Information",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "error": "Erreur"
+    }
+  },
+  "message": {
+    "error": {
+      "header": "Erreur",
+      "goHome": "Retour à l'accueil",
+      "close": "Fermer",
+      "copyRequestId": "Copier l'identifiant de la requête",
+      "requestIdCopied": "Identifiant de la requête copié dans le presse-papiers"
+    },
+    "success": {
+      "header": "Succès",
+      "ok": "OK"
+    },
+    "warning": {
+      "header": "Avertissement"
+    },
+    "info": {
+      "header": "Information"
+    }
+  },
+  "errorBoundary": {
+    "title": "Oups ! Une erreur s'est produite",
+    "message": "Nous sommes désolés pour la gêne occasionnée. L'application a rencontré une erreur inattendue.",
+    "reload": "Recharger la page",
+    "goHome": "Retour à l'accueil",
+    "details": "Détails de l'erreur (développement uniquement)"
+  },
+  "error": {
+    "resourceNotFound": "{{resourceName}} avec l'ID {{resourceId}} introuvable",
+    "validationFailed": "Échec de la validation",
+    "unauthorized": "Vous n'êtes pas autorisé",
+    "forbidden": "Accès interdit",
+    "serverError": "Une erreur s'est produite. Veuillez réessayer plus tard."
+  },
+  "products": {
+    "subtitle": "Consultez les détails des produits et les données Amazon de toutes vos annonces actives."
+  },
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "listings": "Annonces",
+    "ebayListings": "Annonces eBay",
+    "listingJobs": "Tâches d'annonces",
+    "drafts": "Brouillons",
+    "products": "Produits",
+    "inventory": "Inventaire",
+    "orders": "Commandes",
+    "stores": "Boutiques",
+    "billing": "Facturation",
+    "settings": "Paramètres",
+    "admin": "Opérations d'administration",
+    "configuration": "Configuration",
+    "storeSettings": "Paramètres de la boutique",
+    "listingSettingsGroups": "Groupes de paramètres d'annonces",
+    "amazonAccounts": "Comptes Amazon",
+    "reports": "Rapports",
+    "support": "Assistance",
+    "logout": "Déconnexion",
+    "logoutConfirmTitle": "Avertissement",
+    "logoutConfirmDescription": "Voulez-vous vraiment vous déconnecter ?",
+    "logoutConfirmButton": "Déconnexion",
+    "editProfile": "Modifier le profil"
+  },
+  "chatbot": {
+    "sidebarTitle": "Des questions ?",
+    "ctaLabel": "Contactez-nous",
+    "openAria": "Ouvrir le chat d'assistance",
+    "unreadAria": "{{count}} messages d'assistance non lus",
+    "unreadOverflow": "99+",
+    "panelTitle": "Zon",
+    "welcomeMessage": "Bonjour, comment puis-je vous aider ?",
+    "placeholder": "Saisissez votre message…",
+    "placeholderReply": "Merci pour votre message. Les réponses complètes par IA seront bientôt disponibles.",
+    "send": "Envoyer",
+    "cancel": "Annuler la réponse",
+    "newConversation": "Nouvelle conversation",
+    "conversations": "Conversations",
+    "emptyTitle": "Démarrer une conversation",
+    "emptyDescription": "Posez vos questions à Zon sur vos annonces, commandes, paramètres ou votre compte.",
+    "offline": "Vous êtes hors ligne. L'historique de votre conversation reste disponible.",
+    "loading": "Chargement des conversations…",
+    "connected": "Connecté",
+    "disconnected": "Reconnexion…",
+    "retry": "Réessayer la réponse",
+    "refresh": "Actualiser le chat",
+    "minimize": "Réduire",
+    "expand": "Agrandir",
+    "close": "Fermer"
+  },
+  "operator": {
+    "console": "Console opérateur"
+  },
+  "header": {
+    "selectLanguage": "Choisir la langue",
+    "notifications": "Notifications",
+    "openMenu": "Ouvrir le menu",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale"
+  },
+  "profile": {
+    "accountSettings": "Paramètres du compte"
+  },
+  "languages": {
+    "en": "English",
+    "tr": "Türkçe",
+    "ru": "Русский",
+    "hi": "हिन्दी",
+    "ur": "اردو",
+    "ar": "العربية",
+    "az": "Azərbaycanca",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español",
+    "it": "Italiano",
+    "ro": "Română",
+    "uk": "Українська",
+    "zh": "简体中文",
+    "pt": "Português"
+  },
+  "notifications": {
+    "comingSoonTitle": "Action bientôt disponible",
+    "comingSoon": "Cette fonctionnalité est en cours de développement et sera disponible prochainement."
+  },
+  "settingsHub": {
+    "title": "Paramètres",
+    "subtitle": "Gérez votre compte, vos intégrations et votre automatisation",
+    "sections": {
+      "profile": {
+        "title": "Profil",
+        "subtitle": "Vos informations personnelles et votre avatar",
+        "edit": "Modifier les informations personnelles",
+        "nameLabel": "Nom complet",
+        "phoneLabel": "Numéro de téléphone",
+        "emailLabel": "Adresse e-mail",
+        "tabs": {
+          "personalInfo": "Informations personnelles",
+          "personalInfoSubtitle": "Votre nom, vos coordonnées et votre avatar",
+          "connectedStores": "Boutiques connectées"
+        }
+      },
+      "accounts": {
+        "title": "Comptes connectés",
+        "ebay": {
+          "title": "Compte eBay",
+          "subtitle": "Gérez vos boutiques eBay connectées"
+        },
+        "amazon": {
+          "title": "Compte Amazon",
+          "subtitle": "Gérez vos comptes acheteur pour la collecte des commandes"
+        }
+      },
+      "ebay": {
+        "sellerId": "Identifiant vendeur",
+        "connectedSince": "Connecté depuis",
+        "disconnect": {
+          "action": "Déconnecter",
+          "confirmDescription": "La déconnexion arrête la synchronisation des commandes, les achats automatiques et les mises à jour de suivi pour cette boutique. Vos commandes et annonces existantes sont conservées, et la reconnexion ultérieure de la boutique rétablit tout. Pour retirer également l'accès côté eBay, supprimez SellerHill dans les paramètres « Accès des applications tierces » d'eBay.",
+          "confirmLabel": "Déconnecter la boutique",
+          "success": "La boutique eBay a été déconnectée."
+        },
+        "manageStores": {
+          "empty": "Aucune boutique eBay connectée pour le moment"
+        }
+      },
+      "amazon": {
+        "noAccounts": "Aucun compte Amazon connecté",
+        "connectedSince": "Connecté depuis",
+        "twoFactorOn": "2FA activée",
+        "twoFactorOff": "Sans 2FA",
+        "autoFulfillOn": "Exécution automatique activée · plafond {{cap}}",
+        "autoFulfillOff": "Exécution automatique désactivée",
+        "verificationError": {
+          "invalid_credentials": "Amazon a rejeté l'e-mail ou le mot de passe. Mettez à jour les identifiants et vérifiez à nouveau.",
+          "captcha": "Amazon a demandé un captcha et a bloqué la connexion automatisée. Réessayez dans un instant.",
+          "two_factor_required": "La 2FA est activée sur ce compte, mais aucune clé secrète d'authentification n'est enregistrée. Ajoutez la clé secrète 2FA et vérifiez à nouveau.",
+          "auth_not_proven": "La connexion n'a pas abouti. Vérifiez les identifiants et la clé secrète 2FA, puis vérifiez à nouveau.",
+          "unexpected_login_page": "Le processus de connexion d'Amazon n'a pas pu être terminé automatiquement. Réessayez dans un instant ; si le problème persiste, contactez l'assistance.",
+          "transport": "Impossible de joindre Amazon pour vérifier ce compte. Réessayez dans un instant.",
+          "unknown": "Impossible de vérifier ce compte. Réessayez dans un instant ; si le problème persiste, contactez l'assistance."
+        }
+      },
+      "storeConfig": {
+        "title": "Configuration de la boutique",
+        "subtitle": "Localisation globale, validation et paramètres régionaux",
+        "edit": "Modifier",
+        "new": "Nouveau",
+        "global": "Global",
+        "country": "Pays",
+        "region": "Région",
+        "zipCode": "Code postal",
+        "noLocation": "Aucune localisation définie",
+        "noConfigs": "Aucune configuration de boutique pour le moment"
+      },
+      "blacklist": {
+        "title": "Gestion de la liste noire",
+        "subtitle": "Mots-clés interdits dans les annonces de produits",
+        "manage": "Gérer",
+        "keywordCount": "{{count}} mot(s)-clé(s)"
+      },
+      "storeManagement": {
+        "title": "Configuration de la boutique",
+        "subtitle": "Paramètres de la boutique et liste noire de mots-clés des annonces",
+        "storeSettings": "Paramètres de la boutique",
+        "storeSettingsSubtitle": "Localisation, validation et préférences régionales",
+        "manageMessageTemplates": "Modèles de messages",
+        "manageMessageTemplatesSubtitle": "Consultez, modifiez et créez vos modèles de messages automatisés aux acheteurs",
+        "manageBlacklist": "Gérer la liste noire",
+        "manageBlacklistSubtitle": "Mots-clés à bloquer dans les titres, descriptions et caractéristiques des annonces",
+        "infoMessage": "Les modèles de messages et les règles de la liste noire s'appliquent selon la portée (globale ou par boutique) choisie dans les paramètres de la boutique."
+      },
+      "listingGroups": {
+        "title": "Groupes de paramètres d'annonces",
+        "subtitle": "Stratégies de repricing, logique de stock, marges bénéficiaires",
+        "manage": "Gérer les groupes",
+        "manageSubtitle": "Consultez, modifiez et créez vos groupes de prix et de stock",
+        "viewAll": "Tout afficher",
+        "create": "Créer un nouveau groupe",
+        "createSubtitle": "Définissez une nouvelle stratégie de repricing et de marge bénéficiaire",
+        "groupCount": "{{count}} groupe(s)"
+      },
+      "account": {
+        "title": "Compte et sécurité",
+        "subtitle": "Préférences de mot de passe",
+        "changePassword": "Changer le mot de passe",
+        "changePasswordSubtitle": "Mettez à jour votre mot de passe de connexion"
+      }
+    },
+    "drawer": {
+      "profile": {
+        "title": "Modifier les informations personnelles",
+        "subtitle": "Mettez à jour votre nom, vos coordonnées et votre biographie",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "phoneInvalid": "Saisissez un numéro de téléphone valide pour le pays sélectionné",
+        "phoneCountry": "Pays",
+        "phoneCountrySearch": "Rechercher un pays",
+        "bio": "Biographie",
+        "address": "Adresse"
+      },
+      "ebayAccounts": {
+        "title": "Comptes eBay",
+        "subtitle": "Vos boutiques eBay connectées",
+        "addNew": {
+          "title": "Nouveau compte eBay",
+          "subtitle": "Autorisez une nouvelle boutique via la connexion sécurisée d'eBay"
+        },
+        "viewAll": {
+          "title": "Tout"
+        }
+      },
+      "ebayAccountsAll": {
+        "title": "Boutiques connectées",
+        "subtitle": "Toutes vos boutiques eBay connectées"
+      },
+      "amazonAccounts": {
+        "title": "Comptes Amazon",
+        "subtitle": "Vos comptes acheteur pour la collecte des commandes",
+        "addNew": {
+          "title": "Nouveau compte Amazon",
+          "subtitle": "Connectez un nouveau compte acheteur pour la collecte des commandes"
+        },
+        "empty": {
+          "title": "Aucun compte acheteur pour le moment",
+          "description": "Connectez un compte acheteur Amazon pour analyser vos commandes et enregistrer les coûts réels."
+        },
+        "viewAll": {
+          "title": "Tout"
+        }
+      },
+      "amazonAccountsAll": {
+        "title": "Comptes connectés",
+        "subtitle": "Tous vos comptes Amazon connectés"
+      },
+      "amazonAdd": {
+        "title": "Ajouter un compte Amazon",
+        "subtitle": "Fournissez les identifiants pour la collecte des commandes",
+        "label": "Libellé du compte",
+        "email": "E-mail",
+        "password": "Mot de passe",
+        "twoFactorSecret": "Clé secrète 2FA",
+        "twoFactorSecretHint": "Obligatoire. Amazon demande un code de vérification à presque chaque connexion automatisée, et une clé d'authentification est la seule que nous pouvons saisir pour vous. Dans les paramètres Connexion et sécurité d'Amazon, activez une application d'authentification et collez ici la clé de configuration, et non un code à 6 chiffres. Lors de la modification d'un compte existant, laissez ce champ vide pour conserver la clé enregistrée."
+      },
+      "amazonEdit": {
+        "title": "Modifier le compte Amazon",
+        "subtitle": "Mettez à jour le libellé ou les identifiants",
+        "label": "Libellé du compte",
+        "email": "E-mail",
+        "emailReadOnly": "L'e-mail ne peut pas être modifié après la création",
+        "password": "Nouveau mot de passe",
+        "passwordHint": "Laissez vide pour conserver le mot de passe actuel",
+        "twoFactorSecret": "Clé secrète 2FA",
+        "twoFactorHint": "Laissez vide pour conserver la clé secrète 2FA actuelle",
+        "twoFactorBadgeSet": "2FA définie",
+        "twoFactorBadgeNotSet": "2FA non définie"
+      },
+      "storeConfig": {
+        "titleEdit": "Modifier la configuration de la boutique",
+        "titleNew": "Nouvelle configuration de boutique",
+        "subtitle": "Localisation et règles de validation",
+        "global": "Global (toutes les boutiques)",
+        "appliesTo": "S'applique à",
+        "validation": "Validation des annonces",
+        "validateTitle": "Valider les titres des produits",
+        "validateDescription": "Valider les descriptions des produits"
+      },
+      "storeSettings": {
+        "title": "Paramètres de la boutique",
+        "subtitle": "Localisation et validation des annonces pour la portée sélectionnée",
+        "global": "Global (toutes les boutiques)",
+        "appliesTo": "S'applique à",
+        "checkBlacklist": "Vérifier les mots-clés de la liste noire",
+        "checkBlacklistDesc": "Analyse les titres, descriptions, caractéristiques et marques des annonces par rapport à votre liste noire avant publication. La sélection de champs propre à chaque mot-clé détermine où il est vérifié.",
+        "country": "Pays",
+        "countryPlaceholder": "Sélectionnez un pays",
+        "region": "Région",
+        "zipCode": "Code postal",
+        "steps": {
+          "address": "Adresse",
+          "automation": "Automatisation",
+          "messaging": "Messages aux acheteurs",
+          "blacklist": "Liste noire"
+        }
+      },
+      "blacklist": {
+        "manage": {
+          "title": "Gérer la liste noire",
+          "subtitle": "Mots-clés bloqués dans les titres, descriptions et caractéristiques des annonces pour la portée sélectionnée"
+        },
+        "add": {
+          "keyword": "Mot-clé",
+          "keywordsLabel": "Mots-clés",
+          "keywordsPlaceholder": "Saisissez des mots-clés...",
+          "keywordsHint": "Saisissez un mot-clé par ligne ou séparez-les par des virgules",
+          "typeLabel": "Vérifier dans",
+          "type": {
+            "title": "Titre",
+            "description": "Description",
+            "feature_specification": "Caractéristiques et spécifications",
+            "brand_manufacturer": "Marque et fabricant"
+          },
+          "add": "Ajouter des mots-clés",
+          "duplicate": "Tous les mots-clés incluent déjà les champs sélectionnés",
+          "empty": "Veuillez saisir au moins un mot-clé",
+          "typeRequired": "Sélectionnez au moins un champ"
+        },
+        "list": {
+          "empty": "Aucun mot-clé de liste noire pour la portée sélectionnée",
+          "noResults": "Aucun mot-clé ne correspond à votre recherche",
+          "removeLabel": "Supprimer le mot-clé",
+          "selectAll": "Tout sélectionner",
+          "selectedCount": "{{count}} sélectionné(s)",
+          "bulkDelete": "Supprimer la sélection",
+          "confirmBulkDeleteDescription": "Supprimer {{count}} mot(s)-clé(s) de la liste noire ? Cette action est irréversible."
+        }
+      },
+      "listingGroup": {
+        "list": {
+          "title": "Groupes de paramètres d'annonces",
+          "subtitle": "Consultez, modifiez ou créez vos groupes de repricing"
+        },
+        "all": {
+          "title": "Tous les groupes",
+          "subtitle": "Sélectionnez un groupe pour modifier ses règles de prix et de stock"
+        }
+      },
+      "password": {
+        "title": "Changer le mot de passe",
+        "subtitle": "Choisissez un mot de passe fort et unique",
+        "current": "Mot de passe actuel",
+        "new": "Nouveau mot de passe",
+        "confirm": "Confirmer le mot de passe",
+        "mismatch": "Les mots de passe ne correspondent pas",
+        "tooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel",
+        "successHeader": "Mot de passe mis à jour",
+        "successDescription": "Votre mot de passe a été modifié avec succès."
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 SellerHill E-commerce Solutions. Tous droits réservés.",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "contactSupport": "Contacter l'assistance"
+  },
+  "landing": {
+    "navbar": {
+      "features": "Fonctionnalités",
+      "templates": "Modèles",
+      "profit": "Profit réel",
+      "pricing": "Tarifs",
+      "faq": "FAQ",
+      "login": "Se connecter",
+      "getStarted": "Commencer gratuitement",
+      "demo": "Démo",
+      "menu": {
+        "why": "Pourquoi SellerHill",
+        "groups": "Groupes de paramètres",
+        "templates": "Modèles d'annonces",
+        "actions": "Actions en attente",
+        "specifics": "Caractéristiques des articles",
+        "mobile": "Mobile",
+        "trust": "Sécurité et confidentialité"
+      },
+      "about": "À propos"
+    },
+    "hero": {
+      "eyebrow": "Automatisation Amazon → eBay",
+      "headline": "Une automatisation complète pour votre boutique eBay.",
+      "headlineAccent": "À un prix abordable.",
+      "subheading": "Règles de prix et de modèles par groupe de produits, contrôle des prix et du stock quatre fois par jour, caractéristiques des articles entièrement renseignées, commandes et suivi automatiques. Sans oublier un écran d'actions en attente qui vous indique précisément ce qui requiert votre attention.",
+      "ctaPrimary": "Commencer gratuitement",
+      "ctaSecondary": "Démo en direct",
+      "trialTitle": "1 MOIS D'ESSAI GRATUIT !",
+      "trialNoCard": "Sans carte bancaire",
+      "trialCancelAnytime": "Résiliable à tout moment",
+      "trialMobile": "Gérez tout depuis votre téléphone",
+      "priceBadge": {
+        "caption": "prix mensuel abordable",
+        "per": "/MOIS"
+      },
+      "toast": {
+        "title": "Commande passée automatiquement",
+        "text": "Suivi envoyé à eBay · à l'instant"
+      }
+    },
+    "proof": {
+      "sync": {
+        "value": "4×",
+        "label": "contrôles des prix et du stock par jour"
+      },
+      "specifics": {
+        "value": "45",
+        "label": "caractéristiques d'article renseignées par annonce"
+      },
+      "templates": {
+        "value": "12",
+        "label": "modèles d'annonces professionnels"
+      },
+      "trial": {
+        "value": "1 mois",
+        "label": "d'essai gratuit, sans carte"
+      }
+    },
+    "why": {
+      "eyebrow": "Pourquoi SellerHill",
+      "sectionTitle": "Tous les outils font l'essentiel. La différence, c'est tout le reste.",
+      "sectionSubtitle": "Mettre en ligne, commander et suivre sont le minimum dans cette catégorie. SellerHill ajoute les outils qui vous permettent de gérer votre boutique autrement.",
+      "exclusive": "Uniquement sur SellerHill",
+      "groups": {
+        "title": "Une stratégie différente pour chaque groupe de produits",
+        "description": "Ne forcez plus un seul jeu de paramètres sur toute votre boutique. Définissez la marge, le modèle d'annonce, le stock, la réserve de stock et les frais déduits pour chaque groupe de produits : un groupe pour la fête des Mères, un autre uniquement pour les pièces automobiles.",
+        "chipA": "Fête des Mères",
+        "chipB": "Automobile",
+        "chipC": "Électronique",
+        "margin": "{{value}} % de marge",
+        "buffer": "réserve de {{value}} unités"
+      },
+      "sync": {
+        "title": "Prix et stock suivis 4 fois par jour",
+        "description": "Le prix et le stock de la source sont vérifiés quatre fois par jour, et chaque changement parvient à votre annonce eBay dans la même passe. Vous cessez de vendre ce qui est en rupture de stock et de conserver des prix qui font perdre de l'argent.",
+        "caption": "Un contrôle toutes les 6 heures"
+      },
+      "specifics": {
+        "title": "Des caractéristiques d'article réellement renseignées",
+        "description": "Nous ne contournons pas les champs obligatoires avec « Non applicable ». Chaque attribut est associé à une valeur acceptée par la catégorie eBay, afin que votre annonce apparaisse dans les filtres des acheteurs.",
+        "others": "Les autres",
+        "us": "SellerHill"
+      },
+      "actions": {
+        "title": "Les actions en attente vous gardent sur la bonne voie",
+        "description": "Une commande bloquée, un compte déconnecté, une annonce en rupture de stock… Tout ce qui attend votre intervention, sur un seul écran, les urgences en premier.",
+        "rowA": "Commande en attente de votre validation",
+        "rowB": "Annonce bloquée par votre liste noire",
+        "rowC": "Annonce active en rupture de stock"
+      },
+      "supplier": {
+        "title": "Votre fournisseur reste invisible",
+        "description": "Les images sont envoyées sur les serveurs d'eBay, les marques sont retirées des titres et les numéros de suivi sont convertis automatiquement. Les mots-clés de votre liste noire sont vérifiés sur chaque annonce avant sa mise en ligne.",
+        "chipImages": "Images hébergées sur eBay",
+        "chipTracking": "Suivi converti",
+        "chipBlacklist": "Vérification de la liste noire"
+      },
+      "price": {
+        "title": "Une automatisation abordable",
+        "description": "L'ensemble complet de l'automatisation professionnelle pour un abonnement mensuel bien plus bas. Toutes les fonctionnalités sont dans tous les forfaits ; les forfaits ne diffèrent que par le volume d'annonces et de commandes.",
+        "cta": "Voir les forfaits"
+      }
+    },
+    "groups": {
+      "eyebrow": "Groupes de paramètres",
+      "sectionTitle": "Une boutique. Autant de stratégies que nécessaire.",
+      "sectionSubtitle": "Un groupe de paramètres est un ensemble réutilisable : définissez une fois la règle de prix, le modèle d'annonce et les paramètres de stock, puis appliquez-le aux produits de votre choix. Créez des groupes distincts pour les campagnes saisonnières, les règles propres à une catégorie ou les articles à forte marge.",
+      "params": {
+        "margin": {
+          "title": "Marge bénéficiaire",
+          "description": "Règles de marge par tranche de prix."
+        },
+        "template": {
+          "title": "Modèle d'annonce",
+          "description": "Un design de description par groupe."
+        },
+        "stock": {
+          "title": "Stock et réserve de stock",
+          "description": "La quantité affichée sur eBay et sa marge de sécurité."
+        },
+        "fees": {
+          "title": "Frais déduits",
+          "description": "Les frais eBay et les coûts fixes sont intégrés au prix."
+        },
+        "content": {
+          "title": "Titre et contenu",
+          "description": "Suppression de la marque et titres par IA, par groupe."
+        }
+      },
+      "examplesTitle": "Exemples de configuration",
+      "examples": {
+        "seasonal": {
+          "name": "Fête des Mères",
+          "note": "Campagne saisonnière : un modèle adapté aux cadeaux et une marge plus élevée jusqu'à la mi-mai."
+        },
+        "category": {
+          "name": "Automobile",
+          "note": "Pièces auto uniquement : un modèle axé sur la compatibilité et sa propre réserve de stock."
+        },
+        "electronics": {
+          "name": "Électronique",
+          "note": "Un modèle avec tableau de spécifications et une réserve plus large pour les produits à forte rotation."
+        }
+      },
+      "screenCaption": "L'écran réel des groupes de paramètres du compte de démonstration"
+    },
+    "templates": {
+      "eyebrow": "Modèles d'annonces",
+      "sectionTitle": "Des annonces d'aspect professionnel, sans designer.",
+      "sectionSubtitle": "Choisissez l'un des 12 modèles prêts à l'emploi ou rédigez votre propre HTML. Chaque groupe de paramètres peut utiliser son propre modèle. Les aperçus ci-dessous sont générés avec nos vrais modèles.",
+      "names": {
+        "generalStore": "Boutique généraliste",
+        "techGadgets": "High-tech",
+        "homeDecor": "Maison et déco",
+        "kitchenDining": "Cuisine",
+        "fitnessSports": "Sport et fitness",
+        "outdoorSurvival": "Plein air",
+        "beautyHealth": "Beauté et santé",
+        "apparelFashion": "Vêtements et mode",
+        "autoParts": "Pièces auto",
+        "petSupplies": "Animalerie",
+        "toysKids": "Jouets et enfants",
+        "minimalist": "Minimaliste"
+      },
+      "points": {
+        "editable": "Entièrement modifiable : ouvrez le modèle et changez ce que vous voulez.",
+        "mobile": "Adapté au mobile : s'affiche correctement aussi dans l'application eBay.",
+        "clean": "Aucune trace du fournisseur : rien dans la description ou les images ne mène à votre fournisseur.",
+        "specs": "Les caractéristiques et points forts sont insérés automatiquement."
+      },
+      "previewNote": "Modèle en direct, faites défiler pour explorer",
+      "openFull": "Ouvrir en pleine page"
+    },
+    "showcase": {
+      "eyebrow": "Dans le produit",
+      "sectionTitle": "Les écrans que vous utiliserez chaque jour.",
+      "sectionSubtitle": "Ce ne sont pas des maquettes ; ce sont de vrais écrans de notre compte de démonstration accessible sans inscription.",
+      "actionCenter": {
+        "title": "Actions en attente : votre prochaine tâche est toujours claire",
+        "detail": "Tout ce que l'automatisation ne peut pas résoudre seule arrive ici : commandes en attente de validation, annonces bloquées par votre liste noire, comptes déconnectés, limites du forfait sur le point d'être atteintes. Chaque élément indique ce qui s'est passé, pourquoi c'est important et où aller, en un clic.",
+        "point": "Le compteur de la barre latérale indique, depuis n'importe quel écran, ce qui vous attend."
+      },
+      "itemSpecifics": {
+        "title": "Les caractéristiques d'article qu'eBay attend, complètes",
+        "detail": "SellerHill collecte tous les attributs du catalogue source pour un produit et les associe aux champs définis par la catégorie eBay. Lorsqu'une catégorie n'accepte que des valeurs d'une liste, il choisit la bonne, en envoyant jusqu'à 45 caractéristiques par annonce.",
+        "point": "Les annonces qui apparaissent dans les filtres des acheteurs apparaissent davantage dans les recherches."
+      },
+      "orders": {
+        "title": "Commandes passées automatiquement, suivi géré automatiquement",
+        "detail": "Lorsqu'un article se vend sur eBay, la commande est passée automatiquement chez la source et expédiée directement à votre acheteur. Une fois expédiée, le numéro de suivi est converti et envoyé à eBay, de sorte que votre acheteur ne voit jamais votre fournisseur.",
+        "point": "Vous définissez un plafond de dépense par commande ; tout ce qui le dépasse attend votre validation."
+      },
+      "priceStock": {
+        "title": "Prix et stock synchronisés 4 fois par jour",
+        "detail": "Le prix et le stock source de chaque annonce sont vérifiés quatre fois par jour. Lorsqu'un élément change, le prix eBay est recalculé avec la règle de marge de votre groupe de paramètres et le stock est mis à jour après application de votre réserve.",
+        "point": "Verrouillez le prix ou la quantité par annonce, ou suspendez les ventes en un clic."
+      }
+    },
+    "profit": {
+      "sectionTitle": "Le chiffre d'affaires n'est pas le profit. Voyez ce que vous gagnez vraiment.",
+      "sectionSubtitle": "SellerHill n'applique pas de marge estimée. Il rapproche ce qu'eBay vous a réellement versé de ce que vous avez réellement payé pour la commande, et affiche ce qu'il reste.",
+      "actuals": {
+        "title": "Des chiffres réels des deux côtés",
+        "description": "Les gains nets eBay proviennent de la vente réelle, le coût de la commande de la commande réelle chez la source. Rien n'est supposé entre les deux."
+      },
+      "confirmed": {
+        "title": "Profit confirmé",
+        "description": "Profit calculé à partir de données de transaction complètes. C'est le chiffre sur lequel vous pouvez vous appuyer."
+      },
+      "estimated": {
+        "title": "Profit estimé",
+        "description": "Lorsque les données de coût ne sont pas encore complètes, le profit est signalé comme estimation et séparé de votre total confirmé."
+      },
+      "pnl": {
+        "title": "Compte de résultat mois par mois",
+        "description": "Douze mois de chiffre d'affaires, de coûts, de marge et de ROI sur un seul écran, exportables en un clic."
+      },
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "chart": "Graphique",
+        "pnl": "Résultat",
+        "perOrder": "Par commande"
+      }
+    },
+    "mobile": {
+      "eyebrow": "Prêt pour le mobile",
+      "sectionTitle": "Tout ce que vous faites sur ordinateur, depuis votre téléphone.",
+      "sectionSubtitle": "Aucune application à télécharger. L'interface s'exécute dans votre navigateur et s'adapte à toutes les tailles d'écran ; les présentations en cartes la rendent facile à lire et à utiliser sur un téléphone.",
+      "bullets": {
+        "b1": "Suivez commandes, profit et actions en attente en déplacement",
+        "b2": "Ajoutez des produits, modifiez les paramètres d'annonces, suspendez les ventes",
+        "b3": "Rien à installer ; même compte, mêmes écrans"
+      },
+      "screens": {
+        "dashboard": "Tableau de bord",
+        "actions": "Actions en attente",
+        "orders": "Commandes"
+      }
+    },
+    "trust": {
+      "eyebrow": "Sécurité et confidentialité",
+      "sectionTitle": "Vos informations sont à vous, et elles le restent.",
+      "sectionSubtitle": "Connecter vos comptes à une plateforme d'automatisation demande de la confiance. Nous précisons ce que nous conservons et ce que nous ne conservons pas.",
+      "card": {
+        "title": "Votre numéro de carte ne nous parvient jamais",
+        "description": "Les paiements sont traités sur la page de paiement sécurisée de Stripe. Nous ne voyons ni ne conservons jamais votre numéro de carte."
+      },
+      "session": {
+        "title": "Les détails de votre session ne sont jamais partagés",
+        "description": "Les identifiants de connexion et les données de session de votre compte Amazon sont stockés chiffrés, utilisés uniquement pour vos propres opérations et jamais transmis à une application tierce."
+      },
+      "policy": {
+        "title": "Des politiques rédigées clairement",
+        "description": "Ce que nous traitons et pourquoi est exposé dans notre Politique de confidentialité ; les conditions du service figurent dans nos Conditions d'utilisation. Consultez-les à tout moment."
+      },
+      "privacyLink": "Politique de confidentialité",
+      "termsLink": "Conditions d'utilisation"
+    },
+    "about": {
+      "eyebrow": "À propos",
+      "sectionTitle": "Une équipe logicielle qui connaît la vente de l'intérieur.",
+      "lead": "SellerHill est un produit logiciel développé par 2B Trading, LLC. Fondée dans le Wyoming en 2022, notre équipe a appris ce métier de première main en vendant sur Amazon et eBay.",
+      "body": "Nous construisons SellerHill en alliant cette expérience de vente à 20 ans d'ingénierie logicielle. Notre objectif est une plateforme qui gère seule le travail quotidien d'un vendeur, fonde chaque décision sur des données exactes et les protège. Nous améliorons continuellement le produit grâce aux retours des vendeurs qui l'utilisent.",
+      "facts": {
+        "experience": {
+          "title": "Des fonctionnalités nées de besoins réels",
+          "description": "Les groupes de paramètres, les caractéristiques d'article complètes et les actions en attente sont nés de problèmes rencontrés en vendant. Nous ajoutons des fonctionnalités qui font le travail, pas celles qui ne font que bien paraître sur le papier."
+        },
+        "data": {
+          "title": "Des données exactes, sans chiffres gonflés",
+          "description": "Le profit est calculé à partir des gains eBay réels et du coût Amazon réel. Lorsque le coût d'une commande n'est pas encore connu, nous ne le remplaçons pas par une supposition ; nous l'affichons clairement."
+        },
+        "security": {
+          "title": "La sécurité dès la conception",
+          "description": "Les identifiants de compte sont stockés chiffrés et les données de paiement ne nous parviennent jamais. La sécurité est le fondement de l'architecture, pas une fonctionnalité ajoutée après coup."
+        }
+      }
+    },
+    "standard": {
+      "sectionTitle": "Et tout ce que vous attendez d'une plateforme d'automatisation.",
+      "sectionSubtitle": "Les fondamentaux, complets, et tous inclus dans chaque forfait.",
+      "items": {
+        "bulkAsin": {
+          "title": "Mise en ligne d'ASIN en masse",
+          "description": "Collez des centaines d'ASIN et laissez les annonces se construire dans la file d'attente."
+        },
+        "aiTitle": {
+          "title": "Titres optimisés par IA",
+          "description": "Des titres qui exploitent les 80 caractères pour la recherche."
+        },
+        "autoOrder": {
+          "title": "Commandes automatiques",
+          "description": "Quand un article se vend, la commande est passée chez la source."
+        },
+        "tracking": {
+          "title": "Suivi et conversion",
+          "description": "Numéros de suivi convertis et envoyés à eBay."
+        },
+        "messages": {
+          "title": "Messages automatiques aux acheteurs",
+          "description": "Messages de commande, d'expédition, de livraison et de demande d'avis."
+        },
+        "multiStore": {
+          "title": "Plusieurs boutiques eBay",
+          "description": "Gérez toutes vos boutiques depuis un seul compte."
+        },
+        "import": {
+          "title": "Import des annonces existantes",
+          "description": "Importez dans SellerHill les annonces déjà en ligne sur eBay."
+        },
+        "blacklist": {
+          "title": "Vérification de la liste noire",
+          "description": "Les mots interdits sont recherchés dans les titres, descriptions et caractéristiques."
+        }
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "De l'ASIN à une boutique automatisée",
+      "sectionSubtitle": "Configurez une fois, et le travail quotidien n'est plus le vôtre.",
+      "step1": {
+        "title": "Connectez vos comptes",
+        "description": "Connectez votre boutique eBay et votre compte Amazon. Cela prend quelques minutes et il n'y a rien à installer."
+      },
+      "step2": {
+        "title": "Créez vos groupes de paramètres",
+        "description": "Définissez une seule fois les règles de marge, de modèle, de stock et de frais, par groupe de produits."
+      },
+      "step3": {
+        "title": "Ajoutez vos produits",
+        "description": "Collez des ASIN et choisissez un groupe de paramètres. Les annonces sont créées avec des caractéristiques d'article complètes."
+      },
+      "step4": {
+        "title": "Laissez SellerHill s'en charger",
+        "description": "Les prix et le stock restent synchronisés quatre fois par jour, les commandes sont passées, le suivi est géré et les messages aux acheteurs partent."
+      },
+      "step5": {
+        "title": "Suivez les actions en attente",
+        "description": "Tout ce qui requiert votre décision sur un seul écran, et le profit réel de chaque commande."
+      }
+    },
+    "demo": {
+      "sectionTitle": "Découvrez SellerHill avant de vous inscrire.",
+      "sectionSubtitle": "Explorez le tableau de bord, les annonces, les commandes, les groupes de paramètres et les actions en attente avec des données d'exemple. Rien à remplir, rien à résilier.",
+      "button": "Essayer la démo en direct",
+      "note": "Aucun compte requis · Sans carte bancaire · Rien n'est enregistré.",
+      "bullets": {
+        "b1": "Le vrai tableau de bord, avec profit confirmé et profit estimé côte à côte",
+        "b2": "Des groupes de paramètres d'exemple comme Fête des Mères et Automobile",
+        "b3": "Rien n'est enregistré ; partez quand vous voulez"
+      }
+    },
+    "pricing": {
+      "eyebrow": "Tarifs",
+      "sectionTitle": "Une automatisation abordable.",
+      "sectionSubtitle": "Chaque forfait inclut toutes les fonctionnalités. Les forfaits ne diffèrent que par les annonces actives et le volume mensuel de commandes : les fonctionnalités que d'autres outils réservent à leurs forfaits supérieurs sont à vous, même avec le plus petit forfait.",
+      "billingNote": "Résiliable à tout moment. Les prix s'entendent hors taxes locales le cas échéant.",
+      "perMonth": "/mois",
+      "mostPopular": "Le plus populaire",
+      "planCta": "Commencer gratuitement",
+      "showAllPlans": "Voir les {{count}} forfaits",
+      "showFewerPlans": "Afficher moins de forfaits",
+      "notIncluded": "Non inclus",
+      "upToListings": "Jusqu'à {{limit}} annonces actives",
+      "unlimitedListings": "Annonces actives illimitées",
+      "upToOrders": "Jusqu'à {{limit}} commandes automatiques / mois",
+      "unlimitedOrders": "Commandes automatiques illimitées",
+      "upToConversions": "{{limit}} conversions de suivi / mois",
+      "unlimitedConversions": "Conversions de suivi illimitées",
+      "catalogError": "Les tarifs en direct n'ont pas pu être chargés pour le moment. Aperçu des forfaits ci-dessous.",
+      "included": {
+        "groups": "Groupes de paramètres et 12 modèles d'annonces",
+        "sync": "Contrôle des prix et du stock 4× par jour",
+        "specifics": "Caractéristiques d'article eBay complètes",
+        "autoOrder": "Commandes et suivi automatiques",
+        "actions": "Écran des actions en attente",
+        "profit": "Rapports de profit réel",
+        "multiStore": "Plusieurs boutiques eBay",
+        "support": "Assistance par e-mail et chat"
+      },
+      "catalogFallback": {
+        "nano": {
+          "price": "$24.99",
+          "listings": "Jusqu'à 500 annonces actives",
+          "orders": "Jusqu'à 100 commandes automatiques / mois",
+          "conversions": "50 conversions de suivi / mois"
+        },
+        "starter": {
+          "price": "$44.99",
+          "listings": "Jusqu'à 2,000 annonces actives",
+          "orders": "Jusqu'à 300 commandes automatiques / mois",
+          "conversions": "150 conversions de suivi / mois"
+        },
+        "growth": {
+          "price": "$104.99",
+          "listings": "Jusqu'à 5,000 annonces actives",
+          "orders": "Jusqu'à 600 commandes automatiques / mois",
+          "conversions": "300 conversions de suivi / mois"
+        },
+        "pro": {
+          "price": "$179.99",
+          "listings": "Jusqu'à 10,000 annonces actives",
+          "orders": "Jusqu'à 1,000 commandes automatiques / mois",
+          "conversions": "500 conversions de suivi / mois"
+        }
+      }
+    },
+    "faq": {
+      "sectionTitle": "Questions fréquentes",
+      "sectionSubtitle": "Bon à savoir avant de commencer.",
+      "q1": {
+        "question": "Que sont les groupes de paramètres et pourquoi sont-ils importants ?",
+        "answer": "Un groupe de paramètres est un ensemble réutilisable composé d'une règle de marge, d'un modèle d'annonce, du stock, d'une réserve de stock et de frais déduits. Au lieu d'imposer une seule configuration à toute votre boutique, vous donnez à chaque groupe de produits sa propre stratégie : vos produits de la fête des Mères suivent une marge et un modèle saisonniers, vos produits automobiles leurs propres règles. Déplacez les produits d'un groupe à l'autre quand vous le souhaitez."
+      },
+      "q2": {
+        "question": "À quelle fréquence la synchronisation des prix et du stock s'exécute-t-elle ?",
+        "answer": "SellerHill vérifie le prix et le stock source de vos produits en ligne quatre fois par jour. Lorsque le prix ou le stock change, l'annonce eBay correspondante est mise à jour dans la même passe. Et quand un article se vend sur eBay, le stock est réduit immédiatement, sans attendre le prochain contrôle."
+      },
+      "q3": {
+        "question": "Comment renseignez-vous les caractéristiques d'article ?",
+        "answer": "Nous collectons tous les attributs du catalogue source pour un produit et les associons aux champs définis par la catégorie eBay. Lorsqu'une catégorie n'accepte que certaines valeurs, nous choisissons la bonne dans sa liste. Au lieu de contourner les champs obligatoires avec « Non applicable », nous les remplissons avec de vraies valeurs, en envoyant jusqu'à 45 caractéristiques par annonce."
+      },
+      "q4": {
+        "question": "Comment fonctionne la commande automatique ?",
+        "answer": "Lorsqu'un acheteur passe commande sur eBay, SellerHill passe la commande correspondante depuis votre compte Amazon connecté et l'expédie à l'adresse de l'acheteur. Vous définissez un plafond de dépense par compte ; les commandes qui le dépassent ne sont pas passées et attendent votre validation sur l'écran des actions en attente."
+      },
+      "q5": {
+        "question": "Qu'est-ce que la conversion du numéro de suivi ?",
+        "answer": "Le numéro de suivi fourni par la source peut révéler l'origine de l'article. Lorsque la conversion est activée, SellerHill le convertit en un autre numéro, suivable, avant de l'envoyer à eBay. Vous décidez si la conversion est activée et quels transporteurs elle couvre."
+      },
+      "q6": {
+        "question": "Le nom de mon fournisseur apparaîtra-t-il sur mes annonces ?",
+        "answer": "Non. Les images des produits sont envoyées sur les serveurs d'eBay, les marques peuvent être retirées des titres, et les modèles de description ne contiennent rien qui renvoie à un fournisseur. Les mots-clés de votre liste noire sont recherchés dans chaque annonce avant sa mise en ligne ; une annonce qui correspond n'est pas publiée."
+      },
+      "q7": {
+        "question": "À quoi sert l'écran des actions en attente ?",
+        "answer": "Tout ce que l'automatisation ne peut pas résoudre seule y arrive : commandes en attente de validation, annonces bloquées par votre liste noire, comptes déconnectés, annonces actives en rupture de stock ou limites du forfait sur le point d'être atteintes. Les éléments sont classés par urgence et vous mènent directement au bon écran."
+      },
+      "q8": {
+        "question": "Puis-je modifier les modèles d'annonces ?",
+        "answer": "Oui. Choisissez l'un des 12 modèles prêts à l'emploi, modifiez-les à votre guise ou rédigez votre propre modèle HTML. Chaque groupe de paramètres peut utiliser un modèle différent, et l'aperçu montre l'apparence de votre annonce sur eBay avant l'enregistrement."
+      },
+      "q9": {
+        "question": "Conservez-vous les données de ma carte ou de mes comptes ?",
+        "answer": "Nous ne conservons pas votre numéro de carte ; les paiements sont traités sur la page de paiement sécurisée de Stripe et les données de votre carte ne nous parviennent jamais. Les identifiants de connexion et les données de session de votre compte Amazon sont stockés chiffrés, utilisés uniquement pour vos propres opérations et jamais partagés avec une application tierce. Les détails figurent dans notre Politique de confidentialité."
+      },
+      "q10": {
+        "question": "Puis-je l'utiliser depuis mon téléphone ?",
+        "answer": "Oui. SellerHill s'exécute dans votre navigateur et l'interface s'adapte à toutes les tailles d'écran. Tout ce que vous faites sur ordinateur, y compris ajouter des produits, modifier des paramètres et suivre les commandes et les actions en attente, fonctionne depuis votre téléphone, sans application à installer."
+      },
+      "q11": {
+        "question": "Comment le profit réel est-il calculé ?",
+        "answer": "SellerHill prend les gains nets qu'eBay vous a réellement versés pour la vente (après frais eBay) et soustrait ce que vous avez réellement payé pour la commande, taxes et livraison comprises. Les commandes dont les données de coût ne sont pas encore complètes sont signalées « estimées » et séparées de votre total confirmé."
+      },
+      "q12": {
+        "question": "Puis-je essayer avant de payer ?",
+        "answer": "Oui, de deux façons. La démo en direct ouvre toute l'application avec des données d'exemple, sans inscription. Ou créez un compte et démarrez l'essai gratuit d'un mois, sans carte bancaire."
+      }
+    },
+    "ctaBanner": {
+      "variant2": {
+        "headline": "Une automatisation plus intelligente. Un prix plus bas.",
+        "subheading": "Des stratégies par groupe de produits, une synchronisation quatre fois par jour, des caractéristiques d'article complètes et un écran d'actions en attente qui vous guide. Essayez gratuitement pendant un mois, sans carte bancaire.",
+        "button": "Commencer gratuitement"
+      }
+    },
+    "footer": {
+      "description": "SellerHill est une plateforme d'automatisation Amazon vers eBay : stratégies par groupe de produits, contrôle des prix et du stock quatre fois par jour, caractéristiques d'article complètes, commandes et suivi automatiques, et rapports de profit réel.",
+      "product": "Produit",
+      "legal": "Mentions légales",
+      "links": {
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "templates": "Modèles",
+        "profit": "Profit réel",
+        "demo": "Démo en direct"
+      },
+      "companyLinks": {
+        "contact": "Contact"
+      },
+      "legalLinks": {
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "cookies": "Cookies"
+      },
+      "copyright": "© {{year}} SellerHill. Tous droits réservés."
+    }
+  },
+  "demo": {
+    "banner": {
+      "label": "Démo",
+      "description": "Données d'exemple — rien n'est enregistré.",
+      "exit": "Quitter la démo",
+      "signUp": "Créer un compte gratuit"
+    },
+    "readonly": {
+      "title": "Démo en lecture seule",
+      "message": "Vous explorez une démo remplie de données d'exemple, les modifications ne peuvent donc pas être enregistrées. Créez un compte gratuit pour l'utiliser avec votre propre boutique."
+    }
+  }
+}

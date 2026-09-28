@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Umsatz, Gewinn und Leistung Ihrer Angebote",
+    "greeting": "Hallo, {{name}}",
+    "selectStore": "Shop auswählen",
+    "allStores": "Alle Shops",
+    "noData": "Noch keine Daten",
+    "backToDashboard": "Zurück zum Dashboard",
+    "tabs": {
+      "cards": "Karten",
+      "chart": "Diagramm",
+      "pnl": "GuV"
+    },
+    "today": "Heute",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "thisYear": "Dieses Jahr",
+    "metrics": {
+      "sales": "Umsatz",
+      "units": "Stückzahl",
+      "orders": "Bestellungen",
+      "ordersUnits": "Bestellungen / Stück",
+      "refunds": "Erstattungen",
+      "refundRate": "Erstattungsquote",
+      "grossProfit": "Bruttogewinn",
+      "netProfit": "Nettogewinn",
+      "estimatedPayout": "Gesch. Auszahlung",
+      "margin": "Marge",
+      "roi": "ROI",
+      "avgOrderValue": "Ø Bestellwert",
+      "costOfGoods": "Produktkosten",
+      "transactionFees": "Transaktionsgebühren",
+      "adFees": "Werbegebühren",
+      "amazonShipping": "Amazon-Versand",
+      "amazonTax": "Amazon-Steuer",
+      "revenueUncosted": "Umsatz ohne Kosten"
+    },
+    "card": {
+      "showMore": "Mehr Details",
+      "showLess": "Weniger Details",
+      "activeHint": "Filtert die Listen darunter"
+    },
+    "listingsSection": "Angebote",
+    "ordersSection": "Bestellungen",
+    "listingsCount": "{{count}} mit Verkäufen",
+    "ordersCount": "{{count}} Bestellungen",
+    "viewAllListings": "Alle anzeigen",
+    "viewAllOrders": "Alle anzeigen",
+    "listingsEmptyTitle": "Keine Angebote mit Verkäufen",
+    "listingsEmptySubtitle": "Angebote, die im gewählten Zeitraum Bestellungen erhalten haben, erscheinen hier.",
+    "ordersEmptyTitle": "Keine Bestellungen in diesem Zeitraum",
+    "ordersEmptySubtitle": "Bestellungen des gewählten Zeitraums erscheinen hier, sobald Verkäufe eingehen.",
+    "chart": {
+      "title": "Leistung",
+      "subtitle": "Nettogewinn im Verhältnis zum Verkaufsvolumen",
+      "summary": "Zeitraumübersicht",
+      "granularity": {
+        "day": "30 Tage",
+        "week": "12 Wochen",
+        "month": "12 Monate"
+      },
+      "series": {
+        "netProfit": "Nettogewinn",
+        "sales": "Umsatz",
+        "units": "Stückzahl",
+        "refunds": "Erstattungen"
+      }
+    },
+    "pnl": {
+      "title": "Gewinn und Verlust",
+      "subtitle": "Monatliche Aufschlüsselung der letzten 12 Monate",
+      "parameter": "Kennzahl / Zeitraum",
+      "currentPeriod": "Aktueller Zeitraum",
+      "heatmap": "Heatmap",
+      "export": "CSV herunterladen"
+    },
+    "groups": {
+      "revenue": "Umsatz",
+      "costs": "Kosten",
+      "profit": "Gewinn",
+      "ratios": "Kennzahlen"
+    },
+    "profit": {
+      "confirmedLabel": "Bestätigt",
+      "confirmedTooltip": "Gewinn aus Bestellungen, deren tatsächliche Amazon-Kosten erfasst wurden. Unbekannte Kosten werden nie als null gewertet.",
+      "estimatedLabel": "Geschätzt",
+      "estimatedTooltip": "Bestellungen, die auf die Amazon-Abwicklung warten, verwenden geschätzte Kosten (Amazon-Steuer mit Ihrem eingestellten Satz von {{rate}} %).",
+      "uncostedLabel": "Umsatz ohne Kosten",
+      "uncostedTooltip": "Verkäufe, deren Amazon-Kosten noch nicht ermittelt werden konnten – nur Umsatz, kein Gewinn ausgewiesen."
+    }
+  }
+}
