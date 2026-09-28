@@ -16,7 +16,9 @@ import { AspectResolverService } from './aspect-resolver.service';
 import {
   chunkForBulk,
   correlateBulkResponses,
+  bulkResponsesFromHttpError,
   describeBulkErrors,
+  type EbayBulkError,
   extractBulkErrorIds,
   extractExistingOfferId,
   extractMissingAspectName,
@@ -98,6 +100,11 @@ export interface BulkListingOutcome {
    * the generic "could not be created". The caller reattaches it.
    */
   errorName?: string;
+  /**
+   * eBay's own error entries for this item, so the classifier can still branch
+   * on error ids (duplicate item, missing aspect, policy) instead of prose.
+   */
+  ebayErrors?: EbayBulkError[];
 }
 
 /**
@@ -348,7 +355,7 @@ export class EbayBulkService {
       if (outcome.ok) {
         withItems.push(outcome.item);
       } else {
-        settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry)));
+        settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry), undefined, outcome.entry?.errors));
       }
     }
     if (withItems.length === 0) {
@@ -388,7 +395,7 @@ export class EbayBulkService {
         withOffers.push(outcome.item);
         continue;
       }
-      settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry)));
+      settled.push(this.failure(outcome.item, describeBulkErrors(outcome.entry), undefined, outcome.entry?.errors));
     }
     if (withOffers.length === 0) {
       return { settled, retry };
@@ -465,13 +472,18 @@ export class EbayBulkService {
         continue;
       }
 
-      settled.push(this.failure(state, describeBulkErrors(outcome.entry)));
+      settled.push(this.failure(state, describeBulkErrors(outcome.entry), undefined, outcome.entry?.errors));
     }
 
     return { settled, retry };
   }
 
-  private failure(state: DraftState, error: string, errorName?: string): BulkListingOutcome {
+  private failure(
+    state: DraftState,
+    error: string,
+    errorName?: string,
+    ebayErrors?: EbayBulkError[]
+  ): BulkListingOutcome {
     return {
       key: state.draft.key,
       ok: false,
@@ -480,6 +492,7 @@ export class EbayBulkService {
       resolution: state.draft.resolution,
       error,
       ...(errorName ? { errorName } : {}),
+      ...(ebayErrors && ebayErrors.length > 0 ? { ebayErrors } : {}),
     };
   }
 
@@ -514,6 +527,12 @@ export class EbayBulkService {
         this.logger.error(
           `${path} failed with status ${error.response.status}: ${JSON.stringify(error.response.data)}`
         );
+      }
+      // Every entry failed: eBay answers 400 with the ordinary envelope. Hand
+      // the entries back so the per-entry recovery below still runs.
+      const perEntry = bulkResponsesFromHttpError(error);
+      if (perEntry) {
+        return perEntry;
       }
       throw error;
     }
