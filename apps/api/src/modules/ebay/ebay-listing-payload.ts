@@ -5,6 +5,7 @@ import {
   EBAY_MAX_IMAGES,
   EBAY_NOT_APPLICABLE,
   EBAY_TITLE_MAX_LENGTH,
+  EbayMarketplaceId,
   type ListingCreationData,
 } from '@repo/shared';
 
@@ -47,13 +48,23 @@ export interface InventoryItemPayload {
  * - eBay validates Brand and MPN as a PAIR: a brand with no MPN fails with
  *   "Input data for tag <BrandMPN> is invalid or missing", so when no usable
  *   part number survives we send eBay's own documented non-value.
+ * - A product with no UPC still gets a `product.upc`: the site's substitute
+ *   text from eBay's "Product Identifier Text" guidance. Many categories
+ *   require a GTIN, and OMITTING the field was refused at publish with
+ *   "The UPC field is missing" — a failure on the seller's screen for a
+ *   product that every other listing tool publishes fine. Amazon rarely
+ *   exposes a UPC on the page, so this is the common case, not the edge.
  */
-export function resolveCatalogIdentifiers(data: ListingCreationData): {
+export function resolveCatalogIdentifiers(
+  data: ListingCreationData,
+  marketplaceId: EbayMarketplaceId = EbayMarketplaceId.EBAY_US
+): {
   upc?: string;
   ean?: string;
   mpn?: string;
 } {
-  const upc = normalizeGtin(data.identifiers?.upc);
+  const config = EBAY_MARKETPLACE_CONFIG[marketplaceId] ?? EBAY_MARKETPLACE_CONFIG[EbayMarketplaceId.EBAY_US];
+  const upc = normalizeGtin(data.identifiers?.upc) ?? config.identifierNotApplicable;
   const ean = normalizeGtin(data.identifiers?.ean);
 
   const rawMpn = data.identifiers?.mpn?.trim();
@@ -82,9 +93,10 @@ export function resolveImageUrls(data: ListingCreationData): { imageUrls: string
 /** Body for `PUT /inventory_item/{sku}` and each `bulk_create_or_replace_inventory_item` entry. */
 export function buildInventoryItemPayload(
   data: ListingCreationData,
-  resolution: AspectResolution
+  resolution: AspectResolution,
+  marketplaceId: EbayMarketplaceId = EbayMarketplaceId.EBAY_US
 ): { payload: InventoryItemPayload; usedPlaceholderImage: boolean } {
-  const identifiers = resolveCatalogIdentifiers(data);
+  const identifiers = resolveCatalogIdentifiers(data, marketplaceId);
   const { imageUrls, usedPlaceholder } = resolveImageUrls(data);
 
   return {

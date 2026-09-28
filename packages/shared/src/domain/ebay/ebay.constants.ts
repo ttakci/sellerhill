@@ -34,6 +34,14 @@ export interface EbayMarketplaceConfig {
   countryCode: string; // ISO 3166-1 alpha-2
   currency: string;
   siteId: string; // eBay Site ID (e.g., 0 for US, 3 for UK)
+  /**
+   * The substitute sent in `product.upc` when a category requires a GTIN and
+   * the product has none. Per site, from eBay's Inventory guidance "Product
+   * Identifier Text" (developer.ebay.com/api-docs/sell/static/inventory/
+   * product-identifier-text.html). Omitting the field instead is refused with
+   * "The UPC field is missing" (errorId 25002).
+   */
+  identifierNotApplicable: string;
 }
 
 export const EBAY_MARKETPLACE_CONFIG: Record<EbayMarketplaceId, EbayMarketplaceConfig> = {
@@ -42,36 +50,42 @@ export const EBAY_MARKETPLACE_CONFIG: Record<EbayMarketplaceId, EbayMarketplaceC
     countryCode: 'US',
     currency: 'USD',
     siteId: '0',
+    identifierNotApplicable: 'Does not apply',
   },
   [EbayMarketplaceId.EBAY_UK]: {
     id: EbayMarketplaceId.EBAY_UK,
     countryCode: 'GB',
     currency: 'GBP',
     siteId: '3',
+    identifierNotApplicable: 'Does not apply',
   },
   [EbayMarketplaceId.EBAY_DE]: {
     id: EbayMarketplaceId.EBAY_DE,
     countryCode: 'DE',
     currency: 'EUR',
     siteId: '77',
+    identifierNotApplicable: 'Nicht zutreffend',
   },
   [EbayMarketplaceId.EBAY_FR]: {
     id: EbayMarketplaceId.EBAY_FR,
     countryCode: 'FR',
     currency: 'EUR',
     siteId: '71',
+    identifierNotApplicable: 'Non applicable',
   },
   [EbayMarketplaceId.EBAY_IT]: {
     id: EbayMarketplaceId.EBAY_IT,
     countryCode: 'IT',
     currency: 'EUR',
     siteId: '101',
+    identifierNotApplicable: 'Non applicabile',
   },
   [EbayMarketplaceId.EBAY_ES]: {
     id: EbayMarketplaceId.EBAY_ES,
     countryCode: 'ES',
     currency: 'EUR',
     siteId: '186',
+    identifierNotApplicable: 'No aplicable',
   },
 };
 

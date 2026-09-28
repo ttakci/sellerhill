@@ -59,6 +59,36 @@ describe('extractRejectedAspect', () => {
 });
 
 describe('classifyListingFailure', () => {
+  it('reports a missing product identifier generically — it is our payload gap, not the seller’s product', () => {
+    // The real shape eBay sent in production (errorId 25002, parameters
+    // positional: "2" is "1", "3" is "UPC"). Before: read as a missing aspect
+    // named "1", and once that was guarded, as an eBay duplicate item by id.
+    const failure = classifyListingFailure(
+      ebayError([
+        {
+          errorId: 25002,
+          message: 'A user error has occurred. The UPC field is missing. Please add UPC to the listing and try again.',
+          parameters: [
+            { name: '0', value: 'The UPC field is missing.' },
+            { name: '1', value: 'The UPC field is missing. Please add UPC to the listing and try again.' },
+            { name: '2', value: '1' },
+            { name: '3', value: 'UPC' },
+          ],
+        },
+      ])
+    );
+    expect(failure.code).toBe(ListingFailureCode.UNKNOWN);
+    expect(failure.details.retryable).toBe(false);
+    expect(failure.details.aspectNames).toBeUndefined();
+  });
+
+  it('claims an eBay duplicate item only when the message says so — 25002 is a generic user-error id', () => {
+    const failure = classifyListingFailure(
+      ebayError([{ errorId: 25002, message: 'A user error has occurred. The listing duration is invalid.' }])
+    );
+    expect(failure.code).not.toBe(ListingFailureCode.EBAY_DUPLICATE_ITEM);
+  });
+
   it('does not classify an unrelated parameterised error as a missing aspect', () => {
     const failure = classifyListingFailure(
       ebayError([
