@@ -36,4 +36,19 @@ describe('AdminModule dependency direction', () => {
     expect(source).not.toMatch(/^import .*EbayTaxonomyService.*$/m);
     expect(source).not.toMatch(/from '\.\.\/ebay\//);
   });
+
+  it('does not import ListingsModule (ListingsModule already imports AdminModule)', () => {
+    // Task 7 (scraper client / product-source switch): ScraperClient and
+    // ProductSourceService were deliberately NOT added as ListingsModule
+    // providers/exports for this exact reason. ListingsModule -> AdminModule
+    // already exists (listings.module.ts), so AdminModule -> ListingsModule
+    // would close a direct cycle. Both providers instead live in their own
+    // `ProductSourceModule` (apps/api/src/modules/listings/product-source.module.ts),
+    // which has no feature-module imports, so AdminModule (Task 12's scraper
+    // observability tab) and ListingsModule can each import it directly.
+    const source = read('admin.module.ts');
+
+    expect(source).not.toMatch(/from '\.\.\/listings\/listings\.module'/);
+    expect(source).not.toMatch(/\bListingsModule\b/);
+  });
 });

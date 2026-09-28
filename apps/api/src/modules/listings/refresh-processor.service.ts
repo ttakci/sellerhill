@@ -2,15 +2,17 @@ import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
   AmazonMarketplace,
-  ENTITLED_SUBSCRIPTION_STATUSES,
   extractCorrelationId,
   generateCorrelationId,
   KeepaStockStatus,
   KeepaUsageSource,
   ListingStatus,
   PlatformSettingKey,
+  ProductDataProviderKind,
+  SourceStockStatus,
   type KeepaApiMeta,
   type KeepaProduct,
+  type ScraperProductResult,
 } from '@repo/shared';
 import { Job, Queue } from 'bullmq';
 
@@ -21,9 +23,12 @@ import { PlatformSettingsService } from '../../common/settings/platform-settings
 
 import { KeepaUsageService } from './keepa-usage.service';
 import { KeepaService } from './keepa.service';
+import { ProductSourceService } from './product-source.service';
 import { ProductSyncService, type PendingListingUpdate } from './product-sync.service';
 import { dataFailureDelayMinutes } from './refresh-backoff';
 import { resolveRefreshBatchSize } from './refresh-batch-size';
+import { buildRefreshEntitlementSql } from './refresh-entitlement-sql';
+import { planKeepaRollback, planScraperRefresh, resolveScraperRefreshBatchSize, type ScraperRefreshPlan } from './scraper-refresh';
 
 interface ProductRow {
   id: string;
@@ -41,6 +46,11 @@ interface ProductRow {
   description: string | null;
   specs: Record<string, string> | null;
   consecutive_failures: number;
+  // Scraper-provider stock precision (migration 124). Keepa-sourced rows keep
+  // the 'exact' default; only the scraper branch reads/writes these.
+  stock_status: string;
+  max_order_quantity: number | null;
+  source_removed_at: Date | null;
 }
 
 interface SelectBatchJobData {
@@ -65,7 +75,8 @@ export class RefreshProcessorService extends WorkerHost {
     private readonly databaseService: DatabaseService,
     private readonly keepaService: KeepaService,
     private readonly keepaUsageService: KeepaUsageService,
-    private readonly productSyncService: ProductSyncService
+    private readonly productSyncService: ProductSyncService,
+    private readonly productSource: ProductSourceService
   ) {
     super();
   }
@@ -111,6 +122,15 @@ export class RefreshProcessorService extends WorkerHost {
       this.logger.debug('Keepa refresh disabled by platform settings — skipping tick.');
       return;
     }
+    const provider = await this.productSource.activeProvider();
+    if (provider === ProductDataProviderKind.SCRAPER && (await this.productSource.proxies()).length === 0) {
+      // debug, not warn: this fires every scheduler tick (once a minute)
+      // while proxies are absent — a persistent no-proxy config belongs on
+      // an operator-facing admin surface, not as ~1,440 warn lines/day into
+      // Loki for a condition that never changes tick to tick.
+      this.logger.debug('Scraper provider active but no proxies configured — refresh paused (prices/stock kept).');
+      return;
+    }
     const batchSize = await this.resolveBatchSize();
     const leaseMinutes = await this.platformSettings.getNumber(
       PlatformSettingKey.KEEPA_REFRESH_CLAIM_LEASE_MINUTES,
@@ -131,19 +151,14 @@ export class RefreshProcessorService extends WorkerHost {
     //
     // Built as a conditional fragment rather than a permanent join so that with
     // enforcement off the statement is byte-identical to the original.
+    //
+    // The fragments themselves live in `buildRefreshEntitlementSql` (shared
+    // with the admin operations summary's refresh-lag/capacity query, which
+    // must count exactly the products this claim would actually pick up).
     const enforcementOn = await this.platformSettings.getBoolean(
       PlatformSettingKey.BILLING_ENFORCEMENT_ENABLED,
     );
-    const entitledStatuses = ENTITLED_SUBSCRIPTION_STATUSES.map((v) => `'${v}'`).join(', ');
-    const entitlementJoin = enforcementOn
-      ? `JOIN billing_customers bc ON bc.user_id = l.user_id
-              JOIN billing_subscriptions bs ON bs.customer_id = bc.id
-                AND bs.status IN (${entitledStatuses})`
-      : '';
-    // Same cost stop for listings past the owner's plan limit (only the oldest
-    // listings up to the limit are automated — see ListingPlanLimitProcessor).
-    // A product whose only active listings are over the limit is not refreshed.
-    const planLimitFilter = enforcementOn ? 'AND l.over_plan_limit = FALSE' : '';
+    const { entitlementJoin, planLimitFilter } = buildRefreshEntitlementSql(enforcementOn);
 
     const rows = await this.databaseService.query<{ id: string }>(
       `WITH due AS (
@@ -202,6 +217,14 @@ export class RefreshProcessorService extends WorkerHost {
    * this method only gathers the inputs.
    */
   private async resolveBatchSize(): Promise<number> {
+    if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+      const [proxies, rate, reservePercent] = await Promise.all([
+        this.productSource.proxies(),
+        this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_PER_IP_RPS),
+        this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_RESERVE_PERCENT),
+      ]);
+      return resolveScraperRefreshBatchSize({ proxyCount: proxies.length, perIpRequestsPerSecond: rate, reservePercent, min: 1, max: 1000 });
+    }
     const [manualBatchSize, autoEnabled, reservePercent, refillRate] = await Promise.all([
       this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_BATCH_SIZE),
       this.platformSettings.getBoolean(PlatformSettingKey.KEEPA_REFRESH_BATCH_AUTO),
@@ -242,13 +265,19 @@ export class RefreshProcessorService extends WorkerHost {
 
     const placeholders = productIds.map((_, i) => `$${i + 1}`).join(',');
     const products = await this.databaseService.query<ProductRow>(
-      `SELECT id, asin, marketplace, price, stock, title, image_urls, brand, features, description, specs, consecutive_failures
+      `SELECT id, asin, marketplace, price, stock, title, image_urls, brand, features, description, specs, consecutive_failures,
+              stock_status, max_order_quantity, source_removed_at
        FROM products
        WHERE id IN (${placeholders})`,
       productIds
     );
 
     if (products.length === 0) {
+      return;
+    }
+
+    if ((await this.productSource.activeProvider()) === ProductDataProviderKind.SCRAPER) {
+      await this.refreshBatchViaScraper(products);
       return;
     }
 
@@ -329,6 +358,83 @@ export class RefreshProcessorService extends WorkerHost {
   }
 
   /**
+   * Scraper refresh: commerce-mode fetch (lean parse), then per-product plan.
+   * The claim/lease/backoff/fan-out machinery is the same as Keepa's.
+   * A service outage throws ScraperUnavailableError → BullMQ retries the batch.
+   * A per-ASIN block is skipped: the claim lease expires and the product
+   * becomes due again, and consecutive_failures does not grow for something
+   * that is not the product's fault.
+   */
+  private async refreshBatchViaScraper(products: ProductRow[]): Promise<void> {
+    const floor = await this.platformSettings.getNumber(PlatformSettingKey.SCRAPER_IN_STOCK_FLOOR);
+    const byMarketplace = new Map<AmazonMarketplace, ProductRow[]>();
+    for (const row of products) {
+      const m = row.marketplace as AmazonMarketplace;
+      byMarketplace.set(m, [...(byMarketplace.get(m) ?? []), row]);
+    }
+    const results = new Map<string, ScraperProductResult>();
+    for (const [marketplace, group] of byMarketplace) {
+      for (const r of await this.productSource.fetchCommerce(group.map((p) => p.asin), marketplace)) {
+        results.set(r.asin, r);
+      }
+    }
+    const pending: PendingListingUpdate[] = [];
+    for (const row of products) {
+      const plan = planScraperRefresh(
+        {
+          price: row.price?.current !== undefined ? Number(row.price.current) : null,
+          stock: row.stock,
+          stockStatus: (row.stock_status as SourceStockStatus) ?? SourceStockStatus.EXACT,
+          maxOrderQuantity: row.max_order_quantity,
+          removed: row.source_removed_at !== null,
+        },
+        results.get(row.asin),
+        floor,
+      );
+      if (plan.kind === 'skip') {
+        continue;
+      }
+      if (plan.kind === 'data_failure') {
+        await this.handleDataFailure(row);
+        continue;
+      }
+      try {
+        pending.push(...(await this.applyScraperPlan(row, plan)));
+      } catch (error: unknown) {
+        this.logger.error(`Scraper refresh failed for ASIN ${row.asin}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    await this.productSyncService.flushUpdates(pending);
+  }
+
+  private async applyScraperPlan(
+    row: ProductRow,
+    plan: Extract<ScraperRefreshPlan, { kind: 'observed' }>,
+  ): Promise<PendingListingUpdate[]> {
+    const intervalMinutes = await this.platformSettings.getNumber(PlatformSettingKey.KEEPA_REFRESH_INTERVAL_MINUTES);
+    await this.databaseService.query(
+      `UPDATE products
+       SET price = CASE WHEN $1::numeric IS NOT NULL
+                        THEN jsonb_set(COALESCE(price, '{}'::jsonb), '{current}', to_jsonb($1::numeric))
+                        ELSE price END,
+           stock = COALESCE($2, stock),
+           stock_status = COALESCE($3, stock_status),
+           max_order_quantity = CASE WHEN $4::boolean THEN max_order_quantity ELSE $5 END,
+           source_removed_at = CASE WHEN $6::boolean THEN COALESCE(source_removed_at, NOW()) ELSE NULL END,
+           last_refresh_attempt_at = NOW(),
+           last_successful_refresh_at = NOW(),
+           next_refresh_at = NOW() + make_interval(mins => $7::int),
+           consecutive_failures = 0,
+           updated_at = NOW()
+       WHERE id = $8`,
+      [plan.price, plan.stock, plan.stockStatus, plan.keepMaxOrderQuantity, plan.maxOrderQuantity, plan.removed, intervalMinutes, row.id],
+    );
+    return plan.commerceChanged
+      ? this.productSyncService.computePendingUpdates(row.id, row.asin, row.marketplace as AmazonMarketplace)
+      : [];
+  }
+
+  /**
    * Compare + update one product from its Keepa snapshot, fan out if its
    * commerce state (price/stock) changed.
    *
@@ -350,9 +456,17 @@ export class RefreshProcessorService extends WorkerHost {
     const effectivePrice = kp.price ?? previousPrice;
     const effectiveStock = kp.stockStatus === KeepaStockStatus.UNKNOWN ? row.stock : kp.stock;
 
+    // Rollback safety: Keepa never writes max_order_quantity/source_removed_at
+    // itself, so switching back from the scraper provider must actively clear
+    // them (Keepa's own read is authoritative whenever it isn't UNKNOWN) —
+    // otherwise a listing stays capped/flagged by scraper-era state forever.
+    // A cleared cap changes the listed quantity, so it counts as commerce.
+    const rollback = planKeepaRollback(kp.stockStatus, row.max_order_quantity);
+
     const commerceChanged =
       (effectivePrice !== null && effectivePrice !== previousPrice) ||
-      (effectiveStock !== null && Number(row.stock ?? 0) !== Number(effectiveStock));
+      (effectiveStock !== null && Number(row.stock ?? 0) !== Number(effectiveStock)) ||
+      rollback.commerceChangedByRollback;
     const metadataChanged =
       (kp.title !== undefined && kp.title !== row.title) ||
       (kp.brand !== undefined && kp.brand !== row.brand) ||
@@ -379,6 +493,14 @@ export class RefreshProcessorService extends WorkerHost {
              specs = CASE WHEN $11::jsonb = '{}'::jsonb THEN specs ELSE $11::jsonb END,
              identifiers = CASE WHEN $12::jsonb = '{}'::jsonb THEN identifiers ELSE $12::jsonb END,
              raw_keepa_data = $8,
+             -- Rollback safety: after switching back from the scraper provider,
+             -- rows Keepa refreshes read 'exact' (or 'out_of_stock') again
+             -- rather than keeping a stale scraper-derived status, and the
+             -- scraper-only columns (order cap, 404 flag) are cleared back to
+             -- their Keepa defaults whenever Keepa's own read isn't UNKNOWN.
+             stock_status = COALESCE($13, stock_status),
+             max_order_quantity = CASE WHEN $14::boolean THEN NULL ELSE max_order_quantity END,
+             source_removed_at = CASE WHEN $14::boolean THEN NULL ELSE source_removed_at END,
              last_refresh_attempt_at = NOW(),
              last_successful_refresh_at = NOW(),
              next_refresh_at = NOW() + make_interval(mins => $9::int),
@@ -398,6 +520,8 @@ export class RefreshProcessorService extends WorkerHost {
           row.id,
           JSON.stringify(kp.specs ?? {}),
           JSON.stringify(kp.identifiers ?? {}),
+          rollback.stockStatus,
+          rollback.clearScraperState,
         ]
       );
 
@@ -418,14 +542,22 @@ export class RefreshProcessorService extends WorkerHost {
       }
       return [];
     } else {
+      // Nothing commerce/metadata-wise moved, but stock_status and the
+      // scraper-only columns still need the same rollback treatment here —
+      // otherwise a row whose Keepa stock happens to equal its old scraper
+      // stock (taking THIS branch) would keep a stale 'at_least'/404 flag
+      // forever, since Keepa never revisits this branch's fields again.
       await this.databaseService.query(
         `UPDATE products
-         SET last_refresh_attempt_at = NOW(),
+         SET stock_status = COALESCE($3, stock_status),
+             max_order_quantity = CASE WHEN $4::boolean THEN NULL ELSE max_order_quantity END,
+             source_removed_at = CASE WHEN $4::boolean THEN NULL ELSE source_removed_at END,
+             last_refresh_attempt_at = NOW(),
              last_successful_refresh_at = NOW(),
              next_refresh_at = NOW() + make_interval(mins => $1::int),
              consecutive_failures = 0
          WHERE id = $2`,
-        [intervalMinutes, row.id]
+        [intervalMinutes, row.id, rollback.stockStatus, rollback.clearScraperState]
       );
       this.logger.debug(`Refreshed (unchanged) ASIN ${row.asin}`);
     }

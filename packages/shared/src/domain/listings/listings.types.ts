@@ -3,6 +3,7 @@
  */
 
 import type { ProductData, ProductIdentifiers } from '../products/product-data.types';
+import type { SourceStockStatus } from '../products/source-product.types';
 
 import type { ListingFailureCode, ListingFailureDetails } from './listing-failure.types';
 
@@ -104,6 +105,10 @@ export interface ListingDto {
   /** Structured item specs (Brand, Model, …) for detail + eBay aspects. */
   specs?: Record<string, string>;
   sourceStock?: number;
+  /** How precisely `sourceStock` is known (exact / at-least / out-of-stock). */
+  sourceStockStatus?: SourceStockStatus;
+  /** True when the Amazon source product page is no longer reachable (404). */
+  sourceRemoved?: boolean;
   /** eBay account / store this listing belongs to (multi-store). */
   ebayAccountId?: string;
   /** Latest matched order date for this listing (from orders.listing_id). */

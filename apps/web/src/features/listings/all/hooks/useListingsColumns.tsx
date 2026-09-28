@@ -1,4 +1,4 @@
-import type { ListingDto } from '@repo/shared';
+import { formatSourceStock, type ListingDto } from '@repo/shared';
 import { formatCurrency as formatCurrencyValue, type TableColumn } from '@repo/ui';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -196,7 +196,9 @@ export function useListingsColumns(locale: string) {
         width: '4.25rem',
         align: 'right',
         render: (_value, listing) => (
-          <S.StockValue $outOfStock={listing.sourceStock === 0}>{listing.sourceStock ?? '—'}</S.StockValue>
+          <S.StockValue $outOfStock={listing.sourceStock === 0}>
+            {formatSourceStock(listing.sourceStock, listing.sourceStockStatus)}
+          </S.StockValue>
         ),
       },
     ],

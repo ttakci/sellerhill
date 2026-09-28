@@ -47,6 +47,9 @@ export interface ListingsAllPageProps {
     max: string;
     onMinChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onMaxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    /** Helper copy shown under the range inputs — e.g. explaining that the
+     *  Amazon stock range treats an "at least" value as its lower bound. */
+    note?: string;
   }[];
   onClearFilters: () => void;
   hasActiveFilters: boolean;

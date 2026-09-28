@@ -17,6 +17,7 @@
     "llm:check": "tsx src/scripts/llm-check.ts",
     "llm:pricing": "tsx src/scripts/llm-pricing-set.ts",
     "ebay:aspect-probe": "tsx src/scripts/ebay-aspect-probe.ts",
+    "provider:compare": "tsx src/scripts/provider-compare.ts",
     "stripe:sync-catalog": "tsx src/scripts/stripe-sync-catalog.ts",
     "stripe:test-clock": "tsx src/scripts/stripe-test-clock.ts",
     "aquiline:probe": "tsx src/scripts/aquiline-probe.ts",

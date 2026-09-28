@@ -80,11 +80,37 @@ class EnvironmentVariables {
   @IsOptional()
   KEEPA_API_KEY?: string;
 
+  // --- Amazon scraper service (spec 2026-09-26-amazon-scraper-provider) ---
+  @IsString()
+  @IsOptional()
+  SCRAPER_SERVICE_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  SCRAPER_SERVICE_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  SCRAPER_PROXIES?: string;
+
+  @IsString()
+  @IsOptional()
+  PRODUCT_DATA_PROVIDER?: string;
+
   // --- Keepa stale-driven refresh pipeline (all optional, sensible defaults) ---
+  // NO class-field default on purpose: the authoritative default is the
+  // platform-settings registry (`keepa.refresh.intervalMinutes`, currently
+  // '360'), resolved DB override -> env -> registry default. A numeric
+  // initializer here is copied onto the validated config when the env var is
+  // absent, and `PlatformSettingsService.envValue()` reads that via
+  // `ConfigService.get`, so it would silently mask the registry default on
+  // every deployment that does not set the var — the same
+  // "an explicit value beats the default" defect `BILLING_ENFORCEMENT_ENABLED`
+  // documents below. Leave it `undefined` here so the registry default wins.
   @IsNumber()
   @IsOptional()
   @Min(1)
-  KEEPA_REFRESH_INTERVAL_MINUTES: number = 720; // 12h
+  KEEPA_REFRESH_INTERVAL_MINUTES?: number;
 
   @IsNumber()
   @IsOptional()

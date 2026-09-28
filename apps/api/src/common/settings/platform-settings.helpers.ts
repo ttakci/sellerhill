@@ -4,7 +4,7 @@
 // what a setting value may be lives here and is unit-tested, so the write path
 // (admin PUT) and the read path (resolve DB/env/default) can never disagree.
 
-import { PlatformSettingType } from '@repo/shared';
+import { PlatformSettingKey, PlatformSettingType, partitionProxyList } from '@repo/shared';
 
 import type { PlatformSettingDefinition } from './platform-settings.registry';
 
@@ -21,6 +21,8 @@ export enum SettingValidationError {
   OUT_OF_RANGE = 'outOfRange',
   NOT_IN_OPTIONS = 'notInOptions',
   INVALID_CRON = 'invalidCron',
+  /** An entry of `scraper.proxies` is not `scheme://host:port` (see `isValidProxyUrl`). */
+  NOT_PROXY_URL = 'notProxyUrl',
 }
 
 const TRUE_VALUES = ['true', '1', 'yes', 'on'];
@@ -79,6 +81,12 @@ export function validateSettingValue(
     }
     case PlatformSettingType.STRING:
     default:
+      // One malformed proxy entry would otherwise be saved silently (the value
+      // is write-only, so the operator cannot see it) and then drop from every
+      // request. The rejection names no value — it carries credentials.
+      if (definition.key === PlatformSettingKey.SCRAPER_PROXIES && partitionProxyList(trimmed).invalidEntries.length > 0) {
+        return { ok: false, reason: SettingValidationError.NOT_PROXY_URL };
+      }
       return { ok: true, normalized: trimmed };
   }
 }

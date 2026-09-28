@@ -134,9 +134,10 @@ export enum ActionCenterItemKey {
   /** Drafts prepared but never published — they cost nothing and sell nothing. */
   LISTING_DRAFTS_PENDING = 'listing_drafts_pending',
   /**
-   * Active listings whose source product is quarantined (the ASIN has failed
-   * refresh repeatedly — usually delisted). The eBay listing is still live and
-   * sellable, which is the dangerous part.
+   * Active listings whose source product returned a real HTTP 404 (quantity
+   * already pushed to 0) or whose data could not be read enough times to be
+   * quarantined. Broken down by {@link SourceUnavailableReason}: the second
+   * cause is not evidence Amazon delisted anything.
    */
   LISTING_SOURCE_UNAVAILABLE = 'listing_source_unavailable',
   /** Active listings pushed to quantity 0 — live, visible, and unbuyable. */
@@ -237,4 +238,15 @@ export interface ActionCenterSummaryDto {
   groups: ActionCenterGroupDto[];
   /** ISO timestamp the snapshot was computed at. */
   generatedAt: string;
+}
+
+/**
+ * Breakdown codes of `ActionCenterItemKey.LISTING_SOURCE_UNAVAILABLE`. Exclusive:
+ * a product that is both removed and failing counts as REMOVED.
+ */
+export enum SourceUnavailableReason {
+  /** Amazon answered HTTP 404 for the product page. */
+  REMOVED = 'removed',
+  /** The product's data could not be read repeatedly (quarantine threshold). */
+  UNREADABLE = 'unreadable',
 }

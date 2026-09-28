@@ -20,6 +20,7 @@ import { QuotaEnforcementService } from '../billing/quota-enforcement.service';
 import { EbayService } from '../ebay/ebay.service';
 import { OrderSyncService } from '../orders/order-sync.service';
 
+import { fairBatchPriority } from './fair-priority';
 import { ListingProcessorService } from './listing-processor.service';
 
 interface ImportRow { row: number; asin: string; ebayItemId: string }
@@ -127,13 +128,26 @@ export class ListingImportService {
       throw err;
     }
 
-    await this.listingQueue.addBulk(job.items.map((item) => ({
+    // Fair per-seller priority — same rule as the create path (ListingQueueService).
+    const [{ count }] = await this.database.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count
+         FROM listing_job_items i
+         JOIN listing_jobs j ON j.id = i.job_id
+        WHERE j.user_id = $1 AND j.id <> $2 AND LOWER(i.status) = $3`,
+      [userId, job.id, ListingStatus.DRAFT],
+    );
+    const queuedForUser = Number(count);
+
+    await this.listingQueue.addBulk(job.items.map((item, i) => ({
       name: 'import-existing-listing',
       data: stampCurrentCorrelation({
         kind: ListingJobKind.EXISTING_IMPORT, jobId: job.id, listingJobItemId: item.id,
         userId, asin: item.asin, ebayItemId: item.ebayItemId, ebayAccountId, ...defaults,
       } as ExistingListingImportQueueData),
-      opts: { attempts: 3, backoff: { type: 'exponential', delay: 5000 }, removeOnComplete: true, removeOnFail: false },
+      opts: {
+        attempts: 3, backoff: { type: 'exponential', delay: 5000 }, removeOnComplete: true, removeOnFail: false,
+        priority: fairBatchPriority(queuedForUser, Math.floor(i / 25)),
+      },
     })));
     return { jobId: job.id, total: rows.length };
   }

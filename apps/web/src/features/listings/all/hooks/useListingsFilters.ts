@@ -379,6 +379,10 @@ export function useListingsFilters() {
         max: filters[key].max,
         onMinChange: handleRangeChange(key, 'min'),
         onMaxChange: handleRangeChange(key, 'max'),
+        // Amazon only reports a lower bound above 20 (or below a seller's
+        // order-quantity cap), so the range filter treats "20+" as 20 — a
+        // caller could otherwise expect a range max to exclude it.
+        note: key === 'sourceStock' ? t('listings.filters.sourceStockNote') : undefined,
       })),
     [filters, t, handleRangeChange]
   );

@@ -1,5 +1,10 @@
 {
   "admin": {
+    "errors": {
+      "setting": {
+        "notProxyUrl": "{{entry}}. girdi bir proxy URL'si değil (http(s)://, socks5:// veya socks5h:// ile host:port bekleniyor)."
+      }
+    },
     "title": "Yönetim operasyonları",
     "subtitle": "Platform maliyetlerini, kuyrukları, sağlayıcı kullanımını ve müşteri dağılımını izleyin.",
     "tabs": {
@@ -51,7 +56,15 @@
     "warnings": {
       "queue_waiting": "{{subject}} kuyruğu bekleme eşiğini aştı",
       "keepa_low_tokens": "Keepa token bakiyesi düşük",
-      "llm_failure_rate": "LLM hata oranı yükseldi"
+      "llm_failure_rate": "LLM hata oranı yükseldi",
+      "scraper_no_proxies": "Scraper proxy'si tanımlı değil — Amazon'dan veri çekilmiyor",
+      "scraper_unreachable": "Scraper servisine ulaşılamıyor",
+      "scraper_block_rate_high": "Scraper blok oranı yüksek (%)",
+      "refresh_lag": "Ürün yenileme takvimin gerisinde (dakika)",
+      "scraper_proxy_invalid": "Hatalı biçimli scraper proxy girdileri atlanıyor (adet)",
+      "scraper_transport_failure_high": "Scraper proxy'ler üzerinden Amazon'a ulaşamıyor (%) — proxy listesini ve şifreleri kontrol edin",
+      "scraper_parse_failure_high": "Scraper ayrıştırma hataları yüksek (%) — Amazon sayfa düzenini değiştirmiş olabilir",
+      "scraper_direct_egress": "Scraper proxy'siz çekim yapabiliyor — bu sunucuda SCRAPER_ALLOW_DIRECT'i kapatın"
     },
     "metrics": {
       "keepa_tokens": "Keepa tokenları",
@@ -100,6 +113,11 @@
       "ebayStores": "Aktif eBay mağazaları",
       "amazonAccounts": "Amazon alıcı hesapları",
       "keepaBalance": "Kalan Keepa token",
+      "scraperLastHour": "Scraper, son 1 saat (başarılı · bloklu · okunamayan · proxy hatası · zaman aşımı)",
+      "scraperLastHourValue": "{{found}} · {{blocked}} · {{parseFailed}} · {{proxyError}} · {{expired}}",
+      "refreshLag": "Yenileme gecikmesi",
+      "refreshLagValue": "{{minutes}} dk",
+      "syncsPerDay": "Ulaşılabilir günlük sync",
       "warningsTitle": "Uyarılar",
       "noWarnings": "Aktif uyarı yok.",
       "roleCliNotice": "Kullanıcı rolleri yalnızca operatör CLI'ı ile değiştirilir. HTTP üzerinden rol yükseltme kapalıdır."
@@ -123,7 +141,7 @@
         "default": "Varsayılan"
       },
       "category": {
-        "keepa": "Keepa ürün yenileme",
+        "keepa": "Ürün verisi ve yenileme",
         "amazon": "Amazon sipariş eşleme & takip",
         "auto_fulfill": "Otomatik satın alma",
         "email": "E-posta (SMTP)",
@@ -132,7 +150,8 @@
         "llm": "Yapay zekâ içerik",
         "buyer_messaging": "Alıcı mesajlaşma",
         "retention": "Veri saklama & disk",
-        "ebay": "eBay çağrı bütçesi"
+        "ebay": "eBay çağrı bütçesi",
+        "scraper": "Scraper"
       },
       "keys": {
         "keepa.refresh.enabled": "Arka plan yenileme açık",
@@ -195,7 +214,12 @@
         "tracking.aquiline.maxProfiles": "Aquiline profil sınırı",
         "billing.trialDays": "Deneme süresi (gün)",
         "billing.webhookGraceHours": "Ödeme bildirimi tolerans süresi (saat)",
-        "llm.apiKey": "Yapay zekâ API anahtarı"
+        "llm.apiKey": "Yapay zekâ API anahtarı",
+        "product.dataProvider": "Ürün veri kaynağı",
+        "scraper.proxies": "Scraper proxy'leri",
+        "scraper.perIpRequestsPerSecond": "Proxy başına saniyelik istek",
+        "scraper.inStockFloor": "\"In Stock\" stok tabanı",
+        "scraper.blockRateWarnPercent": "Blok oranı uyarısı (%)"
       },
       "descriptions": {
         "keepa.refresh.enabled": "Arka planda Keepa yenileme zamanlayıcısının ana anahtarı. Kapatıldığında arka plan token harcaması, yeniden başlatma gerekmeden anında durur.",
@@ -258,7 +282,12 @@
         "tracking.aquiline.maxProfiles": "Aquiline planınızın izin verdiği satıcı profili sayısı (Starter 10; ardından 25, 50, 100, 250). Planı yükseltince buradan artırın. Profiller kalıcıdır, silinemez.",
         "billing.trialDays": "Yeni kayıt olan satıcıya verilen ücretsiz deneme süresi, 1 ile 90 arası. Değişiklik yalnızca kaydedildikten sonra kayıt olanlar için geçerlidir.",
         "billing.webhookGraceHours": "Abonelik dönemi bittiğinde yenileme bildirimi gecikirse hesabın askıya alınmasından önce beklenen süre (varsayılan 6). Ödeme yapan satıcı yenileme anında kesintiye uğramaz.",
-        "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir."
+        "llm.apiKey": "Yapay zekâ sağlayıcısının API anahtarı. Şifreli saklanır ve yazıldıktan sonra bir daha gösterilmez. Panelde değer yoksa ortamdaki LLM_API_KEY kullanılır. Anahtar boşsa yapay zekâ başlık ve ürün özelliği yazımı çalışmaz, ilanlar yine de normal başlıkla açılır. Sağlayıcı adresi ve model güvenlik için yalnızca ortam değişkeninden yönetilir.",
+        "product.dataProvider": "Amazon ürün verisinin nereden alındığı. \"scraper\" kendi servisimiz, \"keepa\" geri dönüş seçeneği. İkisi karışmaz.",
+        "scraper.proxies": "Virgülle ayrılmış proxy URL'leri (http://kullanıcı:şifre@host:port; https://, socks5:// ve socks5h:// da geçerli). Hiç yoksa Amazon'dan veri çekilmez; sunucunun kendi IP'si asla kullanılmaz.",
+        "scraper.perIpRequestsPerSecond": "Her proxy'nin saniyede kaç sayfa çekebileceği. Her proxy bu hıza yetecek kadar işçi çalıştırır; Amazon ~2 sn içinde yanıt verdiği sürece toplam verim ≈ hız × proxy sayısı.",
+        "scraper.inStockFloor": "Amazon sayı vermeden \"In Stock\" gösterdiğinde kaydedilen stok. N+ olarak gösterilir.",
+        "scraper.blockRateWarnPercent": "Son bir saatte scraper isteklerinin bu oranı bloklanırsa admin uyarısı çıkar."
       },
       "newValueLabel": "Yeni değer",
       "search": "Ayar ara (ad veya ortam değişkeni)",
@@ -278,7 +307,8 @@
         "required": "Bir değer girin.",
         "notANumber": "Geçerli bir sayı girin.",
         "belowMin": "En az {{bound}} olmalı.",
-        "aboveMax": "En fazla {{bound}} olmalı."
+        "aboveMax": "En fazla {{bound}} olmalı.",
+        "notAProxyUrl": "{{entry}}. girdi bir proxy URL'si değil (http(s)://, socks5:// veya socks5h:// ile host:port bekleniyor)."
       }
     },
     "listingQuality": {

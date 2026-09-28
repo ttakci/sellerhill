@@ -1,9 +1,11 @@
 import {
   PlatformSettingCategory,
+  PlatformSettingKey,
   PlatformSettingSource,
   PlatformSettingType,
   checkPlatformSettingDraft,
   isPlatformSettingDraftDirty,
+  partitionProxyList,
   type PlatformSettingDto,
 } from '@repo/shared';
 import React, { useCallback, useMemo, useState, type ChangeEvent } from 'react';
@@ -21,6 +23,7 @@ import {
 
 const CATEGORY_ORDER: PlatformSettingCategory[] = [
   PlatformSettingCategory.KEEPA,
+  PlatformSettingCategory.SCRAPER,
   PlatformSettingCategory.LLM,
   PlatformSettingCategory.EBAY,
   PlatformSettingCategory.AMAZON,
@@ -67,9 +70,16 @@ export const AdminSettingsPanelContainer = ({ skip }: AdminSettingsPanelProps): 
       const serverError = settings.serverErrors[setting.key];
       let errorText: string | undefined;
       if (serverError) {
-        errorText = t(serverError, { defaultValue: t('translation:error.serverError') });
+        // The API's proxy-list refusal names no position (its message carries
+        // no value); the position is re-derived here from the same shared
+        // grammar so both messages read "entry N".
+        const entry =
+          setting.key === PlatformSettingKey.SCRAPER_PROXIES && draft !== undefined
+            ? partitionProxyList(draft).invalidEntries[0]
+            : undefined;
+        errorText = t(serverError, { defaultValue: t('translation:error.serverError'), entry });
       } else if (isDirty && !check.valid) {
-        errorText = t(`admin.settings.validation.${check.issue}`, { bound: check.bound });
+        errorText = t(`admin.settings.validation.${check.issue}`, { bound: check.bound, entry: check.entry });
       }
       let inputType: SettingRowView['inputType'] = 'text';
       if (setting.isSecret) {
