@@ -27,6 +27,16 @@ def test_found_full_has_content_with_our_gallery(monkeypatch):
     assert isinstance(r["content"]["specs"], dict)
 
 
+def test_found_reports_its_network_time_separately_from_parsing(monkeypatch):
+    def slow_page(*a, **k):
+        import time
+        time.sleep(0.05)
+        return page("plain_in_stock")
+    monkeypatch.setattr(fetch, "page", slow_page)
+    r = fetcher.fetch_one("B000000001", "US", "commerce")
+    assert r["outcome"] == "found" and 40 <= r["netMs"] < 5000
+
+
 def test_404_is_not_found(monkeypatch):
     def boom(*a, **k):
         raise fetch.AmazonNotFound("x")

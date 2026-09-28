@@ -173,6 +173,35 @@ def test_threads_follow_the_rate():
     assert threads_for_rate(100, 2) == 40
 
 
+def test_latency_is_the_network_time_and_never_reaches_the_wire():
+    # Parsing runs on CPU and queues behind other pages; folding that wait into
+    # the "page round trip" made a CPU-bound service look like a slow proxy and
+    # grew workers into more contention. The fetcher reports its network time
+    # as `netMs`; the pool uses it for stats and sizing and strips it.
+    def fetch(asin, marketplace, mode):
+        time.sleep(0.05)
+        return {"asin": asin, "outcome": "found", "netMs": 1234.0}
+
+    pool = ProxyPool(fetch, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://u:p@10.0.0.9:1"], rate=50)
+    result = pool.submit("A000000001", "US", "commerce", "background").result(5)
+    assert "netMs" not in result
+    assert pool.stats()["meanLatencyMs"] == 1234
+    pool.shutdown()
+
+
+def test_latency_falls_back_to_wall_time_without_netms():
+    def fetch(asin, marketplace, mode):
+        time.sleep(0.05)
+        return {"asin": asin, "outcome": "blocked"}
+
+    pool = ProxyPool(fetch, threads_per_proxy=1, max_threads_per_proxy=1)
+    pool.ensure(["http://u:p@10.0.0.8:1"], rate=50)
+    pool.submit("A000000002", "US", "commerce", "background").result(5)
+    assert 40 <= pool.stats()["meanLatencyMs"] < 2000
+    pool.shutdown()
+
+
 def test_threads_follow_measured_latency_once_known():
     # A 20 s round trip at 1 req/s needs 20 busy workers just to reach the
     # budget; the fixed ~2 s assumption gave 4 and capped the proxy at 0.2/s.

@@ -218,6 +218,14 @@ class ProxyPool:
                     _log.warning("fetch_one raised %s for asin=%s", type(exc).__name__, asin)
                     result = {"asin": asin, "outcome": "parse_failed", "fetchedAt": None, "signals": None, "content": None}
             latency = (time.monotonic() - started) * 1000
+            # `netMs` is the fetcher's own network time. Stats and the
+            # latency-adaptive worker sizing use it instead of wall time —
+            # wall time also counts the wait for a parse worker, and sizing
+            # fetch threads from CPU queueing grew them into more contention.
+            # Internal: it must not reach the wire.
+            net_ms = result.pop("netMs", None) if isinstance(result, dict) else None
+            if isinstance(net_ms, (int, float)) and net_ms >= 0:
+                latency = float(net_ms)
             outcome = result.get("outcome")
             if not no_streak_change:
                 # A dead or refusing proxy (proxy_error) cools down like a
