@@ -1060,7 +1060,7 @@ export class ListingsService {
       `
       SELECT id, asin, title, description, price, currency, image_urls,
              brand, manufacturer, category, category_path, features, specs, identifiers, stock,
-             stock_status, max_order_quantity, source_removed_at,
+             stock_status, max_order_quantity, source_removed_at, updated_at,
              raw_provider_data, raw_keepa_data
       FROM products WHERE asin = $1 AND marketplace = $2
     `,
@@ -1103,6 +1103,9 @@ export class ListingsService {
       stockStatus: (row.stock_status as SourceStockStatus) ?? SourceStockStatus.EXACT,
       maxOrderQuantity: row.max_order_quantity ?? null,
       sourceRemoved: row.source_removed_at !== null && row.source_removed_at !== undefined,
+      // The create path decides from this whether the row may be listed from
+      // or must be re-fetched first (see `isCreateCacheFresh`).
+      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
       raw: row.raw_provider_data
         ? typeof row.raw_provider_data === 'string'
           ? (JSON.parse(row.raw_provider_data) as Record<string, unknown>)
@@ -1562,6 +1565,22 @@ export class ListingsService {
       [jobId]
     );
     return rows[0]?.status === ListingJobStatus.CANCELLED;
+  }
+
+  /**
+   * Flip a job to PROCESSING the moment a worker starts its first batch.
+   *
+   * `updateJobCounts` only writes PROCESSING after the first ITEM lands, so a
+   * job used to sit on "pending" through the whole scraper prefetch and one
+   * item's full preparation (~50s of a 70s job) with nothing on screen saying
+   * work had begun. Guarded on PENDING: a CANCELLED or terminal job is never
+   * resurrected, and a second batch of the same job is a no-op.
+   */
+  async markJobProcessing(jobId: string): Promise<void> {
+    await this.databaseService.query(
+      `UPDATE listing_jobs SET status = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = $3`,
+      [jobId, ListingJobStatus.PROCESSING, ListingJobStatus.PENDING]
+    );
   }
 
   /**
